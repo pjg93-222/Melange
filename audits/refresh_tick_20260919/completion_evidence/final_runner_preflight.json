@@ -1,0 +1,30 @@
+{
+  "base": "a7a11b5df1c123568a0672138bb1318d858be9a0",
+  "tip": "1d6b3793a1f496ff07f4b460010c882969dd63eb",
+  "changed_paths": [
+    "fec/refresh_tick.py",
+    "fec/tests/infra/test_refresh_tick.py"
+  ],
+  "before_sha256": {
+    "fec/refresh_tick.py": "817d0d8fdf4166e7ce8e73eaaf96260a00cdb84945deb84df36f6c8a372b211f",
+    "fec/tests/infra/test_refresh_tick.py": "37b6ee4f73881fc2c02ef77964ed50479620f7a871be9ab343fe7dc7ea4bd4b2"
+  },
+  "preexisting_dirty_paths": [
+    "collector_sentinels/abc.done",
+    "collector_sentinels/cbs.done",
+    "collector_sentinels/cnn.done",
+    "collector_sentinels/msnow.done",
+    "collector_sentinels/mtp.done",
+    "collector_sentinels/npr.done",
+    "collector_sentinels/pbs.done",
+    "data/money/Moneyball_email.zip",
+    "data/stance/own_source_stance_model.joblib",
+    "data/system/system_manifest.json",
+    "fec/liwc/behavior_calibrated.json.candidate"
+  ],
+  "holds": [
+    "fold default off",
+    "R retry gate unchanged",
+    "scheduled task unchanged"
+  ]
+}

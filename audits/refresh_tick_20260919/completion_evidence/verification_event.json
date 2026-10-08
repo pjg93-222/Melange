@@ -1,0 +1,14 @@
+{
+  "code_commit": "1d6b3793a1f496ff07f4b460010c882969dd63eb",
+  "broad_kernel_commit": "a7a11b5df1c123568a0672138bb1318d858be9a0",
+  "kernel_passed": 250,
+  "kernel_baseline_failures": 2,
+  "final_refresh_tests_passed": 64,
+  "final_live_tests_passed": 4,
+  "affected_tests_passed": 158,
+  "scheduled_task": "weekly_refresh.py unchanged",
+  "fold_default": "off",
+  "R_revisit_opt_in": "held",
+  "brain_update": "drafted",
+  "event": "evt-20260920T0505461828852Z-2f49e6efa3"
+}

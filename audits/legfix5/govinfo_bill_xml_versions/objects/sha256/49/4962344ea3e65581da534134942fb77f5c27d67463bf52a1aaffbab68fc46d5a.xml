@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S221 IS: Department of Veterans Affairs Provider Accountability Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-01-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 221</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190124">January 24, 2019</action-date><action-desc><sponsor name-id="S377">Mr. Gardner</sponsor> (for himself, <cosponsor name-id="S338">Mr. Manchin</cosponsor>, <cosponsor name-id="S347">Mr. Moran</cosponsor>, <cosponsor name-id="S252">Ms. Collins</cosponsor>, and <cosponsor name-id="S373">Mr. Cassidy</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSVA00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend title 38, United States Code, to require the Under Secretary of Health to report major
+			 adverse personnel actions involving certain health care employees to the
+			 National Practitioner Data Bank and to applicable State licensing boards,
+			 and for other purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="idF350846780414C94863E90CE078B610C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Department of Veterans Affairs Provider Accountability Act</short-title></quote>.</text> </section><section id="idEA14BFE07EB14CA9B598DCEE6258B1D0" section-type="subsequent-section"><enum>2.</enum><header>Accountability within Veterans Health Administration</header> <subsection id="idC3B82C1AF1ED499C84142560276F2C65"><enum>(a)</enum><header>Reporting major adverse actions to National Practitioner Data Bank and State licensing boards</header><text>Section 7461 of title 38, United States Code, is amended by adding at the end the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="id06F49ABBE5F145639785CB7FD224A9AF" style="OLC">
+ <subsection id="id8A44B34F9834447490C53756F844BC8F"><enum>(f)</enum><text>Whenever the Under Secretary for Health (or an official designated by the Under Secretary) brings charges based on conduct or performance against a section 7401(1) employee and as a result of those charges a major adverse action is taken against the employee, the Under Secretary shall, not later than 30 days after the date on which such major adverse action is carried out, transmit to the National Practitioner Data Bank and the applicable State licensing board the name of the employee, a description of the major adverse action, and a description of the reason for the major adverse action.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection><subsection id="id364058D32C924DBEBAD5DEFE815CFD70"><enum>(b)</enum><header>Prohibition on signing settlements with certain clauses</header>
+ <paragraph id="id0FC3A620013B444BBBA2604110BCE6A2"><enum>(1)</enum><header>In general</header><text>Except as provided in paragraph (2), the Secretary of Veterans Affairs may not enter into a settlement agreement relating to a claim by an employee of the Department of Veterans Affairs under which the Department would be required to conceal a serious medical error or purge a negative record from a personnel file of an employee of the Department.</text>
+ </paragraph><paragraph id="idD780C1012A0B4912B74BDB8BB4CE3841"><enum>(2)</enum><header>Exception</header><text>Paragraph (1) shall not apply to a negative record if the head of the Office of Accountability and Whistleblower Protection of the Department and the Special Counsel (established by section 1211 of title 5, United States Code) jointly certify that the negative record is not legitimate.</text></paragraph></subsection></section></legis-body></bill>
+
+

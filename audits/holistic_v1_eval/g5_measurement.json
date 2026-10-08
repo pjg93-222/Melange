@@ -1,0 +1,177 @@
+{
+ "cu_DIAGNOSTIC_REFERENCE": {
+  "netfile": "congress_cosponsor_network_AUG20260802.xlsx",
+  "pairs": 2555,
+  "density_pct_of_141778": 1.8,
+  "weight": {
+   "median": 0.133333,
+   "p90": 0.6656,
+   "max": 6.4954
+  },
+  "degree": {
+   "median": 6,
+   "max": 171
+  },
+  "p": {
+   "median": 0.021301,
+   "tail_gt_0.5": 0.001174,
+   "tail_gt_0.8": 0.0,
+   "tail_gt_0.9": 0.0,
+   "tail_gt_0.99": 0.0
+  },
+  "p_by_party_stratum": {
+   "within": {
+    "n": 2555,
+    "median": 0.021301,
+    "tail_gt_0.5": 0.001174
+   },
+   "cross": {
+    "n": 0,
+    "median": null,
+    "tail_gt_0.5": null
+   }
+  }
+ },
+ "holistic": {
+  "netfile": "holistic_network_AUG_20260817.xlsx",
+  "pairs": 62996,
+  "density_pct_of_141778": 44.43,
+  "weight": {
+   "median": 0.174078,
+   "p90": 1.0503,
+   "max": 112.7303
+  },
+  "degree": {
+   "median": 251,
+   "max": 432
+  },
+  "p": {
+   "median": 0.02824,
+   "tail_gt_0.5": 0.005921,
+   "tail_gt_0.8": 0.000302,
+   "tail_gt_0.9": 3.2e-05,
+   "tail_gt_0.99": 0.0
+  },
+  "p_by_party_stratum": {
+   "within": {
+    "n": 62996,
+    "median": 0.02824,
+    "tail_gt_0.5": 0.005921
+   },
+   "cross": {
+    "n": 0,
+    "median": null,
+    "tail_gt_0.5": null
+   }
+  }
+ },
+ "d8_trigger_eval": {
+  "tail_ratio_gt0.5_hol_over_cu": 5.043,
+  "median_p_delta_abs": 0.0069,
+  "trigger_tail_ratio_gt_2x": true,
+  "trigger_median_delta_gt_0.1": false,
+  "fired": true,
+  "label": "DIAGNOSTIC cross-config calibration comparison (different universes + role weights); feeds the D8 wscale ruling; never a shipped claim"
+ },
+ "mea3_role_mass": {
+  "dyads": 62606,
+  "regular_mass_share": {
+   "median": 0.232497,
+   "p25": 0.0726,
+   "p75": 1.0,
+   "gt_0.5_frac": 0.362106
+  },
+  "trigger_median_gt_0.5": false,
+  "top10_dyads_by_weight": [
+   {
+    "pair": [
+     "Andy Biggs",
+     "Elijah Crane"
+    ],
+    "weight": 203.705,
+    "regular_share": 0.007
+   },
+   {
+    "pair": [
+     "Andy Biggs",
+     "Chip Roy"
+    ],
+    "weight": 201.034,
+    "regular_share": 0.007
+   },
+   {
+    "pair": [
+     "Edward Markey",
+     "Elizabeth Warren"
+    ],
+    "weight": 98.728,
+    "regular_share": 0.021
+   },
+   {
+    "pair": [
+     "Jeff Merkley",
+     "Ron Wyden"
+    ],
+    "weight": 80.006,
+    "regular_share": 0.026
+   },
+   {
+    "pair": [
+     "Lisa Murkowski",
+     "Dan Sullivan"
+    ],
+    "weight": 79.434,
+    "regular_share": 0.033
+   },
+   {
+    "pair": [
+     "John Cornyn",
+     "Ted Cruz"
+    ],
+    "weight": 74.011,
+    "regular_share": 0.053
+   },
+   {
+    "pair": [
+     "Richard Durbin",
+     "Tammy Duckworth"
+    ],
+    "weight": 69.423,
+    "regular_share": 0.03
+   },
+   {
+    "pair": [
+     "Richard Blumenthal",
+     "Edward Markey"
+    ],
+    "weight": 64.627,
+    "regular_share": 0.027
+   },
+   {
+    "pair": [
+     "Amy Klobuchar",
+     "Tina Smith"
+    ],
+    "weight": 64.103,
+    "regular_share": 0.022
+   },
+   {
+    "pair": [
+     "Martin Heinrich",
+     "Ben Luj\u00e1n"
+    ],
+    "weight": 63.863,
+    "regular_share": 0.029
+   }
+  ]
+ },
+ "mea4_admitted_per_layer": {
+  "engagement": 21,
+  "hcoi": 0,
+  "social_new": 171,
+  "social_reinforced": 559,
+  "coappear": 198
+ },
+ "mea5_isolates": 0,
+ "windows": "congresses 117-119, all 8 types, BILLSTATUS 2026-08-01 vintage; denominator 141778 roster pairs"
+}

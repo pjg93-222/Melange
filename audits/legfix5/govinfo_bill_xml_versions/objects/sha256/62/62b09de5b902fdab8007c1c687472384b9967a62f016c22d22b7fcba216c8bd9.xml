@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HBE5EF793BF32429DA93FA62C8F51A92D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 9065 IH: Pregnancy Loss Mental Health Research Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-05-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 9065</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260529">May 29, 2026</action-date><action-desc><sponsor name-id="M001240">Mr. McDowell</sponsor> (for himself and <cosponsor name-id="B000740">Mrs. Bice</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide research on, and services for, individuals with clinical mental health complications following a pregnancy loss, and for other purposes.</official-title></form><legis-body id="H984225354E224B6FBA21C10BF4435EA8" style="OLC"> 
+<section display-inline="no-display-inline" id="H949FA58261B94633BA254B7466C76703" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Pregnancy Loss Mental Health Research Act of 2026</short-title></quote>.</text></section> <title id="H8F836973474C4247A78FFBF9BA94D69E"><enum>I</enum><header>Research on Clinical Mental Health Complications Following a Pregnancy Loss</header> <section id="H292BAA942B9F433F89F704D0F18261E5"><enum>101.</enum><header>Expansion and intensification of activities of National Institute of Mental Health</header> <subsection id="H6DDFE5A2E9514A88971364908C023A94"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of Health and Human Services, acting through the Director of the National Institutes of Health and the Director of the National Institute of Mental Health (in this section referred to as the <quote>Institute</quote>), shall expand and intensify research and related activities of the Institute with respect to clinical mental health complications, including persistent complex bereavement disorder, following a pregnancy loss (including a miscarriage, stillbirth, or abortion).</text></subsection>
+<subsection id="HCF67DB95F3B044A19D658BD2EEE58DA0"><enum>(b)</enum><header>Coordination with other institutes</header><text display-inline="yes-display-inline">The Director of the Institute shall coordinate the activities of the Director under subsection (a) with similar activities conducted by the other national research institutes and agencies of the National Institutes of Health to the extent that such Institutes and agencies have responsibilities that are related to clinical mental health complications following a pregnancy loss (including a miscarriage, stillbirth, or abortion).</text></subsection> <subsection id="H9A375B1A665949D1A23CBE5785F70835"><enum>(c)</enum><header>Programs for pregnancy loss conditions</header><text display-inline="yes-display-inline">In carrying out subsection (a), the Director of the Institute shall conduct or support research to expand the understanding of the causes of, and to identify treatment for, mental health conditions following a pregnancy loss, including the following:</text>
+<paragraph id="HAFA71CBDF9084554B1E7AD75EA990485"><enum>(1)</enum><text>Basic research concerning the etiology and causes of the conditions.</text></paragraph> <paragraph id="H356447D0E582476F9F79CF2E6B15C86F"><enum>(2)</enum><text display-inline="yes-display-inline">The development of improved screening and diagnostic techniques.</text></paragraph>
+<paragraph id="H651EE3DE795A4E739F4AE5753137D80B"><enum>(3)</enum><text>Clinical research for the development and evaluation of new treatments, including new biological agents.</text></paragraph> <paragraph id="HAA775FE473C24130911CB28EC66D64D5"><enum>(4)</enum><text>Information and education programs for health care professionals and the public.</text></paragraph></subsection>
+<subsection id="H16679B9CBA0B4DB08DECF92296C21FAD"><enum>(d)</enum><header>Longitudinal study</header>
+<paragraph id="H76118750825949098E3DDBE3E51F2108"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Director of the Institute shall conduct a national longitudinal study to determine the prevalence of mental health complications following a pregnancy loss, and the symptoms, severity, and duration of such cases, toward the goal of more fully identifying the characteristics of such cases and developing diagnostic techniques.</text></paragraph> <paragraph id="H511ABF8503F24A35A08CF1C6A5B74FDC"><enum>(2)</enum><header>Report</header><text display-inline="yes-display-inline">Beginning not later than 3 years after the date of enactment of this Act, and periodically thereafter for the duration of the study under paragraph (1), the Director of the Institute shall prepare and submit to the Congress a report on the findings of the study, any progress with respect to the study, and methodologies used to conduct the study.</text></paragraph></subsection></section>
+<section id="H7677566E11DD4047B109DB161FAB8BB4"><enum>102.</enum><header>Authorization of appropriations</header>
+<subsection id="HF8D05CB818B14B09AFC04A3BBF1FD6FA"><enum>(a)</enum><header>In general</header><text>For the purpose of carrying out this title, there is authorized to be appropriated $4,500,000 for each of the fiscal years 2027 through 2028.</text></subsection> <subsection id="HDA5313541F3A4978AF1EB8BB41193FC1"><enum>(b)</enum><header>Limitation</header><text>Any amounts appropriated under this title are subject to the requirements and limitations under sections 506 and 507 of division H of the Consolidated Appropriations Act, 2021 (<external-xref legal-doc="public-law" parsable-cite="pl/116/260">Public Law 116–260</external-xref>) in the same manner and to the same extent as if such amounts for each year were appropriated under such division.</text></subsection></section></title>
+<title id="HC47C612F72E746ABA4F56ED793337550"><enum>II</enum><header>Delivery of services with respect to mental health complications following a pregnancy loss</header>
+<section id="HBC7A8264A3494F388D7BBB18A587EDCC"><enum>201.</enum><header>Grant program for clinical mental health conditions following a pregnancy loss</header>
+<subsection id="H354DCA1724054F748888A3B49284865E"><enum>(a)</enum><header>Grants</header><text display-inline="yes-display-inline">Section 317L–1(a) of the Public Health Service Act (42 U.S.C. 247b–13a(a)) is amended by striking <quote>pregnant, or have given birth within the preceding 12 months,</quote> and inserting <quote>are pregnant, have given birth within the preceding 12 months, or have experienced a pregnancy loss</quote>.</text></subsection> <subsection id="H7123157D1DE649AEAAA07E609FDCC2CB"><enum>(b)</enum><header>Use of funds</header><text>Paragraphs (1)(C) and (2)(C) of section 317L–1(d) of the Public Health Service Act (42 U.S.C. 247b–13a(d)) are amended by inserting <quote>and women who have experienced a pregnancy loss</quote> after <quote>pregnant and postpartum women</quote>.</text></subsection>
+<subsection id="H912C2AA573B140AFA43CC75D654DDA64"><enum>(c)</enum><header>Dissemination of best practices</header><text>Section 317L–1(f) of the Public Health Service Act (42 U.S.C. 247b–13a(f)) is amended by inserting <quote>and for women who have experienced a pregnancy loss</quote> before the period at the end.</text></subsection> <subsection id="H42843A755F0B4F94B6BAA9D707A21752"><enum>(d)</enum><header>Special rules</header><text>Section 317L–1 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/247b-13a">42 U.S.C. 247b–13a</external-xref>) is amended—</text>
+<paragraph id="HD860EEF799AE4435B24C81C5F175BF57"><enum>(1)</enum><text>by redesignating subsection (h) as subsection (i); and</text></paragraph> <paragraph id="HF6A2B2C98CA14AEA81F2F69792BDCC16"><enum>(2)</enum><text>by inserting after subsection (g) the following:</text>
+<quoted-block style="OLC" id="H5288733FD7D847BBB54BBADA269C395A" display-inline="no-display-inline">
+<subsection id="HA3C9A4F4A6B240E8AC017444C60BC6A7">
+                                <enum>(h)</enum>
+                                <header>Assistance To address clinical mental health conditions
+                                    following a pregnancy loss</header>
+                                <paragraph id="HC0D975FCAB3D42ABA65A672C3EEF1F41">
+                                    <enum>(1)</enum>
+                                    <header>In general</header>
+ <text display-inline="yes-display-inline">In addition to the activities described in subsection (d), grant funds received by an entity under subsection (a) may be used for projects for the establishment, operation, and coordination of effective and cost-efficient systems for the delivery of mental health services to individuals struggling with clinical mental health conditions following a pregnancy loss.</text>
+                                </paragraph>
+                                <paragraph id="H890ABD21F27D44E0A68E5F1E2A8CB6FF">
+                                    <enum>(2)</enum>
+                                    <header>Certain activities</header>
+ <text>Projects referred to in paragraph (1) may include providing services for the screening, diagnosis, and management of mental health conditions, including persistent complex bereavement disorders, following a pregnancy loss, including—</text>
+                                    <subparagraph id="HB40A6CF2F87141C38AFC6B63A463753A">
+                                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">delivering or enhancing outpatient and home-based health and support services (including case management, screening, and mental health treatment services) for individuals with, or who are at risk of developing, mental health complications following a pregnancy loss, and delivering or enhancing support services for the families of such individuals;</text>
+                                    </subparagraph>
+                                    <subparagraph id="H49DBA7DFBCFD49428DF0508F82CB2C8C">
+                                        <enum>(B)</enum>
+ <text>delivering or enhancing inpatient care management services that ensure the well-being of the mother and family; and</text>
+                                    </subparagraph>
+                                    <subparagraph id="HEBF50BC720E442BBB2A5225D9B90B0B4">
+                                        <enum>(C)</enum>
+ <text display-inline="yes-display-inline">improving the quality, availability, and organization of health care and support services (including transportation services, attendant care, homemaker services, day or respite care, and providing counseling on financial assistance and insurance) for individuals with mental health conditions following a pregnancy loss.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="HC2A64DB12BED49A4BD8B5E529E0958DE">
+                                    <enum>(3)</enum>
+                                    <header>Subgrant recipients</header>
+ <text>An entity receiving a grant under subsection (a) may carry out projects described in paragraph (1) by making subgrants to an entity (other than a prohibited entity) that—</text>
+                                    <subparagraph id="H60D01BA48C7742CC917C918E15C238A0">
+                                        <enum>(A)</enum>
+ <text>is a public or nonprofit private entity, which may include—</text>
+                                        <clause id="H9724A8A0E763493A986212A5A1839E0B">
+                                            <enum>(i)</enum>
+ <text>a State, Tribal, or local governmental entity;</text>
+                                        </clause>
+                                        <clause id="HF6EEFA0FF217454687C5A9E3D97F8E1D">
+                                            <enum>(ii)</enum>
+ <text>a public or nonprofit private hospital, community-based organization, community health center, migrant health center, or homeless health center; or</text>
+                                        </clause>
+                                        <clause id="HD59188915C8D4938B75539C302C10B15">
+                                            <enum>(iii)</enum>
+ <text>other appropriate public or nonprofit private entity; and</text>
+                                        </clause>
+                                    </subparagraph>
+                                    <subparagraph id="H58FB471F669F4C7089C8DD44D0144BC1">
+                                        <enum>(B)</enum>
+ <text>has experience in providing services for projects described in paragraph (1).</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="H6FD0834659AF4EEE84C086CF83C513ED">
+                                    <enum>(4)</enum>
+                                    <header>Prohibited entities</header>
+                                    <subparagraph id="H9033959E7C194B7088876897C4B13EDD">
+                                        <enum>(A)</enum>
+                                        <header>In general</header>
+ <text display-inline="yes-display-inline">For purposes of paragraph (3), the term <term>prohibited entity</term> means an entity, including its affiliates, subsidiaries, successors, and clinics, that performs, or provides any funds to any other entity that performs, abortions, other than—</text>
+                                        <clause id="H3D1C5934331F45C59F140607817C6EBA">
+                                            <enum>(i)</enum>
+ <text>in the case of a pregnancy that is the result of an act of rape or incest; or</text>
+                                        </clause>
+                                        <clause id="HF8019AE006544D55BFD223B3F19ED7C9">
+                                            <enum>(ii)</enum>
+ <text>in the case where a woman suffers from a physical disorder, physical injury, or physical illness that would, as certified by a physician, place the woman in danger of death unless an abortion is performed, including a life endangering physical condition caused by, or arising from, the pregnancy itself.</text>
+                                        </clause>
+                                    </subparagraph>
+                                    <subparagraph id="HDE3E053B54BB40D1AAB590DD753D24CB">
+                                        <enum>(B)</enum>
+                                        <header>End of prohibition</header>
+ <text>The definition in subparagraph (A) shall cease to apply to an entity if such entity certifies that the entity, including its affiliates, subsidiaries, successors, and clinics, will not perform, and will not provide any funds to any other entity that performs, an abortion described in subparagraph (A).</text>
+                                    </subparagraph>
+                                    <subparagraph id="H339B043412564718BE67F881128C7936">
+                                        <enum>(C)</enum>
+                                        <header>Repayment by prohibited entity</header>
+ <text>The Secretary shall seek repayment of any Federal assistance received by any entity that makes a certification described in subparagraph (B) and subsequently violates the terms of such certification.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="HCD10F80EB3DC4106A0876623F286209F">
+                                    <enum>(5)</enum>
+                                    <header>Terms and conditions</header>
+ <text>An entity receiving a grant under subsection (a) to carry out projects described in paragraph (1) shall be subject to the following terms and conditions:</text>
+                                    <subparagraph id="H7B67611F3E654E88A261E8C6A6E333CE">
+                                        <enum>(A)</enum>
+ <text>Not more than 5 percent of the grant will be used for administration, accounting, reporting, and program oversight functions.</text>
+                                    </subparagraph>
+                                    <subparagraph id="H79D8C68D39F24889A90ECE7A09977D8F">
+                                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">The grant will be used to supplement and not supplant funds from other sources related to the treatment of clinical mental health conditions following a pregnancy loss.</text>
+                                    </subparagraph>
+                                    <subparagraph id="H53D2E63973804D199C66D82FCE59B2E9">
+                                        <enum>(C)</enum>
+ <text>The applicant will abide by any limitations deemed appropriate by the Secretary on any charges to individuals receiving services pursuant to the grant. As determined appropriate by the Secretary, such limitations on charges may vary based on the financial circumstances of the individual receiving services.</text>
+                                    </subparagraph>
+                                    <subparagraph id="HA096A592A3624481837EA734B6A7E98D">
+                                        <enum>(D)</enum>
+ <text>The grant will not be expended to make payment for services to the extent that payment has been made, or can reasonably be expected to be made, with respect to such services—</text>
+                                        <clause id="H029B3A4755EC4F4E87D56227E4F28916">
+                                            <enum>(i)</enum>
+ <text>under any State compensation program, under an insurance policy, or under any Federal or State health benefits program; or</text>
+                                        </clause>
+                                        <clause id="H54B4910E81EC42D8873D527C14A7159E">
+                                            <enum>(ii)</enum>
+ <text>by an entity that provides health services on a prepaid basis.</text>
+                                        </clause>
+                                    </subparagraph>
+                                </paragraph>
+                            </subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection></section></title> 
+</legis-body></bill>
+

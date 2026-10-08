@@ -211,13 +211,12 @@ stopifnot(
 partition <- partition_company_variants(c("BINANCE US", "Binance"))
 stopifnot(
   identical(partition$phase1, "Binance"),
-  identical(partition$phase2, "BINANCE US"),
-  length(partition$covered) == 0L
+  identical(partition$covered, "BINANCE US")
 )
 employer_url <- fec_build_url(2024L, "Crypto.com")
 stopifnot(
-  grepl("contributor_employer=Crypto.com", employer_url, fixed = TRUE),
-  !grepl("CRYPTO%20COM", employer_url, fixed = TRUE)
+  grepl("contributor_employer=CRYPTO%20COM", employer_url, fixed = TRUE),
+  !grepl("Crypto.com", employer_url, fixed = TRUE)
 )
 
 stopifnot(
@@ -290,8 +289,12 @@ stopifnot(
   identical(spending_report_company_labels("Tzero"), "tZero")
 )
 
-# Explicit FEC back-references can establish a memo parent. Identical amount,
-# date and donor alone cannot. The linked memo may describe part of a parent.
+# Memo dedup: a memo leg identifies its parent two ways. The five-key match
+# (company/committee/date/amount/contributor) misses any leg whose amount drifted
+# from its parent, so the parent transaction id printed in the memo text as
+# "[SA11AI:7772]" is matched as well. Real anatomy: Gemini's 2.692-bitcoin
+# liquidation to MAKE AMERICA GREAT AGAIN INC. filed $176,952.05 on the parent
+# and $176,942.05 on the memo leg, and the $10 gap counted it twice.
 # Cross-committee earmark legs must stay countable (R8 recipient-as-shown).
 memo_rows <- data.frame(
   sub_id = c("PARENT", "MEMO_DRIFT", "MEMO_EXACT", "EARMARK_OTHER_CMTE"),
@@ -302,8 +305,6 @@ memo_rows <- data.frame(
   contributor_name = "WINKLEVOSS, TYLER",
   is_memo_leg = c(0L, 1L, 1L, 1L),
   transaction_id = c("SA11AI.7772", "SA17.7929.0", "SA17.7930.0", "SA17.7931.0"),
-  file_num = 1234L, report_year = 2024L, report_type = "M8",
-  filing_form = "F3X", line_number = c("11AI", "17", "17", "17"),
   receipt_type_full = c(
     "2.692 BITCOINS LIQUIDATED",
     "2.692 BITCOINS LIQUIDATED [SA11AI:7772]",
@@ -319,8 +320,8 @@ stopifnot(
   memo_flag[["PARENT"]] == 0L,
   # caught by the back-reference despite the amount drift
   memo_flag[["MEMO_DRIFT"]] == 1L,
-  # Matching all five financial fields is a review clue, not a relationship.
-  memo_flag[["MEMO_EXACT"]] == 0L,
+  # still caught by the original five-key match
+  memo_flag[["MEMO_EXACT"]] == 1L,
   # different committee: a real earmark leg, counts (R8)
   memo_flag[["EARMARK_OTHER_CMTE"]] == 0L
 )

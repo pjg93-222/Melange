@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HC9F144F2A9B5498698144F6865D4DA80" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 5858 IH: Community Access to Treatment and Care for Health through Increased Testing Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-10-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5858</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251028">October 28, 2025</action-date><action-desc><sponsor name-id="S001221">Ms. Scholten</sponsor> (for herself and <cosponsor name-id="H001091">Mrs. Hinson</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To make it easier for rural health facilities to buy and upgrade preventative health care equipment through the Community Facilities Grant Program of the Department of Agriculture.</official-title></form><legis-body id="HEF3BF94CCFB14DE0AD4670D4C2527B52" style="OLC"> 
+<section id="H3CD5EA39BC8D4D68982C919B8ED43C45" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Community Access to Treatment and Care for Health through Increased Testing Act</short-title></quote> or the <quote><short-title>CATCH IT Act</short-title></quote>.</text></section>
+<section id="HDDE7A605C4F3487CB80CC6E8F167DA06"><enum>2.</enum><header>Increase in Federal share of cost of preventative health care equipment for rural health facility under the Community Facilities Grant Program</header><text display-inline="no-display-inline">Section 306(a)(19)(B) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1926">7 U.S.C. 1926(a)(19)(B)</external-xref>) is amended—</text> <paragraph id="H21BDCFA6803A4D6BAD12F35D54E36367"><enum>(1)</enum><text>in clause (iii), by adding at the end the following: <quote>The Federal share determined under the preceding sentence shall be increased by 25 percentage points if the development of the facility includes the purchase or upgrading of preventative health care equipment.</quote>; and</text></paragraph> 
+<paragraph id="H3EF3F045A0154B7F89E65B9C5BE5EE64"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block style="OLC" id="HF59D0DC2AD174945BB882F8D68FD715E" display-inline="no-display-inline"> <clause id="H2067A95D2EAB4FF9AA7D4A758EFC383D"><enum>(iv)</enum><header>Preventative health care equipment defined</header><text display-inline="yes-display-inline">In clause (iii), the term <term>preventative health care equipment</term> includes equipment such as the following:</text> 
+<subclause id="HB9D0563E46FB4F75A14EE9B3031BB8BC"><enum>(I)</enum><text display-inline="yes-display-inline">Advanced breast imaging equipment that may be used in a digital breast tomosynthesis or 3-dimensional mammography.</text></subclause> <subclause id="HD9E7047382F24A07AB8234BCB16C861C"><enum>(II)</enum><text>Mobile cancer screening unit.</text></subclause> 
+<subclause id="HDCD00CA2208F41848E574CBDDE5F8740"><enum>(III)</enum><text>Laboratory equipment that may be used in multi-cancer early detection or diagnostic cancer screening.</text></subclause> <subclause id="H6167733D73DA47B88A70773740DA25AC"><enum>(IV)</enum><text>Colorectal cancer screening equipment.</text></subclause> 
+<subclause id="HEA6E32FEAB964744A975950FC1F1F3DF"><enum>(V)</enum><text>Computerized tomography scanner.</text></subclause> <subclause id="HE0EE4CBFD15E4159B5C9AA2C2BC3B0DE"><enum>(VI)</enum><text>Diagnostic ultrasound equipment.</text></subclause></clause><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section>
+<section id="HAF2D5369818C480BABDB76C879AD5EA9"><enum>3.</enum><header>Effective date</header><text display-inline="no-display-inline">The amendments made by this Act shall take effect on the 1st day of the 1st Federal fiscal year that begins on or after the date of the enactment of this Act.</text> </section> </legis-body></bill>
+

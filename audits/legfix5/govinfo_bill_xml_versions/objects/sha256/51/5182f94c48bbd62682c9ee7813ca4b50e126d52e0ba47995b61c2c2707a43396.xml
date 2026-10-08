@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="HC28508C70F4E46A298B37C0038475BA4" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 261 IH: Strongly condemning the February 2019 terrorist attack in India, offering condolences to the family and friends of the victims, and reaffirming solidarity with the people of India.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 261</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190327">March 27, 2019</action-date><action-desc><sponsor name-id="P000605">Mr. Perry</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HFA00">Committee on Foreign Affairs</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Strongly condemning the February 2019 terrorist attack in India, offering condolences to the family
+			 and friends of the victims, and reaffirming solidarity with the people of
+			 India.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas, on February 14, 2019, a Pakistan-based terrorist organization attacked an Indian Central Reserve Police Force convoy, killing at least 40 Indian paramilitary forces and wounding at least 44 others;</text>
+ </whereas><whereas><text>Whereas the United States and United Nations (U.N.) designated terrorist group Jaish-e-Mohammad (JeM) has claimed responsibility for the attack;</text>
+ </whereas><whereas><text>Whereas the Department of State has designated JeM as a foreign terrorist organization since December 26, 2001;</text>
+ </whereas><whereas><text>Whereas JeM is one of numerous terrorist groups that receive safe haven in Pakistan;</text> </whereas><whereas><text>Whereas the Department of State’s 2017 Country Reports on Terrorism states, <quote>The Pakistani government failed to significantly limit Lashkar e-Tayyiba (LeT) and JeM from openly raising money, recruiting, and training in Pakistan.</quote>;</text>
+ </whereas><whereas><text>Whereas LeT conducted the 2008 Mumbai attacks that killed more than 160 individuals and injured at least 300 others in a series of attacks that targeted a railway station, a popular restaurant, a hospital, two hotels, and a Jewish center;</text>
+ </whereas><whereas><text>Whereas the 2017 Country Reports on Terrorism also states, <quote>The Pakistani government did not restrict the Afghan Taliban and the Haqqani Network from operating in Pakistan-based safe havens while threatening U.S. and Afghan forces in Afghanistan.</quote>;</text>
+ </whereas><whereas><text>Whereas, in 2017, the Financial Action Task Force (FATF), an international body focused on combating terrorist financing, continued to state concern that Pakistan’s outstanding gaps in the implementation of the U.N. Security Council’s sanctions regimes against ISIL (Da’esh) and al-Qaida have not been resolved, and that U.N.-listed entities, including LeT and its affiliates, were not effectively prohibited from raising funds in Pakistan, nor being denied financial services;</text>
+ </whereas><whereas><text>Whereas, in June 2018, the FATF placed Pakistan on the grey list due to the country’s strategic deficiencies in its antimoney laundering and combating financing of terrorism regime;</text>
+ </whereas><whereas><text>Whereas, in February 2019, the FATF assessed Pakistan’s progress towards delisting and stated, <quote>[Pakistan] does not demonstrate a proper understanding of the TF [terrorism financing] risks posed by Da’esh, al-Qa’ida, Jamaatud Dawa, Falah-i-Insaniyay Foundation, LeT, JeM, the Haqqani Network, and persons affiliated with the Taliban</quote>;</text>
+ </whereas><whereas><text>Whereas the United States and India share a mutually beneficial political, economic, and security partnership;</text>
+ </whereas><whereas><text>Whereas, in 2005, the United States and India launched a strategic partnership that served to broaden and deepen the security cooperation between the two countries;</text>
+ </whereas><whereas><text>Whereas the security cooperation between the United States and India plays an essential role in combating terrorism in the region, including the India-U.S. Counterterrorism Joint Working Group;</text>
+ </whereas><whereas><text>Whereas the United States and India have pledged to strengthen cooperation against terrorist threats from groups, including al-Qaida (AQ), ISIS, JeM, LeT, and D-Company; and</text>
+ </whereas><whereas><text>Whereas the United States is committed to working with the Government of India to combat terrorism in all forms: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="HF08C1338F81946738A0AA960A45AC822" style="traditional">
+ <section display-inline="yes-display-inline" id="H5C3E5DEAB20949B396151E604E5646FC" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That the House of Representatives—</text> <paragraph id="HCD5293EBE3CE490CB8FF0C4AC359FA7F"><enum>(1)</enum><text>condemns in the strongest terms the recent terrorist attack in India that resulted in the tragic loss of 40 lives;</text>
+ </paragraph><paragraph id="HE649192EE94841CC88199F1F42618257"><enum>(2)</enum><text>offers its deepest condolences to the family and friends of the victims and to India, and reaffirms its solidarity with the Indian people;</text>
+ </paragraph><paragraph id="HC87B0AD74CB54F99BB174748FFDE53FB"><enum>(3)</enum><text>honors the memory of the 40 Indian paramilitary force members whose lives were tragically lost in this horrific attack;</text>
+ </paragraph><paragraph id="HC9D594F8B382450EBBD4FC123D751A43"><enum>(4)</enum><text>urges the Government of Pakistan to end immediately its support, including access to a safe haven, to terrorist groups operating on its soil, whose goals are to sow chaos, violence, and terror in the region;</text>
+ </paragraph><paragraph id="H1F04A3A533BF4D79B4E518E2BF33E21D"><enum>(5)</enum><text display-inline="yes-display-inline">recognizes the threat posed by Jaish-e-Mohammad and other terrorist organizations being provided safe haven in Pakistan and reaffirms the United States commitment to addressing Pakistan’s harboring and support of internationally recognized terrorist organizations;</text>
+ </paragraph><paragraph id="HC2D7E66877584792BD2DD5C757794725"><enum>(6)</enum><text>recognizes the significant efforts made by the Government of India to combat terrorism; and</text> </paragraph><paragraph id="H588A981DAA2B4386A39E8A4F0C7FF1AE"><enum>(7)</enum><text>reaffirms the United States commitment to working with the Government of India to combat terrorism in all forms.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

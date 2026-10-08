@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 136 STAT. ?>
+<?I98 136 STAT. ?>
+<?I99 136 STAT. ?>
+<?I50 PUBLIC LAW 117–107—MAR. 29, 2022?>
+<?I51 PUBLIC LAW 117–107—MAR. 29, 2022?>
+<?I52 PUBLIC LAW 117–107—MAR. 29, 2022?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 117–107: To amend section 249 of title 18, United States Code, to specify lynching as a hate crime act.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>107</docNumber>
+<citableAs>Public Law 117–107</citableAs><citableAs>136 Stat. 1125</citableAs>
+<approvedDate>2022-03-29</approvedDate>
+<dc:date>2022-03-29</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-30</processedDate>
+<congress>117</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 117–107—MAR. 29, 2022</centerRunningHead>
+<page identifier="/us/stat/136/1125">136 STAT. 1125</page>
+<dc:type>Public Law</dc:type><docNumber>117–107</docNumber>
+<congress value="117">117th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To amend section 249 of title 18, United States Code, to specify lynching as a hate crime act.<sidenote><p class="centered fontsize8" id="x6e27f683-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658076"><approvedDate date="2022-03-29">Mar. 29, 2022</approvedDate></p><p class="centered fontsize8" id="x6e27f684-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658076">[<ref href="/us/bill/117/hr/55">H.R. 55</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x6e281d95-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658180">Emmett Till Antilynching Act.</p></sidenote>
+<section id="d506e88" identifier="/us/pl/117/107/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x6e281d96-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658180"><ref href="/us/usc/t18/s1">18 USC 1 note</ref>.</p></sidenote><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Emmett Till Antilynching Act</shortTitle>”.</content></section>
+<section id="d506e103" identifier="/us/pl/117/107/s2" role="instruction" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>LYNCHING; OTHER CONSPIRACIES.</heading><content class="firstIndent0 fontsize10" id="x6e2844a7-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658120">  <ref href="/us/usc/t18/s249/a">Section 249(a) of title 18, United States Code</ref>, <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="add">adding</amendingAction> at the end the following:<quotedContent><paragraph class="fontsize10" id="y6e2844a8-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="5">“(5) </num><heading class="fontsize10"><inline class="smallCaps">Lynching</inline>.—</heading><content>Whoever conspires to commit any offense under paragraph (1), (2), or (3) shall, if death or serious bodily injury (as defined in section 2246 of this title) results from the offense, be imprisoned for not more than 30 years, fined in accordance with this title, or both.</content></paragraph>
+<paragraph class="fontsize10" id="y6e286bb9-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="6">“(6) </num><heading class="fontsize10"><inline class="smallCaps">Other conspiracies</inline>.—</heading><content>Whoever conspires to commit any offense under paragraph (1), (2), or (3) shall, if death or serious bodily injury (as defined in section 2246 of this title) results from the offense, or if the offense includes kidnapping or an attempt to kidnap, aggravated sexual abuse or an attempt to commit aggravated sexual abuse, or an attempt to kill, be imprisoned for not more than 30 years, fined in accordance with this title, or both.”</content></paragraph>
+</quotedContent>.</content></section>
+<section id="d506e140" identifier="/us/pl/117/107/s3" style="-uslm-lc:I658141"><num class="fontsize12" value="3">SEC. 3. </num><heading>DETERMINATION OF BUDGETARY EFFECTS.</heading><content style="-uslm-lc:I658120">  The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled “Budgetary Effects of PAYGO Legislation” for this Act, submitted for printing in the <page identifier="/us/stat/136/1126">136 STAT. 1126</page>
+Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</content></section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2022-03-29">March 29, 2022</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/117/hr/55">H.R. 55</ref>:</heading>
+<note>
+<headingText style="-uslm-lc:I658032">HOUSE REPORTS:</headingText> ┐No. <ref href="/us/hrpt/117/251">117–251</ref> (<committee>Comm. on the Judiciary</committee>).
+</note>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 168 (2022):</heading>
+<p class="indentUp4 firstIndent-1" id="x6e2892ca-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658035">Feb. 28, considered and passed House.</p><p class="indentUp4 firstIndent-1" id="x6e2892cb-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658035">Mar. 7, considered and passed Senate.</p></note>
+<note>
+<heading style="-uslm-lc:I658032">DAILY COMPILATION OF PRESIDENTIAL DOCUMENTS (2022):</heading>
+<p class="indentUp4 firstIndent-1" id="x6e2892cc-fdeb-11f0-85eb-bfa20168462a" style="-uslm-lc:I658035">Mar. 29, Presidential remarks.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

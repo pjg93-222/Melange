@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S893 IS: Secure 5G and Beyond Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-03-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 893</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190327">March 27, 2019</action-date>
+			<action-desc><sponsor name-id="S287">Mr. Cornyn</sponsor> (for himself, <cosponsor name-id="S300">Mr. Burr</cosponsor>, <cosponsor name-id="S327">Mr. Warner</cosponsor>, <cosponsor name-id="S252">Ms. Collins</cosponsor>, <cosponsor name-id="S350">Mr. Rubio</cosponsor>, <cosponsor name-id="S330">Mr. Bennet</cosponsor>, <cosponsor name-id="S374">Mr. Cotton</cosponsor>, and <cosponsor name-id="S221">Mrs. Feinstein</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To require the President to develop a strategy to ensure the security of next generation mobile
+			 telecommunications systems and infrastructure in the United States and to
+			 assist allies and strategic partners in maximizing the security of next
+			 generation mobile telecommunications systems, infrastructure, and
+			 software, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Secure 5G and Beyond Act of 2019</short-title></quote>.</text>
+		</section><section id="id866F81DC9E954A058A0F6C53B5A4FFCB"><enum>2.</enum><header>Strategy to ensure security of next generation mobile telecommunications systems and infrastructure</header>
+ <subsection id="idCF774E6A28894183AC913CFB7F144658"><enum>(a)</enum><header>Appropriate committees of Congress defined</header><text>In this section, the term <term>appropriate committees of Congress</term> means—</text> <paragraph id="id72FCF35BF3B549FD872403DBDE4F770A"><enum>(1)</enum><text>the Select Committee on Intelligence, the Committee on Commerce, Science, and Transportation, the Committee on Foreign Relations, the Committee on Armed Services, and the Committee on Homeland Security and Governmental Affairs of the Senate; and</text>
+ </paragraph><paragraph id="id9EC8E988B0EE43C49B173BC73508EA5B"><enum>(2)</enum><text>the Permanent Select Committee on Intelligence, the Committee on Energy and Commerce, the Committee on Foreign Affairs, the Committee on Armed Services, and the Committee on Homeland Security of the House of Representatives.</text>
+ </paragraph></subsection><subsection id="id288de9fd5f994b21b03c637d6ed7be8f"><enum>(b)</enum><header>Strategy required</header><text>Not later than 180 days after the date of the enactment of this Act, the President, in consultation with the Chairman of the Federal Communications Commission, the Administrator of the National Telecommunications and Information Administration, the Secretary of Homeland Security, the Director of National Intelligence, the Attorney General, and the Secretary of Defense, shall develop and submit to the appropriate committees of Congress a strategy—</text>
+ <paragraph id="idCFB22DA924B34A849770E4B507A5F8B5"><enum>(1)</enum><text>to ensure the security of 5th and future generations mobile telecommunications systems and infrastructure within the United States;</text>
+ </paragraph><paragraph id="idC2EE9F382F8D473C84C298CB3B320D33"><enum>(2)</enum><text>to assist mutual defense treaty allies of the United States, strategic partners of the United States, and other countries, when in the security interests of the United States, in maximizing the security of 5th and future generations mobile telecommunications systems and infrastructure inside their countries; and</text>
+ </paragraph><paragraph id="idedcfba6f49714f27b13be64a78d0ccaf"><enum>(3)</enum><text>to protect the competitiveness of United States companies, privacy of United States consumers, and integrity of standards setting bodies against political influence.</text>
+ </paragraph></subsection><subsection id="id1905ba837a784db0a9614f581dbe6716"><enum>(c)</enum><header>Designation</header><text>The strategy developed under subsection (b) shall be known as the <quote>Secure Next Generation Mobile Communications Strategy</quote>.</text> </subsection><subsection id="idF731763DA11F483EAF6069A648D06DC9"><enum>(d)</enum><header>Elements</header><text>The strategy required by subsection (b) shall represent a whole-of-government approach and shall include the following:</text>
+ <paragraph id="idfff5c79fc3f44c2289df179848c21383"><enum>(1)</enum><text>A description of United States national and economic security interests pertaining to the deployment of 5th and future generations mobile telecommunications systems and infrastructure.</text>
+ </paragraph><paragraph id="id64c67ec2e8894f3a915e7be37283453d"><enum>(2)</enum><text>An identification and assessment of potential security threats and vulnerabilities to the infrastructure, equipment, systems, software, and virtually defined networks that support 5th and future generations mobile telecommunications systems and infrastructure.</text>
+ </paragraph><paragraph id="id04fd8f3870da42768b3009756fdba6b4"><enum>(3)</enum><text>A list of available domestic suppliers of 5th and future generations telecommunications equipment and other suppliers in countries that are mutual defense allies or strategic partners of the United States and a strategy to assess their ability to produce and supply 5th generation and future generations telecommunications systems and infrastructure.</text>
+ </paragraph><paragraph id="id7d71dd020e0d46e9bfc7cdeaf1582d62"><enum>(4)</enum><text>Identification of trusted supplier entities from both inside and outside the United States that are capable of producing and supplying to private industry infrastructure and systems equipment supporting 5th and future generations mobile telecommunications systems and infrastructure.</text>
+ </paragraph><paragraph id="ida2ffc6822797417086e050c1a0ed8fa8"><enum>(5)</enum><text>Identification of where security gaps exist in the United States domestic or mutual defense treaty allies and strategic partners telecommunications equipment supply chain for 5th and future generations infrastructure and systems equipment.</text>
+ </paragraph><paragraph id="id1efdbe0f8419416780c2e8bde0ccf5e8"><enum>(6)</enum><text>Identification of incentives and policy options to help close or narrow such security gaps in the United States domestic industrial base, including research and development in critical technologies and workforce development in new generation technologies.</text>
+ </paragraph><paragraph id="idfd69de790b204ba48cf8d8e3379ccbc5"><enum>(7)</enum><text>Identification of incentives and policy options for leveraging the telecommunications equipment suppliers from mutual defense treaty allies, strategic partners, and other countries to ensure that private industry in the United States has adequate sources for secure, effective, and reliable 5th and future generations mobile telecommunications systems and infrastructure equipment.</text>
+ </paragraph><paragraph id="id149def337e764a76b41a5bae75cc9588"><enum>(8)</enum><text>A strategy for diplomatic engagement with mutual defense treaty allies, strategic partners, and other countries to share security risk information and findings pertaining to 5th and future generations mobile telecommunications systems and infrastructure equipment and cooperation on mitigating those risks.</text>
+ </paragraph><paragraph id="id11df9e81dd7c490588a67398e652d4ca"><enum>(9)</enum><text>A strategy for engagements with private sector telecommunications infrastructure and systems equipment developers to share information and findings on 5th and future generations mobile telecommunication systems and infrastructure equipment standards to secure platforms.</text>
+ </paragraph><paragraph id="ide39d16ebd8fb417899dee82a6ca8cf9e"><enum>(10)</enum><text>A strategy for diplomatic engagements with mutual defense treaty allies, strategic partners, and other countries to share information and findings on 5th and future generations mobile telecommunication systems and infrastructure equipment standards and standards setting bodies to promote maximum interoperability, competitiveness, openness, and secure platforms.</text>
+ </paragraph><paragraph id="id480aee972f2d43b3a57973c43b4ed9a6"><enum>(11)</enum><text>A strategy for joint testing environments with mutual defense treaty allies, strategic partners, and other countries to ensure a trusted marketplace for 5th and future generations mobile telecommunication systems and infrastructure equipment.</text>
+ </paragraph><paragraph id="idf99e6f5a221249b8963477622aba0591"><enum>(12)</enum><text>A strategy for research and development by the Federal Government, in close partnership with trusted supplier entities, mutual defense treaty allies, strategic partners, and other countries to reach and maintain United States leadership in 5th and future generations communications security, including the development of an ongoing monitoring capability of 5th and future generations telecommunications systems for security vulnerabilities.</text>
+ </paragraph><paragraph id="id72e11a0cf8d24ec8aaf777d0fe3f01c4"><enum>(13)</enum><text>Options for identifying and helping to mitigate the security risks of 5th and future generations telecommunications systems and infrastructure equipment with security flaws or vulnerabilities or equipment sourced from countries of concern that have already been put in place within mutual defense treaty allies, strategic partners, and other countries, when in the security interests of the United States.</text>
+ </paragraph><paragraph id="idb987d78c715a4b77acabe6c58570faa9"><enum>(14)</enum><text>A description of the appropriate roles and missions of the Federal Communications Commission, the National Telecommunications and Information Administration, the Department of Homeland Security, the intelligence community, the Department of Justice, and the Department of Defense in executing the strategy.</text>
+ </paragraph><paragraph id="id7a69b178ee344cb3b7c372cb39a4d363"><enum>(15)</enum><text>Development of a plan that includes interagency mechanisms for the National Telecommunications and Information Administration to act as the executive agent to coordinate implementation of the strategy.</text>
+ </paragraph><paragraph id="id93e904445c6349538fd39bbecf149e58"><enum>(16)</enum><text>An identification of the key diplomatic, development, intelligence, military, and economic resources necessary to implement the strategy, including specific budgetary requests.</text>
+ </paragraph><paragraph id="id851ab44fced143eb9fce62398dc0cf60"><enum>(17)</enum><text>A description of such legislative or administrative action as may be necessary to carry out the strategy.</text>
+ </paragraph></subsection><subsection id="id60d360c1e04c4be585e6becb6d4db91d"><enum>(e)</enum><header>Limitation</header><text>The strategy required by subsection (b) shall not include a recommendation or a proposal to Federalize 5th or future generations mobile telecommunications systems or infrastructure.</text>
+ </subsection><subsection id="idfa26dc36b88e4c90b29f86c46ccf556d"><enum>(f)</enum><header>Briefing</header><text>Not later than 14 days after the date on which the strategy required by subsection (b) is completed, the President’s designee shall provide to the appropriate committees of Congress a briefing on the implementation of the strategy.</text>
+ </subsection><subsection id="id8bfb1f677eb941e78ee69af920f19986"><enum>(g)</enum><header>Implementation</header><text>The National Telecommunications and Information Administration shall act as the executive agent to coordinate implementation of the strategy, and keep congressional committees apprised of progress on implementation.</text>
+ </subsection><subsection id="id672113d2c9284e248c6b9768e892bba6"><enum>(h)</enum><header>Form</header><text>The strategy submitted under subsection (b) shall be submitted in unclassified form, but may include a classified annex.</text>
+			</subsection></section></legis-body>
+</bill>
+
+

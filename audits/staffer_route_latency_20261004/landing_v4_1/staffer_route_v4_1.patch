@@ -1,0 +1,1381 @@
+diff --git a/fec/surfaces/staffer_closeness_routes.py b/fec/surfaces/staffer_closeness_routes.py
+--- a/fec/surfaces/staffer_closeness_routes.py
++++ b/fec/surfaces/staffer_closeness_routes.py
+@@ -36,14 +36,22 @@
+ to the rest, in every search it runs: the spur searches of the ranked alternatives, and each pass of distinct and independent
+ routes (staffer_distinct_routes keeps the dropped staff out of the later passes). Every result of an office route, found,
+ unreachable or coverage, says who was left out (uncovered_staff_count, uncovered_staff_ids, sorted; target_count still counts the
+-staff the request named), and an unreachable reason is judged on the covered staff. It is insufficient_work_coverage only when its
+-origin is uncovered or none of the office's staff is covered. An office none of whose usable staff has dated work at it says so of
+-"the staff this search could use" when some staff were left out (not covered) or kept out (avoided), and of "this office's current
+-staff" only when nobody was (SEARCHED_STAFF_MESSAGES).
++staff the request named) and which coverage they lack (uncovered_basis: payroll_or_roster, or roster alone when work_sources is
++directory, which reads no payroll evidence, so none can cover anyone), and an unreachable reason is judged on the covered staff. It is
++insufficient_work_coverage only when its origin is uncovered or none of the office's staff is covered. An office none of whose usable
++staff has dated work at it says so of "the staff this search could use" when some staff were left out (not covered) or kept out
++(avoided), and of "this office's current staff" only when nobody was (SEARCHED_STAFF_MESSAGES).
++
++One index per request. A request that runs several passes (distinct and independent alternatives call ClosenessRoutes.route once per
++pass) takes its work index at its first pass and keeps it to its last (request_work, opened by AdvocacyRouter.route_many), so a router
++the service releases between two passes does not build the whole index again for the next. A released router stores no index and no
++hop-row cache it builds, and still answers every request that reaches it.
+ """
+ from array import array
+ from bisect import bisect_left
+ from collections import OrderedDict, namedtuple
++import contextlib
++import contextvars
+ from copy import deepcopy
+ from fractions import Fraction
+ import heapq
+@@ -683,6 +691,39 @@
+     return {'unreachable_reason': reason, 'message': message, 'suggested_objective': SUGGESTED_OBJECTIVE}
+ 
+ 
++# One search request, one work index. A request with several passes (distinct and independent alternatives call ClosenessRoutes.route once
++# per pass) takes the index at its first pass and keeps it to its last, whatever the router's table holds in between: a publish that
++# releases the router between two passes must not make the next pass build the whole index again (tens of seconds on the live records).
++# A contextvar, so a request on another thread has its own and nothing has to be passed through route_many's signature.
++_REQUEST_WORK = contextvars.ContextVar('staffer_request_work', default=None)
++
++
++class _RequestWork:
++    """What one request has taken from the ClosenessRoutes it searches: its work indexes by key and, for a released router, the hop-row
++    caches that router no longer keeps."""
++    __slots__ = ('indexes', 'row_caches')
++
++    def __init__(self):
++        self.indexes, self.row_caches = {}, {}
++
++
++@contextlib.contextmanager
++def request_work():
++    """Keep one work index (and, on a released router, one hop-row cache) for every pass of the request that runs inside.
++
++    AdvocacyRouter.route_many opens it around distinct_routes and the Yen loop. A scope that is already open is the request's own, so a
++    nested one changes nothing. It closes, and what it held is let go, when the request ends, however it ends.
++    """
++    if _REQUEST_WORK.get() is not None:
++        yield
++        return
++    token = _REQUEST_WORK.set(_RequestWork())
++    try:
++        yield
++    finally:
++        _REQUEST_WORK.reset(token)
++
++
+ class ClosenessRoutes:
+     """Work-time routes for one router: the closeness index, the shared hop-row caches and the search over them.
+ 
+@@ -704,16 +745,34 @@
+         self.cache = OrderedDict()
+         self.row_caches = OrderedDict()
+         self.row_lock = threading.Lock()
++        # Set by release(), for good: the service has replaced this router. It stores no index and no hop-row cache from then on.
++        self.released = False
+         # Tests pass _search_reference here; the server never does.
+         self.search = search or _search_bidirectional
+ 
+     def index(self, options):
+         """The work index for the options that shape it, built once: concurrent callers wait for the one build.
+ 
+-        The lock only guards the two small tables and is never held while building, which takes tens of seconds on
+-        the live records. A build that fails raises in every caller then waiting on it and is retried by the next.
++        A request that holds a scope (request_work) is given the index it took first for every later pass, whatever the table holds by then.
+         """
+         key = (options['include_review'], options['include_unresolved'], options['include_historical'], options['work_sources'])
++        scope = _REQUEST_WORK.get()
++        if scope is not None:
++            held = scope.indexes.get((self, key))
++            if held is not None:
++                return held
++        index = self._shared_index(key, options)
++        if scope is not None:
++            scope.indexes[(self, key)] = index
++        return index
++
++    def _shared_index(self, key, options):
++        """The table's index for `key` (built with `options` if it holds none): the part of index() every request shares.
++
++        The lock only guards the two small tables and is never held while building, which takes tens of seconds on
++        the live records. A build that fails raises in every caller then waiting on it and is retried by the next. A released router
++        keeps nothing it builds: the callers waiting on the build still get its index, and the table stays empty.
++        """
+         with self.index_lock:
+             index = self.indexes.get(key)
+             if index is not None:
+@@ -734,7 +793,7 @@
+             raise
+         finally:
+             with self.index_lock:
+-                if error is None:
++                if error is None and not self.released:
+                     self.indexes[key] = index
+                     while len(self.indexes) > 4:
+                         self.indexes.popitem(last=False)
+@@ -758,6 +817,9 @@
+                options['include_unresolved'], options['include_historical'],
+                _frozen(operational), _frozen(excluded), getattr(router, 'nodes_revision', None))
+         with self.row_lock:
++            if self.released:
++                # The router has been replaced: nothing is stored on it. A request with a scope shares one cache among its passes.
++                return self._unstored_row_cache(key, index)
+             cache = self.row_caches.get(key)
+             if cache is None or cache.index is not index:
+                 cache = self.row_caches[key] = _RowCache(index)
+@@ -766,13 +828,25 @@
+                 self.row_caches.popitem(last=False)
+             return cache
+ 
++    def _unstored_row_cache(self, key, index):
++        scope = _REQUEST_WORK.get()
++        if scope is None:
++            return _RowCache(index)
++        cache = scope.row_caches.get((self, key))
++        if cache is None or cache.index is not index:
++            cache = scope.row_caches[(self, key)] = _RowCache(index)
++        return cache
++
+     def release(self):
+         """Let go of the work indexes and hop-row caches, for a router the service has replaced (AdvocacyRouter.release_search_state).
+ 
+-        A search that is running keeps the index and the caches it already holds; one that asks afterwards builds them again and
+-        answers exactly as before, so nothing here changes an answer. The finished results (self.cache) are small and stay, as does
+-        the router: the two refer to each other, so the router itself is freed only by a garbage collection.
++        A search that is running keeps the index and the caches it already holds (a request keeps its one index for all its passes,
++        request_work); one that asks afterwards builds its own and answers exactly as before, so nothing here changes an answer. From
++        here on the router stores no index and no hop-row cache it builds, and an index whose build was still running is not put back
++        into the emptied table. The finished results (self.cache) are small and stay, as does the router: the two refer to each other, so
++        the router itself is freed only by a garbage collection.
+         """
++        self.released = True          # first: whatever stores after this sees it, and whatever stored before is cleared below
+         with self.index_lock:
+             self.indexes.clear()
+         with self.row_lock:
+@@ -812,7 +886,10 @@
+             # staff, search to the covered ones, and report who was left out on every result. The request fails only when
+             # nothing can be searched: the origin is uncovered, or no member of the office is covered.
+             uncovered = [p for p in targets if not allowed(p)]
+-            base.update(uncovered_staff_count=len(uncovered), uncovered_staff_ids=uncovered)
++            # What "uncovered" means in this search: no payroll evidence and not on the staffer roster, or, where payroll evidence is not read
++            # at all (a directory-only comparison), not on the roster.
++            base.update(uncovered_staff_count=len(uncovered), uncovered_staff_ids=uncovered,
++                        uncovered_basis='roster' if options['work_sources'] == 'directory' else 'payroll_or_roster')
+             if allowed(origin) and len(uncovered) < len(targets):
+                 targets, unavailable = tuple(p for p in targets if allowed(p)), []
+         if unavailable:
+diff --git a/fec/surfaces/staffer_distinct_routes.py b/fec/surfaces/staffer_distinct_routes.py
+--- a/fec/surfaces/staffer_distinct_routes.py
++++ b/fec/surfaces/staffer_distinct_routes.py
+@@ -101,8 +101,9 @@
+         last = router.route_many(origin, sorted(remaining), request, progress)
+         first = first or last
+         # An office search leaves its uncovered staff out once (D-086): they stay out of every later pass, and each route
+-        # reports the request's count, as the first pass counted it, not the count of the staff that pass was given.
+-        left_out = {key: first[key] for key in ('uncovered_staff_count', 'uncovered_staff_ids') if key in first}
++        # reports the request's count, as the first pass counted it, not the count of the staff that pass was given, and the
++        # basis of that count (what coverage they lack), which is the request's too.
++        left_out = {key: first[key] for key in ('uncovered_staff_count', 'uncovered_staff_ids', 'uncovered_basis') if key in first}
+         remaining.difference_update(left_out.get('uncovered_staff_ids', ()))
+         if last['status'] != 'found':
+             break
+diff --git a/fec/surfaces/staffer_live/README.md b/fec/surfaces/staffer_live/README.md
+--- a/fec/surfaces/staffer_live/README.md
++++ b/fec/surfaces/staffer_live/README.md
+@@ -57,7 +57,7 @@
+ 
+ Each shared-workplace exposure integrates the product of both people's concurrent-job allocations divided by observed peer headcount, with a workplace-type multiplier. Recognized shared-employee titles have factors 0.02 in the House, 0.05 in the Senate, and 0.02 when chamber is unknown; these are assumptions. Saturating strength and a 0.8 per-hop factor produce structural route costs. Uncertainty adds costs for unverified present access, age, and workplace concentration. Separate overlap runs contribute recency in proportion to their exposure; a brief return does not refresh a long old overlap. Source evidence and modeled-window labels are restricted to the actual joint intervals. Same-name records are not merged by routing. Member context affects office terminal anchors only, with a 15% maximum bonus; it does not rank person-to-person routes.
+ 
+-Ecosystem (`objective=evidence_cost`) uses separate association costs and bidirectional Dijkstra. Neither model estimates friendship or willingness. There is no wall-clock or expansion cutoff on route searches, although neighborhood browsing has paging and effort limits. Unknown people, insufficient work coverage, pending searches and exhausted connectivity remain distinct states. A Staffer search that finds no route answers `unreachable` with an `unreachable_reason` and a plain `message` that says why (an office whose current staff have no dated work at it, an origin or a destination with no usable workplace connection, or no path between them; the office reason is judged on the staff the search could use, and its message says "the staff this search could use" instead of "this office's current staff" when some were left out or excluded), and, like `insufficient_work_coverage`, a `suggested_objective` of `evidence_cost`; the page shows the message with one Search Ecosystem button that runs the same search, from the same endpoints, under Ecosystem. An office search under Staffer leaves out the office's current staff who lack coverage (no payroll record and not an operational staffer) and searches to the rest, in every search it runs; every office answer (found, unreachable or `insufficient_work_coverage`) reports who was left out as `uncovered_staff_count` and `uncovered_staff_ids`, the page says so in one line, "N of this office's current staff lack the payroll or staffer-roster coverage this model requires and were left out" (a person with dated directory work can be one of them, so the line does not say they have no work records; there is no line in an `insufficient_work_coverage` answer whose origin is the person without coverage: no search ran, so the page does not say that staff were left out), and `insufficient_work_coverage` is answered only when the origin is not covered or none of the office's staff is.
++Ecosystem (`objective=evidence_cost`) uses separate association costs and bidirectional Dijkstra. Neither model estimates friendship or willingness. There is no wall-clock or expansion cutoff on route searches, although neighborhood browsing has paging and effort limits. Unknown people, insufficient work coverage, pending searches and exhausted connectivity remain distinct states. A Staffer search that finds no route answers `unreachable` with an `unreachable_reason` and a plain `message` that says why (an office whose current staff have no dated work at it, an origin or a destination with no usable workplace connection, or no path between them; the office reason is judged on the staff the search could use, and its message says "the staff this search could use" instead of "this office's current staff" when some were left out or excluded), an `explanation` that is that same text (an unreachable answer with no reason keeps the generic explanation), and, like `insufficient_work_coverage`, a `suggested_objective` of `evidence_cost`; the page shows the message with one Search Ecosystem button that runs the same search, from the same endpoints, under Ecosystem. An office search under Staffer leaves out the office's current staff who lack coverage (no payroll record and not an operational staffer) and searches to the rest, in every search it runs; every office answer (found, unreachable or `insufficient_work_coverage`) reports who was left out as `uncovered_staff_count` and `uncovered_staff_ids`, and which coverage they lack as `uncovered_basis` (`payroll_or_roster`, or `roster` when `work_sources` is `directory`: that comparison reads no payroll evidence, so payroll covers nobody there and a person with payroll records and no roster entry is left out of it), the page says so in one line, "N of this office's current staff lack the payroll or staffer-roster coverage this model requires and were left out" or, for `roster`, "N of this office's current staff lack the staffer-roster coverage this model requires and were left out" ("lacks ... and was" for one person; an answer with no `uncovered_basis` gets the first wording; a person with dated directory work can be one of them, so the line does not say they have no work records; there is no line in an `insufficient_work_coverage` answer whose origin is the person without coverage: no search ran, so the page does not say that staff were left out), and `insufficient_work_coverage` is answered only when the origin is not covered or none of the office's staff is.
+ 
+ General LDA routes use the sealed sparse SQLite index at `<source-root>/audits/staffer_live_runtime/lda_activity_v1.sqlite` with its sibling `.sqlite.receipt.json`. It contains all 1,037,547 activities and 2,741,465 exact `NAMED_ON_ACTIVITY` incidences for all 25,340 LDA IDs, without generating all person pairs. The build verifies native source hashes before and after extraction, records counts and seals the database hash. The service checks the database once at startup and opens read-only lazy queries. Rebuild to a new filename using `staffer_activity_index.py <native-generation-directory> <new-database-path>` when the source generation changes; do not overwrite a sealed index in use.
+ 
+@@ -65,7 +65,7 @@
+ 
+ Verification and source indexing run in the background at service start; the page opens immediately and reports its loading stage. Name-prefix indexes, immutable graph revisions, bounded response caches, gzip and ETags keep subsequent searches and refreshes small. The browser caches names/layout and batches canvas drawing, coalesces repaints, cancels obsolete requests and skips unchanged graph revisions. Full person and edge provenance is fetched on selection rather than repeated in every map response. Source refreshes invalidate metadata and source-dependent caches.
+ 
+-Once the service is ready, and again whenever a new router is published (the day changes, the evidence changes, an identity rebuild lands), a background prewarm builds the Staffer work index for the page's default options and then the people index, one after the other, so the first route or page load after a publish does not wait for them. A request that arrives during a prewarm waits for that build (one build per work-index key, never two) and gets exactly the answer a lazy build gives. A prewarm whose router has been replaced stops before its next stage. It never holds the service lock while it builds. `GET /api/staffer-performance` reports its state and timings under `metrics.prewarm`: the status, the router it was for, each stage's milliseconds, the milliseconds of the one garbage collection that precedes its first build (`gc_ms`) and the earlier prewarms. When a new router is published the service lets go of the router it replaced at once (its work indexes, hop-row caches and same-displayed-name index; a search still running on it keeps what it holds, one that asks afterwards builds again, and no answer changes), and that collection frees what is left of it before the new indexes are built, so the old router's indexes and the new router's are not resident together. Set `MELANGE_STAFFER_PREWARM=0` before starting the sidecar to turn the prewarm and its collection off; the release at a publish stays. A Staffer search skips two people who never stood in one workplace together before any pair arithmetic; `neighbor_checks` still counts every candidate considered and `pairs_scored` counts the pairs whose arithmetic ran. The people with payroll evidence are kept on the work index, and the same-displayed-name groups behind `avoid_people` and distinct alternatives come from a name index built once per nodes mapping (and dropped when the service installs a different mapping on the same router, so the replaced mapping can be freed).
++Once the service is ready, and again whenever a new router is published (the day changes, the evidence changes, an identity rebuild lands), a background prewarm builds the Staffer work index for the page's default options and then the people index, one after the other, so the first route or page load after a publish does not wait for them. A request that arrives during a prewarm waits for that build (one build per work-index key, never two) and gets exactly the answer a lazy build gives. A prewarm whose router has been replaced stops before its next stage. It never holds the service lock while it builds. `GET /api/staffer-performance` reports its state and timings under `metrics.prewarm`: the status, the router it was for, each stage's milliseconds, the milliseconds of the one garbage collection that precedes its first build when a router was replaced since the last collection (`gc_ms`; a prewarm that follows no replacement, the first one after a start, collects nothing, because there is nothing to free and a collection holds every request thread while it runs, and has no `gc_ms`, nor has one that is abandoned before it builds) and the earlier prewarms. When a new router is published the service lets go of the router it replaced at once (its work indexes, hop-row caches and same-displayed-name index; the replaced router stores nothing it builds from then on; a request still running on it keeps what it holds, and a request that searches more than once, such as distinct or independent alternatives, keeps the one work index it took at its first pass for all its passes, so a publish between two of them costs no rebuild; a request that asks afterwards builds its own; no answer changes), and the collection that the next prewarm runs frees what is left of it before the new indexes are built, so the old router's indexes and the new router's are not meant to be resident together. That is not guaranteed: a request that was already running on the replaced router keeps its index until it ends, and no collection frees what it still refers to, so for as long as such a request runs the two can be resident together. Set `MELANGE_STAFFER_PREWARM=0` before starting the sidecar to turn the prewarm and its collection off; the release at a publish stays. A Staffer search skips two people who never stood in one workplace together before any pair arithmetic; `neighbor_checks` still counts every candidate considered and `pairs_scored` counts the pairs whose arithmetic ran. The people with payroll evidence are kept on the work index, and the same-displayed-name groups behind `avoid_people` and distinct alternatives come from a name index built once per nodes mapping (and dropped when the service installs a different mapping on the same router, so the replaced mapping can be freed).
+ 
+ The page reports service readiness separately from source exceptions and identity reconciliation; a completed crawl alone cannot establish final identity reconciliation. After the extraction task produces a new fully verified model generation, explicitly repin `GENERATION` and `VERIFICATION` in `staffer_graph_snapshot.py`, run the source integration tests, and restart this sidecar only. Existing Congress-layer graphs remain separate.
+ 
+diff --git a/fec/surfaces/staffer_live/staffer-route.js b/fec/surfaces/staffer_live/staffer-route.js
+--- a/fec/surfaces/staffer_live/staffer-route.js
++++ b/fec/surfaces/staffer_live/staffer-route.js
+@@ -141,12 +141,13 @@
+     const details=el(out,'details','','route-methods');el(details,'summary','How this route was chosen');el(details,'p',data.explanation,'note');el(details,'p',`Route computed from the indexed records. Ready in ${((data.response_elapsed_ms??data.elapsed_ms??data.search_elapsed_ms)/1000).toFixed(2)} seconds.${data.cache_hit?' Reused a cached result.':''}`,'note');for(const warning of data.warnings||[])el(details,'p',warning,'note');
+     if(matchMedia('(max-width:720px)').matches)$('route-status').scrollIntoView({block:'start',behavior:'smooth'});
+   }
+-  // An office search under Staffer leaves out the current staff who lack the coverage the model requires (no payroll record and not an operational staffer; a person with dated directory work can be one) and searches to the rest (D-086); the answer counts them in uncovered_staff_count. One plain line with the result, only when there are some.
++  // An office search under Staffer leaves out the current staff who lack the coverage the model requires (no payroll record and not an operational staffer; a person with dated directory work can be one) and searches to the rest (D-086); the answer counts them in uncovered_staff_count and says in uncovered_basis which coverage they lack: payroll_or_roster, or roster where the comparison reads directory episodes only (work_sources=directory has no payroll evidence to cover anyone), and the line names that coverage. Any other basis, or none (an older server), gets the payroll-or-roster wording. One plain line with the result, only when there are some.
+   function leftOutLine(data){
+     // No search ran when the origin is the person without coverage (the answer names it among unavailable_person_ids), so nobody was left out of one: the server still counts the staff, and the page does not say they were left out.
+     if(data.status==='insufficient_work_coverage'&&Array.isArray(data.unavailable_person_ids)&&data.unavailable_person_ids.includes(data.origin))return '';
+     const left=Number(data.uncovered_staff_count);
+-    return left>0?`${left} of this office's current staff ${left===1?'lacks':'lack'} the payroll or staffer-roster coverage this model requires and ${left===1?'was':'were'} left out.`:'';
++    const coverage=data.uncovered_basis==='roster'?'staffer-roster':'payroll or staffer-roster';
++    return left>0?`${left} of this office's current staff ${left===1?'lacks':'lack'} the ${coverage} coverage this model requires and ${left===1?'was':'were'} left out.`:'';
+   }
+   // After a Staffer search found no route: one button that runs the same search under Ecosystem. The server names that objective (suggested_objective); the selector must offer it, else it is the Ecosystem value this page has always used. The click is a normal new search (same endpoints, same holder, supersedes whatever is still active), so it goes through the form.
+   function offerEcosystem(out,data){
+diff --git a/fec/surfaces/staffer_live_service.py b/fec/surfaces/staffer_live_service.py
+--- a/fec/surfaces/staffer_live_service.py
++++ b/fec/surfaces/staffer_live_service.py
+@@ -314,6 +314,9 @@
+         self._prewarm_seq = 0
+         self._prewarm_latest = None
+         self._prewarm_finished = deque(maxlen=4)
++        # Set when a publish replaced a router (_release_replaced_router), cleared by the prewarm that collects for it (under _prewarm_lock):
++        # a collection runs only then, since at a start nothing was replaced and a collection would only stall every request thread.
++        self._router_replaced = False
+         self._groups_lock = threading.Lock()
+         self._groups_index = None
+         self.source_catalog = None
+@@ -1265,17 +1268,22 @@
+     # people index. The answers are the ones a lazy build gives, since it is the same build: a request that arrives
+     # during a prewarm waits for that build (ClosenessRoutes.index, network_index) instead of starting another.
+     # Memory is the constraint (D-087): a publish releases the replaced router's work state at once
+-    # (_release_replaced_router), and the prewarm runs one collection before its first build, so the old indexes and the new
+-    # ones are not resident together.
++    # (_release_replaced_router), and the prewarm that follows a replacement runs one collection before its first build (a prewarm at a
++    # start follows none, so it runs none), which is meant to keep the old indexes and the new ones from being resident together. It is not
++    # guaranteed: a request that was already running on the replaced router keeps the index it holds until it ends, and a long one can
++    # outlast the collection and the new router's build, so the two can be resident together for that long.
+     PREWARM_STAGES = ('work_index', 'network_index')
+ 
+     def _release_replaced_router(self, replaced, current):
+         """Let go of what the router the service has just replaced kept for its searches (its work indexes, hop-row caches and
+         name index), so that they are not held while the new router's are built. A search still running on it keeps what it
+-        holds, one that asks afterwards builds again, and no answer changes (AdvocacyRouter.release_search_state). The router
+-        itself is freed by the collection that runs before the prewarm's first build. Never raises, never takes the service lock."""
++        holds, one that asks afterwards builds its own (the replaced router stores nothing from then on), and no answer changes
++        (AdvocacyRouter.release_search_state). The router itself is freed by the collection that the next prewarm runs, which this
++        call asks for. Never raises, never takes the service lock."""
+         if replaced is None or replaced is current:
+             return
++        with self._prewarm_lock:
++            self._router_replaced = True
+         try:
+             replaced.release_search_state()
+         except Exception as exc:
+@@ -1330,18 +1338,25 @@
+             record.update(status='running', waited_ms=round((started - waiting) * 1000, 2), started_utc=utcnow())
+             self._publish_prewarm(seq, record)
+             failed = False
+-            collected = False
++            checked = False
+             for name in self.PREWARM_STAGES:
+                 if self.router is not router or self._stop.is_set():
+                     record.update(status='abandoned', abandoned_before=name)
+                     break
+-                if not collected:
+-                    # One full collection, before this prewarm builds anything: what the router the service replaced left
+-                    # behind (it is only reachable from itself, so only a collection frees it) is gone before the new indexes are
+-                    # built, and the old indexes and the new ones are never resident together.
+-                    collected, mark = True, time.perf_counter()
+-                    gc.collect()
+-                    record['gc_ms'] = round((time.perf_counter() - mark) * 1000, 2)
++                if not checked:
++                    checked = True
++                    with self._prewarm_lock:
++                        replaced, self._router_replaced = self._router_replaced, False
++                    if replaced:
++                        # One full collection, before this prewarm builds anything, and only because a publish replaced a router since
++                        # the last one (a start replaced none: there was nothing to free, and the collection held every request thread
++                        # for ten seconds on the live heap). What the router the service replaced left behind (it is only reachable
++                        # from itself, so only a collection frees it) is gone before the new indexes are built, so the old indexes and
++                        # the new ones are not resident together, unless a request that was already running on the replaced router
++                        # still holds them: that request keeps its index until it ends, and no collection frees what it still refers to.
++                        mark = time.perf_counter()
++                        gc.collect()
++                        record['gc_ms'] = round((time.perf_counter() - mark) * 1000, 2)
+                 mark = time.perf_counter()
+                 try:
+                     stage = {'status': getattr(self, '_prewarm_' + name)(router)}
+@@ -2123,15 +2138,19 @@
+         elif result.get('objective') in ('overlap_strength', 'overlap_fewest_steps'):
+             explanation = ('Fewest steps first, then shared-background scores.' if result['objective'] == 'overlap_fewest_steps' else
+                 'Minimizes distance derived from shared-background scores; fewer steps break ties. Scores do not measure personal familiarity or access.')
++        # A Staffer answer that found no route says why (unreachable_reason, message): its explanation is that message, the text the page shows
++        # for it, so no consumer is handed the generic sentence beside a reason it contradicts. An answer with no reason keeps the generic one.
++        reasoned = result['status'] == 'unreachable' and bool(result.get('unreachable_reason') and result.get('message'))
+         if result['status'] == 'unknown_person':
+             explanation = 'No search was run: only known people with a resolved name can be route endpoints; institutions, activities and routing hubs are evidence, not endpoints.'
+         elif result['status'] == 'search_limited':
+             explanation = 'Search reached its effort limit; this does not establish that no route exists. No conclusion about reachability was reached.'
+         elif result['status'] == 'unreachable':
+-            explanation = 'No supported path exists in the currently indexed evidence under these filters. This does not establish that no real-world introduction is possible.'
++            explanation = (result['message'] if reasoned else
++                           'No supported path exists in the currently indexed evidence under these filters. This does not establish that no real-world introduction is possible.')
+         elif result['status'] == 'insufficient_work_coverage':
+             explanation = result['message']
+-        if result.get('alternative_strategy') in ('distinct', 'independent'):
++        if not reasoned and result.get('alternative_strategy') in ('distinct', 'independent'):
+             explanation += ' Alternatives are found by excluding contacts used in earlier choices, including records with the same displayed name. Each is best under those exclusions; the set is not globally optimized.'
+             if result['alternative_strategy'] == 'independent':
+                 explanation += ' Connections whose selected evidence repeats a workplace or organization are also excluded; missing context identifiers cannot establish independence.'
+diff --git a/fec/surfaces/staffer_routing.py b/fec/surfaces/staffer_routing.py
+--- a/fec/surfaces/staffer_routing.py
++++ b/fec/surfaces/staffer_routing.py
+@@ -490,12 +490,24 @@
+         """Let go of what this router's searches kept: the work indexes and hop-row caches, and the name index.
+ 
+         For a router the service has replaced, so that its indexes are not held while the next router's are built. A search
+-        still running keeps what it already holds, and one that asks afterwards builds again and answers exactly as before.
++        still running keeps what it already holds (a request with several passes keeps the one index it took first, whatever
++        happens to the router between its passes), and one that asks afterwards builds its own and answers exactly as before:
++        from here on the router stores nothing it builds (ClosenessRoutes.release). A router that has not searched yet gets its search
++        object now, so that it is released too.
+         """
+-        routes = getattr(self, 'closeness_routes', None)
+-        if routes is not None:
+-            routes.release()
++        self.closeness().release()
+         self.forget_contact_groups()
++
++    @staticmethod
++    def _one_work_index():
++        """The scope of one search request (staffer_closeness_routes.request_work).
++
++        A request that searches once per pass (distinct and independent alternatives, the Yen loop) takes the work index at its first pass
++        and uses that one to its last, so a publish that releases this router between two passes costs no rebuild. Imported here, as the
++        closeness search is.
++        """
++        from fec.surfaces.staffer_closeness_routes import request_work
++        return request_work()
+ 
+     def route_many(self, origin, targets, options=None, progress=None):
+         """Find the best person path to a target set in one symmetric search.
+@@ -526,11 +538,14 @@
+             options['_avoided_targets'] = tuple(sorted(set(options['_avoided_targets']) | (set(named) - set(targets))))
+         if options['route_count'] > 1 and options['alternative_strategy'] != 'ranked':
+             from fec.surfaces.staffer_distinct_routes import distinct_routes
+-            return distinct_routes(self, origin, targets, options, progress)
++            with self._one_work_index():
++                return distinct_routes(self, origin, targets, options, progress)
+         if options['objective'] == 'work_time':
++            # One call, so one index for all of its Yen loop: ClosenessRoutes.route takes it once.
+             return self.closeness().route(origin, targets, options, progress)
+         if options['route_count'] > 1:
+-            return self._route_alternatives(origin, targets, options, progress)
++            with self._one_work_index():
++                return self._route_alternatives(origin, targets, options, progress)
+         excluded_nodes = set(options['_excluded_nodes'])
+         excluded_edges = set(options['_excluded_edges'])
+         if options['objective'] in ('work_time', 'overlap_strength', 'overlap_fewest_steps', 'overlap_balanced'):
+diff --git a/fec/tests/surfaces/test_staffer_left_out_staff.cjs b/fec/tests/surfaces/test_staffer_left_out_staff.cjs
+--- a/fec/tests/surfaces/test_staffer_left_out_staff.cjs
++++ b/fec/tests/surfaces/test_staffer_left_out_staff.cjs
+@@ -4,9 +4,11 @@
+ // uncovered_staff_count on every office answer; test_staffer_office_covered_staff.py asserts that against the real producer
+ // through the router, the service and the HTTP handler. The page shows one plain line with the result when that count is above
+ // zero: its singular and plural forms, and none when the count is zero or missing, or when no search ran because the origin is the person without
+-// coverage (the answer names the origin among unavailable_person_ids; test_staffer_office_covered_staff.py pins that on the producer). The real
+-// staffer-route.js runs in a vm over a small fake DOM and a scripted server. The page as it was before the change (read from git) and thirteen
+-// deliberate bugs of the new page are each caught by the same scenarios: the negative controls.
++// coverage (the answer names the origin among unavailable_person_ids; test_staffer_office_covered_staff.py pins that on the producer).
++// The line names the coverage the staff lack as the answer's uncovered_basis says (v4.1): payroll_or_roster, or roster where the comparison reads
++// directory episodes only, which has no payroll evidence to cover anyone; any other basis, or none, gets the payroll-or-roster wording. The real
++// staffer-route.js runs in a vm over a small fake DOM and a scripted server. The page as it was before the change and as v4 ran it (read from git)
++// and seventeen deliberate bugs of the new page are each caught by the same scenarios: the negative controls.
+ const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+ const {execFileSync}=require('node:child_process');
+ const REL='fec/surfaces/staffer_live/staffer-route.js';
+@@ -20,6 +22,10 @@
+ }
+ const before=fromGit(BEFORE,REL);
+ const NO_GIT=before===null?'the pre-change page (commit '+BEFORE.slice(0,9)+') is not in this checkout':false;
++// The page as v4 ran it: the line is there, and it names payroll whatever the basis.
++const V4='79ef9f1b7440bcee21c7f7c677a93263d9fcc04a';
++const v4=fromGit(V4,REL);
++const NO_V4=v4===null?'the v4 page (commit '+V4.slice(0,9)+') is not in this checkout':false;
+ 
+ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+ // How many ticks a scenario waits for something to happen. The controls wait briefly: a page with a bug is expected not to get there.
+@@ -32,6 +38,9 @@
+ // The sentences, as the ruling words them.
+ const PLURAL=n=>`${n} of this office's current staff lack the payroll or staffer-roster coverage this model requires and were left out.`;
+ const SINGULAR="1 of this office's current staff lacks the payroll or staffer-roster coverage this model requires and was left out.";
++// ... and for a comparison of directory episodes only (uncovered_basis 'roster'): no payroll evidence is read there, so the roster alone is named.
++const ROSTER_PLURAL=n=>`${n} of this office's current staff lack the staffer-roster coverage this model requires and were left out.`;
++const ROSTER_SINGULAR="1 of this office's current staff lacks the staffer-roster coverage this model requires and was left out.";
+ const COMPARED='Example Office · compared 5 staff';
+ const RECORDS='Staff listed in records through 2026-09-01';
+ 
+@@ -241,6 +250,45 @@
+     ok(JSON.stringify(page.leftOut())===JSON.stringify([PLURAL(2)]),'not a coverage answer (found): the line stays, found '+JSON.stringify(page.leftOut()));
+   });
+ }
++// The basis of the count picks the wording: 'roster' names the roster alone, in the singular and the plural, on every kind of answer that shows the line.
++const ROSTER=(n,extra={})=>({uncovered_staff_count:n,uncovered_staff_ids:Array.from({length:n},(_,i)=>'u'+(i+1)),uncovered_basis:'roster',...extra});
++async function namesTheRosterAloneWhereNoPayrollIsRead(code,ok){
++  const cases=[['found, plural',found(ROSTER(3)),ROSTER_PLURAL(3)],['found, singular',found(ROSTER(1)),ROSTER_SINGULAR],
++    ['unreachable',{...UNREACHABLE,...ROSTER(2)},ROSTER_PLURAL(2)],['coverage, no staff covered',NO_STAFF_COVERED({uncovered_basis:'roster'}),ROSTER_PLURAL(3)]];
++  for(const [what,payload,expected] of cases){
++    await search(code,payload,page=>{
++      ok(JSON.stringify(page.leftOut())===JSON.stringify([expected]),'roster, '+what+': one line, "'+expected+'"; found '+JSON.stringify(page.leftOut()));
++      ok(!/payroll/.test(page.leftOut().join(' ')),'roster, '+what+': the line does not mention payroll, found '+JSON.stringify(page.leftOut()));
++    });
++  }
++  await search(code,found(ROSTER(3)),page=>{
++    const lines=page.card()?.children.filter(c=>c.tag==='p').map(c=>c.textContent)||[];
++    ok(JSON.stringify(lines.filter(l=>[COMPARED,ROSTER_PLURAL(3),RECORDS].includes(l)))===JSON.stringify([COMPARED,ROSTER_PLURAL(3),RECORDS]),'roster, card: the line sits between the compared and the records lines; found '+JSON.stringify(lines));
++  });
++  const second={...found(ROSTER(3)),route_rank:2};
++  await search(code,{...found(ROSTER(3)),routes:[found(ROSTER(3)),second],routes_requested:3,alternative_strategy:'distinct'},page=>{
++    const choices=page.$('route-options').children.filter(e=>e.tag==='button');
++    choices[1]?.onclick();
++    ok(JSON.stringify(page.leftOut())===JSON.stringify([ROSTER_PLURAL(3)]),'roster, routes: route 2 shows the line once, found '+JSON.stringify(page.leftOut()));
++  });
++  // where no search ran because the origin is the person without coverage there is still no line, whatever the basis
++  await search(code,ORIGIN_UNCOVERED({uncovered_basis:'roster'}),page=>{
++    ok(page.leftOut().length===0,'roster, origin uncovered: no line, found '+JSON.stringify(page.leftOut()));
++  });
++}
++// Anything but the word 'roster' keeps the wording the page always had, so a page in front of an older server (no basis at all) says what it said.
++async function keepsThePayrollOrRosterWordingForAnyOtherBasis(code,ok){
++  const cases=[['payroll_or_roster',{uncovered_basis:'payroll_or_roster'}],['no basis, as an older server answers',{}],['null',{uncovered_basis:null}],
++    ['an empty string',{uncovered_basis:''}],['another case',{uncovered_basis:'Roster'}],['a longer name',{uncovered_basis:'roster_only'}],['a list',{uncovered_basis:['roster']}]];
++  for(const [what,extra] of cases){
++    await search(code,found({uncovered_staff_count:2,uncovered_staff_ids:['u1','u2'],...extra}),page=>{
++      ok(JSON.stringify(page.leftOut())===JSON.stringify([PLURAL(2)]),'basis ('+what+'): the payroll-or-roster line, found '+JSON.stringify(page.leftOut()));
++    });
++  }
++  await search(code,found({uncovered_staff_count:1,uncovered_staff_ids:['u1'],uncovered_basis:'payroll_or_roster'}),page=>{
++    ok(JSON.stringify(page.leftOut())===JSON.stringify([SINGULAR]),'basis (payroll_or_roster, singular): the singular payroll-or-roster line, found '+JSON.stringify(page.leftOut()));
++  });
++}
+ const SCENARIOS=[
+   ['a found office route shows the plural line in the office card',showsThePluralLineInTheOfficeCard],
+   ['one left-out member reads in the singular',showsTheSingularLine],
+@@ -254,6 +302,8 @@
+   ['the line stays when the origin is covered and no staff member is',showsTheLineWhenTheOriginIsCoveredAndNoStaffMemberIs],
+   ['the line stays when the answer does not say the origin is the one without coverage',readsTheOriginOnlyFromTheAnswer],
+   ['an answer that is not a coverage answer keeps its line',onlyACoverageAnswerLosesItsLine],
++  ['a directory-only comparison names the staffer roster alone, in every kind of answer',namesTheRosterAloneWhereNoPayrollIsRead],
++  ['any other basis, or none, keeps the payroll-or-roster wording',keepsThePayrollOrRosterWordingForAnyOtherBasis],
+ ];
+ const assertOk=(condition,what)=>assert.ok(condition,what);
+ // Runs every scenario against `code`, collecting what fails instead of asserting.
+@@ -274,6 +324,10 @@
+   assert.equal(SINGULAR,"1 of this office's current staff lacks the payroll or staffer-roster coverage this model requires and was left out.");
+   // What the line must not claim: that the people left out have no work records. A person with a dated directory episode can lack the coverage.
+   assert.ok(!/work records/.test(PLURAL(3))&&!/work records/.test(SINGULAR));
++  // The directory-only wording (uncovered_basis 'roster'): the roster alone, and no claim about payroll.
++  assert.equal(ROSTER_PLURAL(3),"3 of this office's current staff lack the staffer-roster coverage this model requires and were left out.");
++  assert.equal(ROSTER_SINGULAR,"1 of this office's current staff lacks the staffer-roster coverage this model requires and was left out.");
++  assert.ok(!/payroll|work records/.test(ROSTER_PLURAL(3))&&!/payroll|work records/.test(ROSTER_SINGULAR));
+ });
+ 
+ for(const [name,scenario] of SCENARIOS)test(name,()=>scenario(source,assertOk));
+@@ -292,12 +346,19 @@
+   assert.ok(failures.length>=6,'failed '+failures.length+' of the checks');
+ });
+ 
++test('negative control: the page as v4 ran it names payroll for a directory-only comparison, and only there is it wrong',{skip:NO_V4},async()=>{
++  const failures=await failuresOf(v4);
++  assert.ok(failures.length>0,'it fails the roster scenario');
++  assert.ok(failures.every(f=>/^roster, /.test(f)),'and nothing else: '+JSON.stringify(failures.filter(f=>!/^roster, /.test(f)).slice(0,4)));
++  assert.ok(failures.some(f=>/^roster, found, plural/.test(f))&&failures.some(f=>/^roster, found, singular/.test(f)),'it names payroll in both forms');
++});
++
+ // Deliberate bugs of the new page. Each is one edit to the real file, and the scenarios must notice every one.
+ // The guard of leftOutLine, as the deliberate bugs below see it.
+ const GUARD="if(data.status==='insufficient_work_coverage'&&Array.isArray(data.unavailable_person_ids)&&data.unavailable_person_ids.includes(data.origin))return '';";
+ const BUGS=[
+   ['the singular still says "lack"',"${left===1?'lacks':'lack'}","${'lack'}",/^singular:/],
+-  ['the line says the staff have no work records, as it did before the coverage wording was corrected',"${left===1?'lacks':'lack'} the payroll or staffer-roster coverage this model requires","${left===1?'has':'have'} no work records this model uses",/^plural: exactly one line/],
++  ['the line says the staff have no work records, as it did before the coverage wording was corrected',"${left===1?'lacks':'lack'} the ${coverage} coverage this model requires","${left===1?'has':'have'} no work records this model uses",/^plural: exactly one line/],
+   ['the singular still says "were"',"${left===1?'was':'were'}","${'were'}",/^singular:/],
+   ['a count of zero gets a line',"return left>0?","return left>=0?",/^0: no line/],
+   ['the line counts the compared staff, not the left-out',"const left=Number(data.uncovered_staff_count);","const left=Number(data.candidate_count);",/^0: no line|^missing: no line/],
+@@ -310,6 +371,11 @@
+   ['a coverage answer loses its line when anyone is unavailable, not only the origin',GUARD,"if(data.status==='insufficient_work_coverage'&&Array.isArray(data.unavailable_person_ids)&&data.unavailable_person_ids.length>0)return '';",/^no staff covered: one line/],
+   ['the list of unavailable people is trusted to be a list',"&&Array.isArray(data.unavailable_person_ids)&&","&&",/^cannot tell \(a list that is not a list\)/],
+   ['the line is never held back',GUARD,"",/^origin uncovered/],
++  // The basis of the count (v4.1).
++  ['the basis is ignored: every answer names payroll',"coverage=data.uncovered_basis==='roster'?'staffer-roster':'payroll or staffer-roster'","coverage='payroll or staffer-roster'",/^roster, /],
++  ['the roster alone is named whatever the basis',"coverage=data.uncovered_basis==='roster'?'staffer-roster':'payroll or staffer-roster'","coverage='staffer-roster'",/^basis \(payroll_or_roster\)|^plural: exactly one line/],
++  ['any basis that is set names the roster alone',"data.uncovered_basis==='roster'","data.uncovered_basis",/^basis \(payroll_or_roster\)/],
++  ['the basis is read from the wrong field',"data.uncovered_basis==='roster'","data.basis==='roster'",/^roster, /],
+ ];
+ for(const [name,find,replacement,expected] of BUGS){
+   test('negative control: '+name+' is caught',async()=>{
+diff --git a/fec/tests/surfaces/test_staffer_office_covered_staff.py b/fec/tests/surfaces/test_staffer_office_covered_staff.py
+--- a/fec/tests/surfaces/test_staffer_office_covered_staff.py
++++ b/fec/tests/surfaces/test_staffer_office_covered_staff.py
+@@ -3,8 +3,9 @@
+ Under the Staffer model (objective=work_time) an office is a set of current staff. One of them without the model's coverage
+ (no payroll record and not an operational staffer) used to fail the whole request as insufficient_work_coverage. Now an
+ office route drops the uncovered staff, searches to the covered ones and says who was left out: every office result (found,
+-unreachable or coverage) carries uncovered_staff_count and uncovered_staff_ids (sorted). The request fails as
+-insufficient_work_coverage only when its origin is uncovered or none of the office's staff is covered, with the message and
++unreachable or coverage) carries uncovered_staff_count and uncovered_staff_ids (sorted) and uncovered_basis, the coverage they lack
++(payroll_or_roster, or roster alone where the comparison reads directory episodes only, so no payroll evidence can cover anyone). The
++request fails as insufficient_work_coverage only when its origin is uncovered or none of the office's staff is covered, with the message and
+ suggested_objective it always had. An unreachable reason is judged on the covered staff. The rule holds in every search an
+ office request runs: the spur searches of ranked alternatives and each pass of distinct and independent routes. Person
+ routes, and a request that is not for an office, are unchanged.
+@@ -37,7 +38,8 @@
+ AS_OF = '2026-09-10'
+ # The tip this change was built on (staffer-unreachable-hint): the routing modules as they were before any of it.
+ BASE = 'a9db5fd5fc2c164bdbd591488867008649532d83'
+-NEW_FIELDS = {'uncovered_staff_count', 'uncovered_staff_ids'}
++NEW_FIELDS = {'uncovered_staff_count', 'uncovered_staff_ids', 'uncovered_basis'}   # every field an office answer gained
++COUNT_FIELDS = {'uncovered_staff_count', 'uncovered_staff_ids'}                    # who was left out
+ COVERAGE_MESSAGE = ("These people are known, but their records do not meet this model's authenticated staffer coverage "
+                     "requirements. Try Ecosystem for documented associations.")
+ UI = {'objective': 'work_time', 'work_sources': 'payroll_and_directory', 'include_historical': True, 'include_review': True,
+@@ -86,7 +88,7 @@
+ 
+ 
+ def left_out(result):
+-    return {key: result[key] for key in sorted(NEW_FIELDS)}
++    return {key: result[key] for key in sorted(COUNT_FIELDS)}
+ 
+ 
+ # --------------------------------------------------------------------------- the base commit
+@@ -676,3 +678,125 @@
+         finally:
+             server.close()
+             service.route_executor.shutdown(wait=True, cancel_futures=True)
++
++
++# --------------------------------------------------------------------------- what the left-out staff lack (uncovered_basis)
++# The line the page shows says which coverage the left-out staff lack. Payroll evidence can cover a person only where it is read: a
++# comparison of directory episodes only (work_sources=directory) has none, so there "uncovered" means "not on the staffer roster", and the
++# page must not say "payroll or" (the re-check's finding D1: a person with payroll rows and no roster entry is left out of that comparison).
++# The basis names what the mode can use, not whether the world happens to hold payroll rows.
++def work_row(person_id, office, start, end, how):
++    provenance = {'work_route_source': 'politico_profile_history'} if how == 'directory' else {'method': 'payroll-identity-rows-v1'}
++    return {'person_id': person_id, 'employer_id': office, 'start': start, 'end_exclusive': end, 'employment_verified': True, 'provenance': provenance}
++
++
++DIRECTORY_OFFICE = 'office:t'
++DIRECTORY_STAFF = ('d1', 'p1')
++MODES = (('payroll_and_directory', 'payroll_or_roster'), ('directory', 'roster'))
++
++
++def directory_world(operational=('o', 'd1')):
++    """o and d1 are on the staffer roster (a directory episode each at the office); p1 has payroll rows and a directory row there and is not."""
++    nodes = {'o': person('Origin Person'), 'p1': person('Payroll Person'), 'd1': person('Directory Person'), DIRECTORY_OFFICE: office_node(DIRECTORY_OFFICE)}
++    episodes = [work_row('o', DIRECTORY_OFFICE, '2019-01-01', '2021-01-01', 'directory'),
++                work_row('p1', DIRECTORY_OFFICE, '2020-01-01', '2022-01-01', 'payroll'),
++                work_row('p1', DIRECTORY_OFFICE, '2020-01-01', '2022-01-01', 'directory'),
++                work_row('d1', DIRECTORY_OFFICE, '2020-06-01', '2022-01-01', 'directory')]
++    router = AdvocacyRouter(nodes, episodes, 'directory-mode', AS_OF)
++    router.operational_staffer_ids = set(operational)
++    return router
++
++
++def basis_failures():
++    """Every way an office answer differs from the rule: payroll_or_roster where payroll evidence is read, roster alone where it is not."""
++    failures = []
++
++    def check(what, answer, basis, status=None, left=None):
++        for item in (answer, *answer.get('routes', [])):
++            if item.get('uncovered_basis') != basis:
++                failures.append('%s: uncovered_basis %r, not %r' % (what, item.get('uncovered_basis'), basis))
++            if left is not None and item.get('uncovered_staff_ids') != left:
++                failures.append('%s: left out %r, not %r' % (what, item.get('uncovered_staff_ids'), left))
++        if status is not None and answer['status'] != status:
++            failures.append('%s: status %r, not %r' % (what, answer['status'], status))
++    # The re-check's scenario: p1 has payroll rows and no roster entry. Payroll evidence read, p1 is covered; directory episodes only, it is not.
++    for mode, basis in MODES:
++        left = ['p1'] if mode == 'directory' else []
++        for count, strategy in ((1, 'ranked'), (3, 'ranked'), (3, 'distinct'), (3, 'independent')):
++            answer = ask(directory_world(), 'o', DIRECTORY_STAFF, DIRECTORY_OFFICE, work_sources=mode, route_count=count, alternative_strategy=strategy)
++            check('%s, %d %s' % (mode, count, strategy), answer, basis, 'found', left)
++        # nobody the model can use but the origin: payroll covers p1 where it is read, so only d1 is left out there, and both are left out here
++        answer = ask(directory_world(operational=('o',)), 'o', DIRECTORY_STAFF, DIRECTORY_OFFICE, work_sources=mode)
++        if mode == 'directory':
++            check(mode + ', nobody covered', answer, basis, 'insufficient_work_coverage', ['d1', 'p1'])
++        else:
++            check(mode + ', one covered by payroll', answer, basis, 'found', ['d1'])
++        # the origin is the one without coverage
++        check(mode + ', uncovered origin', ask(directory_world(operational=('d1',)), 'o', DIRECTORY_STAFF, DIRECTORY_OFFICE, work_sources=mode),
++              basis, 'insufficient_work_coverage')
++        # an unreachable answer: the office the covered staff do not work at
++        answer = ask(reasons_world(), 'o', PROFILE, 'office:profile', work_sources=mode)
++        check(mode + ', unreachable', answer, basis, 'unreachable', ['u5'])
++    return failures
++
++
++def test_every_office_answer_says_which_coverage_its_left_out_staff_lack():
++    assert basis_failures() == []
++
++
++def test_the_basis_check_has_teeth(monkeypatch):
++    """Negative control: a producer that says payroll_or_roster in every mode fails the directory-only answers, and every one of them."""
++    real = ClosenessRoutes.route
++
++    def always_payroll_or_roster(self, *args, **kwargs):
++        result = real(self, *args, **kwargs)
++        return {**result, 'uncovered_basis': 'payroll_or_roster'} if 'uncovered_basis' in result else result
++    monkeypatch.setattr(ClosenessRoutes, 'route', always_payroll_or_roster)
++    failures = basis_failures()
++    assert failures and all('directory' in f for f in failures), failures
++    assert any('nobody covered' in f for f in failures) and any('unreachable' in f for f in failures) and any('uncovered origin' in f for f in failures)
++
++
++def test_a_person_with_payroll_rows_and_no_roster_entry_is_left_out_of_a_directory_only_comparison_and_the_basis_says_why():
++    router = directory_world()
++    both = ask(router, 'o', DIRECTORY_STAFF, DIRECTORY_OFFICE, work_sources='payroll_and_directory')
++    assert both['status'] == 'found' and left_out(both) == {'uncovered_staff_count': 0, 'uncovered_staff_ids': []}
++    directory_only = ask(directory_world(), 'o', DIRECTORY_STAFF, DIRECTORY_OFFICE, work_sources='directory')
++    assert left_out(directory_only) == {'uncovered_staff_count': 1, 'uncovered_staff_ids': ['p1']} and directory_only['target'] == 'd1'
++    assert directory_only['uncovered_basis'] == 'roster' and both['uncovered_basis'] == 'payroll_or_roster'
++    index = router.closeness().index(router._options({'objective': 'work_time', 'work_sources': 'directory'}))
++    assert 'p1' not in closeness._payroll_people(index), 'a directory-only index holds no payroll evidence, so payroll covers nobody in it'
++    assert 'p1' in closeness._payroll_people(router.closeness().index(router._options({'objective': 'work_time'})))
++
++
++def test_a_world_without_payroll_rows_still_names_payroll_or_roster_where_payroll_evidence_is_read():
++    result = ask(reasons_world(), 'o', PROFILE, 'office:profile')
++    assert result['uncovered_basis'] == 'payroll_or_roster' and result['uncovered_staff_ids'] == ['u5']
++    assert ask(reasons_world(), 'o', PROFILE, 'office:profile', work_sources='directory')['uncovered_basis'] == 'roster'
++
++
++def test_the_service_and_the_handler_serve_the_basis_on_the_answer_and_on_every_route():
++    page = {'objective': 'work_time', 'route_count': 3, 'alternative_strategy': 'distinct', 'include_historical': 1, 'include_review': 1,
++            'include_policy': 0, 'include_unresolved': 0, 'include_user_asserted': 1}
++    for mode, basis in MODES:
++        left = ['p1'] if mode == 'directory' else []
++        service = service_for(directory_world(), DIRECTORY_STAFF, DIRECTORY_OFFICE)
++        server = Served(service)
++        try:
++            answer = service.office_route('o', DIRECTORY_OFFICE, {**UI, 'route_count': 3, 'work_sources': mode})
++            over_http = via_http(server, '/api/staffer-office-route', origin='o', office=DIRECTORY_OFFICE, work_sources=mode, **page)
++            for name, served in (('service', answer), ('handler', over_http)):
++                assert served['status'] == 'found' and served['routes'], (mode, name)
++                for item in (served, *served['routes']):
++                    assert (item['uncovered_basis'], item['uncovered_staff_ids']) == (basis, left), (mode, name, item['uncovered_basis'])
++        finally:
++            server.close()
++            service.route_executor.shutdown(wait=True, cancel_futures=True)
++    person_page = {**page, 'target': 'p1', 'origin': 'o'}
++    service = service_for(directory_world(), DIRECTORY_STAFF, DIRECTORY_OFFICE)
++    server = Served(service)
++    try:
++        assert NEW_FIELDS.isdisjoint(via_http(server, '/api/staffer-route', work_sources='directory', **person_page)), 'a person route carries none of it'
++    finally:
++        server.close()
++        service.route_executor.shutdown(wait=True, cancel_futures=True)
+diff --git a/fec/tests/surfaces/test_staffer_prewarm.py b/fec/tests/surfaces/test_staffer_prewarm.py
+--- a/fec/tests/surfaces/test_staffer_prewarm.py
++++ b/fec/tests/surfaces/test_staffer_prewarm.py
+@@ -285,8 +285,8 @@
+     assert state['status'] == 'done' and state['seq'] == 2
+     assert [(e['seq'], e['status'], e.get('abandoned_before')) for e in state['earlier']] == [(1, 'abandoned', 'network_index')]
+     assert list(state['earlier'][0]['stages']) == ['work_index'], 'it had finished the stage it was in, and no more'
+-    assert DEFAULT_KEY in new.closeness_routes.indexes and DEFAULT_KEY in old.closeness_routes.indexes
+-    assert new.closeness_routes.indexes[DEFAULT_KEY] is not old.closeness_routes.indexes[DEFAULT_KEY], 'the new router has its own index'
++    assert DEFAULT_KEY in new.closeness_routes.indexes, 'the new router built its own index'
++    assert old.closeness_routes.indexes == {}, 'the replaced router was released while its build ran, so the finished build was not put back into it'
+     assert service._explorer_index['revision'] == service.revision
+ 
+ 
+@@ -361,8 +361,9 @@
+ 
+ # --------------------------------------------------------------------------- the replaced router's memory
+ # D-087: memory headroom on this host is the binding constraint. When the service publishes a new router it lets go of what the
+-# replaced one kept for its searches (the work indexes, the hop-row caches, the name index), and the prewarm runs one collection
+-# before it builds, so the old router's indexes and the new router's are not resident together. No answer changes.
++# replaced one kept for its searches (the work indexes, the hop-row caches, the name index), and the prewarm that follows a replacement
++# runs one collection before it builds (a prewarm at a start follows none, and runs none: nothing is freed and a collection stalls every
++# request thread), so the old router's indexes and the new router's are not meant to be resident together. No answer changes.
+ def weak_refs_to_the_work_state(service):
+     """Weak references to the router the service holds, its default work index and one of its hop-row caches.
+ 
+@@ -451,8 +452,8 @@
+     assert router_ref() is None
+ 
+ 
+-def test_one_collection_runs_before_the_first_build_of_a_prewarm_and_none_in_an_abandoned_one(monkeypatch):
+-    service = prewarmed_service()
++def traced_prewarm(monkeypatch):
++    """What a prewarm does, in order: each collection (the prewarm thread's own), each work index build and each people index request."""
+     trace, real_collect = [], gc.collect
+     real_build, real_network = staffer_work_sources.build_index, LiveService.network_index
+ 
+@@ -463,35 +464,124 @@
+     monkeypatch.setattr(live.gc, 'collect', collect)
+     monkeypatch.setattr(staffer_work_sources, 'build_index', lambda router, options: trace.append('work_index') or real_build(router, options))
+     monkeypatch.setattr(LiveService, 'network_index', lambda self, *a, **k: trace.append('network_index') or real_network(self, *a, **k))
+-    service._start_prewarm()
++    return trace
++
++
++def test_a_prewarm_at_a_start_runs_no_collection_because_no_router_was_replaced(monkeypatch):
++    """At a start nothing is freed, and a full collection holds every request thread while it runs: on the live heap it held them for
++    10.1 s (gc_ms on /api/staffer-performance), before the 40 s build, for nothing."""
++    service = prewarmed_service()
++    trace = traced_prewarm(monkeypatch)
++    assert service._router_replaced is False, 'the first router the service published replaced nothing'
++    service._start_prewarm()
++    settle()
++    assert trace == ['work_index', 'network_index'], 'the two builds, and no collection'
++    state = service.metrics['prewarm']
++    assert state['status'] == 'done' and 'gc_ms' not in state
++    assert service._router_replaced is False
++
++
++def test_the_prewarm_after_a_replacement_runs_one_collection_before_its_first_build_and_a_later_one_runs_none(monkeypatch):
++    service = prewarmed_service()
++    service._start_prewarm()
++    settle()                                  # a start: nothing replaced, nothing collected
++    trace = traced_prewarm(monkeypatch)
++    service._refresh_profiles(force=True)     # publishes a new router: the old one is replaced and released, and the new one's prewarm queued
+     settle()
+     assert trace == ['gc', 'work_index', 'network_index'], 'one collection, before the first build and not between the stages'
+-    assert service.metrics['prewarm']['gc_ms'] >= 0
+-    # Several swaps while the first prewarm builds: the first prewarm's collection, and the last router's. The two in between
+-    # are abandoned before any build, so they collect nothing.
++    state = service.metrics['prewarm']
++    assert state['seq'] == 2 and state['status'] == 'done' and state['gc_ms'] >= 0
++    assert service._router_replaced is False, 'the prewarm that collected has used up the request for one'
+     trace.clear()
++    service._start_prewarm()                  # the same router again: nothing was replaced since, so nothing to collect
++    settle()
++    assert trace == ['network_index'] and 'gc_ms' not in service.metrics['prewarm'], trace
++
++
++def test_prewarms_abandoned_before_they_build_collect_nothing_and_the_one_that_builds_collects_for_every_swap(monkeypatch):
++    service = prewarmed_service()
++    service._start_prewarm()
++    settle()
++    trace, real_collect = [], gc.collect
++
++    def collect(*args, **kwargs):
++        if threading.current_thread().name == 'staffer-prewarm':
++            trace.append('gc')
++        return real_collect(*args, **kwargs)
+     gate = Gate(monkeypatch)
+     monkeypatch.setattr(live.gc, 'collect', collect)
+-    service._refresh_profiles(force=True)
++    service._refresh_profiles(force=True)     # the first replacement: its prewarm collects, then builds (held at the gate)
+     assert gate.started.wait(10)
+-    for _ in range(3):
++    for _ in range(3):                        # three more swaps while it builds: two prewarms are abandoned before any build
+         service._refresh_profiles(force=True)
+-    gate.release.set()
+-    settle()
+-    assert gate.calls == 2 and trace.count('gc') == 2, trace
+-
+-
+-def test_a_request_that_reaches_the_released_router_builds_again_and_answers_exactly_as_before():
++    assert service._router_replaced is True, 'the swaps since the collection are waiting for one'
++    gate.release.set()
++    settle()
++    assert gate.calls == 2 and trace == ['gc', 'gc'], trace   # the first prewarm's, and the last router's
++    assert service._router_replaced is False
++
++
++def test_only_a_router_that_was_actually_replaced_asks_for_a_collection():
++    service = routed_service()
++    router = service.router
++    service._release_replaced_router(None, router)         # the first router of a start
++    service._release_replaced_router(router, router)       # the same router published again
++    assert service._router_replaced is False
++    other = routed_service().router
++    service._release_replaced_router(other, router)
++    assert service._router_replaced is True and other.closeness_routes.released
++    service._router_replaced = False
++
++    class Broken:
++        def release_search_state(self):
++            raise RuntimeError('release failed')
++    service._release_replaced_router(Broken(), router)     # the router was replaced even if letting go of its state failed
++    assert service._router_replaced is True and service.metrics['router_release_error'] == 'RuntimeError: release failed'
++
++
++def test_a_request_that_reaches_the_released_router_builds_its_own_index_and_answers_exactly_as_before(monkeypatch):
+     service = a_prewarmed_service_that_has_served_a_search()
+     router = service.router
+     before = work_route(service, 2)
+     held = router.closeness_routes.indexes[DEFAULT_KEY]       # what a search that is running holds
+     router.release_search_state()
+     assert router.closeness_routes.indexes == {} and router.closeness_routes.row_caches == {}
++    builds, real_build = [], staffer_work_sources.build_index
++    monkeypatch.setattr(staffer_work_sources, 'build_index', lambda r, o: builds.append(1) or real_build(r, o))
+     after = work_route(service, 3)                             # another request: not the finished result, so a search
+-    assert router.closeness_routes.indexes[DEFAULT_KEY] is not held, 'it built the index again'
++    assert builds == [1], 'it built an index of its own'
++    assert router.closeness_routes.indexes == {} and router.closeness_routes.row_caches == {}, 'and the released router kept neither it nor its rows'
+     assert after['neighbor_checks'] > 0 and strip(after) == strip(before)
+     assert json.dumps(strip(after), sort_keys=True) == json.dumps(strip(before), sort_keys=True)
++    assert held is not None
++
++
++def test_a_request_waiting_on_the_replaced_routers_build_still_gets_its_answer_and_the_finished_build_is_not_put_back(monkeypatch):
++    """The re-check's part 3: the old router's prewarm build is in flight, a request on that router waits on it, a new router is
++    published (the old one is released), and then the build finishes. The request is answered as an unreleased router would answer it,
++    and the released router does not take the finished index back (it would have held it for as long as anything referred to the router)."""
++    service = prewarmed_service()
++    gate = Gate(monkeypatch)
++    old = service.router
++    service._start_prewarm()
++    assert gate.started.wait(10)
++    answers = []
++    request = threading.Thread(target=lambda: answers.append(service.route('person:gordon', 'person:other-gordon', {'objective': 'work_time', 'limit': 501})),
++                               daemon=True)
++    request.start()                           # it took the old router, and waits on the build the prewarm is running
++    time.sleep(.3)
++    assert request.is_alive() and not answers
++    service._refresh_profiles(force=True)     # publishes a new router: the old one is released while its build is in flight
++    assert service.router is not old and old.closeness_routes.released
++    gate.release.set()
++    request.join(30)
++    settle()
++    assert answers and answers[0]['status'] == 'found'
++    assert gate.calls == 2, 'the old router\'s one build (shared by the prewarm and the request), and the new router\'s'
++    assert old.closeness_routes.indexes == {} and old.closeness_routes.row_caches == {}, 'the released router kept nothing'
++    assert DEFAULT_KEY in service.router.closeness_routes.indexes
++    expected = routed_service().route('person:gordon', 'person:other-gordon', {'objective': 'work_time', 'limit': 501})
++    assert strip(answers[0]) == strip(expected)
+ 
+ 
+ def test_a_search_takes_its_index_once_so_a_release_in_the_middle_of_it_costs_no_second_build(monkeypatch):
+@@ -552,6 +642,7 @@
+     service._rebuild_identity()
+     assert held() is None, 'the identity rebuild published a new router and released the old one\'s work index'
+     assert service.router.closeness_routes.indexes == {}
++    assert service._router_replaced is True, 'and asked for the collection that frees the router itself'
+ 
+ 
+ # --------------------------------------------------------------------------- the people index is the same one
+diff --git a/fec/tests/surfaces/test_staffer_request_work_index.py b/fec/tests/surfaces/test_staffer_request_work_index.py
+new file mode 100644
+--- /dev/null
++++ b/fec/tests/surfaces/test_staffer_request_work_index.py
+@@ -0,0 +1,416 @@
++"""One search request, one work index; a released router stores nothing (the v4.1 fix round, finding A1 of the Opus re-check).
++
++Distinct and independent alternatives call ClosenessRoutes.route once per pass, and each call asked the router's table for its work
++index. The service releases a router it replaces (AdvocacyRouter.release_search_state empties the table), so a publish that landed
++between two passes of a request still running on the replaced router made the next pass build the whole index again: tens of seconds on
++the live records, for one request, on a router nothing was going to use again.
++
++Now route_many opens a request scope (staffer_closeness_routes.request_work) around the searches that run more than one pass, and
++ClosenessRoutes.index gives a request the index it took first for every later pass. A released ClosenessRoutes stores no index and no
++hop-row cache it builds (an in-flight build that finishes after the release is not put back either), and still answers every request
++that reaches it. Every check below compares the answer with the same request on an untouched twin router.
++
++    python -m pytest fec/tests/surfaces/test_staffer_request_work_index.py -q
++"""
++from collections import Counter
++import contextlib
++from concurrent.futures import ThreadPoolExecutor
++import json
++import os
++import random
++import threading
++import time
++import traceback
++
++import pytest
++
++from fec.surfaces import staffer_closeness_routes as closeness
++from fec.surfaces import staffer_distinct_routes
++from fec.surfaces import staffer_work_sources
++from fec.surfaces.staffer_closeness_routes import ClosenessRoutes
++from fec.surfaces.staffer_routing import AdvocacyRouter
++from fec.surfaces.test_staffer_closeness_bidirectional import roster, synthetic_router
++
++SEED, PEOPLE, OFFICES = 23, 300, 14
++TIMING = {'elapsed_ms', 'search_elapsed_ms', 'expanded', 'neighbor_checks', 'pairs_scored', 'cache_hit', 'response_elapsed_ms'}
++STRATEGIES = ('distinct', 'independent')
++MINIMUM = {'distinct': 3, 'independent': 2}   # routes a request needs in these worlds to run more than two passes (independent excludes more)
++
++
++def strip(value):
++    if isinstance(value, dict):
++        return {k: strip(v) for k, v in value.items() if k not in TIMING}
++    if isinstance(value, list):
++        return [strip(v) for v in value]
++    return value
++
++
++def canon(answer):
++    return json.dumps(strip(answer), sort_keys=True, default=str)
++
++
++_OFFSETS = iter(range(1, 10 ** 9))
++_OFFSET_LOCK = threading.Lock()
++
++
++def ask(router, request):
++    """The request as the page makes it. `offset` is no part of any cost: it keeps the finished-result cache from answering a repeat."""
++    origin, targets, options = request
++    with _OFFSET_LOCK:
++        offset = next(_OFFSETS)
++    return router.route_many(origin, list(targets), {**options, 'offset': offset})
++
++
++def worlds(people=PEOPLE):
++    """Two identical worlds: one is asked untouched (the expected answers), the other is released while it answers."""
++    twin, ids, offices = synthetic_router(SEED, people=people, offices=OFFICES)
++    live, _, _ = synthetic_router(SEED, people=people, offices=OFFICES)
++    return twin, live, ids, offices
++
++
++def warm(router):
++    router.closeness().index(router._options({'objective': 'work_time'}))
++
++
++def a_request_with_passes(twin, ids, offices, strategy):
++    """A seeded request that the twin answers with at least MINIMUM[strategy] routes: so one that runs at least that many passes."""
++    minimum = MINIMUM[strategy]
++    rng = random.Random(7)
++    for _ in range(400):
++        origin = rng.choice(ids)
++        if rng.random() < .5:
++            office = rng.choice(offices)
++            staff = [p for p in roster(twin, office) if p != origin]
++            if len(staff) < minimum:
++                continue
++            request = (origin, tuple(staff), {'objective': 'work_time', '_target_office': office, 'route_count': 3, 'alternative_strategy': strategy})
++        else:
++            request = (origin, (rng.choice([p for p in ids if p != origin]),), {'objective': 'work_time', 'route_count': 3, 'alternative_strategy': strategy})
++        answer = ask(twin, request)
++        if answer['status'] == 'found' and answer['routes_returned'] >= minimum:
++            return request
++    raise AssertionError('no request with %d routes found in this world' % minimum)
++
++
++class Probe:
++    """Counts what one request costs the router it runs on: work index builds, the index object each index() call returned, and hop-row
++    caches created."""
++
++    def __init__(self, monkeypatch):
++        self.builds, self.fetched, self.row_caches = 0, [], 0
++        self.lock = threading.Lock()
++        real_build, real_index, real_rows = staffer_work_sources.build_index, ClosenessRoutes.index, closeness._RowCache
++        probe = self
++
++        def build(router, options):
++            with probe.lock:
++                probe.builds += 1
++            return real_build(router, options)
++
++        def index(routes, options):
++            found = real_index(routes, options)
++            probe.fetched.append(id(found))
++            return found
++
++        class CountedRows(real_rows):
++            def __init__(self, *args, **kwargs):
++                with probe.lock:
++                    probe.row_caches += 1
++                super().__init__(*args, **kwargs)
++        monkeypatch.setattr(staffer_work_sources, 'build_index', build)
++        monkeypatch.setattr(ClosenessRoutes, 'index', index)
++        monkeypatch.setattr(closeness, '_RowCache', CountedRows)
++
++    def reset(self):
++        self.builds, self.fetched, self.row_caches = 0, [], 0
++
++
++def release_after_the_first_pass(monkeypatch, router):
++    """A publish lands between the first and the second pass of the request: the router the service replaced is released."""
++    routes = router.closeness()
++    real_route, passes = routes.route, []
++
++    def route(*args, **kwargs):
++        result = real_route(*args, **kwargs)
++        passes.append(1)
++        if len(passes) == 1:
++            router.release_search_state()
++        return result
++    monkeypatch.setattr(routes, 'route', route)
++    return passes
++
++
++# --------------------------------------------------------------------------- a release between the passes
++@pytest.mark.parametrize('strategy', STRATEGIES)
++def test_a_release_between_the_passes_costs_no_rebuild_and_changes_no_answer(strategy, monkeypatch):
++    twin, live, ids, offices = worlds()
++    request = a_request_with_passes(twin, ids, offices, strategy)
++    expected = canon(ask(twin, request))
++    warm(live)
++    probe = Probe(monkeypatch)
++    passes = release_after_the_first_pass(monkeypatch, live)
++    answer = ask(live, request)
++    assert live.closeness_routes.released and len(passes) >= MINIMUM[strategy], 'the release landed after the first of several passes'
++    assert probe.builds == 0, 'no pass built the index again'
++    assert len(probe.fetched) == len(passes) and len(set(probe.fetched)) == 1, 'every pass used the one index the request took first'
++    assert canon(answer) == expected
++    assert live.closeness_routes.indexes == {} and live.closeness_routes.row_caches == {}, 'and the released router stored nothing'
++
++
++@pytest.mark.parametrize('strategy', STRATEGIES)
++def test_without_the_request_scope_the_same_release_makes_the_next_pass_build_again(strategy, monkeypatch):
++    """Negative control: route_many as it was in v4 (no scope). The answer is right, and a pass pays for a whole index."""
++    twin, live, ids, offices = worlds()
++    request = a_request_with_passes(twin, ids, offices, strategy)
++    expected = canon(ask(twin, request))
++    warm(live)
++    probe = Probe(monkeypatch)
++    monkeypatch.setattr(AdvocacyRouter, '_one_work_index', staticmethod(contextlib.nullcontext))
++    passes = release_after_the_first_pass(monkeypatch, live)
++    answer = ask(live, request)
++    assert canon(answer) == expected
++    assert len(passes) >= MINIMUM[strategy] and probe.builds >= 1 and len(set(probe.fetched)) >= 2
++
++
++def test_a_release_inside_a_ranked_request_costs_no_rebuild(monkeypatch):
++    twin, live, ids, offices = worlds()
++    rng = random.Random(3)
++    origin, target = rng.sample(ids, 2)
++    request = (origin, (target,), {'objective': 'work_time', 'route_count': 3, 'alternative_strategy': 'ranked'})
++    expected = canon(ask(twin, request))
++    warm(live)
++    probe = Probe(monkeypatch)
++    real_evidence, fired = closeness._full_evidence, []
++
++    def releasing(*args, **kwargs):
++        if not fired:
++            fired.append(1)
++            live.release_search_state()
++        return real_evidence(*args, **kwargs)
++    monkeypatch.setattr(closeness, '_full_evidence', releasing)
++    answer = ask(live, request)
++    assert fired and probe.builds == 0 and len(set(probe.fetched)) == 1
++    assert canon(answer) == expected
++
++
++# --------------------------------------------------------------------------- a request that starts on a released router
++@pytest.mark.parametrize('strategy', STRATEGIES)
++def test_a_request_on_a_released_router_builds_one_index_for_all_its_passes_and_the_router_keeps_nothing(strategy, monkeypatch):
++    twin, live, ids, offices = worlds()
++    request = a_request_with_passes(twin, ids, offices, strategy)
++    expected = canon(ask(twin, request))
++    warm(live)
++    live.release_search_state()
++    probe = Probe(monkeypatch)
++    answer = ask(live, request)
++    assert canon(answer) == expected
++    assert probe.builds == 1, 'one index for the request, not one per pass'
++    assert len(probe.fetched) >= MINIMUM[strategy] and len(set(probe.fetched)) == 1
++    assert probe.row_caches == 1, 'and one hop-row cache, shared by its passes'
++    assert live.closeness_routes.indexes == {} and live.closeness_routes.row_caches == {}
++    again = ask(live, request)                       # the next request pays for its own: nothing was kept
++    assert canon(again) == expected and probe.builds == 2 and live.closeness_routes.indexes == {}
++
++
++@pytest.mark.parametrize('strategy', STRATEGIES)
++def test_without_the_request_scope_every_pass_on_a_released_router_builds_its_own_index_and_rows(strategy, monkeypatch):
++    twin, live, ids, offices = worlds()
++    request = a_request_with_passes(twin, ids, offices, strategy)
++    expected = canon(ask(twin, request))
++    live.release_search_state()
++    probe = Probe(monkeypatch)
++    monkeypatch.setattr(AdvocacyRouter, '_one_work_index', staticmethod(contextlib.nullcontext))
++    answer = ask(live, request)
++    assert canon(answer) == expected
++    assert probe.builds >= MINIMUM[strategy] and probe.row_caches == probe.builds
++
++
++@pytest.mark.parametrize('request_kind', ['single', 'office', 'ranked'])
++def test_a_released_router_answers_every_kind_of_request_as_an_untouched_one_does(request_kind):
++    twin, live, ids, offices = worlds()
++    rng = random.Random(11)
++    origin = rng.choice(ids)
++    if request_kind == 'office':
++        office = offices[0]
++        request = (origin, tuple(p for p in roster(twin, office) if p != origin), {'objective': 'work_time', '_target_office': office, 'route_count': 1})
++    else:
++        request = (origin, (rng.choice([p for p in ids if p != origin]),),
++                   {'objective': 'work_time', 'route_count': 3 if request_kind == 'ranked' else 1, 'alternative_strategy': 'ranked'})
++    expected = canon(ask(twin, request))
++    live.release_search_state()
++    assert canon(ask(live, request)) == expected
++    assert live.closeness_routes.indexes == {} and live.closeness_routes.row_caches == {}
++
++
++# --------------------------------------------------------------------------- a build that is still running when the release lands
++class Gate:
++    """Stands in for staffer_work_sources.build_index: holds every build until the test lets it go."""
++
++    def __init__(self, monkeypatch):
++        self.real, self.calls = staffer_work_sources.build_index, 0
++        self.started, self.release = threading.Event(), threading.Event()
++        monkeypatch.setattr(staffer_work_sources, 'build_index', self)
++
++    def __call__(self, router, options):
++        self.calls += 1
++        self.started.set()
++        assert self.release.wait(20), 'the test never released the build'
++        return self.real(router, options)
++
++
++def test_an_index_whose_build_finishes_after_the_release_goes_to_the_callers_waiting_on_it_and_is_not_put_back(monkeypatch):
++    router, _, _ = synthetic_router(SEED, people=60, offices=6)
++    routes = ClosenessRoutes(router)
++    options = router._options({'objective': 'work_time'})
++    gate = Gate(monkeypatch)
++    with ThreadPoolExecutor(3) as pool:
++        futures = [pool.submit(routes.index, options) for _ in range(3)]
++        assert gate.started.wait(10)
++        time.sleep(.2)
++        routes.release()                     # the router is replaced while its index is being built
++        gate.release.set()
++        built = [future.result(20) for future in futures]
++    assert gate.calls == 1 and len({id(index) for index in built}) == 1, 'one build, and every waiting caller got its index'
++    assert routes.indexes == {} and routes.index_flights == {}, 'the released router did not keep it'
++    again = routes.index(options)
++    assert gate.calls == 2 and again is not built[0] and routes.indexes == {}, 'the next caller builds its own'
++
++
++def test_a_router_that_is_not_released_still_keeps_its_index_and_hop_rows(monkeypatch):
++    twin, _, ids, offices = worlds()
++    probe = Probe(monkeypatch)
++    request = (ids[0], (ids[7],), {'objective': 'work_time', 'route_count': 1})
++    ask(twin, request)
++    ask(twin, request)
++    assert probe.builds == 1 and probe.row_caches == 1, 'the second request used what the first left'
++    assert len(twin.closeness_routes.indexes) == 1 and len(twin.closeness_routes.row_caches) == 1 and not twin.closeness_routes.released
++
++
++# --------------------------------------------------------------------------- the scope itself
++def test_the_scope_is_per_request_nests_and_closes_however_the_request_ends():
++    assert closeness._REQUEST_WORK.get() is None
++    with closeness.request_work():
++        outer = closeness._REQUEST_WORK.get()
++        assert outer is not None
++        with closeness.request_work():
++            assert closeness._REQUEST_WORK.get() is outer, 'a scope inside the request\'s own is that scope'
++        assert closeness._REQUEST_WORK.get() is outer
++        seen = []
++        thread = threading.Thread(target=lambda: seen.append(closeness._REQUEST_WORK.get()))
++        thread.start()
++        thread.join()
++        assert seen == [None], 'a request on another thread has its own scope, not this one'
++    assert closeness._REQUEST_WORK.get() is None
++    with pytest.raises(ZeroDivisionError):
++        with closeness.request_work():
++            assert closeness._REQUEST_WORK.get() is not None
++            1 / 0
++    assert closeness._REQUEST_WORK.get() is None, 'an error ends the scope too'
++
++
++def test_route_many_opens_the_scope_around_the_searches_that_run_more_than_one_pass_and_around_nothing_else(monkeypatch):
++    router, ids, offices = synthetic_router(SEED, people=80, offices=6)
++    open_in = {}
++    real_distinct, real_alternatives, real_route = staffer_distinct_routes.distinct_routes, AdvocacyRouter._route_alternatives, ClosenessRoutes.route
++
++    def distinct(*args, **kwargs):
++        open_in['distinct'] = closeness._REQUEST_WORK.get() is not None
++        return real_distinct(*args, **kwargs)
++
++    def alternatives(self, *args, **kwargs):
++        open_in['yen'] = closeness._REQUEST_WORK.get() is not None
++        return real_alternatives(self, *args, **kwargs)
++
++    def route(self, *args, **kwargs):
++        open_in.setdefault('search', []).append(closeness._REQUEST_WORK.get() is not None)
++        return real_route(self, *args, **kwargs)
++    monkeypatch.setattr(staffer_distinct_routes, 'distinct_routes', distinct)
++    monkeypatch.setattr(AdvocacyRouter, '_route_alternatives', alternatives)
++    monkeypatch.setattr(ClosenessRoutes, 'route', route)
++    router.route_many(ids[0], [ids[9]], {'objective': 'work_time', 'route_count': 1})
++    router.route_many(ids[0], [ids[9]], {'objective': 'work_time', 'route_count': 3, 'alternative_strategy': 'ranked'})
++    assert open_in == {'search': [False, False]}, 'one search call per request: it takes its index once, so it needs no scope'
++    open_in.clear()
++    router.route_many(ids[0], [ids[9]], {'objective': 'work_time', 'route_count': 3, 'alternative_strategy': 'distinct'})
++    assert open_in['distinct'] is True and open_in['search'] and all(open_in['search']), 'every pass of a distinct request runs inside the scope'
++    open_in.clear()
++    router.route_many(ids[0], [ids[9]], {'objective': 'evidence_cost', 'route_count': 2, 'alternative_strategy': 'ranked'})
++    assert open_in == {'yen': True}
++    assert closeness._REQUEST_WORK.get() is None, 'and every scope was closed'
++
++
++# --------------------------------------------------------------------------- concurrent requests and releases
++def test_requests_and_releases_in_other_threads_never_change_an_answer_or_rebuild_in_the_middle_of_a_request(monkeypatch):
++    """A short run of the stress test the re-check made (6 workers, a releaser every 0-15 ms, a name-index forgetter) at a smaller size:
++    every answer equals the untouched twin's, no thread errs, and every request uses one index object from its first pass to its last."""
++    twin, live, ids, offices = worlds(people=250)
++    rng = random.Random(5)
++    requests = []
++    for k in range(18):
++        origin = rng.choice(ids)
++        if k % 2:
++            office = rng.choice(offices)
++            staff = [p for p in roster(twin, office) if p != origin]
++            if not staff:
++                continue
++            base = (origin, tuple(staff), {'objective': 'work_time', '_target_office': office})
++        else:
++            base = (origin, (rng.choice([p for p in ids if p != origin]),), {'objective': 'work_time'})
++        kind = ('single', 'distinct', 'independent', 'ranked')[k % 4]
++        options = dict(base[2])
++        if kind != 'single':
++            options.update(route_count=3, alternative_strategy=kind)
++        requests.append((kind, (base[0], base[1], options)))
++    expected = [canon(ask(twin, request)) for _, request in requests]
++    seen = threading.local()
++    real_index = ClosenessRoutes.index
++
++    def tracking(routes, options):
++        found = real_index(routes, options)
++        used = getattr(seen, 'ids', None)
++        if used is not None:
++            used.append(id(found))
++        return found
++    monkeypatch.setattr(ClosenessRoutes, 'index', tracking)
++    stop = threading.Event()
++    errors, mismatches, rebuilt, done = [], [], Counter(), Counter()
++
++    def worker(number):
++        local = random.Random(number)
++        while not stop.is_set():
++            i = local.randrange(len(requests))
++            seen.ids = []
++            try:
++                answer = ask(live, requests[i][1])
++            except Exception:
++                errors.append(traceback.format_exc())
++                continue
++            finally:
++                used, seen.ids = seen.ids, None
++            if len(set(used)) > 1:
++                rebuilt[requests[i][0]] += 1
++            if canon(answer) != expected[i]:
++                mismatches.append(i)
++            done[requests[i][0]] += 1
++
++    def releaser():
++        local = random.Random(99)
++        while not stop.is_set():
++            time.sleep(local.uniform(0, .015))
++            try:
++                live.release_search_state()
++                if local.random() < .3:
++                    live.forget_contact_groups()
++            except Exception:
++                errors.append(traceback.format_exc())
++    threads = [threading.Thread(target=worker, args=(n,)) for n in range(4)] + [threading.Thread(target=releaser)]
++    for thread in threads:
++        thread.start()
++    time.sleep(float(os.environ.get('STAFFER_STRESS_SECONDS', '4')))
++    stop.set()
++    for thread in threads:
++        thread.join(120)
++    assert not errors, errors[:1]
++    assert not mismatches, mismatches[:5]
++    assert not rebuilt, 'requests that used more than one index object: %s' % dict(rebuilt)
++    assert sum(done.values()) >= 10 and set(done) >= {'single', 'distinct'}, dict(done)
+diff --git a/fec/tests/surfaces/test_staffer_unreachable_hint.py b/fec/tests/surfaces/test_staffer_unreachable_hint.py
+--- a/fec/tests/surfaces/test_staffer_unreachable_hint.py
++++ b/fec/tests/surfaces/test_staffer_unreachable_hint.py
+@@ -39,8 +39,8 @@
+ # The tip this change was built on (staffer-search-ids-followup): the module as it was before any of it.
+ BASE = 'f23a40aee4c749bae9db132599a853a52c81d9bf'
+ NEW_UNREACHABLE_FIELDS = {'unreachable_reason', 'message', 'suggested_objective'}
+-# What an office result carries since D-086 (an office route searches to its covered staff): test_staffer_office_covered_staff.py.
+-OFFICE_COVERAGE_FIELDS = {'uncovered_staff_count', 'uncovered_staff_ids'}
++# What an office result carries since D-086 (an office route searches to its covered staff) and the v4.1 basis of the count: test_staffer_office_covered_staff.py.
++OFFICE_COVERAGE_FIELDS = {'uncovered_staff_count', 'uncovered_staff_ids', 'uncovered_basis'}
+ 
+ 
+ def load_contract():
+@@ -222,6 +222,97 @@
+ def test_every_reason_reaches_the_page_over_http_in_the_json_the_handler_serves(stack):
+     served = {name: stack(router_for(name))[1] for name in CASES}
+     assert mismatches(lambda name: via_http(served[name], name)) == []
++
++
++# --------------------------------------------------------------------------- the explanation is the message (the re-check's finding A4)
++# An unreachable answer that carries a reason says it in `message`; its `explanation` (the text under "How this route was chosen", and what
++# any other consumer of the payload reads) is that same text, not the generic sentence that was written before the reasons existed. An answer
++# with no reason keeps the generic sentence, and so does every other status.
++GENERIC = ('No supported path exists in the currently indexed evidence under these filters. This does not establish that no real-world '
++           'introduction is possible.')
++ALTERNATIVES = ' Alternatives are found by excluding contacts used in earlier choices'
++REASONED = [name for name, case in CASES.items() if 'unreachable_reason' in case['payload']]
++
++
++def asked(service, name, **override):
++    origin, destination, extra = SCENARIOS[name]
++    options = {**UI, **extra, **override}
++    if isinstance(destination, str):
++        return service.route(origin, destination, options)
++    return service.office_route(origin, destination[0], options)
++
++
++def explanation_failures(produce):
++    """Every unreachable answer with a reason whose explanation is not its message (nor the contract's message)."""
++    wrong = []
++    for name in REASONED:
++        for override in ({}, {'route_count': 1}, {'alternative_strategy': 'independent'}, {'alternative_strategy': 'ranked'}):
++            answer = produce(name, **override)
++            if not (answer['status'] == 'unreachable' and answer['explanation'] == answer['message'] == CASES[name]['payload']['message']):
++                wrong.append((name, override, answer['status'], answer['explanation'][:70]))
++    return wrong
++
++
++def test_the_explanation_of_an_unreachable_answer_with_a_reason_is_its_message_for_every_reason_and_strategy():
++    services = {name: make_service(router_for(name)) for name in REASONED}
++    assert len(REASONED) == 9 and 'insufficient_work_coverage' not in REASONED
++    assert explanation_failures(lambda name, **override: asked(services[name], name, **override)) == []
++
++
++def test_the_explanation_of_an_unreachable_answer_with_a_reason_is_its_message_over_http(stack):
++    served = {name: stack(router_for(name))[1] for name in REASONED}
++    for name in REASONED:
++        answer = via_http(served[name], name)
++        assert answer['status'] == 'unreachable' and answer['unreachable_reason']
++        assert answer['explanation'] == answer['message'] == CASES[name]['payload']['message'], name
++
++
++def test_an_unreachable_answer_without_a_reason_and_every_other_status_keep_their_explanation():
++    router = world()
++    service = make_service(router)
++    # Ecosystem has no reasons: its unreachable answer keeps the generic sentence, and the distinct portfolio's note after it
++    ecosystem = {**UI, 'objective': closeness.SUGGESTED_OBJECTIVE}
++    single = service.route('a1', 'b1', {**ecosystem, 'route_count': 1})
++    assert single['status'] == 'unreachable' and 'unreachable_reason' not in single and single['explanation'] == GENERIC
++    portfolio = service.route('a1', 'b1', ecosystem)
++    assert portfolio['status'] == 'unreachable' and 'unreachable_reason' not in portfolio
++    assert portfolio['explanation'].startswith(GENERIC + ALTERNATIVES) and portfolio['explanation'] != portfolio.get('message')
++    # the Staffer answers that are not unreachable
++    found = service.route('a1', 'a3', {**UI, 'route_count': 1})
++    assert found['status'] == 'found' and found['explanation'].startswith('Ranks complete paths')
++    unknown = service.route('a1', 'nobody-at-all', {**UI, 'route_count': 1})
++    assert unknown['status'] == 'unknown_person' and unknown['explanation'].startswith('No search was run')
++    restricted = make_service(router_for('insufficient_work_coverage'))
++    coverage = asked(restricted, 'insufficient_work_coverage', route_count=1)
++    assert coverage['status'] == 'insufficient_work_coverage' and coverage['explanation'] == coverage['message']
++    distinct = asked(restricted, 'insufficient_work_coverage')
++    assert distinct['explanation'].startswith(distinct['message'] + ALTERNATIVES), 'a coverage answer is worded as it always was'
++
++
++def test_a_payload_with_a_status_of_unreachable_and_a_reason_but_no_message_keeps_the_generic_sentence(monkeypatch):
++    """The page reads its sentence from `message` only when the reason and the message are both there, and so does the explanation."""
++    service = make_service(router_for('no_path_in_work_records'))
++    real = ClosenessRoutes.route
++
++    def without_message(self, *args, **kwargs):
++        result = real(self, *args, **kwargs)
++        return {k: v for k, v in result.items() if k != 'message'} if result['status'] == 'unreachable' else result
++    monkeypatch.setattr(ClosenessRoutes, 'route', without_message)
++    answer = asked(service, 'no_path_in_work_records', route_count=1)
++    assert answer['status'] == 'unreachable' and answer['unreachable_reason'] and 'message' not in answer and answer['explanation'] == GENERIC
++
++
++def test_the_explanation_check_has_teeth(monkeypatch):
++    """Negative control: the service as it was before the change (the generic sentence for every unreachable answer) fails it, for all nine."""
++    real = LiveService._route_response
++
++    def generic(self, router, result, started):
++        answer = real(self, router, result, started)
++        return {**answer, 'explanation': GENERIC} if result['status'] == 'unreachable' else answer
++    monkeypatch.setattr(LiveService, '_route_response', generic)
++    services = {name: make_service(router_for(name)) for name in REASONED}
++    failures = explanation_failures(lambda name, **override: asked(services[name], name, **override))
++    assert {name for name, *_ in failures} == set(REASONED) and len(failures) == 4 * len(REASONED)
+ 
+ 
+ def test_the_page_selector_and_the_server_agree_on_the_ecosystem_objective():

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HB3A6401B9FA146E7A3996DF9881690B6" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 662 EH: Block Grant Assistance Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 662</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the Disaster Relief Supplemental Appropriations Act, 2023 to improve disaster relief funding for agricultural producers, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H0A103A2C4E864750B52817B890FB016C" style="OLC"> 
+<section id="HE91901EA83264940B84FF0E1DCF02780" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Block Grant Assistance Act of 2023</short-title></quote>.</text></section> <section id="HFF4D9CD1B52B43F2AE397AED269D0DCC"><enum>2.</enum><header>Disaster Relief Supplemental Appropriations Act, 2023 amendment</header><text display-inline="no-display-inline">Title I of the Disaster Relief Supplemental Appropriations Act, 2023 (division N of <external-xref legal-doc="public-law" parsable-cite="pl/117/328">Public Law 117–328</external-xref>), is amended, in the matter under the heading <quote><header-in-text style="appropriations" level="appropriations-intermediate">Office of the Secretary</header-in-text></quote> under the heading <quote><header-in-text style="appropriations" level="appropriations-intermediate">Processing, Research and Marketing</header-in-text></quote> under the heading <quote><header-in-text style="appropriations" level="appropriations-major">AGRICULTURAL PROGRAMS</header-in-text></quote> under the heading <quote><header-in-text style="appropriations" level="appropriations-major">DEPARTMENT OF AGRICULTURE</header-in-text></quote>, by inserting <quote>: <proviso><italic>Provided further</italic></proviso>, That the Secretary of Agriculture may provide assistance for losses described under this heading in this Act in the form of block grants to eligible States and territories</quote> before the period at the end.</text></section> 
+<section id="H6E380B0D42DE45F1AFF02CFBCDCC0629"><enum>3.</enum><header>Emergency designation</header> 
+<subsection id="HD2421F6FABBE422B8793274B1FAEC129"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">This Act and the amendments made by this Act are designated as an emergency requirement pursuant to section 4(g) of the Statutory Pay-As-You-Go Act of 2010 (<external-xref legal-doc="usc" parsable-cite="usc/2/933">2 U.S.C. 933(g)</external-xref>). </text></subsection> <subsection id="H8B124822C72E46F09F68E90D213ABC4C"><enum>(b)</enum><header>Designation in Senate</header><text display-inline="yes-display-inline">In the Senate, this Act and the amendment made by this section are designated as an emergency requirement pursuant to section 4001(a)(1) of S. Con. Res. 14 (117th Congress), the concurrent resolution on the budget for fiscal year 2022. </text></subsection></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20230612" chamber="House">Passed the House of Representatives June 12, 2023.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

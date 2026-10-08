@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H5BCCC97A5FD24BC482906C9C7FFF665B" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5284 IH: Rural Microentrepreneur Assistance Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-08-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5284</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230825">August 25, 2023</action-date><action-desc><sponsor name-id="N000193">Mr. Nunn of Iowa</sponsor> (for himself and <cosponsor name-id="C001119">Ms. Craig</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Consolidated Farm and Rural Development Act to extend and enhance the Rural Microentrepreneur Assistance Program, and for other purposes.</official-title></form><legis-body id="H0A937229A50240D19380EB72EAB783A2" style="OLC"> 
+<section id="H9C104577D8FA42DBB56917A436DC7824" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Rural Microentrepreneur Assistance Act of 2023</short-title></quote>.</text></section> <section id="HDB35D5183B704EEAA43032AED5063754"><enum>2.</enum><header>Increase in funding for the Rural Microentrepreneur Assistance Program</header><text display-inline="no-display-inline">Section 379E of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/2008s">7 U.S.C. 2008s</external-xref>) is amended—</text> 
+<paragraph id="H046F3D771CEC435C9A89BE1F173C6C78"><enum>(1)</enum><text>in subsection (a)(4), by striking <quote>$50,000</quote> and inserting <quote>$75,000</quote>;</text></paragraph> <paragraph id="H82FADBD4B0F8461CA51A0AA961D50D8D"><enum>(2)</enum><text>in subsection (c)(1)(A), by striking <quote>75 percent</quote> and inserting <quote>100 percent, and a loan under this section for a project may be used to cover not more than 50 percent of any demolition, construction, or related costs of real estate improvements under the project</quote>; and</text></paragraph> 
+<paragraph id="H0865CC36EB8A48FAAD3E6C7748E08CF2"><enum>(3)</enum><text>in subsection (d), by striking <quote>2019 through 2023</quote> and inserting <quote>2024 through 2028</quote>.</text> </paragraph></section> </legis-body></bill>
+

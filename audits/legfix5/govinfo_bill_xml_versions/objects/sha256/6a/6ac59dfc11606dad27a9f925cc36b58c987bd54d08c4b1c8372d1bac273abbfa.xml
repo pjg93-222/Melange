@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HBA09CB053CF54473A5F5A820C5CE6681" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1941 IH: Coastal and Marine Economies Protection Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1941</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190328">March 28, 2019</action-date><action-desc><sponsor name-id="C001122">Mr. Cunningham</sponsor> (for himself, <cosponsor name-id="R000607">Mr. Rooney of Florida</cosponsor>, <cosponsor name-id="L000579">Mr. Lowenthal</cosponsor>, <cosponsor name-id="H001068">Mr. Huffman</cosponsor>, <cosponsor name-id="V000133">Mr. Van Drew</cosponsor>, <cosponsor name-id="H000324">Mr. Hastings</cosponsor>, <cosponsor name-id="R000616">Mr. Rouda</cosponsor>, <cosponsor name-id="P000614">Mr. Pappas</cosponsor>, <cosponsor name-id="G000574">Mr. Gallego</cosponsor>, <cosponsor name-id="V000081">Ms. Velázquez</cosponsor>, <cosponsor name-id="H001087">Ms. Hill of California</cosponsor>, <cosponsor name-id="P000613">Mr. Panetta</cosponsor>, <cosponsor name-id="O000172">Ms. Ocasio-Cortez</cosponsor>, <cosponsor name-id="B001292">Mr. Beyer</cosponsor>, <cosponsor name-id="W000797">Ms. Wasserman Schultz</cosponsor>, <cosponsor name-id="J000298">Ms. Jayapal</cosponsor>, <cosponsor name-id="S001206">Ms. Shalala</cosponsor>, <cosponsor name-id="H001080">Ms. Haaland</cosponsor>, <cosponsor name-id="J000288">Mr. Johnson of Georgia</cosponsor>, <cosponsor name-id="M001200">Mr. McEachin</cosponsor>, <cosponsor name-id="C001112">Mr. Carbajal</cosponsor>, <cosponsor name-id="K000394">Mr. Kim</cosponsor>, <cosponsor name-id="P000597">Ms. Pingree</cosponsor>, <cosponsor name-id="L000582">Mr. Ted Lieu of California</cosponsor>, <cosponsor name-id="C001055">Mr. Case</cosponsor>, <cosponsor name-id="S001150">Mr. Schiff</cosponsor>, <cosponsor name-id="C001066">Ms. Castor of Florida</cosponsor>, <cosponsor name-id="D000197">Ms. DeGette</cosponsor>, <cosponsor name-id="L000593">Mr. Levin of California</cosponsor>, <cosponsor name-id="S001200">Mr. Soto</cosponsor>, and <cosponsor name-id="C001124">Mr. Cox of California</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HII00">Committee on Natural Resources</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Outer Continental Shelf Lands Act to prohibit the Secretary of the Interior including
+			 in any leasing program certain planning areas, and for other purposes.</official-title></form>
+	<legis-body id="HFF05CCFB9F2B4E2D91BB7D476DE56F91" style="OLC">
+ <section id="H1B6E9C888D304DE8B3C64AA6AED33250" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Coastal and Marine Economies Protection Act</short-title></quote>.</text> </section><section id="HF0E6655969BA4B98AD0868BADCDA2A65"><enum>2.</enum><header>Prohibition on leasing in certain planning areas</header><text display-inline="no-display-inline">Section 18 of the Outer Continental Shelf Lands Act is amended by redesignating subsections (g) and (h) as subsections (h) and (i) respectively, and by inserting after subsection (f) the following:</text>
+			<quoted-block display-inline="no-display-inline" id="HE0991B1014EE4DD5972F0F06AA728813" style="OLC">
+ <subsection id="H9F7AE0E332AB42D1829BC02192C7F975"><enum>(g)</enum><text display-inline="yes-display-inline">The Secretary shall not include in any leasing program under this section any area within the Atlantic Region planning areas or the Pacific Region planning areas, as such planning areas are described in the document entitled <quote>Draft Proposed Program Outer Continental Shelf Oil and Gas Leasing Program 2019–2024</quote>, dated January 2018.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

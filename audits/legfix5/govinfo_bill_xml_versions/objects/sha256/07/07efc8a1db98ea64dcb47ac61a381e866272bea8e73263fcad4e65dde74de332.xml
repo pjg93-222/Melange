@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H6F5EF0748D7741C5968DFDDBF3A7B05D" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 5765 IH: Stop Appropriations for Obsequy Costs Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-10-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5765</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20211028">October 28, 2021</action-date>
+<action-desc><sponsor name-id="B000825">Mrs. Boebert</sponsor> (for herself, <cosponsor name-id="M001199">Mr. Mast</cosponsor>, <cosponsor name-id="M001211">Mrs. Miller of Illinois</cosponsor>, <cosponsor name-id="H001071">Mr. Hice of Georgia</cosponsor>, <cosponsor name-id="N000190">Mr. Norman</cosponsor>, <cosponsor name-id="G000552">Mr. Gohmert</cosponsor>, and <cosponsor name-id="C001116">Mr. Clyde</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To prohibit the use of Federal funds for funeral expenses related to COVID–19, and for other purposes.</official-title>
+</form>
+<legis-body id="HCDBF5240078D4D58AC1ADB0B954F09F3" style="OLC">
+<section id="H08B13383530A4B72AC816F5F7D05FFD2" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the “<short-title>Stop Appropriations for Obsequy Costs Act</short-title>” or the “<short-title>Stop AOC Act</short-title>”.</text></section> <section id="HE1B17611E3B9486594166E295DEF9BB3"><enum>2.</enum><header>Prohibiting use of Federal funds for funeral expenses related to COVID–19</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, including section 4006 of the American Rescue Plan Act of 2021 and section 408(e)(1) of the Robert T. Stafford Disaster Relief and Emergency Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/5174">42 U.S.C. 5174(e)(1)</external-xref>), Federal funds may not be used to provide financial assistance to an individual or household for funeral expenses if the eligibility for such assistance is derived from a cause of death related to COVID–19.</text></section>
+</legis-body>
+</bill> 
+
+

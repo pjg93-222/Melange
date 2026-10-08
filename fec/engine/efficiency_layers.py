@@ -30,7 +30,7 @@ DYAD_PATH = os.path.join(DERIVED, "stance_priors", "dyad_signs.csv")
 BOARDS_PATH = os.path.join(DERIVED, "champions_v2", "boards.json")
 PRICING_PATH = os.path.join(MB_ROOT, "data", "lobbying", "coalition_pricing.json")
 CONGESTION_PATH = os.path.join(MB_ROOT, "data", "engine", "congestion.json")
-NON_CU_CONTEST_SECTORS = frozenset(("bank", "crypto", "fintech"))
+NON_CU_CONTEST_SECTORS = frozenset(("bank", "crypto", "fintech", "telecom"))
 
 
 class EfficiencyLayersError(RuntimeError):
@@ -161,6 +161,7 @@ def build_payload(
         _number(row["att_bank"], f"{row['name']} att_bank", minimum=0.0)
         + _number(row["att_crypto"], f"{row['name']} att_crypto", minimum=0.0)
         + _number(row["att_fintech"], f"{row['name']} att_fintech", minimum=0.0)
+        + _number(row["att_telecom"], f"{row['name']} att_telecom", minimum=0.0)
         for row in rows
     ]
     cu_pac = [
@@ -445,7 +446,7 @@ def build_payload(
         "method": {
             "scope": "descriptive decision aid; moves no rank",
             "contest_index": (
-                "mean z[log1p(bank+crypto+fintech lobbying attention), "
+                "mean z[log1p(bank+crypto+fintech+telecom lobbying attention), "
                 "log1p(opposing PAC dollars), signed non-CU opposition count, "
                 "pricing attention_pct when the ratified artifact is present]"
             ),
@@ -600,6 +601,11 @@ def _load_panel(path):
                 "att_fintech": _number(
                     row["att_fintech"], f"panel row {row_number} att_fintech", minimum=0.0
                 ),
+                # A panel written before telecom existed has no att_telecom column;
+                # that is zero telecom attention, not a reason to halt the chain.
+                "att_telecom": _number(
+                    row.get("att_telecom") or 0, f"panel row {row_number} att_telecom", minimum=0.0
+                ),
                 "finance_committee": bool(finance),
             }
     return records, total_119
@@ -727,7 +733,7 @@ def _load_signed_opposition(derived, dyad_path):
         "opposition_count_sum": sum(opposition.values()),
         "count_rule": (
             "sum dyad_signs.oppose_n once per org-member row when the org has at "
-            "least one bank, crypto, or fintech token in the six annual strict indexes"
+            "least one bank, crypto, fintech, or telecom token in the six annual strict indexes"
         ),
     }
     return opposition, receipt

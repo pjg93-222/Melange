@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HD8A563C4916E4EC38C44D4187D003CFA" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4868 IH: Member Business Loan Expansion Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-07-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4868</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230725">July 25, 2023</action-date><action-desc><sponsor name-id="G000581">Mr. Vicente Gonzalez of Texas</sponsor> (for himself and <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Federal Credit Union Act to provide more loan flexibility to credit unions, to amend the Federal Home Loan Bank Act to expand homeownership access, and for other purposes.</official-title></form><legis-body id="HBD8793DB51A647709880E99AD458CA71" style="OLC"> 
+<section id="H83E72C11A4B043978655BDE0ED35FA06" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Member Business Loan Expansion Act</short-title></quote>. </text></section> <section id="HF005B76F2402456093E09C86B9FF4862"><enum>2.</enum><header>Flexibility for NCUA Board to increase Federal credit union loan maturities</header><text display-inline="no-display-inline">Section 107(5) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1757">12 U.S.C. 1757(5)</external-xref>) is amended by inserting after <quote>shall not exceed 15 years</quote> the following: <quote>(or such longer maturity as the Board may allow, by regulation)</quote>.</text></section>
+<section id="HC2E5E545CB13470F8E8C804D24827C7C"><enum>3.</enum><header>Expanding credit to small businesses</header><text display-inline="no-display-inline">Section 107A(c)(1)(B)(iii) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1757a">12 U.S.C. 1757a(c)(1)(B)(iii)</external-xref>) is amended by striking <quote>$50,000</quote> and inserting <quote>$100,000</quote>.</text></section> <section id="H2282570DE1234F3EB49FB0D4754FC86B"><enum>4.</enum><header>Expanding homeownership access through community financial institutions</header><text display-inline="no-display-inline">Section 2(10)(A) of the Federal Home Loan Bank Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1422">12 U.S.C. 1422(10)(A)</external-xref>) is amended—</text>
+<paragraph id="H8F9252B9575A4BB2806D7D95C0EFEF1A"><enum>(1)</enum><text>in clause (i), by inserting after <quote>Federal Deposit Insurance Act</quote> the following <quote>or Federal Credit Union Act</quote>; and</text></paragraph> <paragraph id="H1288BAF6FE1445FCB0E4D1C2DAF6DF39"><enum>(2)</enum><text>in clause (ii), by striking <quote>$1,000,000,000</quote> and inserting <quote>$10,000,000,000</quote>.</text></paragraph></section> 
+</legis-body></bill>
+

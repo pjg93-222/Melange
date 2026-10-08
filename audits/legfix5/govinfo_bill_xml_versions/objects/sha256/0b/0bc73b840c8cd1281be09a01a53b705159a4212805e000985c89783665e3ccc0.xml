@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL26003-D6J-R9-FR9"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3616 IS: Expanding Access to Lending Options Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-01-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress>
+ <session>2d Session</session><legis-num>S. 3616</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260113">January 13, 2026</action-date><action-desc><sponsor name-id="S385">Ms. Cortez Masto</sponsor> (for herself and <cosponsor name-id="S398">Mr. Cramer</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To provide the National Credit Union Administration Board flexibility to increase Federal credit union loan maturities, and for other purposes.</official-title></form><legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="HA882AFE96A114424BAB5D2C8057D8CC9"><section section-type="section-one" id="id5F48600D78744E3BA5797753DD46545C"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Expanding Access to Lending Options Act</short-title></quote>.</text></section><section section-type="subsequent-section" id="HCDF6B86057ED493FB2EF53C54210976D"><enum>2.</enum><header>Powers of Federal credit unions</header><text display-inline="no-display-inline">Section 107(5) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1757">12 U.S.C. 1757(5)</external-xref>) is amended—</text><paragraph id="id94FF88B107DF4CBBB6498191C8CAB3EA"><enum>(1)</enum><text display-inline="yes-display-inline">in the matter preceding subparagraph (A), by inserting <quote>or up to a term of 20 years as the Board may allow, in regulations</quote> after <quote>15 years</quote>; and</text></paragraph><paragraph id="idE9595698F8EF401F95884771066D9D26"><enum>(2)</enum><text display-inline="yes-display-inline">in subparagraph (A)(i), by striking <quote>or will be the principal residence of a credit union member, and which is</quote>.</text></paragraph></section></legis-body></bill>
+

@@ -1,0 +1,180 @@
+====================================================================================================
+1. EVERY ROW gradeN12 NAMED
+====================================================================================================
+rowid    what the grade called it           v2          cut tag                            keep/cut words
+66969    G4 Grassley oath                   TRUNCATE    SEN. PATTY MURRAY (D-WA)           39 kept / 88 cut
+68730    G1 partial foreign                 TRUNCATE    REP. MAXINE WATERS (D-CA 43RD DIST 35 kept / 137 cut
+69544    G4 OK. OK. WILD                    SKIP:kept_text WILD (voice-over)                  2 kept
+70117    class E timestamp run              TRUNCATE    [21:25:00] (CHEERING) KAMALA HARRI 31 kept / 10 cut
+70149    G2d class C name residue           TRUNCATE    BRIAN NELSON, GENERAL COUNSEL, CAL 20 kept / 28 cut
+70812    G2b abbreviation anchor            TRUNCATE    [06:43:28] DONALD TRUMP (R), FORME 34 kept / 9 cut
+71147    G2b abbreviation anchor            TRUNCATE    DONALD TRUMP (R), FORMER U.S. PRES 11 kept / 8 cut
+80238    G1 chyron insert (Cassidy)         TRUNCATE    SEN. BILL CASSIDY                  41 kept / 12 cut
+82055    G2b abbreviation anchor            SKIP:label_or_ DONALD TRUMP (R), FORMER U.S. PRES 50 kept
+83061    G3 member words removed            TRUNCATE    PROKUPECZ (voice-over)             8 kept / 94 cut
+83941    G2d class C name residue           TRUNCATE    KIM PHAM, GENERAL ADMINISTRATOR, L 13 kept / 42 cut
+102837   G1 partial foreign (UNIDENTIFIED)  TRUNCATE    SEN. JOE MANCHIN, D-W.VA, "MEET TH 23 kept / 121 cut
+104285   G1 partial foreign (no-space colon TRUNCATE    SEN. TIM KAINE                     35 kept / 84 cut
+108647   G1 partial foreign x4              SKIP:credit_un CHUCK TODD                         107 kept
+111034   G1 partial foreign x2              SKIP:kept_text CHUCK TODD                         3 kept
+191195   class E possessive                 TRUNCATE    HENRY ROBERTO CUELLAR, (D) U.S REP 17 kept / 9 cut
+192027   G1 chyron insert (Scalise)         TRUNCATE    REP. STEVE SCALISE                 19 kept / 10 cut
+192133   G2d class C name residue           TRUNCATE    SUZANNE MALVEAUX, NATIONAL CORRESP 24 kept / 36 cut
+193439   G2d class C name residue           TRUNCATE    SUNLEN SERFATY, CONGRESSIONAL CORR 8 kept / 30 cut
+205497   G2b abbreviation anchor            TRUNCATE    TIM MORRISON, FORMER U.S. ADVISER  13 kept / 14 cut
+225128   stage direction                    NOT FLAGGED -                                  -
+225986   G2c pre-existing wrong person      TRUNCATE    TODD (voice-over)                  23 kept / 52 cut
+226287   G1 chyron insert (Thompson)        TRUNCATE    NOBLES (voice-over)                21 kept / 29 cut
+242833   G1 partial foreign (BRET BAIER)    SKIP:credit_un SEN. DICK DURBIN                   39 kept
+244993   G4 OK. OK. WILD                    SKIP:kept_text WILD (voice-over)                  2 kept
+245558   G1 WRONG-SPEAKER (Mike Johnson x5) TRUNCATE    LISA KING, EXECUTIVE DIRECTOR, SUM 110 kept / 502 cut
+245771   in-use gold / CU row               SKIP:credit_un WALLACE (voice over)               10 kept
+257343   G2a PBS anchor                     TRUNCATE    Fred de Sam Lazaro                 24 kept / 273 cut
+258130   G2a PBS anchor                     SKIP:label_or_ Laura Barrón-López                 68 kept
+258713   G2a PBS anchor                     TRUNCATE    Laura Barrón-López               11 kept / 198 cut
+258736   G2a PBS anchor                     TRUNCATE    Laura Barrón-López                 30 kept / 316 cut
+258820   G2a PBS anchor                     TRUNCATE    Laura Barrón-López                 31 kept / 347 cut
+278454   G4 OK. Q:                          NOT FLAGGED -                                  -
+278528   G4 OK. Q:                          NOT FLAGGED -                                  -
+
+====================================================================================================
+2. PROTECTION
+====================================================================================================
+CU-gate rows (rule c)                     : 207
+  of those FLAGGED                        : 19
+  of those TRUNCATED  (must be 0)         : 0  []
+label-bound INTERVIEW rows (rule b)       : 1895
+  of those FLAGGED                        : 107
+  of those TRUNCATED  (must be 0)         : 0  []
+245771 (in-use gold / Risch)              : SKIPPED: credit_union_stance_channel_row
+interviews_cu.csv data rows (the CU items): 37
+
+====================================================================================================
+3. V1 vs V2
+====================================================================================================
+v1 flagged 5863 ; v2 flagged 6284
+v1 would WRITE 5859 rows (5,859 UPDATE + 64 INSERT in the grade) ; v2 would TRUNCATE 5484
+rows v2 flags that v1 did not      : 424
+rows v1 flagged that v2 does not   : 3
+rows v1 would have written and v2 refuses: 751
+    v2 skip: kept_text_under_min_turn_words                                     629
+    v2 skip: label_or_gold_record_points_here                                   104
+    v2 skip: credit_union_stance_channel_row                                     17
+    v2 finds no FOREIGN tag (lenient own rule / filler guard / stricter anch      1
+  the 424 newly flagged rows, by the class that cut them:
+    A_anchored_caps                                                             375
+    D_mixed_case_label                                                           48
+    C_unanchored_paren                                                            1
+  rows BOTH would change but at a DIFFERENT cut point: 24
+    70149    v1 keeps   22 w | v2 keeps   20 w | v2 tag='BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPA'
+    234649   v1 keeps   15 w | v2 keeps   11 w | v2 tag='RANDI KAYE, CNN ANCHOR/CORRESPONDENT (voice-ov'
+    70812    v1 keeps   40 w | v2 keeps   34 w | v2 tag='[06:43:28] DONALD TRUMP (R), FORMER U.S. PRESI'
+    71147    v1 keeps   16 w | v2 keeps   11 w | v2 tag='DONALD TRUMP (R), FORMER U.S. PRESIDENT AND'
+    235227   v1 keeps   19 w | v2 keeps   15 w | v2 tag='RANDI KAYE, CNN ANCHOR/CORRESPONDENT (voice-ov'
+    268084   v1 keeps   96 w | v2 keeps   64 w | v2 tag='O’DONNELL'
+    269809   v1 keeps  330 w | v2 keeps  168 w | v2 tag='LAURENCE TRIBE, CO-AUTHOR, “TO END A PRESIDENC'
+    204464   v1 keeps   22 w | v2 keeps   19 w | v2 tag='DONALD TRUMP (R), PRESIDENT OF THE UNITED STAT'
+    205497   v1 keeps   17 w | v2 keeps   13 w | v2 tag='TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT'
+    271840   v1 keeps   12 w | v2 keeps    9 w | v2 tag='LIN-MANUEL MIRANDA, ACTOR/MUSICIAN (singing)'
+    212161   v1 keeps   24 w | v2 keeps   21 w | v2 tag='PHIL MURPHY, (D), NEW JERSEY (voice-over)'
+    81316    v1 keeps   34 w | v2 keeps   33 w | v2 tag='O’BRIEN (voice-over)'
+
+====================================================================================================
+4. IS THE AMBIGUOUS VERDICT A LIVE PATH?  census over EVERY interview row
+====================================================================================================
+  foreign        6871 tags
+  own              43 tags
+  ambiguous examples:
+    NONE on this corpus.  Unit proof that the path is live and correct:
+      tag_ownership('CHARLIES (voice-over)' , 'Cy Charlie'  ) = ambiguous
+      tag_ownership('PRESIDENT AND'         , 'Ada Alpher'  ) = ambiguous
+      tag_ownership('ALPHERS'               , 'Ada Alpher'  ) = ambiguous
+      tag_ownership('MURRAYS (voice-over)'  , 'Patty Murray') = ambiguous
+
+====================================================================================================
+5. THE EIGHT-WORD FLOOR IS "< 8": the rows sitting exactly ON it are NOT saved
+====================================================================================================
+rows truncated to EXACTLY 8 words: 122
+  83061 (the one row the grade proved loses the member own words) is here: True
+    65975    Katie Britt            keeps 'Our commander in chief is not in command.'
+    66838    Ruben Gallego          keeps "And I'm sorry to the women of Arizona."
+    68057    Pramila Jayapal        keeps "I don't think it is the right direction."
+    68065    Pramila Jayapal        keeps "I don't think it is the right direction."
+    69428    Andy Biggs             keeps 'I call upon you to resign today, today.'
+    69522    Andy Biggs             keeps 'I call upon you to resign today, today.'
+    69534    Andy Biggs             keeps 'I call upon you to resign today, today.'
+    71081    Mike Rogers            keeps 'She voted 100 percent with the Biden-Harris agenda.'
+    72823    Ted Cruz               keeps 'The Take It Down Act does two things.'
+    73309    Roger Wicker           keeps 'Good morning. The hearing will come to order.'
+  kept-word distribution just above the floor: 8w:122, 9w:112, 10w:108, 11w:109, 12w:107, 13w:138, 14w:134, 15w:147
+
+====================================================================================================
+6. EVERY ROW V1 FLAGGED THAT V2 DOES NOT, and a seeded sample of the newly flagged
+====================================================================================================
+  274661   Paul Gosar             v1 tag(s)=['JENNIFER GOSAR, REP. PAUL GOSAR']
+        v1 would have kept: 'It was not my purpose to make anyone upset. I voluntarily took the cartoon down, not becau'
+  278454   Bill Cassidy           v1 tag(s)=['OK. Q']
+        v1 would have kept: ''
+  278528   Chris Van Hollen       v1 tag(s)=['OK. Q']
+        v1 would have kept: ''
+  NEW 271929   Jon Ossoff           [A_anchored_caps] tag='O’DONNELL'
+        keeps ...'visive. It’s exactly the opposite of what the country needs right now.'
+        cuts    'O’DONNELL: It also apparently is an incumbent senator running scared because according to the latest'...
+  NEW 106388   Amy Klobuchar        [A_anchored_caps] tag='CHUCK TODD'
+        keeps ...'hecks, assault weapon bans and some of the things we’re talking about.'
+        cuts    'CHUCK TODD:Senator Klobuchar, I have to leave it there. I appreciate it. Thanks for coming on and sh'...
+  NEW 276096   Jamie Raskin         [A_anchored_caps] tag='STEPHEN AYRES, STORMED CAPITOL ON JANUARY 6'
+        keeps ...'ome. Did you see that? And that have any effect on what you did after?'
+        cuts    'STEPHEN AYRES, STORMED CAPITOL ON JANUARY 6: When we were there, as soon as that come out, everybody'...
+  NEW 250725   Pramila Jayapal      [A_anchored_caps] tag='AMY WALTER, PUBLISHER AND EDITOR-IN-CHIEF, "COOK POL'
+        keeps ...' color. And this issue of immigration is critically important to them.'
+        cuts    'AMY WALTER, PUBLISHER AND EDITOR-IN-CHIEF, "COOK POLITICAL REPORT": I just don\'t know that I think t'...
+  NEW 154422   Mike Johnson         [D_mixed_case_label] tag='Laura Barrón-López'
+        keeps ...'leave it to the administration. They know much more about the details.'
+        cuts    "Laura Barrón-López: Meanwhile, Republican lawmakers have largely brushed aside Trump's new overseas "...
+  NEW 274879   Daniel Goldman       [A_anchored_caps] tag='O’DONNELL'
+        keeps ...'f Justice that the Department of Justice is not aware of the evidence.'
+        cuts    'O’DONNELL: Senator McCaskill, I think it also shows how much that the committee can accomplish witho'...
+  NEW 272010   Tammy Duckworth      [A_anchored_caps] tag='O’DONNELL'
+        keeps ...'u have to land this airplane. We have to get this thing on the ground.'
+        cuts    'O’DONNELL: Joining us now, Democratic Senator Tammy Duckworth of Illinois. She’s a former Army Lieut'...
+  NEW 272307   Steny Hoyer          [A_anchored_caps] tag='O’DONNELL'
+        keeps ...'summoned the mob, assembled the mob, and lit the flame of this attack.'
+        cuts    'O’DONNELL: Joining discussion now, John Heilemann, MSNBC national affairs analyst and executive edit'...
+  NEW 279370   Elizabeth Warren     [A_anchored_caps] tag='UNIDENTIFIED PERSON #1'
+        keeps ...'about we do things like universal child care and tuition-free college?'
+        cuts    'UNIDENTIFIED PERSON #1: That would be unreal.'...
+  NEW 272503   Elizabeth Warren     [A_anchored_caps] tag='CHRIS HAYES, MSNBC HOST, “ALL IN”'
+        keeps ...'uld be transformative for families and transformative for this nation.'
+        cuts    'CHRIS HAYES, MSNBC HOST, “ALL IN”: Senator Elizabeth Warren of the state of Massachusetts, thank you'...
+  NEW 247935   Hakeem Jeffries      [A_anchored_caps] tag='KRISTEN WELKER, MODERATOR, NBC "MEET THE PRESS"'
+        keeps ...'My Republican colleagues have a simple choice.'
+        cuts    'KRISTEN WELKER, MODERATOR, NBC "MEET THE PRESS": Yeah.'...
+  NEW 258155   Rick Scott           [D_mixed_case_label] tag='Laura Barrón-López'
+        keeps ...'We all have to figure out what we have to do differently.'
+        cuts    'Laura Barrón-López: In Washington today, Republican Senator Rick Scott, who led the Senate GOP campa'...
+  NEW 272232   Nancy Pelosi         [A_anchored_caps] tag='O’DONNELL'
+        keeps ...'e president every day and I do. Last night was the hardest day for me.'
+        cuts    'O’DONNELL: This morning, Chuck Schumer said this president shouldn’t hold office one more day. The q'...
+  NEW 271070   Elizabeth Warren     [A_anchored_caps] tag='SETH MEYERS, HOST, “LATE NIGHT WITH SETH MEYERS”'
+        keeps ...'Mike Bloomberg.'
+        cuts    'SETH MEYERS, HOST, “LATE NIGHT WITH SETH MEYERS”: Forty-seven million. Instead of running for presid'...
+  NEW 215693   Josh Hawley          [A_anchored_caps] tag='LAURA INGRAHAM, FOX NEWS HOST, "THE INGRAHAM ANGLE"'
+        keeps ...' group now says, oh, it was a candlelight vigil, we are singing songs.'
+        cuts    'LAURA INGRAHAM, FOX NEWS HOST, "THE INGRAHAM ANGLE": Oh, yeah.'...
+  NEW 84757    Jim Jordan           [A_anchored_caps] tag='BORIS SANCHEZ, CNN CO-ANCHOR OF "CNN NEWS CENTRAL"'
+        keeps ...'Mr. Gomez is recognized.'
+        cuts    'BORIS SANCHEZ, CNN CO-ANCHOR OF "CNN NEWS CENTRAL": We\'ve been listening to House Speaker Mike Johns'...
+  NEW 88308    Robert Garcia        [A_anchored_caps] tag='BORIS SANCHEZ, CNN CO-ANCHOR OF "CNN NEWS CENTRAL"'
+        keeps ..."s going to have a break, and then we'll continue. Thank you very much."
+        cuts    'BORIS SANCHEZ, CNN CO-ANCHOR OF "CNN NEWS CENTRAL": We\'ve been listening to Democrats on the House O'...
+  NEW 258734   Charles Schumer      [D_mixed_case_label] tag='Laura Barrón-López'
+        keeps ...'air way by a former Trump prosecutor, and I have faith in the results.'
+        cuts    'Laura Barrón-López: The deal was, Biden would plead guilty to two misdemeanor tax charges. In exchan'...
+  NEW 104233   Susan Collins        [A_anchored_caps] tag='CHUCK TODD'
+        keeps ...'Thank you.'
+        cuts    'CHUCK TODD:Look, it’s going to be Pollyanna-ish and you guys are going to say the right things about'...
+  NEW 268104   Nancy Pelosi         [A_anchored_caps] tag='O’DONNELL'
+        keeps ...' is becoming self-impeachable in terms of some of the things that he —'
+        cuts    'O’DONNELL: Speaker Pelosi has not been trying to control the rhetoric or the positions of the Democr'...
+DONE

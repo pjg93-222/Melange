@@ -1,0 +1,109 @@
+============================================================================================================
+F3 r1  COLUMN MAP: Raw sheet -> press_matrix -> per_category_stance    run 2026-09-19T00:07:31
+============================================================================================================
+workbook C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx
+   mtime 2026-09-18T02:09:29  size 11316932 B
+   lock at LIVE root present: False
+
+transcription self-check: OK
+
+raw-sheet member rows   press_matrix range(2,535) -> 533    blend range(2,536) -> 534
+   written-by-blend but NOT-read-by-press_matrix: ['Weights']
+
+col  ltr Raw-sheet header                           stance column              w535      fate in the stance path
+------------------------------------------------------------------------------------------------------------------------------------
+5    E   Examination & Supervision                  Examination & Supervision  0.1000    SCORED as media evidence
+6    F   Credit Union Capital Requirements          CU Capital Requirements    0.0400    SCORED as media evidence
+7    G   NCUA Budget & Share Insurance Fund         NCUA Budget & Insurance    0.1000    SCORED as media evidence
+8    H   Interchange                                Interchange                0.3000    SCORED as media evidence
+9    I   Payments                                   Payments                   0.0800    SCORED as media evidence
+10   J   Technology & Emerging Issues               Technology & Emerging      0.0800    SCORED as media evidence
+11   K   Fraud Prevention                           Fraud Prevention           0.0800    SCORED as media evidence
+12   L   Data Privacy & Cybersecurity               Data Privacy & Cyber       0.0800    SCORED as media evidence
+13   M   Charter Modernization & Governance         Charter Modernization      0.1500    SCORED as media evidence
+14   N   Defense Credit Union Issues                Defense CU Issues          0.0300    SCORED as media evidence
+15   O   Field of Membership                        Field of Membership        0.1500    SCORED as media evidence
+16   P   Credit Union Tax Status                    CU Tax Status              0.3000    SCORED as media evidence
+17   Q   CDFI Fund                                  CDFI Fund                  0.0200    SCORED as media evidence
+18   R   CU-Bank Competitive Dynamics               (none)                     0.0300    normalized, then NEVER READ (absent from cats[])
+19   S   CFPB Issues & Structural Reform            CFPB                       0.0500    SCORED as media evidence
+20   T   Credit Card & Consumer-Fee Mandates        Credit Card Mandates       0.3000    SCORED as media evidence
+21   U   Telephone Consumer Protection Act          TCPA                       0.0300    SCORED as media evidence
+22   V   Member Business Lending                    Member Business Lending    0.0400    SCORED as media evidence
+23   W   Mortgage Lending & Housing                 Mortgage & Housing         0.0800    SCORED as media evidence
+24   X   General Credit Union                       (none)                     None      NOT normalized; exclusion ledger only
+
+-- alias / list consistency --
+   RAW_TO_STANCE entries (media_rules.py:11-30)      : 18
+   per_category_stance cats[] (per_category:28-31)   : 18
+   RAW_PATTERNS keys == blend HDRMAP (blend.py:50/53): 20  <- columns the blend WRITES
+   press_matrix COLS (moneyball_core.py:94)          : 19
+   alias targets == cats[] names                    : True
+   RAW_PATTERNS keys == sheet headers E..X          : True
+   headers with NO alias entry                      : ['CU-Bank Competitive Dynamics', 'General Credit Union']
+
+-- ORIG gate  (blend.py:360  `_cats=[c for c in _route['categories'] if c in ORIG]`) --
+   press_raw_original.json keys: 20   (mtime 2026-07-02T02:32:47)
+      CDFI Fund                                  in ORIG: True
+      CFPB Issues & Structural Reform            in ORIG: True
+      CU-Bank Competitive Dynamics               in ORIG: True
+      Charter Modernization & Governance         in ORIG: True
+      Credit Card & Consumer-Fee Mandates        in ORIG: True
+      Credit Union Capital Requirements          in ORIG: True
+      Credit Union Tax Status                    in ORIG: True
+      Data Privacy & Cybersecurity               in ORIG: True
+      Defense Credit Union Issues                in ORIG: True
+      Examination & Supervision                  in ORIG: True
+      Field of Membership                        in ORIG: True
+      Fraud Prevention                           in ORIG: True
+      General Credit Union                       in ORIG: True
+      Interchange                                in ORIG: True
+      Member Business Lending                    in ORIG: True
+      Mortgage Lending & Housing                 in ORIG: True
+      NCUA Budget & Share Insurance Fund         in ORIG: True
+      Payments                                   in ORIG: True
+      Technology & Emerging Issues               in ORIG: True
+      Telephone Consumer Protection Act          in ORIG: True
+   headers that are NOT ORIG keys -> press routed there is dropped BEFORE the sheet: []
+   ORIG keys that are not sheet headers: []
+
+Rank & Allocation roster (per_category_stance.py:17): 533 members
+
+col  header                                     nonzero  pos      neg      nonzero on R&A roster
+------------------------------------------------------------------------------------------------------------------------
+5    Examination & Supervision                  63       51       12       63
+6    Credit Union Capital Requirements          7        6        1        7
+7    NCUA Budget & Share Insurance Fund         4        4        0        4
+8    Interchange                                47       25       22       47
+9    Payments                                   172      146      26       172
+10   Technology & Emerging Issues               177      157      20       177
+11   Fraud Prevention                           209      118      91       209
+12   Data Privacy & Cybersecurity               73       60       13       73
+13   Charter Modernization & Governance         26       25       1        26
+14   Defense Credit Union Issues                32       9        23       32
+15   Field of Membership                        26       25       1        26
+16   Credit Union Tax Status                    53       52       1        53
+17   CDFI Fund                                  78       70       8        78
+18   CU-Bank Competitive Dynamics               156      63       93       156
+19   CFPB Issues & Structural Reform            290      95       195      290
+20   Credit Card & Consumer-Fee Mandates        88       9        79       88
+21   Telephone Consumer Protection Act          60       59       1        60
+22   Member Business Lending                    75       66       9        75
+23   Mortgage Lending & Housing                 221      181      40       221
+24   General Credit Union                       270      256      14       270
+
+-- columns that carry media but reach NO stance cell --
+   col 18 CU-Bank Competitive Dynamics             156 members nonzero | row535 press-pillar weight 0.03 | NO stance column
+   col 24 General Credit Union                     270 members nonzero | never normalized -> exclusion ledger
+
+-- general_exclusion_ledger(raw_all[24]) reproduced (media_rules.py:192-201) --
+   ledger members 270 ; equals col-24 nonzero census: True
+   all applied_to_policy_domains == False: True
+
+-- category_stance.json media block --
+   cats recorded            : 18
+   general_credit_union_exclusions members: 270
+   matches ledger rebuilt from TODAY's workbook: True
+   NOTE category_stance.json mtime 2026-09-17T02:14:04 vs workbook mtime 2026-09-18T02:09:29
+
+DONE F3 r1

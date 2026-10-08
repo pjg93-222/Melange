@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-WAL26380-XM8-PC-V5X"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S4728 IS: Combat Emerging Threats to Critical Infrastructure Act of 2026</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-06-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 4728</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260610">June 10, 2026</action-date><action-desc><sponsor name-id="S327">Mr. Warner</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Director of the Cybersecurity and Infrastructure Security Agency to work with Sector Risk Management Agencies to update sector-specific plans, and for other purposes.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Combat Emerging Threats to Critical Infrastructure Act of 2026</short-title></quote>.</text></section><section id="id2a35e7cb328c4480a7eaf953b060996b"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text><paragraph id="id16896771cf1144919430a49275713926"><enum>(1)</enum><header>Artificial intelligence</header><text>The term <term>artificial intelligence</term> has the meaning given that term in section 5002 of the National Artificial Intelligence Initiative Act of 2020 (<external-xref legal-doc="usc" parsable-cite="usc/15/9401">15 U.S.C. 9401</external-xref>).</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id1a25af04a84d4bd8b7c532383f4c48db"><enum>(2)</enum><header>Digital asset</header><text>The term <quote>digital asset</quote> has the meaning given that term in section 2 of the GENIUS Act (<external-xref legal-doc="usc" parsable-cite="usc/12/5901">12 U.S.C. 5901</external-xref>).</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idf0bace47a3494adfa68d1b8b6790ff71"><enum>(3)</enum><header>Director</header><text>The term <quote>Director</quote> means the Director of the Cybersecurity and Infrastructure Security Agency.</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id90acfbc638c540199933ca995646ac15"><enum>(4)</enum><header>National Security Memorandum 22</header><text>The term <quote>National Security Memorandum 22</quote> means the National Security Memorandum on Critical Infrastructure and Resilience (NSM–22), issued April 30, 2024.</text></paragraph><paragraph id="id7b17d3dc39664f40acc3da1be381f26a"><enum>(5)</enum><header>Sector Risk Management Agency</header><text>The term <term>Sector Risk Management Agency</term> has the meaning given that term in section 2200 of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/650">6 U.S.C. 650</external-xref>).</text></paragraph></section><section commented="no" display-inline="no-display-inline" id="ide26115ba6e184c36ac21332a2d8def0e"><enum>3.</enum><header>Sector Risk Management Agency sector-specific plans</header><subsection commented="no" display-inline="no-display-inline" id="id6d9b83349e654ed28901d7bfe71b0b91"> <enum>(a)</enum> <header>Update of sector-Specific plans</header> <text>Not later than 1 year after the date of enactment of this Act, the Director shall update the sector-specific plans for—</text>
+                <paragraph id="id659be0730e0549d6be5263c77d44bc07">
+                    <enum>(1)</enum>
+ <text>the Chemical Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="iddeb08062aec44ff89613e23b43ac61de">
+                    <enum>(2)</enum>
+ <text>the Commercial Facilities Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id85e43777046249b9b7d9eecc90239afc">
+                    <enum>(3)</enum>
+ <text>the Communications Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="idb47d68807951476bb5308dd9e0da49c6">
+                    <enum>(4)</enum>
+ <text>the Critical Manufacturing Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id9b52bfbdeff243c4900b326b7a8863c1">
+                    <enum>(5)</enum>
+ <text>the Dams Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="ide9508fb8333c45469a0c2dedf37ad4dc">
+                    <enum>(6)</enum>
+ <text>the Defense Industrial Base Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="idd8a2f3a3e7ef4815a3e7c066c135fbd9">
+                    <enum>(7)</enum>
+ <text>the Emergency Services Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id16c31ad9e9fa47b7b72ac47fabeb222d">
+                    <enum>(8)</enum>
+ <text>the Energy Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id48f48d1265154918be538555b50470d3">
+                    <enum>(9)</enum>
+ <text>the Financial Services Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id4a692fa14ce64b97a865ba31aa57e31b">
+                    <enum>(10)</enum>
+ <text>the Food and Agriculture Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="idd61394c3a83948809a3643aee5f17f8c">
+                    <enum>(11)</enum>
+ <text>the Government Services and Facilities Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id56d56d25faa041f2a64213a1e37efbac">
+                    <enum>(12)</enum>
+ <text>the Healthcare and Public Health Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id79ead73b7d684e099519acbf07a0a0cf">
+                    <enum>(13)</enum>
+ <text>the Information Technology Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="id2088f742b42443bc87a235b064002bd5">
+                    <enum>(14)</enum>
+ <text>the Nuclear Reactors, Materials, and Waste Sector, as that term is used in National Security Memorandum 22;</text>
+                </paragraph>
+                <paragraph id="idf735d363892841aa8684b75e6eba22ca">
+                    <enum>(15)</enum>
+ <text>the Transportation Systems Sector, as that term is used in National Security Memorandum 22; and</text>
+                </paragraph>
+                <paragraph id="idf423d971fbb7443a9de9c51afbeca20f">
+                    <enum>(16)</enum>
+ <text>the Water and Wastewater Sector, as that term is used in National Security Memorandum 22.</text>
+                </paragraph>
+            </subsection><subsection id="idb7d7ece190034e289ddf2fc78949f914">
+                <enum>(b)</enum>
+                <header>Technology-Facilitated threats</header>
+ <text>In carrying out subsection (a)—</text> <paragraph commented="no" display-inline="no-display-inline" id="id43cdb09cbed440d9903b27098cb0ee2a"> <enum>(1)</enum> <text display-inline="yes-display-inline">each sector-specific plan shall incorporate sector-specific risk management practices to address risks exacerbated or facilitated by disruptive technologies, such as artificial intelligence, including—</text>
+                    <subparagraph id="idf19b78b95be44929a29f14225ca5bea9">
+                        <enum>(A)</enum>
+ <text>malicious activity, sabotage, or efforts to otherwise clandestinely degrade artificial intelligence systems or the supply chain of an artificial intelligence system, including training or test data, frameworks or software libraries, training or inference computing environments, or other components necessary for the training, management, or maintenance of an artificial intelligence system used by an owner or operator of critical infrastructure;</text>
+                    </subparagraph>
+                    <subparagraph id="id0ae6efdb17e644bb93a0caae784c1037">
+                        <enum>(B)</enum>
+ <text>malicious activity leveraging artificial intelligence capabilities for computer network exploitation campaigns directed at the networks of owners and operators of critical infrastructure;</text>
+                    </subparagraph>
+                    <subparagraph id="id13b360bddd2f446c9f0899aaf0c35ee4">
+                        <enum>(C)</enum>
+ <text>risks and mitigations associated with the deployment of cloud-based architecture, robotics, and zero trust principles (as defined in NIST Special Publication 800–207 or any successor publication);</text>
+                    </subparagraph>
+                    <subparagraph id="id59c3602513dc478fbc3c0bad14a83879">
+                        <enum>(D)</enum>
+ <text>evolving risks associated with social engineering techniques and digitally manipulated or digitally generated images, audio, video, or text documents; and</text>
+                    </subparagraph>
+                    <subparagraph id="id7aa241260d0c475795452f0a5d55cb11">
+                        <enum>(E)</enum>
+ <text>interagency and public-private information and threat intelligence sharing functions dependent on the organization, funding, and expertise of agencies (as defined in section 4101 of title 5, United States Code); and</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="idc0c3b5196bd14602a743274562968113">
+                    <enum>(2)</enum>
+ <text>with respect to the sector-specific plan for the Financial Services Sector pursuant to subsection (a)(9), the Director shall coordinate with the Secretary of the Treasury to develop a process to determine digital asset vulnerabilities relating to cryptographic risks resulting from quantum computing.</text>
+                </paragraph>
+ </subsection><subsection commented="no" display-inline="no-display-inline" id="ide4290ac153624b4398cb29be852f0cab"><enum>(c)</enum><header>Interagency coordination</header><text>In carrying out subsection (a), the Director shall coordinate with each relevant designated Sector Risk Management Agency.</text></subsection><subsection commented="no" display-inline="no-display-inline" id="id894006cac41d4f1fbabc74cdad7ca62b"><enum>(d)</enum><header>Reports to Congress</header><text>Not later than 30 days after the date on which the Director completes the update of the sector-specific plans required under subsection (a), the Director shall—</text><paragraph commented="no" display-inline="no-display-inline" id="id8240ea6b320d478fa0dba791e417b38d"><enum>(1)</enum><text display-inline="yes-display-inline">inform and provide a copy of each sector-specific plan to—</text><subparagraph commented="no" display-inline="no-display-inline" id="ida6a123e658ab4dc79faee5b0ef194cad"><enum>(A)</enum><text>the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id81b2b48b5bf84b7cb006f955b3ed9528"><enum>(B)</enum><text>the <committee-name committee-id="SLIN00">Select Committee on Intelligence of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id041ac9c251c244f290d76617c3c4cd11"> <enum>(C)</enum> <text>the <committee-name committee-id="HHM00">Committee on Homeland Security of the House of Representatives</committee-name>; and</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idb78e964bff154346b38958d084119a93">
+                        <enum>(D)</enum>
+ <text>the <committee-name committee-id="HIG00">Permanent Select Committee on Intelligence of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idbd0f2ae4853a4537b07b25056d5c0ea1"><enum>(2)</enum><text>inform and provide a copy of the sector-specific plan for the Defense Industrial Base Sector updated pursuant to subsection (a)(6) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="id3f4ee74d180b4fa18026855ab7527f19"> <enum>(A)</enum> <text>the <committee-name committee-id="SSAS00">Committee on Armed Services of the Senate</committee-name>; and</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idefee764a01b649819397f3628b8e2cc1">
+                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the <committee-name committee-id="HAS00">Committee on Armed Services of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idcbcc8baf69634f2ea425b063cac833fe"><enum>(3)</enum><text display-inline="yes-display-inline">inform and provide a copy of the sector-specific plan for the Energy Sector updated pursuant to subsection (a)(8) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="idda677f4ab1ce4b9fa24ede2d34c91cac"> <enum>(A)</enum> <text>the <committee-name committee-id="SSEG00">Committee on Energy and Natural Resources of the Senate</committee-name>; and</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id976590ed10d84abc808d2cf5e80d0a5a">
+                        <enum>(B)</enum>
+ <text>the <committee-name committee-id="HIF00">Committee on Energy and Commerce of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id72a3cd56118b417eade32619ee37c45b"><enum>(4)</enum><text>inform and provide a copy of the sector-specific plan for the Financial Services Sector updated pursuant to subsection (a)(9) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="idcaf34e75758d474181303629a29a3422"><enum>(A)</enum><text>the <committee-name committee-id="SSFI00">Committee on Finance of the Senate</committee-name>; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idf138c323db2c4f27b557b9111be38979"> <enum>(B)</enum> <text>the <committee-name committee-id="HBA00">Committee on Financial Services of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id37bee395fd6b4ababc0864d13a03f5c0"><enum>(5)</enum><text display-inline="yes-display-inline">inform and provide a copy of the sector-specific plan for the Food and Agriculture Sector updated pursuant to subsection (a)(10) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="id706f5de3f6ed4d8681b85e53f4fb4951"><enum>(A)</enum><text>the <committee-name committee-id="SSAF00">Committee on Agriculture, Nutrition, and Forestry of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id355e2cbe072749ddaa92f3fc854de125"><enum>(B)</enum><text>the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0a5152cfe85f47f0a1b959fa58f73b68"><enum>(C)</enum><text>the <committee-name committee-id="SSFI00">Committee on Finance of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9cd4123c61c64aeab513a6b692da1ea1"> <enum>(D)</enum> <text>the <committee-name committee-id="HAG00">Committee on Agriculture of the House of Representatives</committee-name>;</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ide8112fa704cf47e78c7bd873c25c20f8">
+                        <enum>(E)</enum>
+ <text>the <committee-name committee-id="HIF00">Committee on Energy and Commerce of the House of Representatives</committee-name>; and</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8d15d1b480c2481a9cc05d123def47a5">
+                        <enum>(F)</enum>
+ <text>the <committee-name committee-id="HWM00">Committee on Ways and Means of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id9853c7942b3d4e55a3197aac57f9ee64"><enum>(6)</enum><text display-inline="yes-display-inline">inform and provide a copy of the sector-specific plan for the Government Services and Facilities Sector updated pursuant to subsection (a)(11) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="idadc7578627494965b5f69982c5a4b721"> <enum>(A)</enum> <text>the <committee-name committee-id="SSEV00">Committee on Environment and Public Works of the Senate</committee-name>;</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id236f690ce9614d8eb10f02a754f9aeae">
+                        <enum>(B)</enum>
+ <text>the <committee-name committee-id="HGO00">Committee on Oversight and Government Reform of the House of Representatives</committee-name>; and</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idf0e81d77a9e94f6f8bd942e98e7a9149">
+                        <enum>(C)</enum>
+ <text>the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id57097d4bb0d64d2a95ed183f45f772ed"><enum>(7)</enum><text display-inline="yes-display-inline">inform and provide a copy of the sector-specific plan for the Healthcare and Public Health Sector updated pursuant to subsection (a)(12) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="id639f4ae82c104dcfb3b7d6964d66351f"><enum>(A)</enum><text>the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idf4a02169ded64e78aa0e44e46c4713fe"><enum>(B)</enum><text>the <committee-name committee-id="SSFI00">Committee on Finance of the Senate</committee-name>;</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id368c8ab2a38f4fd8bc6447a60afc83e1"> <enum>(C)</enum> <text>the <committee-name committee-id="HIF00">Committee on Energy and Commerce of the House of Representatives</committee-name>; and</text>
+                    </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id622d2289c4734c7da6fa53cdf234a3fe">
+                        <enum>(D)</enum>
+ <text>the <committee-name committee-id="HWM00">Committee on Ways and Means of the House of Representatives</committee-name>;</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idcd88e5dd046c47fa8cc9ca5b0dd19045"><enum>(8)</enum><text>inform and provide a copy of the sector-specific plan for the Transportation Systems Sector updated pursuant to subsection (a)(15) to—</text><subparagraph id="id9b8ec5ce20d9432c8f968ba7300c4e18"><enum>(A)</enum><text>the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation of the Senate</committee-name>; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idf5ac7e96e890476d85682cdafaa07451"> <enum>(B)</enum> <text>the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure of the House of Representatives</committee-name>; and</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id2d4c192cb6774fa3a8a0401fc0aa4f18"><enum>(9)</enum><text>inform and provide a copy of the sector-specific plan for the Water and Wastewater Sector updated pursuant to subsection (a)(16) to—</text><subparagraph commented="no" display-inline="no-display-inline" id="id7307fb9ce5cd4eaa8665f36b2e615b6c"><enum>(A)</enum><text>the <committee-name committee-id="SSEV00">Committee on Environment and Public Works of the Senate</committee-name>; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2cb96e6bafe0460aa9182c56735f2978"> <enum>(B)</enum> <text>the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure of the House of Representatives</committee-name>.</text>
+ </subparagraph></paragraph></subsection></section><section id="id2ec8fca5646245f8b7ea0741bd90110c"><enum>4.</enum><header>Biennial reassessment</header><subsection id="id05055c10747c4456a1557c2e5eaad9a4"><enum>(a)</enum><header>In general</header><text>Not later than 2 years after the date on which the Director completes the update of the sector-specific plans required under section 3(a), and not less frequently than once every 2 years thereafter, the Director shall—</text><paragraph commented="no" display-inline="no-display-inline" id="id4adc7d979d534cec928d0bfbf50d5fd4"><enum>(1)</enum><text display-inline="yes-display-inline">conduct a reassessment of each sector-specific plan; and</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id6bff3ba9af7f4a85a5b987e7fc296df9"><enum>(2)</enum><text display-inline="yes-display-inline">issue revised sector-specific plans.</text></paragraph></subsection><subsection id="id142682d07b89460f90f67e7e956f792d"> <enum>(b)</enum> <header>Notification to Congress</header> <text>Not later than 30 days after the date on which the Director completes each update of the sector-specific plans required under subsection (a), the Director shall inform and provide copies of each sector-specific plan to the relevant committees of Congress in the manner prescribed under section 3(d).</text>
+            </subsection></section></legis-body></bill>
+

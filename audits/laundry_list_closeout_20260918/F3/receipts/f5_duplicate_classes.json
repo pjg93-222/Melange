@@ -1,0 +1,56 @@
+{
+ "all_channel": {
+  "hearing": {
+   "compet": 18,
+   "general": 11,
+   "reach": 166,
+   "scored": 187,
+   "sheet_only": 21
+  },
+  "interview": {
+   "compet": 2,
+   "general": 4,
+   "reach": 19,
+   "scored": 25,
+   "sheet_only": 6
+  },
+  "press": {
+   "compet": 18,
+   "general": 398,
+   "reach": 983,
+   "scored": 1387,
+   "sheet_only": 404
+  },
+  "social": {
+   "compet": 508,
+   "general": 363,
+   "reach": 5258,
+   "scored": 5709,
+   "sheet_only": 451
+  },
+  "speech": {
+   "compet": 41,
+   "general": 6,
+   "reach": 166,
+   "scored": 172,
+   "sheet_only": 6
+  }
+ },
+ "cross_channel_press_social": 0,
+ "cross_platform_twin_keys": 911,
+ "cross_platform_twin_surplus": 966,
+ "press_urlform_double_into_stance_cell": 1,
+ "press_urlform_double_nonstance_only": 5,
+ "same_platform_keys": 97,
+ "same_platform_same_date_keys": 69,
+ "same_platform_surplus": 107,
+ "social_repeat_keys": 1008,
+ "social_surplus": 1073,
+ "totals": {
+  "compet": 587,
+  "general": 782,
+  "reach": 6592,
+  "scored": 7480,
+  "sheet_only": 888
+ }
+}

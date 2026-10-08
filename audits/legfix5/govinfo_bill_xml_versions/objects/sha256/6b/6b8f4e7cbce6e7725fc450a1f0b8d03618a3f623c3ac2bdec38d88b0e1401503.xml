@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H594AA19A1BDF41BCB94AC434C18EBEA7" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4919 IH: Deter Obnoxious, Nefarious, and Outrageous Telephone Calls Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-08-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 4919</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210803">August 3, 2021</action-date>
+<action-desc><sponsor name-id="R000305">Ms. Ross</sponsor> (for herself and <cosponsor name-id="K000392">Mr. Kustoff</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To modify the penalties for violations of the Telephone Consumer Protection Act of 1993.</official-title>
+</form>
+<legis-body id="H85900F61F62942D98003E7EE7EB1B054" style="OLC">
+<section section-type="section-one" id="H18F132EF0B014D8DBF5D325875FE6533"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Deter Obnoxious, Nefarious, and Outrageous Telephone Calls Act of 2021</short-title></quote> or the <quote><short-title>DO NOT Call Act of 2021</short-title></quote>.</text></section> <section section-type="subsequent-section" id="HE82B0DBFA7F841CA9129763B5576B4CF"><enum>2.</enum><header>Penalties for violations of the Telephone Consumer Protection Act of 1993</header> <subsection id="H7A071FAA2E0F4FE49C2ED9309C44FB7D"><enum>(a)</enum><header>Criminal penalties</header> <paragraph id="HF7924E2347564BA29CE2357F489CCD60"><enum>(1)</enum><header>In general</header><text>Section 227 of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" display-inline="no-display-inline" id="H7A374FFF50AE499C812D9A696875C68F">
+<subsection id="H1B746727A02C4C689D4948EC7D61F373"><enum>(k)</enum><header>Criminal penalties</header>
+<paragraph id="H9896DD92F8444057837172E346C5CEE2"><enum>(1)</enum><header>In general</header><text>Except as provided in paragraph (2), any person who willfully and knowingly violates this section shall be imprisoned for not more than 1 year, fined under title 18, United States Code, or both.</text></paragraph> <paragraph id="H79C045FAD3C94E5B875D59A6D7BFFA92"><enum>(2)</enum><header>Aggravated offense</header><text>Any person who willfully and knowingly violates this section shall be imprisoned for not more than 3 years, fined under title 18, United States Code, or both if—</text>
+<subparagraph id="H6EECBFE4F41447ABBA6A736CF802F840"><enum>(A)</enum><text>the person has previously been convicted under this subsection;</text></subparagraph> <subparagraph id="H6694D35A8FB9481DB0EB80C4AF428C39"><enum>(B)</enum><text>the offense involved initiating more than—</text>
+<clause id="H0B653562CC2C4129A45FEEC055304A8E"><enum>(i)</enum><text>100,000 calls in a 24-hour period;</text></clause> <clause id="H8E46C9B38AE646CB817FAD3BCD9C8838"><enum>(ii)</enum><text>1,000,000 calls in a 30-day period; or</text></clause>
+<clause id="H268D380AEE074C4990BE9199AC8CBE7E"><enum>(iii)</enum><text>10,000,000 calls in a 1-year period;</text></clause></subparagraph> <subparagraph id="HC80355D21C6E490C89E05B498F412472"><enum>(C)</enum><text>the person committed the offense with the intent to use the calls in furtherance of a felony or conspiracy to commit a felony; or</text></subparagraph>
+<subparagraph id="H40CD0AFA411440769574F4971C2BAF9B"><enum>(D)</enum><text>the offense caused loss to 1 or more persons aggregating $5,000 or more in value during any 1-year period.</text></subparagraph></paragraph> <paragraph id="H9E642DD20BFD4645AF9EC446DB42B0DE"><enum>(3)</enum><header>Definitions</header><text>For purposes of this subsection—</text>
+<subparagraph id="H2BFB865A0645404C81DED40E51F6516F"><enum>(A)</enum><text>the term <term>call</term> includes a message or other communication; and</text></subparagraph> <subparagraph id="HC4FE3560E5014133BF88A55E4191CEDA"><enum>(B)</enum><text>the term <term>initiate</term>, with respect to a call, includes the act of sending, making, or transmitting a call, message, or other communication, as applicable.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph>
+<paragraph id="H7C8E0C48C75A47DEAA6EAADD4DF8E19A"><enum>(2)</enum><header>Technical and conforming amendment</header><text>Section 227(e)(5)(B) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(e)(5)(B)</external-xref>) is amended, in the second sentence, by striking <quote>section 501</quote> and inserting <quote>subsection (k)</quote>.</text></paragraph></subsection> <subsection id="H42DE7F501E0D49E0B73271E11DEB6718"><enum>(b)</enum><header>Increased penalties for provision of inaccurate caller identification information</header><text>Section 227(e)(5) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(e)(5)</external-xref>) is amended—</text>
+<paragraph id="HA665137D242B4159982F809AEC88FD93"><enum>(1)</enum><text>in subparagraph (A)(i), by striking <quote>$10,000</quote> and inserting <quote>$20,000</quote>; and</text></paragraph> <paragraph id="H9031D0D7F21C411AAE09C1DE895CD27C"><enum>(2)</enum><text>in subparagraph (B), in the first sentence, by striking <quote>$10,000</quote> and inserting <quote>$20,000</quote>.</text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H9C7E9E9414904C138E798927FEFEA407" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 826 IH: Expressing disapproval of the Trump administration’s harmful actions towards Medicaid.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-02-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. RES. 826</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200203">February 3, 2020</action-date><action-desc><sponsor name-id="V000131">Mr. Veasey</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Expressing disapproval of the Trump administration’s harmful actions towards Medicaid.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas Medicaid and the Children’s Health Insurance Program (CHIP) provide comprehensive, quality health care to 71 million Americans and children;</text>
+ </whereas><whereas><text>Whereas Medicaid expansion has provided coverage to millions of adults and reduced the uninsured rate for both adults and children;</text>
+ </whereas><whereas><text>Whereas Medicaid is a lifeline for some of our most vulnerable populations, including children with complex medical needs, people living with disabilities, low-income seniors, and individuals with mental illness and substance use disorders;</text>
+ </whereas><whereas><text>Whereas Medicaid expansion has improved access to diagnoses and treatment for people with life-threatening conditions, including cancer, heart disease, and substance use disorder;</text>
+ </whereas><whereas><text>Whereas Medicaid expansion improves health outcomes and saves lives;</text> </whereas><whereas><text>Whereas research shows that Medicaid expansion has saved at least 19,000 lives since 2014;</text>
+ </whereas><whereas><text>Whereas Medicaid is the largest payer of behavioral health services in the country;</text> </whereas><whereas><text>Whereas Medicaid is the largest payer of long-term services and supports, including those provided in community-based settings;</text>
+ </whereas><whereas><text>Whereas the opioid epidemic has claimed hundreds of thousands of lives, and Medicaid provides access to evidence-based treatment for individuals struggling with opioid use disorder;</text>
+ </whereas><whereas><text>Whereas researchers found that Medicaid expansion is linked to a 6-percent reduction in the opioid death rate, an 11-percent lower death rate for heroin, and a 10-percent lower death rate for fentanyl;</text>
+ </whereas><whereas commented="no"><text>Whereas Medicaid and CHIP play a key role in maternity services, pay for nearly half of all births in the United States, and provide access to prenatal and postpartum care;</text>
+ </whereas><whereas><text>Whereas nearly all States and the District of Columbia provide Medicaid coverage to pregnant women with incomes higher than minimum Federal standards;</text>
+ </whereas><whereas><text>Whereas maternal mortality rates have risen nationally and disproportionately affect women of color;</text>
+ </whereas><whereas><text>Whereas access to health care can help prevent, detect, and treat conditions that put women at increased risk for pregnancy-related complications;</text>
+ </whereas><whereas><text>Whereas research shows that Medicaid expansion improves postpartum care for women, reduces maternal and infant death, and reduces the likelihood a woman will experience a gap in coverage;</text>
+ </whereas><whereas><text>Whereas rural hospitals are closing at an alarming rate, jeopardizing access to care for the 20 percent of Americans who live in rural areas, including 13,000,000 children, and research has found that States that expanded Medicaid had fewer rural hospital closures, and that rural hospitals in those States experienced improved financial performance;</text>
+ </whereas><whereas><text>Whereas Medicaid expansion reduces medical debt for individuals receiving coverage, which improves their individual and family financial security;</text>
+ </whereas><whereas><text>Whereas once in office, President Trump has gone further than any President in the history of the program to make life harder for working families who rely on Medicaid for their health and well-being;</text>
+ </whereas><whereas><text>Whereas the President has waged an unrelenting war on Medicaid, making it easier for States to take coverage away and create barriers for reenrollment;</text>
+ </whereas><whereas commented="no"><text>Whereas, on President Trump’s watch, the number of uninsured children has increased, reversing years of declines, largely as a result of substantial losses in Medicaid coverage for children—many of whom remain eligible;</text>
+ </whereas><whereas><text>Whereas under President Trump, over 1,000,000 children have lost Medicaid and CHIP coverage and over 750,000 adults have lost Medicaid coverage; and</text>
+ </whereas><whereas><text>Whereas, despite President Trump’s campaign promise that he would <quote>save Medicaid</quote>, his administration has—</text> <paragraph id="H522D0179E225462A9A473A35048A3D87"><enum>(1)</enum><text display-inline="yes-display-inline">issued guidance to allow States to cap their Medicaid funding through a block grant, putting the financial viability of the States’ programs at risk and taking coverage and access to health care away from our citizens;</text>
+ </paragraph><paragraph id="HADD91883F384421CAB9F7D92920DC69A"><enum>(2)</enum><text>proposed regulations to roll back access standards put in place to ensure beneficiaries receive the care they need;</text>
+ </paragraph><paragraph id="H09B39C95A57E44798F839201EF6186CD"><enum>(3)</enum><text display-inline="yes-display-inline">issued guidance to allow State Medicaid programs to restrict access to prescription drugs by adopting closed formularies;</text>
+ </paragraph><paragraph id="HB938DC023DF5483CA694C23F23F184F5"><enum>(4)</enum><text>proposed massive, annually compounding cuts in Federal funding to the program in direct contradiction to an explicit campaign promise; and</text>
+ </paragraph><paragraph id="HD4F404FC93C3486FABB35777CAEE86A6"><enum>(5)</enum><text>allowed States to institute policies that have resulted in people improperly losing Medicaid coverage: Now, therefore, be it</text></paragraph></whereas></preamble>
+	<resolution-body id="H26675841A05A4205934A5CB4242E00DB" style="traditional">
+ <section display-inline="yes-display-inline" id="H2D9D9AA7F35A4A06900D09BA41359FA0" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That it is the sense of the House of Representatives that—</text> <paragraph id="H9D13BC03A6F44E099A5D54677E0878EF"><enum>(1)</enum><text display-inline="yes-display-inline">the illegal actions taken by the Trump administration to undermine the Medicaid program, including beneficiary protections, are a cruel attack on a program that provides for the health and well-being for some of our most vulnerable citizens;</text>
+ </paragraph><paragraph id="HC0D89216090B44F2BF0F7D36526E6973"><enum>(2)</enum><text display-inline="yes-display-inline">the Trump administration should immediately withdraw its illegal block grant guidance and cease its campaign to undermine and weaken Medicaid; and</text>
+ </paragraph><paragraph id="HC62BA8A6829049B8B19CF946898507EF"><enum>(3)</enum><text>the Trump administration should uphold its responsibility to faithfully execute the law, including the Medicaid Act, and cease any and all efforts that threaten the care of the millions of Americans who rely on Medicaid.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

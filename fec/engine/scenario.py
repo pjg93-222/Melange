@@ -75,7 +75,7 @@ def shift_stance(m,issues,steps,toward_anti):
 for mv in a.money:
     m,src,amt=mv.split(':'); amt=float(amt)
     if m not in C: log.append('!! unknown member: '+m); continue
-    dlean=mr.shift_lean(m,src,amt)
+    dlean=mr.shift_lean(m,src,amt,fm.CM[m])   # COMPET_MULT: same c as flip_value below (dial OFF -> 1.0)
     if src=='comp': ind[m]=ind.get(m,0)+amt
     elif src=='cu': cu_state[m]=cu_state.get(m,0)+amt
     newov=mr.defection(m,dlean)

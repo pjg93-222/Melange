@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB376DEA6FD44449891FAA9081E496D65" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4190 IH: Restoring Benefits to Defrauded Veterans Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-06-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4190</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230615">June 15, 2023</action-date><action-desc><sponsor name-id="T000483">Mr. Trone</sponsor> (for himself and <cosponsor name-id="C001133">Mr. Ciscomani</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to direct the Secretary of Veterans Affairs to repay the estates of deceased beneficiaries for certain benefits paid by the Secretary and misused by fiduciaries of such beneficiaries.</official-title></form><legis-body id="H4072B62A5BA543418121A78B12137EED" style="OLC"> 
+<section id="HA8C5B73BD15B4BD58B6630AD6E911A21" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Restoring Benefits to Defrauded Veterans Act</short-title></quote>.</text></section> <section id="H7BCFBB4EAA7E4279B2652B2FFD8EA6F1" section-type="subsequent-section"><enum>2.</enum><header>Repayment by the Secretary of Veterans Affairs of estates of deceased beneficiaries for certain benefits paid by the Secretary and misused by fiduciaries</header><text display-inline="no-display-inline">Section 6107 of title 38, United States Code, is amended—</text>
+<paragraph id="HCD1A732F43014AFEA379CCDE345E3F17"><enum>(1)</enum><text>by redesignating subsections (c) and (d) as subsections (d) and (e), respectively;</text></paragraph> <paragraph id="HC0585A9F1757445999CF06C05F1EC94E"><enum>(2)</enum><text>by inserting after subsection (b) the following new subsection (c):</text>
+<quoted-block style="USC" id="H7CE201E6618947FC96DC211FE6093A4C" display-inline="no-display-inline">
+<subsection id="HC1CD480CAD8A43CEB776EDF78E035256"><enum>(c)</enum><header>Reissuance of amounts in the case of a deceased beneficiary</header>
+<paragraph id="HB6D0731306DC429EB6842DDF43CA36E3" display-inline="yes-display-inline" indent="up1"><enum>(1)</enum><text display-inline="yes-display-inline">If a beneficiary described in subsection (a) predeceases a payment under subsection (a) or (b), the Secretary shall pay such benefits, subject to paragraph (2), to an individual or entity in the following order:</text> <subparagraph id="H7D4C1297E1974363BD84FFEA3928A91F" indent="up1"><enum>(A)</enum><text display-inline="yes-display-inline">The estate of the beneficiary.</text></subparagraph>
+<subparagraph id="HEB5179BA3D45422081321C77D4A6C301" indent="up1"><enum>(B)</enum><text display-inline="yes-display-inline">A successor fiduciary serving the beneficiary when the beneficiary died.</text></subparagraph> <subparagraph id="H731C491637644D0F958998AE082A6D57" indent="up1"><enum>(C)</enum><text display-inline="yes-display-inline">The next inheritor determined by a court of competent jurisdiction.</text></subparagraph></paragraph>
+<paragraph id="H41DB89B4140F4140A12EC0527C954A1B" indent="up1"><enum>(2)</enum><text>The Secretary may not make a payment under this subsection to a fiduciary who misused benefits of the beneficiary.</text></paragraph></subsection><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph> <paragraph id="H0D08615AAD804198B4006319506564DC"><enum>(3)</enum><text>in subsection (e), as redesdignated, by striking <quote>subsection (a) or (b)</quote> and inserting <quote>this section</quote>.</text></paragraph></section> 
+</legis-body></bill>
+

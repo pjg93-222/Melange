@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 133 STAT. ?>
+<?I98 133 STAT. ?>
+<?I99 133 STAT. ?>
+<?I50 PUBLIC LAW 116–36—JULY 31, 2019?>
+<?I51 PUBLIC LAW 116–36—JULY 31, 2019?>
+<?I52 PUBLIC LAW 116–36—JULY 31, 2019?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 116–36: To amend title 38, United States Code, to reduce the credit hour requirement for the Edith Nourse Rogers STEM Scholarship program of the Department of Veterans Affairs.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>36</docNumber>
+<citableAs>Public Law 116–36</citableAs><citableAs>133 Stat. 1048</citableAs>
+<approvedDate>2019-07-31</approvedDate>
+<dc:date>2019-07-31</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>116</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 116–36—JULY 31, 2019</centerRunningHead>
+<page identifier="/us/stat/133/1048">133 STAT. 1048</page>
+<dc:type>Public Law</dc:type><docNumber>116–36</docNumber>
+<congress value="116">116th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To amend title 38, United States Code, to reduce the credit hour requirement for the Edith Nourse Rogers STEM Scholarship program of the Department of Veterans Affairs.<sidenote><p class="centered fontsize8" id="x9b0b1ef0-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076"><approvedDate date="2019-07-31">July 31, 2019</approvedDate></p><p class="centered fontsize8" id="x9b0b1ef1-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076">[<ref href="/us/bill/116/hr/2196">H.R. 2196</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula>
+<section id="d172833e85" identifier="/us/pl/116/36/s1" role="instruction" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><heading>REDUCTION IN CREDIT HOUR REQUIREMENT FOR EDITH NOURSE ROGERS STEM SCHOLARSHIP.</heading><content style="-uslm-lc:I658120">  <ref href="/us/usc/t38/s3320/b/4/A/i">Section 3320(b)(4)(A)(i) of title 38, United States Code</ref>, <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="delete">striking</amendingAction> “<quotedText>more than the standard 128 semester (or 192 quarter) credit hours</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>at least the standard 120 semester (or 180 quarter) credit hours</quotedText>”.</content></section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2019-07-31">July 31, 2019</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/116/hr/2196">H.R. 2196</ref>:</heading>
+<note>
+<headingText style="-uslm-lc:I658032">HOUSE REPORTS:</headingText> ┐No. <ref href="/us/hrpt/116/118">116–118</ref> (<committee>Comm. on Veterans’ Affairs</committee>).
+</note>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 165 (2019):</heading>
+<p class="indentUp4 firstIndent-1" id="x9b0b1ef2-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">June 24, considered and passed House.</p><p class="indentUp4 firstIndent-1" id="x9b0b1ef3-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">July 25, considered and passed Senate.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

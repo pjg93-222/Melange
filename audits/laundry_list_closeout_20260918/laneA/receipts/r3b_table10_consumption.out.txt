@@ -1,0 +1,170 @@
+﻿====================================================================================================
+R3b  Table10 / normalized-sheet consumption   run 2026-09-18T23:33:04
+====================================================================================================
+
+-- A. worksheet tables --
+   Rank & Allocation                  table Table12        ref A1:N535
+   IM Allocation                      table Table20        ref A1:V535
+   Category Stance                    table Table21        ref A1:T534
+   Congestion                         table Table22        ref A1:Q535
+   Signed Coalitions                  table Table23        ref A12:J106
+   Coalition Profiles                 table Table24        ref A3:P13
+   Coalition Profiles                 table Table25        ref A16:F24
+   Closeness Between Members          table Table111       ref A1:H2360
+   Primary Layer - Normalized         table Table11        ref A1:M535
+   Primary Layer                      table Table6         ref A1:M535
+   Legislative Score - Normalized     table Table7         ref A1:EV535
+   Legislative Score - Raw            table Table1         ref A1:EM535
+   Demographic - Normalized           table Table8         ref A1:AA535
+   Demographic Factors - Raw          table Table4         ref A1:AA534
+   Press Release - Normalized         table Table13        ref A1:X535
+   Press Release - Raw                table Table10        ref A1:X535
+   Committee Data                     table Table14        ref A1:E289
+   Press Release Articles             table Table112       ref A1:AB3702
+   Sponsor Interactions               table Table15        ref A1:M639
+   Original Co-Sponsor Interaction    table Table16        ref A1:M2973
+   Co-Sponsor Interactions            table Table17        ref A1:M7456
+   Success Sponsor                    table Table18        ref A1:M77
+   Success Original Co-Sponsor        table Table19        ref A1:M984
+
+-- B. defined names --
+
+-- C. formulas naming Table10 --
+   Press Release - Normalized          10660 formula cells
+
+   Table10 column names named inside those formulas:
+      #This Row                                 10660
+      Examination & Supervision                  1066
+      Credit Union Capital Requirements          1066
+      NCUA Budget & Share Insurance Fund         1066
+      Interchange                                1066
+      Payments                                   1066
+      Technology & Emerging Issues               1066
+      Fraud Prevention                           1066
+      Data Privacy & Cybersecurity               1066
+      Charter Modernization & Governance         1066
+      Defense Credit Union Issues                1066
+      Field of Membership                        1066
+      Credit Union Tax Status                    1066
+      CDFI Fund                                  1066
+      CU-Bank Competitive Dynamics               1066
+      CFPB Issues & Structural Reform            1066
+      Credit Card & Consumer-Fee Mandates        1066
+      Telephone Consumer Protection Act          1066
+      Member Business Lending                    1066
+      Mortgage Lending & Housing                 1066
+      General Credit Union                       1066
+
+   samples:
+      Press Release - Normalized!E2 = =_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Examination & Supervision]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Examination & Supervision])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Examination & Supervision]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+      Press Release - Normalized!F2 = =_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Credit Union Capital Requirements]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Credit Union Capital Requirements])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Credit Union Capital Requirements]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+      Press Release - Normalized!G2 = =_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[NCUA Budget & Share Insurance Fund]]),
+_xlpm.posMax,MAX(0,MAX(Table10[NCUA Budget & Share Insurance Fund])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[NCUA Budget & Share Insurance Fund]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+      Press Release - Normalized!H2 = =_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Interchange]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Interchange])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Interchange]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+
+-- D. sheet 'Press Release - Normalized' --
+   header row: ['member', 'chamber', 'state', 'party', 'Examination & Supervision', 'Credit Union Capital Requirements', 'NCUA Budget & Share Insurance Fund', 'Interchange', 'Payments', 'Technology & Emerging Issues', 'Fraud Prevention', 'Data Privacy & Cybersecurity', 'Charter Modernization & Governance', 'Defense Credit Union Issues', 'Field of Membership', 'Credit Union Tax Status', 'CDFI Fund', 'CU-Bank Competitive Dynamics', 'CFPB Issues & Structural Reform', 'Credit Card & Consumer-Fee Mandates', 'Telephone Consumer Protection Act', 'Member Business Lending', 'Mortgage Lending & Housing', 'General Credit Union']
+   row 2:
+      A2=Aaron Bean
+      B2=House
+      C2=FL
+      D2=Republican
+      E2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Examination & Supervision]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Examination & Supervision])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Examination & Supervision]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x
+      F2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Credit Union Capital Requirements]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Credit Union Capital Requirements])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Credit Union Capital Requirements]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(
+      G2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[NCUA Budget & Share Insurance Fund]]),
+_xlpm.posMax,MAX(0,MAX(Table10[NCUA Budget & Share Insurance Fund])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[NCUA Budget & Share Insurance Fund]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+
+      H2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Interchange]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Interchange])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Interchange]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+      I2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Payments]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Payments])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Payments]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+      J2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Technology & Emerging Issues]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Technology & Emerging Issues])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Technology & Emerging Issues]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,
+      K2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Fraud Prevention]]),
+_xlpm.posMax,MAX(0,MAX(Table10[Fraud Prevention])),
+_xlpm.negMax,ABS(MIN(0,MIN(Table10[Fraud Prevention]))),
+IF(_xlpm.x=0,0,
+IF(_xlpm.x>0,
+IF(_xlpm.posMax=0,0,_xlpm.x/_xlpm.posMax),
+IF(_xlpm.negMax=0,0,_xlpm.x/_xlpm.negMax)
+))
+)
+      L2==_xlfn.LET(
+_xlpm.x,N(Table10[[#This Row],[Data Privacy & Cybersecurity]]),

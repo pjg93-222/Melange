@@ -1,0 +1,143 @@
+LANE C receipt: every bill_key() / bill_type_key() / evidence_key() / key_collisions() call site
+ripgrep over the WORKTREE fec/ tree (== main @776ce0d3a). fec/bill_rules.py is byte-identical in the LIVE tree.
+
+fec/audit/audit_full.py:578:        _lrkey.setdefault((_BR.bill_key(_r.get('bill')),str(_r.get('congress'))),set()).add(str(_r.get('bill')))
+fec/audit/audit_rendered_desk.py:130:def bill_key(row):
+fec/audit/audit_rendered_desk.py:155:            k = bill_key(row)
+fec/bill_rules.py:131:    pinned = EXCLUDED_BILL_CONGRESSES.get((bill_key(bill), _congress(congress)))
+fec/bill_rules.py:135:def bill_key(value):
+fec/bill_rules.py:141:def bill_type_key(value):
+fec/bill_rules.py:157:def key_collisions(identifiers):
+fec/bill_rules.py:165:        key = bill_key(identifier)
+fec/bill_rules.py:168:        typed = bill_type_key(identifier)
+fec/bill_rules.py:177:def evidence_key(value):
+fec/bill_rules.py:179:    parsed = bill_key(value)
+fec/bill_rules.py:254:            key = bill_key(row.get('Bill'))
+fec/bill_rules.py:263:    key = bill_key(bill)
+fec/bill_rules.py:308:    typed = bill_type_key(bill)
+fec/legislation/bill_audit_console.py:136:        raw = directions.get(BR.bill_key(row.get('Name')))
+fec/legislation/bill_audit_console.py:163:        key = (BR.evidence_key(row.get('Name')), _text(row.get('Congress')))
+fec/legislation/bill_audit_console.py:168:        key = (BR.evidence_key(row.get('Name')), _text(row.get('Congress')))
+fec/legislation/bill_audit_console.py:284:    key = BR.evidence_key(query)
+fec/legislation/bill_audit_console.py:285:    rows = [row for row in data['rows'] if BR.evidence_key(row.get('Name')) == key]
+fec/legislation/bill_audit_console.py:314:    key = (BR.bill_key(bill), congress)
+fec/legislation/bill_audit_console.py:319:        if (BR.bill_key(row.get('Bill')), _text(row.get('Congress')).strip()) == key:
+fec/legislation/bill_audit_console.py:351:    key=(member.lower(),BR.evidence_key(bill),congress)
+fec/legislation/bill_audit_console.py:354:        if (_text(row.get('Member')).lower(),BR.evidence_key(row.get('Bill')),_text(row.get('Congress'))) == key:
+fec/legislation/bill_audit_console.py:97:                key = BR.bill_key(row.get('Bill'))
+fec/legislation/bill_coverage_audit.py:187:        typed = BR.bill_type_key(row.get('Name'))
+fec/legislation/bill_coverage_audit.py:354:        typed = BR.bill_type_key(bill)
+fec/legislation/bill_coverage_audit.py:357:            legacy = BR.bill_key(bill)
+fec/legislation/bill_coverage_audit.py:368:        if BR.bill_key(bill) is None:
+fec/legislation/bill_coverage_audit.py:392:        typed = BR.bill_type_key(bill)
+fec/legislation/bill_coverage_audit.py:395:        if typed is not None and BR.bill_key(bill) is None:
+fec/legislation/bill_coverage_audit.py:697:        key = BR.bill_key(r.get('Name'))
+fec/legislation/bill_coverage_audit.py:708:            key = BR.bill_key(bill)
+fec/legislation/bill_coverage_audit.py:792:    # BR.key_collisions() implements a related type-aware rule; the two are deliberately separate today.
+fec/legislation/bill_coverage_audit.py:793:    print('  bill_key() keeps only (chamber, number) and discards the R/J/Res segment')
+fec/legislation/bill_coverage_audit.py:798:        key = BR.bill_key(name)
+fec/legislation/bill_coverage_audit.py:805:            selected_names.add((BR.bill_key(r['bill']), str(r['congress']), r['bill']))
+fec/legislation/build_archive_legislative.py:106:        key=BR.bill_type_key(row.get('Bill'))
+fec/legislation/build_archive_legislative.py:118:    key=BR.bill_type_key(bill)
+fec/legislation/build_archive_legislative.py:95:    return BR.bill_key(name)
+fec/legislation/leg_evidence_recompute.py:1120:        key = bill_key(row.get("Bill"))
+fec/legislation/leg_evidence_recompute.py:1128:    key = bill_key(bill)
+fec/legislation/leg_evidence_recompute.py:1139:        key = bill_key(row.get("Bill"))
+fec/legislation/leg_evidence_recompute.py:1152:        key = bill_key(row.get("bill"))
+fec/legislation/leg_evidence_recompute.py:1191:        bill_key(row.get("bill")) for row in ctx.selected if bill_key(row.get("bill"))
+fec/legislation/leg_evidence_recompute.py:2225:        bill_key(row.get("Name")) for row in ctx.bill_rows if bill_key(row.get("Name"))
+fec/legislation/leg_evidence_recompute.py:2228:        bill_key(row.get("Bill")) for row in ctx.manual if bill_key(row.get("Bill"))
+fec/legislation/leg_evidence_recompute.py:2231:        target: archive_keys[bill_key(target)] + manual_keys[bill_key(target)]
+fec/legislation/leg_evidence_recompute.py:2244:        if bill_key(row.get("Name")) == bill_key("S.2704")
+fec/legislation/leg_evidence_recompute.py:3285:        key = bill_key(row.get("Bill"))
+fec/legislation/leg_evidence_recompute.py:3294:        ("SJRES18", bill_key("S.J.Res.18"), "119"),
+fec/legislation/leg_evidence_recompute.py:3295:        ("HJRES59", bill_key("H.J.Res.59"), "119"),
+fec/legislation/leg_evidence_recompute.py:3296:        ("HR6955", bill_key("H.R.6955"), "119"),
+fec/legislation/leg_evidence_recompute.py:3310:                        bill_key(row.get("Name")), "neutral"
+fec/legislation/leg_evidence_recompute.py:3330:                        bill_key(row.get("Name")), "neutral"
+fec/legislation/leg_evidence_recompute.py:3684:                                    bill_key(row.get("Name")),
+fec/legislation/leg_evidence_recompute.py:3695:                                        bill_key(row.get("Name")), "neutral"
+fec/legislation/leg_evidence_recompute.py:3716:                                    bill_key(row.get("Name")),
+fec/legislation/leg_evidence_recompute.py:3727:                                        bill_key(row.get("Name")), "neutral"
+fec/legislation/leg_evidence_recompute.py:849:def bill_key(value):
+fec/legislation/leg_evidence_recompute.py:854:def bill_type_key(value):
+fec/legislation/make_bill_directions_congress_candidate.py:85:        typed = BR.bill_type_key(row.get('Bill'))
+fec/legislation/reconcile_congress_advanced.py:327:def known_bill_key(bill: dict[str, Any]) -> str:
+fec/legislation/reconcile_congress_advanced.py:534:            "bill_key": known_bill_key(bill),
+fec/legislation/reconcile_congress_advanced.py:535:            "found": known_bill_key(bill) in by_key,
+fec/lobbying/bill_lobbying_sidecar.py:200:def _validate_bill_key(value, context):
+fec/lobbying/bill_lobbying_sidecar.py:222:            internal = _validate_bill_key(
+fec/lobbying/bill_lobbying_sidecar.py:294:        _validate_bill_key(bill_key, f"interaction bill members row {row_number}")
+fec/lobbying/bill_lobbying_sidecar.py:311:def _forecast_bill_key(congress, bill_label, context):
+fec/lobbying/bill_lobbying_sidecar.py:360:        bill_key = _forecast_bill_key(
+fec/lobbying/bill_lobbying_sidecar.py:503:        _validate_bill_key(bill_key, f"interaction ledger row {row_number}")
+fec/lobbying/build_network_2021_rebuild.py:3072:def canonical_bill_key(bill_key):
+fec/lobbying/build_network_2021_rebuild.py:3101:    if canonical_bill_key(bill_key) != value:
+fec/lobbying/build_network_2021_rebuild.py:3106:def repository_display_bill_key(display_bill, congress):
+fec/lobbying/build_network_2021_rebuild.py:3127:        return canonical_bill_key(
+fec/lobbying/build_network_2021_rebuild.py:3197:                "bill_key": canonical_bill_key(bill_key),
+fec/lobbying/build_network_2021_rebuild.py:3456:                key = repository_display_bill_key(row.get("bill", ""), congress)
+fec/lobbying/build_network_2021_rebuild.py:3468:            key = repository_display_bill_key(
+fec/lobbying/build_network_2021_rebuild.py:6447:                        canonical_bill_key(bill_key)
+fec/lobbying/champions_v2.py:190:def _bill_key(value, label):
+fec/lobbying/champions_v2.py:213:        bill = _bill_key(
+fec/lobbying/champions_v2.py:268:        bill = _bill_key(row.get("bill_key"), f"interaction row {row_number}")
+fec/lobbying/champions_v2.py:384:        _bill_key(key, "bill title cache"): str(value or "").strip()
+fec/lobbying/champions_v2.py:389:def _direction_bill_key(bill, congress, label):
+fec/lobbying/champions_v2.py:412:        key = _direction_bill_key(
+fec/lobbying/contested_bills.py:153:        bill_key = BR.bill_type_key(bill)
+fec/lobbying/contested_bills.py:233:    bill_key = BR.bill_type_key(bill)
+fec/lobbying/fec_lda_round4b_look.py:179:def _canonical_bill_key(value, source):
+fec/lobbying/fec_lda_round4b_look.py:251:            bill_key = _canonical_bill_key(row["bill_key"], source)
+fec/lobbying/fec_lda_round4b_look.py:270:    return _canonical_bill_key(value, source)
+fec/lobbying/lobby_interactions.py:212:            canonical = builder.canonical_bill_key(key)
+fec/lobbying/lobby_interactions.py:310:                    key=lambda key: builder.canonical_bill_key(key),
+fec/lobbying/lobby_interactions.py:349:                    canonical = builder.canonical_bill_key(bill_key)
+fec/lobbying/org_stance_priors.py:153:def _canonical_bill_key(value, label):
+fec/lobbying/org_stance_priors.py:171:    return _canonical_bill_key(
+fec/lobbying/org_stance_priors.py:480:                bill_key = _canonical_bill_key(
+fec/lobbying/org_stance_priors.py:640:            bill_key = _canonical_bill_key(
+fec/lobbying/org_stance_priors.py:675:        bill_key = _canonical_bill_key(
+fec/network/build_sector_diagnostic.py:289:def bill_key(rec):
+fec/network/build_sector_diagnostic.py:302:        k = bill_key(r)
+fec/network/build_sector_diagnostic.py:321:        r['_key'] = bill_key(r); r['_terms'] = hits
+fec/surfaces/make_lobby_network_html.py:1029:def _canonical_bill_key(congress, bill_type, bill_number):
+fec/surfaces/make_lobby_network_html.py:1051:            return _canonical_bill_key(congress_number, bill_type, int(number_text))
+fec/surfaces/make_lobby_network_html.py:1309:            key = _canonical_bill_key(congress, bill_type, bill_number)
+fec/tests/infra/test_audit_completion_20260716.py:220:            (rules.bill_key("H.R.7733"), "117"): {
+fec/tests/infra/test_policy_repairs_20260718.py:47:        self.assertNotEqual(BR.evidence_key("LTR-A"), BR.evidence_key("LTR-B"))
+fec/tests/infra/test_policy_repairs_20260718.py:48:        self.assertEqual(BR.evidence_key("H.R. 1"), BR.evidence_key("H.R.1"))
+fec/tests/legislation/test_bill_audit_console_resolution.py:29:        (BR.bill_key(row['Name']), row['Congress']): {
+fec/tests/legislation/test_bill_collision_guards.py:101:    assert BR.bill_type_key('H.Con.Res.14') == ('H', 'CONRES', 14)
+fec/tests/legislation/test_bill_collision_guards.py:102:    assert BR.bill_type_key('S.Con.Res.7') == ('S', 'CONRES', 7)
+fec/tests/legislation/test_bill_collision_guards.py:103:    assert BR.bill_type_key('HJRES59') == ('H', 'JRES', 59)
+fec/tests/legislation/test_bill_collision_guards.py:104:    assert BR.bill_type_key('S919') == ('S', 'R', 919)
+fec/tests/legislation/test_bill_collision_guards.py:106:        assert BR.bill_type_key(value) is None, value
+fec/tests/legislation/test_bill_collision_guards.py:111:    assert BR.bill_type_key('S.R.12') == BR.bill_type_key('S.12')
+fec/tests/legislation/test_bill_collision_guards.py:112:    assert BR.bill_type_key('S.R.12') == ('S', 'R', 12)
+fec/tests/legislation/test_bill_collision_guards.py:113:    assert BR.bill_type_key('S.Res.12') == ('S', 'RES', 12)
+fec/tests/legislation/test_bill_collision_guards.py:117:    result = BR.key_collisions(['H.R.59', 'H.J.59'])
+fec/tests/legislation/test_bill_collision_guards.py:553:            key = BR.bill_key(row['Bill'])
+fec/tests/legislation/test_bill_collision_guards.py:560:            expected[BR.bill_key('H.J.Res.59')], 'legacy-registry')
+fec/tests/legislation/test_bill_collision_guards.py:575:            BR.bill_type_key(row['Bill']),
+fec/tests/legislation/test_bill_collision_guards.py:582:            BR.bill_type_key(decision['bill']),
+fec/tests/legislation/test_bill_collision_guards.py:595:        (BR.bill_type_key(row['Bill']), BR._congress(row.get('Congress')))
+fec/tests/legislation/test_bill_collision_guards.py:601:            BR.bill_type_key(quarantine['bill']),
+fec/tests/legislation/test_bill_collision_guards.py:607:    assert (BR.bill_type_key('S.919'), '117') not in identities
+fec/tests/legislation/test_bill_collision_guards.py:608:    assert (BR.bill_type_key('S.919'), '119') in identities
+fec/tests/legislation/test_bill_rules_routing.py:67:    assert BR.key_collisions(real_identifiers) == {}
+fec/tests/legislation/test_bill_rules_routing.py:68:    assert BR.key_collisions(['H.R.59', 'H.J.Res.59']) == {
+fec/tests/legislation/test_bill_rules_routing.py:70:    assert BR.key_collisions(['H.R.59', 'H.J.59']) == {
+fec/tests/legislation/test_bill_rules_routing.py:74:def test_type_aware_key_is_additive_to_legacy_bill_key():
+fec/tests/legislation/test_bill_rules_routing.py:75:    assert BR.bill_type_key('H.R.59') == ('H', 'R', 59)
+fec/tests/legislation/test_bill_rules_routing.py:76:    assert BR.bill_type_key('H.J.Res.59') == ('H', 'JRES', 59)
+fec/tests/legislation/test_bill_rules_routing.py:77:    assert BR.bill_type_key('H.Res.59') == ('H', 'RES', 59)
+fec/tests/legislation/test_bill_rules_routing.py:78:    assert BR.bill_type_key('H.Con.Res.14') == ('H', 'CONRES', 14)
+fec/tests/legislation/test_bill_rules_routing.py:79:    assert BR.bill_type_key('S.557') == ('S', 'R', 557)
+fec/tests/legislation/test_bill_rules_routing.py:80:    assert {BR.bill_key(value) for value in
+fec/tests/lobbying/test_lda_rebuild.py:8266:        assert BN.canonical_bill_key(bill) == canonical
+fec/tests/lobbying/test_lda_rebuild.py:8268:    assert BN.repository_display_bill_key("H.Amdt.247", "116") == (
+fec/tests/lobbying/test_lda_rebuild.py:8271:    assert BN.repository_display_bill_key("S.Amdt.1049", 116) == (
+fec/tests/run_tests.py:78:   BR.evidence_key('LTR-A')!=BR.evidence_key('LTR-B') and
+fec/tests/run_tests.py:79:   BR.evidence_key('H.R. 1')==BR.evidence_key('H.R.1'))
+fec/tools/b0_bicam_arrival_audit.py:622:    typed = bill_type_key(bill_value)

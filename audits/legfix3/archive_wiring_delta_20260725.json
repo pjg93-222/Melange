@@ -1,0 +1,4724 @@
+{
+  "archive": "congress_bills_archive_20260624_115822.xlsx",
+  "baseline": {
+    "mode": "LEGDIR_V1=1",
+    "overrides": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\bill_overrides.csv",
+    "registry": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\cxwt-legfix3\\backups\\bill_directions.PRE-LEGFIX3.csv",
+    "run": {
+      "returncode": 0,
+      "stderr": [],
+      "stdout": [
+        "matched model members with >=1 archive bill: 516 / 533",
+        "manual sponsored/original evidence rows loaded: 297",
+        "unmatched archive rows: 10 ; top unmatched names: ['Stacey Plaskett', 'James Moylan']",
+        "shared false-positive exclusions: 580 rows; override rows: 112 (excluded 53, neutral 20); deduplicated 2717 rows",
+        "",
+        "VALIDATION — Durbin per-category (signed role-weighted):",
+        "   Interchange                -6.3",
+        "   TCPA                       +6.2",
+        "   Fraud Prevention           +4.8",
+        "   Member Business Lending    +4.8",
+        "   Credit Card Mandates       -4.3",
+        "   Mortgage & Housing         +3.9",
+        "   CU Capital Requirements    +2.9",
+        "   Data Privacy & Cyber       +2.3",
+        "   Examination & Supervision  +1.6"
+      ]
+    }
+  },
+  "cells": [
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Andrew Garbarino",
+      "new": 2.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Andrew Garbarino",
+      "new": 1.2800000000000002,
+      "old": 3.2800000000000002,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Andrew Garbarino",
+      "new": 10.120000000000001,
+      "old": 12.120000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999996,
+      "member": "Andrew Ogles",
+      "new": 5.6,
+      "old": 3.6,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Andrew Ogles",
+      "new": 1.6,
+      "old": 3.6,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.000000000000002,
+      "member": "Andrew Ogles",
+      "new": 13.799999999999999,
+      "old": 17.8,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Andy Barr",
+      "new": 36.68000000000001,
+      "old": 34.68000000000001,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Andy Barr",
+      "new": 4.48,
+      "old": 6.48,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -3.999999999999993,
+      "member": "Andy Barr",
+      "new": 32.00000000000001,
+      "old": 36.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Ann Wagner",
+      "new": 18.520000000000003,
+      "old": 16.520000000000003,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Ann Wagner",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.000000000000003,
+      "member": "Ann Wagner",
+      "new": 7.3999999999999995,
+      "old": 11.400000000000002,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.0,
+      "member": "Barry Loudermilk",
+      "new": 16.64,
+      "old": 15.64,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.0,
+      "member": "Barry Loudermilk",
+      "new": 3.8,
+      "old": 2.8,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Barry Loudermilk",
+      "new": 3.4000000000000004,
+      "old": 5.4,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -3.0,
+      "member": "Barry Loudermilk",
+      "new": 9.4,
+      "old": 12.4,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Bernie Moreno",
+      "new": 4.0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Bernie Moreno",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Bernie Moreno",
+      "new": 2.0,
+      "old": 4.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Bill Hagerty",
+      "new": 9.680000000000001,
+      "old": 7.6800000000000015,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Bill Hagerty",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Bill Hagerty",
+      "new": 5.84,
+      "old": 7.84,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0000000000000036,
+      "member": "Bill Huizenga",
+      "new": 21.240000000000006,
+      "old": 19.240000000000002,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Bill Huizenga",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Bill Huizenga",
+      "new": 9.879999999999999,
+      "old": 13.879999999999999,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.0,
+      "member": "Brad Knott",
+      "new": 2.0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -1.0,
+      "member": "Brad Knott",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Brad Knott",
+      "new": 1.0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Bryan Steil",
+      "new": 4.4,
+      "old": 2.4000000000000004,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Bryan Steil",
+      "new": 3.4000000000000004,
+      "old": 5.4,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Bryan Steil",
+      "new": 6.0,
+      "old": 8.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0000000000000018,
+      "member": "Byron Donalds",
+      "new": 9.040000000000001,
+      "old": 7.039999999999999,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Byron Donalds",
+      "new": 2.08,
+      "old": 4.08,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Byron Donalds",
+      "new": 13.320000000000004,
+      "old": 17.320000000000004,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Cynthia Lummis",
+      "new": 10.08,
+      "old": 8.08,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Cynthia Lummis",
+      "new": 4.48,
+      "old": 6.48,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.9999999999999964,
+      "member": "Cynthia Lummis",
+      "new": 13.840000000000003,
+      "old": 15.84,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0000000000000036,
+      "member": "Daniel Meuser",
+      "new": 22.000000000000004,
+      "old": 20.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Daniel Meuser",
+      "new": 12.480000000000004,
+      "old": 14.480000000000004,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -3.999999999999986,
+      "member": "Daniel Meuser",
+      "new": 34.36000000000001,
+      "old": 38.35999999999999,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.0,
+      "member": "Dusty Johnson",
+      "new": 2.0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -1.0,
+      "member": "Dusty Johnson",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Dusty Johnson",
+      "new": 7.32,
+      "old": 8.32,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Frank Lucas",
+      "new": 2.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Frank Lucas",
+      "new": 1.0,
+      "old": 3.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Frank Lucas",
+      "new": 6.0,
+      "old": 8.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 3.0,
+      "member": "French Hill",
+      "new": 18.280000000000005,
+      "old": 15.280000000000005,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 3.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.999999999999999,
+      "member": "French Hill",
+      "new": 3.2,
+      "old": 6.199999999999999,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 3.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -5.999999999999998,
+      "member": "French Hill",
+      "new": 11.320000000000002,
+      "old": 17.32,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 3.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 3.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0000000000000004,
+      "member": "Glenn Grothman",
+      "new": 4.640000000000001,
+      "old": 2.64,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Glenn Grothman",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.000000000000001,
+      "member": "Glenn Grothman",
+      "new": 6.88,
+      "old": 8.88,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999996,
+      "member": "James Risch",
+      "new": 4.6,
+      "old": 2.6,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "James Risch",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "James Risch",
+      "new": 15.96,
+      "old": 17.96,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Jerry Moran",
+      "new": 11.32,
+      "old": 9.32,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Jerry Moran",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Jerry Moran",
+      "new": 9.400000000000002,
+      "old": 11.400000000000002,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999996,
+      "member": "John Boozman",
+      "new": 5.6,
+      "old": 3.6,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "John Boozman",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "John Boozman",
+      "new": 13.440000000000001,
+      "old": 15.440000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.9999999999999998,
+      "member": "John Rose",
+      "new": 3.8,
+      "old": 1.8,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "John Rose",
+      "new": 0.6400000000000001,
+      "old": 2.64,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "John Rose",
+      "new": 10.48,
+      "old": 12.48,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.0,
+      "member": "John Thune",
+      "new": 2.6,
+      "old": 1.6,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -1.0,
+      "member": "John Thune",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "John Thune",
+      "new": 3.6800000000000006,
+      "old": 4.680000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.0,
+      "member": "Julie Fedorchak",
+      "new": 1.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -1.0,
+      "member": "Julie Fedorchak",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Julie Fedorchak",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999991,
+      "member": "Katie Britt",
+      "new": 7.199999999999999,
+      "old": 5.2,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Katie Britt",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.000000000000001,
+      "member": "Katie Britt",
+      "new": 7.8,
+      "old": 9.8,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.0,
+      "member": "Ken Calvert",
+      "new": 1.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -1.0,
+      "member": "Ken Calvert",
+      "new": 0.6400000000000001,
+      "old": 1.6400000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Ken Calvert",
+      "new": 5.16,
+      "old": 6.16,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Kevin Cramer",
+      "new": 6.48,
+      "old": 4.48,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Kevin Cramer",
+      "new": 5.760000000000001,
+      "old": 7.760000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Kevin Cramer",
+      "new": 26.04000000000001,
+      "old": 28.04000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Lisa McClain",
+      "new": 2.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Lisa McClain",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0000000000000004,
+      "member": "Lisa McClain",
+      "new": 3.72,
+      "old": 5.720000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Maria Salazar",
+      "new": 4.0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Maria Salazar",
+      "new": 2.2800000000000002,
+      "old": 4.28,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Maria Salazar",
+      "new": 7.560000000000002,
+      "old": 11.560000000000002,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Marlin Stutzman",
+      "new": 2.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Marlin Stutzman",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Marlin Stutzman",
+      "new": 3.0,
+      "old": 5.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Michael Lawler",
+      "new": 3.0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Michael Lawler",
+      "new": 2.8,
+      "old": 4.8,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Michael Lawler",
+      "new": 5.6,
+      "old": 7.6,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999991,
+      "member": "Mike Crapo",
+      "new": 6.199999999999999,
+      "old": 4.2,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Mike Crapo",
+      "new": 1.2800000000000002,
+      "old": 3.2800000000000002,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Mike Crapo",
+      "new": 13.16,
+      "old": 15.16,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.0,
+      "member": "Mike Ezell",
+      "new": 3.0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -1.0,
+      "member": "Mike Ezell",
+      "new": 0.8,
+      "old": 1.8,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Mike Ezell",
+      "new": 7.199999999999999,
+      "old": 8.2,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Mike Flood",
+      "new": 3.0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Mike Flood",
+      "new": 4.640000000000001,
+      "old": 6.640000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0000000000000036,
+      "member": "Mike Flood",
+      "new": 8.639999999999999,
+      "old": 10.640000000000002,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Mike Haridopolos",
+      "new": 7.0,
+      "old": 5.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Mike Haridopolos",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Mike Haridopolos",
+      "new": 5.0,
+      "old": 9.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.0,
+      "member": "Mike Kennedy",
+      "new": 1.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -1.0,
+      "member": "Mike Kennedy",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Mike Kennedy",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.0,
+      "member": "Mike Lee",
+      "new": 3.24,
+      "old": 2.24,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -1.0,
+      "member": "Mike Lee",
+      "new": 0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Mike Lee",
+      "new": 1.6,
+      "old": 2.6,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Mike Rounds",
+      "new": 8.4,
+      "old": 6.4,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Mike Rounds",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Mike Rounds",
+      "new": 4.08,
+      "old": 6.08,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.9999999999999998,
+      "member": "Monica De La Cruz",
+      "new": 3.8,
+      "old": 1.8,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Monica De La Cruz",
+      "new": 1.0,
+      "old": 3.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Monica De La Cruz",
+      "new": 12.600000000000003,
+      "old": 14.600000000000003,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Pete Ricketts",
+      "new": 5.8,
+      "old": 3.8,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Pete Ricketts",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0000000000000018,
+      "member": "Pete Ricketts",
+      "new": 7.199999999999999,
+      "old": 9.200000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.9999999999999996,
+      "member": "Pete Sessions",
+      "new": 4.6,
+      "old": 2.6,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -1.9999999999999996,
+      "member": "Pete Sessions",
+      "new": 3.0800000000000005,
+      "old": 5.08,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0000000000000036,
+      "member": "Pete Sessions",
+      "new": 9.44,
+      "old": 11.440000000000003,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999982,
+      "member": "Ralph Norman",
+      "new": 9.28,
+      "old": 7.280000000000001,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Ralph Norman",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Ralph Norman",
+      "new": 9.400000000000002,
+      "old": 13.400000000000002,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 1.9999999999999996,
+      "member": "Roger Wicker",
+      "new": 5.6,
+      "old": 3.6,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Roger Wicker",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Roger Wicker",
+      "new": 11.68,
+      "old": 13.68,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Roger Williams",
+      "new": 23.92,
+      "old": 21.92,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Roger Williams",
+      "new": 4.680000000000001,
+      "old": 6.680000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -3.9999999999999964,
+      "member": "Roger Williams",
+      "new": 28.00000000000001,
+      "old": 32.00000000000001,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Scott Fitzgerald",
+      "new": 3.0,
+      "old": 1.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Scott Fitzgerald",
+      "new": 1.2800000000000002,
+      "old": 3.2800000000000002,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Scott Fitzgerald",
+      "new": 17.040000000000003,
+      "old": 19.040000000000003,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 0.9999999999999991,
+      "member": "Steve Daines",
+      "new": 6.199999999999999,
+      "old": 5.2,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 1.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -1.0,
+      "member": "Steve Daines",
+      "new": 4.48,
+      "old": 5.48,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -1.0,
+      "member": "Steve Daines",
+      "new": 20.080000000000002,
+      "old": 21.080000000000002,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 1.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Thom Tillis",
+      "new": 6.800000000000001,
+      "old": 4.800000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -2.0,
+      "member": "Thom Tillis",
+      "new": 1.2800000000000002,
+      "old": 3.2800000000000002,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0000000000000018,
+      "member": "Thom Tillis",
+      "new": 9.680000000000001,
+      "old": 11.680000000000003,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Tim Moore",
+      "new": 13.0,
+      "old": 11.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Tim Moore",
+      "new": 1.0,
+      "old": 3.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Tim Moore",
+      "new": 6.0,
+      "old": 10.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 3.0,
+      "member": "Tim Scott",
+      "new": 13.680000000000001,
+      "old": 10.680000000000001,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 3.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": -3.0,
+      "member": "Tim Scott",
+      "new": 0,
+      "old": 3.0,
+      "responsible": [
+        {
+          "bill": "S.J.Res.18",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 3.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Credit Union Capital Requirements"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Tom Emmer",
+      "new": 2.64,
+      "old": 0.6400000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Tom Emmer",
+      "new": 2.5600000000000005,
+      "old": 4.5600000000000005,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0000000000000004,
+      "member": "Tom Emmer",
+      "new": 2.8800000000000003,
+      "old": 4.880000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "Troy Downing",
+      "new": 5.0,
+      "old": 3.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Troy Downing",
+      "new": 0,
+      "old": 2.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "Troy Downing",
+      "new": 5.0,
+      "old": 9.0,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0000000000000004,
+      "member": "Warren Davidson",
+      "new": 4.880000000000001,
+      "old": 2.8800000000000003,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0000000000000004,
+      "member": "Warren Davidson",
+      "new": 2.8800000000000003,
+      "old": 4.880000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Warren Davidson",
+      "new": 8.48,
+      "old": 10.48,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CFPB",
+      "delta": 2.0,
+      "member": "William Timmons",
+      "new": 18.320000000000004,
+      "old": 16.320000000000004,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "registry-exact",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Credit Union Capital Requirements",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -1.9999999999999991,
+      "member": "William Timmons",
+      "new": 2.4400000000000004,
+      "old": 4.4399999999999995,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -4.0,
+      "member": "William Timmons",
+      "new": 16.480000000000004,
+      "old": 20.480000000000004,
+      "responsible": [
+        {
+          "bill": "H.J.Res.59",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "legacy-registry",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        },
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 1.9999999999999998,
+      "member": "Young Kim",
+      "new": 2.8,
+      "old": 0.8,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Young Kim",
+      "new": 4.680000000000001,
+      "old": 6.680000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Young Kim",
+      "new": 16.080000000000005,
+      "old": 18.080000000000005,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    },
+    {
+      "category": "CU Capital Requirements",
+      "delta": 2.0,
+      "member": "Zachary Nunn",
+      "new": 2.0,
+      "old": 0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": "bill-override",
+          "new_contribution": 2.0,
+          "new_mechanism": "section-default",
+          "new_override_reason": "audit Tier-2 #4, Paul gate opened 2026-07-25",
+          "new_sign": 1,
+          "new_source_section": "Fraud Prevention",
+          "old_category_mechanism": null,
+          "old_contribution": 0,
+          "old_mechanism": null,
+          "old_override_reason": null,
+          "old_sign": null,
+          "old_source_section": null
+        }
+      ]
+    },
+    {
+      "category": "Fraud Prevention",
+      "delta": -2.0,
+      "member": "Zachary Nunn",
+      "new": 3.0,
+      "old": 5.0,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Fraud Prevention"
+        }
+      ]
+    },
+    {
+      "category": "Member Business Lending",
+      "delta": -2.0,
+      "member": "Zachary Nunn",
+      "new": 9.200000000000001,
+      "old": 11.200000000000001,
+      "responsible": [
+        {
+          "bill": "H.R.6955",
+          "congress": "119",
+          "new_category_mechanism": null,
+          "new_contribution": 0,
+          "new_mechanism": null,
+          "new_override_reason": null,
+          "new_sign": null,
+          "new_source_section": null,
+          "old_category_mechanism": "source-section",
+          "old_contribution": 2.0,
+          "old_mechanism": "section-default",
+          "old_override_reason": null,
+          "old_sign": 1,
+          "old_source_section": "Member Business Lending"
+        }
+      ]
+    }
+  ],
+  "new": {
+    "mode": "Congress-aware typed registry",
+    "overrides": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\cxwt-legfix3\\bill_overrides.csv",
+    "registry": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\cxwt-legfix3\\bill_directions.csv",
+    "run": {
+      "returncode": 0,
+      "stderr": [],
+      "stdout": [
+        "matched model members with >=1 archive bill: 516 / 533",
+        "manual sponsored/original evidence rows loaded: 297",
+        "unmatched archive rows: 10 ; top unmatched names: ['Stacey Plaskett', 'James Moylan']",
+        "shared false-positive exclusions: 580 rows; override rows: 361 (excluded 53, neutral 20); deduplicated 2785 rows",
+        "",
+        "VALIDATION — Durbin per-category (signed role-weighted):",
+        "   Interchange                -6.3",
+        "   TCPA                       +6.2",
+        "   Fraud Prevention           +4.8",
+        "   Member Business Lending    +4.8",
+        "   Credit Card Mandates       -4.3",
+        "   Mortgage & Housing         +3.9",
+        "   CU Capital Requirements    +2.9",
+        "   Data Privacy & Cyber       +2.3",
+        "   Examination & Supervision  +1.6"
+      ]
+    }
+  },
+  "schema": "legfix3-archive-wiring-delta-v1",
+  "summary": {
+    "bills_newly_direction_covered": [
+      {
+        "bill": "H.R.10510",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.1777",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.1791",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.1799",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.1919",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.1944",
+        "congress": "119",
+        "direction": -1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "credit-card-default"
+      },
+      {
+        "bill": "H.R.2064",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.2094",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.2543",
+        "congress": "117",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.2702",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.2808",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.3170",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.3379",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.3633",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.4167",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.4437",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.4544",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.4568",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.4936",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.507",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.5403",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.582",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.6644",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.6889",
+        "congress": "117",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.6933",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.7035",
+        "congress": "119",
+        "direction": -1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.7056",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.7297",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.7647",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.7733",
+        "congress": "117",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.8714",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "H.R.975",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.110",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.1124",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.1467",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.1561",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.1582",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.2019",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.2486",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.3017",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.3502",
+        "congress": "118",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.3575",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.3616",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.3623",
+        "congress": "119",
+        "direction": -1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.3660",
+        "congress": "119",
+        "direction": -1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "credit-card-default"
+      },
+      {
+        "bill": "S.381",
+        "congress": "119",
+        "direction": -1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "credit-card-default"
+      },
+      {
+        "bill": "S.522",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.875",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.919",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      },
+      {
+        "bill": "S.978",
+        "congress": "119",
+        "direction": 1,
+        "new_mechanism": "registry-exact",
+        "old_mechanism": "section-default"
+      }
+    ],
+    "bills_newly_direction_covered_count": 50,
+    "changed_cells": 162,
+    "new_registry_exclusion_count": 0,
+    "new_registry_exclusions": [],
+    "sign_flip_count": 0,
+    "sign_flips": []
+  }
+}

@@ -1,0 +1,174 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-PAT19979-53K-DT-NZW"><form><distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2799</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191106">November 6, 2019</action-date><action-desc><sponsor name-id="S288">Ms. Murkowski</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSEG00">Committee on Energy and Natural Resources</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Secretary of Energy and the Secretary of the Interior to establish a joint Nexus of
+			 Energy and Water Sustainability Office, and for other purposes.</official-title></form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the
+		  <quote><short-title>Nexus of Energy and Water for Sustainability Act of 2019</short-title></quote> or the <quote><short-title>NEWS Act of 2019</short-title></quote>.</text>
+		</section><section id="ide16cafbf0f1b42bfa5fb374cbc6d0595"><enum>2.</enum><header>Nexus of energy and water for sustainability</header>
+			<subsection id="id15956e0a76cf4af98344222dc50d8f01"><enum>(a)</enum><header>Definitions</header><text>In this section:</text>
+				<paragraph id="idfbe09fbe8fad4472ae899dd13738eb52"><enum>(1)</enum><header>Energy-water nexus</header><text>The term <term>energy-water nexus</term> means the links between—</text>
+					<subparagraph id="idf2b39f8e84904e10b402ce97067dfb2e"><enum>(A)</enum><text>the water needed to produce fuels, electricity, and other forms of energy; and</text>
+					</subparagraph><subparagraph id="id3c1e0a1f267746729bfe4981225b634a"><enum>(B)</enum><text>the energy needed to transport, reclaim, and treat water and wastewater.</text>
+					</subparagraph></paragraph><paragraph id="idce295572c5a04bea8103018dd92710b8"><enum>(2)</enum><header>Interagency coordination committee</header><text>The term <term>Interagency Coordination Committee</term> means the Committee on the Nexus of Energy and Water for Sustainability (or the <quote>NEWS Committee</quote>) established under subsection (b)(1).</text>
+				</paragraph><paragraph id="id1fcc2665c1ec4809a5f6575993d6c189"><enum>(3)</enum><header>Nexus of energy and water sustainability office; news office</header><text>The term <term>Nexus of Energy and Water Sustainability Office</term> or the <quote>NEWS Office</quote> means an office located at the Department of Energy and managed in cooperation with the Department
+			 of the Interior pursuant to an agreement between the 2 agencies to carry
+			 out leadership and administrative functions for the Interagency
+			 Coordination Committee.</text>
+				</paragraph><paragraph id="id095a07c729de42b09fe86f96eb038dd2"><enum>(4)</enum><header>RD&amp;D</header><text>The term <term>RD&amp;D</term> means research, development, and demonstration.</text>
+				</paragraph></subsection><subsection id="id11f61d05021540a386b659d83d3f14f9"><enum>(b)</enum><header>Interagency coordination committee</header>
+				<paragraph id="id15c0f6f6cbc04d3abe9977cd75033955"><enum>(1)</enum><header>Establishment</header><text>Not later than 180 days after the date of enactment of this Act, the Secretary of Energy and the
+			 Secretary of the Interior shall establish the joint NEWS Office and
+			 Interagency Coordination Committee on the Nexus of Energy and Water for
+			 Sustainability (or the <quote>NEWS Committee</quote>) to carry out the duties described in paragraph (3).</text>
+				</paragraph><paragraph id="idad7e4473baf6462a923f8e9e23ca30e1"><enum>(2)</enum><header>Administration</header>
+					<subparagraph id="idee3f8a8d04f047199319e4c1867f5e15"><enum>(A)</enum><header>Chairs</header><text>The Secretary of Energy and the Secretary of the Interior shall jointly manage the NEWS Office and
+			 serve as co-chairs of the Interagency Coordination Committee.</text>
+					</subparagraph><subparagraph id="id5e24527a96324636b5c544c3a4d9047e"><enum>(B)</enum><header>Membership; staffing</header><text>Membership and staffing shall be determined by the co-chairs.</text>
+					</subparagraph></paragraph><paragraph id="id5c819cdd47374c618651b231b2eaeb23"><enum>(3)</enum><header>Duties</header><text>The Interagency Coordination Committee shall—</text>
+					<subparagraph id="id962ae20366564dc5bb97e891a891501d"><enum>(A)</enum><text>serve as a forum for developing common Federal goals and plans on energy-water nexus RD&amp;D activities in coordination with the National Science and Technology Council;</text>
+					</subparagraph><subparagraph id="idecb7e7c8ae63415ea940a3bdcd50b894"><enum>(B)</enum><text>not later than 1 year after the date of enactment of this Act, and biennially thereafter, issue a
+			 strategic plan on energy-water nexus RD&amp;D activities priorities and objectives;</text>
+					</subparagraph><subparagraph id="id5848cb2684644c46b8c3b9eb970c4ef8"><enum>(C)</enum><text>convene and promote coordination of the activities of Federal departments and agencies on
+			 energy-water nexus RD&amp;D activities, including the activities of—</text>
+						<clause id="id805380b5ffd34dcda4d2aa76433c1848"><enum>(i)</enum><text>the Department of Energy;</text>
+						</clause><clause id="idb9642085211a492a94d0e33f08a8de66"><enum>(ii)</enum><text>the Department of the Interior;</text>
+						</clause><clause id="id84f4361ba08149e59823908c870898af"><enum>(iii)</enum><text>the Corps of Engineers;</text>
+						</clause><clause id="ideac185bc210c457786320a7a9b025152"><enum>(iv)</enum><text>the Department of Agriculture;</text>
+						</clause><clause id="idb8c73840578f437fb862be7255747a8a"><enum>(v)</enum><text>the Department of Defense;</text>
+						</clause><clause id="id6257354cf106458ca056191308c3acc6"><enum>(vi)</enum><text>the Department of State;</text>
+						</clause><clause id="ida6f41f83e49d44d3996d276cfb14570c"><enum>(vii)</enum><text>the Environmental Protection Agency;</text>
+						</clause><clause id="id70008f18bfaf450ab5e4e1a0049a858f"><enum>(viii)</enum><text>the Council on Environmental Quality;</text>
+						</clause><clause id="ideff8608727594226a3d9f919b287dea6"><enum>(ix)</enum><text>the National Institute of Standards and Technology;</text>
+						</clause><clause id="idc284aa419b02467289d2a09c19629d35"><enum>(x)</enum><text>the National Oceanic and Atmospheric Administration;</text>
+						</clause><clause id="id8bd09901608947b79db4b1e2175912b4"><enum>(xi)</enum><text>the National Science Foundation;</text>
+						</clause><clause id="id332e8b9b25f84cbb81a64266884980ba"><enum>(xii)</enum><text>the Office of Management and Budget;</text>
+						</clause><clause id="iddef8949dcc7d4ed38806fac8e859a7ae"><enum>(xiii)</enum><text>the Office of Science and Technology Policy;</text>
+						</clause><clause id="id3522f2f3cfef4e6ba4665917967974f1"><enum>(xiv)</enum><text>the National Aeronautics and Space Administration; and</text>
+						</clause><clause id="id0c63522719194ff384023bd76c4c8e0e"><enum>(xv)</enum><text>such other Federal departments and agencies as the Interagency Coordination Committee considers
+			 appropriate;</text>
+						</clause></subparagraph><subparagraph id="id8dd84670bd0b49998f33347510bbf088"><enum>(D)</enum><clause commented="no" display-inline="yes-display-inline" id="ida8ffc90270c34af290bf51823e7b8bec"><enum>(i)</enum><text>coordinate and develop capabilities and methodologies for data collection, management, and
+			 dissemination of information related to energy-water nexus RD&amp;D activities from and to other Federal departments and agencies; and</text>
+						</clause><clause id="id07672e32618d43748487b5aa4656bbf6"><enum>(ii)</enum><text>promote information exchange between Federal departments and agencies—</text>
+							<subclause id="id62e00b5b78ff4a6b9d4ac06eb9165b46"><enum>(I)</enum><text>to identify and document Federal and non-Federal programs and funding opportunities that support
+			 basic and applied RD&amp;D proposals to advance energy-water nexus related science and technologies;</text>
+							</subclause><subclause id="idddad86d2bed04949b8e638c7b4fd3818"><enum>(II)</enum><text>to leverage existing programs by encouraging joint solicitations, block grants, and matching
+			 programs with non-Federal entities; and</text>
+							</subclause><subclause id="id527da9efb46b4370b4df17ea380337d3"><enum>(III)</enum><text>to identify opportunities for domestic and international public-private partnerships, innovative
+			 financing mechanisms, and information and data exchange;</text>
+							</subclause></clause></subparagraph><subparagraph id="id706a24ca83134d3d9ea6aea0f2414cc7"><enum>(E)</enum><text>promote the integration of energy-water nexus considerations into existing Federal water, energy,
+			 and other natural resource, infrastructure, and science programs at the
+			 national and regional levels and with programs administered in partnership
+			 with non-Federal entities; and</text>
+					</subparagraph><subparagraph id="idbb9c7802993c4f4f8710d31549d3a68d"><enum>(F)</enum><text>not later than 1 year after the date of enactment of this Act, issue a report on the potential
+			 benefits and feasibility of establishing an energy-water center of
+			 excellence within the National Laboratories (as that term is defined in
+			 section 2 of the Energy Policy Act of 2005 (42 U.S.C. 15801)).</text>
+					</subparagraph></paragraph><paragraph id="id433c864a76044fa5a512bd016bb77f07"><enum>(4)</enum><header>No regulation</header><text>Nothing in this subsection grants to the Interagency Coordination Committee the authority to
+			 promulgate regulations or set standards.</text>
+				</paragraph><paragraph id="id1e1e32511a814522ae48601b182a0dbe"><enum>(5)</enum><header>Review; report</header><text>At the end of the 5-year period beginning on the date on which the Interagency Coordination
+			 Committee and NEWS Office are established, the NEWS Office shall—</text>
+					<subparagraph id="id87b0e48beed948db870950e78b63782b"><enum>(A)</enum><text>review the activities, relevance, and effectiveness of the Interagency Coordination Committee; and</text>
+					</subparagraph><subparagraph id="id8bb02652eeeb480da2dfcc2ae0fa80e0"><enum>(B)</enum><text>submit to the Committee on Energy and Natural Resources of the Senate and the Committees on
+			 Science, Space, and Technology, Energy and Commerce, and Natural Resources
+			 of the House of Representatives a report that—</text>
+						<clause id="idde6f882a77a84db5963e1d7297c79e87"><enum>(i)</enum><text>describes the results of the review conducted under subparagraph (A); and</text>
+						</clause><clause id="id69a4b3d42d5342238dfcbab25c7c7e13"><enum>(ii)</enum><text>includes a recommendation on whether the Interagency Coordination Committee should continue.</text>
+						</clause></subparagraph></paragraph></subsection><subsection id="ida1576821f2104bf6aecbb52592cf2f77"><enum>(c)</enum><header>Crosscut budget</header><text>Not later than 30 days after the President submits the budget of the United States Government under
+			 section 1105 of title 31, United States Code, the co-chairs of the
+			 Interagency Coordination Committee (acting through the NEWS Office) shall
+			 submit to the Committee on Energy and Natural Resources of the Senate and
+			 the Committees on Science, Space, and Technology, Energy and Commerce, and
+			 Natural Resources of the House of Representatives, an interagency budget
+			 crosscut report that displays at the program-, project-, and
+			 activity-level for each of the Federal agencies that carry out or support
+			 (including through grants, contracts, interagency and intraagency
+			 transfers, and multiyear and no-year funds) basic and applied RD&amp;D activities to advance the energy-water nexus related science and technologies—</text>
+				<paragraph id="id89f40c1690174b659e64de6335a5cbf0"><enum>(1)</enum><text>the budget proposed in the budget request of the President for the upcoming fiscal year;</text>
+				</paragraph><paragraph id="id5c3723d9ce454978a02f94d7cfc11114"><enum>(2)</enum><text>expenditures and obligations for the prior fiscal year; and</text>
+				</paragraph><paragraph id="id0b56b48b170c4d68a7cd1c0c38bdbbca"><enum>(3)</enum><text>estimated expenditures and obligations for the current fiscal year.</text>
+				</paragraph></subsection></section><section id="id52dccc41215c48019069e13137c9f62f"><enum>3.</enum><header>Smart energy and water efficiency pilot program</header>
+			<subsection id="id5F080C650A0B434FB1BFC6C4CA970F9D"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subtitle A of title IX of the Energy Policy Act of 2005 (42 U.S.C. 16191 et seq.) is amended by
+			 adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id6f98c2c5f72045f98e908295548170e1" style="OLC">
+					<section id="id8f6fbab67c644840a79fb6ef60234048"><enum>918.</enum><header>Smart energy and water efficiency pilot program</header>
+						<subsection id="idb2fe649faa9344caa782344991940cd2"><enum>(a)</enum><header>Definitions</header><text>In this section:</text>
+							<paragraph id="id18600326a35e4066b2a0f4ab8e7ea104"><enum>(1)</enum><header>Eligible entity</header><text>The term <term>eligible entity</term> means—</text>
+								<subparagraph id="idb64e5def0b114fd79a69a2e3eaf2f201"><enum>(A)</enum><text>a utility;</text>
+								</subparagraph><subparagraph id="ide542746349ba48d5a0ef49bb1b053873"><enum>(B)</enum><text>a municipality;</text>
+								</subparagraph><subparagraph id="id651ad89e05274a9abdcea1561657be93"><enum>(C)</enum><text>a water district;</text>
+								</subparagraph><subparagraph id="id07336c3d04204d08b6f905283ce07729"><enum>(D)</enum><text>an Indian tribe or Alaska Native village; and</text>
+								</subparagraph><subparagraph id="id1020728e9d8f42bbbbbf4c7b9bf979d5"><enum>(E)</enum><text>any other authority that provides water, wastewater, or water reuse services.</text>
+								</subparagraph></paragraph><paragraph id="id3d5c6f568574455eac9ed336c5edcf1d"><enum>(2)</enum><header>Smart energy and water efficiency pilot program</header><text>The term <term>smart energy and water efficiency pilot program</term> or <quote>pilot program</quote> means the pilot program established under subsection (b).</text>
+							</paragraph></subsection><subsection id="ida6eb8b867c744deaa387d7a2799d89a7"><enum>(b)</enum><header>Smart energy and water efficiency pilot program</header>
+							<paragraph id="id6c704561cf0a44a39712339889697080"><enum>(1)</enum><header>In general</header><text>The Secretary shall establish and carry out a smart energy and water efficiency pilot program in
+			 accordance with this section.</text>
+							</paragraph><paragraph id="idf1236581537944d292dc43a68bae2846"><enum>(2)</enum><header>Purpose</header><text>The purpose of the smart energy and water efficiency pilot program is to award grants to eligible
+			 entities to demonstrate unique, advanced, or innovative technology-based
+			 solutions that will—</text>
+								<subparagraph id="idf506e2b63ebf41bea09b2f78208b9444"><enum>(A)</enum><text>improve the net energy balance of water, wastewater, and water reuse systems;</text>
+								</subparagraph><subparagraph id="idE5E9B9F1CF714228BE9CCE406FFEADC2"><enum>(B)</enum><text>improve the net energy balance of water, wastewater, and water reuse systems to help communities
+			 across the United States make measurable progress in conserving water,
+			 saving energy, and reducing costs;</text>
+								</subparagraph><subparagraph id="id68d1f507fc8f4d42a0ce943105482cb0"><enum>(C)</enum><text>support the implementation of innovative and unique processes and the installation of established
+			 advanced automated systems that provide real-time data on energy and
+			 water; and</text>
+								</subparagraph><subparagraph id="id8fbe1dec10724e7b9b92e64ac8643885"><enum>(D)</enum><text>improve energy-water conservation and quality and predictive maintenance through technologies that
+			 utilize internet connected technologies, including sensors, intelligent
+			 gateways, and security embedded in hardware.</text>
+								</subparagraph></paragraph><paragraph id="id95a05bab3e9d4203abbb2de840146ffd"><enum>(3)</enum><header>Project selection</header>
+								<subparagraph id="idf9282824dcaf43f091812f503194e2bd"><enum>(A)</enum><header>In general</header><text>The Secretary shall make competitive, merit-reviewed grants under the pilot program to not less
+			 than 3, but not more than 5, eligible entities.</text>
+								</subparagraph><subparagraph id="id77ba63943fb24073ba27c5fbd80af832"><enum>(B)</enum><header>Selection criteria</header><text>In selecting an eligible entity to receive a grant under the pilot program, the Secretary shall
+			 consider—</text>
+									<clause id="id7322d723fcba4532baebf86223101d97"><enum>(i)</enum><text>energy and cost savings;</text>
+									</clause><clause id="id6dee18fbcc434041851ef157544ab66b"><enum>(ii)</enum><text>the uniqueness, commercial viability, and reliability of the technology to be used;</text>
+									</clause><clause id="ide1408b0b0d664da28edae18cbaac5c3e"><enum>(iii)</enum><text>the degree to which the project integrates next-generation sensors software, analytics, and
+			 management tools;</text>
+									</clause><clause id="id2d919ca943164e278776e1665e5486d2"><enum>(iv)</enum><text>the anticipated cost-effectiveness of the pilot project through measurable energy savings, water
+			 savings or reuse, and infrastructure costs averted;</text>
+									</clause><clause id="id037fd39ccfa5453a8b48f929c7971231"><enum>(v)</enum><text>whether the technology can be deployed in a variety of geographic regions and the degree to which
+			 the technology can be implemented in a wide range of applications ranging
+			 in scale from small towns to large cities, including tribal communities;</text>
+									</clause><clause id="id91c0c206386344e0af56e4be325ae1ff"><enum>(vi)</enum><text>whether the technology has been successfully deployed elsewhere;</text>
+									</clause><clause id="id1f29f652d237455a8ce393d0ccc29208"><enum>(vii)</enum><text>whether the technology was sourced from a manufacturer based in the United States; and</text>
+									</clause><clause id="idf27cde849e4a4d7c99ec806d67399ba9"><enum>(viii)</enum><text>whether the project will be completed in 5 years or less.</text>
+									</clause></subparagraph><subparagraph id="id3b8b9499f441457f97f4702454817715"><enum>(C)</enum><header>Applications</header>
+									<clause id="id25f036962b2a431da15a68d966693ced"><enum>(i)</enum><header>In general</header><text>Subject to clause (ii), an eligible entity seeking a grant under the pilot program shall submit to
+			 the Secretary an application at such time, in such manner, and containing
+			 such information as the Secretary determines to be necessary.</text>
+									</clause><clause id="iddca06599c7c14024bb9687c4e7c263fd"><enum>(ii)</enum><header>Contents</header><text>An application under clause (i) shall, at a minimum, include—</text>
+										<subclause id="id3f8959b3ce0f43d3a7beb77cffd318bf"><enum>(I)</enum><text>a description of the project;</text>
+										</subclause><subclause id="id2687e1c5ecf0417f872db9976755e04a"><enum>(II)</enum><text>a description of the technology to be used in the project;</text>
+										</subclause><subclause id="idfa4e8fab307c4e878c637313e16d72e3"><enum>(III)</enum><text>the anticipated results, including energy and water savings, of the project;</text>
+										</subclause><subclause id="idc90f6d38b52e4c878244a767ebca72fa"><enum>(IV)</enum><text>a comprehensive budget for the project;</text>
+										</subclause><subclause id="id5fd3e03e3a6a4fae9fca10108a9568bb"><enum>(V)</enum><text>the names of the project lead organization and any partners;</text>
+										</subclause><subclause id="id9a6b542c6a8d496696b72aa214eb8c58"><enum>(VI)</enum><text>the number of users to be served by the project;</text>
+										</subclause><subclause id="id234ee03dc2b946f5804ac312e430b29c"><enum>(VII)</enum><text>a description of the ways in which the proposal would meet performance measures established by the
+			 Secretary; and</text>
+										</subclause><subclause id="idf2846163187148798999b977bdfeb1e8"><enum>(VIII)</enum><text>any other information that the Secretary determines to be necessary to complete the review and
+			 selection of a grant recipient.</text>
+										</subclause></clause></subparagraph></paragraph><paragraph id="id176a3391013f443f9054d3b106157981"><enum>(4)</enum><header>Administration</header>
+								<subparagraph id="iddc5a547021d34223bc5429cb1fa87818"><enum>(A)</enum><header>In general</header><text>Not later than 1 year after the date of enactment of this section, the Secretary shall select grant
+			 recipients under this section.</text>
+								</subparagraph><subparagraph id="idea5488f8988f4a6bb7ee4e2a390092dc"><enum>(B)</enum><header>Evaluations</header>
+									<clause id="idde46c96cb5924b0eb13b6c0da4f8c1da"><enum>(i)</enum><header>Annual evaluations</header><text>The Secretary shall annually carry out an evaluation of each project for which a grant is provided
+			 under this section that meets performance measures and benchmarks
+			 developed by the Secretary, consistent with the purposes of this section.</text>
+									</clause><clause id="id4b680da2d2ac48f3b74afc14fa53b7c9"><enum>(ii)</enum><header>Requirements</header><text>Consistent with the performance measures and benchmarks developed under clause (i), in carrying out
+			 an evaluation under that clause, the Secretary shall—</text>
+										<subclause id="idfa23b56cb69b49eaad81c7d9b1e6ed53"><enum>(I)</enum><text>evaluate the progress and impact of the project; and</text>
+										</subclause><subclause id="id105f016f769049b1a78a72865a118aef"><enum>(II)</enum><text>assesses the degree to which the project is meeting the goals of the pilot program.</text>
+										</subclause></clause></subparagraph><subparagraph id="id2a85c31783474e4db09557957da04098"><enum>(C)</enum><header>Technical and policy assistance</header><text>On the request of a grant recipient, the Secretary shall provide technical and policy assistance.</text>
+								</subparagraph><subparagraph id="ide2b971f6d4d044e3b0a55664afe69afc"><enum>(D)</enum><header>Best practices</header><text>The Secretary shall make available to the public through the Internet and other means the Secretary
+			 considers to be appropriate—</text>
+									<clause id="id0de9a36caec04b7d920bd5ca1e903252"><enum>(i)</enum><text>a copy of each evaluation carried out under subparagraph (B); and</text>
+									</clause><clause id="idafc47968c4f04a95b6eb346de994d08e"><enum>(ii)</enum><text>a description of any best practices identified by the Secretary as a result of those evaluations.</text>
+									</clause></subparagraph><subparagraph id="id95f713138c304b1c8c5e28b26a8dade9"><enum>(E)</enum><header>Report to congress</header><text>The Secretary shall submit to Congress a report containing the results of each evaluation carried
+			 out under subparagraph (B).</text>
+								</subparagraph></paragraph></subsection><subsection id="id71883e0c282c4d159740b650e54c6f61"><enum>(c)</enum><header>Authorization of appropriations</header><text>There is authorized to be appropriated to carry out this section $15,000,000, to remain available
+			 until expended.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection><subsection id="idD8E4AA6E9E704607894F65BF0F7E7B91"><enum>(b)</enum><header>Conforming amendment</header><text>The table of contents of the Energy Policy Act of 2005 (Public Law 109–58; 119 Stat. 594) is
+			 amended by inserting after the item relating to section 917 the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id66C390295AB2498A8C1A7E120C576AC7" style="OLC"><toc><toc-entry bold="off" level="section">Sec. 918. Smart energy and water efficiency pilot program.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section></legis-body></bill>

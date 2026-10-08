@@ -1,0 +1,50 @@
+﻿### FINGERPRINT AFTER
+taken_utc: 2026-09-19 03:43:18.829Z
+
+
+Key                                   Mtime                         Len
+---                                   -----                         ---
+ranks_python.json                     2026-09-18 05:52:04.544Z   540097
+Moneyball Main Version - Blended.xlsx 2026-09-18 06:09:29.560Z 11316932
+Moneyball Dashboard.html              2026-09-18 06:24:02.091Z 12669435
+cu-member-desk.html                   2026-09-18 06:35:46.576Z 18808024
+ROOT dashboard_data.json              2026-09-18 06:23:53.548Z 12515286
+ROOT category_stance.json             2026-09-17 06:14:04.697Z  1598026
+
+git -C LIVE     status --porcelain | Measure-Object -Line => 498
+git -C WORKTREE status --porcelain | Measure-Object -Line => 1
+
+--- LIVE root _audit_tmp* / _mcstab* / .pipeline_run.lock* ---
+
+Name                     Mtime                    Length
+----                     -----                    ------
+_audit_tmp_frontier.json 2026-08-04 02:04:08.000Z   5038
+_audit_tmp_optimize.json 2026-08-04 02:03:43.000Z   4131
+
+--- pycache / pytest_cache dirs under WORKTREE fec (count) ---
+count: 22
+fec\__pycache__
+fec\audit\__pycache__
+fec\collect\__pycache__
+fec\district\__pycache__
+fec\engine\__pycache__
+fec\legislation\__pycache__
+fec\lobbying\__pycache__
+fec\members\__pycache__
+fec\network\__pycache__
+fec\speech\__pycache__
+fec\staffer_network\__pycache__
+fec\stance\__pycache__
+fec\surfaces\__pycache__
+fec\tests\audit\__pycache__
+fec\tests\collect\__pycache__
+fec\tests\district\__pycache__
+fec\tests\infra\__pycache__
+fec\tests\legislation\__pycache__
+fec\tests\members\__pycache__
+fec\tests\speech\__pycache__
+fec\tests\staffer_network\__pycache__
+fec\tests\surfaces\__pycache__
+
+--- pillar_inputs_snapshot.json (audit sub-run may refresh) ---
+MISSING

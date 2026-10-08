@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H70514316571147C0BECDAB2760063348" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 429 IH: Affirming the right of all renters to a safe, affordable, and decent home.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 429</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190605">June 5, 2019</action-date><action-desc><sponsor name-id="L000551">Ms. Lee of California</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the <committee-name committee-id="HBU00">Committee on the Budget</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Affirming the right of all renters to a safe, affordable, and decent home.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas housing is a basic human right;</text> </whereas><whereas><text>Whereas evidence-based research has shown that families with safe, decent, and affordable homes are better able to find employment, achieve economic mobility, perform better in school, and maintain improved health;</text>
+ </whereas><whereas><text>Whereas providing housing assistance is one of the most effective ways to help families, children, and youth escape poverty and domestic violence and to prevent homelessness;</text>
+ </whereas><whereas><text>Whereas investing in affordable housing infrastructure has numerous benefits for the economy, including creating jobs, boosting families’ incomes, promoting healthy families, and encouraging further development;</text>
+ </whereas><whereas><text>Whereas far too many families living in urban, suburban, and rural communities struggle to afford their rent each month, putting them at increased risk of eviction and homelessness;</text>
+ </whereas><whereas><text>Whereas people of color, especially single Black and Latina mothers, experience disparate rates of eviction;</text>
+ </whereas><whereas><text>Whereas according to the Department of Housing and Urban Development (HUD) point-in-time count of 2018, there were over 553,000 people in the United States experiencing homelessness on any given night, including over 110,000 children;</text>
+ </whereas><whereas><text>Whereas homelessness has become so pervasive that some States and cities have declared that homelessness has reached a state of emergency;</text>
+ </whereas><whereas><text>Whereas people experiencing homelessness are more likely to be the victims of violent crimes and face dehumanizing conditions;</text>
+ </whereas><whereas><text>Whereas major progress toward the national goals for ending homelessness in our Nation has stalled in the absence of increased funding;</text>
+ </whereas><whereas><text>Whereas a shortage of affordable housing exists in every State and major metropolitan area;</text> </whereas><whereas><text>Whereas a full-time worker earning the Federal minimum wage cannot afford a modest two-bedroom apartment in any State, metropolitan area, or county in the United States;</text>
+ </whereas><whereas><text>Whereas over half of all renters are cost-burdened, paying more than 30 percent of their income for housing, and 71 percent of extremely low-income households are severely cost-burdened, paying more than half of their income for housing;</text>
+ </whereas><whereas><text>Whereas rapidly rising rents across the country have pushed many long-time residents and families out of the communities they call home;</text>
+ </whereas><whereas><text>Whereas 3 out of every 4 families in need of housing assistance are turned away due to chronic underfunding;</text>
+ </whereas><whereas><text>Whereas the role of Federal affordable housing investment is even more important given the limited ability of the private market alone to address these needs;</text>
+ </whereas><whereas><text>Whereas various programs at the Department of Housing and Urban Development provide Federal rental assistance, which helps about 10,000,000 people, including nearly 4,000,000 children and more than 4,000,000 low-income families, and such programs include the Public Housing program, the section 8 Housing Choice Vouchers (HCV) program, the section 8 Project-Based Rental Assistance program, the section 202 Supportive Housing for the Elderly program, the section 811 Supportive Housing for Persons with Disabilities program, and the Housing Opportunities for Persons with AIDS (HOPWA) program;</text>
+ </whereas><whereas><text>Whereas despite leveraging billions of dollars in private resources to preserve and expand the supply of affordable housing, affordable housing programs continue to be chronically underfunded despite their success at providing safe housing to families in need;</text>
+ </whereas><whereas><text>Whereas chronic underfunding of the Public Housing Capital Fund has led to a backlog of up to $70,000,000,000 in capital repairs and deteriorating conditions for residents;</text>
+ </whereas><whereas><text>Whereas without Federal investments, many more families would be homeless, living in substandard or overcrowded conditions, or struggling to meet other basic needs because too much of their limited income would be used to pay rent;</text>
+ </whereas><whereas><text>Whereas low Federal spending caps required by the Budget Control Act of 2011 (<external-xref legal-doc="public-law" parsable-cite="pl/112/25">Public Law 112–25</external-xref>) have decreased funding for affordable housing and community development programs;</text>
+ </whereas><whereas><text>Whereas these austere spending caps threaten affordable housing and community development for millions of low-income families;</text>
+ </whereas><whereas><text>Whereas even renters with housing subsidies often face barriers to finding housing providers willing to rent to them;</text>
+ </whereas><whereas><text>Whereas under current Federal law, housing discrimination against a renter is illegal if it is based on race, color, religion, sex, familial status, national origin, or disability;</text>
+ </whereas><whereas><text>Whereas 68,000,000 Americans believe they have been treated differently in their search for housing based on their race, color, religion, sex, familial status, national origin, or disability;</text>
+ </whereas><whereas><text>Whereas renters and others experiencing housing need should be protected against housing discrimination through stronger enforcement of fair housing laws; and</text>
+ </whereas><whereas><text>Whereas despite various clarifying guidance from HUD, the reentry community continues to face barriers in trying to secure access to federally assisted housing: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="HC06563523B414D989E7FF32BE18FBD5F" style="traditional">
+		<section display-inline="yes-display-inline" id="H98BBDF2AB441436AB2882407FCADFCFF" section-type="undesignated-section">
+ <enum></enum><text display-inline="yes-display-inline">That the House of Representatives—</text> <paragraph id="H6F4C1855C7F84B3E8E171158FB5331FD"><enum>(1)</enum><text>supports a significant investment in housing resources to build and preserve affordable housing for America’s poorest families and to end homelessness and housing poverty once and for all;</text>
+ </paragraph><paragraph id="HFCB057B6E0B74706AEF9B26F0B59052B"><enum>(2)</enum><text>supports lifting the spending caps required by the Budget Control Act of 2011 and robustly funding programs to increase access to affordable housing and address homelessness at the Department of Housing and Urban Development (HUD) and other Federal agencies;</text>
+ </paragraph><paragraph id="H9E42D13ADBC34381870F495DBE66D437"><enum>(3)</enum><text>supports including in any infrastructure package housing investments to serve families with the lowest incomes, including $70,000,000,000 in funding for the Public Housing Capital Fund to address the backlog of capital repairs for public housing and at least $5,000,000,000 for the National Housing Trust Fund to boost the supply of affordable housing available to extremely low-income families;</text>
+ </paragraph><paragraph id="H5810938D970C458CBB3AD6D18F5C0CEC"><enum>(4)</enum><text>affirms that renters may not be barred from federally assisted housing solely on the basis of a criminal record;</text>
+ </paragraph><paragraph id="H7B9F933778DD43E9BF9CDAB762098803"><enum>(5)</enum><text>supports expansion of renters’ rights, including the right of tenants to organize tenant associations; and</text>
+ </paragraph><paragraph commented="no" id="HEFE203ABA4E24F10A1AFF9E4E3E9D057"><enum>(6)</enum><text>affirms that housing is a basic human right.</text> </paragraph></section></resolution-body></resolution> 
+

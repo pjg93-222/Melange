@@ -1,0 +1,121 @@
+{
+ "displayed_stance_changes": 56,
+ "displayed_stance_src_changes": 491,
+ "owner_record_conflicts": [
+  {
+   "csv_stance": "oppose",
+   "golden_labels_label": [
+    "neutral",
+    "neutral"
+   ],
+   "golden_labels_source": [
+    "augmented_v2+goldqueue",
+    "augmented_v2+goldqueue"
+   ],
+   "golden_labels_split": [
+    "train",
+    "train"
+   ],
+   "label_set_human_label": [
+    "oppose",
+    "oppose"
+   ],
+   "member": "Jon Ossoff",
+   "sheet_stance": "neutral",
+   "title": "El Senador Ossoff Presenta Proyecto de Ley Bipartidista para Proteger a los Ni\u00f1os de los Depredadores en L\u00ednea y la Explotaci\u00f3n Sexual",
+   "url": "https://www.ossoff.senate.gov/press-releases/el-senador-ossoff-presenta-proyecto-de-ley-bipartidista-para-proteger-a-los-ninos-de-los-depredadores-en-linea-y-la-explotacion-sexual/"
+  },
+  {
+   "csv_stance": "oppose",
+   "golden_labels_label": [
+    "neutral",
+    "neutral"
+   ],
+   "golden_labels_source": [
+    "augmented_v2+goldqueue",
+    "augmented_v2+goldqueue"
+   ],
+   "golden_labels_split": [
+    "train",
+    "train"
+   ],
+   "label_set_human_label": [
+    "oppose",
+    "oppose"
+   ],
+   "member": "Kirsten Gillibrand",
+   "sheet_stance": "neutral",
+   "title": "Gillibrand Slams Trump Administration For Making Seniors More Vulnerable To Financial Frauds And Scams",
+   "url": "https://www.gillibrand.senate.gov/news/press/release/gillibrand-slams-trump-administration-for-making-seniors-more-vulnerable-to-financial-frauds-and-scams/"
+  },
+  {
+   "csv_stance": "support",
+   "golden_labels_label": [
+    "oppose",
+    "oppose"
+   ],
+   "golden_labels_source": [
+    "augmented_v2+goldqueue",
+    "augmented_v2+goldqueue"
+   ],
+   "golden_labels_split": [
+    "test",
+    "test"
+   ],
+   "label_set_human_label": [
+    "support",
+    "support"
+   ],
+   "member": "Lance Gooden",
+   "sheet_stance": "oppose",
+   "title": "Interchange bill should be rejected in any form",
+   "url": "https://www.americascreditunions.org/news-media/news/interchange-bill-should-be-rejected-any-form#G000589"
+  },
+  {
+   "csv_stance": "support",
+   "golden_labels_label": [
+    "oppose",
+    "oppose"
+   ],
+   "golden_labels_source": [
+    "augmented_v2+goldqueue",
+    "augmented_v2+goldqueue"
+   ],
+   "golden_labels_split": [
+    "train",
+    "train"
+   ],
+   "label_set_human_label": [
+    "support",
+    "support"
+   ],
+   "member": "Roger Marshall",
+   "sheet_stance": "oppose",
+   "title": "America\u2019s Credit Unions joins with other industry groups in opposition to NDAA interchange amendments",
+   "url": "https://www.americascreditunions.org/news-media/news/americas-credit-unions-joins-other-industry-groups-opposition-ndaa-interchange#M001198"
+  }
+ ],
+ "owner_records_agree": 53,
+ "press_corr_hits_in_493": [
+  {
+   "member": "Tim Scott",
+   "override_stance": "neutral",
+   "title": "Industry win: Judge vacates CFPB credit card late fee rule"
+  },
+  {
+   "member": "Tim Scott",
+   "override_stance": "support",
+   "title": "Credit union board modernization part of updated housing bill"
+  }
+ ],
+ "press_corr_hits_in_57": [
+  {
+   "csv_stance": "support",
+   "member": "Tim Scott",
+   "override_stance": "support",
+   "sheet_stance": "neutral",
+   "title": "Credit union board modernization part of updated housing bill"
+  }
+ ],
+ "schema": "n14-gap-and-conflict-v1"
+}

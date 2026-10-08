@@ -1,0 +1,15 @@
+lane B receipt 06 measured: 157 shipped edges, 170 surplus windows, 53 drawn edges below the floor
+
+no other filter (lane B's own population)  queue  18225 | collapse drops  201 | surplus(all dyads)  201 over  184 dyads | surplus(shipped edges only)  170 over  157 edges
+behind the press + roster filters (shipped) queue  17733 | collapse drops  192 | surplus(all dyads)  192 over  175 dyads | surplus(shipped edges only)  169 over  156 edges
+
+reconciliation of the count the artifact reports:
+  lane B counted surplus on SHIPPED EDGES only (06_p4:48 `if k not in AE: continue`) : 170
+  the shipped filter also collapses dyads that never become edges (formality-only)   : 31
+  ->  total windows the filter removes from the scored queue, its own population      : 201
+  with the press + roster filters in front of it the population changes slightly      : 192
+
+dyads with duplicate windows that are NOT shipped edges: 27
+  their windows classify as: {'formality': 66}
+  (all formality => the dyad is dropped at member_reference_layer.py:342 and no consumer ever saw it)
+DONE 13

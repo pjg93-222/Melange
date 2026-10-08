@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL26731-WHG-NL-JF4"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S4585 IS: Discount Window Preparedness Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-05-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 4585</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260520">May 20, 2026</action-date><action-desc><sponsor name-id="S327">Mr. Warner</sponsor> (for himself and <cosponsor name-id="S389">Mr. Kennedy</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Federal Reserve Act to mandate discount window testing, and for other purposes.</official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause"><section section-type="section-one" id="id4cff2caae13f4196b5ed3f9f98a99a89"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Discount Window Preparedness Act</short-title></quote>.</text></section><section id="id7f00c705485c4c4ea40bd4cff5dec3a4"><enum>2.</enum><header>Demonstration of ability to use the discount window</header><subsection id="id8d0d91a52769408094c138115acf93bc"><enum>(a)</enum><header>In general</header><text>Section 10B of the Federal Reserve Act (<external-xref legal-doc="usc" parsable-cite="usc/12/347b">12 U.S.C. 347b</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="ide149c4d32e6141d599fbba3b5b3d9f2a"><subsection id="id1c2c3431038642e9a018055660067266"> <enum>(c)</enum> <header>Requirement for depository institutions To demonstrate ability To seek advances</header> <paragraph id="id78a4e52762e84506b9d201640737bd45"> <enum>(1)</enum> <header>Definitions</header> <text>In this subsection:</text>
+              <subparagraph commented="no" display-inline="no-display-inline"
+                id="iddb7191ccaeba484e93d34c86f8d587d0">
+                <enum>(A)</enum>
+                <header>Appropriate congressional committees</header>
+ <text>The term <term>appropriate congressional committees</term> means the Committee on Banking, Housing, and Urban Affairs of the Senate and the Committee on Financial Services of the House of Representatives.</text>
+              </subparagraph>
+              <subparagraph id="id96ad6481aa7a470e9fa74017dabd5142">
+                <enum>(B)</enum>
+                <header>Depository institution</header>
+ <text>The term <term>depository institution</term> means—</text> <clause commented="no" display-inline="no-display-inline" id="idee4fdfff3e754f819e407a2bb8a7153e"> <enum>(i)</enum> <text display-inline="yes-display-inline">any institution the deposits of which are insured under the Federal Deposit Insurance Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1811">12 U.S.C. 1811 et seq.</external-xref>); or</text>
+                </clause>
+                <clause commented="no" display-inline="no-display-inline"
+                  id="ided7561182b6d4ddf8bde6eb773ed79d2">
+                  <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">an insured credit union, as defined in section 101 of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1752">12 U.S.C. 1752</external-xref>).</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="id1c52a218bc7844708f6231e48cabb91e">
+              <enum>(2)</enum>
+              <header>Requirements</header>
+ <text>Not later than 1 year after the date of enactment of this subsection, any depository institution operating in the United States that is eligible to seek advances under this section shall, pursuant to regulations promulgated under this subsection, conduct testing of such advances and demonstrate, to the satisfaction of the Federal reserve bank at which the depository institution maintains an account, or at which another depository institution maintains an account on its behalf, and to the primary Federal regulator of the depository institution, that—</text>
+              <subparagraph id="id7d8df4290c9640f08efdd92044ba6196">
+                <enum>(A)</enum>
+ <text>the depository institution has, and maintains on an ongoing basis, all operational and technical capacities necessary to borrow advances in a timely and efficient manner; as demonstrated by such required testing; and</text>
+              </subparagraph>
+              <subparagraph id="id6c770ae2bbcd4929a877713e601f60ca">
+                <enum>(B)</enum>
+ <text>the depository institution maintains collateral with the Federal reserve bank of which it is a member to support borrowing in accordance with the requirements of this subsection.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="idf47199be1cd24d479887be93e11a40c6">
+              <enum>(3)</enum>
+              <header>Regulations</header>
+ <text>Not later than 180 days after the date of enactment of this subsection, the Board, the Federal Deposit Insurance Corporation, the Office of the Comptroller of the Currency, and the National Credit Union Administration shall promulgate final regulations implementing the requirements under paragraph (2), including:</text>
+              <subparagraph id="id9d5eda0f7c2a4f3fa976e98bf940a7f6">
+                <enum>(A)</enum>
+                <header>Asset thresholds for testing requirements</header>
+                <clause id="idb1b78dce0fc2436b8fcde046a5b9eec2">
+                  <enum>(i)</enum>
+                  <header>Larger institutions</header>
+ <text>For depository institutions having assets greater than $100,000,000,000, mandatory testing shall be required not less frequently than quarterly, on a schedule determined by the Board.</text>
+                </clause>
+                <clause id="id22f361bb6b8342d9b7f0f6603dc6d5ce">
+                  <enum>(ii)</enum>
+                  <header>Smaller institutions</header>
+ <text>For depository institutions having assets not less than $10,000,000,000 and not greater than $100,000,000,000, mandatory testing shall be required not less frequently than semiannually.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="idde0c123392344eeaa5035979ac3d1c1a">
+                <enum>(B)</enum>
+                <header>Variation of the schedule, size, and tenor of advances</header>
+ <text>The regulations promulgated under this paragraph may provide for Federal reserve banks to vary the size, tenor, and timing of advances required under this section if the Board determines that—</text>
+                <clause commented="no" display-inline="no-display-inline"
+                  id="id66b5addd4d0a4e2fb276dc98e2f8a37d">
+                  <enum>(i)</enum>
+ <text display-inline="yes-display-inline">such variations would be effective, particularly with respect to reducing stigma associated with advances under this section; and</text>
+                </clause>
+                <clause commented="no" display-inline="no-display-inline"
+                  id="id8618af365afe4997b9978bb38f0fa0a9">
+                  <enum>(ii)</enum>
+ <text>after consultation with affected depository institutions, such variations would not result in undue added operational burdens or costs.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph commented="no" display-inline="no-display-inline"
+                id="id3811b5eafbdc456eab48dc5a8509be98">
+                <enum>(C)</enum>
+                <header>Incorporation of mandatory testing into supervision</header>
+ <text>The regulations promulgated under this paragraph shall require that each of the Board, the Federal Deposit Insurance Corporation, the Office of the Comptroller of the Currency, and the National Credit Union Administration—</text>
+                <clause id="idf4adee1aa79a480f97975d9beaa99c8d">
+                  <enum>(i)</enum>
+ <text>incorporate an assessment of the readiness of each depository institution to seek advances under this section into the examination activities of the agency with regard to liquidity risk management of the depository institution;</text>
+                </clause>
+                <clause id="id5a0b6cf015374963942e263426369701">
+                  <enum>(ii)</enum>
+ <text>provide that the regulations and supervisory standards of the agency with regard to liquidity provisioning shall give appropriate, positive consideration to—</text>
+                  <subclause id="id29ca86ea674d4162bdac2de985462020">
+                    <enum>(I)</enum>
+ <text>the ability of a depository institution to meet the requirements of the regulations promulgated under this paragraph; and</text>
+                  </subclause>
+                  <subclause id="id7983f888c45047d7ac8ce6702959c0cc">
+                    <enum>(II)</enum>
+ <text>the ability of the depository institution to access liquidity through advances under this section, including the pre-pledged collateral of the depository institution.</text>
+                  </subclause>
+                </clause>
+              </subparagraph>
+              <subparagraph id="id2fd9858a36614087ae6873c11620d91b">
+                <enum>(D)</enum>
+                <header>Reporting requirements for depository institutions</header>
+ <text>The regulations promulgated under this paragraph shall require that—</text> <clause id="id4bb4b2f3a1bc46baad71e2bd60d75438"> <enum>(i)</enum> <text>the management of each depository institution eligible to seek an advance under this section shall establish, and the risk committee or equivalent body of the board of directors of the depository institution shall review and approve, not less frequently than annually, the liquidity risk management plans and operational readiness of the depository institution to execute such plans, including detailed policies and procedures for seeking advances under this section; and</text>
+                </clause>
+                <clause id="id2b9b8c8d191a401996b74df5a2c62c18">
+                  <enum>(ii)</enum>
+ <text>once approved, the management described in paragraph (A) shall submit to the Board, the Federal reserve bank of which the depository institution is a member, and the primary Federal supervisor of the depository institution, a report detailing the findings of the reviews required under that subparagraph.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="idd3af2719a70f438a94be2cfa32ebe937">
+              <enum>(4)</enum>
+              <header>Mandatory improvements to operations</header>
+ <text>Not later than 180 days after the date of enactment of this subsection, the Board and the Federal reserve banks shall implement improvements to advances under this section to ensure that depository institutions are able to access advances rapidly as needed, including—</text>
+              <subparagraph id="id46aad15deeea48859ea8fb8025cb3058">
+                <enum>(A)</enum>
+ <text>changes to operations for advances under this section and Federal Reserve payment services to ensure that a depository institution eligible to obtain advances under this section is able to obtain such advances until at least 8 p.m. each day in each relevant United States time zone;</text>
+              </subparagraph>
+              <subparagraph id="idbdb97b5521954687bdf1b797e59fe090">
+                <enum>(B)</enum>
+ <text>implementing a secure, computer-based online access platform that depository institutions may use to obtain such advances, including automating the process of primary credit approval if appropriate collateral is pledged;</text>
+              </subparagraph>
+              <subparagraph id="idab0f830b1cae428eb773595af87c68a0">
+                <enum>(C)</enum>
+ <text>standardizing technical specifications and operational procedures for such advances across all Federal reserve banks;</text>
+              </subparagraph>
+              <subparagraph id="idd7d1ea5db90d4a5392698048816e3ba7">
+                <enum>(D)</enum>
+ <text>implementing procedures for the consistent and efficient identification, assignment, and transfer of security interests in collateral that is pledged to secure borrowing between any Federal Home Loan Bank and any Federal reserve bank;</text>
+              </subparagraph>
+              <subparagraph id="idd5652cde1fff476d8a23547c9c0df173">
+                <enum>(E)</enum>
+ <text>implementing simplified procedures for depository institutions to pledge small business loans as collateral for advances under this section, with emphasis on simplified documentation for smaller institutions; and</text>
+              </subparagraph>
+              <subparagraph id="id4c92b33ec1264ddeaedc9c48df082853">
+                <enum>(F)</enum>
+ <text>creating and funding an outreach program to provide information and technical assistance to smaller institutions with regard to accessing advances under this section.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline"
+              id="idb17a881f5ef3428b83d23f6416adad1d">
+              <enum>(5)</enum>
+              <header>Harmonization</header>
+ <text display-inline="yes-display-inline">Not later than 270 days after the date of enactment of this subsection, the Board, in consultation with the Federal Housing Finance Administration and the Federal Home Loan Banks, shall promulgate regulations or guidance simplifying and harmonizing, to the greatest extent practicable, policies and procedures for the pledging of collateral for advances under this section, including for the timely and efficient transfer of collateral between Federal Home Loan Banks and Federal reserve banks.</text>
+            </paragraph>
+            <paragraph id="id77637a2b1886480093d0963dd9697198">
+              <enum>(6)</enum>
+              <header>Federal reserve reporting</header>
+              <subparagraph id="id9bfbf1ba8ef84678a908c48ef533566f">
+                <enum>(A)</enum>
+                <header>Review</header>
+ <text>Not later than 270 days after the date of enactment of this subsection, the Board shall comprehensively review the weekly reporting of its balance sheet, including advances under this section, and consider changes to reduce the risk of market distortions caused by speculative activity regarding such advances, giving particular consideration to—</text>
+                <clause id="id55844b2a92d047e0b903e036e8ab004b">
+                  <enum>(i)</enum>
+ <text>the breakdown of balance sheet data by district and the manner in which such reporting may contribute to speculative activity that threatens the stability of individual depository institutions; and</text>
+                </clause>
+                <clause id="id596898a1e3d0494a8054b468c9e2894c">
+                  <enum>(ii)</enum>
+ <text>the effects of disclosure requirements described in section 11(s).</text> </clause> </subparagraph> <subparagraph id="id5402b273fe2646289cce83a699a81921"> <enum>(B)</enum> <header>Revised reporting methodology</header> <text>Not later than 90 days after the date on which the review required under subparagraph (A) is completed, the Board shall revise reporting policies as appropriate to address the findings of such review, and if necessary make recommendations to the appropriate congressional committees regarding potential statutory changes.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="id11046189c67a4249a86d754936353d0e">
+              <enum>(7)</enum>
+              <header>Study</header>
+ <text>Not later than 1 year after the date of enactment of this subsection, the Board, in consultation with the Comptroller of the Currency, the Federal Deposit Insurance Corporation, and the National Credit Union Administration, shall complete a study and submit to the appropriate congressional committees a report on additional measures that could be undertaken to reduce the stigma and otherwise improve the process for advances under this section, including—</text>
+              <subparagraph id="ide95620e41a5f42398f86a61589f2bfc4">
+                <enum>(A)</enum>
+ <text>the pricing and other terms of such advances, especially as they compare to alternative liquidity sources;</text>
+              </subparagraph>
+              <subparagraph id="ida347e58dc19b4999b497246039dc9ee8">
+                <enum>(B)</enum>
+ <text>the costs and benefits of any other relevant operational or policy changes; and</text>
+              </subparagraph>
+              <subparagraph id="id06a1fe71915842e984ef7fff9d03237c">
+                <enum>(C)</enum>
+ <text>recommendations to the appropriate congressional committees regarding any statutory changes necessary to reduce the stigma associated with, and otherwise improve the process for, such advances.</text>
+              </subparagraph>
+            </paragraph>
+          </subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section></legis-body></bill>
+

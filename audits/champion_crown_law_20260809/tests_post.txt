@@ -1,0 +1,166 @@
+[core: CRN kernel]
+  OK   sm64 in [0,1)
+  OK   sm64 deterministic
+  OK   sm64 well-spread (mean ~0.5)
+  OK   sm64 key-independent (no order effect)
+[core: atomic dump]
+  OK   dump_atomic writes valid json
+  OK   dump_atomic leaves original intact + no temp on failure
+  OK   write_text_atomic writes complete text
+  OK   save_workbook_atomic writes a readable verified workbook
+[core: constants]
+  OK   IMP has all 18 categories incl. CU Tax Status
+  OK   allocation blocks expose CU Tax Status as its own money-engine topic
+  OK   PERS silence == Ally parity (user-ratified 0.45)
+  OK   CFPB blocks folded (99+145)
+  OK   SGATE monotone down the full ladder
+  OK   auto-repair SMART Acts excluded even when source title is ambiguous
+  OK   financial/regulatory SMART Acts remain included
+  OK   misfiled CDFI/privacy bills have source-controlled effective categories
+  OK   duplicate bill roles retain only the strongest role
+  OK   letters use the same per-Congress decay as bills
+  OK   manual letter identifiers never collide through the formal-bill parser
+  OK   Influence bonus is limited to party elites
+  OK   committee Chair/Ranking overlap zeros the party-elite bonus
+[stance: fixed bands + bounded rounding]
+  OK   same thresholds in every domain; only top label changes
+  OK   all ten fixed tiers are reachable without a curve
+  OK   positive scores cannot be skeptic and negative scores cannot be highly persuadable
+  OK   no-signal stance remains em dash
+  OK   missing media does not dilute present sponsored-legislation evidence
+  OK   overall rounding is bounded; Tier 1 is sufficient for the Champion display crown
+  OK   overall bands use the strict 2026-07-18 fixed ladder
+  OK   overall Opponent cutoff is ordered, provenance-visible, and reachable
+  OK   Legislative+Press tier preserves pillar magnitudes (no second percentile transform)
+  OK   exceptional rounding is bounded, sign-aware, and never fills empty domains
+[media: shared routing + signed normalization + General CU exclusion]
+  OK   General CU subject words route to a real policy domain
+  OK   press target beats unsupported source tags
+  OK   media context guards block road, generic tax-exempt, and community-bank false positives
+  OK   domain normalization preserves relative signed magnitude
+  OK   residual General CU evidence is explicit and never projected into policy domains
+  OK   image evidence resolves weak text but preserves clear-text conflicts for review
+[identity: fail-closed joins]
+  OK   identity resolver accepts exact, Last/First, and bioguide matches
+  OK   identity resolver rejects an ambiguous surname instead of taking first roster row
+[core: rosters + network]
+  OK   533 members
+  OK   party coverage (no ? beyond a handful)
+  OK   network symmetric
+  OK   no self-loops
+  OK   all weights positive & sane
+[core: physics]
+  OK   cpf_diffusion cross-party dampened (<1), same-party 1.0
+  OK   cpf_pressure co-partisan 1.7 / out-partisan 0.5
+  OK   cascade kernel probabilities in (0,1)
+[core: receptivity gate]
+  OK   gate within [0.15, 0.90]
+  OK   opponent gate < persuadable gate (same member)
+[money_response]
+  OK   saturating (concave) money curve
+  OK   bounded by MAXSHIFT x pressure x LOSSFRAME
+  OK   loss-frame asymmetry exact
+  OK   sub-threshold absorbed
+  OK   defection outputs only valid rungs
+  OK   committed terminal rungs immune
+[flip_model]
+  OK   pflip in (0,1)
+  OK   CU money raises pflip
+  OK   industry money lowers pflip
+  OK   receptivity scales money channel (pm=2 amplifies CU effect)
+[say-do gate + delivery discount]
+  OK   authored Champion survives + earns proven (Path A)
+  OK   recorded floor vote corroborates (Path V)
+  OK   committee title does not substitute for action
+  OK   uncorroborated top cells cap to Ally, raw preserved
+  OK   cap touches nothing else
+  OK   overall Champion requires delivery in at least two-thirds of raw top cells
+  OK   six top domains with two-thirds delivered clear the aggregate say-do rule
+  OK   fixed high-volume low-followthrough rule caps an introduced-only paper trail
+  OK   exceptional direct authorship with full domain delivery clears the paper-trail cap
+  OK   missing evidence source fails OPEN (no cell or overall caps)
+  OK   delivery_mult bounds [0.70,1.00] + neutral fallback
+[CHRG attribution + ordinary-questioning guards]
+  OK   comma direct-address is not a speaker label
+  OK   opening member statement is not classified as witness
+  OK   same-surname outside witness is blocklisted
+  OK   only live member questioning survives hearing parser
+  OK   joint package scope is explicit
+[audio speaker-identity layer: module suites (design 2026-07-16, user-directed)]
+  OK   test_audio_calibrate suite clean
+  OK   test_audio_identity suite clean
+  OK   test_audio_linear_head suite clean
+  OK   test_audio_neural_head suite clean
+  OK   test_audio_diarize suite clean
+  OK   test_audio_align suite clean
+  OK   test_audio_attrib suite clean
+  OK   test_hearings_media suite clean
+  OK   test_bill_rules_routing suite clean
+  OK   test_bill_audit_console_resolution suite clean
+  OK   test_bill_archive_provenance suite clean
+FAIL  test_bill_collision_guards suite clean  :: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\.claude\\worktrees\\r-category-stats-loop-69c0dc\\data\\legislation\\bill_directions.csv'
+  OK   test_b5_onc_successor suite clean
+FAIL  test_primacy_tier suite clean  :: FAILED (errors=3)
+  OK   test_lda_rebuild suite clean
+  OK   test_lobbyview_network suite clean
+  OK   test_lobby_interactions suite clean
+  OK   test_accepted_legislation_cross_producer_contract suite clean
+  OK   test_assemble_approved_legislation_generation suite clean
+  OK   test_audit_billstatus_snapshot_divergence suite clean
+FAIL  test_audit_legislation_decay_propagation suite clean  :: FAILED (errors=1)
+  OK   test_build_accepted_legislation_generation suite clean
+  OK   test_build_accepted_legislation_workbook suite clean
+  OK   test_build_billstatus_relevance_sidecar suite clean
+  OK   test_build_billstatus_review_sidecar suite clean
+  OK   test_build_legislation_identifier_probe_shards suite clean
+  OK   test_build_legislation_membership_triage suite clean
+  OK   test_build_legislation_workbook_numeric_plan suite clean
+  OK   test_build_partial_legislation_review_prefill suite clean
+  OK   test_build_partial_legislation_review_queue suite clean
+  OK   test_compute_legislation_policy_scenarios suite clean
+  OK   test_extract_legislation_workbook_audited_layout suite clean
+  OK   test_legislation_base_network suite clean
+FAIL  test_legislation_computation_decision_template suite clean  :: FAILED (errors=2)
+  OK   test_legislation_direction_ledger suite clean
+  OK   test_legislation_measure_key_contract suite clean
+  OK   test_legislation_shadow_consumer_plan suite clean
+  OK   test_legislation_shadow_input_closure suite clean
+  OK   test_legislation_sidecar_downstream_isolation suite clean
+  OK   test_manage_legislation_junk_pile suite clean
+  OK   test_materialize_legislation_base_and_bipartisan suite clean
+  OK   test_materialize_legislation_rollcall_aggregate suite clean
+  OK   test_official_billstatus_rollcall_source suite clean
+  OK   test_refresh_billstatus_snapshot_evidence suite clean
+  OK   test_review_legislation_candidate_memberships suite clean
+  OK   test_run_billstatus_bulk_enrichment suite clean
+  OK   test_run_legislation_acceptance_service suite clean
+  OK   test_run_legislation_dashboard_member_desk suite clean
+  OK   test_run_legislation_final_regression suite clean
+  OK   test_run_legislation_pillars_and_ranks suite clean
+  OK   test_run_legislation_review_batches suite clean
+  OK   test_run_legislation_say_do_passes suite clean
+  OK   test_run_legislation_second_pass_dependents suite clean
+  OK   test_run_legislation_timeout_rollover suite clean
+  OK   test_run_legislation_timeout_rollover_watcher suite clean
+  OK   test_stage_billstatus_bulk_enrichment suite clean
+  OK   test_audit_legfix5_artifact_gaps suite clean
+  OK   test_audit_legfix5_coverage_reconciliation suite clean
+  OK   test_audit_legislation_final_regression_currentness suite clean
+  OK   test_audit_legislation_query_specificity suite clean
+  OK   test_build_legislation_candidate_evidence suite clean
+  OK   test_build_legislation_culling_control_plane suite clean
+  OK   test_build_legislation_membership_decisions suite clean
+  OK   test_build_legislation_staged_integration_gate suite clean
+  OK   test_build_legislation_category_review_queue suite clean
+  OK   test_legislation_opus_candidate_adjudication suite clean
+  OK   test_run_legislation_claude_ambiguity_review suite clean
+  OK   test_run_reversible_legislation_culling suite clean
+FAIL  test_legislation_article_cross_reference suite clean  :: 1 failed, 15 passed in 2.61s
+  OK   test_legislation_headless_harvest_contract suite clean
+  OK   test_legislation_measure_weight suite clean
+  OK   test_run_legislation_network_dependents suite clean
+  OK   test_legislation_culling_integration_contract suite clean
+FAIL  test_legislation_shadow_recompute suite clean  :: 12 failed, 1 passed in 1.76s
+  OK   audit_stale_imports suite clean
+
+KERNEL TESTS — 144 passed, 6 FAILED

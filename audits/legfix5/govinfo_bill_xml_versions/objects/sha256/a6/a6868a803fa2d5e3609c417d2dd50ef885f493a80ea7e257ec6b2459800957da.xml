@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H56C1E722543A48E1A2AC1C3FEC99EDAC" public-private="public" key="H" bill-type="olc"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2223 IH: Helping Homeless Veterans Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 2223</legis-num> 
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20190410">April 10, 2019</action-date> 
+<action-desc><sponsor name-id="B001285">Ms. Brownley of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To amend title 38, United States Code, to make permanent certain programs that assist homeless veterans and other veterans with special needs, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H906FC0D40BF14C87A5B03506C2389139" style="OLC"> 
+<section id="HD58540F8D3924F2A9458C663F00BD56A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Helping Homeless Veterans Act of 2019</short-title></quote>.</text></section> <section id="H81535BBF5FEA48D5AE63E859CAF2A8FE" section-type="subsequent-section"><enum>2.</enum><header>Programs assisting homeless veterans and other veterans with special needs</header> <subsection id="HD73CA16774094FE5AE730E648CD45787"><enum>(a)</enum><header>Homeless veterans reintegration programs</header><text display-inline="yes-display-inline">Section 2021(e)(1) of title 38, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block display-inline="no-display-inline" id="HA2DD36B6B03F4028BD864D5135B3AEE2" style="OLC"> 
+<subparagraph id="HC32879C1762B4D79832526BA7AA45949" indent="up1"><enum>(G)</enum><text display-inline="yes-display-inline">$50,000,000 for each fiscal year after 2020.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="HFEC139A9E9764F8F961C26FE8C764C9D"><enum>(b)</enum><header>Referral and counseling services for veterans at risk of homelessness who are transitioning from certain institutions</header><text display-inline="yes-display-inline">Section 2023 of such title is amended—</text> 
+<paragraph id="HB1D473AE15C640328E614888BE647C2F"><enum>(1)</enum><text>by striking subsection (d); and</text></paragraph> <paragraph id="H87D2659CB540403592285B9831FD793A"><enum>(2)</enum><text>by redesignating subsection (e) as subsection (d).</text></paragraph></subsection> 
+<subsection id="H4A9E0553FA794DE783834E5E7DE5FEBF"><enum>(c)</enum><header>Treatment for seriously mentally ill and homeless veterans</header><text display-inline="yes-display-inline">Section 2031 of such title is amended—</text> <paragraph id="H61821D31FA784CF6B9FB6AFA40A1785B"><enum>(1)</enum><text>in subsection (a), by striking <quote>(a)</quote>; and</text></paragraph> 
+<paragraph id="HD925325A71344A99A4BEE3306EA2DA1D"><enum>(2)</enum><text>by striking subsection (b).</text></paragraph></subsection> <subsection id="HFC769A58332A4D6EB17A6B451B5FD586"><enum>(d)</enum><header>Housing assistance for homeless veterans</header><text display-inline="yes-display-inline">Section 2041 of such title is amended by striking subsection (c).</text></subsection> 
+<subsection id="H608EE9870D8F44C184D18CC6F738D6D1"><enum>(e)</enum><header>Financial assistance for supportive services for very low-Income veteran families in permanent housing</header><text>Section 2044(e)(1) of such title is amended by adding at the end the following new subparagraph:</text> <quoted-block display-inline="no-display-inline" id="H295F63561D67469E8BDA9A77FA9781B6" style="USC"> <subparagraph id="HE636DC1962E64173960411E3848F3FF1" indent="up1"><enum>(H)</enum><text display-inline="yes-display-inline">$380,000,000 for each fiscal year after fiscal year 2019.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="H6FE2A6AEAD5C4FBCBA55F81F9FB77024"><enum>(f)</enum><header>Grant program for homeless veterans with special needs</header><text display-inline="yes-display-inline">Section 2061(d)(1) of such title is amended—</text> <paragraph id="H17E4A64BF8F043A0B3B65A441F2A4070" commented="no"><enum>(1)</enum><text>by striking <quote>each of fiscal years 2007 through 2020</quote> and inserting <quote>each fiscal year</quote>; and</text></paragraph> 
+<paragraph id="HB0BCAE802C16439E97538B3A1ECDDA86"><enum>(2)</enum><text>by striking <quote>such</quote>.</text></paragraph></subsection> <subsection id="H41ABD10DADF24D689DC551FA188F8FE0"><enum>(g)</enum><header>Advisory Committee on Homeless Veterans</header><text display-inline="yes-display-inline">Section 2066 of such title is amended by striking subsection (d).</text></subsection></section> 
+</legis-body> 
+</bill> 
+
+

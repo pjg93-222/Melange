@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" public-private="public" dms-id="HB29D3ECB7DE94CA89B56616D0CAFEB83" resolution-type="house-resolution"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HRES 1005 IH: Expressing the sense of the House of Representatives that creators and digital workers, as a distinct and growing class of small businesses and independent economic contributors, deserve fair treatment, transparency, and economic opportunity in the modern platform-based economy.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-01-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">119th CONGRESS</congress>
+ <session display="yes">2d Session</session><legis-num display="yes">H. RES. 1005</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260115">January 15, 2026</action-date><action-desc><sponsor name-id="K000389">Mr. Khanna</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HED00">Committee on Education and Workforce</committee-name>, and in addition to the Committee on <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Expressing the sense of the House of Representatives that creators and digital workers, as a distinct and growing class of small businesses and independent economic contributors, deserve fair treatment, transparency, and economic opportunity in the modern platform-based economy.</official-title></form><preamble><whereas><text>Whereas over ten million Americans earn income as creators, freelancers, and digital workers through online platforms that distribute content, facilitate gig work, and connect workers to audiences and customers, often operating as independent businesses;</text></whereas><whereas><text>Whereas creators generate significant economic value for platforms through original content, innovation, and community-building, yet often face limited transparency and predictability regarding compensation, data access, and platform policies;</text></whereas><whereas><text>Whereas platform-based work may involve income volatility, evolving rules, and changes to algorithmic systems or platform policies that can materially affect creators’ reach and earnings;</text></whereas><whereas><text>Whereas many creators and digital workers are classified as independent contractors, which can limit access to employer-sponsored health care, retirement plans, paid leave, and other labor protections provided under existing law;</text></whereas><whereas><text>Whereas the lack of portable benefits can create economic uncertainty for independent workers and may discourage mobility, entrepreneurship, and long-term income stability across platforms;</text></whereas><whereas><text>Whereas algorithmic systems play a significant role in content distribution and monetization, and limited transparency can make it difficult for creators to understand how changes may affect visibility or earnings;</text></whereas><whereas><text>Whereas limited ability to maintain direct, opt-in communication with audiences can restrict creators’ capacity to move between platforms and build sustainable, independent businesses, consistent with privacy protections;</text></whereas><whereas><text>Whereas platforms rely heavily on creator-generated content to drive advertising and subscription revenue, while revenue-sharing arrangements with creators are often unclear or inconsistent;</text></whereas><whereas><text>Whereas misclassification of workers under existing labor laws can deprive individuals of wages, benefits, and legal protections to which they are entitled, while also creating uncertainty for platforms and legitimate independent businesses; and</text></whereas><whereas> <text>Whereas creators and digital workers frequently operate as small businesses, yet may face barriers accessing technical assistance, financing, and support programs available to other small businesses and entrepreneurs; Now, therefore, be it</text>
+ </whereas></preamble><resolution-body id="H8CAFE463287F41679BF477533C3C29D8"><section display-inline="yes-display-inline" section-type="undesignated-section" id="HED9333FDFB0449E59B9BF0EEDCF0F0E0"><text>That the House of Representatives supports—</text><paragraph id="H23E237EA3D8E4E15BC67747DA9D7D1DC"> <enum>(1)</enum> <text>access to affordable, reliable, and portable health care options for creators and digital workers, so that coverage is not dependent on a single employer or platform;</text>
+            </paragraph><paragraph id="H301A1D30626E4E70A43FD28338A95E82">
+                <enum>(2)</enum>
+ <text>ensuring that digital workers can carry benefits across gigs and platforms, including portable benefit systems and retirement plan options designed for independent workers;</text>
+            </paragraph><paragraph id="HC113A74B8AB549D6ADF0325A7B55BF5D">
+                <enum>(3)</enum>
+ <text>clear, transparent, and predictable revenue-sharing terms between platforms and creators for the content and labor that generate value for those platforms;</text>
+            </paragraph><paragraph id="HA0DA8E7E200748DCB52D8AAC37957EC3">
+                <enum>(4)</enum>
+ <text>ability for creators to maintain decentralized, opt-in, direct relationships with audiences who choose to engage with their work, enabling creators to move between platforms without losing their audiences;</text>
+            </paragraph><paragraph id="H804D87656313467EA717C665014794B6">
+                <enum>(5)</enum>
+ <text>offering robust small business resources to creators and digital workers, supporting transparency around platform algorithms that affect compensation and visibility, and protecting workers against misclassification under existing Federal labor law;</text>
+            </paragraph><paragraph id="HC3D8EF51711044AEA9C6EDC41E15DF98">
+                <enum>(6)</enum>
+ <text>access to timely, responsive customer support and clear appeal processes for creators and digital workers when platform actions materially affect their accounts, content, or income; and</text>
+            </paragraph><paragraph id="H1725B86D52314346BF71562C26D6AEA6">
+                <enum>(7)</enum>
+ <text>transparency, consent, and accountability standards related to the use of artificial intelligence and synthetic media that materially affect creators’ identities, reputations, or livelihoods.</text>
+            </paragraph></section></resolution-body></resolution>
+
+

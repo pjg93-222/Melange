@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-HLA25A04-2JP-CS-F41"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S3312 IS: Quantum Readiness and Innovation Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-12-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>1st Session</session><legis-num>S. 3312</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20251202">December 2, 2025</action-date><action-desc><sponsor name-id="S380">Mr. Peters</sponsor> (for himself and <cosponsor name-id="S396">Mrs. Blackburn</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Director of the National Institute of Standards and Technology to develop guidance for upgrading information systems to post-quantum cryptography, and for other purposes.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Quantum Readiness and Innovation Act of 2025</short-title></quote>.</text></section><section commented="no" display-inline="no-display-inline" id="id3a95fa624b8940d7937f69fa08485c48"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text><paragraph commented="no" display-inline="no-display-inline" id="idb34f9725654448b2a811fc12fedea16d"><enum>(1)</enum><header>Appropriate congressional committees</header><text>The term <term>appropriate congressional committees</term> means—</text><subparagraph commented="no" display-inline="no-display-inline" id="id4c010631f72f46fd919573714d0b693a"><enum>(A)</enum><text display-inline="yes-display-inline">the Committee on Commerce, Science, and Transportation of the Senate; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id638335abb99a4f0390634c5499b5a5f0"><enum>(B)</enum><text display-inline="yes-display-inline">the Committee on Energy and Commerce of the House of Representatives.</text></subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idd45fb42332a94a2392f7d32b191bf057"><enum>(2)</enum><header display-inline="yes-display-inline">Classical computer; quantum computer</header><text>The terms <quote>classical computer</quote> and <term>quantum computer</term> have the meanings given such terms in section 3 of the Quantum Computing Cybersecurity Preparedness Act (<external-xref legal-doc="public-law" parsable-cite="pl/117/260">Public Law 117–260</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/6/1526">6 U.S.C. 1526</external-xref> note).</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id9532c869eff1406d99a90232dc654c57"><enum>(3)</enum><header>Critical infrastructure sectors</header><text>The term <term>critical infrastructure sectors</term> means the critical infrastructure sectors defined in the National Security Memorandum on <quote>Critical Infrastructure Security and Resilience</quote> (NSM–22), dated April 30, 2024.</text></paragraph><paragraph id="id18bb8b86e32440188d68fdee92086c5e"><enum>(4)</enum><header>High-impact system</header><text>The term <quote>high-impact system</quote> means a Federal information system that holds sensitive information, the loss of which would be categorized as high impact under Federal Information Processing Standards Publication 199 (relating to standards for security categorization of Federal information and information systems), as in effect on the day before the date of the enactment of this Act.</text></paragraph><paragraph id="id463dfe3d43dd4731add8fa2ebfddbf9a"><enum>(5)</enum><header>Post-quantum cryptography</header><text>The term <term>post-quantum cryptography</term>—</text><subparagraph commented="no" display-inline="no-display-inline" id="idf88af16d24fa407592629a5e4476c325"><enum>(A)</enum><text display-inline="yes-display-inline">means those cryptographic algorithms or methods that are assessed not to be specifically vulnerable to attack by either a quantum computer or classical computer; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3041839a78aa4f35b4a3e0175034df43"><enum>(B)</enum><text>includes—</text><clause id="id9481931d95764dfaa08fd4d7e11c24e9"><enum>(i)</enum><text>the lattice-based digital signature algorithm specified in National Institute of Standards and Technology Federal Information Processing Standards Publication 204 (dated August 13, 2024; relating to Module-Lattice-Based Digital Signature Standard), or any successor standard;</text></clause><clause commented="no" display-inline="no-display-inline" id="ide53edd85792445ae9609e7421a829bdf"><enum>(ii)</enum><text display-inline="yes-display-inline">the module-lattice-based key encapsulation mechanism specified in National Institute of Standards and Technology Federal Information Processing Standards Publication 203 (dated August 13, 2024; relating to Module-Lattice-Based Key-Encapsulation Mechanism Standard), or any successor standard; and</text></clause><clause id="id6a30da782f8d4f5baf84548a62e9df04"> <enum>(iii)</enum> <text>any cryptographic algorithm or method implemented in accordance with National Institute of Standards and Technology Federal Information Processing Standard Publication 140–3 (dated March 22, 2019; relating to Security Requirements for Cryptographic Modules), or any successor standard, operating within a zero trust architecture as described in National Institute of Standards and Technology Special Publication 800–207 (dated August 2020; relating to Zero Trust Architecture), or any successor standard.</text>
+ </clause></subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idffb5f2cc350c485384cf7e6334965371"><enum>(6)</enum><header>Sector risk management agency</header><text>The term <quote>sector risk management agency</quote> has the meaning given such term in section 2200 of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/650">6 U.S.C. 650</external-xref>).</text></paragraph></section><section commented="no" display-inline="no-display-inline" id="id8caca5f7d87540deb65aff40055b7632"><enum>3.</enum><header>Guidance on upgrading to post-quantum cryptography</header><subsection commented="no" display-inline="no-display-inline" id="id4e7d82e7020249fca18af9d2573065fa"><enum>(a)</enum><header display-inline="yes-display-inline">In general</header><text>Not later than 180 days after the date of the enactment of this Act, the Director of the National Institute of Standards and Technology, in consultation with the Director of the Office of Science and Technology Policy, shall establish guidance for upgrading information systems to post-quantum cryptography, including guidance that is specifically tailored for critical infrastructure sectors.</text></subsection><subsection commented="no" display-inline="no-display-inline" id="id3b63dbc595fe4c96a92ee5141750499c"><enum>(b)</enum><header>Requirement</header><text>The guidance established pursuant to subsection (a) shall include standards and selection criteria to guide the procurement and deployment of commercial solutions for an entity seeking to upgrade to post-quantum cryptography.</text></subsection><subsection commented="no" display-inline="no-display-inline" id="id40c5f5cc76d140bc80fe5d634df42941"> <enum>(c)</enum> <header>Dissemination of guidance</header> <paragraph commented="no" display-inline="no-display-inline" id="id0c8c161f90e549dfad33da190621dbee"> <enum>(1)</enum> <header>In general</header> <text display-inline="yes-display-inline">The Director of the National Institute of Standards and Technology shall make available to entities in the private sector the guidance established under subsection (a).</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id89afc05f61894a818d62f255662a99de">
+                    <enum>(2)</enum>
+                    <header>Special Publications</header>
+ <text>The Director may satisfy the requirement under paragraph (1) through the publication of Special Publications.</text>
+                </paragraph>
+            </subsection><subsection commented="no" display-inline="no-display-inline"
+                id="id67ed570345234008bc5adb7efbdc7c08">
+                <enum>(d)</enum>
+                <header>Coordination and assistance for industry-Led assessments of adoption of
+                    guidance</header>
+                <paragraph id="id0151045527d4473694a6a6fc8e216754">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>If an industry sector representative, who is part of the Quantum Economic Development Consortium, decides to carry out an assessment of the adoption by the industry sector of the guidance established under subsection (a), the Director of the National Institute of Standards and Technology shall offer to collaborate on such assessment with such representative.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="id789e449df7804ff6b2f5f01efa404ae4">
+                    <enum>(2)</enum>
+                    <header>Technical Assistance and Interoperability Frameworks</header>
+ <text display-inline="yes-display-inline">If requested by the representative described in paragraph (1), the Director of the National Institute of Standards and Technology shall support the assessment by providing—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                        id="idb96c9b9e17c1444b90dcc09a228eb007">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">technical and administrative support;</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                        id="idbeee8fe59e204017a605bc82569c8f4d">
+                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">test beds to support the assessment; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                        id="idf72b848084e7403cb1685a31e52aac65">
+                        <enum>(C)</enum>
+ <text display-inline="yes-display-inline">interoperability frameworks.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="id23965549c6db40ad8e708d98d7b25b91">
+                    <enum>(3)</enum>
+                    <header>Coordination Assistance</header>
+ <text display-inline="yes-display-inline">The Director of the National Institute of Standards and Technology may support an assessment described in paragraph (1) by coordinating between stakeholders as the Director considers necessary.</text>
+                </paragraph>
+ </subsection></section><section commented="no" display-inline="no-display-inline" section-type="subsequent-section" id="idc00f1c3de5b9451b8e3158d351732273"><enum>4.</enum><header display-inline="yes-display-inline">Strategy for Federal agency upgrade to post-quantum cryptography</header><subsection id="idb8c37e4a2fcf4aa6a487f38149277683"><enum>(a)</enum><header>National Quantum Cybersecurity Upgrade Strategy</header><text>Not later than 360 days after the date of the enactment of this Act, the Director of the Office of Science and Technology Policy, in coordination with the Director of the National Institute of Standards and Technology and in consultation with the Quantum Economic Development Consortium, shall develop a National Quantum Cybersecurity Upgrade Strategy that includes the following:</text><paragraph commented="no" display-inline="no-display-inline" id="idc4ac1b0082fe48198c562745e0ac55e8"><enum>(1)</enum><text>A definition of a cryptographically relevant quantum computer.</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ida3873dbbc4184f26bd31ef10a9f1614f"><enum>(2)</enum><text display-inline="yes-display-inline">Recommended standards to apply to determine whether a quantum computer meets such definition, including—</text><subparagraph commented="no" display-inline="no-display-inline" id="idc7604dae25904d7ebc7a9481ddc4aebc"><enum>(A)</enum><text display-inline="yes-display-inline">the characteristics of such computers; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ide45cab5d9d96402c9af35aed705ec70b"><enum>(B)</enum><text>the particular point at which such computers are capable of attacking real world systems that classical computers are unable to attack.</text></subparagraph></paragraph><paragraph id="ide2c0f62c17d742c6889743b2bc50d176"><enum>(3)</enum><text>Guidelines for assessing the urgency of upgrading to post-quantum cryptography for each Federal agency relative to—</text><subparagraph commented="no" display-inline="no-display-inline" id="ide05e3eb2500548b79b63dafb025546ce"><enum>(A)</enum><text display-inline="yes-display-inline">the critical functions of each agency; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id26f39e3605404fa2b37c540a89d82719"><enum>(B)</enum><text display-inline="yes-display-inline">the risk each agency faces should a cryptographically relevant quantum computer attack a system operated by the agency.</text></subparagraph></paragraph><paragraph id="idb34a7fcc0f514d68912ebc0576a9715f"><enum>(4)</enum><text>Recommended performance measures for upgrading to post-quantum cryptography for the following tasks:</text><subparagraph id="id4ac26c6f9aa64860989c6bf31f79c496"><enum>(A)</enum><text>Preparation for upgrading to post-quantum cryptography, including—</text><clause commented="no" display-inline="no-display-inline" id="idf3821c52cfba438b8236da90991bbb20"><enum>(i)</enum><text display-inline="yes-display-inline">the adoption of hardware integrating quantum-resistant cryptographic algorithms; and</text></clause><clause commented="no" display-inline="no-display-inline" id="idb1630271d4334c7dab228248b3cf63df"><enum>(ii)</enum><text display-inline="yes-display-inline">the deployment of software-only post-quantum cryptography overlays that meet or exceed security standards set forth in the Federal Information Processing Standards issued by the National Institute of Standards and Technology.</text></clause></subparagraph><subparagraph id="id65b7767082334ea8b2c35f7ecc49a9bf"><enum>(B)</enum><text>Establishment of a baseline understanding of the data inventory, including through the use of automated tools to identify assets.</text></subparagraph><subparagraph id="idd00a23e4d47144949fd9c4ae791ec907"><enum>(C)</enum><text>Planning and execution of post-quantum cryptographic solutions, including ensuring that data at rest and in motion is subject to appropriate protections.</text></subparagraph><subparagraph id="id0d29221f167a4277a02b4957c853ddbe"><enum>(D)</enum><text>Monitoring and evaluating the success of the upgrade and assessing the security of the system.</text></subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id4799377d93954e96b7489a39e91a5fee"><enum>(5)</enum><text>A plan for implementing the above performance measures, including evaluating and monitoring entities that are at high risk of quantum attacks, including sector risk management agencies.</text></paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="id6c3ea2277bce4354969d2d810c1c6465"> <enum>(b)</enum> <header>Post-Quantum voluntary pilot program</header> <paragraph commented="no" display-inline="no-display-inline" id="idfe4cd5d5aff549e99cfd675b16ef198b"> <enum>(1)</enum> <header>In general</header> <text display-inline="yes-display-inline">Not later than 360 days after the date of the enactment of this Act, the Director of the Office of Science and Technology Policy shall establish a pilot program to provide planning, technical, and any other support the Director considers appropriate to any covered entity that elects to participate in the program for the purpose of upgrading the systems of such covered entity to post-quantum cryptography.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id2f52755538564f48ba9f5a3122eaddc6">
+                    <enum>(2)</enum>
+                    <header>High risk entities</header>
+ <text display-inline="yes-display-inline">The Director shall encourage any covered entity that is at high risk of quantum attack to participate in the pilot program established under paragraph (1).</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id40606d511c834189845e7c8af6c37646">
+                    <enum>(3)</enum>
+                    <header>Requirements</header>
+ <text display-inline="yes-display-inline">Under the pilot program established under paragraph (1)—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id83fedaccab4b481b87df313df66d53ef">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">not later than 18 months after the date of the establishment of the program, not fewer than 1 high-impact system of any covered entity participating in the program shall be upgraded to post-quantum cryptography in accordance with the recommended performance measures described in subsection (a)(4); and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="ide56eda3686bb4d3eaa381d4982e66b9e">
+                        <enum>(B)</enum>
+ <text>upon completion of the initial upgrade under subparagraph (A), the head of the covered entity may upgrade—</text>
+                        <clause commented="no" display-inline="no-display-inline" id="id3643bd904f1249b18c5a64c467e30931">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">1 additional system in accordance with such performance measures; or</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id53bf2eedd0e64664a48dd172c16580c1">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">2 or more systems in accordance with such performance measures if the head notifies the Director before initiating such upgrade.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idbb05c1e3cc5c451d84be5d9e9aa0a4d6">
+                    <enum>(4)</enum>
+                    <header>Pilot program reports</header>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id7bcfcfc3634143e08e0e1af0b86d4f6f">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text display-inline="yes-display-inline">For each covered entity participating in the program established under paragraph (1), the Director, in coordination with the head of such entity, shall submit to the appropriate congressional committees—</text>
+                        <clause commented="no" display-inline="no-display-inline" id="idf5ddb4295c3547e89d1bdc9741092ea2">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">an initial report not later than 180 days after the date on which the initial upgrade is completed under paragraph (3)(A); and</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="idcfe9beb4231542c2a71e59d056674855">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">an updated report annually until such date as the Director considers appropriate.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id31ce5a3e455e44768c49403bc95cd9d7">
+                        <enum>(B)</enum>
+                        <header>Elements</header>
+ <text display-inline="yes-display-inline">Each report submitted under subparagraph (A) shall describe—</text>
+                        <clause commented="no" display-inline="no-display-inline" id="idbe3cb9b66321454fb962393c67f31379">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the actions of the head of the covered entity in carrying out the program; and</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id7a5c7eab316949799ded52ab4fe2fd76">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">any planning, technical, or other support that the Director provided to the head of the covered entity through the program.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id52ded2f89ac146adbca2a1fdbe8c74b7">
+                    <enum>(5)</enum>
+                    <header>Covered entity defined</header>
+ <text>In this subsection, the term <quote>covered entity</quote> means—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id85e34c6d30d84b629f98dcea84671b6c"> <enum>(A)</enum> <text display-inline="yes-display-inline">a sector risk management agency;</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id1cf193d395f34300875029d3a4d324b9">
+                        <enum>(B)</enum>
+ <text>a Federal agency; or</text> </subparagraph> <subparagraph commented="no" display-inline="no-display-inline" id="idf277558bfc364f2ba1015641edf5cd58"> <enum>(C)</enum> <text>a mission partner of a Federal agency.</text>
+                    </subparagraph>
+                </paragraph>
+ </subsection><subsection commented="no" display-inline="no-display-inline" id="id2e8299af09d74ea9ba4bc875d6732234"><enum>(c)</enum><header>Report to Congress</header><text>Not later than 360 days after the date of the enactment of this Act, the Director of the Office of Science and Technology Policy shall submit to the appropriate congressional committees a report that includes the National Quantum Cybersecurity Upgrade Strategy developed under subsection (a) and a description of the pilot program established pursuant to subsection (b)(1).</text></subsection></section></legis-body></bill>
+

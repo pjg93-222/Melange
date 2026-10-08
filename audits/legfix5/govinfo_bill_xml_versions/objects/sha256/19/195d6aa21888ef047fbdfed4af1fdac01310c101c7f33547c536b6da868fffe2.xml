@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H660A46D6B1364FE6BC928D558D1D4260" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 123 IH: FHA Additional Credit Pilot Program Reauthorization Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 123</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190103">January 3, 2019</action-date><action-desc><sponsor name-id="G000553">Mr. Green of Texas</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize a pilot program under section 258 of the National Housing Act to establish an
+			 automated process for providing additional credit rating information for
+			 mortgagors and prospective mortgagors under certain mortgages.</official-title></form>
+	<legis-body id="H6280CCA288F24B30A0DDABAB2EF5B2AF" style="OLC">
+ <section id="H042B7DB688E042188326CB3E36D4ED75" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>FHA Additional Credit Pilot Program Reauthorization Act</short-title></quote>.</text> </section><section id="H296CCB48B75E42519D084C4694E79B1C" section-type="subsequent-section"><enum>2.</enum><header>Authorization of pilot program</header> <subsection id="H1434EED011B54EA482DC2C925EE5F622"><enum>(a)</enum><header>Establishment</header><text display-inline="yes-display-inline">The Secretary of Housing and Urban Development shall establish and carry out the pilot program under section 258 of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1715z-24">12 U.S.C. 1715z–24</external-xref>), as amended by subsection (b) of this section.</text>
+ </subsection><subsection id="HB8B01C76531445D0A9ED5B19189E1ACB"><enum>(b)</enum><header>Sunset</header><text display-inline="yes-display-inline">Subsection (d) of section 258 of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1715z-24">12 U.S.C. 1715z–24(d)</external-xref>) is amended by striking <quote>5-year period beginning on the date of the enactment of the Building American Homeownership Act of 2008</quote> and inserting <quote>14-year period beginning on the date of the enactment of the <short-title>FHA Additional Credit Pilot Program Reauthorization Act</short-title></quote>.</text>
+			</subsection></section></legis-body></bill>
+
+

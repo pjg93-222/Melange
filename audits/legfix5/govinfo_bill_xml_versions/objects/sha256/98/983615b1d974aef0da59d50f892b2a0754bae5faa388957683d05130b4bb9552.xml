@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2098 IS: Accountability for Wall Street Executives Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2098</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190711">July 11, 2019</action-date><action-desc><sponsor name-id="S270">Mr. Schumer</sponsor> (for <cosponsor name-id="S387">Ms. Harris</cosponsor> (for herself,	<cosponsor name-id="S361">Ms. Hirono</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S221">Mrs. Feinstein</cosponsor>, <cosponsor name-id="S366">Ms. Warren</cosponsor>, <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>, and <cosponsor name-id="S322">Mr. Merkley</cosponsor>)) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Revised Statutes to grant State attorneys general the ability to issue subpoenas to
+			 investigate suspected violations of State laws that are applicable to
+			 national banks.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Accountability for Wall Street Executives Act</short-title></quote>.</text>
+ </section><section id="id0F4510E7662D46629C6EF34A81466A56"><enum>2.</enum><header>Visitorial powers</header><text display-inline="no-display-inline">The sixth undesignated paragraph of section 5240 of the Revised Statutes (<external-xref legal-doc="usc" parsable-cite="usc/12/484">12 U.S.C. 484</external-xref>) is amended by striking subparagraph (B) and inserting the following:</text>
+			<quoted-block display-inline="no-display-inline" id="id61CA0596D9744833BF409B76619683DB" style="OLC">
+ <subparagraph commented="no" display-inline="no-display-inline" id="ID40156A2D01E744298D47709990869BAF" indent="up1"><enum>(B)</enum><text display-inline="yes-display-inline">Notwithstanding subparagraph (A)—</text> <clause commented="no" display-inline="no-display-inline" id="id3AA6A81A177544ACBEE131AE52AD400E"><enum>(i)</enum><text display-inline="yes-display-inline">lawfully authorized State auditors and examiners may, at reasonable times and upon reasonable notice to a bank, review their records solely to ensure compliance with applicable State unclaimed property or escheat laws upon reasonable cause to believe that the bank has failed to comply with such laws;</text>
+ </clause><clause commented="no" display-inline="no-display-inline" id="id4C654709DDED4C6FBE87667A2E136662"><enum>(ii)</enum><text display-inline="yes-display-inline">an attorney general (or other chief law enforcement officer) of a State may issue subpoenas to national banks or officers of national banks based upon reasonable cause to believe that the national bank or an officer of a national bank has failed to comply with applicable State laws; and</text>
+ </clause><clause commented="no" display-inline="no-display-inline" id="id26CBF681F26E43A29EBF757C19366D8F"><enum>(iii)</enum><text display-inline="yes-display-inline">an attorney general (or other chief law enforcement officer) of a State may require a national bank to provide aggregate data on loans and other financial products and services provided by the national bank in such State.</text></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill>
+
+

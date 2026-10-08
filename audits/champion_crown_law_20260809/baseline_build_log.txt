@@ -1,0 +1,1 @@
+champions v2: 134 champions | 31 threats | 108 mixed | 259446 bytes -> C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\r-category-stats-loop-69c0dc\audits\champion_crown_law_20260809\baseline_boards.json

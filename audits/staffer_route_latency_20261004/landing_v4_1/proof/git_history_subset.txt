@@ -1,0 +1,24 @@
+# The tests that skip in a clean export for want of git history, with GIT_DIR at the shared object store (read-only) so `git show <sha>:<path>` works without a .git in the export.
+
+## tip_v41: files 10, passed/failed/errors/skipped (302, 0, 0, 0)
+   fec/tests/surfaces/test_staffer_office_covered_staff.py        pass 67   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_prewarm.py                     pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_request_work_index.py          pass 17   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.py            pass 26   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     pass 20   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs pass 21   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_left_out_staff.cjs             pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_live_query_committee_names.cjs pass 18   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_live_query_ids.cjs             pass 25   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.cjs           pass 38   fail 0   err 0  skip 0 
+## applied_tree: files 10, passed/failed/errors/skipped (302, 0, 0, 0)
+   fec/tests/surfaces/test_staffer_office_covered_staff.py        pass 67   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_prewarm.py                     pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_request_work_index.py          pass 17   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.py            pass 26   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     pass 20   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs pass 21   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_left_out_staff.cjs             pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_live_query_committee_names.cjs pass 18   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_live_query_ids.cjs             pass 25   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.cjs           pass 38   fail 0   err 0  skip 0 

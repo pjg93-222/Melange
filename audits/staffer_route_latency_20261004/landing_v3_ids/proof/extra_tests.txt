@@ -1,0 +1,12 @@
+# The tests that mention staffer_live but are not named test_staffer_* (run_suites.py does not reach them): the dashboard, clean workspace, combined section, network html, edge startup and desktop tests.
+# Same method: clean git archive export with autocrlf off, one process per file (scripts/run_extra.py), at the new tip f23a40aee. The same six files at 86631c454 and a5e33a0b2 are in previous_tip_a5e33a0b2/extra_tests.txt
+# (287 passed, 0 failed, 2 skipped at both).
+
+## new tip f23a40aee
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0       3.8s  py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 1.47s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0       3.8s  script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0       3.5s  py     pass 4    fail 0   err 0  skip 0   4 passed in 0.61s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0       4.7s  script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0       3.9s  py     pass 9    fail 0   err 0  skip 0   9 passed in 0.97s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0       4.0s  py     pass 2    fail 0   err 0  skip 0   2 passed in 1.04s
+TOTAL {'passed': 287, 'failed': 0, 'errors': 0, 'skipped': 2} files 6

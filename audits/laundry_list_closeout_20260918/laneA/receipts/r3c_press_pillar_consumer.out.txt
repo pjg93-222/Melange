@@ -1,0 +1,71 @@
+﻿====================================================================================================
+R3c  press pillar consumers of Table13 / Press Release - Normalized   run 2026-09-18T23:34:09
+====================================================================================================
+
+-- sheets referencing the normalized press sheet/table --
+   Sub Layer - Raw                     10127 formula cells
+   Rank & Allocation                     533 formula cells
+
+-- Table13 column names appearing in those formulas --
+   (none named individually)
+
+-- A1-style column letters of Press Release - Normalized referenced --
+   col A       533
+   col E      2132
+   col F      1066
+   col G      1066
+   col H      1066
+   col I      1066
+   col J      1066
+   col K      1066
+   col L      1066
+   col M      1066
+   col N      1066
+   col O      1066
+   col P      1066
+   col Q      1066
+   col R      1066
+   col S      1066
+   col T      1066
+   col U      1066
+   col V      1066
+   col W      1066
+
+-- samples --
+   Rank & Allocation!C3 = =SUMPRODUCT(INDEX('Press Release - Normalized'!$E$2:$W$534,MATCH($A3,'Press Release - Normalized'!$A$2:$A$534,0),0),'Press Release - Normalized'!$E$535:$W$535)
+
+   Rank & Allocation!C4 = =SUMPRODUCT(INDEX('Press Release - Normalized'!$E$2:$W$534,MATCH($A4,'Press Release - Normalized'!$A$2:$A$534,0),0),'Press Release - Normalized'!$E$535:$W$535)
+
+   Rank & Allocation!C5 = =SUMPRODUCT(INDEX('Press Release - Normalized'!$E$2:$W$534,MATCH($A5,'Press Release - Normalized'!$A$2:$A$534,0),0),'Press Release - Normalized'!$E$535:$W$535)
+
+   Sub Layer - Raw!C4 = =SUMPRODUCT('Legislative Score - Normalized'!C3:G3,'Legislative Score - Normalized'!C$2:G$2) + SUMPRODUCT('Press Release - Normalized'!E2,'Press Release - Normalized'!E$535)
+
+   Sub Layer - Raw!D4 = =SUMPRODUCT('Legislative Score - Normalized'!K3:O3,'Legislative Score - Normalized'!K$2:O$2) + SUMPRODUCT('Press Release - Normalized'!F2,'Press Release - Normalized'!F$535)
+
+   Sub Layer - Raw!E4 = =SUMPRODUCT('Legislative Score - Normalized'!S3:W3,'Legislative Score - Normalized'!S$2:W$2) + SUMPRODUCT('Press Release - Normalized'!G2,'Press Release - Normalized'!G$535)
+
+
+-- verdict per media category --
+category                               col  named by Table13 col letter ref
+Examination & Supervision              E    0              2132          
+Credit Union Capital Requirements      F    0              1066          
+NCUA Budget & Share Insurance Fund     G    0              1066          
+Interchange                            H    0              1066          
+Payments                               I    0              1066          
+Technology & Emerging Issues           J    0              1066          
+Fraud Prevention                       K    0              1066          
+Data Privacy & Cybersecurity           L    0              1066          
+Charter Modernization & Governance     M    0              1066          
+Defense Credit Union Issues            N    0              1066          
+Field of Membership                    O    0              1066          
+Credit Union Tax Status                P    0              1066          
+CDFI Fund                              Q    0              1066          
+CU-Bank Competitive Dynamics           R    0              1066          
+CFPB Issues & Structural Reform        S    0              1066          
+Credit Card & Consumer-Fee Mandates    T    0              1066          
+Telephone Consumer Protection Act      U    0              1066          
+Member Business Lending                V    0              1066          
+Mortgage Lending & Housing             W    0              1066          
+General Credit Union                   X    0              0             
+
+DONE R3c

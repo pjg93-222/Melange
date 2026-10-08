@@ -1,0 +1,25 @@
+# The uuid (typeahead, D-083) and record-browser tests, three runs in a row on the clean export of 86631c454; peak = resident memory of the whole process tree sampled every 0.1 s
+
+## run 1
+fec/tests/surfaces/test_staffer_search_differential.py                   rc=0     61.8s  py     pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_http.py                        rc=0      7.6s  py     pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_identifiers.py                 rc=0      6.0s  py     pass 17   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker.cjs                     rc=0      0.2s  cjs    pass 1    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs                 rc=0      2.8s  cjs    pass 14   fail 0   err 0  skip 0 
+TOTAL {'passed': 56, 'failed': 0, 'errors': 0, 'skipped': 0} files 5
+
+## run 2
+fec/tests/surfaces/test_staffer_search_differential.py                   rc=0     82.0s  py     pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_http.py                        rc=0      5.9s  py     pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_identifiers.py                 rc=0      6.6s  py     pass 17   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker.cjs                     rc=0      0.2s  cjs    pass 1    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs                 rc=0      2.1s  cjs    pass 14   fail 0   err 0  skip 0 
+TOTAL {'passed': 56, 'failed': 0, 'errors': 0, 'skipped': 0} files 5
+
+## run 3
+fec/tests/surfaces/test_staffer_search_differential.py                   rc=0     81.7s  py     pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_http.py                        rc=0      5.3s  py     pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_identifiers.py                 rc=0      4.8s  py     pass 17   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker.cjs                     rc=0      0.1s  cjs    pass 1    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs                 rc=0      1.7s  cjs    pass 14   fail 0   err 0  skip 0 
+TOTAL {'passed': 56, 'failed': 0, 'errors': 0, 'skipped': 0} files 5

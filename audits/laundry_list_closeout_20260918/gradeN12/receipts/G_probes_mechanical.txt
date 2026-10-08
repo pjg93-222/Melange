@@ -1,0 +1,107 @@
+====================================================================================================
+P1  KEPT TEXT DOES NOT END ON A SENTENCE TERMINATOR (mid-sentence cut candidates)
+    by the class of the FIRST removed segment:
+      C_unanchored_paren             139   e.g. [67803, 68431, 68548, 68560, 68606, 68892, 68899, 68994, 69517, 69540, 69708, 70149]
+    total 139 of 5859 non-skipped rows
+
+====================================================================================================
+P2  KEPT TEXT ENDS WITH WHAT LOOKS LIKE THE START OF A LABEL (leading edge of a foreign tag)
+    rows whose kept text ends in an ALL-CAPS run: 28
+      rowid=70149   trailing='BRIAN NELSON,'                    next_class=C_unanchored_paren       next_tag='GENERAL COUNSEL, CALIFORNIA DEPARTMENT O'
+      rowid=70812   trailing='FORMER U.S.'                      next_class=E_colonless_honorific    next_tag='PRESIDENT AND'
+      rowid=71147   trailing='FORMER U.S.'                      next_class=E_colonless_honorific    next_tag='PRESIDENT AND'
+      rowid=73675   trailing='DEI.'                             next_class=A_anchored_caps          next_tag='MARSH (voice-over)'
+      rowid=73681   trailing='DEI.'                             next_class=A_anchored_caps          next_tag='MARSH (voice-over)'
+      rowid=73688   trailing='DEI.'                             next_class=A_anchored_caps          next_tag='MARSH (voiceover)'
+      rowid=80870   trailing='OK.'                              next_class=A_anchored_caps          next_tag='SCOTT (on camera)'
+      rowid=82055   trailing='FORMER U.S.'                      next_class=E_colonless_honorific    next_tag='PRESIDENT AND'
+      rowid=83720   trailing='KIM PHAM,'                        next_class=C_unanchored_paren       next_tag='GENERAL ADMINISTRATOR, LOUVRE MUSEUM (th'
+      rowid=83941   trailing='KIM PHAM,'                        next_class=C_unanchored_paren       next_tag='GENERAL ADMINISTRATOR, LOUVRE MUSEUM (th'
+      rowid=87617   trailing='FBI.'                             next_class=A_anchored_caps          next_tag='REID (voice-over)'
+      rowid=87806   trailing='FBI.'                             next_class=A_anchored_caps          next_tag='REED (voice-over)'
+      rowid=87821   trailing='FBI.'                             next_class=A_anchored_caps          next_tag='REID (voice-over)'
+      rowid=87837   trailing='FBI.'                             next_class=A_anchored_caps          next_tag='REID (voice-over)'
+      rowid=110329  trailing='DA.'                              next_class=E_colonless_honorific    next_tag='GOV. RON'
+      rowid=185972  trailing='ISIS.'                            next_class=B_unknown_surname_paren  next_tag='SHAWN (voice-over)'
+      rowid=192133  trailing='SUZANNE MALVEAUX,'                next_class=C_unanchored_paren       next_tag='NATIONAL CORRESPONDENT, CNN(off-camera)'
+      rowid=193439  trailing='SUNLEN SERFATY,'                  next_class=C_unanchored_paren       next_tag='CONGRESSIONAL CORRESPONDENT, CNN (voice '
+      rowid=195175  trailing='NAFTA.'                           next_class=A_anchored_caps          next_tag='KING (voice-over)'
+      rowid=205497  trailing='FORMER U.S.'                      next_class=E_colonless_honorific    next_tag='ADVISER TO PRESIDENT TRUMP ON RUSSIA AND'
+      rowid=214505  trailing='NAFTA.'                           next_class=A_anchored_caps          next_tag='TAPPER (voice-over)'
+      rowid=217223  trailing='MO.'                              next_class=A_anchored_caps          next_tag='ZELENY (voice-over)'
+      rowid=217895  trailing='COVID.'                           next_class=B_unknown_surname_paren  next_tag='CONWAY (voice-over)'
+      rowid=223650  trailing='SCOTUS.'                          next_class=A_anchored_caps          next_tag='LEMON (on camera)'
+      rowid=227229  trailing='III.'                             next_class=E_colonless_honorific    next_tag='SEN. LINDSEY GRAHAM, R-S.C.'
+
+====================================================================================================
+P3  SEGMENT TEXT STARTS WITH LABEL DEBRIS (punctuation / party / role tail / paren)
+    ALL segments with leading debris, by class: {'E_colonless_honorific': 229, 'D_mixed_case_label': 1, 'A_anchored_caps': 3} (total 233)
+    of those, segments that WOULD BE INSERTED : {'E_colonless_honorific': 35} (total 35)
+      INSERT rowid=66973   E_colonless_honorific      '. The Senator will recognize that the Senate is in a non-deb'
+      INSERT rowid=68279   E_colonless_honorific      '; I think Bob Good has made a lot of -- a lot of enemies.'
+      INSERT rowid=79884   E_colonless_honorific      "(voiceover): Well, it's not exactly what I think. What I thi"
+      INSERT rowid=80238   E_colonless_honorific      ', (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LA'
+      INSERT rowid=84935   E_colonless_honorific      "(R- I've been saying for a long time that I think that all t"
+      INSERT rowid=89101   E_colonless_honorific      "(R-Mop: It'll give me comfort if they pass an audit, and the"
+      INSERT rowid=89961   E_colonless_honorific      ', CHAIR, SENATE BANKING COMMITTEE:: Well, there you have it.'
+      INSERT rowid=91491   E_colonless_honorific      '; I do not support the weaponization fund as it has been des'
+      INSERT rowid=102837  E_colonless_honorific      ', "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiratio'
+      INSERT rowid=102837  E_colonless_honorific      ', "THIS WEEK"/ABC, DEC. 17, 2017: You\'ve got somebody who, b'
+      INSERT rowid=108647  E_colonless_honorific      ':It is a dilemma in one respect but not in another. I will t'
+      INSERT rowid=108647  E_colonless_honorific      ':I can tell you this: what we see in this process, forcibly '
+      INSERT rowid=108647  E_colonless_honorific      ':I can tell you, they have the resources to get it done. Chu'
+      INSERT rowid=108647  E_colonless_honorific      ':Thanks. Good to be with you-- CHUCK TODD:By the way, NBC Ne'
+      INSERT rowid=111034  E_colonless_honorific      ':Yeah, I didn’t see Senator Graham but I just want to join h'
+      INSERT rowid=111034  E_colonless_honorific      ':Well, there are two separate lines of activity here. One is'
+      INSERT rowid=120706  E_colonless_honorific      ', "STATE OF THE UNION"/CNN: I will just tell you, this could'
+      INSERT rowid=167914  E_colonless_honorific      ", D—DELAWARE: Do you believe Special Counsel Mueller's inves"
+      INSERT rowid=167914  E_colonless_honorific      ", D—CONNECTICUT: It will be really troubling if you couldn't"
+      INSERT rowid=187143  E_colonless_honorific      ', D—CONN.: I want to know, are you prepared to do whatever i'
+      INSERT rowid=187143  E_colonless_honorific      ', D—CONN.: Are we going to ban assault weapons? Are we going'
+      INSERT rowid=192027  E_colonless_honorific      ', (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF'
+      INSERT rowid=197182  E_colonless_honorific      '; I understand that there are some well- intentioned Democra'
+      INSERT rowid=198345  E_colonless_honorific      ', "GMA"/ABC: We have a deeply insecure president who underst'
+      INSERT rowid=208795  E_colonless_honorific      ', PRESIDENTIAL CANDIDATE Bernie is my friend, and I am not h'
+      INSERT rowid=215057  E_colonless_honorific      '(voice over): The president has every right to present his c'
+      INSERT rowid=215756  E_colonless_honorific      '(Voice Over, Captioned): "Had we not had senators who decide'
+      INSERT rowid=219462  E_colonless_honorific      '; At 2:07, a mob of Trump supporters breached the steps. I d'
+      INSERT rowid=223251  E_colonless_honorific      '(voice-over): We have information that that phone may or may'
+      INSERT rowid=226287  E_colonless_honorific      ', CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6'
+      INSERT rowid=242833  E_colonless_honorific      ', SENATE MAJORITY WHIP D-Ill.: Many of the same senators who'
+      INSERT rowid=253028  E_colonless_honorific      '(voice-over): This, ladies and gentlemen, is gold. This is d'
+      INSERT rowid=265823  E_colonless_honorific      ', (R) LOUISIANA; And we`re being told that a woman went to 1'
+      INSERT rowid=273301  E_colonless_honorific      '(voice over): We have to work with President Trump to win ba'
+      INSERT rowid=274112  E_colonless_honorific      ':Well, right now, I`m so pleased that a group of seven senat'
+
+====================================================================================================
+P4  AN APPARENT SPEAKER LABEL SURVIVES *INSIDE* A SEGMENT THAT WOULD BE INSERTED
+    rowid=104285  seg1  -> Tim Kaine                class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=108647  seg1  -> Richard Durbin           class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=108647  seg2  -> Richard Durbin           class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=108647  seg5  -> Richard Durbin           class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=108647  seg6  -> Richard Durbin           class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=111034  seg1  -> Charles Schumer          class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=111034  seg2  -> Charles Schumer          class=E_colonless_honorific    inner labels=['CHUCK TODD']
+    rowid=167914  seg1  -> Christopher Coons        class=E_colonless_honorific    inner labels=['DELAWARE']
+    rowid=167914  seg2  -> Christopher Murphy       class=E_colonless_honorific    inner labels=['CONNECTICUT']
+    rowid=187143  seg1  -> Christopher Murphy       class=E_colonless_honorific    inner labels=['CONN.']
+    rowid=187143  seg2  -> Richard Blumenthal       class=E_colonless_honorific    inner labels=['CONN.']
+
+====================================================================================================
+P5  GAPS THE GRAMMAR CANNOT SEE AT ALL (corpus-wide, INTERVIEW rows)
+    INTERVIEW rows scanned: 153576   (flagged by the migration: 5863)
+    "NAME:" with NO space after the colon (NBC/MTP shape, invisible to TAG): 29 rows
+        unflagged examples: [(103834, 'CHUCK TODD'), (104233, 'CHUCK TODD'), (105315, 'CHUCK TODD'), (106388, 'CHUCK TODD'), (106389, 'CHUCK TODD'), (107615, 'TOM BROKAW'), (107616, 'JOY-ANN REID'), (107617, 'CHUCK TODD')]
+    a bare "Q: " questioner turn (CFR/PBS shape, never qualifies)          : 121 rows
+        unflagged examples: [83858, 277325, 277326, 277345, 277541, 277543, 277548, 277722]
+    an "UNIDENTIFIED MALE/FEMALE" label present                            : 34 rows
+        unflagged examples: [(70228, 'UNIDENTIFIED MALE'), (70229, 'UNIDENTIFIED FEMALE'), (81266, 'UNIDENTIFIED MALE'), (91011, 'UNIDENTIFIED FEMALE'), (159015, 'UNIDENTIFIED MALE'), (190969, 'UNIDENTIFIED MALE'), (205441, 'UNIDENTIFIED MALE'), (213358, 'UNIDENTIFIED MALE')]
+
+====================================================================================================
+P6  TAGS WHOSE FIRST TOKEN IS FILLER, NOT A NAME (the tag ate the member's own words)
+    segments whose tag starts with a filler token: 5
+      rowid=69544   A_anchored_caps          tag='OK. OK. WILD (voice-over)'                          row_has_no_member_words    kept_nw=0    skip='row_has_no_member_words'
+      rowid=244993  A_anchored_caps          tag='OK. OK. WILD (voice-over)'                          row_has_no_member_words    kept_nw=0    skip='row_has_no_member_words'
+      rowid=251506  A_anchored_caps          tag='I RAJU (on camera)'                                 ledger_only_unresolved     kept_nw=31   skip=None
+      rowid=278454  A_anchored_caps          tag='OK. Q'                                              row_has_no_member_words    kept_nw=0    skip='row_has_no_member_words'
+      rowid=278528  A_anchored_caps          tag='OK. Q'                                              row_has_no_member_words    kept_nw=0    skip='row_has_no_member_words'

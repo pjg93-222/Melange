@@ -1,0 +1,239 @@
+[the dial: two positions, nothing else]
+  OK   default is the repaired rule
+  OK   the dial name is IV_TURN_TAGS
+  OK   only "1" selects legacy; a typo falls back to the default, never to a third behaviour
+[legacy collector patterns are byte-identical to fetch_interviews.py at 35521f9aa]
+  OK   LABEL legacy pattern is byte-identical
+  OK   INLINE_LABEL legacy pattern is byte-identical
+  OK   MIXED_LABEL legacy pattern is byte-identical
+  OK   the repaired patterns are not the legacy ones
+[the collector compiles the grammar from the module, and reads the dial once]
+  OK   fetch_interviews.py imports the grammar module
+  OK   the dial is read once, at top level, with the repaired default
+  OK   LABEL, INLINE_LABEL and MIXED_LABEL all come from the module
+  OK   no raw ALL-CAPS label literal is left behind in the collector
+  OK   the collector still drops micro-interjections at the same floor, at all four sites
+  OK   scrub() keeps its acronym guard
+  OK   the two other collectors are untouched by this change
+[collector: a page that carries only legacy shapes parses identically under both dials]
+  OK   LABEL: identical boundaries on a legacy-only page
+  OK   INLINE_LABEL: identical truncation markers on a legacy-only page
+[collector: the repaired patterns see the three shapes the legacy ones cannot]
+  OK   LABEL repaired sees the backtick form, legacy does not
+  OK   LABEL repaired sees the lower-case parenthetical form, legacy does not
+  OK   LABEL repaired sees the bracketed timestamp form, legacy does not
+  OK   INLINE_LABEL repaired truncates at the backtick tag, legacy does not
+  OK   INLINE_LABEL repaired truncates at a parenthetical tag, legacy does not
+  OK   MIXED_LABEL repaired sees the PBS title tail, legacy does not
+  OK   MIXED_LABEL repaired still matches the party tail it always matched
+  OK   a label parenthetical can never hide a colon (parse_turns cuts on sp.index(":"))
+[stored text: every graded shape splits]
+  OK   splits: backtick host tag (U2 tagfreq #1, 1,434 occurrences)
+  OK   splits: lower-case parenthetical (U2 tagfreq #2)
+  OK   splits: on-camera parenthetical (U2 tagfreq #3)
+  OK   splits: R1 STOP-name tag with a broadcast parenthetical
+  OK   splits: R2 correspondent surname the lexicon never saw
+  OK   splits: R3 tag after a bracketed timestamp (anchor fails)
+  OK   splits: R3 tag after a comma (anchor fails)
+  OK   splits: full correspondent tag with a role tail
+  OK   splits: the contaminated in-use gold row, verbatim (measR1d U3U4 #15, speeches row 245771)
+  OK   splits: R4 PBS "<Name>, U.S. <Title>:" label
+  OK   splits: R4 mixed-case honorific prefix
+  OK   splits: R5 colon-less honorific tag
+[stored text: every false marker the measurement proved must NOT split]
+  OK   does not split: an acronym-colon construction in real speech
+  OK   does not split: an ALL-CAPS document heading
+  OK   does not split: a bare agency tag with no parenthetical
+  OK   does not split: a mid-sentence attribution verb
+  OK   does not split: a network name with no parenthetical
+  OK   does not split: a truncated honorific residue with no name
+  OK   does not split: an all-caps Washington Journal row (unmeasured, must be left alone)
+  OK   does not split: a mixed-case sentence start in a NON-mixed-case leg
+  OK   does not split: a mixed-case editorial heading in a mixed-case leg
+  OK   FMR. HUD on its own is not a speaker (no name follows the honorific)
+[stored text: the guards N12 added to the colon-less class, each measured]
+  OK   a deepfake stage direction is not a turn, possessive and all (rows 225771 / 242500)
+  OK   a possessive INSIDE a real colon-less tag still splits (row 191195 is a real bleed)
+  OK   the run crosses a bracketed timestamp and an ALL-CAPS parenthetical (row 70117)
+  OK   a colon-less tag inside an unclosed parenthesis is a stage direction (row 225128)
+  OK   the colon-less start is extended back over the whole ALL-CAPS run (row 69954 shape)
+  OK   the extension never crosses a sentence terminator, so a closing acronym stays with the member
+  OK   a mid-sentence colon-less mention is not a turn boundary
+  OK   an abbreviation does not open a false sentence for the mixed-case rule (row 260197)
+  OK   a heading whose every token is a STOP word never qualifies
+[V2 grade counter-example: the no-space colon MTP writes (G1 MECHANISM 1, 38 corpus rows)]
+  OK   CHUCK TODD:It  -- a colon with no space after it is still a turn boundary (row 104285)
+  OK   the no-space form still needs a qualifying name: a time of day is not a tag
+  OK   the no-space form does not fire on an acronym or a heading word
+[V2 grade counter-example: UNIDENTIFIED / quoted / dated role tails (G1 MECHANISM 2)]
+  OK   UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017:  splits (row 102837, 75 corpus rows)
+  OK   UNIDENTIFIED MALE #1: splits too (the hash-number form, rows 70228 / 70229)
+  OK   BRET BAIER, HOST OF "SPECIAL REPORT":  splits (row 242833, 215 of 262 words were his)
+  OK   a quoted, slashed and dated role tail splits (row 102837 head)
+[V2 grade counter-example: non-ASCII and curly-apostrophe names (G2a / G2e)]
+  OK   Laura Barrón-López: splits (row 258713; MIXED name tokens were ASCII-only)
+  OK   the DECOMPOSED spelling Barrón-López: splits too (row 258713, 8 corpus rows are NFD)
+  OK   a decomposed and a precomposed name normalise to the same member
+  OK   Fred de Sam Lazaro: splits -- a lower-case name particle (row 257343)
+  OK   O’BRIEN (voice over): splits -- U+2019 joins the name class (row 80974, 183 corpus rows)
+  OK   the curly apostrophe folds to the straight one when matching a member
+[V2 grade counter-example: an abbreviation period must not satisfy the sentence anchor (G2b)]
+  OK   the tag is the whole chyron, not "PRESIDENT AND" (rows 82055 / 71147 / 70812)
+  OK   the run crosses U.S. so the member keeps his whole question (row 205497)
+  OK   [V2] "No." is an ANSWER, not an abbreviation: the tag after it still splits (rows 260912 / 263507 / 264343 / 268284 / 274221 / 275455)
+  OK   [V2] the run crosses a TITLE abbreviation, so "MR." goes with the tag (row 274133)
+  OK   [V2] a mixed-case middle initial is still part of the name (row 175681)
+  OK   [V2] a same-surname mixed tag is the member own, even for a relative (row 274661)
+  OK   [V2] an ellipsis is a trailing-off, not an abbreviation (row 174172)
+  OK   [V2] a mixed-case tag after an ellipsis still splits (row 174172)
+  OK   a dotted abbreviation on its own never opens a turn
+[V2 grade counter-example: class C must not leave the next speaker NAME behind (G2d)]
+  OK   BRIAN NELSON, GENERAL COUNSEL, ... (2011- 2015):  the NAME goes with the tag (row 70149)
+  OK   SUZANNE MALVEAUX, NATIONAL CORRESPONDENT, CNN(off-camera): takes its name too (row 192133)
+[V2 rule 2: whose tag is it -- lenient for the member, strict for everyone else]
+  OK   a self tag by surname is own
+  OK   a self tag with the full name is own
+  OK   a same-surname different-first-name tag is NOT own for the COLLECTOR rule (succession-seat guard, names_member is unchanged)
+  OK   a different surname is not own
+  OK   the backtick folds to an apostrophe when matching a member
+  OK   [V2] the MIGRATION rule is LENIENT: a same-surname tag is the row own member and is NEVER cut
+  OK   [V2] a hyphenated or particled surname component still reads as own
+  OK   [V2] a tag that clearly names someone else is FOREIGN
+  OK   [V2] a broadcast role tag is FOREIGN even though it names nobody
+  OK   [V2] a tag with no name left after the role and heading words is AMBIGUOUS, never cut
+  OK   [V2] a near-miss on the member surname is AMBIGUOUS, never cut
+  OK   [V2] filler words are never a speaker name: a bare Q: can never be a tag
+  OK   [V2] leading filler is not part of the tag, so the member keeps "OK. OK." (rows 69544/244993)
+  OK   a row whose member speaks again splits into three turns, the third marked own
+  OK   [V2] first_foreign_hit finds the CUT POINT and ignores the member own later turn
+  OK   [V2] a row whose only tags are the member own name has no cut point
+[stored text: nothing is lost -- the spans tile the whole string]
+  OK   spans tile the string: backtick host tag (U2 tagfreq #1, 1,434 occurr
+  OK   spans tile the string: lower-case parenthetical (U2 tagfreq #2)
+  OK   spans tile the string: on-camera parenthetical (U2 tagfreq #3)
+  OK   spans tile the string: R1 STOP-name tag with a broadcast parenthetica
+  OK   spans tile the string: R2 correspondent surname the lexicon never saw
+  OK   spans tile the string: R3 tag after a bracketed timestamp (anchor fai
+  OK   spans tile the string: R3 tag after a comma (anchor fails)
+  OK   spans tile the string: full correspondent tag with a role tail
+  OK   spans tile the string: the contaminated in-use gold row, verbatim (me
+  OK   spans tile the string: R4 PBS "<Name>, U.S. <Title>:" label
+  OK   spans tile the string: R4 mixed-case honorific prefix
+  OK   spans tile the string: R5 colon-less honorific tag
+  OK   every span is either the kept text or carries a class
+[stored text: resolution is fail-closed -- drop, never guess]
+  OK   a full roster name resolves
+  OK   a nickname resolves
+  OK   a role tail is ignored
+  OK   a party suffix is stripped
+  OK   a bare surname with NO honorific never binds (the page alias map does not exist here)
+  OK   a bare surname WITH an honorific binds only when the roster surname is unique
+  OK   a mismatched first name never binds (predecessor / relative guard)
+  OK   an off-roster host never binds
+  OK   an ambiguous surname is never guessed
+[migration: importing the tool does nothing]
+  OK   the tool is guarded by a main block
+  OK   the tool opens the database read-only for a dry run
+  OK   [V2 REPLACES V1-INSERT] the tool can neither insert nor delete a speeches row, at all
+  OK   [V2] the only statement it runs against speeches is the truncating UPDATE
+  OK   the ledger table name is the agreed one
+  OK   [V2] the tool version says truncate-only
+  OK   [V2 rule c] the CU set really does pin the gold row
+[migration: the dry run changes nothing]
+  OK   the dry run leaves every byte in place
+  OK   [V2 REPLACES V1-INSERT] the bled INTERVIEW rows are flagged, skips included
+  OK   the clean row is not flagged
+  OK   the ALL-CAPS Washington Journal row is not flagged (rule d)
+  OK   the CREC row is not flagged (rule d)
+  OK   [V2] the same-surname row carries no foreign tag at all, so it is not flagged (rule 2)
+  OK   the lexicon is derived from the corpus AND the roster
+  OK   a bare surname tag is admitted only because the corpus taught the lexicon
+[migration: the five skip rules, each with its own reason]
+  OK   [V2 rule a] a row whose kept text is under eight words is SKIPPED, not emptied
+  OK   [V2 rule a] a row that opens with a foreign tag keeps no member words and is SKIPPED
+  OK   [V2 rule b] a label-bound row is SKIPPED with the label reason
+  OK   [V2 rule c] a CU-extract row is SKIPPED with the CU reason (the gold row)
+  OK   [V2 rule e] an ambiguous tag SKIPS the whole row
+  OK   [V2] every skipped row names its reason and every unskipped row has a cut point
+  OK   [V2] the residue list is exactly the skipped rows
+[migration: --apply refuses without a verified backup]
+  OK   a missing backup is refused
+  OK   a wrong-size backup is refused
+  OK   a pipeline lock beside the database is refused
+  OK   a non-empty -wal is refused
+  OK   with a byte-sized backup and no lock the preconditions pass
+  OK   [V2] --apply without the label-safety inventory is refused
+[migration: --apply]
+  OK   [V2 REPLACES V1-INSERT] the transaction truncated and inserted nothing
+  OK   [V2 REPLACES V1-INSERT] the row count is unchanged: nothing was inserted or deleted
+  OK   the bled row keeps only the member own words
+  OK   nwords is recomputed with the text
+  OK   [V2] the member own later turn is NOT re-created as a row anywhere
+  OK   [V2 REPLACES V1-INSERT] another roster member later turn is NOT re-attributed to them
+  OK   a host turn is never inserted
+  OK   a short later member turn is never inserted
+  OK   the clean row is byte-identical
+  OK   the all-caps Washington Journal row is byte-identical
+  OK   the CREC row is byte-identical
+  OK   the CU-extract row is byte-identical
+  OK   the no member words row is byte-identical
+  OK   the short kept text row is byte-identical
+  OK   the label-bound row is byte-identical
+  OK   the ambiguous tag row is byte-identical
+  OK   the same-surname own tag row is byte-identical
+  OK   every truncated row is a strict prefix of what it held before
+[migration: the ledger holds every removed character]
+  OK   [V2 REPLACES V1-INSERT] the ledger carries no inserted-rowid column any more
+  OK   one ledger row per truncated speeches row
+  OK   row 1: kept + removed reproduces the original text byte for byte
+  OK   row 1: the removed segments tile the removed text exactly
+  OK   row 1: the original row carries all seven columns
+  OK   row 1: every removed segment names its tag, class and ownership
+  OK   row 1: the first removed segment is the FOREIGN one the cut was made at
+  OK   row 1: the detector classes are recorded on the ledger row
+  OK   row 2: kept + removed reproduces the original text byte for byte
+  OK   row 2: the removed segments tile the removed text exactly
+  OK   row 2: the original row carries all seven columns
+  OK   row 2: every removed segment names its tag, class and ownership
+  OK   row 2: the first removed segment is the FOREIGN one the cut was made at
+  OK   row 2: the detector classes are recorded on the ledger row
+  OK   row 3: kept + removed reproduces the original text byte for byte
+  OK   row 3: the removed segments tile the removed text exactly
+  OK   row 3: the original row carries all seven columns
+  OK   row 3: every removed segment names its tag, class and ownership
+  OK   row 3: the first removed segment is the FOREIGN one the cut was made at
+  OK   row 3: the detector classes are recorded on the ledger row
+  OK   row 7: kept + removed reproduces the original text byte for byte
+  OK   row 7: the removed segments tile the removed text exactly
+  OK   row 7: the original row carries all seven columns
+  OK   row 7: every removed segment names its tag, class and ownership
+  OK   row 7: the first removed segment is the FOREIGN one the cut was made at
+  OK   row 7: the detector classes are recorded on the ledger row
+  OK   row 9: kept + removed reproduces the original text byte for byte
+  OK   row 9: the removed segments tile the removed text exactly
+  OK   row 9: the original row carries all seven columns
+  OK   row 9: every removed segment names its tag, class and ownership
+  OK   row 9: the first removed segment is the FOREIGN one the cut was made at
+  OK   row 9: the detector classes are recorded on the ledger row
+  OK   every ledgered row was reconstructed
+  OK   [V2] no skipped row was ledgered
+[migration: idempotency]
+  OK   a second apply finds nothing to truncate
+  OK   a second apply leaves every byte in place
+  OK   the only rows still carrying a foreign tag are the ones the migration deliberately skipped
+[migration: --restore is byte-exact]
+  OK   restore reported what it did
+  OK   the database is byte-identical to its pre-migration state
+  OK   the pre-migration digest is reproduced
+  OK   restore twice is a no-op
+  OK   apply after restore is possible again (the ledger is marked, not deleted)
+  OK   and restores byte-exact a second time
+[migration: apply -> restore returns the FILE, not just the rows]
+  OK   apply really changed the file
+  OK   [V2] after restore, every byte outside SQLite own header counters is identical
+  OK   [V2] not one byte at or past the end of the file header differs
+[migration: labels, constants and out-of-bounds sources are never touched]
+  OK   no stance, category or gold label word appears in the migrator
+  OK   the migrator touches one source only
+  OK   the migrator never writes iv_fetch_log or any other table
+INTERVIEW TURN TAG TESTS — 212 passed, 0 FAILED

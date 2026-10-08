@@ -143,6 +143,7 @@ class IncrementalProfiles:
         self.profile_contracts = {}
         self.profile_revision = digest({})
         self.profile_changes = {"added": [], "changed": [], "removed": [], "unchanged_count": 0}
+        self._derived_key = None  # names the generation, receipt and prefix the derived digests were computed for
 
     @staticmethod
     def content_digest(row):
@@ -270,44 +271,57 @@ class IncrementalProfiles:
             for row in candidate:
                 if not str(row.get("source_url", "")).rstrip("/").endswith("/" + row["profile_uuid"]):
                     raise ValueError("Profile UUID and provenance URL disagree")
-            next_digests = {row["profile_uuid"]: self.row_digests[index]["profile_content_sha256"]
-                            for index, row in enumerate(candidate)}
-            changes = {"added": sorted(set(next_digests) - set(self.profile_digests)),
-                "changed": sorted(i for i in next_digests if i in self.profile_digests and next_digests[i] != self.profile_digests[i]),
-                "removed": sorted(set(self.profile_digests) - set(next_digests)),
-                "unchanged_count": sum(self.profile_digests.get(i) == value for i, value in next_digests.items())}
-            contracts = {}
-            for index, row in enumerate(candidate):
-                eligible = self.eligible(row)
-                contracts[row["profile_uuid"]] = {**self.row_digests[index],
-                    "schema_id": "staffer-live-profile-content-v1", "source_profile_uuid": row["profile_uuid"],
-                    "display_name": (str(row.get("verified_name", "")).strip() if eligible else row.get("expected_name")),
-                    "expected_name": row.get("expected_name"), "verified_name": row.get("verified_name"),
-                    "eligible": eligible, "identity_status": row.get("identity_status"),
-                    "name_verification": "SOURCE_PROFILE_NAME_COLLECTION_VERIFIED_REVIEW_ONLY" if eligible else "IDENTITY_OR_CONTENT_REVIEW_REQUIRED",
-                    "canonical_identity_promoted": False, "source_url": row.get("source_url"),
-                    "source_path": str(self.path), "observed_at": row.get("observed_at"),
-                    "path": str(self.path), "sha256": self.row_digests[index]["profile_content_sha256"],
-                    "sha256_scope": "CANONICAL_PROFILE_CONTENT",
-                    "raw_line_sha256": self.row_digests[index]["profile_raw_line_sha256"],
-                    "byte_start": self.line_end_offsets[index - 1] if index else 0,
-                    "byte_end": self.line_end_offsets[index], "receipt_sha256": receipt_digest,
-                    "verification_receipt": str(receipt_path), "verified_at": receipt.get("generated_at"),
-                    "prefix_binding": "SHA256_BYTE_PREFIX" if hash_bound else "COUNT_ONLY_PREFIX",
-                    "verified_prefix_bytes": prefix_bytes if hash_bound else None,
-                    "verified_prefix_sha256": prefix_sha256 if hash_bound else None,
-                    "digest_basis": "Content: sorted-key compact JSON excluding observed_at/fetched_at/retrieved_at; row: all parsed fields; raw line: exact bytes including newline"}
-            self.accepted = candidate
-            self.accepted_receipt = receipt
-            self.accepted_receipt_digest = receipt_digest
-            self.accepted_prefix_sha256 = digest(candidate)
-            self.generation_needs_receipt = False
-            self.verified_byte_binding = byte_binding if hash_bound else None
-            self.exceptions = sum(not self.eligible(row) for row in candidate)
-            self.profile_digests, self.profile_contracts = next_digests, contracts
-            self.eligible_profile_digests = {i: value for i, value in next_digests.items() if contracts[i]["eligible"]}
-            self.profile_revision = digest(self.eligible_profile_digests)
-            self.profile_changes = changes
+            # The digests, contracts and change list below depend only on the generation, the receipt and the
+            # verified prefix. When they are those of the cycle that derived them, the derived values still hold and
+            # are kept (the rows and receipt were still read and checked above, on this cycle): nothing was added,
+            # changed or removed, and the 0.3 s digest of every row is not computed again.
+            derived_key = (self.generation, receipt_digest, count, prefix_bytes, prefix_sha256, hash_bound)
+            if derived_key == self._derived_key:
+                self.accepted = candidate
+                self.accepted_receipt = receipt
+                self.generation_needs_receipt = False
+                self.verified_byte_binding = byte_binding if hash_bound else None
+                self.profile_changes = {"added": [], "changed": [], "removed": [], "unchanged_count": len(self.profile_digests)}
+            else:
+                next_digests = {row["profile_uuid"]: self.row_digests[index]["profile_content_sha256"]
+                                for index, row in enumerate(candidate)}
+                changes = {"added": sorted(set(next_digests) - set(self.profile_digests)),
+                    "changed": sorted(i for i in next_digests if i in self.profile_digests and next_digests[i] != self.profile_digests[i]),
+                    "removed": sorted(set(self.profile_digests) - set(next_digests)),
+                    "unchanged_count": sum(self.profile_digests.get(i) == value for i, value in next_digests.items())}
+                contracts = {}
+                for index, row in enumerate(candidate):
+                    eligible = self.eligible(row)
+                    contracts[row["profile_uuid"]] = {**self.row_digests[index],
+                        "schema_id": "staffer-live-profile-content-v1", "source_profile_uuid": row["profile_uuid"],
+                        "display_name": (str(row.get("verified_name", "")).strip() if eligible else row.get("expected_name")),
+                        "expected_name": row.get("expected_name"), "verified_name": row.get("verified_name"),
+                        "eligible": eligible, "identity_status": row.get("identity_status"),
+                        "name_verification": "SOURCE_PROFILE_NAME_COLLECTION_VERIFIED_REVIEW_ONLY" if eligible else "IDENTITY_OR_CONTENT_REVIEW_REQUIRED",
+                        "canonical_identity_promoted": False, "source_url": row.get("source_url"),
+                        "source_path": str(self.path), "observed_at": row.get("observed_at"),
+                        "path": str(self.path), "sha256": self.row_digests[index]["profile_content_sha256"],
+                        "sha256_scope": "CANONICAL_PROFILE_CONTENT",
+                        "raw_line_sha256": self.row_digests[index]["profile_raw_line_sha256"],
+                        "byte_start": self.line_end_offsets[index - 1] if index else 0,
+                        "byte_end": self.line_end_offsets[index], "receipt_sha256": receipt_digest,
+                        "verification_receipt": str(receipt_path), "verified_at": receipt.get("generated_at"),
+                        "prefix_binding": "SHA256_BYTE_PREFIX" if hash_bound else "COUNT_ONLY_PREFIX",
+                        "verified_prefix_bytes": prefix_bytes if hash_bound else None,
+                        "verified_prefix_sha256": prefix_sha256 if hash_bound else None,
+                        "digest_basis": "Content: sorted-key compact JSON excluding observed_at/fetched_at/retrieved_at; row: all parsed fields; raw line: exact bytes including newline"}
+                self.accepted = candidate
+                self.accepted_receipt = receipt
+                self.accepted_receipt_digest = receipt_digest
+                self.accepted_prefix_sha256 = digest(candidate)
+                self.generation_needs_receipt = False
+                self.verified_byte_binding = byte_binding if hash_bound else None
+                self.exceptions = sum(not self.eligible(row) for row in candidate)
+                self.profile_digests, self.profile_contracts = next_digests, contracts
+                self.eligible_profile_digests = {i: value for i, value in next_digests.items() if contracts[i]["eligible"]}
+                self.profile_revision = digest(self.eligible_profile_digests)
+                self.profile_changes = changes
+                self._derived_key = derived_key
         except (OSError, ValueError, TypeError) as exc:
             self.errors.append(str(exc))
         return self.summary()
@@ -441,8 +455,15 @@ class LiveDashboard:
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
+        """Identity decisions, relationship statements and route search cancellation.
+
+        All three change server state, so they share one local-origin guard.
+        /api/staffer-route-cancel takes {"id": <search_id>, "holder": <page token>}: that page lets go of the search,
+        which stops when no page still holds it. The holder is optional; a cancel without one lets go of the shared
+        anonymous holder that every request without a token uses.
+        """
         endpoint = urlsplit(self.path).path
-        if endpoint not in {'/api/staffer-identity', '/api/staffer-assertions'}:
+        if endpoint not in {'/api/staffer-identity', '/api/staffer-assertions', '/api/staffer-route-cancel'}:
             # Consume a small, declared request body before closing. Otherwise
             # Windows may reset the socket with unread bytes and hide the 404.
             previous_timeout = self.connection.gettimeout()
@@ -457,22 +478,39 @@ class Handler(BaseHTTPRequestHandler):
                 self.connection.settimeout(previous_timeout)
             self.send_error(404)
             return
+        cancel = endpoint == '/api/staffer-route-cancel'
+        subject, noun, kind = (('Route search changes', 'route search change', 'route search') if cancel else
+                               ('Identity decisions', 'identity decision', 'identity'))
         try:
             origin = self.headers.get('Origin')
             if origin:
                 parsed = urlsplit(origin)
                 if parsed.scheme != 'http' or parsed.hostname not in {'localhost', '127.0.0.1'} or parsed.port != self.server.server_address[1]:
-                    raise ValueError('Identity decisions must come from this local viewer')
+                    raise ValueError(subject + ' must come from this local viewer')
             if self.headers.get('Sec-Fetch-Site') == 'cross-site':
-                raise ValueError('Cross-site identity changes are not accepted')
+                raise ValueError('Cross-site ' + kind + ' changes are not accepted')
             if self.headers.get('Content-Type', '').split(';')[0] != 'application/json':
-                raise ValueError('Identity decisions require JSON')
+                raise ValueError(subject + ' require JSON')
             length = int(self.headers.get('Content-Length', '0'))
             if not 1 <= length <= 16384:
-                raise ValueError('Invalid identity decision size')
+                raise ValueError('Invalid ' + noun + ' size')
             payload = json.loads(self.rfile.read(length))
             if not isinstance(payload, dict):
-                raise ValueError('Invalid identity decision')
+                raise ValueError('Invalid ' + noun)
+            if cancel:
+                search_id = payload.get('id')
+                if not isinstance(search_id, str) or not 1 <= len(search_id) <= 64:
+                    raise ValueError('Choose a search to cancel')
+                holder = payload.get('holder')
+                if holder is not None and (not isinstance(holder, str) or not 1 <= len(holder) <= 64):
+                    raise ValueError('Invalid search holder')
+                service = self.server.dashboard
+                if not hasattr(service, 'cancel_route_search'):
+                    self.send_bytes(b'{"error":"Route cancellation unavailable"}', 'application/json', 503)
+                    return
+                answer = service.cancel_route_search(search_id, **({'holder': holder} if holder else {}))
+                self.send_bytes(json.dumps(answer).encode(), 'application/json')
+                return
             result = (self.server.dashboard.assertion_decision(payload) if endpoint == '/api/staffer-assertions' else
                       self.server.dashboard.identity_decision(payload.get('primary_id'), payload.get('alias_ids'), payload.get('decision')))
             self.send_bytes(json.dumps(result).encode(), 'application/json', 202)
@@ -632,7 +670,19 @@ class Handler(BaseHTTPRequestHandler):
                     office = parts.path == '/api/staffer-office-route'
                     origin, target = query.get('origin', [''])[0], query.get('office' if office else 'target', [''])[0]
                     if query.get('async', ['0'])[0] == '1':
-                        result = service.start_route_search(origin, target, self.routing_options(query), office=office)
+                        # holder=<page token> names the page asking. supersedes=<search_id> makes that page let go of the
+                        # search this request replaces. A GET carries none of the origin checks of the POST routes, so
+                        # a supersede is honoured only when the browser reports the request as same-origin or typed
+                        # in (Sec-Fetch-Site same-origin or none), or sends no such header (not a browser fetch).
+                        extra = {}
+                        fetch_site = (self.headers.get('Sec-Fetch-Site') or '').strip().lower()
+                        supersedes = query.get('supersedes', [''])[0][:64]
+                        if supersedes and fetch_site in ('', 'same-origin', 'none'):
+                            extra['supersedes'] = supersedes
+                        holder = query.get('holder', [''])[0][:64]
+                        if holder:
+                            extra['holder'] = holder
+                        result = service.start_route_search(origin, target, self.routing_options(query), office=office, **extra)
                     else:
                         result = (service.office_route if office else service.route)(origin, target, self.routing_options(query))
                 else:

@@ -1,0 +1,7 @@
+# Frozen evidence (DE-040): stored byte-exact, never end-of-line converted. Each landing set's SHA256SUMS.txt
+# records the sha256 of these bytes, and core.autocrlf=true would rewrite them on add and again on checkout.
+*.patch -text
+*.json -text
+# The proof captures carry the CR bytes of the runs they quote, and the sets' SHA256SUMS.txt hash them too, so
+# everything else in this packet is stored byte-exact as well.
+* -text

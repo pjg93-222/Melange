@@ -1,0 +1,102 @@
+
+====================================================================================================
+S2-0  NEGATIVE CONTROL : re-implemented Resolver vs the producer's own resolution
+====================================================================================================
+archive Member cells ................................. 10181
+   not comparable (producer never recorded a member) . 631  {'excluded-title': 578, 'excluded-override': 53}
+   comparable ........................................ 9550
+      agree with legislation_routing_audit.json ...... 9550
+      disagree ....................................... 0
+=> the transcribed Resolver is FAITHFUL on every comparable row
+
+====================================================================================================
+S2-a  CLASSIFICATION of the 53 sponsorless (bill, Congress) in the selected archive
+====================================================================================================
+SPONSOR-IS-CURRENT-MEMBER-ROW-MISSING    bills=4    member rows=91    
+SPONSOR-NOT-IN-ROSTER                    bills=49   member rows=1795  
+SPONSOR-UNKNOWN-LOCALLY                  bills=0    member rows=0     
+TOTAL                                    bills=53   member rows=1886  
+
+by Congress x class:
+   C=117  IS=1  NOT=31  UNKNOWN=0
+   C=118  IS=3  NOT=18  UNKNOWN=0
+
+which local source answered, for the defect class:
+   selected-archive Sponsor column                4
+
+====================================================================================================
+S2-b  DEFECT CLASS : sponsor is a current roster member, no sponsor row exists anywhere in the bill
+====================================================================================================
+bill           C    rows   sponsor (resolved)     categories                     evidence source
+S.3382         117  37     Tim Scott              Member Business Lending        selected-archive Sponsor column
+H.R.4686       118  21     Anna Luna              Mortgage & Housing             selected-archive Sponsor column
+H.R.6410       118  5      Anna Luna              Data Privacy & Cyber           selected-archive Sponsor column
+S.3992         118  28     Tim Scott              Member Business Lending        selected-archive Sponsor column
+
+====================================================================================================
+S2-c  BENIGN CLASS : named sponsor is not a current member (row legitimately absent)
+====================================================================================================
+   "exact roster name" = the decisive test; "surname shared" lists roster members who share
+   the surname, i.e. the reason the Resolver alone could not settle the case.
+bill           C    rows   Sponsor cell                   exact name? roster members sharing the surname
+H.R.1020       117  4      Phillips, Dean                 NO          []
+H.R.1280       117  256    Bass, Karen                    NO          []
+H.R.154        117  9      Rush, Bobby L.                 NO          []
+H.R.1711       117  1      Scott, David                   NO          ['Austin Scott', 'Rick Scott', 'Robert Scott', 'Tim Scott']
+H.R.1841       117  4      McNerney, Jerry                NO          []
+H.R.1996       117  764    Perlmutter, Ed                 NO          []
+H.R.4481       117  7      Phillips, Dean                 NO          []
+H.R.4773       117  35     Luetkemeyer, Blaine            NO          []
+H.R.6038       117  27     Luetkemeyer, Blaine            NO          []
+H.R.7412       117  22     Mooney, Alexander X.           NO          []
+H.R.7628       117  44     Luetkemeyer, Blaine            NO          []
+H.R.7643       117  1      Crist, Charlie                 NO          []
+H.R.7776       117  8      DeFazio, Peter A.              NO          []
+H.R.793        117  98     Blumenauer, Earl               NO          []
+H.R.8340       117  2      Swalwell, Eric                 NO          []
+H.R.8950       117  2      Maloney, Sean Patrick          NO          []
+H.R.9588       117  12     Luetkemeyer, Blaine            NO          []
+H.R.982        117  4      Deutch, Theodore E.            NO          []
+S.2034         117  6      Rubio, Marco                   NO          []
+S.2131         117  3      Tester, Jon                    NO          []
+S.2658         117  13     Casey, Robert P., Jr.          NO          []
+S.2788         117  10     Rubio, Marco                   NO          []
+S.2801         117  2      Sinema, Kyrsten                NO          []
+S.2981         117  14     Rubio, Marco                   NO          []
+S.4008         117  2      Cardin, Benjamin L.            NO          []
+S.4325         117  42     Sinema, Kyrsten                NO          []
+S.4760         117  9      Stabenow, Debbie               NO          []
+S.5025         117  6      Manchin, Joe, III              NO          []
+S.588          117  24     Feinstein, Dianne              NO          []
+S.63           117  5      Cardin, Benjamin L.            NO          []
+S.64           117  3      Cardin, Benjamin L.            NO          []
+H.R.1059       118  37     Armstrong, Kelly               NO          ['Alan Armstrong']
+H.R.1313       118  38     Mooney, Alexander X.           NO          []
+H.R.1410       118  2      Luetkemeyer, Blaine            NO          []
+H.R.1411       118  2      Luetkemeyer, Blaine            NO          []
+H.R.1540       118  2      Cartwright, Matt               NO          []
+H.R.1602       118  83     Porter, Katie                  NO          []
+H.R.1651       118  2      Phillips, Dean                 NO          []
+H.R.2568       118  2      Mooney, Alexander X.           NO          []
+H.R.3712       118  28     Mooney, Alexander X.           NO          []
+H.R.4766       118  1      McHenry, Patrick T.            NO          []
+H.R.5739       118  32     Wexton, Jennifer               NO          []
+H.R.7440       118  2      McHenry, Patrick T.            NO          []
+H.R.804        118  7      Luetkemeyer, Blaine            NO          []
+H.R.8285       118  14     Swalwell, Eric                 NO          []
+S.1514         118  30     Rubio, Marco                   NO          []
+S.3902         118  2      Tester, Jon                    NO          []
+S.4264         118  4      Sinema, Kyrsten                NO          []
+S.610          118  68     Sinema, Kyrsten                NO          []
+
+====================================================================================================
+S2-d  UNKNOWN-LOCALLY
+====================================================================================================
+
+====================================================================================================
+S2-e  CROSS-CHECK : bills where a sponsor-role row EXISTS -- does it carry the named sponsor?
+====================================================================================================
+(bill,Congress) with a sponsor row whose holder is NOT the person the Sponsor column names .. 0
+bill           C    Sponsor column resolves to members holding the sponsor role
+
+wrote s2_state.json

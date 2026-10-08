@@ -542,6 +542,7 @@ cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved)
 function flyTo(i){cam.s=2.4;cam.tx=W/2-LX[i]*cam.s;cam.ty=H/2-LY[i]*cam.s;draw();}
 // ============ LIVE SCENARIO/PATHFINDER ENGINE (faithful port of flip_model + competitive cascade + lt_priming) ============
 const EG=DATA.engine,K=EG.const,BPF=EG.bpf,PTY=DATA.party;
+// COMPET_MULT (Paul 2026-10-05): EG.cmult = per-member competitiveness multiplier c, scaling EFFECTIVE dollars on BOTH money legs (absent in dial-OFF / old bundles -> neutral 1). Read as EG.cmult inline (no global) so every sliced copy of these functions stays self-contained.
 const PM=EG.pmult||null,EMU=EG.emult||null,DM=EG.dmult||null;   // receptivity psych parity (2026-07-09): pressure/edge/delivery multipliers mirrored from the Python engine (old bundles -> neutral 1.0)
 let ADJ=Array.from({length:N},()=>({}));for(const [u,v,w] of EG.adj){ADJ[u][v]=w;ADJ[v][u]=w;}
 // HOLISTIC NETWORK TOGGLE (Paul-ruled 2026-08-18). The holistic adjacency travels in the same
@@ -606,14 +607,14 @@ function flipModel(i,tiers,cu,ind){
   for(let u=0;u<N;u++){let a=0,b=0;const nb=ADJ[u];for(const v in nb){const c=CAMP(tiers[v]);if(c==='neu')continue;const wc=nb[v]*align(u,+v);if(c==='pro')a+=wc;else b+=wc;}nA[u]=a;nB[u]=b;}   // persuasion proximity uses SOURCE-ALIGNMENT
   const mA=Math.max(...nA)||1,mB=Math.max(...nB)||1;   // 2026-10-01 (Paul: "Match backend"): the REAL peer maximum, 1 only when it is 0 (an empty camp) = flip_model.topic_setup `max(nA.values()) or 1` and the desk's desk_roi; it used to floor each maximum at 1
   const eng=EG.eng[i],priority=(EG.priority&&EG.priority[i])||EG.tierp;let total=0;const pf=new Float64Array(N),tg=new Float64Array(N);
-  for(let u=0;u<N;u++){const pm=PM?PM[u]:1;const a=K.WM*pm*(cu[u]+1)/((cu[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nA[u]/mA;const b=K.WM*pm*(ind[u]+1)/((ind[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nB[u]/mB;const p=(a+b)>0?a/(a+b):0;pf[u]=p;tg[u]=Math.max(0,eng[u]+K.BASE*priority[u])*(PERS[SCN[tiers[u]]]||0)*(1+0.3*BPF[u])*(DM?DM[u]:1);total+=tg[u]*p;}   // Direct issue engagement + tier/LOO-orientation priority; floor only after combination, then pressure/delivery parity.
+  for(let u=0;u<N;u++){const pm=PM?PM[u]:1,cm=EG.cmult?EG.cmult[u]:1;const a=K.WM*pm*(cm*cu[u]+1)/((cm*cu[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nA[u]/mA;const b=K.WM*pm*(cm*ind[u]+1)/((cm*ind[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nB[u]/mB;const p=(a+b)>0?a/(a+b):0;pf[u]=p;tg[u]=Math.max(0,eng[u]+K.BASE*priority[u])*(PERS[SCN[tiers[u]]]||0)*(1+0.3*BPF[u])*(DM?DM[u]:1);total+=tg[u]*p;}   // Direct issue engagement + tier/LOO-orientation priority; floor only after combination, then pressure/delivery parity.
   return {pf,tg,nA,nB,mA,mB,total};
 }
-function pflipOf(u,nAu,nBu,mA,mB,cu,ind){const pm=PM?PM[u]:1;const a=K.WM*pm*(cu+1)/((cu+1)+K.HALFF*EG.rcp[u])+K.WP*nAu/mA;const b=K.WM*pm*(ind+1)/((ind+1)+K.HALFF*EG.rcp[u])+K.WP*nBu/mB;return (a+b)>0?a/(a+b):0;}
-function shiftLean(u,dollars){const r=dollars/EG.rcp[u];return K.MAXSHIFT*(r/(r+K.HALF))*(PM?PM[u]:1);}   // x pressure_mult (psych parity 2026-07-09 = money_response.shift_lean)
+function pflipOf(u,nAu,nBu,mA,mB,cu,ind){const pm=PM?PM[u]:1,cm=EG.cmult?EG.cmult[u]:1;const a=K.WM*pm*(cm*cu+1)/((cm*cu+1)+K.HALFF*EG.rcp[u])+K.WP*nAu/mA;const b=K.WM*pm*(cm*ind+1)/((cm*ind+1)+K.HALFF*EG.rcp[u])+K.WP*nBu/mB;return (a+b)>0?a/(a+b):0;}
+function shiftLean(u,dollars){const r=(EG.cmult?EG.cmult[u]:1)*dollars/EG.rcp[u];return K.MAXSHIFT*(r/(r+K.HALF))*(PM?PM[u]:1);}   // x pressure_mult (psych parity 2026-07-09 = money_response.shift_lean)
 // QME 2026-10-01 (mirrors lt_priming.py LT_MONEY_PARITY): prime()'s money term = money_response.shift_lean/MAXSHIFT = pm*r/(r+HALF), so the inverse divides the unit target by pressure_mult and uses the HALF dial (K.LTHALF; 0.10 when parity is off). K.LTPAR===0 -> old (pm 1, K.HALF). Old bundles lack K.LTPAR/LTHALF -> parity on.
 function ltPM(u){return K.LTPAR===0?1:Math.max(PM?PM[u]:1,1e-9);}
-function dollarsForUnits(u,units){units=Math.min(units/ltPM(u),0.98);const h=(K.LTHALF!=null&&K.LTPAR!==0)?K.LTHALF:(K.LTPAR===0?0.10:K.HALF);return h*EG.rcp[u]*units/(1-units);}
+function dollarsForUnits(u,units){units=Math.min(units/ltPM(u),0.98);const h=(K.LTHALF!=null&&K.LTPAR!==0)?K.LTHALF:(K.LTPAR===0?0.10:K.HALF);return h*EG.rcp[u]*units/(1-units)/(EG.cmult?EG.cmult[u]:1);}
 // stance-integrity gates (2026-07-04, mirrors fec/engine/lt_priming.py; 'Lean Skeptic' carved out of every one):
 // overall Skeptic/Highly-Skeptical/Opponent can be neither target nor recruit; recruit pricing scales by
 // persuadability (True-Neutral-anchored, LS pinned flat); theta grows with declared-Opponent-cell breadth.
@@ -1093,15 +1094,15 @@ function runScenario(){
    +(defects?`<div class=defwarn style=margin-top:6px>⚠ crosses defection threshold (${K.DTHRESH}) — overall stance would shift ${lean>0?'toward pro':'toward anti'}.</div>`:'')
    +cascStr;
   // HEAD-TO-HEAD (this issue): CU pull vs industry pull -> flip odds + break-even spend
-  const c=baseCache[issue],pm=PM?PM[sel]:1;
-  const A=K.WM*pm*(EG.cu[sel]+cu+1)/((EG.cu[sel]+cu+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nAsel/c.mA;
-  const Bv=K.WM*pm*(EG.ind[sel]+co+1)/((EG.ind[sel]+co+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nBsel/c.mB;
+  const c=baseCache[issue],pm=PM?PM[sel]:1,cmS=EG.cmult?EG.cmult[sel]:1;
+  const A=K.WM*pm*(cmS*(EG.cu[sel]+cu)+1)/((cmS*(EG.cu[sel]+cu)+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nAsel/c.mA;
+  const Bv=K.WM*pm*(cmS*(EG.ind[sel]+co)+1)/((cmS*(EG.ind[sel]+co)+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nBsel/c.mB;
   const pct=Math.round(100*A/(A+Bv));
   document.getElementById('h2hcu').style.width=pct+'%';document.getElementById('h2hind').style.width=(100-pct)+'%';document.getElementById('h2hpct').textContent=pct+'%';
   const tA=c.pfbase*Bv/(1-c.pfbase),q=(tA-K.WP*c.nAsel/c.mA)/(K.WM*pm);let be;
   if(co===0)be='<span style=color:#9D9784>add competitor $ to see the CU break-even</span>';
   else if(q>=1)be='<b style=color:#f59e0b>CU money alone can’t fully offset</b> $'+(co/1000)+'k of competitor spend here';
-  else{const need=Math.max(0,Math.round((q*K.HALFF*EG.rcp[sel]/(1-q))-1-EG.cu[sel]));be='to neutralize $'+(co/1000)+'k competitor → <b>$'+Math.round(need/1000)+'k</b> CU money';}
+  else{const need=Math.max(0,Math.round(((q*K.HALFF*EG.rcp[sel]/(1-q))-1)/cmS-EG.cu[sel]));be='to neutralize $'+(co/1000)+'k competitor → <b>$'+Math.round(need/1000)+'k</b> CU money';}
   document.getElementById('h2hbe').innerHTML=be;
 }
 const pedges=p=>p.slice(1).map((v,k)=>[p[k],v]);
@@ -1186,6 +1187,7 @@ function updateEngChk(){
 }
 // panels
 function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function frontierKneeText(f){return f.knee_found===true?'best value at $'+(f.knee/1000).toFixed(0)+'k':'best-value point not identified within this range';}
 function refresh(){
  if(HONORS)refreshHonorControls();
  const f=DATA.frontier[issue], useSlider=(mode==='coal'&&!!f);
@@ -1210,7 +1212,7 @@ function refresh(){
    // non-null here by construction: useSlider requires mode==='coal' && DATA.frontier[issue], which is the
    // exact condition computeFund() uses to set SPREAD. "$50k each" mirrors the flat FUND pin at :304 --
    // in coalition mode every entrant is allocated the same 50, so the count implies no tailored amount.
-   document.getElementById('mdetail').innerHTML=`~<b>${SPREAD.toFixed(0)}</b> co-sponsors, up from <b>${f.base.toFixed(0)}</b> · <b>${ORD.length}</b> members funded at $50k each · best value at $${(f.knee/1000).toFixed(0)}k · drag to set budget`;
+   document.getElementById('mdetail').innerHTML=`~<b>${SPREAD.toFixed(0)}</b> co-sponsors, up from <b>${f.base.toFixed(0)}</b> · <b>${ORD.length}</b> members funded at $50k each · ${frontierKneeText(f)} · drag to set budget`;
  }else if(DATA.engine.refflip[issue]===0){   // Overall = aggregate stance layer; summing every issue's budget is meaningless
    document.getElementById('money').textContent='—';
    const ob=DATA.opt?('$'+(DATA.opt.budget/1e6).toFixed(1)+'M'):'joint';

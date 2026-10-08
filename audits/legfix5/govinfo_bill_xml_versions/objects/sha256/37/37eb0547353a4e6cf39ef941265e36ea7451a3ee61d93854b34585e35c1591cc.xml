@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL23229-06C-8R-WP6"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 S544 IS: To amend the Federal Credit Union Act to provide a sunset for certain ways in which credit unions may be Agent members of the National Credit Union Administration Central Liquidity Facility.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-02-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>118th CONGRESS</congress><session>1st Session</session><legis-num>S. 544</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20230228">February 28, 2023</action-date><action-desc><sponsor name-id="S413">Mr. Padilla</sponsor> (for himself and <cosponsor name-id="S398">Mr. Cramer</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Federal Credit Union Act to provide a sunset for certain ways in which credit unions may be Agent members of the National Credit Union Administration Central Liquidity Facility.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Agent membership</header><subsection id="id58a90505d13b46b9a1d16dcad8b9da73"><enum>(a)</enum><header>In general</header><text>Section 304(b)(2) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1795c">12 U.S.C. 1795c(b)(2)</external-xref>) is amended by striking <quote>all those credit unions</quote> and inserting <quote>such credit unions as the Board may in its discretion determine</quote>.</text></subsection><subsection id="id039f398c4dd840298339832e2247d294"><enum>(b)</enum><header>Sunset</header><paragraph id="id019aa888129b49f2ad4bb23158a9be10"><enum>(1)</enum><header>In general</header><text>Section 304(b)(2) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1795c">12 U.S.C. 1795c(b)(2)</external-xref>) is amended by striking <quote>such credit unions as the Board may in its discretion determine</quote> and inserting <quote>all those credit unions</quote>.</text></paragraph><paragraph id="id4a35100b4ac94e98afff3d88fbad43be" commented="no"><enum>(2)</enum><header>Effective date</header><text>The amendments made by paragraph (1) shall take effect on the date that is 3 years after the date of enactment of this Act.</text></paragraph></subsection></section></legis-body></bill> 
+

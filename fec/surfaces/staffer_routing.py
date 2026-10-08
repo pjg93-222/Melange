@@ -12,11 +12,13 @@ import heapq
 import itertools
 import json
 import math
+import threading
 import time
 
 try:
     from .staffer_activity_index import ActivitySearchLimited
     from .staffer_payroll_identity import employment_overlap
+    from .staffer_route_cancel import check_cancelled
 except ImportError:  # direct script execution: no package context
     import os as _bootstrap_os, sys as _bootstrap_sys
     _bootstrap_root = _bootstrap_os.path.dirname(_bootstrap_os.path.dirname(
@@ -25,9 +27,11 @@ except ImportError:  # direct script execution: no package context
         _bootstrap_sys.path.insert(0, _bootstrap_root)
     from fec.surfaces.staffer_activity_index import ActivitySearchLimited
     from fec.surfaces.staffer_payroll_identity import employment_overlap
+    from fec.surfaces.staffer_route_cancel import check_cancelled
 
 
 VERSION = 'employment-routing-v7-overlap-evidence-audit'
+_CLOSENESS_LOCK = threading.Lock()
 
 
 class _Limit(Exception):
@@ -155,7 +159,8 @@ class AdvocacyRouter:
                     "policy_cost": 8.0, "max_expansions": 2000, "max_neighbor_checks": 100000,
                     "timeout_ms": 1500, "limit": 100, "offset": 0, "objective": "evidence_cost",
                     "work_sources": "payroll_and_directory", "route_count": 1, "uncertainty_weight": 1.0, "alternative_strategy": "distinct", "avoid_people": (),
-                    "_excluded_nodes": (), "_excluded_edges": (), "_excluded_contexts": (), "_target_office": None}
+                    "_excluded_nodes": (), "_excluded_edges": (), "_excluded_contexts": (), "_target_office": None,
+                    "_avoided_targets": ()}
         defaults.update({k: v for k, v in options.items() if k in defaults})
         count = float(defaults['route_count'])
         if not math.isfinite(count) or not count.is_integer() or not 1 <= count <= 5:
@@ -421,6 +426,7 @@ class AdvocacyRouter:
             return (cost, route['steps'])
 
         while accepted and len(accepted) < count:
+            check_cancelled()
             previous = accepted[-1]
             for index in range(len(previous['node_ids']) - 1):
                 root = previous['node_ids'][:index + 1]
@@ -428,6 +434,7 @@ class AdvocacyRouter:
                     for r in accepted if len(r['node_ids']) > index + 1 and r['node_ids'][:index + 1] == root}))
                 if progress:
                     progress({'routes_found': len(accepted), 'routes_requested': count})
+                check_cancelled()
                 spur = self.route_many(root[-1], [p for p in targets if p not in root[:-1]],
                     {**single, '_excluded_nodes': tuple(sorted(set(single['_excluded_nodes']) | set(root[:-1]))),
                      '_excluded_edges': tuple(sorted(set(single['_excluded_edges']) | set(excluded)))}, progress)
@@ -455,6 +462,53 @@ class AdvocacyRouter:
                 'routes_returned': len(routes), 'alternatives_complete': True,
                 'search_elapsed_ms': round((self._clock() - started) * 1000, 2)}
 
+    def closeness(self):
+        """This router's work-time routes: its indexes and hop-row caches, created once.
+
+        Creation is serialized, so two first requests share one set instead of building two work indexes, and the
+        service calls this before it publishes a router, so no request has to create it.
+        """
+        routes = getattr(self, 'closeness_routes', None)
+        if routes is None:
+            with _CLOSENESS_LOCK:
+                routes = getattr(self, 'closeness_routes', None)
+                if routes is None:
+                    from fec.surfaces.staffer_closeness_routes import ClosenessRoutes
+                    routes = self.closeness_routes = ClosenessRoutes(self)
+        return routes
+
+    def forget_contact_groups(self):
+        """Drop the same-displayed-name index (staffer_distinct_routes._contact_groups) kept for this router's nodes mapping.
+
+        The index holds the mapping it was built from, so a mapping the router no longer has stays alive for as long as the
+        index does. The service calls this when it installs a different mapping on this router; the next request that needs
+        the index builds it again from the new mapping.
+        """
+        self._contact_groups = None
+
+    def release_search_state(self):
+        """Let go of what this router's searches kept: the work indexes and hop-row caches, and the name index.
+
+        For a router the service has replaced, so that its indexes are not held while the next router's are built. A search
+        still running keeps what it already holds (a request with several passes keeps the one index it took first, whatever
+        happens to the router between its passes), and one that asks afterwards builds its own and answers exactly as before:
+        from here on the router stores nothing it builds (ClosenessRoutes.release). A router that has not searched yet gets its search
+        object now, so that it is released too.
+        """
+        self.closeness().release()
+        self.forget_contact_groups()
+
+    @staticmethod
+    def _one_work_index():
+        """The scope of one search request (staffer_closeness_routes.request_work).
+
+        A request that searches once per pass (distinct and independent alternatives, the Yen loop) takes the work index at its first pass
+        and uses that one to its last, so a publish that releases this router between two passes costs no rebuild. Imported here, as the
+        closeness search is.
+        """
+        from fec.surfaces.staffer_closeness_routes import request_work
+        return request_work()
+
     def route_many(self, origin, targets, options=None, progress=None):
         """Find the best person path to a target set in one symmetric search.
 
@@ -475,17 +529,23 @@ class AdvocacyRouter:
             if origin in avoided or (len(targets) == 1 and not options['_target_office'] and targets[0] in avoided):
                 raise ValueError('A route endpoint cannot also be a person to avoid')
             options['_excluded_nodes'] = tuple(sorted(set(options['_excluded_nodes']) | avoided))
-        targets = tuple(p for p in targets if p not in options['_excluded_nodes'])
+        named = targets
+        targets = tuple(p for p in named if p not in options['_excluded_nodes'])
+        if options['objective'] == 'work_time' and options['_target_office'] and len(targets) < len(named):
+            # The office's staff this request keeps out of the search (people the reader avoids, and people who share an avoided
+            # person's displayed name). The Staffer search names them when it explains an office it found no work records at
+            # (ClosenessRoutes.route), and distinct_routes hands the options on to every pass, so they are recorded once, here.
+            options['_avoided_targets'] = tuple(sorted(set(options['_avoided_targets']) | (set(named) - set(targets))))
         if options['route_count'] > 1 and options['alternative_strategy'] != 'ranked':
             from fec.surfaces.staffer_distinct_routes import distinct_routes
-            return distinct_routes(self, origin, targets, options, progress)
+            with self._one_work_index():
+                return distinct_routes(self, origin, targets, options, progress)
         if options['objective'] == 'work_time':
-            if not hasattr(self, 'closeness_routes'):
-                from fec.surfaces.staffer_closeness_routes import ClosenessRoutes
-                self.closeness_routes = ClosenessRoutes(self)
-            return self.closeness_routes.route(origin, targets, options, progress)
+            # One call, so one index for all of its Yen loop: ClosenessRoutes.route takes it once.
+            return self.closeness().route(origin, targets, options, progress)
         if options['route_count'] > 1:
-            return self._route_alternatives(origin, targets, options, progress)
+            with self._one_work_index():
+                return self._route_alternatives(origin, targets, options, progress)
         excluded_nodes = set(options['_excluded_nodes'])
         excluded_edges = set(options['_excluded_edges'])
         if options['objective'] in ('work_time', 'overlap_strength', 'overlap_fewest_steps', 'overlap_balanced'):
@@ -561,6 +621,8 @@ class AdvocacyRouter:
             distance, _, person = heapq.heappop(queues[side])
             settled[side].add(person)
             expanded += 1
+            if not expanded % 64:
+                check_cancelled()
             for other, hop in self._neighbors(person, options, budget).items():
                 if other in excluded_nodes or tuple(sorted((person, other))) in excluded_edges:
                     continue

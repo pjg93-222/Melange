@@ -1,0 +1,41 @@
+scratch tree: 13 files edited by landing_v2 at LIVE pre-image bytes, 1 file(s) only landing_v3_ids edits, 3 file(s) only v4 edits (LIVE's own); 45 paths are watched
+PASS  start (LIVE-as-it-was): every one of the 45 watched paths is as expected
+
+== 1. v4 and landing_v3_ids before landing_v2
+PASS  v4 --apply on the tree without landing_v2 or landing_v3_ids: rc=2, REFUSED
+PASS  landing_v3_ids --apply on the tree without landing_v2: rc=2, REFUSED
+PASS  after the refusals: every one of the 45 watched paths is as expected
+
+== 2. landing_v2, then v4 refused, then landing_v3_ids
+PASS  landing_v2 --apply: rc=0
+PASS  after landing_v2: every one of the 45 watched paths is as expected
+PASS  v4 --apply on a tree with landing_v2 but without landing_v3_ids: rc=2, REFUSED
+PASS  after that refusal: every one of the 45 watched paths is as expected
+PASS  landing_v3_ids dry run after landing_v2: rc=0
+PASS  after the landing_v3_ids dry run: every one of the 45 watched paths is as expected
+PASS  landing_v3_ids --apply: rc=0
+PASS  after landing_v3_ids: every one of the 45 watched paths is as expected
+
+== 3. v4
+PASS  v4 dry run after both landings: rc=0
+PASS  after the v4 dry run: every one of the 45 watched paths is as expected
+      apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  v4 --apply: rc=0
+PASS  after v4: every one of the 45 watched paths is as expected
+PASS  every file of v4 changed (26), and no other watched file did
+PASS  the other 19 watched files kept their earlier bytes
+
+== 4. back out, in reverse order
+PASS  landing_v3_ids rollback while v4 is still on is refused (rc=1): v4 must come off first
+PASS  after that refusal: every one of the 45 watched paths is as expected
+PASS  landing_v2 rollback while v3 and v4 are still on is refused (rc=1)
+PASS  after that refusal: every one of the 45 watched paths is as expected
+PASS  v4 --rollback: rc=0
+PASS  after the v4 rollback: every one of the 45 watched paths is as expected
+PASS  landing_v3_ids --rollback: rc=0
+PASS  after the landing_v3_ids rollback: every one of the 45 watched paths is as expected
+PASS  landing_v2 --rollback: rc=0
+PASS  after the landing_v2 rollback (LIVE-as-it-was again): every one of the 45 watched paths is as expected
+PASS  every file any of the three patch sets created is gone (28)
+
+result: ALL PASS

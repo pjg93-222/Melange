@@ -1,0 +1,11 @@
+4c156ef6d13fd5ca0baee7ac154c767f *ranks_python.json
+c1b4556f67363016e68ae1e956abfef3 *category_stance.json
+5f5976e4c097f3fc17294167735e1bc2 *dashboard_data.json
+1113a341ab0dfa6b88388d18b2f7b74a *member_desk_bundle.json
+8b9fa5ea18dcb1266b4a61e5b922a70f *member_references.json
+eb5eca34f2f6cbc25640a349319f1790 *per_topic_alloc.json
+af6073049a3bb878f2353130c4eb2bd3 *optimize_result.json
+1464c4dbc1e1809c4b0ca148138bacb3 *bipartisan.json
+2253f52b9b4988bd48f9cb9a3ed1c95f *Moneyball Dashboard.html
+b2a56f088e3c1fb6ddc25cbac1ea48e6 *cu-member-desk.html
+83eaa2b8e82298be4cb91f09761ea584 *Moneyball Main Version - Blended.xlsx

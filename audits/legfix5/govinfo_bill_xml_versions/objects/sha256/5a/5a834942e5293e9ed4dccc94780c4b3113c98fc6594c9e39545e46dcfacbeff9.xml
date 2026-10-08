@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H41151FF750A54BEFAD5D88E63CE5C4AB" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6330 IH: Coronavirus Housing Counseling Support Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-03-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6330</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200323">March 23, 2020</action-date><action-desc><sponsor name-id="A000378">Mrs. Axne</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize additional funding for the housing counseling program of the Department of Housing and Urban Development.</official-title></form><legis-body id="HCE6955621FDA442AAD004CBDC74869F4" style="OLC"><section id="H4C9AD41AD5224919943602C5C8502383" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Coronavirus Housing Counseling Support Act</short-title></quote>. </text></section><section id="H31F7F61231F94DE396D32109BCD8FA97"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">The Congress finds the following:</text><paragraph id="HC4912DB697DE45C6B61542D67A881D06"><enum>(1)</enum><text display-inline="yes-display-inline">The spread of COVID–19, which is now considered a global pandemic, is expected to negatively impact the incomes of potentially millions of homeowners, making it difficult for them to pay their mortgages on time.</text></paragraph><paragraph id="H4721A6B55D674284BC55DC2822F662B8"><enum>(2)</enum><text>Housing counseling is critical to ensuring that homeowners have the resources they need to navigate the loss mitigation options available to them while they are experiencing financial hardship.</text></paragraph></section><section id="HDF6B414A7F8D414DAE158560DDD988DA"><enum>3.</enum><header>HUD counseling program authorization</header><text display-inline="no-display-inline">There is authorized to be appropriated the Secretary of Housing and Urban Development $700,000,000 to carry out counseling services described under section 106 of the Housing and Urban Development Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/12/1701x">12 U.S.C. 1701x</external-xref>).</text></section></legis-body></bill> 
+

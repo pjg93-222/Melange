@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HDA2FECE30AFE4FDDB10E34631700E652" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 2882 EH: Udall Foundation Reauthorization Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress>118th CONGRESS</congress> <session>2d Session</session> 
+<legis-num>H. R. 2882</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To reauthorize the Morris K. Udall and Stewart L. Udall Trust Fund, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H49CB2813E5DF4F62A392852C52C9ABAE" style="OLC"> 
+<section id="HDC9D42AE07A748E9AC043850892C6F1D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Udall Foundation Reauthorization Act of 2023</short-title></quote>.</text> </section> <section id="H0B96BD512E75411BAB84D5426D152B91"><enum>2.</enum><header>Investment earnings</header><text display-inline="no-display-inline">Section 8(b)(1) of the Morris K. Udall and Stewart L. Udall Foundation Act (<external-xref legal-doc="usc" parsable-cite="usc/20/5606">20 U.S.C. 5606(b)(1)</external-xref>) is amended by adding at the end the following: <quote>Beginning on October 1, 2023, and thereafter, interest earned from investments made with any new appropriations to the Trust Fund shall only be available subject to appropriations and is authorized to be appropriated to carry out the provisions of this Act.</quote>.</text></section>
+<section id="HA9DADC17E37045E4AA02D058E1B35E96"><enum>3.</enum><header>Reauthorization of the udall foundation trust fund</header><text display-inline="no-display-inline">Section 13 of the Morris K. Udall and Stewart L. Udall Foundation Act (<external-xref legal-doc="usc" parsable-cite="usc/20/5609">20 U.S.C. 5609</external-xref>) is amended—</text> <paragraph id="HDA41D9FEC0A24CA1AC58D96F3DC5CD81"><enum>(1)</enum><text>in subsection (a), by striking <quote>2023</quote> and inserting <quote>2028</quote>;</text></paragraph> 
+<paragraph id="H080852622A384C00B0ECC0F9324502CE"><enum>(2)</enum><text>in subsection (b), in the matter preceding paragraph (1), by striking <quote>2023</quote> and inserting <quote>2028</quote>; and</text></paragraph> <paragraph id="H79A58016B03B41C6867E83D17A987793"><enum>(3)</enum><text>in subsection (c), by striking <quote>5-fiscal year period</quote> and all that follows through the period at the end and inserting <quote>5-fiscal year period beginning with fiscal year 2024.</quote>.</text></paragraph></section>
+<section id="HD020A33F2E64485FA896ED28F9D245AE"><enum>4.</enum><header>Audit of the Foundation</header><text display-inline="no-display-inline">Not later than 4 years after the date of enactment of this section, the Inspector General of the Department of the Interior shall complete an audit of the Morris K. Udall and Stewart L. Udall Foundation.</text></section> </legis-body> <attestation><attestation-group><attestation-date date="20240205" chamber="House">Passed the House of Representatives February 5, 2024.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation> <endorsement display="yes"></endorsement> </bill> 
+

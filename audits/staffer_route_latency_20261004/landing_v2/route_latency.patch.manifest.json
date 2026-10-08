@@ -1,0 +1,539 @@
+{
+ "fec/surfaces/install_staffer_live.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 182,
+   "n_lone_cr": 0,
+   "size": 9383
+  },
+  "after_sha256": "5aafbf8253a639ca5fcda7a037928770447b2921a8b2987913bb60371b04e2f4",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 180,
+   "n_lone_cr": 0,
+   "size": 9293
+  },
+  "before_sha256": "0064f66430b228703f831f7481070b3a797ab7004b1726e3474f5fb9952679bc"
+ },
+ "fec/surfaces/staffer_closeness_routes.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 6,
+   "n_crcrlf": 0,
+   "n_crlf": 770,
+   "n_lone_cr": 0,
+   "size": 44146
+  },
+  "after_sha256": "990838332bded29b9847f03eac94a1b486966f6678354369f4508abb48d02aaa",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 8,
+   "n_crcrlf": 0,
+   "n_crlf": 235,
+   "n_lone_cr": 0,
+   "size": 15713
+  },
+  "before_sha256": "a8d52fd8e73784f355eabe0ea6c7f9e57e7f948c853244a1c618b04c3115c874"
+ },
+ "fec/surfaces/staffer_distinct_routes.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 124,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 6317
+  },
+  "after_sha256": "41a0edb6e39053acaf2acceab7e1509754f64e5e5955bdb021f9a5684965472b",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 112,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 5681
+  },
+  "before_sha256": "f51d65c7906a3e292eebc2864f62a3c14b7f28122a22e0f2e06137a0fec628e1"
+ },
+ "fec/surfaces/staffer_graph_snapshot.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 9,
+   "n_crcrlf": 0,
+   "n_crlf": 512,
+   "n_lone_cr": 0,
+   "size": 32969
+  },
+  "after_sha256": "673d639778c0fd1358c6b4d1a33c65af25e1fcacb0e9e87ba74a44623e3238f3",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 9,
+   "n_crcrlf": 0,
+   "n_crlf": 418,
+   "n_lone_cr": 0,
+   "size": 26944
+  },
+  "before_sha256": "46e69b5b5d44736313dc7269299dfca570e75fd42f2420823a47ab855b1bf08d"
+ },
+ "fec/surfaces/staffer_identity_web.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 570,
+   "n_lone_cr": 0,
+   "size": 33326
+  },
+  "after_sha256": "0fcb0cc9354a06b33d8ff59df608972529462f1e70c07817014176a002a35d88",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 555,
+   "n_lone_cr": 0,
+   "size": 32593
+  },
+  "before_sha256": "7c0fc7ebbb173408cc0dcabac6cbd2cdd68d7d9cae857d13483077a3a6629c25"
+ },
+ "fec/surfaces/staffer_live/README.md": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 118,
+   "n_lone_cr": 0,
+   "size": 29262
+  },
+  "after_sha256": "af8934ade0fe56c5b726e784a186716e9390b0b1989501070d065688a7bd27d2",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 110,
+   "n_lone_cr": 0,
+   "size": 22995
+  },
+  "before_sha256": "41b10a8d2da925523845460757b186aed30805b08ae78f7669d5e862c7169e41"
+ },
+ "fec/surfaces/staffer_live/index.html": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 65,
+   "n_lone_cr": 0,
+   "size": 15683
+  },
+  "after_sha256": "828cdaf56d6d08e0501011a03a22fdfa99da80f3edcf2e7b675c8e4aacd2bf39",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 65,
+   "n_lone_cr": 0,
+   "size": 15667
+  },
+  "before_sha256": "0ad2ad26483f49518aa23f171e6a49a07f849fe66ee7e08adede62dcff382dd1"
+ },
+ "fec/surfaces/staffer_live/staffer-inventory-worker.js": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 27,
+   "n_crcrlf": 0,
+   "n_crlf": 67,
+   "n_lone_cr": 0,
+   "size": 6467
+  },
+  "after_sha256": "7a4960d7d5aba5aa755308dd4f4fac94adc06e88946382d286f4d0ce24fd572a",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 27,
+   "n_crcrlf": 0,
+   "n_crlf": 61,
+   "n_lone_cr": 0,
+   "size": 5870
+  },
+  "before_sha256": "8b001865ce3dc9bcf4c993ca1b452aa40c219794bc824b060b7910173217a855"
+ },
+ "fec/surfaces/staffer_live/staffer-route.js": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 285,
+   "n_lone_cr": 0,
+   "size": 38691
+  },
+  "after_sha256": "77a7c19904f470ad01a5c03a8855406e8f78527fea71c430c6422c2f18d095ba",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 272,
+   "n_lone_cr": 0,
+   "size": 36496
+  },
+  "before_sha256": "7a433d3a3d99a0070c67c5b47492eeb2c4d60e44c85dc51b4b12fced1714fd56"
+ },
+ "fec/surfaces/staffer_live_server.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 35,
+   "n_crcrlf": 0,
+   "n_crlf": 787,
+   "n_lone_cr": 0,
+   "size": 52285
+  },
+  "after_sha256": "663dff5ffcf0e48cbf062d2b26e8b96123030ec80a7034276b84c7b9c875e137",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 35,
+   "n_crcrlf": 0,
+   "n_crlf": 737,
+   "n_lone_cr": 0,
+   "size": 48349
+  },
+  "before_sha256": "39745d4a57213ae233a1e1aeeabcf2f7e526eee72989f1d67341e2e8a7095385"
+ },
+ "fec/surfaces/staffer_live_service.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 1998,
+   "n_lone_cr": 0,
+   "size": 131160
+  },
+  "after_sha256": "f311203438a6eca3bc89716d42a3c3b8f36a20d4d3d55e134c49d17afe15aa30",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 1595,
+   "n_lone_cr": 0,
+   "size": 106545
+  },
+  "before_sha256": "792ab5987b93dc3dc17eb2f61288a52c79b83b55e238fdaa5834c82f7b797e33"
+ },
+ "fec/surfaces/staffer_overlap_routes.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 332,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 19624
+  },
+  "after_sha256": "312bca42eede3304731af35075c6e8920717fb9c4b000d2dd01de3dd19a7cb54",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 328,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 19436
+  },
+  "before_sha256": "ddaef25278ea2fc636b7d690d1047d8ee7e6a73042dcea008894cf13de7394b1"
+ },
+ "fec/surfaces/staffer_route_cancel.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 33,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 859
+  },
+  "after_sha256": "3e8b003f4bea16582927cb21de3d3276175763d55d45efed02a73ab754e4e9df",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/surfaces/staffer_routing.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 1,
+   "n_crcrlf": 0,
+   "n_crlf": 650,
+   "n_lone_cr": 0,
+   "size": 42437
+  },
+  "after_sha256": "05fa3f38b029d0bf94584122cdafbebaadd6c0f301f854e292cb0d024d55060f",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 1,
+   "n_crcrlf": 0,
+   "n_crlf": 644,
+   "n_lone_cr": 0,
+   "size": 42179
+  },
+  "before_sha256": "1f3b4e876b823b9b5f8807cc19fb6794f04b44247b7417694840a3322a73b0af"
+ },
+ "fec/surfaces/staffer_search_index.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 208,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 11262
+  },
+  "after_sha256": "0e03bf444a671909b87adbf7745c1dd0838eda56f726f05a6077872d2c16e497",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/surfaces/test_staffer_closeness_bidirectional.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 1613,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 88825
+  },
+  "after_sha256": "85b3eb48eaa8639db9d723c3efb2a28f8c7c2c9ef5bf07ed15af9c6ad7ccb6b5",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/staffer_latency_fixtures.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 78,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 3376
+  },
+  "after_sha256": "0df083bbcb82dab894970da11666a0db06c6029026b105a0127663ffc9045d5a",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_identity_status_count.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 137,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 7418
+  },
+  "after_sha256": "6c578f6d53df8b3ca90ac2870a8d0d3db879ef2aa21051ccd1d9feeec395b081",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 186,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 12862
+  },
+  "after_sha256": "c11062f5070344ca806cf9e0fc8a95cd81152d025581cde9f31a5bb867db2af0",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_lock_free_view.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 519,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 25374
+  },
+  "after_sha256": "4964738780d9952ccad74593d20dbcfe1a6e3a6165acf091d6e59064966102e6",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_rebuild_view.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 106,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 5313
+  },
+  "after_sha256": "5195bc23454ed430e61c211b1f5ae958f2b2a06e52feaab64e57e08696e2596c",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_refresh_memo.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 436,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 23049
+  },
+  "after_sha256": "ab9a76b7417dbdc32b73c767cafa73194bb191bbd4579fc563a3c14a82704ee4",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_route_jobs.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 1189,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 63176
+  },
+  "after_sha256": "7fda7c29754fcc111319202d325f474acf6f84db5d8391eaecada0d82fd6aff4",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_route_jobs_client.cjs": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 369,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 22137
+  },
+  "after_sha256": "95e924b2a5413cde588667716ed0fa15b025516f6226739b49466b2c8096f40a",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_route_latency.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 180,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 10069
+  },
+  "after_sha256": "4c329ef63732f3695a3e3da18eee42390ab710dbe6630a2181d237b3082ba8cc",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_search_differential.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 807,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 48048
+  },
+  "after_sha256": "55cd97926c72887632c63b0042ffb5b9469796226c52f3d5ef052b04e7143e96",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_typeahead_http.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": false,
+   "klass": "PURE_LF",
+   "n_bare_lf": 84,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 3633
+  },
+  "after_sha256": "72ac5519f8d963e37dee619377b90fd94259f8e570ea1297e779334528f1ec32",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_typeahead_identifiers.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 272,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 15862
+  },
+  "after_sha256": "8c31076e57f5b64b3dfe66e553dcf25e9eff030ec4c36ecb6a8959304994a1c8",
+  "before_eol": null,
+  "before_sha256": null
+ }
+}

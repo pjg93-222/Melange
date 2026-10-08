@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H6ED6B0BA4F354D7BBE5B66BB78ABD7C1" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8353 IH: Freedom Against Imposed Theology Harms Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8353</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260416">April 16, 2026</action-date><action-desc><sponsor name-id="S001224">Mr. Self</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To establish a prohibition on fees related to religious participation, and for other purposes.</official-title></form><legis-body id="H3E509660464245CC8B887FE3366852B3" style="OLC"> 
+<section id="H808179839B0244699527F4EEAEAE5B86" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Freedom Against Imposed Theology Harms Act</short-title></quote> or the <quote><short-title>FAITH Act</short-title></quote>.</text></section> 
+<section id="H8DB03BC8FD704B1CA3DE85AE5F54A2DE"><enum>2.</enum><header>Prohibition on fees related to religious participation</header> 
+<subsection id="HE9716F60EDEB4BE49E0F455798F41B69"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline"><external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/18/13">Chapter 13</external-xref> of title 18, United States Code, is amended by adding at the end the following:</text> <quoted-block id="HD2EBB0688F3C4632ADED6CA550F04A95" style="USC"> <section id="H7ABC426079FF4C82BCE43D9A4F7477F7"><enum>251.</enum><header>Prohibition on fees related to religious participation</header> <subsection id="HB018622C751D4C558C0E97F9AF2C6A15"><enum>(a)</enum><header>Offense</header><text>Whoever knowingly imposes, assesses, collects, or attempts to impose, assess, or collect any fee, fine, surcharge, penalty, or other financial obligation from any person based on that person’s participation or membership in, or refusal to participate in or become a member of, any religious theology, denomination, or organization shall—</text> 
+<paragraph id="HCE42111E7B8A4886A19A117941BA1A50"><enum>(1)</enum><text>in the case that the fee, fine, surcharge, penalty or other financial obligation does not exceed $1,000, shall be fined under this title, imprisoned not more than 1 year, or both; or</text></paragraph> <paragraph id="H3B3C8B8FD8744F32BCDEDBEF3D58AAE1"><enum>(2)</enum><text>in any other case, shall be fined under this title, imprisoned not more than 3 years, or both.</text> </paragraph></subsection> 
+<subsection id="H95A996B4973D48B899C664376125C3FF"><enum>(b)</enum><header>Prohibiting denial of goods and services</header><text>Whoever knowingly denies goods, services, access, or opportunities to a person on the basis of nonpayment of any fee prohibited under subsection (a) shall be fined under this title, imprisoned not more than 1 year, or both.</text></subsection> <subsection id="H317B06F9998C472B9EA6DE0199AAA2C5"><enum>(c)</enum><header>Rule of construction</header><text>Nothing in this section shall be construed to restrict the ability of religious organizations and educational institutions to request or receive voluntary contributions from their members for internal purposes.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="HCAE7D9861888408DB5FDC2DBB2AEB0F4">
+        <enum>(b)</enum>
+        <header>Clerical amendment</header>
+ <text display-inline="yes-display-inline">The table of sections for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/18/13">chapter 13</external-xref> of title 18, United States Code, is amended by adding at the end the following:</text>
+        <quoted-block style="USC" id="HC8580FF56C1640A9841668D4BD2ED1DA"
+          display-inline="no-display-inline">
+          <toc regeneration="no-regeneration">
+            <toc-entry level="section">251. Prohibition on fees related to religious
+              participation.</toc-entry>
+          </toc>
+          <after-quoted-block>.</after-quoted-block>
+        </quoted-block>
+      </subsection></section> 
+<section id="H1D47CE1B066C48ACB633391BB48F35FF"><enum>3.</enum><header>RICO offense</header><text display-inline="no-display-inline">Section 1961(1) of title 18, United States Code, is amended by inserting <quote>section 251 (relating to the prohibition on fees tied to religious participation),</quote> after <quote>section 224 (relating to sports bribery),</quote>.</text> </section> <section id="H77934E9C116041E681DBBDA9E4464ADD"><enum>4.</enum><header>Effective date</header><text display-inline="no-display-inline">This Act and the amendments made by this Act shall take effect 30 days after the date of enactment of this Act.</text></section> 
+</legis-body></bill>
+

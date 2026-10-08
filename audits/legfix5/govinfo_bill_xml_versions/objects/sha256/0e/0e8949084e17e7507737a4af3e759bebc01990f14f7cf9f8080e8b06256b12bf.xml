@@ -1,0 +1,443 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-OLL25C38-Y97-VN-NPW">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3062 IS: Guidelines for User Age-verification and Responsible Dialogue Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-10-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3062</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251028">October 28, 2025</action-date>
+            <action-desc><sponsor name-id="S399">Mr. Hawley</sponsor> (for himself, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S416">Mrs.
+                    Britt</cosponsor>, <cosponsor name-id="S327">Mr. Warner</cosponsor>, <cosponsor name-id="S364">Mr. Murphy</cosponsor>, and <cosponsor name-id="S406">Mr.
+                    Kelly</cosponsor>) introduced the following bill; which was read twice and
+                referred to the <committee-name committee-id="SSJU00">Committee on the
+                    Judiciary</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To require artificial intelligence chatbots to implement age verification
+            measures and make certain disclosures, and for other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="S1" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Guidelines for User Age-verification and Responsible Dialogue Act of 2025</short-title></quote> or the <quote><short-title>GUARD Act</short-title></quote>.</text>
+        </section>
+        <section id="id4cc1a98ace494017a3e17ae2d41ca5d0">
+            <enum>2.</enum>
+            <header>Findings</header>
+ <text display-inline="no-display-inline">Congress finds the following:</text> <paragraph id="idb1f1fe1589cc4c28ab4bc8e5ca559ae0"> <enum>(1)</enum> <text>Artificial intelligence chatbots are increasingly being deployed on social media platforms and in consumer applications used by minors.</text>
+            </paragraph>
+            <paragraph id="id6e603077d9a2425bacd04ca2ab36ebbd">
+                <enum>(2)</enum>
+ <text>These chatbots can generate and disseminate harmful or sexually explicit content to children.</text>
+            </paragraph>
+            <paragraph id="idf7859f6b4e1042c78712f63a1164c6d2">
+                <enum>(3)</enum>
+ <text>These chatbots can manipulate emotions and influence behavior in ways that exploit the developmental vulnerabilities of minors.</text>
+            </paragraph>
+            <paragraph id="ideebbd7aa2a2a455b957fb8303361e680">
+                <enum>(4)</enum>
+ <text>The widespread availability of such chatbots exposes children to physical and psychological safety risks, including grooming, addiction, self-harm, and harm to others.</text>
+            </paragraph>
+            <paragraph id="id1f750b67dfbd4253939d0f7d041c92f7">
+                <enum>(5)</enum>
+ <text>Protecting children from artificial intelligence chatbots that simulate human interaction without accountability is a compelling governmental interest.</text>
+            </paragraph>
+        </section>
+        <section id="idc4a9d69ff14045599c60a04b8a9daf4e">
+            <enum>3.</enum>
+            <header>Definitions</header>
+ <text display-inline="no-display-inline">In this Act:</text> <paragraph id="idae4fea52c2954ebd958a285ee5a65e8a"> <enum>(1)</enum> <header>AI companion</header> <text>The term <term>AI companion</term> means an artificial intelligence chatbot that—</text>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id4bf9cf8c42a44034bc3216510850ec4e">
+                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">provides adaptive, human-like responses to user inputs; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="idcd336e7f4a6640688f7169941201f184">
+                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">is designed to encourage or facilitate the simulation of interpersonal or emotional interaction, friendship, companionship, or therapeutic communication.</text>
+                </subparagraph>
+            </paragraph>
+            <paragraph id="id00c6309bb21c4b369030ed820e5d72e6" commented="no">
+                <enum>(2)</enum>
+                <header>Artificial intelligence chatbot</header>
+ <text display-inline="yes-display-inline">The term <term>artificial intelligence chatbot</term>—</text>
+                <subparagraph commented="no" display-inline="no-display-inline" id="idfd4a30961b204dae81de383539e96180">
+                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">means any interactive computer service or software application that—</text>
+                    <clause id="idb16f6fbf7bd84d43992f7b1658badbab" commented="no">
+                        <enum>(i)</enum>
+ <text>produces new expressive content or responses not fully predetermined by the developer or operator of the service or application; and</text>
+                    </clause>
+                    <clause id="id3b1a4dcc65ff49b9840c330c0ec09c3b" commented="no">
+                        <enum>(ii)</enum>
+ <text>accepts open-ended natural-language or multimodal user input and produces adaptive or context-responsive output; and</text>
+                    </clause>
+                </subparagraph>
+                <subparagraph id="id6356adc4e56741d0b0fbf37a51fc674a" commented="no">
+                    <enum>(B)</enum>
+ <text>does not include an interactive computer service or software application—</text>
+                    <clause commented="no" display-inline="no-display-inline" id="id4139cf9df7404b3eb182b9af6b42e341">
+                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the responses of which are limited to contextualized replies; and</text>
+                    </clause>
+                    <clause commented="no" display-inline="no-display-inline" id="id18beee19f0834368b5e71c3a287604df">
+                        <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">that is unable to respond on a range of topics outside of a narrow specified purpose.</text>
+                    </clause>
+                </subparagraph>
+            </paragraph>
+            <paragraph id="id092e164c0df34d3788851c6bba7dd192">
+                <enum>(3)</enum>
+                <header>Covered entity</header>
+ <text>The term <term>covered entity</term> means any person who owns, operates, or otherwise makes available an artificial intelligence chatbot to individuals in the United States.</text>
+            </paragraph>
+            <paragraph id="id2c87fb0b34aa47a48faee8dd07bd9ee0">
+                <enum>(4)</enum>
+                <header>Minor</header>
+ <text>The term <term>minor</term> means any individual who has not attained 18 years of age.</text>
+            </paragraph>
+            <paragraph id="id647dd285799149e687fdf806d64e0deb" commented="no">
+                <enum>(5)</enum>
+                <header>Reasonable age verification measure</header>
+ <text>The term <term>reasonable age verification measure</term> means a method that is authenticated to relate to a user of an artificial intelligence chatbot, such as—</text>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id6d21a0d84b804328a6341df4fb7cdeb3">
+                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">a government-issued identification; or</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id09cb1bb0d2b6495289ebb9d415cc0d75">
+                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">any other commercially reasonable method that can reliably and accurately—</text>
+                    <clause commented="no" display-inline="no-display-inline" id="ida0ea4f79a2454ed8bff34235be21e3b2">
+                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">determine whether a user is an adult; and</text>
+                    </clause>
+                    <clause commented="no" display-inline="no-display-inline" id="idcb4910bfd3fa4c4a9166336b7fed1b16">
+                        <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">prevent access by minors to AI companions, as required by section 6.</text>
+                    </clause>
+                </subparagraph>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline" id="id94b8ddc559c44e23813860d90d455157">
+                <enum>(6)</enum>
+                <header display-inline="yes-display-inline">Reasonable age verification
+                    process</header>
+ <text display-inline="yes-display-inline">The term <term>reasonable age verification process</term> means an age verification process employed by a covered entity that—</text>
+                <subparagraph id="id525fb639ac484378b6bd27a391643f4c" commented="no">
+                    <enum>(A)</enum>
+ <text>uses one or more reasonable age verification measures in order to verify the age of a user of an artificial intelligence chatbot owned, operated, or otherwise made available by the covered entity;</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id56ba54628e2447869563a6e7210c7b45">
+                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">provides that requiring a user to confirm that the user is not a minor, or to insert the user's birth date, is not sufficient to constitute a reasonable age verification measure;</text>
+                </subparagraph>
+                <subparagraph id="id08e975ddbf4949ba9ae6c145a3b7cf66" commented="no">
+                    <enum>(C)</enum>
+ <text>ensures that each user is subjected to each reasonable age verification measure used by the covered entity as part of the age verification process; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                    id="id4af025b7e7ac44009f50bda0565fd273">
+                    <enum>(D)</enum>
+ <text display-inline="yes-display-inline">does not base verification of a user's age on factors such as whether the user shares an Internet Protocol address, hardware identifier, or other technical indicator with another user determined to not be a minor.</text>
+                </subparagraph>
+            </paragraph>
+        </section>
+        <section id="id571f944c15594925875d7a692404380d">
+            <enum>4.</enum>
+            <header>Criminal prohibitions</header>
+            <subsection commented="no" display-inline="no-display-inline" id="id1b87513a6d21487ea9a11ec3f9fd98bb">
+                <enum>(a)</enum>
+                <header display-inline="yes-display-inline">In general</header>
+ <text display-inline="yes-display-inline">Part I of title 18, United States Code, is amended by inserting after chapter 5 the following:</text>
+                <quoted-block style="USC" display-inline="no-display-inline" id="id1afcc6f412284528b590621b162d9224">
+                    <chapter id="id9b4022f995714c0ea369ee9a8c13b5b5" style="OLC">
+                        <enum>6</enum>
+                        <header>Artificial intelligence</header>
+                        <toc>
+                            <toc-entry level="section">Sec.</toc-entry>
+                            <toc-entry level="section" idref="idc8fd9d8fa9ad46adb84d681ca270ccd1">91. Artificial intelligence chatbots.</toc-entry>
+                        </toc>
+                        <section id="idc8fd9d8fa9ad46adb84d681ca270ccd1">
+                            <enum>91.</enum>
+                            <header>Artificial intelligence chatbots</header>
+                            <subsection commented="no" display-inline="no-display-inline" id="id5a7e02d99c8f46b092a8c493aac39533">
+                                <enum>(a)</enum>
+                                <header display-inline="yes-display-inline">Definitions</header>
+ <text display-inline="yes-display-inline">In this section:</text> <paragraph id="id5adddfe48d15417eaf201489a8a02e76" commented="no"> <enum>(1)</enum> <header>Artificial intelligence chatbot</header> <text display-inline="yes-display-inline">The term <term>artificial intelligence chatbot</term>—</text>
+                                    <subparagraph commented="no" display-inline="no-display-inline" id="id54eb0457929143b58ff4fb71667c96f0">
+                                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">means any interactive computer service or software application that—</text>
+                                        <clause id="id84f60a1892dc4cbdb676bd10257638ca" commented="no">
+                                            <enum>(i)</enum>
+ <text>produces new expressive content or responses not fully predetermined by the developer or operator of the service or application; and</text>
+                                        </clause>
+                                        <clause id="id3bc9fd2d5a9c46229e0ac603b16cb562" commented="no">
+                                            <enum>(ii)</enum>
+ <text>accepts open-ended natural-language or multimodal user input and produces adaptive or context-responsive output; and</text>
+                                        </clause>
+                                    </subparagraph>
+                                    <subparagraph id="id829fccc11e11476eb89bf40a2a1dfbd2" commented="no">
+                                        <enum>(B)</enum>
+ <text>does not include an interactive computer service or software application—</text>
+                                        <clause commented="no" display-inline="no-display-inline" id="idd72a8b29533f485a9bb0d367a1c07487">
+                                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the responses of which are limited to contextualized replies; and</text>
+                                        </clause>
+                                        <clause commented="no" display-inline="no-display-inline" id="idd19fffe98d984826b620e91422f756af">
+                                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">that is unable to respond on a range of topics outside of a narrow specified purpose.</text>
+                                        </clause>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="iddad14520e85345f682d9c9bfb97b7fc6">
+                                    <enum>(2)</enum>
+                                    <header>Minor</header>
+ <text>The term <term>minor</term> means any individual who has not attained 18 years of age.</text>
+                                </paragraph>
+                                <paragraph commented="no" display-inline="no-display-inline" id="idb2f1522ec8bf4a4ba0a61ad992ebd56c">
+                                    <enum>(3)</enum>
+                                    <header>Sexually explicit conduct</header>
+ <text>The term <term>sexually explicit conduct</term> has the meaning given the term in section 2256.</text>
+                                </paragraph>
+                            </subsection>
+                            <subsection id="iddef317713cdd44a1861e830072d2a365">
+                                <enum>(b)</enum>
+                                <header>Solicitation of minors</header>
+                                <paragraph id="id04a2811e78ec459b8864cc1d4bffaddd">
+                                    <enum>(1)</enum>
+                                    <header>Offense</header>
+ <text>It shall be unlawful to design, develop, or make available an artificial intelligence chatbot, knowing or with reckless disregard for the fact that the artificial intelligence chatbot poses a risk of soliciting, encouraging, or inducing minors to—</text>
+                                    <subparagraph commented="no" display-inline="no-display-inline" id="idbbb3e90e0f87425c8e38f2e0de8b03a0">
+                                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">engage in, describe, or simulate sexually explicit conduct; or</text>
+                                    </subparagraph>
+                                    <subparagraph commented="no" display-inline="no-display-inline" id="id72b4a31e950d4d8f863851cd6e0c0b7c">
+                                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">create or transmit any visual depiction of sexually explicit conduct, including any visual depiction described in section 1466A(a).</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="id7d8941be2b1445eea69122d00db4b992">
+                                    <enum>(2)</enum>
+                                    <header>Penalty</header>
+ <text>Any person who violates paragraph (1) shall be fined not more than $100,000 per offense.</text>
+                                </paragraph>
+                            </subsection>
+                            <subsection id="idf095e35c35c446798fc3d2b0ab4a5849">
+                                <enum>(c)</enum>
+                                <header>Promotion of physical violence</header>
+                                <paragraph id="idace38c86fde1441dbaff44321b09053a">
+                                    <enum>(1)</enum>
+                                    <header>Offense</header>
+ <text>It shall be unlawful to design, develop, or make available an artificial intelligence chatbot, knowing or with reckless disregard for the fact that the artificial intelligence chatbot encourages, promotes, or coerces suicide, non-suicidal self-injury, or imminent physical or sexual violence.</text>
+                                </paragraph>
+                                <paragraph id="id51b4822c19ab4ab68c9baa8b6de244a6" commented="no" display-inline="no-display-inline">
+                                    <enum>(2)</enum>
+                                    <header>Penalty</header>
+ <text>Any person who violates paragraph (1) shall be fined not more than $100,000 per offense.</text>
+                                </paragraph>
+                            </subsection>
+                        </section>
+                    </chapter>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="idf4a1f10076c14e5dbe443db3e45b074d">
+                <enum>(b)</enum>
+                <header>Technical and conforming amendment</header>
+ <text>The table of chapters for part I of title 18, United States Code, is amended by inserting after the item relating to chapter 5 the following:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline" id="idac528d62604d47cd9d1ed78b30f91d80">
+                    <toc>
+                        <multi-column-toc-entry level="chapter" bold="on">
+                            <toc-enum>6.</toc-enum>
+                            <level-header level="chapter">Artificial intelligence</level-header>
+                            <target>91</target>
+                        </multi-column-toc-entry>
+                    </toc>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+        </section>
+        <section id="id34a0deecffa94d9ca3352d080fcb86b9">
+            <enum>5.</enum>
+            <header>Covered entity obligations</header>
+            <subsection id="id4dc23f3fcfff4c90927bfa338c450bbc">
+                <enum>(a)</enum>
+                <header>Creation of user accounts</header>
+ <text>A covered entity shall require each individual accessing an artificial intelligence chatbot to make a user account in order to use or otherwise interact with such chatbot.</text>
+            </subsection>
+            <subsection id="idc7e64e44db814cae96b2047d12cd900f">
+                <enum>(b)</enum>
+                <header>Age verification</header>
+                <paragraph id="id5c1e584b861141f487bdcbcb348466fe">
+                    <enum>(1)</enum>
+                    <header>Age verification of existing accounts</header>
+ <text>With respect to each user account of an artificial intelligence chatbot that exists as of the effective date of this Act, a covered entity shall—</text>
+                    <subparagraph id="id0bb5fe3f638147c1ba5e9c281a17e3d3">
+                        <enum>(A)</enum>
+ <text>on such date, freeze any such account;</text> </subparagraph> <subparagraph id="idd51cc2422ebb4106b82d58adf03d1225"> <enum>(B)</enum> <text>in order to restore the functionality of such account, require that the user provide age data that is verifiable using a reasonable age verification process, subject to paragraph (4); and</text>
+                    </subparagraph>
+                    <subparagraph id="id58fd09b3fbb845aeb6006b59e83efd76">
+                        <enum>(C)</enum>
+ <text>using such age data, classify each user as a minor or an adult.</text> </subparagraph> </paragraph> <paragraph id="idd0516243f7094d7b9e3ec9b5b11e051a"> <enum>(2)</enum> <header>Age verification of new accounts</header> <text>At the time an individual creates a new user account to use or interact with an artificial intelligence chatbot, a covered entity shall—</text>
+                    <subparagraph id="idb9176fda76fa40b89f5b4319c5c3470c">
+                        <enum>(A)</enum>
+ <text>request age data from the individual;</text> </subparagraph> <subparagraph id="idd31c549a45e444739ed2772f74a3383e"> <enum>(B)</enum> <text>verify the individual’s age using a reasonable age verification process, subject to paragraph (4); and</text>
+                    </subparagraph>
+                    <subparagraph id="id12a4d6e123bb4d7a9d6c4960d18757c6">
+                        <enum>(C)</enum>
+ <text>using such age data, classify each user as a minor or an adult.</text> </subparagraph> </paragraph> <paragraph id="idf201aa213a4d44b2847ddd30ec6f54b2"> <enum>(3)</enum> <header>Periodic age verification</header> <text>A covered entity shall periodically review previously verified user accounts using a reasonable age verification process, subject to paragraph (4), to ensure compliance with this Act.</text>
+                </paragraph>
+                <paragraph id="id0824451054c94b25bc5e588b9cec1c14" commented="no">
+                    <enum>(4)</enum>
+                    <header>Use of third parties</header>
+ <text>For purposes of paragraphs (1)(B), (2)(B), and (3), a covered entity may contract with a third party to employ reasonable age verification measures as part of the covered entity's reasonable age verification process, but the use of such a third party shall not relieve the covered entity of its obligations under this Act or from liability under this Act.</text>
+                </paragraph>
+                <paragraph id="idcefe2939e8a64794b45d76cc7b9df1fb">
+                    <enum>(5)</enum>
+                    <header>Age verification measure data security</header>
+ <text>A covered entity—</text> <subparagraph id="id0f34a6f66ae248f28d2bcbbf1b7107b8"> <enum>(A)</enum> <text>shall establish, implement, and maintain reasonable data security to—</text>
+                        <clause id="idb516e83cf3044fac8cc05436bb1f8801">
+                            <enum>(i)</enum>
+ <text>limit collection of personal data to that which is minimally necessary to verify a user’s age or maintain compliance with this Act; and</text>
+                        </clause>
+                        <clause id="id140455ef14814f4384160f4ed5659c3a">
+                            <enum>(ii)</enum>
+ <text>protect such age verification data against unauthorized access;</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="ida617a56189f74ad1a2fbc2849c7e1c92">
+                        <enum>(B)</enum>
+ <text>shall protect such age verification data against unauthorized access;</text>
+                    </subparagraph>
+                    <subparagraph id="id773194c947464a03b9f637130bf94f1b">
+                        <enum>(C)</enum>
+ <text>shall protect the integrity and confidentiality of such data by only transmitting such data using industry-standard encryption protocols;</text>
+                    </subparagraph>
+                    <subparagraph id="id59f3f1de2a4e41d8b690b8b69cd5416c">
+                        <enum>(D)</enum>
+ <text>shall retain such data for no longer than is reasonably necessary to verify a user’s age or maintain compliance with this Act; and</text>
+                    </subparagraph>
+                    <subparagraph id="id0e090b69b173432982df68325f2524a4">
+                        <enum>(E)</enum>
+ <text>may not share with, transfer to, or sell to, any other entity such data.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="id5f2b690309e64043ac8527e6a1320c0d">
+                <enum>(c)</enum>
+                <header>Required disclosures for artificial intelligence chatbots</header>
+                <paragraph id="id6a8d98e24fde431197934416f5324827">
+                    <enum>(1)</enum>
+                    <header>Disclosure of non-human status</header>
+ <text>Each artificial intelligence chatbot made available to users shall—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id6aa8d08c586e4ae59d35a9a90e89eeae"> <enum>(A)</enum> <text display-inline="yes-display-inline">at the initiation of each conversation with a user and at 30-minute intervals, clearly and conspicuously disclose to the user that the chatbot is an artificial intelligence system and not a human being; and</text>
+                    </subparagraph>
+                    <subparagraph id="id49f2ac61cf6a469baff38791a0377e09">
+                        <enum>(B)</enum>
+ <text>be programmed to ensure that the chatbot does not claim to be a human being or otherwise respond deceptively when asked by a user if the chatbot is a human being.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id0074e46d1c1940d68a27f70a5a9c5194">
+                    <enum>(2)</enum>
+                    <header>Disclosure regarding non-professional status</header>
+                    <subparagraph id="ida69a9d80d9a140f8a0a8e3bfc02742ba">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text>An artificial intelligence chatbot may not represent, directly or indirectly, that the chatbot is a licensed professional, including a therapist, physician, lawyer, financial advisor, or other professional.</text>
+                    </subparagraph>
+                    <subparagraph id="id988e367075fb404ebfb731d27016ac6c">
+                        <enum>(B)</enum>
+                        <header>Other limitations</header>
+ <text>Each artificial intelligence chatbot made available to users shall, at the initiation of each conversation with a user and at reasonably regular intervals, clearly and conspicuously disclose to the user that—</text>
+                        <clause id="id6896a085193c44c587970ef08b00beed">
+                            <enum>(i)</enum>
+ <text>the chatbot does not provide medical, legal, financial, or psychological services; and</text>
+                        </clause>
+                        <clause id="id6b6605bca7ea437193baff38dbe4d62e">
+                            <enum>(ii)</enum>
+ <text>users of the chatbot should consult a licensed professional for such advice.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+        </section>
+        <section id="id630f14555c6f44148043fcf3a253802b">
+            <enum>6.</enum>
+            <header>Prohibition on minor use of AI companions</header>
+ <text display-inline="no-display-inline">If the age verification process described in section 5(b) determines that an individual is a minor, a covered entity shall prohibit the minor from accessing or using any AI companion owned, operated, or otherwise made available by the covered entity.</text>
+        </section>
+        <section id="id41a9556f02b44658bf63f2ddc910f093">
+            <enum>7.</enum>
+            <header>Enforcement</header>
+            <subsection id="id38165a99471b47f585dc674eb85edefc">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text>In the case of a violation of section 5 or 6, or a regulation promulgated thereunder, the Attorney General may bring a civil action in an appropriate district court of the United States to—</text>
+                <paragraph commented="no" display-inline="no-display-inline" id="idd977e805039d407e8c6c0f9dc3740c09">
+                    <enum>(1)</enum>
+ <text display-inline="yes-display-inline">enjoin the violation;</text> </paragraph> <paragraph commented="no" display-inline="no-display-inline" id="id09bf4d1db0004a8a90e2df6117bf3e39"> <enum>(2)</enum> <text display-inline="yes-display-inline">enforce compliance with section 5 or 6, or the regulation promulgated thereunder; or</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idd655a3c9ff0e436393ff19495f4aacae">
+                    <enum>(3)</enum>
+ <text display-inline="yes-display-inline">obtain civil penalties under subsection (c) of this section, restitution, and other appropriate relief.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="ida1c31f73a7524d3c96c11f9f1f6ea205">
+                <enum>(b)</enum>
+                <header>Attorney General powers</header>
+                <paragraph id="id63b2b8410a134fa6927f41bffe0ac8f9">
+                    <enum>(1)</enum>
+                    <header>Investigatory powers</header>
+ <text>For the purpose of conducting investigations or bringing enforcement actions under this section, the Attorney General may issue subpoenas, administer oaths, and compel the production of documents or testimony.</text>
+                </paragraph>
+                <paragraph id="idf8a1d480abd649b2982dc63696c4e1a9">
+                    <enum>(2)</enum>
+                    <header>Rulemaking</header>
+ <text>The Attorney General may promulgate any regulations necessary to carry out this Act.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="id1d1a0928bea94cc99f4c783863357a49">
+                <enum>(c)</enum>
+                <header>Civil penalties</header>
+                <paragraph id="idd2add63123d54961aaa52619d95ab604">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>Any person who violates section 5 or 6, or a regulation promulgated thereunder, shall be subject to a civil penalty not to exceed $100,000 for each violation.</text>
+                </paragraph>
+                <paragraph id="idfa574bae427b44a39f30f171f7542e46" commented="no">
+                    <enum>(2)</enum>
+                    <header>Separate violations</header>
+ <text>Each violation described in paragraph (1) shall be considered a separate violation.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="idc5ae0bd2e37e4e84b3be6f51c34c5ceb">
+                <enum>(d)</enum>
+                <header>State enforcement</header>
+ <text>In any case in which the attorney general of a State has reason to believe that an interest of the residents of that State has been or is threatened or adversely affected by the engagement of any covered entity in a violation of this Act or a regulation promulgated thereunder, the State, as parens patriae, may bring a civil action on behalf of the residents of the State in a district court of the United States or a State court of appropriate jurisdiction to obtain injunctive relief.</text>
+            </subsection>
+            <subsection id="ida4724ee4659b445d9c6b2418cd9a1111">
+                <enum>(e)</enum>
+                <header>Relationship to State laws</header>
+ <text display-inline="yes-display-inline">Nothing in this Act or an amendment made by this Act, or any regulation promulgated thereunder, shall be construed to prohibit or otherwise affect the enforcement of any State law or regulation that is at least as protective of users of artificial intelligence chatbots as this Act and the amendments made by this Act, and the regulations promulgated thereunder.</text>
+            </subsection>
+        </section>
+        <section id="idb398878771e747f5afad5858ef76ba48">
+            <enum>8.</enum>
+            <header>Effective date</header>
+ <text display-inline="no-display-inline">This Act and the amendments made by this Act shall take effect on the date that is 180 days after the date of enactment of this Act.</text>
+        </section>
+    </legis-body>
+</bill>
+

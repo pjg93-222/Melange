@@ -1,0 +1,51 @@
+# The test edits of commit 20aefec50 are what the merge needs, and they are not weakenings.
+# On the merged tree (HEAD 7bf774055, before the edits) test_staffer_office_covered_staff.py and test_staffer_unreachable_hint.py as they were fail 35 of their 66 tests (33 and 2):
+# every comparison with the base commit sees pairs_scored on one side only, and the work counter sees pair_row where it counted pair.
+# The unedited files were run as zz_preedit_*.py copies beside the real ones (git show HEAD:<file>); the copies were removed afterwards.
+
+...FFFFFFFFF........FFFFFFFFFFFFFFFFFFFFFFFF.................F.F...      [100%]
+=========================== short test summary info ===========================
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[1-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[1-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[1-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[3-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[3-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[3-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[5-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[5-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[5-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-1-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-1-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-1-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-3-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-3-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-3-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-5-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-5-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-5-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-1-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-1-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-1-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-3-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-3-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-3-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-5-ranked]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-5-distinct]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-5-independent]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[target_without_work_connections]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[no_path_in_work_records]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[office_without_work_records]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[origin_without_work_connections]
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_office_requests_in_random_worlds_follow_the_rule_and_equal_the_base_commit_where_it_changes_nothing
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_office_covered_staff.py::test_person_requests_and_requests_for_a_set_of_people_equal_the_base_commit_byte_for_byte
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_unreachable_hint.py::test_results_equal_the_base_commits_except_for_the_new_fields
+FAILED fec/tests/surfaces/zz_preedit_test_staffer_unreachable_hint.py::test_the_checks_build_no_rows_the_search_did_not_and_price_no_pairs
+35 failed, 32 passed in 54.30s
+
+# With the edits, the same two files and the route-jobs test fixed in fb3f874c2:
+...................................................................      [100%]
+67 passed in 14.29s
+
+# Fix round (commit 7ce88cc52 and the tests of 453718ddc): the pair-count assertion that 20aefec50 loosened to `new_pairs <= old_pairs` is exact again, but counting only the pairs the base commit priced
+# between people who overlapped (work_of(..., overlapping_only=True), ExposureIndex.overlaps), so it equals the tip's count; the rows still equal the base commit's. Its negative controls, the changed expectations
+# of the sentences and the mutation checks are in proof/fix_round.txt.

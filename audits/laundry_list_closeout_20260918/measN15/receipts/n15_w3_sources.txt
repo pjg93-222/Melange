@@ -1,0 +1,78 @@
+======================================================================================================
+N15 / W3  WHICH DESK SOURCE SUPPLIED THE DISPLAYED ROW, AND WHY apply_to_desk KEPT IT
+======================================================================================================
+  bundle audit counters (first 4 MB of member_desk_bundle.json):
+     bill_withdrawn_rows_removed              None
+     bill_duplicate_rows_collapsed            None
+     bills_displayed_unique                   None
+     bill_source_rows                         None
+     bill_manual_rows                         None
+     bill_collector_roster_rows               None
+     bill_withdrawal_rules_already_absent     None
+
+  workbook role-sheet rows read: {'Sponsor Interactions': 638, 'Original Co-Sponsor Interaction': 2972, 'Co-Sponsor Interactions': 7455}
+  manual_bill_evidence.csv rows read: 371
+  data/members/primacy_act_memberships.ndjson                rows read: 117
+  data/members/registry_anchor_memberships.ndjson            rows read: 73
+  data/members/bank_anchor_memberships.ndjson                rows read: 140
+  data/members/collector_roster_updates.ndjson               rows read: 237
+  data/members/sentinel_verified_membership_history.ndjson   rows read: 258
+  sentinel_admissions.json memberships: 30
+
+  PER-TRIPLE: every source that carries the triple, with the role that source states.
+  "kept/removed" is apply_to_desk applied to that pre-collapse row: removed iff the official
+  fact is withdrawn OR canonical_role(row) != canonical_role(fact).
+
+  member                     bill        cong  official role  source -> role stated [apply_to_desk]
+  Alexandria Ocasio-Cortez   H.R.1030    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  André Carson               H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Ayanna Pressley            H.R.1030    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Brian Fitzpatrick          H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Cynthia Lummis             S.3529      117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Dwight Evans               H.R.4895    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Ed Case                    H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Eleanor Norton             H.R.1030    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Ilhan Omar                 H.R.1030    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Ilhan Omar                 H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Jesús García               H.R.1030    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Peter Welch                H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Peter Welch                H.R.982     117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Pramila Jayapal            H.R.1030    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Pramila Jayapal            H.R.4895    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Raphael Warnock            S.3529      117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Robin Kelly                H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Susan Collins              S.349       117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Thomas Suozzi              H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Tim Scott                  S.3529      117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Tim Walberg                H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Vern Buchanan              H.R.1215    117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+  Vern Buchanan              H.R.982     117   original-cosponsor wb:Co-Sponsors=cosponsor[REMOVED]; wb:Original Co-Sponsor=original-cosponsor[kept]
+
+  SOURCE(S) that supplied the SURVIVING displayed row (role == official role):
+     workbook:Original Co-Sponsor Interaction                               n=23
+  PRE-COLLAPSE rows apply_to_desk REMOVED for these 23 triples, by source:
+     workbook:Co-Sponsor Interactions                                       n=23
+  triples with NO source found = 0
+  triples where a superseded-role row exists in a desk source = 23 / 23
+
+  WHY apply_to_desk LEFT THE DISPLAYED ROW IN PLACE -- verbatim, LIVE\fec\legislation\official_membership_movements.py:94-108:
+     94 | def apply_to_desk(bills,document):
+     95 |     from legislation.congress_bill_repository import parse_bill_identity
+     96 |     by_name={(r['repository_key'],r['member']):r for r in document.get('facts',[])}
+     97 |     removed=0
+     98 |     for name,rows in bills.items():
+     99 |         kept=[]
+    100 |         for row in rows:
+    101 |             try: key=parse_bill_identity(row['bill'],row['congress'])['key']
+    102 |             except ValueError: kept.append(row);continue
+    103 |             fact=by_name.get((key,name))
+    104 |             if fact and (fact['withdrawn'] or BR.canonical_role(row['role'])!=BR.canonical_role(fact['role'])):
+    105 |                 removed+=1
+    106 |             else: kept.append(row)
+    107 |         bills[name]=kept
+    108 |     return removed
+  -> by_name is keyed (repository_key, member NAME); for all 23 the fact EXISTS,
+     fact["withdrawn"] is False and canonical_role(displayed role) == canonical_role(fact role),
+     so the else-branch keeps the row.  The superseded-role duplicate row for the same triple
+     is the row apply_to_desk removes, pre-collapse.
+DONE

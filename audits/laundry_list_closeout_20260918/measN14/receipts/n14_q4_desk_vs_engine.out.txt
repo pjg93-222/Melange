@@ -1,0 +1,114 @@
+====================================================================================================
+N14 Q4  DESK DISPLAY vs ENGINE SCORE, AFTER BOTH CORRECTION STEPS   run 2026-09-19T13:03:27
+====================================================================================================
+-- 0. GATE: are the tone inputs still the bytes the shipped engine run scored? --
+   ../Draft Systems/cu_press_stance_tone.csv      MATCH  6f2f926d08196a12
+   data/stance/interview_stance_final.csv         MATCH  cdc856843cdb5a4d
+   data/stance/interview_stance_final.receipt.jso MATCH  0efd6c7cda3b65e4
+   data/stance/press_refresh_feed_receipt.json    MATCH  781ec2713ade3a58
+   data/stance/press_refresh_tone.csv             MATCH  393a983ce6d9c7fa
+   press_stance_final.csv                         MATCH  78f4babdec8eb4a9
+   press_component_meta.json mtime 2026-09-19T03:25:33 | routing audit mtime 2026-09-19T03:25:33
+   GATE: the shipped engine run is on TODAY'S bytes
+
+-- 1. REBUILD THE ENGINE SIGN (build_media_blend lines 366-392) --
+   tone rows: shipped meta 2668 | this run 2668 | routing audit rows 2668
+   press_stance_final.csv: 2668 turn keys, mtime 2026-09-19T03:19:23
+
+   counter                shipped   recomputed   verdict
+   stack_signed             1823         1823   MATCH
+   debate_fallback             0            0   MATCH
+   unrelated_zeroed           29           29   MATCH
+   gold_overrides             34           34   MATCH
+   tone rows whose turn key is ABSENT from press_stance_final.csv: 0
+   routing-audit rows whose url equals the tone row at the same index: 2668 of 2668  (ALIGNED)
+
+----------------------------------------------------------------------------------------------------
+-- 2. THE 57, AFTER BOTH CORRECTION STEPS --
+
+outcome                                         count
+STILL DIFFERS                                      33
+engine does not score it                           21
+AGREE after corrections                             3
+
+-- THE ROWS THAT STILL DIFFER (desk sign vs engine sign, both post-correction) --
+member                   date       title[:52]                                           DESK         ENGINE       engine basis
+Chris Pappas             2025-07-17 Pappas Statement on Passage of Cryptocurrency Legisl neutral/+0   +1           stack:support/majority
+Cory Booker              2025-12-04 Simpson sets the record straight on overdraft progra neutral/+0   +1           stack:support/majority
+Cynthia Lummis           2024-05-16 Lummis Lauds Passage of Resolution Rolling Back SEC  neutral/+0   +1           stack:support/unanimous
+Earl Carter              2025-07-18 Carter Statement on House Passage of Key Crypto Legi neutral/+0   +1           stack:support/majority
+Elizabeth Warren         2025-05-15 In Speech to National Urban League, Warren Calls Out neutral/+0   -1           stack:oppose/majority
+Jim Jordan               2025-04-15 Ohio Credit Union League hosts Rep. Jordan           neutral/+0   +1           stack:support/majority
+John Kennedy             2025-10-22 Senate bill would make needed updates to SAR/CTR thr neutral/+0   +1           stack:support/unanimous
+John Mannion             2026-04-29 Opportunity Knock$ brings together Members of Congre neutral/+0   +1           stack:support/majority
+John Rose                2025-06-24 House passes bill curtailing abusive mortgage trigge oppose/-1    +1           stack:support/unanimous
+John Thune               2025-05-13 Credit union tax status untouched in Ways and Means  neutral/+0   +1           stack:support/majority
+John Thune               2025-05-21 Opposing efforts to add interchange price caps to st oppose/-1    +1           stack:support/unanimous
+John Thune               2025-06-10 'Poison pill' GENIUS Act amendments less likely to m oppose/-1    +1           stack:support/unanimous
+Joni Ernst               2025-10-07 Legislators and advocates connect                    neutral/+0   +1           stack:support/majority
+Josh Hawley              2025-05-22 Interchange, rate cap amendments are GENIUS Act ‘poi oppose/-1    +1           stack:support/majority
+Josh Hawley              2025-05-29 VP Vance calls for Congress to pass ‘clean’ GENIUS A neutral/+0   +1           stack:support/majority
+Josh Hawley              2025-06-10 'Poison pill' GENIUS Act amendments less likely to m oppose/-1    +1           stack:support/majority
+Josh Hawley              2025-06-18 GENIUS Act clears senate without interchange, credit oppose/-1    +1           stack:support/majority
+Juan Vargas              2024-02-07 Nussle meets with credit union supporters on Capitol neutral/+0   +1           stack:support/unanimous
+Juan Vargas              2025-02-06 Bipartisan House bill would update board meeting req neutral/+0   +1           stack:support/unanimous
+Kirsten Gillibrand       2025-05-08 Senator Gillibrand Statement On The GENIUS Act       neutral/+0   +1           stack:support/majority
+Kweisi Mfume             2022-09-21 Congressman Mfume, Maryland Congressional Delegation neutral/+0   +1           stack:support/unanimous
+Kweisi Mfume             2023-05-17 Mfume, Maryland Congressional Delegation Members Ann neutral/+0   +1           stack:support/unanimous
+Lance Gooden             2026-04-22 Gooden Reveals Historic U.S. Military Use of Bitcoin neutral/+0   +1           stack:support/majority
+Lisa Blunt Rochester     2025-05-08 STATEMENT: Senator Lisa Blunt Rochester Releases Sta neutral/+0   -1           stack:oppose/majority
+Mike Flood               2025-01-07 Congressman Flood: Inspector General Reveals New Det neutral/+0   -1           stack:oppose/majority
+Mike Rounds              2024-10-30 Leagues, CU advocates talk fraud, financial educatio neutral/+0   +1           stack:support/majority
+Richard Blumenthal       2025-12-04 Simpson sets the record straight on overdraft progra neutral/+0   +1           stack:support/majority
+Richard Blumenthal       2026-01-15 ICYMI Op-Ed: Crypto is a Gamble our Financial System neutral/+0   -1           stack:oppose/majority
+Richard Durbin           2024-10-07 Illinois ‘sovereign immunity’ assertion in interchan neutral/+0   -1           stack:oppose/majority
+Roger Marshall           2026-01-14 Reintroduced Big Box Bailout would harm consumers, s oppose/-1    +1           stack:support/majority
+Stephen Lynch            2025-07-11 Reps. Lynch and Waters Announce Anti-Crypto Corrupti neutral/+0   -1           stack:oppose/majority
+Tim Scott                2025-02-06 Credit unions engage with policymakers prior to stab neutral/+0   +1           stack:support/majority
+Todd Young               2025-12-03 Hauptman says NCUA must be aware of consequences of  neutral/+0   +1           stack:support/majority
+
+STILL DIFFERS: 33 of 57
+members affected: 25
+
+-- THE ROWS THE ENGINE DOES NOT SCORE AT ALL (so nothing can differ) --
+   {'neutral-zeroed': 15, 'no-policy-domain': 4, 'zero-intensity': 2}
+   Andy Barr                Fraud fight: Prioritize innovative technology, infor neutral-zeroed desk=support/+1
+   Catherine Cortez Masto   cortez masto statement on clarity act                neutral-zeroed desk=oppose/-1
+   Chris Van Hollen         Van Hollen, Alsobrooks, Colleagues Take Action to Pr neutral-zeroed desk=neutral/+0
+   Chris Van Hollen         Van Hollen Joins Warren, Colleagues in Pressing Admi neutral-zeroed desk=support/+1
+   Frederica Wilson         Congresswoman Wilson Introduces Mandatory Foreclosur neutral-zeroed desk=oppose/-1
+   French Hill              RELEASE: REP. HILL PROTECTS THE PERSONAL RIGHTS OF C no-policy-domain desk=neutral/+0
+   French Hill              Fraud fight: Prioritize innovative technology, infor neutral-zeroed desk=support/+1
+   Jeanne Shaheen           Three Shaheen-Led Bills to Lower Housing Costs, Impr neutral-zeroed desk=support/+1
+   Jimmy Panetta            Reps. Panetta, LaHood Reintroduce Bipartisan Legisla no-policy-domain desk=neutral/+0
+   Jimmy Panetta            Rep. Panetta Authors and Introduces Bipartisan Bill  no-policy-domain desk=neutral/+0
+   John Kennedy             Leagues, credit unions host lawmakers, attend local  zero-intensity desk=support/+1
+   John Rose                Members of Congress encourage ‘strong, unified voice zero-intensity desk=support/+1
+   Jon Ossoff               Sens. Ossoff, Moody Introduce Bipartisan Bill to Mak neutral-zeroed desk=support/+1
+   Jon Ossoff               El Senador Ossoff Presenta Proyecto de Ley Bipartidi neutral-zeroed desk=neutral/+0
+   Joni Ernst               ICYMI: WSJ Ed Board Promotes Ernst’s Telework Transp no-policy-domain desk=neutral/+0
+   Kirsten Gillibrand       Gillibrand Slams Trump Administration For Making Sen neutral-zeroed desk=neutral/+0
+   Kirsten Gillibrand       Schumer, Gillibrand & Ryan: With West Point Facing S neutral-zeroed desk=neutral/+0
+   Maggie Goodlander        Goodlander Joins Republicans to Pass Affordable HOME neutral-zeroed desk=support/+1
+   Mike Crapo               Fighting fraud on multiple fronts                    neutral-zeroed desk=support/+1
+   Richard Blumenthal       Blumenthal Releases Report On Trump's Gutting of Con neutral-zeroed desk=oppose/-1
+   Sheldon Whitehouse       Senate interest rate bill would increase compliance  neutral-zeroed desk=oppose/-1
+
+-- THE ROWS THAT AGREE AFTER CORRECTIONS --
+   Lance Gooden             Interchange bill should be rejected in any form      desk=oppose/-1 engine=-1  stack:oppose/review
+   Roger Marshall           America’s Credit Unions joins with other industry gr desk=oppose/-1 engine=-1  stack:oppose/majority
+   Tim Scott                Credit union board modernization part of updated hou desk=support/+1 engine=+1  stack:support/unanimous + gold_override:supp
+
+----------------------------------------------------------------------------------------------------
+-- 3. WHAT THE TWO CORRECTION STEPS TOUCH ON THE 57 --
+   desk _press_corr hits (press_stance_overrides, url EXACT or title substring): 1
+   engine _press_gold hits on the same 57                                      : 1
+   engine rows signed from the STACK rather than the CSV stance column          : 57
+   engine rows that fell back to the CSV stance column                          : 0
+
+   NOTE the asymmetry in the two matchers, measured:
+     make_member_desk._press_corr  line 174: c['url'] == url        (EXACT, no rstrip)
+     build_media_blend._press_gold line 345: rstrip('/') both sides (TOLERANT)
+     override rows whose url ends in "/" (only these can diverge): 0 of 8
+wrote n14_q4_desk_vs_engine.json
+DONE N14 Q4

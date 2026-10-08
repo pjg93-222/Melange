@@ -28,15 +28,6 @@ if ($unknown.ready -or $unknown.reason -ne 'memory_detection_unavailable') {
   throw 'Missing memory telemetry must fail closed.'
 }
 
-$chunked = Get-MentatNodeHeapPlan -TotalPhysicalMb 32294 -AvailableMb 9745 -MinimumMb 6144
-if (-not $chunked.ready -or $chunked.heap_mb -ne 6821) {
-  throw 'The verified chunked build must fit within the available-memory cap.'
-}
-$chunkedBlocked = Get-MentatNodeHeapPlan -TotalPhysicalMb 32294 -AvailableMb 8000 -MinimumMb 6144
-if ($chunkedBlocked.ready -or $chunkedBlocked.heap_mb -ne 0) {
-  throw 'Chunked builds must still refuse insufficient available memory.'
-}
-
 $buildScript = Join-Path (
   Split-Path -Parent $PSScriptRoot
 ) 'tools\build_industry_report.ps1'

@@ -1,10 +1,10 @@
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 2L || length(args) > 6L) {
+if (length(args) < 2L || length(args) > 5L) {
   stop(
     paste(
       "usage: Rscript tools/export_crypto_spending_data.R",
       "<mentat.db> <output.json> [fec-committee-master-dir]",
-      "[fec-beneficiary-dir] [industry] [tidy-staging.sqlite]"
+      "[fec-beneficiary-dir] [industry]"
     ),
     call. = FALSE
   )
@@ -40,35 +40,13 @@ MENTAT_INDUSTRY <- if (length(args) >= 5L && nzchar(trimws(args[[5L]]))) {
 if (!nzchar(MENTAT_INDUSTRY)) {
   stop("Industry cannot be empty.", call. = FALSE)
 }
-# Sixth positional argument: where to write the tidy staging store that
-# tools/build_tidy_workbook.py turns into the companion
-# `<Industry> Industry Spending Data.xlsx`. ABSENT means "skip staging": a
-# five-argument invocation - every existing caller, every ad-hoc console run -
-# behaves exactly as before and only prints that it skipped. The path is NOT
-# mustWork: the orchestrator passes a pending name that does not exist yet.
-tidy_stage_path <- if (length(args) >= 6L && nzchar(trimws(args[[6L]]))) {
-  normalizePath(trimws(args[[6L]]), winslash = "/", mustWork = FALSE)
-} else {
-  ""
-}
 
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
   "fec_api.R", "reconcile.R", "report.R", "fec_beneficiary.R",
-  "identity_components.R", "export_guards.R", "fec_transfer_graph.R",
-  "state_destinations.R", "tidy_stage.R"
+  "identity_components.R", "export_guards.R"
 )) {
   source(file.path(MENTAT_PROJECT_ROOT, "R", module), local = .GlobalEnv)
-}
-
-# A memo the memo plan removed as its counted parent's duplicate (duplicate_memo 1;
-# F13's memo_redisclosure_of_counted_parent, or an FEC back reference) was matched:
-# it carries the match as its reason, never "disclosure_memo_unmatched".
-# tests/test_export_memo_reason.R reads this definition from this file.
-export_memo_duplicate_reason <- function(reason, duplicate_memo, duplicate_reason) {
-  matched <- !is.na(duplicate_memo) & duplicate_memo == 1L & reason %in% "disclosure_memo_unmatched"
-  reason[matched] <- ifelse(is.na(duplicate_reason[matched]), "", as.character(duplicate_reason[matched]))
-  reason
 }
 
 require_package("data.table")
@@ -153,7 +131,7 @@ read_fec_committee_master <- function(directory) {
       designation = character(), committee_type = character(),
       party_affiliation = character(), party = character(),
       connected_organization = character(), candidate_id = character(),
-      source_url = character(), state = character()
+      source_url = character()
     ))
   }
   headers <- c(
@@ -186,7 +164,6 @@ read_fec_committee_master <- function(directory) {
       cycle,
       committee_id = toupper(trim_text(committee_id)),
       committee_name = trim_text(committee_name),
-      state = toupper(trim_text(state)),
       designation = toupper(trim_text(designation)),
       committee_type = toupper(trim_text(committee_type)),
       party_affiliation = toupper(trim_text(party_affiliation)),
@@ -216,29 +193,7 @@ on.exit(DBI::dbDisconnect(connection), add = TRUE)
 
 lookups <- spending_report_lookups(connection)
 raw_rows <- spending_raw_report_rows(connection, versioning_applied = TRUE)
-raw_rows[, company_attribution_status := fec_attribution_status(raw_rows,
-  split(lookups$companies$variant, lookups$companies$company), fec_committee_master)]
 export_phase("raw_database_rows_loaded", nrow(raw_rows))
-# S2 HANDOFF: this fill is a defensive guard for databases or report.R
-# versions whose spending_raw_report_rows() SELECT lacks
-# contributor_street_1 / contributor_street_2, so raw_rows could still
-# arrive without them. Backfill both columns here, before raw_export is
-# copied from raw_rows below, so the .() projection does not error with
-# "object not found"; report.R's SELECTs carry the two columns as of S2.
-for (column in c("contributor_street_1", "contributor_street_2")) {
-  if (!column %in% names(raw_rows)) raw_rows[, (column) := NA_character_]
-}
-evidence_scope <- contribution_cycle(raw_rows$contribution_receipt_date) %in% supported_cycles
-unresolved <- evidence_scope & fec_receipt_countable(raw_rows) &
-  fec_receipt_role_unresolved(raw_rows$receipt_role)
-if (any(unresolved)) {
-  atomic_write_csv(raw_rows[unresolved], paste0(output_path, ".receipt-review.csv"))
-}
-# 2026-09-17 ruling: unresolved receipt roles no longer block the export. The
-# CSV above is the review list for rows that ship counted and flagged
-# (receipt_role_unverified = 1); the gate below stops publication only when a
-# row's own evidence contradicts itself.
-fec_assert_receipt_evidence(raw_rows[evidence_scope])
 analysis_rows <- spending_report_rows(
   connection,
   lookups = lookups,
@@ -268,8 +223,10 @@ master_index <- match(
 analysis_rows[, type_filled_from_master := FALSE]
 analysis_rows[, designation_filled_from_master := FALSE]
 type_fill <- !is.na(master_index) &
+  !nzchar(trim_text(analysis_rows$recipient_committee_type)) &
   nzchar(fec_committee_master$committee_type[master_index])
 designation_fill <- !is.na(master_index) &
+  !nzchar(trim_text(analysis_rows$recipient_committee_designation)) &
   nzchar(fec_committee_master$designation[master_index])
 analysis_rows[type_fill, recipient_committee_type :=
   fec_committee_master$committee_type[master_index[type_fill]]]
@@ -283,13 +240,6 @@ classifications <- spending_recipient_classification(
   analysis_rows,
   lookups = lookups
 )
-# Resolve generic registered PACs without pretending they are company PACs.
-# The legacy Stats template keeps its historical grouping; these are the
-# independently rendered industry workbooks with an explicit Other PAC channel.
-other_pac <- classifications$recipient_category == "Unclassified" &
-  analysis_rows$recipient_committee_type %in% c("N", "Q")
-classifications$recipient_category[other_pac] <- "Other PAC"
-classifications$category_source[other_pac] <- "fec:registered_nonparty_pac_type"
 master_party <- ifelse(
   is.na(master_index),
   "",
@@ -458,8 +408,6 @@ analysis_map <- analysis_rows[, .(
   party,
   category_source,
   party_source,
-  recipient_committee_type,
-  recipient_committee_designation,
   included_summary
 )]
 analysis_map <- merge(
@@ -504,7 +452,7 @@ raw_export[, inclusion_reason := ifelse(
     "Excluded recipient class from summaries",
     ifelse(
       duplicate_memo == 1L,
-      paste0("Memo duplicate: ", duplicate_reason, "; retained source ", duplicate_of_sub_id),
+      "Exact five-key memo duplicate",
       ifelse(
         nzchar(trim_text(excluded_reason)),
         trim_text(excluded_reason),
@@ -513,22 +461,6 @@ raw_export[, inclusion_reason := ifelse(
     )
   ))
 )]
-raw_export[fec_receipt_role_excluded(receipt_role),
-           inclusion_reason := paste0("Receipt role: ", receipt_role)]
-# Counted, but the receipt role could not be resolved from the filing. The row
-# ships with the money in the total and the caveat attached, so a reader can
-# filter on it (2026-09-17 ruling: contradictions, not ambiguity).
-raw_export[, receipt_role_unverified := fec_receipt_role_unverified(receipt_role)]
-raw_export[, receipt_role_reason := fec_receipt_role_reason(receipt_role)]
-raw_export[, receipt_role_reason := export_memo_duplicate_reason(receipt_role_reason, duplicate_memo, duplicate_reason)]
-raw_export[, company_attribution_reason := ifelse(company_attribution_status == "accepted", "",
-  paste0(company_attribution_status, "; original matcher: ", company_match_reason))]
-raw_export[include_in_analysis == "Yes" & company_attribution_status != "accepted",
-           inclusion_reason := paste0("Included provisionally: ", company_attribution_reason)]
-raw_export[include_in_analysis == "No" & company_attribution_status == "contradicted_by_reported_organization" &
-             !fec_receipt_role_excluded(receipt_role),
-           inclusion_reason := paste0("Attribution contradicted by reported organization: ",
-             ifelse(toupper(trim_text(entity_type)) == "IND", contributor_employer, contributor_name))]
 raw_export[, cycle_alignment := ifelse(
   cycle == source_cycle,
   "OK",
@@ -562,42 +494,22 @@ raw_export <- raw_export[, .(
   party_source = trim_text(party_source),
   recipient = trim_text(committee_name),
   committee_id = toupper(trim_text(committee_id)),
-  committee_type = toupper(trim_text(recipient_committee_type)),
-  committee_designation = toupper(trim_text(recipient_committee_designation)),
   recipient_key = ifelse(
     nzchar(toupper(trim_text(committee_id))),
     paste0("FEC:", toupper(trim_text(committee_id))),
     paste0("NAME:", normalize_variant_key(committee_name))
   ),
   date,
-  employer = trim_text(contributor_employer),
-  occupation = trim_text(contributor_occupation),
-  street_1 = trim_text(contributor_street_1),
-  street_2 = trim_text(contributor_street_2),
   city = trim_text(contributor_city),
   state = trim_text(contributor_state),
   zipcode = trim_text(contributor_zip),
+  employer = trim_text(contributor_employer),
+  occupation = trim_text(contributor_occupation),
   record_type = ifelse(is.na(record_type), trim_text(record_type_raw), record_type),
   source_table = trim_text(source_table),
-  funding_source_type = fec_funding_source(entity_type),
-  funding_direction = ifelse(recipient_category == "Company PAC", "Into company PAC", "To named recipient"),
   company_match_status = trim_text(company_match_status),
-  company_match_reason = trim_text(company_match_reason),
-  company_attribution_status,
-  company_attribution_reason,
-  matched_alias = trim_text(matched_variant),
   include_in_analysis,
   inclusion_reason,
-  receipt_role,
-  receipt_role_unverified,
-  receipt_role_reason,
-  receipt_type_full = trim_text(receipt_type_full),
-  filing_form = trim_text(filing_form),
-  line_number = trim_text(line_number),
-  memo_text = trim_text(memo_text),
-  transaction_id = trim_text(transaction_id),
-  back_reference_transaction_id = trim_text(back_reference_transaction_id),
-  source_url = trim_text(pdf_url),
   person_key,
   identity_basis,
   is_memo_leg = as.integer(is_memo_leg),
@@ -605,8 +517,6 @@ raw_export <- raw_export[, .(
   superseded_by_amendment = as.integer(superseded_by_amendment),
   duplicate_filing_version = as.integer(duplicate_filing_version),
   duplicate_memo = as.integer(duplicate_memo)
-  , duplicate_of_sub_id = trim_text(duplicate_of_sub_id)
-  , duplicate_reason = trim_text(duplicate_reason)
 )]
 raw_export[, sort_date := as.integer(as.Date(date))]
 data.table::setorder(raw_export, cycle, -sort_date, contributor, source_id)
@@ -647,18 +557,9 @@ direct_candidate_keys <- unique(paste(
 downstream_universe <- recipient_universe[
   !paste(cycle, committee_id, sep = "|") %in% direct_candidate_keys
 ]
-# Collect routes needed by ANY company view. A different company's refunds can
-# make the industry net nonpositive without invalidating this company's route.
-positive_company_roots <- raw_export[include_in_analysis == "Yes" & nzchar(committee_id),
-  .(net = sum(amount)), by = .(cycle, company, committee_id)][net > 0]
-downstream_universe[, traversal_seed := paste(cycle, committee_id, sep = "|") %in%
-  paste(positive_company_roots$cycle, positive_company_roots$committee_id, sep = "|")]
-# F15 (Paul approved 2026-09-26): each company view is dated from its own roots.
-transfer_context <- fec_transfer_context(beneficiary_dir, downstream_universe, candidate_links, supported_cycles,
-  views = positive_company_roots[, .(cycle, view = "Company", company, committee_id)])
 downstream_activity <- fec_read_downstream_activity(
   beneficiary_dir,
-  transfer_context$universe,
+  downstream_universe,
   candidate_master,
   supported_cycles
 )
@@ -674,16 +575,12 @@ committee_map <- fec_build_committee_map(
 export_phase("committee_map_built", nrow(committee_map))
 beneficiary_tables <- fec_build_beneficiary_tables(
   raw_export,
-  downstream_activity,
-  transfer_context$edges,
-  candidate_links,
-  networks = transfer_context$networks,
-  industry_universe = transfer_context$universe
+  downstream_activity
 )
 export_phase("beneficiary_bridge_built", nrow(beneficiary_tables$bridge))
 downstream_activity_export <- fec_aggregate_downstream_activity(
   downstream_activity,
-  transfer_context$universe
+  downstream_universe
 )
 export_phase(
   "downstream_activity_aggregated",
@@ -715,29 +612,16 @@ omitted_non_accepted_by_cycle <- setNames(
   rep(0L, nrow(cycles)),
   as.character(cycles$cycle)
 )
-# Retain the legacy metadata field at zero: no query-status rows are omitted.
-raw_export <- mentat_add_destinations(raw_export, fec_committee_master, candidate_master, candidate_links)
-workbook_raw_export <- raw_export[
-  cycle %in% supported_cycles
+calculated_omissions <- raw_export[
+  cycle %in% supported_cycles & company_match_status != "accepted",
+  .(rows = .N),
+  by = cycle
 ]
-
-# app/report_insights.py REFUSES a worksheet over 50,000 rows outright rather
-# than truncating it, so the fine-grain sheets are capped HERE instead of being
-# discovered unchartable after publication. The cap is overridable for tests and
-# for a console whose limit changes; below 100 rows the fold would dominate the
-# sheet and the detail would be meaningless.
-detail_row_cap <- suppressWarnings(as.integer(
-  Sys.getenv("MENTAT_DETAIL_ROW_CAP", "45000")
-))
-if (length(detail_row_cap) != 1L || is.na(detail_row_cap) ||
-  detail_row_cap < 100L) {
-  stop("MENTAT_DETAIL_ROW_CAP must be an integer of at least 100.", call. = FALSE)
-}
-detail_frames <- spending_detail_frames(workbook_raw_export, detail_row_cap)
-export_phase(
-  "detail_frames_built",
-  detail_frames$stats$recipient_rows + detail_frames$stats$contributor_rows
-)
+omitted_non_accepted_by_cycle[as.character(calculated_omissions$cycle)] <-
+  calculated_omissions$rows
+workbook_raw_export <- raw_export[
+  cycle %in% supported_cycles & company_match_status == "accepted"
+]
 
 # Guards run HERE because this is the only point where the roster, the complete
 # unfiltered rows (every status, every cycle) and the supported cycles are all in
@@ -775,51 +659,8 @@ guard_category_view_b <- analysis_rows[
   )
 ]
 
-# The tidy staging frames are built HERE, before the guard run, for the same
-# reason the guards themselves are: this is the last point at which every frame
-# is in scope AND nothing has been filtered for presentation. Building them
-# ahead of the guards is what lets mentat_guard_tidy_reconciliation refuse to
-# publish a store whose fact tables disagree with the cycle totals the Overview
-# prints - a check that is worthless after the store is already on disk.
-#
-# data_quality is filled in after the guards run, because the guard results ARE
-# its R-side rows. Nothing else is deferred.
-tidy_frames <- NULL
-if (nzchar(tidy_stage_path)) {
-  tidy_started_at <- unname(proc.time()[["elapsed"]])
-  tidy_frames <- mentat_build_tidy_frames(
-    raw_export = workbook_raw_export,
-    committee_map = committee_map,
-    committee_master = fec_committee_master,
-    candidate_links = candidate_links,
-    candidate_master = candidate_master,
-    downstream_activity_export = downstream_activity_export,
-    bridge = beneficiary_tables$bridge_all,
-    state_destinations = mentat_state_destinations(workbook_raw_export),
-    recipient_locations = unique(workbook_raw_export[
-      , c("cycle", "committee_id", "recipient", mentat_destination_fields),
-      with = FALSE
-    ]),
-    guard_results = NULL,
-    # Leadership-PAC sponsor links exist only inside fec_build_committee_map's
-    # internal mappings frame; it is carried out as an attribute so the
-    # committee_sponsors table can hold them beside the FEC ccl rows.
-    mappings = fec_committee_map_mappings(committee_map)
-  )
-  cat(sprintf(
-    "  tidy staging frames built in %.2fs\n",
-    unname(proc.time()[["elapsed"]]) - tidy_started_at
-  ))
-}
-
-guard_progress <- data.table::as.data.table(DBI::dbGetQuery(connection,
-  "SELECT * FROM scrape_progress WHERE variant_set LIKE 'P1_employer%' OR variant_set LIKE 'P2_variant%' OR variant_set LIKE 'P2_company_name%'"))
-guard_progress[, destination := ifelse(grepl("^P2_company_name", variant_set), "corporate", "contributions")]
-guard_api <- if (DBI::dbExistsTable(connection, "api_work_progress"))
-  DBI::dbGetQuery(connection, "SELECT * FROM api_work_progress") else data.frame()
-guard_views <- mentat_guard_progress_views(guard_progress, guard_api)
 guard_started_at <- unname(proc.time()[["elapsed"]])
-guard_results <- mentat_run_export_guards(
+mentat_run_export_guards(
   list(
     mentat_guard_roster_coverage(companies, raw_export, supported_cycles),
     mentat_guard_cell_coverage(companies, raw_export, supported_cycles),
@@ -832,7 +673,25 @@ guard_results <- mentat_run_export_guards(
     # Reported-vs-stored, split by destination: the employer/variant passes fill
     # contributions, the company-as-contributor pass fills corporate_giving.
     mentat_guard_collection_completeness(
-      guard_views$completeness,
+      DBI::dbGetQuery(
+        connection,
+        # Identity passes (P2_name / P2_name_state) are excluded from the
+        # denominator. They search a CONTRIBUTOR NAME, so records_total counts
+        # every person nationally with that name and has no relation to what
+        # should be stored: one Coinbase 2024 seed reports 1,049,000 records
+        # against 2,299 for the employer pass. Counting them made a complete
+        # Coinbase look 1,085,852 rows short. Only the employer and variant
+        # passes define a universe the database is supposed to contain.
+        paste(
+          "SELECT company, cycle, records_total,",
+          "CASE WHEN variant_set LIKE 'P2_company_name%' THEN 'corporate'",
+          "ELSE 'contributions' END AS destination",
+          "FROM scrape_progress",
+          "WHERE variant_set LIKE 'P1_employer%'",
+          "OR variant_set LIKE 'P2_variant%'",
+          "OR variant_set LIKE 'P2_company_name%'"
+        )
+      ),
       DBI::dbGetQuery(
         connection,
         paste(
@@ -845,37 +704,32 @@ guard_results <- mentat_run_export_guards(
         )
       )
     ),
-    mentat_guard_zero_provenance(guard_views$zero),
-    guard_views$api_guard,
+    mentat_guard_zero_provenance(
+      if ("zero_verified" %in% DBI::dbListFields(connection, "scrape_progress")) {
+        DBI::dbGetQuery(
+          connection,
+          paste(
+            "SELECT company, cycle, records_total, zero_verified",
+            "FROM scrape_progress"
+          )
+        )
+      } else {
+        DBI::dbGetQuery(
+          connection,
+          "SELECT company, cycle, records_total FROM scrape_progress"
+        )
+      }
+    ),
     mentat_guard_direction_integrity(beneficiary_tables$summary),
     mentat_guard_date_sanity(
       downstream_activity_export$first_activity_date, "downstream_activity"
     ),
-    mentat_guard_date_sanity(
-      downstream_activity_export$last_activity_date, "downstream_last_activity"
-    ),
-    # The two fine-grain sheets are NEW publication surfaces, not a view of an
-    # existing one: nothing else in the workbook re-sums them, so a fold that
-    # lost a group would ship a chartable sheet that silently understates the
-    # cycle total printed one tab away.
-    mentat_guard_detail_reconciliation(detail_frames, expected_cycle_totals),
-    # The companion Data workbook is a SECOND publication of the same dollars,
-    # regrouped four ways. Nothing downstream re-sums it against the Overview,
-    # so a fact table that lost a group would ship a chartable sheet quietly
-    # disagreeing with the figure printed in the other book. NULL when no
-    # staging path was supplied - mentat_run_export_guards drops NULL entries,
-    # so a five-argument invocation neither builds nor checks the store.
-    if (nzchar(tidy_stage_path)) {
-      mentat_guard_tidy_reconciliation(tidy_frames, expected_cycle_totals)
-    } else {
-      NULL
-    },
     # Mirrors the category list the workbook template renders
     # (tools/crypto_workbook_builder.mjs masterCategories). Kept here so a
     # category the template shows but nothing ever populates is reported rather
     # than silently rendering $0.00, as Trade Association did in six books.
     mentat_guard_category_population(
-      c("Super PAC", "Carey", "Other PAC", "Company PAC", "Leadership PAC",
+      c("Super PAC", "Carey", "Company PAC", "Leadership PAC",
         "Trade Association", "Candidate", "Party Committee", "JFC",
         "Unclassified"),
       workbook_raw_export$recipient_category
@@ -890,12 +744,6 @@ cat(sprintf(
 
 payload <- list(
   metadata = list(
-    destination_schema = 1L,
-    transfer_coverage = transfer_context$coverage,
-    # F12: what the date rule removed from, or flagged in, downstream activity.
-    downstream_date_rule = attr(downstream_activity, "date_rule"),
-    # F15: each view's own walk - its roots, carryover status and the committees it dated.
-    view_date_rule = transfer_context$networks$census,
     industry = MENTAT_INDUSTRY,
     database_path = database_path,
     database_bytes = file.info(database_path)$size,
@@ -938,37 +786,14 @@ payload <- list(
     beneficiary_summary_rows = nrow(beneficiary_tables$summary),
     downstream_aggregate_rows = nrow(downstream_activity_export),
     expected_cycle_totals = as.list(expected_cycle_totals),
-    detail_row_cap = detail_frames$stats$row_cap,
-    recipient_detail_rows = detail_frames$stats$recipient_rows,
-    recipient_detail_folded_rows = detail_frames$stats$recipient_folded_rows,
-    contributor_detail_rows = detail_frames$stats$contributor_rows,
-    contributor_detail_folded_rows = detail_frames$stats$contributor_folded_rows,
     omitted_non_accepted_by_cycle = as.list(
       omitted_non_accepted_by_cycle
-    ),
-    export_guards = lapply(seq_len(nrow(guard_results)), function(index) {
-      list(
-        id = as.character(guard_results$id[[index]]),
-        severity = as.character(guard_results$severity[[index]]),
-        passed = isTRUE(guard_results$passed[[index]]),
-        detail = as.character(guard_results$detail[[index]]),
-        metric = if (is.na(guard_results$metric[[index]])) {
-          NULL
-        } else {
-          as.numeric(guard_results$metric[[index]])
-        }
-      )
-    }),
-    export_guard_warning_count = sum(
-      !guard_results$passed & guard_results$severity == "warn"
     ),
     generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS%z")
   ),
   cycles = cycles,
   companies = companies,
   raw_rows = workbook_raw_export,
-  state_destinations = mentat_state_destinations(workbook_raw_export),
-  recipient_locations = unique(workbook_raw_export[, c("cycle","committee_id","recipient",mentat_destination_fields), with=FALSE]),
   # Against every covered cycle, not the filtered one: under a per-cycle build
   # the other cycles' rows belong to their own build and are not exceptions.
   # Using supported_cycles here made a filtered Telecom export LARGER than the
@@ -985,82 +810,13 @@ payload <- list(
     leadership_pacs$source_url,
     downstream_activity$source_url
   ))),
-  # Their own payload keys, never a view of raw_rows: prepare_workbook_payload.py
-  # strips raw_rows to 18 fields that carry no geography, employer or occupation,
-  # and formula-fact mode replaces raw_rows entirely.
-  recipient_detail = detail_frames$recipient_detail,
-  contributor_detail = detail_frames$contributor_detail,
   employees = person_cycle,
   committee_map = committee_map,
-  transfer_edges = transfer_context$edges,
-  candidate_committee_links = candidate_links,
-  candidate_master = candidate_master,
   downstream_activity = downstream_activity_export,
-  downstream_reach = beneficiary_tables$reach,
-  downstream_measurement_ledger = beneficiary_tables$measurement_ledger,
-  downstream_sources = data.table::rbindlist(lapply(supported_cycles, function(year) {
-    paths <- c(file.path(beneficiary_dir, paste0("pas2", substr(year, 3, 4)), "itpas2.txt"),
-               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "itoth.txt"),
-               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "transfer-info.json"),
-               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "transfer-edges.csv"))
-    data.table::data.table(cycle = year, source = basename(paths), path = paths,
-      sha256 = vapply(paths, function(path) if (file.exists(path))
-        digest::digest(file = path, algo = "sha256") else "", character(1)),
-      status = ifelse(file.exists(paths), "saved source; complete filing coverage not established", "missing source; not zero activity"),
-      policy = paste0("PAS2 parser ", FEC_PAS2_PARSER_VERSION, "; ", FEC_PAS2_AMBIGUOUS_VERSION_POLICY,
-        "; OTH v6 count_all; earliest arrival (F12), carryover onward; company views dated from their own roots (F15)"))
-  })),
   beneficiary_bridge = beneficiary_tables$bridge,
   beneficiary_summary = beneficiary_tables$summary
 )
 export_phase("payload_assembled", nrow(workbook_raw_export))
-
-# Tidy staging store. Written from the frames above, NOT from the JSON payload:
-# tools/prepare_workbook_payload.py projects raw_rows onto 18 fields that carry
-# no ZIP, city, state, employer or occupation, and formula-fact mode replaces
-# raw_rows outright. Going through the payload would give a large industry a
-# companion workbook silently narrower than a small one's.
-if (nzchar(tidy_stage_path)) {
-  tidy_frames$data_quality <- mentat_tidy_data_quality(guard_results)
-  tidy_blank_columns <- unlist(lapply(names(tidy_frames), function(name) {
-    frame <- tidy_frames[[name]]
-    if (is.null(frame) || !nrow(frame)) return(character())
-    empty <- names(frame)[vapply(frame, function(column) all(is.na(column)), logical(1))]
-    if (!length(empty)) return(character())
-    paste0(name, ".", empty)
-  }), use.names = FALSE)
-  mentat_write_tidy_stage(tidy_stage_path, tidy_frames, list(
-    schema_version = mentat_tidy_schema_version,
-    attribution_policy = "contradictions-only-v1",
-    industry = MENTAT_INDUSTRY,
-    industry_slug = gsub(
-      "^_+|_+$", "", gsub("[^a-z0-9]+", "_", tolower(MENTAT_INDUSTRY))
-    ),
-    # Empty for an all-cycles build. The orchestrator sets MENTAT_CYCLE_FILTER
-    # before the export for exactly this reason.
-    cycle_label = trimws(Sys.getenv("MENTAT_CYCLE_FILTER", unset = "")),
-    supported_cycles = as.integer(supported_cycles),
-    cycle_labels = sprintf("%d-%d", supported_cycles - 1L, supported_cycles),
-    database_path = database_path,
-    # The database SHA-256 is the orchestrator's quiesced hash, not something R
-    # can recompute without re-reading a multi-gigabyte file; it reaches the
-    # writer as --database-sha256 and is recorded here as unknown.
-    database_sha256 = NA_character_,
-    generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS%z"),
-    exporter_version = paste0("md5:", unname(tools::md5sum(script_path))),
-    expected_cycle_totals = as.list(expected_cycle_totals),
-    accounting_note = paste(
-      "Analysis Amount counts included itemized receipts at the named recipient",
-      "and is 0 for memo, conduit, superseded, duplicate and out-of-cycle legs;",
-      "Amount is the figure as filed. Neither is verified unique giving."
-    ),
-    blank_columns = if (length(tidy_blank_columns)) tidy_blank_columns else character()
-  ))
-  export_phase("tidy_stage_written", nrow(tidy_frames$contributions))
-  cat(sprintf("  tidy staging store: %s\n", tidy_stage_path))
-} else {
-  cat("  tidy staging skipped: no staging path argument supplied.\n")
-}
 
 write_payload_json <- function(payload, path, chunk_rows = 10000L) {
   connection <- file(path, open = "wb")

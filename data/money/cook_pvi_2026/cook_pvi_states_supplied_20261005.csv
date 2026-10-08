@@ -1,0 +1,52 @@
+state,state_abbr,pvi_label,pvi_signed_points
+Alabama,AL,R+15,15
+Alaska,AK,R+6,6
+Arizona,AZ,R+2,2
+Arkansas,AR,R+15,15
+California,CA,D+12,-12
+Colorado,CO,D+6,-6
+Connecticut,CT,D+8,-8
+Delaware,DE,D+8,-8
+Florida,FL,R+5,5
+Georgia,GA,R+1,1
+Hawaii,HI,D+13,-13
+Idaho,ID,R+18,18
+Illinois,IL,D+6,-6
+Indiana,IN,R+9,9
+Iowa,IA,R+6,6
+Kansas,KS,R+8,8
+Kentucky,KY,R+15,15
+Louisiana,LA,R+11,11
+Maine,ME,D+4,-4
+Maryland,MD,D+15,-15
+Massachusetts,MA,D+14,-14
+Michigan,MI,EVEN,0
+Minnesota,MN,D+3,-3
+Mississippi,MS,R+11,11
+Missouri,MO,R+9,9
+Montana,MT,R+10,10
+Nebraska,NE,R+10,10
+Nevada,NV,R+1,1
+New Hampshire,NH,D+2,-2
+New Jersey,NJ,D+4,-4
+New Mexico,NM,D+4,-4
+New York,NY,D+8,-8
+North Carolina,NC,R+1,1
+North Dakota,ND,R+18,18
+Ohio,OH,R+5,5
+Oklahoma,OK,R+17,17
+Oregon,OR,D+8,-8
+Pennsylvania,PA,R+1,1
+Rhode Island,RI,D+8,-8
+South Carolina,SC,R+8,8
+South Dakota,SD,R+15,15
+Tennessee,TN,R+14,14
+Texas,TX,R+6,6
+Utah,UT,R+11,11
+Vermont,VT,D+17,-17
+Virginia,VA,D+3,-3
+Washington,WA,D+10,-10
+District of Columbia,DC,D+44,-44
+West Virginia,WV,R+21,21
+Wisconsin,WI,EVEN,0
+Wyoming,WY,R+23,23

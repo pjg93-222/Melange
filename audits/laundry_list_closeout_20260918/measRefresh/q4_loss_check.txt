@@ -1,0 +1,65 @@
+BEFORE archive_leg candidate = audits\congress_pipeline\20260914T042414Z\before\archive_leg.json
+AFTER  archive_leg           = archive_leg.json (LIVE, mtime 2026-09-19 15:47:37)
+
+== VALIDATION: does the candidate BEFORE archive reproduce ranks BEFORE agenda for all 533? ==
+  mismatches: 1   [('Tim Scott', 50.034000000000006, 48.162000000000006)]
+  AFTER archive reproduces ranks AFTER agenda mismatches: 0  []
+  members in archive before/after: 523 / 523
+  members only-before: []
+  members only-after : []
+
+== Q4 per-member per-category archive_leg movements ==
+  (member,category) cells that DECREASED: 1
+    DEC Tony Wied                  Interchange                  0.0 -> -1.0 (-1)
+  (member,category) cells that DISAPPEARED entirely: 0 []
+  (member,category) cells that INCREASED: 22
+    INC Tim Scott                  Member Business Lending      10.760000000000002 -> 17.0 (+6.24)
+    INC Zachary Nunn               Member Business Lending      9.2 -> 10.2 (+1)
+    INC Warren Davidson            Member Business Lending      8.48 -> 9.48 (+1)
+    INC Todd Young                 Member Business Lending      0.8 -> 1.8 (+1)
+    INC Tim Moore                  Member Business Lending      6.0 -> 7.0 (+1)
+    INC Thomas Tiffany             Member Business Lending      1.8 -> 2.8 (+1)
+    INC Ryan Zinke                 Member Business Lending      1.6 -> 2.6 (+1)
+    INC Morgan Griffith            Member Business Lending      1.4400000000000002 -> 2.4400000000000004 (+1)
+    INC Michael Rulli              Member Business Lending      0.0 -> 1.0 (+1)
+    INC Marilyn Strickland         Member Business Lending      4.640000000000001 -> 5.640000000000001 (+1)
+    INC Marilyn Strickland         Charter Modernization        0.0 -> 1.0 (+1)
+    INC Lisa McClain               Member Business Lending      3.72 -> 4.720000000000001 (+1)
+    INC Julie Fedorchak            Member Business Lending      0.0 -> 1.0 (+1)
+    INC John Rose                  Member Business Lending      10.48 -> 11.48 (+1)
+    INC John Carter                Member Business Lending      1.0 -> 2.0 (+1)
+    INC Jahana Hayes               Member Business Lending      4.800000000000001 -> 5.800000000000001 (+1)
+    INC Jahana Hayes               Charter Modernization        0.8 -> 1.8 (+1)
+    INC Gregory Murphy             Member Business Lending      1.8 -> 2.8 (+1)
+    INC Deb Fischer                Fraud Prevention             0.0 -> 1.0 (+1)
+    INC Brad Knott                 Member Business Lending      1.0 -> 2.0 (+1)
+    INC Andy Biggs                 Member Business Lending      3.6 -> 4.6 (+1)
+    INC Adelita Grijalva           Fraud Prevention             0.0 -> 1.0 (+1)
+  NEW (member,category) cells: 6
+    NEW Adelita Grijalva           Fraud Prevention             -> 1.0
+    NEW Deb Fischer                Fraud Prevention             -> 1.0
+    NEW Julie Fedorchak            Member Business Lending      -> 1.0
+    NEW Marilyn Strickland         Charter Modernization        -> 1.0
+    NEW Michael Rulli              Member Business Lending      -> 1.0
+    NEW Tony Wied                  Interchange                  -> -1.0
+
+  total signed archive contribution before/after: 9621.150000 / 9647.390000
+  total cells before/after: 3395 / 3401
+
+== Q4 every DECREASE in any leg input or count, member level ==
+  agenda DECREASED for: [('Tony Wied', 3.0, 1.0)]
+  efficiency DECREASED for: []
+  agenda_percentile DECREASED for: 130 members (displacement, not input loss)
+  efficiency_percentile DECREASED for: 9 members
+  pillar DECREASED for: 137 members
+  pcts.leg DECREASED for: 122 members
+  score DECREASED for: 122 members
+  advancement_rates cells DECREASED: []
+
+== routing audit AFTER summary (no BEFORE copy of this file exists on disk) ==
+  source_rows=10847 selected_events=8148 sentinel_ledger_rows=18910 sentinel_verified_rows=290
+  dispositions: {"duplicate-lower-role": 19, "duplicate-same-role": 135, "excluded-override": 53, "excluded-title": 578, "neutral-official-evidence": 1, "neutral-override": 12, "neutral-registry": 33, "official-membership-withdrawn-or-role-superseded": 1854, "selected": 8148, "unmatched-member": 14}
+  excluded: {"accessible, affordable internet": 186, "app store accountability": 4, "auto repair SMART Act": 25, "cease orwellian surveillance": 5, "data from foreign adversaries": 5, "fourth amendment is not for sale": 13, "george floyd": 256, "health and location data": 35, "protecting military servicemembers": 46, "safer gaming": 3}
+  duplicates: {"duplicate-lower-role": 19, "duplicate-same-role": 135}
+  unmatched_members: {"Alexander X. Mooney": 1, "Ed Perlmutter": 2, "James Moylan": 1, "Marco Rubio": 1, "Michael C. Burgess": 1, "Stacey Plaskett": 8}
+  selected_evidence in ranks BEFORE/AFTER: 8126 / 8148

@@ -1,0 +1,42 @@
+====================================================================================================
+N14 Q2b  DATING THE SHEET ITSELF   run 2026-09-19T12:56:30
+====================================================================================================
+-- 1. .xlsx ZIP MEMBER TIMESTAMPS (workbook copy in SCRATCH; same sha256 as LIVE) --
+   distinct ZIP timestamps across 86 parts: 5
+      2026-09-19T03:25:32    34 parts
+      2026-09-19T03:25:34    24 parts
+      2026-09-19T03:25:36     9 parts
+      2026-09-19T03:25:38    16 parts
+      2026-09-19T03:33:36     3 parts
+   VERDICT: a single stamp means every part was rewritten by the last save, so the
+   ZIP cannot date the press sheet independently.
+
+-- 2. CONTENT DATES --
+   sheet header: member, bioguide, chamber, state, party, date, title, url, categories, relevance, score, score_graded, score_label, stance, stance_sign, p_support, p_oppose, p_neutral, stance_conf, n_words, lsd_pos, lsd_neg, lsd_net, lsd_net_norm, lsd_charge, stance_src, press_value, recency_weight
+   press sheet date range        : 2022-01-05 .. 2026-06-24  (3457 dated of 3701 rows)
+   BASE tone CSV date range      : 2022-01-05 .. 2026-06-24  (2144 dated of 2388 rows)
+   REFRESH tone CSV date range   : 2026-06-25 .. 2026-08-31  (291 dated of 291 rows)
+
+   stance_src census
+      sheet        : {'debate': 2391, 'bill': 1310}
+      BASE csv     : {'debate': 1891, 'human_label': 497}
+      REFRESH csv  : {'press_refresh_rules_v1': 291}
+   The sheet carries ZERO 'human_label' rows: CONFIRMED
+
+-- 3. WHICH TONE ARTIFACT DOES THE SHEET MATCH? --
+   Draft CU_Press_Stance_Tone.xlsx    sheets: ['Press Value by Member', 'Releases', 'About']
+      [Press Value by Member] header lacks url/stance: ['Member', 'Bioguide', 'State', 'Party', 'Chamber', 'Releases (n)', 'Mean Press Value', 'Dominant Stance', '% Support', '% Oppose', '% Neutral', 'Examination & Supervision']
+      [Releases] header lacks url/stance: ['Member', 'State', 'Party', 'Chamber', 'Date', 'Title', 'Url', 'Stance', 'Stance Conf', 'Lsd Net', 'Lsd Net Norm', 'Press Value']
+      [About] header lacks url/stance: ['CU Press Stance / Tone -- standalone results']
+   LIVE CU_Press_Stance_Tone.xlsx     sheets: ['Press Value by Member', 'Releases', 'About']
+      [Press Value by Member] header lacks url/stance: ['Member', 'Bioguide', 'State', 'Party', 'Chamber', 'Releases (n)', 'Mean Press Value', 'Dominant Stance', '% Support', '% Oppose', '% Neutral', 'Examination & Supervision']
+      [Releases] header lacks url/stance: ['Member', 'State', 'Party', 'Chamber', 'Date', 'Title', 'Url', 'Stance', 'Stance Conf', 'Lsd Net', 'Lsd Net Norm', 'Press Value']
+      [About] header lacks url/stance: ['CU Press Stance / Tone -- standalone results']
+
+-- 4. press_stance_overrides.json: LIVE vs WORKTREE OVERLAY --
+   LIVE corrections 23 | worktree 23 | identities only in LIVE 0 | only in worktree 0
+   shared identities whose STANCE differs : 0  <- the only difference that can move a displayed or scored label
+   shared identities differing on OTHER fields only: 0
+   top-level keys: LIVE ['_README', 'corrections'] | worktree ['_README', 'corrections']
+wrote n14_q2b_sheet_age_probe.json
+DONE N14 Q2b

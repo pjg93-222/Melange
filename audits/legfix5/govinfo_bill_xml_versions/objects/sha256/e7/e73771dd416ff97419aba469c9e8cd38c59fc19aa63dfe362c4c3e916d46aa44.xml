@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2349 IS: Protection from Robocalling Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-31</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2349</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190731">July 31, 2019</action-date><action-desc><sponsor name-id="S221">Mrs. Feinstein</sponsor> (for herself, <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>, and <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Federal Trade Commission Act to eliminate the common carrier exemption for
+			 telecommunications companies.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protection from Robocalling Act of 2019</short-title></quote>.</text>
+ </section><section id="idE7C441D8532E42908AF4AD769B687F62"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds that—</text> <paragraph id="id29D57E86A11D40999EC1534A67E5360B"><enum>(1)</enum><text>illegal robocalls and spam calls are a growing annoyance and problem for the people of the United States; and</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id539270E74B9E4DB1B091DF6D04640A15"><enum>(2)</enum><text>exemptions within the Federal Trade Commission Act (<external-xref legal-doc="usc" parsable-cite="usc/15/41">15 U.S.C. 41</external-xref> et seq.) limit the enforcement capabilities of the Federal Trade Commission with respect to illegal robocalling and spam calling.</text>
+ </paragraph></section><section id="id92047451630240C8801EE5D74D0E6C05" section-type="subsequent-section"><enum>3.</enum><header>Eliminating the common carrier exemption for telecommunications companies</header><text display-inline="no-display-inline">Section 4 of the Federal Trade Commission Act (<external-xref legal-doc="usc" parsable-cite="usc/15/44">15 U.S.C. 44</external-xref>) is amended by striking <quote>the Act entitled <quote>An Act to regulate commerce,</quote> approved February 14, 1887, and all Acts amendatory thereof and supplementary thereto and the Communications Act of 1934</quote> and inserting <quote>subtitle IV of title 49, United States Code,</quote>.</text>
+		</section></legis-body></bill>
+
+

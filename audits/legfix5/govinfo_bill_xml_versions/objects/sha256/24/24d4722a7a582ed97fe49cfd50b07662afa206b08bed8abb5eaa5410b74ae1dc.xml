@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HBDF78E832F0B4E708B828EAE7DF4ABA1" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 8501 IH: Preventing Abortion Sanctuaries Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-07-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8501</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20220726">July 26, 2022</action-date>
+<action-desc><sponsor name-id="L000564">Mr. Lamborn</sponsor> (for himself, <cosponsor name-id="B001299">Mr. Banks</cosponsor>, <cosponsor name-id="B000825">Mrs. Boebert</cosponsor>, <cosponsor name-id="G000565">Mr. Gosar</cosponsor>, <cosponsor name-id="W000814">Mr. Weber of Texas</cosponsor>, <cosponsor name-id="L000589">Mrs. Lesko</cosponsor>, <cosponsor name-id="B001291">Mr. Babin</cosponsor>, <cosponsor name-id="G000595">Mr. Good of Virginia</cosponsor>, <cosponsor name-id="M001211">Mrs. Miller of Illinois</cosponsor>, <cosponsor name-id="H001071">Mr. Hice of Georgia</cosponsor>, and <cosponsor name-id="N000190">Mr. Norman</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committees on <committee-name committee-id="HED00">Education and Labor</committee-name>, <committee-name committee-id="HII00">Natural Resources</committee-name>, and <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To prohibit abortion sanctuary States from receiving funds from the Department of Health and Human Services, and for other purposes.</official-title>
+</form>
+<legis-body id="H61B473CB9E4447C6A7872E976E2A1F9D" style="OLC">
+<section id="H338804FA08224FA9B5BF7F754E3DA7C0" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Preventing Abortion Sanctuaries Act</short-title></quote>. </text></section> <section id="HE9A3FE16EA504611B575292A1DE53636"><enum>2.</enum><header>Prohibiting abortion sanctuary States from receiving certain Federal funds</header> <subsection id="H7E79962C5E5246E58B17BF564A09F951"><enum>(a)</enum><header>Finding</header><text display-inline="yes-display-inline">Congress has the authority to enact this Act pursuant to its powers under the Commerce Clause of Article 1, section 8 of the Constitution of the United States, which includes the power to regulate those activities having substantial relation to interstate commerce and activities that substantially affect interstate commerce in the aggregate.</text></subsection>
+<subsection id="H2945F947413F4610A0A3691F2A01C46D"><enum>(b)</enum><header>In general</header><text>None of the funds made available to the Secretary of Health and Human Services may be used to provide funds to any abortion sanctuary State.</text></subsection> <subsection id="HD24C56D6A6B140D4886F4269576E4251"><enum>(c)</enum><header>Annual determination of ineligible States</header><text display-inline="yes-display-inline">Not later than 1 year after the date of enactment of this Act, and annually thereafter, the Secretary of Health and Human Services shall—</text>
+<paragraph id="H775CE371BD0740059D135159556421FA"><enum>(1)</enum><text>determine which States are ineligible based on the criteria set forth in subsection (d)(2); and</text></paragraph> <paragraph id="HA54AE0719F7D466EB37C1F9F93C7AC3E"><enum>(2)</enum><text>submit a list of such ineligible States, including the specific criteria in subsection (d)(2) upon which each such determination was based, to Congress.</text></paragraph></subsection>
+<subsection id="H5BFC3A2066AE443FBD29D00AE1593078"><enum>(d)</enum><header>Definitions</header><text>In this Act:</text> <paragraph id="HFAD982A0F811411A9938FC937C0BC530"><enum>(1)</enum><text display-inline="yes-display-inline">The term <term>abortion</term> means the use or prescription of any instrument, medicine, drug, or any other substance or device—</text>
+<subparagraph id="HCBF841E569B749499610C97D9EFB7E34"><enum>(A)</enum><text>to intentionally kill the unborn child of a woman known to be pregnant; or</text></subparagraph> <subparagraph id="H10C0B5947BB04CA994CC11F4D9389DEE"><enum>(B)</enum><text>to intentionally terminate the pregnancy of a woman known to be pregnant, with an intention other than—</text>
+<clause id="H28CFFB2709B84BE6AE0987235E6ED238"><enum>(i)</enum><text>after viability to produce a live birth and preserve the life and health of the child born alive; or</text></clause> <clause id="HDE245FAC994B4A91ADAD5CABEA77FD41"><enum>(ii)</enum><text>to remove a dead unborn child.</text></clause></subparagraph></paragraph>
+<paragraph id="HBD563451E28E476292900327E1AF6D27"><enum>(2)</enum><text>The term <term>abortion sanctuary State</term> means a State that—</text> <subparagraph id="H0D1553E8DC5445548EB6910AF1D8BD22"><enum>(A)</enum><text display-inline="yes-display-inline">establishes a fund or commission (or similar entity) for the purpose of providing direct financial and logistical support to individuals traveling to such State to receive an abortion;</text></subparagraph>
+<subparagraph id="H5F04F486650E44D8B676CBA000F204AF"><enum>(B)</enum><text display-inline="yes-display-inline">does not have in effect any law with regards to gestational protections for an unborn child; or</text></subparagraph> <subparagraph id="H49A309AEC902423DA971DA74CE08835D"><enum>(C)</enum><text display-inline="yes-display-inline">has in effect laws that prohibit the enforcement of a law of another State that authorizes a person to bring a civil action against a person or entity that does any of the following:</text>
+<clause id="H9572F4BAFDF744729E219A386816835D"><enum>(i)</enum><text display-inline="yes-display-inline">Receives or seeks an abortion.</text></clause> <clause id="HA99A6A6659B74F94A9550060176495E2"><enum>(ii)</enum><text>Performs or induces an abortion.</text></clause>
+<clause id="H471692CB9DFB46449516B24AC5C6D689"><enum>(iii)</enum><text>Knowingly engages in conduct that aids or abets the performance or inducement of an abortion.</text></clause> <clause id="H52C60E99AD914ACBBF1E42343CE1FC6C"><enum>(iv)</enum><text>Attempts or intends to engage in conduct described in clause (i), (ii), or (iii).</text></clause></subparagraph></paragraph>
+<paragraph id="HF90CC70DD69D4B4685365CF18A65F17B"><enum>(3)</enum><text display-inline="yes-display-inline">The term <term>logistical support</term> means direct assistance, such as airfare, lodging, ground transportation, gas money, meals, or dependent childcare, to help a person access or obtain an abortion.</text></paragraph> <paragraph id="H16BC70FFBE114EEEB5784F2842163D36"><enum>(4)</enum><text display-inline="yes-display-inline">The term <term>unborn child</term> means a member of the species homo sapiens, at any stage of development, who is carried in the womb. </text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

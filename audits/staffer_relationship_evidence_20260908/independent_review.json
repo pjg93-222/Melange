@@ -1,0 +1,83 @@
+{
+  "status": "PASS",
+  "reviewer": "Astra independent review agent",
+  "scope": "Exact six-file deltas against audits/staffer_relationship_evidence_20260908/before, with final-boundary tests and alias census; unrelated HEAD changes excluded.",
+  "production_edits": false,
+  "open_blockers": [],
+  "resolved_findings": [
+    {
+      "id": "R1",
+      "finding": "Observed report cores had been annotated as exact service-duration evidence.",
+      "resolution": "REPORT_PERIOD endpoints now retain modeled_overlap, explicit class and unknown actual duration in direct and affinity hops and UI; mixed uncertain/core cases in both directions also retain modeled support and no duration; modeled cores cannot claim current coworker status."
+    },
+    {
+      "id": "R2",
+      "finding": "Service revision omitted updated identity/routing model versions.",
+      "resolution": "Both import modes and revision digest include affinity, work routing, identity and name-standard versions; functional refresh tests demonstrate revision changes and cache replacement."
+    }
+  ],
+  "checks": {
+    "targeted_tests_passed": 95,
+    "targeted_tests_failed": 0,
+    "test_files": [
+      "test_staffer_evidence_boundaries.py",
+      "test_staffer_identity_auto.py",
+      "test_staffer_identity_records.py",
+      "test_staffer_connection_facts.py",
+      "test_staffer_network_scope.py",
+      "test_staffer_assertions.py",
+      "test_staffer_routing_evidence.py"
+    ],
+    "complete_token_exception": "Retains all legacy compatible() guards and only bypasses the additional surname veto when full normalized token sequences agree; no omitted, reordered, or expanded token is admitted.",
+    "intern_exclusion": "Endpoint/intermediary exclusion preserved in exact diffs; existing network-scope regressions pass.",
+    "routing_math": "No numeric coefficient or shortest-path algorithm changes in reviewed deltas; activity-only evidence no longer receives fallback employment points."
+  },
+  "identity_delta": {
+    "method": "Reviewed parent-produced fixed-input before/after census and every affected name pair; reviewer did not rerun the full census.",
+    "nodes": 195847,
+    "episodes": 478819,
+    "aliases_before": 5872,
+    "aliases_after": 5860,
+    "withdrawals": 12,
+    "additions": 0,
+    "disposition": "Retain all 12 withdrawals as unresolved source identities pending explicit name-change/full-surname evidence. This is not a finding that they are 12 pairs of different humans. Two punctuation-only withdrawals in the initial census are correctly absent from final delta."
+  },
+  "limits": [
+    "Deployment, served JavaScript, final live inventory reconciliation and commit scope remain parent-owned checks.",
+    "No real-world familiarity calibration, canonical graph reranking or source-date truth validation was performed in this review."
+  ],
+  "bindings": [
+    {
+      "path": "fec/surfaces/staffer_identity_auto.py",
+      "sha256": "62fb5594c84ec5fd8356cfd81cbbb1f37fdf85431af2a3751e657335d82bb1b9"
+    },
+    {
+      "path": "fec/surfaces/staffer_payroll_identity.py",
+      "sha256": "6cefc9d00a97d87317d9317679f484ad05e5e7522a1355927acdf829fc9df957"
+    },
+    {
+      "path": "fec/surfaces/staffer_overlap_routes.py",
+      "sha256": "f102e065053dc84394f7823d41e8b18bab718611f24855595e8cbd348cf838a9"
+    },
+    {
+      "path": "fec/surfaces/staffer_routing.py",
+      "sha256": "113240455d28a1b30b08afd230f07632eb60d5cdcb07aed33759e4d7971216ef"
+    },
+    {
+      "path": "fec/surfaces/staffer_live_service.py",
+      "sha256": "041934493daec6ef7d7accf26850c97d4b676e78ecc33765d0dcc17a683dc0c4"
+    },
+    {
+      "path": "fec/surfaces/staffer_live/staffer-route.js",
+      "sha256": "7b136f0caa659c6673a4555d48677469888294b365f7b01e5f8c0f6f2a5d6fcc"
+    },
+    {
+      "path": "fec/tests/surfaces/test_staffer_evidence_boundaries.py",
+      "sha256": "c7dd938c06e123bc827ac50fc2813278d18abd8849a34716da2a382cd7e1f0ae"
+    },
+    {
+      "path": "audits/staffer_relationship_evidence_20260908/identity_delta.json",
+      "sha256": "6ce4f6b63571588ce904bd8beebfbe2823a671a2953fd427ddfdf0dde3b7d0ab"
+    }
+  ]
+}

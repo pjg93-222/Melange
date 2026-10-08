@@ -1,0 +1,258 @@
+fec\press_stream.py                                            DRIFTED  raw 6202/14119 bytes  crlf_live=False crlf_wt=True
+    normalised diff lines: 153   (hunks: 8)
+    --- LIVE
+    +++ WT
+    @@ -15,0 +16 @@
+    +import re
+    @@ -85,2 +86,71 @@
+    -def tone_turn_key(row):
+    -    url = canonical_url(row.get("url"), keep_fragment=True)
+    +# PRESS_URL_CANON (A5, 2026-09-19; packet audits/laundry_list_closeout_20260918 FINDINGS.md A5).
+    +# One release ingested under two URL forms was counted twice: 12 (member, title, date) groups
+    +# survived ``load_tone_rows``, 6 of them with more than one 'used' row.  Eleven of the 12
+    +# differ by PATH ALIAS alone (the twelfth is a truncated stored url and is left alone) -- a
+    +# CMS section prefix ('/news/press-releases/X' beside
+    +# '/press-releases/X'), an inserted date path ('/news/videos/watch/2018/03/06/X' beside
+    +# '/media/videos/watch/X'), a section rename ('/newsroom/op-eds/X' beside
+    +# '/newsroom/press-releases/X'), or a Drupal duplicate-slug marker ('...-election-0' beside
+    +# '...-election').  No scheme, www., trailing-slash, case, query or fragment rule reaches any of
+    +# them, so the extra rules are PATH rules and they live in ``release_url_key``.
+    +#
+    +# ``canonical_url`` is deliberately left byte-identical.  That is measured, not cautious:
+    +# ``data/stance/api_press_stance.csv`` is keyed on the RAW url, so folding the path rules into
+    +# ``canonical_url`` itself drops the press router's PRIMARY basis from 627 api-target hits to 93
+    +# (receipt audits/laundry_list_closeout_20260918/fixM/m2_canon_candidates.out.txt).  The
+    +# full-text body map, the stack-label map, the collector's own turn key and
+    +# ``press_baseline_fold.index_key``'s pinned divergence all key on ``canonical_url`` too.
+    +# ``release_url_key`` has exactly one caller, ``tone_turn_key``, so the change is confined to
+    +# which rows are ingested; every surviving row's routing is unchanged.
+    +#
+    +# Default '2' = release identity.  PRESS_URL_CANON=1 restores the legacy key byte for byte.
+    +PRESS_URL_CANON = (os.environ.get("PRESS_URL_CANON", "2") or "2").strip()
+    +if PRESS_URL_CANON not in ("1", "2"):
+    +    # Fail at import, before any I/O: a dial that silently changes what COUNTS must never
+    +    # fall through to a default because it was misspelled (the DESK_MEMBERSHIP_SOURCE
+    +    # pattern, make_member_desk.py ~232).
+    +    raise ValueError("PRESS_URL_CANON must be '1' (legacy url key) or '2' (release key); got %r"
+    +                     % os.environ.get("PRESS_URL_CANON"))
+    +TONE_DEDUP_LEDGER_SCHEMA = "press-tone-ingest-dedup-v1"
+    +# A Drupal collision marker, never a numbered edition: '-0' only, and only on a slug that is
+    +# itself hyphenated.  Scalise's 'heat-report-22'/'-26'/'-28' are editions and must stay apart.
+    +_DUPLICATE_SLUG = re.compile(r"^(?P<slug>[^/]*[A-Za-z][^/]*-[^/]*)-0$")
+    +# A release slug: three or more hyphen-separated parts and at least one letter.  A one-hyphen
+fec\surfaces\make_member_desk.py                               DRIFTED  raw 194451/196574 bytes  crlf_live=True crlf_wt=True
+    normalised diff lines: 31   (hunks: 5)
+    --- LIVE
+    +++ WT
+    @@ -43,0 +44 @@
+    +import surfaces.desk_press_source as DPS   # DESK_PRESS_SOURCE: the desk's press stream (N1a)
+    @@ -1655 +1656,14 @@
+    -    for r in pw.iter_rows(min_row=2, values_only=True):
+    +    # N1a (2026-09-19, packet audits/laundry_list_closeout_20260918 FINDINGS.md A1): the rows
+    +    # walked below are the UNION of this sheet and the press stream the RANKING ENGINE reads
+    +    # (fec/press_stream.py). No script in the chain writes 'Press Release Articles' — it comes
+    +    # from the external R pipeline — so the desk showed a frozen corpus: 291 engine rows had no
+    +    # sheet row, 221 of them SCORING (receipt laneA/receipts/r9_engine_only_press.out.txt).
+    +    # The helper only SELECTS rows and hands them back in this sheet's own tuple shape, so
+    +    # every rule below — billstatus routing, the stance_src=='bill' sign branch, the
+    +    # press_stance_overrides correction, PDATE recovery, norm_cats, graded_label — runs over an
+    +    # added row exactly as over a sheet row, and the press_source_rows census that
+    +    # dashboard_integrity reconciles still counts every row walked.
+    +    # DESK_PRESS_SOURCE=sheet restores this loop's pre-2026-09-19 input byte for byte.
+    +    _press_rows, _press_source_ledger = DPS.desk_press_rows(
+    +        pw.iter_rows(min_row=2, values_only=True), ph)
+    +    for r in _press_rows:
+    @@ -1695,0 +1710,3 @@
+    +                   # N1a: which source each walked press row came from, plus the A5 ingest
+    +                   # ledger, so the press census chains from the tone files to this payload.
+    +                   'press_source_ledger':_press_source_ledger,
+    @@ -1754 +1771,7 @@
+    -            key = (nm, MR.normalized_text(text)); duplicate = key in seen
+    +            # N2 (2026-09-19): the key is MR.crosspost_key, the WHOLE normalised statement,
+    +            # not MR.normalized_text's first 120 characters -- 445 of 1,434 groups were false
+    +            # collisions on a shared prefix.  Measured effect on this payload: 298 of the 895
+    +            # 'also' notes change (289 of them should never have existed).
+    +            # MR.normalized_text stays the tweet_stance_final join key above, untouched.
+    +            # CROSSPOST_KEY_CHARS=120 restores the old key; CROSSPOST_DEDUP is unchanged.
+    +            key = (nm, MR.crosspost_key(text)); duplicate = key in seen
+    @@ -2045 +2068,3 @@
+    -            if (nm, MR.normalized_text(tx)) in seen:
+    +            # `seen` is keyed by MR.crosspost_key (N2), so its only other reader keys the
+    +            # same way or this lookup silently stops matching.
+    +            if (nm, MR.crosspost_key(tx)) in seen:
+fec\stance\media_rules.py                                      DRIFTED  raw 11615/14138 bytes  crlf_live=True crlf_wt=True
+    normalised diff lines: 45   (hunks: 3)
+    --- LIVE
+    +++ WT
+    @@ -8,0 +9 @@
+    +import os
+    @@ -75,0 +77,30 @@
+    +# CROSSPOST_KEY_CHARS (N2, 2026-09-19; packet audits/laundry_list_closeout_20260918 FINDINGS.md
+    +# A3).  ``normalized_text`` truncates at 120 characters and is ALSO the join key against
+    +# tweet_stance_final.csv (make_member_desk.py ~1720/1737, build_media_blend.py ``_nrm``), so it
+    +# cannot move without moving per-post stances -- and it does not move here.  The cross-post
+    +# duplicate key is a different job and now has its own function.  Re-measured on the shipped
+    +# social corpus (receipt fixM/m4_crosspost_key_census.out.txt): 8,647 of the 9,502 dedup-population
+    +# rows exceed 120 normalised characters, so 445 of 1,434 duplicate groups -- 935 rows, 490 of them
+    +# surplus -- were FALSE collisions, different statements sharing a boilerplate prefix.  At
+    +# CROSSPOST_DEDUP=0 no score was wrong: 5,722 rows score under either key, row for row.  But 298 of
+    +# the desk's 895 'also posted on ...' notes named the wrong statement (289 of them should not exist
+    +# at all), and on the documented rollback (CROSSPOST_DEDUP=1, decision D-034) 289 rows would be
+    +# dropped as duplicates of posts they are not.
+    +# Default '0' = the whole statement.  CROSSPOST_KEY_CHARS=120 restores the legacy key byte for
+    +# byte.  An empty key still means 'link-only post: no scorable text' under either value: the
+    +# truncation of an empty normalisation is empty, so both call sites' emptiness test is unchanged.
+    +CROSSPOST_KEY_CHARS = (os.environ.get('CROSSPOST_KEY_CHARS', '0') or '0').strip()
+    +if not CROSSPOST_KEY_CHARS.isdigit():
+    +    # Fail at import, before any producer does I/O: a dial that silently changes what counts
+    +    # as one statement must never fall through to a default because it was misspelled (the
+    +    # DESK_MEMBERSHIP_SOURCE pattern, make_member_desk.py ~232).
+    +    raise ValueError("CROSSPOST_KEY_CHARS must be a non-negative integer ('0' = the whole "
+    +                     "statement, '120' = the legacy key); got %r"
+    +                     % os.environ.get('CROSSPOST_KEY_CHARS'))
+    +
+    +
+    +def _normalized(text):
+    +    text = re.sub(r'https?://\S+', '', str(text or '').lower())
+    +    return re.sub(r'[^a-z0-9]', '', text)
+    +
+    +
+    @@ -77,2 +108,12 @@
+    -    text = re.sub(r'https?://\S+', '', str(text or '').lower())
+    -    return re.sub(r'[^a-z0-9]', '', text)[:120]
+    +    return _normalized(text)[:120]
+    +
+fec\tests\run_tests.py                                         DRIFTED  raw 62041/64661 bytes  crlf_live=True crlf_wt=True
+    normalised diff lines: 35   (hunks: 2)
+    --- LIVE
+    +++ WT
+    @@ -348,0 +349,33 @@
+    +               # A5/N2 (Paul-approved 2026-09-19, packet
+    +               # audits/laundry_list_closeout_20260918 FINDINGS.md A5 and A3). Both
+    +               # are KEY changes behind a revert switch whose other position must be
+    +               # an exact identity, so each suite pins the legacy key byte for byte
+    +               # AND pins the key that must NOT move -- canonical_url for A5 (every
+    +               # press join reads it) and normalized_text for N2 (the
+    +               # tweet_stance_final join). Registered beside the other dial suites.
+    +               # Synthetic fixtures only: no corpus, no workbook, no artifact.
+    +               'test_press_url_canon',
+    +               'test_crosspost_key',
+    +               # The reference layer's three admission filters (Paul-approved 2026-09-19,
+    +               # packet audits/laundry_list_closeout_20260918 FINDINGS.md B4/B5/B6): the
+    +               # PRESS own-domain gate, the roll-call/signature-block exclusion, and
+    +               # identical windows counting once. Registered here beside the other dial
+    +               # suites because each filter carries a revert switch whose '0' position must
+    +               # stay an exact identity, and because the producer cannot be imported --
+    +               # member_reference_layer.py runs its whole body and writes the live tree, so
+    +               # the rules live in the pure fec/members/reference_filters.py and the wiring
+    +               # is pinned as text. Synthetic fixtures only: no roster, no db, no artifact.
+    +               'test_reference_admission_filters',
+    +               # N1a (Paul-approved 2026-09-19, packet
+    +               # audits/laundry_list_closeout_20260918 FINDINGS.md A1): the member desk
+    +               # now reads the same press stream as the ranking engine, unioned with the
+    +               # workbook sheet. DESK_PRESS_SOURCE=sheet must restore the pre-change
+    +               # input byte for byte, so the suite pins both dial positions, the release
+    +               # identity the union keys on (A5's), the field map, and the ledger that
+    +               # keeps the desk's press census closed. Registered beside the other dial
+    +               # suites. The producer cannot be imported -- import == execution:
+    +               # make_member_desk.py runs its whole body and overwrites the live desk --
+    +               # so the rules live in the pure fec/surfaces/desk_press_source.py and the
+    +               # wiring is pinned as text. Synthetic fixtures only: no workbook, no
+    +               # corpus, no artifact.
+    +               'test_desk_press_source',
+    @@ -653 +686 @@
+    -    'test_stage_billstatus_bulk_enrichment')
+    +    'test_sponsor_column','test_stage_billstatus_bulk_enrichment')
+fec\audit\audit_full.py                                        DRIFTED  raw 194767/182884 bytes  crlf_live=True crlf_wt=True
+    normalised diff lines: 291   (hunks: 25)
+    --- LIVE
+    +++ WT
+    @@ -12 +11,0 @@
+    -from audit.published_source_contracts import personal_source_errors, press_source_errors, vote_source_errors
+    @@ -16,2 +15,4 @@
+    -    from process_liveness import process_alive
+    -    return process_alive(pid)
+    +    try:
+    +        os.kill(int(pid),0); return True
+    +    except (OSError,ValueError,TypeError):
+    +        return False
+    @@ -51,10 +52 @@
+    -# Hold the member's other factors fixed. Named fundraisers change with each
+    -# live FEC cycle and cannot serve as permanent small/large-capacity fixtures.
+    -_capacity_original=mr.C[g].get('receipts')
+    -try:
+    -    mr.C[g]['receipts']=1000000
+    -    small=mr.shift_lean(g,'cu',100000)
+    -    mr.C[g]['receipts']=10000000
+    -    big=mr.shift_lean(g,'cu',100000)
+    -finally:
+    -    mr.C[g]['receipts']=_capacity_original
+    +big=mr.shift_lean('Jared Golden','cu',100000); small=mr.shift_lean('Steve Daines','cu',100000)
+    @@ -166,9 +158 @@
+    -# OPT_OUT -> scratch json so the test run doesn't clobber the production optimize_result.json
+    -# (mirrors FRONTIER_OUT below).  The scratch directory is data\system\audit_scratch, which NO store
+    -# in fec\audit\build_system_manifest.py's REGISTRY measures.  It used to be data\lobbying, which
+    -# repo.data_lobbying DOES measure: the manifest picker took this file as that store's newest and
+    -# pinned its bytes, so every audit run rewrote its own pin and A2b went red on itself (4134 B
+    -# 2213f048.. pinned vs 4135 B bd3e5f19.. on disk, 2026-09-06).  A subprocess writes it, so the
+    -# directory has to exist first.
+    -_ASCRATCH=B+r'\data\system\audit_scratch'
+    -os.makedirs(_ASCRATCH,exist_ok=True)
+    +# OPT_OUT -> temp json so the test run doesn't clobber the production optimize_result.json (mirrors FRONTIER_OUT below).
+    @@ -176 +160 @@
+    -_OE={'BUDGET':'300000','INC':'5000','OPT_OUT':_ASCRATCH+r'\_audit_tmp_optimize.json'}
+    +_OE={'BUDGET':'300000','INC':'5000','OPT_OUT':B+r'\data\lobbying\_audit_tmp_optimize.json'}
+    @@ -183 +167 @@
+    -_opt=json.load(open(_ASCRATCH+r'\_audit_tmp_optimize.json')); _pp=[v for _,v in _opt['path']]
+    +_opt=json.load(open(B+r'\data\lobbying\_audit_tmp_optimize.json')); _pp=[v for _,v in _opt['path']]
+fec\audit\dashboard_integrity.py                               DRIFTED  raw 43831/45387 bytes  crlf_live=True crlf_wt=True
+    normalised diff lines: 18   (hunks: 3)
+    --- LIVE
+    +++ WT
+    @@ -647,0 +648,10 @@
+    +# N1a 2026-09-19: under DESK_PRESS_SOURCE=engine the desk's press rows are the union of
+    +# 'Press Release Articles' and the tone stream fec/press_stream.py returns, so the refresh tone
+    +# file and the receipt that hash-binds it are desk INPUTS. Registering them is the same lesson
+    +# the bill-lobbying sidecar taught on 08-06: an unregistered dependency makes the first
+    +# refresh-only change look like same-input/different-bundle corruption. They are hashed under
+    +# either dial position — a declared input that is not read can only relax this check, while an
+    +# undeclared one that IS read breaks it.
+    +        'data/stance/press_refresh_tone.csv','data/stance/press_refresh_feed_receipt.json',
+    +        os.path.join('fec','press_stream.py'),
+    +        os.path.join('fec','surfaces','desk_press_source.py'),
+    @@ -697,0 +708,6 @@
+    +    # The HISTORICAL half of the desk's press stream lives OUTSIDE the project root (the R
+    +    # pipeline's Draft Systems tree), so it cannot be expressed as a root-relative entry like
+    +    # every other source above. Hash it by the constant press_stream itself resolves, which is
+    +    # also what MONEYBALL_DRAFT relocates. press_stream has no top-level I/O.
+    +    import press_stream as PS
+    +    source_state['press_stream:BASE_TONE_PATH']=_file_sha(PS.BASE_TONE_PATH)
+    @@ -701,0 +718,2 @@
+    +    # N1a: which press corpus the desk read is the largest single determinant of its press rows.
+    +    source_state['env:DESK_PRESS_SOURCE']=os.environ.get('DESK_PRESS_SOURCE','engine')
+MATHEMATICAL_SPECIFICATION.md                                  DRIFTED  raw 8323/10931 bytes  crlf_live=True crlf_wt=True
+    normalised diff lines: 5   (hunks: 1)
+    --- LIVE
+    +++ WT
+    @@ -73,0 +74,5 @@
+    +LEG_SPONSOR_FROM_COLUMN=1 (2026-09-19: the bill archive's bill-level `Sponsor` column mints the missing sponsor-role rows, which then pass every unchanged gate; 0 revert
+    +PRESS_URL_CANON=2 (2026-09-19, packet audits/laundry_list_closeout_20260918 A5: one press release ingested under two aliased URL forms counts ONCE — 11 pairs, all path a
+    +CROSSPOST_KEY_CHARS=0 (2026-09-19, packet audits/laundry_list_closeout_20260918 A3: the cross-post duplicate key is the WHOLE normalised statement, not its first 120 cha
+    +DESK_PRESS_SOURCE=engine (2026-09-19, packet audits/laundry_list_closeout_20260918 A1: the member desk reads the same press stream as the ranking engine — the union of w
+    +REF_PRESS_OWN_DOMAIN=1 · REF_ROSTER_FILTER=1 · REF_IDENTICAL_ONCE=1 (2026-09-19 member-reference admission filters, packet audits/laundry_list_closeout_20260918 B6/B4/B5
+.claude\skills\moneyball-config-and-flags\SKILL.md             DRIFTED  raw 41520/44355 bytes  crlf_live=False crlf_wt=True
+    normalised diff lines: 7   (hunks: 3)
+    --- LIVE
+    +++ WT
+    @@ -42,3 +42 @@
+    -Class legend used in the tables: **P** = production-ratified calibration · **R** = revert switch (non-default rolls back a shipped, ratified change — a debug/audit tool,
+    -
+    -> **Why X exists (added 2026-08-19).** Guard-bypass dials were previously scattered through the O and R tables, which reads as "harmless redirect" and "reversible switch
+    +Class legend used in the tables: **P** = production-ratified calibration · **R** = revert switch (non-default rolls back a shipped, ratified change — a debug/audit tool,
+    @@ -88,0 +87,2 @@
+    +| `PRESS_URL_CANON` | `2` (release identity) | `fec/press_stream.py` (beside `release_url_key`) | `1` restores the legacy ingest key byte for byte, re-admitting one rele
+    +| `CROSSPOST_KEY_CHARS` | `0` (whole statement) | `fec/stance/media_rules.py` (beside `crosspost_key`) | `120` restores the truncated cross-post duplicate key byte for b
+    @@ -179,0 +180 @@
+    +| `DESK_PRESS_SOURCE` | `engine` (the ranking engine's stream, unioned with the sheet) | `fec/surfaces/desk_press_source.py` (beside `desk_press_rows`) | `sheet` restore
+fec\surfaces\desk_press_source.py                              LIVE=False WORKTREE=True
+fec\tests\surfaces\test_desk_press_source.py                   LIVE=False WORKTREE=True

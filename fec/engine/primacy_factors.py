@@ -32,6 +32,7 @@ ACT_W = {
     'bank_primary': 0.15,
     'crypto_primary': 0.15,
     'fintech': 0.15,
+    'telecom_primary': 0.15,
     'offtopic': 0.00,
     'oppose': -1.00,
 }
@@ -92,6 +93,7 @@ ADJUDICATION_LEDGER = 'data/engine/primacy_adjudication_ledger.ndjson'
 CU_TENSOR = 'data/lobbying/industry_axes.ndjson'
 SYNTHETIC_CELL_PREFIXES = (
     'credit_union_cell_', 'bank_cell_', 'crypto_cell_', 'fintech_cell_',
+    'telecom_cell_',
 )
 
 

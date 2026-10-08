@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE amendment-doc PUBLIC "-//US Congress//DTDs/amend.dtd//EN" "amend.dtd">
+<amendment-doc amend-stage="proposed" amend-type="engrossed-amendment" amend-degree="first" key="H"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4346 EAH: </dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-06-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<engrossed-amendment-form>
+<distribution-code display="no"><?xm-replace_text {distribution code}?></distribution-code> 
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session> 
+<current-chamber display="yes">In the House of Representatives, U. S.,</current-chamber> 
+<action> 
+<action-date date="20220624">June 24, 2022</action-date> 
+</action> 
+<legis-type display="yes">HOUSE AMENDMENT TO SENATE AMENDMENT:</legis-type></engrossed-amendment-form> 
+<engrossed-amendment-body> 
+<section section-type="resolved" id="H483024832"> <text>That the House agree to the amendment of the Senate to the bill (H.R. 4346) entitled <quote>An Act making appropriations for Legislative Branch for the fiscal year ending September 30, 2022, and for other purposes.</quote>, with the following </text></section><amendment> <amendment-instruction line-numbers="off"><text>In lieu of the matter proposed to be inserted by the amendment of the Senate, insert the following: </text></amendment-instruction> 
+<amendment-block style="OLC" id="H16964CBBBF634689B57DE390534F3FB9" changed="added" reported-display-style="italic"> 
+<section id="H5904E2D0D2894151A99DEF364DAA19EE" section-type="section-one"><enum>1.</enum><header>Sense of Congress</header><text display-inline="no-display-inline">It is the sense of Congress that—</text> <paragraph id="HE7C302BAA25F44EBAF38C2B920FCD592"><enum>(1)</enum><text display-inline="yes-display-inline">the cost of insulin, a lifesaving medication for the approximately 7,400,000 Americans who need it, is often prohibitive;</text></paragraph> 
+<paragraph id="HB10ACBA8FF224094B25C22F1C6E5F126"><enum>(2)</enum><text>in 2020, nearly 1 in 6 adults reported delaying, skipping, reducing the amount of, or otherwise not getting prescription drugs because of the costs of the drugs; and</text></paragraph> <paragraph id="HEB5F9ACEFCB1480DBC22654AFEE4BAA4"><enum>(3)</enum><text>increased barriers to accessing necessary medication can lead to lower medication use and increase in cost of related hospitalizations and emergency room visits.</text></paragraph></section> 
+<section id="H63982EAC019E48B28F119827DDB6E43C"><enum>2.</enum><header>Addition of vaccines against COVID–19 to list of taxable vaccines</header> 
+<subsection id="HB8B2AF75796D4673A37F8BE47F5D7686"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline"><external-xref legal-doc="usc" parsable-cite="usc/26/4132">Section 4132(a)(1)</external-xref> of the Internal Revenue Code of 1986 is amended by adding at the end the following new subparagraph: </text> <quoted-block style="OLC" display-inline="no-display-inline" id="HFA96651BD14C4CD7BF9748BC138DEF22"> <subparagraph id="H81FD6A74034F4649AC26909D1EB267E1"><enum>(Q)</enum><text display-inline="yes-display-inline">Any vaccine against COVID–19. </text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="H48BF9CF78D8A4AB4970A086BB553510C"><enum>(b)</enum><header>Effective date</header> 
+<paragraph id="H44B83B69293348988731B0C92A6468D4"><enum>(1)</enum><header>Sales, etc</header><text display-inline="yes-display-inline">The amendment made by this section shall apply to sales and uses on or after the later of—</text> <subparagraph id="HDDCC7BAEDAC94663B3FDB97A06C4E239"><enum>(A)</enum><text>the first day of the first month which begins more than 4 weeks after the date of the enactment of this Act, or</text></subparagraph> 
+<subparagraph id="H2772071048014F78A47FD9A798B5F8FE"><enum>(B)</enum><text>the date on which the Secretary of Health and Human Services lists any vaccine against COVID–19 for purposes of compensation for any vaccine-related injury or death through the Vaccine Injury Compensation Trust Fund. </text></subparagraph></paragraph> <paragraph id="H4260F16833C34A7EA96705CC9BD93AF6"><enum>(2)</enum><header>Deliveries</header><text>For purposes of paragraph (1) and <external-xref legal-doc="usc" parsable-cite="usc/26/4131">section 4131</external-xref> of the Internal Revenue Code of 1986, in the case of sales on or before the effective date described in such paragraph for which delivery is made after such date, the delivery date shall be considered the sale date. </text></paragraph></subsection></section> 
+</amendment-block> </amendment></engrossed-amendment-body><attestation><attestation-group><attestor display="no">Lorraine Miller</attestor><role>Clerk.</role></attestation-group></attestation><endorsement></endorsement></amendment-doc> 
+
+

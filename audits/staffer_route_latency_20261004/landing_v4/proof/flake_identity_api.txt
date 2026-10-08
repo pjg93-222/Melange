@@ -1,0 +1,8 @@
+# test_staffer_identity_api.py, run 20 times in each of the four trees of the fix round (scripts/flake_identity_api.sh; one pytest process per run, the 4 data files copied read-only from LIVE for the runs).
+# It fails intermittently (WinError 10053 in the test's own HTTP client while it reads the answer to a rejected POST): in 2, 3 and 6 of 20 runs at 5d4a9bd0a, the tip and the applied tree, in 0 of these 20 at f23a40aee, which failed it once in the
+# suite run of that tree (proof/test_results_f23a40aee_vs_tip.txt); see also proof/applied_tree_suites.txt. The rates differ from run to run with the host's load; none of the trees edits the handler.
+
+base_f23a40aee: 20 runs, 20 passed, 0 failed 
+base_5d4a9bd0a: 20 runs, 18 passed, 2 failed  | test_cross_site_wrong_origin_scheme_and_port_are_rejected  | test_content_type_and_size_limits_reject_before_dispatch 
+tip_v4: 20 runs, 17 passed, 3 failed  | test_assertion_endpoint_uses_local_origin_gate  | test_content_type_and_size_limits_reject_before_dispatch  | test_content_type_and_size_limits_reject_before_dispatch 
+applied_tree: 20 runs, 14 passed, 6 failed  | test_cross_site_wrong_origin_scheme_and_port_are_rejected  | test_content_type_and_size_limits_reject_before_dispatch  | test_cross_site_wrong_origin_scheme_and_port_are_rejected  | test_cross_site_wrong_origin_scheme_and_port_are_rejected test_cross_site_wrong_origin_scheme_and_port_are_rejected  | test_assertion_endpoint_uses_local_origin_gate  | test_cross_site_wrong_origin_scheme_and_port_are_rejected 

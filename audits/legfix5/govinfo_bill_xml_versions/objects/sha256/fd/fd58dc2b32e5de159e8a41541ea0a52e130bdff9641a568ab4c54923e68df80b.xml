@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H51F344BDCE4A4F2FB9D36C8C5A84CDF4" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2558 IH: To define the dollar as a fixed weight of gold.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2558</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190507">May 7, 2019</action-date><action-desc><sponsor name-id="M001195">Mr. Mooney of West Virginia</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To define the dollar as a fixed weight of gold.</official-title></form>
+	<legis-body id="H3034214746D54CC4B7852C1E583D2E6A" style="OLC">
+ <section id="HDDD0CA18777D40BCBF8FA4ECB66E3F5D" section-type="section-one"><enum>1.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text> <paragraph id="H94A929A853C148058E58D11FA545A08D"><enum>(1)</enum><text>The United States dollar has lost 30 percent of its purchasing power since 2000, and 96 percent of its purchasing power since the end of the gold standard in 1913.</text>
+ </paragraph><paragraph id="H4B351661E50349C1A1C5B43AFE447138"><enum>(2)</enum><text>Under the Federal Reserve’s 2 percent inflation objective, the dollar loses half of its purchasing power every generation, or 35 years.</text>
+ </paragraph><paragraph id="H698EA008B390453AB588EDDCF4A8F49D"><enum>(3)</enum><text>American families need long-term price stability to meet their household spending needs, save money, and plan for retirement.</text>
+ </paragraph><paragraph id="HF8E7E9F0AFF44070815208EF4471A5ED"><enum>(4)</enum><text>The Federal Reserve policy of long-term inflation has made American manufacturing uncompetitive, raising the cost of United States manufactured goods by more than 40 percent since 2000, compared to less than 20 percent in Germany and France.</text>
+ </paragraph><paragraph id="HCF15B0494E104FA9B141F73CE7C50464"><enum>(5)</enum><text>Between 2000 and 2010, United States manufacturing employment shrunk by one-third after holding steady for 30 years at nearly 20,000,000 jobs.</text>
+ </paragraph><paragraph id="HADAAF02CF56F43728A49081BE7D97EEA"><enum>(6)</enum><text>The American economy needs a stable dollar, fixed exchange rates, and money supply controlled by the market not the government.</text>
+ </paragraph><paragraph id="HE54B9BF980CD4A5881F0EC8AC096D2EA"><enum>(7)</enum><text>The gold standard puts control of the money supply with the market instead of the Federal Reserve.</text> </paragraph><paragraph id="H1301A021802D4C00BB50F9C2C2E1B12F"><enum>(8)</enum><text>The gold standard means legal tender defined by and convertible into a certain quantity of gold.</text>
+ </paragraph><paragraph id="H727733FEBE124CD6935BC61F9A99287E"><enum>(9)</enum><text>Under the gold standard through 1913 the United States economy grew at an annual average of four percent, one-third larger than the growth rate since then and twice the level since 2000.</text>
+ </paragraph><paragraph id="H541F652B4B2846EC9788D541C5EB2F15"><enum>(10)</enum><text>The international gold exchange standard from 1914 to 1971 did not provide for a United States dollar convertible into gold, and therefore helped cause the Great Depression and stagflation.</text>
+ </paragraph><paragraph id="HE7FFD56EC41E4D85899BD86636076EC5"><enum>(11)</enum><text>The Federal Reserve’s trickle down policy of expanding the money supply with no demand for it has enriched the owners of financial assets but endangered the jobs, wages, and savings of blue collar workers.</text>
+ </paragraph><paragraph id="H76F5EFA7C5B24FE3A2EEA5F941F6BD17"><enum>(12)</enum><text>Restoring American middle-class prosperity requires change in monetary policy authorized to Congress in Article I, Section 8, Clause 5 of the Constitution.</text>
+ </paragraph></section><section id="H8DCDB876702044CAA06D6482282AA29E"><enum>2.</enum><header>Define the dollar in terms of gold</header><text display-inline="no-display-inline">Effective 30 months after the date of enactment of this Act—</text> <paragraph id="H406558A8416347B681BE554A120C4B9E"><enum>(1)</enum><text display-inline="yes-display-inline">the Secretary of the Treasury (in this Act referred to as the <quote>Secretary</quote>) shall define the dollar in terms of a fixed weight of gold, based on that day’s closing market price of gold; and</text>
+ </paragraph><paragraph id="H774E5527CD1247C0AC0EF547C7905849"><enum>(2)</enum><text>Federal Reserve Banks shall make Federal Reserve notes exchangeable with gold at the statutory gold definition of the dollar.</text>
+ </paragraph></section><section id="H3032A7264FCD4EF3AD92CC2C26ACA3D2"><enum>3.</enum><header>Disclosure of holding</header><text display-inline="no-display-inline">During the 30-month period following the date of enactment of this Act, the United States Government shall take timely and reasonable steps to disclose all of its holdings of gold, together with a contemporaneous report of any United States governmental purchases or sales, thus enhancing the ability of the market and of market participants to arrive at the fixed dollar-gold parity in an orderly fashion.</text>
+		</section></legis-body></bill>
+
+

@@ -1,0 +1,77 @@
+{
+  "generated_at_utc": "2026-09-07T07:07:35.839416+00:00",
+  "name_standard_version": "1.1",
+  "labels_file": "name_standard_gold_labels_20260907.ndjson",
+  "labels_sha256_before": "d0f4aefd6ba6c937f3eaca467e75ffb84967dc39778fa1914c068efc1ee30710",
+  "labels_sha256_after": "eafaa3726b79f565e8c033adb3fc47ba887627ca7be7d02b6146a16ff2f17d53",
+  "rows_total": 300,
+  "relabels_total": 6,
+  "relabels_by_rule": {
+    "R5-a": 6
+  },
+  "R5_b_zero_row_finding": {
+    "applicable_rows": 0,
+    "finding": "The blind labeller already read every bare-V row as a middle initial. All nine bare-V rows in the sample (044, 068, 069, 206, 207, 208, 209, 210, 269) carry middle 'V', suffix null and a display_name that already places the initial, so R5-b has no applicable row. Zero labels were changed under it. It was the PARSER, not the gold, that read V as a suffix.",
+    "bare_v_sample_ids": [
+      "name-gold-20260906-044",
+      "name-gold-20260906-068",
+      "name-gold-20260906-069",
+      "name-gold-20260906-206",
+      "name-gold-20260906-207",
+      "name-gold-20260906-208",
+      "name-gold-20260906-209",
+      "name-gold-20260906-210",
+      "name-gold-20260906-269"
+    ]
+  },
+  "relabels": [
+    {
+      "rule": "R5-a",
+      "rule_text": "display_name never renders a nickname (rule 8, Paul's minimal-duplication law)",
+      "sample_id": "name-gold-20260906-140",
+      "field": "display_name",
+      "before": "Patricia \"Trish\" Reilly",
+      "after": "Patricia Reilly"
+    },
+    {
+      "rule": "R5-a",
+      "rule_text": "display_name never renders a nickname (rule 8, Paul's minimal-duplication law)",
+      "sample_id": "name-gold-20260906-141",
+      "field": "display_name",
+      "before": "Thomas \"Tim\" John Knutson",
+      "after": "Thomas John Knutson"
+    },
+    {
+      "rule": "R5-a",
+      "rule_text": "display_name never renders a nickname (rule 8, Paul's minimal-duplication law)",
+      "sample_id": "name-gold-20260906-286",
+      "field": "display_name",
+      "before": "Isaac \"Jack\" Azran",
+      "after": "Isaac Azran"
+    },
+    {
+      "rule": "R5-a",
+      "rule_text": "display_name never renders a nickname (rule 8, Paul's minimal-duplication law)",
+      "sample_id": "name-gold-20260906-288",
+      "field": "display_name",
+      "before": "Nathaniel \"Tyler\" Lemons",
+      "after": "Nathaniel Lemons"
+    },
+    {
+      "rule": "R5-a",
+      "rule_text": "display_name never renders a nickname (rule 8, Paul's minimal-duplication law)",
+      "sample_id": "name-gold-20260906-289",
+      "field": "display_name",
+      "before": "Soohyung \"Soo\" Kim",
+      "after": "Soohyung Kim"
+    },
+    {
+      "rule": "R5-a",
+      "rule_text": "display_name never renders a nickname (rule 8, Paul's minimal-duplication law)",
+      "sample_id": "name-gold-20260906-290",
+      "field": "display_name",
+      "before": "William \"Fritz\" Reber",
+      "after": "William Reber"
+    }
+  ]
+}

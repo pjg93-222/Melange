@@ -1,0 +1,37 @@
+{
+ "base_csv_date_max": "2026-06-24",
+ "base_csv_date_min": "2022-01-05",
+ "base_csv_rows": 2388,
+ "override_ledger": {
+  "live": 23,
+  "other_fields_differ": 0,
+  "stance_differs": [],
+  "worktree": 23
+ },
+ "refresh_csv_date_max": "2026-08-31",
+ "refresh_csv_date_min": "2026-06-25",
+ "refresh_csv_rows": 291,
+ "schema": "n14-q2b-sheet-age-v1",
+ "sheet_date_max": "2026-06-24",
+ "sheet_date_min": "2022-01-05",
+ "sheet_dated_rows": 3457,
+ "sheet_rows": 3701,
+ "stance_src_base": {
+  "debate": 1891,
+  "human_label": 497
+ },
+ "stance_src_refresh": {
+  "press_refresh_rules_v1": 291
+ },
+ "stance_src_sheet": {
+  "bill": 1310,
+  "debate": 2391
+ },
+ "zip_timestamps": {
+  "2026-09-19T03:25:32": 34,
+  "2026-09-19T03:25:34": 24,
+  "2026-09-19T03:25:36": 9,
+  "2026-09-19T03:25:38": 16,
+  "2026-09-19T03:33:36": 3
+ }
+}

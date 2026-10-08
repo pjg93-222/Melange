@@ -1,0 +1,356 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H0B3E8A517D834AE3A04E4CA5FC8E0CAE" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8585 IH: Community Multi-Share Coverage Program Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8585</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260429">April 29, 2026</action-date><action-desc><sponsor name-id="M001194">Mr. Moolenaar</sponsor> (for himself and <cosponsor name-id="H001058">Mr. Huizenga</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HED00">Education and Workforce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require the Secretary of Health and Human Services to award grants
+            to support community-based coverage entities to carry out a comprehensive coverage
+            program that provides qualifying individuals and small businesses health coverage and
+            integrated health-related social need services to small business workers that promote
+            improved health, long-term economic self-sufficiency, employment and retention, and for
+ other purposes.</official-title></form><legis-body id="HB777ACD12A0542F39C6FCEC8361A9862" style="OLC"><section id="H5C5762B8F29E4F45984E4AEB07C514AD" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Community Multi-Share Coverage Program Act of 2026</short-title></quote>.</text></section><section id="H288C6421DB5B4D2FBF0DFCE62FBBFDF0"> <enum>2.</enum> <header>Grants to establish community multi-share coverage programs to enable small businesses to provide affordable health coverage and support services to employees with limited income and assets</header> <subsection id="H6C0AE261F8B34725998BE2ABAC751925"> <enum>(a)</enum> <header>In general</header> <text>Not later than 180 days after the date of the enactment of this Act, the Secretary of Health and Human Services shall award at least 3 and not more than 5 grants to support Community Multi-Share Coverage programs. Such programs shall—</text>
+                <paragraph id="H0F9C14D99B4C479BB631839422F3248C">
+                    <enum>(1)</enum>
+ <text>reduce the number of uninsured individuals through hospital-community partnership initiatives that provide an affordable health coverage option for such individuals and provide a coverage transition for those limited to coverage through government-sponsored programs;</text>
+                </paragraph>
+                <paragraph id="HBAD11E08942340C6AD6A8E8DEFB97FA4">
+                    <enum>(2)</enum>
+ <text>promote workforce development for small businesses by addressing the psycho-social barriers that directly impact employment success and create barriers to exiting Medicaid, resulting in better health and workplace success; and</text>
+                </paragraph>
+                <paragraph id="HDD1B394C36834712BF7D7CB276FB4226">
+                    <enum>(3)</enum>
+ <text>support small business economic recovery by allowing small businesses to be competitive in their hiring, and to provide high quality, affordable health coverage to workers who are otherwise hesitant to lose Medicaid eligibility.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="HC52B31A803124BFD8FC6695367520780">
+                <enum>(b)</enum>
+                <header>Community multi-Share coverage program requirements</header>
+ <text>For purposes of this section, the term <quote>Community Multi-Share Coverage Program</quote> means a program that satisfies each of the following program requirements:</text>
+                <paragraph id="H96DEB29CDF5E48F2815FD6823F452D3E">
+                    <enum>(1)</enum>
+                    <header>Physical presence in the community</header>
+ <text>The program maintains a physical presence within close geographic proximity to the enrollees it is serving, with a focus on mitigating barriers to engagement by enabling face-to-face interactions between the program staff, enrollees, and community organizations.</text>
+                </paragraph>
+                <paragraph id="H53B8F0D5FD3A4562B09F800784CABB8C">
+                    <enum>(2)</enum>
+                    <header>Health coverage</header>
+ <text>The program provides enrolled qualifying individuals with health coverage that satisfies the following:</text>
+                    <subparagraph id="H69724EE6FC8A4388AB940409AA278D96">
+                        <enum>(A)</enum>
+                        <header>Services covered</header>
+ <text>Provides coverage for the following categories of services when furnished by network providers and community resources:</text>
+                        <clause id="HEE478F367ADD49F192732762A0AB2ED7">
+                            <enum>(i)</enum>
+ <text>Physician services.</text> </clause> <clause id="HE0DF6E1A39C24CBEA8C6061B60D6C8CF"> <enum>(ii)</enum> <text>Inpatient and outpatient hospital services.</text>
+                        </clause>
+                        <clause id="HAFF74F633C9846128B2F46C70232E2EF">
+                            <enum>(iii)</enum>
+ <text>Behavioral health services, including services for substance use disorder prevention and treatment.</text>
+                        </clause>
+                        <clause id="HAC111B9E4C194908906F7FDFAAB021DB">
+                            <enum>(iv)</enum>
+ <text>Preventative services.</text> </clause> <clause id="H78618CB7275B45B18C8669C18AB61059"> <enum>(v)</enum> <text>Diagnostic laboratory tests and x-rays.</text>
+                        </clause>
+                        <clause id="H4B59A2B66DF04559BE041419044E105B">
+                            <enum>(vi)</enum>
+ <text>Prescription drugs.</text> </clause> <clause id="HCADEF897B73148819F09F059245655A3"> <enum>(vii)</enum> <text>Emergency ambulance services that are provided by ground transportation.</text>
+                        </clause>
+                        <clause id="HFD55437A24E04F3CA5FB779648D43694">
+                            <enum>(viii)</enum>
+ <text>Emergency services (as defined in section 2719A(b)(2)(B) of the Public Health Service Act (42 U.S.C. 300gg–1719a(b)(2)(B))).</text>
+                        </clause>
+                        <clause id="H517139ADA6CB45F693B8ABC87F1EF3AD">
+                            <enum>(ix)</enum>
+ <text>Population health improvement services.</text> </clause> </subparagraph> <subparagraph id="H9622A2AAF46A4C22A663EA96AA267CC2"> <enum>(B)</enum> <header>Cost-sharing</header> <text>Imposes no deductible on covered services provided by network providers and community resources, and limits co-payments for in-network covered services to levels that do not create a barrier to patient access.</text>
+                    </subparagraph>
+                    <subparagraph id="H45339319F66C4C29B7CB933D3AB73B3A">
+                        <enum>(C)</enum>
+                        <header>Network providers</header>
+ <text>Establishes agreements with hospitals and health care providers located within the community to provide care for qualifying individuals.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H7C2ABDC5857A479A8C92EA2F513B1655">
+                    <enum>(3)</enum>
+                    <header>Community collaboration and alignment</header>
+ <text>The program is carried out in partnership with, or in formal coordination with, an existing community-based collaborative, intermediary, or coordinating entity that—</text>
+                    <subparagraph id="HF7FFA67109EA40829DD4CF873F4EE461">
+                        <enum>(A)</enum>
+ <text>has demonstrated experience aligning safety-net health, human service, and workforce-related services within the community;</text>
+                    </subparagraph>
+                    <subparagraph id="HDD858361536E459D84DC9A4C254E3076">
+                        <enum>(B)</enum>
+ <text>supports the identification of community-defined needs, priorities, and service gaps through ongoing engagement with community stakeholders; and</text>
+                    </subparagraph>
+                    <subparagraph id="H2CD45B222FFB43949727D9629ABC0245">
+                        <enum>(C)</enum>
+ <text>facilitates coordination among participating health care providers, community-based organizations, employers, and other relevant partners to avoid duplication and promote effective use of community resources.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H3B63A9C2E76547D7A59EA5D7586F04CA">
+                    <enum>(4)</enum>
+                    <header>Integrated continuous health improvement services</header>
+ <text>The program provides, either directly or through contract, integrated continuous health improvement services that satisfy the following:</text>
+                    <subparagraph id="H6F4C4BE930554AF6931128DBEFC2961D">
+                        <enum>(A)</enum>
+ <text>Regular assessments of community factors and resources that potentially impact enrollees’ physical, emotional, and economic health.</text>
+                    </subparagraph>
+                    <subparagraph id="H0C8CB8DE17B7430EA11A7840A171A52C">
+                        <enum>(B)</enum>
+ <text>A community-based planning process to identify and address any negative influences identified pursuant to subparagraph (A), and promote well-being through partnerships and alignment efforts between the community-based coverage entity and—</text>
+                        <clause id="H17E8C4E9CAF542DFB746FD021B353D1E">
+                            <enum>(i)</enum>
+ <text>local small employers;</text> </clause> <clause id="HA5113D7C52FD4ABD852D6051EF39D4C5"> <enum>(ii)</enum> <text>entities that provide educational and occupational training (including classes, workshops, mentorships, and apprenticeships) designed to enhance preparation for work and support economic self-sufficiency;</text>
+                        </clause>
+                        <clause id="H0F335231B40543C2B032E2605F25505A">
+                            <enum>(iii)</enum>
+ <text>community health and health-related social need initiatives;</text>
+                        </clause>
+                        <clause id="H14E021646BF44082985B5B704EE666F2">
+                            <enum>(iv)</enum>
+ <text>investors;</text> </clause> <clause id="H8EDFFDF74FEA4F859DA4A5C8A0511647"> <enum>(v)</enum> <text>local, State, and Federal governmental agencies; and</text>
+                        </clause>
+                        <clause id="H3AD815D0A49843338DBB0AE13A6B9C64">
+                            <enum>(vi)</enum>
+ <text>organizations described in <external-xref legal-doc="usc" parsable-cite="usc/26/501">section 501(c)(3)</external-xref> of the Internal Revenue Code of 1986 that focuses on human service needs relating to physical health, behavioral health, poverty, education, access to health care, and safety.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="H2B27C86E4C8F4F9DA82DB32F50D3F2EF">
+                        <enum>(C)</enum>
+ <text>Individualized assessment of each enrollee to identify any negative influences on their physical, emotional, and economic health, and ability to achieve economic self-sufficiency, which shall include—</text>
+                        <clause id="HEE8C303DBCE24C1BB77CF8E03B7A8F5D">
+                            <enum>(i)</enum>
+ <text>an assessment of any of the enrollee’s psycho-social barriers, health risks, barriers to long-term employment, and barriers to increasing income; and</text>
+                        </clause>
+                        <clause id="HB979A89DFB0A43DA8F4ECC7129B06E53">
+                            <enum>(ii)</enum>
+ <text>a determination of the enrollee’s health domain score, which is a measurement of specific influences of physical, emotional, and financial health with respect to a qualifying individual.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="H31DE9DF439FA4B4D8EA16DD032B95BA4">
+                        <enum>(D)</enum>
+ <text>Establishment of an individualized plan to support each enrollee in achieving better health and economic self-sufficiency, which shall—</text>
+                        <clause id="H5CF1CB3665754D8D8CA7E8AC2109D587">
+                            <enum>(i)</enum>
+ <text>identify community resources that will support the enrollee in improving their physical, behavioral, or economic health, which may include—</text>
+                            <subclause id="HF520F9A91B3F46D3B907ACAF81089645">
+                                <enum>(I)</enum>
+ <text>group classes that address barriers to physical, emotional, and economic health; and</text>
+                            </subclause>
+                            <subclause id="H0946DB8072084E2D9CC1812E758C1141">
+                                <enum>(II)</enum>
+ <text>educational and occupational training opportunities that enhance work preparedness and support economic self-sufficiency; and</text>
+                            </subclause>
+                        </clause>
+                        <clause id="H703DE4ED44D349A184F8A291271A7E21">
+                            <enum>(ii)</enum>
+ <text>contain engagement milestones, with a goal of identifying and overcoming obstacles to engagement in personal health improvement and mitigation of root-cause barriers, which shall include—</text>
+                            <subclause id="HB87D938DCF704C5395CEB89CE911DD23">
+                                <enum>(I)</enum>
+ <text>participation in individualized health coaching services to address the enrollee’s health-related social needs and to support their physical, emotional, and financial health; and</text>
+                            </subclause>
+                            <subclause id="H1B32A4747192418C8B37AC77057D48D6">
+                                <enum>(II)</enum>
+ <text>engagement with community resources, such as participating in group classes, as recommended by the health coach.</text>
+                            </subclause>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H13551AFD6624475CA885EA86BA28FDB2">
+                    <enum>(5)</enum>
+                    <header>Funding structure</header>
+                    <subparagraph id="H79F431B4CC9E47AFA1EFD7FA0FBFD47E">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text>The direct costs of the program are shared among the following entities, each of which makes a direct financial contribution:</text>
+                        <clause id="HA48BBB21ECAA48F387592ABBF05CC082">
+                            <enum>(i)</enum>
+ <text>The public sector.</text> </clause> <clause id="H9C67242B60854347AED0CC4331160E42"> <enum>(ii)</enum> <text>Local health care providers.</text>
+                        </clause>
+                        <clause id="HA3D9E56CB01A428A8D18325034BDEBB3">
+                            <enum>(iii)</enum>
+ <text>Enrollees.</text> </clause> <clause id="HA31DCE4E86CD4611BB9FE7887BB874EE"> <enum>(iv)</enum> <text>Enrollees’ employers or skilled trade organizations.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="HA7362877AE3545C5A64DC6F3DDA4C9F0">
+                        <enum>(B)</enum>
+                        <header>Shared financial responsibility and long-term
+                            sustainability</header>
+ <text>The program shall be structured to support long-term financial sustainability through a shared financial responsibility framework that—</text>
+                        <clause id="H873448F2F3C74CE896BF80323FD30394">
+                            <enum>(i)</enum>
+ <text>relies on coordinated and ongoing contributions from multiple levels of government, local resources, and hospital community benefit investment;</text>
+                        </clause>
+                        <clause id="H456924963652411882CD44C965F58150">
+                            <enum>(ii)</enum>
+ <text>avoids dependence on a single funding source by establishing a defined, multi-year transition toward a stable allocation of financial responsibility across participating sectors; and</text>
+                        </clause>
+                        <clause id="H662E9C8DBC35445085EEDA02DA02C67B">
+                            <enum>(iii)</enum>
+ <text>demonstrates measurable progress toward a mature financing structure in which Federal support is supplemented by sustained contributions from State and local government and hospital community benefit resources.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H27F852F7F2804D83839A030701143C0D">
+                    <enum>(6)</enum>
+                    <header>Enrollees</header>
+                    <subparagraph id="HEED7DE0104864A7EA172500A75ECA81C">
+                        <enum>(A)</enum>
+ <text>In the event that a Program is unable to provide services to all qualifying individuals in its catchment area, the Program has a publicly available written policy for determining which qualifying individuals are offered enrollment.</text>
+                    </subparagraph>
+                    <subparagraph id="H652B6D6CECD343DCB2D7F739D8752C24">
+                        <enum>(B)</enum>
+ <text>The program may rescind a qualifying individual’s enrollment due to sustained failure to meet minimum engagement and personal growth thresholds, which shall be participatory and not health-contingent, and provide for reasonable alternatives, in their individual plan described in subsection (b)(2)(D).</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HE2BB16F6954D44EEBB3E7BACE041BD8B">
+                    <enum>(7)</enum>
+                    <header>Evaluation</header>
+ <text>The program formally evaluates its impact on enrollees’ employment status, physical and behavioral health, income, and economic self-sufficiency.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="HE37ED75EA88D492B8E6562FF19D2AEF2">
+                <enum>(c)</enum>
+                <header>Qualifying individual</header>
+ <text>The term <quote>qualifying individual</quote> means an individual who—</text> <paragraph id="HD7063F4721CE46AA9B55D06042AD1C23"> <enum>(1)</enum> <text>resides or works within the catchment area of a partner hospital described in subsection (e)(1)(A);</text>
+                </paragraph>
+                <paragraph id="HF0CC11674DDF404E9E98385EDFC97570">
+                    <enum>(2)</enum>
+ <text>subject to any modification made by such program to narrow the income eligibility range, has a household income that exceeds the Medicaid eligibility limit applicable to the qualifying individual in their State of residence but does not exceed 400 percent of the Federal poverty line applicable to their household size;</text>
+                </paragraph>
+                <paragraph id="H1FC0A45214154CA79C822A36F47245A4">
+                    <enum>(3)</enum>
+ <text>is not enrolled in a qualified health plan during the 180-day period preceding the date on which such qualifying individual seeks to enroll in the Community Multi-Share Coverage Program, unless a such coverage is terminated due to a qualifying special event;</text>
+                </paragraph>
+                <paragraph id="H714E2DC18DC848B2801065EEF88BE3AE">
+                    <enum>(4)</enum>
+ <text>is ineligible for enrollment in a Federal health care program, including ineligibility to receive health services through the Indian Health Service or Veterans Administration;</text>
+                </paragraph>
+                <paragraph id="H5BE20F785F2F429298BE483E49FEFB72">
+                    <enum>(5)</enum>
+ <text>works for a small employer which does not offer its employees coverage in a qualified health plan under which the combined premium plus deductible cost to cover the employee’s household is less than seven percent of the employee’s household income; and</text>
+                </paragraph>
+                <paragraph id="HB3FE9AA16BD94F11ADC80EA1B9D73548">
+                    <enum>(6)</enum>
+ <text>meets other requirements the Secretary determines appropriate.</text> </paragraph> </subsection> <subsection id="H2DACF70D7C374C4F875FF6868ABB4CD8"> <enum>(d)</enum> <header>Grant terms</header> <paragraph id="H43C72BC4B5294BACA8736194C2EDBCAF"> <enum>(1)</enum> <header>Duration</header> <text>A grant awarded under this section shall be made for a period of 4 years.</text>
+                </paragraph>
+                <paragraph id="HEA5E1300CA064ABBA061368FF1DAB883">
+                    <enum>(2)</enum>
+                    <header>Amount</header>
+ <text>The Secretary shall determine the maximum amount of each grant awarded under subsection (a).</text>
+                </paragraph>
+                <paragraph id="HB67C553E8C214BFB829AA1C734802005">
+                    <enum>(3)</enum>
+                    <header>Number</header>
+ <text>At least one award must be made to a Community Multi-Share Coverage Program that is operating at the time that this section is enacted.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="HB3AAB178B28E48A68309101438DD3631">
+                <enum>(e)</enum>
+                <header>Applications</header>
+                <paragraph id="H6E7431785A1B44DCA172651F6E75FBB3">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>To be eligible to be awarded a grant under subsection (a), an applicant must—</text>
+                    <subparagraph id="H93F8E86C31DF4F2ABE9DAF66D13640B0">
+                        <enum>(A)</enum>
+ <text>be a non-profit entity with documented commitments from local partner hospitals and small employers to participate in a Community Multi-Share Coverage Plan; and</text>
+                    </subparagraph>
+                    <subparagraph id="H70C4257E31C440CA9502BE25E50E9193">
+                        <enum>(B)</enum>
+ <text>submit to the Secretary an application at such time, in such manner, and containing the certification described in paragraph (2) and such other information as the Secretary may require.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HB2FDDA739C5B4EA8AF6D188B65C3AA3C">
+                    <enum>(2)</enum>
+                    <header>Certification</header>
+ <text>To eligible for funding under this section, an application described in paragraph (1) shall include certifications that the program—</text>
+                    <subparagraph id="H4C9B390DD44F4BE386895F09E7232FE2">
+                        <enum>(A)</enum>
+ <text>will not impose any preexisting condition exclusion (as such term is defined in section 2704(b)(1)(A)) of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/300gg-3">42 U.S.C. 300gg–3(b)(1)(A)</external-xref>) with respect to the health coverage described in subsection (b)(1);</text>
+                    </subparagraph>
+                    <subparagraph id="H3773CBE0ADCF4739AD311D95EE8E4D4A">
+                        <enum>(B)</enum>
+ <text>has or will establish a network of health care providers and community resources sufficient to provide services to qualifying individuals enrolled under the health coverage described in subsection (b)(2);</text>
+                    </subparagraph>
+                    <subparagraph id="HC3DD7E630BB84EC698B17F552C1B85C3">
+                        <enum>(C)</enum>
+ <text>will seek to enroll individuals whose household income is less than the basic cost of living (as determined in a manner consistent with the <quote>Asset Limited, Income Constrained, Employed</quote> or <quote>ALICE</quote> methodology);</text>
+                    </subparagraph>
+                    <subparagraph id="H23230870043544978B644AB01A2BEDF3">
+                        <enum>(D)</enum>
+ <text>select an entity to carry out administrative and accounting responsibilities (including monthly billing, verification of eligibility of qualifying individuals, enrollment of qualifying individuals, maintenance of a list of active enrollees, and operation of a benefit utilization management program) necessary with respect to the health insurance coverage described in subsection (b)(2); and</text>
+                    </subparagraph>
+                    <subparagraph id="H02581E56985040129A48FBDD961F38BC">
+                        <enum>(E)</enum>
+ <text>shall submit written reports to the Secretary on an annual basis evaluating the progress on advancing access to health care, increasing economic self-sufficiency, and other elements that the Secretary requires.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="H339E2046B9E046BE8AA83376E5C29014">
+                <enum>(f)</enum>
+                <header>Definitions</header>
+ <text>In this section:</text> <paragraph id="H2022517A5C7E4480BF38F02D6211EA87"> <enum>(1)</enum> <header>Agency</header> <text>The term <quote>agency</quote> means a local, State, or Federal agency.</text>
+                </paragraph>
+                <paragraph id="HED731F868B7343789CCDAA36C39C006B">
+                    <enum>(2)</enum>
+                    <header>Federal health care program</header>
+ <text>The term <quote>Federal health care program</quote> has the meaning given such term in section 1128B(f) of the Social Security Act (42 U.S.C. 1320a–7b(f)).</text>
+                </paragraph>
+                <paragraph id="H8BCB898E6CC241EEACAFCD1EC49ADD81">
+                    <enum>(3)</enum>
+                    <header>Health coach</header>
+ <text>The term <quote>health coach</quote> means an individual who is a member of the staff of the community-based coverage entity that has received training to provide health coaching services (including health improvement program services).</text>
+                </paragraph>
+                <paragraph id="H8022C5D5DFFD45FA81360DC2E4B405FE">
+                    <enum>(4)</enum>
+                    <header>Hospital</header>
+ <text>The term <quote>hospital</quote> means an institution that—</text> <subparagraph id="HDB1D4B2310774022AB64C0EC625D011D"> <enum>(A)</enum> <text>meets the requirements of section 1861(e) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/31395x">42 U.S.C. 31395x(e)</external-xref>); and</text>
+                    </subparagraph>
+                    <subparagraph id="HD2D9A13660A24E43BF50F4B2E036FD4F">
+                        <enum>(B)</enum>
+ <text>is an organization described in subsections (c)(3) and (r)(3) of <external-xref legal-doc="usc" parsable-cite="usc/26/501">section 501</external-xref> of the Internal Revenue Code of 1986 and is exempt from taxation under section 501(a) of such code.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H8E3F4E8EC9D7422E900622FBEC383AB1">
+                    <enum>(5)</enum>
+                    <header>Qualified health plan</header>
+ <text>The term <quote>qualified health plan</quote> has the meaning given such term in section 1301(a) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18021">42 U.S.C. 18021(a)</external-xref>).</text>
+                </paragraph>
+                <paragraph id="HFAD02795B8D246E2BCBB80BA22947D22">
+                    <enum>(6)</enum>
+                    <header>Secretary</header>
+ <text>The term <quote>Secretary</quote> means the Secretary of Health and Human Services.</text>
+                </paragraph>
+                <paragraph id="HD94B7A746D67485A81DC6F6921B4F357">
+                    <enum>(7)</enum>
+                    <header>Small employer</header>
+ <text>The term <quote>small employer</quote> has the meaning given such term in section 1304(b)(2) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18024">42 U.S.C. 18024(b)(2)</external-xref>).</text>
+                </paragraph>
+                <paragraph id="HBAD3B60012D345E2BEDCEB67E2264DB4">
+                    <enum>(8)</enum>
+                    <header>Health-related social needs</header>
+ <text>The term <quote>health-related social needs</quote> has the meaning given such term by the Director of the Centers for Disease Control and Prevention.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="H1EB14E26AB14451E8CE138673585609B">
+                <enum>(g)</enum>
+                <header>Authorization of appropriations</header>
+ <text>There is authorized to be appropriated to carry out this section—</text> <paragraph id="H455D139D319A461198DB1EB36C386C1B"> <enum>(1)</enum> <text>$4,800,000 for fiscal year 2026;</text>
+                </paragraph>
+                <paragraph id="H991F09A2F52E468A99977DF086A829AA">
+                    <enum>(2)</enum>
+ <text>$7,200,000 for fiscal year 2027; and</text> </paragraph> <paragraph id="HA410D90DCC674EBABBF08D55706D1C5B"> <enum>(3)</enum> <text>$12,000,000 for each of fiscal years 2028 and 2029.</text>
+                </paragraph>
+            </subsection>
+        </section></legis-body></bill>
+
+

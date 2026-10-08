@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Enrolled-Bill" dms-id="H3DDC010C84E443779950F27828EC3D48" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title> HR 1082 ENR: Sami's Law</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">One Hundred Seventeenth Congress of the United States of America</congress><session display="yes">At the Second Session</session><enrolled-dateline>Begun and held at the City of Washington on Monday, the third day of January, two thousand and twenty-two</enrolled-dateline> 
+<legis-num display="yes">H. R. 1082</legis-num> 
+<current-chamber display="no"></current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To study the incidence of fatal and non-fatal assaults in TNC and for-hire vehicles in order to enhance safety and save lives.</official-title> 
+</form> 
+<legis-body id="H8CD39F17FDA246899810D2DB5E118264" style="OLC"> 
+<section id="HB421627E048D423B970DC76F1778FB69" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Sami's Law</short-title></quote>.</text></section> <section section-type="subsequent-section" id="H173219C2B1D34190B6A7FE6C7B666514"><enum>2.</enum><header>GAO study on incidence of fatal and non-fatal physical and sexual assault of passengers, TNC drivers, and drivers of other for-hire vehicles</header> <subsection id="H3E41D86AB6074A08A7B8DC9ECE494DF9"><enum>(a)</enum><header>GAO report</header><text>Not later than 1 year after the date of enactment of this Act, and every 2 years thereafter, the Comptroller General of the United States shall submit to Congress a report that includes the results of a study regarding—</text> 
+<paragraph id="HA586CD38CDEF4653B2982060B0F33F7D"><enum>(1)</enum><text>the incidence of fatal and non-fatal physical assault and sexual assault perpetrated in the preceding 2 calendar years (starting with calendar years 2019 and 2020 for the first study)—</text> <subparagraph id="HB2EEDBC8BD664AA982A334A515B3346E"><enum>(A)</enum><text>against TNC drivers and drivers of other for-hire vehicles (including taxicabs) by passengers and riders of for-hire vehicles; and</text></subparagraph> 
+<subparagraph id="H339E84571DAB4FFD9DDBD9B04383162F"><enum>(B)</enum><text>against passengers and riders by other passengers and TNC drivers or drivers of other for-hire vehicles (including taxicabs), including the incidences that are committed by individuals who are not TNC drivers or drivers of other for-hire vehicles but who pose as TNC drivers or drivers of other for-hire vehicles;</text></subparagraph></paragraph> <paragraph id="HB0F31275617645C3BF42AC01C1007B7C"><enum>(2)</enum><text>the nature and specifics of any background checks conducted on prospective TNC drivers and drivers of other for-hire vehicles (including taxicabs), including any State and local laws requiring those background checks; and</text></paragraph> 
+<paragraph id="H938EDA51C5BE418A9FD05527D42FC999"><enum>(3)</enum><text>the safety steps taken by transportation network companies and other for-hire vehicle services (including taxicab companies) related to rider and driver safety.</text></paragraph></subsection> <subsection id="HA2199A3AD15D4968B93ABF9C35CDDDAF"><enum>(b)</enum><header>Sexual assault defined</header><text>In this section, the term <term>sexual assault</term> means the occurrence of an act that constitutes any nonconsensual sexual act proscribed by Federal, Tribal, or State law, including when the victim lacks capacity to consent.</text></subsection></section> 
+</legis-body> <attestation><attestation-group><role>Speaker of the House of Representatives.</role></attestation-group><attestation-group><role>Vice President of the United States and President of the Senate.</role></attestation-group></attestation> 
+</bill> 
+
+

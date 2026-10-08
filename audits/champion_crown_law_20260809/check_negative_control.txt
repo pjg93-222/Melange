@@ -1,0 +1,16 @@
+GATE: standalone negative control of the two new audit_full.py checks
+RESULT: PASS (logic executed standalone by analyze_crown_law.py; audit_full.py itself not run)
+
+Check 1 (artifact self-consistency: no tier==1 row on any threats board)
+  vs baseline_boards.json : FLAGS exactly credit_union: Maxine Waters, bank: Tim Scott
+  vs rule_boards.json     : clean
+
+Check 2 (freshness: threats bioguides vs live member_desk_bundle tier==1 crown set)
+  vs baseline_boards.json : FLAGS exactly credit_union: Maxine Waters, bank: Tim Scott
+  vs rule_boards.json     : clean
+
+Interpretation: both checks can fire (proven on the pre-rule artifact) and both
+pass on the post-rule artifact. On the live machine they will read RED after this
+merge until the deploy chain regenerates boards.json (run_pipeline.py runs
+champions_v2 at line 105 before audit_full at line 121, so a normal chain run
+lands green). Machine-readable results: diff_receipt.json checks NC1/NC2/NC3.

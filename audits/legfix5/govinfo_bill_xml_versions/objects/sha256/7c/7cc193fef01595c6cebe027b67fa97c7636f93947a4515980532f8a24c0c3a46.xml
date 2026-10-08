@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HE023E5F25505460BBBE485B52E28A2E6" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 6018 IH: Housing Promotes Livelihood and Ultimate Success Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-11-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 6018</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20211118">November 18, 2021</action-date>
+<action-desc><sponsor name-id="B001282">Mr. Barr</sponsor> (for himself, <cosponsor name-id="W000816">Mr. Williams of Texas</cosponsor>, <cosponsor name-id="R000614">Mr. Roy</cosponsor>, <cosponsor name-id="S001213">Mr. Steil</cosponsor>, and <cosponsor name-id="P000599">Mr. Posey</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To allow amounts made available for the Continuum of Care program of the Secretary of Housing and Urban Development.</official-title>
+</form>
+<legis-body id="HCE483B0AC88040538F193304AC078D89" style="OLC"> 
+<section id="H42695FE341FA4A6FA0669CE6E590A07A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing Promotes Livelihood and Ultimate Success Act of 2021</short-title></quote> or the <quote><short-title>Housing PLUS Act of 2021</short-title></quote>.</text></section> <section id="HBB4020DF498B4DA29D8A948F0EFB4C7F"><enum>2.</enum><header>Availability of Continuum of Care funds for grantees requiring wraparound services or applying preconditions</header> <text display-inline="no-display-inline">Subtitle C of title IV of the McKinney-Vento Homeless Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/11381">42 U.S.C. 11381 et seq.</external-xref>) is amended by adding at the end the following new section:</text> 
+<quoted-block style="OLC" id="H969FAE45A0874BB3B54B4A66B2BB094A" display-inline="no-display-inline"> 
+<section id="H6F741DA6730A497AB183EF2F2C80C3C0"><enum>436.</enum><header>Availability of funds for grantees requiring wraparound services or applying preconditions</header> 
+<subsection id="HA61FD5E5DB7642829FD242EE273C196E"><enum>(a)</enum><header>Availability</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, the Secretary may not, in making amounts available under this subtitle, prohibit, limit, or restrict the award or amount of grants made with such amounts to or for eligible entities, project sponsors, or recipients—</text> <paragraph id="HF22F0B146E634554AA6106E27FF6C46E"><enum>(1)</enum><text>that require the provision of supportive services, such as counseling, job training, or addiction treatment, for individuals served by a program, project, or activity assisted with such amounts;</text></paragraph> 
+<paragraph id="H5B7A683A96294DECA52E3C6A6CEFDEF8"><enum>(2)</enum><text>that require, as a condition for occupancy in a project, or assistance from a program, project, or activity, assisted with such amounts that individuals meet certain prerequisites, such as sobriety or lack of drug use; or</text></paragraph> <paragraph id="H10290BE9F0574F238D240E64BAF64789"><enum>(3)</enum><text>faith-based organizations.</text></paragraph></subsection> 
+<subsection id="H1E238A6ED99247578B8B205EB7BD0A5E"><enum>(b)</enum><header>Set aside</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, in making available amounts under this subtitle for each fiscal year, the Secretary shall ensure that not less than 30 percent of such amounts shall be used by eligible entities, project sponsors, and recipients that provide or offer access to wraparound services.</text></subsection> <subsection id="H2B680D97EF61463A9B56670FDA49E96F"><enum>(c)</enum><header>Accountability</header><text display-inline="yes-display-inline">Not later than 180 days after the completion of each fiscal year, the Secretary shall submit, to the House Committee on Financial Services of the House of Representatives and Committee on Banking, Housing and Urban Affairs of the Senate, for such fiscal year—</text> 
+<paragraph id="H3C2A881A637C4FABA844B2F163F7FB73"><enum>(1)</enum><text>a written certification that the amounts made available for carrying out this subtitle were made available in compliance with subsections (a) and (b) of this section; and</text></paragraph> <paragraph id="H94423612FD054E01B9F6FEE918D334EC"><enum>(2)</enum><text>a report specifying how the Notices of Funding Opportunity for such fiscal year for amounts made available for carrying out this subtitle evidence such compliance.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+</legis-body>
+</bill> 
+
+

@@ -1,0 +1,175 @@
+diff --git a/fec/legislation/build_archive_legislative.py b/fec/legislation/build_archive_legislative.py
+--- a/fec/legislation/build_archive_legislative.py
++++ b/fec/legislation/build_archive_legislative.py
+@@ -7,6 +7,7 @@
+ _admission_directions=SA.scoring_directions(_admissions)
+ from legislation import official_membership_movements as OM
+ from legislation.congress_bill_repository import parse_bill_identity
++from legislation import sponsor_column as SC
+ _movement_index=OM.index(OM.load(MB_ROOT))
+ from members.member_identity import Resolver
+ sys.stdout.reconfigure(encoding='utf-8',errors='replace')
+@@ -48,6 +49,8 @@
+     membership=text_column('Record Type').eq('membership')
+     return eligible & verified & membership
+ A=pd.read_excel(sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1],sheet_name='All Bills')
++_archive_rows=len(A)   # only the archive rows carry the bill-level Sponsor column;
++                       # sentinel and manual evidence arrive with that cell blank.
+ # The verified sentinel is persisted to the canonical workbook before this
+ # producer runs.  Consume that worksheet, not the transient collector JSONL,
+ # so the Excel bill ledger and every downstream label share one source of
+@@ -160,11 +163,27 @@
+     if value is None or pd.isna(value): return None
+     if isinstance(value,(int,float,str,bool)): return value
+     return str(value)
++# 2026-09-19 (Paul-approved): the archive names a bill-level Sponsor on EVERY row and this
++# producer never read it, so a named sponsor who holds no member row in a scoring cell
++# reached the stance matrix nowhere -- Tim Scott x Member Business Lending was published at
++# 10.76 with +6.24 missing, 58% of the cell (F1 receipt
++# audits/laundry_list_closeout_20260918/F1/receipts/s3_s4_missing_weight.txt). The rows are
++# injected HERE, before the loop, so official-membership eligibility, category routing,
++# sign, decay and strongest-role-wins all judge them unchanged: a sponsor the sentinel
++# already supplies dedups away instead of double-counting. LEG_SPONSOR_FROM_COLUMN=0
++# restores the pre-fix behaviour exactly (nothing synthesised, nothing appended).
++_sponsor_column_rows=SC.sponsor_rows_from_column(
++    A.iloc[:_archive_rows].to_dict('records'),matchmember,seccat,BR._congress)
++if _sponsor_column_rows:
++    A=pd.concat([A,pd.DataFrame(_sponsor_column_rows)],ignore_index=True)
++print('archive Sponsor-column sponsor rows synthesised: %d (LEG_SPONSOR_FROM_COLUMN)'%len(_sponsor_column_rows))
+ for _idx,r in A.iterrows():
+     audit={'source_row':int(_idx)+2,'member_source':_clean(r.get('Member')),
+            'bill':_clean(r.get('Name')),'congress':_clean(r.get('Congress')),
+            'title':_clean(r.get('Title')),'source_section':_clean(r.get('Section')),
+            'source_role':_clean(r.get('Role')),'tracker_status':_clean(r.get('LastAction'))}
++    _evidence_source=_clean(r.get(SC.SOURCE_COLUMN))   # set only on synthesised rows
++    if _evidence_source: audit['evidence_source']=_evidence_source
+     cat=seccat(r['Section'])
+     if not cat:
+         audit['disposition']='unknown-section'; routing_rows.append(audit); continue
+diff --git a/fec/tests/legislation/test_sponsor_column_producer_wiring.py b/fec/tests/legislation/test_sponsor_column_producer_wiring.py
+new file mode 100644
+--- /dev/null
++++ b/fec/tests/legislation/test_sponsor_column_producer_wiring.py
+@@ -0,0 +1,122 @@
++# -*- coding: utf-8 -*-
++"""The producer really is wired to the bill-level Sponsor column, and to its dial.
++
++build_archive_legislative.py cannot be imported to check this -- importing it reads the
++archive workbook and overwrites archive_leg.json and legislation_routing_audit.json -- so
++the wiring is asserted against the producer's SOURCE TEXT, the same technique
++test_bill_collision_guards.py and test_sentinel_bill_workbook_sync.py already use on this
++file.  sponsor_column.py itself is pure and is imported normally.
++
++What this guards: a helper that ships with nobody calling it is indistinguishable from a
++helper that was never written, and a hook placed AFTER the row loop (or inside it) would
++bypass every gate the rows are supposed to face.  Position, not just presence, is asserted.
++"""
++import os
++import sys
++import traceback
++
++
++FEC = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++ROOT = os.path.dirname(FEC)
++sys.path.insert(0, FEC)
++
++from legislation import sponsor_column as SC  # noqa: E402
++
++PRODUCER = os.path.join(FEC, 'legislation', 'build_archive_legislative.py')
++with open(PRODUCER, encoding='utf-8') as _handle:
++    SOURCE = _handle.read()
++
++ROW_LOOP = 'for _idx,r in A.iterrows():'
++ARCHIVE_READ = "A=pd.read_excel(sorted(glob.glob(MB_ROOT+r'\\congress_bills_archive_*.xlsx'))[-1]"
++CALL = '_sponsor_column_rows=SC.sponsor_rows_from_column('
++
++
++def test_the_producer_imports_the_helper():
++    assert 'from legislation import sponsor_column as SC' in SOURCE
++
++
++def test_the_producer_calls_the_helper_exactly_once():
++    assert SOURCE.count('SC.sponsor_rows_from_column(') == 1, SOURCE.count(
++        'SC.sponsor_rows_from_column(')
++    assert CALL in SOURCE
++
++
++def test_the_helper_is_handed_the_producers_own_rules():
++    # Not re-derived copies: the Resolver, the category map and the Congress normaliser the
++    # row loop itself uses, so a synthesised row can never resolve to a different member.
++    assert "A.iloc[:_archive_rows].to_dict('records'),matchmember,seccat,BR._congress" in SOURCE
++
++
++def test_only_the_archive_slice_is_searched_for_sponsors():
++    # The bill-level Sponsor column exists only on archive rows; sentinel and manual
++    # evidence is concatenated with that cell blank.
++    assert '_archive_rows=len(A)' in SOURCE
++    assert SOURCE.index(ARCHIVE_READ) < SOURCE.index('_archive_rows=len(A)') < SOURCE.index(CALL)
++
++
++def test_the_rows_are_injected_before_the_row_loop_so_every_gate_still_judges_them():
++    assert 'A=pd.concat([A,pd.DataFrame(_sponsor_column_rows)],ignore_index=True)' in SOURCE
++    assert SOURCE.index(CALL) < SOURCE.index(ROW_LOOP)
++    assert SOURCE.index('A=pd.concat([A,pd.DataFrame(_sponsor_column_rows)]') < SOURCE.index(ROW_LOOP)
++    # Top-level, not nested inside the loop or a function.
++    assert ('\n' + CALL) in SOURCE
++
++
++def test_the_frame_assembly_the_hook_extends_is_untouched():
++    # Negative control: the sentinel concat and the fail-closed letters floor are exactly
++    # where they were, so this fix cannot be the reason either one moved.
++    assert 'A=pd.concat([A,_verified[A.columns]],ignore_index=True)' in SOURCE
++    assert '_LTR_MIN_ROWS, _LTR_MIN_IDS, _LTR_MIN_MEMBERS = 296, 7, 251' in SOURCE
++    assert SOURCE.index('A=pd.concat([A,_verified[A.columns]]') < SOURCE.index(CALL)
++
++
++def test_the_routing_audit_carries_the_provenance_marker():
++    assert 'r.get(SC.SOURCE_COLUMN)' in SOURCE, 'the audit must read the helper constant'
++    assert "audit['evidence_source']=_evidence_source" in SOURCE
++    assert (SOURCE.index("'tracker_status':_clean(r.get('LastAction'))}")
++            < SOURCE.index("audit['evidence_source']=_evidence_source")
++            < SOURCE.index("cat=seccat(r['Section'])"))
++
++
++def test_the_marker_is_recorded_only_on_the_rows_that_carry_it():
++    # Guarded by a truth test, so rows the archive already held add no key and an audit
++    # written with the dial off stays byte-identical to the pre-fix one.
++    assert 'if _evidence_source: audit' in SOURCE
++
++
++def test_the_dial_is_named_in_the_producer_and_defaults_to_the_fix():
++    assert SC.DIAL == 'LEG_SPONSOR_FROM_COLUMN'
++    assert SC.DIAL in SOURCE
++    assert SC.enabled({}) is True
++    assert SC.enabled({SC.DIAL: '0'}) is False
++    assert SC.SOURCE == 'archive-sponsor-column'
++
++
++def test_the_producer_never_reads_the_dial_itself():
++    # One authority for the dial: sponsor_column.enabled. A second os.environ read in the
++    # producer is how HALF and HALFF drifted apart; the producer may only NAME the dial in
++    # its comment, and the helper decides.
++    assert "environ.get('LEG_SPONSOR_FROM_COLUMN'" not in SOURCE
++    assert "environ['LEG_SPONSOR_FROM_COLUMN']" not in SOURCE
++    assert 'SC.enabled(' not in SOURCE
++
++
++def main():
++    tests = [fn for name, fn in sorted(globals().items())
++             if name.startswith('test_') and callable(fn)]
++    passed = failed = 0
++    for fn in tests:
++        try:
++            fn()
++            passed += 1
++            print('PASS %s' % fn.__name__)
++        except BaseException:
++            failed += 1
++            print('FAIL %s' % fn.__name__)
++            traceback.print_exc()
++    print('test_sponsor_column_producer_wiring: %d passed, %d failed' % (passed, failed))
++    return 1 if failed else 0
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())

@@ -1,0 +1,92 @@
+============================================================================================
+STAGE 0  copy the live database into SCRATCH twice (live opened read-only)
+============================================================================================
+copy of 481439744 bytes x2                 : 1.2s
+live    sha256 0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+work    sha256 0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee  (equal to live: True)
+backup  sha256 0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee  (equal to live: True)
+content digest of 14 tables / 270489 speeches rows : 4.8s
+
+============================================================================================
+STAGE 1  --apply on the WORK COPY
+============================================================================================
+elapsed: 23.1s
+{
+ "already_migrated": 0,
+ "chars_removed": 2103770,
+ "rows_after": 270489,
+ "rows_deleted": 0,
+ "rows_inserted": 0,
+ "rows_skipped": 800,
+ "rows_truncated": 5484,
+ "skipped_credit_union_stance_channel_row": 19,
+ "skipped_kept_text_under_min_turn_words": 674,
+ "skipped_label_or_gold_record_points_here": 107,
+ "words_removed": 348132
+}
+work sha256 after apply  96ed7354974fe6e9fb28d945b4b3d8f3924682535aefa088a503a11a1a163cff
+
+-- row count
+   before 270489   after 270489   UNCHANGED: True
+   rowid set identical (nothing inserted, nothing deleted): True
+-- which rows changed
+   rows whose stored tuple changed : 5484
+   ledger rows                     : 5484
+   changed set == ledger set       : True
+   == the migration report         : True
+-- which COLUMNS changed
+   rows where anything other than text/nwords moved : 0  []
+   new text is NOT a prefix of the old text : 0  []
+   nwords != len(text.split())              : 0  []
+   ledger does NOT reconstruct the original : 0  []
+   ledger original_text_sha256 mismatch     : 0  []
+-- every OTHER table
+   cr_fetch_log                       IDENTICAL          before=7426 after=7426
+   cspan_attribution_audit            IDENTICAL          before=862 after=862
+   cspan_fetch_log                    IDENTICAL          before=862 after=862
+   fetch_log                          IDENTICAL          before=214 after=214
+   hearing_antag                      IDENTICAL          before=33955 after=33955
+   hearing_antag2                     IDENTICAL          before=961 after=961
+   hearing_meta                       IDENTICAL          before=7174 after=7174
+   hearing_meta2                      IDENTICAL          before=114 after=114
+   interactions                       IDENTICAL          before=404 after=404
+   iv_fetch_log                       IDENTICAL          before=168979 after=168979
+   members                            IDENTICAL          before=515 after=515
+   posts                              IDENTICAL          before=29780 after=29780
+   speeches                           CHANGED            before=270489 after=270489
+   speeches_turn_split_ledger         NEW (the ledger)   before=0 after=5484
+   yt_fetch_log                       IDENTICAL          before=0 after=0
+
+============================================================================================
+STAGE 2  --restore on the WORK COPY
+============================================================================================
+elapsed: 0.5s
+{
+ "rows_deleted": 0,
+ "rows_restored": 5484
+}
+
+speeches content identical to the pre-apply state : True
+speeches digest  before ('16b1434de4820e85d416b63452419842d8fd599b6b758ddc65b6d2d9ba270184', 270489)
+speeches digest  after  ('16b1434de4820e85d416b63452419842d8fd599b6b758ddc65b6d2d9ba270184', 270489)
+rows still differing after restore (must be 0)    : 0  []
+   cr_fetch_log                       restored identical: True
+   cspan_attribution_audit            restored identical: True
+   cspan_fetch_log                    restored identical: True
+   fetch_log                          restored identical: True
+   hearing_antag                      restored identical: True
+   hearing_antag2                     restored identical: True
+   hearing_meta                       restored identical: True
+   hearing_meta2                      restored identical: True
+   interactions                       restored identical: True
+   iv_fetch_log                       restored identical: True
+   members                            restored identical: True
+   posts                              restored identical: True
+   speeches                           restored identical: True
+   yt_fetch_log                       restored identical: True
+
+work file sha256 after restore  9212937605be0c68487da36dea371680815654fc99b7b58e26a75d88ee8d0bde
+live file sha256 (untouched)    0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee  (live unchanged: True)
+
+TIMINGS  copy 1.2s | digest 4.8s | apply 23.1s | restore 0.5s
+DONE

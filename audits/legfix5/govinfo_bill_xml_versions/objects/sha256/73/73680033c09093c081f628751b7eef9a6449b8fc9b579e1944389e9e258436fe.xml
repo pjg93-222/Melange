@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H7835CBCFC9F54F8C8B3BC6149523CB63" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 7275 IH: VA Preventing Duplicate Payments Act of 2022</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-03-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 7275</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20220329">March 29, 2022</action-date>
+<action-desc><sponsor name-id="L000591">Mrs. Luria</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name>, and in addition to the Committees on <committee-name committee-id="HAS00">Armed Services</committee-name>, <committee-name committee-id="HWM00">Ways and Means</committee-name>, and <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To increase interagency cooperation and coordination and to require policies and procedures to detect and prevent duplicate payments for the same medical services by the Department of Veterans Affairs, Department of Health and Human Services, and Department of Defense, and for other purposes.</official-title>
+</form>
+<legis-body id="H36212104BFBC4ECF9919B1420A27B382" style="OLC">
+<section id="H653044C811C647CFB401BDAF35BAEC41" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>VA Preventing Duplicate Payments Act of 2022</short-title></quote>.</text></section> <section id="H1A1EBAC333854C389E7915DAEE228DA8"><enum>2.</enum><header>Department of Veterans Affairs policies and procedures to detect and prevent duplicate payments for the same medical services</header> <subsection id="H754458E4993E4E60A1CAF837252A33A1"><enum>(a)</enum><header>Policies and procedures required</header> <paragraph id="HF9C47229644C49C5A984E7F630A4AF08"><enum>(1)</enum><header>In general</header><text>The Secretary of Veterans Affairs shall establish policies and procedures for the detection and prevention of duplicate billings and payments by the Secretary of non-Department health care providers under section 1703 of title 38, United States Code, through the comparison of a billing or payment made by the Secretary for a medical service to a billing or payment made for the same medical service by—</text>
+<subparagraph id="H3B761726C8EE4D729F7545982E73B0CC"><enum>(A)</enum><text display-inline="yes-display-inline">the Administrator of the Centers for Medicare &amp; Medicaid Services under the Medicare program under title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395 et seq.</external-xref>); or</text></subparagraph> <subparagraph id="HCBFBF93D30B84340A3B0EB9B40579F25"><enum>(B)</enum><text>the Secretary of Defense under the TRICARE program.</text></subparagraph></paragraph>
+<paragraph id="HA975308F56304D0FB122B3B538822C4C"><enum>(2)</enum><header>Capabilities</header><text>The policies and procedures required under subsection (a) shall include—</text> <subparagraph id="H6ACB1C07C8694304B3EB3CB45C459478"><enum>(A)</enum><text>the capability to use data exchanges; and</text></subparagraph>
+<subparagraph id="H2AE2C40B1F5E4EB0AF2BAE6CBADAA05B"><enum>(B)</enum><text>the capability to access and share the claims and payment data of other programs and agencies, if permitted pursuant to data-matching agreements entered into pursuant to subsection (b).</text></subparagraph></paragraph> <paragraph id="H5B8428C40D7F4FCC993D02244624F76A"><enum>(3)</enum><header>Deadline for implementation</header><text>Not later than 90 days after the date of the enactment of this Act, the Secretary shall establish a plan to comply with the requirements of paragraph (1).</text></paragraph></subsection>
+<subsection id="H9F8D5A64FD4C412EAF4A58E0D08806CC"><enum>(b)</enum><header>Data-Matching agreements</header>
+<paragraph id="HDEB72DA7974F443083908FDB7B9D201F"><enum>(1)</enum><header>Agreements required</header><text>The Secretary of Veterans Affairs, the Secretary of Defense, and the Administrator of the Centers for Medicare &amp; Medicaid Services shall enter into data-matching agreements under which the Secretary of Defense and the Administrator agree to share and match relevant data in the systems of records of the Department of Defense and the Centers for Medicare &amp; Medicaid Services, respectively, with the Secretary of Veterans Affairs for the purpose of implementing the policies and procedures required under subsection (a).</text></paragraph> <paragraph id="H2E615BE1201F4472B47865B1F3F5464B"><enum>(2)</enum><header>Nonapplicability of certain requirements</header><text>Subsection (o) of section 552a of title 5, United States Code, shall not apply to an agreement described in paragraph (1).</text></paragraph></subsection>
+<subsection id="H4210DD3A06E64530B6294968F904BF92"><enum>(c)</enum><header>Implementation of policy</header><text>The Secretary of Veterans Affairs, in coordination with the Secretary of Defense and the Administrator of the Centers for Medicare &amp; Medicaid Services, shall establish and implement policies that—</text> <paragraph id="H4EF7DF5DF349496ABCF5D86913174C4D"><enum>(1)</enum><text>clarify which department or agency is financially responsible in a situation in which an individual is eligible, or potentially eligible, for payment or reimbursement of an expense relating to a medical service under the laws administered by the Secretary of Veterans Affairs and—</text>
+<subparagraph id="H9F82288327D14A1EBF6626F845840107"><enum>(A)</enum><text>the TRICARE program; or</text></subparagraph> <subparagraph id="H1100FC6F835642618E67635F1C7BD4DB"><enum>(B)</enum><text display-inline="yes-display-inline">the Medicare program under title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395 et seq.</external-xref>);</text></subparagraph></paragraph>
+<paragraph id="H2028DD780B74448B9610CDA0FDB84912"><enum>(2)</enum><text>provide for the recoupment of payments if duplicate payments are made for the same medical service.</text></paragraph></subsection> <subsection id="H5619407426D449F48D8E154CBEE12AEE"><enum>(d)</enum><header>Report</header><text>Not later than one year after the date of the enactment of this Act, the Secretary of Veterans Affairs shall submit to the Committees on Veterans’ Affairs of the Senate and the House of Representatives a report that includes each of the following:</text>
+<paragraph id="HA92E3B86C2DA4B2E95A9DF3700DC1AAB"><enum>(1)</enum><text>A description of the progress the Secretary has made in implementing this Act.</text></paragraph> <paragraph id="HBE86D614408F4897AABF9EF85C29A449"><enum>(2)</enum><text>An analysis of the effect of any agreements entered into pursuant to subsection (b) on reducing duplicate payments.</text></paragraph>
+<paragraph id="H5078F7CF829B4BD1A935C4F3247EC744"><enum>(3)</enum><text>Any recommendations of the Secretary for legislative action to eliminate duplicate billing and payment for the same medical services.</text></paragraph></subsection> <subsection id="H60AA72833EFA4BD79D49F2E2B913E480" commented="no"><enum>(e)</enum><header>TRICARE program defined</header><text display-inline="yes-display-inline">The term <quote>TRICARE program</quote> has the meaning given that term in section 1072 of title 10, United States Code.</text></subsection></section>
+</legis-body>
+</bill> 
+
+

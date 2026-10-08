@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H325ED1DBFDCE42B487B26B637BD2996F" public-private="public" key="H" bill-type="olc" stage-count="1">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4481 EH: Small Business 7(a) Loan Agent Transparency Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IB</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 4481</legis-num>
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<legis-type>AN ACT</legis-type>
+<official-title display="yes">To amend the Small Business Act to establish requirements for 7(a) agents, and for other purposes.</official-title>
+</form>
+<legis-body id="HC5C412A3096449C2BD84F4427A9D1F12" style="OLC">
+<section id="H3D8FD700520B47A2A5DC082D6FC0E885" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Small Business 7(a) Loan Agent Transparency Act</short-title></quote>.</text></section> <section id="HF24F81906517476EB93CF18D029A4C24" section-type="subsequent-section"><enum>2.</enum><header>Requirements for 7<enum-in-header>(a)</enum-in-header> agents</header> <subsection id="HA38E51CDB42D434CBAB98E6E64872B28"><enum>(a)</enum><header>Office of Credit Risk Management Duties</header><text display-inline="yes-display-inline">Section 47(b) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/657t">15 U.S.C. 657t(b)</external-xref>) is amended—</text>
+<paragraph id="HFD01B849EFBD42098828823638DCF8EF" commented="no"><enum>(1)</enum><text>in paragraph (2), by striking <quote>and</quote> at the end;</text></paragraph> <paragraph id="HBB50CF93D782481B8828F9D8F39949DD" commented="no"><enum>(2)</enum><text>in paragraph (3), by striking the period and inserting a semicolon; and</text></paragraph>
+<paragraph id="H84ADFF606EA04C81AB8E1D1EC46817E7" commented="no"><enum>(3)</enum><text>by adding at the end the following new paragraph:</text> <quoted-block style="OLC" id="H9A88AC9F99464E6E852DBACA2BC5B1E6" display-inline="no-display-inline"> <paragraph id="HC5D87E84228247A8A4475936AF891256" commented="no"><enum>(4)</enum><text display-inline="yes-display-inline">any 7(a) agent.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection>
+<subsection id="HB5155059CAAE43A49D36FCAA7F14817C"><enum>(b)</enum><header>Enforcement authority</header>
+<paragraph id="H52AF9EA2FBA74755B4AB9597D3799D7D"><enum>(1)</enum><header>Office of Credit Risk Management</header><text>Section 47(e) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/657t">15 U.S.C. 657t(e)</external-xref>) is amended by inserting <quote>or 7(a) agent</quote> after <quote>7(a) lender</quote> each place such term appears.</text></paragraph> <paragraph id="HB331AA5E6C604733BA9B7F28A77ED799"><enum>(2)</enum><header>Lender Oversight Committee</header><text display-inline="yes-display-inline">Section 48(c)(2) of the Small Business Act is amended by striking <quote>and any Lending Partner or Intermediary participant</quote> and inserting <quote>, any 7(a) agent (as defined in section 47), or any Lending Partner or Intermediary participant</quote>.</text></paragraph></subsection>
+<subsection id="H54A6DD7B8700490AA44F7E973BDE2A1D"><enum>(c)</enum><header>Registration system</header><text display-inline="yes-display-inline">Section 47 of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/657t">15 U.S.C. 657t</external-xref>) is amended by adding at the end the following new subsections:</text> <quoted-block style="OLC" id="HE278B1D3D6B94D88898801F03F5DF859" display-inline="no-display-inline"> <subsection id="HE0AD270EC4E24033904F260AF0CB65A0"><enum>(j)</enum><header>Registration system for 7<enum-in-header>(a)</enum-in-header> agents</header> <paragraph id="H790456BCD3894FF2828BA7D9C9789EF4"><enum>(1)</enum><header>In general</header><text>The Director shall establish a registration system for 7(a) agents that assigns a unique identifier to each 7(a) agent and collects data necessary for the Director to submit the report required under paragraph (4).</text></paragraph>
+<paragraph id="H45A0438F59A14EBC969210DBA6C32705"><enum>(2)</enum><header>Requirements</header><text>A 7(a) agent shall—</text> <subparagraph id="H43CCAF50660F446581D08F34B162703E"><enum>(A)</enum><text display-inline="yes-display-inline">register in the system established under paragraph (1) before providing covered services to a lender or applicant; and</text></subparagraph>
+<subparagraph id="HFD3C94D79830456A96B126E91819B03E"><enum>(B)</enum><text>effective 1 year after the date of the enactment of this subsection, submit an annual fee for such registration to the Director.</text></subparagraph></paragraph> <paragraph id="HA67629B86D1B41E485D14977B1378581"><enum>(3)</enum><header>Database</header><text display-inline="yes-display-inline">The Director shall establish and maintain an electronic database of the types of covered services provided by each 7(a) agent.</text></paragraph></subsection>
+<subsection id="HB7F8BA940E604B8E860452794ADE5F2D"><enum>(k)</enum><header>Definitions</header><text display-inline="yes-display-inline">In this section:</text> <paragraph id="HD6341C0DF24D42ACB8A5D07E5DD8060D" commented="no"><enum>(1)</enum><header>7<enum-in-header>(a)</enum-in-header> agent</header><text display-inline="yes-display-inline">The term <term>7(a) agent</term> means a person who provides covered services on behalf of a lender or applicant.</text></paragraph>
+<paragraph id="H42FF8F89F6AB44F0814A776B918C5202" commented="no"><enum>(2)</enum><header>Covered services</header><text display-inline="yes-display-inline">The term <term>covered services</term> means—</text> <subparagraph id="HE9D42988F14F49858D012719F3AE959B" commented="no"><enum>(A)</enum><text>assistance with completing an application for a loan under section 7(a) (including preparing a business plan, cash flow projections, financial statements, and related documents); or </text></subparagraph>
+<subparagraph id="H66BAE349F4A34C51BD8855D02FFC9FC0" commented="no"><enum>(B)</enum><text display-inline="yes-display-inline">consulting, broker, or referral services with respect to a loan under section 7(a).</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H6A082583CD3B408CAB4A53B7AA3D9D96"><enum>(d)</enum><header>Effective date</header><text display-inline="yes-display-inline">This Act and the amendments made by this Act shall take effect 6 months after the date of the enactment of this Act.</text></subsection></section>
+</legis-body><attestation><attestation-group><attestation-date date="20211102" chamber="House">Passed the House of Representatives November 2, 2021.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

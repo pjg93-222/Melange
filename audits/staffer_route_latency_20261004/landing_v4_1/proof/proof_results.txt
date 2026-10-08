@@ -1,0 +1,210 @@
+patch staffer_route_v4_1.patch  tip 19a5c28bc  base content (the v4 tip) 79ef9f1b7  files 11 (10 edits, 1 new)
+PASS  the patch file hashes to the summary value
+PASS  the patch manifest names exactly the files of the patch set
+PASS  the patch manifest and the summary agree on every pre- and post-image hash
+PASS  the patch carries exactly the files that differ between 79ef9f1b7 and the tip (11: 1 added, 10 modified), no deletion and no rename
+
+== 0. every pre-image is LIVE's bytes now, which are landing_v4's post-images
+PASS  saved pre-image hashes to the manifest value  fec/surfaces/staffer_closeness_routes.py
+PASS     and is LIVE's working file now, byte for byte  (76c0347eb942)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (76c0347eb942), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/surfaces/staffer_distinct_routes.py
+PASS     and is LIVE's working file now, byte for byte  (8fab7ea38bc8)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (8fab7ea38bc8), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/surfaces/staffer_live/README.md
+PASS     and is LIVE's working file now, byte for byte  (07a757393a05)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (07a757393a05), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/surfaces/staffer_live/staffer-route.js
+PASS     and is LIVE's working file now, byte for byte  (d5e5ad28823c)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (d5e5ad28823c), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/surfaces/staffer_live_service.py
+PASS     and is LIVE's working file now, byte for byte  (a512c5c7dcfe)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (a512c5c7dcfe), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/surfaces/staffer_routing.py
+PASS     and is LIVE's working file now, byte for byte  (c9b0896a0081)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (c9b0896a0081), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/tests/surfaces/test_staffer_left_out_staff.cjs
+PASS     and is LIVE's working file now, byte for byte  (c34f37e52e63)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (c34f37e52e63), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/tests/surfaces/test_staffer_office_covered_staff.py
+PASS     and is LIVE's working file now, byte for byte  (72323acb4fdb)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (72323acb4fdb), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/tests/surfaces/test_staffer_prewarm.py
+PASS     and is LIVE's working file now, byte for byte  (bf8319795c04)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (bf8319795c04), also byte for byte against its post_images
+PASS  saved pre-image hashes to the manifest value  fec/tests/surfaces/test_staffer_unreachable_hint.py
+PASS     and is LIVE's working file now, byte for byte  (15dbe2ef7359)  from: LIVE working file now = landing_v4 post-image
+PASS     which is landing_v4's post-image (15dbe2ef7359), also byte for byte against its post_images
+
+== 1. apply to a scratch tree of the pre-images, drift against the branch tip (worktree file, and git blob)
+PASS  apply_to() on the scratch tree: ok=True reason='' check_rc=0 apply_rc=0
+PASS  post-image fec/surfaces/staffer_closeness_routes.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/surfaces/staffer_closeness_routes.py                           EOL_ONLY
+PASS  post-image fec/surfaces/staffer_distinct_routes.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/surfaces/staffer_distinct_routes.py                            EOL_ONLY
+PASS  post-image fec/surfaces/staffer_live/README.md hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/surfaces/staffer_live/README.md                                IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_live/staffer-route.js hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/surfaces/staffer_live/staffer-route.js                         IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_live_service.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/surfaces/staffer_live_service.py                               IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_routing.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/surfaces/staffer_routing.py                                    EOL_ONLY
+PASS  post-image fec/tests/surfaces/test_staffer_left_out_staff.cjs hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 EOL_ONLY
+PASS  post-image fec/tests/surfaces/test_staffer_office_covered_staff.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/tests/surfaces/test_staffer_office_covered_staff.py            EOL_ONLY
+PASS  post-image fec/tests/surfaces/test_staffer_prewarm.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/tests/surfaces/test_staffer_prewarm.py                         EOL_ONLY
+PASS  post-image fec/tests/surfaces/test_staffer_request_work_index.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/tests/surfaces/test_staffer_request_work_index.py              EOL_ONLY
+PASS  post-image fec/tests/surfaces/test_staffer_unreachable_hint.py hashes to the manifest value
+PASS  drift post-image vs branch tip (worktree)  fec/tests/surfaces/test_staffer_unreachable_hint.py                EOL_ONLY
+
+   EOL_ONLY explained (an edited file keeps its own terminators, a new file carries the git blob's LF, and the branch worktree holds git-checkout CRLF):
+   - fec/surfaces/staffer_closeness_routes.py
+       pre-image      : size=56426 crlf=968 lf=5 lone_cr=0 class=MIXED
+       post-image     : size=60933 crlf=1045 lf=5 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=60938 crlf=1050 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/surfaces/staffer_distinct_routes.py
+       pre-image      : size=8063 crlf=0 lf=157 lone_cr=0 class=PURE_LF
+       post-image     : size=8175 crlf=0 lf=158 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=8333 crlf=158 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/surfaces/staffer_routing.py
+       pre-image      : size=44816 crlf=691 lf=1 lone_cr=0 class=MIXED
+       post-image     : size=45797 crlf=706 lf=1 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=45798 crlf=707 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/tests/surfaces/test_staffer_left_out_staff.cjs
+       pre-image      : size=26381 crlf=0 lf=320 lone_cr=0 class=PURE_LF
+       post-image     : size=32724 crlf=0 lf=386 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=33110 crlf=386 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/tests/surfaces/test_staffer_office_covered_staff.py
+       pre-image      : size=44324 crlf=0 lf=678 lone_cr=0 class=PURE_LF
+       post-image     : size=53061 crlf=0 lf=802 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=53863 crlf=802 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/tests/surfaces/test_staffer_prewarm.py
+       pre-image      : size=33345 crlf=0 lf=685 lone_cr=0 class=PURE_LF
+       post-image     : size=39000 crlf=0 lf=776 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=39776 crlf=776 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/tests/surfaces/test_staffer_request_work_index.py
+       pre-image      : (new file)
+       post-image     : size=20096 crlf=0 lf=416 lone_cr=0 class=PURE_LF   (the git blob's bytes)
+       branch tip file: size=20512 crlf=416 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   - fec/tests/surfaces/test_staffer_unreachable_hint.py
+       pre-image      : size=31989 crlf=0 lf=558 lone_cr=0 class=PURE_LF
+       post-image     : size=37891 crlf=0 lf=649 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=38540 crlf=649 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+PASS         and the lines equal the tip blob line for line (terminators stripped)
+   verdict counts (worktree): {'EOL_ONLY': 8, 'IDENTICAL_BYTES': 3}
+PASS  drift post-image vs the tip's git blob  fec/surfaces/staffer_closeness_routes.py                           EOL_ONLY
+PASS  drift post-image vs the tip's git blob  fec/surfaces/staffer_distinct_routes.py                            IDENTICAL_BYTES
+PASS  drift post-image vs the tip's git blob  fec/surfaces/staffer_live/README.md                                EOL_ONLY
+PASS  drift post-image vs the tip's git blob  fec/surfaces/staffer_live/staffer-route.js                         EOL_ONLY
+PASS  drift post-image vs the tip's git blob  fec/surfaces/staffer_live_service.py                               EOL_ONLY
+PASS  drift post-image vs the tip's git blob  fec/surfaces/staffer_routing.py                                    EOL_ONLY
+PASS  drift post-image vs the tip's git blob  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 IDENTICAL_BYTES
+PASS  drift post-image vs the tip's git blob  fec/tests/surfaces/test_staffer_office_covered_staff.py            IDENTICAL_BYTES
+PASS  drift post-image vs the tip's git blob  fec/tests/surfaces/test_staffer_prewarm.py                         IDENTICAL_BYTES
+PASS  drift post-image vs the tip's git blob  fec/tests/surfaces/test_staffer_request_work_index.py              IDENTICAL_BYTES
+PASS  drift post-image vs the tip's git blob  fec/tests/surfaces/test_staffer_unreachable_hint.py                IDENTICAL_BYTES
+   verdict counts (blob): {'EOL_ONLY': 5, 'IDENTICAL_BYTES': 6}
+
+== 2. terminator audit (pre-image -> post-image, aligned by the base -> tip line diff)
+PASS  fec/surfaces/staffer_closeness_routes.py                           untouched   962 identical (bytes incl. terminator); changed   11 ->   88 lines at CRLF
+PASS     bare-LF lines 5 -> 5, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_distinct_routes.py                            untouched   155 identical (bytes incl. terminator); changed    2 ->    3 lines at LF
+PASS     bare-LF lines 157 -> 158, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live/README.md                                untouched   118 identical (bytes incl. terminator); changed    2 ->    2 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live/staffer-route.js                         untouched   298 identical (bytes incl. terminator); changed    2 ->    3 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live_service.py                               untouched  2128 identical (bytes incl. terminator); changed   14 ->   33 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_routing.py                                    untouched   686 identical (bytes incl. terminator); changed    6 ->   21 lines at CRLF
+PASS     bare-LF lines 1 -> 1, lone CR 0 -> 0
+PASS  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 untouched   316 identical (bytes incl. terminator); changed    4 ->   70 lines at LF
+PASS     bare-LF lines 320 -> 386, lone CR 0 -> 0
+PASS  fec/tests/surfaces/test_staffer_office_covered_staff.py            untouched   674 identical (bytes incl. terminator); changed    4 ->  128 lines at LF
+PASS     bare-LF lines 678 -> 802, lone CR 0 -> 0
+PASS  fec/tests/surfaces/test_staffer_prewarm.py                         untouched   671 identical (bytes incl. terminator); changed   14 ->  105 lines at LF
+PASS     bare-LF lines 685 -> 776, lone CR 0 -> 0
+PASS  fec/tests/surfaces/test_staffer_unreachable_hint.py                untouched   556 identical (bytes incl. terminator); changed    2 ->   93 lines at LF
+PASS     bare-LF lines 558 -> 649, lone CR 0 -> 0
+
+== 3. the dry run against LIVE itself (read-only): pre-image check, then git apply --check
+PASS  apply_landing.py (dry run) against LIVE: pre-image check passes for all 11 files, git apply --check rc=0 (rc=0)
+PASS  raw `git -c core.autocrlf=false -c core.safecrlf=false apply --check` against LIVE itself passes: rc=0 
+      ok      edit fec/surfaces/staffer_closeness_routes.py                           expected 76c0347eb942  actual 76c0347eb942
+      ok      edit fec/surfaces/staffer_distinct_routes.py                            expected 8fab7ea38bc8  actual 8fab7ea38bc8
+      ok      edit fec/surfaces/staffer_live/README.md                                expected 07a757393a05  actual 07a757393a05
+      ok      edit fec/surfaces/staffer_live/staffer-route.js                         expected d5e5ad28823c  actual d5e5ad28823c
+      ok      edit fec/surfaces/staffer_live_service.py                               expected a512c5c7dcfe  actual a512c5c7dcfe
+      ok      edit fec/surfaces/staffer_routing.py                                    expected c9b0896a0081  actual c9b0896a0081
+      ok      edit fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected c34f37e52e63  actual c34f37e52e63
+      ok      edit fec/tests/surfaces/test_staffer_office_covered_staff.py            expected 72323acb4fdb  actual 72323acb4fdb
+      ok      edit fec/tests/surfaces/test_staffer_prewarm.py                         expected bf8319795c04  actual bf8319795c04
+      ok      new  fec/tests/surfaces/test_staffer_request_work_index.py              expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_unreachable_hint.py                expected 15dbe2ef7359  actual 15dbe2ef7359
+      dry run (git apply --check, read-only): rc=0
+
+== 4. LIVE has not moved from the landing_v4 post-images (read-only)
+   LIVE HEAD 3366a7840; summary recorded 3366a7840 at the cut; 1 commit(s) since the base landing_v4 was cut against (3248a6a02), not a gate:
+      3366a7840 Land the people-network latency work (landing_v2, landing_v3_ids, landing_v4)
+PASS  all 26 files landing_v4 touched (15 edited, 11 new) hold its post-image
+PASS  none of the 1 new files exists in LIVE
+PASS  none of the new paths is tracked in LIVE: []
+
+== 5. rollback paths, on the scratch tree
+PASS  git apply -R of the patch on the post-image tree: rc=0 
+PASS     restored byte-exact  fec/surfaces/staffer_closeness_routes.py
+PASS     restored byte-exact  fec/surfaces/staffer_distinct_routes.py
+PASS     restored byte-exact  fec/surfaces/staffer_live/README.md
+PASS     restored byte-exact  fec/surfaces/staffer_live/staffer-route.js
+PASS     restored byte-exact  fec/surfaces/staffer_live_service.py
+PASS     restored byte-exact  fec/surfaces/staffer_routing.py
+PASS     restored byte-exact  fec/tests/surfaces/test_staffer_left_out_staff.cjs
+PASS     restored byte-exact  fec/tests/surfaces/test_staffer_office_covered_staff.py
+PASS     restored byte-exact  fec/tests/surfaces/test_staffer_prewarm.py
+PASS     restored byte-exact  fec/tests/surfaces/test_staffer_unreachable_hint.py
+PASS     the new files are gone again
+
+== 6. every post-image JavaScript file passes node --check, every Python file compiles (the saved post-images)
+PASS  saved post-image fec/surfaces/staffer_closeness_routes.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_closeness_routes.py 
+PASS  saved post-image fec/surfaces/staffer_distinct_routes.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_distinct_routes.py 
+PASS  saved post-image fec/surfaces/staffer_live/README.md hashes to the manifest value
+PASS  saved post-image fec/surfaces/staffer_live/staffer-route.js hashes to the manifest value
+PASS  node --check (JavaScript)  fec/surfaces/staffer_live/staffer-route.js 
+PASS  saved post-image fec/surfaces/staffer_live_service.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_live_service.py 
+PASS  saved post-image fec/surfaces/staffer_routing.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_routing.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_left_out_staff.cjs hashes to the manifest value
+PASS  node --check (JavaScript)  fec/tests/surfaces/test_staffer_left_out_staff.cjs 
+PASS  saved post-image fec/tests/surfaces/test_staffer_office_covered_staff.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_office_covered_staff.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_prewarm.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_prewarm.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_request_work_index.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_request_work_index.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_unreachable_hint.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_unreachable_hint.py 
+   8 Python files compiled, 2 JavaScript files checked
+
+result: ALL PASS (0 failed checks)

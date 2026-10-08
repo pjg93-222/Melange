@@ -1,0 +1,94 @@
+# 2026-10-03 22:58:32 Eastern Daylight Time: read-only against C:\Users\pgoff\OneDrive\Desktop\Melange Systems. Nothing is written; --apply is not run.
+# patch staffer_route_v4.patch  sha256 35ec5a23470d2107179018170eceeb29872e2cd65b51dc57daee40b6ce54499a
+
+## the tree's git HEAD, and the bytes of the files the patch names against their pre-images
+3248a6a02e42bd23665995e69dc649ac926aab95
+edit fec/staffer_network/closeness_math.py                              tree dc3a630ffaaf  pre-image dc3a630ffaaf  SAME
+edit fec/surfaces/staffer_closeness_routes.py                           tree 02922dffd027  pre-image 02922dffd027  SAME
+edit fec/surfaces/staffer_distinct_routes.py                            tree 41a0edb6e390  pre-image 41a0edb6e390  SAME
+edit fec/surfaces/staffer_live/README.md                                tree 8efd198264c8  pre-image 8efd198264c8  SAME
+edit fec/surfaces/staffer_live/staffer-inventory-worker.js              tree 4a420d5fdff8  pre-image 4a420d5fdff8  SAME
+edit fec/surfaces/staffer_live/staffer-live.js                          tree 5c479e200b84  pre-image 5c479e200b84  SAME
+edit fec/surfaces/staffer_live/staffer-route.js                         tree 77a7c19904f4  pre-image 77a7c19904f4  SAME
+edit fec/surfaces/staffer_live_service.py                               tree f311203438a6  pre-image f311203438a6  SAME
+edit fec/surfaces/staffer_routing.py                                    tree 05fa3f38b029  pre-image 05fa3f38b029  SAME
+edit fec/surfaces/staffer_work_sources.py                               tree a454872caa50  pre-image a454872caa50  SAME
+edit fec/surfaces/test_staffer_closeness_bidirectional.py               tree 85b3eb48eaa8  pre-image 85b3eb48eaa8  SAME
+new  fec/tests/surfaces/staffer_unreachable_hint_contract.cjs           tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_contact_group.py                   tree (absent)  pre-image (absent)  SAME
+edit fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs         tree 900e0523f0da  pre-image 900e0523f0da  SAME
+new  fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_live_query_committee_names.cjs     tree (absent)  pre-image (absent)  SAME
+edit fec/tests/surfaces/test_staffer_live_query_ids.cjs                 tree ed319888f16b  pre-image ed319888f16b  SAME
+new  fec/tests/surfaces/test_staffer_office_covered_staff.py            tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_payroll_people.py                  tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_prewarm.py                         tree (absent)  pre-image (absent)  SAME
+edit fec/tests/surfaces/test_staffer_route_jobs.py                      tree 7fda7c29754f  pre-image 7fda7c29754f  SAME
+edit fec/tests/surfaces/test_staffer_route_models.cjs                   tree 30f80af798a0  pre-image 30f80af798a0  SAME
+new  fec/tests/surfaces/test_staffer_row_equality.py                    tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_unreachable_hint.cjs               tree (absent)  pre-image (absent)  SAME
+new  fec/tests/surfaces/test_staffer_unreachable_hint.py                tree (absent)  pre-image (absent)  SAME
+
+## python scripts/apply_landing.py   (dry run, read-only)
+ok      edit fec/staffer_network/closeness_math.py                              expected dc3a630ffaaf  actual dc3a630ffaaf
+ok      edit fec/surfaces/staffer_closeness_routes.py                           expected 02922dffd027  actual 02922dffd027
+ok      edit fec/surfaces/staffer_distinct_routes.py                            expected 41a0edb6e390  actual 41a0edb6e390
+ok      edit fec/surfaces/staffer_live/README.md                                expected 8efd198264c8  actual 8efd198264c8
+ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js              expected 4a420d5fdff8  actual 4a420d5fdff8
+ok      edit fec/surfaces/staffer_live/staffer-live.js                          expected 5c479e200b84  actual 5c479e200b84
+ok      edit fec/surfaces/staffer_live/staffer-route.js                         expected 77a7c19904f4  actual 77a7c19904f4
+ok      edit fec/surfaces/staffer_live_service.py                               expected f311203438a6  actual f311203438a6
+ok      edit fec/surfaces/staffer_routing.py                                    expected 05fa3f38b029  actual 05fa3f38b029
+ok      edit fec/surfaces/staffer_work_sources.py                               expected a454872caa50  actual a454872caa50
+ok      edit fec/surfaces/test_staffer_closeness_bidirectional.py               expected 85b3eb48eaa8  actual 85b3eb48eaa8
+ok      new  fec/tests/surfaces/staffer_unreachable_hint_contract.cjs           expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_contact_group.py                   expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs         expected 900e0523f0da  actual 900e0523f0da
+ok      new  fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_live_query_committee_names.cjs     expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_live_query_ids.cjs                 expected ed319888f16b  actual ed319888f16b
+ok      new  fec/tests/surfaces/test_staffer_office_covered_staff.py            expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_payroll_people.py                  expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_prewarm.py                         expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_route_jobs.py                      expected 7fda7c29754f  actual 7fda7c29754f
+ok      edit fec/tests/surfaces/test_staffer_route_models.cjs                   expected 30f80af798a0  actual 30f80af798a0
+ok      new  fec/tests/surfaces/test_staffer_row_equality.py                    expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_unreachable_hint.cjs               expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_unreachable_hint.py                expected (absent)  actual (absent)
+dry run (git apply --check, read-only): rc=0
+rc=0
+
+## the same check typed out: git -C <tree> -c core.autocrlf=false -c core.safecrlf=false apply --check staffer_route_v4.patch
+rc=0
+
+## python scripts/rollback_landing.py   (plan, read-only): a tree that has not had this patch applied reports 'already original' and 'already absent'
+already original   fec/staffer_network/closeness_math.py
+already original   fec/surfaces/staffer_closeness_routes.py
+already original   fec/surfaces/staffer_distinct_routes.py
+already original   fec/surfaces/staffer_live/README.md
+already original   fec/surfaces/staffer_live/staffer-inventory-worker.js
+already original   fec/surfaces/staffer_live/staffer-live.js
+already original   fec/surfaces/staffer_live/staffer-route.js
+already original   fec/surfaces/staffer_live_service.py
+already original   fec/surfaces/staffer_routing.py
+already original   fec/surfaces/staffer_work_sources.py
+already original   fec/surfaces/test_staffer_closeness_bidirectional.py
+already absent     fec/tests/surfaces/staffer_unreachable_hint_contract.cjs
+already absent     fec/tests/surfaces/test_staffer_contact_group.py
+already original   fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+already absent     fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs
+already absent     fec/tests/surfaces/test_staffer_left_out_staff.cjs
+already absent     fec/tests/surfaces/test_staffer_live_query_committee_names.cjs
+already original   fec/tests/surfaces/test_staffer_live_query_ids.cjs
+already absent     fec/tests/surfaces/test_staffer_office_covered_staff.py
+already absent     fec/tests/surfaces/test_staffer_payroll_people.py
+already absent     fec/tests/surfaces/test_staffer_prewarm.py
+already original   fec/tests/surfaces/test_staffer_route_jobs.py
+already original   fec/tests/surfaces/test_staffer_route_models.cjs
+already absent     fec/tests/surfaces/test_staffer_row_equality.py
+already absent     fec/tests/surfaces/test_staffer_unreachable_hint.cjs
+already absent     fec/tests/surfaces/test_staffer_unreachable_hint.py
+plan only; rerun with --rollback to restore
+rc=0

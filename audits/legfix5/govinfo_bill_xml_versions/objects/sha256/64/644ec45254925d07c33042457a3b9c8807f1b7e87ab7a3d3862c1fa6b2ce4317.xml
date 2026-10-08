@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H845F18F93144475CB964D51E87D669C4" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 2959 EH: COVID–19 Fraud Prevention Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress>117th CONGRESS</congress> <session>1st Session</session> 
+<legis-num>H. R. 2959</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To establish the Consumer and Investor Fraud Working Group to help protect consumers and investors from fraud during the COVID–19 pandemic, to assist consumers and investors affected by such fraud, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H97ACA3FB9F8343E18192C243E5DD211D" style="OLC"> 
+<section id="HCDBA16B048C64D8ABF1946094123BA29" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>COVID–19 Fraud Prevention Act</short-title></quote>.</text></section> <section id="HC0AE4E8ED02B442A9C2D1F7FB39621AC" section-type="subsequent-section"><enum>2.</enum><header>Consumer and Investor Fraud Working Group</header> <subsection id="H9992CB805E494990B8E09E0BFB92054B"><enum>(a)</enum><header>Establishment</header><text display-inline="yes-display-inline">Not later than the end of the 30-day period beginning on the date of enactment of this Act, the Director of the Bureau of Consumer Financial Protection and the Securities and Exchange Commission shall, jointly, establish a working group to be known as the <quote>Consumer and Investor Fraud Working Group</quote> (the <quote>Working Group</quote>).</text></subsection> 
+<subsection id="HA9F3D66AC65C4DABB8B500A55997C605"><enum>(b)</enum><header>Duties</header><text display-inline="yes-display-inline">The Working Group shall facilitate collaboration between the Bureau of Consumer Financial Protection and the Securities and Exchange Commission on—</text> <paragraph id="H6F8C75E0BEBC47638E468FC51B0690BF"><enum>(1)</enum><text display-inline="yes-display-inline">providing resources to consumers and investors to avoid fraud during the COVID–19 pandemic;</text></paragraph> 
+<paragraph id="H1B51B9926ADE43159463AE3E5443B016"><enum>(2)</enum><text display-inline="yes-display-inline">providing resources, including information on the availability of legal aid resources, to consumers and investors who have been adversely impacted by such fraud; and</text></paragraph> <paragraph id="H8C9A4AFACCBF45BCB663ECFB4348E973"><enum>(3)</enum><text display-inline="yes-display-inline">such other topics as the Working Group determines appropriate.</text></paragraph></subsection> 
+<subsection id="H0EC6D71AC1C242798C800597FFFD50C8"><enum>(c)</enum><header>Coordination with other agencies</header><text display-inline="yes-display-inline">In carrying out the duties described under subsection (b), the Working Group shall coordinate and collaborate with other Federal and State government agencies, as appropriate.</text></subsection> <subsection id="H92B89CEAD4D34DACAAE5C0DF6B5852B1"><enum>(d)</enum><header>Quarterly report</header><text display-inline="yes-display-inline">The Working Group shall issue a quarterly report to the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate on the progress of the Working Group and summarizing—</text> 
+<paragraph id="H42CAC658DE40475ABA39FB8AA1D7209B"><enum>(1)</enum><text>the resources made publicly available to consumers by the Working Group;</text></paragraph> <paragraph id="H2DFCED9B984D4BF5B9C6E548D8B17786"><enum>(2)</enum><text>any public enforcement action taken jointly or individually by any member of the Working Group;</text></paragraph> 
+<paragraph id="H4634CA486B9A4060B6B725389524D392"><enum>(3)</enum><text>the number and description of consumer complaints received by the Bureau of Consumer Financial Protection and the Securities and Exchange Commission regarding fraud related to the COVID–19 pandemic; and</text></paragraph> <paragraph id="HCF08FF09547E4B3E83478A6FE8DB5A1C"><enum>(4)</enum><text>any other actions of the Working Group.</text></paragraph></subsection> 
+<subsection id="HE59E2CEFD1CA4B2C9463F29690090C08"><enum>(e)</enum><header>Sunset</header><text>This section shall cease to have any force or effect on and after December 31, 2022.</text></subsection></section> <section id="H11760B60F18C49A98A25CE535E9C7F59"><enum>3.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage. </text></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20210518" chamber="House">Passed the House of Representatives May 18, 2021.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

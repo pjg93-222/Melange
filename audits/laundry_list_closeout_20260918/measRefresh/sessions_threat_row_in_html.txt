@@ -1,0 +1,16 @@
+make_lobby_network_html.py CHAMPIONS_V2_SECTORS = ("credit_union", "bank", "crypto", "fintech")
+  CHAMPIONS_V2_PAGE_CAP = 15
+  call site: _champions_v2_page_payload(payload, cap=None)
+  call site: _champions_v2_page_payload(champions_v2)
+
+== does the bank-threat row value 3.643101 reach a published surface? ==
+  lobby-network.html             2846642 bytes | {'3.643101': 0, '"threat": 3.643101': 0, 'S000250': 42}
+  lobby-screen.html               109159 bytes | {'3.643101': 0, '"threat": 3.643101': 0, 'S000250': 0}
+  Moneyball.html               106213210 bytes | {'3.643101': 0, '"threat": 3.643101': 0, 'S000250': 174}
+  Moneyball_Email.html          94098576 bytes | {'3.643101': 0, '"threat": 3.643101': 0, 'S000250': 172}
+  cu-member-desk.html           18817886 bytes | {'3.643101': 0, '"threat": 3.643101': 0, 'S000250': 45}
+  Moneyball Dashboard.html      12666388 bytes | {'3.643101': 0, '"threat": 3.643101': 0, 'S000250': 8}
+
+== Sessions' own record inside the published desk payload ==
+  cu-member-desk.html      @13957048    tier=1 tierrank=13 overall_stance=C
+  Moneyball.html           @29428826    tier=1 tierrank=13 overall_stance=C

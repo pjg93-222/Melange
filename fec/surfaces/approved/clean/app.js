@@ -28,7 +28,7 @@ const DESK_TAB_VIEWS=['members','member-bills','efficiency','coalition','compare
 const HEAD_TITLES={influence:'Influence',industry:'Industry',people:'People & connections','research-bills':'Bills',interactions:'Reported interactions',champions:'Champions',forecasts:'Cosponsorship forecast','cu-fintech':'CU × fintech',methods:'Methods'};
 const knownView=v=>Object.prototype.hasOwnProperty.call(HEAD_TITLES,v)||DESK_VIEWS.has(v)||Object.prototype.hasOwnProperty.call(pages,v);const headTitle=v=>Object.prototype.hasOwnProperty.call(HEAD_TITLES,v)?HEAD_TITLES[v]:knownView(v)?'Member desk':'View not found';
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const SECTOR_NAMES={bank:'Bank',credit_union:'Credit union',fintech:'Fintech',crypto:'Crypto',financial_other:'Other finance'};
+const SECTOR_NAMES={bank:'Bank',credit_union:'Credit union',fintech:'Fintech',crypto:'Crypto',telecom:'Telecom',financial_other:'Other finance'};
 const SEARCH_ICON='<svg class="mlk-search__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5"/></svg>',INFO_ICON='<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1"/></svg>';
 const IS_MAC=typeof navigator!=='undefined'&&/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent||'');
 let headInfo=null,searchData=null,searchLoading=null,searchError='',searchTimer2,searchState={rows:[],active:-1};

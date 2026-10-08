@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 138 STAT. ?>
+<?I98 138 STAT. ?>
+<?I99 138 STAT. ?>
+<?I50 PUBLIC LAW 118–192—DEC. 23, 2024?>
+<?I51 PUBLIC LAW 118–192—DEC. 23, 2024?>
+<?I52 PUBLIC LAW 118–192—DEC. 23, 2024?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 118–192: To amend title 5, United States Code, to provide for the halt in pension payments for Members of Congress sentenced for certain offenses, and for other purposes.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>192</docNumber>
+<citableAs>Public Law 118–192</citableAs><citableAs>138 Stat. 2660</citableAs>
+<approvedDate>2024-12-23</approvedDate>
+<dc:date>2024-12-23</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>118</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 118–192—DEC. 23, 2024</centerRunningHead>
+<page identifier="/us/stat/138/2660">138 STAT. 2660</page>
+<dc:type>Public Law</dc:type><docNumber>118–192</docNumber>
+<congress value="118">118th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To amend title 5, United States Code, to provide for the halt in pension payments for Members of Congress sentenced for certain offenses, and for other purposes.<sidenote><p class="centered fontsize8" id="xb548d230-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076"><approvedDate date="2024-12-23">Dec. 23, 2024</approvedDate></p><p class="centered fontsize8" id="xb548d231-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076">[<ref href="/us/bill/118/s/932">S. 932</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xb548d232-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">No Congression-ally Obligated Recurring Revenue Used as Pensions To Incarcerated Officials Now Act.</p></sidenote>
+<section id="d22530e88" identifier="/us/pl/118/192/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xb548d233-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180"><ref href="/us/usc/t5/s101">5 USC 101 note</ref>.</p></sidenote><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">No Congressionally Obligated Recurring Revenue Used as Pensions To Incarcerated Officials Now Act</shortTitle>” or the “<shortTitle role="act">No CORRUPTION Act</shortTitle>”.</content></section>
+<section id="d22530e106" identifier="/us/pl/118/192/s2" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>FORFEITURE OF PENSION.</heading><subsection class="firstIndent0 fontsize10" id="yb5492054-e80e-11f0-a1e4-69761a48a15a" identifier="/us/pl/118/192/s2/a" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><heading class="fontsize10"><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xb5492055-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">Applicability.</p></sidenote><inline class="smallCaps">In General</inline>.—</heading><chapeau><ref href="/us/usc/t5/s8332/o">Section 8332(o) of title 5, United States Code</ref>, <amendingAction type="amend">is amended</amendingAction>—</chapeau><paragraph class="fontsize10" id="yb5492056-e80e-11f0-a1e4-69761a48a15a" identifier="/us/pl/118/192/s2/a/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>by <amendingAction type="redesignate">redesignating</amendingAction> paragraphs (4), (5), and (6) as paragraphs (5), (6), and (7), respectively;</content></paragraph>
+<paragraph class="fontsize10" id="yb5492057-e80e-11f0-a1e4-69761a48a15a" identifier="/us/pl/118/192/s2/a/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>by <amendingAction type="insert">inserting</amendingAction> after paragraph (3) the following:<quotedContent><paragraph class="indentDown1 firstIndent0 fontsize10" id="yb5494768-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="4">“(4)</num><subparagraph class="inline" id="yb5494769-e80e-11f0-a1e4-69761a48a15a"><num value="A">(A) </num><content>Subject to subparagraph (B), an individual convicted of an offense described in paragraph (2) shall not be eligible to receive any payment of an annuity pursuant to the retirement system under this subchapter or chapter 84, except that this sentence applies only to such payments based on service rendered as a Member (irrespective of when rendered).</content></subparagraph>
+<subparagraph class="indentUp0 firstIndent0 fontsize10" id="yb549476a-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><content>If the conviction of an individual described in subparagraph (A) is overturned on appeal by a court of competent jurisdiction, the individual shall receive payments that the individual would have received but for the application of subparagraph (A).</content></subparagraph>
+<subparagraph class="indentUp0 firstIndent0 fontsize10" id="yb549476b-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="C">“(C) </num><content>This paragraph applies only to a conviction that occurs after the date of enactment of the No Congressionally Obligated Recurring Revenue Used as Pensions To Incarcerated Officials Now Act.”</content></subparagraph>
+</paragraph>
+</quotedContent>;</content></paragraph>
+<paragraph class="fontsize10" id="yb549476c-e80e-11f0-a1e4-69761a48a15a" identifier="/us/pl/118/192/s2/a/3" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="3">(3) </num><content>in paragraph (5)(B)(i), as so redesignated, by <amendingAction type="delete">striking</amendingAction> “<quotedText>paragraph (5)</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>paragraph (6)</quotedText>”; and</content></paragraph>
+<paragraph class="fontsize10" id="yb549476d-e80e-11f0-a1e4-69761a48a15a" identifier="/us/pl/118/192/s2/a/4" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="4">(4) </num><content>in paragraph (6), as so redesignated, by <amendingAction type="delete">striking</amendingAction> “<quotedText>paragraph (4)(B)</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>paragraph (5)(B)</quotedText>”.<page identifier="/us/stat/138/2661">138 STAT. 2661</page></content></paragraph>
+</subsection>
+<subsection class="firstIndent0 fontsize10" id="yb549476e-e80e-11f0-a1e4-69761a48a15a" identifier="/us/pl/118/192/s2/b" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">Technical and Conforming Amendment</inline>.—</heading><content><ref href="/us/usc/t38/s719/e/2">Section 719(e)(2) of title 38, United States Code</ref>, <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="delete">striking</amendingAction> “<quotedText>section 8332(o)(5)</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>section 8332(o)(6)</quotedText>”.</content></subsection>
+</section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2024-12-23">December 23, 2024</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/118/s/932">S. 932</ref>:</heading>
+<note>
+<headingText style="-uslm-lc:I658032">SENATE REPORTS:</headingText> ┐No. <ref href="/us/srpt/118/37">118–37</ref> (<committee>Comm. on Homeland Security and Governmental Affairs</committee>).
+</note>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD:</heading>
+<subheading style="-uslm-lc:I658033">Vol. 169 (2023):</subheading>
+<p class="indentUp2 firstIndent-1" id="xb549476f-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658034">July 13, considered and passed Senate.</p><subheading style="-uslm-lc:I658033">Vol. 170 (2024):</subheading>
+<p class="indentUp2 firstIndent-1" id="xb5494770-e80e-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658034">Dec. 16, considered and passed House.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

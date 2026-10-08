@@ -1,0 +1,334 @@
+FILE BEFORE = backups\ranks_python.json.PRE-MEMBERSHIP-REFRESH-20260919
+FILE AFTER  = ranks_python.json
+members before/after: 533 / 533
+members only-before: []
+members only-after : []
+
+== leg pillar keys ==
+per-member sub-component fields (legislative_pillar.<field>[<member name>]): ['agenda', 'efficiency', 'pillar', 'agenda_percentile', 'efficiency_percentile']
+global/aggregate fields: ['advancement_rates', 'automatic_bill_effects', 'blend', 'efficiency_weights', 'inputs_sha256', 'policy', 'schema', 'selected_evidence', 'topic_weights', 'unknown_advancement']
+leg percentile that enters the score: pcts[<member>]['leg']
+
+== Q1 how many members had each leg sub-component change ==
+  agenda                   changed for 20 / 533 members
+  efficiency               changed for 1 / 533 members
+  pillar                   changed for 179 / 533 members
+  agenda_percentile        changed for 171 / 533 members
+  efficiency_percentile    changed for 10 / 533 members
+  pcts_leg                 changed for 201 / 533 members
+  pcts['press'] (control)      changed for 0 / 533 members
+  pcts['inf'] (control)      changed for 0 / 533 members
+  pcts['dem'] (control)      changed for 0 / 533 members
+  press_pillar (control)   changed for 0 / 533 members
+  influence_raw_adjusted   changed for 0 / 533 members
+  formal_role_influence    changed for 0 / 533 members
+  score                    changed for 201 / 533 members
+  rank                     changed for 279 / 533 members
+  base_rank                changed for 279 / 533 members
+
+  ab_weights before {'2': 0.45, '3': 0.1, '4': 0.4, '5': 0.05} after {'2': 0.45, '3': 0.1, '4': 0.4, '5': 0.05}
+  scoring_policy same: True
+  blend before [0.7, 0.3] after [0.7, 0.3]
+  topic_weights same: True
+  efficiency_weights same: True
+  selected_evidence 8126 -> 8148
+  automatic_bill_effects len 34 -> 34
+  unknown_advancement    len 365 -> 370
+  policy same: True
+
+== inputs_sha256 (legislative_pillar.inputs_sha256) ==
+  CHANGED  archive_leg.json                             97b94b5e3108d775 -> a45d277607cb1a8f
+  CHANGED  bill_repository_live.json                    d4f63b660d69d09d -> fdb12754f131b9f7
+  SAME     data/engine/sentinel_admission_policy.json   1a52383f43f14ff3 -> 1a52383f43f14ff3
+  CHANGED  legislation_routing_audit.json               7e8419e2014050b9 -> b4f68bbadbf1fddb
+
+== advancement_rates (legislative_pillar.advancement_rates, per category) ==
+  CHANGED Fraud Prevention                 {'Aaron Bean': 1.0, 'Abraham Hamadeh': 0.0, 'Adam Gray': 0.0, 'Adam Schiff': 0.0, 'Adam Smith': 0.0, 'Addison McDowell': 0.0, 'Adelita Grijalva': 0.0, 'Adrian Smith': 0.0, 'Adriano Espaillat': 1.0, 'Al Green': 0.0, 'Alan Armstrong': 0.0, 'Alex Padilla': 0.0, 'Alexandria Ocasio-Cortez': 0.0, 'Alma Adams': 0.0, 'Ami Bera': 1.0, 'Amy Klobuchar': 0.0, 'Analilia Mejia': 0.0, 'Andrea Salinas': 0.0, 'Andrew Clyde': 0.0, 'Andrew Garbarino': 0.0, 'Andrew Ogles': 0.0, 'André Carson': 0.0, 'Andy Barr': 0.4444444444444445, 'Andy Biggs': 0.0, 'Andy Harris': 0.0, 'Andy Kim': 0.0, 'Angela Alsobrooks': 0.0, 'Angie Craig': 0.0, 'Angus King': 0.0, 'Ann Wagner': 0.0, 'Anna Luna': 0.0, 'April McClain Delaney': 0.0, 'Ashley Hinson': 0.0, 'Ashley Moody': 0.0, 'August Pfluger': 0.0, 'Austin Scott': 0.0, 'Ayanna Pressley': 1.0, 'Barry Loudermilk': 0.0, 'Barry Moore': 0.0, 'Becca Balint': 0.0, 'Ben Cline': 0.0, 'Ben Luján': 0.0, 'Bennie Thompson': 0.0, 'Bernard Sanders': 0.0, 'Bernie Moreno': 0.0, 'Beth Van Duyne': 0.0, 'Betty McCollum': 1.0, 'Bill Cassidy': 0.0, 'Bill Foster': 0.4444444444444445, 'Bill Hagerty': 0.0, 'Bill Huizenga': 0.0, 'Blake Moore': 0.0, 'Bonnie Watson Coleman': 1.0, 'Brad Finstad': 0.0, 'Brad Knott': 0.0, 'Brad Sherman': 1.0, 'Bradley Schneider': 0.0, 'Brandon Gill': 0.0, 'Brendan Boyle': 1.0, 'Brett Guthrie': 0.0, 'Brian Babin': 0.0, 'Brian Fitzpatrick': 0.0, 'Brian Jack': 0.0, 'Brian Mast': 0.0, 'Brian Schatz': 0.0, 'Brittany Pettersen': 0.0, 'Bruce Westerman': 0.0, 'Bryan Steil': 0.0, 'Burgess Owens': 0.0, 'Byron Donalds': 0.0, 'Carlos Gimenez': 0.0, 'Carol Miller': 0.0, 'Catherine Cortez Masto': 0.0, 'Celeste Maloy': 0.0, 'Charles Fleischmann': 0.0, 'Charles Schumer': 0.0, 'Chellie Pingree': 0.0, 'Chip Roy': 0.0, 'Chris Pappas': 0.0, 'Chris Van Hollen': 0.0, 'Chrissy Houlahan': 1.0, 'Christian Menefee': 0.0, 'Christopher Coons': 0.0, 'Christopher Deluzio': 0.0, 'Christopher Murphy': 0.0, 'Christopher Smith': 0.0, 'Chuck Edwards': 0.0, 'Chuck Grassley': 0.0, 'Cindy Hyde-Smith': 0.0, 'Claudia Tenney': 0.0, 'Clay Fuller': 0.0, 'Clay Higgins': 0.0, 'Cleo Fields': 0.0, 'Cliff Bentz': 0.0, 'Cory Booker': 0.0, 'Cory Mills': 0.0, 'Craig Goldman': 0.0, 'Cynthia Lummis': 0.0, 'Dale Strong': 0.0, 'Dan Crenshaw': 0.0, 'Dan Newhouse': 0.0, 'Dan Sullivan': 0.0, 'Daniel Goldman': 0.0, 'Daniel Meuser': 0.6129032258064516, 'Daniel Webster': 0.0, 'Danny Davis': 0.0, 'Darin LaHood': 0.0, 'Darrell Issa': 0.0, 'Darren Soto': 0.0, 'Dave Min': 0.0, 'David Joyce': 0.4444444444444445, 'David Kustoff': 0.0, 'David McCormick': 0.0, 'David Rouzer': 0.0, 'David Schweikert': 0.0, 'David Taylor': 0.0, 'David Valadao': 0.0, 'Deb Fischer': 0.0, 'Debbie Dingell': 0.5, 'Debbie Wasserman Schultz': 0.0, 'Deborah Ross': 0.0, 'Delia Ramirez': 0.0, 'Derek Schmidt': 0.0, 'Derek Tran': 0.0, 'Derrick Van Orden': 0.0, 'Diana DeGette': 0.5, 'Diana Harshbarger': 0.0, 'Dina Titus': 1.0, 'Don Bacon': 0.0, 'Donald Beyer': 0.4444444444444445, 'Donald Davis': 0.0, 'Donald Norcross': 0.0, 'Doris Matsui': 0.5, 'Dusty Johnson': 0.0, 'Dwight Evans': 1.0, 'Earl Carter': 0.0, 'Ed Case': 1.0, 'Edward Markey': 0.0, 'Eleanor Norton': 1.0, 'Elijah Crane': 0.0, 'Elise Stefanik': 0.0, 'Elissa Slotkin': 1.0, 'Elizabeth Warren': 0.0, 'Emanuel Cleaver': 1.0, 'Emilia Sykes': 0.0, 'Emily Randall': 0.0, 'Eric Burlison': 0.0, 'Eric Crawford': 0.0, 'Eric Schmitt': 0.0, 'Eric Sorensen': 0.0, 'Erin Houchin': 0.0, 'Eugene Vindman': 0.0, 'Frank Lucas': 0.0, 'Frank Mrvan': 0.0, 'Frank Pallone': 0.0, 'Frederica Wilson': 0.0, 'French Hill': 0.0, 'Gabe Amo': 0.0, 'Gabe Evans': 0.0, 'Gabe Vasquez': 0.0, 'Gary Palmer': 0.0, 'Gary Peters': 0.0, 'George Latimer': 0.0, 'George Whitesides': 0.0, 'Gilbert Cisneros': 0.0, 'Glenn Grothman': 0.0, 'Glenn Ivey': 0.0, 'Glenn Thompson': 0.0, 'Grace Meng': 0.0, 'Greg Casar': 0.0, 'Greg Landsman': 0.0, 'Greg Stanton': 1.0, 'Gregory Meeks': 1.0, 'Gregory Murphy': 0.0, 'Gregory Steube': 0.0, 'Gus Bilirakis': 0.0, 'Guy Reschenthaler': 0.4444444444444445, 'Gwen Moore': 1.0, 'Hakeem Jeffries': 1.0, 'Haley Stevens': 1.0, 'Harold Rogers': 0.0, 'Harriet Hageman': 0.0, 'Henry Cuellar': 0.0, 'Henry Johnson': 0.0, 'Herbert Conaway': 0.0, 'Hillary Scholten': 0.0, 'Ilhan Omar': 0.0, 'Jack Bergman': 0.0, 'Jack Reed': 0.0, 'Jacky Rosen': 0.0, 'Jahana Hayes': 1.0, 'Jake Auchincloss': 1.0, 'Jake Ellzey': 0.0, 'James Baird': 0.0, 'James Clyburn': 0.0, 'James Comer': 0.0, 'James Gallagher': 0.0, 'James Himes': 0.26229508196721313, 'James Justice': 0.0, 'James Lankford': 0.0, 'James McGovern': 1.0, 'James Risch': 0.0, 'James Walkinshaw': 0.0, 'Jamie Raskin': 1.0, 'Janelle Bynum': 0.0, 'Janice Schakowsky': 0.5, 'Jared Golden': 0.0, 'Jared Huffman': 1.0, 'Jared Moskowitz': 0.0, 'Jasmine Crockett': 0.0, 'Jason Crow': 1.0, 'Jason Smith': 0.0, 'Jay Obernolte': 0.0, 'Jeanne Shaheen': 0.0, 'Jeff Crank': 0.0, 'Jeff Hurd': 0.0, 'Jeff Merkley': 0.0, 'Jefferson Shreve': 0.0, 'Jefferson Van Drew': 0.0, 'Jennifer Kiggans': 0.0, 'Jennifer McClellan': 0.0, 'Jerrold Nadler': 1.0, 'Jerry Moran': 0.0, 'Jesús García': 1.0, 'Jill Tokuda': 0.0, 'Jim Banks': 0.0, 'Jim Costa': 0.0, 'Jim Jordan': 0.0, 'Jimmy Gomez': 0.0, 'Jimmy Panetta': 1.0, 'Jimmy Patronis': 0.0, 'Joaquin Castro': 0.0, 'Jodey Arrington': 0.0, 'Joe Courtney': 1.0, 'Joe Neguse': 1.0, 'Joe Wilson': 0.0, 'John Barrasso': 0.0, 'John Boozman': 0.0, 'John Carter': 0.0, 'John Cornyn': 0.0, 'John Curtis': 0.0, 'John Fetterman': 0.0, 'John Garamendi': 1.0, 'John Hickenlooper': 0.0, 'John Hoeven': 0.0, 'John James': 0.0, 'John Joyce': 0.0, 'John Kennedy': 0.0, 'John Larson': 0.0, 'John Mannion': 0.0, 'John McGuire': 0.0, 'John Moolenaar': 0.0, 'John Rose': 0.0, 'John Rutherford': 0.0, 'John Thune': 0.0, 'Johnny Olszewski': 0.0, 'Jon Husted': 0.0, 'Jon Ossoff': 0.0, 'Jonathan Jackson': 0.0, 'Joni Ernst': 0.0, 'Joseph Morelle': 1.0, 'Josh Brecheen': 0.0, 'Josh Gottheimer': 0.0, 'Josh Harder': 0.0, 'Josh Hawley': 0.0, 'Josh Riley': 0.0, 'Joyce Beatty': 1.0, 'Juan Ciscomani': 0.0, 'Juan Vargas': 1.0, 'Judy Chu': 0.0, 'Julia Brownley': 1.0, 'Julia Letlow': 0.0, 'Julie Fedorchak': 0.0, 'Julie Johnson': 0.0, 'Kat Cammack': 0.0, 'Katherine Clark': 1.0, 'Kathy Castor': 0.0, 'Katie Britt': 0.0, 'Keith Self': 0.0, 'Kelly Morrison': 0.0, 'Ken Calvert': 0.0, 'Kevin Cramer': 0.0, 'Kevin Hern': 0.0, 'Kevin Kiley': 0.0, 'Kevin Mullin': 0.0, 'Kim Schrier': 0.0, 'Kirsten Gillibrand': 0.0, 'Kristen McDonald Rivet': 0.0, 'Kweisi Mfume': 1.0, 'LaMonica McIver': 1.0, 'Lance Gooden': 0.0, 'Lateefah Simon': 0.0, 'Laura Friedman': 0.0, 'Laura Gillen': 0.0, 'Laurel Lee': 0.0, 'Lauren Boebert': 0.0, 'Lauren Underwood': 0.0, 'Linda Sánchez': 0.0, 'Lindsey Graham': 0.0, 'Lisa Blunt Rochester': 0.3333333333333333, 'Lisa McClain': 0.0, 'Lisa Murkowski': 0.0, 'Lizzie Fletcher': 0.0, 'Lloyd Doggett': 0.0, 'Lloyd Smucker': 0.0, 'Lois Frankel': 1.0, 'Lori Trahan': 0.5, 'Lucy McBath': 0.0, 'Luis Correa': 0.4444444444444445, 'Luz Rivas': 0.0, 'Madeleine Dean': 1.0, 'Maggie Goodlander': 0.0, 'Marc Veasey': 0.0, 'Marcy Kaptur': 0.0, 'Margaret Hassan': 0.0, 'Maria Cantwell': 0.0, 'Maria Salazar': 0.0, 'Mariannette Miller-Meeks': 0.0, 'Marie Gluesenkamp Perez': 0.0, 'Marilyn Strickland': 1.0, 'Mario Diaz-Balart': 0.0, 'Mark Alford': 1.0, 'Mark Amodei': 0.0, 'Mark DeSaulnier': 1.0, 'Mark Harris': 0.0, 'Mark Kelly': 0.736842105263158, 'Mark Messmer': 0.0, 'Mark Pocan': 0.0, 'Mark Takano': 0.0, 'Mark Warner': 0.0, 'Marlin Stutzman': 0.0, 'Marsha Blackburn': 0.0, 'Martin Heinrich': 0.0, 'Mary Miller': 0.0, 'Mary Scanlon': 1.0, 'Matt Van Epps': 0.0, 'Max Miller': 0.0, 'Maxine Dexter': 0.0, 'Maxine Waters': 0.0, 'Maxwell Frost': 0.0, 'Mazie Hirono': 0.0, 'Melanie Stansbury': 0.0, 'Michael Baumgartner': 0.0, 'Michael Bennet': 0.0, 'Michael Cloud': 0.0, 'Michael Guest': 0.0, 'Michael Lawler': 0.0, 'Michael McCaul': 0.0, 'Michael Rulli': 0.0, 'Michael Simpson': 0.0, 'Michael Turner': 0.0, 'Michelle Fischbach': 0.0, 'Mike Bost': 0.0, 'Mike Carey': 0.0, 'Mike Collins': 0.0, 'Mike Crapo': 0.0, 'Mike Ezell': 0.0, 'Mike Flood': 0.0, 'Mike Haridopolos': 0.0, 'Mike Johnson': 0.0, 'Mike Kelly': 0.0, 'Mike Kennedy': 0.0, 'Mike Lee': 0.0, 'Mike Levin': 0.0, 'Mike Quigley': 1.0, 'Mike Rogers': 0.0, 'Mike Rounds': 0.0, 'Mike Thompson': 1.0, 'Mitch McConnell': 0.0, 'Monica De La Cruz': 0.0, 'Morgan Griffith': 0.0, 'Morgan Luttrell': 0.0, 'Morgan McGarvey': 0.0, 'Nancy Mace': 1.0, 'Nancy Pelosi': 0.0, 'Nanette Barragán': 0.0, 'Nathaniel Moran': 0.0, 'Neal Dunn': 0.0, 'Nellie Pou': 0.0, 'Nicholas Begich': 0.0, 'Nicholas Langworthy': 0.0, 'Nick LaLota': 0.0, 'Nicole Malliotakis': 0.0, 'Nikema Williams': 1.0, 'Nikki Budzinski': 0.0, 'Norma Torres': 0.0, 'Nydia Velázquez': 0.4444444444444445, 'Pablo Hernández Rivera': 0.0, 'Pat Fallon': 0.0, 'Pat Harrigan': 0.0, 'Patrick Ryan': 0.0, 'Patty Murray': 0.0, 'Paul Gosar': 0.0, 'Paul Tonko': 0.3333333333333333, 'Pete Aguilar': 0.0, 'Pete Ricketts': 0.0, 'Pete Sessions': 0.0, 'Pete Stauber': 0.0, 'Peter Welch': 0.23529411764705882, 'Pramila Jayapal': 0.0, 'Raja Krishnamoorthi': 1.0, 'Ralph Norman': 0.0, 'Rand Paul': 0.0, 'Randy Feenstra': 0.0, 'Randy Fine': 0.0, 'Randy Weber': 0.0, 'Raphael Warnock': 0.4675324675324676, 'Rashida Tlaib': 0.30769230769230776, 'Raul Ruiz': 0.0, 'Richard Blumenthal': 0.5, 'Richard Durbin': 0.0, 'Richard Hudson': 0.0, 'Richard McCormick': 0.0, 'Richard Neal': 0.0, 'Rick Allen': 0.0, 'Rick Larsen': 0.0, 'Rick Scott': 1.0, 'Riley Moore': 0.0, 'Ritchie Torres': 0.0, 'Ro Khanna': 0.0, 'Robert Aderholt': 0.0, 'Robert Bresnahan': 0.0, 'Robert Garcia': 0.0, 'Robert Latta': 0.0, 'Robert Menendez': 0.0, 'Robert Onder': 0.0, 'Robert Scott': 0.0, 'Robert Wittman': 0.0, 'Robin Kelly': 0.0, 'Roger Marshall': 0.0, 'Roger Wicker': 0.0, 'Roger Williams': 0.5555555555555555, 'Ron Estes': 0.0, 'Ron Johnson': 0.0, 'Ron Wyden': 0.0, 'Ronny Jackson': 0.0, 'Rosa DeLauro': 0.0, 'Ruben Gallego': 1.0, 'Rudy Yakym': 0.0, 'Russ Fulcher': 0.0, 'Russell Fry': 0.0, 'Ryan Mackenzie': 0.0, 'Ryan Zinke': 0.0, 'Salud Carbajal': 1.0, 'Sam Graves': 0.0, 'Sam Liccardo': 0.0, 'Sanford Bishop': 0.0, 'Sara Jacobs': 0.0, 'Sarah Elfreth': 0.0, 'Sarah McBride': 0.0, 'Scott DesJarlais': 0.0, 'Scott Fitzgerald': 0.0, 'Scott Franklin': 0.0, 'Scott Perry': 0.0, 'Scott Peters': 0.5, 'Sean Casten': 1.0, 'Seth Magaziner': 0.0, 'Seth Moulton': 0.0, 'Sharice Davids': 0.0, 'Sheldon Whitehouse': 0.0, 'Shelley Capito': 0.0, 'Sheri Biggs': 0.0, 'Shomari Figures': 0.0, 'Shontel Brown': 0.0, 'Shri Thanedar': 0.0, 'Steny Hoyer': 0.0, 'Stephanie Bice': 0.0, 'Stephen Lynch': 0.0, 'Steve Cohen': 0.0, 'Steve Daines': 0.0, 'Steve Scalise': 0.0, 'Steve Womack': 0.0, 'Steven Horsford': 0.0, 'Suhas Subramanyam': 0.0, 'Summer Lee': 0.0, 'Susan Collins': 1.0, 'Susie Lee': 1.0, 'Suzan DelBene': 1.0, 'Suzanne Bonamici': 1.0, 'Sydney Kamlager-Dove': 0.0, 'Sylvia Garcia': 0.0, 'Tammy Baldwin': 0.0, 'Tammy Duckworth': 0.0, 'Ted Budd': 0.0, 'Ted Cruz': 0.0, 'Ted Lieu': 0.5, 'Teresa Leger Fernandez': 0.0, 'Terri Sewell': 0.0, 'Thom Tillis': 0.0, 'Thomas Kean': 0.0, 'Thomas Massie': 0.0, 'Thomas Suozzi': 0.0, 'Thomas Tiffany': 0.0, 'Tim Burchett': 0.0, 'Tim Kaine': 0.0, 'Tim Moore': 0.0, 'Tim Scott': 1.0, 'Tim Sheehy': 0.0, 'Tim Walberg': 0.0, 'Timothy Kennedy': 0.0, 'Tina Smith': 0.0, 'Todd Young': 0.0, 'Tom Barrett': 0.0, 'Tom Cole': 0.0, 'Tom Cotton': 0.0, 'Tom Emmer': 0.0, 'Tom McClintock': 1.0, 'Tommy Tuberville': 0.0, 'Tony Wied': 0.0, 'Tracey Mann': 0.0, 'Trent Kelly': 0.0, 'Troy Balderson': 0.0, 'Troy Carter': 0.0, 'Troy Downing': 0.0, 'Troy Nehls': 0.0, 'Val Hoyle': 0.0, 'Valerie Foushee': 0.0, 'Vern Buchanan': 0.0, 'Veronica Escobar': 0.0, 'Vicente Gonzalez': 1.0, 'Victoria Spartz': 0.0, 'Vince Fong': 0.0, 'Virginia Foxx': 0.0, 'Warren Davidson': 0.4444444444444445, 'Wesley Bell': 0.0, 'Wesley Hunt': 0.0, 'William Keating': 0.0, 'William Timmons': 0.0, 'Yassamin Ansari': 0.0, 'Young Kim': 0.0, 'Yvette Clarke': 0.3333333333333333, 'Zachary Nunn': 0.0, 'Zoe Lofgren': 0.0} -> {'Aaron Bean': 1.0, 'Abraham Hamadeh': 0.0, 'Adam Gray': 0.0, 'Adam Schiff': 0.0, 'Adam Smith': 0.0, 'Addison McDowell': 0.0, 'Adelita Grijalva': 0.0, 'Adrian Smith': 0.0, 'Adriano Espaillat': 1.0, 'Al Green': 0.0, 'Alan Armstrong': 0.0, 'Alex Padilla': 0.0, 'Alexandria Ocasio-Cortez': 0.0, 'Alma Adams': 0.0, 'Ami Bera': 1.0, 'Amy Klobuchar': 0.0, 'Analilia Mejia': 0.0, 'Andrea Salinas': 0.0, 'Andrew Clyde': 0.0, 'Andrew Garbarino': 0.0, 'Andrew Ogles': 0.0, 'André Carson': 0.0, 'Andy Barr': 0.4444444444444445, 'Andy Biggs': 0.0, 'Andy Harris': 0.0, 'Andy Kim': 0.0, 'Angela Alsobrooks': 0.0, 'Angie Craig': 0.0, 'Angus King': 0.0, 'Ann Wagner': 0.0, 'Anna Luna': 0.0, 'April McClain Delaney': 0.0, 'Ashley Hinson': 0.0, 'Ashley Moody': 0.0, 'August Pfluger': 0.0, 'Austin Scott': 0.0, 'Ayanna Pressley': 1.0, 'Barry Loudermilk': 0.0, 'Barry Moore': 0.0, 'Becca Balint': 0.0, 'Ben Cline': 0.0, 'Ben Luján': 0.0, 'Bennie Thompson': 0.0, 'Bernard Sanders': 0.0, 'Bernie Moreno': 0.0, 'Beth Van Duyne': 0.0, 'Betty McCollum': 1.0, 'Bill Cassidy': 0.0, 'Bill Foster': 0.4444444444444445, 'Bill Hagerty': 0.0, 'Bill Huizenga': 0.0, 'Blake Moore': 0.0, 'Bonnie Watson Coleman': 1.0, 'Brad Finstad': 0.0, 'Brad Knott': 0.0, 'Brad Sherman': 1.0, 'Bradley Schneider': 0.0, 'Brandon Gill': 0.0, 'Brendan Boyle': 1.0, 'Brett Guthrie': 0.0, 'Brian Babin': 0.0, 'Brian Fitzpatrick': 0.0, 'Brian Jack': 0.0, 'Brian Mast': 0.0, 'Brian Schatz': 0.0, 'Brittany Pettersen': 0.0, 'Bruce Westerman': 0.0, 'Bryan Steil': 0.0, 'Burgess Owens': 0.0, 'Byron Donalds': 0.0, 'Carlos Gimenez': 0.0, 'Carol Miller': 0.0, 'Catherine Cortez Masto': 0.0, 'Celeste Maloy': 0.0, 'Charles Fleischmann': 0.0, 'Charles Schumer': 0.0, 'Chellie Pingree': 0.0, 'Chip Roy': 0.0, 'Chris Pappas': 0.0, 'Chris Van Hollen': 0.0, 'Chrissy Houlahan': 1.0, 'Christian Menefee': 0.0, 'Christopher Coons': 0.0, 'Christopher Deluzio': 0.0, 'Christopher Murphy': 0.0, 'Christopher Smith': 0.0, 'Chuck Edwards': 0.0, 'Chuck Grassley': 0.0, 'Cindy Hyde-Smith': 0.0, 'Claudia Tenney': 0.0, 'Clay Fuller': 0.0, 'Clay Higgins': 0.0, 'Cleo Fields': 0.0, 'Cliff Bentz': 0.0, 'Cory Booker': 0.0, 'Cory Mills': 0.0, 'Craig Goldman': 0.0, 'Cynthia Lummis': 0.0, 'Dale Strong': 0.0, 'Dan Crenshaw': 0.0, 'Dan Newhouse': 0.0, 'Dan Sullivan': 0.0, 'Daniel Goldman': 0.0, 'Daniel Meuser': 0.6129032258064516, 'Daniel Webster': 0.0, 'Danny Davis': 0.0, 'Darin LaHood': 0.0, 'Darrell Issa': 0.0, 'Darren Soto': 0.0, 'Dave Min': 0.0, 'David Joyce': 0.4444444444444445, 'David Kustoff': 0.0, 'David McCormick': 0.0, 'David Rouzer': 0.0, 'David Schweikert': 0.0, 'David Taylor': 0.0, 'David Valadao': 0.0, 'Deb Fischer': 0.0, 'Debbie Dingell': 0.5, 'Debbie Wasserman Schultz': 0.0, 'Deborah Ross': 0.0, 'Delia Ramirez': 0.0, 'Derek Schmidt': 0.0, 'Derek Tran': 0.0, 'Derrick Van Orden': 0.0, 'Diana DeGette': 0.5, 'Diana Harshbarger': 0.0, 'Dina Titus': 1.0, 'Don Bacon': 0.0, 'Donald Beyer': 0.4444444444444445, 'Donald Davis': 0.0, 'Donald Norcross': 0.0, 'Doris Matsui': 0.5, 'Dusty Johnson': 0.0, 'Dwight Evans': 1.0, 'Earl Carter': 0.0, 'Ed Case': 1.0, 'Edward Markey': 0.0, 'Eleanor Norton': 1.0, 'Elijah Crane': 0.0, 'Elise Stefanik': 0.0, 'Elissa Slotkin': 1.0, 'Elizabeth Warren': 0.0, 'Emanuel Cleaver': 1.0, 'Emilia Sykes': 0.0, 'Emily Randall': 0.0, 'Eric Burlison': 0.0, 'Eric Crawford': 0.0, 'Eric Schmitt': 0.0, 'Eric Sorensen': 0.0, 'Erin Houchin': 0.0, 'Eugene Vindman': 0.0, 'Frank Lucas': 0.0, 'Frank Mrvan': 0.0, 'Frank Pallone': 0.0, 'Frederica Wilson': 0.0, 'French Hill': 0.0, 'Gabe Amo': 0.0, 'Gabe Evans': 0.0, 'Gabe Vasquez': 0.0, 'Gary Palmer': 0.0, 'Gary Peters': 0.0, 'George Latimer': 0.0, 'George Whitesides': 0.0, 'Gilbert Cisneros': 0.0, 'Glenn Grothman': 0.0, 'Glenn Ivey': 0.0, 'Glenn Thompson': 0.0, 'Grace Meng': 0.0, 'Greg Casar': 0.0, 'Greg Landsman': 0.0, 'Greg Stanton': 1.0, 'Gregory Meeks': 1.0, 'Gregory Murphy': 0.0, 'Gregory Steube': 0.0, 'Gus Bilirakis': 0.0, 'Guy Reschenthaler': 0.4444444444444445, 'Gwen Moore': 1.0, 'Hakeem Jeffries': 1.0, 'Haley Stevens': 1.0, 'Harold Rogers': 0.0, 'Harriet Hageman': 0.0, 'Henry Cuellar': 0.0, 'Henry Johnson': 0.0, 'Herbert Conaway': 0.0, 'Hillary Scholten': 0.0, 'Ilhan Omar': 0.0, 'Jack Bergman': 0.0, 'Jack Reed': 0.0, 'Jacky Rosen': 0.0, 'Jahana Hayes': 1.0, 'Jake Auchincloss': 1.0, 'Jake Ellzey': 0.0, 'James Baird': 0.0, 'James Clyburn': 0.0, 'James Comer': 0.0, 'James Gallagher': 0.0, 'James Himes': 0.4444444444444445, 'James Justice': 0.0, 'James Lankford': 0.0, 'James McGovern': 1.0, 'James Risch': 0.0, 'James Walkinshaw': 0.0, 'Jamie Raskin': 1.0, 'Janelle Bynum': 0.0, 'Janice Schakowsky': 0.5, 'Jared Golden': 0.0, 'Jared Huffman': 1.0, 'Jared Moskowitz': 0.0, 'Jasmine Crockett': 0.0, 'Jason Crow': 1.0, 'Jason Smith': 0.0, 'Jay Obernolte': 0.0, 'Jeanne Shaheen': 0.0, 'Jeff Crank': 0.0, 'Jeff Hurd': 0.0, 'Jeff Merkley': 0.0, 'Jefferson Shreve': 0.0, 'Jefferson Van Drew': 0.0, 'Jennifer Kiggans': 0.0, 'Jennifer McClellan': 0.0, 'Jerrold Nadler': 1.0, 'Jerry Moran': 0.0, 'Jesús García': 1.0, 'Jill Tokuda': 0.0, 'Jim Banks': 0.0, 'Jim Costa': 0.0, 'Jim Jordan': 0.0, 'Jimmy Gomez': 0.0, 'Jimmy Panetta': 1.0, 'Jimmy Patronis': 0.0, 'Joaquin Castro': 0.0, 'Jodey Arrington': 0.0, 'Joe Courtney': 1.0, 'Joe Neguse': 1.0, 'Joe Wilson': 0.0, 'John Barrasso': 0.0, 'John Boozman': 0.0, 'John Carter': 0.0, 'John Cornyn': 0.0, 'John Curtis': 0.0, 'John Fetterman': 0.0, 'John Garamendi': 1.0, 'John Hickenlooper': 0.0, 'John Hoeven': 0.0, 'John James': 0.0, 'John Joyce': 0.0, 'John Kennedy': 0.0, 'John Larson': 0.0, 'John Mannion': 0.0, 'John McGuire': 0.0, 'John Moolenaar': 0.0, 'John Rose': 0.0, 'John Rutherford': 0.0, 'John Thune': 0.0, 'Johnny Olszewski': 0.0, 'Jon Husted': 0.0, 'Jon Ossoff': 0.0, 'Jonathan Jackson': 0.0, 'Joni Ernst': 0.0, 'Joseph Morelle': 1.0, 'Josh Brecheen': 0.0, 'Josh Gottheimer': 0.0, 'Josh Harder': 0.0, 'Josh Hawley': 0.0, 'Josh Riley': 0.0, 'Joyce Beatty': 1.0, 'Juan Ciscomani': 0.0, 'Juan Vargas': 1.0, 'Judy Chu': 0.0, 'Julia Brownley': 1.0, 'Julia Letlow': 0.0, 'Julie Fedorchak': 0.0, 'Julie Johnson': 0.0, 'Kat Cammack': 0.0, 'Katherine Clark': 1.0, 'Kathy Castor': 0.0, 'Katie Britt': 0.0, 'Keith Self': 0.0, 'Kelly Morrison': 0.0, 'Ken Calvert': 0.0, 'Kevin Cramer': 0.0, 'Kevin Hern': 0.0, 'Kevin Kiley': 0.0, 'Kevin Mullin': 0.0, 'Kim Schrier': 0.0, 'Kirsten Gillibrand': 0.0, 'Kristen McDonald Rivet': 0.0, 'Kweisi Mfume': 1.0, 'LaMonica McIver': 1.0, 'Lance Gooden': 0.0, 'Lateefah Simon': 0.0, 'Laura Friedman': 0.0, 'Laura Gillen': 0.0, 'Laurel Lee': 0.0, 'Lauren Boebert': 0.0, 'Lauren Underwood': 0.0, 'Linda Sánchez': 0.0, 'Lindsey Graham': 0.0, 'Lisa Blunt Rochester': 0.3333333333333333, 'Lisa McClain': 0.0, 'Lisa Murkowski': 0.0, 'Lizzie Fletcher': 0.0, 'Lloyd Doggett': 0.0, 'Lloyd Smucker': 0.0, 'Lois Frankel': 1.0, 'Lori Trahan': 0.5, 'Lucy McBath': 0.0, 'Luis Correa': 0.4444444444444445, 'Luz Rivas': 0.0, 'Madeleine Dean': 1.0, 'Maggie Goodlander': 0.0, 'Marc Veasey': 0.0, 'Marcy Kaptur': 0.0, 'Margaret Hassan': 0.0, 'Maria Cantwell': 0.0, 'Maria Salazar': 0.0, 'Mariannette Miller-Meeks': 0.0, 'Marie Gluesenkamp Perez': 0.0, 'Marilyn Strickland': 1.0, 'Mario Diaz-Balart': 0.0, 'Mark Alford': 1.0, 'Mark Amodei': 0.0, 'Mark DeSaulnier': 1.0, 'Mark Harris': 0.0, 'Mark Kelly': 0.736842105263158, 'Mark Messmer': 0.0, 'Mark Pocan': 0.0, 'Mark Takano': 0.0, 'Mark Warner': 0.0, 'Marlin Stutzman': 0.0, 'Marsha Blackburn': 0.0, 'Martin Heinrich': 0.0, 'Mary Miller': 0.0, 'Mary Scanlon': 1.0, 'Matt Van Epps': 0.0, 'Max Miller': 0.0, 'Maxine Dexter': 0.0, 'Maxine Waters': 0.0, 'Maxwell Frost': 0.0, 'Mazie Hirono': 0.0, 'Melanie Stansbury': 0.0, 'Michael Baumgartner': 0.0, 'Michael Bennet': 0.0, 'Michael Cloud': 0.0, 'Michael Guest': 0.0, 'Michael Lawler': 0.0, 'Michael McCaul': 0.0, 'Michael Rulli': 0.0, 'Michael Simpson': 0.0, 'Michael Turner': 0.0, 'Michelle Fischbach': 0.0, 'Mike Bost': 0.0, 'Mike Carey': 0.0, 'Mike Collins': 0.0, 'Mike Crapo': 0.0, 'Mike Ezell': 0.0, 'Mike Flood': 0.0, 'Mike Haridopolos': 0.0, 'Mike Johnson': 0.0, 'Mike Kelly': 0.0, 'Mike Kennedy': 0.0, 'Mike Lee': 0.0, 'Mike Levin': 0.0, 'Mike Quigley': 1.0, 'Mike Rogers': 0.0, 'Mike Rounds': 0.0, 'Mike Thompson': 1.0, 'Mitch McConnell': 0.0, 'Monica De La Cruz': 0.0, 'Morgan Griffith': 0.0, 'Morgan Luttrell': 0.0, 'Morgan McGarvey': 0.0, 'Nancy Mace': 1.0, 'Nancy Pelosi': 0.0, 'Nanette Barragán': 0.0, 'Nathaniel Moran': 0.0, 'Neal Dunn': 0.0, 'Nellie Pou': 0.0, 'Nicholas Begich': 0.0, 'Nicholas Langworthy': 0.0, 'Nick LaLota': 0.0, 'Nicole Malliotakis': 0.0, 'Nikema Williams': 1.0, 'Nikki Budzinski': 0.0, 'Norma Torres': 0.0, 'Nydia Velázquez': 0.4444444444444445, 'Pablo Hernández Rivera': 0.0, 'Pat Fallon': 0.0, 'Pat Harrigan': 0.0, 'Patrick Ryan': 0.0, 'Patty Murray': 0.0, 'Paul Gosar': 0.0, 'Paul Tonko': 0.3333333333333333, 'Pete Aguilar': 0.0, 'Pete Ricketts': 0.0, 'Pete Sessions': 0.0, 'Pete Stauber': 0.0, 'Peter Welch': 0.23529411764705882, 'Pramila Jayapal': 0.0, 'Raja Krishnamoorthi': 1.0, 'Ralph Norman': 0.0, 'Rand Paul': 0.0, 'Randy Feenstra': 0.0, 'Randy Fine': 0.0, 'Randy Weber': 0.0, 'Raphael Warnock': 0.4675324675324676, 'Rashida Tlaib': 0.30769230769230776, 'Raul Ruiz': 0.0, 'Richard Blumenthal': 0.5, 'Richard Durbin': 0.0, 'Richard Hudson': 0.0, 'Richard McCormick': 0.0, 'Richard Neal': 0.0, 'Rick Allen': 0.0, 'Rick Larsen': 0.0, 'Rick Scott': 1.0, 'Riley Moore': 0.0, 'Ritchie Torres': 0.0, 'Ro Khanna': 0.0, 'Robert Aderholt': 0.0, 'Robert Bresnahan': 0.0, 'Robert Garcia': 0.0, 'Robert Latta': 0.0, 'Robert Menendez': 0.0, 'Robert Onder': 0.0, 'Robert Scott': 0.0, 'Robert Wittman': 0.0, 'Robin Kelly': 0.0, 'Roger Marshall': 0.0, 'Roger Wicker': 0.0, 'Roger Williams': 0.5555555555555555, 'Ron Estes': 0.0, 'Ron Johnson': 0.0, 'Ron Wyden': 0.0, 'Ronny Jackson': 0.0, 'Rosa DeLauro': 0.0, 'Ruben Gallego': 1.0, 'Rudy Yakym': 0.0, 'Russ Fulcher': 0.0, 'Russell Fry': 0.0, 'Ryan Mackenzie': 0.0, 'Ryan Zinke': 0.0, 'Salud Carbajal': 1.0, 'Sam Graves': 0.0, 'Sam Liccardo': 0.0, 'Sanford Bishop': 0.0, 'Sara Jacobs': 0.0, 'Sarah Elfreth': 0.0, 'Sarah McBride': 0.0, 'Scott DesJarlais': 0.0, 'Scott Fitzgerald': 0.0, 'Scott Franklin': 0.0, 'Scott Perry': 0.0, 'Scott Peters': 0.5, 'Sean Casten': 1.0, 'Seth Magaziner': 0.0, 'Seth Moulton': 0.0, 'Sharice Davids': 0.0, 'Sheldon Whitehouse': 0.0, 'Shelley Capito': 0.0, 'Sheri Biggs': 0.0, 'Shomari Figures': 0.0, 'Shontel Brown': 0.0, 'Shri Thanedar': 0.0, 'Steny Hoyer': 0.0, 'Stephanie Bice': 0.0, 'Stephen Lynch': 0.0, 'Steve Cohen': 0.0, 'Steve Daines': 0.0, 'Steve Scalise': 0.0, 'Steve Womack': 0.0, 'Steven Horsford': 0.0, 'Suhas Subramanyam': 0.0, 'Summer Lee': 0.0, 'Susan Collins': 1.0, 'Susie Lee': 1.0, 'Suzan DelBene': 1.0, 'Suzanne Bonamici': 1.0, 'Sydney Kamlager-Dove': 0.0, 'Sylvia Garcia': 0.0, 'Tammy Baldwin': 0.0, 'Tammy Duckworth': 0.0, 'Ted Budd': 0.0, 'Ted Cruz': 0.0, 'Ted Lieu': 0.5, 'Teresa Leger Fernandez': 0.0, 'Terri Sewell': 0.0, 'Thom Tillis': 0.0, 'Thomas Kean': 0.0, 'Thomas Massie': 0.0, 'Thomas Suozzi': 0.0, 'Thomas Tiffany': 0.0, 'Tim Burchett': 0.0, 'Tim Kaine': 0.0, 'Tim Moore': 0.0, 'Tim Scott': 1.0, 'Tim Sheehy': 0.0, 'Tim Walberg': 0.0, 'Timothy Kennedy': 0.0, 'Tina Smith': 0.0, 'Todd Young': 0.0, 'Tom Barrett': 0.0, 'Tom Cole': 0.0, 'Tom Cotton': 0.0, 'Tom Emmer': 0.0, 'Tom McClintock': 1.0, 'Tommy Tuberville': 0.0, 'Tony Wied': 0.0, 'Tracey Mann': 0.0, 'Trent Kelly': 0.0, 'Troy Balderson': 0.0, 'Troy Carter': 0.0, 'Troy Downing': 0.0, 'Troy Nehls': 0.0, 'Val Hoyle': 0.0, 'Valerie Foushee': 0.0, 'Vern Buchanan': 0.0, 'Veronica Escobar': 0.0, 'Vicente Gonzalez': 1.0, 'Victoria Spartz': 0.0, 'Vince Fong': 0.0, 'Virginia Foxx': 0.0, 'Warren Davidson': 0.4444444444444445, 'Wesley Bell': 0.0, 'Wesley Hunt': 0.0, 'William Keating': 0.0, 'William Timmons': 0.0, 'Yassamin Ansari': 0.0, 'Young Kim': 0.0, 'Yvette Clarke': 0.3333333333333333, 'Zachary Nunn': 0.0, 'Zoe Lofgren': 0.0}
+  categories before/after: 17 / 17 ; unchanged categories: 16
+
+== Q1 rank movement ==
+  members with rank change: 279 / 533
+  max |rank move|: 68
+
+-- 15 largest UPWARD movers (rank number decreased = better) --
+  Marilyn Strickland         rank  202 ->  180 (-22)
+        agenda                 7.648000000000003 -> 8.948000000000004  (+1.3)
+        pillar                 0.633264 -> 0.683265  (+0.050001)
+        agenda_percentile      0.51315 -> 0.58458  (+0.07143)
+        pcts.leg               0.69736 -> 0.73308  (+0.03572)
+        score                  0.348196514 -> 0.364270514  (+0.016074000)
+  Jahana Hayes               rank  129 ->  111 (-18)
+        agenda                 11.488000000000007 -> 12.788000000000007  (+1.3)
+        pillar                 0.7582629999999999 -> 0.7911630000000001  (+0.0329)
+        agenda_percentile      0.69172 -> 0.73872  (+0.047)
+        pcts.leg               0.79699 -> 0.84022  (+0.04323)
+        score                  0.417338695 -> 0.436792195  (+0.019453500)
+  John Carter                rank  445 ->  427 (-18)
+        agenda                 3.56 -> 3.86  (+0.3)
+        pillar                 0.17894100000000002 -> 0.19341699999999998  (+0.014476)
+        agenda_percentile      0.25563 -> 0.27631  (+0.02068)
+        pcts.leg               0.23496 -> 0.25563  (+0.02067)
+        score                  0.132893500 -> 0.142195000  (+0.009301500)
+  Morgan Griffith            rank  341 ->  326 (-15)
+        agenda                 7.942000000000001 -> 8.242  (+0.3)
+        pillar                 0.376313 -> 0.390789  (+0.014476)
+        agenda_percentile      0.53759 -> 0.55827  (+0.02068)
+        pcts.leg               0.42857 -> 0.453  (+0.02443)
+        score                  0.218308862 -> 0.229302362  (+0.010993500)
+  Thomas Tiffany             rank  512 ->  498 (-14)
+        agenda                 1.2799999999999998 -> 1.5799999999999998  (+0.3)
+        pillar                 0.072366 -> 0.089467  (+0.017101)
+        agenda_percentile      0.10338 -> 0.12781  (+0.02443)
+        pcts.leg               0.09586 -> 0.1203  (+0.02444)
+        score                  0.063738904 -> 0.074736904  (+0.010998000)
+  Adelita Grijalva           rank  525 ->  514 (-11)
+        agenda                 0.6000000000000001 -> 1.35  (+0.75)
+        pillar                 0.049994 -> 0.07762999999999999  (+0.027636)
+        agenda_percentile      0.07142 -> 0.1109  (+0.03948)
+        pcts.leg               0.0639 -> 0.10338  (+0.03948)
+        score                  0.044168500 -> 0.061934500  (+0.017766000)
+  Gregory Murphy             rank  352 ->  341 (-11)
+        agenda                 4.64 -> 4.9399999999999995  (+0.3)
+        pillar                 0.23552199999999998 -> 0.251314  (+0.015792)
+        agenda_percentile      0.33646 -> 0.35902  (+0.02256)
+        pcts.leg               0.29887 -> 0.3139  (+0.01503)
+        score                  0.210766402 -> 0.217529902  (+0.006763500)
+  Michael Rulli              rank  376 ->  368 (-8)
+        agenda                 2.35 -> 2.65  (+0.3)
+        pillar                 0.32105 -> 0.338151  (+0.017101)
+        agenda_percentile      0.17669 -> 0.20112  (+0.02443)
+        pcts.leg               0.37969 -> 0.39473  (+0.01504)
+        score                  0.188377058 -> 0.195145058  (+0.006768000)
+  Julie Fedorchak            rank  461 ->  454 (-7)
+        agenda                 2.75 -> 3.05  (+0.3)
+        pillar                 0.147364 -> 0.159208  (+0.011844)
+        agenda_percentile      0.21052 -> 0.22744  (+0.01692)
+        pcts.leg               0.19736 -> 0.21428  (+0.01692)
+        score                  0.112106791 -> 0.119720791  (+0.007614000)
+  Todd Young                 rank  251 ->  245 (-6)
+        agenda                 4.840000000000001 -> 5.140000000000001  (+0.3)
+        pillar                 0.248682 -> 0.26315099999999997  (+0.014469)
+        agenda_percentile      0.35526 -> 0.37593  (+0.02067)
+        pcts.leg               0.31203 -> 0.32706  (+0.01503)
+        score                  0.302757054 -> 0.309520554  (+0.006763500)
+  Brad Knott                 rank  476 ->  471 (-5)
+        agenda                 1.8 -> 2.1  (+0.3)
+        pillar                 0.10394300000000001 -> 0.11578699999999999  (+0.011844)
+        agenda_percentile      0.14849 -> 0.16541  (+0.01692)
+        pcts.leg               0.13909 -> 0.15601  (+0.01692)
+        score                  0.098200559 -> 0.105814559  (+0.007614000)
+  Jodey Arrington            rank  429 ->  425 (-4)
+        pcts.leg               0.17105 -> 0.17293  (+0.00188)
+        score                  0.141824955 -> 0.142670955  (+0.000846000)
+  Ryan Zinke                 rank  383 ->  379 (-4)
+        agenda                 6.1000000000000005 -> 6.4  (+0.3)
+        pillar                 0.31183599999999995 -> 0.321048  (+0.009212)
+        agenda_percentile      0.44548 -> 0.45864  (+0.01316)
+        pcts.leg               0.37406 -> 0.37781  (+0.00375)
+        score                  0.182544670 -> 0.184232170  (+0.001687500)
+  Dan Newhouse               rank  243 ->  240 (-3)
+        pillar                 0.510519 -> 0.509203  (-0.001316)
+        agenda_percentile      0.44736 -> 0.44548  (-0.00188)
+        pcts.leg               0.5733 -> 0.57518  (+0.00188)
+        score                  0.309857012 -> 0.310703012  (+0.000846000)
+  David McCormick            rank  317 ->  314 (-3)
+        score                  0.236625376 -> 0.236625376  (+0.000000000)   [NO OWN LEG CHANGE]
+
+-- 15 largest DOWNWARD movers (rank number increased = worse) --
+  Tony Wied                  rank  366 ->  434 (+68)
+        agenda                 3.0 -> 1.0  (-2)
+        pillar                 0.156576 -> 0.061838  (-0.094738)
+        agenda_percentile      0.22368 -> 0.08834  (-0.13534)
+        pcts.leg               0.21052 -> 0.08082  (-0.1297)
+        score                  0.197213245 -> 0.138848245  (-0.058365000)
+  Tom McClintock             rank  235 ->  241 (+6)
+        pillar                 0.526689 -> 0.524057  (-0.002632)
+        agenda_percentile      0.3609 -> 0.35714  (-0.00376)
+        pcts.leg               0.59586 -> 0.5921  (-0.00376)
+        score                  0.312352756 -> 0.310660756  (-0.001692000)
+  Brendan Boyle              rank  198 ->  202 (+4)
+        pillar                 0.530637 -> 0.5293209999999999  (-0.001316)
+        agenda_percentile      0.36654 -> 0.36466  (-0.00188)
+        pcts.leg               0.6015 -> 0.59962  (-0.00188)
+        score                  0.350448124 -> 0.349602124  (-0.000846000)
+  Rick Allen                 rank  216 ->  220 (+4)
+        pillar                 0.602625 -> 0.601309  (-0.001316)
+        agenda_percentile      0.57894 -> 0.57706  (-0.00188)
+        pcts.leg               0.66917 -> 0.66541  (-0.00376)
+        score                  0.327955256 -> 0.326263256  (-0.001692000)
+  Adrian Smith               rank  106 ->  109 (+3)
+        pillar                 0.7586419999999998 -> 0.7573259999999999  (-0.001316)
+        agenda_percentile      0.72368 -> 0.7218  (-0.00188)
+        pcts.leg               0.79887 -> 0.79511  (-0.00376)
+        score                  0.440876091 -> 0.439184091  (-0.001692000)
+  Cleo Fields                rank  126 ->  129 (+3)
+        pillar                 0.691348 -> 0.689468  (-0.00188)
+        agenda_percentile      0.64285 -> 0.64097  (-0.00188)
+        efficiency_percentile  0.80451 -> 0.80263  (-0.00188)
+        pcts.leg               0.7406 -> 0.73684  (-0.00376)
+        score                  0.417830246 -> 0.416138246  (-0.001692000)
+  Joaquin Castro             rank  332 ->  335 (+3)
+        pillar                 0.377629 -> 0.37499699999999997  (-0.002632)
+        agenda_percentile      0.53947 -> 0.53571  (-0.00376)
+        pcts.leg               0.43233 -> 0.42857  (-0.00376)
+        score                  0.223582597 -> 0.221890597  (-0.001692000)
+  John Rutherford            rank  122 ->  125 (+3)
+        pcts.leg               0.84022 -> 0.83834  (-0.00188)
+        score                  0.420000700 -> 0.419154700  (-0.000846000)
+  Lucy McBath                rank  459 ->  462 (+3)
+        score                  0.112542256 -> 0.112542256  (+0.000000000)   [NO OWN LEG CHANGE]
+  Marcy Kaptur               rank  426 ->  429 (+3)
+        pillar                 0.24604999999999996 -> 0.24473399999999998  (-0.001316)
+        agenda_percentile      0.3515 -> 0.34962  (-0.00188)
+        pcts.leg               0.30827 -> 0.30639  (-0.00188)
+        score                  0.142571375 -> 0.141725375  (-0.000846000)
+  Mary Scanlon               rank  179 ->  182 (+3)
+        pillar                 0.659584 -> 0.656952  (-0.002632)
+        agenda_percentile      0.55075 -> 0.54699  (-0.00376)
+        pcts.leg               0.71616 -> 0.71052  (-0.00564)
+        score                  0.366471673 -> 0.363933673  (-0.002538000)
+  Michelle Fischbach         rank  278 ->  281 (+3)
+        pillar                 0.39604599999999995 -> 0.39472999999999997  (-0.001316)
+        agenda_percentile      0.56578 -> 0.5639  (-0.00188)
+        pcts.leg               0.4624 -> 0.45864  (-0.00376)
+        score                  0.278788333 -> 0.277096333  (-0.001692000)
+  Mike Kennedy               rank  340 ->  343 (+3)
+        pillar                 0.378945 -> 0.376313  (-0.002632)
+        agenda_percentile      0.54135 -> 0.53759  (-0.00376)
+        pcts.leg               0.43421 -> 0.43045  (-0.00376)
+        score                  0.218535866 -> 0.216843866  (-0.001692000)
+  André Carson               rank  347 ->  349 (+2)
+        pillar                 0.36578499999999997 -> 0.36446899999999993  (-0.001316)
+        agenda_percentile      0.52255 -> 0.52067  (-0.00188)
+        score                  0.213941967 -> 0.213941967  (+0.000000000)   [NO OWN LEG CHANGE]
+  Becca Balint               rank  428 ->  430 (+2)
+        pillar                 0.189469 -> 0.18815299999999996  (-0.001316)
+        agenda_percentile      0.27067 -> 0.26879  (-0.00188)
+        pcts.leg               0.25187 -> 0.25  (-0.00187)
+        score                  0.141994876 -> 0.141153376  (-0.000841500)
+
+== distribution of rank moves ==
+  0: 254 | 1-5: 267 | 6-20: 10 | 21-50: 1 | 51+: 1
+
+== movers whose OWN leg percentile did NOT change (pure displacement) ==
+  count: 151 of 279 movers
+  of those, score identical before/after: 151
+
+== named members (Q3) ==
+  Earl Carter                rank  223 ->  225 | score 0.323284329 -> 0.322438329
+        agenda                 8.526 -> 8.526 
+        efficiency             0.025 -> 0.025 
+        pillar                 0.568412 -> 0.5670959999999999   CHANGED
+        agenda_percentile      0.56954 -> 0.56766   CHANGED
+        efficiency_percentile  0.56578 -> 0.56578 
+        pcts.leg               0.64097 -> 0.63909   CHANGED
+        pcts.press             0.011580735 -> 0.011580735 
+        pcts.inf               0.03887689 -> 0.03887689 
+        pcts.dem               0.36278 -> 0.36278 
+  Jahana Hayes               rank  129 ->  111 | score 0.417338695 -> 0.436792195
+        agenda                 11.488000000000007 -> 12.788000000000007   CHANGED
+        efficiency             0.4 -> 0.4 
+        pillar                 0.7582629999999999 -> 0.7911630000000001   CHANGED
+        agenda_percentile      0.69172 -> 0.73872   CHANGED
+        efficiency_percentile  0.91353 -> 0.91353 
+        pcts.leg               0.79699 -> 0.84022   CHANGED
+        pcts.press             -0.048328166 -> -0.048328166 
+        pcts.inf               0.07775378 -> 0.07775378 
+        pcts.dem               0.64849 -> 0.64849 
+  John Carter                rank  445 ->  427 | score 0.132893500 -> 0.142195000
+        agenda                 3.56 -> 3.86   CHANGED
+        efficiency             0.0 -> 0.0 
+        pillar                 0.17894100000000002 -> 0.19341699999999998   CHANGED
+        agenda_percentile      0.25563 -> 0.27631   CHANGED
+        efficiency_percentile  0.0 -> 0.0 
+        pcts.leg               0.23496 -> 0.25563   CHANGED
+        pcts.press             0.0 -> 0.0 
+        pcts.inf               0.0 -> 0.0 
+        pcts.dem               0.54323 -> 0.54323 
+  Marilyn Strickland         rank  202 ->  180 | score 0.348196514 -> 0.364270514
+        agenda                 7.648000000000003 -> 8.948000000000004   CHANGED
+        efficiency             0.4 -> 0.4 
+        pillar                 0.633264 -> 0.683265   CHANGED
+        agenda_percentile      0.51315 -> 0.58458   CHANGED
+        efficiency_percentile  0.91353 -> 0.91353 
+        pcts.leg               0.69736 -> 0.73308   CHANGED
+        pcts.press             0.01208014 -> 0.01208014 
+        pcts.inf               0.0 -> 0.0 
+        pcts.dem               0.66353 -> 0.66353 
+  Morgan Griffith            rank  341 ->  326 | score 0.218308862 -> 0.229302362
+        agenda                 7.942000000000001 -> 8.242   CHANGED
+        efficiency             0.0 -> 0.0 
+        pillar                 0.376313 -> 0.390789   CHANGED
+        agenda_percentile      0.53759 -> 0.55827   CHANGED
+        efficiency_percentile  0.0 -> 0.0 
+        pcts.leg               0.42857 -> 0.453   CHANGED
+        pcts.press             0.09244106 -> 0.09244106 
+        pcts.inf               0.03887689 -> 0.03887689 
+        pcts.dem               0.01315 -> 0.01315 
+  Tony Wied                  rank  366 ->  434 | score 0.197213245 -> 0.138848245
+        agenda                 3.0 -> 1.0   CHANGED
+        efficiency             0.0 -> 0.0 
+        pillar                 0.156576 -> 0.061838   CHANGED
+        agenda_percentile      0.22368 -> 0.08834   CHANGED
+        efficiency_percentile  0.0 -> 0.0 
+        pcts.leg               0.21052 -> 0.08082   CHANGED
+        pcts.press             0.016920715 -> 0.016920715 
+        pcts.inf               0.228941685 -> 0.228941685 
+        pcts.dem               0.18421 -> 0.18421 
+  Troy Carter                rank  365 ->  364 | score 0.198589062 -> 0.198589062
+        agenda                 5.624000000000001 -> 5.624000000000001 
+        efficiency             0.0 -> 0.0 
+        pillar                 0.289471 -> 0.289471 
+        agenda_percentile      0.41353 -> 0.41353 
+        efficiency_percentile  0.0 -> 0.0 
+        pcts.leg               0.3515 -> 0.3515 
+        pcts.press             0.004273063 -> 0.004273063 
+        pcts.inf               0.03887689 -> 0.03887689 
+        pcts.dem               0.48872 -> 0.48872 
+
+== displacement math for pure-displacement named members ==
+  Troy Carter                score IDENTICAL 0.198589062 | rank 365 -> 364 | neighbours crossing ABOVE: 0 | crossing BELOW: 1
+
+== every member whose pcts.leg changed, sorted by |delta| ==
+  count: 201
+    Tony Wied                  0.21052 -> 0.08082 (-0.1297)  rank 366 -> 434
+    Jahana Hayes               0.79699 -> 0.84022 (+0.04323)  rank 129 -> 111
+    Adelita Grijalva           0.0639 -> 0.10338 (+0.03948)  rank 525 -> 514
+    Marilyn Strickland         0.69736 -> 0.73308 (+0.03572)  rank 202 -> 180
+    Thomas Tiffany             0.09586 -> 0.1203 (+0.02444)  rank 512 -> 498
+    Morgan Griffith            0.42857 -> 0.453 (+0.02443)  rank 341 -> 326
+    John Carter                0.23496 -> 0.25563 (+0.02067)  rank 445 -> 427
+    Brad Knott                 0.13909 -> 0.15601 (+0.01692)  rank 476 -> 471
+    Julie Fedorchak            0.19736 -> 0.21428 (+0.01692)  rank 461 -> 454
+    Michael Rulli              0.37969 -> 0.39473 (+0.01504)  rank 376 -> 368
+    Todd Young                 0.31203 -> 0.32706 (+0.01503)  rank 251 -> 245
+    Gregory Murphy             0.29887 -> 0.3139 (+0.01503)  rank 352 -> 341
+    Young Kim                  0.94736 -> 0.93984 (-0.00752)  rank 33 -> 35
+    Deb Fischer                0.73872 -> 0.74624 (+0.00752)  rank 118 -> 117
+    Mary Scanlon               0.71616 -> 0.71052 (-0.00564)  rank 179 -> 182
+    Rick Allen                 0.66917 -> 0.66541 (-0.00376)  rank 216 -> 220
+    Jesús García               0.81954 -> 0.81578 (-0.00376)  rank 131 -> 132
+    Nicholas Begich            0.45112 -> 0.44736 (-0.00376)  rank 326 -> 328
+    Mark Pocan                 0.24248 -> 0.23872 (-0.00376)  rank 449 -> 449
+    Tom McClintock             0.59586 -> 0.5921 (-0.00376)  rank 235 -> 241
+    Scott Peters               0.82894 -> 0.82518 (-0.00376)  rank 114 -> 115
+    Robert Latta               0.24624 -> 0.24248 (-0.00376)  rank 450 -> 450
+    Randy Weber                0.7218 -> 0.71804 (-0.00376)  rank 191 -> 192
+    Pete Aguilar               0.70112 -> 0.69736 (-0.00376)  rank 189 -> 190
+    Mike Kennedy               0.43421 -> 0.43045 (-0.00376)  rank 340 -> 343
+    Mike Flood                 0.92481 -> 0.92105 (-0.00376)  rank 25 -> 27
+    Michelle Fischbach         0.4624 -> 0.45864 (-0.00376)  rank 278 -> 281
+    Ken Calvert                0.44924 -> 0.44548 (-0.00376)  rank 310 -> 311
+    Kat Cammack                0.38721 -> 0.38345 (-0.00376)  rank 312 -> 313
+    John Hoeven                0.4436 -> 0.43984 (-0.00376)  rank 311 -> 312
+    Joaquin Castro             0.43233 -> 0.42857 (-0.00376)  rank 332 -> 335
+    Cleo Fields                0.7406 -> 0.73684 (-0.00376)  rank 126 -> 129
+    Beth Van Duyne             0.73308 -> 0.72932 (-0.00376)  rank 18 -> 18
+    Andy Biggs                 0.76879 -> 0.77255 (+0.00376)  rank 125 -> 123
+    Andrew Clyde               0.5921 -> 0.59586 (+0.00376)  rank 263 -> 262
+    Adrian Smith               0.79887 -> 0.79511 (-0.00376)  rank 106 -> 109
+    Craig Goldman              0.3139 -> 0.31015 (-0.00375)  rank 356 -> 358
+    Christopher Deluzio        0.31578 -> 0.31203 (-0.00375)  rank 403 -> 403
+    Ryan Zinke                 0.37406 -> 0.37781 (+0.00375)  rank 383 -> 379
+    Janice Schakowsky          0.81578 -> 0.81203 (-0.00375)  rank 95 -> 95
+  ... (full list in q1_pcts_leg_changed.txt)

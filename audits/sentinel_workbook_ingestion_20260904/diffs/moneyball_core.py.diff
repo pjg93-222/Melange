@@ -1,0 +1,12 @@
+--- orig/fec/moneyball_core.py	2026-09-03 20:51:57.474341700 -0400
++++ patched/fec/moneyball_core.py	2026-09-04 02:07:40.575272700 -0400
+@@ -621,7 +621,8 @@
+                 # returns a shorter tuple; pad to the named 13-column bill
+                 # contract instead of treating an omitted empty XML cell as
+                 # corrupt evidence.
+-                if len(r)<13: r=tuple(r)+(None,)*(13-len(r))
++                # Exactly 12 IS that sparse row; anything shorter is a malformed sheet and must still reach the fail-closed IndexError below.
++                if len(r)==12: r=tuple(r)+(None,)
+                 m=roster.get(nrm(r[2]))
+                 if not m: continue
+                 if BR.excluded_bill(r[3],r[9],r[4],r[12]): continue

@@ -1,0 +1,16 @@
+C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py:195: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_z1dts48c\\fec\\_stub_counts\\fetch-congressional-record-py-crec---since.txt' mode='r' encoding='utf-8'>
+  return int(open(path, encoding='utf-8').read().strip() or '0')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+F
+======================================================================
+FAIL: test_T34_crash_after_filing_failure_bypasses_attempt_gap (__main__.RefreshTickTest.test_T34_crash_after_filing_failure_bypasses_attempt_gap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 2004, in test_T34_crash_after_filing_failure_bypasses_attempt_gap
+    self.assertEqual(2, invocations(root, crec))
+AssertionError: 2 != 1
+
+----------------------------------------------------------------------
+Ran 1 test in 3.401s
+
+FAILED (failures=1)

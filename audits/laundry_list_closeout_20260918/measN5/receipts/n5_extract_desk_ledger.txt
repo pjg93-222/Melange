@@ -1,0 +1,11 @@
+bundle: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\member_desk_bundle.json  77552295 bytes  mtime=1789713343.404749
+sha256 = ed5a1bc21d780e26cbabf00e044e61f195e6b055637bf75a13780cf88a9951d2
+top-level keys: 31
+members: 533
+  legislation_culling        {"status": "PASS_PRODUCTION_CULLING_INTEGRATED", "phase": "production", "promotion_performed": true, "counts": {"action_counts": {"exclude_candidate_false_positive": 2505, "exclude_membership_edge_false_positive": 403, "upsert_candidate_memberships": 66, "upsert_membership_edge": 7}, "action_rows_ap
+
+members in bundle = 533 ; displayed bill rows (post-collapse) = 6130 ; members with >=1 = 523
+role histogram of displayed rows: {'original': 2325, 'cosponsor': 3199, 'sponsor': 606}
+congress histogram: {'116': 21, '117': 1593, '118': 2088, '119': 2428}
+
+wrote C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\measN5\desk_ledger_shipped.json (2.2 MB)

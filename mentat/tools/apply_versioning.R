@@ -43,39 +43,24 @@ DBI::dbExecute(connection, "PRAGMA journal_mode = WAL")
 init_schema(connection)
 
 flag_totals <- function(label) {
-  tables <- c("contributions", "corporate_giving")
-  rows <- lapply(tables, function(table) {
-    totals <- DBI::dbGetQuery(
-      connection,
-      paste(
-        "SELECT SUM(superseded_by_amendment) AS superseded,",
-        "SUM(duplicate_filing_version) AS duplicate_filing,",
-        "SUM(duplicate_memo) AS duplicate_memo, COUNT(*) AS rows",
-        "FROM", table
-      )
+  totals <- DBI::dbGetQuery(
+    connection,
+    paste(
+      "SELECT SUM(superseded_by_amendment) AS superseded,",
+      "SUM(duplicate_filing_version) AS duplicate_filing,",
+      "SUM(duplicate_memo) AS duplicate_memo, COUNT(*) AS rows",
+      "FROM contributions"
     )
-    totals$table <- table
-    totals
-  })
-  by_table <- data.table::rbindlist(rows, fill = TRUE)
-  for (index in seq_len(nrow(by_table))) {
-    cat(sprintf(
-      "%-8s table=%-16s rows=%s superseded=%s duplicate_filing=%s duplicate_memo=%s\n",
-      label,
-      by_table$table[[index]],
-      format(by_table$rows[[index]], big.mark = ","),
-      format(by_table$superseded[[index]] %||% 0, big.mark = ","),
-      format(by_table$duplicate_filing[[index]] %||% 0, big.mark = ","),
-      format(by_table$duplicate_memo[[index]] %||% 0, big.mark = ",")
-    ))
-  }
-  list(
-    by_table = by_table,
-    rows = sum(by_table$rows %||% 0),
-    superseded = sum(by_table$superseded %||% 0, na.rm = TRUE),
-    duplicate_filing = sum(by_table$duplicate_filing %||% 0, na.rm = TRUE),
-    duplicate_memo = sum(by_table$duplicate_memo %||% 0, na.rm = TRUE)
   )
+  cat(sprintf(
+    "%-8s rows=%s superseded=%s duplicate_filing=%s duplicate_memo=%s\n",
+    label,
+    format(totals$rows, big.mark = ","),
+    format(totals$superseded %||% 0, big.mark = ","),
+    format(totals$duplicate_filing %||% 0, big.mark = ","),
+    format(totals$duplicate_memo %||% 0, big.mark = ",")
+  ))
+  totals
 }
 
 before <- flag_totals("before")

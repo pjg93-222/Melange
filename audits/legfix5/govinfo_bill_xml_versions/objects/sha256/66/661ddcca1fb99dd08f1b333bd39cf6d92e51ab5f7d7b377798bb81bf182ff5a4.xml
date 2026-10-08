@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HBEEDA3ACA9704732A6A554CEF326D782" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3744 IH: Agriculture Environmental Stewardship Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3744</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190712">July 12, 2019</action-date><action-desc><sponsor name-id="K000188">Mr. Kind</sponsor> (for himself, <cosponsor name-id="R000585">Mr. Reed</cosponsor>, <cosponsor name-id="P000607">Mr. Pocan</cosponsor>, <cosponsor name-id="W000813">Mrs. Walorski</cosponsor>, <cosponsor name-id="W000800">Mr. Welch</cosponsor>, <cosponsor name-id="G000579">Mr. Gallagher</cosponsor>, <cosponsor name-id="P000608">Mr. Peters</cosponsor>, <cosponsor name-id="S001148">Mr. Simpson</cosponsor>, and <cosponsor name-id="C001092">Mr. Collins of New York</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name>, and in addition to the Committee on <committee-name committee-id="HSY00">Science, Space, and Technology</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Internal Revenue Code of 1986 to make qualified biogas property and qualified manure
+			 resource recovery property eligible for the energy credit and to permit
+			 renewable energy bonds to finance qualified biogas property, and for other
+			 purposes.</official-title></form>
+	<legis-body id="H173BE2AE26424A31A8701880D63A872F" style="OLC">
+ <section id="HD22C69C49707472FB750CE5CDCAE49BC" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Agriculture Environmental Stewardship Act of 2019</short-title></quote>.</text> </section><section id="H29E2B3776C7C4374B37A1601854E6A1A"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text>
+ <paragraph id="HECFD7F82E46143DFA8B6BF3566E9EAB4"><enum>(1)</enum><text>Incentives and encouragement for the conservation and appropriate handling of nutrients contained in organic matter are necessary.</text>
+ </paragraph><paragraph id="H3D3587B7633A4D91B6594C524767A4BE"><enum>(2)</enum><text>Biogas systems will save Federal, State, and local taxpayers money by converting waste into useful products, such as fuel, fertilizer, thermal heat, feedstock for hydrogen fuel cells, and renewable chemicals.</text>
+ </paragraph><paragraph id="H882ABEECB978481686D27A265A790F36"><enum>(3)</enum><text>Manure resource recovery systems will save Federal, State, and local taxpayers money by recovering the nutrients contained in organic matter from their source, rather than recovering the nutrients after they have entered landfills or waterways.</text>
+			</paragraph></section><section id="HB49BA0C466AE47628933C256CE85E069" section-type="subsequent-section"><enum>3.</enum><header>Energy credit for qualified biogas property and qualified manure resource recovery property</header>
+ <subsection id="HF17A3310C9984D1A9C6585E225064CF2"><enum>(a)</enum><header>In General</header><text display-inline="yes-display-inline"><external-xref legal-doc="usc" parsable-cite="usc/26/48">Section 48(a)(3)(A)</external-xref> of the Internal Revenue Code of 1986 is amended by striking <quote>or</quote> at the end of clause (vi) and by adding at the end the following new clauses:</text> <quoted-block display-inline="no-display-inline" id="H1B043DDE391E44DFB036A1A7147CD662" style="OLC"> <clause id="HF381E26C698D4BCCABCFCAF8853AEEA9"><enum>(viii)</enum><text display-inline="yes-display-inline">qualified biogas property, or</text>
+ </clause><clause id="H9CA47599018649FEA34589621AAB19EB"><enum>(ix)</enum><text>qualified manure resource recovery property,</text></clause><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection id="HF167AD2C9EA9485985DE2B97D4E061D6"><enum>(b)</enum><header>30-Percent Credit</header><text display-inline="yes-display-inline">Section 48(a)(2)(A)(i) of such Code is amended by striking <quote>and</quote> at the end of subclause (III), by striking <quote>and</quote> at the end of subclause (IV), and by adding at the end the following new subclauses:</text>
+				<quoted-block display-inline="no-display-inline" id="H8FC83DC06D654CDABD64774E55303861" style="OLC">
+ <subclause id="H74D26992EBD141D5A6674C6D40404483"><enum>(V)</enum><text display-inline="yes-display-inline">qualified biogas property, and</text> </subclause><subclause id="H9B2BA43F3C57410E88F079C76CC32E66"><enum>(VI)</enum><text>qualified manure resource recovery property, and</text></subclause><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HB71B85F32E434EE8A91342376979E8BA"><enum>(c)</enum><header>Definitions</header><text>Section 48(c) of such Code is amended by adding at the end the following new paragraphs:</text> <quoted-block display-inline="no-display-inline" id="H60672CEDC3674F5E8B401063E9707B6E" style="OLC"> <paragraph id="H3600158790CD46C08731DE9F27E41B3A"><enum>(5)</enum><header>Qualified biogas property</header> <subparagraph id="HE24D969996CE4D8C8A08E5334FDB759A"><enum>(A)</enum><header>In general</header><text>The term <term>qualified biogas property</term> means property comprising a system which—</text>
+ <clause id="HF7A070E716164D4985A0D41B44C2E828"><enum>(i)</enum><text display-inline="yes-display-inline">uses anaerobic digesters, or other biological, chemical, thermal, or mechanical processes (alone or in combination), to convert biomass (as defined in section 45K(c)(3)) into a gas which consists of not less than 52 percent methane, and</text>
+ </clause><clause id="H5FF266B177404016839C7A44DF8E3D8A"><enum>(ii)</enum><text>captures such gas for use as a fuel.</text> </clause></subparagraph><subparagraph id="H1C9916FC0CE5455B875AB3C1EE42A3B6"><enum>(B)</enum><header>Inclusion of certain cleaning and conditioning equipment</header><text>Such term shall include any property which cleans and conditions the gas referred to in subparagraph (A) for use as a fuel.</text>
+ </subparagraph><subparagraph commented="no" id="HD630EED3D0B44BDD841B3074AA3AB826"><enum>(C)</enum><header>Termination</header><text>No credit shall be determined under this section with respect to any qualified biogas property for any period after December 31, 2021.</text>
+						</subparagraph></paragraph><paragraph id="HCAFFBD90583D4929B17ADE62A164D737"><enum>(6)</enum><header>Qualified manure resource recovery property</header>
+ <subparagraph id="HC5ABD8273DB2495C93BF425CF7EC935D"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">The term <term>qualified manure resource recovery property</term> means property comprising a system which uses physical, biological, chemical, thermal, or mechanical processes to recover the nutrients nitrogen and phosphorus from a non-treated digestate or animal manure by reducing or separating at least 50 percent of the concentration of such nutrients, excluding any reductions during the incineration, storage, composting, or field application of the non-treated digestate or animal manure.</text>
+ </subparagraph><subparagraph id="H2E4DCAA0E62C43C8987EEAD3E7D3D13C"><enum>(B)</enum><header>Inclusion of certain processing equipment</header><text>Such term shall include—</text> <clause id="H4C4A74EF12FB46FA9C593CDD20C45947"><enum>(i)</enum><text>any property which is used to recover the nutrients referred to in subparagraph (A), such as—</text>
+ <subclause id="H5DBA3B7170DA4DC888594A95CC40B145"><enum>(I)</enum><text>biological reactors,</text> </subclause><subclause id="HAF7B9392F5C641C587B3AAFCB7652EC5"><enum>(II)</enum><text>crystallizers,</text>
+ </subclause><subclause id="H31F45B43FF1941F09CCDE70705883A9D"><enum>(III)</enum><text>reverse osmosis membranes and other water purifiers,</text> </subclause><subclause id="H57ED9522C9C84D4C86B9BBA6857A97B4"><enum>(IV)</enum><text>evaporators,</text>
+ </subclause><subclause id="HB5617CDAD80E4945B7A5821D062D81E4"><enum>(V)</enum><text>distillers,</text> </subclause><subclause id="H647811A6D5084810B23C9D89B3B3B73F"><enum>(VI)</enum><text>decanter centrifuges, and</text>
+ </subclause><subclause id="H4BE5AAC9E4D841AE9E9434DF3CB2CFD2"><enum>(VII)</enum><text>equipment that facilitates the process of dissolved air flotation, ammonia stripping, gasification, or ozonation, and</text>
+ </subclause></clause><clause id="H717F8077D89647CB90A344CE12F57963"><enum>(ii)</enum><text>any thermal drier which treats the nutrients recovered by the processes referred to in subparagraph (A).</text>
+ </clause></subparagraph><subparagraph commented="no" id="H3903843CCD984CD6A51BD29A3BD0B164"><enum>(C)</enum><header>Termination</header><text display-inline="yes-display-inline">No credit shall be determined under this section with respect to any qualified manure resource recovery property for any period after December 31, 2021.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H6BBF29B1DCDD4FA6BE976B12A93C6A30"><enum>(d)</enum><header>Denial of Double Benefit for Qualified Biogas Property</header><text>Section 45(e) of such Code is amended by adding at the end the following new paragraph:</text> <quoted-block display-inline="no-display-inline" id="HFC44A8D2603941F99ED664FAAE26D385" style="OLC"> <paragraph id="H6C7E82CF757C471EA0347B198754D835"><enum>(12)</enum><header>Coordination with energy credit for qualified biogas property</header><text display-inline="yes-display-inline">The term <term>qualified facility</term> shall not include any facility which produces electricity from gas produced by qualified biogas property (as defined in section 48(c)(5)) if a credit is determined under section 48 with respect to such property for the taxable year or any prior taxable year.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection commented="no" id="H4333AE373728402F8ADBC8E328739676"><enum>(e)</enum><header>Effective Date</header><text>The amendments made by this section shall apply to periods after December 31, 2018, in taxable years ending after such date, under rules similar to the rules of section 48(m) of such Code (as in effect on the day before the date of the enactment of the Revenue Reconciliation Act of 1990).</text>
+			</subsection></section><section commented="no" id="HB13E87F1BBA14B0192F02AE4823D05A9"><enum>4.</enum><header>Renewable energy bonds relating to biogas property and manure resource recovery property</header>
+ <subsection commented="no" display-inline="no-display-inline" id="HA716F416D73A471C87E8DD4A71D93D41"><enum>(a)</enum><header>In General</header><text display-inline="yes-display-inline">Part IV of subchapter A of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/1">chapter 1</external-xref> of the Internal Revenue Code of 1986 is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H79A0D324884A4E58B9EFA2B4BBC10295" style="OLC">
+					<subpart id="H9A1489A7F5A2435C8351EBB3E93B357F"><enum>H</enum><header>Nonrefundable credit to holders of certain bonds</header>
+						<toc container-level="subpart-container" idref="H9A1489A7F5A2435C8351EBB3E93B357F" lowest-bolded-level="division-lowest-bolded" lowest-level="section" quoted-block="no-quoted-block" regeneration="yes-regeneration">
+							<toc-entry idref="HD78E69BE185941C799232CEA5CD8F17F" level="section">Sec. 54. Credit to holders of qualified renewable energy bonds.</toc-entry>
+						</toc>
+						<section commented="no" id="HD78E69BE185941C799232CEA5CD8F17F"><enum>54.</enum><header>Credit to holders of qualified renewable energy bonds</header>
+							<subsection commented="no" id="H8177706DEA9A44EB9FFB65B4A8A9079E">
+								<enum>(a)</enum>
+								<header>Allowance of Credit</header>
+ <text display-inline="yes-display-inline">If a taxpayer holds a qualified renewable energy bond on one or more credit allowance dates of the bond during any taxable year, there shall be allowed as a credit against the tax imposed by this chapter for the taxable year an amount equal to 70 percent of the sum of the credits determined under subsection (b) with respect to such dates.</text>
+							</subsection><subsection commented="no" display-inline="no-display-inline" id="H51830D26FB804D28850FDF4E7DE32ED4">
+								<enum>(b)</enum>
+								<header>Amount of Credit</header>
+								<paragraph commented="no" id="HF91B047AB2B84147B1B959853BB27342">
+									<enum>(1)</enum>
+									<header>In general</header>
+ <text>The amount of the credit determined under this subsection with respect to any credit allowance date for a qualified renewable energy bond is 25 percent of the annual credit determined with respect to such bond.</text>
+								</paragraph><paragraph commented="no" id="H15FD92F6DE554C49A38225AC29DBFBDC">
+									<enum>(2)</enum>
+									<header>Annual credit</header>
+ <text>The annual credit determined with respect to any qualified renewable energy bond is the product of—</text> <subparagraph commented="no" id="H7551CA1DF6024F44B9A949D8E30FECCF"> <enum>(A)</enum> <text>the applicable credit rate, multiplied by</text>
+									</subparagraph><subparagraph commented="no" id="HB84157DDC18142A3A74C8347C07D7060">
+										<enum>(B)</enum>
+ <text>the outstanding face amount of the bond.</text> </subparagraph></paragraph><paragraph commented="no" id="HCF3FC8D8189E40B9BA900123A5F8B432"> <enum>(3)</enum> <header>Applicable credit rate</header> <text>For purposes of paragraph (2), the applicable credit rate is the rate which the Secretary estimates will permit the issuance of qualified renewable energy bonds with a specified maturity or redemption date without discount and without interest cost to the qualified issuer. The applicable credit rate with respect to any qualified renewable energy bond shall be determined as of the first day on which there is a binding, written contract for the sale or exchange of the bond.</text>
+								</paragraph><paragraph commented="no" id="H1966886B4603410484702EDFE33CA161">
+									<enum>(4)</enum>
+									<header>Special rule for issuance and redemption</header>
+ <text>In the case of a bond which is issued during the 3-month period ending on a credit allowance date, the amount of the credit determined under this subsection with respect to such credit allowance date shall be a ratable portion of the credit otherwise determined based on the portion of the 3-month period during which the bond is outstanding. A similar rule shall apply when the bond is redeemed or matures.</text>
+								</paragraph></subsection><subsection commented="no" id="HB5D05C7919404458B0F531193700844F">
+								<enum>(c)</enum>
+								<header>Limitation based on amount of tax</header>
+								<paragraph commented="no" id="HA917642E53984C15A5CCEC4A390ABC7A">
+									<enum>(1)</enum>
+									<header>In general</header>
+ <text>The credit allowed under subsection (a) for any taxable year shall not exceed the excess of—</text> <subparagraph commented="no" id="HE5F96B00095F490E93111E96ED6CEFA9"> <enum>(A)</enum> <text>the sum of the regular tax liability (as defined in section 26(b)) plus the tax imposed by section 55, over</text>
+									</subparagraph><subparagraph commented="no" id="HA312A64D572F41CA9E50C0A7C5A5B0B3">
+										<enum>(B)</enum>
+ <text>the sum of the credits allowable under this part (other than subpart C and this subpart).</text> </subparagraph></paragraph><paragraph commented="no" id="HC998FCBE96C94DEC8FE7170F506008CA"> <enum>(2)</enum> <header>Carryover of unused credit</header> <text>If the credit allowable under subsection (a) exceeds the limitation imposed by paragraph (1) for such taxable year, such excess shall be carried to the succeeding taxable year and added to the credit allowable under subsection (a) for such taxable year (determined before the application of paragraph (1) for such succeeding taxable year).</text>
+ </paragraph></subsection><subsection commented="no" id="H8367F533EC27446E94A26A242DABF3FC"><enum>(d)</enum><header>Qualified renewable energy bonds</header><text display-inline="yes-display-inline">For purposes of this subpart—</text> <paragraph commented="no" id="HA38D0042FA63483FA861E7CAE1DB67BE"> <enum>(1)</enum> <header>In general</header> <text>The term <term>qualified renewable energy bonds</term> means any bond issued as part of an issue if—</text>
+ <subparagraph id="H3ED44EF2F1F345E6A99764174CE45DFF"><enum>(A)</enum><text>the bond is issued by a qualified issuer pursuant to an allocation by the Secretary to such issuer of a portion of the national renewable energy bond limitation under paragraph (2),</text>
+									</subparagraph><subparagraph id="PB675ED9B4B024AABB806B9527BBF7F7F">
+										<enum>(B)</enum>
+ <text display-inline="yes-display-inline">100 percent of the available project proceeds of such issue are to be used for capital expenditures incurred by a governmental body, public power provider, or cooperative electric company for property owned by the public power provider, a governmental body, or a cooperative electric company, as the case may be, that is—</text>
+ <clause id="HB0DFDC8447C746598DA4D85161D47D1E"><enum>(i)</enum><text>qualified biogas property (as defined in section 48(c)(5)), or</text> </clause><clause id="H18223EDAA6704CC59C225FB22C565137"><enum>(ii)</enum><text>a qualified manure resource recovery property (as defined in section 48(c)(6)),</text>
+										</clause></subparagraph><subparagraph id="P93CDD179E52046389B098F9FA8B1FE27">
+										<enum>(C)</enum>
+ <text>the qualified issuer designates such bond for purposes of this section, and</text> </subparagraph><subparagraph id="PD6F52C775C4847EE9E7F009460ED1054"> <enum>(D)</enum> <text>the issue meets the requirements of this section.</text>
+									</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="H05892B4AED0E4AACAEAB18D65E1E9394"><enum>(2)</enum><header>Limitation on amount of bonds designated</header>
+ <subparagraph commented="no" id="H1AFC1A146F554AC893E8A1A05DADCC6F"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">The maximum aggregate face amount of bonds which may be designated under paragraph (1)(C) by any issuer shall not exceed the limitation amount allocated under this paragraph to such issuer.</text>
+ </subparagraph><subparagraph commented="no" id="HD8992044158E4376AE7D6FA62910CF0E"><enum>(B)</enum><header>National limitation on amount of bonds designated</header><text display-inline="yes-display-inline">There is a national renewable energy bond limitation of $800,000,000 which shall be allocated by the Secretary as provided in subparagraph (C), except that—</text>
+ <clause commented="no" id="H9BA5F8EB2F43406B9C51B176EAD6A246"><enum>(i)</enum><text display-inline="yes-display-inline">not more than 33<fraction>1/3</fraction> percent thereof may be allocated to projects of public power providers,</text> </clause><clause commented="no" id="H740A12A2EE95439AAE31A154BAA14CE4"><enum>(ii)</enum><text display-inline="yes-display-inline">not more than 33<fraction>1/3</fraction> percent thereof may be allocated to projects of governmental bodies, and</text>
+ </clause><clause commented="no" id="H72B157960C1B491F9B733D7953E706C2"><enum>(iii)</enum><text display-inline="yes-display-inline">not more than 33<fraction>1/3</fraction> percent thereof may be allocated to projects of cooperative electric companies.</text> </clause></subparagraph><subparagraph commented="no" id="H672F3B3B0EA24103807D8C014EE87A64"><enum>(C)</enum><header>Method of allocation</header> <clause commented="no" id="HB6AE40F9C91C422B89E0B662EC57CFA3"><enum>(i)</enum><header>Allocation among public power providers</header><text display-inline="yes-display-inline">After the Secretary determines the projects of public power providers which are appropriate for receiving an allocation of the national renewable energy bond limitation, the Secretary shall, to the maximum extent practicable, make allocations among such projects in such manner that the amount allocated to each such project bears the same ratio to the cost of such project as the limitation under subparagraph (B)(i) bears to the cost of all such projects.</text>
+ </clause><clause commented="no" id="HB7A6BC82EB404D57A028E23DDDC2FB57"><enum>(ii)</enum><header>Allocation among governmental bodies and cooperative electric companies</header><text display-inline="yes-display-inline">The Secretary shall make allocations of the amount of the national renewable energy bond limitation described in subparagraphs (B)(ii) and (B)(iii) among projects of governmental bodies and cooperative electric companies, respectively, in such manner as the Secretary determines appropriate.</text>
+ </clause></subparagraph></paragraph></subsection><subsection id="HBFE9383E91844877827395B7247D55CF"><enum>(e)</enum><header>Definitions</header><text>For purposes of this section—</text> <paragraph commented="no" id="H1A8B895B3FE64D1AACEDA52FBEFEB704"> <enum>(1)</enum> <header>Qualified issuer</header> <text>The term <term>qualified issuer</term> means a public power provider, a cooperative electric company, a governmental body, a renewable energy bond lender, or a not-for-profit electric utility which has received a loan or loan guarantee under the Rural Electrification Act.</text>
+								</paragraph><paragraph commented="no" id="H9FA66A4046E04AA6BD9457E967EE0131">
+									<enum>(2)</enum>
+									<header>Public power provider</header>
+ <text>The term <term>public power provider</term> means a State utility with a service obligation, as such terms are defined in section 217 of the Federal Power Act (as in effect on the date of the enactment of this paragraph).</text>
+								</paragraph><paragraph commented="no" id="HA31DAB554A85408983E8E309BF0113E8">
+									<enum>(3)</enum>
+									<header>Governmental body</header>
+ <text>The term <term>governmental body</term> means any State or Indian tribal government, or any political subdivision thereof.</text> </paragraph><paragraph commented="no" id="H9585D5427303404983154F48E75D2940"> <enum>(4)</enum> <header>Cooperative electric company</header> <text>The term <term>cooperative electric company</term> means a mutual or cooperative electric company described in section 501(c)(12) or section 1381(a)(2)(C).</text>
+								</paragraph><paragraph commented="no" id="H9CF61C48319B43A5904C86E1EFF659EB">
+									<enum>(5)</enum>
+									<header>Renewable energy bond lender</header>
+ <text>The term <term>renewable energy bond lender</term> means a lender which is a cooperative which is owned by, or has outstanding loans to, 100 or more cooperative electric companies and is in existence on February 1, 2002, and shall include any affiliated entity which is controlled by such lender.</text>
+								</paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="HA9BF11A5D4194542B2955FBB7A10DB31">
+								<enum>(f)</enum>
+								<header>Other Definitions</header>
+ <text>For purposes of this subchapter—</text> <paragraph commented="no" id="H71D38F016071465DAF234804CE010CF1"> <enum>(1)</enum> <header>Credit allowance date</header> <text>The term <term>credit allowance date</term> means—</text>
+									<subparagraph commented="no" id="H6601A47354DA4618B4D36E40F0395414">
+										<enum>(A)</enum>
+ <text>March 15,</text> </subparagraph><subparagraph commented="no" id="H9C569AB9B6E94E3199EA140FA1CE5C38"> <enum>(B)</enum> <text>June 15,</text>
+									</subparagraph><subparagraph commented="no" id="H2854FEC7357C444BA8FAAF415A08008A">
+										<enum>(C)</enum>
+ <text>September 15, and</text> </subparagraph><subparagraph commented="no" id="HB8598A2FA984483E983EFFB4106CC596"> <enum>(D)</enum> <text>December 15.</text>
+									</subparagraph><continuation-text commented="no" continuation-text-level="paragraph">Such term includes the last day on which the bond is outstanding.</continuation-text></paragraph><paragraph commented="no" id="HF74DB48B78394D7D963A268A71410142">
+									<enum>(2)</enum>
+									<header>Bond</header>
+ <text>The term <term>bond</term> includes any obligation.</text> </paragraph><paragraph commented="no" id="HAB4741E5FF8641DA87565F3BF9AE0C6C"> <enum>(3)</enum> <header>State</header> <text>The term <term>State</term> includes the District of Columbia and any possession of the United States.</text>
+								</paragraph><paragraph commented="no" id="H846FF132013941E8921448424B0982FA">
+									<enum>(4)</enum>
+									<header>Available project proceeds</header>
+ <text>The term <term>available project proceeds</term> means—</text> <subparagraph commented="no" id="HDE83A63711D84BD1B8746313BC4599F6"> <enum>(A)</enum> <text>the excess of—</text>
+										<clause commented="no" id="H24B69103ABF44B6FA3924070F3A8E666">
+											<enum>(i)</enum>
+ <text>the proceeds from the sale of an issue, over</text> </clause><clause commented="no" id="HBB27A6C942CA48C08D7DD2F8BAEB043C"> <enum>(ii)</enum> <text>the issuance costs financed by the issue (to the extent that such costs do not exceed 2 percent of such proceeds), and</text>
+										</clause></subparagraph><subparagraph commented="no" id="H05417F742B8440C7AD0C3C792A16361F">
+										<enum>(B)</enum>
+ <text>the proceeds from any investment of the excess described in subparagraph (A).</text> </subparagraph></paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="HFCF2168FF12944E4B5C09BB959B65796"> <enum>(g)</enum> <header>Credit Treated as Interest</header> <text>For purposes of this subtitle, the credit determined under subsection (a) shall be treated as interest which is includible in gross income.</text>
+							</subsection><subsection commented="no" id="H774B125EC6A2419A9FC980C6BAD7D45B">
+								<enum>(h)</enum>
+								<header>S Corporations and Partnerships</header>
+ <text>In the case of a renewable energy bond held by an S corporation or partnership, the allocation of the credit allowed by this section to the shareholders of such corporation or partners of such partnership shall be treated as a distribution.</text>
+							</subsection><subsection commented="no" id="H359B584ACBB8437D8016830625578A4D">
+								<enum>(i)</enum>
+								<header>Bonds Held by Real Estate Investment Trusts</header>
+ <text>If any qualified renewable energy bond is held by a real estate investment trust, the credit determined under subsection (a) shall be allowed to beneficiaries of such trust (and any gross income included under subsection (f) with respect to such credit shall be distributed to such beneficiaries) under procedures prescribed by the Secretary.</text>
+							</subsection><subsection commented="no" id="HC2045D26CED74F4885E501F322033DB7">
+								<enum>(j)</enum>
+								<header>Credits May be Stripped</header>
+ <text>Under regulations prescribed by the Secretary—</text> <paragraph commented="no" id="H3B2B42B7B5EA44579F9A083ADADAE94C"> <enum>(1)</enum> <header>In general</header> <text>There may be a separation (including at issuance) of the ownership of a qualified renewable energy bond and the entitlement to the credit under this section with respect to such bond. In case of any such separation, the credit under this section shall be allowed to the person who on the credit allowance date holds the instrument evidencing the entitlement to the credit and not to the holder of the bond.</text>
+								</paragraph><paragraph commented="no" id="HB90C806C9AA94FDDA7C5ED5AFA9BFA7D">
+									<enum>(2)</enum>
+									<header>Certain rules to apply</header>
+ <text>In the case of a separation described in paragraph (1), the rules of section 1286 shall apply to the qualified renewable energy bond as if it were a stripped bond and to the credit under this section as if it were a stripped coupon.</text>
+								</paragraph></subsection></section></subpart><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection commented="no" id="H1CBB5678E372489FA03AD0A97A63A0DD"><enum>(b)</enum><header>Payments to issuers</header><text display-inline="yes-display-inline">Subchapter B of chapter 65 of such Code is amended by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HE80371E844B84CC0AD6CA4A4F175294D" style="OLC"> <section commented="no" id="HAA9F2FD8D88D44589C3E3DCE59EE74C9"><enum>6431.</enum><header>Credit for qualified renewable energy bonds allowed to issuer</header> <subsection commented="no" id="HC43A534B02484C8FB0FE806C03C109DE"> <enum>(a)</enum> <header>In general</header> <text display-inline="yes-display-inline">The issuer of a qualified renewable energy bond (as defined in section 54(d)) shall be allowed a credit with respect to each interest payment under such bond which shall be payable by the Secretary as provided in subsection (b).</text>
+						</subsection><subsection commented="no" id="H5CE3CDE13EE047AE81F55D88DD39A20D">
+							<enum>(b)</enum>
+							<header>Payment of credit</header>
+ <text>The Secretary shall pay (contemporaneously with each interest payment date under such bond) to the issuer of such bond (or to any person who makes such interest payments on behalf of the issuer) 35 percent of the interest payable under such bond on such date.</text>
+						</subsection><subsection commented="no" id="H5369A422878E40C5B7056FFCC260716C">
+							<enum>(c)</enum>
+							<header>Application of arbitrage rules</header>
+ <text display-inline="yes-display-inline">For purposes of section 148, the yield on such bonds shall be reduced by the credit allowed under this section.</text>
+						</subsection><subsection commented="no" id="HDD5376109A6E4EEF8955E34645225573">
+							<enum>(d)</enum>
+							<header>Interest payment date</header>
+ <text>For purposes of this subsection, the term <term>interest payment date</term> means each date on which interest is payable by the issuer under the terms of the bond.</text> </subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection commented="no" id="HEC66F76C764C4CBBA50BC315C9E9B464"><enum>(c)</enum><header>Conforming amendments</header> <paragraph commented="no" id="HF8E23596F2C04F2CB98186DF3AAEE22F"><enum>(1)</enum><text display-inline="yes-display-inline">The table of subparts for part IV of subchapter A of chapter 1 of such Code is amended by adding at the end the following new item:</text>
+					<quoted-block display-inline="no-display-inline" id="H891CA36639494420B5653CF651DB4C24" style="OLC">
+						<toc container-level="quoted-block-container" idref="H79A0D324884A4E58B9EFA2B4BBC10295" lowest-bolded-level="division-lowest-bolded" lowest-level="section" quoted-block="no-quoted-block" regeneration="yes-regeneration">
+							<toc-entry idref="H9A1489A7F5A2435C8351EBB3E93B357F" level="subpart">Subpart H. Nonrefundable credit to holders of certain bonds.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="HFBE9A6152ED84358868A6958A9EBF3BA"><enum>(2)</enum><text display-inline="yes-display-inline">The table of sections for subchapter B of chapter 65 of such Code is amended by adding at the end the following new item:</text>
+					<quoted-block display-inline="no-display-inline" id="H05D759C86AAF4C8B86C49E188F44972F" style="OLC">
+						<toc container-level="quoted-block-container" idref="HE80371E844B84CC0AD6CA4A4F175294D" lowest-bolded-level="division-lowest-bolded" lowest-level="section" quoted-block="no-quoted-block" regeneration="yes-regeneration">
+							<toc-entry idref="HAA9F2FD8D88D44589C3E3DCE59EE74C9" level="section">Sec. 6431. Credit for qualified renewable energy bonds allowed to issuer.</toc-entry>
+						</toc><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph><paragraph commented="no" id="HB69DAD74982449BA97D917967B80EF35"><enum>(3)</enum><text>Section 6211(b)(4)(A) of such Code is amended by striking ‘‘and 36B, 168(k)(4)’’ and inserting <quote>36B, 168(k)(4), and 6431</quote>.</text> </paragraph><paragraph commented="no" id="HF9E9B923C3594A71A44EFA7107D55B99"><enum>(4)</enum><text>Section 6401(b)(1) of such Code is amended by striking ‘‘and G’’ and inserting ‘‘G, and H’’.</text>
+ </paragraph></subsection><subsection commented="no" id="HDF5461ED52A6419AAF9E2BA824D3FF28"><enum>(d)</enum><header>Effective Date</header><text>The amendments made by this section shall apply to bonds issued after the date of the enactment of this Act.</text>
+			</subsection></section><section commented="no" id="H50D7679923434D0FB96905C887DA73F8"><enum>5.</enum><header>Study of biogas and nutrient reuse</header>
+ <subsection commented="no" id="H64BE7CD7C1ED4032BAA19083873E3AF9"><enum>(a)</enum><header>In General</header><text display-inline="yes-display-inline">The Secretary of the Treasury shall enter into an agreement with the National Renewable Energy Laboratory to undertake a study of biogas that addresses the following:</text>
+ <paragraph commented="no" id="H7B6C57C3FD3E4E7DA9F4F0665F910C8D"><enum>(1)</enum><text>The quality of biogas, including a comparison of biogas to natural gas and the identification of any components of biogas which make biogas unsuitable for injection into existing natural gas pipelines.</text>
+ </paragraph><paragraph commented="no" id="H01CBE3FF635F4B49B1109DE0007619A3"><enum>(2)</enum><text>Methods for obtaining the highest energy content in biogas, including the use of co-digestion and identifying the optimal feed mixture.</text>
+ </paragraph><paragraph commented="no" id="H71A357EAF6564FAE88D8AF7E645AD9D3"><enum>(3)</enum><text>Recommendations for the expansion of biogas production, including an analysis of the extent to which increasing the methane content of biogas would result in the greater use of biogas and an analysis of how the expanded use of biogas could help meet the growing energy needs of the United States.</text>
+ </paragraph><paragraph commented="no" id="H1079178AE1EF47D48F695A990C8C89F8"><enum>(4)</enum><text display-inline="yes-display-inline">Methods for productive use of nutrients recovered from qualified manure resource recovery property that benefits the agricultural economy.</text>
+ </paragraph></subsection><subsection commented="no" id="H3BF23A158997494DA2C8689C94BA1F16"><enum>(b)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 2 years after the date of the enactment of this Act, the Secretary shall submit to Congress a report on the study conducted under subsection (a).</text>
+			</subsection></section></legis-body></bill>
+
+

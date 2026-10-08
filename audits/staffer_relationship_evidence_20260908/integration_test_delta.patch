@@ -1,0 +1,14 @@
+--- a/fec/surfaces/test_staffer_live_service.py
++++ b/fec/surfaces/test_staffer_live_service.py
+@@ -451,8 +451,9 @@
+             self.assertNotIn("zero heuristic", route["explanation"])
+         balanced = self.service.route("person:gordon", "person:stephanie")
+         self.assertEqual(balanced['objective'], 'overlap_balanced')
+-        self.assertIn("Balances strong connections", balanced['explanation'])
+-        self.assertIn("Stronger overlaps", self.service.route("person:gordon", "person:stephanie", {'objective':'overlap_strength'})["explanation"])
++        self.assertIn("Balances shared-background scores", balanced['explanation'])
++        self.assertIn("not measurements of familiarity", balanced['explanation'])
++        self.assertIn("shared-background scores", self.service.route("person:gordon", "person:stephanie", {'objective':'overlap_strength'})["explanation"])
+ 
+     def test_freshness_age_and_stale_flag_are_evaluated_at_request_time(self):
+         old = (datetime.now(timezone.utc) - timedelta(seconds=400)).isoformat()

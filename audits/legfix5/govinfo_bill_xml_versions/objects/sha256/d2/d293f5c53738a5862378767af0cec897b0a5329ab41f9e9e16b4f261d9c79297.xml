@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H20CD1A2F75834C9CB97DFD7D58F661BE" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4271 IH: Gun Suicide Prevention Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-09-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4271</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190910">September 10, 2019</action-date><action-desc><sponsor name-id="B001285">Ms. Brownley of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To prohibit the sale of a firearm unless it carries a warning label that provides the number of the
+			 National Suicide Prevention Lifeline.</official-title></form>
+	<legis-body id="H89E432ADA0784FE0956C8568A827E59F" style="OLC">
+ <section id="H20B0C202BB9D4705AA7CA6FF2EAB2173" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Gun Suicide Prevention Act</short-title></quote>.</text> </section><section id="H61DE0E1F5E654D5693C1790EBC91341D"><enum>2.</enum><header>Labeling requirement</header> <subsection id="HDA12A92ECDED4DCC8D77F175AB3B6E2D"><enum>(a)</enum><header>Prohibition</header><text display-inline="yes-display-inline">Notwithstanding the exclusion of firearms from the definition of consumer product in section 3(a)(5)(E) of the Consumer Product Safety Act (<external-xref legal-doc="usc" parsable-cite="usc/15/2052">15 U.S.C. 2052(a)(5)(E)</external-xref>), it shall be unlawful for a manufacturer or retailer to sell or offer for sale any firearm that does not meet the requirements of subsection (b).</text>
+ </subsection><subsection id="HF41CF2E52881400D91C5178157D6C5C5"><enum>(b)</enum><header>National Suicide Prevention Hotline label</header><text>A firearm meets the requirements of this subsection if a clear and conspicuous warning label is attached to the firearm or appears on any packaging of the firearm and on any descriptive material included with the firearm that—</text>
+ <paragraph commented="no" id="HDB9BBE0F303C4C31ADACF30B59C02F2B"><enum>(1)</enum><text>is written in both English and Spanish;</text> </paragraph><paragraph id="H249D94141F774FAB853E6070D5FD5063"><enum>(2)</enum><text display-inline="yes-display-inline">in English, reads <quote>WARNING: IF YOU OR SOMEONE YOU KNOW IS CONTEMPLATING SUICIDE, PLEASE CALL THE NATIONAL SUICIDE PREVENTION LIFELINE AT</quote> followed by the toll-free phone number of the National Suicide Prevention Lifeline, maintained by the Assistant Secretary for Mental Health and Substance Use under section 520E–3 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/290bb-36c">42 U.S.C. 290bb–36c</external-xref>), or any successor to such toll-free number; and</text>
+ </paragraph><paragraph id="H22C5A229B68948F8AD4E606B944CA505"><enum>(3)</enum><text display-inline="yes-display-inline">contains a yellow triangle containing an exclamation mark that appears immediately before the word <quote>WARNING</quote> on the label.</text> </paragraph></subsection><subsection id="H0C6786BAE6904CC89A9D120B1447BA05"><enum>(c)</enum><header>Enforcement</header><text>A violation of the prohibition in subsection (a) shall be treated as a violation of section 19(a) of the Consumer Product Safety Act (<external-xref legal-doc="usc" parsable-cite="usc/15/2068">15 U.S.C. 2068</external-xref>). Any person who violates subsection (a) shall be subject to the penalties set forth in section 20 and 21 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/15/2069">15 U.S.C. 2069</external-xref>; 2070).</text>
+ </subsection><subsection id="H5C544882A0224604865300C1EFC66368"><enum>(d)</enum><header>Definition</header><text>As used in this Act, the term <quote>retailer</quote> includes a dealer, as such term is definition in section 921(a) of title 18, United States Code.</text> </subsection><subsection id="H8CEC1855F617418DACEF40AC8965F0EC"><enum>(e)</enum><header>Effective date</header><text>This Act shall take effect on the date that is two years after the date of enactment of this Act.</text>
+			</subsection></section></legis-body></bill>
+
+

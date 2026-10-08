@@ -1,0 +1,2020 @@
+{
+ "archive_rows": 10181,
+ "gapA": [
+  "h.r.4686|118",
+  "h.r.6410|118",
+  "s.3382|117",
+  "s.3992|118"
+ ],
+ "gapB": [
+  "h.r.4686|118|Mortgage & Housing",
+  "h.r.6410|118|Data Privacy & Cyber",
+  "s.3382|117|Member Business Lending",
+  "s.3992|118|Member Business Lending",
+  "s.762|117|Member Business Lending"
+ ],
+ "grainA_bills": 468,
+ "grainA_sponsorless": [
+  "h.r.1020|117",
+  "h.r.1059|118",
+  "h.r.1280|117",
+  "h.r.1313|118",
+  "h.r.1410|118",
+  "h.r.1411|118",
+  "h.r.1540|118",
+  "h.r.154|117",
+  "h.r.1602|118",
+  "h.r.1651|118",
+  "h.r.1711|117",
+  "h.r.1841|117",
+  "h.r.1996|117",
+  "h.r.2568|118",
+  "h.r.3712|118",
+  "h.r.4481|117",
+  "h.r.4686|118",
+  "h.r.4766|118",
+  "h.r.4773|117",
+  "h.r.5739|118",
+  "h.r.6038|117",
+  "h.r.6410|118",
+  "h.r.7412|117",
+  "h.r.7440|118",
+  "h.r.7628|117",
+  "h.r.7643|117",
+  "h.r.7776|117",
+  "h.r.793|117",
+  "h.r.804|118",
+  "h.r.8285|118",
+  "h.r.8340|117",
+  "h.r.8950|117",
+  "h.r.9588|117",
+  "h.r.982|117",
+  "s.1514|118",
+  "s.2034|117",
+  "s.2131|117",
+  "s.2658|117",
+  "s.2788|117",
+  "s.2801|117",
+  "s.2981|117",
+  "s.3382|117",
+  "s.3902|118",
+  "s.3992|118",
+  "s.4008|117",
+  "s.4264|118",
+  "s.4325|117",
+  "s.4760|117",
+  "s.5025|117",
+  "s.588|117",
+  "s.610|118",
+  "s.63|117",
+  "s.64|117"
+ ],
+ "grainA_sponsorless_rows": 1886,
+ "grainB_cells": 624,
+ "grainB_sponsorless": [
+  "h.r.1020|117|Member Business Lending",
+  "h.r.1059|118|Technology & Emerging",
+  "h.r.1280|117|Data Privacy & Cyber",
+  "h.r.1313|118|CFPB",
+  "h.r.1410|118|CFPB",
+  "h.r.1411|118|CFPB",
+  "h.r.1540|118|Mortgage & Housing",
+  "h.r.154|117|Mortgage & Housing",
+  "h.r.1602|118|Examination & Supervision",
+  "h.r.1651|118|Member Business Lending",
+  "h.r.1711|117|CFPB",
+  "h.r.1841|117|Fraud Prevention",
+  "h.r.1996|117|CU Capital Requirements",
+  "h.r.1996|117|Fraud Prevention",
+  "h.r.1996|117|Member Business Lending",
+  "h.r.1996|117|NCUA Budget & Insurance",
+  "h.r.2568|118|Mortgage & Housing",
+  "h.r.3712|118|Technology & Emerging",
+  "h.r.4481|117|Member Business Lending",
+  "h.r.4686|118|Mortgage & Housing",
+  "h.r.4766|118|Examination & Supervision",
+  "h.r.4773|117|CFPB",
+  "h.r.5739|118|Charter Modernization",
+  "h.r.5739|118|Member Business Lending",
+  "h.r.6038|117|CFPB",
+  "h.r.6410|118|Data Privacy & Cyber",
+  "h.r.7412|117|CFPB",
+  "h.r.7440|118|Examination & Supervision",
+  "h.r.7628|117|Fraud Prevention",
+  "h.r.7628|117|Member Business Lending",
+  "h.r.7643|117|Mortgage & Housing",
+  "h.r.7776|117|Data Privacy & Cyber",
+  "h.r.7776|117|Defense CU Issues",
+  "h.r.793|117|Member Business Lending",
+  "h.r.804|118|Technology & Emerging",
+  "h.r.8285|118|Mortgage & Housing",
+  "h.r.8340|117|Mortgage & Housing",
+  "h.r.8950|117|Technology & Emerging",
+  "h.r.9588|117|Data Privacy & Cyber",
+  "h.r.982|117|CFPB",
+  "s.1514|118|Mortgage & Housing",
+  "s.2034|117|Fraud Prevention",
+  "s.2131|117|Mortgage & Housing",
+  "s.2658|117|Mortgage & Housing",
+  "s.2788|117|Mortgage & Housing",
+  "s.2801|117|Examination & Supervision",
+  "s.2981|117|Mortgage & Housing",
+  "s.3382|117|Member Business Lending",
+  "s.3902|118|Examination & Supervision",
+  "s.3992|118|Member Business Lending",
+  "s.4008|117|Member Business Lending",
+  "s.4264|118|Examination & Supervision",
+  "s.4325|117|Charter Modernization",
+  "s.4325|117|NCUA Budget & Insurance",
+  "s.4760|117|Technology & Emerging",
+  "s.5025|117|NCUA Budget & Insurance",
+  "s.588|117|Charter Modernization",
+  "s.588|117|Examination & Supervision",
+  "s.610|118|Charter Modernization",
+  "s.610|118|NCUA Budget & Insurance",
+  "s.63|117|Member Business Lending",
+  "s.64|117|Member Business Lending",
+  "s.762|117|Member Business Lending"
+ ],
+ "rescued_by_frame": [
+  "h.r.4686|118",
+  "h.r.6410|118"
+ ],
+ "selected_archive": "congress_bills_archive_20260825_115305.xlsx",
+ "sponsor_cell": {
+  "h.j.res.121|118": [
+   "Ogles, Andrew"
+  ],
+  "h.j.res.122|118": [
+   "Barr, Andy"
+  ],
+  "h.j.res.190|118": [
+   "Palmer, Gary J."
+  ],
+  "h.j.res.195|118": [
+   "Donalds, Byron"
+  ],
+  "h.j.res.47|119": [
+   "Clyde, Andrew S."
+  ],
+  "h.j.res.48|119": [
+   "Clyde, Andrew S."
+  ],
+  "h.j.res.49|119": [
+   "Clyde, Andrew S."
+  ],
+  "h.j.res.50|118": [
+   "Williams, Roger"
+  ],
+  "h.j.res.50|119": [
+   "Clyde, Andrew S."
+  ],
+  "h.j.res.51|119": [
+   "Clyde, Andrew S."
+  ],
+  "h.j.res.59|119": [
+   "Hill, J. French"
+  ],
+  "h.j.res.66|118": [
+   "Williams, Roger"
+  ],
+  "h.j.res.85|118": [
+   "Williams, Roger"
+  ],
+  "h.r.10036|118": [
+   "Barr, Andy"
+  ],
+  "h.r.10057|118": [
+   "Torres, Ritchie"
+  ],
+  "h.r.1010|117": [
+   "Mfume, Kweisi"
+  ],
+  "h.r.1020|117": [
+   "Phillips, Dean"
+  ],
+  "h.r.10262|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.1027|119": [
+   "Sorensen, Eric"
+  ],
+  "h.r.1030|117": [
+   "Tlaib, Rashida"
+  ],
+  "h.r.10510|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.10511|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.10540|118": [
+   "Scanlon, Mary Gay"
+  ],
+  "h.r.10542|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.10543|118": [
+   "Garbarino, Andrew R."
+  ],
+  "h.r.1059|118": [
+   "Armstrong, Kelly"
+  ],
+  "h.r.1122|118": [
+   "Emmer, Tom"
+  ],
+  "h.r.1215|117": [
+   "Blunt Rochester, Lisa"
+  ],
+  "h.r.1226|117": [
+   "Crow, Jason"
+  ],
+  "h.r.1280|117": [
+   "Bass, Karen"
+  ],
+  "h.r.1313|118": [
+   "Mooney, Alexander X."
+  ],
+  "h.r.1382|118": [
+   "Barr, Andy"
+  ],
+  "h.r.1392|118": [
+   "Davidson, Warren"
+  ],
+  "h.r.1395|117": [
+   "Beatty, Joyce"
+  ],
+  "h.r.1410|118": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.1411|118": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.1430|119": [
+   "Ogles, Andrew"
+  ],
+  "h.r.1443|117": [
+   "Torres, Ritchie"
+  ],
+  "h.r.1471|117": [
+   "Sherman, Brad"
+  ],
+  "h.r.1532|117": [
+   "Tlaib, Rashida"
+  ],
+  "h.r.1540|118": [
+   "Cartwright, Matt"
+  ],
+  "h.r.1549|117": [
+   "Casten, Sean"
+  ],
+  "h.r.154|117": [
+   "Rush, Bobby L."
+  ],
+  "h.r.1596|118": [
+   "Moulton, Seth"
+  ],
+  "h.r.1602|118": [
+   "Porter, Katie"
+  ],
+  "h.r.1644|118": [
+   "Meuser, Daniel"
+  ],
+  "h.r.1651|118": [
+   "Phillips, Dean"
+  ],
+  "h.r.1652|119": [
+   "Barr, Andy"
+  ],
+  "h.r.1653|119": [
+   "Barr, Andy"
+  ],
+  "h.r.1663|118": [
+   "Torres, Ritchie"
+  ],
+  "h.r.166|117": [
+   "Green, Al"
+  ],
+  "h.r.166|118": [
+   "Green, Al"
+  ],
+  "h.r.1672|117": [
+   "Welch, Peter"
+  ],
+  "h.r.1707|118": [
+   "Issa, Darrell E."
+  ],
+  "h.r.1711|117": [
+   "Scott, David"
+  ],
+  "h.r.1729|117": [
+   "Barr, Andy"
+  ],
+  "h.r.1777|119": [
+   "Bentz, Cliff"
+  ],
+  "h.r.1783|117": [
+   "Clyburn, James E."
+  ],
+  "h.r.1791|119": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.1799|119": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.1804|119": [
+   "Meuser, Daniel"
+  ],
+  "h.r.1806|118": [
+   "Hill, J. French"
+  ],
+  "h.r.1841|117": [
+   "McNerney, Jerry"
+  ],
+  "h.r.1848|117": [
+   "Pallone, Frank, Jr."
+  ],
+  "h.r.185|119": [
+   "McGovern, James P."
+  ],
+  "h.r.1919|119": [
+   "Emmer, Tom"
+  ],
+  "h.r.1944|119": [
+   "Ocasio-Cortez, Alexandria"
+  ],
+  "h.r.1996|117": [
+   "Perlmutter, Ed"
+  ],
+  "h.r.2040|117": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.2064|119": [
+   "Leger Fernandez, Teresa"
+  ],
+  "h.r.2069|117": [
+   "Velazquez, Nydia M."
+  ],
+  "h.r.2094|119": [
+   "Rutherford, John H."
+  ],
+  "h.r.2123|119": [
+   "Garbarino, Andrew R."
+  ],
+  "h.r.2155|119": [
+   "Ogles, Andrew"
+  ],
+  "h.r.2201|117": [
+   "Davis, Danny K."
+  ],
+  "h.r.2211|117": [
+   "Foster, Bill"
+  ],
+  "h.r.2236|117": [
+   "Lieu, Ted"
+  ],
+  "h.r.2311|117": [
+   "Emmer, Tom"
+  ],
+  "h.r.2331|119": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.2392|119": [
+   "Steil, Bryan"
+  ],
+  "h.r.2460|118": [
+   "Clarke, Yvette D."
+  ],
+  "h.r.2481|119": [
+   "Valadao, David G."
+  ],
+  "h.r.2513|119": [
+   "Meuser, Daniel"
+  ],
+  "h.r.2543|117": [
+   "Waters, Maxine"
+  ],
+  "h.r.2547|117": [
+   "Waters, Maxine"
+  ],
+  "h.r.2568|118": [
+   "Mooney, Alexander X."
+  ],
+  "h.r.2602|118": [
+   "Lee, Susie"
+  ],
+  "h.r.2612|119": [
+   "Trahan, Lori"
+  ],
+  "h.r.2656|118": [
+   "Torres, Ritchie"
+  ],
+  "h.r.2670|118": [
+   "Rogers, Mike D."
+  ],
+  "h.r.2702|119": [
+   "Barr, Andy"
+  ],
+  "h.r.2743|118": [
+   "Barr, Andy"
+  ],
+  "h.r.2798|118": [
+   "Barr, Andy"
+  ],
+  "h.r.2808|119": [
+   "Rose, John W."
+  ],
+  "h.r.2891|118": [
+   "Joyce, David P."
+  ],
+  "h.r.2987|119": [
+   "Bresnahan, Robert"
+  ],
+  "h.r.3009|117": [
+   "Garcia, Sylvia R."
+  ],
+  "h.r.3149|119": [
+   "James, John"
+  ],
+  "h.r.3155|117": [
+   "Lee, Susie"
+  ],
+  "h.r.3170|118": [
+   "Rutherford, John H."
+  ],
+  "h.r.3172|117": [
+   "Rutherford, John H."
+  ],
+  "h.r.3234|119": [
+   "Emmer, Tom"
+  ],
+  "h.r.3315|118": [
+   "Cohen, Steve"
+  ],
+  "h.r.3323|117": [
+   "Torres, Ritchie"
+  ],
+  "h.r.3355|119": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.3379|119": [
+   "Fitzgerald, Scott"
+  ],
+  "h.r.3390|119": [
+   "De La Cruz, Monica"
+  ],
+  "h.r.3402|118": [
+   "Auchincloss, Jake"
+  ],
+  "h.r.3445|119": [
+   "Huizenga, Bill"
+  ],
+  "h.r.3467|118": [
+   "Barr, Andy"
+  ],
+  "h.r.3511|118": [
+   "LaLota, Nick"
+  ],
+  "h.r.3520|117": [
+   "Lieu, Ted"
+  ],
+  "h.r.3555|118": [
+   "De La Cruz, Monica"
+  ],
+  "h.r.3556|118": [
+   "Barr, Andy"
+  ],
+  "h.r.3564|118": [
+   "Davidson, Warren"
+  ],
+  "h.r.3633|119": [
+   "Hill, J. French"
+  ],
+  "h.r.3664|117": [
+   "Issa, Darrell E."
+  ],
+  "h.r.3712|118": [
+   "Mooney, Alexander X."
+  ],
+  "h.r.3854|117": [
+   "Steube, W. Gregory"
+  ],
+  "h.r.3881|118": [
+   "Gooden, Lance"
+  ],
+  "h.r.3928|118": [
+   "Schiff, Adam B."
+  ],
+  "h.r.3958|117": [
+   "Waters, Maxine"
+  ],
+  "h.r.3962|117": [
+   "Dean, Madeleine"
+  ],
+  "h.r.3968|117": [
+   "Torres, Ritchie"
+  ],
+  "h.r.4023|119": [
+   "Carbajal, Salud O."
+  ],
+  "h.r.4052|118": [
+   "Davis, Danny K."
+  ],
+  "h.r.4088|117": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.4115|117": [
+   "Tlaib, Rashida"
+  ],
+  "h.r.4167|119": [
+   "Fitzgerald, Scott"
+  ],
+  "h.r.4224|118": [
+   "Matsui, Doris O."
+  ],
+  "h.r.4231|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.4233|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.4311|118": [
+   "Trahan, Lori"
+  ],
+  "h.r.4349|118": [
+   "Pallone, Frank, Jr."
+  ],
+  "h.r.4350|117": [
+   "Smith, Adam"
+  ],
+  "h.r.4437|119": [
+   "Timmons, William R."
+  ],
+  "h.r.4438|119": [
+   "Auchincloss, Jake"
+  ],
+  "h.r.4465|118": [
+   "Wasserman Schultz, Debbie"
+  ],
+  "h.r.4479|119": [
+   "Liccardo, Sam T."
+  ],
+  "h.r.4481|117": [
+   "Phillips, Dean"
+  ],
+  "h.r.4495|117": [
+   "Waters, Maxine"
+  ],
+  "h.r.4531|117": [
+   "Meuser, Daniel"
+  ],
+  "h.r.4544|119": [
+   "Waters, Maxine"
+  ],
+  "h.r.4551|119": [
+   "Waters, Maxine"
+  ],
+  "h.r.4568|119": [
+   "Liccardo, Sam T."
+  ],
+  "h.r.4586|117": [
+   "Wagner, Ann"
+  ],
+  "h.r.4616|117": [
+   "Sherman, Brad"
+  ],
+  "h.r.4623|118": [
+   "Lieu, Ted"
+  ],
+  "h.r.4639|118": [
+   "Davidson, Warren"
+  ],
+  "h.r.4649|118": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.4686|118": [
+   "Luna, Anna Paulina"
+  ],
+  "h.r.4735|119": [
+   "Steil, Bryan"
+  ],
+  "h.r.4737|118": [
+   "Flood, Mike"
+  ],
+  "h.r.4741|117": [
+   "Beyer, Donald S., Jr."
+  ],
+  "h.r.474|117": [
+   "Lieu, Ted"
+  ],
+  "h.r.4755|118": [
+   "Stevens, Haley M."
+  ],
+  "h.r.4763|118": [
+   "Thompson, Glenn"
+  ],
+  "h.r.4766|118": [
+   "McHenry, Patrick T."
+  ],
+  "h.r.4773|117": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.478|119": [
+   "Barr, Andy"
+  ],
+  "h.r.4823|118": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.4867|118": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.4868|118": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.4895|117": [
+   "Omar, Ilhan"
+  ],
+  "h.r.4899|118": [
+   "Beatty, Joyce"
+  ],
+  "h.r.4919|117": [
+   "Ross, Deborah K."
+  ],
+  "h.r.4936|119": [
+   "Nunn, Zachary"
+  ],
+  "h.r.5009|118": [
+   "Joyce, David P."
+  ],
+  "h.r.5032|118": [
+   "Ogles, Andrew"
+  ],
+  "h.r.507|119": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.5180|118": [
+   "Tlaib, Rashida"
+  ],
+  "h.r.5189|117": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.527|117": [
+   "Emmer, Tom"
+  ],
+  "h.r.5311|118": [
+   "Lieu, Ted"
+  ],
+  "h.r.5385|117": [
+   "Omar, Ilhan"
+  ],
+  "h.r.5403|118": [
+   "Emmer, Tom"
+  ],
+  "h.r.5410|118": [
+   "Lynch, Stephen F."
+  ],
+  "h.r.5427|118": [
+   "Williams, Roger"
+  ],
+  "h.r.5484|119": [
+   "Pallone, Frank"
+  ],
+  "h.r.5502|117": [
+   "Schakowsky, Janice D."
+  ],
+  "h.r.5577|119": [
+   "Garbarino, Andrew R."
+  ],
+  "h.r.5628|118": [
+   "Clarke, Yvette D."
+  ],
+  "h.r.5689|119": [
+   "Subramanyam, Suhas"
+  ],
+  "h.r.5739|118": [
+   "Wexton, Jennifer"
+  ],
+  "h.r.5745|118": [
+   "Beyer, Donald S., Jr."
+  ],
+  "h.r.5746|117": [
+   "Beyer, Donald S., Jr."
+  ],
+  "h.r.5802|117": [
+   "Pallone, Frank, Jr."
+  ],
+  "h.r.5808|118": [
+   "Pettersen, Brittany"
+  ],
+  "h.r.5828|118": [
+   "Garbarino, Andrew R."
+  ],
+  "h.r.582|118": [
+   "Vargas, Juan"
+  ],
+  "h.r.5843|118": [
+   "Higgins, Clay"
+  ],
+  "h.r.5848|119": [
+   "Ezell, Mike"
+  ],
+  "h.r.5911|117": [
+   "Beatty, Joyce"
+  ],
+  "h.r.5914|117": [
+   "Gottheimer, Josh"
+  ],
+  "h.r.5915|117": [
+   "Aguilar, Pete"
+  ],
+  "h.r.5966|118": [
+   "Beyer, Donald S., Jr."
+  ],
+  "h.r.5974|117": [
+   "Garcia, Jesus G. \"Chuy\""
+  ],
+  "h.r.6038|117": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.6125|119": [
+   "Beatty, Joyce"
+  ],
+  "h.r.6256|119": [
+   "Downing, Troy"
+  ],
+  "h.r.6257|119": [
+   "Dunn, Neal P."
+  ],
+  "h.r.6265|119": [
+   "Kean, Thomas H."
+  ],
+  "h.r.6292|119": [
+   "Pallone, Frank"
+  ],
+  "h.r.6328|117": [
+   "Cleaver, Emanuel"
+  ],
+  "h.r.6350|118": [
+   "McGarvey, Morgan"
+  ],
+  "h.r.6398|118": [
+   "Barr, Andy"
+  ],
+  "h.r.6410|118": [
+   "Luna, Anna Paulina"
+  ],
+  "h.r.6415|117": [
+   "Emmer, Tom"
+  ],
+  "h.r.6449|119": [
+   "Kustoff, David"
+  ],
+  "h.r.6546|119": [
+   "Williams, Roger"
+  ],
+  "h.r.654|119": [
+   "Barr, Andy"
+  ],
+  "h.r.6573|118": [
+   "Fallon, Pat"
+  ],
+  "h.r.6644|119": [
+   "Hill, J. French"
+  ],
+  "h.r.6732|117": [
+   "Hill, J. French"
+  ],
+  "h.r.6752|117": [
+   "Trahan, Lori"
+  ],
+  "h.r.6775|118": [
+   "Tlaib, Rashida"
+  ],
+  "h.r.6789|118": [
+   "Barr, Andy"
+  ],
+  "h.r.6838|119": [
+   "Barr, Andy"
+  ],
+  "h.r.6889|117": [
+   "Vargas, Juan"
+  ],
+  "h.r.6891|119": [
+   "Ross, Deborah K."
+  ],
+  "h.r.6933|118": [
+   "Fitzgerald, Scott"
+  ],
+  "h.r.6934|119": [
+   "Bresnahan, Robert P."
+  ],
+  "h.r.6955|119": [
+   "Hill, J. French"
+  ],
+  "h.r.7000|118": [
+   "Steil, Bryan"
+  ],
+  "h.r.7003|117": [
+   "Waters, Maxine"
+  ],
+  "h.r.7022|117": [
+   "Foster, Bill"
+  ],
+  "h.r.7035|119": [
+   "Gooden, Lance"
+  ],
+  "h.r.7036|118": [
+   "Foster, Bill"
+  ],
+  "h.r.7056|119": [
+   "Barr, Andy"
+  ],
+  "h.r.7120|117": [
+   "Foster, Bill"
+  ],
+  "h.r.7231|117": [
+   "Lynch, Stephen F."
+  ],
+  "h.r.7297|118": [
+   "Rose, John W."
+  ],
+  "h.r.7351|117": [
+   "Velazquez, Nydia M."
+  ],
+  "h.r.7412|117": [
+   "Mooney, Alexander X."
+  ],
+  "h.r.7428|118": [
+   "Steil, Bryan"
+  ],
+  "h.r.7437|118": [
+   "Houchin, Erin"
+  ],
+  "h.r.7440|118": [
+   "McHenry, Patrick T."
+  ],
+  "h.r.7520|118": [
+   "Pallone, Frank"
+  ],
+  "h.r.758|118": [
+   "Barr, Andy"
+  ],
+  "h.r.7614|117": [
+   "Thompson, Glenn"
+  ],
+  "h.r.7628|117": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.7643|117": [
+   "Crist, Charlie"
+  ],
+  "h.r.7647|119": [
+   "Gonzalez, Vicente"
+  ],
+  "h.r.7661|117": [
+   "Torres, Ritchie"
+  ],
+  "h.r.766|117": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.7733|117": [
+   "Cleaver, Emanuel"
+  ],
+  "h.r.7756|118": [
+   "Schakowsky, Janice D."
+  ],
+  "h.r.7776|117": [
+   "DeFazio, Peter A."
+  ],
+  "h.r.7900|117": [
+   "Smith, Adam"
+  ],
+  "h.r.790|117": [
+   "Barr, Andy"
+  ],
+  "h.r.7910|117": [
+   "Nadler, Jerrold"
+  ],
+  "h.r.793|117": [
+   "Blumenauer, Earl"
+  ],
+  "h.r.800|118": [
+   "Kustoff, David"
+  ],
+  "h.r.8036|117": [
+   "Hill, J. French"
+  ],
+  "h.r.804|118": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.8071|118": [
+   "Hill, J. French"
+  ],
+  "h.r.8152|117": [
+   "Pallone, Frank, Jr."
+  ],
+  "h.r.8264|118": [
+   "Barr, Andy"
+  ],
+  "h.r.8285|118": [
+   "Swalwell, Eric"
+  ],
+  "h.r.8288|118": [
+   "Barr, Andy"
+  ],
+  "h.r.8311|119": [
+   "Schakowsky, Janice D."
+  ],
+  "h.r.8338|118": [
+   "Kim, Young"
+  ],
+  "h.r.8340|117": [
+   "Swalwell, Eric"
+  ],
+  "h.r.8356|118": [
+   "Kim, Young"
+  ],
+  "h.r.837|118": [
+   "Kaptur, Marcy"
+  ],
+  "h.r.8395|119": [
+   "Kim, Young"
+  ],
+  "h.r.8464|118": [
+   "Timmons, William R."
+  ],
+  "h.r.8628|118": [
+   "Donalds, Byron"
+  ],
+  "h.r.8643|119": [
+   "Torres, Ritchie"
+  ],
+  "h.r.8686|118": [
+   "Loudermilk, Barry"
+  ],
+  "h.r.8714|118": [
+   "Leger Fernandez, Teresa"
+  ],
+  "h.r.8730|117": [
+   "Feenstra, Randy"
+  ],
+  "h.r.8874|117": [
+   "Welch, Peter"
+  ],
+  "h.r.892|119": [
+   "Ryan, Patrick"
+  ],
+  "h.r.8950|117": [
+   "Maloney, Sean Patrick"
+  ],
+  "h.r.8974|117": [
+   "Pressley, Ayanna"
+  ],
+  "h.r.915|119": [
+   "Alford, Mark"
+  ],
+  "h.r.9161|117": [
+   "Scanlon, Mary Gay"
+  ],
+  "h.r.9303|118": [
+   "Waters, Maxine"
+  ],
+  "h.r.940|119": [
+   "Hill, J. French"
+  ],
+  "h.r.9414|117": [
+   "Mfume, Kweisi"
+  ],
+  "h.r.941|119": [
+   "Hill, J. French"
+  ],
+  "h.r.9588|117": [
+   "Luetkemeyer, Blaine"
+  ],
+  "h.r.975|119": [
+   "Vargas, Juan"
+  ],
+  "h.r.976|119": [
+   "Williams, Roger"
+  ],
+  "h.r.982|117": [
+   "Deutch, Theodore E."
+  ],
+  "h.r.987|119": [
+   "Barr, Andy"
+  ],
+  "h.res.1076|117": [
+   "Velazquez, Nydia M."
+  ],
+  "h.res.629|118": [
+   "Ogles, Andrew"
+  ],
+  "h.res.634|117": [
+   "Velazquez, Nydia M."
+  ],
+  "s.1023|117": [
+   "Durbin, Richard J."
+  ],
+  "s.1029|118": [
+   "Cassidy, Bill"
+  ],
+  "s.1088|117": [
+   "Cruz, Ted"
+  ],
+  "s.1090|117": [
+   "Cruz, Ted"
+  ],
+  "s.1091|118": [
+   "Van Hollen, Chris"
+  ],
+  "s.110|119": [
+   "Sullivan, Dan"
+  ],
+  "s.1124|119": [
+   "Cruz, Ted"
+  ],
+  "s.1159|118": [
+   "Boozman, John"
+  ],
+  "s.1160|118": [
+   "Tillis, Thomas"
+  ],
+  "s.1223|119": [
+   "Tuberville, Tommy"
+  ],
+  "s.1287|119": [
+   "Cassidy, Bill"
+  ],
+  "s.1323|118": [
+   "Merkley, Jeff"
+  ],
+  "s.1343|117": [
+   "Reed, Jack"
+  ],
+  "s.1362|118": [
+   "Kennedy, John"
+  ],
+  "s.1439|119": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.1467|119": [
+   "Reed, Jack"
+  ],
+  "s.1490|117": [
+   "Peters, Gary C."
+  ],
+  "s.1494|117": [
+   "Moran, Jerry"
+  ],
+  "s.1512|119": [
+   "Cassidy, Bill"
+  ],
+  "s.1514|118": [
+   "Rubio, Marco"
+  ],
+  "s.1527|119": [
+   "Gallego, Ruben"
+  ],
+  "s.1561|119": [
+   "Cramer, Kevin"
+  ],
+  "s.1564|119": [
+   "Murray, Patty"
+  ],
+  "s.1582|119": [
+   "Hagerty, Bill"
+  ],
+  "s.1586|119": [
+   "Lee, Mike"
+  ],
+  "s.1587|117": [
+   "Rosen, Jacky"
+  ],
+  "s.1628|117": [
+   "Markey, Edward J."
+  ],
+  "s.1635|119": [
+   "Cramer, Kevin"
+  ],
+  "s.1684|117": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.1690|117": [
+   "Rosen, Jacky"
+  ],
+  "s.1767|117": [
+   "Smith, Tina"
+  ],
+  "s.1838|118": [
+   "Durbin, Richard J."
+  ],
+  "s.1870|118": [
+   "Tuberville, Tommy"
+  ],
+  "s.1913|117": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.2019|119": [
+   "Crapo, Mike"
+  ],
+  "s.2034|117": [
+   "Rubio, Marco"
+  ],
+  "s.2095|118": [
+   "Luj\u00e1n, Ben Ray"
+  ],
+  "s.2121|118": [
+   "Cassidy, Bill"
+  ],
+  "s.2131|117": [
+   "Tester, Jon"
+  ],
+  "s.2142|118": [
+   "Menendez, Robert"
+  ],
+  "s.2226|118": [
+   "Reed, Jack"
+  ],
+  "s.2234|117": [
+   "Merkley, Jeff"
+  ],
+  "s.2290|117": [
+   "Peters, Gary C."
+  ],
+  "s.2349|117": [
+   "Durbin, Richard J."
+  ],
+  "s.2391|118": [
+   "Kennedy, John"
+  ],
+  "s.2419|119": [
+   "Scott, Tim"
+  ],
+  "s.2486|119": [
+   "Scott, Tim"
+  ],
+  "s.2508|117": [
+   "Reed, Jack"
+  ],
+  "s.2545|119": [
+   "Padilla, Alex"
+  ],
+  "s.255|117": [
+   "Wicker, Roger F."
+  ],
+  "s.2642|118": [
+   "Moran, Jerry"
+  ],
+  "s.2658|117": [
+   "Casey, Robert P., Jr."
+  ],
+  "s.2704|117": [
+   "Wicker, Roger F."
+  ],
+  "s.2724|117": [
+   "Kennedy, John"
+  ],
+  "s.2730|118": [
+   "Durbin, Richard J."
+  ],
+  "s.273|119": [
+   "Rosen, Jacky"
+  ],
+  "s.2760|118": [
+   "Hawley, Josh"
+  ],
+  "s.2788|117": [
+   "Rubio, Marco"
+  ],
+  "s.2801|117": [
+   "Sinema, Kyrsten"
+  ],
+  "s.2852|118": [
+   "Scott, Rick"
+  ],
+  "s.2860|118": [
+   "Merkley, Jeff"
+  ],
+  "s.2892|118": [
+   "Wyden, Ron"
+  ],
+  "s.2920|117": [
+   "Warnock, Raphael G."
+  ],
+  "s.2931|119": [
+   "Kennedy, John"
+  ],
+  "s.293|118": [
+   "Cramer, Kevin"
+  ],
+  "s.2946|119": [
+   "Kennedy, John"
+  ],
+  "s.2968|118": [
+   "Kennedy, John"
+  ],
+  "s.2981|117": [
+   "Rubio, Marco"
+  ],
+  "s.2995|119": [
+   "Van Hollen, Chris"
+  ],
+  "s.3017|119": [
+   "Kennedy, John"
+  ],
+  "s.3065|117": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.3128|117": [
+   "Menendez, Robert"
+  ],
+  "s.3136|119": [
+   "Shaheen, Jeanne"
+  ],
+  "s.3171|119": [
+   "Markey, Edward J."
+  ],
+  "s.3195|117": [
+   "Cantwell, Maria"
+  ],
+  "s.3248|118": [
+   "Scott, Rick"
+  ],
+  "s.3302|118": [
+   "Shaheen, Jeanne"
+  ],
+  "s.3324|118": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.3337|118": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.3354|119": [
+   "Curtis, John R."
+  ],
+  "s.3370|119": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.3382|117": [
+   "Scott, Tim"
+  ],
+  "s.349|117": [
+   "Klobuchar, Amy"
+  ],
+  "s.3502|118": [
+   "Reed, Jack"
+  ],
+  "s.3529|117": [
+   "Van Hollen, Chris"
+  ],
+  "s.3541|118": [
+   "Moran, Jerry"
+  ],
+  "s.3549|118": [
+   "Reed, Jack"
+  ],
+  "s.3554|118": [
+   "Warner, Mark R."
+  ],
+  "s.3561|119": [
+   "Reed, Jack"
+  ],
+  "s.3575|119": [
+   "Padilla, Alex"
+  ],
+  "s.3592|118": [
+   "Scott, Tim"
+  ],
+  "s.3616|119": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.3623|119": [
+   "Marshall, Roger"
+  ],
+  "s.3627|117": [
+   "Cassidy, Bill"
+  ],
+  "s.3660|119": [
+   "Fetterman, John"
+  ],
+  "s.3755|119": [
+   "Boozman, John"
+  ],
+  "s.3801|118": [
+   "Cruz, Ted"
+  ],
+  "s.3813|117": [
+   "Sullivan, Dan"
+  ],
+  "s.381|119": [
+   "Sanders, Bernard"
+  ],
+  "s.389|117": [
+   "Coons, Christopher A."
+  ],
+  "s.3902|118": [
+   "Tester, Jon"
+  ],
+  "s.3907|119": [
+   "Reed, Jack"
+  ],
+  "s.3930|118": [
+   "Warnock, Raphael G."
+  ],
+  "s.394|119": [
+   "Hagerty, Bill"
+  ],
+  "s.3954|117": [
+   "Cruz, Ted"
+  ],
+  "s.3991|118": [
+   "Durbin, Richard J."
+  ],
+  "s.3992|118": [
+   "Scott, Tim"
+  ],
+  "s.4004|117": [
+   "Boozman, John"
+  ],
+  "s.4008|117": [
+   "Cardin, Benjamin L."
+  ],
+  "s.401|119": [
+   "Cramer, Kevin"
+  ],
+  "s.4064|119": [
+   "Boozman, John"
+  ],
+  "s.4155|118": [
+   "Lummis, Cynthia M."
+  ],
+  "s.4261|118": [
+   "Heinrich, Martin"
+  ],
+  "s.4264|118": [
+   "Sinema, Kyrsten"
+  ],
+  "s.4281|117": [
+   "Cassidy, Bill"
+  ],
+  "s.4307|119": [
+   "Durbin, Richard J."
+  ],
+  "s.4325|117": [
+   "Sinema, Kyrsten"
+  ],
+  "s.4408|117": [
+   "Warren, Elizabeth"
+  ],
+  "s.4450|119": [
+   "Alsobrooks, Angela D."
+  ],
+  "s.4522|117": [
+   "Kennedy, John"
+  ],
+  "s.4533|117": [
+   "Kennedy, John"
+  ],
+  "s.4542|118": [
+   "Peters, Gary C."
+  ],
+  "s.4601|119": [
+   "Scott, Rick"
+  ],
+  "s.464|119": [
+   "Lee, Mike"
+  ],
+  "s.4674|117": [
+   "Durbin, Richard J."
+  ],
+  "s.4698|117": [
+   "Ossoff, Jon"
+  ],
+  "s.4760|117": [
+   "Stabenow, Debbie"
+  ],
+  "s.4772|118": [
+   "Kennedy, John"
+  ],
+  "s.4831|117": [
+   "Lee, Mike"
+  ],
+  "s.4879|117": [
+   "Padilla, Alex"
+  ],
+  "s.4943|118": [
+   "Blumenthal, Richard"
+  ],
+  "s.4946|117": [
+   "Van Hollen, Chris"
+  ],
+  "s.4980|117": [
+   "Warren, Elizabeth"
+  ],
+  "s.4994|117": [
+   "Lankford, James"
+  ],
+  "s.5025|117": [
+   "Manchin, Joe, III"
+  ],
+  "s.5049|117": [
+   "Moran, Jerry"
+  ],
+  "s.5076|117": [
+   "Ernst, Joni"
+  ],
+  "s.5183|117": [
+   "Padilla, Alex"
+  ],
+  "s.522|119": [
+   "Hagerty, Bill"
+  ],
+  "s.5242|118": [
+   "Lee, Mike"
+  ],
+  "s.539|118": [
+   "Sullivan, Dan"
+  ],
+  "s.544|118": [
+   "Padilla, Alex"
+  ],
+  "s.5462|118": [
+   "Warren, Elizabeth"
+  ],
+  "s.557|119": [
+   "Kennedy, John"
+  ],
+  "s.563|117": [
+   "Cramer, Kevin"
+  ],
+  "s.588|117": [
+   "Feinstein, Dianne"
+  ],
+  "s.601|118": [
+   "Kennedy, John"
+  ],
+  "s.610|118": [
+   "Sinema, Kyrsten"
+  ],
+  "s.631|118": [
+   "Klobuchar, Amy"
+  ],
+  "s.63|117": [
+   "Cardin, Benjamin L."
+  ],
+  "s.64|117": [
+   "Cardin, Benjamin L."
+  ],
+  "s.673|118": [
+   "Rosen, Jacky"
+  ],
+  "s.745|117": [
+   "Klobuchar, Amy"
+  ],
+  "s.762|117": [
+   "Scott, Tim"
+  ],
+  "s.767|117": [
+   "Cortez Masto, Catherine"
+  ],
+  "s.76|119": [
+   "Lankford, James"
+  ],
+  "s.809|119": [
+   "Lee, Mike"
+  ],
+  "s.817|118": [
+   "Warren, Elizabeth"
+  ],
+  "s.824|119": [
+   "Kennedy, John"
+  ],
+  "s.841|119": [
+   "Blackburn, Marsha"
+  ],
+  "s.869|118": [
+   "Smith, Tina"
+  ],
+  "s.875|119": [
+   "Scott, Tim"
+  ],
+  "s.887|118": [
+   "Cruz, Ted"
+  ],
+  "s.910|117": [
+   "Merkley, Jeff"
+  ],
+  "s.919|117": [
+   "Schatz, Brian"
+  ],
+  "s.919|119": [
+   "Hagerty, Bill"
+  ],
+  "s.965|117": [
+   "Markey, Edward J."
+  ],
+  "s.967|118": [
+   "Lee, Mike"
+  ],
+  "s.978|119": [
+   "Moody, Ashley"
+  ],
+  "s.j.res.134|119": [
+   "Reed, Jack"
+  ],
+  "s.j.res.18|119": [
+   "Scott, Tim"
+  ],
+  "s.j.res.32|118": [
+   "Kennedy, John"
+  ],
+  "s.j.res.70|118": [
+   "Scott, Tim"
+  ],
+  "s.res.101|118": [
+   "Collins, Susan M."
+  ],
+  "s.res.118|119": [
+   "Scott, Rick"
+  ],
+  "s.res.543|117": [
+   "Collins, Susan M."
+  ],
+  "s.res.584|118": [
+   "Collins, Susan M."
+  ],
+  "s.res.627|119": [
+   "Scott, Rick"
+  ]
+ },
+ "sponsor_resolved": {
+  "h.j.res.121|118": "Andrew Ogles",
+  "h.j.res.122|118": "Andy Barr",
+  "h.j.res.190|118": "Gary Palmer",
+  "h.j.res.195|118": "Byron Donalds",
+  "h.j.res.47|119": "Andrew Clyde",
+  "h.j.res.48|119": "Andrew Clyde",
+  "h.j.res.49|119": "Andrew Clyde",
+  "h.j.res.50|118": "Roger Williams",
+  "h.j.res.50|119": "Andrew Clyde",
+  "h.j.res.51|119": "Andrew Clyde",
+  "h.j.res.59|119": "French Hill",
+  "h.j.res.66|118": "Roger Williams",
+  "h.j.res.85|118": "Roger Williams",
+  "h.r.10036|118": "Andy Barr",
+  "h.r.10057|118": "Ritchie Torres",
+  "h.r.1010|117": "Kweisi Mfume",
+  "h.r.1020|117": null,
+  "h.r.10262|118": "Maxine Waters",
+  "h.r.1027|119": "Eric Sorensen",
+  "h.r.1030|117": "Rashida Tlaib",
+  "h.r.10510|118": "Maxine Waters",
+  "h.r.10511|118": "Maxine Waters",
+  "h.r.10540|118": "Mary Scanlon",
+  "h.r.10542|118": "Maxine Waters",
+  "h.r.10543|118": "Andrew Garbarino",
+  "h.r.1059|118": null,
+  "h.r.1122|118": "Tom Emmer",
+  "h.r.1215|117": "Lisa Blunt Rochester",
+  "h.r.1226|117": "Jason Crow",
+  "h.r.1280|117": null,
+  "h.r.1313|118": null,
+  "h.r.1382|118": "Andy Barr",
+  "h.r.1392|118": "Warren Davidson",
+  "h.r.1395|117": "Joyce Beatty",
+  "h.r.1410|118": null,
+  "h.r.1411|118": null,
+  "h.r.1430|119": "Andrew Ogles",
+  "h.r.1443|117": "Ritchie Torres",
+  "h.r.1471|117": "Brad Sherman",
+  "h.r.1532|117": "Rashida Tlaib",
+  "h.r.1540|118": null,
+  "h.r.1549|117": "Sean Casten",
+  "h.r.154|117": null,
+  "h.r.1596|118": "Seth Moulton",
+  "h.r.1602|118": null,
+  "h.r.1644|118": "Daniel Meuser",
+  "h.r.1651|118": null,
+  "h.r.1652|119": "Andy Barr",
+  "h.r.1653|119": "Andy Barr",
+  "h.r.1663|118": "Ritchie Torres",
+  "h.r.166|117": "Al Green",
+  "h.r.166|118": "Al Green",
+  "h.r.1672|117": "Peter Welch",
+  "h.r.1707|118": "Darrell Issa",
+  "h.r.1711|117": null,
+  "h.r.1729|117": "Andy Barr",
+  "h.r.1777|119": "Cliff Bentz",
+  "h.r.1783|117": "James Clyburn",
+  "h.r.1791|119": "Vicente Gonzalez",
+  "h.r.1799|119": "Barry Loudermilk",
+  "h.r.1804|119": "Daniel Meuser",
+  "h.r.1806|118": "French Hill",
+  "h.r.1841|117": null,
+  "h.r.1848|117": "Frank Pallone",
+  "h.r.185|119": "James McGovern",
+  "h.r.1919|119": "Tom Emmer",
+  "h.r.1944|119": "Alexandria Ocasio-Cortez",
+  "h.r.1996|117": null,
+  "h.r.2040|117": "Barry Loudermilk",
+  "h.r.2064|119": "Teresa Leger Fernandez",
+  "h.r.2069|117": "Nydia Vel\u00e1zquez",
+  "h.r.2094|119": "John Rutherford",
+  "h.r.2123|119": "Andrew Garbarino",
+  "h.r.2155|119": "Andrew Ogles",
+  "h.r.2201|117": "Danny Davis",
+  "h.r.2211|117": "Bill Foster",
+  "h.r.2236|117": "Ted Lieu",
+  "h.r.2311|117": "Tom Emmer",
+  "h.r.2331|119": "Barry Loudermilk",
+  "h.r.2392|119": "Bryan Steil",
+  "h.r.2460|118": "Yvette Clarke",
+  "h.r.2481|119": "David Valadao",
+  "h.r.2513|119": "Daniel Meuser",
+  "h.r.2543|117": "Maxine Waters",
+  "h.r.2547|117": "Maxine Waters",
+  "h.r.2568|118": null,
+  "h.r.2602|118": "Susie Lee",
+  "h.r.2612|119": "Lori Trahan",
+  "h.r.2656|118": "Ritchie Torres",
+  "h.r.2670|118": "Mike Rogers",
+  "h.r.2702|119": "Andy Barr",
+  "h.r.2743|118": "Andy Barr",
+  "h.r.2798|118": "Andy Barr",
+  "h.r.2808|119": "John Rose",
+  "h.r.2891|118": "David Joyce",
+  "h.r.2987|119": "Robert Bresnahan",
+  "h.r.3009|117": "Sylvia Garcia",
+  "h.r.3149|119": "John James",
+  "h.r.3155|117": "Susie Lee",
+  "h.r.3170|118": "John Rutherford",
+  "h.r.3172|117": "John Rutherford",
+  "h.r.3234|119": "Tom Emmer",
+  "h.r.3315|118": "Steve Cohen",
+  "h.r.3323|117": "Ritchie Torres",
+  "h.r.3355|119": "Barry Loudermilk",
+  "h.r.3379|119": "Scott Fitzgerald",
+  "h.r.3390|119": "Monica De La Cruz",
+  "h.r.3402|118": "Jake Auchincloss",
+  "h.r.3445|119": "Bill Huizenga",
+  "h.r.3467|118": "Andy Barr",
+  "h.r.3511|118": "Nick LaLota",
+  "h.r.3520|117": "Ted Lieu",
+  "h.r.3555|118": "Monica De La Cruz",
+  "h.r.3556|118": "Andy Barr",
+  "h.r.3564|118": "Warren Davidson",
+  "h.r.3633|119": "French Hill",
+  "h.r.3664|117": "Darrell Issa",
+  "h.r.3712|118": null,
+  "h.r.3854|117": "Gregory Steube",
+  "h.r.3881|118": "Lance Gooden",
+  "h.r.3928|118": "Adam Schiff",
+  "h.r.3958|117": "Maxine Waters",
+  "h.r.3962|117": "Madeleine Dean",
+  "h.r.3968|117": "Ritchie Torres",
+  "h.r.4023|119": "Salud Carbajal",
+  "h.r.4052|118": "Danny Davis",
+  "h.r.4088|117": "Vicente Gonzalez",
+  "h.r.4115|117": "Rashida Tlaib",
+  "h.r.4167|119": "Scott Fitzgerald",
+  "h.r.4224|118": "Doris Matsui",
+  "h.r.4231|118": "Maxine Waters",
+  "h.r.4233|118": "Maxine Waters",
+  "h.r.4311|118": "Lori Trahan",
+  "h.r.4349|118": "Frank Pallone",
+  "h.r.4350|117": "Adam Smith",
+  "h.r.4437|119": "William Timmons",
+  "h.r.4438|119": "Jake Auchincloss",
+  "h.r.4465|118": "Debbie Wasserman Schultz",
+  "h.r.4479|119": "Sam Liccardo",
+  "h.r.4481|117": null,
+  "h.r.4495|117": "Maxine Waters",
+  "h.r.4531|117": "Daniel Meuser",
+  "h.r.4544|119": "Maxine Waters",
+  "h.r.4551|119": "Maxine Waters",
+  "h.r.4568|119": "Sam Liccardo",
+  "h.r.4586|117": "Ann Wagner",
+  "h.r.4616|117": "Brad Sherman",
+  "h.r.4623|118": "Ted Lieu",
+  "h.r.4639|118": "Warren Davidson",
+  "h.r.4649|118": "Barry Loudermilk",
+  "h.r.4686|118": "Anna Luna",
+  "h.r.4735|119": "Bryan Steil",
+  "h.r.4737|118": "Mike Flood",
+  "h.r.4741|117": "Donald Beyer",
+  "h.r.474|117": "Ted Lieu",
+  "h.r.4755|118": "Haley Stevens",
+  "h.r.4763|118": "Glenn Thompson",
+  "h.r.4766|118": null,
+  "h.r.4773|117": null,
+  "h.r.478|119": "Andy Barr",
+  "h.r.4823|118": "Barry Loudermilk",
+  "h.r.4867|118": "Vicente Gonzalez",
+  "h.r.4868|118": "Vicente Gonzalez",
+  "h.r.4895|117": "Ilhan Omar",
+  "h.r.4899|118": "Joyce Beatty",
+  "h.r.4919|117": "Deborah Ross",
+  "h.r.4936|119": "Zachary Nunn",
+  "h.r.5009|118": "David Joyce",
+  "h.r.5032|118": "Andrew Ogles",
+  "h.r.507|119": "Vicente Gonzalez",
+  "h.r.5180|118": "Rashida Tlaib",
+  "h.r.5189|117": "Vicente Gonzalez",
+  "h.r.527|117": "Tom Emmer",
+  "h.r.5311|118": "Ted Lieu",
+  "h.r.5385|117": "Ilhan Omar",
+  "h.r.5403|118": "Tom Emmer",
+  "h.r.5410|118": "Stephen Lynch",
+  "h.r.5427|118": "Roger Williams",
+  "h.r.5484|119": "Frank Pallone",
+  "h.r.5502|117": "Janice Schakowsky",
+  "h.r.5577|119": "Andrew Garbarino",
+  "h.r.5628|118": "Yvette Clarke",
+  "h.r.5689|119": "Suhas Subramanyam",
+  "h.r.5739|118": null,
+  "h.r.5745|118": "Donald Beyer",
+  "h.r.5746|117": "Donald Beyer",
+  "h.r.5802|117": "Frank Pallone",
+  "h.r.5808|118": "Brittany Pettersen",
+  "h.r.5828|118": "Andrew Garbarino",
+  "h.r.582|118": "Juan Vargas",
+  "h.r.5843|118": "Clay Higgins",
+  "h.r.5848|119": "Mike Ezell",
+  "h.r.5911|117": "Joyce Beatty",
+  "h.r.5914|117": "Josh Gottheimer",
+  "h.r.5915|117": "Pete Aguilar",
+  "h.r.5966|118": "Donald Beyer",
+  "h.r.5974|117": "Jes\u00fas Garc\u00eda",
+  "h.r.6038|117": null,
+  "h.r.6125|119": "Joyce Beatty",
+  "h.r.6256|119": "Troy Downing",
+  "h.r.6257|119": "Neal Dunn",
+  "h.r.6265|119": "Thomas Kean",
+  "h.r.6292|119": "Frank Pallone",
+  "h.r.6328|117": "Emanuel Cleaver",
+  "h.r.6350|118": "Morgan McGarvey",
+  "h.r.6398|118": "Andy Barr",
+  "h.r.6410|118": "Anna Luna",
+  "h.r.6415|117": "Tom Emmer",
+  "h.r.6449|119": "David Kustoff",
+  "h.r.6546|119": "Roger Williams",
+  "h.r.654|119": "Andy Barr",
+  "h.r.6573|118": "Pat Fallon",
+  "h.r.6644|119": "French Hill",
+  "h.r.6732|117": "French Hill",
+  "h.r.6752|117": "Lori Trahan",
+  "h.r.6775|118": "Rashida Tlaib",
+  "h.r.6789|118": "Andy Barr",
+  "h.r.6838|119": "Andy Barr",
+  "h.r.6889|117": "Juan Vargas",
+  "h.r.6891|119": "Deborah Ross",
+  "h.r.6933|118": "Scott Fitzgerald",
+  "h.r.6934|119": "Robert Bresnahan",
+  "h.r.6955|119": "French Hill",
+  "h.r.7000|118": "Bryan Steil",
+  "h.r.7003|117": "Maxine Waters",
+  "h.r.7022|117": "Bill Foster",
+  "h.r.7035|119": "Lance Gooden",
+  "h.r.7036|118": "Bill Foster",
+  "h.r.7056|119": "Andy Barr",
+  "h.r.7120|117": "Bill Foster",
+  "h.r.7231|117": "Stephen Lynch",
+  "h.r.7297|118": "John Rose",
+  "h.r.7351|117": "Nydia Vel\u00e1zquez",
+  "h.r.7412|117": null,
+  "h.r.7428|118": "Bryan Steil",
+  "h.r.7437|118": "Erin Houchin",
+  "h.r.7440|118": null,
+  "h.r.7520|118": "Frank Pallone",
+  "h.r.758|118": "Andy Barr",
+  "h.r.7614|117": "Glenn Thompson",
+  "h.r.7628|117": null,
+  "h.r.7643|117": null,
+  "h.r.7647|119": "Vicente Gonzalez",
+  "h.r.7661|117": "Ritchie Torres",
+  "h.r.766|117": "Barry Loudermilk",
+  "h.r.7733|117": "Emanuel Cleaver",
+  "h.r.7756|118": "Janice Schakowsky",
+  "h.r.7776|117": null,
+  "h.r.7900|117": "Adam Smith",
+  "h.r.790|117": "Andy Barr",
+  "h.r.7910|117": "Jerrold Nadler",
+  "h.r.793|117": null,
+  "h.r.800|118": "David Kustoff",
+  "h.r.8036|117": "French Hill",
+  "h.r.804|118": null,
+  "h.r.8071|118": "French Hill",
+  "h.r.8152|117": "Frank Pallone",
+  "h.r.8264|118": "Andy Barr",
+  "h.r.8285|118": null,
+  "h.r.8288|118": "Andy Barr",
+  "h.r.8311|119": "Janice Schakowsky",
+  "h.r.8338|118": "Young Kim",
+  "h.r.8340|117": null,
+  "h.r.8356|118": "Young Kim",
+  "h.r.837|118": "Marcy Kaptur",
+  "h.r.8395|119": "Young Kim",
+  "h.r.8464|118": "William Timmons",
+  "h.r.8628|118": "Byron Donalds",
+  "h.r.8643|119": "Ritchie Torres",
+  "h.r.8686|118": "Barry Loudermilk",
+  "h.r.8714|118": "Teresa Leger Fernandez",
+  "h.r.8730|117": "Randy Feenstra",
+  "h.r.8874|117": "Peter Welch",
+  "h.r.892|119": "Patrick Ryan",
+  "h.r.8950|117": null,
+  "h.r.8974|117": "Ayanna Pressley",
+  "h.r.915|119": "Mark Alford",
+  "h.r.9161|117": "Mary Scanlon",
+  "h.r.9303|118": "Maxine Waters",
+  "h.r.940|119": "French Hill",
+  "h.r.9414|117": "Kweisi Mfume",
+  "h.r.941|119": "French Hill",
+  "h.r.9588|117": null,
+  "h.r.975|119": "Juan Vargas",
+  "h.r.976|119": "Roger Williams",
+  "h.r.982|117": null,
+  "h.r.987|119": "Andy Barr",
+  "h.res.1076|117": "Nydia Vel\u00e1zquez",
+  "h.res.629|118": "Andrew Ogles",
+  "h.res.634|117": "Nydia Vel\u00e1zquez",
+  "s.1023|117": "Richard Durbin",
+  "s.1029|118": "Bill Cassidy",
+  "s.1088|117": "Ted Cruz",
+  "s.1090|117": "Ted Cruz",
+  "s.1091|118": "Chris Van Hollen",
+  "s.110|119": "Dan Sullivan",
+  "s.1124|119": "Ted Cruz",
+  "s.1159|118": "John Boozman",
+  "s.1160|118": "Thom Tillis",
+  "s.1223|119": "Tommy Tuberville",
+  "s.1287|119": "Bill Cassidy",
+  "s.1323|118": "Jeff Merkley",
+  "s.1343|117": "Jack Reed",
+  "s.1362|118": "John Kennedy",
+  "s.1439|119": "Catherine Cortez Masto",
+  "s.1467|119": "Jack Reed",
+  "s.1490|117": "Gary Peters",
+  "s.1494|117": "Jerry Moran",
+  "s.1512|119": "Bill Cassidy",
+  "s.1514|118": null,
+  "s.1527|119": "Ruben Gallego",
+  "s.1561|119": "Kevin Cramer",
+  "s.1564|119": "Patty Murray",
+  "s.1582|119": "Bill Hagerty",
+  "s.1586|119": "Mike Lee",
+  "s.1587|117": "Jacky Rosen",
+  "s.1628|117": "Edward Markey",
+  "s.1635|119": "Kevin Cramer",
+  "s.1684|117": "Catherine Cortez Masto",
+  "s.1690|117": "Jacky Rosen",
+  "s.1767|117": "Tina Smith",
+  "s.1838|118": "Richard Durbin",
+  "s.1870|118": "Tommy Tuberville",
+  "s.1913|117": "Catherine Cortez Masto",
+  "s.2019|119": "Mike Crapo",
+  "s.2034|117": null,
+  "s.2095|118": "Ben Luj\u00e1n",
+  "s.2121|118": "Bill Cassidy",
+  "s.2131|117": null,
+  "s.2142|118": "Robert Menendez",
+  "s.2226|118": "Jack Reed",
+  "s.2234|117": "Jeff Merkley",
+  "s.2290|117": "Gary Peters",
+  "s.2349|117": "Richard Durbin",
+  "s.2391|118": "John Kennedy",
+  "s.2419|119": "Tim Scott",
+  "s.2486|119": "Tim Scott",
+  "s.2508|117": "Jack Reed",
+  "s.2545|119": "Alex Padilla",
+  "s.255|117": "Roger Wicker",
+  "s.2642|118": "Jerry Moran",
+  "s.2658|117": null,
+  "s.2704|117": "Roger Wicker",
+  "s.2724|117": "John Kennedy",
+  "s.2730|118": "Richard Durbin",
+  "s.273|119": "Jacky Rosen",
+  "s.2760|118": "Josh Hawley",
+  "s.2788|117": null,
+  "s.2801|117": null,
+  "s.2852|118": "Rick Scott",
+  "s.2860|118": "Jeff Merkley",
+  "s.2892|118": "Ron Wyden",
+  "s.2920|117": "Raphael Warnock",
+  "s.2931|119": "John Kennedy",
+  "s.293|118": "Kevin Cramer",
+  "s.2946|119": "John Kennedy",
+  "s.2968|118": "John Kennedy",
+  "s.2981|117": null,
+  "s.2995|119": "Chris Van Hollen",
+  "s.3017|119": "John Kennedy",
+  "s.3065|117": "Catherine Cortez Masto",
+  "s.3128|117": "Robert Menendez",
+  "s.3136|119": "Jeanne Shaheen",
+  "s.3171|119": "Edward Markey",
+  "s.3195|117": "Maria Cantwell",
+  "s.3248|118": "Rick Scott",
+  "s.3302|118": "Jeanne Shaheen",
+  "s.3324|118": "Catherine Cortez Masto",
+  "s.3337|118": "Catherine Cortez Masto",
+  "s.3354|119": "John Curtis",
+  "s.3370|119": "Catherine Cortez Masto",
+  "s.3382|117": "Tim Scott",
+  "s.349|117": "Amy Klobuchar",
+  "s.3502|118": "Jack Reed",
+  "s.3529|117": "Chris Van Hollen",
+  "s.3541|118": "Jerry Moran",
+  "s.3549|118": "Jack Reed",
+  "s.3554|118": "Mark Warner",
+  "s.3561|119": "Jack Reed",
+  "s.3575|119": "Alex Padilla",
+  "s.3592|118": "Tim Scott",
+  "s.3616|119": "Catherine Cortez Masto",
+  "s.3623|119": "Roger Marshall",
+  "s.3627|117": "Bill Cassidy",
+  "s.3660|119": "John Fetterman",
+  "s.3755|119": "John Boozman",
+  "s.3801|118": "Ted Cruz",
+  "s.3813|117": "Dan Sullivan",
+  "s.381|119": "Bernard Sanders",
+  "s.389|117": "Christopher Coons",
+  "s.3902|118": null,
+  "s.3907|119": "Jack Reed",
+  "s.3930|118": "Raphael Warnock",
+  "s.394|119": "Bill Hagerty",
+  "s.3954|117": "Ted Cruz",
+  "s.3991|118": "Richard Durbin",
+  "s.3992|118": "Tim Scott",
+  "s.4004|117": "John Boozman",
+  "s.4008|117": null,
+  "s.401|119": "Kevin Cramer",
+  "s.4064|119": "John Boozman",
+  "s.4155|118": "Cynthia Lummis",
+  "s.4261|118": "Martin Heinrich",
+  "s.4264|118": null,
+  "s.4281|117": "Bill Cassidy",
+  "s.4307|119": "Richard Durbin",
+  "s.4325|117": null,
+  "s.4408|117": "Elizabeth Warren",
+  "s.4450|119": "Angela Alsobrooks",
+  "s.4522|117": "John Kennedy",
+  "s.4533|117": "John Kennedy",
+  "s.4542|118": "Gary Peters",
+  "s.4601|119": "Rick Scott",
+  "s.464|119": "Mike Lee",
+  "s.4674|117": "Richard Durbin",
+  "s.4698|117": "Jon Ossoff",
+  "s.4760|117": null,
+  "s.4772|118": "John Kennedy",
+  "s.4831|117": "Mike Lee",
+  "s.4879|117": "Alex Padilla",
+  "s.4943|118": "Richard Blumenthal",
+  "s.4946|117": "Chris Van Hollen",
+  "s.4980|117": "Elizabeth Warren",
+  "s.4994|117": "James Lankford",
+  "s.5025|117": null,
+  "s.5049|117": "Jerry Moran",
+  "s.5076|117": "Joni Ernst",
+  "s.5183|117": "Alex Padilla",
+  "s.522|119": "Bill Hagerty",
+  "s.5242|118": "Mike Lee",
+  "s.539|118": "Dan Sullivan",
+  "s.544|118": "Alex Padilla",
+  "s.5462|118": "Elizabeth Warren",
+  "s.557|119": "John Kennedy",
+  "s.563|117": "Kevin Cramer",
+  "s.588|117": null,
+  "s.601|118": "John Kennedy",
+  "s.610|118": null,
+  "s.631|118": "Amy Klobuchar",
+  "s.63|117": null,
+  "s.64|117": null,
+  "s.673|118": "Jacky Rosen",
+  "s.745|117": "Amy Klobuchar",
+  "s.762|117": "Tim Scott",
+  "s.767|117": "Catherine Cortez Masto",
+  "s.76|119": "James Lankford",
+  "s.809|119": "Mike Lee",
+  "s.817|118": "Elizabeth Warren",
+  "s.824|119": "John Kennedy",
+  "s.841|119": "Marsha Blackburn",
+  "s.869|118": "Tina Smith",
+  "s.875|119": "Tim Scott",
+  "s.887|118": "Ted Cruz",
+  "s.910|117": "Jeff Merkley",
+  "s.919|117": "Brian Schatz",
+  "s.919|119": "Bill Hagerty",
+  "s.965|117": "Edward Markey",
+  "s.967|118": "Mike Lee",
+  "s.978|119": "Ashley Moody",
+  "s.j.res.134|119": "Jack Reed",
+  "s.j.res.18|119": "Tim Scott",
+  "s.j.res.32|118": "John Kennedy",
+  "s.j.res.70|118": "Tim Scott",
+  "s.res.101|118": "Susan Collins",
+  "s.res.118|119": "Rick Scott",
+  "s.res.543|117": "Susan Collins",
+  "s.res.584|118": "Susan Collins",
+  "s.res.627|119": "Rick Scott"
+ }
+}

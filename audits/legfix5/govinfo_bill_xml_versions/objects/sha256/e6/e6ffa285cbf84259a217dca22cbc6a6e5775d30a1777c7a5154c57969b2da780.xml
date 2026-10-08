@@ -1,0 +1,462 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-OLL26077-WYX-CL-PTK">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3756 IS: Poverty Statistics Enhancement Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-02-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code display="yes">II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>2d Session</session>
+        <legis-num>S. 3756</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20260202">February 2, 2026</action-date>
+            <action-desc><sponsor name-id="S389">Mr. Kennedy</sponsor> introduced the following
+                bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental
+                Affairs</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To require the Bureau of the Census, in measuring poverty, to incorporate
+            the distributional analysis of household income used by the Congressional Budget Office,
+            and for other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="S1" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Poverty Statistics Enhancement Act</short-title></quote>.</text>
+        </section>
+        <section commented="no" display-inline="no-display-inline" id="idff06d4bac091405e8ea605e1ac5190b6">
+            <enum>2.</enum>
+            <header>Definitions and special rules</header>
+ <text display-inline="no-display-inline">In this Act:</text> <paragraph id="H5FD4E9EFFDFD4B4EBF1C1CC3C678CE38"> <enum>(1)</enum> <header>Administering agency</header> <text display-inline="yes-display-inline">The term <term>administering agency</term> means a Federal, State, or local governmental agency responsible for assessing income, collecting revenue, administering a benefit, or collecting, compiling, and analyzing data related to income assessments, revenue collections, or benefits administration.</text>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline" id="id2eec70e83f1543c385552521fe29fed8">
+                <enum>(2)</enum>
+                <header>Director</header>
+ <text display-inline="yes-display-inline">The term <term>Director</term> means the Director of the Bureau of the Census.</text>
+            </paragraph>
+            <paragraph id="H638D77374E5E4574BCC57BF9E8958ED7" commented="no">
+                <enum>(3)</enum>
+                <header>Earned income</header>
+                <subparagraph id="H07CC7950222D40B7B18AEF8F2D025B9F">
+                    <enum>(A)</enum>
+                    <header>In general</header>
+ <text>The term <term>earned income</term> means income paid to individuals from the following:</text>
+                    <clause id="H66C60CADD6A0422B933463F2481225F5" commented="no">
+                        <enum>(i)</enum>
+ <text>Earnings from employment or self-employment, including employment by a governmental entity to perform specific services, with continued employment conditional on successful delivery of those services.</text>
+                    </clause>
+                    <clause id="H032406731AAF49EF8A860A6B1B60CDEF" commented="no">
+                        <enum>(ii)</enum>
+ <text>Interest.</text> </clause> <clause id="H6F8934BCC082433F9D1A7EBAFB463470" commented="no"> <enum>(iii)</enum> <text>Dividends.</text>
+                    </clause>
+                    <clause id="H03B7C9EC454C4B4C8F56BD8DB0A64901" commented="no">
+                        <enum>(iv)</enum>
+ <text>Rents, royalties, and estates and trusts.</text> </clause> <clause id="H3FC42D19F9944BC192ED2AD31CD897A2" commented="no"> <enum>(v)</enum> <text>Realized capital gains.</text>
+                    </clause>
+                    <clause id="HB13D55D21F674FF0A9A60A2C36B53C7D" commented="no">
+                        <enum>(vi)</enum>
+ <text>The monetary value of employer-paid benefits, including—</text> <subclause id="H5886747E9523431586B596AFE3CE9154" commented="no"> <enum>(I)</enum> <text>health insurance premiums;</text>
+                        </subclause>
+                        <subclause id="H4AA9E082379843CFB0A18AAE31BF1ED8" commented="no">
+                            <enum>(II)</enum>
+ <text>the actuarial value of—</text> <item commented="no" display-inline="no-display-inline" id="id5a682e022cef4850bc77d2d81baa7d68"> <enum>(aa)</enum> <text display-inline="yes-display-inline">employer-funded health insurance net of employee contributions;</text>
+                            </item>
+                            <item commented="no" display-inline="no-display-inline" id="id41b9fd994c4a4930b5e81445fc78ae15">
+                                <enum>(bb)</enum>
+ <text display-inline="yes-display-inline">life insurance premiums;</text>
+                            </item>
+                            <item commented="no" display-inline="no-display-inline" id="id7046c6835d8b42e89e0d49af59896cce">
+                                <enum>(cc)</enum>
+ <text display-inline="yes-display-inline">contributions to a health savings account (as defined in <external-xref legal-doc="usc" parsable-cite="usc/26/223">section 223(d)</external-xref> of the Internal Revenue Code of 1986);</text>
+                            </item>
+                            <item commented="no" display-inline="no-display-inline" id="id52be6ff970c746e59766c170aff46a40">
+                                <enum>(dd)</enum>
+ <text display-inline="yes-display-inline">contributions to a qualified cash or deferred arrangement (as defined in section 401(k)(2) of such Code);</text>
+                            </item>
+                            <item commented="no" display-inline="no-display-inline" id="id165df7e557174bf5a6c3a31a2b2f0c5f">
+                                <enum>(ee)</enum>
+ <text display-inline="yes-display-inline">contributions to an individual retirement plan (as defined in section 7701(a)(37) of such Code); and</text>
+                            </item>
+                            <item commented="no" display-inline="no-display-inline" id="id456937c9b5094dd588be2cf723646f3e">
+                                <enum>(ff)</enum>
+ <text display-inline="yes-display-inline">employer contributions to a defined contribution retirement plan (as defined in section 414(i) of such Code);</text>
+                            </item>
+                        </subclause>
+                        <subclause id="HCC85364B05AB421CA4D58A9630B99035" commented="no" display-inline="no-display-inline">
+                            <enum>(III)</enum>
+ <text>benefits from a defined benefit retirement plan (as defined in section 414(j) of such Code) at the time the benefits are delivered;</text>
+                        </subclause>
+                        <subclause id="HC55044683D734750AD7459C74FB31732" commented="no">
+                            <enum>(IV)</enum>
+ <text>benefits provided to government employees tied specifically to their employment, including veterans benefits; and</text>
+                        </subclause>
+                        <subclause id="HB3927F0B883F454C935F5EAF6E2CCC2A" commented="no">
+                            <enum>(V)</enum>
+ <text>other benefits paid by an employer during retirement, including pensions, healthcare coverage, and other benefits, counted at the time at which the benefit is received.</text>
+                        </subclause>
+                    </clause>
+                    <clause id="H850D0849FFF044A785E64E9099734C91" commented="no">
+                        <enum>(vii)</enum>
+ <text>In-kind compensation such as cost-free or reduced-cost lodging or meals, except for items required by the employer for performing work, such as uniforms or personal protective equipment.</text>
+                    </clause>
+                </subparagraph>
+                <subparagraph id="HC9A3A052C34B4FDD9078AFA671A8422B">
+                    <enum>(B)</enum>
+                    <header>Special rules for earned income</header>
+                    <clause id="HDA6FB1EA240F4DB09F595059782C5934" commented="no" display-inline="no-display-inline">
+                        <enum>(i)</enum>
+                        <header>Adjustments generally</header>
+ <text>For purposes of subparagraph (A), all types of earned income shall be reconciled and adjusted to known, reliable independent benchmarks, including benchmarks produced by statistical agencies, programmatic agencies, the Internal Revenue Service, private sources, and such other sources as the Director determines appropriate.</text>
+                    </clause>
+                    <clause id="H059975BD1D7E48C6BCBE9D3C2DDDD609" commented="no">
+                        <enum>(ii)</enum>
+                        <header>Readjustments</header>
+ <text>In addition to adjusting earned income under clause (i), additional adjustments shall be made for missing and misreported data based on existing and future research by the Bureau of the Census, other government agencies, academic researchers, and other private research.</text>
+                    </clause>
+                </subparagraph>
+            </paragraph>
+            <paragraph id="H743934654E2D4A09BEF42A1FD86AD955">
+                <enum>(4)</enum>
+                <header>Government transfer payments</header>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id5ea75d9012e44e91b35d91ab887db0d6">
+                    <enum>(A)</enum>
+                    <header display-inline="yes-display-inline">In general</header>
+ <text display-inline="yes-display-inline">The term <term>government transfer payments</term> means any money, goods, services, or discounts provided to individuals, families, or households by or at the direction of Federal Government or State, local, or other government sources, including agencies and agents thereof, or by private entities at the direction of any such source, that are not payments for services performed as an employee or that are not provided equally to all legal residents of the United States without any conditions related to income, assets, economic status, age, social condition, or any other restriction.</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id274e0fdcebe34da5bf4ba3a5694b7edf">
+                    <enum>(B)</enum>
+                    <header>Inclusions</header>
+ <text display-inline="yes-display-inline">The term <term>government transfer payments</term> includes the following:</text>
+                    <clause id="HF48A07C027914E7798A4309E43E88BB4">
+                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">Unemployment insurance compensation.</text>
+                    </clause>
+                    <clause id="H13A60B94E9D64F7192B690559B19D732">
+                        <enum>(ii)</enum>
+ <text>Workers’ compensation.</text> </clause> <clause id="H44CF61B84B1645A1AA24BCDF7D37F1C4"> <enum>(iii)</enum> <text>Benefits administered by the Social Security Administration, including—</text>
+                        <subclause commented="no" display-inline="no-display-inline" id="id0f0ad1e500a7447291a5d2474b068282">
+                            <enum>(I)</enum>
+ <text display-inline="yes-display-inline">old-age insurance benefits and disability insurance benefits under title II of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/401">42 U.S.C. 401 et seq.</external-xref>); and</text>
+                        </subclause>
+                        <subclause commented="no" display-inline="no-display-inline" id="ide8fa5d49607d4422bd74d4abeb59447f">
+                            <enum>(II)</enum>
+ <text>supplemental security income benefits under title XVI of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1381">42 U.S.C. 1381 et seq.</external-xref>).</text>
+                        </subclause>
+                    </clause>
+                    <clause id="H549E7D41274F4B8EAF0E5C8D997632E0">
+                        <enum>(iv)</enum>
+ <text>Benefits under the Railroad Retirement Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/45/231">45 U.S.C. 231 et seq.</external-xref>).</text>
+                    </clause>
+                    <clause id="HA855561ACBDB47BB970A4906232BBDEC">
+                        <enum>(v)</enum>
+ <text>Other disability benefits from government, except those provided to government employees as part of their employment compensation.</text>
+                    </clause>
+                    <clause id="id6c79fba40378494ca21bd59780f69c84" commented="no">
+                        <enum>(vi)</enum>
+ <text>Benefits provided under the Medicare program under title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395 et seq.</external-xref>), including any income-related subsidy described in section 1860D–14 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395w-114">42 U.S.C. 1395w–114</external-xref>), and any other reduction in premiums or cost sharing, such as deductibles, copayments, or coinsurance under such title.</text>
+                    </clause>
+                    <clause id="id3e543ea6a67d444fbb9e0a3ef3306394">
+                        <enum>(vii)</enum>
+ <text>So much of the amount of any income tax refund paid to a taxpayer which is attributable to—</text>
+                        <subclause commented="no" display-inline="no-display-inline" id="id8730921c37ff43a7b6295bb8d7bb7639">
+                            <enum>(I)</enum>
+ <text display-inline="yes-display-inline">the earned income credit under <external-xref legal-doc="usc" parsable-cite="usc/26/32">section 32</external-xref> of the Internal Revenue Code of 1986;</text>
+                        </subclause>
+                        <subclause id="idee845e1257f34548b43e4959db4373f5">
+                            <enum>(II)</enum>
+ <text>the child tax credit under section 24 of such Code; and</text> </subclause> <subclause commented="no" display-inline="no-display-inline" id="idb46e8388a0b24923a4beb4445f619246"> <enum>(III)</enum> <text>any other refundable credit under subpart C of part IV of subchapter A of chapter 1 of such Code.</text>
+                        </subclause>
+                    </clause>
+                    <clause id="idab92c4c1415e4d6ba27dafb785ef0718">
+                        <enum>(viii)</enum>
+ <text>Assistance or benefits provided under the Temporary Assistance for Needy Families program established under part A of title IV of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/601">42 U.S.C. 601 et seq.</external-xref>).</text>
+                    </clause>
+                    <clause id="id5e8242d432534f2ba85d59ad238a99f0">
+                        <enum>(ix)</enum>
+ <text>Medical assistance provided under the Medicaid program established under title XIX of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396">42 U.S.C. 1396 et seq.</external-xref>).</text>
+                    </clause>
+                    <clause id="idc01dadacceb84171bcbe49c178db2c98" commented="no" display-inline="no-display-inline">
+                        <enum>(x)</enum>
+ <text>Child health assistance or pregnancy-related assistance provided under the State Children's Health Insurance Program established under title XXI of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1397aa">42 U.S.C. 1397aa et seq.</external-xref>).</text>
+                    </clause>
+                    <clause id="HB5ECBD4347454BE2BE428F3A3594518A">
+                        <enum>(xi)</enum>
+ <text>Benefits provided pursuant to an Indian health program (as defined in section 4 of the Indian Health Care Improvement Act (<external-xref legal-doc="usc" parsable-cite="usc/25/1603">25 U.S.C. 1603</external-xref>)).</text>
+                    </clause>
+                    <clause id="HC1D45C9DDC2240469F759D80E21F0436">
+                        <enum>(xii)</enum>
+ <text>Premium tax credits under <external-xref legal-doc="usc" parsable-cite="usc/26/36B">section 36B</external-xref> of the Internal Revenue Code of 1986, cost-sharing reduction payments under section 1402 of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18071">42 U.S.C. 18071</external-xref>), or any other payment that reduces the premium amount paid by the enrollee.</text>
+                    </clause>
+                    <clause id="H2EF8FBC3C908488DB45B06DCF923C496">
+                        <enum>(xiii)</enum>
+ <text>Any other government payments to assist in purchasing medical care or health insurance.</text>
+                    </clause>
+                    <clause id="H0054E5EB51404A5B913CB77CB2688C42">
+                        <enum>(xiv)</enum>
+ <text>Benefits under the supplemental nutrition assistance program established under the Food and Nutrition Act of 2008 (<external-xref legal-doc="usc" parsable-cite="usc/7/2011">7 U.S.C. 2011 et seq.</external-xref>).</text>
+                    </clause>
+                    <clause id="H326B794B49334578A0EEC0EAE0950726">
+                        <enum>(xv)</enum>
+ <text>Free and reduced price meals provided under the Richard B. Russell National School Lunch Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1751">42 U.S.C. 1751 et seq.</external-xref>) and section 4 of the Child Nutrition Act of 1966 (<external-xref legal-doc="usc" parsable-cite="usc/42/1773">42 U.S.C. 1773</external-xref>).</text>
+                    </clause>
+                    <clause id="HEE54BDC101914C89B72E4440CE5E08AA">
+                        <enum>(xvi)</enum>
+ <text>Benefits and services provided under the special supplemental nutrition program for women, infants, and children established by section 17 of the Child Nutrition Act of 1966 (<external-xref legal-doc="usc" parsable-cite="usc/42/1786">42 U.S.C. 1786</external-xref>).</text>
+                    </clause>
+                    <clause id="id5ce525a2251049d39ffd135c588f13dd" commented="no" display-inline="no-display-inline">
+                        <enum>(xvii)</enum>
+ <text>Meals provided under the child and adult care food program established under section 17 of the Richard B. Russell National School Lunch Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1766">42 U.S.C. 1766</external-xref>).</text>
+                    </clause>
+                    <clause id="HD8402EA4C6714A619249EC0B28E15BAE">
+                        <enum>(xviii)</enum>
+ <text>Rental assistance under section 8 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f</external-xref>), including housing choice vouchers and project-based rental assistance.</text>
+                    </clause>
+                    <clause id="H0C6A475B7E5E4B5B8C71430C92F6C974">
+                        <enum>(xix)</enum>
+ <text>Assistance provided by the Rural Housing Service of the Department of Agriculture, including rental assistance.</text>
+                    </clause>
+                    <clause id="H03B3A0E248F24B1DBB2611B0E6CED257">
+                        <enum>(xx)</enum>
+ <text>Assistance (including services) under the Low-Income Home Energy Assistance Program, established under the Low-Income Home Energy Assistance Act of 1981 (<external-xref legal-doc="usc" parsable-cite="usc/42/8621">42 U.S.C. 8621 et seq.</external-xref>).</text>
+                    </clause>
+                    <clause id="HC9F99A991E1A4393A0A9CA30C6B8BF51">
+                        <enum>(xxi)</enum>
+ <text>A Federal Pell Grant under section 401 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1070a">20 U.S.C. 1070a</external-xref>).</text>
+                    </clause>
+                    <clause id="HD94171E79AE340D2BB95977206683B02">
+                        <enum>(xxii)</enum>
+ <text>So much of the American Opportunity Tax Credit under <external-xref legal-doc="usc" parsable-cite="usc/26/25A">section 25A</external-xref> of the Internal Revenue Code of 1986 as is allowed under subsection (i) thereof.</text>
+                    </clause>
+                    <clause id="idd5c61be326414808b47b0e7efde23db6" commented="no">
+                        <enum>(xxiii)</enum>
+ <text>Such other transfers by or at the direction of Federal Government or State, local, or other government sources that the Director determines to be consistent with subparagraph (A) using available data sources.</text>
+                    </clause>
+                </subparagraph>
+            </paragraph>
+            <paragraph id="H523E527B25AE4DB5B143977736752FB2">
+                <enum>(5)</enum>
+                <header>Income tax data</header>
+ <text display-inline="yes-display-inline">The term <term>income tax data</term> means return information, as defined in <external-xref legal-doc="usc" parsable-cite="usc/26/6103">section 6103(b)(2)</external-xref> of the Internal Revenue Code of 1986 (<external-xref legal-doc="usc" parsable-cite="usc/26/6103">26 U.S.C. 6103(b)(2)</external-xref>).</text>
+            </paragraph>
+            <paragraph id="HCEB57E69F371448CADC919D34EC2C411">
+                <enum>(6)</enum>
+                <header>Statistical agency</header>
+ <text display-inline="yes-display-inline">The term <term>statisical agency</term> means—</text>
+                <subparagraph commented="no" display-inline="no-display-inline" id="id8048f86a8dfb4faaaf278df592e7e896">
+                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the Bureau of Labor Statistics of the Department of Labor;</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="idecf9b8cc8e744b648bb0f5d126363b4f">
+                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the Bureau of Economic Analysis of the Department of Commerce; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="idf42af71cbacf4ddf92ce0bc4db4beab2">
+                    <enum>(C)</enum>
+ <text>any other Federal, State, or local government entity that collects, processes, or publishes data related to any of the components of income covered by this Act.</text>
+                </subparagraph>
+            </paragraph>
+            <paragraph id="H2F5AC3F4BE064642B5FF2A50F371184F" commented="no">
+                <enum>(7)</enum>
+                <header>Taxes</header>
+                <subparagraph id="H607161A70FDA466DACFD9D33CE3B6F87">
+                    <enum>(A)</enum>
+                    <header>In general</header>
+                    <clause commented="no" display-inline="no-display-inline" id="idfadabbca930f433a97819011a81b8f7b">
+                        <enum>(i)</enum>
+                        <header display-inline="yes-display-inline">General definition</header>
+ <text>The term <term>taxes</term> means all money revenues paid by individuals, families, or households to the Federal Government or a State, local, or other government either directly or indirectly through an employer or other entity based on their earnings from employment, savings, investing, real estate, trusts, or other sources or on the value, ownership, or usage of real estate property, personal property, other assets of any kind, or purchases of goods and services (including both real and financial).</text>
+                    </clause>
+                    <clause commented="no" display-inline="no-display-inline" id="id6ffb2f11851b47749006fb93e2b3375b">
+                        <enum>(ii)</enum>
+                        <header>Inclusions</header>
+ <text display-inline="yes-display-inline">The term <term>taxes</term> includes—</text>
+                        <subclause id="ide399a8c6f2a14d43a24d7b30f3a817bb" commented="no">
+                            <enum>(I)</enum>
+ <text display-inline="yes-display-inline">employment taxes under subtitle C of the Internal Revenue Code of 1986 (whether paid by the employer or employee);</text>
+                        </subclause>
+                        <subclause id="idd8d3f65655034c259294bf2b3c807d7d" commented="no" display-inline="no-display-inline">
+                            <enum>(II)</enum>
+ <text>income taxes, including taxes on investment income;</text> </subclause> <subclause id="HDDFA03B9C51D4667AFD6957D8CC224BA" commented="no"> <enum>(III)</enum> <text>corporate income taxes allocated to shareholders based on best research on share of corporate taxes that reduce dividends;</text>
+                        </subclause>
+                        <subclause id="H8FD211FF2D374AC18F68B13F5C2B8016" commented="no">
+                            <enum>(IV)</enum>
+ <text>corporate income taxes allocated to employees based on best research on share of corporate taxes that reduce compensation;</text>
+                        </subclause>
+                        <subclause id="H69CED17756664C3394CBD0AC7AC14FB1" commented="no">
+                            <enum>(V)</enum>
+ <text>self-employment income and payroll taxes;</text> </subclause> <subclause id="HF246A52833214FCDBD68EFE1F3C98866" commented="no"> <enum>(VI)</enum> <text>property taxes;</text>
+                        </subclause>
+                        <subclause id="H1A15ED9025BB4F72862010B4FCFBBB53" commented="no">
+                            <enum>(VII)</enum>
+ <text>capital gains taxes;</text> </subclause> <subclause id="H7368FBCD5B4E4A3591BD9BF5422A884A" commented="no"> <enum>(VIII)</enum> <text>estate taxes;</text>
+                        </subclause>
+                        <subclause id="HF3580707848F46498A5645655AB8E76B" commented="no">
+                            <enum>(IX)</enum>
+ <text>inheritance taxes;</text> </subclause> <subclause id="HDAAD4AA01B424B869E64D8550405BCF2" commented="no"> <enum>(X)</enum> <text display-inline="yes-display-inline">gift taxes;</text>
+                        </subclause>
+                        <subclause id="H1812069EC848413C9D772DB50FFDE779" commented="no">
+                            <enum>(XI)</enum>
+ <text>sales taxes, use taxes, value added taxes, or any other fee collected by government on sales of any goods or any services (either real or financial) to households or individuals;</text>
+                        </subclause>
+                        <subclause id="H010B172C278A435EB2C64DBA31FE6F63" commented="no">
+                            <enum>(XII)</enum>
+ <text>excise taxes paid either separately or included as part of the price paid for a good or service;</text>
+                        </subclause>
+                        <subclause id="H35270247B5004E8C8AA97F1735CA7845" commented="no">
+                            <enum>(XIII)</enum>
+ <text>tariffs and duties paid either directly or as part of the price paid for a good or service; and</text>
+                        </subclause>
+                        <subclause id="H911CEA666E314C4B9EEC4034AC8B92F0">
+                            <enum>(XIV)</enum>
+ <text>such other sources of money revenues that the Director determines to be consistent with clause (i).</text>
+                        </subclause>
+                    </clause>
+                </subparagraph>
+                <subparagraph id="H4F66CA73398541AD986F3BEFBCED9F64" commented="no">
+                    <enum>(B)</enum>
+                    <header>Special rules for determining amounts of tax</header>
+                    <clause id="H08C103017A484E84BB3AAF11E6095A5B">
+                        <enum>(i)</enum>
+                        <header>In general</header>
+ <text display-inline="yes-display-inline">For purposes of subparagraph (A), totals of taxes shall be reconciled and adjusted to sum to total tax and other revenue income available from other reliable sources, including the Office of Management and Budget, the Department of the Treasury, and the Bureau of Economic Analysis.</text>
+                    </clause>
+                    <clause id="id26e5691b33334d5fa415a6dac5a43679" commented="no">
+                        <enum>(ii)</enum>
+                        <header>Treatment of tax credits</header>
+ <text>With respect to any taxpayer:</text> <subclause id="id287e5b142df94ff7a02196d7bafc539a"> <enum>(I)</enum> <text>The amount of taxes paid shall be determined without regard to any refund paid to the taxpayer which is attributable to any refundable credit under subpart C of part IV of subchapter A of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/1">chapter 1</external-xref> of the Internal Revenue Code of 1986.</text>
+                        </subclause>
+                        <subclause id="idd33d1d420e3c43dab33cb590f9aafa3a" commented="no" display-inline="no-display-inline">
+                            <enum>(II)</enum>
+ <text>The amount of any refund paid to the taxpayer which is attributable to any such refundable credit shall be treated as a government transfer payment in accordance with paragraph (3).</text>
+                        </subclause>
+                    </clause>
+                </subparagraph>
+            </paragraph>
+        </section>
+        <section id="H0D2E96DF6E524B8F9D837DA8B580DAA8">
+            <enum>3.</enum>
+            <header>Adjustment of Census income inequality calculation</header>
+            <subsection id="H3DD42C66DC3144D1906C574FA6446A3E">
+                <enum>(a)</enum>
+                <header>New methodology</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="id33c7e0ad25434eaeaad54816b867d2fd">
+                    <enum>(1)</enum>
+                    <header display-inline="yes-display-inline">In general</header>
+ <text display-inline="yes-display-inline">Not later than 1 year after the date of enactment of this Act, the Director, in consultation with the heads of other appropriate Federal, State, and local agencies, as determined by the Director, shall implement a new methodology to measure poverty, in addition to the Official Poverty Measure and the Supplemental Poverty Measure, that—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="ide3ae516419ff43169918bc115a94cc40">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">uses the methodology outlined in the report of the Congressional Budget Office titled <quote>Reconciling the Official Poverty Measure and CBO’s Distributional Analysis of Household Income</quote>; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id44af600d0fb9428d900b267f2b493103">
+                        <enum>(B)</enum>
+ <text>measures the income of an individual as the amount equal to—</text> <clause commented="no" display-inline="no-display-inline" id="idcd226a853e32405ba2cf421ca8a18a98"> <enum>(i)</enum> <text display-inline="yes-display-inline">the sum of earned income and government transfer payments received by the individual, less</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id535f7e96cf3349549b67a57fd6493faa">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">the taxes paid by the individual.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="ida2d18744171d48348c58b1a9fb00b831">
+                    <enum>(2)</enum>
+                    <header>Resolution of potential conflict</header>
+ <text>To the extent of any conflict between the requirements under subparagraphs (A) and (B) of paragraph (1), the requirement under such subparagraph (A) shall supersede the requirement under such subparagraph (B).</text>
+                </paragraph>
+            </subsection>
+            <subsection id="H2FA477805F444C22B0D5DCBE98B3E180">
+                <enum>(b)</enum>
+                <header>Agency data</header>
+                <paragraph id="H873D7CBC2142467EBFE96DE08E450C37">
+                    <enum>(1)</enum>
+                    <header>Federal agencies</header>
+ <text>Not later than 180 days after the head of a Federal agency receives a request from the Director for data possessed or reasonably obtainable by such Federal agency for carrying out this section, such head shall make available to the Director such data to the extent otherwise permitted by law.</text>
+                </paragraph>
+                <paragraph id="H03642D6A2EC4449AAA1CF8F8D12F542E">
+                    <enum>(2)</enum>
+                    <header>State and local agencies</header>
+ <text>The Director may request the head of a State or local agency that is an administering agency to provide such data as the Director determines necessary to carry out this section.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="HC900537C14C84D9BAF496B54F6272881">
+                <enum>(c)</enum>
+                <header>Publication of data</header>
+                <paragraph id="H3D62ED27285F4C90A40B67B4C0E75D27">
+                    <enum>(1)</enum>
+                    <header>Data report</header>
+ <text display-inline="yes-display-inline">Not later than 1 year after the date on which the Director implements the new methodology required under subsection (a), the Director shall submit to Congress a report detailing the implementation of this Act, including the availability and quality of data from the administering agencies from which the Director has requested information for carrying out this section.</text>
+                </paragraph>
+                <paragraph id="H640F1969E04F4AEBA2B13A2609CFB98A">
+                    <enum>(2)</enum>
+                    <header>Measurement report</header>
+                    <subparagraph id="HFBF3BC4E026F4581AE8BF3560800BC18">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text display-inline="yes-display-inline">Not later than 1 year after the date on which the Director implements the new methodology required under subsection (a), the Director shall submit to Congress a report detailing the implementation of this Act, including—</text>
+                        <clause id="H5F188209117149AEA23F3B8A6664DC50">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the recalculated measures of income inequality based on the new calculation methodology implemented under subsection (a);</text>
+                        </clause>
+                        <clause id="H7E4771F6399B4CE4871352A765DD28BB">
+                            <enum>(ii)</enum>
+ <text>a comparison between the recalculated measures of income inequality and of household income dispersion based on the new calculation methodology implemented under subsection (a) and such measures based on the calculation methodologies in use for such measures on the day before the date on which such new calculation methodology was implemented; and</text>
+                        </clause>
+                        <clause id="HED19A594740F4D7183AD78232D03BD4B">
+                            <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">a comparison between each statistic tracked by the Bureau of the Census based on the new calculation methodology implemented under subsection (a) and such statistic based on the calculation methodologies in use for such statistic on the day before the date on which such new calculation methodology was implemented.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="HC2CDD1311CD94A44BA70B71E01668780">
+                        <enum>(B)</enum>
+                        <header>Data sources</header>
+                        <clause id="HBD314A8499F74E86AB649B82E491EDDE">
+                            <enum>(i)</enum>
+                            <header>In general</header>
+ <text>The Director shall use the best available data sources in creating the report required under subparagraph (A), including the use of surveys previously collected by the Bureau of the Census, data from other statistical agencies, data from private sources, and, in cases of missing or unknown data, statistical imputations.</text>
+                        </clause>
+                        <clause id="HAC61AB49015E4609942836CBF8F6387B">
+                            <enum>(ii)</enum>
+                            <header>Survey augmentation</header>
+ <text display-inline="yes-display-inline">In carrying out clause (i), the Director may augment surveys being carried out by the Bureau of the Census or the Bureau of Labor Statistics of the Department of Labor.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HB5DC82E38D724328917165B6E15D7965">
+                    <enum>(3)</enum>
+                    <header>Statistics publication</header>
+ <text display-inline="yes-display-inline">For all publications and data sets issued after the date on which the Director implements the new methodology required under subsection (a), the Director shall use such new calculation methodology to calculate each instance of each measure or statistic based on such methodology, including each historical instance.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="HDE18ADACC70A4888A929FED0D6A17DAA">
+                <enum>(d)</enum>
+                <header>Protection and disclosure of personally identifiable information</header>
+                <paragraph id="HD6911530BA9D44E4AE71C6516C777823">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">The security, disclosure, and confidentiality provisions set for in sections 9 and 23 of title 13, United States Code, shall apply to personally identifiable information obtained by the Bureau of the Census pursuant to this Act.</text>
+                </paragraph>
+                <paragraph id="H0E343E8BEC364B498603A7E955B34F3B">
+                    <enum>(2)</enum>
+                    <header>Restricted access to personally identifiable information</header>
+ <text display-inline="yes-display-inline">Access to personally identifiable information collected to supplement the restricted-use Current Population Survey Annual Social and Economic Supplements in accordance with subsection (b)(1) shall be available only to those who have access to the Current Population Survey data with the permission of the Bureau of the Census and in accordance with any other applicable provision of Federal and State law.</text>
+                </paragraph>
+                <paragraph id="HC3E13F98EFEE4B548599F13F75F4E227" commented="no" display-inline="no-display-inline">
+                    <enum>(3)</enum>
+                    <header>Criminal penalties</header>
+ <text display-inline="yes-display-inline">Any individual who knowingly accesses or discloses personally identifiable information in violation of this section shall be fined not more than $300,000, imprisoned for not more than 5 years, or both.</text>
+                </paragraph>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H79623B4EB4744EB68F07CCE1DCAB43AB" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8102 IH: Workforce Investments Accountability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8102</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260326">March 26, 2026</action-date><action-desc><sponsor name-id="F000450">Ms. Foxx</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Workforce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Workforce Innovation and Opportunity Act to enhance the performance accountability system and dedicate funding to skills development.</official-title></form><legis-body id="H6C2D9FBC63644000B4E921AA0CB8CC23" style="OLC"> 
+<section id="HB8C7DF45452E4BA68408DE9025CE52DE" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Workforce Investments Accountability Act</short-title></quote>.</text></section> <section id="H0D087E466F72447F8634433751895989"><enum>2.</enum><header>Performance accountability system</header> <subsection id="H280F0557153049B39797824474571579"><enum>(a)</enum><header>State performance accountability measures</header> <paragraph id="HCD7B0B5E482E4D50ADDA64DF83EB0D20"><enum>(1)</enum><header>Primary indicators of performance</header><text>Section 116(b)(2)(A) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(b)(2)(A)</external-xref>) is amended—</text> 
+<subparagraph id="H105AEE2E516F438EA421A876D170A7AB"><enum>(A)</enum><text>in clause (i)—</text> <clause id="H70CAFFF9F63D49F5856C2EDA11CC49F5"><enum>(i)</enum><text>in subclause (II)—</text> 
+<subclause id="H66ED2F340B974B6297DB36861F133903"><enum>(I)</enum><text>by striking <quote>fourth</quote> and inserting <quote>second</quote>; and</text></subclause> <subclause id="H867646448224408D92A67462CADF35A0"><enum>(II)</enum><text>by inserting <quote>and remain in unsubsidized employment during the fourth quarter after exit from the program</quote> after <quote>the program</quote>;</text></subclause></clause> 
+<clause id="H08A09E308BEA48B09D0CE227BB0DB400"><enum>(ii)</enum><text>in subclause (IV), by striking <quote>secondary school diploma</quote> and inserting <quote>regular high school diploma</quote>;</text></clause> <clause id="H1444D9CD6AEA4AC081010400FB2D1EFB"><enum>(iii)</enum><text>in subclause (V)—</text> 
+<subclause id="HA38FF7E89AE64D9F83E275DE2A4A2383"><enum>(I)</enum><text>by striking <quote>, during a program year, are in</quote> and inserting <quote>enter into</quote>; and</text></subclause> <subclause id="H41DC643A64F74245995AD38657BEA4A3"><enum>(II)</enum><text>by inserting before the semicolon at the end the following: <quote>within 12 months after the quarter in which the participant enters into the education and training program</quote>; and</text></subclause></clause> 
+<clause id="H95846C83F1A5437E94E777CD8D249BBB"><enum>(iv)</enum><text>by amending subclause (VI) to read as follows:</text> <quoted-block id="H25F0F864ECB9467DB594F4FBF29D61BB" style="OLC"> <subclause id="H41BD6724381D4F538ECB731D388187E4"><enum>(VI)</enum><text>of the program participants who received training services during a program year, the percentage of such program participants who participated in on-the-job training, employer-directed skills development, incumbent worker training, or an apprenticeship.</text></subclause><after-quoted-block>;</after-quoted-block></quoted-block></clause></subparagraph> 
+<subparagraph id="H977E565B784D43F0A30154BB5F40697F"><enum>(B)</enum><text>in clause (ii)—</text> <clause id="H053694000C4F45F499DDCB4A4A6DFB00"><enum>(i)</enum><text>in subclause (II)—</text> 
+<subclause id="H1D55B71F75DC49C49DBD003605D71C4E"><enum>(I)</enum><text>by striking <quote>fourth</quote> and inserting <quote>second</quote>;</text></subclause> <subclause id="H666E54916CAC44E792171A3343206A48"><enum>(II)</enum><text>by inserting <quote>, and who remain either in such activities or unsubsidized employment during the fourth quarter after exit from the program</quote> after <quote>the program</quote>; and</text></subclause> 
+<subclause id="HAE1338C1A86944E9B991572279FF3C38"><enum>(III)</enum><text>by striking <quote>and</quote> at the end;</text></subclause></clause> <clause id="H6121FAAD8F1143D2AD93753B586F0B54"><enum>(ii)</enum><text>in subclause (III)—</text> 
+<subclause id="H19CCDE4B34CE4B24AD961E5BF43D2E5C"><enum>(I)</enum><text>by striking <quote>(VI)</quote> and inserting <quote>(V)</quote>; and</text></subclause> <subclause id="HA57E61AD0C4A43FAAD7A6A721F586F2B"><enum>(II)</enum><text>by striking the period at the end and inserting <quote>; and</quote>; and</text></subclause></clause> 
+<clause id="H0811C3CCFFD145B8890221E316E5FB50"><enum>(iii)</enum><text>by adding at the end the following:</text> <quoted-block id="H144E205630BE488C9310219907092ECE" style="OLC"> <subclause id="H7918CDFFEB4249AFA9AE32509DD95AD2"><enum>(IV)</enum><text>of the program participants who exited the program during a program year, the percentage of such program participants who completed, prior to such exit, a work experience as described in section 129(c)(2)(C).</text></subclause><after-quoted-block>;</after-quoted-block></quoted-block></clause></subparagraph> 
+<subparagraph id="H7EA7F4668FFE43DEBBBD4274C779730B"><enum>(C)</enum><text>in clause (iii), by striking <quote>secondary school diploma</quote> and inserting <quote>regular high school diploma</quote>; and</text></subparagraph> <subparagraph id="H53F871B91E9C4A109BFE41E339FD86EE"><enum>(D)</enum><text>by striking clause (iv).</text></subparagraph></paragraph> 
+<paragraph id="HD060ED417DD34BABB9C210D98054BF16"><enum>(2)</enum><header>Levels of performance</header><text>Section 116(b)(3)(A) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(b)(3)(A)</external-xref>) is amended—</text> <subparagraph id="H30C11C7446CA4D4F913955A0C8F217BB"><enum>(A)</enum><text>by amending clause (iii) to read as follows:</text> 
+<quoted-block id="HEEEEBF527378438E8CE86AA6B470BAC7" style="OLC"> 
+<clause id="H8520C21ECF8F49BD900BFF7454B3584A"><enum>(iii)</enum><header>Identification in State plan</header> 
+<subclause id="HA6BADEA5324246DB8A70EDCF8DD1CFC4"><enum>(I)</enum><header>Secretaries</header><text>For each State submitting a State plan, the Secretary of Labor and the Secretary of Education shall, not later than January 15 of the year in which such State plan is submitted, for the first 2 program years covered by the State plan, and not later than January 15 of the second program year covered by the State plan, for the third and fourth program years covered by the State plan—</text> <item id="H7F486E1A4D7748CEA23DEC1944C74086"><enum>(aa)</enum><text>propose to the State expected levels of performance, for each of the corresponding primary indicators of performance for each of the programs described in clause (ii) for such State, which shall—</text> 
+<subitem id="H1CA89AFEECBD49B89C2EA1C8B2E998A6"><enum>(AA)</enum><text>be consistent with the factors listed in clause (v); and</text></subitem> <subitem id="H00C18F63A1D44BDFB939AB2E6B4C3920"><enum>(BB)</enum><text>be proposed in a manner that ensures sufficient time is provided for the State to evaluate and respond to such proposals; and</text></subitem></item> 
+<item id="H56705DC22FEB437890657C65F32DD84B"><enum>(bb)</enum><text>publish, on a public website of the Department of Labor, the statistical model developed under clause (viii) and the methodology used to develop each such expected level of performance.</text></item></subclause> <subclause id="H72B8599B7D3445B8B77629FE407C4B89"><enum>(II)</enum><header>States</header><text>Each State shall—</text> 
+<item id="H097AEC498D204CBB972C4F475E5AEEA6"><enum>(aa)</enum><text>evaluate each of the expected levels of performance proposed under subclause (I) with respect to such State;</text></item> <item id="H46FEB2B8E05547E591DC519FDA7F0D4C"><enum>(bb)</enum><text>based on such evaluation of each such expected level of performance—</text> 
+<subitem id="HA510334350004FAEBACC71D5484B1DDE"><enum>(AA)</enum><text>accept the expected level of performance as so proposed; or</text></subitem> <subitem id="HD92FDE8C0D994930B498775ED9AD31EB"><enum>(BB)</enum><text>provide a counterproposal for such expected level of performance, including an analysis of how the counterproposal addresses factors or circumstances unique to the State that may not have been accounted for in the expected level of performance; and</text></subitem></item> 
+<item id="HE78A4BB44EBA43439572F6E0EC311C10"><enum>(cc)</enum><text>include in the State plan, with respect to each of the corresponding primary indicators of performance for each of the programs described in clause (ii) for such State—</text> <subitem id="HB3E8D10DFBF24E8FB9FAE0930519A613"><enum>(AA)</enum><text>the expected level of performance proposed under subclause (I);</text></subitem> 
+<subitem id="HA3CB899B97B048B6B5A7931A9949693F"><enum>(BB)</enum><text>the counterproposal for such proposed level, if any; and</text></subitem> <subitem id="H2A9A618495DA4F319165E65C5429FF6D"><enum>(CC)</enum><text>the level of performance that is agreed to under clause (iv).</text></subitem></item></subclause></clause><after-quoted-block>;</after-quoted-block></quoted-block></subparagraph> 
+<subparagraph id="H05AF189BD22747CC95422670D4009CD8"><enum>(B)</enum><text>in clause (iv)—</text> <clause id="H12071AE7548E494DB344A9B530AE0DF1"><enum>(i)</enum><text>in subclause (I)—</text> 
+<subclause id="H3713E7FEABF74ECFAE1DD6A24AF87759"><enum>(I)</enum><text>in the second sentence, by striking <quote>the levels identified in the State plan under clause (iii) and the factors described in clause (v)</quote> and inserting <quote>the factors described in clause (v) and any counterproposal, and the analysis provided by the State with such counterproposal, described in clause (iii)(II)(bb)(BB)</quote>; and</text></subclause> <subclause id="HFC728CAD71ED47B48E04D8AC0F8263D6"><enum>(II)</enum><text>in the third sentence, by striking <quote>incorporated into the State plan</quote> and inserting <quote>included in the State plan, as described in clause (iii)(II)(cc),</quote>; and</text></subclause></clause> 
+<clause id="H618F2E01DDE24386B3C92D9BF19A80D6"><enum>(ii)</enum><text>in subclause (II)—</text> <subclause id="HB983DAD8BE41476A83B72D203F82A5F4"><enum>(I)</enum><text>in the second sentence, by striking <quote>the factors described in clause (v)</quote> and inserting <quote>the factors described in clause (v) and any counterproposal, and the analysis provided by the State with such counterproposal, described in clause (iii)(II)(bb)(BB)</quote>; and</text></subclause> 
+<subclause id="H9CF3321FEAA44FE8B4A22E403C96B5DE"><enum>(II)</enum><text>in the third sentence, by striking <quote>incorporated into the State plan</quote> and inserting <quote>included in the State plan, as described in clause (iii)(II)(cc),</quote>; and</text></subclause></clause></subparagraph> <subparagraph id="HAB84DE221F9541B881F6E8BFA841ED39"><enum>(C)</enum><text>in clause (v)(II)—</text> 
+<clause id="H0D1957491050400EB1390D2DA33A1195"><enum>(i)</enum><text>in the matter preceding item (aa), by striking <quote>based on</quote> and inserting <quote>based on each consideration that is found to be predictive of performance on an indicator for a program and consists of</quote>; and</text></clause> <clause id="H1DA16558371F4EE289669949054139DA"><enum>(ii)</enum><text>in item (bb), by inserting <quote>, foster care status, school status, education level, highest grade level completed, and low-income status</quote>.</text></clause></subparagraph></paragraph></subsection> 
+<subsection id="H318982C289B948488D3BCD3306ECBCAE"><enum>(b)</enum><header>Performance reports</header><text>Section 116(d) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(d)</external-xref>) is amended—</text> <paragraph id="H87F04B2202224DE0A48F3539410E6A79"><enum>(1)</enum><text>by amending paragraph (1) to read as follows:</text> 
+<quoted-block id="H553EE87A5E14427AB761EB161809FA2B" style="OLC"> 
+<paragraph id="H1EC69CB46CC640599F2A17DC00F2C6A4"><enum>(1)</enum><header>In general</header> 
+<subparagraph id="H192DEAD67A1247DAB5BED2BDF0F70267"><enum>(A)</enum><header>Templates for performance reports</header><text>Not later than 12 months after the date of enactment of the <short-title>Workforce Investments Accountability Act</short-title>, the Secretary of Labor, in conjunction with the Secretary of Education, shall develop, or review and modify, as appropriate, to comply with the requirements of this subsection, the templates for performance reports that shall be used by States (including by States on behalf of eligible providers of training services under section 122) and local areas to produce a report on outcomes achieved by the core programs. In developing, or reviewing and modifying, such templates, the Secretary of Labor, in conjunction with the Secretary of Education, shall take into account the need to maximize the value of the templates for workers, jobseekers, employers, local elected officials, State officials, Federal policymakers, and other key stakeholders.</text></subparagraph> <subparagraph id="H7D4ACE730A0B43CF802B9C9C517DFED7"><enum>(B)</enum><header>Standardized reporting</header><text>In developing, or reviewing and modifying, the templates under subparagraph (A), the Secretary of Labor, in conjunction with the Secretary of Education, shall ensure that States and local areas, in producing performance reports for core programs and eligible providers of training services, collect and report information on common data elements—</text> 
+<clause id="H6F5CAF88148C404FB7BBE472D022B723"><enum>(i)</enum><text>in a comparable and uniform format; and</text></clause> <clause id="H2993489EF9704775824E4E7C7B398249"><enum>(ii)</enum><text>using terms that are assigned identical meanings across all such reports.</text></clause></subparagraph> 
+<subparagraph id="HD036F1A07D604AA69744F3B7AF74B449"><enum>(C)</enum><header>Additional reporting</header><text>The Secretary of Labor, in conjunction with the Secretary of Education—</text> <clause id="H1E2317230AEB461897D124E8FEA25BDC"><enum>(i)</enum><text>in addition to the information on the common data elements, may require additional information with respect to any core program as necessary for effective reporting; and</text></clause> 
+<clause id="HC1F688CF6D1241BD969FF80033CDFAE2"><enum>(ii)</enum><text>shall periodically review any such requirement for additional information to ensure the requirement is necessary and does not impose an undue reporting burden.</text></clause></subparagraph> <subparagraph id="HBB9C789A52D0446DA6113DF3568FE03B"><enum>(D)</enum><header>Privacy</header><text>The Secretary of Labor, in conjunction with the Secretary of Education, shall ensure subparagraph (B) is carried out in a manner that protects and promotes individual privacy and data security, in accordance with applicable Federal privacy laws.</text></subparagraph> 
+<subparagraph id="HA9513E35A057486B99A7161035FE0B02"><enum>(E)</enum><header>Access to wage records</header> 
+<clause id="HB62DB67F6B2A4747AA8402A82CC9054E"><enum>(i)</enum><header>Access</header><text>A State may facilitate for a local area that meets the requirements of clause (ii), for the sole purpose of fulfilling the reporting requirements under this subsection, access to the quarterly wage records (excluding such records made available by any other State) of program participants in the local area.</text></clause> <clause id="H27AAD4919B5343DDA2FDC0C72F1948EA"><enum>(ii)</enum><header>Privacy protections</header><text>To receive access to such quarterly wage records, the local area shall have demonstrated to the State the ability to comply, and agree to comply, with all applicable Federal and State requirements relating to the access and use of such quarterly wage records, including requirements relating to data privacy and cybersecurity.</text></clause></subparagraph></paragraph><after-quoted-block>;</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="HBF2E2D79A0FB4652AD7C9A1AB5CCC364"><enum>(2)</enum><text>in paragraph (2)—</text> <subparagraph id="H09C96CD8C3864D478C292CCBBAD8F856"><enum>(A)</enum><text>in subparagraph (B), by inserting <quote>, and aggregated to compare those levels of performance for all individuals with barriers to employment with those levels of performance for all other individuals</quote> before the semicolon at the end;</text></subparagraph> 
+<subparagraph id="H6297D7BD993E41F7A386E7BA3CA784C4"><enum>(B)</enum><text>in subparagraphs (D) and (F), by striking <quote>career and training services, respectively</quote> and inserting <quote>career services, training services, and supportive services, respectively</quote>;</text></subparagraph> <subparagraph id="HAD08EBEA6125422483CD8AC17FD49A2F"><enum>(C)</enum><text>by redesignating subparagraphs (J) through (L) as subparagraphs (K) through (M), respectively and inserting after subparagraph (I) the following:</text> 
+<quoted-block id="H0CD7209FA8D946B6A8E9FB87CD16125E" style="OLC"> 
+<subparagraph id="HE9E54A78F8BC4CD4A940D52CC7B5AA51"><enum>(J)</enum><text>the median earnings gain of participants who received training services, calculated as the median value of the difference between—</text> <clause id="H7BDD019753694BC5BC8B40242AB209AF"><enum>(i)</enum><text>participant earnings in unsubsidized employment during the 4 quarters after program exit; and</text></clause> 
+<clause id="H5F5207D332544EF5BFFF7BB65BF14736"><enum>(ii)</enum><text>participant earnings in the 4 quarters prior to entering the program;</text></clause></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block></subparagraph> <subparagraph id="HC48A6E44439B46EA9DA40D5B7E4D3615"><enum>(D)</enum><text>in subparagraph (L), as so redesignated—</text> 
+<clause id="H6DFDCD59569D40818CA693D9532FF4FC"><enum>(i)</enum><text>by striking clause (ii); and</text></clause> <clause id="H5E0526CBA13C4112AE8A71242047D158"><enum>(ii)</enum><text>by striking <quote>strategies for programs</quote> and all that follows through <quote>the performance</quote>, and inserting <quote>strategies for programs, the performance</quote>;</text></clause></subparagraph></paragraph> 
+<paragraph id="HDAFAEABDB1BC47E89F7A2C9BD47C2E84"><enum>(3)</enum><text>in paragraph (3)—</text> <subparagraph id="HBFC696A356F74E819B82765197F2D671"><enum>(A)</enum><text>in subparagraph (A), by striking <quote>(L)</quote> and inserting <quote>(M)</quote>;</text></subparagraph> 
+<subparagraph id="HF5D783BC32BF4522820DC1334F036746"><enum>(B)</enum><text>in subparagraph (B), by striking <quote>and</quote> at the end;</text></subparagraph> <subparagraph id="HA9128452AF87468891054AA9D385E243"><enum>(C)</enum><text>by redesignating subparagraph (C) as subparagraph (F); and</text></subparagraph> 
+<subparagraph id="HA412C071DAFC4A35B1A34E58A5839F30"><enum>(D)</enum><text>by inserting after subparagraph (B) the following:</text> <quoted-block id="H4B907641A547464E82FC44C8FD7DF672" style="OLC"> <subparagraph id="H095012F0A1D54724A77B454DFD45B83A"><enum>(C)</enum><text>the percentage of the local area’s allocation under section 133(b) that the local area spent on services paid for through an individual training account described in section 134(c)(3)(F)(iii) or a training contract described in section 134(c)(3)(G)(ii);</text></subparagraph> 
+<subparagraph id="H11B941A0633C4644B199D2FEA774149D"><enum>(D)</enum><text>the percentage of the local area’s allocation under section 133(b) that the local area spent on supportive services;</text></subparagraph> <subparagraph id="H6B468F9B5D094DF6B01A520A3EB9282D"><enum>(E)</enum><text>the percentage of the local area’s allocation under section 133(b), if any, that is spent on incumbent worker training; and</text></subparagraph><after-quoted-block>;</after-quoted-block></quoted-block></subparagraph></paragraph> 
+<paragraph id="HCBCD3C638D364B6DB7E7480E433A454E"><enum>(4)</enum><text>by amending paragraph (4) to read as follows:</text> <quoted-block id="HCACB50C722984FB290CB399B7CAB48FF" style="OLC"> <paragraph id="HAD107A848866495CB818B13896D67DA8"><enum>(4)</enum><header>Contents of eligible training providers performance report</header> <subparagraph id="HA4FF64E7A96D431DA6685F26EF1F767B"><enum>(A)</enum><header>In general</header><text>The State shall use the information submitted by the eligible providers of training services under section 122 and administrative records, including quarterly wage records, of the participants of the programs offered by the providers to produce a performance report on the eligible providers of training services in the State, which shall include, subject to paragraph (6)(C)—</text> 
+<clause id="HE11A8C151A5B485AB79D8C14C1EFAF2C"><enum>(i)</enum><text>with respect to each program of study (or the equivalent) of a provider on the list described in section 122(d)—</text> <subclause id="H22083A5BB2824A3BA9FECE5EDC4CDAAD"><enum>(I)</enum><text>information specifying the levels of performance achieved with respect to the primary indicators of performance described in subclauses (I) through (IV) of subsection (b)(2)(A)(i) with respect to all individuals engaging in the program of study (or the equivalent); and</text></subclause> 
+<subclause id="H1108E2405ADD4238981BD8A1224D7602"><enum>(II)</enum><text>the total number of individuals exiting from the program of study (or the equivalent), disaggregated by whether such individuals completed the program of study (or equivalent); and</text></subclause></clause> <clause id="H4D8757DE1AC94EC397E3C5868E376206"><enum>(ii)</enum><text>with respect to all eligible providers of training services under section 122—</text> 
+<subclause id="H8DC9345A8A50427382A8C64AA534A4A4"><enum>(I)</enum><text>the total number of participants who received training services through each adult and dislocated worker program authorized under chapter 3 of subtitle B, disaggregated by the type of entity that provided the training services, during the most recent program year and the 3 preceding program years;</text></subclause> <subclause id="H3D39A8E6F20B48D4A6E501C0A62EB507"><enum>(II)</enum><text>the total number of participants who exited from training services, disaggregated by the type of entity that provided the training services, and by whether such participants completed the training services, during the most recent program year and the 3 preceding program years;</text></subclause> 
+<subclause id="H20D878249386400EA1C8A810EBA23691"><enum>(III)</enum><text>the average cost per participant for the participants who received training services, disaggregated by the type of entity that provided the training, during the most recent program year and the 3 preceding program years;</text></subclause> <subclause id="H7BA4C451CA7841C4BAC347E4D69A4A5E"><enum>(IV)</enum><text>the average of the per-program ratios of median earnings increase for a participant to the total cost of the provider’s program; and</text></subclause> 
+<subclause id="HB914330C4F87479FB439D620ACA53C4A"><enum>(V)</enum><text>the number of individuals with barriers to employment served by each adult and dislocated worker program authorized under chapter 3 of subtitle B, disaggregated by each subpopulation of such individuals, and by race, ethnicity, sex, and age; and</text></subclause></clause> <clause id="HC0E1DEAFED184E2E9FAAC35E60FA9035"><enum>(iii)</enum><text>to the extent practicable, with respect to each recognized postsecondary credential awarded by eligible providers in the State described in section 122(d)—</text> 
+<subclause id="HAC4E50B03D2A4F5CB154545E4566545A"><enum>(I)</enum><text>information specifying the levels of performance achieved with respect to the primary indicators of performance described in subclauses (I) through (IV) of subsection (b)(2)(A)(i) for all participants in the State receiving such credential; and</text></subclause> <subclause id="H5B78E87EFDE146499BFB177AFB9312C0"><enum>(II)</enum><text>information specifying the levels of performance achieved with respect to the primary indicators of performance described in subclauses (I) through (IV) of subsection (b)(2)(A)(i) for participants in the State receiving such credential who are individuals with barriers to employment, disaggregated by each subpopulation of such individuals, and by race, ethnicity, sex, and age.</text></subclause></clause></subparagraph></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="H3F729C30A6244BFA82B7402A42AF101E"><enum>(5)</enum><text>in paragraph (6)—</text> <subparagraph id="H8CBD583B58704F31A4FB96AB62596C99"><enum>(A)</enum><text>by amending subparagraph (A) to read as follows:</text> 
+<quoted-block id="H89C451289F1E4EADA77CC88E1C5DC282" style="OLC"> 
+<subparagraph id="H5BD092044DC348FCA64D1D17425D5EB9"><enum>(A)</enum><header>State performance reports</header><text>The Secretary of Labor and the Secretary of Education shall annually make available the performance reports for States containing the information described in paragraph (2), which shall include making such reports available—</text> <clause id="HEF79BFA05FBE4B9CB6237490688E9DA8"><enum>(i)</enum><text>digitally using transparent, linked, open, and interoperable data formats that are human readable and machine actionable such that the data from these reports—</text> 
+<subclause id="H0B7C4D3565644447B9E4B60A8D75E0BC"><enum>(I)</enum><text>are easily understandable; and</text></subclause> <subclause id="H6A6BB48993924E9AA24E6E64098FEC77"><enum>(II)</enum><text>can be easily included in web-based tools and services supporting search, discovery, comparison, analysis, navigation, and guidance;</text></subclause></clause> 
+<clause id="H47C850FF8A5B4500B80E6B16FB2E7F4E"><enum>(ii)</enum><text>in a printable format; and</text></clause> <clause id="H685FABDF289544058A205EC9EF023728"><enum>(iii)</enum><text>in multiple languages, to the extent practicable.</text></clause></subparagraph><after-quoted-block>;</after-quoted-block></quoted-block></subparagraph> 
+<subparagraph id="HBBD59FE7AD0645C2BDE3D36A85FAD2F9"><enum>(B)</enum><text>in subparagraph (B)—</text> <clause id="H1F37CA580B2144FBAA0AFD1C1648D2BC"><enum>(i)</enum><text>by striking <quote>(including by electronic means), in an easily understandable format,</quote>; and</text></clause> 
+<clause id="HE635E41607924260A7F298B7BC0D8010"><enum>(ii)</enum><text>by adding at the end the following: <quote>The Secretary of Labor and the Secretary of Education shall include, on the website where the State performance reports are required under subparagraph (A) to be made available, a link to local area performance reports and the eligible provider of training services report for each State. Such reports shall be made available in each of the formats described in subparagraph (A).</quote>; and</text></clause></subparagraph> <subparagraph id="HD24DE93A90E8430D9ED010F8E29C68CE"><enum>(C)</enum><text>by adding at the end the following:</text> 
+<quoted-block id="H8257EB27ED844EC9B81286844FA105F1" style="OLC"> 
+<subparagraph id="HA6BFBAA2A3904A60AA53A3DFBEFE3B70" commented="no"><enum>(E)</enum><header>Rule of construction</header><text>Nothing in this subsection shall be construed to require the retroactive collection of information, from program years beginning prior to the date of the enactment of the <short-title>Workforce Investments Accountability Act</short-title>, that was not required under this subsection prior to such enactment.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subparagraph></paragraph></subsection> <subsection id="H7109B8C1E659400F852EA4DAAD8DA7B8"><enum>(c)</enum><header>Evaluation of state programs</header><text>Section 116(e) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(e)</external-xref>) is amended—</text> 
+<paragraph id="H825734E09CC1470DAB5842AF32EA2B5B"><enum>(1)</enum><text>in paragraph (1)—</text> <subparagraph id="HE88DE7544FA346B2B4B005C21A7CEDC1"><enum>(A)</enum><text>in the first sentence, by striking <quote>shall conduct ongoing</quote> and inserting <quote>shall use data to conduct analyses and ongoing</quote>; and</text></subparagraph> 
+<subparagraph id="HAD991CAEE5BF4AE1BD8D98BFE2C92C6E"><enum>(B)</enum><text>in the second sentence, by striking <quote>conduct the</quote> and inserting <quote>conduct such analyses and</quote>; and</text></subparagraph></paragraph> <paragraph id="H53F1585095F047BCB119E939662FC687"><enum>(2)</enum><text>in paragraph (2), by adding <quote>A State may use various forms of analysis, such as machine learning or other advanced analytics, to improve program operations and outcomes and to identify areas for further evaluation.</quote> at the end.</text></paragraph></subsection> 
+<subsection id="H09A852CFF1024CD59BC25DEC7EA23C51">
+        <enum>(d)</enum>
+        <header>Sanctions for state failure To meet state performance accountability
+          measures</header>
+ <text>Section 116(f) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(f)</external-xref>) is amended to read as follows:</text>
+        <quoted-block id="HC5290D40A3CF44C5878042EA2F8A7686" style="OLC">
+          <subsection id="H783F3EBE348D4F928E0D266D4665EB32">
+            <enum>(f)</enum>
+            <header>Sanctions for state failure To meet state performance accountability
+              measures</header>
+            <paragraph id="HCA83FE8A24AD4773B8CB26661A154115">
+              <enum>(1)</enum>
+              <header>Targeted support and assistance</header>
+              <subparagraph id="H6056F4E939B8444C951F4E37A89DE2E1">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>If a State fails to meet 80 percent of the State adjusted level of performance for an indicator described in subsection (b)(2)(A) (referred to in the regulations carrying out this section as an <quote>individual indicator score</quote>) for a core program for any program year, the Secretary of Labor and the Secretary of Education shall provide technical assistance.</text>
+              </subparagraph>
+              <subparagraph id="H158D7662983647768B9EBA733DC1F71F">
+                <enum>(B)</enum>
+                <header>Sanctions</header>
+                <clause id="H899C187DED1E4697BD04C6E0EB7BB4F3">
+                  <enum>(i)</enum>
+                  <header>In general</header>
+ <text>If the State fails in the manner described in subclause (I) or (II) of clause (ii) with respect to the program year specified in that subclause, the percentage of each amount that could (in the absence of this subsection) be reserved by the Governor under section 128(a)(1) for the immediately succeeding program year shall be reduced by 5 percent and an amount equivalent to the amount reduced shall be returned to the Secretary of Labor until such date as the Secretary of Labor or the Secretary of Education, as appropriate, determines that the State meets the State adjusted level of performance, in the case of a failure described in clause (ii)(II), or has submitted the reports for the appropriate program years, in the case of a failure described in clause (ii)(I).</text>
+                </clause>
+                <clause id="HEEF4894108D14883B6678ADF98FF5AAB">
+                  <enum>(ii)</enum>
+                  <header>Failures</header>
+ <text>A State shall be subject to clause (i)—</text> <subclause id="H2D2593C7C5264EA6B5EEA720DC4E16F8"> <enum>(I)</enum> <text>if (except in the case of exceptional circumstances as determined by the Secretary of Labor or the Secretary of Education, as appropriate), such State fails to submit a report under subsection (d) for any program year; or</text>
+                  </subclause>
+                  <subclause id="H6D2947DB26584795BD8EBAD6DAC2BBDA">
+                    <enum>(II)</enum>
+ <text>for a failure under subparagraph (A) that has continued for a second consecutive program year.</text>
+                  </subclause>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="HB0D942E322E041E488975C7169186936">
+              <enum>(2)</enum>
+              <header>Comprehensive support and assistance</header>
+              <subparagraph id="H883E3327EF8046AF9FD80EBE3AD14F4C">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>If a State fails to meet an average of 90 percent of the State adjusted levels of performance for a single core program across all indicators of performance (referred to in the regulations carrying out this section as an <quote>overall State program score</quote>) for any program year, or if a State fails to meet an average of 90 percent of the State adjusted levels of performance for a single indicator of performance across all core programs (referred to in the regulations carrying out this section as an <quote>overall State indicator score</quote>) for any program year, the Secretary of Labor and the Secretary of Education shall provide technical assistance, as described and authorized under section 168(b), including assistance in the development of a comprehensive performance improvement plan.</text>
+              </subparagraph>
+              <subparagraph id="HE4D66C4D891E4BACA9636F83044CBB65">
+                <enum>(B)</enum>
+                <header>Second consecutive year failure</header>
+ <text>If such failure under subparagraph (A) continues for a second consecutive program year, the percentage of each amount that could (in the absence of this subsection) be reserved by the Governor under section 128(a)(1) for the immediately succeeding program year shall be reduced by 8 percent and an amount equivalent to the amount reduced shall be returned to the Secretary of Labor until such date as the Secretary of Labor or the Secretary of Education, as appropriate, determines that the State meets such State adjusted levels of performance.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H06965E65A43341B58D5ED852CF78FA8D">
+              <enum>(3)</enum>
+              <header>Limitation</header>
+ <text>The total reduction under this subsection to the percentage of each amount that could (in the absence of this subsection) be reserved by the Governor under section 128(a)(1) may not exceed 10 percent for a program year.</text>
+            </paragraph>
+            <paragraph id="H8AC158ABBB154911B2820B4384DA3612">
+              <enum>(4)</enum>
+              <header>Reallotment of reductions</header>
+              <subparagraph id="HA91A3EAE5DE34494B5A1DD97918CE032">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>The amounts available for reallotment for a program year shall be reallotted to a State (in this paragraph referred to as an <quote>eligible State</quote>) that—</text>
+                <clause id="H3034CC6EAD474ADCBA06FED7F83394F0">
+                  <enum>(i)</enum>
+ <text>was not subject to a reduction of funds under paragraph (1)(B) or paragraph (2)(B) of this subsection for such program year;</text>
+                </clause>
+                <clause id="H349475EDE5C143E6845C3ED07267B4E3">
+                  <enum>(ii)</enum>
+ <text>in the case of amounts available under section 127(b)(1)(C), was 1 of the 5 States that achieved, in the most recent program year, the greatest increase from the prior year to the average of the State’s adjusted levels of performance across all indicators of performance for the youth program under chapter 2 of subtitle B;</text>
+                </clause>
+                <clause id="H1B673CD4FD124A3DBD7A3D4E47BC7E0C">
+                  <enum>(iii)</enum>
+ <text>in the case of amounts available under section 132(b)(1)(B), was 1 of the 5 States that achieved, in the most recent program year, the greatest increase from the prior year to the average of the State’s adjusted levels of performance across all indicators of performance for the adult program under chapter 3 of subtitle B; and</text>
+                </clause>
+                <clause id="HE5C6AE4176EE435F8F656B3924876BE7">
+                  <enum>(iv)</enum>
+ <text>in the case of amounts available under section 132(b)(2)(B), was 1 of the 5 States that achieved, in the most recent program year, the greatest increase from the prior year to the average of the State’s adjusted levels of performance across all indicators of performance for the dislocated worker program under chapter 3 of subtitle B.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="HBBD09E52F47F45C6A11BCEF8D6B01486">
+                <enum>(B)</enum>
+                <header>Amounts available for reallotment</header>
+ <text>In this paragraph, the term <quote>amounts available for reallotment for a program year</quote> means the amounts available under section 127(b)(1)(C) and paragraphs (1)(B) and (2)(B) of section 132(b) for such program year which could (in the absence of the requirements to return funds of paragraph (1)(B) or paragraph (2)(B) of this subsection) have otherwise been reserved under section 128(a)(1) by a Governor of a State for such program year.</text>
+              </subparagraph>
+              <subparagraph id="HD8DE63CD65A74E5EBB694FEA03DB8BE9">
+                <enum>(C)</enum>
+                <header>Reallotment amounts</header>
+ <text>In making reallotments under subparagraph (A) for a program year to eligible States, the Secretary shall allot to each eligible State—</text>
+                <clause id="HCC9CE619052D4C53809A3180B2EC4830">
+                  <enum>(i)</enum>
+ <text>in the case of amounts available under section 127(b)(1)(C), an amount based on the relative amount of the allotment made (before the reallotments under this paragraph are made) to such eligible State under section 127(b)(1)(C) for such program year, compared to the total allotments made (before the reallotments under this paragraph are made) to all eligible States under section 127(b)(1)(C) for such program year;</text>
+                </clause>
+                <clause id="H9C83A8A3EF974164ACC141A9C706CEDA">
+                  <enum>(ii)</enum>
+ <text>in the case of amounts available under paragraph (1)(B) of section 132(b), an amount based on the relative amount of the allotment made (before the reallotments under this paragraph are made) to such eligible State under paragraph (1)(B) of section 132(b) for such program year, compared to the total allotments made (before the reallotments under this paragraph are made) to all eligible States under paragraph (1)(B) of section 132(b) for such program year; and</text>
+                </clause>
+                <clause id="HCD8194E2F8864261A26833C8A3AA1BD5">
+                  <enum>(iii)</enum>
+ <text>in the case of amounts available under paragraph (2)(B) of section 132(b), an amount based on the relative amount of the allotment made (before the reallotments under this paragraph are made) to such eligible State under paragraph (2)(B) of section 132(b) for such program year, compared to the total allotments made (before the reallotments under this paragraph are made) to all eligible States under paragraph (2)(B) of section 132(b) for such program year.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+          </subsection>
+          <after-quoted-block>.</after-quoted-block>
+        </quoted-block>
+      </subsection> 
+<subsection id="H0E67294D23DD46049762EA55A5164343">
+        <enum>(e)</enum>
+        <header>Sanctions for local area failure To meet local performance accountability
+          measures</header>
+ <text>Section 116(g) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(g)</external-xref>) is amended—</text>
+        <paragraph id="H96B83191276E4C319D3B46F43C10C4A6">
+          <enum>(1)</enum>
+ <text>in paragraph (1)—</text> <subparagraph id="H04525B4D3E0542DDA1CB902103477AF2"> <enum>(A)</enum> <text>by inserting <quote>80 percent of the</quote> before <quote>local performance</quote>; and</text>
+          </subparagraph>
+          <subparagraph id="H50ECA91983FA416EB43D10FDD8F52FA5">
+            <enum>(B)</enum>
+ <text>by striking <quote>local performance accountability measures established under subsection (c)</quote> and inserting <quote>local level of performance established under subsection (c) for an indicator of performance described in subsection (b)(2)(A) for a single program, an average of 90 percent of the local levels of performance across all such indicators for a single program, or an average of 90 percent of the local levels of performance for a single such indicator across all programs,</quote>; and</text>
+          </subparagraph>
+        </paragraph>
+        <paragraph id="H190AF66E26A145D180E4B924CC19E8A5">
+          <enum>(2)</enum>
+ <text>in paragraph (2)—</text> <subparagraph id="H6901AD1B13A649488FE645B3B22D76D4"> <enum>(A)</enum> <text>by amending subparagraph (A) to read as follows:</text>
+            <quoted-block id="H4C4FFDC47A264CD9A05B1C925F7921A7" style="OLC">
+              <subparagraph id="H5BDA73E3C4BA44E2B1AE34794A4FD8FE">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>If such failure continues, the Governor shall take corrective actions, which shall include—</text>
+                <clause id="H4F1B79029E194EFD8CA8B90B8289B112">
+                  <enum>(i)</enum>
+ <text>in the case of such failure, as described in paragraph (1), for a second consecutive year, on any single indicator, across indicators for a single program, or on a single indicator across programs, a 5-percent reduction in the amount that would (in the absence of this clause) be allocated to the local area for the immediately succeeding program year under chapter 2 or 3 of subtitle B for the program subject to the performance failure;</text>
+                </clause>
+                <clause id="H208A31EE580742E3A390E984991F9187">
+                  <enum>(ii)</enum>
+ <text>in the case of such failure, as described in paragraph (1), for a third consecutive year, the development of a reorganization plan through which the Governor shall—</text>
+                  <subclause id="HD40ED06208FE443CAB9DE6B42F7471B9">
+                    <enum>(I)</enum>
+ <text>require the appointment and certification of a new local board, consistent with the criteria established under section 107(b);</text>
+                  </subclause>
+                  <subclause id="H1B3B3FC982F3439DBD2C0AF553DECDAE">
+                    <enum>(II)</enum>
+ <text>prohibit the use of one-stop delivery system contractors or service providers identified as achieving a poor level of performance; and</text>
+                  </subclause>
+                  <subclause id="HC6C2636352834E95BD8CB6DA55A5F4FE">
+                    <enum>(III)</enum>
+ <text>redesignate a local area (which may include merging a local area with another local area), if the Governor determines that the likely cause of such continued performance failure of a local area is due to such local area’s designation being granted without the appropriate consideration of parameters described under section 106(b)(1)(B); or</text>
+                  </subclause>
+                </clause>
+                <clause id="HDC594BFABFB842CDADB0F0235AAA3A13">
+                  <enum>(iii)</enum>
+ <text>taking another significant action determined appropriate by the Governor.</text>
+                </clause>
+              </subparagraph>
+              <after-quoted-block>;</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+          <subparagraph id="HEE6898CB40294A96A1F8C8F303ADB82F">
+            <enum>(B)</enum>
+ <text>in subparagraph (B)(i), by inserting <quote>(ii)</quote> after <quote>subparagraph (A)</quote>; and</text>
+          </subparagraph>
+          <subparagraph id="HB138E4D9E6AB49CBAFF59BF8554F4110">
+            <enum>(C)</enum>
+ <text>by adding at the end the following:</text> <quoted-block id="HE90B19AE323A4EB890E9BCAD3744A1C5" style="OLC"> <subparagraph id="H5C2506ADADD444DD8E7FCB79511DC644"> <enum>(D)</enum> <header>Reallocation of reductions</header> <text>With respect to any amounts available to carry out section 128(b), paragraph (2)(A) or (3) of section 133(b), and section 133(b)(2)(B) to a Governor for a program year which would (in the absence of subparagraph (A)(i)) have otherwise been allocated by such Governor to a local area (referred to individually in this subparagraph as an <quote>unallocated amount</quote>) for such program year—</text>
+                <clause id="HA559C88C61704DAE9091380541ACA20E">
+                  <enum>(i)</enum>
+ <text>10 percent of those 3 unallocated amounts shall be reserved by the Governor to provide technical assistance to local areas within the State that were subject to a reduction of allocation amounts pursuant to subparagraph (A)(i) for such program year; and</text>
+                </clause>
+                <clause id="HC181E1F443304E6388D5BE978061574F">
+                  <enum>(ii)</enum>
+ <text>the amounts remaining after the reservations under clause (i) shall be reallocated by the Governor, to the local areas within the State that were not subject to a reduction of allocation amounts pursuant to subparagraph (A)(i) for such program year, in a manner determined by the Governor, which may take into consideration the extent to which local areas serve a significant number, as determined by the Governor, of individuals with barriers to employment.</text>
+                </clause>
+              </subparagraph>
+              <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+        </paragraph>
+      </subsection> 
+<subsection id="HDB60E507578B4436A5376303F97CFA7A">
+        <enum>(f)</enum>
+        <header>Establishing pay-for-Performance contract strategy incentives</header>
+ <text>Section 116(h) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(h)</external-xref>) is amended by striking <quote>non-Federal funds</quote> and inserting <quote>not more than 5 percent of the funds reserved under section 128(a)(1)</quote>.</text>
+      </subsection> 
+<subsection id="H7FD450A1063A4BFAAB914B786C74C8D4"><enum>(g)</enum><header>Information and technical assistance</header><text>Section 116 of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141</external-xref>) is amended—</text> <paragraph id="H73E88EE6966D417E959638FB567B8E48"><enum>(1)</enum><text>by redesignating subsection (i) as subsection (j); and</text></paragraph> 
+<paragraph id="H1D27B179CA884B05A1F20C4A82D5B3AD"><enum>(2)</enum><text>by inserting after subsection (h) the following:</text> <quoted-block id="H64CCAF1625C64C9689D301EC6D9697B1" style="OLC"> <subsection id="H8F65F30BCF234B1F9BF301534A9E4C99"><enum>(i)</enum><header>Information and technical assistance</header><text>Beginning not later than 12 months after the date of enactment of the <short-title>Workforce Investments Accountability Act</short-title>, the Secretary of Labor shall hold meetings with each State board and State agency that administers a core program, and that requests such a meeting, to provide information and technical assistance concerning the performance accountability measures established in accordance with subsection (b), and related requirements for States under this section.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> 
+<subsection id="HE19623E7BC8B4F9590A4CDE88E558F56"><enum>(h)</enum><header>Fiscal and management accountability information systems</header><text>Section 116(j) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141(j)</external-xref>), as so redesignated, is amended—</text> <paragraph id="H5F686D34C3A74F5CB0A35AB3D1A289F4"><enum>(1)</enum><text>in the first sentence of paragraph (2), by inserting <quote>, and may use information provided from the National Directory of New Hires in accordance with section 453(j)(8) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/653">42 U.S.C. 653(j)(8)</external-xref>)</quote> after <quote>State law</quote>;</text></paragraph> 
+<paragraph id="HD915CC5FA4B844D2B291BAAD41C7A400"><enum>(2)</enum><text>by redesignating paragraph (3) as paragraph (4); and</text></paragraph> <paragraph id="H7F6DF33008CF4328990F3D59F09B545E"><enum>(3)</enum><text>by inserting after paragraph (2) the following:</text> 
+<quoted-block id="H744D3B6AEBE34E48AD1233E370779F61" style="OLC"> 
+<paragraph id="H33C731B1D0B3407681CB271EEB4447D0"><enum>(3)</enum><header>Designated entity</header><text>The Governor shall designate a State agency (or appropriate State entity) to assist in carrying out the performance reporting requirements of this section for core programs and eligible providers of training services. The designated State agency (or appropriate State entity) shall be responsible for—</text> <subparagraph id="H2935BBA8BB004209B923BD5A56678944"><enum>(A)</enum><text>facilitating data matches using quarterly wage record information, including wage record information made available by other States, to measure employment and earnings outcomes;</text></subparagraph> 
+<subparagraph id="HD73B81849FBB42A9BE4105B4A90455C0"><enum>(B)</enum><text>notifying State agencies that administer core programs and eligible providers of training services of the State’s procedures for data validation and reliability, as described in subsection (d)(5); and</text></subparagraph> <subparagraph id="H676B9090B732455188FBC3123EF58E0D"><enum>(C)</enum><text>protection against disaggregation that would violate applicable privacy standards, as described in subsection (d)(6)(C).</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> 
+<subsection id="H758D614C29F240188FA8D6A63CBD44BF"><enum>(i)</enum><header>Implementation of performance accountability measures</header><text>Section 116 of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3141">29 U.S.C. 3141</external-xref>) is amended by adding at the end the following:</text> <quoted-block id="HC84D3302A88B4F15A556CD2EB6EACDEE" style="OLC"> <subsection id="HA3D65E82D4FD477DB60B9CBCBD2AD445"><enum>(k)</enum><header>Implementation of performance accountability measures</header><text>Not later than 12 months after the date of enactment of the <short-title>Workforce Investments Accountability Act</short-title>, the Secretary of Labor and the Secretary of Education shall fully implement the requirements of this section for programs described in subsection (b)(3)(A)(iv), including—</text> 
+<paragraph id="H21F23FC09C094152AE3935BBDC93CC4D"><enum>(1)</enum><text>developing and disseminating the objective statistical adjustment model described in subsection (b)(3)(A)(viii) and using the model as described in subsection (b)(3)(A)(viii) for each program; and</text></paragraph> <paragraph id="HA1101D78A4D64BB6844E6A460CBE66EC"><enum>(2)</enum><text>notifying the State agencies carrying out such programs of the performance accountability measures established under this section, of the reporting and evaluation requirements for such programs, and of the sanctions requirements for programs that fail to meet State adjusted levels of performance under subsection (b)(3)(A)(iv).</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section> 
+<section id="H2893A268BD1A434EA5B5104F5C38DE2C"><enum>3.</enum><header>Minimum amount for skills development</header><text display-inline="no-display-inline">Section 134(c)(1) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3174">29 U.S.C. 3174(c)(1)</external-xref>) is amended—</text> <paragraph id="H5B9CA3A092A04306B252908823B9338A"><enum>(1)</enum><text>by redesignating subparagraph (B) as subparagraph (C); and</text></paragraph> 
+<paragraph id="HA3E9F6DF1F8F45E2B30E70C6DF8000DA"><enum>(2)</enum><text>by inserting after subparagraph (A), the following:</text> <quoted-block id="HD355249B81B94C9880647DBAA0B42707" style="OLC"> <subparagraph id="HF013198997934CDD806EC0128F5135AF"><enum>(B)</enum><header>Minimum amount for skills development</header><text>Not less than 50 percent of the funds described in subparagraph (A) shall be used by the local area for the payment of training services—</text> 
+<clause id="H445F6A77518D4A219F91E7D613C4F8D8"><enum>(i)</enum><text>provided to adults and dislocated workers under paragraph (3)(F)(iii); and</text></clause> <clause id="H9984BAEF2C704A5583EC57E71E072E3C"><enum>(ii)</enum><text>provided to adults and dislocated workers under paragraph (3)(G)(ii),</text></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> 
+</legis-body></bill>
+

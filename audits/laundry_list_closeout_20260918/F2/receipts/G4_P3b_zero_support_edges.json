@@ -1,0 +1,177 @@
+{
+ "detector": "P3b",
+ "drawn_zero_support": [
+  {
+   "a": "James Lankford",
+   "b": "Brian Schatz",
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 0,
+   "tone": null
+  }
+ ],
+ "drawn_below_two": [
+  {
+   "a": "Bernard Sanders",
+   "b": "Ilhan Omar",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "David Rouzer",
+   "b": "Austin Scott",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Eric Crawford",
+   "b": "Austin Scott",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "James Lankford",
+   "b": "Brian Schatz",
+   "n_scored": 2,
+   "remaining": 0
+  },
+  {
+   "a": "James Lankford",
+   "b": "Jeanne Shaheen",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "James Lankford",
+   "b": "Mazie Hirono",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "John Barrasso",
+   "b": "Bill Hagerty",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "John Thune",
+   "b": "David McCormick",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "John Thune",
+   "b": "Jerry Moran",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "John Thune",
+   "b": "Tommy Tuberville",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Kweisi Mfume",
+   "b": "Maxine Waters",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Maria Cantwell",
+   "b": "Richard Durbin",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Maxine Waters",
+   "b": "Austin Scott",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Mike Lee",
+   "b": "John Hoeven",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Mike Lee",
+   "b": "Joni Ernst",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Mitch McConnell",
+   "b": "Mike Crapo",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Richard Durbin",
+   "b": "John Boozman",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Richard Durbin",
+   "b": "Ron Johnson",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Seth Magaziner",
+   "b": "Austin Scott",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Bill Hagerty",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Dan Sullivan",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "John Kennedy",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Mike Rounds",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Rand Paul",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Rick Scott",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Ron Wyden",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Tammy Duckworth",
+   "n_scored": 3,
+   "remaining": 1
+  }
+ ]
+}

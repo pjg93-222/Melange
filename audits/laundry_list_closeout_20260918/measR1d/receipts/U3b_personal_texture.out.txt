@@ -1,0 +1,60 @@
+personal-texture INTERVIEW items: 1059  (of 4751 items over 480 members)
+
+items whose DISPLAYED text contains a foreign speaker tag : 18  (1.70%)
+   of those, display_eligible=True                        : 18
+   of those, narrative_eligible=True                      : 0
+items pinned to a U2-affected speeches row                : 31
+display_eligible INTERVIEW items overall                  : 1059
+narrative_eligible INTERVIEW items overall                : 0
+items that could not be pinned to any row                 : 0
+
+most frequent foreign tags inside displayed personal-texture text:
+     14  O`DONNELL
+      1  LAH (voice-over)
+      1  GUEST
+      1  ROSALYNN CARTER (Former First Lady)
+      1  MARK STRASSMANN (voice over)
+      1  CARROLL (voice-over)
+
+members affected: 14
+
+=== every item whose displayed text carries a foreign tag (up to 25 shown) ===
+ 1. Adam Schiff              2023-05-30 family             display=True narrative=False tags=['LAH (voice-over)']
+     ...ultimately, voters want to decide this race, and they want that choice to make. And I think they will have that choice.   >>>  LAH (voice-over): Congresswoman Katie Porter, beloved by the progressive base, is also running for the Senate seat. (on-camera): How much does that tip the scales if he selects representatively?...
+ 2. Alexandria Ocasio-Cortez 2021-03-02 family             display=True narrative=False tags=['CARROLL (voice-over)']
+     ... immigrant, whether you are one or two generations from Puerto Rico like my family is. To see that, it's a great shame.   >>>  CARROLL (voice-over): It's unclear if Unanue's comments have hurt sales. Goya, a privately owned company, doesn't disclose earning. Hispanic consumers make up a significant chunk of buying power in the United States. $1....
+ 3. Bernard Sanders          2021-07-14 books_media        display=True narrative=False tags=['O`DONNELL']
+     ...is is the moment where we restored faith in our government, that it can work for ordinary people. Not just the wealthy.   >>>  O`DONNELL: I find it easy to describe the process that we`re seeing here, but it is difficult to describe, the degree of legislative difficulty in what we are watching tonight and the precision required. We have never se...
+ 4. Cory Booker              2018-07-09 books_media        display=True narrative=False tags=['O`DONNELL']
+     ...en though we now see that numerous people around his campaign and his administration are under investigation right now.   >>>  O`DONNELL: The one thing a Supreme Court justice cannot protect a President from is an impeachment proceeding. That was senator Cory Booker tonight with Rachel Maddow. And this weekend in an interview with The New York T...
+ 5. Hakeem Jeffries          2021-01-27 family             display=True narrative=False tags=['O`DONNELL']
+     ...d by the big lie that Donald Trump told and that has been supported by so many Republicans in the House and the Senate.   >>>  O`DONNELL: According to the Department of Homeland Security, threats like the ones received by the family of Congressman Jeffries aren`t going to end any time soon. Today the Department of Homeland Security issued a warn...
+ 6. Jahana Hayes             2019-07-02 family             display=True narrative=False tags=['O`DONNELL']
+     ...n`t want it for my children, then it`s not OK for anyone else`s children. God help us all if this is what Americans do.   >>>  O`DONNELL: Congresswoman Frederica Wilson of Florida said this —...
+ 7. Joaquin Castro           2022-05-24 family             display=True narrative=False tags=['O`DONNELL']
+     ...erica, because politicians, these hard-core conservative politicians (AUDIO GAP) they won`t do a single thing about it.   >>>  O`DONNELL: Representative Castro, you have a governor who tweeted that he was embarrassed that Texas gun purchases where number two to California, and by the way, California`s lead a state in the nation by tens of millio...
+ 8. Joe Neguse               2019-12-11 faith              display=True narrative=False tags=['O`DONNELL']
+     ...t is what my conscience demands. And I hope and I pray that my colleagues will do the same. And with that I yield back.   >>>  O`DONNELL: That was Congressman Joe Neguse in his opening remarks tonight. Leading off discussion tonight here is Jill Wine-Banks, former assistant Watergate special prosecutor and an MSNBC legal analyst. Barbara McQuade...
+ 9. Jon Ossoff               2017-04-13 formative          display=True narrative=False tags=['O`DONNELL']
+     ...l as democrats by focusing on local economic development and shared values in the community that bring people together.   >>>  O`DONNELL: How much of an issue has the republican repeal of the affordable care act — how much has that been an issue in your district?...
+10. Jon Ossoff               2017-06-19 formative          display=True narrative=False tags=['O`DONNELL']
+     ...she walks to work in the morning and we`re down there so she can walk to work for early morning shifts at the hospital.   >>>  O`DONNELL: And has this been an issue as you talked to voters in the district the fact that you are living two miles over the line....
+11. Maxwell Frost            2021-09-23 inspiration        display=True narrative=False tags=['O`DONNELL']
+     ...nue to fight for justice because we need to honor those who have been killed due to senseless gun violence with action.   >>>  O`DONNELL: We saw once again, stalemate take over in Congress. Yesterday, Senator Cory Booker announced that his attempted negotiations on a bipartisan police reform bill basically came to nothing with Republican Senator...
+12. Maxwell Frost            2021-09-23 family             display=True narrative=False tags=['O`DONNELL']
+     ... is what drove me to be an intern on his reelection campaign. And ultimately, is part of the reason why I`m here today.   >>>  O`DONNELL: The March for Our Lives movement and the other things you`ve been involved in, has involved a lot of lobbying, especially state government in Florida, trying to get gun laws changed there, you`ve had...
+13. Mike Johnson             2023-12-03 family             display=True narrative=False tags=['ROSALYNN CARTER (Former First Lady)', 'MARK STRASSMANN (voice over)']
+     ...e. GEORGE SANTOS (Former Member of Congress from New York): I no longer have to answer a single question from you guys.   >>>  ROSALYNN CARTER (Former First Lady): The next president of the United States, my husband, Jimmy Carter. MARK STRASSMANN (voice over): Rosalynn Carter put the public in her service. Unelected but undeniable, Jimmy Carter'...
+14. Mitch McConnell          2021-04-06 hobbies_sports     display=True narrative=False tags=['O`DONNELL']
+     ...poration, I`d stay out of politics. I think this is quite stupid to jump in the middle of a highly controversial issue.   >>>  O`DONNELL: Governor, what`s your reaction to that coming from a man who has spent his entire professional life begging businesses and corporations to be financially involved in politics by giving him and his party money?...
+15. Ritchie Torres           2016-04-13 inspiration        display=True narrative=False tags=['O`DONNELL']
+     ...o do the same now. And to really shine a harsh spotlight on how the urban poor lives in the wealthiest city in America.   >>>  O`DONNELL: Ritchie Torres, thank you —...
+16. Ritchie Torres           2016-04-13 formative          display=True narrative=False tags=['O`DONNELL']
+     ...o public housing for giving me a fighting chance at a decent life and becoming the youngest member of the city council.   >>>  O`DONNELL: So, even with the struggles of growing up in public housing and the problems with the conditions of the housing and the maintenance, danger, safety issues, even with all that, you still felt grateful to be in ...
+17. Ritchie Torres           2021-03-04 formative          display=True narrative=False tags=['O`DONNELL']
+     ...been on a personal mission to ensure that no child in America faces the hardship that weighed heavily on me as a child.   >>>  O`DONNELL: Congressman DeLauro, talk about what it takes to get these kinds of provisions in bills like this, including one of the reasons it`s in this bill tonight is that you have been pushing it for all of these years...
+18. Sean Casten              2024-09-26 family             display=True narrative=False tags=['GUEST']
+     ...  >>>  GUEST: -- CHARGERS? THAT'S NOT TRUE. IT IS MORE THAN THAT. WE HAD TAX CREDIT FOR CHARGERS. YOU HAVE HAD HUGE NUMBERS OF PEOPLE WHO HAVE GONE, MY WIFE HAS DONE THIS, PUT A CHARGER IN OUR GARAGE AND TAKEN ADVANTAGE. WE ARE...
+
+wrote U3b_personal_texture_hits.json (18), U3b_personal_sample20_GRADED.csv
+DONE U3b

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S905 IS: Senior Legal Hotline Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-03-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 905</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190327">March 27, 2019</action-date>
+			<action-desc><sponsor name-id="S384">Mr. Tillis</sponsor> (for himself, <cosponsor name-id="S309">Mr. Casey</cosponsor>, and <cosponsor name-id="S057">Mr. Leahy</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Older Americans Act of 1965 to authorize a national network of Statewide senior legal
+			 hotlines, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Senior Legal Hotline Act of 2019</short-title></quote>.</text>
+		</section><section id="id013AF5682E854483A6A9FF0264FBE7C2"><enum>2.</enum><header>Statewide senior legal hotlines</header>
+ <text display-inline="no-display-inline">Subtitle B of title VII of the Older Americans Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/42/3058aa">42 U.S.C. 3058aa</external-xref> et seq.) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="idE11A863697F54D3580349EC486E6B003" style="OLC">
+				<section id="id40A2158CD1694D198D6E5432E6C913CC"><enum>753.</enum><header>Statewide senior legal hotlines</header>
+ <subsection id="id635AF955F2944247A8F86062FA269A64"><enum>(a)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="idCFDA6EE0B366483BA5F78731AFE9BDCC"><enum>(1)</enum><header>Eligible entity</header> <subparagraph id="id7073094CE8CB4D168B22AE2C975B2F8B"><enum>(A)</enum><header>In general</header><text>The term <term>eligible entity</term> means a nonprofit organization or a partnership described in subparagraph (B) that—</text>
+ <clause id="id8D9330FFCD624282B1B6073AEA2FE6F7"><enum>(i)</enum><text>provides legal assistance to older individuals at no cost to such individuals; and</text> </clause><clause id="idD28CBABD96204212BB88856540B4D8EE"><enum>(ii)</enum><subclause commented="no" display-inline="yes-display-inline" id="id38836A99DC3B4C61BD4D858E7F851966"><enum>(I)</enum><text>operates a senior legal hotline in existence on the date on which the entity submits an application under subsection (c); or</text>
+ </subclause><subclause id="id28DE6F53CD8246DABBBBD3A4E121F40A" indent="up1"><enum>(II)</enum><text>demonstrates the capacity to provide legal assistance to older individuals through a Statewide senior legal hotline.</text>
+ </subclause></clause></subparagraph><subparagraph id="id1A557C104C7D4F31BE2B3DB476E99131"><enum>(B)</enum><header>Partnership</header><text>A partnership described in this subparagraph is a partnership between—</text> <clause id="id9B8E680877E744519043BAC34CD24D8B"><enum>(i)</enum><text>multiple nonprofit organizations; or</text>
+ </clause><clause id="id0B48BF7C0BD941EEA9553D9770AA4CBA"><enum>(ii)</enum><text>one or more nonprofit organizations with one or more State or local governments.</text> </clause></subparagraph></paragraph><paragraph id="id6B43C8FDC0794681AA2AE1BAFD813403"><enum>(2)</enum><header>Senior legal hotline</header><text>The term <term>senior legal hotline</term> means a program or partnership of programs that—</text>
+ <subparagraph id="idDFB1B71029104775BF972471F162B949"><enum>(A)</enum><text>provides legal services, such as counseling, advice, advocacy, information, referrals, and other services, as appropriate, to older individuals on a broad range of civil legal issues;</text>
+ </subparagraph><subparagraph id="idD6F91CB75D0846669B40BC8DCA351528"><enum>(B)</enum><text>provides such services by telephone and by other forms of communication;</text> </subparagraph><subparagraph id="id6CC39B9537A54369AB2A9565574D391C"><enum>(C)</enum><text>provides such services at no cost to the older individuals receiving such services;</text>
+ </subparagraph><subparagraph commented="no" id="id510F934B534442F59EF74E266A7616AF"><enum>(D)</enum><text>serves older individuals with the greatest social need and greatest economic need as a target population for such services; and</text>
+ </subparagraph><subparagraph commented="no" id="id6F0BC788B1F542C2ACF47B640B918B6A"><enum>(E)</enum><text>develops partnerships with other programs and legal assistance providers to ensure that older individuals who need more extensive services, including representation, have access to such services.</text>
+ </subparagraph></paragraph><paragraph id="idE65007A60EC54B37BC9C7E6933FE265A"><enum>(3)</enum><header>Statewide senior legal hotline</header><text>The term <term>Statewide senior legal hotline</term> means a senior legal hotline that serves older individuals throughout a State.</text> </paragraph></subsection><subsection id="idEF993C3E80C2410190283A12EF61364B"><enum>(b)</enum><header>Authorization</header><text>The Assistant Secretary may award grants, on a competitive basis, to eligible entities that submit an application under subsection (c) to establish or operate a Statewide senior legal hotline in accordance with the requirements under subsection (d).</text>
+					</subsection><subsection id="idA990E3E0C6314ED8B8A54CE1BD3A677C"><enum>(c)</enum><header>Application process</header>
+						<paragraph id="idFE5D981EE7794E8DA8431587F1DEBBDA"><enum>(1)</enum><header>In general</header>
+ <text>An eligible entity seeking a grant under this section shall submit to the Assistant Secretary an application at such time, in such manner, and containing such information as the Assistant Secretary may reasonably require, including the contents described in paragraph (2).</text>
+ </paragraph><paragraph id="id5BCFAFA41C344ABAADAAA5970857BA72"><enum>(2)</enum><header>Contents</header><text>An application submitted under paragraph (1) shall contain, at a minimum, each of the following:</text> <subparagraph id="id9D1A30276D644835BE0A5D1AD921F77E"><enum>(A)</enum><text>An identification of the State to be served by the Statewide senior legal hotline.</text>
+ </subparagraph><subparagraph id="idDB9D4137EB2C4026B3003EEB2ABF234D"><enum>(B)</enum><text>A plan indicating how the eligible entity will satisfy each requirement under subsection (d) with respect to establishing or operating a Statewide senior legal hotline.</text>
+ </subparagraph><subparagraph id="idC88E196B48834911A1632D5B1AFBB7B7"><enum>(C)</enum><text>An assurance that the eligible entity will be able to provide, from non-Federal funds, an amount equal to not less than 25 percent of the estimated amount awarded through the grant under this section. An eligible entity may use in-kind contributions to meet the matching requirement under this subparagraph.</text>
+ </subparagraph><subparagraph id="idEC742D9BFB574627A53E85D8329B27A5"><enum>(D)</enum><text>A description of the certification process the eligible entity has in place to ensure that staff members of and volunteers serving the Statewide senior legal hotline will have no conflict of interest (including any financial or substantive conflict of interest) in providing services through the hotline.</text>
+ </subparagraph></paragraph><paragraph id="id2E4A001F86E44EF8BC335C35A6CF1B4C"><enum>(3)</enum><header>Selection</header><text>The Assistant Secretary shall, in selecting eligible entities to receive a grant under this section—</text>
+							<subparagraph id="id4F42A8268CA34A53BC3AA29B56DEDDA0"><enum>(A)</enum>
+ <text>consider—</text> <clause id="idE249BE0DD8A94247BBBACB5DD6AA14F9"><enum>(i)</enum><text>the extent to which the application submitted by the eligible entity under paragraph (2) meets the requirements of such paragraph; and</text>
+ </clause><clause id="id94475A15BFDC4270B49BDB30F8561597"><enum>(ii)</enum><text>the demonstrated capacity of the eligible entity to administer a Statewide senior legal hotline, including the experience and history of the eligible entity in delivering high quality advice, assistance, and other legal services, to older individuals through low-cost and innovative methods; and</text>
+ </clause></subparagraph><subparagraph id="id54284E4AEAB448FB871D10624DA208D8"><enum>(B)</enum><text>ensure that no 2 eligible entities receiving a grant under this section for a fiscal year are planning to establish or operate a Statewide senior legal hotline that serves the same State for such fiscal year.</text>
+ </subparagraph></paragraph></subsection><subsection id="idADFA534B89ED4910B0F23A69A3ED463E"><enum>(d)</enum><header>Requirements</header><text>Each eligible entity receiving a grant under this section shall, in establishing or operating a Statewide senior legal hotline supported by such grant—</text>
+ <paragraph id="ida27dbb48579c4f95ae706c60e504e16a"><enum>(1)</enum><text>provide for a sufficient number of appropriately trained attorneys, paralegals, other staff members, and volunteers to ensure effective delivery of the services described in subsection (a)(2)(A);</text>
+ </paragraph><paragraph id="id25ce1093849a4725b49df6ee8915a5bc"><enum>(2)</enum><text>collaborate with the appropriate State unit on aging, including any legal assistance developer, and free or low-cost legal service providers throughout the State, including those who provide free legal assistance to older individuals, to maximize coordination and cost-effective delivery of legal assistance to older individuals;</text>
+ </paragraph><paragraph id="id56398557a1f24624899befd41b3c77a9"><enum>(3)</enum><text>strive to maximize coordination in the delivery of legal assistance to older individuals in the State, including legal assistance funded by the Legal Services Corporation under the Legal Services Corporation Act (<external-xref legal-doc="usc" parsable-cite="usc/42/2996">42 U.S.C. 2996</external-xref> et seq.), legal assistance supported by a grant under part B of title III of this Act, legal assistance provided by a law school clinic, and any other legal assistance provided at no-cost to the persons receiving the assistance;</text>
+ </paragraph><paragraph id="ida5c339e0cad34287a069dc50ce3ba5d7"><enum>(4)</enum><text>build effective communication within the aging network operating in the State to provide coordinated assistance and referrals as appropriate;</text>
+ </paragraph><paragraph id="id27c3b915f7a442dc8db6ea12c5cd96a2"><enum>(5)</enum><text>establish mechanisms to make referrals for representation and other assistance beyond the scope of the hotline to—</text>
+ <subparagraph id="id93F95A60D81A44EF9988B320CBED3535"><enum>(A)</enum><text>other divisions or projects of the same legal aid agency of which the hotline is a division or project;</text>
+ </subparagraph><subparagraph id="idFFCE02AAADAE4BA7A653CA457907B360"><enum>(B)</enum><text>other legal aid agencies;</text> </subparagraph><subparagraph id="idCA91A47BCFF54A1CB6A8083A03DFFC96"><enum>(C)</enum><text>private attorneys, including those providing pro bono legal services;</text>
+ </subparagraph><subparagraph id="idE39F2F53BE554088AE109BE792A779DB"><enum>(D)</enum><text>providers included in the aging network operating in the State;</text> </subparagraph><subparagraph id="idBBC7BDD4A3DE4B18B4721B27C67206A7"><enum>(E)</enum><text>advocacy and assistance programs for older individuals; or</text>
+ </subparagraph><subparagraph id="idF4557AD66F86490BADFDA72AB951FE27"><enum>(F)</enum><text>any other individuals or entities, as appropriate; and</text> </subparagraph></paragraph><paragraph id="idad1e0ba123b547adb0419b21dcd5d5d6"><enum>(6)</enum><text>conduct outreach through the aging network operating in the State, and by other means, to inform older individuals about the availability of the services provided by the hotline, specifically targeting older individuals with the greatest economic need and greatest social need.</text>
+ </paragraph></subsection><subsection id="idEFC31A375572481F934662AB8D86583D"><enum>(e)</enum><header>Authorization of appropriations</header><text>There is authorized to be appropriated to carry out this section $10,000,000 for each of fiscal years 2020 through 2024.</text>
+					</subsection></section><after-quoted-block>. </after-quoted-block></quoted-block></section></legis-body>
+</bill>
+
+

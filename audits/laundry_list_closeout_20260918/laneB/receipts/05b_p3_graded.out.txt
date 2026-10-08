@@ -1,0 +1,45 @@
+﻿==============================================================================
+P3 GRADED SAMPLE (n=30, seed 20260918, population = 2602 unguarded windows)
+==============================================================================
+grades: {'member': 29, 'non-member': 1}
+  member      29/30 =  96.7%   95% CP CI [ 82.8%,  99.9%]   -> 2154-2600 of 2602 windows (point 2515)
+  non-member   1/30 =   3.3%   95% CP CI [  0.1%,  17.2%]   -> 2-448 of 2602 windows (point 87)
+  unclear      0/30 =   0.0%   95% CP CI [  0.0%,  11.6%]   -> 0-301 of 2602 windows (point 0)
+
+SECOND TAG  list_artefact  10/30 =  33.3%   95% CP CI [ 17.3%,  52.8%]  -> 450-1374 of 2602 (point 867)
+
+the single non-member row:
+  [05] Jim Banks -> Mike Rogers | literal='mike rogers' src=INTERVIEW sid=307767 scored=False edge_shipped=False
+       Mike Rogers who "just barely lost in the last cycle to Elissa Slotkin" = the Michigan Senate candidate, NOT Rep. Mike Rogers (AL). The July namesake shape.
+       window: Well, Mike Rogers just barely lost in the last cycle to Elissa Slotkin who ran as a moderate. And what you just heard from with Dr. Abdul El-Sayed, you just heard from the most extreme socialist-leaning Demo
+
+wrote receipts/05b_p3_sample30_GRADED.json
+
+==============================================================================
+D-P3b  ROLL-CALL / SIGNATURE-LIST ARTEFACT (repo-wide)
+==============================================================================
+mentions whose window is a roster/signature list : 749  (1.4% of all 53011 mentions)
+  by source : {'CREC': 567, 'PRESS_OFFICIAL_MENTION': 182}
+  by form   : {'BARE': 555, 'TITLE': 12, 'TYPED': 182}
+  counted into n_scored                         : 502
+  SHIPPED edges with >=1 such SCORED window     : 78
+  of those SIGNED (pos+neg>0)                   : 72
+  of those drawn (n_scored>=2)                  : 77
+  SHIPPED edges whose ENTIRE scored support is list-artefact : 2
+    of those SIGNED : 0   drawn : 1
+
+  overlap with the UNGUARDED population:
+    (unguarded computed in 05; here: list-artefact mentions that are BARE-form) : 555
+
+  10 examples:
+    Eric Crawford            -> Austin Scott             [CREC] AL) Rogers (KY) Rose Ross Rouzer Ruiz Rutherford Ryan Salazar Salinas Sanchez Scalise Scanlon Schakowsky Schmi
+    Eric Crawford            -> Austin Scott             [CREC] ivas Rogers (AL) Rogers (KY) Rose Ross Rouzer Ruiz Rulli Rutherford Ryan Salazar Salinas Sanchez Scalise Scanl
+    Young Kim                -> Austin Scott             [CREC] (KY) Rose Ross Rouzer Roy Ruiz Rulli Rutherford Ryan Salazar Salinas Sanchez Scalise Scanlon Schakowsky Schmid
+    Robert Bresnahan         -> Jim Jordan               [CREC] X) Gooden Gosar Graves Griffith Grothman Guest Hageman Hamadeh (AZ) Harrigan Harris (MD) Harris (NC) Harshbarg
+    John Thune               -> John Cornyn              [CREC] the fiscal year ending September 30, 2026, and for other purposes. John Thune, Chuck Grassley, Ted Budd, Tom C
+    John Thune               -> Bernie Moreno            [CREC] ar ending September 30, 2026, and for other purposes. John Thune, Chuck Grassley, Ted Budd, Tom Cotton, Cindy 
+    John Thune               -> Tommy Tuberville         [CREC] mber 30, 2026, and for other purposes. John Thune, Chuck Grassley, Ted Budd, Tom Cotton, Cindy Hyde-Smith, Kat
+    John Thune               -> Roger Marshall           [CREC] for other purposes. John Thune, Chuck Grassley, Ted Budd, Tom Cotton, Cindy Hyde-Smith, Katie Boyd Britt, John
+    John Thune               -> David McCormick          [CREC] ses. John Thune, Chuck Grassley, Ted Budd, Tom Cotton, Cindy Hyde-Smith, Katie Boyd Britt, John R. Curtis, Joh
+    John Thune               -> Jerry Moran              [CREC] Chuck Grassley, Ted Budd, Tom Cotton, Cindy Hyde-Smith, Katie Boyd Britt, John R. Curtis, John Cornyn, Bernie 
+DONE 05b

@@ -5,7 +5,7 @@ check into fec\\audit_failure_gate.py's KNOWN_GATED set.
 Loads the module UNDER TEST by file path (not by package import) so this file can run either from
 its live location or from a scratch copy — ROOT is derived from this file's own path, three parents
 up, matching the fec/tests/infra/<this file> layout. Plain pytest-style functions, no fixtures, so
-fec\\tests\\run_focused_tests.py can collect them directly."""
+pytest can collect them directly."""
 import importlib.util
 from pathlib import Path
 

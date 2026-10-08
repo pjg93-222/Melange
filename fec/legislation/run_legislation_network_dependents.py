@@ -186,6 +186,8 @@ MODEL_ENVIRONMENT_KEYS = frozenset(
         "BRIDGE",
         "TOPIC",
         "OPT_OUT",
+        "PTF_OUT",
+        "SAL_OUT",
         "FRONTIER_OUT",
         "CONGEST",
         "CATSTANCE",
@@ -196,6 +198,9 @@ MODEL_ENVIRONMENT_KEYS = frozenset(
         "HALFF",
         "IMPUTE_IND0",
         "RECEPT_LAYER",
+        "COMPET_MULT",
+        "COMPET_SRC",
+        "OPTIMIZE_RESULT_PATH",
         "LEV",
         "REPFAC",
         "MAXSEEDS",
@@ -562,6 +567,7 @@ def canonical_environment(run_dir: Path) -> dict[str, str]:
             "MC": "20",
             "IMPUTE_IND0": "1",
             "RECEPT_LAYER": "1",
+            "COMPET_MULT": "0",   # the shadow input contracts carry no competitiveness artifact (default is ON since 2026-10-06)
             "LEV": "1",
         }
     )

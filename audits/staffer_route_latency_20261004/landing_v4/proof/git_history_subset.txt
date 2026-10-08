@@ -1,0 +1,25 @@
+# Eight test files skip some of their tests in a clean `git archive` export, because those tests read a base commit with `git -C <root> show <sha>:<path>` and an export has no .git.
+# Here the same eight files run on the export and on the applied tree with GIT_DIR pointed at the shared object store (read-only: `git show` writes nothing), so nothing skips.
+# The numbers must equal the worktree runs (new_tests_three_in_a_row.txt), where git is available.
+
+## clean export of the v4 tip
+fec/tests/surfaces/test_staffer_office_covered_staff.py                  rc=0     16.5s  py     pass 62   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.py                      rc=0     14.5s  py     pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs               rc=0      3.3s  cjs    pass 20   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs     rc=0      6.9s  cjs    pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_left_out_staff.cjs                       rc=0     32.3s  cjs    pass 28   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_live_query_committee_names.cjs           rc=0      1.7s  cjs    pass 18   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_live_query_ids.cjs                       rc=0      1.0s  cjs    pass 25   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.cjs                     rc=0     28.1s  cjs    pass 38   fail 0   err 0  skip 0 
+TOTAL {'passed': 233, 'failed': 0, 'errors': 0, 'skipped': 0} files 8
+
+## the applied tree (clean 3248a6a02 + LIVE's current bytes + landing_v4)
+fec/tests/surfaces/test_staffer_office_covered_staff.py                  rc=0     13.3s  py     pass 62   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.py                      rc=0     14.3s  py     pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs               rc=0      3.2s  cjs    pass 20   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs     rc=0      6.8s  cjs    pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_left_out_staff.cjs                       rc=0     32.4s  cjs    pass 28   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_live_query_committee_names.cjs           rc=0      3.2s  cjs    pass 18   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_live_query_ids.cjs                       rc=0      2.5s  cjs    pass 25   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.cjs                     rc=0     28.6s  cjs    pass 38   fail 0   err 0  skip 0 
+TOTAL {'passed': 233, 'failed': 0, 'errors': 0, 'skipped': 0} files 8

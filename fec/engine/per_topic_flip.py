@@ -47,10 +47,11 @@ DIRECT=('--bridge' in sys.argv) or os.environ.get('BRIDGE')=='1'; GAMMA=1.2   # 
 cpf=MC.cpf_pressure
 # RECEPTIVITY LAYER (2026-07-02): money pressure scaled by pressure_mult (matches flip_model).
 rc=MC.rc
+CM={n:MC.cmult(n) for n in members}   # COMPET_MULT (Paul 2026-10-05): c scales EFFECTIVE dollars on BOTH legs; dial OFF -> exactly 1.0, no file read
 def pflip(n,al,nA,nB,mAt,mBt):
     pm=rc(n,'pressure_mult')
-    a=WM*pm*(cu[n]+al+1)/((cu[n]+al+1)+HALFF*Rcap[n])+WP*nA[n]/mAt   # capacity-aware saturating CU pull
-    b=WM*pm*(ind[n]+1)/((ind[n]+1)+HALFF*Rcap[n])+WP*nB[n]/mBt        # ... and industry pull
+    a=WM*pm*(CM[n]*(cu[n]+al)+1)/((CM[n]*(cu[n]+al)+1)+HALFF*Rcap[n])+WP*nA[n]/mAt   # capacity-aware saturating CU pull (al = REAL allocated dollars; c*(cu+al) = effective)
+    b=WM*pm*(CM[n]*ind[n]+1)/((CM[n]*ind[n]+1)+HALFF*Rcap[n])+WP*nB[n]/mBt        # ... and industry pull (same c)
     return a/(a+b) if a+b>0 else 0
 # 18 legislative topic blocks -> the 17 matrix categories (CFPB Restrain+Reach share the combined CFPB stance)
 from moneyball_core import blocks,BLOCKCAT
@@ -92,7 +93,7 @@ def main():   # L3: guarded so importing this module for its functions doesn't r
         nch=sum(1 for n in members if cs[n] in PRO); nop=sum(1 for n in members if cs[n] in ANTI)
         print('%-30s ($%s, %d funded | %d pro/%d anti here): %s'%(labels[sc][:30],f'{sp:,}',len(top),nch,nop,
             ', '.join('%s $%dk'%(n.split()[-1],a//1000) for n,a in top[:4])))
-    outf=MB_ROOT+r'\data\lobbying\per_topic_alloc_bridge.json' if DIRECT else MB_ROOT+r'\per_topic_alloc.json'
+    outf=os.environ.get('PTF_OUT') or (MB_ROOT+r'\data\lobbying\per_topic_alloc_bridge.json' if DIRECT else MB_ROOT+r'\per_topic_alloc.json')   # PTF_OUT: no-clobber redirect for probe/candidate runs (default = today's paths)
     MC.dump_atomic(ALL,outf)
     print('\nwrote %s  (mode: %s, %d sub-categories)'%(os.path.basename(outf),'BRIDGE-BOOST' if DIRECT else 'baseline',len(ALL)))
 if __name__=='__main__': main()

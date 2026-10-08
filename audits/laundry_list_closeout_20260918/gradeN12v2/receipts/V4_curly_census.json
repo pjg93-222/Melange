@@ -1,0 +1,9 @@
+{
+ "  of those FLAGGED by v2": 164,
+ "  of those STILL UNTOUCHED": 9,
+ "  of those TRUNCATED by v2": 140,
+ "INTERVIEW rows with ANY curly-apostrophe ALL-CAPS word": 180,
+ "INTERVIEW rows with a curly-apostrophe ALL-CAPS TURN TAG (anchored, colon)": 173,
+ "ledger rows whose CUT TAG carries U+2019": 165,
+ "ledger rows with ANY tag carrying U+2019": 165
+}

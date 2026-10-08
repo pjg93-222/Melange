@@ -1,0 +1,112 @@
+============================================================================================================
+F3 r2  PRESS channel -> stance cells    run 2026-09-19T00:11:07
+============================================================================================================
+
+(a) INGEST  -- LIVE fec/press_stream.py:98-118  load_tone_rows()
+    RULE press_stream.py:111  if (row.get('source') or '').strip().upper()=='OFFICIAL_MENTION': continue
+    RULE press_stream.py:114  if not key[0] or key in seen: continue   # key=(canonical_url, bioguide|member)
+    cu_press_stance_tone.csv         read 2388   OFFICIAL_MENTION 0     empty-url 0    turn-key dup 0     kept 2388
+    press_refresh_tone.csv           read 291    OFFICIAL_MENTION 0     empty-url 0    turn-key dup 0     kept 291
+    ---- rows read 2679 | excluded: OFFICIAL_MENTION 0, empty url 0, duplicate turn key 0
+    ---- tone_rows handed to the blend: 2679   unaccounted: 0
+    producer's own count (press_component_meta.json 'tone_rows'): 2679   MATCH: True
+
+(b) SCORING DISPOSITIONS  -- per-row ledger the producer itself wrote
+    press_domain_routing_audit.json rows: 2679   (== tone_rows: True)
+    bucket               rows     quoted LIVE rule
+    used                 1387     blend.py:403  _audit['scoring_disposition']='used'   -> contributes
+    neutral-zeroed       845      blend.py:384-385  if _sg==0.0: disposition='neutral-zeroed'; continue
+    zero-intensity       384      blend.py:391-392  if _pv==0.0: disposition='zero-intensity'; continue
+    no-policy-domain     60       blend.py:398-399  if not _cats: disposition='no-policy-domain'; continue
+    unresolved-member    3        blend.py:382-383  if not _m: disposition='unresolved-member'; continue
+    ---- total 2679   producer meta dispositions {'used': 1387, 'neutral-zeroed': 845, 'zero-intensity': 384, 'no-policy-domain': 60, 'unresolved-member': 3}   MATCH: True
+
+(c) OF THE 'used' ROWS, WHICH REACH A STANCE CELL?
+    the blend writes 20 columns (blend.py:443 HDRMAP); per_category_stance reads 18
+    -> a row routed ONLY to 'CU-Bank Competitive Dynamics' and/or 'General Credit Union'
+       lands on the sheet but in NO stance cell
+    used rows                                              : 1387
+    ... contributing to >=1 STANCE cell                    : 983
+        of which routed ONLY to stance columns              : 971
+        of which ALSO split into a non-stance column        : 12
+    ... contributing to NO stance cell (sheet-only)         : 404
+    unaccounted                                            : 0
+
+    per-item weight is split 1/len(_cats)  (blend.py:405  `for _c in _cats: _dyn[_c][_m]+=_sg*_pv*_dec*_cw/len(_cats)`)
+    sum of item-weight reaching stance columns: 977.75 of 1387.00  (70.5% ; 409.25 item-equivalents are spent on non-stance columns)
+
+    non-stance destinations among used rows:
+       General Credit Union               398 used rows route here
+       CU-Bank Competitive Dynamics       18 used rows route here
+
+    sheet-only rows (no stance cell at all) by destination set:
+       General Credit Union                                         398
+       CU-Bank Competitive Dynamics                                 6
+
+    stance-column hit counts among used rows (item counts, before 1/n split):
+       Mortgage Lending & Housing               -> Mortgage & Housing         345
+       Technology & Emerging Issues             -> Technology & Emerging      144
+       CFPB Issues & Structural Reform          -> CFPB                       110
+       CDFI Fund                                -> CDFI Fund                  90
+       Interchange                              -> Interchange                75
+       Fraud Prevention                         -> Fraud Prevention           75
+       Examination & Supervision                -> Examination & Supervision  64
+       Credit Union Tax Status                  -> CU Tax Status              60
+       Payments                                 -> Payments                   58
+       Credit Card & Consumer-Fee Mandates      -> Credit Card Mandates       48
+       Member Business Lending                  -> Member Business Lending    34
+       Data Privacy & Cybersecurity             -> Data Privacy & Cyber       21
+       Charter Modernization & Governance       -> Charter Modernization      12
+       Field of Membership                      -> Field of Membership        10
+       Defense Credit Union Issues              -> Defense CU Issues          9
+       Credit Union Capital Requirements        -> CU Capital Requirements    6
+       NCUA Budget & Share Insurance Fund       -> NCUA Budget & Insurance    3
+       Telephone Consumer Protection Act        -> TCPA                       1
+    stance columns receiving ZERO press items: none
+
+(d) ROUTING FIDELITY: effective category vs the category the SOURCE ROW declared
+    RULE blend.py:358  _route=MR.press_routing_decision(api_target, title, _declared, fulltext)
+    RULE media_rules.py:139-144  target-specific hits WIN and DISCARD declared tags
+    RULE blend.py:360  _cats=[c for c in _route['categories'] if c in ORIG]  (ORIG = 20 sheet headers)
+    routing_basis over all 2679 rows: {'title': 1120, 'no-policy-domain': 405, 'body-confirms-declared': 638, 'target': 350, 'body-general': 166}
+    rows where a DECLARED specific category was discarded: 1304
+    ... of those with disposition 'used'                 : 585
+    most-discarded declared categories:
+       Examination & Supervision                275
+       CU-Bank Competitive Dynamics             217
+       Technology & Emerging Issues             142
+       Fraud Prevention                         136
+       Field of Membership                      126
+       Mortgage Lending & Housing               125
+       Member Business Lending                  125
+       Credit Union Tax Status                  121
+    used rows whose effective categories share NOTHING with their declared-specific set: 228
+       (that is the designed behaviour of the target/title precedence rule above, not a defect; counted because M3 asks for it)
+       Adelita Grijalva       declared=['Examination & Supervision', 'Field of Membership'] -> effective=['General Credit Union']  basis=title
+       Adelita Grijalva       declared=['Field of Membership'] -> effective=['General Credit Union']  basis=title
+       Adelita Grijalva       declared=['Field of Membership'] -> effective=['General Credit Union']  basis=title
+       Alex Padilla           declared=['NCUA Budget & Share Insurance Fund'] -> effective=['Mortgage Lending & Housing']  basis=title
+       Andrew Clyde           declared=['Credit Union Tax Status'] -> effective=['General Credit Union']  basis=title
+       Andy Barr              declared=['Fraud Prevention', 'Data Privacy & Cybersecurity', 'CFPB Issues & Structural Reform'] -> effective=['General Credit Union']  basis=title
+
+(e) DUPLICATE CLASS: one press release ingested under TWO URL FORMS
+    the (url,identity) turn key at press_stream.py:113 does NOT collapse these -- different path
+    RULE: no other de-duplication exists anywhere in the press channel
+    (member, normalised title, date) groups with 2+ rows: 12   surplus rows: 12
+    groups with MORE THAN ONE 'used' row -> the statement scores twice: 6
+
+    each such group, with the STANCE CELL it double-counts into:
+       Cynthia Lummis       date=(unparsed)   rows_used=2
+          General Credit Union                     SAME COLUMN x2 -> NO stance column
+       Gabe Amo             date=(unparsed)   rows_used=2
+          General Credit Union                     SAME COLUMN x2 -> NO stance column
+       Mike Crapo           date=(unparsed)   rows_used=2
+          General Credit Union                     SAME COLUMN x2 -> NO stance column
+       Patty Murray         date=(unparsed)   rows_used=2
+          General Credit Union                     SAME COLUMN x2 -> NO stance column
+       Roger Marshall       date=2022-08-11   rows_used=2
+          Interchange                              SAME CELL x2 -> stance col 'Interchange'
+       Seth Magaziner       date=(unparsed)   rows_used=2
+          General Credit Union                     SAME COLUMN x2 -> NO stance column
+
+DONE F3 r2

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H9CDCEEFB9B314E95908E6C05B171B0E3" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2804 IH: Fair Allocation of Highway Funds Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2804</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190516">May 16, 2019</action-date><action-desc><sponsor name-id="F000454">Mr. Foster</sponsor> (for himself and <cosponsor name-id="K000392">Mr. Kustoff of Tennessee</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 23, United States Code, with respect to apportionments to States for certain highway
+			 programs, and for other purposes.</official-title></form>
+	<legis-body id="H5C39EEC59FED4F9B963AE97C776AE1BF" style="OLC">
+ <section id="H10BDD956956D460AA91201D5B8FCCBB4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fair Allocation of Highway Funds Act of 2019</short-title></quote>.</text> </section><section id="HBD468371C4A24E169337EC05594651D4"><enum>2.</enum><header>Calculation of amounts</header><text display-inline="no-display-inline">Section 104(c)(1)(B) of title 23, United States Code, is amended—</text>
+ <paragraph id="HD7D87EFC71BA47AE8BE9E7ED4DE52252"><enum>(1)</enum><text>by striking <quote>The initial amounts</quote> and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="H53BE9235E9164665A1AF9E6D09137D52" style="USC"> <clause id="H331AB55016A64192AF9AA43E8FC9506B"><enum>(i)</enum><header>General rule</header><text display-inline="yes-display-inline">Except as provided in clause (ii), the initial amounts</text></clause><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="H07A5219F7FA64815A171CF6FF7B5F7D1"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="H2211E0C67FAE4954854488DF1723F873" style="USC"> <clause id="HC220730632804F2FA1763DE5498C5C1F"><enum>(ii)</enum><header>Special rule for fiscal years 2020 through 2022</header> <subclause id="H870EAFB38EF543BC99A114CBBBF5BADE"><enum>(I)</enum><header>In general</header><text display-inline="yes-display-inline">Notwithstanding clause (i), for each of fiscal years 2020, 2021, and 2022, the initial amounts resulting from the calculation under subparagraph (A) shall be adjusted to ensure that each State receives an aggregate apportionment equal to at least 95 percent, but not more than 105 percent, of the sum of—</text>
+ <item id="HC80589B2FB21465C841A58787F9AFDD1"><enum>(aa)</enum><text>the estimated tax payments attributable to highway users in the State paid into the Highway Trust Fund (other than the Mass Transit Account) in the most recent fiscal year for which data are available; plus</text>
+ </item><item id="H95B5AC738CA6414A959A03335409F2A4"><enum>(bb)</enum><text display-inline="yes-display-inline">an amount which bears the same ratio to the General Fund transfer amount for the applicable fiscal year as—</text>
+ <subitem id="HB6D830EC734946E9ACDBEA2ED2FB0620"><enum>(AA)</enum><text>the aggregate of amounts collected in such State under the Federal internal revenue laws (other than the taxes and penalties described in <external-xref legal-doc="usc" parsable-cite="usc/26/9503">section 9503(b)</external-xref> of the Internal Revenue Code of 1986) in the most recent fiscal year for which data are available; bears to</text>
+ </subitem><subitem id="HA6A71EA7475C4CF7BF974D497FF15FFF"><enum>(BB)</enum><text>the aggregate of amounts collected in all States under such Federal internal revenue laws in such fiscal year.</text>
+ </subitem></item></subclause><subclause id="H078B3178886A44BB894E5862581DA7A1"><enum>(II)</enum><header>Total apportionment</header><text>After the adjustment described in subclause (I), the amount for each State determined under this subsection for each of fiscal years 2020, 2021, and 2022 shall be adjusted by a single multiplicative factor to ensure that the total amount apportioned will not be affected by this clause.</text>
+ </subclause><subclause id="HF3625131C2C448648C4613B9D6C3E520"><enum>(III)</enum><header>General Fund transfer amount defined</header><text display-inline="yes-display-inline">In this clause, the term <term>General Fund transfer amount</term> means, for a fiscal year, the product obtained by multiplying the amount identified in <external-xref legal-doc="usc" parsable-cite="usc/26/9503">section 9503(f)(8)(A)</external-xref> of the Internal Revenue Code of 1986 by the proportion that—</text>
+ <item id="HA7069B6729EE469AA4ED524A70A2E9D8"><enum>(aa)</enum><text display-inline="yes-display-inline">the amount authorized for appropriation under section 1101(a)(1) of the FAST Act for that fiscal year; bears to</text>
+ </item><item id="HBC5CE96BC3BB4637976F66A825AF4597"><enum>(bb)</enum><text display-inline="yes-display-inline">the aggregate amount authorized for appropriation under section 1101(a)(1) of the FAST Act for fiscal years 2020, 2021, and 2022.</text></item></subclause></clause><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section></legis-body></bill>
+
+

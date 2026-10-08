@@ -1,0 +1,15 @@
+--- orig/fec/weekly_refresh.py	2026-09-03 21:11:30.651248900 -0400
++++ patched/fec/weekly_refresh.py	2026-09-04 02:07:40.573225800 -0400
+@@ -295,7 +295,11 @@
+ if not step('Congress.gov bill discovery',[
+     'legislation/refresh_legislation_discovery.py',
+ ],timeout=21600,hard=False):
+-    _deferred_collection_failures.append('Congress.gov bill discovery')
++    # NOT deferred, and never a hard abort: discovery yields pending-only candidates that
++    # cannot score, so a failed or timed-out walk leaves every scored input untouched. The
++    # collector resumes (--resume), so the stale candidate set simply carries to next week;
++    # aborting the whole refresh over it would strand complete press/interview evidence.
++    log('   WARN: Congress.gov bill discovery incomplete -- candidate set unchanged this cycle')
+ # Start the bill update before the slower interview and press legs. Its result is a hard final-
+ # publication prerequisite, but the failure is deferred until independent press acceptance has
+ # finished. Omitting an explicit --receipt uses the producer's root-resolved default; the old

@@ -1,0 +1,10 @@
+{
+ "counts": {
+  "bluesky_post_rows": 29780,
+  "routed_to_social_legacy": 24,
+  "routed_to_social_full": 24,
+  "unverified_handle_excluded": 21732,
+  "empty_text_excluded": 74
+ },
+ "samples": []
+}

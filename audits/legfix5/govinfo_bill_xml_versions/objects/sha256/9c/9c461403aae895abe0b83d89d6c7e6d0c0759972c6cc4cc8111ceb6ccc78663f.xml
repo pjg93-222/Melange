@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HB20A4A5CA0414F4F8F809AB413F52B9D" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3058 IH: Vaccination Information and Promotion Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3058</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190603">June 3, 2019</action-date><action-desc><sponsor name-id="J000032">Ms. Jackson Lee</sponsor> (for herself, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="M001160">Ms. Moore</cosponsor>, <cosponsor name-id="S001185">Ms. Sewell of Alabama</cosponsor>, <cosponsor name-id="P000617">Ms. Pressley</cosponsor>, <cosponsor name-id="J000126">Ms. Johnson of Texas</cosponsor>, <cosponsor name-id="M000087">Mrs. Carolyn B. Maloney of New York</cosponsor>, <cosponsor name-id="P000604">Mr. Payne</cosponsor>, and <cosponsor name-id="M001208">Mrs. McBath</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Secretary of Health and Human Services to carry out a program to address the health
+			 crisis of insufficient vaccinations, and for other purposes.</official-title></form>
+	<legis-body id="H44ADA214BEC0451582323505C4BAB814" style="OLC">
+ <section id="HE8154D0882E340BDA3F6E6B604E3F09B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Vaccination Information and Promotion Act of 2019</short-title></quote> or the <quote><short-title>VIP Act of 2019</short-title></quote>.</text> </section><section id="HA08E0C4133D04EA99588056D64B734C8"><enum>2.</enum><header>Addressing the health crisis of insufficient vaccinations</header> <text display-inline="no-display-inline">The Secretary of Health and Human Services, in consultation with the Director of the Centers for Disease Control and Prevention, shall develop and implement a program to reverse the decline in the rate of childhood vaccinations, including by—</text>
+ <paragraph id="HE4710A16CC5C4108BCB12045A9EE539D"><enum>(1)</enum><text display-inline="yes-display-inline">conducting a national effort to increase public awareness of and knowledge about the benefits of childhood vaccinations;</text>
+ </paragraph><paragraph id="HCE987885CF194BF8820ED489897B05D6"><enum>(2)</enum><text>supporting the development of a broad range of communication tools to inform the public on the importance of vaccinations;</text>
+ </paragraph><paragraph id="HF7253E70577F4369A8D7DD5D9EC86FFD"><enum>(3)</enum><text display-inline="yes-display-inline">acting through the Director of the National Institutes of Health, making more readily available on federally hosted social media specific information from the scientific and medical community on the importance of vaccinations to the health and well-being of infants, children, young adults, adults, and the elderly; and</text>
+ </paragraph><paragraph id="HEBE3ECA2853B4754B14006C12DC7D677"><enum>(4)</enum><text display-inline="yes-display-inline">awarding grants and other financial assistance to public and private educational institutions, and non-governmental (including nonprofit) and other appropriate entities that serve children, students, and the elderly, to implement vaccination education programs.</text>
+ </paragraph></section><section id="HA9649B78BD0C49A78DAA96428A23A4B1"><enum>3.</enum><header>GAO study</header><text display-inline="no-display-inline">The Comptroller General of the United States shall conduct, and submit to the Congress a report on the results of, a study on the change over time in public attitudes toward childhood vaccinations and the reasons underlying such changes.</text>
+ </section><section id="H01970A7910744C16822F167CA5F68655"><enum>4.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">To carry out this Act, there is authorized to be appropriated $50,000,000 for each of fiscal years 2020 through 2025.</text>
+		</section></legis-body></bill>
+
+

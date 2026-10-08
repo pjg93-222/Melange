@@ -1,0 +1,7536 @@
+[
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 260292,
+  "n": 1238,
+  "tag": "O`DONNELL"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 214803,
+  "n": 228,
+  "tag": "LEMON (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66799,
+  "n": 210,
+  "tag": "RAJU (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 263653,
+  "n": 138,
+  "tag": "O’DONNELL"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 192142,
+  "n": 93,
+  "tag": "ACOSTA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 68642,
+  "n": 86,
+  "tag": "ZELENY (voice-over)"
+ },
+ {
+  "classes": [
+   "B_stop_name_paren"
+  ],
+  "example_rowid": 66330,
+  "n": 80,
+  "tag": "FOX (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 92364,
+  "n": 79,
+  "tag": "COLLINS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67470,
+  "n": 74,
+  "tag": "FOREMAN (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 67942,
+  "n": 72,
+  "tag": "DR. ANTHONY FAUCI"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66610,
+  "n": 71,
+  "tag": "TODD (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66649,
+  "n": 69,
+  "tag": "RAJU (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 194451,
+  "n": 66,
+  "tag": "MURRAY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 193744,
+  "n": 54,
+  "tag": "NOBLES (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 69038,
+  "n": 53,
+  "tag": "MATTINGLY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66838,
+  "n": 51,
+  "tag": "SERFATY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66297,
+  "n": 49,
+  "tag": "REID (voice-over)"
+ },
+ {
+  "classes": [
+   "B_stop_name_paren"
+  ],
+  "example_rowid": 66346,
+  "n": 49,
+  "tag": "FOX (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67671,
+  "n": 44,
+  "tag": "SCHNEIDER (voice-over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 119188,
+  "n": 44,
+  "tag": "Laura Barrón-López"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 68515,
+  "n": 39,
+  "tag": "LEE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 84103,
+  "n": 36,
+  "tag": "TAPPER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67361,
+  "n": 34,
+  "tag": "LAH (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69069,
+  "n": 34,
+  "tag": "SAENZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 69741,
+  "n": 34,
+  "tag": "BROWN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 194786,
+  "n": 34,
+  "tag": "DEAN (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 231121,
+  "n": 31,
+  "tag": "MCKEND (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 196274,
+  "n": 27,
+  "tag": "MARQUARDT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 215022,
+  "n": 24,
+  "tag": "CHURCH (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73288,
+  "n": 23,
+  "tag": "LIEBERMANN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 79546,
+  "n": 23,
+  "tag": "WATT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 188478,
+  "n": 23,
+  "tag": "PHILLIP (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67320,
+  "n": 22,
+  "tag": "CARROLL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 202693,
+  "n": 21,
+  "tag": "MALVEAUX (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66695,
+  "n": 20,
+  "tag": "HOLMES (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74474,
+  "n": 20,
+  "tag": "KAYE (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66721,
+  "n": 18,
+  "tag": "TAUSCHE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 189239,
+  "n": 18,
+  "tag": "COLLINS (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 216865,
+  "n": 18,
+  "tag": "NOBLES (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 190673,
+  "n": 17,
+  "tag": "MATTINGLY (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193065,
+  "n": 17,
+  "tag": "ACOSTA (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 208990,
+  "n": 17,
+  "tag": "MURRAY (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67803,
+  "n": 16,
+  "tag": "O'SULLIVAN (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 68431,
+  "n": 16,
+  "tag": "UNKNOWN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74427,
+  "n": 16,
+  "tag": "BASH (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 202954,
+  "n": 16,
+  "tag": "MALVEAUX (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66648,
+  "n": 15,
+  "tag": "RAJU (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66855,
+  "n": 14,
+  "tag": "RAJU (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 69536,
+  "n": 14,
+  "tag": "WILD (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 79170,
+  "n": 14,
+  "tag": "FOREMAN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 88112,
+  "n": 14,
+  "tag": "SERFATY (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193061,
+  "n": 14,
+  "tag": "SCHNEIDER (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193064,
+  "n": 14,
+  "tag": "SCHNEIDER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 218750,
+  "n": 14,
+  "tag": "MURRAY (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67427,
+  "n": 13,
+  "tag": "FOREMAN (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73419,
+  "n": 13,
+  "tag": "REID (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 73750,
+  "n": 13,
+  "tag": "LAVANDERA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74794,
+  "n": 13,
+  "tag": "TOM FOREMAN, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 76052,
+  "n": 13,
+  "tag": "HUBBARD (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67105,
+  "n": 12,
+  "tag": "ZANONA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68111,
+  "n": 12,
+  "tag": "WALLACE (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 68339,
+  "n": 12,
+  "tag": "MUNTEAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 77288,
+  "n": 12,
+  "tag": "ZELENY (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 80129,
+  "n": 12,
+  "tag": "TODD (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 85754,
+  "n": 12,
+  "tag": "CAIFA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199324,
+  "n": 12,
+  "tag": "BORGER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72548,
+  "n": 11,
+  "tag": "REID (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 77391,
+  "n": 11,
+  "tag": "SULLIVAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 85416,
+  "n": 11,
+  "tag": "JIMENEZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 115262,
+  "n": 11,
+  "tag": "CHUCK TODD (V/O)"
+ },
+ {
+  "classes": [
+   "B_stop_name_paren"
+  ],
+  "example_rowid": 65877,
+  "n": 10,
+  "tag": "FOX (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 70673,
+  "n": 10,
+  "tag": "GALLAGHER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 72199,
+  "n": 10,
+  "tag": "MARSH (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 103834,
+  "n": 10,
+  "tag": "CHUCK TODD"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 127606,
+  "n": 10,
+  "tag": "WALLACE (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 142540,
+  "n": 10,
+  "tag": "GUTFELD (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193803,
+  "n": 10,
+  "tag": "NOBLES (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199977,
+  "n": 10,
+  "tag": "JONES (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 68057,
+  "n": 9,
+  "tag": "ALVAREZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68523,
+  "n": 9,
+  "tag": "LEE (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68582,
+  "n": 9,
+  "tag": "ZELENY (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 80362,
+  "n": 9,
+  "tag": "STELTER (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 90078,
+  "n": 9,
+  "tag": "SCANNELL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 186901,
+  "n": 9,
+  "tag": "WATTERS (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188372,
+  "n": 9,
+  "tag": "BASH (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 65837,
+  "n": 8,
+  "tag": "TODD (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66734,
+  "n": 8,
+  "tag": "ATWOOD (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67376,
+  "n": 8,
+  "tag": "LAH (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67988,
+  "n": 8,
+  "tag": "FLORES (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72478,
+  "n": 8,
+  "tag": "SANDOVAL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74795,
+  "n": 8,
+  "tag": "FOREMAN (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 75577,
+  "n": 8,
+  "tag": "RIPLEY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 77528,
+  "n": 8,
+  "tag": "RAJU (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 210349,
+  "n": 8,
+  "tag": "SANCHEZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 215936,
+  "n": 8,
+  "tag": "GRIFFIN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66264,
+  "n": 7,
+  "tag": "SERFATY (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67279,
+  "n": 7,
+  "tag": "YOSHIDA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70731,
+  "n": 7,
+  "tag": "HOLMES (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 73994,
+  "n": 7,
+  "tag": "FREEMAN (voice-over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 176619,
+  "n": 7,
+  "tag": "Fred de Sam Lazaro"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184686,
+  "n": 7,
+  "tag": "BREAM (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 212212,
+  "n": 7,
+  "tag": "DR. ROBERT REDFIELD"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 212700,
+  "n": 7,
+  "tag": "DIAMOND (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 215174,
+  "n": 7,
+  "tag": "CURNOW (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215533,
+  "n": 7,
+  "tag": "COOPER (on-camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 225235,
+  "n": 7,
+  "tag": "BROADDUS (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 272503,
+  "n": 7,
+  "tag": "CHRIS HAYES, MSNBC HOST, “ALL IN”"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67280,
+  "n": 6,
+  "tag": "PROKUPECZ (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 70418,
+  "n": 6,
+  "tag": "CORNISH (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 70856,
+  "n": 6,
+  "tag": "ROMO (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 83232,
+  "n": 6,
+  "tag": "MICHAELSON (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 195636,
+  "n": 6,
+  "tag": "BASH (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 198224,
+  "n": 6,
+  "tag": "MOOS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207084,
+  "n": 6,
+  "tag": "UNIDENTIFIED SPEAKERS (in unison)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207830,
+  "n": 6,
+  "tag": "TOM FOREMAN, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213371,
+  "n": 6,
+  "tag": "DEAN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213658,
+  "n": 6,
+  "tag": "BORGER (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 215301,
+  "n": 6,
+  "tag": "COATES (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 219015,
+  "n": 6,
+  "tag": "MARQUEZ (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 225239,
+  "n": 6,
+  "tag": "BROADDUS (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 231885,
+  "n": 6,
+  "tag": "BERTRAND (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 231971,
+  "n": 6,
+  "tag": "PERINO (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66796,
+  "n": 5,
+  "tag": "KAYE (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67927,
+  "n": 5,
+  "tag": "REID (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68034,
+  "n": 5,
+  "tag": "GOLODRYGA (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 68285,
+  "n": 5,
+  "tag": "PAZMINO (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 70395,
+  "n": 5,
+  "tag": "LAH (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 71995,
+  "n": 5,
+  "tag": "CHEN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72452,
+  "n": 5,
+  "tag": "CONTORNO (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72823,
+  "n": 5,
+  "tag": "COOPER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74911,
+  "n": 5,
+  "tag": "BRUNHUBER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 82467,
+  "n": 5,
+  "tag": "LAVANDERA (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 86337,
+  "n": 5,
+  "tag": "NEWTON (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 86850,
+  "n": 5,
+  "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 88901,
+  "n": 5,
+  "tag": "TIRRELL (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 89184,
+  "n": 5,
+  "tag": "CAMPBELL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 99503,
+  "n": 5,
+  "tag": "MACCALLUM (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 130199,
+  "n": 5,
+  "tag": "EMANUEL (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 137267,
+  "n": 5,
+  "tag": "BRET BAIER, HOST OF “SPECIAL REPORT”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188186,
+  "n": 5,
+  "tag": "CARROLL (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188764,
+  "n": 5,
+  "tag": "LU STOUT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188765,
+  "n": 5,
+  "tag": "JOHNS (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 195159,
+  "n": 5,
+  "tag": "MOOS (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195174,
+  "n": 5,
+  "tag": "KING (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199126,
+  "n": 5,
+  "tag": "BROWN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 200995,
+  "n": 5,
+  "tag": "JEFF ZELENY, CNN SENIOR WASHINGTON CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204507,
+  "n": 5,
+  "tag": "MARQUARDT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206107,
+  "n": 5,
+  "tag": "SAENZ (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 206178,
+  "n": 5,
+  "tag": "AMANPOUR (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 208110,
+  "n": 5,
+  "tag": "COOPER (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 209078,
+  "n": 5,
+  "tag": "AMANPOUR (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215212,
+  "n": 5,
+  "tag": "BRUNHUBER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215392,
+  "n": 5,
+  "tag": "SANCHEZ (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 217485,
+  "n": 5,
+  "tag": "REP. NANCY PELOSI (D-CA)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 217502,
+  "n": 5,
+  "tag": "GINGRAS (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 217653,
+  "n": 5,
+  "tag": "CHEN (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 219037,
+  "n": 5,
+  "tag": "MUNTEAN (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 220577,
+  "n": 5,
+  "tag": "SEBASTIAN (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 230944,
+  "n": 5,
+  "tag": "MCKEND (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 231582,
+  "n": 5,
+  "tag": "MURRAY (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250249,
+  "n": 5,
+  "tag": "ZANONA (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 251089,
+  "n": 5,
+  "tag": "BELL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 266126,
+  "n": 5,
+  "tag": "O`ROURKE"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 267695,
+  "n": 5,
+  "tag": "HAYES (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66327,
+  "n": 4,
+  "tag": "SUNLEN SERFATY, CNN CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68062,
+  "n": 4,
+  "tag": "MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 69332,
+  "n": 4,
+  "tag": "PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70902,
+  "n": 4,
+  "tag": "ROSALES (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72367,
+  "n": 4,
+  "tag": "OMAR JIMENEZ, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72878,
+  "n": 4,
+  "tag": "KEILAR (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73558,
+  "n": 4,
+  "tag": "ANDERSON COOPER, CNN HOST, ANDERSON COOPER 360"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74971,
+  "n": 4,
+  "tag": "WALSH (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 76474,
+  "n": 4,
+  "tag": "HUBBARD (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 94131,
+  "n": 4,
+  "tag": "MARGARET BRENNAN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 99773,
+  "n": 4,
+  "tag": "UNIDENTIFIED PERSON #2"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 100196,
+  "n": 4,
+  "tag": "UNIDENTIFIED PERSON #1"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 100236,
+  "n": 4,
+  "tag": "SPUNT (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190304,
+  "n": 4,
+  "tag": "JEFF ZELENY, CNN SENIOR WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 190960,
+  "n": 4,
+  "tag": "SEGALL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193131,
+  "n": 4,
+  "tag": "ACOSTA (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 193405,
+  "n": 4,
+  "tag": "SEN. ELIZABETH WARREN (D-MA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 198049,
+  "n": 4,
+  "tag": "KYUNG LAH, CNN SENIOR NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 198394,
+  "n": 4,
+  "tag": "VALENCIA (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 199444,
+  "n": 4,
+  "tag": "JOE BIDEN, FORMER VICE PRESIDENT OF THE UNITED STATES"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204546,
+  "n": 4,
+  "tag": "MATTINGLY (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 210863,
+  "n": 4,
+  "tag": "ZELENY(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 217088,
+  "n": 4,
+  "tag": "SANCHEZ (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 218532,
+  "n": 4,
+  "tag": "WALKER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223571,
+  "n": 4,
+  "tag": "DONIE O'SULLIVAN, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223670,
+  "n": 4,
+  "tag": "WILD (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 231837,
+  "n": 4,
+  "tag": "BERTRAND (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241935,
+  "n": 4,
+  "tag": "RODRIGUEZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 242881,
+  "n": 4,
+  "tag": "TAPPER (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 242958,
+  "n": 4,
+  "tag": "FREEMAN (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 244517,
+  "n": 4,
+  "tag": "SCHOLES (voice-over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 255752,
+  "n": 4,
+  "tag": "Former Vice President Joseph Biden"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 66609,
+  "n": 3,
+  "tag": "TODD (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67167,
+  "n": 3,
+  "tag": "WHITFIELD (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67843,
+  "n": 3,
+  "tag": "LIEBERMANN (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69428,
+  "n": 3,
+  "tag": "WHITNEY WILD, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69765,
+  "n": 3,
+  "tag": "WHITNEY WILD, CNN LAW ENFORCEMENT CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 71987,
+  "n": 3,
+  "tag": "CHEN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73356,
+  "n": 3,
+  "tag": "BRIAN TODD, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73792,
+  "n": 3,
+  "tag": "LAVANDERA (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74976,
+  "n": 3,
+  "tag": "WALSH (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 75059,
+  "n": 3,
+  "tag": "BENBROOK (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 79440,
+  "n": 3,
+  "tag": "MUNTEAN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 82605,
+  "n": 3,
+  "tag": "WALDMAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 82828,
+  "n": 3,
+  "tag": "KILEY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 84421,
+  "n": 3,
+  "tag": "LEE (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 86573,
+  "n": 3,
+  "tag": "CULVER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87050,
+  "n": 3,
+  "tag": "GONZALEZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87567,
+  "n": 3,
+  "tag": "LEE (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 88111,
+  "n": 3,
+  "tag": "SUNLEN SERFATY, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 89282,
+  "n": 3,
+  "tag": "LAWRENCE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 90611,
+  "n": 3,
+  "tag": "COOPER (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 104095,
+  "n": 3,
+  "tag": "SEN. KAMALA HARRIS"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 107615,
+  "n": 3,
+  "tag": "TOM BROKAW"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184757,
+  "n": 3,
+  "tag": "TOMLINSON (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190280,
+  "n": 3,
+  "tag": "GUPTA (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 191432,
+  "n": 3,
+  "tag": "MARGARET BRENNAN, HOST, \"FACE THE NATION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 194519,
+  "n": 3,
+  "tag": "CHUCK TODD, MODERATOR, NBC \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195226,
+  "n": 3,
+  "tag": "WATT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 197901,
+  "n": 3,
+  "tag": "RANDI KAYE, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 201030,
+  "n": 3,
+  "tag": "KURTZ (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203183,
+  "n": 3,
+  "tag": "UNIDENTIFIED MALE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204331,
+  "n": 3,
+  "tag": "PHIL MATTINGLY, CNN CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205045,
+  "n": 3,
+  "tag": "GLORIA BORGER, CNN CHIEF POLITICAL ANALYST (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 205440,
+  "n": 3,
+  "tag": "SCIUTTO (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 206692,
+  "n": 3,
+  "tag": "KAFANOV (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 209166,
+  "n": 3,
+  "tag": "MURRAY(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213799,
+  "n": 3,
+  "tag": "MANU RAJU, CNN SENIOR POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214210,
+  "n": 3,
+  "tag": "BROWN (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217993,
+  "n": 3,
+  "tag": "JESSICA SCHNEIDER, CNN JUSTICE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 219241,
+  "n": 3,
+  "tag": "TUCHMAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221331,
+  "n": 3,
+  "tag": "SCHNEIDER(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223064,
+  "n": 3,
+  "tag": "DANA BASH, CNN ANCHOR, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 225458,
+  "n": 3,
+  "tag": "NOBLES (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 225559,
+  "n": 3,
+  "tag": "ZELENY (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 226697,
+  "n": 3,
+  "tag": "FIELD (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 233432,
+  "n": 3,
+  "tag": "MCKEND (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 234312,
+  "n": 3,
+  "tag": "FISHER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 235676,
+  "n": 3,
+  "tag": "D. GRIFFIN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 239748,
+  "n": 3,
+  "tag": "WALLACE (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 240566,
+  "n": 3,
+  "tag": "MUNTEAN (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 242760,
+  "n": 3,
+  "tag": "AGUIRRE (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 243032,
+  "n": 3,
+  "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 250362,
+  "n": 3,
+  "tag": "VALERIO (voice-over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 256066,
+  "n": 3,
+  "tag": "Fmr. Attorney General Vanita Gupta"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 261351,
+  "n": 3,
+  "tag": "HAYES (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 265776,
+  "n": 3,
+  "tag": "REP. BETO"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 275763,
+  "n": 3,
+  "tag": "DR. YASHICA ROBINSON"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 65975,
+  "n": 2,
+  "tag": "SUNLEN SERFATY, CNN WASHINGTON CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 66969,
+  "n": 2,
+  "tag": "SEN. PATTY MURRAY (D-WA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67702,
+  "n": 2,
+  "tag": "JIMENEZ (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 67723,
+  "n": 2,
+  "tag": "HOLMES (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67915,
+  "n": 2,
+  "tag": "POLANTZ (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 68649,
+  "n": 2,
+  "tag": "ALVAREZ (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 69206,
+  "n": 2,
+  "tag": "REP. STEVE SCALISE"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69738,
+  "n": 2,
+  "tag": "CECILY STRONG, COMEDIAN, \"SATURDAY NIGHT LIVE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70228,
+  "n": 2,
+  "tag": "UNIDENTIFIED MALE #1"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70674,
+  "n": 2,
+  "tag": "GALLAGHER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70676,
+  "n": 2,
+  "tag": "GALLAGHER (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 71208,
+  "n": 2,
+  "tag": "O'SULLIVAN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72408,
+  "n": 2,
+  "tag": "OMAR JIMENEZ, CNN CORRESPONDENT (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73287,
+  "n": 2,
+  "tag": "OREN LIEBERMANN, CNN PENTAGON CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 78473,
+  "n": 2,
+  "tag": "BRIANNA KEILAR, CNN CO-ANCHOR OF \"CNN NEWS CENTRAL\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 79191,
+  "n": 2,
+  "tag": "GONZALEZ (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 80113,
+  "n": 2,
+  "tag": "LAWRENCE (voiceover)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 80238,
+  "n": 2,
+  "tag": "SEN. BILL CASSIDY"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 80273,
+  "n": 2,
+  "tag": "STELTER (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 81303,
+  "n": 2,
+  "tag": "STEPHANOPOULOS (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 81316,
+  "n": 2,
+  "tag": "O’BRIEN (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 82397,
+  "n": 2,
+  "tag": "WEIR (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 83022,
+  "n": 2,
+  "tag": "SEN. CHUCK SCHUMER (D-NY)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 83720,
+  "n": 2,
+  "tag": "KIM PHAM, GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 85688,
+  "n": 2,
+  "tag": "PHILLIP (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87155,
+  "n": 2,
+  "tag": "ED LAVANDERA, CNN SENIOR NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87248,
+  "n": 2,
+  "tag": "BORIS SANCHEZ, CNN CO-ANCHOR OF \"CNN NEWS CENTRAL\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 88268,
+  "n": 2,
+  "tag": "SUNLEN SERFATY, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 89318,
+  "n": 2,
+  "tag": "HANCOCKS (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 91180,
+  "n": 2,
+  "tag": "SEN. SUSAN COLLINS (R-ME)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 91305,
+  "n": 2,
+  "tag": "SLOAN (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 103039,
+  "n": 2,
+  "tag": "EMANUEL (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 103617,
+  "n": 2,
+  "tag": "PERGRAM (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 110003,
+  "n": 2,
+  "tag": "SEN. MITCH"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 111230,
+  "n": 2,
+  "tag": "REP. KEVIN"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 137274,
+  "n": 2,
+  "tag": "HEINRICH (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 138713,
+  "n": 2,
+  "tag": "SERRIE (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 184739,
+  "n": 2,
+  "tag": "EMANUEL (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 186196,
+  "n": 2,
+  "tag": "SEN. KAMALA HARRIS, D-CALIF."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 187602,
+  "n": 2,
+  "tag": "WALLACE"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 188179,
+  "n": 2,
+  "tag": "STARR (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188846,
+  "n": 2,
+  "tag": "JOHNS (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 193708,
+  "n": 2,
+  "tag": "HARTUNG (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 194042,
+  "n": 2,
+  "tag": "KAYE (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 194448,
+  "n": 2,
+  "tag": "ROBERTSON (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 194533,
+  "n": 2,
+  "tag": "PHILLIP (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195572,
+  "n": 2,
+  "tag": "MJ LEE, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195870,
+  "n": 2,
+  "tag": "UNIDENTIFIED FEMALE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 197470,
+  "n": 2,
+  "tag": "JOHNS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 198022,
+  "n": 2,
+  "tag": "ANDERSON COOPER, CNN ANCHOR, \"ANDERSON COOPER 360\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 198711,
+  "n": 2,
+  "tag": "SERFATY(voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 199769,
+  "n": 2,
+  "tag": "ROMANS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 200127,
+  "n": 2,
+  "tag": "JIMMY KIMMEL, HOST, \"JIMMY KIMMEL LIVE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 200418,
+  "n": 2,
+  "tag": "PAMELA BROWN, CNN SENIOR WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 200474,
+  "n": 2,
+  "tag": "MJ LEE, CNN POLITICAL REPORTER (voice-over)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 200874,
+  "n": 2,
+  "tag": "GRIFFIN (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 201050,
+  "n": 2,
+  "tag": "HILL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 201538,
+  "n": 2,
+  "tag": "JOHN BERMAN, CNN ANCHOR, \"NEW DAY\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 202500,
+  "n": 2,
+  "tag": "JAKE TAPPER, CNN HOST, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 202926,
+  "n": 2,
+  "tag": "CHUCK TODD, HOST, NBC'S \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203032,
+  "n": 2,
+  "tag": "AINSLEY EARHARDT, HOST, FOX NEWS \"FOX & FRIENDS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204428,
+  "n": 2,
+  "tag": "MJ LEE, CNN POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204721,
+  "n": 2,
+  "tag": "KAITLAN COLLINS, CNN WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205194,
+  "n": 2,
+  "tag": "SARA MURRAY, CNN NATIONAL POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205230,
+  "n": 2,
+  "tag": "SARA MURRAY, CNN POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206882,
+  "n": 2,
+  "tag": "ALEX MARQUARDT, CNN SENIOR NATIONAL SECURITY CORRESPONDENT (voice- over)"
+ },
+ {
+  "classes": [
+   "B_stop_name_paren"
+  ],
+  "example_rowid": 207714,
+  "n": 2,
+  "tag": "FOX(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207922,
+  "n": 2,
+  "tag": "NICK WATT, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 209918,
+  "n": 2,
+  "tag": "NORAH O'DONNELL, CBS ANCHOR, \"CBS EVENING NEWS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 210318,
+  "n": 2,
+  "tag": "LAH(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 212701,
+  "n": 2,
+  "tag": "DIAMOND (on camera)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 212900,
+  "n": 2,
+  "tag": "ZAKARIA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213656,
+  "n": 2,
+  "tag": "BORGER (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 213722,
+  "n": 2,
+  "tag": "SAVIDGE (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213825,
+  "n": 2,
+  "tag": "MANU RAJU, CNN SENIOR CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214156,
+  "n": 2,
+  "tag": "ANDERSON (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214690,
+  "n": 2,
+  "tag": "ANDERSON (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 215604,
+  "n": 2,
+  "tag": "YOUNG (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216003,
+  "n": 2,
+  "tag": "MARQUARDT (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 216318,
+  "n": 2,
+  "tag": "HARLOW (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 216559,
+  "n": 2,
+  "tag": "AVLON (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216834,
+  "n": 2,
+  "tag": "NOBLES (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217136,
+  "n": 2,
+  "tag": "RYAN NOBLES, CNN CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217234,
+  "n": 2,
+  "tag": "RANDI KAYE, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 217393,
+  "n": 2,
+  "tag": "CURNOW (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217449,
+  "n": 2,
+  "tag": "MICHAEL HOLMES, CNN ANCHOR (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 217575,
+  "n": 2,
+  "tag": "JONES (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217741,
+  "n": 2,
+  "tag": "ERICA HILL, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 218348,
+  "n": 2,
+  "tag": "QUEST (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 219973,
+  "n": 2,
+  "tag": "WILD (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 220440,
+  "n": 2,
+  "tag": "NEWTON (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221285,
+  "n": 2,
+  "tag": "SANTIAGO (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221554,
+  "n": 2,
+  "tag": "JESSICA DEAN, CNN CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223154,
+  "n": 2,
+  "tag": "JEFF ZELENY, CNN CHIEF NATIONAL AFFAIRS CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223560,
+  "n": 2,
+  "tag": "DONIE O'SULLIVAN, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren",
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 224560,
+  "n": 2,
+  "tag": "GRAYER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224905,
+  "n": 2,
+  "tag": "SAENZ (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 225508,
+  "n": 2,
+  "tag": "KASIE HUNT, CNN CHIEF NATIONAL AFFAIRS ANALYST (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 225833,
+  "n": 2,
+  "tag": "ATHENA JONES, CNN NATIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 226129,
+  "n": 2,
+  "tag": "FIELD (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226708,
+  "n": 2,
+  "tag": "JEREMY DIAMOND, CNN WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 227770,
+  "n": 2,
+  "tag": "RIPLEY (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 227840,
+  "n": 2,
+  "tag": "LAH (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 228154,
+  "n": 2,
+  "tag": "SCHNEIDER (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 228437,
+  "n": 2,
+  "tag": "ESSIG (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 231928,
+  "n": 2,
+  "tag": "BORIS SANCHEZ, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 232274,
+  "n": 2,
+  "tag": "JIMENEZ (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 234649,
+  "n": 2,
+  "tag": "RANDI KAYE, CNN ANCHOR/CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 235138,
+  "n": 2,
+  "tag": "BOEBERT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 238304,
+  "n": 2,
+  "tag": "SCIUTTO (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 239540,
+  "n": 2,
+  "tag": "ATWOOD (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241776,
+  "n": 2,
+  "tag": "SCHMIDT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 242522,
+  "n": 2,
+  "tag": "O'SULLIVAN (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 243978,
+  "n": 2,
+  "tag": "PIRRO (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 244026,
+  "n": 2,
+  "tag": "PAVLICH (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 245995,
+  "n": 2,
+  "tag": "ZANONA (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 246045,
+  "n": 2,
+  "tag": "ZANONA (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 246590,
+  "n": 2,
+  "tag": "FLORES (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 246658,
+  "n": 2,
+  "tag": "HARLOW (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 250634,
+  "n": 2,
+  "tag": "CAIFA (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 251110,
+  "n": 2,
+  "tag": "BELL (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 251639,
+  "n": 2,
+  "tag": "FLORES (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 260914,
+  "n": 2,
+  "tag": "O`DONNELL (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 262475,
+  "n": 2,
+  "tag": "REP. DEVIN NUNES (R-CA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 274947,
+  "n": 2,
+  "tag": "CAPEHART (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 278210,
+  "n": 2,
+  "tag": "JANE HARMAN (?)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 287538,
+  "n": 2,
+  "tag": "LIEBERMANN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 305407,
+  "n": 2,
+  "tag": "MEG TIRRELL, CNN MEDICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 308368,
+  "n": 2,
+  "tag": "RADDATZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 308527,
+  "n": 2,
+  "tag": "RADDATZ (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 65891,
+  "n": 1,
+  "tag": "SCANNELL (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 66438,
+  "n": 1,
+  "tag": "REP. TROY NEHIS"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 66618,
+  "n": 1,
+  "tag": "MUNTEAN (on-camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 66917,
+  "n": 1,
+  "tag": "REP. MIKE JOHNSON"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67223,
+  "n": 1,
+  "tag": "ROSALES (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67230,
+  "n": 1,
+  "tag": "JASON CARROLL, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67273,
+  "n": 1,
+  "tag": "PROKUPECZ (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67319,
+  "n": 1,
+  "tag": "CARROLL (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67383,
+  "n": 1,
+  "tag": "BERNAL (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67388,
+  "n": 1,
+  "tag": "BERNAL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67541,
+  "n": 1,
+  "tag": "KRISTEN WELKER, NBC MODERATOR, \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67813,
+  "n": 1,
+  "tag": "KRISTEN WELKER, NBC NEWS' \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 67828,
+  "n": 1,
+  "tag": "MARGARET BRENNAN, MODERATOR, \"FACE THE NATION\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 67918,
+  "n": 1,
+  "tag": "POLANTZ (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 68279,
+  "n": 1,
+  "tag": "REP. CARLOS GIMENEZ (R-FL)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68452,
+  "n": 1,
+  "tag": "CHRIS LACIVITA, TRUMP CO-CAMPAIGN MANAGER (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 68730,
+  "n": 1,
+  "tag": "REP. MAXINE WATERS (D-CA 43RD DISTRICT)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 69214,
+  "n": 1,
+  "tag": "REP. MIKE"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69314,
+  "n": 1,
+  "tag": "MICHEL MARTIN, HOST, NPR \"MORNING EDITION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69390,
+  "n": 1,
+  "tag": "BIANNA GOLODRYGA, HOST, \"CNN NEWSROOM\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69534,
+  "n": 1,
+  "tag": "WHITNEY WILD, LAW ENFORCEMENT CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 69932,
+  "n": 1,
+  "tag": "WHITNEY WILD, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 69954,
+  "n": 1,
+  "tag": "KAMALA HARRIS, VICE PRESIDENT OF THE STATES"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 70117,
+  "n": 1,
+  "tag": "[21:25:00] (CHEERING) KAMALA HARRIS (D), VICE PRESIDENT OF THE UNITED"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70149,
+  "n": 1,
+  "tag": "BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70229,
+  "n": 1,
+  "tag": "UNIDENTIFIED FEMALE #2"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 70290,
+  "n": 1,
+  "tag": "KAMALA HARRIS, VICE PRESIDENT OF THE"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 70310,
+  "n": 1,
+  "tag": "MARGARET BRENNAN, MODERATOR, CBS \"FACE THE NATION\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 70812,
+  "n": 1,
+  "tag": "[06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 71087,
+  "n": 1,
+  "tag": "KRISTEN WELKER, MODERATOR, NBC \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 71133,
+  "n": 1,
+  "tag": "GOV. TIM WALZ (D-MN)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 71147,
+  "n": 1,
+  "tag": "DONALD TRUMP (R), FORMER U.S. PRESIDENT AND"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 71801,
+  "n": 1,
+  "tag": "SEN. JOHN THUNE (R-SD)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72195,
+  "n": 1,
+  "tag": "BILL HEMMER, FOX NEWS ANCHOR, \"AMERICA'S NEWSROOM\""
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 72218,
+  "n": 1,
+  "tag": "KAMALA HARRIS, VICE PRESIDENT OF THE UNITED STATES (October 23, 2024)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 72412,
+  "n": 1,
+  "tag": "DUERSON (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 72435,
+  "n": 1,
+  "tag": "DUERSON (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72497,
+  "n": 1,
+  "tag": "JOHN BERMAN, CNN CO-ANCHOR OF \"CNN NEWS CENTRAL\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 72687,
+  "n": 1,
+  "tag": "JESSE WATTERS, FOX NEWS HOST, \"JESSE WATTERS PRIMETIME\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 73089,
+  "n": 1,
+  "tag": "SEN. AMY KLOBUCHAR (D-MN)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73309,
+  "n": 1,
+  "tag": "BRIAN TODD, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73464,
+  "n": 1,
+  "tag": "REP. CATHY RODGERS (R-or)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 73622,
+  "n": 1,
+  "tag": "RIED (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 73688,
+  "n": 1,
+  "tag": "MARSH (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 74002,
+  "n": 1,
+  "tag": "FREEMAN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74070,
+  "n": 1,
+  "tag": "ROSEMARY CHURCH, CNN ANCHOR OF \"CNN NEWSROOM\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 74084,
+  "n": 1,
+  "tag": "SEN. MARIA CANTWELL (D-WA)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 74121,
+  "n": 1,
+  "tag": "SEN. SHELLEY MOORE CAPITO (R)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 74211,
+  "n": 1,
+  "tag": "MARSH (on camera)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 74226,
+  "n": 1,
+  "tag": "DONALD TRUMP, PRESIDENT OF THE UNITED STATES (September 4, 2019)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 74343,
+  "n": 1,
+  "tag": "REP. JASMINE CROCKETT (D-TX)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74478,
+  "n": 1,
+  "tag": "MARGARET BRENNAN, CBS MODERATOR, \"FACE THE NATION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74654,
+  "n": 1,
+  "tag": "KENNEDY, HOST, \"KENNEDY SAVES THE WORLD\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74758,
+  "n": 1,
+  "tag": "SARA SIDNER, CNN CO-ANCHOR OF \"CNN NEWS CENTRAL\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 74790,
+  "n": 1,
+  "tag": "TOM FOREMAN, CNN CORRESPONDENT (voiceover)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 75054,
+  "n": 1,
+  "tag": "REP. JAMES COMER (R-KY)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 75323,
+  "n": 1,
+  "tag": "POLO SANDOVAL, CNN ANCHOR/CORRESPONDENT"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 75426,
+  "n": 1,
+  "tag": "DR. MEHMET OZ"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 75472,
+  "n": 1,
+  "tag": "JON STEWART, HOST, \"COMEDY CENTRAL\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 75643,
+  "n": 1,
+  "tag": "REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 76333,
+  "n": 1,
+  "tag": "ANDERSON COOPER, CNN ANCHOR, AC360"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 76423,
+  "n": 1,
+  "tag": "GABE COHEN, CNN CORRESPONDENT (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 76735,
+  "n": 1,
+  "tag": "HUBBARD (voiceover)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 77054,
+  "n": 1,
+  "tag": "REP. HAKEEM"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 77093,
+  "n": 1,
+  "tag": "BERMAN (on camera)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 77252,
+  "n": 1,
+  "tag": "CROWD (chanting)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 77864,
+  "n": 1,
+  "tag": "TUCKER CARLSON, AMERICAN COMMENTATOR, HOST, \"THE TUCKER CARLSON SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 78621,
+  "n": 1,
+  "tag": "JAKE TAPPER, CNN HOST, \"THE LEAD\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 79884,
+  "n": 1,
+  "tag": "MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 80213,
+  "n": 1,
+  "tag": "BRIAN TODD, CNN CORRESPONDENT (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 81743,
+  "n": 1,
+  "tag": "STEPHANOPOULOS (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 81874,
+  "n": 1,
+  "tag": "KARL (voiceover)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 82015,
+  "n": 1,
+  "tag": "DONALD TRUMP, (R) FORMER PRESIDENT OF THE UNITED STATES"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 82049,
+  "n": 1,
+  "tag": "REP. RAJA KRISHNAMOORTHI"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 82714,
+  "n": 1,
+  "tag": "WALDMAN (voiceover)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 82752,
+  "n": 1,
+  "tag": "SEN. RICHARD BLUMENTHAL (D-CT)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 83159,
+  "n": 1,
+  "tag": "YOSHIDA (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 83365,
+  "n": 1,
+  "tag": "PROKUPECZ (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 83813,
+  "n": 1,
+  "tag": "C. CONTORNO (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 83924,
+  "n": 1,
+  "tag": "DONALD TRUMP, PRESIDENT OF"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 84641,
+  "n": 1,
+  "tag": "MEGYN KELLY, HOST, \"THE MEGYN KELLY SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 84926,
+  "n": 1,
+  "tag": "GONZALEZ (voiceover)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 84935,
+  "n": 1,
+  "tag": "SEN. ERIC SCHMITT"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 86942,
+  "n": 1,
+  "tag": "REP. JESUS"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 87072,
+  "n": 1,
+  "tag": "GOV. GREG ABBOTT (R-TX)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87127,
+  "n": 1,
+  "tag": "SIDNER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87229,
+  "n": 1,
+  "tag": "ED LAVANDERA, CNN SENIOR NATIONAL CORRESPONDENT (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 87806,
+  "n": 1,
+  "tag": "REED (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 88200,
+  "n": 1,
+  "tag": "LEIGH MCGOWAN, PODCAST HOST, \"POLITICSGIRL\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 88245,
+  "n": 1,
+  "tag": "REP. ROBERT GARCIA (D-CA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 88862,
+  "n": 1,
+  "tag": "HASSAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 89071,
+  "n": 1,
+  "tag": "MULLIN (?)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 89101,
+  "n": 1,
+  "tag": "REP. ERIC BURLISON"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 89134,
+  "n": 1,
+  "tag": "WATTLES (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 89137,
+  "n": 1,
+  "tag": "SEN. MARKWAYNE MULLIN (R-OK)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 89289,
+  "n": 1,
+  "tag": "HARRIS (ph)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 89353,
+  "n": 1,
+  "tag": "SEN. RICHARD BLUMENTHAL (D-Can't)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 89608,
+  "n": 1,
+  "tag": "TAPPER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 89795,
+  "n": 1,
+  "tag": "TAMARA KEITH, HOST, \"NPR POLITICS PODCAST\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 89880,
+  "n": 1,
+  "tag": "LAUREN FOX, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 89961,
+  "n": 1,
+  "tag": "SEN. TIM SCOTT (R-SC)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 90079,
+  "n": 1,
+  "tag": "LAH (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 90851,
+  "n": 1,
+  "tag": "KRISTEN WELKER, HOST, NBC'S \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 91304,
+  "n": 1,
+  "tag": "SAENZ (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 91340,
+  "n": 1,
+  "tag": "BENYON (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 92139,
+  "n": 1,
+  "tag": "BINION (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 92282,
+  "n": 1,
+  "tag": "STEVE BANNON, HOST, \"BANNON'S WAR ROOM\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 92421,
+  "n": 1,
+  "tag": "JOHN DICKERSON (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 92959,
+  "n": 1,
+  "tag": "DOCTOR JAY BHATTACHARYA (NIH Director)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 95553,
+  "n": 1,
+  "tag": "JEFFREY ROSEN (Acting Attorney General)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 96081,
+  "n": 1,
+  "tag": "MARK STRASSMANN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 97275,
+  "n": 1,
+  "tag": "BRET BAIER (Fox News)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 98181,
+  "n": 1,
+  "tag": "MARK STRASSMANN (on camera)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 98378,
+  "n": 1,
+  "tag": "CROWD (in unison)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 99663,
+  "n": 1,
+  "tag": "DOOCY (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 100083,
+  "n": 1,
+  "tag": "STEVE MNUCHIN, TREASURY SECRETARY, AUG. 1, 2017"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 100599,
+  "n": 1,
+  "tag": "REP. NANCY PELOSI, D-CALIF."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 102804,
+  "n": 1,
+  "tag": "DANA MILBANK, OP-ED COLUMNIST, \"THE WASHINGTON POST\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 102837,
+  "n": 1,
+  "tag": "SEN. JOE MANCHIN, D-W.VA, \"MEET THE PRESS\"/NBC, DEC. 17, 2017"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 103014,
+  "n": 1,
+  "tag": "REP. MARJORY TAYLOR GREENE (R-GA)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 103045,
+  "n": 1,
+  "tag": "PERGRAM (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 103939,
+  "n": 1,
+  "tag": "FMR. GOV. NIKKI HALEY"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 104285,
+  "n": 1,
+  "tag": "SEN. TIM KAINE"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 104568,
+  "n": 1,
+  "tag": "GOVERNOR JAY INSLEE I'"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 104834,
+  "n": 1,
+  "tag": "REP. PRAMILA JAYAPAL"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 106351,
+  "n": 1,
+  "tag": "SEN. ANDY KIM"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 107405,
+  "n": 1,
+  "tag": "SEN. JOHN"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 107616,
+  "n": 1,
+  "tag": "JOY-ANN REID"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 107618,
+  "n": 1,
+  "tag": "DAVID BRODY"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 107897,
+  "n": 1,
+  "tag": "SENATOR BOB CORKER"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 108462,
+  "n": 1,
+  "tag": "GOVERNOR RON"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 110238,
+  "n": 1,
+  "tag": "REP. KEVIN MCCARTHY"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 110249,
+  "n": 1,
+  "tag": "KRISTEN WELKER"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 110329,
+  "n": 1,
+  "tag": "GOV. RON"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 112183,
+  "n": 1,
+  "tag": "DR. BEN CARSON"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 112511,
+  "n": 1,
+  "tag": "REP. JIM"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 116271,
+  "n": 1,
+  "tag": "Gene Block, UCLA Chancellor"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 116632,
+  "n": 1,
+  "tag": "REP. MIKE POMPEO"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 130197,
+  "n": 1,
+  "tag": "MIKE EMANUEL, FOX NEWS CHANNEL CHIEF CONGRESSIONAL CORRESPONDENT (voice- over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 137929,
+  "n": 1,
+  "tag": "BRET BAIER, HOST OF \"SPECIAL REPORT\""
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 137948,
+  "n": 1,
+  "tag": "Tom Stein, Democratic Voter"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 138711,
+  "n": 1,
+  "tag": "ROBERTS (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 138715,
+  "n": 1,
+  "tag": "LAWRENCE (on camera)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 144501,
+  "n": 1,
+  "tag": "Scott Bessent, U.S. Treasury Secretary Nominee"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 151413,
+  "n": 1,
+  "tag": "Jamieson Greer, U.S. Trade Representative"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 155292,
+  "n": 1,
+  "tag": "Kristi Noem, U.S. Homeland Security Secretary"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 156910,
+  "n": 1,
+  "tag": "CHRIS WALLACE, FOX NEWS HOST, \"FOX NEWS SUNDAY\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 158223,
+  "n": 1,
+  "tag": "DOOCY (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 159015,
+  "n": 1,
+  "tag": "UNIDENTIFIED MALE, MARCH 20"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 159647,
+  "n": 1,
+  "tag": "REP. DEBBIE WASSERMAN SCHULTZ, D-FLA."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 161673,
+  "n": 1,
+  "tag": "WOLF BLITZER, CNN HOST, \"THE SITUATION ROOM\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 164210,
+  "n": 1,
+  "tag": "SPRINGER (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 167914,
+  "n": 1,
+  "tag": "SEN. CHRIS COONS"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 175673,
+  "n": 1,
+  "tag": "Sarah Binder, George Washington University"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 175681,
+  "n": 1,
+  "tag": "Jamil N. Jaffer, George Mason University"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 176931,
+  "n": 1,
+  "tag": "DR. MUSTAFA ALI"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 180228,
+  "n": 1,
+  "tag": "Kristi Noem, Former U.S. Homeland Security Secretary"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 181804,
+  "n": 1,
+  "tag": "BRET BAIER, HOST, ‘SPECIAL REPORT’"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 182973,
+  "n": 1,
+  "tag": "REP. ELIJAH CUMMINGS (D, MD)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 184653,
+  "n": 1,
+  "tag": "Jodi Nicholson, Referendum Opponent"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184694,
+  "n": 1,
+  "tag": "BREAM (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 184706,
+  "n": 1,
+  "tag": "TURNER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 184708,
+  "n": 1,
+  "tag": "JONATHAN HUNT, FOX NEWS CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184763,
+  "n": 1,
+  "tag": "HASNIE (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 184785,
+  "n": 1,
+  "tag": "BAIER (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184868,
+  "n": 1,
+  "tag": "TOMLINSON (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184896,
+  "n": 1,
+  "tag": "DOOCY (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184946,
+  "n": 1,
+  "tag": "EDSON (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184974,
+  "n": 1,
+  "tag": "CORKE (voice over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 184980,
+  "n": 1,
+  "tag": "Jay Hurst, Pentagon Chief Financial Officer"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 184993,
+  "n": 1,
+  "tag": "MEREDITH (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 185003,
+  "n": 1,
+  "tag": "HEMMER (voice-over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 185146,
+  "n": 1,
+  "tag": "Leona Tate, Civil Rights Activist"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 185287,
+  "n": 1,
+  "tag": "Scott Bessent, U.S. Treasury Secretary"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 185582,
+  "n": 1,
+  "tag": "CHUCK TODD, MODERATOR, \"MEET THE PRESS\"/NBC"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 185655,
+  "n": 1,
+  "tag": "SEN. MICHAEL BENNETT, D-COLO."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 185923,
+  "n": 1,
+  "tag": "JOY BEHAR, \"THE VIEW\"/ABC, OCT. 10, 2016"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 185972,
+  "n": 1,
+  "tag": "SHAWN (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 187143,
+  "n": 1,
+  "tag": "SEN. CHRIS MURPHY"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 187768,
+  "n": 1,
+  "tag": "HARRIGAN (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188232,
+  "n": 1,
+  "tag": "ANDERSON COOPER, CNN HOST, A.C. 360"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188319,
+  "n": 1,
+  "tag": "SAVANNAH GUTHRIE, ANCHOR, NBC \"TODAY\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 188398,
+  "n": 1,
+  "tag": "[13:34:57] SEN. CHUCK SCHUMER"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188464,
+  "n": 1,
+  "tag": "ANDERSON COOPER, CNN ANCHOR, \"A.C. 360\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188575,
+  "n": 1,
+  "tag": "ANDERSON COOPER, CNN HOST (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 188603,
+  "n": 1,
+  "tag": "REP. ADAM SMITH"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 188845,
+  "n": 1,
+  "tag": "KRISTIE LU STOUT, HOST, \"NEWS STREAM\" (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 189056,
+  "n": 1,
+  "tag": "ATHENA JONES, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 189577,
+  "n": 1,
+  "tag": "SEN. CHUCK SCHUMER"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 189693,
+  "n": 1,
+  "tag": "REP. KEVIN MCCARTHY, R-CALIF."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190089,
+  "n": 1,
+  "tag": "DR. SANJAY GUPTA, CNN CHIEF MEDICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190185,
+  "n": 1,
+  "tag": "JOY BEHAR, CO-HOST, \"THE VIEW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190589,
+  "n": 1,
+  "tag": "CHARLAMAGNE THA GOD, RADIO HOST, POWER 105.1"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190843,
+  "n": 1,
+  "tag": "VAN JONES, CNN CONTRIBUTOR, CNN HOST, \"THE VAN JONES SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190849,
+  "n": 1,
+  "tag": "GUPTA (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 190905,
+  "n": 1,
+  "tag": "GUPTA (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 191195,
+  "n": 1,
+  "tag": "HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 191321,
+  "n": 1,
+  "tag": "BRIGGS (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 191483,
+  "n": 1,
+  "tag": "ROMANS(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 191504,
+  "n": 1,
+  "tag": "ATHENA JONES, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 191567,
+  "n": 1,
+  "tag": "M.J. LEE, CNN NATIONAL POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 191649,
+  "n": 1,
+  "tag": "JARRETT (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 192076,
+  "n": 1,
+  "tag": "SEN. MARK WARNER"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 192133,
+  "n": 1,
+  "tag": "SUZANNE MALVEAUX, NATIONAL CORRESPONDENT, CNN(off-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 192185,
+  "n": 1,
+  "tag": "SUZANNE MALVEAUX, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 192413,
+  "n": 1,
+  "tag": "BURNETT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 192659,
+  "n": 1,
+  "tag": "SIDNER (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 192803,
+  "n": 1,
+  "tag": "ELLEN DEGENERES, HOST, \"THE ELLEN DEGENERES SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 192852,
+  "n": 1,
+  "tag": "ANDERSON HAYS COOPER, ANDERSON COOPER 360 , CNN"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193024,
+  "n": 1,
+  "tag": "ALISYN CAMEROTA, CNN ANCHOR, \"NEW DAY\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 193145,
+  "n": 1,
+  "tag": "SEN. KAMALA HARRIS (D-CA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193377,
+  "n": 1,
+  "tag": "ELIANA JOHNSON, NATIONAL POLITICAL REPORTER, \"POLITICO\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193439,
+  "n": 1,
+  "tag": "SUNLEN SERFATY, CONGRESSIONAL CORRESPONDENT, CNN (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 193707,
+  "n": 1,
+  "tag": "LU STOUT (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 194196,
+  "n": 1,
+  "tag": "MCLEAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 194354,
+  "n": 1,
+  "tag": "MICHAEL SHEAR, WHITE HOUSE CORRESPONDENT, \"THE NEW YORK TIMES\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 194809,
+  "n": 1,
+  "tag": "LISA LERER, NATIONAL POLITICAL REPORTER, \"NEW YORK TIMES\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 194817,
+  "n": 1,
+  "tag": "MAX BOOT, COLUMNIST, \"THE WASHINGTON POST\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195479,
+  "n": 1,
+  "tag": "LEE(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195487,
+  "n": 1,
+  "tag": "BOB WOODWARD, AUTHOR, \"FEAR"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195509,
+  "n": 1,
+  "tag": "MJ LEE, CNN NATIONAL POLITICAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 195553,
+  "n": 1,
+  "tag": "M.J. LEE, CNN POLITICAL REPORTER (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 195566,
+  "n": 1,
+  "tag": "REP. GERRY CONNOLLY (D-VA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 196148,
+  "n": 1,
+  "tag": "ABBY PHILLIP, CNN WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 196183,
+  "n": 1,
+  "tag": "NATALIE ALLEN, CNN ANCHOR (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 196219,
+  "n": 1,
+  "tag": "DONALD TRUMP (R), PRESIDENT OF THE UNITED STATES"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 196263,
+  "n": 1,
+  "tag": "FOREMAN(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 196291,
+  "n": 1,
+  "tag": "MARTHA MACCALLUM, HOST, \"THE STORY\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 196820,
+  "n": 1,
+  "tag": "CHRIS WALLACE, FOX NEWS ANCHOR, \"FOX NEWS SUNDAY\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 196861,
+  "n": 1,
+  "tag": "SEN. RICHARD BLUMENTHAL, D-CONN.T"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 197135,
+  "n": 1,
+  "tag": "JULIAN CASTRO, FORMER SECRETARY OF HOUSING AND URBAN DEVELOPMENT"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 197182,
+  "n": 1,
+  "tag": "SEN. BERNIE SANDERS (I-VT)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 197221,
+  "n": 1,
+  "tag": "DEAN(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 197663,
+  "n": 1,
+  "tag": "M.J. LEE, CNN NATIONAL POLITICS CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 197955,
+  "n": 1,
+  "tag": "STEPHEN COLBERT, TV HOST/COMEDIAN"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 198309,
+  "n": 1,
+  "tag": "STEPHEN COLBERT, HOST, \"THE LATE SHOW\"/CBS"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 198345,
+  "n": 1,
+  "tag": "SEN. TIM KAINE, D-VA., \"GMA\"/ABC"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 198464,
+  "n": 1,
+  "tag": "ATWOOD(voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 198822,
+  "n": 1,
+  "tag": "REP. RASHIDA TLAIB (D-MI)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 198868,
+  "n": 1,
+  "tag": "REP. AYANNA PRESSLEY (D-MA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 198954,
+  "n": 1,
+  "tag": "RYAN NOBLES, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 199283,
+  "n": 1,
+  "tag": "JOHN BOEHNER, FORMER SPEAKER OF THE"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199391,
+  "n": 1,
+  "tag": "LARRY MINNIX, LEADINGAGE, PRESIDENT/CEO"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199617,
+  "n": 1,
+  "tag": "ANDERSON COOPER, CNN ANCHOR, ANDERSON COOPER 360"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199842,
+  "n": 1,
+  "tag": "CHRIS CUOMO, CNN ANCHOR, \"CUOMO PRIME TIME\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 199848,
+  "n": 1,
+  "tag": "[05:59:59] SEN. BERNIE"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 199958,
+  "n": 1,
+  "tag": "VAN JONES, CNN POLITICAL COMMENTATOR, HOST, \"THE VAN JONES SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 200828,
+  "n": 1,
+  "tag": "M.J. LEE, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 201017,
+  "n": 1,
+  "tag": "STEPHEN COLBERT, HOST, \"THE LATE SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 201044,
+  "n": 1,
+  "tag": "DAVID MUIR, HOST, \"ABC WORLD NEWS TONIGHT\"/ABC"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 201331,
+  "n": 1,
+  "tag": "ZELENY(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 201798,
+  "n": 1,
+  "tag": "STEPHEN COLBERT, HOST, \"THE LATE SHOW WITH STEPHEN COLBERT\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 202561,
+  "n": 1,
+  "tag": "RUDY GIULIANI, ATTORNEY TO PRESIDENT DONALD TRUMP"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 202601,
+  "n": 1,
+  "tag": "JAKE TAPPER, CNN CHIEF WASHINGTON CORRESPONDENT, CNN HOST, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 202609,
+  "n": 1,
+  "tag": "MJ LEE, CNN POLITICAL CORRESPONDENT (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 203109,
+  "n": 1,
+  "tag": "BOLDUAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203125,
+  "n": 1,
+  "tag": "MJ LEE, CNN NATIONAL POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 203235,
+  "n": 1,
+  "tag": "VERCAMMEN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203257,
+  "n": 1,
+  "tag": "HOWELL (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203537,
+  "n": 1,
+  "tag": "JESSICA SCHNEIDER, CNN JUSTICE CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 203556,
+  "n": 1,
+  "tag": "MOOS (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 203736,
+  "n": 1,
+  "tag": "SEN. MICHAEL BENNET (D-CO)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 203737,
+  "n": 1,
+  "tag": "[04:40:06] SEN. MICHAEL BENNET (D-CO)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203839,
+  "n": 1,
+  "tag": "UNIDENTIFIED REPORTER"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 203841,
+  "n": 1,
+  "tag": "PLEITGEN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204101,
+  "n": 1,
+  "tag": "MATTINGLY(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204133,
+  "n": 1,
+  "tag": "CARLSON (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204438,
+  "n": 1,
+  "tag": "PHIL MATTINGLY, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204443,
+  "n": 1,
+  "tag": "PHIL MATTINGLY, CNN U.S. CONGRESSIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 204464,
+  "n": 1,
+  "tag": "DONALD TRUMP (R), PRESIDENT OF THE UNITED STATES (via phone)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 204536,
+  "n": 1,
+  "tag": "ELBAGIR (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 204674,
+  "n": 1,
+  "tag": "RAJU(?)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205070,
+  "n": 1,
+  "tag": "JAMES CLAPPER, FORMER DIRECTOR OF NATIONAL INTELLIGENCE, \"MEET THE PRESS\"/MAY 28"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205141,
+  "n": 1,
+  "tag": "GLORIA BORGER, CNN CHIEF POLITICAL ANALYST (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205261,
+  "n": 1,
+  "tag": "GARY TUCHMAN, CNN NATIONAL CORRESPONDENT (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 205497,
+  "n": 1,
+  "tag": "TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 205712,
+  "n": 1,
+  "tag": "JULIE PACE, WASHINGTON BUREAU CHIEF, \"ASSOCIATED PRESS\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 206050,
+  "n": 1,
+  "tag": "REEVE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206079,
+  "n": 1,
+  "tag": "CHUCK TODD, NBC MODERATOR, \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 206144,
+  "n": 1,
+  "tag": "MURRAY(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206418,
+  "n": 1,
+  "tag": "SCHNEIDER(voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206687,
+  "n": 1,
+  "tag": "REP. PRAMILA JAYAPAL (D-WASHINGTON'S 7TH DISTRICT)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206879,
+  "n": 1,
+  "tag": "ALEX MARQUARDT, CNN SENIOR NATIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 206986,
+  "n": 1,
+  "tag": "RIVERS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 206998,
+  "n": 1,
+  "tag": "ALEXANDER MARQUARDT, CNN SENIOR NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207096,
+  "n": 1,
+  "tag": "ALEX MARQUARDT, CNN SENIOR NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207171,
+  "n": 1,
+  "tag": "LAUREN FOX, CNN CONGRESSIONAL REPORTER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207481,
+  "n": 1,
+  "tag": "DANA BASH, CNN CHIEF POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207595,
+  "n": 1,
+  "tag": "EDDIE MURPHY, ACTOR-COMEDIAN, HOST, NBC \"SATURDAY NIGHT LIVE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207797,
+  "n": 1,
+  "tag": "LARRY KING, FORMER HOST, \"LARRY KING LIVE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 207815,
+  "n": 1,
+  "tag": "BALDWIN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 208038,
+  "n": 1,
+  "tag": "BLITZER (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 209180,
+  "n": 1,
+  "tag": "ALLEN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 209188,
+  "n": 1,
+  "tag": "JASON CARROLL, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 209209,
+  "n": 1,
+  "tag": "SARA MURRAY, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 209991,
+  "n": 1,
+  "tag": "SEN. CHUCK"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 210140,
+  "n": 1,
+  "tag": "ROMERO (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 210341,
+  "n": 1,
+  "tag": "MARGARET BRENNAN, CBS NEWS ANCHOR, \"FACE THE NATION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 211415,
+  "n": 1,
+  "tag": "ANDERSON COOPER, CNN HOST, \"A.C. 360\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 211710,
+  "n": 1,
+  "tag": "RACHEL MADDOW, MSNBC ANCHOR, 'THE RACHEL MADDOW SHOW\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 212161,
+  "n": 1,
+  "tag": "PHIL MURPHY, (D), NEW JERSEY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 212205,
+  "n": 1,
+  "tag": "LARA TRUMP, SENIOR ADVISER FOR TRUMP 2020"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 212635,
+  "n": 1,
+  "tag": "REP. JERRY NADLER (D-NY)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 212809,
+  "n": 1,
+  "tag": "AVLON (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 212904,
+  "n": 1,
+  "tag": "DR. MENE PANGALOS"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 213039,
+  "n": 1,
+  "tag": "REP. NANCY"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213154,
+  "n": 1,
+  "tag": "NICK WATT, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213389,
+  "n": 1,
+  "tag": "CHRIS CUOMO, ANCHOR \"CNN TONIGHT\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 213945,
+  "n": 1,
+  "tag": "GARY TUCHMAN, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214155,
+  "n": 1,
+  "tag": "BRIT HUME, FOX NEWS HOST (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214220,
+  "n": 1,
+  "tag": "RAJU(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214752,
+  "n": 1,
+  "tag": "BORGER(voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 214863,
+  "n": 1,
+  "tag": "DR. PETER MCCOLLOUGH"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 214935,
+  "n": 1,
+  "tag": "BLITZER (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215046,
+  "n": 1,
+  "tag": "DEFTERIOS (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 215057,
+  "n": 1,
+  "tag": "SEN. JOSH HAWLEY (R-MO)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 215307,
+  "n": 1,
+  "tag": "COREN (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215308,
+  "n": 1,
+  "tag": "GIOKOS (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215355,
+  "n": 1,
+  "tag": "CHRIS CUOMO, CNN HOST, \"CUOMO PRIME TIME\""
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 215408,
+  "n": 1,
+  "tag": "SOARES (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215693,
+  "n": 1,
+  "tag": "LAURA INGRAHAM, FOX NEWS HOST, \"THE INGRAHAM ANGLE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215756,
+  "n": 1,
+  "tag": "RAJU (Voice Over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 215918,
+  "n": 1,
+  "tag": "SUNLEN SERFATY, CNN CONGRESSIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216116,
+  "n": 1,
+  "tag": "BECKY ANDERSON, CNN HOST (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216227,
+  "n": 1,
+  "tag": "ABBY PHILLIP, CNN POLITICAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216241,
+  "n": 1,
+  "tag": "ABBY PHILLIP, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 216306,
+  "n": 1,
+  "tag": "STARR (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216504,
+  "n": 1,
+  "tag": "JOE JOHNS, CNN SENIOR WASHINGTON CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216536,
+  "n": 1,
+  "tag": "ZAIN ASHER, CNN HOST (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 216843,
+  "n": 1,
+  "tag": "KAITLAN COLLINS, CNN CHIEF WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217081,
+  "n": 1,
+  "tag": "CHURCH (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217402,
+  "n": 1,
+  "tag": "ATHENA JONES, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217429,
+  "n": 1,
+  "tag": "ATHENA JONES, CNN U.S. NATIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217430,
+  "n": 1,
+  "tag": "JONES (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217589,
+  "n": 1,
+  "tag": "ED LAVANDERA, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 217677,
+  "n": 1,
+  "tag": "SCNEIDER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 217735,
+  "n": 1,
+  "tag": "BERMAN (on-camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 217895,
+  "n": 1,
+  "tag": "CONWAY (voice-over)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 218259,
+  "n": 1,
+  "tag": "GINGRAS (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 218403,
+  "n": 1,
+  "tag": "GEORGE STEPHANOPOULOS, ABC NEWS CHIEF ANCHOR, \"THIS WEEK\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 218584,
+  "n": 1,
+  "tag": "YOUNG (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 218686,
+  "n": 1,
+  "tag": "NIKOLE HANNAH-JONES, CREATOR, \"THE 1619 PROJECT\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 218703,
+  "n": 1,
+  "tag": "REP. JOAQUIN"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 219192,
+  "n": 1,
+  "tag": "HANCOCKS (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 219374,
+  "n": 1,
+  "tag": "DR. PETERS MARKS"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 219462,
+  "n": 1,
+  "tag": "REP. RALPH NORMAN (R-SC)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 219898,
+  "n": 1,
+  "tag": "CHUCK TODD, MODERATOR, \"MEET THE PRESS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 219941,
+  "n": 1,
+  "tag": "K. COLLINS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 219954,
+  "n": 1,
+  "tag": "KEILAR (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 219962,
+  "n": 1,
+  "tag": "C. WILD (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 220454,
+  "n": 1,
+  "tag": "TUCKER CARLSON, FOX NEWS HOST, \"TUCKER CARLSON TONIGHT\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 220834,
+  "n": 1,
+  "tag": "SEBASTIAN (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221153,
+  "n": 1,
+  "tag": "PHIL MATTINGLY, CNN SENIOR WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221163,
+  "n": 1,
+  "tag": "DANA BASH, CNN CHIEF POLITICAL CORRESPONDENT & CNN CO-ANCHOR, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221197,
+  "n": 1,
+  "tag": "COLLINS (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221410,
+  "n": 1,
+  "tag": "DEAN (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 221656,
+  "n": 1,
+  "tag": "CASAREZ (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 221657,
+  "n": 1,
+  "tag": "CASAREZ (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 221914,
+  "n": 1,
+  "tag": "JAKE TAPPER, CNN ANCHOR, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 222235,
+  "n": 1,
+  "tag": "MALVEAUX (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 222240,
+  "n": 1,
+  "tag": "O'SULLIVAN(voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 222283,
+  "n": 1,
+  "tag": "STELTER(voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 222399,
+  "n": 1,
+  "tag": "BIANNA GOLODRYGA, CNN CONTRIBUTOR (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 222440,
+  "n": 1,
+  "tag": "CHRIS WALLACE, HOST, \"FOX NEWS SUNDAY\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 222717,
+  "n": 1,
+  "tag": "REP. ADAM KINZINGER (D-IL)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 222899,
+  "n": 1,
+  "tag": "BLITZER (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223240,
+  "n": 1,
+  "tag": "JESSICA DEAN, CNN CONGRESSIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 223335,
+  "n": 1,
+  "tag": "NEWTON (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223345,
+  "n": 1,
+  "tag": "CUOMO (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 223516,
+  "n": 1,
+  "tag": "DONIE O'SULLIVAN, CNN CORRRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224065,
+  "n": 1,
+  "tag": "DANIEL DALE, CNN REPORTER (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 224245,
+  "n": 1,
+  "tag": "CHANCE (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 224252,
+  "n": 1,
+  "tag": "CHANCE (voice over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 224617,
+  "n": 1,
+  "tag": "SEN. MITT ROMNEY (R-UT)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224623,
+  "n": 1,
+  "tag": "O'SULLIVAN (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224650,
+  "n": 1,
+  "tag": "WALSH (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224843,
+  "n": 1,
+  "tag": "MARQUARDT (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 224926,
+  "n": 1,
+  "tag": "KAFANOV (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224959,
+  "n": 1,
+  "tag": "PRES. VOLODYMYR ZELENSKYY, UKRAINE (through translator)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 224984,
+  "n": 1,
+  "tag": "ZELENSKYY (through translator)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 225432,
+  "n": 1,
+  "tag": "RIVERS (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 225487,
+  "n": 1,
+  "tag": "UNIDENTIFIED MALE (through translator)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 225693,
+  "n": 1,
+  "tag": "JONATHAN MARTIN, REPORTER/AUTHOR"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 225736,
+  "n": 1,
+  "tag": "BROADDUS (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 225781,
+  "n": 1,
+  "tag": "FISHER (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 225784,
+  "n": 1,
+  "tag": "FISHER (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226031,
+  "n": 1,
+  "tag": "SANTIAGO (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226232,
+  "n": 1,
+  "tag": "BROWN (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226250,
+  "n": 1,
+  "tag": "NARRATOR (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226330,
+  "n": 1,
+  "tag": "DANA BASH, CNN CHIEF POLITICAL CORRESPONDENT & CNN HOST, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 226559,
+  "n": 1,
+  "tag": "POLANTZ (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226564,
+  "n": 1,
+  "tag": "DANA BASH, CNN CHIEF POLITICAL CORRESPONDENT/ANCHOR"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226567,
+  "n": 1,
+  "tag": "DANA BASH, CNN CHIEF POLITICAL CORRESPONDENT, CNN CO-ANCHOR, \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 226589,
+  "n": 1,
+  "tag": "STATE REP. RUSTY BOWERS (R-AZ)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 226817,
+  "n": 1,
+  "tag": "PERVUM (ph)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 226852,
+  "n": 1,
+  "tag": "STEPHEN COLBERT, HOST, COMEDY CENTRAL'S \"THE COLBERT REPORT\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 227088,
+  "n": 1,
+  "tag": "DR. DONELL HARVIN"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 227229,
+  "n": 1,
+  "tag": "SEN. LINDSEY GRAHAM, R-S.C."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 227236,
+  "n": 1,
+  "tag": "UNIDENTIFIED FEMALE (through translator)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 227244,
+  "n": 1,
+  "tag": "REP. PETE AGUILAR (D)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 227632,
+  "n": 1,
+  "tag": "GRIFFIN (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 227726,
+  "n": 1,
+  "tag": "WANG (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 227757,
+  "n": 1,
+  "tag": "RIPLEY (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 227792,
+  "n": 1,
+  "tag": "WANG (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 227793,
+  "n": 1,
+  "tag": "WANG (voice over)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 227807,
+  "n": 1,
+  "tag": "SCIUTTO (on-camera)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 227834,
+  "n": 1,
+  "tag": "WHITFIELD (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 227868,
+  "n": 1,
+  "tag": "DIAMOND (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 228176,
+  "n": 1,
+  "tag": "JESSE WATTERS, FOX NEWS CHANNEL HOST, \"JESSE WATTERS PRIMETIME\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 229533,
+  "n": 1,
+  "tag": "VOLODYMYR ZELENSKYY, UKRAINIAN PRESIDENT (through translator)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 230193,
+  "n": 1,
+  "tag": "SEN. THOM TILLIS (R-NC)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 230391,
+  "n": 1,
+  "tag": "TODD (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 230710,
+  "n": 1,
+  "tag": "NEIL CAVUTO, HOST OF \"YOUR WORLD\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 230830,
+  "n": 1,
+  "tag": "BASH (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 231697,
+  "n": 1,
+  "tag": "RYAN MCCARTHY, SECRETARY OF THE ARMY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 231793,
+  "n": 1,
+  "tag": "PHILLIP (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 231910,
+  "n": 1,
+  "tag": "SANCHEZ (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 232108,
+  "n": 1,
+  "tag": "WHOOPI GOLDBERG, \"THE VIEW\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 232182,
+  "n": 1,
+  "tag": "GOV. JOHN KASICH, R-OHIO"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 232308,
+  "n": 1,
+  "tag": "BORIS SANCHEZ, CNN WHITE HOUSE CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 232334,
+  "n": 1,
+  "tag": "BORIS SANCHEZ, CNN WHITE HOUSE CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 232421,
+  "n": 1,
+  "tag": "MIRACLE (on camara)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 232941,
+  "n": 1,
+  "tag": "STEPHEN COLBERT, HOST, \"THE LATE SHOW WITH STEPHEN COLBERT,\" CBS"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 233406,
+  "n": 1,
+  "tag": "REP. ZOE LOFGREN (D)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 233627,
+  "n": 1,
+  "tag": "LYNDA KINKADE, CNN ANCHOR AND CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 233743,
+  "n": 1,
+  "tag": "CAMEROTA (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 234270,
+  "n": 1,
+  "tag": "KAITLAN COLLINS, CNN ANCHOR (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 234547,
+  "n": 1,
+  "tag": "SEN. CLAIRE MCCASKILL"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 234579,
+  "n": 1,
+  "tag": "HOLMES (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 235441,
+  "n": 1,
+  "tag": "GINGRAS (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 236182,
+  "n": 1,
+  "tag": "MATTINGLY (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 236236,
+  "n": 1,
+  "tag": "CHURCH (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 236648,
+  "n": 1,
+  "tag": "SPUNT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 237248,
+  "n": 1,
+  "tag": "KYUNG I. LAH, CNN CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 237252,
+  "n": 1,
+  "tag": "KYUNG LAH, CNN SENIOR U.S. NATIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 237256,
+  "n": 1,
+  "tag": "KYUNG LAH, CNN NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 237500,
+  "n": 1,
+  "tag": "TAYLOR SWIFT, SINGER (singing)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 238167,
+  "n": 1,
+  "tag": "ROBERTS (voice-over)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 238571,
+  "n": 1,
+  "tag": "SUAREZ (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 238633,
+  "n": 1,
+  "tag": "SUAREZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 239743,
+  "n": 1,
+  "tag": "CHRIS WALLACE, FOX ANCHOR (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 240536,
+  "n": 1,
+  "tag": "MARTHA RADDATZ, ABC NEWS CO-ANCHOR, \"THIS WEEK WITH GEORGE STEPHANOPOULOS\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 240575,
+  "n": 1,
+  "tag": "SEN. MARCO RUBIO (R-FL)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 240762,
+  "n": 1,
+  "tag": "CHATTERLEY (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 240771,
+  "n": 1,
+  "tag": "BERTRAND (on camera)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 240797,
+  "n": 1,
+  "tag": "BERTRAND (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241054,
+  "n": 1,
+  "tag": "SEN. TOM COTTON, R-ARKANSAS (through telephone)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 241390,
+  "n": 1,
+  "tag": "HOMLES (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 241422,
+  "n": 1,
+  "tag": "PERGRAM (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241510,
+  "n": 1,
+  "tag": "O'SULLIVAN (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241525,
+  "n": 1,
+  "tag": "LIEBERMANN (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241584,
+  "n": 1,
+  "tag": "ATWOOD (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241890,
+  "n": 1,
+  "tag": "GWEN KATULA, WISCONSIN MAYOR (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 241894,
+  "n": 1,
+  "tag": "VLADIMIR PUTIN, RUSSIAN PRESIDENT (through translator)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 242524,
+  "n": 1,
+  "tag": "WATT (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 242666,
+  "n": 1,
+  "tag": "RANEY (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 242733,
+  "n": 1,
+  "tag": "JEFF ZELENY, CNN CHIEF U.S. NATIONAL AFFAIRS CORRESPONDENT (voiceover)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 242858,
+  "n": 1,
+  "tag": "HARRAK (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 243005,
+  "n": 1,
+  "tag": "DONALD TRUMP, FORMER PRESIDENT OF THE UNITED STATES"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 243863,
+  "n": 1,
+  "tag": "REP. DON BACON (R-NE)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 243919,
+  "n": 1,
+  "tag": "JON STEWART, HOST, COMEDY CENTRAL'S \"THE DAILY SHOW\""
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 243973,
+  "n": 1,
+  "tag": "MCENANY (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 243994,
+  "n": 1,
+  "tag": "RIVERA (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 244146,
+  "n": 1,
+  "tag": "KILMEADE (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 244208,
+  "n": 1,
+  "tag": "FORD (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 244317,
+  "n": 1,
+  "tag": "MARQUEZ (on-camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 245558,
+  "n": 1,
+  "tag": "LISA KING, EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 245958,
+  "n": 1,
+  "tag": "CULVER (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 246049,
+  "n": 1,
+  "tag": "ZANONA (on-camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 246400,
+  "n": 1,
+  "tag": "SCANNELL (voice over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 246706,
+  "n": 1,
+  "tag": "LAURENCE (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 247814,
+  "n": 1,
+  "tag": "CATHERINE HERRIDGE, FOX NEWS NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "C_unanchored_paren"
+  ],
+  "example_rowid": 247829,
+  "n": 1,
+  "tag": "BAIER (on camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 248420,
+  "n": 1,
+  "tag": "REP. JOHN DELANEY, D-MD"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 248449,
+  "n": 1,
+  "tag": "GOV. CHRIS CHRISTIE (R-NJ)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 248606,
+  "n": 1,
+  "tag": "JOE SCARBOROUGH, MSNBC CO-HOST, \"MORNING JOE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 249039,
+  "n": 1,
+  "tag": "JEN PSAKI, HOST, MSNBC \"INSIDE WITH JEN PSAKI\""
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 249127,
+  "n": 1,
+  "tag": "REP. PRAMILA JAYAPAL (D-WA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 249883,
+  "n": 1,
+  "tag": "LIN-MANUEL MIRANDA, PLAYWRIGHT, \"HAMILTON\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250163,
+  "n": 1,
+  "tag": "DANA BASH, CNN ANCHOR AND HOST, \"INSIDE POLITICS\" AND \"STATE OF THE UNION\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250248,
+  "n": 1,
+  "tag": "MELANIE ZANONA, CNN CAPITOL HILL REPORTER (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250279,
+  "n": 1,
+  "tag": "RENE MARSH, CNN U.S. NATIONAL CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250307,
+  "n": 1,
+  "tag": "MIGUEL MARQUEZ, CNN SENIOR NATIONAL CORRESPONDENT (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250309,
+  "n": 1,
+  "tag": "MARQUEZ (voice over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250367,
+  "n": 1,
+  "tag": "MIGUEL MARQUEZ, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 250725,
+  "n": 1,
+  "tag": "AMY WALTER, PUBLISHER AND EDITOR-IN-CHIEF, \"COOK POLITICAL REPORT\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 251011,
+  "n": 1,
+  "tag": "MARQUEZ (voiceover)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 251080,
+  "n": 1,
+  "tag": "MIKA BRZEZINSKI, CO-HOST, \"MORNING JOE\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 251322,
+  "n": 1,
+  "tag": "NEIL CAVUTO, HOST OF, “YOUR WORLD”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 251506,
+  "n": 1,
+  "tag": "I RAJU (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 252579,
+  "n": 1,
+  "tag": "GARRETT (On camera)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 253028,
+  "n": 1,
+  "tag": "REP. PAT FALLON (R-TX)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 254028,
+  "n": 1,
+  "tag": "LI (voice-over)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 254901,
+  "n": 1,
+  "tag": "Sen. John Kennedy, La."
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 254977,
+  "n": 1,
+  "tag": "Sen. Ben Cardin, Md."
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 257660,
+  "n": 1,
+  "tag": "Judge Ketanji Brown Jackson, Supreme Court Nominee"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 257777,
+  "n": 1,
+  "tag": "Janet Yellen, U.S. Treasury Secretary"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 258150,
+  "n": 1,
+  "tag": "Tom Manger, U.S. Capitol Police Chief"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 258611,
+  "n": 1,
+  "tag": "Lisa Monaco, U.S. Deputy Attorney General"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 258713,
+  "n": 1,
+  "tag": "Laura Barrón-López"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 258994,
+  "n": 1,
+  "tag": "UNIDENTIFIED REPORTER #2"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 260198,
+  "n": 1,
+  "tag": "Rep. Nancy Pelosi, De-Calif."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 260915,
+  "n": 1,
+  "tag": "O`DONNELL (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 261434,
+  "n": 1,
+  "tag": "DONALD TRUMP, U.S. PRESIDENTIAL CANDIDATE 2016"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 261659,
+  "n": 1,
+  "tag": "RACHEL MADDOW, HOST, “THE RACHEL MADDOW SHOW”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 263665,
+  "n": 1,
+  "tag": "LAWRENCE O`DONNELL"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 263786,
+  "n": 1,
+  "tag": "SHELBY HOLLIDAY, BUSINESS AND POLITICS REPORTER, “THE WALL STREET JOURNAL”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 264015,
+  "n": 1,
+  "tag": "CHUCK TODD, MODERATOR, “MEET THE PRESS”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 264063,
+  "n": 1,
+  "tag": "CHRIS MATTHEWS, MSNBC HOST, “HARDBALL”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 264134,
+  "n": 1,
+  "tag": "JOAN WALSH, NATIONAL AFFAIRS CORRESPONDENT, “THE NATION”"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 267623,
+  "n": 1,
+  "tag": "REP. DEVIN NUNES"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 267680,
+  "n": 1,
+  "tag": "MARGARET BRENNAN, HOST, “FACE THE NATION”"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 267967,
+  "n": 1,
+  "tag": "REP. ADAM SCHIFF (D-CA)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 269058,
+  "n": 1,
+  "tag": "REP. BETO O`ROURKE (D-TX)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 269809,
+  "n": 1,
+  "tag": "LAURENCE TRIBE, CO-AUTHOR, “TO END A PRESIDENCY”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 269986,
+  "n": 1,
+  "tag": "SHERYL STOLBERG, CONGRESSIONAL CORRESPONDENT, “THE NEW YORK TIMES”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 270593,
+  "n": 1,
+  "tag": "SEAN HANNITY, HOST, “HANNITY”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 270775,
+  "n": 1,
+  "tag": "MICHELLE GOLDBERG, “THE NEW YORK TIMES”"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 270910,
+  "n": 1,
+  "tag": "SEN. LAMAR ALEXANDER (R-TN)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 270962,
+  "n": 1,
+  "tag": "CHRIS WALLACE, HOST, “FOX NEWS SUNDAY”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 271019,
+  "n": 1,
+  "tag": "ANDERSON COOPER, “60 MINUTES”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 271840,
+  "n": 1,
+  "tag": "LIN-MANUEL MIRANDA, ACTOR/MUSICIAN (singing)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 272166,
+  "n": 1,
+  "tag": "HAAKE (on camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 272871,
+  "n": 1,
+  "tag": "VELSHI (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 273264,
+  "n": 1,
+  "tag": "SETH MEYERS, HOST, “LATE NIGHT WITH SETH MEYERS”"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 273301,
+  "n": 1,
+  "tag": "REP. ELISE STEFANIK (R-NY)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 273834,
+  "n": 1,
+  "tag": "WILLIAMS (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 274112,
+  "n": 1,
+  "tag": "SENATOR JEFF MERKLEY (D-OR)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 274352,
+  "n": 1,
+  "tag": "HAYES (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 274378,
+  "n": 1,
+  "tag": "KARA SWISHER, HOST, “SWAY”"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 274662,
+  "n": 1,
+  "tag": "SAULE OMAROVA, PRESIDENT BIDEN"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 274686,
+  "n": 1,
+  "tag": "DAVE RAMSEY, FOUNDER & PRESIDENT, THE LAMPO GROUP, INC."
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 274922,
+  "n": 1,
+  "tag": "REP. PRAMILA JAYAPAL (D-WA4)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 275257,
+  "n": 1,
+  "tag": "COSTELLO (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 275789,
+  "n": 1,
+  "tag": "JOE SCARBOROUGH, MSNBC HOST, “MORNING JOE”"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 275908,
+  "n": 1,
+  "tag": "REP. KEVIN MCCARTHY (R-CA)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 275920,
+  "n": 1,
+  "tag": "REP. LIZ CHENEY (R-WY)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 275925,
+  "n": 1,
+  "tag": "HAYES"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 275953,
+  "n": 1,
+  "tag": "GUTIERREZ (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 275993,
+  "n": 1,
+  "tag": "RACHEL MADDOW, MSNBC HOST, “TRMS”"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 276096,
+  "n": 1,
+  "tag": "STEPHEN AYRES, STORMED CAPITOL ON JANUARY 6"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 279495,
+  "n": 1,
+  "tag": "UNIDENTIFIED PERSON #5"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 280493,
+  "n": 1,
+  "tag": "UNIDENTIFIED PERSON #3"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 305167,
+  "n": 1,
+  "tag": "REID BINION, CNN REPORTER (voice-over)"
+ },
+ {
+  "classes": [
+   "E_colonless_honorific"
+  ],
+  "example_rowid": 305334,
+  "n": 1,
+  "tag": "DR. ERICA SCHWARTZ"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 305349,
+  "n": 1,
+  "tag": "CARROLL (voiceover)"
+ },
+ {
+  "classes": [
+   "D_mixed_case_label"
+  ],
+  "example_rowid": 305584,
+  "n": 1,
+  "tag": "Benjamin Netanyahu, Israeli Prime Minister"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 307558,
+  "n": 1,
+  "tag": "JONATHAN KARL, ABC NEWS CO-ANCHOR, \"THIS WEEK WITH GEORGE STEPHANOPOULOS\""
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 307937,
+  "n": 1,
+  "tag": "FOREMAN (on-camera)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 307946,
+  "n": 1,
+  "tag": "ROMO (on camera)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 316384,
+  "n": 1,
+  "tag": "MADDIE GANNON, CNN CORRESPONDENT (voice-over)"
+ },
+ {
+  "classes": [
+   "A_anchored_caps"
+  ],
+  "example_rowid": 316385,
+  "n": 1,
+  "tag": "GANNON (voice-over)"
+ },
+ {
+  "classes": [
+   "B_unknown_surname_paren"
+  ],
+  "example_rowid": 323616,
+  "n": 1,
+  "tag": "BRUCE (voice-over)"
+ }
+]

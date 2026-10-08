@@ -1,0 +1,64 @@
+== make_lobby_network_html.py: which board lists reach the page ==
+   _champions_v2_page_payload body (42 lines):
+     def _champions_v2_page_payload(payload, cap=None):
+         """Copy boards for the page, optionally capping threat/mixed per chamber."""
+         page_payload = json.loads(json.dumps(payload, ensure_ascii=False))
+         before = {}
+         after = {}
+         for sector in CHAMPIONS_V2_SECTORS:
+             before[sector] = {}
+             after[sector] = {}
+             boards = page_payload["sectors"][sector]
+             for board_name in ("threats", "mixed"):
+                 rows = boards[board_name]
+                 before[sector][board_name] = {
+                     chamber: sum(row["chamber"] == chamber for row in rows)
+                     for chamber in ("House", "Senate")
+                 }
+                 if cap is not None:
+                     used = {"House": 0, "Senate": 0}
+                     retained = []
+                     for row in rows:
+                         chamber = row["chamber"]
+                         if used[chamber] < cap:
+                             retained.append(row)
+                             used[chamber] += 1
+                     boards[board_name] = retained
+                     rows = retained
+                 after[sector][board_name] = {
+                     chamber: sum(row["chamber"] == chamber for row in rows)
+                     for chamber in ("House", "Senate")
+                 }
+         page_payload["receipt"]["page_retention"] = {
+             "cap_applied": cap is not None,
+             "threat_mixed_per_chamber_cap": cap,
+             "rows_before": before,
+             "rows_after": after,
+             "reason": (
+                 "champions page exceeded MAX_DOCUMENT_BYTES with full boards"
+                 if cap is not None else "full boards fit below MAX_DOCUMENT_BYTES"
+             ),
+         }
+         return page_payload
+     
+     
+
+== lobby-network.html: champions_v2 payload ==
+   "champions_v2"             hits=0
+   crown_threat_exclusions    hits=0
+   "threats"                  hits=1
+   threat_sectors             hits=0
+   "bank"                     hits=146
+   ctx @2804007 ...s empty by construction, not by absence of lobbying."; function renderV2Boards(){ for(const boardName of ["champions","threats","mixed"]){ const empty=!(v2Boards()[boardName]||[]).length; const emptyNote=document.querySelector(`[data-v2-empty="${boardName}"]`),tables=document.querySelector(`[data-v2-tables="${boardName}"]`); if(emptyNote){emptyNote.textContent=EMPTY_V2_BOARD_NOTE;emptyNote.classList.toggle("hidden",!empty);} tables?.classList.toggle("hidden",empty); if(empty)continue; if(boardName==="mixed")for(const chamber of ["House","Senate"]){const body=document.getElementById(`v2-mixed-${chamber.toLocaleLowerCase()}`);if(body)body.innerHTML=v2MixedRows(chamber);} else{const body=document.getElementById(`v2-${boardName}-body`);if(body)body.inner...
+
+== crown label: Pete Sessions on the published desk / combined ==
+   cu-member-desk.html         18817886 bytes | {'Pete Sessions': 7, 'S000250': 45, 'crown_threat_exclusions': 0}
+      @13957057    ...atch_all_positive_band","recognition":"Lean Persuadable","sub_cohort":"positive","sub_cohort_size":368,"tensor_status":"incomplete","tensor_tiebreak":null,"years_served":"3.655030800821"}}}},{"name":"Pete Sessions","district":"Congressional District 17 (119th Congress), Texas","chamber":"House","par...
+   Moneyball.html             106213210 bytes | {'Pete Sessions': 124, 'S000250': 174, 'crown_threat_exclusions': 0}
+      @29428835    ...atch_all_positive_band","recognition":"Lean Persuadable","sub_cohort":"positive","sub_cohort_size":368,"tensor_status":"incomplete","tensor_tiebreak":null,"years_served":"3.655030800821"}}}},{"name":"Pete Sessions","district":"Congressional District 17 (119th Congress), Texas","chamber":"House","par...
+   Moneyball Dashboard.html    12666388 bytes | {'Pete Sessions': 4, 'S000250': 8, 'crown_threat_exclusions': 0}
+
+== the contradiction, from the two artifacts a viewer is served ==
+   member_desk_bundle.json (16:08:06): Pete Sessions tier=1 tierrank=13 bio={'bioguide': 'S000250', 'birthday': '1955-03-22', 'gender': 'M', 'party': 'Republican', 'state': 'TX', 'type': 'rep', 'url': 'https://sessions.house.gov', 'twitter': 'PeteSessions', 'facebook': 'petesessions', 'youtube': '@congressmanpetesessions', 'ballotpedia_id': 'Pete Sessions', 'wikipedia_id': 'Pete Sessions', 'first_name': 'Pete', 'middle_name': 'A.', 'last_name': 'Sessions', 'wikipedia': {'url': 'https://en.wikipedia.org/wiki/Pete_Sessions', 'revision_id': 1370369969, 'revision_timestamp': '2026-08-20T19:03:31Z', 'summary': {'overview': "Peter Anderson Sessions (born March 22, 1955) is an American politician who serves in the United States House of Representatives for Texas's 17th congressional district as a member of the Republican Party. He chaired the House Rules Committee from 2013 to 2019 and is a former chair of the National Republican Congressional Committee.", 'early_life': 'Pete Sessions was born in Waco, Texas, on March 22, 1955, to Alice June Lewis and William S. Sessions, who served as director of the Federal Bureau of Investigation.', 'career': "He attended Winston Churchill High School and graduated from Southwestern University in 1978. Through August 2017, Sessions voted with his party in 98.8% of votes in the 115th session of Congress and voted in line with President Trump's position in 97.5% of votes. In the 2010 election, while he was chair of the National Republican Congressional Committee, the party gained control of the House with a net gain of 63 seats and 89 new freshman members. For the 119th Congress:", 'family_personal': 'In February 1984, Sessions married Juanita "Nete" Diaz; the couple had two sons. In August 2011, they divorced after 27 years of marriage.', 'life_experiences': 'Sessions drew controversy in 2016 when he asserted that the site of the Pulse nightclub in Orlando, the scene of a terrorist mass shooting, was not a gay club.'}}} overall_stance='C'
+   boards.json (16:04:08) sectors.bank.threats[0]: name='Pete Sessions' tier=None threat=3.643101
+   bank threat board size=5 | Sessions is row 1 of it

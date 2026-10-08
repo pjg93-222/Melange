@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H5F15E3985806419DAC177E88C276D2C5" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 6889 EH: Credit Union Board Modernization Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 6889</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the Federal Credit Union Act to modify the frequency of board of directors meetings, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H7039B5693FBD4CC29B89E45F53A06A15" style="OLC"> 
+<section id="H160F9971D41040D1B3143B10D9E4DCDB" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Credit Union Board Modernization Act</short-title></quote>.</text> </section> <section id="HA739988B45474B67AAF4A692C4498AF5"><enum>2.</enum><header>Frequency of board of directors meetings</header><text display-inline="no-display-inline">Section 113 of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1761b">12 U.S.C. 1761b</external-xref>) is amended—</text> 
+<paragraph id="H90D6885E5EBE49E09115FA73FC77A243"><enum>(1)</enum><text>by striking <quote>monthly</quote> each place such term appears;</text> </paragraph> <paragraph id="H5930348925214164A8E4EF4FE289C5BF" commented="no"><enum>(2)</enum><text>in the matter preceding paragraph (1), by striking <quote>The board of directors</quote> and inserting the following:</text> 
+<quoted-block style="OLC" id="H167B6A414AB441E9A514BA72288CCAC2" display-inline="no-display-inline"> 
+<subsection id="H78845944737A45EA83C4471EF45C5C9D" commented="no"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The board of directors</text> </subsection><after-quoted-block>; </after-quoted-block> </quoted-block> </paragraph> <paragraph id="H0C02FCC0BBBF437286FB45FFA88C2BD1"><enum>(3)</enum><text>in subsection (a) (as so designated), by striking <quote>shall meet at least once a month and</quote>; and</text> </paragraph> 
+<paragraph id="H38F89EF5779545B4B772065A81A2A71A"><enum>(4)</enum><text>by adding at the end the following:</text> <quoted-block style="OLC" id="H97C14D5507E14DA985108F06ECCE0DCB" display-inline="no-display-inline"> <subsection id="H5EA152F22D054310B61D2E36AD803B75"><enum>(b)</enum><header>Meetings</header><text display-inline="yes-display-inline">The board of directors of a Federal credit union shall meet as follows:</text> 
+<paragraph id="H8B8778BA1D6A4A6DB57F7A54A0D668C4"><enum>(1)</enum><text display-inline="yes-display-inline">With respect to a de novo Federal credit union, not less frequently than monthly during each of the first five years of the existence of such Federal credit union.</text> </paragraph> <paragraph id="H56C71B6E45AB4D65910B151DB9D4A362"><enum>(2)</enum><text display-inline="yes-display-inline">Not less than six times annually, with at least one meeting held during each fiscal quarter, with respect to a Federal credit union—</text> 
+<subparagraph id="H4C433B6C70C5405582F2F891588A9ED1"><enum>(A)</enum><text>with composite rating of either 1 or 2 under the Uniform Financial Institutions Rating System (or an equivalent rating under a comparable rating system); and</text> </subparagraph> <subparagraph id="HAA2CA1690A8946D39488E24A740967EE"><enum>(B)</enum><text display-inline="yes-display-inline">with a capability of management rating under such composite rating of either 1 or 2.</text> </subparagraph> </paragraph> 
+<paragraph id="H8A19833A98A24709AB19D1A054699067"><enum>(3)</enum><text display-inline="yes-display-inline">Not less frequently than once a month, with respect to a Federal credit union—</text> <subparagraph id="H462F0CA38DD54385870CEC1CF3CFBFD3"><enum>(A)</enum><text>with composite rating of either 3, 4, or 5 under the Uniform Financial Institutions Rating System (or an equivalent rating under a comparable rating system); or</text> </subparagraph> 
+<subparagraph id="HB51BC4DB21BB42D287004CDE291A3E22"><enum>(B)</enum><text display-inline="yes-display-inline">with a capability of management rating under such composite rating of either 3, 4, or 5.</text> </subparagraph> </paragraph> </subsection><after-quoted-block>.</after-quoted-block> </quoted-block> </paragraph> </section> <section id="H28B7319950464A5DB795545FB5F9B284" display-inline="no-display-inline" section-type="subsequent-section"><enum>3.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20220929" chamber="House">Passed the House of Representatives September 29, 2022.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

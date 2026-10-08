@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HBC3E3EFC1ABB4A89882DE7AF9AB60B60" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 922 IH: Virtual Currency Consumer Protection Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 922</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190130">January 30, 2019</action-date><action-desc><sponsor name-id="S001200">Mr. Soto</sponsor> (for himself, <cosponsor name-id="B001305">Mr. Budd</cosponsor>, <cosponsor name-id="D000626">Mr. Davidson of Ohio</cosponsor>, and <cosponsor name-id="W000822">Mrs. Watson Coleman</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HAG00">Agriculture</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To promote fair and transparent virtual currency markets by examining the potential for price
+			 manipulation.</official-title></form>
+	<legis-body id="H21CF2FF054C6461988A3DF739E049A4D" style="OLC">
+ <section id="H5455DB6E8F064352AEC0950027819E84" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Virtual Currency Consumer Protection Act of 2019</short-title></quote>.</text> </section><section id="H9BA75EF30CFF40B79277C56CFB15DC3A"><enum>2.</enum><header>Sense of the Congress</header><text display-inline="no-display-inline">It is the sense of Congress that virtual currency could have a significant effect on the economy, and regulation of them may be important to protect investors, deter bad actors, create market certainty, and ensure American competitiveness in an evolving global marketplace.</text>
+		</section><section id="H7C20A196E27C47B7B45883A179757447"><enum>3.</enum><header>Study and report on the prevention of virtual currency price manipulation</header>
+ <subsection id="HEA42C56DFDD34917A470EB12C17EC812"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Not later than one year after the date of the enactment of this Act, the Chairman of the Commodity Futures Trading Commission, in consultation with the heads of the Securities and Exchange Commission and other relevant Federal agencies (as determined by the Chairman of the Commodity Futures Trading Commission), shall submit to the Committees on Agriculture and on Financial Services of the House of Representatives and the Committees on Agriculture, Nutrition, and Forestry and on Banking, Housing, and Urban Affairs of the Senate a report to promote fair and transparent virtual currency markets by examining the potential for price manipulation. The report shall include the following:</text>
+ <paragraph id="H8E4F3AC3FA3249728E21BAB078E0567D"><enum>(1)</enum><text display-inline="yes-display-inline">A brief description of—</text> <subparagraph id="H2E564046E2054659829676045D02E4E7"><enum>(A)</enum><text>methods by which persons could manipulate the price of virtual currencies;</text>
+ </subparagraph><subparagraph id="HCCB69F3069644A79BA9103FDFF56EB6B"><enum>(B)</enum><text>which types of virtual currency, if any, are more susceptible to being manipulated; and</text> </subparagraph><subparagraph id="HC4A7377A7A624A64AF6FD987F732BAA8"><enum>(C)</enum><text display-inline="yes-display-inline">the effects on, and particular harm to, investors if price manipulation of virtual currencies occurs.</text>
+ </subparagraph></paragraph><paragraph id="HCB4892E71D6249CBA420CE91F08375A2"><enum>(2)</enum><text>An analysis of the extent to which the regulatory authority of the Commodity Futures Trading Commission and other relevant Federal agencies allows for—</text>
+ <subparagraph id="HF7ADBC9C4CA7490DA41D19091B9F3557"><enum>(A)</enum><text>market surveillance of virtual currencies for signs of manipulation; and</text> </subparagraph><subparagraph id="HA11C15B809B948DB9A2E1986B11829D2"><enum>(B)</enum><text>enforcement of Federal regulations against persons involved in any such manipulation.</text>
+ </subparagraph></paragraph><paragraph id="HD11CA53814854F0E993B8AD42F4C5FD2"><enum>(3)</enum><text display-inline="yes-display-inline">Recommendations for any legislative changes needed to improve the ability of the Commodity Futures Trading Commission and other relevant Federal agencies—</text>
+ <subparagraph id="H0E8070EE4EAE457199D6B2DDD533EAF0"><enum>(A)</enum><text>to carry out the monitoring and enforcement activities described in paragraph (2);</text> </subparagraph><subparagraph id="H054F20C0E7784F4BA0BE2BC5CCCD6DF4"><enum>(B)</enum><text>to prevent price manipulations of virtual currencies; and</text>
+ </subparagraph><subparagraph id="HFE012AF50BA04736BB1A28AB4B63A20F"><enum>(C)</enum><text display-inline="yes-display-inline">to protect virtual currency investors from price manipulation.</text> </subparagraph></paragraph></subsection><subsection id="H29C11086DD104036A4D2F965D0AF83DE"><enum>(b)</enum><header>Virtual currency defined</header><text>In this Act, the term <term>virtual currency</term> means a digital representation of value that does not have legal tender status and that functions as a medium of exchange, a unit of account, or a store of value.</text>
+			</subsection></section></legis-body></bill>
+
+

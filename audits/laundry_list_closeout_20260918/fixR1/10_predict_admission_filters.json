@@ -1,0 +1,419 @@
+{
+ "shipped_edges": 8017,
+ "configs": {
+  "all three ON (default)": {
+   "mentions": 52254,
+   "edges": 8010,
+   "drawn": 3482,
+   "signed": 7248,
+   "sum_n_scored": 15637,
+   "excluded": {
+    "roster_list_window": 749,
+    "press_third_party_domain": 8
+   },
+   "identical_window_repeat": 192
+  },
+  "REF_PRESS_OWN_DOMAIN=0": {
+   "mentions": 52262,
+   "edges": 8016,
+   "drawn": 3482,
+   "signed": 7249,
+   "sum_n_scored": 15644,
+   "excluded": {
+    "roster_list_window": 749
+   },
+   "identical_window_repeat": 192
+  },
+  "REF_ROSTER_FILTER=0": {
+   "mentions": 53003,
+   "edges": 8011,
+   "drawn": 3509,
+   "signed": 7247,
+   "sum_n_scored": 15715,
+   "excluded": {
+    "press_third_party_domain": 8
+   },
+   "identical_window_repeat": 201
+  },
+  "REF_IDENTICAL_ONCE=0": {
+   "mentions": 52254,
+   "edges": 8010,
+   "drawn": 3535,
+   "signed": 7248,
+   "sum_n_scored": 15806,
+   "excluded": {
+    "roster_list_window": 749,
+    "press_third_party_domain": 8
+   },
+   "identical_window_repeat": 0
+  },
+  "all three OFF (= shipped artifact)": {
+   "mentions": 53011,
+   "edges": 8017,
+   "drawn": 3562,
+   "signed": 7248,
+   "sum_n_scored": 15892,
+   "excluded": {},
+   "identical_window_repeat": 0
+  }
+ },
+ "edges_removed": [
+  [
+   "Angie Craig",
+   "Seth Magaziner"
+  ],
+  [
+   "James Lankford",
+   "Brian Schatz"
+  ],
+  [
+   "Juan Ciscomani",
+   "Seth Magaziner"
+  ],
+  [
+   "Ken Calvert",
+   "Seth Magaziner"
+  ],
+  [
+   "Kweisi Mfume",
+   "Ed Case"
+  ],
+  [
+   "Mark Warner",
+   "Steve Daines"
+  ],
+  [
+   "Scott Fitzgerald",
+   "Seth Magaziner"
+  ],
+  [
+   "Young Kim",
+   "Seth Magaziner"
+  ]
+ ],
+ "edges_added": [
+  [
+   "Earl Carter",
+   "Austin Scott"
+  ]
+ ],
+ "edges_below_floor": [
+  [
+   "Adam Schiff",
+   "Andy Biggs"
+  ],
+  [
+   "Alex Padilla",
+   "Dan Newhouse"
+  ],
+  [
+   "Alex Padilla",
+   "Jacky Rosen"
+  ],
+  [
+   "Alex Padilla",
+   "John Garamendi"
+  ],
+  [
+   "Alex Padilla",
+   "Ken Calvert"
+  ],
+  [
+   "Alex Padilla",
+   "Martin Heinrich"
+  ],
+  [
+   "Alex Padilla",
+   "Sam Liccardo"
+  ],
+  [
+   "Alex Padilla",
+   "Steve Daines"
+  ],
+  [
+   "Alex Padilla",
+   "Suzanne Bonamici"
+  ],
+  [
+   "Alex Padilla",
+   "Tim Sheehy"
+  ],
+  [
+   "Andrew Ogles",
+   "Byron Donalds"
+  ],
+  [
+   "Andy Biggs",
+   "James Comer"
+  ],
+  [
+   "Anna Luna",
+   "Thomas Massie"
+  ],
+  [
+   "Bernard Sanders",
+   "Ilhan Omar"
+  ],
+  [
+   "Bill Hagerty",
+   "Ted Cruz"
+  ],
+  [
+   "Bill Huizenga",
+   "Charles Schumer"
+  ],
+  [
+   "Daniel Goldman",
+   "Adam Schiff"
+  ],
+  [
+   "Daniel Goldman",
+   "James Comer"
+  ],
+  [
+   "Daniel Goldman",
+   "Maxwell Frost"
+  ],
+  [
+   "David Rouzer",
+   "Austin Scott"
+  ],
+  [
+   "Dwight Evans",
+   "Jesús García"
+  ],
+  [
+   "Eric Crawford",
+   "Austin Scott"
+  ],
+  [
+   "Henry Cuellar",
+   "Vicente Gonzalez"
+  ],
+  [
+   "Jack Reed",
+   "Adelita Grijalva"
+  ],
+  [
+   "Jack Reed",
+   "Brian Fitzpatrick"
+  ],
+  [
+   "James Lankford",
+   "Jeanne Shaheen"
+  ],
+  [
+   "James Lankford",
+   "Mazie Hirono"
+  ],
+  [
+   "Jared Moskowitz",
+   "Byron Donalds"
+  ],
+  [
+   "John Barrasso",
+   "Bill Hagerty"
+  ],
+  [
+   "John Thune",
+   "David McCormick"
+  ],
+  [
+   "John Thune",
+   "Jerry Moran"
+  ],
+  [
+   "John Thune",
+   "Tommy Tuberville"
+  ],
+  [
+   "Jonathan Jackson",
+   "Amy Klobuchar"
+  ],
+  [
+   "Jonathan Jackson",
+   "Elizabeth Warren"
+  ],
+  [
+   "Kweisi Mfume",
+   "Maxine Waters"
+  ],
+  [
+   "Maria Cantwell",
+   "Richard Durbin"
+  ],
+  [
+   "Mark Kelly",
+   "John James"
+  ],
+  [
+   "Mark Takano",
+   "Sanford Bishop"
+  ],
+  [
+   "Maxine Waters",
+   "Austin Scott"
+  ],
+  [
+   "Mazie Hirono",
+   "Dan Sullivan"
+  ],
+  [
+   "Mazie Hirono",
+   "Doris Matsui"
+  ],
+  [
+   "Mike Lee",
+   "John Hoeven"
+  ],
+  [
+   "Mike Lee",
+   "Joni Ernst"
+  ],
+  [
+   "Mike Rogers",
+   "Mitch McConnell"
+  ],
+  [
+   "Mitch McConnell",
+   "Mike Crapo"
+  ],
+  [
+   "Nancy Pelosi",
+   "Tim Scott"
+  ],
+  [
+   "Paul Tonko",
+   "Hakeem Jeffries"
+  ],
+  [
+   "Pete Stauber",
+   "Steve Daines"
+  ],
+  [
+   "Pramila Jayapal",
+   "Mark Takano"
+  ],
+  [
+   "Raphael Warnock",
+   "Bill Cassidy"
+  ],
+  [
+   "Raphael Warnock",
+   "Gus Bilirakis"
+  ],
+  [
+   "Raphael Warnock",
+   "Richard Durbin"
+  ],
+  [
+   "Richard Durbin",
+   "John Boozman"
+  ],
+  [
+   "Richard Durbin",
+   "Ron Johnson"
+  ],
+  [
+   "Rick Scott",
+   "Mike Haridopolos"
+  ],
+  [
+   "Ritchie Torres",
+   "Gregory Meeks"
+  ],
+  [
+   "Roger Marshall",
+   "Steve Daines"
+  ],
+  [
+   "Ron Wyden",
+   "Debbie Dingell"
+  ],
+  [
+   "Russell Fry",
+   "James Comer"
+  ],
+  [
+   "Seth Magaziner",
+   "Austin Scott"
+  ],
+  [
+   "Seth Moulton",
+   "Elizabeth Warren"
+  ],
+  [
+   "Susan Collins",
+   "Shelley Capito"
+  ],
+  [
+   "Suzanne Bonamici",
+   "Elizabeth Warren"
+  ],
+  [
+   "Thom Tillis",
+   "Bill Hagerty"
+  ],
+  [
+   "Thom Tillis",
+   "Dan Sullivan"
+  ],
+  [
+   "Thom Tillis",
+   "John Kennedy"
+  ],
+  [
+   "Thom Tillis",
+   "Mike Rounds"
+  ],
+  [
+   "Thom Tillis",
+   "Rand Paul"
+  ],
+  [
+   "Thom Tillis",
+   "Rick Scott"
+  ],
+  [
+   "Thom Tillis",
+   "Ron Wyden"
+  ],
+  [
+   "Thom Tillis",
+   "Tammy Duckworth"
+  ],
+  [
+   "Thomas Kean",
+   "Nancy Pelosi"
+  ],
+  [
+   "Thomas Massie",
+   "Anna Luna"
+  ],
+  [
+   "Thomas Massie",
+   "Danny Davis"
+  ],
+  [
+   "Tim Kaine",
+   "Angus King"
+  ],
+  [
+   "Tim Kaine",
+   "Kim Schrier"
+  ],
+  [
+   "Tim Scott",
+   "John Cornyn"
+  ],
+  [
+   "Tom Emmer",
+   "Ritchie Torres"
+  ],
+  [
+   "Wesley Hunt",
+   "John Cornyn"
+  ]
+ ],
+ "edges_above_floor": []
+}

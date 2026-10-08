@@ -1,0 +1,67 @@
+[
+ {
+  "cut_class": "A_anchored_caps",
+  "member": "Susan Collins",
+  "own_tags": [
+   "SEN. SUSAN COLLINS"
+  ],
+  "removed_nwords": 54,
+  "rowid": 105315
+ },
+ {
+  "cut_class": "A_anchored_caps",
+  "member": "Amy Klobuchar",
+  "own_tags": [
+   "SEN. AMY KLOBUCHAR"
+  ],
+  "removed_nwords": 13,
+  "rowid": 106055
+ },
+ {
+  "cut_class": "A_anchored_caps",
+  "member": "Amy Klobuchar",
+  "own_tags": [
+   "SEN. AMY KLOBUCHAR",
+   "SEN. AMY KLOBUCHAR",
+   "SEN. AMY KLOBUCHAR"
+  ],
+  "removed_nwords": 64,
+  "rowid": 106388
+ },
+ {
+  "cut_class": "A_anchored_caps",
+  "member": "Adam Schiff",
+  "own_tags": [
+   "REP. ADAM SCHIFF",
+   "REP. ADAM SCHIFF",
+   "REP. ADAM SCHIFF",
+   "REP. ADAM SCHIFF",
+   "REP. ADAM SCHIFF",
+   "REP. ADAM SCHIFF"
+  ],
+  "removed_nwords": 1048,
+  "rowid": 109799
+ },
+ {
+  "cut_class": "A_anchored_caps",
+  "member": "John Barrasso",
+  "own_tags": [
+   "SEN. JOHN BARRASSO",
+   "SEN. JOHN BARRASSO"
+  ],
+  "removed_nwords": 266,
+  "rowid": 110715
+ },
+ {
+  "cut_class": "A_anchored_caps",
+  "member": "Mike Johnson",
+  "own_tags": [
+   "JOHNSON (voice-over)",
+   "JOHNSON (voice-over)",
+   "JOHNSON (voice-over)",
+   "JOHNSON (voice-over)"
+  ],
+  "removed_nwords": 502,
+  "rowid": 245558
+ }
+]

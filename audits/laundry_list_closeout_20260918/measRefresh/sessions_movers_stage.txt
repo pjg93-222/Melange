@@ -1,0 +1,18 @@
+validation: recomputed order == honors AFTER order: True | tiers equal: True
+evidence-floor displaced NOW: 419 of 533  (floor = cu_primary >= 0.75, tier_util.py:84/:715)
+conduct-ladder floored NOW: 2 ['Andy Barr', 'French Hill']
+
+member          chamber  seatB   stgA   stgB   seat  f_ranked   grade%  cu_pri   agenda    lambda placed by             
+Bernie Moreno   Senate     211    162     80     80  0.488670  0.66666   1.250     4.25  0.283333 product percentile    
+     score=0.456091348440  seat_pct=0.69696  tier now=3 (BEFORE tier=0)  distance to 0.75 floor = +0.500
+     mix={"shared": 1.75, "cu_primary": 1.25, "crypto_primary": 1.25}
+Patrick Ryan    House       85    181    181    181  0.485344  0.53240   1.000     3.50  0.233333 product percentile    
+     score=0.439954629120  seat_pct=0.66203  tier now=0 (BEFORE tier=3)  distance to 0.75 floor = +0.250
+     mix={"shared": 1.75, "cu_primary": 1.0, "bank_primary": 0.5, "offtopic": 0.25}
+
+== lower bound on evidence-floor crossings between the two generations ==
+   a member seated at 1-based seat <= 85 was NOT floored (floored members reseat to slot>=85).
+   provably crossed DOWN (BEFORE seat<=85, floored NOW): 0 []
+   candidates crossed UP (NOW seat<=85, BEFORE seat>85): 1 ['Bernie Moreno']
+   rank_honors overall_board keys: ['generation', 'measure_primacy', 'minimum_cu_primary_credit', 'mode', 'order', 'priority_tiers', 'top13']
+   per-member floor-qualification field recorded in either generation: False

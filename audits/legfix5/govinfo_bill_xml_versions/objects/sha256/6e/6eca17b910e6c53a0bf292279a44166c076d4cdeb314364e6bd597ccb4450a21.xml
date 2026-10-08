@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H5CDF24C8949F4B10886B5F2CE539B3EC" key="H" public-private="public">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3530 IH: Improving Confidence in Veterans’ Care Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 3530</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20190627">June 27, 2019</action-date>
+<action-desc><sponsor name-id="C001115">Mr. Cloud</sponsor> (for himself, <cosponsor name-id="B001301">Mr. Bergman</cosponsor>, and <cosponsor name-id="P000258">Mr. Peterson</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend title 38, United States Code, to direct the Secretary of Veterans Affairs to enforce the licensure requirement for medical providers of the Department of Veterans Affairs.</official-title>
+</form> 
+<legis-body id="H389A128A44F64CE8B43CF306CDCA6F46" style="OLC"> 
+<section id="H64AA1903181D4663B22683D96BFA4401" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Improving Confidence in Veterans’ Care Act</short-title></quote>.</text> </section> <section id="HE08F9BBE6C5D4B17A4455E636B7A1800" section-type="subsequent-section"><enum>2.</enum><header>Enforcement of licensure requirement for medical providers of the Department of Veterans Affairs</header> <subsection id="H758CD44495FE40AC8816DCC1EE23D3A9"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 7402 of title 38, United States Code, is amended—</text> 
+<paragraph id="H304BBDF5112540D08638D1FBBA0850A4"><enum>(1)</enum><text>in subsection (f)—</text> <subparagraph id="H53B778DCB5E1492A94CC6C16D4BEF2BD"><enum>(A)</enum><text>in paragraph (1), by striking <quote>more than one</quote> and inserting <quote>one or more</quote>; and</text> </subparagraph>
+<subparagraph id="H26635C5EE1F9439ABD6D5041AED0E101"><enum>(B)</enum><text>in paragraph (2)(A), by inserting before the semicolon the following: <quote>, or, if the position requires the person to prescribe controlled substances, the Drug Enforcement Agency registration of the person has been terminated, revoked, or surrendered, and the person has not received a waiver from the Drug Enforcement Agency</quote>;</text> </subparagraph></paragraph> <paragraph id="H83236B2130B643A1994EEA1C1C5144B8"><enum>(2)</enum><text>by redesignating subsection (g) as subsection (h); and</text> </paragraph>
+<paragraph id="HF8314EF0E9BA40148F7866A5E30D96EB"><enum>(3)</enum><text>by inserting after subsection (f) the following new subsection (g):</text> <quoted-block display-inline="no-display-inline" id="H66233885E6D74AC6B88EAC595FF8D100" style="USC"> <subsection id="H9DFE739FC70E42E3A7F758E3087E06FB"><enum>(g)</enum> <paragraph commented="no" display-inline="yes-display-inline" id="H8728602A06F142C8AAB09CFB12B9C136"><enum>(1)</enum><text>The Secretary shall take prompt and appropriate adverse personnel actions pursuant to this chapter against an employee who—</text> 
+<subparagraph id="HC2CA980793D44F95A443C46342BA51AE" indent="up1"><enum>(A)</enum><text display-inline="yes-display-inline">is not licensed, registered, certified, or in receipt of a waiver, as required by subsection (f); or</text> </subparagraph> <subparagraph id="HDA7C9765639A47C5B6EEE9F4DC0C98EB" indent="up1"><enum>(B)</enum><text display-inline="yes-display-inline">who does not promptly notify the Secretary of any suspension in such license, registration, or certification.</text> </subparagraph></paragraph>
+<paragraph display-inline="no-display-inline" id="HC32DE719C85B43A7B1723430A82EB2CB" indent="up1"><enum>(2)</enum><text>The Secretary shall conduct biennial audits of employees covered by subsection (f) to ensure that the employee is licensed, registered, or certified as required by such subsection.</text> </paragraph> <paragraph commented="no" id="HDABBB4880C274BCEA5CAA6F1D70BC7FC" indent="up1"><enum>(3)</enum><text display-inline="yes-display-inline">The Secretary shall ensure that the hiring process for employees covered by subsection (f) includes—</text> 
+<subparagraph commented="no" id="H67E38E6B1956491099EF06D5135BC138"><enum>(A)</enum><text display-inline="yes-display-inline">requesting from the individual applying for the position the status of the licensure, registration, or certification of the individual as required by such subsection, including a description of any actions the individual must take to fulfill such licensure, registration, or certification requirement before beginning such employment; and</text> </subparagraph> <subparagraph commented="no" id="HF9C9AAAA5363410D82362C814063340C"><enum>(B)</enum><text>verifying such status before the individual begins such employment.</text> </subparagraph></paragraph>
+<paragraph display-inline="no-display-inline" id="H4A045156AA4F4FEB936C9D7C83312DF3" indent="up1"><enum>(4)</enum><text display-inline="yes-display-inline">The Secretary shall provide annual training to directors of Veterans Integrated Service Networks, directors of Department health-care facilities, and chiefs of staff of Department health-care facilities (and such other employees as the directors or chiefs of staff determine appropriate) with respect to carrying out this subsection and subsection (f).</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </paragraph></subsection> <subsection id="HF63060FAFEF74915BDF3B97AB8E280DC"><enum>(b)</enum><header>Training</header><text display-inline="yes-display-inline">Not later than 60 days after the date of the enactment of this Act, the Secretary of Veterans Affairs shall submit to the Committees on Veterans’ Affairs of the House of Representatives and the Senate a report describing the training that will be provided under subsection (g)(4) of section 7402 of title 38, United States Code, as added by subsection (a).</text> </subsection></section>
+</legis-body>
+</bill> 
+
+

@@ -1,0 +1,102 @@
+============================================================================================================
+F3 r5  DUPLICATE CLASSES at the stance cell + all-channel non-stance routing   run 2026-09-19T00:17:18
+============================================================================================================
+
+social scored rows replayed: 5709
+
+------------------------------------------------------------------------------------------------------------
+M4.1  SOCIAL duplicates landing in the SAME (member, stance category) cell
+------------------------------------------------------------------------------------------------------------
+    key = (member, stance category, normalised text)   -- normalised_text is media_rules.py:76-78
+    RULE blend.py:47  CROSSPOST_DEDUP default '0'  -> the duplicate is COUNTED, not dropped
+         (ratified decision D-034 / ruling Q11)
+    cells receiving the same statement >1x : 1008   surplus contributions: 1073
+      CLASS A  cross-platform twins (>=2 distinct platforms) : 911 keys / 966 surplus
+      CLASS B  same-platform repeats (one platform)          : 97 keys / 107 surplus
+      check: 911 + 97 == 1008 -> True
+
+    platform signature of the repeated-cell keys:
+       facebook + x                 901
+       x                            96
+       bluesky + facebook + x       6
+       bluesky + x                  3
+       bluesky + facebook           1
+       facebook                     1
+
+    CLASS B same-platform repeats, split by whether the dates differ:
+       same platform AND same date (an exact re-ingest of one post): 69 keys
+       same platform, DIFFERENT dates (a genuine repeat statement)  : 28 keys
+
+    top repeated cells:
+       Roger Marshall         Interchange                x8  platforms=['facebook', 'x'] dates=['2026-04-13', '2026-04-14', '2026-04-15']
+       Mark Harris            Payments                   x7  platforms=['facebook', 'x'] dates=['2026-04-29']
+       Daniel Meuser          Fraud Prevention           x5  platforms=['x'] dates=['2026-04-30']
+       Ritchie Torres         Mortgage & Housing         x5  platforms=['facebook', 'x'] dates=['2024-10-28']
+       Bernard Sanders        Credit Card Mandates       x4  platforms=['bluesky', 'facebook', 'x'] dates=['2026-02-02']
+       Elise Stefanik         Payments                   x4  platforms=['facebook', 'x'] dates=['2025-07-17']
+       Elise Stefanik         Technology & Emerging      x4  platforms=['facebook', 'x'] dates=['2025-07-17']
+       Sylvia Garcia          CFPB                       x4  platforms=['x'] dates=['2025-07-10']
+       Andy Barr              CFPB                       x4  platforms=['facebook', 'x'] dates=['2025-03-06']
+       Gary Peters            CFPB                       x4  platforms=['facebook', 'x'] dates=['2025-02-11']
+
+------------------------------------------------------------------------------------------------------------
+M4.2  PRESS: one release ingested under TWO URL FORMS  (carried from receipt f2)
+------------------------------------------------------------------------------------------------------------
+    (member, normalised title, date) groups with 2+ rows : 12
+    groups where >1 row has disposition 'used'           : 6
+    of those, doubling into an actual STANCE cell        : 1
+       Roger Marshall|2022-08-11                categories=['Interchange', 'Interchange']
+    of those, doubling only into a NON-stance column     : 5
+       Cynthia Lummis|(unparsed)                categories=['General Credit Union']
+       Gabe Amo|(unparsed)                      categories=['General Credit Union']
+       Mike Crapo|(unparsed)                    categories=['General Credit Union']
+       Patty Murray|(unparsed)                  categories=['General Credit Union']
+       Seth Magaziner|(unparsed)                categories=['General Credit Union']
+
+------------------------------------------------------------------------------------------------------------
+M4.3  CROSS-CHANNEL: the same statement on the PRESS side and the SOCIAL side
+------------------------------------------------------------------------------------------------------------
+    press and social are p80-scaled separately then mixed 50/50 (blend.py:466), so such a
+    pair contributes on BOTH sides of the same cell.  No rule anywhere looks for it.
+    used press rows whose normalised TITLE equals one of the same member's social texts: 0
+
+------------------------------------------------------------------------------------------------------------
+M4.4  OWN-SOURCE channels: repeats inside one channel
+------------------------------------------------------------------------------------------------------------
+    RULE blend.py:172-173 / 215-216 / 257-258  _evn=max(1,_ev[(member,date)]); contribution /= _evn
+    -> several passages from ONE event are normalised to ONE unit, so passage-level repeats
+       do NOT multiply a cell.  Counts from receipt f3:
+       speech     (member,stance-cat,date) keys with >1 scored row: 32   surplus 42   -- absorbed by the 1/n event divisor
+       hearing    (member,stance-cat,date) keys with >1 scored row: 39   surplus 49   -- absorbed by the 1/n event divisor
+       interview  (member,stance-cat,date) keys with >1 scored row: 2    surplus 3    -- absorbed by the 1/n event divisor
+    CAVEAT the divisor is keyed on (member, date) over the WHOLE channel, not per category:
+       a member with passages in 3 categories on one date has each contribution divided by the
+       TOTAL passage count for that date, so a multi-category event delivers LESS than one unit
+       per category.  That is a magnitude effect, not a duplicate.
+
+============================================================================================================
+ALL-CHANNEL TOTAL: media items routed to a column with NO stance cell
+============================================================================================================
+    channel      scored    reach stance   sheet-only     CU-Bank      General CU
+    press        1387      983            404            18           398
+    social       5709      5258           451            508          363
+    speech       172       166            6              41           6
+    hearing      187       166            21             18           11
+    interview    25        19             6              2            4
+    TOTAL        7480      6592           888            587          782
+    bluesky      0         0              0              0            0   (channel never injected)
+
+    'CU-Bank Competitive Dynamics' (raw col 18): 587 scored items route here.
+      press_matrix NORMALISES col 18 (moneyball_core.py:94 COLS=range(5,24)) and the row-535
+      press-pillar weight is 0.03, so it DOES reach the ranking engine -- but it has no entry
+      in per_category_stance.py:28-31 cats[] and no entry in media_rules.py RAW_TO_STANCE,
+      so it reaches NO stance cell.  156 members carry a nonzero value in it.
+
+    'General Credit Union' (raw col 24): 782 scored items route here.
+      moneyball_core.py:98 normalises COLS only, so col 24 is never normalised; :99 routes it
+      to general_exclusion_ledger and per_category_stance.py:156 publishes that ledger under
+      media.general_credit_union_exclusions (270 members).  Row 535 carries NO weight for it,
+      so it reaches neither the stance path NOR the press pillar.  Nothing is hidden: the
+      ledger is in the artifact with applied_to_policy_domains=False.
+
+DONE F3 r5

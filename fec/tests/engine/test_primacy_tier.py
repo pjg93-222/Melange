@@ -53,6 +53,7 @@ class PrimacyFactors(unittest.TestCase):
         self.assertEqual(PF.ACT_W['shared'], 0.5)
         self.assertEqual(PF.ACT_W['oppose'], -1.0)
         self.assertEqual(PF.ACT_W['crypto_primary'], 0.15)
+        self.assertEqual(PF.ACT_W['telecom_primary'], 0.15)
 
     def test_default_board_basis_is_the_per_area_board(self):
         # RE-PINNED 2026-09-16 (D-031, Paul 2026-09-15): the shipped default is
@@ -689,8 +690,12 @@ class CullingSurfaceStatus(unittest.TestCase):
 class RatifiedActContract(unittest.TestCase):
     def test_complete_weight_table(self):
         self.assertEqual(PF.ACT_W['offtopic'], 0.0)
-        for name in ('bank_primary', 'crypto_primary', 'fintech'):
+        for name in ('bank_primary', 'crypto_primary', 'fintech', 'telecom_primary'):
             self.assertEqual(PF.ACT_W[name], 0.15)
+        # The beneficiary table that feeds the diagnostic must agree with ACT_W.
+        from engine.primacy_method import BENEFICIARY_W
+        self.assertEqual(BENEFICIARY_W['telecom_primary'], PF.ACT_W['telecom_primary'])
+        self.assertTrue(PF._is_synthetic_cell_class('telecom_cell_3'))
 
     def test_oppose_is_the_only_negative_class(self):
         self.assertEqual(

@@ -1,0 +1,4 @@
+Error in write_immutable_json(file.path(events_dir, sprintf("%08d-%s.json",  : 
+  Immutable receipt collision: C:/Users/pgoff/OneDrive/Desktop/Melange Systems/audits/legfix5/congress_advanced_pages_20260725/text_relevance_httr_full_stage_20260727r/events/00000001-116-hr-1.json
+Calls: write_event -> write_immutable_json
+Execution halted

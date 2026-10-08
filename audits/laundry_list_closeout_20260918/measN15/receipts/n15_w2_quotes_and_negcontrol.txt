@@ -1,0 +1,139 @@
+======================================================================================================
+N15 / W2  WHAT THE DISPOSITION MEANS IN CODE (verbatim)
+======================================================================================================
+
+  --- module docstring + the enabled() gate   fec/legislation/official_membership_movements.py:1-21 ---
+      1 | """Current official membership facts, separate from immutable admission history.
+      2 | 
+      3 | An explicitly withdrawn cosponsor ceases earning credit. A missing name is not
+      4 | treated as a withdrawal. Sponsors and role corrections require exact Bioguide
+      5 | identity in the hash-bound official repository, never a name approximation.
+      6 | """
+      7 | from pathlib import Path
+      8 | import json
+      9 | from datetime import datetime, timezone
+     10 | from legislation.congress_bill_repository import sha256_file
+     11 | from legislation.verify_collector_roster_updates import build_ledger_view, desk_summary
+     12 | import bill_rules as BR
+     13 | 
+     14 | RELATIVE = 'data/legislation/official_membership_movements.json'
+     15 | 
+     16 | 
+     17 | def enabled(root):
+     18 |     path=Path(root)/'data/engine/sentinel_admission_policy.json'
+     19 |     return path.is_file() and json.loads(path.read_text(encoding='utf-8')).get('automatic_movements') is True
+     20 | 
+     21 | 
+
+  --- the RECORD FIELDS: withdrawn is a BOOLEAN off person["withdrawn_date"]; role is the official role   fec/legislation/official_membership_movements.py:40-57 ---
+     40 |             row={'schema':'collector-roster-update-v1','repository_key':key,
+     41 |                  'bill':act[0],'congress':act[1],'member':name,'bioguide':bio,'role':role,
+     42 |                  'join_date':person.get('date') or bill.get('introduced_date',''),
+     43 |                  'withdrawn':bool(person.get('withdrawn_date')),'withdrawn_date':person.get('withdrawn_date') or '',
+     44 |                  'areas':list(view['areas_by_act'][act]),
+     45 |                  **{f:str(seed.get(f) or '') for f in ('title','sponsor','summary','action')},
+     46 |                  'ncos':bill.get('cosponsor_count',0),'url':bill.get('url',''),
+     47 |                  'source':'verified official BILLSTATUS roster','verified_at':receipt['completed_at'],
+     48 |                  'repository_sha256':repository_sha256}
+     49 |             facts.append(row)
+     50 |             old=view['members_by_act'].get(act,{}).get(name)
+     51 |             if not row['withdrawn'] and old!=role:
+     52 |                 if desk_summary(row['summary'])!=row['summary']:
+     53 |                     raise ValueError('official movement would alter seeded summary: '+key)
+     54 |                 additions.append(row)
+     55 |     return {'schema':'official-membership-movements-v1','status':'PASS',
+     56 |             'checked_at':receipt['completed_at'],'repository_sha256':repository_sha256,
+     57 |             'facts':facts,'additions':additions,'unresolved':unresolved}
+
+  --- load() gates + eligible(): ONE predicate covers BOTH withdrawn and role-supersession   fec/legislation/official_membership_movements.py:60-91 ---
+     60 | def load(root):
+     61 |     path=Path(root)/RELATIVE
+     62 |     if not path.exists(): return {'facts':[],'additions':[]}
+     63 |     d=json.loads(path.read_text(encoding='utf-8'))
+     64 |     if d.get('schema')!='official-membership-movements-v1' or d.get('status')!='PASS':
+     65 |         raise ValueError('official membership movements are not a valid PASS')
+     66 |     if d['repository_sha256']!=sha256_file(Path(root)/'bill_repository_live.json'):
+     67 |         raise ValueError('official membership movements refer to a different repository')
+     68 |     age=(datetime.now(timezone.utc)-datetime.fromisoformat(d['checked_at'].replace('Z','+00:00'))).total_seconds()
+     69 |     if not -300<=age<=8*86400: raise ValueError('official membership facts are stale')
+     70 |     keys=[(r['repository_key'],r['bioguide']) for r in d['facts']]
+     71 |     if len(keys)!=len(set(keys)): raise ValueError('duplicate official membership identity')
+     72 |     # Re-derive the projection from the source snapshot, rather than trusting
+     73 |     # a self-asserted receipt on a mutable sidecar.
+     74 |     repo=json.loads((Path(root)/'bill_repository_live.json').read_text(encoding='utf-8'))
+     75 |     for row in d['facts']:
+     76 |         b=repo['bills'][row['repository_key']]
+     77 |         people=([b['sponsor']] if row['role']=='sponsor' else
+     78 |                 b['original_cosponsors'] if row['role']=='original' else b['cosponsors'] if row['role']=='cosponsor' else [])
+     79 |         p=next((p for p in people if p.get('bioguide')==row['bioguide']),None)
+     80 |         if p is None or bool(p.get('withdrawn_date'))!=row['withdrawn']:
+     81 |             raise ValueError('movement differs from the official source')
+     82 |     return d
+     83 | 
+     84 | 
+     85 | def index(document):
+     86 |     return {(r['repository_key'],r['bioguide']):r for r in document.get('facts',[])}
+     87 | 
+     88 | 
+     89 | def eligible(row,facts):
+     90 |     fact=facts.get((row['repository_key'],row['bioguide']))
+     91 |     return fact is None or (not fact['withdrawn'] and BR.canonical_role(row['role'])==BR.canonical_role(fact['role']))
+
+  --- the producer lines that EMIT the disposition   fec/legislation/build_archive_legislative.py:202-208 ---
+    202 |     try:
+    203 |         _repository_key=parse_bill_identity(r['Name'],r['Congress'])['key']
+    204 |     except ValueError:
+    205 |         _repository_key=''
+    206 |     if not OM.eligible({'repository_key':_repository_key,'bioguide':_member_bios.get(mm),'role':role},_movement_index):
+    207 |         audit.update({'disposition':'official-membership-withdrawn-or-role-superseded','member':mm,'contribution':0.0})
+    208 |         routing_rows.append(audit); continue
+
+  MECHANICS, stated from the quotes above:
+   * the official record carries NO "superseded" field.  eligible() (line 89-91) returns False
+     on EITHER  fact["withdrawn"] is True  OR  canonical_role(row role) != canonical_role(fact role).
+   * build_archive_legislative.py:206-208 collapses both into the SINGLE disposition string
+     "official-membership-withdrawn-or-role-superseded", so the string alone cannot tell them apart:
+     the only way to separate them is to read fact["withdrawn"] out of the official record.
+   * role-supersession in practice = the archive row says "cosponsor" while BILLSTATUS lists the
+     person among original_cosponsors (official role "original" -> canonical "original-cosponsor").
+   * build() writes withdrawn/withdrawn_date per person (line 43) and only proposes an ADDITION
+     when the membership is NOT withdrawn and the role actually changed (line 50-54).
+
+======================================================================================================
+N15 / W5 SUPPORT  THE ROWS apply_to_desk CANNOT JUDGE, AND THE ROWS THE RECORD IS SILENT ABOUT
+======================================================================================================
+  unparseable: LTR-* sign-on letter                    287
+  unparseable: amendment (H.AMDT./S.AMDT.)             173
+  TOTAL unjudgeable (parse_bill_identity raises -> kept at line 102) = 460
+
+  displayed rows with a parseable key but NO official fact = 13
+     {"member": "Robert Menendez", "bill": "S.3128", "congress": "117", "key": "117:s:3128", "desk_role": "sponsor", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Bill Cassidy", "Chris Van Hollen", "Cindy Hyde-Smith", "Cory Booker"]}
+     {"member": "Robert Menendez", "bill": "S.2142", "congress": "118", "key": "118:s:2142", "desk_role": "sponsor", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Bill Cassidy", "Chris Van Hollen", "Cindy Hyde-Smith", "Cory Booker"]}
+     {"member": "Robert Menendez", "bill": "S.910", "congress": "117", "key": "117:s:910", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Alex Padilla", "Amy Klobuchar", "Angus King", "Ben Luján"]}
+     {"member": "Robert Menendez", "bill": "S.767", "congress": "117", "key": "117:s:767", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Amy Klobuchar", "Catherine Cortez Masto", "Elizabeth Warren", "Maria Cantwell"]}
+     {"member": "Robert Menendez", "bill": "S.2724", "congress": "117", "key": "117:s:2724", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Bill Cassidy", "Cindy Hyde-Smith", "John Kennedy"]}
+     {"member": "Robert Menendez", "bill": "S.869", "congress": "118", "key": "118:s:869", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Amy Klobuchar", "Cindy Hyde-Smith", "Cynthia Lummis", "Jerry Moran"]}
+     {"member": "Robert Menendez", "bill": "S.2860", "congress": "118", "key": "118:s:2860", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Alex Padilla", "Amy Klobuchar", "Angus King", "Ben Luján"]}
+     {"member": "Robert Menendez", "bill": "S.1323", "congress": "118", "key": "118:s:1323", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Alex Padilla", "Amy Klobuchar", "Angus King", "Ben Luján"]}
+     {"member": "Robert Menendez", "bill": "S.817", "congress": "118", "key": "118:s:817", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Ben Luján", "Bernard Sanders", "Brian Schatz", "Christopher Murphy"]}
+     {"member": "Robert Menendez", "bill": "S.1514", "congress": "118", "key": "118:s:1514", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Angus King", "Ben Luján", "Bill Cassidy", "Catherine Cortez Masto"]}
+     {"member": "Robert Menendez", "bill": "S.2095", "congress": "118", "key": "118:s:2095", "desk_role": "original", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Amy Klobuchar", "Ben Luján", "Brian Schatz", "Peter Welch"]}
+     {"member": "Robert Menendez", "bill": "S.2981", "congress": "117", "key": "117:s:2981", "desk_role": "cosponsor", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Catherine Cortez Masto", "Christopher Murphy", "James Risch", "John Hickenlooper"]}
+     {"member": "Robert Menendez", "bill": "S.2391", "congress": "118", "key": "118:s:2391", "desk_role": "cosponsor", "key_in_bill_repository_live": true, "members_in_facts_for_this_key": ["Cindy Hyde-Smith", "Jerry Moran", "John Kennedy"]}
+  official record unresolved[] entries (person not on the engine roster) = 960 ; sample [{"repository_key": "117:hr:1010", "bioguide": "H000324", "role": "cosponsor"}, {"repository_key": "117:hr:1020", "bioguide": "P000616", "role": "sponsor"}]
+
+======================================================================================================
+N15 / NEGATIVE CONTROL  PRE-apply_to_desk ROWS THAT VIOLATE THE TWO CONDITIONS
+======================================================================================================
+  pre-collapse candidate rows reconstructed from the desk sources = 12011
+  rows that WOULD be removed by apply_to_desk (withdrawn)     = 1
+  rows that WOULD be removed by apply_to_desk (role differs)   = 2714
+  TOTAL = 2715   <-- had apply_to_desk not run, W5-a/W5-b would report these, not 0
+     role-differs <- workbook:Co-Sponsor Interactions           n=2714
+     withdrawn <- bank_anchor                                   n=1
+     role pair cosponsor -> official original-cosponsor       n=2714
+  NOTE: this reconstruction is a SOURCE-PRESENCE probe, not a re-simulation of
+  make_member_desk (bill_rules exclusions, overrides and the sentinel remove/append passes are
+  not replayed), so it is an UPPER BOUND on the rows the real pass saw.
+  member_desk_bundle.json "bill_withdrawn_rows_removed" = 2715  (None = the media_audit block is not serialised into the bundle)
+DONE

@@ -1,0 +1,1088 @@
+==============================================================================================================
+INSERT 01 | rowid=66969 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Chuck Grassley
+  INSERT attributed to: Patty Murray
+  date=2024-04-17 show=cnc package=https://transcripts.cnn.com/show/cnc/date/2024-04-17/segment/08
+  tag                 : 'SEN. PATTY MURRAY (D-WA)'
+  seg nwords          : 84
+  ALL tags in this row: [["SEN. PATTY MURRAY (D-WA)", "E_colonless_honorific", false, "Patty Murray", "reattributed"]]
+  --- 239 chars of ORIGINAL text BEFORE the tag ---
+  ...Do you solemnly swear and in all things appertaining to the trial or impeachment of Alejandro N. Mayorkas, secretary of Homeland Security now pending, you will do impartial justice according to the Constitution and laws. So help you, God. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. PATTY MURRAY (D-WA) I do. Yes. At this time, I will administer the oath to all Senators in the chamber in conformance with the Article I, Section 3, Clause 6 of the Constitution, and the Senate impeachment rules. Will all Senators now stand and raise their right hands? Do you solemnly swear that in all things appertaining to the trial of the impeachment of Alejandro Mayorkas, secretary of Homeland Security, now, pending, you will do impartial justice according to the Constitution and laws, so help you, God.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I do. Yes. At this time, I will administer the oath to all Senators in the chamber in conformance with the Article I, Section 3, Clause 6 of the Constitution, and the Senate impeachment rules. Will all Senators now stand and raise their right hands? Do you solemnly swear that in all things appertaining to the trial of the impeachment of Alejandro Mayorkas, secretary of Homeland Security, now, pending, you will do impartial justice according to the Constitution and laws, so help you, God.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 02 | rowid=66973 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Ted Cruz
+  INSERT attributed to: Patty Murray
+  date=2024-04-17 show=cnc package=https://transcripts.cnn.com/show/cnc/date/2024-04-17/segment/10
+  tag                 : 'SEN. PATTY MURRAY (D-WA)'
+  seg nwords          : 36
+  ALL tags in this row: [["SEN. PATTY MURRAY (D-WA)", "E_colonless_honorific", false, "Patty Murray", "reattributed"]]
+  --- 470 chars of ORIGINAL text BEFORE the tag ---
+  ...-- Constitution, to the original understanding of the Constitution at the time it was ratified. And to the explicit position of the Biden Department of Justice as argued before the Supreme Court of the United States. The majority leader's position is asking members of this Senate to vote on political expediency to avoid listening to arguments. The only rational way to resolve this question is actually to debate it, to consider the Constitution and consider the law. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. PATTY MURRAY (D-WA). The Senator will recognize that the Senate is in a non-debatable position. The Senator has a right to offer his point of order but - or his motion. But we are in a non-debatable position.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  . The Senator will recognize that the Senate is in a non-debatable position. The Senator has a right to offer his point of order but - or his motion. But we are in a non-debatable position.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 03 | rowid=68279 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Chip Roy
+  INSERT attributed to: Carlos Gimenez
+  date=2024-06-16 show=ip package=https://transcripts.cnn.com/show/ip/date/2024-06-16/segment/01
+  tag                 : 'REP. CARLOS GIMENEZ (R-FL)'
+  seg nwords          : 15
+  ALL tags in this row: [["REP. CARLOS GIMENEZ (R-FL)", "E_colonless_honorific", false, "Carlos Gimenez", "reattributed"]]
+  --- 154 chars of ORIGINAL text BEFORE the tag ---
+  ...should the president get reelected, then I think the president will learn quickly that some of these people may not be sitting in the trenches with them. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. CARLOS GIMENEZ (R-FL); I think Bob Good has made a lot of -- a lot of enemies.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  ; I think Bob Good has made a lot of -- a lot of enemies.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 04 | rowid=68730 | seg_index=1/2 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Christopher Murphy
+  INSERT attributed to: Maxine Waters
+  date=2024-07-08 show=ow package=https://transcripts.cnn.com/show/ow/date/2024-07-08/segment/01
+  tag                 : 'REP. MAXINE WATERS (D-CA 43RD DISTRICT)'
+  seg nwords          : 25
+  ALL tags in this row: [["REP. MAXINE WATERS (D-CA 43RD DISTRICT)", "A_anchored_caps", false, "Maxine Waters", "reattributed"], ["REP. ADAM SCHIFF (D-CA 30TH DISTRICT)", "A_anchored_caps", false, "Adam Schiff", "reattributed"]]
+  --- 188 chars of ORIGINAL text BEFORE the tag ---
+  ...I love Joe Biden. I don't know that the interview on Friday night did enough to answer those questions. [12:10:02] And so, I think this week is going to be absolutely critical. I think -- 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. MAXINE WATERS (D-CA 43RD DISTRICT): Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pushed out. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pushed out.
+  --- 500 chars AFTER the segment ---
+  REP. ADAM SCHIFF (D-CA 30TH DISTRICT): He should take a moment to make the best informed judgment. And if the judgment is run, then run hard and beat that S.O.B. Meanwhile, it appears Donald Trump is very close to picking his running mate. Indications are that Trump is deciding among senators J.D. Vance and Marco Rubio or North Dakota Governor Doug Burgum. With Republican convention scheduled to begin one week from today, Trump is running out of time to make his pick. Both Vance and Rubio made t...
+
+==============================================================================================================
+INSERT 05 | rowid=68730 | seg_index=2/2 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Christopher Murphy
+  INSERT attributed to: Adam Schiff
+  date=2024-07-08 show=ow package=https://transcripts.cnn.com/show/ow/date/2024-07-08/segment/01
+  tag                 : 'REP. ADAM SCHIFF (D-CA 30TH DISTRICT)'
+  seg nwords          : 100
+  ALL tags in this row: [["REP. MAXINE WATERS (D-CA 43RD DISTRICT)", "A_anchored_caps", false, "Maxine Waters", "reattributed"], ["REP. ADAM SCHIFF (D-CA 30TH DISTRICT)", "A_anchored_caps", false, "Adam Schiff", "reattributed"]]
+  --- 349 chars of ORIGINAL text BEFORE the tag ---
+  ...I love Joe Biden. I don't know that the interview on Friday night did enough to answer those questions. [12:10:02] And so, I think this week is going to be absolutely critical. I think -- REP. MAXINE WATERS (D-CA 43RD DISTRICT): Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pushed out. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. ADAM SCHIFF (D-CA 30TH DISTRICT): He should take a moment to make the best informed judgment. And if the judgment is run, then run hard and beat that S.O.B. Meanwhile, it appears Donald Trump is very close to picking his running mate. Indications are that Trump is deciding among senators J.D. Vance and Marco Rubio or North Dakota Governor Doug Burgum. With Republican convention scheduled to begin one week from today, Trump is running out of time to make his pick. Both Vance and Rubio made their rounds on the weekend talk shows, forcefully defending Trump when asked whether he would enact revenge on Democrats.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  He should take a moment to make the best informed judgment. And if the judgment is run, then run hard and beat that S.O.B. Meanwhile, it appears Donald Trump is very close to picking his running mate. Indications are that Trump is deciding among senators J.D. Vance and Marco Rubio or North Dakota Governor Doug Burgum. With Republican convention scheduled to begin one week from today, Trump is running out of time to make his pick. Both Vance and Rubio made their rounds on the weekend talk shows, forcefully defending Trump when asked whether he would enact revenge on Democrats.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 06 | rowid=68832 | seg_index=1/2 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Ayanna Pressley
+  INSERT attributed to: Bennie Thompson
+  date=2024-07-09 show=ow package=https://transcripts.cnn.com/show/ow/date/2024-07-09/segment/01
+  tag                 : 'REP. BENNIE THOMPSON (D-MS 2ND DISTRICT)'
+  seg nwords          : 13
+  ALL tags in this row: [["REP. BENNIE THOMPSON (D-MS 2ND DISTRICT)", "A_anchored_caps", false, "Bennie Thompson", "reattributed"], ["REP. MIKE QUIGLEY (D-IL 5TH DISTRICT)", "A_anchored_caps", false, "Mike Quigley", "reattributed"]]
+  --- 26 chars of ORIGINAL text BEFORE the tag ---
+  ...Joe Biden is the nominee. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. BENNIE THOMPSON (D-MS 2ND DISTRICT): He's a good man. He has good policies. There's no reason to change. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  He's a good man. He has good policies. There's no reason to change.
+  --- 179 chars AFTER the segment ---
+  REP. MIKE QUIGLEY (D-IL 5TH DISTRICT): He just has to step down because he can't win. And my colleagues need to recognize that a dismissive letter is not going to change any mind....
+
+==============================================================================================================
+INSERT 07 | rowid=68832 | seg_index=2/2 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Ayanna Pressley
+  INSERT attributed to: Mike Quigley
+  date=2024-07-09 show=ow package=https://transcripts.cnn.com/show/ow/date/2024-07-09/segment/01
+  tag                 : 'REP. MIKE QUIGLEY (D-IL 5TH DISTRICT)'
+  seg nwords          : 27
+  ALL tags in this row: [["REP. BENNIE THOMPSON (D-MS 2ND DISTRICT)", "A_anchored_caps", false, "Bennie Thompson", "reattributed"], ["REP. MIKE QUIGLEY (D-IL 5TH DISTRICT)", "A_anchored_caps", false, "Mike Quigley", "reattributed"]]
+  --- 136 chars of ORIGINAL text BEFORE the tag ---
+  ...Joe Biden is the nominee. REP. BENNIE THOMPSON (D-MS 2ND DISTRICT): He's a good man. He has good policies. There's no reason to change. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. MIKE QUIGLEY (D-IL 5TH DISTRICT): He just has to step down because he can't win. And my colleagues need to recognize that a dismissive letter is not going to change any mind.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  He just has to step down because he can't win. And my colleagues need to recognize that a dismissive letter is not going to change any mind.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 08 | rowid=73089 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Bryan Steil
+  INSERT attributed to: Amy Klobuchar
+  date=2025-01-06 show=se package=https://transcripts.cnn.com/show/se/date/2025-01-06/segment/04
+  tag                 : 'SEN. AMY KLOBUCHAR (D-MN)'
+  seg nwords          : 53
+  ALL tags in this row: [["SEN. AMY KLOBUCHAR (D-MN)", "E_colonless_honorific", false, "Amy Klobuchar", "reattributed"]]
+  --- 311 chars of ORIGINAL text BEFORE the tag ---
+  ...Madam President, the certificate of the electoral vote of the state of Vermont seems to be regular in form and authentic, and it appears therefrom that Kamala D. Harris of the state of California received three votes for president and Tim Walz of the state of Minnesota received three votes for vice president. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. AMY KLOBUCHAR (D-MN) Madam President, the certificate of the electoral vote of the Commonwealth of Virginia seems to be regular in form and authentic, and it appears therefrom that Kamala D. Harris of the state of California received 13 votes for president and Tim Walz of the state of Minnesota received 13 votes for vice president.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Madam President, the certificate of the electoral vote of the Commonwealth of Virginia seems to be regular in form and authentic, and it appears therefrom that Kamala D. Harris of the state of California received 13 votes for president and Tim Walz of the state of Minnesota received 13 votes for vice president.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 09 | rowid=75643 | seg_index=1/1 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Bernard Sanders
+  INSERT attributed to: Alexandria Ocasio-Cortez
+  date=2025-03-24 show=ip package=https://transcripts.cnn.com/show/ip/date/2025-03-24/segment/01
+  tag                 : 'REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT)'
+  seg nwords          : 18
+  ALL tags in this row: [["REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT)", "A_anchored_caps", false, "Alexandria Ocasio-Cortez", "reattributed"]]
+  --- 104 chars of ORIGINAL text BEFORE the tag ---
+  ...We got 20,000 people here in Tucson, and we got hundreds of millions of people all across this country. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT): Are we ready to fight? Are we ready to win and we will never, ever, ever give up.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Are we ready to fight? Are we ready to win and we will never, ever, ever give up.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 10 | rowid=79884 | seg_index=2/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : John Barrasso
+  INSERT attributed to: John Thune
+  date=2025-09-05 show=ip package=https://transcripts.cnn.com/show/ip/date/2025-09-05/segment/01
+  tag                 : 'SEN. JOHN THUNE (R-SD)'
+  seg nwords          : 27
+  ALL tags in this row: [["MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voiceover)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["SEN. JOHN THUNE (R-SD)", "E_colonless_honorific", false, "John Thune", "reattributed"]]
+  --- 224 chars of ORIGINAL text BEFORE the tag ---
+  ...I have confidence in what the president of the United States is doing, and I will not second guess. MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voiceover): Do you have a full confidence in RFK Jr. as health secretary? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. JOHN THUNE (R-SD) (voiceover): Well, it's not exactly what I think. What I think it's the president ultimately to whom he answers, so if the president has confidence in him.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (voiceover): Well, it's not exactly what I think. What I think it's the president ultimately to whom he answers, so if the president has confidence in him.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 11 | rowid=80238 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Jon Husted
+  INSERT attributed to: Bill Cassidy
+  date=2025-09-17 show=ip package=https://transcripts.cnn.com/show/ip/date/2025-09-17/segment/02
+  tag                 : 'SEN. BILL CASSIDY'
+  seg nwords          : 10
+  ALL tags in this row: [["SEN. BILL CASSIDY", "E_colonless_honorific", false, "Bill Cassidy", "reattributed"]]
+  --- 197 chars of ORIGINAL text BEFORE the tag ---
+  ...Yeah, and thank you, Mr. Chairman. And the -- and the irony of this is, is when I talk with you, you say that. And when I talk with Secretary Kennedy, he says this, we got to get this figured out. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. BILL CASSIDY, (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 12 | rowid=82752 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Ruben Gallego
+  INSERT attributed to: Richard Blumenthal
+  date=2025-10-01 show=acd package=https://transcripts.cnn.com/show/acd/date/2025-10-01/segment/01
+  tag                 : 'SEN. RICHARD BLUMENTHAL (D-CT)'
+  seg nwords          : 17
+  ALL tags in this row: [["SEN. RICHARD BLUMENTHAL (D-CT)", "E_colonless_honorific", false, "Richard Blumenthal", "reattributed"]]
+  --- 132 chars of ORIGINAL text BEFORE the tag ---
+  ...Their threat doesn't work on me. What I cheer about is the fact that they're going to increase the cost on working class Americans. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. RICHARD BLUMENTHAL (D-CT) There is no question that this shutdown will be painful but we need to take a stand.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  There is no question that this shutdown will be painful but we need to take a stand.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 13 | rowid=84935 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Josh Hawley
+  INSERT attributed to: Eric Schmitt
+  date=2025-11-20 show=tsiem package=https://transcripts.cnn.com/show/tsiem/date/2025-11-20/segment/01
+  tag                 : 'SEN. ERIC SCHMITT'
+  seg nwords          : 29
+  ALL tags in this row: [["SEN. ERIC SCHMITT", "E_colonless_honorific", false, "Eric Schmitt", "reattributed"]]
+  --- 89 chars of ORIGINAL text BEFORE the tag ---
+  ...I don't think they'll do that, Elex. I think I'd be really surprised if they tried that. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. ERIC SCHMITT (R- I've been saying for a long time that I think that all the credible information that can be released should be released, and so that's where we're at.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (R- I've been saying for a long time that I think that all the credible information that can be released should be released, and so that's where we're at.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 14 | rowid=89101 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Josh Hawley
+  INSERT attributed to: Eric Burlison
+  date=2026-03-19 show=arena package=https://transcripts.cnn.com/show/arena/date/2026-03-19/segment/01
+  tag                 : 'REP. ERIC BURLISON'
+  seg nwords          : 23
+  ALL tags in this row: [["REP. ERIC BURLISON", "E_colonless_honorific", false, "Eric Burlison", "reattributed"]]
+  --- 48 chars of ORIGINAL text BEFORE the tag ---
+  ...Let's wait and see what the request amounts to. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. ERIC BURLISON (R-Mop: It'll give me comfort if they pass an audit, and then I'll know that at least they're keeping track of the dollars.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (R-Mop: It'll give me comfort if they pass an audit, and then I'll know that at least they're keeping track of the dollars.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 15 | rowid=89353 | seg_index=1/1 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Susie Lee
+  INSERT attributed to: Richard Blumenthal
+  date=2026-03-25 show=sitroom package=https://transcripts.cnn.com/show/sitroom/date/2026-03-25/segment/04
+  tag                 : "SEN. RICHARD BLUMENTHAL (D-Can't)"
+  seg nwords          : 28
+  ALL tags in this row: [["SEN. RICHARD BLUMENTHAL (D-Can't)", "A_anchored_caps", false, "Richard Blumenthal", "reattributed"]]
+  --- 126 chars of ORIGINAL text BEFORE the tag ---
+  ...They did nothing to address the reforms of ICE. And that's what we want. And so until they do that, it's not a serious offer. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. RICHARD BLUMENTHAL (D-Can't): As long as Donald Trump is holding America hostage to pass a measure that would in effect purge voter rolls and suppress voters, there will be no deal.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  As long as Donald Trump is holding America hostage to pass a measure that would in effect purge voter rolls and suppress voters, there will be no deal.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 16 | rowid=89961 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Elizabeth Warren
+  INSERT attributed to: Tim Scott
+  date=2026-04-21 show=ctw package=https://transcripts.cnn.com/show/ctw/date/2026-04-21/segment/02
+  tag                 : 'SEN. TIM SCOTT (R-SC)'
+  seg nwords          : 53
+  ALL tags in this row: [["SEN. TIM SCOTT (R-SC)", "E_colonless_honorific", false, "Tim Scott", "reattributed"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...shouting from the rooftops about how the Fed should cut interest rates. Evidently, he learned his lesson. This time around, he sucked up to Donald Trump to snag his dream job. Mr. Chairman, last week, every single Democratic member of this committee asks that you postpone this hearing and instead conduct oversight on the president's role in directing bogus criminal probes into Chair Powell and Governor Cook. The Senate should not be aiding and abetting Donald Trump's illegal takeover of the Fed by installing his chosen sock puppet as chair. It's an invitation for corruption and for economic catastrophe. We have the power to stop it and we should be using that power. Thank you, Mr. Chairman. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. TIM SCOTT (R-SC), CHAIR, SENATE BANKING COMMITTEE:: Well, there you have it. I'll just say it. It is interesting that we're going to hear from Senator Dave McCormick and his introduction of Kevin Warsh was last time unanimously confirmed by the United States Senate, unanimously confirmed by the U.S. Senate. Dave, the floor is yours.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , CHAIR, SENATE BANKING COMMITTEE:: Well, there you have it. I'll just say it. It is interesting that we're going to hear from Senator Dave McCormick and his introduction of Kevin Warsh was last time unanimously confirmed by the United States Senate, unanimously confirmed by the U.S. Senate. Dave, the floor is yours.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 17 | rowid=91180 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Thom Tillis
+  INSERT attributed to: Susan Collins
+  date=2026-05-22 show=tsiem package=https://transcripts.cnn.com/show/tsiem/date/2026-05-22/segment/02
+  tag                 : 'SEN. SUSAN COLLINS (R-ME)'
+  seg nwords          : 26
+  ALL tags in this row: [["SEN. SUSAN COLLINS (R-ME)", "E_colonless_honorific", false, "Susan Collins", "reattributed"]]
+  --- 48 chars of ORIGINAL text BEFORE the tag ---
+  ...This is, I mean, this is just stupid on stilts. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. SUSAN COLLINS (R-ME) I do not believe that individuals who were convicted of violence against police officers on January 6 should be entitled to reimbursement for their legal fees.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I do not believe that individuals who were convicted of violence against police officers on January 6 should be entitled to reimbursement for their legal fees.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 18 | rowid=91491 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Thom Tillis
+  INSERT attributed to: Susan Collins
+  date=2026-06-02 show=ctmo package=https://transcripts.cnn.com/show/ctmo/date/2026-06-02/segment/01
+  tag                 : 'SEN. SUSAN COLLINS (R-ME)'
+  seg nwords          : 13
+  ALL tags in this row: [["SEN. SUSAN COLLINS (R-ME)", "E_colonless_honorific", false, "Susan Collins", "reattributed"]]
+  --- 148 chars of ORIGINAL text BEFORE the tag ---
+  ...This is beyond the pale. This is not good for my colleagues. There's no one positive thing that could be spun out of this between now and November. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. SUSAN COLLINS (R-ME); I do not support the weaponization fund as it has been described.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  ; I do not support the weaponization fund as it has been described.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 19 | rowid=102837 | seg_index=2/3 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Thom Tillis
+  INSERT attributed to: John Cornyn
+  date=2018-01-24 show=ben-shapiro-conservatives-being-censored-in-name-of-safety package=https://www.foxnews.com/transcript/ben-shapiro-conservatives-being-censored-in-name-of-safety
+  tag                 : 'SEN. JOHN CORNYN, R-TEXAS'
+  seg nwords          : 18
+  ALL tags in this row: [["SEN. JOE MANCHIN, D-W.VA", "E_colonless_honorific", false, null, "ledger_only_unresolved"], ["SEN. JOHN CORNYN, R-TEXAS", "E_colonless_honorific", false, "John Cornyn", "reattributed"], ["SEN. CHRIS VAN HOLLEN, D-MD.", "E_colonless_honorific", false, "Chris Van Hollen", "reattributed"]]
+  --- 301 chars of ORIGINAL text BEFORE the tag ---
+  ...No, I haven't. I sit on the Judiciary Committee along with Senator Coons and I have not seen any evidence to suggest that. SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017: I do not at all believe that Mr. Mueller has been compromised for his investigation. I think he's beyond reproach. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. JOHN CORNYN, R-TEXAS, "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiration and respect for Director Mueller. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiration and respect for Director Mueller.
+  --- 434 chars AFTER the segment ---
+  SEN. CHRIS VAN HOLLEN, D-MD., "THIS WEEK"/ABC, DEC. 17, 2017: You've got somebody who, by all accounts, is an independent person, somebody who's got lots of integrity. UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: He enjoys very broad support in the Senate both among Republicans and Democrats because of his long service as the FBI director, because of his record of respectable leadership as a senior federal prosecutor. (END VIDEO CLIPS)...
+
+==============================================================================================================
+INSERT 20 | rowid=102837 | seg_index=3/3 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Thom Tillis
+  INSERT attributed to: Chris Van Hollen
+  date=2018-01-24 show=ben-shapiro-conservatives-being-censored-in-name-of-safety package=https://www.foxnews.com/transcript/ben-shapiro-conservatives-being-censored-in-name-of-safety
+  tag                 : 'SEN. CHRIS VAN HOLLEN, D-MD.'
+  seg nwords          : 66
+  ALL tags in this row: [["SEN. JOE MANCHIN, D-W.VA", "E_colonless_honorific", false, null, "ledger_only_unresolved"], ["SEN. JOHN CORNYN, R-TEXAS", "E_colonless_honorific", false, "John Cornyn", "reattributed"], ["SEN. CHRIS VAN HOLLEN, D-MD.", "E_colonless_honorific", false, "Chris Van Hollen", "reattributed"]]
+  --- 422 chars of ORIGINAL text BEFORE the tag ---
+  ...No, I haven't. I sit on the Judiciary Committee along with Senator Coons and I have not seen any evidence to suggest that. SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017: I do not at all believe that Mr. Mueller has been compromised for his investigation. I think he's beyond reproach. SEN. JOHN CORNYN, R-TEXAS, "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiration and respect for Director Mueller. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. CHRIS VAN HOLLEN, D-MD., "THIS WEEK"/ABC, DEC. 17, 2017: You've got somebody who, by all accounts, is an independent person, somebody who's got lots of integrity. UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: He enjoys very broad support in the Senate both among Republicans and Democrats because of his long service as the FBI director, because of his record of respectable leadership as a senior federal prosecutor. (END VIDEO CLIPS)
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , "THIS WEEK"/ABC, DEC. 17, 2017: You've got somebody who, by all accounts, is an independent person, somebody who's got lots of integrity. UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: He enjoys very broad support in the Senate both among Republicans and Democrats because of his long service as the FBI director, because of his record of respectable leadership as a senior federal prosecutor. (END VIDEO CLIPS)
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 21 | rowid=104285 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Rand Paul
+  INSERT attributed to: Tim Kaine
+  date=2017-04-09 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-april-9-2017-n744341
+  tag                 : 'SEN. TIM KAINE'
+  seg nwords          : 81
+  ALL tags in this row: [["SEN. TIM KAINE", "E_colonless_honorific", false, "Tim Kaine", "reattributed"]]
+  --- 190 chars of ORIGINAL text BEFORE the tag ---
+  ...My heart breaks seeing those images, say what can we do? But it doesn't mean we just sort of rip up the Constitution and say okay it's fine to bomb anybody if they're committing atrocities. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. TIM KAINE Doing this without consulting Congress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s chemical attack than the U.S. ambassador to the United Nations Nikki Haley. Haley has been the face of the administration in this crisis and yesterday, I asked her whether the Trump administration believes it has achieved its objective with the military strike or whether more needs to be done.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Doing this without consulting Congress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s chemical attack than the U.S. ambassador to the United Nations Nikki Haley. Haley has been the face of the administration in this crisis and yesterday, I asked her whether the Trump administration believes it has achieved its objective with the military strike or whether more needs to be done.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 22 | rowid=104834 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Joaquin Castro
+  INSERT attributed to: Pramila Jayapal
+  date=2023-12-17 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-december-17-2023-n1308182
+  tag                 : 'REP. PRAMILA JAYAPAL'
+  seg nwords          : 15
+  ALL tags in this row: [["REP. PRAMILA JAYAPAL", "E_colonless_honorific", false, "Pramila Jayapal", "reattributed"]]
+  --- 218 chars of ORIGINAL text BEFORE the tag ---
+  ...I want to speak quickly to the Democrats in the Senate and others who are considering supporting this proposal. If you do so, you will be surrendering to right-wing racism. And more than that, you will be enabling it. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. PRAMILA JAYAPAL Senate Democrats and the White House must not agree to these extreme demands [END TAPE]
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Senate Democrats and the White House must not agree to these extreme demands [END TAPE]
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 23 | rowid=106351 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Christopher Murphy
+  INSERT attributed to: Andy Kim
+  date=2025-02-23 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-february-23-2025-n1311564
+  tag                 : 'SEN. ANDY KIM'
+  seg nwords          : 12
+  ALL tags in this row: [["SEN. ANDY KIM", "E_colonless_honorific", false, "Andy Kim", "reattributed"]]
+  --- 119 chars of ORIGINAL text BEFORE the tag ---
+  ...Yeah, listen, I think this is the most serious constitutional crisis the country has faced, certainly since Watergate. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. ANDY KIM We are basically on the cusp of a constitutional crisis. [END TAPE]
+  --- INSERT text (what would be stored), first 2500 chars ---
+  We are basically on the cusp of a constitutional crisis. [END TAPE]
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 24 | rowid=108647 | seg_index=1/6 | class=E_colonless_honorific | disp=own_later_turn
+  stored member (row) : Richard Durbin
+  INSERT attributed to: Richard Durbin
+  date=2018-07-08 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-july-8-2018-n889676
+  tag                 : 'SENATOR DICK DURBIN'
+  seg nwords          : 170
+  ALL tags in this row: [["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "ledger_only_short_turn"], ["CHUCK TODD", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...ll face. This court will decide the future of women's health care and the freedom of women to make choices about the future of their families. That is a critical decision this court will face. So beyond the procedure, beyond the gamesmanship, it is a life and death important decision to be made by this court on so many issues. CHUCK TODD:And yet you have this political dilemma that stares, I think, you and Chuck Schumer really in the face as the two leaders, which is this: staying united to stop the Supreme Court pick could cost you red state senators. Not fighting it as hard might allow the red state senators to get reelected and get Democrats in control of the Senate. That's your dilemma. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SENATOR DICK DURBIN:It is a dilemma in one respect but not in another. I will tell you, the men and women that I work with on the Democratic side really take this seriously. They understand it's an historic decision. It's about more than the next election. It's about what country the United States of America is going to chart as its course in the future on this Supreme Court. I think each and every one of them take that seriously, that personally. It goes beyond the next election. CHUCK TODD:All right. And final question, you brought up the issue of trying to reunify these kids with their parents, the migrants at the border. A court -- the Trump administration is trying to buy more time. The court doesn't look like they're going to give them that more time. What's the recourse though? If a court says, you know, "No, you're not living up to this commitment," it's not like you can put HHS in jail or something. What is the actual recourse? 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :It is a dilemma in one respect but not in another. I will tell you, the men and women that I work with on the Democratic side really take this seriously. They understand it's an historic decision. It's about more than the next election. It's about what country the United States of America is going to chart as its course in the future on this Supreme Court. I think each and every one of them take that seriously, that personally. It goes beyond the next election. CHUCK TODD:All right. And final question, you brought up the issue of trying to reunify these kids with their parents, the migrants at the border. A court -- the Trump administration is trying to buy more time. The court doesn't look like they're going to give them that more time. What's the recourse though? If a court says, you know, "No, you're not living up to this commitment," it's not like you can put HHS in jail or something. What is the actual recourse?
+  --- 500 chars AFTER the segment ---
+  SENATOR DICK DURBIN:I can tell you this: what we see in this process, forcibly removing children from their parents at the border and then putting them adrift on a bureaucratic sea where they can't even find them. If you take a child into a hospital for treatment the first thing they do is strap a bracelet on the wrist to make sure they aren't lost in the hospital. It is a convergence of cruelty and incompetence that brings us to this moment. And now it's up to a judge, a federal judge in San Di...
+
+==============================================================================================================
+INSERT 25 | rowid=108647 | seg_index=2/6 | class=E_colonless_honorific | disp=own_later_turn
+  stored member (row) : Richard Durbin
+  INSERT attributed to: Richard Durbin
+  date=2018-07-08 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-july-8-2018-n889676
+  tag                 : 'SENATOR DICK DURBIN'
+  seg nwords          : 124
+  ALL tags in this row: [["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "ledger_only_short_turn"], ["CHUCK TODD", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...tion. It's about what country the United States of America is going to chart as its course in the future on this Supreme Court. I think each and every one of them take that seriously, that personally. It goes beyond the next election. CHUCK TODD:All right. And final question, you brought up the issue of trying to reunify these kids with their parents, the migrants at the border. A court -- the Trump administration is trying to buy more time. The court doesn't look like they're going to give them that more time. What's the recourse though? If a court says, you know, "No, you're not living up to this commitment," it's not like you can put HHS in jail or something. What is the actual recourse? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SENATOR DICK DURBIN:I can tell you this: what we see in this process, forcibly removing children from their parents at the border and then putting them adrift on a bureaucratic sea where they can't even find them. If you take a child into a hospital for treatment the first thing they do is strap a bracelet on the wrist to make sure they aren't lost in the hospital. It is a convergence of cruelty and incompetence that brings us to this moment. And now it's up to a judge, a federal judge in San Diego to enforce his order this Tuesday so that children under the age of five are reunited-- CHUCK TODD:How do you enforce it? How do you enforce it if the administration's saying-- 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :I can tell you this: what we see in this process, forcibly removing children from their parents at the border and then putting them adrift on a bureaucratic sea where they can't even find them. If you take a child into a hospital for treatment the first thing they do is strap a bracelet on the wrist to make sure they aren't lost in the hospital. It is a convergence of cruelty and incompetence that brings us to this moment. And now it's up to a judge, a federal judge in San Diego to enforce his order this Tuesday so that children under the age of five are reunited-- CHUCK TODD:How do you enforce it? How do you enforce it if the administration's saying--
+  --- 500 chars AFTER the segment ---
+  SENATOR DICK DURBIN:Well, if they-- CHUCK TODD:--"We only have so many resources?" SENATOR DICK DURBIN:I can tell you, they have the resources to get it done. Chuck, this is not an accident. This is a policy of deterrence to stop future flow, to be mean to these kids and their families to say to others, "Don't even try it." And that, to me, is cruel. It's not what America's all about. CHUCK TODD:Senator Dick Durbin, I have to leave it there. Democrat from Illinois. Senator, thanks for coming on ...
+
+==============================================================================================================
+INSERT 26 | rowid=108647 | seg_index=5/6 | class=E_colonless_honorific | disp=own_later_turn
+  stored member (row) : Richard Durbin
+  INSERT attributed to: Richard Durbin
+  date=2018-07-08 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-july-8-2018-n889676
+  tag                 : 'SENATOR DICK DURBIN'
+  seg nwords          : 81
+  ALL tags in this row: [["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "ledger_only_short_turn"], ["CHUCK TODD", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...cess, forcibly removing children from their parents at the border and then putting them adrift on a bureaucratic sea where they can't even find them. If you take a child into a hospital for treatment the first thing they do is strap a bracelet on the wrist to make sure they aren't lost in the hospital. It is a convergence of cruelty and incompetence that brings us to this moment. And now it's up to a judge, a federal judge in San Diego to enforce his order this Tuesday so that children under the age of five are reunited-- CHUCK TODD:How do you enforce it? How do you enforce it if the administration's saying-- SENATOR DICK DURBIN:Well, if they-- CHUCK TODD:--"We only have so many resources?" 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SENATOR DICK DURBIN:I can tell you, they have the resources to get it done. Chuck, this is not an accident. This is a policy of deterrence to stop future flow, to be mean to these kids and their families to say to others, "Don't even try it." And that, to me, is cruel. It's not what America's all about. CHUCK TODD:Senator Dick Durbin, I have to leave it there. Democrat from Illinois. Senator, thanks for coming on and sharing your views. Much appreciated. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :I can tell you, they have the resources to get it done. Chuck, this is not an accident. This is a policy of deterrence to stop future flow, to be mean to these kids and their families to say to others, "Don't even try it." And that, to me, is cruel. It's not what America's all about. CHUCK TODD:Senator Dick Durbin, I have to leave it there. Democrat from Illinois. Senator, thanks for coming on and sharing your views. Much appreciated.
+  --- 410 chars AFTER the segment ---
+  SENATOR DICK DURBIN:Thanks. Good to be with you-- CHUCK TODD:By the way, NBC News will provide live coverage of President Trump's Supreme Court announcement tomorrow evening at 9:00 Eastern, 6:00 p.m. on the West Coast. Later on the broadcast we'll talk to President Trump's lawyer, Rudy Giuliani. But up next, the fight over the Supreme Court and a reality check on North Korea. Panel is next so stick around....
+
+==============================================================================================================
+INSERT 27 | rowid=108647 | seg_index=6/6 | class=E_colonless_honorific | disp=own_later_turn
+  stored member (row) : Richard Durbin
+  INSERT attributed to: Richard Durbin
+  date=2018-07-08 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-july-8-2018-n889676
+  tag                 : 'SENATOR DICK DURBIN'
+  seg nwords          : 67
+  ALL tags in this row: [["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "ledger_only_short_turn"], ["CHUCK TODD", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"], ["SENATOR DICK DURBIN", "E_colonless_honorific", true, "Richard Durbin", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...r this Tuesday so that children under the age of five are reunited-- CHUCK TODD:How do you enforce it? How do you enforce it if the administration's saying-- SENATOR DICK DURBIN:Well, if they-- CHUCK TODD:--"We only have so many resources?" SENATOR DICK DURBIN:I can tell you, they have the resources to get it done. Chuck, this is not an accident. This is a policy of deterrence to stop future flow, to be mean to these kids and their families to say to others, "Don't even try it." And that, to me, is cruel. It's not what America's all about. CHUCK TODD:Senator Dick Durbin, I have to leave it there. Democrat from Illinois. Senator, thanks for coming on and sharing your views. Much appreciated. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SENATOR DICK DURBIN:Thanks. Good to be with you-- CHUCK TODD:By the way, NBC News will provide live coverage of President Trump's Supreme Court announcement tomorrow evening at 9:00 Eastern, 6:00 p.m. on the West Coast. Later on the broadcast we'll talk to President Trump's lawyer, Rudy Giuliani. But up next, the fight over the Supreme Court and a reality check on North Korea. Panel is next so stick around.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :Thanks. Good to be with you-- CHUCK TODD:By the way, NBC News will provide live coverage of President Trump's Supreme Court announcement tomorrow evening at 9:00 Eastern, 6:00 p.m. on the West Coast. Later on the broadcast we'll talk to President Trump's lawyer, Rudy Giuliani. But up next, the fight over the Supreme Court and a reality check on North Korea. Panel is next so stick around.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 28 | rowid=111034 | seg_index=1/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Lindsey Graham
+  INSERT attributed to: Charles Schumer
+  date=2017-05-14 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-may-14-2017-n759241
+  tag                 : 'SEN. CHUCK SCHUMER'
+  seg nwords          : 122
+  ALL tags in this row: [["SEN. CHUCK SCHUMER", "E_colonless_honorific", false, "Charles Schumer", "reattributed"], ["SEN. CHUCK SCHUMER", "E_colonless_honorific", false, "Charles Schumer", "reattributed"]]
+  --- 282 chars of ORIGINAL text BEFORE the tag ---
+  ...Happy Mother's Day. CHUCK TODD:Thank you, sir. Appreciate it. Well, let me go to the other side of the aisle, Senate Democratic Leader, Chuck Schumer of New York. Senator, welcome back to Meet the Press. I hope that you are more enthusiastic about being on than Senator Graham was. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. CHUCK SCHUMER:Yeah, I didn’t see Senator Graham but I just want to join him in wishing all the moms of America, and your family Chuck, Happy Mother’s Day and particularly to my mom who , god willing, will turn 89 in three weeks. CHUCK TODD:Well done. Okay, let me start with the issue of a special prosecutor. Why do you believe that it needs to be done? As you know, Senator Ben Sasse indicated that if you do that, it is sending a message that you don’t trust the Intel committee to do their work and it’s sort of a vote of no confidence there. Shouldn’t you let them do their job to see if they could do it without a special prosecutor? 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :Yeah, I didn’t see Senator Graham but I just want to join him in wishing all the moms of America, and your family Chuck, Happy Mother’s Day and particularly to my mom who , god willing, will turn 89 in three weeks. CHUCK TODD:Well done. Okay, let me start with the issue of a special prosecutor. Why do you believe that it needs to be done? As you know, Senator Ben Sasse indicated that if you do that, it is sending a message that you don’t trust the Intel committee to do their work and it’s sort of a vote of no confidence there. Shouldn’t you let them do their job to see if they could do it without a special prosecutor?
+  --- 500 chars AFTER the segment ---
+  SEN. CHUCK SCHUMER:Well, there are two separate lines of activity here. One is the oversight function of the Intelligence Committee, they are doing their job. Mark Warner has done a very good job. I’ve had some differences with Senator Burr in the last week. People tell me that he was very upset with Comey’s firing and he has been very good. I hope it continues, but they can’t prosecute. A special prosecutor appointed by the Justice Department has the ability to actually prosecute people for vio...
+
+==============================================================================================================
+INSERT 29 | rowid=111034 | seg_index=2/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Lindsey Graham
+  INSERT attributed to: Charles Schumer
+  date=2017-05-14 show=meet-the-press package=https://www.nbcnews.com/meet-the-press/meet-press-may-14-2017-n759241
+  tag                 : 'SEN. CHUCK SCHUMER'
+  seg nwords          : 269
+  ALL tags in this row: [["SEN. CHUCK SCHUMER", "E_colonless_honorific", false, "Charles Schumer", "reattributed"], ["SEN. CHUCK SCHUMER", "E_colonless_honorific", false, "Charles Schumer", "reattributed"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...e enthusiastic about being on than Senator Graham was. SEN. CHUCK SCHUMER:Yeah, I didn’t see Senator Graham but I just want to join him in wishing all the moms of America, and your family Chuck, Happy Mother’s Day and particularly to my mom who , god willing, will turn 89 in three weeks. CHUCK TODD:Well done. Okay, let me start with the issue of a special prosecutor. Why do you believe that it needs to be done? As you know, Senator Ben Sasse indicated that if you do that, it is sending a message that you don’t trust the Intel committee to do their work and it’s sort of a vote of no confidence there. Shouldn’t you let them do their job to see if they could do it without a special prosecutor? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. CHUCK SCHUMER:Well, there are two separate lines of activity here. One is the oversight function of the Intelligence Committee, they are doing their job. Mark Warner has done a very good job. I’ve had some differences with Senator Burr in the last week. People tell me that he was very upset with Comey’s firing and he has been very good. I hope it continues, but they can’t prosecute. A special prosecutor appointed by the Justice Department has the ability to actually prosecute people for violation of law and they go on in tandem. One shouldn’t step on another and I know that they are talking to each other right now. The FBI was with the intelligence committee to make sure no one is granted immunity. But it is two separate issues and you very much need a special prosecutor, Chuck. We need someone who is independent of the Justice Department to get to the bottom of this, and I just say one more thing: the silence of my Republican colleagues on this issue is sort of deafening. This is not an issue of party, this is an issue of country. Foreign interference in the elections is a very very serious serious thing and we should get to the bottom of it. Where is the Howard Baker of 2017? We desperately need one. CHUCK TODD:One of your Democratic colleagues, Senator Sheldon Whitehouse, said the following to me about why he is skeptical of a special counsel. Take a listen. His concern is that everything starts over and that we are suddenly hitting a reset button and it sets the investigation back.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :Well, there are two separate lines of activity here. One is the oversight function of the Intelligence Committee, they are doing their job. Mark Warner has done a very good job. I’ve had some differences with Senator Burr in the last week. People tell me that he was very upset with Comey’s firing and he has been very good. I hope it continues, but they can’t prosecute. A special prosecutor appointed by the Justice Department has the ability to actually prosecute people for violation of law and they go on in tandem. One shouldn’t step on another and I know that they are talking to each other right now. The FBI was with the intelligence committee to make sure no one is granted immunity. But it is two separate issues and you very much need a special prosecutor, Chuck. We need someone who is independent of the Justice Department to get to the bottom of this, and I just say one more thing: the silence of my Republican colleagues on this issue is sort of deafening. This is not an issue of party, this is an issue of country. Foreign interference in the elections is a very very serious serious thing and we should get to the bottom of it. Where is the Howard Baker of 2017? We desperately need one. CHUCK TODD:One of your Democratic colleagues, Senator Sheldon Whitehouse, said the following to me about why he is skeptical of a special counsel. Take a listen. His concern is that everything starts over and that we are suddenly hitting a reset button and it sets the investigation back.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 30 | rowid=120706 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Nancy Pelosi
+  INSERT attributed to: Richard Durbin
+  date=2018-02-05 show=carter-page-on-the-revelations-from-the-nunes-memo package=https://www.foxnews.com/transcript/carter-page-on-the-revelations-from-the-nunes-memo
+  tag                 : 'SEN. DICK DURBIN, D-ILL.'
+  seg nwords          : 18
+  ALL tags in this row: [["SEN. DICK DURBIN, D-ILL.", "E_colonless_honorific", false, "Richard Durbin", "reattributed"]]
+  --- 193 chars of ORIGINAL text BEFORE the tag ---
+  ...If the president uses this fake, horrible release of distorted intelligence as an excuse to fire Deputy Acting Attorney General Rosenstein or Mueller, it could lead to a constitutional crisis. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. DICK DURBIN, D-ILL., "STATE OF THE UNION"/CNN: I will just tell you, this could participate in in a constitutional crisis.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , "STATE OF THE UNION"/CNN: I will just tell you, this could participate in in a constitutional crisis.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 31 | rowid=167914 | seg_index=1/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Jeanne Shaheen
+  INSERT attributed to: Christopher Coons
+  date=2018-04-12 show=ex-doj-attorney-rosenstein-should-have-already-been-fired package=https://www.foxnews.com/transcript/ex-doj-attorney-rosenstein-should-have-already-been-fired
+  tag                 : 'SEN. CHRIS COONS'
+  seg nwords          : 20
+  ALL tags in this row: [["SEN. CHRIS COONS", "E_colonless_honorific", false, "Christopher Coons", "reattributed"], ["SEN. CHRIS MURPHY", "E_colonless_honorific", false, "Christopher Murphy", "reattributed"]]
+  --- 70 chars of ORIGINAL text BEFORE the tag ---
+  ...Do you think Special Counsel Mueller's investigation is a witch hunt? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. CHRIS COONS, D—DELAWARE: Do you believe Special Counsel Mueller's investigation is an attack on our country and all we stand for? 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , D—DELAWARE: Do you believe Special Counsel Mueller's investigation is an attack on our country and all we stand for?
+  --- 171 chars AFTER the segment ---
+  SEN. CHRIS MURPHY, D—CONNECTICUT: It will be really troubling if you couldn't say here today that you don't believe that the Mueller investigation is an attack on America....
+
+==============================================================================================================
+INSERT 32 | rowid=167914 | seg_index=2/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Jeanne Shaheen
+  INSERT attributed to: Christopher Murphy
+  date=2018-04-12 show=ex-doj-attorney-rosenstein-should-have-already-been-fired package=https://www.foxnews.com/transcript/ex-doj-attorney-rosenstein-should-have-already-been-fired
+  tag                 : 'SEN. CHRIS MURPHY'
+  seg nwords          : 26
+  ALL tags in this row: [["SEN. CHRIS COONS", "E_colonless_honorific", false, "Christopher Coons", "reattributed"], ["SEN. CHRIS MURPHY", "E_colonless_honorific", false, "Christopher Murphy", "reattributed"]]
+  --- 205 chars of ORIGINAL text BEFORE the tag ---
+  ...Do you think Special Counsel Mueller's investigation is a witch hunt? SEN. CHRIS COONS, D—DELAWARE: Do you believe Special Counsel Mueller's investigation is an attack on our country and all we stand for? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. CHRIS MURPHY, D—CONNECTICUT: It will be really troubling if you couldn't say here today that you don't believe that the Mueller investigation is an attack on America.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , D—CONNECTICUT: It will be really troubling if you couldn't say here today that you don't believe that the Mueller investigation is an attack on America.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 33 | rowid=187143 | seg_index=1/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Charles Schumer
+  INSERT attributed to: Christopher Murphy
+  date=2018-03-14 show=hannity-mccabe-is-as-corrupt-and-crooked-as-they-come package=https://www.foxnews.com/transcript/hannity-mccabe-is-as-corrupt-and-crooked-as-they-come
+  tag                 : 'SEN. CHRIS MURPHY'
+  seg nwords          : 19
+  ALL tags in this row: [["SEN. CHRIS MURPHY", "E_colonless_honorific", false, "Christopher Murphy", "reattributed"], ["SEN. RICHARD BLUMENTHAL", "E_colonless_honorific", false, "Richard Blumenthal", "reattributed"]]
+  --- 132 chars of ORIGINAL text BEFORE the tag ---
+  ...The NRA has been made public enemy number one and I'm proud of it. We are going to win! We're going win to win! We're going to win! 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. CHRIS MURPHY, D—CONN.: I want to know, are you prepared to do whatever it takes to beat the gun lobby? 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , D—CONN.: I want to know, are you prepared to do whatever it takes to beat the gun lobby?
+  --- 120 chars AFTER the segment ---
+  SEN. RICHARD BLUMENTHAL, D—CONN.: Are we going to ban assault weapons? Are we going to have universal background checks?...
+
+==============================================================================================================
+INSERT 34 | rowid=187143 | seg_index=2/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Charles Schumer
+  INSERT attributed to: Richard Blumenthal
+  date=2018-03-14 show=hannity-mccabe-is-as-corrupt-and-crooked-as-they-come package=https://www.foxnews.com/transcript/hannity-mccabe-is-as-corrupt-and-crooked-as-they-come
+  tag                 : 'SEN. RICHARD BLUMENTHAL'
+  seg nwords          : 17
+  ALL tags in this row: [["SEN. CHRIS MURPHY", "E_colonless_honorific", false, "Christopher Murphy", "reattributed"], ["SEN. RICHARD BLUMENTHAL", "E_colonless_honorific", false, "Richard Blumenthal", "reattributed"]]
+  --- 240 chars of ORIGINAL text BEFORE the tag ---
+  ...The NRA has been made public enemy number one and I'm proud of it. We are going to win! We're going win to win! We're going to win! SEN. CHRIS MURPHY, D—CONN.: I want to know, are you prepared to do whatever it takes to beat the gun lobby? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. RICHARD BLUMENTHAL, D—CONN.: Are we going to ban assault weapons? Are we going to have universal background checks?
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , D—CONN.: Are we going to ban assault weapons? Are we going to have universal background checks?
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 35 | rowid=192027 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Lucy McBath
+  INSERT attributed to: Steve Scalise
+  date=2019-03-02 show=ndaysat package=https://transcripts.cnn.com/show/ndaysat/date/2019-03-02/segment/01
+  tag                 : 'REP. STEVE SCALISE'
+  seg nwords          : 8
+  ALL tags in this row: [["REP. STEVE SCALISE", "E_colonless_honorific", false, "Steve Scalise", "reattributed"]]
+  --- 99 chars of ORIGINAL text BEFORE the tag ---
+  ...I urge my colleagues to vote yes on HR8; the bipartisan Background Checks Act of 2019. It is time. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 36 | rowid=197182 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Elizabeth Warren
+  INSERT attributed to: Bernard Sanders
+  date=2019-06-10 show=ath package=https://transcripts.cnn.com/show/ath/date/2019-06-10/segment/01
+  tag                 : 'SEN. BERNIE SANDERS (I-VT)'
+  seg nwords          : 54
+  ALL tags in this row: [["SEN. BERNIE SANDERS (I-VT)", "E_colonless_honorific", false, "Bernard Sanders", "reattributed"]]
+  --- 74 chars of ORIGINAL text BEFORE the tag ---
+  ...There are people who are ready for big structural change in this country. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. BERNIE SANDERS (I-VT); I understand that there are some well- intentioned Democrats and candidates who believe that the best way forward is a middle-ground strategy that antagonizes no one, that stands up to nobody, and that changes nothing. In my view, that approach is not just bad public policy, but it is a failed political strategy.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  ; I understand that there are some well- intentioned Democrats and candidates who believe that the best way forward is a middle-ground strategy that antagonizes no one, that stands up to nobody, and that changes nothing. In my view, that approach is not just bad public policy, but it is a failed political strategy.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 37 | rowid=198345 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Charles Schumer
+  INSERT attributed to: Tim Kaine
+  date=2017-05-10 show=levin-schumer-is-undermining-the-constitution-dr-gorka-comeys-last-testimony-was-the-last-straw package=https://www.foxnews.com/transcript/levin-schumer-is-undermining-the-constitution-dr-gorka-comeys-last-testimony-was-the-last-straw
+  tag                 : 'SEN. TIM KAINE, D-VA.'
+  seg nwords          : 31
+  ALL tags in this row: [["SEN. TIM KAINE, D-VA.", "E_colonless_honorific", false, "Tim Kaine", "reattributed"]]
+  --- 270 chars of ORIGINAL text BEFORE the tag ---
+  ...We know Director Comey was leading an investigation on whether the Trump campaign colluded with the Russians, a serious offense. Were those investigations getting too close to home for the president? The dismissal of Director Comey establishes a very troubling pattern. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. TIM KAINE, D-VA., "GMA"/ABC: We have a deeply insecure president who understands that the noose is tightening because of this Russia investigation. And that's why I believe he has let Jim Comey go.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , "GMA"/ABC: We have a deeply insecure president who understands that the noose is tightening because of this Russia investigation. And that's why I believe he has let Jim Comey go.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 38 | rowid=206687 | seg_index=1/1 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Mike Johnson
+  INSERT attributed to: Pramila Jayapal
+  date=2019-12-12 show=es package=https://transcripts.cnn.com/show/es/date/2019-12-12/segment/04
+  tag                 : "REP. PRAMILA JAYAPAL (D-WASHINGTON'S 7TH DISTRICT)"
+  seg nwords          : 11
+  ALL tags in this row: [["REP. PRAMILA JAYAPAL (D-WASHINGTON'S 7TH DISTRICT)", "A_anchored_caps", false, "Pramila Jayapal", "reattributed"]]
+  --- 94 chars of ORIGINAL text BEFORE the tag ---
+  ...Go ahead, vote to impeach President Trump. Join us when President Trump is inaugurated again. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. PRAMILA JAYAPAL (D-WASHINGTON'S 7TH DISTRICT): The president is the smoking gun. The smoking gun is reloaded.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  The president is the smoking gun. The smoking gun is reloaded.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 39 | rowid=208795 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Bernard Sanders
+  INSERT attributed to: Elizabeth Warren
+  date=2020-01-19 show=ip package=https://transcripts.cnn.com/show/ip/date/2020-01-19/segment/01
+  tag                 : 'SEN. ELIZABETH WARREN (D-MA)'
+  seg nwords          : 59
+  ALL tags in this row: [["SEN. ELIZABETH WARREN (D-MA)", "E_colonless_honorific", false, "Elizabeth Warren", "reattributed"]]
+  --- 176 chars of ORIGINAL text BEFORE the tag ---
+  ...Well, as a matter of fact, I didn't say it. Anybody who knows me, knows that it's incomprehensible that I would think that a woman could not be President of the United States. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. ELIZABETH WARREN (D-MA), PRESIDENTIAL CANDIDATE Bernie is my friend, and I am not here to try to fight with Bernie. Can a woman beat Donald Trump? Look at the man on this stage. Collectively, they have last 10 elections. The only people on this stage who have won every single election that they've been in, are the women. Amy and me.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , PRESIDENTIAL CANDIDATE Bernie is my friend, and I am not here to try to fight with Bernie. Can a woman beat Donald Trump? Look at the man on this stage. Collectively, they have last 10 elections. The only people on this stage who have won every single election that they've been in, are the women. Amy and me.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 40 | rowid=215057 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Lindsey Graham
+  INSERT attributed to: Josh Hawley
+  date=2020-12-09 show=cnr package=https://transcripts.cnn.com/show/cnr/date/2020-12-09/segment/06
+  tag                 : 'SEN. JOSH HAWLEY (R-MO)'
+  seg nwords          : 28
+  ALL tags in this row: [["SEN. JOSH HAWLEY (R-MO)", "E_colonless_honorific", false, "Josh Hawley", "reattributed"]]
+  --- 148 chars of ORIGINAL text BEFORE the tag ---
+  ...I'm okay with the way things are going. The president's challenging the election results and within the rule of law, and that's allowed in America. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. JOSH HAWLEY (R-MO) (voice over): The president has every right to present his case and every court that he wants to go to and has every right to be heard. [11:50:05]
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (voice over): The president has every right to present his case and every court that he wants to go to and has every right to be heard. [11:50:05]
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 41 | rowid=215756 | seg_index=2/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Mitch McConnell
+  INSERT attributed to: John Thune
+  date=2021-01-08 show=cnr package=https://transcripts.cnn.com/show/cnr/date/2021-01-08/segment/18
+  tag                 : 'SEN. JOHN THUNE (R-S.D.)'
+  seg nwords          : 66
+  ALL tags in this row: [["RAJU (Voice Over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["SEN. JOHN THUNE (R-S.D.)", "E_colonless_honorific", false, "John Thune", "reattributed"]]
+  --- 233 chars of ORIGINAL text BEFORE the tag ---
+  ...We will not bow to lawlessness or intimidation. RAJU (Voice Over): And in the halls of the Capitol, Republicans and Democrats placing the blame squarely on Trump's refusal to acknowledge reality and his lies about his election loss. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. JOHN THUNE (R-S.D.) (Voice Over, Captioned): "Had we not had senators who decided to object, we probably wouldn't have had that many people in town, if the president hadn't encouraged them all to come to town. And there was a lot of anger and a lot of emotion based upon, in most cases, just a lot of false information. You know, they were convinced of things that weren't so."
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (Voice Over, Captioned): "Had we not had senators who decided to object, we probably wouldn't have had that many people in town, if the president hadn't encouraged them all to come to town. And there was a lot of anger and a lot of emotion based upon, in most cases, just a lot of false information. You know, they were convinced of things that weren't so."
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 42 | rowid=218597 | seg_index=2/2 | class=A_anchored_caps | disp=own_later_turn
+  stored member (row) : Alex Padilla
+  INSERT attributed to: Alex Padilla
+  date=2021-03-23 show=cnnt package=https://transcripts.cnn.com/show/cnnt/date/2021-03-23/segment/02
+  tag                 : 'PADILLA (on camera)'
+  seg nwords          : 90
+  ALL tags in this row: [["LEMON (on camera)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["PADILLA (on camera)", "A_anchored_caps", true, "Alex Padilla", "own_later_turn"]]
+  --- 489 chars of ORIGINAL text BEFORE the tag ---
+  ...In five states, voters must be registered and have specific forms of I.D. in order to cast a ballot. But those same states allow people to buy rifles without permits and require no background checks for some sales. Additionally, in a majority of states, new voters are able to obtain a rifle quicker than they are able to cast their first ballot. It seems to me that we have our priorities entirely backward. [23:10:27] LEMON (on camera): Why is it easier to buy a gun than it is to vote? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  PADILLA (on camera): Well, Don, it shouldn't be, and that's my point. As I mentioned in committee earlier today, it seems like we have our priorities backwards, and -- see the impact of you know, the voter suppression efforts election after election and we see the consequences of lack of gun safety laws in mass shooting after mass shooting. A couple this week alone. You know, our heart's broken. Thoughts and prayers are called for, but so is action, and that's what the tone was of judiciary committee today, starting with Chairman Durbin.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Well, Don, it shouldn't be, and that's my point. As I mentioned in committee earlier today, it seems like we have our priorities backwards, and -- see the impact of you know, the voter suppression efforts election after election and we see the consequences of lack of gun safety laws in mass shooting after mass shooting. A couple this week alone. You know, our heart's broken. Thoughts and prayers are called for, but so is action, and that's what the tone was of judiciary committee today, starting with Chairman Durbin.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 43 | rowid=219462 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Andrew Clyde
+  INSERT attributed to: Ralph Norman
+  date=2021-05-13 show=nday package=https://transcripts.cnn.com/show/nday/date/2021-05-13/segment/01
+  tag                 : 'REP. RALPH NORMAN (R-SC)'
+  seg nwords          : 22
+  ALL tags in this row: [["REP. RALPH NORMAN (R-SC)", "E_colonless_honorific", false, "Ralph Norman", "reattributed"]]
+  --- 426 chars of ORIGINAL text BEFORE the tag ---
+  ...There was no insurrection, and to call it an insurrection, in my opinion, is a bold-faced lie. Watching the TV footage of those who entered the Capitol and walked through Statuary Hall, showed people in an orderly fashion staying between the stanchions and ropes, taking videos and pictures. You know, if you didn't know the TV footage was a video from January the 6th, you would actually think it was a normal tourist visit. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. RALPH NORMAN (R-SC); At 2:07, a mob of Trump supporters breached the steps. I don't know who did a poll that it's Trump supporters.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  ; At 2:07, a mob of Trump supporters breached the steps. I don't know who did a poll that it's Trump supporters.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 44 | rowid=223251 | seg_index=2/3 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Pete Aguilar
+  INSERT attributed to: Bennie Thompson
+  date=2021-11-18 show=cnr package=https://transcripts.cnn.com/show/cnr/date/2021-11-18/segment/20
+  tag                 : 'REP. BENNIE THOMPSON (D-MS)'
+  seg nwords          : 31
+  ALL tags in this row: [["NOBLES (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["REP. BENNIE THOMPSON (D-MS)", "E_colonless_honorific", false, "Bennie Thompson", "reattributed"], ["NOBLES (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"]]
+  --- 557 chars of ORIGINAL text BEFORE the tag ---
+  ...You've had over 200 interviews with witnesses. We've looked at over 25,000 documents. We continue to make significant progress. NOBLES (voice-over): They contend they are making progress, despite resistance from those loyal to former President Donald Trump. The committee is holding off on referring former Chief of Staff Mark Meadows for criminal contempt of Congress. Instead, writing him a letter with a list of what they want to know from him, including answers to questions about a personal cell phone and messages they say Meadows may have destroyed. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. BENNIE THOMPSON (D-MS) (voice-over): We have information that that phone may or may not be in his possession. The number is not active anymore that he used, so we just want to know. [03:55:02] 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (voice-over): We have information that that phone may or may not be in his possession. The number is not active anymore that he used, so we just want to know. [03:55:02]
+  --- 106 chars AFTER the segment ---
+  NOBLES (voice-over): While Meadows remains defiant, the committee continues to insist that he must appear....
+
+==============================================================================================================
+INSERT 45 | rowid=226287 | seg_index=2/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Jim Jordan
+  INSERT attributed to: Bennie Thompson
+  date=2022-06-11 show=cnr package=https://transcripts.cnn.com/show/cnr/date/2022-06-11/segment/22
+  tag                 : 'REP. BENNIE THOMPSON (D)'
+  seg nwords          : 9
+  ALL tags in this row: [["NOBLES (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["REP. BENNIE THOMPSON (D)", "E_colonless_honorific", false, "Bennie Thompson", "reattributed"]]
+  --- 217 chars of ORIGINAL text BEFORE the tag ---
+  ...This was a partisan production put on by the former head of ABC News. I don't think we learned anything new. NOBLES (voice-over): And committee chair Bennie Thompson telling CNN the committee has a lot more to share. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. BENNIE THOMPSON (D), CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 46 | rowid=227229 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Christopher Murphy
+  INSERT attributed to: Lindsey Graham
+  date=2017-02-03 show=president-trump-slaps-down-on-iran package=https://www.foxnews.com/transcript/president-trump-slaps-down-on-iran
+  tag                 : 'SEN. LINDSEY GRAHAM, R-S.C.'
+  seg nwords          : 13
+  ALL tags in this row: [["SEN. LINDSEY GRAHAM, R-S.C.", "E_colonless_honorific", false, "Lindsey Graham", "reattributed"]]
+  --- 81 chars of ORIGINAL text BEFORE the tag ---
+  ...This is truly reckless because this is a country that could start World War III. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. LINDSEY GRAHAM, R-S.C. I don't want a war with Iran, but they deserved to be sanctioned.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I don't want a war with Iran, but they deserved to be sanctioned.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 47 | rowid=230193 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : John Thune
+  INSERT attributed to: Thom Tillis
+  date=2022-09-22 show=se package=https://transcripts.cnn.com/show/se/date/2022-09-22/segment/01
+  tag                 : 'SEN. THOM TILLIS (R-NC)'
+  seg nwords          : 21
+  ALL tags in this row: [["SEN. THOM TILLIS (R-NC)", "E_colonless_honorific", false, "Thom Tillis", "reattributed"]]
+  --- 156 chars of ORIGINAL text BEFORE the tag ---
+  ...I think there's a process, for declassifying documents, and - and I think it ought to be adhered to and followed. And I think that should apply to anybody. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. THOM TILLIS (R-NC) I believe there's a formal process it needs to go through it - that needs to be gone through, and documented.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I believe there's a formal process it needs to go through it - that needs to be gone through, and documented.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 48 | rowid=241054 | seg_index=1/1 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Jim Jordan
+  INSERT attributed to: Tom Cotton
+  date=2017-03-14 show=speaker-ryan-this-is-the-replacement-bill-we-all-ran-on-gen-keane-on-high-stakes-of-tillersons-asia-trip package=https://www.foxnews.com/transcript/speaker-ryan-this-is-the-replacement-bill-we-all-ran-on-gen-keane-on-high-stakes-of-tillersons-asia-trip
+  tag                 : 'SEN. TOM COTTON, R-ARKANSAS (through telephone)'
+  seg nwords          : 35
+  ALL tags in this row: [["SEN. TOM COTTON, R-ARKANSAS (through telephone)", "A_anchored_caps", false, "Tom Cotton", "reattributed"]]
+  --- 404 chars of ORIGINAL text BEFORE the tag ---
+  ...We didn't tell the voters we were going to repeal ObamaCare but keep a bunch of the taxes for an extra year and bring back the Cadillac tax. We didn't tell them we were going to repeal ObamaCare but take the Medicaid expansion and extend it for several years. And we didn't tell them we were going to provide insurance subsidies in the bill and have a 30 percent penalty even though the mandate is gone. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. TOM COTTON, R-ARKANSAS (through telephone): There is no three-phase process. There is no three-step plan. That is just political talk. It's just politicians engaging in spin. There is not going to be phase three legislation. It's phase one and done.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  There is no three-phase process. There is no three-step plan. That is just political talk. It's just politicians engaging in spin. There is not going to be phase three legislation. It's phase one and done.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 49 | rowid=242833 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Mitch McConnell
+  INSERT attributed to: Richard Durbin
+  date=2012-04-19 show=tax-bill-caught-in-house-rules-fight package=https://www.foxnews.com/transcript/tax-bill-caught-in-house-rules-fight
+  tag                 : 'SEN. DICK DURBIN'
+  seg nwords          : 262
+  ALL tags in this row: [["SEN. DICK DURBIN", "E_colonless_honorific", false, "Richard Durbin", "reattributed"]]
+  --- 207 chars of ORIGINAL text BEFORE the tag ---
+  ...They want to ram this gigantic $1 trillion bill through Congress and they're using once again the Christmas break as an inducement to vote for it. Now look we all know that this is not the way to legislate. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. DICK DURBIN, SENATE MAJORITY WHIP D-Ill.: Many of the same senators who are criticizing congressionally directed spending, or earmarks, have earmarks in the bill. That is the height of hypocrisy, to stand up and request earmark, have it included in the bill, and then fold your arms and piously announce I'm against earmarks. BRET BAIER, HOST OF “SPECIAL REPORT”: The omnibus spending bill, $1.1 trillion, is going to be considered, in fact, in 20 minutes. The Senate, a Senate clerk will start reading the 1,924-page bill. As we take a live look on the floor, right now that is Senator Kerry talking about the ratification and START treaty with U.S. and Russia, but eventually they will get to the omnibus bill. In there, as we mentioned, more than 6,500 earmarks. Here's a list of the top earmarkers in this bill. The top two are Republicans. Senator Cochran from Mississippi and Wicker. There you see the amounts, the number, the amount of money, and the number of earmarks solo or with other members. Senator Inouye from Hawaii is next. Senator Feinstein from California. Next is Senator Murray from Washington. Those are the top five. Then Senator Reid is number seven. He’s the Senate majority leader, he has 166 earmarks, $237 million, and Senator McConnell, minority leader is 48 at $112 million. So what about all of this? We'll start there. Let's bring in our panel, Chris Stirewalt, FOX News politics editor digital, Juan Williams, Fox News contributor and syndicated columnist Charles Krauthammer. Let's start with the omnibus bill. Chris, where are we? What's happening?
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , SENATE MAJORITY WHIP D-Ill.: Many of the same senators who are criticizing congressionally directed spending, or earmarks, have earmarks in the bill. That is the height of hypocrisy, to stand up and request earmark, have it included in the bill, and then fold your arms and piously announce I'm against earmarks. BRET BAIER, HOST OF “SPECIAL REPORT”: The omnibus spending bill, $1.1 trillion, is going to be considered, in fact, in 20 minutes. The Senate, a Senate clerk will start reading the 1,924-page bill. As we take a live look on the floor, right now that is Senator Kerry talking about the ratification and START treaty with U.S. and Russia, but eventually they will get to the omnibus bill. In there, as we mentioned, more than 6,500 earmarks. Here's a list of the top earmarkers in this bill. The top two are Republicans. Senator Cochran from Mississippi and Wicker. There you see the amounts, the number, the amount of money, and the number of earmarks solo or with other members. Senator Inouye from Hawaii is next. Senator Feinstein from California. Next is Senator Murray from Washington. Those are the top five. Then Senator Reid is number seven. He’s the Senate majority leader, he has 166 earmarks, $237 million, and Senator McConnell, minority leader is 48 at $112 million. So what about all of this? We'll start there. Let's bring in our panel, Chris Stirewalt, FOX News politics editor digital, Juan Williams, Fox News contributor and syndicated columnist Charles Krauthammer. Let's start with the omnibus bill. Chris, where are we? What's happening?
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 50 | rowid=243863 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Tim Burchett
+  INSERT attributed to: Don Bacon
+  date=2023-06-21 show=cnc package=https://transcripts.cnn.com/show/cnc/date/2023-06-21/segment/08
+  tag                 : 'REP. DON BACON (R-NE)'
+  seg nwords          : 30
+  ALL tags in this row: [["REP. DON BACON (R-NE)", "E_colonless_honorific", false, "Don Bacon", "reattributed"]]
+  --- 170 chars of ORIGINAL text BEFORE the tag ---
+  ...Yes, I thought it was pretty weak. But I can guarantee you, if some guy, some working man or woman gets popped with a gun charge, they're probably going to do some time. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. DON BACON (R-NE) I believe, in the end, you had a Trump-appointed attorney. I don't know who this judge is in this case. But I trust our justice system to get it right.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I believe, in the end, you had a Trump-appointed attorney. I don't know who this judge is in this case. But I trust our justice system to get it right.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 51 | rowid=245558 | seg_index=1/8 | class=C_unanchored_paren | disp=own_later_turn
+  stored member (row) : Mike Johnson
+  INSERT attributed to: Mike Johnson
+  date=2023-08-17 show=qmb package=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+  tag                 : 'JOHNSON (voice-over)'
+  seg nwords          : 69
+  ALL tags in this row: [["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["KING (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["KING (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"]]
+  --- 238 chars of ORIGINAL text BEFORE the tag ---
+  ...You see there are these large flowers down there. There's some white ones, some pink ones; that's a native hibiscus. It's in the mallow family and the wetland ones they call them marsh mallows. Get it? Marsh mallows, yes. (MUSIC PLAYING) 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  JOHNSON (voice-over): My name is Mike Johnson. I'm the chief of conservation for Summit Metro Parks. We are at the Valley View Area of Cascade Valley Metro Park. Today, you would never know that this was ever a golf course. The vegetation that you see behind me, 90 percent of it is native; whereas when this was a golf course, 90 percent of it was non native and invasive. LISA KING, 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  My name is Mike Johnson. I'm the chief of conservation for Summit Metro Parks. We are at the Valley View Area of Cascade Valley Metro Park. Today, you would never know that this was ever a golf course. The vegetation that you see behind me, 90 percent of it is native; whereas when this was a golf course, 90 percent of it was non native and invasive. LISA KING,
+  --- 500 chars AFTER the segment ---
+  EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over): This park is right within the city of Akron limits. And when we started the acquisition, we realized that how important it was to connect the other two parks to this area. It allowed us to knit together 1,800 acres. That is something that is very difficult to do in a county where everything is beginning to be built out. JOHNSON (voice-over): The first choice we had to make is, do we allow it to restore on its own? Just kind of let it go? Or do...
+
+==============================================================================================================
+INSERT 52 | rowid=245558 | seg_index=3/8 | class=A_anchored_caps | disp=own_later_turn
+  stored member (row) : Mike Johnson
+  INSERT attributed to: Mike Johnson
+  date=2023-08-17 show=qmb package=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+  tag                 : 'JOHNSON (voice-over)'
+  seg nwords          : 119
+  ALL tags in this row: [["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["KING (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["KING (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ... of conservation for Summit Metro Parks. We are at the Valley View Area of Cascade Valley Metro Park. Today, you would never know that this was ever a golf course. The vegetation that you see behind me, 90 percent of it is native; whereas when this was a golf course, 90 percent of it was non native and invasive. LISA KING, EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over): This park is right within the city of Akron limits. And when we started the acquisition, we realized that how important it was to connect the other two parks to this area. It allowed us to knit together 1,800 acres. That is something that is very difficult to do in a county where everything is beginning to be built out. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  JOHNSON (voice-over): The first choice we had to make is, do we allow it to restore on its own? Just kind of let it go? Or do we take a more active role in that process? And because this was a golf course, we decided it was necessary to take a more active role. We had to undo the golf course before we could restore the landscape. The next step was to establish a native cover of vegetation. And rather than plant trees, we decided to plant nuts. And over the course of the fall, our volunteers brought us a quarter million nuts. And over the course of two days, 600 volunteers showed up to plant 120,000 of them. (MUSIC PLAYING) 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  The first choice we had to make is, do we allow it to restore on its own? Just kind of let it go? Or do we take a more active role in that process? And because this was a golf course, we decided it was necessary to take a more active role. We had to undo the golf course before we could restore the landscape. The next step was to establish a native cover of vegetation. And rather than plant trees, we decided to plant nuts. And over the course of the fall, our volunteers brought us a quarter million nuts. And over the course of two days, 600 volunteers showed up to plant 120,000 of them. (MUSIC PLAYING)
+  --- 500 chars AFTER the segment ---
+  JOHNSON (voice-over): This is the Cuyahoga River and we are looking out over a vast restored flood plain. When we acquired the property, the banks of the river were steep. They had been channelized. The golf course, they wanted to keep the water out. We wanted to bring the water back into the landscape. (MUSIC PLAYING) JOHNSON (voice-over): The Cuyahoga River is significant. This is the river that burned. It actually burned several times throughout history because it was so polluted from industr...
+
+==============================================================================================================
+INSERT 53 | rowid=245558 | seg_index=4/8 | class=C_unanchored_paren | disp=own_later_turn
+  stored member (row) : Mike Johnson
+  INSERT attributed to: Mike Johnson
+  date=2023-08-17 show=qmb package=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+  tag                 : 'JOHNSON (voice-over)'
+  seg nwords          : 54
+  ALL tags in this row: [["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["KING (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["KING (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...ult to do in a county where everything is beginning to be built out. JOHNSON (voice-over): The first choice we had to make is, do we allow it to restore on its own? Just kind of let it go? Or do we take a more active role in that process? And because this was a golf course, we decided it was necessary to take a more active role. We had to undo the golf course before we could restore the landscape. The next step was to establish a native cover of vegetation. And rather than plant trees, we decided to plant nuts. And over the course of the fall, our volunteers brought us a quarter million nuts. And over the course of two days, 600 volunteers showed up to plant 120,000 of them. (MUSIC PLAYING) 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  JOHNSON (voice-over): This is the Cuyahoga River and we are looking out over a vast restored flood plain. When we acquired the property, the banks of the river were steep. They had been channelized. The golf course, they wanted to keep the water out. We wanted to bring the water back into the landscape. (MUSIC PLAYING) 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  This is the Cuyahoga River and we are looking out over a vast restored flood plain. When we acquired the property, the banks of the river were steep. They had been channelized. The golf course, they wanted to keep the water out. We wanted to bring the water back into the landscape. (MUSIC PLAYING)
+  --- 500 chars AFTER the segment ---
+  JOHNSON (voice-over): The Cuyahoga River is significant. This is the river that burned. It actually burned several times throughout history because it was so polluted from industrial dumping. There was a time in recent memory where this stretch of river that we have here in Valley View supported almost no fish or aquatic life. It was about as dead as a river could be. So this is a type of fish called a darter and darters are sort of the pinnacle of water quality indicators in fisheries biology. ...
+
+==============================================================================================================
+INSERT 54 | rowid=245558 | seg_index=5/8 | class=C_unanchored_paren | disp=own_later_turn
+  stored member (row) : Mike Johnson
+  INSERT attributed to: Mike Johnson
+  date=2023-08-17 show=qmb package=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+  tag                 : 'JOHNSON (voice-over)'
+  seg nwords          : 136
+  ALL tags in this row: [["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["KING (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["KING (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...ive role. We had to undo the golf course before we could restore the landscape. The next step was to establish a native cover of vegetation. And rather than plant trees, we decided to plant nuts. And over the course of the fall, our volunteers brought us a quarter million nuts. And over the course of two days, 600 volunteers showed up to plant 120,000 of them. (MUSIC PLAYING) JOHNSON (voice-over): This is the Cuyahoga River and we are looking out over a vast restored flood plain. When we acquired the property, the banks of the river were steep. They had been channelized. The golf course, they wanted to keep the water out. We wanted to bring the water back into the landscape. (MUSIC PLAYING) 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  JOHNSON (voice-over): The Cuyahoga River is significant. This is the river that burned. It actually burned several times throughout history because it was so polluted from industrial dumping. There was a time in recent memory where this stretch of river that we have here in Valley View supported almost no fish or aquatic life. It was about as dead as a river could be. So this is a type of fish called a darter and darters are sort of the pinnacle of water quality indicators in fisheries biology. Again, another species that its presence here is indicative of clean water. And what's good for fish is ultimately good for people, too. One of the biggest challenges of any park district is preserving our natural resources and, also at the same time, letting people come in and enjoy that. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  The Cuyahoga River is significant. This is the river that burned. It actually burned several times throughout history because it was so polluted from industrial dumping. There was a time in recent memory where this stretch of river that we have here in Valley View supported almost no fish or aquatic life. It was about as dead as a river could be. So this is a type of fish called a darter and darters are sort of the pinnacle of water quality indicators in fisheries biology. Again, another species that its presence here is indicative of clean water. And what's good for fish is ultimately good for people, too. One of the biggest challenges of any park district is preserving our natural resources and, also at the same time, letting people come in and enjoy that.
+  --- 500 chars AFTER the segment ---
+  KING (voice-over): What we knew we needed to do was one more phase. [15:50:00] KING (voice-over): Where we could bring access to the river for the public. So phase two is under construction now. JOHNSON (voice-over): These parks and the wetlands and the streams filter pollutants from the water that we eventually drink. They clean the air, they provide habitat for wildlife, including a large array of endangered species we have here in Summit County. They're also important for people. These are pl...
+
+==============================================================================================================
+INSERT 55 | rowid=245558 | seg_index=8/8 | class=A_anchored_caps | disp=own_later_turn
+  stored member (row) : Mike Johnson
+  INSERT attributed to: Mike Johnson
+  date=2023-08-17 show=qmb package=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+  tag                 : 'JOHNSON (voice-over)'
+  seg nwords          : 83
+  ALL tags in this row: [["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["JOHNSON (voice-over)", "C_unanchored_paren", true, "Mike Johnson", "own_later_turn"], ["KING (voice-over)", "A_anchored_caps", false, null, "ledger_only_unresolved"], ["KING (voice-over)", "C_unanchored_paren", false, null, "ledger_only_unresolved"], ["JOHNSON (voice-over)", "A_anchored_caps", true, "Mike Johnson", "own_later_turn"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ... supported almost no fish or aquatic life. It was about as dead as a river could be. So this is a type of fish called a darter and darters are sort of the pinnacle of water quality indicators in fisheries biology. Again, another species that its presence here is indicative of clean water. And what's good for fish is ultimately good for people, too. One of the biggest challenges of any park district is preserving our natural resources and, also at the same time, letting people come in and enjoy that. KING (voice-over): What we knew we needed to do was one more phase. [15:50:00] KING (voice-over): Where we could bring access to the river for the public. So phase two is under construction now. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  JOHNSON (voice-over): These parks and the wetlands and the streams filter pollutants from the water that we eventually drink. They clean the air, they provide habitat for wildlife, including a large array of endangered species we have here in Summit County. They're also important for people. These are places for people to come and relax, to destress. They are important for recreation and connecting with nature, for especially young people to connect with nature and inspire them to become the next generation of land stewards.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  These parks and the wetlands and the streams filter pollutants from the water that we eventually drink. They clean the air, they provide habitat for wildlife, including a large array of endangered species we have here in Summit County. They're also important for people. These are places for people to come and relax, to destress. They are important for recreation and connecting with nature, for especially young people to connect with nature and inspire them to become the next generation of land stewards.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 56 | rowid=249127 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Ritchie Torres
+  INSERT attributed to: Pramila Jayapal
+  date=2023-11-08 show=cnr package=https://transcripts.cnn.com/show/cnr/date/2023-11-08/segment/19
+  tag                 : 'REP. PRAMILA JAYAPAL (D-WA)'
+  seg nwords          : 25
+  ALL tags in this row: [["REP. PRAMILA JAYAPAL (D-WA)", "E_colonless_honorific", false, "Pramila Jayapal", "reattributed"]]
+  --- 327 chars of ORIGINAL text BEFORE the tag ---
+  ...When you're uttering phrases like "From the river to the sea," you're not simply advocating for the creation of a Palestinian state, you're advocating for the destruction of Israel as a Jewish state. And that crosses a line that no member of Congress should ever cross. It's hate speech and Congress has a right to condemn it. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. PRAMILA JAYAPAL (D-WA) It is outrageous. I am embarrassed for those Democrats who voted to censure their own colleague, who voted against free speech. It is an embarrassment.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  It is outrageous. I am embarrassed for those Democrats who voted to censure their own colleague, who voted against free speech. It is an embarrassment.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 57 | rowid=253028 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Nancy Mace
+  INSERT attributed to: Pat Fallon
+  date=2024-02-22 show=cnap package=https://transcripts.cnn.com/show/cnap/date/2024-02-22/segment/01
+  tag                 : 'REP. PAT FALLON (R-TX)'
+  seg nwords          : 16
+  ALL tags in this row: [["REP. PAT FALLON (R-TX)", "E_colonless_honorific", false, "Pat Fallon", "reattributed"]]
+  --- 111 chars of ORIGINAL text BEFORE the tag ---
+  ...We already know the president took bribes from Burisma. I also want to add, betraying your country is treason. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. PAT FALLON (R-TX) (voice-over): This, ladies and gentlemen, is gold. This is direct evidence of naked corruption and bribery.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (voice-over): This, ladies and gentlemen, is gold. This is direct evidence of naked corruption and bribery.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 58 | rowid=254901 | seg_index=1/1 | class=D_mixed_case_label | disp=reattributed
+  stored member (row) : Lindsey Graham
+  INSERT attributed to: John Kennedy
+  date=2019-07-18 show=pbs-newshour package=https://www.pbs.org/newshour/show/former-sen-jeff-flake-on-why-republicans-arent-disavowing-trumps-awful-words
+  tag                 : 'Sen. John Kennedy, La.'
+  seg nwords          : 25
+  ALL tags in this row: [["Sen. John Kennedy, La.", "D_mixed_case_label", false, "John Kennedy", "reattributed"]]
+  --- 178 chars of ORIGINAL text BEFORE the tag ---
+  ...The point is, they're all American citizens, entitled to their voice. And when they do provocative things, they're going to be met with provocation. So this is a two-way street. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  Sen. John Kennedy, La.: I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 59 | rowid=260196 | seg_index=1/1 | class=D_mixed_case_label | disp=reattributed
+  stored member (row) : Charles Schumer
+  INSERT attributed to: Nancy Pelosi
+  date=2018-12-11 show=pbs-newshour package=https://www.pbs.org/newshour/show/how-trump-got-into-a-televised-tussle-over-a-border-wall
+  tag                 : 'Rep. Nancy Pelosi, De-Calif.'
+  seg nwords          : 21
+  ALL tags in this row: [["Rep. Nancy Pelosi, De-Calif.", "D_mixed_case_label", false, "Nancy Pelosi", "reattributed"]]
+  --- 38 chars of ORIGINAL text BEFORE the tag ---
+  ...All right, let me say something here. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  Rep. Nancy Pelosi, De-Calif.: Let me -- let me say one thing. The fact is that you do not have the votes in the House.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Let me -- let me say one thing. The fact is that you do not have the votes in the House.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 60 | rowid=260198 | seg_index=1/1 | class=D_mixed_case_label | disp=reattributed
+  stored member (row) : Mitch McConnell
+  INSERT attributed to: Nancy Pelosi
+  date=2018-12-11 show=pbs-newshour package=https://www.pbs.org/newshour/show/how-trump-got-into-a-televised-tussle-over-a-border-wall
+  tag                 : 'Rep. Nancy Pelosi, De-Calif.'
+  seg nwords          : 14
+  ALL tags in this row: [["Rep. Nancy Pelosi, De-Calif.", "D_mixed_case_label", false, "Nancy Pelosi", "reattributed"]]
+  --- 252 chars of ORIGINAL text BEFORE the tag ---
+  ...It would be truly bizarre for them to decide they prefer a partial government shutdown to reasonable funding for national security. I would seem as through their party is more committed to political spite for the president than to the public interest. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  Rep. Nancy Pelosi, De-Calif.: Good afternoon. We just had a meeting of which you saw the introduction to.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  Good afternoon. We just had a meeting of which you saw the introduction to.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 61 | rowid=265823 | seg_index=1/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Lindsey Graham
+  INSERT attributed to: Bill Cassidy
+  date=2018-09-26 show=msnow package=https://www.ms.now/transcript/2018-09-26-msna1148406
+  tag                 : 'SEN. BILL CASSIDY'
+  seg nwords          : 25
+  ALL tags in this row: [["SEN. BILL CASSIDY", "E_colonless_honorific", false, "Bill Cassidy", "reattributed"], ["SEN. ORRIN HATCH", "E_colonless_honorific", false, null, "ledger_only_unresolved"]]
+  --- 303 chars of ORIGINAL text BEFORE the tag ---
+  ...I am telling you that affidavit, if it doesn`t jump out at you as being strange that you would go to 10 parties over two years where you witnessed drugging and raping and you kept coming back and back and you never told anybody, you never warned any of your girlfriends, I find that to be over the top. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SEN. BILL CASSIDY, (R) LOUISIANA; And we`re being told that a woman went to 10 different parties where women were being gang raped and never reported it. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  , (R) LOUISIANA; And we`re being told that a woman went to 10 different parties where women were being gang raped and never reported it.
+  --- 144 chars AFTER the segment ---
+  SEN. ORRIN HATCH, (R) UTAH; I think it is a smear. I don`t think there`s any question in my mind about it. But I`m willing to keep an open mind....
+
+==============================================================================================================
+INSERT 62 | rowid=273301 | seg_index=1/1 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Lindsey Graham
+  INSERT attributed to: Elise Stefanik
+  date=2021-05-07 show=msnow package=https://www.ms.now/transcript/transcript-reidout-5-7-21-n1266750
+  tag                 : 'REP. ELISE STEFANIK (R-NY)'
+  seg nwords          : 44
+  ALL tags in this row: [["REP. ELISE STEFANIK (R-NY)", "E_colonless_honorific", false, "Elise Stefanik", "reattributed"]]
+  --- 272 chars of ORIGINAL text BEFORE the tag ---
+  ...I would just say to my Republican colleagues, can we move forward without President Trump? The answer is no. I`ve always liked Liz Cheney, but she`s made a determination that the Republican Party can`t grow with President Trump. I`ve determined we can`t grow without him. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. ELISE STEFANIK (R-NY) (voice over): We have to work with President Trump to win back the majority. We need fighters. President Trump is a fighter on behalf of the American people, and voters want fighters to stand up for them, and that`s what I`m committed to doing.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  (voice over): We have to work with President Trump to win back the majority. We need fighters. President Trump is a fighter on behalf of the American people, and voters want fighters to stand up for them, and that`s what I`m committed to doing.
+  --- 0 chars AFTER the segment ---
+  ...
+
+==============================================================================================================
+INSERT 63 | rowid=274112 | seg_index=1/2 | class=E_colonless_honorific | disp=reattributed
+  stored member (row) : Charles Schumer
+  INSERT attributed to: Jeff Merkley
+  date=2021-09-13 show=msnow package=https://www.ms.now/transcript/transcript-last-word-lawrence-o-donnell-9-13-21-n1279120
+  tag                 : 'SENATOR JEFF MERKLEY (D-OR)'
+  seg nwords          : 167
+  ALL tags in this row: [["SENATOR JEFF MERKLEY (D-OR)", "E_colonless_honorific", false, "Jeff Merkley", "reattributed"], ["O`DONNELL", "A_anchored_caps", false, null, "ledger_only_unresolved"]]
+  --- 700 chars of ORIGINAL text BEFORE the tag ---
+  ...ting bill. According to a source briefed on the White House`s position, Biden told Schumer, Chuck, you tell me when you need me to start making phone calls.” Today the White House did not deny that report. White House deputy press secretary Karine Jean-Pierre said, “as for the filibuster when or if the president has something to say about it, you will hear about it directly from him.” Joining us now is Democratic Senator Jeff Merkley of Oregon. He`s a member of the Senate Rules Committee and the Senate Budget Committee. Senator Merkley, thank you for joining us. I know you have been a leader in the — to try to get a voting rights bill through the Senate. What is the situation as of tonight? 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  SENATOR JEFF MERKLEY (D-OR):Well, right now, I`m so pleased that a group of seven senators have come together, that includes Joe Manchin. We have worked to address a whole variety of issues that had been raised by various secretary of states or election officials regarding automatic voter registration, voter ID, gerrymandering, public financing and we reached an agreement. And so we anticipate that a bill will be introduced tomorrow. That`s the plan as of tonight. Of course things are always shifting in the Senate. And the fact is it will have the support of every Democrat and Joe will be working to solicit the support of Republicans. After all the integrity of our elections is fundamental to our constitution, fundamental to our republic and this should be something that all hundred senators should sign on to. So hopefully we will have that Republican support. But if not, then we`ll be looking at how to get it done with 50 Democrats because we 50 Democrats are determined to defend the constitution. 
+  --- INSERT text (what would be stored), first 2500 chars ---
+  :Well, right now, I`m so pleased that a group of seven senators have come together, that includes Joe Manchin. We have worked to address a whole variety of issues that had been raised by various secretary of states or election officials regarding automatic voter registration, voter ID, gerrymandering, public financing and we reached an agreement. And so we anticipate that a bill will be introduced tomorrow. That`s the plan as of tonight. Of course things are always shifting in the Senate. And the fact is it will have the support of every Democrat and Joe will be working to solicit the support of Republicans. After all the integrity of our elections is fundamental to our constitution, fundamental to our republic and this should be something that all hundred senators should sign on to. So hopefully we will have that Republican support. But if not, then we`ll be looking at how to get it done with 50 Democrats because we 50 Democrats are determined to defend the constitution.
+  --- 376 chars AFTER the segment ---
+  O`DONNELL: Well, the only way you can get it done with the 50 Democrats is there will have to be a change in the Senate 60-vote threshold. That`s the reporting we were just quoting from “Rolling Stone” that President Biden is ready to go forward pushing a change in the 60-vote threshold in the Senate. Is that what we`re going to see if the Republicans do not join this bill?...
+
+==============================================================================================================
+INSERT 64 | rowid=274922 | seg_index=1/1 | class=A_anchored_caps | disp=reattributed
+  stored member (row) : Adam Schiff
+  INSERT attributed to: Pramila Jayapal
+  date=2022-01-06 show=msnow package=https://www.ms.now/transcript/transcript-all-chris-hayes-1-6-22-n1287470
+  tag                 : 'REP. PRAMILA JAYAPAL (D-WA4)'
+  seg nwords          : 14
+  ALL tags in this row: [["REP. PRAMILA JAYAPAL (D-WA4)", "A_anchored_caps", false, "Pramila Jayapal", "reattributed"]]
+  --- 233 chars of ORIGINAL text BEFORE the tag ---
+  ...When the order came to evacuate, I stayed behind for a while until two Republicans came up to me. One of them said, you can`t let them see you. I know these people. I can talk to these people. I can talk my way through these people. 
+  --- RAW removed span (tag + words), first 2500 chars ---
+  REP. PRAMILA JAYAPAL (D-WA4): I remember every moment vividly. I viscerally feel the pounding on the gallery doors.
+  --- INSERT text (what would be stored), first 2500 chars ---
+  I remember every moment vividly. I viscerally feel the pounding on the gallery doors.
+  --- 0 chars AFTER the segment ---
+  ...
+

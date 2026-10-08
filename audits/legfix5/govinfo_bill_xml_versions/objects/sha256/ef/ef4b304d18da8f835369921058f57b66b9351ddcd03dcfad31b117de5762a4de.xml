@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H1FA92D7F248E4184A4CE711C71F4E9A9" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 1955 IH: Responsible and Effective Spending Cuts of Undesirable Expenditures Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-03-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 1955</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210317">March 17, 2021</action-date>
+<action-desc><sponsor name-id="D000032">Mr. Donalds</sponsor> (for himself, <cosponsor name-id="B001299">Mr. Banks</cosponsor>, <cosponsor name-id="N000190">Mr. Norman</cosponsor>, and <cosponsor name-id="M000871">Mr. Mann</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBU00">Committee on the Budget</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To temporarily modify the application of the sequester under the Statutory Pay-As-You-Go Act of 2010, and for other purposes.</official-title>
+</form>
+<legis-body id="HF1359A11B0294152AAB5886819C573D7" style="OLC">
+<section id="HA1B74BB0EBD3490B9DC5C3D7E5D969AF" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Responsible and Effective Spending Cuts of Undesirable Expenditures Act</short-title></quote> or the <quote><short-title>RESCUE Act</short-title></quote>. </text></section> <section id="H397B66E54CB44043BC891B9705AD4F5F" section-type="subsequent-section"><enum>2.</enum><header>Application of PAYGO Act sequestration</header> <subsection id="HA326CBA0D2DA4BD6963E78216F96212B"><enum>(a)</enum><header>Application</header> <paragraph id="H0D3CC898E16F4AD5B38FFDA6B141AFAA"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, with respect to carrying out the first sequestration order under the Statutory Pay-As-You-Go Act of 2010 issued after the date of enactment of this Act, before any other direct spending program (including Medicare programs described in section 256(d) of the Balanced Budget and Emergency Deficit Control Act of 1985) is reduced under such order, the budgetary resources of the direct spending programs described in subsection (b)—</text>
+<subparagraph id="HDE5B1C42CFE8413994ACF0176C9310D8"><enum>(A)</enum><text display-inline="yes-display-inline">shall be reduced, in the order such provisions are listed in such subsection, in an amount equal to the amount of any reduction required, but for this section, for Medicare programs under section 6 of the Statutory Pay-As-You-Go Act of 2010; and</text></subparagraph> <subparagraph id="HD10C4C6385CB40B8A17EF4C8D7FD29A5"><enum>(B)</enum><text>after the reduction required under subparagraph (A), shall be further reduced, in the order such provisions are listed in such subsection, by the amount (if any) of the remaining budget-year debit as determined under such section 6.</text></subparagraph></paragraph>
+<paragraph id="H5A84C053D39C4F6293B3547B40E16D97"><enum>(2)</enum><header>Regular procedure</header><text display-inline="yes-display-inline">After the reductions required by paragraph (1), such sequestration order shall be carried out with respect to direct spending programs (excluding such Medicare programs) consistent with the requirements of the Statutory Pay-As-You-Go Act of 2010.</text></paragraph></subsection> <subsection id="H3AAED6EFCE9644E7AD3F0CAE7D554DF9"><enum>(b)</enum><header>Wasteful spending programs</header><text>The direct spending programs described in this subsection are as follows:</text>
+<paragraph id="H9E7C20730BB44D13A9AE8A2F784D9798"><enum>(1)</enum><text display-inline="yes-display-inline">Section 9704 of the American Rescue Plan Act of 2021 (<external-xref legal-doc="public-law" parsable-cite="pl/117/2">Public Law 117–2</external-xref>) and the amendments made by such section (relating to special financial assistance program for financially troubled multiemployer plans).</text></paragraph> <paragraph id="H99CD5F7D8C184D388599D4A8D256F1F6"><enum>(2)</enum><text display-inline="yes-display-inline">Section 9901 of such Act and the amendments made by such section (relating to coronavirus State and local fiscal recovery funds).</text></paragraph>
+<paragraph id="HB371C5CFFCA6455FBD9DBEB1D5A667A9"><enum>(3)</enum><text>Title X of such Act (relating to foreign relations).</text></paragraph> <paragraph id="H4B841CD17E764B2DAF2B72F7AC049A9B"><enum>(4)</enum><text display-inline="yes-display-inline">Any other provision of such Act or any amendment made by such provision (if applicable) that is not related to the direct health care treatment and prevention of COVID–19 in the United States. </text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

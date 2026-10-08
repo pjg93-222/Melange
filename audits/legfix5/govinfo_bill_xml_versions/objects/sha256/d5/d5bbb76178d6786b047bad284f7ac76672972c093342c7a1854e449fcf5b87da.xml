@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HA1B68AA0801F467FA1A19ED69F8C8AC9" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3736 IH: Standardizing Testing and Accountability Before Large Elections Giving Electors Necessary Information for Unobstructed Selection Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3736</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190712">July 12, 2019</action-date><action-desc><sponsor name-id="B001296">Mr. Brendan F. Boyle of Pennsylvania</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HHA00">Committee on House Administration</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Federal Election Campaign Act of 1971 to require the principal campaign committee of a
+			 candidate in a general election for the office of President to file a
+			 certification that the candidate has undergone a medical examination
+			 conducted by a medical office under the jurisdiction of the Secretary of
+			 the Navy.</official-title></form>
+	<legis-body id="HB0BAF432F93E43C8B71ED9F5DD5EDEF5" style="OLC">
+ <section id="H4568D67A05244090AD9129E3744E730C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Standardizing Testing and Accountability Before Large Elections Giving Electors Necessary Information for Unobstructed Selection Act</short-title></quote> or the <quote><short-title>STABLE GENIUS Act</short-title></quote>.</text>
+		</section><section id="H61EFA65B64EA43B4A9EABB166C8E807D" section-type="subsequent-section"><enum>2.</enum><header>Medical examination of presidential candidates</header>
+ <subsection id="H627F1C0F68334E25B18777A1E05DD834"><enum>(a)</enum><header>Requiring principal campaign committee To certify that candidate has undergone examination</header><text display-inline="yes-display-inline">Section 304 of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30104">52 U.S.C. 30104</external-xref>) is amended by adding at the end the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="H82BFA4A24E484DB1889EB7941C2DB10D" style="OLC">
+					<subsection id="H8B30DCF67B5E4903916A2399C786CFFA"><enum>(j)</enum><header>Certification of medical examination of presidential candidate</header>
+ <paragraph id="HA8B2303A862A4BC4923815FEE01427E9"><enum>(1)</enum><header>Requiring filing of certification</header><text display-inline="yes-display-inline">The principal campaign committee of a candidate for election for the office of President shall file a report with the Commission under this section containing—</text>
+ <subparagraph id="H24408CD9798C487C850B35D91730AEBA"><enum>(A)</enum><text>a certification that a medical office under the jurisdiction of the Secretary of the Navy conducted a medical examination of the candidate after the candidate won the nomination of a political party to run as a candidate in the general election for such office; and</text>
+ </subparagraph><subparagraph id="H03771103481A4F08860AD9FF5FE15AEB"><enum>(B)</enum><text>the results of such medical examination.</text> </subparagraph></paragraph><paragraph id="HCBD23070D5BF421CA62AD57EB70FE580"><enum>(2)</enum><header>Deadline</header><text>A principal campaign committee of a candidate for election for the office of President shall file the report required under paragraph (1) not later than 21 days after the date on which the candidate won the political party’s nomination to run as a candidate in the general election.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HCE26C63C6B454D20A1E4D70DFF18C36F"><enum>(b)</enum><header>Effective date</header><text>The amendment made by subsection (a) shall apply with respect to the general election for the office of President held in November 2020 and each succeeding general election for such office.</text>
+			</subsection></section></legis-body></bill>
+
+

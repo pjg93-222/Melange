@@ -1,0 +1,8 @@
+C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py:195: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_lqoo2jxs\\fec\\_stub_counts\\fetch-congressional-record-py-crec---since.txt' mode='r' encoding='utf-8'>
+  return int(open(path, encoding='utf-8').read().strip() or '0')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+...
+----------------------------------------------------------------------
+Ran 3 tests in 11.870s
+
+OK

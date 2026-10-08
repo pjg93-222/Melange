@@ -1,0 +1,12 @@
+
+== LIVE (unwired) : FAILS (as it must) ==
+   assertIn    _press_rows, _press_source_ledger = DPS.desk_press_rows(   DID NOT HOLD
+   assertIn    for r in _press_rows:                                      DID NOT HOLD
+   assertIn    'press_source_ledger':_press_source_ledger                 DID NOT HOLD
+   assertNotIn for r in pw.iter_rows(min_row=2, values_only=True):        DID NOT HOLD
+
+== WORKTREE (wired) : ALL PASS ==
+   assertIn    _press_rows, _press_source_ledger = DPS.desk_press_rows(   held
+   assertIn    for r in _press_rows:                                      held
+   assertIn    'press_source_ledger':_press_source_ledger                 held
+   assertNotIn for r in pw.iter_rows(min_row=2, values_only=True):        held

@@ -1,0 +1,43 @@
+# The tests that mention staffer_live but are not named test_staffer_* (run_suites.py does not reach them): the dashboard, clean workspace, combined section, network html, edge startup and desktop tests.
+# Same method (scripts/run_extra.py: one process per file), at f23a40aee, at the v4 tip, and on the applied tree.
+
+## f23a40aee
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0       2.6s  py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 0.72s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0       2.3s  script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0       2.4s  py     pass 4    fail 0   err 0  skip 0   4 passed in 0.76s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0       3.4s  script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0       3.0s  py     pass 9    fail 0   err 0  skip 0   9 passed in 1.00s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0       1.9s  py     pass 2    fail 0   err 0  skip 0   2 passed in 0.35s
+TOTAL {'passed': 287, 'failed': 0, 'errors': 0, 'skipped': 2} files 6
+
+## 5d4a9bd0a (the tip before the fix round)
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0       2.1s  py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 0.60s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0       1.6s  script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0       1.8s  py     pass 4    fail 0   err 0  skip 0   4 passed in 0.35s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0       3.0s  script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0       2.1s  py     pass 9    fail 0   err 0  skip 0   9 passed in 0.58s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0       1.9s  py     pass 2    fail 0   err 0  skip 0   2 passed in 0.35s
+TOTAL {'passed': 287, 'failed': 0, 'errors': 0, 'skipped': 2} files 6
+
+## v4 tip
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0       3.5s  py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 0.95s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0       2.8s  script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0       3.1s  py     pass 4    fail 0   err 0  skip 0   4 passed in 0.47s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0       4.9s  script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0       2.8s  py     pass 9    fail 0   err 0  skip 0   9 passed in 0.77s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0       5.3s  py     pass 2    fail 0   err 0  skip 0   2 passed in 0.76s
+TOTAL {'passed': 287, 'failed': 0, 'errors': 0, 'skipped': 2} files 6
+
+## applied tree
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0       3.2s  py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 1.07s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0       2.5s  script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0       2.5s  py     pass 4    fail 0   err 0  skip 0   4 passed in 0.36s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0       3.0s  script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0       2.6s  py     pass 9    fail 0   err 0  skip 0   9 passed in 0.75s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0       1.9s  py     pass 2    fail 0   err 0  skip 0   2 passed in 0.37s
+TOTAL {'passed': 287, 'failed': 0, 'errors': 0, 'skipped': 2} files 6
+
+## file for file
+f23a40aee and v4 tip: 6 files in f23a40aee, 6 in v4 tip; 6 files with identical counts and identical failures (passed, failed, errors, skipped), 0 differing, 0 only in f23a40aee, 0 only in v4 tip
+5d4a9bd0a and v4 tip: 6 files in 5d4a9bd0a, 6 in v4 tip; 6 files with identical counts and identical failures (passed, failed, errors, skipped), 0 differing, 0 only in 5d4a9bd0a, 0 only in v4 tip
+v4 tip and applied tree: 6 files in v4 tip, 6 in applied tree; 6 files with identical counts and identical failures (passed, failed, errors, skipped), 0 differing, 0 only in v4 tip, 0 only in applied tree

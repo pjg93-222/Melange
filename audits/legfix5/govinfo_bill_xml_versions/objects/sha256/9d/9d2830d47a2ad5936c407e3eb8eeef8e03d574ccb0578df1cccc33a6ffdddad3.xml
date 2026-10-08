@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H9A7AE6A2F6434666B64C77EC5E0169BD"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 9375 IH: Honor Their Service Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-06-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code> 
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 9375</legis-num> 
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20260618">June 18, 2026</action-date> 
+<action-desc><sponsor name-id="T000474">Mrs. Torres of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To amend title 38, United States Code, to authorize the Secretary of Veterans Affairs to award grants to eligible entities to provide immigration legal services to noncitizen veterans, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H177A02ED0C4B4E598348C45DAB549561"> 
+<section id="H689118C208ED4C0A9D8C2B4F333361B0" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Honor Their Service Act</short-title></quote>.</text></section> <section id="H0595CAAA6E054B41AEBFB23EEDAB3E98"><enum>2.</enum><header>Department of veterans affairs grants for eligible entities providing immigration legal services to noncitizen veterans</header> <subsection id="H06BFE7475CAC45C3A548D3F84077B2F0"><enum>(a)</enum><header>In general</header><text>Part II of title 38, United States Code, is amended by adding at the end the following new chapter:</text> 
+<quoted-block id="H47C24FE7D76C4497922EF41942D58386" style="USC">
+                    <chapter id="H5F2D2E9FC8E649C1A4EEF47F33438156">
+                        <enum>25</enum>
+                        <header>BENEFITS FOR NONCITIZEN VETERANS</header>
+                        <toc>
+                            <toc-entry level="section">2501. Immigration legal services for
+                                noncitizen veterans.</toc-entry>
+                        </toc>
+                    </chapter>
+                    <section id="HA7FFF7DAE6A44185B42BC6CAF9B61CA9">
+                        <enum>2501.</enum>
+                        <header>Immigration legal services for noncitizen veterans</header>
+                        <subsection id="H160E53C8DF3147C09FE1A2971FB5A2DE">
+                            <enum>(a)</enum>
+                            <header>Grants</header>
+ <text>Subject to the availability of appropriations provided for such purpose, the Secretary shall award grants to eligible entities that provide immigration legal services to noncitizen veterans who are in removal proceedings, at risk for removal, or have been removed from the United States.</text>
+                        </subsection>
+                        <subsection id="H373F69EB486E4549A053BDC1259506A0">
+                            <enum>(b)</enum>
+                            <header>Criteria</header>
+                            <paragraph id="H970A49D4BA3D49E1B5ED6820DD5CD499"
+                                display-inline="yes-display-inline">
+                                <enum>(1)</enum>
+ <text>The Secretary shall—</text> <subparagraph id="H19234C3F2A9B4BAE9BCFD281C501363C"> <enum>(A)</enum> <text>establish criteria and requirements for grants under this section, including criteria for entities eligible to receive such grants; and</text>
+                                </subparagraph>
+                                <subparagraph id="H40AE8C81F7BB47F38E67D352B0950169">
+                                    <enum>(B)</enum>
+ <text>publish such criteria and requirements in the Federal Register.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HE184B03F59A14C5AB9D2D80F61E9A643" indent="up1">
+                                <enum>(2)</enum>
+ <text>In establishing criteria and requirements under paragraph (1), the Secretary shall—</text>
+                                <subparagraph id="HF173B5C9A7E4441790AD4A9633F1D83A">
+                                    <enum>(A)</enum>
+ <text>take into consideration any criteria and requirements needed with respect to carrying out this section in rural communities, on trust lands, and in the territories and possessions of the United States; and</text>
+                                </subparagraph>
+                                <subparagraph id="H0C154CD73F534ADA8CB5CED029401DFA">
+                                    <enum>(B)</enum>
+ <text>consult with organizations that have experience in providing immigration legal services or discharge characterizations to noncitizen veterans, including—</text>
+                                    <clause id="H1EF562C5B7704E10BC5B823ADC098DEF">
+                                        <enum>(i)</enum>
+ <text>veterans service organizations;</text> </clause> <clause id="H7C2E2DEF15EC480DA27C1999AB7748A5"> <enum>(ii)</enum> <text>nonprofit immigration legal services providers with demonstrated experience representing noncitizen veterans; and</text>
+                                    </clause>
+                                    <clause id="HED1C735F66784A16AD2764D31BFC5A7E">
+                                        <enum>(iii)</enum>
+ <text>such other organizations as the Secretary determines appropriate.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H58486D47C3974CCFAB733DCE53E7AB07">
+                            <enum>(c)</enum>
+                            <header>Eligible entities</header>
+ <text>The Secretary may award a grant under this section to an entity applying for such a grant only if the applicant for the grant—</text>
+                            <paragraph id="HC02B656028D243F88E0FCEBDFD1FA515">
+                                <enum>(1)</enum>
+ <text>is a public or nonprofit private entity with the capacity (as determined by the Secretary) to effectively administer a grant under this section;</text>
+                            </paragraph>
+                            <paragraph id="HABB796D49CFE4E4A92A86D71896923ED">
+                                <enum>(2)</enum>
+ <text>demonstrates that adequate financial support will be available to carry out the services for which the grant is sought consistent with the application;</text>
+                            </paragraph>
+                            <paragraph id="HF2F5435D4A834F9B8DE2C246BC9BCAF6">
+                                <enum>(3)</enum>
+ <text>agrees to meet the applicable criteria and requirements established under subsection (b)(1); and</text>
+                            </paragraph>
+                            <paragraph id="H151EDAD1AF034C92964626F6B4BA0584">
+                                <enum>(4)</enum>
+ <text>has, as determined by the Secretary, demonstrated the capacity to meet such criteria and requirements.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H4CB93266FB89497A8C7B917A6E37B302">
+                            <enum>(d)</enum>
+                            <header>Use of funds</header>
+ <text>Grants under this section shall be used to provide noncitizen veterans described in subsection (a) the following:</text>
+                            <paragraph id="H5CDB681BC368423786CF8A885D170E16">
+                                <enum>(1)</enum>
+ <text>Legal services relating to defense in removal proceedings under section 240 of the Immigration and Nationality Act (<external-xref legal-doc="usc" parsable-cite="usc/8/1229a">8 U.S.C. 1229a</external-xref>).</text>
+                            </paragraph>
+                            <paragraph id="H899F7FFBBF264160AF6365AE40DB50B6">
+                                <enum>(2)</enum>
+ <text>Legal services relating to applications for naturalization, including naturalization through military service under sections 328 and 329 of the Immigration and Nationality Act (<external-xref legal-doc="usc" parsable-cite="usc/8/1439">8 U.S.C. 1439</external-xref>, 1440).</text>
+                            </paragraph>
+                            <paragraph id="H785895E19ADD48C685A68317B5769770">
+                                <enum>(3)</enum>
+ <text>Legal services relating to applications for parole, including parole in place and humanitarian parole, under section 212(d)(5) of the Immigration and Nationality Act (<external-xref legal-doc="usc" parsable-cite="usc/8/1182">8 U.S.C. 1182(d)(5)</external-xref>).</text>
+                            </paragraph>
+                            <paragraph id="H457492499EDF4D2E897E8044EF0F2E3C">
+                                <enum>(4)</enum>
+ <text>Legal services to assist noncitizen veterans who have been removed from the United States in pursuing lawful reentry or repatriation (<external-xref legal-doc="usc" parsable-cite="usc/8/1182">8 U.S.C. 1182(a)(9)(A)(iii)</external-xref>).</text>
+                            </paragraph>
+                            <paragraph id="H466F4AD3431F457B93C67F45C7251161">
+                                <enum>(5)</enum>
+ <text>Legal services relating to requests to upgrade the characterization of a discharge or dismissal of a former member of the Armed Forces under section 1553 of title 10, where such characterization is a barrier to immigration relief or naturalization.</text>
+                            </paragraph>
+                            <paragraph id="H395E8E75CF5343A19863D3F40B5CA1B4">
+                                <enum>(6)</enum>
+ <text>Such other immigration legal services as the Secretary determines appropriate.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="HED17EAF405774EC7989BA94F0190C05F">
+                            <enum>(e)</enum>
+                            <header>Locations</header>
+ <text>To the extent practicable, the Secretary shall award grants under this section to eligible entities in a manner that ensures individuals are able to access these legal services regardless of their location, including through virtual services.</text>
+                        </subsection>
+                        <subsection id="H188A110B48CA468B94A852B5B6F67C24">
+                            <enum>(f)</enum>
+                            <header>Biennial reports</header>
+                            <paragraph id="H743E2BB6330C4D13BB3C4DA556D28556"
+                                display-inline="yes-display-inline">
+                                <enum>(1)</enum>
+ <text>Not less frequently than once every two years, the Secretary shall submit to the Committee on Veterans’ Affairs of the Senate and the Committee on Veterans’ Affairs of the House of Representatives a report on grants awarded under this section.</text>
+                            </paragraph>
+                            <paragraph id="H86C77054AC6643588F55A898E4CB15DD" indent="up1">
+                                <enum>(2)</enum>
+ <text>To the extent feasible, each report required by paragraph (1) shall include the following with respect to the period covered by the report:</text>
+                                <subparagraph id="H2A12A0463D96423898E039754B139E9C">
+                                    <enum>(A)</enum>
+ <text>The number of noncitizen veterans assisted.</text> </subparagraph> <subparagraph id="H9D6BBA35437F42068A5D764CC6E3B85D"> <enum>(B)</enum> <text>A description of the immigration legal services provided.</text>
+                                </subparagraph>
+                                <subparagraph id="H21169293D70145F4ABE51E1F222A5F5E">
+                                    <enum>(C)</enum>
+ <text>A description of the immigration matters addressed.</text> </subparagraph> <subparagraph id="H6FC667E6D5844579AB3E9EFE3BB23F0E"> <enum>(D)</enum> <text>An analysis by the Secretary with respect to the operational effectiveness and cost-effectiveness of the services provided.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H3D9937B454964691BECDEFE0EE0AE007">
+                            <enum>(g)</enum>
+                            <header>Noncitizen veteran defined</header>
+ <text>In this section, the term <quote>noncitizen veteran</quote> means a veteran, as defined in section 101(2) of this title, who is not a citizen or national of the United States. as defined in section 1101(a)(3) of title 8.</text>
+                        </subsection>
+                    </section>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block></subsection> 
+<subsection id="H1C2507F4F994415A847EF9EED0B24F01">
+                <enum>(b)</enum>
+                <header>Clerical amendments</header>
+ <text>The tables of chapters at the beginning of title 38, United States Code, and of part II of title 38, United States Code, are each amended by inserting after the item relating to chapter 24 the following new item:</text>
+                <list level="paragraph">
+                    <list-item><quote>25. Benefits for Noncitizen Veterans 2501</quote>.</list-item>
+                </list>
+            </subsection> 
+<subsection id="H684221CEEB4C49A783FC86ECDBC6F9FB"><enum>(c)</enum><header>Criteria</header><text>Not later than 180 days after the date of the enactment of this Act, the Secretary of Veterans Affairs shall establish and publish in the Federal Register the criteria and requirements pursuant to subsection (b)(1) of section 2501 of title 38, United States Code, as added by subsection (a).</text></subsection> <subsection id="HC81AA91ACC2A40458286B51111D3A8B9"><enum>(d)</enum><header>Authorization of appropriations</header><text>There is authorized to be appropriated to carry out this section $20,000,000 for fiscal years 2027 through 2030.</text></subsection></section> 
+</legis-body> 
+</bill> 
+
+

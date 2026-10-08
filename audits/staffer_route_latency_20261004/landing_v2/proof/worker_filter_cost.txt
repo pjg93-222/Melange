@@ -1,0 +1,8 @@
+# Cost of the record browser's filter() on 145,000 rows (the real population is about that size): median of 7 queries, old filter (722a55ba7) vs the new worker. Node, one vm context per worker.
+rows 145000
+2 letters "ab"              old   207 ms  new   219 ms
+a name "alex adams"         old   308 ms  new   291 ms
+a whole id                  old   357 ms  new   210 ms
+an upper-case whole id      old   233 ms  new   202 ms
+a piece of an id "3f2a"     old   293 ms  new   237 ms
+peak rss MB 319

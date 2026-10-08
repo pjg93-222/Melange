@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H06EDD0B8604049DC9CC6BB89F9DD6150" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 535 IH: PFAS Action Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 535</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190114">January 14, 2019</action-date><action-desc><sponsor name-id="D000624">Mrs. Dingell</sponsor> (for herself, <cosponsor name-id="U000031">Mr. Upton</cosponsor>, and <cosponsor name-id="K000380">Mr. Kildee</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HPW00">Transportation and Infrastructure</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require the Administrator of the Environmental Protection Agency to designate per- and
+			 polyfluoroalkyl substances as hazardous substances under the Comprehensive
+			 Environmental Response, Compensation, and Liability Act of 1980.</official-title></form>
+	<legis-body id="H8E7BDDB519DF464598155E0DB9ED57D8" style="OLC">
+ <section id="HEFABF65BA2B04F6E864BD058E8A44128" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>PFAS Action Act of 2019</short-title></quote>.</text> </section><section id="H9620B0474F4048BCA5BB72BA6826CDB5"><enum>2.</enum><header>Designation as hazardous substances</header><text display-inline="no-display-inline">Not later than 1 year after the date of enactment of this Act, the Administrator of the Environmental Protection Agency shall designate all per- and polyfluoroalkyl substances as hazardous substances under section 102(a) of the Comprehensive Environmental Response, Compensation, and Liability Act of 1980 (<external-xref legal-doc="usc" parsable-cite="usc/42/9602">42 U.S.C. 9602(a)</external-xref>).</text>
+		</section></legis-body></bill>
+
+

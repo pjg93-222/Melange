@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-DAV19G01-GDT-4K-P66">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2502 IS: American Security Drone Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-09-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2502</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190918">September 18, 2019</action-date>
+			<action-desc><sponsor name-id="S404">Mr. Scott of Florida</sponsor> (for himself, <cosponsor name-id="S374">Mr. Cotton</cosponsor>, <cosponsor name-id="S399">Mr. Hawley</cosponsor>, <cosponsor name-id="S350">Mr. Rubio</cosponsor>, <cosponsor name-id="S364">Mr. Murphy</cosponsor>, and <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To ban the Federal procurement of certain drones and other unmanned aircraft systems, and for other
+			 purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>American Security Drone Act of 2019</short-title></quote>.</text>
+ </section><section id="id13DD0CD5226546648F0C701253F52A56"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text> <paragraph id="id19AF92C7A05647AFB9A3A3CE294790D6"><enum>(1)</enum><header>Covered foreign entity</header><text display-inline="yes-display-inline">the term <term>covered foreign entity</term> means—</text>
+ <subparagraph id="idf20c8f343a894dd3ae71ecc6a946273d"><enum>(A)</enum><text>a covered entity (as determined by the Secretary of Commerce);</text> </subparagraph><subparagraph id="ide78f11855e2f4d24a3e5afa724ee9d0b"><enum>(B)</enum><text>any entity that is subject to extrajudicial direction from a foreign government, as determined by the Director of National Intelligence;</text>
+ </subparagraph><subparagraph id="id49f240e93c03451abe232285a29cd6c8"><enum>(C)</enum><text>any entity the Secretary of Homeland Security, in coordination with the Director of National Intelligence, the Secretary of Defense, and the Secretary of State, determines poses a national security risk;</text>
+ </subparagraph><subparagraph id="ideba3f18ba4a94e8d8f77cae4444d2dfd"><enum>(D)</enum><text>any entity subject to influence or control by the Government of the People Republic of China or the Communist Party of the People’s Republic of China, as determined by the Secretary of Homeland Security; and</text>
+ </subparagraph><subparagraph id="id0C5FB1394AE84BAFBF5D5BBD35530AA8"><enum>(E)</enum><text>any subsidiary or affiliate of an entity described in subparagraphs (A) through (D).</text> </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idC3FE916FEDEE4AC2A7D011B8847164A5"><enum>(2)</enum><header>Covered unmanned aircraft</header><text>The term <term>covered unmanned aircraft</term> means an unmanned aircraft system and any related services and equipment.</text>
+			</paragraph></section><section id="id8AA1B0FDB3414DE0BCCB49F8DE8550D0"><enum>3.</enum><header>Ban on procurement of foreign off-the-shelf drones and unmanned aircraft systems</header>
+ <subsection id="idA2CCB95723354682B59F75A9B3A5C763"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Except as provided under subsections (b) and (c), the head of an executive agency may not procure any commercial off-the-shelf drone or covered unmanned aircraft system manufactured or assembled by a covered foreign entity, including any Original Equipment Manufacturer flight controllers, radios, data transmission devices, cameras, or gimbals manufactured in a covered foreign country or by an entity domiciled in a covered foreign country.</text>
+ </subsection><subsection id="ideaa4bc70c7614f009b041dae96be9a84"><enum>(b)</enum><header>Exemption</header><text>The Secretary of Homeland Security and the Secretary of Defense are exempt from the restriction under subsection (a) if the operation or procurement—</text>
+ <paragraph id="id53449DFC94304DC5BEBEECBE5CCDB924"><enum>(1)</enum><text>is for the purposes of training, testing, or analysis for—</text>
+ <subparagraph id="idB67C1569C0CB4DC8A094D1C1BCEA67D3"><enum>(A)</enum><text>Counter-UAS surrogate intelligence;</text> </subparagraph><subparagraph id="idA8EE071A61D0475187FDDF5EB462CC13"><enum>(B)</enum><text>electronic warfare; or</text>
+ </subparagraph><subparagraph id="id239F270AE24E460184F0980637582F23"><enum>(C)</enum><text>information warfare operations; and</text> </subparagraph></paragraph><paragraph id="idEB7FC860BAE84DDCB84EAB351D5D5CFB"><enum>(2)</enum><text>is required in the national interest of the United States.</text>
+ </paragraph></subsection><subsection id="idB848BF1AF737492B86ACE320D33A807F"><enum>(c)</enum><header>Waiver</header><text>The head of an executive agency may waive the prohibition under subsection (a) on a case-by-case basis with the approval of the Secretary of Homeland Security or the Secretary of Defense and notification to Congress.</text>
+			</subsection></section><section id="idF9FBF45D823D49ECA5208BF5F155937F"><enum>4.</enum><header>Prohibition on operation of foreign commercial off-the-shelf drones and small unmanned aircraft
+			 systems</header>
+			<subsection id="id4F18562C291248DD9A56BD468E842794"><enum>(a)</enum><header>Prohibition</header>
+ <paragraph id="idABDE3F1FC9B84FBEB4F7FB6766155424"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Beginning not later than 180 days after the date of the enactment of this Act, no Federal department or agency may operate a commercial off-the-shelf drone or covered unmanned aircraft system manufactured or assembled by a covered foreign entity.</text>
+ </paragraph><paragraph id="id3217D482DBDC4C71B5CF94BA04B721C1"><enum>(2)</enum><header>Phase-in period for existing contracts</header><text>The prohibition under paragraph (1) shall not apply, during the 1-year period beginning on the date of the enactment of this Act, to commercial off-the-shelf drones and covered unmanned aircraft systems procured through a contract entered into before the date of the enactment of this Act.</text>
+ </paragraph></subsection><subsection id="id2270e1054ca84b1eb236b6463aa290f9"><enum>(b)</enum><header>Exemption</header><text>The Secretary of Homeland Security and the Secretary of Defense are exempt from the restriction under subsection (a) if the operation or procurement—</text>
+ <paragraph id="idA9DCA5A316FB4E56A68E78F3F5FAB08C"><enum>(1)</enum><text>is for the purposes of training, testing, or analysis for—</text>
+ <subparagraph id="id6D82D653F92849CFB1E8ABF75B8A2495"><enum>(A)</enum><text>Counter-UAS surrogate intelligence;</text> </subparagraph><subparagraph id="id5D628CB1C2424F508BAA359973EF3207"><enum>(B)</enum><text>electronic warfare; or</text>
+ </subparagraph><subparagraph id="idD3E226E338B444BF8A64D2697B4144FC"><enum>(C)</enum><text>information warfare operations; and</text> </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id65B4D926CAF2491AB52EB11683261250"><enum>(2)</enum><text>is required in the national interest of the United States.</text>
+ </paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="id35E213FA5EB64A97BC7EAABEE5E939D8"><enum>(c)</enum><header>Waiver</header><text>The head of an executive agency may waive the prohibition under subsection (a) on a case-by-case basis with the approval of the Secretary of Homeland Security or the Secretary of Defense and notification to Congress.</text>
+ </subsection><subsection commented="no" display-inline="no-display-inline" id="id9AAD856A89FC426BB9AAF68B91D69887"><enum>(d)</enum><header>Regulations</header><text>Not later than 180 days after the date of the enactment of this Act, the Secretary of Homeland Security shall prescribe regulations to implement this section.</text>
+			</subsection></section><section id="id19AF33C3BE6D46E5B4D34372BDFBFE3E"><enum>5.</enum><header>Prohibition on use of Federal funds for purchases and operation of commercial off-the-shelf drones
+			 and unmanned
+ aircraft systems from China</header><text display-inline="no-display-inline">No Federal funds awarded through a contract, grant, or cooperative agreement or otherwise made available may be used to purchase a commercial off-the-shelf drone or covered unmanned aircraft system, or a system to counter unmanned aircraft systems, that is manufactured or assembled by a covered foreign entity or in connection with the operation of such a drone or system.</text>
+		</section><section id="id8BA6D68F41F74A39929E3D9C74C7867F"><enum>6.</enum><header>Comptroller General report</header>
+ <text display-inline="no-display-inline">Not later than 90 days after the date of the enactment of this Act, the Comptroller General of the United States shall submit to Congress a report on the amount of commercial off-the-shelf drones and covered unmanned aircraft systems procured by Federal departments and agencies from covered foreign entities.</text>
+		</section></legis-body>
+</bill>
+
+

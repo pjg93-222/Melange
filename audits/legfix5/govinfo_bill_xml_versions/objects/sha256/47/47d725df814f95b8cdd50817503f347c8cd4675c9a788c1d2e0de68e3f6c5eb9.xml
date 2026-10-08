@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S582 IS: FinCEN Improvement Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-02-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 582</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190227">February 27, 2019</action-date><action-desc><sponsor name-id="S385">Ms. Cortez Masto</sponsor> (for herself, <cosponsor name-id="S373">Mr. Cassidy</cosponsor>, <cosponsor name-id="S403">Ms. Sinema</cosponsor>, and <cosponsor name-id="S347">Mr. Moran</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To ensure that the Financial Crimes Enforcement Network works with Tribal law enforcement agencies,
+			 protects against all forms of terrorism, and focuses on virtual
+			 currencies.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" id="H08E7F7ECEF034CB0A3BF88A6D9449B61" style="OLC">
+ <section id="H141850AB069345C89E233A7E0CAE3064" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>FinCEN Improvement Act of 2019</short-title></quote>.</text> </section><section id="HE5ACB8955AD3431D95A0180FCD2BEFA4"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text>
+ <paragraph id="H2E1BC33F905C416E94857314000D249C"><enum>(1)</enum><text display-inline="yes-display-inline">The mission of the Financial Crimes Enforcement Network (referred to in this Act as <quote>FinCEN</quote>) is to safeguard the financial system from illicit use, combat money laundering, and promote national security through the collection, analysis, and dissemination of financial intelligence and strategic use of financial authorities.</text>
+ </paragraph><paragraph id="H67A90497CE7B41C896B30F69479FEE1C"><enum>(2)</enum><text display-inline="yes-display-inline">In its mission to safeguard the financial system from the abuses of financial crime, including terrorist financing, money laundering, and other illicit activity, the United States should prioritize working with partners in Federal, State, local, Tribal, and foreign law enforcement authorities.</text>
+ </paragraph><paragraph id="H6461D9811BD542FB8C6F7243019326BD"><enum>(3)</enum><text>The Federal Bureau of Investigation has stated that, since the terror attacks on September 11, 2001, <quote>The threat landscape has expanded considerably, though it is important to note that the more traditional threat posed by al Qaeda and its affiliates is still present and active. The threat of domestic terrorism also remains persistent overall, with actors crossing the line from First Amendment protected rights to committing crimes to further their political agenda.</quote>.</text>
+ </paragraph><paragraph id="HCF223A1D643941EBBD9498D3BDC142EC"><enum>(4)</enum><text>Although the use and trading of virtual currencies are legal practices, some terrorists and criminals, including international criminal organizations, seek to exploit vulnerabilities in the global financial system and are increasingly using emerging payment methods such as virtual currencies to move illicit funds.</text>
+ </paragraph><paragraph id="H24B3D60C1FE74B7AADD2AB258EA0E775"><enum>(5)</enum><text>In carrying out its mission, FinCEN should prioritize all forms of terrorism and emerging methods of terrorism and illicit finance.</text>
+ </paragraph></section><section id="H8299E1C753904BF4A94D7BDAA6DF1E9E"><enum>3.</enum><header>Strengthening FinCEN</header><text display-inline="no-display-inline">Section 310(b)(2) of title 31, United States Code, is amended—</text> <paragraph id="H4A6A2F4A30EE431FBEF2AE25A7F05A6F"><enum>(1)</enum><text>in subparagraph (C)—</text>
+ <subparagraph id="H7EC07D34FE8D45508FFF9B46E27E60B0"><enum>(A)</enum><text>in clause (i), by inserting <quote>Tribal,</quote> after <quote>local,</quote>; and</text> </subparagraph><subparagraph id="HBDF6C083AEE84137A20DD9C8337CA459"><enum>(B)</enum><text>in clause (vi), by striking <quote>international</quote>;</text>
+ </subparagraph></paragraph><paragraph id="H9A278DFA95024E479D9DBF02A01EDFED"><enum>(2)</enum><text>in subparagraph (E), by striking <quote>local,</quote> and inserting <quote>local, Tribal,</quote>;</text> </paragraph><paragraph id="H17B2D5A75C5E478099AC4B0A7C181DEF"><enum>(3)</enum><text>in subparagraph (F), by striking <quote>Federal, State, local, and foreign law enforcement</quote> and inserting <quote>Federal, State, local, Tribal, and foreign law enforcement</quote>; and</text>
+ </paragraph><paragraph id="H678C3827138649F099C5091506443520"><enum>(4)</enum><text>in subparagraph (H), by inserting <quote>, including matters involving emerging technologies or value that substitutes for currency</quote> after <quote>initiatives</quote>.</text></paragraph></section></legis-body></bill>
+
+

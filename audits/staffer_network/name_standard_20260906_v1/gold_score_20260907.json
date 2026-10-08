@@ -1,0 +1,3116 @@
+{
+  "meta": {
+    "generated_at": "2026-09-07T06:29:22.943979+00:00",
+    "live_root": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+    "inputs": {
+      "sample": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\name_standard_gold_sample_20260906.ndjson",
+      "parser": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\name_standard_gold_parser_20260906.ndjson",
+      "labels": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\name_standard_gold_labels_20260907.ndjson",
+      "sample_sha256": "0ed5bab0e7de46c287ddeca0c2ca29ca3f7e1dc30c0c7e4b0a834c0ec545a93c",
+      "parser_sha256": "ad056a1a3ca39c39b441ca2536de91eaa594380444b2b484adadd132c3ce4c2d",
+      "labels_sha256_expected": "d0f4aefd6ba6c937f3eaca467e75ffb84967dc39778fa1914c068efc1ee30710",
+      "labels_sha256_actual": "d0f4aefd6ba6c937f3eaca467e75ffb84967dc39778fa1914c068efc1ee30710",
+      "labels_sha256_verified": true
+    },
+    "n_total": 300,
+    "n_high_confidence": 254,
+    "n_low_confidence": 46,
+    "missing_in_parser": [],
+    "missing_in_labels": [],
+    "fields_scored": [
+      "first",
+      "middle_initial",
+      "last",
+      "suffix",
+      "nickname_raw",
+      "display_name",
+      "all_parts"
+    ],
+    "normalization": "casefold + NFKD ascii-fold + smart-quote/dash-to-ascii fold + strip periods + collapse whitespace; None/'' treated as equal; middle scored as first character of normalised middle (an initial); display_name uses the same normalisation (so period/spacing style does not count as a mismatch).",
+    "per_source_grouping": "'by_parser_source' uses the 4 parser_source routing values (house_csv/payroll_comma/senate/display) as literally requested; 'by_source_tag' uses the 6 raw source values (adds lda/quorum/politico/littlesis, all display-routed) and is how the LittleSis slice and the payroll_comma/senate SOURCE_TAG double-count are exposed.",
+    "unclassified_disagreements": []
+  },
+  "agreement": {
+    "all_300": {
+      "n": 300,
+      "first": {
+        "agree": 287,
+        "n": 300,
+        "rate": 0.956667
+      },
+      "middle_initial": {
+        "agree": 275,
+        "n": 300,
+        "rate": 0.916667
+      },
+      "last": {
+        "agree": 266,
+        "n": 300,
+        "rate": 0.886667
+      },
+      "suffix": {
+        "agree": 288,
+        "n": 300,
+        "rate": 0.96
+      },
+      "nickname_raw": {
+        "agree": 292,
+        "n": 300,
+        "rate": 0.973333
+      },
+      "display_name": {
+        "agree": 269,
+        "n": 300,
+        "rate": 0.896667
+      },
+      "all_parts": {
+        "agree": 257,
+        "n": 300,
+        "rate": 0.856667
+      }
+    },
+    "high_confidence_254": {
+      "n": 254,
+      "first": {
+        "agree": 254,
+        "n": 254,
+        "rate": 1.0
+      },
+      "middle_initial": {
+        "agree": 245,
+        "n": 254,
+        "rate": 0.964567
+      },
+      "last": {
+        "agree": 253,
+        "n": 254,
+        "rate": 0.996063
+      },
+      "suffix": {
+        "agree": 245,
+        "n": 254,
+        "rate": 0.964567
+      },
+      "nickname_raw": {
+        "agree": 252,
+        "n": 254,
+        "rate": 0.992126
+      },
+      "display_name": {
+        "agree": 239,
+        "n": 254,
+        "rate": 0.940945
+      },
+      "all_parts": {
+        "agree": 244,
+        "n": 254,
+        "rate": 0.96063
+      }
+    },
+    "by_parser_source": {
+      "house_csv": {
+        "n": 50,
+        "first": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "middle_initial": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "last": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "suffix": {
+          "agree": 49,
+          "n": 50,
+          "rate": 0.98
+        },
+        "nickname_raw": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "display_name": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "all_parts": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        }
+      },
+      "payroll_comma": {
+        "n": 44,
+        "first": {
+          "agree": 44,
+          "n": 44,
+          "rate": 1.0
+        },
+        "middle_initial": {
+          "agree": 42,
+          "n": 44,
+          "rate": 0.954545
+        },
+        "last": {
+          "agree": 41,
+          "n": 44,
+          "rate": 0.931818
+        },
+        "suffix": {
+          "agree": 42,
+          "n": 44,
+          "rate": 0.954545
+        },
+        "nickname_raw": {
+          "agree": 44,
+          "n": 44,
+          "rate": 1.0
+        },
+        "display_name": {
+          "agree": 38,
+          "n": 44,
+          "rate": 0.863636
+        },
+        "all_parts": {
+          "agree": 39,
+          "n": 44,
+          "rate": 0.886364
+        }
+      },
+      "senate": {
+        "n": 6,
+        "first": {
+          "agree": 6,
+          "n": 6,
+          "rate": 1.0
+        },
+        "middle_initial": {
+          "agree": 6,
+          "n": 6,
+          "rate": 1.0
+        },
+        "last": {
+          "agree": 6,
+          "n": 6,
+          "rate": 1.0
+        },
+        "suffix": {
+          "agree": 6,
+          "n": 6,
+          "rate": 1.0
+        },
+        "nickname_raw": {
+          "agree": 5,
+          "n": 6,
+          "rate": 0.833333
+        },
+        "display_name": {
+          "agree": 6,
+          "n": 6,
+          "rate": 1.0
+        },
+        "all_parts": {
+          "agree": 6,
+          "n": 6,
+          "rate": 1.0
+        }
+      },
+      "display": {
+        "n": 200,
+        "first": {
+          "agree": 191,
+          "n": 200,
+          "rate": 0.955
+        },
+        "middle_initial": {
+          "agree": 182,
+          "n": 200,
+          "rate": 0.91
+        },
+        "last": {
+          "agree": 173,
+          "n": 200,
+          "rate": 0.865
+        },
+        "suffix": {
+          "agree": 191,
+          "n": 200,
+          "rate": 0.955
+        },
+        "nickname_raw": {
+          "agree": 193,
+          "n": 200,
+          "rate": 0.965
+        },
+        "display_name": {
+          "agree": 180,
+          "n": 200,
+          "rate": 0.9
+        },
+        "all_parts": {
+          "agree": 167,
+          "n": 200,
+          "rate": 0.835
+        }
+      }
+    },
+    "by_source_tag": {
+      "house_csv": {
+        "n": 50,
+        "first": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "middle_initial": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "last": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "suffix": {
+          "agree": 49,
+          "n": 50,
+          "rate": 0.98
+        },
+        "nickname_raw": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "display_name": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "all_parts": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        }
+      },
+      "lda": {
+        "n": 50,
+        "first": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "middle_initial": {
+          "agree": 48,
+          "n": 50,
+          "rate": 0.96
+        },
+        "last": {
+          "agree": 44,
+          "n": 50,
+          "rate": 0.88
+        },
+        "suffix": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "nickname_raw": {
+          "agree": 47,
+          "n": 50,
+          "rate": 0.94
+        },
+        "display_name": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "all_parts": {
+          "agree": 44,
+          "n": 50,
+          "rate": 0.88
+        }
+      },
+      "littlesis": {
+        "n": 50,
+        "first": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "middle_initial": {
+          "agree": 43,
+          "n": 50,
+          "rate": 0.86
+        },
+        "last": {
+          "agree": 35,
+          "n": 50,
+          "rate": 0.7
+        },
+        "suffix": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "nickname_raw": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "display_name": {
+          "agree": 39,
+          "n": 50,
+          "rate": 0.78
+        },
+        "all_parts": {
+          "agree": 34,
+          "n": 50,
+          "rate": 0.68
+        }
+      },
+      "payroll_comma": {
+        "n": 50,
+        "first": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "middle_initial": {
+          "agree": 48,
+          "n": 50,
+          "rate": 0.96
+        },
+        "last": {
+          "agree": 47,
+          "n": 50,
+          "rate": 0.94
+        },
+        "suffix": {
+          "agree": 48,
+          "n": 50,
+          "rate": 0.96
+        },
+        "nickname_raw": {
+          "agree": 49,
+          "n": 50,
+          "rate": 0.98
+        },
+        "display_name": {
+          "agree": 44,
+          "n": 50,
+          "rate": 0.88
+        },
+        "all_parts": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        }
+      },
+      "politico": {
+        "n": 50,
+        "first": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "middle_initial": {
+          "agree": 43,
+          "n": 50,
+          "rate": 0.86
+        },
+        "last": {
+          "agree": 46,
+          "n": 50,
+          "rate": 0.92
+        },
+        "suffix": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "nickname_raw": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "display_name": {
+          "agree": 45,
+          "n": 50,
+          "rate": 0.9
+        },
+        "all_parts": {
+          "agree": 41,
+          "n": 50,
+          "rate": 0.82
+        }
+      },
+      "quorum": {
+        "n": 50,
+        "first": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "middle_initial": {
+          "agree": 48,
+          "n": 50,
+          "rate": 0.96
+        },
+        "last": {
+          "agree": 48,
+          "n": 50,
+          "rate": 0.96
+        },
+        "suffix": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "nickname_raw": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "display_name": {
+          "agree": 50,
+          "n": 50,
+          "rate": 1.0
+        },
+        "all_parts": {
+          "agree": 48,
+          "n": 50,
+          "rate": 0.96
+        }
+      }
+    },
+    "littlesis_slice": {
+      "n": 50,
+      "first": {
+        "agree": 45,
+        "n": 50,
+        "rate": 0.9
+      },
+      "middle_initial": {
+        "agree": 43,
+        "n": 50,
+        "rate": 0.86
+      },
+      "last": {
+        "agree": 35,
+        "n": 50,
+        "rate": 0.7
+      },
+      "suffix": {
+        "agree": 46,
+        "n": 50,
+        "rate": 0.92
+      },
+      "nickname_raw": {
+        "agree": 46,
+        "n": 50,
+        "rate": 0.92
+      },
+      "display_name": {
+        "agree": 39,
+        "n": 50,
+        "rate": 0.78
+      },
+      "all_parts": {
+        "agree": 34,
+        "n": 50,
+        "rate": 0.68
+      }
+    }
+  },
+  "source_tag_mismatch_slice": {
+    "description": "Rows whose sample `source` tag does not match the `parser_source` the parser actually routed them through. All 6 are source=payroll_comma, parser_source=senate (Senate 'LAST, FIRST M' strings tagged as House payroll_comma). Counted in by_parser_source['senate'] AND in by_source_tag['payroll_comma'] above -- this block isolates just them.",
+    "sample_ids": [
+      "name-gold-20260906-093",
+      "name-gold-20260906-096",
+      "name-gold-20260906-097",
+      "name-gold-20260906-098",
+      "name-gold-20260906-099",
+      "name-gold-20260906-100"
+    ],
+    "stats": {
+      "n": 6,
+      "first": {
+        "agree": 6,
+        "n": 6,
+        "rate": 1.0
+      },
+      "middle_initial": {
+        "agree": 6,
+        "n": 6,
+        "rate": 1.0
+      },
+      "last": {
+        "agree": 6,
+        "n": 6,
+        "rate": 1.0
+      },
+      "suffix": {
+        "agree": 6,
+        "n": 6,
+        "rate": 1.0
+      },
+      "nickname_raw": {
+        "agree": 5,
+        "n": 6,
+        "rate": 0.833333
+      },
+      "display_name": {
+        "agree": 6,
+        "n": 6,
+        "rate": 1.0
+      },
+      "all_parts": {
+        "agree": 6,
+        "n": 6,
+        "rate": 1.0
+      }
+    }
+  },
+  "cause_summary": {
+    "all_disagreements": {
+      "PARSER_DEFECT": 33,
+      "AMBIGUOUS": 10,
+      "SOURCE_TAG": 1,
+      "NON_NAME": 10
+    },
+    "source_tag_mismatch_slice": {
+      "SOURCE_TAG": 1
+    },
+    "n_disagreement_rows": 54,
+    "n_disagreement_rows_high_confidence": 17
+  },
+  "top_parser_defect_patterns": [
+    {
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles",
+      "count": 8,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-156",
+          "raw": "Brent Marrero Pagán",
+          "parser_display_name": "Brent Marrero Pagán",
+          "label_display_name": "Brent Marrero Pagán"
+        },
+        {
+          "sample_id": "name-gold-20260906-231",
+          "raw": "Leonardo Mendoza Bernuy",
+          "parser_display_name": "Leonardo Mendoza Bernuy",
+          "label_display_name": "Leonardo Mendoza Bernuy"
+        }
+      ]
+    },
+    {
+      "pattern": "display_name_never_renders_nickname",
+      "count": 6,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-140",
+          "raw": "PATRICIA (\"TRISH\") REILLY",
+          "parser_display_name": "Patricia Reilly",
+          "label_display_name": "Patricia \"Trish\" Reilly"
+        },
+        {
+          "sample_id": "name-gold-20260906-141",
+          "raw": "mr THOMAS \"TIM\" JOHN KNUTSON",
+          "parser_display_name": "Thomas John Knutson",
+          "label_display_name": "Thomas \"Tim\" John Knutson"
+        }
+      ]
+    },
+    {
+      "pattern": "mononym_defaults_to_last_not_first",
+      "count": 5,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-142",
+          "raw": "JEREMY",
+          "parser_display_name": "Jeremy",
+          "label_display_name": "Jeremy"
+        },
+        {
+          "sample_id": "name-gold-20260906-143",
+          "raw": "JULIE",
+          "parser_display_name": "Julie",
+          "label_display_name": "Julie"
+        }
+      ]
+    },
+    {
+      "pattern": "house_csv_positional_no_multitoken_surname_detection",
+      "count": 4,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-025",
+          "raw": "DEL BECCARO CHRISTOPHER E",
+          "parser_display_name": "Beccaro Christopher E. del",
+          "label_display_name": "Christopher E. Del Beccaro"
+        },
+        {
+          "sample_id": "name-gold-20260906-030",
+          "raw": "GRECO JOHNSON KRISTINE M",
+          "parser_display_name": "Johnson Kristine M. Greco",
+          "label_display_name": "Kristine M. Greco Johnson"
+        }
+      ]
+    },
+    {
+      "pattern": "payroll_comma_jobtitle_glued_to_name",
+      "count": 4,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-089",
+          "raw": "ASSISTANT(REPUBLICAN)SOMMER, MATTHEW",
+          "parser_display_name": "Matthew Assistant Republican Sommer",
+          "label_display_name": "Matthew Sommer"
+        },
+        {
+          "sample_id": "name-gold-20260906-090",
+          "raw": "CLESI, CHRISTIAN D FELLOW (DEMOCRATIC",
+          "parser_display_name": "Christian D. Fellow Democratic Clesi",
+          "label_display_name": "Christian D. Clesi"
+        }
+      ]
+    },
+    {
+      "pattern": "display_trailing_annotation_absorbed",
+      "count": 3,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-111",
+          "raw": "JILL DOWELL - EFFECTIVE 2/9/21",
+          "parser_display_name": "Jill Dowell Effective 2. 9. 21",
+          "label_display_name": "Jill Dowell"
+        },
+        {
+          "sample_id": "name-gold-20260906-139",
+          "raw": "MATTHEW SMITH (TIKTOK VALESKO",
+          "parser_display_name": "Matthew Smith Tiktok Valesko",
+          "label_display_name": "Matthew Smith"
+        }
+      ]
+    },
+    {
+      "pattern": "nickname_regex_captures_non_nickname_parenthetical",
+      "count": 3,
+      "examples": [
+        {
+          "sample_id": "name-gold-20260906-137",
+          "raw": "DAVID LESSTRANG (CONTRACT LOBBYIST)",
+          "parser_display_name": "David Lesstrang",
+          "label_display_name": "David Lesstrang"
+        },
+        {
+          "sample_id": "name-gold-20260906-138",
+          "raw": "JOHN ANDERSON (NAME ERROR/NOT A REAL PERSON) jr",
+          "parser_display_name": "John Anderson Jr.",
+          "label_display_name": "John Anderson Jr."
+        }
+      ]
+    }
+  ],
+  "disagreements": [
+    {
+      "sample_id": "name-gold-20260906-025",
+      "source": "house_csv",
+      "parser_source": "house_csv",
+      "source_tag_mismatch": false,
+      "stratum": "overflow",
+      "raw": "DEL BECCARO CHRISTOPHER E",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "BECCARO",
+        "middle": "CHRISTOPHER E",
+        "last": "DEL",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Beccaro Christopher E. del",
+        "format_detected": "house_csv"
+      },
+      "label_parts": {
+        "first": "Christopher",
+        "middle": "E",
+        "last": "Del Beccaro",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Christopher E. Del Beccaro",
+        "confidence": "low",
+        "note": "Two-token surname assumed (Del Beccaro) over literal first-token split, since 'Beccaro' is implausible as a first name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "house_csv rule takes token0=last, token1=first with no multi-token-surname detection; splits the two-token Italian-style surname 'Del Beccaro' into last=Del, first=Beccaro. Label confidence=low (its own reading is a plausibility judgment too), but 'Beccaro' as a first name is not credible.",
+      "pattern": "house_csv_positional_no_multitoken_surname_detection"
+    },
+    {
+      "sample_id": "name-gold-20260906-030",
+      "source": "house_csv",
+      "parser_source": "house_csv",
+      "source_tag_mismatch": false,
+      "stratum": "overflow",
+      "raw": "GRECO JOHNSON KRISTINE M",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "JOHNSON",
+        "middle": "KRISTINE M",
+        "last": "GRECO",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Johnson Kristine M. Greco",
+        "format_detected": "house_csv"
+      },
+      "label_parts": {
+        "first": "Kristine",
+        "middle": "M",
+        "last": "Greco Johnson",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Kristine M. Greco Johnson",
+        "confidence": "low",
+        "note": "Two-token surname assumed (Greco Johnson, e.g. hyphenless married double surname) over reading 'Johnson' as a first name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same house_csv positional defect: two-token married double surname 'Greco Johnson' split into last=Greco, first=Johnson.",
+      "pattern": "house_csv_positional_no_multitoken_surname_detection"
+    },
+    {
+      "sample_id": "name-gold-20260906-039",
+      "source": "house_csv",
+      "parser_source": "house_csv",
+      "source_tag_mismatch": false,
+      "stratum": "overflow",
+      "raw": "RIVERA ALMANSA KARLA M.",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "ALMANSA",
+        "middle": "KARLA M",
+        "last": "RIVERA",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Almansa Karla M. Rivera",
+        "format_detected": "house_csv"
+      },
+      "label_parts": {
+        "first": "Karla",
+        "middle": "M",
+        "last": "Rivera Almansa",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Karla M. Rivera Almansa",
+        "confidence": "low",
+        "note": "Two-token Spanish-style surname assumed (Rivera Almansa) over reading 'Almansa' as a first name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same house_csv positional defect: two-token Spanish-style surname 'Rivera Almansa' split into last=Rivera, first=Almansa.",
+      "pattern": "house_csv_positional_no_multitoken_surname_detection"
+    },
+    {
+      "sample_id": "name-gold-20260906-044",
+      "source": "house_csv",
+      "parser_source": "house_csv",
+      "source_tag_mismatch": false,
+      "stratum": "overflow",
+      "raw": "WALL KELSEY V",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "KELSEY",
+        "middle": "",
+        "last": "WALL",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Kelsey Wall V",
+        "format_detected": "house_csv"
+      },
+      "label_parts": {
+        "first": "Kelsey",
+        "middle": "V",
+        "last": "Wall",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Kelsey V. Wall",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Bare 'V' is both a valid Roman-numeral suffix and a plausible middle initial; name_standard.py's docstring (rule 2) documents this exact fork as deliberate -- it treats a whole-token 'V' as a suffix specifically to keep the payroll re-key stable, not because it is more often correct. Gold reads V as a middle initial. This exact fork explains 9 of the 54 disagreements (044, 068, 069, 206, 207, 208, 209, 210, 269) and 9 of the 10 high-confidence all_parts failures -- worth Paul's attention as an empirical base-rate signal even though it is a documented choice, not a bug.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-046",
+      "source": "house_csv",
+      "parser_source": "house_csv",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "BRAVO LIRANZA GABRIEL A",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "LIRANZA",
+        "middle": "GABRIEL A",
+        "last": "BRAVO",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Liranza Gabriel A. Bravo",
+        "format_detected": "house_csv"
+      },
+      "label_parts": {
+        "first": "Gabriel",
+        "middle": "A",
+        "last": "Bravo Liranza",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Gabriel A. Bravo Liranza",
+        "confidence": "low",
+        "note": "Two-token Spanish-style surname assumed (Bravo Liranza) over reading 'Liranza' as a first name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same house_csv positional defect: two-token Spanish-style surname 'Bravo Liranza' split into last=Bravo, first=Liranza.",
+      "pattern": "house_csv_positional_no_multitoken_surname_detection"
+    },
+    {
+      "sample_id": "name-gold-20260906-068",
+      "source": "payroll_comma",
+      "parser_source": "payroll_comma",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "JOLLY-MARSHALL, LISA V.",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "LISA",
+        "middle": "",
+        "last": "JOLLY-MARSHALL",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Lisa Jolly-Marshall V",
+        "format_detected": "payroll_comma"
+      },
+      "label_parts": {
+        "first": "Lisa",
+        "middle": "V",
+        "last": "Jolly-Marshall",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Lisa V. Jolly-Marshall",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-069",
+      "source": "payroll_comma",
+      "parser_source": "payroll_comma",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "MIDDLETON,JACK V",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "JACK",
+        "middle": "",
+        "last": "MIDDLETON",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Jack Middleton V",
+        "format_detected": "payroll_comma"
+      },
+      "label_parts": {
+        "first": "Jack",
+        "middle": "V",
+        "last": "Middleton",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Jack V. Middleton",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-089",
+      "source": "payroll_comma",
+      "parser_source": "payroll_comma",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "ASSISTANT(REPUBLICAN)SOMMER, MATTHEW",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "MATTHEW",
+        "middle": "",
+        "last": "ASSISTANT REPUBLICAN SOMMER",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Matthew Assistant Republican Sommer",
+        "format_detected": "payroll_comma"
+      },
+      "label_parts": {
+        "first": "Matthew",
+        "middle": null,
+        "last": "Sommer",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Matthew Sommer",
+        "confidence": "low",
+        "note": "Job-title fragment 'ASSISTANT(REPUBLICAN)' glued to the surname was stripped as non-name content."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "payroll_comma has no non-name-token detection; the job/party fragment 'ASSISTANT(REPUBLICAN)' tokenises into 3 word-tokens that all land left of the comma and get joined whole into `last`.",
+      "pattern": "payroll_comma_jobtitle_glued_to_name"
+    },
+    {
+      "sample_id": "name-gold-20260906-090",
+      "source": "payroll_comma",
+      "parser_source": "payroll_comma",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "CLESI, CHRISTIAN D FELLOW (DEMOCRATIC",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "CHRISTIAN",
+        "middle": "D FELLOW DEMOCRATIC",
+        "last": "CLESI",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Christian D. Fellow Democratic Clesi",
+        "format_detected": "payroll_comma"
+      },
+      "label_parts": {
+        "first": "Christian",
+        "middle": "D",
+        "last": "Clesi",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Christian D. Clesi",
+        "confidence": "low",
+        "note": "Trailing truncated job-title fragment 'FELLOW (DEMOCRATIC' dropped as non-name content."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same gap on the given-name side: the truncated fragment 'FELLOW (DEMOCRATIC' tokenises and joins into `middle` after the real middle initial 'D'. This does not break all_parts, since middle is scored as an initial only -- it only breaks display_name (and the full middle string).",
+      "pattern": "payroll_comma_jobtitle_glued_to_name"
+    },
+    {
+      "sample_id": "name-gold-20260906-091",
+      "source": "payroll_comma",
+      "parser_source": "payroll_comma",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "DIRECTOR (FORT WORTH)NICHOLSON, EMILY J",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "EMILY",
+        "middle": "J",
+        "last": "DIRECTOR FORT WORTH NICHOLSON",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Emily J. Director Fort Worth Nicholson",
+        "format_detected": "payroll_comma"
+      },
+      "label_parts": {
+        "first": "Emily",
+        "middle": "J",
+        "last": "Nicholson",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Emily J. Nicholson",
+        "confidence": "low",
+        "note": "Job-title fragment 'DIRECTOR (FORT WORTH)' glued to the surname was stripped as non-name content."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same gap: the job-title fragment 'DIRECTOR (FORT WORTH)' glued before the surname joins whole into `last`.",
+      "pattern": "payroll_comma_jobtitle_glued_to_name"
+    },
+    {
+      "sample_id": "name-gold-20260906-092",
+      "source": "payroll_comma",
+      "parser_source": "payroll_comma",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "ERSHIP LIAISON(MINORITY)HAWKINS, THOMAS P",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "THOMAS",
+        "middle": "P",
+        "last": "ERSHIP LIAISON MINORITY HAWKINS",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Thomas P. Ership Liaison Minority Hawkins",
+        "format_detected": "payroll_comma"
+      },
+      "label_parts": {
+        "first": "Thomas",
+        "middle": "P",
+        "last": "Hawkins",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Thomas P. Hawkins",
+        "confidence": "low",
+        "note": "Leading fragment is a truncated job title (likely '...ERSHIP LIAISON(MINORITY)') glued to the surname; stripped as non-name content."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same gap on a truncated leading fragment: '...ERSHIP LIAISON(MINORITY)' (itself missing its own opening letters, an upstream data-truncation issue) joins whole into `last` ahead of the real surname 'Hawkins'.",
+      "pattern": "payroll_comma_jobtitle_glued_to_name"
+    },
+    {
+      "sample_id": "name-gold-20260906-093",
+      "source": "payroll_comma",
+      "parser_source": "senate",
+      "source_tag_mismatch": true,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "SENATOR TOM UDALL (NM)",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": false,
+        "display_name": true,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "nickname_raw"
+      ],
+      "parser_parts": {
+        "first": "TOM",
+        "middle": "",
+        "last": "UDALL",
+        "suffix": "",
+        "nickname_raw": "NM",
+        "display_name": "Tom Udall",
+        "format_detected": "senate_senator_western"
+      },
+      "label_parts": {
+        "first": "Tom",
+        "middle": null,
+        "last": "Udall",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Tom Udall",
+        "confidence": "high",
+        "note": "Source tag says payroll_comma but raw has no comma and matches the senate title pattern; parsed as senate. Trailing '(NM)' is a state abbreviation, not a nickname, and was dropped."
+      },
+      "cause_class": "SOURCE_TAG",
+      "cause_note": "Row is tagged source=payroll_comma but the raw string ('SENATOR TOM UDALL (NM)') has no comma and matches the senate-title pattern; the parser correctly detected this and routed it through parser_source=senate instead (see source_tag_mismatch_slice; scored under both payroll_comma and senate in the by_source_tag / by_parser_source tables above). The one resulting field disagreement is a secondary effect of the same over-broad nickname regex as the nickname_regex_captures_non_nickname_parenthetical pattern: the trailing '(NM)' state abbreviation is captured as nickname_raw, which gold correctly drops.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-111",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "date_hint",
+      "raw": "JILL DOWELL - EFFECTIVE 2/9/21",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "JILL",
+        "middle": "DOWELL EFFECTIVE 2 9",
+        "last": "21",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Jill Dowell Effective 2. 9. 21",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Jill",
+        "middle": null,
+        "last": "Dowell",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Jill Dowell",
+        "confidence": "low",
+        "note": "Trailing ' - EFFECTIVE 2/9/21' annotation dropped as non-name content."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 4 deliberately does NOT strip date-hints from display-sourced raw text (rationale: a slash in a display name might legitimately be part of the name). Here the raw really is contaminated with a payroll-style annotation ('- EFFECTIVE 2/9/21'), so the documented display exemption misfires: 'Dowell Effective 2 9' becomes middle and '21' becomes last.",
+      "pattern": "display_trailing_annotation_absorbed"
+    },
+    {
+      "sample_id": "name-gold-20260906-137",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "DAVID LESSTRANG (CONTRACT LOBBYIST)",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": false,
+        "display_name": true,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "nickname_raw"
+      ],
+      "parser_parts": {
+        "first": "DAVID",
+        "middle": "",
+        "last": "LESSTRANG",
+        "suffix": "",
+        "nickname_raw": "CONTRACT LOBBYIST",
+        "display_name": "David Lesstrang",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "David",
+        "middle": null,
+        "last": "Lesstrang",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "David Lesstrang",
+        "confidence": "low",
+        "note": "Trailing '(CONTRACT LOBBYIST)' is a role descriptor, not a nickname; dropped."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 5's nickname lift captures ANY parenthetical into nickname_raw with no content check; '(CONTRACT LOBBYIST)' is a role descriptor, not a nickname. Every other field, including display_name, already agrees.",
+      "pattern": "nickname_regex_captures_non_nickname_parenthetical"
+    },
+    {
+      "sample_id": "name-gold-20260906-138",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "JOHN ANDERSON (NAME ERROR/NOT A REAL PERSON) jr",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": false,
+        "display_name": true,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "nickname_raw"
+      ],
+      "parser_parts": {
+        "first": "JOHN",
+        "middle": "",
+        "last": "ANDERSON",
+        "suffix": "JR",
+        "nickname_raw": "NAME ERROR/NOT A REAL PERSON",
+        "display_name": "John Anderson Jr.",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "John",
+        "middle": null,
+        "last": "Anderson",
+        "suffix": "Jr",
+        "nickname_raw": null,
+        "display_name": "John Anderson Jr.",
+        "confidence": "low",
+        "note": "Parenthetical is a data-quality flag, not a nickname, dropped; source itself asserts this record is not a real person."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same rule-5 gap: '(NAME ERROR/NOT A REAL PERSON)' is a data-quality flag (the source is explicitly asserting this row is not a real person), not a nickname. first/middle/last/suffix all already agree (John/--/Anderson/Jr).",
+      "pattern": "nickname_regex_captures_non_nickname_parenthetical"
+    },
+    {
+      "sample_id": "name-gold-20260906-139",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "MATTHEW SMITH (TIKTOK VALESKO",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "MATTHEW",
+        "middle": "SMITH TIKTOK",
+        "last": "VALESKO",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Matthew Smith Tiktok Valesko",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Matthew",
+        "middle": null,
+        "last": "Smith",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Matthew Smith",
+        "confidence": "low",
+        "note": "Trailing '(TIKTOK VALESKO' is an unbalanced, truncated fragment; treated as garbled non-name content and dropped rather than as a nickname."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "The nickname regex requires a balanced '(...)'; the raw's parenthetical is unbalanced/truncated ('(TIKTOK VALESKO' with no closing paren), so it never matches as a nickname and instead tokenises straight into the name, giving middle='Smith Tiktok', last='Valesko'.",
+      "pattern": "display_trailing_annotation_absorbed"
+    },
+    {
+      "sample_id": "name-gold-20260906-140",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "PATRICIA (\"TRISH\") REILLY",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": false,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "nickname_raw",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "PATRICIA",
+        "middle": "",
+        "last": "REILLY",
+        "suffix": "",
+        "nickname_raw": "\"TRISH\"",
+        "display_name": "Patricia Reilly",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Patricia",
+        "middle": null,
+        "last": "Reilly",
+        "suffix": null,
+        "nickname_raw": "Trish",
+        "display_name": "Patricia \"Trish\" Reilly",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8's display_name() deliberately never renders nickname_raw; gold expects the nickname quoted inline ('Patricia \"Trish\" Reilly'). Separately, nickname_raw itself also has a leftover-punctuation defect here: the raw's nickname is paren-delimited with an inner literal quote pair ('(\"TRISH\")'), and the paren-capture group keeps the inner quote marks verbatim, so parser nickname_raw is the literal string '\"TRISH\"' instead of 'TRISH'. The task's normalization spec strips periods but not quote characters, so this scores as an additional nickname_raw mismatch on top of the display_name one.",
+      "pattern": "display_name_never_renders_nickname"
+    },
+    {
+      "sample_id": "name-gold-20260906-141",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "mr THOMAS \"TIM\" JOHN KNUTSON",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "THOMAS",
+        "middle": "JOHN",
+        "last": "KNUTSON",
+        "suffix": "",
+        "nickname_raw": "TIM",
+        "display_name": "Thomas John Knutson",
+        "format_detected": "display_western_titled"
+      },
+      "label_parts": {
+        "first": "Thomas",
+        "middle": "John",
+        "last": "Knutson",
+        "suffix": null,
+        "nickname_raw": "Tim",
+        "display_name": "Thomas \"Tim\" John Knutson",
+        "confidence": "high",
+        "note": "Courtesy title 'mr' dropped."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8 gap as above; nickname_raw itself ('TIM' vs 'Tim') already agrees after casefold, only display_name disagrees because it omits the nickname entirely.",
+      "pattern": "display_name_never_renders_nickname"
+    },
+    {
+      "sample_id": "name-gold-20260906-142",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "JEREMY",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "JEREMY",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Jeremy",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": "Jeremy",
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Jeremy",
+        "confidence": "low",
+        "note": "Single token; common given name, no surname provided."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8's single-remaining-token default always assigns `last` (documented rationale: payroll-key consistency), never `first`. 'Jeremy' is an extremely common English given name with no surname in the source; gold reads it as `first` with no surname.",
+      "pattern": "mononym_defaults_to_last_not_first"
+    },
+    {
+      "sample_id": "name-gold-20260906-143",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "JULIE",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "JULIE",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Julie",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": "Julie",
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Julie",
+        "confidence": "low",
+        "note": "Single token; common given name, no surname provided."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same rule-8 default; 'Julie' is a common given name.",
+      "pattern": "mononym_defaults_to_last_not_first"
+    },
+    {
+      "sample_id": "name-gold-20260906-144",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "MELINDA",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "MELINDA",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Melinda",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": "Melinda",
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Melinda",
+        "confidence": "low",
+        "note": "Single token; common given name, no surname provided."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same rule-8 default; 'Melinda' is a common given name.",
+      "pattern": "mononym_defaults_to_last_not_first"
+    },
+    {
+      "sample_id": "name-gold-20260906-145",
+      "source": "lda",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "PAMELA",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "PAMELA",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Pamela",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": "Pamela",
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Pamela",
+        "confidence": "low",
+        "note": "Single token; common given name, no surname provided."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same rule-8 default; 'Pamela' is a common given name.",
+      "pattern": "mononym_defaults_to_last_not_first"
+    },
+    {
+      "sample_id": "name-gold-20260906-156",
+      "source": "quorum",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "non_ascii",
+      "raw": "Brent Marrero Pagán",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Brent",
+        "middle": "Marrero",
+        "last": "Pagán",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Brent Marrero Pagán",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Brent",
+        "middle": null,
+        "last": "Marrero Pagán",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Brent Marrero Pagán",
+        "confidence": "low",
+        "note": "Two-token Spanish-style surname assumed (Marrero Pagán) over reading 'Marrero' as a middle name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "_split_western only extends the surname across the fixed PARTICLES set; 'Marrero' is not a particle, so only 'Pagan' becomes last and 'Marrero' is stranded in middle instead of the two-token Spanish-style surname 'Marrero Pagan'.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-197",
+      "source": "quorum",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "Mariana Adame de Vreeze",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Mariana",
+        "middle": "Adame",
+        "last": "de Vreeze",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Mariana Adame de Vreeze",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Mariana",
+        "middle": null,
+        "last": "Adame de Vreeze",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Mariana Adame de Vreeze",
+        "confidence": "low",
+        "note": "Three-token compound surname assumed (Adame de Vreeze); lowercase 'de' preserved as given in source."
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "The parser DID apply its own documented particle rule correctly here ('de' is in PARTICLES, so 'de Vreeze' is extended as the surname) -- unlike the PARSER_DEFECT surname-boundary rows above, this is not a case of zero surname-detection. Gold instead reads a three-token compound surname 'Adame de Vreeze'. Both a 2-token particle-bounded surname and a 3-token compound surname are defensible without knowing the actual person; the parser's choice is principled, not a defect.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-206",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Divya V. Sunkad",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Divya",
+        "middle": "",
+        "last": "Sunkad",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Divya Sunkad V",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Divya",
+        "middle": "V",
+        "last": "Sunkad",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Divya V. Sunkad",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044, via the display-format trailing-token suffix lift.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-207",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Ekaterina V. Pedyash",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Ekaterina",
+        "middle": "",
+        "last": "Pedyash",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Ekaterina Pedyash V",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Ekaterina",
+        "middle": "V",
+        "last": "Pedyash",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Ekaterina V. Pedyash",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-208",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Elisabeth V. Feichter",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Elisabeth",
+        "middle": "",
+        "last": "Feichter",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Elisabeth Feichter V",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Elisabeth",
+        "middle": "V",
+        "last": "Feichter",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Elisabeth V. Feichter",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-209",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Emily V. McBride",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Emily",
+        "middle": "",
+        "last": "McBride",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Emily McBride V",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Emily",
+        "middle": "V",
+        "last": "McBride",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Emily V. McBride",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-210",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Jonah V. Layton",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Jonah",
+        "middle": "",
+        "last": "Layton",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Jonah Layton V",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Jonah",
+        "middle": "V",
+        "last": "Layton",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Jonah V. Layton",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-231",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "plain",
+      "raw": "Leonardo Mendoza Bernuy",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Leonardo",
+        "middle": "Mendoza",
+        "last": "Bernuy",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Leonardo Mendoza Bernuy",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Leonardo",
+        "middle": null,
+        "last": "Mendoza Bernuy",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Leonardo Mendoza Bernuy",
+        "confidence": "low",
+        "note": "Two-token Spanish-style surname assumed (Mendoza Bernuy) over reading 'Mendoza' as a middle name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same _split_western gap: 'Mendoza' is not a particle, so only 'Bernuy' becomes last instead of the two-token Spanish-style surname 'Mendoza Bernuy'.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-246",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "Antonia Germano Do Nascimento",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Antonia",
+        "middle": "Germano Do",
+        "last": "Nascimento",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Antonia Germano Do Nascimento",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Antonia",
+        "middle": null,
+        "last": "Germano Do Nascimento",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Antonia Germano Do Nascimento",
+        "confidence": "low",
+        "note": "Three-token Portuguese-style compound surname assumed (Germano Do Nascimento)."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same _split_western gap, specifically a missing-particle case: 'do' (as in 'Germano Do Nascimento') is not in the PARTICLES set even though 'dos'/'da'/'das'/'du' are -- an easy, targeted fix, unlike the general unmarked-double-surname cases in this pattern.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-249",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "Irene C. Dufour Allen",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Irene",
+        "middle": "C Dufour",
+        "last": "Allen",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Irene C. Dufour Allen",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Irene",
+        "middle": "C",
+        "last": "Dufour Allen",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Irene C. Dufour Allen",
+        "confidence": "low",
+        "note": "Two-token surname assumed (Dufour Allen, e.g. hyphenless married double surname) over reading 'Dufour' as a second middle name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same _split_western gap: 'Dufour' is not a particle, so only 'Allen' becomes last instead of the two-token surname 'Dufour Allen'.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-250",
+      "source": "politico",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "Valeria S. Velazquez Cotto",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Valeria",
+        "middle": "S Velazquez",
+        "last": "Cotto",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Valeria S. Velazquez Cotto",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Valeria",
+        "middle": "S",
+        "last": "Velazquez Cotto",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Valeria S. Velazquez Cotto",
+        "confidence": "low",
+        "note": "Two-token Spanish-style surname assumed (Velazquez Cotto)."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same _split_western gap: 'Velazquez' is not a particle, so only 'Cotto' becomes last instead of the two-token Spanish-style surname 'Velazquez Cotto'.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-261",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "date_hint",
+      "raw": "Clarence OtisJr &PNC Bank N A Tstees of the John E Barbey Trst UDT dtd 08/21/51 FBO Helen Mucklow(dec'd)A S appt'd for JohnE B DuPont UrsulaFairbairn",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": false,
+        "nickname_raw": false,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last",
+        "suffix",
+        "nickname_raw",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Clarence",
+        "middle": "OtisJr PNC Bank N A Tstees of the John E Barbey Trst UDT dtd 08 21 51 FBO Helen Mucklow A S appt'd for JohnE B DuPont",
+        "last": "UrsulaFairbairn",
+        "suffix": "",
+        "nickname_raw": "dec'd",
+        "display_name": "Clarence OtisJr Pnc Bank N. A. Tstees Of The John E. Barbey Trst Udt Dtd 08 21 51 Fbo Helen Mucklow A. S. Appt'd For JohnE B. DuPont UrsulaFairbairn",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Clarence",
+        "middle": null,
+        "last": "Otis",
+        "suffix": "Jr",
+        "nickname_raw": null,
+        "display_name": "Clarence Otis Jr.",
+        "confidence": "low",
+        "note": "Raw is garbled multi-party trust/proxy text, not a single clean personal name; extracted only the leading 'Clarence Otis[Jr]' fragment as the primary trustee. Co-trustee 'Ursula Fairbairn' and other beneficiaries named in the text are not represented in the structured fields."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Raw is garbled multi-party trust/proxy legal text, not a clean personal name; gold extracts only the leading 'Clarence Otis Jr' fragment as a best-guess primary trustee. No positional/token-based parser could be expected to isolate the right fragment from this kind of legal boilerplate without semantic understanding of trust documents.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-262",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "date_hint",
+      "raw": "ClarenceOtisJr PNC Bank N A Tstees of theJohn E Barbey Trst UDT dtd 8/21/51 FBO MaryG Barbey(dec'd) A S appt'd for Kelly G Barbey UrsulaFairbairn",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": false,
+        "nickname_raw": false,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "suffix",
+        "nickname_raw",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "ClarenceOtisJr",
+        "middle": "PNC Bank N A Tstees of theJohn E Barbey Trst UDT dtd 8 21 51 FBO MaryG Barbey A S appt'd for Kelly G Barbey",
+        "last": "UrsulaFairbairn",
+        "suffix": "",
+        "nickname_raw": "dec'd",
+        "display_name": "ClarenceOtisJr Pnc Bank N. A. Tstees Of theJohn E. Barbey Trst Udt Dtd 8. 21 51 Fbo MaryG Barbey A. S. Appt'd For Kelly G. Barbey UrsulaFairbairn",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Clarence",
+        "middle": null,
+        "last": "Otis",
+        "suffix": "Jr",
+        "nickname_raw": null,
+        "display_name": "Clarence Otis Jr.",
+        "confidence": "low",
+        "note": "Raw is garbled multi-party trust/proxy text (leading token 'ClarenceOtisJr' fully concatenated); extracted only the leading trustee fragment. Co-trustee 'Ursula Fairbairn' and other beneficiaries are not represented in the structured fields."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Same garbled multi-party trust-text family as 261 (sibling record); the leading token is fully concatenated ('ClarenceOtisJr') here.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-263",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "date_hint",
+      "raw": "ClarenceOtisJr PNC BankNA Trstees of the JohnE Barbey Trst UDTdtd 08/21/51 FBO HelenMucklow(dec'd) A S appt'd forCatharineA Varacchi UrsulaFairbairn",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": false,
+        "nickname_raw": false,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "suffix",
+        "nickname_raw",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "ClarenceOtisJr",
+        "middle": "PNC BankNA Trstees of the JohnE Barbey Trst UDTdtd 08 21 51 FBO HelenMucklow A S appt'd forCatharineA Varacchi",
+        "last": "UrsulaFairbairn",
+        "suffix": "",
+        "nickname_raw": "dec'd",
+        "display_name": "ClarenceOtisJr Pnc BankNA Trstees Of The JohnE Barbey Trst UDTdtd 08 21 51 Fbo HelenMucklow A. S. Appt'd forCatharineA Varacchi UrsulaFairbairn",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Clarence",
+        "middle": null,
+        "last": "Otis",
+        "suffix": "Jr",
+        "nickname_raw": null,
+        "display_name": "Clarence Otis Jr.",
+        "confidence": "low",
+        "note": "Raw is garbled multi-party trust/proxy text (leading token 'ClarenceOtisJr' fully concatenated); extracted only the leading trustee fragment. Co-trustee 'Ursula Fairbairn' and other beneficiaries are not represented in the structured fields."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Same garbled multi-party trust-text family as 261/262 (sibling record).",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-264",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "date_hint",
+      "raw": "F FairbairnClarence OtisJr& PNC Del Trust CoTstees of John E Barbey Trst UDTdtd 8/21/51 FBO MaryG Barbeyas appt'd for KatrinaBurrus Ursula",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "F",
+        "middle": "FairbairnClarence OtisJr PNC",
+        "last": "Del Trust CoTstees of John E Barbey Trst UDTdtd 8 21 51 FBO MaryG Barbeyas appt'd for KatrinaBurrus Ursula",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "F FairbairnClarence OtisJr Pnc Del Trust CoTstees Of John E Barbey Trst UDTdtd 8 21 51 Fbo MaryG Barbeyas Appt'd For KatrinaBurrus Ursula",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Clarence Otis Jr.",
+        "confidence": "low",
+        "note": "Raw is severely garbled multi-party trust text; the primary-trustee tokens 'Fairbairn' and 'Clarence' are fused with no space ('FairbairnClarence'), so first/middle/last are left null rather than guessed. Best-guess identity, by analogy with sibling records 261-263/265, is co-trustees Clarence Otis Jr and Ursula Fairbairn."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Same garbled multi-party trust-text family, but here even the leading fragment is fused ('FairbairnClarence') with no space, so gold declines to guess and leaves first/middle/last null rather than emit a wrong answer -- appropriately conservative on genuinely unparseable input.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-265",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "date_hint",
+      "raw": "FairbairnClarence OtisJr & PNC Bank N A Trustees of the JohnE Barbey TrustU/D/T dtd 8/21/51 FBO Helen Mucklow Barbey fbo Peter DuPont Ursula",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "middle_initial",
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "FairbairnClarence",
+        "middle": "OtisJr PNC Bank N A Trustees of the JohnE Barbey TrustU D T dtd 8 21 51 FBO Helen Mucklow Barbey fbo Peter DuPont",
+        "last": "Ursula",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "FairbairnClarence OtisJr Pnc Bank N. A. Trustees Of The JohnE Barbey TrustU D. T. Dtd 8. 21 51 Fbo Helen Mucklow Barbey Fbo Peter DuPont Ursula",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Clarence Otis Jr.",
+        "confidence": "low",
+        "note": "Raw is severely garbled multi-party trust text; the leading tokens 'FairbairnClarence' are fused with no space, so first/middle/last are left null rather than guessed. Best-guess identity, by analogy with sibling records 261-263, is co-trustees Clarence Otis Jr and Ursula Fairbairn."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Same as 264: leading tokens fused ('FairbairnClarence'), gold leaves first/middle/last null.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-266",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Constantine II",
+      "confidence": "low",
+      "match": {
+        "first": false,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "first",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "Constantine",
+        "suffix": "II",
+        "nickname_raw": "",
+        "display_name": "Constantine II",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": "Constantine",
+        "middle": null,
+        "last": null,
+        "suffix": "II",
+        "nickname_raw": null,
+        "display_name": "Constantine II",
+        "confidence": "low",
+        "note": "Reads as a regnal name plus ordinal (e.g. a monarch), not a first/last staffer name; no surname present."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same rule-8 default, applied after suffix 'II' is correctly lifted (suffix itself agrees): the sole remaining token 'Constantine' becomes `last`, but gold reads a regnal name plus ordinal as `first`='Constantine' with no surname -- same code path as the bare-mononym cases above, just with a suffix present.",
+      "pattern": "mononym_defaults_to_last_not_first"
+    },
+    {
+      "sample_id": "name-gold-20260906-269",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "embedded_suffix",
+      "raw": "Ryan V. Safner",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": true,
+        "suffix": false,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "suffix",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Ryan",
+        "middle": "",
+        "last": "Safner",
+        "suffix": "V",
+        "nickname_raw": "",
+        "display_name": "Ryan Safner V",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Ryan",
+        "middle": "V",
+        "last": "Safner",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Ryan V. Safner",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "AMBIGUOUS",
+      "cause_note": "Same documented bare-'V' suffix-vs-middle-initial fork as 044.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-272",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "non_ascii",
+      "raw": "Júlio Cesar Nery Ferreira",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "Júlio",
+        "middle": "Cesar Nery",
+        "last": "Ferreira",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Júlio Cesar Nery Ferreira",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Júlio",
+        "middle": "Cesar",
+        "last": "Nery Ferreira",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Júlio Cesar Nery Ferreira",
+        "confidence": "low",
+        "note": "Read as First+Middle+two-token surname (Nery Ferreira); Portuguese-style multi-part names admit other splits (e.g. three-word surname)."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same _split_western gap: 'Nery' is not a particle, so only 'Ferreira' becomes last instead of the two-token Portuguese-style surname 'Nery Ferreira'.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-274",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "non_ascii",
+      "raw": "René Pinto Lugo",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": false,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "middle_initial",
+        "last"
+      ],
+      "parser_parts": {
+        "first": "René",
+        "middle": "Pinto",
+        "last": "Lugo",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "René Pinto Lugo",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "René",
+        "middle": null,
+        "last": "Pinto Lugo",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "René Pinto Lugo",
+        "confidence": "low",
+        "note": "Two-token Spanish-style surname assumed (Pinto Lugo) over reading 'Pinto' as a middle name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same _split_western gap: with only 3 tokens and no particle, 'Pinto' is read as the whole middle and 'Lugo' as last, instead of treating 'Pinto Lugo' as one two-token surname with no middle name.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-286",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "Isaac \"Jack\" Azran",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Isaac",
+        "middle": "",
+        "last": "Azran",
+        "suffix": "",
+        "nickname_raw": "Jack",
+        "display_name": "Isaac Azran",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Isaac",
+        "middle": null,
+        "last": "Azran",
+        "suffix": null,
+        "nickname_raw": "Jack",
+        "display_name": "Isaac \"Jack\" Azran",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8 gap as above; nickname_raw agrees ('Jack'), only display_name disagrees.",
+      "pattern": "display_name_never_renders_nickname"
+    },
+    {
+      "sample_id": "name-gold-20260906-287",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "Keith Uncapher (Deceased)",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": false,
+        "display_name": true,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "nickname_raw"
+      ],
+      "parser_parts": {
+        "first": "Keith",
+        "middle": "",
+        "last": "Uncapher",
+        "suffix": "",
+        "nickname_raw": "Deceased",
+        "display_name": "Keith Uncapher",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Keith",
+        "middle": null,
+        "last": "Uncapher",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Keith Uncapher",
+        "confidence": "low",
+        "note": "Trailing '(Deceased)' is a status flag, not a nickname; dropped."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Same rule-5 gap: '(Deceased)' is a status flag, not a nickname.",
+      "pattern": "nickname_regex_captures_non_nickname_parenthetical"
+    },
+    {
+      "sample_id": "name-gold-20260906-288",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "Nathaniel \"Tyler\" Lemons",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Nathaniel",
+        "middle": "",
+        "last": "Lemons",
+        "suffix": "",
+        "nickname_raw": "Tyler",
+        "display_name": "Nathaniel Lemons",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Nathaniel",
+        "middle": null,
+        "last": "Lemons",
+        "suffix": null,
+        "nickname_raw": "Tyler",
+        "display_name": "Nathaniel \"Tyler\" Lemons",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8 gap as above; nickname_raw agrees ('Tyler'), only display_name disagrees.",
+      "pattern": "display_name_never_renders_nickname"
+    },
+    {
+      "sample_id": "name-gold-20260906-289",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "Soohyung “Soo” Kim.",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Soohyung",
+        "middle": "",
+        "last": "Kim",
+        "suffix": "",
+        "nickname_raw": "Soo",
+        "display_name": "Soohyung Kim",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Soohyung",
+        "middle": null,
+        "last": "Kim",
+        "suffix": null,
+        "nickname_raw": "Soo",
+        "display_name": "Soohyung \"Soo\" Kim",
+        "confidence": "high",
+        "note": "Curly quotes around nickname and trailing sentence period after 'Kim.' both normalized."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8 gap as above; nickname_raw agrees ('Soo') and the curly-quote/trailing-period cleanup both work correctly, only display_name disagrees because it omits the nickname.",
+      "pattern": "display_name_never_renders_nickname"
+    },
+    {
+      "sample_id": "name-gold-20260906-290",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "quoted_or_paren_nickname",
+      "raw": "William “Fritz” Reber",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": true,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": true
+      },
+      "fields_disagreed": [
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "William",
+        "middle": "",
+        "last": "Reber",
+        "suffix": "",
+        "nickname_raw": "Fritz",
+        "display_name": "William Reber",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "William",
+        "middle": null,
+        "last": "Reber",
+        "suffix": null,
+        "nickname_raw": "Fritz",
+        "display_name": "William \"Fritz\" Reber",
+        "confidence": "high",
+        "note": "Curly quotes around nickname normalized."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "Rule 8 gap as above; nickname_raw agrees ('Fritz'), only display_name disagrees.",
+      "pattern": "display_name_never_renders_nickname"
+    },
+    {
+      "sample_id": "name-gold-20260906-291",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "Brainwash",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "Brainwash",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Brainwash",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Brainwash",
+        "confidence": "low",
+        "note": "Single-word alias/moniker, not a conventional first/last personal name."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Single-word stage name/alias ('Brainwash'); not decomposable into first/last at all -- gold correctly declines rather than force it into `last` the way the parser's single-token default does.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-292",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "Brimstone",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "Brimstone",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Brimstone",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Brimstone",
+        "confidence": "low",
+        "note": "Single-word alias/moniker, not a conventional first/last personal name."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Single-word stage name/alias ('Brimstone'); same as 291.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-293",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "Directors",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "Directors",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Directors",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Directors",
+        "confidence": "low",
+        "note": "Plural organizational role ('Board of Directors'), not a personal name at all."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "'Directors' is a plural organizational role (Board of Directors), not a person at all.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-294",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "JonOne",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "JonOne",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "JonOne",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "JonOne",
+        "confidence": "low",
+        "note": "Stylized single-token artist alias (concatenated 'Jon'+'One'); not split into first/last since 'One' is not a surname."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Stylized concatenated artist alias ('JonOne' = 'Jon'+'One'); not a first/last name.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-295",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "single_token",
+      "raw": "Moby",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "",
+        "middle": "",
+        "last": "Moby",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Moby",
+        "format_detected": "display_single_token"
+      },
+      "label_parts": {
+        "first": null,
+        "middle": null,
+        "last": null,
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Moby",
+        "confidence": "low",
+        "note": "Single-token stage name/mononym, not a first/last personal name."
+      },
+      "cause_class": "NON_NAME",
+      "cause_note": "Single-token stage name/mononym ('Moby'); same as 291/292.",
+      "pattern": ""
+    },
+    {
+      "sample_id": "name-gold-20260906-296",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "John Paul Mac Isaac",
+      "confidence": "high",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": true,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last"
+      ],
+      "parser_parts": {
+        "first": "John",
+        "middle": "Paul Mac",
+        "last": "Isaac",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "John Paul Mac Isaac",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "John",
+        "middle": "Paul",
+        "last": "Mac Isaac",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "John Paul Mac Isaac",
+        "confidence": "high",
+        "note": ""
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "'Mac' is handled as a surname prefix only at RENDER time (rule 8's _cap_segment/MAC_RUNONS), not at SPLIT time (rule 7's PARTICLES); _split_western has no way to know 'Mac Isaac' is one surname, so it reads middle='Paul Mac', last='Isaac'.",
+      "pattern": "display_western_surname_boundary_misses_nonparticle_doubles"
+    },
+    {
+      "sample_id": "name-gold-20260906-300",
+      "source": "littlesis",
+      "parser_source": "display",
+      "source_tag_mismatch": false,
+      "stratum": "three_plus_surname_tokens",
+      "raw": "Timothy D Hendrix Search",
+      "confidence": "low",
+      "match": {
+        "first": true,
+        "middle_initial": true,
+        "last": false,
+        "suffix": true,
+        "nickname_raw": true,
+        "display_name": false,
+        "all_parts": false
+      },
+      "fields_disagreed": [
+        "last",
+        "display_name"
+      ],
+      "parser_parts": {
+        "first": "Timothy",
+        "middle": "D Hendrix",
+        "last": "Search",
+        "suffix": "",
+        "nickname_raw": "",
+        "display_name": "Timothy D. Hendrix Search",
+        "format_detected": "display_western"
+      },
+      "label_parts": {
+        "first": "Timothy",
+        "middle": "D",
+        "last": "Hendrix",
+        "suffix": null,
+        "nickname_raw": null,
+        "display_name": "Timothy D. Hendrix",
+        "confidence": "low",
+        "note": "Trailing 'Search' token dropped as a likely web-scraping artifact (e.g. a page search-button label), not part of the name."
+      },
+      "cause_class": "PARSER_DEFECT",
+      "cause_note": "No junk-token detection for display sources: the trailing scrape artifact 'Search' (almost certainly a leftover UI button label from the source page) is read as a second surname token, giving last='Search' instead of 'Hendrix'.",
+      "pattern": "display_trailing_annotation_absorbed"
+    }
+  ]
+}

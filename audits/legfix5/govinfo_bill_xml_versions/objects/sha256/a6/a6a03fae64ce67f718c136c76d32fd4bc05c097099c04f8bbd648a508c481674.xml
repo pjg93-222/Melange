@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H634A925667FE4552B1C6437EB098A00C" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4204 IH: Shielding Community Banks from Systemic Risk Assessments Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-06-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 4204</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230620">June 20, 2023</action-date>
+<action-desc><sponsor name-id="G000553">Mr. Green of Texas</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Federal Deposit Insurance Act to exempt community banks from any special assessment of the Federal Deposit Insurance Corporation caused by the use of the systemic risk authority under that Act, and for other purposes.</official-title>
+</form>
+<legis-body id="H102E52885EB04A27ABDC5B6934746B13" style="OLC">
+<section id="H7F55A74363BA41DDA3BBCE4661A8BE73" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Shielding Community Banks from Systemic Risk Assessments Act</short-title></quote>.</text></section> <section id="HDA52A8698E964A638D2B96E59350B0DB" section-type="subsequent-section"><enum>2.</enum><header>Special assessments to recover losses due to the use of systemic risk authority</header> <subsection id="HDD3E4DA663EE488F89AFD0AAE2DEAE50"><enum>(a)</enum><header>Findings</header><text display-inline="yes-display-inline">Congress finds the following:</text>
+<paragraph id="HED6A68C03802455688ACF1467429ED8D"><enum>(1)</enum><text display-inline="yes-display-inline">Community banks, including rural banks, community development financial institutions, and minority depository institutions, did not cause or contribute to the recent bank failures of Silicon Valley Bank and Signature Bank, and otherwise may have seen deposit outflows due to the mismanagement of these large banks.</text></paragraph> <paragraph id="HC20EDC2D10954AD38A6122957963CD1D"><enum>(2)</enum><text display-inline="yes-display-inline">The Federal Deposit Insurance Corporation has broad flexibility under law to exempt community banks from the special assessment that the Corporation will need to charge to recoup losses from the use of the systemic risk exception.</text></paragraph></subsection>
+<subsection id="H5231F80FBC83418BA39846667C8A3FAF"><enum>(b)</enum><header>Sense of Congress</header><text display-inline="yes-display-inline">It is the sense of the Congress that the Federal Deposit Insurance Corporation should fully exempt community banks from any special assessment to recoup losses to the Deposit Insurance Fund due to the failures of Silicon Valley Bank and Signature Bank and the use of the systemic risk exception.</text></subsection> <subsection id="H3DBFD598666F4752A4BDEA5F9FE452A0"><enum>(c)</enum><header>Limitations on special assessments related to the use of the systemic risk authority</header><text display-inline="yes-display-inline">Section 13(c)(4)(G)(ii) of the Federal Deposit Insurance Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1823">12 U.S.C. 1823(c)(4)(G)(ii)</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" id="HE404B50BFC914ABABAB4A9D88ED3648B" display-inline="no-display-inline">
+<subclause id="HA24C3FE37DDA47D3B644305A5724D424"><enum>(IV)</enum><header>Exemptions; graduated assessments</header><text display-inline="yes-display-inline">With respect to any special assessment described under this clause, the Corporation shall—</text> <item id="H2950565DBB9542778E9C7EFCC93C8047"><enum>(aa)</enum><text display-inline="yes-display-inline">exempt insured depository institutions and depository institution holding companies with less than $5,000,000,000 in consolidated assets (or such higher asset amount as the Corporation determines appropriate); and</text></item>
+<item id="H97165BFDCD6C4494BE3C2E142BDE48DA"><enum>(bb)</enum><text display-inline="yes-display-inline">graduate the amount of such special assessments such that insured depository institutions and depository institution holding companies with less than $50,000,000,000 in consolidated assets pay a significantly smaller portion of such assessment than those insured depository institutions and depository institution holding companies with $50,000,000,000 or more in consolidated assets.</text></item></subclause><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section> </legis-body> </bill> 
+

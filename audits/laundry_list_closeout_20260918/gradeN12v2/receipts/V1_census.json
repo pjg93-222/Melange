@@ -1,0 +1,70 @@
+{
+ "INSERT_EVIDENCE": {
+  "ledger_has_no_insert_field": true,
+  "rows_would_insert_in_builder_summary": 0
+ },
+ "by_cut_class_truncated": {
+  "A_anchored_caps": 4402,
+  "B_stop_name_paren": 141,
+  "B_unknown_surname_paren": 513,
+  "C_unanchored_paren": 127,
+  "D_mixed_case_label": 79,
+  "E_colonless_honorific": 222
+ },
+ "chars_removed_on_truncated": 2103770,
+ "cut_at_none_or_negative_on_truncated": 0,
+ "distinct_rowids": 6284,
+ "duplicate_rowids": [],
+ "kept_nwords_mismatch": [],
+ "kept_text_len_ge_original_len": 0,
+ "kept_text_not_strip_of_kept_raw": [],
+ "ledger": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\\scratchpad\\fixN12v2\\v2_dry_run_ledger.jsonl",
+ "ledger_record_keys": [
+  "all_tags",
+  "chamber",
+  "classes",
+  "cut_at",
+  "cut_class",
+  "cut_tag",
+  "date",
+  "kept",
+  "member",
+  "original",
+  "package",
+  "reconstructs",
+  "removed",
+  "rowid",
+  "skip",
+  "skip_all"
+ ],
+ "prefix_failures": [],
+ "reconstruct_failures": [],
+ "reconstructs_flag_false": 0,
+ "records": 6284,
+ "rows_skipped": 800,
+ "rows_truncated": 5484,
+ "segment_tiling_failures": [],
+ "skip_any_reason": {
+  "credit_union_stance_channel_row": 19,
+  "kept_text_under_min_turn_words": 690,
+  "label_or_gold_record_points_here": 107
+ },
+ "skip_binding": {
+  "credit_union_stance_channel_row": 19,
+  "kept_text_under_min_turn_words": 674,
+  "label_or_gold_record_points_here": 107
+ },
+ "tags_by_ownership": {
+  "foreign": 6871,
+  "own": 27
+ },
+ "words_before_on_truncated": 616732,
+ "words_kept_on_truncated": 268604,
+ "words_removed_on_truncated": 348132,
+ "written_value_checks": {
+  "written_is_prefix_of_lstripped_original": 5484,
+  "written_is_prefix_of_raw_original": 5484,
+  "written_shorter_than_original": 5484,
+  "written_words_le_original_words": 5484
+ }
+}

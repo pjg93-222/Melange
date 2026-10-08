@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-Senate" dms-id="A1" public-private="public" slc-id="S1-DUN21995-H3P-NS-G89" star-print="no-star-print" bill-type="olc" stage-count="1" public-print="no"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3437 ES: COVID–19 Bankruptcy Relief Extension Consolidation Act of 2021</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form display="yes">
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">S. 3437</legis-num><current-chamber display="no">IN THE SENATE OF THE UNITED STATES</current-chamber><legis-type display="yes">AN ACT</legis-type><official-title display="yes">To extend certain COVID–19 bankruptcy relief provisions through March 27, 2022.</official-title></form><legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause"><section id="S1" section-type="section-one" commented="no" display-inline="no-display-inline"><enum>1.</enum><header display-inline="yes-display-inline">Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>COVID–19 Bankruptcy Relief Extension Consolidation Act of 2021</short-title></quote>.</text></section><section id="id5CA84B876B0E4B10B6B77770C2552FB4" commented="no" display-inline="no-display-inline" section-type="subsequent-section"><enum>2.</enum><header display-inline="yes-display-inline">Extensions</header><text display-inline="no-display-inline">Section 1001 of division FF of the Consolidated Appropriations Act, 2021 (<external-xref legal-doc="public-law" parsable-cite="pl/116/260">Public Law 116–260</external-xref>; 124 Stat. 3216) is amended by striking <quote>the date that is 1 year after the date of enactment of this Act</quote> each place the term appears and inserting <quote>March 27, 2022</quote>.</text></section></legis-body><attestation><attestation-group><attestation-date date="20211218" legis-day="20211217" chamber="Senate">Passed the Senate December 18 (legislative day, December 17), 2021.</attestation-date><attestor display="no"></attestor><role>Secretary</role></attestation-group></attestation><endorsement display="yes"></endorsement></bill> 
+

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public" stage-count="1" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1015 IS: Supporting Accurate Views of Emergency Services Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-04-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 1015</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190403">April 3, 2019</action-date><action-desc><sponsor name-id="S300">Mr. Burr</sponsor> (for himself and <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Director of the Office of Management and Budget to review and make certain revisions
+			 to the Standard Occupational Classification System, and for other
+			 purposes. </official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" id="HAB8E1E61F09A4C0E84D3A135744AC444" style="OLC">
+ <section id="H0E497618A5994CBB881B3F36F2F06B40" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Supporting Accurate Views of Emergency Services Act of 2019</short-title></quote> or the <quote><short-title>911 SAVES Act</short-title></quote>.</text> </section><section id="H4DCFD1E90DDA4760A8B3D19280B8A5BE" section-type="subsequent-section"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text>
+ <paragraph id="H4D95C5CA9BA14107B489476B2B5E5AA2"><enum>(1)</enum><text display-inline="yes-display-inline">Public safety telecommunicators play a critical role in emergency response.</text> </paragraph><paragraph id="HCF71E1D1ECB74DE5A9DDDB3B8234C35A"><enum>(2)</enum><text>The work performed by public safety telecommunicators goes far beyond merely relaying information between the public and first responders.</text>
+ </paragraph><paragraph id="H5D94A461A64546F5851FF591C54399A4"><enum>(3)</enum><text>When responding to reports of missing, abducted, and sexually exploited children, the information obtained and actions taken by public safety telecommunicators form the foundation for an effective response.</text>
+ </paragraph><paragraph id="H8664EB1065B94A2E83440E7C75915430"><enum>(4)</enum><text>When a hostage taker or suicidal person calls 9–1–1, the first contact is with the public safety telecommunicator whose negotiation skills can prevent the situation from getting worse.</text>
+ </paragraph><paragraph id="HF1B76FAF6ED44E16BAB93C25FF259602"><enum>(5)</enum><text>During active shooter incidents, public safety telecommunicators coach callers through first aid and give advice to prevent further harm, all while collecting vital information to provide situational awareness for responding officers.</text>
+ </paragraph><paragraph id="H47D0BAFB101847EA822523E6F32BDD82"><enum>(6)</enum><text>When gunshots are fired at police officers, firefighters, or emergency medical technicians, their calls for help go to public safety telecommunicators.</text>
+ </paragraph><paragraph id="HAF4F409AA10F44A8B61232CA4ACF7C30"><enum>(7)</enum><text>Public safety telecommunicators often communicate with people in great distress, harm, fear, or injury, while employing their experience and training to recognize a critical piece of information.</text>
+ </paragraph><paragraph id="H264CCCC9ECE746D2AF69944D1287120F"><enum>(8)</enum><text>There have been incidents in which public safety telecommunicators, recognizing the sound of a racked shotgun, have prevented serious harm or death of law enforcement officers who would have otherwise walked into a trap.</text>
+ </paragraph><paragraph id="H54BC5E65A31C4E2791BE0C7975BC0D56"><enum>(9)</enum><text>The work of public safety telecommunicators comes with an extreme emotional and physical impact that is compounded by long hours and the around-the-clock nature of the job.</text>
+ </paragraph><paragraph id="H44AB2296274443A8826E9296BFDCFBA9"><enum>(10)</enum><text>Research has suggested that public safety telecommunicators are exposed to trauma that may lead to the development of posttraumatic stress disorder.</text>
+ </paragraph><paragraph id="H937F5A6C756E4EB3870D4AA863E8ECEB"><enum>(11)</enum><text>Recognizing the risks associated with exposure to traumatic events, some agencies provide critical incident stress debriefing teams to lessen the psychological impact and accelerate recovery for public safety telecommunicators and first responders, alike.</text>
+ </paragraph><paragraph id="HEB178CDC3E8F455DADF230AE78195528"><enum>(12)</enum><text display-inline="yes-display-inline">The Standard Occupational Classification System is designed and maintained solely for statistical purposes, and is used by Federal statistical agencies to classify workers and jobs into occupational categories for the purpose of collecting, calculating, analyzing, or disseminating data.</text>
+ </paragraph><paragraph id="HB7F4067C4479403F81CC4FD17C6AF69E"><enum>(13)</enum><text>Occupations in the Standard Occupational Classification are classified based on work performed and, in some cases, on the skills, education, or training needed to perform the work.</text>
+ </paragraph><paragraph id="HB0D4EE8A399A4220A0E1A1D972671723"><enum>(14)</enum><text>Classifying public safety telecommunicators as a protective service occupation would correct an inaccurate representation in the Standard Occupational Classification, recognize these professionals for the lifesaving work they perform, and better align the Standard Occupational Classification with related classification systems.</text>
+ </paragraph></section><section id="H20F255754E8743DFBC164FC15053E802"><enum>3.</enum><header>Review of Standard Occupational Classification System</header><text display-inline="no-display-inline">The Director of the Office of Management and Budget shall, not later than 30 days after the date of the enactment of this Act, categorize public safety telecommunicators as a protective service occupation under the Standard Occupational Classification System.</text></section></legis-body></bill>
+
+

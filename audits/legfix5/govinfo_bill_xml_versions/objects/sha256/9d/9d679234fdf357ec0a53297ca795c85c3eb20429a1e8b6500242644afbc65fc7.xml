@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H87FF66D4E66F424C80C2F4BD2AC8577F" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4041 IH: Stop Mandating Additional Requirements for Travel Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-06-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4041</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20210622">June 22, 2021</action-date><action-desc><sponsor name-id="C001120">Mr. Crenshaw</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To terminate the order requiring persons to wear masks while on conveyances and at transportation hubs.</official-title></form><legis-body id="HB835E6DF1E45414CA2FB0349168DB822" style="OLC"><section id="H6BE87D4AD4A24EBFA08A3AA446FBE0AD" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stop Mandating Additional Requirements for Travel Act</short-title></quote> or the <quote><short-title>SMART Act</short-title></quote>.</text></section><section id="H9C97EDA96D174A3091EC9E4DA71F5CEC"><enum>2.</enum><header>Revocation of CDC order</header><text display-inline="no-display-inline">Effective on July 4, 2021, the order issued on January 29, 2021, by the Centers for Disease Control and Prevention under section 361 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/264">42 U.S.C. 264</external-xref>) establishing a requirement for persons to wear masks while on conveyances and at transportation hubs shall have no force or effect.</text></section></legis-body></bill> 
+

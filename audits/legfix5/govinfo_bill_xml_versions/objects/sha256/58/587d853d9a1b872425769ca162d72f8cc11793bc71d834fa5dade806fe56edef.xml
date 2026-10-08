@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1271 IS: Defense Acquisition Decision Making Streamlining Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-05-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 1271</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190501">May 1, 2019</action-date>
+			<action-desc><sponsor name-id="S381">Mr. Rounds</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSAS00">Committee on Armed Services</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To provide for pilot programs to streamline decision-making process for weapon systems.</official-title>
+	</form>
+	<legis-body>
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Defense Acquisition Decision Making Streamlining Act of 2019</short-title></quote>.</text> </section><section id="idAB3608B894A445AB90C9A3D6F5444ED7" section-type="subsequent-section"><enum>2.</enum><header>Pilot programs to streamline decision-making process for weapon systems</header> <subsection id="id82F4FC613B48472396F0819E9D5EBA0E"><enum>(a)</enum><header>Candidate acquisition programs</header> <paragraph id="id27FB3DD6DDEF43DB87EC3D4D75E33E76"><enum>(1)</enum><header>In general</header><text>Not later than 90 days after the date of the enactment of this Act, each Service Acquisition Executive shall recommend to the Secretary of Defense at least one major defense acquisition program for a <quote>skunk works</quote> pilot program as described in the Department of Defense’s Better Buying Power 3.0 memorandum. Each pilot program should include tailored measures to streamline the entire milestone decision process, with the results evaluated and reported for potential wider use.</text>
+ </paragraph><paragraph id="id613CB9CE695344BE838F7982045AA659"><enum>(2)</enum><header>Elements</header><text>Each pilot program selected pursuant to paragraph (1) shall include the following elements:</text> <subparagraph id="idB3EC3109B7084E579151330B085A5701"><enum>(A)</enum><text>Delineating the appropriate information needed to support milestone decisions, assuring program accountability and oversight, which should be based on the business case principles needed for well-informed milestone decisions, including user-defined requirements, reasonable acquisition and life-cycle cost estimates, and a knowledge-based acquisition plan for maturing technologies, stabilizing the program design, and ensuring key manufacturing processes are in control.</text>
+ </subparagraph><subparagraph id="id7A0F5E82A17F46AC8B2CC16160BF997C"><enum>(B)</enum><text>Developing an efficient process for providing this information to the milestone decision authority by—</text>
+ <clause id="id28A6310EC43E4B5AAE21197ABE8C4151"><enum>(i)</enum><text>minimizing any reviews between the program office and the different functional staff offices within each chain of command level; and</text>
+ </clause><clause id="id9726610DBC3D48D2945CCF73DF59209F"><enum>(ii)</enum><text>establishing frequent, regular interaction between the program office and milestone decision makers, in lieu of documentation reviews, to help expedite the process.</text>
+ </clause></subparagraph></paragraph></subsection><subsection id="id35AADACAD1034D8797DBB080E02756B9"><enum>(b)</enum><header>Briefing</header><text>Not later than 180 days after the date of the enactment of this Act, the Under Secretary of Defense for Acquisition and Sustainment shall provide to the congressional defense committees an informal briefing detailing—</text>
+ <paragraph id="id38F70AB19C1246789A6D1B08B3A43477"><enum>(1)</enum><text>the acquisition programs selected pursuant to subsection (a);</text> </paragraph><paragraph id="id79C7567C866B4962887755B7BADE50D3"><enum>(2)</enum><text>the associated action plans, including timelines, for each program; and</text>
+ </paragraph><paragraph id="id44CE3CF316864C4F9B5A385101F7D78E"><enum>(3)</enum><text>the manner in which each program conforms to the requirements set forth in subsection (a)(2).</text> </paragraph></subsection><subsection id="id80A9F828C8414A44B4DB284F876E0E17"><enum>(c)</enum><header>Congressional defense committees defined</header><text>In this section, the term <term>congressional defense committees</term> has the meaning given that term in section 101(a)(16) of title 10, United States Code.</text>
+			</subsection></section></legis-body>
+</bill>
+
+

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H64E1D091BCC34C1FA2A4F16EFDAB1528" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>115 HR 1596 IH: Stabilizing Vulnerable Banks Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-03-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1596</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230314">March 14, 2023</action-date><action-desc><sponsor name-id="M001196">Mr. Moulton</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Economic Growth, Regulatory Relief, and Consumer Protection Act to repeal the exemption from enhanced supervision and prudential standards applicable to bank holding companies with total consolidated assets between $50,000,000,000 and $250,000,000,000.</official-title></form><legis-body id="H54AAC36461A04A28AC2D56AFC86417C7" style="OLC"><section id="HE7038D08817D46209EDFCBE3A4535B04" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stabilizing Vulnerable Banks Act</short-title></quote>.</text></section><section id="H1CDC4A6586854499ABFD1306164E8AEF"><enum>2.</enum><header>Enhanced supervision and prudential standards for certain bank holding companies</header><subsection id="H8B37696E97BA47F3A5B30273F9A45696"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 401 of the Economic Growth, Regulatory Relief, and Consumer Protection Act (<external-xref legal-doc="public-law" parsable-cite="pl/115/174">Public Law 115–174</external-xref>) is hereby repealed and the provisions of law amended by such section are revived or restored as if such section had not been enacted.</text></subsection><subsection id="H99532306519046C8BDA71BD0EF10B602"><enum>(b)</enum><header>Clerical amendment</header><text display-inline="yes-display-inline">The table of contents for the Economic Growth, Regulatory Relief, and Consumer Protection Act is amended by striking the item relating to section 401.</text></subsection></section></legis-body></bill> 
+

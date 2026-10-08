@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H7B427CE4D34E462090465DD83B0F3E5B" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 963 IH: Home Loan Quality Transparency Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 963</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190205">February 5, 2019</action-date><action-desc><sponsor name-id="V000081">Ms. Vel&#225;zquez</sponsor> (for herself, <cosponsor name-id="M000087">Mrs. Carolyn B. Maloney of New York</cosponsor>, and <cosponsor name-id="G000553">Mr. Green of Texas</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Home Mortgage Disclosure Act of 1975 to modify the exemptions from certain disclosure requirements.</official-title></form><legis-body id="HBA3E025169FB4C78AB5ACF671FA99198" style="OLC"> 
+<section id="HF78FEB74093E4688B0E97DC357C20871" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Home Loan Quality Transparency Act of 2019</short-title></quote>.</text></section> <section id="H72FD5AEB43C841BA89251E029F726191"><enum>2.</enum><header>Exemption from certain disclosure requirements</header> <subsection id="H0287BFB9621F4FAEB6EA5BCB5D0C111B"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 304 of the Home Mortgage Disclosure Act of 1975 (<external-xref legal-doc="usc" parsable-cite="usc/12/2803">12 U.S.C. 2803</external-xref>) is amended—</text> 
+<paragraph id="H3F58D29CE915488789EDE65031BE9E06"><enum>(1)</enum><text display-inline="yes-display-inline">by striking subsection (i) and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="H6407C55B8EC1429C9AF59B3658F8B866" style="OLC"> <subsection id="HFC28A7C9A0A04B49B2FE12D11449527D"><enum>(i)</enum><header>Exemption from certain disclosure requirements</header><text>The requirements of paragraphs (4), (5), and (6) of subsection (b) shall not apply with respect to any depository institution described in section 303(3)(A) that has total assets, as of the most recent full fiscal year of the institution, of $30,000,000 or less.</text></subsection><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="H7273E955B3104816833B3583613AE0B8"><enum>(2)</enum><text>by striking subsection (o).</text></paragraph></subsection> <subsection id="H17519922D34D4EB499BC3BA3C36FA506"><enum>(b)</enum><header>Technical and conforming amendment</header><text>Section 104 of the Economic Growth, Regulatory Relief, and Consumer Protection Act (<external-xref legal-doc="public-law" parsable-cite="pl/115/174">Public Law 115–174</external-xref>; 132 Stat. 1301) is amended by striking subsection (b).</text></subsection></section> 
+</legis-body></bill>
+

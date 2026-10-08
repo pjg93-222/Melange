@@ -1,0 +1,239 @@
+from __future__ import annotations
+
+import ast
+import contextlib
+import importlib.util
+import io
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[3]
+SCRIPT = ROOT / "fec" / "legislation" / "sync_sentinel_bill_ledger.py"
+
+
+def load_module():
+    spec = importlib.util.spec_from_file_location("sentinel_sync", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_archive_helper(name):
+    """Return one pure helper from build_archive_legislative.py without running it.
+
+    That producer is a script -- importing it reads the archive workbook and writes
+    artifacts -- so the function is compiled out of the source instead.
+    """
+    fec = str(ROOT / "fec")
+    if fec not in sys.path:
+        sys.path.insert(0, fec)
+    import bill_rules
+
+    source = (ROOT / "fec" / "legislation" / "build_archive_legislative.py").read_text(encoding="utf-8")
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            module = ast.Module(body=[node], type_ignores=[])
+            namespace = {"BR": bill_rules}
+            exec(compile(module, "<build_archive_legislative>", "exec"), namespace)
+            return namespace[name]
+    raise AssertionError("build_archive_legislative.py defines no %s()" % name)
+
+
+def test_plan_tracks_canonical_ids_and_only_verified_rows_score(tmp_path, monkeypatch):
+    module = load_module()
+    repository_path = tmp_path / "repository.json"
+    repository_path.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(module, "REPOSITORY", repository_path)
+    repository = {"bills": {"119:hr:7": {
+        "key": "119:hr:7", "display": "H.R.7", "congress": 119,
+        "type": "hr", "number": 7, "title": "Test Act",
+        "sponsor": {"name": "Rep. Sponsor"}, "cosponsor_count": 3,
+        "introduced_date": "2025-01-03", "update_date": "2026-09-01",
+        "latest_action": {"date": "2026-08-31", "text": "Introduced"},
+        "policy_area": "Finance", "source": "GovInfo",
+        "url": "https://www.congress.gov/bill/119th-congress/house-bill/7",
+        "summary": "Summary", "updated_at": "2026-09-02T00:00:00Z",
+    }}}
+    updates = [{
+        "repository_key": "119:hr:7", "member": "Member One",
+        "bioguide": "M000001", "role": "original", "join_date": "2025-01-03",
+        "areas": ["Payments"], "source": "GovInfo", "verified_at": "2026-09-02T00:00:00Z",
+    }]
+    pending = [{
+        "repository_key": "119:hr:7", "member": "Member Two",
+        "role": "cosponsor", "reason": "needs review", "verified_at": "2026-09-02T00:00:00Z",
+    }]
+    plan = module.build_plan(repository, updates, pending,
+                             discovery=[{"canonical_key":"119:s:9","display_number":"S.9","congress":119,"type":"s","number":9,"candidate_status":"included_unreviewed_candidate"}],
+                             adjudications=[],
+                             input_path=tmp_path / "in.xlsx", output_path=tmp_path / "out.xlsx")
+    assert plan["counts"] == {
+        "repository_bills": 1, "verified_memberships": 1,
+        "verified_interaction_rows": 1, "pending_memberships": 1,
+        "ledger_rows_excluding_header": 4,
+        "discovery_candidates": 1, "discovery_only_ids": 1,
+        "discovery_pending_review": 1,
+    }
+    header = plan["ledger_rows"][0]
+    rows = [dict(zip(header, row)) for row in plan["ledger_rows"][1:]]
+    assert {row["Canonical Bill ID"] for row in rows} == {"119:hr:7", "119:s:9"}
+    assert sum(bool(row["Scoring Eligible"]) for row in rows) == 1
+    assert plan["accepted_interactions"][0]["sheet"] == "Original Co-Sponsor Interaction"
+    assert plan["accepted_interactions"][0]["values"][1] == "original-cosponsor"
+
+
+def test_pipeline_orders_workbook_sync_before_legislative_consumers():
+    source = (ROOT / "fec" / "run_pipeline.py").read_text(encoding="utf-8")
+    verify = source.index("('verify_collector_roster_updates.py',[])")
+    sync = source.index("('sync_sentinel_bill_ledger.py',[])")
+    archive = source.index("('build_archive_legislative.py',[])")
+    stance = source.index("('per_category_stance.py',[])")
+    pillars = source.index("('compute_pillars.py',['--write'])")
+    assert verify < sync < archive < stance < pillars
+
+    weekly = (ROOT / "fec" / "weekly_refresh.py").read_text(encoding="utf-8")
+    discovery = weekly.index("'legislation/refresh_legislation_discovery.py'")
+    repository = weekly.index("'legislation/update_bill_repository.py'", discovery)
+    full_pipeline = weekly.index("'run_pipeline.py'", repository)
+    assert discovery < repository < full_pipeline
+
+
+def test_archive_builder_appends_scoring_eligible_rows_to_legacy_archive():
+    source = (ROOT / "fec" / "legislation" / "build_archive_legislative.py").read_text(encoding="utf-8")
+    assert "sheet_name='Sentinel Bill Ledger'" in source
+    assert "'Scoring Eligible'" in source
+    assert "_sentinel[_eligible]" in source
+    # The eligible rows must actually reach the scored frame, not just be selected.
+    assert "A=pd.concat([A,_verified[A.columns]],ignore_index=True)" in source
+
+
+def test_workbook_writer_is_artifact_tool_only():
+    source = (ROOT / "fec" / "sync_sentinel_bill_ledger_artifact.cjs").read_text(encoding="utf-8")
+    assert '@oai/artifact-tool' in source
+    assert "Workbook.create" in source
+    assert "SpreadsheetFile.exportXlsx" in source
+    assert "openpyxl" not in source
+
+
+def test_runtime_resolution_returns_none_when_no_runtime_exists():
+    """A runtime-absent box must produce a skip signal, never an exception."""
+    module = load_module()
+    with tempfile.TemporaryDirectory() as home:
+        missing = Path(home) / "definitely-absent"
+        saved_env = {key: os.environ.get(key) for key in
+                     ("ARTIFACT_TOOL_NODE", "ARTIFACT_TOOL_NODE_MODULES", "HOME", "USERPROFILE")}
+        saved_root = module.CODEX_RUNTIME_ROOT
+        try:
+            os.environ["HOME"] = home
+            os.environ["USERPROFILE"] = home
+            os.environ["ARTIFACT_TOOL_NODE"] = str(missing / "node.exe")
+            os.environ["ARTIFACT_TOOL_NODE_MODULES"] = str(missing / "node_modules")
+            module.CODEX_RUNTIME_ROOT = missing / "cache"
+            config = missing / "artifact_tool_runtime.json"
+            assert not config.exists()
+            candidates = module.runtime_candidates(config)
+            assert [source for source, _node, _modules in candidates] == ["env", "codex_cache"]
+            assert module.runtime(config) is None
+        finally:
+            module.CODEX_RUNTIME_ROOT = saved_root
+            for key, value in saved_env.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+
+def test_install_target_is_locked_to_the_canonical_ledger():
+    """--workbook may only ever name the ledger this script is allowed to replace."""
+    module = load_module()
+    assert module.LEDGER_BASENAME == "Sentinel Bill Ledger.xlsx"
+    assert module.WORKBOOK.name == module.LEDGER_BASENAME
+    saved_argv = sys.argv
+    try:
+        sys.argv = ["sync_sentinel_bill_ledger.py", "--workbook", "C:\\tmp\\Some Other Book.xlsx"]
+        stderr = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(stderr):
+                module.main()
+        except SystemExit as exit_code:
+            assert exit_code.code == 2, exit_code.code
+        else:
+            raise AssertionError("a non-sentinel --workbook was accepted")
+        assert "Sentinel Bill Ledger.xlsx" in stderr.getvalue()
+    finally:
+        sys.argv = saved_argv
+
+
+def _decay_plan(module, tmp_root):
+    repository_path = Path(tmp_root) / "repository.json"
+    repository_path.write_text("{}", encoding="utf-8")
+    saved = module.REPOSITORY
+    bills = {}
+    for congress, number in ((118, 11), (117, 22)):
+        bills["%d:hr:%d" % (congress, number)] = {
+            "key": "%d:hr:%d" % (congress, number), "display": "H.R.%d" % number,
+            "congress": congress, "type": "hr", "number": number, "title": "Test Act",
+            "sponsor": {"name": "Rep. Sponsor"}, "cosponsor_count": 1,
+            "introduced_date": "2023-01-03", "update_date": "2026-09-01",
+            "latest_action": {"date": "2026-08-31", "text": "Introduced"},
+            "policy_area": "Finance", "source": "GovInfo", "url": "https://example.invalid",
+            "summary": "Summary", "updated_at": "2026-09-02T00:00:00Z",
+        }
+    updates = [{"repository_key": key, "member": "Member One", "bioguide": "M000001",
+                "role": "original", "join_date": "2023-01-03", "areas": ["Payments"],
+                "source": "GovInfo", "verified_at": "2026-09-02T00:00:00Z"}
+               for key in sorted(bills)]
+    try:
+        module.REPOSITORY = repository_path
+        return module.build_plan({"bills": bills}, updates, [],
+                                 discovery=[], adjudications=[],
+                                 input_path=Path(tmp_root) / "in.xlsx",
+                                 output_path=Path(tmp_root) / "out.xlsx")
+    finally:
+        module.REPOSITORY = saved
+
+
+def test_ledger_and_interaction_rows_carry_per_congress_decay():
+    """Sentinel rows must use the archive's rule, not a literal 1.0."""
+    module = load_module()
+    import bill_rules
+
+    with tempfile.TemporaryDirectory() as tmp_root:
+        plan = _decay_plan(module, tmp_root)
+    header = plan["ledger_rows"][0]
+    assert "DecayWeight" in header
+    rows = [dict(zip(header, row)) for row in plan["ledger_rows"][1:]]
+    by_congress = {}
+    for row in rows:
+        by_congress.setdefault(int(row["Congress"]), set()).add(row["DecayWeight"])
+    assert by_congress[118] == {bill_rules.congress_decay(118)}, by_congress
+    assert by_congress[117] == {bill_rules.congress_decay(117)}, by_congress
+    # The literal the old code shipped, and the reason this test exists.
+    assert bill_rules.congress_decay(118) != 1.0
+    assert bill_rules.congress_decay(119) == 1.0
+
+    weights = {values[9]: values[10] for values in
+               (record["values"] for record in plan["accepted_interactions"])}
+    assert weights["118"] == bill_rules.congress_decay(118), weights
+    assert weights["117"] == bill_rules.congress_decay(117), weights
+
+
+def test_archive_decay_fill_computes_from_congress_when_blank():
+    """A ledger written before the DecayWeight column must not score at full weight."""
+    decay_weight_for = load_archive_helper("decay_weight_for")
+    import bill_rules
+
+    assert decay_weight_for(118, None) == bill_rules.congress_decay(118)
+    assert decay_weight_for(118, "") == bill_rules.congress_decay(118)
+    assert decay_weight_for(117, "nan") == bill_rules.congress_decay(117)
+    assert decay_weight_for(119, None) == 1.0
+    # A stored value always wins over the computed one.
+    assert decay_weight_for(118, 0.5) == 0.5
+    assert decay_weight_for(118, "0.8") == 0.8
+    # An unparseable Congress with no stored weight stays neutral rather than crashing.
+    assert decay_weight_for("", None) == 1.0

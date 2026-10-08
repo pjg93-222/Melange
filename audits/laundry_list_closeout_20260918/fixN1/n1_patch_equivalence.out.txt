@@ -1,0 +1,16 @@
+make_member_desk.py                after    hits=1  from surfaces.honors_publication import compact_honor_cell
+make_member_desk.py                replace  hits=1  for r in pw.iter_rows(min_row=2, values_only=True):
+make_member_desk.py                after    hits=1  'press_billstatus_rows_routed_to_legislation':press_billstatus
+dashboard_integrity.py             after    hits=1  'data/engine/pillar_inputs_snapshot.json','data/stance/press_d
+dashboard_integrity.py             before   hits=1  # the footprint display dials shape the bundle, so they are in
+dashboard_integrity.py             after    hits=1  source_state['env:DESK_MEDIA_STANCE']=os.environ.get('DESK_MED
+run_tests.py                       after    hits=1  'test_desk_responsiveness_dial',
+MATHEMATICAL_SPECIFICATION.md      before   hits=1  MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)
+SKILL.md                           before   hits=1  | `DESK_B5_FALLBACK` |
+make_member_desk.py                            residual diff lines  12   N1a lines in the residual: 0 OK
+dashboard_integrity.py                         residual diff lines   0   N1a lines in the residual: 0 OK
+run_tests.py                                   residual diff lines  22   N1a lines in the residual: 0 OK
+MATHEMATICAL_SPECIFICATION.md                  residual diff lines   4   N1a lines in the residual: 0 OK
+SKILL.md                                       residual diff lines   6   N1a lines in the residual: 0 OK
+desk_press_source.py                           new file, patch body read straight from the worktree
+test_desk_press_source.py                      new file, patch body read straight from the worktree

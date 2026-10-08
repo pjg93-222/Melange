@@ -3,6 +3,80 @@
 This document describes the production rules enforced from raw media and bill
 evidence through the network dashboard and member desk.
 
+## Code divergence (2026-10-04)
+
+Added on 2026-10-04 to record where the code has moved past this contract.
+The text below this section is unchanged since commit `e3d2923d0`
+(2026-07-15). Checked against Melange `main` at `4a81d5022`; only the points
+listed here were re-checked. Copies of this file with the same text sit in
+the Melange live tree and in the Mentat checkout. The Mentat branch,
+`codex/mentat-crypto`, has its merge base with `main` at `78ef3488f`
+(2026-07-28): it holds items 1 and 2 but none of items 3 to 6.
+
+1. Path J (provenance only: the code matches the say-do rule below). Commit
+   `2636444e6` (2026-07-08) extended the say-do gate with paths V and J; J
+   credited a Chair or Ranking seat on a committee of jurisdiction over a
+   gatekeep category (`GATEKEEP_JURIS`, marked USER-RATIFIED 2026-07-08).
+   J is in the code at `d66da46ac` (2026-07-14) and gone from its child
+   `e3d2923d0` (2026-07-15), the commit that added this document. That
+   commit's message says it captured another session's uncommitted work as
+   the working base at Paul's direction. No ruling to drop J was found in
+   that message, in any commit message on `main`, or in the brain's
+   DECISIONS, DEADENDS, CONSTRAINTS or STATE. The code has paths A and V
+   only (`fec/moneyball_core.py:624-625`, `:747-763`; kernel check
+   "committee title does not substitute for action",
+   `fec/tests/run_tests.py:224`).
+2. Champion crown and the aggregate say-do check. Commit `391a4a8b5`
+   (2026-07-16) made overall Champion a display crown instead of a score
+   band: the scored overall ladder tops out at Ally, and the crown went to
+   every Tier-1 member of the display-tier policy. The overall-Champion
+   check in "Say-do rule" no longer vetoes that crown. The check still
+   runs, but its result changes no label: it is recorded as
+   `gate.overall_capped` in `category_stance.json`
+   (`fec/stance/per_category_stance.py:119-122`, `:174`).
+3. Curved label domains. Since commit `b4801b172` (2026-08-03, an
+   agent-created checkpoint of in-flight work), four declared domains take
+   their labels from a curve: Member Business Lending, Mortgage & Housing,
+   Charter Modernization and Technology & Emerging. There the fixed bands
+   are applied to the tie-aware midrank CDF of the adjusted score, with
+   positive and negative evidence curved separately; raw and adjusted
+   scores are unchanged (`fec/stance/stance_rules.py:28-33`, `:92-142`;
+   `fec/stance/per_category_stance.py:78-83`). The rule that no percentile
+   changes a label therefore holds only outside these four domains. Scale
+   id: `fixed-bands-with-declared-signed-empirical-curves-v3`.
+4. Board crown and displayed labels. Since commit `e3e5ece7c` (2026-09-16;
+   brain decision D-031) the crown is the active primacy board's top 13
+   (`fec/moneyball_core.py:565-579`), and a top-13 member without a
+   qualifying action stops the honors publication
+   (`fec/stance/overall_stance_policy.py:172-173`). Every other member gets
+   the analytic overall band (`fec/moneyball_core.py:519-521`). The
+   dashboard and member desk show this crowned band as the overall label
+   (`OVERALL_LABEL=analytic`, the default;
+   `fec/surfaces/dashboard_honors.py:18-36`,
+   `fec/surfaces/make_member_desk.py:2631-2665`); in the bundles published
+   on 2026-10-01 exactly the board's 13 show Champion on both. Their
+   per-domain labels are rank-honors recognitions
+   (`fec/stance/RANK_HONORS.md`; projection added in `296f40e2b`), not the
+   labels this contract describes, which remain the stance input in
+   `category_stance.json`.
+5. Fail-closed cell gate. Commit `742b68aec` (2026-09-16; it records an
+   earlier live edit) removed the cell gate's fail-open return. An empty
+   accepted-evidence map now caps every Champion/Defender cell without a V
+   path (`fec/moneyball_core.py:747-763`), and the corroboration loader
+   raises on a missing or invalid source instead of disabling the gate
+   (`:648-721`). Only the aggregate check in item 2 still fails open on an
+   empty map (`:786`, `:798`); the kernel pins both halves
+   (`fec/tests/run_tests.py:255-264`). The commit left this asymmetry open
+   for Paul (O-A1-1), and the brain records no ruling on it.
+6. Cross-posts. Since commit `a0c45a709` (2026-09-16; brain decision D-034)
+   an exact cross-post duplicate is scored under its own sign, and the desk
+   notes `also posted on <platform> <date>` instead of marking it not
+   scored. A link-only post, with no text left once the URL is removed,
+   still does not score. `CROSSPOST_DEDUP` defaults to off
+   (`fec/stance/build_media_blend.py:45-47`,
+   `fec/surfaces/make_member_desk.py:259`, `:295`); `CROSSPOST_DEDUP=1`
+   restores the exclusion.
+
 ## Fixed stance scale
 
 Every policy domain uses the same score bands. No category median, IQR,

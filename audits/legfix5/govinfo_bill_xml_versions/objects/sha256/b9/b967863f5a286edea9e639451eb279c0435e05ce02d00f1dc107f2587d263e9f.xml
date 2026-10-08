@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-EHF25B76-49N-RH-14F">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3156 IS: Federal Worker Mortgage Forbearance Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3156</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251107">November 7, 2025</action-date>
+            <action-desc><sponsor name-id="S428">Ms. Alsobrooks</sponsor> (for herself, <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>, <cosponsor name-id="S362">Mr.
+                    Kaine</cosponsor>, and <cosponsor name-id="S327">Mr. Warner</cosponsor>)
+                introduced the following bill; which was read twice and referred to the
+                    <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban
+                    Affairs</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To provide certain Federal employees with the ability to request and receive
+            a period of forbearance on certain mortgage loans during a period during which there is
+            a lapse in appropriations, and for other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="S1" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Federal Worker Mortgage Forbearance Act</short-title></quote>.</text>
+        </section>
+        <section id="idf8a32ce7463a405d9a8ffd3bcd460b09">
+            <enum>2.</enum>
+            <header>Right of affected individuals to request forbearance</header>
+            <subsection id="id8f6360a02c0147d98a577cb6319fcadd">
+                <enum>(a)</enum>
+                <header>Definitions</header>
+ <text>In this section:</text> <paragraph commented="no" display-inline="no-display-inline" id="id2ba678ca34a74275af136a2f17b90010"> <enum>(1)</enum> <header>Agency</header> <text>The term <term>agency</term> means each authority of the executive, legislative, or judicial branch of the Government of the United States.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id48e557f00b5c46a19989a4b9c1899824">
+                    <enum>(2)</enum>
+                    <header display-inline="yes-display-inline">Covered individual</header>
+ <text>The term <term>covered individual</term>—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id6e13c4386c264e77a50ca39f7a7e8eaf"> <enum>(A)</enum> <text display-inline="yes-display-inline">means an employee of an agency, without regard to whether the individual is, during a period during which there is a lapse in appropriations with respect to the agency—</text>
+                        <clause commented="no" display-inline="no-display-inline" id="idda5f7ce76ef64a009c060086e0be8d06">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">determined to be an excepted employee or an employee performing emergency work, as those terms are defined by the Office of Personnel Management; or</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id118b3701a4c84bb899216e4c708dbfe7">
+                            <enum>(ii)</enum>
+ <text>subject to furlough;</text> </clause> </subparagraph> <subparagraph commented="no" display-inline="no-display-inline" id="id41d3b5bfd0fa460fbc735086d4c82a06"> <enum>(B)</enum> <text>includes a contractor who—</text>
+                        <clause commented="no" display-inline="no-display-inline" id="idfeb250ec7cd34baea33a8d95bf1889ec">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">as part of the ordinary job duties of the individual, provides support to any employee described in subparagraph (A); and</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id13fb28cc4e474e4184f6f160514bfe25">
+                            <enum>(ii)</enum>
+ <text>during a period during which there is a lapse in appropriations with respect to the applicable agency, does not provide the services described in clause (i); and</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id3d56ea86af87475ea4cfd164a286ce1a">
+                        <enum>(C)</enum>
+ <text>does not include an individual described in subparagraph (A) or (B) who, during a period during which there is a lapse in appropriations with respect to the applicable agency, is paid the basic pay ordinarily paid to the individual.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id1d731e89594b4edabe625c19450a7fb2">
+                    <enum>(3)</enum>
+                    <header>Covered period</header>
+ <text>The term <term>covered period</term> means, with respect to a period during which there is a lapse in appropriations with respect to an agency, the period beginning on the date on which that lapse begins and ending on the date that is 180 days after the date on which that lapse ends.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idcf256fe9e120494da84c3eca619207c2">
+                    <enum>(4)</enum>
+                    <header>Federally backed mortgage loan</header>
+ <text>The term <term>Federally backed mortgage loan</term> means a loan that is—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="ideefe3141608d4f1590ca95acc58dd776">
+                        <enum>(A)</enum>
+ <text>secured by a first or subordinate lien on residential real property (including individual units of condominiums and cooperatives) designed principally for the occupancy of from 1- to 4- families; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="iddcd5b47ecc0a4e7cadf5cacc8543d293">
+                        <enum>(B)</enum>
+                        <clause commented="no" display-inline="yes-display-inline" id="id445abd3777a1416aa89547c8eadee61e">
+                            <enum>(i)</enum>
+ <text>purchased or securitized by the Federal Home Loan Mortgage Corporation or the Federal National Mortgage Association;</text>
+                        </clause>
+                        <clause indent="up1" commented="no" display-inline="no-display-inline" id="id2fb973a1909344769fd09ca44dc163a9">
+                            <enum>(ii)</enum>
+ <text>insured by the Federal Housing Administration under title II of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1707">12 U.S.C. 1707 et seq.</external-xref>);</text>
+                        </clause>
+                        <clause indent="up1" commented="no" display-inline="no-display-inline" id="ida4d2df2823404b628435673c77480fff">
+                            <enum>(iii)</enum>
+ <text>insured under section 255 of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1715z-20">12 U.S.C. 1715z–20</external-xref>);</text>
+                        </clause>
+                        <clause indent="up1" commented="no" display-inline="no-display-inline" id="id7eff5e3184ef440da71213b352020863">
+                            <enum>(iv)</enum>
+ <text>guaranteed under section 184 or 184A of the Housing and Community Development Act of 1992 (12 U.S.C. 1715z–13a, 1715z–13b);</text>
+                        </clause>
+                        <clause indent="up1" commented="no" display-inline="no-display-inline" id="id4b81184f47cf42df8a10d5992c8b84ae">
+                            <enum>(v)</enum>
+ <text>guaranteed or insured by the Department of Veterans Affairs; or</text>
+                        </clause>
+                        <clause indent="up1" commented="no" display-inline="no-display-inline" id="id34dd51b78855453aa040d8b56b2ceee3">
+                            <enum>(vi)</enum>
+ <text>guaranteed, made, or insured by the Department of Agriculture.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="id72d77f3894d54a6baddefd13025bda21">
+                <enum>(b)</enum>
+                <header>Forbearance of loan payments for holders of Federally backed mortgage loans
+                    during covered periods</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="id5b7be896d17045bfa7a4da9774165622">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>During any covered period with respect to an agency that begins on or after the effective date of this section described in subsection (d), a covered individual with respect to the agency with a Federally backed mortgage loan may request forbearance on the Federally backed mortgage loan, regardless of delinquency status, by—</text>
+                    <subparagraph id="PH944F8163DC9B4F85A54D73D980D1A96B">
+                        <enum>(A)</enum>
+ <text>submitting a request to the servicer of the Federally backed mortgage loan; and</text>
+                    </subparagraph>
+                    <subparagraph id="PH1106BC870E8B42B78ACC5FB26688008A">
+                        <enum>(B)</enum>
+ <text>affirming that the covered individual is experiencing a financial hardship because of the applicable lapse in appropriations.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="PHDA8EC6C3F0D4497697D2287BB3E1D81C">
+                    <enum>(2)</enum>
+                    <header>Grant of forbearance</header>
+ <text>Upon a request by a covered individual for forbearance under paragraph (1), the servicer to which the request was submitted shall promptly, and without unreasonable delay, grant forbearance with respect to the applicable Federally backed mortgage loan—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="idb996fbd959f143598b3a0cadf17933a3">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">for a period of 90 days; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id8a24cdf858024093aa0e3bdd46c99c67">
+                        <enum>(B)</enum>
+ <text>regardless of the delinquency status of the Federally backed mortgage loan.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="PH8649EBD61B3042908F68A1DB8D0F48F6">
+                    <enum>(3)</enum>
+                    <header>Right to discontinue</header>
+ <text>A covered individual with respect to whom forbearance is granted under this subsection may, at any time, request that the applicable servicer discontinue the forbearance.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id56f9407f5fd7445e967e81d04bde0910">
+                    <enum>(4)</enum>
+                    <header display-inline="yes-display-inline">Accrual of interest or fees</header>
+ <text>During a period of forbearance under this subsection, no fees, penalties, or interest, beyond the amounts scheduled or calculated as if the applicable covered individual made all contractual payments on time and in full under the terms of the mortgage contract, shall accrue on the account of the covered individual.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idf342af5156494a8bae1aca8843ae2152">
+                    <enum>(5)</enum>
+                    <header>No lump-sum payment required</header>
+ <text>After the end of a period of forbearance under this subsection with respect to a Federally backed mortgage loan, the servicer of the Federally backed mortgage loan may not require the applicable covered individual to pay a lump-sum payment for the payments on the Federally backed mortgage loan that were not paid during that period of forbearance.</text>
+                </paragraph>
+                <paragraph id="id2152ebf57c40456588b9acd107903975" commented="no">
+                    <enum>(6)</enum>
+                    <header>Criminal penalty for false statements</header>
+ <text>Knowingly making a false statement in, or in connection with, a request for forbearance under paragraph (1) shall constitute a violation of section 1014 of title 18, United States Code.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id863ef8538d124b6e9979da1ef23a97be">
+                    <enum>(7)</enum>
+                    <header>Notice</header>
+ <text>Not later than 10 days after the date on which a lapse in appropriations with respect to an agency begins, the head of the agency shall provide notice to covered individuals with respect to the agency of the rights of the covered individuals under this subsection.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="iddcc362c23dc245a6847888c283ad878d">
+                    <enum>(8)</enum>
+                    <header display-inline="yes-display-inline">Rule of construction</header>
+ <text display-inline="yes-display-inline">Nothing in this subsection may be construed to grant forgiveness with respect to a Federally backed mortgage loan.</text>
+                </paragraph>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="id3dc278a5231c42b6bffd4f6f5a6da423">
+                <enum>(c)</enum>
+                <header>Furnishing of credit information</header>
+ <text>Section 623(a)(1) of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681s-2">15 U.S.C. 1681s–2(a)(1)</external-xref>) is amended by adding at the end the following:</text>
+                <quoted-block id="idFA80DBD4BAC44D4CA69DCC924744AC8D" style="OLC" act-name="">
+                    <subparagraph id="idF76C4A295C5F462194E80ACCDAFF5AAE">
+                        <enum>(G)</enum>
+                        <header>Reporting information relating to certain forbearances</header>
+                        <clause commented="no" display-inline="no-display-inline" id="ideb6f832779854a3596f793b902094ad4">
+                            <enum>(i)</enum>
+                            <header display-inline="yes-display-inline">Definition</header>
+ <text>In this subsection, the term <term>accommodation</term> means an agreement to grant a period of forbearance pursuant to section 2(b) of the <short-title>Federal Worker Mortgage Forbearance Act</short-title>.</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id2dbe6e5e3ec146dd888da622c67ea498">
+                            <enum>(ii)</enum>
+                            <header>Reporting</header>
+ <text display-inline="yes-display-inline">Except as provided in clause (iii), if a furnisher makes an accommodation with respect to 1 or more payments on a credit obligation or account of a consumer, and the consumer makes the payments or is not required to make 1 or more payments pursuant to the accommodation, the furnisher shall—</text>
+                            <subclause commented="no" display-inline="no-display-inline" id="id29e66be84ae148ddb7d3292c9018a02d">
+                                <enum>(I)</enum>
+ <text display-inline="yes-display-inline">report the credit obligation or account as current; or</text>
+                            </subclause>
+                            <subclause commented="no" display-inline="no-display-inline" id="idf08bb904f8654994927a725c3f2b41a0">
+                                <enum>(II)</enum>
+ <text display-inline="yes-display-inline">if the credit obligation or account was delinquent before the accommodation—</text>
+                                <item commented="no" display-inline="no-display-inline" id="idce996a80d63c411b8468ce4733e34b00">
+                                    <enum>(aa)</enum>
+ <text display-inline="yes-display-inline">maintain the delinquent status during the period in which the accommodation is in effect; and</text>
+                                </item>
+                                <item commented="no" display-inline="no-display-inline" id="id4720263176594e18a24e04f074d60572">
+                                    <enum>(bb)</enum>
+ <text display-inline="yes-display-inline">if the consumer brings the credit obligation or account current during the period described in item (aa), report the credit obligation or account as current.</text>
+                                </item>
+                            </subclause>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="idfa49ceb4d9a441eba235172e8c98246a">
+                            <enum>(iii)</enum>
+                            <header>Exception</header>
+ <text display-inline="yes-display-inline">Clause (ii) shall not apply with respect to a credit obligation or account of a consumer that has been charged-off.</text>
+                        </clause>
+                    </subparagraph>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="id62a476e40b9e4c09bfb7489dd170656f">
+                <enum>(d)</enum>
+                <header>Retroactive effective date</header>
+ <text>This section, and the amendments made by this section, shall take effect as if enacted on September 30, 2025.</text>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

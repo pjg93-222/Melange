@@ -84,6 +84,8 @@ class KneeExclusion(unittest.TestCase):
         s, t = _src('optimize.py'); d = next(n for n in t.body if isinstance(n, ast.Assign) and _targets(n) == {'dials'})
         keys = {k.value for k in d.value.keys}
         self.assertTrue({'BUDGET', 'INC', 'PMAX', 'TOPIC', 'CONV_MAXSTEP', 'HALFF', 'WM', 'WP', 'BASE', 'MAXSHIFT', 'HALF', 'DTHRESH', 'LOSSFRAME', 'IMPUTE_IND0', 'PERS_NONE', 'RECEPT_LAYER'} <= keys)
+        # COMPET_MULT: recorded only when the dial is ON (dial OFF keeps optimize_result.json byte-identical), so the keys are added by a guarded statement, not the literal
+        self.assertTrue(any(isinstance(n, ast.If) and 'compet_on' in ast.dump(n.test) and "'COMPET_MULT'" in ast.unparse(n) and "'COMPET_SRC_SHA256'" in ast.unparse(n) for n in t.body))
         dump = next(n for n in ast.walk(t) if isinstance(n, ast.Call) and getattr(n.func, 'id', '') == 'dump_atomic')
         self.assertIn('dials', {k.value for k in dump.args[0].keys})
 

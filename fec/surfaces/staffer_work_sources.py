@@ -44,6 +44,15 @@ def uncovered(row, intervals):
     return [{**row, 'start':a, 'end_exclusive':b} for a,b in runs]
 
 
+def payroll_people(index):
+    """The people with at least one payroll-sourced episode in the index's source evidence.
+
+    Fixed by the index: it is computed when build_index finishes and kept on the index (index.payroll_people), so a
+    route request reads it instead of scanning every person's episodes.
+    """
+    return frozenset(p for p, rows in index.source_episodes.items() if any(r['work_source'].startswith('payroll') for r in rows))
+
+
 def build_index(router, options):
     rows, census = [], []
     metadata = dict(router.nodes)
@@ -87,4 +96,5 @@ def build_index(router, options):
         'workplaces':len(index.people_by_workplace), 'episodes_by_source':dict(counts),
         'modeled_payroll_intervals':sum(r['modeled_payroll_interval'] for rows in index.source_episodes.values() for r in rows),
         'semantics':'Payroll and directory evidence retain their source identities; report windows are modeled exposure, not observed daily overlap. Trajectory title is a stint summary.'}
+    index.payroll_people = payroll_people(index)
     return index

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HDB9330B1EC744442AA7732E6390FE9F7" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7795 IH: Veterans Affairs Subcontractor Competition and Opportunity Network Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 7795</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20260304">March 4, 2026</action-date>
+<action-desc><sponsor name-id="K000404">Ms. King-Hinds</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require the Secretary of Veterans Affairs to establish and maintain a database of certified veteran-owned small businesses and service-disabled veteran-owned small businesses to assist the Department of Veterans Affairs in meeting its subcontracting goals, and for other purposes.</official-title>
+</form>
+<legis-body id="H0B55F6CE42EF400296374E26C551F850" style="OLC">
+<section id="H4B58E87BD9EE4C0B8D77BE525727A745" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Veterans Affairs Subcontractor Competition and Opportunity Network Act</short-title></quote> or the <quote><short-title>VA SUBCON Act</short-title></quote>.</text></section> <section id="H1CCA8E7158F14E989C2EA4F239687E5A"><enum>2.</enum><header>Veterans Affairs Subcontractor Competition and Opportunity Network Database</header> <subsection id="HBA10B2E994AB4338A3DBB79031F6B3F5"><enum>(a)</enum><header>Database required</header> <paragraph id="H7224B224A44C43DAA48ED5CB85E03E8F"><enum>(1)</enum><header>In general</header><text>The Secretary of Veterans Affairs, acting through the Director of Small and Disadvantaged Business Utilization of the Department of Veterans Affairs (as established pursuant to section 15(k) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/644">15 U.S.C. 644(k)</external-xref>)), shall establish and maintain a database of small business concerns certified by the Small Business Administration as small business concerns owned and controlled by veterans.</text></paragraph>
+<paragraph id="HCD608773D6664469AC591E5AD524E520"><enum>(2)</enum><header>Purpose</header><text display-inline="yes-display-inline">The purpose of the database shall be to assist the Department in meeting the small business contracting goals established pursuant to subparagraphs (A) and (B) of section 8127(a)(1) of title 38, United States Code (relating to small business concerns owned and controlled by veterans), and in implementing the review mechanism required by section 8127(a)(4) of such title. As such, the database shall enable users to distinguish between—</text> <subparagraph id="H6FD72A4378D44250BF9F5015E5503F21"><enum>(A)</enum><text>small business concerns owned and controlled by veterans who are not veterans with service-connected disabilities; and</text></subparagraph>
+<subparagraph id="H29103A1E31554CEA8CDB446F431629D7"><enum>(B)</enum><text>small business concerns owned and controlled by veterans with service-connected disabilities.</text></subparagraph></paragraph> <paragraph id="H0D5868A84B0B4DCCBBA04339774A454C"><enum>(3)</enum><header>Exclusion</header><text>Notwithstanding paragraphs (1) and (2), the Secretary, acting through the Director, shall exclude from the database—</text>
+<subparagraph id="HBA8DB738A62142799A6E6D4BD8244040"><enum>(A)</enum><text>any small business concern that is part of a mentor-protegé program or joint venture; and</text></subparagraph> <subparagraph id="HE369A36305ED466A92EAA95FE04A3628"><enum>(B)</enum><text>any small business concern that has not had at least two past prime contracts for which the concern received an evaluation rating of <quote>Satisfactory</quote> or better pursuant to the Contractor Performance Assessment Reporting System (CPARS).</text></subparagraph></paragraph></subsection>
+<subsection id="H609C5B6EECD74A31AC691B6D6723ABB2"><enum>(b)</enum><header>Availability</header><text>The Secretary, acting through the Director, shall make the database available to other-than-small businesses who are offerors on Department contracts (including subcontracts) at appropriate stages of the acquisition process for use by such businesses in formulating any required small business subcontracting plans.</text></subsection> <subsection id="HE4D20D9DE4BF466EB952D31D5AAF1F2E"><enum>(c)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 180 days after the date of the establishment of the database, the Secretary shall submit to the Committees on Veterans’ Affairs of the Senate and the House of Representatives a report on the database. The report shall include—</text>
+<paragraph id="H77CE27E5902647E7841DFF0F052B7F2A"><enum>(1)</enum><text>a description of the extent to which the database has been made available to, and used by, businesses under subsection (b);</text></paragraph> <paragraph id="H2A49D3DFFD364DDEAD06A827CFE11367"><enum>(2)</enum><text>the number of small business concerns owned and controlled by veterans who, since the date of the establishment of the database, have been selected as subcontractors on Department contracts, including the number of such concerns owned and controlled by veterans who are not veterans with service-connected disabilities and the number of such concerns owned and controlled by veterans with service-connected disabilities; and</text></paragraph>
+<paragraph id="H4BE353FADAB846ED825421D3124EE1C2"><enum>(3)</enum><text>the recommendations of the Secretary for increasing the utilization of the database.</text></paragraph></subsection> <subsection id="H1B5A2B84A088455EAF80EC94484BB419"><enum>(d)</enum><header>Use of existing resources</header><text>This section shall be implemented using existing personnel, systems, and funds. This section does not authorize additional appropriations or the establishment of a new program, office, or organizational entity.</text></subsection>
+<subsection id="HEC74365F3A5B46679440FF5B0F011547"><enum>(e)</enum><header>Sunset</header><text>This section shall sunset on December 31, 2028.</text></subsection></section> </legis-body> </bill> 
+

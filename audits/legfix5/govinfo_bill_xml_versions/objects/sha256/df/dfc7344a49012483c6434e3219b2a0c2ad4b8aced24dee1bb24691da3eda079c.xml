@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H7CD6D672C0D24DCB9190DCC8B2B81FF3" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 5746 EH: NASA Enhanced Use Leasing Extension Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 5746</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend title 51, United States Code, to extend the authority of the National Aeronautics and Space Administration to enter into leases of non-excess property of the Administration.</official-title> 
+</form> 
+<legis-body id="HE81DB092F1054AF6996D4DD9C82A8DD9" style="OLC"> 
+<section id="H5C535BD30F8B46D4B56ED5D50880F63D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>NASA Enhanced Use Leasing Extension Act of 2021</short-title></quote>.</text></section> <section id="H99C70F67513042A1A4AEA23D2A161369"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress find the following:</text> 
+<paragraph id="HD87A9E2024094D8A831A50CDC1FF5F23"><enum>(1)</enum><text>NASA uses enhanced use leasing to enter into agreements with private sector entities, State and local governments, academic institutions, and other Federal agencies for lease of non-excess, underutilized NASA properties and facilities.</text></paragraph> <paragraph id="H9D6AC8296371446A96BB88A3187D0D07"><enum>(2)</enum><text>NASA uses enhanced use leasing authority to support responsible management of its real property, including to improve the use of underutilized property for activities that are compatible with NASA’s mission and to reduce facility operating and maintenance costs.</text></paragraph> 
+<paragraph id="H76D3F9EBDBEC490D98013AB3C0BE3CCA"><enum>(3)</enum><text>In fiscal year 2019, under its enhanced use lease authority, NASA leased 65 real properties.</text></paragraph> <paragraph id="H70D749368D9D4D1FBC0ED410A87C85B8"><enum>(4)</enum><text display-inline="yes-display-inline">In fiscal year 2019, NASA’s use of enhanced use leasing resulted in the collection of $10,843,025.77 in net revenue.</text></paragraph> 
+<paragraph id="H8CE236CE31084279B42F4F19EA6EB4AF"><enum>(5)</enum><text display-inline="yes-display-inline">In fiscal year 2019, NASA used a portion of its enhanced use leasing revenues for repairs of facility control systems such as lighting and heating, ventilation, and air conditioning.</text></paragraph> <paragraph id="H93E261D5DB58494CBE64F97117534B10"><enum>(6)</enum><text>NASA’s use of enhanced use leasing authority can contribute to reducing the rate of increase of the Agency’s overall deferred maintenance cost.</text></paragraph></section> 
+<section id="H9756E366E22640CD93226016EDB9EB47"><enum>3.</enum><header>Extension of authority to enter into leases of non-excess property of the National Aeronautics and Space Administration</header><text display-inline="no-display-inline">Section 20145(g) of title 51, United States Code, is amended by striking <quote>December 31, 2021</quote> and inserting <quote>December 31, 2031</quote>.</text></section> <section id="H42ED965194B3483A88665B0EBFCAAD2A"><enum>4.</enum><header>Determination of Budgetary Effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text> </section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20211208" chamber="House">Passed the House of Representatives December 8, 2021.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

@@ -133,7 +133,7 @@ def defensive_appeal_value(cat,actorparty,shock_on):
     held=[]
     for m in members:
         if camp(MAT0[m].get(cat,'') )!='pro' or prt.get(m)!=actorparty: continue
-        dl=abs(mr.shift_lean(m,'comp',probe))
+        dl=abs(mr.shift_lean(m,'comp',probe,fm.CM[m]))
         if mr.DTHRESH<=dl<mr.DTHRESH*(1+DELTA/2): held.append(m)
     return held if shock_on else []
 
@@ -242,7 +242,7 @@ if a.advise:
     MBC.dump_atomic({'advisory':[{'issue':c,'value':round(v,3),'worst_regime_dspread':round(w,2),
                **{k:r[k] for k in ('params','E_dspread','E_dwin','E_dmidband')},
                'defections_prevented':r['defections_prevented']} for v,w,c,r in sorted(rows,key=lambda t:-t[0])]},
-              B+r'\salience_advisory.json',indent=1)
+              os.environ.get('SAL_OUT') or B+r'\salience_advisory.json',indent=1)   # SAL_OUT: no-clobber redirect for probe/candidate runs (default = the production path)
     print('\nwrote salience_advisory.json')
 elif a.issue:
     if a.issue not in cats: print('unknown issue; choose from:',cats); sys.exit(1)

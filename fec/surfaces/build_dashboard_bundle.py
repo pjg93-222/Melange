@@ -593,7 +593,7 @@ def frontier_for(lb):
     t=BF['topics'].get(lb)
     if not t: return None
     pts=[[p['b'],p['spread'],(idx.get(p['seed']) if p.get('seed') else -1),(p.get('type','') or '')[:1]] for p in t['path']]
-    return {'base':t['base'],'knee':t.get('knee',0),'core':t.get('core_seeds',0),'path':pts}
+    return {'base':t['base'],'knee':t.get('knee',0),'knee_found':bool(t.get('knee_found')),'core':t.get('core_seeds',0),'path':pts}
 frontier=[frontier_for(lb) for lb in source_issues]
 # --- joint optimizer (cross-topic CU allocation; explicit fixed-state/replanning guarantee scope) ---
 if not os.path.exists(B+r'\optimize_result.json'): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05
@@ -654,6 +654,12 @@ engine={'adj':ADJ,
 engine['pmult']=[round(fmE.rc(n,'pressure_mult',1.0),3) for n in members]
 engine['emult']=[round(fmE.rc(n,'edge_mult',1.0),3) for n in members]
 engine['dmult']=[round(fmE.MC.delivery_mult(n),3) for n in members]
+# COMPET_MULT (Paul 2026-10-05; default OFF): the competitiveness multiplier c travels with the engine so the in-browser flip/priming/break-even math
+# (tpl: EG.cmult -> CMU) and the member desk's ROI (eng.get('cmult')) use the SAME c as optimize/flip_model. Added ONLY when the dial is ON, so a
+# dial-OFF bundle is byte-identical to the pre-dial one; old bundles lack it -> neutral 1.0.
+if fmE.MC.compet_on():
+    engine['cmult']=[fmE.CM[n] for n in members]
+    engine['const']['COMPET']={'amplitude':fmE.MC.COMPET_AMPLITUDE,'scale':fmE.MC.COMPET_SCALE,'artifact_sha256':fmE.MC.compet_record()[1]}
 # ---- Noble & Turner (2024) going-public parameters per issue -> System-shocks exec cue ----
 # z = sincere polarization (D-R stance gap on the issue); psi = missing posture + True-Neutral
 # uncertainty. The exact estimator is shared with salience_shock.py in moneyball_core.

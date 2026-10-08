@@ -4,7 +4,18 @@ Each search is optimal under its accumulated exclusions. The portfolio is
 not a globally optimal disjoint-path set and does not imply independent success.
 """
 import re
+import threading
 import unicodedata
+
+try:
+    from .staffer_route_cancel import check_cancelled
+except ImportError:  # direct script execution: no package context
+    import os as _bootstrap_os, sys as _bootstrap_sys
+    _bootstrap_root = _bootstrap_os.path.dirname(_bootstrap_os.path.dirname(
+        _bootstrap_os.path.dirname(_bootstrap_os.path.abspath(__file__))))
+    if _bootstrap_root not in _bootstrap_sys.path:
+        _bootstrap_sys.path.insert(0, _bootstrap_root)
+    from fec.surfaces.staffer_route_cancel import check_cancelled
 
 
 def contact_key(node, fallback):
@@ -15,11 +26,39 @@ def contact_key(node, fallback):
     return 'name:' + ' '.join(re.findall(r'[^\W_]+', label, re.UNICODE))
 
 
+_CONTACT_LOCK = threading.Lock()
+
+
+def _contact_groups(router):
+    """Node ids by contact key for the router's nodes mapping, built once and kept on the router.
+
+    What it is built from, and so what invalidates it: the mapping object itself (held, so its identity cannot be
+    reused), its length, and router.nodes_revision, which LiveService bumps when it installs nodes whose label, kind or
+    name status differ. A mapping that is replaced by an equal one is indexed again on its first use; one that has no
+    nodes_revision (a router built outside the service) is keyed by the mapping and its length alone.
+    """
+    nodes = router.nodes
+    token = (len(nodes), getattr(router, 'nodes_revision', None))
+    held = getattr(router, '_contact_groups', None)
+    if held is None or held[0] is not nodes or held[1] != token:
+        with _CONTACT_LOCK:
+            held = getattr(router, '_contact_groups', None)
+            if held is None or held[0] is not nodes or held[1] != token:
+                groups = {}
+                for ident, node in nodes.items():
+                    groups.setdefault(contact_key(node, ident), []).append(ident)
+                held = router._contact_groups = (nodes, token, groups)
+    return held[2]
+
+
 def contact_group(router, people):
     # Conservative search exclusion only, never an identity merge. Identical
     # displayed names must not manufacture an apparently independent contact.
-    keys = {contact_key(router.nodes.get(p, {}), p) for p in people}
-    return {p for p, n in router.nodes.items() if contact_key(n, p) in keys}
+    groups = _contact_groups(router)
+    found = set()
+    for key in {contact_key(router.nodes.get(p, {}), p) for p in people}:
+        found.update(groups.get(key, ()))
+    return found
 
 
 def evidence_contexts(hop):
@@ -54,19 +93,25 @@ def distinct_routes(router, origin, targets, options, progress):
     accepted, first, last = [], None, None
     prior_people, prior_edges, prior_contexts = set(), set(), set()
     while first is None or (remaining and len(accepted) < count):
+        check_cancelled()
         request = {**options, 'route_count': 1, 'alternative_strategy': 'ranked',
                    '_excluded_nodes': tuple(sorted(blocked)),
                    '_excluded_edges': tuple(sorted(edges)),
                    '_excluded_contexts': tuple(sorted(contexts))}
         last = router.route_many(origin, sorted(remaining), request, progress)
         first = first or last
+        # An office search leaves its uncovered staff out once (D-086): they stay out of every later pass, and each route
+        # reports the request's count, as the first pass counted it, not the count of the staff that pass was given, and the
+        # basis of that count (what coverage they lack), which is the request's too.
+        left_out = {key: first[key] for key in ('uncovered_staff_count', 'uncovered_staff_ids', 'uncovered_basis') if key in first}
+        remaining.difference_update(left_out.get('uncovered_staff_ids', ()))
         if last['status'] != 'found':
             break
         ids = last['node_ids']
         people = set(ids[1:] if office else ids[1:-1])
         pairs = {tuple(sorted((a,b))) for a,b in zip(ids, ids[1:])}
         evidence = route_contexts(last)
-        route = {**last, 'route_rank': len(accepted)+1, 'alternative_strategy': strategy,
+        route = {**last, **left_out, 'route_rank': len(accepted)+1, 'alternative_strategy': strategy,
                  'optimality_scope': 'best route under exclusions from earlier choices',
                  'dependence_on_previous_routes': {
                      'shared_intermediaries': len(people & prior_people),
@@ -84,6 +129,9 @@ def distinct_routes(router, origin, targets, options, progress):
                 'same_terminal_contact': ids[-1] == best_ids[-1],
                 'scope': 'recorded evidence only; no independence claim'}
         accepted.append(route)
+        if progress:
+            # An accepted route is final; later searches only add alternatives.
+            progress({'routes_found': len(accepted), 'routes_requested': count, 'accepted_route': route})
         prior_people.update(people)
         prior_edges.update(pairs)
         prior_contexts.update(evidence)
@@ -98,8 +146,6 @@ def distinct_routes(router, origin, targets, options, progress):
             contexts.update(evidence)
         if not pairs and not office:
             break
-        if progress:
-            progress({'routes_found': len(accepted), 'routes_requested': count})
     return {**first, 'routes': accepted, 'routes_requested': count,
             'routes_returned': len(accepted), 'alternative_strategy': strategy,
             'portfolio_optimal': False, 'alternatives_complete': True,

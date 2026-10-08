@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S230 IS: Preserving American Justice Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-01-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 230</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190125" legis-day="20190124">January 25 (legislative day, January 24), 2019</action-date>
+			<action-desc><sponsor name-id="S247">Mr. Wyden</sponsor> (for himself and <cosponsor name-id="S322">Mr. Merkley</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To require a report on foreign nationals who flee from the United States while awaiting trial or
+			 sentencing for a criminal offense committed in the United States, to
+			 establish a list of countries who have assisted or facilitated with such
+			 departures, to penalize parties connected to such departures, and to amend
+			 the Internal Revenue Code of 1986 to prohibit the exclusion from gross
+			 income from certain investments made by foreign governments who are
+			 identified on such list.</official-title>
+	</form>
+	<legis-body>
+ <section id="id952A23D73A894D418E862E70CD8CDA08" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Preserving American Justice Act</short-title></quote>.</text> </section><section id="id452F5764869E4AC1BE6974114D54D505" section-type="subsequent-section"><enum>2.</enum><header>Investigation of certain foreign nationals</header> <subsection id="idE2527233F3464ACCB68382C106920D12"><enum>(a)</enum><header>Investigation</header><text>Not later than 90 days after the date of enactment of this Act, the Attorney General shall complete an investigation of whether the Government of Saudi Arabia materially assisted or facilitated any citizen or national of Saudi Arabia, including Abdulrahman Noorah, Abdulaziz Al Duways, Waleed Ali Alharthi, Suliman Ali Algwaiz, and Ali Hussain Alhamoud, in departing from the United States while the citizen or national was awaiting trial or sentencing for a criminal offense committed in the United States.</text>
+ </subsection><subsection id="id7F3939079EA94D07BB70488669AB32BC"><enum>(b)</enum><header>Report</header><text>If the Attorney General determines that the Government of Saudi Arabia did materially assist or facilitate a citizen or national of Saudi Arabia as described in subsection (a), the Attorney General shall submit a written report to Congress and the Secretary of State detailing the findings of the investigation.</text>
+			</subsection><subsection id="id0CCA9F8BBEB84053BA67D0B193126D74"><enum>(c)</enum><header>Prohibition on issuance and revocation of certain visas</header>
+ <paragraph id="idCDF418C8428641A18F9EECA3A1A126F7"><enum>(1)</enum><header>In general</header><text>Except as provided under paragraph (2), if the Secretary of State receives a report under subsection (b), the Secretary of State may not issue a visa, and shall revoke any visa issued, to a Member of the Council of Ministers of Saudi Arabia, an immediate family member of a Member of the Council of Ministers of Saudi Arabia, a descendant of the King of Saudi Arabia, or an immediate family member of such a descendant until the date on which the citizen or national of Saudi Arabia described in the report is extradited to the United States for completion of the trial or sentencing.</text>
+ </paragraph><paragraph id="id568DCBB90B2F44E3BF119723CD5DCC98"><enum>(2)</enum><header>Exception</header><text>The Secretary of State may issue a visa otherwise prohibited under paragraph (1), or not revoke a visa otherwise required to be revoked under such paragraph, if the Secretary determines that it is necessary—</text>
+ <subparagraph id="id38A5958EFB694847B40775792E551690"><enum>(A)</enum><text>to enable the President to receive an Ambassador or other public Minister under Article II, section 3, of the Constitution in a manner consistent with the Vienna Conventions on Diplomatic and Consular Relations; or</text>
+ </subparagraph><subparagraph id="id652274318CFD43FBA763B101C27773C9"><enum>(B)</enum><text>to permit the United States to comply with the Agreement regarding the Headquarters of the United Nations, signed at Lake Success June 26, 1947, and entered into force November 21, 1947, between the United Nations and the United States, or with any other applicable international obligations.</text>
+ </subparagraph></paragraph><paragraph id="id97536FFA225C477E97140F806CD84090"><enum>(3)</enum><header>Vienna Conventions on Diplomatic and Consular Relations defined</header><text>In this subsection, the term <term>Vienna Conventions on Diplomatic and Consular Relations</term> means—</text> <subparagraph id="id17B7487B104C4C928B60A32B606E1DA8"><enum>(A)</enum><text>the Vienna Convention on Diplomatic Relations, done at Vienna April 18, 1961; and</text>
+ </subparagraph><subparagraph id="idD6403D52585240AABC42245103BFF06A"><enum>(B)</enum><text>the Vienna Convention on Consular Relations, done at Vienna April 24, 1963.</text> </subparagraph></paragraph></subsection></section><section commented="no" display-inline="no-display-inline" id="id190B1D0289EE482EB3067FAF19280D0D" section-type="subsequent-section"><enum>3.</enum><header display-inline="yes-display-inline">Treatment of foreign nationals fleeing the United States during criminal proceedings</header> <subsection id="idD144DB207AD146F29BC3CD82127FC26A"><enum>(a)</enum><header>Foreign national defined</header><text>In this section, the term <term>foreign national</term> means an individual in the United States who is not a citizen of the United States.</text>
+ </subsection><subsection id="id3317C8FD91E94B838D46CB86C67CB6FA"><enum>(b)</enum><header>Report</header><text>Not later than 6 months after the date of enactment of this Act, and once every year thereafter, the Attorney General, acting through the Director of the Bureau of Justice Statistics, in coordination with the Secretary of Homeland Security, shall—</text>
+ <paragraph id="idD7E80445809147138B618066CE95048A"><enum>(1)</enum><text>collect information from State courts and law enforcement agencies on any foreign nationals who have, during the reporting period, departed from the United States while awaiting trial or sentencing for a criminal offense committed in the United States; and</text>
+ </paragraph><paragraph id="idE88629A863CF402CAA90876B3C1A9EE8"><enum>(2)</enum><text>publish a report based on the information collected under paragraph (1).</text> </paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="id4F84ED1F9DF141029B0EA634B0F3DA05"><enum>(c)</enum><header display-inline="yes-display-inline">List of countries</header> <paragraph commented="no" display-inline="no-display-inline" id="id95FD23713D314A6E93F813A8D490556B"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Attorney General, in coordination with the Director of National Intelligence, shall establish and maintain a list of countries the governments of which have, in the determination of the Attorney General, materially assisted or facilitated the departure of any foreign national included in the report required under subsection (b).</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="idA47A6A331AC341B7AB8F26BEA1873239"><enum>(2)</enum><header>Determination</header><text>In establishing and maintaining the list required under paragraph (1), the Attorney General—</text> <subparagraph commented="no" display-inline="no-display-inline" id="idA453201E2423423A82C5F5C4774A6923"><enum>(A)</enum><text>shall take into account the information in the annual reports published under subsection (b)(2); and</text>
+ </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id601189A98A5646C49407AC25668CCB9C"><enum>(B)</enum><text>may include or remove any country as the Attorney General determines appropriate.</text> </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idAA5CBE13D7A74AD79C2B8A06C9FAA97C"><enum>(3)</enum><header>Report to Congress</header><text>Not later than 1 year after the date of enactment of this Act, and once every year thereafter, the Attorney General shall submit to Congress a report on the procedures used by the Attorney General in determining which countries are on the list maintained under paragraph (1).</text>
+ </paragraph></subsection><subsection id="id6FC71B85F5F443CFA9BB012EB65F432E"><enum>(d)</enum><header>Loss of tax exclusion for foreign governments included on list</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/892">Section 892</external-xref> of the Internal Revenue Code of 1986 is amended by redesignating subsection (c) as subsection (d) and by inserting after subsection (b) the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="id4041A2BE6D524B3E8271F36F139A175E" style="OLC">
+ <subsection commented="no" display-inline="no-display-inline" id="idF2E53BA4A8834488829A3909C839B148"><enum>(c)</enum><header>Exception</header><text>Subsection (a)(1) shall not apply to any foreign government which is identified on the list maintained by the Attorney General pursuant to section 3(c) of the <short-title>Preserving American Justice Act</short-title> for any period beginning with the date that is 30 days after the date such foreign government is added to such list and ending with the date such foreign government is removed from such list.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body>
+</bill>
+
+

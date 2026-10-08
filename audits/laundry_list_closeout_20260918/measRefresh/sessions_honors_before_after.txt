@@ -1,0 +1,39 @@
+== BEFORE 049fbd78ae4bf13ec00ca4e9 (1789802882.779233) ==
+   top-level: {14 keys: as_of, cats, coverage, evidence_window, generation_id, inputs_sha256, measure_titles, members, overall_board, overall_board_mode, overall_policy, policy, schema, years_served}
+   schema = 'rank-honors-v2'
+   generation_id = '049fbd78ae4bf13ec00ca4e9'
+   as_of = '2026-09-19'
+   overall_board: {7 keys: generation, measure_primacy, minimum_cu_primary_credit, mode, order, priority_tiers, top13}
+      generation             'faaf854c0a2cb45d51a32149'
+      measure_primacy        {644 keys: 116:hamdt:247, 116:hamdt:248, 116:hamdt:249, 116:hamdt:255, 116:hamdt:258, 116:hamdt:259, 116:hamdt:260, 116:hamdt:263, 116:hamdt:500, 116:hamdt:840, 116:samdt:1049, 116:samdt:1456, 116:samdt:1499, 116:samdt:1580}
+      minimum_cu_primary_credit 0.75
+      mode                   'per_area_v1'
+      order                  [533 items; first='Alex Padilla']
+      priority_tiers         {533 keys: Aaron Bean, Abraham Hamadeh, Adam Gray, Adam Schiff, Adam Smith, Addison McDowell, Adelita Grijalva, Adrian Smith, Adriano Espaillat, Al Green, Alan Armstrong, Alex Padilla, Alexandria Ocasio-Cortez, Alma Adams}
+      top13                  [13 items; first='Alex Padilla']
+== AFTER 6df55c4075768f860f941d95 (1789847700.677485) ==
+   top-level: {14 keys: as_of, cats, coverage, evidence_window, generation_id, inputs_sha256, measure_titles, members, overall_board, overall_board_mode, overall_policy, policy, schema, years_served}
+   schema = 'rank-honors-v2'
+   generation_id = '6df55c4075768f860f941d95'
+   as_of = '2026-09-19'
+   overall_board: {7 keys: generation, measure_primacy, minimum_cu_primary_credit, mode, order, priority_tiers, top13}
+      generation             '5c637cfd62356269239e0cb0'
+      measure_primacy        {644 keys: 116:hamdt:247, 116:hamdt:248, 116:hamdt:249, 116:hamdt:255, 116:hamdt:258, 116:hamdt:259, 116:hamdt:260, 116:hamdt:263, 116:hamdt:500, 116:hamdt:840, 116:samdt:1049, 116:samdt:1456, 116:samdt:1499, 116:samdt:1580}
+      minimum_cu_primary_credit 0.75
+      mode                   'per_area_v1'
+      order                  [533 items; first='Alex Padilla']
+      priority_tiers         {533 keys: Aaron Bean, Abraham Hamadeh, Adam Gray, Adam Schiff, Adam Smith, Addison McDowell, Adelita Grijalva, Adrian Smith, Adriano Espaillat, Al Green, Alan Armstrong, Alex Padilla, Alexandria Ocasio-Cortez, Alma Adams}
+      top13                  [13 items; first='Alex Padilla']
+
+== overall_board.top13 ==
+  BEFORE (13): ['Alex Padilla', 'Vicente Gonzalez', 'Maxine Waters', 'Brian Fitzpatrick', 'William Timmons', 'Scott Fitzgerald', 'Tim Scott', 'Brad Sherman', 'Bill Huizenga', 'Young Kim', 'Dan Sullivan', 'Juan Vargas', 'Daniel Meuser']
+  AFTER  (13): ['Alex Padilla', 'Vicente Gonzalez', 'Maxine Waters', 'Brian Fitzpatrick', 'William Timmons', 'Scott Fitzgerald', 'Tim Scott', 'Brad Sherman', 'Bill Huizenga', 'Young Kim', 'Dan Sullivan', 'Juan Vargas', 'Pete Sessions']
+  LOST  tier-1 crown: ['Daniel Meuser']
+  GAINED tier-1 crown: ['Pete Sessions']
+  unchanged: 12
+  BEFORE tier map: none (source None)
+  AFTER tier map: none (source None)
+
+== Pete Sessions / Daniel Meuser rows in each generation ==
+  BEFORE overall_board.priority_tiers: Sessions=2 | Meuser=1
+  AFTER overall_board.priority_tiers: Sessions=1 | Meuser=2

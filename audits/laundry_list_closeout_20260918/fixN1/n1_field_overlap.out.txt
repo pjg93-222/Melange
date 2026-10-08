@@ -1,0 +1,85 @@
+﻿roster from the shipped bundle: 533 members
+sheet rows 3701 = 2391 press + 1310 billstatus
+engine rows from load_tone_rows(): 2668   (ledger rows_read=2679, canon=2)
+
+-- keyed by (release_url_key, identity) --
+sheet press keys      :   2379  (rows 2391)
+engine keys           :   2667  (rows 2668)
+BOTH   (overlap)      :   2376
+ENGINE ONLY  -> added :    291  rows 291
+SHEET  ONLY  -> kept  :      3  rows 3
+sheet keys carrying >1 row: 12
+
+-- r9 continuity (canonical_url only, member-resolvable sheet rows) --
+sheet urls 2389  engine urls 2668  engine-only 293  sheet-only 14
+
+-- 2. OVERLAP rows: fields that DISAGREE between sheet and engine (2376 keys) --
+   date             2138 of 2376 keys
+        S000510      sheet=datetime.datetime(2025, 8, 15, 0, 0) engine='8/15/2025'
+        S000510      sheet=datetime.datetime(2025, 2, 27, 0, 0) engine='2/27/2025'
+        G000553      sheet=datetime.datetime(2024, 2, 20, 0, 0) engine='2/20/2024'
+        G000553      sheet=datetime.datetime(2026, 2, 9, 0, 0) engine='2/9/2026'
+   score_graded     1207 of 2376 keys
+        S000510      sheet=-0.4                               engine='0'
+        S000510      sheet=0.4                                engine='0'
+        G000553      sheet=0.4                                engine='0'
+        G000553      sheet=0.4                                engine='0'
+   stance_src        493 of 2376 keys
+        S000510      sheet='debate'                           engine='human_label'
+        A000382      sheet='debate'                           engine='human_label'
+        A000382      sheet='debate'                           engine='human_label'
+        P000614      sheet='debate'                           engine='human_label'
+   stance_sign        57 of 2376 keys
+        M001198      sheet=-1                                 engine='1'
+        V000130      sheet=0                                  engine='1'
+        S001184      sheet=0                                  engine='1'
+        T000250      sheet=0                                  engine='1'
+   stance             57 of 2376 keys
+        M001198      sheet='oppose'                           engine='support'
+        V000130      sheet='neutral'                          engine='support'
+        S001184      sheet='neutral'                          engine='support'
+        T000250      sheet='neutral'                          engine='support'
+   title              37 of 2376 keys
+        G000568      sheet='Credit unions deliver thousands of â€œDonâ€™t Tax My Credit engine='Credit unions deliver thousands of “Don’t Tax My Credit Uni
+        B001267      sheet='Bennet, Reed Celebrate Final Passage of Bipartisan Bill to  engine='Bennet, Reed Celebrate Final Passage of Bipartisan Bill to 
+        B001287      sheet='ICYMI â€“ Bera on CNN: â€œTrump Could End This Shutdown Wit engine='ICYMI – Bera on CNN: “Trump Could End This Shutdown With On
+        B001303      sheet='ICYMI: Senator Blunt Rochester Discusses Housing, Fed Chair engine='ICYMI: Senator Blunt Rochester Discusses Housing, Fed Chair
+
+-- 3. ADDED rows (engine-only, member resolvable by the desk resolver) --
+added rows             :    288
+engine-only but member UNRESOLVED by the desk (excluded, counted) : 3
+added rows by tone source file: {'refresh': 288}
+
+added rows by the ENGINE's own scoring disposition (laneA r1 census):
+   used                      221
+   no-policy-domain           28
+   zero-intensity             20
+   neutral-zeroed             19
+
+top 20 members by rows gained:
+   Josh Riley                        9
+   George Whitesides                 9
+   Raphael Warnock                   7
+   Peter Welch                       7
+   Barry Loudermilk                  6
+   John Hickenlooper                 5
+   Ruben Gallego                     5
+   Lisa Blunt Rochester              5
+   Margaret Hassan                   5
+   Jack Reed                         5
+   Bill Hagerty                      4
+   Mike Crapo                        4
+   Richard Durbin                    4
+   Steven Horsford                   4
+   Susan Collins                     4
+   Tim Moore                         4
+   Janelle Bynum                     4
+   Jeanne Shaheen                    4
+   Jacky Rosen                       4
+   Martin Heinrich                   4
+members gaining at least one row: 146
+
+added rows whose date fdate() would BLANK (M/D/YYYY or NA): 0 of 288
+added rows by stance_src: {'press_refresh_rules_v1': 288}
+
+DONE probe_overlap

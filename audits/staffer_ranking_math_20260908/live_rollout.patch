@@ -1,0 +1,199 @@
+--- a/fec/surfaces/build_staffer_network_section.py
++++ b/fec/surfaces/build_staffer_network_section.py
+@@ -76,7 +76,7 @@
+ 
+ PRODUCER_VERSION = 'staffer-network-section-v1'
+ SCHEMA_ID = 'staffer-network-section-v1'
+-GENERATION = 'staffer_social_network_20260907_v6_primary'
++GENERATION = 'staffer_social_network_20260908_v8_math_primary'
+ VERIFICATION_SUFFIX = '_verification'
+ PRIMARY_SUFFIX = '_primary'
+ 
+--- a/fec/run_pipeline.py
++++ b/fec/run_pipeline.py
+@@ -402,8 +402,8 @@
+     # ALSO clean-skips on its own when that directory is missing, so a rename here degrades to
+     # a skip rather than a chain halt.
+     'build_staffer_network_section.py':(
+-        'audits/staffer_network/staffer_social_network_20260907_v6_primary',
+-        'audits/staffer_network/staffer_social_network_20260907_v6_verification/'
++        'audits/staffer_network/staffer_social_network_20260908_v8_math_primary',
++        'audits/staffer_network/staffer_social_network_20260908_v8_math_verification/'
+         'staffer_social_network_verification_receipt.json',
+     ),
+     # The Groups producer needs strictly MORE than the section producer does: the same verified
+@@ -415,8 +415,8 @@
+     # EMPTY_OFFICES / EMPTY_ORGANISATIONS / EMPTY_CLIENTS). The generation names are the
+     # producer's own GENERATION / SIDECAR_GENERATION / LDA_GENERATION constants.
+     'build_staffer_groups_section.py':(
+-        'audits/staffer_network/staffer_social_network_20260907_v6_primary',
+-        'audits/staffer_network/staffer_social_network_20260907_v6_verification/'
++        'audits/staffer_network/staffer_social_network_20260908_v8_math_primary',
++        'audits/staffer_network/staffer_social_network_20260908_v8_math_verification/'
+         'staffer_social_network_verification_receipt.json',
+         'audits/staffer_network/tiered_corroboration_sidecar_20260907_v3_primary',
+         os.path.join(
+--- a/fec/surfaces/staffer_graph_snapshot.py
++++ b/fec/surfaces/staffer_graph_snapshot.py
+@@ -16,9 +16,14 @@
+ import threading
+ 
+ 
+-GENERATION = "staffer_social_network_20260907_v6_primary"
+-VERIFICATION = "staffer_social_network_20260907_v6_verification"
++GENERATION = "staffer_social_network_20260908_v8_math_primary"
++VERIFICATION = "staffer_social_network_20260908_v8_math_verification"
+ SAMPLE_ROWS = 10000
++
++
++def selected_graph_receipt_path(audits):
++    """Consumers without a supplied receipt follow the same explicit graph pin."""
++    return Path(audits) / GENERATION / 'staffer_social_network_receipt.json'
+ 
+ 
+ def rows(path):
+--- a/fec/surfaces/repin_staffer_live.py
++++ b/fec/surfaces/repin_staffer_live.py
+@@ -46,7 +46,7 @@
+ # --------------------------------------------------------------------------- paths
+ 
+ DEFAULT_SOURCE_ROOT = Path(r"C:\Users\pgoff\OneDrive\Desktop\Melange Systems")
+-DEFAULT_GENERATION = "staffer_social_network_20260907_v6_primary"
++DEFAULT_GENERATION = "staffer_social_network_20260908_v8_math_primary"
+ 
+ SNAPSHOT_MODULE_RELATIVE = Path("fec") / "surfaces" / "staffer_graph_snapshot.py"
+ RUNTIME_RELATIVE = Path("audits") / "staffer_live_runtime"
+--- a/fec/surfaces/staffer_payroll_identity.json
++++ b/fec/surfaces/staffer_payroll_identity.json
+@@ -1,5 +1,5 @@
+ {
+   "version": "payroll-identity-rows-v1",
+-  "path": "audits\\staffer_network\\payroll_identity_current\\payroll_identity_evidence.json.gz",
+-  "sha256": "64b0050fdc1301e2c8072794031c3a745315734afd5c4671c40548a36be44080"
++  "path": "audits\\staffer_network\\payroll_identity_20260908_v8_primary\\payroll_identity_evidence.json.gz",
++  "sha256": "b2e3c16e25b708cad25096eb1aa923f6fe660502d8878402227b5059cfbe71a7"
+ }
+--- a/fec/surfaces/staffer_person_inventory.py
++++ b/fec/surfaces/staffer_person_inventory.py
+@@ -4,6 +4,7 @@
+ 
+ try:
+     from .staffer_routing_evidence import LDA_ROOT, read_rows, sha
++    from .staffer_graph_snapshot import selected_graph_receipt_path
+ except ImportError:  # direct script execution: no package context
+     import os as _bootstrap_os, sys as _bootstrap_sys
+     _bootstrap_root = _bootstrap_os.path.dirname(_bootstrap_os.path.dirname(
+@@ -11,6 +12,7 @@
+     if _bootstrap_root not in _bootstrap_sys.path:
+         _bootstrap_sys.path.insert(0, _bootstrap_root)
+     from fec.surfaces.staffer_routing_evidence import LDA_ROOT, read_rows, sha
++    from fec.surfaces.staffer_graph_snapshot import selected_graph_receipt_path
+ 
+ 
+ PAYROLL_EXCEPTIONS = Path(__file__).with_name("staffer_payroll_inventory_exceptions.json")
+@@ -104,7 +106,7 @@
+     try:
+         receipt_path = next((Path(s['path']) for s in getattr(graph, 'sources', [])
+                              if s.get('role') == 'graph_receipt'),
+-                            audits / "staffer_social_network_20260907_v6_primary/staffer_social_network_receipt.json")
++                            selected_graph_receipt_path(audits))
+         receipt = getattr(graph, 'receipt', None) or json.loads(receipt_path.read_text(encoding="utf-8"))
+         spec = next(s for s in receipt["inputs"] if s["role"] == "hill_person_spine")
+         original = Path(spec["path"])
+@@ -131,7 +133,7 @@
+         result["counts"]["payroll_source_identities"] = len(staged)
+         result["sourcecoverage"]["payroll"] = {"status": "VERIFIED_SPINE_INVENTORY", "source_ids": len(staged),
+             "reused_verified_static_inventory": reuse_verified,
+-            "scope": "v6 verified payroll identities, not a claim every historical raw payroll record was resolved"}
++            "scope": "Verified payroll identities in the bound generation, not a claim every historical raw payroll record was resolved"}
+         spine_receipt_path = path.parent / "hill_personnel_spine_receipt.json"
+         spine_spec = next(s for s in receipt["inputs"] if s["role"] == "hill_personnel_spine_receipt")
+         if sha(spine_receipt_path) != spine_spec["sha256"]:
+@@ -149,7 +151,7 @@
+             exceptions = json.loads(PAYROLL_EXCEPTIONS.read_text(encoding="utf-8"))
+             bound_hashes = {s["sha256"] for s in spine_receipt["inputs"].values() if s.get("sha256")}
+             if any(s["sha256"] not in bound_hashes for s in exceptions["sources"]):
+-                raise ValueError("Payroll exception sources not bound by v6 receipt")
++                raise ValueError("Payroll exception sources not bound by the payroll receipt")
+             for record in exceptions["nonempty_unkeyed_rows"]:
+                 ident = "payroll-unresolved-record:" + str(record["row_id"])
+                 result["nodes"][ident] = node(ident, record["name"], {
+--- a/fec/surfaces/staffer_routing_evidence.py
++++ b/fec/surfaces/staffer_routing_evidence.py
+@@ -11,6 +11,7 @@
+ 
+ try:
+     from .staffer_assertions import load_coworker_assertions, record_coworker_decision, local_date
++    from .staffer_graph_snapshot import selected_graph_receipt_path
+ except ImportError:  # direct script execution: no package context
+     import os as _bootstrap_os, sys as _bootstrap_sys
+     _bootstrap_root = _bootstrap_os.path.dirname(_bootstrap_os.path.dirname(
+@@ -18,6 +19,7 @@
+     if _bootstrap_root not in _bootstrap_sys.path:
+         _bootstrap_sys.path.insert(0, _bootstrap_root)
+     from fec.surfaces.staffer_assertions import load_coworker_assertions, record_coworker_decision, local_date
++    from fec.surfaces.staffer_graph_snapshot import selected_graph_receipt_path
+ 
+ LDA_ROOT = Path(r"C:\Users\pgoff\AppData\Local\Melange\staffer_network\normalized\lda-source-native\generation-20260830T231200Z")
+ EXAMPLES = {"Gordon Holzberg": "lda:lobbyist:147664", "Stephanie Belk": "lda:lobbyist:147663",
+@@ -185,7 +187,7 @@
+     try:
+         graph_receipt_path = next((Path(s['path']) for s in getattr(graph, 'sources', [])
+                                    if s.get('role') == 'graph_receipt'),
+-                                  audits / "staffer_social_network_20260907_v6_primary/staffer_social_network_receipt.json")
++                                  selected_graph_receipt_path(audits))
+         graph_receipt = getattr(graph, 'receipt', None) or json.loads(graph_receipt_path.read_text(encoding="utf-8"))
+         spec = next(s for s in graph_receipt["inputs"] if s["role"] == "hill_member_office_index")
+         original = Path(spec["path"])
+--- a/fec/tests/surfaces/test_staffer_person_inventory.py
++++ b/fec/tests/surfaces/test_staffer_person_inventory.py
+@@ -60,6 +60,8 @@
+ 
+ def test_verified_static_spine_reused_without_rehash_or_parse(tmp_path, monkeypatch):
+     from types import SimpleNamespace
++    from fec.surfaces import staffer_graph_snapshot
++    monkeypatch.setattr(staffer_graph_snapshot, 'GENERATION', 'staffer_social_network_selected_fixture_primary')
+     source_fixture(tmp_path, monkeypatch)
+     audits = tmp_path / "audits/staffer_network"
+     spine_dir = audits / "spine"
+@@ -67,7 +69,7 @@
+     receipt_path = spine_dir / "hill_personnel_spine_receipt.json"
+     receipt_path.write_text(json.dumps({"conservation": {"observations_admitted": 2, "observation_conservation_holds": True},
+         "sources": {"source_rows_suppressed": {"house": 1}, "source_rows_suppressed_by_reason": {"empty": 1}}}))
+-    graph_dir = audits / "staffer_social_network_20260907_v6_primary"
++    graph_dir = audits / staffer_graph_snapshot.GENERATION
+     graph_dir.mkdir()
+     (graph_dir / "staffer_social_network_receipt.json").write_text(json.dumps({"node_universe": {"person": 1}, "inputs": [
+         {"role": "hill_person_spine", "path": str(spine_dir / "deliberately_missing.gz"), "sha256": "verified"},
+--- a/fec/surfaces/start_staffer_live.ps1
++++ b/fec/surfaces/start_staffer_live.ps1
+@@ -1,8 +1,18 @@
+-param([string]$SourceRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent), [int]$Port = 8841)
++param([string]$SourceRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent), [int]$Port = 8841, [string]$DashboardFile = '')
+ $ErrorActionPreference = 'Stop'
+ $pythonPath = (Get-Command python -ErrorAction Stop).Source
+ $runtimeDirectory = Join-Path $SourceRoot 'audits\staffer_live_runtime'
+ New-Item -ItemType Directory -Path $runtimeDirectory -Force | Out-Null
++$serverMetadataPath = Join-Path $runtimeDirectory 'server.json'
++if (-not $DashboardFile -and (Test-Path -LiteralPath $serverMetadataPath)) {
++    $priorServerMetadata = Get-Content -LiteralPath $serverMetadataPath -Raw | ConvertFrom-Json
++    $DashboardFile = [string]$priorServerMetadata.dashboard_file
++}
++# The coordinated v8 release serves this verified artifact; explicit/runtime choices persist.
++if (-not $DashboardFile) { $DashboardFile = 'Moneyball_Redesign.html' }
++if ($DashboardFile -notin @('Moneyball.html', 'Moneyball_Redesign.html')) {
++    throw "Unsupported dashboard filename: $DashboardFile"
++}
+ $existing = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue
+ if ($existing) {
+     try {
+@@ -15,7 +25,7 @@
+     throw "Port $Port is in use by another service; no process was stopped."
+ }
+ $serverScript = Join-Path $PSScriptRoot 'staffer_live_server.py'
+-$taskArguments = @(('"' + $serverScript + '"'), '--source-root', ('"' + $SourceRoot + '"'), '--port', [string]$Port)
++$taskArguments = @(('"' + $serverScript + '"'), '--source-root', ('"' + $SourceRoot + '"'), '--port', [string]$Port, '--dashboard-file', $DashboardFile)
+ $process = Start-Process -FilePath $pythonPath -ArgumentList $taskArguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $runtimeDirectory 'server.stdout.log') -RedirectStandardError (Join-Path $runtimeDirectory 'server.stderr.log')
+-[pscustomobject]@{pid=$process.Id;port=$Port;source_root=$SourceRoot;started_at=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $runtimeDirectory 'server.json') -Encoding utf8
++[pscustomobject]@{pid=$process.Id;port=$Port;source_root=$SourceRoot;dashboard_file=$DashboardFile;started_at=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath $serverMetadataPath -Encoding utf8
+ Write-Output "Started live staffer dashboard: http://127.0.0.1:$Port/staffer-live/ (PID $($process.Id))"

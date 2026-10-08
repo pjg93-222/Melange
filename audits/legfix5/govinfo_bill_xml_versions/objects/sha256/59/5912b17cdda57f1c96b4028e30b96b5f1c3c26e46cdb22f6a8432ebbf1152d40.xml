@@ -1,0 +1,460 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MIR19D18-VJR-MP-MHD"><form><distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2839</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191112">November 12, 2019</action-date><action-desc><sponsor name-id="S389">Mr. Kennedy</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Bank Holding Company Act of 1956 to regulate industrial bank holding companies, and
+			 for other purposes.</official-title></form>
+	<legis-body>
+		<section id="id5c968b3b46174491adc6c058a84bc340" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Eliminating Corporate Shadow Banking Act of 2019</short-title></quote>.</text>
+		</section><section id="ide5c5904363314ba1863a91a1d1f7d523"><enum>2.</enum><header>Industrial bank holding company regulation</header>
+			<subsection id="idc36f2d65e1b24090a3ffc7cbf7cab80d"><enum>(a)</enum><header>Definitions</header><text>Section 2 of the Bank Holding Company Act of 1956 (12 U.S.C. 1841) is amended—</text>
+				<paragraph id="idC7E4EBFE03374024A46A6FB9CC31C54A"><enum>(1)</enum><text>in subsection (c)(2), by redesignating subparagraph (H) as subsection (r),  moving that subsection
+			 to appear after subsection (q), and adjusting the margins accordingly;</text>
+				</paragraph><paragraph id="id6E0A0C887D0549C0A8136A75748F569A"><enum>(2)</enum><text>in subsection (r), as so redesignated—</text>
+					<subparagraph id="id05FC26778E754282AE79315F8E162AAE"><enum>(A)</enum><text>by striking <quote>(r) An industrial</quote> and inserting the following:</text>
+						<quoted-block display-inline="no-display-inline" id="id2760F12FF9B34084AAAF8A1077FE2832" style="OLC">
+							<subsection id="id57E0E82F07A54C759291ACB77835E392"><enum>(r)</enum><header>Industrial bank</header><text>The term <term>industrial bank</term> means an industrial</text></subsection><after-quoted-block>; and</after-quoted-block></quoted-block>
+					</subparagraph><subparagraph id="idD489CED703DD41EB84A4A5BE4D7C2444"><enum>(B)</enum><text>in the flush text following subparagraph (B), by striking <quote>subparagraph</quote> and inserting <quote>subsection</quote>; and</text>
+					</subparagraph></paragraph><paragraph id="id7669C43EBE6B4AA09321618DA48306B3"><enum>(3)</enum><text>by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="idca281d3d05a34537a31b90dc8f4f0655" style="OLC">
+						<subsection id="id2a57221a7c654efca84fca18050589b9"><enum>(s)</enum><header>Covered industrial bank holding company</header><text>The term <term>covered industrial bank holding company</term> means any company—</text>
+							<paragraph id="idcf280e922a274593b1f0f3f1dd0db06b"><enum>(1)</enum><text>that, before October 1, 2019, controlled (as determined by the Board pursuant to subsection (a)),
+			 directly or indirectly, an
+			 industrial bank;</text>
+							</paragraph><paragraph id="idC4C07D1832E04D19BEDEBA288FD37AE6"><enum>(2)</enum><text>that did not acquire control of any other depository institution after October 1, 2019;</text>
+							</paragraph><paragraph id="id732E6B8372FC4A2DA3D54A9975435171"><enum>(3)</enum><text>with respect to which there is no change in control, directly or indirectly, of any depository
+			 institution subsidiary after October 1, 2019, that requires a registration
+			 under this section or an application under section 7(j) or 18(c) of the
+			 Federal Deposit Insurance Act (12 U.S.C. 1817(j), 1828(c)), section 3 of
+			 this Act, or section 10 of the Home Owners’ Loan Act (12 U.S.C. 1467a);
+			 and</text>
+							</paragraph><paragraph id="idff4805e8073c44e0ba4308e598aeaa94"><enum>(4)</enum><text>that was not—</text>
+								<subparagraph id="id612a89d59db343968a044fbc690ae79c"><enum>(A)</enum><text>a bank holding company;</text>
+								</subparagraph><subparagraph id="id9E59DAD360FD443DB9D2D6D6C49A6CF8"><enum>(B)</enum><text>a savings and loan holding company;</text>
+								</subparagraph><subparagraph id="idC04DD4A2C701406EA800642AC8575F46"><enum>(C)</enum><text>a company that is subject to this Act pursuant to section 8(a) of the International Banking Act of
+			 1978 (12 U.S.C. 3106(a));</text>
+								</subparagraph><subparagraph id="idAC6E6F14CA054559A4E3723277D0B70A"><enum>(D)</enum><text>a holding company regulated by the Securities and Exchange Commission pursuant to section
+			 240.15c3–1(a)(7) of title 17, Code of Federal Regulations, as in effect on
+			 August 1, 2019; or</text>
+								</subparagraph><subparagraph id="id9429432587844b309cc8f67ced49922f"><enum>(E)</enum><text>controlled by a company described in subparagraph (A), (B), (C), or (D).</text>
+								</subparagraph></paragraph></subsection><subsection id="iddff9748c08794f3592fc75b789b5af0b"><enum>(t)</enum><header>Capital terms relating to covered industrial bank holding companies</header>
+							<paragraph id="id09f92697e3c2405f8f36f30ed6799314"><enum>(1)</enum><header>Adequately capitalized</header><text>With respect to a covered industrial bank holding company, the term <term>adequately capitalized</term> means a level of capitalization which meets or exceeds all applicable Federal regulatory capital
+			 standards.</text>
+							</paragraph><paragraph id="id3dc22e19942e4c09b07c12adcc0ba6a6"><enum>(2)</enum><header>Well capitalized</header><text>With respect to a covered industrial bank holding company, the term <term>well capitalized</term> means a level of capitalization which meets or exceeds the required capital levels for well
+			 capitalized covered industrial bank holding companies established by the
+			 Board.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph></subsection><subsection id="id4d590480255141baaa45f7ceeea2a771"><enum>(b)</enum><header>Covered industrial bank holding company registration and ownership</header><text>The Bank Holding Company Act  of 1956 (12 U.S.C. 1841 et seq.) is amended by adding at the end the
+			 following:</text>
+				<quoted-block display-inline="no-display-inline" id="id57bd7c65aac943479c982a32c3bc7481" style="OLC">
+					<section id="id40e2371c974d4354bc1dc3a99e60b28c"><enum>15.</enum><header>Industrial bank holding company regulation</header>
+						<subsection id="idf90f25f3e5cf448d83e66298e8ac66a6"><enum>(a)</enum><header>Acquisition of industrial bank shares or assets</header><text>Section 3 of this Act (other than section 3(c)(3)(B)) shall apply to any covered industrial bank
+			 holding company in the same manner as that
+			 section applies to a company that is or would become a bank holding
+			 company, except that for purposes of applying this subsection—</text>
+							<paragraph id="id39523c2feb594b9d9bb1e2f2385e0fde"><enum>(1)</enum><text>any reference to a <quote>bank holding company</quote> in such section 3 shall be deemed to be a reference to a <quote>covered industrial bank holding company</quote>;</text>
+							</paragraph><paragraph id="ida72f95ceec9e46ec91ca5957a80ec824"><enum>(2)</enum><text>any reference to a <quote>bank</quote> in such section 3 shall be deemed to be a reference to an <quote>industrial bank</quote>;</text>
+							</paragraph><paragraph id="id8531afdec78c4702a6d8bcc9708026a2"><enum>(3)</enum><text>any reference to the <quote>Bank Holding Company Act Amendments of 1970</quote> in such section 3 shall be deemed to be a reference to the <quote>Industrial Bank Holding Company Act of 2019</quote>;</text>
+							</paragraph><paragraph id="id0fd83252e2f941f58b74a8bf228a400c"><enum>(4)</enum><text>any reference to a <quote>home State</quote> in such section 3 shall be deemed to be a reference to—</text>
+								<subparagraph id="id8002c5c857644c38850d75b93a20d11f"><enum>(A)</enum><text>with respect to a covered industrial bank holding company, the State in which the total deposits of
+			 all
+			 banking subsidiaries of such company were the largest on the later of—</text>
+									<clause id="id85d3faadc91f4c28bc7d805c0a7f845a"><enum>(i)</enum><text>October 1, 2019; or</text>
+									</clause><clause id="id7d9cf5b2090f4754aeeed05f04264c74"><enum>(ii)</enum><text>the date on which the company becomes a covered industrial bank holding company under this section;
+			 and</text>
+									</clause></subparagraph><subparagraph id="id36f61fe2bda94121ab3315bb2d5dee7c"><enum>(B)</enum><text>with respect to an industrial bank, the home State of the bank as determined under section 44(g) of
+			 the Federal Deposit Insurance Act (12 U.S.C. 1831u(g));</text>
+								</subparagraph></paragraph><paragraph id="id1414cdb597cc4b9d81ea9708461b5157"><enum>(5)</enum><text>any reference to a <quote>host State</quote> in such section 3 shall be deemed to be a reference to—</text>
+								<subparagraph id="id513d576d0e584e1bb9cd9f844800887d"><enum>(A)</enum><text>with respect to a covered industrial bank holding company, a State, other than the home State of
+			 the
+			 company, in which the company controls, or seeks to control, an industrial
+			 bank subsidiary; and</text>
+								</subparagraph><subparagraph id="id88994ea3fdd34adbb7a93e3bba02e1c4"><enum>(B)</enum><text>with respect to an industrial bank, the host State of the bank as determined under section 44(g) of
+			 the Federal Deposit Insurance Act (12 U.S.C. 1831u(g));</text>
+								</subparagraph></paragraph><paragraph id="ided9a33b56e0744298a31896ba5dd1f1d"><enum>(6)</enum><text>any reference to an <quote>out-of-State bank holding company</quote> in such section 3 shall be deemed to be a reference to, with respect to any State, a covered
+			 industrial bank holding company whose home State is another State; and</text>
+							</paragraph><paragraph id="id299acfd5f0cc41918793b1732733708e"><enum>(7)</enum><text>any reference to an <quote>out-of-State bank</quote> in such section 3 shall be deemed to be a reference to, with respect to any State, an industrial
+			 bank whose home State is another State.</text>
+							</paragraph></subsection><subsection id="id7c68217963494f968cd86d873799c94c"><enum>(b)</enum><header>Application process</header><text>An application filed under subsection (a) to acquire control of an industrial bank shall be treated
+			 as an application for a deposit facility for purposes of this Act and any
+			 other Federal law.</text>
+						</subsection><subsection id="id884eb50a5cc24313950832bcc664b20f"><enum>(c)</enum><header>Registration</header>
+							<paragraph id="idad9d217a900048368a15a918bf0b38ce"><enum>(1)</enum><header>In general</header><text>Each covered industrial bank holding company shall register with the Board on forms prescribed by
+			 the Board
+			 before the end of the 180-day period beginning on the later of—</text>
+								<subparagraph id="id46b2873ea53947a984ba71ef1438b185"><enum>(A)</enum><text>the date the company becomes a covered industrial bank holding company; or</text>
+								</subparagraph><subparagraph id="idf654454ebd394c9984f101c197ed49d1"><enum>(B)</enum><text>the date of enactment of this section.</text>
+								</subparagraph></paragraph><paragraph id="id28df1aaafbad4112805441ba97e8fc7a"><enum>(2)</enum><header>Information to be included</header><text>Each registration submitted under paragraph (1) shall include such information, under oath, with
+			 respect to the financial condition, ownership, operations, management, and
+			 intercompany relationships of the covered industrial bank holding company
+			 and
+			 subsidiaries of the covered industrial bank holding company, and other
+			 factors
+			 (including information described in subsection (d)(1)(C)), as the Board
+			 may determine to be appropriate to carry out the purposes of this section.</text>
+							</paragraph><paragraph id="id74ad603aabd84b0983a23907039da382"><enum>(3)</enum><header>Extension of time for submitting complete information</header><text>Upon application by a covered industrial bank holding company and subject to such requirements,
+			 factors,
+			 and evidence as the Board may require, the Board may extend the period
+			 described in paragraph (1) within which the covered industrial bank
+			 company shall
+			 register and file the requisite information.</text>
+							</paragraph></subsection><subsection id="id3fdfaaa492b3420a9d24d0fab885bdb7"><enum>(d)</enum><header>Reports and examinations</header>
+							<paragraph id="id045b8a18be8e43f0a6e81db7d44fc3b8"><enum>(1)</enum><header>Reports</header>
+								<subparagraph id="id577554196a784b3fada223b998273c51"><enum>(A)</enum><header>Reports required</header><text>Each covered industrial bank holding company and each subsidiary of a covered industrial bank
+			 holding company,
+			 other than an industrial bank, shall file with the Board such reports as
+			 may be required by the Board.</text>
+								</subparagraph><subparagraph id="idd7e8942a9ad2402f9a1e8efe1a9f55fe"><enum>(B)</enum><header>Form and manner</header><text>Reports filed under subparagraph (A) shall be made under oath and shall be in such form and for
+			 such periods as the Board may prescribe.</text>
+								</subparagraph><subparagraph id="id89020c83a4f948b08fb28f73bbfb814f"><enum>(C)</enum><header>Information</header><text>Each report filed under subparagraph (A) shall contain such information as the Board may require
+			 concerning—</text>
+									<clause id="id42bf2128993d4c479036045dd236b829"><enum>(i)</enum><text>the operations of the covered industrial bank holding company and the subsidiaries of the covered
+			 industrial bank
+			 holding company;</text>
+									</clause><clause id="ideb5e6f5e3f2b421589d5355d866d02ea"><enum>(ii)</enum><text>the financial condition of the covered industrial bank holding company and the subsidiaries of the
+			 covered industrial bank holding company, together with information on
+			 systems
+			 maintained within the covered industrial bank holding company or within
+			 any
+			 subsidiary of the covered industrial bank holding company for monitoring
+			 and
+			 controlling financial and operating risks, and transactions with insured
+			 depository institution subsidiaries of the covered industrial bank holding
+			 company;</text>
+									</clause><clause id="id673fef3c4af14e3ebebb76576ac9757e"><enum>(iii)</enum><text>compliance by the covered industrial bank holding company and the subsidiaries of the covered
+			 industrial bank
+			 holding company with all applicable Federal and State laws; and</text>
+									</clause><clause id="id24152479186346798c957c8efbb509a4"><enum>(iv)</enum><text>such other information as the Board may require.</text>
+									</clause></subparagraph><subparagraph id="idde3291351848435aaa9f77c363794b00"><enum>(D)</enum><header>Acceptance of existing reports</header><text>For purposes of this paragraph, the Board may accept reports that a covered industrial bank holding
+			 company or any subsidiary of a covered industrial bank holding company has
+			 provided or has been required to provide to any other Federal or State
+			 supervisor or to any appropriate self-regulatory organization.</text>
+								</subparagraph></paragraph><paragraph id="id01520a038a094457bc197d7e53041d8e"><enum>(2)</enum><header>Examinations</header>
+								<subparagraph id="idd5088c893817432a9833c6e29e74c318"><enum>(A)</enum><header>In general</header><text>Each covered industrial bank holding company and each subsidiary of each covered industrial bank
+			 holding company
+			 (other than an industrial bank) shall be subject to such examinations by
+			 the Board as the Board may prescribe for purposes of this section.</text>
+								</subparagraph><subparagraph id="idd8691a18caed4685a069e31e312e9a5d"><enum>(B)</enum><header>Furnishing reports to other agencies</header><text>Examination and other reports made or received under this section may be furnished by the Board to
+			 any other appropriate Federal agency or any appropriate State bank
+			 supervisor or other State financial supervisory agency.</text>
+								</subparagraph><subparagraph id="iddc13f1df49ef4c27b7924a2867364865"><enum>(C)</enum><header>Use of reports from other agencies</header><text>The Board may use, for purposes of this subsection, reports of examination made by any other
+			 appropriate Federal agency, any appropriate State bank supervisor, or any
+			 other State financial supervisory authority with respect to any covered
+			 industrial bank holding company or subsidiary of the covered industrial
+			 bank holding company,
+			 to the extent the Board may determine such use to be feasible for such
+			 purposes.</text>
+								</subparagraph></paragraph><paragraph id="id72012f7759ec4fa989f296e4d09aa5cf"><enum>(3)</enum><header>Capital</header>
+								<subparagraph id="id45f462065dfd4d7484934f567de5ad22"><enum>(A)</enum><header>In general</header><text>The Board may not, by regulation, guideline, order, or otherwise, prescribe or impose any capital
+			 or capital adequacy rules, guidelines, standards, or requirements on any
+			 functionally regulated affiliate (as defined in section 45 of the Federal
+			 Deposit Insurance Act (12 U.S.C. 1831v)) of any depository institution
+			 that is controlled by a covered industrial bank holding company that—</text>
+									<clause id="id06db560fa07446a7a5a50bf3492f3408"><enum>(i)</enum><text>is not a depository institution; and</text>
+									</clause><clause id="id243c6be96c02439db134406a31aed42e"><enum>(ii)</enum><text>is—</text>
+										<subclause id="id20f135cdd6cc41a78ca7ca0dd531b4e2"><enum>(I)</enum><text>in compliance with the applicable capital requirements of the appropriate Federal or State
+			 supervisory
+			 agency of the affiliate (including the Securities and Exchange Commission
+			 or State insurance authority);</text>
+										</subclause><subclause id="ide2c098762d6d4ce5afba24459cc3e49d"><enum>(II)</enum><text>properly registered as an investment adviser—</text>
+											<item id="id30248CE072BD4C9487D1162454705631"><enum>(aa)</enum><text>under the Investment Advisers Act of 1940 (15 U.S.C. 80b–1 et seq.); or</text>
+											</item><item id="idB46B6219D24646CB839ED0665492EBF0"><enum>(bb)</enum><text>with any State; or</text>
+											</item></subclause><subclause id="id2347e522541e40458406617df5c565f9"><enum>(III)</enum><text>is licensed as an insurance agent with the appropriate State insurance authority.</text>
+										</subclause></clause></subparagraph><subparagraph id="iddae68a12d3604a3db8b371f9e684c887"><enum>(B)</enum><header>Rule of construction</header><text>Subparagraph (A) shall not be construed as preventing the Board from imposing capital or capital
+			 adequacy rules, guidelines, standards, or requirements with respect to—</text>
+									<clause id="id5b1daa1faf644e469fb6ff74fcdc7181"><enum>(i)</enum><text>activities of a registered investment adviser other than with respect to investment advisory
+			 activities or activities incidental to investment advisory activities; or</text>
+									</clause><clause id="id252a7304d1ba498bb98c80ea9d02f033"><enum>(ii)</enum><text>activities of a licensed insurance agent other than insurance agency activities or activities
+			 incidental to insurance agency activities.</text>
+									</clause></subparagraph></paragraph></subsection><subsection id="idf7a36209df414067b9ef567bca206c03"><enum>(e)</enum><header>Access to information</header>
+							<paragraph id="id708115af51484a75a1a045b21bbfe6ca"><enum>(1)</enum><header>Information provided by board</header><text>Any confidential supervisory information, including examination or other reports, pertaining to a
+			 covered industrial bank holding company furnished by the Board to any
+			 other Federal agency or any
+			 appropriate State supervisory agency shall remain confidential unless the
+			 Board, in writing, otherwise consents.</text>
+							</paragraph><paragraph id="id74cebb2275f64d0f80433dd55716be7e"><enum>(2)</enum><header>Deference to depository institution examinations</header><text>Any appropriate Federal supervisory agency of a covered industrial bank holding company shall, to
+			 the
+			 fullest extent possible, rely on examination reports made by the
+			 appropriate Federal banking
+			 agency and the appropriate State bank supervisor relating to any
+			 depository institution subsidiary of the covered industrial bank holding
+			 company in lieu of a direct
+			 examination.</text>
+							</paragraph><paragraph id="id1df2c80d31204b52ae7befd4a768924f"><enum>(3)</enum><header>Information to be provided to board</header>
+								<subparagraph id="id1a5fbd67efed4a04a334fcf1a838377b"><enum>(A)</enum><header>Request to agency</header><text>Upon request by the Board, an appropriate Federal supervisory agency may provide to the Board
+			 information regarding the condition of an industrial bank, any covered
+			 industrial bank holding company of the industrial bank, or any other
+			 affiliate of any
+			 such covered industrial bank holding company that is necessary to assess
+			 risk to the industrial
+			 bank.</text>
+								</subparagraph><subparagraph id="id869770b8051144a089ff7a3ffc0cc471"><enum>(B)</enum><header>Availability from holding company directly</header><text>Notwithstanding section 45 of the Federal Deposit Insurance Act (12 U.S.C. 1825), section 115 of
+			 the Gramm-Leach-Bliley Act (12 U.S.C. 1820a), or any other provision of
+			 law (including any regulation), if the information requested under
+			 subparagraph (A) is not provided to the Board, and the information is
+			 necessary to assess risk to the industrial bank, the Board may require the
+			 covered industrial bank holding company or affiliate thereof referred to
+			 in such subparagraph with respect
+			 to such industrial bank to provide such information to the Board.</text>
+								</subparagraph></paragraph><paragraph id="id146e7ed6a79a482cb99e16f3e861b7b2"><enum>(4)</enum><header>Examinations by board</header>
+								<subparagraph id="id3453eedf1bc64698919d0f496ffe7f72"><enum>(A)</enum><header>In general</header><text>Subject to subparagraph (B) and notwithstanding section 45 of the Federal Deposit Insurance Act (12
+			 U.S.C. 1831v), section 115 of the Gramm-Leach-Bliley Act (12 U.S.C.
+			 1820a), or any other provision of law (including any regulation), no law
+			 shall be construed as preventing the Board from examining an affiliate of
+			 an industrial bank as may be necessary to disclose fully the relationship
+			 between the industrial bank and the affiliate, and the effect of such
+			 relationship on the industrial bank, if the Board finds such examination
+			 necessary to determine the condition of an industrial bank.</text>
+								</subparagraph><subparagraph id="id9b4014a9da6740779a21493b5bba2281"><enum>(B)</enum><header>Functionally regulated affiliates</header><text>Before the Board may examine any affiliate of an industrial bank that is a broker, a dealer, an
+			 investment company, an investment advisor, or an entity that is subject to
+			 consolidated supervision by the Securities and Exchange Commission, other
+			 than a depository institution, the Board—</text>
+									<clause id="idE6ABAD6B63D54EEB9E3230D9B246F782"><enum>(i)</enum><text>shall request the Commission to provide the information that the Board is seeking to obtain through
+			 examination; and</text>
+									</clause><clause id="id566750CA059843098DC496E0B8DF7DBE"><enum>(ii)</enum><text>may proceed with the examination only if the requested information is not provided by the
+			 Commission in a timely manner.</text>
+									</clause></subparagraph></paragraph></subsection><subsection id="ide7b5c922b3fc4cd69025cee54a5270c9"><enum>(f)</enum><header>Limitation on control</header>
+							<paragraph id="idaff8c92509b847258e52ad99199fd025"><enum>(1)</enum><header>In general</header><text>Except as provided in paragraph (3) or (4), no industrial bank may be controlled, directly or
+			 indirectly, by a commercial firm.</text>
+							</paragraph><paragraph id="id6769e06341384a4babb5f6e748644bea"><enum>(2)</enum><header>Commercial firm defined</header><text>For purposes of this section, the term <term>commercial firm</term> means any entity that derives any amount of revenue from activities that are not financial in
+			 nature, or incidental to a financial activity as defined in section 4(k).</text>
+							</paragraph><paragraph id="id4e0d3699684a49a6949a7267413a16a3"><enum>(3)</enum><header>Pre-2019 exclusions for certain industrial banks</header>
+								<subparagraph id="id6004672bb5664385bcd8b2627d7a4680"><enum>(A)</enum><header>Grandfathered institutions</header><text>Paragraph (1) shall not apply with respect to any industrial bank—</text>
+									<clause id="ide9a4cab8f96e47ed9ca5fa8fd1bd44e8"><enum>(i)</enum><text>that became an insured depository institution before October 1, 2019, or pursuant to an application
+			 for deposit insurance that was approved by the Federal Deposit Insurance
+			 Corporation before such date; and</text>
+									</clause><clause id="idfc5ff38fdaa741428d8a4a55e3ec58cf"><enum>(ii)</enum><text>with respect to which there is no change in control, directly or indirectly, of the bank after
+			 September 30, 2019, that requires a registration under this section or an
+			 application under section 7(j) or 18(c) of the Federal Deposit Insurance
+			 Act (12 U.S.C. 1817(j), 1828(c)), section 3 of this Act, or section 10 of
+			 the Home Owners’ Loan Act (12 U.S.C. 1467a), except a direct or indirect
+			 change of control in which—</text>
+										<subclause id="id5169dcc783e54bcbb06677f09b1be013"><enum>(I)</enum><text>immediately prior to such change in control the acquiring company is a bank holding company, a
+			 financial holding company, a savings and loan holding company, or a
+			 holding company regulated by the Securities and Exchange Commission
+			 pursuant to section 240.15c3–1(a)(7) of title 17,  Code of Federal
+			 Regulations, as in effect on August 1, 2019;</text>
+										</subclause><subclause id="id78b6ee2ab9ee4644aa2c1e10f6804306"><enum>(II)</enum><text>the resulting holding company is a bank holding company, a financial holding company, a savings and
+			 loan holding company, or a holding company regulated by the Securities and
+			 Exchange Commission pursuant to section 240.15c3–1(a)(7) of title 17, Code
+			 of Federal Regulations, as in effect on October 1, 2019; and</text>
+										</subclause><subclause id="id72bc12c02aaa4ceaba2f76d733eec55e"><enum>(III)</enum><text>the resulting ultimate holding company is subject to consolidated supervision by the Board or a
+			 holding company regulated by the Securities and Exchange Commission
+			 pursuant to section 240.15c3–1(a)(7) of title 17, Code of Federal
+			 Regulations, as in effect on October 1, 2019.</text>
+										</subclause></clause></subparagraph><subparagraph id="idc5e30860015f4728984eb60066b0d7f6"><enum>(B)</enum><header>Corporate reorganizations permitted</header><text>The acquisition of direct or indirect control of an industrial bank referred to in subparagraph
+			 (A)(ii) shall not be treated as a <quote>change in control</quote> for purposes of that subparagraph if—</text>
+									<clause id="id192b593ab19a491b9cf56dbf6e9fde00"><enum>(i)</enum><text>the company acquiring control is itself directly or indirectly controlled by a company that was an
+			 affiliate of the industrial bank on the date referred to in that
+			 subparagraph, and remains an affiliate at all times after that date; and</text>
+									</clause><clause id="id3008c9f4ec474b3d89d99cc12379fcaa"><enum>(ii)</enum><text>the transaction through which the company acquired control of the industrial bank constituted
+			 solely a corporate reorganization of a company that controlled the
+			 industrial bank on the date referred to in that subparagraph.</text>
+									</clause></subparagraph></paragraph><paragraph id="ida614ade02cf64bf9b7e09dd2a0295c81"><enum>(4)</enum><header>Pre-2019 exclusions for commercial firms</header>
+								<subparagraph id="id764c7cc81c66449bae8c30b03e4de101"><enum>(A)</enum><header>Grandfathered commercial firms</header><text>Paragraph (1) shall not apply to any commercial firm—</text>
+									<clause id="id7B7BBBE7ACBC4FEF8E6DE5C024E0814A"><enum>(i)</enum><text>that became a covered industrial bank holding company by virtue of acquiring control of an
+			 industrial
+			 bank before October 1, 2019;</text>
+									</clause><clause id="id83D9B3C963D346FB9D9B177A54C43FEC"><enum>(ii)</enum><text>that did not acquire control of any other depository institution after October 1, 2019;</text>
+									</clause><clause id="id6FE65C2594874BBF8730A1F6A48B8996"><enum>(iii)</enum><text>with respect to which there is no change in control, directly or indirectly, of any depository
+			 institution subsidiary after October 1, 2019, that requires a registration
+			 under this section or an application under section 7(j) or 18(c) of the
+			 Federal Deposit Insurance Act (12 U.S.C. 1817(j), 1828(c)), section 3 of
+			 this Act, or section 10 of the Home Owners’ Loan Act (12 U.S.C. 1467a);
+			 and</text>
+									</clause><clause id="ida1bb973bdfb340ec9f47667ffad7a0c6"><enum>(iv)</enum><text>each industrial bank subsidiary of which remains in compliance with the limitations contained in
+			 subparagraph (B).</text>
+									</clause></subparagraph><subparagraph id="id72fc594a8f804d40b142acd78c58fbfe"><enum>(B)</enum><header>Activity and branching limitations</header><text>An industrial bank subsidiary of a commercial firm described in clauses (i), (ii), and (iii) of
+			 subparagraph (A) is in compliance with the requirements of this
+			 subparagraph for purposes of subparagraph (A)(iv) if the industrial bank—</text>
+									<clause id="ida7f176405e77411b81e42b38cd683734"><enum>(i)</enum><text>engages only in activities in which the industrial bank was engaged on October 1, 2019; and</text>
+									</clause><clause id="id6f18676c4a3f4a95bdfe371e9a72892b"><enum>(ii)</enum><text>does not acquire, establish, or operate any branch, deposit production office, loan production
+			 office, automated teller machine, or remote service unit in any State
+			 other than the home State of the bank or any host State in which such bank
+			 operated branches on October 1, 2019.</text>
+									</clause></subparagraph><subparagraph id="id1ce14604a9a74f90a986efb946682250"><enum>(C)</enum><header>Corporate reorganizations permitted</header><text>The acquisition of direct or indirect control of a depository institution subsidiary referred to in
+			 subparagraph (A)(iii) shall not be treated as a <quote>change in control</quote> for purposes of that subparagraph if—</text>
+									<clause id="id050254de50bc4e33b81fc9a88f6f7a78"><enum>(i)</enum><text>the company acquiring control is itself directly or indirectly controlled by a company that was an
+			 affiliate of such subsidiary on the date referred to in that subparagraph,
+			 and remains an affiliate at all times after that date; and</text>
+									</clause><clause id="id3e0b9b68765246ffab1799a582d85088"><enum>(ii)</enum><text>the transaction through which the company acquired control of the depository institution
+			 constituted solely a corporate reorganization of a company that controlled
+			 the depository institution on the date referred to in that subparagraph.</text>
+									</clause></subparagraph></paragraph></subsection><subsection id="id839b7bc9bd2a4937996a2845ce759fda"><enum>(g)</enum><header>Procedures and timing for termination of activities or divestiture</header>
+							<paragraph id="id41435748075b47ad865cd98c7abe11c4"><enum>(1)</enum><header>Transition provision</header>
+								<subparagraph id="idbeb364f67cc04eda93bbb772b929854c"><enum>(A)</enum><header>In general</header><text>Any covered industrial bank holding company that fails to comply with the provisions of subsection
+			 (f) shall divest its ownership
+			 or control of each industrial bank subsidiary of the covered industrial
+			 bank holding company not later
+			 than the end of the 2-year period beginning on the first date that the
+			 covered industrial bank holding company ceased to comply with subsection
+			 (f).</text>
+								</subparagraph><subparagraph id="id05fbbfc12ab844c788cbee1520b011d8"><enum>(B)</enum><header>Extension of time period</header>
+									<clause id="id43728066bb1a4255a4426b0cd48834d8"><enum>(i)</enum><header>In general</header><text>Upon application by a covered industrial bank holding company, the appropriate Federal
+			 supervisory agency of the covered industrial bank holding company may
+			 extend the 2-year period
+			 referred to in subparagraph (A) with respect to the covered industrial
+			 bank holding company for
+			 not more than 1 year if, in the judgment of the Federal supervisory
+			 agency, the extension would not be detrimental to the public interest.</text>
+									</clause><clause id="id18e5f5476e6545f0ba19762452341614"><enum>(ii)</enum><header>Factors</header><text>In making any decision to grant an extension under clause (i) to a covered industrial bank holding
+			 company, the appropriate Federal supervisory agency of the covered
+			 industrial bank holding company
+			 shall consider whether—</text>
+										<subclause id="id19870a5c9d4c4741ae318ed0becdb68f"><enum>(I)</enum><text>the covered industrial bank holding company has made a good faith effort to divest those interests;
+			 and</text>
+										</subclause><subclause id="idf8a08025d84f4e669d03034bac8ffdec"><enum>(II)</enum><text>such extension is necessary to avert substantial loss to the covered industrial bank holding
+			 company.</text>
+										</subclause></clause></subparagraph></paragraph><paragraph id="id9227ef33a7e34701a337b3c13a3f6a43"><enum>(2)</enum><header>Conditions before divestiture</header><text>During the 2-year period referred to in paragraph (1)(A) with respect to any covered industrial
+			 bank holding company and any
+			 extension of that period, the appropriate Federal supervisory agency may
+			 impose any conditions or restrictions on the covered industrial bank
+			 holding company or any subsidiary of
+			 the covered industrial bank holding company (other than a bank), including
+			 restricting or prohibiting
+			 transactions between the covered industrial bank holding company or
+			 subsidiary and any depository
+			 institution subsidiary of the covered industrial bank holding company, as
+			 are appropriate under the
+			 circumstances.</text>
+							</paragraph><paragraph id="id023f93d4744d43c4ac43eeb2c2328151"><enum>(3)</enum><header>Termination of activities or divestiture of nonbank subsidiaries constituting serious risk</header>
+								<subparagraph id="id664d3bfa52684d058713c6fa03399357"><enum>(A)</enum><header>In general</header><text>Notwithstanding any other provision of this section, the appropriate Federal supervisory agency
+			 may, whenever such agency has reasonable cause to believe that the
+			 continuation by a covered industrial bank holding company of any activity
+			 or
+			 of ownership or control of any nonbank subsidiary of the covered
+			 industrial bank holding company,
+			 other than a nonbank subsidiary of a depository institution, constitutes a
+			 serious risk to the financial safety, soundness, or stability of a
+			 depository institution subsidiary of the covered industrial bank holding
+			 company and is
+			 inconsistent with sound banking principles or with the purposes of this
+			 section, at the election of the covered industrial bank holding company—</text>
+									<clause id="idc8fd5ef46d904f93977a6436f6cae7d7"><enum>(i)</enum><text>order the covered industrial bank holding company or any nonbank subsidiary of the covered
+			 industrial bank holding company, after due notice and
+			 opportunity for hearing, and after considering the views of the
+			 appropriate Federal banking agency and, if applicable, appropriate State
+			 bank supervisor, to terminate those activities or to terminate (within 120
+			 days or such longer period as the appropriate Federal supervisory agency
+			 may direct in unusual circumstances) the ownership or control by the
+			 covered industrial bank holding company or nonbank subsidiary of the
+			 depository institution
+			 subsidiary either by sale or by distribution of the shares of the
+			 depository institution subsidiary, in accordance with subparagraph (B), to
+			 the shareholders of the covered industrial bank holding company; or</text>
+									</clause><clause id="idee2066c53d8349818b1daa5316228403"><enum>(ii)</enum><text>order the covered industrial bank holding company, after due notice and opportunity for hearing,
+			 and
+			 after consultation with the appropriate State bank supervisor for the
+			 industrial bank controlled by the covered industrial bank holding company,
+			 to terminate (within 120 days or such longer period as
+			 the appropriate Federal supervisory agency may direct) the ownership or
+			 control of any such industrial bank by the covered industrial bank holding
+			 company.</text>
+									</clause></subparagraph><subparagraph id="id225f78c96e8544438f191bb93e3a7794"><enum>(B)</enum><header>Pro rata distribution</header><text>Any distribution to shareholders referred to in clause (i) shall be pro rata with respect to all of
+			 the shareholders of the distributing covered  industrial bank holding
+			 company, and the distributing covered industrial bank holding company
+			 shall not make any charge to any shareholder in connection with that
+			 distribution.</text>
+								</subparagraph></paragraph><paragraph id="ide2c23def5e504211a78988a87c62ef81"><enum>(4)</enum><header>Holding company responsibility</header>
+								<subparagraph id="id7e6a282f6c8a4390ac2dfcff59e5ab7f"><enum>(A)</enum><header>Source of strength</header><text>Notwithstanding section 45 of the Federal Deposit Insurance Act (12 U.S.C. 1831v), a covered
+			 industrial bank holding company—</text>
+									<clause id="iddd1725051e324409bc13101baf77cb60"><enum>(i)</enum><text>shall serve as a source of financial and managerial strength to the subsidiary banks of the covered
+			 industrial bank holding company in the same manner as required under
+			 section 38A of the Federal Deposit Insurance Act (12 U.S.C. 1831o–1); and</text>
+									</clause><clause id="idffa8ec6e408144d1b7ff447554509fb7"><enum>(ii)</enum><text>shall not conduct the operations of the covered industrial bank holding company in an unsafe or
+			 unsound manner.</text>
+									</clause></subparagraph><subparagraph id="idd91722fac2f948659b240e79d11dafae"><enum>(B)</enum><header>Implementation</header><text>The appropriate Federal supervisory agency of a covered industrial bank holding company shall
+			 implement the requirements under subparagraph (A) with respect to that
+			 industrial bank holding company.</text>
+								</subparagraph></paragraph></subsection><subsection id="id80d1f39228a241b591e1c5583875ffb5"><enum>(h)</enum><header>Foreign bank ownership</header><text>After October 1, 2019, no foreign bank may acquire, directly or indirectly, control of an
+			 industrial bank.</text>
+						</subsection><subsection id="idcbd8c6cc4f79409e8c81f53bce3536aa"><enum>(i)</enum><header>Administrative provisions</header>
+							<paragraph id="idc77fc21afd6f4f58a2435e5113b80564"><enum>(1)</enum><header>Agent for service of process</header><text>The Board may require any covered industrial bank holding company, or persons connected with the
+			 covered industrial bank holding company if it is not a corporation, to
+			 execute and file a
+			 prescribed form of irrevocable appointment of agent for service of
+			 process.</text>
+							</paragraph><paragraph id="id204b7117e98f497a8f2c4be142872b3a"><enum>(2)</enum><header>Release from registration</header><text>The Board may at any time, upon a motion by the Board or upon application, release a registered
+			 covered industrial bank holding company from any registration previously
+			 made by
+			 the covered industrial bank holding company, if the Board determines that
+			 the covered industrial bank holding company no longer controls any
+			 industrial bank.</text>
+							</paragraph></subsection><subsection id="ida1b2647ecb8242d5bd9a05a2aa43de5d"><enum>(j)</enum><header>Definition</header><text>In this section:</text>
+							<paragraph commented="no" id="id7150725c277043e39ea4a2bbbad5ee3f"><enum>(1)</enum><header>Appropriate federal supervisory agency</header><text>The term <term>appropriate Federal supervisory agency</term> means, with respect to a company that controls an industrial bank—</text>
+								<subparagraph commented="no" id="id8f85d4ca07ac4337bfb971e01debd7ae"><enum>(A)</enum><text>the Board, in the case of a company that is a bank holding company, a company that is a covered
+			 industrial bank holding company, a company that is a savings and loan
+			 holding
+			 company, or a company that is subject to this Act  pursuant to section
+			 8(a) of the International Banking Act of 1978 (12 U.S.C. 3106(a)); or</text>
+								</subparagraph><subparagraph commented="no" id="id8651120f5bae42d392d6a15fe75bb640"><enum>(B)</enum><text>the Securities and Exchange Commission, in the case of a company that is regulated by the
+			 Commission pursuant to section 240.15c3–1(a)(7) of title 17, Code of
+			 Federal Regulations, as in effect on August 1, 2019.</text>
+								</subparagraph></paragraph><paragraph commented="no" id="id8fc352aa33e2485e9d4417c5681dfbfe"><enum>(2)</enum><header>Rule of construction</header><text>Under the definition of the term <term>appropriate Federal supervisory agency</term> in paragraph (1), more than 1 agency may be an appropriate Federal supervisory agency with respect
+			 to any given company that controls an industrial bank.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection><subsection id="id3e00437a733f4391a0fbd20647c3cbd7"><enum>(c)</enum><header>Enforcement</header><text>Section 8 of the Federal Deposit Insurance Act (12 U.S.C. 1818) is amended—</text>
+				<paragraph id="idDD51D7F2A70B4D35B0B1CAC69EE3D5C5"><enum>(1)</enum><text>in subsection (b), by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="id56600d9ed0184268bffa20c867e4f91c" style="OLC">
+						<paragraph id="id51f060a9c1534fe098b131810ad9cc1a"><enum>(11)</enum><header>Industrial bank holding companies</header><text>This subsection and subsections (c) through (s) and subsection (u) of this section shall apply to
+			 any covered industrial bank holding company and to any subsidiary (other
+			 than a
+			 depository institution) of a covered industrial bank holding company in
+			 the same
+			 manner as those subsections apply to State nonmember insured banks.</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block>
+				</paragraph><paragraph id="id61C6CE2C7B074F53B4D1A72C83699556"><enum>(2)</enum><text>in subsection (h)(2), by striking <quote>Any party to</quote> and inserting <quote>Any party aggrieved by an order of any appropriate Federal supervisory agency under section 15 of
+			 the Bank Holding Company Act of 1956 or any party to</quote>; and</text>
+				</paragraph><paragraph id="id2908756D49584852BAECD2D4E618512E"><enum>(3)</enum><text>in subsection (i), by striking <quote>or 39</quote> each place that term appears and inserting <quote>, 39, or section 15 of the Bank Holding Company Act of 1956</quote>.</text>
+				</paragraph></subsection><subsection id="id1629a8913a7040e195cc4baca9f13158"><enum>(d)</enum><header>Prompt corrective action</header><text>Section 38(f)(2)(H) of the Federal Deposit Insurance Act (12 U.S.C. 1831o(f)(2)(H)) is amended—</text>
+				<paragraph id="id45006f1008594273b784bf5b78d3f02c"><enum>(1)</enum><text>in the subparagraph heading, by inserting <quote><header-in-text level="subparagraph" style="OLC">or industrial bank holding company</header-in-text></quote> after <quote><header-in-text level="subparagraph" style="OLC">company</header-in-text></quote>;</text>
+				</paragraph><paragraph id="id01E60C3DAC5F44DAA13382E88685FCB4"><enum>(2)</enum><text>by striking <quote>Prohibiting any bank</quote> and inserting the following:</text>
+					<quoted-block display-inline="no-display-inline" id="idb2c2f6ce38e546e2bd2cfa5312f892b4" style="OLC">
+						<clause id="idcf8b00a4e68b496dbceca783ccda24bb"><enum>(i)</enum><header>Bank holding company</header><text>Prohibiting any bank</text></clause><after-quoted-block>; and</after-quoted-block></quoted-block>
+				</paragraph><paragraph id="id60883bd6d88a4b2cae429c7f06d38038"><enum>(3)</enum><text>by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="id1a106124e8ad4fc1b0e8767dc7c3a485" style="OLC">
+						<clause id="ida0869dd1fbbd45238286bdca9438a9fe"><enum>(ii)</enum><header>Industrial bank holding company</header><text>Prohibiting any covered industrial bank holding company having control of the insured depository
+			 institution from making any capital distribution without the prior
+			 approval of the Board.</text></clause><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph></subsection><subsection id="id588d945464a1417c89daea9154e079af"><enum>(e)</enum><header>Technical and conforming amendments</header>
+				<paragraph id="id19b4861016b54347abf08d0e2bd2d161"><enum>(1)</enum><header>Bank Holding Company Act of 1956</header><text>Section 14(a)(2) of the Bank Holding Company Act of 1956 (12 U.S.C. 1852(a)(2)) is amended—</text>
+					<subparagraph id="id7425D9F7F1344C1F9FF448AE2158572E"><enum>(A)</enum><text>in subparagraph (E), by striking <quote>and</quote> at the end; and</text>
+					</subparagraph><subparagraph id="id47963083C0AF43E793E81DA349F7923B"><enum>(B)</enum><text>by inserting after subparagraph (F) the following:</text>
+						<quoted-block display-inline="no-display-inline" id="id17171ad043a5403fb15ffb25e3959160" style="OLC">
+							<subparagraph id="idc5d51d499f1544a4b60d29ef395c1708"><enum>(G)</enum><text>a covered industrial bank holding company; and</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+					</subparagraph></paragraph><paragraph id="id128A81D3255540B7AEC925007104C55E"><enum>(2)</enum><header>Federal Deposit Insurance Act</header><text>Section 3 of the Federal Deposit Insurance Act (12 U.S.C. 1813) is amended—</text>
+					<subparagraph id="idCD00867C6C744AADBDE4D9EC404700C8"><enum>(A)</enum><text>in subsection (a), by adding at the end the following:</text>
+						<quoted-block display-inline="no-display-inline" id="idBD30DDDE73984E12A1B1ECCBF071415A" style="OLC">
+							<paragraph id="idEA58554A691B4542A81248F0E05D2639"><enum>(4)</enum><header>Industrial bank</header><text>The term <term>industrial bank</term> has the meaning given the term in section 2 of the Bank Holding Company Act of 1956 (12 U.S.C.
+			 1841).</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block>
+					</subparagraph><subparagraph id="id4A8573E26A4645D6AF02353CC2D0B9F4"><enum>(B)</enum><text>in subsection (q)(3)—</text>
+						<clause id="idC43F066C02ED48E991137BACAA5D9D65"><enum>(i)</enum><text>in subparagraph (F), by striking <quote>and</quote> at the end;</text>
+						</clause><clause id="id4615B1832CA84AB49F1B563B6BFA02F7"><enum>(ii)</enum><text>in subparagraph (G), by striking the period and inserting <quote>; and</quote>; and</text>
+						</clause><clause id="id53FDABF683CA407DBC074ECBC93B407A"><enum>(iii)</enum><text>by inserting after subparagraph (G) the following:</text>
+							<quoted-block display-inline="no-display-inline" id="idA3178731C87C49FC9ED1FF66480D2DC4" style="OLC">
+								<subparagraph id="id91B302B5D65F4ACF9940369AD4B683DB"><enum>(H)</enum><text>any covered industrial bank holding company, and any subsidiary of an industrial bank holding
+			 company
+			 (other than a depository institution).</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+						</clause></subparagraph><subparagraph id="id3CBB045880C94F5BB4963A80C6106334"><enum>(C)</enum><text>in subsection (w)—</text>
+						<clause id="idFFE52758F3F5496A931E2C053C661A53"><enum>(i)</enum><text>in paragraph (1), by striking <quote>or a savings and loan holding company</quote> and inserting <quote>, a savings and loan holding company, or a covered industrial bank holding company</quote>; and</text>
+						</clause><clause id="idDD5E6FFF10A14144B6F47C93886401CB"><enum>(ii)</enum><text>by adding at the end the following:</text>
+							<quoted-block display-inline="no-display-inline" id="idf90df60d2b784ad18c12c4496a7910f1" style="OLC">
+								<paragraph id="id39a9ea4c210b45d2b3fbb25ea5ad5554"><enum>(8)</enum><header>Covered industrial bank holding company</header><text>The term <term>covered industrial bank holding company</term> has the meaning given the  term in section 2 of the Bank Holding Company Act of 1956 (12 U.S.C.
+			 1841).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+						</clause></subparagraph></paragraph><paragraph id="id7870835a06784130963baffa52635a0a"><enum>(3)</enum><header>Gramm-Leach Bliley Act</header><text>Section 115 of the Gramm-Leach-Bliley Act (12 U.S.C. 1820a) is amended—</text>
+					<subparagraph id="id11aba268d7874b6fa13eb2743d4118e9"><enum>(A)</enum><text>in subsection (a), by striking <quote>or</quote> after <quote>bank holding company</quote> and inserting <quote>, covered industrial bank holding company, or</quote>; and</text>
+					</subparagraph><subparagraph id="id8b6bc23daa1b4bec859c7331663ac5cd"><enum>(B)</enum><text>in subsection (d)—</text>
+						<clause id="id9e370e6e26bc44eab608230fdfcf58ea"><enum>(i)</enum><text>by redesignating paragraphs (5), (6), and (7) as paragraphs (6), (7), and (8), respectively; and</text>
+						</clause><clause id="id250a9d92535343fabb9ea892a42af0f3"><enum>(ii)</enum><text>by inserting after paragraph (4) the following:</text>
+							<quoted-block display-inline="no-display-inline" id="id4edb2a1834ac435cbe0bf2e196a98916" style="OLC">
+								<paragraph id="id4912fc16861d49cc9c2f5390f9bb4e21"><enum>(5)</enum><header>Covered industrial bank holding company</header><text>The term <term>covered industrial bank holding company</term> has the meaning given the term in section 2 of the Bank Holding Company Act of 1956 (12 U.S.C.
+			 1841).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+						</clause></subparagraph></paragraph><paragraph id="idc42f2b42ad5f446cbc3a3d44d01965c8"><enum>(4)</enum><header>Home Mortgage Disclosure Act of 1975</header><text>Section 304(g)(1) of the Home Mortgage Disclosure Act of 1975 (12 U.S.C. 2803(g)(1)) is amended by
+			 inserting <quote>, covered industrial bank holding company (as defined in section 2 of the Bank Holding Company Act
+			 of 1956
+			 (12 U.S.C. 1841),</quote> after <quote>bank holding company</quote>.</text>
+				</paragraph><paragraph id="idbac7521220664d0084c57fffd13f1e02"><enum>(5)</enum><header>Right to Financial Privacy Act of 1978</header><text>Section 1101(6) of the Right to Financial Privacy Act of 1978 (12 U.S.C. 3401(6)) is amended—</text>
+					<subparagraph id="id11A749F5D8A44E1B892DDD33E97DEC42"><enum>(A)</enum><text>in subparagraph (A), by striking <quote>and</quote> at the end; and</text>
+					</subparagraph><subparagraph id="id1E8D5756097E4A20B75DBE0BABA135B9"><enum>(B)</enum><text>by adding at the end the following:</text>
+						<quoted-block display-inline="no-display-inline" id="id820cc516cebd4f969e6cd47d94b4c0d4" style="OLC">
+							<subparagraph id="id4be2d46951694bff9df5abed1b1ef8a4"><enum>(C)</enum><text>any covered industrial bank holding company (as defined in section 2 of the Bank Holding Company
+			 Act of
+			 1956 (12 U.S.C. 1841)); and</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+					</subparagraph></paragraph></subsection></section><section id="id9e6ce441c72b4ebf82a6af1a489835ec"><enum>3.</enum><header>Regulations</header><text display-inline="no-display-inline">The Board of Governors of the Federal Reserve System shall prescribe such regulations as the Board
+			 determines to be appropriate to carry out the amendments made by this Act.</text></section></legis-body></bill>

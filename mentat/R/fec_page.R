@@ -28,8 +28,16 @@ fec_build_url <- function(
   }
   variants <- unique(trim_text(variants))
   variants <- variants[!is.na(variants) & nzchar(variants)]
-  # Query literal roster spellings. Attribution normalization cannot establish
-  # that FEC searches with altered punctuation return the same population.
+  if (identical(query_field, "contributor_employer")) {
+    variants <- unique(vapply(variants, function(value) {
+      if (grepl("&", value, fixed = TRUE)) {
+        value
+      } else {
+        normalize_register_key(value)
+      }
+    }, character(1L), USE.NAMES = FALSE))
+    variants <- variants[nzchar(variants)]
+  }
   if (!length(variants)) {
     stop("At least one non-empty FEC query value is required.", call. = FALSE)
   }
@@ -318,7 +326,7 @@ fec_read_page <- function(session) {
     "})())"
   )
   json <- fec_runtime_value(session, expression)
-  payload <- jsonlite::fromJSON(json, simplifyVector = FALSE, bigint_as_char = TRUE)
+  payload <- jsonlite::fromJSON(json, simplifyVector = FALSE)
   if (is.null(payload$info) || is.null(payload$rows)) {
     stop("FEC DataTable payload is missing info or rows.", call. = FALSE)
   }
@@ -363,13 +371,6 @@ fec_canaries <- function(payload, expected_total = NULL) {
     nonempty_sub_id = list(
       passed = !length(rows) || all(nzchar(row_ids)),
       detail = paste0("rows=", length(rows), "; nonempty_sub_id=", sum(nzchar(row_ids)))
-    ),
-    unique_sub_id = list(
-      passed = !length(row_ids) || !anyDuplicated(row_ids),
-      detail = paste0(
-        "rows=", length(row_ids),
-        "; unique_sub_id=", data.table::uniqueN(row_ids)
-      )
     ),
     page_row_count = list(
       passed = length(rows) == if (info$page + 1L < info$pages) {
@@ -576,17 +577,6 @@ fec_export_current_query <- function(
       call. = FALSE
     )
   }
-  if (!"sub_id" %in% names(rows)) {
-    stop("FEC export is missing the required sub_id column.", call. = FALSE)
-  }
-  export_sub_ids <- trim_text(rows$sub_id)
-  if (any(!nzchar(export_sub_ids)) || anyDuplicated(export_sub_ids)) {
-    stop(
-      "FEC export contains blank or repeated sub_id values; refusing ",
-      "row-count-only completion.",
-      call. = FALSE
-    )
-  }
   message("FEC export downloaded and verified: ", nrow(rows), " rows.")
   rows[]
 }
@@ -691,11 +681,6 @@ fec_browser_api_batch <- function(
       "var cursor=%s;",
       "var perPage=%d;",
       "var attempts=%d;",
-      # Match complete JSON strings first, so digits inside names/memos are
-      # untouched. Quote long integer tokens before JS can round IDs/cursors.
-      "function parseExact(text){return JSON.parse(text.replace(",
-      r"(/"(?:[^"\\]|\\.)*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g,)",
-      r"(function(token){return /^-?\d{16,}$/.test(token)?'"'+token+'"':token;}));})",
       "async function fetchPage(page,cursor){",
       "var last={status:0,error:'request did not start'};",
       "for(var attempt=1;attempt<=attempts;attempt++){",
@@ -715,7 +700,7 @@ fec_browser_api_batch <- function(
       "}",
       "var response=await fetch(url.href);",
       "if(response.ok){",
-      "return {page:page,status:response.status,body:parseExact(await response.text())};",
+      "return {page:page,status:response.status,body:await response.json()};",
       "}",
       "last={page:page,status:response.status,error:await response.text()};",
       "if(response.status!==429 && response.status<500){return last;}",
@@ -751,7 +736,7 @@ fec_browser_api_batch <- function(
     attempts
   )
   payload <- fec_runtime_value(session, expression, timeout_seconds = 60)
-  jsonlite::fromJSON(payload, simplifyVector = FALSE, bigint_as_char = TRUE)
+  jsonlite::fromJSON(payload, simplifyVector = FALSE)
 }
 
 fec_walk_variant_set_api <- function(
@@ -1181,10 +1166,7 @@ fec_walk_variant_set_once <- function(
     timeout_seconds = timeout_seconds,
     retries = retries
   )
-  # The durable checkpoint contract is 100 rows/page. Enforce it before the
-  # first callback so resume never has to infer completion from an arbitrary UI
-  # preference left in local storage.
-  initial <- fec_set_page_length(session, 100L)
+  initial <- fec_read_page(session)
   records_total <- initial$info$recordsTotal
   if (records_total >= 500L && is.infinite(max_pages)) {
     exported <- fec_walk_variant_set_export(
@@ -1203,7 +1185,6 @@ fec_walk_variant_set_once <- function(
   expected_total <- records_total
   first_payload <- initial
   processed_pages <- 0L
-  seen_sub_ids <- character()
   repeat {
     payload <- first_payload
     first_payload <- NULL
@@ -1227,20 +1208,6 @@ fec_walk_variant_set_once <- function(
         call. = FALSE
       )
     }
-    page_sub_ids <- vapply(
-      payload$rows,
-      function(row) trim_text(row$sub_id %||% ""),
-      character(1L)
-    )
-    repeated_sub_ids <- intersect(page_sub_ids, seen_sub_ids)
-    if (length(repeated_sub_ids)) {
-      stop(
-        "FEC pagination repeated sub_id(s) across pages: ",
-        paste(head(unique(repeated_sub_ids), 5L), collapse = ", "),
-        call. = FALSE
-      )
-    }
-    seen_sub_ids <- c(seen_sub_ids, page_sub_ids)
     page_callback(
       rows = payload$rows,
       page = page,

@@ -1,0 +1,115 @@
+BEFORE = backups\bill_repository_live.json.PRE-MEMBERSHIP-REFRESH-20260919
+AFTER  = bill_repository_live.json
+top-level keys before ['bills', 'failures', 'schema', 'self_repair', 'source', 'updated_at'] after ['bills', 'failures', 'schema', 'self_repair', 'source', 'updated_at']
+schema 'congress-bill-repository-v1' -> 'congress-bill-repository-v1' | source 'https://www.congress.gov/' -> 'https://www.congress.gov/'
+updated_at '2026-09-14T04:38:12Z' -> '2026-09-19T19:46:11Z'
+failures 0 -> 0  {} -> {}
+self_repair before {"failed_bills_retained": 0, "last_good_preserved": true}
+self_repair after  {"failed_bills_retained": 0, "last_good_preserved": true}
+
+== Q2 bill counts ==
+  bills before: 473 | after: 473 | delta +0
+  NEW bills   (0): []
+  REMOVED bills (0): []
+  common: 473
+
+== Q2 which fields changed, across 473 changed bills ==
+  updated_at               473 bills
+  update_date              16 bills
+  cosponsor_count          8 bills
+  cosponsors               8 bills
+  latest_action            3 bills
+  summary                  2 bills
+  amendments               1 bills
+
+== Q2 latest_action / status changes ==
+  bills whose latest_action changed: 3
+    119:hr:1653      {"date": "2025-02-27", "text": "Referred to the House Committee on Financial Services."} | {"date": "2026-09-16", "text": "Ordered to be Reported (Amended) by the Yeas and Nays: 29 - 20."}
+    119:hr:3633      {"date": "2026-08-08", "text": "Cloture motion on the motion to proceed to the measure presented in Senate. (C | {"date": "2026-09-15", "text": "Motion by Senator Tillis to reconsider the vote by which cloture on the motion
+    119:hr:4936      {"date": "2025-08-08", "text": "Referred to the House Committee on Financial Services."} | {"date": "2026-09-16", "text": "Ordered to be Reported (Amended) by the Yeas and Nays: 49 - 0."}
+  bills whose 'stale' flag changed: 0 []
+  field policy_area        changed on 0 bills []
+  field summary            changed on 2 bills ['119:hr:1653', '119:hr:9330']
+  field introduced_date    changed on 0 bills []
+  field congress           changed on 0 bills []
+  field number             changed on 0 bills []
+  field display            changed on 0 bills []
+  field source             changed on 0 bills []
+  field amendments         changed on 1 bills ['119:hr:3633']
+
+== Q2 category assignment field: 'areas' ==
+  bills whose areas changed: 0
+  total area assignments before/after: 619 / 619 (+0)
+
+== Q2 sponsor changes ==
+  bills whose sponsor object changed: 0
+
+== Q2 cosponsor links ==
+  total cosponsor rows before/after: 3789 / 3810 (+21)
+  cosponsor links ADDED  : 21
+  cosponsor links REMOVED: 0
+  total original_cosponsor rows before/after: 2381 / 2381 (+0)
+  original_cosponsor links ADDED: 0 | REMOVED: 0
+  bills whose cosponsor_count FIELD changed: 8
+    119:hr:4167      cosponsor_count 43 -> 44 (actual list len 37 -> 38)
+    119:hr:4936      cosponsor_count 53 -> 54 (actual list len 52 -> 53)
+    119:hr:5689      cosponsor_count 21 -> 22 (actual list len 13 -> 14)
+    119:hr:7035      cosponsor_count 7 -> 8 (actual list len 6 -> 7)
+    119:hr:9668      cosponsor_count 2 -> 3 (actual list len 1 -> 2)
+    119:hr:987       cosponsor_count 130 -> 144 (actual list len 126 -> 140)
+    119:s:2019       cosponsor_count 11 -> 12 (actual list len 8 -> 9)
+    119:s:401        cosponsor_count 46 -> 47 (actual list len 6 -> 7)
+
+  withdrawn_date non-empty before: 1 rows | after: 1 rows
+
+  added cosponsor links, first 80:
+    ADDED 119:hr:4167      ('S001159', '2026-09-15')
+    ADDED 119:hr:4936      ('G000606', '2026-09-14')
+    ADDED 119:hr:5689      ('H001081', '2026-09-16')
+    ADDED 119:hr:7035      ('W000829', '2026-09-15')
+    ADDED 119:hr:9668      ('W000830', '2026-09-15')
+    ADDED 119:hr:987       ('B001302', '2026-09-16')
+    ADDED 119:hr:987       ('C001051', '2026-09-15')
+    ADDED 119:hr:987       ('D000626', '2026-09-14')
+    ADDED 119:hr:987       ('F000482', '2026-09-14')
+    ADDED 119:hr:987       ('G000568', '2026-09-15')
+    ADDED 119:hr:987       ('K000405', '2026-09-15')
+    ADDED 119:hr:987       ('M001136', '2026-09-16')
+    ADDED 119:hr:987       ('M001210', '2026-09-14')
+    ADDED 119:hr:987       ('M001236', '2026-09-14')
+    ADDED 119:hr:987       ('N000193', '2026-09-16')
+    ADDED 119:hr:987       ('R000612', '2026-09-16')
+    ADDED 119:hr:987       ('R000619', '2026-09-14')
+    ADDED 119:hr:987       ('T000165', '2026-09-15')
+    ADDED 119:hr:987       ('Z000018', '2026-09-14')
+    ADDED 119:s:2019       ('F000463', '2026-09-17')
+    ADDED 119:s:401        ('Y000064', '2026-09-16')
+
+== Q2 per-bioguide cosponsor-row counts (all bills) ==
+  bioguides with DECREASED cosponsor rows: 0
+  bioguides with INCREASED cosponsor rows: 21
+    INC Z000018    5 -> 6 (+1)
+    INC Y000064    3 -> 4 (+1)
+    INC W000830    4 -> 5 (+1)
+    INC W000829    4 -> 5 (+1)
+    INC T000165    8 -> 9 (+1)
+    INC S001159    8 -> 9 (+1)
+    INC R000619    2 -> 3 (+1)
+    INC R000612    14 -> 15 (+1)
+    INC N000193    20 -> 21 (+1)
+    INC M001236    7 -> 8 (+1)
+    INC M001210    4 -> 5 (+1)
+    INC M001136    9 -> 10 (+1)
+    INC K000405    2 -> 3 (+1)
+    INC H001081    14 -> 15 (+1)
+    INC G000606    2 -> 3 (+1)
+    INC G000568    9 -> 10 (+1)
+    INC F000482    3 -> 4 (+1)
+    INC F000463    6 -> 7 (+1)
+    INC D000626    11 -> 12 (+1)
+    INC C001051    3 -> 4 (+1)
+    INC B001302    5 -> 6 (+1)
+
+== per-bioguide SPONSOR counts ==
+  bioguides with DECREASED sponsored bills: 0 []
+  bioguides with INCREASED sponsored bills: 0 []

@@ -1,0 +1,255 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-OLL25C57-KHS-PJ-WV1">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3137 IS: Housing for All Veterans Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3137</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251106">November 6, 2025</action-date>
+            <action-desc><sponsor name-id="S394">Ms. Smith</sponsor> (for herself, <cosponsor name-id="S363">Mr. King</cosponsor>, <cosponsor name-id="S362">Mr.
+                    Kaine</cosponsor>, <cosponsor name-id="S330">Mr. Bennet</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, and <cosponsor name-id="S311">Ms.
+                    Klobuchar</cosponsor>) introduced the following bill; which was read twice and
+                referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing,
+                    and Urban Affairs</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To establish a rental assistance program for low-income veteran families,
+            and for other purposes.</official-title>
+    </form>
+    <legis-body display-enacting-clause="yes-display-enacting-clause">
+        <section section-type="section-one" id="S1">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing for All Veterans Act of 2025</short-title></quote>.</text>
+        </section>
+        <section id="id542a7c73d7a84f9b86942a9ce135ec2b">
+            <enum>2.</enum>
+            <header>Low-income veteran rental assistance program</header>
+            <subsection id="id93824974c22740ff900f1a4b25f1b1cf">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text>Section 8(o) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)</external-xref>) is amended by adding at the end the following:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline" id="id771719d5572d47df8229e699a5452911">
+                    <paragraph id="idfa0ecb04d76f494b8547dfd1f617f959">
+                        <enum>(23)</enum>
+                        <header>Low-income veteran rental assistance program</header>
+                        <subparagraph id="idd781db0e77284e2fb3079f7714851ec0">
+                            <enum>(A)</enum>
+                            <header>Definitions</header>
+ <text>In this paragraph:</text> <clause id="id9ac1e9b907f848f38589e71406384bb5"> <enum>(i)</enum> <header>Qualified veteran family</header> <subclause id="id7A7AE9ECE2214C5CB6DBF361ADA7EB15"> <enum>(I)</enum> <header>In general</header> <text>The term <term>qualified veteran family</term> means—</text>
+                                    <item id="id4cf716c426ea4223b0f6db3d2ebb727c">
+                                        <enum>(aa)</enum>
+ <text>for fiscal year 2026, a veteran family having an income no higher than 50 percent of the applicable income limitation for extremely low-income families;</text>
+                                    </item>
+                                    <item id="ided5c62aba5e7467d8543d8579c92643f">
+                                        <enum>(bb)</enum>
+ <text>for fiscal year 2027, a veteran family having an income no higher than 75 percent of the applicable income limitation for extremely low-income families;</text>
+                                    </item>
+                                    <item id="id2cf76e29b4bc4760a024262813e67673">
+                                        <enum>(cc)</enum>
+ <text>for fiscal year 2028, an extremely low-income veteran family;</text>
+                                    </item>
+                                    <item id="idd6d3f13597bd46bd9dc708e93fcf8b3e">
+                                        <enum>(dd)</enum>
+ <text>for fiscal year 2029, a very low-income veteran family; and</text>
+                                    </item>
+                                    <item id="id35c475b8cdca4f19add1ffd8495bd215">
+                                        <enum>(ee)</enum>
+ <text>for fiscal year 2030 and thereafter, a low-income veteran family.</text>
+                                    </item>
+                                </subclause>
+                                <subclause id="idfef589af5ecc4cbbbfff6b6478b1947e">
+                                    <enum>(II)</enum>
+                                    <header>Continuing eligibility</header>
+ <text>The term <term>qualified veteran family</term> includes a veteran family that was initially assisted under this paragraph but no longer satisfies the requirements under subclause (I), provided that the income of the veteran family does not exceed 100 percent of the area median income.</text>
+                                </subclause>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="idc791eb0a577143248284697c9ed1710c">
+                                <enum>(ii)</enum>
+                                <header>Tribally designated housing entity</header>
+ <text>The term <term>tribally designated housing entity</term> has the meaning given the term in section 4 of the Native American Housing Assistance and Self-Determination Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/25/4103">25 U.S.C. 4103</external-xref>).</text>
+                            </clause>
+                            <clause id="id12eb0ee48f924e9cab82c67a26065840">
+                                <enum>(iii)</enum>
+                                <header>Veteran</header>
+ <text>The term <term>veteran</term>—</text> <subclause commented="no" display-inline="no-display-inline" id="id625115b19870473b99ce1c65b3d1f00e"> <enum>(I)</enum> <text display-inline="yes-display-inline">means a person who, regardless of length of service, was a member of the Armed Forces (as that term is defined in section 101 of title 10, United States Code); and</text>
+                                </subclause>
+                                <subclause commented="no" display-inline="no-display-inline" id="id98f091df50bf4ab19da820c96fba30ac">
+                                    <enum>(II)</enum>
+ <text>does not include a person who—</text> <item id="id5b0924af129e4f7a9ad44a30df7d2566"> <enum>(aa)</enum> <text>received a dishonorable discharge from the Armed Forces; or</text>
+                                    </item>
+                                    <item id="id6cfa50f86be14315a7ec165c46f246b2">
+                                        <enum>(bb)</enum>
+ <text>was discharged or dismissed from the Armed Forces by reason of the sentence of a general court-martial.</text>
+                                    </item>
+                                </subclause>
+                            </clause>
+                            <clause id="idf3e2f851dcfd4702955cd4d5e1a35e8b">
+                                <enum>(iv)</enum>
+                                <header>Veteran family</header>
+ <text>The term <term>veteran family</term> means—</text> <subclause commented="no" display-inline="no-display-inline" id="idfbc90b8d67284f23884776bb0fb6a5c3"> <enum>(I)</enum> <text display-inline="yes-display-inline">a veteran who is a single person;</text>
+                                </subclause>
+                                <subclause commented="no" display-inline="no-display-inline" id="id10456f74034149ad9df4c31f1fd0210c">
+                                    <enum>(II)</enum>
+ <text display-inline="yes-display-inline">a family (including families with children) whose head of household (or whose spouse) is a veteran; and</text>
+                                </subclause>
+                                <subclause commented="no" display-inline="no-display-inline" id="id90f9b60410c44a4cb5cfa2e89eff5ca5">
+                                    <enum>(III)</enum>
+ <text display-inline="yes-display-inline">1 or more veterans living together with 1 or more persons.</text>
+                                </subclause>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="id95dcb8742ca649a9b8a9b6c444d5c9bc">
+                            <enum>(B)</enum>
+                            <header>Entitlement to rental assistance</header>
+                            <clause id="id7e4b7044351741158af7c6356a0199d3">
+                                <enum>(i)</enum>
+                                <header>Entitlement</header>
+ <text>A qualified veteran family shall be entitled to rental assistance under this paragraph.</text>
+                            </clause>
+                            <clause id="id41950bf1a87c455692eaf96f6a4ddd08">
+                                <enum>(ii)</enum>
+                                <header>Access to assistance</header>
+ <text>Each public housing agency administering assistance under this subsection shall ensure that—</text>
+                                <subclause commented="no" display-inline="no-display-inline" id="idccd46f7a1d7d4969980d3061f7346149">
+                                    <enum>(I)</enum>
+ <text display-inline="yes-display-inline">any veteran family desiring to submit an application for assistance under this paragraph shall have the opportunity to do so; and</text>
+                                </subclause>
+                                <subclause commented="no" display-inline="no-display-inline" id="idb3a67be16188405888d3f22b09ed24c0">
+                                    <enum>(II)</enum>
+ <text display-inline="yes-display-inline">assistance under this paragraph shall be furnished with reasonable promptness to all qualified veteran families.</text>
+                                </subclause>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="id44053b598167480983dc816c4ea3aac9">
+                            <enum>(C)</enum>
+                            <header>Information regarding services</header>
+ <text>The Secretary, in consultation with the Secretary of Veterans Affairs, shall provide public housing agencies assisting veteran families under this paragraph with information regarding services available to veterans in the area, and those public housing agencies shall provide that information to all veteran families assisted under this paragraph.</text>
+                        </subparagraph>
+                        <subparagraph id="id69a8633b1e454e3987bc8d963c9fbdaf">
+                            <enum>(D)</enum>
+                            <header>Prohibition on discrimination</header>
+                            <clause id="id1de63699bf974176bff13e0ba2964967">
+                                <enum>(i)</enum>
+                                <header>In general</header>
+ <text>An owner of 5 or more rental dwelling units may not refuse to lease any available unit to a holder of a voucher the funds for which are appropriated pursuant to this paragraph because of the status of the prospective tenant as a holder of such voucher.</text>
+                            </clause>
+                            <clause id="idc031bdaffbaf49d9ac4e0c1dbfbdbc66">
+                                <enum>(ii)</enum>
+                                <header>Rule of construction</header>
+ <text>This subparagraph may not be construed to preempt any law of any State or political subdivision thereof that provides more protection than this subparagraph.</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="idc8fdc1ec98544bcf8721f4e09660ba00">
+                            <enum>(E)</enum>
+                            <header>Verification of veteran status</header>
+                            <clause commented="no" display-inline="no-display-inline" id="id37115fb66b4748e6baffc28ed9b02c9c">
+                                <enum>(i)</enum>
+                                <header display-inline="yes-display-inline">In general</header>
+ <text>The Secretary, in consultation with the Secretary of Veterans Affairs, shall maintain an electronic process through which a public housing agency may verify the veteran status of any veteran family that applies for or receives rental assistance under this paragraph.</text>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="id34d67096b2c24fe8bbe67c535bb05840">
+                                <enum>(ii)</enum>
+                                <header>Waiver status</header>
+ <text>The Secretary, in consultation with the Secretary of Veterans Affairs, may waive the exclusion described in subparagraph (A)(iii)(II) for purposes of eligibility for rental assistance under this paragraph for particular areas served by a public housing agency.</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="id4c8b90e4f8cb4562bd7baacf8eb28eb3">
+                            <enum>(F)</enum>
+                            <header>Moving to work</header>
+ <text>Sums appropriated pursuant to this paragraph may not be used for or pursuant to the Moving to Work demonstration program authorized under section 204 of the Departments of Veterans Affairs and Housing and Urban Development, and Independent Agencies Appropriations Act, 1996 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f</external-xref> note; <external-xref legal-doc="public-law" parsable-cite="pl/104/134">Public Law 104–134</external-xref>).</text>
+                        </subparagraph>
+                        <subparagraph id="ide48584f19d444be2a94fc9b265be2b7c">
+                            <enum>(G)</enum>
+                            <header>Compliance with income targeting requirements</header>
+ <text>Rental assistance provided under this paragraph shall not be considered for the purpose of determining compliance with the requirements of section 16(b).</text>
+                        </subparagraph>
+                        <subparagraph id="id4374ab48d2df41fd9e775da3e409939d">
+                            <enum>(H)</enum>
+                            <header>Exclusion of veteran disability benefits</header>
+ <text>Disability benefits administered by the Department of Veterans Affairs shall not be counted as income for the purpose of determining whether a veteran family meets the requirements to be a qualified veteran family under subparagraph (A)(i).</text>
+                        </subparagraph>
+                        <subparagraph id="id3c6cad6450e2482ca0101a3b4c541a3f">
+                            <enum>(I)</enum>
+                            <header>Administering agencies</header>
+ <text>The Secretary shall designate a public housing agency to administer assistance under this paragraph in any area where no existing public housing agency has jurisdiction or where no public housing agency is adequately administering such assistance, subject to public comment and after consultation with States, public housing agencies, local governments, Indian tribes, and tribally designated housing entities.</text>
+                        </subparagraph>
+                        <subparagraph id="id1b6b4ffc3d8944e4a447570dcb384df3">
+                            <enum>(J)</enum>
+                            <header>Transition</header>
+ <text>No veteran receiving rental assistance under this subsection on the date of enactment of this paragraph shall be subject to any redetermination of eligibility as a result of the enactment of this paragraph.</text>
+                        </subparagraph>
+                        <subparagraph id="idc75e8e39308a418ba89305c09e3e0627">
+                            <enum>(K)</enum>
+                            <header>Supported housing</header>
+                            <clause id="id38a7bd994c3d49dd88ba97cc5fa0ec3d">
+                                <enum>(i)</enum>
+                                <header>In general</header>
+ <text>Notwithstanding this paragraph, all vouchers made available by law for the supported housing program administered by the Secretary in conjunction with the Department of Veterans Affairs under paragraph (19) shall continue to be included in that supported housing program.</text>
+                            </clause>
+                            <clause id="id3ed54326ff87476ca93a70dce6336501">
+                                <enum>(ii)</enum>
+                                <header>Referrals</header>
+ <text>Public housing agencies shall refer veterans assisted under this paragraph to the supported housing program under paragraph (19) if the public housing agency determines that assistance through that program would be appropriate for the veteran.</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="id847bcaf0a9e644c9afd344d9c083bb0d">
+                            <enum>(L)</enum>
+                            <header>Service fees</header>
+                            <clause id="id3464d40bc7474105aaeef1f00ccc2791">
+                                <enum>(i)</enum>
+                                <header>In general</header>
+ <text>Public housing agencies administering assistance under this paragraph shall be eligible to receive service fees to cover costs of assisting qualified veteran families to successfully lease units with assistance under this paragraph, as determined by the Secretary.</text>
+                            </clause>
+                            <clause id="id89a8c2a7f84c41b2b6c6eff27913d6db">
+                                <enum>(ii)</enum>
+                                <header>Amount</header>
+ <text>The amount of service fees under this subparagraph shall not exceed $4,000 for each applicant household determined to be eligible for assistance under this paragraph, except that such amount shall be adjusted for inflation annually by the Secretary in accordance with an inflationary index selected by the Secretary.</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="ida9d26725c9e3421799a281b70517a4bd">
+                            <enum>(M)</enum>
+                            <header>Authorization and permanent appropriation</header>
+ <text>For fiscal year 2026 and each succeeding fiscal year, there is appropriated, out of any money in the Treasury not otherwise appropriated, for the Secretary to carry out this paragraph, such sums as may be necessary to provide rental assistance for all qualified veteran families entitled to assistance under this paragraph, administrative fees under subsection (q) associated with such rental assistance, and service fees under subparagraph (L) of this paragraph.</text>
+                        </subparagraph>
+                        <subparagraph id="id293c02c3bf41453fac99fcaea1d52a90">
+                            <enum>(N)</enum>
+                            <header>Relation to existing voucher programs</header>
+                            <clause id="idBEB9766986F54D88B78070EF5B7A3341">
+                                <enum>(i)</enum>
+                                <header>Supplement, not supplant</header>
+ <text>Amounts appropriated under subparagraph (M) shall supplement, and not supplant, amounts otherwise made available for rental assistance under this subsection, including amounts made available under paragraph (19).</text>
+                            </clause>
+                            <clause id="id84887F658A13406C8406603289641C6E">
+                                <enum>(ii)</enum>
+                                <header>Rule of construction</header>
+ <text>Nothing in this paragraph shall be construed to affect the number of vouchers for rental assistance otherwise provided under this subsection, including under paragraph (19).</text>
+                            </clause>
+                        </subparagraph>
+                    </paragraph>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+            <subsection id="id2c4d83653cf949a097dbe7eca2198672">
+                <enum>(b)</enum>
+                <header>Effective date</header>
+ <text>The amendment made by this section shall take effect on the first day of the fiscal year beginning after the fiscal year during which this section was enacted.</text>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

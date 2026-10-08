@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H807EDB664E7C47909494B73503B4D018" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 77 IH: Expressing the sense of Congress that financial institutions and other companies should work proactively with their customers affected by the shutdown of the Federal Government who may be facing short-term financial hardship and long-term damage to their creditworthiness through no fault of their own.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 77</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190125">January 25, 2019</action-date><action-desc><sponsor name-id="W000187">Ms. Waters</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Expressing the sense of Congress that financial institutions and other companies should work
+			 proactively with their customers affected by the shutdown of the Federal
+			 Government who may be facing short-term financial hardship and long-term
+			 damage to their creditworthiness through no fault of their own.</official-title></form>
+	<resolution-body id="H9A99E001286E423F8C3887BBB52DFE31" style="traditional">
+ <section display-inline="yes-display-inline" id="H5333FAB75D5541558F95854FFEBF41C6" section-type="undesignated-section"><enum></enum><text>That it is the sense of Congress that—</text> <paragraph id="H6C9B1B4F82CB440D87F244FF8C44033B"><enum>(1)</enum><text>financial institutions and other companies, such as consumer reporting agencies and companies engaged in the production of consumer scores, should work with consumers affected by the shutdown of the Federal Government that began on December 22, 2018;</text>
+ </paragraph><paragraph id="H773530B2623F4CDE81AA9CD40D95D62F"><enum>(2)</enum><text display-inline="yes-display-inline">the negative impact the shutdown is having on millions of consumers and the U.S. economy is significant and growing; for example, analysis from S&amp;P Global Ratings estimates that the U.S. economy has already lost more than $6 billion as of January 25, 2019, and will continue to reduce real Gross Domestic Product by $1.2 billion each week the government shutdown continues;</text>
+ </paragraph><paragraph id="H3EF3C4F1A7A64E079565812F2A8E40F9"><enum>(3)</enum><text>financial institutions and other companies, such as consumer reporting agencies and companies engaged in the production of consumer scores should provide opportunities for consumers affected by the shutdown—including Federal employees, government contractors, small businesses, and other individuals—who are or will be facing financial distress to easily contact and alert them of their situation immediately;</text>
+ </paragraph><paragraph id="H20EA131808134D76AD48D6C8110B6B95"><enum>(4)</enum><text>affected consumers may face financial hardship in making timely payments on their debts, such as mortgages, student loans, car loans, credit cards, and other debt, as well as paying for rent, food, transportation, school and other basic necessities, due to the temporary delay or permanent loss of their income;</text>
+ </paragraph><paragraph id="H6967EEB601134D92A98A60D55E57191E"><enum>(5)</enum><text>financial institutions should consider waiv­ing or reducing penalty, late payment, and similar fees as well as ceasing foreclosures and providing forbearance for the duration of the shutdown, in order to provide quick relief to their affected customers;</text>
+ </paragraph><paragraph id="HE1476B2CEA414FF8B286953C19F74153"><enum>(6)</enum><text>consumers affected by the shutdown may be experiencing financial stress through no fault of their own and their creditworthiness should not be impaired because of the shutdown;</text>
+ </paragraph><paragraph id="H00538CEC541740FCA4A583AD5A60EFF2"><enum>(7)</enum><text>financial institutions and other companies, such as consumer reporting agencies and companies engaged in the production of consumer scores, should take steps to prevent adverse information being reported and utilized in any manner that harms affected consumers, including by preventing modified credit arrangements intended to help consumers fulfill their financial obligations from being reported to, and coded by, consumer reporting agencies on a person’s credit report in a manner that hurts the creditworthiness of the affected consumers;</text>
+ </paragraph><paragraph id="H4CB2A034E69E47C2865FEBF73AAEF26D"><enum>(8)</enum><text>new products, services, or prudent workout arrangements designed to help affected consumers that are consistent with safe and sound lending practices are generally in the long-term best interest of the financial institution, the consumer, and the economy;</text>
+ </paragraph><paragraph id="H87E1FD692E064D988F93A9A239F180E9"><enum>(9)</enum><text>financial institutions should work pro­ac­tive­ly to identify their customers who have been affected and adopt flexible, prudent arrangements to help such customers meet their debt and other obligations; and</text>
+ </paragraph><paragraph id="H086D20B52E734CFCA32E9AF1C42BF074"><enum>(10)</enum><text>prudent efforts to adopt flexible workout arrangements for affected consumers should not be subject to examiner criticism or negative examinations.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

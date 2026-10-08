@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB43E6119643545FF8865342D01B392A3" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8464 IH: Stopping Fraudulent Payments Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8464</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260423">April 23, 2026</action-date><action-desc><sponsor name-id="C001108">Mr. Comer</sponsor> (for himself and <cosponsor name-id="A000375">Mr. Arrington</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Government Reform</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 31, United States Code, to authorize pausing and segmenting payments, and for other purposes.</official-title></form><legis-body id="HEAB494BF9010456FB2987997BE123DE2" style="OLC"> 
+<section id="H9D51A2ECC22943F68D1C914BFA1160AC" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stopping Fraudulent Payments Act</short-title></quote>.</text></section> <section id="H6583374E49A341B6972CBF419146FFEB" section-type="subsequent-section"><enum>2.</enum><header>Authority to pause and segment payments</header> <subsection id="HD383555CBB414AC0BA177412666637AC"><enum>(a)</enum><header>Treasury payment voucher waiver authority</header> <paragraph id="H55EC3211113341E289DAB4DB9D419D06"><enum>(1)</enum><header>Amendment</header><text>Subchapter II of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/33">chapter 33</external-xref> of title 31, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block id="H630330EF14804839B0B56C9CF0FF4295" style="USC"> 
+<section id="H336680BF756E4038B4B864F2DC98F441"><enum>3337.</enum><header>Authority to pause and segment payments</header> 
+<subsection id="H0365898E433241E596339595CC6DDE35">
+                <enum>(a)</enum>
+                <header>Agency obligation To pause disbursement requests for corrective
+                  action</header>
+ <text display-inline="yes-display-inline">The head of an agency that administers a federally funded financial assistance or public benefit program shall take a corrective action to temporarily delay, condition, or segment a disbursement request before the certification of a payment voucher under section 3325 if, as determined by an official designated by the head of the agency, the agency—</text>
+                <paragraph id="HA6C0B34CAF4F4DC4854BDCB16E55026D">
+                  <enum>(1)</enum>
+ <text display-inline="yes-display-inline">has sufficient reason to determine that the payment presents an elevated risk of fraud based on a fraud-risk indicator or an improper payment resulting in financial loss to the Government as estimated under the requirements of section 3352; or</text>
+                </paragraph>
+                <paragraph id="H40B664DC34B04A75B38C99D910190652">
+                  <enum>(2)</enum>
+ <text>has been notified of an order from the Secretary of the Treasury described under subsection (b).</text>
+                </paragraph>
+              </subsection> 
+<subsection id="H5F00121D36304D95962B5C2224655420">
+                <enum>(b)</enum>
+                <header>Treasury obligation To return payment voucher and issue corrective action
+                  order</header>
+ <text>Except where otherwise required by law, the Secretary of the Treasury shall notify the relevant certifying official of an order to return a certified payment voucher submitted to a disbursing official under section 3325 pursuant to the requirements of this section and issue a corrective action order to the head of an agency if the Secretary of the Treasury determines—</text>
+                <paragraph id="H361FDC7B146B4284ABC76AB53BBD9709">
+                  <enum>(1)</enum>
+ <text display-inline="yes-display-inline">a determination has been made that the payment presents an elevated risk of fraud-based on a fraud-risk indicator or an improper payment under subchapter IV; or</text>
+                </paragraph>
+                <paragraph id="H461EA8710DA948F2B0E86ED9E2FA2E88">
+                  <enum>(2)</enum>
+ <text display-inline="yes-display-inline">a payment payee has been flagged in the Do Not Pay system, as prescribed in guidance prepared by the Secretary of the Treasury, or another Treasury administered payment, account, or payee validation program or service.</text>
+                </paragraph>
+              </subsection> 
+<subsection id="H756BECE09DA94F879A982AF3D126B816">
+                <enum>(c)</enum>
+                <header>Agency documentation and time-Limited corrective action</header>
+ <text>An action taken by an agency under subsection (a) shall—</text> <paragraph id="H091337DA8A8D4C8B868CC7B474787437"> <enum>(1)</enum> <text>be based on objective, documented fraud-risk indicator;</text>
+                </paragraph>
+                <paragraph id="H2875ECFEE4D0437FA908DC2DC7E52399">
+                  <enum>(2)</enum>
+ <text>be narrowly applied to the portion of the payment presenting the elevated risk; and</text>
+                </paragraph>
+                <paragraph id="H10E14EC8202044DB91CC63219B124F3F">
+                  <enum>(3)</enum>
+ <text display-inline="yes-display-inline">be limited in duration to the minimum period of time necessary as determined by the agency to verify eligibility of the payee or accuracy of the payment per the program requirements or as stipulated under another law.</text>
+                </paragraph>
+              </subsection> 
+<subsection id="H84BFE80E26B84213845898853744EE6A">
+                <enum>(d)</enum>
+                <header>Payee notification and time limit of paused disbursement requests</header>
+ <text display-inline="yes-display-inline">With respect to a disbursement request that has been delayed pursuant to subsection (a) or a payment voucher that is returned pursuant subsection (b), the head of the agency shall take the following actions in accordance with any the regulations issued under subsection (i) along with any clarifying guidance issued by the Secretary of the Treasury in consultation with the Director of the Office of Management and Budget:</text>
+                <paragraph id="HA7A1AF268A6547EEA87E641A8BC39B1A">
+                  <enum>(1)</enum>
+ <text>Provide prompt notice to the payee, as appropriate, including a notification that—</text>
+                  <subparagraph id="H3B8F94844F6D4BC7A87F459566457FC0">
+                    <enum>(A)</enum>
+ <text>a disbursement has been temporarily paused, conditioned, or segmented;</text>
+                  </subparagraph>
+                  <subparagraph id="HBE41EE5C09C04AB2A1B5934D92D904FF">
+                    <enum>(B)</enum>
+ <text>identifies the nature of the fraud-risk indicator relied upon by the agency to make the determination; and</text>
+                  </subparagraph>
+                  <subparagraph id="H000B4D01134A463BA5178E69B260F47B">
+                    <enum>(C)</enum>
+ <text>outline the process for the review period.</text> </subparagraph> </paragraph> <paragraph id="HEAB6363835744C69A00021D1C3070132"> <enum>(2)</enum> <text display-inline="yes-display-inline">Establish a process tailored to the specific requirements and design of the agency program for a payee to contest any factual inaccuracy or provide clarifying information during the corrective action review period.</text>
+                </paragraph>
+                <paragraph id="H867432B0B81C4B1A8BFC7C681D296581">
+                  <enum>(3)</enum>
+ <text>Issue such payment not later than 45 days after the determination was made or the agency was notified, but not later than 7 days after the date on which the payee contests the corrective action under the process established pursuant to paragraph (2).</text>
+                </paragraph>
+              </subsection> 
+<subsection id="H0B700596E85D404DA8E17F9C121B3E9C">
+                <enum>(e)</enum>
+                <header>Segmentation of low-Risk payments</header>
+ <text>To the maximum extent practicable, the head of each agency shall allow a routine, historically consistent payment amount to proceed while temporarily holding an anomalous, unusually large, or high-risk portion of a payment, or class of payments, pending review and resolution of a corrective action.</text>
+              </subsection> 
+<subsection id="H64D9681AE2B94D3D91271AFD34C56C30"><enum>(f)</enum><header>Exemptions for law enforcement activities</header><text>The head of an agency, in consultation with the Secretary of the Treasury and the Attorney General, may waive any provision in this section on a case-by-case basis if notified of or instructed by a Federal law enforcement authority, including an agency Inspector General, that the action will jeopardize an active criminal investigation or legal proceeding related to an effort to defraud the Federal Government or violate the False Claims Act (<external-xref legal-doc="usc" parsable-cite="usc/31/3729">31 U.S.C. 3729 et seq.</external-xref>).</text></subsection> <subsection id="HF1A8B857B7724260A7B028856896AA0D"><enum>(g)</enum><header>Limitation of liability</header><text>No officer or employee of the Federal Government shall be personally liable for an action taken in good faith under this section. An action taken under this section may not constitute a final determination of eligibility, liability, or wrongdoing on the part of a payee.</text></subsection> 
+<subsection id="HCC3E9857FAA04CDBB8D85E8B5F08BD36"><enum>(h)</enum><header>Rule of construction for program authorizing statute</header><text>Nothing in this section may be construed to supersede any other provision of law with respect to the statute that authorizes the payment or program the payment is made under.</text></subsection> <subsection id="HACA8FF945BC545BBACBF99FD23503EA1"><enum>(i)</enum><header>Regulations</header><text>Not later than 180 days after the date of the enactment of this section, and annually thereafter, the Secretary of the Treasury, in consultation with the Director of the Office of Management and Budget, shall issue regulations and establish procedures to administer the requirements of this section that shall be published in the Federal Register.</text></subsection> 
+<subsection id="H2EA6E9B370C54D6EBCA83492D7D40FCA"><enum>(j)</enum><header>Routine, historically consistent payment amount defined</header><text>In this section, the term <quote>routine, historically consistent payment amount</quote> means a payment amount that is consistent with previous payment history of the payee, established program use patterns, or other objective benchmarks determined by the certifying agency.</text></subsection> <subsection id="HD31F9D160D7D4EF192D0DD424260B261"> <enum>(k)</enum> <header>Fraud-Risk indicator defined</header> <text>In this section, the term <quote>fraud-risk indicator</quote> means an objective data point or analytic signal that indicates an anomalous payment pattern or increase in the volume of a payment amount, a verified data mismatch, network or behavioral anomaly, or match identified by the Do Not Pay system under section 3354 and any other payment, account, and payee validation program or service provided by the Department of the Treasury that would result in financial loss to the government.</text>
+              </subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="H4682FE85807F4999929D41A55BC8CA7D"><enum>(2)</enum><header>Technical and conforming amendment</header><text display-inline="yes-display-inline">The table of sections for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/33">chapter 33</external-xref> of title 31, United States Codes, is amended by inserting after the item for section 3336 the following:</text> <quoted-block style="USC" id="H1A12199DF31C4A819C58CF46A8AF2A62" display-inline="no-display-inline"> <toc regeneration="no-regeneration"> <toc-entry level="item">3337. Authority to pause and segment payments.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> <subsection id="H89DE51A829FF4B8D9747ECB70E7CC124"><enum>(b)</enum><header>Relief of accountable officers</header><text>Section 3527 of title 31, United States Code, is amended—</text> 
+<paragraph id="H2952A32EB5E24AF6899BE8D81330875A"><enum>(1)</enum><text>in subsection (a)(2), by inserting after <quote>the loss or deficiency was not the result of an illegal or incorrect payment</quote> the following: <quote>, or was made as a result of a good faith effort to comply with the requirements of section 3337</quote>; and</text></paragraph> <paragraph id="HE8B0EF9CAA344AC28873C9865ADD6A86"><enum>(2)</enum><text>in subsection (b)(1)(A)(ii), by inserting after <quote>the loss or deficiency was not the result of an illegal or incorrect payment</quote> the following: <quote>, or was made as a result of a good faith effort to comply with the requirements of section 3337</quote>.</text></paragraph></subsection></section> 
+</legis-body></bill>
+

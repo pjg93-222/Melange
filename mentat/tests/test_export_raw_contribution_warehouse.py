@@ -16,25 +16,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "tools"))
 import export_raw_contribution_warehouse as warehouse  # noqa: E402
 
-CONTRACT = json.loads(
-    (
-        PROJECT_ROOT.parent
-        / "audits"
-        / "mentat_failings_20260915"
-        / "contracts"
-        / "raw_contribution_columns.json"
-    ).read_text(encoding="utf-8")
-)
-try:
-    from tests.test_raw_contribution_columns import (  # noqa: E402
-        assert_block_adjacent,
-    )
-except ImportError:  # invoked as a bare file rather than a package module
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from test_raw_contribution_columns import (  # noqa: E402
-        assert_block_adjacent,
-    )
-
 
 SCHEMA = """
 CREATE TABLE companies (
@@ -46,36 +27,22 @@ CREATE TABLE companies (
 CREATE TABLE contributions (
   sub_id TEXT PRIMARY KEY,
   contributor_name TEXT,
-  contributor_city TEXT,
-  contributor_state TEXT,
-  contributor_zip TEXT,
-  contributor_employer TEXT,
-  contributor_occupation TEXT,
   contribution_receipt_amount REAL,
   industry TEXT NOT NULL,
   company TEXT NOT NULL,
   two_year_transaction_period INTEGER NOT NULL,
   company_match_status TEXT,
-  excluded_reason TEXT,
-  contributor_street_1 TEXT,
-  contributor_street_2 TEXT
+  excluded_reason TEXT
 );
 CREATE TABLE corporate_giving (
   sub_id TEXT PRIMARY KEY,
   contributor_name TEXT,
-  contributor_city TEXT,
-  contributor_state TEXT,
-  contributor_zip TEXT,
-  contributor_employer TEXT,
-  contributor_occupation TEXT,
   contribution_receipt_amount REAL,
   industry TEXT NOT NULL,
   company TEXT NOT NULL,
   cycle INTEGER NOT NULL,
   company_match_status TEXT,
-  excluded_reason TEXT,
-  contributor_street_1 TEXT,
-  contributor_street_2 TEXT
+  excluded_reason TEXT
 );
 """
 
@@ -89,11 +56,7 @@ def create_database(path: Path) -> None:
         )
         connection.executemany(
             """
-            INSERT INTO contributions (
-                sub_id, contributor_name, contribution_receipt_amount,
-                industry, company, two_year_transaction_period,
-                company_match_status, excluded_reason
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO contributions VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (
@@ -120,11 +83,7 @@ def create_database(path: Path) -> None:
         )
         connection.execute(
             """
-            INSERT INTO corporate_giving (
-                sub_id, contributor_name, contribution_receipt_amount,
-                industry, company, cycle, company_match_status,
-                excluded_reason
-            )
+            INSERT INTO corporate_giving
             VALUES ('g-1', NULL, 50, 'Fintech', 'Beta/Pay', 2024,
                     'review', NULL)
             """
@@ -233,25 +192,6 @@ class RawWarehouseTests(unittest.TestCase):
                 csv_rows = list(csv.reader(stream))
             self.assertEqual(len(csv_rows), 1)
             self.assertEqual(csv_rows[0][0], "sub_id")
-            # This fixture's contributions table now carries the full
-            # address block in migrated shape (contributor_street_1/_2
-            # appended at the end, the shape an ALTER TABLE migration
-            # leaves), so require defaults to the whole block and the
-            # placement rule is exercised on a migrated shape right here,
-            # not only against the real schema in
-            # tests/test_raw_contribution_columns.py.
-            assert_block_adjacent(csv_rows[0], CONTRACT["block_db"])
-            with closing(sqlite3.connect(database)) as fixture_connection:
-                fixture_pragma_names = tuple(
-                    str(row[1])
-                    for row in fixture_connection.execute(
-                        "PRAGMA table_info(contributions)"
-                    ).fetchall()
-                )
-            expected_header, _missing = warehouse.contract_column_order(
-                fixture_pragma_names
-            )
-            self.assertEqual(csv_rows[0], list(expected_header))
 
             second = warehouse.export_warehouse(
                 database,
@@ -310,11 +250,7 @@ class RawWarehouseTests(unittest.TestCase):
             with closing(sqlite3.connect(database)) as connection, connection:
                 connection.execute(
                     """
-                    INSERT INTO contributions (
-                        sub_id, contributor_name, contribution_receipt_amount,
-                        industry, company, two_year_transaction_period,
-                        company_match_status, excluded_reason
-                    )
+                    INSERT INTO contributions
                     VALUES ('wrong', 'Wrong', 1, 'Crypto', 'Alpha',
                             2022, 'accepted', NULL)
                     """

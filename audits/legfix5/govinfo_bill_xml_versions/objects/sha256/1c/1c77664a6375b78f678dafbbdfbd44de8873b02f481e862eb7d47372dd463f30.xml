@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HCD7ED83A7BB1402F9C3796BA3BCC8825" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4335 IH: VALID Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-06-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4335</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230623">June 23, 2023</action-date><action-desc><sponsor name-id="K000381">Mr. Kilmer</sponsor> (for himself, <cosponsor name-id="P000620">Ms. Pettersen</cosponsor>, <cosponsor name-id="H001096">Ms. Hageman</cosponsor>, <cosponsor name-id="B001301">Mr. Bergman</cosponsor>, and <cosponsor name-id="R000609">Mr. Rutherford</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the National Housing Act to include information regarding VA home loans in the Informed Consumer Choice Disclosure required to be provided to prospective FHA borrowers.</official-title></form><legis-body id="HD9A928607F204BBB9C3F154020F2C1FF" style="OLC"> 
+<section id="H365385EFDD064B2782F4C48A03011847" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>VA Loan Informed Disclosure Act of 2023</short-title></quote> or the <quote>VALID Act of 2023</quote>.</text></section> <section id="H65BFBB0E40B042299654AAB23330105B"><enum>2.</enum><header>FHA Informed Consumer Choice Disclosure</header> <subsection id="H3411D1549605420FB41AC9F74B1682F0"><enum>(a)</enum><header>Inclusion of information relating to VA loans</header><text display-inline="yes-display-inline">Subparagraph (A) of section 203(f)(2) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(f)(2)(A)</external-xref>) is amended—</text> 
+<paragraph id="H572EA798DE544BDB8E62E874F51C1DCF"><enum>(1)</enum><text>by inserting <quote>(i)</quote> after <quote>loan-to-value ratio</quote>; and</text></paragraph> <paragraph id="HAD6B9EDC4A8748AE82234290565836C3"><enum>(2)</enum><text>by inserting before the semicolon the following: <quote>, and (ii) in connection with a loan guaranteed or insured under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/38/37">chapter 37</external-xref> of title 38, United States Code, assuming prevailing interest rates</quote>.</text></paragraph></subsection> 
+<subsection id="H7B6DCEB3CDCE4DA9AA91E4761B013547"><enum>(b)</enum><header>Rule of construction</header><text display-inline="yes-display-inline">Nothing in the amendments made by subsection (a) shall be construed to require an original lender to determine whether a prospective borrower is eligible for any loan included in the notice required under section 203(f) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(f)</external-xref>).</text></subsection></section> </legis-body></bill>
+

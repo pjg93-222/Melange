@@ -1,0 +1,628 @@
+========== FULL-BODY AUDIT ==========
+[1] Existing audits
+  OK   integrity (22) sub-audit clean
+  OK   frontier (11) sub-audit clean
+
+[2] Money-response (diminishing returns + capacity)
+  OK   money curve concave (doubling $ < doubling effect)
+  OK   capacity-aware (bigger-receipts member moves less)
+  OK   competitor money = -LOSSFRAME x cu (loss-frame asymmetry, PT)
+  OK   defection yields ONLY valid overall tiers (no taxonomy leak)
+  OK   committed Opponents immune to money defection (structural probe)
+  OK   Tier-1 display crowns are floored at Ally in money math (crowned remain movable)
+  OK   Champion display label never leaks into money math
+  OK   money engine uses specified crown-floor divergence from col G (not drift)
+  OK   Highly Skeptical deep-but-movable (sub-threshold absorbed, big shock -> Opponent)
+  OK   overall bends are the strict fixed ladder, not roster-population quotas
+
+[3] Electoral plays (non-partisan, gated)
+  OK   contest plays gated to Opponents only
+  OK   defend plays gated to allies only
+  OK   contest plays not partisan-skewed (<70%% one party; enforced at n>=12)
+
+[4] Stance matrix sanity
+  OK   press-to-label evidence weight matches the diminished centralized policy
+  OK   overall band table matches kernel (all cutoffs + tiers, provenance)
+  OK   Durbin is Interchange Opponent
+  OK   Durbin anti on Credit Card (Opponent/Skeptic)
+  OK   champion rate disciplined (<2000 of ~9000 cells)
+
+[5] Co-sponsor route (Pareto + MC reinforcement + determinism)
+  OK   route front non-empty
+  OK   MC-exact >= tree-reach at shared costs (reinforcement)
+  OK   MC route deterministic (same seed -> identical)
+
+[6] LT-priming validity
+  OK   priming sorted cheapest-first
+  OK   every recipe closes the gap (pressure+money)
+  OK   no committed Opponents/Champions in primeable set
+
+[7] Scenario runner (end-to-end)
+  OK   scenario runs end-to-end (reports a net influence change)
+  OK   scenario deterministic (same scenario -> identical)
+  OK   competitor shock reduces CU influence (sign sane)
+  OK   competitor shock reduces winnability too (flip channel, consistent footing)
+  OK   CU spend registers gradual flip-value gain (not absorbed)
+
+[8] Joint budget optimizer (fixed-state lazy greedy / modeled replanning)
+  OK   optimizer runs + reports a winnability frontier
+  OK   optimizer improves winnability (monotone, sign sane)
+  OK   optimizer deterministic (same budget -> identical)
+  OK   optimizer path monotone (conversion is a gain, not the old persuadability-loss)
+  OK   optimizer reports mode, observation status, and guarantee scope honestly
+  OK   optimizer exact fixed-state certificate is internally consistent
+voteview party duplicate: congress=119 bioguide=K000401 icpsrs=['22336', '92336'] party_codes=['200', '328'] chosen_icpsr=92336 chosen_party_code=328 rule=largest numeric icpsr
+voteview party duplicate: congress=118 bioguide=M001183 icpsrs=['40915', '90915'] party_codes=['100', '328'] chosen_icpsr=90915 chosen_party_code=328 rule=largest numeric icpsr
+  OK   no zero-FEC-data member ranks top-20 winnability (missing != no-opposition)
+  OK   imputation limited to no-FEC-record members; verified-real ind=0 zeros trusted
+  OK   budget_frontier deterministic w/ edge-keyed CRN (single topic)
+
+[NEW] Salience shock + press SNA layers (Noble-Turner / HCoI / Fink / Zhou-Elejalde / Joo)
+  OK   salience advisory covers all issues
+  OK   salience regime probs valid (p+q+b~1, all in [0,1])
+  OK   bundle exports Noble sal params (one per issue layer)
+  OK   HCoI communities non-trivial and disjoint (Louvain partition)
+  OK   engagement layer: valid probabilities, no self-edges
+  OK   stance-dynamics imputation beats coin flip on masked cells (sign agreement > 0.55)
+  OK   imputation proposals carry provenance (user adjudicates; matrix untouched)
+  OK   frame-alignment rates in [0,1] across issues
+
+[GOLD] Golden labels + domain classifier + collector DB
+  OK   golden label set parses, all labels in vocabulary
+  OK   golden set preserves the user's train/test split and firewalls goldeval
+  OK   golden set has no duplicate URLs
+  OK   label conflicts are flagged, not silently resolved
+  OK   domain classifier loads and predicts sane labels
+  OK   social_media.db integrity + no orphan posts
+  OK   tweet stance output preserves image-reader provenance as a distinct signal
+  OK   Barr credit-card late-fee tweet gold is applied by exact Quorum ID
+  OK   Britt/Lummis user-ratified social evidence is support by exact Quorum ID
+  OK   CBDC polarity is anti-CU and anti-CBDC Davidson posts compose to support
+  OK   approved tweet-image annotations carry exact ID, stance, confidence, and review status
+  OK   retired speech gold is limited to explicit neutral precision negatives
+
+========================================
+  OK   receptivity layer covers all members
+  OK   receptivity multipliers within documented caps
+  OK   press-pillar weight row 535: 19 numeric positive weights (no formula remnants)
+  OK   media-blend press component is DYNAMIC and fresh (not the frozen archive)
+  OK   press component intensity non-degenerate (no clip saturation / constant weights)
+  OK   press stack drives the dynamic component (not silently on DEBATE fallback)
+  OK   user-ratified press gold overrides reach the scoring component
+  OK   validated own-source press channels are enabled and loaded
+  OK   hearing channel remains gold-only
+  OK   Bluesky remains single-counted
+  OK   own-source channel sidecars preserve source row identity
+  OK   interview DB projection -> extract -> stance chain is receipt/hash bound
+  OK   transcript-appendix passages stay a negligible share of pillar-feeding gold hearings
+  OK   press domain ledger covers every input row with one auditable disposition
+  OK   press routing rejects unsupported declared tags instead of trusting them blindly
+  OK   Barr late-fee CRA press evidence is scored as user-ratified support
+  OK   legislation ledger covers every source row and scores one strongest-role event
+  OK   pinned CDFI/privacy bills have exactly one effective policy column
+  OK   no bill orphaned without a policy slot
+  OK   all 18 canonical categories survive routing
+  OK   unmatched members stay the known delegates and departed members
+  OK   no sitting roster member is unmatched by name resolution
+  OK   unmatched sponsor rows stay a negligible share of the archive
+  OK   no two scored bill ids collapse to one bill_key
+  OK   legislative evidence coverage holds its floor
+  OK   sentinel_ledger_freshness
+  OK   chain_tolerated_failures
+  OK   sentinel verified history receipt/hash/counts and unique keys
+  OK   sentinel workbook receipt reconciles to cumulative verified history
+  OK   sentinel generated interaction tabs reconcile to cumulative verified history
+  OK   receptivity runs on the behavioral basis (lexical Big5 indicted 2026-07-04)
+  OK   receptivity N-slot = affective-content N (round-7/7b; no silent behavioral/text revert)
+  OK   receptivity cooperation-role slot = cooperation_v2 (promotion @94f09cf; coverage>=250, |z|<=5, no silent v1 revert)
+  OK   cooperation and low-antagonism A remain separately sourced (zero substitutions)
+  OK   cooperation vs low-antagonism A cross-contamination below alarm threshold
+  OK   reactivity_z disposition sane (coverage >=150, |z|<=5)
+  OK   workbook member rows == roster size (no silent row drift)
+  OK   python pillar shadow-compute parity (rank math reproducible, 533/533)
+  OK   pillar snapshot vintage <= 14 days (stale-basis tripwire)
+  OK   own-source channel inputs within 28 days of the corpus (channels are default-ON)
+  OK   train/test split-leak (text-hash, incl. augment views) within known bound
+
+[IND] District industry
+  OK   ind-schema district-industry-v1
+  OK   ind-geos 486 total and 435 districts
+  OK   ind-sector_meta exactly CNS01..CNS20
+  OK   ind-shift-share max reconciliation_abs_err <= 0.5
+  OK   ind-positive-employment makeup_pct sums within [0.985, 1.015]
+  OK   ind-generated_at parses ISO and artifact age between -1 and 450 days
+  OK   ind-member desk non-null industry coverage >= 500
+  OK   ind4-schema district-industry-4digit-v1
+  OK   ind4-district coverage exactly 435
+  OK   demographic-potential qualification, score, rank, and tier recompute exactly
+  OK   demographic-potential metadata count matches qualifying members
+  OK   demographic-potential metadata count matches qualifying markets
+  OK   demographic-potential score weights are pinned and sum to 100%
+  OK   demographic-potential weights are explicitly judgmental, not fitted
+  OK   demographic-potential formula and official-source catalog is complete
+  OK   demographic-potential sensitivity audit covers equal and leave-one-out weights
+  OK   demographic-potential structural companion recomputes exactly
+  OK   ACS community artifact is complete 2024 119th-Congress context
+  OK   ACS community variable/profile/source catalogs are complete
+  OK   incomplete CBP large-employer cells are missing/neutral in score
+  OK   district employer candidates attached to >= 500 members
+  OK   district employer candidate rows are named, valued, and non-aggregate
+  OK   desk renders Demographic Potential sticker and filter
+  OK   desk renders Demographic Potential score, rank, and sorting
+  OK   desk renders weight provenance, formulas, sources, and sensitivity
+  OK   desk renders ACS community controls and structural companion
+  OK   desk renders demographic industry pie chart
+  OK   desk renders employer candidate lists with method caveat
+  OK   demographic-potential formula is preserved in tracked methodology
+  OK   big5_llm artifact schema (5 traits + n_chunks per member, coverage >=400)
+  OK   reference-layer edge schema (keys present, scored>=pos+neg, >=1000 edges)
+  OK   press sentiment is active at a diminished weight and may affect labels
+  OK   desk pillar bars match rank authority (no stale-workbook drift)
+  OK   desk displayed pillars*weights reconstruct displayed score
+  OK   every member renders a Big-Five panel (gold or labeled estimate; Paul fill 2026-07-17)
+  OK   every estimate slot carries a provenance label
+  OK   formal office remains titled display context and never changes Influence or rank
+  OK   desk broad-gold and raw Pink Neuroticism reads do not collapse to one value
+  OK   desk preserves mixed Blue/Pink corpus-vintage metadata for archived diagnostics
+  OK   external Senate gold preserves the discriminant equal-weight Extraversion comparator
+  OK   multitrait OOF Senate gold activates E with dominance and role-adjusted visibility
+  OK   all broad Big Five traits activate with explicit panel-strength labels
+  OK   source-primary Blue promotion preserves frozen MTMM/criterion gate and affective-N slot
+  OK   validated multimethod Big Five preserves all 5 reliability/known-group/discriminant gates
+  OK   independent O/C/E coverage is not truncated by the narrower affective-N stratum
+  OK   validated A-antagonism facet preserves qualified schema and inverse pole
+  OK   validated A facet propagates to desk without replacing engine/text A
+  OK   validated A claim is sampling-frame scoped (no full-roster percentile/imputation)
+  OK   current narratives cannot silently fall back to legacy E/audio prose
+  OK   every member holding verified audio evidence publishes an audio layer (no silent blindness)
+  OK   the two audio layers stay on separately labelled scales (no false equivalence)
+  OK   both audio layers propagate from the evidence ledger into the member desk payload
+  OK   published profile prose never denies audio the member holds
+  OK   personal-texture artifact precision/schema/provenance (no volume reward)
+  OK   personal-texture layer propagates exactly to member profiles (display-only)
+  OK   Wikipedia biography summaries account for the full current roster
+  OK   Wikipedia summaries propagate revision-identically to member profiles
+  OK   speech corpus exact-duplicate free (member+package+text)
+  OK   co-appearance edge schema (keys present, n>=1, non-empty)
+  OK   accepted audio manifest is fully partitioned into a candidate-only review intake
+  OK   press refresh feed is hash-bound and keeps official mentions out of stance/speech
+FAIL  email delivery packages are current, hash-bound, and within the attachment budget :: inputs=False packages=True
+  OK   Congress.gov bill repository is weekly-current, complete, and hash-bound
+  OK   audio v2 fail-closed on-air, aligned, program-conditioned contract active
+  OK   legacy audio and paid narrative paths retired from unattended/display consumption
+  OK   corpus integrity gate protects accepted scores and verifies repaired CHRG attribution
+  OK   corrupt legacy CHRG hearing counts cannot re-enter behavioral diligence
+  OK   voice-ES retired from display (b5_es_voice not re-wired into the desk)
+  OK   desk presents the accepted five-axis display under canonical Big-Five names
+  OK   observable communication facets and role-adjusted exposure propagate as separate context
+  OK   broad one-panel Neuroticism occupies the canonical slot while affective N remains separate
+  OK   legacy E/audio narratives fail closed pending guarded local rebuild
+  OK   desk suppresses synthetic/default-only dominance values and keeps behavior display N-free
+  OK   qualified conversation roles v2 propagate exactly to the desk and remain engine-isolated
+  OK   desk preserves missing low-antagonism behavior and its selected-stratum scope
+  OK   Quorum member resolver refuses surname-only identity guesses
+  OK   vote_category_lean.json is hash-bound and fresh vs bills archive
+  OK   say-do gate coherent (capped->Ally w/ raw C/D preserved; proven are C/D cells)
+  OK   say-do corroboration paths coherent (only A/V cells survive as C/D)
+  OK   overall say-do caps have an auditable fixed-rule reason
+  OK   CFPB direction contract is unchanged (restrain positive; reach negative)
+  OK   primacy board basis is a recognized mode
+  OK   evidence floor holds the ratified production value
+  OK   legacy display-tier policy pair remains 84%% Legislative / 16%% Press
+  OK   primacy board has no fixed display positions
+  OK   primacy board has no fixed tier placements
+  OK   no tiered member sits below the evidence floor
+  OK   allocation engine consumes primacy tiers rather than rank scores
+  OK   primacy factors cover the full 533-member rank roster
+  OK   five uniform sponsor-equivalent CU adjudication credits enter factor math
+  OK   local Opus-5-method primacy math receipt closes every gate
+  OK   culling surface reports the hash-bound production promotion state
+  OK   culling ledger closes all scoring, held, and excluded decisions
+  OK   merged beneficiary universe contains exactly 644 classified acts
+  OK   member desk and beneficiary universe close on the same 644 acts
+  OK   primacy amendment sidecar is 117 unique sponsor-only memberships
+  OK   all 55 registry anchors are classified after six official-source repairs
+  OK   registry sidecar resolves 73 official member links across six acts
+  OK   every registry reconciliation gate is closed
+  OK   net conduct ledger reproduces Barr and Hill with both sides visible
+  OK   grievance evidence carries a human reason and cure for every event
+  OK   delivery evidence names the bill, instrument, and positive credit
+  OK   conduct ceilings keep constrained members out of Tier 1
+  OK   overall Champion crown exactly equals primacy Tier 1
+  OK   adjudicated five hold their ratified seats under the active board basis
+  OK   Vargas holds Tier 1 under the uncertainty-penalized factor board
+  OK   primacy artifact carries the ratified uncertainty penalty K=0.25
+  OK   primacy artifact carries the ratified amendment weight 0.5
+  OK   champions boards obey champion-cannot-be-threat law
+  OK   champions threat boards fresh vs live crown set
+  OK   champions boards obey cross-sector exclusivity (champion seat yields)
+  OK   every amendment-shaped act id is recognized by the measure-weight bridge
+  OK   dashboard overall labels exactly match shared crown law
+  OK   dashboard carries aligned grievance and delivery tier evidence
+  OK   dashboard scenario engine carries primacy tier priority only
+  OK   member desk carries aligned grievance and delivery tier evidence
+  OK   dashboard HTML renders conduct reason and cure
+  OK   member desk HTML renders cure plus all three CU delivery anchors
+  OK   workbook stance column exactly matches shared crown law
+
+[AUDIO-ID] Speaker-identity layer candidates (research-only)
+  SKIP  identity enroll-bank/attribution candidates absent (layer not yet run)
+  SKIP  identity thresholds candidate absent (calibration not yet run)
+  SKIP  no per-corpus attribution candidates (rejects-ledger pairing not applicable)
+  OK   attribution module has no write reference to live review/descriptor artifacts
+
+[NET] Network configurations (registry / artifact / bundle tri-state)
+  OK   dashboard_data.json present for config audit
+  OK   published CU adjacency in the bundle matches the CU artifact (no drift on rebuild)
+  OK   published CU network records its provenance in the bundle
+  OK   NET_CONFIG=bank_reg: artifact on disk and bundle presence agree
+  OK   NET_CONFIG=crypto: artifact on disk and bundle presence agree
+  OK   NET_CONFIG=holistic: artifact on disk and bundle presence agree
+  OK   NET_CONFIG=holistic_norm: artifact on disk and bundle presence agree
+  OK   sector bank_reg quotes the LIVE CU baseline, not a frozen one
+  OK   sector bank_reg engine_floor recomputes from its own adjacency
+  OK   sector crypto quotes the LIVE CU baseline, not a frozen one
+  OK   sector crypto engine_floor recomputes from its own adjacency
+  OK   network artifact families are disjoint at the live root
+  OK   the CU file unfiltered max-by-mtime consumers would pick IS the published graph
+  OK   NET_CONFIG=bank_reg ships a complete key quad (adj/edges/elay)
+  OK   NET_CONFIG=bank_reg elay is one provenance code per drawn edge
+  OK   NET_CONFIG=bank_reg layout arrays are roster-length and paired
+  OK   NET_CONFIG=crypto ships a complete key quad (adj/edges/elay)
+  OK   NET_CONFIG=crypto elay is one provenance code per drawn edge
+  OK   NET_CONFIG=crypto layout arrays are roster-length and paired
+  OK   NET_CONFIG=holistic ships a complete key quad (adj/edges/elay)
+  OK   NET_CONFIG=holistic elay is one provenance code per drawn edge
+  OK   NET_CONFIG=holistic layout arrays are roster-length and paired
+  OK   NET_CONFIG=holistic_norm ships a complete key quad (adj/edges/elay)
+  OK   NET_CONFIG=holistic_norm elay is one provenance code per drawn edge
+  OK   NET_CONFIG=holistic_norm layout arrays are roster-length and paired
+  OK   template network toggle offers exactly the registry configs
+  OK   deployed network toggle offers exactly the registry configs
+  OK   promoted sector bank_reg ships its full honesty block
+  OK   promoted sector bank_reg accounts for every roster member
+  OK   promoted sector crypto ships its full honesty block
+  OK   promoted sector crypto accounts for every roster member
+
+[FCST] Cosponsor forecast freshness
+  OK   cosponsor_forecast_freshness
+
+[STAFF] Staffer network section
+  OK   staffer_section_present
+  OK   staffer_section_inputs_current
+  OK   staffer_surface_embeds_section
+  OK   staffer_groups_artifacts_present
+  OK   staffer_groups_artifacts_generation_current
+  OK   staffer_groups_artifacts_within_size_pin
+  OK   staffer_groups_clients_conservation
+  OK   staffer_groups_embedded_in_surface
+
+[SYS] System manifest vs disk (containerization phase 0)
+  manifest      : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\system\system_manifest.json
+  OK   A0 system manifest was not regenerated in this process
+  OK   A0 system manifest exists on disk
+  OK   A0 system manifest parses as JSON
+  OK   A0 system manifest declares schema melange-system-manifest-v1
+  OK   A0 system manifest declares at least one store
+  OK   A0 system manifest declares at least one root
+  OK   A0 system manifest predates this audit run
+  OK   A0 system manifest file mtime predates this audit run
+  OK   A0 system manifest generator_commit resolves in git
+  OK   A0 at least one declared root is present on this host
+  OK   A6 OneDrive root matches observation
+  OK   A1 repo.bill_beneficiary_tags still exists
+  OK   A2 repo.bill_beneficiary_tags size_class agrees
+  OK   A2 repo.bill_beneficiary_tags file_count within tolerance
+  OK   A1 repo.industry_axes still exists
+  OK   A2 repo.industry_axes size_class agrees
+  OK   A2 repo.industry_axes file_count within tolerance
+  OK   A1 repo.network_base_live still exists
+  OK   A2 repo.network_base_live size_class agrees
+  OK   A2 repo.network_base_live file_count within tolerance
+  OK   A4 repo.network_base_live hash_always is inside the declared envelope
+  OK   A4 repo.network_base_live every hashed file still present
+  OK   A4 repo.network_base_live every hashed file byte-identical
+  OK   A4 repo.network_base_live gained no unhashed file
+  OK   A1 repo.acu_registry still exists
+  OK   A2 repo.acu_registry size_class agrees
+  OK   A2 repo.acu_registry file_count within tolerance
+  OK   A4 repo.acu_registry hash_always is inside the declared envelope
+  OK   A4 repo.acu_registry every hashed file still present
+  OK   A4 repo.acu_registry every hashed file byte-identical
+  OK   A4 repo.acu_registry gained no unhashed file
+  OK   A1 repo.acu_outline_docx still exists
+  OK   A2 repo.acu_outline_docx size_class agrees
+  OK   A2 repo.acu_outline_docx file_count within tolerance
+  OK   A1 repo.congestion still exists
+  OK   A2 repo.congestion size_class agrees
+  OK   A2 repo.congestion file_count within tolerance
+  OK   A4 repo.congestion hash_always is inside the declared envelope
+  OK   A4 repo.congestion every hashed file still present
+  OK   A4 repo.congestion every hashed file byte-identical
+  OK   A4 repo.congestion gained no unhashed file
+  OK   A1 repo.culling_receipt still exists
+  OK   A2 repo.culling_receipt size_class agrees
+  OK   A2 repo.culling_receipt file_count within tolerance
+  OK   A4 repo.culling_receipt hash_always is inside the declared envelope
+  OK   A4 repo.culling_receipt every hashed file still present
+  OK   A4 repo.culling_receipt every hashed file byte-identical
+  OK   A4 repo.culling_receipt gained no unhashed file
+  OK   A1 repo.source_data still exists
+  OK   A2 repo.source_data size_class agrees
+  OK   A2 repo.source_data file_count within tolerance
+  OK   A2b repo.source_data sentinels unchanged
+  OK   A1 repo.ranks_python still exists
+  OK   A2 repo.ranks_python size_class agrees
+  OK   A2 repo.ranks_python file_count within tolerance
+  OK   A1 repo.dashboard_data still exists
+  OK   A2 repo.dashboard_data size_class agrees
+  OK   A2 repo.dashboard_data file_count within tolerance
+  OK   A1 repo.bipartisan still exists
+  OK   A2 repo.bipartisan size_class agrees
+  OK   A2 repo.bipartisan file_count within tolerance
+  OK   A1 repo.category_stance still exists
+  OK   A2 repo.category_stance size_class agrees
+  OK   A2 repo.category_stance file_count within tolerance
+  OK   A1 repo.member_receptivity still exists
+  OK   A2 repo.member_receptivity size_class agrees
+  OK   A2 repo.member_receptivity file_count within tolerance
+  OK   A1 repo.say_do_gap still exists
+  OK   A2 repo.say_do_gap size_class agrees
+  OK   A2 repo.say_do_gap file_count within tolerance
+  OK   A1 repo.vote_category_lean still exists
+  OK   A2 repo.vote_category_lean size_class agrees
+  OK   A2 repo.vote_category_lean file_count within tolerance
+  OK   A1 repo.workbook still exists
+  OK   A2 repo.workbook size_class agrees
+  OK   A2 repo.workbook file_count within tolerance
+  OK   A1 repo.holistic_base still exists
+  OK   A2 repo.holistic_base size_class agrees
+  OK   A2 repo.holistic_base file_count within tolerance
+  OK   A1 repo.holistic_aug still exists
+  OK   A2 repo.holistic_aug size_class agrees
+  OK   A2 repo.holistic_aug file_count within tolerance
+  OK   A1 repo.data_holistic still exists
+  OK   A2 repo.data_holistic size_class agrees
+  OK   A2 repo.data_holistic file_count within tolerance
+  OK   A1 repo.dashboard_html still exists
+  OK   A2 repo.dashboard_html size_class agrees
+  OK   A2 repo.dashboard_html file_count within tolerance
+  OK   A1 repo.desk_html still exists
+  OK   A2 repo.desk_html size_class agrees
+  OK   A2 repo.desk_html file_count within tolerance
+  OK   A1 repo.combined_html still exists
+  OK   A2 repo.combined_html size_class agrees
+  OK   A2 repo.combined_html file_count within tolerance
+  OK   A1 repo.desk_bundle still exists
+  OK   A2 repo.desk_bundle size_class agrees
+  OK   A2 repo.desk_bundle file_count within tolerance
+  OK   A1 repo.press_text_cache still exists
+  OK   A2 repo.press_text_cache size_class agrees
+  OK   A2 repo.press_text_cache file_count within tolerance
+  OK   A1 repo.data_stance still exists
+  OK   A2 repo.data_stance size_class agrees
+  OK   A2 repo.data_stance file_count within tolerance
+  OK   A2b repo.data_stance sentinels unchanged
+  OK   A1 repo.data_legislation still exists
+  OK   A2 repo.data_legislation size_class agrees
+  OK   A2 repo.data_legislation file_count within tolerance
+FAIL  A2b repo.data_legislation sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['bank_anchor_reconciliation.json sha256: manifest=1b3bfa0de3d40f67... / disk=aa3fa12d78211a8b...']
+  OK   A1 repo.data_lobbying still exists
+  OK   A2 repo.data_lobbying size_class agrees
+  OK   A2 repo.data_lobbying file_count within tolerance
+FAIL  A2b repo.data_lobbying sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['_audit_tmp_optimize.json size: manifest=4134 bytes / disk=4135 bytes']
+  OK   A1 repo.data_network still exists
+  OK   A2 repo.data_network size_class agrees
+  OK   A2 repo.data_network file_count within tolerance
+  OK   A2b repo.data_network sentinels unchanged
+  OK   A1 repo.data_members still exists
+  OK   A2 repo.data_members size_class agrees
+  OK   A2 repo.data_members file_count within tolerance
+FAIL  A2b repo.data_members sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 2 disagree :: ['member_narrative_evidence_v4.json size: manifest=7595671 bytes / disk=8256668 bytes', 'member_narratives_v3_descriptive_receipt.json sha256: manifest=7ec3a09980284ce3... / disk=564b6ee0e1420a45...']
+  OK   A1 repo.data_money still exists
+  OK   A2 repo.data_money size_class agrees
+  OK   A2 repo.data_money file_count within tolerance
+FAIL  A2b repo.data_money sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 2 disagree :: ['Moneyball_email.zip size: manifest=14200183 bytes / disk=14180827 bytes', 'budget_frontier_electoral.json size: manifest=84977 bytes / disk=84979 bytes']
+  OK   A1 repo.data_engine still exists
+  OK   A2 repo.data_engine size_class agrees
+  OK   A2 repo.data_engine file_count within tolerance
+FAIL  A2b repo.data_engine sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 3 disagree :: ['staffer_network_section.json size: manifest=4400802 bytes / disk=5393487 bytes', 'responsiveness_layers.json size: manifest=2223222 bytes / disk=2223193 bytes', 'dashboard_integrity_state.json sha256: manifest=d1ce3c5d2f93af88... / disk=a02ea9dee84d4790...']
+  OK   A1 repo.data_district still exists
+  OK   A2 repo.data_district size_class agrees
+  OK   A2 repo.data_district file_count within tolerance
+  OK   A2b repo.data_district sentinels unchanged
+  OK   A1 repo.data_reference still exists
+  OK   A2 repo.data_reference size_class agrees
+  OK   A2 repo.data_reference file_count within tolerance
+  OK   A1 repo.outputs still exists
+FAIL  A2b repo.outputs sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['email_package/EMAIL_PACKAGE_MANIFEST.json sha256: manifest=8f31430c7f963829... / disk=9c8dea460cac851f...']
+  OK   A1 repo.db_hearings_seq still exists
+  OK   A5 repo.db_hearings_seq carries a sqlite sidecar block
+  OK   A5 repo.db_hearings_seq has no -shm stranded without its -wal
+  OK   A2 repo.db_hearings_seq size_class agrees
+  OK   A2 repo.db_hearings_seq file_count within tolerance
+  OK   A1 repo.db_hearings_wit still exists
+  OK   A5 repo.db_hearings_wit carries a sqlite sidecar block
+  OK   A5 repo.db_hearings_wit has no -shm stranded without its -wal
+  OK   A2 repo.db_hearings_wit size_class agrees
+  OK   A2 repo.db_hearings_wit file_count within tolerance
+  OK   A1 repo.db_social_media still exists
+  OK   A5 repo.db_social_media carries a sqlite sidecar block
+  OK   A5 repo.db_social_media has no -shm stranded without its -wal
+  OK   A2 repo.db_social_media size_class agrees
+  OK   A2 repo.db_social_media file_count within tolerance
+  OK   A1 repo.fec_code still exists
+  OK   A2 repo.fec_code size_class agrees
+  OK   A2 repo.fec_code file_count within tolerance
+FAIL  A2b repo.fec_code sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['audit/build_system_manifest.py size: manifest=115111 bytes / disk=129433 bytes']
+  OK   A1 repo.fec_audit still exists
+  OK   A2 repo.fec_audit size_class agrees
+  OK   A2 repo.fec_audit file_count within tolerance
+  OK   A1 repo.fec_tests still exists
+  OK   A2 repo.fec_tests size_class agrees
+  OK   A2 repo.fec_tests file_count within tolerance
+  OK   A1 repo.claude_commands still exists
+  OK   A2 repo.claude_commands size_class agrees
+  OK   A2 repo.claude_commands file_count within tolerance
+  OK   A1 repo.claude_skills still exists
+  OK   A2 repo.claude_skills size_class agrees
+  OK   A2 repo.claude_skills file_count within tolerance
+  OK   A1 repo.audits still exists
+  OK   A1 repo.worktrees still exists
+  NOTICE A2b repo.worktrees: 4 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b repo.worktrees sentinels unchanged
+  OK   A1 repo.git still exists
+  OK   A2 repo.git size_class agrees
+  OK   A2 repo.git still holds a populated git object store
+  NOTICE A2b repo.git: 3 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+FAIL  A2b repo.git sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 3 sentinel(s) recorded / disk: 2 disagree :: ['objects/pack/pack-d1922fb787c71fc0269e907e9f96f28b73044cf5.pack: manifest recorded it at 3245205287 bytes / disk: not a file at C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\.git\\objects\\pack\\pack-d1922fb787c71fc0269e907e9f96f28b73044cf5.pack', 'objects/pack/pack-9972c648b9c1aee96cee9aa6041de35e165d9331.pack: manifest recorded it at 1202595060 bytes / disk: not a file at C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\.git\\objects\\pack\\pack-9972c648b9c1aee96cee9aa6041de35e165d9331.pack']
+FAIL  A1 repo.rescue_dir still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\offbox_rescue_20260826 / disk: os.path.exists says ABSENT
+FAIL  A1 repo.rescue_manifest_a still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\offbox_rescue_20260826\RESCUE_MANIFEST.json / disk: os.path.exists says ABSENT
+FAIL  A1 repo.rescue_manifest_b still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\offbox_rescue_20260826\RESCUE_MANIFEST_PHASE_B.json / disk: os.path.exists says ABSENT
+FAIL  A1 repo.rescue_manifest_c still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\offbox_rescue_20260826\RESCUE_MANIFEST_PHASE_C.json / disk: os.path.exists says ABSENT
+  OK   A1 secret.anthropic_key still exists
+  OK   A2 secret.anthropic_key size_class agrees
+  OK   A2 secret.anthropic_key file_count within tolerance
+  OK   A1 secret.govinfo_key still exists
+  OK   A2 secret.govinfo_key size_class agrees
+  OK   A2 secret.govinfo_key file_count within tolerance
+  OK   A1 draft.root still exists
+  OK   A2 draft.root size_class agrees
+  OK   A2 draft.root file_count within tolerance
+  NOTICE A2b draft.root: 4 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b draft.root sentinels unchanged
+  OK   A1 draft.stance_label_set still exists
+  OK   A2 draft.stance_label_set size_class agrees
+  OK   A2 draft.stance_label_set file_count within tolerance
+  OK   A4 draft.stance_label_set hash_always is inside the declared envelope
+  OK   A4 draft.stance_label_set every hashed file still present
+  OK   A4 draft.stance_label_set every hashed file byte-identical
+  OK   A4 draft.stance_label_set gained no unhashed file
+  OK   A1 secret.renviron still exists
+  OK   A2 secret.renviron size_class agrees
+  OK   A2 secret.renviron file_count within tolerance
+  OK   A1 mdata.npr_audio still exists
+  OK   A2 mdata.npr_audio size_class agrees
+  OK   A2 mdata.npr_audio file_count within tolerance
+  OK   A2b mdata.npr_audio sentinels unchanged
+  OK   A1 mdata.wj_audio still exists
+  OK   A2 mdata.wj_audio size_class agrees
+  OK   A2 mdata.wj_audio file_count within tolerance
+  OK   A2b mdata.wj_audio sentinels unchanged
+  OK   A1 mdata.sunday_audio still exists
+  OK   A2 mdata.sunday_audio size_class agrees
+  OK   A2 mdata.sunday_audio file_count within tolerance
+  OK   A2b mdata.sunday_audio sentinels unchanged
+  OK   A1 mdata.axe_audio still exists
+  OK   A2 mdata.axe_audio size_class agrees
+  OK   A2 mdata.axe_audio file_count within tolerance
+  OK   A2b mdata.axe_audio sentinels unchanged
+  OK   A1 mdata.youtube_audio still exists
+  OK   A2 mdata.youtube_audio size_class agrees
+  OK   A2 mdata.youtube_audio file_count within tolerance
+  OK   A2b mdata.youtube_audio sentinels unchanged
+  OK   A1 mdata.sunday_pilot still exists
+  OK   A2 mdata.sunday_pilot size_class agrees
+  OK   A2 mdata.sunday_pilot file_count within tolerance
+  OK   A2b mdata.sunday_pilot sentinels unchanged
+  OK   A1 mdata.bicam_zips still exists
+  OK   A2 mdata.bicam_zips size_class agrees
+  OK   A2 mdata.bicam_zips file_count within tolerance
+  NOTICE A2b mdata.bicam_zips: 3 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b mdata.bicam_zips sentinels unchanged
+  OK   A1 mdata.bicam_extracted still exists
+  OK   A2 mdata.bicam_extracted size_class agrees
+  OK   A2 mdata.bicam_extracted file_count within tolerance
+  NOTICE A2b mdata.bicam_extracted: 3 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b mdata.bicam_extracted sentinels unchanged
+  OK   A1 mdata.models still exists
+  OK   A2 mdata.models size_class agrees
+  OK   A2 mdata.models file_count within tolerance
+  OK   A2b mdata.models sentinels unchanged
+  OK   A1 mdata.golden_run still exists
+  OK   A2 mdata.golden_run size_class agrees
+  OK   A2 mdata.golden_run file_count within tolerance
+  OK   A2b mdata.golden_run sentinels unchanged
+  OK   A1 mdata.residual still exists
+  NOTICE A2b mdata.residual: 4 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b mdata.residual sentinels unchanged
+  OK   A1 local.lda_sweeps still exists
+  OK   A2b local.lda_sweeps sentinels unchanged
+  OK   A1 local.lda_positions still exists
+  OK   A2 local.lda_positions size_class agrees
+  OK   A2 local.lda_positions file_count within tolerance
+  NOTICE A2b local.lda_positions: 4 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b local.lda_positions sentinels unchanged
+  OK   A1 local.lda_derived still exists
+  OK   A2 local.lda_derived size_class agrees
+  OK   A2 local.lda_derived file_count within tolerance
+  NOTICE A2b local.lda_derived: 3 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b local.lda_derived sentinels unchanged
+  OK   A1 local.billstatus still exists
+  OK   A2 local.billstatus size_class agrees
+  OK   A2 local.billstatus file_count within tolerance
+  OK   A2b local.billstatus sentinels unchanged
+  OK   A1 local.lobbyview_raw still exists
+  OK   A2 local.lobbyview_raw size_class agrees
+  OK   A2 local.lobbyview_raw file_count within tolerance
+  OK   A2b local.lobbyview_raw sentinels unchanged
+  OK   A1 local.lobbyview_derived still exists
+  OK   A2 local.lobbyview_derived size_class agrees
+  OK   A2 local.lobbyview_derived file_count within tolerance
+  OK   A2b local.lobbyview_derived sentinels unchanged
+  OK   A1 local.demographics still exists
+  OK   A2 local.demographics size_class agrees
+  OK   A2 local.demographics file_count within tolerance
+  OK   A2b local.demographics sentinels unchanged
+  OK   A1 local.fec_spending still exists
+  OK   A2 local.fec_spending size_class agrees
+  OK   A2 local.fec_spending file_count within tolerance
+  OK   A2b local.fec_spending sentinels unchanged
+  OK   A1 secret.lda_anthropic_key still exists
+  OK   A2 secret.lda_anthropic_key size_class agrees
+  OK   A2 secret.lda_anthropic_key file_count within tolerance
+  OK   A1 secret.lda_api_key still exists
+  OK   A2 secret.lda_api_key size_class agrees
+  OK   A2 secret.lda_api_key file_count within tolerance
+  OK   A1 mirror.melange still exists
+  OK   A2 mirror.melange size_class agrees
+  OK   A2 mirror.melange still holds a populated git object store
+FAIL  A2b mirror.melange sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 3 sentinel(s) recorded / disk: 2 disagree :: ['objects/pack/pack-cbf44144eba629576a4ffda2e43f3709fbd4aa4c.pack: manifest recorded it at 25818629 bytes / disk: not a file at C:\\Users\\pgoff\\GitMirrors\\melange-systems.git\\objects\\pack\\pack-cbf44144eba629576a4ffda2e43f3709fbd4aa4c.pack', 'objects/pack/pack-d6c44ee726ae55bc9bc47a0046c688a8763fe8f7.pack: manifest recorded it at 2700240 bytes / disk: not a file at C:\\Users\\pgoff\\GitMirrors\\melange-systems.git\\objects\\pack\\pack-d6c44ee726ae55bc9bc47a0046c688a8763fe8f7.pack']
+  OK   A1 mirror.glassbox still exists
+  OK   A2 mirror.glassbox size_class agrees
+  OK   A2 mirror.glassbox still holds a populated git object store
+  OK   A2b mirror.glassbox sentinels unchanged
+  OK   A1 glassbox.scripts still exists
+  OK   A2 glassbox.scripts size_class agrees
+  OK   A2 glassbox.scripts file_count within tolerance
+  OK   A1 glassbox.events still exists
+  OK   A2 glassbox.events size_class agrees
+  OK   A2 glassbox.events file_count within tolerance
+  OK   A1 glassbox.state still exists
+  OK   A2 glassbox.state size_class agrees
+  OK   A2 glassbox.state file_count within tolerance
+  NOTICE A2b glassbox.state: 4 sentinel(s) recorded, NONE carrying a sha256 (all above the 8388608-byte hash cap). If this store is also above the walk limit its content evidence is existence-and-size only. Regenerate with a producer that emits the largest-hashable fallback.
+  OK   A2b glassbox.state sentinels unchanged
+  OK   A0 the manifest-vs-disk section examined at least one store
+  OK   A6 every store volume matches observation
+  OK   A6 every store disk id matches observation
+  OK   A6 every offbox_replica recomputes from the live OneDrive root
+  OK   A6 every single_disk recomputes from the live OneDrive root
+  OK   A6 no store claims a durable backup
+  OK   A3 repo.dashboard_data is not older than its input repo.ranks_python
+  OK   A3 repo.holistic_aug is not older than its input repo.holistic_base
+  OK   A3 repo.dashboard_html is not older than its input repo.dashboard_data
+  OK   A3 repo.desk_html is not older than its input repo.desk_bundle
+  OK   A3 repo.combined_html is not older than its input repo.dashboard_html
+FAIL  A3 repo.combined_html is not older than its input repo.desk_html :: manifest: declares repo.combined_html derives_from repo.desk_html / disk: input mtime 2026-09-08T06:11:34Z is NEWER than derivative mtime 2026-09-08T02:35:11Z (by 12983.3s, tolerance 2.0s) — the derivative is stale
+  SKIP   A2b repo.data_reference sentinels :: manifest recorded no sentinel files for this store
+  SKIP   A2 repo.outputs :: manifest recorded 38118 files, above this gate's re-walk limit of 20000; sentinel parity is checked instead
+  SKIP   A2 repo.audits :: manifest recorded BUDGET-EXCEEDED (300000 files, walk incomplete): a partial expectation cannot be compared to a complete observation
+  SKIP   A2 repo.worktrees :: manifest recorded BUDGET-EXCEEDED (500000 files, walk incomplete): a partial expectation cannot be compared to a complete observation
+  SKIP   A2 mdata.residual :: manifest recorded 84666 files, above this gate's re-walk limit of 20000; sentinel parity is checked instead
+  SKIP   A2 local.lda_sweeps :: manifest recorded 21605 files, above this gate's re-walk limit of 20000; sentinel parity is checked instead
+  SKIP   absent_expected no_credentials_in_offbox_rescue :: base directory C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\offbox_rescue_20260826 does not exist on this host
+  manifest agreement: 307 checks, 14 failed, 7 skipped, 9 notices
+  OK   system manifest section emitted checks
+FULL-BODY AUDIT — 554 passed, 15 FAILED
+  FAILURES: ['email delivery packages are current, hash-bound, and within the attachment budget', 'A2b repo.data_legislation sentinels unchanged', 'A2b repo.data_lobbying sentinels unchanged', 'A2b repo.data_members sentinels unchanged', 'A2b repo.data_money sentinels unchanged', 'A2b repo.data_engine sentinels unchanged', 'A2b repo.outputs sentinels unchanged', 'A2b repo.fec_code sentinels unchanged', 'A2b repo.git sentinels unchanged', 'A1 repo.rescue_dir still exists', 'A1 repo.rescue_manifest_a still exists', 'A1 repo.rescue_manifest_b still exists', 'A1 repo.rescue_manifest_c still exists', 'A2b mirror.melange sentinels unchanged', 'A3 repo.combined_html is not older than its input repo.desk_html']

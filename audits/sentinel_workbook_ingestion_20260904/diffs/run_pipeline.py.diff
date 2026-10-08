@@ -1,0 +1,23 @@
+--- orig/fec/run_pipeline.py	2026-09-03 20:54:24.802902800 -0400
++++ patched/fec/run_pipeline.py	2026-09-04 02:07:40.575272700 -0400
+@@ -82,7 +82,20 @@
+     # canonical bill IDs + review state into Excel, then let archive scoring
+     # and labels consume that worksheet.  This must precede every legislative
+     # downstream producer.
++    # Verified collector -> ledger gate (2026-08-29 Paul). Consumes the previous-cycle
++    # member_desk_bundle exactly like champions_v2/industry_tiers, plus the weekly
++    # Congress.gov/GovInfo bill repository and its refresh receipt, and publishes the
++    # additive cosponsor-join sidecar make_member_desk merges as its fourth membership
++    # source. Local files only -- the chain's network-free law holds. It runs BEFORE
++    # compute_pillars/build_primacy_surfaces so the same-cycle desk rebuild inside
++    # build_primacy_surfaces --engine-inputs-only already sees the fresh sidecar.
++    # Its refusal set is a strict SUBSET of the validate_live_repository gate that
++    # make_member_desk already trips at import, so this step can only ever halt a chain
++    # that was going to halt anyway -- and it halts it before compute_pillars --write.
+     ('verify_collector_roster_updates.py',[]),
++    # Runtime-absent is a CLEAN SKIP, not a failure: the sync keeps the last-good ledger
++    # and records status SKIPPED_RUNTIME_ABSENT in its receipt. That skip cannot go
++    # unnoticed -- audit_full's sentinel_ledger_freshness check ages it out at 21 days.
+     ('sync_sentinel_bill_ledger.py',[]),
+     ('build_archive_legislative.py',[]),
+     ('extract_cu_speeches.py',[]),

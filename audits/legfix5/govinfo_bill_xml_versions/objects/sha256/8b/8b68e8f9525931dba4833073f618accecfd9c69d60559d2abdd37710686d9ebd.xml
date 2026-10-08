@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H4F93E29DE4444E6EA2A43B29B412D865" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6293 IH: Interagency Council on Homelessness Coronavirus Guidance Act of 2020</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-03-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6293</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200319">March 19, 2020</action-date><action-desc><sponsor name-id="Z000017">Mr. Zeldin</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require issuance of guidance by the United States Interagency Council on Homelessness regarding protecting the homeless from the Coronavirus Disease 2019 (COVID-19), and for other purposes.</official-title></form><legis-body id="H440709B3A8C147A09BC7FBF0DADA3D68" style="OLC"><section id="H8CC4ACDBAEB7486CA7B5A5950655ACB1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Interagency Council on Homelessness Coronavirus Guidance Act of 2020</short-title></quote>.</text></section><section id="H4242848F48654F67A33FF4319038F783"><enum>2.</enum><header>Guidance from United States Interagency Council on Homelessness</header><subsection id="H5873A5FD0B3947B8B163E9F862DED250"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Each member of the United States Interagency Council on Homelessness pursuant to paragraphs (1) through (11) of section 202(a) of the McKinney-Vento Homeless Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/11312">42 U.S.C. 11312(a)</external-xref>) shall, not later than the expiration of the 30-day period beginning on the date of the enactment of this Act, issue public guidance to stakeholders and other affected parties on best practices for preparing for, preventing, containing, and responding to the Coronavirus Disease 2019 (COVID-19), including specifically for vulnerable homeless populations.</text></subsection><subsection id="HE2A08D7470EE476395BE5C63006A6300"><enum>(b)</enum><header>Definition of homelessness</header><text display-inline="yes-display-inline">Guidance issued pursuant to subsection (a) by a member of the United States Interagency Council on Homelessness shall be based on the definition of homelessness used by the agency or office represented by such member.</text></subsection></section></legis-body></bill> 
+

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2145 IS: Bogus Bonus Ban Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2145</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190717">July 17, 2019</action-date>
+			<action-desc><sponsor name-id="S376">Ms. Ernst</sponsor> (for herself, <cosponsor name-id="S397">Mr. Braun</cosponsor>, and <cosponsor name-id="S378">Mr. Lankford</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To prohibit the payment of bonuses to contractors for unsatisfactory performance.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Bogus Bonus Ban Act of 2019</short-title></quote>.</text>
+		</section><section id="id54D931C6558540F39007901CC78F5957"><enum>2.</enum><header>Linking of award and incentive fees to contract outcomes</header>
+ <subsection id="id4FEFF33F933A400B8FF203A8F5E468CB"><enum>(a)</enum><header>Guidance</header><text>Not later than 180 days after the date of the enactment of this Act, the Director of the Office of Management and Budget, in coordination with the heads of Federal departments and agencies, shall issue guidance, with detailed implementation instructions (including definitions), on the appropriate use of award and incentive fees in department or agency programs.</text>
+ </subsection><subsection id="idA043E1B3FE0D40EEB51F6BD56DA2722B"><enum>(b)</enum><header>Elements</header><text>The guidance under subsection (a) shall—</text> <paragraph id="id0eb29d682e4249a6ab1c8495e8f76cd5"><enum>(1)</enum><text>ensure that all new contracts using award fees link such fees to outcomes (which shall be defined in terms of program cost, schedule, and performance);</text>
+ </paragraph><paragraph id="id962b31f061f54445b7f8b62fa07e06dc"><enum>(2)</enum><text>establish standards for identifying the appropriate level of officials authorized to approve the use of award and incentive fees in new contracts;</text>
+ </paragraph><paragraph id="ida79a358967914dd48894779e52ffbad0"><enum>(3)</enum><text>provide guidance on the circumstances in which contractor performance may be judged to be excellent or superior and the percentage of the available award fee which contractors should be paid for such performance;</text>
+ </paragraph><paragraph id="id8e8ab7ae8af1456db25a41447d99cc77"><enum>(4)</enum><text>establish standards for determining the percentage of the available award fee, if any, which contractors should be paid for performance that is judged to be acceptable, average, expected, good, or satisfactory;</text>
+ </paragraph><paragraph id="ide94f52c52ed04426bba8dc0f06483467"><enum>(5)</enum><text>ensure that no award fee may be paid for contractor performance that is judged to be below satisfactory performance or performance that does not meet the basic requirements of the contract;</text>
+ </paragraph><paragraph id="idc2118a7a1cda4be19e15ae8d6f8bbe8d"><enum>(6)</enum><text>provide specific direction on the circumstances, if any, in which it may be appropriate to roll over award fees that are not earned in one award fee period to a subsequent award fee period or periods;</text>
+ </paragraph><paragraph id="id6d0a6a976c1c40f0bdc49e93efce707e"><enum>(7)</enum><text>ensure that the Department or agency—</text> <subparagraph id="id524b2903b83f45b9b08f8c53db39f28a"><enum>(A)</enum><text>collects relevant data on award and incentive fees paid to contractors and provides for the inclusion of such information, including a listing of each award and incentive fee so paid, on USAspending.gov, the searchable website of government spending established pursuant to section 2(b) of the Federal Funding Accountability and Transparency Act of 2006 (<external-xref legal-doc="public-law" parsable-cite="pl/109/206">Public Law 109–206</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/31/6101">31 U.S.C. 6101</external-xref> note); and</text>
+ </subparagraph><subparagraph id="id751e4c86042641c388b0d1e0a449c310"><enum>(B)</enum><text>has mechanisms in place to evaluate such data on a regular basis; and</text> </subparagraph></paragraph><paragraph id="id98b9321d169d4ec58c2d813224fd9abe"><enum>(8)</enum><text>include performance measures to evaluate the effectiveness of award and incentive fees as a tool for improving contractor performance and achieving desired program outcomes.</text>
+ </paragraph></subsection><subsection id="idDDE2440248AD42A08E0E33FB53A93F81"><enum>(c)</enum><header>Return of unearned bonuses</header><text>Any funds intended to be awarded as incentive fees that are not paid due to the inability of a contractor to meet the criteria established by this section shall be returned to the Treasury of the United States.</text>
+ </subsection><subsection id="idAAD08A75AA8E4992AC6CEAF1C073A588"><enum>(d)</enum><header>Inclusion of award fee as award type filter on USAspending.gov</header><text>The Secretary of the Treasury shall include <quote>award fee</quote> as a filter on USAspending.gov.</text></subsection></section></legis-body> </bill> 
+

@@ -1,0 +1,160 @@
+ 1. rowid=66721   2024-04-04  Christopher Coons          tag='TAUSCHE (voice-over)' [B_unknown_surname_paren]
+    KEEP (19 w)  ...This particular targeted killing, which is hard to explain or understand, I would vote to condition aid to Israel.
+    CUT  (32 w)  TAUSCHE (voice-over): Joining a faction of lawmakers calling for Biden to take a tougher line on the Mideast ally, even as CNN learns, the White House is still greenlighting new arms sales....
+
+ 2. rowid=66733   2024-04-05  Elizabeth Warren           tag='TAUSCHE (voice-over)' [B_unknown_surname_paren]
+    KEEP (18 w)  ...We cannot approve the sale of arms to a country that is in violation of our own laws.
+    CUT  (23 w)  TAUSCHE (voice-over): Israel now on guard for retaliation from Iran, days after striking an Iranian government building in Syria, killing top IRGC officials....
+
+ 3. rowid=67689   2024-05-19  James Lankford             tag='RAJU (on-camera)' [A_anchored_caps]
+    KEEP (37 w)  ...here. And today, we're still dealing with what's best for our economy. How do we deal with immigration and all the policy issues still matter on this?
+    CUT  (10 w)  RAJU (on-camera): What about character being convicted felon, et cetera....
+
+ 4. rowid=68606   2024-07-03  Nancy Pelosi               tag='LEE (voice-over)' [C_unanchored_paren]
+    KEEP (43 w)  ...thinking and the rest. He has a bad night. Now, again, I think it's a legitimate question to say is this an episode or is this a condition? [04:05:00]
+    CUT  (78 w)  LEE (voice-over): New CNN polling showing no immediate damage from Biden's halting debate performance. The president trailing Donald Trump by six points, 43 percent to 49 percent. The same numbers as April. But Biden's approval ra...
+
+ 5. rowid=68814   2024-07-09  Ritchie Torres             tag='RAJU (voice-over)' [A_anchored_caps]
+    KEEP (31 w)  ...o leave voluntarily, then he's going to be our nominee. And we have to make the best of a complicated situation. I think I'm viewing it pragmatically.
+    CUT  (18 w)  RAJU (voice-over): Some resign to supporting the president, even as they fear he may lose to Donald Trump....
+
+ 6. rowid=70352   2024-08-28  Lucy McBath                tag='TODD (voice-over)' [A_anchored_caps]
+    KEEP (29 w)  ...le, they are creating barriers to counting votes and certifying the elections. So Donald Trump can once again attempt to throw our country into chaos.
+    CUT  (19 w)  TODD (voice-over): Former President Trump recently praised those three board members, Janelle King, Rick Jeffries, and Dr. Janice Johnston....
+
+ 7. rowid=74474   2025-02-17  Jamie Raskin               tag='KAYE (voice-over)' [A_anchored_caps]
+    KEEP (44 w)  ...town, and that's Donald Trump, and the Department of Justice no longer has any independence at all in executing the criminal law enforcement function.
+    CUT  (43 w)  KAYE (voice-over): Bove got his law degree from Georgetown University. He served more than nine years as an Assistant U.S. Attorney in New York Southern District. And will now leave his mark in the nation's capital. Randi Kaye, CN...
+
+ 8. rowid=77473   2025-06-04  Chip Roy                   tag='RAJU (on camera)' [A_anchored_caps]
+    KEEP (32 w)  ... if the Senate wants to go that direction, then this bill is -- I mean, it's not even close to passing. So, they need to go further or the bills dead.
+    CUT  (75 w)  RAJU (on camera): Speaker Johnson did indicate that Donald Trump was concerned and upset about what he saw from Elon Musk post on X, but he said that it was bill he believed would ultimately still become law. He told reporters. He...
+
+ 9. rowid=86367   2026-01-06  Debbie Wasserman Schultz   tag='NEWTON (voice-over)' [B_unknown_surname_paren]
+    KEEP (51 w)  ...rom the arrest and removal of Maduro, who was illegally holding office and who violated U.S. and international law, that we move towards a transition.
+    CUT  (247 w)  NEWTON (voice-over): On the streets of Caracas, the shock of the last few days is giving way to a return to business as usual and a regime that is all too familiar. Hundreds of political prisoners remain in custody and citizens ha...
+
+10. rowid=89318   2026-03-25  Lindsey Graham             tag='HANCOCKS (voice-over)' [B_unknown_surname_paren]
+    KEEP (8 w)  ...And as to this commander in chief --
+    CUT  (112 w)  HANCOCKS (voice-over): Some within president Trump's circle are pushing for the U.S. military to take over Iran's Kharg Island to force the opening of the Strait of Hormuz, a tiny island off the coast of Iran, that 90 percent of t...
+
+11. rowid=91281   2026-05-26  John Cornyn                tag='SAENZ (voice-over)' [A_anchored_caps]
+    KEEP (28 w)  ...think Ken Paxton's flaws and the baggage he brings to the general election is going to be exploited to the fullest by James Talarico and by Democrats.
+    CUT  (30 w)  SAENZ (voice-over): Senator John Cornyn in his last stand against State Attorney General Ken Paxton, who received President Donald Trump's endorsement despite concerns raised by GOP leaders in Washington. [02:20:01]...
+
+12. rowid=91306   2026-05-26  Analilia Mejia             tag='SLOAN (voiceover)' [B_unknown_surname_paren]
+    KEEP (15 w)  ...A pregnant woman who was in pain and gripping her stomach and wasn't receiving care.
+    CUT  (17 w)  SLOAN (voiceover): This 9-year-old, speaking to us with her mom's permission, asking just to see her dad....
+
+13. rowid=92298   2026-06-30  Mike Johnson               tag='SAENZ (voice-over)' [A_anchored_caps]
+    KEEP (22 w)  ...He sounded great. He said he was, you know, out on a medical issue and he'll be back as soon as possible.
+    CUT  (107 w)  SAENZ (voice-over): And Kean's father, former New Jersey Governor Tom Kean Sr., assured CNN his son was fine and would be back soon, saying, "This won't linger. It's not some kind of disease that's going to incapacitate him in the...
+
+14. rowid=188603  2019-01-07  Adam Schiff                tag='REP. ADAM SMITH' [E_colonless_honorific]
+    KEEP (34 w)  ...g wartime, this president doesn't have the power to declare an emergency and build a multibillion-dollar wall on the border. So that's a non- starter.
+    CUT  (8 w)  REP. ADAM SMITH (D-WASHINGTON 9TH CONGRESSIONAL DISTRICT, CHAIRMAN,...
+
+15. rowid=194347  2019-04-17  Nancy Pelosi               tag='COLLINS (voice-over)' [A_anchored_caps]
+    KEEP (16 w)  ...I respect protecting sources and methods. I don't support hiding the truth from the American people.
+    CUT  (64 w)  COLLINS (voice-over): As Washington counts down to Thursday, the White House is escalating its fight with Capitol Hill over the president's finances. Multiple House committees issued subpoenas this week to financial institutions a...
+
+16. rowid=201848  2019-09-19  Adam Schiff                tag='RAJU (voice-over)' [A_anchored_caps]
+    KEEP (41 w)  ...tional Intelligence will not authorize the IG to tell us. And the inspector general is doing his very best, being very careful that he follow the law.
+    CUT  (174 w)  RAJU (voice-over): The controversy has gathered new steam after a "Washington Post" report that an official in the American intelligence community was so bothered by a promise Trump made to a foreign leader that a formal whistlebl...
+
+17. rowid=212445  2020-06-08  James Clyburn              tag='ACOSTA (voice-over)' [A_anchored_caps]
+    KEEP (37 w)  ...orty-six seconds. That's a long time to be on one knee. But for 244 years, there were plenty of knees on the necks of blacks who came to this country.
+    CUT  (46 w)  ACOSTA (voice-over): Yet press secretary Kayleigh McEnany had no problem laying out where the president stands on professional athletes taking a knee at football games and protest of unjust policing. Last week the National Footbal...
+
+18. rowid=215277  2020-12-19  Christopher Coons          tag='BORGER (voice-over)' [A_anchored_caps]
+    KEEP (49 w)  ...re, longer than any city in America after the riots following King's assassination. And it was in that moment that a young Joe Biden said, I can help.
+    CUT  (59 w)  BORGER (voice-over): Biden was a believer in his own ability to convince anyone of anything, but no amount of self-confidence or ambition was big enough to deliver a Senate seat at age 27. So he ran for the County Council. As usua...
+
+19. rowid=217373  2021-02-13  Charles Schumer            tag='NOBLES (on camera)' [A_anchored_caps]
+    KEEP (28 w)  ...ans have chosen to forgive. The former president tried to overturn the results of a legitimate election and provoked an assault on our own government.
+    CUT  (103 w)  NOBLES (on camera): And there was a moment on the Senate floor that might have been a prediction as to what was going to happen later in the day. I was in the room and I saw Senator Bill Cassidy of Louisiana scrawl a note on a pie...
+
+20. rowid=218060  2021-03-03  Josh Hawley                tag='LEMON (on camera)' [A_anchored_caps]
+    KEEP (27 w)  ...ng of being cancelled, the last six weeks the radical left, their corporate allies, the liberal tried to cancel me, censor me, expel me, shut me down.
+    CUT  (98 w)  LEMON (on camera): So, people didn't like when Senator Hawley voted to overturn the election and cancel millions of Americans' votes over a lie. He actually tried to cancel votes over a lie. After the insurrection, Simon and Schus...
+
+21. rowid=219163  2021-05-02  Steve Scalise              tag='RAJU (on camera)' [A_anchored_caps]
+    KEEP (18 w)  ...President Trump is still a very active part of our party and a vocal leader in our party.
+    CUT  (136 w)  RAJU (on camera): Now, Cheney does have some support within the House Republican Conference, including from Anthony Gonzalez who like Cheney, joined with eight of their other colleagues to vote to impeach Donald Trump. Gonzalez to...
+
+22. rowid=222585  2021-10-19  Charles Schumer            tag='MATTINGLY (voice-over)' [A_anchored_caps]
+    KEEP (26 w)  ...Last night, I continued my discussions with Speaker Pelosi and President Biden as we work to an agreement on legislation we can bring to the floor.
+    CUT  (63 w)  MATTINGLY (voice-over): And today, separate morning Oval Office meetings with Manchin and Senator Kyrsten Sinema, the two critical moderate holdouts. Afternoon meetings split by ideological leanings, nine progressives who have urg...
+
+23. rowid=223345  2021-11-24  Josh Hawley                tag='CUOMO (on camera)' [A_anchored_caps]
+    KEEP (78 w)  ...king, spending your time on video games, spending your time watching porn online while doing nothing is not good for you, your family or this country.
+    CUT  (50 w)  CUOMO (on camera): Interestingly, the second part of that, that's old-school Republicanism. You know what I mean? It's just value speaking, virtue signal. It's fine. Put it to the side. The first part, I'm coming after you because...
+
+24. rowid=224297  2022-01-21  Mitch McConnell            tag='LEMON (on camera)' [A_anchored_caps]
+    KEEP (23 w)  ...Well, the concern is misplaced because if you look at the statistics, African- Americans are voting in just as high percentage as Americans.
+    CUT  (57 w)  LEMON (on camera): Well, it looks like someone needs to remind the GOP leader that African-Americans are in fact Americans. CNN contacted the senator in his office, he said -- he said he left out a word, so there was blowback of h...
+
+25. rowid=225450  2022-04-27  Andy Biggs                 tag='NOBLES (voice-over)' [A_anchored_caps]
+    KEEP (29 w)  ...that's basically negotiating with Liz Cheney, on whether he should encourage President Trump to resign or not becomes a huge, huge trust issue for me.
+    CUT  (27 w)  NOBLES (voice-over): And while McCarthy attempts to hold his membership together, Democrats arguing that this whole episode, demonstrates that McCarthy has a problem with the truth. [21:55:00]...
+
+26. rowid=231793  2022-10-14  Derek Schmidt              tag='PHILLIP (on-camera)' [A_anchored_caps]
+    KEEP (52 w)  ...that any state involvement in this area is going to have to satisfy exactly and judicial scrutiny. And we have to respect that decision going forward.
+    CUT  (30 w)  PHILLIP (on-camera): Derek Schmidt has has said that he doesn't think that you are upfront with the voters about where your limits are when it comes to abortion. Have you?...
+
+27. rowid=236064  2023-01-10  Byron Donalds              tag='MURRAY (voice-over)' [C_unanchored_paren]
+    KEEP (22 w)  ...I'm wondering why the Vice President of the United States had classified documents outside of the hands of the intelligence community. [17:05:03]
+    CUT  (23 w)  MURRAY (voice-over): Republicans pouncing on the news that classified documents were found in a private office from Joe Biden's time as vice president....
+
+28. rowid=243008  2023-05-31  Steve Cohen                tag='FREEMAN (voice-over)' [B_unknown_surname_paren]
+    KEEP (21 w)  ...Today is another chapter, and hopefully, almost a final or closing chapter of what happened four and a half years ago.
+    CUT  (143 w)  FREEMAN (voice-over): Defender Robert Bowers, accused of killing 11 Jewish worshippers, and wounding several others in October 2018, sat in a courtroom, wearing a collared-shirt and olive sweater actively speaking with his attorne...
+
+29. rowid=254901  2019-07-18  Lindsey Graham             tag='Sen. John Kennedy, La.' [D_mixed_case_label]
+    KEEP (30 w)  ...merican citizens, entitled to their voice. And when they do provocative things, they're going to be met with provocation. So this is a two-way street.
+    CUT  (29 w)  Sen. John Kennedy, La.: I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion....
+
+30. rowid=263198  2017-06-27  Lindsey Graham             tag='O`DONNELL' [A_anchored_caps]
+    KEEP (48 w)  ...d of the trump presidency unless Mueller did something wrong. This is not draining the swamp. What he`s interjecting is turning democracy upside down.
+    CUT  (15 w)  O`DONNELL: Ron Klain and former Federal Prosecutor Paul Butler will join us after a break...
+
+31. rowid=267372  2019-03-06  John Hickenlooper          tag='O`DONNELL' [A_anchored_caps]
+    KEEP (148 w)  ...rica is those that have succeeded find ways to create that opportunity for the next group, the next generation coming along, and that`s not happening.
+    CUT  (66 w)  O`DONNELL: The Trump administration cut the top tax bracket — top tax rate down to 37 percent. That`s for individual filers at about $500,000 of income. Under President Obama, it was up toward 39.5 percent and there`s some supplem...
+
+32. rowid=267616  2019-03-26  Bernard Sanders            tag='O`DONNELL' [A_anchored_caps]
+    KEEP (84 w)  ... off the health care that they have. So we have got to expose him for what he is, and we have got to talk about where we should be going as a country.
+    CUT  (43 w)  O`DONNELL: According to polling, the Republicans have already succeeded in labeling themselves as the party who wants to take away health care. Here is presidential candidate Pete Buttigieg reacting to President Trump`s latest att...
+
+33. rowid=267653  2019-03-28  Nancy Pelosi               tag='O`DONNELL' [A_anchored_caps]
+    KEEP (55 w)  ...nd we can draw our own conclusions. We don`t need you interpreting for us. It was condescending. It was arrogant. And it wasn`t the right thing to do.
+    CUT  (248 w)  O`DONNELL: Leading off our discussion tonight is the journalist who gave us that perfect phrase for where this story is now, suspended animation, Quinta Jurecic. She`s managing editor of Lawfare, a website devoted to national secu...
+
+34. rowid=268642  2019-06-24  James Himes                tag='O`DONNELL' [A_anchored_caps]
+    KEEP (60 w)  ...efending our democracy. That mission requires a vigorous debate and competing ideas, but it also requires care, discipline and a measure of deference.
+    CUT  (425 w)  O`DONNELL: We`ll discuss impeachment with Congressman Himes and Chairman Smith, but that`s not all. We will get their reactions to the Trump administration`s treatment of children at the southern border. And later in this hour, we...
+
+35. rowid=269576  2019-10-15  Jamie Raskin               tag='O`DONNELL' [A_anchored_caps]
+    KEEP (262 w)  ...o counter corruption but Giuliani`s team basically connected with the corruption and essentially wanted to take over the corruption racket in Ukraine.
+    CUT  (108 w)  O`DONNELL: And “The New York Times” is reporting tonight that there is kind of an investigation of sorts going on inside the White House, which seems to be what the “New York Times” is calling a search for a scapegoat, and they ar...
+
+36. rowid=272066  2020-11-24  Jon Ossoff                 tag='O’DONNELL' [A_anchored_caps]
+    KEEP (47 w)  ...nvestigations for insider trading. It’s not just that you’re a crook, Senator. It’s that you’re attacking the health of the people that you represent.
+    CUT  (404 w)  O’DONNELL: Joining us now is Jane Mayer, chief Washington correspondent for “The New Yorker”. She is the author of “Dark Money: The Hidden History of the Billionaires behind the Rise of the Radical Right”. And Jane, Charles Koch i...
+
+37. rowid=273667  2021-06-25  Daniel Goldman             tag='O`DONNELL' [A_anchored_caps]
+    KEEP (210 w)  ...o I`m going to stay loyal to my guy, Donald Trump, and I`m not going to cooperate. That may be very different if he were facing five, eight, 10 years.
+    CUT  (22 w)  O`DONNELL: Daniel Goldman, Dan Alonso, and David Cay Johnston, thank you all very much for starting us off tonight, really appreciate it....
+
+38. rowid=274662  2021-11-18  John Kennedy               tag='SAULE OMAROVA, PRESIDENT BIDEN' [E_colonless_honorific]
+    KEEP (10 w)  ...I don`t know whether to call you professor or comrade.
+    CUT  (4 w)  SAULE OMAROVA, PRESIDENT BIDEN`S...
+
+39. rowid=276098  2022-07-12  Daniel Goldman             tag='O`DONNELL' [A_anchored_caps]
+    KEEP (234 w)  ... evidence that demonstrates that Trump knows that what he did was wrong, which is the whole ball of wax was going to be for the Department of Justice.
+    CUT  (21 w)  O`DONNELL: Barry Berke and Daniel Goldman, thank you very much for joining our coverage on this important night. Really appreciate it....
+
+40. rowid=280493  2020-11-02  Raphael Warnock            tag='UNIDENTIFIED PERSON #3' [A_anchored_caps]
+    KEEP (32 w)  ...he tip of the spear of a new South that is more inclusive, that is bold, that is forward-looking. And we are ready for change, and we want change now.
+    CUT  (5 w)  UNIDENTIFIED PERSON #3: Yes, sir....
+

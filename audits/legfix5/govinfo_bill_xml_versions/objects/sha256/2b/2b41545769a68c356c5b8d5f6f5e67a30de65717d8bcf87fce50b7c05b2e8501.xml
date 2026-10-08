@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S496 IS: Young Fishermen's Development Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-02-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 496</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190214">February 14, 2019</action-date>
+			<action-desc><sponsor name-id="S383">Mr. Sullivan</sponsor> (for himself, <cosponsor name-id="S288">Ms. Murkowski</cosponsor>, <cosponsor name-id="S275">Ms. Cantwell</cosponsor>, and <cosponsor name-id="S252">Ms. Collins</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To preserve United States fishing heritage through a national program dedicated to training and
+			 assisting the next generation of commercial fishermen, and for other
+			 purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Young Fishermen's Development Act</short-title></quote>.</text>
+ </section><section id="id8febef67b4fb460fad4022203ccc33d5"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text> <paragraph id="id99435d84ed9e4f72b6d1fb178ba3a1f6"><enum>(1)</enum><header>Sea grant institution</header><text>The term <term>Sea Grant Institution</term> means a sea grant college or sea grant institute, as those terms are defined in section 203 of the National Sea Grant College Program Act (<external-xref legal-doc="usc" parsable-cite="usc/33/1122">33 U.S.C. 1122</external-xref>).</text>
+ </paragraph><paragraph id="idDB204A2A39544B8C9214B6F4250B4651"><enum>(2)</enum><header>Tribal organization</header><text>The term <term>Tribal organization</term> has the meaning given the term <quote>tribal organization</quote> in section 4 of the Indian Self-Determination and Education Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/25/5304">25 U.S.C. 5304</external-xref>).</text> </paragraph><paragraph id="idf25ff36ae8f045438b0ae5bf86a4393a"><enum>(3)</enum><header>Young fisherman</header><text>The term <term>young fisherman</term> means an individual who—</text>
+ <subparagraph id="id7f2bc30b3e9a4f709a508ebd20c1871e"><enum>(A)</enum><text>desires to participate in the commercial fisheries of the United States, including the Great Lakes fisheries;</text>
+ </subparagraph><subparagraph id="id8cd2744cb91f4ec2809017c6be35a23e"><enum>(B)</enum><text>has worked as a captain, crew member, or deckhand on a commercial fishing vessel for not more than 10 years of cumulative service; or</text>
+ </subparagraph><subparagraph id="id5bfd4d14c5fa4c498016c8d48357b774"><enum>(C)</enum><text>is a beginning commercial fisherman.</text> </subparagraph></paragraph></section><section id="idced4bcde9f7d4aeab69147dd4ed48fb5"><enum>3.</enum><header>Establishment of program</header><text display-inline="no-display-inline">The Secretary of Commerce, acting through the National Sea Grant Office, shall establish a program to provide training, education, outreach, and technical assistance initiatives for young fishermen, to be known as the <quote>Young Fishermen’s Development Grant Program</quote> (referred to in this section as the <quote>Program</quote>).</text>
+		</section><section id="id236172752f9640288a1b928ce23a126e"><enum>4.</enum><header>Grants</header>
+ <subsection id="id6ce2ff240b9d44ffb6223740b2a6987c"><enum>(a)</enum><header>In general</header><text>In carrying out the Program, the Secretary shall make competitive grants to support new and established local and regional training, education, outreach, and technical assistance initiatives for young fishermen, including programs, workshops, and services relating to—</text>
+ <paragraph id="id98b49806084843fcb9cd819bec0edc3b"><enum>(1)</enum><text>seamanship, navigation, electronics, and safety;</text> </paragraph><paragraph id="id69dd6648500e4d0cb476f631c87cc466"><enum>(2)</enum><text>vessel and engine care, maintenance, and repair;</text>
+ </paragraph><paragraph id="idea0ab3edee714eea9ecfd644218a819b"><enum>(3)</enum><text>innovative conservation fishing gear engineering and technology;</text> </paragraph><paragraph id="idca02522e104a4ee3a294cb26d0377ff7"><enum>(4)</enum><text>sustainable fishing practices;</text>
+ </paragraph><paragraph id="id7802bef119c14c78bed7704ee8dd89f4"><enum>(5)</enum><text>entrepreneurship and good business practices;</text> </paragraph><paragraph id="id037815d482534879a1305fd8e039bf0e"><enum>(6)</enum><text>direct marketing, supply chain, and traceability;</text>
+ </paragraph><paragraph id="id7824dd4ca3b24aa9ad479f927fa6875a"><enum>(7)</enum><text>financial and risk management, including vessel, permit, and quota purchasing;</text> </paragraph><paragraph id="idb124f3f2a10b4f47ae0fdc9be46328cc"><enum>(8)</enum><text>State and Federal legal requirements for specific fisheries, including reporting, monitoring, licenses, and regulations;</text>
+ </paragraph><paragraph id="id3b42607cf99b4a6996ee95c9d66d98f4"><enum>(9)</enum><text>State and Federal fisheries policy and management;</text> </paragraph><paragraph id="id53be138c69c049de86303e16d4ca801f"><enum>(10)</enum><text>mentoring, apprenticeships, or internships; and</text>
+ </paragraph><paragraph id="id6e01fbd9f8274374966b9e26603eac54"><enum>(11)</enum><text>any other activities, opportunities, or programs, as the Secretary determines appropriate.</text> </paragraph></subsection><subsection id="id571cc37e72a34816bc55dc9a56970527"><enum>(b)</enum><header>Eligibility</header> <paragraph id="idad7b2e9c48f1489696f584cc1653082e"><enum>(1)</enum><header>Applicants</header><text>To be eligible to receive a grant under the Program, a recipient shall be a collaborative State, Tribal, local, or regionally based network or partnership of public or private entities, which may include—</text>
+ <subparagraph id="ide40f84b7441b426bbab659ba86bbe026"><enum>(A)</enum><text>a Sea Grant Institution;</text> </subparagraph><subparagraph id="idbf1581aa20c24a8b843078ae163049d5"><enum>(B)</enum><text>a Federal or State agency or a Tribal organization;</text>
+ </subparagraph><subparagraph id="idee547ecd5dbe42c3868642ee82677c61"><enum>(C)</enum><text>a community-based nongovernmental organization;</text> </subparagraph><subparagraph id="idcb4cb4b10cb049c79a4f375a5b74fbe1"><enum>(D)</enum><text>fishermen’s cooperatives or associations;</text>
+ </subparagraph><subparagraph id="id127f1f9dcd1a486ea1be4a463139eba6"><enum>(E)</enum><text>an institution of higher education (including an institution awarding an associate’s degree), or a foundation maintained by an institution of higher education; or</text>
+ </subparagraph><subparagraph id="id0f3588bdda044dc4b65219a5cf69f9eb"><enum>(F)</enum><text>any other appropriate entity, as the Secretary determines appropriate.</text> </subparagraph></paragraph><paragraph id="id82f9027f8ea74c22b1345e0859be46ad"><enum>(2)</enum><header>Participants</header><text>All young fishermen seeking to participate in the commercial fisheries of the United States and the Great Lakes are eligible to participate in the activities funded through grants provided for in this section, except that participants in such activities shall be selected by each grant recipient.</text>
+				</paragraph></subsection><subsection id="id8aabd48ce3cf46d7ae142fb904352a86"><enum>(c)</enum><header>Maximum term and amount of grant</header>
+ <paragraph id="id0e2fd4bda24748408c2959c74299ae06"><enum>(1)</enum><header>In general</header><text>A grant under this section shall—</text> <subparagraph id="id2092ad2235504a68b8c69a476d1e65d5"><enum>(A)</enum><text>have a term of no more than 3 fiscal years; and</text>
+ </subparagraph><subparagraph id="idb929d1ea002e47d2aec905a53398a7f1"><enum>(B)</enum><text>be in an amount that is not more than $200,000 for each fiscal year.</text> </subparagraph></paragraph><paragraph id="idae61a4529b7c4e5dba1b47fd00fb8d1d"><enum>(2)</enum><header>Consecutive grants</header><text>An eligible recipient may receive consecutive grants under this section.</text>
+ </paragraph></subsection><subsection id="idc5876eed3ced4948b8e12e7c8431c28e"><enum>(d)</enum><header>Matching requirement</header><text>To be eligible to receive a grant under this section, a recipient shall provide a match in the form of cash or in-kind contributions from the recipient in the amount equal to or greater than 25 percent of the funds provided by the grant.</text>
+ </subsection><subsection id="iddf173ccf504b4d3bad63a07860b0454b"><enum>(e)</enum><header>Regional balance</header><text>In making grants under this section, the Secretary shall, to the maximum extent practicable, ensure geographic diversity.</text>
+ </subsection><subsection id="id16867a48d5b4418787f2d8d483e3ff25"><enum>(f)</enum><header>Cooperation and evaluation criteria</header><text>In carrying out this section and in developing criteria for evaluating grant applications, the Secretary shall consult, to the maximum extent practicable, with—</text>
+ <paragraph id="idcc885434c6364ac5a715a78c9a24feef"><enum>(1)</enum><text>Sea Grant Institutions and extension agents of such institutions;</text> </paragraph><paragraph id="idf9deaf051ee94720bbfa598f68f1324b"><enum>(2)</enum><text>community-based nongovernmental fishing organizations;</text>
+ </paragraph><paragraph id="id906de4112ce445fea88883ca3b1899c6"><enum>(3)</enum><text>Federal and State agencies, including Regional Fishery Management Councils established under the Magnuson-Stevens Fishery Conservation and Management Act (<external-xref legal-doc="usc" parsable-cite="usc/16/1851">16 U.S.C. 1851</external-xref> et seq.);</text>
+ </paragraph><paragraph id="id04b5e390d678413a997bb74a76a03dcf"><enum>(4)</enum><text>institutions of higher education with fisheries expertise and programs; and</text> </paragraph><paragraph id="iddf49f009c21b42e3847c8db79c1afca2"><enum>(5)</enum><text>partners, as the Secretary determines.</text>
+ </paragraph></subsection><subsection id="id862ffcc07e594be087afea40e8bef225"><enum>(g)</enum><header>Prohibition</header><text>A grant under this section may not be used to purchase any fishing license, permit, quota, or other harvesting right.</text>
+ </subsection></section><section id="id705da141f8014a7fae89158585d331ed"><enum>5.</enum><header>Funding</header><text display-inline="no-display-inline">Of the amount made available to the Secretary of Commerce under section 311(e) of the Magnuson-Stevens Fishery Conservation and Management Act (<external-xref legal-doc="usc" parsable-cite="usc/16/1861">16 U.S.C. 1861(e)</external-xref>) for each of fiscal years 2019 through 2024, the Secretary shall use $2,000,000 to carry out section 4 of this Act.</text>
+		</section></legis-body>
+</bill>
+
+

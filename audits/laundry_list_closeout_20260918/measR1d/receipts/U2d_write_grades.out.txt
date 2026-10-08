@@ -1,0 +1,12 @@
+U2_flagged_sample40_GRADED.csv             {'FOREIGN-SPEECH-PRESENT': 40}
+U2_unflagged_sample40_GRADED.csv           {'CLEAN': 38, 'UNCLEAR': 1, 'FOREIGN-SPEECH-PRESENT': 1}
+U2b_R1_sample_GRADED.csv                   {'FOREIGN-SPEECH-PRESENT': 20}
+U2b_R2_sample_GRADED.csv                   {'FOREIGN-SPEECH-PRESENT': 20}
+U2b_R3_sample_GRADED.csv                   {'FOREIGN-SPEECH-PRESENT': 20}
+U2b_R4_sample_GRADED.csv                   {'FOREIGN-SPEECH-PRESENT': 12}
+
+PRECISION  (flagged 40)   : 40/40 = 100.0%
+RECALL MISS (unflagged 40): 1/40 = 2.5%  (+1 UNCLEAR, a different defect)
+the single recall miss is recovered by residual class R1, so after the R1-R5 correction the
+graded unflagged sample contains 0/40 uncovered bleeds.
+DONE U2d

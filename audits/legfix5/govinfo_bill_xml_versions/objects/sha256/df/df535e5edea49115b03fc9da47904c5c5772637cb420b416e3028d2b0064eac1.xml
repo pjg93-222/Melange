@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HC96C264C1B7E48C4B48A3E650E0CD3DA" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6832 IH: To amend the CARES Act to authorize appropriations to carry out the duties of the Special Inspector General for Pandemic Recovery, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-05-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6832</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200512">May 12, 2020</action-date><action-desc><sponsor name-id="P000616">Mr. Phillips</sponsor> (for himself and <cosponsor name-id="W000187">Ms. Waters</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HSM00">Small Business</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the CARES Act to authorize appropriations to carry out the duties of the Special Inspector General for Pandemic Recovery, and for other purposes.</official-title></form><legis-body id="H32DD355DF2CD43D3B4D0F68844CFAF95" style="OLC"><section id="H458B839458974812B3817ACB8D7460CE" section-type="section-one"><enum>1.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">Section 4018(g) of the CARES Act (<external-xref legal-doc="public-law" parsable-cite="pl/116/136">Public Law 116–136</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" id="HB0EE97859316481493882E1854FC864F" display-inline="no-display-inline"><paragraph id="H8680CF6EE09E43EEA926AF98929D7836"><enum>(3)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">In addition to the amounts made available under paragraph (1), there is authorized to be appropriated to carry out this section $75,000,000 for fiscal year 2020 and each fiscal year thereafter. </text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

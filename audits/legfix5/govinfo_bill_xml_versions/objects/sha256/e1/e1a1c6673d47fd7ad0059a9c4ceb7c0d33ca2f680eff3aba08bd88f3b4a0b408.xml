@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HC1C3B3E3F07C42A79C8E10F0BF7E1B0F" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 327 IH: End Dark Money Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-01-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 327</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20210115">January 15, 2021</action-date><action-desc><sponsor name-id="C001121">Mr. Crow</sponsor> (for himself, <cosponsor name-id="S001168">Mr. Sarbanes</cosponsor>, <cosponsor name-id="L000582">Mr. Lieu</cosponsor>, <cosponsor name-id="M000312">Mr. McGovern</cosponsor>, and <cosponsor name-id="P000618">Ms. Porter</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To repeal the restriction on the use of funds by the Internal Revenue Service to bring transparency to the political activity of certain nonprofit organizations.</official-title></form><legis-body id="HF1DC3CC1424F41CE984E30417E1D9620" style="OLC"><section id="H0CD1E55A22B84267B20CB519A1D34EDB" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>End Dark Money Act</short-title></quote>.</text></section><section id="H878613042C1340DD962B5BCA0EA199E1" section-type="subsequent-section"><enum>2.</enum><header>Repeal of restriction of use of funds by Internal Revenue Service to bring transparency to political activity of certain nonprofit organizations</header><text display-inline="no-display-inline">Section 122 of the Financial Services and General Government Appropriations Act, 2021 (division E of <external-xref legal-doc="public-law" parsable-cite="pl/116/260">Public Law 116–260</external-xref>) shall have no force or effect during fiscal year 2021.</text></section></legis-body></bill> 
+

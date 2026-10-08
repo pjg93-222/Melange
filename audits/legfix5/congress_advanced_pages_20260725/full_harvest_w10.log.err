@@ -1,0 +1,3 @@
+Warning message:
+In checkNumberOfLocalWorkers(workers) :
+  Careful, you are setting up 10 localhost parallel workers with only 8 CPU cores available for this R process (per 'system'), which could result in a 125% load. The soft limit is set to 100%. Overusing the CPUs has negative impact on the current R process, but also on all other processes of yours and others running on the same machine. See help("parallelly.maxWorkers.localhost", package = "parallelly") for further explanations and how to override the soft limit that triggered this warning

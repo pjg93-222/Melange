@@ -1,0 +1,128 @@
+﻿==========================================================================================
+congress_bills_archive_20260825_115305.xlsx
+  sheet All Bills                    data_rows=10181   headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+==========================================================================================
+congress_bills_archive_20260624_115822.xlsx
+  sheet All Bills                    data_rows=10986   headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 01 Examination & Supervision data_rows=674     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 02 Credit Union Capital Require data_rows=618     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 03 NCUA Budget & Share Insuranc data_rows=713     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 04 Interchange               data_rows=36      headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 05 Payments                  data_rows=34      headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 06 Technology & Emerging Issues data_rows=877     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 07 Fraud Prevention          data_rows=1123    headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 08 Data Privacy & Cybersecurity data_rows=966     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 09 Charter Modernization & Gove data_rows=639     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 10 Defense Credit Union Issues data_rows=49      headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 11 Field of Membership       data_rows=41      headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 12 CDFI Fund                 data_rows=0       headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 13 CFPB Issues & Structural Ref data_rows=635     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 14 Credit Card & Consumer-Fee M data_rows=146     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 15 Telephone Consumer Protectio data_rows=165     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 16 Member Business Lending   data_rows=2665    headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet 17 Mortgage Lending & Housing data_rows=1605    headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+==========================================================================================
+Sentinel Bill Ledger.xlsx
+  sheet Sentinel Bill Ledger         data_rows=18887   headers=['Record Type', 'Review Status', 'Scoring Eligible', 'Canonical Bill ID', 'Bill', 'Congress', 'Measure Type', 'Number', 'Section', 'Member', 'Bioguide', 'Role', 'Join Date', 'Title', 'Sponsor', 'Cosponsor Count', 'Introduced Date', 'Repository Updated Date', 'Latest Action Date', 'Latest Action', 'Policy Area', 'Source', 'Detail Link', 'Summary', 'Verified At', 'Pending Reason', 'Repository SHA256', 'DecayWeight']
+  sheet Original Co-Sponsor Interaction data_rows=53      headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet Co-Sponsor Interactions      data_rows=201     headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  sheet Sponsor Interactions         data_rows=14      headers=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+==========================================================================================
+Moneyball Main Version - Blended.xlsx : role sheets
+  sheet Sponsor Interactions               data_rows=638    
+     row1  ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     row2  ['Examination & Supervision', 'sponsor', 'Andrew Ogles', 'H.R.2155', 'Saving Privacy Act', 'Rep. Ogles, Andrew [R-TN-5]', '0', 'House - Financial Services; Judiciar', 'Introduced', '119', '1', '/help/legislative-glossary#glossary_', 'Saving Privacy Act']
+     row3  ['Examination & Supervision', 'sponsor', 'Andy Barr', 'H.R.7056', 'Community Bank Regulatory Tailoring ', 'Barr, Andy [Rep.-R-KY-6]', '2', 'Committees: House - Financial Servic', 'Introduced', '119', '1', '/bill/119th-congress/house-bill/7056', None]
+     row4  ['Examination & Supervision', 'sponsor', 'Andy Barr', 'H.R.2702', 'FIRM Act', 'Barr, Andy [Rep.-R-KY-6]', '19', 'Committees: House - Financial Servic', 'Introduced', '119', '1', '/bill/119th-congress/house-bill/2702', 'Financial Integrity and Regulation M']
+  sheet Original Co-Sponsor Interaction    data_rows=2972   
+     row1  ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     row2  ['Examination & Supervision', 'original-cosponsor', 'Alex Padilla', 'S.588', 'Addressing Climate Financial Risk Ac', 'Sen. Feinstein, Dianne [D-CA]', '6', 'Senate - Banking, Housing, and Urban', 'Introduced', '117', '0.6400000000000001', '/help/legislative-glossary#glossary_', 'Addressing Climate Financial Risk Ac']
+     row3  ['Examination & Supervision', 'original-cosponsor', 'Alexandria Ocasio-Cortez', 'H.R.6775', 'Public Banking Act of 2023', 'Tlaib, Rashida [Rep.-D-MI-12]', '7', 'Committees: House - Financial Servic', 'Introduced', '118', '0.8', '/bill/118th-congress/house-bill/6775', 'Public Banking Act of 2023']
+     row4  ['Examination & Supervision', 'original-cosponsor', 'Alexandria Ocasio-Cortez', 'H.R.1602', 'SVB Act', 'Porter, Katie [Rep.-D-CA-47]', '68', 'Committees: House - Financial Servic', 'Introduced', '118', '0.8', '/bill/118th-congress/house-bill/1602', 'Secure Viable Banking Act or the SVB']
+  sheet Co-Sponsor Interactions            data_rows=7455   
+     row1  ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     row2  ['Examination & Supervision', 'cosponsor', 'Adam Schiff', 'H.R.1602', 'SVB Act', 'Rep. Porter, Katie [D-CA-47]', '68', 'House - Financial Services', 'Introduced', '118', '0.8', '/help/legislative-glossary#glossary_', 'Secure Viable Banking Act or the SVB']
+     row3  ['Examination & Supervision', 'cosponsor', 'Adam Smith', 'H.R.1602', 'SVB Act', 'Rep. Porter, Katie [D-CA-47]', '68', 'House - Financial Services', 'Introduced', '118', '0.8', '/help/legislative-glossary#glossary_', 'Secure Viable Banking Act or the SVB']
+     row4  ['Examination & Supervision', 'cosponsor', 'Al Green', 'H.R.10262', 'AI Act of 2024', 'Waters, Maxine [Rep.-D-CA-43]', '2', 'Committees: House - Financial Servic', 'Introduced', '118', '0.8', '/bill/118th-congress/house-bill/1026', None]
+  sheet Success Sponsor                    data_rows=76     
+     row1  ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     row2  ['Examination & Supervision', 'sponsor', 'Ann Wagner', 'H.R.4586', 'Risk-Based Credit Examination Act', 'Rep. Wagner, Ann [R-MO-2]', '1', 'House - Financial Services | Senate ', 'Passed House', '117', '0.6400000000000001', '/help/legislative-glossary#glossary_', 'Risk-Based Credit Examination Act']
+     row3  ['Examination & Supervision', 'sponsor', 'Bill Hagerty', 'S.1582', 'GENIUS Act', 'Hagerty, Bill [Sen.-R-TN]', '5', 'Latest Action: 07/18/2025 Became Pub', 'Became Law', '119', '1', '/bill/119th-congress/senate-bill/158', 'Guiding and Establishing National In']
+     row4  ['Examination & Supervision', 'sponsor', 'Donald Beyer', 'H.R.5746', 'Freedom to Vote: John R. Lewis Act', 'Beyer, Donald S., Jr. [Rep.-D-VA-8]', '5', 'Committees: House - Science, Space, ', 'Resolving Differences', '117', '0.6400000000000001', '/bill/117th-congress/house-bill/5746', 'Freedom to Vote: John R. Lewis Act']
+  sheet Success Original Co-Sponsor        data_rows=983    
+     row1  ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     row2  ['Examination & Supervision', 'original-cosponsor', 'Angie Craig', 'H.R.3633', 'Digital Asset Market Clarity Act of ', 'Rep. Hill, J. French [R-AR-2]', '21', 'House - Financial Services; Agricult', 'Passed House', '119', '1', '/help/legislative-glossary#glossary_', 'Digital Asset Market Clarity Act of ']
+     row3  ['Examination & Supervision', 'original-cosponsor', 'Bill Foster', 'H.R.4437', 'SMART Act of 2025', 'Timmons, William R. [Rep.-R-SC-4]', '1', 'Committees: House - Financial Servic', 'Passed House', '119', '1', '/bill/119th-congress/house-bill/4437', 'Supervisory Modifications for Approp']
+     row4  ['Examination & Supervision', 'original-cosponsor', 'Bill Foster', 'H.R.4586', 'Risk-Based Credit Examination Act', 'Wagner, Ann [Rep.-R-MO-2]', '1', 'Committees: House - Financial Servic', 'Passed House', '117', '0.6400000000000001', '/bill/117th-congress/house-bill/4586', 'Risk-Based Credit Examination Act']
+  sheet CFPB Bills                         data_rows=60     
+     row1  ['Bill #', 'Title', 'Sponsor', 'Lead Committee', 'Support (record count)', 'Direction (+1/0/-1)', 'Category', 'Confidence', 'Reasoning (review me)', 'Congress.gov link', 'Sponsor CFPB Press', 'Coalition CFPB Press', 'Coalition n', 'Press vs Direction']
+     row2  ['H.R.976', '1071 Repeal to Protect Small Busines', '52', 'House - Financial Services', '82', '1', 'Reduce', 'High', 'Repeals CFPB 1071 small-business dat', 'https://www.congress.gov/help/legisl', '0.0285', '0.0286', '53', 'Agree']
+     row3  ['S.J.Res.32', 'A joint resolution providing for con', '45', 'Committees: Senate - Banking, Housin', '66', '1', 'Reduce', 'High', 'CRA resolution nullifying CFPB 1071 ', 'https://www.congress.gov/bill/118th-', '0.0205', '0.0242', '23', 'Agree']
+     row4  ['H.R.1382', 'TABS Act of 2023', '38', 'Committees: House - Financial Servic', '51', '1', 'Reduce', 'High', 'TABS Act - moves CFPB to congression', 'https://www.congress.gov/bill/118th-', '0.0227', '0.0269', '25', 'Agree']
+==========================================================================================
+data\legislation\bill_directions.csv
+  fieldnames = ['Bill', 'Congress', 'Category', 'Direction', 'Note']
+  rows = 126
+    {'Bill': 'H.R.976', 'Congress': '119', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}
+    {'Bill': 'S.J.Res.32', 'Congress': '118', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}
+    {'Bill': 'H.R.1382', 'Congress': '118', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}
+    {'Bill': 'H.R.1313', 'Congress': '118', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}
+    {'Bill': 'H.J.Res.66', 'Congress': '118', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}
+==========================================================================================
+manual_bill_evidence.csv
+  fieldnames = ['Member', 'Role', 'Bill', 'Title', 'Sponsor', 'Congress', 'Category', 'Direction', 'DecayWeight', 'LastAction', 'DetailLink', 'Summary', 'Note']
+  rows = 371
+    {'Member': 'Andy Barr', 'Role': 'original-cosponsor', 'Bill': 'H.R.1181', 'Title': 'Protecting Privacy in Purchases Act', 'Sponsor': 'Blake Moore', 'Congress': '119', 'Category': 'Data Privacy & Cyber', 'Direction': '+1', 'DecayWeight': '1.0', 'LastAction': 'Introduced in House', 'DetailLink': 'https://www.congress.gov/bill/119th-congress/house-bill/1181', 'Summary': 'Protects financial transaction data associated with firearms and ammunition purchases', 'Note': 'Official Congress history lists Barr as an original cosponsor; absent from local archive'}
+    {'Member': 'Andy Barr', 'Role': 'sponsor', 'Bill': 'LTR-117-CDFI-BARR', 'Title': 'Oversight letter to CDFI Fund Director on credit union recertification and cure-status process', 'Sponsor': 'Andy Barr', 'Congress': '117', 'Category': 'CDFI Fund', 'Direction': '+1', 'DecayWeight': '0.64', 'LastAction': 'Letter sent 2022-09-01 to CDFI Fund Director Jodie Harris (cc Treasury Secretary)', 'DetailLink': '', 'Summary': 'Presses the CDFI Fund on opaque recertification, cure-status form letters, and Accountability-standard barriers harming CDFI credit unions; requests a provisional-certification pathway', 'Note': 'Congressional letter (RE_ E-Meet.zip); Paul-directed ingestion 2026-07-17: all positive; creator=sponsor, signatories=original-cosponsor'}
+    {'Member': 'John Rose', 'Role': 'original-cosponsor', 'Bill': 'LTR-117-CDFI-BARR', 'Title': 'Oversight letter to CDFI Fund Director on credit union recertification and cure-status process', 'Sponsor': 'Andy Barr', 'Congress': '117', 'Category': 'CDFI Fund', 'Direction': '+1', 'DecayWeight': '0.64', 'LastAction': 'Letter sent 2022-09-01 to CDFI Fund Director Jodie Harris (cc Treasury Secretary)', 'DetailLink': '', 'Summary': 'Presses the CDFI Fund on opaque recertification, cure-status form letters, and Accountability-standard barriers harming CDFI credit unions; requests a provisional-certification pathway', 'Note': 'Congressional letter (RE_ E-Meet.zip); Paul-directed ingestion 2026-07-17: all positive; creator=sponsor, signatories=original-cosponsor | role corrected 2026-07-17 (Paul: signers=original-cosponsor; L1 both leads=sponsor)'}
+==========================================================================================
+data\legislation\bill_overrides.csv
+Bill,Congress,Category,Direction,Include,Note
+H.R.8395,119,Payments,+1,include,Young Kim sponsor; primary purpose is payment access and payment-rail modernization
+H.R.1030,117,Payments,0,include,Digital-dollar wallet component; moved out of Examination pending CU-direction review
+H.R.4895,117,Payments,0,include,FedAccounts and digital-dollar balances; moved out of Examination pending CU-direction review
+H.R.5502,117,Examination & Supervision,0,exclude,Online-marketplace seller verification is not CU examination evidence
+H.R.5746,117,Examination & Supervision,0,exclude,Voting and election legislation is not CU examination evidence
+S.J.Res.18,119,CFPB,,include,"audit Tier-2 #4, Paul gate opened 2026-07-25"
+H.J.Res.59,119,CFPB,,include,"audit Tier-2 #4, Paul gate opened 2026-07-25"
+H.R.6955,119,CU Capital Requirements,,include,"audit Tier-2 #4, Paul gate opened 2026-07-25"
+
+==========================================================================================
+legislation_routing_audit.json keys / summary
+  top keys: ['schema', 'source', 'source_rows', 'selected_events', 'sentinel_ledger_rows', 'sentinel_verified_rows', 'summary', 'rows']
+  schema = legislation-routing-audit-v1 | source = congress_bills_archive_20260825_115305.xlsx + Sentinel Bill Ledger
+  source_rows = 10820 selected_events = 8123
+  sentinel_ledger_rows = 18887 sentinel_verified_rows = 268
+  summary.dispositions = {
+  "selected": 8123,
+  "excluded-title": 578,
+  "excluded-override": 53,
+  "neutral-override": 12,
+  "official-membership-withdrawn-or-role-superseded": 1854,
+  "duplicate-lower-role": 19,
+  "unmatched-member": 14,
+  "duplicate-same-role": 133,
+  "neutral-registry": 33,
+  "neutral-official-evidence": 1
+}
+  summary.duplicates = {'duplicate-lower-role': 19, 'duplicate-same-role': 133}
+  rows = 10820
+  example row = {
+  "source_row": 2,
+  "member_source": "Andy Barr",
+  "bill": "H.R.8264",
+  "congress": 118,
+  "title": "Bank Supervision Appeals Improvement Act of 2024",
+  "source_section": "Examination & Supervision",
+  "source_role": "sponsor",
+  "tracker_status": "Introduced",
+  "category_mechanism": "source-section",
+  "direction_mechanism": "section-default",
+  "member": "Andy Barr",
+  "effective_category": "Examination & Supervision",
+  "effective_role": "sponsor",
+  "sign": 1,
+  "decay_weight": 0.8,
+  "contribution": 2.4000000000000004,
+  "disposition": "selected"
+}

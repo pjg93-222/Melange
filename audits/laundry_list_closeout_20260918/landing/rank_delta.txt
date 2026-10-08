@@ -1,0 +1,14 @@
+members before/after: 533 / 533 | movers: 2
+ab_weights before: {'2': 0.45, '3': 0.1, '4': 0.4, '5': 0.05} | after: {'2': 0.45, '3': 0.1, '4': 0.4, '5': 0.05}
+members whose pillar percentile changed: {'leg': 5, 'press': 452, 'inf': 0, 'dem': 0}
+movers by which of THEIR OWN pillars changed: {('leg', 'press'): 1, ('press',): 1}
+max |rank move|: 1
+--- top 25 movers
+  Andrew Ogles                   39 ->   38  leg 0.97180->0.97368; press -0.00555->-0.00555
+  Pete Sessions                  38 ->   39  press 0.02348->0.02347
+--- named members
+  Tim Scott            rank 1 -> 1 | score 0.831962 -> 0.830271 | [('leg', 0.97368, 0.96992), ('press', 0.630548623, 0.630553975)]
+  Roger Marshall       rank 399 -> 399 | score 0.165519 -> 0.165653 | [('press', -0.567008776, -0.565677114)]
+  Anna Luna            rank 323 -> 323 | score 0.231925 -> 0.231925 | [('press', 0.02398958, 0.023988031)]
+  Juan Vargas          rank 19 -> 19 | score 0.569952 -> 0.569932 | [('press', 0.146032481, 0.145837183)]
+  Mike Crapo           rank 2 -> 2 | score 0.828492 -> 0.828491 | [('press', 0.14021266, 0.140203605)]

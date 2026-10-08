@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HF44BC2842D134E4DB5C28C2CDB4368E2" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6598 IH: Commodity Futures Trading Commission Research and Development Modernization Act of 2025</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-12-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6598</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251210">December 10, 2025</action-date><action-desc><sponsor name-id="S001189">Mr. Austin Scott of Georgia</sponsor> (for himself and <cosponsor name-id="M001237">Ms. McDonald Rivet</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To modernize the authority of the Commodity Futures Trading Commission to conduct research, development, demonstration, and information programs.</official-title></form><legis-body id="HD13DD8217FF54602BB4648F0E42D740D" style="OLC"><section id="HC7BFCC1E2F814A4BA9CD64BCCC086E73" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Commodity Futures Trading Commission Research and Development Modernization Act of 2025</short-title></quote>.</text></section><section id="H171681C5F3714B7D92887713CEA84238"><enum>2.</enum><header>Modernization of authority of the Commission to conduct research, development, demonstration, and information programs</header><text display-inline="no-display-inline">Section 18 of the Commodity Exchange Act (<external-xref legal-doc="usc" parsable-cite="usc/7/22">7 U.S.C. 22</external-xref>) is amended to read as follows:</text><quoted-block id="HC909581E2986473B8F10C3EB6A3D5774" style="OLC"><section id="HB513BA8A9C6842F5BA6B084BB03CC497"><enum>18.</enum><header>Research and development programs</header><subsection id="HB3E283592CA04083A9CD3870ACDE69AD"><enum>(a)</enum><header>Programs</header><text>The Commission, as part of its ongoing operations, shall establish and maintain research, development, demonstration, and information programs that further the purposes of this Act, including programs that—</text><paragraph id="H7792F0640AAE42E388106F70C6F3D1E0"><enum>(1)</enum><text>facilitate the understanding by the Commission of emerging technologies, technological advances, and innovations and their potential application to and effect on the transactions and markets under the jurisdiction of the Commission, and associated implications for cybersecurity, data security, and systemic risk;</text></paragraph><paragraph id="H5A1616A71AC34EF38C49C8FC91D7344A"><enum>(2)</enum><text>provide an environment where emerging technologies, technological advances, and innovations may be explored by the Commission with developers and potential users to evaluate potential effects on the Commission and the markets under the jurisdiction of the Commission;</text></paragraph><paragraph id="H83E5FF370BAA4B92AA9CDE40DFFD1610"><enum>(3)</enum><text>identify areas where the Commission should adapt its administration of this Act in light of emerging technologies, technological advances, and innovations to benefit the markets under the jurisdiction of the Commission; and</text></paragraph><paragraph id="H60976EC2413849699382456CDAE97574"><enum>(4)</enum><text>develop educational and other informational materials for dissemination and use among producers, market-users, and the general public regarding—</text><subparagraph id="HBE5F481B60E24560A964EB7BCE14844A"><enum>(A)</enum><text display-inline="yes-display-inline">the activities, products, entities, and markets regulated under or subject to the requirements of this Act;</text></subparagraph><subparagraph id="HDE60E0D3640A4DA0B20C0EA8857690C1"><enum>(B)</enum><text display-inline="yes-display-inline">emerging technologies, technological advances, and innovations in commodity or financial markets; and</text></subparagraph><subparagraph id="H385C016C1C2A4BEF806B3E5180062138"><enum>(C)</enum><text>applicable requirements of this Act and the regulations prescribed under this Act with regard to the subjects described in subparagraphs (A) and (B).</text></subparagraph></paragraph></subsection><subsection id="HECD0AA401C49487CB26BA7C066865F05"><enum>(b)</enum><header>Research and development plan</header><paragraph id="H2965F08BFC29426581E83A90585E0553"><enum>(1)</enum><header>In general</header><text>The Commission may, by rule or by order, adopt a research and development plan for a program established under subsection (a).</text></paragraph><paragraph id="H108650A1274942AD9241DB0B7E2FE0F4"><enum>(2)</enum><header>Conditions</header><text>A research and development plan adopted pursuant to paragraph (1) shall identify—</text><subparagraph id="HA7F13820911D44AB9658D1F9862E7B00"><enum>(A)</enum><text>specific areas of interest to the Commission;</text></subparagraph><subparagraph id="HFE2439FEB69E42A5A3209F0CC484D08E"><enum>(B)</enum><text>potential activities the Commission will undertake to investigate an area of interest; and</text></subparagraph><subparagraph id="H6178C03466614B02B5698464E4E3758A"><enum>(C)</enum><text display-inline="yes-display-inline">the means by which the authority described in subsection (c) will be used in the applicable program established under subsection (a).</text></subparagraph></paragraph></subsection><subsection id="H9BC43CF58FE647E1BC7B305DF73B25FD"><enum>(c)</enum><header>Other transaction authority</header><paragraph id="H7E88FDBC3C6D429297240D60BA407356"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Notwithstanding the Office of Federal Procurement Policy Act of 1974 and the Competition in Contracting Act, the Commission may enter into a transaction (other than a contract) for the purpose of aiding or facilitating the programs and activities under subsection (a).</text></paragraph><paragraph id="H6CEF6C39816C477987362CA6FF99DCE2"><enum>(2)</enum><header>Conditions</header><text>The Commission may enter into a transaction under this subsection only if—</text><subparagraph id="H814653FE187145DDB56E57D52CC9B28A"><enum>(A)</enum><text>the transaction is used only in furtherance of a research and development plan established under subsection (b);</text></subparagraph><subparagraph id="H4734FB7925F248EF894A5A251B8CC126"><enum>(B)</enum><text>the Commission endeavored to use a competitive process, where appropriate, when determining the parties to the transaction; and</text></subparagraph><subparagraph id="H97C2BB2DDC02468AAB46D7E06EDA2E59"><enum>(C)</enum><text>using a contract to do so is either not feasible or not appropriate.</text></subparagraph></paragraph><paragraph id="H666EFEEE3E0A442FADE4645E0DA14D70"><enum>(3)</enum><header>Policies</header><text>The Commission shall establish and publish written policies setting forth the manner and criteria for utilizing the authority provided by this subsection.</text></paragraph></subsection><subsection id="H4D618511F55441DB8347B80851D2F473"> <enum>(d)</enum> <header>Acceptance of non-Monetary contributions for research and development programs, projects, and activities</header> <paragraph id="H765A722283BC46E68E6D8F11EC7ABDFE"> <enum>(1)</enum> <header>Authorization</header> <text>The Commission may accept and use, on behalf of the United States and in accordance with this subsection, any covered non-monetary contribution.</text>
+            </paragraph>
+            <paragraph id="H28BA4ABA68A34B8C86F056F54851C20A">
+              <enum>(2)</enum>
+              <header>Conditions</header>
+              <subparagraph id="HE717F8FB0B4240E4B18AE5E7E7D03BD6">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>A covered non-monetary contribution may be accepted pursuant to this subsection only if it is in furtherance of a research and development plan adopted under subsection (b).</text>
+              </subparagraph>
+              <subparagraph id="H9ED7A9D1BA724A6F977B283ACA34280E">
+                <enum>(B)</enum>
+                <header>Limitations on solicitation and acceptance</header>
+ <text>The Commission (including any Commissioner, employee, or contractor) may not solicit or accept a covered non-monetary contribution if—</text>
+                <clause id="H8012454E85AA42F39348D623BCC372D1">
+                  <enum>(i)</enum>
+ <text>conditions inconsistent with applicable laws or regulations apply to the covered non-monetary contribution;</text>
+                </clause>
+                <clause id="H1E51213A0E254CFDB1BDC7F973144EEB">
+                  <enum>(ii)</enum>
+ <text>the covered non-monetary contribution is conditioned on, or will require, the expenditure of appropriated funds not available to the Commission;</text>
+                </clause>
+                <clause id="HE41FA795EA17459FA840AE8CEECE072C">
+                  <enum>(iii)</enum>
+ <text>using a contract or other transaction authority under subsection (c) to acquire the covered non-monetary contribution is either feasible or appropriate; or</text>
+                </clause>
+                <clause id="H475D977D66B342BFB9A94DE78DBC24F9">
+                  <enum>(iv)</enum>
+ <text>the solicitation or acceptance of the covered non-monetary contribution would—</text>
+                  <subclause id="H3891D591A7294E239C6B516B8CB986AA">
+                    <enum>(I)</enum>
+ <text>reflect unfavorably on the ability of the Commission to carry out its responsibilities or official duties in a fair and objective manner, or compromise the integrity or the appearance of the integrity of its programs or any official involved in its programs; or</text>
+                  </subclause>
+                  <subclause id="HCB11B6DD731640E6AD7FB9EF7281DE13">
+                    <enum>(II)</enum>
+ <text>give the endorsement or the appearance of the endorsement by the Commission or Commission staff of the products, services, activities, or policies of the person providing the covered non-monetary contribution.</text>
+                  </subclause>
+                </clause>
+              </subparagraph>
+              <subparagraph id="HB455904CD19A49B481FDAFDC1A002829">
+                <enum>(C)</enum>
+                <header>Duration</header>
+ <text>To the extent applicable, the Commission shall return any covered non-monetary contribution accepted pursuant to this subsection as soon as practicable after the purpose for accepting the covered non-monetary contribution has been met.</text>
+              </subparagraph>
+              <subparagraph id="H93B532BF5E574E5CBC93A321F4018659">
+                <enum>(D)</enum>
+                <header>Requirements</header>
+ <text>The Commission shall, by rule or by order, establish and publish written requirements setting forth the manner and criteria to be used in determining whether a covered non-monetary contribution meets the conditions of this paragraph.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H80730AA81AA048838E540DD6896D2C06">
+              <enum>(3)</enum>
+              <header>Disclosure</header>
+ <text>Within 14 days of agreeing to accept a covered non-monetary contribution pursuant to this subsection, the Commission shall provide notice and details of such agreement to the Committee on Agriculture of the House of Representatives and the Committee on Agriculture, Nutrition, and Forestry of the Senate.</text>
+            </paragraph>
+            <paragraph id="H4D4C1E4A7413419FA008F5C03B8C6344">
+              <enum>(4)</enum>
+              <header>Definition of covered non-monetary contribution</header>
+ <text>In this subsection, the term <quote>covered non-monetary contribution</quote> means a non-monetary contribution of provision of access, use of facilities, personal property, or services that is related to—</text>
+              <subparagraph id="HAE3D0517E2854F3291952DE07C35B9D3">
+                <enum>(A)</enum>
+ <text>sharing of research, data, or other information;</text> </subparagraph> <subparagraph id="H3D230EB0685C46918D11450E47E4CF56"> <enum>(B)</enum> <text>public presentations; or</text>
+              </subparagraph>
+              <subparagraph id="HAC654509DD09424BB8C0EF1B665AEAF3">
+                <enum>(C)</enum>
+ <text>noncommercially available services or systems.</text> </subparagraph> </paragraph> <paragraph id="H94B3FA2C5DAC47A2A75F9F6CF361C952"> <enum>(5)</enum> <header>Sunset</header> <text>The authority provided in this subsection may not be exercised on or after October 1, 2031.</text>
+            </paragraph>
+ </subsection><subsection id="HFBEC5F81471A4F76B3A9B58D1B88E974"><enum>(e)</enum><header>Annual report</header><text display-inline="yes-display-inline">Not later than 60 days after the end of each fiscal year, the Commission shall submit to the Committee on Agriculture, Nutrition, and Forestry of the Senate and the Committee on Agriculture of the House of Representatives a report on all transactions entered into under subsection (c) and all covered non-monetary contributions accepted under subsection (d) in the fiscal year, which shall include the following:</text><paragraph id="H1BEA1C309D2644529A7374C9894A06DB"><enum>(1)</enum><text display-inline="yes-display-inline">A brief description of the subject of each such transaction or covered non-monetary contribution, with an explanation of—</text><subparagraph id="HF8BB3647E1BF47C1B692D788696ECEB7"><enum>(A)</enum><text>its potential utility to the Commission or the markets regulated by the Commission;</text></subparagraph><subparagraph id="HD9B6AB87AEDE466B9211E55EB23AAFE2"><enum>(B)</enum><text>how it fulfills the goals and objectives of the research and development plan established under subsection (b); and</text></subparagraph><subparagraph id="HD4E3E007C9CC4FA192B817D2EEF77D3F"><enum>(C)</enum><text>the status of all related projects.</text></subparagraph></paragraph><paragraph id="H097C4A0F7E2B4F5D94DF292336F9FACE"><enum>(2)</enum><text display-inline="yes-display-inline">With respect to each covered non-monetary contribution, a description of—</text><subparagraph id="H4D5D4E06DFF44AC3BBEA471AFA8B0808"><enum>(A)</enum><text display-inline="yes-display-inline">the source of the covered non-monetary contribution;</text></subparagraph><subparagraph id="HB7BA4E0E7DB14E8CA5E40671DD29CFBD"><enum>(B)</enum><text>the nature of the covered non-monetary contribution; and</text></subparagraph><subparagraph id="H510CFF45799F49618D29F8B8AFC6D4E9"><enum>(C)</enum><text>how the covered non-monetary contribution meets the conditions set forth in subsection (d)(2).</text></subparagraph></paragraph><paragraph id="H13982FB6B6A442F29A78296E9B0CED4D"><enum>(3)</enum><text display-inline="yes-display-inline">A description of all sums expended by the Commission in connection with a transaction entered into under subsection (c), and, if readily ascertainable, the value of any covered non-monetary contribution accepted under subsection (d).</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill>
+

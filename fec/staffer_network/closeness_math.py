@@ -207,6 +207,70 @@ class ExposureIndex:
             workplace = self.metadata[workplace]['parent_workplace_id']
         return workplace
 
+    def overlaps(self, left, right):
+        """Whether two people stood in one workplace together for at least a day: exactly the case pair() can find exposure in.
+
+        The merge below is the one pair() runs over each shared workplace's segments (sorted, never overlapping within
+        one person), so it finds an intersection of positive length if and only if pair() does. When it finds none, every
+        workplace's exposure is 0, the total is 0 and pair()['strength'] is 0, so a caller that only wants positive
+        strengths may skip pair() for the two people. A True answer promises nothing: a workplace whose kappa is 0
+        overlaps and still yields no strength.
+        """
+        a, b = self.cells.get(left, {}), self.cells.get(right, {})
+        if len(a) > len(b):
+            a, b = b, a
+        for c, aa in a.items():
+            bb = b.get(c)
+            if bb is None:
+                continue
+            i, j, n, m = 0, 0, len(aa), len(bb)
+            while i < n and j < m:
+                x, y = aa[i], bb[j]
+                if min(x[1], y[1]) > max(x[0], y[0]):
+                    return True
+                if x[1] <= y[1]:
+                    i += 1
+                else:
+                    j += 1
+        return False
+
+    def pair_row(self, left, right):
+        """The part of pair() that a hop row reads, from the same float operations in the same order.
+
+        Returns {'strength', 'workplaces'}: each workplace with positive exposure carries employer_id,
+        effective_exposure_days, last_overlap_day, exposure_weighted_last_overlap_day and context_group, which is all that
+        uncertainty() and evidence_contexts() read. What pair() adds (headcount ranges, durations, strength shares,
+        labels) is evidence for a route that has been chosen, and _full_evidence still builds it with pair(). Every number
+        here is bit-identical to pair()'s (tests/surfaces/test_staffer_row_equality.py); the saving is work not done.
+        """
+        if left == right:
+            raise ValueError('self exposure is not a relationship')
+        a, b = self.cells.get(left, {}), self.cells.get(right, {})
+        support, total = [], 0.
+        for c in sorted(a.keys() & b.keys()):
+            aa, bb, i, j = a[c], b[c], 0, 0
+            exposure, contributions, factor, census = 0., [], None, None
+            while i < len(aa) and j < len(bb):
+                start, end = max(aa[i][0], bb[j][0]), min(aa[i][1], bb[j][1])
+                if end > start:
+                    if census is None:
+                        factor, census = self.kappa(c), self.census[c]
+                    amount = factor * aa[i][2] * bb[j][2] * census.integral(start, end)
+                    exposure += amount
+                    contributions.append((start, end, amount))
+                if aa[i][1] <= bb[j][1]:
+                    i += 1
+                else:
+                    j += 1
+            if exposure > 0:
+                total += exposure
+                last = overlap_support(contributions)
+                support.append({'employer_id': c, 'effective_exposure_days': exposure,
+                                'last_overlap_day': last['last_overlap_day'],
+                                'exposure_weighted_last_overlap_day': last['exposure_weighted_last_overlap_day'],
+                                'context_group': self.context_group(c)})
+        return {'strength': bounded_strength(total, min(self.tier(left), self.tier(right))), 'workplaces': support}
+
     def pair(self, left, right):
         if left == right:
             raise ValueError('self exposure is not a relationship')

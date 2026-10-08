@@ -1,0 +1,41 @@
+n,grade,list_type,a,b,src,sid,pkg,date,form,literal,scored,tone_cls,edge_shipped,reason
+1,ARTEFACT,HOUSE_ROLLCALL,Jill Tokuda,Austin Scott,CREC,145264,CREC-2023-03-30,2023-03-30,BARE,austin scott,True,formality,False,"House roll-call roster; span straddles ""Scott, Austin Scott, David""."
+2,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,John Barrasso,CREC,122859,CREC-2022-02-09,2022-02-09,BARE,john barrasso,True,formality,False,Senate cloture/cosponsor signature block.
+3,ARTEFACT,PRESS_COSIGNER_LIST,Andrea Salinas,Raul Ruiz,PRESS_OFFICIAL_MENTION,,,2026-08-03,TYPED,,False,,False,Press release: target appears only in the letter co-signer list.
+4,ARTEFACT,HOUSE_ROLLCALL,Lauren Underwood,Austin Scott,CREC,25269,CREC-2019-06-13,2019-06-13,BARE,austin scott,False,,False,"House roll-call roster; straddles ""Scott, Austin Scott, David""."
+5,ARTEFACT,PRESS_COSIGNER_LIST,Lori Trahan,Kelly Morrison,PRESS_OFFICIAL_MENTION,,,2026-06-25,TYPED,,False,,False,Press release: target appears only in the 125-lawmaker co-signer list.
+6,ARTEFACT,HOUSE_ROLLCALL,Derrick Van Orden,Austin Scott,CREC,154842,CREC-2023-11-02,2023-11-02,BARE,austin scott,True,formality,False,House roll-call roster.
+7,ARTEFACT,HOUSE_ROLLCALL,Glenn Grothman,Vicente Gonzalez,CREC,152825,CREC-2023-09-27,2023-09-27,BARE,vicente gonzalez,True,formality,False,"House roll-call roster; straddles ""Gonzalez, Vicente Gonzalez-Colon""."
+8,ARTEFACT,PRESS_COSIGNER_LIST,Andrea Salinas,Emily Randall,PRESS_OFFICIAL_MENTION,,,2026-08-03,TYPED,,False,,False,Press release: co-signer list only.
+9,ARTEFACT,HOUSE_ROLLCALL,Derrick Van Orden,Vicente Gonzalez,CREC,150072,CREC-2023-07-13,2023-07-13,BARE,vicente gonzalez,False,,False,"House roll-call roster; straddles ""Gonzalez, Vicente Gonzalez-Colon""."
+10,ARTEFACT,PRESS_COSIGNER_LIST,Kweisi Mfume,Donald Norcross,PRESS_OFFICIAL_MENTION,,,2026-08-31,TYPED,,True,formality,False,"Press release: ""The letter was signed by: Reps. ..."" co-signer list."
+11,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,Rick Scott,CREC,122859,CREC-2022-02-09,2022-02-09,BARE,rick scott,True,formality,True,"Senate signature block ending ""Rick Scott."""
+12,ARTEFACT,HOUSE_ROLLCALL,Chellie Pingree,Vicente Gonzalez,CREC,152973,CREC-2023-09-27,2023-09-27,BARE,vicente gonzalez,True,formality,False,"House roll-call roster; straddles ""Gonzalez, Vicente Gonzalez-Colon""."
+13,ARTEFACT,SENATE_SIGNATURE_BLOCK,John Barrasso,Todd Young,CREC,109256,CREC-2021-09-23,2021-09-23,BARE,todd young,True,formality,False,"Senate signature block ending ""United States Senators."""
+14,ARTEFACT,SENATE_SIGNATURE_BLOCK,John Thune,Chuck Grassley,CREC,306692,CREC-2026-07-27,2026-07-27,BARE,chuck grassley,False,,True,Cloture motion signature list on Executive Calendar nominations.
+15,ARTEFACT,PRESS_COSIGNER_LIST,Andy Biggs,Elijah Crane,PRESS_OFFICIAL_MENTION,,,2026-07-24,TYPED,,False,,False,"Press release: ""Joining Biggs and Titus on the letter were U.S. Representatives ..."" list."
+16,ARTEFACT,HOUSE_ROLLCALL,Chellie Pingree,Vicente Gonzalez,CREC,152973,CREC-2023-09-27,2023-09-27,BARE,vicente gonzalez,False,,False,House roll-call roster.
+17,ARTEFACT,SENATE_SIGNATURE_BLOCK,Mike Lee,Tommy Tuberville,CREC,111706,CREC-2021-10-07,2021-10-07,BARE,tommy tuberville,False,,True,Senate cloture signature list.
+18,ARTEFACT,SENATE_SIGNATURE_BLOCK,John Barrasso,John Kennedy,CREC,109256,CREC-2021-09-23,2021-09-23,BARE,john kennedy,True,formality,True,Senate cosponsor signature block.
+19,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,John Thune,CREC,123062,CREC-2022-02-10,2022-02-10,BARE,john thune,True,formality,False,Senate signature block.
+20,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,John Thune,CREC,122859,CREC-2022-02-09,2022-02-09,BARE,john thune,True,formality,False,Senate signature block.
+21,ARTEFACT,HOUSE_ROLLCALL,Lauren Underwood,Austin Scott,CREC,25267,CREC-2019-06-13,2019-06-13,BARE,austin scott,False,,False,House roll-call roster.
+22,ARTEFACT,HOUSE_ROLLCALL,Sara Jacobs,Austin Scott,CREC,150585,CREC-2023-07-19,2023-07-19,BARE,austin scott,True,formality,False,House roll-call roster.
+23,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,Alex Padilla,CREC,122859,CREC-2022-02-09,2022-02-09,BARE,alex padilla,True,formality,False,Senate signature block.
+24,ARTEFACT,PRESS_COSIGNER_LIST,Kweisi Mfume,Ed Case,PRESS_OFFICIAL_MENTION,,,2026-08-31,TYPED,,True,neutral-substantive,True,Press release co-signer list; tone scored neutral-substantive off a list entry.
+25,ARTEFACT,PRESS_COSIGNER_LIST,Lori Trahan,Shri Thanedar,PRESS_OFFICIAL_MENTION,,,2026-06-25,TYPED,,False,,False,Press release co-signer list.
+26,ARTEFACT,SENATE_SIGNATURE_BLOCK,Charles Schumer,Christopher Murphy,CREC,143449,CREC-2023-03-02,2023-03-02,BARE,christopher murphy,False,,True,Senate cloture signature list.
+27,ARTEFACT,SENATE_SIGNATURE_BLOCK,Charles Schumer,Patty Murray,CREC,124932,CREC-2022-03-14,2022-03-14,BARE,patty murray,False,,True,Senate signature block.
+28,ARTEFACT,PRESS_COSIGNER_LIST,Lori Trahan,Sarah McBride,PRESS_OFFICIAL_MENTION,,,2026-06-25,TYPED,,False,,False,Press release co-signer list.
+29,ARTEFACT,HOUSE_ROLLCALL,Aaron Bean,Austin Scott,CREC,166922,CREC-2024-06-13,2024-06-13,BARE,austin scott,True,formality,False,House roll-call roster.
+30,ARTEFACT,PRESS_COSIGNER_LIST,Kweisi Mfume,Dave Min,PRESS_OFFICIAL_MENTION,,,2026-08-31,TYPED,,True,formality,False,Press release co-signer list.
+31,ARTEFACT,SENATE_SIGNATURE_BLOCK,Charles Schumer,Brian Schatz,CREC,143446,CREC-2023-03-02,2023-03-02,BARE,brian schatz,False,,True,Senate cloture signature list.
+32,ARTEFACT,PRESS_COSIGNER_LIST,Jeff Merkley,Seth Moulton,PRESS_OFFICIAL_MENTION,,,2026-08-25,TYPED,,False,,False,Press release: Senators/Representatives co-signer list.
+33,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,Jeff Merkley,CREC,123062,CREC-2022-02-10,2022-02-10,BARE,jeff merkley,True,formality,False,Senate signature block.
+34,ARTEFACT,PRESS_COSIGNER_LIST,Kweisi Mfume,Steven Horsford,PRESS_OFFICIAL_MENTION,,,2026-08-31,TYPED,,True,formality,False,Press release co-signer list.
+35,ARTEFACT,SENATE_SIGNATURE_BLOCK,John Thune,Tim Sheehy,CREC,306692,CREC-2026-07-27,2026-07-27,BARE,tim sheehy,False,,False,Cloture motion signature list on Executive Calendar nominations.
+36,ARTEFACT,HOUSE_ROLLCALL,Paul Tonko,Austin Scott,CREC,166691,CREC-2024-06-12,2024-06-12,BARE,austin scott,True,formality,False,House roll-call roster.
+37,ARTEFACT,HOUSE_ROLLCALL,Tom Emmer,Austin Scott,CREC,167627,CREC-2024-06-27,2024-06-27,BARE,austin scott,True,formality,False,House roll-call roster.
+38,ARTEFACT,HOUSE_ROLLCALL,Josh Harder,Austin Scott,CREC,27070,CREC-2019-07-12,2019-07-12,BARE,austin scott,True,formality,False,House roll-call roster.
+39,ARTEFACT,SENATE_SIGNATURE_BLOCK,Thom Tillis,Joni Ernst,CREC,123062,CREC-2022-02-10,2022-02-10,BARE,joni ernst,True,formality,False,Senate signature block.
+40,ARTEFACT,SENATE_SIGNATURE_BLOCK,Mike Lee,Tim Scott,CREC,111706,CREC-2021-10-07,2021-10-07,BARE,tim scott,True,formality,False,Senate cloture signature list.

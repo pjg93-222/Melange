@@ -1,0 +1,166 @@
+﻿refs 53011 | artifact edges 8017
+POM refs with article_url grafted: 11184 of 11184
+
+==============================================================================
+P1 : PRESS pass (src=PRESS, headline of a tone-csv article)
+==============================================================================
+re-derived PRESS mentions : 42   (artifact PRESS counter 32; delta sits on dropped dyads)
+R1 ratified rule  : {'own': 34, 'thirdparty': 8}
+R2 per-member     : {'own_member': 34, 'thirdparty': 8}
+hosts:
+   www.britt.senate.gov                              9   [own]
+   www.americascreditunions.org                      8   [thirdparty]
+   www.hagerty.senate.gov                            3   [own]
+   www.markey.senate.gov                             3   [own]
+   cleaver.house.gov                                 2   [own]
+   vargas.house.gov                                  2   [own]
+   flood.house.gov                                   2   [own]
+   www.rickscott.senate.gov                          2   [own]
+   whitesides.house.gov                              2   [own]
+   ocasio-cortez.house.gov                           1   [own]
+   watsoncoleman.house.gov                           1   [own]
+   www.lummis.senate.gov                             1   [own]
+   www.kennedy.senate.gov                            1   [own]
+   keithself.house.gov                               1   [own]
+   fletcher.house.gov                                1   [own]
+   www.smith.senate.gov                              1   [own]
+   gonzalez.house.gov                                1   [own]
+   www.scott.senate.gov                              1   [own]
+
+PRESS mentions landing on a shipped edge      : 32
+PRESS mentions from a NON-own domain (R1)     : 8  (19% of PRESS)
+  ...of which land on a shipped edge          : 7
+shipped edges touched by a thirdparty PRESS row: 7
+shipped edges whose ENTIRE raw support is PRESS and thirdparty: 6
+    Angie Craig                    -> Seth Magaziner                 n_raw=1 n_scored=1 net=+0.00
+    Juan Ciscomani                 -> Seth Magaziner                 n_raw=1 n_scored=1 net=+0.00
+    Ken Calvert                    -> Seth Magaziner                 n_raw=1 n_scored=1 net=+0.00
+    Mark Warner                    -> Steve Daines                   n_raw=1 n_scored=1 net=+1.00
+    Scott Fitzgerald               -> Seth Magaziner                 n_raw=1 n_scored=1 net=+0.00
+    Young Kim                      -> Seth Magaziner                 n_raw=1 n_scored=1 net=+0.00
+
+every thirdparty PRESS mention (speaker -> target | host | title):
+   Angie Craig                -> Seth Magaziner             | www.americascreditunions.org       | Rep. Magaziner: Credit unions play ‘crucial role’
+   Erin Houchin               -> Mark Warner                | www.americascreditunions.org       | Sen. Warner, Rep. Houchin talk credit union support at GAC
+   Juan Ciscomani             -> Seth Magaziner             | www.americascreditunions.org       | Rep. Magaziner: Credit unions play ‘crucial role’
+   Ken Calvert                -> Seth Magaziner             | www.americascreditunions.org       | Rep. Magaziner: Credit unions play ‘crucial role’
+   Mark Warner                -> Steve Daines               | www.americascreditunions.org       | Longtime credit union supporter Sen. Daines to retire
+   Scott Fitzgerald           -> Seth Magaziner             | www.americascreditunions.org       | Rep. Magaziner: Credit unions play ‘crucial role’
+   Vicente Gonzalez           -> Brian Fitzpatrick          | www.americascreditunions.org       | Rep. Fitzpatrick: Credit unions ‘act purely in the interest of members’
+   Young Kim                  -> Seth Magaziner             | www.americascreditunions.org       | Rep. Magaziner: Credit unions play ‘crucial role’
+
+==============================================================================
+P1 : PRESS_OFFICIAL_MENTION pass (typed press-body feed)
+==============================================================================
+re-derived POM mentions : 11184   (artifact POM counter 2538)
+R1 ratified rule : {'own': 11184}
+R2 per-member    : {'own_member': 11155, 'other_member_gov': 29}
+POM mentions from a NON-own domain (R1) : 0
+  hosts: []
+POM mentions on ANOTHER member's .gov site (R1 own, R2 mismatch): 29
+  first 15 (speaker -> target | host):
+     Patrick Ryan               -> Mike Johnson               | patryan.house.gov
+     Patrick Ryan               -> Tammy Baldwin              | patryan.house.gov
+     Patrick Ryan               -> Tammy Duckworth            | patryan.house.gov
+     Patrick Ryan               -> Elizabeth Warren           | patryan.house.gov
+     Patrick Ryan               -> Seth Moulton               | patryan.house.gov
+     Patrick Ryan               -> Jason Crow                 | patryan.house.gov
+     Patrick Ryan               -> Chrissy Houlahan           | patryan.house.gov
+     Patrick Ryan               -> Derek Tran                 | patryan.house.gov
+     Patrick Ryan               -> Maggie Goodlander          | patryan.house.gov
+     Patrick Ryan               -> Mike Thompson              | patryan.house.gov
+     Patrick Ryan               -> Ted Lieu                   | patryan.house.gov
+     Patrick Ryan               -> Seth Moulton               | patryan.house.gov
+     Patrick Ryan               -> Jimmy Panetta              | patryan.house.gov
+     Patrick Ryan               -> Jason Crow                 | patryan.house.gov
+     Patrick Ryan               -> Chrissy Houlahan           | patryan.house.gov
+  distinct speakers affected: 1
+  shipped edges touched     : 0
+
+POM edges in artifact                    : 853
+shipped edges supported ONLY by POM      : 19
+  of those with n_scored>=2 (drawn)      : 0
+
+==============================================================================
+JULY "MAGAZINER CLUSTER" — still present?
+==============================================================================
+total re-derived mentions touching Magaziner (either end): 125
+by source: {'CREC': 54, 'PRESS': 5, 'PRESS_OFFICIAL_MENTION': 62, 'X': 4}
+press-family mentions touching Magaziner: 67
+   [PRES] Angie Craig              -> Seth Magaziner           | host=www.americascreditunions.org   | Rep. Magaziner: Credit unions play ‘crucial role’
+   [PRES] Juan Ciscomani           -> Seth Magaziner           | host=www.americascreditunions.org   | Rep. Magaziner: Credit unions play ‘crucial role’
+   [PRES] Ken Calvert              -> Seth Magaziner           | host=www.americascreditunions.org   | Rep. Magaziner: Credit unions play ‘crucial role’
+   [PRES] Scott Fitzgerald         -> Seth Magaziner           | host=www.americascreditunions.org   | Rep. Magaziner: Credit unions play ‘crucial role’
+   [PRES] Young Kim                -> Seth Magaziner           | host=www.americascreditunions.org   | Rep. Magaziner: Credit unions play ‘crucial role’
+   [PRES] Bernard Sanders          -> Seth Magaziner           | host=sanders.senate.gov             | NEWS: Sanders Introduces Bill to Guarantee Paid Vacation for U.S. Work
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | ri lawmakers blast trump for politicizing disaster aid denying ris req
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | ri delegation announces 33m in federal build grants for new providence
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | ri delegation joins seniors on anniversary of medicare and medicaid di
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | ri delegation steers 13 5 million to upgrade providence ferry terminal
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | rhode island congressional delegation announces 1 9 million for uri cy
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | 16937
+   [PRES] Sheldon Whitehouse       -> Seth Magaziner           | host=whitehouse.senate.gov          | rhode island congressional delegation announces 4 6 million for uri cc
+   [PRES] Jeff Merkley             -> Seth Magaziner           | host=merkley.senate.gov             | Wyden, Merkley, Bonamici, Hoyle, Dexter, Colleagues Oppose Rescission 
+   [PRES] Jack Reed                -> Seth Magaziner           | host=reed.senate.gov                | RI Delegation Steers $13.5 Million to Upgrade Providence Ferry Termina
+   [PRES] Jack Reed                -> Seth Magaziner           | host=reed.senate.gov                | RI Delegation Announces $33M in Federal BUILD Grants for New Providenc
+   [PRES] Jack Reed                -> Seth Magaziner           | host=reed.senate.gov                | RI Lawmakers Blast Trump for Politicizing Disaster Aid & Denying RI<U+
+   [PRES] Judy Chu                 -> Seth Magaziner           | host=chu.house.gov                  | Reps. Chu and Morrison Lead Democratic Women<U+2019>s Caucus to Demand
+   [PRES] Brad Sherman             -> Seth Magaziner           | host=sherman.house.gov              | Jewish Members of Congress Condemn Antisemitic Attacks in Florida Repu
+   [PRES] Ron Wyden                -> Seth Magaziner           | host=wyden.senate.gov               | Wyden, Merkley, Bonamici, Hoyle, Dexter, Colleagues Oppose Rescission 
+   [PRES] Jared Huffman            -> Seth Magaziner           | host=huffman.house.gov              | 70+ House Democrats Demand NPS Address Multimillion-Dollar Grant Backl
+   [PRES] Jared Huffman            -> Seth Magaziner           | host=huffman.house.gov              | Huffman, Bennet, Colleagues Fight Against Rescission of Key Energy Lea
+   [PRES] Elizabeth Warren         -> Seth Magaziner           | host=warren.senate.gov              | Warren, Lawmakers Slam Trump Admin for Efforts to Tear Apart Military 
+   [PRES] Jimmy Panetta            -> Seth Magaziner           | host=panetta.house.gov              | Rep. Panetta Joins Rep. Jayapal and Nearly 200 Lawmakers in Demanding 
+   [PRES] Jamie Raskin             -> Seth Magaziner           | host=raskin.house.gov               | raskin beyer norton ivey demand trump administration remove demolished
+   [PRES] Jamie Raskin             -> Seth Magaziner           | host=raskin.house.gov               | raskin delbene and trahan call on trump administration to reverse harm
+   [PRES] Pramila Jayapal          -> Seth Magaziner           | host=jayapal.house.gov              | Jayapal, Garcia, Pingree, Raskin, Thompson Demand Independent Investig
+   [PRES] Jason Crow               -> Seth Magaziner           | host=crow.house.gov                 | Crow Pushes Republican Leadership to Hold Vote to Ban Stock Trading fo
+   [PRES] Lori Trahan              -> Seth Magaziner           | host=trahan.house.gov               | Trahan Leads 125 Lawmakers Calling on Trump Administration to Reverse 
+   [PRES] Sara Jacobs              -> Seth Magaziner           | host=sarajacobs.house.gov           | Rep. Sara Jacobs Led 54 Colleagues in Demanding Answers on Delayed DAC
+   [PRES] Alex Padilla             -> Seth Magaziner           | host=padilla.senate.gov             | padilla sanders introduce bill to guarantee paid vacation for u s work
+   [PRES] Alex Padilla             -> Seth Magaziner           | host=padilla.senate.gov             | padilla warren lawmakers slam trump admin for efforts to tear apart mi
+   [PRES] Zachary Nunn             -> Seth Magaziner           | host=nunn.house.gov                 | Nunn Secures House Passage of Congressional Stock Trading Ban
+   [PRES] Andrea Salinas           -> Seth Magaziner           | host=salinas.house.gov              | Rep. Salinas Presses Trump Administration for Updates on Gaza Ceasefir
+   [PRES] Seth Magaziner           -> Gabe Amo                 | host=magaziner.house.gov            | Magaziner, Amo Announce $2.9 Million for Mental Health Services for Ch
+   [PRES] Seth Magaziner           -> Nikki Budzinski          | host=magaziner.house.gov            | Magaziner, RI Tourism and Labor Officials, Promote His Legislation to 
+   [PRES] Seth Magaziner           -> Jasmine Crockett         | host=magaziner.house.gov            | Magaziner, RI Tourism and Labor Officials, Promote His Legislation to 
+   [PRES] Seth Magaziner           -> Greg Casar               | host=magaziner.house.gov            | Magaziner, RI Tourism and Labor Officials, Promote His Legislation to 
+   [PRES] Seth Magaziner           -> Joe Courtney             | host=magaziner.house.gov            | Magaziner Secures Wins for Rhode Island in Annual Defense Bill
+   [PRES] Seth Magaziner           -> Sheldon Whitehouse       | host=magaziner.house.gov            | Rhode Island Congressional Delegation Announces $1.9 Million for URI C
+
+shipped edges touching Magaziner: 23
+   Angie Craig                  -> Seth Magaziner               n_raw=1   n_scored=1   net=+0.00 sources={'PRESS': 1}
+   Cory Mills                   -> Seth Magaziner               n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Jack Reed                    -> Seth Magaziner               n_raw=9   n_scored=1   net=+1.00 sources={'CREC': 4, 'PRESS_OFFICIAL_MENTION': 5}
+   Jennifer Kiggans             -> Seth Magaziner               n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Juan Ciscomani               -> Seth Magaziner               n_raw=1   n_scored=1   net=+0.00 sources={'PRESS': 1}
+   Ken Calvert                  -> Seth Magaziner               n_raw=1   n_scored=1   net=+0.00 sources={'PRESS': 1}
+   Scott Fitzgerald             -> Seth Magaziner               n_raw=1   n_scored=1   net=+0.00 sources={'PRESS': 1}
+   Seth Magaziner               -> Austin Scott                 n_raw=2   n_scored=2   net=+1.00 sources={'CREC': 2}
+   Seth Magaziner               -> Brian Fitzpatrick            n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Seth Magaziner               -> Chip Roy                     n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Seth Magaziner               -> Cory Booker                  n_raw=1   n_scored=1   net=+0.00 sources={'CREC': 1}
+   Seth Magaziner               -> Gabe Amo                     n_raw=9   n_scored=4   net=+0.33 sources={'CREC': 6, 'PRESS_OFFICIAL_MENTION': 3}
+   Seth Magaziner               -> Hakeem Jeffries              n_raw=3   n_scored=2   net=+1.00 sources={'CREC': 3}
+   Seth Magaziner               -> Maria Salazar                n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Seth Magaziner               -> Marie Gluesenkamp Perez      n_raw=4   n_scored=4   net=+1.00 sources={'X': 4}
+   Seth Magaziner               -> Mark Takano                  n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Seth Magaziner               -> Mike Johnson                 n_raw=5   n_scored=4   net=-0.50 sources={'CREC': 5}
+   Seth Magaziner               -> Nancy Pelosi                 n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Seth Magaziner               -> Pramila Jayapal              n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Seth Magaziner               -> Rosa DeLauro                 n_raw=1   n_scored=1   net=+0.00 sources={'CREC': 1}
+   Seth Magaziner               -> Sheldon Whitehouse           n_raw=4   n_scored=1   net=+1.00 sources={'CREC': 1, 'PRESS_OFFICIAL_MENTION': 3}
+   Seth Magaziner               -> Tim Burchett                 n_raw=1   n_scored=1   net=+1.00 sources={'CREC': 1}
+   Young Kim                    -> Seth Magaziner               n_raw=1   n_scored=1   net=+0.00 sources={'PRESS': 1}
+
+--- thirdparty-press article fan-out census (any single article -> N distinct targets) ---
+thirdparty press (speaker,article) groups: 8 | with >=2 distinct targets: 0 | >=5: 0
+   Angie Craig              x1  https://www.americascreditunions.org/news-me -> ['Seth Magaziner']
+   Erin Houchin             x1  https://www.americascreditunions.org/news-me -> ['Mark Warner']
+   Juan Ciscomani           x1  https://www.americascreditunions.org/news-me -> ['Seth Magaziner']
+   Ken Calvert              x1  https://www.americascreditunions.org/news-me -> ['Seth Magaziner']
+   Mark Warner              x1  https://www.americascreditunions.org/news-me -> ['Steve Daines']
+   Scott Fitzgerald         x1  https://www.americascreditunions.org/news-me -> ['Seth Magaziner']
+   Vicente Gonzalez         x1  https://www.americascreditunions.org/news-me -> ['Brian Fitzpatrick']
+   Young Kim                x1  https://www.americascreditunions.org/news-me -> ['Seth Magaziner']
+DONE 03b

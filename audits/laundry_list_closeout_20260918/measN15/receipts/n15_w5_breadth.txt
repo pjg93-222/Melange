@@ -1,0 +1,26 @@
+======================================================================================================
+N15 / W5  BREADTH: EVERY DISPLAYED DESK BILL ROW vs THE OFFICIAL RECORD
+======================================================================================================
+  official facts=5683 (withdrawn=True: 2) ; repository bills=473 ; roster members=533
+  desk bundle: 533 members, 6130 displayed bill rows
+  desk member names NOT in the engine roster: 0 []
+
+  rows                                                 6130
+  parseable                                            5670
+  unparseable_bill_identity                            460
+  repository_key_absent_from_bill_repository_live      0
+  official_fact_present                                5657
+  no_official_fact_by_name                             13
+  fact_reachable_by_bioguide_but_NOT_by_name           0
+
+  *** W5-a  displayed rows whose OFFICIAL record says WITHDRAWN        = 0
+  *** W5-b  displayed rows whose role DIFFERS from the official role   = 0
+  unparseable displayed bill prefixes (apply_to_desk keeps these unjudged): {"LTR-119-C": 259, "S.AMDT.22": 51, "S.AMDT.23": 30, "LTR-117-C": 17, "LTR-118-C": 11, "S.AMDT.43": 6, "S.AMDT.10": 5, "S.AMDT.21": 4, "S.AMDT.47": 4, "S.AMDT.37": 3, "H.AMDT.24": 3, "S.AMDT.62": 3}
+
+  EVERY fact in the official record with withdrawn=True, and whether the desk shows it:
+     Shri Thanedar              H.R.3881     118:hr:3881 role=cosponsor  withdrawn_date=2023-10-02  join=2023-09-28   desk row: ABSENT from the desk
+     Roger Marshall             S.2669       118:s:2669  role=original   withdrawn_date=2024-07-24  join=2023-07-27   desk row: ABSENT from the desk
+
+  CROSS-CHECK on the routing side (why 1854 rows carry the disposition):
+     role superseded: archive role cosponsor -> official original-cosponsor rows=1854
+DONE

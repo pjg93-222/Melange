@@ -34,6 +34,7 @@ from legislation import dashboard_legislative_workbench as DLW
 from legislation.congress_bill_repository import validate_live_repository
 import legislation.verify_collector_roster_updates as CRU   # verified collector->ledger sidecar (import-safe)
 import district.district_cu_metrics as DCM
+from district.cook_pvi import load_optional_reference, attach_reference
 from legislation.legislation_culling_status import load_surface_status
 from members.hearing_display_contract import load_optional as load_hearing_display
 from members.member_identity import Resolver
@@ -174,7 +175,7 @@ def _press_corr(title, url):
         if (c.get('url') and c['url'] == url) or (c.get('title_contains') and c['title_contains'].lower() in t):
             return c
     return None
-OPT    = L('optimize_result.json') or {}     # joint lazy-greedy optimizer: {alloc:{name:$}, mode, guarantee, base, final,...}
+OPT    = L(os.environ.get('OPTIMIZE_RESULT_PATH') or 'optimize_result.json') or {}     # joint lazy-greedy optimizer: {alloc:{name:$}, mode, guarantee, base, final,...}
 if not OPT: print('  !! optimize_result.json MISSING/empty — desk allocation panels will be blank (run optimize.py)')   # S3-05
 OPT_ALLOC = OPT.get('alloc', {})             # the RESEARCH-GROUNDED suggested allocation (vs score-proportional)
 EH  = L('data/money/electoral_history.json') or {}      # per-member FEC primary+general vote-share trend + forecast (build_electoral_history.py)
@@ -185,6 +186,7 @@ EMPLOYERS = _optional_L('data/district/district_employers.json')  # OPTIONAL Pha
 FINANCIAL = _optional_L('data/district/district_financial.json')  # OPTIONAL Phase-G FDIC/NCUA district footprint
 HMDA = _optional_L('data/district/district_hmda.json')            # OPTIONAL Phase-H mortgage lending
 COMMUNITY = _optional_L('data/district/district_community.json')  # OPTIONAL 2024 ACS structural context/controls
+COOK_PVI = load_optional_reference()  # hash-bound, offline historical source snapshot
 DISTRICT_BRIEFS = L('data/district/district_briefs_v1.json')       # REQUIRED ratified three-paragraph district narratives
 if os.environ.get('MONEYBALL_ALLOW_MISSING_BILL_REPOSITORY') == '1':
     print('  !! BREAKGLASS: live Congress.gov bill repository gate disabled')
@@ -2527,6 +2529,7 @@ def desk_roi(eng, stance, tiername, adj, party, gated=frozenset(), chunk=10000.0
     cu, ind, rcp, tierp, bpf, ENG = eng['cu'], eng['ind'], eng['rcp'], eng['tierp'], eng['bpf'], eng['eng']
     PRIORITY = eng.get('priority') or [tierp for _ in ENG]
     pmult=eng.get('pmult') or [1.0]*len(cu); dmult=eng.get('dmult') or [1.0]*len(cu)
+    cmult=eng.get('cmult') or [1.0]*len(cu)                    # COMPET_MULT (absent/dial OFF -> exactly 1.0 = the old arithmetic)
     WM, WP, HALFF, BASE = K['WM'], K['WP'], K['HALFF'], K['BASE']
     SRCPRO, SRCANTI = K['SRCPRO'], K['SRCANTI']
     Nn = len(stance)
@@ -2538,9 +2541,9 @@ def desk_roi(eng, stance, tiername, adj, party, gated=frozenset(), chunk=10000.0
         if pu != pv and pu in DR and pv in DR: return SRCANTI
         return 1.0
     def camp(t): return 'pro' if t in PRO else ('anti' if t in ANTI else 'neu')   # = flip_model PRO / ANTI
-    def pf(cuA, indA, nAu, mA, nBu, mB, c, pm):
-        au = WM * pm * (cuA + 1) / ((cuA + 1) + c) + WP * nAu / mA
-        bu = WM * pm * (indA + 1) / ((indA + 1) + c) + WP * nBu / mB
+    def pf(cuA, indA, nAu, mA, nBu, mB, c, pm, cm=1.0):
+        au = WM * pm * (cm * cuA + 1) / ((cm * cuA + 1) + c) + WP * nAu / mA
+        bu = WM * pm * (cm * indA + 1) / ((cm * indA + 1) + c) + WP * nBu / mB
         return au / (au + bu) if (au + bu) > 0 else 0.0
     roi = [0.0] * Nn
     for i in range(len(ENG) - 1):                              # the real issues (exclude the appended 'Overall')
@@ -2567,7 +2570,7 @@ def desk_roi(eng, stance, tiername, adj, party, gated=frozenset(), chunk=10000.0
             pers = PERS.get(tiername.get(tiers[u], '—'), 0) or 0
             if pers <= 0: continue                             # no persuadability weight -> no winnability to move
             tg = max(0.0, engi[u] + BASE * priorityi[u]) * pers * (1 + 0.3 * bpf[u]) * dmult[u]
-            d = pf(cu[u] + chunk, ind[u], nA[u], mA, nB[u], mB, c, pmult[u]) - pf(cu[u], ind[u], nA[u], mA, nB[u], mB, c, pmult[u])
+            d = pf(cu[u] + chunk, ind[u], nA[u], mA, nB[u], mB, c, pmult[u], cmult[u]) - pf(cu[u], ind[u], nA[u], mA, nB[u], mB, c, pmult[u], cmult[u])
             roi[u] += tg * d
     return roi                                                 # expected weighted flips gained from the next $10k
 def desk_eff_values(scores, invested, percentiles):
@@ -3288,6 +3291,7 @@ def build_bundle():
                 # without reinterpreting or recomputing it on the surface.
                 _member['responsiveness_cu'] = _resp_by_name[_member['name']]
         bundle['responsiveness_receipts'] = _resp_receipts
+    attach_reference(bundle, COOK_PVI, LEG)  # descriptive fields only, after desk calculations
     return attach_honors_display(bundle, honors)
 
 HTML = _tpl('make_member_desk_00.tpl')
@@ -3421,7 +3425,7 @@ if __name__ == '__main__':
         # and the board render path touches none of the deferred fields (field-by-field
         # audit incl. renderRanked's helper functions). member_desk_bundle.json above stays
         # the FULL bundle either way - its consumers see no change.
-        HEAVY_MEMBER_FIELDS = ['articles','personal','industry','district_brief','responsiveness_cu','psy',
+        HEAVY_MEMBER_FIELDS = ['articles','personal','industry','district_brief','cook_pvi','responsiveness_cu','psy',
                                'bills','refs','staffdir','community','electoral','employers',
                                'partners','bio','financial']
         split = os.environ.get('DESK_SPLIT', '1') != '0'

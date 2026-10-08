@@ -1,0 +1,12 @@
+GATE: baseline build and byte equivalence
+RESULT: PASS (executed by coordinator lane after Codex sandbox denied python; see DIFF_SUMMARY.md)
+BASELINE_BUILD_COMMAND: MONEYBALL_ROOT=<live tree> python fec\lobbying\champions_v2.py --out audits\champion_crown_law_20260809\baseline_boards.json
+BASELINE_BOARDS_SHA256_RAW: 473E896B6450609CE7943103368FC933351AC77BFCBF021CAA6490D5EDBA3320
+LIVE_BOARDS_SHA256_RAW: C160D1A66344EA24ABBFEC5F6911171BAF9ED7045F9B75BD48DC47EF406CA2D6
+METHOD: parse both JSON docs, drop generated_utc, re-dump sort_keys=True indent=1 + trailing newline, compare bytes
+NORMALIZED_EQUIVALENCE: EQUAL (see diff_receipt.json check "baseline == live artifact (generated_utc excluded)")
+NOTE: the 2026-08-07T02:56Z signed_attention.csv write postdating the live artifact
+(flagged as possible input drift during the blocked executor pass) did NOT change
+producer output: current inputs reproduce the deployed artifact byte-exactly.
+The baseline->rule diff therefore measures exactly the crown law's effect on the
+deployed data.

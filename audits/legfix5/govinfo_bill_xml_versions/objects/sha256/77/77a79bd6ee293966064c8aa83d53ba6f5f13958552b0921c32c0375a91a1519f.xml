@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="H874B6A1478B54DDA95312AB0B24E9643" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1815 RH: SEC Disclosure Effectiveness Testing Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IB</distribution-code>
+		<calendar display="yes">Union Calendar No. 91</calendar>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 1815</legis-num>
+		<associated-doc display="yes" role="report">[Report No. 116–123]</associated-doc>
+		<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190318">March 18, 2019</action-date>
+			<action-desc><sponsor name-id="C001117">Mr. Casten of Illinois</sponsor> introduced the following bill; which was referred to the <committee-name added-display-style="italic" committee-id="HBA00" deleted-display-style="strikethrough">Committee on Financial Services</committee-name></action-desc>
+		</action>
+		<action>
+			<action-date>June 20, 2019</action-date>
+			<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the
+			 Union, and ordered to be printed</action-desc>
+			<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+			<action-instruction>For text of introduced bill, see copy of bill as introduced on March 18, 2019</action-instruction>
+		</action>
+		<action display="yes">
+			<action-desc display="yes"><pagebreak></pagebreak></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To require the Securities and Exchange Commission, when developing rules and regulations about
+			 disclosures to retail investors, to conduct investor testing, including a
+			 survey and interviews of retail investors, and for other purposes.<pagebreak></pagebreak></official-title>
+	</form>
+	<legis-body changed="added" committee-id="HBA00" display-enacting-clause="yes-display-enacting-clause" id="HD086AFEA8C1941F08C8DD3C7C3A26F80" reported-display-style="italic" style="OLC">
+ <section id="H65E16EB65DBB4BA8B277E73BA96BDBFB" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>SEC Disclosure Effectiveness Testing Act</short-title></quote>.</text> </section><section id="HD040447E68CE40378C706E846198FB45"><enum>2.</enum><header>Disclosure testing</header> <subsection id="H77D45B1922554224BAFDB51DC40ECABB"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 23(a) of the Securities Exchange Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/15/78w">15 U.S.C. 78w(a)</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="HF61E9C215525496C9E1A11941F610C89" reported-display-style="italic" style="OLC">
+					<paragraph id="H41A74E285DDC4C4DAFCE3CEDFF6A2DEF" indent="up1"><enum>(4)</enum><header>Investor testing</header>
+ <subparagraph id="H725F77CBAEBC43A884A38EF19F8499BC"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">The Commission shall engage in investor testing prior to issuing any rule or regulation which designates documents or information to be disclosed under the securities laws, if such documents or information—</text>
+ <clause id="H2FB18113432B47C48582D37BB044AB6F"><enum>(i)</enum><text display-inline="yes-display-inline">are primarily used by retail investors, as determined by the Commission; and</text> </clause><clause id="H25DDFF470A6E41DAA28A28B22BD7AA28"><enum>(ii)</enum><text display-inline="yes-display-inline">are intended to be used by retail investors to make informed investment decisions or to understand the investments held by the retail investor.</text>
+ </clause></subparagraph><subparagraph id="HF411FC41447844BCA7ADE7B4D0C45966"><enum>(B)</enum><header>Contents</header><text>Investor testing conducted pursuant to subparagraph (A) shall include the following:</text> <clause id="H3192E977E2434FC2B6A25AD12C89825F"><enum>(i)</enum><text display-inline="yes-display-inline">Qualitative testing in the form of one-on-one cognitive interviews of retail investors about documents or information, or samples of such documents or information, to be provided.</text>
+ </clause><clause id="HBD87C764F8224DA19A57F2EC837AD7CE"><enum>(ii)</enum><text>A nationwide survey of retail investors, designed to complement the interviews under clause (i), on—</text>
+ <subclause id="H34DFF3D9FD714C4B89B307D8D21F4BBA"><enum>(I)</enum><text display-inline="yes-display-inline">the usefulness of such documents or information, or samples of such documents or information;</text> </subclause><subclause id="HC4F6088C4D1947D3810484A6CC834942"><enum>(II)</enum><text display-inline="yes-display-inline">the proposed format of such documents or information, or samples of such documents or information; and</text>
+ </subclause><subclause id="HB0A4BC24731D499E8264BDA1FD70ADCD"><enum>(III)</enum><text display-inline="yes-display-inline">delivery preferences of such documents or information, or samples of such documents or information.</text> </subclause></clause><clause id="H24E597B6766C4E9A977E40C762572B13"><enum>(iii)</enum><text display-inline="yes-display-inline">Analysis and publication in the Federal Register of the results of the survey and interviews.</text>
+ </clause><clause id="HF09A67A149544220A89AF202F7A083DE"><enum>(iv)</enum><text display-inline="yes-display-inline">An opportunity for the public to comment on such results published in the Federal Register.</text> </clause></subparagraph><subparagraph id="H63D6DC1C973144EBA619DE6DC0EECE5E"><enum>(C)</enum><header>Substantive changes</header><text display-inline="yes-display-inline">If the Commission, in the period between engaging in investor testing and publishing a final rule, makes substantive changes to such rule that the Commission determines would have a significant impact on retail investors, the Commission shall again engage in investor testing.</text>
+ </subparagraph><subparagraph id="H53547F65A96C472CBA82E2891688EB23"><enum>(D)</enum><header>Public availability of retail testing results</header><text>The Commission shall make the data and results of any investor testing performed pursuant to this paragraph available to the public.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HD0442F555A584D2BB80238F11CCAA5D2"><enum>(b)</enum><header>Participation of Investor Advocate</header><text display-inline="yes-display-inline">Section 4(g) of the Securities Exchange Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/15/78d">15 U.S.C. 78d(g)</external-xref>) is amended—</text> <paragraph id="HCBAF6BFB23BF4406933953C18FA6BEA1"><enum>(1)</enum><text>in paragraph (4)—</text>
+ <subparagraph id="H2363C48A2C9A414E993A8C735C30CA80"><enum>(A)</enum><text>in subparagraph (D)(ii), by striking <quote>and</quote> at the end;</text> </subparagraph><subparagraph id="H6E020A125C2743C88BF73DF41E4C66BF"><enum>(B)</enum><text>by redesignating subparagraph (E) as subparagraph (F); and</text>
+ </subparagraph><subparagraph id="H29C500DCC40C47BFA8D216A36A969DCF"><enum>(C)</enum><text>by inserting after subparagraph (D) the following:</text> <quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="HE420B2F628634F1E8FE8A813BBA4E56D" reported-display-style="italic" style="OLC"> <subparagraph id="H33D05E91876648439B20A0BA2B05445A"><enum>(E)</enum><text display-inline="yes-display-inline">engage in investor testing—</text>
+ <clause id="HCA3E3B005EAE4A66ABC30558D7303969"><enum>(i)</enum><text>as necessary to carry out the functions of the Office; and</text> </clause><clause id="HF188B5A24FF34CADB89769A5C31D9965"><enum>(ii)</enum><text>under section 23(a)(4), if the Commission determines it appropriate; and</text></clause></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="H4F14F727325B439790AD207E86E98B18"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="HA0FC0F04869F4931A2233919B10F456D" reported-display-style="italic" style="OLC"> <paragraph id="HD7552777E744478F971D71A396502B45"><enum>(9)</enum><header>Publication of data and results of investor testing</header><text display-inline="yes-display-inline">With respect to any investor testing carried out by the Investor Advocate pursuant to paragraph (4)(E), the Investor Advocate may make the data and results of such investor testing available to the public, and without further review or editing by the Commission.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph></subsection><subsection id="HB5230C6077264537916CF51674D9016D"><enum>(c)</enum><header>Prior rules</header>
+ <paragraph id="H44436451FCAB4845B4F1A9927EFE97AB"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">For any final rule or regulation issued by the Securities and Exchange Commission (in this subsection referred to as the <quote>Commission</quote>) before the date of the enactment of this Act that would be subject to investor testing under section 23(a)(4) of the Securities Exchange Act of 1934, had such rule been issued on or after the date of enactment of this Act, the Commission shall perform investor testing with respect to such rule or regulation that includes the contents described in such section 23(a)(4).</text>
+ </paragraph><paragraph id="H3D3351B7BDFE4CC19B4DF1812945E9C6"><enum>(2)</enum><header>Schedule</header><text display-inline="yes-display-inline">The Commission shall, not later than 6 months after the date of the enactment of this Act, establish a schedule for completing any investor testing required under paragraph (1) that prioritizes testing of any final rules and regulations that designate documents or information central to retail investor decision making.</text>
+ </paragraph><paragraph id="H24DE2DA32FAB4670816772CF3A3D1D1A"><enum>(3)</enum><header>Report</header><text display-inline="yes-display-inline">The Commission shall issue a report to Congress each year containing the following:</text> <subparagraph id="H45C8CACC9F0C4039A44763BCD4CDA589"><enum>(A)</enum><text>The status of any investor testing required under paragraph (1).</text>
+ </subparagraph><subparagraph id="H515DCE03E2294482A78B50859E805B98"><enum>(B)</enum><text display-inline="yes-display-inline">The results of any investor testing completed under paragraph (1).</text> </subparagraph><subparagraph id="H17B59B29C80F42ECBE70BF115E4C5D6D"><enum>(C)</enum><text display-inline="yes-display-inline">Any priorities the Commission has, based on results of investor testing required by paragraph (1), for—</text>
+ <clause id="H6EBD19E5D67F446DB99CD4BE6A5D23A7"><enum>(i)</enum><text>revising or eliminating any final rule or regulation designating documents or information to be provided to retail investors; and</text>
+ </clause><clause id="H7A3EADABC026424F877C94BEF63B44B0"><enum>(ii)</enum><text display-inline="yes-display-inline">revising any other final rule or regulation to supplement revised or eliminated rules designating documents or information to be provided to retail investors.</text>
+						</clause></subparagraph></paragraph></subsection></section></legis-body>
+	<endorsement display="yes">
+		<action-date display="yes">June 20, 2019</action-date>
+		<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the
+			 Union, and ordered to be printed</action-desc></endorsement>
+</bill>
+
+

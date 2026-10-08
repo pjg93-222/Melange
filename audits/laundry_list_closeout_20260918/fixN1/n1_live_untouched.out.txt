@@ -1,0 +1,13 @@
+Moneyball Main Version - Blended.xlsx                2026-09-18 02:09:29
+member_desk_bundle.json                              2026-09-18 02:35:43
+data/stance/press_refresh_tone.csv                   2026-09-16 23:44:44
+data/stance/press_refresh_feed_receipt.json          2026-09-16 23:44:49
+fec/surfaces/make_member_desk.py                     2026-09-16 17:24:06
+fec/audit/dashboard_integrity.py                     2026-09-17 03:30:15
+fec/tests/run_tests.py                               2026-09-18 13:05:39
+MATHEMATICAL_SPECIFICATION.md                        2026-08-05 03:25:03
+say_do_gap.json                                      2026-07-19 07:53:52
+data/engine/dashboard_integrity_state.json           2026-09-18 02:35:36
+
+Draft Systems tone CSV: 2026-06-30 18:50:17
+now: 2026-09-19 02:15:11

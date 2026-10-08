@@ -1076,6 +1076,7 @@ function methodHTML(m){
   if(P.narrative&&P.narrative.format==='descriptive-v3')add('Profile summary','Three plain-language paragraphs summarize the public record, public communication, and the limits of the available evidence. These summaries use checked templates tied to the recorded source measures. Each profile is checked for source consistency, complete coverage, and a length of 200–400 words. These checks are deterministic; they are not an independent human review of every audio recording. A recurring interview pattern requires two independently produced interviews in different settings. Single-source observations remain provisional.');
   else if(P.narrative||P.narrative_status)add('Approach brief','Written from the measures already on this profile: the personality axes, the observed-behaviour percentiles, the speech measures and the hearing-antagonism facet. Those are gathered into one evidence packet per member and drafted by Claude Sonnet on 31 August 2026. Each brief is checked mechanically for length, for banned phrasing, and for wording reused from another member. No check confirms a sentence against the measure it came from.');
   if(m.district_brief)add('District brief',`Three evidence-grounded paragraphs covering household and housing conditions, credit-union relevance, and industry specialization. The corpus was generated ${esc(districtBriefMeta.generated||'—')} and passed deterministic word-band, figure-cap, evidence-grounding, formatting, ban-list, and novelty checks. It is displayed as narrative context, not as a score. ${esc(((districtBriefMeta.known_limitations||[])[0])||'')}`);
+  if(m.cook_pvi)add('Cook PVI · 2026 source snapshot',`Cook Political Report's rounded label describes historical presidential partisan lean relative to the nation; it is not an election forecast. This snapshot covers voting House districts only, with no Senate or territorial values. A district-code match does not verify the current member or current district boundaries. Source incumbent names are not used for matching. ${cookPviSourceHTML()} This context does not enter scores, ranks, allocations, receptivity, ROI, or efficiency calculations.`);
   if(P.big5_pct||P.big5_fb_pct)add('Personality read','Gold-validated: gold-anchored axes use the OOF Senate-gold composites.');
   if(X.do_pct!=null)add('Credit-union bill delivery','Sponsored + cosponsored CU bills weighted by role and by how far each advanced. Not passage-weighted, so it does not reward holding the majority.');
   if(X.antag)add('Antagonist flag',`<div style="font-size:11px;font-weight:700;color:#f59e0b;background:#f59e0b22;border:1px solid #f59e0b55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">Signed-mention antagonist set (Aref-Neal splinter)</div>`);
@@ -1471,6 +1472,34 @@ const REACH_NOT_ADJUSTED={reach_evidence_missing:'no reach evidence',model_not_f
 const prettyEmployerMethod=s=>String(s).replace(
   /^place-of-performance top-10 federal recipients FY(\d{2,4}); booking\/HQ caveats apply\.?$/,
   'Place-of-performance top-10 federal recipients, FY$1. Booking and HQ caveats apply.');
+function cookPviSourceHTML(){
+  const meta=D.cook_pvi_meta||{};
+  const url=String(meta.source_page_url||'');
+  const link=/^https:\/\/www\.cookpolitical\.com\//i.test(url)?` <a href="${attr(url)}" target=_blank rel=noopener>Cook Political Report source ↗</a>`:'';
+  return `Article published ${esc(meta.article_publication_date||'date unavailable')}; snapshot retrieved ${esc(meta.retrieval_date||'date unavailable')}.${link}`;
+}
+function cookPviHTML(m){
+  const pvi=m.cook_pvi;
+  if(!pvi)return '';
+  const available=pvi.status==='available'&&typeof pvi.pvi_label==='string'&&!!pvi.pvi_label.trim();
+  const status=available?'available':(['outside_scope','unmatched'].includes(pvi.status)?pvi.status:'unavailable');
+  let body;
+  if(available){
+    const district=pvi.district_label||pvi.district_id||'District code unavailable';
+    body=`<div class=dgrid style="margin-bottom:8px"><div class=dcell><div class=v>${esc(pvi.pvi_label)}</div><div class=l>${esc(district)} · rounded source label</div></div></div>
+      <p class=empty>Historical presidential partisan lean relative to the nation; not an election forecast.</p>
+      <p class=empty>Historical district-code match only. Current member and district boundaries are unverified.</p>`;
+  }else{
+    const message=pvi.status==='outside_scope'?'Outside scope: this snapshot covers voting House districts, with no Senate or territorial values.'
+      :pvi.status==='unmatched'?'Unavailable: no district-code match in this source snapshot.'
+      :'Unavailable: no Cook PVI source value loaded.';
+    body=`<p class=empty>${message}</p>`;
+  }
+  return `<div class=cook-pvi-context data-cook-pvi-status="${attr(status)}" style="margin-bottom:14px">
+    <div class=eyebrow style="margin-bottom:8px">Cook PVI · 2026 source snapshot</div>${body}
+    <div class=empty>${cookPviSourceHTML()}</div>
+  </div>`;
+}
 function demoHTML(m){
   const d=m.demo||{},community=m.community||{},ce=community.estimates||{},cd=community.derived||{},cm=D.community_meta||{};
   const dr=radar(m.demo_radar||[],D.demo_short,'#c2862a',82);
@@ -1510,7 +1539,7 @@ function demoHTML(m){
     ...(communityCovers?[]:[[ce.median_age??d.median_age??'—','Median age'],[pc(cd.poverty_rate??d.poverty_rate),'Poverty rate']]),
     [money(d.percap),'Income per person','Per-capita income']]
     .map(([v,l,t])=>`<div class=dcell${t?` title="${attr(t)}"`:''}><div class=v>${v}</div><div class=l>${l}</div></div>`).join('');
-  const base=`${districtBrief}<div class=gen style=margin-bottom:12px><div>${dr}</div><div class=dgrid>${cells}</div></div>${popBasisNote}`;
+  const base=`${cookPviHTML(m)}${districtBrief}<div class=gen style=margin-bottom:12px><div>${dr}</div><div class=dgrid>${cells}</div></div>${popBasisNote}`;
   const variableCatalog=cm.variable_catalog||{},moe=community.moe_90||{};
   const moeTitle=metric=>{
     const row=variableCatalog[metric]||{},margin=finiteNum(moe[metric]),bits=[];
@@ -2032,7 +2061,7 @@ function relatedAnecdotes(bill){
 }
 function namesFor(indices){return indices.map(i=>M[i].name);}
 function uniqueNames(rows){return [...new Set((rows||[]).map(v=>String(v||'').trim()).filter(Boolean))];}
-const BILL_LOBBY_SECTOR_COLORS={bank:'#60a5fa',credit_union:'#34d399',crypto:'#c084fc',financial_other:'#fbbf24',fintech:'#22d3ee'};
+const BILL_LOBBY_SECTOR_COLORS={bank:'#60a5fa',credit_union:'#34d399',crypto:'#c084fc',financial_other:'#fbbf24',fintech:'#22d3ee',telecom:'#f472b6'};
 function billLobbySectorLabel(value){return String(value||'unclassified').split('|').map(v=>v.replace(/_/g,' ')).join(' / ');}
 function billLobbySectorColor(value){return BILL_LOBBY_SECTOR_COLORS[String(value||'').split('|')[0]]||'#94a3b8';}
 function billLobbyCount(value){return Number(value||0).toLocaleString();}

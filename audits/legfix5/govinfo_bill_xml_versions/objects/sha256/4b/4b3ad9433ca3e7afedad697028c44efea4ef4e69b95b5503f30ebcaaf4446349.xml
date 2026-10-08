@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HA195AAFC63A64CC998F57EB713E0642D" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2710 IH: Patient Access to ESRD New Innovative Devices Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2710</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190514">May 14, 2019</action-date><action-desc><sponsor name-id="D000096">Mr. Danny K. Davis of Illinois</sponsor> (for himself and <cosponsor name-id="H001074">Mr. Hollingsworth</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title XVIII of the Social Security Act to improve access to innovative new medical devices
+			 furnished to individuals with end stage renal disease under part B of the
+			 Medicare program by establishing a new device add-on payment adjustment
+			 under such part.</official-title></form>
+	<legis-body id="H0C327D96AE1E4FD9B93455D0F7E363E0" style="OLC">
+ <section id="HB40F235421BF40B8B9B52DC28D39D426" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Patient Access to ESRD New Innovative Devices Act</short-title></quote>.</text> </section><section id="HD7D4848539EF4D4B9F6E6C4755A8C90B"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text>
+ <paragraph id="H69DFCC2CF09342C096DD3B3B0643F8B9"><enum>(1)</enum><text>There are approximately 400,000 Medicare beneficiaries with end-stage renal disease, making up 1 percent of the Medicare population but accounting for approximately 7 percent of all Medicare spending.</text>
+ </paragraph><paragraph id="H6AB56062240E48B8B1193F69976EB309"><enum>(2)</enum><text>Expected remaining lifetime for dialysis patients under 80 years old is one-third as long as their counterparts without ESRD, and for dialysis patients over 80 years old, it is one-half as long as that of their counterparts without ESRD.</text>
+ </paragraph><paragraph id="H6DBC258250294C0DA9C7D5F9B486C1A8"><enum>(3)</enum><text>On average, hemodialysis patients are hospitalized nearly twice per year and about 30 percent have an unplanned rehospitalization within the 30 days following discharge, contributing to high costs for treating ESRD Medicare beneficiaries.</text>
+ </paragraph><paragraph id="HEA2E8DBB75C34C37A68C615DB335C9BB"><enum>(4)</enum><text>There is a lack of innovative new devices for ESRD Medicare beneficiaries, in part because of the lack of reimbursement incentives for novel devices.</text>
+ </paragraph></section><section id="H59C44949AEE148BB8801C9559C8926B1"><enum>3.</enum><header>Increasing patient access to innovative devices for the treatment of ESRD</header><text display-inline="no-display-inline">As part of the promulgation of the annual rule for the Medicare end stage renal disease prospective payment system under section 1881(b)(14) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395rr">42 U.S.C. 1395rr(b)(14)</external-xref>) for calendar year 2020, the Secretary of Health and Human Services (in this section referred to as the <quote>Secretary</quote>) shall establish a process to provide—</text>
+ <paragraph id="H06C5AE3873974396897860D0911C0AFC"><enum>(1)</enum><text>an add-on payment adjustment for a new medical device reviewed by the Food and Drug Administration under section 513(f)(2) or section 515 of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360c">21 U.S.C. 360c</external-xref>, 360e) on or after January 1, 2020, and furnished to a beneficiary for the diagnosis, treatment, or management of end stage renal disease; and</text>
+ </paragraph><paragraph id="H6D28C08B37E14D6190ECFE21A4EDDFE3"><enum>(2)</enum><text>for such adjustment to be implemented in a nonbudget neutral manner under subparagraph (D)(iv) of such section 1881(b)(14).</text>
+			</paragraph></section></legis-body></bill>
+
+

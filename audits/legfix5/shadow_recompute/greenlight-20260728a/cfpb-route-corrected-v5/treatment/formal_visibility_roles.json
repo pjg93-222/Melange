@@ -1,0 +1,48 @@
+{
+  "schema": "party-elite-influence-roles-v3",
+  "verified_on": "2026-07-14",
+  "valid_until": "2027-01-03",
+  "definition": "Current formal chamber or party leadership only. Constitutional officers without a party leadership office are excluded.",
+  "influence_bonus_contract": {
+    "method": "Additive party-elite positional term on the existing committee/influence raw score. A listed elite who is also a committee or subcommittee Chair or Ranking Member receives zero additional term because that authority is already in the base committee score.",
+    "3.0": "Speaker",
+    "2.0": "majority or minority floor leader",
+    "1.5": "majority or minority whip",
+    "1.0": "other listed chamber or party leadership office"
+  },
+  "sources": {
+    "house": "https://www.house.gov/leadership",
+    "senate": "https://www.senate.gov/senators/leadership.htm?lv=true",
+    "senate_democratic": "https://www.democrats.senate.gov/newsroom/press-releases/majority-leader-schumer-announces-senate-democratic-leadership-team-for-the-119th-congress",
+    "senate_republican": "https://www.republican.senate.gov/2024/11/13/barrasso-announces-senate-gop-leadership-for-the-119th-congress/"
+  },
+  "members": {
+    "Amy Klobuchar": {"office": "Senate Democratic Steering and Policy Committee Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Bernard Sanders": {"office": "Senate Democratic Outreach Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Brian Schatz": {"office": "Senate Democratic Chief Deputy Whip", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Catherine Cortez Masto": {"office": "Senate Democratic Outreach Vice Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Charles Schumer": {"office": "Senate Democratic Leader", "role_type": "party_elite", "influence_bonus": 2.0},
+    "Christopher Murphy": {"office": "Senate Democratic Deputy Conference Secretary", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Cory Booker": {"office": "Senate Democratic Strategic Communications Committee Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Elizabeth Warren": {"office": "Senate Democratic Conference Vice Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Hakeem Jeffries": {"office": "House Democratic Leader", "role_type": "party_elite", "influence_bonus": 2.0},
+    "James Lankford": {"office": "Senate Republican Conference Vice Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Jay Obernolte": {"office": "House Republican Policy Committee Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Joe Neguse": {"office": "House Assistant Democratic Leader", "role_type": "party_elite", "influence_bonus": 1.0},
+    "John Barrasso": {"office": "Senate Majority Whip", "role_type": "party_elite", "influence_bonus": 1.5},
+    "John Thune": {"office": "Senate Majority Leader", "role_type": "party_elite", "influence_bonus": 2.0},
+    "Katherine Clark": {"office": "House Democratic Whip", "role_type": "party_elite", "influence_bonus": 1.5},
+    "Lisa McClain": {"office": "House Republican Conference Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Mark Warner": {"office": "Senate Democratic Conference Vice Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Mike Johnson": {"office": "Speaker of the House", "role_type": "party_elite", "influence_bonus": 3.0},
+    "Pete Aguilar": {"office": "House Democratic Caucus Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Richard Durbin": {"office": "Senate Democratic Whip", "role_type": "party_elite", "influence_bonus": 1.5},
+    "Shelley Capito": {"office": "Senate Republican Policy Committee Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Steve Scalise": {"office": "House Majority Leader", "role_type": "party_elite", "influence_bonus": 2.0},
+    "Tammy Baldwin": {"office": "Senate Democratic Conference Secretary", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Ted Lieu": {"office": "House Democratic Caucus Vice Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Tim Scott": {"office": "National Republican Senatorial Committee Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Tom Cotton": {"office": "Senate Republican Conference Chair", "role_type": "party_elite", "influence_bonus": 1.0},
+    "Tom Emmer": {"office": "House Majority Whip", "role_type": "party_elite", "influence_bonus": 1.5}
+  }
+}

@@ -1,0 +1,31 @@
+﻿== artifact inventory (live root) ==
+path                                                              bytes  mtime(local)            sha256[:16]
+ranks_python.json                                                540097  2026-09-18 01:52:04     b9444ad01c525124
+category_stance.json                                            1598026  2026-09-17 02:14:04     cc03649b4f641bb0
+dashboard_data.json                                            12515286  2026-09-18 02:23:53     7d15dfbe686efebc
+archive_leg.json                                                 120137  2026-09-17 00:45:22     c9e519f8ab9ecd0d
+legislation_routing_audit.json                                  5740582  2026-09-17 00:45:23     50ef1c89ae4c7788
+Moneyball Main Version - Blended.xlsx                          11316932  2026-09-18 02:09:29     2d2c6b2572b4d567
+Moneyball Dashboard.html                                       12669435  2026-09-18 02:24:02     4b369f9dab9d7ed6
+cu-member-desk.html                                            18808024  2026-09-18 02:35:46     2b5f78e854888bff
+per_topic_alloc.json                                              71078  2026-09-18 02:10:09     4585b5b7017a5a34
+data\lobbying\per_topic_coalition.json                            20442  2026-09-18 02:11:09     0dd0f5975193c79f
+data\money\budget_frontier.json                                   67284  2026-09-18 02:13:13     b3b73b012e4f5e87
+data\money\budget_frontier_electoral.json                         84903  2026-09-18 02:16:26     2b0446635e47e9f7
+data\legislation\bill_directions.csv                               6877  2026-07-25 12:52:45     9168e7a3aa72ea76
+data\legislation\bill_overrides.csv                                 883  2026-07-25 12:52:52     7bffeaa78b9658fb
+manual_bill_evidence.csv                                         223983  2026-07-29 00:40:26     3b5d873c7cff0add
+congress_bills_archive_20260624_115822.xlsx                     1832697  2026-07-01 17:28:33     4ca1c81af641a2e2
+congress_bills_archive_20260825_115305.xlsx                      814147  2026-08-25 11:54:47     3abb133d7291915f
+Sentinel Bill Ledger.xlsx                                       4115616  2026-09-17 00:42:55     1df0d753b261ba8c
+backups\bill_directions.PRE-LEGFIX3.csv                          ABSENT  -                       -
+vote_category_lean.json                                          337096  2026-09-17 02:12:34     32ab79b9a5f74131
+.pipeline_run.lock                                               ABSENT  -                       -
+
+== glob of congress_bills_archive_*.xlsx, sorted(), as the producer sorts it ==
+  [0] congress_bills_archive_20260624_115822.xlsx
+  [1] congress_bills_archive_20260825_115305.xlsx
+  SELECTED by [-1] -> congress_bills_archive_20260825_115305.xlsx
+
+== excel lock files (~$*) at root ==
+  (none listed above == workbook not held open by Excel)

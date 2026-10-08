@@ -5,6 +5,9 @@ Winnability of a member on a topic:  pflip(n) = a/(a+b),
   a = WM*pm*(cu+1)/((cu+1)+HALFF*R) + WP*nA/mAt   (party-weighted proximity to champions)
   b = WM*pm*(ind+1)/((ind+1)+HALFF*R) + WP*nB/mBt (party-weighted proximity to opponents)
 CU money raises a with saturating (Michaelis-Menten) returns; competitor money raises b.
+COMPET_MULT (Paul 2026-10-05, default OFF -> c==1.0 exactly): the competitiveness multiplier c scales EFFECTIVE dollars on
+BOTH legs, a: (c*cu+1)/((c*cu+1)+HALFF*R), b: (c*ind+1)/((c*ind+1)+HALFF*R); pm still multiplies both and the same c sits on
+both, so equal money and equal peer pull stay at pflip 0.5. Real dollars (the $10k cap, the pot) are never scaled.
 PHYSICS (obs-(e) ruling 2026-08-17): proximity here uses party-only cpf_pressure -- NOT the
 bridge-amplified cpf_diffusion of the cascade engines (the two-physics design). Earlier
 docstring prose claiming bridge amplification and sqrt returns was stale; corrected, code
@@ -84,11 +87,12 @@ def camp(t): return 'pro' if t in PRO else 'anti' if t in ANTI else 'neu'
 # (Byrne susceptibility x F&H electoral incentive x Linde-Vis PT domain); peer channel is handled by
 # edge_mult inside the cascade engines. Neutral fallback = legacy.
 rc=MC.rc
-def pflip(cu_n,ind_n,R_n,nA_n,nB_n,mAt,mBt,pm=1.0):
+CM={n:MC.cmult(n) for n in members}   # COMPET_MULT: per-member competitiveness multiplier, precomputed once (dial OFF -> all exactly 1.0, no file read); optimize/salience/audit read fm.CM
+def pflip(cu_n,ind_n,R_n,nA_n,nB_n,mAt,mBt,pm=1.0,cm=1.0):
     # capacity-aware saturating money pull (Michaelis-Menten form): $X moves a big-receipts member less,
     # diminishes within a member, and matches money_response's curve -> one consistent diminishing-returns model.
-    a=WM*pm*(cu_n+1)/((cu_n+1)+HALFF*R_n)+WP*nA_n/mAt
-    b=WM*pm*(ind_n+1)/((ind_n+1)+HALFF*R_n)+WP*nB_n/mBt
+    a=WM*pm*(cm*cu_n+1)/((cm*cu_n+1)+HALFF*R_n)+WP*nA_n/mAt   # cm=1.0 (COMPET_MULT off) is bitwise the old arithmetic
+    b=WM*pm*(cm*ind_n+1)/((cm*ind_n+1)+HALFF*R_n)+WP*nB_n/mBt
     return a/(a+b) if a+b>0 else 0.0
 _cache={}
 _priority_cache={}
@@ -139,5 +143,5 @@ def topic_setup(cat,MAT):
 def flip_value(cat,MAT,cu_state,ind_state):
     """Expected weighted flips on a topic = sum tgt*pflip, given a money state."""
     cs,campT,nA,nB,mAt,mBt,tgt=topic_setup(cat,MAT)
-    return sum(tgt[n]*pflip(cu_state[n],ind_state[n],R[n],nA[n],nB[n],mAt,mBt,rc(n,'pressure_mult')) for n in members)
+    return sum(tgt[n]*pflip(cu_state[n],ind_state[n],R[n],nA[n],nB[n],mAt,mBt,rc(n,'pressure_mult'),CM[n]) for n in members)
 cats=list(cat2sc.keys())

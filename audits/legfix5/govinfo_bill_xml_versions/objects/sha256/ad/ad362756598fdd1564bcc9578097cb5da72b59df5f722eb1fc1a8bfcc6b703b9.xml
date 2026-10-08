@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="HF8886941011043179D288BD39BEA689B" public-private="public" resolution-type="house-joint" star-print="no-star-print" key="H">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HJ 156 IH: Directing the President, pursuant to the War Powers Resolution, to comply with the 60-day use of force and 30-day phased withdrawal requirements regarding the use of the United States Armed Forces in Operation Epic Fury in Iran.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IA</distribution-code>
+<congress display="yes">119th CONGRESS</congress>
+<session display="yes">2d Session</session>
+<legis-num display="yes">H. J. RES. 156</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20260416">April 16, 2026</action-date>
+<action-desc><sponsor name-id="F000466">Mr. Fitzpatrick</sponsor> submitted the following joint resolution; which was referred to the <committee-name committee-id="HFA00">Committee on Foreign Affairs</committee-name></action-desc>
+</action>
+<legis-type>JOINT RESOLUTION</legis-type>
+<official-title display="yes">Directing the President, pursuant to the War Powers Resolution, to comply with the 60-day use of force and 30-day phased withdrawal requirements regarding the use of the United States Armed Forces in Operation Epic Fury in Iran.</official-title>
+</form>
+<resolution-body style="OLC" id="H3DCFD1D2D8054771B0ECB36EBBA63335"> 
+<section id="HC44AEA441452421DBD0AFB173F6A24C6" section-type="section-one"><enum>1.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text> <paragraph id="H8ABE136588114168902064C49B7B545A"><enum>(1)</enum><text>The Islamic Republic of Iran is the world’s largest state sponsor of terrorism and provides financial and material support to foreign terrorist organizations, including Hamas, Hezbollah, and the Houthis.</text></paragraph> 
+<paragraph id="HC52F96884D024C44871391CB6E8B1ACB"><enum>(2)</enum><text>The Islamic Republic of Iran poses a direct threat to the United States and is responsible for the deaths of hundreds of Americans.</text></paragraph> <paragraph id="HA940E96CB1564A39A609DF2380EEF026"><enum>(3)</enum><text>The Islamic Republic of Iran has suppressed their own people, implementing total internet blackouts, extrajudicial killings, forced disappearances, torture, sexual and gender-based violence, detention and imprisonment, criminalization of libel, and restrictions on religious freedom.</text></paragraph> 
+<paragraph id="HDC69C7906C0B40F09384B2212CB043C3"><enum>(4)</enum><text>The Islamic Republic of Iran has continued to amass a stockpile of enriched uranium and have blocked access to their nuclear sites, according to the Director General of the International Atomic Energy Agency, Rafael Grossi.</text></paragraph> <paragraph id="HAE495ED681174CF0B2E5B35E96516562"><enum>(5)</enum><text>On February 28, 2026, United States Central Command, joint with Israel, commenced Operation Epic Fury at the direction of the President of the United States, and included the launching of airstrikes on Iran, targeting military and governments sites, and the assassination of Supreme Leader Ali Khamenei, as well as other Iranian Officials.</text></paragraph> 
+<paragraph id="H8C320C71483649618E5122B9740F9E5F"><enum>(6)</enum><text>Operation Epic Fury has since led to retaliatory attacks by Iran and their proxies against Israel, and the closure of the Strait of Hormuz.</text></paragraph> <paragraph id="H33DA8141F5174505AD61DF2E7C99FC76"><enum>(7)</enum><text display-inline="yes-display-inline">Since the start of Operation Epic Fury, 13 United States service members have been killed, and 381 have been wounded, according to United States Central Command.</text></paragraph> 
+<paragraph id="HCB9FC91321CD491E84D51E9990BF4B38"><enum>(8)</enum><text>Under article I, section 8 of the Constitution, Congress holds the sole power to declare war, and the 1973 War Powers Resolution limits the President’s ability to initiate military action without authorization, requiring troop withdrawal within 60 days unless Congress authorizes continued engagement.</text></paragraph></section> <section id="H6B21877D1DAA4790B38162C33B81C9C4" section-type="subsequent-section"><enum>2.</enum><header>Termination of the use of military force</header> <subsection id="H881C288A67BB4AC6AED8F02A0DA114FA"><enum>(a)</enum><header>Termination required</header><text display-inline="yes-display-inline">Consistent with requirements of section 5(b) of the War Powers Resolution (<external-xref legal-doc="usc" parsable-cite="usc/50/1544">50 U.S.C. 1544(b)</external-xref>), not later than 60 days (subject to subsection (b)) after the commencement of Operation Epic Fury, the President shall terminate the use of military forces regarding this operation in Iran and shall withdraw the Armed Forces from Iran in accordance with section 2 not later than 30 days thereafter.</text></subsection> 
+<subsection id="H2178AE8BE265440AB9E38A34718A27E3"><enum>(b)</enum><header>Tolling of time period</header><text display-inline="yes-display-inline">Any day that is on or after the commencement of Operation Epic Fury during which the United States engages in cease-fire negotiations with the Government of Iran or has entered into a negotiated cease-fire shall not count as one of the 60 days described in subsection (a).</text></subsection></section> <section id="HF9B30A3AAD2E43EDAE72B84C12D6B09D"><enum>3.</enum><header>Phased withdrawal</header><text display-inline="no-display-inline">Pursuant to section 5(b) of the War Powers Resolution (<external-xref legal-doc="usc" parsable-cite="usc/50/1544">50 U.S.C. 1544(b)</external-xref>) and unless otherwise explicitly authorized by a declaration of war or a specific congressional authorization for use of military force against Iran, Congress directs the President to begin the phased removal of the Armed Forces from Iran, other than those elements of the Armed Forces that may be necessary to defend the United States or an ally or partner of the United States from imminent attack, or prevent the procurement of a nuclear weapon, to the extent that the President complies fully with the requirements of section 5(b) of the War Powers Resolution (<external-xref legal-doc="usc" parsable-cite="usc/50/1544">50 U.S.C. 1544(b)</external-xref>) with respect to any such use of the Armed Forces.</text></section> 
+<section id="H2BAFC500B15B4702B04DE71754716EAE"><enum>4.</enum><header>Rule of construction regarding intelligence sharing</header><text display-inline="no-display-inline">Nothing in this joint resolution may be construed to influence or disrupt any intelligence, counterintelligence, or investigative activities relating to threats in or emanating from Iran conducted by, or in conjunction with, the United States Government involving—</text> <paragraph id="H558B6BAF3F604654B651BCB6F708928A"><enum>(1)</enum><text>the collection of intelligence;</text></paragraph> 
+<paragraph id="H1F2D98F907A24CB0B9C713D99A8D1B82"><enum>(2)</enum><text>the analysis of intelligence; or</text></paragraph> <paragraph id="HF221888EA1F443CF9585DA425A67E55B"><enum>(3)</enum><text>the sharing of intelligence between the United States and any coalition partner if the President determines such sharing is appropriate and in the national security interests of the United States.</text></paragraph></section> 
+</resolution-body>
+</resolution> 
+
+

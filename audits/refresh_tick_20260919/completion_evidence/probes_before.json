@@ -1,0 +1,36 @@
+{
+  "modified_between_ticks": {
+    "code": 0,
+    "outcome": "PUBLISHED",
+    "seconds": 8.18,
+    "tail": "23:02Z] financial_other discovery (review sheet) START   (timeout 1800s, COMPUTING)\r\n[2026-09-20 04:23:02Z] financial_other discovery (review sheet) OK        0s  stub financial_other_discovery.py wrote 60 rows (invocation 2)\r\n[2026-09-20 04:23:02Z] forecast ledger (freeze+score) START   (timeout 900s, COMPUTING)\r\n[2026-09-20 04:23:02Z] forecast ledger (freeze+score) OK        0s  stub forecast_ledger.py wrote 60 rows (invocation 2)\r\n[2026-09-20 04:23:02Z] PUBLISHED \u2014 every evidence source refreshed inside its cadence window\r\n[2026-09-20 04:23:03Z] collected 26 superseded manifest file(s)\r\n[2026-09-20 04:23:03Z] ===== REFRESH TICK PUBLISHED (exit 0) \u2014 26 step(s) run, 26 ok, 0 filed =====\r\n\r\n",
+    "root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_rds05fad",
+    "bad_manifest_outputs": [
+      "data/out/fetch-congressional-record-py-crec---since.csv"
+    ]
+  },
+  "zero_then_noop": {
+    "first": {
+      "code": 1,
+      "outcome": "COLLECTED_NOT_PUBLISHED",
+      "seconds": 0.55,
+      "tail": "TART   (timeout 3000s, COLLECTING)\r\n[2026-09-20 04:23:04Z] CREC floor speeches            OK        0s  stub fetch_congressional_record.py|crec|--since wrote 60 rows (invocation 2)\r\n[2026-09-20 04:23:04Z] CREC floor speeches            COVERAGE SUSPECT \u2014 1 file(s) that carried >= 50 rows now carry none\r\n[2026-09-20 04:23:04Z] compute phase wanted: evidence is not currently publishable (CREC floor speeches: coverage is SUSPECT)\r\n[2026-09-20 04:23:04Z] BLOCKER \u2014 CREC floor speeches: coverage is SUSPECT\r\n[2026-09-20 04:23:04Z] NOT ELIGIBLE \u2014 1 evidence source(s) block publication\r\n[2026-09-20 04:23:04Z] ===== REFRESH TICK COLLECTED_NOT_PUBLISHED (exit 1) \u2014 1 step(s) run, 0 ok, 0 filed =====\r\n\r\n"
+    },
+    "second": {
+      "code": 0,
+      "outcome": "PUBLISHED",
+      "seconds": 5.2,
+      "tail": ":23:09Z] financial_other discovery (review sheet) START   (timeout 1800s, COMPUTING)\r\n[2026-09-20 04:23:09Z] financial_other discovery (review sheet) OK        0s  stub financial_other_discovery.py wrote 60 rows (invocation 1)\r\n[2026-09-20 04:23:09Z] forecast ledger (freeze+score) START   (timeout 900s, COMPUTING)\r\n[2026-09-20 04:23:09Z] forecast ledger (freeze+score) OK        0s  stub forecast_ledger.py wrote 60 rows (invocation 1)\r\n[2026-09-20 04:23:09Z] PUBLISHED \u2014 every evidence source refreshed inside its cadence window\r\n[2026-09-20 04:23:09Z] collected 1 superseded manifest file(s)\r\n[2026-09-20 04:23:09Z] ===== REFRESH TICK PUBLISHED (exit 0) \u2014 27 step(s) run, 27 ok, 0 filed =====\r\n\r\n"
+    },
+    "root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_fj7ymj5d",
+    "coverage": "OK"
+  },
+  "locked_manifest_due_zero": {
+    "code": 0,
+    "outcome": "PUBLISHED",
+    "seconds": 13.1,
+    "tail": "23:26Z] financial_other discovery (review sheet) START   (timeout 1800s, COMPUTING)\r\n[2026-09-20 04:23:26Z] financial_other discovery (review sheet) OK        0s  stub financial_other_discovery.py wrote 60 rows (invocation 2)\r\n[2026-09-20 04:23:27Z] forecast ledger (freeze+score) START   (timeout 900s, COMPUTING)\r\n[2026-09-20 04:23:27Z] forecast ledger (freeze+score) OK        0s  stub forecast_ledger.py wrote 60 rows (invocation 2)\r\n[2026-09-20 04:23:27Z] PUBLISHED \u2014 every evidence source refreshed inside its cadence window\r\n[2026-09-20 04:23:27Z] collected 26 superseded manifest file(s)\r\n[2026-09-20 04:23:27Z] ===== REFRESH TICK PUBLISHED (exit 0) \u2014 27 step(s) run, 27 ok, 0 filed =====\r\n\r\n",
+    "root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_zqavw9wt",
+    "coverage": "OK"
+  }
+}

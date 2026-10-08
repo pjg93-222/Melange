@@ -1,0 +1,104 @@
+====================================================================================================
+N14 Q2  PROVENANCE: WHICH SIDE WAS WRITTEN LAST, AND BY WHAT   run 2026-09-19T12:54:25
+====================================================================================================
+artifact                                                       mtime                         bytes  sha256[:16]
+WORKBOOK (the sheet)                                           2026-09-19T03:33:37        11316197  75e14042fd29333a
+workbook copy in scratch                                       2026-09-19T12:47:33        11316197  75e14042fd29333a
+BASE tone CSV (engine)                                         2026-06-30T18:50:17         1080244  6f2f926d08196a12
+REFRESH tone CSV (engine)                                      2026-09-16T23:44:44          134925  393a983ce6d9c7fa
+refresh feed receipt                                           2026-09-16T23:44:49            5404  781ec2713ade3a58
+CU_Press_Stance_Tone.xlsx (Draft)                              2026-06-30T18:50:28          386737  de4f5ce2f6b21b29
+CU_Press_Stance_Tone.xlsx (LIVE root)                          2026-06-30T18:59:20          489295  1f45a8be2a47784b
+cu_press_releases_scored.xlsx (Draft)                          2026-06-24T10:15:35         1052014  5dc64e07a0bf1d14
+cu_press_releases_scored.xlsx (LIVE)                           2026-06-30T00:10:24         1074978  52b44a175cbbacac
+cu_stance_label_set.csv (Draft)                                2026-06-30T18:56:09         1454373  bcdd9e8f82937a8e
+cu_stance_label_set.xlsx (Draft)                               2026-06-23T22:45:01          576168  783d465c2a881337
+cu_stance_label_set.csv (LIVE root)                            MISSING                           -  -
+cu_stance_label_set.xlsx (LIVE root)                           2026-06-30T00:17:20          575997  3a3bd0a2944d697b
+press_stance_overrides.json (LIVE)                             2026-07-19T00:35:31            6205  404d5a6240ee636d
+press_stance_overrides.json (worktree overlay)                 2026-09-18T19:22:05            6325  e3b01f21f47299b0
+press_stance_overrides PRE-CFPBFIX snapshot                    2026-06-29T19:21:18            1362  d040829928c39f00
+press_date_overrides.json (LIVE)                               2026-06-28T23:31:55           43566  63fe7a48cf0a3163
+press_overrides_from_dashboard.json (the dashboard export queu 2026-07-16T21:06:04            1332  2149fec1290f99b6
+cfpb_stance_review_queue_2026-07-16.csv                        2026-07-16T21:12:22           35862  bfac2023573d1e70
+press_stance_final.csv (the STACK the engine signs with)       2026-09-19T03:19:23          769125  78f4babdec8eb4a9
+press_component_meta.json (engine press run receipt)           2026-09-19T03:25:33            9652  5356d7db745785d5
+
+WORKBOOK is NEWER than the BASE tone CSV by 80.4 days
+WORKBOOK is NEWER than the REFRESH tone CSV by 2.2 days
+
+----------------------------------------------------------------------------------------------------
+-- 1. WHAT LAST WROTE EACH SIDE --
+Workbook mtime is a FILE mtime, not a SHEET mtime: the chain writes many other sheets in
+the same file.  Repo scripts that name sheet 'Press Release Articles':
+   ./audit/dashboard_integrity.py                           reads (writes-somewhere)
+   ./network/corrected_signals.py                           reads (read-only)
+   ./surfaces/desk_press_source.py                          reads (writes-somewhere)
+   ./surfaces/make_member_desk.py                           reads (writes-somewhere)
+   ./tests/surfaces/test_desk_press_source.py               reads (read-only)
+
+No repo script WRITES that sheet's rows.  Quoted, make_member_desk.py:1658-1659 --
+   'No script in the chain writes 'Press Release Articles' - it comes from the external
+    R pipeline - so the desk showed a frozen corpus'
+and fec/stance/apply_press_overrides.py:19-21 --
+   'the COM re-flow below rebuilds 'Press Release - Raw' from Draft Systems'
+    cu_press_stance_tone.csv, which is FROZEN at 2026-06-30'
+
+BASE tone CSV: the only repo scripts that open it for WRITING are
+   fec/stance/apply_press_dedup.py:12       (ST = MB_DRAFT + cu_press_stance_tone.csv)
+   fec/stance/apply_press_overrides.py:36   (same; RETIRED at line 26, raises SystemExit
+                                             unless APPLY_PRESS_OVERRIDES_LEGACY=1)
+   both write the WORKBOOK via Excel COM, not the CSV; the CSV is their INPUT.
+   Its mtime 2026-06-30T18:50:17 equals the Draft Systems CU_Press_Stance_Tone.xlsx mtime 2026-06-30T18:50:28
+   -- one external R export, not a chain step.
+
+REFRESH tone CSV: written by fec/collect/build_press_engine_feed.py (the only producer;
+   it is the script that emits score_graded for a refresh row) and gated by
+   press_stream.validate_refresh_receipt against press_refresh_feed_receipt.json.
+
+----------------------------------------------------------------------------------------------------
+-- 2. THE REFRESH RECEIPT (the only chain-written part of the engine stream) --
+   schema press-refresh-engine-feed-v1  status ACTIVE_TYPED_SUPPLEMENT  promotion CUMULATIVE_ACCEPTED_RUN_LEDGER
+   accepted runs: 3
+      {"collection_intake": {"generated_at": "2026-08-31T05:18:10.752600+00:00", "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine
+      {"collection_intake": {"generated_at": "2026-09-02T21:20:52.047776+00:00", "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine
+      {"collection_intake": {"generated_at": "2026-09-04T22:24:34.933917+00:00", "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine
+   producer named in the receipt: (not named)
+
+----------------------------------------------------------------------------------------------------
+-- 3. DID A RECORDED RE-ADJUDICATION MOVE THE CSV STANCE COLUMNS AFTER THE SHEET? --
+The CSV stance columns can only move if the CSV FILE moved.  Base tone CSV mtime
+   2026-06-30T18:50:17  <-- 2026-06-30, BEFORE the workbook (2026-09-19T03:33:37)
+and BEFORE the 2026-07-15 CFPB re-correction.  So no 07-15 edit is IN the base CSV.
+
+Where the 2026-07-15 re-adjudication actually landed (PRE-CFPBFIX snapshots):
+   category_stance.PRE-CFPBFIX-20260715_161807.json             2026-07-15T12:26:09
+   cu_valence_registry.PRE-CFPBFIX-20260715_161807.json         2026-07-07T23:09:14
+   press_stance_overrides.PRE-CFPBFIX-20260715_161807.json      2026-06-29T19:21:18
+   tweet_stance_final.csv.PRE-CFPBFIX-20260715_161807.csv       2026-07-07T21:54:54
+   NOTE: cu_press_stance_tone.csv has NO PRE-CFPBFIX snapshot -- it was not rewritten.
+
+press_stance_overrides.json  corrections: PRE-CFPBFIX 4 -> LIVE 23 (worktree copy 23)
+   corrections ADDED after the 07-15 snapshot : 19
+   corrections whose STANCE was CHANGED       : 0
+      +8  Paul gold 2026-07-15 -> support
+      +2  Paul gold 2026-07-18 (desk review, Brian Fitzpatrick - ' -> support
+      +1  Paul gold 2026-07-15 -> neutral
+      +1  Paul gold 2026-07-16: Barr-led CRA repeal effort is pro- -> support
+      +1  Paul gold 2026-07-15 -> oppose
+      +1  Paul gold 2026-07-16 (desk review): CFPB’s regulatory ac -> support
+      +1  Paul gold 2026-07-16 (desk review): Bills introduced in  -> support
+      +1  Paul gold 2026-07-16 (desk review): Simpson, Senate Bank -> support
+      +1  Paul gold 2026-07-16 (desk review): Credit union board m -> support
+      +1  Paul gold 2026-07-18 (desk review, Brian Fitzpatrick): m -> support
+      +1  Paul gold 2026-07-18 (desk review, Brian Fitzpatrick): c -> support
+
+   worktree-overlay-only corrections (not in the LIVE file): 0
+
+press_overrides_from_dashboard.json (the dashboard-exported override queue): 4 rows, mtime 2026-07-16T21:06:04
+   of those already merged into the LIVE ledger: 4 ; NOT merged: 0
+
+cfpb_stance_review_queue_2026-07-16.csv: 94 rows, columns ['queue_reason', 'id', 'member', 'party', 'date', 'text', 'registry_read', 'classical_read', 'api_read', 'current_label', 'PAUL_GOLD']
+   by channel/source: {'?': 94}
+wrote n14_q2_provenance.json
+DONE N14 Q2

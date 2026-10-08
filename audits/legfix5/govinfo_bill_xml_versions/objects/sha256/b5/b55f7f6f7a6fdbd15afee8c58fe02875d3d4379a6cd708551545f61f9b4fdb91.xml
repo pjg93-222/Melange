@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HF9662D97B5D44BE98F3118E364C5AA6C" public-private="public" key="H" bill-type="olc"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 5351 IH: Prioritizing Readiness and Competitiveness Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-09-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code> 
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 5351</legis-num> 
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20210923">September 23, 2021</action-date> 
+<action-desc><sponsor name-id="H001091">Mrs. Hinson</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAP00">Committee on Appropriations</committee-name>, and in addition to the Committees on <committee-name committee-id="HAS00">Armed Services</committee-name>, <committee-name committee-id="HBA00">Financial Services</committee-name>, and <committee-name committee-id="HFA00">Foreign Affairs</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To ensure the United States maintains a competitive edge over China, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H31AE094294B14B74B8D96E76600A42E8" style="OLC"> 
+<section id="H665173526E6344DBA341790C7C828E74" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Prioritizing Readiness and Competitiveness Act</short-title></quote> or the <quote><short-title>PRC Act</short-title></quote>.</text> </section> <section id="H48187320F00C486285CFCDE4D7C4BB3E"><enum>2.</enum><header>Statement of policy</header><text display-inline="no-display-inline">It is the policy of the United States that—</text> 
+<paragraph id="H894B88E6C525473EBF5C15C8A59C33D8"><enum>(1)</enum><text>great power competition with the People’s Republic of China will define the future of the 21st century;</text></paragraph> <paragraph id="H22CAE9B8F4D540D187929C76597199F4"><enum>(2)</enum><text>the People’s Republic of China is a revisionist power that seeks to upend the international system in ways that are inimical to United States national interests;</text></paragraph> 
+<paragraph id="H8733B36C45104147BEFD8FE28F14553E"><enum>(3)</enum><text>great power competition with the People’s Republic of China is global in nature and requires a whole-of-government response;</text></paragraph> <paragraph id="H2C5579110D894833BE2BBD3F749BF744"><enum>(4)</enum><text>resilient domestic manufacturing, a strong and advanced United States Navy, and an innovative economy are critical to succeeding in great power competition; and</text></paragraph> 
+<paragraph id="H81E0DFBB75874C6697581ABE08BD04B9"><enum>(5)</enum><text>promoting and supporting new technological research and development will be necessary to maintain a competitive advantage and effectively combat hostile efforts by the Government of the People’s Republic of China.</text></paragraph></section> <section id="H112A1F0CE3B74C949BD5807F82B193CD"><enum>3.</enum><header>Transfer of certain unexpended funds related to Afghanistan for the purpose of building a resilient domestic industrial base and strengthening defense technology innovation</header> <subsection id="H611DA9393D7141BEA4E0A65C2875A404"><enum>(a)</enum><header>In general</header><text>The President shall transfer to each of the following appropriations accounts for the following purposes an amount equal to one-third of the total amount rescinded under subsection (b):</text> 
+<paragraph id="H120DA67B87B448EFAE922343F167390B"><enum>(1)</enum><text>The Defense Production Act purchases account for activities by the Department of Defense pursuant to sections 108, 301, 302, and 303 of the Defense Production Act of 1950 (<external-xref legal-doc="usc" parsable-cite="usc/50/4518">50 U.S.C. 4518</external-xref>, 4531, 4532, 4533).</text></paragraph> <paragraph id="HFABD7E147912498987B8E9F70ACBFBF7"><enum>(2)</enum><text>The Shipbuilding and Conversion, Navy account of the Department of Defense.</text></paragraph> 
+<paragraph id="HBA6576A81D7D4A4DA802EEC31BBDF692"><enum>(3)</enum><text>The research, development, test, and evaluation, Defense-wide account of the Department of Defense, to be available for the Defense Advanced Research Projects Agency to carry out projects related to strengthening the United States’ global advantage in strategic technologies, which may include aerospace, robotics, artificial intelligence, information technology, new and advanced materials, biotechnology, advanced machinery, telecommunications, and energy and power generation.</text></paragraph></subsection> <subsection id="H1C69ACA213134E1C88358EDC6E02035F"><enum>(b)</enum><header>Rescission of unexpended funds dedicated to maintaining a military and diplomatic presence in Afghanistan</header><text>The following amounts are hereby rescinded:</text> 
+<paragraph id="H0B1A036121A14355A843A5791C4D8936"><enum>(1)</enum><text>The unobligated balance of amounts made available to the Department of Defense for the Afghanistan Security Forces Fund.</text></paragraph> <paragraph id="H03F90B71A43649A3B846CAE9C86BED37"><enum>(2)</enum><text>Of the unobligated balance of amounts made available to the Department of State for Diplomatic Programs, all remaining funds relating to maintaining United States diplomatic personnel in Afghanistan.</text></paragraph> 
+<paragraph id="H846CE8619E99404F85054A0207426B86"><enum>(3)</enum><text>Of the unobligated balance of amounts made available for the Economic Support Fund, all remaining funds relating to implementing and supporting comprehensive strategies to combat corruption in Afghanistan, and for the reintegration of former Taliban and other extremists.</text></paragraph> <paragraph id="HC3308F3697D34234B20C5778C4DDBDFC"><enum>(4)</enum><text>Of the unobligated balance of amounts made available to the Department of State for the International Narcotics Control and Law Enforcement Fund, all remaining funds relating to programs in Afghanistan.</text></paragraph> 
+<paragraph id="H61A0423830DC4FAF9C8936C2BA7B642F"><enum>(5)</enum><text>Of the unobligated balance of amounts made available to the Department of State for International Military Education and Training programs, all remaining funds relating to training personnel of the Afghan security forces.</text></paragraph></subsection></section> </legis-body> </bill> 
+

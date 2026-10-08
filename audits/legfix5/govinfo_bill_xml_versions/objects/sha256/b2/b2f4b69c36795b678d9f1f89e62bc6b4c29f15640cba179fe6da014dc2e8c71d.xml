@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H8F8D8617FFB24EF3A22B4D4B0641D0E1" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 1657 IH: Lake Winnibigoshish Land Exchange Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-03-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 1657</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230317">March 17, 2023</action-date>
+<action-desc><sponsor name-id="S001212">Mr. Stauber</sponsor> (for himself, <cosponsor name-id="F000475">Mr. Finstad</cosponsor>, <cosponsor name-id="F000470">Mrs. Fischbach</cosponsor>, <cosponsor name-id="H001068">Mr. Huffman</cosponsor>, and <cosponsor name-id="N000191">Mr. Neguse</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HII00">Committee on Natural Resources</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To provide for a land exchange in the Chippewa National Forest, Minnesota, and for other purposes.</official-title>
+</form>
+<legis-body id="H0179D3E8D03B4C79BAD1EAA1A027AEB0" style="OLC">
+<section id="H82E82A997B234F0D96C9AA91E057D9FB" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Lake Winnibigoshish Land Exchange Act of 2023</short-title></quote>.</text></section> <section id="H091DDA09ECBA4CE89B88BDD534159AA4"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text>
+<paragraph id="H24E6430A397E4E8C9C3C6F8A7EF63556"><enum>(1)</enum><header>BWLT</header><text>The term <term>BWLT</term> means Big Winnie Land and Timber, LLC, a Minnesota Limited Liability Corporation. </text></paragraph> <paragraph id="H028408E510904D50848BB8E2E6FF1964"><enum>(2)</enum><header>Map</header><text display-inline="yes-display-inline">The term <term>Map</term> means the map entitled <quote>Proposed Land Exchange - Big Winnie Land and Timber LLC and Chippewa National Forest</quote> and dated January 4, 2023.</text></paragraph>
+<paragraph id="HA913B3879C4D460EAA39515F141CABD4"><enum>(3)</enum><header>Federal land</header><text display-inline="yes-display-inline">The term <term>Federal land</term> means the approximately 13.8 acres of Federal land in Itasca County, Minnesota, generally depicted as the <quote>Federal Parcel for Exchange</quote> on the Map.</text></paragraph> <paragraph id="H9F7B506A9E6F47378C85EF407A928A30"><enum>(4)</enum><header>Non-Federal land</header><text display-inline="yes-display-inline">The term <term>non-Federal land</term> means the approximately 38 acres of non-Federal land in Itasca County, Minnesota, generally depicted as the <quote>Private Parcel for Exchange</quote> on the Map.</text></paragraph>
+<paragraph id="H7EC97151C4CC43FD808D9412D2F4EB94"><enum>(5)</enum><header>Secretary</header><text>The term <term>Secretary</term> means the Secretary of Agriculture, acting through the Chief of the Forest Service.</text></paragraph></section> <section id="H643BA30D810A4F4D8507B356BC2C293C"><enum>3.</enum><header>Exchange of land</header> <subsection id="H8CC035193ABA4310A447EC42B078076A"><enum>(a)</enum><header>Exchange authorized</header><text>Subject to the provisions of this Act, if BWLT offers to convey the non-Federal land to the United States, the Secretary shall, not later than 180 days after receiving the offer—</text>
+<paragraph id="H0BBBB56A02CC41F6BD3474F8926CBE1F"><enum>(1)</enum><text>accept the offer; </text></paragraph> <paragraph id="H3EB95DDF86C140F1BF2BD2B54BDCEC4A"><enum>(2)</enum><text>convey to BWLT all right, title, and interest of the United States in and to the Federal land; and</text></paragraph>
+<paragraph id="HD2653E01761E4C7DAE07B88C5113233E"><enum>(3)</enum><text>accept from BWLT all right, title, and interest of BWLT in and to the non-Federal land.</text></paragraph></subsection> <subsection id="HA7F38B1A4E0B4535B5D36E5E0AF6CA06"><enum>(b)</enum><header>Requirements</header><text>The exchange under subsection (a) shall be—</text>
+<paragraph id="H54617E2650044D3A97B0E499555AE5A5"><enum>(1)</enum><text>subject to valid existing rights; and</text></paragraph> <paragraph id="H6ED828CE30AE4881B7328EB48DF6AE9D"><enum>(2)</enum><text>conditioned on a cash equalization payment made by BWLT to the United States in accordance with subsection (c) if, under the appraisals conducted in accordance with this Act, it is determined that the value of the Federal land exceeds the value of the non-Federal land. </text></paragraph></subsection>
+<subsection id="H19EA9E04FD5144B18503824C58C80CBB"><enum>(c)</enum><header>Equal value and cash equalization</header>
+<paragraph id="HC855D99AB51442DDA5FEB174CA71922A"><enum>(1)</enum><header>In general</header><text>Except as provided in paragraph (2), the exchange under subsection (a) shall be for equal value or the values shall be equalized by a cash payment.</text></paragraph> <paragraph id="HAAA14A40F7744732A82CE35E63ADC18F"><enum>(2)</enum><header>Exception</header><text>If the appraised value of the non-Federal land conveyed to the Secretary exceeds the appraised value of the Federal land, a cash equalization payment by the United States to BWLT is hereby waived and the amount of such waived payment shall be considered a donation by BWLT to the United States for all purposes of law. </text></paragraph></subsection>
+<subsection id="H9BD1090D641242E39F68EFFD4534BDDE"><enum>(d)</enum><header>Appraisals</header>
+<paragraph id="H867B361CEE65412FBCB8E549AFA2E124"><enum>(1)</enum><header>In general</header><text>The value of the land to be exchanged under this Act shall be determined by appraisals conducted by one or more independent and qualified appraisers mutually agreed to by the Secretary and BWLT. </text></paragraph> <paragraph id="HBB9CA1F08BC9443BBA474BC3777B36E1"><enum>(2)</enum><header>Appraisal standards</header><text>The Secretary shall complete an appraisal of the land to be exchanged under this Act in accordance with—</text>
+<subparagraph id="H565594560DB84E519D572A5828D95D38"><enum>(A)</enum><text>the Uniform Appraisal Standards for Federal Land Acquisitions; and</text></subparagraph> <subparagraph id="HB420F4BD91014970A732860E3C430333"><enum>(B)</enum><text>the Uniform Standards of Professional Appraisal Practice. </text></subparagraph></paragraph></subsection>
+<subsection id="HF86F25C4C65647C081275BB9C657E482"><enum>(e)</enum><header>Format</header><text>Title to the non-Federal land to be conveyed to the Secretary under this Act shall be in a format acceptable to the Secretary.</text></subsection> <subsection id="H6FDF9239C6424198A90B465DD5D75261"><enum>(f)</enum><header>Management of acquired land</header><text>The land acquired by the Secretary under subsection (a) shall be—</text>
+<paragraph id="HFEE6DD6FD47E49648D6CCF676E1FE826"><enum>(1)</enum><text>added to, and managed as part of, the Chippewa National Forest; and</text></paragraph> <paragraph id="H1643BE5D9C76496BA14E03BA257C5D6B"><enum>(2)</enum><text>managed in accordance with the laws, rules, and regulations pertaining to National Forest System lands.</text></paragraph></subsection>
+<subsection id="HB605E869C3594F8F939FD1CF48B06139"><enum>(g)</enum><header>Map and legal descriptions</header>
+<paragraph id="HBF67E4C2BBD34520AB5578D574C5CECA"><enum>(1)</enum><header>In general</header><text>As soon as practicable after the date of enactment of this Act, the Secretary shall finalize a Map and legal descriptions of all land to be conveyed under this Act.</text></paragraph> <paragraph id="H385FD2143B544414939A249BCB98BEFE"><enum>(2)</enum><header>Controlling document</header><text>In the case of a discrepancy between the Map and a legal description, the Map shall control. </text></paragraph>
+<paragraph id="HF0919C8DF1B141DC950432D881CE5960"><enum>(3)</enum><header>Corrections</header><text>The Secretary and BWLT, by mutual agreement, may correct any minor errors in the Map or in the legal descriptions, including with respect to the boundaries of the Federal land parcel and the non-Federal land parcel.</text></paragraph> <paragraph id="H52390D6C06344469BB7CCD581567E12B"><enum>(4)</enum><header>Map on file</header><text>The Map and legal descriptions shall be on file and available for public inspection in appropriate offices of the Forest Service.</text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

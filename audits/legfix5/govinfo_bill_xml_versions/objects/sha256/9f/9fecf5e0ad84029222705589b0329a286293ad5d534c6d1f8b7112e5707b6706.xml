@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H1280558122954559B8B0B6F9CC6F98E7" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 3111 IH: Grandfamily Housing Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-05-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 3111</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210511">May 11, 2021</action-date>
+<action-desc><sponsor name-id="M000312">Mr. McGovern</sponsor> (for himself and <cosponsor name-id="P000617">Ms. Pressley</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To provide grants to owners of intergenerational dwelling units, and for other purposes.</official-title>
+</form>
+<legis-body id="H4D1D357A2B6240F2839E93A417D20FBA" style="OLC">
+<section id="H33776CC6F11542A48894C06CBD71409C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Grandfamily Housing Act of 2021</short-title></quote>.</text></section> <section id="HE72BD9B447B54D29B0092BA796D3703D"><enum>2.</enum><header>Grant program for grandfamily housing</header> <subsection id="HC4036DFB7FC1487EB44AC96D98602868"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Title II of the LEGACY Act of 2003 is amended by adding at the end the following:</text>
+<quoted-block style="OLC" id="H6D9056DC1F8146648CAF51A8041F8876" display-inline="no-display-inline">
+<section id="H9467FBC4E2A34248989CF6D1F5BD7E1C"><enum>206.</enum><header>Grant program</header>
+<subsection id="HBB1098F0B103463B9AF0E66D05C670AC"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary shall, not later than 180 days after the date of the enactment of this section, establish a program to provide grants to owners of intergenerational dwelling units.</text></subsection> <subsection id="H8E66A95E5115423CB4AE3E23EB8BD11F"><enum>(b)</enum><header>Application</header><text display-inline="yes-display-inline">To be eligible to receive a grant under this section, an owner of an intergenerational dwelling unit shall submit an application to the Secretary at such time, in such manner, and containing such information as the Secretary may reasonably require.</text></subsection>
+<subsection id="H3E23299AE43C4095A07FF54DF3FE5DA9"><enum>(c)</enum><header>Use of grant amounts</header><text>An owner of an intergenerational dwelling unit that receives a grant under this section shall use amounts provided to cover costs associated with—</text> <paragraph id="H8E078FD0B14C4DB7B2E33534A44D1F79"><enum>(1)</enum><text>employing a service coordinator to—</text>
+<subparagraph id="HE7C15556A16749FE8237C84153DA3978"><enum>(A)</enum><text display-inline="yes-display-inline">provide onsite services to intergeneration families, including tutoring, health care services, and afterschool care; and </text></subparagraph> <subparagraph id="HEBFB8266BD284418AF0FA2946832A868"><enum>(B)</enum><text display-inline="yes-display-inline">coordinate with any local kinship navigator program (as described in section 474(a)(7) of the Social Security Act);</text></subparagraph></paragraph>
+<paragraph id="HB9A55FD9527C4EBBA43388111885022A"><enum>(2)</enum><text>facilitating outreach to intergenerational families as described in subsection (c);</text></paragraph> <paragraph id="H40C90C503A5E4C3B9F837DEE6709B383"><enum>(3)</enum><text>planning and providing services to intergenerational families; and</text></paragraph>
+<paragraph id="H603AF0F051E64317BA3966E10605D1A3"><enum>(4)</enum><text display-inline="yes-display-inline">maintaining spaces within the property which contains the intergenerational dwelling unit used for programing and services for intergenerational families.</text></paragraph></subsection> <subsection id="H9BFD81C218DB44E6BA41F304611A8152"><enum>(d)</enum><header>Outreach</header> <paragraph id="H35E770553DE046DE9DE7C5CC0E14ED8D"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">An owner of an intergenerational dwelling unit that receives a grant shall engage with intergenerational families in the community surrounding the property that contains the grandfamily housing owned by the grant recipient by—</text>
+<subparagraph id="HD7DB3EB9FC7A4F68A7C22010BB5DE7A7" display-inline="no-display-inline"><enum>(A)</enum><text>performing periodic informational outreach; and</text></subparagraph> <subparagraph id="H7108ECCB50CA4A36A3B9FCCA466EFC35" commented="no"><enum>(B)</enum><text display-inline="yes-display-inline">planning and executing events for intergenerational families.</text></subparagraph></paragraph>
+<paragraph id="H0B4045CC93C9438F91B0CE5AE10D29BD"><enum>(2)</enum><header>Coordination</header><text display-inline="yes-display-inline">Outreach shall, where possible, be in coordination with a local kinship navigator program (as described in section 474(a)(7) of the Social Security Act) or a comparable program or entity in the State in which the intergenerational dwelling unit is located.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="HB879EE96C8D94EABB1A36A7CC232BFED"><enum>(b)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 1 year after the date of the enactment of this section, the Secretary of Housing and Urban Development shall submit to the Congress a report that—</text>
+<paragraph id="H5CA0BD056BE94EB88CB79BB17F8FD725"><enum>(1)</enum><text>describes the effectiveness of the grant program establish pursuant to section 206 of the LEGACY Act of 2003; and</text></paragraph> <paragraph id="H2B5643CF001F4723BEA10A9E7FC6D78A"><enum>(2)</enum><text>makes recommendations for legislative changes that could allow for the grant program to be more effective.</text></paragraph></subsection>
+<subsection id="H64295F638A1A42E3ACE2652B74DCDCE0"><enum>(c)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">There are authorized to be appropriated to the Secretary to carry out this section $50,000,000 for each of fiscal years 2022 and 2023.</text></subsection></section> </legis-body> </bill> 
+

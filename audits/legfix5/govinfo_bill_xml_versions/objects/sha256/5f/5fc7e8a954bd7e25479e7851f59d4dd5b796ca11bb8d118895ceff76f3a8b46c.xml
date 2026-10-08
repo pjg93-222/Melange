@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="HCCC609AA7D79469DAEB7B57826690962" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HRES 1329 IH: Recognizing the need for greater access to rural and agricultural media programming.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-09-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. RES. 1329</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20220902">September 2, 2022</action-date><action-desc><sponsor name-id="P000599">Mr. Posey</sponsor> (for himself and <cosponsor name-id="S001200">Mr. Soto</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Recognizing the need for greater access to rural and agricultural media programming.</official-title></form><preamble> 
+<whereas><text>Whereas individuals living in rural areas in the United States need access to media content that is relevant to their daily lives;</text></whereas> <whereas><text>Whereas rural and agricultural programming includes agricultural weather, agribusiness news, commodity market news, and western sports, and this programming is important to the farmers and ranchers of the United States for their way of life and making a living;</text></whereas> 
+<whereas><text>Whereas rural and agricultural programming covers matters that affect all individuals in the United States;</text></whereas> <whereas><text>Whereas all individuals in the United States need to be exposed to, and informed about, what is occurring outside of the major cities and suburbs of the United States;</text></whereas> 
+<whereas><text>Whereas all individuals in the United States feel the effects of inflation and supply chain shortages, and rural and agricultural programming is in a unique position to inform viewers of the roots of these issues;</text></whereas> <whereas><text>Whereas the population of the world is projected to grow from 7,000,000,000 to approximately 9,000,000,000 by 2050, and agricultural productivity will need to increase to meet the growing demand for food and the projected increase in consumption;</text></whereas> 
+<whereas><text>Whereas a decrease in investment in agricultural research and development would result in a negative shock to agricultural productivity;</text></whereas> <whereas><text>Whereas an informed public is key to supporting the proper level of investment in agricultural research and development;</text></whereas> 
+<whereas><text>Whereas significant consolidation in the media market and prioritization of consolidated media has had a negative impact on access to rural and agricultural programming; and</text></whereas> <whereas><text>Whereas multichannel video programming distributors and providers of digital and streaming media should make delivery of rural and agricultural programming, including agricultural news and western lifestyle content, a priority: Now, therefore, be it</text></whereas></preamble><resolution-body style="OLC" id="HF83C13EBEDA042FAB715C4A1C9F73F38"> 
+<section id="HE43F3C7D357746CBA448EE4EA5B3DDF9" display-inline="yes-display-inline" section-type="undesignated-section"><text display-inline="yes-display-inline">That the House of Representatives recognizes the importance of rural and agricultural programming and the need for greater access to rural and agricultural media programming.</text></section> </resolution-body></resolution>
+

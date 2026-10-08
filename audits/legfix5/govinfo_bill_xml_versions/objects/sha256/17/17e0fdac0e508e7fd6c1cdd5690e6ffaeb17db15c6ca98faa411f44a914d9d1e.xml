@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H770553348DF24FB2913D081A09BCFCB1" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 6740 IH: Respectable Housing Act of 2022</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-02-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 6740</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20220215">February 15, 2022</action-date>
+<action-desc><sponsor name-id="M000317">Ms. Malliotakis</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require the Department of Housing and Urban Development to inspect certain low-income housing developments to ensure compliance with housing quality and safety standards, and for other purposes.</official-title>
+</form>
+<legis-body id="H17CBCAC4B18E4ACAB855FF3DB3D2F256" style="OLC">
+<section id="HEA725FAAA86C4907A5D9C197484E674C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Respectable Housing Act of 2022</short-title></quote>.</text></section> <section id="H622C2B92324D44FFBB18BF49E412A136"><enum>2.</enum><header>Inspections</header> <subsection id="HCF256B84800F4A6B8179F7E3901BCC1C"><enum>(a)</enum><header>Housing quality requirements</header><text display-inline="yes-display-inline">The Secretary of Housing and Urban Development shall require each owner of a housing project that contains 100 dwelling units or more for which project-based rental assistance is provided under section 8 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f</external-xref>) to maintain the project, and assisted dwelling units in the project, in a condition that complies with standards which meet or exceed the housing quality standards established under section 6(f) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1437d">42 U.S.C. 1437d(f)</external-xref>) with respect to public housing.</text></subsection>
+<subsection id="H1E8D3A13508D4F6E9D593F6B0336DB12"><enum>(b)</enum><header>Biennial inspections</header><text display-inline="yes-display-inline">The Secretary of Housing and Urban Development shall make inspections of each housing project described in subsection (a) not less frequently than biennially to determine whether the project is, and such dwelling units in the project are, maintained in accordance with the housing quality requirements applicable under subsection (a).</text></subsection> <subsection id="HB7C27E178B45435A82267B9DBF45B692"><enum>(c)</enum><header>Inspectors</header><text>Inspections of a public housing project required under this paragraph shall be conducted by employees of the Department of Housing and Urban Development or such other inspectors as may be obtained by the Secretary.</text></subsection>
+<subsection id="HB5295547640A49BBA52506C73E165A97"><enum>(d)</enum><header>Public availability</header><text>The Secretary shall make the results of inspections pursuant to this section publicly available online.</text></subsection></section> </legis-body> </bill> 
+

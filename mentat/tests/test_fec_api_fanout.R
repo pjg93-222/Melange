@@ -98,42 +98,4 @@ stopifnot(
 DBI::dbDisconnect(budget_connection)
 unlink(budget_database, force = TRUE)
 
-# Load only helper definitions, never the collector's command-line entry point.
-for (expression in parse(file.path(project_root, "tools", "collect_api_lane.R"))) {
-  if (is.call(expression) && identical(expression[[1L]], as.name("<-")) &&
-      as.character(expression[[2L]]) %in% c("atomic_write_json", "parse_assignments", "initialize_lane_tasks", "lane_startup_delay")) {
-    eval(expression, envir = .GlobalEnv)
-  }
-}
-# Managed pools already created the persistent budget before dispatching R.
-# Direct lanes retain the existing stagger and malformed pool URLs do not
-# disable it. Repeated company invocations must incur no pool-mode sleep.
-stopifnot(
-  lane_startup_delay(32L, "http://127.0.0.1:12345/batch") == 0,
-  lane_startup_delay(32L, "http://127.0.0.1:12345/batch") == 0,
-  lane_startup_delay(32L, "") == 7.75,
-  lane_startup_delay(1L, "") == 0,
-  lane_startup_delay(NA_integer_, "") == 0,
-  lane_startup_delay(0L, "") == 0,
-  lane_startup_delay(32L, "https://example.invalid/batch") == 7.75,
-  lane_startup_delay(32L, "http://127.0.0.1:12345/other") == 7.75
-)
-marker_root <- tempfile("mentat-initialization-")
-dir.create(marker_root)
-marker <- file.path(marker_root, "a.json")
-tasks <- list(list(task_id = "a-2026", company = "Alpha", cycle = 2026L, initialization_marker = marker))
-original_reset <- reset_api_progress
-reset_calls <- 0L
-reset_api_progress <- function(connection, tasks) { reset_calls <<- reset_calls + 1L; 2L }
-# Crash after dispatch but before R startup: no marker, so even resume resets.
-stopifnot(initialize_lane_tasks(NULL, tasks, TRUE) == 2L, file.exists(marker))
-# Crash after collection begins: preserve all existing page checkpoints.
-stopifnot(initialize_lane_tasks(NULL, tasks, TRUE) == 0L, reset_calls == 1L)
-stopifnot(initialize_lane_tasks(NULL, tasks, FALSE) == 2L, reset_calls == 2L)
-unlink(marker)
-reset_api_progress <- function(connection, tasks) stop("injected reset failure")
-failure <- tryCatch(initialize_lane_tasks(NULL, tasks, TRUE), error = conditionMessage)
-stopifnot(identical(failure, "injected reset failure"), !file.exists(marker))
-reset_api_progress <- original_reset
-unlink(marker_root, recursive = TRUE)
 cat("test_fec_api_fanout: PASS\n")

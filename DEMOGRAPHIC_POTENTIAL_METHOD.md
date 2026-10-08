@@ -7,6 +7,43 @@ economic and financial evidence indicates expansion opportunity for credit
 unions. It is a market-opportunity score, not a prediction of a legislator's
 political support and not a causal forecast of credit-union growth.
 
+## Code divergence (2026-10-04)
+
+Added on 2026-10-04 to record where the code has moved past this document.
+The text below this section is unchanged since commit `ba25d8803`
+(2026-07-25). Checked against Melange `main` at `4a81d5022` and the
+published `member_desk_bundle.json` of 2026-10-01; only the points listed
+here were re-checked.
+
+- This document describes version 2.1 ("growth room"), which is no longer
+  the default. Since commit `73ebf18e6` (2026-09-16; brain decision D-035,
+  recording Paul's ruling of 2026-09-15, "The footprint should be the
+  potential"), `DEMO_POTENTIAL` defaults to `footprint`, score version 3.0
+  (`fec/district/demographic_potential.py:29-42`).
+  `DEMO_POTENTIAL=growth_room` restores version 2.1 as written here.
+- Version 3.0 scores four components, again with judgmental weights: CU
+  employment LQ 30%, CU establishment LQ 20%, CU branch share 25% and CU
+  deposit share 25% (`:160-165`). Both LQs are used at full precision and
+  the shares are not inverted, so a larger existing credit-union footprint
+  scores higher: the opposite direction from the whitespace components.
+- A market qualifies when its unrounded credit-union employment LQ is at
+  least 1.0; otherwise its reason is `no_cu_employment_concentration`
+  (`:33-35`, `:1428-1458`). The sector gate in section 2 and the
+  eight-component formula in sections 1 and 3 apply only to version 2.1.
+- The structural companion score in section 6 does not apply to version
+  3.0: it reports `not_applicable_for_mode` with no adjusted markets
+  (`:922-944`). The sensitivity audit in section 7 runs five scenarios
+  (equal weights plus four leave-one-out), not nine.
+- Unchanged in version 3.0: tie-aware percentiles computed separately for
+  district and state markets, the neutral 0.50 value for missing evidence,
+  competition ranks, and the four tiers in section 7.
+- The published bundle carries `score_version` 3.0, with 224 qualified
+  members in 198 qualified markets.
+- Code comments in `fec/audit/audit_full.py`,
+  `fec/audit/dashboard_integrity.py` and the member-desk template cite this
+  change as "D-034". In the brain, D-034 is cross-post scoring and this
+  change is D-035.
+
 ## 1. Weight provenance — important
 
 The eight component weights are **judgmental policy weights** selected for

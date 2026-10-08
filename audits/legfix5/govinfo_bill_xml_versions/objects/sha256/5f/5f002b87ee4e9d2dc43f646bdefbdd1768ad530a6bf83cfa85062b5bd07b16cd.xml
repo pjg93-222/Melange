@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="HC0D71DE09A844B849FDA8B58705F7983" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 500 IH: Recognizing the benefits of digitization of the mortgage process.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 500</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190717">July 17, 2019</action-date><action-desc><sponsor name-id="D000614">Mr. Duffy</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Recognizing the benefits of digitization of the mortgage process.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas online, mobile, and other responsible technological advances can be leveraged with the use of remote data management and alternative sources of data to increase availability of safe products to underserved, underbanked, and unbanked communities;</text>
+ </whereas><whereas><text>Whereas use of electronically signed documents in the mortgage process can reduce length of closing time, reduce hours of costly labor-intensive processes, are cost effective to store and transmit, and offer greater protection against unauthorized tampering, alteration, or loss;</text>
+ </whereas><whereas><text>Whereas digitization and automated valuation models may lower costs and expedite closing times for consumers;</text>
+ </whereas><whereas><text>Whereas digital signatures applied to mortgages have statutory basis in the Electronic Signatures in Global and National Commerce Act (ESIGN; <external-xref legal-doc="public-law" parsable-cite="pl/106/229">Public Law 106–229</external-xref>), which recognized the legal validity of signatures and records executed with an electronic stamp;</text>
+ </whereas><whereas><text>Whereas remote online notarization and the use of audio and visual technology and electronic methods can meet demands to facilitate a modern closing process for home mortgage closings and enhance the consumer experience;</text>
+ </whereas><whereas><text>Whereas an eNote is an electronic version of the negotiable promissory note that is digitally signed and electronically transmitted and stored;</text>
+ </whereas><whereas><text>Whereas online products provide consumers with anonymity to prevent discrimination against protected classes in the mortgage process;</text>
+ </whereas><whereas><text>Whereas the digital mortgage process provides consumers with control of and access to their own data, information, and finances;</text>
+ </whereas><whereas><text>Whereas single source validation allows lenders to verify a consumer’s assets and employment to streamline a more accurate and secure closing process;</text>
+ </whereas><whereas><text>Whereas continued enhancements in digital identity verification using multi-factor authentication to validate the consumer protects their identity and data;</text>
+ </whereas><whereas><text>Whereas the digitization of property data has helped to streamline and automate more accurate valuations;</text>
+ </whereas><whereas><text>Whereas certain markets may continue to necessitate physical appraisals for different types of construction, lot sizes, amenities, age, and other factors;</text>
+ </whereas><whereas><text>Whereas nonuniform State rules create a barrier and uncertainty for investors considering purchasing digital mortgages;</text>
+ </whereas><whereas><text>Whereas State and local governments should focus on harmonization, including adoption of model laws that could be uniformly adopted by States; and</text>
+ </whereas><whereas><text>Whereas the Federal Housing Administration, Fannie Mae, Freddie Mac, and the Department of Veterans Affairs already allow for the use of electronic signatures on mortgage documents insured or guaranteed by their programs, and the Government National Mortgage Association (Ginnie Mae) is in the process of permitting the use of eNotes for loans included in securities it guarantees: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="H76148904C4354706AE669AB4D7C4281A" style="traditional">
+ <section display-inline="yes-display-inline" id="H5DF07A1071FF4D7E99F84D101DE11584" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That the House of Representatives—</text> <paragraph id="H7B621D93BEDE46C089FE3B04B9E1DE0A"><enum>(1)</enum><text>supports the adoption by States of consistent standards for the digitization of the mortgage process; and</text>
+ </paragraph><paragraph id="HD27AD3DF4F75423A9ACE2340F6D20D23"><enum>(2)</enum><text>urges the Secretary of Housing and Urban Development to continue to support Ginnie Mae’s effort to accept eNotes and electronically signed mortgage documents.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

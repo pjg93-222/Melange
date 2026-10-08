@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE amendment-doc PUBLIC "-//US Congress//DTDs/amend.dtd//EN" "amend.dtd">
+<amendment-doc amend-type="engrossed-amendment"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 2617 EAS: </dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-11-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<engrossed-amendment-form>
+<congress display="no">117th CONGRESS</congress><session display="no">2d Session</session><legis-num display="no">H.R. 2617</legis-num><current-chamber display="yes">In the Senate of the United States,</current-chamber><action><action-date date="20221115">November 15, 2022.</action-date></action><legis-type display="yes">Amendments:</legis-type></engrossed-amendment-form><engrossed-amendment-body><section id="id701c2bda1f7d45e99f51f52e4b5f8b92" section-type="resolved"><text>That the bill from the House of Representatives (H.R. 2617) entitled <quote>An Act to amend section 1115 of title 31, United States Code, to amend the description of how performance goals are achieved, and for other purposes.</quote>, do pass with the following</text></section><amendment><amendment-instruction blank-lines-after="1"><enum>(1)</enum><text>On page 3, line 12, strike <deleted-phrase reported-display-style="bold-brackets">Chief</deleted-phrase></text></amendment-instruction><amendment-instruction blank-lines-after="1"><enum>(2)</enum><text>On page 3, line 12, strike <deleted-phrase reported-display-style="bold-brackets">Office</deleted-phrase> and insert: <added-phrase reported-display-style="italic">Officer of each agency</added-phrase></text></amendment-instruction><amendment-instruction blank-lines-after="1"><enum>(3)</enum><text>On page 3, line 17, after “equivalent)” insert: <added-phrase reported-display-style="italic">of that agency</added-phrase></text></amendment-instruction><amendment-instruction blank-lines-after="1"><enum>(4)</enum><text>On page 3, line 19, after “(5)” insert: <added-phrase reported-display-style="italic">for that agency</added-phrase></text></amendment-instruction><amendment-instruction blank-lines-after="1"><enum>(5)</enum><text>On page 4, line 1, strike <deleted-phrase reported-display-style="bold-brackets">House</deleted-phrase> and insert: <added-phrase reported-display-style="italic">Senate</added-phrase></text></amendment-instruction></amendment></engrossed-amendment-body><attestation><attestation-group><attestor></attestor><role>Secretary</role></attestation-group></attestation><endorsement></endorsement></amendment-doc> 
+

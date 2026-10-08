@@ -314,6 +314,53 @@ ROSTERS = {
             ),
         ),
     },
+    # Added 2026-10-07 (Paul: "Full boards, treat it exactly like fintech").
+    # Seventeen pinned families: eleven operating companies and six trade
+    # associations.  Patterns run against the NORMALIZED name (upper case,
+    # "&" -> " AND ", punctuation -> space), so "AT&T" is "AT AND T",
+    # "T-Mobile" is "T MOBILE" and "U.S. Cellular" is "U S CELLULAR".  Every
+    # include anchors on the family's own distinctive phrase - never on a
+    # shared token such as SPRINT, CHARTER, SPECTRUM, COX or FRONTIER - and the
+    # exclusions below name the known collisions found in the 2021-2026 LDA
+    # client audit (charter schools, Spectrum Health/Brands, Frontier Airlines,
+    # Cox Automotive/Health, Optimum Nutrition, Lumen Learning/Bioscience, the
+    # United States Telecommunications Training Institute).
+    "telecom": {
+        "patterns": (
+            (r"\b(?:VERIZON|CELLCO)\b", "VERIZON", "Verizon family incl. Cellco Partnership"),
+            (r"\bAT AND T\b|\bATT SERVICES\b|^ATT (?:INC|CORP|CORPORATION)$", "AT&T", "AT&T family; normalized AT AND T, never a bare ATT token"),
+            (r"\bT MOBILE\b|\bTMOBILE\b", "T-MOBILE", "T-Mobile family"),
+            (r"\bMETRO ?PCS\b", "T-MOBILE", "MetroPCS (T-Mobile subsidiary)"),
+            (r"^SPRINT(?: INC| CORP| CORPORATION| LLC)?$|\bSPRINT (?:COMMUNICATIONS|NEXTEL|SPECTRUM|SOLUTIONS|WIRELESS)\b", "T-MOBILE", "Sprint (T-Mobile 2020 merger); bare SPRINT only as the whole name"),
+            (r"\bCOMCAST\b|\bNBC ?UNIVERSAL\b", "COMCAST", "Comcast family incl. NBCUniversal"),
+            (r"\bCHARTER COMMUNICATIONS\b|\bTIME WARNER CABLE\b|\bCHARTER SPECTRUM\b", "CHARTER COMMUNICATIONS", "Charter Communications/Spectrum/Time Warner Cable; the full name, so press matching never sees a bare CHARTER (bank charter)"),
+            (r"^(?=.*\b(?:CHARTER|CABLE)\b).*\bSPECTRUM\b", "CHARTER COMMUNICATIONS", "Spectrum brand only alongside CHARTER or CABLE"),
+            (r"\bLUMEN TECHNOLOGIES\b|^LUMEN(?: INC| LLC| CORP| CORPORATION)?$|\bCENTURY ?LINK\b|\bLEVEL ?3 (?:COMMUNICATIONS|PARENT|NETWORKS|TELECOM)\b|\bQWEST\b", "LUMEN", "Lumen/CenturyLink/Level 3/Qwest"),
+            (r"\bCOX (?:ENTERPRISES|COMMUNICATIONS)\b", "COX", "Cox Enterprises/Cox Communications"),
+            (r"\bALTICE\b|\bCABLEVISION\b|\bOPTIMUM (?:COMMUNICATIONS|CABLE|MOBILE|WIRELESS)\b|^OPTIMUM$", "ALTICE USA", "Altice USA/Optimum/Cablevision"),
+            (r"\bFRONTIER COMMUNICATIONS\b", "FRONTIER COMMUNICATIONS", "Frontier Communications (incl. Citizens Telecom d/b/a)"),
+            (r"^DISH$|\bDISH (?:NETWORK|WIRELESS|DBS|PURCHASING)\b|\bECHOSTAR\b", "DISH / ECHOSTAR", "DISH Network/EchoStar"),
+            (r"\b(?:U S|US|UNITED STATES) CELLULAR\b|\bTELEPHONE AND DATA SYSTEMS\b|\bTDS TELECOM(?:MUNICATIONS)?\b", "US CELLULAR / TDS", "U.S. Cellular/Telephone and Data Systems"),
+            (r"\bCTIA\b|\bTHE WIRELESS ASSOCIATION\b", "CTIA", "Wireless trade association (also the CITA misspelling)"),
+            (r"\bNCTA\b|\bINTERNET AND TELEVISION ASS(?:OCIATION|OC|N)\b|\b(?:NATIONAL|NTL) CABLE (?:AND )?TELECOMMUNICATIONS ASS(?:OCIATION|OC|N)\b", "NCTA", "Cable trade association, all three of its names"),
+            (r"\bU ?S ?TELECOM\b|\bUNITED STATES TELECOM(?:MUNICATIONS)? ASS(?:OCIATION|OC|N)\b", "USTELECOM", "USTelecom, filed as United States Telecom Association"),
+            (r"\bCOMPETITIVE CARRIERS ASSOCIATION\b", "COMPETITIVE CARRIERS ASSOCIATION", "Regional/rural wireless carriers' association"),
+            (r"\bNTCA\b|\bRURAL BROADBAND ASS(?:OCIATION|OC|N)\b|\bNATIONAL TELE(?:COMMUNICATIONS|PHONE) COOPERATIVE ASS(?:OCIATION|OC|N)\b", "NTCA", "NTCA - The Rural Broadband Association, also filed under its full legal names (current and pre-rename)"),
+            (r"\bWISPA\b|\bWIRELESS INTERNET SERVICES? PROVIDERS? ASS(?:OCIATION|OC|N)\b", "WISPA", "Wireless ISP association"),
+        ),
+        # No client IDs are pinned yet: the audit run keyed on names only.
+        "include_client_ids": {},
+        "exclude_client_ids": {},
+        "exclude_name_patterns": (
+            (r"\bCHARTER (?:SCHOOLS?|BROKERAGE|CASTING|SPACE|INSTITUTE)\b", "nonsector_name_collision"),
+            (r"\bSPECTRUM (?:HEALTH|HEALTHCARE|BRANDS|PHARMACEUTICALS|PHOTONICS)\b", "nonsector_name_collision"),
+            (r"\bLUMEN (?:LEARNING|BIOSCIENCE)\b", "nonsector_name_collision"),
+            (r"\bCOX (?:AUTOMOTIVE|HEALTH|MEDIA GROUP)\b", "nonsector_name_collision"),
+            (r"\bOPTIMUM (?:HEALTH|NUTRITION)\b", "nonsector_name_collision"),
+            (r"\bFRONTIER (?:AIRLINES|OIL)\b", "nonsector_name_collision"),
+            (r"\bTELECOMMUNICATIONS TRAINING INSTITUTE\b", "nonsector_name_collision"),
+        ),
+    },
 }
 
 DEFAULT_SECTORS = tuple(ROSTERS)

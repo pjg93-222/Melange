@@ -1,0 +1,101 @@
+
+====================================================================================================
+S1  INPUTS
+====================================================================================================
+selected archive              congress_bills_archive_20260825_115305.xlsx   rows=10181
+roster (data/engine/congestion.json)                members=533
+legislation_routing_audit.json  source=congress_bills_archive_20260825_115305.xlsx + Sentinel Bill Ledger
+   source_rows=10820 selected_events=8123  (archive 10181 + sentinel 268 + manual 371 = 10820)
+archive_leg.json members=523
+
+routing-audit linkage  archive row i <-> audit source_row i+2 : 10181 agree / 0 disagree
+grain A  (bill,Congress) groups = 468 ; whitespace-variant collisions = 0 
+
+====================================================================================================
+S1-a  GRAIN A : (bill, Congress) with >=1 member row and ZERO sponsor-role rows
+====================================================================================================
+bills (bill,Congress) in the selected archive ..................... 468
+   of which >=1 sponsor-role row ................................. 415
+   of which ZERO sponsor-role rows ............................... 53   (11.3%)
+member rows in the archive ....................................... 10181
+   member rows riding on a ZERO-sponsor bill ..................... 1886   (18.5%)
+
+by Congress:
+   Congress      bills no-spons        pct         rows rows-no-spons
+   117             163       32      19.6%         3820         1476
+   118             173       21      12.1%         3928          410
+   119             132        0       0.0%         2433            0
+
+by chamber:
+   chamber       bills no-spons        pct         rows rows-no-spons
+   House           290       34      11.7%         7495         1578
+   Senate          178       19      10.7%         2686          308
+
+by chamber x Congress (no-sponsor bills / all bills):
+   House    117: 18/97   118: 16/115   119: 0/78
+   Senate   117: 14/66   118: 5/58   119: 0/54
+
+role mix on the ZERO-sponsor bills:
+   cosponsor              1202 rows
+   original-cosponsor     684 rows
+
+role mix on bills that DO have a sponsor row:
+   cosponsor              5443 rows
+   original-cosponsor     2291 rows
+   sponsor                561 rows
+
+====================================================================================================
+S1-b  GRAIN B : (bill, Congress, canonical category) -- the grain archive_leg.json sums on
+====================================================================================================
+rows whose Section maps to no canonical category (producer: unknown-section) ... 0
+(bill,Congress,category) cells ................................................ 624
+   with >=1 sponsor-role row .................................................. 561
+   with ZERO sponsor-role rows ................................................ 63   (10.1%)
+   member rows riding on a ZERO-sponsor cell .................................. 1890
+
+bills that have a sponsor row SOMEWHERE but not in every category they appear in:
+   cells ...................................................................... 1
+   distinct bills ............................................................. 1
+   member rows ................................................................ 4
+   (this is the S.762 pattern: sponsor row exists under other sections only)
+      S.762            C=117  missing in Member Business Lending    sponsor row present in ['Charter Modernization', 'Mortgage & Housing']
+
+====================================================================================================
+S1-c  the archive's bill-level 'Sponsor' column
+====================================================================================================
+header of 'All Bills' = ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+rows with a non-empty Sponsor cell ............................................ 10181 / 10181
+(bill,Congress) with exactly one Sponsor spelling ............................. 468
+(bill,Congress) with NO Sponsor value at all .................................. 0
+(bill,Congress) with >1 distinct Sponsor spelling ............................. 0
+
+Sponsor cell -> 533-member roster (re-implemented fec/members/member_identity.Resolver):
+   (bill,Congress) with a Sponsor name .......................................... 468
+   resolves to a current roster member .......................................... 419
+   refuses (person not in the roster, or ambiguous) .............................. 49
+
+the named sponsor IS a current roster member but has NO sponsor-role member row:
+   grain A  (bill,Congress) ..................................................... 4 / 419  (1.0%)
+   grain B  (bill,Congress,category) ............................................ 5 / 566
+   member rows riding on those grain-A bills .................................... 91
+
+first 15 grain-A gaps (bill / Congress / Sponsor cell / resolved / roles actually present):
+   H.R.4686         C=118  Luna, Anna Paulina                 -> Anna Luna              ['cosponsor', 'original-cosponsor']
+   H.R.6410         C=118  Luna, Anna Paulina                 -> Anna Luna              ['cosponsor', 'original-cosponsor']
+   S.3382           C=117  Scott, Tim                         -> Tim Scott              ['cosponsor', 'original-cosponsor']
+   S.3992           C=118  Scott, Tim                         -> Tim Scott              ['cosponsor', 'original-cosponsor']
+
+====================================================================================================
+S1-d  FRAME NOTE : the producer scores archive + sentinel-verified + manual, not the archive alone
+====================================================================================================
+sentinel verified scoring rows ................................................ 268
+   of which Role canonicalizes to sponsor ..................................... 14
+manual_bill_evidence.csv rows ................................................. 371
+   of which Role canonicalizes to sponsor ..................................... 86
+
+(bill,Congress) sponsorless in the ARCHIVE but given a sponsor row by sentinel/manual .. 2
+      h.r.4686           C=118
+      h.r.6410           C=118
+=> archive-only sponsorless bills that stay sponsorless in the scored frame ........... 51
+
+wrote s1_state.json

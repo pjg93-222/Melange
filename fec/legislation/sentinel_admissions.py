@@ -14,14 +14,15 @@ from datetime import datetime, timezone
 
 SCHEMA = 'sentinel-admissions-v1'
 RELATIVE = Path('data/legislation/sentinel_admissions.json')
-CLASSES = {'cu_primary', 'shared', 'bank_primary', 'crypto_primary', 'fintech', 'offtopic', 'oppose'}
+CLASSES = {'cu_primary', 'shared', 'bank_primary', 'crypto_primary', 'fintech', 'telecom_primary', 'offtopic', 'oppose'}
 
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def load(root, *, max_age_days=8):
+# TEMPORARY 2026-10-08 (Paul, D-122: 'Widen only if needed'): uscode.house.gov maintenance blocked refresh_sentinel_admissions; revert to 8 after the next successful refresh.
+def load(root, *, max_age_days=10):
     path = Path(root) / RELATIVE
     if not path.exists():
         return {'schema': SCHEMA, 'bills': {}, 'memberships': [], 'decisions': {}}

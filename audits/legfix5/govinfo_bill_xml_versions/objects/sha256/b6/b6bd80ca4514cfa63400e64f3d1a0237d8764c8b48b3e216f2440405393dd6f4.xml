@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" bill-type="olc" dms-id="H06FF8F1FB71740F990727EA863C7AC66" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3734 : SERV Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-11-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IIB</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 3734</legis-num>
+		<current-chamber display="yes">IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date date="20191114">November 14, 2019</action-date><action-desc> Received; read twice and referred to the <committee-name committee-id="SSSB00">Committee on Small Business and Entrepreneurship</committee-name></action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To require the Comptroller General of the United States to report on access to credit for small
+			 business concerns owned and controlled by covered individuals, to require
+			 the Administrator of the Small Business Administration to report on the
+			 veterans interagency task force, and for other purposes.</official-title>
+	</form>
+	<legis-body id="H70F4A05652D34E02BD53DCB02519C418" style="OLC">
+ <section id="HCA5919BB32684FACB7037A16D9BAB35F" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Successful Entrepreneurship for Reservists and Veterans Act</short-title></quote> or the <quote>SERV Act</quote>.</text> </section><section id="HF9DDC0A6DB144508A5E9B47C5A38BB88" section-type="subsequent-section"><enum>2.</enum><header>Reporting requirement for veterans interagency task force</header><text display-inline="no-display-inline">Section 32(c) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/657b">15 U.S.C. 657b(c)</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block id="HA7B671FE092646C9854F209F47393DA6" style="OLC">
+ <paragraph id="H640D54FF3BA24706A35879A56FF09696"><enum>(4)</enum><header>Report</header><text display-inline="yes-display-inline">Along with the budget justification documents for the Small Business Administration submitted to Congress in connection with the budget for a fiscal year submitted under 1105 of title 31, United States Code, the Administrator shall submit a report—</text>
+ <subparagraph id="HFA4145FA0FE04CA4B568EDDD30452910"><enum>(A)</enum><text>discussing the appointments made to and activities of the task force; and</text> </subparagraph><subparagraph id="HB9A147F658CE40C1B6A284C33AAD53C4"><enum>(B)</enum><text display-inline="yes-display-inline">identifying and outlining a plan for outreach and promotion of the programs and services for veterans, including Veteran Business Outreach Centers, Boots to Business, Boots to Business Reboot, Service-Disabled Entrepreneurship Development Training Program, Veteran Institute for Procurement, Women Veteran Entrepreneurship Training Program, and Veteran Women Igniting the Spirit of Entrepreneurship.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section><section id="H52234C7EF6514A1EA346D333A658B6D0" section-type="subsequent-section"><enum>3.</enum><header>GAO report on access to credit</header>
+			<subsection id="H8F634E3F1ED647569EA8A97B7A1D7E52"><enum>(a)</enum><header>Report on access to credit</header>
+ <paragraph id="H5AB3C84AF86E4FD8A9F5F1E5FE739B98"><enum>(1)</enum><header>In general</header><text>Not later than 1 year after the date of the enactment of this Act, the Comptroller General of the United States shall submit a report on the ability of small business concerns owned and controlled by covered individuals to access credit to—</text>
+ <subparagraph id="H2E84222794F44EC89419EA7E92DF212E"><enum>(A)</enum><text>the Committee on Veterans’ Affairs and the Committee on Small Business and Entrepreneurship of the Senate; and</text>
+ </subparagraph><subparagraph id="H9E98696A760F4F6DB8D5B2E7EA6B20D8"><enum>(B)</enum><text>the Committee on Veterans’ Affairs and the Committee on Small Business of the House of Representatives.</text>
+ </subparagraph></paragraph><paragraph id="HEAC11AECA1604084842367755E5D65F0"><enum>(2)</enum><header>Contents</header><text>The report submitted under paragraph (1) shall include, to the extent practicable, an analysis of—</text> <subparagraph id="HD02C994F93CC4E3DBDA0AC756E236562"><enum>(A)</enum><text>the sources of credit used by small business concerns owned and controlled by covered individuals and the average percentage of the credit obtained from each source by such concerns;</text>
+ </subparagraph><subparagraph id="H22A55C8397E645EB85B5FBB165709284"><enum>(B)</enum><text>the default rate for small business concerns owned and controlled by covered individuals, disaggregated by each source of credit described in subparagraph (A), as compared to the default rate for the source of credit for small business concerns generally;</text>
+ </subparagraph><subparagraph id="H9289F9E11A0243658DC9C57E485476A7"><enum>(C)</enum><text>the Federal lending programs available to provide credit to small business concerns owned and controlled by covered individuals;</text>
+ </subparagraph><subparagraph id="HFFE4D56C14034DA58D9A3328853DA655"><enum>(D)</enum><text>gaps, if any, in the availability of credit for small business concerns owned and controlled by covered individuals that are not being filled by the Federal Government or private sources;</text>
+ </subparagraph><subparagraph id="HEA643A48071143FB8DAF7D99799186AC"><enum>(E)</enum><text>obstacles faced by covered individuals in trying to access credit;</text> </subparagraph><subparagraph id="HD87F1F036864442C9794B36B4F13CB0A"><enum>(F)</enum><text>the extent to which deployment and other military responsibilities affect the credit history of veterans and Reservists; and</text>
+ </subparagraph><subparagraph id="H54942674B2A14880BC420BAF451C52A6"><enum>(G)</enum><text>the extent to which covered individuals are aware of Federal programs targeted towards helping covered individuals access credit.</text>
+ </subparagraph></paragraph></subsection><subsection id="HF30274EC9C2E4ECBAA76EC435B4F9060"><enum>(b)</enum><header>Definitions</header><text>In this Act:</text> <paragraph id="H35D45419EC554BA4BD96D43F7DA371F7"><enum>(1)</enum><header>Covered individual</header><text>The term <term>covered individual</term> means—</text>
+ <subparagraph id="H1BA3C37E452E468981645A9D63DCE70D"><enum>(A)</enum><text>a veteran;</text> </subparagraph><subparagraph id="H376DDEA82EC84895B941DD4EBC6E99DC"><enum>(B)</enum><text display-inline="yes-display-inline">a service-disabled veteran;</text>
+ </subparagraph><subparagraph id="H075F729CD307456FAB0D45FE6474CD39"><enum>(C)</enum><text>a Reservist;</text> </subparagraph><subparagraph id="HB97336FAE364467EB4830D7B89E86439"><enum>(D)</enum><text>the spouse of an individual described in subparagraph (A), (B), or (C); or</text>
+ </subparagraph><subparagraph id="H43434F67E6DB4CF6B093F11B9430B528"><enum>(E)</enum><text>the spouse of a member of the Armed Forces.</text> </subparagraph></paragraph><paragraph id="H45F606498402401B8B6215455B7D5757"><enum>(2)</enum><header>Reservist</header><text>The term <term>Reservist</term> means a member of a reserve component of the Armed Forces, as described in section 10101 of title 10, United States Code.</text>
+ </paragraph><paragraph id="HB0A9850F7746475D90B199ECBE201796"><enum>(3)</enum><header>Small Business Act definitions</header><text>The terms <term>service-disabled veteran</term>, <term>small business concern</term>, and <term>veteran</term> have the meanings given those terms, respectively, under section 3 of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/632">15 U.S.C. 632</external-xref>).</text>
+				</paragraph></subsection></section></legis-body>
+	<attestation><attestation-group><attestation-date chamber="House" date="20191113">Passed the House of Representatives November 13, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+</bill>
+
+

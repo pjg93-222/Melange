@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H44EA813292324017928D03A6C21BBBEC" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6016 IH: Keep Healthcare Affordable Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6016</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251110">November 10, 2025</action-date><action-desc><sponsor name-id="S001190">Mr. Schneider</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Internal Revenue Code of 1986 to extend and modify the enhanced premium tax credit, and for other purposes.</official-title></form><legis-body id="H5B95966A53B54EAD978DF9B9151106BA" style="OLC"> 
+<section id="H8164CC472C2D4ADEB1A19636B27843CB" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Keep Healthcare Affordable Act</short-title></quote>.</text></section> 
+<section id="H5C1AABC4B5364C0C8D88445E78A3E419"><enum>2.</enum><header>Extension and modification of enhanced premium tax credit</header> 
+<subsection id="H1CB2E1FDD6484DA3BFD9D4CFB9CABD6B">
+        <enum>(a)</enum>
+        <header>Extension of rules To increase premium assistance amounts</header>
+ <text display-inline="yes-display-inline"><external-xref legal-doc="usc" parsable-cite="usc/26/36B">Section 36B(b)(3)(A)(iii)</external-xref> of the Internal Revenue Code of 1986 is amended—</text>
+        <paragraph id="H7B33CF28FBB6462A8898B79B1E1D0E13">
+          <enum>(1)</enum>
+ <text>in the matter preceding subclause (I), by striking <quote>before January 1, 2026</quote> and inserting <quote>before January 1, 2030</quote>, and</text>
+        </paragraph>
+        <paragraph id="H8CB734ECF7704657B547A3E830AAE2ED">
+          <enum>(2)</enum>
+ <text>in the heading, by striking <quote><header-in-text level="clause" style="OLC">through <enum-in-header>2025</enum-in-header></header-in-text></quote> and inserting <quote><header-in-text level="clause" style="OLC">through <enum-in-header>2029</enum-in-header></header-in-text></quote>.</text>
+        </paragraph>
+      </subsection> 
+<subsection id="H6A2E6DA5913B4080892D9C44F1E7B5DE">
+        <enum>(b)</enum>
+        <header>Extension and modification of rule To allow credit to taxpayers whose household
+          income exceeds specified amount</header>
+ <text display-inline="yes-display-inline">Section 36B(c)(1)(E) of such Code is amended—</text>
+        <paragraph id="H2635B6BAE4D34F1FAF01F30F79E6C3FC">
+          <enum>(1)</enum>
+ <text display-inline="yes-display-inline">by striking <quote><header-in-text level="subparagraph" style="OLC">through <enum-in-header>2025</enum-in-header></header-in-text>.—In the case of</quote> and inserting</text>
+          <quoted-block style="OLC" id="H961F213AFE5C4453A209CED934AF04DA" display-inline="yes-display-inline">
+ <text display-inline="yes-display-inline"><header-in-text level="subparagraph" style="OLC">through <enum-in-header>2029</enum-in-header></header-in-text>.—</text> <clause id="H0A1BACB97BCA409EABF6CFF0A5AC3F46"> <enum>(i)</enum> <header>Before <enum-in-header>2026</enum-in-header></header> <text display-inline="yes-display-inline">In the case of</text>
+            </clause>
+            <after-quoted-block>, and</after-quoted-block>
+          </quoted-block>
+        </paragraph>
+        <paragraph id="H38E33D7288FB4F699C50E6510ADFDD38">
+          <enum>(2)</enum>
+ <text>by adding at the end the following:</text> <quoted-block style="OLC" id="H87DA826B5F7F431989C9491FA679E760" display-inline="no-display-inline"> <clause id="HB2FC9B412B394EE09C34AA343C93B3A1"> <enum>(ii)</enum> <header>After <enum-in-header>2025</enum-in-header></header> <text display-inline="yes-display-inline">In the case of a taxable year beginning after December 31, 2025, and before January 1, 2030, subparagraph (A) shall be applied by substituting <quote>but does not exceed 1000 percent</quote> for <quote>but does not exceed 400 percent</quote>.</text>
+            </clause>
+            <after-quoted-block>.</after-quoted-block>
+          </quoted-block>
+        </paragraph>
+      </subsection> 
+<subsection id="HA113F35AE5C04BF98929599D9446EEB5"><enum>(c)</enum><header>Effective date</header><text>The amendments made by this section shall apply to taxable years beginning after December 31, 2025.</text></subsection></section> </legis-body></bill>
+

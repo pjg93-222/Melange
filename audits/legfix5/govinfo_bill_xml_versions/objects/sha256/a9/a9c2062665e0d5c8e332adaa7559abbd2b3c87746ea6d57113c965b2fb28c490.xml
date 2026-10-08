@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution public-private="public" resolution-stage="Agreed-to-Senate" resolution-type="senate-resolution" star-print="no-star-print">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 SRES 146 ATS: Recognizing the centennial of the Institute of International Education.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-04-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">III</distribution-code>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>S. RES. 146</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action display="yes">
+			<action-date date="20190404">April 4, 2019</action-date>
+			<action-desc><sponsor name-id="S318">Mr. Wicker</sponsor> (for himself and <cosponsor name-id="S057">Mr. Leahy</cosponsor>) submitted the following resolution; which was considered and agreed to</action-desc>
+		</action>
+		<legis-type>RESOLUTION</legis-type>
+		<official-title display="yes">Recognizing the centennial of the Institute of International Education.</official-title>
+	</form>
+	<preamble>
+ <whereas><text>Whereas 2019 marks the 100th anniversary of the founding of the Institute of International Education (referred to in this preamble as the <quote>IIE</quote>), the oldest educational exchange organization in the United States;</text>
+ </whereas><whereas><text>Whereas the trustees of the IIE and the students and scholars associated with the IIE have contributed to their societies in numerous ways and have been recognized with 108 Nobel Prizes;</text>
+ </whereas><whereas><text>Whereas the IIE was founded by former Secretary of State Elihu Root, President Nicholas Murray Butler of Columbia University, and Professor Stephen Duggan, Sr., of the College of the City of New York, with support from the Carnegie Corporation of New York;</text>
+ </whereas><whereas><text>Whereas the IIE was established to demonstrate that the international exchange of people and ideas can transcend borders and promote greater understanding and peace;</text>
+ </whereas><whereas><text>Whereas the IIE is privileged to administer 200 programs that promote mutual understanding and enhance the national security and economic competitiveness of the United States, including—</text>
+ <paragraph id="id75b172c5834c46ab9642fb3fbaf22479"><enum>(1)</enum><text>the Fulbright Program, the flagship international exchange program sponsored by the United States Government;</text>
+ </paragraph><paragraph id="id3f80e08f4ef34832a6d6c344e560109b"><enum>(2)</enum><text>the Benjamin A. Gilman International Scholarship Program, which enables high-performing United States undergraduate students of limited financial means to study or intern abroad;</text>
+ </paragraph><paragraph id="idffc93d717e22405fabab50e312da1a05"><enum>(3)</enum><text>the Hubert H. Humphrey Fellowship Program, which provides a year of enrichment in the United States for experienced professionals from designated countries undergoing development or political transition;</text>
+ </paragraph><paragraph id="id3c4422cf1d444859ae31abdc2eddc079"><enum>(4)</enum><text>Open Doors, the comprehensive information resource on—</text> <subparagraph id="idF52B6AC458DE48BB9AC6A16298D0286B"><enum>(A)</enum><text>international students and scholars studying or teaching at higher education institutions in the United States; and</text>
+ </subparagraph><subparagraph id="idE09D656B2EC94231B50CD329820A203F"><enum>(B)</enum><text>students from the United States studying abroad for academic credit at their home colleges or universities;</text>
+ </subparagraph></paragraph><paragraph id="id25616822ebaa4ddd9fe07d3d06d49a1f"><enum>(5)</enum><text>EducationUSA, the network of over 425 international student advising centers in 178 countries that promotes higher education in the United States to students around the world;</text>
+ </paragraph><paragraph id="idc009b505aafc45f488dec6f515bae695"><enum>(6)</enum><text>the International Visitor Leadership Program, the premier professional exchange program of the Department of State;</text>
+ </paragraph><paragraph id="idb48a6154a77b4569b641376b3a3f874f"><enum>(7)</enum><text>TechWomen, a mentorship and exchange program pairing emerging international women leaders in science, technology, engineering, and mathematics with women professionals in the United States;</text>
+ </paragraph><paragraph id="id3ae0a829950d44b39ae94afa737c2594"><enum>(8)</enum><text>the Boren Awards and The Language Flagship, initiatives of the National Security Education Program that invests in the next generation of leaders in the United States by supporting United States undergraduate and graduate students in learning languages critical to United States interests; and</text>
+ </paragraph><paragraph id="id2f6dd025a82746118dd14c5d6dd3373a"><enum>(9)</enum><text>Project Global Officer, a Department of Defense initiative providing summer scholarships and year-round language training to Reserve Officers’ Training Corps students for critical language study and cultural learning;</text>
+ </paragraph></whereas><whereas><text>Whereas the IIE has been rescuing scholars, artists, and students threatened by war, civil and religious conflict, terrorism, and dictatorships and other forms of repression continuously since 1920;</text>
+ </whereas><whereas><text>Whereas, in 2002, the IIE endowed a permanent Scholar Rescue Fund (referred to in this preamble as the <quote>IIE-SRF</quote>) to aid scholars threatened by conflict and repression in their home countries by—</text>
+ <paragraph id="id259EEDD3C4424B1F9B6B9CEC49BB11FE"><enum>(1)</enum><text>vetting the scholars;</text> </paragraph><paragraph id="idF1C266E1534D427582640B98E9338F2F"><enum>(2)</enum><text>providing the scholars with funding; and</text>
+ </paragraph><paragraph id="idF2B8D78A37F840F1A80495ACD7F4F69C"><enum>(3)</enum><text>placing the scholars at host institutions;</text> </paragraph></whereas><whereas><text>Whereas, since the endowment of the IIE-SRF in 2002, the IIE-SRF has—</text>
+ <paragraph id="id96FAA27282A54487AF22E477C53AF7E9"><enum>(1)</enum><text>placed 793 scholars from 59 countries at 393 host institutions in 44 countries; and</text> </paragraph><paragraph id="id830BE17EB46148F584C7FFFD10E0A111"><enum>(2)</enum><text>saved entire national academies;</text>
+ </paragraph></whereas><whereas><text>Whereas building economies, helping governments and corporations develop an educated workforce, and preparing students and professionals for success in the global economy is fundamental to the work of the IIE;</text>
+ </whereas><whereas><text>Whereas there are more than 27,000 annual participants in programs developed, managed, and implemented by the IIE; and</text>
+ </whereas><whereas><text>Whereas the IIE is at the foundation of a network of colleges, universities, and communities that host over 1,000,000 international students annually, at a benefit of over $42,000,000,000 to the economy of the United States: Now, therefore, be it</text>
+		</whereas></preamble>
+	<resolution-body>
+ <section display-inline="yes-display-inline" id="S1" section-type="undesignated-section"><enum></enum><text>That the Senate recognizes—</text> <paragraph id="idbd95ca3837894dceaa93d5203fea8acb"><enum>(1)</enum><text>on the 100th anniversary of the establishment of the Institute of International Education (referred to in this resolution as the <quote>IIE</quote>) the many accomplishments of—</text>
+ <subparagraph id="idBB4E9DC7058540EFAF6529EFA1525757"><enum>(A)</enum><text>the members and staff of the IIE; and</text> </subparagraph><subparagraph id="id7F4D005ABDFE44688F60E1CF05905282"><enum>(B)</enum><text>the participants in programs administered by the IIE;</text>
+ </subparagraph></paragraph><paragraph id="idd2fb95f078f84c01a047289c3adb4f60"><enum>(2)</enum><text>the contributions of the members and staff of the IIE to—</text> <subparagraph id="id12392698044743DBA8F96E4119AD9161"><enum>(A)</enum><text>national security;</text>
+ </subparagraph><subparagraph id="idC103A2CD586144E3B0AD53B8316E8A61"><enum>(B)</enum><text>economic development;</text> </subparagraph><subparagraph id="id55F48C5023424755899E7ECDCA8AC29E"><enum>(C)</enum><text>advancement of cultural awareness; and</text>
+ </subparagraph><subparagraph id="id4FE853B35A124F129D20386B2F8E7966"><enum>(D)</enum><text>cooperation among nations;</text> </subparagraph></paragraph><paragraph id="id4ddeac3d5f7244fa8002b0ef82e033f8"><enum>(3)</enum><text>the effectiveness of the IIE at promoting opportunity by—</text>
+ <subparagraph id="id72327FC5C08B4EEFA7CF70E27BD0B98D"><enum>(A)</enum><text>providing scholarships and administering programs that benefit underserved populations;</text> </subparagraph><subparagraph id="id838E30DD8F4447A0A989A2B917CF4F1E"><enum>(B)</enum><text>rescuing and assisting threatened and displaced scholars, students, and artists; and</text>
+ </subparagraph><subparagraph id="id81AB7D60402946128FA93A6B06ABBC8C"><enum>(C)</enum><text>encouraging teaching and learning across cultures into the future; and</text> </subparagraph></paragraph><paragraph id="id3cc75ef9648d44b18290ead6626a1c02"><enum>(4)</enum><text>the important role of the IIE as a distinguished partner with the—</text>
+ <subparagraph id="id6E56076CC14746289AD0865ABDD6C960"><enum>(A)</enum><text>United States Government;</text> </subparagraph><subparagraph id="idFB315B427925466E9F3057730CCFBF4D"><enum>(B)</enum><text>private sector; and</text>
+ </subparagraph><subparagraph id="idFF2C5240B41C486EA537C4B4F0F9DBFD"><enum>(C)</enum><text>nonprofit and philanthropic communities.</text> </subparagraph></paragraph></section></resolution-body> </resolution> 
+

@@ -1,0 +1,102 @@
+{
+ "cu_edges_roster_internal": 1874,
+ "cu_edges_off_roster_skipped": 340,
+ "strict_dominant_or_equal": 1461,
+ "strict_rate": 0.779616,
+ "missing_pairs": 8,
+ "dominance_violations": 405,
+ "samples": [
+  {
+   "edge": [
+    "B001282",
+    "C001137"
+   ],
+   "cu_w": 0.05129891760425771,
+   "parity_w": 0.04950737714883372,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "D000594"
+   ],
+   "cu_w": 2.451197485744504,
+   "parity_w": 1.707554804391345,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "E000235"
+   ],
+   "cu_w": 0.2910427500435996,
+   "parity_w": 0.2560994223480445,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "F000472"
+   ],
+   "cu_w": 0.4797569736553535,
+   "parity_w": 0.4079035579765181,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "H001082"
+   ],
+   "cu_w": 0.08693374985924762,
+   "parity_w": 0.08514220940382364,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "H001098"
+   ],
+   "cu_w": 0.05129891760425771,
+   "parity_w": 0.04950737714883372,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "J000311"
+   ],
+   "cu_w": 0.05129891760425771,
+   "parity_w": 0.04950737714883372,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "K000397"
+   ],
+   "cu_w": 1.795394199137004,
+   "parity_w": 1.336722934445832,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "K000405"
+   ],
+   "cu_w": 0.3061862178478973,
+   "parity_w": 0.208662430793771,
+   "class": "dominance"
+  },
+  {
+   "edge": [
+    "B001282",
+    "L000597"
+   ],
+   "cu_w": 0.08693374985924762,
+   "parity_w": 0.08514220940382364,
+   "class": "dominance"
+  }
+ ],
+ "pin": ">=99.5% strict; 100% explained (freeze addendum 2026-08-17)",
+ "note": "CU base vintage 2026-06-25 scrape vs holistic BILLSTATUS 2026-08-01 \u2014 source-discrepancy classes for any residue"
+}

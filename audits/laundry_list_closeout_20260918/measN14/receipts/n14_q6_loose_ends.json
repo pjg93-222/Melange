@@ -1,0 +1,569 @@
+{
+ "cu_golden_labels": {
+  "rows": 760,
+  "rows_detail": [
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Andy Barr",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Fraud fight: Prioritize innovative technology, information-sharing"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Catherine Cortez Masto",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "cortez masto statement on clarity act"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Chris Pappas",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Pappas Statement on Passage of Cryptocurrency Legislation"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Chris Van Hollen",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Van Hollen, Alsobrooks, Colleagues Take Action to Protect Federal Workers\u2019 Financial Health as Shutdown Threatens Economic Hardship"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Chris Van Hollen",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Van Hollen Joins Warren, Colleagues in Pressing Administration on Impact of Mass CFPB Firings for Consumers Scammed by Big Corporations; Government Watchdog Takes Up Warren, Kim Call to Investigate"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Cory Booker",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Simpson sets the record straight on overdraft programs"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Cynthia Lummis",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Lummis Lauds Passage of Resolution Rolling Back SEC Overreach"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Earl Carter",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Carter Statement on House Passage of Key Crypto Legislation"
+   },
+   {
+    "csv": "oppose",
+    "gold": "oppose",
+    "member": "Elizabeth Warren",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "In Speech to National Urban League, Warren Calls Out Republican Plans to Shortchange American Families to Pay for Billionaire Tax Cuts"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Frederica Wilson",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Congresswoman Wilson Introduces Mandatory Foreclosure Mediation Act, Fights to Keep Florida Families in Their Homes"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "French Hill",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "RELEASE: REP. HILL PROTECTS THE PERSONAL RIGHTS OF CENTRAL ARKANSANS AND AMERICANS"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "French Hill",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Fraud fight: Prioritize innovative technology, information-sharing"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Jeanne Shaheen",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Three Shaheen-Led Bills to Lower Housing Costs, Improve Affordable Housing Pass in Bipartisan Housing Package"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Jim Jordan",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Ohio Credit Union League hosts Rep. Jordan"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Jimmy Panetta",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Reps. Panetta, LaHood Reintroduce Bipartisan Legislation to Simplify Retirement Savings Options for Seniors"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Jimmy Panetta",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Rep. Panetta Authors and Introduces Bipartisan Bill to Simplify Retirement Savings Options for Seniors"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "John Kennedy",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Senate bill would make needed updates to SAR/CTR thresholds"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "John Kennedy",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Leagues, credit unions host lawmakers, attend local political events"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "John Mannion",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Opportunity Knock$ brings together Members of Congress, credit union leaders"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "John Rose",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "House passes bill curtailing abusive mortgage trigger leads"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "John Rose",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Members of Congress encourage \u2018strong, unified voice\u2019 from credit unions"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "John Thune",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Credit union tax status untouched in Ways and Means reconciliation bill"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "John Thune",
+    "sheet": "oppose",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Opposing efforts to add interchange price caps to stablecoin legislation"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "John Thune",
+    "sheet": "oppose",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "'Poison pill' GENIUS Act amendments less likely to move forward"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Jon Ossoff",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Sens. Ossoff, Moody Introduce Bipartisan Bill to Make Homeownership More Affordable for First Responders & Teachers"
+   },
+   {
+    "csv": "oppose",
+    "gold": "neutral",
+    "member": "Jon Ossoff",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "El Senador Ossoff Presenta Proyecto de Ley Bipartidista para Proteger a los Ni\u00f1os de los Depredadores en L\u00ednea y la Explotaci\u00f3n Sexual"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Joni Ernst",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "ICYMI: WSJ Ed Board Promotes Ernst\u2019s Telework Transparency Act"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Joni Ernst",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Legislators and advocates connect"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Josh Hawley",
+    "sheet": "oppose",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Interchange, rate cap amendments are GENIUS Act \u2018poison pills\u2019"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Josh Hawley",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "VP Vance calls for Congress to pass \u2018clean\u2019 GENIUS Act"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Josh Hawley",
+    "sheet": "oppose",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "'Poison pill' GENIUS Act amendments less likely to move forward"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Josh Hawley",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "GENIUS Act clears senate without interchange, credit card rate cap amendments"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Juan Vargas",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Bipartisan House bill would update board meeting requirements"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Juan Vargas",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Nussle meets with credit union supporters on Capitol Hill"
+   },
+   {
+    "csv": "oppose",
+    "gold": "neutral",
+    "member": "Kirsten Gillibrand",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Gillibrand Slams Trump Administration For Making Seniors More Vulnerable To Financial Frauds And Scams"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Kirsten Gillibrand",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Senator Gillibrand Statement On The GENIUS Act"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Kirsten Gillibrand",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Schumer, Gillibrand & Ryan: With West Point Facing Severe Damage From Extreme Flooding, Reps Call On U.S. Army Corps Top Brass To Get Boots On The Ground Asap And Deploy Any & All Resources Available To Get Hudson Valle"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Kweisi Mfume",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Mfume, Maryland Congressional Delegation Members Announce Over $24 Million in Federal Funding to Spur Economic Growth in Maryland Communities Disproportionately Impacted by the COVID-19 Pandemic"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Kweisi Mfume",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Congressman Mfume, Maryland Congressional Delegation Announces Over $86M in Federal Funds for Investments in Minority and Underserved Communities"
+   },
+   {
+    "csv": "support",
+    "gold": "oppose",
+    "member": "Lance Gooden",
+    "sheet": "oppose",
+    "source": "augmented_v2+goldqueue",
+    "split": "test",
+    "title": "Interchange bill should be rejected in any form"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Lance Gooden",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Gooden Reveals Historic U.S. Military Use of Bitcoin Node"
+   },
+   {
+    "csv": "oppose",
+    "gold": "oppose",
+    "member": "Lisa Blunt Rochester",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "STATEMENT: Senator Lisa Blunt Rochester Releases Statement on GENIUS Act"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Maggie Goodlander",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Goodlander Joins Republicans to Pass Affordable HOMES Act to Cut Red Tape and Lower Housing Costs"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Mike Crapo",
+    "sheet": "support",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Fighting fraud on multiple fronts"
+   },
+   {
+    "csv": "oppose",
+    "gold": "oppose",
+    "member": "Mike Flood",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Congressman Flood: Inspector General Reveals New Details on Credit Union Merger"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Mike Rounds",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Leagues, CU advocates talk fraud, financial education, and more with policymakers"
+   },
+   {
+    "csv": "oppose",
+    "gold": "oppose",
+    "member": "Richard Blumenthal",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "test",
+    "title": "ICYMI Op-Ed: Crypto is a Gamble our Financial System Doesn't Need"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Richard Blumenthal",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Simpson sets the record straight on overdraft programs"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Richard Blumenthal",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "test",
+    "title": "Blumenthal Releases Report On Trump's Gutting of Consumer Protections"
+   },
+   {
+    "csv": "oppose",
+    "gold": "oppose",
+    "member": "Richard Durbin",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Illinois \u2018sovereign immunity\u2019 assertion in interchange challenge would hurt state-chartered CUs"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Roger Marshall",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Reintroduced Big Box Bailout would harm consumers, small businesses"
+   },
+   {
+    "csv": "support",
+    "gold": "oppose",
+    "member": "Roger Marshall",
+    "sheet": "oppose",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "America\u2019s Credit Unions joins with other industry groups in opposition to NDAA interchange amendments"
+   },
+   {
+    "csv": "neutral",
+    "gold": "neutral",
+    "member": "Sheldon Whitehouse",
+    "sheet": "oppose",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Senate interest rate bill would increase compliance complexity"
+   },
+   {
+    "csv": "oppose",
+    "gold": "oppose",
+    "member": "Stephen Lynch",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "train",
+    "title": "Reps. Lynch and Waters Announce Anti-Crypto Corruption Week"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Tim Scott",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Credit unions engage with policymakers prior to stablecoin bill release"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Tim Scott",
+    "sheet": "neutral",
+    "source": "augmented_v2",
+    "split": "train",
+    "title": "Credit union board modernization part of updated housing bill"
+   },
+   {
+    "csv": "support",
+    "gold": "support",
+    "member": "Todd Young",
+    "sheet": "neutral",
+    "source": "augmented_v2+goldqueue",
+    "split": "test",
+    "title": "Hauptman says NCUA must be aware of consequences of overregulation"
+   }
+  ],
+  "tally_on_57": {
+   "gold == CSV stance": 53,
+   "gold == SHEET stance": 4
+  },
+  "url_keyed": 758
+ },
+ "dropped_keys": [
+  [
+   "https://moylan.house.gov/federal-employee-government-shutdown-resource-guide",
+   "M001219"
+  ],
+  [
+   "https://plaskett.house.gov/news/documentsingle.aspx?DocumentID=4575",
+   "P000610"
+  ]
+ ],
+ "dropped_unresolved_member": 2,
+ "label_set_vintage": {
+  "Draft cu_stance_label_set.xlsx::Done (locked)": {
+   "xlsx agrees with NEITHER": 2,
+   "xlsx agrees with the CSV": 18,
+   "xlsx agrees with the SHEET": 15
+  },
+  "Draft cu_stance_label_set.xlsx::Done (locked)::drift_vs_csv": 25,
+  "Draft cu_stance_label_set.xlsx::To Rework": {
+   "xlsx agrees with the CSV": 17,
+   "xlsx agrees with the SHEET": 5
+  },
+  "Draft cu_stance_label_set.xlsx::To Rework::drift_vs_csv": 9,
+  "LIVE  cu_stance_label_set.xlsx::Done (locked)": {
+   "xlsx agrees with NEITHER": 2,
+   "xlsx agrees with the CSV": 18,
+   "xlsx agrees with the SHEET": 15
+  },
+  "LIVE  cu_stance_label_set.xlsx::Done (locked)::drift_vs_csv": 25,
+  "LIVE  cu_stance_label_set.xlsx::To Rework": {
+   "xlsx agrees with the CSV": 18,
+   "xlsx agrees with the SHEET": 4
+  },
+  "LIVE  cu_stance_label_set.xlsx::To Rework::drift_vs_csv": 8
+ },
+ "schema": "n14-loose-ends-v1",
+ "shared_keys": 2376,
+ "stance_disagreements_the_desk_displays": 57,
+ "stance_src_keys_the_desk_displays": 493,
+ "title_mojibake": {
+  "csv_bad": 0,
+  "neither": 1,
+  "sheet_bad": 36
+ }
+}

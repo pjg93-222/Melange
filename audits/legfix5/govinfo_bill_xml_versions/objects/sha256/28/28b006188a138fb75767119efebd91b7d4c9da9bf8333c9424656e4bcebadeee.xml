@@ -1,0 +1,635 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="HEC626B82C3D642B39EF4267EF15142BA" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HRES 902 IH: Bipartisan Healthcare Optimization, Protection, and Extension Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 902</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251120">November 20, 2025</action-date><action-desc><sponsor name-id="S001201">Mr. Suozzi</sponsor> (for himself and <cosponsor name-id="B001298">Mr. Bacon</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HRU00">Committee on Rules</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Providing for consideration of the bill (H.R. 185) to advance responsible policies.</official-title></form><resolution-body style="traditional" id="H83CA28EE143F454095B5A0C17DD4E7BD">
+    <section display-inline="yes-display-inline" section-type="undesignated-section"
+      id="HD85B99BE7CE14362BA27E485740B53B3">
+ <text display-inline="yes-display-inline">That immediately upon adoption of this resolution, the House shall proceed to the consideration in the House of the bill (H.R. 185) to advance responsible policies. All points of order against consideration of the bill are waived. The amendment in the nature of a substitute specified in section 4 of this resolution shall be considered as adopted. The bill, as amended, shall be considered as read. All points of order against provisions in the bill, as amended, are waived. The previous question shall be considered as ordered on the bill, as amended, and on any further amendment thereto, to final passage without intervening motion except: (1) one hour of debate equally divided and controlled by the majority leader and minority leader or their respective designees; and (2) one motion to recommit.</text>
+    </section>
+    <section id="H560269ACF9F4497897AC6BC3F959D202">
+      <enum>2.</enum>
+ <text display-inline="yes-display-inline">Clause 1(c) of rule XIX and clause 8 of rule XX shall not apply to the consideration of H.R. 185.</text>
+    </section>
+    <section id="HF1840B4B4BA54607BA7895B21D0D4689">
+      <enum>3.</enum>
+ <text display-inline="yes-display-inline">The Clerk shall transmit to the Senate a message that the House has passed H.R. 185 no later than one calendar day after passage.</text>
+    </section>
+    <section id="HC1CF69597CC34024B5284ACD90C7C599">
+      <enum>4.</enum>
+ <text display-inline="yes-display-inline">The amendment in the nature of a substitute referred to in the first section of this resolution is as follows:</text>
+      <paragraph id="HA9688A49A97F4AE7AF9C52ABA94A3C05">
+        <enum><?xm-replace_text {enum}?></enum>
+ <text>Strike all after the enacting clause and insert the following:</text> <quoted-block id="H574FA57F572543ACAC4EA161BBA8AE76" style="OLC"> <section id="HBEF3E529705A478289C9B6CEF52921FE" section-type="section-one"> <enum>1.</enum> <header>Short title</header> <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Bipartisan Healthcare Optimization, Protection, and Extension Act</short-title></quote> or the <quote><short-title>HOPE Act</short-title></quote>.</text>
+          </section>
+          <section id="H8832F952382F4F69B438A1705D6C62A0" section-type="subsequent-section">
+            <enum>2.</enum>
+            <header>Extension and modification of enhanced premium tax credit</header>
+            <subsection id="HA62DE0F917A34461AF4FF68F0DFBA578">
+              <enum>(a)</enum>
+              <header>Extension and modification of rules To increase premium assistance
+                amounts</header>
+ <text display-inline="yes-display-inline"><external-xref legal-doc="usc" parsable-cite="usc/26/36B">Section 36B(b)(3)(A)(iii)</external-xref> of the Internal Revenue Code of 1986 is amended—</text>
+              <paragraph id="HEF0BEA3C989849A1A16599CBB59AAD63">
+                <enum>(1)</enum>
+ <text>by redesignating subclauses (I) and (II) as items (aa) and (bb), respectively, and adjusting the margins accordingly,</text>
+              </paragraph>
+              <paragraph id="H27CE3AEEA90443759538C55C2AE69700">
+                <enum>(2)</enum>
+ <text>by striking <quote><header-in-text level="clause" style="OLC">Temporary percentages for <enum-in-header>2021</enum-in-header> through <enum-in-header>2025</enum-in-header></header-in-text>.—In the case of</quote> and inserting</text>
+                <quoted-block style="OLC" id="HBA8481335CC546599CEEDA729C32835E"
+                  display-inline="yes-display-inline">
+ <text display-inline="yes-display-inline"><header-in-text level="clause" style="OLC">Temporary percentages for certain years</header-in-text>.—</text>
+                  <subclause id="H32AC76F4B6FB485FAD56E1863AFC5FC3">
+                    <enum>(I)</enum>
+                    <header>Before <enum-in-header>2026</enum-in-header></header>
+ <text display-inline="yes-display-inline">In the case of</text> </subclause> <after-quoted-block>, and</after-quoted-block> </quoted-block> </paragraph> <paragraph id="H517D5171A0D94DA2AEC423F9A638380F"> <enum>(3)</enum> <text>by adding at the end the following:</text>
+                <quoted-block style="OLC" id="H31F6B6B517A94795BB272299DB9421C7"
+                  display-inline="no-display-inline">
+                  <subclause id="HD180D9F454A04CE1B697A5300BEAD202" commented="no">
+                    <enum>(II)</enum>
+                    <header>After <enum-in-header>2025</enum-in-header></header>
+ <text display-inline="yes-display-inline">In the case of a taxable year beginning after December 31, 2025, and before January 1, 2028—</text>
+                    <item id="H4D273443FFB5488F8B406A7F74EDD098" commented="no">
+                      <enum>(aa)</enum>
+ <text>clause (ii) shall not apply for purposes of adjusting premium percentages under this subparagraph, and</text>
+                    </item>
+                    <item id="HDB3007ACF0304D639D91B709BD22B4FB" commented="no">
+                      <enum>(bb)</enum>
+ <text>the following table shall be applied in lieu of the table contained in clause (i):</text>
+                      <table table-type="" table-template-name="Generic: 1 text, 2 num"
+                        align-to-level="section" frame="topbot" colsep="1" rowsep="0"
+                        blank-lines-before="1" line-rules="hor-ver" rule-weights="4.4.4.0.0.0">
+                        <tgroup cols="3" grid-typeface="1.1" rowsep="0"
+                          thead-tbody-ldg-size="10.10.12">
+                          <colspec coldef="txt-no-ldr" colname="column1" min-data-value="180"
+                            colwidth="202pts"/>
+                          <colspec coldef="fig" colname="column2" min-data-value="10"
+                            colwidth="56pts"/>
+                          <colspec coldef="fig" colname="column3" min-data-value="10" rowsep="0"
+                            colwidth="56pts"/>
+                          <thead>
+                            <row>
+                              <entry align="center" morerows="0" namest="column1" rowsep="1"
+                                colname="column1">In the case of household income (expressed as a
+                                percent of poverty line) within the following income tier:</entry>
+                              <entry align="center" morerows="0" namest="column2" rowsep="1"
+                                colname="column2">The initial premium percentage is-</entry>
+                              <entry align="center" morerows="0" namest="column3" rowsep="1"
+                                colname="column3">The final premium percentage is-</entry>
+                            </row>
+                          </thead>
+                          <tbody>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">Up to
+                                150%</entry>
+                              <entry align="right" rowsep="0" colname="column2">0.0%</entry>
+                              <entry align="right" rowsep="0" colname="column3">0.0%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">150%
+                                up to 200%</entry>
+                              <entry align="right" rowsep="0" colname="column2">0.0%</entry>
+                              <entry align="right" rowsep="0" colname="column3">2.0%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">200%
+                                up to 250%</entry>
+                              <entry align="right" rowsep="0" colname="column2">2.0%</entry>
+                              <entry align="right" rowsep="0" colname="column3">4.0%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">250%
+                                up to 300%</entry>
+                              <entry align="right" rowsep="0" colname="column2">4.0%</entry>
+                              <entry align="right" rowsep="0" colname="column3">6.0%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">300%
+                                up to 400%</entry>
+                              <entry align="right" rowsep="0" colname="column2">6.0%</entry>
+                              <entry align="right" rowsep="0" colname="column3">8.5%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">400%
+                                up to 600%</entry>
+                              <entry align="right" rowsep="0" colname="column2">8.5%</entry>
+                              <entry align="right" rowsep="0" colname="column3">8.5%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">600%
+                                up to 800%</entry>
+                              <entry align="right" rowsep="0" colname="column2">8.5%</entry>
+                              <entry align="right" rowsep="0" colname="column3">9.0%</entry>
+                            </row>
+                            <row>
+                              <entry align="left" leader-modify="clr-ldr" rowsep="0"
+                                stub-definition="txt-ldr" stub-hierarchy="1" colname="column1">800%
+                                up to 935%</entry>
+                              <entry align="right" rowsep="0" colname="column2">9.0%</entry>
+                              <entry align="right" rowsep="0" colname="column3">9.35%</entry>
+                            </row>
+                          </tbody>
+                        </tgroup>
+                      </table>
+                    </item>
+                  </subclause>
+                  <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+              </paragraph>
+            </subsection>
+            <subsection id="H90991C3FA5824298BA607753998BD4FD" display-inline="no-display-inline">
+              <enum>(b)</enum>
+              <header>Extension and modification of rule To allow credit to taxpayers whose
+                household income exceeds <enum-in-header>400</enum-in-header> percent of poverty
+                line</header>
+ <text display-inline="yes-display-inline">Section 36B(c)(1)(E) of such Code is amended—</text>
+              <paragraph id="H436118A1BF5C4F69B804D46D243AF5B7">
+                <enum>(1)</enum>
+ <text display-inline="yes-display-inline">by striking <quote><header-in-text level="subparagraph" style="OLC">Temporary rule for <enum-in-header>2021 </enum-in-header>through <enum-in-header>2025</enum-in-header></header-in-text>.—In the case of</quote> and inserting</text>
+                <quoted-block style="OLC" id="H391F3A9A64E74125987007069C7B5488"
+                  display-inline="yes-display-inline">
+ <text display-inline="yes-display-inline"><header-in-text level="subparagraph" style="OLC">Temporary rule for certain years</header-in-text>.—</text>
+                  <clause id="H92FE8EEBF1CF4258A54EF705F4D496E9">
+                    <enum>(i)</enum>
+                    <header>Before <enum-in-header>2026</enum-in-header></header>
+ <text display-inline="yes-display-inline">In the case of</text> </clause> <after-quoted-block>, and</after-quoted-block> </quoted-block> </paragraph> <paragraph id="H4BB38683D41F4B81965C859EF57D1D90"> <enum>(2)</enum> <text>by adding at the end the following:</text>
+                <quoted-block style="OLC" id="H16F2A55CBFAB4946A51BFF994209889A"
+                  display-inline="no-display-inline">
+                  <clause id="HA1BC2AACCD2A4759AD2408C00624D6ED">
+                    <enum>(ii)</enum>
+                    <header>After <enum-in-header>2025</enum-in-header></header>
+ <text display-inline="yes-display-inline">In the case of a taxable year beginning after December 31, 2025, and before January 1, 2028, subparagraph (A) shall be applied by substituting <quote>but does not exceed 935 percent</quote> for <quote>but does not exceed 400 percent</quote>.</text>
+                  </clause>
+                  <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+              </paragraph>
+            </subsection>
+            <subsection id="HD1DC4005E0B44ACD8812E6654A49784E">
+              <enum>(c)</enum>
+              <header>Effective date</header>
+ <text>The amendments made by this section shall apply to taxable years beginning after December 31, 2025.</text>
+            </subsection>
+          </section>
+          <section id="H64D00B6398334563B7370EF5195CB7B9">
+            <enum>3.</enum>
+            <header>Guardrails to prevent fraud in Exchanges</header>
+            <subsection id="HDF8F84D6CB57425FBC08CDA2A1A55721" commented="no"
+              display-inline="no-display-inline">
+              <enum>(a)</enum>
+              <header>Reduction of fraudulent enrollment in qualified health plans</header>
+              <paragraph id="H68D86D1641194DD0B13C9DF1EE2EAA17" commented="no">
+                <enum>(1)</enum>
+                <header>Penalties for agents and brokers</header>
+ <text>Section 1411(h)(1) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18081">42 U.S.C. 18081(h)(1)</external-xref>) is amended—</text>
+                <subparagraph id="HF227266FF95E46A7A62459C6B8A00B12" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(A)</enum>
+ <text>in subparagraph (A)—</text> <clause id="H0C008C2500004C709FCA1D8BAD551F21" commented="no" display-inline="no-display-inline"> <enum>(i)</enum> <text display-inline="yes-display-inline">by redesignating clause (ii) as clause (iv);</text>
+                  </clause>
+                  <clause id="H6680D806F5E142FB94ABB645420FB266" commented="no"
+                    display-inline="no-display-inline">
+                    <enum>(ii)</enum>
+ <text>in clause (i)—</text> <subclause id="H5775589BC8A94004B52E1BD2BA8D376A" commented="no" display-inline="no-display-inline"> <enum>(I)</enum> <text display-inline="yes-display-inline">in the matter preceding subclause (I), by striking <quote>If—</quote> and all that follows through the <quote>such person</quote> in the matter following subclause (II) and inserting the following: <quote>If any person (other than an agent or broker) fails to provide correct information under subsection (b) and such failure is attributable to negligence or disregard of any rules or regulations of the Secretary, such person</quote>; and</text>
+                    </subclause>
+                    <subclause id="HC9F027B4148749ACAE88EAAFB2C75229" commented="no"
+                      display-inline="no-display-inline">
+                      <enum>(II)</enum>
+ <text display-inline="yes-display-inline">in the second sentence, by striking <quote>For purposes</quote> and inserting the following:</text>
+                      <quoted-block style="OLC" display-inline="no-display-inline"
+                        id="H63FECF8437C74B1CB037F250B42F417D">
+                        <clause commented="no" display-inline="no-display-inline"
+                          id="HDFA77BD7F86746F2ABF6DD62DFEF53E7">
+                          <enum>(iii)</enum>
+                          <header>Definitions of negligence, disregard</header>
+ <text>For purposes</text> </clause> <after-quoted-block>;</after-quoted-block> </quoted-block> </subclause> </clause> <clause id="HAB25B6DA47DA4675B9C4E2BB45654263" commented="no" display-inline="no-display-inline"> <enum>(iii)</enum> <text>by inserting after clause (i) the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline"
+                      id="H458B12FFCCFE4E23A6D9F16196F5CB4D">
+                      <clause commented="no" display-inline="no-display-inline"
+                        id="H712DD6DAB10B4978A8F74B18F2A60253">
+                        <enum>(ii)</enum>
+                        <header>Civil penalties for certain violations by agents or brokers</header>
+ <text display-inline="yes-display-inline">If any agent or broker fails to provide correct information under subsection (b) or section 1311(c)(8) or other information, as specified by the Secretary, and such failure is attributable to negligence or disregard of any rules or regulations of the Secretary, such agent or broker shall be subject, in addition to any other penalties that may be prescribed by law, including subparagraph (C), to a civil penalty of not less than $10,000 and not more than $50,000 with respect to each individual who is the subject of an application for which such incorrect information is provided.</text>
+                      </clause>
+                      <after-quoted-block>; and</after-quoted-block>
+                    </quoted-block>
+                  </clause>
+                  <clause id="H6057C463D155406B977F8B4CB4AE6D64" commented="no"
+                    display-inline="no-display-inline">
+                    <enum>(iv)</enum>
+ <text>in clause (iv) (as so redesignated), by inserting <quote>or (ii)</quote> after <quote>clause (i)</quote>;</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H9E5047D358DE4F289B1498A076B8F4BE" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">in subparagraph (B)—</text> <clause id="H59C2EFE9A4304AD5896B1677290245B2" commented="no" display-inline="no-display-inline"> <enum>(i)</enum> <text display-inline="yes-display-inline">by inserting <quote>including subparagraph (C),</quote> after <quote>law,</quote>;</text>
+                  </clause>
+                  <clause id="HF172B9D464704218A7F4BFD9FFC44DFF" commented="no"
+                    display-inline="no-display-inline">
+                    <enum>(ii)</enum>
+ <text>by striking <quote>Any person</quote> and inserting the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="H33E196EA564A4F59BD5FA818C609346B"> <clause commented="no" display-inline="no-display-inline" id="H078B5D9E83BF4533B0E23FD7E00ADF56"> <enum>(i)</enum> <header>In general</header> <text>Any person</text>
+                      </clause>
+                      <after-quoted-block>; and</after-quoted-block>
+                    </quoted-block>
+                  </clause>
+                  <clause id="HD8BBF25D19B1464EAC4BE148F3BAC3F3" commented="no">
+                    <enum>(iii)</enum>
+ <text>by adding at the end the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="HBDED319B9C414FCD84FE4377E414C3BE"> <clause id="HE1CA8C67B8ED4E80A249D21DBE8A26A8" commented="no"> <enum>(ii)</enum> <header>Civil penalties for knowing violations by agents or brokers</header> <subclause commented="no" display-inline="no-display-inline" id="H24DCA891A57C40749A350E4FEC9BBAA0"> <enum>(I)</enum> <header display-inline="yes-display-inline">In general</header> <text>Any agent or broker who knowingly provides false or fraudulent information under subsection (b) or section 1311(c)(8), or other false or fraudulent information as part of an application for enrollment in a qualified health plan offered through an Exchange, as specified by the Secretary, shall be subject, in addition to any other penalties that may be prescribed by law, including subparagraph (C), to a civil penalty of not more than $200,000 with respect to each individual who is the subject of an application for which such false or fraudulent information is provided.</text>
+                        </subclause>
+                        <subclause id="H0CFB35D837D141C294D02A39A1A8D23D" commented="no">
+                          <enum>(II)</enum>
+                          <header>Procedure</header>
+ <text>The provisions of section 1128A of the Social Security Act (other than subsections (a) and (b) of such section) shall apply to a civil monetary penalty under subclause (I) in the same manner as such provisions apply to a penalty or proceeding under section 1128A of the Social Security Act.</text>
+                        </subclause>
+                      </clause>
+                      <after-quoted-block>; and</after-quoted-block>
+                    </quoted-block>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H0BD4E7EC2B234602995F9EBFF44AAEC1" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(C)</enum>
+ <text>by adding at the end the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="H780744BF8FD54764A5ECF9EB81FDBA2C"> <subparagraph commented="no" display-inline="no-display-inline" id="HA7963A8F15A5493C9F71F78F034E98C3"> <enum>(C)</enum> <header display-inline="yes-display-inline">Criminal penalties</header> <text display-inline="yes-display-inline">Any agent or broker who knowingly and willfully provides false or fraudulent information under subsection (b) or section 1311(c)(8), or other false or fraudulent information as part of an application for enrollment in a qualified health plan offered through an Exchange, as specified by the Secretary, shall be fined under title 18, United States Code, imprisoned for not more than 10 years, or both.</text>
+                    </subparagraph>
+                    <after-quoted-block>.</after-quoted-block>
+                  </quoted-block>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H3FA1503A21C045C2BB7CED23EA0D5F0E" commented="no">
+                <enum>(2)</enum>
+                <header>Consumer protections</header>
+                <subparagraph id="H1F650C72679545C88375C07171D08218" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(A)</enum>
+                  <header>In general</header>
+ <text display-inline="yes-display-inline">Section 1311(c) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18031">42 U.S.C. 18031(c)</external-xref>) is amended by adding at the end the following new paragraph:</text>
+                  <quoted-block style="OLC" display-inline="no-display-inline"
+                    id="H13B9EDF963674CFBA625BAD7C3DBED5A">
+                    <paragraph commented="no" id="HADFE177BFDAA4306946E2F6B02CE0853">
+                      <enum>(8)</enum>
+                      <header>Agent- or broker-assisted enrollment in qualified health plans in
+                        certain exchanges</header>
+                      <subparagraph commented="no" display-inline="no-display-inline"
+                        id="H31F8741BFFA44B9ABCBDF4E25E5C3B00">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text display-inline="yes-display-inline">For plan years beginning on or after such date specified by the Secretary, but not later than January 1, 2029, in the case of an Exchange that the Secretary operates pursuant to section 1321(c)(1), the Secretary shall establish a verification process for new enrollments of individuals in, and changes in coverage for individuals under, a qualified health plan offered through such Exchange, which are submitted by an agent or broker in accordance with section 1312(e) and for which the agent or broker is eligible to receive a commission.</text>
+                      </subparagraph>
+                      <subparagraph commented="no" display-inline="no-display-inline"
+                        id="HAC0D52662D144C2CAF7D02722B0FCE7B">
+                        <enum>(B)</enum>
+                        <header>Requirements</header>
+ <text>The enrollment verification process under subparagraph (A) shall include—</text>
+                        <clause id="H0261543C19554E99913110972D305124" commented="no">
+                          <enum>(i)</enum>
+ <text>a requirement that the agent or broker provide with the new enrollment or coverage change such documentation or evidence (such as a standardized consent form) or other sources as the Secretary determines necessary to establish that the agent or broker has the consent of the individual for the new enrollment or coverage change;</text>
+                        </clause>
+                        <clause id="HB373E560E3484284A6FD93FF8C939875" commented="no">
+                          <enum>(ii)</enum>
+ <text>a requirement that any commissions due to a broker or agent for such new enrollment or coverage change are paid after the enrollee has resolved all inconsistencies in accordance with paragraphs (3) and (4) of section 1411(e);</text>
+                        </clause>
+                        <clause id="H05B8B60698B14CBBBF3FD1E4D63D7DB6" commented="no">
+                          <enum>(iii)</enum>
+ <text>a requirement that the information required under clause (i) and, as applicable, the date on which inconsistencies are resolved as described in clause (ii), is accessible to the applicable qualified health plan through a database or other resource, as determined by the Secretary, so that any commissions due to a broker or agent for such enrollment can be effectuated at the appropriate time;</text>
+                        </clause>
+                        <clause id="H6B8B8A74A9C74138ABBE925F3F0A101C" commented="no">
+                          <enum>(iv)</enum>
+ <text>a requirement that individuals are notified of any changes to enrollment, coverage, the agent of record, or premium tax credits in a timely manner and that such notice provides plain language instructions on how individuals can cancel unauthorized activity;</text>
+                        </clause>
+                        <clause commented="no" id="H44448CF8544C46D5A4A4E43E80CF5884">
+                          <enum>(v)</enum>
+ <text>a requirement that individuals be able to access their account information on a website or other technology platform, as defined by the Secretary, when used to submit an enrollment or plan change, in lieu of the Exchange website described in subsection (d)(4)(C), including information on the agent of record, the qualified health plan, and when any changes are made to the agent of record or the qualified health plan, on a consumer-facing website or through a toll-free telephone hotline; and</text>
+                        </clause>
+                        <clause id="HEF41155153344B7E8F9ECFA67711C8B6" commented="no">
+                          <enum>(vi)</enum>
+ <text>a requirement that the agent or broker report to the Secretary any third-party marketing organization or field marketing organization (as such terms are defined in section 1312(e)) involved in the chain of enrollment (as so defined) with respect to such new enrollment or coverage change.</text>
+                        </clause>
+                      </subparagraph>
+                      <subparagraph commented="no" display-inline="no-display-inline"
+                        id="HEBEA7C333856449F805F01687EDE4B97">
+                        <enum>(C)</enum>
+                        <header>Consumer protection</header>
+ <text display-inline="yes-display-inline">The Secretary shall ensure that the enrollment verification process under subparagraph (A) prioritizes continuity of coverage and care for individuals, including by not disenrolling individuals from a qualified health plan without the consent of the individual, regardless of whether the broker, agent, or qualified health plan is in violation of any requirement under this paragraph.</text>
+                      </subparagraph>
+                    </paragraph>
+                    <after-quoted-block>.</after-quoted-block>
+                  </quoted-block>
+                </subparagraph>
+                <subparagraph id="H50D185C613AF427993A834D5AFFB862A" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(B)</enum>
+                  <header>Required reporting</header>
+ <text>Section 1311(c)(1) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18031">42 U.S.C. 18031(c)(1)</external-xref>) is amended—</text>
+                  <clause id="HD4123427FFC449ECB0964D7CD1CC0E58" commented="no"
+                    display-inline="no-display-inline">
+                    <enum>(i)</enum>
+ <text display-inline="yes-display-inline">in subparagraph (H), by striking <quote>and</quote> at the end;</text>
+                  </clause>
+                  <clause id="HDF650AD4A9AC42A5A931A7B8796E4110" commented="no"
+                    display-inline="no-display-inline">
+                    <enum>(ii)</enum>
+ <text>in subparagraph (I), by striking the period at the end and inserting <quote>; and</quote>; and</text>
+                  </clause>
+                  <clause id="H4AB84193EFBC4A029448E6BBEC4B3B1A" commented="no"
+                    display-inline="no-display-inline">
+                    <enum>(iii)</enum>
+ <text>by adding at the end the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="H4566738F5D314506AA1FAF44C1CCA42D"> <subparagraph commented="no" display-inline="no-display-inline" id="HEC667656150B449A816158E890B8002F"> <enum>(J)</enum> <text>report to the Secretary the termination (as defined in section 1312(e)(1)(C)) of an issuer.</text>
+                      </subparagraph>
+                      <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H386730C2F78E43C3A6F2476DE5282EB7" commented="no"
+                display-inline="no-display-inline">
+                <enum>(3)</enum>
+                <header>Authority to regulate field marketing organizations and third-party
+                  marketing organizations</header>
+ <text>Section 1312(e) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18032">42 U.S.C. 18032(e)</external-xref>) is amended—</text>
+                <subparagraph id="HA40EF5A8C7FA4EBD9AE0EA4C4434DDFC" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">by redesignating paragraphs (1) and (2) as subclauses (I) and (II), respectively, and adjusting the margins accordingly;</text>
+                </subparagraph>
+                <subparagraph id="HA8CB9410CE584DF382742C90540305B3" commented="no">
+                  <enum>(B)</enum>
+ <text>in subclause (II) (as so redesignated), by striking the period at the end and inserting <quote>; and</quote>;</text>
+                </subparagraph>
+                <subparagraph id="H68FE1094BBE74EA78BCC6D74E775ABE6" commented="no"
+                  display-inline="no-display-inline">
+                  <enum>(C)</enum>
+ <text>by striking the subsection designation and heading and all that follows through <quote>brokers—</quote> and inserting the following:</text>
+                  <quoted-block style="OLC" display-inline="no-display-inline"
+                    id="H7F9B1C411CD8406CA4E84124135EEBD6">
+                    <subsection commented="no" display-inline="no-display-inline"
+                      id="H75EE16A0F51E4E92A24E8A4E3381FEDD">
+                      <enum>(e)</enum>
+                      <header>Regulation of agents, brokers, and certain marketing
+                        organizations</header>
+                      <paragraph commented="no" display-inline="no-display-inline"
+                        id="HC4B687E1749743388C832D8436238764">
+                        <enum>(1)</enum>
+                        <header display-inline="yes-display-inline">Agents, brokers, and certain
+                          marketing organizations</header>
+                        <subparagraph commented="no" display-inline="no-display-inline"
+                          id="H2E31CAEC40DA4F0D93E13C08AA3FF145">
+                          <enum>(A)</enum>
+                          <header display-inline="yes-display-inline">In general</header>
+ <text>The Secretary shall establish procedures under which a State may allow—</text>
+                          <clause commented="no" display-inline="no-display-inline"
+                            id="HD92511260D824100AE316FB9C36DBAD5">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">agents or brokers—</text> </clause> </subparagraph> </paragraph> </subsection> <after-quoted-block>; and</after-quoted-block> </quoted-block> </subparagraph> <subparagraph id="HE834578DC0654375B4E0BBC4A2C974AD" commented="no" display-inline="no-display-inline"> <enum>(D)</enum> <text>by adding at the end the following:</text>
+                  <quoted-block style="OLC" display-inline="no-display-inline"
+                    id="H387C2F386F724F2AB3A0D327EFD72390">
+                    <clause commented="no" display-inline="no-display-inline"
+                      id="H7085D7C1A3944F4384B4B3DB0AD015FA">
+                      <enum>(ii)</enum>
+ <text>field marketing organizations and third-party marketing organizations to participate in the chain of enrollment for an individual with respect to qualified health plans offered through an Exchange.</text>
+                    </clause>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                      id="H56E2979EA0FA4E02B10725509FF10100">
+                      <enum>(B)</enum>
+                      <header>Criteria</header>
+ <text display-inline="yes-display-inline">For plan years beginning on or after such date specified by the Secretary, but not later than January 1, 2029, the Secretary, by regulation, shall establish criteria for States to use in determining whether to allow agents and brokers to enroll individuals and employers in qualified health plans as described in subclause (I) of subparagraph (A)(i) and to assist individuals as described in subclause (II) of such subparagraph and field marketing organizations and third-party marketing organizations to participate in the chain of enrollment as described in subparagraph (A)(ii). Such criteria shall, at a minimum, require that—</text>
+                      <clause id="H65655E7E3E354A14BCF6CFE4097D0353" commented="no">
+                        <enum>(i)</enum>
+ <text>an agent or broker act in accordance with a standard of conduct that includes a duty of such agent or broker to act in the best interests of the enrollee;</text>
+                      </clause>
+                      <clause commented="no" display-inline="no-display-inline"
+                        id="H3E860770FA6C4851B03637A7BAC18A78">
+                        <enum>(ii)</enum>
+ <text>a field marketing organization or third-party marketing organization agree to report the termination of an agent or broker to the applicable State and the Secretary, including the reason for termination; and</text>
+                      </clause>
+                      <clause id="HCF066924867B40EFACF4DED8D7C967E8" commented="no">
+                        <enum>(iii)</enum>
+ <text>an agent, broker, field marketing organization, or third-party marketing organization—</text>
+                        <subclause commented="no" display-inline="no-display-inline"
+                          id="H0E6DC3E6C2CA4B888FFAB1EBCDF79AB2">
+                          <enum>(I)</enum>
+ <text display-inline="yes-display-inline">meet such marketing requirements as are required by the Secretary; </text>
+                        </subclause>
+                        <subclause commented="no" display-inline="no-display-inline"
+                          id="HC4AEDCD24E1A485C9BC415689FC737FD">
+                          <enum>(II)</enum>
+ <text display-inline="yes-display-inline">meet marketing requirements in accordance with other applicable Federal or State law;</text>
+                        </subclause>
+                        <subclause id="HCC90B6DA6C824185BFFB9CE3DA86C042" commented="no">
+                          <enum>(III)</enum>
+ <text>does not employ practices that are confusing or misleading, as determined by the Secretary;</text>
+                        </subclause>
+                        <subclause id="HB8821C8DCC6B499C844A974236EF13AF" commented="no">
+                          <enum>(IV)</enum>
+ <text>submit all marketing materials to the Secretary for, as determined appropriate by the Secretary, review and approval;</text>
+                        </subclause>
+                        <subclause id="H807C2F37BD4041AF9F9DF2D337E1F64E" commented="no">
+                          <enum>(V)</enum>
+ <text>is a licensed agent or broker or meets other licensure requirements, as required by the State;</text>
+                        </subclause>
+                        <subclause id="H0B8A9DFE51034EAB9E9D9B612579E78B" commented="no">
+                          <enum>(VI)</enum>
+ <text>register with the Secretary; and</text> </subclause> <subclause id="H1AA3CADC1A64423394A93832C5938F7A" commented="no"> <enum>(VII)</enum> <text>does not compensate any individual or organization for referrals or any other service relating to the sale of, marketing for, or enrollment in qualified health plans unless such individual or organization meets the criteria described in subclauses (I) through (VI). </text>
+                        </subclause>
+                      </clause>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                      id="H52E9BCC16DD64231B23765B383454E99">
+                      <enum>(C)</enum>
+                      <header>Definitions</header>
+ <text>In this paragraph:</text> <clause commented="no" display-inline="no-display-inline" id="HB8E0945EAE0149DD99086E7114FDE908"> <enum>(i)</enum> <header>Chain of enrollment</header> <text>The term <term>chain of enrollment</term>, with respect to enrollment of an individual in a qualified health plan offered through an Exchange, means any steps taken from marketing to such individual, to such individual making an enrollment decision with respect to such a plan. </text>
+                      </clause>
+                      <clause commented="no" display-inline="no-display-inline"
+                        id="HB4DF2A7CA6D64CB89F51262087A8231C">
+                        <enum>(ii)</enum>
+                        <header>Field marketing organization</header>
+ <text>The term <term>field marketing organization</term> means an organization or individual that directly employs or contracts with agents and brokers, or contracts with carriers, to provide functions relating to enrollment of individuals in qualified health plans offered through an Exchange as part of the chain of enrollment.</text>
+                      </clause>
+                      <clause id="HD57AB11ECAB449009B80C67C0E4E212E" commented="no">
+                        <enum>(iii)</enum>
+                        <header>Marketing</header>
+ <text>The term <term>marketing</term> means the use of marketing materials to provide information to current and prospective enrollees in a qualified health plan offered through an Exchange.</text>
+                      </clause>
+                      <clause commented="no" display-inline="no-display-inline"
+                        id="H005D8EE48B38474683734E98C3AFC169">
+                        <enum>(iv)</enum>
+                        <header>Marketing materials</header>
+ <text display-inline="yes-display-inline">The term <term>marketing materials</term> means materials relating to a qualified health plan offered through an Exchange or benefits offered through an Exchange that—</text>
+                        <subclause commented="no" display-inline="no-display-inline"
+                          id="H43FFB6457F1D426886C9B415D2565251">
+                          <enum>(I)</enum>
+ <text display-inline="yes-display-inline">are intended—</text> <item id="HF35D28FB4EF440FEB099CF1EC6FF096F" commented="no"> <enum>(aa)</enum> <text>to draw an individual’s attention to such plan or the premium tax credits or cost-sharing reductions for such plan or plans offered through an Exchange;</text>
+                          </item>
+                          <item id="HB5877FB05C254D8CBC32E8FE9363F212" commented="no">
+                            <enum>(bb)</enum>
+ <text>to influence an individual’s decision-making process when selecting a qualified health plan in which to enroll; or</text>
+                          </item>
+                          <item id="HCA850B5807F246A6A97D6AA0787E1366" commented="no">
+                            <enum>(cc)</enum>
+ <text>to influence an enrollee’s decision to stay enrolled in such plan; and </text>
+                          </item>
+                        </subclause>
+                        <subclause id="HEB95BCFC907C4C068E6B1A40DDC9B74B" commented="no">
+                          <enum>(II)</enum>
+ <text>include or address content regarding the benefits, benefit structure, premiums, or cost sharing of such plan.</text>
+                        </subclause>
+                      </clause>
+                      <clause commented="no" display-inline="no-display-inline"
+                        id="H97DB53DE824848CDB58C839994B62BF0">
+                        <enum>(v)</enum>
+                        <header>Termination</header>
+ <text display-inline="yes-display-inline">The term <term>termination</term>, with respect to a contract or business arrangement between an agent or broker and a field marketing organization, third-party marketing organization, or health insurance issuer, means—</text>
+                        <subclause commented="no" display-inline="no-display-inline"
+                          id="H558DB569A39D49B3A67CD81FC879BB34">
+                          <enum>(I)</enum>
+ <text display-inline="yes-display-inline">the ending of such contract or business arrangement, either unilaterally by one of the parties or on mutual agreement; or</text>
+                        </subclause>
+                        <subclause commented="no" display-inline="no-display-inline"
+                          id="H625A40AE44A0451ABAF89123527AF077">
+                          <enum>(II)</enum>
+ <text>the expiration of such contract or business arrangement that is not replaced by a substantially similar agreement. </text>
+                        </subclause>
+                      </clause>
+                      <clause commented="no" display-inline="no-display-inline"
+                        id="H66D2751A8DB74A878E4604AD1FB391D4">
+                        <enum>(vi)</enum>
+                        <header>Third-party marketing organization</header>
+ <text>The term <term>third-party marketing organization</term> means an organization or individual that is compensated to perform lead generation, marketing, or sales relating to enrollment of individuals in qualified health plans offered through an Exchange as part of the chain of enrollment.</text>
+                      </clause>
+                    </subparagraph>
+                    <after-quoted-block>.</after-quoted-block>
+                  </quoted-block>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H512816B962734446A67406BA594CEEE5" commented="no"
+                display-inline="no-display-inline">
+                <enum>(4)</enum>
+                <header>Transparency</header>
+ <text display-inline="yes-display-inline">Section 1312(e) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18032">42 U.S.C. 18032(e)</external-xref>), as amended by paragraph (3), is further amended by adding at the end the following new paragraphs:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline"
+                  id="H83032950EEF9433A9DA8AE227F689770">
+                  <paragraph id="H175307C348A64C70BB15B04A00E5FC5B" commented="no">
+                    <enum>(2)</enum>
+                    <header>Audits</header>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                      id="H81B9C4BCC9B24535A3692558467C3939">
+                      <enum>(A)</enum>
+                      <header>In general</header>
+ <text display-inline="yes-display-inline">For plan years beginning on or after such date specified by the Secretary, but not later than January 1, 2029, the Secretary, in coordination with the States and in consultation with the National Association of Insurance Commissioners, shall implement a process for the oversight and enforcement of agent and broker compliance with this section and other applicable Federal and State law (including regulations) that shall include—</text>
+                      <clause id="H666157197DEA41D59E55A54093614066" commented="no">
+                        <enum>(i)</enum>
+ <text>periodic audits of agents and brokers based on—</text> <subclause id="H0F64210D6BC1404187451B2F8FDBC35C" commented="no"> <enum>(I)</enum> <text>complaints filed with the Secretary by individuals enrolled by such an agent or broker in a qualified health plan offered through an Exchange;</text>
+                        </subclause>
+                        <subclause id="H1749C26C97FD454B896C0915171639AC" commented="no">
+                          <enum>(II)</enum>
+ <text>an incident or enrollment pattern that suggests fraud; and</text> </subclause> <subclause id="H9B6B2E33BBA246068715C98825D75402" commented="no"> <enum>(III)</enum> <text>other factors determined by the Secretary; and</text>
+                        </subclause>
+                      </clause>
+                      <clause id="H822DF333E1914BA9B61421064AAFCE3F" commented="no">
+                        <enum>(ii)</enum>
+ <text>a process under which the Secretary shall share audit results and refer potential cases of fraud to the relevant State department of insurance.</text>
+                      </clause>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                      id="H11005BEFFA444BE6AFA3A423C9AE2F81">
+                      <enum>(B)</enum>
+                      <header>Effect</header>
+ <text display-inline="yes-display-inline">Nothing in this paragraph limits or restricts any referrals made under section 1311(i)(3) or any enforcement actions under section 1411(h).</text>
+                    </subparagraph>
+                  </paragraph>
+                  <paragraph id="HE47E1C1FCA7245B6A6CEE8F842CF6A5C" commented="no">
+                    <enum>(3)</enum>
+                    <header>List</header>
+ <text>The Secretary shall develop a process to regularly provide to qualified health plans, Exchanges, and States a list of suspended and terminated agents and brokers.</text>
+                  </paragraph>
+                  <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+              </paragraph>
+            </subsection>
+            <subsection id="H34D11832DCD7484F9E6D61DDD05057EE">
+              <enum>(b)</enum>
+              <header>Removal of deceased individuals from Exchange plans</header>
+ <text display-inline="yes-display-inline">Section 1311(c) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18031">42 U.S.C. 18031(c)</external-xref>), as amended by subsection (a), is further amended by adding at the end the following new paragraph:</text>
+              <quoted-block style="OLC" id="HE762893EF6724AA8B7588F36005A97E8"
+                display-inline="no-display-inline">
+                <paragraph id="HDA8F9F74AD8649498186A6080D265418">
+                  <enum>(9)</enum>
+                  <header>Removal of deceased individuals from Exchange plans</header>
+                  <subparagraph id="H093949353ADF48FA89351CCE16B03161">
+                    <enum>(A)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Not later than 90 days after the date of the enactment of this paragraph, and on a quarterly basis thereafter, the Secretary shall conduct a check of the Death Master File (as such term is defined in section 203(d) of the Bipartisan Budget Act of 2013) for purposes of identifying individuals enrolled in a qualified health plan through an Exchange who are deceased.</text>
+                  </subparagraph>
+                  <subparagraph id="HB9540245CE07416EB45AC17B2DC90864">
+                    <enum>(B)</enum>
+                    <header>Process</header>
+ <text>The Secretary shall—</text> <clause id="H1CF291F18083435AAE8C4C6BAED605CB"> <enum>(i)</enum> <text>establish a process to verify that an individual identified pursuant to a check described in <internal-xref idref="H093949353ADF48FA89351CCE16B03161" legis-path="(8)(A)">subparagraph (A)</internal-xref> is deceased; and</text>
+                    </clause>
+                    <clause id="HCC71EC37E99244839E6B4176CE84B790">
+                      <enum>(ii)</enum>
+ <text>require an Exchange to terminate such individual’s enrollment under a qualified health plan.</text>
+                    </clause>
+                  </subparagraph>
+                </paragraph>
+                <after-quoted-block>.</after-quoted-block>
+              </quoted-block>
+            </subsection>
+            <subsection id="HE07C53CEB2E54E4EB4CF9282C3EBFC7F">
+              <enum>(c)</enum>
+              <header>Standard of proof for terminating agents and brokers</header>
+ <text>Section 1312(e) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18032">42 U.S.C. 18032(e)</external-xref>), as amended by subsection (a), is further amended by adding at the end the following new paragraph:</text>
+              <quoted-block style="OLC" id="H16D652ED7A0E4F58B3E402CA86B47A93"
+                display-inline="no-display-inline">
+                <paragraph id="H91A847B87DB74B9996C97296E99AB7A0">
+                  <enum>(4)</enum>
+                  <header>Standard for termination for certain Exchanges</header>
+ <text display-inline="yes-display-inline">In the case of an agent or broker with an agreement in effect with an Exchange operated by the Secretary pursuant to section 1321(c) to perform activities described in paragraph (1)(A)(i) with respect to such Exchange, the Secretary may terminate such agreement for cause if the Secretary finds, based on a preponderance of the evidence, that such agent or broker has violated such agreement, otherwise applicable law, or any other requirement applicable to such agent or broker.</text>
+                </paragraph>
+                <after-quoted-block>.</after-quoted-block>
+              </quoted-block>
+            </subsection>
+            <subsection id="H5084F47FF7A64D309C1C64AD9029092D" commented="no">
+              <enum>(d)</enum>
+              <header>Requirement for Exchange To notify individuals of value of premium tax
+                credits</header>
+ <text display-inline="yes-display-inline">Section 1412(c)(2) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18082">42 U.S.C. 18082(c)(2)</external-xref>) is amended by adding at the end the following new subparagraph:</text>
+              <quoted-block style="OLC" id="HF159BD53D5A3455895C015398B788A7B"
+                display-inline="no-display-inline">
+                <subparagraph id="H514943768E8244B19638D5EDF6AB8EF5" commented="no">
+                  <enum>(C)</enum>
+                  <header>Exchange responsibilities</header>
+ <text display-inline="yes-display-inline">Beginning January 1, 2027, if an Exchange is notified under paragraph (1) of an advance determination under section 1411 with respect to the eligibility of an individual for a premium tax credit under <external-xref legal-doc="usc" parsable-cite="usc/26/36B">section 36B</external-xref> of the Internal Revenue Code of 1986, the Exchange shall, prior to enrolling such individual in a qualified health plan, clearly notify such individual of the amount of such tax credit.</text>
+                </subparagraph>
+                <after-quoted-block>.</after-quoted-block>
+              </quoted-block>
+            </subsection>
+          </section>
+          <section id="H2B37F192AC4B46A69B4980A01C2E65C4">
+            <enum>4.</enum>
+            <header>Extending annual open enrollment period for Exchanges for plan year
+              2026</header>
+ <text display-inline="no-display-inline">The Secretary of Health and Human Services shall revise section 155.410(e) of title 45, Code of Federal Regulations (or any successor regulation) to provide that the annual open enrollment period determined for plan year 2026 pursuant to section 1311(c)(6) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18031">42 U.S.C. 18031(c)(6)</external-xref>) shall begin on November 1, 2025, and end on May 15, 2026.</text>
+          </section>
+          <after-quoted-block>.</after-quoted-block>
+        </quoted-block>
+      </paragraph>
+    </section>
+  </resolution-body></resolution>
+

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HFB855DACA7A346E5A178AC026C658CF0" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 9266 IH: Community Finance Language Inclusion Act of 2022</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-11-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 9266</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20221103">November 3, 2022</action-date><action-desc><sponsor name-id="G000587">Ms. Garcia of Texas</sponsor> (for herself, <cosponsor name-id="D000631">Ms. Dean</cosponsor>, <cosponsor name-id="A000148">Mr. Auchincloss</cosponsor>, and <cosponsor name-id="G000586">Mr. Garc&#237;a of Illinois</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Community Development Banking and Financial Institutions Act of 1994 to include in technical assistance provided by the Community Development Financial Institutions Fund resources for non-English speaking individuals, and for other purposes.</official-title></form><legis-body id="H9C919FEE84B845718A3C220F2ED614CD" style="OLC">
+<section id="H9D9F8EA29B7F4BEC99588EBC0C3C5BA0" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Community Finance Language Inclusion Act of 2022</short-title></quote>.</text></section> <section id="H352C35FBC8A14547B10E05DACC4DDE58" section-type="subsequent-section"><enum>2.</enum><header>Inclusion of resources for non-English speaking individuals in technical assistance provided by the Community Development Financial Institutions Fund</header><text display-inline="no-display-inline">Section 108(c)(1) of the Community Development Banking and Financial Institutions Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/12/4707">12 U.S.C. 4707(c)(1)</external-xref>) is amended—</text> 
+<paragraph id="H8F567A30E27E48A4A7EFEB27CDEA5D48"><enum>(1)</enum><text>by striking <quote>and development</quote> and inserting <quote>, development</quote>; and</text></paragraph> <paragraph id="HDF90E98C7F50412A98EBC12C2B017C8A"><enum>(2)</enum><text>by striking <quote>products.</quote> and inserting <quote>products, and the provision of outreach and resources for non-English speaking individuals or individuals with limited English proficiency.</quote>.</text> </paragraph></section> 
+</legis-body></bill>
+

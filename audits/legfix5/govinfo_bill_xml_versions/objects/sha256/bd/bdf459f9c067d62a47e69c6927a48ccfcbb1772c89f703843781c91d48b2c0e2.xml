@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" dms-id="HED1EDE782A76407F9813F29873E9C843" public-private="public" key="G" bill-type="olc" stage-count="1"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4586 : Risk-Based Credit Examination Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IIB</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 4586</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date>July 27, 2022</action-date><action-desc>Received; read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>AN ACT</legis-type><official-title display="yes">To amend the Securities Exchange Act of 1934 with respect to risk-based examinations of Nationally Recognized Statistical Rating Organizations.</official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC" id="HA0EC351C6014414D87DECDD9CC8A68A3"><section id="H529026E642A546C08B0E67AF79853051" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Risk-Based Credit Examination Act</short-title></quote>.</text></section><section id="H3FD26C0FB74246C785196E020578A6B4"><enum>2.</enum><header>Conduct of risk-based examinations of nationally recognized statistical rating organizations</header><text display-inline="no-display-inline">Section 15E(p)(3)(B) of the Securities Exchange Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/15/78o-7">15 U.S.C. 78o–7(p)(3)(B)</external-xref>) is amended in the matter preceding clause (i), by inserting <quote>, as appropriate,</quote> after <quote>Each examination under subparagraph (A) shall include</quote>.</text></section></legis-body><attestation><attestation-group><attestation-date date="20220726" chamber="House">Passed the House of Representatives July 26, 2022.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation></bill> 
+

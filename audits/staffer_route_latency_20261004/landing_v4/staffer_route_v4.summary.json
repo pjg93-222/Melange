@@ -1,0 +1,270 @@
+{
+ "base": "f23a40aee4c749bae9db132599a853a52c81d9bf",
+ "live_head": "3248a6a02e42bd23665995e69dc649ac926aab95",
+ "tip": "79ef9f1b7440bcee21c7f7c677a93263d9fcc04a",
+ "patch": "staffer_route_v4.patch",
+ "patch_sha256": "35ec5a23470d2107179018170eceeb29872e2cd65b51dc57daee40b6ce54499a",
+ "requires": "landing_v2 (route_latency.patch) and landing_v3_ids (ids_followup.patch) applied to LIVE",
+ "files": [
+  {
+   "file": "fec/staffer_network/closeness_math.py",
+   "kind": "edit",
+   "blocks": 1,
+   "pre_sha256": "dc3a630ffaaf41fa7234a60aeaf08b887d49d9e59be7d5194608cb9fbf733f62",
+   "pre_source": "LIVE working file now (neither landing_v2 nor landing_v3_ids touches it)",
+   "post_sha256": "9bad28845a057871ff829c673c2ac59f83674c85009eb286d2b097dda04d3dc5",
+   "pre_eol": "size=13459 crlf=0 lf=286 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=16972 crlf=0 lf=350 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/staffer_closeness_routes.py",
+   "kind": "edit",
+   "blocks": 18,
+   "pre_sha256": "02922dffd027f784ff66a384258c1ccc85cabca38348ca82ceb551eab478852f",
+   "pre_source": "LIVE working file now = landing_v3_ids post-image",
+   "post_sha256": "76c0347eb942e2457a2dbb8e9e028b83c6655194c0d1bff21d2c80d3ef97b933",
+   "pre_eol": "size=44373 crlf=772 lf=6 lone_cr=0 class=MIXED",
+   "post_eol": "size=56426 crlf=968 lf=5 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_distinct_routes.py",
+   "kind": "edit",
+   "blocks": 5,
+   "pre_sha256": "41a0edb6e39053acaf2acceab7e1509754f64e5e5955bdb021f9a5684965472b",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "8fab7ea38bc8eb5b917ff1d2a78c5faffa6127550f3ec6967618455a6fd634c4",
+   "pre_eol": "size=6317 crlf=0 lf=124 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=8063 crlf=0 lf=157 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/README.md",
+   "kind": "edit",
+   "blocks": 3,
+   "pre_sha256": "8efd198264c850d8e4242ecae2fdf9221c961658620a69fe8094d58bb46726e2",
+   "pre_source": "LIVE working file now = landing_v3_ids post-image",
+   "post_sha256": "07a757393a05c5b06d581b0a9887b7b6280d749abc5c3af8bd1d18de7cb39ead",
+   "pre_eol": "size=29994 crlf=118 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=34095 crlf=120 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-inventory-worker.js",
+   "kind": "edit",
+   "blocks": 3,
+   "pre_sha256": "4a420d5fdff86d7b1eba055b4af306995af107597625038a583720cbf4b6adec",
+   "pre_source": "LIVE working file now = landing_v3_ids post-image",
+   "post_sha256": "e1c26ae95a07b888dceee903ac349365d3872395ed0126fd53edbc1d9113cd13",
+   "pre_eol": "size=6882 crlf=70 lf=27 lone_cr=0 class=MIXED",
+   "post_eol": "size=7888 crlf=85 lf=27 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-live.js",
+   "kind": "edit",
+   "blocks": 1,
+   "pre_sha256": "5c479e200b84195c80e89995bd8ede1a2d0af4882293db2c85a19238a0bf49ca",
+   "pre_source": "LIVE working file now = landing_v3_ids post-image",
+   "post_sha256": "a5dcb5d97466f2874d3207e79155ca4649d4b51b46e50681f227a64821baaac3",
+   "pre_eol": "size=41969 crlf=153 lf=4 lone_cr=0 class=MIXED",
+   "post_eol": "size=42424 crlf=156 lf=4 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-route.js",
+   "kind": "edit",
+   "blocks": 6,
+   "pre_sha256": "77a7c19904f470ad01a5c03a8855406e8f78527fea71c430c6422c2f18d095ba",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "d5e5ad28823caef1af96685eedabf41a27bf90390963445b1a29c4c15daaa514",
+   "pre_eol": "size=38691 crlf=285 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=40785 crlf=300 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live_service.py",
+   "kind": "edit",
+   "blocks": 13,
+   "pre_sha256": "f311203438a6eca3bc89716d42a3c3b8f36a20d4d3d55e134c49d17afe15aa30",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "a512c5c7dcfe5726caa27552f28b27b90e254c118bb591124da00a29d87e3e78",
+   "pre_eol": "size=131160 crlf=1998 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=140654 crlf=2142 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_routing.py",
+   "kind": "edit",
+   "blocks": 6,
+   "pre_sha256": "05fa3f38b029d0bf94584122cdafbebaadd6c0f301f854e292cb0d024d55060f",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "c9b0896a00814b1d392564aa0801a497f83b2d5581539e64676a8ff6ee2a2d24",
+   "pre_eol": "size=42437 crlf=650 lf=1 lone_cr=0 class=MIXED",
+   "post_eol": "size=44816 crlf=691 lf=1 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_work_sources.py",
+   "kind": "edit",
+   "blocks": 2,
+   "pre_sha256": "a454872caa503976e01fc1241fb865af1c1b8f757ab713fc853460c014135240",
+   "pre_source": "LIVE working file now (neither landing_v2 nor landing_v3_ids touches it)",
+   "post_sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0",
+   "pre_eol": "size=4623 crlf=0 lf=90 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=5120 crlf=0 lf=100 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/test_staffer_closeness_bidirectional.py",
+   "kind": "edit",
+   "blocks": 10,
+   "pre_sha256": "85b3eb48eaa8639db9d723c3efb2a28f8c7c2c9ef5bf07ed15af9c6ad7ccb6b5",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "b0d567d04a9fcda0d78388825ade8a09f598a51f13aa845d1734bc3fc580783d",
+   "pre_eol": "size=88825 crlf=0 lf=1613 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=98739 crlf=0 lf=1789 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/staffer_unreachable_hint_contract.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "c31c533e69f0225e3add1bee6c2da85eedb6842a99f263531285900b8937e5f3",
+   "pre_eol": null,
+   "post_eol": "size=5056 crlf=0 lf=119 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_contact_group.py",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "c448b95f371e2951cd2bcb435e6b67c5c9f4ac840f5577ac65211cfdf1fa94d3",
+   "pre_eol": null,
+   "post_eol": "size=12058 crlf=0 lf=222 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs",
+   "kind": "edit",
+   "blocks": 1,
+   "pre_sha256": "900e0523f0da143608e312051adb7d4fcac140678afffe204e1465d6f4c5c4ac",
+   "pre_source": "LIVE working file now = landing_v3_ids post-image",
+   "post_sha256": "e584f29d3902d9ff1cd77fbb1b22fab2d5827ed4181a50b7776d98d001bc2058",
+   "pre_eol": "size=19639 crlf=0 lf=248 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=19872 crlf=0 lf=250 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "0de034a648b1724fe006e8b8375157878de1833c140f888b29a01e47f592c09b",
+   "pre_eol": null,
+   "post_eol": "size=30329 crlf=0 lf=314 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_left_out_staff.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "c34f37e52e63a28131867cf3ee4e730e75dffd639d50cb60d06affe3cf7feace",
+   "pre_eol": null,
+   "post_eol": "size=26381 crlf=0 lf=320 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_live_query_committee_names.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "0ae28847f398fe1ba8f14e968a3b86d7880b4a47256d032be8a7c4a89b46c588",
+   "pre_eol": null,
+   "post_eol": "size=29831 crlf=0 lf=330 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_live_query_ids.cjs",
+   "kind": "edit",
+   "blocks": 1,
+   "pre_sha256": "ed319888f16b3ba35b92ffa2de04ca41e137dc3872cc05bb4235fc65afc19298",
+   "pre_source": "LIVE working file now = landing_v3_ids post-image",
+   "post_sha256": "eb603033945490400fbf5a7f852e20a16aee079457d07c0212f6f755cb4e9ec0",
+   "pre_eol": "size=24414 crlf=0 lf=290 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=24639 crlf=0 lf=292 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_office_covered_staff.py",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "72323acb4fdb574f661b49c4f1a7935bdc3e6e13982440acc333d75bfedab110",
+   "pre_eol": null,
+   "post_eol": "size=44324 crlf=0 lf=678 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_payroll_people.py",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "611292aa55974edaa0fdf8f25c19cc72b88c83c9d0b9eb4c4140085f3de9b844",
+   "pre_eol": null,
+   "post_eol": "size=4547 crlf=0 lf=78 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_prewarm.py",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "bf8319795c04bfa102e09a94c985a9774ad6579c8ff16b15588aa2ea36cfbf16",
+   "pre_eol": null,
+   "post_eol": "size=33345 crlf=0 lf=685 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_route_jobs.py",
+   "kind": "edit",
+   "blocks": 2,
+   "pre_sha256": "7fda7c29754fcc111319202d325f474acf6f84db5d8391eaecada0d82fd6aff4",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "70e33c3c9be442d33c5e21d422d02d54d5dd46788059d4834ea2e98c4c561d34",
+   "pre_eol": "size=63176 crlf=0 lf=1189 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=63751 crlf=0 lf=1197 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_route_models.cjs",
+   "kind": "edit",
+   "blocks": 2,
+   "pre_sha256": "30f80af798a0b8742953efea60bf375ccaab70a3dc4c868e776328f641981cbc",
+   "pre_source": "LIVE working file now (neither landing_v2 nor landing_v3_ids touches it)",
+   "post_sha256": "cab07048370c44edaca8269e571560a31ba8580d4f459c0bf0288ab30c1a3f2b",
+   "pre_eol": "size=10921 crlf=124 lf=25 lone_cr=0 class=MIXED",
+   "post_eol": "size=10907 crlf=124 lf=25 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_row_equality.py",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "18a90de2ba8a379f215682ea4c25559ff92b5fa4d0173feee9d95df4d81907e0",
+   "pre_eol": null,
+   "post_eol": "size=29704 crlf=0 lf=528 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_unreachable_hint.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "cf0638a0291ff35a090be9a563ea97e6500f92d01bfff0b2519effcd6f06b6f9",
+   "pre_eol": null,
+   "post_eol": "size=21489 crlf=0 lf=283 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_unreachable_hint.py",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "15dbe2ef735960c65fb5c584797c31416ea747c98e33eab8cf93c2d1811eb66b",
+   "pre_eol": null,
+   "post_eol": "size=31989 crlf=0 lf=558 lone_cr=0 class=PURE_LF"
+  }
+ ]
+}

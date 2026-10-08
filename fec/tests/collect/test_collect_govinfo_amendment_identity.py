@@ -13,8 +13,7 @@ covers was lost once already; this suite is what makes a second loss loud.
 
 Run with::
 
-    python fec/tests/run_focused_tests.py \
-        fec/tests/collect/test_collect_govinfo_amendment_identity.py
+    python -m pytest fec/tests/collect/test_collect_govinfo_amendment_identity.py -q
 """
 
 from __future__ import annotations

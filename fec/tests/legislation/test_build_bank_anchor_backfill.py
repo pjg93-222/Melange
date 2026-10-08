@@ -108,6 +108,34 @@ class BankAnchorContractTests(unittest.TestCase):
                 ['Payments'],
                 'AFC-backed EWA framework reintroduction',
             ),
+            ('H.R.3557', '118'): (
+                'BILLSTATUS-118hr3557.xml',
+                'telecom_primary',
+                'L1:association-position',
+                ['Technology & Emerging'],
+                'NCTA and USTelecom-backed broadband permitting reform (American Broadband Deployment Act of 2023)',
+            ),
+            ('H.R.2289', '119'): (
+                'BILLSTATUS-119hr2289.xml',
+                'telecom_primary',
+                'L1:association-position',
+                ['Technology & Emerging'],
+                'NCTA-led trade-association coalition letter urging floor action on the American Broadband Deployment Act of 2025',
+            ),
+            ('S.3587', '117'): (
+                'BILLSTATUS-117s3587.xml',
+                'telecom_primary',
+                'L1:association-position',
+                ['Technology & Emerging'],
+                'NCTA-supported USDA ReConnect broadband funding (Connect Unserved Americans Act)',
+            ),
+            ('S.4821', '118'): (
+                'BILLSTATUS-118s4821.xml',
+                'telecom_primary',
+                'L1:association-position',
+                ['Technology & Emerging'],
+                'USTelecom-endorsed faster federal-land broadband permits',
+            ),
         }
         actual = {
             key: (
@@ -120,13 +148,14 @@ class BankAnchorContractTests(unittest.TestCase):
             for key, value in bank.ANCHORS.items()
         }
         self.assertEqual(actual, expected)
-        self.assertEqual(len(bank.ANCHORS), 11)
+        self.assertEqual(len(bank.ANCHORS), 15)
         self.assertEqual(
             bank.ACT_WEIGHT,
             {
                 'bank_primary': 0.15,
                 'crypto_primary': 0.15,
                 'fintech': 0.15,
+                'telecom_primary': 0.15,
             },
         )
         self.assertEqual(
@@ -140,6 +169,44 @@ class BankAnchorContractTests(unittest.TestCase):
         self.assertNotIn(('S.2190', '118'), bank.ANCHORS)
         self.assertNotIn(('S.875', '119'), bank.ANCHORS)
         self.assertNotIn(('H.R.2702', '119'), bank.ANCHORS)
+
+    def test_tagged_date_defaults_so_existing_anchors_stay_byte_identical(self):
+        self.assertEqual(bank.DEFAULT_TAGGED, '2026-08-10')
+        explicit = {
+            key for key, value in bank.ANCHORS.items() if 'tagged' in value
+        }
+        self.assertEqual(
+            explicit,
+            {('H.R.3557', '118'), ('H.R.2289', '119'),
+             ('S.3587', '117'), ('S.4821', '118')},
+        )
+        for key in explicit:
+            self.assertEqual(bank.ANCHORS[key]['tagged'], '2026-10-07')
+        for key, value in bank.ANCHORS.items():
+            if key not in explicit:
+                self.assertEqual(
+                    value.get('tagged', bank.DEFAULT_TAGGED), '2026-08-10'
+                )
+
+    def test_every_pinned_billstatus_exists_and_is_the_declared_act(self):
+        # The four telecom anchors (2026-10-07) ship their official XML in the
+        # repo; the backfill itself re-checks identity at chain time.
+        for key, config in bank.ANCHORS.items():
+            with self.subTest(anchor=key):
+                path = bank.BILLSTATUS / config['xml']
+                self.assertTrue(path.is_file(), str(path))
+                self.assertEqual(
+                    bank.display_key(bank.parse_billstatus(path)), key
+                )
+        telecom = sorted(
+            key for key, value in bank.ANCHORS.items()
+            if value['class'] == 'telecom_primary'
+        )
+        self.assertEqual(
+            telecom,
+            [('H.R.2289', '119'), ('H.R.3557', '118'),
+             ('S.3587', '117'), ('S.4821', '118')],
+        )
 
     def test_strict_bioguide_map_rejects_historical_name_collisions(self):
         sponsor = person(

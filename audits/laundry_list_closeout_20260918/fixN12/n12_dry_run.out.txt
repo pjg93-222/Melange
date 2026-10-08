@@ -1,0 +1,214 @@
+============================================================================================
+N12 DRY RUN -- LIVE social_media.db, READ-ONLY
+============================================================================================
+db bytes: 481439744
+
+--------------------------------------------------------------------------------------------
+1  CENSUS vs THE MEASUREMENT
+--------------------------------------------------------------------------------------------
+INTERVIEW rows                     : 153576
+rows FLAGGED by the repaired rule  : 5863
+measured affected rows (U2c union) : 5835
+  in both                          : 5834
+  measured but NOT flagged now     : 1
+  flagged now but NOT measured     : 29
+
+measured class                      rows | N12 class                       rows
+D-U2 anchored ALL-CAPS              4537 |
+R1 STOP-name + paren                 142 |
+R2 unknown surname + paren           702 |
+R3 unanchored + paren                180 |
+R4 mixed-case label                   12 |
+R5 colon-less (new rows)             262 |
+                                         | A_anchored_caps                 4549
+                                         | B_stop_name_paren                142
+                                         | B_unknown_surname_paren          721
+                                         | C_unanchored_paren               243
+                                         | D_mixed_case_label                40
+                                         | E_colonless_honorific            289
+
+per measured class, how many of its rows this run flags at all:
+  D-U2 anchored ALL-CAPS          4537 of  4537   (missed 0)
+  R1 STOP-name + paren             142 of   142   (missed 0)
+  R2 unknown surname + paren       702 of   702   (missed 0)
+  R3 unanchored + paren            180 of   180   (missed 0)
+  R4 mixed-case label               12 of    12   (missed 0)
+  R5 colon-less (new rows)         261 of   262   (missed 1)
+
+a sample of rows the measurement flagged and this run does not (up to 12):
+  rowid=225128  Ted Cruz               2022-03-23 acd              --to answer a question. (SEN. DICK DURBIN BANGS THE GAVEL)
+
+a sample of rows this run flags and the measurement did not (up to 12):
+  rowid=108613  Kevin Kiley          pbs-newshour   tag='Enikia Ford Morthel, Berkeley Unified School District' [D_mixed_case_label]
+        B: ...Has anyone been terminated?
+        A: Enikia Ford Morthel, Berkeley Unified School District: In general, I can tell you that can't speak about personal matters, but I can tell you that we ...
+  rowid=116271  Ilhan Omar           pbs-newshour   tag='Gene Block, UCLA Chancellor' [D_mixed_case_label]
+        B: ... send the police that were standing by, your campus police, law enforcement, to intervene?
+        A: Gene Block, UCLA Chancellor: We tried. We notified -- as soon as we saw the violence, we notified all of our mutual aid partners. We tried to get poli...
+  rowid=137948  Michael Lawler       pbs-newshour   tag='Tom Stein, Democratic Voter' [D_mixed_case_label]
+        B: ... I do. I will be voting for him. But the choice is between Donald Trump and Kamala Harris.
+        A: Tom Stein, Democratic Voter: When it comes down to it, he's got to support Trump or he won't have his job. And I think that's -- I feel it's dangerous...
+  rowid=154423  Mike Johnson         pbs-newshour   tag='Ben Sapiro, Conservative Political Commentator' [D_mixed_case_label]
+        B: ...z: As for Qatar gifting a luxury jet, some of Trump's top MAGA allies were less forgiving.
+        A: Ben Sapiro, Conservative Political Commentator: Taking sacks of goodies from people who support Hamas, Muslim Brotherhood, Al-Jazeera, all the rest, t...
+  rowid=174172  Bernard Sanders      pbs-newshour   tag='Zohran Mamdani, New York City Mayor' [D_mixed_case_label]
+        B: ...I, Zohran Kwame Mamdani...
+        A: Zohran Mamdani, New York City Mayor: I, Zohran Kwame Mamdani......
+  rowid=175673  Angus King           pbs-newshour   tag='Sarah Binder, George Washington University' [D_mixed_case_label]
+        B: ...power largely. I'd say it's the seventh inning. We're behind 4-3. But the game isn't over.
+        A: Sarah Binder, George Washington University: The big, long picture here over the 20th century into these years of Trump is a loss of congressional powe...
+  rowid=175681  Tammy Duckworth      pbs-newshour   tag='Jamil N. Jaffer, George Mason University' [D_mixed_case_label]
+        B: ... is where Republicans are. They have basically given their powers over to the White House.
+        A: Jamil N. Jaffer, George Mason University: President Trump has been running the table on the legislative branch for two terms now in a row....
+  rowid=176057  Jim Jordan           pbs-newshour   tag='Jack Smith, Former Special Counsel' [D_mixed_case_label]
+        B: ...So help you God?
+        A: Jack Smith, Former Special Counsel: I do....
+  rowid=184653  Ben Cline            pbs-newshour   tag='Jodi Nicholson, Referendum Opponent' [D_mixed_case_label]
+        B: ...ving rural voices from the legislative process. And that's something we have to say no to.
+        A: Jodi Nicholson, Referendum Opponent: I used to teach preschool and it sounds like managing a preschool classroom, because, first of all, two wrongs do...
+  rowid=184980  Adam Smith           pbs-newshour   tag='Jay Hurst, Pentagon Chief Financial Officer' [D_mixed_case_label]
+        B: ...So you're saying the full cost at this point is $25 billion?
+        A: Jay Hurst, Pentagon Chief Financial Officer: Yes, that's our estimate for the cost....
+  rowid=185146  Troy Carter          pbs-newshour   tag='Leona Tate, Civil Rights Activist' [D_mixed_case_label]
+        B: ...resent them. But that means you can't just come in and summarily crack us up, break us up.
+        A: Leona Tate, Civil Rights Activist: So now we move backwards with the Supreme Court decision that will go down as one of the most racist rulings in our...
+  rowid=254901  Lindsey Graham       pbs-newshour   tag='Sen. John Kennedy, La.' [D_mixed_case_label]
+        B: ...provocative things, they're going to be met with provocation. So this is a two-way street.
+        A: Sen. John Kennedy, La.: I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion....
+
+--------------------------------------------------------------------------------------------
+2/3  WHAT MOVES
+--------------------------------------------------------------------------------------------
+  ledger_only_duplicate_row                 1
+  ledger_only_short_turn                   49
+  ledger_only_unresolved                 6139
+  own_later_turn                           10
+  reattributed                             54
+  row_has_no_member_words                   4
+  rows_flagged                           5863
+  rows_skipped_row_has_no_member_words        4
+  rows that would be UPDATEd             5859
+  rows that would be INSERTed              64
+  characters removed from flagged rows  2182540
+  every ledgered row reconstructs byte for byte: True
+
+top 15 members receiving re-attributed turns:
+  Pramila Jayapal                       4
+  Bennie Thompson                       3
+  Richard Blumenthal                    3
+  Patty Murray                          2
+  John Thune                            2
+  Bill Cassidy                          2
+  Susan Collins                         2
+  Tim Kaine                             2
+  Charles Schumer                       2
+  Richard Durbin                        2
+  Christopher Murphy                    2
+  Nancy Pelosi                          2
+  Carlos Gimenez                        1
+  Maxine Waters                         1
+  Adam Schiff                           1
+
+words in flagged rows before : 611385
+words kept on those rows     : 251185  (41.1%)
+rows with NO member words at all before the first tag (left untouched, residue): 4
+
+--------------------------------------------------------------------------------------------
+4  THE 999 MIS-ATTRIBUTED REFERENCE MENTIONS
+--------------------------------------------------------------------------------------------
+INTERVIEW mentions in lane B refs.jsonl: 11365
+  SAME (row not repaired)                                9949
+  VANISH (segment speaker off-roster -> mention drops)   1157
+  SAME (window entirely before the split)                 111
+  TRUNC (window crosses the split)                         86
+  REASSIGN (segment speaker is a roster member)            62
+mentions no longer attributed to the wrong speaker: 1219
+  of which currently carry a PAID label: 529
+
+--------------------------------------------------------------------------------------------
+5  THE 18 CONTAMINATED DESK EXCERPTS (personal texture)
+--------------------------------------------------------------------------------------------
+items whose displayed text carries a foreign tag : 18
+  the tag leaves the kept text after the split   : 17
+  the tag is still inside the kept text          : 0
+  not pinned to a flagged row                    : 1
+
+--------------------------------------------------------------------------------------------
+6  speeches ROW 245771 -- the in-use James Risch gold interview item
+--------------------------------------------------------------------------------------------
+BEFORE (33 words):
+  'Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.'
+AFTER  (10 words):
+  'Oh, he does, clearly. We all take orders from Bertie.'
+REMOVED [A_anchored_caps] tag='WALLACE (voice over)' -> ledger_only_unresolved
+  'Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.'
+
+--------------------------------------------------------------------------------------------
+8  LABEL SAFETY -- every record that points at a speeches row
+--------------------------------------------------------------------------------------------
+artifact                                                                   rowids  FLAGGED
+outputs\member_personal_relationships\20260910_systematic_encounters\sys    31772      321
+        66332, 66348, 66365, 66366, 66370, 66374, 66651, 66808, 66917, 66969, 66973, 67104, 67115, 67694, 68279, 68893, 69206, 69523, 69535, 69540 ...
+data\speech\source_media_candidates_cumulative_all_verified_v4.jsonl         1402       85
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+data\speech\source_media_candidates_cumulative_all_verified_v5.jsonl         1402       85
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+data\speech\source_media_candidates_cumulative_expanded_v3.jsonl             1402       85
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+data\speech\source_media_candidates_cumulative_all_verified_v3.jsonl         1353       84
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+data\speech\source_media_candidates_cumulative_current.jsonl                 1353       84
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+data\speech\source_media_candidates_cumulative_expanded_v2_merged.jsonl      1353       84
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+data\speech\source_media_candidates_cumulative_expanded_v4.jsonl             1299       79
+        80870, 80923, 80934, 80974, 81023, 81045, 81046, 81074, 81075, 81132, 81133, 81230, 81231, 81306, 81307, 81394, 81395, 81574, 81590, 81593 ...
+outputs\member_personal_relationships\20260910_anchored\mined_candidates     1121       12
+        71180, 199257, 200468, 202744, 220925, 242623, 258130, 267287, 267871, 274128, 275088, 275482
+data\speech\source_media_candidates_priority_consolidated_expanded_v2.js      103        6
+        224465, 260286, 260287, 260303, 260325, 260326
+outputs\member_personal_relationships\20260910_probability_sample_labels      237        5
+        82219, 107232, 110327, 198859, 213833
+outputs\member_personal_relationships\20260910_probability_sample_labels      237        5
+        82219, 107232, 110327, 198859, 213833
+outputs\member_personal_relationships\20260910_systematic_encounters\cal      237        5
+        82219, 107232, 110327, 198859, 213833
+data\speech\source_media_supplement_v1.jsonl                                   43        5
+        260286, 260287, 260303, 260325, 260326
+data\speech\source_media_verified_cumulative_all_verified_v3.jsonl            278        4
+        81595, 81963, 260286, 260325
+data\speech\source_media_verified_cumulative_all_verified_v4.jsonl            296        4
+        81595, 81963, 260286, 260325
+data\speech\source_media_verified_cumulative_all_verified_v5.jsonl            296        4
+        81595, 81963, 260286, 260325
+data\speech\source_media_verified_cumulative_exact_windows_v6.jsonl           296        4
+        81595, 81963, 260286, 260325
+data\speech\speech_descriptive_clip_cache.jsonl                               296        4
+        81595, 81963, 260286, 260325
+outputs\member_personal_relationships\20260910_chamber_degrees_v6\routin       23        2
+        112781, 231573
+outputs\member_personal_relationships\20260910_chamber_degrees_v6\routin       23        2
+        112781, 231573
+data\speech\source_media_verified_abc_all_verified_v3.jsonl                   274        2
+        81595, 81963
+data\speech\source_media_verified_priority_all_verified_v3.jsonl                4        2
+        260286, 260325
+outputs\member_personal_relationships\20260910_pilot\candidates.ndjson        187        1
+        85315
+outputs\member_personal_relationships\20260910_pilot\events.ndjson             23        1
+        85315
+outputs\member_personal_relationships\20260910_pilot\retrieval_review_sa       48        1
+        85315
+
+--- interview stance gold: does each hand label still bind? ---
+interviews_cu.csv rows: 37   columns: bioguide,member,date,source,chamber,categories,nwords,text
+hand-labelled interview rows      : 37 (all 37 of interview_gold_queue.csv are filled)
+  passage on an UNflagged row     : 36  -> id unchanged, label binds
+  passage survives the split      : 0
+  passage disappears              : 1  -> GOLD ORPHAN
+  could not be pinned to a row    : 0
+  PASSAGE DISAPPEARS -> the hand label ORPHANS
+    id=x438321aa3c0b  James Risch 2020-02-23  gold=support  rows=[245771]
+    passage: Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.
+
+DONE N12 DRY RUN

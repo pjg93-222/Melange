@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H00F63D2E127B4B208A844539D6E12357" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 2656 IH: Trigger Leads Abatement Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-04-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2656</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230417">April 17, 2023</action-date><action-desc><sponsor name-id="T000486">Mr. Torres of New York</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Fair Credit Reporting Act to prohibit the creation and sale of trigger leads, and for other purposes.</official-title></form><legis-body id="HE6541A76EB354D5B96BE1CB6B23A4F37" style="OLC"> 
+<section id="HEAF0F1F5C37245EA90916FC861D64050" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Trigger Leads Abatement Act of 2023</short-title></quote>. </text></section> <section id="H6C7425B90407455F96FAB5D6FCA30A7E"><enum>2.</enum><header>Trigger lead prohibition</header><text display-inline="no-display-inline">Section 604(c) of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681b">15 U.S.C. 1681b(c)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block display-inline="no-display-inline" id="H48525EE441A14E4880D124E272DEAE2D" style="OLC"> 
+<paragraph id="H1BA143391B1D4F61B7C03218BA4097E9"><enum>(4)</enum><header>Prohibition on trigger leads for residential mortgage loans</header><text display-inline="yes-display-inline">Notwithstanding paragraph (1), no consumer reporting agency may furnish a consumer report in connection with a credit transaction that is not initiated by a consumer, if the report is being procured based in whole or in part on the presence of an inquiry made in connection with a residential mortgage loan (as defined under section 103 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1602">15 U.S.C. 1602</external-xref>)).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body></bill>
+

@@ -69,7 +69,7 @@ def winnability():
         cs, campT, nA, nB, mAt, mBt, tgt = FM.topic_setup(c, FM.CS0)
         for n in FM.members:
             wn[n] += tgt[n] * FM.pflip(FM.cu0[n], FM.ind0[n], FM.R[n], nA[n], nB[n], mAt, mBt,
-                                       FM.rc(n, 'pressure_mult'))
+                                       FM.rc(n, 'pressure_mult'), FM.CM[n])   # COMPET_MULT: same c as flip_model (dial OFF -> 1.0)
     return wn
 
 def swap(variant_pm):

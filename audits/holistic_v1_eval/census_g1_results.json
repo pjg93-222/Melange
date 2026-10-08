@@ -1,0 +1,365 @@
+{
+ "billstatus": {
+  "117/hconres": {
+   "files": 125,
+   "max_number": 125,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117hconres1.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/hjres": {
+   "files": 106,
+   "max_number": 106,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117hjres6.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/hr": {
+   "files": 9709,
+   "max_number": 9709,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117hr23.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/hres": {
+   "files": 1532,
+   "max_number": 1532,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117hres398.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/s": {
+   "files": 5357,
+   "max_number": 5357,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117s11.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/sconres": {
+   "files": 52,
+   "max_number": 52,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117sconres1.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/sjres": {
+   "files": 70,
+   "max_number": 70,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117sjres33.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "117/sres": {
+   "files": 877,
+   "max_number": 877,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-117sres4.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/hconres": {
+   "files": 135,
+   "max_number": 135,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118hconres20.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/hjres": {
+   "files": 230,
+   "max_number": 230,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118hjres11.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/hr": {
+   "files": 10564,
+   "max_number": 10564,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118hr184.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/hres": {
+   "files": 1627,
+   "max_number": 1627,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118hres340.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/s": {
+   "files": 5649,
+   "max_number": 5649,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118s7.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/sconres": {
+   "files": 46,
+   "max_number": 46,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118sconres1.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/sjres": {
+   "files": 122,
+   "max_number": 122,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118sjres2.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "118/sres": {
+   "files": 942,
+   "max_number": 942,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-118sres3.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/hconres": {
+   "files": 114,
+   "max_number": 114,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119hconres2.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/hjres": {
+   "files": 207,
+   "max_number": 207,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119hjres9.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/hr": {
+   "files": 10006,
+   "max_number": 10012,
+   "gap": 6,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119hr152.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/hres": {
+   "files": 1468,
+   "max_number": 1468,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119hres10.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/s": {
+   "files": 5190,
+   "max_number": 5206,
+   "gap": 16,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119s5.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/sconres": {
+   "files": 37,
+   "max_number": 37,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119sconres1.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/sjres": {
+   "files": 203,
+   "max_number": 203,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119sjres36.xml",
+   "zip_vintage_utc": "2026-08-01"
+  },
+  "119/sres": {
+   "files": 827,
+   "max_number": 827,
+   "gap": 0,
+   "nonmatching_entries": 0,
+   "first_entry": "BILLSTATUS-119sres46.xml",
+   "zip_vintage_utc": "2026-08-01"
+  }
+ },
+ "bicam": {
+  "117/hconres": {
+   "rows": 125,
+   "max_number": 125
+  },
+  "117/hjres": {
+   "rows": 108,
+   "max_number": 919
+  },
+  "117/hr": {
+   "rows": 9711,
+   "max_number": 11200
+  },
+  "117/hres": {
+   "rows": 1535,
+   "max_number": 6893
+  },
+  "117/s": {
+   "rows": 5358,
+   "max_number": 7066
+  },
+  "117/sconres": {
+   "rows": 52,
+   "max_number": 52
+  },
+  "117/sjres": {
+   "rows": 70,
+   "max_number": 70
+  },
+  "117/sres": {
+   "rows": 877,
+   "max_number": 877
+  },
+  "118/hconres": {
+   "rows": 135,
+   "max_number": 304
+  },
+  "118/hjres": {
+   "rows": 231,
+   "max_number": 294
+  },
+  "118/hr": {
+   "rows": 10560,
+   "max_number": 13500
+  },
+  "118/hres": {
+   "rows": 1624,
+   "max_number": 3203
+  },
+  "118/s": {
+   "rows": 5644,
+   "max_number": 15737
+  },
+  "118/sconres": {
+   "rows": 45,
+   "max_number": 153
+  },
+  "118/sjres": {
+   "rows": 121,
+   "max_number": 122
+  },
+  "118/sres": {
+   "rows": 922,
+   "max_number": 942
+  },
+  "119/hconres": {
+   "rows": 1,
+   "max_number": 2
+  },
+  "119/hjres": {
+   "rows": 12,
+   "max_number": 12
+  },
+  "119/hr": {
+   "rows": 108,
+   "max_number": 239
+  },
+  "119/hres": {
+   "rows": 7,
+   "max_number": 20
+  },
+  "119/s": {
+   "rows": 2,
+   "max_number": 25
+  },
+  "119/sjres": {
+   "rows": 1,
+   "max_number": 1
+  }
+ },
+ "notes": [],
+ "bicam_all_congress_rowcounts": {
+  "6": 79,
+  "7": 53,
+  "8": 151,
+  "9": 10,
+  "10": 40,
+  "11": 66,
+  "13": 21,
+  "14": 98,
+  "15": 218,
+  "16": 324,
+  "17": 315,
+  "18": 467,
+  "19": 607,
+  "20": 609,
+  "21": 842,
+  "22": 944,
+  "23": 982,
+  "24": 1261,
+  "25": 1528,
+  "26": 1037,
+  "27": 1102,
+  "28": 773,
+  "29": 908,
+  "30": 1110,
+  "31": 823,
+  "32": 807,
+  "33": 1157,
+  "34": 1212,
+  "35": 1141,
+  "36": 1182,
+  "37": 994,
+  "38": 839,
+  "39": 1250,
+  "40": 1899,
+  "41": 3084,
+  "42": 5206,
+  "76": 1,
+  "79": 3,
+  "82": 1612,
+  "83": 1778,
+  "84": 1945,
+  "85": 1755,
+  "86": 1285,
+  "87": 2094,
+  "88": 1450,
+  "89": 1907,
+  "90": 1571,
+  "91": 1623,
+  "92": 1538,
+  "93": 26223,
+  "94": 24288,
+  "95": 22313,
+  "96": 14591,
+  "97": 13236,
+  "98": 12202,
+  "99": 11599,
+  "100": 11276,
+  "101": 11787,
+  "102": 12016,
+  "103": 9815,
+  "104": 7992,
+  "105": 9161,
+  "106": 10873,
+  "107": 10823,
+  "108": 10725,
+  "109": 13120,
+  "110": 14121,
+  "111": 13732,
+  "112": 12363,
+  "113": 10735,
+  "114": 12090,
+  "115": 13583,
+  "116": 16620,
+  "117": 17836,
+  "118": 19282,
+  "119": 131
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "desk_rows": 6579,
+ "legacy_groups": 956,
+ "legacy_repeats": 1025,
+ "full_groups": 662,
+ "full_repeats": 703,
+ "false_collision_groups": 311,
+ "rows_over_120_chars": 6054,
+ "notes_changed": 298,
+ "notes_removed": 289,
+ "notes_added": 0,
+ "scored_identical_at_dial0": true,
+ "rollback_rows_rescued": 289
+}

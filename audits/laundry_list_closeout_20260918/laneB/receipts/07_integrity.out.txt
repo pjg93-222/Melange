@@ -1,0 +1,41 @@
+﻿=== .pipeline_run.lock at LIVE root? ===
+C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.pipeline_run.lock : ABSENT
+
+=== mtime / ctime of every file this lane read or reported on ===
+file                                                       mtime               ctime(created)      bytes
+member_references.json                                     2026-09-17 01:25:27 2026-09-17 01:25:26 4200039
+member_reference_cache_fable.jsonl                         2026-09-14 01:15:04 2026-07-04 06:21:33 2953398
+member_reference_cache_baseline_v2.json                    2026-09-08 19:24:46 2026-09-08 19:25:55 2020069
+member_reference_classification_receipt.json               2026-09-14 01:15:04 2026-09-14 01:15:04 359
+member_reference_verify.csv                                2026-07-04 18:51:02 2026-07-04 18:20:19 221780
+social_media.db                                            2026-09-14 02:06:46 2026-07-01 22:47:55 481439744
+Quorum Processed.xlsx                                      2026-09-14 00:41:34 2026-07-02 00:13:22 9332289
+congestion.json                                            2026-09-16 23:33:28 2026-09-16 23:33:28 201270
+sentinel_admission_policy.json                             2026-09-08 18:54:43 2026-09-08 17:25:32 452
+official_mentions.jsonl                                    2026-09-16 23:44:45 2026-09-16 23:44:44 38182289
+press_refresh_tone.csv                                     2026-09-16 23:44:44 2026-09-16 23:44:44 134925
+press_refresh_feed_receipt.json                            2026-09-16 23:44:49 2026-09-16 23:44:49 5404
+cu_press_stance_tone.csv                                   2026-06-30 18:50:17 2026-06-21 20:12:44 1080244
+member_reference_layer.py                                  2026-09-08 19:17:48 2026-07-04 18:17:37 24400
+reference_cache.py                                         2026-09-08 19:13:21 2026-09-08 19:13:21 2196
+press_stream.py                                            2026-09-01 14:08:09 2026-08-28 12:11:39 6202
+member_reference_layer.py                                  2026-09-18 19:22:06 2026-09-18 19:22:06 24400
+resolve_attribution_domain.py                              2026-09-18 19:22:06 2026-09-18 19:22:06 4120
+build_dashboard_bundle.py                                  2026-09-18 19:22:06 2026-09-18 19:22:06 54870
+make_member_desk.py                                        2026-09-18 19:22:06 2026-09-18 19:22:06 194451
+
+=== cache datability ===
+cache file created : 2026-07-04 06:21:33
+cache file modified: 2026-09-14 01:15:04
+per-row timestamp fields: NONE (fields are k/out/model/transport/classifier; see 01 receipt)
+-> CACHE DATE RANGE PER ROW = UNKNOWN; only file ctime/mtime bound it.
+
+=== worktree cleanliness (git status --porcelain, read-only command) ===
+(run separately in PowerShell; see 07_integrity.out.txt tail)
+DONE 07
+
+=== git HEAD ===
+776ce0d3af46f8c46d8a660d06bcba0333e71920
+=== git status --porcelain (blank = clean) ===
+?? audits/laundry_list_closeout_20260918/
+(end)

@@ -1,0 +1,249 @@
+====================================================================================================
+G1 NOT-SPEECH chyron inserts
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=80238   Jon Husted               2025-09-17  show=ip                     nwords=53 len=279
+  pkg=https://transcripts.cnn.com/show/ip/date/2025-09-17/segment/02
+  [role tail after (R-XX) / (R)               @   216] ys this, we got to get this figured out. SEN. BILL CASSIDY, (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+  HEAD  Yeah, and thank you, Mr. Chairman. And the -- and the irony of this is, is when I talk with you, you say that. And when I talk with Secretary Kennedy, he says this, we got to get this figured out. SEN. BILL CASSIDY, (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+------------------------------------------------------------------------------------------------
+rowid=192027  Lucy McBath              2019-03-02  show=ndaysat                nwords=29 len=164
+  pkg=https://transcripts.cnn.com/show/ndaysat/date/2019-03-02/segment/01
+  [role tail after (R-XX) / (R)               @   119] kground Checks Act of 2019. It is time. REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+  HEAD  I urge my colleagues to vote yes on HR8; the bipartisan Background Checks Act of 2019. It is time. REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+------------------------------------------------------------------------------------------------
+rowid=226287  Jim Jordan               2022-06-11  show=cnr                    nwords=50 len=290
+  pkg=https://transcripts.cnn.com/show/cnr/date/2022-06-11/segment/22
+  [role tail after (R-XX) / (R)               @   238] the committee has a lot more to share. REP. BENNIE THOMPSON (D), CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+  [dotted abbreviation then an ALL-CAPS run   @   250] e has a lot more to share. REP. BENNIE THOMPSON (D), CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+  HEAD  This was a partisan production put on by the former head of ABC News. I don't think we learned anything new. NOBLES (voice-over): And committee chair Bennie Thompson telling CNN the committee has a lot more to share. REP. BENNIE THOMPSON (D), CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+====================================================================================================
+G1 WRONG-SPEAKER (Mike Johnson)
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=245558  Mike Johnson             2023-08-17  show=qmb                    nwords=612 len=3466
+  pkg=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+  HEAD  You see there are these large flowers down there. There's some white ones, some pink ones; that's a native hibiscus. It's in the mallow family and the wetland ones they call them marsh mallows. Get it? Marsh mallows, yes. (MUSIC PLAYING) JOHNSON (voice-over): My name is Mike Johnson. I'm the chief o
+  TAIL  for people to come and relax, to destress. They are important for recreation and connecting with nature, for especially young people to connect with nature and inspire them to become the next generation of land stewards.
+====================================================================================================
+G1 partial-foreign / no-space colon / UNIDENTIFIED
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=68730   Christopher Murphy       2024-07-08  show=ow                     nwords=172 len=970
+  pkg=https://transcripts.cnn.com/show/ow/date/2024-07-08/segment/01
+  HEAD  I love Joe Biden. I don't know that the interview on Friday night did enough to answer those questions. [12:10:02] And so, I think this week is going to be absolutely critical. I think -- REP. MAXINE WATERS (D-CA 43RD DISTRICT): Biden is not going anywhere. He has been strong in saying that in the l
+  TAIL  gin one week from today, Trump is running out of time to make his pick. Both Vance and Rubio made their rounds on the weekend talk shows, forcefully defending Trump when asked whether he would enact revenge on Democrats.
+------------------------------------------------------------------------------------------------
+rowid=102837  Thom Tillis              2018-01-24  show=ben-shapiro-conservati nwords=144 len=856
+  pkg=https://www.foxnews.com/transcript/ben-shapiro-conservatives-being-censored-in-name-of-safet
+  [UNIDENTIFIED / UNKNOWN role label          @   590] n independent person, somebody who's got lots of integrity. UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: He enjoys very broad support in the Senate both am
+  HEAD  No, I haven't. I sit on the Judiciary Committee along with Senator Coons and I have not seen any evidence to suggest that. SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017: I do not at all believe that Mr. Mueller has been compromised for his investigation. I think he's beyond reproach.
+  TAIL  oys very broad support in the Senate both among Republicans and Democrats because of his long service as the FBI director, because of his record of respectable leadership as a senior federal prosecutor. (END VIDEO CLIPS)
+------------------------------------------------------------------------------------------------
+rowid=104285  Rand Paul                2017-04-09  show=meet-the-press         nwords=119 len=680
+  pkg=https://www.nbcnews.com/meet-the-press/meet-press-april-9-2017-n744341
+  [no-space colon after an ALL-CAPS tag       @   304] without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s chemical
+  HEAD  My heart breaks seeing those images, say what can we do? But it doesn't mean we just sort of rip up the Constitution and say okay it's fine to bomb anybody if they're committing atrocities. SEN. TIM KAINE Doing this without consulting Congress without a vote, I think, is a clear violation of law. CH
+  TAIL  . Haley has been the face of the administration in this crisis and yesterday, I asked her whether the Trump administration believes it has achieved its objective with the military strike or whether more needs to be done.
+------------------------------------------------------------------------------------------------
+rowid=108647  Richard Durbin           2018-07-08  show=meet-the-press         nwords=635 len=3571
+  pkg=https://www.nbcnews.com/meet-the-press/meet-press-july-8-2018-n889676
+  [no-space colon after an ALL-CAPS tag       @   622] decision to be made by this court on so many issues. CHUCK TODD:And yet you have this political dilemma that stares, I think, you and Chuck Schumer r
+  [no-space colon after an ALL-CAPS tag       @  1000] in control of the Senate. That's your dilemma. SENATOR DICK DURBIN:It is a dilemma in one respect but not in another. I will tell you, the men and wom
+  [no-space colon after an ALL-CAPS tag       @  1479] y, that personally. It goes beyond the next election. CHUCK TODD:All right. And final question, you brought up the issue of trying to reunify these ki
+  [no-space colon after an ALL-CAPS tag       @  1951] ail or something. What is the actual recourse? SENATOR DICK DURBIN:I can tell you this: what we see in this process, forcibly removing children from t
+  [no-space colon after an ALL-CAPS tag       @  2536] so that children under the age of five are reunited-- CHUCK TODD:How do you enforce it? How do you enforce it if the administration's saying-- SENATOR
+  [no-space colon after an ALL-CAPS tag       @  2632] ou enforce it if the administration's saying-- SENATOR DICK DURBIN:Well, if they-- CHUCK TODD:--"We only have so many resources?" SENATOR DICK DURBIN:
+  [no-space colon after an ALL-CAPS tag       @  2715] CHUCK TODD:--"We only have so many resources?" SENATOR DICK DURBIN:I can tell you, they have the resources to get it done. Chuck, this is not an accid
+  [no-space colon after an ALL-CAPS tag       @  3013] , to me, is cruel. It's not what America's all about. CHUCK TODD:Senator Dick Durbin, I have to leave it there. Democrat from Illinois. Senator, thank
+  HEAD  But let's get down to the heart of it. This Supreme Court is going to decide whether or not people in families with pre-existing conditions can have access to affordable health insurance. That's it. It's real, and it's a constitutional challenge by the Trump administration this court will face. This
+  TAIL  6:00 p.m. on the West Coast. Later on the broadcast we'll talk to President Trump's lawyer, Rudy Giuliani. But up next, the fight over the Supreme Court and a reality check on North Korea. Panel is next so stick around.
+------------------------------------------------------------------------------------------------
+rowid=111034  Lindsey Graham           2017-05-14  show=meet-the-press         nwords=444 len=2442
+  pkg=https://www.nbcnews.com/meet-the-press/meet-press-may-14-2017-n759241
+  [no-space colon after an ALL-CAPS tag       @    26] Happy Mother's Day. CHUCK TODD:Thank you, sir. Appreciate it. Well, let me go to the other side of the aisle, Senate
+  [no-space colon after an ALL-CAPS tag       @   293] usiastic about being on than Senator Graham was. SEN. CHUCK SCHUMER:Yeah, I didn’t see Senator Graham but I just want to join him in wishing all the m
+  [no-space colon after an ALL-CAPS tag       @   522] y mom who , god willing, will turn 89 in three weeks. CHUCK TODD:Well done. Okay, let me start with the issue of a special prosecutor. Why do you beli
+  [no-space colon after an ALL-CAPS tag       @   938] f they could do it without a special prosecutor? SEN. CHUCK SCHUMER:Well, there are two separate lines of activity here. One is the oversight function
+  [no-space colon after an ALL-CAPS tag       @  2160] is the Howard Baker of 2017? We desperately need one. CHUCK TODD:One of your Democratic colleagues, Senator Sheldon Whitehouse, said the following to
+  HEAD  Happy Mother's Day. CHUCK TODD:Thank you, sir. Appreciate it. Well, let me go to the other side of the aisle, Senate Democratic Leader, Chuck Schumer of New York. Senator, welcome back to Meet the Press. I hope that you are more enthusiastic about being on than Senator Graham was. SEN. CHUCK SCHUMER
+  TAIL  ouse, said the following to me about why he is skeptical of a special counsel. Take a listen. His concern is that everything starts over and that we are suddenly hitting a reset button and it sets the investigation back.
+------------------------------------------------------------------------------------------------
+rowid=242833  Mitch McConnell          2012-04-19  show=tax-bill-caught-in-hou nwords=303 len=1795
+  pkg=https://www.foxnews.com/transcript/tax-bill-caught-in-house-rules-fight
+  HEAD  They want to ram this gigantic $1 trillion bill through Congress and they're using once again the Christmas break as an inducement to vote for it. Now look we all know that this is not the way to legislate. SEN. DICK DURBIN, SENATE MAJORITY WHIP D-Ill.: Many of the same senators who are criticizing
+  TAIL  in our panel, Chris Stirewalt, FOX News politics editor digital, Juan Williams, Fox News contributor and syndicated columnist Charles Krauthammer. Let's start with the omnibus bill. Chris, where are we? What's happening?
+====================================================================================================
+G2a PBS anchor invisible to class D
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=258736  Elise Stefanik           2023-07-26  show=pbs-newshour           nwords=346 len=2058
+  pkg=https://www.pbs.org/newshour/show/whats-next-for-hunter-bidens-case-after-plea-deal-unravels
+  HEAD  With each passing day, House Republicans' investigations uncover more and more evidence showing that Joe Biden not only knew about, but was involved in his family's illegal influence peddling scheme. Laura Barrón-López: Again, those accusations are unsubstantiated. But Republican attacks on the pres
+  TAIL  eanor tax charges that you mentioned. But he could still end up working out a deal with the Justice Department, right? So can you walk us through where all those charges stand, including that potential felony gun charge?
+------------------------------------------------------------------------------------------------
+rowid=258820  Charles Schumer          2023-09-21  show=pbs-newshour           nwords=378 len=2420
+  pkg=https://www.pbs.org/newshour/show/ukraines-zelenskyy-appeals-to-u-s-for-continued-aid-agains
+  HEAD  Providing aid is not just a matter of Ukrainian security. It's a matter of American security, because a victorious Putin is an emboldened Putin, making the world less safe for democracy. Laura Barrón-López: Among the key things Zelenskyy asked for during his Capitol Hill visit, more air defense and
+  TAIL  ts, saying the move was to protect their farmers. Back in the U.S., as Republican infighting over more aid to Ukraine continues, President Biden seeks to project strong support for a fellow democracy under brutal attack.
+------------------------------------------------------------------------------------------------
+rowid=258130  Charles Schumer          2022-11-28  show=pbs-newshour           nwords=813 len=4859
+  pkg=https://www.pbs.org/newshour/show/trump-dines-with-white-supremacist-renewing-questions-abou
+  HEAD  For a former president to sit down and have dinner with a high-profile antisemite is disgusting and dangerous. To give an antisemite even the smallest platform, much less an audience over dinner, is pure evil. Even assuming the former president didn't realize Mr. Fuentes was coming to Mar-a-Lago, fo
+  TAIL  st conference earlier this year. And yet there was no vast Republican condemnation of it across the party. Stu, what roots do you see of this? Why do you think that these figures are accepted within the Republican Party?
+------------------------------------------------------------------------------------------------
+rowid=257343  Ilhan Omar               2021-10-29  show=pbs-newshour           nwords=297 len=1806
+  pkg=https://www.pbs.org/newshour/show/minneapolis-residents-split-on-reducing-police-role-establ
+  HEAD  We're voting yes because there is a vision we can collectively create as a city on what public safety should look like for us. Fred de Sam Lazaro: The plan would amend the Minneapolis charter, removing the police department and the city's requirement to fund a minimum number of officers. There would
+  TAIL  a Department of Public Safety. Fred de Sam Lazaro: The North Side has borne the brunt of the city's sharp increase in shootings and homicides this year. Memorials to children killed by gun violence dot the neighborhood.
+------------------------------------------------------------------------------------------------
+rowid=258713  Jeanne Shaheen           2023-07-11  show=pbs-newshour           nwords=209 len=1330
+  pkg=https://www.pbs.org/newshour/show/nato-summit-starts-with-ukraine-seeking-path-to-join-allia
+  HEAD  We can see something move forward when we see the ratification. Laura Barrón-López: All the while, the war in Ukraine goes on. Overnight, Russian forces attacks Kyiv and Odessa in drone strikes, where Ukrainian forces struck down 26 of the 28 drones. But one month into the Ukrainian counteroffensi
+  TAIL  meeting closely tomorrow between President Biden and President Zelenskyy, especially as President Biden has refused to back off his position that the conflict must be over before Ukraine can gain full membership to NATO.
+====================================================================================================
+G2b abbreviation period satisfies the anchor
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=82055   Raphael Warnock          2024-04-28  show=this-week              nwords=58 len=299
+  pkg=https://abcnews.go.com/Politics/week-transcript-4-28-24-trumps-legal-landscape/story?id=1097
+  [role tail after (R-XX) / (R)               @   264] te House. And that is a dangerous proposition. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+  [dotted abbreviation then an ALL-CAPS run   @   276] d that is a dangerous proposition. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+  HEAD  I think that Georgia voters, black voters included, are going to show up for Joe Biden the same way they showed up for me. Not to vote is to vote. It is to push Donald Trump a little bit closer to the White House. And that is a dangerous proposition. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+------------------------------------------------------------------------------------------------
+rowid=71147   Mitch McConnell          2024-10-29  show=ctmo                   nwords=19 len=107
+  pkg=https://transcripts.cnn.com/show/ctmo/date/2024-10-29/segment/04
+  [role tail after (R-XX) / (R)               @    72] fed lies. They were provoked by the president. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+  [dotted abbreviation then an ALL-CAPS run   @    84] ey were provoked by the president. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+  HEAD  The mob was fed lies. They were provoked by the president. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+------------------------------------------------------------------------------------------------
+rowid=70812   Lindsey Graham           2024-09-30  show=ctmo                   nwords=43 len=249
+  pkg=https://transcripts.cnn.com/show/ctmo/date/2024-09-30/segment/04
+  [role tail after (R-XX) / (R)               @   214] cy by wide margins. Focus on those. [06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+  [dotted abbreviation then an ALL-CAPS run   @   226] argins. Focus on those. [06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+  HEAD  And here's what I would tell President Trump, when people look at the state of play, they trust you on the economy, the border, inflation and foreign policy by wide margins. Focus on those. [06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+------------------------------------------------------------------------------------------------
+rowid=205497  Daniel Goldman           2019-11-19  show=acd                    nwords=27 len=150
+  pkg=https://transcripts.cnn.com/show/acd/date/2019-11-19/segment/02
+  [dotted abbreviation then an ALL-CAPS run   @    91] y to tell you that he told Mr. Yermak? TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND EUROPE ON THE
+  HEAD  What did Ambassador Sondland say to tell you that he told Mr. Yermak? TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND EUROPE ON THE
+====================================================================================================
+G2c already the wrong person
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=225986  Daniel Webster           2022-05-29  show=cnr                    nwords=75 len=467
+  pkg=https://transcripts.cnn.com/show/cnr/date/2022-05-29/segment/18
+  HEAD  Their rates of gun violence declined quite substantially, both with respect to homicides and with suicides. And it virtually eliminated fatal mass shootings. TODD (voice-over): Since Australia's gun control laws went into effect in 1996, mass shootings have gone from almost once a year to almost nev
+  TAIL  tings have gone from almost once a year to almost never, with only one since that time. And John Howard later pointed out, his government was able to get that done, even though he's a political conservative. JOHN HOWARD,
+====================================================================================================
+G2d class C keeps the next speaker NAME
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=70149   Lateefah Simon           2024-08-20  show=se                     nwords=48 len=326
+  pkg=https://transcripts.cnn.com/show/se/date/2024-08-20/segment/03
+  HEAD  Kamala, had been a hard and tough prosecutor in Alameda County, prosecuting men who were pimping young girls and rapists. BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015): Kamala wanted to make sure that murderers and child abusers face meaningful accountability and conse
+  TAIL  ls and rapists. BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015): Kamala wanted to make sure that murderers and child abusers face meaningful accountability and consequences for those actions.
+------------------------------------------------------------------------------------------------
+rowid=83941   Robert Wittman           2025-11-01  show=csr                    nwords=55 len=332
+  pkg=https://transcripts.cnn.com/show/csr/date/2025-11-01/segment/01
+  HEAD  And they threatened the guards with the angle cutters to hold them back. KIM PHAM, GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation): The security team on the site had the initial reaction to evacuate the public from the room. Their first instinct was to get the public away from the ro
+  TAIL  MUSEUM (through text translation): The security team on the site had the initial reaction to evacuate the public from the room. Their first instinct was to get the public away from the robbers equipped with power tools.
+------------------------------------------------------------------------------------------------
+rowid=192133  Ilhan Omar               2019-03-05  show=ebo                    nwords=60 len=407
+  pkg=https://transcripts.cnn.com/show/ebo/date/2019-03-05/segment/01
+  HEAD  I know how it feels to be hated because of my religious beliefs. I am proof that as Americans, we can embrace our differences. SUZANNE MALVEAUX, NATIONAL CORRESPONDENT, CNN(off-camera): Freshman Congresswoman Ilhan Omar sworn into office just two months ago, now facing an extraordinary public admoni
+  TAIL  reshman Congresswoman Ilhan Omar sworn into office just two months ago, now facing an extraordinary public admonishment from her own party for several controversial comments about Israel supporters and American politics.
+------------------------------------------------------------------------------------------------
+rowid=193439  Alexandria Ocasio-Cortez 2019-04-02  show=cg                     nwords=38 len=231
+  pkg=https://transcripts.cnn.com/show/cg/date/2019-04-02/segment/02
+  HEAD  And it's systemic and it has an impact. SUNLEN SERFATY, CONGRESSIONAL CORRESPONDENT, CNN (voice over): New freshman members of Congress are pulling back the curtain on what many see as a pervasive culture of sexism on Capitol Hill.
+====================================================================================================
+G3 member words removed
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=83061   Maxine Dexter            2025-10-07  show=acd                    nwords=102 len=628
+  pkg=https://transcripts.cnn.com/show/acd/date/2025-10-07/segment/01
+  HEAD  I need people to not take the bait. PROKUPECZ (voice-over): That's why Maxine Dexter wants all these protesters to leave the ICE facility. The Democratic congresswoman from Portland supports their message, but fears they're playing into President Trump's hands. The question is, are we being strategi
+  TAIL  in this reality TV vision that Donald Trump has of Portland is a mistake. [20:40:11] PROKUPECZ (voice-over): It seems unlikely she'll get her wish. Protester Justin Allen doesn't think any of these people are going away.
+====================================================================================================
+G4 the five named rows
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=69544   James Comer              2024-07-23  show=cnr                    nwords=64 len=399
+  pkg=https://transcripts.cnn.com/show/cnr/date/2024-07-23/segment/23
+  HEAD  OK. OK. WILD (voice-over): Members of the Committee pressed Cheatle for answers about why the former president was allowed to take the stage even after she admitted the Secret Service had been notified between two and five times police were looking for suspicious person. Cheatle repeatedly said law
+  TAIL  vice had been notified between two and five times police were looking for suspicious person. Cheatle repeatedly said law enforcement didn't immediately determine that person who turned out to be the shooter was a threat.
+------------------------------------------------------------------------------------------------
+rowid=244993  James Comer              2023-07-23  show=cnr                    nwords=64 len=399
+  pkg=https://transcripts.cnn.com/show/cnr/date/2023-07-23/segment/23
+  HEAD  OK. OK. WILD (voice-over): Members of the Committee pressed Cheatle for answers about why the former president was allowed to take the stage even after she admitted the Secret Service had been notified between two and five times police were looking for suspicious person. Cheatle repeatedly said law
+  TAIL  vice had been notified between two and five times police were looking for suspicious person. Cheatle repeatedly said law enforcement didn't immediately determine that person who turned out to be the shooter was a threat.
+------------------------------------------------------------------------------------------------
+rowid=278454  Bill Cassidy             2022-05-04  show=cfr                    nwords=34 len=191
+  pkg=https://www.cfr.org/event/conversation-senator-bill-cassidy
+  [bare Q: turn                               @     3] OK. Q: Do you think that it’s possible to make progress on your plan without some serious cha
+  HEAD  OK. Q: Do you think that it’s possible to make progress on your plan without some serious changes to the people that the administration has put in place to design and implement energy policy?
+------------------------------------------------------------------------------------------------
+rowid=278528  Chris Van Hollen         2019-05-21  show=cfr                    nwords=16 len=77
+  pkg=https://www.cfr.org/event/conversation-senator-chris-van-hollen-can-polarized-congress-check
+  [bare Q: turn                               @     3] OK. Q: Senator, David Sanger from the New York Times . Good to see you again.
+  HEAD  OK. Q: Senator, David Sanger from the New York Times . Good to see you again.
+------------------------------------------------------------------------------------------------
+rowid=66969   Chuck Grassley           2024-04-17  show=cnc                    nwords=127 len=756
+  pkg=https://transcripts.cnn.com/show/cnc/date/2024-04-17/segment/08
+  HEAD  Do you solemnly swear and in all things appertaining to the trial or impeachment of Alejandro N. Mayorkas, secretary of Homeland Security now pending, you will do impartial justice according to the Constitution and laws. So help you, God. SEN. PATTY MURRAY (D-WA) I do. Yes. At this time, I will admi
+  TAIL  that in all things appertaining to the trial of the impeachment of Alejandro Mayorkas, secretary of Homeland Security, now, pending, you will do impartial justice according to the Constitution and laws, so help you, God.
+====================================================================================================
+gold / CU
+====================================================================================================
+------------------------------------------------------------------------------------------------
+rowid=245771  James Risch              2020-02-23  show=tom-steyer-on-performa nwords=33 len=209
+  pkg=https://www.foxnews.com/transcript/tom-steyer-on-performance-in-nevada-expectations-for-sout
+  HEAD  Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.
+
+====================================================================================================
+CORPUS-WIDE CENSUS over 153576 INTERVIEW rows
+====================================================================================================
+no-space colon after an ALL-CAPS tag                     38 rows
+      103834  Josh Gottheimer        meet-the-press     ive to any tax increases that hurt the families in my district. CHUCK TODD:And it's not clear whether the White House can unite progressives and moder
+      104029  Mitch McConnell        meet-the-press     Really? Because-- CHUCK TODD:I mean, I'm just asking, that is a-- look, any senator can have a rationale not to vote for a c
+      104233  Susan Collins          meet-the-press     Thank you. CHUCK TODD:Look, it’s going to be Pollyanna-ish and you guys are going to say the right things about bipar
+      104285  Rand Paul              meet-the-press     Congress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s
+      104800  Charles Schumer        meet-the-press     We disagree. PRES. DONALD TRUMP:And I'll tell you what. SEN. CHUCK SCHUMER:We disagree.
+      105315  Susan Collins          meet-the-press     cuts in the Medicaid/Medicare program as a result of this bill. CHUCK TODD:All right. We will be watching that commitment that was made to you. I'm cu
+U+2019 inside an ALL-CAPS token                         183 rows
+      80974   Hakeem Jeffries        this-week          Donald Trump and Republicans on Capitol Hill are nowhere to be found. O’BRIEN (voice over): The pain of the gridlock keeps growing. O’BRIEN: What woul
+      81023   Mike Rounds            this-week          We can't. We simply can't. O’BRIEN (voice over): The impacts of the shutdown getting worse by the day. The FAA announcing a 10
+      81315   Thomas Massie          this-week          I think this is a state and local issue. O’BRIEN: Why do you think the president adopted that position?
+      81316   Jay Obernolte          this-week          at the malicious use of it creates some really negative consequences. O’BRIEN (voice-over): But on Capitol Hill, lawmakers largely on the sidelines wh
+      81317   Bernard Sanders        this-week          ntelligent A.I. could replace human beings in controlling the planet. O’BRIEN: Do you think Congress is behind on this issue?
+      81318   Jake Auchincloss       this-week          state legislators from doing any regulation of A.I. bots whatsoever. O’BRIEN (voice-over): A.I. companies stress while risks for the technology exist,
+UNIDENTIFIED / UNKNOWN role label                        75 rows
+      70228   Lucy McBath            se                 n, out of nowhere, I got pregnant. Jordan was so much fun as a child. UNIDENTIFIED MALE #1: When all of a sudden -- UNIDENTIFIED FEMALE #1: Oh my God,
+      70229   Lucy McBath            se                 se rounds, he aimed at Jordan. Jordan didn't deserve to die that way. UNIDENTIFIED FEMALE #2: Reports of an active shooter at a high school. UNIDENTIF
+      81266   Elizabeth Warren       this-week          No one elected Elon Musk to nothing. UNIDENTIFIED MALE, COMEDIAN, “SATURDAY NIGHT LIVE”: Donald, what are you doing in my office?
+      90800   Raphael Warnock        ctmo               Are you ready to use your voice? UNIDENTIFIED SPEAKERS (in unison): Yes!
+      91011   Brian Fitzpatrick      lcl                the source of the funding is, in order to stop it and/or reverse it. (UNIDENTIFIED FEMALE) (voice-over): So, you want to stop it?
+      99772   Raphael Warnock        npr-all-things-con Good to see you, man. UNIDENTIFIED PERSON #2: Welcome to the Little White House. Yes, sir.
+role tail after (R-XX) / (R)                             78 rows
+      69206   Elise Stefanik         cnr                merican people have suffered crisis after crisis. REP. STEVE SCALISE, (R-LA) MAJORITY LEADER OF
+      70117   Charles Schumer        se                 come. On to victory in November. [21:25:00] (CHEERING) KAMALA HARRIS (D), VICE PRESIDENT OF THE UNITED
+      70535   Nancy Pelosi           cnr                ght. She looked presidential. I thought he looked silly. DONALD TRUMP (R), FORMER U.S. PRESIDENT, 2024
+      70812   Lindsey Graham         ctmo               reign policy by wide margins. Focus on those. [06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+      70967   Mike Rogers            acd                RAJU (voice-over): But as Trump said this last week -- DONALD TRUMP, (R) FORMER PRESIDENT OF THE
+      71147   Mitch McConnell        ctmo               e mob was fed lies. They were provoked by the president. DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+bare Q: turn                                            110 rows
+      83858   Lisa Murkowski         skc                We're hoping so. Q: OK. The Leader had kind of indicated that there was an uptick in them this week. Is that true?
+      277325  Dan Sullivan           csis               Yes. Q: Thank you. Hi. I’m Debbie Atuk. I’m originally from Nome and live in Brooklyn, but I’m also on t
+      277326  Dan Sullivan           csis               Yeah. Q: So when did we stop spending on military in Alaska? And why do you think they made that decision
+      277541  Christopher Coons      cfr                those open channels of communication, I think that’s well worth doing. Q: (Off mic.)
+      277543  Christopher Coons      cfr                Yes. Q: That is the answer? That you—
+      277548  Christopher Coons      cfr                for a robust program. I’m sorry, the first part of your question was? Q: Support for IAEA.
+dotted abbreviation then an ALL-CAPS run                514 rows
+      66331   Ro Khanna              fmjc               ent once called for an outright ban on TikTok -- DONALD TRUMP, FORMER U.S. PRESIDENT
+      69899   Bernie Moreno          cnr                Trump and fellow Ohioan JD Vance speaking at the GOP convention. SEN. J.D. VANCE (R-OH), 2024
+      70535   Nancy Pelosi           cnr                ked presidential. I thought he looked silly. DONALD TRUMP (R), FORMER U.S. PRESIDENT, 2024
+      70812   Lindsey Graham         ctmo               by wide margins. Focus on those. [06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+      70863   Rick Scott             cnr                guess what it means? You're going to lose power. DONALD TRUMP, FORMER U.S. PRESIDENT, 2024
+      71015   Mike Rogers            cnr                voice-over): But as Trump said this last week -- DONALD TRUMP, FORMER U.S. PRESIDENT, 2024
+DONE

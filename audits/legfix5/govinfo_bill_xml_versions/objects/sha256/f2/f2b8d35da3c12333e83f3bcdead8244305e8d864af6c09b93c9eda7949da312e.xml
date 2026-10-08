@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HA761CFB295464FAD9F969D7D1318AE67" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5989 IH: Rural Health Care Facilities Revitalization Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-10-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5989</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20231019">October 19, 2023</action-date>
+<action-desc><sponsor name-id="C001134">Ms. Caraveo</sponsor> (for herself, <cosponsor name-id="M001194">Mr. Moolenaar</cosponsor>, <cosponsor name-id="M001219">Mr. Moylan</cosponsor>, and <cosponsor name-id="S001226">Ms. Salinas</cosponsor>) introduced the following bill</action-desc>
+</action>
+<action display="yes">
+<action-date date="20231025">October 25, 2023</action-date>
+<action-desc>Referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To authorize rural health facilities to use certain Federal agricultural credit assistance for the purpose of refinancing debt obligations, updating necessary services, technology, and equipment, and supporting ancillary needs.</official-title>
+</form>
+<legis-body id="H427CEB3B7A8943BCBAD66C01153C2B3F" style="OLC">
+<section id="H86584B29864C47968F3C10E89FE0FCF2" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Rural Health Care Facilities Revitalization Act</short-title></quote>.</text></section> <section id="HFEF00E9EBF2643CA9B978E681D86FD82"><enum>2.</enum><header>Assistance for distressed rural health care facilities</header> <subsection id="H48757C0271BE4E4A97A6DE9D4E3464F9"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subtitle A of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1922">7 U.S.C. 1922–1936c</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" id="HB1073E4E24444082881245947C0BF25C" display-inline="no-display-inline">
+<section id="H4CCDDD2682CF40A7AE8CD111BBD59B9B"><enum>310J.</enum><header>Assistance for distressed rural health care facilities</header>
+<subsection id="H57D6FC6BA6354F9D843F77A7D7BCE886"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">A health care facility, including a hospital, behavioral health facility, health care clinic (including a mobile health care clinic), home health agency, and long-term care facility, in a rural area may use assistance provided under section 306(a) for a community facility, or under section 310B, to—</text> <paragraph id="HF29C3C17321D4A43AC2FBFE7FADB4433"><enum>(1)</enum><text>refinance a debt obligation;</text></paragraph>
+<paragraph id="HD28A50060ACB4F1F9BAC8AE381542574"><enum>(2)</enum><text>update a telehealth, equipment, or online database; or</text></paragraph> <paragraph id="HE700C3E3DA354E1C94FD3AD81808253F"><enum>(3)</enum><text>support ancillary needs, including operating expenses and reserve funds.</text></paragraph></subsection>
+<subsection id="H109230E4CC35464B83DD20A1033ACD53"><enum>(b)</enum><header>Limitations</header><text>A facility may use assistance pursuant to subsection (a) only if doing so would—</text> <paragraph id="H2CB80476A6D34494A360E5EA248BDF67"><enum>(1)</enum><text>help preserve access to a health service in a rural community;</text></paragraph>
+<paragraph id="H142AE11E469B42AF9DD7C015A29D530D"><enum>(2)</enum><text>meaningfully improve the financial position of the facility; and</text></paragraph> <paragraph id="HE7F172FAF98C42799D4FF811A1673A65"><enum>(3)</enum><text>otherwise meet the financial feasibility and security adequacy requirements of the Rural Development Agency.</text></paragraph></subsection>
+<subsection id="HA0BCAD85E27A4B45958B39D5278A833D"><enum>(c)</enum><header>Waiver</header><text display-inline="yes-display-inline">In the case of an application from a facility referred to in subsection (a) of this section for assistance under section 306(a) for a community facility, or under section 310B, the Secretary may waive the requirement of section 302(a)(1)(D) if the facility that is insolvent or located in a persistent poverty area, socially vulnerable community (as determined by the Secretary), or distressed area (as determined by the Secretary).</text></subsection> <subsection id="HEBBD6559FEF54F918966C4F43492E69D"><enum>(d)</enum><header>Definitions</header><text>In this section:</text>
+<paragraph id="H479D8F3F64EB43C1A0778663993D85BE"><enum>(1)</enum><header>Persistent poverty area</header><text display-inline="yes-display-inline">The term <term>persistent poverty area</term> means an area with a poverty rate of 20 percent or more for 4 consecutive time periods, approximately 10 years apart, spanning approximately 30 years.</text></paragraph> <paragraph id="HD907F770CD4A41B584FAC41DA22CBD6C"><enum>(2)</enum><header>Rural area</header><text display-inline="yes-display-inline">The term <term>rural area</term> means an area with a population of 50,000 or fewer inhabitants that is not an urbanized area adjacent or contiguous to a city with a population of more than 50,000 inhabitants.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></subsection>
+<subsection id="H026E4BC46FF1422D9F799887C542F1CC"><enum>(b)</enum><header>Effective date</header><text>The amendment made by subsection (a) shall take effect 6 months after the date of the enactment of this Act.</text></subsection></section> </legis-body> </bill> 
+

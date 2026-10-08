@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL19C97-824-P4-SV5"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3050 IS: To amend the Federal Financial Institutions Examination Council Act of 1978 to provide designees of the Secretary of Veterans Affairs and the Administrator of the Rural Housing Service of the Department of Agriculture with positions on the Appraisal Subcommittee of the Federal Financial Institutions Examination Council.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-12-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 3050</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191212">December 12, 2019</action-date><action-desc><sponsor name-id="S314">Mr. Tester</sponsor> (for himself, <cosponsor name-id="S303">Mr. Thune</cosponsor>, <cosponsor name-id="S307">Mr. Brown</cosponsor>, and <cosponsor name-id="S379">Mr. Perdue</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Federal Financial Institutions Examination Council Act of 1978 to provide designees of
+			 the Secretary of Veterans Affairs and the Administrator of the Rural
+			 Housing Service of the Department of Agriculture with positions on the
+			 Appraisal Subcommittee of the Federal Financial Institutions Examination
+			 Council.</official-title></form>
+	<legis-body>
+ <section id="id9C92A2CB1534412F9105F38E11050D9A" section-type="section-one"><enum>1.</enum><header>Appraisal Subcommittee</header><text display-inline="no-display-inline">Section 1011 of the Federal Financial Institutions Examination Council Act of 1978 (<external-xref legal-doc="usc" parsable-cite="usc/12/3310">12 U.S.C. 3310</external-xref>) is amended, in the first sentence, by inserting <quote>the Department of Veterans Affairs, the Rural Housing Service of the Department of Agriculture,</quote> after <quote>Financial Protection,</quote>.</text></section></legis-body></bill>
+
+

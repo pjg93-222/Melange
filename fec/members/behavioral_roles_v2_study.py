@@ -306,6 +306,7 @@ def rank_sensitivity(candidate):
                     m_at,
                     m_bt,
                     FM.rc(member, "pressure_mult"),
+                    FM.CM[member],  # COMPET_MULT: same c as flip_model (dial OFF -> 1.0)
                 )
         return values
 

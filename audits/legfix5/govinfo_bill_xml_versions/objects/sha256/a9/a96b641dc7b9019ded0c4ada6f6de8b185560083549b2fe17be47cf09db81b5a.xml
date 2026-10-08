@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Placed-on-Calendar-Senate" bill-type="olc" dms-id="HC0EA7A4AA017429CB1C860F904811B5F" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2486 PCS: Fostering Undergraduate Talent by Unlocking Resources for Education Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<calendar>Calendar No. 212</calendar><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 2486</legis-num>
+		<current-chamber display="yes">IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date>September 18, 2019</action-date><action-desc>Received</action-desc></action><action><action-date>September 19, 2019</action-date><action-desc>Read the first time</action-desc></action><action><action-date>September 23, 2019</action-date><action-desc>Read the second time and placed on the calendar</action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To reauthorize mandatory funding programs for historically Black colleges and universities and
+			 other minority-serving institutions.</official-title>
+	</form>
+	<legis-body id="H7EC3906CC5954320B1D9DB433B5F2EE7" style="OLC">
+ <section id="H66737508D474486DAC20D50DE3F5CB96" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fostering Undergraduate Talent by Unlocking Resources for Education Act</short-title></quote> or the <quote><short-title>FUTURE Act</short-title></quote>.</text> </section><section id="H91F0E06611254E46BB3DF41974EE8208"><enum>2.</enum><header>Strengthening historically black colleges and universities and other minority-serving institutions</header><text display-inline="no-display-inline">Section 371(b)(1)(A) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1067q">20 U.S.C. 1067q(b)(1)(A)</external-xref>) is amended—</text>
+ <paragraph id="H2CCBB620F235456FBFD040B6B28C1BB8"><enum>(1)</enum><text>in the first sentence, by striking <quote>through 2019</quote> and inserting <quote>through 2021</quote>; and</text> </paragraph><paragraph id="H1C7F170318444E49A10817EF1B798E10"><enum>(2)</enum><text>in the second sentence, by striking <quote>2019</quote> and inserting <quote>2021</quote>.</text>
+			</paragraph></section><section commented="no" id="H20CBD1EF34C54AC1BFFE5D9F4680AF59"><enum>3.</enum><header>Elimination of account maintenance fees</header>
+ <subsection commented="no" id="H085E4A8666B34051B3CA2674FA64BE0B"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 458 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1087h">20 U.S.C. 1087h</external-xref>) is amended—</text> <paragraph commented="no" id="HDA72A393BD6449BCBA6F05F0E3CE2F2E"><enum>(1)</enum><text display-inline="yes-display-inline">in subsection (a)—</text>
+ <subparagraph commented="no" id="HBCFA574C7E4B4CDBB0747BC79439DD07"><enum>(A)</enum><text display-inline="yes-display-inline">by striking paragraphs (1), (4), and (5); and</text> </subparagraph><subparagraph commented="no" id="HC5806FEFFCE34F43B139348DB0F1A973"><enum>(B)</enum><text display-inline="yes-display-inline">by redesignating paragraphs (3), (6), (7), and (8) as paragraphs (1), (2), (3), and (4), respectively;</text>
+ </subparagraph></paragraph><paragraph commented="no" id="H85072B7E1F494B7CB062BAAA99809506"><enum>(2)</enum><text display-inline="yes-display-inline">by striking subsection (b); and</text> </paragraph><paragraph commented="no" id="HC1DE711DB04A4B60ABB3714DBF849B8B"><enum>(3)</enum><text>by redesignating subsection (c) as subsection (b).</text>
+ </paragraph></subsection><subsection commented="no" id="HBB07C74F1D9E4788B1A94F4E4102E7E3"><enum>(b)</enum><header>Conforming amendments</header><text>Section 422B(c) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1072b">20 U.S.C. 1072b(c)</external-xref>) is amended—</text> <paragraph commented="no" id="H0465FB37AF894C1582B39CC68685CCA7"><enum>(1)</enum><text>by striking paragraph (3); and</text>
+ </paragraph><paragraph commented="no" id="HADF89571611C4B5FA0EC2A3C15697491"><enum>(2)</enum><text>by redesignating paragraphs (4) through (6) as paragraphs (3) through (5), respectively.</text> </paragraph></subsection><subsection commented="no" id="HA47F5A474CD34174A1A9365A01915FDA"><enum>(c)</enum><header>Effective date</header><text>The amendments made by this section shall take effect on October 1, 2019.</text>
+ </subsection></section><section commented="no" id="H4B43B9FACB5D461DBCA365F176906AC8"><enum>4.</enum><header>Transfer of Federal Pell Grant Funds</header><text display-inline="no-display-inline">Section 401(b)(7)(A)(iv) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1070a">20 U.S.C. 1070a(b)(7)(A)(iv)</external-xref>) is amended by striking subclauses (X) and (XI) and inserting the following:</text>
+			<quoted-block display-inline="no-display-inline" id="HAF6F5C280F6E46858321C3D8DB5EEB5E" style="OLC">
+ <subclause commented="no" id="HA329C47245154C31A9A39CF5B8EBF7AE"><enum>(X)</enum><text>$1,267,000,000 for fiscal year 2020;</text> </subclause><subclause commented="no" id="H25F7C3603C444F1F8F403E68EF703B9F"><enum>(XI)</enum><text>$1,145,000,000 for fiscal year 2021;</text>
+ </subclause><subclause commented="no" id="H6DBC8B48D69D4B8195115A80545DC211"><enum>(XII)</enum><text>$1,145,000,000 for fiscal year 2022;</text> </subclause><subclause id="HA51A72CEC7BE4185ACFDD0F9FE8BAE7F"><enum>(XIII)</enum><text>$1,145,000,000 for fiscal year 2023;</text>
+ </subclause><subclause id="H50C583F514C04A9FB8285455A8B2763B"><enum>(XIV)</enum><text>$1,145,000,000 for fiscal year 2024;</text> </subclause><subclause id="HC2ED778EAEC74AC0B88EBDA637D94808"><enum>(XV)</enum><text>$1,394,000,000 for fiscal year 2025; and</text>
+ </subclause><subclause id="HEC77D8B81A064464A743FC41B4CC4EF7"><enum>(XVI)</enum><text>$1,145,000,000 for fiscal year 2026 and each succeeding fiscal year.</text></subclause><after-quoted-block>.</after-quoted-block></quoted-block> </section><section id="H14301AC787834C64AC47C0DE9FD42FED"><enum>5.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the Committee on the Budget of the House of Representatives, provided that such statement has been submitted prior to the vote on passage.</text>
+		</section></legis-body>
+	<attestation><attestation-group><attestation-date chamber="House" date="20190917">Passed the House of Representatives September 17, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk</role></attestation-group></attestation>
+	<endorsement display="yes"><action-date>September 23, 2019</action-date><action-desc>Read the second time and placed on the calendar</action-desc></endorsement>
+</bill>
+
+

@@ -242,7 +242,7 @@ REGISTRY = (
        'Not mechanically recoverable: the class column is adjudicated per act against the ACU '
        'outline. Re-deriving means re-running the 19-category review.',
        'on adjudication', 4, 'hash_always',
-       note='The 644-act universe. One of four load-bearing artifacts with no live in-repo '
+       note='The 648-act universe. One of four load-bearing artifacts with no live in-repo '
             'producer — losing it is unrecoverable inside this repo. Declares hash_always ON '
             'MERIT and is REFUSED by the git scope rule, because git tracks it: the refusal is '
             'the record that git — not this manifest — is what stands behind this file.'),
@@ -442,7 +442,7 @@ REGISTRY = (
        # invokes as `build_primacy_surfaces.py --engine-inputs-only` at fec/run_pipeline.py:122.
        # Official refresh generations and pointers are validated by their source receipts,
        # not by a promise that weekly output bytes never change.
-       sentinel_excl=['congress_advanced_current/*', 'sentinel_admissions.json',
+       sentinel_excl=['bank_anchor_reconciliation.json', 'congress_advanced_current/*', 'sentinel_admissions.json',
                       'sentinel_admission_checkpoint.json', 'official_membership_movements.json',
                       'vote_source_snapshot.json', 'vote_refresh_receipt.json'],
        sentinel_newest=False),
@@ -498,6 +498,8 @@ REGISTRY = (
        #                                  the ELECTORAL env var)         run_pipeline.py:133
        #   electoral.json                 fec/engine/build_electoral.py:32
        #                                                                 run_pipeline.py:78
+       #   competitiveness_c.json.candidate  fec/engine/build_competitiveness.py (dump_atomic; deterministic,
+       #                                  no timestamps)                 run_pipeline.py: the step after build_electoral
        #   electoral_plays.json           fec/engine/build_electoral_plays.py:37
        #                                                                 run_pipeline.py:128
        # What SURVIVES as sentinel material: electoral_history.json (208 KB) and affective_n.json
@@ -505,8 +507,11 @@ REGISTRY = (
        # every run, so the informative evidence RISES 1 -> 2. (The sixth chain-touched file is the
        # relocated audit scratch _audit_tmp_frontier.json; see the audit_full change. Its abandoned
        # copy is left on disk by this landing and would take the third by_size slot until deleted.)
-       sentinel_excl=['Moneyball_email.zip', 'budget_frontier.json',
-                      'budget_frontier_electoral.json', 'electoral.json', 'electoral_plays.json',
+       # COMPET_MULT (2026-10-05): fec/engine/build_competitiveness.py (chain step, right after build_electoral.py) writes
+       # competitiveness_c.json (the live artifact since Paul 2026-10-06; the earlier .candidate is kept as evidence) -- a chain output, so excluded from sentinel duty like its siblings. The Cook PVI
+       # inputs under cook_pvi_2026/ (+ PROVENANCE.json with their sha256s) are static and stay ordinary store content.
+       sentinel_excl=['Moneyball_email.zip', 'budget_frontier.json', 'competitiveness_c.json.candidate',
+                      'competitiveness_c.json', 'budget_frontier_electoral.json', 'electoral.json', 'electoral_plays.json',
                       'fec_page_cache/*', 'fec_refresh_current.json', 'fec_money_application.json'],
        sentinel_newest=False),
     _s('repo.data_engine', 'live_tree', 'data/engine', 'DERIVED',

@@ -1,0 +1,30 @@
+{
+  "schema": "congress-httr-cookie-replay-receipt-v2",
+  "created_at": "2026-08-17 22:23:02 UTC",
+  "invocation_id": "5062c3e9e87d7b7c0ea3449c03d9c330fb07f6fbd2b8720ab19e58bc1ce2bb0b",
+  "batch_id": "80af16a2d10eac54ad36b157a88b1fefa365ca6791a2476ff8f30c144364c83e",
+  "attempt_ordinal": 1,
+  "request_id": "1a991ba77836647e3cfc889f1bc14df35e117c72329d959ab0952d68e8114861",
+  "status": "accepted",
+  "canonical_key": "119:hr:2401",
+  "expected_url": "https://www.congress.gov/bill/119th-congress/house-bill/2401/text",
+  "final_url": "https://www.congress.gov/bill/119th-congress/house-bill/2401/text",
+  "http_status": 200,
+  "content_type": "text/html; charset=UTF-8",
+  "expected_marker": "Shown Here:",
+  "body_sha256": "ec636220352c7efac23a1f73e5139883328d478796a8fb47e2b30b565d6df12a",
+  "byte_length": 388615,
+  "validation": {
+    "status_200": true,
+    "exact_url": true,
+    "html_content_type": true,
+    "not_challenge": true,
+    "expected_main_marker": true
+  },
+  "html_file": "C:/Users/pgoff/OneDrive/Desktop/Melange Systems/audits/legfix5/congress_advanced_pages_20260725/text_relevance_httr_full_20260727z/accepted_html/119/hr/2401/page.html.gz",
+  "transport": "native_chrome_cookie_replay_httr",
+  "http_attempts": 1,
+  "retry_waits": 0,
+  "cf_clearance_present": true,
+  "cookie_values_persisted": false
+}

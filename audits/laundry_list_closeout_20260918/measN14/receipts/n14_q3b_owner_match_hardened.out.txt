@@ -1,0 +1,45 @@
+====================================================================================================
+N14 Q3b  OWNER-RECORD MATCH, RE-KEYED ON THE RELEASE URL   run 2026-09-19T13:00:28
+====================================================================================================
+cu_stance_label_set.csv  rows 552 | distinct release URLs 550 | distinct titles 538
+   urls carrying MORE than one label-set row: 2
+   of those, urls whose human_labels DISAGREE: 0
+
+-- THE R PIPELINE WORKBOOKS, RE-KEYED ON URL ALONE --
+   the 57 collapse to 57 distinct sheet-url keys and 57 distinct csv-url keys
+   Draft CU_Press_Stance_Tone.xlsx        [Releases            ] urls  2375 | col stance      | of 57 found 57 -> SHEET  0  CSV 57  neither  0
+   LIVE  CU_Press_Stance_Tone.xlsx        [Releases            ] urls  3619 | col stance      | of 57 found 57 -> SHEET 28  CSV 22  neither  7
+   Draft cu_stance_label_set.xlsx         [To Rework           ] urls   148 | col human_label | of 57 found 22 -> SHEET  5  CSV 17  neither  0
+   Draft cu_stance_label_set.xlsx         [Done (locked)       ] urls   402 | col human_label | of 57 found 35 -> SHEET 15  CSV 18  neither  2
+   LIVE  cu_stance_label_set.xlsx         [To Rework           ] urls   148 | col human_label | of 57 found 22 -> SHEET  4  CSV 18  neither  0
+   LIVE  cu_stance_label_set.xlsx         [Done (locked)       ] urls   402 | col human_label | of 57 found 35 -> SHEET 15  CSV 18  neither  2
+
+ledgers: overrides 23 | dashboard queue 4 (url-keyed 4) | cfpb queue press rows 7 (PAUL_GOLD filled 0)
+
+----------------------------------------------------------------------------------------------------
+-- PER-ROW OWNER RECORD, URL FIRST, TITLE ONLY AS A NAMED FALLBACK --
+
+verdict                             count
+CSV matches the owner record           57
+
+owner record source / how it was matched                    count
+cu_stance_label_set.csv:human_label / url                      56
+press_stance_overrides.json / ledger(url-or-title)              1
+
+-- THE AMBIGUOUS / NEITHER / NOT-FOUND ROWS, IN FULL --
+
+-- NEGATIVE CONTROL: does the label set ever agree with the SHEET against the CSV? --
+   {'human_label == CSV stance': 56}
+   A count above zero in "human_label == SHEET stance" would mean the sheet carries the
+   owner record for that release.  Measured: 0.
+
+-- SECOND CONTROL: on the 436 human_label keys that AGREE, does the CSV still carry
+   the label-set value?  (if the CSV stance is the human_label by construction, the
+   agreeing rows must agree with the label set too) --
+   base-CSV rows with stance_src=human_label: 497
+   of those, url-matched to exactly one label-set row: 497
+   CSV stance == label-set human_label : 497
+   CSV stance != label-set human_label : 0
+   not url-matchable in the label set  : 0
+wrote n14_q3b_owner_match_hardened.json
+DONE N14 Q3b

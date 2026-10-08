@@ -1,0 +1,37 @@
+﻿ledger rows joined to both databases: 5477
+
+rows where (stored nwords before) - (stored nwords after) != removed_nwords: 4
+  M1 cut lands mid-token (benign, gap exactly 1): 4
+  M2 the ORIGINAL row already broke nwords == len(text.split()): 0
+  unexplained: 0
+pre-apply corpus invariant nwords == len(text.split()) on these 5477 originals: HELD
+
+M1 rowid=83813 member='Adelita Grijalva' gap=+1  stored_nwords_before=17 len(split)=17 kept=10 live=10 removed_nwords=8 cut_is_mid_token=True
+   kept  ...'I am basically a tourist with an office in D.'
+   CUT -> 'C. CONTORNO (voice-over): Steve Contorno, CNN, Tucson, Arizo'...
+   the token straddling the cut: 'D.' + 'C.'
+
+M1 rowid=187602 member='Mitch McConnell' gap=+1  stored_nwords_before=37 len(split)=37 kept=28 live=28 removed_nwords=10 cut_is_mid_token=True
+   kept  ...'ke us for us to structure this deal. But the president is --'
+   CUT -> 'WALLACE: I think you and I could work it out.'...
+   the token straddling the cut: '--' + 'WALLACE:'
+
+M1 rowid=219962 member='Gary Peters' gap=+1  stored_nwords_before=129 len(split)=129 kept=19 live=19 removed_nwords=111 cut_is_mid_token=True
+   kept  ...'a very likely violent crowd that was coming to Washington D.'
+   CUT -> 'C. WILD (voice-over): The 127-page report shows U.S. Capitol'...
+   the token straddling the cut: 'D.' + 'C.'
+
+M1 rowid=240000 member='Lindsey Graham' gap=+1  stored_nwords_before=182 len(split)=182 kept=162 live=162 removed_nwords=21 cut_is_mid_token=True
+   kept  ..." far as I'm concerned. If you can prosecute them, let's try."
+   CUT -> 'WALLACE: Well, you talk -- you talk about missile defense. I'...
+   the token straddling the cut: 'try.' + 'WALLACE:'
+
+sum over all 5477 ledger rows:
+  true word delta   (stored before - stored after) = 346496
+  tool words_removed (sum len(removed_raw.split())) = 346500
+  gap = 4, and the per-row gaps account for it exactly: True
+
+EXACT IDENTITY  len(kept.split()) + len(removed.split()) - [cut is mid-token] == len(original.split())  holds on all 5477 rows: True
+nothing is lost either way: the ledger reconstruction check (C11) already proved kept_raw + removed_raw == the original text byte for byte on all 5477 rows.
+
+VERDICT: the 4-word gap is entirely M1 (mid-token cuts); no data defect

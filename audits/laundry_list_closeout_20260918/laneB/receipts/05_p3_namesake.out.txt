@@ -1,0 +1,161 @@
+﻿==============================================================================
+P3 : match-form census over all 53011 re-derived mentions
+==============================================================================
+by form: {'BARE': 13862, 'TITLE': 27370, 'TYPED': 11184, 'HANDLE': 595}
+BARE (bare full-name scan)   : 13862
+TITLE (title+surname path)   : 27370
+
+UNGUARDED (BARE, no cue in window) : 2602   = 18.8% of BARE, 4.9% of all mentions
+  by source: {'CREC': 1044, 'INTERVIEW': 1530, 'CHRG': 9, 'PRESS': 19}
+
+unguarded windows counted into n_scored           : 1566
+dyads touched                                    : 1409
+SHIPPED edges touched                            : 1043
+shipped edges with >=1 SCORED unguarded window    : 877
+  of those SIGNED (pos+neg>0)                     : 795
+  of those drawn (n_scored>=2)                    : 662
+shipped edges whose ENTIRE scored support is unguarded-bare : 255
+  of those SIGNED   : 201
+  of those drawn    : 40
+
+=== 20 most frequent UNGUARDED target names ===
+target                                n     lits top literal spellings
+Charles Schumer                     272        1 ['chuck schumer']
+Nancy Pelosi                        238        1 ['nancy pelosi']
+Mitch McConnell                     228        1 ['mitch mcconnell']
+Austin Scott                        157        1 ['austin scott']
+Vicente Gonzalez                    120        1 ['vicente gonzalez']
+Adam Schiff                          84        1 ['adam schiff']
+Bernard Sanders                      77        2 ['bernie sanders', 'bernard sanders']
+Lindsey Graham                       72        1 ['lindsey graham']
+Mike Johnson                         65        2 ['mike johnson', 'michael johnson']
+Jim Jordan                           55        2 ['jim jordan', 'james jordan']
+Hakeem Jeffries                      48        1 ['hakeem jeffries']
+Ilhan Omar                           35        1 ['ilhan omar']
+Elizabeth Warren                     30        2 ['elizabeth warren', 'liz warren']
+Ted Cruz                             29        1 ['ted cruz']
+John Cornyn                          29        1 ['john cornyn']
+Thomas Massie                        27        1 ['thomas massie']
+Christopher Murphy                   27        2 ['chris murphy', 'christopher murphy']
+Susan Collins                        26        1 ['susan collins']
+Tim Scott                            24        1 ['tim scott']
+Rand Paul                            24        1 ['rand paul']
+
+=== 20 most frequent UNGUARDED literal strings ===
+   'chuck schumer'                       272
+   'nancy pelosi'                        238
+   'mitch mcconnell'                     228
+   'austin scott'                        157
+   'vicente gonzalez'                    120
+   'adam schiff'                          84
+   'bernie sanders'                       74
+   'lindsey graham'                       72
+   'mike johnson'                         64
+   'jim jordan'                           51
+   'hakeem jeffries'                      48
+   'ilhan omar'                           35
+   'ted cruz'                             29
+   'john cornyn'                          29
+   'elizabeth warren'                     28
+   'thomas massie'                        27
+   'susan collins'                        26
+   'tim scott'                            24
+   'rand paul'                            24
+   'chuck grassley'                       18
+
+==============================================================================
+RANDOM SAMPLE OF 30 UNGUARDED WINDOWS (seed 20260918) -- for hand grading
+==============================================================================
+
+[01] Maxwell Frost  ->  Austin Scott   (literal 'austin scott' | src=CREC sid=153295 scored=True shipped=False)
+     se Rosendale Ross Rouzer Roy Ruiz Ruppersberger Rutherford Ryan Salazar Salinas Santos Scalise Schakowsky Schiff Schneider Scholten Schrier Schweikert Scott (VA) Scott, Austin Scott, David Self Sessions Sewell Sherman Sherrill Simpson Slotkin Smith (MO) Smith (NE) Smith (NJ) Smucker Sorensen Soto Spanberger Spartz Stanton Stauber Steel Stefanik Steil Steube Stevens St
+
+[02] Steny Hoyer  ->  Adam Schiff   (literal 'adam schiff' | src=INTERVIEW sid=98507 scored=True shipped=True)
+     ned. Those are the facts.' That's what's critical in any trial. You wouldn't call the whistleblower. What you call, is the people who were actually there, which is what Adam Schiff has done acting as a investigator. And in the investigations, in both Nixon and Clinton, you had a special prosecutor, they investigated. They investigated confidentially.
+
+[03] French Hill  ->  James Comer   (literal 'james comer' | src=INTERVIEW sid=319823 scored=False shipped=False)
+     THANK YOU FOR YOUR QUESTION. THE QUESTION WAS, DOES JOE BIDEN VIEW HIS SON'S BUSINESS DEALINGS AS A COMPROMISE? JAMES COMER IS ACTIVELY INVESTIGATING THE HUNTER BIDEN LAPTOP. THAT IS AN ACTIVE INVESTIGATION.
+
+[04] Ron Johnson  ->  Adam Schiff   (literal 'adam schiff' | src=CREC sid=38880 scored=True shipped=True)
+     ,'' the former official added. ``They were plotting to actually have him removed from office.'' Misko left the White House last summer to join House impeachment manager Adam Schiff's committee, where sources say he offered ``guidance'' to the whistleblower, who has been officially identified only as an intelligence officer in a complaint against Trump filed under whis
+
+[05] Jim Banks  ->  Mike Rogers   (literal 'mike rogers' | src=INTERVIEW sid=307767 scored=False shipped=False)
+     Well, Mike Rogers just barely lost in the last cycle to Elissa Slotkin who ran as a moderate. And what you just heard from with Dr. Abdul El-Sayed, you just heard from the most extreme socialist-leaning Demo
+
+[06] Charles Schumer  ->  Mitch McConnell   (literal 'mitch mcconnell' | src=INTERVIEW sid=209493 scored=False shipped=True)
+     The President and Mitch McConnell put huge pressure on these folks. I hope we can get witnesses and documents. It's an uphill fight. Is it more likely than not? Probably no. But is it a decent good chance? Yes.
+
+[07] Tim Walberg  ->  Austin Scott   (literal 'austin scott' | src=CREC sid=167717 scored=True shipped=False)
+     adewagen Reschenthaler Rodgers (WA) Rogers (AL) Rogers (KY) Rose Rouzer Rulli Ruppersberger Rutherford Ryan Salazar Scalise Schneider Scholten Schrier Scott (VA) Scott, Austin Scott, David Self Sessions Sewell Sherrill Simpson Slotkin Smith (MO) Smith (NE) Smith (NJ) Smucker Soto Spanberger Spartz Stanton Steel Steil Strickland Strong Suozzi Tenney Thompson (PA) Timmo
+
+[08] Mike Johnson  ->  Charles Schumer   (literal 'chuck schumer' | src=INTERVIEW sid=323119 scored=False shipped=True)
+     ACK TO THE RESPONSIBILITY AND DOING BUDGETING AND APPROPRIATIONS FOR THE PEOPLE AS IT IS SUPPOSED TO WORK. WE NEED MORE TIME. THAT IS WHAT THIS DEBATE IS ABOUT. I ASKED CHUCK SCHUMER, GIVE US A SIMPLE SEVEN-WEEK STOPGAP FUNDING MEASURE TO KEEP THIS GOING AND THAT IS WHEN HE TURNED INTO A POLITICAL CHARADE AND PEOPLE ARE BEING HARMED.
+
+[09] Brad Sherman  ->  Vicente Gonzalez   (literal 'vicente gonzalez' | src=CREC sid=155551 scored=True shipped=False)
+     n, Scott Frost Gallagher Gallego Garamendi Garbarino Garcia (IL) Garcia (TX) Garcia, Mike Garcia, Robert Gimenez Golden (ME) Goldman (NY) Gomez Gonzales, Tony Gonzalez, Vicente Gonzalez-Colon Gottheimer Granger Graves (LA) Graves (MO) Green, Al (TX) Griffith Grijalva Guthrie Harder (CA) Hayes Higgins (NY) Hill Himes Hinson Horsford Houlahan Hoyer Hoyle (OR) Hudson Huf
+
+[10] Rand Paul  ->  Kirsten Gillibrand   (literal 'kirsten gillibrand' | src=INTERVIEW sid=100251 scored=True shipped=True)
+     See, this is the false narrative that Jon Stewart and Kirsten Gillibrand want you to believe. There's $2 billion in the fund. And, as we speak, payments are going out every day. We have given $12 billion. This isn't a stingy country. This isn't a country
+
+[11] David Rouzer  ->  Vicente Gonzalez   (literal 'vicente gonzalez' | src=CREC sid=168740 scored=True shipped=False)
+     Flood Fong Foster Foushee Frankel, Lois Frost Gallego Garbarino Garcia (IL) Garcia (TX) Garcia, Mike Garcia, Robert Gimenez Goldman (NY) Gomez Gonzales, Tony Gonzalez, Vicente Gonzalez-Colon Gottheimer Granger Green, Al (TX) Harder (CA) Hayes Hill Himes Hinson Horsford Houchin Houlahan Hoyer Hoyle (OR) Huffman Issa Ivey Jackson (IL) Jackson (NC) Jacobs James Jayapal
+
+[12] Mike Johnson  ->  Charles Schumer   (literal 'chuck schumer' | src=INTERVIEW sid=82626 scored=False shipped=True)
+     can people. It's fine to have partisan debates and squabbles but you don't hold the people hostage for their services to allow yourself political cover, and that's what Chuck Schumer and Hakeem Jeffries are doing right now.
+
+[13] Nancy Pelosi  ->  Mitch McConnell   (literal 'mitch mcconnell' | src=INTERVIEW sid=255940 scored=False shipped=True)
+     No, he doesn't. This is the same Mitch McConnell who came to the floor on April 9 and said: This is as far as we're going to go. The Republicans -- the Democrats are holding this up. We're not going beyond this. And, today, he voted u
+
+[14] Cory Booker  ->  Tim Scott   (literal 'tim scott' | src=INTERVIEW sid=274167 scored=False shipped=True)
+     Today I had a quick conversation with Tim Scott. We weren`t making progress. It was clear that we were not making good progress that we needed to make to give America what I think the largest civil rights protests we`ve had in our country`
+
+[15] Cory Booker  ->  Hakeem Jeffries   (literal 'hakeem jeffries' | src=CREC sid=179295 scored=True shipped=True)
+     I want to answer that question. I want to, at first, say Hakeem Jeffries is here. Now I am worried because two Brooklynites are shaking hands. I confess, when I had the floor and Schumer was here, it was the only time in my life I could deny him the right to
+
+[16] Michael Lawler  ->  Hakeem Jeffries   (literal 'hakeem jeffries' | src=INTERVIEW sid=85903 scored=True shipped=True)
+     Both leaders -- both leaders have failed here because we don't have a bill on the floor and Hakeem Jeffries is sticking with his three years or bust with no reforms.
+
+[17] James Clyburn  ->  Ralph Norman   (literal 'ralph norman' | src=INTERVIEW sid=79396 scored=True shipped=True)
+     ndone partisanship, uh, but absolute unanimity. How does he say that 7 to 0 is partisanship? That's absolutism. And so, I don't know what he's talking about, but that's Ralph Norman. He is always looking for attention.
+
+[18] Thom Tillis  ->  Sheldon Whitehouse   (literal 'sheldon whitehouse' | src=CREC sid=122859 scored=True shipped=False)
+     hristopher A. Coons, Roy Blunt, Shelley Moore Capito, Patrick J. Leahy, Kyrsten Sinema, Jon Tester, Ron Johnson, Amy Klobuchar, Jon Ossoff, John Barrasso, Patty Murray, Sheldon Whitehouse, Rick Scott. Mark R. Warner, Kirsten E. Gillibrand, Rob Portman, Mike Rounds, James Lankford, Joni Ernst, Cynthia M. Lummis, Mike Crapo, Bill Hagerty, Richard Burr, Dan Sullivan, Deb
+
+[19] John Barrasso  ->  Todd Young   (literal 'todd young' | src=CREC sid=109256 scored=True shipped=False)
+     an M. Collins, Bill Hagerty, Mike Braun, Mike Crapo, M. Michael Rounds, Jerry Moran, Bill Cassidy, M.D., Tim Scott, John Cornyn, Dan Sullivan, Mitt Romney, Deb Fischer, Todd Young, Rob Portman, United States Senators.
+
+[20] Sanford Bishop  ->  Austin Scott   (literal 'austin scott' | src=CREC sid=34714 scored=True shipped=True)
+     rd Ruiz Ruppersberger Rush Rutherford Ryan Sablan San Nicolas Sanchez Sarbanes Scalise Scanlon Schakowsky Schiff Schneider Schrader Schrier Schweikert Scott (VA) Scott, Austin Scott, David Sensenbrenner Serrano Sewell (AL) Shalala Sherman Shimkus Simpson Slotkin Smith (MO) Smith (NE) Smith (NJ) Smith (WA) Smucker Soto Spanberger Spano Speier Stanton Stauber Stefanik S
+
+[21] Steny Hoyer  ->  Charles Schumer   (literal 'chuck schumer' | src=INTERVIEW sid=159646 scored=True shipped=True)
+     As Chuck Schumer was saying, in politics, in the media, in public square fashion our rhetoric so that it does not insight but informs.
+
+[22] James Comer  ->  Adam Schiff   (literal 'adam schiff' | src=INTERVIEW sid=107908 scored=True shipped=True)
+     No, very – I totally disagree with that. Adam Schiff always over-promised and under-delivered. He said just last week that releasing Trump's tax returns was going to be a bombshell. I mean, there's no bombshell there. There's nothing there.An
+
+[23] Christopher Coons  ->  Lindsey Graham   (literal 'lindsey graham' | src=INTERVIEW sid=305573 scored=False shipped=True)
+     It is, Martha. This was very hard news to wake up to this morning. Lindsey Graham was -- look, as Tim just said, and I'll agree with him, no better friend, no tougher adversary. And he and I certainly fought plenty over our differences about politics and policy, but w
+
+[24] Richard McCormick  ->  Austin Scott   (literal 'austin scott' | src=CREC sid=149921 scored=True shipped=False)
+     se Ross Rouzer Ruiz Ruppersberger Rutherford Ryan Sablan Salazar Salinas Sanchez Sarbanes Scalise Scanlon Schakowsky Schiff Schneider Scholten Schrier Scott (VA) Scott, Austin Scott, David Sessions Sewell Sherman Sherrill Simpson Slotkin Smith (NE) Smith (NJ) Smith (WA) Smucker Sorensen Soto Spanberger Spartz Stansbury Stanton Steel Stefanik Stevens Strickland Strong
+
+[25] Thom Tillis  ->  Steve Daines   (literal 'steve daines' | src=CREC sid=123062 scored=True shipped=False)
+     Joe Manchin, III, Sherrod Brown, Bill Cassidy, John Cornyn, John Thune, Mark Kelly, Cory A. Booker, Richard Blumenthal, Brian Schatz. Patrick J. Toomey, Lindsey Graham, Steve Daines, John Hoeven, Gary C. Peters, Jeff Merkley, Rand Paul, Bernard Sanders, James M. Inhofe, Alex Padilla, Christopher Murphy, Tina Smith, Kevin Cramer, Marsha Blackburn, Thomas R. Carper, Ron
+
+[26] Ro Khanna  ->  Thomas Massie   (literal 'thomas massie' | src=INTERVIEW sid=307652 scored=False shipped=True)
+     Well, I was telling a colleague we may need to have a 192 War Powers Resolutions because he's basically threatening every other country in the world. But Thomas Massie and I tried to prevent this war in Iran with our War Powers Resolution. And now let's be clear: we're just scraping to try to get back to how the situation was before he got us in to this
+
+[27] Mike Johnson  ->  Charles Schumer   (literal 'chuck schumer' | src=INTERVIEW sid=323109 scored=False shipped=True)
+     ED AND DOES NOT WANT THE TROOPS TO BE PAID AND YOU SHOULD LISTEN TO HIS COMMENTS LAST NIGHT. HE IS ENJOYING THIS. HE SAID EVERY DAY GETS BETTER FOR US QUOTE UNQUOTE PRE-CHUCK SCHUMER AND THE DEMOCRATS ARE PREVENTING YOUR FAMILY FROM GETTING THE CARE AND AT THE REPUBLICANS IN MY HEART GOES OUT TO YOU.
+
+[28] Steve Scalise  ->  Nancy Pelosi   (literal 'nancy pelosi' | src=INTERVIEW sid=235835 scored=True shipped=True)
+     2Well, that's the way Congress worked for over 200 years. Nancy Pelosi is the one who changed it. We're changing it back to what it used to be. And then ultimately opening up the process.
+
+[29] Gus Bilirakis  ->  Vicente Gonzalez   (literal 'vicente gonzalez' | src=CREC sid=145042 scored=True shipped=False)
+     d Fitzpatrick Fleischmann Fletcher Flood Foxx Franklin, C. Scott Fry Fulcher Gaetz Gallagher Gallego Garbarino Garcia, Mike Gimenez Golden (ME) Gonzales, Tony Gonzalez, Vicente Gonzalez-Colon Good (VA) Gooden (TX) Gosar Gottheimer Granger Graves (LA) Graves (MO) Green (TN) Greene (GA) Griffith Grothman Guest Guthrie Hageman Harris Harshbarger Hern Higgins (LA) Hill Hi
+
+[30] Carlos Gimenez  ->  Jim Jordan   (literal 'jim jordan' | src=INTERVIEW sid=258909 scored=False shipped=True)
+     has caused. And this is not good for America. The Democrats have seen what they did is also not good for America. And so we need to move forward. I just don't see that Jim Jordan has got a path forward to being the speaker. And if Kevin McCarthy can't do it, then we need to look for a consensus candidate that the Republicans can rally around and be our speaker for th
+
+wrote receipts/05_p3_sample30_ungraded.json
+DONE 05

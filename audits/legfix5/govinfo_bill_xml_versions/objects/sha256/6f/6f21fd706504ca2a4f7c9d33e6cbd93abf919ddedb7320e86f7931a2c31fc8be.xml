@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL23290-1R9-Y9-X5X"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>115 S817 IS: Secure Viable Banking Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-03-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>118th CONGRESS</congress><session>1st Session</session><legis-num>S. 817</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20230315">March 15, 2023</action-date><action-desc><sponsor name-id="S366">Ms. Warren</sponsor> (for herself, <cosponsor name-id="S354">Ms. Baldwin</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S386">Ms. Duckworth</cosponsor>, <cosponsor name-id="S369">Mr. Markey</cosponsor>, <cosponsor name-id="S313">Mr. Sanders</cosponsor>, <cosponsor name-id="S361">Ms. Hirono</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, <cosponsor name-id="S359">Mr. Heinrich</cosponsor>, <cosponsor name-id="S306">Mr. Menendez</cosponsor>, <cosponsor name-id="S309">Mr. Casey</cosponsor>, <cosponsor name-id="S418">Mr. Fetterman</cosponsor>, <cosponsor name-id="S316">Mr. Whitehouse</cosponsor>, <cosponsor name-id="S422">Mr. Welch</cosponsor>, <cosponsor name-id="S353">Mr. Schatz</cosponsor>, <cosponsor name-id="S409">Mr. Luján</cosponsor>, and <cosponsor name-id="S364">Mr. Murphy</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To repeal title IV of the Economic Growth, Regulatory Relief, and Consumer Protection Act.</official-title></form><legis-body><section id="id91eaf54feecc46d2b6f5e505b150e97e" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Secure Viable Banking Act</short-title></quote> or the <quote><short-title>SVB Act</short-title></quote>.</text></section><section id="S1"><enum>2.</enum><header>Restoration of banking regulations</header><text display-inline="no-display-inline">Title IV of the Economic Growth, Regulatory Relief, and Consumer Protection Act (<external-xref legal-doc="public-law" parsable-cite="pl/115/174">Public Law 115–174</external-xref>; 132 Stat. 1296) is repealed, and the provisions of law amended by that title are restored as if that title had not been enacted.</text></section></legis-body></bill> 
+

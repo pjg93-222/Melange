@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HD6A38EFD38D140F7955572DFE13B710A" key="H" public-private="public"><form><distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3373</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190620">June 20, 2019</action-date><action-desc><sponsor name-id="T000468">Ms. Titus</sponsor> (for herself and <cosponsor name-id="Y000033">Mr. Young</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HFA00">Committee on Foreign Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To establish the Office of International Disability Rights, and for other purposes.</official-title></form>
+	<legis-body id="H075F0EE7E9584C7E8CD66FFE2FCA95A4" style="OLC">
+		<section id="HE8EE9077018441A0B22444E9DD29F98D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Office of International Disability Rights Act</short-title></quote>.</text>
+		</section><section id="HD698FFC5E6F04D089C17A53505E2969B"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text>
+			<paragraph id="H8FD47820A14A4C88ABAE00CC7A21D147"><enum>(1)</enum><text display-inline="yes-display-inline">The United States has shown leadership domestically on disability rights with the Americans with
+			 Disabilities Act, and this leadership should be leveraged to support
+			 international disability rights.</text>
+			</paragraph><paragraph id="H36887881455242A68A29AB61E427E044"><enum>(2)</enum><text>There are more than one billion persons with disabilities around the world, and 80 percent live in
+			 developing countries.</text>
+			</paragraph><paragraph id="H66F18B0BDF364CE783205F39174B2EAC"><enum>(3)</enum><text>60 percent of persons with disabilities are women.</text>
+			</paragraph><paragraph id="H2CAC55505A194E49A51B8396254AC4E1"><enum>(4)</enum><text>Women with disabilities are more likely to experience sexual violence than women without
+			 disabilities.</text>
+			</paragraph><paragraph id="H0492D3C608A842DCA1ECE8C802AB2F6D"><enum>(5)</enum><text display-inline="yes-display-inline">There are more than 90 million children with disabilities worldwide.</text>
+			</paragraph><paragraph id="HDD4192E857AB49A69259028749DE560B"><enum>(6)</enum><text display-inline="yes-display-inline">Children with disabilities are more likely to be malnourished than children without disabilities.</text>
+			</paragraph><paragraph id="H0758FD550BE240A28353F6C761698CC5"><enum>(7)</enum><text>Persons with disabilities are subject to economic and social marginalization. The World Bank has
+			 estimated the Gross Domestic Product loss due to disability to be between
+			 $1.71 trillion and $2.23 trillion annually.</text>
+			</paragraph><paragraph id="H35BC9FEAFECA4E739298C408DA8EF7BC"><enum>(8)</enum><text>The inclusion of persons with disabilities is a fundamental part of democracy and essential to the
+			 full realization of human rights.</text>
+			</paragraph><paragraph id="H9DAEDCDCAB794D6F9F60A1CF1F83BB27"><enum>(9)</enum><text>The political participation and leadership of persons with disabilities, including those who
+			 acquired a disability through conflict, is crucial to sustaining
+			 democratic institutions.</text>
+			</paragraph><paragraph id="H0B93B55428184AF1A8890829FE471CC6"><enum>(10)</enum><text>Persons with disabilities face disadvantages in educational attainment, labor market outcomes,
+			 financial stability, housing, and standard of living conditions.</text>
+			</paragraph><paragraph id="H82B13A1099944555B7268DC510185F89"><enum>(11)</enum><text>Issues related to disability rights cut across all sectors, including democracy, human rights,
+			 labor, global health, education, and disaster relief.</text>
+			</paragraph><paragraph id="H0FF735E5E4C64D5E8407FDB3B3427B26"><enum>(12)</enum><text>Persons with disabilities are members of all marginalized groups, including women, young people,
+			 the LGBTI community, ethnic and religious minorities, internally displaced
+			 people, and refugees.</text>
+			</paragraph><paragraph id="HC682FCB6916242239339233775CA40ED"><enum>(13)</enum><text>The public presence of the Special Advisor for International Disability Rights at the Department of
+			 State, first appointed in 2010, helped raise the visibility of persons
+			 with disabilities in Department policies and programs and improved the
+			 inclusion of disabilities in the Department’s annual Country Reports on
+			 Human Rights Practices and Trafficking in Persons reports.</text>
+			</paragraph><paragraph id="H6E6F4B0D7F324A0CB4C8379AB135CFDF"><enum>(14)</enum><text>There is currently no mandate that all Department of State programming be disability inclusive and
+			 the Department does not have a formal, publicly available disability
+			 policy.</text>
+			</paragraph></section><section id="HA03701245A3546F399136D82AB3C561B"><enum>3.</enum><header>Office of International Disability Rights</header>
+			<subsection id="HF70D3B477518447F81D623D4E8D91A9D"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of State shall establish an Office of International Disability Rights (referred to in
+			 this section as the <quote>Office</quote>), which should be placed within the Bureau for Democracy, Human Rights, and Labor (DRL).</text>
+			</subsection><subsection id="H37ABE5AAD4B446079AF82D638C33C43A"><enum>(b)</enum><header>Purpose</header><text display-inline="yes-display-inline">The Office shall coordinate efforts of the United States Government, as directed by the Secretary,
+			 regarding human rights for persons with disabilities and advancing the
+			 status of persons with disabilities in United States foreign policy.</text>
+			</subsection><subsection id="H41183E648258489791FEBE93B7BABF05"><enum>(c)</enum><header>Duties</header><text>The Office shall carry out the following:</text>
+				<paragraph id="HC797CA03708049D7A9D126BEAFCFE54A"><enum>(1)</enum><text display-inline="yes-display-inline">Serve as the principal advisor to the Department of State on all matters related to international
+			 rights for persons with disabilities.</text>
+				</paragraph><paragraph id="H261E3DE8050345F8B648ED63D12AB58C"><enum>(2)</enum><text>Represent the United States in diplomatic and multilateral fora on matters relevant to the rights
+			 of persons with disabilities and work to raise the profile of disability
+			 across a broader range of organizations contributing to international
+			 development efforts.</text>
+				</paragraph><paragraph id="H50572DD2049F44BB8729ECADB5ADC28A"><enum>(3)</enum><text>Work to ensure that disability inclusive practices and empowerment of persons with disabilities are
+			 fully integrated into all United States foreign operations.</text>
+				</paragraph><paragraph id="H9FFF5CE689EC4810936289E30E75489D"><enum>(4)</enum><text>Conduct regular consultation with civil society organizations working to advance international
+			 disability rights and empower persons with disabilities internationally.</text>
+				</paragraph><paragraph id="H0C7FE418AFFF41A2AFEC9506792611FE"><enum>(5)</enum><text>Consult with other relevant offices at the Department of State that are responsible for drafting
+			 annual reports documenting progress on human rights to include references
+			 to instances of discrimination, prejudice, or abuses of persons with
+			 disabilities wherever applicable.</text>
+				</paragraph><paragraph id="H33354993CB7D4BB6B2C9AD9C95C6EE04"><enum>(6)</enum><text>Advise the Department of State’s Bureau of Human Resources Development on the hiring and
+			 recruitment and overseas practices of civil service employees and foreign
+			 service officers with disabilities and their family members with chronic
+			 medical conditions or disabilities.</text>
+				</paragraph></subsection><subsection id="H94B6C433FDB74B02A5D25291263325E0"><enum>(d)</enum><header>Supervision</header><text display-inline="yes-display-inline">The Office shall be headed by a Special Advisor for International Disability Rights. The Special
+			 Advisor should be a person of recognized distinction in the field of
+			 disability rights.</text>
+			</subsection><subsection id="H21B6D3E717C44F9B83B18216B70460A5"><enum>(e)</enum><header>Consultation</header><text display-inline="yes-display-inline">The Secretary shall direct Ambassadors at Large, Representatives, Special Envoys, and coordinators
+			 working on human rights to consult with the Office to promote the human
+			 rights and full participation in international development activities of
+			 all persons with disabilities.</text>
+			</subsection></section><section id="H53A0EB043D8E458B8CCF09BE9E6FBC56"><enum>4.</enum><header>Training</header>
+			<subsection id="H8DBFA438CFDB4127A76001816DE31920"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of State shall require online or in-person mandatory disability inclusion training
+			 for all civil service and foreign service personnel of the Department of
+			 State and chiefs of mission, including on—</text>
+				<paragraph id="H4ADAE9BDEC6C4AE799D96A0063E3CE69"><enum>(1)</enum><text>how to develop solicitations, programming, budgets, and policies that are inclusive;</text>
+				</paragraph><paragraph id="HA5A2CE209325464B90FADD69C56EDFCE"><enum>(2)</enum><text>how to ensure a disability-inclusive work environment;</text>
+				</paragraph><paragraph id="H89CA0D3FF15A4A4B8661BEC5D7211325"><enum>(3)</enum><text>how to conduct disability-inclusive analyses of laws and programming;</text>
+				</paragraph><paragraph id="HA03D4A0E008C45EA8BBEA5E8BEBCDAA7"><enum>(4)</enum><text>how to support local disabled people’s organizations; and</text>
+				</paragraph><paragraph id="HF73507ED6F834786A21550578A13DB3F"><enum>(5)</enum><text>how to ensure nongovernmental organizations that receive funding from the Department mainstream
+			 disability rights throughout all programs.</text>
+				</paragraph></subsection><subsection id="H196CD8CEB6F648F289DF8A51BE9BA373"><enum>(b)</enum><header>Foreign service officers</header><text>The Secretary shall ensure that training for foreign service officers under subsection (a) should
+			 include country-specific and cultural considerations.</text>
+			</subsection></section><section id="H1F41E05D8D5C4CC4A33CB620643668B3"><enum>5.</enum><header>Disability inclusion in foreign policy</header>
+			<subsection id="HAFAD21EC6D2442A5AC5F5BC54213CBC4"><enum>(a)</enum><header>Sense of Congress</header><text display-inline="yes-display-inline">It is the sense of Congress that, since international disability rights is foundational to
+			 development, national security, and economic outcomes, disability
+			 inclusion should be mainstreamed through all foreign assistance and
+			 programming.</text>
+			</subsection><subsection id="H19A3FEBD2DEC4D4B82F4514DA45944B5"><enum>(b)</enum><header>Formal policy for disability inclusion</header>
+				<paragraph id="H5B9541389B5041D7B22791B2057C226F"><enum>(1)</enum><header>In general</header><text>Not later than one year after the date of the enactment of this Act, the Secretary of State shall
+			 develop and adopt a formal policy for disability inclusion in the
+			 Department of State.</text>
+				</paragraph><paragraph id="HAE7D1B5D880A44C69B0143F1F7647B27"><enum>(2)</enum><header>Matters to be included</header><text>Such policy should include information and guidance on the Department’s approach to disability
+			 inclusion in United States foreign assistance programming, including—</text>
+					<subparagraph id="H9C483FC6A027471795097E70545E02E3"><enum>(A)</enum><text>recruiting and hiring, employment, overseas assignments, accessibility, foreign assistance, program
+			 monitoring and evaluation, and reporting; and</text>
+					</subparagraph><subparagraph id="H08DDBBD5EFEA40E9A87D3F2F25B82ACF"><enum>(B)</enum><text>access and inclusion at the Department’s headquarters and United States diplomatic posts.</text>
+					</subparagraph></paragraph><paragraph id="H36C2608E71964C3DAAA3603A2FF4095B"><enum>(3)</enum><header>Consultation</header><text>In developing and adopting such policy, the Secretary shall consult with—</text>
+					<subparagraph id="H74060F548CA14034A39E89991FB423E0"><enum>(A)</enum><text>disabled person’s organizations and international nongovernmental organizations working on
+			 disability rights; and</text>
+					</subparagraph><subparagraph id="H12AA090E6FB14A9DBA43EFAFA9ACBF43"><enum>(B)</enum><text>the Administrator of the United States Agency for International Development (USAID) to promote
+			 coherence of such policy with USAID’s formal disability policy.</text>
+					</subparagraph></paragraph><paragraph id="H8B0C722831064C94B3EDAE0DAB0351E0"><enum>(4)</enum><header>Public availability</header><text>The Secretary shall publish such policy on a publicly available website of the Department.</text>
+				</paragraph></subsection></section><section id="H5F423462FE214BA493F84CFDC3E2CC43"><enum>6.</enum><header>Report and briefing requirements</header>
+			<subsection id="H90AD400349704CE78ED3180BEB7BF48D"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Not later than 180 days after the date of the enactment of this Act, and annually thereafter, the
+			 Secretary of State shall submit a report and provide a briefing to the
+			 Committee on Foreign Affairs of the House of Representatives and the
+			 Committee on Foreign Relations of the Senate on the steps taken to
+			 implement this Act.</text>
+			</subsection><subsection id="HCC08C792487A4919B013CB02FBF13706"><enum>(b)</enum><header>Matters To be included</header><text>The report and briefing required by subsection (a) shall include—</text>
+				<paragraph id="H2A0B07FD0AFC4A749F5C715E7C45C568"><enum>(1)</enum><text display-inline="yes-display-inline">an explanation of policies and programs to fulfill—</text>
+					<subparagraph id="HBACA61C79D8444AC9A99E20C1F8C84D9"><enum>(A)</enum><text>the duties of the Office of International Disability Rights under section 3; and</text>
+					</subparagraph><subparagraph id="HEACAA9C5147A4C1A911527086EF046B0"><enum>(B)</enum><text>the training requirements under section 4;</text>
+					</subparagraph></paragraph><paragraph id="H053AAC38EC1B47EA888BF4CF0C1063DD"><enum>(2)</enum><text>the status of efforts to mainstream disability rights throughout Department of State programming
+			 without regard to whether such programming is specifically directed toward
+			 persons with disabilities;</text>
+				</paragraph><paragraph id="H1771E1951E5E4731943A7C02F956A5AE"><enum>(3)</enum><text>explanation of disability-specific programming across the Department;</text>
+				</paragraph><paragraph id="H03EB9FC79E304E35B7C4EB594A84E0FA"><enum>(4)</enum><text>any policy, programming, or human resources gaps to mainstreaming disability rights throughout the
+			 Department and plans to address gaps through appropriate mechanisms;</text>
+				</paragraph><paragraph id="H806175A6E41C412AB99107844A857AFB"><enum>(5)</enum><text>progress made on the realization of the rights of persons with disabilities as a result of
+			 Department policies and programming; and</text>
+				</paragraph><paragraph id="H2AB52057CC73441890DC9BF9AB30673A"><enum>(6)</enum><text>recommendations for legislative actions to fully implement the matters described in paragraphs (1)
+			 through (5).</text>
+				</paragraph></subsection></section></legis-body></bill>

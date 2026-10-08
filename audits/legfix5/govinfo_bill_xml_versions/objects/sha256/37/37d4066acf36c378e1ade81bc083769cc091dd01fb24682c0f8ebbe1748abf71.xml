@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HA2741CBBBA774EFF9FF2DFB307B218B5" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5445 IH: Designating the Guam and Western Pacific USDA Rural Development Office Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-09-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5445</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230913">September 13, 2023</action-date><action-desc><sponsor name-id="M001219">Mr. Moylan</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide for the designation of the Guam and Western Pacific USDA Rural Development office as the representative of USDA Rural Development in Guam, the Commonwealth of the Northern Mariana Islands, American Samoa, and the Freely Associated States.</official-title></form><legis-body id="H09B7B67896134DABB3D093C74A9ACF16" style="OLC"> 
+<section id="H92662537B91945F4AEB338633C4A10C1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Designating the Guam and Western Pacific USDA Rural Development Office Act</short-title></quote>.</text></section> <section id="HF35F540F3C544DFE946245FC1E75006B"><enum>2.</enum><header>Designation of the Guam and Western Pacific USDA Rural Development Office</header><text display-inline="no-display-inline">Within 90 days after the date of the enactment of this Act, the Secretary of Agriculture and the Undersecretary for Rural Development shall designate the Guam and Western Pacific USDA Rural Development office to be the representative of USDA Rural Development in Guam, the Commonwealth of the Northern Mariana Islands, American Samoa, the Republic of the Marshall Islands, Palau, and the Federated States of Micronesia, and shall delegate to that office the same rights and responsibilities as are delegated to the USDA Rural Development office for any State.</text> </section> 
+</legis-body></bill>
+

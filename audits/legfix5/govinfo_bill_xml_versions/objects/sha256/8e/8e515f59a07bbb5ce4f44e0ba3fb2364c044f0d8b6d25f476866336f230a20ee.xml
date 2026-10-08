@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1270 IS: Housing Accountability Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-05-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 1270</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190501">May 1, 2019</action-date><action-desc><sponsor name-id="S350">Mr. Rubio</sponsor> (for himself and <cosponsor name-id="S391">Mr. Young</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To provide standards for physical condition and management of housing receiving assistance payments
+			 under section 8 of the United States Housing Act of 1937.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing Accountability Act of 2019</short-title></quote>.</text>
+ </section><section id="id60830784E50E4C21B29FCC7A81A77B17"><enum>2.</enum><header>Standards for physical condition and management of housing receiving assistance payments</header><text display-inline="no-display-inline">Section 8 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f</external-xref>) is amended by inserting after subsection (v) the following:</text>
+			<quoted-block display-inline="no-display-inline" id="id7DAAC6EF9B87489AB91B55A5FA5D116D" style="OLC">
+				<subsection id="idC338BC6FD3514FD9BC60D5F0FD3A36B0"><enum>(w)</enum><header>Standards for physical condition and management of housing receiving assistance payments</header>
+ <paragraph id="idc4eb5d3683f24447bf6918cfff235c4b"><enum>(1)</enum><header>Standards for physical condition and management of housing</header><text>Any entity receiving assistance payments under this section shall maintain decent, safe, and sanitary conditions, as determined by the Secretary, for any structure covered under a housing assistance payment contract.</text>
+ </paragraph><paragraph id="id68a691b9eb6b40d888e7f9cb4f47266d"><enum>(2)</enum><header>Survey of tenants</header><text>The Secretary shall develop a process by which a Performance-Based Contract Administrator shall, on a semiannual basis, conduct a survey of the tenants of each structure covered under a housing assistance payment contract for the purpose of identifying consistent or persistent problems with the physical condition of the structure or performance of the manager of the structure.</text>
+ </paragraph><paragraph id="idBB3D0AD618C049139ADD38A1B17CD038"><enum>(3)</enum><header>Remediation</header><text>A structure covered under a housing assistance payment contract shall be referred to the Secretary for remediation if a Performance-Based Contract Administrator identifies a consistent or persistent problem with the structure or the management of the structure based on—</text>
+ <subparagraph id="idCDEE0CFA5EE94205B98F49413E6569EC"><enum>(A)</enum><text>a survey conducted under paragraph (2); or</text> </subparagraph><subparagraph id="idB1DE9B0484C048DE8B34C16659951482"><enum>(B)</enum><text>any other observation made by the Performance-Based Contract Administrator during the normal course of business.</text>
+						</subparagraph></paragraph><paragraph id="id95e6cb09e07149e5b4d3fe419ad30cbb"><enum>(4)</enum><header>Penalty for failure to uphold standards</header>
+ <subparagraph id="idF07A348BC79142A7A554EB4AB9D4425F"><enum>(A)</enum><header>In general</header><text>The Secretary may impose a penalty on any owner of a structure covered under a housing assistance payment contract if the Secretary finds that the structure or manager of the structure—</text>
+ <clause id="idd19eaef907144d2db406c2d037d10cf0"><enum>(i)</enum><text>did not satisfactorily meet the requirements under paragraph (1); or</text> </clause><clause id="id81e732e52a6945faa440aa57382ec817"><enum>(ii)</enum><text>is repeatedly referred to the Secretary for remediation by a Performance-Based Contract Administrator through the process established under paragraph (3).</text>
+ </clause></subparagraph><subparagraph id="id5ed17b6b0e0948918ba0f62ad6ff1ed7"><enum>(B)</enum><header>Amount</header><text>A penalty imposed under subparagraph (A) shall be in an amount equal to not less than 1 percent of the annual budget authority the owner is allocated under a housing assistance payment contract.</text>
+ </subparagraph><subparagraph id="id54F6C5D898094EC4B59A5CA48379A798"><enum>(C)</enum><header>Use of amounts</header><text>Any amounts collected under this paragraph shall be used solely for the purpose of supporting safe and sanitary conditions at applicable structures or for tenant relocation, as designated by the Secretary, with priority given to the tenants of the structure that led to the penalty.</text>
+ </subparagraph></paragraph><paragraph id="id6FEA4AED6212444CB55670F45A9942F0"><enum>(5)</enum><header>Applicability</header><text>This subsection shall not apply to any property assisted under subsection (o).</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </section><section id="id684270FA26094F448FC702E768B85079"><enum>3.</enum><header>Issuance of report</header><text display-inline="no-display-inline">Not later than 1 year after the date of enactment of this Act, the Secretary of Housing and Urban Development shall submit to Congress a report that—</text>
+ <paragraph id="id748c79fb53884814a48657f50830cd49"><enum>(1)</enum><text>examines the adequacy of capital reserves for each structure covered under a housing assistance payment contract under section 8 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f</external-xref>);</text>
+ </paragraph><paragraph id="idf1b48cb92de14551a7785fe9cfd795c8"><enum>(2)</enum><text>examines the use of funds derived from a housing assistance payment contract for purposes unrelated to the maintenance and capitalization of the structure covered under the contract; and</text>
+ </paragraph><paragraph id="id2f31288e490d4f5686a8aab58c12e4c7"><enum>(3)</enum><text>includes any administrative or legislative recommendations to further improve the living conditions at those structures.</text></paragraph></section></legis-body></bill>
+
+

@@ -1,0 +1,449 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2232 IS: Campaign Finance Transparency Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2232</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190723">July 23, 2019</action-date>
+			<action-desc><sponsor name-id="S311">Ms. Klobuchar</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSRA00">Committee on Rules and Administration</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Federal Election Campaign Act of 1971 to reduce the number of members of the Federal
+			 Election Commission from 6 to 5, to revise the method of selection and
+			 terms of service of members of the Commission, to distribute the powers of
+			 the Commission between the Chair and the remaining members, and for other
+			 purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Campaign Finance Transparency Act</short-title></quote>.</text>
+		</section><section id="H6590F95CC5604DFDB4E916FEA968191C">
+			<enum>2.</enum>
+			<header>Membership of Federal Election Commission</header>
+			<subsection id="HC7EA9EDDEC6E4247B6E815B24C432353">
+				<enum>(a)</enum>
+				<header>Reduction in Number of Members; Removal of Secretary of Senate
+				and Clerk of House as Ex Officio Members</header>
+				<paragraph id="H4C4B4919AC24486ABDCABB24B485FC67">
+					<enum>(1)</enum>
+					<header>In general; quorum</header>
+ <text display-inline="yes-display-inline">Section 306(a)(1) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(a)(1)</external-xref>) is amended—</text>
+ <subparagraph id="id470CC1385FA04A1A89D3D6F6082F1A82"><enum>(A)</enum><text display-inline="yes-display-inline">by striking <quote>There is established</quote> and inserting <quote>(A) There is established</quote>; and</text> </subparagraph><subparagraph id="idD517509D9A654C6F84A260DB564E8E0D"><enum>(B)</enum><text display-inline="yes-display-inline">by striking the second and third sentences and inserting the following:</text>
+						<quoted-block display-inline="no-display-inline" id="idE822645BD8444CAC98681D6F7C74F63F" style="OLC">
+ <subparagraph id="id2688E179FD4B40838E55E10F9FDC6A73" indent="up1"><enum>(B)</enum><text display-inline="yes-display-inline">The Commission is composed of 5 members appointed by the President by and with the advice and consent of the Senate, of whom—</text>
+ <clause id="idC337F664061C47FF9931489947C51CA6"><enum>(i)</enum><text display-inline="yes-display-inline">no more than 2 may be affiliated with the same political party; and</text>
+ </clause><clause id="idBA5BE156D02449B8A0ABBA4655B9FE3E"><enum>(ii)</enum><text display-inline="yes-display-inline">at least 1 shall not be affiliated with—</text> <subclause id="id9DF7DE58736F4D29AE43CD15989D7E90"><enum>(I)</enum><text display-inline="yes-display-inline">the political party with which the most members of the House of Representatives are affiliated; or</text>
+ </subclause><subclause id="idCC8CEBA3FC944BC2888AA3F20B401D93"><enum>(II)</enum><text>the political party with which the second most member of the House of Representatives are affiliated.</text>
+									</subclause></clause><continuation-text continuation-text-level="subparagraph" indent="paragraph">A  member shall by
+					treated as affiliated with a political party if the member
+					was affiliated, including as a registered voter, employee,
+					consultant, donor, officer, or attorney, with such
+			 political
+					party or any of its candidates or elected public officials
+					at any time during the 5-year period ending on the date on
+					which such individual is nominated to be a member of the
+ Commission.</continuation-text></subparagraph><subparagraph id="idE7BF077630FD4833BD740E64D076B29C" indent="up1"><enum>(C)</enum><text display-inline="yes-display-inline">Four members shall constitute a quorum.</text> </subparagraph><after-quoted-block>.</after-quoted-block></quoted-block> </subparagraph></paragraph><paragraph id="H779A2B7D60DB42A5815D403492934C62"> <enum>(2)</enum> <header>Conforming amendments relating to reduction in number of members</header> <subparagraph commented="no" display-inline="yes-display-inline" id="HCF361A5A50464CE58EEF35FB3E22990F"><enum>(A)</enum> <text>The second sentence of section 306(c) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(c)</external-xref>) is amended by striking <quote>affirmative vote of 4 members of the Commission</quote> and inserting <quote>affirmative vote of a majority of the members of the Commission who are serving at the time</quote>.</text>
+					</subparagraph><subparagraph id="H55B24922DF554BED8638B2B1A32BCBDA" indent="up1">
+						<enum>(B)</enum>
+ <text display-inline="yes-display-inline">Such Act is further amended by striking <quote>affirmative vote of 4 of its members</quote> and inserting <quote>affirmative vote of a majority of the members of the Commission who are serving at the time</quote> each place it appears in the following sections:</text>
+						<clause id="H940AA985802A482AA41E94EE8B3B44B3">
+							<enum>(i)</enum>
+ <text>Section 309(a)(2) (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(2)</external-xref>).</text> </clause><clause id="H41AFAB8BC8C8402E91A737DAC9A07BB7"> <enum>(ii)</enum> <text>Section 309(a)(4)(A)(i) (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(4)(A)(i)</external-xref>).</text>
+						</clause><clause id="H20C89F55F819482A84C1B405BD626E0B">
+							<enum>(iii)</enum>
+ <text>Section 309(a)(5)(C) (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(5)(C)</external-xref>).</text>
+						</clause><clause id="HDBA511DAA1DE4A189DA62B0E74BA398F">
+							<enum>(iv)</enum>
+ <text>Section 309(a)(6)(A) (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(6)(A)</external-xref>).</text>
+						</clause><clause id="H1D965F6ACD1546ED952DC30EF479E38B">
+							<enum>(v)</enum>
+ <text>Section 311(b) (<external-xref legal-doc="usc" parsable-cite="usc/52/30111">52 U.S.C. 30111(b)</external-xref>).</text> </clause></subparagraph></paragraph><paragraph id="H408049C2E02F4A8CBEDB61C19F5CA34D"> <enum>(3)</enum> <header>Conforming amendment relating to removal of ex officio members</header> <text>Section 306(a) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(a)</external-xref>) is amended by striking <quote>(other than the Secretary of the Senate and the Clerk of the House of Representatives)</quote> each place it appears in paragraphs (4) and (5).</text>
+				</paragraph></subsection><subsection id="HACA8085D024D48C6A43D9BAC065D862D">
+				<enum>(b)</enum>
+				<header>Terms of Service</header>
+ <text>Section 306(a)(2) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(a)(2)</external-xref>) is amended to read as follows:</text>
+				<quoted-block display-inline="no-display-inline" id="HA3A10ABECA474CE28529E15522B196E3" style="OLC">
+					<paragraph id="H2D0D4EE36C074301BFEEF637A407762D">
+						<enum>(2)</enum>
+						<header>Terms of service</header>
+						<subparagraph commented="no" id="H0AFEFCF9258C4895AB49109D90727F13">
+							<enum>(A)</enum>
+							<header>In general</header>
+ <text>Each member of the Commission shall serve for a single term of 6 years.</text>
+						</subparagraph><subparagraph id="H24E1D72B48A248D4A6D28E7E36FDD086">
+							<enum>(B)</enum>
+							<header>Special rule for initial appointments</header>
+ <text>Of the members first appointed to serve terms that begin in January 2022, the President shall designate 2 to serve for 3-year terms. The members selected under this subparagraph shall not be affiliated with the same political party.</text>
+						</subparagraph><subparagraph id="H08F61B752DA04806918AA791950DDF26">
+							<enum>(C)</enum>
+							<header>No reappointment permitted</header>
+ <text>An individual who served a term as a member of the Commission may not serve for an additional term, except that—</text>
+							<clause id="HD1D7BDDDA60D438AADC35F6269C5B8C2">
+								<enum>(i)</enum>
+ <text display-inline="yes-display-inline">an individual who served a 3-year term under subparagraph (B) may also be appointed to serve a 6-year term under subparagraph (A); and</text>
+							</clause><clause id="H33111FF66DF04179B29A5D89E07ECD26">
+								<enum>(ii)</enum>
+ <text>for purposes of this subparagraph, an individual who is appointed to fill a vacancy under subparagraph (D) shall not be considered to have served a term if the portion of the unexpired term the individual fills is less than 50 percent of the period of the term.</text>
+							</clause></subparagraph><subparagraph id="H8BF7B3632D224FC995E4022488231644">
+							<enum>(D)</enum>
+							<header>Vacancies</header>
+ <text display-inline="yes-display-inline">Any vacancy occurring in the membership of the Commission shall be filled in the same manner as in the case of the original appointment. Except as provided in subparagraph (C), an individual appointed to fill a vacancy occurring other than by the expiration of a term of office shall be appointed only for the unexpired term of the member he or she succeeds.</text>
+						</subparagraph><subparagraph id="H01C3EF2631FA48D3988EE7615D1F664C">
+							<enum>(E)</enum>
+							<header>Limitation on service after expiration of
+					    term</header>
+ <text>A member of the Commission may continue to serve on the Commission after the expiration of the member’s term for an additional period, but only until the earlier of—</text>
+							<clause id="H98549BA2B1F842B781032CD3286EC5B4">
+								<enum>(i)</enum>
+ <text>the date on which the member’s successor has taken office as a member of the Commission; or</text>
+							</clause><clause id="HFC6CA19CDCF14324B056663594FF55C9">
+								<enum>(ii)</enum>
+ <text>the expiration of the 1-year period that begins on the last day of the member’s term.</text>
+							</clause></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection><subsection id="H990182CF1C6D486CA1C5BBDC6F0D51D7">
+				<enum>(c)</enum>
+				<header>Qualifications</header>
+ <text>Section 306(a)(3) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(a)(3)</external-xref>) is amended to read as follows:</text>
+				<quoted-block display-inline="no-display-inline" id="H27032E9AF7844F8DAB775D5A04CC6414" style="OLC">
+					<paragraph id="H8F4FB52BF82A4F438D91B169330821FB">
+						<enum>(3)</enum>
+						<header>Qualifications</header>
+						<subparagraph id="HE195884AE97A4CD2BF33D919AA6DFFF7">
+							<enum>(A)</enum>
+							<header>In general</header>
+ <text display-inline="yes-display-inline">The President may select an individual for service as a member of the Commission if the individual has experience in election law and has a demonstrated record of integrity, impartiality, and good judgment.</text>
+						</subparagraph><subparagraph id="H12D6B25D25CD4024A6845013A4820B6D">
+							<enum>(B)</enum>
+							<header>Assistance of Blue Ribbon Advisory Panel</header>
+							<clause id="H8B89A5FF4AF345C3AFDBA3BE494F99B4">
+								<enum>(i)</enum>
+								<header>In general</header>
+ <text display-inline="yes-display-inline">Prior to the regularly scheduled expiration of the term of a member of the Commission and upon the occurrence of a vacancy in the membership of the Commission prior to the expiration of a term, the President shall convene a Blue Ribbon Advisory Panel consisting of an odd number of individuals selected by the President.</text>
+ </clause><clause id="id9F25E6C4576E413BBC5A1DF15A2FF963"><enum>(ii)</enum><header>Composition</header><text display-inline="yes-display-inline">The Blue Ribbon Advisory Panel shall include individuals representing each major political party and individuals who are independent of a political party and individuals with experience in election law, except that the President may not select any individual to serve on the panel who holds any public office at the time of selection. The President shall make reasonable efforts to encourage racial, ethnic, and gender diversity on the panel.</text>
+							</clause><clause id="H33A2409121B84B96B0A4E9B58400858F">
+								<enum>(iii)</enum>
+								<header>Recommendations</header>
+ <text>With respect to each member of the Commission whose term is expiring or each vacancy in the membership of the Commission (as the case may be), the Blue Ribbon Advisory Panel shall recommend to the President at least one but not more than 3 individuals for nomination for appointment as a member of the Commission.</text>
+							</clause><clause id="HB56F4F127A9A458FBD979AE1F14C3793">
+								<enum>(iv)</enum>
+								<header>Publication</header>
+ <text>At the time the President submits to the Senate the nominations for individuals to be appointed as members of the Commission, the President shall publish the Blue Ribbon Advisory Panel’s recommendations for such nominations.</text>
+							</clause><clause id="H19A3495B3D5A49EAA5C8C58D30830C7F">
+								<enum>(v)</enum>
+								<header>Exemption from Federal Advisory Committee
+						Act</header>
+ <text>The Federal Advisory Committee Act (5 U.S.C. App.) does not apply to a Blue Ribbon Advisory Panel convened under this subparagraph.</text>
+							</clause></subparagraph><subparagraph id="HC8E9EDB705F14945B1C2E0BE9D8710BD">
+							<enum>(C)</enum>
+							<header>Prohibiting engagement with other business or
+					    employment during service</header>
+ <text display-inline="yes-display-inline">A member of the Commission shall not engage in any other business, vocation, or employment. Any individual who is engaging in any other business, vocation, or employment at the time of his or her appointment to the Commission shall terminate or liquidate such activity no later than 90 days after such appointment.</text>
+						</subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section><section id="H0E4C3E8B8EB84E5FA1E94D1B5E8BDD64">
+			<enum>3.</enum>
+			<header>Assignment of powers to Chair of Federal Election
+			    Commission</header>
+			<subsection id="H0ADAD173C14740DBB19D4BFCEB2FEAD5">
+				<enum>(a)</enum>
+				<header>Appointment of Chair by President</header>
+				<paragraph id="H280010D67B5A4F85B0A7D08815611686">
+					<enum>(1)</enum>
+					<header>In general</header>
+ <text>Section 306(a)(5) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(a)(5)</external-xref>) is amended to read as follows:</text>
+					<quoted-block display-inline="no-display-inline" id="HDF4FE0AB8A464C268FE2E40E2C9A16DD" style="OLC">
+						<paragraph id="HA4A0EF767BB346369181BA0D49DBABE1">
+							<enum>(5)</enum>
+							<header>Chair</header>
+							<subparagraph commented="no" id="HE083B5510FC640A496623E96198ECA5E">
+								<enum>(A)</enum>
+								<header>Initial appointment</header>
+ <text display-inline="yes-display-inline">Of the members first appointed to serve terms that begin in January 2022, one such member (as designated by the President at the time the President submits nominations to the Senate) shall serve as Chair of the Commission.</text>
+							</subparagraph><subparagraph commented="no" id="HA6399F30BC1A4E63941E0C4A0F3DB306">
+								<enum>(B)</enum>
+								<header>Subsequent appointments</header>
+ <text>Any individual who is appointed to succeed the member who serves as Chair of the Commission for the term beginning in January 2022 (as well as any individual who is appointed to fill a vacancy if such member does not serve a full term as Chair) shall serve as Chair of the Commission.</text>
+							</subparagraph><subparagraph id="HA0DA98E4703145E3AB2DB9CE8907A045">
+								<enum>(C)</enum>
+								<header>Vice Chair</header>
+ <text display-inline="yes-display-inline">The Commission shall select, by majority vote of its members, one of its members to serve as Vice Chair, who shall act as Chair in the absence or disability of the Chair or in the event of a vacancy in the position of Chair.</text>
+							</subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph><paragraph id="HED077B487F024D7CAFE7BE5409387468">
+					<enum>(2)</enum>
+					<header>Conforming amendment</header>
+ <text>Section 309(a)(2) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(2)</external-xref>) is amended by striking <quote>through its chairman or vice chairman</quote> and inserting <quote>through the Chair</quote>.</text>
+				</paragraph></subsection><subsection id="HCD3C0B3EB17E40E88A706ED8BA8C0D75">
+				<enum>(b)</enum>
+				<header>Powers</header>
+				<paragraph id="H91A553B70C1A437DBF4FCA52893D92D3">
+					<enum>(1)</enum>
+					<header>Assignment of certain powers to Chair</header>
+ <text display-inline="yes-display-inline">Section 307(a) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30107">52 U.S.C. 30107(a)</external-xref>) is amended to read as follows:</text>
+					<quoted-block display-inline="no-display-inline" id="HF1A30FAC1C3F4AB3BBD9987A197C3E7F" style="OLC">
+						<subsection id="H055C02FE276E4DA787C6F2541F03AC4F">
+							<enum>(a)</enum>
+							<header>Distribution of Powers Between Chair and
+					    Commission</header>
+							<paragraph id="H9DD09B03AA304D808A2ABE207A7A230E">
+								<enum>(1)</enum>
+								<header>Powers assigned to Chair</header>
+								<subparagraph id="HAD1AAD948B4242C0818E7DE80EBA804F">
+									<enum>(A)</enum>
+									<header>Administrative powers</header>
+ <text display-inline="yes-display-inline">The Chair of the Commission shall be the chief administrative officer of the Commission and shall have the authority to administer the Commission and its staff, and (in consultation with the other members of the Commission) shall have the power—</text>
+									<clause id="H4AD165D2551D4F5D9F41526E18A9D055">
+										<enum>(i)</enum>
+ <text>to appoint and remove the staff director of the Commission;</text>
+									</clause><clause id="H81E5443DAD77417C82AB902A0AC5B75F">
+										<enum>(ii)</enum>
+ <text display-inline="yes-display-inline">to request the assistance (including personnel and facilities) of other agencies and departments of the United States, whose heads may make such assistance available to the Commission with or without reimbursement; and</text>
+									</clause><clause id="HEFEDA3BEFF274A549B0C4C83FCBCC293">
+										<enum>(iii)</enum>
+ <text>to prepare and establish the budget of the Commission and to make budget requests to the President, the Director of the Office of Management and Budget, and Congress.</text>
+									</clause></subparagraph><subparagraph id="H6C954DAAE41A412C8CD95148F4377BBD">
+									<enum>(B)</enum>
+									<header>Other powers</header>
+ <text>The Chair of the Commission shall have the power—</text>
+ <clause id="id3704a895a0714bf99e210b4dad799ad4"><enum>(i)</enum><text>to appoint and remove the general counsel of the Commission;</text> </clause><clause commented="no" id="idBAB8D4FAB1ED4B4BA51C8958F0A065A0"><enum>(ii)</enum><text>to appoint and remove the director of enforcement of the Commission with the concurrence of at least 2 other members of the Commission who are not affiliated with the same political party as the Chair;</text>
+									</clause><clause id="H9BF55AB5AB9F439290DDC3650F55DBB9">
+										<enum>(iii)</enum>
+ <text>to require by special or general orders, any person to submit, under oath, such written reports and answers to questions as the Chair may prescribe;</text>
+									</clause><clause id="H1DA08E62076848E198FDF83F33A9673C">
+										<enum>(iv)</enum>
+ <text>to administer oaths or affirmations;</text> </clause><clause id="HA09E53DED6AF406EA305A083A8B7F8BB"> <enum>(v)</enum> <text>to require by subpoena, signed by the Chair, the attendance and testimony of witnesses and the production of all documentary evidence relating to the execution of its duties;</text>
+									</clause><clause id="HC9D44497D1A044ED96C4D9448ACB9866">
+										<enum>(vi)</enum>
+ <text>in any proceeding or investigation, to order testimony to be taken by deposition before any person who is designated by the Chair, and shall have the power to administer oaths and, in such instances, to compel testimony and the production of evidence in the same manner as authorized under clause (iv); and</text>
+									</clause><clause id="HFB4EC36189E74F41B09C2F5005A297A5">
+										<enum>(vii)</enum>
+ <text>to pay witnesses the same fees and mileage as are paid in like circumstances in the courts of the United States.</text>
+									</clause></subparagraph></paragraph><paragraph id="H20B1C0C61E4C4CC6A3D6A5D36B2023D5">
+								<enum>(2)</enum>
+								<header>Powers assigned to Commission</header>
+ <text>The Commission shall have the power—</text> <subparagraph display-inline="no-display-inline" id="H4345852CD50741ED9DCD44285BB88DF3"> <enum>(A)</enum> <text display-inline="yes-display-inline">to initiate (through civil actions for injunctive, declaratory, or other appropriate relief) any civil action in the name of the Commission to enforce the provisions of this Act and chapter 95 and <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/96">chapter 96</external-xref> of the Internal Revenue Code of 1986, through its director of enforcement;</text>
+ </subparagraph><subparagraph display-inline="no-display-inline" id="idF4AE22CC9DCC4B3FBBC59BAB225947D5"><enum>(B)</enum><text display-inline="yes-display-inline">to defend (in the case of any civil action brought under section 309(a)(8) of this Act) or appeal (including a proceeding before the Supreme Court on certiorari) any civil action in the name of the Commission to enforce the provisions of this Act and chapter 95 and <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/96">chapter 96</external-xref> of the Internal Revenue Code of 1986, through its general counsel;</text>
+								</subparagraph><subparagraph id="H5D0440AFF0334FC69F6006B6B62D948B">
+									<enum>(C)</enum>
+ <text>to render advisory opinions under section 308 of this Act;</text>
+								</subparagraph><subparagraph id="HBE6F7503608843499F8893191D74BFBA">
+									<enum>(D)</enum>
+ <text>to develop such prescribed forms and to make, amend, and repeal such rules, pursuant to the provisions of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/5/5">chapter 5</external-xref> of title 5, United States Code, as are necessary to carry out the provisions of this Act and chapter 95 and <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/96">chapter 96</external-xref> of the Internal Revenue Code of 1986;</text>
+								</subparagraph><subparagraph id="H5BD8CE12E55149199E17DA76AE6224E8">
+									<enum>(E)</enum>
+ <text>to oversee investigations conducted by the director of enforcement;</text> </subparagraph><subparagraph id="id94779915B580437AAA22F4062C20ED1E"><enum>(F)</enum><text>to conduct hearings expeditiously, to encourage voluntary compliance, and to report apparent violations to the appropriate law enforcement authorities; and</text>
+								</subparagraph><subparagraph id="H117CF483B4D34EF5984F5C4ABD8AC725">
+									<enum>(G)</enum>
+ <text>to transmit to the President and Congress not later than June 1 of each year a report which states in detail the activities of the Commission in carrying out its duties under this Act, and which includes any recommendations for any legislative or other action the Commission considers appropriate.</text>
+								</subparagraph></paragraph><paragraph id="H77428C23E9C34C6686B5D0F84A1F9EFD">
+								<enum>(3)</enum>
+								<header>Permitting Commission to exercise other powers
+						of Chair</header>
+ <text>With respect to any investigation, action, or proceeding, the Commission, by an affirmative vote of a majority of the members who are serving at the time, may exercise any of the powers of the Chair described in paragraph (1)(B).</text>
+							</paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph><paragraph id="HBFA1570E6AC4430A967D3597FF488089">
+					<enum>(2)</enum>
+					<header>Conforming amendments relating to personnel
+				    authority</header>
+ <text>Section 306(f) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(f)</external-xref>) is amended—</text>
+					<subparagraph commented="no" id="H425B75C8589142A6A073906CD2B73224">
+						<enum>(A)</enum>
+ <text>by striking <quote>the Commission</quote> in the first sentence of paragraph (1) and inserting <quote>the Chair of the Commission in consultation with the other members</quote>;</text> </subparagraph><subparagraph id="H49D1ABF289B44756A318E03DAE613860"> <enum>(B)</enum> <text>in paragraph (2), by striking <quote>With the approval of the Commission</quote> and inserting <quote>With the approval of the Chair of the Commission</quote>; and</text>
+					</subparagraph><subparagraph id="HF265AD456C88460D937506D59EBA6A97">
+						<enum>(C)</enum>
+ <text>by striking paragraph (3).</text> </subparagraph></paragraph><paragraph id="H72B05B3FDA94439CA1B9C89FAB75429B"> <enum>(3)</enum> <header>Conforming amendment relating to budget submission</header> <text>Section 307(d)(1) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30107">52 U.S.C. 30107(d)(1)</external-xref>) is amended by striking <quote>the Commission submits any budget</quote> and inserting <quote>the Chair (or, pursuant to subsection (a)(3), the Commission) submits any budget</quote>.</text>
+				</paragraph><paragraph id="H159FC512DACF4525884DED69653B6B62">
+					<enum>(4)</enum>
+					<header>Other conforming amendments</header>
+ <text>Section 306(c) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30106">52 U.S.C. 30106(c)</external-xref>) is amended by striking <quote>All decisions</quote> and inserting <quote>Subject to section 307(a), all decisions</quote>.</text>
+ </paragraph><paragraph id="H555289453EDA48FB9CB6D807544A571C"><enum>(5)</enum><header>Technical amendment</header><text>The heading of section 307 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30107">52 U.S.C. 30107</external-xref>) is amended by striking <quote><header-in-text level="section" style="traditional">the commission</header-in-text></quote> and inserting <quote><header-in-text level="section" style="traditional">the chair and the commission</header-in-text></quote>.</text>
+				</paragraph></subsection></section><section commented="no" id="H34B75A54AE674A6C87D60357FEF49E6B">
+			<enum>4.</enum>
+			<header>Revision to enforcement process</header>
+ <subsection commented="no" id="id0B2518643212479F84A1D2D48A7EC80E"><enum>(a)</enum><header>Establishment of Director of Enforcement</header><text>Paragraph (1) of section 306(f) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(f)(1)</external-xref>) is amended to read as follows:</text>
+				<quoted-block display-inline="no-display-inline" id="id68A47C539E9C4D98892676EE2F33C6C7" style="OLC">
+ <paragraph commented="no" id="idE26CE003C3E44F10B7F189E26AAB355D"><enum>(1)</enum><text>The Commission shall have the following:</text> <subparagraph commented="no" id="idD6EC85893F1E48EF8D5A85556C8FE648"><enum>(A)</enum><text>A staff director who—</text>
+ <clause commented="no" id="idE1823A1B36CF446AA6B0A0397FAB9EAD"><enum>(i)</enum><text>shall be appointed by the Chair of the Commission in consultation with the other members; and</text> </clause><clause commented="no" id="id5B5E2D86602142E6BBE1096F72486E30"><enum>(ii)</enum><text>except as provided in subparagraph (C), may, with the approval of the Chair of the Commission, appoint and fix the pay of such additional personnel as he or she considers desirable without regard to the provisions of title 5, United States Code, governing appointments in the competitive service.</text>
+ </clause></subparagraph><subparagraph commented="no" id="id4D62D1DFBB584AB89919C5B1F0DCA8D3"><enum>(B)</enum><text>A general counsel who shall be appointed by the Chair of the Commission in consultation with the other members.</text>
+ </subparagraph><subparagraph commented="no" id="id16FA0061F17B477D84FCE04908C39536"><enum>(C)</enum><text>A director of enforcement who—</text> <clause commented="no" id="idB3094672119D493FBE132115FDB6106F"><enum>(i)</enum><text>shall be nominated by the Chair and approved by a majority vote of the members of the Commission who are serving at the time, including an affirmative vote by at least 2 members who are not affiliated with the same political party as the Chair;</text>
+ </clause><clause commented="no" id="id923FA88B5F274D3090256EB2C805C9CD"><enum>(ii)</enum><text>shall serve for a term of 4 years, subject to renewal; and</text> </clause><clause commented="no" id="idB5100A8AB1074CC3BAC6DFCD55C12E16"><enum>(iii)</enum><text>may, with the approval of the Chair of the Commission, appoint and fix the pay of such additional personnel to assist with the duties of the director as he or she considers desirable without regard to the provisions of title 5, United States Code, governing appointments in the competitive service.</text></clause></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection><subsection commented="no" id="H8C9F82EC870C4137A89CFE0E80E931DE">
+				<enum>(b)</enum>
+				<header>Standard for initiating investigations and determining whether
+				violations have occurred</header>
+				<paragraph commented="no" id="HEA7BF7ED791445A5AB7D3B01885B0734">
+					<enum>(1)</enum>
+					<header>Revision of standards</header>
+ <text>Section 309(a) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)</external-xref>) is amended by striking paragraphs (2) and (3) and inserting the following:</text>
+					<quoted-block display-inline="no-display-inline" id="H851E194E72844ADDB4B6A26D703CF20F" style="traditional">
+						<paragraph commented="no" id="H37ACA80F0EBF46B8AB1AD8141F204D9D" indent="up1">
+							<enum>(2)</enum>
+							<subparagraph commented="no" display-inline="yes-display-inline" id="HCA29794C672F42CD8A2AFD75943803A8"><enum>(A)</enum>
+ <text display-inline="yes-display-inline">The director of enforcement, upon receiving a complaint filed with the Commission under paragraph (1) or upon the basis of information ascertained by the Commission in the normal course of carrying out its supervisory responsibilities, shall make a determination as to whether or not there is reason to believe that a person has committed, or is about to commit, a violation of this Act or chapter 95 or <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/96">chapter 96</external-xref> of the Internal Revenue Code of 1986, and as to whether or not the Commission should either initiate an investigation of the matter or that the complaint should be dismissed. The director of enforcement shall promptly provide notification to the Commission of such determination and the reasons therefore, together with any written response submitted under paragraph (1) by the person alleged to have committed the violation. Upon the expiration of the 30-day period which begins on the date the director of enforcement provides such notification, the director’s determination shall take effect, unless during such 30-day period the Commission, by vote of a majority of the members of the Commission who are serving at the time, overrules the director’s determination. If the determination by the director of enforcement that the Commission should investigate the matter takes effect, or if the determination by the director of enforcement that the complaint should be dismissed is overruled as provided under the previous sentence, the director of enforcement shall initiate an investigation of the matter on behalf of the Commission.</text>
+							</subparagraph><subparagraph commented="no" id="H86F0D4A7E9094916831FBC3040112E5C" indent="up1">
+								<enum>(B)</enum>
+ <text display-inline="yes-display-inline">If the Commission initiates an investigation pursuant to subparagraph (A), the Commission, through the Chair, shall notify the subject of the investigation of the alleged violation. Such notification shall set forth the factual basis for such alleged violation. The Commission shall make an investigation of such alleged violation, which may include a field investigation or audit, in accordance with the provisions of this section. The director of enforcement shall provide notification to the Commission of any intent to issue a subpoena or conduct any other form of discovery pursuant to the investigation. Upon the expiration of the 15-day period which begins on the date the director of enforcement provides such notification, the director of enforcement may issue the subpoena or conduct the discovery, unless during such 15-day period the Commission, by vote of a majority of the members of the Commission who are serving at the time, prohibits the director of enforcement from issuing the subpoena or conducting the discovery.</text>
+							</subparagraph></paragraph><paragraph commented="no" id="H846098CE58314FAEA839FA0E72AEBC50" indent="up1">
+							<enum>(3)</enum>
+							<subparagraph commented="no" display-inline="yes-display-inline" id="H7C36B8997C0547108EEEA64A9A6F09B2"><enum>(A)</enum>
+ <text display-inline="yes-display-inline">Upon completion of an investigation under paragraph (2), the director of enforcement shall promptly submit to the Commission the director's recommendation that the Commission find either that there is probable cause or that there is not probable cause to believe that a person has committed, or is about to commit, a violation of this Act or chapter 95 or <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/96">chapter 96</external-xref> of the Internal Revenue Code of 1986, and shall include with the recommendation a brief stating the position of the director of enforcement on the legal and factual issues of the case.</text>
+							</subparagraph><subparagraph commented="no" id="H86C3D5E588EC49D4A5BD8B6F6123EFF3" indent="up1">
+								<enum>(B)</enum>
+ <text>At the time the director of enforcement submits to the Commission the recommendation under subparagraph (A), the director of enforcement shall simultaneously notify the respondent of such recommendation and the reasons therefore, shall provide the respondent with an opportunity to submit a brief within 30 days stating the position of the respondent on the legal and factual issues of the case and replying to the brief of the director of enforcement. The director of enforcement and shall promptly submit such brief to the Commission upon receipt.</text>
+							</subparagraph><subparagraph commented="no" id="H464E294AFE784CF086892F166EFE3C36" indent="up1">
+								<enum>(C)</enum>
+ <text display-inline="yes-display-inline">Not later than 30 days after the director of enforcement submits the recommendation to the Commission under subparagraph (A) (or, if the respondent submits a brief under subparagraph (B), not later than 30 days after the director of enforcement submits the respondent’s brief to the Commission under such subparagraph), the Commission shall approve or disapprove the recommendation by vote of a majority of the members of the Commission who are serving at the time. In the case of a tie vote, the Commission shall be considered to have adopted the recommendation.</text>
+							</subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph><paragraph commented="no" id="HF16B0DA65D68422699537E1C8890EE3C">
+					<enum>(2)</enum>
+					<header>Conforming amendment relating to Initial response to filing
+				    of complaint</header>
+ <text display-inline="yes-display-inline">Section 309(a)(1) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(1)</external-xref>) is amended—</text>
+					<subparagraph commented="no" id="H31E51A2AA74C46818220069337759B8A">
+						<enum>(A)</enum>
+ <text>in the third sentence, by striking <quote>the Commission</quote> and inserting <quote>the director of enforcement</quote>; and</text>
+					</subparagraph><subparagraph commented="no" id="HAD62C8ABB41F4A8CA1B0C8817B540BF5">
+						<enum>(B)</enum>
+ <text>by amending the fourth sentence to read as follows: <quote>Not later than 15 days after receiving notice from the director of enforcement under the previous sentence, the person may provide the director of enforcement with a written response that no action should be taken against such person on the basis of the complaint.</quote>.</text>
+					</subparagraph></paragraph></subsection><subsection commented="no" id="HE4A35D9EB90742B0B478AE4D561A12D2">
+				<enum>(c)</enum>
+				<header>Revision of standard for review of dismissal of
+				complaints</header>
+				<paragraph commented="no" id="HED36ADA6EC3046CC908B76D25E2FEAF8">
+					<enum>(1)</enum>
+					<header>In general</header>
+ <text>Section 309(a)(8) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(8)</external-xref>) is amended to read as follows:</text>
+					<quoted-block display-inline="no-display-inline" id="HEB0A6C683D1F4338A39A814E587C1D0A" style="traditional">
+						<paragraph commented="no" id="H67835D968D1A49A7BE4F5C89F62BFE6C" indent="up1">
+							<enum>(8)</enum>
+							<subparagraph commented="no" display-inline="yes-display-inline" id="H3AB16F16A3D04594B8E21CEC1454CD8C"><enum>(A)</enum>
+								<clause commented="no" display-inline="yes-display-inline" id="H46C03242EDA94A9586E5DB06BC78E04B"><enum>(i)</enum>
+ <text display-inline="yes-display-inline">Any party aggrieved by an action of the Commission (including a determination of the director of enforcement which is not overruled by the Commission) dismissing a complaint filed by such party after finding either no reason to believe a violation has occurred or no probable cause a violation has occurred may file a petition with the United States District Court for the District of Columbia. Any petition under this subparagraph shall be filed within 60 days after the date on which the party received notice of the dismissal of the complaint.</text>
+								</clause><clause commented="no" id="HED7F537589264047A6614C99E9A04A6A" indent="up2">
+									<enum>(ii)</enum>
+ <text display-inline="yes-display-inline">In any proceeding under this subparagraph, the court shall determine by de novo review whether the dismissal of the complaint is contrary to law. In any matter in which the penalty for the alleged violation is greater than $50,000, the court should disregard any claim or defense by the Commission of prosecutorial discretion as a basis for dismissing the complaint.</text>
+								</clause></subparagraph><subparagraph commented="no" id="HFACCFA2839A54C228E4F10001B83BC1D" indent="up1">
+								<enum>(B)</enum>
+								<clause commented="no" display-inline="yes-display-inline" id="HD9A7CE023F9D49A7BFD2A9338C03D83C"><enum>(i)</enum>
+ <text display-inline="yes-display-inline">Any party who has filed a complaint with the Commission and who is aggrieved by a failure of the Commission, within one year after the filing of the complaint, to either dismiss the complaint or to find reason to believe a violation has occurred or is about to occur, may file a petition with the United States District Court for the District of Columbia.</text>
+ </clause><clause commented="no" id="idD0A1DB6FB9464CC8AD738D46BF35BF0E" indent="up1"><enum>(ii)</enum><text display-inline="yes-display-inline">The Commission may submit under seal an ex parte request for a temporary stay of any proceeding initiated under clause (i), and the court may grant such request if it determines that the investigation of the complaint by the Commission is being held in abeyance on a reasonable basis.</text>
+								</clause><clause commented="no" id="H6EF9E2CE82224841BC87D082D7340EA5" indent="up1">
+									<enum>(iii)</enum>
+ <text display-inline="yes-display-inline">In any proceeding under this subparagraph, except in the case of a stay granted under clause (ii), the court shall treat the failure to act on the complaint as a dismissal of the complaint, and shall determine by de novo review whether the agency’s failure to act on the complaint is contrary to law.</text>
+								</clause></subparagraph><subparagraph commented="no" id="H12931D0E8A0F4B17BFFBDAAECF20F62B" indent="up1">
+								<enum>(C)</enum>
+ <text display-inline="yes-display-inline">In any proceeding under this paragraph the court may declare that the dismissal of the complaint or the failure to act is contrary to law, and may direct the Commission to conform with such declaration within 30 days, failing which the complainant may bring, in the name of such complainant, a civil action to remedy the violation involved in the original complaint.</text>
+							</subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph><paragraph commented="no" id="H69DD2F94ED0642BAA4CA2E9F66F838EE">
+					<enum>(2)</enum>
+					<header>Effective date</header>
+ <text>The amendments made by paragraph (1) shall apply—</text> <subparagraph commented="no" id="HEE229CDA6E3C466CA8A502BE07B63282"> <enum>(A)</enum> <text>in the case of complaints which are dismissed by the Federal Election Commission, with respect to complaints which are dismissed on or after the date of the enactment of this Act; and</text>
+ </subparagraph><subparagraph commented="no" id="HC55023067E4442A484627671D0A6509F"><enum>(B)</enum><text>in the case of complaints upon which the Federal Election Commission failed to act, with respect to complaints which were filed on or after the date of the enactment of this Act.</text>
+ </subparagraph></paragraph></subsection></section><section commented="no" id="id043ED84AF31A4C72BEEE0B31211C68D1"><enum>5.</enum><header>Restoring the Commission's random audit authority</header><text display-inline="no-display-inline">Section 311(b) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30111">52 U.S.C. 30111(a)</external-xref>) is amended to read as follows:</text>
+			<quoted-block display-inline="no-display-inline" id="id0C4D014C38E844F48201CDC99A7655DB" style="OLC">
+				<subsection commented="no" display-inline="no-display-inline" id="ID8CCC5ED0022F41D0B171EB3A0CDE8693"><enum>(b)</enum><header>Audits</header>
+ <paragraph commented="no" display-inline="no-display-inline" id="idEF8E9745804B411FADCD2180C9AB866F"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Commission shall conduct audits and field investigations of not less than 10 percent of political committees required to file a report under section 304 of this Act. Such audits and field investigations shall be conducted proportionally among—</text>
+ <subparagraph commented="no" display-inline="no-display-inline" id="id64EF94624D7040E6802079B5647F6A8F"><enum>(A)</enum><text display-inline="yes-display-inline">authorized committees of candidates;</text> </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF804DBCA51B04CF6A5A521BB5538B933"><enum>(B)</enum><text display-inline="yes-display-inline">political committees established and maintained by political parties;</text>
+ </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD14BC8E17C9240F2A7909EEB438C0AE4"><enum>(C)</enum><text>political committees not described in subparagraph (A) or (B) that accepts donations or contributions that do not comply with the limitations, prohibitions, and reporting requirements of this Act; and</text>
+ </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE79A1F5888AA467D9C289C123712891A"><enum>(D)</enum><text>political committees not described in subparagraph (A), (B), or (C).</text> </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idF3A42EF24D904500B622E63712FBE3B7"><enum>(2)</enum><header>Priority</header><text display-inline="yes-display-inline">All audits and field investigations concerning the verification for, and receipt and use of, any payments received by a candidate or committee under chapter 95 or <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/96">chapter 96</external-xref> of the Internal Revenue Code of 1986 shall be given priority.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id00F39E48FEFB403CA179D4A3F063C5A2"><enum>(3)</enum><header>Determination of violations</header><text display-inline="yes-display-inline">The Commission shall establish materiality thresholds with respect to the enforcement of a violation of any provision of this Act which is discovered during an audit conducted under this subsection.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section><section id="H2ED0E51D5E25467E9D68A739517148EA" section-type="subsequent-section">
+			<enum>6.</enum>
+			<header>Permanent extension of administrative penalty authority</header>
+			<subsection commented="no" id="HC93E26D4783F4FBF85C372DA4357031D">
+				<enum>(a)</enum>
+				<header>Extension of authority</header>
+ <text display-inline="yes-display-inline">Section 309(a)(4)(C)(v) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30109">52 U.S.C. 30109(a)(4)(C)(v)</external-xref>) is amended by striking <quote>, and that end on or before December 31, 2023</quote>.</text>
+ </subsection><subsection commented="no" id="H806F47533E784FEA9C3C56B4C76280BF"><enum>(b)</enum><header>Effective date</header><text>The amendment made by subsection (a) shall take effect on December 31, 2019.</text>
+			</subsection></section><section id="id8beaa6cb8b724e27a18152e2152223ac"><enum>7.</enum><header>Permitting appearance at hearings on requests for advisory opinions by persons opposing the
+			 requests</header>
+ <subsection id="idc00e18ba70884eaab9ffca2e48b840ee"><enum>(a)</enum><header>In general</header><text>Section 308 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30108">52 U.S.C. 30108</external-xref>) is amended by adding at the end the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="id3c0e73c34d6d4e188998caf69db80724" style="OLC">
+ <subsection id="id3957e5b32f4c41778e26ceb90ddb7695"><enum>(e)</enum><text>To the extent that the Commission provides an opportunity for a person requesting an advisory opinion under this section (or counsel for such person) to appear before the Commission to present testimony in support of the request, and the person (or counsel) accepts such opportunity, the Commission shall provide a reasonable opportunity for an interested party who submitted written comments under subsection (d) in response to the request (or counsel for such interested party) to appear before the Commission to present testimony in response to the request.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="ide3c49cb929954a6e8cde378f25eb9674"><enum>(b)</enum><header>Effective date</header><text>The amendment made by subsection (a) shall apply with respect to requests for advisory opinions under section 308 of the Federal Election Campaign Act of 1971 which are made on or after the date of the enactment of this Act.</text>
+ </subsection></section><section commented="no" id="id3244A7A235C147D88EB19683BA3FB602"><enum>8.</enum><header>Revising prohibitions on fraudulent misrepresentation of campaign authority</header><text display-inline="no-display-inline">Section 322 of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30124">52 U.S.C. 30124</external-xref>) is amended—</text> <paragraph commented="no" id="idB7173EDC15344D33980067524726E384"><enum>(1)</enum><text display-inline="yes-display-inline">in subsection (a)—</text>
+ <subparagraph commented="no" id="id8BB5A680AA93488D92448E95493DB9A4"><enum>(A)</enum><text display-inline="yes-display-inline">by striking <quote>who is a candidate for Federal office or an employee or agent of such a candidate</quote> in the matter preceding paragraph (1);</text> </subparagraph><subparagraph commented="no" id="id99434c4be517403382f062e3ec5db5f8"><enum>(B)</enum><text>by striking <quote>other candidate or political party or employee or agent thereof on a matter which is damaging to such other candidate or political party or employee or agent thereof</quote> and inserting <quote>candidate, political party, other real or fictitious political committee or organization, or employee or agent or any of the foregoing,</quote>; and</text>
+ </subparagraph></paragraph><paragraph commented="no" id="id86ede5267090401a881c812dc1cc5b33"><enum>(2)</enum><text>in subsection (b)(1), by striking <quote>candidate or political party or employee or agent thereof</quote> and inserting <quote>candidate, political party, other real or fictitious committee or organization, or employee or agent of any of the foregoing</quote>.</text>
+			</paragraph></section><section commented="no" id="idA459E6DD31EB431995B2979441DDDA71"><enum>9.</enum><header>Prohibiting fraudulent PAC practices</header>
+			<subsection commented="no" id="id0D341C53316E4724B31D80B4FFA75B95"><enum>(a)</enum><header>In general</header>
+ <paragraph commented="no" id="idCC5F8BDD96694CC89EF55B320CBCAE88"><enum>(1)</enum><header>Prohibition</header><text>Section 313 of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30114">52 U.S.C. 30114</external-xref>) is amended by adding at the end the following new subsection:</text>
+					<quoted-block display-inline="no-display-inline" id="id886176fea562404cb6b67bc259589d0e" style="OLC">
+						<subsection commented="no" id="idE1294ED722934C1D8ED47CDE12E8767B"><enum>(d)</enum><header>Prohibited uses by other political committees</header>
+ <paragraph commented="no" id="id8C6BBD6D591F493FA2E6306FC378F4E4"><enum>(1)</enum><header>In general</header><text>A contribution or donation that is made to a political committee and is not described in subsection (a) shall not be converted to personal use (including any use described in subparagraphs (A) through (I) of subsection (b)(2)).</text>
+							</paragraph><paragraph id="id64997edbf96f44bfade287a6fe93cec3"><enum>(2)</enum><header>Self-Dealing</header>
+ <subparagraph id="id54e20598e06a49bf8acc2b2ad5fd3f44"><enum>(A)</enum><header>In general</header><text>For purposes of paragraph (1), a contribution or donation shall be presumed to be converted to personal use if the contribution or donation is used to make a significant disbursement to a controlling person.</text>
+ </subparagraph><subparagraph id="id97e47e20a5524c7b95e0e1cadccbf333"><enum>(B)</enum><header>Rebuttal</header><text>The presumption in subparagraph (A) may be rebutted only upon a showing that—</text> <clause id="idf562e7d3f0164788be9f1544bbc0097d"><enum>(i)</enum><text>the significant disbursement to the controlling person is a bona fide payment for goods or services at no greater than fair market value;</text>
+ </clause><clause id="id4386bb77d0be44f7927e5a45717852a3"><enum>(ii)</enum><text>the significant disbursement was negotiated at arms’ length by and approved by an agent of the committee who—</text>
+ <subclause id="idEF5A110F875A4A7E93F0447BD9384319"><enum>(I)</enum><text>was neither the controlling person nor in an employment relationship directly or indirectly subject to the direction or control of the controlling person;</text>
+ </subclause><subclause id="id7c125d4c943d47a1be28681b76fbf91f"><enum>(II)</enum><text>relied upon appropriate data as to fair market value prior to approving the disbursement; and</text> </subclause><subclause id="ide03bdcb3c79b4a3ab904fc046748e257"><enum>(III)</enum><text>documented the basis for the approval determination concurrently with making that determination; and</text>
+ </subclause></clause><clause id="ide0f9cab4a37e49e4b5de944628b64cca"><enum>(iii)</enum><text>at the time the significant disbursement was made, the aggregate total of itemized contributions to the committee during the election cycle exceeded the aggregate total of disbursements to controlling persons by the committee during the election cycle.</text>
+ </clause></subparagraph><subparagraph id="id611d7d28e19848b784105659a3c91fb9"><enum>(C)</enum><header>Definitions</header><text>For purposes of this paragraph:</text> <clause id="id59c6f6d55b35482391afab7c2e0980c2"><enum>(i)</enum><header>Controlling person</header><text>The term <term>controlling person</term> means any person who has authority or ability to direct or control the committee’s disbursements, any family member or business partner of such person, and any corporation (whether for-profit or not-for-profit, but not including publicly traded corporations), limited liability company, partnership, trust, bank or financial account, or other entity owned or controlled in whole or in part by such person, family member, or business partner.</text>
+ </clause><clause id="idaaa7b387ac804ea0842a1cfb14c27cf4"><enum>(ii)</enum><header>Significant disbursement</header><text>The term <term>significant disbursement</term> means any disbursement to a person if—</text> <subclause id="idBF4845DDDA834C0DBF71926FD74FED73"><enum>(I)</enum><text>such disbursement exceeds $1,000; or</text>
+ </subclause><subclause id="idC63B1F53815242F2A297E59A8403726F"><enum>(II)</enum><text>such disbursement, when aggregated with all other disbursements by the committee to the person within the calendar year, exceeds $5,000.</text></subclause></clause></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph><paragraph commented="no" id="idAFE0AA6A4FB446EB869E9B9BE232310A"><enum>(2)</enum><header>Conforming amendment</header><text>The heading for subsection (b) of section 313 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30114">52 U.S.C. 30114</external-xref>) is amended by inserting <quote><header-in-text level="subsection" style="OLC">by candidates and office holders</header-in-text></quote> after <quote><header-in-text level="subsection" style="OLC">Prohibited uses</header-in-text></quote>.</text> </paragraph></subsection><subsection commented="no" id="id3A3997606EC14533879AC69FAF3482A2"><enum>(b)</enum><header>Reporting</header><text>Section 304(b)(6)(B) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30104">52 U.S.C. 30104(b)(6)(B)</external-xref>) is amended by striking <quote>and</quote> at the end of clause (iv), by inserting <quote>and</quote> at the end of clause (v), and by adding at the end the following new clause:</text>
+				<quoted-block display-inline="no-display-inline" id="id36c1f6df1d244f958d6ee05cc2e32f33" style="OLC">
+ <clause id="ide05d7e4de1cc47ba987fc47ec8f2fc94"><enum>(vi)</enum><text>person who during the reporting period received a disbursement that constituted a significant disbursement to a controlling person within the meaning of section 313(b)(2), together with the date, amount, and purpose of the significant disbursement and a sworn statement demonstrating that the requirements of 313(b)(2)(B) were satisfied;</text></clause><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="id98447211ae7a4a39b2e7048e05a3b33a"><enum>(c)</enum><header>Study on additional measures</header><text>Not later than 120 days after the enactment of this Act, the Chairman of the Federal Trade Commission and the Chairman of the Federal Election Commission shall jointly submit to Congress a report on measures that should be taken by Congress or the Federal Election Commission to limit fraudulent solicitations by political committees.</text>
+ </subsection><subsection id="id0dffa308d40542b8b8edaca8adedd4b0"><enum>(d)</enum><header>Effective Date</header><text>The amendments made by this section shall apply to disbursements made after the date of the enactment of this Act.</text>
+ </subsection></section><section commented="no" id="id7C5FCEC760F844DB9FB611EE055AD194"><enum>10.</enum><header>Prohibition on aiding or abetting the making of contributions in the name of another</header><text display-inline="no-display-inline">Section 320 of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30122">52 U.S.C. 30122</external-xref>) is amended—</text> <paragraph commented="no" id="idEDF3824F8E1F4BDEBC692C0201C2D388"><enum>(1)</enum><text display-inline="yes-display-inline">by striking <quote>No person</quote> and inserting the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id08014CF62CBB4801B0BC0C234159140F" style="OLC">
+ <subsection commented="no" id="id484F059DD57D42C6A1C7A22E6FF999B1"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">No person</text></subsection><after-quoted-block>; and</after-quoted-block></quoted-block> </paragraph><paragraph commented="no" id="idF0B6AB3760F144EFB920BEBAB7E85513"><enum>(2)</enum><text display-inline="yes-display-inline">by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id2D3BB694DE5E421098452FA69CBD6945" style="OLC">
+ <subsection commented="no" id="idBC82A47CDFCB421BA16D898C2A4A2F81"><enum>(b)</enum><header>Aiding or abetting</header><text>No person shall knowingly direct, help, or assist any person in making a contribution in the name of another.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></section><section commented="no" id="id8B9BBEC64F1E40BC81A00AA12E25688D"><enum>11.</enum><header>Rules relating to conversion of campaign funds</header><text display-inline="no-display-inline">Section 313(b) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30114">52 U.S.C. 30114(b)</external-xref>) is amended—</text> <paragraph commented="no" id="id5B9D3663113B475AB918709BD0D36FD8"><enum>(1)</enum><text display-inline="yes-display-inline">in paragraph (1), by inserting <quote>and any other contribution or donation accepted by a political committee</quote> after <quote>subsection (a)</quote>; and</text>
+ </paragraph><paragraph commented="no" id="id2B19EE9FBA194B02A7D9E4EBBE8C20B4"><enum>(2)</enum><text>in paragraph (2)—</text> <subparagraph commented="no" id="id7F9ECFDFBD884036BB2E2F2D843CE9F1"><enum>(A)</enum><text>by inserting <quote>, in the case of a contribution or donation described in subsection (a),</quote> after <quote>if</quote>;</text>
+ </subparagraph><subparagraph commented="no" id="id3A969E70137C47A5AEEC70021E84921F"><enum>(B)</enum><text>by striking <quote>including</quote> and inserting <quote> and, in the case of any other contribution or donation accepted by a political committee, the contribution or amount is used to fulfill any commitment, obligation, or expense of a person that would exist irrespective of such political committee's political activities. Conversion to personal use shall include</quote>;</text>
+ </subparagraph><subparagraph commented="no" id="idECAB6EB2495A494581D609ABE4609371"><enum>(C)</enum><text>by striking subparagraph (C) and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="idD8861AE082AC4C5BB6FBD5439C6AC8FC" style="OLC"> <subparagraph commented="no" id="idC4EDAB10024D4FF29D9365D370F8E921"><enum>(C)</enum><text>an automobile expense that is not related to a campaign or the political activities of the committee;</text></subparagraph><after-quoted-block>;</after-quoted-block></quoted-block>
+ </subparagraph><subparagraph commented="no" id="id70B07B5887A94D0EAF33E0FCDC19E876"><enum>(D)</enum><text>in subparagraph (E), by striking <quote>non-campaign-related trip</quote> and inserting <quote>trip not related to a campaign or the political activities of the committee</quote>; and</text> </subparagraph><subparagraph commented="no" id="id663859ACE912479D92802AC58FB2C283"><enum>(E)</enum><text>in subparagraph (H), by inserting <quote>or the political activities of the committee</quote> after <quote>election campaign</quote>.</text>
+				</subparagraph></paragraph></section><section commented="no" id="idE1F9114E375E432FBC84A0D84D157375"><enum>12.</enum><header>Increasing and indexing for inflation registration and reporting thresholds</header>
+ <subsection commented="no" id="id307EB72E8B6A424FB3F1C70BCBD4A023"><enum>(a)</enum><header>Registration thresholds</header><text>Section 301(4) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30101">52 U.S.C. 30101(4)</external-xref>) is amended—</text> <paragraph id="id80fd48445fd64150b3f8de2014c45ce6"><enum>(1)</enum><text>in subparagraph (A), by striking <quote>$1,000</quote> each place it appears and inserting <quote>$5,000</quote>;</text>
+ </paragraph><paragraph id="id433aae6a8ac149069ddf8ca23aa44492"><enum>(2)</enum><text>in subparagraph (C)—</text> <subparagraph id="idC032EE417F8B4CE4BE9DF1F68989EDF4"><enum>(A)</enum><text>by striking <quote>receives contributions aggregating in excess of $5,000 during a calendar year, or</quote>;</text>
+ </subparagraph><subparagraph id="id02E9C18AC7C24787B92F3B3EF049CCAE"><enum>(B)</enum><text>by striking <quote>, or makes contributions in excess of $1,000</quote> and inserting <quote>or makes contributions in excess of $5,000</quote>; and</text> </subparagraph><subparagraph id="id7140597259854619B104610D42412AA9"><enum>(C)</enum><text>by striking <quote>or makes expenditures aggregating in excess of $1,000 during a calendar year</quote>; and</text>
+ </subparagraph></paragraph><paragraph id="id985194126A8141EC9641849E0AFF98E6"><enum>(3)</enum><text>by adding at the end the following new flush sentence:</text> <quoted-block display-inline="no-display-inline" id="id2CDC5D01B541415798F7B6A218B8E83E" style="OLC"> <quoted-block-continuation-text quoted-block-continuation-text-level="paragraph">In any calendar year after 2020, section 315(c)(1)(B) shall apply to each amount described in subparagraphs (A) and (C) of this paragraph in the same manner as such section applies to the limitations established under subsections (a)(1)(A), (a)(1)(B), (a)(3), and (h) of such section, except that for purposes of applying such section to the amounts described in subparagraphs (A) and (C) of this paragraph, the <quote>base period</quote> shall be 2020.</quoted-block-continuation-text><after-quoted-block>.</after-quoted-block></quoted-block> </paragraph></subsection><subsection commented="no" id="id11F749CA735C448C9D13BBE51A21960D"><enum>(b)</enum><header>Reporting thresholds</header> <paragraph commented="no" id="id94B3E9EC9D044B128817BB96B945CBD2"><enum>(1)</enum><header>Modification of independent expenditure reporting threshold</header> <text>Section 304(c)(1) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30104">52 U.S.C. 30104(c)(1)</external-xref>) is amended by striking <quote>$250</quote> in paragraph (1) and inserting <quote>$1,000</quote>.</text>
+ </paragraph><paragraph commented="no" id="id521806A587F04B4EB8EE9E60C366484C"><enum>(2)</enum><header>Inflation adjustment</header><text>Section 304 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/52/30104">52 U.S.C. 30104</external-xref>) is amended by adding at the end the following new subsection:</text>
+					<quoted-block display-inline="no-display-inline" id="idFACE995B2E0D4EB6B2B6CB8B77D53307" style="OLC">
+						<subsection commented="no" id="idF5C8D1446A49406F98346902F423EAB4"><enum>(j)</enum><header>Inflation adjustments</header>
+ <paragraph commented="no" id="id29F4D69B3D244DEE9C8462C11648CEF9"><enum>(1)</enum><header>In general</header><text>In any odd-numbered calendar year after 2020—</text> <subparagraph id="ID149D5C5B62D1496581FA1F21A591763E"><enum>(A)</enum><text>each of the dollar amounts described in paragraph (2) shall be increased by the percent difference determined under section 315(c)(1)(A) (applied as if the base period was calendar year 2020);</text>
+ </subparagraph><subparagraph id="ID28D29E7D26654E7CAB0D81FFB5E0DCE0"><enum>(B)</enum><text>each amount so increased shall remain in effect for the 2-year period beginning on the first day following the date of the last general election in the year preceding the year in which the amount is increased and ending on the date of the next general election; and</text>
+ </subparagraph><subparagraph id="ID0917DF1E85C949CCB8E15A96110759CF"><enum>(C)</enum><text>if any amount after adjustment under subparagraph (A) is not a multiple of $100, such amount shall be rounded to the nearest multiple of $100.</text>
+ </subparagraph></paragraph><paragraph id="idEB18C80840C54FFFADDC72CD6670680B"><enum>(2)</enum><header>Dollar amounts described</header><text>The dollar amounts described in this paragraph are the following:</text> <subparagraph id="idB8B230E39DDC4B028F2F1B2E716B831E"><enum>(A)</enum><text>Each of the $100,000 amounts in clauses (i) and (iii) of subsection (a)(3)(A).</text>
+ </subparagraph><subparagraph id="id7C11D17737BB4477BB229DCDAE358679"><enum>(B)</enum><text>The $1,000 amount in subsection (a)(6)(A).</text> </subparagraph><subparagraph id="idB8822AED807D4C52806597266FDDAF59"><enum>(C)</enum><text>Each of the $200 amounts in subparagraphs (A), (F), and (G) of subsection (b)(3).</text>
+ </subparagraph><subparagraph id="id441FA723C56C4A938432F0B0D8F2CF35"><enum>(D)</enum><text>The $200 amount in subsection (b)(5)(A).</text> </subparagraph><subparagraph id="idC357CB18C65041429265E1ECE7B40745"><enum>(E)</enum><text>Each of the $200 amounts in subparagraphs (A), (B)(iii), and (B)(v) of subsection (b)(6).</text>
+ </subparagraph><subparagraph id="id9865111094C947ADB567CD0D4FDC3484"><enum>(F)</enum><text>The $1,000 amount in subsection (c)(1).</text> </subparagraph><subparagraph id="id5988830C166C4FBF89BAD08B24912FEB"><enum>(G)</enum><text>The $200 amount in subsection (c)(2)(C).</text>
+ </subparagraph><subparagraph id="id0DF8EDDD7EB64235A50BE7DEA56E1933"><enum>(H)</enum><text>The $5,000 amount in subsection (e)(2)(A).</text> </subparagraph><subparagraph id="idA98FFB05A225401CA2B751AB25F423A4"><enum>(I)</enum><text>The $200 amount in subsection (e)(3).</text>
+ </subparagraph><subparagraph id="idCDA5E55843694B9796A7861C6E79D445"><enum>(J)</enum><text>Each of the $10,000 amounts in paragraphs (1), (4)(A) and (4)(B) of subsection (f).</text> </subparagraph><subparagraph id="id5424F63C0F7F4C0DA145FD9A11B3E82F"><enum>(K)</enum><text>The $200 amount in subsection (f)(2)(C).</text>
+ </subparagraph><subparagraph id="id3209BFF75BBC4BA6A225286034A55BED"><enum>(L)</enum><text>Each of the $1,000 amounts in subparagraphs (E) and (F) of subsection (f)(2)(C).</text> </subparagraph><subparagraph id="id42542B82A60A4AC3AC26BA095BB72E6D"><enum>(M)</enum><text>Each of the $1,000 amounts in subparagraphs (A) and (B) of subsection (g)(1).</text>
+ </subparagraph><subparagraph id="id2D7D66F74B2A49F09BCFC3B143412312"><enum>(N)</enum><text>Each of the $10,000 amounts in subparagraphs (A) and (B) of subsection (g)(2).</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </paragraph></subsection><subsection id="id21b5f43c979e45699969c50602241a83"><enum>(c)</enum><header>Effective date</header><text>The amendments made by this section shall apply to calendar years beginning after December 31, 2019.</text>
+ </subsection></section><section commented="no" id="idC48DAAA2820740898321C0E9E4C683B0"><enum>13.</enum><header>Permitting political committees to make disbursements by methods other than check</header><text display-inline="no-display-inline">Section 302(h)(1) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30102">52 U.S.C. 30102(h)(1)</external-xref> is amended by striking the last sentence and inserting the following: <quote>No disbursements may be made (other than petty cash disbursements under paragraph (2)) by such committee except from such accounts.</quote>.</text>
+ </section><section commented="no" id="id884F467FEA6942189730E2B986DB9F58"><enum>14.</enum><header>Electronic filing of electioneering communication reports</header><text display-inline="no-display-inline">Section 304(a)(11)(A)(i) of the Federal Election Campaign Act of 1971 (<external-xref legal-doc="usc" parsable-cite="usc/52/30104">52 U.S.C. 30104(a)(11)(A)(i)</external-xref>) is amended by striking <quote>or expenditures</quote> and inserting <quote>, expenditures, or disbursements for electioneering communications</quote>.</text>
+		</section><section id="HB72200CAD73E47CE876FB22142F7AA44">
+			<enum>15.</enum>
+			<header>Effective date; transition</header>
+			<subsection id="H89FAC71339AF435EA4B01756B6EB7F6B">
+				<enum>(a)</enum>
+				<header>In General</header>
+ <text display-inline="yes-display-inline">Except as otherwise provided, the amendments made by this Act shall apply beginning January 1, 2022.</text>
+			</subsection><subsection id="H2A53AFE389644529B5E616B1835CDEDE">
+				<enum>(b)</enum>
+				<header>Transition</header>
+				<paragraph id="H32177A2E837047DFA2AC24A8DAD2FE52">
+					<enum>(1)</enum>
+					<header>Termination of service of current members</header>
+ <text display-inline="yes-display-inline">Notwithstanding any provision of the Federal Election Campaign Act of 1971, the term of any individual serving as a member of the Federal Election Commission as of December 31, 2021, shall expire on that date.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="H9D86742469DC40BDB418C83B171A3D60"><enum>(2)</enum><header>No effect on existing cases or proceedings</header><text>Nothing in this Act or in any amendment made by this Act shall affect any of the powers exercised by the Federal Election Commission prior to December 31, 2021, including any investigation initiated by the Commission prior to such date or any proceeding (including any enforcement action) pending as of such date.</text>
+				</paragraph></subsection></section></legis-body>
+</bill>
+
+

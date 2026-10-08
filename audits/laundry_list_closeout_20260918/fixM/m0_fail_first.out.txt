@@ -1,0 +1,24 @@
+FAIL-FIRST RECEIPT -- HEAD source (git archive HEAD, autocrlf off) + the two new test files only.
+No implementation present: press_stream.release_url_key and media_rules.crosspost_key do not exist,
+and the desk still keys on MR.normalized_text.  Both suites must be RED here.
+
+=== tests/stance/test_press_url_canon.py
+ERROR: test_a_merged_row_is_named_in_the_ledger_not_deleted (__main__.IngestAndLedger.test_a_merged_row_is_named_in_the_ledger_not_deleted)
+ERROR: test_dial_one_ingests_both_forms (__main__.IngestAndLedger.test_dial_one_ingests_both_forms)
+ERROR: test_the_dial_reads_the_environment_at_call_time (__main__.IngestAndLedger.test_the_dial_reads_the_environment_at_call_time)
+ERROR: test_the_ledger_accounts_for_every_row_read (__main__.IngestAndLedger.test_the_ledger_accounts_for_every_row_read)
+----------------------------------------------------------------------
+Ran 20 tests in 0.043s
+
+FAILED (failures=3, errors=46)
+
+=== tests/stance/test_crosspost_key.py
+ERROR: test_a_link_only_post_still_keys_empty_under_both_values (__main__.CrosspostKey.test_a_link_only_post_still_keys_empty_under_both_values) (text="'https://only.example/link'")
+ERROR: test_a_link_only_post_still_keys_empty_under_both_values (__main__.CrosspostKey.test_a_link_only_post_still_keys_empty_under_both_values) (text="'   '")
+ERROR: test_a_link_only_post_still_keys_empty_under_both_values (__main__.CrosspostKey.test_a_link_only_post_still_keys_empty_under_both_values) (text="''")
+ERROR: test_a_link_only_post_still_keys_empty_under_both_values (__main__.CrosspostKey.test_a_link_only_post_still_keys_empty_under_both_values) (text='None')
+----------------------------------------------------------------------
+Ran 17 tests in 0.018s
+
+FAILED (failures=3, errors=26)
+

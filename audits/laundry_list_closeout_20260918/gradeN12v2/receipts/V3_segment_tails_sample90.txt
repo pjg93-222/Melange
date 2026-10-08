@@ -1,0 +1,508 @@
+================================================================================================
+#01 rowid=69687 class=A_anchored_caps member='Mark Kelly'  removed_nwords=5  segs=1
+   seg1 tag='ZELENY (voice-over)' cls=A_anchored_caps nwords=3 firstperson_starts=0
+      HEAD: Buttigieg? Less so.
+
+================================================================================================
+#02 rowid=204546 class=A_anchored_caps member='Christopher Murphy'  removed_nwords=24  segs=1
+   seg1 tag='MATTINGLY (voice over)' cls=A_anchored_caps nwords=21 firstperson_starts=0
+      HEAD: And when Johnson returned to the U.S., he went further working with Democratic Senate colleagues to ensure the aid went through.
+
+================================================================================================
+#03 rowid=205035 class=A_anchored_caps member='Elizabeth Warren'  removed_nwords=9  segs=1
+   seg1 tag='BASH (on camera)' cls=A_anchored_caps nwords=6 firstperson_starts=0
+      HEAD: What is elitist about structural change?
+
+================================================================================================
+#04 rowid=205473 class=A_anchored_caps member='Nancy Pelosi'  removed_nwords=18  segs=1
+   seg1 tag='ACOSTA (voice-over)' cls=A_anchored_caps nwords=16 firstperson_starts=0
+      HEAD: But here is the problem. The president has dangled this possibility before during the Russia investigation.
+
+================================================================================================
+#05 rowid=222883 class=A_anchored_caps member='Alexandria Ocasio-Cortez'  removed_nwords=119  segs=1
+   seg1 tag='RAJU (voice-over)' cls=A_anchored_caps nwords=117 firstperson_starts=0
+      HEAD: The larger bill, the product of months of painstaking negotiations where progressives were forced to compromise slashing their $3.5 trillion plan in half, leading up priorities like paid leave and a b
+      TAIL: ...e than $500 billion to fight climate change, a Medicare expansion to include hearing coverage and a fusion of cash for affordable housing, and a year-long extension of the Child Tax Credit. In a boon for Biden, progressives are endorsing the slimmed down plan.
+
+================================================================================================
+#06 rowid=226823 class=A_anchored_caps member='Ron Johnson'  removed_nwords=30  segs=1
+   seg1 tag='RAJU (voice-over)' cls=A_anchored_caps nwords=28 firstperson_starts=0
+      HEAD: And with abortion is now banned in Wisconsin, Democrats hope their voters take their fury to the polls, but they first have to work out a family feud.
+
+================================================================================================
+#07 rowid=231693 class=A_anchored_caps member='Nancy Pelosi'  removed_nwords=18  segs=1
+   seg1 tag='SCHNEIDER (voice-over)' cls=A_anchored_caps nwords=16 firstperson_starts=0
+      HEAD: In the hours that followed, anger and disbelief from Pelosi and Senate Majority Leader Chuck Schumer.
+
+================================================================================================
+#08 rowid=251272 class=A_anchored_caps member='Mike Johnson'  removed_nwords=55  segs=1
+   seg1 tag='LAVANDERA (voice-over)' cls=A_anchored_caps nwords=53 firstperson_starts=0
+      HEAD: Meanwhile in Washington D.C., Senate leaders are working toward a possible deal to change current immigration law including the possibility of expedited removals of migrants who cross illegally and ti
+      TAIL: ...ange current immigration law including the possibility of expedited removals of migrants who cross illegally and tightening rules on granting asylum. The House Speaker tells CNN's Jake Tapper the problem cannot be solved by allocating more money to the border.
+
+================================================================================================
+#09 rowid=251319 class=A_anchored_caps member='Jamie Raskin'  removed_nwords=29  segs=1
+   seg1 tag='TAPPER (voice-over)' cls=A_anchored_caps nwords=27 firstperson_starts=0
+      HEAD: The next day, Ali Alexander, a Trump supporter and leader of the group Stop the Steal, created a website to share and promote logistics about the rally.
+
+================================================================================================
+#10 rowid=265316 class=A_anchored_caps member='Jerrold Nadler'  removed_nwords=337  segs=1
+   seg1 tag='O`DONNELL' cls=A_anchored_caps nwords=336 firstperson_starts=1
+      HEAD: The committee then spent nine hours and 41 minutes failing to find a single thig that FBI agent Peter Strzok did that was politically motivated in his investigator work involving both the Trump campai
+      TAIL: ...ly be a United States citizen. We know all of this, thanks to lawsuits that have been brought in various federal courts, including one by the ACLU. The ACLU`s lead attorney on this case will be back in court tomorrow and he will join us next with more details.
+
+================================================================================================
+#11 rowid=267483 class=A_anchored_caps member='Susan Collins'  removed_nwords=193  segs=1
+   seg1 tag='O`DONNELL' cls=A_anchored_caps nwords=192 firstperson_starts=0
+      HEAD: After the vote, the president tweeted that he looked forward to vetoing the resolution. House Speaker Nancy Pelosi said this is not an emergency and the Congress declared in a strong bipartisan voice 
+      TAIL: ..., Senate Democratic leader Chuck Schumer tried to bring up that same resolution in the Senate for a vote and Republican Senator Lindsey Graham objected and blocked a vote on that resolution. Today, the president was asked if his immigration policies are cruel.
+
+================================================================================================
+#12 rowid=270268 class=A_anchored_caps member='Peter Welch'  removed_nwords=93  segs=1
+   seg1 tag='O`DONNELL' cls=A_anchored_caps nwords=92 firstperson_starts=0
+      HEAD: Wendy Sherman, I`m so glad you`re with us tonight because on historic nights like this, to have people who think — we get to think we`ve seen it all in Washington, and then days like this happen and r
+      TAIL: ...elosi hasn`t done it yet. This was one of those days. Your feelings about what you saw today both in her announcement for what`s to happen in the impeachment proceeding and, again, how she handled that challenge. AMBASSADOR WENDY SHERMAN. FORMER UNDERSECRETARY
+
+================================================================================================
+#13 rowid=271406 class=A_anchored_caps member='Nancy Pelosi'  removed_nwords=183  segs=1
+   seg1 tag='O`DONNELL' cls=A_anchored_caps nwords=182 firstperson_starts=0
+      HEAD: And joining us now, the representative of California`s 12th congressional district who is the 52nd speaker of the House of Representatives and in that constitutionally established office, Nancy Pelosi
+      TAIL: ...ems tonight, you are two sneezes away from the presidency with the fact that the president and vice president are not taking the necessary precautions. Are you concerned about that situation with the president and the vice president, their lack of precautions?
+
+================================================================================================
+#14 rowid=272540 class=A_anchored_caps member='Daniel Goldman'  removed_nwords=46  segs=1
+   seg1 tag='O`DONNELL' cls=A_anchored_caps nwords=45 firstperson_starts=1
+      HEAD: OK. This is — I didn`t understand this distinction. This is worth zooming in on it. So, incitement does not necessarily mean that you gave me the idea. I could have had the idea. Incitement, as you de
+
+================================================================================================
+#15 rowid=275041 class=A_anchored_caps member='Charles Schumer'  removed_nwords=21  segs=1
+   seg1 tag='O`DONNELL' cls=A_anchored_caps nwords=20 firstperson_starts=0
+      HEAD: And here is what Senator Elizabeth Warren said an hour ago in the Senate floor about the current Senate rule.
+
+================================================================================================
+#16 rowid=89836 class=B_stop_name_paren member='Mike Johnson'  removed_nwords=38  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=36 firstperson_starts=0
+      HEAD: And the prospects of further expulsions could impact Johnson's already narrow majority, a reality that members say no one can deny, especially as the speaker stares down several must- pass bills just 
+
+================================================================================================
+#17 rowid=216537 class=B_stop_name_paren member='Jamie Raskin'  removed_nwords=38  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=36 firstperson_starts=0
+      HEAD: Ten House Republicans joined House Democrats last week to charge Trump with incitement of insurrection, saying he encouraged a violent mob to storm the U.S. Capitol January 6th in an effort to overtur
+
+================================================================================================
+#18 rowid=216538 class=B_stop_name_paren member='Madeleine Dean'  removed_nwords=20  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=18 firstperson_starts=0
+      HEAD: Even with the bipartisan passing of the article in the House, many Republicans oppose the trial against Trump.
+
+================================================================================================
+#19 rowid=217016 class=B_stop_name_paren member='Tom Cotton'  removed_nwords=38  segs=1
+   seg1 tag='FOX (voice over)' cls=B_stop_name_paren nwords=35 firstperson_starts=0
+      HEAD: Trump's lawyers also saying he did not direct anyone to commit lawless actions, and arguing these words on the day of the insurrection were meant in a figurative sense and protected by the First Amend
+
+================================================================================================
+#20 rowid=217089 class=B_stop_name_paren member='Jamie Raskin'  removed_nwords=31  segs=1
+   seg1 tag='FOX (voice over)' cls=B_stop_name_paren nwords=28 firstperson_starts=0
+      HEAD: House Managers immediately presenting a chilling preview of their strategy on the first day of the trial, playing a video highlighting some of Trump's words from January 6th.
+
+================================================================================================
+#21 rowid=217176 class=B_stop_name_paren member='Joe Neguse'  removed_nwords=15  segs=1
+   seg1 tag='FOX (voice over)' cls=B_stop_name_paren nwords=12 firstperson_starts=0
+      HEAD: Many Republicans saying that while the rioters committed crimes, Trump did not.
+
+================================================================================================
+#22 rowid=234890 class=B_stop_name_paren member='Alexandria Ocasio-Cortez'  removed_nwords=93  segs=1
+   seg1 tag='FOX (on camera)' cls=B_stop_name_paren nwords=90 firstperson_starts=2
+      HEAD: And this is what Democrats have been arguing all along, that this is really showing disunity among Republicans. That this is showing that they aren't ready to govern. The more likely scenario is that 
+      TAIL: ...y is not going to have votes. We may need to have some conversations with Democrats about whether there's some kind of consensus moderate Republican candidate. I don't think Democrats are going to leave the floor to give Kevin McCarthy the upper hand, Kaitlan.
+
+================================================================================================
+#23 rowid=235130 class=B_stop_name_paren member='Chip Roy'  removed_nwords=21  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=19 firstperson_starts=0
+      HEAD: Sources tell CNN McCarthy is continuing negotiations with the group of opposing lawmakers and met separately with freshman holdouts.
+
+================================================================================================
+#24 rowid=243011 class=B_stop_name_paren member='Elise Stefanik'  removed_nwords=18  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=16 firstperson_starts=0
+      HEAD: The bill narrowly made it out of the Rules Committee Tuesday night, with a 7-6 vote.
+
+================================================================================================
+#25 rowid=246376 class=B_stop_name_paren member='Byron Donalds'  removed_nwords=82  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=80 firstperson_starts=0
+      HEAD: While there is still broad bipartisan support to fund that war effort in Ukraine, Republicans in the House are bitterly divided as they debate a path forward to avert a government shutdown. Cracks in 
+      TAIL: ... in the conference have been building for months. In July, 70 House Republicans voted to strip Ukraine of all U.S. military aid as part of the debate on the defense bill. While Senate GOP leader Mitch McConnell has been a dogged supporter of funding the war --
+
+================================================================================================
+#26 rowid=247110 class=B_stop_name_paren member='Kevin Hern'  removed_nwords=8  segs=1
+   seg1 tag='FOX (voice over)' cls=B_stop_name_paren nwords=5 firstperson_starts=0
+      HEAD: Lauren Fox, CNN, Capitol Hill.
+
+================================================================================================
+#27 rowid=247235 class=B_stop_name_paren member='Dusty Johnson'  removed_nwords=17  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=15 firstperson_starts=0
+      HEAD: Allies of McCarthy are seeking retribution from the eight Republican rebels who voted against him.
+
+================================================================================================
+#28 rowid=247269 class=B_stop_name_paren member='Chip Roy'  removed_nwords=27  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=25 firstperson_starts=0
+      HEAD: House Judiciary Committee Jim Jordan was one of the co- founders of the conservative Freedom Caucus and is a close ally of former President Trump.
+
+================================================================================================
+#29 rowid=249676 class=B_stop_name_paren member='Michael Guest'  removed_nwords=62  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=60 firstperson_starts=0
+      HEAD: According to a panel, Santos refused to participate in an interview or provide a written response, and the panel did not subpoena him. Santos posting on X criticizing the Committee's finding, calling 
+      TAIL: ...nd the panel did not subpoena him. Santos posting on X criticizing the Committee's finding, calling it biased and a disgusting politicized smear that shows the depths of how low our federal government has sunk. Santos also saying he will not seek re- election.
+
+================================================================================================
+#30 rowid=307026 class=B_stop_name_paren member='Rand Paul'  removed_nwords=17  segs=1
+   seg1 tag='FOX (voice-over)' cls=B_stop_name_paren nwords=15 firstperson_starts=0
+      HEAD: Paul also took the unusual step Wednesday of kicking Fauci's lawyer out of the hearing.
+
+================================================================================================
+#31 rowid=68991 class=B_unknown_surname_paren member='Michael Bennet'  removed_nwords=107  segs=1
+   seg1 tag='TAUSCHE (voice-over)' cls=B_unknown_surname_paren nwords=105 firstperson_starts=0
+      HEAD: An adviser to the president said few in Biden's inner circle are concerned enough to pierce Biden's firm position. Only family could do that and only if there's hard data. The adviser telling CNN of h
+      TAIL: ...rump leading Biden by five points. The first time this year, the candidates are separated by a margin of more than three points. And some donors planning events in Chicago and Florida say they're now up in the air. But for Biden, it's full steam ahead for now.
+
+================================================================================================
+#32 rowid=78553 class=B_unknown_surname_paren member='Hakeem Jeffries'  removed_nwords=102  segs=1
+   seg1 tag='YOSHIDA (voice-over)' cls=B_unknown_surname_paren nwords=100 firstperson_starts=0
+      HEAD: The multi trillion dollar legislation would unlock tax cuts and funding boosts for national security, partly paid for by the largest cut to the federal safety net in decades. Tax breaks and changes to
+      TAIL: ...historic cuts to Medicaid and food stamps. A ripple effect could also hit the health care system, especially rural hospitals. And roughly $3.4 trillion is also projected to be added to the deficit over the next decade. In Washington, Michael Yoshida reporting.
+
+================================================================================================
+#33 rowid=90113 class=B_unknown_surname_paren member='Christopher Murphy'  removed_nwords=41  segs=1
+   seg1 tag='SCANNELL (voice-over)' cls=B_unknown_surname_paren nwords=39 firstperson_starts=0
+      HEAD: These are not isolated incidents. Democratic Senator Chris Murphy called out $580 million bet placed 15 minutes before Trump posted on Truth Social he would delay striking Iran's energy infrastructure
+
+================================================================================================
+#34 rowid=184811 class=B_unknown_surname_paren member='Mitch McConnell'  removed_nwords=56  segs=1
+   seg1 tag='BREAM (voice-over)' cls=B_unknown_surname_paren nwords=54 firstperson_starts=0
+      HEAD: As the U.S. prepares to build a temporary port to supply critical aid to Palestinian civilians in Gaza, Israel plans a significant offensive on the last major Hamas stronghold in Rafah. Plus, hundreds
+      TAIL: ...to Palestinian civilians in Gaza, Israel plans a significant offensive on the last major Hamas stronghold in Rafah. Plus, hundreds of Americans, maybe more, potentially trapped in Haiti as a violent rebellion rises, taking the country to the brink of collapse.
+
+================================================================================================
+#35 rowid=185014 class=B_unknown_surname_paren member='Bill Cassidy'  removed_nwords=34  segs=1
+   seg1 tag='SPUNT (on camera)' cls=B_unknown_surname_paren nwords=31 firstperson_starts=0
+      HEAD: Negotiations, Chris, are ongoing until this comes to vote. Meanwhile, there's another clock ticking, raising the nation's debt ceiling until it hits its limit in just a few weeks -- Chris.
+
+================================================================================================
+#36 rowid=190960 class=B_unknown_surname_paren member='Mark Warner'  removed_nwords=5  segs=1
+   seg1 tag='SEGALL (voice-over)' cls=B_unknown_surname_paren nwords=3 firstperson_starts=0
+      HEAD: Sharing private data.
+
+================================================================================================
+#37 rowid=201038 class=B_unknown_surname_paren member='Rashida Tlaib'  removed_nwords=73  segs=1
+   seg1 tag='KURTZ (on camera)' cls=B_unknown_surname_paren nwords=70 firstperson_starts=0
+      HEAD: Joining us now to analyze the coverage, Gayle Trotter, host of the Right in D.C. podcast, and Richard Fowler, radio talk show host and Fox News contributor. Gayle, why are members of the squad not dra
+      TAIL: ...Gayle, why are members of the squad not drawing much media scrutiny in stark contrast to Marjorie Taylor Greene for ripping Israel as terrorist state and apartheid state. Whether people agree with them or not, you'd think that would draw some serious coverage.
+
+================================================================================================
+#38 rowid=203109 class=B_unknown_surname_paren member='Lindsey Graham'  removed_nwords=42  segs=1
+   seg1 tag='BOLDUAN (voice-over)' cls=B_unknown_surname_paren nwords=40 firstperson_starts=0
+      HEAD: Until then, the bill sits on Senator Mitch McConnell's desk and leaves Caesar right back where he began, putting his life on the line to try and convince the world to care and, once and for all, not l
+
+================================================================================================
+#39 rowid=215557 class=B_unknown_surname_paren member='Nancy Pelosi'  removed_nwords=178  segs=2
+   seg1 tag='CURNOW (on camera)' cls=B_unknown_surname_paren nwords=73 firstperson_starts=0
+      HEAD: So, this new Congress is now the most diverse in history. There are a record number of women, black and Latino members, as well as lawmakers who identify as LGBTQ. So, we'll have more on that stunning
+      TAIL: ...dentify as LGBTQ. So, we'll have more on that stunning Trump call coming up in just a few minutes' time. Also ahead, though, here on CNN, U.S. vaccination efforts are falling far, far behind targets. What extra says need to be done. That's next too. [03:20:00]
+   seg2 tag='CURNOW (on camera)' cls=C_unanchored_paren nwords=99 firstperson_starts=0
+      HEAD: So, the U.S. is racing to get ahead of the coronavirus pandemic in the halls of overburdened hospitals and in the push to up the pace of vaccinations across the country. But it's really not having muc
+      TAIL: ...king project reports more than 125,000 people are in hospital with the virus. This of course, as the pace of vaccinations really lags behind, only about four million doses have been administered across the country so far below the Trump administration targets.
+
+================================================================================================
+#40 rowid=217682 class=B_unknown_surname_paren member='Michael McCaul'  removed_nwords=69  segs=1
+   seg1 tag='CHEN (on camera)' cls=B_unknown_surname_paren nwords=66 firstperson_starts=0
+      HEAD: State leaders are now turning their attention to address those skyrocketing energy bills. The Governor today said that the Public Utility Commission called an emergency meeting to issue a moratorium o
+      TAIL: ...lled an emergency meeting to issue a moratorium on disconnection of service due to nonpayment as well as to restrict electric providers from sending invoices at this time. Abbott said that would allow time for them to address those huge energy bills -- Pamela?
+
+================================================================================================
+#41 rowid=221483 class=B_unknown_surname_paren member='Amy Klobuchar'  removed_nwords=18  segs=1
+   seg1 tag='KAFANOV (voice-over)' cls=B_unknown_surname_paren nwords=16 firstperson_starts=0
+      HEAD: Newsom has sought to turn the race into a referendum and how to fight the pandemic.
+
+================================================================================================
+#42 rowid=223873 class=B_unknown_surname_paren member='Ron Johnson'  removed_nwords=41  segs=1
+   seg1 tag='COATES (on camera)' cls=B_unknown_surname_paren nwords=38 firstperson_starts=0
+      HEAD: This was your earlier point, right, the idea of thinking about people being dismissive of what it actually was for or just getting it wrong as to what it was for. What do you make about that statement
+
+================================================================================================
+#43 rowid=231393 class=B_unknown_surname_paren member='Tom Cotton'  removed_nwords=9  segs=1
+   seg1 tag='MCKEND (voice-over)' cls=B_unknown_surname_paren nwords=7 firstperson_starts=0
+      HEAD: CNN has not independently confirmed the allegations.
+
+================================================================================================
+#44 rowid=243009 class=B_unknown_surname_paren member='Steve Cohen'  removed_nwords=7  segs=1
+   seg1 tag='FREEMAN (voice-over)' cls=B_unknown_surname_paren nwords=5 firstperson_starts=0
+      HEAD: Danny Freeman, CNN, Pittsburgh. [03:45:06]
+
+================================================================================================
+#45 rowid=244971 class=B_unknown_surname_paren member='Elise Stefanik'  removed_nwords=10  segs=1
+   seg1 tag='MCKEND (voice-over)' cls=B_unknown_surname_paren nwords=8 firstperson_starts=0
+      HEAD: But Democrats argue, misinformation is the larger threat.
+
+================================================================================================
+#46 rowid=67803 class=C_unanchored_paren member='Lauren Boebert'  removed_nwords=10  segs=1
+   seg1 tag="O'SULLIVAN (voice-over)" cls=C_unanchored_paren nwords=8 firstperson_starts=0
+      HEAD: It has a name. It's called Christian nationalism.
+
+================================================================================================
+#47 rowid=68560 class=C_unanchored_paren member='James Clyburn'  removed_nwords=25  segs=1
+   seg1 tag='LEE (voice-over)' cls=C_unanchored_paren nwords=23 firstperson_starts=0
+      HEAD: Some prominent Biden supporters also expressing support for Harris, but insisting for now that the president remains at the top of the ticket.
+
+================================================================================================
+#48 rowid=69517 class=C_unanchored_paren member='Melanie Stansbury'  removed_nwords=28  segs=1
+   seg1 tag='PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)' cls=C_unanchored_paren nwords=20 firstperson_starts=0
+      HEAD: Republican and Democratic members of Congress frustrated with the head of the Secret Service, many calling for her immediate resignation.
+
+================================================================================================
+#49 rowid=69708 class=C_unanchored_paren member='Ted Cruz'  removed_nwords=33  segs=1
+   seg1 tag='FOREMAN (voice-over)' cls=C_unanchored_paren nwords=31 firstperson_starts=0
+      HEAD: Suggestion that Harris wants to outright ban guns, gasoline cars and red meat, that she couldn't pass the bar exam and is totally against Jewish people. All of those are false.
+
+================================================================================================
+#50 rowid=195413 class=C_unanchored_paren member='Steve Cohen'  removed_nwords=28  segs=1
+   seg1 tag='MATTINGLY (voice-over)' cls=C_unanchored_paren nwords=26 firstperson_starts=0
+      HEAD: With this singular issue looming throughout the tense hours-long meeting, when and whether the committee will be able to hear from special counsel Robert Mueller himself.
+
+================================================================================================
+#51 rowid=200895 class=C_unanchored_paren member='Bernard Sanders'  removed_nwords=33  segs=1
+   seg1 tag='GRIFFIN (on camera)' cls=C_unanchored_paren nwords=30 firstperson_starts=0
+      HEAD: You wrote, shame on you. This is a gun issue. To use the gun lobby talking points on this only discredits you as a presidential option. What did you mean?
+
+================================================================================================
+#52 rowid=216945 class=C_unanchored_paren member='Charles Schumer'  removed_nwords=117  segs=1
+   seg1 tag='LEMON (on camera)' cls=C_unanchored_paren nwords=114 firstperson_starts=0
+      HEAD: So, here's our breaking news. With hours to go until the beginning of the second impeachment trial for the former President Donald Trump, tonight his lawyer David Schoen withdrawing his request to pau
+      TAIL: ...to 16 hours to present their case. Trump's lawyers already arguing that the trial is unconstitutional because he is no longer president. So, I want to bring in now Senator Bob Casey, he's a Democrat of Pennsylvania. Senator, good to see you. Thank you so much.
+
+================================================================================================
+#53 rowid=217666 class=C_unanchored_paren member='Alexandria Ocasio-Cortez'  removed_nwords=33  segs=1
+   seg1 tag='JIMENEZ (voice over)' cls=C_unanchored_paren nwords=30 firstperson_starts=0
+      HEAD: And as residents wait for the water and power to come back, some still forced to use their cars for warmth. Others, if they're lucky, find shelter in a hotel.
+
+================================================================================================
+#54 rowid=221509 class=C_unanchored_paren member='James Clyburn'  removed_nwords=107  segs=1
+   seg1 tag='LEMON (on camera)' cls=C_unanchored_paren nwords=104 firstperson_starts=0
+      HEAD: President Biden set to unveil his six-point plan tomorrow on how his administration will try to end the COVID pandemic. A source telling CNN the plan will include vaccine requirements, which sounds li
+      TAIL: ... COVID-19. There's a lot to discuss tonight with CNN's senior political commentator, David Axelrod and Matthew Dowd, the former chief strategist for President George W. Bush, and the author of "Revelations on the River." Gentlemen, good evening to both of you.
+
+================================================================================================
+#55 rowid=222899 class=C_unanchored_paren member='Pramila Jayapal'  removed_nwords=401  segs=2
+   seg1 tag='BLITZER (on camera)' cls=C_unanchored_paren nwords=194 firstperson_starts=1
+      HEAD: In the U.S. Senate, the moderate Democrat Joe Manchin who has been behind other major delays released a statement about the so-called framework, saying this, "It's the product of months of negotiation
+      TAIL: ...or President Biden, for the Speaker Nancy Pelosi. They were at least hoping to get that infrastructure, the traditional infrastructure package $1.2 trillion for America's roads, bridges, highways, everything else. They wanted to get that passed, didn't happen.
+   seg2 tag='KEVIN LIPTAK, CNN WHITE HOUSE REPORTER (on camera)' cls=A_anchored_caps nwords=196 firstperson_starts=1
+      HEAD: yeah, and remember, this was a deadline that the president set for himself. I mean, he has been telling lawmakers over of the last two weeks that it would be a disappointment if he arrives in Rome, an
+      TAIL: ...er side, Manchin and Sinema have put out some very supportive statements but they haven't said explicitly that they will get behind this bill. And until that happens, it's very hard to see how these two sides come together and give the president what he wants.
+
+================================================================================================
+#56 rowid=223081 class=C_unanchored_paren member='Mitch McConnell'  removed_nwords=51  segs=1
+   seg1 tag='ZELENY(voice over)' cls=C_unanchored_paren nwords=49 firstperson_starts=0
+      HEAD: Trump's role in midterm election races and whether he runs for president again is a central question hanging over the party. At a weekend GOP gathering in Las Vegas, that question was on the back burn
+      TAIL: ...election races and whether he runs for president again is a central question hanging over the party. At a weekend GOP gathering in Las Vegas, that question was on the back burner as former Vice President Mike Pence and a parade of Republicans made appearances.
+
+================================================================================================
+#57 rowid=235280 class=C_unanchored_paren member='Jim Jordan'  removed_nwords=9  segs=1
+   seg1 tag='SERFATY (voice-over)' cls=C_unanchored_paren nwords=7 firstperson_starts=0
+      HEAD: With founding members like Congressman Jim Jordan.
+
+================================================================================================
+#58 rowid=238571 class=C_unanchored_paren member='Michael Turner'  removed_nwords=62  segs=1
+   seg1 tag='SUAREZ (voiceover)' cls=C_unanchored_paren nwords=60 firstperson_starts=0
+      HEAD: The Pentagon says at least four other Chinese surveillance balloons have been spotted in recent years. They also said they had briefed Congress on previous balloons that flew near Texas and Florida. O
+      TAIL: ...years. They also said they had briefed Congress on previous balloons that flew near Texas and Florida. Officials say, this balloon was unique from the others in the path it took and the length of time it spent loitering over sensitive missile sites in Montana.
+
+================================================================================================
+#59 rowid=241389 class=C_unanchored_paren member='James Comer'  removed_nwords=64  segs=1
+   seg1 tag='HOLMES (voice over)' cls=C_unanchored_paren nwords=61 firstperson_starts=0
+      HEAD: Trump ally and Head of the House Judiciary Committee Jim Jordan, firing off a subpoena to a former senior prosecutor on the Manhattan DA's team Mark Pomerantz the committee saying Pomerantz's public s
+      TAIL: ...rk Pomerantz the committee saying Pomerantz's public statements about the investigation strongly suggest that Bragg's prosecution of President Trump is politically motivated. Trump World also questioning the impartiality of the judge on the case, Juan Merchan.
+
+================================================================================================
+#60 rowid=252705 class=C_unanchored_paren member='Thomas Suozzi'  removed_nwords=38  segs=1
+   seg1 tag='BASH (voice over)' cls=C_unanchored_paren nwords=35 firstperson_starts=0
+      HEAD: Whoever wins this seat, vacant since Republican George Santos was expelled, will have a big impact on a House with a narrow GOP majority. Suozzi is a seasoned politician with deep roots in the distric
+
+================================================================================================
+#61 rowid=137948 class=D_mixed_case_label member='Michael Lawler'  removed_nwords=30  segs=1
+   seg1 tag='Tom Stein, Democratic Voter' cls=D_mixed_case_label nwords=26 firstperson_starts=0
+      HEAD: When it comes down to it, he's got to support Trump or he won't have his job. And I think that's -- I feel it's dangerous.
+
+================================================================================================
+#62 rowid=155292 class=D_mixed_case_label member='Josh Hawley'  removed_nwords=36  segs=1
+   seg1 tag='Kristi Noem, U.S. Homeland Security Secretary' cls=D_mixed_case_label nwords=30 firstperson_starts=1
+      HEAD: Absolutely. I have spoken with your governor and did that day that this devastation happened. And so we have promised and pledged to get that expedited as soon as possible.
+
+================================================================================================
+#63 rowid=175681 class=D_mixed_case_label member='Tammy Duckworth'  removed_nwords=24  segs=1
+   seg1 tag='Jamil N. Jaffer, George Mason University' cls=D_mixed_case_label nwords=18 firstperson_starts=0
+      HEAD: President Trump has been running the table on the legislative branch for two terms now in a row.
+
+================================================================================================
+#64 rowid=257011 class=D_mixed_case_label member='Betty McCollum'  removed_nwords=32  segs=1
+   seg1 tag='Fred de Sam Lazaro' cls=D_mixed_case_label nwords=28 firstperson_starts=0
+      HEAD: McCollum has pushed the federal Food and Drug Administration to step up its enforcement and also arranged federal grants of $1 million to help programs like Adawe's Beautywell.
+
+================================================================================================
+#65 rowid=257862 class=D_mixed_case_label member='Mitch McConnell'  removed_nwords=189  segs=1
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=187 firstperson_starts=0
+      HEAD: And, in the House, members of GOP leadership have themselves amplified the same racist conspiracies espoused by mass shooters. In May, a mass shooter killed 10 people in a Buffalo New York grocery sto
+      TAIL: ...l Democrats as equal actors in encouraging violence by pointing to some Black Lives Matter protests that devolved into looting and damaged property. Republicans have also tried to censure a Democratic congresswoman for urging protesters to get confrontational.
+
+================================================================================================
+#66 rowid=257966 class=D_mixed_case_label member='Lindsey Graham'  removed_nwords=34  segs=1
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=32 firstperson_starts=0
+      HEAD: Biden rebuked Republicans who have normalized talk of political violence, identifying them as the commanding force of the party. And, today, he again tried to reach those he described as mainstream Re
+
+================================================================================================
+#67 rowid=257967 class=D_mixed_case_label member='Brian Schatz'  removed_nwords=15  segs=1
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=13 firstperson_starts=0
+      HEAD: Schatz said, ultimately, races across the country will come down to one question.
+
+================================================================================================
+#68 rowid=258183 class=D_mixed_case_label member='Adam Schiff'  removed_nwords=182  segs=3
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=94 firstperson_starts=1
+      HEAD: Former FBI Agent Tracy Walder said no public accounting with senior officials was a mistake. Tracy Walder, Former FBI Agent: I think, in the final report. What I would really like to see is accountabi
+      TAIL: ...ce or the FBI or local police, for not taking some of these threats seriously. And they need -- either need to have new training in place, in terms of how to understand some of these threats, or we need to look at creating a federal domestic terrorism statute.
+   seg2 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=55 firstperson_starts=0
+      HEAD: Speaking before a Senate committee in 2021, FBI Director Christopher Wray defended the FBI's actions, but admitted the outcome was impermissible. Christopher Wray, FBI Director: I do not consider what
+      TAIL: ...ended the FBI's actions, but admitted the outcome was impermissible. Christopher Wray, FBI Director: I do not consider what happened on January 6 to be an acceptable result. And that's why we're looking so hard at figuring out, how can the process be improved?
+   seg3 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=27 firstperson_starts=0
+      HEAD: The committee's report, compiled after months of public and private testimony, is expected to heavily focus on former President Donald Trump's efforts to overturn the 2020 election...
+
+================================================================================================
+#69 rowid=258251 class=D_mixed_case_label member='James Comer'  removed_nwords=131  segs=1
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=129 firstperson_starts=1
+      HEAD: Congressman Comer said right there that this is about the difference in treatment. Well, there's a very real factual reasons why there -- President Trump was treated differently. He withheld these doc
+      TAIL: ...nd was also potentially violating the Espionage Act. I think it's also important to note that, as Republicans widely are calling for more information on Biden, they have not said that they would investigate former President Trump's classified documents at all.
+
+================================================================================================
+#70 rowid=258252 class=D_mixed_case_label member='Adam Schiff'  removed_nwords=40  segs=1
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=38 firstperson_starts=0
+      HEAD: So, just like they called for in the case of President Trump's classified documents, Democrats are again calling for a damage assessment, which is very common when classified documents are found where
+
+================================================================================================
+#71 rowid=258253 class=D_mixed_case_label member='Adam Smith'  removed_nwords=115  segs=2
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=87 firstperson_starts=1
+      HEAD: While it's increasingly clear that other severe types of weather, like the recent flooding in California, droughts and longer wildfire seasons, all can be linked to global warming, the fingerprints of
+      TAIL: ...nd the Arctic, a region warming nearly four times faster than the rest of the world. Judah Cohen, Verisk Atmospheric and Environmental Research: The biggest changes we're seeing with climate change and are happening in the Arctic. I think there's a connection.
+   seg2 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=24 firstperson_starts=0
+      HEAD: Climate scientist Dr. Judah Cohen studies the links between Arctic warming and disruptions to the polar vortex, the swirling winds above the North Pole.
+
+================================================================================================
+#72 rowid=258611 class=D_mixed_case_label member='Lindsey Graham'  removed_nwords=22  segs=1
+   seg1 tag='Lisa Monaco, U.S. Deputy Attorney General' cls=D_mixed_case_label nwords=16 firstperson_starts=0
+      HEAD: Senator, I know the Department of Defense has had longstanding concerns about our engagement. The department...
+
+================================================================================================
+#73 rowid=258713 class=D_mixed_case_label member='Jeanne Shaheen'  removed_nwords=198  segs=3
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=79 firstperson_starts=0
+      HEAD: All the while, the war in Ukraine goes on. Overnight, Russian forces attacks Kyiv and Odessa in drone strikes, where Ukrainian forces struck down 26 of the 28 drones. But one month into the Ukrainian 
+      TAIL: ...erritory from Russia move slower than expected, and artillery is running low. Back in Vilnius, Ukraine welcomed a commitment by 11 allied countries to provide fighter jet training, and France announced it would send long-range missiles to the Ukrainian forces.
+   seg2 tag='Emmanuel Macron, French President (through translator)' cls=D_mixed_case_label nwords=25 firstperson_starts=1
+      HEAD: We have decided to deliver new deep-strike missiles to Ukraine. They will therefore be deployed in accordance with the commitments we have made with them.
+   seg3 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=84 firstperson_starts=0
+      HEAD: Ukraine has an ally in the summit's host city, where thousands of blue and yellow flags line the streets, an unmistakable signal of support for President Zelenskyy, who will meet with President Biden 
+      TAIL: ...e. Many at the summit are watching that meeting closely tomorrow between President Biden and President Zelenskyy, especially as President Biden has refused to back off his position that the conflict must be over before Ukraine can gain full membership to NATO.
+
+================================================================================================
+#74 rowid=258820 class=D_mixed_case_label member='Charles Schumer'  removed_nwords=347  segs=5
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=87 firstperson_starts=0
+      HEAD: Among the key things Zelenskyy asked for during his Capitol Hill visit, more air defense and long-range rockets, called ATACMS, which President Biden has been reluctant to provide. Just before Zelensk
+      TAIL: ...rity Adviser Jake Sullivan said the president would not be sending ATACMS to Ukraine, for now. Jake Sullivan, U.S. National Security Adviser: To date, he has determined that he would not provide ATACMS, but he has also not taken it off the table in the future.
+   seg2 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=65 firstperson_starts=0
+      HEAD: Later, at the White House, President Biden welcomed Zelenskyy and announced a new military aid package to Ukraine based on funds previously approved by Congress. Joe Biden, President of the United Sta
+      TAIL: .... Joe Biden, President of the United States: Today, I approved the next tranche of U.S. security assistance to Ukraine, including more artillery, more ammunition, more anti-tank weapons. And, next week, the first U.S. Abrams tanks will be delivered to Ukraine.
+   seg3 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=112 firstperson_starts=0
+      HEAD: American aid now and in the future is critical to Ukraine's survival. Early today, missiles rained over cities across Ukraine. It was Russia's largest aerial bombardment in more than a month. Some of 
+      TAIL: ...Cherkasy. And in Southern Ukraine, projectiles destroyed a residential block in Kherson, killing five and wounding more. Raising the stakes further, the Polish prime minister on television last night said Poland would stop sending military supplies to Ukraine.
+   seg4 tag='Mateusz Morawiecki, Polish Prime Minister (through interpreter)' cls=D_mixed_case_label nwords=18 firstperson_starts=1
+      HEAD: We are no longer transferring weapons to Ukraine because we're now arming ourselves with the most modern weapons.
+   seg5 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=50 firstperson_starts=0
+      HEAD: And just last week, Poland, Hungary and Slovakia announced a ban on Ukrainian grain imports, saying the move was to protect their farmers. Back in the U.S., as Republican infighting over more aid to U
+      TAIL: ...announced a ban on Ukrainian grain imports, saying the move was to protect their farmers. Back in the U.S., as Republican infighting over more aid to Ukraine continues, President Biden seeks to project strong support for a fellow democracy under brutal attack.
+
+================================================================================================
+#75 rowid=259085 class=D_mixed_case_label member='Henry Cuellar'  removed_nwords=84  segs=1
+   seg1 tag='Laura Barrón-López' cls=D_mixed_case_label nwords=82 firstperson_starts=0
+      HEAD: Homeland Security is now threatening legal action if they -- if Border Patrol is not granted access to this Shelby Park in Eagle Pass. But I wanted to get your reaction from -- on Governor Greg Abbott
+      TAIL: ...ht. Texas Governor Greg Abbott pushed back on what you accounted as the incident. And he blamed President Biden for the drowning, specifically saying: "The fact is, the deaths are because of Biden's open border magnet." What's your response to Governor Abbott?
+
+================================================================================================
+#76 rowid=70290 class=E_colonless_honorific member='Hakeem Jeffries'  removed_nwords=6  segs=1
+   seg1 tag='KAMALA HARRIS, VICE PRESIDENT OF THE' cls=E_colonless_honorific nwords=0 firstperson_starts=0
+      HEAD: 
+
+================================================================================================
+#77 rowid=74343 class=E_colonless_honorific member='Robert Garcia'  removed_nwords=4  segs=1
+   seg1 tag='REP. JASMINE CROCKETT (D-TX)' cls=E_colonless_honorific nwords=1 firstperson_starts=0
+      HEAD: ,
+
+================================================================================================
+#78 rowid=103939 class=E_colonless_honorific member='Tim Scott'  removed_nwords=64  segs=1
+   seg1 tag='FMR. GOV. NIKKI HALEY' cls=E_colonless_honorific nwords=60 firstperson_starts=1
+      HEAD: I don't want unelected justices deciding something this personal. … We're not going to let this be a political football. Let's let the states work this out. If Congress decides to do it -- but don't g
+      TAIL: ...onal. … We're not going to let this be a political football. Let's let the states work this out. If Congress decides to do it -- but don't get in that game of them saying “how many weeks, how many weeks.” No. Let's first figure out what we agree on. [END TAPE]
+
+================================================================================================
+#79 rowid=104834 class=E_colonless_honorific member='Joaquin Castro'  removed_nwords=18  segs=1
+   seg1 tag='REP. PRAMILA JAYAPAL' cls=E_colonless_honorific nwords=15 firstperson_starts=0
+      HEAD: Senate Democrats and the White House must not agree to these extreme demands [END TAPE]
+
+================================================================================================
+#80 rowid=188285 class=E_colonless_honorific member='Charles Schumer'  removed_nwords=2  segs=1
+   seg1 tag='SEN. MITCH' cls=E_colonless_honorific nwords=0 firstperson_starts=0
+      HEAD: 
+
+================================================================================================
+#81 rowid=191195 class=E_colonless_honorific member='Nancy Pelosi'  removed_nwords=9  segs=1
+   seg1 tag="HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S" cls=E_colonless_honorific nwords=1 firstperson_starts=0
+      HEAD: 28TH
+
+================================================================================================
+#82 rowid=192027 class=E_colonless_honorific member='Lucy McBath'  removed_nwords=10  segs=1
+   seg1 tag='REP. STEVE SCALISE' cls=E_colonless_honorific nwords=8 firstperson_starts=0
+      HEAD: , (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+
+================================================================================================
+#83 rowid=212286 class=E_colonless_honorific member='Rand Paul'  removed_nwords=6  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=4 firstperson_starts=0
+      HEAD: , DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================
+#84 rowid=213110 class=E_colonless_honorific member='Steve Scalise'  removed_nwords=6  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=4 firstperson_starts=0
+      HEAD: , DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================
+#85 rowid=213122 class=E_colonless_honorific member='Andy Kim'  removed_nwords=6  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=4 firstperson_starts=0
+      HEAD: , DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================
+#86 rowid=213926 class=E_colonless_honorific member='Rand Paul'  removed_nwords=6  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=4 firstperson_starts=0
+      HEAD: , DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================
+#87 rowid=220804 class=E_colonless_honorific member='Rand Paul'  removed_nwords=6  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=4 firstperson_starts=0
+      HEAD: , DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================
+#88 rowid=271136 class=E_colonless_honorific member='Glenn Grothman'  removed_nwords=8  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=6 firstperson_starts=0
+      HEAD: , DIRECTOR OF THE NATIONAL INSTITUTE
+
+================================================================================================
+#89 rowid=307009 class=E_colonless_honorific member='Rand Paul'  removed_nwords=7  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=5 firstperson_starts=0
+      HEAD: , FORMER DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================
+#90 rowid=307013 class=E_colonless_honorific member='James Lankford'  removed_nwords=7  segs=1
+   seg1 tag='DR. ANTHONY FAUCI' cls=E_colonless_honorific nwords=5 firstperson_starts=0
+      HEAD: , FORMER DIRECTOR, NATIONAL INSTITUTE
+

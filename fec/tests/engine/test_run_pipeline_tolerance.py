@@ -8,8 +8,8 @@ CHAIN entry, which is not something a unit test may trigger. The pure helpers
 extracted by ast and exec'd into a namespace that holds only ``os`` and ``json`` --
 that is the entire surface they may use.
 
-Runs under fec/tests/run_focused_tests.py (plain functions, ``tmp_path`` supplied
-positionally, no monkeypatch) and under pytest.
+Runs under pytest (plain functions, ``tmp_path`` supplied positionally, no
+monkeypatch).
 """
 from __future__ import annotations
 

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H5C46E5FA680B44E097E729601D66CE0A" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 240 IH: Expressing support for the designation of July 30, 2019, as “National Whistleblower Appreciation Day”.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 240</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190314">March 14, 2019</action-date><action-desc><sponsor name-id="S001175">Ms. Speier</sponsor> (for herself, <cosponsor name-id="C000984">Mr. Cummings</cosponsor>, <cosponsor name-id="M001187">Mr. Meadows</cosponsor>, <cosponsor name-id="R000602">Miss Rice of New York</cosponsor>, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, and <cosponsor name-id="T000468">Ms. Titus</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Expressing support for the designation of July 30, 2019, as <quote>National Whistleblower Appreciation Day</quote>.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas, in 1777, before the passage of the Bill of Rights, 10 sailors and marines blew the whistle on misconduct that was harmful to the United States;</text>
+ </whereas><whereas><text>Whereas the Continental Congress unanimously supported the whistleblowers in words and deeds, including by releasing Government records and authorizing payment for legal expenses incurred by the whistleblowers incurred in defending against a retaliatory criminal libel lawsuit brought against them;</text>
+ </whereas><whereas><text>Whereas, on July 30, 1778, in demonstration of their full support for whistleblowers, the Members of the Continental Congress unanimously enacted the first whistleblower legislation in the United States that read: <quote>Resolved, That it is the duty of all persons in the service of the United States, as well as all other the inhabitants thereof, to give the earliest information to Congress or other proper authority of any misconduct, frauds or misdemeanors committed by any officers or persons in the service of these states, which may come to their knowledge</quote>;</text>
+ </whereas><whereas><text>Whereas whistleblowers risk their careers, jobs, and reputations by reporting waste, fraud, and abuse to the proper authorities;</text>
+ </whereas><whereas><text>Whereas in providing the proper authorities with lawful disclosures, whistleblowers save the taxpayers of the United States billions of dollars each year and serve the public interest by ensuring that the United States remains an ethical and safe place; and</text>
+ </whereas><whereas><text>Whereas it is the public policy of the United States to encourage, in accordance with Federal law (including the Constitution of the United States, rules, and regulations) and consistent with the protection of classified information (including sources and methods of detection of classified information), honest and good faith reporting of misconduct, fraud, misdemeanors, and other crimes to the appropriate authority at the earliest time possible: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="H7FD28A6469CF44DB9E6FE1215C9CAF52" style="traditional">
+ <section display-inline="yes-display-inline" id="H3BD5FAB761D04527951CDE4FDF6A1642" section-type="undesignated-section"><enum></enum><text>That the House—</text> <paragraph id="H554AFC94BE4D4986AA335CBD00B41F76"><enum>(1)</enum><text>designates <quote>National Whistleblower Appreciation Day</quote>; and</text>
+ </paragraph><paragraph id="HA16CCBE62484456EBEE9D73381CA746E"><enum>(2)</enum><text>ensures that the Federal Government implements the intent of the Founding Fathers, as reflected in the legislation enacted on July 30, 1778, by encouraging each executive agency to recognize National Whistleblower Appreciation Day by—</text>
+ <subparagraph id="H05970A4179444A2181441E757245B089"><enum>(A)</enum><text>informing employees, contractors working on behalf of United States taxpayers, and members of the public about the legal right of a United States citizen to <quote>blow the whistle</quote> to the appropriate authority by honest and good faith reporting of misconduct, fraud, misdemeanors, or other crimes; and</text>
+ </subparagraph><subparagraph id="H8E4B2E9619CA48FF9DFFDF0C42187385"><enum>(B)</enum><text>acknowledging the contributions of whistleblowers to combating waste, fraud, abuse, and violations of laws and regulations of the United States.</text>
+				</subparagraph></paragraph></section></resolution-body></resolution>
+
+

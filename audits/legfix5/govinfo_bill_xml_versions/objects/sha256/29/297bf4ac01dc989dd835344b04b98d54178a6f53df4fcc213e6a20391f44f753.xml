@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H7003E298572F462A87C8CA7034BD3689" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4458 IH: Cybersecurity and Financial System Resilience Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-09-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4458</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190924">September 24, 2019</action-date><action-desc><sponsor name-id="M001156">Mr. McHenry</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require the Board of Governors of the Federal Reserve System to issue reports on cybersecurity
+			 with respect to the functions of the Federal Reserve System, and for other
+			 purposes.</official-title></form>
+	<legis-body id="H05618EE1C8344E7FA683B095392E41EE" style="OLC">
+ <section id="HBD86E71212CD4DC48B70C9A6EDEDD1C8" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Cybersecurity and Financial System Resilience Act of 2019</short-title></quote>.</text> </section><section id="H54BF035A2A894BC6BE1C3CB2FEE6D2CE"><enum>2.</enum><header>Cybersecurity report</header> <subsection id="HE45FF38A591B4BEAB6425CB7A256F997"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Not later than the end of the 180-day period beginning on the date of enactment of this Act, and annually thereafter, the Board of Governors of the Federal Reserve System shall submit a report to the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate that provides a detailed explanation on measures taken by the Board of Governors and the Federal reserve banks to strengthen cybersecurity with respect to the functions of the Federal Reserve System, including the supervision and regulation of financial institutions. Each such report shall specifically include a detailed explanation of—</text>
+ <paragraph id="H3FF644779C1F46D2861F9E2680340F17"><enum>(1)</enum><text>policies and procedures that guard against—</text> <subparagraph id="HA132390EC4344336A9F9DF5FCB533C0C"><enum>(A)</enum><text>efforts to deny access to or degrade, disrupt, or destroy any information and communications technology system or network, or exfiltrate information from such a system or network without authorization;</text>
+ </subparagraph><subparagraph id="HB3FEBD0B45644BE79CA2745624982A05"><enum>(B)</enum><text>destructive malware attacks;</text> </subparagraph><subparagraph id="HD124628AB1F34B94AC1C53B2204CFE45"><enum>(C)</enum><text>denial of service activities; and</text>
+ </subparagraph><subparagraph id="H3BD486EB436246AA9B17F0AC1FD7D885"><enum>(D)</enum><text>any other efforts that, in the determination of the Board, may threaten the functions of the Federal Reserve System by undermining cybersecurity; and</text>
+ </subparagraph></paragraph><paragraph id="H81AFA64C7F1542ACB19D2CF2D6EEA7A2"><enum>(2)</enum><text>activities to ensure the effective implementation of policies and procedures described under paragraph (1), including—</text>
+ <subparagraph id="HAABE93906A544592A968D09FE4977EA9"><enum>(A)</enum><text>the appointment of qualified staff, the provision of staff training, and the use of accountability measures to support staff performance;</text>
+ </subparagraph><subparagraph id="H48F7EB0A0C7E452ABD8B93E13017E19F"><enum>(B)</enum><text>deployment of adequate resources and technologies;</text> </subparagraph><subparagraph id="HF5B72698BEAE4AF8952D5E87F625B989"><enum>(C)</enum><text>the development and dissemination of best practices regarding cybersecurity; and</text>
+ </subparagraph><subparagraph id="H0927FF1F8062446BBE794A6FB263E217"><enum>(D)</enum><text>as appropriate, efforts to strengthen cybersecurity in coordination with departments and agencies of the Federal Government, foreign central banks, and other partners.</text>
+ </subparagraph></paragraph></subsection><subsection id="HDD056718F4E644CD9815F2F74AF275AE"><enum>(b)</enum><header>Form of report</header><text display-inline="yes-display-inline">The report required under subsection (a) shall be submitted in unclassified form, but may include a classified annex, if appropriate.</text>
+ </subsection><subsection id="HC4E706E6889645C2875D6FC15611E251"><enum>(c)</enum><header>Congressional briefing</header><text display-inline="yes-display-inline">The Chairman of the Board of Governors of the Federal Reserve System, or a member of the Board of Governors (as designated by the Chairman), shall provide a detailed briefing to the appropriate Members of Congress on each report submitted pursuant to subsection (a).</text>
+ </subsection><subsection id="H533B8E18EBAF4232804DEA0204400EF8"><enum>(d)</enum><header>Appropriate members of congress defined</header><text>For the purposes of this Act, the term <quote>appropriate Members of Congress</quote> means the following:</text> <paragraph id="HD7728C0F215D43B5BE6921EB1DA13C30"><enum>(1)</enum><text>The Chairman and Ranking Member of the Committee on Financial Services of the House of Representatives.</text>
+ </paragraph><paragraph id="H25413F6C647549B58DAA76D5AFB5AA25"><enum>(2)</enum><text>The Chairman and Ranking Member of the Committee on Banking, Housing, and Urban Affairs of the Senate.</text>
+ </paragraph></subsection><subsection id="HB6768A7158E34380969CB050DEF39919"><enum>(e)</enum><header>Sunset</header><text>The provisions of this Act shall have no force or effect on or after the date that is 7 years after the date of enactment of this Act.</text>
+			</subsection></section></legis-body></bill>
+
+

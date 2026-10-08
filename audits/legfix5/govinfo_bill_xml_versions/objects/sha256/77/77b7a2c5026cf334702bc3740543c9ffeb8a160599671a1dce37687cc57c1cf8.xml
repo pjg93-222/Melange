@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2443 IS: Investment in Tomorrow’s Pediatric Health Care Workforce Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-09-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2443</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190909">September 9, 2019</action-date>
+			<action-desc><sponsor name-id="S259">Mr. Reed</sponsor> (for himself and <cosponsor name-id="S373">Mr. Cassidy</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Public Health Service Act to provide for investment in tomorrow's pediatric health
+			 care workforce.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Investment in Tomorrow’s Pediatric Health Care Workforce Act</short-title></quote>.</text>
+ </section><section commented="no" id="HCF9C7893CE124113A4C32CD5F62D5FBD"><enum>2.</enum><header>Investment in tomorrow's pediatric health care workforce</header><text display-inline="no-display-inline">Section 775 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/295f">42 U.S.C. 295f</external-xref>) is amended to read as follows:</text> <quoted-block display-inline="no-display-inline" id="HB8408707BB1746ECA78E0D156312D5ED" style="OLC"> <section commented="no" id="HDE79FEDF15E2470AA51E977099B89823"><enum>775.</enum><header>Investment in tomorrow’s pediatric health care workforce</header> <subsection commented="no" id="H9AE398892EE048E4BB2E91D80C5C929C"><enum>(a)</enum><header>In general</header><text>The Secretary shall establish and carry out a program of entering into pediatric specialty loan repayment agreements with qualified health professionals under which—</text>
+ <paragraph id="HC8479A3B576B40F69B6C28C412A482E3"><enum>(1)</enum><text display-inline="yes-display-inline">the qualified health professional agrees to a period of not less than 2 years of obligated service during which the professional will—</text>
+ <subparagraph id="HB801F899C1A0421C9619A36B3E34157C"><enum>(A)</enum><text display-inline="yes-display-inline">participate in an accredited pediatric medical subspecialty, pediatric surgical specialty, child and adolescent psychiatry subspecialty, or child and adolescent mental and behavioral health residency or fellowship; or</text>
+ </subparagraph><subparagraph id="H9D97A97DE83A4078A0DDB12FC29E824E"><enum>(B)</enum><text display-inline="yes-display-inline">be employed full-time in providing pediatric medical subspecialty care, pediatric surgical specialty care, child and adolescent psychiatry subspecialty care, or child and adolescent mental and behavioral health care, including substance use disorder prevention and treatment services, in an area with—</text>
+ <clause id="HC2EC961B72E743E684380D8A457BBACD"><enum>(i)</enum><text display-inline="yes-display-inline">a shortage of health care professionals practicing in the pediatric medical subspecialty, the pediatric surgical specialty, the child and adolescent psychiatry subspecialty, or child and adolescent mental and behavioral health, as applicable; and</text>
+ </clause><clause id="H39F2B5892353489999DC5C8EC687CAF5"><enum>(ii)</enum><text display-inline="yes-display-inline">a sufficient pediatric population, as determined by the Secretary, to support the addition of a practitioner in the pediatric medical subspecialty, the pediatric surgical specialty, the child and adolescent psychiatry subspecialty, or child and adolescent mental and behavioral health, as applicable; and</text>
+ </clause></subparagraph></paragraph><paragraph commented="no" id="H753E1583FB4448389E6D67CF726835FF"><enum>(2)</enum><text>the Secretary agrees to make payments on the principal and interest of undergraduate, graduate, or graduate medical education loans of the qualified health professional of not more than $35,000 a year for each year of agreed upon service under paragraph (1) for a period of not more than 3 years.</text>
+						</paragraph></subsection><subsection commented="no" id="HF9FABBD4C70B42B2B51D681245E5C586"><enum>(b)</enum><header>Eligibility requirements</header>
+ <paragraph commented="no" id="H989BFFE5B41D4A9ABA81D5E3D7CE6880"><enum>(1)</enum><header>Pediatric medical specialists and pediatric surgical specialists</header><text>For purposes of loan repayment agreements under this section with respect to pediatric medical subspecialty and pediatric surgical specialty practitioners, the term <term>qualified health professional</term> means a licensed physician who—</text>
+ <subparagraph commented="no" id="H385BE0C3A01C43FA84DCE76CCE12B922"><enum>(A)</enum><text>is entering or receiving training in an accredited pediatric medical subspecialty or pediatric surgical subspecialty residency or fellowship; or</text>
+ </subparagraph><subparagraph commented="no" id="H555E58F6789B48FF8841221176D50A4B"><enum>(B)</enum><text>has completed (but not prior to the end of the calendar year in which the <short-title>Investment in Tomorrow’s Pediatric Health Care Workforce Act</short-title> is enacted) the training described in subparagraph (A).</text> </subparagraph></paragraph><paragraph commented="no" id="HB1732C71CF09440FBAC4BA9AE1E23688"><enum>(2)</enum><header>Child and adolescent psychiatry and mental and behavioral health</header><text>For purposes of loan repayment agreements under this section with respect to child and adolescent mental and behavioral health care, the term <term>qualified health professional</term> means a health care professional who—</text>
+ <subparagraph id="HFFF0E1DCD0F44AF6B46EB12201D9D477"><enum>(A)</enum><text display-inline="yes-display-inline">has received specialized training or clinical experience in child and adolescent mental health in psychiatry, psychology, school psychology, or psychiatric nursing;</text>
+ </subparagraph><subparagraph id="H09F29C6DC7124F04A9828A6C6C2F32AA"><enum>(B)</enum><text display-inline="yes-display-inline">has a license or certification in a State to practice allopathic medicine, osteopathic medicine, psychology, school psychology, or psychiatric nursing; or</text>
+ </subparagraph><subparagraph commented="no" id="H383335D9AC404121819FD19CA6C6B14F"><enum>(C)</enum><text display-inline="yes-display-inline">is a mental health service professional who has completed (but not before the end of the calendar year in which the <short-title>Investment in Tomorrow’s Pediatric Health Care Workforce Act</short-title> is enacted) specialized training or clinical experience in child and adolescent mental health described in subparagraph (A).</text>
+ </subparagraph></paragraph><paragraph commented="no" id="HDE50B234918A43E0ADBEF640A2AC22F7"><enum>(3)</enum><header>Additional eligibility requirements</header><text>The Secretary may not enter into a loan repayment agreement under this section with a qualified health professional unless—</text>
+ <subparagraph commented="no" id="H4DC27590E9E44BB9AF26925797E74693"><enum>(A)</enum><text>the professional agrees to work in, or for a provider serving, an area or community with a shortage of eligible qualified health professionals (as defined in paragraphs (1) and (2));</text>
+ </subparagraph><subparagraph commented="no" id="HD22BA1F732234EB7AC6C4026626070E4"><enum>(B)</enum><text display-inline="yes-display-inline">the professional is a United States citizen, a permanent legal United States resident, or lawfully present in the United States; and</text>
+ </subparagraph><subparagraph commented="no" id="HF8780B1017574229BCC68E778579D04A"><enum>(C)</enum><text>if the professional is enrolled in a graduate program, the program is accredited, and the professional has an acceptable level of academic standing (as determined by the Secretary).</text>
+ </subparagraph></paragraph></subsection><subsection commented="no" id="H62F4103948BE4E7980C388693DA77547"><enum>(c)</enum><header>Priority</header><text>In entering into loan repayment agreements under this section, the Secretary shall give priority to applicants who—</text>
+ <paragraph commented="no" id="H57CE041AFBF949A4B410226B7A709831"><enum>(1)</enum><text>have familiarity with evidence-based methods and cultural and linguistic competence in health care services; and</text>
+ </paragraph><paragraph commented="no" id="H557DF0752097483D83E78F6F5BB059EE"><enum>(2)</enum><text>demonstrate financial need.</text> </paragraph></subsection><subsection commented="no" id="H795B21934A0F4DC794C1798C6B02252E"><enum>(d)</enum><header>Authorization of appropriations</header><text>There are authorized to be appropriated for each of fiscal years 2020 through 2024—</text>
+ <paragraph commented="no" id="HFF5015D677D74A128E860810D4C7F045"><enum>(1)</enum><text display-inline="yes-display-inline">$30,000,000 to carry out this section with respect to loan repayment agreements with qualified health professionals described in subsection (b)(1); and</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="H4E18559D4931440E8D90B5E847235284"><enum>(2)</enum><text display-inline="yes-display-inline">$20,000,000 to carry out this section with respect to loan repayment agreements with respect to qualified health professionals described in subsection (b)(2).</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body>
+</bill>
+
+

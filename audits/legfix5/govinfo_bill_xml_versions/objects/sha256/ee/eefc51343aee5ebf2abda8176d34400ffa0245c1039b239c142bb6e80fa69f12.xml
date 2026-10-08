@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 134 STAT. ?>
+<?I98 134 STAT. ?>
+<?I99 134 STAT. ?>
+<?I50 PUBLIC LAW 116–342—JAN. 13, 2021?>
+<?I51 PUBLIC LAW 116–342—JAN. 13, 2021?>
+<?I52 PUBLIC LAW 116–342—JAN. 13, 2021?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 116–342: To provide regulatory relief to charitable organizations that provide housing assistance, and for other purposes.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>342</docNumber>
+<citableAs>Public Law 116–342</citableAs><citableAs>134 Stat. 5134</citableAs>
+<approvedDate>2021-01-13</approvedDate>
+<dc:date>2021-01-13</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>116</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 116–342—JAN. 13, 2021</centerRunningHead>
+<page identifier="/us/stat/134/5134">134 STAT. 5134</page>
+<dc:type>Public Law</dc:type><docNumber>116–342</docNumber>
+<congress value="116">116th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To provide regulatory relief to charitable organizations that provide housing assistance, and for other purposes.<sidenote><p class="centered fontsize8" id="xbfe83964-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076"><approvedDate date="2021-01-13">Jan. 13, 2021</approvedDate></p><p class="centered fontsize8" id="xbfe83965-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076">[<ref href="/us/bill/116/s/371">S. 371</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xbfe83966-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Building Up Independent Lives and Dreams Act.</p><p class="leftAlign firstIndent0 fontsize8" id="xbfe83967-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t12/s2601">12 USC 2601 note</ref>.</p></sidenote>
+<section id="d172977e92" identifier="/us/pl/116/342/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Building Up Independent Lives and Dreams Act</shortTitle>” or the “<shortTitle role="act">BUILD Act</shortTitle>”.</content></section>
+<section id="d172977e105" identifier="/us/pl/116/342/s2" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>MORTGAGE LOAN TRANSACTION DISCLOSURE REQUIREMENTS.</heading><subsection class="firstIndent0 fontsize10" id="ybfe88788-e820-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/116/342/s2/a" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><heading class="fontsize10"><inline class="smallCaps">TILA Amendment</inline>.—</heading><content>Section 105 of the Truth in Lending Act (<ref href="/us/usc/t15/s1604">15 U.S.C. 1604</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="insert">inserting</amendingAction> after subsection (d) the following:<quotedContent><subsection class="firstIndent0 fontsize10" id="ybfe88789-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="e">“(e) </num><heading class="fontsize10"><inline class="smallCaps">Disclosure for Charitable Mortgage Loan Transactions</inline>.—</heading><content>With respect to a mortgage loan transaction involving a residential mortgage loan offered at 0 percent interest with only bonafide and reasonable fees and that is primarily for charitable purposes by an organization described in section 501(c)(3) of the Internal Revenue Code of 1986 and exempt from taxation under section 501(a) of such Code, forms HUD–1 and GFE (as defined under <ref href="/us/cfr/t12/s1024.2/b">section 1024.2(b) of title 12, Code of Federal Regulations</ref>) together with a disclosure substantially in the form of the Loan Model Form H–2 (as depicted in <ref href="/us/cfr/t12/pt1026/appH">Appendix H to part 1026 of title 12, Code of Federal Regulations</ref>) shall, collectively, be an appropriate model form for purposes of subsection (b) of this section.”</content></subsection>
+</quotedContent>.</content></subsection>
+<subsection class="firstIndent0 fontsize10" id="ybfe8878a-e820-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/116/342/s2/b" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">RESPA Amendment</inline>.—</heading><content>Section 4 of the Real Estate Settlement Procedures Act of 1974 (<ref href="/us/usc/t12/s2603">12 U.S.C. 2603</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="add">adding</amendingAction> at the end the following:<quotedContent><subsection class="firstIndent0 fontsize10" id="ybfe8878b-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="d">“(d) </num><heading class="fontsize10"><inline class="smallCaps">Disclosure for Charitable Mortgage Loan Transactions</inline>.—</heading><content>With respect to a mortgage loan transaction involving a residential mortgage loan offered at 0 percent interest with only bonafide and reasonable fees and that is primarily for charitable purposes, an organization described in section 501(c)(3) of the Internal Revenue Code of 1986 and exempt from taxation under section 501(a) of such Code may use forms HUD–1 and GFE (as defined under <ref href="/us/cfr/t12/s1024.2/b">section 1024.2(b) of title 12, Code of Federal Regulations</ref>) together with a disclosure substantially in the form of the Loan Model Form H–2 (as depicted in <ref href="/us/cfr/t12/pt1026/appH">Appendix H to part 1026 of title 12, Code of Federal Regulations</ref>), collectively, in lieu of the disclosure published under subsection (a) of this section.”</content></subsection>
+</quotedContent>.<page identifier="/us/stat/134/5135">134 STAT. 5135</page></content></subsection>
+<subsection class="firstIndent0 fontsize10" id="ybfe8878c-e820-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/116/342/s2/c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="c">(c) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xbfe8878d-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t12/s2603">12 USC 2603 note</ref>.</p></sidenote><heading class="fontsize10"><inline class="smallCaps">Effective Date</inline>.—</heading><content>The amendments made by subsections (a) and (b) shall take effect on the date of the enactment of this Act.</content></subsection>
+</section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2021-01-13">January 13, 2021</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/116/s/371">S. 371</ref> (<ref href="/us/bill/116/hr/1060">H.R. 1060</ref>):</heading>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 166 (2020):</heading>
+<p class="indentUp4 firstIndent-1" id="xbfe8ae9e-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Dec. 21, considered and passed Senate.</p><p class="indentUp4 firstIndent-1" id="xbfe8ae9f-e820-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Dec. 31, considered and passed House.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

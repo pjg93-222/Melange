@@ -1,0 +1,108 @@
+{
+ "flagged_pairs": [
+  {
+   "a": "bpf",
+   "b": "cooperation_v2_z",
+   "spearman": 0.8877807290663184,
+   "pearson": 0.8837272328223112,
+   "party_partial": 0.8889691736088318,
+   "n": 314
+  },
+  {
+   "a": "stance_score_mean",
+   "b": "stance_pers_mean",
+   "spearman": 0.9768588981500539,
+   "pearson": 0.9775852850911163,
+   "party_partial": 0.9785079037751471,
+   "n": 533
+  },
+  {
+   "a": "stance_score_mean",
+   "b": "stance_none_share",
+   "spearman": -0.7366475721867223,
+   "pearson": -0.7324375327817256,
+   "party_partial": -0.7673999342803741,
+   "n": 533
+  },
+  {
+   "a": "stance_score_mean",
+   "b": "breadth_z",
+   "spearman": 0.743437058002242,
+   "pearson": 0.7462354398207741,
+   "party_partial": 0.7818505002714822,
+   "n": 511
+  },
+  {
+   "a": "stance_pers_mean",
+   "b": "stance_none_share",
+   "spearman": -0.7210707950434269,
+   "pearson": -0.7125615013056489,
+   "party_partial": -0.7353465827775555,
+   "n": 533
+  },
+  {
+   "a": "stance_pers_mean",
+   "b": "breadth_z",
+   "spearman": 0.7415280162519197,
+   "pearson": 0.7397027298256317,
+   "party_partial": 0.7627669224688932,
+   "n": 511
+  },
+  {
+   "a": "stance_none_share",
+   "b": "breadth_z",
+   "spearman": -0.8508050884481196,
+   "pearson": -0.8509146032185283,
+   "party_partial": -0.8446035355008706,
+   "n": 511
+  },
+  {
+   "a": "cooperation_v2_z",
+   "b": "M_seed_prob",
+   "spearman": 0.7565740637789188,
+   "pearson": 0.8053847502673371,
+   "party_partial": 0.8022786925332286,
+   "n": 314
+  },
+  {
+   "a": "security",
+   "b": "M_incent_mult",
+   "spearman": -0.773063858231035,
+   "pearson": -0.49827953749693177,
+   "party_partial": -0.5003370456492835,
+   "n": 533
+  },
+  {
+   "a": "M_susc_z",
+   "b": "M_edge_mult",
+   "spearman": 0.9999680020330661,
+   "pearson": 0.9999826454068155,
+   "party_partial": 0.9999811496884428,
+   "n": 533
+  },
+  {
+   "a": "M_susc_z",
+   "b": "M_susc_mult",
+   "spearman": 0.9999836940433893,
+   "pearson": 0.9999918478509474,
+   "party_partial": 0.9999911493750444,
+   "n": 533
+  },
+  {
+   "a": "M_pressure_mult",
+   "b": "M_incent_mult",
+   "spearman": 0.8955872620748722,
+   "pearson": 0.848028802933404,
+   "party_partial": 0.8470466514799823,
+   "n": 533
+  },
+  {
+   "a": "M_edge_mult",
+   "b": "M_susc_mult",
+   "spearman": 0.9999628099965397,
+   "pearson": 0.9999732058248091,
+   "party_partial": 0.9999708441401116,
+   "n": 533
+  }
+ ]
+}

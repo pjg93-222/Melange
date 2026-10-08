@@ -1,0 +1,16 @@
+﻿=== COMMAND (no --source-root => build_cumulative branch, line 508) ===
+python fec\collect\build_press_engine_feed.py --intake-receipt C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\receipts\intake_20260901.json --accepted-receipts-dir C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\data\engine\press_collection_receipts --tone-output C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\data\stance\press_refresh_tone.csv --fulltext-output C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\data\stance\press_refresh_fulltext.jsonl --mentions-output C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\data\press\official_mentions.jsonl --receipt-output C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\data\stance\press_refresh_feed_receipt.json
+
+=== ENV ===
+MONEYBALL_ROOT  = C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging
+MONEYBALL_DRAFT = C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\draft
+TEMP            = C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\tmp
+cwd             = C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\sentinel-collectors-progress-f7de7d
+
+=== EXIT CODE: 0   elapsed: 8.2s ===
+
+=== STDOUT ===
+press refresh feed: 294 stance rows + 22243 typed official mentions from 4 accepted runs
+
+
+=== STDERR ===

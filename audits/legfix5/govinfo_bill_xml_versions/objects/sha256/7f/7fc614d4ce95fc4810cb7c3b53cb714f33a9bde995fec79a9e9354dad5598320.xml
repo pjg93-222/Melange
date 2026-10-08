@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H5AE9537F3DD342CC8D5A85A6DEE86558" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 3006 IH: Promoting Resident Opportunities and Self-Sufficiency Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-05-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 3006</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210507">May 7, 2021</action-date>
+<action-desc><sponsor name-id="A000370">Ms. Adams</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To ensure that residents of certain housing projects converted under the rental assistance demonstration of the Department of Housing and Urban Development maintain eligibility for assistance under certain economic self-sufficiency programs, and for other purposes.</official-title>
+</form>
+<legis-body id="H88DDF332A7084F87A70E46CB30822FF8" style="OLC">
+<section id="H43DB7A60D6DC44EDA0CD1A710F1F6CCB" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Promoting Resident Opportunities and Self-Sufficiency Act</short-title></quote>.</text></section> <section id="HFD792287C5624F40B54C1F0FB4858922" section-type="subsequent-section"><enum>2.</enum><header>Resident Opportunity and Self-Sufficiency program</header><text display-inline="no-display-inline">Section 34 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437z-6">42 U.S.C. 1437z–6</external-xref>) is amended by adding at the end the following new subsection:</text>
+<quoted-block style="OLC" id="HD5FD16215C5A40438779F01A55B2E0F3" display-inline="no-display-inline">
+<subsection id="H79FB1C0DEF4848508EFEF3B996C8DA94"><enum>(f)</enum><header>Eligibility for RAD projects</header><text display-inline="yes-display-inline">Notwithstanding any other provision of this section, assistance under this section may be provided with respect to residents of any housing project for which assistance has been converted under the rental assistance demonstration program under the heading <quote>Rental Assistance Demonstration</quote> in title II of the Transportation, Housing and Urban Development, and Related Agencies Appropriations Act, 2012 (division C of <external-xref legal-doc="public-law" parsable-cite="pl/112/55">Public Law 112–55</external-xref>; 125 Stat. 673), if assistance was provided under this section with respect to such project before such conversion.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> <section id="H2BFF325C2EDB435F893472B2DD1145AD"><enum>3.</enum><header>Jobs-Plus Pilot initiative</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, assistance under the Jobs-Plus Pilot initiative of the Department of Housing and Urban Development initially authorized under the heading <quote>Public Housing Capital Fund</quote> in title II of the Transportation, Housing and Urban Development, and Related Agencies Appropriations Act, 2014 (division L of <external-xref legal-doc="public-law" parsable-cite="pl/113/76">Public Law 113–76</external-xref>; 128 Stat. 609) may be provided with respect to residents of any housing project for which assistance has been converted under the rental assistance demonstration program under the heading <quote>Rental Assistance Demonstration</quote> in title II of the Transportation, Housing and Urban Development, and Related Agencies Appropriations Act, 2012 (division C of <external-xref legal-doc="public-law" parsable-cite="pl/112/55">Public Law 112–55</external-xref>; 125 Stat. 673), if assistance was provided under such initiative with respect to such project before such conversion.</text></section>
+<section id="H4D8F4C13D36B418FB17E289A45192F20"><enum>4.</enum><header>Revised congregate housing services program</header><text display-inline="no-display-inline">Paragraph (6) of section 802(k) of the Cranston-Gonzalez National Affordable Housing Act of 1990 (<external-xref legal-doc="usc" parsable-cite="usc/42/8011">42 U.S.C. 8011(k)(6)</external-xref>) is amended—</text> <paragraph id="H1DF53512D5E2427FBC55DD59953CE3FD"><enum>(1)</enum><text>by redesignating subparagraphs (B) through (F) as subparagraphs (C) through (G), respectively; and</text></paragraph>
+<paragraph id="HCE95A826F02041D8AEF97CF3854AD7AD"><enum>(2)</enum><text>by inserting after subparagraph (A) the following new subparagraph:</text> <quoted-block style="OLC" id="HD99BE6CB9993497FAF6FC785DD4E3D2B" display-inline="no-display-inline"> <subparagraph id="HB79E7B82E678414E85A1644D74BC42BC"><enum>(B)</enum><text display-inline="yes-display-inline">public housing that has been converted to assistance under a project-based subsidy contract under section 8 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f</external-xref>) or under a contract under section 8(o)(13) of the United States Housing Act of 1937, and housing otherwise owned by a public housing agency (as such term is defined in section 8(o)(11) of such Act);</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section>
+</legis-body>
+</bill> 
+
+

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "files": [
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\v8_surface_candidate\\staffer_network_section.json",
+      "sha256": "81ede5be4dbd81ee9da160c0134a496f1b29f743bc8248885b9353d23d80a0f8",
+      "bytes": 5393487
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\v8_surface_candidate\\staffer_offices_section.json",
+      "sha256": "a5a2199aaefb0816529402ad9454b2938d00376cbb1fbb5c8e064300d9b3554e",
+      "bytes": 4132653
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\v8_surface_candidate\\staffer_organisations_section.json",
+      "sha256": "5a80c945574901a77b9c0d6a40efe3df31ed7749b1ab84975642a54a928c7f7a",
+      "bytes": 3939693
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\v8_surface_candidate\\staffer_clients_section.json",
+      "sha256": "d20a98b72a215dcd5687a90ef5be10b38bf56b809dd6527bdd81bb168326ee2e",
+      "bytes": 3892182
+    }
+  ],
+  "member_count": 533,
+  "ranked_staff_rows": 7675,
+  "tied_staff_rows": 888,
+  "bridge_rows": 25,
+  "distinct_referenced_payroll_ids": 21369,
+  "invalid_payroll_ids": [],
+  "outreach_complete_graph": true,
+  "outreach_unreachable_candidate_is_null": true
+}

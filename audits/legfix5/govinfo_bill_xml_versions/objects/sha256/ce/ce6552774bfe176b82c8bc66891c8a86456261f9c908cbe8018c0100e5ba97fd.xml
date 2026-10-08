@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H424E536FEE704053A8E066E470782FA7" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4170 IH: Ensuring National Constitutional Rights for Your Private Telecommunications Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-08-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4170</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190806">August 6, 2019</action-date><action-desc><sponsor name-id="L000582">Mr. Ted Lieu of California</sponsor> (for himself, <cosponsor name-id="D000617">Ms. DelBene</cosponsor>, and <cosponsor name-id="J000289">Mr. Jordan</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name>, and in addition to the Committee on <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To preempt State data security vulnerability mandates and decryption requirements.</official-title></form>
+	<legis-body id="H34D7952B5981405CA4099162147C8BC0" style="OLC">
+ <section id="H30F321937AA144B7B7F11BAC9EB9B734" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Ensuring National Constitutional Rights for Your Private Telecommunications Act of 2019</short-title></quote> or the <quote><short-title>ENCRYPT Act of 2019</short-title></quote>.</text> </section><section id="HB251AD9FD85E4EFBB320F36893B1DC2D"><enum>2.</enum><header>Preemption of State data security vulnerability mandates and decryption requirements</header> <subsection id="HB629012F8FE04B0FB128BB1F64B3515F"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">A State or political subdivision of a State may not—</text>
+ <paragraph id="HCC2C826ACE274C3284E8A7103C77CD4B"><enum>(1)</enum><text>mandate or request that a manufacturer, developer, seller, or provider of covered products or services—</text>
+ <subparagraph id="HBEBC6B28F34E42E683D24164C7DFACF3"><enum>(A)</enum><text>design or alter the security functions in its product or service to allow the surveillance of any user of such product or service, or to allow the physical search of such product, by any agency or instrumentality of a State, a political subdivision of a State, or the United States; or</text>
+ </subparagraph><subparagraph id="HB74374CFDA714430B077573CD25C6E9F"><enum>(B)</enum><text>have the ability to decrypt or otherwise render intelligible information that is encrypted or otherwise rendered unintelligible using its product or service; or</text>
+ </subparagraph></paragraph><paragraph id="HF7F4936DB69D41D7BB8BFBA29E76E865"><enum>(2)</enum><text>prohibit the manufacture, sale or lease, offering for sale or lease, or provision to the general public of a covered product or service because such product or service uses encryption or a similar security function.</text>
+ </paragraph></subsection><subsection id="H33AB3F5F98F84AD8A525F14BEFD34286"><enum>(b)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="H5260390D9EBB41EFBA7EF265668006BD"><enum>(1)</enum><header>Covered product or service</header><text display-inline="yes-display-inline">The term <quote>covered product or service</quote> means any computer hardware, computer software, electronic device, or online service that—</text>
+ <subparagraph id="H724BA3B7037748709CDA7DA835F4FF4F"><enum>(A)</enum><text display-inline="yes-display-inline">has traveled in interstate or foreign commerce or otherwise affects interstate or foreign commerce; and</text>
+ </subparagraph><subparagraph id="HB1137F03657146A7ADD4134DB3AC931B"><enum>(B)</enum><text>is made available to the general public.</text> </subparagraph></paragraph><paragraph id="H763BF2E82E5A4CA884721F5E7D9C1258"><enum>(2)</enum><header>Online service</header><text>The term <quote>online service</quote> means a service provided over the internet that makes available to users—</text>
+ <subparagraph id="HDF2623237E2F49A79E01424060676FBF"><enum>(A)</enum><text>the ability to send or receive communications, such as emails, text messages, photos, and audio and video communications;</text>
+ </subparagraph><subparagraph id="H5E8ABC15762E43258D3BD4ED3BCD86B9"><enum>(B)</enum><text>the ability to share data files with other users; or</text> </subparagraph><subparagraph id="HA1D755F1DD924C85B410F4F84607C109"><enum>(C)</enum><text>remote computer processing or storage.</text>
+ </subparagraph></paragraph><paragraph commented="no" id="H040AC1F29808439FBF3C3F685F5319C6"><enum>(3)</enum><header>State</header><text display-inline="yes-display-inline">The term <quote>State</quote> means each of the several States, the District of Columbia, each commonwealth, territory, or possession of the United States, and each federally recognized Indian Tribe.</text>
+				</paragraph></subsection></section></legis-body></bill>
+
+

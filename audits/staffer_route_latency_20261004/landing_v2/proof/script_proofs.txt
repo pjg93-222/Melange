@@ -1,0 +1,53 @@
+== dry run against LIVE itself (apply_landing.py without --apply: git apply --check, read-only)
+dry run (git apply --check, read-only): rc=0
+PASS  dry run against LIVE: rc=0
+
+== apply_landing.py on the scratch tree
+PASS  dry run on the scratch tree: dry run (git apply --check, read-only): rc=0
+PASS  the dry run wrote nothing
+apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  --apply on the scratch tree: rc=0
+PASS  every post-image hash matches the manifest
+PASS  a second --apply is refused (the targets moved): apply_to: {'ok': False, 'reason': 'target moved since the patch was cut', 'check_rc': None, 'apply_rc': None, 'mismatches': ['fec/surfaces/install_staffer_live.py', 'fec/surfaces/staffer_closeness_routes.py', 'fec/surfaces/staffer_distinct_routes.py', 'fec/surfaces/staffer_graph_snapshot.py', 'fec/surfaces/staffer_identity_web.py', 'fec/surfaces/staffer_live/README.md', 'fec/surfaces/staffer_live/index.html', 'fec/surfaces/staffer_live/staffer-inventory-worker.js', 'fec/surfaces/staffer_live/staffer-route.js', 'fec/surfaces/staffer_live_server.py', 'fec/surfaces/staffer_live_service.py', 'fec/surfaces/staffer_overlap_routes.py', 'fec/surfaces/staffer_route_cancel.py', 'fec/surfaces/staffer_routing.py', 'fec/surfaces/staffer_search_index.py', 'fec/surfaces/test_staffer_closeness_bidirectional.py', 'fec/tests/surfaces/staffer_latency_fixtures.py', 'fec/tests/surfaces/test_staffer_identity_status_count.py', 'fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs', 'fec/tests/surfaces/test_staffer_lock_free_view.py', 'fec/tests/surfaces/test_staffer_rebuild_view.py', 'fec/tests/surfaces/test_staffer_refresh_memo.py', 'fec/tests/surfaces/test_staffer_route_jobs.py', 'fec/tests/surfaces/test_staffer_route_jobs_client.cjs', 'fec/tests/surfaces/test_staffer_route_latency.py', 'fec/tests/surfaces/test_staffer_search_differential.py', 'fec/tests/surfaces/test_staffer_typeahead_http.py', 'fec/tests/surfaces/test_staffer_typeahead_identifiers.py']}
+
+== rollback_landing.py on the scratch tree
+restore pre-image  fec/surfaces/install_staffer_live.py
+restore pre-image  fec/surfaces/staffer_closeness_routes.py
+restore pre-image  fec/surfaces/staffer_distinct_routes.py
+restore pre-image  fec/surfaces/staffer_graph_snapshot.py
+restore pre-image  fec/surfaces/staffer_identity_web.py
+restore pre-image  fec/surfaces/staffer_live/README.md
+restore pre-image  fec/surfaces/staffer_live/index.html
+restore pre-image  fec/surfaces/staffer_live/staffer-inventory-worker.js
+restore pre-image  fec/surfaces/staffer_live/staffer-route.js
+restore pre-image  fec/surfaces/staffer_live_server.py
+restore pre-image  fec/surfaces/staffer_live_service.py
+restore pre-image  fec/surfaces/staffer_overlap_routes.py
+remove new file    fec/surfaces/staffer_route_cancel.py
+restore pre-image  fec/surfaces/staffer_routing.py
+remove new file    fec/surfaces/staffer_search_index.py
+remove new file    fec/surfaces/test_staffer_closeness_bidirectional.py
+remove new file    fec/tests/surfaces/staffer_latency_fixtures.py
+remove new file    fec/tests/surfaces/test_staffer_identity_status_count.py
+remove new file    fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
+remove new file    fec/tests/surfaces/test_staffer_lock_free_view.py
+remove new file    fec/tests/surfaces/test_staffer_rebuild_view.py
+remove new file    fec/tests/surfaces/test_staffer_refresh_memo.py
+remove new file    fec/tests/surfaces/test_staffer_route_jobs.py
+remove new file    fec/tests/surfaces/test_staffer_route_jobs_client.cjs
+remove new file    fec/tests/surfaces/test_staffer_route_latency.py
+remove new file    fec/tests/surfaces/test_staffer_search_differential.py
+remove new file    fec/tests/surfaces/test_staffer_typeahead_http.py
+remove new file    fec/tests/surfaces/test_staffer_typeahead_identifiers.py
+plan only; rerun with --rollback to restore
+PASS  plan only: rc=0
+PASS  the plan wrote nothing
+PASS  a file edited after the apply stops the rollback and nothing changes
+PASS     (the edited file and the rest are untouched)
+rolled back 28 files
+PASS  --rollback: rc=0
+PASS  every pre-image is back, byte for byte
+PASS  the 15 new files are gone
+PASS  a second rollback changes nothing
+
+result: ALL PASS

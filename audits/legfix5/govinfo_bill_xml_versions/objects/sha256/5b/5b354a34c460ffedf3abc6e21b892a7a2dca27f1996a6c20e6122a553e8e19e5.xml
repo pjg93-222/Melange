@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H62D00CD89ADF477996B3F0D4D6DCE61B" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 7734 IH: To amend title 31, United States Code, to require the timely production of reports to Congress under the Bank Secrecy Act, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-05-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7734</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20220512">May 12, 2022</action-date><action-desc><sponsor name-id="W000187">Ms. Waters</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 31, United States Code, to require the timely production of reports to Congress under the Bank Secrecy Act, and for other purposes.</official-title></form><legis-body id="HA6F5B7B260084D99A17C36CC24D0EE9D" style="OLC"> 
+<section id="H9B44F2E64D4A48BBAA3F4241AA6B2475" section-type="section-one"><enum>1.</enum><header>Timely production of Bank Secrecy Act reports to Congress</header><text display-inline="no-display-inline">Section 5319 of title 31, United States Code, is amended—</text> <paragraph id="H2D36582488AB4628AEDD779A3A77F44E"><enum>(1)</enum><text>by striking <quote>The Secretary of the Treasury</quote> and inserting the following:</text> 
+<quoted-block style="OLC" id="H81839A096B6949DAB542A76BEC561E62" display-inline="no-display-inline"> 
+<subsection id="H6D707CF6AD0245A2AA12384C8A0AB19A"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of the Treasury</text></subsection><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph> <paragraph id="H548C4557CF004118A0D4923ECB19777C"><enum>(2)</enum><text>by adding at the end the following:</text> 
+<quoted-block style="USC" id="HE35847F987264FECB6D820CE8C586682" display-inline="no-display-inline"> 
+<subsection id="H7EDA9654D22347AF8E473CC96C4E4E83"><enum>(b)</enum><header>Timely production of reports to Congress</header> 
+<paragraph id="HE615BBF5766140E383C0681BA7A968DA"><enum>(1)</enum><header>Production by the Secretary</header><text display-inline="yes-display-inline">Upon the request of any congressional committee or subcommittee of appropriate jurisdiction for any report filed under this subchapter, the Secretary of the Treasury shall deliver the requested report to the committee or subcommittee not later than 30 days after such request is made.</text></paragraph> <paragraph id="HAEB227FF8E794AA99909ED2266F6CFFC"><enum>(2)</enum><header>Production by a financial institution pursuant to a subpoena</header><text display-inline="yes-display-inline">Upon subpoena by any congressional committee or subcommittee of appropriate jurisdiction, a financial institution shall deliver a report filed under this subchapter by the financial institution, and any information on which such report is based, to the committee or subcommittee not later than the return date specified for such report in the subpoena.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> 
+</legis-body></bill>
+

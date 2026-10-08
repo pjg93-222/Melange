@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2162 IS: Securing America's Borders Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2162</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190718">July 18, 2019</action-date><action-desc><sponsor name-id="S345">Mr. Johnson</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Commissioner of U.S. Customs and Border Protection to annually hire at least 600 new
+			 Border Patrol agents, to report quarterly to Congress on the status of the
+			 Border Patrol workforce, and to conduct a comprehensive staffing analysis.</official-title></form>
+	<legis-body>
+ <section id="id52A05278EF39420090DDA33DC04CDD74" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Securing America's Borders Act of 2019</short-title></quote>.</text> </section><section id="id84d918eb8a7d47f9968e9d0635eafef5" section-type="subsequent-section"><enum>2.</enum><header>Additional border patrol personnel</header> <subsection id="id49159494a86c42f586711e1166b1e57c"><enum>(a)</enum><header>Agents</header><text>The Commissioner of U.S. Customs and Border Protection shall hire, train, and assign not fewer than 600 new Border Patrol agents, compared to the current attrition level, during every fiscal year until the total number of Border Patrol agents equals and sustains the requirements identified in Executive Order 13767 (82 Fed. Reg. 8793).</text>
+ </subsection><subsection id="id9c2d972b595d468db5d3b541d8b4f44b"><enum>(b)</enum><header>Support staff</header><text>The Commissioner is authorized to hire, train, and assign support staff to perform non-law enforcement administrative functions to support the new Border Patrol agents hired pursuant to subsection (a).</text>
+ </subsection><subsection id="idfa70497fcbdc4562a016c43f2944ba09"><enum>(c)</enum><header>Reports to Congress</header><text>Not later that 90 days after the date of the enactment of this Act, and every 90 days thereafter, the Commissioner shall submit a report to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs of the Senate</committee-name> and the <committee-name committee-id="">Committee on Homeland Security of the House of Representatives</committee-name> that describes the status of the Border Patrol workforce, including—</text>
+ <paragraph id="id997aab865b7045e2a5c3c0f9bee78b70"><enum>(1)</enum><text>the total number of Border Patrol agents;</text> </paragraph><paragraph id="idfd1de81efe564302bb5e8811cf538666"><enum>(2)</enum><text>the total number of Border Patrol support staff;</text>
+ </paragraph><paragraph id="id3e51900b85974e468f1f085ddf3cf62b"><enum>(3)</enum><text>the number of Border Patrol agents and support staff hired during the reporting period;</text> </paragraph><paragraph id="id03ff88d98eb74490aff1f40761a4080e"><enum>(4)</enum><text>the number of Border Patrol agents and support staff lost to attrition, broken down by port of entry; and</text>
+ </paragraph><paragraph id="id78a5f884ece048638a364986b0afaf46"><enum>(5)</enum><text>any hiring authorities, incentive pay, or other special pay incentives utilized during the reporting period.</text>
+ </paragraph></subsection></section><section id="id3ebb38c3a4e6438f80ba695b17a7ca35"><enum>3.</enum><header>Comprehensive staffing analysis</header><text display-inline="no-display-inline">The Commissioner of U.S. Customs and Border Protection shall—</text> <paragraph id="id85981480c9d64b9ab02ed53d46a3e243"><enum>(1)</enum><text>not later than 60 days after the date of the enactment of this Act, amend the comprehensive staffing analysis required under section 2(e) of the Border Patrol Agent Pay Reform Act of 2014 (<external-xref legal-doc="public-law" parsable-cite="pl/113/277">Public Law 113–277</external-xref>) based on any changes to workload demands since the date of the enactment of such Act; and</text>
+ </paragraph><paragraph id="id8d5343642fa240539a040256fe2b55e0"><enum>(2)</enum><text>not later than 90 days after the date of the enactment of this Act, submit a report to the Comptroller General of the United States that includes the results of a comprehensive staffing analysis, as required under section 2(e) of the Border Patrol Agent Pay Reform Act of 2014 (<external-xref legal-doc="public-law" parsable-cite="pl/113/277">Public Law 113–277</external-xref>).</text>
+ </paragraph></section><section id="id0D42CDFE3C314391999CE2E25B4207A3"><enum>4.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">There are authorized to be appropriated, for each of the fiscal years 2020 through 2026, such sums as may be necessary to carry out this Act.</text></section></legis-body></bill>
+
+

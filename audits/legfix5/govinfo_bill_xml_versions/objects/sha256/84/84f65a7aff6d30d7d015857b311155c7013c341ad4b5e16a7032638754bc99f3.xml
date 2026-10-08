@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S331 IS: Home Loan Quality Transparency Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-02-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 331</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190205">February 5, 2019</action-date>
+			<action-desc><sponsor name-id="S385">Ms. Cortez Masto</sponsor> (for herself, <cosponsor name-id="S306">Mr. Menendez</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, <cosponsor name-id="S386">Ms. Duckworth</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S275">Ms. Cantwell</cosponsor>, <cosponsor name-id="S221">Mrs. Feinstein</cosponsor>, <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>, <cosponsor name-id="S387">Ms. Harris</cosponsor>, <cosponsor name-id="S366">Ms. Warren</cosponsor>, <cosponsor name-id="S247">Mr. Wyden</cosponsor>, <cosponsor name-id="S394">Ms. Smith</cosponsor>, and <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Home Mortgage Disclosure Act of 1975 to modify the exemptions from certain disclosure
+			 requirements.</official-title>
+	</form>
+	<legis-body>
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Home Loan Quality Transparency Act of 2019</short-title></quote>.</text> </section><section id="id23F0F4D1EAF743A09E9BF60B737D8DDD" section-type="subsequent-section"><enum>2.</enum><header>Exemption from certain disclosure requirements</header> <subsection id="id69E655B4392C456184F312BD35D5C6BA"><enum>(a)</enum><header>In general</header> <text display-inline="yes-display-inline">Section 304 of the Home Mortgage Disclosure Act of 1975 (<external-xref legal-doc="usc" parsable-cite="usc/12/2803">12 U.S.C. 2803</external-xref>) is amended—</text>
+ <paragraph id="idD72A623AE04A40BB8CB7DB9C4CD7A179"><enum>(1)</enum><text display-inline="yes-display-inline">by striking subsection (i) and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="id22d1da7d5d35414b9cee93a2d5ea5b17" style="OLC"> <subsection id="id24768bdf2440434aaa071995cda51d06"><enum>(i)</enum><header>Exemption from certain disclosure requirements</header><text>The requirements of paragraphs (4), (5), and (6) of subsection (b) shall not apply with respect to any depository institution described in section 303(3)(A) that has total assets, as of the most recent full fiscal year of the institution, of $30,000,000 or less.</text></subsection><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="id542D8E9DC05341928DBEE1AB6C567CAA"><enum>(2)</enum><text>by striking subsection (o).</text> </paragraph></subsection><subsection id="id5D48DDDA4BB449DBA14FC935ABFE40F2"><enum>(b)</enum><header>Technical and conforming amendment</header><text>Section 104 of the Economic Growth, Regulatory Relief, and Consumer Protection Act (<external-xref legal-doc="public-law" parsable-cite="pl/115/174">Public Law 115–174</external-xref>) is amended by striking subsection (b).</text>
+			</subsection></section></legis-body>
+</bill>
+
+

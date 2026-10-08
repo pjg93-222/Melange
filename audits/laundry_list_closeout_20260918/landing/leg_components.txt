@@ -1,0 +1,15 @@
+legislative_pillar components: ['advancement_rates', 'agenda', 'agenda_percentile', 'automatic_bill_effects', 'blend', 'efficiency', 'efficiency_percentile', 'efficiency_weights', 'inputs_sha256', 'pi
+== Tim Scott
+   agenda                       48.162000000000006 -> 50.034000000000006
+   efficiency                   0.21717960614496337 -> 0.21228041639557577
+   efficiency_percentile        0.80075 -> 0.79511
+   pillar                       0.9270649999999998 -> 0.9253729999999999
+== Andrew Ogles
+== Pete Sessions
+members changed per component: {'advancement_rates': 1, 'agenda': 1, 'efficiency': 1, 'efficiency_percentile': 4, 'inputs_sha256': 2, 'pillar': 4}
+scalar automatic_bill_effects : [{'member': 'Janelle Bynum', 'bill': 'H.R.10082', 'category': 'Charter Modernization', 'category_contribution': 3.0, 'ag -> [{'member': 'Janelle Bynum', 'bill': 'H.R.10
+scalar unknown_advancement : [{'member': 'French Hill', 'bill': 'H.J.Res.59', 'congress': 119}, {'member': 'Daniel Meuser', 'bill': 'H.J.Res.59', 'co -> [{'member': 'French Hill', 'bill': 'H.J.Res.59'
+scalar selected_evidence : 8123 -> 8126
+scalar schema : live-legislative-pillar-v1 -> live-legislative-pillar-v1
+scalar blend : [0.7, 0.3] -> [0.7, 0.3]
+scalar policy : Accepted signed role-weighted agenda; signed decay-weighted sponsored/original bill advancement, normalized per category -> Accepted signed role-weighted agenda; signed decay-weighted 

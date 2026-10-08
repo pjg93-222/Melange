@@ -1,0 +1,67 @@
+{
+ "bars": {
+  "calibration_artifact_consumable": false,
+  "calibration_eer_rate_lte_0_05": false,
+  "caption_mismatch_n_gte_148": false,
+  "heldout_genuine_unit_accept_gte_0_90": false,
+  "heldout_impostor_unit_reject_gte_0_99": true,
+  "human_ratified_labels": false
+ },
+ "cache": {
+  "cache_hits": 504,
+  "directory": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\outputs\\audio_neural_fresh21\\b5_audio_neural_raw_embedding_cache.candidate",
+  "window_embeddings_total": 504
+ },
+ "calibration": {
+  "caption_mismatch_n": 0,
+  "eer_rate": 0.2261904761904762,
+  "status": "CALIBRATION_STOP_BAR_MISS",
+  "theta_accept": 1.0,
+  "theta_eer": 0.03936324746606282
+ },
+ "calibration_trials_sha256": "1212313d97e2ef46e375c3c788422e78c2bcbc2abeed08879ce832f1ffbf0f57",
+ "cohort_n": 21,
+ "consumed_cohort_exclusion": {
+  "member_n": 30,
+  "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audio_wav2vec_30member_scores.csv",
+  "sha256": "56870ca856ca5d45b4ae7e157d28b43416c1070f4dec45d5fa0821a81dd00a7c"
+ },
+ "disposition": "Fresh-member, fresh-source weak-label laboratory evidence only. Production remains blocked on human identity ratification and the 148 caption-mismatch bar.",
+ "head_sha256": "1a90f26bc5208908f32021ca7648880bad3c2d25ec86db3e9f5c35f2c91e7e1a",
+ "heldout_test": {
+  "decision_threshold": 0.03936324746606282,
+  "identity_min_margin": 0.1,
+  "segment": {
+   "genuine_accept_rate": 0.3333333333333333,
+   "genuine_n": 84,
+   "impostor_n": 1680,
+   "impostor_reject_rate": 0.9880952380952381
+  },
+  "threshold_role": "theta_eer research-only; theta_accept unavailable without mismatch negatives",
+  "unit_all_windows_must_pass": {
+   "genuine_accept_rate": 0.09523809523809523,
+   "genuine_n": 21,
+   "impostor_n": 420,
+   "impostor_reject_rate": 0.9976190476190476
+  }
+ },
+ "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+ "method": {
+  "batch_size": 8,
+  "classifier": "single neural linear layer",
+  "early_stopping_patience": 3,
+  "learning_rate": 0.001,
+  "loss": "cross_entropy",
+  "optimizer": "Adam",
+  "representation": "raw 768-dimensional mean-pooled facebook/wav2vec2-base",
+  "source": "Mestre and Ryan 2026, section 4.3 and footnote 9"
+ },
+ "model_manifest_sha256": "22a683ef5759bceea3b348a8f866de195f5b6d2980def3fc0f2f311988ad0ba3",
+ "production_consumers": 0,
+ "research_threshold_rule": "theta_eer fixed on calibration split; diagnostic only because this fresh cohort has zero caption-mismatch negatives and the consumable theta_accept bar cannot run",
+ "schema": "b5-audio-neural-pilot-v1",
+ "split_manifest_sha256": "539376fb0f9984075215ea5346e87cbea16051bb5b6800b0a02045be03f2f701",
+ "status": "FAILED_WEAK_LABEL_SMOKE",
+ "test_trials_sha256": "e06385fa19a42e41291a46f0bbf3b6144461673fefe8f0cbe51b43d7e45eac4f",
+ "thresholds_sha256": "029119b1b727d42493606cf1fecc8267f2741ae2d409b7ed6e902577c76a2f76"
+}

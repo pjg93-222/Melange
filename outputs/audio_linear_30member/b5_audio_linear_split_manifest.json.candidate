@@ -1,0 +1,1066 @@
+{
+ "caption_mismatch_clips": [
+  {
+   "identity": "MISMATCH",
+   "keep": false,
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Debbie Wasserman Schultz",
+   "path": "Debbie Wasserman Schultz/clip_BH9NmDnWppw.wav",
+   "speaker": "SOLO_TARGET"
+  },
+  {
+   "identity": "MISMATCH",
+   "keep": false,
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mark Pocan",
+   "path": "Mark Pocan/clip_tJ19wFgEfz4.wav",
+   "speaker": "SOLO_TARGET"
+  },
+  {
+   "identity": "MISMATCH",
+   "keep": false,
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Maxwell Frost",
+   "path": "Maxwell Frost/clip_BHRlWujNsa4.wav",
+   "speaker": "SOLO_TARGET"
+  }
+ ],
+ "cohort_members": [
+  "Chip Roy",
+  "Chuck Grassley",
+  "Dan Newhouse",
+  "Debbie Wasserman Schultz",
+  "Derrick Van Orden",
+  "Diana DeGette",
+  "Elizabeth Warren",
+  "Gus Bilirakis",
+  "Jack Bergman",
+  "James Himes",
+  "Jeff Merkley",
+  "John Larson",
+  "Marc Veasey",
+  "Mark Pocan",
+  "Maxwell Frost",
+  "Michael Bennet",
+  "Mike Lee",
+  "Nicole Malliotakis",
+  "Peter Welch",
+  "Richard Durbin",
+  "Robert Wittman",
+  "Ryan Zinke",
+  "Sara Jacobs",
+  "Shelley Capito",
+  "Steve Womack",
+  "Suzan DelBene",
+  "Suzanne Bonamici",
+  "Ted Cruz",
+  "Tim Walberg",
+  "Tommy Tuberville"
+ ],
+ "schema": "b5-audio-linear-split-manifest-v1",
+ "selected": [
+  {
+   "event_id": "Chip Roy/clip_7plN4FuU7E4.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chip Roy",
+   "path": "Chip Roy/clip_7plN4FuU7E4.wav",
+   "source_sha256": "c5b714879dbb680f77f95606270673934b3cfecb33f1aaf661756c1eafc81914",
+   "split": "train"
+  },
+  {
+   "event_id": "Chip Roy/clip_qKt2rHB3sDQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chip Roy",
+   "path": "Chip Roy/clip_qKt2rHB3sDQ.wav",
+   "source_sha256": "cd9911e1d4d331fdf3809f6ae15244e883f46aea0ecdffa2653a331f2a9435a1",
+   "split": "train"
+  },
+  {
+   "event_id": "Chip Roy/clip_rieVaVTKcb8.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chip Roy",
+   "path": "Chip Roy/clip_rieVaVTKcb8.wav",
+   "source_sha256": "7bfba4cf2899cd6d62e9002de284febb47a32214c832f57952bed79ef1c2fb96",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Chip Roy/clip_xEBY5S7hjZI.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chip Roy",
+   "path": "Chip Roy/clip_xEBY5S7hjZI.wav",
+   "source_sha256": "8e86ff6b60a6daf508b094e0f8058f6d0cdecb2e2876757af4041fde2898b905",
+   "split": "test"
+  },
+  {
+   "event_id": "Chuck Grassley/clip_1kplQcuHuoU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chuck Grassley",
+   "path": "Chuck Grassley/clip_1kplQcuHuoU.wav",
+   "source_sha256": "4788486f1d0c494732e6682b4830d0eba8f87c9d9879426f129ccf627d9104dd",
+   "split": "train"
+  },
+  {
+   "event_id": "Chuck Grassley/clip_6J0ksIyQ_zs.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chuck Grassley",
+   "path": "Chuck Grassley/clip_6J0ksIyQ_zs.wav",
+   "source_sha256": "d242d48519bb01ba5674b6a2a03bcb2abd7a4e55c57fad2527a7d65dab21cba2",
+   "split": "train"
+  },
+  {
+   "event_id": "Chuck Grassley/clip_8p1QzvVqCIg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chuck Grassley",
+   "path": "Chuck Grassley/clip_8p1QzvVqCIg.wav",
+   "source_sha256": "05ffb0e9a07dcc176a5dd622cc883aafb1a68c5c69fee4bbb71e2c31c49069f0",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Chuck Grassley/clip_Fw01E7zEZQo.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Chuck Grassley",
+   "path": "Chuck Grassley/clip_Fw01E7zEZQo.wav",
+   "source_sha256": "1806c64883042aef93afa8a2405a3789f75bfaa218284a65ff65fff16b5a7777",
+   "split": "test"
+  },
+  {
+   "event_id": "Dan Newhouse/clip_NGGGsitoOLA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Dan Newhouse",
+   "path": "Dan Newhouse/clip_NGGGsitoOLA.wav",
+   "source_sha256": "cd05cff31d926a03f93ebe41d60008836fe3bbbe957e08579604a0b308f9dd3c",
+   "split": "train"
+  },
+  {
+   "event_id": "Dan Newhouse/clip_mbU-yAdEdLk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Dan Newhouse",
+   "path": "Dan Newhouse/clip_mbU-yAdEdLk.wav",
+   "source_sha256": "30d107ac996026d4c6f20e97ead07afa16558e0c043bbf4c4470088ac9d6e763",
+   "split": "train"
+  },
+  {
+   "event_id": "Dan Newhouse/clip_utv7XitamG4.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Dan Newhouse",
+   "path": "Dan Newhouse/clip_utv7XitamG4.wav",
+   "source_sha256": "9e9a9266b9a0e5bce6f06b1da526a0063b90fded43106907f38db5856d91dc0d",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Dan Newhouse/clip_vCYKIwbfz1A.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Dan Newhouse",
+   "path": "Dan Newhouse/clip_vCYKIwbfz1A.wav",
+   "source_sha256": "97f97d96f30f5e2392668107fa6839219cca0e35cb7e585c104651b4f0bce291",
+   "split": "test"
+  },
+  {
+   "event_id": "Debbie Wasserman Schultz/clip_213lgTIL8ZA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Debbie Wasserman Schultz",
+   "path": "Debbie Wasserman Schultz/clip_213lgTIL8ZA.wav",
+   "source_sha256": "7523d1410a54bd7a0e109907a46dc0293cd813d6f5ea3c4069a88c6a65da9a71",
+   "split": "train"
+  },
+  {
+   "event_id": "Debbie Wasserman Schultz/clip_9jof3Od7tdY.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Debbie Wasserman Schultz",
+   "path": "Debbie Wasserman Schultz/clip_9jof3Od7tdY.wav",
+   "source_sha256": "5d7bc0b6cf8eed80389742dc24d02ffe6b8e5747f573b9e55492d351a862bbdd",
+   "split": "train"
+  },
+  {
+   "event_id": "Debbie Wasserman Schultz/clip_FjyGYlKCqyQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Debbie Wasserman Schultz",
+   "path": "Debbie Wasserman Schultz/clip_FjyGYlKCqyQ.wav",
+   "source_sha256": "01aaa0018b92de9b8770bd4b54e88ca0c03be166fabb80d36800e75990f80771",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Debbie Wasserman Schultz/clip_aheZoff1eGw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Debbie Wasserman Schultz",
+   "path": "Debbie Wasserman Schultz/clip_aheZoff1eGw.wav",
+   "source_sha256": "949d3aa52a30432fc77318c712aa1e8b6216e729ca16f9972da95309865c46e6",
+   "split": "test"
+  },
+  {
+   "event_id": "Derrick Van Orden/clip_09TsQVCsvn8.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Derrick Van Orden",
+   "path": "Derrick Van Orden/clip_09TsQVCsvn8.wav",
+   "source_sha256": "b5c379e85d7cb38344b19719a9ee0cf6df364081f682c33bad6c86d299649d2f",
+   "split": "train"
+  },
+  {
+   "event_id": "Derrick Van Orden/clip_DgY2r7hO10U.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Derrick Van Orden",
+   "path": "Derrick Van Orden/clip_DgY2r7hO10U.wav",
+   "source_sha256": "e8168a1ea8205748a9078e4f7fee0d86c984db1f8b5d2b8a8f28aed088cef437",
+   "split": "train"
+  },
+  {
+   "event_id": "Derrick Van Orden/clip_KeZzvyuqoyg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Derrick Van Orden",
+   "path": "Derrick Van Orden/clip_KeZzvyuqoyg.wav",
+   "source_sha256": "d7517b901b966c9ea22074a84fc18c491fc98df1e2ab68816d1ef5aa9a770ebd",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Derrick Van Orden/clip_wC8wMXAV-hA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Derrick Van Orden",
+   "path": "Derrick Van Orden/clip_wC8wMXAV-hA.wav",
+   "source_sha256": "5f2e785c2198ee9206425c2591c30091a16b200a5e2e8fb097f9c314374a2a3b",
+   "split": "test"
+  },
+  {
+   "event_id": "Diana DeGette/clip_1ClcyVNIe5s.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Diana DeGette",
+   "path": "Diana DeGette/clip_1ClcyVNIe5s.wav",
+   "source_sha256": "fc40791e7418f3692d6e3a8a1ac3eb9df681a0f79213e2450602ff012074299d",
+   "split": "train"
+  },
+  {
+   "event_id": "Diana DeGette/clip_F7zKrEXaAFQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Diana DeGette",
+   "path": "Diana DeGette/clip_F7zKrEXaAFQ.wav",
+   "source_sha256": "f1aaea6f0e45fd7b569209d1a41319e60d175296d831876423477cd9355671bf",
+   "split": "train"
+  },
+  {
+   "event_id": "Diana DeGette/clip_HznC2OkvADQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Diana DeGette",
+   "path": "Diana DeGette/clip_HznC2OkvADQ.wav",
+   "source_sha256": "5490393678365e856192f340b5c8b6bed66e4cfb4b743e3723f3be2306a1a473",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Diana DeGette/clip_PJjIz9f_fP4.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Diana DeGette",
+   "path": "Diana DeGette/clip_PJjIz9f_fP4.wav",
+   "source_sha256": "c8079e6ed00a877a3b5c69eff66414b04b3c1f46db657df94ac4fce5f1aaf8ab",
+   "split": "test"
+  },
+  {
+   "event_id": "Elizabeth Warren/clip_-EFX-UJAp_Q.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Elizabeth Warren",
+   "path": "Elizabeth Warren/clip_-EFX-UJAp_Q.wav",
+   "source_sha256": "ea5077a915e615e46d28e36a80be9cdbd6acb2437e637c7ef5feba85b3ff15e4",
+   "split": "train"
+  },
+  {
+   "event_id": "Elizabeth Warren/clip_VGYoRqBU02w.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Elizabeth Warren",
+   "path": "Elizabeth Warren/clip_VGYoRqBU02w.wav",
+   "source_sha256": "9323d8fffd10f034b1118f6f6b24832e3bd8ae2a9a50bed99540e8bbf74265b6",
+   "split": "train"
+  },
+  {
+   "event_id": "Elizabeth Warren/clip_vtATKMMG4Fk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Elizabeth Warren",
+   "path": "Elizabeth Warren/clip_vtATKMMG4Fk.wav",
+   "source_sha256": "924d458a9b270be23d3cf72ee76bb8a4068fee896dbee22c7a0a34484d4ebf5c",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Elizabeth Warren/clip_wYAHqxf-ILw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Elizabeth Warren",
+   "path": "Elizabeth Warren/clip_wYAHqxf-ILw.wav",
+   "source_sha256": "c954e906de077839f35d851dda3456665021fbacc0c2bbdc7aa3ef5b0f25bea3",
+   "split": "test"
+  },
+  {
+   "event_id": "Gus Bilirakis/clip_BKwCY1iEGaw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Gus Bilirakis",
+   "path": "Gus Bilirakis/clip_BKwCY1iEGaw.wav",
+   "source_sha256": "fc511be2102c0b9288c5c2a7f63b5fa52b7b56ab7887ef5f1596d4ccbe3505c1",
+   "split": "train"
+  },
+  {
+   "event_id": "Gus Bilirakis/clip_LwJ3ZqLNceI.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Gus Bilirakis",
+   "path": "Gus Bilirakis/clip_LwJ3ZqLNceI.wav",
+   "source_sha256": "cb903d72bdff1b5cac040d040420c537c364e01f8ea156fe27e663454c3e3b5a",
+   "split": "train"
+  },
+  {
+   "event_id": "Gus Bilirakis/clip_MrANqhHrQhM.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Gus Bilirakis",
+   "path": "Gus Bilirakis/clip_MrANqhHrQhM.wav",
+   "source_sha256": "c80511004b657991561d25479ff32b3cc97820b88833601aac65caef500a0156",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Gus Bilirakis/clip_P9wFhVi5M5s.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Gus Bilirakis",
+   "path": "Gus Bilirakis/clip_P9wFhVi5M5s.wav",
+   "source_sha256": "b922bf7c7b703b26d8492ad18edd721f7c7b86da1f69563d0c72e5a9ab39eb54",
+   "split": "test"
+  },
+  {
+   "event_id": "Jack Bergman/clip_38P3Bi77RYg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jack Bergman",
+   "path": "Jack Bergman/clip_38P3Bi77RYg.wav",
+   "source_sha256": "61cf56b955891d2bb227d21a842a4d214caf34298eeae0b3494b80c4050f3ecb",
+   "split": "train"
+  },
+  {
+   "event_id": "Jack Bergman/clip_5jL0w5Llw_I.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jack Bergman",
+   "path": "Jack Bergman/clip_5jL0w5Llw_I.wav",
+   "source_sha256": "a18ecdf00d793aa910bf49f642907c143f7df83d9660db18a6e47809c388afe2",
+   "split": "train"
+  },
+  {
+   "event_id": "Jack Bergman/clip_GBB9Jaz1Xzo.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jack Bergman",
+   "path": "Jack Bergman/clip_GBB9Jaz1Xzo.wav",
+   "source_sha256": "72ee1ca6158e76c7a23152e49031f02b09b3304f4c4f7b669b9ce7f6fe8b3066",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Jack Bergman/clip_zk5TyUI-zjE.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jack Bergman",
+   "path": "Jack Bergman/clip_zk5TyUI-zjE.wav",
+   "source_sha256": "e6eec43a1209b329cd3ca2dce30b09739769b32e683503cc4aad6006a7476c6f",
+   "split": "test"
+  },
+  {
+   "event_id": "James Himes/clip_LWPKG2MSxoI.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "James Himes",
+   "path": "James Himes/clip_LWPKG2MSxoI.wav",
+   "source_sha256": "6e32fa0b416bb9d16f9ab1a5d4c79f8f2bae756a4ab88fed7467f14ef2d12b7f",
+   "split": "train"
+  },
+  {
+   "event_id": "James Himes/clip_Vo7-NaMDilE.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "James Himes",
+   "path": "James Himes/clip_Vo7-NaMDilE.wav",
+   "source_sha256": "fac81125de1fbe7cc5322e3e39993dfb3772de23b88592eff07fc29d4507e776",
+   "split": "train"
+  },
+  {
+   "event_id": "James Himes/clip_XR90Xk2fmZE.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "James Himes",
+   "path": "James Himes/clip_XR90Xk2fmZE.wav",
+   "source_sha256": "053c9e9126c74b275918ef5b52f2a6a6055fb46da9ed60c439661fc391123c70",
+   "split": "calibration"
+  },
+  {
+   "event_id": "James Himes/clip_sYvnHBIehUY.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "James Himes",
+   "path": "James Himes/clip_sYvnHBIehUY.wav",
+   "source_sha256": "d41937e9a61f331448c28cb3d7796d6e0891ea31a9279a994af11dda8cf68099",
+   "split": "test"
+  },
+  {
+   "event_id": "Jeff Merkley/clip_N0kH_J0UyRw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jeff Merkley",
+   "path": "Jeff Merkley/clip_N0kH_J0UyRw.wav",
+   "source_sha256": "c507c327204099b59fcae3450965588da2996a05b08af4fcbfc23816639f4d58",
+   "split": "train"
+  },
+  {
+   "event_id": "Jeff Merkley/clip_YFIGH1iQbEE.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jeff Merkley",
+   "path": "Jeff Merkley/clip_YFIGH1iQbEE.wav",
+   "source_sha256": "867dbf009ca9566d4dfd9c31e434dbee797a30caade0dd6333b38fbdb982f9fb",
+   "split": "train"
+  },
+  {
+   "event_id": "Jeff Merkley/clip_ey-7h_tuDBE.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jeff Merkley",
+   "path": "Jeff Merkley/clip_ey-7h_tuDBE.wav",
+   "source_sha256": "5a2ff63f2f2a1a039aec59bad51cd5309411ea1793a874fd693f7f920ef4bca9",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Jeff Merkley/clip_iSCxtsRfKDo.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Jeff Merkley",
+   "path": "Jeff Merkley/clip_iSCxtsRfKDo.wav",
+   "source_sha256": "fde1c4c0669fb53683512dd23f40e425bad9a281497d49c71e3bc78e6514ba78",
+   "split": "test"
+  },
+  {
+   "event_id": "John Larson/clip_13zYdMxLnJU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "John Larson",
+   "path": "John Larson/clip_13zYdMxLnJU.wav",
+   "source_sha256": "4a837c78ed440fac385a61cdb754d4c02d75a69335bff588ec3112aac250b127",
+   "split": "train"
+  },
+  {
+   "event_id": "John Larson/clip_24hzeP6PRpk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "John Larson",
+   "path": "John Larson/clip_24hzeP6PRpk.wav",
+   "source_sha256": "3bafa5aa8998ec01355bb010cfb07ef84118f1e14e24f44d56f99118b69c671f",
+   "split": "train"
+  },
+  {
+   "event_id": "John Larson/clip_FTeuTbeQbfo.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "John Larson",
+   "path": "John Larson/clip_FTeuTbeQbfo.wav",
+   "source_sha256": "bf16393727bd0c7a584b26537fced95dcab28faaee2d8b8860506fdbc58f40bb",
+   "split": "calibration"
+  },
+  {
+   "event_id": "John Larson/clip_TPbbQ8kRKkQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "John Larson",
+   "path": "John Larson/clip_TPbbQ8kRKkQ.wav",
+   "source_sha256": "114d03696c9ae2333107342dd33f2e9455ec520026167618c764e50ae5e79fdb",
+   "split": "test"
+  },
+  {
+   "event_id": "Marc Veasey/clip_AUvcqPKLhew.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Marc Veasey",
+   "path": "Marc Veasey/clip_AUvcqPKLhew.wav",
+   "source_sha256": "175cbd110c838eccfb82790e1f6da95aa98d9aea5d42e157b60c048bc294c06e",
+   "split": "train"
+  },
+  {
+   "event_id": "Marc Veasey/clip_MBmjNjMSNMA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Marc Veasey",
+   "path": "Marc Veasey/clip_MBmjNjMSNMA.wav",
+   "source_sha256": "4b27e4ea8a6e7eae22f809dafc925530bea656c88c5fc33a8c10a6fff453a1ad",
+   "split": "train"
+  },
+  {
+   "event_id": "Marc Veasey/clip_Tb9WvQ0eXCI.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Marc Veasey",
+   "path": "Marc Veasey/clip_Tb9WvQ0eXCI.wav",
+   "source_sha256": "b15fd71db6086d1a067829984608f2409bfbde13f854e962c9195fe872108da6",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Marc Veasey/clip_qUKv7m-KcZU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Marc Veasey",
+   "path": "Marc Veasey/clip_qUKv7m-KcZU.wav",
+   "source_sha256": "1ab630466a32efb17b546af8a9a6dff7b060f90e4010395a2940438045f64451",
+   "split": "test"
+  },
+  {
+   "event_id": "Mark Pocan/clip_04WZu_WUT3M.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mark Pocan",
+   "path": "Mark Pocan/clip_04WZu_WUT3M.wav",
+   "source_sha256": "f24a27c0013364f7f0fc940ec3eeb83d946f4c5954c788eb1076ca8fde1e5be6",
+   "split": "train"
+  },
+  {
+   "event_id": "Mark Pocan/clip_MADHdKemTo0.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mark Pocan",
+   "path": "Mark Pocan/clip_MADHdKemTo0.wav",
+   "source_sha256": "4fb57091fff7996d30bed3ac6f9ad47b274d2c07d696865bde2ccc5a651d7629",
+   "split": "train"
+  },
+  {
+   "event_id": "Mark Pocan/clip_inM5h9bQH1s.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mark Pocan",
+   "path": "Mark Pocan/clip_inM5h9bQH1s.wav",
+   "source_sha256": "4e24f0404e82649a3e0f32e2228d8a693869253233bf228b326b7c450e6555f7",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Mark Pocan/clip_kPBdRP0RRd8.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mark Pocan",
+   "path": "Mark Pocan/clip_kPBdRP0RRd8.wav",
+   "source_sha256": "69e82c4141edd8efa32929f99fa611a021f39bda814f58f6eb64cb4bfa2e76b3",
+   "split": "test"
+  },
+  {
+   "event_id": "Maxwell Frost/clip_6ayXgPDAMTk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Maxwell Frost",
+   "path": "Maxwell Frost/clip_6ayXgPDAMTk.wav",
+   "source_sha256": "945ea0f8e801d9bb0978d4c2ad42283ed7cca89a117b201ddc8cd261ef988f6d",
+   "split": "train"
+  },
+  {
+   "event_id": "Maxwell Frost/clip_TWH4kyPI62k.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Maxwell Frost",
+   "path": "Maxwell Frost/clip_TWH4kyPI62k.wav",
+   "source_sha256": "d850879d262fe9990bf9aaeec195ed1f582a0f7465f3286e12f4d049c18f8a61",
+   "split": "train"
+  },
+  {
+   "event_id": "Maxwell Frost/clip_XICS1c_A0FA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Maxwell Frost",
+   "path": "Maxwell Frost/clip_XICS1c_A0FA.wav",
+   "source_sha256": "862e2167c7b6d6870984e64d8dc35593ffc83ac480667038003bcbc0241f635f",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Maxwell Frost/clip_aZPNMHwj3_M.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Maxwell Frost",
+   "path": "Maxwell Frost/clip_aZPNMHwj3_M.wav",
+   "source_sha256": "81f152e6dcd3fee93f6a4a9a3611f60ac7cd8a660673d0a8231e72d85c9826b8",
+   "split": "test"
+  },
+  {
+   "event_id": "Michael Bennet/clip_1LlCn-HZDuY.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Michael Bennet",
+   "path": "Michael Bennet/clip_1LlCn-HZDuY.wav",
+   "source_sha256": "85cc7958e3c88cbff7df24218c31870cfc263166278d8a5453379edd95127377",
+   "split": "train"
+  },
+  {
+   "event_id": "Michael Bennet/clip_1LzkCKSgYIg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Michael Bennet",
+   "path": "Michael Bennet/clip_1LzkCKSgYIg.wav",
+   "source_sha256": "8ffdc2669cb1c43d5bad0fd7c310aeff1386c27c587fe32e16f3f5186bbc4fec",
+   "split": "train"
+  },
+  {
+   "event_id": "Michael Bennet/clip_BPnFf3XlB-Y.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Michael Bennet",
+   "path": "Michael Bennet/clip_BPnFf3XlB-Y.wav",
+   "source_sha256": "e7356ac45e94587bc4126e9a6e98b58dce469d795472efe94c3751ad9962aed7",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Michael Bennet/clip_GEedWt0DuAc.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Michael Bennet",
+   "path": "Michael Bennet/clip_GEedWt0DuAc.wav",
+   "source_sha256": "01373ef83f9efd759b65bdf11ea1dc83fcd7669a4d80c6efd4fedc54bdb91516",
+   "split": "test"
+  },
+  {
+   "event_id": "Mike Lee/clip_chIlDHHaTAc.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mike Lee",
+   "path": "Mike Lee/clip_chIlDHHaTAc.wav",
+   "source_sha256": "54f1f6e94b86d5ebcc6c4828b98ddcfe52def233f185aaac4051f4d1ebcf90d2",
+   "split": "train"
+  },
+  {
+   "event_id": "Mike Lee/clip_eOxpyONVU_k.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mike Lee",
+   "path": "Mike Lee/clip_eOxpyONVU_k.wav",
+   "source_sha256": "c70d8d2a717bbfbcedc270f310fa9a74c1d310f51567a32bc3223180dd16ac50",
+   "split": "train"
+  },
+  {
+   "event_id": "Mike Lee/clip_hyjWMAlMu2w.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mike Lee",
+   "path": "Mike Lee/clip_hyjWMAlMu2w.wav",
+   "source_sha256": "7047c93a2aae6be310718b90765ce7c374473d14bc977c84a23c42270f5f1cec",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Mike Lee/clip_kEek8vkwb_M.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Mike Lee",
+   "path": "Mike Lee/clip_kEek8vkwb_M.wav",
+   "source_sha256": "7e479010a11ad66d9f8f849fba77dda22490e5b5a67b4e54bdae17d04d9ccc67",
+   "split": "test"
+  },
+  {
+   "event_id": "Nicole Malliotakis/clip_3dDkdZWQFaM.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Nicole Malliotakis",
+   "path": "Nicole Malliotakis/clip_3dDkdZWQFaM.wav",
+   "source_sha256": "900a71fba8c621f4fda2ed5c9a3cb543b09dff852eed94511fade74c89fa9afc",
+   "split": "train"
+  },
+  {
+   "event_id": "Nicole Malliotakis/clip_8kD-ToOJ0Nw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Nicole Malliotakis",
+   "path": "Nicole Malliotakis/clip_8kD-ToOJ0Nw.wav",
+   "source_sha256": "f665b10e001680b6e250fac65a4e28937ee77076cfaa135f709efb6531024767",
+   "split": "train"
+  },
+  {
+   "event_id": "Nicole Malliotakis/clip_FQkSIwbJ_Ps.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Nicole Malliotakis",
+   "path": "Nicole Malliotakis/clip_FQkSIwbJ_Ps.wav",
+   "source_sha256": "70050cd693f012d20822aaa4dfb7976e0a537cc65ebfaf36fd77c6c484f54382",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Nicole Malliotakis/clip_LNGKKWy5WCM.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Nicole Malliotakis",
+   "path": "Nicole Malliotakis/clip_LNGKKWy5WCM.wav",
+   "source_sha256": "152107ce89fb067cfc70493664a55c8d35b13e71d7d5533d907cf7fd4f7589a2",
+   "split": "test"
+  },
+  {
+   "event_id": "Peter Welch/clip_39dybSp7MhA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Peter Welch",
+   "path": "Peter Welch/clip_39dybSp7MhA.wav",
+   "source_sha256": "d364c350224cbc4ad3b64124bfc390fd3466cd91fa776866fd8f13b4a5f1cc25",
+   "split": "train"
+  },
+  {
+   "event_id": "Peter Welch/clip_a_FGp-Ikal4.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Peter Welch",
+   "path": "Peter Welch/clip_a_FGp-Ikal4.wav",
+   "source_sha256": "a268d70d8811d81978f75dc2bb3ab430aa4deb63fef8e17130d93f3b4e67dafe",
+   "split": "train"
+  },
+  {
+   "event_id": "Peter Welch/clip_jk8uCbLh0nY.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Peter Welch",
+   "path": "Peter Welch/clip_jk8uCbLh0nY.wav",
+   "source_sha256": "c02c1e99fbac7e71c9b349da45eb7a1f16a0ebaa5f85338bf30d940179729e17",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Peter Welch/clip_oCXwV2rbKSg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Peter Welch",
+   "path": "Peter Welch/clip_oCXwV2rbKSg.wav",
+   "source_sha256": "8dc30c3aaf8a4bb04aa38f95cba8c3623264e2338fe2e424e9699f75893efcc8",
+   "split": "test"
+  },
+  {
+   "event_id": "Richard Durbin/clip_BQjAGyTkWpU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Richard Durbin",
+   "path": "Richard Durbin/clip_BQjAGyTkWpU.wav",
+   "source_sha256": "9b5be103cf48108f298380a29d90dd431ea59118ebc673806f27294158fdb53d",
+   "split": "train"
+  },
+  {
+   "event_id": "Richard Durbin/clip_IMJldau41ZM.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Richard Durbin",
+   "path": "Richard Durbin/clip_IMJldau41ZM.wav",
+   "source_sha256": "adbc3ab7f0429cf95c0262a0737b8601175b8cf218b23e4d3a3ce678de77dd3e",
+   "split": "train"
+  },
+  {
+   "event_id": "Richard Durbin/clip_T7cT3q-SMR4.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Richard Durbin",
+   "path": "Richard Durbin/clip_T7cT3q-SMR4.wav",
+   "source_sha256": "fd21309bd2f3a9a0b7d7b9d860339e597fdf610a1b03d87bb49ee3fc6b573851",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Richard Durbin/clip_eOC5Zd2mPOw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Richard Durbin",
+   "path": "Richard Durbin/clip_eOC5Zd2mPOw.wav",
+   "source_sha256": "4fd9b4ca1c27b59dfb55f26d500488ec7b022578351169ef8251d9b60f9b59e8",
+   "split": "test"
+  },
+  {
+   "event_id": "Robert Wittman/clip_FPnnPRc9kB4.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Robert Wittman",
+   "path": "Robert Wittman/clip_FPnnPRc9kB4.wav",
+   "source_sha256": "27c8ec20939c969094d2fd619be1799f3cba61a63fe2293de4b6ba5e33654c52",
+   "split": "train"
+  },
+  {
+   "event_id": "Robert Wittman/clip__7V7L_C8mpw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Robert Wittman",
+   "path": "Robert Wittman/clip__7V7L_C8mpw.wav",
+   "source_sha256": "55b0d317c79d2d951e2cd6257cf9dabebad8469450dfc9a718ca7f801b38db61",
+   "split": "train"
+  },
+  {
+   "event_id": "Robert Wittman/clip_gWXGcbGjAKk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Robert Wittman",
+   "path": "Robert Wittman/clip_gWXGcbGjAKk.wav",
+   "source_sha256": "af03cf49bbd76c70503e2f28f724efb25c8def75adbb498c22ac48659ca32fe5",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Robert Wittman/clip_kVh9nHuGZIM.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Robert Wittman",
+   "path": "Robert Wittman/clip_kVh9nHuGZIM.wav",
+   "source_sha256": "68a64473b2b3f7cde8875545d2a6a9641a7018ae07e2319e4496fe4213969acf",
+   "split": "test"
+  },
+  {
+   "event_id": "Ryan Zinke/clip_Ai9P_bZhG68.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ryan Zinke",
+   "path": "Ryan Zinke/clip_Ai9P_bZhG68.wav",
+   "source_sha256": "704f8a43f370e03662cff62de5d5a59605fe52eadbf70521064a2b9a26878884",
+   "split": "train"
+  },
+  {
+   "event_id": "Ryan Zinke/clip_MgngyAZG95c.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ryan Zinke",
+   "path": "Ryan Zinke/clip_MgngyAZG95c.wav",
+   "source_sha256": "8bed23309079378ee4b54dd56f6960d64c2ab506a3a7f91662e6ae69de4d1b6c",
+   "split": "train"
+  },
+  {
+   "event_id": "Ryan Zinke/clip_PZhGxS29GiQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ryan Zinke",
+   "path": "Ryan Zinke/clip_PZhGxS29GiQ.wav",
+   "source_sha256": "5b4a9911587be108506133e8ac39b78b32bf252bfe93188d67290b6ccb5c8fed",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Ryan Zinke/clip_d46FAH1mr3c.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ryan Zinke",
+   "path": "Ryan Zinke/clip_d46FAH1mr3c.wav",
+   "source_sha256": "50816ba6cfd5b0254ce90bf6e2dcaff8b9f4f1b824b324234cc659dc650d79c6",
+   "split": "test"
+  },
+  {
+   "event_id": "Sara Jacobs/clip_MhQMQ33X4Yg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Sara Jacobs",
+   "path": "Sara Jacobs/clip_MhQMQ33X4Yg.wav",
+   "source_sha256": "eb562ee3a59a8c69ec7c067567365b4bf2d7265e2ae22257190f8e611eb5d457",
+   "split": "train"
+  },
+  {
+   "event_id": "Sara Jacobs/clip__FaukfmN5zo.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Sara Jacobs",
+   "path": "Sara Jacobs/clip__FaukfmN5zo.wav",
+   "source_sha256": "97910251416d689b493e4ae5bf29613573b1eb8eec0ba9a0d63b14b3cc98c362",
+   "split": "train"
+  },
+  {
+   "event_id": "Sara Jacobs/clip_uqAevLU9kp0.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Sara Jacobs",
+   "path": "Sara Jacobs/clip_uqAevLU9kp0.wav",
+   "source_sha256": "a84d7bb6e99fa768e9d88e715b057a2776ea5033dd0fbc4da649e55fedb1685d",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Sara Jacobs/clip_zA5prWwlozw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Sara Jacobs",
+   "path": "Sara Jacobs/clip_zA5prWwlozw.wav",
+   "source_sha256": "01feeedacdffa73bf6702f8c08962bca7c1175c80da7751d8b552d1167b70356",
+   "split": "test"
+  },
+  {
+   "event_id": "Shelley Capito/clip_d5waZUNrKuY.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Shelley Capito",
+   "path": "Shelley Capito/clip_d5waZUNrKuY.wav",
+   "source_sha256": "3b4b89eed4d8b4be876e8e2bcaf88f40c2cbc93a5fbdc74b63939cfbe9619b35",
+   "split": "train"
+  },
+  {
+   "event_id": "Shelley Capito/clip_fMToajkLsUI.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Shelley Capito",
+   "path": "Shelley Capito/clip_fMToajkLsUI.wav",
+   "source_sha256": "75c85a4f12a744466389d7f4879922528fe316b2d5b03eed380d1b2e9160d155",
+   "split": "train"
+  },
+  {
+   "event_id": "Shelley Capito/clip_nQeCOEobsEk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Shelley Capito",
+   "path": "Shelley Capito/clip_nQeCOEobsEk.wav",
+   "source_sha256": "6095fd34dba57c02854e1c568189c7a653b85848f270396ce16c0bcbd722063d",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Shelley Capito/clip_nutjNtuzxPA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Shelley Capito",
+   "path": "Shelley Capito/clip_nutjNtuzxPA.wav",
+   "source_sha256": "580db4f701ff3b6eb1bab03bc300501ed00e532b771573b22f54e1e3c787aac6",
+   "split": "test"
+  },
+  {
+   "event_id": "Steve Womack/clip_LuxXlQ5owRw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Steve Womack",
+   "path": "Steve Womack/clip_LuxXlQ5owRw.wav",
+   "source_sha256": "010d95f2a77689afdc9899aae52978db63e78a957b14a71f305761e9337a9fc6",
+   "split": "train"
+  },
+  {
+   "event_id": "Steve Womack/clip_NCUxVgOtkqM.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Steve Womack",
+   "path": "Steve Womack/clip_NCUxVgOtkqM.wav",
+   "source_sha256": "99467ec07159dc89a3477f251e9eefcd25139ba5e5b453a131a9269927d2223f",
+   "split": "train"
+  },
+  {
+   "event_id": "Steve Womack/clip__3oNuoc2n3E.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Steve Womack",
+   "path": "Steve Womack/clip__3oNuoc2n3E.wav",
+   "source_sha256": "120109ba9006057483b1a3e476303dac7157cebe3a0783310908b978ecf9cf86",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Steve Womack/clip_cBprJ3OblQw.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Steve Womack",
+   "path": "Steve Womack/clip_cBprJ3OblQw.wav",
+   "source_sha256": "086535283058aff28ac4a9bf13b20b21f433a34b0b39bca00b394bbbdc46d8af",
+   "split": "test"
+  },
+  {
+   "event_id": "Suzan DelBene/clip_FIhLwM5hDvQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzan DelBene",
+   "path": "Suzan DelBene/clip_FIhLwM5hDvQ.wav",
+   "source_sha256": "2b990a8c1daa86cc04426c1f2468417201795ca70024eba0912e9c601e51a227",
+   "split": "train"
+  },
+  {
+   "event_id": "Suzan DelBene/clip_JdB28ZoiVSA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzan DelBene",
+   "path": "Suzan DelBene/clip_JdB28ZoiVSA.wav",
+   "source_sha256": "cf26c6c4731ec48deac72625875646ec05054c6c1192e8c41eb1b828d94f093f",
+   "split": "train"
+  },
+  {
+   "event_id": "Suzan DelBene/clip_LhxV4CztToU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzan DelBene",
+   "path": "Suzan DelBene/clip_LhxV4CztToU.wav",
+   "source_sha256": "01648fa291fdcbbb103facf38eda4e31e125dcaa8e6675344a20c2345897ca5e",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Suzan DelBene/clip_wZ2N3QobS5k.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzan DelBene",
+   "path": "Suzan DelBene/clip_wZ2N3QobS5k.wav",
+   "source_sha256": "383c8d26a78183445e5296c11ac321fb1f164e4b801454238e073d2018237ae8",
+   "split": "test"
+  },
+  {
+   "event_id": "Suzanne Bonamici/clip_B3RNHRDSwzQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzanne Bonamici",
+   "path": "Suzanne Bonamici/clip_B3RNHRDSwzQ.wav",
+   "source_sha256": "b41115819737222817b036f3e7b5b9258f2549ea74727b132e5742b05499a2dd",
+   "split": "train"
+  },
+  {
+   "event_id": "Suzanne Bonamici/clip_ePbsWK2TK2Q.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzanne Bonamici",
+   "path": "Suzanne Bonamici/clip_ePbsWK2TK2Q.wav",
+   "source_sha256": "393b86bc22dc9f2c5631365c20593f97108616033824cdc14287a256ccdc6fae",
+   "split": "train"
+  },
+  {
+   "event_id": "Suzanne Bonamici/clip_lcpSixJAG5A.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzanne Bonamici",
+   "path": "Suzanne Bonamici/clip_lcpSixJAG5A.wav",
+   "source_sha256": "a671fc68080ba3d228efce9a2371f83769e065adf5600b0fc31c299f6a7694f2",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Suzanne Bonamici/clip_trSVDE4vnGQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Suzanne Bonamici",
+   "path": "Suzanne Bonamici/clip_trSVDE4vnGQ.wav",
+   "source_sha256": "58518088e49621e1c3b192cc15f2487954c4717d99a5121e9c5c37b373444e50",
+   "split": "test"
+  },
+  {
+   "event_id": "Ted Cruz/clip_Cjd1Qd8Xgkk.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ted Cruz",
+   "path": "Ted Cruz/clip_Cjd1Qd8Xgkk.wav",
+   "source_sha256": "1c36180e6b3e0b29ad1b16c36a7f4563f684259e8c5ee17868257ef06d722211",
+   "split": "train"
+  },
+  {
+   "event_id": "Ted Cruz/clip_JXkhGoz8aLc.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ted Cruz",
+   "path": "Ted Cruz/clip_JXkhGoz8aLc.wav",
+   "source_sha256": "59752cec9e9a5da5600d8e04e6a6c3c083dc00aebd7e976979141c93d0f9fc2b",
+   "split": "train"
+  },
+  {
+   "event_id": "Ted Cruz/clip_KvHWkZyibSg.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ted Cruz",
+   "path": "Ted Cruz/clip_KvHWkZyibSg.wav",
+   "source_sha256": "4eca2542d0467df2822fdb807801aef7be0c027860a4b7cf0b9c894eeff26d84",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Ted Cruz/clip_eu77aiLXTNQ.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Ted Cruz",
+   "path": "Ted Cruz/clip_eu77aiLXTNQ.wav",
+   "source_sha256": "5ce6ff47d1dfb7b0287e6cdf6a6f89339286f2314efd94d2ded4bf3064a4a795",
+   "split": "test"
+  },
+  {
+   "event_id": "Tim Walberg/clip_BHQbjOzV7Qs.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tim Walberg",
+   "path": "Tim Walberg/clip_BHQbjOzV7Qs.wav",
+   "source_sha256": "076afb9bd637649bc8bd16fed028cebd1c8cf899bfbab30d85d867ee0efe4698",
+   "split": "train"
+  },
+  {
+   "event_id": "Tim Walberg/clip_IdmoOGtqCd0.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tim Walberg",
+   "path": "Tim Walberg/clip_IdmoOGtqCd0.wav",
+   "source_sha256": "6ddf1203c4e2ff6e18ed66d9c95bd03822b8e86862139402921860cba7874b08",
+   "split": "train"
+  },
+  {
+   "event_id": "Tim Walberg/clip_mSJUiFcSunU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tim Walberg",
+   "path": "Tim Walberg/clip_mSJUiFcSunU.wav",
+   "source_sha256": "c9412106ccfb8b95e915f8b1dc993f55109bc6791a8341974cd559e32bc2c90f",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Tim Walberg/clip_nouQa9wNHXA.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tim Walberg",
+   "path": "Tim Walberg/clip_nouQa9wNHXA.wav",
+   "source_sha256": "395e9877fd56e4da938d633568b4966ffad47d6224b4c2858611f0ed2704b21a",
+   "split": "test"
+  },
+  {
+   "event_id": "Tommy Tuberville/clip_ADn1exAGUkU.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tommy Tuberville",
+   "path": "Tommy Tuberville/clip_ADn1exAGUkU.wav",
+   "source_sha256": "617c3a9fd56c233d73ec17e3b211b759ba6af806b7a28bb1f7139ff9654b5967",
+   "split": "train"
+  },
+  {
+   "event_id": "Tommy Tuberville/clip_C9YrkmD97yE.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tommy Tuberville",
+   "path": "Tommy Tuberville/clip_C9YrkmD97yE.wav",
+   "source_sha256": "4bbd9aefeecde9694c17527449636574ed595dce8fbf471821cabe94cdf49de7",
+   "split": "train"
+  },
+  {
+   "event_id": "Tommy Tuberville/clip_GfwQ0boqJIo.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tommy Tuberville",
+   "path": "Tommy Tuberville/clip_GfwQ0boqJIo.wav",
+   "source_sha256": "07bfa31b6d81c103fa4bc8d496858553936cc13a9d5134e87078bd4feecb1cd1",
+   "split": "calibration"
+  },
+  {
+   "event_id": "Tommy Tuberville/clip_XerfZErws7Q.wav",
+   "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+   "member": "Tommy Tuberville",
+   "path": "Tommy Tuberville/clip_XerfZErws7Q.wav",
+   "source_sha256": "7f7d496148dc93185336fc4c306e1bce26ea3c554f8cc6e5d4a89819005c4d1e",
+   "split": "test"
+  }
+ ],
+ "selection_rule": "same 30-member failed-cosine cohort; lexicographically first four SOLO_TARGET/MATCH/keep clips; 2 train, 1 calibration, 1 test",
+ "split_summary": {
+  "event_n": 120,
+  "members": [
+   "Chip Roy",
+   "Chuck Grassley",
+   "Dan Newhouse",
+   "Debbie Wasserman Schultz",
+   "Derrick Van Orden",
+   "Diana DeGette",
+   "Elizabeth Warren",
+   "Gus Bilirakis",
+   "Jack Bergman",
+   "James Himes",
+   "Jeff Merkley",
+   "John Larson",
+   "Marc Veasey",
+   "Mark Pocan",
+   "Maxwell Frost",
+   "Michael Bennet",
+   "Mike Lee",
+   "Nicole Malliotakis",
+   "Peter Welch",
+   "Richard Durbin",
+   "Robert Wittman",
+   "Ryan Zinke",
+   "Sara Jacobs",
+   "Shelley Capito",
+   "Steve Womack",
+   "Suzan DelBene",
+   "Suzanne Bonamici",
+   "Ted Cruz",
+   "Tim Walberg",
+   "Tommy Tuberville"
+  ],
+  "source_n": 120,
+  "split_counts": {
+   "calibration": 30,
+   "test": 30,
+   "train": 60
+  }
+ },
+ "status": "RESEARCH_CANDIDATE_NOT_CONSUMED"
+}

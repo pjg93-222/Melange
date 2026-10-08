@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ELT25987-YTP-P0-P6M">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3096 IS: Beef Labeling Clarity Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3096</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251104">November 4, 2025</action-date>
+            <action-desc><sponsor name-id="S411">Mr. Marshall</sponsor> introduced the following
+                bill; which was read twice and referred to the <committee-name committee-id="SSAF00">Committee on Agriculture, Nutrition, and
+                Forestry</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To direct the Secretary of Agriculture to promulgate regulations modifying
+            labeling requirements for beef and beef food products.</official-title>
+    </form>
+    <legis-body display-enacting-clause="yes-display-enacting-clause">
+        <section section-type="section-one" id="id214A53B3AE6842359C6AED86498441CF">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Beef Labeling Clarity Act</short-title></quote>.</text>
+        </section>
+        <section section-type="subsequent-section" id="id2C057F712EA24CF696493DE8E3BDAF80">
+            <enum>2.</enum>
+            <header>Beef labeling regulations</header>
+            <subsection id="idE15ECA3047754EC7966EBF7AC9FEA80E">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text display-inline="yes-display-inline">Not later than 180 days after the date of enactment of this Act, the Secretary of Agriculture shall promulgate regulations that, for beef and beef food products subject to the requirements of the Federal Meat Inspection Act (<external-xref legal-doc="usc" parsable-cite="usc/21/601">21 U.S.C. 601 et seq.</external-xref>)—</text>
+                <paragraph id="idB214909885F94AA19339F5BE3BA4E8B4">
+                    <enum>(1)</enum>
+ <text>eliminate the use of the label <quote>Product of U.S.A.</quote>; and</text>
+                </paragraph>
+                <paragraph id="id350203ECCA33400699ECA3D420A5C106">
+                    <enum>(2)</enum>
+ <text>establish, and allow for the voluntary use of, the labels described in subsection (b).</text>
+                </paragraph>
+            </subsection>
+            <subsection id="idC5172BEF75A1468D9C8D87B970D7D24B">
+                <enum>(b)</enum>
+                <header>Labels</header>
+ <text>The labels referred to in subsection (a)(2) are the following:</text> <paragraph id="id0E308B9F1D934E939A6DC14302F3A3E6"> <enum>(1)</enum> <header>Processed in <enum-in-header>U.S.A</enum-in-header></header> <text>The label <quote>Processed in U.S.A.</quote> means that the beef or beef food product has undergone substantial transformation in a facility in the United States subject to inspection under the Federal Meat Inspection Act (<external-xref legal-doc="usc" parsable-cite="usc/21/601">21 U.S.C. 601 et seq.</external-xref>).</text>
+                </paragraph>
+                <paragraph id="id14278971A8DE43AABEFA5D0549786897">
+                    <enum>(2)</enum>
+                    <header>Raised and Processed in <enum-in-header>U.S.A</enum-in-header></header>
+ <text>The label <quote>Raised and Processed in U.S.A.</quote> means that the live animal that is the source of the beef or beef food product is raised in the United States for not less than 100 days before it is processed at a facility described in paragraph (1).</text>
+                </paragraph>
+                <paragraph id="id4e77dcbb6d484dfcb9d02f94286464ba">
+                    <enum>(3)</enum>
+                    <header>Born, Raised, and Processed in
+                        <enum-in-header>U.S.A</enum-in-header></header>
+ <text>The label <quote>Born, Raised, and Processed in U.S.A.</quote> means that the live animal that is the source of the beef or beef food product is born and raised in the United States and processed at a facility described in paragraph (1).</text>
+                </paragraph>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

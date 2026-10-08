@@ -1,0 +1,109 @@
+{
+  "schema_id": "staffer-network-name-standard-test-receipt-v1",
+  "built_at": "2026-09-07T06:09:11Z",
+  "task": "Add the missing test suite and receipt for fec/staffer_network/name_standard.py (module itself not modified).",
+  "module": {
+    "path": "fec/staffer_network/name_standard.py",
+    "bytes": 34533,
+    "sha256": "0b837e57e4bdfd951664fa275227f09efeeee475f642f9814a2c2bd4403ca330",
+    "modified_by_this_task": false,
+    "note": "Not touched. This sha256 matches rekey_delta_report.json's receipt.module_sha256 exactly, confirming it is still the module that delta run analyzed."
+  },
+  "class_tables": {
+    "v1": {
+      "path": "data/staffer_network/reference/first_name_nicknames_v1.json",
+      "sha256": "39632ef4cfe7234ca19a1c1a122353d076593b8815e311258c44d226004aa62e",
+      "entries": 188,
+      "touched_by_this_task": false,
+      "note": "rekey_delta_report.json pins only the v2 table's sha256; no v1 pin existed anywhere before this receipt. Recorded here as the baseline of record and also hardcoded as V1TableIntegrityTests.V1_SHA256 in the test file, so future drift on this file is caught."
+    },
+    "v2": {
+      "path": "data/staffer_network/reference/first_name_nicknames_v2.json",
+      "sha256": "1cd1fc638b9c7efd4ebac83575850bafd0f4532ead8b3c5fadd2f55769186717",
+      "entries": 479,
+      "matches_rekey_delta_report_pin": true
+    }
+  },
+  "gold_files": {
+    "gold_sample": {
+      "path": "data/staffer_network/reference/name_standard_gold_sample_20260906.ndjson",
+      "sha256": "0ed5bab0e7de46c287ddeca0c2ca29ca3f7e1dc30c0c7e4b0a834c0ec545a93c",
+      "rows": 300
+    },
+    "gold_parser": {
+      "path": "data/staffer_network/reference/name_standard_gold_parser_20260906.ndjson",
+      "sha256": "ad056a1a3ca39c39b441ca2536de91eaa594380444b2b484adadd132c3ce4c2d",
+      "rows": 300
+    },
+    "cross_check": "raw text identical between the two files for all 300 sample_ids (verified before writing tests)."
+  },
+  "delta_report": {
+    "path": "audits/staffer_network/name_standard_20260906_v1/rekey_delta_report.json",
+    "sha256": "89dd0e5c4311d434ffc1de2a14a0af2cad2ecb8e24c881300c938916f5c1de14",
+    "headline_counts": {
+      "nothing_was_rekeyed": true,
+      "hill_person_spine_rows": 144693,
+      "key_change_changed": 17351,
+      "key_change_unchanged": 127342,
+      "merges_groups_of_2_or_more": 3
+    }
+  },
+  "test_suite": {
+    "path": "fec/tests/staffer_network/test_staffer_name_standard.py",
+    "pre_existing_state": "The suite already existed (712 lines) and was already registered in fec/tests/run_tests.py's _LANE_MODULES tuple (line 354, comment dated 2026-09-06) before this task began. The task brief's premise that the suite was missing did not hold for this module; it was extended in place rather than duplicated under a new filename.",
+    "registration_change": "none needed -- already registered",
+    "module_under_test_modified": false,
+    "defect_found_in_name_standard_py": false,
+    "new_test_classes": [
+      "GoldParserRegressionTests",
+      "V1TableIntegrityTests",
+      "ClassTableCacheTests",
+      "SpineStreamPropertyTests"
+    ],
+    "new_or_extended_test_methods": [
+      "GoldParserRegressionTests.test_the_file_is_three_hundred_rows_matching_the_gold_sample",
+      "GoldParserRegressionTests.test_reparsing_reproduces_the_pinned_output_exactly",
+      "V1TableIntegrityTests.test_v1_table_matches_the_recorded_baseline",
+      "V1TableIntegrityTests.test_the_default_class_table_path_resolves_to_v2_not_v1",
+      "ClassTableCacheTests.test_reset_forces_a_reload_after_the_env_override_changes",
+      "SpineStreamPropertyTests.test_the_sample_is_the_requested_size",
+      "SpineStreamPropertyTests.test_no_exception_reconstructing_and_reparsing_house_csv_form",
+      "SpineStreamPropertyTests.test_no_exception_reconstructing_and_reparsing_payroll_comma_form",
+      "DisplayNameTests.test_van_and_von_particles_lowercase_like_de_la",
+      "KeyAndClassTableTests.test_paul_named_ambiguous_stems_are_present_and_ambiguous (extended with jo/terry/lee, was alex/sam/pat/chris only)"
+    ],
+    "test_count_before": 82,
+    "test_count_after": 91,
+    "coverage_added": [
+      "parser-output regression: re-parsing all 300 name_standard_gold_parser_20260906.ndjson rows reproduces parts, display_name, name_key_no_nicknames and name_key_v2 exactly",
+      "v1 table sha256 pin (recorded fresh; absent from rekey_delta_report.json)",
+      "reset_class_table_cache: proves the module-level cache is stale until reset and that reset picks up a changed STAFFER_NAME_CLASS_TABLE override",
+      "ambiguous nickname stems jo/terry/lee added alongside the pre-existing alex/sam/pat/chris",
+      "display_name particle lowering for van/von (Martin van Buren, Wernher von Braun), alongside pre-existing Mc/Mac/O'/de coverage",
+      "20,000-row streamed property test over the real hill_person_spine.ndjson.gz: payee_key triples reconstructed into both 'LAST FIRST M' and 'LAST, FIRST M' raw shapes and parsed with no exception, seed 20260906, single-pass reservoir sampling (Algorithm R)"
+    ]
+  },
+  "test_tails": {
+    "pytest_on_test_file": "91 passed, 48287 subtests passed in 8.08s",
+    "direct_invocation_matching_run_tests_py_subprocess_style": "Ran 91 tests in 1.051s\n\nOK",
+    "full_kernel_fec_tests_run_tests_py": {
+      "final_line": "KERNEL TESTS — 183 passed, 2 FAILED",
+      "test_staffer_name_standard_suite_verdict": "OK   test_staffer_name_standard suite clean",
+      "unrelated_pre_existing_failures": [
+        "FAIL  test_primacy_tier suite clean  :: FAILED (failures=1)",
+        "FAIL  test_make_staffer_network_html suite clean  :: unrecognised verdict"
+      ],
+      "note": "Both failures are unrelated to fec/staffer_network/name_standard.py: test_primacy_tier covers legislation primacy tiers, test_make_staffer_network_html covers the staffer-network HTML surface renderer. Neither imports name_standard, and each _LANE_MODULES suite runs as its own subprocess (fresh interpreter), so no state from this task's additions can have caused either. Not investigated further or fixed -- out of this task's scope."
+    }
+  },
+  "constraints_observed": {
+    "name_standard_py_modified": false,
+    "gold_labels_files_touched": false,
+    "v1_table_file_touched": false,
+    "git_used": false,
+    "files_written_with_write_tool_not_heredoc": true,
+    "files_written_under_audits_staffer_network": [
+      "audits/staffer_network/name_standard_20260906_v1/receipt.json"
+    ]
+  }
+}

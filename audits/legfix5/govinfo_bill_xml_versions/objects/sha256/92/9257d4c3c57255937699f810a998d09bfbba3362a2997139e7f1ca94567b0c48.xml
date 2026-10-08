@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H09341F4C1A2B4277A14B628AA0C5244D" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 5458 IH: Small Entrepreneurs’ Empowerment and Development Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-09-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5458</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210930">September 30, 2021</action-date>
+<action-desc><sponsor name-id="M001156">Mr. McHenry</sponsor> (for himself and <cosponsor name-id="E000294">Mr. Emmer</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Securities Act of 1933 to provide small issuers with a micro-offering exemption free of mandated disclosures or offering filings, but subject to the antifraud provisions of the Federal securities laws, and for other purposes.</official-title>
+</form>
+<legis-body id="HAD1A5D3F682F48D8B395925D087A0AEA" style="OLC"> 
+<section id="HD8DE95E5F19F4C7FB556F6B090844D06" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Small Entrepreneurs’ Empowerment and Development Act of 2021</short-title></quote> or the <quote><short-title>SEED Act of 2021</short-title></quote>. </text></section> <section id="H9D90B6696E2A4B01B4E30D3CAD88A28E"><enum>2.</enum><header>Micro-offering exemption</header> <subsection id="HA2081F01EB914A63B6DFE76D9323DFE4"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 4 of the Securities Act of 1933 (<external-xref legal-doc="usc" parsable-cite="usc/15/77d">15 U.S.C. 77d</external-xref>) is amended—</text> 
+<paragraph id="H54F138E2E87A40FBB01FD5459E971A62"><enum>(1)</enum><text>in subsection (a), by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="H276EE2753F2844B4AA0612D0BACAEE3C" style="OLC"> <paragraph id="HE1262D85CDCC4AF09AA43742F2B5CE1C"><enum>(8)</enum><text display-inline="yes-display-inline">transactions meeting the requirements of subsection (f).</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="H580B2AD8E80344E7B3C9030807AD66DE"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HE5FE1A06A9BB4E5AA1E49E5609B6409D" style="OLC"> <subsection id="H5EC0B37E6F2B47079BE1BAD500646BA6"><enum>(f)</enum><header>Micro-Offerings</header><text display-inline="yes-display-inline">The transactions referred to in subsection (a)(8) are transactions involving the sale of securities by an issuer (including all entities controlled by or under common control with the issuer) where the aggregate amount of all securities sold by the issuer, including any amount sold in reliance on the exemption provided under subsection (a)(8), during the 12-month period preceding such transaction, does not exceed $250,000.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> 
+<subsection id="H8D2F08D9F027473D89C4F91F38E57865"><enum>(b)</enum><header>Disqualification</header> 
+<paragraph id="HCF600360191B4B3D9120ABE7500F1B11"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Not later than 270 days after the date of enactment of this Act, the Securities and Exchange Commission shall, by rule, establish disqualification provisions under which an issuer shall not be eligible to offer securities pursuant to section 4(a)(8) of the Securities Act of 1933, as added by this section.</text></paragraph> <paragraph id="H534D5476DF1D4CCA966DB37469A2C820"><enum>(2)</enum><header>Inclusions</header><text>Disqualification provisions required by this subsection shall—</text> 
+<subparagraph id="HE98E090F818541A19C0258B9F4D4F050"><enum>(A)</enum><text> be substantially similar to the provisions of section 230.506(d) of title 17, Code of Federal Regulations (or any successor thereto); and</text></subparagraph> <subparagraph id="HF497AE4A23D84DA88BD726C10BC3C99A"><enum>(B)</enum><text>disqualify any offering or sale of securities by a person that—</text> 
+<clause id="H4F86FF38064549CD8D6EC63D361077DB"><enum>(i)</enum><text> is subject to a final order of a covered regulator that—</text> <subclause id="HEABD408054264034B25EBA1AF11CDA51"><enum>(I)</enum><text>bars the person from—</text> 
+<item id="H46FA2542F01D4433827AA3C4C4DD70A3"><enum>(aa)</enum><text>association with an entity regulated by the covered regulator;</text></item> <item id="H281C81BF53A34F7E95DFB95B58684D11"><enum>(bb)</enum><text>engaging in the business of securities, insurance, or banking; or</text></item> 
+<item id="HCFE9EFD4AC4440C4A00E2BBB227D9049"><enum>(cc)</enum><text>engaging in savings association or credit union activities; or</text></item></subclause> <subclause id="H39952094729F4CE69D3AD22223EA1D24"><enum>(II)</enum><text>constitutes a final order based on a violation of any law or regulation that prohibits fraudulent, manipulative, or deceptive conduct, if such final order was issued within the previous 10-year period; or</text></subclause></clause> 
+<clause id="H185E0E5894354237B69B6A661CFA4BF9"><enum>(ii)</enum><text>has been convicted of any felony or misdemeanor in connection with the purchase or sale of any security or involving the making of any false filing with the Commission.</text></clause></subparagraph></paragraph> <paragraph id="H11B8ABCFFF784E1590BD4C0F770074F5"><enum>(3)</enum><header>Covered regulator defined</header><text>In this subsection, the term <term>covered regulator</term> means—</text> 
+<subparagraph id="HAD1C99F727124B1AA9EC0AFD2FF6ED11"><enum>(A)</enum><text display-inline="yes-display-inline">a State securities commission (or an agency or officer of a State performing like functions);</text></subparagraph> <subparagraph id="H7E174E6AC8A54E038F2D9346672883E2"><enum>(B)</enum><text>a State authority that supervises or examines banks, savings associations, or credit unions;</text></subparagraph> 
+<subparagraph id="H446EF4FCD8614607A8035D8FD537C784"><enum>(C)</enum><text>a State insurance commission (or an agency or officer of a State performing like functions);</text></subparagraph> <subparagraph id="H4ACFDFC0F4FF4E019500B133A2842227"><enum>(D)</enum><text>a Federal banking agency (as defined under section 3 of the Federal Deposit Insurance Act); and</text></subparagraph> 
+<subparagraph id="H442C8AC9134F40099F055A2A9C9C9480"><enum>(E)</enum><text>the National Credit Union Administration.</text></subparagraph></paragraph></subsection> <subsection id="H58A0C4FF26824FE9908C2611D570808A"><enum>(c)</enum><header>Exemption under State regulations</header><text display-inline="yes-display-inline">Section 18(b)(4) of the Securities Act of 1933 (<external-xref legal-doc="usc" parsable-cite="usc/15/77r">15 U.S.C. 77r(b)(4)</external-xref>) is amended—</text> 
+<paragraph id="HC33116B834F1473FB757DE939B98BCB0"><enum>(1)</enum><text>in subparagraph (F), by striking <quote>or</quote> at the end;</text></paragraph> <paragraph id="H0BBB6A9224F04B56AAFEBD4F12C19754"><enum>(2)</enum><text>in subparagraph (G), by striking the period and inserting <quote>; or</quote>; and</text></paragraph> 
+<paragraph id="H10904FB9E6474FFA876AC3358B9F1F43"><enum>(3)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HE249ACE9C43F49DEB49217A605A97A3F" style="OLC"> <subparagraph id="H63DC0861DD9C49D29A16B56962B5B989"><enum>(H)</enum><text display-inline="yes-display-inline">section 4(a)(8).</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection></section> 
+</legis-body>
+</bill> 
+
+

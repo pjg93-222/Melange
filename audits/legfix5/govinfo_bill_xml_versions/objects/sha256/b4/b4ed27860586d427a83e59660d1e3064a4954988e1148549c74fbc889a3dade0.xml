@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H612E87F56F80445EBE00CFD7625A6098" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 6473 IH: Community Connect Grant Program Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-11-21</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6473</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20231121">November 21, 2023</action-date><action-desc><sponsor name-id="S001218">Ms. Stansbury</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name>, and in addition to the Committee on <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Rural Electrification Act of 1936 to reauthorize the Community Connect Grant Program, and for other purposes.</official-title></form><legis-body id="HDCFFAF9DE3E44F1C8FFED4DE791A3B72" style="OLC"> 
+<section section-type="section-one" id="H6AC366F0CD9D493E8051CF58B27F0B6C"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Community Connect Grant Program Act of 2023</short-title></quote>.</text></section> <section id="HBBB6B61D909B4C87A8FBD3EE0F5BDA41"><enum>2.</enum><header>Community Connect Grant Program</header><text display-inline="no-display-inline">Section 604 of the Rural Electrification Act of 1936 (<external-xref legal-doc="usc" parsable-cite="usc/7/950bb-3">7 U.S.C. 950bb–3</external-xref>) is amended—</text> 
+<paragraph id="H4548B8B0B12F43F7821289E7F736E7F0"><enum>(1)</enum><text>in subsection (a)—</text> <subparagraph id="H3CAA10D2C6D5479C9D69F1554E9C21A5"><enum>(A)</enum><text>in paragraph (1), by striking <quote>less than the</quote> and all that follows through the period at the end and inserting the following: “less than—</text> 
+<quoted-block style="OLC" display-inline="no-display-inline" id="H92938E8346084D9A933D0FD18C65C7DA"> 
+<subparagraph id="H06A7E14BCF6A4BBF9352526384FD1196"><enum>(A)</enum><text>a 100-Mbps downstream transmission capacity; and</text></subparagraph> <subparagraph id="HD58BF0664D2042319C79BEF54BD9D242"><enum>(B)</enum><text>a 20-Mbps upstream transmission capacity.</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block></subparagraph> 
+<subparagraph id="H1A8F9022FBFE4D58B11E16BF61F25C77"><enum>(B)</enum><text>in paragraph (2)—</text> <clause id="H0F1768E3015E408589F5BB3B26A651B4"><enum>(i)</enum><text>in the matter preceding subparagraph (A), by striking <quote>an area</quote> and inserting <quote>a rural area</quote>;</text></clause> 
+<clause id="HF30B047EA74C4B81928DAFEE8D609C1A"><enum>(ii)</enum><text>in subparagraph (A), by striking <quote>10-Mbps</quote> and inserting <quote>25-Mbps</quote>; and</text></clause> <clause id="H62A3B95D2DA94CD1A382F0104B7859A9"><enum>(iii)</enum><text>in subparagraph (B), by striking <quote>1-Mbps</quote> and inserting <quote>3-Mbps</quote>;</text></clause></subparagraph></paragraph> 
+<paragraph id="HC351564203AB456D916A6D0C03EA5794"><enum>(2)</enum><text>in subsection (d)(2)(A), by striking <quote>area; or</quote> and inserting <quote>area (including any eligible broadband service that will be provided in the future in the eligible service area pursuant to enforceable commitments for network deployment applicable under another broadband funding program); or</quote>; and </text></paragraph> <paragraph id="HCFE5914F3B4E45B5ADBD1A34CE5229EE"><enum>(3)</enum><text>in subsection (g), by striking <quote>2023</quote> and inserting <quote>2028</quote>.</text></paragraph></section> 
+</legis-body></bill>
+

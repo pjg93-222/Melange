@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HD9B497EB8A33467098927061951D1439" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2293 IH: Protecting Access to Wheelchairs Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 2293</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20190412">April 12, 2019</action-date>
+<action-desc><sponsor name-id="L000557">Mr. Larson of Connecticut</sponsor> (for himself, <cosponsor name-id="Z000017">Mr. Zeldin</cosponsor>, <cosponsor name-id="S001196">Ms. Stefanik</cosponsor>, <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>, <cosponsor name-id="H001038">Mr. Higgins of New York</cosponsor>, <cosponsor name-id="T000469">Mr. Tonko</cosponsor>, <cosponsor name-id="K000376">Mr. Kelly of Pennsylvania</cosponsor>, <cosponsor name-id="E000294">Mr. Emmer</cosponsor>, <cosponsor name-id="R000515">Mr. Rush</cosponsor>, <cosponsor name-id="C001067">Ms. Clarke of New York</cosponsor>, <cosponsor name-id="L000559">Mr. Langevin</cosponsor>, <cosponsor name-id="S001193">Mr. Swalwell of California</cosponsor>, <cosponsor name-id="J000298">Ms. Jayapal</cosponsor>, <cosponsor name-id="S001165">Mr. Sires</cosponsor>, <cosponsor name-id="C001078">Mr. Connolly</cosponsor>, <cosponsor name-id="R000576">Mr. Ruppersberger</cosponsor>, <cosponsor name-id="D000191">Mr. DeFazio</cosponsor>, <cosponsor name-id="M001137">Mr. Meeks</cosponsor>, <cosponsor name-id="L000565">Mr. Loebsack</cosponsor>, <cosponsor name-id="K000210">Mr. King of New York</cosponsor>, <cosponsor name-id="E000297">Mr. Espaillat</cosponsor>, <cosponsor name-id="B001278">Ms. Bonamici</cosponsor>, and <cosponsor name-id="R000602">Miss Rice of New York</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend title XVIII of the Social Security Act to exclude complex rehabilitative manual wheelchairs from the Medicare competitive acquisition program, and for other purposes.</official-title>
+</form>
+<legis-body id="HF764B3C03B0E4C0F90F2CAF8A6458AF4" style="OLC"> 
+<section id="HF103DA7B24044D6B9F17899C56ABC731" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting Access to Wheelchairs Act</short-title></quote>. </text></section> <section id="H671698B41EE145B1A81F2BC492A28F30"><enum>2.</enum><header>Exclusion of complex rehabilitative manual wheelchairs from Medicare competitive acquisition program; Non-application of Medicare fee-schedule adjustments for certain wheelchair accessories and cushions</header> <subsection id="HBF52883755894071B4098C5BA25405BF"><enum>(a)</enum><header>Exclusion of complex rehabilitative manual wheelchairs from competitive acquisition program</header><text display-inline="yes-display-inline">Section 1847(a)(2)(A) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395w-3">42 U.S.C. 1395w–3(a)(2)(A)</external-xref>) is amended—</text> 
+<paragraph id="H71431E9AFA6A46FCAD9ABB5BD271DE19"><enum>(1)</enum><text>by inserting <quote>, complex rehabilitative manual wheelchairs (as determined by the Secretary), and certain manual wheelchairs (identified, as of October 1, 2018, by HCPCS codes E1235, E1236, E1237, E1238, and K0008 or any successor to such codes)</quote> after <quote>group 3 or higher</quote>; and</text></paragraph> <paragraph id="H81C3D5C0FE394575864BEF5E03C2A3E0"><enum>(2)</enum><text display-inline="yes-display-inline">by striking <quote>such wheelchairs</quote> and inserting <quote>such complex rehabilitative power wheelchairs, complex rehabilitative manual wheelchairs, and certain manual wheelchairs</quote>.</text></paragraph></subsection> 
+<subsection id="H931DF982135D4484BA2D64A9D91CCE1A"><enum>(b)</enum><header>Non-Application of Medicare fee schedule adjustments for wheelchair accessories and seat and back cushions when furnished in connection with complex rehabilitative manual wheelchairs</header> 
+<paragraph id="H186758A185D04668BF74E21BEAE0B5E8"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, the Secretary of Health and Human Services shall not, during the period beginning on July 1, 2019, and ending on December 31, 2020, use information on the payment determined under the competitive acquisition programs under section 1847 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395w-3">42 U.S.C. 1395w–3</external-xref>) to adjust the payment amount that would otherwise be recognized under section 1834(a)(1)(B)(ii) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395m">42 U.S.C. 1395m(a)(1)(B)(ii)</external-xref>) for wheelchair accessories (including seating systems) and seat and back cushions when furnished in connection with complex rehabilitative manual wheelchairs (as determined by the Secretary), and certain manual wheelchairs (identified, as of October 1, 2018, by HCPCS codes E1235, E1236, E1237, E1238, and K0008 or any successor to such codes).</text></paragraph> <paragraph id="H81CD515538D74000B61D16A2A6D11810"><enum>(2)</enum><header>Implementation</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, the Secretary may implement this subsection by program instruction or otherwise.</text></paragraph></subsection></section> 
+</legis-body>
+</bill> 
+
+

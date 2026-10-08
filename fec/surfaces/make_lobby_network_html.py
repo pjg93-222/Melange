@@ -36,7 +36,7 @@ COMPANY_MEMBER_LIMIT = 10
 FORECAST_LEADER_LIMIT = 10
 MAX_DOCUMENT_BYTES = 6 * 1024 * 1024
 CHAMPIONS_V2_SCHEMA = "champions-v2-v1"
-CHAMPIONS_V2_SECTORS = ("credit_union", "bank", "crypto", "fintech")
+CHAMPIONS_V2_SECTORS = ("credit_union", "bank", "crypto", "fintech", "telecom")
 INDUSTRY_TIERS_SCHEMA = "industry-tiers-v1"
 RESPONSIVENESS_LAYERS_SCHEMA = "responsiveness-layers-v1"
 RESPONSIVENESS_TIER_NOTE = (
@@ -2116,6 +2116,7 @@ def _load_champions_v2(path):
         "bank": ["log1p_supportive_att", "rapport"],
         "crypto": ["log1p_supportive_att", "rapport"],
         "fintech": ["log1p_supportive_att", "rapport"],
+        "telecom": ["log1p_supportive_att", "rapport"],
     }
     required_row = {
         "bioguide", "name", "chamber", "tier", "components",
@@ -2294,6 +2295,7 @@ RHETORIC_CATEGORY = {
     "crypto": "Technology & Emerging",
     "bank": "Credit Card Mandates",
     "fintech": "Payments",
+    "telecom": "TCPA",
 }
 
 
@@ -2328,7 +2330,7 @@ def _attach_tier_rhetoric(industry_tiers, stance_matrix):
     industry_tiers["rhetoric_frame"] = (
         "press-derived category stance, CU-agenda frame; "
         "crypto=Technology & Emerging, bank=Credit Card Mandates, "
-        "fintech=Payments"
+        "fintech=Payments, telecom=TCPA"
     )
     return industry_tiers
 

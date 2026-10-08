@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H960D957D98E441EF8F37D524E2E0AA8C" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4775 IH: Stop Waste And Misuse by the President Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-10-21</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4775</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191021">October 21, 2019</action-date><action-desc><sponsor name-id="L000582">Mr. Ted Lieu of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name>, and in addition to the Committee on <committee-name committee-id="HJU00">the Judiciary</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To limit the amount of expenditure on Presidential travel, and for other purposes.</official-title></form>
+	<legis-body id="HEAF25522771E4E34ABEDBD404CCEDABF" style="OLC">
+ <section id="HA1DC32A22BAF40B282689316517216D6" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This subtitle may be cited as the <quote><short-title>Stop Waste And Misuse by the President Act of 2019</short-title></quote> or the <quote><short-title>SWAMP Act of 2019</short-title></quote>.</text> </section><section id="HB44EAEA80D1045EFA76D45B44F957E2B"><enum>102.</enum><header>Findings</header><text display-inline="no-display-inline">The Congress finds as follows:</text>
+ <paragraph id="H831E6926DBB14A8689CA71D730CDEF32"><enum>(1)</enum><text>Presidential travel to commercial entities owned in whole or in part by the President or First Family results in the American taxpayer effectively subsidizing the President’s businesses.</text>
+ </paragraph><paragraph id="H94387B3D72094AC189C218894F66FB60"><enum>(2)</enum><text>President Trump spent more during his first four months in office than President Obama did, on average, in roughly two years.</text>
+ </paragraph><paragraph id="HCE4CB747B31A49EEB34D338EB110DCFE"><enum>(3)</enum><text>It is unacceptable for the President to maintain an interest in traveling to properties in which he has a direct financial interest, as the U.S. Government is responsible for renting space for personnel in said private commercial entities.</text>
+ </paragraph><paragraph id="H650F34759D8D490BAE2B46210D37246E"><enum>(4)</enum><text>Every time the President travels to Mar-a-Lago, he necessarily promotes his private business interests via free press at the Government’s expense.</text>
+ </paragraph><paragraph id="HF53D9601EF844BAB816D580EAE64F338"><enum>(5)</enum><text>The State Department’s promotion of Mar-a-Lago on its official website raises serious ethics concerns.</text>
+ </paragraph><paragraph id="HE9B5A9D109C34F4B9DD35D074D16499D"><enum>(6)</enum><text>As of October 17, 2019, President Trump has cost the U.S. taxpayer unprecedented amounts of money, including the following estimated costs:</text>
+ <subparagraph id="H4E45720567604D758B8184F059EC94C5"><enum>(A)</enum><text>For trips to Mar-a-Lago:</text> <clause id="H05B3555E91F947F49B0A2D12F3D17C02"><enum>(i)</enum><text>Total cost for security in Palm Beach: $3,700,000 (each trip).</text>
+ </clause><clause id="H79D267569DAD42F5A75782C96288DF5F"><enum>(ii)</enum><text>Roundtrip flights from Joint Base Andrews, Maryland, to West Palm, Florida: $700,000.</text> </clause><clause id="HDDB4F39B1E4145A8B8A3CD802D86B4D6"><enum>(iii)</enum><text>Overtime for local law enforcement during Trump’s trips: $60,000/day.</text>
+ </clause></subparagraph><subparagraph id="H3EEBC0EFEEAC4B969D64C02264EDBD5F"><enum>(B)</enum><text>For Trump Tower:</text> <clause id="H75283D1DFFFA41FEBA754A875823F0D4"><enum>(i)</enum><text>Request for additional Secret Service funding to secure Trump Towers: $60,000,000.</text>
+ </clause><clause id="HE0D2F296397140A09DB381C3CF661CED"><enum>(ii)</enum><text>New York Police Department security costs: $127,000–$146,000/day.</text> </clause><clause id="H26647B218DFD41CA8A17DCD9E6603737"><enum>(iv)</enum><text>Air Force One flights to New York City: $180,000/hour.</text>
+ </clause></subparagraph></paragraph><paragraph id="HA7F7BF547DE1418D99FBB681EE6536D6"><enum>(7)</enum><text>As of October 17, 2019, the President has spent the following number of days at various properties he owns:</text>
+ <subparagraph id="H34F98F1EF6824CDDBE7BF7607CBC6833"><enum>(A)</enum><text>99 days at Mar-a-Lago.</text> </subparagraph><subparagraph id="H99B40CE243B54DB0A1C3FAA5AB1C45AB"><enum>(B)</enum><text>90 days at Trump National Bedminster.</text>
+ </subparagraph><subparagraph id="HD203FED632574A0DB0C25F9A833AD2CA"><enum>(C)</enum><text>76 days at Trump National Potomac.</text> </subparagraph><subparagraph id="H6F729D9841D54D09A5913D46EEF0C628"><enum>(D)</enum><text>59 days at Trump International West Palm.</text>
+ </subparagraph><subparagraph id="H7C6AFF12D14940F29EA57BE70B37B9C5"><enum>(E)</enum><text>22 days at Trump International Hotel.</text> </subparagraph><subparagraph id="H66569588C62045E0BDA2BFF80BDACABC"><enum>(F)</enum><text>20 days at Trump Tower.</text>
+ </subparagraph></paragraph></section><section id="H25C2921F589C438DB57F6BD4D3EF9785"><enum>103.</enum><header>Reimbursal for costs of protection</header><text display-inline="no-display-inline">In the case of a person whom the United States Secret Service is authorized to protect under paragraph (1) or (2) of section 3056(a) of title 18, United States Code, if that person, while traveling for official business or for personal purposes, stays in a hotel or other establishment providing daily-rate accommodation in which that person has an ownership or financial interest, that person shall reimburse to the Treasury—</text>
+ <paragraph id="HAE3A6CF17B0E428588A04FF16D0170E5"><enum>(1)</enum><text>any amount expended by the United States Secret Service for the provision of such protection; and</text> </paragraph><paragraph id="H7A7EFC374CCA40B28DFF75611AF14377"><enum>(2)</enum><text>any amount expended for other costs incurred by the Government pertaining to that stay.</text>
+			</paragraph></section></legis-body></bill>
+
+

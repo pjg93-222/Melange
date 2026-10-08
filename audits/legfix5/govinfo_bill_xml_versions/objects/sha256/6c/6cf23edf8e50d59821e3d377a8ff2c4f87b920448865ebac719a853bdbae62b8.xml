@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MDM26455-T81-YS-74F"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3927 IS: End Warehouse Detention Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-02-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 3927</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260226">February 26, 2026</action-date><action-desc><sponsor name-id="S426">Mr. Kim</sponsor> (for himself and <cosponsor name-id="S370">Mr. Booker</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To prohibit funds made available through the One Big Beautiful Bill Act from being used to purchase warehouses, to contract with the owners of warehouses, or to repurpose, operate, staff, or maintain any warehouse owned by the Department of Homeland Security for the purpose of detaining noncitizens.</official-title></form><legis-body><section id="id3cb568f087e5488683f7a655265033fe" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>End Warehouse Detention Act</short-title></quote>.</text></section><section section-type="subsequent-section" commented="no" display-inline="no-display-inline" id="id41fdf2301e5d4ea28f56e6f5c3e2734f"><enum>2.</enum><header display-inline="yes-display-inline">Prohibiting the use of certain Federal funds for detention facilities in warehouses</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, amounts appropriated or otherwise made available under <external-xref legal-doc="public-law" parsable-cite="pl/119/21">Public Law 119–21</external-xref> may not be expended—</text><paragraph commented="no" display-inline="no-display-inline" id="idc10a3a6e86a54cb5a49b1fe5c31d9da1"><enum>(1)</enum><text display-inline="yes-display-inline">to purchase a warehouse or to contract with the owner of any warehouse for the purpose of detaining noncitizens; or</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id0eb86fc910bf4d58b0caff178186b16c"><enum>(2)</enum><text>to repurpose, operate, staff, or maintain any warehouse owned by U.S. Immigration and Customs Enforcement or U.S. Customs and Border Protection to accommodate the detention of noncitizens.</text></paragraph></section></legis-body></bill>
+

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public" slc-id="S1-MIR19A28-W6L-CL-G9T"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2572 IS: FHA Loan Affordability Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-09-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2572</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190926">September 26, 2019</action-date><action-desc><sponsor name-id="S324">Mrs. Shaheen</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To limit the collection of annual premiums under the FHA program for mortgage insurance for single
+			 family housing, and for other purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" id="H62DFDDDFF3ED42E59633ED9349B2E488" style="OLC">
+ <section id="H58AC0D47A69043C5A29C98058AF6F56D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>FHA Loan Affordability Act of 2019</short-title></quote>.</text> </section><section id="HD4AF8A4C7C4245E48A03FB1B11B53100" section-type="subsequent-section"><enum>2.</enum><header>Annual premiums</header><text display-inline="no-display-inline">Section 203(c)(2) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(c)(2)</external-xref>) is amended—</text>
+ <paragraph id="H63742ACA41ED42329A21B57C44DE26F4"><enum>(1)</enum><text>in subparagraph (B)—</text> <subparagraph id="H1899EB9E714B42C0BDE05FC750676408"><enum>(A)</enum><text>in clause (i), by striking <quote>For any</quote> and inserting <quote>Subject to subparagraph (D), for any</quote>; and</text>
+ </subparagraph><subparagraph id="H2C3E54E1DB9A4B5DAB3EC15F039D867B"><enum>(B)</enum><text display-inline="yes-display-inline">in clause (ii), by striking <quote>For any</quote> and inserting <quote>Subject to subparagraph (D), for any</quote>;</text> </subparagraph></paragraph><paragraph id="H07F2D8A2B93F4B88ADF703F8F5C5F79F"><enum>(2)</enum><text display-inline="yes-display-inline">in subparagraph (C)(i), by striking <quote>In addition</quote> and inserting <quote>Subject to subparagraph (D), in addition</quote>; and</text>
+ </paragraph><paragraph id="H235B297A4FA1407585D1E951A0CB6418"><enum>(3)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HECA1BA1383BD4D68BD117289F00ED1EB" style="OLC"> <subparagraph id="H1F21C6E02A3D4975BD3F56BBD2858A46"><enum>(D)</enum><text display-inline="yes-display-inline">The Secretary may not collect any annual premiums under this paragraph with respect to a mortgage at any time that the remaining insured principal balance (excluding the portion of the remaining balance attributable to the premium collected under subparagraph (A)) is 78 percent or less than the lower of (i) the sales price of the dwelling at the sale in connection with which the mortgage was made, or (ii) the appraised value of the dwelling at the time of the origination of the mortgage.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section></legis-body></bill>
+
+

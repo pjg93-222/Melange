@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="H6297AA79FF4646F4927691AC7CD467DE" key="H" public-private="public"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 729 RH: Tribal Coastal Resiliency Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-11-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IB</distribution-code> 
+<calendar display="yes">Union Calendar No. 228</calendar> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 729</legis-num> 
+<associated-doc role="report" display="yes">[Report No. 116–283]</associated-doc> 
+<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20190123">January 23, 2019</action-date> 
+<action-desc><sponsor name-id="K000381">Mr. Kilmer</sponsor> (for himself, <cosponsor name-id="Y000033">Mr. Young</cosponsor>, <cosponsor name-id="G000551">Mr. Grijalva</cosponsor>, <cosponsor name-id="C001053">Mr. Cole</cosponsor>, <cosponsor name-id="H001064">Mr. Heck</cosponsor>, <cosponsor name-id="C001094">Mr. Cook</cosponsor>, <cosponsor name-id="G000574">Mr. Gallego</cosponsor>, <cosponsor name-id="D000617">Ms. DelBene</cosponsor>, <cosponsor name-id="P000597">Ms. Pingree</cosponsor>, <cosponsor name-id="H001068">Mr. Huffman</cosponsor>, <cosponsor name-id="M001160">Ms. Moore</cosponsor>, <cosponsor name-id="L000570">Mr. Luján</cosponsor>, and <cosponsor name-id="D000624">Mrs. Dingell</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HII00">Committee on Natural Resources</committee-name></action-desc> 
+</action> 
+<action>
+<action-date date="20191113">November 13, 2019</action-date>
+<action-desc>Additional sponsors: <cosponsor name-id="L000560">Mr. Larsen of Washington</cosponsor> and <cosponsor name-id="C001055">Mr. Case</cosponsor></action-desc>
+</action>
+<action> 
+<action-date date="20191113">November 13, 2019</action-date> 
+<action-desc>Committed to the Committee of the Whole House on the State of the Union and ordered to be printed<pagebreak/></action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To amend the Coastal Zone Management Act of 1972 to authorize grants to Indian Tribes to further achievement of Tribal coastal zone objectives, and for other purposes.<pagebreak/></official-title> 
+</form> 
+<legis-body id="H6FD87FA2325E4D6D8BB700BDE1C69CBE" style="OLC"> 
+<section id="H4B724FB684944EC2BA3987FC73CE280E" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Tribal Coastal Resiliency Act</short-title></quote>.</text> </section> <section id="HFCCC8785994C419084B0DF97B42A3085"><enum>2.</enum><header>Grants to further achievement of Tribal coastal zone objectives</header> <subsection id="HF2690B155BD0484BB61004241E22D24B"><enum>(a)</enum><header>Grants authorized</header><text>The Coastal Zone Management Act of 1972 (<external-xref legal-doc="usc" parsable-cite="usc/16/1451">16 U.S.C. 1451</external-xref> et seq.) is amended by adding at the end the following:</text> 
+<quoted-block id="HAA189B35CB89431E9DE7BD08F529A7BB" style="OLC"> 
+<section id="HCA129FC64DDC42E0BFFEE3FD2B7DF636"><enum>320.</enum><header>Grants to further achievement of Tribal coastal zone objectives</header> 
+<subsection id="HF403EBA6A2E9404E96A797A6C4AA4FEF"><enum>(a)</enum><header>Grants authorized</header><text>The Secretary may award competitive grants to Indian Tribes to further achievement of the objectives of such a Tribe for its Tribal coastal zone.</text> </subsection> <subsection id="HF09FCDA522A94F09B69ED9C9EB4C453B"><enum>(b)</enum><header>Cost share</header> <paragraph id="H177C7317994D4A7D9EB05D7590DDF8E7"><enum>(1)</enum><header>In general</header><text>The Federal share of the cost of any activity carried out with a grant under this section shall be—</text> 
+<subparagraph id="HC6CC4CCB7D394802AA355A27514810AC"><enum>(A)</enum><text>in the case of a grant of less than $200,000, 100 percent of such cost; and</text> </subparagraph> <subparagraph id="H42C4DE12AB7E4BCD861F8CE4D2E17C49"><enum>(B)</enum><text>in the case of a grant of $200,000 or more, 95 percent of such cost, except as provided in paragraph (2).</text> </subparagraph></paragraph> 
+<paragraph id="HADABC042CA87414E861414102E8D5101"><enum>(2)</enum><header>Waiver</header><text>The Secretary may waive the application of paragraph (1)(B) with respect to a grant to an Indian Tribe, or otherwise reduce the portion of the share of the cost of an activity required to be paid by an Indian Tribe under such paragraph, if the Secretary determines that the Tribe does not have sufficient funds to pay such portion.</text> </paragraph></subsection> <subsection id="HE9D6F474B3BE4A07A715EC3B8D5C7622"><enum>(c)</enum><header>Compatibility</header><text>The Secretary may not award a grant under this section unless the Secretary determines that the activities to be carried out with the grant are compatible with this title and that the grantee has consulted with the affected coastal state regarding the grant objectives and purposes.</text> </subsection> 
+<subsection id="HB97491CF5AEE4D858F5A678708FE2255"><enum>(d)</enum><header>Authorized objectives and purposes</header><text>Amounts awarded as a grant under this section shall be used for one or more of the objectives and purposes authorized under subsections (b) and (c), respectively, of section 306A.</text> </subsection> <subsection id="HA3306C97830448C292701123B7E8C068"><enum>(e)</enum><header>Funding</header><text>Of amounts appropriated to carry out this Act, $5,000,000 is authorized to carry out this section for each fiscal year.</text> </subsection> 
+<subsection id="HC80DEE7E288F44EE83C898DF334FA8BE"><enum>(f)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="HDDC4ABDA06E24E40AB0955AF012C2266"><enum>(1)</enum><header>Indian land</header><text>The term <quote>Indian land</quote> has the meaning that term has under section 2601 of the Energy Policy Act of 1992 (<external-xref legal-doc="usc" parsable-cite="usc/25/3501">25 U.S.C. 3501</external-xref>).</text> </paragraph> 
+<paragraph id="H18A673E87C3A4DEFA241E5D4D752DF45"><enum>(2)</enum><header> Indian Tribe</header><text display-inline="yes-display-inline">The term <quote>Indian Tribe</quote> means an Indian tribe, as that term is defined in section 4 of the Indian Self-Determination and Education Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/25/5304">25 U.S.C. 5304</external-xref>).</text> </paragraph> <paragraph id="H2433852DD9914190B6BF10C5E5F54918"><enum>(3)</enum><header>Tribal coastal zone</header><text>The term <quote>Tribal coastal zone</quote> means any Indian land of an Indian Tribe that is within the coastal zone.</text> </paragraph> 
+<paragraph id="H80571ABAE8CA4DDD8D549CC9F844D045"><enum>(4)</enum><header>Tribal coastal zone objective</header><text>The term <quote>Tribal coastal zone objective</quote> means, with respect to an Indian Tribe, any of the following objectives:</text> <subparagraph id="HD3CD599C894B4CA497F3DF84C7DE12BB"><enum>(A)</enum><text>Protection, restoration, or preservation of areas in the Tribal coastal zone of such Tribe that hold—</text> 
+<clause id="H68DF69934CAD4FD484B85F22BB80B135"><enum>(i)</enum><text>important ecological, cultural, or sacred significance for such Tribe; or</text> </clause> <clause id="HEE762234C28E4989B1D0D4C674EB5DCE"><enum>(ii)</enum><text>traditional, historic, and esthetic values essential to such Tribe.</text> </clause></subparagraph> 
+<subparagraph id="H37AD51771B2D46D0913C7A1493E1C3FA"><enum>(B)</enum><text display-inline="yes-display-inline">Preparing and implementing a special area management plan and technical planning for important coastal areas.</text> </subparagraph> <subparagraph id="H633844370FC6444398C274DE3D41D63B"><enum>(C)</enum><text>Any coastal or shoreline stabilization measure, including any mitigation measure, for the purpose of public safety, public access, or cultural or historical preservation.</text></subparagraph></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </subsection> 
+<subsection id="H6A9E1909D5E849DAB9F3070DC6C6FDAB"><enum>(b)</enum><header>Guidance</header><text>Not later than 180 days after the date of the enactment of this Act, the Secretary of Commerce shall issue guidance for the program established under the amendment made by subsection (a), including the criteria for awarding grants under such program based on consultation with Indian Tribes (as that term is defined in that amendment).</text> </subsection> <subsection id="H6F5146FF8C6148548002BEC68806E4C9"><enum>(c)</enum><header>Use of State grants To fulfill Tribal objectives</header><text>Section 306A(c)(2) of the Coastal Zone Management Act of 1972 (<external-xref legal-doc="usc" parsable-cite="usc/16/1455a">16 U.S.C. 1455a(c)(2)</external-xref>) is amended by striking <quote>and</quote> after the semicolon at the end of subparagraph (D), by striking the period at the end of subparagraph (E) and inserting <quote>; and</quote>, and by adding at the end the following:</text> 
+<quoted-block id="H1CA8A99625CC471A9D06DE378B22CE94" style="OLC"> 
+<subparagraph id="H458C27DEF8C044649E4A4CDEB6B91C67" changed="added"><enum>(F)</enum><text>fulfilling any Tribal coastal zone objective (as that term is defined in section 320).</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block> </subsection> <subsection id="H2F5AAC837A8E4A919A3EAF4F36465E58"><enum>(d)</enum><header>Other programs not affected</header><text display-inline="yes-display-inline">Nothing in this section shall be construed to affect the ability of an Indian Tribe to apply for, receive assistance under, or participate in any program authorized by the Coastal Zone Management Act of 1972 (<external-xref legal-doc="usc" parsable-cite="usc/16/1451">16 U.S.C. 1451</external-xref> et seq.) or other related Federal laws.</text> </subsection></section> 
+</legis-body> 
+<endorsement display="yes"> 
+<action-date date="20191113">November 13, 2019</action-date> 
+<action-desc>Committed to the Committee of the Whole House on the State of the Union and ordered to be printed</action-desc></endorsement> 
+</bill> 
+
+

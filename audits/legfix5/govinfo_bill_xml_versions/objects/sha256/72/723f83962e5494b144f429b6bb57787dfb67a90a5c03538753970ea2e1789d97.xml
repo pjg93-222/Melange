@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HD9A2C7159CDE4519A0D9B32C794BCD03" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6777 IH: Secure Our Elections Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-05-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6777</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200508">May 8, 2020</action-date><action-desc><sponsor name-id="N000191">Mr. Neguse</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HHA00">Committee on House Administration</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To repeal the matching requirement for payments made to States for election security grants under the Coronavirus Aid, Relief, and Economic Security Act.</official-title></form><legis-body id="H928C246F08F34941A8A08991DB5E0317" style="OLC"><section id="HBCD88DBA95374BBA9ACA2991EDAFDF73" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Secure Our Elections Act</short-title></quote>. </text></section><section id="H5D2CBD00941641CDAF53E6402711A21F" section-type="subsequent-section"><enum>2.</enum><header>Repeal of matching requirement for election security grants to States</header><subsection id="H489966879BD64052B17A7E85725A0D7F"><enum>(a)</enum><header>Repeal</header><text display-inline="yes-display-inline">The last proviso under the heading “Election Assistance Commission, Election Security Grants” in the Financial Services and General Government Appropriations Act, 2020 (<external-xref legal-doc="public-law" parsable-cite="pl/116/93">Public Law 116–93</external-xref>; 133 Stat. 2461) (relating to the State matching funds requirement) shall not apply with respect to any payment made to a State using funds appropriated or otherwise made available to the Election Assistance Commission under the Coronavirus Aid, Relief, and Economic Security Act (<external-xref legal-doc="public-law" parsable-cite="pl/116/136">Public Law 116–136</external-xref>).</text></subsection><subsection id="HE51E73DE3BEB422C8B88A0095035AAE1"><enum>(b)</enum><header>Effective date</header><text display-inline="yes-display-inline">Subsection (a) shall take effect as if included in the enactment of the Coronavirus Aid, Relief, and Economic Security Act (<external-xref legal-doc="public-law" parsable-cite="pl/116/136">Public Law 116–136</external-xref>).</text></subsection></section></legis-body></bill> 
+

@@ -1,0 +1,14 @@
+{
+ "backup": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\social_media.PRE-TURNSPLIT-20260919.db",
+ "backup_bytes": 481439744,
+ "backup_sha256": "0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee",
+ "db": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\social_media.db",
+ "live_bytes_after_copy": 481439744,
+ "live_bytes_before_copy": 481439744,
+ "live_sha256_after_copy": "0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee",
+ "live_sha256_before_copy": "0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee",
+ "sha256_equal": true,
+ "sizes_equal": true,
+ "wal_bytes_after_copy": 0,
+ "wal_bytes_before_copy": 0
+}

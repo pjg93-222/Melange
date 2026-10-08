@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H7DF6F8CD0CC041DE98A458FA5ED0835E" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4771 IH: VA Tele-Hearing Modernization Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-10-21</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4771</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191021">October 21, 2019</action-date><action-desc><sponsor name-id="C001122">Mr. Cunningham</sponsor> (for himself and <cosponsor name-id="K000386">Mr. Katko</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to permit appellants to appear in disability compensation
+			 cases before the Board of Veterans’ Appeals by picture and voice
+			 transmission from locations other than facilities of the Department of
+			 Veterans Affairs.</official-title></form>
+	<legis-body id="H520051848BDB4E59B22D8B5B65FE0934" style="OLC">
+ <section id="HEAAC4959C08C418888D1DF16DFE9FB73" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>VA Tele-Hearing Modernization Act</short-title></quote>.</text> </section><section id="H3C5D1168D34946E580081B2873E193B6"><enum>2.</enum><header>Disability compensation hearings before the Board of Veterans' Appeals by means of teleconference from locations other than facilities of the Department of Veterans Affairs</header> <subsection id="HA453FEEE35B7495B8D46B0C3E62175EA"><enum>(a)</enum><header>Establishment</header><text display-inline="yes-display-inline">Section 7107 of title 38, United States Code, is amended—</text>
+ <paragraph id="HB9A333436B944CEF9EEE873C4946BC1A"><enum>(1)</enum><text display-inline="yes-display-inline">in subsection (c)(2)—</text> <subparagraph id="HA7234DCEF5EC425A95FC1795F4271724"><enum>(A)</enum><text display-inline="yes-display-inline">in subparagraph (A), by inserting <quote>or subparagraph (C) of this paragraph</quote> after <quote>subparagraph (B) of such paragraph</quote>;</text>
+ </subparagraph><subparagraph id="H8D6C32ACEF2B44D39CF19A80653BABAB"><enum>(B)</enum><text display-inline="yes-display-inline">in subparagraph (B), by inserting <quote>or subparagraph (C) of this paragraph</quote> after <quote>subparagraph (A) of such paragraph</quote>; and</text> </subparagraph><subparagraph id="H1DE6C43B55B34810A9E50EE26CD69FEA"><enum>(C)</enum><text>by adding at the end the following new subparagraph (C):</text>
+						<quoted-block display-inline="no-display-inline" id="H2A43B1E2EC91454C8C18A09156B79862" style="USC">
+ <subparagraph id="HB138F5A739E1452BA9D1598283FC98BA" indent="up2"><enum>(C)</enum><text display-inline="yes-display-inline">Upon notification of a Board hearing under subparagraph (A) or (B) of paragraph (1) in a case regarding disability compensation under a law administered by the Secretary, the appellant may alternatively request a hearing by picture and voice transmission—</text>
+ <clause id="HF71A70140238442D808697F47E79C123"><enum>(i)</enum><text>at a location selected by the appellant; and</text> </clause><clause id="H4CFA6EAD95E3432DA15DC56B85B72DB5"><enum>(ii)</enum><text>via a secure internet platform established and maintained by the Secretary that protects sensitive personal information from a data breach.</text>
+								</clause></subparagraph><quoted-block-continuation-text quoted-block-continuation-text-level="paragraph">If so requested, the Board shall grant such request.</quoted-block-continuation-text><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="HB06D3DABE8DD48278DDAE1EBF17C903E"><enum>(2)</enum><text display-inline="yes-display-inline">by adding at the end the following new subsection (f):</text> <quoted-block display-inline="no-display-inline" id="HB6E389743A554FB690467945FA332311" style="USC"> <subsection id="H9590BECFC68F4178BFDB5310EA4586AC"><enum>(f)</enum><header>Definitions</header><text display-inline="yes-display-inline">In this section, the terms <quote>sensitive personal information</quote> and <quote>data breach</quote> have the meanings given those terms in section 5727 of this title.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></subsection><subsection id="HB2E70A76B2084868941197C4454777FE"><enum>(b)</enum><header>Deadline</header><text>The Secretary shall implement the amendments made by subsection (a) not later than 180 days after the date of the enactment of this Act.</text>
+ </subsection><subsection id="HBEB146FA1824499189785E7527CFDC63"><enum>(c)</enum><header>Reports</header><text display-inline="yes-display-inline">On the day that is one year after the date on which the Secretary implements subparagraph (C) of subsection (c)(2) of such section 7107, as added by subsection (a), and twice annually thereafter, the Secretary shall submit to the Committees on Veterans’ Affairs of the Senate and House of Representatives a report regarding hearings held under such subparagraph. Each such report shall include, with respect to the year immediately preceding the date of the report, the following:</text>
+ <paragraph id="H61EBA4A3D4E04A36A114D46155B56926"><enum>(1)</enum><text display-inline="yes-display-inline">The number of hearings scheduled under such subparagraph.</text> </paragraph><paragraph id="H31327EDC3B584B4BBB2D32053A13B24D"><enum>(2)</enum><text display-inline="yes-display-inline">The number of hearings under such subparagraph that were cancelled and why each such hearing was cancelled.</text>
+ </paragraph><paragraph id="HB94681674EAE41DE9549375306182011"><enum>(3)</enum><text display-inline="yes-display-inline">Any statistical difference in outcomes between cases heard under such subparagraph and those held at the principal location of the Board or by picture and voice transmission at a facility of the Department.</text>
+				</paragraph></subsection></section></legis-body></bill>
+
+

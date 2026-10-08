@@ -1,0 +1,176 @@
+INTERVIEW rows: 153576
+SPEAKER_LEX: 584 surnames (484 roster + 123 corpus-derived multi-token surnames)
+
+==============================================================================
+U2 ROW-LEVEL RESULT
+==============================================================================
+INTERVIEW rows                          : 153576
+rows skipped as ALL-CAPS (not turns)    : 7117
+rows FLAGGED (>=1 foreign speaker tag)  : 4537  (2.954% of all INTERVIEW rows)
+rows carrying ONLY a SELF tag           : 10
+total foreign tag occurrences           : 4746
+
+characters (INTERVIEW total)            : 69944213
+characters in FLAGGED rows              : 3002638  (4.293% of corpus chars)
+characters AFTER the first foreign tag  : 1818603
+   as % of FLAGGED-row characters       : 60.57%
+   as % of ALL INTERVIEW characters     : 2.6001%
+
+--- by show (`chamber`), shows with >=1 hit, sorted by hits ---
+show                               rows  flagged    rate%
+msnow                             16112     1404    8.714
+cnr                               16565     1100    6.641
+sitroom                            4493      316    7.033
+cg                                 4871      285    5.851
+cnnt                               1459      276   18.917
+acd                                2345      199    8.486
+ctw                                 977      102   10.440
+ebo                                2678       97    3.622
+nday                               3634       79    2.174
+ctmo                               3816       71    1.861
+fmjc                                250       62   24.800
+csr                                 416       50   12.019
+se                                 2140       47    2.196
+ip                                 5115       41    0.802
+esrs                                518       33    6.371
+nwsm                                 73       28   38.356
+es                                 1707       28    1.640
+cnc                                5286       25    0.473
+tsiem                               478       25    5.230
+wrn                                 208       25   12.019
+ndaysat                             382       20    5.236
+ow                                  833       19    2.281
+qmb                                 347       16    4.611
+ws                                  113       16   14.159
+this-week                          1693       16    0.945
+face-the-nation                    6450       14    0.217
+meet-the-press                     6906       12    0.174
+ndaysun                             232       10    4.310
+ath                                1069        9    0.842
+exclusive-steven-mnuchin-talks       24        8   33.333
+senator-lindsey-graham-on-nort       21        8   38.095
+ampr                                588        7    1.190
+reince-priebus-reacts-to-quest       13        7   53.846
+fox-news-sunday                     202        6    2.970
+bbn                                  75        6    8.000
+CPT                                 632        6    0.949
+cws                                  83        4    4.819
+tbwjs                               138        4    2.899
+sotu                                810        4    0.494
+cfr                                1206        4    0.332
+ist                                 305        3    0.984
+cnap                                713        3    0.421
+wwkmf                               172        3    1.744
+cton                                217        3    1.382
+lcl                                 779        2    0.257
+skc                                1351        2    0.148
+chicago-teachers-union-reviewi        4        2   50.000
+some-republicans-express-outra       10        2   20.000
+ten-republicans-join-democrats        4        2   50.000
+tff                                  45        1    2.222
+biden-places-focus-on-covid          11        1    9.091
+can-rubio-make-gop-presidentia       16        1    6.250
+cdc-director-predicts-covid           5        1   20.000
+congress-set-to-override-trump       26        1    3.846
+conway-on-white-house-operatio       19        1    5.263
+donald-trump-and-marco-rubio-r        5        1   20.000
+education-secretary-nominee-gr       12        1    8.333
+facebooks-rules-are-in-shamble       13        1    7.692
+fbi-seeks-further-info-from-pu        6        1   16.667
+fox-news-sunday-on                  136        1    0.735
+herman-cain-on-his-presidentia       14        1    7.143
+holiday-travelers-juggle-risks        4        1   25.000
+justice-on-covid-crime                2        1   50.000
+new-documents-revisit-question        4        1   25.000
+paul-ryan-talks-gop-tax-reform       15        1    6.667
+crn                                 448        1    0.223
+smer                                119        1    0.840
+sekulow-defends-don-trump-jr-s       13        1    7.692
+senate-to-vote-to-override-pre       11        1    9.091
+sens-graham-mccaskill-talk-for       11        1    9.091
+speaker-ryan-this-is-the-repla        2        1   50.000
+special-report-panel-reacts-to        1        1  100.000
+the-five-democrats-agenda-infl        2        1   50.000
+tom-steyer-on-performance-in-n        4        1   25.000
+transcript-special-report-with       52        1    1.923
+  (shows with zero hits: 6938 of 7013 distinct shows)
+
+--- by source host (`package` URL host) ---
+host                                   rows  flagged    rate%
+transcripts.cnn.com                   67883     3029    4.462
+foxnews.com                           30203       58    0.192
+ms.now                                16112     1404    8.714
+c-span.org                             7116        0    0.000
+nbcnews.com                            6906       12    0.174
+cbsnews.com                            6450       14    0.217
+pbs.org                                6253        0    0.000
+npr.org                                6164        0    0.000
+hughhewitt.com                         2573        0    0.000
+abcnews.go.com                         1693       16    0.945
+cfr.org                                1206        4    0.332
+csis.org                                692        0    0.000
+cnn.com                                 251        0    0.000
+aspensecurityforum.org                   74        0    0.000
+
+--- by year ---
+year       rows  flagged    rate%
+2003         40        0    0.000
+2004         98        0    0.000
+2005         77        0    0.000
+2006        163        0    0.000
+2007        294        1    0.340
+2008        122        0    0.000
+2009        677        0    0.000
+2010        437        1    0.229
+2011       1215        3    0.247
+2012       1216        0    0.000
+2013       1537        0    0.000
+2014       1840        5    0.272
+2015       2364       14    0.592
+2016       3967      139    3.504
+2017       6154      162    2.632
+2018       7135      126    1.766
+2019      29664      828    2.791
+2020      14665      449    3.062
+2021      15984     1045    6.538
+2022      11250      634    5.636
+2023      11412      358    3.137
+2024      13584      399    2.937
+2025      18335      210    1.145
+2026      11346      163    1.437
+
+--- 25 most frequent FOREIGN tags ---
+ 1.   1434  O`DONNELL
+ 2.    230  RAJU (voice-over)
+ 3.    223  LEMON (on camera)
+ 4.    103  ZELENY (voice-over)
+ 5.     95  ACOSTA (voice-over)
+ 6.     88  TODD (voice-over)
+ 7.     84  FOREMAN (voice-over)
+ 8.     80  RAJU (on camera)
+ 9.     80  COLLINS (voice-over)
+10.     71  MURRAY (voice-over)
+11.     63  SERFATY (voice-over)
+12.     60  MATTINGLY (voice-over)
+13.     58  NOBLES (voice-over)
+14.     52  REID (voice-over)
+15.     45  LAH (voice-over)
+16.     44  SCHNEIDER (voice-over)
+17.     39  DEAN (voice-over)
+18.     38  LEE (voice-over)
+19.     38  SAENZ (voice-over)
+20.     38  TAPPER (voice-over)
+21.     36  BROWN (voice-over)
+22.     28  MARQUARDT (voice-over)
+23.     25  LIEBERMANN (voice-over)
+24.     25  WATT (voice-over)
+25.     25  PHILLIP (voice-over)
+
+distinct foreign tag strings: 490
+wrote U2_flagged_rows.json (4537 rows)
+wrote U2_flagged_sample40_UNGRADED.csv (40 rows)
+wrote U2_unflagged_sample40_UNGRADED.csv (40 rows)
+
+seed=20260918  sample rowids flagged: [231934, 211903, 78123, 267374, 245788, 237248, 212525, 248715, 198470, 305438, 252230, 204015, 195136, 219445, 216511, 76143, 241010, 215804, 226492, 221285, 273244, 225423, 220070, 287505, 273111, 273787, 86351, 217540, 204901, 222355, 212933, 200397, 260859, 223855, 265793, 223815, 83817, 224984, 274189, 305167]
+seed=20260918  sample rowids unflagged: [198915, 119261, 204605, 76543, 307885, 134862, 70554, 103450, 82277, 73762, 121982, 273730, 82115, 74625, 248664, 97109, 221792, 215491, 257385, 199976, 98730, 254098, 220009, 257711, 77071, 199891, 253698, 258948, 245510, 76767, 188682, 234299, 189860, 66479, 250217, 234368, 236059, 235129, 276562, 272411]
+DONE U2

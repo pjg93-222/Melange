@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2286 IS: Improving Justice Programs through Science Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2286</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190725">July 25, 2019</action-date>
+			<action-desc><sponsor name-id="S353">Mr. Schatz</sponsor> (for himself, <cosponsor name-id="S369">Mr. Markey</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, and <cosponsor name-id="S316">Mr. Whitehouse</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSJU00">Committee on the Judiciary</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To establish a Science Advisory Board at the Department of Justice, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Improving Justice Programs through Science Act of 2019</short-title></quote>.</text>
+		</section><section id="id0294ACC1D9954FE38FACBA04693F5E3C"><enum>2.</enum><header>Science Advisory Board</header>
+ <subsection id="id850ABA5AD1C84B099EA992D5CCDAB642"><enum>(a)</enum><header>Amendment</header><text display-inline="yes-display-inline">Part A of title I of the Omnibus Crime Control and Safe Streets Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/34/10101">34 U.S.C. 10101</external-xref> et seq.) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="idD14C93AA4F8A40B787456C41BE54FFBF" style="OLC">
+					<section id="id4AE0EDE204844036AB9EBC2B8CF8CC74"><enum>110.</enum><header>Science Advisory Board</header>
+ <subsection id="id5F9C34BCDF3C49BFBA46EB73F079D17D"><enum>(a)</enum><header>Establishment</header><text>There is established within the Office a Science Advisory Board (in this section referred to as the <quote>Board</quote>)—</text> <paragraph id="idB470526C834B4147A7111D7279F2DFCA"><enum>(1)</enum><text>which shall be composed of 26 senior representatives of academic institutions, including primary and secondary educational institutions, institutions of higher education, advanced technology education, and other related entities, and criminal justice and juvenile justice professionals, appointed in accordance with subsection (c); and</text>
+ </paragraph><paragraph id="id226397bcc3214f3ba64da32f512fd326"><enum>(2)</enum><text>the purpose of which shall be to—</text> <subparagraph id="idc4e2b5e3f9794c7abfa17500b1fb0f92"><enum>(A)</enum><text>foster sustained dialogue between the academic and criminal and juvenile justice communities on research-based policies; and</text>
+ </subparagraph><subparagraph id="id7dba0e35d0284927af16ad612e73f84c"><enum>(B)</enum><text>advise the Attorney General with respect to—</text> <clause id="id048d60005a474385a626862598b84acb"><enum>(i)</enum><text>relevant developments in criminal and juvenile justice research;</text>
+ </clause><clause id="id8dcc5ff9d30f431b9f647aa575ea5c48"><enum>(ii)</enum><text>the implications of developments described in clause (i) for Federal, State, and local criminal and juvenile justice agencies; and</text>
+ </clause><clause id="idd104bd05101540b0a298a2041fece9b5"><enum>(iii)</enum><text>any other matters as requested by the Attorney General.</text> </clause></subparagraph></paragraph></subsection><subsection id="ide584865294024fe784c059970fe1b2bd"><enum>(b)</enum><header>Charter</header><text>There shall be a charter to govern the structure and mission of the Board, which shall—</text>
+ <paragraph id="id27beac8f16f04dcb9a97f980057b9e26"><enum>(1)</enum><text>direct the Board to focus on the departmental application of science and evidence under the guidance of the Attorney General; and</text>
+ </paragraph><paragraph id="id43891e794c8c47f1ae6e0669e9bc5efe"><enum>(2)</enum><text>be reviewed and updated every 4 years, as appropriate.</text> </paragraph></subsection><subsection id="id1df42373978d468ca4c4a1d751012a8b"><enum>(c)</enum><header>Members</header> <paragraph id="id1171d424d1b94857b45585c87c609c24"><enum>(1)</enum><header>Appointment</header><text>The 26 members of the Board shall—</text>
+ <subparagraph id="id626ace0016c547cb944c5f3b639d1045"><enum>(A)</enum><text>be appointed by the Attorney General, in consultation with the Assistant Attorney General of the Office and considering recommendations from—</text>
+ <clause id="id2521C1942AD845E0888D1E9D5068638C"><enum>(i)</enum><text>the Director of the National Institute of Justice;</text> </clause><clause id="idDBA569CA73644701B496389D24A6A6A5"><enum>(ii)</enum><text>the Director Bureau of Justice Statistics;</text>
+ </clause><clause id="id682C0EDFF99C4731B030167F7E3AE974"><enum>(iii)</enum><text>the Director of the Office for Victims of Crime;</text> </clause><clause id="id473A1B4AAE0F49C7B26C2D15C547691F"><enum>(iv)</enum><text>the Director of the Office of Sex Offender Sentencing, Monitoring, and Tracking; and</text>
+ </clause><clause id="idC03FE20324AA4DFC873F5EA429A253BF"><enum>(v)</enum><text>the Director of the Office of Juvenile Justice and Delinquency Prevention;</text> </clause></subparagraph><subparagraph id="id3db38876f666453b9602ebfe97aafbbf"><enum>(B)</enum><text>include senior representatives with a balance of backgrounds, experiences, and viewpoints that will include the expertise of scientific, criminal justice, and juvenile justice professionals;</text>
+ </subparagraph><subparagraph id="idd80beb7513df4261a986e0d59eb04716"><enum>(C)</enum><text>include not fewer than 8 researchers in the field of statistics, evaluation, social sciences, or physical and biological sciences, which may include those researchers recommended by the National Academy of Sciences;</text>
+ </subparagraph><subparagraph id="id9d45e11aa88b439195c221bd3fc67b6c"><enum>(D)</enum><text>be selected to achieve a balance of backgrounds, experiences, and viewpoints that will include the expertise of scientific, criminal justice, and juvenile justice practitioners; and</text>
+ </subparagraph><subparagraph id="id862e0f5d327c4503a1df289c91b20a37"><enum>(E)</enum><text>include not less than three-fifths of the members who hold terminal degrees in their field, have published researcher, and are leading research in areas, including—</text>
+ <clause id="id597a12e6566149af894f14a72a9ed8de"><enum>(i)</enum><text>criminology;</text> </clause><clause id="id31bfde3ac7c2447ba8aafd87358f0cff"><enum>(ii)</enum><text>criminal justice;</text>
+ </clause><clause id="id08ea2e09d7a841579acd67aa4c7afa55"><enum>(iii)</enum><text>juvenile justice;</text> </clause><clause id="ide7146208ad354a84a54e73b987e160ad"><enum>(iv)</enum><text>tribal justice;</text>
+ </clause><clause id="id3fa9f89b58cf4fa7972865f4a2a7311e"><enum>(v)</enum><text>statistics;</text> </clause><clause id="idb3ead8f896f4476ea05f867d55db9f5f"><enum>(vi)</enum><text>economics;</text>
+ </clause><clause id="id1ada543a347a4876acf9f80f7ca20e64"><enum>(vii)</enum><text>sociology;</text> </clause><clause id="idd9905bff09994abe9001abefabf0ec5f"><enum>(viii)</enum><text>psychology;</text>
+ </clause><clause id="idc20a710e919a44dc8f5ace20deeeaf87"><enum>(ix)</enum><text>political science; and</text> </clause><clause id="id5c84d041b329402cb768461957cdb837"><enum>(x)</enum><text>other relevant sciences.</text>
+ </clause></subparagraph></paragraph><paragraph id="idf3d7761fde014abcb8af7b6b8b69b4af"><enum>(2)</enum><header>Terms</header><text>The term of each member appointed under paragraph (1) shall be 4 years.</text> </paragraph><paragraph id="id80985654c20042a59a0fee29a571245f"><enum>(3)</enum><header>Vacancies</header><text>Any vacancy in the membership of the Board shall—</text>
+ <subparagraph id="id2e909f428be049988e4706e947090806"><enum>(A)</enum><text>not affect the powers of the board;</text> </subparagraph><subparagraph id="idc540c6b5725f47768abf2709c77cdc8f"><enum>(B)</enum><text>be filled in the same manner as the original appointment; and</text>
+ </subparagraph><subparagraph id="idda0cd8601db64b3f863437f35a04abe8"><enum>(C)</enum><text>be only for the remainder of the term of the original appointment.</text> </subparagraph></paragraph><paragraph id="id37e6cdeeaacc4dbd9ca289b4c4f0462f"><enum>(4)</enum><header>Chairperson</header><text>The Attorney General, with the advice and recommendation of the Assistant Attorney General, shall appoint 1 member of the Science Advisory Board to serve as the Chairperson of the Board.</text>
+ </paragraph></subsection><subsection id="id9856cbef6e2c40be982c6ad48624a876"><enum>(d)</enum><header>Meetings</header><text>The Board shall—</text> <paragraph id="id7d5e06d0985b4970af042ebab76b4a62"><enum>(1)</enum><text>meet on a regular basis to discuss science, research, and ongoing criminal and juvenile justice departmental activities, including coordination with other Federal, State, local, tribal, territorial, and private sector partners; and</text>
+ </paragraph><paragraph id="id6b30644f82a44ad7b15b68ff6abe7fe9"><enum>(2)</enum><text>make recommendations to the Assistant Attorney General;</text> </paragraph><paragraph id="id7b2b67a29c54452b89d18ad129a4a2f1"><enum>(3)</enum><text>provide advice and recommendations concerning support for research, statistics, and grant programs of the Office;</text>
+ </paragraph><paragraph id="iddcc8c4f8b09f482fa7438662fa5056c5"><enum>(4)</enum><text>serve as a point of contact with the academic and practitioner communities to inform the Office of the impact of the research, statistics, and grant programs of the Office on both the academic community and the criminal and juvenile justice fields;</text>
+ </paragraph><paragraph id="id07212d9c799d4f73b0286402b2ba394f"><enum>(5)</enum><text>offer broad input into long-range plans and partnership opportunities;</text> </paragraph><paragraph id="id031a4ecc211c497091538e49d18a2ad0"><enum>(6)</enum><text>serve as a forum for consideration of proposed interdisciplinary projects across the sciences; and</text>
+ </paragraph><paragraph id="id197b4707294b4363992c12311b333e4a"><enum>(7)</enum><text>advise on policy development, program implementation and evaluation, and identify research needs and opportunities.</text>
+ </paragraph></subsection><subsection id="idf064b5303d38456193ecdf34ece98e8a"><enum>(e)</enum><header>Support</header><text>The Attorney General shall ensure that the Board complies with the requirements under—</text> <paragraph id="id47c66d1a02b94dada62f09d9f784e772"><enum>(1)</enum><text>the Federal Advisory Committee Act (5 U.S.C. App.);</text>
+ </paragraph><paragraph id="idbcd2d51ea6ba4e00a1d6399f95b59aa8"><enum>(2)</enum><text>section 552b of title 5 (commonly known as the <quote>Government in the Sunshine Act</quote>); and</text> </paragraph><paragraph id="id1c09c44f289e4385921e2a354919bbff"><enum>(3)</enum><text>any—</text>
+ <subparagraph id="id5699b3a35af64fff8e4e557eeb7f5ec7"><enum>(A)</enum><text>governing Federal statute or regulation; or</text> </subparagraph><subparagraph id="id6e09c22d41d546dc990292763da035b7"><enum>(B)</enum><text>relevant policy or procedure of the Department of Justice.</text></subparagraph></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="id2a4e8d668cdb45a1b0c4d2ebbcb77179"><enum>(b)</enum><header>Report</header><text>Not later than 90 days after the date of enactment of this Act, and annually thereafter, the Attorney General shall submit to the Committee on the Judiciary of the Senate and the Committee on the Judiciary of the House of Representatives a report on the status and activities of the Science Advisory Board established under section 110 of title I of the Omnibus Crime Control and Safe Streets Act of 1968, as added by subsection (a) of this Act.</text>
+			</subsection></section></legis-body>
+</bill>
+
+

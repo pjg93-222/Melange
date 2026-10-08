@@ -1,0 +1,111 @@
+====================================================================================================
+N14 Q1  THE THREE DISAGREEMENT SETS   run 2026-09-19T12:53:47
+====================================================================================================
+live root   : C:\Users\pgoff\OneDrive\Desktop\Melange Systems
+base tone   : C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv
+refresh tone: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\stance\press_refresh_tone.csv
+workbook cp : C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\measN14\wb.xlsx
+PRESS_URL_CANON as imported: '2'
+
+sheet rows 3701, header 28 columns
+sheet release keys (billstatus rows skipped) : 2379
+sheet keys carrying MORE than one sheet row  : 12
+engine tone rows returned by load_tone_rows   : 2668
+  ingest: read 2679 -> returned 2668 (exact 0, url-form 11, conflict-kept 1, official-mention 0, no-url 0)
+
+shared: 2377 ENGINE ROWS over 2376 distinct RELEASE KEYS  (delta 1)
+
+field            by ROW   by KEY
+score_graded       1208     1208
+stance_src          494      493
+stance_sign          57       57
+stance               57       57
+title                37       37
+url                   1        1
+stance_conf           1        1
+date                  1        1
+
+REPRODUCTION CHECK against the two prior publications
+  stance        docstring(keys)=   57 measured(keys)=   57 MATCH   |   receipt(rows)=   57 measured(rows)=   57 MATCH
+  stance_sign   docstring(keys)=   57 measured(keys)=   57 MATCH   |   receipt(rows)=   57 measured(rows)=   57 MATCH
+  stance_src    docstring(keys)=  493 measured(keys)=  493 MATCH   |   receipt(rows)=  494 measured(rows)=  494 MATCH
+  score_graded  docstring(keys)= 1207 measured(keys)= 1208 DIFF   |   receipt(rows)= 1208 measured(rows)= 1208 MATCH
+
+shared keys carrying more than ONE engine row: 1
+   V000130  https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-mo
+      engine row: date=9/30/2022   title=House Passes Rep. Vargas’ Credit Union Board Modernization
+      engine row: date=1/30/2023   title=House Passes Rep. Vargas’ Credit Union Board Modernization
+      sheet rows under this key: 2
+
+----------------------------------------------------------------------------------------------------
+-- THE 57 RELEASES WHERE THE DISPLAYED STANCE DISAGREES --
+member                     date       title[:70]                                                             url tail                           SHEET stance/sign/src  CSV stance/sign/src   
+Andy Barr                             Fraud fight: Prioritize innovative technology, information-sharing     nology-information-sharing#B001282 support/1/debate       neutral/0/human_label 
+Catherine Cortez Masto                cortez masto statement on clarity act                                  tez-masto-statement-on-clarity-act oppose/-1/debate       neutral/0/human_label 
+Chris Pappas               2025-07-17 Pappas Statement on Passage of Cryptocurrency Legislation              sage-of-cryptocurrency-legislation neutral/0/debate       support/1/human_label 
+Chris Van Hollen           2025-10-09 Van Hollen, Alsobrooks, Colleagues Take Action to Protect Federal Work utdown-threatens-economic-hardship neutral/0/debate       support/1/human_label 
+Chris Van Hollen           2025-04-29 Van Hollen Joins Warren, Colleagues in Pressing Administration on Impa -up-warren-kim-call-to-investigate support/1/debate       neutral/0/human_label 
+Cory Booker                2025-12-04 Simpson sets the record straight on overdraft programs                 traight-overdraft-programs#B001288 neutral/0/debate       support/1/human_label 
+Cynthia Lummis             2024-05-16 Lummis Lauds Passage of Resolution Rolling Back SEC Overreach          olution-rolling-back-sec-overreach neutral/0/debate       support/1/human_label 
+Earl Carter                2025-07-18 Carter Statement on House Passage of Key Crypto Legislation            cumentsingle.aspx?DocumentID=15812 neutral/0/debate       support/1/human_label 
+Elizabeth Warren           2025-05-15 In Speech to National Urban League, Warren Calls Out Republican Plans  es-to-pay-for-billionaire-tax-cuts neutral/0/debate       oppose/-1/human_label 
+Frederica Wilson           2022-11-28 Congresswoman Wilson Introduces Mandatory Foreclosure Mediation Act, F ep-florida-families-in-their-homes oppose/-1/debate       neutral/0/human_label 
+French Hill                2024-05-23 RELEASE: REP. HILL PROTECTS THE PERSONAL RIGHTS OF CENTRAL ARKANSANS A ocumentsingle.aspx?DocumentID=9317 neutral/0/debate       support/1/human_label 
+French Hill                           Fraud fight: Prioritize innovative technology, information-sharing     nology-information-sharing#H001072 support/1/debate       neutral/0/human_label 
+Jeanne Shaheen             2026-03-12 Three Shaheen-Led Bills to Lower Housing Costs, Improve Affordable Hou pass-in-bipartisan-housing-package support/1/debate       neutral/0/human_label 
+Jim Jordan                 2025-04-15 Ohio Credit Union League hosts Rep. Jordan                             on-league-hosts-rep-jordan#J000289 neutral/0/debate       support/1/human_label 
+Jimmy Panetta              2025-11-26 Reps. Panetta, LaHood Reintroduce Bipartisan Legislation to Simplify R an-legislation-simplify-retirement neutral/0/debate       support/1/human_label 
+Jimmy Panetta              2024-12-18 Rep. Panetta Authors and Introduces Bipartisan Bill to Simplify Retire n-bill-simplify-retirement-savings neutral/0/debate       support/1/human_label 
+John Kennedy               2025-10-22 Senate bill would make needed updates to SAR/CTR thresholds            -updates-sarctr-thresholds#K000393 neutral/0/debate       support/1/human_label 
+John Kennedy               2025-08-26 Leagues, credit unions host lawmakers, attend local political events   end-local-political-events#K000393 support/1/debate       neutral/0/human_label 
+John Mannion               2026-04-29 Opportunity Knock$ brings together Members of Congress, credit union l gress-credit-union-leaders#M001231 neutral/0/debate       support/1/human_label 
+John Rose                  2025-06-24 House passes bill curtailing abusive mortgage trigger leads            ive-mortgage-trigger-leads#R000612 oppose/-1/debate       support/1/human_label 
+John Rose                             Members of Congress encourage ‘strong, unified voice’ from credit unio nified-voice-credit-unions#R000612 support/1/debate       neutral/0/human_label 
+John Thune                 2025-05-13 Credit union tax status untouched in Ways and Means reconciliation bil -means-reconciliation-bill#T000250 neutral/0/debate       support/1/human_label 
+John Thune                 2025-05-21 Opposing efforts to add interchange price caps to stablecoin legislati aps-stablecoin-legislation#T000250 oppose/-1/debate       support/1/human_label 
+John Thune                 2025-06-10 'Poison pill' GENIUS Act amendments less likely to move forward        s-less-likely-move-forward#T000250 oppose/-1/debate       support/1/human_label 
+Jon Ossoff                 2025-03-12 Sens. Ossoff, Moody Introduce Bipartisan Bill to Make Homeownership Mo able-for-first-responders-teachers support/1/debate       neutral/0/human_label 
+Jon Ossoff                 2022-08-02 El Senador Ossoff Presenta Proyecto de Ley Bipartidista para Proteger  s-en-linea-y-la-explotacion-sexual neutral/0/debate       oppose/-1/human_label 
+Joni Ernst                 2024-10-22 ICYMI: WSJ Ed Board Promotes Ernst’s Telework Transparency Act         s-ernsts-telework-transparency-act neutral/0/debate       support/1/human_label 
+Joni Ernst                 2025-10-07 Legislators and advocates connect                                      tors-and-advocates-connect#E000295 neutral/0/debate       support/1/human_label 
+Josh Hawley                2025-05-22 Interchange, rate cap amendments are GENIUS Act ‘poison pills’         re-genius-act-poison-pills#H001089 oppose/-1/debate       support/1/human_label 
+Josh Hawley                2025-05-29 VP Vance calls for Congress to pass ‘clean’ GENIUS Act                 ress-pass-clean-genius-act#H001089 neutral/0/debate       support/1/human_label 
+Josh Hawley                2025-06-10 'Poison pill' GENIUS Act amendments less likely to move forward        s-less-likely-move-forward#H001089 oppose/-1/debate       support/1/human_label 
+Josh Hawley                2025-06-18 GENIUS Act clears senate without interchange, credit card rate cap ame t-card-rate-cap-amendments#H001089 oppose/-1/debate       support/1/human_label 
+Juan Vargas                2025-02-06 Bipartisan House bill would update board meeting requirements          board-meeting-requirements#V000130 neutral/0/debate       support/1/human_label 
+Juan Vargas                2024-02-07 Nussle meets with credit union supporters on Capitol Hill              on-supporters-capitol-hill#V000130 neutral/0/debate       support/1/human_label 
+Kirsten Gillibrand         2025-05-01 Gillibrand Slams Trump Administration For Making Seniors More Vulnerab able-to-financial-frauds-and-scams neutral/0/debate       oppose/-1/human_label 
+Kirsten Gillibrand         2025-05-08 Senator Gillibrand Statement On The GENIUS Act                         ibrand-statement-on-the-genius-act neutral/0/debate       support/1/human_label 
+Kirsten Gillibrand         2023-07-11 Schumer, Gillibrand & Ryan: With West Point Facing Severe Damage From  deploy-any-all-resources-available neutral/0/debate       support/1/human_label 
+Kweisi Mfume               2023-05-17 Mfume, Maryland Congressional Delegation Members Announce Over $24 Mil -impacted-by-the-covid-19-pandemic neutral/0/debate       support/1/human_label 
+Kweisi Mfume               2022-09-21 Congressman Mfume, Maryland Congressional Delegation Announces Over $8 nority-and-underserved-communities neutral/0/debate       support/1/human_label 
+Lance Gooden               2026-01-16 Interchange bill should be rejected in any form                        hould-be-rejected-any-form#G000589 oppose/-1/debate       support/1/human_label 
+Lance Gooden               2026-04-22 Gooden Reveals Historic U.S. Military Use of Bitcoin Node              2F2920-4821-4B84-A676-A9521924FEBC neutral/0/debate       support/1/human_label 
+Lisa Blunt Rochester       2025-05-08 STATEMENT: Senator Lisa Blunt Rochester Releases Statement on GENIUS A r-releases-statement-on-genius-act neutral/0/debate       oppose/-1/human_label 
+Maggie Goodlander          2026-01-09 Goodlander Joins Republicans to Pass Affordable HOMES Act to Cut Red T t-red-tape-and-lower-housing-costs support/1/debate       neutral/0/human_label 
+Mike Crapo                 2025-07-10 Fighting fraud on multiple fronts                                      ting-fraud-multiple-fronts#C000880 support/1/debate       neutral/0/human_label 
+Mike Flood                 2025-01-07 Congressman Flood: Inspector General Reveals New Details on Credit Uni ls-new-details-credit-union-merger neutral/0/debate       oppose/-1/human_label 
+Mike Rounds                2024-10-30 Leagues, CU advocates talk fraud, financial education, and more with p tion-and-more-policymakers#R000605 neutral/0/debate       support/1/human_label 
+Richard Blumenthal         2026-01-15 ICYMI Op-Ed: Crypto is a Gamble our Financial System Doesn't Need      e-our-financial-system-doesnt-need neutral/0/debate       oppose/-1/human_label 
+Richard Blumenthal         2025-12-04 Simpson sets the record straight on overdraft programs                 traight-overdraft-programs#B001277 neutral/0/debate       support/1/human_label 
+Richard Blumenthal         2026-06-15 Blumenthal Releases Report On Trump's Gutting of Consumer Protections  ps-gutting-of-consumer-protections oppose/-1/debate       neutral/0/human_label 
+Richard Durbin             2024-10-07 Illinois ‘sovereign immunity’ assertion in interchange challenge would challenge-would-hurt-state#D000563 neutral/0/debate       oppose/-1/human_label 
+Roger Marshall             2026-01-14 Reintroduced Big Box Bailout would harm consumers, small businesses    consumers-small-businesses#M001198 oppose/-1/debate       support/1/human_label 
+Roger Marshall             2025-08-19 America’s Credit Unions joins with other industry groups in opposition pposition-ndaa-interchange#M001198 oppose/-1/debate       support/1/human_label 
+Sheldon Whitehouse         2026-02-03 Senate interest rate bill would increase compliance complexity         ease-compliance-complexity#W000802 oppose/-1/debate       neutral/0/human_label 
+Stephen Lynch              2025-07-11 Reps. Lynch and Waters Announce Anti-Crypto Corruption Week            nounce-anti-crypto-corruption-week neutral/0/debate       oppose/-1/human_label 
+Tim Scott                  2025-02-06 Credit unions engage with policymakers prior to stablecoin bill releas or-stablecoin-bill-release#S001184 neutral/0/debate       support/1/human_label 
+Tim Scott                  2026-06-17 Credit union board modernization part of updated housing bill          -part-updated-housing-bill#S001184 neutral/0/debate       support/1/human_label 
+Todd Young                 2025-12-03 Hauptman says NCUA must be aware of consequences of overregulation     onsequences-overregulation#Y000064 neutral/0/debate       support/1/human_label 
+
+----------------------------------------------------------------------------------------------------
+-- stance_src DISAGREEMENT SHAPES (494 rows / 493 keys) --
+   sheet=debate <- csv=human_label                   494
+
+-- score_graded DISAGREEMENT DIRECTION (1208 rows / 1208 keys) --
+   sheet > csv                       978
+   sheet < csv                       230
+   csv side is exactly 0.000000  :    907
+   sheet side is exactly 0.000000:    192
+wrote n14_q1_disagreement_sets.json
+DONE N14 Q1

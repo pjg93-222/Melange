@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Placed-on-Calendar-Senate" bill-type="olc" dms-id="HBEB11287499D40AF9CCCBC850BBB4C36" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1158 PCS: DHS Cyber Incident Response Teams Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<calendar>Calendar No. 113</calendar><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 1158</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date>June 11, 2019</action-date><action-desc>Received; read twice and placed on the calendar</action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To authorize cyber incident response teams at the Department of Homeland Security, and for other
+			 purposes.</official-title>
+	</form>
+	<legis-body id="HB8655CC7900D41D59AEDF15AA988D588" style="OLC">
+ <section id="H547A5ADEB35F48ACBCF009F6CBECCF91" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>DHS Cyber Incident Response Teams Act of 2019</short-title></quote>.</text> </section><section id="H7B5F3B5EB31844A0AA5ED09224E92393"><enum>2.</enum><header>Department of Homeland Security cyber incident response teams</header> <subsection id="H6E33E5B18D284CC6AAD3E5A1EECA1DCC"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 2209 of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/148">6 U.S.C. 148</external-xref>) is amended—</text>
+ <paragraph id="H4AA0753BACDF414F930C3C200EAB5EA7"><enum>(1)</enum><text>in subsection (d)(1)(B)(iv), by inserting <quote>, including cybersecurity specialists</quote> after <quote>entities</quote>;</text> </paragraph><paragraph id="HF5CA42B019874F6F9432489A1D0710B5"><enum>(2)</enum><text>by redesignating subsections (f) through (m) as subsections (g) through (n), respectively;</text>
+ </paragraph><paragraph id="H2C8D429ED3584E24AA8634D5DFAA1322"><enum>(3)</enum><text>by inserting after subsection (e) the following new subsection (f):</text> <quoted-block display-inline="no-display-inline" id="HE3D5341FADF2461BB7F7C9C9F1BA10C7" style="USC"> <subsection id="H3A16A2174A884A4EA5AF9DD368936990"><enum>(f)</enum><header>Cyber incident response teams</header> <paragraph id="HE7102CE000BB4634BF5CF9B5C979D830"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Center shall maintain cyber hunt and incident response teams for the purpose of providing, as appropriate and upon request, assistance, including the following:</text>
+ <subparagraph id="H5D2583C29C5848128078A9C4A8E40F9C"><enum>(A)</enum><text>Assistance to asset owners and operators in restoring services following a cyber incident.</text> </subparagraph><subparagraph id="H9B1E30AA057943B5BB948677C383738C"><enum>(B)</enum><text>The identification of cybersecurity risk and unauthorized cyber activity.</text>
+ </subparagraph><subparagraph id="H68EDB53E574B4291B52066E1A78F9DD0"><enum>(C)</enum><text>Mitigation strategies to prevent, deter, and protect against cybersecurity risks.</text> </subparagraph><subparagraph id="H4C24B0276618448CAB8431EF9EAB3161"><enum>(D)</enum><text>Recommendations to asset owners and operators for improving overall network and control systems security to lower cybersecurity risks, and other recommendations, as appropriate.</text>
+ </subparagraph><subparagraph id="H7DD39F486991496A9950DA1E611A1EC0"><enum>(E)</enum><text>Such other capabilities as the Under Secretary appointed under section 103(a)(1)(H) determines appropriate.</text>
+ </subparagraph></paragraph><paragraph id="H72BBA9F1057F49D397EE61E2C7E9E96E"><enum>(2)</enum><header>Cybersecurity specialists</header><text display-inline="yes-display-inline">The Secretary may include cybersecurity specialists from the private sector on cyber hunt and incident response teams.</text>
+ </paragraph><paragraph id="H4B321FFE5FE948FA87A673810C01148A"><enum>(3)</enum><header>Associated metrics</header><text display-inline="yes-display-inline">The Center shall continually assess and evaluate the cyber incident response teams and their operations using robust metrics.</text>
+ </paragraph><paragraph id="H4DDA92C4881C4A719C111EC41694EB5C"><enum>(4)</enum><header>Submittal of information to Congress</header><text display-inline="yes-display-inline">Upon the conclusion of each of the first 4 fiscal years ending after the date of the enactment of this subsection, the Center shall submit to the Committee on Homeland Security of the House of Representatives and the Homeland Security and Governmental Affairs Committee of the Senate, information on the metrics used for evaluation and assessment of the cyber incident response teams and operations pursuant to paragraph (3), including the resources and staffing of such cyber incident response teams. Such information shall include each of the following for the period covered by the report:</text>
+ <subparagraph id="H25ED1BD9FCB44E70967E7624DAD50DBA"><enum>(A)</enum><text>The total number of incident response requests received.</text> </subparagraph><subparagraph id="H1DB20D17DE254E8E9CC81B17EF52CF4A"><enum>(B)</enum><text>The number of incident response tickets opened.</text>
+ </subparagraph><subparagraph id="HBE39FB428F684078B8CF5BDB77BA9E17"><enum>(C)</enum><text>All interagency staffing of incident response teams.</text> </subparagraph><subparagraph id="H2EC95EC616CE4B5DBA56C3D86D805916"><enum>(D)</enum><text>The interagency collaborations established to support incident response teams.</text></subparagraph></paragraph></subsection><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="H2B1A940A60C04D8FB878B4B6E2B25586"><enum>(4)</enum><text>in subsection (g), as redesignated by paragraph (2)—</text> <subparagraph id="H4A28854905C74BA784115F9C8805A6EA"><enum>(A)</enum><text>in paragraph (1), by inserting <quote>, or any team or activity of the Center,</quote> after <quote>Center</quote>; and</text>
+ </subparagraph><subparagraph id="H1B86D92D147348159BEC4BFBD219532F"><enum>(B)</enum><text>in paragraph (2), by inserting <quote>, or any team or activity of the Center,</quote> after <quote>Center</quote>.</text> </subparagraph></paragraph></subsection><subsection id="H9D76CC2BC6F540F1A6FF37038A164899"><enum>(b)</enum><header>No additional funds authorized</header><text display-inline="yes-display-inline">No additional funds are authorized to be appropriated to carry out the requirements of this Act and the amendments made by this Act. Such requirements shall be carried out using amounts otherwise authorized to be appropriated.</text>
+			</subsection></section></legis-body>
+	<attestation><attestation-group><attestation-date chamber="House" date="20190610">Passed the House of Representatives June 10, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+	<endorsement display="yes"><action-date>June 11, 2019</action-date><action-desc>Received; read twice and placed on the calendar</action-desc></endorsement>
+</bill>
+
+

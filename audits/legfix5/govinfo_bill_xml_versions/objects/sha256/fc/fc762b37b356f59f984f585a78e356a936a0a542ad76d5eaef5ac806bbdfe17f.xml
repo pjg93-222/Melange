@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB4F62BD1757748E08AA5B81BB98C9232" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 8212 IH: End the Cyprus Embargo Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-05-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8212</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20240501">May 1, 2024</action-date>
+<action-desc><sponsor name-id="P000614">Mr. Pappas</sponsor> (for himself, <cosponsor name-id="B001257">Mr. Bilirakis</cosponsor>, <cosponsor name-id="T000468">Ms. Titus</cosponsor>, and <cosponsor name-id="M000317">Ms. Malliotakis</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HFA00">Committee on Foreign Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To provide for nonapplicability of a policy of denial for exports, re-exports, or transfers of defense articles and defense services destined for or originating in the Republic of Cyprus.</official-title>
+</form>
+<legis-body id="H40697AB27FE14BDD84BB9922922645A6" style="OLC"> 
+<section id="H0A20CE0124C9446BBC4446B2611C6B6A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>End the Cyprus Embargo Act</short-title></quote>.</text></section> <section id="H09A777B53B9941149F34F2F20010B28B"><enum>2.</enum><header>Sense of Congress</header><text display-inline="no-display-inline">It is the sense of Congress that—</text> 
+<paragraph id="H078E89C4CD4E4D04B8E02187B2310061"><enum>(1)</enum><text display-inline="yes-display-inline">allowing for the export, re-export, or transfer of arms subject to the United States Munitions List to the Republic of Cyprus would advance United States security interests in Europe by helping to reduce the dependence of the Government of the Republic of Cyprus on other countries, including countries that pose challenges to United States interests around the world, for defense-related materiel; </text></paragraph> <paragraph id="H8984F82D9DA846EC911663CF67FBA211"><enum>(2)</enum><text>the Republic of Cyprus has successfully complied with the conditions set forth in the Eastern Mediterranean Security and Energy Partnership Act of 2019 (title X of division J of <external-xref legal-doc="public-law" parsable-cite="pl/116/94">Public Law 116–94</external-xref>) for the purposes of modifying the prohibitions of the sale or other provisions of any defense article or defense service to the Government of the Republic of Cyprus and modifying the policy of denial for exports, re-exports, or transfers of defense articles on the United States Munitions List to the Republic of Cyprus; and </text></paragraph> 
+<paragraph id="H012C65E0F25C41B3902F627F1654FE28"><enum>(3)</enum><text>it is in the interest of the United States—</text> <subparagraph id="H73011CCAA861447E86D1A95BA7B7A04C"><enum>(A)</enum><text>to continue to support United Nations-facilitated efforts toward a comprehensive solution to the division of Cyprus; </text></subparagraph> 
+<subparagraph id="H1E55BFBC2B774BD3A9548FA22DF3CC08"><enum>(B)</enum><text>to enhance the strategic partnership and security relationship between the United States and Republic of Cyprus as provided for in the Eastern Mediterranean Security and Energy Partnership Act of 2019; </text></subparagraph> <subparagraph id="H7F59FB3317F448A59C4761A8192040D6"><enum>(C)</enum><text>to enhance the cooperation between the United States Armed Forces and the National Guard of the Republic of Cyprus and to enhance existing programs such as the joint training between the National Guards of the Republic of Cyprus and the State of New Jersey under the auspices of the Department of Defense’s State Partnership Program; and </text></subparagraph> 
+<subparagraph id="HF575578CB023492F94EEDFAF10FFEA5E"><enum>(D)</enum><text>for the Republic of Cyprus to join NATO’s Partnership for Peace program.</text></subparagraph></paragraph></section> <section id="HCB7FF5BE0C3E43BDB9A9ABA35A8E7551"><enum>3.</enum><header>Nonapplicability of a policy of denial for exports, re-exports, or transfers of defense articles and defense services destined for or originating in the Republic of Cyprus</header> <subsection id="H479277BE3E094DD9A19DBB47F5A39F08" display-inline="no-display-inline"><enum>(a)</enum><header>In general</header><text>Subject to subsection (d) and except as provided in subsection (b), beginning on the date of the enactment of this Act, the Secretary of State shall not apply a policy of denial for exports, re-exports, or transfers of defense articles and defense services destined for or originating in the Republic of Cyprus if—</text> 
+<paragraph id="HE85ABE37DE804C20B55EB5677A273F0F"><enum>(1)</enum><text>the request is made by or on behalf of the Government of the Republic of Cyprus; and </text></paragraph> <paragraph id="H6EB1C6463F714C1584EB4020C5DDAF34"><enum>(2)</enum><text>the end-user of such defense articles or defense services is the Government of the Republic of Cyprus. </text></paragraph></subsection> 
+<subsection id="H14BACD250988469883966458A0192D9D"><enum>(b)</enum><header>Exception</header><text>The exclusion provided for in subsection (a) shall not apply with respect to the application of a policy of denial based upon credible human rights concerns. </text></subsection> <subsection id="HCBC749704407463F9201290CAAF4F00B"><enum>(c)</enum><header>Waiver</header><text>The President may waive the exclusion provided for in subsection (a) for a period of one fiscal year if the President determines that it is essential to the national security interests of the United States to do so. </text></subsection> 
+<subsection id="H1E2640989E5A4C86A1CB8DAE9C7AA5F0"><enum>(d)</enum><header>Termination</header> 
+<paragraph id="H3F248DAAE4F548E1A95FE8CD5229AEEB"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The President may terminate the exclusion provided for in subsection (a) for the 5-year period beginning on the date that is 5 years after the date of the enactment of this Act, and may renew such termination for subsequent 5-year periods, if, prior to each such 5-year period, the President submits to the appropriate congressional committees a certification that the Government of the Republic of Cyprus is no longer—</text> <subparagraph id="H4922877E4C9E4DF9B989502BE4EFABD6"><enum>(A)</enum><text> cooperating with the United States Government in efforts to implement reforms on anti-money laundering regulations and financial regulatory oversight; and </text></subparagraph> 
+<subparagraph id="H01644CBE30B2479898F13D8514CC7C5F"><enum>(B)</enum><text>denying Russian military vessels access to ports for refueling and servicing.</text></subparagraph></paragraph> <paragraph id="H7B73D99E1D4D4CDC8BC8E664748AD219"><enum>(2)</enum><header>Appropriate congressional committees defined</header><text>In this subsection, the term “appropriate congressional committees” means—</text> 
+<subparagraph id="H1B03899FD27E48268237D1B6608C6970"><enum>(A)</enum><text>the Committee on Foreign Affairs and the Committee on Armed Services of the House of Representatives; and</text> </subparagraph> <subparagraph id="HAE783972AEF643DA9A9118E0597A095B"><enum>(B)</enum><text>the Committee on Foreign Relations and the Committee on Armed Services of the Senate.</text></subparagraph></paragraph></subsection></section> 
+</legis-body>
+</bill> 
+
+

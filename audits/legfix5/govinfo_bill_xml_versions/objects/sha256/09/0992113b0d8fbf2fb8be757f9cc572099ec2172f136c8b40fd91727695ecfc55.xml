@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL22529-FYM-7R-380">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S3970 IS: Stablecoin Transparency Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2022-03-31</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>117th CONGRESS</congress><session>2d Session</session>
+<legis-num>S. 3970</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20220331">March 31, 2022</action-date>
+<action-desc><sponsor name-id="S407">Mr. Hagerty</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To establish reporting requirements for issuers of fiat currency-backed stablecoins, and for other purposes. </official-title>
+</form>
+<legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H5761AA75285448648D6AD4D1359612BE">
+<section section-type="section-one" id="HAAC5882EE62948A787D2BBE92F1446CC"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stablecoin Transparency Act</short-title></quote>. </text></section> <section id="HE2F3240569534B2FA7AD18E13A11DB72"><enum>2.</enum><header>Stablecoin issuer requirements</header> <subsection id="HE7A4DDE7C7D745318B7DA74A602B0FE9"><enum>(a)</enum><header>Definitions</header><text display-inline="yes-display-inline">In this section:</text>
+<paragraph id="HC38180EF5EAA465B94C0ED2703ECB043"><enum>(1)</enum><header>Fiat currency-backed stablecoin</header><text display-inline="yes-display-inline">The term <term>fiat currency-backed stablecoin</term> means a fiat currency-backed digital asset—</text> <subparagraph id="H9F1181D4B26B47B9B9047D221855335D"><enum>(A)</enum><text display-inline="yes-display-inline">that maintains price stability by backing the value of the digital asset to a nondigital currency that is denominated in the same currency in which the digital asset is issued; and</text></subparagraph>
+<subparagraph id="H8FFEA8E1B8FE4353AB95B79329D21722"><enum>(B)</enum><text>is redeemable on a one-to-one basis in the denominated currency to which the digital asset is backed.</text></subparagraph></paragraph> <paragraph id="H5E3561829DAE4F928F1F7D5A461D66D4"><enum>(2)</enum><header>Stablecoin issuer</header><text display-inline="yes-display-inline">The term <term>stablecoin issuer</term> means a person that issues a fiat currency-backed stablecoin.</text></paragraph></subsection>
+<subsection id="HB43BC65061784708A4C557AA74F79224"><enum>(b)</enum><header>Reserves</header><text display-inline="yes-display-inline">Each stablecoin issuer shall hold all reserves associated with each fiat currency-backed stablecoin issued by such stablecoin issuer in—</text> <paragraph id="H038D741A63EC40C6977FF683039CCC3F"><enum>(1)</enum><text>government securities that have maturities of not longer than 12 months;</text></paragraph>
+<paragraph id="H76D7D327E0EB45F2A9E128A251739BAE"><enum>(2)</enum><text>fully collateralized security repurchase agreements; or</text></paragraph> <paragraph id="H87AFBA0AD47847FFA079D56B07F357FA"><enum>(3)</enum><text>United States dollars or any other nondigital currency.</text></paragraph></subsection>
+<subsection id="H149AA5EC91C141C893F86E7CDB9A9053"><enum>(c)</enum><header>Reserve reports</header><text display-inline="yes-display-inline">Not later than 30 days after the date of enactment of this Act and every 30 days thereafter, each stablecoin issuer shall publish on the website of the stablecoin issuer a report on the reserves held by the stablecoin issuer that has been audited by a third-party auditor.</text></subsection></section> </legis-body> </bill> 
+

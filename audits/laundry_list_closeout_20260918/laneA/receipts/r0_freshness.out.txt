@@ -1,0 +1,54 @@
+﻿====================================================================================================
+R0  GENERATION GUARD   run 2026-09-18T23:48:50
+====================================================================================================
+
+.pipeline_run.lock present: False
+
+artifact                                                            bytes  mtime
+Moneyball Main Version - Blended.xlsx                            11316932  2026-09-18 02:09:29.560623
+Social Master.xlsx                                                1982628  2026-09-14 00:41:52.611542
+Quorum Master.xlsx                                                8478026  2026-07-02 00:53:10.777847
+Quorum Processed.xlsx                                             9332289  2026-09-14 00:41:34.338234
+social_media.db                                                 481439744  2026-09-14 02:06:46.826364
+per_topic_alloc.json                                                71078  2026-09-18 02:10:09.475078
+category_stance.json                                              1598026  2026-09-17 02:14:04.697437
+dashboard_data.json                                              12515286  2026-09-18 02:23:53.548837
+cu-member-desk.html                                              18808024  2026-09-18 02:35:46.576979
+cu-member-desk-profiles.js                                       59713412  2026-09-18 02:35:45.820207
+member_desk_bundle.json                                          77552295  2026-09-18 02:35:43.404749
+press_stance_final.csv                                             772282  2026-09-17 00:55:20.843759
+speech_stance_final.csv                                             44551  2026-09-17 00:47:15.769299
+press_text_cache.jsonl                                            8414572  2026-08-28 07:23:42.521832
+speeches_cu.csv                                                    856277  2026-09-17 00:46:26.613864
+data\stance\tweet_stance_final.csv                                2808334  2026-09-17 00:54:16.254684
+data\stance\hearing_stance_final.csv                                98059  2026-09-17 00:47:41.278891
+data\stance\interview_stance_final.csv                               4261  2026-09-17 00:49:52.260504
+data\stance\press_domain_routing_audit.json                       1435452  2026-09-17 02:10:33.615968
+data\stance\press_component_meta.json                                2240  2026-09-17 02:10:33.435521
+data\stance\press_raw_original.json                                237816  2026-07-02 02:32:47.355072
+data\stance\press_refresh_tone.csv                                 134925  2026-09-16 23:44:44.066191
+data\stance\quorum_member_tweets.csv                              5528240  2026-09-14 00:40:56.827674
+data\stance\api_press_stance.csv                                   937089  2026-07-04 05:38:45.384920
+data\stance\press_stance_overrides.json                              6205  2026-07-19 00:35:31.537804
+data\stance\hearings_cu.csv                                        559414  2026-09-14 00:40:00.428314
+data\stance\interviews_cu.csv                                       23202  2026-09-17 00:47:55.438998
+data\engine\congestion.json                                        201270  2026-09-16 23:33:28.935075
+../Draft Systems/cu_press_stance_tone.csv                         1080244  2026-06-30 18:50:17.864859
+
+-- generation note --
+   workbook                     2026-09-18 02:09:29.560623
+   press_component_meta.json    2026-09-17 02:10:33.435521   <- written ONLY by build_media_blend.py
+   cu-member-desk.html          2026-09-18 02:35:46.576979
+   => the media blend last ran 2026-09-17; the published surfaces were built 2026-09-18.
+
+-- inputs_sha256 recorded by that blend run vs the files now --
+   ../Draft Systems/cu_press_stance_tone.csv                  MATCH
+   data/stance/press_refresh_tone.csv                         MATCH
+   press_stance_final.csv                                     MATCH
+   data/stance/interview_stance_final.csv                     MATCH
+   data/stance/interview_stance_final.receipt.json            MATCH
+   data/stance/press_refresh_feed_receipt.json                MATCH
+
+   every press input the 2026-09-17 blend consumed is byte-identical today: True
+
+DONE R0

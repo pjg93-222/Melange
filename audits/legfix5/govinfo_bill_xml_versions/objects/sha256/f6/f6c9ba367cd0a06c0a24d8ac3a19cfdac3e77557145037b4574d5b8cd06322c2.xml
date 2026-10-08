@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H0E44630F9ACE49939BFB71CF409C2345" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3678 IH: Reducing Foreign Influence in 5G Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3678</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190710">July 10, 2019</action-date><action-desc><sponsor name-id="K000391">Mr. Krishnamoorthi</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIG00">Permanent Select Committee on Intelligence</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Director of National Intelligence to submit to Congress a report on fifth-generation
+			 wireless network technology.</official-title></form>
+	<legis-body id="HC922A940589F47EAA1652066287E2BB3" style="OLC">
+ <section id="H2C4AE291438A4F00A41B9A5B48C471B9" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Reducing Foreign Influence in 5G Act</short-title></quote>.</text> </section><section id="H1EA1C3E83FFD49038AC1F43802500A0E" section-type="subsequent-section"><enum>2.</enum><header>Report by Director of National Intelligence on fifth-generation wireless network technology</header> <subsection id="HE64AAE748B9A402EB221018DA4F8425C"><enum>(a)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 180 days after the date of the enactment of this Act, the Director of National Intelligence shall submit to the Permanent Select Committee on Intelligence of the House of Representatives and the Select Committee on Intelligence of the Senate a report on—</text>
+ <paragraph id="H0CE1E207F5274777A811CAB3D690937D"><enum>(1)</enum><text display-inline="yes-display-inline">the threat to the national security of the United States posed by the global and regional adoption of fifth-generation wireless network (in this section referred to as <quote>5G wireless network</quote>) technology built by foreign companies; and</text>
+ </paragraph><paragraph id="H2CB88E8811E94B9AB9C49762746A1DB5"><enum>(2)</enum><text display-inline="yes-display-inline">the effect of possible efforts to mitigate the threat.</text> </paragraph></subsection><subsection id="HB3ABA379E2C0457789736EB1767B194F"><enum>(b)</enum><header>Contents</header><text display-inline="yes-display-inline">The report under subsection (a) shall include—</text>
+ <paragraph id="HC9A1E83728564391B07ADF20480D55E8"><enum>(1)</enum><text display-inline="yes-display-inline">the timeline and scale of global and regional adoption of foreign 5G wireless network technology;</text> </paragraph><paragraph id="H28E8CA80BCBB49609F12E0BD5277165F"><enum>(2)</enum><text display-inline="yes-display-inline">the implications of such global and regional adoption on the cyber and espionage threat to the United States, the interests of the United States, and the cyber and collection capabilities of the United States; and</text>
+ </paragraph><paragraph id="H8F2BA52055B74F5BAD4441C36546EBD4"><enum>(3)</enum><text display-inline="yes-display-inline">the effect of possible mitigation efforts, including with respect to—</text> <subparagraph id="HDC0F0F4948854215865DA87C75C5EAE4"><enum>(A)</enum><text display-inline="yes-display-inline">a policy of the United States Government promoting the use of strong, end-to-end encryption for data transmitted over 5G wireless networks;</text>
+ </subparagraph><subparagraph id="H8A0678B26EDA4AC0B6E13CCA8EBB0218"><enum>(B)</enum><text display-inline="yes-display-inline">a policy of the United States Government promoting or funding free, open-source implementation of 5G wireless network technology;</text>
+ </subparagraph><subparagraph id="H05EF98EC15EB414FBAC701CA80BDC277"><enum>(C)</enum><text display-inline="yes-display-inline">subsidies or incentives provided by the United States Government that could be used to promote the adoption of secure 5G wireless network technology developed by companies of the United States or companies of allies of the United States; and</text>
+ </subparagraph><subparagraph id="HC92816C80DA24C8CAB14B4CD77403AC2"><enum>(D)</enum><text display-inline="yes-display-inline">a strategy by the United States Government to reduce foreign influence and political pressure in international standard-setting bodies.</text>
+ </subparagraph></paragraph></subsection><subsection id="HFD70B9775E044857A4CD8494C431083B"><enum>(c)</enum><header>Form</header><text display-inline="yes-display-inline">The report submitted under subsection (a) shall be submitted in unclassified form, but may include a classified annex.</text>
+			</subsection></section></legis-body></bill>
+
+

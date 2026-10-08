@@ -1,0 +1,66 @@
+== before landing_v2: a tree that holds what LIVE held before landing_v2 (the apply refuses, writes nothing)
+PASS  dry run on LIVE-before-landing_v2: rc=2, REFUSED
+      MISMATCH edit fec/surfaces/staffer_closeness_routes.py                       expected 990838332bde  actual a8d52fd8e737
+      MISMATCH edit fec/surfaces/staffer_live/README.md                            expected af8934ade0fe  actual 41b10a8d2da9
+      MISMATCH edit fec/surfaces/staffer_live/staffer-inventory-worker.js          expected 7a4960d7d5ab  actual 8b001865ce3d
+      ok      edit fec/surfaces/staffer_live/staffer-live.js                      expected bf1c11a20ca7  actual bf1c11a20ca7
+      ok      new  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     expected (absent)  actual (absent)
+      MISMATCH edit fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       expected c11062f50703  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_live_query_ids.cjs             expected (absent)  actual (absent)
+      REFUSED: this patch is cut against the bytes LIVE holds after landing_v2 is applied. Required first: landing_v2 (route_latency.patch, tip 86631c454815533798eb1ad81136ddb1a76a23b9) applied to LIVE. Apply landing_v2 first, or find what changed these files:
+        - fec/surfaces/staffer_closeness_routes.py does not hold its pre-image (LIVE working file now = landing_v2 post-image)
+        - fec/surfaces/staffer_live/README.md does not hold its pre-image (LIVE working file now = landing_v2 post-image)
+        - fec/surfaces/staffer_live/staffer-inventory-worker.js does not hold its pre-image (LIVE working file now = landing_v2 post-image)
+        - fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs is missing (its pre-image is LIVE working file now = landing_v2 post-image)
+      nothing was changed
+PASS  --apply on LIVE-before-landing_v2: rc=2, REFUSED
+PASS  nothing was written (every hash is as it was, new files still absent)
+
+== a tree that holds landing_v2 except for one file the follow-up edits (a moved target)
+PASS  --apply on a moved target: rc=2, MISMATCH named fec/surfaces/staffer_closeness_routes.py
+PASS  nothing was written, the other files included
+
+== after landing_v2: a tree that holds its post-images
+      ok      edit fec/surfaces/staffer_closeness_routes.py                       expected 990838332bde  actual 990838332bde
+      ok      edit fec/surfaces/staffer_live/README.md                            expected af8934ade0fe  actual af8934ade0fe
+      ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js          expected 7a4960d7d5ab  actual 7a4960d7d5ab
+      ok      edit fec/surfaces/staffer_live/staffer-live.js                      expected bf1c11a20ca7  actual bf1c11a20ca7
+      ok      new  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       expected c11062f50703  actual c11062f50703
+      ok      new  fec/tests/surfaces/test_staffer_live_query_ids.cjs             expected (absent)  actual (absent)
+      dry run (git apply --check, read-only): rc=0
+PASS  dry run: rc=0
+PASS  the dry run wrote nothing
+      ok      edit fec/surfaces/staffer_closeness_routes.py                       expected 990838332bde  actual 990838332bde
+      ok      edit fec/surfaces/staffer_live/README.md                            expected af8934ade0fe  actual af8934ade0fe
+      ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js          expected 7a4960d7d5ab  actual 7a4960d7d5ab
+      ok      edit fec/surfaces/staffer_live/staffer-live.js                      expected bf1c11a20ca7  actual bf1c11a20ca7
+      ok      new  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       expected c11062f50703  actual c11062f50703
+      ok      new  fec/tests/surfaces/test_staffer_live_query_ids.cjs             expected (absent)  actual (absent)
+      apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  --apply: rc=0
+PASS  every post-image hash matches the manifest
+PASS  a second --apply is refused (the targets moved): rc=2
+PASS     and it changed nothing
+
+== rollback_landing.py on that tree
+      restore pre-image  fec/surfaces/staffer_closeness_routes.py
+      restore pre-image  fec/surfaces/staffer_live/README.md
+      restore pre-image  fec/surfaces/staffer_live/staffer-inventory-worker.js
+      restore pre-image  fec/surfaces/staffer_live/staffer-live.js
+      remove new file    fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+      restore pre-image  fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
+      remove new file    fec/tests/surfaces/test_staffer_live_query_ids.cjs
+      plan only; rerun with --rollback to restore
+PASS  plan only: rc=0
+PASS  the plan wrote nothing
+PASS  a file edited after the apply stops the rollback and nothing changes: rc=1
+PASS     (the edited file and the rest are untouched)
+      rolled back 7 files
+PASS  --rollback: rc=0
+PASS  every pre-image is back, byte for byte
+PASS  the 2 new files are gone
+PASS  a second rollback changes nothing
+
+result: ALL PASS

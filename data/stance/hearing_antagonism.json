@@ -1,0 +1,2745 @@
+{
+"members": {
+"Maria Cantwell": {
+"antagonism_z": -0.923,
+"grandstand_z": -0.241,
+"n_hearings": 311,
+"n_disp": 0
+},
+"Kevin Mullin": {
+"antagonism_z": 0.266,
+"grandstand_z": 1.22,
+"n_hearings": 141,
+"n_disp": 1
+},
+"Catherine Cortez Masto": {
+"antagonism_z": -0.273,
+"grandstand_z": -0.249,
+"n_hearings": 481,
+"n_disp": 0
+},
+"John Boozman": {
+"antagonism_z": -0.702,
+"grandstand_z": -0.652,
+"n_hearings": 255,
+"n_disp": 0
+},
+"Burgess Owens": {
+"antagonism_z": -0.162,
+"grandstand_z": -0.274,
+"n_hearings": 132,
+"n_disp": 0
+},
+"Susan Collins": {
+"antagonism_z": 3.104,
+"grandstand_z": 1.827,
+"n_hearings": 360,
+"n_disp": 5
+},
+"Gary Peters": {
+"antagonism_z": 0.112,
+"grandstand_z": -0.336,
+"n_hearings": 418,
+"n_disp": 1
+},
+"Deb Fischer": {
+"antagonism_z": -0.473,
+"grandstand_z": -0.429,
+"n_hearings": 253,
+"n_disp": 0
+},
+"Martin Heinrich": {
+"antagonism_z": -0.085,
+"grandstand_z": 0.089,
+"n_hearings": 228,
+"n_disp": 0
+},
+"Lisa Murkowski": {
+"antagonism_z": -1.0,
+"grandstand_z": -0.352,
+"n_hearings": 275,
+"n_disp": 0
+},
+"John Hoeven": {
+"antagonism_z": -0.82,
+"grandstand_z": -0.375,
+"n_hearings": 285,
+"n_disp": 1
+},
+"Tammy Baldwin": {
+"antagonism_z": -1.391,
+"grandstand_z": -0.717,
+"n_hearings": 245,
+"n_disp": 0
+},
+"Mike Crapo": {
+"antagonism_z": -0.829,
+"grandstand_z": -0.271,
+"n_hearings": 100,
+"n_disp": 0
+},
+"Marsha Blackburn": {
+"antagonism_z": 1.237,
+"grandstand_z": 1.405,
+"n_hearings": 373,
+"n_disp": 4
+},
+"Robert Menendez": {
+"antagonism_z": 0.696,
+"grandstand_z": 0.43,
+"n_hearings": 377,
+"n_disp": 12
+},
+"Chuck Grassley": {
+"antagonism_z": 1.174,
+"grandstand_z": -0.308,
+"n_hearings": 238,
+"n_disp": 0
+},
+"Bill Cassidy": {
+"antagonism_z": 0.039,
+"grandstand_z": 1.722,
+"n_hearings": 314,
+"n_disp": 0
+},
+"Elizabeth Warren": {
+"antagonism_z": 0.222,
+"grandstand_z": 0.678,
+"n_hearings": 314,
+"n_disp": 1
+},
+"Ron Johnson": {
+"antagonism_z": 0.546,
+"grandstand_z": 0.663,
+"n_hearings": 966,
+"n_disp": 11
+},
+"Thom Tillis": {
+"antagonism_z": 0.001,
+"grandstand_z": 0.525,
+"n_hearings": 312,
+"n_disp": 1
+},
+"James Lankford": {
+"antagonism_z": -1.119,
+"grandstand_z": -0.104,
+"n_hearings": 273,
+"n_disp": 0
+},
+"Shontel Brown": {
+"antagonism_z": 0.206,
+"grandstand_z": 0.01,
+"n_hearings": 533,
+"n_disp": 3
+},
+"Margaret Hassan": {
+"antagonism_z": -0.371,
+"grandstand_z": -0.592,
+"n_hearings": 375,
+"n_disp": 0
+},
+"Mark Warner": {
+"antagonism_z": 0.663,
+"grandstand_z": 0.248,
+"n_hearings": 209,
+"n_disp": 1
+},
+"John Barrasso": {
+"antagonism_z": -1.157,
+"grandstand_z": -0.804,
+"n_hearings": 254,
+"n_disp": 0
+},
+"Michael Bennet": {
+"antagonism_z": -0.137,
+"grandstand_z": -0.551,
+"n_hearings": 130,
+"n_disp": 0
+},
+"Todd Young": {
+"antagonism_z": 0.227,
+"grandstand_z": -0.264,
+"n_hearings": 289,
+"n_disp": 1
+},
+"Ami Bera": {
+"antagonism_z": -0.4,
+"grandstand_z": -0.282,
+"n_hearings": 124,
+"n_disp": 0
+},
+"Mario Diaz-Balart": {
+"antagonism_z": -0.311,
+"grandstand_z": -0.079,
+"n_hearings": 19,
+"n_disp": 0
+},
+"Ann Wagner": {
+"antagonism_z": 0.904,
+"grandstand_z": 1.421,
+"n_hearings": 269,
+"n_disp": 1
+},
+"Brad Sherman": {
+"antagonism_z": 0.917,
+"grandstand_z": 1.799,
+"n_hearings": 396,
+"n_disp": 4
+},
+"Andy Barr": {
+"antagonism_z": 0.036,
+"grandstand_z": 1.224,
+"n_hearings": 263,
+"n_disp": 0
+},
+"Warren Davidson": {
+"antagonism_z": 0.768,
+"grandstand_z": 0.754,
+"n_hearings": 230,
+"n_disp": 0
+},
+"Chrissy Houlahan": {
+"antagonism_z": -0.148,
+"grandstand_z": -0.406,
+"n_hearings": 214,
+"n_disp": 0
+},
+"Al Green": {
+"antagonism_z": 1.001,
+"grandstand_z": 0.61,
+"n_hearings": 375,
+"n_disp": 5
+},
+"Mike Ezell": {
+"antagonism_z": -0.961,
+"grandstand_z": -1.062,
+"n_hearings": 102,
+"n_disp": 0
+},
+"Yvette Clarke": {
+"antagonism_z": 0.344,
+"grandstand_z": 0.378,
+"n_hearings": 208,
+"n_disp": 2
+},
+"Mike Lee": {
+"antagonism_z": -0.529,
+"grandstand_z": 1.262,
+"n_hearings": 668,
+"n_disp": 2
+},
+"Kevin Cramer": {
+"antagonism_z": -0.875,
+"grandstand_z": -0.861,
+"n_hearings": 190,
+"n_disp": 0
+},
+"Angus King": {
+"antagonism_z": -0.09,
+"grandstand_z": 0.584,
+"n_hearings": 380,
+"n_disp": 1
+},
+"Dan Sullivan": {
+"antagonism_z": 0.558,
+"grandstand_z": 0.432,
+"n_hearings": 347,
+"n_disp": 3
+},
+"Richard Blumenthal": {
+"antagonism_z": -0.467,
+"grandstand_z": -0.265,
+"n_hearings": 431,
+"n_disp": 1
+},
+"Jeanne Shaheen": {
+"antagonism_z": -0.177,
+"grandstand_z": -0.511,
+"n_hearings": 321,
+"n_disp": 1
+},
+"Seth Moulton": {
+"antagonism_z": -0.0,
+"grandstand_z": 1.068,
+"n_hearings": 158,
+"n_disp": 1
+},
+"Michael Turner": {
+"antagonism_z": 0.228,
+"grandstand_z": -0.327,
+"n_hearings": 116,
+"n_disp": 0
+},
+"Salud Carbajal": {
+"antagonism_z": -0.606,
+"grandstand_z": -0.812,
+"n_hearings": 253,
+"n_disp": 0
+},
+"Donald Norcross": {
+"antagonism_z": -0.031,
+"grandstand_z": -0.039,
+"n_hearings": 136,
+"n_disp": 0
+},
+"Dale Strong": {
+"antagonism_z": -0.111,
+"grandstand_z": -0.713,
+"n_hearings": 100,
+"n_disp": 0
+},
+"John Garamendi": {
+"antagonism_z": 0.545,
+"grandstand_z": -0.046,
+"n_hearings": 203,
+"n_disp": 4
+},
+"Morgan Griffith": {
+"antagonism_z": -0.013,
+"grandstand_z": 0.614,
+"n_hearings": 239,
+"n_disp": 5
+},
+"Debbie Dingell": {
+"antagonism_z": -0.144,
+"grandstand_z": -0.134,
+"n_hearings": 186,
+"n_disp": 1
+},
+"James Comer": {
+"antagonism_z": 1.075,
+"grandstand_z": 1.312,
+"n_hearings": 175,
+"n_disp": 0
+},
+"Deborah Ross": {
+"antagonism_z": 0.183,
+"grandstand_z": -0.523,
+"n_hearings": 216,
+"n_disp": 0
+},
+"Nicole Malliotakis": {
+"antagonism_z": -0.958,
+"grandstand_z": -0.054,
+"n_hearings": 88,
+"n_disp": 0
+},
+"Jill Tokuda": {
+"antagonism_z": -0.24,
+"grandstand_z": 0.084,
+"n_hearings": 74,
+"n_disp": 0
+},
+"Michael Cloud": {
+"antagonism_z": -0.059,
+"grandstand_z": 1.081,
+"n_hearings": 161,
+"n_disp": 1
+},
+"Tina Smith": {
+"antagonism_z": 0.677,
+"grandstand_z": -0.455,
+"n_hearings": 648,
+"n_disp": 0
+},
+"Joe Courtney": {
+"antagonism_z": -0.715,
+"grandstand_z": -0.539,
+"n_hearings": 195,
+"n_disp": 0
+},
+"Robert Wittman": {
+"antagonism_z": -0.761,
+"grandstand_z": -0.119,
+"n_hearings": 128,
+"n_disp": 0
+},
+"Mark Kelly": {
+"antagonism_z": 0.108,
+"grandstand_z": -0.525,
+"n_hearings": 589,
+"n_disp": 0
+},
+"Jared Golden": {
+"antagonism_z": 0.142,
+"grandstand_z": -0.649,
+"n_hearings": 113,
+"n_disp": 0
+},
+"Jim Banks": {
+"antagonism_z": -0.347,
+"grandstand_z": 0.149,
+"n_hearings": 181,
+"n_disp": 3
+},
+"Sara Jacobs": {
+"antagonism_z": 0.719,
+"grandstand_z": -0.824,
+"n_hearings": 159,
+"n_disp": 0
+},
+"Nancy Mace": {
+"antagonism_z": 2.696,
+"grandstand_z": 0.44,
+"n_hearings": 126,
+"n_disp": 17
+},
+"Jennifer Kiggans": {
+"antagonism_z": -0.287,
+"grandstand_z": -0.959,
+"n_hearings": 54,
+"n_disp": 0
+},
+"Jennifer McClellan": {
+"antagonism_z": -1.215,
+"grandstand_z": -1.089,
+"n_hearings": 51,
+"n_disp": 0
+},
+"Pat Fallon": {
+"antagonism_z": 0.392,
+"grandstand_z": 0.645,
+"n_hearings": 163,
+"n_disp": 1
+},
+"Nick LaLota": {
+"antagonism_z": -0.645,
+"grandstand_z": -0.292,
+"n_hearings": 86,
+"n_disp": 0
+},
+"William Keating": {
+"antagonism_z": 1.801,
+"grandstand_z": 0.526,
+"n_hearings": 188,
+"n_disp": 6
+},
+"Carlos Gimenez": {
+"antagonism_z": 0.488,
+"grandstand_z": 0.079,
+"n_hearings": 107,
+"n_disp": 0
+},
+"Jimmy Panetta": {
+"antagonism_z": -0.413,
+"grandstand_z": 0.026,
+"n_hearings": 138,
+"n_disp": 0
+},
+"Mark Alford": {
+"antagonism_z": 0.465,
+"grandstand_z": -0.014,
+"n_hearings": 94,
+"n_disp": 0
+},
+"Sydney Kamlager-Dove": {
+"antagonism_z": -0.741,
+"grandstand_z": -0.435,
+"n_hearings": 101,
+"n_disp": 0
+},
+"Mike Levin": {
+"antagonism_z": 1.069,
+"grandstand_z": 0.496,
+"n_hearings": 252,
+"n_disp": 4
+},
+"Harriet Hageman": {
+"antagonism_z": 0.794,
+"grandstand_z": 0.514,
+"n_hearings": 151,
+"n_disp": 7
+},
+"Pete Stauber": {
+"antagonism_z": -0.094,
+"grandstand_z": -0.297,
+"n_hearings": 285,
+"n_disp": 2
+},
+"Jared Huffman": {
+"antagonism_z": 1.427,
+"grandstand_z": 0.958,
+"n_hearings": 154,
+"n_disp": 0
+},
+"Alexandria Ocasio-Cortez": {
+"antagonism_z": 0.456,
+"grandstand_z": 0.552,
+"n_hearings": 195,
+"n_disp": 1
+},
+"Thomas Tiffany": {
+"antagonism_z": -0.74,
+"grandstand_z": -0.191,
+"n_hearings": 147,
+"n_disp": 0
+},
+"Cliff Bentz": {
+"antagonism_z": -0.82,
+"grandstand_z": 0.033,
+"n_hearings": 104,
+"n_disp": 0
+},
+"Ruben Gallego": {
+"antagonism_z": -0.35,
+"grandstand_z": -0.339,
+"n_hearings": 116,
+"n_disp": 1
+},
+"Melanie Stansbury": {
+"antagonism_z": 0.612,
+"grandstand_z": 1.104,
+"n_hearings": 144,
+"n_disp": 0
+},
+"Sam Graves": {
+"antagonism_z": 1.112,
+"grandstand_z": 0.289,
+"n_hearings": 230,
+"n_disp": 1
+},
+"Joe Neguse": {
+"antagonism_z": -0.353,
+"grandstand_z": 0.017,
+"n_hearings": 136,
+"n_disp": 0
+},
+"Val Hoyle": {
+"antagonism_z": -0.77,
+"grandstand_z": -1.215,
+"n_hearings": 48,
+"n_disp": 0
+},
+"Russ Fulcher": {
+"antagonism_z": -0.383,
+"grandstand_z": -0.121,
+"n_hearings": 123,
+"n_disp": 0
+},
+"Ed Case": {
+"antagonism_z": -0.574,
+"grandstand_z": -0.424,
+"n_hearings": 92,
+"n_disp": 0
+},
+"John Curtis": {
+"antagonism_z": -0.198,
+"grandstand_z": 0.294,
+"n_hearings": 133,
+"n_disp": 1
+},
+"Teresa Leger Fernandez": {
+"antagonism_z": 0.033,
+"grandstand_z": -0.79,
+"n_hearings": 127,
+"n_disp": 0
+},
+"Lauren Boebert": {
+"antagonism_z": 0.518,
+"grandstand_z": 1.48,
+"n_hearings": 94,
+"n_disp": 2
+},
+"Wesley Hunt": {
+"antagonism_z": -0.688,
+"grandstand_z": -0.534,
+"n_hearings": 77,
+"n_disp": 0
+},
+"Mazie Hirono": {
+"antagonism_z": -0.392,
+"grandstand_z": 0.066,
+"n_hearings": 350,
+"n_disp": 0
+},
+"Tim Kaine": {
+"antagonism_z": 0.656,
+"grandstand_z": -0.172,
+"n_hearings": 356,
+"n_disp": 1
+},
+"Thomas Massie": {
+"antagonism_z": 0.475,
+"grandstand_z": 1.382,
+"n_hearings": 141,
+"n_disp": 1
+},
+"Gregory Steube": {
+"antagonism_z": 0.273,
+"grandstand_z": 0.427,
+"n_hearings": 115,
+"n_disp": 4
+},
+"Darrell Issa": {
+"antagonism_z": 0.617,
+"grandstand_z": 1.063,
+"n_hearings": 187,
+"n_disp": 2
+},
+"Debbie Wasserman Schultz": {
+"antagonism_z": 2.545,
+"grandstand_z": 3.884,
+"n_hearings": 152,
+"n_disp": 10
+},
+"Stephen Lynch": {
+"antagonism_z": 0.726,
+"grandstand_z": 2.134,
+"n_hearings": 312,
+"n_disp": 0
+},
+"Sanford Bishop": {
+"antagonism_z": 0.354,
+"grandstand_z": 0.55,
+"n_hearings": 221,
+"n_disp": 8
+},
+"Kat Cammack": {
+"antagonism_z": 0.368,
+"grandstand_z": 0.573,
+"n_hearings": 114,
+"n_disp": 3
+},
+"Russell Fry": {
+"antagonism_z": -0.595,
+"grandstand_z": -0.608,
+"n_hearings": 140,
+"n_disp": 1
+},
+"Jasmine Crockett": {
+"antagonism_z": 0.008,
+"grandstand_z": 0.626,
+"n_hearings": 124,
+"n_disp": 2
+},
+"Alan Armstrong": {
+"antagonism_z": 0.418,
+"grandstand_z": -0.134,
+"n_hearings": 177,
+"n_disp": 0
+},
+"Shelley Capito": {
+"antagonism_z": -0.767,
+"grandstand_z": -0.367,
+"n_hearings": 300,
+"n_disp": 0
+},
+"John Fetterman": {
+"antagonism_z": 1.022,
+"grandstand_z": -0.571,
+"n_hearings": 71,
+"n_disp": 0
+},
+"Cynthia Lummis": {
+"antagonism_z": -1.448,
+"grandstand_z": -0.844,
+"n_hearings": 145,
+"n_disp": 0
+},
+"Edward Markey": {
+"antagonism_z": -0.389,
+"grandstand_z": -0.154,
+"n_hearings": 319,
+"n_disp": 7
+},
+"Jeff Merkley": {
+"antagonism_z": -0.566,
+"grandstand_z": -0.488,
+"n_hearings": 211,
+"n_disp": 2
+},
+"Alex Padilla": {
+"antagonism_z": 0.068,
+"grandstand_z": -0.814,
+"n_hearings": 299,
+"n_disp": 0
+},
+"Pete Ricketts": {
+"antagonism_z": -0.416,
+"grandstand_z": -0.702,
+"n_hearings": 115,
+"n_disp": 0
+},
+"Dina Titus": {
+"antagonism_z": 0.101,
+"grandstand_z": -0.369,
+"n_hearings": 277,
+"n_disp": 1
+},
+"Andrea Salinas": {
+"antagonism_z": -0.715,
+"grandstand_z": -1.06,
+"n_hearings": 53,
+"n_disp": 0
+},
+"Rick Larsen": {
+"antagonism_z": -0.967,
+"grandstand_z": -0.209,
+"n_hearings": 190,
+"n_disp": 0
+},
+"Eleanor Norton": {
+"antagonism_z": -0.443,
+"grandstand_z": 0.472,
+"n_hearings": 368,
+"n_disp": 1
+},
+"Celeste Maloy": {
+"antagonism_z": -0.495,
+"grandstand_z": -1.103,
+"n_hearings": 51,
+"n_disp": 0
+},
+"Ted Cruz": {
+"antagonism_z": 5.021,
+"grandstand_z": 1.686,
+"n_hearings": 273,
+"n_disp": 40
+},
+"John Thune": {
+"antagonism_z": -1.12,
+"grandstand_z": -0.892,
+"n_hearings": 223,
+"n_disp": 0
+},
+"Peter Welch": {
+"antagonism_z": 0.285,
+"grandstand_z": 1.053,
+"n_hearings": 233,
+"n_disp": 1
+},
+"Amy Klobuchar": {
+"antagonism_z": 0.496,
+"grandstand_z": 0.108,
+"n_hearings": 316,
+"n_disp": 1
+},
+"Raphael Warnock": {
+"antagonism_z": -0.275,
+"grandstand_z": -0.657,
+"n_hearings": 150,
+"n_disp": 0
+},
+"Jacky Rosen": {
+"antagonism_z": -0.255,
+"grandstand_z": -0.235,
+"n_hearings": 454,
+"n_disp": 0
+},
+"John Hickenlooper": {
+"antagonism_z": -0.342,
+"grandstand_z": -0.853,
+"n_hearings": 265,
+"n_disp": 0
+},
+"Bill Foster": {
+"antagonism_z": 0.371,
+"grandstand_z": 0.81,
+"n_hearings": 308,
+"n_disp": 0
+},
+"Maxine Waters": {
+"antagonism_z": 0.126,
+"grandstand_z": 1.006,
+"n_hearings": 249,
+"n_disp": 1
+},
+"Barry Loudermilk": {
+"antagonism_z": -0.628,
+"grandstand_z": 1.078,
+"n_hearings": 211,
+"n_disp": 0
+},
+"Juan Vargas": {
+"antagonism_z": -0.434,
+"grandstand_z": 0.245,
+"n_hearings": 185,
+"n_disp": 0
+},
+"John Rose": {
+"antagonism_z": -0.545,
+"grandstand_z": -0.162,
+"n_hearings": 253,
+"n_disp": 0
+},
+"Sean Casten": {
+"antagonism_z": -0.797,
+"grandstand_z": 0.382,
+"n_hearings": 316,
+"n_disp": 1
+},
+"Scott Fitzgerald": {
+"antagonism_z": -0.567,
+"grandstand_z": -0.788,
+"n_hearings": 238,
+"n_disp": 0
+},
+"Ayanna Pressley": {
+"antagonism_z": 2.366,
+"grandstand_z": 5.328,
+"n_hearings": 258,
+"n_disp": 18
+},
+"Andy Kim": {
+"antagonism_z": -0.069,
+"grandstand_z": -0.077,
+"n_hearings": 378,
+"n_disp": 0
+},
+"Gregory Meeks": {
+"antagonism_z": 1.661,
+"grandstand_z": 0.104,
+"n_hearings": 181,
+"n_disp": 5
+},
+"Andrew Ogles": {
+"antagonism_z": -1.083,
+"grandstand_z": -0.513,
+"n_hearings": 61,
+"n_disp": 0
+},
+"Joyce Beatty": {
+"antagonism_z": 0.257,
+"grandstand_z": 0.913,
+"n_hearings": 133,
+"n_disp": 1
+},
+"William Timmons": {
+"antagonism_z": -0.347,
+"grandstand_z": 0.24,
+"n_hearings": 251,
+"n_disp": 2
+},
+"Ralph Norman": {
+"antagonism_z": -0.037,
+"grandstand_z": 1.797,
+"n_hearings": 142,
+"n_disp": 2
+},
+"Bill Hagerty": {
+"antagonism_z": -0.967,
+"grandstand_z": 0.53,
+"n_hearings": 182,
+"n_disp": 0
+},
+"Katie Britt": {
+"antagonism_z": -0.257,
+"grandstand_z": 1.545,
+"n_hearings": 65,
+"n_disp": 0
+},
+"Roger Wicker": {
+"antagonism_z": -0.454,
+"grandstand_z": 0.169,
+"n_hearings": 178,
+"n_disp": 0
+},
+"Mike Rounds": {
+"antagonism_z": -0.55,
+"grandstand_z": -0.5,
+"n_hearings": 228,
+"n_disp": 0
+},
+"Joni Ernst": {
+"antagonism_z": -1.161,
+"grandstand_z": -0.764,
+"n_hearings": 188,
+"n_disp": 0
+},
+"Tom Cotton": {
+"antagonism_z": -0.464,
+"grandstand_z": 0.027,
+"n_hearings": 161,
+"n_disp": 0
+},
+"Kirsten Gillibrand": {
+"antagonism_z": -0.853,
+"grandstand_z": -0.774,
+"n_hearings": 176,
+"n_disp": 0
+},
+"Eric Schmitt": {
+"antagonism_z": -0.456,
+"grandstand_z": 0.839,
+"n_hearings": 65,
+"n_disp": 0
+},
+"Ted Budd": {
+"antagonism_z": -0.99,
+"grandstand_z": -0.452,
+"n_hearings": 153,
+"n_disp": 0
+},
+"Ron Wyden": {
+"antagonism_z": -0.253,
+"grandstand_z": 0.138,
+"n_hearings": 155,
+"n_disp": 2
+},
+"James Risch": {
+"antagonism_z": 0.019,
+"grandstand_z": 0.052,
+"n_hearings": 142,
+"n_disp": 0
+},
+"Steve Daines": {
+"antagonism_z": -0.408,
+"grandstand_z": -0.003,
+"n_hearings": 300,
+"n_disp": 0
+},
+"Josh Hawley": {
+"antagonism_z": 1.967,
+"grandstand_z": 0.864,
+"n_hearings": 335,
+"n_disp": 18
+},
+"Jerrold Nadler": {
+"antagonism_z": 0.458,
+"grandstand_z": 0.893,
+"n_hearings": 110,
+"n_disp": 0
+},
+"Madeleine Dean": {
+"antagonism_z": 0.764,
+"grandstand_z": -0.098,
+"n_hearings": 248,
+"n_disp": 3
+},
+"Mary Scanlon": {
+"antagonism_z": 1.2,
+"grandstand_z": 0.562,
+"n_hearings": 185,
+"n_disp": 3
+},
+"Ben Cline": {
+"antagonism_z": -0.61,
+"grandstand_z": -0.47,
+"n_hearings": 191,
+"n_disp": 0
+},
+"Jefferson Van Drew": {
+"antagonism_z": 1.828,
+"grandstand_z": 0.065,
+"n_hearings": 122,
+"n_disp": 7
+},
+"Glenn Ivey": {
+"antagonism_z": 4.728,
+"grandstand_z": 3.446,
+"n_hearings": 76,
+"n_disp": 0
+},
+"Kevin Kiley": {
+"antagonism_z": -0.009,
+"grandstand_z": 0.205,
+"n_hearings": 107,
+"n_disp": 0
+},
+"Daniel Meuser": {
+"antagonism_z": 0.207,
+"grandstand_z": 0.213,
+"n_hearings": 263,
+"n_disp": 0
+},
+"Michelle Fischbach": {
+"antagonism_z": -0.408,
+"grandstand_z": 0.105,
+"n_hearings": 82,
+"n_disp": 1
+},
+"Tim Walberg": {
+"antagonism_z": -0.847,
+"grandstand_z": -0.35,
+"n_hearings": 197,
+"n_disp": 0
+},
+"Suzanne Bonamici": {
+"antagonism_z": -0.846,
+"grandstand_z": 0.617,
+"n_hearings": 239,
+"n_disp": 0
+},
+"Glenn Grothman": {
+"antagonism_z": -0.253,
+"grandstand_z": 0.266,
+"n_hearings": 356,
+"n_disp": 3
+},
+"Alma Adams": {
+"antagonism_z": -0.603,
+"grandstand_z": -0.378,
+"n_hearings": 248,
+"n_disp": 0
+},
+"Rick Allen": {
+"antagonism_z": -0.613,
+"grandstand_z": -0.439,
+"n_hearings": 205,
+"n_disp": 0
+},
+"Pramila Jayapal": {
+"antagonism_z": 0.552,
+"grandstand_z": 0.417,
+"n_hearings": 239,
+"n_disp": 0
+},
+"Haley Stevens": {
+"antagonism_z": -0.744,
+"grandstand_z": 0.115,
+"n_hearings": 158,
+"n_disp": 0
+},
+"Lisa McClain": {
+"antagonism_z": 1.785,
+"grandstand_z": 0.898,
+"n_hearings": 142,
+"n_disp": 6
+},
+"Mark DeSaulnier": {
+"antagonism_z": -0.612,
+"grandstand_z": -0.277,
+"n_hearings": 170,
+"n_disp": 1
+},
+"Jahana Hayes": {
+"antagonism_z": 0.474,
+"grandstand_z": -0.16,
+"n_hearings": 167,
+"n_disp": 0
+},
+"Jerry Moran": {
+"antagonism_z": -0.888,
+"grandstand_z": -0.668,
+"n_hearings": 392,
+"n_disp": 1
+},
+"Frank Mrvan": {
+"antagonism_z": -0.459,
+"grandstand_z": -0.762,
+"n_hearings": 65,
+"n_disp": 0
+},
+"Lucy McBath": {
+"antagonism_z": -0.771,
+"grandstand_z": -0.68,
+"n_hearings": 191,
+"n_disp": 0
+},
+"Aaron Bean": {
+"antagonism_z": 1.07,
+"grandstand_z": -0.113,
+"n_hearings": 63,
+"n_disp": 3
+},
+"Eric Burlison": {
+"antagonism_z": -0.947,
+"grandstand_z": -0.599,
+"n_hearings": 150,
+"n_disp": 1
+},
+"Ilhan Omar": {
+"antagonism_z": 1.034,
+"grandstand_z": 0.289,
+"n_hearings": 127,
+"n_disp": 3
+},
+"Lloyd Smucker": {
+"antagonism_z": 0.962,
+"grandstand_z": 1.454,
+"n_hearings": 102,
+"n_disp": 0
+},
+"Ron Estes": {
+"antagonism_z": -1.4,
+"grandstand_z": -0.361,
+"n_hearings": 62,
+"n_disp": 0
+},
+"Tommy Tuberville": {
+"antagonism_z": -1.096,
+"grandstand_z": -0.513,
+"n_hearings": 209,
+"n_disp": 0
+},
+"Roger Marshall": {
+"antagonism_z": -0.175,
+"grandstand_z": 0.468,
+"n_hearings": 222,
+"n_disp": 2
+},
+"Scott Perry": {
+"antagonism_z": 0.161,
+"grandstand_z": 1.101,
+"n_hearings": 239,
+"n_disp": 2
+},
+"Joaquin Castro": {
+"antagonism_z": 0.307,
+"grandstand_z": 0.323,
+"n_hearings": 124,
+"n_disp": 1
+},
+"Brian Mast": {
+"antagonism_z": 1.049,
+"grandstand_z": 1.215,
+"n_hearings": 142,
+"n_disp": 2
+},
+"Greg Stanton": {
+"antagonism_z": -0.111,
+"grandstand_z": -0.684,
+"n_hearings": 201,
+"n_disp": 0
+},
+"Gabe Amo": {
+"antagonism_z": -1.015,
+"grandstand_z": 1.234,
+"n_hearings": 31,
+"n_disp": 0
+},
+"Thomas Kean": {
+"antagonism_z": -0.404,
+"grandstand_z": -0.717,
+"n_hearings": 105,
+"n_disp": 0
+},
+"David McCormick": {
+"antagonism_z": 1.034,
+"grandstand_z": 0.384,
+"n_hearings": 110,
+"n_disp": 0
+},
+"Steny Hoyer": {
+"antagonism_z": -0.269,
+"grandstand_z": -0.332,
+"n_hearings": 27,
+"n_disp": 0
+},
+"Chris Van Hollen": {
+"antagonism_z": -0.389,
+"grandstand_z": -0.189,
+"n_hearings": 415,
+"n_disp": 4
+},
+"Cindy Hyde-Smith": {
+"antagonism_z": -0.334,
+"grandstand_z": -0.609,
+"n_hearings": 176,
+"n_disp": 1
+},
+"John Kennedy": {
+"antagonism_z": 2.541,
+"grandstand_z": 1.933,
+"n_hearings": 376,
+"n_disp": 22
+},
+"Derek Schmidt": {
+"antagonism_z": 0.046,
+"grandstand_z": -1.001,
+"n_hearings": 35,
+"n_disp": 0
+},
+"Lloyd Doggett": {
+"antagonism_z": -1.407,
+"grandstand_z": 0.958,
+"n_hearings": 46,
+"n_disp": 0
+},
+"Vern Buchanan": {
+"antagonism_z": -0.786,
+"grandstand_z": 0.405,
+"n_hearings": 31,
+"n_disp": 0
+},
+"John Larson": {
+"antagonism_z": 1.314,
+"grandstand_z": 1.501,
+"n_hearings": 37,
+"n_disp": 0
+},
+"Clay Higgins": {
+"antagonism_z": 0.913,
+"grandstand_z": 1.614,
+"n_hearings": 334,
+"n_disp": 3
+},
+"Jack Reed": {
+"antagonism_z": -1.007,
+"grandstand_z": -0.711,
+"n_hearings": 245,
+"n_disp": 0
+},
+"Terri Sewell": {
+"antagonism_z": 0.424,
+"grandstand_z": 0.518,
+"n_hearings": 84,
+"n_disp": 0
+},
+"Suzan DelBene": {
+"antagonism_z": 0.058,
+"grandstand_z": -0.717,
+"n_hearings": 41,
+"n_disp": 0
+},
+"David Schweikert": {
+"antagonism_z": 1.079,
+"grandstand_z": 1.291,
+"n_hearings": 63,
+"n_disp": 0
+},
+"Judy Chu": {
+"antagonism_z": -0.546,
+"grandstand_z": -0.967,
+"n_hearings": 129,
+"n_disp": 0
+},
+"Brendan Boyle": {
+"antagonism_z": 2.595,
+"grandstand_z": 1.78,
+"n_hearings": 45,
+"n_disp": 0
+},
+"Jodey Arrington": {
+"antagonism_z": 2.26,
+"grandstand_z": 1.124,
+"n_hearings": 47,
+"n_disp": 0
+},
+"Donald Beyer": {
+"antagonism_z": -0.668,
+"grandstand_z": -0.342,
+"n_hearings": 136,
+"n_disp": 0
+},
+"Bradley Schneider": {
+"antagonism_z": 0.971,
+"grandstand_z": -0.323,
+"n_hearings": 146,
+"n_disp": 0
+},
+"Thomas Suozzi": {
+"antagonism_z": -0.361,
+"grandstand_z": 0.581,
+"n_hearings": 31,
+"n_disp": 0
+},
+"Christopher Murphy": {
+"antagonism_z": 0.943,
+"grandstand_z": -0.186,
+"n_hearings": 311,
+"n_disp": 1
+},
+"Jimmy Gomez": {
+"antagonism_z": 0.628,
+"grandstand_z": -0.142,
+"n_hearings": 101,
+"n_disp": 3
+},
+"Steven Horsford": {
+"antagonism_z": 0.26,
+"grandstand_z": 0.779,
+"n_hearings": 132,
+"n_disp": 1
+},
+"Bernard Sanders": {
+"antagonism_z": -1.726,
+"grandstand_z": 0.204,
+"n_hearings": 59,
+"n_disp": 0
+},
+"Sheldon Whitehouse": {
+"antagonism_z": 0.074,
+"grandstand_z": 0.24,
+"n_hearings": 332,
+"n_disp": 1
+},
+"Cory Booker": {
+"antagonism_z": 0.027,
+"grandstand_z": -0.44,
+"n_hearings": 169,
+"n_disp": 1
+},
+"Tammy Duckworth": {
+"antagonism_z": -0.631,
+"grandstand_z": -0.898,
+"n_hearings": 193,
+"n_disp": 1
+},
+"Patty Murray": {
+"antagonism_z": -0.755,
+"grandstand_z": 0.779,
+"n_hearings": 239,
+"n_disp": 1
+},
+"Jack Bergman": {
+"antagonism_z": 1.85,
+"grandstand_z": 0.697,
+"n_hearings": 158,
+"n_disp": 2
+},
+"Gilbert Cisneros": {
+"antagonism_z": 0.452,
+"grandstand_z": -0.744,
+"n_hearings": 115,
+"n_disp": 0
+},
+"Elise Stefanik": {
+"antagonism_z": 0.85,
+"grandstand_z": -0.227,
+"n_hearings": 122,
+"n_disp": 5
+},
+"Jason Crow": {
+"antagonism_z": 2.881,
+"grandstand_z": 0.427,
+"n_hearings": 100,
+"n_disp": 0
+},
+"Elissa Slotkin": {
+"antagonism_z": -0.6,
+"grandstand_z": 0.032,
+"n_hearings": 127,
+"n_disp": 0
+},
+"Don Bacon": {
+"antagonism_z": -0.946,
+"grandstand_z": -0.311,
+"n_hearings": 145,
+"n_disp": 0
+},
+"Veronica Escobar": {
+"antagonism_z": -0.014,
+"grandstand_z": -0.026,
+"n_hearings": 199,
+"n_disp": 0
+},
+"Jim Jordan": {
+"antagonism_z": 2.062,
+"grandstand_z": 1.409,
+"n_hearings": 207,
+"n_disp": 2
+},
+"Chip Roy": {
+"antagonism_z": 0.873,
+"grandstand_z": 0.139,
+"n_hearings": 164,
+"n_disp": 1
+},
+"Raja Krishnamoorthi": {
+"antagonism_z": 0.689,
+"grandstand_z": -0.151,
+"n_hearings": 109,
+"n_disp": 4
+},
+"French Hill": {
+"antagonism_z": 0.26,
+"grandstand_z": 0.449,
+"n_hearings": 298,
+"n_disp": 0
+},
+"Ro Khanna": {
+"antagonism_z": 0.616,
+"grandstand_z": 0.887,
+"n_hearings": 164,
+"n_disp": 3
+},
+"Rashida Tlaib": {
+"antagonism_z": 1.826,
+"grandstand_z": 1.126,
+"n_hearings": 330,
+"n_disp": 7
+},
+"John Cornyn": {
+"antagonism_z": 0.624,
+"grandstand_z": 0.27,
+"n_hearings": 171,
+"n_disp": 1
+},
+"Zoe Lofgren": {
+"antagonism_z": -0.353,
+"grandstand_z": 0.96,
+"n_hearings": 160,
+"n_disp": 0
+},
+"Steve Cohen": {
+"antagonism_z": 0.689,
+"grandstand_z": -0.21,
+"n_hearings": 244,
+"n_disp": 1
+},
+"Guy Reschenthaler": {
+"antagonism_z": 1.062,
+"grandstand_z": 2.241,
+"n_hearings": 46,
+"n_disp": 1
+},
+"Jamie Raskin": {
+"antagonism_z": 1.84,
+"grandstand_z": 1.817,
+"n_hearings": 386,
+"n_disp": 0
+},
+"Luis Correa": {
+"antagonism_z": 1.325,
+"grandstand_z": 1.088,
+"n_hearings": 199,
+"n_disp": 1
+},
+"Tom McClintock": {
+"antagonism_z": 0.926,
+"grandstand_z": 1.578,
+"n_hearings": 162,
+"n_disp": 1
+},
+"Michael McCaul": {
+"antagonism_z": -0.231,
+"grandstand_z": 0.783,
+"n_hearings": 109,
+"n_disp": 0
+},
+"Steve Womack": {
+"antagonism_z": -0.491,
+"grandstand_z": 0.189,
+"n_hearings": 60,
+"n_disp": 0
+},
+"Rosa DeLauro": {
+"antagonism_z": -0.771,
+"grandstand_z": -0.481,
+"n_hearings": 60,
+"n_disp": 0
+},
+"Dan Crenshaw": {
+"antagonism_z": -0.47,
+"grandstand_z": 1.151,
+"n_hearings": 143,
+"n_disp": 0
+},
+"Janice Schakowsky": {
+"antagonism_z": -0.576,
+"grandstand_z": 0.05,
+"n_hearings": 201,
+"n_disp": 0
+},
+"Kevin Hern": {
+"antagonism_z": 0.342,
+"grandstand_z": 0.172,
+"n_hearings": 106,
+"n_disp": 2
+},
+"Joseph Morelle": {
+"antagonism_z": 1.215,
+"grandstand_z": 0.033,
+"n_hearings": 163,
+"n_disp": 0
+},
+"Tim Burchett": {
+"antagonism_z": -0.659,
+"grandstand_z": -0.154,
+"n_hearings": 284,
+"n_disp": 0
+},
+"Richard Durbin": {
+"antagonism_z": -1.252,
+"grandstand_z": -0.522,
+"n_hearings": 121,
+"n_disp": 0
+},
+"Christopher Coons": {
+"antagonism_z": -0.191,
+"grandstand_z": -0.403,
+"n_hearings": 199,
+"n_disp": 0
+},
+"Henry Cuellar": {
+"antagonism_z": -0.416,
+"grandstand_z": -0.508,
+"n_hearings": 33,
+"n_disp": 0
+},
+"Neal Dunn": {
+"antagonism_z": 0.132,
+"grandstand_z": 0.973,
+"n_hearings": 124,
+"n_disp": 0
+},
+"Marc Veasey": {
+"antagonism_z": -0.014,
+"grandstand_z": -0.611,
+"n_hearings": 129,
+"n_disp": 0
+},
+"Brian Schatz": {
+"antagonism_z": -0.181,
+"grandstand_z": 0.236,
+"n_hearings": 186,
+"n_disp": 1
+},
+"Ted Lieu": {
+"antagonism_z": -0.436,
+"grandstand_z": 0.21,
+"n_hearings": 132,
+"n_disp": 0
+},
+"Adriano Espaillat": {
+"antagonism_z": 1.227,
+"grandstand_z": 0.207,
+"n_hearings": 89,
+"n_disp": 1
+},
+"Jim Costa": {
+"antagonism_z": -0.033,
+"grandstand_z": 0.895,
+"n_hearings": 133,
+"n_disp": 0
+},
+"Vicente Gonzalez": {
+"antagonism_z": -0.28,
+"grandstand_z": 0.145,
+"n_hearings": 251,
+"n_disp": 0
+},
+"Brian Fitzpatrick": {
+"antagonism_z": -0.414,
+"grandstand_z": -0.657,
+"n_hearings": 114,
+"n_disp": 0
+},
+"Michael Guest": {
+"antagonism_z": 0.034,
+"grandstand_z": -0.585,
+"n_hearings": 127,
+"n_disp": 2
+},
+"Virginia Foxx": {
+"antagonism_z": -0.468,
+"grandstand_z": -0.596,
+"n_hearings": 292,
+"n_disp": 3
+},
+"Mark Takano": {
+"antagonism_z": -0.234,
+"grandstand_z": 0.084,
+"n_hearings": 166,
+"n_disp": 2
+},
+"Josh Harder": {
+"antagonism_z": 0.184,
+"grandstand_z": -0.43,
+"n_hearings": 33,
+"n_disp": 1
+},
+"Lauren Underwood": {
+"antagonism_z": 0.583,
+"grandstand_z": 0.699,
+"n_hearings": 95,
+"n_disp": 1
+},
+"Lori Trahan": {
+"antagonism_z": -0.658,
+"grandstand_z": -0.672,
+"n_hearings": 123,
+"n_disp": 0
+},
+"Frank Pallone": {
+"antagonism_z": -0.166,
+"grandstand_z": -0.017,
+"n_hearings": 256,
+"n_disp": 2
+},
+"Doris Matsui": {
+"antagonism_z": -0.749,
+"grandstand_z": -0.093,
+"n_hearings": 151,
+"n_disp": 0
+},
+"Brett Guthrie": {
+"antagonism_z": -0.402,
+"grandstand_z": 0.252,
+"n_hearings": 181,
+"n_disp": 0
+},
+"Kathy Castor": {
+"antagonism_z": 0.561,
+"grandstand_z": 0.079,
+"n_hearings": 175,
+"n_disp": 2
+},
+"Raul Ruiz": {
+"antagonism_z": 1.273,
+"grandstand_z": 1.525,
+"n_hearings": 158,
+"n_disp": 2
+},
+"Lisa Blunt Rochester": {
+"antagonism_z": -0.138,
+"grandstand_z": -0.573,
+"n_hearings": 170,
+"n_disp": 1
+},
+"Gus Bilirakis": {
+"antagonism_z": 0.675,
+"grandstand_z": -0.205,
+"n_hearings": 171,
+"n_disp": 4
+},
+"Paul Gosar": {
+"antagonism_z": 0.652,
+"grandstand_z": 0.337,
+"n_hearings": 107,
+"n_disp": 4
+},
+"Tom Cole": {
+"antagonism_z": 2.182,
+"grandstand_z": 0.024,
+"n_hearings": 51,
+"n_disp": 0
+},
+"Mark Pocan": {
+"antagonism_z": 0.889,
+"grandstand_z": 1.239,
+"n_hearings": 47,
+"n_disp": 3
+},
+"Lois Frankel": {
+"antagonism_z": -0.512,
+"grandstand_z": 0.497,
+"n_hearings": 31,
+"n_disp": 0
+},
+"Bonnie Watson Coleman": {
+"antagonism_z": 2.12,
+"grandstand_z": 0.896,
+"n_hearings": 94,
+"n_disp": 5
+},
+"John Moolenaar": {
+"antagonism_z": -0.235,
+"grandstand_z": -0.466,
+"n_hearings": 29,
+"n_disp": 0
+},
+"Katherine Clark": {
+"antagonism_z": 0.342,
+"grandstand_z": -0.338,
+"n_hearings": 65,
+"n_disp": 0
+},
+"Daniel Webster": {
+"antagonism_z": -0.196,
+"grandstand_z": -0.795,
+"n_hearings": 77,
+"n_disp": 0
+},
+"Mike Carey": {
+"antagonism_z": 0.322,
+"grandstand_z": -0.212,
+"n_hearings": 78,
+"n_disp": 0
+},
+"Paul Tonko": {
+"antagonism_z": 0.126,
+"grandstand_z": -0.529,
+"n_hearings": 234,
+"n_disp": 7
+},
+"Diana DeGette": {
+"antagonism_z": 0.721,
+"grandstand_z": 0.909,
+"n_hearings": 110,
+"n_disp": 1
+},
+"Darren Soto": {
+"antagonism_z": -0.093,
+"grandstand_z": -0.261,
+"n_hearings": 197,
+"n_disp": 0
+},
+"Laura Gillen": {
+"antagonism_z": 1.203,
+"grandstand_z": -1.015,
+"n_hearings": 21,
+"n_disp": 0
+},
+"Troy Balderson": {
+"antagonism_z": -1.188,
+"grandstand_z": -0.907,
+"n_hearings": 146,
+"n_disp": 0
+},
+"Sharice Davids": {
+"antagonism_z": 0.438,
+"grandstand_z": 0.307,
+"n_hearings": 142,
+"n_disp": 0
+},
+"Bruce Westerman": {
+"antagonism_z": -0.16,
+"grandstand_z": 0.607,
+"n_hearings": 173,
+"n_disp": 1
+},
+"Angie Craig": {
+"antagonism_z": -0.279,
+"grandstand_z": -0.739,
+"n_hearings": 128,
+"n_disp": 0
+},
+"Darin LaHood": {
+"antagonism_z": -0.251,
+"grandstand_z": 1.387,
+"n_hearings": 34,
+"n_disp": 0
+},
+"David Rouzer": {
+"antagonism_z": -1.075,
+"grandstand_z": -0.662,
+"n_hearings": 82,
+"n_disp": 0
+},
+"Julia Brownley": {
+"antagonism_z": -0.83,
+"grandstand_z": -0.493,
+"n_hearings": 126,
+"n_disp": 0
+},
+"Andr\u00e9 Carson": {
+"antagonism_z": -0.136,
+"grandstand_z": -0.41,
+"n_hearings": 42,
+"n_disp": 0
+},
+"Chris Pappas": {
+"antagonism_z": -0.328,
+"grandstand_z": -0.993,
+"n_hearings": 112,
+"n_disp": 0
+},
+"Lizzie Fletcher": {
+"antagonism_z": -0.159,
+"grandstand_z": -0.546,
+"n_hearings": 120,
+"n_disp": 0
+},
+"Robert Latta": {
+"antagonism_z": -0.62,
+"grandstand_z": -0.491,
+"n_hearings": 158,
+"n_disp": 2
+},
+"Adam Gray": {
+"antagonism_z": 1.746,
+"grandstand_z": -0.802,
+"n_hearings": 29,
+"n_disp": 0
+},
+"Adelita Grijalva": {
+"antagonism_z": -0.592,
+"grandstand_z": 0.164,
+"n_hearings": 77,
+"n_disp": 0
+},
+"David Taylor": {
+"antagonism_z": -0.257,
+"grandstand_z": -0.603,
+"n_hearings": 143,
+"n_disp": 0
+},
+"Kim Schrier": {
+"antagonism_z": -0.589,
+"grandstand_z": -0.482,
+"n_hearings": 166,
+"n_disp": 0
+},
+"Michael Simpson": {
+"antagonism_z": 0.817,
+"grandstand_z": -0.711,
+"n_hearings": 28,
+"n_disp": 0
+},
+"Ken Calvert": {
+"antagonism_z": -1.453,
+"grandstand_z": -0.316,
+"n_hearings": 20,
+"n_disp": 0
+},
+"Charles Fleischmann": {
+"antagonism_z": -1.102,
+"grandstand_z": -1.048,
+"n_hearings": 41,
+"n_disp": 0
+},
+"Dan Newhouse": {
+"antagonism_z": -0.268,
+"grandstand_z": -0.402,
+"n_hearings": 45,
+"n_disp": 0
+},
+"Steve Scalise": {
+"antagonism_z": 4.319,
+"grandstand_z": 1.734,
+"n_hearings": 40,
+"n_disp": 2
+},
+"Hakeem Jeffries": {
+"antagonism_z": -1.092,
+"grandstand_z": 0.639,
+"n_hearings": 59,
+"n_disp": 0
+},
+"John Rutherford": {
+"antagonism_z": 0.465,
+"grandstand_z": 0.48,
+"n_hearings": 29,
+"n_disp": 0
+},
+"Jeff Hurd": {
+"antagonism_z": -0.657,
+"grandstand_z": -0.872,
+"n_hearings": 19,
+"n_disp": 0
+},
+"Pete Aguilar": {
+"antagonism_z": -0.696,
+"grandstand_z": -0.607,
+"n_hearings": 68,
+"n_disp": 0
+},
+"Mike Quigley": {
+"antagonism_z": 0.806,
+"grandstand_z": 0.462,
+"n_hearings": 31,
+"n_disp": 0
+},
+"Richard Hudson": {
+"antagonism_z": -0.452,
+"grandstand_z": -0.766,
+"n_hearings": 51,
+"n_disp": 0
+},
+"Emanuel Cleaver": {
+"antagonism_z": -0.936,
+"grandstand_z": -0.374,
+"n_hearings": 183,
+"n_disp": 0
+},
+"Scott Franklin": {
+"antagonism_z": -0.174,
+"grandstand_z": -0.266,
+"n_hearings": 77,
+"n_disp": 0
+},
+"Frank Lucas": {
+"antagonism_z": -1.01,
+"grandstand_z": -0.437,
+"n_hearings": 240,
+"n_disp": 0
+},
+"Bill Huizenga": {
+"antagonism_z": 1.495,
+"grandstand_z": 1.915,
+"n_hearings": 176,
+"n_disp": 3
+},
+"Bryan Steil": {
+"antagonism_z": 0.119,
+"grandstand_z": 0.704,
+"n_hearings": 190,
+"n_disp": 2
+},
+"Betty McCollum": {
+"antagonism_z": -0.897,
+"grandstand_z": -0.469,
+"n_hearings": 33,
+"n_disp": 0
+},
+"Marcy Kaptur": {
+"antagonism_z": -0.472,
+"grandstand_z": -0.135,
+"n_hearings": 40,
+"n_disp": 0
+},
+"Patrick Ryan": {
+"antagonism_z": -0.372,
+"grandstand_z": -0.787,
+"n_hearings": 48,
+"n_disp": 0
+},
+"Robert Aderholt": {
+"antagonism_z": -1.171,
+"grandstand_z": -0.914,
+"n_hearings": 30,
+"n_disp": 0
+},
+"Laura Friedman": {
+"antagonism_z": 1.353,
+"grandstand_z": -0.622,
+"n_hearings": 25,
+"n_disp": 0
+},
+"Randy Weber": {
+"antagonism_z": -0.239,
+"grandstand_z": 0.859,
+"n_hearings": 145,
+"n_disp": 0
+},
+"Brian Babin": {
+"antagonism_z": -0.64,
+"grandstand_z": 0.519,
+"n_hearings": 111,
+"n_disp": 0
+},
+"James Baird": {
+"antagonism_z": -0.226,
+"grandstand_z": -0.801,
+"n_hearings": 219,
+"n_disp": 0
+},
+"Mark Amodei": {
+"antagonism_z": 0.554,
+"grandstand_z": -0.343,
+"n_hearings": 27,
+"n_disp": 0
+},
+"James Justice": {
+"antagonism_z": -0.961,
+"grandstand_z": -1.215,
+"n_hearings": 27,
+"n_disp": 0
+},
+"Lateefah Simon": {
+"antagonism_z": -0.215,
+"grandstand_z": -0.799,
+"n_hearings": 51,
+"n_disp": 0
+},
+"Grace Meng": {
+"antagonism_z": -0.845,
+"grandstand_z": -0.92,
+"n_hearings": 28,
+"n_disp": 0
+},
+"Cory Mills": {
+"antagonism_z": 1.308,
+"grandstand_z": 1.05,
+"n_hearings": 89,
+"n_disp": 0
+},
+"Herbert Conaway": {
+"antagonism_z": -0.541,
+"grandstand_z": -0.098,
+"n_hearings": 75,
+"n_disp": 0
+},
+"David Kustoff": {
+"antagonism_z": -1.009,
+"grandstand_z": -0.084,
+"n_hearings": 94,
+"n_disp": 0
+},
+"Lance Gooden": {
+"antagonism_z": -0.261,
+"grandstand_z": -0.424,
+"n_hearings": 51,
+"n_disp": 0
+},
+"Josh Gottheimer": {
+"antagonism_z": -0.283,
+"grandstand_z": -0.242,
+"n_hearings": 91,
+"n_disp": 0
+},
+"Gary Palmer": {
+"antagonism_z": 0.992,
+"grandstand_z": 0.607,
+"n_hearings": 242,
+"n_disp": 8
+},
+"John James": {
+"antagonism_z": 0.607,
+"grandstand_z": -0.416,
+"n_hearings": 77,
+"n_disp": 0
+},
+"Eric Crawford": {
+"antagonism_z": 0.87,
+"grandstand_z": -0.629,
+"n_hearings": 91,
+"n_disp": 3
+},
+"Scott DesJarlais": {
+"antagonism_z": 0.403,
+"grandstand_z": -0.604,
+"n_hearings": 24,
+"n_disp": 0
+},
+"James McGovern": {
+"antagonism_z": -0.329,
+"grandstand_z": -0.722,
+"n_hearings": 52,
+"n_disp": 0
+},
+"Chellie Pingree": {
+"antagonism_z": -0.56,
+"grandstand_z": -0.715,
+"n_hearings": 66,
+"n_disp": 0
+},
+"Vince Fong": {
+"antagonism_z": -0.249,
+"grandstand_z": -0.955,
+"n_hearings": 26,
+"n_disp": 0
+},
+"Rand Paul": {
+"antagonism_z": 0.345,
+"grandstand_z": 1.615,
+"n_hearings": 116,
+"n_disp": 8
+},
+"Lindsey Graham": {
+"antagonism_z": 0.139,
+"grandstand_z": 1.863,
+"n_hearings": 150,
+"n_disp": 6
+},
+"Wesley Bell": {
+"antagonism_z": -0.617,
+"grandstand_z": -1.118,
+"n_hearings": 42,
+"n_disp": 0
+},
+"John McGuire": {
+"antagonism_z": 0.081,
+"grandstand_z": -1.091,
+"n_hearings": 38,
+"n_disp": 1
+},
+"James Himes": {
+"antagonism_z": -0.414,
+"grandstand_z": 0.483,
+"n_hearings": 57,
+"n_disp": 0
+},
+"Josh Riley": {
+"antagonism_z": -0.534,
+"grandstand_z": -1.215,
+"n_hearings": 16,
+"n_disp": 0
+},
+"Mike Bost": {
+"antagonism_z": 1.602,
+"grandstand_z": -0.636,
+"n_hearings": 92,
+"n_disp": 0
+},
+"Brandon Gill": {
+"antagonism_z": 0.803,
+"grandstand_z": -0.761,
+"n_hearings": 61,
+"n_disp": 7
+},
+"Addison McDowell": {
+"antagonism_z": -0.91,
+"grandstand_z": -0.917,
+"n_hearings": 15,
+"n_disp": 0
+},
+"Sarah McBride": {
+"antagonism_z": -0.711,
+"grandstand_z": -1.215,
+"n_hearings": 11,
+"n_disp": 0
+},
+"Kelly Morrison": {
+"antagonism_z": -0.436,
+"grandstand_z": -0.721,
+"n_hearings": 43,
+"n_disp": 0
+},
+"Maria Salazar": {
+"antagonism_z": 1.132,
+"grandstand_z": 1.748,
+"n_hearings": 75,
+"n_disp": 1
+},
+"Maxwell Frost": {
+"antagonism_z": -0.18,
+"grandstand_z": -0.376,
+"n_hearings": 120,
+"n_disp": 1
+},
+"Tom Barrett": {
+"antagonism_z": -0.593,
+"grandstand_z": -1.141,
+"n_hearings": 34,
+"n_disp": 0
+},
+"Tom Emmer": {
+"antagonism_z": 0.574,
+"grandstand_z": 6.475,
+"n_hearings": 60,
+"n_disp": 1
+},
+"Mitch McConnell": {
+"antagonism_z": -1.696,
+"grandstand_z": -1.054,
+"n_hearings": 21,
+"n_disp": 0
+},
+"Chuck Edwards": {
+"antagonism_z": -0.184,
+"grandstand_z": -0.459,
+"n_hearings": 82,
+"n_disp": 0
+},
+"Marie Gluesenkamp Perez": {
+"antagonism_z": 1.445,
+"grandstand_z": -0.61,
+"n_hearings": 72,
+"n_disp": 0
+},
+"James Clyburn": {
+"antagonism_z": 5.175,
+"grandstand_z": 0.612,
+"n_hearings": 18,
+"n_disp": 0
+},
+"Pablo Hern\u00e1ndez Rivera": {
+"antagonism_z": 1.398,
+"grandstand_z": -0.5,
+"n_hearings": 8,
+"n_disp": 0
+},
+"Randy Fine": {
+"antagonism_z": 3.527,
+"grandstand_z": -0.914,
+"n_hearings": 14,
+"n_disp": 1
+},
+"Clay Fuller": {
+"antagonism_z": -1.085,
+"grandstand_z": -1.215,
+"n_hearings": 6,
+"n_disp": 0
+},
+"Richard Neal": {
+"antagonism_z": -0.708,
+"grandstand_z": -1.019,
+"n_hearings": 29,
+"n_disp": 0
+},
+"Charles Schumer": {
+"antagonism_z": -1.552,
+"grandstand_z": -0.864,
+"n_hearings": 22,
+"n_disp": 0
+},
+"Ashley Hinson": {
+"antagonism_z": -0.124,
+"grandstand_z": 0.249,
+"n_hearings": 26,
+"n_disp": 0
+},
+"Luz Rivas": {
+"antagonism_z": -1.045,
+"grandstand_z": -1.215,
+"n_hearings": 12,
+"n_disp": 0
+},
+"Adam Schiff": {
+"antagonism_z": -0.306,
+"grandstand_z": -0.3,
+"n_hearings": 50,
+"n_disp": 0
+},
+"Kweisi Mfume": {
+"antagonism_z": -0.401,
+"grandstand_z": 0.814,
+"n_hearings": 130,
+"n_disp": 0
+},
+"Marilyn Strickland": {
+"antagonism_z": -0.957,
+"grandstand_z": -1.056,
+"n_hearings": 59,
+"n_disp": 0
+},
+"Pete Sessions": {
+"antagonism_z": 1.16,
+"grandstand_z": 0.322,
+"n_hearings": 186,
+"n_disp": 0
+},
+"Byron Donalds": {
+"antagonism_z": -0.274,
+"grandstand_z": 0.829,
+"n_hearings": 141,
+"n_disp": 2
+},
+"Mariannette Miller-Meeks": {
+"antagonism_z": -0.199,
+"grandstand_z": -0.051,
+"n_hearings": 159,
+"n_disp": 1
+},
+"Diana Harshbarger": {
+"antagonism_z": 0.608,
+"grandstand_z": 0.159,
+"n_hearings": 97,
+"n_disp": 2
+},
+"Andrew Clyde": {
+"antagonism_z": 0.061,
+"grandstand_z": 1.302,
+"n_hearings": 86,
+"n_disp": 3
+},
+"August Pfluger": {
+"antagonism_z": 0.19,
+"grandstand_z": 0.681,
+"n_hearings": 135,
+"n_disp": 3
+},
+"Andrew Garbarino": {
+"antagonism_z": -0.522,
+"grandstand_z": -0.566,
+"n_hearings": 143,
+"n_disp": 0
+},
+"Jon Ossoff": {
+"antagonism_z": 0.151,
+"grandstand_z": -0.292,
+"n_hearings": 211,
+"n_disp": 0
+},
+"Troy Nehls": {
+"antagonism_z": 0.757,
+"grandstand_z": -0.219,
+"n_hearings": 80,
+"n_disp": 0
+},
+"Jake Auchincloss": {
+"antagonism_z": 0.293,
+"grandstand_z": -0.273,
+"n_hearings": 108,
+"n_disp": 0
+},
+"Victoria Spartz": {
+"antagonism_z": 0.875,
+"grandstand_z": 2.133,
+"n_hearings": 68,
+"n_disp": 1
+},
+"Stephanie Bice": {
+"antagonism_z": -0.334,
+"grandstand_z": 1.553,
+"n_hearings": 109,
+"n_disp": 0
+},
+"Randy Feenstra": {
+"antagonism_z": 0.322,
+"grandstand_z": 0.27,
+"n_hearings": 125,
+"n_disp": 1
+},
+"Jay Obernolte": {
+"antagonism_z": -0.254,
+"grandstand_z": -0.087,
+"n_hearings": 101,
+"n_disp": 0
+},
+"Tracey Mann": {
+"antagonism_z": -0.864,
+"grandstand_z": -1.045,
+"n_hearings": 80,
+"n_disp": 0
+},
+"Julia Letlow": {
+"antagonism_z": -0.173,
+"grandstand_z": -0.648,
+"n_hearings": 46,
+"n_disp": 0
+},
+"Claudia Tenney": {
+"antagonism_z": 1.512,
+"grandstand_z": 1.467,
+"n_hearings": 103,
+"n_disp": 3
+},
+"Beth Van Duyne": {
+"antagonism_z": -0.495,
+"grandstand_z": 0.869,
+"n_hearings": 125,
+"n_disp": 0
+},
+"Michael Lawler": {
+"antagonism_z": 1.891,
+"grandstand_z": 1.438,
+"n_hearings": 108,
+"n_disp": 6
+},
+"Mike Flood": {
+"antagonism_z": -0.669,
+"grandstand_z": -0.4,
+"n_hearings": 78,
+"n_disp": 0
+},
+"Delia Ramirez": {
+"antagonism_z": 0.301,
+"grandstand_z": -0.245,
+"n_hearings": 88,
+"n_disp": 2
+},
+"Becca Balint": {
+"antagonism_z": -0.295,
+"grandstand_z": -0.336,
+"n_hearings": 82,
+"n_disp": 1
+},
+"Greg Casar": {
+"antagonism_z": 3.175,
+"grandstand_z": 2.139,
+"n_hearings": 61,
+"n_disp": 0
+},
+"Jared Moskowitz": {
+"antagonism_z": 2.704,
+"grandstand_z": 2.522,
+"n_hearings": 81,
+"n_disp": 1
+},
+"Anna Luna": {
+"antagonism_z": 0.467,
+"grandstand_z": 0.292,
+"n_hearings": 74,
+"n_disp": 1
+},
+"Nicholas Langworthy": {
+"antagonism_z": -0.323,
+"grandstand_z": -1.1,
+"n_hearings": 80,
+"n_disp": 1
+},
+"Brittany Pettersen": {
+"antagonism_z": -0.955,
+"grandstand_z": -1.091,
+"n_hearings": 37,
+"n_disp": 0
+},
+"Zachary Nunn": {
+"antagonism_z": -0.416,
+"grandstand_z": 0.342,
+"n_hearings": 111,
+"n_disp": 0
+},
+"Erin Houchin": {
+"antagonism_z": -0.349,
+"grandstand_z": 0.555,
+"n_hearings": 60,
+"n_disp": 0
+},
+"Monica De La Cruz": {
+"antagonism_z": -0.729,
+"grandstand_z": 0.673,
+"n_hearings": 72,
+"n_disp": 0
+},
+"Christopher Deluzio": {
+"antagonism_z": -0.81,
+"grandstand_z": -0.693,
+"n_hearings": 50,
+"n_disp": 0
+},
+"Keith Self": {
+"antagonism_z": 0.393,
+"grandstand_z": -0.079,
+"n_hearings": 114,
+"n_disp": 0
+},
+"Shri Thanedar": {
+"antagonism_z": -0.17,
+"grandstand_z": -0.905,
+"n_hearings": 82,
+"n_disp": 0
+},
+"Seth Magaziner": {
+"antagonism_z": -0.628,
+"grandstand_z": 0.347,
+"n_hearings": 66,
+"n_disp": 0
+},
+"Josh Brecheen": {
+"antagonism_z": -0.9,
+"grandstand_z": 0.717,
+"n_hearings": 43,
+"n_disp": 0
+},
+"Juan Ciscomani": {
+"antagonism_z": 0.023,
+"grandstand_z": -0.726,
+"n_hearings": 59,
+"n_disp": 0
+},
+"Gabe Vasquez": {
+"antagonism_z": -0.007,
+"grandstand_z": -0.661,
+"n_hearings": 39,
+"n_disp": 0
+},
+"Derrick Van Orden": {
+"antagonism_z": 1.776,
+"grandstand_z": -0.207,
+"n_hearings": 73,
+"n_disp": 3
+},
+"Morgan McGarvey": {
+"antagonism_z": -1.07,
+"grandstand_z": -1.173,
+"n_hearings": 107,
+"n_disp": 0
+},
+"Nikki Budzinski": {
+"antagonism_z": -0.893,
+"grandstand_z": -1.078,
+"n_hearings": 79,
+"n_disp": 0
+},
+"Valerie Foushee": {
+"antagonism_z": -1.157,
+"grandstand_z": -1.146,
+"n_hearings": 50,
+"n_disp": 0
+},
+"Rudy Yakym": {
+"antagonism_z": -0.458,
+"grandstand_z": -0.895,
+"n_hearings": 49,
+"n_disp": 0
+},
+"Elijah Crane": {
+"antagonism_z": 0.542,
+"grandstand_z": -0.34,
+"n_hearings": 143,
+"n_disp": 4
+},
+"Morgan Luttrell": {
+"antagonism_z": 1.026,
+"grandstand_z": 0.172,
+"n_hearings": 73,
+"n_disp": 1
+},
+"Hillary Scholten": {
+"antagonism_z": -0.698,
+"grandstand_z": -0.953,
+"n_hearings": 101,
+"n_disp": 0
+},
+"Greg Landsman": {
+"antagonism_z": -0.286,
+"grandstand_z": -0.44,
+"n_hearings": 63,
+"n_disp": 0
+},
+"Brad Finstad": {
+"antagonism_z": -0.713,
+"grandstand_z": -1.043,
+"n_hearings": 41,
+"n_disp": 0
+},
+"Jake Ellzey": {
+"antagonism_z": -0.858,
+"grandstand_z": -0.675,
+"n_hearings": 39,
+"n_disp": 0
+},
+"Emilia Sykes": {
+"antagonism_z": -0.904,
+"grandstand_z": -1.215,
+"n_hearings": 39,
+"n_disp": 0
+},
+"David Valadao": {
+"antagonism_z": 0.189,
+"grandstand_z": -1.096,
+"n_hearings": 23,
+"n_disp": 0
+},
+"Ryan Zinke": {
+"antagonism_z": -0.698,
+"grandstand_z": 1.838,
+"n_hearings": 26,
+"n_disp": 0
+},
+"Eric Sorensen": {
+"antagonism_z": -0.207,
+"grandstand_z": -0.766,
+"n_hearings": 46,
+"n_disp": 0
+},
+"Emily Randall": {
+"antagonism_z": -1.202,
+"grandstand_z": -0.237,
+"n_hearings": 35,
+"n_disp": 0
+},
+"Michael Rulli": {
+"antagonism_z": -0.84,
+"grandstand_z": -1.029,
+"n_hearings": 19,
+"n_disp": 0
+},
+"Bernie Moreno": {
+"antagonism_z": 0.335,
+"grandstand_z": -1.215,
+"n_hearings": 39,
+"n_disp": 1
+},
+"Michael Baumgartner": {
+"antagonism_z": -0.946,
+"grandstand_z": -1.215,
+"n_hearings": 16,
+"n_disp": 0
+},
+"Robert Onder": {
+"antagonism_z": -1.081,
+"grandstand_z": -1.215,
+"n_hearings": 45,
+"n_disp": 0
+},
+"George Latimer": {
+"antagonism_z": -0.963,
+"grandstand_z": -1.215,
+"n_hearings": 6,
+"n_disp": 0
+},
+"Dave Min": {
+"antagonism_z": -0.68,
+"grandstand_z": 2.302,
+"n_hearings": 24,
+"n_disp": 0
+},
+"Johnny Olszewski": {
+"antagonism_z": 1.124,
+"grandstand_z": 1.487,
+"n_hearings": 33,
+"n_disp": 1
+},
+"Sam Liccardo": {
+"antagonism_z": -0.882,
+"grandstand_z": -1.215,
+"n_hearings": 26,
+"n_disp": 0
+},
+"April McClain Delaney": {
+"antagonism_z": -0.709,
+"grandstand_z": -1.215,
+"n_hearings": 12,
+"n_disp": 0
+},
+"Mark Messmer": {
+"antagonism_z": -0.981,
+"grandstand_z": -1.215,
+"n_hearings": 27,
+"n_disp": 0
+},
+"Jeff Crank": {
+"antagonism_z": 2.724,
+"grandstand_z": 0.045,
+"n_hearings": 14,
+"n_disp": 1
+},
+"Janelle Bynum": {
+"antagonism_z": -0.738,
+"grandstand_z": -1.215,
+"n_hearings": 10,
+"n_disp": 0
+},
+"Troy Downing": {
+"antagonism_z": -0.488,
+"grandstand_z": -1.128,
+"n_hearings": 50,
+"n_disp": 0
+},
+"Ryan Mackenzie": {
+"antagonism_z": -0.705,
+"grandstand_z": -1.215,
+"n_hearings": 25,
+"n_disp": 0
+},
+"Cleo Fields": {
+"antagonism_z": -1.643,
+"grandstand_z": -1.215,
+"n_hearings": 10,
+"n_disp": 0
+},
+"LaMonica McIver": {
+"antagonism_z": 0.175,
+"grandstand_z": -0.771,
+"n_hearings": 39,
+"n_disp": 1
+},
+"Brad Knott": {
+"antagonism_z": -1.344,
+"grandstand_z": -0.942,
+"n_hearings": 38,
+"n_disp": 0
+},
+"Tim Sheehy": {
+"antagonism_z": -1.033,
+"grandstand_z": -1.215,
+"n_hearings": 21,
+"n_disp": 0
+},
+"Nicholas Begich": {
+"antagonism_z": -0.986,
+"grandstand_z": -1.215,
+"n_hearings": 20,
+"n_disp": 0
+},
+"Nellie Pou": {
+"antagonism_z": -0.778,
+"grandstand_z": -1.215,
+"n_hearings": 21,
+"n_disp": 0
+},
+"Suhas Subramanyam": {
+"antagonism_z": -0.744,
+"grandstand_z": -1.215,
+"n_hearings": 29,
+"n_disp": 0
+},
+"Eugene Vindman": {
+"antagonism_z": -0.652,
+"grandstand_z": 6.264,
+"n_hearings": 8,
+"n_disp": 0
+},
+"Tony Wied": {
+"antagonism_z": -0.981,
+"grandstand_z": -1.215,
+"n_hearings": 28,
+"n_disp": 0
+},
+"John Mannion": {
+"antagonism_z": -0.717,
+"grandstand_z": -1.215,
+"n_hearings": 19,
+"n_disp": 0
+},
+"Shomari Figures": {
+"antagonism_z": -0.966,
+"grandstand_z": -1.215,
+"n_hearings": 19,
+"n_disp": 0
+},
+"Robert Bresnahan": {
+"antagonism_z": -0.597,
+"grandstand_z": -1.215,
+"n_hearings": 27,
+"n_disp": 0
+},
+"Maxine Dexter": {
+"antagonism_z": -1.042,
+"grandstand_z": -1.215,
+"n_hearings": 20,
+"n_disp": 0
+},
+"Abraham Hamadeh": {
+"antagonism_z": -1.053,
+"grandstand_z": -1.215,
+"n_hearings": 22,
+"n_disp": 0
+},
+"Derek Tran": {
+"antagonism_z": -0.769,
+"grandstand_z": -1.215,
+"n_hearings": 23,
+"n_disp": 0
+},
+"Maggie Goodlander": {
+"antagonism_z": -0.64,
+"grandstand_z": -1.215,
+"n_hearings": 26,
+"n_disp": 0
+},
+"Yassamin Ansari": {
+"antagonism_z": -1.011,
+"grandstand_z": -0.398,
+"n_hearings": 29,
+"n_disp": 0
+},
+"Marlin Stutzman": {
+"antagonism_z": -1.43,
+"grandstand_z": -1.215,
+"n_hearings": 15,
+"n_disp": 0
+},
+"Brian Jack": {
+"antagonism_z": -0.937,
+"grandstand_z": -1.215,
+"n_hearings": 38,
+"n_disp": 0
+},
+"Ashley Moody": {
+"antagonism_z": -0.989,
+"grandstand_z": -0.835,
+"n_hearings": 27,
+"n_disp": 0
+},
+"Jon Husted": {
+"antagonism_z": -0.965,
+"grandstand_z": -1.215,
+"n_hearings": 20,
+"n_disp": 0
+},
+"Jefferson Shreve": {
+"antagonism_z": -0.884,
+"grandstand_z": -1.215,
+"n_hearings": 10,
+"n_disp": 0
+},
+"Mike Haridopolos": {
+"antagonism_z": -0.817,
+"grandstand_z": -1.215,
+"n_hearings": 15,
+"n_disp": 0
+},
+"Angela Alsobrooks": {
+"antagonism_z": -1.045,
+"grandstand_z": -1.215,
+"n_hearings": 22,
+"n_disp": 0
+},
+"Jimmy Patronis": {
+"antagonism_z": -0.924,
+"grandstand_z": -1.215,
+"n_hearings": 10,
+"n_disp": 0
+},
+"Julie Fedorchak": {
+"antagonism_z": -1.011,
+"grandstand_z": -1.215,
+"n_hearings": 19,
+"n_disp": 0
+},
+"James Walkinshaw": {
+"antagonism_z": -0.99,
+"grandstand_z": 1.463,
+"n_hearings": 14,
+"n_disp": 0
+},
+"Sarah Elfreth": {
+"antagonism_z": -0.878,
+"grandstand_z": -1.215,
+"n_hearings": 10,
+"n_disp": 0
+}
+},
+"n": 456,
+"corpus_hearings": 7174,
+"basis": "display+secondary A-antagonism facet",
+"gate": "5/5 passed 2026-07-11 (antagonism_validate.py)",
+"note": "does NOT feed engine A pillar; ranks unaffected"
+}

@@ -1,0 +1,49 @@
+# 2026-10-04 06:20:31 Eastern Daylight Time: read-only against C:\Users\pgoff\OneDrive\Desktop\Melange Systems. Nothing is written; --apply is not run.
+# patch staffer_route_v4_1.patch  sha256 fcb52fbdad630b20dd9f98d0c3a3a558f40ef41873afc0c1ccb1ee8ce3a6844d
+
+## the tree's git HEAD, and the bytes of the files the patch names against their pre-images
+3366a7840f90a204d496070da11354245d18f741
+edit fec/surfaces/staffer_closeness_routes.py                           tree 76c0347eb942  pre-image 76c0347eb942  SAME
+edit fec/surfaces/staffer_distinct_routes.py                            tree 8fab7ea38bc8  pre-image 8fab7ea38bc8  SAME
+edit fec/surfaces/staffer_live/README.md                                tree 07a757393a05  pre-image 07a757393a05  SAME
+edit fec/surfaces/staffer_live/staffer-route.js                         tree d5e5ad28823c  pre-image d5e5ad28823c  SAME
+edit fec/surfaces/staffer_live_service.py                               tree a512c5c7dcfe  pre-image a512c5c7dcfe  SAME
+edit fec/surfaces/staffer_routing.py                                    tree c9b0896a0081  pre-image c9b0896a0081  SAME
+edit fec/tests/surfaces/test_staffer_left_out_staff.cjs                 tree c34f37e52e63  pre-image c34f37e52e63  SAME
+edit fec/tests/surfaces/test_staffer_office_covered_staff.py            tree 72323acb4fdb  pre-image 72323acb4fdb  SAME
+edit fec/tests/surfaces/test_staffer_prewarm.py                         tree bf8319795c04  pre-image bf8319795c04  SAME
+new  fec/tests/surfaces/test_staffer_request_work_index.py              tree (absent)  pre-image (absent)  SAME
+edit fec/tests/surfaces/test_staffer_unreachable_hint.py                tree 15dbe2ef7359  pre-image 15dbe2ef7359  SAME
+
+## python scripts/apply_landing.py   (dry run, read-only)
+ok      edit fec/surfaces/staffer_closeness_routes.py                           expected 76c0347eb942  actual 76c0347eb942
+ok      edit fec/surfaces/staffer_distinct_routes.py                            expected 8fab7ea38bc8  actual 8fab7ea38bc8
+ok      edit fec/surfaces/staffer_live/README.md                                expected 07a757393a05  actual 07a757393a05
+ok      edit fec/surfaces/staffer_live/staffer-route.js                         expected d5e5ad28823c  actual d5e5ad28823c
+ok      edit fec/surfaces/staffer_live_service.py                               expected a512c5c7dcfe  actual a512c5c7dcfe
+ok      edit fec/surfaces/staffer_routing.py                                    expected c9b0896a0081  actual c9b0896a0081
+ok      edit fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected c34f37e52e63  actual c34f37e52e63
+ok      edit fec/tests/surfaces/test_staffer_office_covered_staff.py            expected 72323acb4fdb  actual 72323acb4fdb
+ok      edit fec/tests/surfaces/test_staffer_prewarm.py                         expected bf8319795c04  actual bf8319795c04
+ok      new  fec/tests/surfaces/test_staffer_request_work_index.py              expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_unreachable_hint.py                expected 15dbe2ef7359  actual 15dbe2ef7359
+dry run (git apply --check, read-only): rc=0
+rc=0
+
+## the same check typed out: git -C <tree> -c core.autocrlf=false -c core.safecrlf=false apply --check staffer_route_v4_1.patch
+rc=0
+
+## python scripts/rollback_landing.py   (plan, read-only): a tree that has not had this patch applied reports 'already original' and 'already absent'
+already original   fec/surfaces/staffer_closeness_routes.py
+already original   fec/surfaces/staffer_distinct_routes.py
+already original   fec/surfaces/staffer_live/README.md
+already original   fec/surfaces/staffer_live/staffer-route.js
+already original   fec/surfaces/staffer_live_service.py
+already original   fec/surfaces/staffer_routing.py
+already original   fec/tests/surfaces/test_staffer_left_out_staff.cjs
+already original   fec/tests/surfaces/test_staffer_office_covered_staff.py
+already original   fec/tests/surfaces/test_staffer_prewarm.py
+already absent     fec/tests/surfaces/test_staffer_request_work_index.py
+already original   fec/tests/surfaces/test_staffer_unreachable_hint.py
+plan only; rerun with --rollback to restore
+rc=0

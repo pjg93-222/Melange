@@ -1,0 +1,255 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-TAM25A90-X96-T5-27R">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3086 IS: Restoring Integrity in Fiduciary Duty Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-10-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3086</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251030">October 30, 2025</action-date>
+            <action-desc><sponsor name-id="S373">Mr. Cassidy</sponsor> (for himself and <cosponsor name-id="S429">Mr. Banks</cosponsor>) introduced the following bill; which was
+                read twice and referred to the <committee-name committee-id="SSHR00">Committee on
+                    Health, Education, Labor, and Pensions</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To amend the Employee Retirement Income Security Act of 1974 to clarify the
+            criteria by which a fiduciary may evaluate and select investments based on nonpecuniary
+            factors, and to clarify the application of prudence and exclusive purpose duties to the
+            exercise of shareholder rights.</official-title>
+    </form>
+    <legis-body display-enacting-clause="yes-display-enacting-clause">
+        <section section-type="section-one" id="S1">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Restoring Integrity in Fiduciary Duty Act</short-title></quote>.</text>
+        </section>
+        <section id="ide883481d31fe4270a42ffe2be92da063">
+            <enum>2.</enum>
+            <header>Exercise of fiduciary duty in evaluating and selecting investments</header>
+            <subsection id="id90e8f06151454ac4ac4fe05cdb70c297">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text>Section 404(a) of the Employee Retirement Income Security Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/29/1104">29 U.S.C. 1104(a)</external-xref>), is amended by adding at the end the following:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline" id="idba27bf10150e4e5583df8cd4899821cb">
+                    <paragraph id="idc208fd9ac8554415832cc1bf4ae85e79">
+                        <enum>(3)</enum>
+                        <header>Investments based on pecuniary factors</header>
+                        <subparagraph id="id856776a8ef9b4c30b9ed2323ba71a122">
+                            <enum>(A)</enum>
+                            <header>In general</header>
+ <text>For the purposes of paragraph (1), a fiduciary—</text> <clause commented="no" display-inline="no-display-inline" id="id2d13d54dec5944f8b2013414c487d459"> <enum>(i)</enum> <text display-inline="yes-display-inline">may evaluate an investment or investment course of action based only on pecuniary factors, except as provided in subparagraph (B);</text>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="idc677b8245dcf4ab4bd8b0a27ca52fb50">
+                                <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">may not subordinate the interests of the participants and beneficiaries in their retirement income or financial benefits under the plan to other objectives;</text>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="idf6370f5c6b4248e6af1036968d00666c">
+                                <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">may not sacrifice investment return or take on additional investment risk to promote nonpecuniary benefits or goals; and</text>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="idd283c2191ae84249bcd571e80ca70f67">
+                                <enum>(iv)</enum>
+ <text display-inline="yes-display-inline">shall weight each pecuniary factor in a manner that appropriately reflects a prudent assessment of the impact of the factor on risk and return.</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="id7cb96308a1114afaaa06883c8cdf73b7">
+                            <enum>(B)</enum>
+                            <header>Use of nonpecuniary factors for investment alternatives</header>
+ <text>Notwithstanding subparagraph (A), when choosing between or among investment alternatives, if a fiduciary is unable to distinguish between or among investment alternatives or investment courses of action on the basis of pecuniary factors alone, the fiduciary shall use the capita aut navia standard as the deciding factor in the investment decision, provided that—</text>
+                            <clause commented="no" display-inline="no-display-inline" id="id25a8d47399a04af6876bef82b788eb2c">
+                                <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the fiduciary documents detail—</text>
+                                <subclause id="id5b344c2c4d834bc3b238e413b913a2f0">
+                                    <enum>(I)</enum>
+ <text>why pecuniary factors were not sufficient to select the investment or investment course of action;</text>
+                                </subclause>
+                                <subclause id="idb42d974de89e410dac9bdcaabae8d675">
+                                    <enum>(II)</enum>
+ <text>how the selected investment compares to the alternative investments with regard to the composition of the portfolio with regard to diversification, the liquidity, current return of the portfolio relative to the anticipated cash flow requirements of the plan, and the projected return of the portfolio relative to the funding objectives of the plan; and</text>
+                                </subclause>
+                                <subclause id="iddb782102e4964b25a9aa240faa32daa4">
+                                    <enum>(III)</enum>
+ <text>how the selected investment is consistent with the interests of the participants and beneficiaries in their retirement income or financial benefits under the plan; and</text>
+                                </subclause>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="id17c21b1e60a34144a9bb5f67198dede1">
+                                <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">the fiduciary demonstrates that it did not expend any resources during the investment course of action on nonpecuniary factors that place weight between or among investment alternatives for the purpose of the investment decision.</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph commented="no" id="id6883ba31aacb464e9d267bad2a2723e1">
+                            <enum>(C)</enum>
+                            <header>Investment alternatives for participant-directed individual
+                                account plans</header>
+ <text>In selecting or retaining investment options for a pension plan described in subsection (c)(1)(A), a fiduciary may consider, select, or retain an investment option on the basis that such investment option promotes, seeks, or supports 1 or more nonpecuniary benefits or goals, only if—</text>
+                            <clause id="id89c16a883d254e428f782e73fe388824">
+                                <enum>(i)</enum>
+ <text>the fiduciary satisfies the requirements of paragraph (1) and subparagraphs (A) and (B) of this paragraph in selecting or retaining any such investment option; and</text>
+                            </clause>
+                            <clause id="id45945933487c4b48a47c8ae5b2056551">
+                                <enum>(ii)</enum>
+ <text>such investment option is not added or retained as, or included as a component of, a default investment described in subsection (c)(5) (or any other default investment alternative).</text>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="idd92ac11ceb4c4c8f950160abb0fa7e1b">
+                            <enum>(D)</enum>
+                            <header>Definitions</header>
+ <text>For the purposes of this paragraph:</text> <clause id="id88dc1c7fe69840039ca7c03fbe3cb470"> <enum>(i)</enum> <header>Capita aut navia</header> <text>The term <term>capita aut navia</term> means a standard by which a fiduciary chooses at random between or among investment alternatives where pecuniary factors are equal and does not give added weight to 1 investment or another, provided that the investment alternatives have identical risk and return attributes and choosing among the investment alternatives would have comparatively negligible impact, not considering liquidity constraints or transaction costs.</text>
+                            </clause>
+                            <clause commented="no" display-inline="no-display-inline" id="ide3538460d60e45699c27fab7df487a40">
+                                <enum>(ii)</enum>
+                                <header>Investment course of action</header>
+ <text display-inline="yes-display-inline">The term <term>investment course of action</term> means any series or program of investments or actions related to a fiduciary’s performance of the fiduciary’s investment duties, and includes the selection of an investment fund as a plan investment, or in the case of a plan described in subsection (c)(1)(A), a designated investment alternative under the plan.</text>
+                            </clause>
+                            <clause id="id61ce5c1c9fbc4b8eaa61048f63145f5c">
+                                <enum>(iii)</enum>
+                                <header>Material</header>
+ <text>The term <term>material,</term> when used to qualify a financial risk or financial return—</text>
+                                <subclause id="iddea61e5352b147a1a7d2683350794769">
+                                    <enum>(I)</enum>
+ <text>means a financial risk or financial return in which there is a substantial likelihood that a reasonable investor would attach importance when—</text>
+                                    <item id="id4cd5feb1e9d846169c0a0cc80c074422">
+                                        <enum>(aa)</enum>
+ <text>evaluating the potential financial risks or returns of an existing or prospective investment; or</text>
+                                    </item>
+                                    <item id="id99d33e3347b24dbcb9525e8b96c528ad">
+                                        <enum>(bb)</enum>
+ <text>exercising, or declining to exercise, any rights with respect to securities; and</text>
+                                    </item>
+                                </subclause>
+                                <subclause id="id901c44ab9d2c4a6fbf0b7cf354a650ef">
+                                    <enum>(II)</enum>
+ <text>does not include furthering nonpecuniary, environmental, social, political, ideological, or other goals or objectives.</text>
+                                </subclause>
+                            </clause>
+                            <clause id="id3ec86f48e7744a96b92df0a0704717b9">
+                                <enum>(iv)</enum>
+                                <header>Pecuniary factor</header>
+ <text>The term <term>pecuniary factor</term> means a factor that a fiduciary prudently determines is expected to have a material effect on the risk or return of an investment based on appropriate investment horizons consistent with the plan’s investment objectives and the funding policy established pursuant to section 402(b)(1).</text>
+                            </clause>
+                        </subparagraph>
+                    </paragraph>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+            <subsection id="id9b4f789068e04862b97891c078c517e3">
+                <enum>(b)</enum>
+                <header>Effective date</header>
+ <text>The amendments made by this section shall apply to actions taken by a fiduciary on or after the date that is 1 year after the date of enactment of this Act.</text>
+            </subsection>
+        </section>
+        <section id="HDDB24A44008140AAB0FB95EC5EE58382" section-type="subsequent-section">
+            <enum>3.</enum>
+            <header>Exercise of shareholder rights</header>
+            <subsection id="HC899A055D64A4136815F1194DD1A521C">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text>Section 404 of the Employee Retirement Income Security Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/29/1104">29 U.S.C. 1104</external-xref>) is amended by adding at the end the following new subsection:</text>
+                <quoted-block id="HDAFBEF6C63554212A1C71C99B10B360D" style="OLC">
+                    <subsection id="H0DE747AB700A4C3F805238EAA93BC4A4">
+                        <enum>(f)</enum>
+                        <header>Exercise of shareholder rights</header>
+                        <paragraph id="H15D93558C01747528A0FDED26763D444">
+                            <enum>(1)</enum>
+                            <header>Authority to exercise shareholder rights</header>
+                            <subparagraph id="HDD9318EEDEF9425A8162AC56D62A3619">
+                                <enum>(A)</enum>
+                                <header>In general</header>
+ <text>The fiduciary duty to manage plan assets that are shares of stock includes the management of shareholder rights appurtenant to those shares, including the right to vote proxies. When deciding whether to exercise a shareholder right and in exercising such right, including the voting of proxies, a fiduciary shall act prudently and solely in the interests of participants and beneficiaries and for the exclusive purpose of providing benefits to participants and beneficiaries and defraying the reasonable expenses of administering the plan. The fiduciary duty to manage shareholder rights appurtenant to shares of stock does not require the voting of every proxy or the exercise of every shareholder right.</text>
+                            </subparagraph>
+                            <subparagraph id="H2DD48B9D026D4AE1B745149A6B9CCDE5">
+                                <enum>(B)</enum>
+                                <header>Exception</header>
+ <text>This subsection shall not apply to voting, tender, and similar rights with respect to securities that are passed through pursuant to the terms of an individual account plan to participants and beneficiaries with accounts holding such securities.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="H11C1BA20166547758F440340B9EAF4AB">
+                            <enum>(2)</enum>
+                            <header>Requirements for exercise of shareholder rights</header>
+ <text>A fiduciary, when deciding whether to exercise a shareholder right and when exercising a shareholder right—</text>
+                            <subparagraph id="HB5CDB02D693549E3BD7092DCBF624DD6">
+                                <enum>(A)</enum>
+ <text>shall—</text> <clause id="H5B8D82A671FC493E9A3204846BB8712D"> <enum>(i)</enum> <text>act solely in accordance with the economic interest of the plan and its participants and beneficiaries;</text>
+                                </clause>
+                                <clause id="H4CDBFFB9D2E243C3BF3A900881C0D69D">
+                                    <enum>(ii)</enum>
+ <text>consider any costs involved;</text> </clause> <clause id="H89D4BADFE3F9442490391543E0FBFE0E"> <enum>(iii)</enum> <text>evaluate material facts that form the basis for any particular proxy vote or exercise of shareholder rights; and</text>
+                                </clause>
+                                <clause id="H6C6E04BAF5724EC78E19DDD961D52897">
+                                    <enum>(iv)</enum>
+ <text>maintain a record of any proxy vote, proxy voting activity, or other exercise of a shareholder right, including any attempt to influence management; and</text>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="HE3BF1D763FE14C17B95B540B554EEF92">
+                                <enum>(B)</enum>
+ <text>shall not subordinate the interests of participants and beneficiaries in their retirement income or financial benefits under the plan to any nonpecuniary objective, or promote nonpecuniary benefits or goals unrelated to those financial interests of the plan’s participants and beneficiaries.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="HCF2B60A98C7749A5B6AB254DFAD93BD0">
+                            <enum>(3)</enum>
+                            <header>Monitoring</header>
+ <text>A fiduciary shall exercise prudence and diligence in the selection and monitoring of a person, if any, selected to advise or otherwise assist with the exercise of shareholder rights, including by providing research and analysis, recommendations on exercise of proxy voting or other shareholder rights, administrative services with respect to voting proxies, and recordkeeping and reporting services.</text>
+                        </paragraph>
+                        <paragraph id="HA708477115264900BAE51471D2D0916F">
+                            <enum>(4)</enum>
+                            <header>Investment managers and proxy advisory firms</header>
+ <text display-inline="yes-display-inline">Where the authority to vote proxies or exercise other shareholder rights has been delegated to an investment manager pursuant to section 403(a), or a proxy voting advisory firm or other person who performs advisory services as to the voting of proxies or the exercise of other shareholder rights, a responsible plan fiduciary shall prudently monitor the proxy voting activities of such investment manager or advisory firm and determine whether such activities are in compliance with paragraphs (1) and (2).</text>
+                        </paragraph>
+                        <paragraph id="H710BC7BCE352463E8BDD271303E3C3DA">
+                            <enum>(5)</enum>
+                            <header>Voting policies</header>
+                            <subparagraph id="H400B032219FC426C86B0C6E58D7CD383">
+                                <enum>(A)</enum>
+                                <header>In general</header>
+ <text>In deciding whether to vote a proxy pursuant to this subsection, the plan fiduciary may adopt a proxy voting policy, including a safe harbor proxy voting policy described in subparagraph (B), providing that the authority to vote a proxy shall be exercised pursuant to specific parameters designed to serve the economic interest of the plan.</text>
+                            </subparagraph>
+                            <subparagraph id="H6E1E175809404882B01B2F9D98C1729F">
+                                <enum>(B)</enum>
+                                <header>Safe harbor voting policy</header>
+ <text>With respect to a decision not to vote a proxy, a fiduciary shall satisfy the fiduciary responsibilities under this subsection if such fiduciary adopts and is following a safe harbor proxy voting policy that—</text>
+                                <clause id="H12C0D8FEA7024E6EAA019677D850285F">
+                                    <enum>(i)</enum>
+ <text>limits voting resources to particular types of proposals that the fiduciary has prudently determined are substantially related to the business activities of the issuer or are expected to have a material effect on the value of the plan investment; or</text>
+                                </clause>
+                                <clause id="H08823093A4E54C508293C7BAE912F569">
+                                    <enum>(ii)</enum>
+ <text>establishes that the fiduciary will refrain from voting on proposals or particular types of proposals when the assets of a plan invested in the issuer relative to the total assets of such plan are below 5 percent (or, in the event such assets are under management, when the assets under management invested in the issuer are below 5 percent of the total assets under management).</text>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="H2393CE873C2C46879422176CBC49F72D">
+                                <enum>(C)</enum>
+                                <header>Exception</header>
+ <text>No proxy voting policy adopted pursuant to this paragraph shall preclude a fiduciary from submitting a proxy vote when the fiduciary determines that the matter being voted on is expected to have a material economic effect on the investment performance of a plan’s portfolio (or the investment performance of assets under management in the case of an investment manager); provided, however, that in all cases compliance with a safe harbor voting policy shall be presumed to satisfy fiduciary responsibilities with respect to decisions not to vote.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="H407A58B0033E4DCB9BD695AC6A6FE051">
+                            <enum>(6)</enum>
+                            <header>Review</header>
+ <text>A fiduciary shall periodically review any policy adopted under this subsection.</text>
+                        </paragraph>
+                    </subsection>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+            <subsection id="HFA68645F47994AD3BC4D428D95EC0DCB" commented="no" display-inline="no-display-inline">
+                <enum>(b)</enum>
+                <header>Effective date</header>
+ <text>The amendments made by subsection (a) shall apply to an exercise of shareholder rights occurring on or after January 1, 2026.</text>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

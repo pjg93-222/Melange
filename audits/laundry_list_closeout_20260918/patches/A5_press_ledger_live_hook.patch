@@ -1,0 +1,26 @@
+diff --git a/fec/stance/build_media_blend.py b/fec/stance/build_media_blend.py
+--- a/fec/stance/build_media_blend.py
++++ b/fec/stance/build_media_blend.py
+@@ -301,7 +301,13 @@
+                               load_tone_rows as _load_press_tone_rows,
+                               source_paths as _press_source_paths)
+     _tone_sources=_press_source_paths()
+-    _tone_rows=_load_press_tone_rows()
++    # A5 (2026-09-19, packet audits/laundry_list_closeout_20260918 FINDINGS.md A5):
++    # load_tone_rows now collapses one release ingested under two URL forms
++    # (PRESS_URL_CANON, default 2). The collapsed rows are NOT lost from the accounting:
++    # the ledger names each one, so rows_read still closes to rows_returned +
++    # official_mention + no_url + exact_url_turn + duplicate_url_form.
++    _tone_ingest={}
++    _tone_rows=_load_press_tone_rows(ledger=_tone_ingest)
+     _dyn=collections.defaultdict(lambda:collections.defaultdict(float))
+     _n=0; _nm=set(); _pvs=[]
+     _domain_audit=[]
+@@ -411,6 +417,7 @@
+         M+r'\data\stance\press_refresh_feed_receipt.json']
+     _da({'built_from_csv_mtime':max((os.path.getmtime(_p) for _p in _tone_sources),default=None),
+          'tone_sources':_tone_sources,'tone_rows':len(_tone_rows),
++         'tone_ingest_dedup':_tone_ingest,
+          'inputs_sha256':{os.path.relpath(_p,M).replace('\\','/'):_sha256_file(_p)
+                           for _p in _meta_inputs if os.path.exists(_p)},
+          'articles_used':_n,'members_nonzero':len(_nm),

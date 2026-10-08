@@ -1,0 +1,147 @@
+==============================================================================
+E6  FRESHNESS / MTIMES
+==============================================================================
+vote_category_lean.json        True  mtime 2026-09-17 02:12:34
+archive_leg.json               mtime 2026-09-17 00:45:22
+congress_bills_archive_*.xlsx  count 2
+    congress_bills_archive_20260624_115822.xlsx     2026-07-01 17:28:33
+    congress_bills_archive_20260825_115305.xlsx     2026-08-25 11:54:47
+audit picks sorted()[-1] (NAME order) : congress_bills_archive_20260825_115305.xlsx
+newest by MTIME                      : congress_bills_archive_20260825_115305.xlsx
+vcl_mtime - archive_mtime = +22.60 days   (>30d behind => STALE)
+audit_full _stale  = False   -> check "not _stale" would PASS
+same test vs newest-by-mtime: delta +22.60 d, stale=False
+
+-- culling check inputs (audit_full.py:1906-1921) --
+legislation_culling_status.json  exists True  mtime 2026-09-18 01:52:07
+   status                           'PASS_PRODUCTION_CULLING_INTEGRATED'
+   phase                            'production'
+   promotion_performed              True
+   production_workbook_written      True
+   rank_written                     True
+   promotion_receipt.status         'PASS_PRODUCTION_INPUTS_PROMOTED'
+   => culling promotion check would PASS
+   counts: cand=60 edges=74 held=1184 excl_fp=2908
+   => culling ledger check would PASS
+
+==============================================================================
+E4  ELECTORAL FRONTIER SEED ORDER
+==============================================================================
+
+### budget_frontier_electoral.json   mtime 2026-09-18 02:16:26
+    sha256 2B0446635E47E9F7
+    mode='electoral' leverage=True topic=None  topics=18
+    top-level keys: ['defend_overview', 'leverage', 'mode', 'topic', 'topics']
+    TOPIC                          seed#1                 seed#2                 seed#3                 knee/knee_found
+    Examination & Supervision      Brian Fitzpatrick[coalition] Janelle Bynum[coalition] Marie Gluesenkamp Perez[coalition] 3000000/False
+    Credit Union Capital Requireme Josh Gottheimer[coalition] Janelle Bynum[coalition] Ted Budd[coalition]    3000000/False
+    NCUA Budget & Share Insurance  Janelle Bynum[coalition] Lisa Murkowski[defend] Rick Allen[coalition]  3000000/False
+    Interchange                    Andy Barr[coalition]   Vicente Gonzalez[coalition] Kevin Cramer[coalition] 1000000/True
+    Payments                       Kevin Cramer[coalition] Vicente Gonzalez[coalition] Steve Daines[coalition] 800000/True
+    Technology & Emerging Issues   Jack Reed[coalition]   Dan Sullivan[defend]   Steven Horsford[coalition] 2600000/True
+    Fraud Prevention               Ted Budd[coalition]    Nicholas Begich[coalition] Nick LaLota[coalition] 3000000/False
+    Data Privacy & Cybersecurity   Vicente Gonzalez[coalition] Jahana Hayes[coalition] Ted Budd[coalition]    2900000/True
+    Charter Modernization & Govern Nicholas Begich[coalition] Donald Davis[coalition] Ruben Gallego[coalition] 3000000/False
+    Defense Credit Union Issues    Bill Hagerty[coalition] Kevin Cramer[coalition] Dan Sullivan[coalition] 500000/True
+    Field of Membership            Andy Barr[coalition]   French Hill[coalition] Dan Sullivan[coalition] 1150000/True
+    CDFI Fund                      Bill Hagerty[coalition] William Timmons[coalition] Nancy Mace[coalition]  3000000/False
+    CFPB Restrain                  Maxine Waters[coalition] Vicente Gonzalez[defend] Mazie Hirono[coalition] 2150000/True
+    Telephone Consumer Protection  Vicente Gonzalez[coalition] Daniel Meuser[coalition] Andy Barr[coalition]   1300000/True
+    Credit Card & Consumer-Fee Man Vicente Gonzalez[coalition] Catherine Cortez Masto[coalition] Dan Sullivan[coalition] 1650000/True
+    Member Business Lending        Jahana Hayes[coalition] Janelle Bynum[coalition] Darren Soto[coalition] 3000000/False
+    Mortgage Lending & Housing     Nicholas Begich[coalition] Ted Budd[coalition]    Juan Ciscomani[coalition] 3000000/False
+    Credit Union Tax Status        Kevin Cramer[coalition] Catherine Cortez Masto[coalition] Bill Hagerty[coalition] 550000/True
+    FIRST-SEED frequency (of 18 topics):
+        Vicente Gonzalez           3
+        Andy Barr                  2
+        Kevin Cramer               2
+        Nicholas Begich            2
+        Bill Hagerty               2
+        Brian Fitzpatrick          1
+        Josh Gottheimer            1
+        Janelle Bynum              1
+        Jack Reed                  1
+        Ted Budd                   1
+        Maxine Waters              1
+        Jahana Hayes               1
+    TOP-3-SEED frequency:
+        Vicente Gonzalez           6
+        Janelle Bynum              4
+        Ted Budd                   4
+        Kevin Cramer               4
+        Dan Sullivan               4
+        Andy Barr                  3
+        Nicholas Begich            3
+        Bill Hagerty               3
+        Jahana Hayes               2
+        Catherine Cortez Masto     2
+        Brian Fitzpatrick          1
+        Marie Gluesenkamp Perez    1
+    per-topic keys: ['base', 'contest_seeds', 'core_seeds', 'defend_seeds', 'knee', 'knee_found', 'path']
+    defend_overview[0:3]: [{"m": "Zachary Nunn", "v": 0.363, "party": "R", "elavg": 50.7}, {"m": "Thom Tillis", "v": 0.348, "party": "R", "elavg": 49.6}, {"m": "Young Kim", "v": 0.332, "party": "R", "elavg": 51.9}]
+
+### budget_frontier.json   mtime 2026-09-18 02:13:13
+    sha256 B3B73B012E4F5E87
+    mode='coalition' leverage=True topic=None  topics=18
+    top-level keys: ['defend_overview', 'leverage', 'mode', 'topic', 'topics']
+    TOPIC                          seed#1                 seed#2                 seed#3                 knee/knee_found
+    Examination & Supervision      Janelle Bynum[coalition] Marie Gluesenkamp Perez[coalition] Vicente Gonzalez[coalition] 2050000/True
+    Credit Union Capital Requireme Josh Gottheimer[coalition] Janelle Bynum[coalition] Nicholas Begich[coalition] 1800000/True
+    NCUA Budget & Share Insurance  French Hill[coalition] Janelle Bynum[coalition] Rick Allen[coalition]  2050000/True
+    Interchange                    Andy Barr[coalition]   French Hill[coalition] Vicente Gonzalez[coalition] 650000/True
+    Payments                       Vicente Gonzalez[coalition] Kevin Cramer[coalition] Steve Daines[coalition] 800000/True
+    Technology & Emerging Issues   Jack Reed[coalition]   Steven Horsford[coalition] Sam Liccardo[coalition] 1950000/True
+    Fraud Prevention               Nicholas Begich[coalition] Nick LaLota[coalition] Derek Tran[coalition]  2250000/False
+    Data Privacy & Cybersecurity   Jahana Hayes[coalition] Joe Courtney[coalition] Joseph Morelle[coalition] 2050000/True
+    Charter Modernization & Govern Donald Davis[coalition] Ruben Gallego[coalition] Nicholas Begich[coalition] 2250000/False
+    Defense Credit Union Issues    Kevin Cramer[coalition] Bill Hagerty[coalition] Jack Reed[coalition]   200000/True
+    Field of Membership            Andy Barr[coalition]   Dan Sullivan[coalition] Roger Williams[coalition] 950000/True
+    CDFI Fund                      Nancy Mace[coalition]  Andrew Ogles[coalition] Tom Emmer[coalition]   2000000/True
+    CFPB Restrain                  Maxine Waters[coalition] Steven Horsford[coalition] Catherine Cortez Masto[coalition] 1550000/True
+    Telephone Consumer Protection  Daniel Meuser[coalition] Kevin Cramer[coalition] Vicente Gonzalez[coalition] 700000/True
+    Credit Card & Consumer-Fee Man Vicente Gonzalez[coalition] Tom Emmer[coalition]   Catherine Cortez Masto[coalition] 1000000/True
+    Member Business Lending        Jahana Hayes[coalition] Janelle Bynum[coalition] Darren Soto[coalition] 2150000/True
+    Mortgage Lending & Housing     Nicholas Begich[coalition] James Himes[coalition] Ryan Zinke[coalition]  2000000/True
+    Credit Union Tax Status        Bill Hagerty[coalition] Dan Sullivan[coalition] Steve Daines[coalition] 500000/True
+    FIRST-SEED frequency (of 18 topics):
+        Andy Barr                  2
+        Vicente Gonzalez           2
+        Nicholas Begich            2
+        Jahana Hayes               2
+        Janelle Bynum              1
+        Josh Gottheimer            1
+        French Hill                1
+        Jack Reed                  1
+        Donald Davis               1
+        Kevin Cramer               1
+        Nancy Mace                 1
+        Maxine Waters              1
+        Daniel Meuser              1
+        Bill Hagerty               1
+    TOP-3-SEED frequency:
+        Vicente Gonzalez           5
+        Janelle Bynum              4
+        Nicholas Begich            4
+        Kevin Cramer               3
+        French Hill                2
+        Andy Barr                  2
+        Steve Daines               2
+        Jack Reed                  2
+        Steven Horsford            2
+        Jahana Hayes               2
+        Bill Hagerty               2
+        Dan Sullivan               2
+    per-topic keys: ['base', 'contest_seeds', 'core_seeds', 'defend_seeds', 'knee', 'knee_found', 'path']
+    defend_overview[0:3]: [{"m": "Zachary Nunn", "v": 0.363, "party": "R", "elavg": 50.7}, {"m": "Thom Tillis", "v": 0.348, "party": "R", "elavg": 49.6}, {"m": "Young Kim", "v": 0.332, "party": "R", "elavg": 51.9}]
+
+==============================================================================
+E4  ELECTORAL POOL INPUTS (topic-independence)
+==============================================================================
+electoral_plays.json  mtime 2026-09-18 02:09:50
+   members=533  play counts={'none': 415, 'defend': 114, 'contest': 4}
+   sample record keys: ['comp', 'overall', 'party', 'play', 'value']
+   any topic/category key present? False
+electoral.json        mtime 2026-09-17 00:28:55
+   members=533  distinct leverage values=438
+   leverage values (first 20): [1.002, 1.003, 1.005, 1.006, 1.008, 1.009, 1.011, 1.012, 1.014, 1.015, 1.017, 1.018, 1.02, 1.023, 1.025, 1.026, 1.028, 1.029, 1.031, 1.032]
+   sample record keys: ['elavg', 'leverage', 'security']

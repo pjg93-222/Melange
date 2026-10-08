@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Enrolled-Bill" bill-type="olc" dms-id="A1" public-print="no" public-private="public" stage-count="1" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title> S1693 ENR: National Flood Insurance Program Extension Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form display="yes">
+<congress>One Hundred Sixteenth Congress of the United States of America</congress><session display="yes">1st Session</session><enrolled-dateline display="yes">Begun and held at the City of Washington on Thursday, the third day of January, two thousand and
+ nineteen</enrolled-dateline><legis-num display="yes">S. 1693</legis-num><current-chamber display="no">IN THE SENATE OF THE UNITED STATES</current-chamber><legis-type display="yes">AN ACT</legis-type><official-title display="yes">To reauthorize the National Flood Insurance Program.</official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC"><section commented="no" display-inline="no-display-inline" id="S1" section-type="section-one"><enum>1.</enum><header display-inline="yes-display-inline">Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>National Flood Insurance Program Extension Act of 2019</short-title></quote>.</text></section><section commented="no" display-inline="no-display-inline" id="id4C7E7FBFDA2443C1AF7376417CA48184" section-type="subsequent-section"><enum>2.</enum><header display-inline="yes-display-inline">Reauthorization of National Flood Insurance Program</header><subsection commented="no" display-inline="no-display-inline" id="idCDABBBDABF674F109B471FF2182AE79B"><enum>(a)</enum><header display-inline="yes-display-inline">Financing</header><text display-inline="yes-display-inline">Section 1309(a) of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4016">42 U.S.C. 4016(a)</external-xref>) is amended by striking <quote>May 31, 2019</quote> and inserting <quote>June 14, 2019</quote>.</text></subsection><subsection commented="no" display-inline="no-display-inline" id="idD35A7774ACDC4A89A31DFEC723716732"><enum>(b)</enum><header display-inline="yes-display-inline">Program expiration</header><text display-inline="yes-display-inline">Section 1319 of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4026">42 U.S.C. 4026</external-xref>) is amended by striking <quote>May 31, 2019</quote> and inserting <quote>June 14, 2019</quote>.</text></subsection><subsection commented="no" display-inline="no-display-inline" id="id0C51F04F6AAB409D9B6F5BA13D14E4E5"><enum>(c)</enum><header display-inline="yes-display-inline">Retroactive effective date</header><text display-inline="yes-display-inline">If this Act is enacted after May 31, 2019, the amendments made by subsections (a) and (b) shall take effect as if enacted on May 31, 2019.</text></subsection></section></legis-body><attestation><attestation-group><attestor display="no"></attestor><role>Speaker of the House of Representatives</role></attestation-group><attestation-group><attestor display="no"></attestor><role>Vice President of the United States and President of the Senate</role></attestation-group></attestation></bill>
+
+

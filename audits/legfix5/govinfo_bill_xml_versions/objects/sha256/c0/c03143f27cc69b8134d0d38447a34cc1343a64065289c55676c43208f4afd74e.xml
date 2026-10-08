@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H96D7DDAB851F4548A2F970EFF001921A" public-private="public" key="H" bill-type="olc"><form><distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 9359</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260618">June 18, 2026</action-date><action-desc><sponsor name-id="M001188">Ms. Meng</sponsor> (for herself and <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Food and Nutrition Act of 2008 to provide for the reissuance to households of supplemental nutrition assistance program benefits to replace benefits stolen by identity theft or typical skimming practices, and for other purposes.</official-title></form><legis-body id="H6E327176C70449F8AB3A32377B5070A9" style="OLC"> 
+<section id="H825E1E922E854ED6AEE5DF1FEB9B2A35" section-type="section-one"><enum>1.</enum><header>Short title</header>
+            <text display-inline="no-display-inline">This Act may be cited as the
+                        <quote><short-title>Ending Stolen SNAP Benefits Act of
+                    2026</short-title></quote>.</text></section> 
+<section id="H63A6622A0B1749EEAB38BE709875CD25" section-type="subsequent-section"><enum>2.</enum><header>Amendments</header><text display-inline="no-display-inline">Section 7 of the Food and Nutrition Act of 2008 (7 U.S.C. 2016) is amended—</text> 
+<paragraph id="H152770EB664E4C34B7F8F6383486B2B7"><enum>(1)</enum><text>in subsection (e) by inserting <quote>or from the reissuance of benefits stolen by identity theft or typical skimming practices</quote> after <quote>mail</quote>; and</text></paragraph> 
+<paragraph id="H38833A83FF8B4112A0E9756341E99AA2"><enum>(2)</enum><text>in subsection (h)(7)—</text> 
+<subparagraph id="HA9AFA5F82B364375AD611AFBDB3EDB53"><enum>(A)</enum><text>by striking <quote>Regulations</quote> and inserting the following:</text> 
+<quoted-block style="OLC" id="H6BEBD98D4D0A4254A3BD2B9763032E6D" display-inline="no-display-inline"> 
+<subparagraph id="HFB7D361AF96648C98B56D7829E5FA38F"><enum>(A)</enum><header>Reissuance of benefits</header><text display-inline="yes-display-inline">Regulations</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block></subparagraph> 
+<subparagraph id="H1DF0A991D9394FD7B6D4E05C827B903A"><enum>(B)</enum><text>by adding at end the following:</text> 
+<quoted-block style="OLC" id="H2D0073A0778943739F419597EFCF1701" display-inline="no-display-inline"> 
+<subparagraph id="HBB3CD9839A9A480BA4C1AAC05D661A18"><enum>(B)</enum><header>Reissuance of stolen benefits</header> 
+<clause id="HD2EAA1D0450F4E38AA55DA2A2553ABF5"><enum>(i) </enum><header>Issuance of regulations</header><text display-inline="yes-display-inline">The Secretary shall issue regulations, consistent with the procedures determined by the Secretary under subparagraphs (A) and (B) of section 501(b)(1) of division HH of the Consolidated Appropriations Act, 2023 (Public Law 117–328; 7 U.S.C. 2016a(b)(1)), without regard to the limitations in subparagraphs (B) and (C) of section 501(b)(2) of such Act—</text> 
+<subclause id="HDA31AD845B7945B8AA38ED9C143D36A6"><enum>(I)</enum><text display-inline="yes-display-inline">to establish criteria and best practices for State agencies to identify supplemental nutrition assistance program benefits stolen by identity theft or typical skimming practices in a way that minimizes the burden of victim households to establish the theft; </text></subclause> 
+<subclause id="H8A0E4860038E48B09C180B59C252BE4C"><enum>(II)</enum><text>to provide for the reissuance to households of benefits stolen by identity theft, or typical skimming practices, that meet such criteria; and</text></subclause> 
+<subclause id="H20096E97C0F74667A2ED4ED24D897451"><enum>(III)</enum><text display-inline="yes-display-inline">to permit State agencies to reissue stolen benefits to the same household, provided the Secretary has approved a State agency’s transition plan in accordance with section 16(l)(2).</text></subclause></clause> 
+<clause id="H4EB6A121F387480EA005B99544EC642B"><enum>(ii)</enum><header>Status report</header><text display-inline="yes-display-inline">Not later than 240 days after the Secretary issues regulations under clause (i), the Secretary shall submit to the Congress a report on the status of benefits reissued under such regulations that includes—</text> 
+<subclause id="H981777AB9B3A4E898A4425C119F3E005"><enum>(I)</enum><text display-inline="yes-display-inline">a detailed description of the prevalence of stolen benefits for which benefits are reissued under such regulations;</text></subclause> 
+<subclause id="H6F462EE9059E45508A0DDD010E34C319"><enum>(II) </enum><text display-inline="yes-display-inline">an examination of current barriers, feasibility, and impact on participant access and ease of use in developing an electronic benefit transfer card that contains technologies such as an embedded microchip in common use in the financial services industry along with the traditional magnetic stripe; and</text></subclause> 
+<subclause id="H5D458E7D575F44D2971EE77692A975D7"><enum>(III)</enum><text>such other information as by the Secretary considers to be appropriate.</text></subclause></clause> 
+<clause id="HFAA342136D77455ABC2087350AB8875C"><enum>(iii)</enum><header>Stolen benefit reissuance report</header><text display-inline="yes-display-inline">Not later than 120 days after end of each fiscal year that begins after the Secretary issues regulations under clause (i), the Secretary shall submit to the Congress, and make available to the public, a report for such fiscal year with respect to each State that includes the aggregate value of supplemental nutrition assistance program benefits reissued under such regulations and the number of households to which such benefits were reissued.</text></clause> 
+<clause id="H26523FCEB40646578B3472EC1F5AF91E"><enum>(iv)</enum><header>Evaluation</header><text>To maximize the accessibility and security of electronic benefit transfer cards, the Secretary shall periodically review and modify such regulations to take into account evolving technology and the threat landscape to better protect against benefit theft.</text></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subparagraph></paragraph></section> 
+<section id="H075690ED0CBD4AD4B304F159156337C3"><enum>3.</enum><header>Cost sharing for transitioning to chip-enabled EBT cards</header><text display-inline="no-display-inline">Section 16 of the Food and Nutrition Act of 2008 (7 U.S.C. 2025) is amended—</text> 
+<paragraph id="H592BEAFBA8C74991A31B2C9A802BC39F"><enum>(1)</enum><text>in subsection (a), by striking <quote>subsection (k),</quote> and inserting <quote>subsection (k), except as provided in subsection (l),</quote>; and</text></paragraph> 
+<paragraph id="H9F539E334F274E0E875D701E216930DC"><enum>(2)</enum><text>by adding at the end the following:</text> 
+<quoted-block style="OLC" id="H92DB99233DD641BBB962A40A4FC82F20" display-inline="no-display-inline"> 
+<subsection id="H7BB420E67DA54AB385D3797716A3CFC3">
+            <enum>(l)</enum>
+            <header>Administrative cost-Sharing for transitioning to chip-Enabled EBT cards</header>
+            <paragraph id="H3CC2593653194E398F144BA031B9B515">
+              <enum>(1)</enum>
+              <header>In general</header>
+              <text>On approval of a plan submitted by a State agency under paragraph (2), the
+                Secretary shall pay to such State agency an amount equal to 90 percent of all
+                administrative costs incurred by the State agency in carrying out a transition from
+                magnetic-stripe EBT cards to EBT cards with chip technology that complies with the
+                American National Standards Institute X9.58–2024 EBT standard, or its succeeding
+                standard, including costs associated with—</text>
+              <subparagraph id="H1FC7BB44185B43C89CAA82C99485002C">
+                <enum>(A)</enum>
+                <text>card issuance strategies;</text>
+              </subparagraph>
+              <subparagraph id="H6CA4D9E91C1047EEB7B7FDFA244D7936">
+                <enum>(B)</enum>
+                <text>one-time up-front costs paid by the State to card vendors;</text>
+              </subparagraph>
+              <subparagraph id="HB7E24C66D9C042A0BD0FB5208CA67ED2">
+                <enum>(C)</enum>
+                <text>business and functional design requirements;</text>
+              </subparagraph>
+              <subparagraph id="H3B9BE2F5DCD44A00867763DF740CB86A">
+                <enum>(D)</enum>
+                <text>implementation planning;</text>
+              </subparagraph>
+              <subparagraph id="HE2BD2F2FB375480193945F5CD64DF21B">
+                <enum>(E)</enum>
+                <text>system testing; </text>
+              </subparagraph>
+              <subparagraph id="H28CB612746504548944E9EC94CE5735E">
+                <enum>(F)</enum>
+                <text>education and outreach in language accessible by all households, including
+                  informational activities under subsection (a)(4); and</text>
+              </subparagraph>
+              <subparagraph id="H66D608BAF2544A2CAC590A83D96EB8D3">
+                <enum>(G)</enum>
+                <text>any other administrative fees reasonably necessary for the successful
+                  implementation of chip cards.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="HDA8B587E62474CFDABE970D7E4E68E5C">
+              <enum>(2)</enum>
+              <header>Approval of transition plans</header>
+              <subparagraph id="H0AE22690B7914D98BAFAF9C472C7C236">
+                <enum>(A)</enum>
+                <header>Submission</header>
+                <text display-inline="yes-display-inline">A State agency shall submit to the
+                  Secretary for approval a plan that carries out paragraph (1), including system
+                  testing, retailer and household education, and outreach efforts. State plans must
+                  include steps to ensure that recipients will retain access to their benefits
+                  without interruption during the transition.</text>
+              </subparagraph>
+              <subparagraph id="HDED394C227954BFEBCCD76E086590016">
+                <enum>(B)</enum>
+                <header>Secretarial action</header>
+                <text>Not later than 90 days after the date on which the Secretary receives a
+                  complete plan under subparagraph (A), the Secretary shall—</text>
+                <clause id="HAB1AB7AEEBE94F1AB9B03F615903CB4E">
+                  <enum>(i)</enum>
+                  <text>approve the plan;</text>
+                </clause>
+                <clause id="HAB9D495D69044471902D851BA63FA0CD">
+                  <enum>(ii)</enum>
+                  <text>approve the plan with conditions; or</text>
+                </clause>
+                <clause id="H94E7ACA3A0054206B8ADF8F41D175188">
+                  <enum>(iii)</enum>
+                  <text>disapprove the plan and provide the State agency with a written explanation
+                    of the reasons for such disapproval. </text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H9308AC64010B4F0E8F81D364A1F864BE">
+                <enum>(C)</enum>
+                <header>Deemed approval</header>
+                <text>If the Secretary fails to take action within the 90-day period described in
+                  subparagraph (B), the plan shall be deemed approved.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H839DF005128E4E929B045575A829341D">
+              <enum>(3)</enum>
+              <header>Sunset</header>
+              <text>This subsection shall sunset on September 30, 2031.</text>
+            </paragraph>
+          </subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> 
+</legis-body></bill>

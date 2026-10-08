@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-KAT21A45-MJH-S4-0D6"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S2938 IS: To designate the United States Courthouse and Federal Building located at 111 North Adams Street in Tallahassee, Florida, as the “Joseph Woodrow Hatchett United States Courthouse and Federal Building”, and for other purposes.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-10-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>1st Session</session><legis-num>S. 2938</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20211005">October 5, 2021</action-date><action-desc><sponsor name-id="S350">Mr. Rubio</sponsor> (for himself and <cosponsor name-id="S404">Mr. Scott of Florida</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSEV00">Committee on Environment and Public Works</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To designate the United States Courthouse and Federal Building located at 111 North Adams Street in Tallahassee, Florida, as the <quote>Joseph Woodrow Hatchett United States Courthouse and Federal Building</quote>, and for other purposes.</official-title></form><legis-body><section id="idF24B11F9E2AB49149F3D3AEABFD418A8" section-type="section-one"><enum>1.</enum><header>Joseph Woodrow Hatchett United States Courthouse and Federal Building</header><subsection id="idEE0307A60EF4443EBC2A91E94B2118D5"><enum>(a)</enum><header>Designation</header><text display-inline="yes-display-inline">The United States Courthouse and Federal Building located at 111 North Adams Street in Tallahassee, Florida, shall be known and designated as the <quote>Joseph Woodrow Hatchett United States Courthouse and Federal Building</quote>.</text></subsection><subsection id="id01A37E49E6534A62B6A2A3250E4B4E46" commented="no" display-inline="no-display-inline"><enum>(b)</enum><header>References</header><text>Any reference in a law, map, regulation, document, paper, or other record of the United States to the United States Courthouse and Federal Building referred to in subsection (a) shall be deemed to be a reference to the <quote>Joseph Woodrow Hatchett United States Courthouse and Federal Building</quote>.</text></subsection></section></legis-body></bill> 
+

@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ALB19878-1GB-NS-0TZ">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2530 IS: School Safety Clearinghouse Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-09-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2530</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190923">September 23, 2019</action-date>
+			<action-desc><sponsor name-id="S379">Mr. Perdue</sponsor> (for himself, <cosponsor name-id="S393">Mr. Jones</cosponsor>, <cosponsor name-id="S384">Mr. Tillis</cosponsor>, and <cosponsor name-id="S372">Mrs. Capito</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To require the Secretary of Homeland Security to establish a School Safety Clearinghouse, and for
+			 other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>School Safety Clearinghouse Act</short-title></quote>.</text>
+ </section><section id="idbe0f0ef938824fcdac19d3d2d160a79c"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text> <paragraph id="ida48280a2febc432ca0bf934a8395d88b"><enum>(1)</enum><text>Incidents of gun violence in schools have severe long-term effects on students and teachers, such as—</text>
+ <subparagraph id="id27167EFB01BE4F83920A72A7F0F46F33"><enum>(A)</enum><text>moderate to severe post-traumatic stress disorder;</text></subparagraph><subparagraph id="id88BE066D25C646AA97825E4E701D9C05"><enum>(B)</enum><text>depression;</text> </subparagraph><subparagraph id="id376FAB64BBFD4376A1B52C7A46632FB7"><enum>(C)</enum><text>violent behavior; and</text>
+ </subparagraph><subparagraph id="id67BB462ED48E40E894C6AC92FD058CCC"><enum>(D)</enum><text>lower proficiencies in math and reading.</text>
+ </subparagraph></paragraph><paragraph id="id8c3858b02dbf411ab849fea2d6d9a018"><enum>(2)</enum><text>According to the American Institute of Architects, most of the 132,853 public and private elementary and secondary schools in the United States are not designed to deter these violent acts.</text>
+ </paragraph><paragraph id="id51349398dcb5456ea90ef0c91bc02fd6"><enum>(3)</enum><text>Following the tragic 2018 school shooting at Marjory Stoneman Douglas High School in Parkland, Florida, the Marjory Stoneman Douglas High School Public Safety Commission reported that the greatest vulnerabilities of the school existed because of voids in basic safety policies and strategies.</text>
+ </paragraph><paragraph id="idb952d24cb6184d6496acdeeefe120545"><enum>(4)</enum><text>The final report of the Federal Commission on School Safety found that one of the biggest concerns raised by schools and school districts was the inability to sift through the multitude of safety options, equipment, technologies, and building designs that are available to improve the safety and design of their schools.</text>
+ </paragraph><paragraph id="id91d9b8e627a34d10a3970ad9c142c695"><enum>(5)</enum><text>While there is no general approach to school safety, architects and engineers as well as other experts in the school security community have suggested the establishment of a Federal clearinghouse that could assess, identify, and share best practices on school building design and overall safety.</text>
+			</paragraph></section><section id="idc1e25c8c87b74976a7759ca69595072b"><enum>3.</enum><header>School safety clearinghouse</header>
+ <subsection id="id5859453c89e44f21be42cf718b341ab7"><enum>(a)</enum><header>In general</header><text>Subtitle A of title XXII of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/651">6 U.S.C. 651</external-xref> et seq.), is amended by inserting after section 2214 the following:</text>
+				<quoted-block display-inline="no-display-inline" id="ide809af5ca7d543e5a4bb5035de478af9" style="OLC">
+					<section id="idd9753507f9db4be39476b45f02108726"><enum>2215.</enum><header>School Safety Clearinghouse</header>
+						<subsection id="id32d05233db2d4b8f98794e11500659af"><enum>(a)</enum><header>Establishment</header>
+ <paragraph id="id56127936A15F4390B3D7CC3A45CE3D64"><enum>(1)</enum><header>In general</header><text>The Secretary shall establish a School Safety Clearinghouse (in this section referred to as the <quote>Clearinghouse</quote>) within the Department.</text> </paragraph><paragraph id="id0CA166E0DB3C48E8AE073CF1AA34592E"><enum>(2)</enum><header>Requirements</header><text>The Clearinghouse shall—</text>
+ <subparagraph id="id044359E077D94DB4BD1AB86362B4D915"><enum>(A)</enum><text>be managed by the Secretary, in coordination with—</text> <clause id="id6F87F83C2CD844A183B8A12AABF13A82"><enum>(i)</enum><text>the Secretary of Education;</text>
+ </clause><clause id="id366FAC8D237845F1B08D88AA9DC335F9"><enum>(ii)</enum><text>the Attorney General; and</text> </clause><clause id="idC41F4AEC8B9C4F33B3205D685DE3B1D4"><enum>(iii)</enum><text>the Secretary of Health and Human Services;</text>
+ </clause></subparagraph><subparagraph id="idBA025B1E103A4FD98A079A1E1A1F9B36"><enum>(B)</enum><text>engage appropriate Federal, State, local, and nongovernmental organizations to identify, cross-promote, and disseminate information; and</text>
+ </subparagraph><subparagraph id="idC334E1B7766F4E80A3CD85E3A5BCD8AA"><enum>(C)</enum><text>be assigned such personnel and resources as the Secretary considers appropriate to carry out this section, including not fewer than 5 full-time equivalent employees.</text>
+								</subparagraph></paragraph><paragraph id="idc007d98905ff47b58463caae004f2650"><enum>(3)</enum><header>Evidence-based tiers</header>
+ <subparagraph id="id323F2EB992B44CF291DF93877216CCBC"><enum>(A)</enum><header>In general</header><text>The Secretary, in consultation with the Secretary of Education, the Attorney General, and the Secretary of Health and Human Services, shall develop tiers for determining evidence-based practices that demonstrate a significant effect on improving the health, safety, and welfare of persons in school settings.</text>
+ </subparagraph><subparagraph id="idB9C2BC898267468EA3199F43DB705C46"><enum>(B)</enum><header>Requirements</header><text>The tiers required to be developed under subparagraph (A) shall—</text> <clause id="id2da9c26872cb45ecae1d20ab26cdf6e6"><enum>(i)</enum><text>prioritize—</text>
+ <subclause id="id76b1963aa4574b939ff5eaf4e5627567"><enum>(I)</enum><text>strong evidence from not less than 1 well-designed and well-implemented experimental study; and</text> </subclause><subclause id="ida5643c11987e45a4812ba9e4d79a3d59"><enum>(II)</enum><text>moderate evidence from not less than 1 well-designed and well-implemented quasi-experimental study; and</text>
+ </subclause></clause><clause id="idb06e38a7e8ae41468b85b72c2810e785"><enum>(ii)</enum><text>consider promising evidence that demonstrates a rationale based on high-quality research findings or positive evaluations that such activity, strategy, or intervention is likely to improve school climate and promote school safety.</text>
+ </clause></subparagraph></paragraph></subsection><subsection id="ide5777fed93d64d3eb21eeed14fe8ce5f"><enum>(b)</enum><header>Functions</header><text>The Clearinghouse shall—</text> <paragraph id="id6FB85246AFC042D3BAB1B8ECE6439990"><enum>(1)</enum><text>serve as a central resource to identify, catalog, and describe best practices, case studies, and relevant Federal grants related to safe school design and evidence-based practices, for use by local education agencies, local law enforcement agencies, schools, architects, engineers, and others, and any other school safety topics related to school design as determined appropriate by the Secretary;</text>
+ </paragraph><paragraph id="idA394FD51BB7646CD9868ECE36B92D9ED"><enum>(2)</enum><text>review and, as appropriate, incorporate finalized school safety recommendations from other related agencies, State and local partners, and appropriate nongovernmental organizations, such as national associations of architects and engineers;</text>
+ </paragraph><paragraph id="id1D9C0D4BCAC247A0A58BF3518E131755"><enum>(3)</enum><text>determine a means to solicit input from institutions of higher education and design schools, national associations of architects, engineers, school safety experts, building supervisors, school facilities managers, community-based organizations, and other school safety stakeholders for the purpose of regularly updating the resources and evidence-based recommendations of the Clearinghouse;</text>
+ </paragraph><paragraph id="id1AE41116C07C46BCA5557929963B9543"><enum>(4)</enum><text>make training and technical assistance available to local education agencies seeking Federal grants to improve school safety, including providing a website with up-to-date information on resources, and may partner with nongovernmental organizations, such as national associations of architects and engineers and security experts, to provide the training and technical assistance; and</text>
+ </paragraph><paragraph id="id37F8403D0D3C4C8289B5076D3400FF5B"><enum>(5)</enum><text>perform such other functions necessary to carry out the functions described in paragraphs (1) through (4) as the Secretary determines appropriate.</text>
+ </paragraph></subsection><subsection id="id3f34d633c78046759768f6d3f9a1dcb8"><enum>(c)</enum><header>Exemption</header><text><external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/44/35">Chapter 35</external-xref> of title 44, United States Code (commonly known as the <quote>Paperwork Reduction Act</quote>), shall not apply to any rulemaking or information collection required under this section.</text> </subsection><subsection id="id492D3360E6F54FF3A12DA79CFB6F1BA3"><enum>(d)</enum><header>Prohibition</header> <paragraph id="id3F1689EA473B467B8646C3E1B5071411"><enum>(1)</enum><header>In general</header><text>In carrying out this section, an officer or employee of the Department may not approve, sponsor, endorse, or take any other action that may be deemed or construed to be an approval, sponsorship, or endorsement of any product of a specific organization (including a nonprofit organization), such as a building material or technology, that provides a financial gain or other benefit to the organization.</text>
+ </paragraph><paragraph id="id3AA00A0FA1ED4C9DBA218A2101A4CD9F"><enum>(2)</enum><header>Rule of construction</header><text>Paragraph (1) shall not be construed to prevent an officer or employee of the Department from implementing—</text>
+ <subparagraph id="id5640D20962A5498898DA69D5FD11E099"><enum>(A)</enum><text>recommendations, training, and other assistance developed under subsection (b), including by broadly identifying building materials and technologies that could uphold health, safety, and welfare on school property; or</text>
+ </subparagraph><subparagraph id="id23CD737BCA1046449EAC39A56FB3F213"><enum>(B)</enum><text>the Support Anti-Terrorism by Fostering Effective Technologies Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/441">6 U.S.C. 441</external-xref> et seq.).</text></subparagraph></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection id="id1A6E7DB746064F9EA43B564C7A210EB5"><enum>(b)</enum><header>Technical and conforming amendment</header><text>The table of contents in section 1(b) of the Homeland Security Act of 2002 (<external-xref legal-doc="public-law" parsable-cite="pl/107/296">Public Law 107–296</external-xref>; 116 Stat. 2135) is amended by inserting after the item relating to section 2214 the following:</text>
+				<quoted-block id="iddd70cc5b-85bc-4c73-8bfc-ac29ba575c1e" style="OLC"><toc><toc-entry idref="idd9753507f9db4be39476b45f02108726" level="section">Sec. 2215. School Safety Clearinghouse.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body>
+</bill>
+
+

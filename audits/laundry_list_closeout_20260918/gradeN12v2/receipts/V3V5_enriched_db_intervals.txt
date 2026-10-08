@@ -1,0 +1,245 @@
+====================================================================================================
+1.  LIVE DATABASE RECONCILIATION  (file:...?mode=ro, PRAGMA query_only=ON, no writes)
+====================================================================================================
+speeches rows=270489  INTERVIEW rows=153576
+ledger table already present in the live db: 0  (0 = the migration has never been applied)
+flagged rowids whose LIVE text still equals the ledger original: 6284 of 6284
+   mismatched: 0 []
+   missing:    0 []
+
+corpus-wide shapes the v1 grade called UNDER-REPAIR, re-measured on the live INTERVIEW text:
+   curly-apostrophe ALL-CAPS tag          rows=1      flagged by v2=1     truncated by v2=0     still untouched=0
+   no-space colon after an ALL-CAPS tag   rows=37     flagged by v2=27    truncated by v2=17    still untouched=10
+   bare "Q: " turn                        rows=110    flagged by v2=0     truncated by v2=0     still untouched=110
+
+====================================================================================================
+2.  V3 ENRICHED STRATUM -- the 83061 shape: the removed text NAMES the row member in the
+    third person AND carries a sentence-initial first person, i.e. where an UNTAGGED return
+    to the member would hide.  Seeded sample (20260920) of 30 read in full.
+====================================================================================================
+enriched stratum size: 167 of 5484 truncated rows (3.05%)
+sampled rowids: [106388, 215559, 218834, 219227, 223436, 223821, 225459, 244208, 246109, 260547, 261106, 263653, 265773, 267002, 267794, 268642, 269443, 270882, 271085, 271334, 271827, 271929, 272309, 272386, 272542, 272998, 274371, 275695, 275712, 275925]
+
+--- 01 rowid=106388 member='Amy Klobuchar' 2018-02-25 removed=64w segs=7 cut_tag='CHUCK TODD'
+    KEPT ...o do, that we can do some changes without hurting hunting, and that includes backgrounds checks, assault weapon bans and some of the things we’re talking about.
+    seg tag='CHUCK TODD' (19w)
+       Senator Klobuchar, I have to leave it there. I appreciate it. Thanks for coming on and sharing your views.
+    seg tag='SEN. AMY KLOBUCHAR' (1w)
+       Okay.
+    seg tag='CHUCK TODD' (6w)
+       Always good to talk with you.
+    seg tag='SEN. AMY KLOBUCHAR' (10w)
+       Thanks. Go Olympics. We're proud of our Minnesota Olympics, Chuck.
+    seg tag='CHUCK TODD' (9w)
+       Quite a bit. We need Minnesota to do well.
+    seg tag='SEN. AMY KLOBUCHAR' (2w)
+       Curling team.
+    seg tag='CHUCK TODD' (7w)
+       There you go. We'll talk about it.
+
+--- 02 rowid=215559 member='Jon Ossoff' 2021-01-04 removed=66w segs=1 cut_tag='LAH (on camera)'
+    KEPT ...ue and Kelly Loeffler had one piece of steel in their spines, one shred of integrity, they would be out here defending Georgia voters from that kind of assault.
+    seg tag='LAH (on camera)' (63w)
+       It's hard to miss what this image means, if Raphael Warnock and John Ossoff flip those two Senate seats, Kamala Harris becomes a tie breaker, Democrats then control the Senate. That is what is at stake on Tuesday. We did reach out to Senators Loeffler and Perdue for comment on the call, neither of them returned our cal
+
+--- 03 rowid=218834 member='Mitch McConnell' 2021-04-06 removed=160w segs=2 cut_tag='LEMON (on camera)'
+    KEPT ...tock, and fly on planes and drink Coca-Cola, too. So what I'm saying here is I think this is quite stupid to jump in the middle of a highly controversial issue.
+    seg tag='LEMON (on camera)' (27w)
+       So Jemele, this is coming from a man who spent years raising massive amounts of money from corporations in the name of free speech. This is rich.
+    seg tag='JEMELE HILL, STAFF WRITER, THE ATLANTIC (on camera)' (122w)
+       Yeah. It's rich. It's hypocritical, and he just basically gave them the corporate version of shut up and dribble. You're fine to contribute as much money as possible to their campaigns, but shut up and don't actually worry about where your money is going or for that matter, what it's being used for. [23:05:04] And we s
+       ...TAIL: mean, Mitch McConnell has been somebody who has stood in the way of democracy for his entire political career. He's one of the worst politicians this country has ever seen. And so for him to after he said all that to say oh, but keep donating, though. It's like does -- like, make it make sense, Don. Make it make sense.
+
+--- 04 rowid=219227 member='Mitch McConnell' 2021-05-05 removed=116w segs=1 cut_tag='LEMON (on camera)'
+    KEPT ...One hundred percent of our focus is on stopping this new administration.
+    seg tag='LEMON (on camera)' (113w)
+       His focus is stopping Joe Biden and only stopping Joe Biden. Only. Remember that? I'm going to make Obama a one-term president, same thing. His focus is 100 percent on obstruction, and it's not the first time we've heard this kind of thing from Mitch McConnell. Remember? He said the single most important thing that he 
+       ...TAIL: hieve was making Barack Obama a one-term president. He failed dismally at that. But he's doubling down on the same obstructionist party of no strategy again. That's how that -- that's how you got Obamacare, right? You should have a strategy and some sort of policy. The White House press secretary Jen Psaki firing back.
+
+--- 05 rowid=223436 member='Lucy McBath' 2021-12-01 removed=74w segs=1 cut_tag='LEMON (on camera)'
+    KEPT ...this body, have the courage to do what is right to save our children and to protect our families? And if not, do you really truly have the courage to look away?
+    seg tag='LEMON (on camera)' (71w)
+       Tragically, she lost her own son to gun violence. And Congressman -- Congresswoman, excuse me, Lucy McBath joins me now. Congresswoman, thank you so much. I appreciate you joining. Listen, I know this is for you probably brings a lot of the emotions back. Sadly, you know this pain better than anyone. You just marked ni
+
+--- 06 rowid=223821 member='Jim Jordan' 2021-12-22 removed=62w segs=1 cut_tag='COATES (on camera)'
+    KEPT ...or not, I just don't know. I have to go back -- I mean, I don't know that -- when those conversations happened. But all I know is I speak with him all the time.
+    seg tag='COATES (on camera)' (59w)
+       The stammer heard around the world at that moment in time. We already know Jordan texted Mark Meadows on January 5th about blocking the certification on the 2020 election results. I mean, what do you think the committee wants to know about his communications with Trump. I mean, it seems obvious there was something he c
+
+--- 07 rowid=225459 member='Scott Perry' 2022-04-27 removed=295w segs=1 cut_tag='NOBLES (voice-over)'
+    KEPT ...The president's going to win Georgia. The president is going to win North Carolina. It's all going to come down to the Keystone State.
+    seg tag='NOBLES (voice-over)' (293w)
+       But a new batch of text messages obtained by CNN which have not previously been reported, illuminate how active he was behind the scenes as well. New messages showing he had a role at almost every turn in scheming to reverse or delay the certification of the 2020 election. On November 12th, five days after the election
+       ...TAIL: ith him. And he explained to me why the principal deputy won't work especially with the FBI. They will view it as not having the authority to enforce what needs to be done. Meadows responded: I got it. I think I understand. Let me work on the deputy position. And Perry replied: Roger. Just sent you something on Signal.
+
+--- 08 rowid=244208 member='Nancy Pelosi' 2022-02-14 removed=178w segs=1 cut_tag='FORD (on camera)'
+    KEPT ...mber of Congress way on the left saying that defund the police is dead. That causes a concern with a few in our caucus, but public safety is our responsibility.
+    seg tag='FORD (on camera)' (175w)
+       Those comments come amid another shocking weekend of violence. Thirteen police officers shot in just 24 hours, nine of them during a shoot-out in Phoenix. The National Police Association calling it a war on cops and a young New York City woman brutally stabbed to death inside her own apartment after the suspect followe
+       ...TAIL: e on the streets if he is violent, if he's been accused of violent things. But separate that for a moment, Nancy Pelosi saying that defund the police, Democrats are not associated with that. I mean, I accept that a little bit because there are Republicans who say things that I know that you don't personally agree with.
+
+--- 09 rowid=246109 member='Bernard Sanders' 2023-09-16 removed=76w segs=3 cut_tag='BRUNHUBER (voice-over)'
+    KEPT ...It is a fight to take on corporate greed.
+    seg tag='BRUNHUBER (voice-over)' (21w)
+       U.S. Senator Bernie Sanders joined the UAW rally in Detroit. Coming up, how this strike is already impacting the auto industry.
+    seg tag='BRUNHUBER (voice-over)' (37w)
+       Plus the special counsel investigating Donald Trump wants to limit what the former president can publicly say. We'll hear how Trump is responding. And in Libya, the search continues as thousands are missing after flooding. (MUSIC PLAYING)
+    seg tag='UNIDENTIFIED MALE (voice-over)' (11w)
+       Live from CNN Center, this is CNN NEWSROOM with Kim Brunhuber.
+
+--- 10 rowid=260547 member='Bernard Sanders' 2016-01-28 removed=188w segs=1 cut_tag='O`DONNELL'
+    KEPT ...hat; but you are not going to pay any more private health insurance. Are you going to be complaining about the fact that I saved you $5,000 in your total bills?
+    seg tag='O`DONNELL' (187w)
+       Joining us now, Michael Barr, professor at the University of Michigan Law School and a former Treasury Department Assistant Secretary for Financial Institution. He supports Hillary Clinton. Also with us, Robert Hockett, Professor at Cornell Law School and a former advisor to the Federal Reserve Bank of New York in the 
+       ...TAIL: ice of gasoline that we have seen in the last couple of years alone. Is not there room there to raise the gasoline tax both for revenue and for environmental impact and is that something that Hillary Clinton would be opposed to as a middle class tax increase? MICHAEL BARR, PROFESSOR AT UNIVERSITY OF MICHIGAN LAW SCHOOL
+
+--- 11 rowid=261106 member='Bernard Sanders' 2016-05-18 removed=98w segs=1 cut_tag='O`DONNELL'
+    KEPT ...ich has unhealthy drinking water, you would be wrong. Hundreds of communities in America have, if not to the same degree have serious problems with their water.
+    seg tag='O`DONNELL' (97w)
+       That is Bernie Sanders campaigning in California tonight. We are going to be coming back to it if there is anything more coming up there. We are joined by Jonathan Alter, political analyst — MSNBC Political Analyst. Jonathan, Bernie Sanders made the point earlier in his comments that he consistently polls better than H
+       ...TAIL: int earlier in his comments that he consistently polls better than Hillary Clinton does against Donald Trump. You have a Fox News Poll out tonight, a rough one for Hillary Clinton with her behind Donald Trump in a national poll, but Bernie Sanders ahead of Donald Trump in that poll, polling better than Hillary Clinton.
+
+--- 12 rowid=263653 member='Bill Cassidy' 2017-09-18 removed=360w segs=1 cut_tag='O’DONNELL'
+    KEPT ...Hey man, you’re on the right track. And if that’s as close as we get, that works great in government.
+    seg tag='O’DONNELL' (359w)
+       And that was a very slippery politician’s answer that Jimmy Kimmel’s audience was hearing there. He did not actually agree with Jimmy Kimmel’s version of the Kimmel test. Instead, he simply said that Jimmy Kimmel’s was on the right track and now that very same Senator Cassidy is pushing a healthcare bill that will repe
+       ...TAIL: ining us Jennifer Reuben, an opinion writer for “The Washington Post” and, Jennifer, you wrote about this Cassidy/Graham bill today for “The Washington Post” and Jimmy Kimmel tweeted your article to his 10 million followers and you make the point very clearly in this article that the Cassidy bill fails the Kimmel test.
+
+--- 13 rowid=265773 member='Mitch McConnell' 2018-09-21 removed=1343w segs=2 cut_tag='O`DONNELL'
+    KEPT ...ill be on the United States Supreme Court. So, my friends keep the faith. Don`t get rattled by all of this. We`re going to plow right through it and do our job.
+    seg tag='O`DONNELL' (1064w)
+       Plow right through it. Mitch McConnell knows the outcome. He has not heard one word from Dr. Ford, but he knows he is going to plow right through it. Mitch McConnell does not have a public record of lying when he says he has the votes to get something through the Senate. And that`s what he said today, he has the votes.
+       ...TAIL: onald Trump has always said, you cannot believe the woman, you must never believe the woman because whatever happened it was not as bad as she says. After this break, we will be joined by a group of congressional experts who know the confirmation process well. Wendy Sherman, Lisa Graves, Mieke Eoyang and Norm Ornstein.
+    seg tag='O`DONNELL' (277w)
+       Today 48 members of the faculty of Yale Law School wrote a letter to the Senate Judiciary Committee about one of Yale Law School`s graduates, Brett Kavanaugh. The lawyers says, “With so much at stake for the Supreme Court and the nation, we are concerned about a rush to judgment that threatens both the integrity of the
+       ...TAIL: ng us is Congressional scholar Norm Ornstein. And Wendy Sherman, I want to go to you first. Very important point that Democrats make in their letter to Chuck Grassley, that this committee, the majority of this committee, Republicans, are intent on delivering a more unfair hearing this time than they did for Anita Hill.
+
+--- 14 rowid=267002 member='Alexandria Ocasio-Cortez' 2019-02-06 removed=296w segs=1 cut_tag='O`DONNELL'
+    KEPT ...alth care is a right. We believe that work should be dignified. And we believe that all people should be accepted regardless of this race, gender, or ethnicity.
+    seg tag='O`DONNELL' (295w)
+       The president doesn`t know and very few people who heard Alexandria Ocasio-Cortez last night know that the reason we have a 40-hour work week in this country is socialism. Long before the major political parties cared about the rights of workers and the labor law, the Socialist Party of America was pushing the idea of 
+       ...TAIL: f the campaign from Donald Trump. And we will take a look at what I just described as America`s gaudiest possible display of very bad socialism that occurred this weekend. I hope you`re not offended by a shirtless man covered in tattoos singing in a stadium financed by hundreds of millions of dollars of taxpayer money.
+
+--- 15 rowid=267794 member='Lloyd Doggett' 2019-04-10 removed=83w segs=1 cut_tag='O`DONNELL'
+    KEPT ...neral, the Justice Department, the IRS lawyers, the treasury lawyers, more lawyers than you can possibly count all to advise on whether shall still means shall.
+    seg tag='O`DONNELL' (82w)
+       Yes, it`s a simple one-sentence piece of the tax code. It`s one of the — I mean, Congressman Doggett, you and I have read and you`ve written a lot of this tax code. Much of it is unintelligible to civilians. This is not one of those. It simply says that the Section 6103 simply says that this information shall be furnis
+
+--- 16 rowid=268642 member='James Himes' 2019-06-24 removed=425w segs=1 cut_tag='O`DONNELL'
+    KEPT ...ssion of defending our democracy. That mission requires a vigorous debate and competing ideas, but it also requires care, discipline and a measure of deference.
+    seg tag='O`DONNELL' (424w)
+       We`ll discuss impeachment with Congressman Himes and Chairman Smith, but that`s not all. We will get their reactions to the Trump administration`s treatment of children at the southern border. And later in this hour, we will hear from a lawyer who has actually visited those children and seen the conditions they are liv
+       ...TAIL:  us tonight. I really appreciate it. I`d like to start with Iran and the meeting you were in at the White House before the president went through this series of decisions, and you tell us, was it before he decided to order the strike and then stand down from the strike? Where was that meeting in the sequence of events?
+
+--- 17 rowid=269443 member='Nancy Pelosi' 2019-09-26 removed=837w segs=1 cut_tag='O`DONNELL'
+    KEPT ... revealed dishonorable fact of the president`s betrayal of his oath of office, betrayal of our national security and betrayal of the integrity of our elections.
+    seg tag='O`DONNELL' (836w)
+       The Republicans and the Republican staff had 48 hours to write their speeches for today`s hearing condemning Nancy Pelosi for saying the president betrayed his oath of office and not one of them did that. Not one. The Republicans have no defense for what the president said on the phone to President Zelensky of Ukraine.
+       ...TAIL: ational security contributor. Larry, let me start with you. We got your read of the so-called transcript, the record of the phone call last night. It all made sense to you. It looked like the kind of thing you`ve seen before. What about what you`ve learned from the whistleblower`s report that was released this morning?
+
+--- 18 rowid=270882 member='Mitch McConnell' 2020-02-05 removed=116w segs=1 cut_tag='O`DONNELL'
+    KEPT ... voted. We`ve had a number of internal meetings to discuss all of this which you all ended up knowing a good deal about and writing about. It`s time to move on.
+    seg tag='O`DONNELL' (115w)
+       Senator Elizabeth Warren is back with us. And Senator, we just saw Mitch McConnell refuse to answer whether or not he thought Donald Trump`s conduct was appropriate. We have now a handful of Republican senators saying it wasn`t. Lisa Murkowski, Republican senator saying the President`s conduct was shameful. But Mitch M
+       ...TAIL:  able to hold on to all but one Republican senator to vote not guilty for President Trump. If Mitch McConnell is still in control of the United States Senate and you are inaugurated President a year from now, will there be anything? Will there be anything legislatively that you can get through the United States Senate?
+
+--- 19 rowid=271085 member='Bernard Sanders' 2020-03-04 removed=82w segs=1 cut_tag='O`DONNELL'
+    KEPT ... wants. Joe has his ideas, his record, his vision for the future. I have mine. And I look forward to a serious debate on the serious issues facing this country.
+    seg tag='O`DONNELL' (81w)
+       Leading off our discussion tonight, Steve Hildebrand, former deputy national campaign manager for Obama`s 2008 presidential campaign, Jamil Smith, senior writer for “Rolling Stone”, and Ambassador Wendy Sherman, a former undersecretary of state in the Obama administration. She is an MSNBC global affairs contributor. I 
+       ...TAIL: Wendy Sherman, a former undersecretary of state in the Obama administration. She is an MSNBC global affairs contributor. I want to listen to what Joe Biden said today to echo what we just heard from Bernie Sanders about trying to make sure that this campaign does not become about personal attacks. Let`s listen to that.
+
+--- 20 rowid=271334 member='Adam Schiff' 2020-05-04 removed=14w segs=1 cut_tag='O`DONNELL'
+    KEPT ...st on 9/11 and, you know, I think that there is no way we could have foreseen just how tragic his damage would be in his remaining months in the administration.
+    seg tag='O`DONNELL' (13w)
+       Chairman Adam Schiff thank you for joining us tonight. We really appreciate it.
+
+--- 21 rowid=271827 member='Lindsey Graham' 2020-09-24 removed=71w segs=1 cut_tag='O’DONNELL'
+    KEPT ...elebrating her life, I appreciate waiting this Saturday to announce the replacement. But I am being killed financially. This money is because they hate my guts.
+    seg tag='O’DONNELL' (70w)
+       Quinnipiac poll shows Jaime Harrison tied with Lindsey Graham, who won his last reelection by 16 points. Jamie Harrison joined us on this program Monday night because control of the United States Senate is so important in this election. We’re going to continue our ongoing discussions with senate candidates around the c
+
+--- 22 rowid=271929 member='Jon Ossoff' 2020-10-19 removed=123w segs=1 cut_tag='O’DONNELL'
+    KEPT ...the heritage of his political adversaries. It’s schoolyard insults. It’s bullying. It’s divisive. It’s exactly the opposite of what the country needs right now.
+    seg tag='O’DONNELL' (122w)
+       It also apparently is an incumbent senator running scared because according to the latest poll, Quinnipiac poll of Georgia, we see Jon Ossoff running at 51 percent to incumbent David Perdue running at 45 percent. That is a mirror of the Biden numbers in Florida — I’m sorry, in Georgia in exactly the same poll. The numb
+       ...TAIL:  Biden running at 51 percent, Donald Trump at 44 percent. That’s virtually identical to the way you’re polling. The RealClearPolitics average polling in your state shows you in a tie with David Perdue. You 45, David Perdue at 46. There’s no poll that doesn’t look bad for an incumbent running for re-election in Georgia.
+
+--- 23 rowid=272309 member='Jamie Raskin' 2021-01-13 removed=336w segs=3 cut_tag='O’DONNELL'
+    KEPT ...uld have died. and it’s a bit much to be hearing that these people would not be trying to destroy our government and kill us if we just weren’t so mean to them.
+    seg tag='O’DONNELL' (81w)
+       Alex, Jamie Raskin is going to go to another level of recognition in Washington. He’s going to be the lead prosecutor in the next Senate impeachment trial of Donald Trump. And he’s going to have a much more receptive Senate than Adam Schiff had. You have Mitch McConnell saying, I won’t decide how I’m going to vote on t
+    seg tag='ALEX WAGNER, CONTRIBUTING WRITER, “THE ATLANTIC”' (211w)
+       It might be, Lawrence, but I mean, let’s just keep in mind it is Mitch McConnell we’re talking about. And he is a political tactician more than he is a great statesman and a great unifier of the country. I think it’s interesting that he’s kept the door open to impeachment, but I think it’s telling that he did not want 
+       ...TAIL:  That is not going to be convenient for Biden who is trying to get his cabinet confirmed. It could very much muddy Biden’s central message, which is to unite the country. I mean this could be weaponized and, you know, it is Mitch McConnell. He lets no crisis go wasted. So, it’s very much a situation that is developing.
+    seg tag='O’DONNELL' (36w)
+       John Heilemann, by the time this trial starts in the Senate, there will be two more votes for — in a conviction and removal in the Senate and those votes will be flying in from Georgia.
+
+--- 24 rowid=272386 member='Charles Schumer' 2021-01-26 removed=243w segs=1 cut_tag='O`DONNELL'
+    KEPT ... so, in keeping our options open on our caucus call today, I inform senators to be prepared that a vote on a budget resolution could come as early as next week.
+    seg tag='O`DONNELL' (242w)
+       Budget reconciliation legislation can pass the Senate with a simple majority of 51 votes. It does not face a 60-vote procedural threshold that other legislation faces. Many of you already know that and you`ve known it since the Democrats used it to pass Obamacare through budget reconciliation. But this year, you`re goi
+       ...TAIL: er seen before. For example, to raise the minimum wage, which has never been attempted in a budget reconciliation bill because budget rules strictly limit the content of that kind of legislation. President Joe Biden isn`t waiting for any extra funding from Congress to increase the vaccination rate in the United States.
+
+--- 25 rowid=272542 member='Daniel Goldman' 2021-02-08 removed=15w segs=1 cut_tag='O`DONNELL'
+    KEPT ...bogus argument both as a legal matter and as a factual matter to find for acquittal for Donald Trump and it shouldn`t be a defense that they`re putting forward.
+    seg tag='O`DONNELL' (14w)
+       Daniel Goldman, thank you very much for joining us tonight. I really appreciate it.
+
+--- 26 rowid=272998 member='Grace Meng' 2021-03-18 removed=65w segs=1 cut_tag='O`DONNELL'
+    KEPT ...s hearing was to address the hurt and pain of our community and to find solutions. And we will not let you take our voice away from us. Thank you. I yield back.
+    seg tag='O`DONNELL' (64w)
+       Joining us now is Congresswoman Grace Meng of New York. Congresswoman Meng, thank you very much for joining us on this important night. We really appreciate it. And as I watched you in the hearing today, I could see that frustration building, and we could see it build just as you began and ended your statement there. H
+
+--- 27 rowid=274371 member='Adam Schiff' 2021-10-12 removed=974w segs=1 cut_tag='O`DONNELL'
+    KEPT ...hy if you find him guilty, you must find that he should be removed, because right matters, because right matters. And the truth matters. Otherwise, we are lost.
+    seg tag='O`DONNELL' (973w)
+       In his new book, Adam Schiff says during the attack of the Capitol, members of the House kept saying to him, you warned us. On page 12, he writes, fear was receding and anger at the president was quickly taking at its place, one of my Democratic colleagues came up to me, and was the first to say, what I would hear vers
+       ...TAIL: the, plane and you had that conversation, and then he went out and just lied about it, everyone would just go well sure. Of course Donald Trump did that. And so, the idea that Donald Trump had to somehow turn Kevin McCarthy, corrupt Kevin McCarthy into something he wasn`t, is no longer my view, after reading your book.
+
+--- 28 rowid=275695 member='Lindsey Graham' 2022-05-11 removed=259w segs=1 cut_tag='O`DONNELL'
+    KEPT ...He plays the TV game and he went too far here. That rally didn`t help, talking about primarying in Liz. He created a sense of revenge.
+    seg tag='O`DONNELL' (258w)
+       Lindsey Graham`s sense of revenge was on full display in the Supreme Court confirmation hearing for Justice Ketanji Brown Jackson when Lindsey Graham said very plainly that he thought that the hearing should be revenge for the way that Brett Kavanaugh was questioned by the committee, after Brett Kavanaugh was publicly 
+       ...TAIL: l who served as acting U.S. solicitor general at the Department of Justice. He`s an MSNBC legal contributor. And Neal, if I end my email to you with “this will help provide some cover”, do you immediately call the FBI — I mean who ends emails like that when they`re talking about anything other than covering up a crime?
+
+--- 29 rowid=275712 member='Mitch McConnell' 2022-05-12 removed=286w segs=1 cut_tag='O`DONNELL'
+    KEPT ...ttee the authority it needs to get the job done right? If you believe the answer is yes, you will vote to uphold the unanimous decision of the ethics committee.
+    seg tag='O`DONNELL' (285w)
+       That`s the way it used to be. Not anymore. No one was surprised by Mitch McConnell and the other Republican members of the Senate ethics committee followed the evidence and made a recommendation to expel a Republican senator based on the evidence. That`s the way everyone expected the ethics committee to work then. That
+       ...TAIL: on a day like today which is a historic day, as you know, it is a historic day, subpoenaing members of the house like this. To see the way it used to be and to see the way enforcement of ethics, enforcement of what — kinds of things are trying to enforce. We`re a completely bipartisan effort in the house in the senate.
+
+--- 30 rowid=275925 member='Jamie Raskin' 2022-06-10 removed=137w segs=1 cut_tag='HAYES'
+    KEPT ...e to reconstruct the whole thing and tell the story. So, the street fighting and the inside political coup come together in an explosive way on January the 6th.
+    seg tag='HAYES' (136w)
+       Yes. And that first point about, you know, all we saw, right during that period is we see Trump talking, we see Powell, we see Giuliani, we see, you know, some of the other lawyers. All the people on the inside who are like, this is B.S., we don`t see them, but they talk to you, right? So, that was the other big part o
+       ...TAIL: e haven`t gotten to hear them. And if I can editorialize, probably would have been good to speak up at the time. But I`m looking forward to reading through those positions (PH), to read what they had to say. We will watch more on Monday. I`m very much looking forward to it Congressman Jamie Raskin. Thank you very much.
+
+====================================================================================================
+3.  ROWS WITH AN EXPLICIT OWN-MEMBER TAG AFTER THE CUT (a smarter rule could keep these)
+====================================================================================================
+   rowid=105315  Susan Collins            own-tagged segments=1 words=3  tags=['SEN. SUSAN COLLINS']
+   rowid=106055  Amy Klobuchar            own-tagged segments=1 words=6  tags=['SEN. AMY KLOBUCHAR']
+   rowid=106388  Amy Klobuchar            own-tagged segments=3 words=13  tags=['SEN. AMY KLOBUCHAR']
+   rowid=109799  Adam Schiff              own-tagged segments=6 words=623  tags=['REP. ADAM SCHIFF']
+   rowid=110715  John Barrasso            own-tagged segments=2 words=113  tags=['SEN. JOHN BARRASSO']
+   rowid=245558  Mike Johnson             own-tagged segments=4 words=392  tags=['JOHNSON (voice-over)']
+   rows=6  words recoverable by an own-tag rule=1150
+
+====================================================================================================
+4.  EXACT (CLOPPER-PEARSON) 95%% INTERVALS
+====================================================================================================
+   V2 sample: FOREIGN-TAG-REAL                     90/90   = 1.0000   95% CI 0.9598 - 1.0000
+   V2 sample: CUT-TOO-EARLY                         0/90   = 0.0000   95% CI 0.0000 - 0.0402   -> 0 of 5484 rows (CI 0 - 221)
+   V2 sample: UNCLEAR                               0/90   = 0.0000   95% CI 0.0000 - 0.0402   -> 0 of 5484 rows (CI 0 - 221)
+   V3 sample: member words removed (SOME)           0/90   = 0.0000   95% CI 0.0000 - 0.0402   -> 0 of 5484 rows (CI 0 - 221)
+   V3 enriched stratum: SOME (see section 2)        1/30   = 0.0333   95% CI 0.0008 - 0.1722   -> 6 of 167 rows (CI 0 - 29)
+     per-class n in sample (15 each), pool=A_anchored_caps  15/15   = 1.0000   95% CI 0.7820 - 1.0000
+     per-class n in sample (15 each), pool=B_stop_name_paren  15/15   = 1.0000   95% CI 0.7820 - 1.0000
+     per-class n in sample (15 each), pool=B_unknown_surname_paren  15/15   = 1.0000   95% CI 0.7820 - 1.0000
+     per-class n in sample (15 each), pool=C_unanchored_paren  15/15   = 1.0000   95% CI 0.7820 - 1.0000
+     per-class n in sample (15 each), pool=D_mixed_case_label  15/15   = 1.0000   95% CI 0.7820 - 1.0000
+     per-class n in sample (15 each), pool=E_colonless_honorific  15/15   = 1.0000   95% CI 0.7820 - 1.0000
+
+   truncated rows N = 5484
+   per-class pools: {"A_anchored_caps": 4402, "B_stop_name_paren": 141, "B_unknown_surname_paren": 513, "C_unanchored_paren": 127, "D_mixed_case_label": 79, "E_colonless_honorific": 222}

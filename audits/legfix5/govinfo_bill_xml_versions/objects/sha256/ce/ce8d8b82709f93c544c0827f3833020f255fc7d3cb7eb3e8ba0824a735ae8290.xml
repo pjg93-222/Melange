@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H78A00EA855EF4BDDA9311F8D464D3993" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 8888 IH: Voting Clarity Act of 2024</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-06-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8888</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20240628">June 28, 2024</action-date><action-desc><sponsor name-id="G000574">Mr. Gallego</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Immigration and Nationality Act to require the Secretary of Homeland Security to provide information regarding voting restrictions to asylum applicants.</official-title></form><legis-body id="HFC56A358CF574C8080439E954A0C1E99" style="OLC"><section id="H1B344D5BAE3D494EBA8075B2ED299C7B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Voting Clarity Act of 2024</short-title></quote>.</text></section><section id="H083749A2B6F948E39C099A3C2A2D5F96"><enum>2.</enum><header>Provision of information regarding voting restrictions to asylum applicants</header><text display-inline="no-display-inline">Section 208(d) of the Immigration and Nationality Act (<external-xref legal-doc="usc" parsable-cite="usc/8/1158">8 U.S.C. 1158(d)</external-xref>) is amended by adding at the end the following: </text><quoted-block style="OLC" id="HF0E49044078F43FF8BD479E809CB8383" display-inline="no-display-inline"><paragraph id="H78E058D974974CD6BD8E46C0950F841E"><enum>(8)</enum><header>Provision of information regarding voting restrictions</header><text display-inline="yes-display-inline">The Secretary of Homeland Security shall provide information to each alien applying for asylum under this section on the restrictions on voting and the penalties for voting unlawfully under Federal law, including under section 611 of title 18, United States Code, at the time of such application. Information under this paragraph shall be provided in a form and language that the alien can understand.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

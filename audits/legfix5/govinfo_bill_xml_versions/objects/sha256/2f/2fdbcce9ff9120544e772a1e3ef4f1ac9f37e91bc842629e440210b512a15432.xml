@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HE5A70D02855347C8BD44943C47E51907" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3928 IH: Federal Reserve Accountability and Justification Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">I</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 3928</legis-num>
+		<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190724">July 24, 2019</action-date>
+			<action-desc><sponsor name-id="R000611">Mr. Riggleman</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To require the Board of Governors of the Federal Reserve to satisfy certain requirements before
+			 providing any new payment service, or substantially changing or expanding
+			 any existing payment service, and for other purposes.</official-title>
+	</form>
+	<legis-body id="H983F51BEC0EE42A7AF46274AF8255E31" style="OLC">
+ <section id="H176194BC138947FD89C72A03CEB727BC" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Federal Reserve Accountability and Justification Act</short-title></quote>.</text> </section><section id="HC4E03DE56307447A878EA5DFEF45FF4E"><enum>2.</enum><header>Payment services</header><text display-inline="no-display-inline">Section 11A of the Federal Reserve Act (<external-xref legal-doc="usc" parsable-cite="usc/12/248a">12 U.S.C. 248a</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="H7F7260E5BF50414199362E04D35A0DA6" style="OLC">
+				<subsection id="H1682B9A084C0425D9E5A9AFFA8D13CCA"><enum>(f)</enum><header>Payment service</header>
+ <paragraph id="H6610DDCFB23D468ABB8C65D39FFCC178"><enum>(1)</enum><header>In general</header><text>The Board may not provide any new payment service, or substantially change or expand any existing payment service unless the Board determines that—</text>
+ <subparagraph display-inline="no-display-inline" id="H09C5B926F3FF4B93846AC303D8D38122"><enum>(A)</enum><text>any costs associated with such service will be recovered;</text> </subparagraph><subparagraph id="H9D6A8D4F2DF84B54A98E8A3310168F45"><enum>(B)</enum><text display-inline="yes-display-inline">providing such service will yield a clear public benefit, such as promoting the integrity of the payments system, improving the effectiveness of financial markets, reducing the risk associated with payments and securities-transfer services, or improving the efficiency of the payments system;</text>
+ </subparagraph><subparagraph id="H8A5D15258B6D4AF2A3E7B3F381098829"><enum>(C)</enum><text display-inline="yes-display-inline">no other providers can be expected to provide such service with reasonable effectiveness, scope, and equity; and</text>
+ </subparagraph><subparagraph id="H9FF1296E472E49C8A12BA9E0DC3ECDF1"><enum>(D)</enum><text display-inline="yes-display-inline">other providers are able to compete with the Federal Reserve Banks in offering such service, based on a competitive impact study.</text>
+						</subparagraph></paragraph><paragraph display-inline="no-display-inline" id="HC557040FE29643538AB130A650674B62"><enum>(2)</enum><header>Reasonable effectiveness, scope, and equity</header>
+ <subparagraph id="HD95EB87BDCFE4F1F97CEF167236F12AB"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">For the purposes of paragraph 1(A), the Board shall determine that other providers can be expected to provide such service with reasonable effectiveness, scope, and equity if the Board has found that other providers—</text>
+ <clause display-inline="no-display-inline" id="H48BEA1C101434043BBE54B429DB6FC73"><enum>(i)</enum><text>offer a service that substantially performs the material functions of such service that the Board would provide and offer the service to member and nonmember depository institutions on nondiscriminatory terms, regardless of the size of the institution; or</text>
+ </clause><clause id="H8A3C72DC70394CCA8D42E8F29E67CEEE"><enum>(ii)</enum><text>are capable within a reasonable time of offering a service that substantially performs the material functions of such service that the Board would provide and of offering the service to member and nonmember depository institutions on nondiscriminatory terms, regardless of the size of the institution.</text>
+ </clause></subparagraph><subparagraph id="H30793853B0AF438C95701D61A88D3D0C"><enum>(B)</enum><header>Central bank money</header><text>The ability of the Board to settle interbank obligations using balances at the central bank (also referred to as central bank money) shall not alone be sufficient to support a determination by the Board that other providers alone cannot be expected to provide such service with reasonable effectiveness, scope, and equity.</text>
+ </subparagraph></paragraph><paragraph id="HC00476A517C64BE7B83B9ADAEFB5C0C5"><enum>(3)</enum><header>Exception</header><text>The service offered by the Board known as the <quote>Federal Funds Wire Service</quote> is not subject to the requirements of this subsection.</text> </paragraph><paragraph id="H1EF4CC2158CD4014B936473688245986"><enum>(4)</enum><header>Final rule</header><text>The Board shall publish in the Federal Register, in accordance with section 553 of title 5 of the United States Code, a final rule that states any determination made pursuant to paragraph (1) and explains the basis for such determination.</text>
+					</paragraph><paragraph id="HB4FD0289C27F442A9EE9FC15F80278F4"><enum>(5)</enum><header>Judicial review</header>
+ <subparagraph id="H7DA5AC2B67224C2595CF830826288416"><enum>(A)</enum><header>In general</header><text>Any person adversely affected or aggrieved by a failure of the Board to properly make a determination under this subsection before providing a new payment service or substantially changing or expanding an existing payment service is entitled to judicial review thereof.</text>
+ </subparagraph><subparagraph id="H8ADF6040457C4DA6AD05044CDF0ED5D4"><enum>(B)</enum><header>Deference</header><text display-inline="yes-display-inline">A court may not give deference to the Board when conducting a review under this paragraph.</text> </subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </section></legis-body> </bill> 
+

@@ -1,0 +1,12 @@
+{
+ "backend": "wav2vec2",
+ "files": {
+  "config.json": "4937977e24d12d1bba70cdce8709c3c04807a8e4ae8ddac4229c48c436ae99ae",
+  "preprocessor_config.json": "b225d617c025463b9e157e06afea8b90dc7078fc70b013c533328423e0486b4a",
+  "pytorch_model.bin": "3249fe98bfc62fcbc26067f724716a6ec49d12c4728a2af1df659013905dff21"
+ },
+ "model_id": "facebook/wav2vec2-base",
+ "snapshot": "0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8",
+ "status": "PINNED_LOCAL_MODEL",
+ "schema": "b5-audio-model-manifest-v1"
+}

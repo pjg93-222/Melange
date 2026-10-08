@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H3F6765AC96EA4E25BDE1D9D10789DB2D" key="H" public-private="public">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2697 IH: Corporal Ronil Singh and Fallen Heroes Scholarship Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 2697</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20190514">May 14, 2019</action-date>
+<action-desc><sponsor name-id="H001090">Mr. Harder of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Labor</committee-name>, and in addition to the Committee on <committee-name committee-id="HBU00">the Budget</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To increase Federal Pell Grants for the children of fallen public safety officers, and for other purposes.</official-title>
+</form> 
+<legis-body id="HABB74AFE18794A14AC1094CBCF7B8740" style="OLC"> 
+<section id="H92B0FFB894DB4C57ACD97551672F01D8" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Corporal Ronil Singh and Fallen Heroes Scholarship Act</short-title></quote>.</text> </section> <section id="H7BC0E9E2B64241B6BF0EF1DDADE22204"><enum>2.</enum><header>Calculation of eligibility</header><text display-inline="no-display-inline">Section 473(b)(2) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1087mm">20 U.S.C. 1087mm(b)(2)</external-xref>) is amended—</text> 
+<paragraph id="H00A14384FF7F46FABB9FEDE40B1DDFF2"><enum>(1)</enum><text display-inline="yes-display-inline">in subparagraph (B), by inserting <quote>, or spouse</quote> after <quote>guardian</quote>; and</text> </paragraph> <paragraph id="H9BA5FC1E878B4FC5B5D2A9AD0FF36B92"><enum>(2)</enum><text>in subparagraph (C), by insert <quote>, or spouse’s</quote> after <quote>guardian’s</quote>.</text> </paragraph></section>
+<section id="H5BC4889F94F945F8BDF139FE465629FC"><enum>3.</enum><header>Calculation of Pell Grant amount</header><text display-inline="no-display-inline">Section 401(b)(2) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1070a">20 U.S.C. 1070a(b)(2)</external-xref>) is amended—</text> <paragraph id="H7C13A794207F4FF98579C0BADB56482A"><enum>(1)</enum><text>by striking the matter preceding clause (i) of subparagraph (A) and inserting the following:</text> 
+<quoted-block id="HC4B89423F6B84831B1ACDB5D832B9436" style="OLC"> 
+<paragraph id="HCA3D794DCCEF4DA09F394BC04786C250"><enum>(2)</enum> 
+<subparagraph commented="no" display-inline="yes-display-inline" id="H8DEA7E0B5C7E4A8AA271722158F50FD7"><enum>(A)</enum><text>Subject to subparagraph (C), the amount of the Federal Pell Grant for a student eligible under this part shall be—</text></subparagraph></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block> </paragraph> <paragraph id="H1079F21EF3B14B11A861784AE838473F"><enum>(2)</enum><text>by adding at the end the following new subparagraph:</text> 
+<quoted-block id="H66BE0CA835CB41E3A31F3715EE0F3A2B" style="OLC"> 
+<subparagraph id="HF5F3C4AA6E134784B3A584C31FF60DA8" indent="up1"><enum>(C)</enum><text>In the case of a student who meets the requirements of subparagraphs (A), (B)(ii), and (C) of section 473(b)(2)—</text> <clause id="H34032594E12B46279AA3CA83043D122B"><enum>(i)</enum><text>clause (ii) of subparagraph (A) of this paragraph shall be applied by substituting <quote>from the amounts appropriated in the last enacted appropriation Act applicable to that award year, an amount equal to the amount of the increase calculated under paragraph (7)(B) for that year</quote> for <quote>the amount of the increase calculated under paragraph (7)(B) for that year</quote>; and</text> </clause>
+<clause id="H90C2CA57B52E4DDB9014EF21A69D8314"><enum>(ii)</enum><text>such student—</text> <subclause id="H8E830A118A29440AA88478CB02396F6E"><enum>(I)</enum><text>shall be provided an amount under clause (i) of this subparagraph only to the extent that funds are specifically provided in advance in an appropriation Act to such students for that award year; and</text> </subclause>
+<subclause id="H66B2267D39164FC1A50DA9E59C596042"><enum>(II)</enum><text>shall not be eligible for the amounts made available pursuant to clauses (i) through (iii) of paragraph (7)(A).</text></subclause></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block> </paragraph></section> <section id="H4CC50258A52C43A9B0D816F37A61DE14"><enum>4.</enum><header>Budgetary Effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the Budget Committee of the House of Representatives, provided that such statement has been submitted prior to the vote on passage.</text> </section>
+<section id="H9AA2DCCC224D4A75891D7315C2C64C01"><enum>5.</enum><header>Effective date</header><text display-inline="no-display-inline">This Act and the amendments made by this Act shall take effect on June 1, 2019.</text> </section> </legis-body> </bill> 
+

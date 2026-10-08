@@ -1,0 +1,292 @@
+==================== R1 ====================
+1 rowid=234850 mem=Chip Roy show=cnr tag='FOX (voice-over)'
+   B: ...ll over the American people. Right now, I'm holding the line because I think we need this place to operate differently. 
+   A: FOX (voice-over): The California Republican remaining confident, telling reporters Tuesday night he only needs eleven more votes, suggesting that some members of Congress may vote present. To lower the threshold, he needs to cross the finish line....
+
+2 rowid=207716 mem=Debbie Dingell show=ebo tag='FOX(voice-over)'
+   B: ...The Speaker is waiting to understand what the rules of the trial are going to be, so she's appointing the right people. 
+   A: FOX(voice-over): Once the trial is underway, if lawmakers have questions for witnesses or motions to offer, they would likely make them in writing to the Chief Justice....
+
+3 rowid=66374 mem=Richard Durbin show=cnr tag='FOX (voice-over)'
+   B: ...I haven't come to a final decision as to whether or not it should be banned. 
+   A: FOX (voice-over): Senators Marco Rubio and Mark Warner, top members of the Senate Intelligence Committee, committed Wednesday to, quote, "working together to get this bill passed through the Senate and signed into law". But Majority Leader Chuck Schumer has no...
+
+4 rowid=246377 mem=Scott Perry show=ctmo tag='FOX (voice-over)'
+   B: ...s bills or their food bills, and before we send blank checks to some other country, we need to take care of our people. 
+   A: FOX (voice-over): Today, Zelenskyy will make his case to bipartisan leaders, including McCarthy, who will ultimately decide if he'll cross his hardliners to put Ukraine aid to a vote....
+
+5 rowid=235129 mem=Nancy Pelosi show=ctw tag='FOX (voice-over)'
+   B: ...I have never seen anything like this disrespect for the institution in a most cavalier, frivolous way. It is quite sad. 
+   A: FOX (voice-over): Twenty holdouts rally their support for Republican representative Byron Donalds....
+
+6 rowid=234921 mem=Chip Roy show=ctw tag='FOX (voice-over)'
+   B: ... and stepping all over the American people. Right now, I'm holding the line. We need this place to operate differently. 
+   A: FOX (voice-over): The California Republican remaining confident, telling reporters Tuesday night he only needs 11 more votes, suggesting some members of Congress may vote present to lower the threshold he needs to cross the finish line. McCarthy We've got to f...
+
+7 rowid=208905 mem=Mazie Hirono show=fmjc tag='FOX (voice over)'
+   B: ...litical, and they're all designed to help his people and certainly they're designed to cover up what the President did. 
+   A: FOX (voice over): Senate Minority Leader Chuck Schumer outraged by McConnell's resolution, saying he'll offer amendments to address its "many flaws."...
+
+8 rowid=235130 mem=Chip Roy show=ctw tag='FOX (voice-over)'
+   B: ...For the first time in history, there have been two Black Americans placed into the nomination for Speaker of the House. 
+   A: FOX (voice-over): Sources tell CNN McCarthy is continuing negotiations with the group of opposing lawmakers and met separately with freshman holdouts....
+
+9 rowid=191773 mem=Adam Schiff show=nwsm tag='FOX (voice over)'
+   B: ...y subpoena the report. We will bring Bob Mueller in to testify before Congress. We will take it to court, if necessary. 
+   A: FOX (voice over): And now the president's emergency declaration to fund a border wall facing fresh criticism. A bipartisan group of 58 former national security officials say there is no factual basis for the proclamation. That comes ahead of a House vote on th...
+
+10 rowid=307108 mem=Rand Paul show=cnr tag='FOX (voice-over)'
+   B: ...A pardon may protect a person from criminal prosecution doesn't rewrite history. 
+   A: FOX (voice-over): Republican Senators seized on the documents Paul released before the hearing. More than 1,000 pages of Fauci's personal diary that had been found on government servers....
+
+11 rowid=242264 mem=Charles Schumer show=ctmo tag='FOX (voice-over)'
+   B: ...g about the speaker's position is it's a -- it's a partisan bill, and he says take it or leave it, or we could default. 
+   A: FOX (voice-over): President Biden contemplating a work-around to raise the debt ceiling without the help of Congress....
+
+12 rowid=195271 mem=Ted Lieu show=nwsm tag='FOX (voice over)'
+   B: ...r options on the table. One of them is contempt. I hope we don't have to use it this Wednesday, but we will if we must. 
+   A: FOX (voice over): While the Attorney General skipped a hearing last week, the House Judiciary Committee is pressing forward with another request, to host Special Counsel Robert Mueller at a hearing next week, tentatively May 15th. Mueller is still a Justice De...
+
+13 rowid=188635 mem=Lindsey Graham show=nwsm tag='FOX (voice over)'
+   B: ...immigration system. It was pretty clear to me that we're never going to have a deal unless we get a wall as part of it. 
+   A: FOX (voice over): Democrats vowing to pressure lawmakers by passing individual bills to reopen each of the closed Federal agencies....
+
+14 rowid=217015 mem=Charles Schumer show=ctw tag='FOX (voice over)'
+   B: ...ture we have agreed to is eminently fair. It will allow for the trial to achieve its purpose, truth and accountability. 
+   A: FOX (voice over): Trump's legal team previewing their defense, filing a 78 page brief accusing House Democrats of engaging in political theater and calling the trial unconstitutional because he's no longer president....
+
+15 rowid=216538 mem=Madeleine Dean show=ctw tag='FOX (voice-over)'
+   B: ... believe we will put forward a very strong case that, of course, is already in the public view of what took place here. 
+   A: FOX (voice-over): Even with the bipartisan passing of the article in the House, many Republicans oppose the trial against Trump....
+
+16 rowid=66370 mem=Richard Durbin show=cnr tag='FOX (voice-over)'
+   B: ...I haven't come to a final decision as to whether or not it should be banned. 
+   A: FOX (voice-over): Senators Marco Rubio and Mark Warner top members of the Senate Intelligence Committee committed Wednesday to quote working together to get this bill passed through the Senate and signed into law but Majority Leader Chuck Schumer has not commi...
+
+17 rowid=235091 mem=Nancy Pelosi show=ctmo tag='FOX (voice-over)'
+   B: ...one of us has seen anything like this disrespect for the institution in a most cavalier, frivolous way. It's quite sad. 
+   A: FOX (voice-over): Twenty holdouts rallied their support for Republican Representative Byron Donalds....
+
+18 rowid=213269 mem=Charles Schumer show=qmb tag='FOX (voice over)'
+   B: ...Unfortunately, the President's executive orders described in one could be paltry. 
+   A: FOX (voice over): Part of Trump's memorandum, reducing the additional unemployment benefit from $600.00 to $400.00 per week, leaving it to states to pitch in $100.00 for every resident enrolled. By Sunday, the President said it's possible the Federal governmen...
+
+19 rowid=222523 mem=Mary Scanlon show=nday tag='FOX (voice-over)'
+   B: ...re lovely and warm and it seemed a great addition to the Capitol, where tensions are high under the best circumstances. 
+   A: FOX (voice-over): Lila will be joined by heir fellow canine partner, Leo, a 4-year-old yellow Lab who joined the Capitol Police force last month....
+
+20 rowid=217091 mem=Bill Cassidy show=fmjc tag='FOX (voice over)'
+   B: ...The House Managers made a compelling, cogent case and the President's team did not. 
+   A: FOX (voice over): And with the Senate Democrats needing 17 Republican votes to convict Trump, some hope that being witnesses to the attack will make this impeachment trial different than the first....
+
+==================== R2 ====================
+1 rowid=244973 mem=Elise Stefanik show=ctmo tag='MCKEND (voice-over)'
+   B: ...This was illegal government censorship to protect and prop up Joe Biden on the eve of the 2020 election. 
+   A: MCKEND (voice-over): But Democrats argue misinformation is the larger threat....
+
+2 rowid=246604 mem=Henry Cuellar show=ist tag='FLORES (voice-over)'
+   B: ... people being deported. When was the last time we saw people going the other way instead of just seeing people flow in? 
+   A: FLORES (voice-over): On the ground in Eagle Pass, CNN witnessed the reality for migrants....
+
+3 rowid=231485 mem=Jodey Arrington show=cnr tag='ROMO (voice-over)'
+   B: ...This crisis is a direct result. Let's be very clear, a direct result of President Biden's unilateral actions. 
+   A: ROMO (voice-over): -- a political hot potato with Republican governors from Texas and Florida, busing immigrants to places like New York and Washington, D.C....
+
+4 rowid=323616 mem=Robert Garcia show=this-week tag='BRUCE (voice-over)'
+   B: ...t happening. He promised a dividend on tariffs. That didn't happen. He promised a dividend on DOGE. That didn't happen. 
+   A: BRUCE (voice-over): Some Republicans pushing back on the idea. Maine Senator Susan Collins calling it extraordinarily costly, adding, tax and spending decisions should not appear to be tied to election results. Senate Majority Leader John Thune sounding skepti...
+
+5 rowid=191739 mem=John Thune show=csr tag='SEGALL (voice-over)'
+   B: ...There were previous instances where they had to issue apologies for breaches in the past. This was different. 
+   A: SEGALL (voice-over): Senator John Thune and much of Washington was watching closely....
+
+6 rowid=241935 mem=Brian Schatz show=cnr tag='RODRIGUEZ (voice-over)'
+   B: ...ople feel the very ways that we, as parents and as a society, don't want them to feel is built into the business model. 
+   A: RODRIGUEZ (voice-over): The proposed bill also requires parental consent for users age 13 to 17 and bans tech platforms from using teens' personal information to target them with content or advertising....
+
+7 rowid=92325 mem=Alexandria Ocasio-Cortez show=lcl tag='UNKNOWN (voice-over)'
+   B: ...I hope he is. That's what I'll say. 
+   A: UNKNOWN (voice-over): That he is the Republican nominee?...
+
+8 rowid=307247 mem=Gary Peters show=this-week tag='RADDATZ (voice over)'
+   B: ...t I use the word failure to their leaders. You, sir, are the failure, not the men and women who are on that front line. 
+   A: RADDATZ (voice over): But this war is increasingly unpopular with the American people. According to a recent “Washington Post”/Ipsos poll, only 29 percent approve of Trump’s handling of the war, while 69 percent disapprove. A war that the administration said w...
+
+9 rowid=240762 mem=Debbie Dingell show=fmjc tag='CHATTERLEY (on camera)'
+   B: ... China already has on Americans through the TikTok app, and quite frankly, could have had access to other apps as well. 
+   A: CHATTERLEY (on camera): I think there's a belief that Chinese companies are and can be private, but when it comes to national security they become an arm, effectively of the Chinese government and to your point that means they can weaponize American data, they...
+
+10 rowid=231371 mem=Don Bacon show=es tag='MCKEND (voice-over)'
+   B: ...Herschel needs to be -- come clean and just be honest. We also know that we all make mistakes. 
+   A: MCKEND (voice-over): For his part, Walker's opponent, Democratic Sen. Raphael Warnock continues to avoid directly attacking his GOP rival over the allegations....
+
+11 rowid=231999 mem=Raphael Warnock show=cnr tag='MCKEND (voice-over)'
+   B: ...s the people of Georgia now to hallucinate and imagine that he is also a United States senator. He's clearly not ready. 
+   A: MCKEND (voice-over): Walker also facing fresh questions about reports he paid for a former girlfriend's abortion more than a decade ago. He's now acknowledging sending a $700 check to the woman but still denied it was for the procedure....
+
+12 rowid=73622 mem=Thom Tillis show=cnr tag='RIED (voice-over)'
+   B: ...I just can't agree. It was surprising to me that it was a blanket pardon. 
+   A: RIED (voice-over): But perhaps the strongest rebuke came from former officer Michael Fanone, who was attacked during the riot....
+
+13 rowid=83159 mem=Richard Durbin show=esrs tag='YOSHIDA (voiceover)'
+   B: ...to whether or not they had a legal rationale for deploying National Guard troops becomes grounds for a personal attack. 
+   A: YOSHIDA (voiceover): Bondi also asked about allegations from Republican senators that as part of the January 6 investigation the FBI improperly spied on them by obtaining phone records of GOP lawmakers....
+
+14 rowid=89345 mem=Lindsey Graham show=ow tag='HANCOCKS (voice-over)'
+   B: ...And as to this commander-in-chief. 
+   A: HANCOCKS (voice-over): Some within President Trump's circle are pushing for the U.S. military to take over Iran's Kharg Island to force the opening of the Strait of Hormuz. A tiny island off the coast of Iran that 90 percent of the country's oil exports passes...
+
+15 rowid=81949 mem=Bernard Sanders show=this-week tag='KARL (voice-over)'
+   B: ...Hey, Mr. Trump, people fought and died to create a democratic society. You're not going to take it away from us. 
+   A: KARL (voice-over): 83-year-old Independent Senator Bernie Sanders is drawing crowds even bigger than he did as a presidential candidate....
+
+16 rowid=184694 mem=John Hickenlooper show=fox-news-sunday tag='BREAM (voice over)'
+   B: ...l hardball. But, of course, pickleball is a softball and you see that sometimes a softer approach can get more results. 
+   A: BREAM (voice over): The father pickleball even once served in the halls of Congress. Its creation, in 1965 by Joel Pritchard, who was then serving in the Washington state senate and was later elected to the U.S. House, has the goal of curing summer boredom. St...
+
+17 rowid=251036 mem=Mike Johnson show=ctmo tag='MCKEND (voice over)'
+   B: ...I want to thank you all for the trust you have instilled in me. 
+   A: MCKEND (voice over): Number one, the country's 45th president and leading Republican presidential candidate becomes the first former president to face criminal charges....
+
+18 rowid=244157 mem=Tom Cotton show=the-five-on-the-long-awaited-biden-putin-summit tag='WATTERS (on camera)'
+   B: ...d spend to the tune of $4 trillion to once again give away things like tax breaks to rich people for electric vehicles. 
+   A: WATTERS (on camera): Capitol Hill correspondent Dana Perino with an update. What do we have now, Dana?...
+
+19 rowid=83232 mem=Alex Padilla show=ebo tag='MICHAELSON (voice-over)'
+   B: ...Let go of my hands. Don't put them behind my back. 
+   A: MICHAELSON (voice-over): Padilla, detained while asking a question of U.S. Homeland Security Secretary Kristi Noem. When CNN's Manu Raju asked Padilla about the Porter videos, the senator responded, quote, 'I'm not even sure what to say". On how damaging it is...
+
+20 rowid=81230 mem=Hakeem Jeffries show=this-week tag='KARL (voice over)'
+   B: ...This is a victory for the American people. 
+   A: KARL (voice over): The deal does not include the one thing Donald Trump demanded....
+
+==================== R3 ====================
+1 rowid=217666 mem=Alexandria Ocasio-Cortez show=cnr tag='JIMENEZ (voice over)'
+   B: ...fford an emergency to begin with, when you have a disaster like this, it can just set people back for years. [19:20:00] 
+   A: JIMENEZ (voice over): And as residents wait for the water and power to come back, some still forced to use their cars for warmth. Others, if they're lucky, find shelter in a hotel....
+
+2 rowid=204676 mem=Chrissy Houlahan show=cnr tag='ACOSTA (voice-over)'
+   B: ...hat I've heard has corroborated that, then we really do have something that is very, very serious and grave. [02:05:00] 
+   A: ACOSTA (voice-over): The president was handed another major legal setback when a federal appeals ruled he must turn over the long secret tax returns and Jay Sekulow said in a statement the decision will be taken to the Supreme Court. The issue raised in the ca...
+
+3 rowid=219245 mem=Mitch McConnell show=cg tag='COLLINS (voice-over)'
+   B: ...Yes, 100 percent of our focus is on stopping this new administration, 
+   A: COLLINS (voice-over): Alongside Louisiana's Democratic Governor and Lake Charles's Republican Mayor, Biden argued for bipartisanship outside of Washington....
+
+4 rowid=204464 mem=Jim Jordan show=nday tag='PRESIDENT OF THE UNITED STATES (via phone)'
+   B: ...It is a sad day. It really is, for this country. What the Democrats have put our nation through. DONALD TRUMP (R), 
+   A: PRESIDENT OF THE UNITED STATES (via phone): They gave us absolutely no rights. I didn't have one negative Republican vote....
+
+5 rowid=71003 mem=Bernard Sanders show=cnc tag='ZELENY (voice over)'
+   B: ...We've got to win Wisconsin. [08:45:01] 
+   A: ZELENY (voice over): Warning against third-party candidates like Jill Stein....
+
+6 rowid=207171 mem=Nancy Pelosi show=cg tag='LAUREN FOX, CNN CONGRESSIONAL REPORTER (voice-over)'
+   B: ...Frankly, I don't care what the Republicans say. 
+   A: LAUREN FOX, CNN CONGRESSIONAL REPORTER (voice-over): A testy House speaker putting a stop to mounting questions about her next move on impeachment....
+
+7 rowid=224574 mem=Jim Jordan show=ndaysat tag='GRAYER (voice-over)'
+   B: ...I had no more calls with -- I talked to the president couple times that day, but I don't remember the times. [08:05:03] 
+   A: GRAYER (voice-over): So --...
+
+8 rowid=227542 mem=Hillary Scholten show=acd tag='RAJU (voice-over)'
+   B: ...bbs has certainly fired up a certain portion of the electorate over those claims and I think it's dangerous. [20:45:06] 
+   A: RAJU (voice-over): Democrats could flip the seat with a boost from redistricting....
+
+9 rowid=200895 mem=Bernard Sanders show=nday tag='GRIFFIN (on camera)'
+   B: ... the mental health situation in America where time after time after time we're seeing indescribable horrors? [08:40:02] 
+   A: GRIFFIN (on camera): You wrote, shame on you. This is a gun issue. To use the gun lobby talking points on this only discredits you as a presidential option. What did you mean?...
+
+10 rowid=92125 mem=Brian Schatz show=ip tag='RAJU (on camera)'
+   B: ...the trust that we once had. INSIDE POLITICS, the best reporting from inside the corridors of power, starts now. (MUSIC) 
+   A: RAJU (on camera): Good morning. And welcome to INSIDE POLITICS SUNDAY and a happy Father's Day. I'm Manu Raju. President Trump is dispatching his vice president, J.D. Vance, on a mission to salvage his emerging deal with Iran that has put him on the defensive,...
+
+11 rowid=69517 mem=Melanie Stansbury show=cnr tag='PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)'
+   B: ...Director with all due respect. The answers that we've received here in this hearing today are completely unsatisfactory 
+   A: PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over): Republican and Democratic members of Congress frustrated with the head of the Secret Service, many calling for her immediate resignation....
+
+12 rowid=228460 mem=John Fetterman show=cg tag='MCKEND (voice-over)'
+   B: ...Steel workers, 
+   A: MCKEND (voice-over): Pennsylvania's Democratic candidate for Senate John Fetterman back on the campaign trail more than three months after suffering a stroke....
+
+13 rowid=242883 mem=James Baird show=ctmo tag='TAPPER (voiceover)'
+   B: ...I to be here is just I think very important. And it really -- it really pays tribute to what we're here for. [06:45:08] 
+   A: TAPPER (voiceover): Republican Congressman Jim Baird from Indiana and Democratic Congressman Mike Thompson from California both served in Vietnam but only just realized all they have in common....
+
+14 rowid=226817 mem=Nancy Pelosi show=president-elect-trump-reacts-to-reports-criticizing-lack-of-transparency-transition-team-turmoil tag='PERVUM (ph)'
+   B: ...Not very much, because we'll be out for Thanksgiving. But we'll have the rest of this week to go over some issues. 
+   A: PERVUM (ph): There are some people who say you got beat pretty badly here, and this speaks......
+
+15 rowid=68560 mem=James Clyburn show=fmjc tag='LEE (voice-over)'
+   B: ...I will support her if he were to step aside. [18:05:00] 
+   A: LEE (voice-over): Some prominent Biden supporters also expressing support for Harris, but insisting for now that the president remains at the top of the ticket....
+
+16 rowid=85561 mem=Nancy Mace show=acd tag='FOREMAN (voice-over)'
+   B: ...Did I drop an F-bomb? I hope I did. Did I call them incompetent? If I didn't, they absolutely earned it. [20:35:09] 
+   A: FOREMAN (voice-over): Mace's office called the report a full exoneration, even though it says she blew a minor miscommunication into a spectacle....
+
+17 rowid=68899 mem=Marc Veasey show=cnr tag='RAJU (voice-over)'
+   B: ...k and be reelected. And so if they need to, you know, distance themselves, then that's what they need to do. [03:05:07] 
+   A: RAJU (voice-over): Yet some, like Congressman Jerry Nadler, now say they are on board with Biden, despite privately calling for a change on Sunday....
+
+18 rowid=224465 mem=Pete Sessions show=sotu tag='BASH (on camera)'
+   B: ...e where Republicans want to be represented by Republicans and Democrats want to be represented by Democrats. [09:55:06] 
+   A: BASH (on camera): The fact that there are so many more safe seats, Republican and Democrat, in Congress, does that make things more partisan here?...
+
+19 rowid=70959 mem=Elissa Slotkin show=acd tag='MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voice-over)'
+   B: ...I'm concerned about all of us running 
+   A: MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voice-over): Democrats in Michigan are running the gauntlet. As the GOP woos blue collar voters, the war in Gaza splits the Democratic coalition and the economy drives voter anxiety....
+
+20 rowid=218632 mem=Josh Hawley show=cnnt tag='LEMON (on camera)'
+   B: ...r way as a violent crime has soared in this country which is what the Democrats have done for the last year. [22:05:00] 
+   A: LEMON (on camera): Why do we have to do this? Why? It's so disingenuous. The question, why can't we address both, right? Criminals who commit crimes and our extraordinary access to very powerful military-style weapons. Maybe the best person to talk about looki...
+
+==================== R4 ====================
+1 rowid=144501 mem=Raphael Warnock show=pbs-newshour tag='Treasury Secretary Nominee'
+   B: ...cuts for those making more than $400,000 would help close the deficit and reduce our national debt? Scott Bessent, U.S. 
+   A: Treasury Secretary Nominee: Senator Warnock, I do not. I believe that you would capture an inordinate amount of small business people....
+
+2 rowid=151413 mem=Steven Horsford show=pbs-newshour tag='Trade Representative'
+   B: ...If it was a plan, if it was always a plan, how is this not market manipulation? Jamieson Greer, U.S. 
+   A: Trade Representative: It's not market manipulation, sir....
+
+3 rowid=155292 mem=Josh Hawley show=pbs-newshour tag='Homeland Security Secretary'
+   B: ...We need it as quickly as possible. Will you help us expedite that? Kristi Noem, U.S. 
+   A: Homeland Security Secretary: Absolutely. I have spoken with your governor and did that day that this devastation happened. And so we have promised and pledged to get that expedited as soon as possible....
+
+4 rowid=180228 mem=John Kennedy show=pbs-newshour tag='Homeland Security Secretary'
+   B: ...spending $220 million running TV ads across the country in which you are featured prominently? Kristi Noem, Former U.S. 
+   A: Homeland Security Secretary: Yes, sir, we went through the legal processes, did it correctly, worked with OMB?...
+
+5 rowid=185172 mem=Jack Reed show=pbs-newshour tag='Attorney General'
+   B: ...And you're the president's consigliere. Todd Blanche, Acting U.S. 
+   A: Attorney General: Your perspective is completely wrong, Senator, respectfully....
+
+6 rowid=185287 mem=Thom Tillis show=pbs-newshour tag='Treasury Secretary'
+   B: ...Did you actually tell Pulte you were going to punch him in the face? Scott Bessent, U.S. 
+   A: Treasury Secretary: No, sir. I actually said it was going to kick his ass. That was last summer, summer '25. And many teams have fights in the locker room and then go out and win for the team on the football field....
+
+7 rowid=256066 mem=John Cornyn show=pbs-newshour tag='Attorney General Vanita Gupta'
+   B: ...ctural racism. What does that mean? That means everything, every institution, every person in America is a racist? Fmr. 
+   A: Attorney General Vanita Gupta: It means that there is bias built into existing institutions. And the policing -- there have been any number of courageous police chiefs that have spoken to the history of systematic racism in policing as well....
+
+8 rowid=256067 mem=John Cornyn show=pbs-newshour tag='Attorney General Vanita Gupta'
+   B: ...cism can exist in a system that -- that requires individual responsibility, or do you think it's one or the other? Fmr. 
+   A: Attorney General Vanita Gupta: I think every American institution has been kind of shaped by these forces, and our goal is to do what we can as policy-makers, as advocates to take that out and to provide -- and to try to fight it in the modern-day iterations t...
+
+9 rowid=256068 mem=John Cornyn show=pbs-newshour tag='Attorney General Vanita Gupta'
+   B: ...Well, do you believe basically all Americans are racist? Fmr. 
+   A: Attorney General Vanita Gupta: I think we all have implicit bias and racial bias, yes, I do....
+
+10 rowid=257777 mem=Steve Daines show=pbs-newshour tag='Treasury Secretary'
+   B: ...or in the high, increasingly broad-based and accelerating inflation that we observed this past year? Janet Yellen, U.S. 
+   A: Treasury Secretary: Senator, we're seeing high inflation in almost all developed countries around the world. And they have very different fiscal policies. So it can't be the case that the bulk of the inflation that we're experiencing reflects the impact of the...
+
+11 rowid=258150 mem=Nancy Pelosi show=pbs-newshour tag='Capitol Police Chief'
+   B: ...January 6 was a day of horror and heartbreak. It is also a moment of extraordinary heroism. Tom Manger, U.S. 
+   A: Capitol Police Chief: I cannot thank our officers enough for their courage, for the resolve....
+
+12 rowid=258611 mem=Lindsey Graham show=pbs-newshour tag='Deputy Attorney General'
+   B: ...I want to ask you again, is the Department of Defense the holdup? Lisa Monaco, U.S. 
+   A: Deputy Attorney General: Senator, I know the Department of Defense has had longstanding concerns about our engagement. The department......
+

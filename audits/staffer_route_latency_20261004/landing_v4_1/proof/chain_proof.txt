@@ -1,0 +1,33 @@
+scratch tree: 15 files landing_v4 edits at their pre-image bytes; 27 paths are watched (26 are landing_v4 files, 11 landing_v4_1 files, 10 in both)
+PASS  start (LIVE-before-landing_v4): every one of the 27 watched paths is as expected
+
+== 1. v4.1 before landing_v4
+PASS  v4.1 --apply on the tree without landing_v4: rc=2, REFUSED
+PASS  v4.1 dry run on the tree without landing_v4: rc=2, REFUSED
+PASS  after the refusals: every one of the 27 watched paths is as expected
+
+== 2. landing_v4, then v4.1
+PASS  landing_v4 dry run: rc=0
+PASS  after the landing_v4 dry run: every one of the 27 watched paths is as expected
+PASS  landing_v4 --apply: rc=0
+PASS  after landing_v4: every one of the 27 watched paths is as expected
+PASS  v4.1 dry run after landing_v4: rc=0
+PASS  after the v4.1 dry run: every one of the 27 watched paths is as expected
+      apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  v4.1 --apply: rc=0
+PASS  after v4.1: every one of the 27 watched paths is as expected
+PASS  every file of v4.1 changed (11), and no other watched file did
+PASS  the other 16 watched files kept their landing_v4 bytes
+PASS  landing_v4 --apply again, with v4.1 on: rc=2, REFUSED (its targets moved)
+PASS  after that refusal: every one of the 27 watched paths is as expected
+
+== 3. back out, in reverse order
+PASS  landing_v4 rollback while v4.1 is still on is refused (rc=1): v4.1 must come off first
+PASS  after that refusal: every one of the 27 watched paths is as expected
+PASS  v4.1 --rollback: rc=0
+PASS  after the v4.1 rollback: every one of the 27 watched paths is as expected
+PASS  landing_v4 --rollback: rc=0
+PASS  after the landing_v4 rollback (LIVE-before-landing_v4 again): every one of the 27 watched paths is as expected
+PASS  every file either patch set created is gone (12)
+
+result: ALL PASS

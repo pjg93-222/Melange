@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H1DC71A1714E04E72A64DE36F6CCB320C" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5013 IH: Small Business Fair Debt Collection Protection Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-11-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5013</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191108">November 8, 2019</action-date><action-desc><sponsor name-id="L000586">Mr. Lawson of Florida</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To apply the Fair Debt Collection Practices Act to small businesses to the same extent as such Act
+			 applies to consumers, to require the Director of the Bureau of Consumer
+			 Financial Protection to define <quote>small business</quote> for purposes of such Act, and for other purposes.</official-title></form>
+	<legis-body id="HCA41CB38FFE6405D9CF558C1A8FE7701" style="OLC">
+ <section id="HD862ED612857462AAA18F7C024513C8C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Small Business Fair Debt Collection Protection Act</short-title></quote>.</text> </section><section id="H2CF552D1BA7142DDB378F623D6CBE5F6"><enum>2.</enum><header>Fair debt collection practices for loans to small businesses</header> <subsection id="HC970220E55B846C1B4E1BDA8527BE4F1"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Fair Debt Collection Practices Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1692">15 U.S.C. 1692</external-xref> et seq.) is amended—</text>
+ <paragraph id="H64692F4AFCB34E4F917A586F80D16ADA"><enum>(1)</enum><text>in section 803, by amending paragraph (5) to read as follows:</text> <quoted-block display-inline="no-display-inline" id="HEE44D9B0C58B4F0BB607B30004FB7D2B" style="USC"> <paragraph id="HC522BFD7E2D14B4B95DA9EFA52659701"><enum>(5)</enum><text>The term <term>debt</term> means any obligation or alleged obligation to pay money arising out of a transaction, whether or not such obligation has been reduced to judgment.</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="H6DDD1B73ADE544E3B9CD118815044C80"><enum>(2)</enum><text>by redesignating section 819 as section 820; and</text> </paragraph><paragraph id="HC2566F2BF629496CAB99C307E0F85278"><enum>(3)</enum><text>by inserting after section 818 the following:</text>
+					<quoted-block display-inline="no-display-inline" id="H3D3651F2C0F84342BFDA5910A26B3215" style="USC">
+						<section id="H4D36F4EC10534C4097C57581378C1858"><enum>819.</enum><header>Application to small businesses</header>
+ <subsection id="H5BF8E65B913D427A91B31DB721202F3E"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">This Act shall apply to small businesses to the same extent as this Act applies to consumers.</text> </subsection><subsection id="H8BD6507DDD1D45F98D0B4B071E51D96E"><enum>(b)</enum><header>Small business defined</header><text>The Director of the Bureau, in consultation with the Administrator of the Small Business Administration, shall issue a rule to define the term <quote>small business</quote> for purposes of this section.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></subsection><subsection id="HBC2E09EADD6D4E00A6DD92819389EF33"><enum>(b)</enum><header>Clerical amendment</header><text display-inline="yes-display-inline">The table of contents for the Fair Debt Collection Practices Act is amended by striking the item relating to section 819 and inserting the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H1A2BB7C14E42468E8A222097E7920637" style="USC">
+					<toc regeneration="no-regeneration">
+						<toc-entry level="section">819. Application to small businesses.</toc-entry>
+						<toc-entry bold="off" level="section">820. Effective date.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H7496F09D37114893AD5E40C5BD5A0293"><enum>(c)</enum><header>Prohibition on harassment or abuse</header><text display-inline="yes-display-inline">Section 806(3) of the Fair Debt Collection Practices Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1692d">15 U.S.C. 1692d</external-xref>) is amended—</text> <paragraph id="HDE789939A89B46EDA5233A74A4901BB1"><enum>(1)</enum><text>by striking <quote>consumers who</quote> and inserting <quote>consumers or small businesses that</quote>; and</text>
+ </paragraph><paragraph id="H23FA01D86B054164B28F9F9F32494F68"><enum>(2)</enum><text>by inserting <quote>, to a commercial credit bureau,</quote> after <quote>consumer reporting agency</quote>.</text> </paragraph></subsection></section></legis-body></bill> 
+

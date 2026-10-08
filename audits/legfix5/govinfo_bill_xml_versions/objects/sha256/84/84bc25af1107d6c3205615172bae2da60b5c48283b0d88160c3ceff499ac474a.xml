@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-RYA21116-H44-SW-SLL">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S209 IS: Emergency Assistance for Rural Water Systems Act of 2021</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-02-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>117th CONGRESS</congress><session>1st Session</session>
+<legis-num>S. 209</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20210203">February 3, 2021</action-date>
+<action-desc><sponsor name-id="S324">Mrs. Shaheen</sponsor> (for herself and <cosponsor name-id="S384">Mr. Tillis</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSAF00">Committee on Agriculture, Nutrition, and Forestry</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To provide for assistance to rural water, wastewater, and waste disposal systems affected by the COVID–19 pandemic, and for other purposes.</official-title>
+</form>
+<legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H72EE37F23AF947D79E8DA87C7D17A831">
+<section section-type="section-one" id="H96A55626F11241D082066575D81FBA50"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Emergency Assistance for Rural Water Systems Act of 2021</short-title></quote>.</text></section> <section id="H2F6EEE528B8C4AF38CC18F40F6E445D5"><enum>2.</enum><header>Emergency assistance for rural water systems</header> <subsection id="id1E3DFFACEEE24ED181BF9701A80A108D"><enum>(a)</enum><header>Definitions</header><text>In this section:</text>
+<paragraph id="idB52F482527794DC39E5319A9B62D2098"><enum>(1)</enum><header>Eligible entity</header><text>The term <term>eligible entity</term> means a rural water, wastewater, or waste disposal facility with respect to which assistance may be provided under a water, wastewater, or waste disposal program under section 306(a), 306A, 306C, or 306D of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1926">7 U.S.C. 1926(a)</external-xref>, 1926a, 1926c, 1926d).</text></paragraph> <paragraph id="id25AE3AF2DCC848E7B75F6ABAE184262D"><enum>(2)</enum><header>Secretary</header><text>The term <term>Secretary</term> means the Secretary of Agriculture.</text></paragraph></subsection>
+<subsection id="H44511399D30C418E8CFD153E1038A4F4"><enum>(b)</enum><header>Emergency assistance</header><text>The Secretary may—</text> <paragraph id="H026A156C0CE849ED8C3ED916DB764182"><enum>(1)</enum><text display-inline="yes-display-inline">provide a grant, a zero percent interest loan, or a 1 percent interest loan to, forgive principal or interest or modify any term or condition of an outstanding loan made to, or refinance part or all of any other loan (if the purpose of the loan is an eligible purpose under section 306(a)(1) or 306C of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1926">7 U.S.C. 1926(a)(1)</external-xref>, 1926c)) made to, an eligible entity; or</text></paragraph>
+<paragraph id="H3772DD7A1AF2421D9CEA5C96460CCDA3"><enum>(2)</enum><text display-inline="yes-display-inline">reduce or eliminate any fee that is or would otherwise be required to be paid under section 306(a)(1) of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1926">7 U.S.C. 1926(a)(1)</external-xref>) with respect to a loan guarantee provided to an eligible entity, on the condition that the eligible entity receives the benefit resulting from the reduction or elimination of the fee.</text></paragraph></subsection> <subsection id="HC148716621BB4193BAB66652721C54E0"><enum>(c)</enum><header>Level of assistance</header><text>The Secretary may provide assistance to an eligible entity under subsection (b) as the Secretary determines is necessary—</text>
+<paragraph id="HF42E49F30DBC458EBDFFE6FF10FAD449"><enum>(1)</enum><text>to ensure that the eligible entity has the necessary resources to maintain public health, safety, or order;</text></paragraph> <paragraph id="H79D33C8E15C94452AF3D03541422BC60"><enum>(2)</enum><text>to address financial hardships of the eligible entity due to the COVID–19 public health emergency; or</text></paragraph>
+<paragraph id="HC684FE7F11DF46BDA10BF18514B0C511"><enum>(3)</enum><text>to promote the financial stability of the eligible entity.</text></paragraph></subsection> <subsection id="H365ACDF9C1F34774BDCC45794300C9EF"><enum>(d)</enum><header>Use of assistance</header><text display-inline="yes-display-inline">An eligible entity to which assistance is provided under subsection (b) may use the assistance—</text>
+<paragraph id="HC3F67BE808AF4418B620DD2252063435"><enum>(1)</enum><text display-inline="yes-display-inline">for any purpose for which the eligible entity is eligible for assistance under the relevant provision of law referred to in subsection (a)(1); or</text></paragraph> <paragraph id="HE336CD47DC2B408896FBA6336B813FAC"><enum>(2)</enum><text>for any direct operational expenses incurred by the eligible entity, as determined by the Secretary.</text></paragraph></subsection>
+<subsection id="H443BDE51421140FB8DDF174B0A945D4E"><enum>(e)</enum><header>Appropriation</header>
+<paragraph id="H930BA1F3EFB54F3AA960B5238946102C"><enum>(1)</enum><header>In general</header><text>Out of any amounts in the Treasury not otherwise appropriated, there is appropriated to the Secretary $1,000,000,000 to carry out this section.</text></paragraph> <paragraph id="HE89B40F4635049588068566EB4C0856C"><enum>(2)</enum><header>Reservation for administrative expenses</header><text display-inline="yes-display-inline">The Secretary shall reserve 3 percent of the amount appropriated by paragraph (1) for administrative expenses incurred by the Secretary in carrying out this section.</text></paragraph>
+<paragraph id="HCC026974B9914286B0BCB8211030EF22"><enum>(3)</enum><header>Availability</header><text>The amount appropriated by paragraph (1) shall remain available through December 31, 2022.</text></paragraph></subsection></section> </legis-body> </bill> 
+

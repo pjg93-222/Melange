@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="HD2B749091CEA45439D9B36D94311B15F" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3141 RH: FHA Loan Affordability Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IB</distribution-code>
+		<calendar display="yes">Union Calendar No. 227</calendar>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 3141</legis-num>
+		<associated-doc display="yes" role="report">[Report No. 116–282]</associated-doc>
+		<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190605">June 5, 2019</action-date>
+			<action-desc><sponsor name-id="P000616">Mr. Phillips</sponsor> introduced the following bill; which was referred to the <committee-name added-display-style="italic" committee-id="HBA00" deleted-display-style="strikethrough">Committee on Financial Services</committee-name></action-desc>
+		</action>
+		<action>
+			<action-date>November 12, 2019</action-date>
+			<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the
+			 Union, and ordered to be printed</action-desc>
+			<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+			<action-instruction>For text of introduced bill, see copy of bill as introduced on June 5, 2019</action-instruction>
+		</action>
+		<action display="yes">
+			<action-desc display="yes"><pagebreak></pagebreak></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To limit the collection of annual premiums under the FHA program for mortgage insurance for single
+			 family housing, and for other purposes.<pagebreak></pagebreak></official-title>
+	</form>
+	<legis-body changed="added" committee-id="HBA00" display-enacting-clause="yes-display-enacting-clause" id="H9495E705189D4B88A699A9B190C6E5A2" reported-display-style="italic" style="OLC">
+ <section id="H0396F35215AD4C45AA2DCFA5E9C64B8C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>FHA Loan Affordability Act of 2019</short-title></quote>.</text> </section><section id="H16EF2DDCCD664E3082144670913C0784" section-type="subsequent-section"><enum>2.</enum><header>Annual premiums</header> <subsection id="HA720F8F5E16048CA99372B981AC78088"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Paragraph (2) of section 203(c) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(c)(2)</external-xref>) is amended—</text>
+ <paragraph id="HA10B1A6EBA964C6390E7AB3A07AE8F6F"><enum>(1)</enum><text>in subparagraph (B)—</text> <subparagraph id="HD7E26B40344240F582F4811767DD60DB"><enum>(A)</enum><text>in clause (i), by striking <quote>For any</quote> and inserting <quote>Subject to subparagraph (D), for any</quote>; and</text>
+ </subparagraph><subparagraph id="H29CA22239F4743568E73F9E80F724CB8"><enum>(B)</enum><text display-inline="yes-display-inline">in clause (ii), by striking <quote>For any</quote> and inserting <quote>Subject to subparagraph (D), for any</quote>;</text> </subparagraph></paragraph><paragraph id="HDBFAC3EAF49842248A988E58ADD90F27"><enum>(2)</enum><text display-inline="yes-display-inline">in subparagraph (C)(i), by striking <quote>In addition</quote> and inserting <quote>Subject to subparagraph (D), in addition</quote>; and</text>
+ </paragraph><paragraph id="H627ADA398F584336BB0D1F482221E47E"><enum>(3)</enum><text>by adding at the end the following new subparagraph:</text> <quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="H3CEB409B88EE4FD69745D12F713828D5" reported-display-style="italic" style="OLC"> <subparagraph id="H916A1D100ABB4B5AA1417E9515D72071" indent="up1"><enum>(D)</enum><text display-inline="yes-display-inline">The Secretary may not collect any annual premiums under this paragraph with respect to a mortgage at any time that the remaining insured principal balance (excluding the portion of the remaining balance attributable to the premium collected under subparagraph (A)) is 78 percent or less than the lower of (i) the sales price of the dwelling at the sale in connection with which the mortgage was made, or (ii) the appraised value of the dwelling at the time of the origination of the mortgage.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></subsection><subsection id="H2682F5AA448C44428800CEDE17D8FF56"><enum>(b)</enum><header>Applicability</header><text display-inline="yes-display-inline">The amendments made by subsection (a) of this section shall apply with respect only to mortgages insured by the Secretary of Housing and Urban Development after the date of the enactment of this Act.</text>
+			</subsection></section></legis-body>
+	<endorsement display="yes">
+		<action-date>November 12, 2019</action-date>
+		<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the
+			 Union, and ordered to be printed</action-desc></endorsement>
+</bill>
+
+

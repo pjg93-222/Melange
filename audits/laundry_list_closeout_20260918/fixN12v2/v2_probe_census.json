@@ -1,0 +1,11 @@
+{
+ "counts": {
+  "U+2019 inside an ALL-CAPS token": 183,
+  "UNIDENTIFIED / UNKNOWN role label": 75,
+  "bare Q: turn": 110,
+  "dotted abbreviation then an ALL-CAPS run": 514,
+  "no-space colon after an ALL-CAPS tag": 38,
+  "role tail after (R-XX) / (R)": 78
+ },
+ "interview_rows": 153576
+}

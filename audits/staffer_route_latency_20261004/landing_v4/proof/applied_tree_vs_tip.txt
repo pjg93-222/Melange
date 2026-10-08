@@ -1,0 +1,6 @@
+# The applied tree (clean `git archive 3248a6a02 fec` + LIVE's current bytes for the 34 patched files + landing_v4 by its own apply script) against the clean export of the v4 tip,
+# every file the tip tracks under fec/ (git ls-tree -r --name-only <tip> -- fec: 1,732 files), by live_patch.py drift. EOL_ONLY: the content is identical and the terminators are LIVE's own,
+# which the patch keeps (a file that LIVE holds CRLF or mixed stays so); CONTENT must be 0.
+
+A C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems/4f30368b-c2d1-47f6-a368-3d68b2892c85/scratchpad/v4fix_work/applied_tree: 1732 files; B C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems/4f30368b-c2d1-47f6-a368-3d68b2892c85/scratchpad/v4fix_work/tip_v4: 1732 files; 1732 files compared (the tracked list)
+IDENTICAL_BYTES 1719, EOL_ONLY 13, CONTENT 0; missing from A 0, missing from B 0; not in the list: in A 0, in B 0

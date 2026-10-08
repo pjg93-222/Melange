@@ -1,0 +1,2054 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H6B38767633DE4C14955EFFF7603E2AE0" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8626 IH: Workforce Housing Tax Credit Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8626</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260430">April 30, 2026</action-date><action-desc><sponsor name-id="P000613">Mr. Panetta</sponsor> (for himself, <cosponsor name-id="C001126">Mr. Carey</cosponsor>, and <cosponsor name-id="N000193">Mr. Nunn of Iowa</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Internal Revenue Code of 1986 to provide a credit for middle-income housing, and for other purposes.</official-title></form><legis-body id="HF58779CB32D2428EB8557E3210E4BB39" style="OLC"> 
+<section id="HDE1595F5FC1149CF9BE70F3A40FB3E26" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Workforce Housing Tax Credit Act</short-title></quote>.</text></section> <section id="H742253A1A035422EB217F205040717DF"><enum>2.</enum><header>Middle-income housing tax credit</header> <subsection id="H687471A375C1410CAF15BE235F43786C"><enum>(a)</enum><header>In general</header><text>Subpart D of part IV of subchapter A of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/1">chapter 1</external-xref> of the Internal Revenue Code of 1986 is amended by inserting after section 42 the following new section:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline" id="HDC92AA02B7EB47DF8B79D49F93FAD6BC">
+                    <section commented="no" display-inline="no-display-inline" section-type="subsequent-section" id="HEF79D06A9A854C0681CF282AAA35EE8C">
+                        <enum>42A.</enum>
+                        <header>Middle-income housing credit</header>
+                        <subsection id="H82D99C369F2E49568F608FFA0F96A40D">
+                            <enum>(a)</enum>
+                            <header>In general</header>
+ <text>For purposes of section 38, the amount of the middle-income housing credit determined under this section for any taxable year in the credit period shall be an amount equal to—</text>
+                            <paragraph id="H991B959D3741453F80931CE9D18B8623">
+                                <enum>(1)</enum>
+ <text>the applicable percentage, of</text> </paragraph> <paragraph id="HFBCA448BC8EE4026B6C1F0F1416B2DD6"> <enum>(2)</enum> <text>the qualified basis of each qualified middle-income building.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="HEC2BC98077FD42E684E1EFC533EB2A0A">
+                            <enum>(b)</enum>
+                            <header>Applicable percentage</header>
+                            <paragraph id="H8B8AC3B7BB844B00A13D5D11EE76FBB2">
+                                <enum>(1)</enum>
+                                <header>Determination of applicable percentage</header>
+ <text>For purposes of this section—</text> <subparagraph id="H252DD71B540849228D9AD1BFFA18965E"> <enum>(A)</enum> <header>In general</header> <text>The term <term>applicable percentage</term> means, with respect to any building, the appropriate percentage prescribed by the Secretary for the earlier of—</text>
+                                    <clause id="HE950CF8BB0294180BF97591EE61508DD">
+                                        <enum>(i)</enum>
+ <text>the month in which such building is placed in service, or</text>
+                                    </clause>
+                                    <clause id="H7457ED118E1943DA97A85E5D52E0A69A">
+                                        <enum>(ii)</enum>
+ <text>at the election of the taxpayer, the month in which the taxpayer and the housing credit agency enter into an agreement with respect to such building (which is binding on such agency, the taxpayer, and all successors in interest) as to the housing credit dollar amount to be allocated to such building.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">A
+                                        month may be elected under clause (ii) only if the election
+                                        is made not later than the 5th day after the close of such
+                                        month. Such an election, once made, shall be
+                                        irrevocable.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="H41D6F8985D634756871649D5171D37EC">
+                                    <enum>(B)</enum>
+                                    <header>Method of prescribing percentages</header>
+ <text>The percentages prescribed by the Secretary for any month shall be percentages which will yield over a 15-year period amounts of credit under subsection (a) which have a present value equal to—</text>
+                                    <clause id="HD4A3392FE1804D86BD11B0B4A0288748">
+                                        <enum>(i)</enum>
+ <text>50 percent of the qualified basis of a new building which is not Federally subsidized for the taxable year, and</text>
+                                    </clause>
+                                    <clause id="H60B0B8B3C09D4EA58BD5572E436F4FB6">
+                                        <enum>(ii)</enum>
+ <text>20 percent of the qualified basis of a building not described in clause (i).</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H91373CE5AE2B4C10A9A14BA3A4F48147">
+                                    <enum>(C)</enum>
+                                    <header>Method of discounting</header>
+ <text>The present value under subparagraph (B) shall be determined—</text>
+                                    <clause id="HB8645923AFCC4AC598E6A8B69775F05C">
+                                        <enum>(i)</enum>
+ <text>as of the last day of the 1st year of the 15-year period referred to in subparagraph (B),</text>
+                                    </clause>
+                                    <clause id="HBD52D3F9C1AC4A19A6F11574E74DA300">
+                                        <enum>(ii)</enum>
+ <text>by using a discount rate equal to 72 percent of the average of the annual Federal mid-term rate and the annual Federal long-term rate applicable under section 1274(d)(1) to the month applicable under clause (i) or (ii) of subparagraph (A) and compounded annually, and</text>
+                                    </clause>
+                                    <clause id="H5CF49A83BFA943798AFA9F33C90D4C19">
+                                        <enum>(iii)</enum>
+ <text>by assuming that the credit allowable under this section for any year is received on the last day of such year.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H69A6D70577494D1594D07961B25B07B1" commented="no">
+                                <enum>(2)</enum>
+                                <header>Minimum credit rate</header>
+                                <subparagraph commented="no" id="H5B77D75FEE4C43DE9FDF843208D15EEF">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The applicable percentage for any building which is not Federally subsidized for the taxable year shall not be less than 5 percent.</text>
+                                </subparagraph>
+                                <subparagraph id="HC329C17CFB7041D58B9D7C669E717DAB">
+                                    <enum>(B)</enum>
+                                    <header>Minimum credit rate for Federally subsidized
+                                        buildings</header>
+ <text>In the case of any building to which subparagraph (A) does not apply, except as provided in paragraph (3), the applicable percentage shall not be less than 2 percent.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H0924D34207934EA5975D71BBA47E1E4A">
+                                <enum>(3)</enum>
+                                <header>Exception for certain Federally subsidized
+                                    buildings</header>
+ <text>In the case of any building to which paragraph (2)(A) does not apply, the applicable percentage is zero unless—</text>
+                                <subparagraph id="H7CF61C5C89164601840F2FA67ABF1F29">
+                                    <enum>(A)</enum>
+ <text>a credit is allowed under section 42 with respect to such building for the taxable year, and</text>
+                                </subparagraph>
+                                <subparagraph id="H41C800E19BA94EB4976801E0BEBEE140">
+                                    <enum>(B)</enum>
+ <text>such building is financed by tax-exempt bonds as described in section 42(h)(4).</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H3916650978BF49538936D525D0BD45F9">
+                                <enum>(4)</enum>
+                                <header>Cross references</header>
+                                <subparagraph commented="no" id="HE322FB34A7D044B3B54B06CD138A08E1">
+                                    <enum>(A)</enum>
+ <text>For treatment of certain rehabilitation expenditures as separate new buildings, see subsection (e).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="HE2DC8BF5B8C44D31805DC102EB1A255C">
+                                    <enum>(B)</enum>
+ <text>For determination of applicable percentage for increases in qualified basis after the 1st year of the credit period, see subsection (f)(3).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H7053D990DBCB42B1B701A42A920E65CC">
+                                    <enum>(C)</enum>
+ <text>For authority of housing credit agency to limit applicable percentage and qualified basis which may be taken into account under this section with respect to any building, see subsection (h)(6).</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="HFC73046DDB74497CAF24EFA1A2FB00BD">
+                            <enum>(c)</enum>
+                            <header>Qualified basis; qualified middle-Income building</header>
+ <text>For purposes of this section—</text> <paragraph id="H4F1D260E27CE4830B838E1050BB9FD60"> <enum>(1)</enum> <header>Qualified basis</header> <subparagraph id="HE1A6AE4DD1BD4722A02C8738D8F7BFCD"> <enum>(A)</enum> <header>Determination</header> <text>The qualified basis of any qualified middle-income building for any taxable year is an amount equal to—</text>
+                                    <clause id="H2523896B515044FAB430C8D7935FB7A7">
+                                        <enum>(i)</enum>
+ <text>the applicable fraction (determined as of the close of such taxable year), of</text>
+                                    </clause>
+                                    <clause id="H103327CAEFD449D6A6B58D6282D136CD">
+                                        <enum>(ii)</enum>
+ <text>the eligible basis of such building (determined under subsection (d)).</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="HE7C95BD0F54D43AEBCCC31EDCF99E087">
+                                    <enum>(B)</enum>
+                                    <header>Applicable fraction</header>
+ <text>For purposes of subparagraph (A), the term <term>applicable fraction</term> means the smaller of the unit fraction or the floor space fraction.</text>
+                                </subparagraph>
+                                <subparagraph id="H1C7EDC73766F4812B5895510EA41B616">
+                                    <enum>(C)</enum>
+                                    <header>Unit fraction</header>
+ <text>For purposes of subparagraph (B), the term <term>unit fraction</term> means the fraction—</text>
+                                    <clause id="HDE72B80A85D34447ACE4E5C3B14C880D">
+                                        <enum>(i)</enum>
+ <text>the numerator of which is the number of middle-income units in the building, and</text>
+                                    </clause>
+                                    <clause id="H6767D432D0084F2489048ACB89334121">
+                                        <enum>(ii)</enum>
+ <text>the denominator of which is the number of residential rental units (whether or not occupied) in such building.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H5D19C0C949124EBC81A8B495907EAC04">
+                                    <enum>(D)</enum>
+                                    <header>Floor space fraction</header>
+ <text>For purposes of subparagraph (B), the term <term>floor space fraction</term> means the fraction—</text>
+                                    <clause id="H920E21BC7AE747589106A3941AF29C3F">
+                                        <enum>(i)</enum>
+ <text>the numerator of which is the total floor space of the middle-income units in such building, and</text>
+                                    </clause>
+                                    <clause id="HC81D4FD07C7B4DBC81C6CBF7AF30530B">
+                                        <enum>(ii)</enum>
+ <text>the denominator of which is the total floor space of the residential rental units (whether or not occupied) in such building.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HB5D81F11782C4F0691233D22AE8C7426">
+                                <enum>(2)</enum>
+                                <header>Qualified middle-income building</header>
+ <text>The term <term>qualified middle-income building</term> means any building which is part of a qualified middle-income housing project at all times during the period—</text>
+                                <subparagraph id="HAAC0207F892E41C79E462B8749738A78">
+                                    <enum>(A)</enum>
+ <text>beginning on the 1st day in the credit period on which such building is part of such a project, and</text>
+                                </subparagraph>
+                                <subparagraph id="H3B64A21E39014A8BBAC3EC9DBCBEA445">
+                                    <enum>(B)</enum>
+ <text>ending on the last day of the credit period with respect to such building.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H0C7685349EA4410FBB6718AF73031C67">
+                            <enum>(d)</enum>
+                            <header>Eligible basis</header>
+ <text>For purposes of this section—</text> <paragraph id="HA4128DBF11094B4ABE79B712956C83F1"> <enum>(1)</enum> <header>New buildings</header> <text>The eligible basis of a new building is its adjusted basis as of the close of the 1st taxable year of the credit period.</text>
+                            </paragraph>
+                            <paragraph id="H12BDA4EE94C046679BE2BA028224237D">
+                                <enum>(2)</enum>
+                                <header>Existing buildings</header>
+                                <subparagraph id="H60FBE2692F8A4F35BDCD59D646ACEC70">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The eligible basis of an existing building is—</text> <clause id="H39311DDE424944A1A1A399D765B6CFBC"> <enum>(i)</enum> <text>in the case of a building which meets the requirements of subparagraph (B), its adjusted basis as of the close of the 1st taxable year of the credit period, and</text>
+                                    </clause>
+                                    <clause id="H4BBE343A0E3F4E88AE81792E46616B7E">
+                                        <enum>(ii)</enum>
+ <text>zero in any other case.</text> </clause> </subparagraph> <subparagraph id="HD3F5D55E85E44C9995BC75DA983A7E40"> <enum>(B)</enum> <header>Requirements</header> <text>A building meets the requirements of this subparagraph if—</text>
+                                    <clause id="HDD1393F900ED49E88085C1B1D09DCD41">
+                                        <enum>(i)</enum>
+ <text>the building is acquired by purchase (as defined in section 179(d)(2)),</text>
+                                    </clause>
+                                    <clause id="H92F3F3A6E7EB4559A99709F5F294066A">
+                                        <enum>(ii)</enum>
+ <text>there is a period of at least 10 years between the date of its acquisition by the taxpayer and the date the building was last placed in service,</text>
+                                    </clause>
+                                    <clause id="HC1E8118D51C04000B7833DABBF50FCD8">
+                                        <enum>(iii)</enum>
+ <text>the building was not previously placed in service by the taxpayer or by any person who was a related person with respect to the taxpayer as of the time previously placed in service, and</text>
+                                    </clause>
+                                    <clause commented="no" id="HB2BCCB4101CE449B8A68D2845F065DAF">
+                                        <enum>(iv)</enum>
+ <text>except as provided in subsection (f)(5), a credit is allowable under subsection (a) by reason of subsection (e) with respect to the building.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H61869A32AA0C4341A20169749F0A74D6">
+                                    <enum>(C)</enum>
+                                    <header>Adjusted basis</header>
+ <text>For purposes of subparagraph (A), the adjusted basis of any building shall not include so much of the basis of such building as is determined by reference to the basis of other property held at any time by the person acquiring the building.</text>
+                                </subparagraph>
+                                <subparagraph id="HEAAC74C29B0C4ADC9F60E53E63A0BEC0">
+                                    <enum>(D)</enum>
+                                    <header>Special rules</header>
+                                    <clause id="H4A53A5675F544911BB39086D73A8196C">
+                                        <enum>(i)</enum>
+                                        <header>Special rules for certain transfers</header>
+ <text>For purposes of determining under subparagraph (B)(ii) when a building was last placed in service, there shall not be taken into account any placement in service—</text>
+                                        <subclause id="HA2D4E37193D14F4887E7027C3FC95323">
+                                            <enum>(I)</enum>
+ <text>in connection with the acquisition of the building in a transaction in which the basis of the building in the hands of the person acquiring it is determined in whole or in part by reference to the adjusted basis of such building in the hands of the person from whom acquired,</text>
+                                        </subclause>
+                                        <subclause id="H296DADA58F2E4179BA8D40AE10609803">
+                                            <enum>(II)</enum>
+ <text>by a person whose basis in such building is determined under section 1014(a) (relating to property acquired from a decedent),</text>
+                                        </subclause>
+                                        <subclause id="HDB7C401BED8645C3B0E34A175102BC3E">
+                                            <enum>(III)</enum>
+ <text>by any governmental unit or qualified nonprofit organization (as defined in subsection (h)(4)) if the requirements of subparagraph (B)(ii) are met with respect to the placement in service by such unit or organization and all the income from such property is exempt from Federal income taxation,</text>
+                                        </subclause>
+                                        <subclause id="H263CD1AC7950439EA749488A373B84B2">
+                                            <enum>(IV)</enum>
+ <text>by any person who acquired such building by foreclosure (or by instrument in lieu of foreclosure) of any purchase-money security interest held by such person if the requirements of subparagraph (B)(ii) are met with respect to the placement in service by such person and such building is resold within 12 months after the date such building is placed in service by such person after such foreclosure, or</text>
+                                        </subclause>
+                                        <subclause id="H2668A79B05C7434599A55E6D5AAE02D6">
+                                            <enum>(V)</enum>
+ <text>of a single-family residence by any individual who owned and used such residence for no other purpose than as his principal residence.</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="HF87231EBB45A4BFBB490E45C5642D731">
+                                        <enum>(ii)</enum>
+                                        <header>Related person</header>
+ <text>For purposes of subparagraph (B)(iii), a person (hereinafter in this subclause referred to as the <term>related person</term>) is related to any person if the related person bears a relationship to such person specified in section 267(b) or 707(b)(1), or the related person and such person are engaged in trades or businesses under common control (within the meaning of subsections (a) and (b) of section 52).</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H5825ABFE7BA8475AADE854E592347B95">
+                                <enum>(3)</enum>
+                                <header>Eligible basis reduced where disproportionate standards for
+                                    units</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H1F823B901E2644F49FA46CB7AD35DF5F">
+                                    <enum>(A)</enum>
+                                    <header display-inline="yes-display-inline">In general</header>
+ <text>Except as provided in subparagraph (B), the eligible basis of any building shall be reduced by an amount equal to the portion of the adjusted basis of the building which is attributable to residential rental units in the building which are not middle-income units and which are above the average quality standard of the middle-income units in the building.</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="HD2614B58225147E681A926986274642F">
+                                    <enum>(B)</enum>
+                                    <header>Exception where taxpayer elects to exclude excess
+                                        costs</header>
+                                    <clause commented="no" display-inline="no-display-inline" id="H77929A242A6947699DB21A7CF1B6BB55">
+                                        <enum>(i)</enum>
+                                        <header display-inline="yes-display-inline">In
+                                            general</header>
+ <text>Subparagraph (A) shall not apply with respect to a residential rental unit in a building which is not a middle-income unit if—</text>
+                                        <subclause id="H3E15CB0E9E444CDCB6FBF555DAF98359">
+                                            <enum>(I)</enum>
+ <text>the excess described in clause (ii) with respect to such unit is not greater than 15 percent of the cost described in clause (ii)(II), and</text>
+                                        </subclause>
+                                        <subclause id="H731434BF72C040ADBA1EC8F77FE25DBB">
+                                            <enum>(II)</enum>
+ <text>the taxpayer elects to exclude from the eligible basis of such building the excess described in clause (ii) with respect to such unit.</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="HE5C70166061D42399B3052BFA478F31F">
+                                        <enum>(ii)</enum>
+                                        <header>Excess</header>
+ <text>The excess described in this clause with respect to any unit is the excess of—</text>
+                                        <subclause id="H19307359217648568372AF7C8C0292A5">
+                                            <enum>(I)</enum>
+ <text>the cost of such unit, over</text> </subclause> <subclause id="H3D9699C06D58449F9DD002F9FAAB18DD"> <enum>(II)</enum> <text>the amount which would be the cost of such unit if the average cost per square foot of middle-income units in the building were substituted for the cost per square foot of such unit.</text>
+                                        </subclause>
+                                        <continuation-text continuation-text-level="clause">The
+                                            Secretary may by regulation provide for the
+                                            determination of the excess under this clause on a basis
+                                            other than square foot costs.</continuation-text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H292D413F77A748409DD3024106928917">
+                                <enum>(4)</enum>
+                                <header>Special rules relating to determination of adjusted
+                                    basis</header>
+ <text>For purposes of this subsection—</text> <subparagraph id="H247F62BC0AD74AA59CD7B0EED8D843A2"> <enum>(A)</enum> <header>In general</header> <text>Except as provided in subparagraph (B), the adjusted basis of any building shall be determined without regard to the adjusted basis of any property which is not residential rental property.</text>
+                                </subparagraph>
+                                <subparagraph id="H2337951401414845937A882B150886A3">
+                                    <enum>(B)</enum>
+                                    <header>Basis of property in common areas, etc.,
+                                        included</header>
+                                    <clause id="H7CBB1D26BA454B4CAF7C62E038476934">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>Except as provided in clause (ii), the adjusted basis of any building shall be determined by taking into account the adjusted basis of property (of a character subject to the allowance for depreciation) used in common areas or provided as comparable amenities to all residential rental units in such building.</text>
+                                    </clause>
+                                    <clause id="H712E9429A9B44E51B06E65197C37B1CB">
+                                        <enum>(ii)</enum>
+                                        <header>Special rule</header>
+ <text>In the case of any building for which the low-income housing tax credit is allowable under section 42, the adjusted basis of the building under this section shall be determined without regard to property used in common areas or provided as comparable amenities to all residential rental units in such building.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H5D269C400B874ABD8ED170B8FC13BD21">
+                                    <enum>(C)</enum>
+                                    <header>No reduction for depreciation</header>
+ <text>The adjusted basis of any building shall be determined without regard to paragraphs (2) and (3) of section 1016(a).</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H793884AE9E2E40DD9DCAFBA08C382768" commented="no">
+                                <enum>(5)</enum>
+                                <header>Special rules for determining eligible basis</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H6252518E7B4045739F28F975A4120B6B">
+                                    <enum>(A)</enum>
+                                    <header display-inline="yes-display-inline">Federal grants not
+                                        taken into account in determining eligible basis</header>
+ <text>The eligible basis of a building shall not include any costs financed with the proceeds of a Federally funded grant.</text>
+                                </subparagraph>
+                                <subparagraph id="H5E00027DEE4841EE8B1BB154BD15943A" commented="no">
+                                    <enum>(B)</enum>
+                                    <header>Increase in credit for buildings in high cost
+                                        areas</header>
+                                    <clause commented="no" display-inline="no-display-inline" id="H28360B2EC916423B9FF191D9C4C47143">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>In the case of any building located in a qualified census tract or difficult development area—</text>
+                                        <subclause id="H5E337E8A67524737865C03A35978FCA5" commented="no">
+                                            <enum>(I)</enum>
+ <text>in the case of a new building, the eligible basis of such building shall be 130 percent of such basis determined without regard to this subparagraph, and</text>
+                                        </subclause>
+                                        <subclause id="H2C7F105547844F63A30125345FC1F0D8" commented="no">
+                                            <enum>(II)</enum>
+ <text>in the case of an existing building, the rehabilitation expenditures taken into account under subsection (e) shall be 130 percent of such expenditures determined without regard to this subparagraph.</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="HB0E09DE94DC741A482396A91D19C3D00">
+                                        <enum>(ii)</enum>
+                                        <header>Qualified census tract</header>
+ <text>The term <term>qualified census tract</term> means, with respect to any period any census tract which is treated as a qualified census tract under section 42(d)(5)(B).</text>
+                                    </clause>
+                                    <clause id="HEBD412BD1DAE4315A9374D7C7E390D62" commented="no">
+                                        <enum>(iii)</enum>
+                                        <header>Difficult development areas</header>
+ <text>The term <term>difficult development areas</term> means any census tract which is treated as a difficult development area under section 42(d)(5)(B) (determined without regard to clause (v) thereof).</text>
+                                    </clause>
+                                    <clause id="HAABD10146A4C40B988AA5C1713E86B1E" commented="no">
+                                        <enum>(iv)</enum>
+                                        <header>Buildings designated by State Housing Credit
+                                            Agency</header>
+ <text>Any building which is designated by the State housing credit agency as requiring the increase in credit under this subparagraph in order for such building to be financially feasible as part of a qualified middle-income housing project shall be treated for purposes of this subparagraph as located in a difficult development area which is designated for purposes of this subparagraph. The preceding sentence shall not apply to any building if paragraph (1) of subsection (h) does not apply to any portion of the eligible basis of such building by reason of paragraph (9) of such subsection.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="HF74B188EFFB94ED69A40FE35855A19B9">
+                                <enum>(6)</enum>
+                                <header>Credit allowable for certain buildings acquired during
+                                    10-year period</header>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="H4021D7F27ED84B05B07B7B2E7A5C4D79">
+                                    <enum>(A)</enum>
+                                    <header display-inline="yes-display-inline">In general</header>
+ <text>Paragraph (2)(B)(ii) shall not apply to any Federally-assisted building (as defined in section 42(d)(6)(C)(i)) or State-assisted building (as defined in section 42(d)(6)(C)(ii)).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H9056AEF5863C47CE8D14662CC56EE5EA">
+                                    <enum>(B)</enum>
+                                    <header>Buildings acquired from insured depository institutions
+                                        in default</header>
+ <text display-inline="yes-display-inline">On application by the taxpayer, the Secretary may waive paragraph (2)(B)(ii) with respect to any building acquired from an insured depository institution in default (as defined in section 3 of the Federal Deposit Insurance Act) or from a receiver or conservator of such an institution.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="HE86E6F27377E4AA19A18D684B94A25D3">
+                                <enum>(7)</enum>
+                                <header>Acquisition of building before end of prior credit
+                                    period</header>
+                                <subparagraph commented="no" id="HA3B3BF7F319D4513ACBDE31350A735CB">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>Under regulations prescribed by the Secretary, in the case of a building described in subparagraph (B) (or interest therein) which is acquired by the taxpayer—</text>
+                                    <clause commented="no" id="HB67E5383C3CC42548AABA2CE46A40EFB">
+                                        <enum>(i)</enum>
+ <text>paragraph (2)(B) shall not apply, but</text> </clause> <clause commented="no" id="H70168D8BEDCC42B1959727942A6CF433"> <enum>(ii)</enum> <text>the credit allowable by reason of subsection (a) to the taxpayer for any period after such acquisition shall be equal to the amount of credit which would have been allowable under subsection (a) for such period to the prior owner referred to in subparagraph (B) had such owner not disposed of the building.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H830451075831439E8F3B06DB2AF7F476">
+                                    <enum>(B)</enum>
+                                    <header>Description of building</header>
+ <text>A building is described in this subparagraph if—</text> <clause commented="no" id="HA9631D30B0B948EDB1BC4A1F8A67C5D2"> <enum>(i)</enum> <text>a credit was allowed by reason of subsection (a) to any prior owner of such building, and</text>
+                                    </clause>
+                                    <clause commented="no" id="H2053D9DB0FCB40E382BEF08E5EEA6F32">
+                                        <enum>(ii)</enum>
+ <text>the taxpayer acquired such building before the end of the credit period for such building with respect to such prior owner (determined without regard to any disposition by such prior owner).</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H1FF5FBE4544844B19F05436F8302C940">
+                            <enum>(e)</enum>
+                            <header>Rehabilitation expenditures treated as separate new
+                                building</header>
+                            <paragraph id="H3E0EA02BA1A54421BBC4271FE0760C1F">
+                                <enum>(1)</enum>
+                                <header>In general</header>
+ <text>Rehabilitation expenditures paid or incurred by the taxpayer with respect to any building shall be treated for purposes of this section as a separate new building.</text>
+                            </paragraph>
+                            <paragraph id="HF361C93DAF1C4D1BB17D47F5CE85C04D">
+                                <enum>(2)</enum>
+                                <header>Rehabilitation expenditures</header>
+ <text>For purposes of paragraph (1)—</text> <subparagraph id="H961EB41C54934C82965B23BD3F8F07E6"> <enum>(A)</enum> <header>In general</header> <text>The term <term>rehabilitation expenditures</term> means amounts chargeable to capital account and incurred for property (or additions or improvements to property) of a character subject to the allowance for depreciation in connection with the rehabilitation of a building.</text>
+                                </subparagraph>
+                                <subparagraph id="HA89EA5BD3ACD483CA08F912AF602796A">
+                                    <enum>(B)</enum>
+                                    <header>Cost of acquisition, etc., not included</header>
+ <text>Such term does not include the cost of acquiring any building (or interest therein) or any amount not permitted to be taken into account under paragraph (3) or (4) of subsection (d).</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H50C57844F7A44D659133CED1459B95A9">
+                                <enum>(3)</enum>
+                                <header>Minimum expenditures to qualify</header>
+                                <subparagraph id="HA2E9C44EEB29474EA8BA6ED39B14BB7F">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>Paragraph (1) shall apply to rehabilitation expenditures with respect to any building only if—</text>
+                                    <clause id="H3B0B704F0C30469392DF08C18F301065">
+                                        <enum>(i)</enum>
+ <text>the expenditures are allocable to 1 or more middle-income units or substantially benefit such units, and</text>
+                                    </clause>
+                                    <clause id="HC8D8BDA415F44C0C88BB75188E2BF184">
+                                        <enum>(ii)</enum>
+ <text>the amount of such expenditures during any 24-month period meets the requirements of whichever of the following subclauses requires the greater amount of such expenditures:</text>
+                                        <subclause id="HDD08F93F7501411DA7D39485F06CA3E1">
+                                            <enum>(I)</enum>
+ <text>The requirement of this subclause is met if such amount is not less than 20 percent of the adjusted basis of the building (determined as of the 1st day of such period and without regard to paragraphs (2) and (3) of section 1016(a)).</text>
+                                        </subclause>
+                                        <subclause id="H46677842C2AC41E5933E60748336DF59">
+                                            <enum>(II)</enum>
+ <text>The requirement of this subclause is met if the qualified basis attributable to such amount, when divided by the number of middle-income units in the building, is equal to or greater than the dollar amount in effect under section 42(e)(3)(A)(ii)(II) for the calendar year in which such expenditures are treated as placed in service under paragraph (4).</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H82F66494C9AC4F2096518B7232D8D82F">
+                                    <enum>(B)</enum>
+                                    <header>Exception</header>
+ <text>In the case of a building acquired by the taxpayer from a governmental unit, at the election of the taxpayer, subparagraph (A)(ii)(I) shall not apply and the credit under this section for such rehabilitation expenditures shall be determined using the percentage under subsection (b) which is applicable to buildings which are Federally subsidized.</text>
+                                </subparagraph>
+                                <subparagraph id="H00D0896492884D7687D8479D0D8A3713">
+                                    <enum>(C)</enum>
+                                    <header>Date of determination</header>
+ <text>The determination under subparagraph (A) shall be made as of the close of the 1st taxable year in the credit period with respect to such expenditures.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H3BA618DA613D46ECADC0A519F3C9AFEF">
+                                <enum>(4)</enum>
+                                <header>Special rules</header>
+ <text>For purposes of applying this section with respect to expenditures which are treated as a separate building by reason of this subsection—</text>
+                                <subparagraph id="H383B3AD7F8B94CA7BCA5C699D92A9A8D">
+                                    <enum>(A)</enum>
+ <text>such expenditures shall be treated as placed in service at the close of the 24-month period referred to in paragraph (3)(A), and</text>
+                                </subparagraph>
+                                <subparagraph id="HCAD875A97267452A9BDA8EBB2E7CD9EB">
+                                    <enum>(B)</enum>
+ <text>the applicable fraction under subsection (c)(1) shall be the applicable fraction for the building (without regard to paragraph (1)) with respect to which the expenditures were incurred.</text>
+                                </subparagraph>
+                                <continuation-text continuation-text-level="paragraph">Nothing in
+                                    subsection (d)(2) shall prevent a credit from being allowed by
+                                    reason of this subsection.</continuation-text>
+                            </paragraph>
+                            <paragraph id="H9CC661563DAC49DEB04B362826445F67">
+                                <enum>(5)</enum>
+                                <header>No double counting</header>
+ <text>Rehabilitation expenditures may, at the election of the taxpayer, be taken into account under this subsection or subsection (d)(2)(A)(i) but not under both such subsections.</text>
+                            </paragraph>
+                            <paragraph id="H64270177FEA245D1BC82B48086444302">
+                                <enum>(6)</enum>
+                                <header>Regulations to apply subsection with respect to group of
+                                    units in building</header>
+ <text>The Secretary may prescribe regulations, consistent with the purposes of this subsection, treating a group of units with respect to which rehabilitation expenditures are incurred as a separate new building.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H838C364615814BDEA34789B97DBD0B0B">
+                            <enum>(f)</enum>
+                            <header>Definition and special rules relating to credit period</header>
+                            <paragraph id="H24EB8AF46C2E4ACC979EC90105862F3E">
+                                <enum>(1)</enum>
+                                <header>Credit period defined</header>
+ <text>For purposes of this section, the term <term>credit period</term> means, with respect to any building, the period of 15 taxable years beginning with—</text>
+                                <subparagraph id="HB1221ED376894D55B9F643E04138B6AD">
+                                    <enum>(A)</enum>
+ <text>the taxable year in which the building is placed in service, or</text>
+                                </subparagraph>
+                                <subparagraph id="H3A33DE457626463085CD342B432076F3">
+                                    <enum>(B)</enum>
+ <text>at the election of the taxpayer, the succeeding taxable year,</text>
+                                </subparagraph>
+                                <continuation-text continuation-text-level="paragraph">but only if
+                                    the building is a qualified middle-income building as of the
+                                    close of the 1st year of such period. The election under
+                                    subparagraph (B), once made, shall be
+                                    irrevocable.</continuation-text>
+                            </paragraph>
+                            <paragraph id="HD0BE2ED6FA2E4D25B52FF8189FF802C8">
+                                <enum>(2)</enum>
+                                <header>Special rule for 1st year of credit period</header>
+                                <subparagraph id="HEE585DE777194EB788A7896D01BECF5B">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The credit allowable under subsection (a) with respect to any building for the 1st taxable year of the credit period shall be determined by substituting for the applicable fraction under subsection (c)(1) the fraction—</text>
+                                    <clause id="HD691C0331C524F53BEB4468AC92AD0EA">
+                                        <enum>(i)</enum>
+ <text>the numerator of which is the sum of the applicable fractions determined under subsection (c)(1) as of the close of each full month of such year during which such building was in service, and</text>
+                                    </clause>
+                                    <clause id="H55691C71B0634A44AC4C4EB3D5E42222">
+                                        <enum>(ii)</enum>
+ <text>the denominator of which is 12.</text> </clause> </subparagraph> <subparagraph id="HA3B94B9439F44BA78C12725FDEA2CDF8"> <enum>(B)</enum> <header>Disallowed 1st-year credit allowed in 16th year</header> <text>Any reduction by reason of subparagraph (A) in the credit allowable (without regard to subparagraph (A)) for the 1st taxable year of the credit period shall be allowable under subsection (a) for the 1st taxable year following the credit period.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H30DCC9DAD54B4AE8AC49F077371FB5F5">
+                                <enum>(3)</enum>
+                                <header>Determination of applicable percentage with respect to
+                                    increases in qualified basis after 1st year of credit
+                                    period</header>
+                                <subparagraph commented="no" id="HE4025FBB42B4441D8655FD49FBBD2957">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>In the case of any building which was a qualified middle-income building as of the close of the 1st year of the credit period, if—</text>
+                                    <clause commented="no" id="HD1CF913B95F441BC9B4948A79B723ED7">
+                                        <enum>(i)</enum>
+ <text>as of the close of any taxable year in the credit period (after the 1st year of such period) the qualified basis of such building, exceeds</text>
+                                    </clause>
+                                    <clause commented="no" id="H6B3606CD532E4AE1B9D2BEA3AE3DC7E7">
+                                        <enum>(ii)</enum>
+ <text>the qualified basis of such building as of the close of the 1st year of the credit period,</text>
+                                    </clause>
+                                    <continuation-text commented="no"
+                                        continuation-text-level="subparagraph">the applicable
+                                        percentage which shall apply under subsection (a) for the
+                                        taxable year to such excess shall be the percentage equal to
+                                            <fraction>2/3</fraction> of the applicable percentage
+                                        which (after the application of subsection (h)) would but
+                                        for this paragraph apply to such basis.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="H10AC5AD0443C4F0488B0ECBFEB21C22A">
+                                    <enum>(B)</enum>
+                                    <header>1st year computation applies</header>
+ <text>A rule similar to the rule of paragraph (2)(A) shall apply to any increase in qualified basis to which subparagraph (A) applies for the 1st year of such increase.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HC400B28BB9E14BBBA57C3BB8684A6FB5">
+                                <enum>(4)</enum>
+                                <header>Dispositions of property</header>
+ <text>If a building (or an interest therein) is disposed of during any year for which credit is allowable under subsection (a), such credit shall be allocated between the parties on the basis of the number of days during such year the building (or interest) was held by each.</text>
+                            </paragraph>
+                            <paragraph id="H0C5D3A5477AB479A9DCE7AC66820185A">
+                                <enum>(5)</enum>
+                                <header>Credit period for existing buildings not to begin before
+                                    rehabilitation credit allowed</header>
+                                <subparagraph id="H42381BA0F9084DC397A3157888B54012">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The credit period for an existing building shall not begin before the 1st taxable year of the credit period for rehabilitation expenditures with respect to the building.</text>
+                                </subparagraph>
+                                <subparagraph id="H0305EFDCA1444AE4810FD92CEC207A5D">
+                                    <enum>(B)</enum>
+                                    <header>Acquisition credit allowed for certain buildings not
+                                        allowed a rehabilitation credit</header>
+                                    <clause id="HCB6C44787DC442988550CFE69A01C01E">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>In the case of a building described in clause (ii)—</text>
+                                        <subclause id="HB745B86FD90A4EA7AA842303FCCB1F80">
+                                            <enum>(I)</enum>
+ <text>subsection (d)(2)(B)(iv) shall not apply, and</text>
+                                        </subclause>
+                                        <subclause id="H4C12AE2CDB2E433A86ECA6A2024E2346">
+                                            <enum>(II)</enum>
+ <text>the credit period for such building shall not begin before the taxable year which would be the 1st taxable year of the credit period for rehabilitation expenditures with respect to the building under the modifications described in clause (ii)(II).</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="H0F6898BC1905408BA9FA07BDCEABC245">
+                                        <enum>(ii)</enum>
+                                        <header>Building described</header>
+ <text>A building is described in this clause if—</text> <subclause id="HA5605E9F8F3847C8A08B018C51A3E3F3"> <enum>(I)</enum> <text>a waiver is granted under subsection (d)(5) with respect to the acquisition of the building, and</text>
+                                        </subclause>
+                                        <subclause id="H8284EBBD6CA24D8AB2E4096AAFADC602">
+                                            <enum>(II)</enum>
+ <text>a credit would be allowed for rehabilitation expenditures with respect to such building if subsection (e)(3)(A)(ii)(I) did not apply and if the dollar amount in effect under subsection (e)(3)(A)(ii)(II) were two-thirds of such amount.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H459A6D0225274B0CA22E85CFA5B0F8CB">
+                            <enum>(g)</enum>
+                            <header>Qualified middle-Income housing project</header>
+ <text>For purposes of this section—</text> <paragraph id="HD7C6C449B52C4C249AFB6E684068DCC6"> <enum>(1)</enum> <header>In general</header> <text>The term <term>qualified middle-income housing project</term> means any project for residential rental property if—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="H1676A9244FBC446C8AA5BBA075F03F24">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">60 percent or more of the residential units in such project are both rent-restricted and occupied by individuals whose income is 100 percent or less of area median gross income, and</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="H070C9E634BC6406EA96B6712A0092E8D">
+                                    <enum>(B)</enum>
+ <text>not less than 20 percent of the residential units in such project are units which—</text>
+                                    <clause commented="no" display-inline="no-display-inline"
+                                        id="H9EFD418852194819AE910A339D69FFCE">
+                                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">are described in subparagraph (A), and</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline"
+                                        id="HB2EA7ECE7CB24A7BBF35B8C628906DC9">
+                                        <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">are not residential units which are taken into account under section 42.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H02260A55DA6240E0B4E71D4173EEA3A6">
+                                <enum>(2)</enum>
+                                <header>Rent-restricted units</header>
+                                <subparagraph id="HED2E90AB1CDA4BA29989AB2342A3479B">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>For purposes of paragraph (1), a residential unit is rent-restricted if the gross rent with respect to such unit does not exceed 30 percent of the imputed income limitation applicable to such unit. For purposes of the preceding sentence, the amount of the income limitation under paragraph (1) applicable for any period shall not be less than such limitation applicable for the earliest period the building (which contains the unit) was included in the determination of whether the project is a qualified middle-income housing project.</text>
+                                </subparagraph>
+                                <subparagraph id="HDDF0A3C1C1F94582BFDA71AA2B835B5E">
+                                    <enum>(B)</enum>
+                                    <header>Gross rent</header>
+ <text>For purposes of subparagraph (A), gross rent—</text> <clause commented="no" id="HB5561C99238E4CCC8EE0D30B2707DE36"> <enum>(i)</enum> <text>includes any utility allowance determined by the Secretary after taking into account such determinations under section 8 of the United States Housing Act of 1937,</text>
+                                    </clause>
+                                    <clause commented="no" id="HBD3DA795949A41C58DBA09E8FD8610A5">
+                                        <enum>(ii)</enum>
+ <text>does not include any fee for a supportive service which is paid to the owner of the unit (on the basis of the middle-income status of the tenant of the unit) by any governmental program of assistance (or by an organization described in section 501(c)(3) and exempt from tax under section 501(a)) if such program (or organization) provides assistance for rent and the amount of assistance provided for rent is not separable from the amount of assistance provided for supportive services, and</text>
+                                    </clause>
+                                    <clause id="HD87963B3263A422E8BCD559057CC99FE">
+                                        <enum>(iii)</enum>
+ <text>does not include any rental payment to the owner of the unit to the extent such owner pays an equivalent amount to the Farmers' Home Administration under section 515 of the Housing Act of 1949.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">For
+                                        purposes of clause (ii), the term <term>supportive
+                                            service</term> means any service provided under a
+                                        planned program of services designed to enable residents of
+                                        a residential rental property to remain independent and
+                                        avoid placement in a hospital, nursing home, or intermediate
+                                        care facility for the mentally or physically
+                                        handicapped.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="H43756420A00E442BAD7A7D8A8C405511">
+                                    <enum>(C)</enum>
+                                    <header>Imputed income limitation applicable to unit</header>
+ <text>For purposes of this paragraph, the imputed income limitation applicable to a unit is the income limitation which would apply under paragraph (1) to individuals occupying the unit if the number of individuals occupying the unit were as follows:</text>
+                                    <clause id="H92E8BCD4561B40F9A90E73F572225DF9">
+                                        <enum>(i)</enum>
+ <text>In the case of a unit which does not have a separate bedroom, 1 individual.</text>
+                                    </clause>
+                                    <clause id="H383AD60B1D2A46D48EDFA8711EA2895D">
+                                        <enum>(ii)</enum>
+ <text>In the case of a unit which has 1 or more separate bedrooms, 1.5 individuals for each separate bedroom.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">In the
+                                        case of a project with respect to which a credit is
+                                        allowable by reason of this section and for which financing
+                                        is provided by a bond described in section 142(a)(7), the
+                                        imputed income limitation shall apply in lieu of the
+                                        otherwise applicable income limitation for purposes of
+                                        applying section 142(d)(4)(B)(ii).</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="HCD31890C0473455CA0082651C5D6325D">
+                                    <enum>(D)</enum>
+                                    <header>Treatment of units occupied by individuals whose incomes
+                                        rise above limit</header>
+                                    <clause id="H2F3BDB5A9A5C4641B32FA4DD6BBF7086">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>Except as provided in clause (ii), notwithstanding an increase in the income of the occupants of a middle-income unit above the income limitation applicable under paragraph (1), such unit shall continue to be treated as a middle-income unit if the income of such occupants initially met such income limitation and such unit continues to be rent-restricted.</text>
+                                    </clause>
+                                    <clause id="H6CDDA25579D544979BE2FABB20CE85CD">
+                                        <enum>(ii)</enum>
+                                        <header>Next available unit must be rented to middle-income
+                                            tenant if income rises above 140 percent of income
+                                            limit</header>
+ <text>If the income of the occupants of the unit increases above 140 percent of the income limitation applicable under paragraph (1), clause (i) shall cease to apply to such unit if any residential rental unit in the building (of a size comparable to, or smaller than, such unit) is occupied by a new resident whose income exceeds such income limitation.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H41A384D3B86E4B7095B692BBD1A5102C">
+                                <enum>(3)</enum>
+                                <header>Date for meeting requirements</header>
+                                <subparagraph id="H66EF853C4E9D42C7B0E4EB42A0007012">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>Except as otherwise provided in this paragraph, a building shall be treated as a qualified middle-income building only if the project (of which such building is a part) meets the requirements of paragraph (1) not later than the close of the 1st year of the credit period for such building.</text>
+                                </subparagraph>
+                                <subparagraph id="HA311BF7C050144B2801AB523C25E411C">
+                                    <enum>(B)</enum>
+                                    <header>Buildings which rely on later buildings for
+                                        qualification</header>
+                                    <clause id="HAD9BDF28E1354347B65DFCD195ADACEC">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>In determining whether a building (hereinafter in this subparagraph referred to as the <quote>prior building</quote>) is a qualified middle-income building, the taxpayer may take into account 1 or more additional buildings placed in service during the 12-month period described in subparagraph (A) with respect to the prior building only if the taxpayer elects to apply clause (ii) with respect to each additional building taken into account.</text>
+                                    </clause>
+                                    <clause id="H36A0C54BCEF1469D871B74177FC9B76D">
+                                        <enum>(ii)</enum>
+                                        <header>Treatment of elected buildings</header>
+ <text>In the case of a building which the taxpayer elects to take into account under clause (i), the period under subparagraph (A) for such building shall end at the close of the 12-month period applicable to the prior building.</text>
+                                    </clause>
+                                    <clause id="HE29367D159B14177B3FF4AE8CD184CA5">
+                                        <enum>(iii)</enum>
+                                        <header>Date prior building is treated as placed in
+                                            service</header>
+ <text>For purposes of determining the credit period for the prior building, the prior building shall be treated for purposes of this section as placed in service on the most recent date any additional building elected by the taxpayer (with respect to such prior building) was placed in service.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H1740A2C34CD1447AACC035AE26CE36AD">
+                                    <enum>(C)</enum>
+                                    <header>Special rule</header>
+ <text>A building—</text> <clause id="HA3AAF434B19B46F4877DC5B8180D1B22"> <enum>(i)</enum> <text>other than the 1st building placed in service as part of a project, and</text>
+                                    </clause>
+                                    <clause id="H30D9DE83D0A84E64B35003B7F815869A">
+                                        <enum>(ii)</enum>
+ <text>other than a building which is placed in service during the 12-month period described in subparagraph (A) with respect to a prior building which becomes a qualified middle-income building,</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">shall
+                                        in no event be treated as a qualified middle-income building
+                                        unless the project is a qualified middle-income housing
+                                        project (without regard to such building) on the date such
+                                        building is placed in service.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="HF89900F53F474C008AA052BEC68A944B">
+                                    <enum>(D)</enum>
+                                    <header>Projects with more than 1 building must be
+                                        identified</header>
+ <text>For purposes of this section, a project shall be treated as consisting of only 1 building unless, before the close of the 1st calendar year in the project period (as defined in subsection (h)(1)(F)(ii)), each building which is (or will be) part of such project is identified in such form and manner as the Secretary may provide.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="HD8B46161D60845AD9BEAC6548A605D6B">
+                                <enum>(4)</enum>
+                                <header>Certain rules made applicable</header>
+ <text>Paragraphs (2) (other than subparagraph (A) thereof), (3), and (7) of section 142(d), and section 6652(j), shall apply for purposes of determining whether any project is a qualified middle-income housing project and whether any unit is a middle-income unit; except that, in applying such provisions for such purposes—</text>
+                                <subparagraph commented="no" id="H0963BAD1FE3D45FBA17219A61B30DFF1">
+                                    <enum>(A)</enum>
+ <text>the term <term>gross rent</term> shall have the meaning given such term by paragraph (2)(B) of this subsection, and</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H8DAB78EA6895480785A1C3E51794D5D1">
+                                    <enum>(B)</enum>
+ <text>the term <term>applicable income limit</term> means the limitation under paragraph (1) of this subsection.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H9E6615E26E4E455994DFB28EDB300CA5">
+                                <enum>(5)</enum>
+                                <header>Election to treat building after credit period as not part
+                                    of a project</header>
+ <text>For purposes of this section, the taxpayer may elect to treat any building as not part of a qualified middle-income housing project for any period beginning after the credit period for such building.</text>
+                            </paragraph>
+                            <paragraph id="HB1C9DBAE04984FD2B09D0129FB0C249B">
+                                <enum>(6)</enum>
+                                <header>Special rule where de minimis equity contribution</header>
+ <text>Property shall not be treated as failing to be residential rental property for purposes of this section merely because the occupant of a residential unit in the project pays (on a voluntary basis) to the lessor a de minimis amount to be held toward the purchase by such occupant of a residential unit in such project if—</text>
+                                <subparagraph id="H47FFB84951FA4487B1CC4B21C56F37E8">
+                                    <enum>(A)</enum>
+ <text>all amounts so paid are refunded to the occupant on the cessation of his occupancy of a unit in the project, and</text>
+                                </subparagraph>
+                                <subparagraph id="H6BA92B212DC245DAAD5E785A7A04885F">
+                                    <enum>(B)</enum>
+ <text>the purchase of the unit is not permitted until after the close of the credit period with respect to the building in which the unit is located.</text>
+                                </subparagraph>
+                                <continuation-text continuation-text-level="paragraph">Any amount
+                                    paid to the lessor as described in the preceding sentence shall
+                                    be included in gross rent under paragraph (2) for purposes of
+                                    determining whether the unit is
+                                    rent-restricted.</continuation-text>
+                            </paragraph>
+                            <paragraph id="H9F1A28EEB70045AF892B01298056DB86">
+                                <enum>(7)</enum>
+                                <header>Scattered site projects</header>
+ <text>Buildings which would (but for their lack of proximity) be treated as a project for purposes of this section shall be so treated if all of the dwelling units in each of the buildings are rent-restricted (within the meaning of paragraph (2)) residential rental units.</text>
+                            </paragraph>
+                            <paragraph id="HD50239B9E42040D8A0716AA9F9E324D2">
+                                <enum>(8)</enum>
+                                <header>Waiver of certain recertifications</header>
+ <text>On application by the taxpayer, the Secretary may waive any annual recertification of tenant income for purposes of this subsection, if the entire building is occupied by middle-income tenants.</text>
+                            </paragraph>
+                            <paragraph id="H35548D9D43F64FEDAA75BFE2706FE71C">
+                                <enum>(9)</enum>
+                                <header>Clarification of general public use requirement</header>
+ <text>A project does not fail to meet the general public use requirement solely because of occupancy restrictions or preferences that favor tenants—</text>
+                                <subparagraph id="H3B78BEB5EC3B491CB98C7D3679517D46">
+                                    <enum>(A)</enum>
+ <text>with special needs,</text> </subparagraph> <subparagraph id="H3DD52C91FBD84F0681598A77D11626F2"> <enum>(B)</enum> <text>who are members of a specified group under a Federal program or State program or policy that supports housing for such a specified group, or</text>
+                                </subparagraph>
+                                <subparagraph id="HAC83227472F046A7B9CF3E8DE689EABB">
+                                    <enum>(C)</enum>
+ <text>who are involved in artistic or literary activities.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H9A553A625BB742F0A944B9133B37E579">
+                            <enum>(h)</enum>
+                            <header>Limitation on aggregate credit allowable with respect to
+                                projects located in a State</header>
+                            <paragraph id="H94FF42D2C4034582A2E7CE14F8DD6110">
+                                <enum>(1)</enum>
+                                <header>Credit may not exceed credit amount allocated to
+                                    building</header>
+                                <subparagraph id="HCECE45A6B907498499E36808FE0FE14B">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The amount of the credit determined under this section for any taxable year with respect to any building shall not exceed the housing credit dollar amount allocated to such building under this subsection.</text>
+                                </subparagraph>
+                                <subparagraph id="H4D227AAB10BA4F8FBC6666361212B4B8">
+                                    <enum>(B)</enum>
+                                    <header>Time for making allocation</header>
+ <text>Except in the case of an allocation which meets the requirements of subparagraph (C), (D), (E), or (F), an allocation shall be taken into account under subparagraph (A) only if it is made not later than the close of the calendar year in which the building is placed in service.</text>
+                                </subparagraph>
+                                <subparagraph id="H3EB9E29BA25B4CFDAE73958FAB657866">
+                                    <enum>(C)</enum>
+                                    <header>Exception where binding commitment</header>
+ <text>An allocation meets the requirements of this subparagraph if there is a binding commitment (not later than the close of the calendar year in which the building is placed in service) by the housing credit agency to allocate a specified housing credit dollar amount to such building beginning in a specified later taxable year.</text>
+                                </subparagraph>
+                                <subparagraph id="H5B4BC5267CCF432D9867D148EDEF6969">
+                                    <enum>(D)</enum>
+                                    <header>Exception where increase in qualified basis</header>
+                                    <clause id="HC8ACE30929794ED185486B41E64A7B8E">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>An allocation meets the requirements of this subparagraph if such allocation is made not later than the close of the calendar year in which ends the taxable year to which it will 1st apply but only to the extent the amount of such allocation does not exceed the limitation under clause (ii).</text>
+                                    </clause>
+                                    <clause id="H832C4175AE10487CABD8229591FF2914">
+                                        <enum>(ii)</enum>
+                                        <header>Limitation</header>
+ <text>The limitation under this clause is the amount of credit allowable under this section (without regard to this subsection) for a taxable year with respect to an increase in the qualified basis of the building equal to the excess of—</text>
+                                        <subclause id="H8F05C27E009741C4BE6E9C29515E5C33">
+                                            <enum>(I)</enum>
+ <text>the qualified basis of such building as of the close of the 1st taxable year to which such allocation will apply, over</text>
+                                        </subclause>
+                                        <subclause id="H1253A88E72E244ED800673482920245A">
+                                            <enum>(II)</enum>
+ <text>the qualified basis of such building as of the close of the 1st taxable year to which the most recent prior housing credit allocation with respect to such building applied.</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="H75EB9A003C924FE3875A44711A8E97E8">
+                                        <enum>(iii)</enum>
+                                        <header>Housing credit dollar amount reduced by full
+                                            allocation</header>
+ <text>Notwithstanding clause (i), the full amount of the allocation shall be taken into account under paragraph (2).</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="HC1FB8AE7FB4844219C658C803D972ED0">
+                                    <enum>(E)</enum>
+                                    <header>Exception where 10 percent of cost incurred</header>
+                                    <clause id="H08448628BDAC49859B8560699267F00F">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>An allocation meets the requirements of this subparagraph if such allocation is made with respect to a qualified building which is placed in service not later than the close of the second calendar year following the calendar year in which the allocation is made.</text>
+                                    </clause>
+                                    <clause id="H5649313EC78B4C49A0F37E4AB2166882">
+                                        <enum>(ii)</enum>
+                                        <header>Qualified building</header>
+ <text>For purposes of clause (i), the term <term>qualified building</term> means any building which is part of a project if the taxpayer's basis in such project (as of the date which is 1 year after the date that the allocation was made) is more than 10 percent of the taxpayer's reasonably expected basis in such project (as of the close of the second calendar year referred to in clause (i)). Such term does not include any existing building unless a credit is allowable under subsection (e) for rehabilitation expenditures paid or incurred by the taxpayer with respect to such building for a taxable year ending during the second calendar year referred to in clause (i) or the prior taxable year.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="HDB3FE43EA7F74E4A96DF52368631E756">
+                                    <enum>(F)</enum>
+                                    <header>Allocation of credit on a project basis</header>
+                                    <clause id="H2495B28C567B4EA18F4F9C24B5CB7707">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>In the case of a project which includes (or will include) more than 1 building, an allocation meets the requirements of this subparagraph if—</text>
+                                        <subclause id="H3FE66FDC21044E6BBDDCDB9377F73F8D">
+                                            <enum>(I)</enum>
+ <text>the allocation is made to the project for a calendar year during the project period,</text>
+                                        </subclause>
+                                        <subclause id="H7131A9FE1FDD4D79841A988199E6A2E9">
+                                            <enum>(II)</enum>
+ <text>the allocation only applies to buildings placed in service during or after the calendar year for which the allocation is made, and</text>
+                                        </subclause>
+                                        <subclause id="H94F71D2D8E8A4871B6C13C6602CC00ED">
+                                            <enum>(III)</enum>
+ <text>the portion of such allocation which is allocated to any building in such project is specified not later than the close of the calendar year in which the building is placed in service.</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="H2A8727DE58E84EE1BD1DCC5EBBD69C02">
+                                        <enum>(ii)</enum>
+                                        <header>Project period</header>
+ <text>For purposes of clause (i), the term <term>project period</term> means the period—</text>
+                                        <subclause id="H192F6B730BC74498BAAE53FBB4237C4D">
+                                            <enum>(I)</enum>
+ <text>beginning with the 1st calendar year for which an allocation may be made for the 1st building placed in service as part of such project, and</text>
+                                        </subclause>
+                                        <subclause id="HE30BC9A9D089403BB8308AF93FE5AFBA">
+                                            <enum>(II)</enum>
+ <text>ending with the calendar year the last building is placed in service as part of such project.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HF8FBC8C55F7E4F5A8943D43394D9F021">
+                                <enum>(2)</enum>
+                                <header>Allocated credit amount to apply to all taxable years ending
+                                    during or after credit allocation year</header>
+ <text>Any housing credit dollar amount allocated to any building for any calendar year—</text>
+                                <subparagraph id="H54C48E1D7D8F4DEC83122B2569B72BDF">
+                                    <enum>(A)</enum>
+ <text>shall apply to such building for all taxable years in the credit period ending during or after such calendar year, and</text>
+                                </subparagraph>
+                                <subparagraph id="H56F85880D9D54FE49D54517290508223">
+                                    <enum>(B)</enum>
+ <text>shall reduce the aggregate housing credit dollar amount of the allocating agency only for such calendar year.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HCDC906A1736B4DBEBB57E6613FDA2EE7">
+                                <enum>(3)</enum>
+                                <header>Housing credit dollar amount for agencies</header>
+                                <subparagraph id="HEF12A55F23D64A398C9E4B233F82C5AA">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The aggregate housing credit dollar amount which a housing credit agency may allocate for any calendar year is the portion of the State housing credit ceiling allocated under this paragraph for such calendar year to such agency.</text>
+                                </subparagraph>
+                                <subparagraph id="HAB55BC796C1D46FD95A54FE812EEA7A7">
+                                    <enum>(B)</enum>
+                                    <header>State ceiling initially allocated to State housing
+                                        credit agencies</header>
+ <text>Except as provided in subparagraph (D), the State housing credit ceiling for each calendar year shall be allocated to the housing credit agency of such State. If there is more than 1 housing credit agency of a State, all such agencies shall be treated as a single agency.</text>
+                                </subparagraph>
+                                <subparagraph id="HF7C92C30C27C4633A7375ACBA31A03D9">
+                                    <enum>(C)</enum>
+                                    <header>State housing credit ceiling</header>
+ <text>The State housing credit ceiling applicable to any State for any calendar year shall be an amount equal to the sum of—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="H8C3E0436E4554059A93774318B012CEB">
+                                        <enum>(i)</enum>
+ <text>the unused State housing credit ceiling (if any) of such State for the preceding calendar year,</text>
+                                    </clause>
+                                    <clause id="HC7587323CB4643FDB62FF007D3FA3715">
+                                        <enum>(ii)</enum>
+ <text>the greater of—</text> <subclause id="H6DC60B620F474ADFA43728138E535CE4"> <enum>(I)</enum> <text>$1.00 multiplied by the State population, or</text>
+                                        </subclause>
+                                        <subclause id="H406ED23DA3414C4E8A4B58CDA6EA9DF7">
+                                            <enum>(II)</enum>
+ <text>$1,500,000, plus</text> </subclause> </clause> <clause id="HDC7E470AAFEE40BF92CFB08672E04D8D"> <enum>(iii)</enum> <text>the amount of State housing credit ceiling returned in the calendar year.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">For
+                                        purposes of clause (i), the unused State housing credit
+                                        ceiling for any calendar year is the excess (if any) of the
+                                        sum of the amounts described in clauses (ii) (reduced by the
+                                        aggregate amounts described in paragraph (10)(A)(i) with
+                                        respect to all elections made for such calendar year) and
+                                        (iii) over the aggregate housing credit dollar amount
+                                        allocated for such year. For purposes of clause (iii), the
+                                        amount of State housing credit ceiling returned in the
+                                        calendar year equals the housing credit dollar amount
+                                        previously allocated within the State to any project which
+                                        fails to meet the 10 percent test under paragraph (1)(E)(ii)
+                                        on a date after the close of the calendar year in which the
+                                        allocation was made or which does not become a qualified
+                                        middle-income housing project within the period required by
+                                        this section or the terms of the allocation or to any
+                                        project with respect to which an allocation is cancelled by
+                                        mutual consent of the housing credit agency and the
+                                        allocation recipient.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="HB05A279CC04146178B153826552B66B7">
+                                    <enum>(D)</enum>
+                                    <header>State may provide for different allocation</header>
+ <text>Rules similar to the rules of section 146(e) (other than paragraph (2)(B) thereof) shall apply for purposes of this paragraph.</text>
+                                </subparagraph>
+                                <subparagraph id="H621BBFFCE23445EB858206CE5A556E80">
+                                    <enum>(E)</enum>
+                                    <header>Population</header>
+ <text>For purposes of this paragraph, population shall be determined in accordance with section 146(j).</text>
+                                </subparagraph>
+                                <subparagraph id="H13927CDBD2E84A06B73DEFB227B9641E">
+                                    <enum>(F)</enum>
+                                    <header>Cost-of-living adjustment</header>
+                                    <clause id="H4B82AD55329C45B2BF99FB271D01C79B">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>In the case of a calendar year after 2026, the $1,500,000 and $1.00 amounts in subparagraph (C) shall each be increased by an amount equal to—</text>
+                                        <subclause id="H408E461258B947F28D0B27A162EB9C8B">
+                                            <enum>(I)</enum>
+ <text>such dollar amount, multiplied by</text> </subclause> <subclause id="H985A5E4A1778445595D80003BB288D7A"> <enum>(II)</enum> <text>the cost-of-living adjustment determined under section 1(f)(3) for such calendar year by substituting <quote>calendar year 2025</quote> for <quote>calendar year 2016</quote> in subparagraph (A)(ii) thereof.</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="H393694F1BE664ECF9BC2E429D6C88397">
+                                        <enum>(ii)</enum>
+                                        <header>Rounding</header>
+                                        <subclause id="H453607D440224B7EB8EB4F6BBE7DDA6F">
+                                            <enum>(I)</enum>
+ <text>In the case of the $1,500,000 amount, any increase under clause (i) which is not a multiple of $5,000 shall be rounded to the next lowest multiple of $5,000.</text>
+                                        </subclause>
+                                        <subclause id="H2AFEC4313A0E4E0BBF77D662C14CFA14">
+                                            <enum>(II)</enum>
+ <text>In the case of the $1.00 amount, any increase under clause (i) which is not a multiple of 5 cents shall be rounded to the next lowest multiple of 5 cents.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H4B687210BF544A15B055C1CC53676E34">
+                                <enum>(4)</enum>
+                                <header>Portion of State ceiling set-aside for certain projects
+                                    involving qualified nonprofit organizations</header>
+                                <subparagraph commented="no" id="H41595639AC23425BB71EDD7A9351CF0A">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>Not more than 90 percent of the State housing credit ceiling (determined without regard to paragraph (7)) for any State for any calendar year shall be allocated to projects other than qualified middle-income housing projects described in subparagraph (B).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="HD136CD378BAC4B8E8767CCD9A5ECD0B7">
+                                    <enum>(B)</enum>
+                                    <header>Projects involving qualified nonprofit
+                                        organizations</header>
+ <text>For purposes of subparagraph (A), a qualified middle-income housing project is described in this subparagraph if a qualified nonprofit organization is to own an interest in the project (directly or through a partnership) and materially participate (within the meaning of section 469(h)) in the development and operation of the project throughout the credit period.</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H0F64D7C3760A4672BD33E8EDA2572E06">
+                                    <enum>(C)</enum>
+                                    <header>Qualified nonprofit organization</header>
+ <text>For purposes of this paragraph, the term <term>qualified nonprofit organization</term> means any organization if—</text>
+                                    <clause commented="no" id="HA027018B18934EE38AF80B1F7F1BC8D7">
+                                        <enum>(i)</enum>
+ <text>such organization is described in paragraph (3) or (4) of section 501(c) and is exempt from tax under section 501(a),</text>
+                                    </clause>
+                                    <clause commented="no" id="HCA432306794C45D8AAC04CDABD46D627">
+                                        <enum>(ii)</enum>
+ <text>such organization is determined by the State housing credit agency not to be affiliated with or controlled by a for-profit organization, and</text>
+                                    </clause>
+                                    <clause commented="no" id="H020AFE1E21FD4C11A5700B3B609A2114">
+                                        <enum>(iii)</enum>
+ <text>one of the exempt purposes of such organization includes the fostering of middle-income housing.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="HBE3FA2FD113D4849ABDDBD68138922B2">
+                                    <enum>(D)</enum>
+                                    <header>Treatment of certain subsidiaries</header>
+                                    <clause commented="no" id="H81132A264F934C2884FA12715FDDB657">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>For purposes of this paragraph, a qualified nonprofit organization shall be treated as satisfying the ownership and material participation test of subparagraph (B) if any qualified corporation in which such organization holds stock satisfies such test.</text>
+                                    </clause>
+                                    <clause commented="no" id="HB5C0B749E2F74D6E848DC0CB59798ABC">
+                                        <enum>(ii)</enum>
+                                        <header>Qualified corporation</header>
+ <text>For purposes of clause (i), the term <term>qualified corporation</term> means any corporation if 100 percent of the stock of such corporation is held by 1 or more qualified nonprofit organizations at all times during the period such corporation is in existence.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H6820AEF5B9564534ACF2800DE2FA0973">
+                                    <enum>(E)</enum>
+                                    <header>State may not override set-aside</header>
+ <text>Nothing in subparagraph (E) of paragraph (3) shall be construed to permit a State not to comply with subparagraph (A) of this paragraph.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H3320B0B1F61F4FFBB7A705FF7624B5C6">
+                                <enum>(5)</enum>
+                                <header>Buildings eligible for credit only if minimum long-term
+                                    commitment to middle-income housing</header>
+                                <subparagraph commented="no" id="HAABBB8AAB4B344CA808BEB89ABE8BD5A">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>No credit shall be allowed by reason of this section with respect to any building for the taxable year unless an extended middle-income housing commitment is in effect as of the end of such taxable year.</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H02036667647744D2BAAFFB141F022278">
+                                    <enum>(B)</enum>
+                                    <header>Extended middle-income housing commitment</header>
+ <text>For purposes of this paragraph, the term <term>extended middle-income housing commitment</term> means any agreement between the taxpayer and the housing credit agency—</text>
+                                    <clause commented="no" id="HF87CCAC33A4C4927A8FC1AA38DA71924">
+                                        <enum>(i)</enum>
+ <text>which requires that the applicable fraction (as defined in subsection (c)(1)) for the building for each taxable year in the extended use period will not be less than the applicable fraction specified in such agreement and which prohibits the actions described in subclauses (I) and (II) of subparagraph (E)(ii),</text>
+                                    </clause>
+                                    <clause commented="no" id="HAB9E2FE9D61044929B230433DA4A43A2">
+                                        <enum>(ii)</enum>
+ <text>which allows individuals who meet the income limitation applicable to the building under subsection (g) (whether prospective, present, or former occupants of the building) the right to enforce in any State court the requirement and prohibitions of clause (i),</text>
+                                    </clause>
+                                    <clause commented="no" id="H5E67F1C6D05242F2A300B3ACE21BD049">
+                                        <enum>(iii)</enum>
+ <text>which prohibits the disposition to any person of any portion of the building to which such agreement applies unless all of the building to which such agreement applies is disposed of to such person,</text>
+                                    </clause>
+                                    <clause commented="no" id="HF99B6B3F5E1C45B3963BB51595C87541">
+                                        <enum>(iv)</enum>
+ <text>which prohibits the refusal to lease to a holder of a voucher or certificate of eligibility under section 8 of the United States Housing Act of 1937 because of the status of the prospective tenant as such a holder,</text>
+                                    </clause>
+                                    <clause commented="no" id="HDFDFB5FB442249518EB64A96B2275327">
+                                        <enum>(v)</enum>
+ <text>which is binding on all successors of the taxpayer, and</text>
+                                    </clause>
+                                    <clause commented="no" id="HE7E09C27AF704839BE7C82F7D1A8F9B0">
+                                        <enum>(vi)</enum>
+ <text>which, with respect to the property, is recorded pursuant to State law as a restrictive covenant.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H034534FD7DDB465FA448148EB0815EDA">
+                                    <enum>(C)</enum>
+                                    <header>Allocation of credit may not exceed amount necessary to
+                                        support commitment</header>
+                                    <clause commented="no" display-inline="no-display-inline" id="H4F091ACF024D42E7B0A63E32B14ABEF0">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text display-inline="yes-display-inline">The housing credit dollar amount allocated to any building may not exceed the amount necessary to support the applicable fraction specified in the extended middle-income housing commitment for such building, including any increase in such fraction pursuant to the application of subsection (f)(3) if such increase is reflected in an amended middle-income housing commitment.</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="H61DD24372C6245679553F15A82869124">
+                                        <enum>(ii)</enum>
+                                        <header>Buildings financed by tax-exempt bonds</header>
+ <text>If paragraph (9) applies to any building the amount of credit allowed in any taxable year may not exceed the amount necessary to support the applicable fraction specified in the extended low-income housing commitment for such building. Such commitment may be amended to increase such fraction.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H9D9C4D6F693C40C39A3E41475C95AB7E">
+                                    <enum>(D)</enum>
+                                    <header>Extended use period</header>
+ <text>For purposes of this paragraph, the term <term>extended use period</term> means the period—</text>
+                                    <clause id="H4450F97F1C604EA68723CCEC97394B3F">
+                                        <enum>(i)</enum>
+ <text>beginning on the 1st day in the credit period on which such building is part of a qualified middle-income housing project, and</text>
+                                    </clause>
+                                    <clause id="H18AED1E22319427E90B0AC102E2D2ABC">
+                                        <enum>(ii)</enum>
+ <text>ending on the later of—</text> <subclause id="HBC2231AF6B224ABAACE1714605609861"> <enum>(I)</enum> <text>the date specified by such agency in such agreement, or</text>
+                                        </subclause>
+                                        <subclause id="H81B245669CA74167A03523F2D1F0117D">
+                                            <enum>(II)</enum>
+ <text>the date which is 15 years after the close of the credit period.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H9F10EC5F41A4486A948FDCC1B1786A42">
+                                    <enum>(E)</enum>
+                                    <header>Exceptions if foreclosure or if no buyer willing to
+                                        maintain middle-income status</header>
+                                    <clause id="H32DFBA901C6045FFBD6898E79097067A" commented="no">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>The extended use period for any building shall terminate—</text>
+                                        <subclause id="HA43F425D08FD4F06BF0244822CA2095B">
+                                            <enum>(I)</enum>
+ <text>on the date the building is acquired by foreclosure (or instrument in lieu of foreclosure) unless the Secretary determines that such acquisition is part of an arrangement with the taxpayer a purpose of which is to terminate such period, or</text>
+                                        </subclause>
+                                        <subclause commented="no" display-inline="no-display-inline" id="H6641DA12003A441097004E37B3A521B1">
+                                            <enum>(II)</enum>
+ <text>on the last day of the period specified in subparagraph (I) if the housing credit agency is unable to present during such period a qualified contract for the acquisition of the middle-income portion of the building by any person who will continue to operate such portion as a qualified middle-income building.</text>
+                                        </subclause>
+                                        <continuation-text continuation-text-level="clause">Subclause (II) shall no apply to the extent more
+                                            stringent requirements are provided in the agreement or
+                                            in State law.</continuation-text>
+                                    </clause>
+                                    <clause id="H560CFAD301F5418DAD611DADB8B4C3EA">
+                                        <enum>(ii)</enum>
+                                        <header>Eviction, etc., of existing middle-income tenants
+                                            not permitted</header>
+ <text>The termination of an extended use period under clause (i) shall not be construed to permit before the close of the 3-year period following such termination—</text>
+                                        <subclause id="HF61CD7981FBF4FCAB0E56240B9DA5A10">
+                                            <enum>(I)</enum>
+ <text>the eviction or the termination of tenancy (other than for good cause) of an existing tenant of any middle-income unit, or</text>
+                                        </subclause>
+                                        <subclause id="H61A7135F84E747A5818676213A32E459">
+                                            <enum>(II)</enum>
+ <text>any increase in the gross rent with respect to such unit not otherwise permitted under this section.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H7857D75684794C0999E7C801E4F4EB2C">
+                                    <enum>(F)</enum>
+                                    <header>Qualified contract</header>
+ <text>For purposes of subparagraph (E), the term <term>qualified contract</term> means a bona fide contract to acquire (within a reasonable period after the contract is entered into) the nonmiddle-income portion of the building for fair market value and the middle-income portion of the building for an amount not less than the applicable fraction (specified in the extended middle-income housing commitment) of—</text>
+                                    <clause id="H2FE01CFF966B497DB1F5681605728DD3">
+                                        <enum>(i)</enum>
+ <text>the sum of—</text> <subclause id="HCA613B2EA0C94D93899D73096D7A85B4"> <enum>(I)</enum> <text>the outstanding indebtedness secured by, or with respect to, the building,</text>
+                                        </subclause>
+                                        <subclause id="HF378C05493AC4C219CB94E64A7B4BE6D">
+                                            <enum>(II)</enum>
+ <text>the adjusted investor equity in the building, plus</text>
+                                        </subclause>
+                                        <subclause id="H6F4A36B616824C3EB8C3BB95EFADE10C">
+                                            <enum>(III)</enum>
+ <text>other capital contributions not reflected in the amounts described in subclause (I) or (II), reduced by</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="HD25646D3DF4A43E1B6C81AC397848336">
+                                        <enum>(ii)</enum>
+ <text>cash distributions from (or available for distribution from) the project.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">The
+                                        Secretary shall prescribe such regulations as may be
+                                        necessary or appropriate to carry out this paragraph,
+                                        including regulations to prevent the manipulation of the
+                                        amount determined under the preceding
+                                        sentence.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="H5B8663EA6378444782F99B34AF0D9EF9">
+                                    <enum>(G)</enum>
+                                    <header>Adjusted investor equity</header>
+                                    <clause commented="no" display-inline="no-display-inline" id="H9378771368AD43CCB96CBD9DDD5F6F1B">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>For purposes of subparagraph (F), the term <term>adjusted investor equity</term> means, with respect to any calendar year, the aggregate amount of cash taxpayers invested with respect to the project increased by the amount equal to—</text>
+                                        <subclause id="H456A7E1F7E7F4CCC9451838F084BB089">
+                                            <enum>(I)</enum>
+ <text>such amount, multiplied by</text> </subclause> <subclause id="H37205E2363AF456B8D731A82CE4480FB"> <enum>(II)</enum> <text>the cost-of-living adjustment for such calendar year, determined under section 1(f)(3) by substituting the base calendar year for <quote>calendar year 2016</quote> in subparagraph (A)(ii) thereof.</text>
+                                        </subclause>
+                                        <continuation-text continuation-text-level="clause">An
+                                            amount shall be taken into account as an investment in
+                                            the project only to the extent there was an obligation
+                                            to invest such amount as of the beginning of the credit
+                                            period and to the extent such amount is reflected in the
+                                            adjusted basis of the project.</continuation-text>
+                                    </clause>
+                                    <clause id="H3A404E05AA384DFC8FBD58E10B64B87F">
+                                        <enum>(ii)</enum>
+                                        <header>Cost-of-living increases in excess of 5 percent not
+                                            taken into account</header>
+ <text>Under regulations prescribed by the Secretary, if the C–CPI–U for any calendar year (as defined in section 1(f)(6)) exceeds the C–CPI–U for the preceding calendar year by more than 5 percent, the C–CPI–U for the base calendar year shall be increased such that such excess shall never be taken into account under clause (i). In the case of a base calendar year before 2017, the C–CPI–U for such year shall be determined by multiplying the CPI for such year by the amount determined under section 1(f)(3)(B).</text>
+                                    </clause>
+                                    <clause id="H130668B83044473D8020CC73D1E9CC9A">
+                                        <enum>(iii)</enum>
+                                        <header>Base calendar year</header>
+ <text>For purposes of this subparagraph, the term <term>base calendar year</term> means the calendar year with or within which the 1st taxable year of the credit period ends.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H60F29F9ABDD04ED3ADE30222870B2F04">
+                                    <enum>(H)</enum>
+                                    <header>Middle-income portion</header>
+ <text>For purposes of this paragraph, the middle-income portion of a building is the portion of such building equal to the applicable fraction specified in the extended middle-income housing commitment for the building.</text>
+                                </subparagraph>
+                                <subparagraph id="H734EB3D8CC504FC5A52EF26396609109">
+                                    <enum>(I)</enum>
+                                    <header>Period for finding buyer</header>
+ <text>The period referred to in this subparagraph is the 1-year period beginning on the date (after the 14th year of the credit period) the taxpayer submits a written request to the housing credit agency to find a person to acquire the taxpayer's interest in the low-income portion of the building.</text>
+                                </subparagraph>
+                                <subparagraph id="H2319223244EA498FAF82F35D53EBB606">
+                                    <enum>(J)</enum>
+                                    <header>Effect of noncompliance</header>
+ <text>If, during a taxable year, there is a determination that an extended middle-income housing agreement was not in effect as of the beginning of such year, such determination shall not apply to any period before such year and subparagraph (A) shall be applied without regard to such determination if the failure is corrected within 1 year from the date of the determination.</text>
+                                </subparagraph>
+                                <subparagraph id="HACB84D44C63346199D0BEBF69F7D2926">
+                                    <enum>(K)</enum>
+                                    <header>Projects which consist of more than 1 building</header>
+ <text>The application of this paragraph to projects which consist of more than 1 building shall be made under regulations prescribed by the Secretary.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H449970D4B40F4841A0DD709608065CDD">
+                                <enum>(6)</enum>
+                                <header>Special rules</header>
+                                <subparagraph id="HAFED6C461FE04787A872609DCDDA23AB">
+                                    <enum>(A)</enum>
+                                    <header>Building must be located within jurisdiction of credit
+                                        agency</header>
+ <text>A housing credit agency may allocate its aggregate housing credit dollar amount only to buildings located in the jurisdiction of the governmental unit of which such agency is a part.</text>
+                                </subparagraph>
+                                <subparagraph id="H5C5A5E3517DB42A581B18FBCC8F1B99D">
+                                    <enum>(B)</enum>
+                                    <header>Agency allocations in excess of limit</header>
+ <text>If the aggregate housing credit dollar amounts allocated by a housing credit agency for any calendar year exceed the portion of the State housing credit ceiling allocated to such agency for such calendar year, the housing credit dollar amounts so allocated shall be reduced (to the extent of such excess) for buildings in the reverse of the order in which the allocations of such amounts were made.</text>
+                                </subparagraph>
+                                <subparagraph id="HE8306DC388114C39B3CDEB3DB0167E16">
+                                    <enum>(C)</enum>
+                                    <header>Credit reduced if allocated credit dollar amount is less
+                                        than credit which would be allowable without regard to
+                                        placed in service convention, etc</header>
+                                    <clause id="H6CA2F803E2294C23915EA753EB9000E1">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>The amount of the credit determined under this section with respect to any building shall not exceed the clause (ii) percentage of the amount of the credit which would (but for this subparagraph) be determined under this section with respect to such building.</text>
+                                    </clause>
+                                    <clause id="H233C01BE82514ECEB09AB8427D6F4ECD">
+                                        <enum>(ii)</enum>
+                                        <header>Determination of percentage</header>
+ <text>For purposes of clause (i), the clause (ii) percentage with respect to any building is the percentage which—</text>
+                                        <subclause id="H881519B9FAD34E9CBD286203ED466EFD">
+                                            <enum>(I)</enum>
+ <text>the housing credit dollar amount allocated to such building, bears to</text>
+                                        </subclause>
+                                        <subclause id="HB7427BE9818B4EC8B6C70FF5EEBE4D5E">
+                                            <enum>(II)</enum>
+ <text>the credit amount determined in accordance with clause (iii).</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="H39DBF0F7DEB64F43BE824EA4792BC0A0">
+                                        <enum>(iii)</enum>
+                                        <header>Determination of credit amount</header>
+ <text>The credit amount determined in accordance with this clause is the amount of the credit which would (but for this subparagraph) be determined under this section with respect to the building if—</text>
+                                        <subclause id="H6663D389917442C6B2339907A5971B9B">
+                                            <enum>(I)</enum>
+ <text>this section were applied without regard to paragraphs (2)(A) and (3)(B) of subsection (f), and</text>
+                                        </subclause>
+                                        <subclause id="HBDD1F715751D45098929CAE15642A20A">
+                                            <enum>(II)</enum>
+ <text>subsection (f)(3)(A) were applied without regard to <quote>the percentage equal to <fraction>2/3</fraction> of</quote>.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H80AA7797E0204779903E40E0B1BB5E9B">
+                                    <enum>(D)</enum>
+                                    <header>Housing credit agency to specify applicable percentage
+                                        and maximum qualified basis</header>
+ <text>In allocating a housing credit dollar amount to any building, the housing credit agency shall specify the applicable percentage and the maximum qualified basis which may be taken into account under this section with respect to such building. The applicable percentage and maximum qualified basis so specified shall not exceed the applicable percentage and qualified basis determined under this section without regard to this subsection.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H8380E95BD66940A1BF58380C09BC7A49">
+                                <enum>(7)</enum>
+                                <header>Increase in State ceiling dedicated to certain rural
+                                    development projects</header>
+                                <subparagraph id="HC83AF8473AB34043B71D9FA40BA32849">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The State housing credit ceiling for any calendar year shall be increased by an amount equal to 5 percent of the amount determined under paragraph (3)(C)(ii).</text>
+                                </subparagraph>
+                                <subparagraph id="H4A191F3BFBD1425B80491E59FE3DEF73" commented="no">
+                                    <enum>(B)</enum>
+                                    <header>Use of increased amount</header>
+                                    <clause commented="no" display-inline="no-display-inline" id="H1CFFA47553E749A99AEEFF32290BDD73">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text display-inline="yes-display-inline">The amount of the increase under subparagraph (A) for any calendar year may only be allocated to buildings located in a rural area.</text>
+                                    </clause>
+                                    <clause id="HDCB259F1367C47F189D871E26F8C5FF3" commented="no" display-inline="no-display-inline">
+                                        <enum>(ii)</enum>
+                                        <header display-inline="yes-display-inline">Rural
+                                            area</header>
+ <text display-inline="yes-display-inline">For purposes of clause (i), the term <term>rural area</term> means any non-metropolitan area, or any rural area as defined by section 520 of the Housing Act of 1949, which is identified by the qualified allocation plan under subsection (l)(1)(B).</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H97D70F1B88324D50B54452BE586FE64F">
+                                <enum>(8)</enum>
+                                <header>Other definitions</header>
+ <text>For purposes of this subsection—</text> <subparagraph id="H9B10C279C18D40A797FC83A72F90EA79"> <enum>(A)</enum> <header>Housing credit agency</header> <text>The term <term>housing credit agency</term> means any agency authorized to carry out this subsection.</text>
+                                </subparagraph>
+                                <subparagraph id="H9F6BE654A9FE484190D5C97E895A2496">
+                                    <enum>(B)</enum>
+                                    <header>Possessions treated as States</header>
+ <text>The term <term>State</term> includes a possession of the United States.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H155CC0FFE02944C8A3E30136CB6AEB5E">
+                                <enum>(9)</enum>
+                                <header>Credit for buildings financed by tax-exempt bonds subject to
+                                    volume cap not taken into account</header>
+ <text>Rules similar to the rules of subsections (h)(4), (m)(1)(D), and (m)(2)(D) of section 42 shall apply for purposes of this subsection.</text>
+                            </paragraph>
+                            <paragraph commented="no" display-inline="no-display-inline" id="H9FEC896A64B143FBB44B45100A7A0B4B">
+                                <enum>(10)</enum>
+                                <header>Election to transfer State housing credit ceiling for
+                                    allocations to low-income buildings</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="HB4D5AB3ABC5D44E6AE9B57D7E200A814">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text display-inline="yes-display-inline">If a State housing credit agency makes an election under this paragraph with respect to a calendar year—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="H21F7E7B88E664C14BA304D9028978BCB">
+                                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the State housing credit ceiling for such calendar year under paragraph (3) (determined before application of paragraph (7)) shall be reduced by the amount specified in such election,</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="H569C55CCFEC54730BD4EACE21C4E3548">
+                                        <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">the amount determined under paragraph (7) for such calendar year shall be reduced by the amount specified in such election, and</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="H177ACD7AD05649EA87E6611DA62753C1">
+                                        <enum>(iii)</enum>
+ <text>the amount determined under section 42(h)(3)(C)(ii) for such calendar year shall be increased by the sum of the amounts specified in clauses (i) and (ii), except that any amount specified under clause (ii)—</text>
+                                        <subclause commented="no" display-inline="no-display-inline" id="H54E94FC1445448CFADD282EF6980DCE0">
+                                            <enum>(I)</enum>
+ <text display-inline="yes-display-inline">may only be allocated under such section to qualified low-income buildings (as defined in section 42) located in a rural area (as defined in paragraph (7), and</text>
+                                        </subclause>
+                                        <subclause commented="no" display-inline="no-display-inline" id="H062CB37DFE7743FEAB4C491930F907CC">
+                                            <enum>(II)</enum>
+ <text>shall not be taken into account for purposes of determining the unused housing credit ceiling under the second sentence of section 42(h)(3)(C).</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H213444A4E3B24EE5865E18E03251051B">
+                                    <enum>(B)</enum>
+                                    <header>Time and manner for making election</header>
+                                    <clause commented="no" display-inline="no-display-inline" id="H963D666FB3934B019272B80B5067BCD6">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text display-inline="yes-display-inline">An election under this paragraph—</text>
+                                        <subclause commented="no" display-inline="no-display-inline" id="H10920270E8D641909E4CFFAD0B379490">
+                                            <enum>(I)</enum>
+ <text display-inline="yes-display-inline">shall be made before the end of the calendar year with respect to which such election applies,</text>
+                                        </subclause>
+                                        <subclause commented="no" display-inline="no-display-inline" id="H118EF465703D449EB56A2EE684CEEA47">
+                                            <enum>(II)</enum>
+ <text display-inline="yes-display-inline">shall be made in such manner as specified by the Secretary, and</text>
+                                        </subclause>
+                                        <subclause commented="no" display-inline="no-display-inline" id="H647730CDEA384B689CE683011B436318">
+                                            <enum>(III)</enum>
+ <text display-inline="yes-display-inline">shall separately specify the amount of reductions to be made under paragraph (3) and paragraph (7).</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="H6789E7AABE77417B911FB1AD67D14938">
+                                        <enum>(ii)</enum>
+                                        <header>Frequency</header>
+ <text>A State housing credit agency may make more than one election under this section with respect to any calendar year, and any such election, once made, shall be revocable only if such revocation is made before the end of the calendar year with respect to which such election is made.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="HB8370156028A474EA82B5D5CB3D2D162">
+                                    <enum>(C)</enum>
+                                    <header>Limitation</header>
+ <text>The aggregate amount specified in elections under this paragraph with respect to any State housing credit agency for calendar year shall not exceed the sum of—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="HAE93E273F1C547D291545981B3B035A4">
+                                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the amount determined under paragraph (3)(C)(ii) for such calendar year, plus</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="H6E721F1EF3CA46959BB0FCABA8142D73">
+                                        <enum>(ii)</enum>
+ <text>the amount determined under paragraph (7) for such calendar year.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="HF7098CE4058F4E0AB407975988A1E337">
+                            <enum>(i)</enum>
+                            <header>Definitions and special rules</header>
+ <text>For purposes of this section—</text> <paragraph id="H9973BEBAC80C4653A078ABABE99957E2"> <enum>(1)</enum> <header>Middle-income unit</header> <subparagraph id="HF080E79612FA45228B7D13D366C6FF6E"> <enum>(A)</enum> <header>In general</header> <text>The term <term>middle-income unit</term> means any unit in a building if—</text>
+                                    <clause id="HEAB9DF7D4CED4F43924FC51ECAC31DC7">
+                                        <enum>(i)</enum>
+ <text>such unit is rent-restricted (as defined in subsection (g)(2)), and</text>
+                                    </clause>
+                                    <clause id="HB4C698754D0A4F48A1253F085ED60A4F">
+                                        <enum>(ii)</enum>
+ <text>the individuals occupying such unit meet the income limitation applicable under subsection (g)(1) to the project of which such building is a part.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="HCDFECDE29FF84EBA8C28FA0398DD5647">
+                                    <enum>(B)</enum>
+                                    <header>Exceptions</header>
+                                    <clause id="H0BB4260A17814F43B0088BF02B57B48D">
+                                        <enum>(i)</enum>
+                                        <header>Exclusion of low-income units</header>
+ <text>A unit shall not be treated as a middle-income unit if such unit is a low-income unit (as defined under section 42(i)(3)).</text>
+                                    </clause>
+                                    <clause id="H866842ABB2A24F9990C4FFC026B7FD50">
+                                        <enum>(ii)</enum>
+                                        <header>Unit must be suitable for permanent
+                                            occupancy</header>
+                                        <subclause id="H674B95E82A004898BCB44435B0ED84D4">
+                                            <enum>(I)</enum>
+                                            <header>In general</header>
+ <text>A unit shall not be treated as a middle-income unit unless the unit is suitable for occupancy and used other than on a transient basis.</text>
+                                        </subclause>
+                                        <subclause id="H278194258C2847699233B7F0FAF0D3EE">
+                                            <enum>(II)</enum>
+                                            <header>Transitional housing for homeless</header>
+ <text>For purposes of subclause (I), a unit shall be considered to be used other than on a transient basis if the unit contains sleeping accommodations and kitchen and bathroom facilities and is located in a building—</text>
+                                            <item commented="no" display-inline="no-display-inline" id="HC35E6B4261BB47DCAB597F783EA4343C">
+                                                <enum>(aa)</enum>
+ <text>which is used exclusively to facilitate the transition of homeless individuals (within the meaning of section 103 of the Stewart B. McKinney Homeless Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/11302">42 U.S.C. 11302</external-xref>), as in effect on the date of the enactment of this clause) to independent living within 24 months, and</text>
+                                            </item>
+                                            <item id="HB1ECD77651BD4FD09D6CB9F05FB89651">
+                                                <enum>(bb)</enum>
+ <text>in which a governmental entity or qualified nonprofit organization (as defined in subsection (h)(4)) provides such individuals with temporary housing and supportive services designed to assist such individuals in locating and retaining permanent housing.</text>
+                                            </item>
+                                        </subclause>
+                                        <subclause id="H6E25C18AF02B4ECBA27CC0EFE6EC3FC7">
+                                            <enum>(III)</enum>
+                                            <header>Suitability for occupancy</header>
+ <text>For purposes of subclause (I), the suitability of a unit for occupancy shall be determined under regulations prescribed by the Secretary taking into account local health, safety, and building codes.</text>
+                                        </subclause>
+                                        <subclause id="H13F7F7220E7645BE814583080E46ACF7">
+                                            <enum>(IV)</enum>
+                                            <header>Single-room occupancy units</header>
+ <text>For purposes of subclause (I), a single-room occupancy unit shall not be treated as used on a transient basis merely because it is rented on a month-by-month basis.</text>
+                                        </subclause>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="HAC02A3B5073A4E2BA7C20EBB3C7E8418">
+                                    <enum>(C)</enum>
+                                    <header>Special rule for buildings having 4 or fewer
+                                        units</header>
+ <text>In the case of any building which has 4 or fewer residential rental units, no unit in such building shall be treated as a middle-income unit if the units in such building are owned by—</text>
+                                    <clause id="HE32723FF66D3404BA5756CBB2E410901">
+                                        <enum>(i)</enum>
+ <text>any individual who occupies a residential unit in such building, or</text>
+                                    </clause>
+                                    <clause id="H47860C4948B2427DB7FF708AFD3FB929">
+                                        <enum>(ii)</enum>
+ <text>any person who is related (as defined in subsection (d)(2)(D)(ii)) to such individual.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H87FF50057BB74AAF8449EA8FA2B13753">
+                                    <enum>(D)</enum>
+                                    <header>Certain students not to disqualify unit</header>
+ <text>A unit shall not fail to be treated as a middle-income unit merely because it is occupied—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="H872630D841874845B8C47D6FC41AC571">
+                                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">by an individual who is—</text>
+                                        <subclause id="H906D2F2410D9439B8F6624BBD78DDFBB">
+                                            <enum>(I)</enum>
+ <text>a student and receiving assistance under title IV of the Social Security Act,</text>
+                                        </subclause>
+                                        <subclause id="HF6F84DD879CE4817A5C0484473FA066D">
+                                            <enum>(II)</enum>
+ <text>a student who was previously under the care and placement responsibility of the State agency responsible for administering a plan under part B or part E of title IV of the Social Security Act, or</text>
+                                        </subclause>
+                                        <subclause id="HD3981E8C9A2E4AFF871D3C1B4E32245B">
+                                            <enum>(III)</enum>
+ <text>enrolled in a job training program receiving assistance under the Job Training Partnership Act or under other similar Federal, State, or local laws, or</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="H0ADCD918F3724C7BA0696652C7D00A31">
+                                        <enum>(ii)</enum>
+ <text>entirely by full-time students if such students are—</text>
+                                        <subclause id="HD206C29CAA124B53B92FC4C5F80727BA">
+                                            <enum>(I)</enum>
+ <text>single parents and their children and such parents are not dependents (as defined in section 152, determined without regard to subsections (b)(1), (b)(2), and (d)(1)(B) thereof) of another individual and such children are not dependents (as so defined) of another individual other than a parent of such children, or</text>
+                                        </subclause>
+                                        <subclause id="H07D00A2623414FB893D6F4B0CCC8C0E9">
+                                            <enum>(II)</enum>
+ <text>married and file a joint return.</text> </subclause> </clause> </subparagraph> <subparagraph id="H769211EEC69A4F1A84FEE02939C8F7AE"> <enum>(E)</enum> <header>Owner-occupied buildings having 4 or fewer units eligible for credit where development plan</header> <clause id="H732241A0EEB6439C8D88BFE0DED841E6"> <enum>(i)</enum> <header>In general</header> <text>Subparagraph (C) shall not apply to the acquisition or rehabilitation of a building pursuant to a development plan of action sponsored by a State or local government or a qualified nonprofit organization.</text>
+                                    </clause>
+                                    <clause id="HD3D206C9A23549E0B460B2084E2C5B38">
+                                        <enum>(ii)</enum>
+                                        <header>Limitation on credit</header>
+ <text>In the case of a building to which clause (i) applies, the applicable fraction shall not exceed 80 percent of the unit fraction.</text>
+                                    </clause>
+                                    <clause id="H019266BA506647DEAD14EAE27D1124AF">
+                                        <enum>(iii)</enum>
+                                        <header>Certain unrented units treated as
+                                            owner-occupied</header>
+ <text>In the case of a building to which clause (i) applies, any unit which is not rented for 90 days or more shall be treated as occupied by the owner of the building as of the 1st day it is not rented.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HD75C5D6BAB4B4FEDBAB83CE3272C7A18">
+                                <enum>(2)</enum>
+                                <header>New building</header>
+ <text>The term <term>new building</term> means a building the original use of which begins with the taxpayer.</text>
+                            </paragraph>
+                            <paragraph id="H84E917A96C5446339214F016E29EBCDB">
+                                <enum>(3)</enum>
+                                <header>Existing building</header>
+ <text>The term <term>existing building</term> means any building which is not a new building.</text>
+                            </paragraph>
+                            <paragraph id="H2085A2566B0348B6A17DBD6BD6EEF7CD">
+                                <enum>(4)</enum>
+                                <header>Application to estates and trusts</header>
+ <text>In the case of an estate or trust, the amount of the credit determined under subsection (a) shall be apportioned between the estate or trust and the beneficiaries on the basis of the income of the estate or trust allocable to each.</text>
+                            </paragraph>
+                            <paragraph id="HFE2C8B3D604C495EA10BD54D2DC75E8A">
+                                <enum>(5)</enum>
+                                <header>Impact of tenant's right of 1st refusal to acquire
+                                    property</header>
+                                <subparagraph id="H46D30BAD5C484E53B673B8A2307E0EC3">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>No Federal income tax benefit shall fail to be allowable to the taxpayer with respect to any qualified middle-income building merely by reason of a right of 1st refusal held by the tenants (in cooperative form or otherwise) or resident management corporation of such building or by a qualified nonprofit organization (as defined in subsection (h)(4)(C)) or government agency to purchase the property after the close of the credit period for a price which is not less than the minimum purchase price determined under subparagraph (B).</text>
+                                </subparagraph>
+                                <subparagraph id="HFBF5B2C8C9B043BCA3DBECE7F37B3D55">
+                                    <enum>(B)</enum>
+                                    <header>Minimum purchase price</header>
+ <text>For purposes of subparagraph (A), the minimum purchase price under this subparagraph is an amount equal to the sum of—</text>
+                                    <clause id="H00C8396641AA458B8787CA944BFB8C76">
+                                        <enum>(i)</enum>
+ <text>the principal amount of outstanding indebtedness secured by the building (other than indebtedness incurred within the 5-year period ending on the date of the sale to the tenants), and</text>
+                                    </clause>
+                                    <clause id="HDDBED9D6BF5F4CB6B616B422CAE034D2">
+                                        <enum>(ii)</enum>
+ <text>all Federal, State, and local taxes attributable to such sale.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">Except
+                                        in the case of Federal income taxes, there shall not be
+                                        taken into account under clause (ii) any additional tax
+                                        attributable to the application of clause
+                                        (ii).</continuation-text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" display-inline="no-display-inline" id="HB88580F401974487884A5DA54A84DE50">
+                                <enum>(6)</enum>
+                                <header>Impact of purchase option to acquire property</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="HD4C3D0D00F3E4B40BDB2606D52DEE70C">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text display-inline="yes-display-inline">No Federal income tax benefit shall fail to be allowable to the taxpayer with respect to any qualified middle-income building merely by reason of a purchase option held by the tenants (in cooperative form or otherwise) or resident management corporation of such building or by a qualified nonprofit organization (as defined in subsection (h)(4)(C)) or government agency to purchase the property or all of the partnership interests (other than interests of the person exercising such option or a related party thereto (within the meaning of section 267(b) or 707(b)(1))) relating to the property after the close of the credit period for a price which is not less than the minimum purchase price determined under subparagraph (B).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H2C0EFD3853784C41A92E6D7B8726D59D">
+                                    <enum>(B)</enum>
+                                    <header>Minimum purchase price</header>
+ <text display-inline="yes-display-inline">For purposes of subparagraph (A)—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="H27E3E1DD67FE4271B1C3D18EC538C6AD">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text display-inline="yes-display-inline">Except as provided in clause (ii), the minimum purchase price is the amount determined under paragraph (5)(B).</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="HD89736D048524D078D4C812A371A398A">
+                                        <enum>(ii)</enum>
+                                        <header>Partnership interests</header>
+ <text>In the case of a purchase of all of the partnership interests relating to a property, the minimum purchase price under this subparagraph shall be an amount not less than the sum of the interests’ shares of the amount which would be determined with respect to the property under paragraph (5)(B) without regard to this sentence.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H5E00F115D562484E889F2A7F69439B86">
+                                    <enum>(C)</enum>
+                                    <header>Property</header>
+ <text>For purposes of subparagraph (A), the term <term>property</term> may include all or any of the assets held for the development, operation, or maintenance of a building.</text>
+                                </subparagraph>
+                                <subparagraph id="H5BA422000D7645D1A1B671DBB38400B1">
+                                    <enum>(D)</enum>
+                                    <header>Application to <enum-in-header>S</enum-in-header>
+                                        corporations and other pass-through entities</header>
+ <text>Except as provided by the Secretary, the rules of this paragraph shall apply to S corporations and other pass-through entities in the same manner as such rules apply to partnerships.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H041B0166EEAB4083A03B5B78FABCB463">
+                                <enum>(7)</enum>
+                                <header>Treatment of rural projects</header>
+ <text>For purposes of this section, in the case of any project for residential rental property located in a rural area (as defined in section 520 of the Housing Act of 1949), any income limitation measured by reference to area median gross income shall be measured by reference to the greater of area median gross income or national non-metropolitan median income. The preceding sentence shall not apply with respect to any building if paragraph (1) of section 42(h) does not apply by reason of paragraph (9) thereof to any portion of the credit determined under this section with respect to such building.</text>
+                            </paragraph>
+                            <paragraph id="H6C864FC5327B4F019B61BA9E92C769CE">
+                                <enum>(8)</enum>
+                                <header>Determination of whether building is Federally
+                                    subsidized</header>
+                                <subparagraph id="HD8751E72C4AB4BD4831CD0A5D7CD108E">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>Except as otherwise provided in this paragraph, for purposes of this section, a project shall be treated as Federally subsidized for any taxable year if, at any time during such taxable year or any prior taxable year, there is or was outstanding any obligation the interest on which is exempt from tax under section 103 the proceeds of which are or were used (directly or indirectly) with respect to such project or the operation thereof.</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="H69E56D0736534A89BC5A186394D38687">
+                                    <enum>(B)</enum>
+                                    <header>Election to reduce eligible basis by proceeds of
+                                        obligations</header>
+ <text>A tax-exempt obligation shall not be taken into account under subparagraph (A) if the taxpayer elects to exclude from the eligible basis of the building for purposes of subsection (d) the proceeds of such obligation.</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H3669FC5E22C84918871A92B0E89C3F72">
+                                    <enum>(C)</enum>
+                                    <header>Special rule for subsidized construction
+                                        financing</header>
+ <text>Subparagraph (A) shall not apply to any tax-exempt obligation used to provide construction financing for any building if—</text>
+                                    <clause commented="no" id="H08C686BBE28E40B09B694E2331DB4C11">
+                                        <enum>(i)</enum>
+ <text>such obligation (when issued) identified the building for which the proceeds of such obligation would be used, and</text>
+                                    </clause>
+                                    <clause commented="no" id="HFF523115FC3F410BB6451E9C0D1AE601">
+                                        <enum>(ii)</enum>
+ <text>such obligation is redeemed before such building is placed in service.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H53C69F3AFE6D41C18FF2E7DF5ED1A3D2">
+                                <enum>(9)</enum>
+                                <header>Reduction in basis</header>
+ <text>In the case of any building for which a credit is allowable under this section and section 42, the basis of the building shall be reduced by the amount of such credit allowed under subsection (a).</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H61CE152AEBB44B8A9A6318C0A4D90425">
+                            <enum>(j)</enum>
+                            <header>Application of at-Risk rules</header>
+ <text>For purposes of this section—</text> <paragraph id="H363AA6847C414636974FA754D2443739"> <enum>(1)</enum> <header>In general</header> <text>Except as otherwise provided in this subsection, rules similar to the rules of section 49(a)(1) (other than subparagraphs (D)(ii)(II) and (D)(iv)(I) thereof), section 49(a)(2), and section 49(b)(1) shall apply in determining the qualified basis of any building in the same manner as such sections apply in determining the credit base of property.</text>
+                            </paragraph>
+                            <paragraph commented="no" id="H204B6434E6624516B6CBDFA737C6D66B">
+                                <enum>(2)</enum>
+                                <header>Special rules for determining qualified person</header>
+ <text>For purposes of paragraph (1)—</text> <subparagraph commented="no" id="H36E5FED91AB34A578E712BA984FA740D"> <enum>(A)</enum> <header>In general</header> <text>If the requirements of subparagraphs (B), (C), and (D) are met with respect to any financing borrowed from a qualified nonprofit organization (as defined in subsection (h)(4)), the determination of whether such financing is qualified commercial financing with respect to any qualified middle-income building shall be made without regard to whether such organization—</text>
+                                    <clause commented="no" id="HF46A0FA3D4F94A599BE64A905DF0D82F">
+                                        <enum>(i)</enum>
+ <text>is actively and regularly engaged in the business of lending money, or</text>
+                                    </clause>
+                                    <clause commented="no" id="H69D818292CE644779C2BC672A58ED684">
+                                        <enum>(ii)</enum>
+ <text>is a person described in section 49(a)(1)(D)(iv)(II).</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="HAC9532546B79406FBD6E53931754227B">
+                                    <enum>(B)</enum>
+                                    <header>Financing secured by property</header>
+ <text>The requirements of this subparagraph are met with respect to any financing if such financing is secured by the qualified middle-income building, except that this subparagraph shall not apply in the case of a federally assisted building described in section 42(d)(6)(C)(i) if—</text>
+                                    <clause commented="no" id="HF6733F0C84A94BDEB6402674D398AE36">
+                                        <enum>(i)</enum>
+ <text>a security interest in such building is not permitted by a Federal agency holding or insuring the mortgage secured by such building, and</text>
+                                    </clause>
+                                    <clause commented="no" id="HA8EFC75977B64378931AE844777A640D">
+                                        <enum>(ii)</enum>
+ <text>the proceeds from the financing (if any) are applied to acquire or improve such building.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph commented="no" id="HE5C447A50ACC4B4CA230BA734829B012">
+                                    <enum>(C)</enum>
+                                    <header>Portion of building attributable to financing</header>
+ <text>The requirements of this subparagraph are met with respect to any financing for any taxable year in the credit period if, as of the close of such taxable year, not more than 60 percent of the eligible basis of the qualified middle-income building is attributable to such financing (reduced by the principal and interest of any governmental financing which is part of a wrap-around mortgage involving such financing).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H1DBF5E1122EE4DB38A2DEAB85EED7B73">
+                                    <enum>(D)</enum>
+                                    <header>Repayment of principal and interest</header>
+ <text>The requirements of this subparagraph are met with respect to any financing if such financing is fully repaid on or before the earliest of—</text>
+                                    <clause commented="no" id="H9497BF0E54504D08AC0D14CC3B175B16">
+                                        <enum>(i)</enum>
+ <text>the date on which such financing matures,</text> </clause> <clause commented="no" id="H4F7ADEAE187B4FD69AEADF3DEC1F236A"> <enum>(ii)</enum> <text>the 90th day after the close of the credit period with respect to the qualified middle-income building, or</text>
+                                    </clause>
+                                    <clause commented="no" id="H93F4946B6E9D4A44B04ED3D5BFC066C4">
+                                        <enum>(iii)</enum>
+ <text>the date of its refinancing or the sale of the building to which such financing relates.</text>
+                                    </clause>
+                                    <continuation-text commented="no" continuation-text-level="subparagraph">In the case of a
+                                        qualified nonprofit organization which is not described in
+                                        section 49(a)(1)(D)(iv)(II) with respect to a building,
+                                        clause (ii) of this subparagraph shall be applied as if the
+                                        date described therein were the 90th day after the earlier
+                                        of the date the building ceases to be a qualified
+                                        middle-income building or the date which is 15 years after
+                                        the close of a credit period with respect
+                                        thereto.</continuation-text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" id="H739B7D35357B4DC38B638127A492989F">
+                                <enum>(3)</enum>
+                                <header>Present value of financing</header>
+ <text>If the rate of interest on any financing described in paragraph (2)(A) is less than the rate which is 1 percentage point below the applicable Federal rate as of the time such financing is incurred, then the qualified basis (to which such financing relates) of the qualified middle-income building shall be the present value of the amount of such financing, using as the discount rate such applicable Federal rate. For purposes of the preceding sentence, the rate of interest on any financing shall be determined by treating interest to the extent of government subsidies as not payable.</text>
+                            </paragraph>
+                            <paragraph commented="no" id="HC86FA596EBA244BD92E18B97F2ADE1F6">
+                                <enum>(4)</enum>
+                                <header>Failure to fully repay</header>
+                                <subparagraph commented="no" id="H0BC0EEA9385A43929701551DFBDA72F7">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>To the extent that the requirements of paragraph (2)(D) are not met, then the taxpayer's tax under this chapter for the taxable year in which such failure occurs shall be increased by an amount equal to the applicable portion of the credit under this section with respect to such building, increased by an amount of interest for the period—</text>
+                                    <clause commented="no" id="HBD2D9776AC5B48DD8C7FE269DE836554">
+                                        <enum>(i)</enum>
+ <text>beginning with the due date for the filing of the return of tax imposed by chapter 1 for the 1st taxable year for which such credit was allowable, and</text>
+                                    </clause>
+                                    <clause commented="no" id="H8415FEA7EBA64C208686A7E8A803D45D">
+                                        <enum>(ii)</enum>
+ <text>ending with the due date for the taxable year in which such failure occurs,</text>
+                                    </clause>
+                                    <continuation-text commented="no" continuation-text-level="subparagraph">determined by using
+                                        the underpayment rate and method under section
+                                        6621.</continuation-text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H4DB3F78269A346B68305937150E3D2B9">
+                                    <enum>(B)</enum>
+                                    <header>Applicable portion</header>
+ <text>For purposes of subparagraph (A), the term <term>applicable portion</term> means the aggregate decrease in the credits allowed to a taxpayer under section 38 for all prior taxable years which would have resulted if the eligible basis of the building were reduced by the amount of financing which does not meet requirements of paragraph (2)(D).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" id="H5497D5D9E6A040FF9755704B1746DF10">
+                                    <enum>(C)</enum>
+                                    <header>Certain rules to apply</header>
+ <text>Rules similar to the rules of subparagraphs (A) and (D) of section 42(j)(4) shall apply for purposes of this subsection.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="HEEBDE342AF1546EB928C1EE21697A45F">
+                            <enum>(k)</enum>
+                            <header>Certifications and other reports to Secretary</header>
+                            <paragraph id="HD73D2206DA9343F39EEB16BA120D8246">
+                                <enum>(1)</enum>
+                                <header>Certification with respect to 1st year of credit
+                                    period</header>
+ <text>Following the close of the 1st taxable year in the credit period with respect to any qualified middle-income building, the taxpayer shall certify to the Secretary (at such time and in such form and in such manner as the Secretary prescribes)—</text>
+                                <subparagraph id="H116AED6450E6483B8448C661DC6D12F0">
+                                    <enum>(A)</enum>
+ <text>the taxable year, and calendar year, in which such building was placed in service,</text>
+                                </subparagraph>
+                                <subparagraph id="HF8F700EF77644FA5BEA7319DA7DAD219">
+                                    <enum>(B)</enum>
+ <text>the adjusted basis and eligible basis of such building as of the close of the 1st year of the credit period,</text>
+                                </subparagraph>
+                                <subparagraph id="H5A25C43D31C34E31997E0888FC538D6B">
+                                    <enum>(C)</enum>
+ <text>the maximum applicable percentage and qualified basis permitted to be taken into account by the appropriate housing credit agency under subsection (h), and</text>
+                                </subparagraph>
+                                <subparagraph id="H0CFB2AC023914DFD9515180FE622A76B">
+                                    <enum>(D)</enum>
+ <text>such other information as the Secretary may require.</text>
+                                </subparagraph>
+                                <continuation-text continuation-text-level="paragraph">In the case
+                                    of a failure to make the certification required by the preceding
+                                    sentence on the date prescribed therefor, unless it is shown
+                                    that such failure is due to reasonable cause and not to willful
+                                    neglect, no credit shall be allowable by reason of subsection
+                                    (a) with respect to such building for any taxable year ending
+                                    before such certification is made.</continuation-text>
+                            </paragraph>
+                            <paragraph id="HA2FE89B4C3784728A6377A2D44B687EF">
+                                <enum>(2)</enum>
+                                <header>Annual reports to the Secretary</header>
+ <text>The Secretary may require taxpayers to submit an information return (at such time and in such form and manner as the Secretary prescribes) for each taxable year setting forth—</text>
+                                <subparagraph id="H91AF2D81C6094191B41909590F832384">
+                                    <enum>(A)</enum>
+ <text>the qualified basis for the taxable year of each qualified middle-income building of the taxpayer,</text>
+                                </subparagraph>
+                                <subparagraph id="H06934C6EA27249D5B61253FCCD5C31BC">
+                                    <enum>(B)</enum>
+ <text>the information described in paragraph (1)(C) for the taxable year, and</text>
+                                </subparagraph>
+                                <subparagraph id="H25C59E4ED96F482F8192E38836E95BE7">
+                                    <enum>(C)</enum>
+ <text>such other information as the Secretary may require.</text>
+                                </subparagraph>
+                                <continuation-text continuation-text-level="paragraph">The penalty
+                                    under section 6652(j) shall apply to any failure to submit the
+                                    return required by the Secretary under the preceding sentence on
+                                    the date prescribed therefor.</continuation-text>
+                            </paragraph>
+                            <paragraph id="H05F595A58E174F47833E3CE1AABEF067">
+                                <enum>(3)</enum>
+                                <header>Annual reports from housing credit agencies</header>
+ <text>Each agency which allocates any housing credit amount to any building for any calendar year shall submit to the Secretary (at such time and in such manner as the Secretary shall prescribe) an annual report specifying—</text>
+                                <subparagraph id="H02107CB750FB42F2BD00C761AD26009F">
+                                    <enum>(A)</enum>
+ <text>the amount of housing credit amount allocated to each building for such year,</text>
+                                </subparagraph>
+                                <subparagraph id="H2CD23C7A0BC3496CA14FC5F762ECC51A">
+                                    <enum>(B)</enum>
+ <text>sufficient information to identify each such building and the taxpayer with respect thereto, and</text>
+                                </subparagraph>
+                                <subparagraph id="H5C3DAE413A1747B3B5BA548E9E13A006">
+                                    <enum>(C)</enum>
+ <text>such other information as the Secretary may require.</text>
+                                </subparagraph>
+                                <continuation-text continuation-text-level="paragraph">The penalty
+                                    under section 6652(j) shall apply to any failure to submit the
+                                    report required by the preceding sentence on the date prescribed
+                                    therefor.</continuation-text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H505B3E4AD488461DABF021B2FC724B2F">
+                            <enum>(l)</enum>
+                            <header>Responsibilities of housing credit agencies</header>
+                            <paragraph id="HDF71372E11B940DEA1711459BBBB6514">
+                                <enum>(1)</enum>
+                                <header>Plans for allocation of credit among projects</header>
+                                <subparagraph id="HEA03D65E53424FAE917CA21A99C1A427">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>Notwithstanding any other provision of this section, the housing credit dollar amount with respect to any building shall be zero unless—</text>
+                                    <clause id="H1C1B71369A9D44AAB92A4A3A1C60AAED">
+                                        <enum>(i)</enum>
+ <text>such amount was allocated pursuant to a qualified allocation plan of the housing credit agency which is approved by the governmental unit (in accordance with rules similar to the rules of section 42(m)(1)) of which such agency is a part,</text>
+                                    </clause>
+                                    <clause id="HA25C9DFE67274E1898A55AB8C7081BA9">
+                                        <enum>(ii)</enum>
+ <text>a comprehensive market study of the housing needs of middle-income individuals in the area to be served by the project is conducted before the credit allocation is made and at the developer's expense by a disinterested party who is approved by such agency, and</text>
+                                    </clause>
+                                    <clause id="H1E66E8047DA74591861954F5B7C03A15">
+                                        <enum>(iii)</enum>
+ <text>a written explanation is available to the general public for any allocation of a housing credit dollar amount which is not made in accordance with established priorities and selection criteria of the housing credit agency.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H40BD921AC3494CCAB046B7939AFE2B03">
+                                    <enum>(B)</enum>
+                                    <header>Qualified allocation plan</header>
+ <text>For purposes of this paragraph, the term <term>qualified allocation plan</term> means any plan—</text>
+                                    <clause id="H9A356DD0B3E24D618963867A4838D03D">
+                                        <enum>(i)</enum>
+ <text>which sets forth selection criteria to be used to determine housing priorities of the housing credit agency which are appropriate to local conditions,</text>
+                                    </clause>
+                                    <clause id="HBEBCB86E916A47CF9B8FD6B2A4BC90CE">
+                                        <enum>(ii)</enum>
+ <text>which also gives preference in allocating housing credit dollar amounts among selected projects to—</text>
+                                        <subclause id="H708B19C48DAE46219DB4E08CE349534A">
+                                            <enum>(I)</enum>
+ <text>projects obligated to serve qualified tenants for the longest periods,</text>
+                                        </subclause>
+                                        <subclause id="HB89E4C6F751F4E08A60D40B37AB0B1C6" commented="no">
+                                            <enum>(II)</enum>
+ <text>projects in areas with insufficient supply of housing affordable to median income households,</text>
+                                        </subclause>
+                                        <subclause id="H2FDD82B935554FE19A615098971A3FF1">
+                                            <enum>(III)</enum>
+ <text>projects which target housing to tenants at a range of incomes between 60 and 100 percent of area median gross income, and</text>
+                                        </subclause>
+                                        <subclause id="H3220B71DFCAD4F49B2002FE5DAF6C3A3">
+                                            <enum>(IV)</enum>
+ <text>projects located near transit hubs, and</text> </subclause> </clause> <clause id="HD48D94C01DEF418D9410716D70AC6419"> <enum>(iii)</enum> <text>which provides a procedure that the agency (or an agent or other private contractor of such agency) will follow in monitoring for noncompliance with the provisions of this section and in notifying the Internal Revenue Service of such noncompliance which such agency becomes aware of and in monitoring for noncompliance with habitability standards through regular site visits.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H0C3B5FA72C9B4709AAB5694CCD1F451E">
+                                    <enum>(C)</enum>
+                                    <header>Certain selection criteria must be used</header>
+ <text>The selection criteria set forth in a qualified allocation plan must include—</text>
+                                    <clause id="H0FE749C4505D4DF5BE07573E5BEA0704">
+                                        <enum>(i)</enum>
+ <text>project location,</text> </clause> <clause id="HA3803811EC3F4813B9B1E230A71E903B"> <enum>(ii)</enum> <text>housing needs characteristics,</text>
+                                    </clause>
+                                    <clause id="HD0B5C30908904A209E6E92EC0B8AF561">
+                                        <enum>(iii)</enum>
+ <text>project characteristics, including whether the project includes the use of existing housing as part of a community revitalization plan,</text>
+                                    </clause>
+                                    <clause id="H50A850897F6445D3A30CF074DD708D3E">
+                                        <enum>(iv)</enum>
+ <text>sponsor characteristics,</text> </clause> <clause id="H22C00CB93CF84BA1AF1B5907D7C6AF51"> <enum>(v)</enum> <text>tenant populations with special housing needs,</text>
+                                    </clause>
+                                    <clause id="H4BFC6F5C4FB7404EB6DBB6F3D15065F2">
+                                        <enum>(vi)</enum>
+ <text>tenant populations of individuals with children,</text>
+                                    </clause>
+                                    <clause id="HDBF30650E698488DAE7B564BDEEDFE27">
+                                        <enum>(vii)</enum>
+ <text>projects intended for eventual tenant ownership,</text>
+                                    </clause>
+                                    <clause id="H5C84A99D6E5A4F58A5B454E92A9CFA1A">
+                                        <enum>(viii)</enum>
+ <text>the energy efficiency of the project, and</text> </clause> <clause id="H5C38578E00154614B0B5FCDA53A10149"> <enum>(ix)</enum> <text>the historic nature of the project.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="H8E10E2C497904CECA1EF9215B88288EE">
+                                    <enum>(D)</enum>
+                                    <header>Certain selection criteria prohibited</header>
+ <text>The selection criteria set forth in a qualified allocation plan shall not include a requirement of local approval or local contributions, either as a threshold qualification requirement or as part of a point system to be considered for allocations of housing credit dollar amount.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H9EFB0F35F02A4C2A8EDCA3977BED0AAF">
+                                <enum>(2)</enum>
+                                <header>Credit allocated to building not to exceed amount necessary
+                                    to assure project feasibility</header>
+                                <subparagraph id="H9463F13F9330486EBBB16584D80F0FA2">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text>The housing credit dollar amount allocated to a project shall not exceed the amount the housing credit agency determines is necessary for the financial feasibility of the project and its viability as a qualified middle-income housing project throughout the credit period.</text>
+                                </subparagraph>
+                                <subparagraph id="H125FF4119C6E46149D577FBC433BF995">
+                                    <enum>(B)</enum>
+                                    <header>Agency evaluation</header>
+ <text>In making the determination under subparagraph (A), the housing credit agency shall consider—</text>
+                                    <clause id="HE7883098ED2941D0996AC8E8F45DB10D">
+                                        <enum>(i)</enum>
+ <text>the sources and uses of funds and the total financing planned for the project,</text>
+                                    </clause>
+                                    <clause id="HADC974AAB9444699B9005AEC66A38D7F">
+                                        <enum>(ii)</enum>
+ <text>any proceeds or receipts expected to be generated by reason of tax benefits,</text>
+                                    </clause>
+                                    <clause id="HF47E23A8E24D4FF0B17819295FF5188D">
+                                        <enum>(iii)</enum>
+ <text>the percentage of the housing credit dollar amount used for project costs other than the cost of intermediaries, and</text>
+                                    </clause>
+                                    <clause id="HCA33A1313E4B4B409BB58E0C996DD27F">
+                                        <enum>(iv)</enum>
+ <text>the reasonableness of the developmental and operational costs of the project.</text>
+                                    </clause>
+                                    <continuation-text continuation-text-level="subparagraph">Clause
+                                        (iii) shall not be applied so as to impede the development
+                                        of projects in hard-to-develop areas. Such a determination
+                                        shall not be construed to be a representation or warranty as
+                                        to the feasibility or viability of the
+                                        project.</continuation-text>
+                                </subparagraph>
+                                <subparagraph id="HFBBAD2AA3E5140FBB603923C0C62377C">
+                                    <enum>(C)</enum>
+                                    <header>Determination made when credit amount applied for and
+                                        when building placed in service</header>
+                                    <clause id="H57568F5FF25C4EADA0D54A165F03C51C">
+                                        <enum>(i)</enum>
+                                        <header>In general</header>
+ <text>A determination under subparagraph (A) shall be made as of each of the following times:</text>
+                                        <subclause id="H22C32913965D411BB2CCF3F7FC07BBA8">
+                                            <enum>(I)</enum>
+ <text>The application for the housing credit dollar amount.</text>
+                                        </subclause>
+                                        <subclause id="HE6EAD75A40544BB6B231B38A195256DD">
+                                            <enum>(II)</enum>
+ <text>The allocation of the housing credit dollar amount.</text>
+                                        </subclause>
+                                        <subclause id="H70549FFDFBAA4477A2165111E5E861F9">
+                                            <enum>(III)</enum>
+ <text>The date the building is placed in service.</text> </subclause> </clause> <clause id="HF21E836A0C014A61AD3410C9F99D1F31"> <enum>(ii)</enum> <header>Certification as to amount of other subsidies</header> <text>Prior to each determination under clause (i), the taxpayer shall certify to the housing credit agency the full extent of all Federal, State, and local subsidies which apply (or which the taxpayer expects to apply) with respect to the building.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H1BB5D0D6BAB64934A1D564255E0EA0A8">
+                            <enum>(m)</enum>
+                            <header>Regulations</header>
+ <text>The Secretary shall prescribe such regulations as may be necessary or appropriate to carry out the purposes of this section, including—</text>
+                            <paragraph id="HF9E6B88DD9F443B28987F38C9453FFB5">
+                                <enum>(1)</enum>
+ <text>regulations dealing with—</text> <subparagraph id="H90F1CCA70A454E1C8B0E341264F7122B"> <enum>(A)</enum> <text>projects which include more than 1 building or only a portion of a building, or</text>
+                                </subparagraph>
+                                <subparagraph id="H66046E7C6BED4F4B8974E2BFF430422F">
+                                    <enum>(B)</enum>
+ <text>buildings which are placed in service in portions,</text> </subparagraph> </paragraph> <paragraph id="H48D710E50A1444DCA3F57ACB6007ADB0"> <enum>(2)</enum> <text>regulations providing for the application of this section to short taxable years,</text>
+                            </paragraph>
+                            <paragraph id="HD259DA934C234CF4947275913A4AAD3C">
+                                <enum>(3)</enum>
+ <text>regulations preventing the avoidance of the rules of this section,</text>
+                            </paragraph>
+                            <paragraph id="H292033A7AA6F4007A2EBF0B3878A8FD8">
+                                <enum>(4)</enum>
+ <text>regulations providing the opportunity for housing credit agencies to correct administrative errors and omissions with respect to allocations and record keeping within a reasonable period after their discovery, taking into account the availability of regulations and other administrative guidance from the Secretary, and</text>
+                            </paragraph>
+                            <paragraph id="H024C67BEA65C4BE9A3382F64EBFBA99D">
+                                <enum>(5)</enum>
+ <text>in consultation with the Secretary of Housing and Urban Development, regulations or guidance to promote uniform definitions and to streamline requirements with respect to qualified middle-income buildings which receive funding from programs administrated by the Department of Housing and Urban Development, including programs authorized by Native American Housing Assistance and Self-Determination Act of 1996.</text>
+                            </paragraph>
+                        </subsection>
+                    </section>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block></subsection> 
+<subsection id="H8C549CC24251419F9AAF713BB5428647"><enum>(b)</enum><header>Treatment as part of general business credit</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/38">Section 38(b)</external-xref> of the Internal Revenue Code of 1986 is amended by striking <quote>plus</quote> at the end of paragraph (40), by striking the period at the end of paragraph (41) and inserting <quote>, plus</quote>, and by adding at the end the following new paragraph:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="H524FA04A8B9541A9BDAD1CA16BA4280E"> <paragraph id="H224A07113B3D4D2DA5EB5418B544B9CA"><enum>(42)</enum><text>the middle-income housing credit determined under section 42A(a).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="H4381E281AC124FD9BFB2C799BCAE0747"><enum>(c)</enum><header>Reduction in basis</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/1016">Section 1016(a)</external-xref> of the Internal Revenue Code of 1986 is amended—</text> <paragraph id="H27F00AC37CB54186B65454239615B970"><enum>(1)</enum><text>by striking <quote>and</quote> at the end of paragraph (37),</text></paragraph> 
+<paragraph id="H1D583214875040D2A33C854AD6650BEA"><enum>(2)</enum><text>by redesignating paragraph (38) as paragraph (39), and</text></paragraph> <paragraph id="HAEE0392F0FD2446BBFF14B79E30D0FBF"><enum>(3)</enum><text>by inserting after paragraph (37) the following new paragraph:</text> 
+<quoted-block style="OLC" display-inline="no-display-inline" id="H3A906C6100F34779BDBCBA7F0CAF648D"> 
+<paragraph id="HE0E01C69E66D47BF9D7075B701F14833"><enum>(38)</enum><text>to the extent provided in section 42A(i)(9), and</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> <subsection id="HE6C679FBD74A4EC39A1405D9A1BD49C7"><enum>(d)</enum><header>Treatment under base erosion minimum tax </header><text><external-xref legal-doc="usc" parsable-cite="usc/26/59A">Section 59A(b)(3)</external-xref> of the Internal Revenue Code of 1986, as amended by <external-xref legal-doc="public-law" parsable-cite="pl/119/21">Public Law 119–21</external-xref>, is amended by redesignating subparagraphs (B) and (C) as subparagraphs (C) and (D), respectively, and by inserting after subparagraph (A) the following new subparagraph:</text> 
+<quoted-block style="OLC" display-inline="no-display-inline" id="H9DC6BDAA416F443A84E9F2648625FF97"> 
+<subparagraph commented="no" display-inline="no-display-inline" id="H32C6DFC7D2B14E14B4616DC14C827B8C"><enum>(B)</enum><text>the middle-income housing credit determined under section 42A(a),</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H260B2BFA01F142B5BBE6A5C32C4D9670"> <enum>(e)</enum> <header>Conforming amendments relating to low-Income housing tax credit</header> <text><external-xref legal-doc="usc" parsable-cite="usc/26/42">Section 42(n)</external-xref> of the Internal Revenue Code of 1986 is amended—</text>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="HE9B5F01B64254D92B1DA009EA9447573">
+                    <enum>(1)</enum>
+ <text display-inline="yes-display-inline">by striking <quote>including regulations—</quote> in the matter preceding paragraph (1) and inserting <quote>including—</quote>,</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="HCCB668E747E244D09D34DD3EAC77CAD9">
+                    <enum>(2)</enum>
+ <text display-inline="yes-display-inline">by inserting <quote>regulations</quote> before <quote>dealing with</quote> in paragraph (1),</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="HF8CBE7E1E0B64FD7885E3CB7A0FC03DE">
+                    <enum>(3)</enum>
+ <text display-inline="yes-display-inline">by inserting <quote>regulations</quote> before <quote>providing</quote> in paragraphs (2) and (4),</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="H5C3EB02634794B049B512398B9588FB2">
+                    <enum>(4)</enum>
+ <text display-inline="yes-display-inline">by inserting <quote>regulations</quote> before <quote>preventing</quote> in paragraph (3),</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="H8B85C6393A3F4737B3F22338ED46E436">
+                    <enum>(5)</enum>
+ <text display-inline="yes-display-inline">by striking <quote>and</quote> at the end of paragraph (3),</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="H98EA39415C5E42838F5B10EB9448030E">
+                    <enum>(6)</enum>
+ <text display-inline="yes-display-inline">by striking the period at the end of paragraph (4) and inserting <quote>, and</quote>, and</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline"
+                    id="H4CD76A1E26584E3983330F23AFB7409D">
+                    <enum>(7)</enum>
+ <text display-inline="yes-display-inline">by adding at the end the following new paragraph</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline"
+                        id="H5BFFD8ED7FDD42589CF3CA13767F7D04">
+                        <paragraph id="H2841E2F844EA4F929C532DFEBFA1674F" commented="no"
+                            display-inline="no-display-inline">
+                            <enum>(5)</enum>
+ <text display-inline="yes-display-inline">in consultation with the Secretary of Housing and Urban Development, regulations or guidance to promote uniform definitions and to streamline requirements with respect to qualified low-income buildings which receive funding from programs administrated by the Department of Housing and Urban Development, including programs authorized by Native American Housing Assistance and Self-Determination Act of 1996.</text>
+                        </paragraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection> 
+<subsection commented="no" display-inline="no-display-inline" id="H6F0E3B5C22044C22943526ABD0420357"><enum>(f)</enum><header display-inline="yes-display-inline">Conforming amendments</header> 
+<paragraph commented="no" id="H6596C3F83E1A42D9B0662558EBE12BFB"><enum>(1)</enum><text><external-xref legal-doc="usc" parsable-cite="usc/26/45L">Section 45L(e)</external-xref> of the Internal Revenue Code of 1986 is amended by inserting <quote>or 42A</quote> after <quote>42</quote>.</text></paragraph> <paragraph commented="no" display-inline="no-display-inline" id="H005E1A0904BE49FE8D3573701D5E8807"><enum>(2)</enum><text>Section 50(c)(3)(C) of such Code is amended by inserting <quote>or 42A</quote> after <quote>42</quote>.</text></paragraph> 
+<paragraph commented="no" display-inline="no-display-inline" id="H7E97B7CE75DE435EB7B1C427711B1413"><enum>(3)</enum><text display-inline="yes-display-inline">Section 55(c)(1) of such Code is amended by inserting <quote>42A(j),</quote> before <quote>45(e)(11)(C)</quote>.</text></paragraph> <paragraph id="HBF20AFF104F54944B6DEB2DF84B13EA3"><enum>(4)</enum><text>Subsections (i)(3)(C), (i)(6)(B)(i), and (k)(1) of section 469 of such Code are each amended by inserting <quote>or 42A</quote> after <quote>42</quote>.</text></paragraph> 
+<paragraph id="HFF4EA3F9390549CB97B17AD9DF457D45"><enum>(5)</enum><text>The table of sections for subpart D of part IV of subchapter A of chapter 1 of such Code is amended by inserting after the item relating to section 42 the following new item:</text> <quoted-block style="OLC" id="HD1A46B792B4B410F8ABE380E40DEB92D"> <toc> <toc-entry idref="HEF79D06A9A854C0681CF282AAA35EE8C" level="section">Sec. 42A. Middle-income housing credit.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> <subsection id="HF6354C1910A54C37A913B10E22AAD71F" commented="no" display-inline="no-display-inline"><enum>(g)</enum><header display-inline="yes-display-inline">Effective date</header><text>The amendments made by this section shall apply to buildings placed in service after December 31, 2025, in taxable years ending after such date.</text></subsection></section> 
+</legis-body></bill>
+

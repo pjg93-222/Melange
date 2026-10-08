@@ -1,0 +1,247 @@
+{
+ "all_pass": true,
+ "board_counts": {
+  "baseline": {
+   "champions": 134,
+   "mixed": 110,
+   "threats": 30
+  },
+  "rule": {
+   "champions": 133,
+   "mixed": 110,
+   "threats": 30
+  }
+ },
+ "checks": [
+  {
+   "check": "E1 credit_union champions: expected strips removed",
+   "detail": "removed=['B001282', 'S000250'] added(backfill)=['F000475', 'L000491']",
+   "ok": true
+  },
+  {
+   "check": "E1 bank champions: expected strips removed",
+   "detail": "removed=['B001277', 'D000563', 'S000033', 'W000817'] added(backfill)=['B001267', 'E000295', 'M001111', 'W000779']",
+   "ok": true
+  },
+  {
+   "check": "E1 crypto champions: expected strips removed",
+   "detail": "removed=['B001288'] added(backfill)=[]",
+   "ok": true
+  },
+  {
+   "check": "E1 fintech champions: expected strips removed",
+   "detail": "removed=[] added(backfill)=[]",
+   "ok": true
+  },
+  {
+   "check": "E2 Scott keeps CU + crypto champions seats (crown path)",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E3/E4 threats boards byte-identical in all sectors",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E3/E4 mixed boards byte-identical in all sectors",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt credit_union: Andy Barr stripped + threat_sectors=['bank']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt credit_union: Pete Sessions stripped + threat_sectors=['bank']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt bank: Richard Blumenthal stripped + threat_sectors=['credit_union']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt bank: Richard Durbin stripped + threat_sectors=['credit_union']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt bank: Bernard Sanders stripped + threat_sectors=['credit_union']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt bank: Elizabeth Warren stripped + threat_sectors=['credit_union']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E5 receipt crypto: Cory Booker stripped + threat_sectors=['credit_union']",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E6 surviving champions rows content-identical",
+   "detail": "[]",
+   "ok": true
+  },
+  {
+   "check": "E7 rules.cross_sector present in rule, absent in baseline",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E8a audit cross-check FLAGS baseline exactly the 7 visible pairs",
+   "detail": "[[\"bank\", \"Bernard Sanders\"], [\"bank\", \"Elizabeth Warren\"], [\"bank\", \"Richard Blumenthal\"], [\"bank\", \"Richard Durbin\"], [\"credit_union\", \"Andy Barr\"], [\"credit_union\", \"Pete Sessions\"], [\"crypto\", \"Cory Booker\"]]",
+   "ok": true
+  },
+  {
+   "check": "E8b audit cross-check clean on rule artifact",
+   "detail": "[]",
+   "ok": true
+  },
+  {
+   "check": "E9 totals: champions 134->133, threats 30->30, mixed 110->110",
+   "detail": "{\"baseline\": {\"champions\": 134, \"threats\": 30, \"mixed\": 110}, \"rule\": {\"champions\": 133, \"threats\": 30, \"mixed\": 110}}",
+   "ok": true
+  }
+ ],
+ "class_level_extras": {
+  "bank": [
+   {
+    "bioguide": "B001288",
+    "composite": 0.253018,
+    "name": "Cory Booker",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "D000623",
+    "composite": -0.28953,
+    "name": "Mark DeSaulnier",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "G000589",
+    "composite": 0.838644,
+    "name": "Lance Gooden",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "H001052",
+    "composite": 0.047366,
+    "name": "Andy Harris",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "H001089",
+    "composite": -0.54339,
+    "name": "Josh Hawley",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "H001100",
+    "composite": -1.802921,
+    "name": "Jeff Hurd",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "J000289",
+    "composite": 0.047366,
+    "name": "Jim Jordan",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "M000312",
+    "composite": -0.168952,
+    "name": "James McGovern",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "M001198",
+    "composite": 0.087161,
+    "name": "Roger Marshall",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "N000002",
+    "composite": -0.28953,
+    "name": "Jerrold Nadler",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "S001196",
+    "composite": 0.485099,
+    "name": "Elise Stefanik",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "S001218",
+    "composite": -0.28953,
+    "name": "Melanie Stansbury",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "T000165",
+    "composite": 0.485099,
+    "name": "Thomas Tiffany",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "W000797",
+    "composite": -1.802921,
+    "name": "Debbie Wasserman Schultz",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   },
+   {
+    "bioguide": "W000800",
+    "composite": 0.087161,
+    "name": "Peter Welch",
+    "threat_sectors": [
+     "credit_union"
+    ]
+   }
+  ],
+  "credit_union": [
+   {
+    "bioguide": "K000009",
+    "composite": -0.331223,
+    "name": "Marcy Kaptur",
+    "threat_sectors": [
+     "bank"
+    ]
+   }
+  ]
+ },
+ "run": "cross_sector_exclusivity_20260809"
+}

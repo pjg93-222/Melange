@@ -199,6 +199,8 @@ s1,s2,s4=mr.shift_lean(g,'cu',100000),mr.shift_lean(g,'cu',200000),mr.shift_lean
 ok('saturating (concave) money curve',0<s1<s2<s4 and s2<2*s1 and s4<2*s2,(s1,s2,s4))
 ok('bounded by MAXSHIFT x pressure x LOSSFRAME',abs(mr.shift_lean(g,'comp',10**9))<=mr.MAXSHIFT*1.60*mr.LOSSFRAME+1e-9)
 ok('loss-frame asymmetry exact',abs(mr.shift_lean(g,'comp',100000)+mr.LOSSFRAME*s1)<1e-9)
+ok('COMPET_MULT: shift_lean cm=1.0 is bitwise the old value; c*amount is the effective dollar on both legs',
+   mr.shift_lean(g,'cu',100000,1.0)==s1 and mr.shift_lean(g,'cu',50000,2.0)==mr.shift_lean(g,'cu',100000) and mr.shift_lean(g,'comp',50000,2.0)==mr.shift_lean(g,'comp',100000))
 ok('sub-threshold absorbed',mr.defection(g,-mr.DTHRESH*0.99) is None)
 ok('defection outputs only valid rungs',all((mr.defection(m,-30) in (None,)+tuple(mr.ORDER)) for m in list(mr.C)[:100]))
 ok('committed terminal rungs immune',all(mr.defection(m,-99) is None for m in mr.C if mr.PROJ.get(mr.OV.get(m),mr.OV.get(m)) in mr.COMMITTED))
@@ -212,6 +214,13 @@ ok('pflip in (0,1)',all(0<x<1 for x in (p0,p1,p2)))
 ok('CU money raises pflip',p1>p0)
 ok('industry money lowers pflip',p2<p0)
 ok('receptivity scales money channel (pm=2 amplifies CU effect)',fm.pflip(50000,0,pm=2.0,**kw)>p1)
+# COMPET_MULT: the default cm=1.0 is a bitwise no-op on pflip (dial OFF == the pre-dial arithmetic) and c sits on BOTH money legs
+ok('pflip default cm=1.0 is a bitwise no-op; c lifts both legs (equal money stays 0.5)',
+   all(fm.pflip(cu_,ind_,pm=pm_,**kw)==fm.pflip(cu_,ind_,pm=pm_,cm=1.0,**kw) for cu_ in (0,5000,50000.5) for ind_ in (0,40000) for pm_ in (1.0,0.9,1.2))
+   and fm.pflip(0,0,cm=1.7,**kw)==fm.pflip(0,0,**kw) and fm.pflip(30000,30000,cm=1.83,**kw)==fm.pflip(30000,30000,cm=1.0,**kw)==fm.pflip(30000,30000,cm=1.2,pm=0.9,**kw)==0.5
+   and fm.pflip(50000,0,cm=2.0,**kw)>p1 and fm.pflip(0,50000,cm=2.0,**kw)<p2)
+ok('COMPET_MULT default ON: every member c is the validated artifact value in [1,2] and fm.CM carries it (COMPET_MULT=0 would give exactly 1.0)',
+   MC.compet_on() and all(1.0<=v<=2.0 for v in fm.CM.values()) and fm.CM[n]==MC.cmult(n) and any(v>1.0 for v in fm.CM.values()))
 
 print('[say-do gate + delivery discount]')
 # Cap law invariants on a synthetic member. Committee office is intentionally not an action path.
@@ -875,7 +884,12 @@ _LANE_PYTEST=(
     # gate). Both are pytest-native and fixture-only; they lift the shipped code with ast and import
     # none of the modules that execute on import.
     'test_optimizer_stance_gate',
-    'test_desk_efficiency_metrics')
+    'test_desk_efficiency_metrics',
+    # COMPET_MULT (Paul 2026-10-05): the competitiveness multiplier c -- builder join/formula, fail-closed kernel accessor, cm=1.0 bitwise identity.
+    'test_competitiveness_c',
+    # Exact stored frontier cutoff and its independent audit/display contracts.
+    'test_frontier_coalition_fixes',
+    'test_frontier_knee_display')
 
 # Of the 20 originally held, 18 are now registered: eight via the PYTHONPATH lane, four via
 # pytest proper, five rescued from vacuous-green via pytest collection, and one slow suite at

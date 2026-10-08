@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H8F99988D226A4B0C9531BB8BDB517961" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8183 IH: Modernizing Access to Talents, Credentials, and Hiring Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8183</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260402">April 2, 2026</action-date><action-desc><sponsor name-id="O000086">Mr. Owens</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Workforce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Workforce Innovation and Opportunity Act to provide for the establishment of talent marketplaces.</official-title></form><legis-body id="HA22131CAFCF94BF1A063CAF16241D3A6" style="OLC"> 
+<section id="H1B279988024A447EB573C4ADCB2EC5D9" section-type="section-one" commented="no"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Modernizing Access to Talents, Credentials, and Hiring Act of 2026</short-title></quote> or <quote><short-title>MATCH Act of 2026</short-title></quote>.</text></section> <section id="HBE4DB2AAC3604C9BABB4A0A2DA5B7CF6" section-type="subsequent-section"><enum>2.</enum><header>Talent marketplace</header> <subsection id="HC9596DC51F8A431CB2A6EBCA8FB08A52"> <enum>(a)</enum> <header>Definitions</header> <text display-inline="yes-display-inline">Section 3 of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3102">29 U.S.C. 3102</external-xref>) is amended by adding at the end the following:</text>
+                <quoted-block style="OLC" id="H4C8A38D029C948119B20237909C63C82"
+                    display-inline="no-display-inline">
+                    <paragraph id="H10C070D2AF664068895F3C505BA31DD3">
+                        <enum>(72)</enum>
+                        <header>Talent marketplace</header>
+                        <subparagraph id="H84B14C2E640340BF8480DEE875F9ECF1">
+                            <enum>(A)</enum>
+                            <header>Talent marketplace</header>
+ <text display-inline="yes-display-inline">The term <term>talent marketplace</term> means an array of publicly- and privately-owned platforms supported by interconnected and, where relevant, interoperable and based on open standards, technologies (which may include artificial intelligence) that—</text>
+                            <clause id="HB95D711D2CBB47F894B5D163D07C1EC3">
+                                <enum>(i)</enum>
+ <text>is made available to the public;</text> </clause> <clause id="H7050F8C834694138A099D88044902752"> <enum>(ii)</enum> <text>is used to match individuals with employment and learning opportunities in a State (or a consortium of States) using information provided by users, including—</text>
+                                <subclause id="HC3A82E4DE77943B5830A5C330E1D40EC">
+                                    <enum>(I)</enum>
+ <text display-inline="yes-display-inline">education and training providers;</text>
+                                </subclause>
+                                <subclause id="HC1F5B8971DD14252B2CD450F07819493">
+                                    <enum>(II)</enum>
+ <text>employers;</text> </subclause> <subclause id="HC46E9B1B7FFD4E59B202900C9B3744F6"> <enum>(III)</enum> <text>jobseekers; </text>
+                                </subclause>
+                                <subclause id="H557DE4C523674136AFEE6F653FDA51FB">
+                                    <enum>(IV)</enum>
+ <text>students; and</text> </subclause> <subclause id="H8771BEBF6AB94848A97281E02FCBF649"> <enum>(V)</enum> <text>any other individual; and </text>
+                                </subclause>
+                            </clause>
+                            <clause id="H4397F8FA62E74809BBC7A5BBA37ACF91">
+                                <enum>(iii)</enum>
+ <text>incorporates and allows users access to—</text> <subclause id="H9F747A5BEE4F4D8DA3D51E907EE8B1CF"> <enum>(I)</enum> <text display-inline="yes-display-inline">the learning and employment records of users of such marketplace;</text>
+                                </subclause>
+                                <subclause id="HB550BE95959E403BB4184D2D751D0156">
+                                    <enum>(II)</enum>
+ <text display-inline="yes-display-inline">a credential registry; and</text>
+                                </subclause>
+                                <subclause id="H0B0F59AC8AC54765823E8C1D4656112E">
+                                    <enum>(III)</enum>
+ <text display-inline="yes-display-inline">a skills profile generator.</text>
+                                </subclause>
+                            </clause>
+                        </subparagraph>
+                        <subparagraph id="H1CC16ED89BED4C7B80644A154C0A6800">
+                            <enum>(B)</enum>
+                            <header>Credential registry</header>
+ <text display-inline="yes-display-inline">The term <term>credential registry</term> means a process through which a digital portal or repository may be used by education and training providers to make publicly available, and, where relevant, interoperable and based on open standards, a description, using standardized terminology, of the skills, competencies and learning outcomes associated with credentials, including recognized postsecondary credentials. </text>
+                        </subparagraph>
+                        <subparagraph id="HAFEAE5C863A34D00A462721EE962A626">
+                            <enum>(C)</enum>
+                            <header>Learning and employment record</header>
+ <text>The term <term>learning and employment record</term> means a digital, machine-readable record of an individual’s educational and employment history that—</text>
+                            <clause id="HF38740BC378D45539B8B1682831A2DF0">
+                                <enum>(i)</enum>
+ <text display-inline="yes-display-inline">contains information that may be self attested and is verified by the employers, persons for whom the individual performed services, and education and training providers of such individual;</text>
+                            </clause>
+                            <clause id="H75166B0809AC47E0BE5007B8BFA52241" commented="no">
+                                <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">allows the individual to control such information and use any such information for the purpose of matching such individual with employment and learning opportunities as described in <internal-xref idref="HB95D711D2CBB47F894B5D163D07C1EC3" legis-path="(72)(A)(i)">subparagraph (A)(ii)</internal-xref>; and</text>
+                            </clause>
+                            <clause id="HC23B7FBC69BC4F0EA3AE71B9CDC512D0">
+                                <enum>(iii)</enum>
+ <text>uses standardized terminology.</text> </clause> </subparagraph> <subparagraph id="H8BCE83B3951144719297E0FC44FD8796"> <enum>(D)</enum> <header>Skills profile generator</header> <text display-inline="yes-display-inline">The term <term>skills profile generator</term> means a digital tool that can be used to create a skill profile that, using standardized terminology, describes skills gained through, or necessary for—</text>
+                            <clause id="H0676022842C747FC923FDAE5DE947A03">
+                                <enum>(i)</enum>
+ <text display-inline="yes-display-inline">employment;</text> </clause> <clause id="H7DA77D25208A44619D4BDF1F38929C1F"> <enum>(ii)</enum> <text>hiring; or</text>
+                            </clause>
+                            <clause id="HE78C95CAF66347D48646C29B632DA751">
+                                <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">education.</text> </clause> </subparagraph> <subparagraph id="H9F4479E7208A4C3EA99ED10B8EC11DB1"> <enum>(E)</enum> <header>Standardized terminology</header> <text>The term <term>standardized terminology</term> means, in relation to a learning employment record, credential registry, or skills profile generator made available through a talent marketplace, a limited set of terms that is provided through a publicly available, and, where relevant, interoperable and based on open standards, skills framework and used to describe skills, competencies, or learning outcomes in a manner that—</text>
+                            <clause id="H3EB49149615A46E09E29AD337040E88A" commented="no">
+                                <enum>(i)</enum>
+ <text>provides a definition of such skill, competency, or outcome, and identifies the skills framework used for such definition;</text>
+                            </clause>
+                            <clause id="H711628195D654A84A6F31B46A1C00DBA">
+                                <enum>(ii)</enum>
+ <text>ensures that identical terms are used to describe substantially similar skills, competencies, or outcomes across such records, registries, and generators in such marketplace; and</text>
+                            </clause>
+                            <clause id="H413951C5D2A547908D08CCF30AE64382">
+                                <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">permits such terms to be effectively used for the purpose of matching individuals with employment and learning opportunities as described in <internal-xref idref="HB95D711D2CBB47F894B5D163D07C1EC3" legis-path="(72)(A)(i)">subparagraph (A)(ii)</internal-xref>.</text>
+                            </clause>
+                        </subparagraph>
+                    </paragraph>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+<subsection id="HFB92F5BE927D4FE1ADBC1986052D08F7"><enum>(b)</enum><header>Workforce data quality initiative</header>
+<paragraph id="HD1E11C1E87E946B6A0EB7ACB7B4697BE"><enum>(1)</enum><header>In general</header><text>Section 169 of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3224">29 U.S.C. 3224</external-xref>) is further amended by adding at the end the following:</text> <quoted-block id="H32E3A05D5103425B9F73030BF7013AEF" style="OLC"> <subsection id="HB32DB2917A954CC9B4DD99350D460D60"><enum>(d)</enum><header>Workforce data quality initiative</header> <paragraph id="H1C004C6B586942D8A5F4AD288B398A32"><enum>(1)</enum><header>Grant program</header><text>Of the amount made available pursuant to section 132(a)(2)(A) for any program year, the Secretary shall use not less than 5 percent and not more than 10 percent of such amount, and may also use funds authorized for purposes of carrying out this section, to award grants to eligible entities to create workforce longitudinal data systems, talent marketplaces, and associated resources for the purposes of assisting States to—</text>
+<subparagraph id="H7E09A41FA3EF4E859A534E754659BD71"><enum>(A)</enum><text>improve program quality;</text></subparagraph> <subparagraph id="H444A6BE015D4426D9CB59E4B0A0D396E"><enum>(B)</enum><text>produce evidence for decision making;</text></subparagraph>
+<subparagraph id="HE192AC893058414B8BEBF0F82D1C6704"><enum>(C)</enum><text>meet performance reporting requirements;</text></subparagraph> <subparagraph id="H7C6C5B9DA5964C3D9E9039C126EA5882"><enum>(D)</enum><text>protect the privacy of users; and</text></subparagraph>
+<subparagraph id="H2F3C51FA122E479186F007534448CC1F"><enum>(E)</enum><text>improve transparency in relation to labor market trends and changes in job skills needed to obtain employment.</text></subparagraph></paragraph> <paragraph id="HB8B5C73611044DE39FF04849C896D1EB"><enum>(2)</enum><header>Application</header><text>To be eligible to receive a grant under this subsection, an eligible entity shall submit an application to the Secretary, at such time and in such manner as the Secretary may require, which shall include—</text>
+<subparagraph id="HF2B833D43DC9415E9FF6794934CFF092"><enum>(A)</enum><text>a description of the activities the eligible entity is proposing, including a description of the need for such activities and a detailed budget;</text></subparagraph> <subparagraph id="H4B4E77EE95B148AE92F6D613222460F9"><enum>(B)</enum><text>a description of the expected outcomes and outputs (such as systems or products) that will result from the proposed activities and the proposed uses of such outputs;</text></subparagraph>
+<subparagraph id="HFAE35C6C48E044AAB39EA6B148E91AB8"><enum>(C)</enum><text>a description of how the proposed activities will support the reporting of performance data for the performance accountability requirements under section 116, including outcomes for eligible training providers;</text></subparagraph> <subparagraph id="H31ECF19577E9415C889BBEF85D90EF51"><enum>(D)</enum><text>a description of the methods and procedures the eligible entity will use to ensure the security and privacy of the collection, storage, and use of all data involved in the systems and resources supported through the grant, including compliance with State and Federal privacy and confidentiality law;</text></subparagraph>
+<subparagraph id="H3972F8E8691744F183E75C05D119CC81"><enum>(E)</enum><text>a plan for how the eligible entity will continue the activities or sustain the use of the outputs created with the grant funds after the grant period ends; and</text></subparagraph> <subparagraph id="H2A1EA91B5DDD45D39BD51D8C655ACE22"><enum>(F)</enum><text display-inline="yes-display-inline">a description of how the eligible entity will ensure interoperability and portability between the talent marketplace maintained by the eligible entity and other talent marketplaces through the use of open standards.</text></subparagraph></paragraph>
+<paragraph id="H14CEB60A135E4025BDD68E682AB04BD7"><enum>(3)</enum><header>Priority</header><text>In awarding grants under the subsection, the Secretary shall give priority to eligible entities that—</text> <subparagraph id="HF2F9DF0420C747AC84B86D51C554B679"><enum>(A)</enum><text>are—</text>
+<clause id="HAA2C820F8E484E5DB218180484303216" commented="no"><enum>(i)</enum><text>State agencies of States that have not previously received a grant from the Secretary for the purposes of this subsection and demonstrate a substantial need to improve its data infrastructure, including for the development of a talent marketplace; or</text></clause> <clause id="HB75BAA20E67E46DA9845EC320D8BD41C"><enum>(ii)</enum><text>consortia of State agencies that are comprised of State agencies from multiple States and include at least one State agency described in <internal-xref idref="HAA2C820F8E484E5DB218180484303216" legis-path="(d)(3)(A)(i)">clause (i)</internal-xref> and have the capacity to make significant contributions toward building interoperable and portable interstate data infrastructure; and</text></clause></subparagraph>
+<subparagraph id="HA83FA628B34C4236B6C2DC870AB7B031"><enum>(B)</enum><text display-inline="yes-display-inline">will use grant funds to—</text> <clause id="H3118D198077B488FB19110EB907B229B"><enum>(i)</enum><text display-inline="yes-display-inline">expand the adoption and use of linked, publicly available, and interoperable data on knowledge, skills, and abilities represented through credentials, occupational job descriptions, and learning assertions, including through the development of a talent marketplace or other tools and services designed to help learners and workers make informed decisions;</text></clause>
+<clause id="HC62B4B9B55874BBAB7017EB8A395F00E"><enum>(ii)</enum><text>participate in and contribute data to a multistate data collaborative, including data that provides participating States the ability to better understand—</text> <subclause id="H571A8F288B2E42519D26810E81DEBA28"><enum>(I)</enum><text>earnings and employment outcomes of individuals who work out-of-State; and</text></subclause>
+<subclause id="HD52A6589A70B4EBABEBD3080FECA27C7"><enum>(II)</enum><text>interstate earnings and employment trends;</text></subclause></clause> <clause id="H14DA23088900445080E19A2E754668E7"><enum>(iii)</enum><text>enhance collaboration with private sector workforce and labor market data entities and the end-users of workforce and labor market data, including individuals, employers, economic development agencies, and workforce development providers; or</text></clause>
+<clause id="H45F1F829FEE14D979C4C7B36A59A7679"><enum>(iv)</enum><text>leverage the use of non-Federal contributions to improve workforce data infrastructure, including staff capacity building.</text></clause></subparagraph></paragraph> <paragraph id="H9C339D0177684032AAA5A17F64ED8B90"><enum>(4)</enum><header>Use of funds</header><text>In addition to the activities described in <internal-xref idref="HA83FA628B34C4236B6C2DC870AB7B031" legis-path="(d)(3)(B)">paragraph (3)(B)</internal-xref>, an eligible entity awarded a grant under this subsection may use funds to carry out any of the following activities:</text>
+<subparagraph id="H483B555AFF2149C39403A3D90C882BF3"><enum>(A)</enum><text>Developing or enhancing a State’s workforce longitudinal data system, including by participating and contributing data to the State’s data system, if applicable, that links with elementary and secondary school and postsecondary data.</text></subparagraph> <subparagraph id="H4A6EA413C18C4D559BFD534A0B501121"><enum>(B)</enum><text>Accelerating the replication and adoption of data systems, projects, products, or practices already in use in one or more States to other States.</text></subparagraph>
+<subparagraph id="H1FD05AAC17E1473C83E504D1725BD5CF"><enum>(C)</enum><text>Research and labor market data improvement activities to improve the timeliness, relevance, and accessibility of such data through pilot projects that are developed locally but designed to scale to other regions or States.</text></subparagraph> <subparagraph id="H17811A840D2B452CBB0BA87DACFE9ED3" commented="no"><enum>(D)</enum><text display-inline="yes-display-inline">Establishing or enhancing a talent marketplace.</text></subparagraph>
+<subparagraph id="HF377DA14C8AE4D8F9647193D3F529934"><enum>(E)</enum><text>Developing policies, guidelines, and security measures for data collection, storing, and sharing to ensure compliance with relevant Federal and State privacy laws and regulations.</text></subparagraph> <subparagraph id="HDB41856C00ED4F008A8856231415ECB9"><enum>(F)</enum><text>Increasing local board access to and integration with the State’s workforce longitudinal data system in a secure manner.</text></subparagraph>
+<subparagraph id="H900731B5EA36409F99FC2811ABB0A001"><enum>(G)</enum><text>Creating or participating in a data exchange for collecting and using standards-based jobs and employment data including, at a minimum, job titles or occupation codes.</text></subparagraph> <subparagraph id="H99AE6069C86D42EDA0E90BA84562AB9F"><enum>(H)</enum><text>Improving State and local staff capacity to understand, use, and analyze data to improve decision-making and improve participant outcomes.</text></subparagraph></paragraph>
+<paragraph id="H49AD07FC82574354A933A8017196A071"><enum>(5)</enum><header>Administration</header>
+<subparagraph id="H4FC0112802FB49C6947A3DEC77FA628E"><enum>(A)</enum><header>Duration</header><text display-inline="yes-display-inline">A grant awarded under this subsection may be for a period of up to 3 years.</text></subparagraph> <subparagraph id="H7E2F1527FC0447408B9B9859AC412B13"><enum>(B)</enum><header>Supplement, not supplant</header><text display-inline="yes-display-inline">Funds made available under this subsection shall be used to supplement, and not supplant, other Federal, State, or local funds used for development of State data systems.</text></subparagraph>
+<subparagraph id="HB8A48C9D5FDD4051A8FF49029F56FC9B"><enum>(C)</enum><header>Report</header><text display-inline="yes-display-inline">Each eligible entity that receives a grant under this subsection shall submit a report to the Secretary not later than 180 days after the conclusion of the grant period on the activities supported through the grant and improvements in the use of workforce and labor market information that have resulted from such activities.</text></subparagraph></paragraph> <paragraph id="H1353ED132C5E40C7B425A924D52D2520"><enum>(6)</enum><header>Definition</header><text display-inline="yes-display-inline">In this subsection—</text>
+<subparagraph id="H6EAFD1156C504EEAAF8BF6AEC247FF3F"><enum>(A)</enum><header>Eligible entity</header><text>The term ‘eligible entity’ means a State agency, including a State workforce agency or a consortium of State agencies, including a multistate data collaborative, that is or includes the State agency responsible for—</text> <clause id="HC6D2DA5E80EB4CC5AB42F325DB7714A1"><enum>(i)</enum><text display-inline="yes-display-inline">State employer wage records used by the State’s unemployment insurance programs in labor market information reporting and analysis and for fulfilling the reporting requirements under section 116(d);</text></clause>
+<clause id="H0CCAE89E06C142A294137946E47B5F43"><enum>(ii)</enum><text display-inline="yes-display-inline">the production of labor market information; and</text></clause> <clause id="H372B38AF96184F82A8ABAB4F83D30CE9"><enum>(iii)</enum><text display-inline="yes-display-inline">the direct administration of one or more of the core programs.</text></clause></subparagraph>
+<subparagraph id="HE54EDE939FDC48E79A8F8A23F3312B4C"><enum>(B)</enum><header>Multistate data collaborative</header><text display-inline="yes-display-inline">The term <term>multistate data collaborative</term> means a partnership among two or more States to coordinate the governance and standards for workforce related data maintained by such States in order to facilitate interoperability and the secure exchange of such data between such States.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph> <paragraph id="HB7DBB507A65B4450B9543337D97C746B"><enum>(2)</enum><header>Conforming amendment</header><text display-inline="yes-display-inline">Section 132(a)(2)(A) of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3172">29 U.S.C. 3172(a)(2)(A)</external-xref>) is amended by inserting after <quote>projects),</quote> the following: <quote>169(d) (relating to workforce data quality initiatives),</quote>.</text></paragraph></subsection>
+<subsection id="H6252A01EC23147B38B0F4DE1C8F6F7A1">
+                <enum>(c)</enum>
+                <header>List and information To assist participants in choosing providers</header>
+ <text>Section 122(d) of the Workforce Innovation and Opportunity Act (29 U.S.C. 12 3152(d)) is amended—</text>
+                <paragraph id="H9B93B4F75E844C8EBDA407F0D88DAADA">
+                    <enum>(1)</enum>
+ <text>by redesignating paragraphs (2), (3), and (4) as paragraphs (3), (4), and (6), respectively;</text>
+                </paragraph>
+                <paragraph id="H486708898981497CB20F49B8A0642A8F">
+                    <enum>(2)</enum>
+ <text>by inserting after paragraph (1) the following:</text> <quoted-block style="OLC" id="HCB44F106E10B4B15A17258B4A920781B" display-inline="no-display-inline"> <paragraph id="H4D2EAE21EA074734B103C81E2DC00C3F"> <enum>(2)</enum> <header>Talent marketplace</header> <text display-inline="yes-display-inline">The Governor may establish (or develop in partnership with other States) a talent marketplace.</text>
+                        </paragraph>
+                        <after-quoted-block>;</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+                <paragraph id="H6060F53EF83749F9B580065FF1153B6B">
+                    <enum>(3)</enum>
+ <text display-inline="yes-display-inline">by amending paragraph (4) (as so redesignated) to read as follows:</text>
+                    <quoted-block style="OLC" id="H9E0ADDE0C7C145F6886900EB352495E5"
+                        display-inline="no-display-inline">
+                        <paragraph id="HD595032803F24B829745361ED044563C">
+                            <enum>(4)</enum>
+                            <header>Availability</header>
+ <text display-inline="yes-display-inline">The list (including the talent marketplace if one has been established by the State), and the accompanying information shall be made available to such participants and to members of the public through the one-stop delivery system in the State—</text>
+                            <subparagraph id="H80F4CA6BE14A4C399083D43AE094BEBD">
+                                <enum>(A)</enum>
+ <text display-inline="yes-display-inline">on a publicly accessible website that—</text>
+                                <clause id="HAC50E5C3982B476788C5C82420B3329B">
+                                    <enum>(i)</enum>
+ <text display-inline="yes-display-inline">is consumer-tested; and</text>
+                                </clause>
+                                <clause id="HF358F215D7D847EDBCBE526D6632B277">
+                                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">is searchable, easily understandable, and navigable, and allows for the comparison of eligible programs through the use of common, linked, open-data descriptive language, including interoperable skills and competency data; and</text>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="HA5A3C0DF8E2D4ABFA07B12790A938E50">
+                                <enum>(B)</enum>
+ <text display-inline="yes-display-inline">in a manner that does not reveal personally identifiable information about an individual participant.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <after-quoted-block>; and</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+                <paragraph id="HA0AE5C1A17E6417DBBE98E9D7224C862">
+                    <enum>(4)</enum>
+ <text display-inline="yes-display-inline">by inserting before paragraph (6) (as so redesignated), the following: </text>
+                    <quoted-block style="OLC" id="H69FE462863414D47B0B818B69A07F757"
+                        display-inline="no-display-inline">
+                        <paragraph id="HAE84964790204F65918809EB6E2280B2">
+                            <enum>(5)</enum>
+                            <header>Website technical assistance</header>
+ <text display-inline="yes-display-inline">The Secretary shall—</text> <subparagraph id="HD98C7E6716C447FD968CEA9013947380"> <enum>(A)</enum> <text display-inline="yes-display-inline">upon request, provide technical assistance to a State on establishing a website that meets the requirements of paragraph (4); and</text>
+                            </subparagraph>
+                            <subparagraph id="HB099143A61D34B9684E58B6898FECD8D">
+                                <enum>(B)</enum>
+ <text display-inline="yes-display-inline">disseminate to each State effective practices or resources from States and private sector entities related to establishing a website that is consumer-tested to ensure that the website is easily understood, searchable, and navigable.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection>
+<subsection id="H971B8DF425E848E4B36251E0E3F25940" commented="no"><enum>(d)</enum><header>Assistance in developing talent marketplaces</header><text display-inline="yes-display-inline">Section 7(a)(3) of the Wagner-Peyser Act (<external-xref legal-doc="usc" parsable-cite="usc/29/49f">29 U.S.C. 49f(a)(3)</external-xref>) is amended—</text> <paragraph id="H84E157985C3C49D08C5875D28F2FE16D"><enum>(1)</enum><text>in subparagraph (F), by striking the <quote>and</quote> at the end;</text></paragraph>
+<paragraph id="H0B2588D70EB54FA7B260DC03B6E7AA30"><enum>(2)</enum><text>by moving subparagraph (G) four ems to the right;</text></paragraph> <paragraph id="HE65C192E51CB45E9A1692CA547133DFB"> <enum>(3)</enum> <text display-inline="yes-display-inline">in subparagraph (G), by striking the period at the end and inserting <quote>; and</quote>; and</text>
+                </paragraph>
+<paragraph id="H6C19D7CE409B4802962B587471BCBE2C"><enum>(4)</enum><text>by adding at the end the following:</text> <quoted-block style="OLC" id="H00D2B3CAC8914495B2721A9CF8BB42BE" display-inline="no-display-inline"> <subparagraph id="H1BC6F314367B46A9BCD713E3BDED4BAA"><enum>(H)</enum><text display-inline="yes-display-inline">establishing a talent marketplace (as defined in section 3 of the Workforce Innovation and Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/29/3102">29 U.S.C. 3102</external-xref>)).</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection></section> 
+</legis-body></bill>
+

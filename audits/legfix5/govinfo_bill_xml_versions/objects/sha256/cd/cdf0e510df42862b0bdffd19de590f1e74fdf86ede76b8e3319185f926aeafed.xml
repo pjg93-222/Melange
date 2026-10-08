@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H65B97572001E43899F07FF1E7DB5EE10" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6265 IH: Coronavirus Guidance for Financial Institutions Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-03-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 6265</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20200312">March 12, 2020</action-date>
+<action-desc><sponsor name-id="S001187">Mr. Stivers</sponsor> (for himself, <cosponsor name-id="H001072">Mr. Hill of Arkansas</cosponsor>, <cosponsor name-id="H001058">Mr. Huizenga</cosponsor>, <cosponsor name-id="B001282">Mr. Barr</cosponsor>, and <cosponsor name-id="M001156">Mr. McHenry</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To provide the sense of Congress related to the joint release on Coronavirus issued by Federal and State financial regulators, to require a report analyzing the effectiveness of the joint release, and for other purposes.</official-title>
+</form>
+<legis-body id="H80C0FD47596D453689FBE727B6924388" style="OLC">
+<section id="HC5124BFC9CC8473AB48AD0AB1E1484D4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Coronavirus Guidance for Financial Institutions Act</short-title></quote>.</text></section> <section id="H63BAF2CFECEF41C985CA7365934451D8"><enum>2.</enum><header>Findings; sense of Congress related to the Coronavirus</header> <subsection id="HBB407D3F30A64C2282BE4E9376A38EA5"><enum>(a)</enum><header>Findings</header><text display-inline="yes-display-inline">The Congress finds the following:</text>
+<paragraph id="H48E6F020F9414D6AA847947A81256979"><enum>(1)</enum><text display-inline="yes-display-inline">On March 9, 2020, six Federal and State financial regulators, including the Federal Deposit Insurance Corporation, the Bureau of Consumer Financial Protection, the Conference of State Banking Supervisors, the Board of Governors of the Federal Reserve System, the National Credit Union Administration, and the Office of the Comptroller of the Currency issued a joint release encouraging financial institutions to meet the needs of their customers and members affected by the Coronavirus.</text></paragraph> <paragraph id="H354CF2CAE1FF4AE091BC226971253A2C"><enum>(2)</enum><text display-inline="yes-display-inline">On March 11, 2020, the World Health Organization declared the Coronavirus a global pandemic.</text></paragraph></subsection>
+<subsection id="H3D39E6DDBFCA4BDDAE76DB153A781F00"><enum>(b)</enum><header>Sense of Congress</header><text display-inline="yes-display-inline">It is the sense of Congress that Federal and State financial regulators acted in a thoughtful and expedient manner to assist customers who may be affected by the Coronavirus.</text></subsection> <subsection id="HD859BEB5A5A04742A0063CC5163AE04F"><enum>(c)</enum><header>Coronavirus defined</header><text display-inline="yes-display-inline">In this section, the term <term>Coronavirus</term> means the Coronavirus Disease 2019 (COVID–19).</text></subsection></section>
+<section id="H917E92E7FE124DA598C323DB6CD7CFD8"><enum>3.</enum><header>Report to Congress</header>
+<subsection id="H8915B71E275B4DEC88DCD23B829E6820"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">After the end of the 1-year period beginning on the date of enactment of this Act, the Federal financial regulators shall, jointly, issue a report to Congress containing an analysis of the impact and effectiveness of the joint release described under section 2(a)(1).</text></subsection> <subsection id="H885C8634BACB45DEBC9CFE4DD365E702"><enum>(b)</enum><header>Federal financial regulators defined</header><text display-inline="yes-display-inline">In this section, the term <term>Federal financial regulators</term> means the Board of Governors of the Federal Reserve System, the Bureau of Consumer Financial Protection, the Comptroller of the Currency, the Federal Deposit Insurance Corporation, and the National Credit Union Administration.</text></subsection></section>
+</legis-body>
+</bill> 
+
+

@@ -1,0 +1,52 @@
+CU gate reproduces the live producer: keywords=True mindate=True
+speeches rows 270489 ; INTERVIEW rows 153576
+CU-gate rows (skip rule c)                    : 207
+label-bound INTERVIEW rowids  STRICT (rule b) : 1895
+label-bound INTERVIEW rowids  WIDE  (superset): 7568
+protected union (b|c) STRICT                  : 2098
+protected union (b|c) WIDE                    : 7707
+245771 in CU set: True ; in strict label set: False
+
+artifact                                               records   rowids  labelled
+0_systematic_encounters\systematic_encounters.ndjson     67467    31772         0
+ce_media_candidates_cumulative_all_verified_v4.jsonl      1402     1402      1402
+ce_media_candidates_cumulative_all_verified_v5.jsonl      1438     1402      1402
+source_media_candidates_cumulative_expanded_v3.jsonl      1402     1402      1402
+ce_media_candidates_cumulative_all_verified_v3.jsonl      1353     1353      1353
+ech\source_media_candidates_cumulative_current.jsonl      1353     1353      1353
+media_candidates_cumulative_expanded_v2_merged.jsonl      1353     1353      1353
+source_media_candidates_cumulative_expanded_v4.jsonl      1304     1299      1299
+ationships\20260910_anchored\mined_candidates.ndjson      1636     1121      1121
+ips\20260910_full_history\speech_review_queue.ndjson       496      477       477
+urce_media_verified_cumulative_all_verified_v4.jsonl       302      296       296
+urce_media_verified_cumulative_all_verified_v5.jsonl       332      296       296
+rce_media_verified_cumulative_exact_windows_v6.jsonl      1847      296       296
+urce_media_verified_cumulative_all_verified_v3.jsonl       284      278       278
+eech\source_media_verified_abc_all_verified_v3.jsonl       279      274       274
+robability_sample_labels\calibration_reviewed.ndjson       240      237       237
+ple_labels\inputs_snapshot\calibration_sample.ndjson       240      237       237
+0910_systematic_encounters\calibration_sample.ndjson       240      237       237
+sonal_relationships\20260910_pilot\candidates.ndjson       232      187       187
+nal_relationships\20260910_pilot\review_queue.ndjson       205      169       169
+C:\melange-data\member_clips\clips_manifest.jsonl         6911      152       152
+a_candidates_priority_consolidated_expanded_v2.jsonl       103      103       103
+ionships\20260910_pilot\retrieval_review_sample.json        60       48        48
+data\speech\source_media_supplement_v1.jsonl                43       43        43
+h\source_media_verified_cumulative_expanded_v3.jsonl        34       31        31
+20260910_frozen_v5\development_review_packets.ndjson        27       27        27
+data\speech\source_media_verified_abc_current.jsonl         29       26        26
+\speech\source_media_verified_abc_only_current.jsonl        29       26        26
+peech\source_media_verified_cumulative_current.jsonl        29       26        26
+h\source_media_verified_cumulative_expanded_v2.jsonl        28       25        25
+e_media_verified_cumulative_expanded_v2_merged.jsonl        28       25        25
+h\source_media_verified_cumulative_expanded_v4.jsonl        33       25        25
+data\speech\source_media_verified_v2.jsonl                  28       25        25
+amber_degrees_v6\routine_encounter_candidates.ndjson        23       23        23
+\20260910_chamber_degrees_v6\routine_reviewed.ndjson        23       23        23
+_personal_relationships\20260910_pilot\events.ndjson        27       23        23
+nships\20260911_v6_regrade\grading_kit\manifest.json        70       19         0
+hips\20260911_v6_regrade\run_receipt_supplement.json        36       19         0
+0_frozen_v5\development_reviewed_interactions.ndjson        17       17        17
+onships\20260910_full_history\reviewed_events.ndjson        44       15        15
+
+wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_closeout_20260918\fixN12v2\v2_skipset.json

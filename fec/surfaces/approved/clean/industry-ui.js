@@ -24,7 +24,7 @@
   const plural = (n, word) => `${num(n)} ${word}${Number(n) === 1 ? '' : 's'}`;
   const kit = () => window.MLK || null;
   const TABS = [['overview', 'Overview'], ['organizations', 'Organizations']];
-  const PLURAL = { credit_union: 'credit unions', bank: 'banks', crypto: 'crypto organizations', fintech: 'fintech organizations' };
+  const PLURAL = { credit_union: 'credit unions', bank: 'banks', crypto: 'crypto organizations', fintech: 'fintech organizations', telecom: 'telecom organizations' };
   const POS = { support: ['▲', 'Support'], oppose: ['▼', 'Oppose'], neutral: ['◆', 'Neutral'] };
   const S = { data: null, tab: 'overview', focus: '', compare: false, byTier: false, colors: {}, bills: {}, orgCount: null, sitenav: null };
   let els = null, uid = 0, redrawQueued = false;

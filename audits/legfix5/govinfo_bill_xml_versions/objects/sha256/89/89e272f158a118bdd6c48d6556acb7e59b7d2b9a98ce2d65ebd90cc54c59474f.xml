@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H2EC3F6DF417645F18D30DDC68B418921" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3749 IH: Legal Services for Homeless Veterans Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3749</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190712">July 12, 2019</action-date><action-desc><sponsor name-id="P000613">Mr. Panetta</sponsor> (for himself, <cosponsor name-id="C001123">Mr. Cisneros</cosponsor>, <cosponsor name-id="S001214">Mr. Steube</cosponsor>, <cosponsor name-id="M001199">Mr. Mast</cosponsor>, <cosponsor name-id="W000823">Mr. Waltz</cosponsor>, and <cosponsor name-id="B001298">Mr. Bacon</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to direct the Secretary of Veterans Affairs to make grants
+			 to entities that provide legal services for homeless veterans and veterans
+			 at risk for homelessness.</official-title></form>
+	<legis-body id="H4388ECD311444A1697A94595409D32EC" style="OLC">
+ <section id="H3591554900DE4EAF9A8F2A46605D880D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Legal Services for Homeless Veterans Act</short-title></quote>.</text> </section><section id="H9876286E74C9417F8371B8FB62D4B545" section-type="subsequent-section"><enum>2.</enum><header>Legal services for homeless veterans and veterans at risk for homelessness</header> <subsection id="H8993D7F485B446899165177E07178221"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline"><external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/38/20">Chapter 20</external-xref> of title 38, United States Code, is amended by inserting after <external-xref legal-doc="usc" parsable-cite="usc/38/2022">section 2022</external-xref> the following new section:</text>
+				<quoted-block display-inline="no-display-inline" id="HC5C834C70C3241F48E97DF85B0906A4F" style="USC">
+					<section id="H3B6F8617E55A448DA45D90DE512DE415"><enum>2022A.</enum><header>Legal services for homeless veterans and veterans at risk for homelessness</header>
+ <subsection id="H91D5806A6DAD4D68A0A0BA04430E6FC6"><enum>(a)</enum><header>Grants and cooperative agreements</header><text display-inline="yes-display-inline">Subject to the availability of appropriations provided for such purpose, the Secretary of Veterans Affairs shall make grants or enter into cooperative agreements to eligible entities that provide legal services to homeless veterans and veterans at risk for homelessness.</text>
+						</subsection><subsection id="H84A2FFAF047743EB83C62C80A2B9AE1B"><enum>(b)</enum><header>Criteria for grants and cooperative agreements</header>
+ <paragraph commented="no" display-inline="yes-display-inline" id="HDE703748C7914C67BCB14BFF797D5555"><enum>(1)</enum><text>The Secretary shall establish criteria and requirements for grants and cooperative agreements under this section, including criteria for entities eligible to receive such grants or cooperative agreements, and shall publish such criteria and requirements in the Federal Register.</text>
+ </paragraph><paragraph id="H66B14471E90B440FAFD9BBD35031DB9D" indent="up1"><enum>(2)</enum><text>In establishing criteria and requirements under paragraph (1), the Secretary shall consult with organizations that have experience in providing services to homeless veterans.</text>
+ </paragraph></subsection><subsection id="H7188C0B3F612461898900C5CABC5A284"><enum>(c)</enum><header>Eligible entities</header><text display-inline="yes-display-inline">The Secretary may make a grant or enter into a cooperative agreement under this section to an entity applying for such a grant or cooperative agreement only if the applicant for the grant or cooperative agreement—</text>
+ <paragraph id="H9D1523FA607E4E668E499582E508CC29"><enum>(1)</enum><text display-inline="yes-display-inline">is a public or nonprofit private entity with the capacity (as determined by the Secretary) to effectively administer a grant or cooperative agreement under this section;</text>
+ </paragraph><paragraph id="HB08907E0CD1D4B31B627CF2CD5C32031"><enum>(2)</enum><text display-inline="yes-display-inline">demonstrates that adequate financial support will be available to carry out the services for which the grant or cooperative agreement is sought consistent with application; and</text>
+ </paragraph><paragraph id="HC30F39BA937F46AF9D3397865897E9A0"><enum>(3)</enum><text>agrees to meet the applicable criteria and requirements established under subsection (b) and has, as determined by the Secretary, demonstrated the capacity to meet such criteria and requirements.</text>
+ </paragraph></subsection><subsection id="H6EF8DED6FEFE43ABB77156866CA7E512"><enum>(d)</enum><header>Use of funds</header><text display-inline="yes-display-inline">Funds provided under grants or cooperative agreements under this section shall be used to provide legal services to homeless veterans and veterans at risk for homelessness to address legal matters that contribute to the risk of becoming and remaining homeless.</text>
+ </subsection><subsection id="HA350C91096D44A9B8422F75D0321348A"><enum>(e)</enum><header>Reports</header><text display-inline="yes-display-inline">On a biennial basis, the Secretary shall submit to the Committees on Veterans’ Affairs of the House of Representatives and the Senate a report on grants and cooperative agreements under this section. To the extent feasible, each such report shall include the following with respect to the year covered by the report:</text>
+ <paragraph id="H44910F3BA5D2465383A468EB0D87AEC2"><enum>(1)</enum><text display-inline="yes-display-inline">The number of homeless veterans assisted.</text> </paragraph><paragraph id="H156DF189F37F42C4A1728E44F42E7820"><enum>(2)</enum><text>A description of the legal services provided.</text>
+ </paragraph><paragraph id="HE9969C5330894EA2A8616EF59FDEDB8D"><enum>(3)</enum><text>A description of the legal matters addressed.</text> </paragraph><paragraph id="H46F7A6F281034F2C880AC93B388E6C21"><enum>(4)</enum><text>An analysis by the Secretary with respect to the operational effectiveness and cost-effectiveness of the services provided.</text>
+							</paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HEB0E376A7B1A40969A6A352B7F952252"><enum>(b)</enum><header>Clerical amendment</header><text display-inline="yes-display-inline">The table of sections at the beginning of such chapter is amended by inserting after the item relating to section 2022 the following new item:</text>
+				<quoted-block display-inline="no-display-inline" id="H1278B260E69240C3A066853E0A0816CB" style="USC">
+					<toc regeneration="no-regeneration">
+						<toc-entry level="section">2022A. Legal services for homeless veterans and veterans at risk for homelessness.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HB6665FFCD6204E19A28FB1FB60B367E4"><enum>(c)</enum><header>Criteria</header><text>Not later than 90 days after the date of the enactment of this Act, the Secretary of Veterans Affairs shall establish the criteria and requirements in the Federal Register pursuant to subsection (b)(1) of section 2022A of title 38, United States Code, as added by subsection (a).</text>
+			</subsection></section></legis-body></bill>
+
+

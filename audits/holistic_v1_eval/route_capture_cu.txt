@@ -1,0 +1,26 @@
+# PATH-2 capture | config=cu | TOPIC=Interchange K=5 | graph=congress_cosponsor_network_AUG20260802.xlsx | shape/order comparison only
+CO-SPONSOR ROUTE — issue: Interchange | 4 champion seeds | out-degree budget K=5
+Pareto front (money, expected co-sponsors gained, risk):
+   $28,358    -> +0.3   co-sponsors  risk 0.65  (λ=0.0)
+   $60,293    -> +0.7   co-sponsors  risk 0.67  (λ=0.0)
+   $79,964    -> +0.8   co-sponsors  risk 0.61  (λ=0.0)
+   $115,155   -> +1.1   co-sponsors  risk 0.64  (λ=0.0)
+   $160,679   -> +1.4   co-sponsors  risk 0.66  (λ=0.0)
+   $206,286   -> +1.6   co-sponsors  risk 0.68  (λ=0.0)
+   $254,058   -> +1.8   co-sponsors  risk 0.70  (λ=0.0)
+   $311,048   -> +1.9   co-sponsors  risk 0.71  (λ=0.0)
+   $332,173   -> +2.0   co-sponsors  risk 0.69  (λ=0.0)
+   $369,704   -> +2.1   co-sponsors  risk 0.70  (λ=0.0)
+   $433,449   -> +2.3   co-sponsors  risk 0.71  (λ=0.0)
+   $459,484   -> +2.4   co-sponsors  risk 0.70  (λ=0.0)
+   $499,070   -> +2.4   co-sponsors  risk 0.71  (λ=0.0)
+   $568,880   -> +2.6   co-sponsors  risk 0.72  (λ=0.0)
+   $602,988   -> +2.6   co-sponsors  risk 0.72  (λ=0.0)
+   $685,251   -> +2.8   co-sponsors  risk 0.73  (λ=0.0)
+   $716,727   -> +2.8   co-sponsors  risk 0.72  (λ=0.0)
+   $812,784   -> +2.9   co-sponsors  risk 0.73  (λ=0.0)
+   $854,000   -> +2.9   co-sponsors  risk 0.73  (λ=0.0)
+   $912,458   -> +3.0   co-sponsors  risk 0.74  (λ=0.0)
+   $1,012,458 -> +3.1   co-sponsors  risk 0.75  (λ=0.0)
+
+Example low-risk route ($300k cap, 0 recruitments):

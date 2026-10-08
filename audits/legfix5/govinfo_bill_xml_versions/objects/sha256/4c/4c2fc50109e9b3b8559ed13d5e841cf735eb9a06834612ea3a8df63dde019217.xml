@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public" slc-id="S1-EHF19A93-G2G-L2-0VZ"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3093 IS: Broadband Speed Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-12-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 3093</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191218">December 18, 2019</action-date><action-desc><sponsor name-id="S322">Mr. Merkley</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To improve the collection of broadband speed data by the Federal Communications Commission in order
+			 to support the effective deployment of broadband services to all areas in
+			 the United States, and for other purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" id="HDAD492B5E59A4E4EA41CBBDFFC78F375" style="OLC">
+ <section id="H0CD5A73DD0054F23A45335CDE73E587D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Broadband Speed Act</short-title></quote>.</text> </section><section id="H093CFF13CFF74A58A18FEB16679DEA69"><enum>2.</enum><header>Broadband speed test</header> <subsection display-inline="no-display-inline" id="H12E65DA45A734A63ACCA333693B61472"><enum>(a)</enum><header>Definitions</header><text display-inline="yes-display-inline">In this section:</text>
+ <paragraph id="H917E5566D28F42DCB0D716ADA9219790"><enum>(1)</enum><header>Broadband internet access service</header><text>The term <term>broadband internet access service</term>—</text> <subparagraph id="idA7C99A56073E47E88BC328155208F4BC"><enum>(A)</enum><text>means a mass-market retail service by wire or radio that provides the capability to transmit data to and receive data from all or substantially all internet endpoints, including any capabilities that are incidental to and enable the operation of the communications service;</text>
+ </subparagraph><subparagraph id="idCA630AA5047945BCB4EAA021E963C3D7"><enum>(B)</enum><text>includes any service that the Commission finds to be providing a functional equivalent of the service described in subparagraph (A); and</text>
+ </subparagraph><subparagraph id="id529C9F47EE384E0C83EA79C0E05352F5"><enum>(C)</enum><text>does not include dial-up internet service.</text> </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="HDFE172655A474691BE0F3951A80D767A"><enum>(2)</enum><header>Commission</header><text>The term <term>Commission</term> means the Federal Communications Commission.</text>
+ </paragraph></subsection><subsection id="HAC252C5CFCB54524B9B4F6196851CE7F"><enum>(b)</enum><header>Regulations required</header><text display-inline="yes-display-inline">Not later than 180 days after the date of enactment of this Act, the Commission shall issue a rule that—</text>
+ <paragraph id="H5038D059A3024203A6FA4504BE7C66ED"><enum>(1)</enum><text display-inline="yes-display-inline">establishes an annual reporting requirement under which each provider of broadband internet access service shall submit to the Commission a report on broadband speed data based on a reasonable sample that is captured to demonstrate that the provider is capable of performing at the speed reported to the Commission on Form 477 or any successor report;</text>
+ </paragraph><paragraph id="HEF6AE0EB4BE744F6963D7695AF409CD6"><enum>(2)</enum><text>establishes a fine for any provider that is found under paragraph (1) to have willfully or knowingly provided false data about the speeds offered; and</text>
+ </paragraph><paragraph commented="no" id="H723FBFE1D3064A799D9B9E8F257FBC8B"><enum>(3)</enum><text display-inline="yes-display-inline">to minimize duplication, incorporates any other requirements issued by the Commission relating to reporting on broadband speed data.</text>
+ </paragraph></subsection><subsection id="H0D7BFD50596B4C70AF1DCEE42FF3398C"><enum>(c)</enum><header>Broadband speed requirement for infrastructure funding</header><text display-inline="yes-display-inline">Any broadband infrastructure that is built with funding awarded on or after the date of enactment of this Act from the Federal universal service support programs established under section 254 of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/254">47 U.S.C. 254</external-xref>) shall provide broadband internet access service with a download speed of not less than 100 megabits per second.</text></subsection></section></legis-body></bill>
+
+

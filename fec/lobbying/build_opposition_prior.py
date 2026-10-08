@@ -62,6 +62,7 @@ INDUSTRY_DATE_STATUS = {
     "community_banks": "dated",
     "fintech": "dated",
     "crypto": "dated",
+    "telecom": "cycle_only",
     "credit_arms": "cycle_only",
 }
 INDUSTRY_SIDE = {
@@ -69,6 +70,7 @@ INDUSTRY_SIDE = {
     "community_banks": "opposition",
     "fintech": "opposition",
     "crypto": "opposition",
+    "telecom": "opposition",
     "credit_arms": "opposition",
 }
 ATTRIBUTION_FIELDS = {
@@ -105,13 +107,13 @@ ZERO = Decimal("0")
 CAVEATS = [
     "Sample basis: 10 companies per industry, employee/executive itemized individual giving plus limited corporate rows - NOT industry-complete. Trade-association PAC money (CULAC, BankPAC) appears only as a recipient, not as industry outflow. The associated basis adds committee-path exposure, including conduit and Super PAC paths.",
     "Member attribution covers direct candidate-committee and leadership-PAC money only; conduit money (ActBlue/WinRed) and Super PAC/JFC money are not member-attributable and are excluded from member totals.",
-    "credit_arms has no transaction dates and ships three stacked views (Employee/Recipient/Master) of the same dollars; only the Recipient view is consumed, at cycle grain, and it is absent from all monthly series.",
+    "credit_arms and telecom have no transaction dates and ship three stacked views (Employee/Recipient/Master) of the same dollars; only the Recipient view is consumed, at cycle grain, and both are absent from all monthly series.",
     "2025-2026 is a partial cycle through the recorded data_max_date; current-window figures are annualized and are projections, not observed totals.",
     "This is a target-side money prior, never a stance or vote predictor.",
     "Not comparable to congestion.json: that artifact measures industry PAC money (CULAC, BankPAC and peers) while this prior measures itemized individual giving by employees and executives of ten sample companies per industry. Cross-checked lean signs agree only 57% (157/276) - the two are different instruments measuring different money streams, and this prior is not a refresh or replacement of congestion.json.",
     "Accepted residuals (reviewed, no live exposure): outputs are written atomically per file rather than as one transactional snapshot - the manifest outputs md5 map is the integrity check; sub-cent rounding was verified exact to the penny against receipts; and detail-vs-map recipient-category disagreement was measured at zero occurrences.",
     "Associated funding is committee-path EXPOSURE, not receipts: the industry's money into a committee is stamped on every candidate that committee was active on. Measured fan-out vs true industry totals: credit_union 7.1x, community_banks 6.7x, fintech 6.8x, crypto 7.8x, credit_arms 16.1x. Never sum associated dollars across members. Beneficiary rows are top-100 per cycle per view, so small exposures are truncated.",
-    "Oppose-direction exposure means industry money sits in committees that OPPOSED the member. Use opposition_assoc_oppose_total (and its support/mixed/conduit siblings) for the opposition-industries signal - members those industries attack, a potential-ally marker. The unprefixed assoc_support_total/assoc_oppose_total/assoc_mixed_total/assoc_conduit_total fields sum ALL FIVE industries INCLUDING credit_union (ours) and are retained for continuity, not for direction-of-threat reads. Per-industry directional splits live in associated_by_industry.",
+    "Oppose-direction exposure means industry money sits in committees that OPPOSED the member. Use opposition_assoc_oppose_total (and its support/mixed/conduit siblings) for the opposition-industries signal - members those industries attack, a potential-ally marker. The unprefixed assoc_support_total/assoc_oppose_total/assoc_mixed_total/assoc_conduit_total fields sum ALL SIX industries INCLUDING credit_union (ours) and are retained for continuity, not for direction-of-threat reads. Per-industry directional splits live in associated_by_industry.",
     "Headline metrics and w_b use RELATIONAL exposure only - independent expenditures and communication costs and ActBlue/WinRed conduit pass-through are removed. Independent-expenditure and communication-cost money is legally non-coordinated with the candidate and is typically directed by a different decision-maker than the government-affairs shop that directs lobbying, so it is the wrong proxy for a lobbying channel; it is carried separately as electoral_pressure. See coverage.global_exposure_decomposition for the measured directional-electoral/conduit/relational split computed from this run's data.",
     "Beneficiary rows are the top 100 per cycle per view, so members with small industry exposure are truncated to zero rather than measured - a zero here means 'not in the top 100', not 'no money'. Senate Banking members with modest sample-company exposure (e.g. Crapo, Tim Scott) legitimately show zero on this basis.",
     "Interpretation (user-ratified 2026-07-31): a member's relational exposure is industry money one hop upstream - dollars the industry placed into committees that give directly to that member. It is a funding-channel intensity measure, which is why it may exceed what the member's own committee received.",
@@ -273,9 +275,9 @@ def _read_attribution(path):
                     f"{path} row {row_number}: unsupported cycle {cycle!r}"
                 )
             month = _text(row.get("month"))
-            if industry == "credit_arms" and month:
+            if INDUSTRY_DATE_STATUS[industry] == "cycle_only" and month:
                 raise IngestError(
-                    f"{path} row {row_number}: credit_arms must not have a month"
+                    f"{path} row {row_number}: {industry} is cycle_only and must not have a month"
                 )
             if month and not MONTH_RE.fullmatch(month):
                 raise IngestError(
@@ -589,7 +591,7 @@ def _method():
         "member_directional_totals": {
             "all_industry": (
                 "assoc_support_total / assoc_oppose_total / "
-                "assoc_mixed_total / assoc_conduit_total sum ALL FIVE "
+                "assoc_mixed_total / assoc_conduit_total sum ALL SIX "
                 "industries including credit_union (ours) - retained for "
                 "continuity"
             ),

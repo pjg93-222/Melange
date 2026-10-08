@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HD8FDBC6E348141A89B050DD59E135EDC" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3024 IH: Families Under One Roof Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3024</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190524">May 24, 2019</action-date><action-desc><sponsor name-id="E000297">Mr. Espaillat</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To prevent the breakup of families receiving certain Federal housing assistance, and for other
+			 purposes.</official-title></form>
+	<legis-body id="HA9E89F1DA0C74965993A667E23703920" style="OLC">
+ <section id="HCA5DB5BAE48E4EE4A03D94D03AA6B49B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Families Under One Roof Act of 2019</short-title></quote>.</text> </section><section id="H0665CF75EFA242658C83855707367D0C" section-type="subsequent-section"><enum>2.</enum><header>Use of housing assistance by non-resident aliens</header> <subsection id="H7297FB2E75084473849B0479C82B3C62"><enum>(a)</enum><header>Eligibility of mixed status families</header><text display-inline="yes-display-inline">Paragraph (2) of section 214(b) of the Housing and Community Development Act of 1980 (<external-xref legal-doc="usc" parsable-cite="usc/42/1436a">42 U.S.C. 1436a(b)(2)</external-xref>) is amended by striking <quote>any</quote> and inserting <quote>the family shall be eligible for financial assistance and the amount of</quote>.</text>
+ </subsection><subsection id="H2933CEE8F6BD4027B740A415DAEB6CB5"><enum>(b)</enum><header>Preservation of families</header><text display-inline="yes-display-inline">Subparagraph (A) of section 214(c)(1) of the Housing and Community Development Act of 1980 (<external-xref legal-doc="usc" parsable-cite="usc/42/1436a">42 U.S.C. 1436a(c)(1)(A)</external-xref>) is amended—</text>
+ <paragraph id="H01EE7AD8CB2B4E648E9768C1B9C06E98"><enum>(1)</enum><text>in the first sentence, by striking <quote>the head of household or spouse</quote> and inserting <quote>any member</quote>; and</text> </paragraph><paragraph id="H70795A8FEFBA45B083FA8372CCA10C58"><enum>(2)</enum><text>in the second sentence—</text>
+ <subparagraph id="H8E3BC1C5D64040ADAA5D01B56CE04C23"><enum>(A)</enum><text>by striking <quote>a head of household</quote> and inserting <quote>such member</quote>; and</text> </subparagraph><subparagraph id="H04A8644A74BF4D83A991E8C6930BC388"><enum>(B)</enum><text>by striking <quote>the head of household</quote> each place such term appears and inserting <quote>such member</quote>.</text>
+					</subparagraph></paragraph></subsection></section></legis-body></bill>
+
+

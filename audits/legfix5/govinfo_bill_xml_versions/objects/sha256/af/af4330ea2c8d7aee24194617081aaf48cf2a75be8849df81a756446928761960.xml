@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 138 STAT. ?>
+<?I98 138 STAT. ?>
+<?I99 138 STAT. ?>
+<?I50 PUBLIC LAW 118–114—NOV. 25, 2024?>
+<?I51 PUBLIC LAW 118–114—NOV. 25, 2024?>
+<?I52 PUBLIC LAW 118–114—NOV. 25, 2024?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 118–114: To amend title 38, United States Code, to direct the Secretary of Veterans Affairs to repay the estates of deceased beneficiaries for certain benefits paid by the Secretary and misused by fiduciaries of such beneficiaries.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>114</docNumber>
+<citableAs>Public Law 118–114</citableAs><citableAs>138 Stat. 1605</citableAs>
+<approvedDate>2024-11-25</approvedDate>
+<dc:date>2024-11-25</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>118</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 118–114—NOV. 25, 2024</centerRunningHead>
+<page identifier="/us/stat/138/1605">138 STAT. 1605</page>
+<dc:type>Public Law</dc:type><docNumber>118–114</docNumber>
+<congress value="118">118th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To amend title 38, United States Code, to direct the Secretary of Veterans Affairs to repay the estates of deceased beneficiaries for certain benefits paid by the Secretary and misused by fiduciaries of such beneficiaries.<sidenote><p class="centered fontsize8" id="x48172682-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076"><approvedDate date="2024-11-25">Nov. 25, 2024</approvedDate></p><p class="centered fontsize8" id="x48172683-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076">[<ref href="/us/bill/118/hr/4190">H.R. 4190</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x48174d94-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Restoring Benefits to Defrauded Veterans Act.</p></sidenote>
+<section id="d51039e88" identifier="/us/pl/118/114/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x48174d95-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t38/s101">38 USC 101 note</ref>.</p></sidenote><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Restoring Benefits to Defrauded Veterans Act</shortTitle>”.</content></section>
+<section id="d51039e103" identifier="/us/pl/118/114/s2" role="instruction" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>REISSUANCE BY THE SECRETARY OF VETERANS AFFAIRS OF ESTATES OF DECEASED BENEFICIARIES FOR CERTAIN BENEFITS PAID BY THE SECRETARY AND MISUSED BY FIDUCIARIES.</heading><chapeau class="indentUp0 firstIndent0 fontsize10" id="x481774a6-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120">  <ref href="/us/usc/t38/s6107">Section 6107 of title 38, United States Code</ref>, <amendingAction type="amend">is amended</amendingAction>—</chapeau><paragraph class="fontsize10" id="y481774a7-e811-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/118/114/s2/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>by <amendingAction type="redesignate">redesignating</amendingAction> subsections (c) and (d) as subsections (d) and (e), respectively;</content></paragraph>
+<paragraph class="fontsize10" id="y481774a8-e811-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/118/114/s2/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>by <amendingAction type="insert">inserting</amendingAction> after subsection (b) the following new subsection (c):<quotedContent><subsection class="indentDown1 firstIndent0 fontsize10" id="y48179bb9-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="c">“(c) </num><heading class="fontsize10"><inline class="smallCaps">Reissuance of Amounts in the Case of a Deceased Beneficiary</inline>.—</heading><paragraph class="inline" id="y48179bba-e811-11f0-bc57-ad3ac4b1618c"><num value="1">(1) </num><content>If a beneficiary described in subsection (a) predeceases a payment under subsection (a) or (b), the Secretary shall pay such benefits, subject to paragraph (2), to an individual or entity in accordance with section 5121 of this title.</content></paragraph>
+<paragraph class="indentUp0 firstIndent0 fontsize10" id="y48179bbb-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">“(2) </num><content>The Secretary may not make a payment under this subsection to a fiduciary who misused benefits of the beneficiary.”</content></paragraph>
+</subsection>
+</quotedContent>; and</content></paragraph>
+<paragraph class="fontsize10" id="y48179bbc-e811-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/118/114/s2/3" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="3">(3) </num><content>in subsection (e), as redesdignated, by <amendingAction type="delete">striking</amendingAction> “<quotedText>subsection (a) or (b)</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>this section</quotedText>”.</content></paragraph>
+</section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2024-11-25">November 25, 2024</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/118/hr/4190">H.R. 4190</ref>:</heading>
+<note>
+<headingText style="-uslm-lc:I658032">HOUSE REPORTS:</headingText> ┐No. <ref href="/us/hrpt/118/655">118–655</ref> (<committee>Comm. on Veterans’ Affairs</committee>).
+</note>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 170 (2024):</heading>
+<p class="indentUp4 firstIndent-1" id="x48179bbd-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 17, considered and passed House.</p><p class="indentUp4 firstIndent-1" id="x48179bbe-e811-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 25, considered and passed Senate.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

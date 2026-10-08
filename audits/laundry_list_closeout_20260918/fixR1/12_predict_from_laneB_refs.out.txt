@@ -1,0 +1,162 @@
+roster 533 members | 484 distinct surnames
+lane B mentions: 53011   by source {'CREC': 28720, 'INTERVIEW': 11365, 'CHRG': 1105, 'PRESS': 42, 'PRESS_OFFICIAL_MENTION': 11184, 'X': 595}
+stored cache keys recomputed identically: True (0 mismatches)
+cache keys 38018 (baseline bindings applied 18623)
+shipped artifact edges 8017 | already has admission_filters: False
+
+============================================================================================
+STEP 0  PARITY: all three dials at 0 must reproduce the shipped artifact exactly
+============================================================================================
+edges mine 8017 vs shipped 8017 | mine-not-shipped 0 | shipped-not-mine 0
+  n_raw    EXACT MATCH 8017 / 8017 = 100.000%
+  n_scored EXACT MATCH 8017 / 8017 = 100.000%
+  pos      EXACT MATCH 8017 / 8017 = 100.000%
+  neg      EXACT MATCH 8017 / 8017 = 100.000%
+  neu      EXACT MATCH 8017 / 8017 = 100.000%
+  net      EXACT MATCH 8017 / 8017 = 100.000%
+  sources  EXACT MATCH 8017 / 8017 = 100.000%
+  formality_dropped EXACT MATCH 8017 / 8017
+sum n_raw mine 36335 vs shipped 36335 | sum n_scored mine 15892 vs shipped 15892
+all dials 0 excluded nothing: True {}
+drawn (n_scored>=2) 3562 | signed 7248
+
+============================================================================================
+STEP 1  ALL THREE FILTERS ON (the shipped default)
+============================================================================================
+per-filter exclusions:
+   press_third_party_domain       8   (mentions, dropped before n_raw and the queue)
+   roster_list_window           749   (mentions, dropped before n_raw and the queue)
+   identical_window_repeat      192   (scored-queue windows collapsed; n_raw keeps them)
+   ...paid target contexts collapsed 237 | uncached contexts --score would pay: 19492 -> 19424 (-68)
+
+mentions        53011 ->  52254  (-757)
+sum n_scored    15892 ->  15637  (-255)
+EDGES            8017 ->   8010  (-7)
+DRAWN  n_sc>=2   3562 ->   3482  (-80)
+SIGNED           7248 ->   7248  (+0)
+
+edges REMOVED ENTIRELY: 8
+   Angie Craig                 -> Seth Magaziner              n_raw=1   n_scored=1  net=+0.00 drawn=False sources={'PRESS': 1}
+   James Lankford              -> Brian Schatz                n_raw=3   n_scored=2  net=+0.00 drawn=True sources={'CREC': 2, 'PRESS_OFFICIAL_MENTION': 1}
+   Juan Ciscomani              -> Seth Magaziner              n_raw=1   n_scored=1  net=+0.00 drawn=False sources={'PRESS': 1}
+   Ken Calvert                 -> Seth Magaziner              n_raw=1   n_scored=1  net=+0.00 drawn=False sources={'PRESS': 1}
+   Kweisi Mfume                -> Ed Case                     n_raw=1   n_scored=1  net=+0.00 drawn=False sources={'PRESS_OFFICIAL_MENTION': 1}
+   Mark Warner                 -> Steve Daines                n_raw=1   n_scored=1  net=+1.00 drawn=False sources={'PRESS': 1}
+   Scott Fitzgerald            -> Seth Magaziner              n_raw=1   n_scored=1  net=+0.00 drawn=False sources={'PRESS': 1}
+   Young Kim                   -> Seth Magaziner              n_raw=1   n_scored=1  net=+0.00 drawn=False sources={'PRESS': 1}
+edges that APPEAR (a cap slot freed by a filtered window promoted a cached window): 1
+   Earl Carter                 -> Austin Scott                n_raw=1   n_scored=1  net=+1.00 sources={'CREC': 1}
+
+edges DROPPING BELOW the consumers' n_scored>=2 floor: 79
+   Adam Schiff               -> Andy Biggs                n_scored 2 -> 1 | net +0.00 -> +0.00 | signed=False | {'INTERVIEW': 2}
+   Alex Padilla              -> Dan Newhouse              n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2}
+   Alex Padilla              -> Jacky Rosen               n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2, 'PRESS_OFFICIAL_MENTION': 12}
+   Alex Padilla              -> John Garamendi            n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2, 'PRESS_OFFICIAL_MENTION': 4}
+   Alex Padilla              -> Ken Calvert               n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2, 'PRESS_OFFICIAL_MENTION': 3}
+   Alex Padilla              -> Martin Heinrich           n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2, 'PRESS_OFFICIAL_MENTION': 12}
+   Alex Padilla              -> Sam Liccardo              n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2}
+   Alex Padilla              -> Steve Daines              n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2}
+   Alex Padilla              -> Suzanne Bonamici          n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2, 'PRESS_OFFICIAL_MENTION': 2}
+   Alex Padilla              -> Tim Sheehy                n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 5, 'PRESS_OFFICIAL_MENTION': 1}
+   Andrew Ogles              -> Byron Donalds             n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'X': 2}
+   Andy Biggs                -> James Comer               n_scored 3 -> 1 | net +0.00 -> +0.00 | signed=False | {'INTERVIEW': 3}
+   Anna Luna                 -> Thomas Massie             n_scored 2 -> 1 | net -1.00 -> -1.00 | signed=True | {'X': 2}
+   Bernard Sanders           -> Ilhan Omar                n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 1}
+   Bill Hagerty              -> Ted Cruz                  n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'INTERVIEW': 1, 'X': 2}
+   Bill Huizenga             -> Charles Schumer           n_scored 2 -> 1 | net -1.00 -> -1.00 | signed=True | {'X': 2}
+   Daniel Goldman            -> Adam Schiff               n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'INTERVIEW': 8}
+   Daniel Goldman            -> James Comer               n_scored 2 -> 1 | net -1.00 -> -1.00 | signed=True | {'INTERVIEW': 5}
+   Daniel Goldman            -> Maxwell Frost             n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'X': 2}
+   David Rouzer              -> Austin Scott              n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 1}
+   Dwight Evans              -> Jesús García              n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'X': 2}
+   Eric Crawford             -> Austin Scott              n_scored 3 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 1}
+   Henry Cuellar             -> Vicente Gonzalez          n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'INTERVIEW': 2}
+   Jack Reed                 -> Adelita Grijalva          n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 8}
+   Jack Reed                 -> Brian Fitzpatrick         n_scored 2 -> 1 | net +1.00 -> +1.00 | signed=True | {'CREC': 2}
+   ... and 54 more
+edges RISING to the floor: 0  []
+
+edges whose net moves: 24 | edges whose n_scored moves: 214
+SIGNED edges that lose ALL scored support: 1
+audit_full floors still hold: >=1000 edges True | every edge n_scored>=pos+neg True
+
+============================================================================================
+STEP 2  EACH DIAL OFF ON ITS OWN
+============================================================================================
+config                                mentions   edges   drawn  signed  n_scored  excl_prs  excl_ros
+all three ON (shipped default)           52254    8010    3482    7248     15637         8       749
+REF_PRESS_OWN_DOMAIN=0                   52262    8016    3482    7249     15644         0       749
+REF_ROSTER_FILTER=0                      53003    8011    3509    7247     15715         8         0
+REF_IDENTICAL_ONCE=0                     52254    8010    3535    7248     15806         8       749
+all three OFF (= shipped artifact)       53011    8017    3562    7248     15892         0         0
+
+marginal effect of each filter (default vs that filter switched off):
+   REF_PRESS_OWN_DOMAIN   edges -6 | drawn +0 | signed -1 | n_scored -7 | mentions -8
+   REF_ROSTER_FILTER      edges -1 | drawn -27 | signed +1 | n_scored -78 | mentions -749
+   REF_IDENTICAL_ONCE     edges +0 | drawn -53 | signed +0 | n_scored -169 | mentions +0
+
+============================================================================================
+STEP 3  CROSS-CHECKS
+============================================================================================
+roster detector: lane B's raw slice vs the producer's collapsed window -- 0 of 53011 disagree
+roster-list mentions repo-wide 749 (lane B measured 749) | by source {'CREC': 567, 'PRESS_OFFICIAL_MENTION': 182}
+  of those counted into n_scored by the shipped artifact: 502 (lane B measured 502)
+PRESS mentions 42 | third-party 8 (lane B measured 8) | hosts {'www.americascreditunions.org': 8}
+PRESS rows with no url at all (would be excluded as third-party): 0
+PRESS_OFFICIAL_MENTION mentions 11184 -- out of scope, and the gate touched none of them: True
+normalised-identical windows on one edge that hash to DIFFERENT cache keys: 0 groups
+  (0 => collapsing the paid target set cannot change which window gets classified)
+Magaziner edges: 23 shipped -> 18 kept
+   Angie Craig               -> Seth Magaziner            n_raw=1  n_scored=1  net=+0.00 {'PRESS': 1}  kept=False
+   Cory Mills                -> Seth Magaziner            n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Jack Reed                 -> Seth Magaziner            n_raw=9  n_scored=1  net=+1.00 {'CREC': 4, 'PRESS_OFFICIAL_MENTION': 5}  kept=True
+   Jennifer Kiggans          -> Seth Magaziner            n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Juan Ciscomani            -> Seth Magaziner            n_raw=1  n_scored=1  net=+0.00 {'PRESS': 1}  kept=False
+   Ken Calvert               -> Seth Magaziner            n_raw=1  n_scored=1  net=+0.00 {'PRESS': 1}  kept=False
+   Scott Fitzgerald          -> Seth Magaziner            n_raw=1  n_scored=1  net=+0.00 {'PRESS': 1}  kept=False
+   Seth Magaziner            -> Austin Scott              n_raw=2  n_scored=2  net=+1.00 {'CREC': 2}  kept=True
+   Seth Magaziner            -> Brian Fitzpatrick         n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Chip Roy                  n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Cory Booker               n_raw=1  n_scored=1  net=+0.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Gabe Amo                  n_raw=9  n_scored=4  net=+0.33 {'CREC': 6, 'PRESS_OFFICIAL_MENTION': 3}  kept=True
+   Seth Magaziner            -> Hakeem Jeffries           n_raw=3  n_scored=2  net=+1.00 {'CREC': 3}  kept=True
+   Seth Magaziner            -> Maria Salazar             n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Marie Gluesenkamp Perez   n_raw=4  n_scored=4  net=+1.00 {'X': 4}  kept=True
+   Seth Magaziner            -> Mark Takano               n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Mike Johnson              n_raw=5  n_scored=4  net=-0.50 {'CREC': 5}  kept=True
+   Seth Magaziner            -> Nancy Pelosi              n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Pramila Jayapal           n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Rosa DeLauro              n_raw=1  n_scored=1  net=+0.00 {'CREC': 1}  kept=True
+   Seth Magaziner            -> Sheldon Whitehouse        n_raw=4  n_scored=1  net=+1.00 {'CREC': 1, 'PRESS_OFFICIAL_MENTION': 3}  kept=True
+   Seth Magaziner            -> Tim Burchett              n_raw=1  n_scored=1  net=+1.00 {'CREC': 1}  kept=True
+   Young Kim                 -> Seth Magaziner            n_raw=1  n_scored=1  net=+0.00 {'PRESS': 1}  kept=False
+
+the block the producer writes at the default:
+{
+ "defaults": {
+  "REF_IDENTICAL_ONCE": "1",
+  "REF_PRESS_OWN_DOMAIN": "1",
+  "REF_ROSTER_FILTER": "1"
+ },
+ "dials": {
+  "REF_IDENTICAL_ONCE": "1",
+  "REF_PRESS_OWN_DOMAIN": "1",
+  "REF_ROSTER_FILTER": "1"
+ },
+ "excluded": {
+  "identical_window_repeat": 192,
+  "press_third_party_domain": 8,
+  "roster_list_window": 749
+ },
+ "excluded_total": 949,
+ "provenance": "audits/laundry_list_closeout_20260918 FINDINGS.md B4/B5/B6; Paul-approved 2026-09-19. Each default is the admitted-set rule; '0' restores the prior behaviour exactly.",
+ "rules": {
+  "identical_window_repeat": "a window identical to an earlier window on the same edge after whitespace normalisation; counted once in n_scored and the pos/neg/neu tallies, still counted in n_raw",
+  "press_third_party_domain": "PRESS pass: the article host is not the speaker's own .house.gov/.senate.gov domain (ratified 2-class rule)",
+  "roster_list_window": "the window is a roll-call roster or signature block: >=10 distinct roster surnames AND >=35% of its tokens are roster surnames"
+ },
+ "schema": "member-reference-admission-filters-v1"
+}
+
+wrote 12_predict_from_laneB_refs.json
+DONE 12

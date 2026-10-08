@@ -1,0 +1,330 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ROM26288-6HT-PT-M8N"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S5021 IS: Protecting Students from Worthless Degrees Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-07-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 5021</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260716">July 16, 2026</action-date><action-desc><sponsor name-id="S322">Mr. Merkley</sponsor> (for himself, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, and <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To provide consumer protections for students.</official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause"><section section-type="section-one" id="S1"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting Students from Worthless Degrees Act</short-title></quote>.</text></section><section id="id9FE81FFF7A7D4747A5AEFE793519ADE8"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text><paragraph id="id74E838F10597427B8D9B0D32F57C3FBD"><enum>(1)</enum><header>Federal education assistance funds</header><text>The term <term>Federal education assistance funds</term> has the meaning given the term in section 487(a)(24) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1094">20 U.S.C. 1094(a)(24)</external-xref>).</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID4ED1806F54E3449AB5B30FC124A48C8A"><enum>(2)</enum><header>Freely associated States</header><text>The term <term>freely associated States</term> means the Republic of the Marshall Islands, the Federated States of Micronesia, and the Republic of Palau.</text></paragraph><paragraph id="idA66F132A38744F63AE9BC387CCC4D27D"><enum>(3)</enum><header>Institution of higher education</header><text>The term <term>institution of higher education</term>—</text><subparagraph commented="no" display-inline="no-display-inline" id="id4147c06050da4f71abe2bac18265ecab"><enum>(A)</enum><text display-inline="yes-display-inline">means a postsecondary education institution that receives Federal education assistance funds; and</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id26c7bea171d64d6cb2f05e54027c0d02"><enum>(B)</enum><text display-inline="yes-display-inline">includes an institution of higher education, as defined in section 102 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1002">20 U.S.C. 1002</external-xref>).</text></subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idb5b4a300e54d42a1b0c4b065b50eb697"><enum>(4)</enum><header>State</header><text display-inline="yes-display-inline">The term <term>State</term> includes, in addition to the several States of the United States, the Commonwealth of Puerto Rico, the District of Columbia, Guam, American Samoa, the United States Virgin Islands, the Commonwealth of the Northern Mariana Islands, and the freely associated States.</text></paragraph></section><section id="id12CE664066DC44E5952AF7DEE21BA1B3"><enum>3.</enum><header>Protections in occupations requiring State licensure</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, an institution of higher education is not eligible to receive Federal education assistance funds with respect to any program of postsecondary education or training, including a degree or certificate program and any program offered by distance education or correspondence courses to students located in a State other than where the institution is physically located, that is designed to prepare students for entry into a recognized occupation or profession that requires licensing or other established requirements as a pre-condition for entry into such occupation or profession, unless, by not later than 1 year after the date of enactment of this Act—</text><paragraph id="idfc2a49e971f94fc8bf99df5496bea8b9"><enum>(1)</enum><text>the successful completion of the program fully qualifies a student, in the metropolitan statistical area in which the student resides, in the State in which the student resides, and in any State in which the institution indicates, through advertising or marketing activities or direct contact with potential students, that a student will be prepared to work in the occupation or profession after successfully completing the program, to—</text><subparagraph id="id1cc16ab5d8c84865b98641201409efa8"><enum>(A)</enum><text>take any examination required for entry into the recognized occupation or profession in the metropolitan statistical area and any State described in this paragraph, including satisfying all Federal, State, or professionally mandated programmatic and specialized accreditation requirements, if any; and</text></subparagraph><subparagraph id="ide7eeea83966c406ca73dbae2c32f696d"><enum>(B)</enum><text>be certified or licensed or meet any other academically related pre-conditions that are required for entry into the recognized occupation or profession in any such State; and</text></subparagraph></paragraph><paragraph id="idf13bc749e34747f9811a7e34635efb58"><enum>(2)</enum><text>the institution offering the program provides timely placement for all of the academically related pre-licensure requirements for entry into the recognized occupation or profession, such as clinical placements, internships, or apprenticeships.</text></paragraph></section><section id="idd8eb035716254e7fb18f07ace8ebf94f"><enum>4.</enum><header>Protecting students at gainful employment programs and protecting all students and Federal funds from low-earning programs</header><subsection commented="no" display-inline="no-display-inline" id="idb6b5409d85264e1cb2490b796ff70e08"><enum>(a)</enum><header>Defining gainful employment programs</header><paragraph id="id131d2b8a35044a1aa4198e43c48c2df5"><enum>(1)</enum><header>Additional institutions</header><text>Section 101(b)(1) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1001">20 U.S.C. 1001(b)(1)</external-xref>) is amended by inserting <quote>, that meets the standards for debt-to-earnings in section 498C,</quote> after <quote>gainful employment in a recognized occupation</quote>.</text></paragraph><paragraph id="id08b789164c4c453892bc0b15faccea50"><enum>(2)</enum><header>Proprietary institution of higher education</header><text>Section 102(b)(1)(A)(i) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1002">20 U.S.C. 1002(b)(1)(A)(i)</external-xref>) is amended by inserting <quote>that meets the standards for debt-to-earnings in section 498C</quote> after <quote>gainful employment in a recognized occupation</quote>.</text></paragraph><paragraph id="idd006d0f2231c45dc8307ba234c08a3d1"><enum>(3)</enum><header>Postsecondary vocational institution</header><text>Section 102(c)(1)(A) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1002">20 U.S.C. 1002(c)(1)(A)</external-xref>) is amended by inserting <quote>that meets the standards for debt-to-earnings in section 498C</quote> after <quote>gainful employment in a recognized occupation</quote>.</text></paragraph><paragraph id="id43cceb71c6d3486182061d63615c57a9" commented="no"><enum>(4)</enum><header>Eligible program</header><text>Section 481(b)(1)(A)(i) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1088">20 U.S.C. 1088(b)(1)(A)(i)</external-xref>) is amended by inserting <quote>and meets the standards for debt-to-earnings in section 498C</quote> after <quote>gainful employment in a recognized profession</quote>.</text></paragraph></subsection><subsection id="id6ad64d7a85fd46b5b36e0a27b8bd2c71"> <enum>(b)</enum> <header>Debt-to-Earnings</header> <text>Subpart 3 of part H of title IV of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1099c">20 U.S.C. 1099c et seq.</external-xref>) is amended by adding at the end the following:</text>
+        <quoted-block id="id680E3218A41F44F5812055ECA197400C" display-inline="no-display-inline"
+          style="OLC">
+          <section id="id5cd0c3051dd3415fa848eaa2914c8479">
+            <enum>498C.</enum>
+            <header>Debt-to-earnings</header>
+            <subsection id="idbe10efa804764070b2199a40cdf6b078">
+              <enum>(a)</enum>
+              <header>Definitions</header>
+ <text>In this section:</text> <paragraph id="ide6bee4b731c7413887038102c84b8c7a"> <enum>(1)</enum> <header>Annual debt-to-earnings rate</header> <text>The term <term>annual debt-to-earnings rate</term> means, for a cohort period and eligible program, the rate that is calculated for the cohort period for students, as defined by the Secretary, who completed the eligible program during such cohort period by dividing the annual loan payment for such cohort period, as calculated by the Secretary, by the median annual earnings for such cohort period.</text>
+              </paragraph>
+              <paragraph id="id5a35abb8de8f4c4ba8c79e793b19015b">
+                <enum>(2)</enum>
+                <header>Annual loan payment</header>
+ <text>The term <term>annual loan payment</term> means, for a cohort period and eligible program, the annual loan payment for the cohort of students who completed the eligible program during the cohort period, calculated by the Secretary by using—</text>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id349e1e7e88924caa9fc968237889bc0a">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the median loan debt of the cohort;</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id9632df13e5344493b177c80bb45e5ce8">
+                  <enum>(B)</enum>
+ <text>an amortization period of—</text> <clause id="id7516f5c495ee4a92992587f591b0b20c"> <enum>(i)</enum> <text>10 years, in the case of an eligible program that leads to an undergraduate certificate or diploma, a postbaccalaureate certificate, an associate degree, or a graduate certificate;</text>
+                  </clause>
+                  <clause id="id1117d3459d2b44d592bfcba294e075fa">
+                    <enum>(ii)</enum>
+ <text>15 years, in the case of an eligible program that leads to a baccalaureate degree or a master's degree; or</text>
+                  </clause>
+                  <clause id="id30c7f9969cf14012b5a2dba42e17d78e">
+                    <enum>(iii)</enum>
+ <text>20 years, in the case of an eligible program not described in clause (i) or (ii); and</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id269148c9df414d33807cf10d3bcf3f00">
+                  <enum>(C)</enum>
+ <text>an annual interest rate that is—</text> <clause commented="no" display-inline="no-display-inline" id="id1ee49d52c7ad4a9b88aebf86ed639e83"> <enum>(i)</enum> <text display-inline="yes-display-inline">in the case of an eligible program that is an undergraduate certificate or diploma program, postbaccalaureate certificate program, or associate degree program, the average of the annual statutory interest rates on Federal Direct Unsubsidized Loans applicable to undergraduate students for the three consecutive award years ending in the final year of the cohort period;</text>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="id059ce66897364e9cbf75be54e29abf3b">
+                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">in the case of an eligible program that is a graduate certificate program or a master's degree program, the average of the annual statutory interest rates on Federal Direct Unsubsidized Loans applicable to graduate students that were in effect during the three consecutive award years ending in the final year of the cohort period;</text>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="id11013cd77db74a6493c501fb202ef320">
+                    <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">in the case of an eligible program that is a bachelor's degree program, the average of the annual statutory interest rates on Federal Direct Unsubsidized Loans applicable to undergraduate students for the six consecutive award years ending in the final year of the cohort period; and</text>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="idb40d3f990c1743bbb8f4b55019ae0a4a">
+                    <enum>(iv)</enum>
+ <text display-inline="yes-display-inline">in the case of an eligible program that is a doctoral program or a first professional degree program, the average of the annual statutory interest rates on Federal Direct Unsubsidized Loan applicable to graduate students for the six consecutive award years ending in the final year of the cohort period.</text>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+              <paragraph commented="no" display-inline="no-display-inline"
+                id="idf2371a2ba8244b6092c0b99859496f75">
+                <enum>(3)</enum>
+                <header>Cohort period</header>
+ <text>The term <term>cohort period</term> means—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id751348e154e74484aba4e91b872eb3f7"> <enum>(A)</enum> <text display-inline="yes-display-inline">a period of 2 award years, with respect to an eligible program for which the number of students who completed the eligible program in the 2-year period is 30 or more; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="idba48a00a5ec54398874d616899cd883e">
+                  <enum>(B)</enum>
+ <text>a period of 4 award years, with respect to an eligible program not described in subparagraph (A).</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="id93703cc8a05342d9925e93f393a1fc5b">
+                <enum>(4)</enum>
+                <header>Discretionary debt-to-earnings rate</header>
+ <text>The term <term>discretionary debt-to-earnings rate</term> means the rate that is calculated for a cohort period and eligible program by calculating the quotient of—</text>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id815d8605acd84c55afc46800f141a5e7">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the annual loan payment for such cohort period; divided by</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id3a9640ecc268440cba327dcc35c5e8d4">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the discretionary earnings for such cohort period.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="id619d9bab795b41cbbb70d685a73434be">
+                <enum>(5)</enum>
+                <header>Discretionary earnings</header>
+ <text>The term <term>discretionary earnings</term> means the difference between—</text>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id9cae9cd02a4443ee8fad205abec1ebfa">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the median annual earnings for a cohort period; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="iddb7f8683c53b4b4bb7a985d4b56f5a9d">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the amount that is 150 percent of the poverty level for an individual, as determined by the Secretary of Health and Human Services for the most recent calendar year for which median annual earnings data has been obtained.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="id827a48032b5c4b0c9910a9fd975f66ec">
+                <enum>(6)</enum>
+                <header>Median annual earnings</header>
+ <text>The term <term>median annual earnings</term> means, for a cohort period and an eligible program, the midpoint of the annual earnings of students who completed the program—</text>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id7ab642c9d99e40908677b0f03c6efef6">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">for a 2-year cohort period—</text> <clause commented="no" display-inline="no-display-inline" id="idf0dc256d0df3477b8a0eef5bcf2bcf56"> <enum>(i)</enum> <text display-inline="yes-display-inline">in the fourth and fifth award years prior to the year for which the most recent data are available from the Federal agency with earnings data, except as provided in clause (ii); and</text>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="id832bf2590f7d4823a203e9463d08542c">
+                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">in the seventh and eighth award years prior to the year for which the most recent data are available from such Federal agency, for qualifying graduate programs; and</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id5788a834549e4941b30d14957ced7ccc">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">for a 4-year cohort period—</text> <clause commented="no" display-inline="no-display-inline" id="id465715399E004F84806321AE2698C4B9"> <enum>(i)</enum> <text display-inline="yes-display-inline">in the fourth, fifth, sixth, and seventh award years prior to the year for which the most recent data are available from the Federal agency with earnings data, except as provided in clause (ii); and</text>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="id9004FDED6D78474CBBD5ED6D647CF68F">
+                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">in the seventh, eighth, ninth, and tenth award years prior to the year for which the most recent data are available from such Federal agency, for qualifying graduate programs.</text>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+              <paragraph commented="no" display-inline="no-display-inline"
+                id="id532eb7a7bc6b4cefbfb15593aa919854">
+                <enum>(7)</enum>
+                <header>Median loan debt</header>
+ <text>The term <term>median loan debt</term> means, for a cohort period and an eligible program, the amount obtained by—</text>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id9f413303ecc248c4a419a0160a3e09ec">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">calculating the loan debt, including private education loans (as defined in section 140(a) of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1650">15 U.S.C. 1650(a)</external-xref>)) for each student who completed the eligible program during such cohort period, based on the lesser of—</text>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="idbaba5fea812e4bada7d1be785e4b59dd">
+                    <enum>(i)</enum>
+ <text display-inline="yes-display-inline">the loan debt incurred by each student; or</text>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="iddb22f3fed4ab44f5adfc86a9ffd81dbb">
+                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">the total amount for tuition and fees and books, equipment, and supplies for each student, less the amount of institutional grant or scholarship funds provided to that student;</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id85f9c95ea63448c686a4553d4fe34f4d">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">removing, if applicable, the number of largest loan debts equivalent to the number of students for whom the Federal agency with earnings data reports it is unable to match to earnings data; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="idaed4f725ad6146f7abeba0035ffe4c69">
+                  <enum>(C)</enum>
+ <text display-inline="yes-display-inline">calculating the median of the remaining loan debts of the cohort of students.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph commented="no" display-inline="no-display-inline"
+                id="id067367b5d37b455bbf2354a134ae9839">
+                <enum>(8)</enum>
+                <header>Qualifying graduate program</header>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id7eaccefe93054582b9897e07925af6ac">
+                  <enum>(A)</enum>
+                  <header>In general</header>
+ <text display-inline="yes-display-inline">The term <term>qualifying graduate program</term> means an eligible program—</text>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="ide0e961ecaa834a59954bd220067071fa">
+                    <enum>(i)</enum>
+ <text>for which the Secretary has identified outlier earnings growth; and</text> </clause> <clause commented="no" display-inline="no-display-inline" id="idc06e3044430d431689d6421b35308fd1"> <enum>(ii)</enum> <text display-inline="yes-display-inline">whose students must complete required postgraduation training programs of not less than 3 years to obtain licensure in one of the following fields:</text>
+                    <subclause commented="no" display-inline="no-display-inline"
+                      id="id4bf74896bb63441a88f6ccd89bd9bff6">
+                      <enum>(I)</enum>
+ <text display-inline="yes-display-inline">Medicine.</text> </subclause> <subclause commented="no" display-inline="no-display-inline" id="id8246361f549b45108084a7f0ea42a9f6"> <enum>(II)</enum> <text display-inline="yes-display-inline">Osteopathy.</text>
+                    </subclause>
+                    <subclause commented="no" display-inline="no-display-inline"
+                      id="idf260d97acecf488791b032e286f4c363">
+                      <enum>(III)</enum>
+ <text display-inline="yes-display-inline">Dentistry.</text> </subclause> <subclause commented="no" display-inline="no-display-inline" id="ida9080852d7594b988cb77c6a9560ac84"> <enum>(IV)</enum> <text display-inline="yes-display-inline">Clinical psychology.</text>
+                    </subclause>
+                    <subclause commented="no" display-inline="no-display-inline"
+                      id="id2db72c6472a04eb2a7df04c614200fba">
+                      <enum>(V)</enum>
+ <text display-inline="yes-display-inline">Marriage and family counseling.</text>
+                    </subclause>
+                    <subclause commented="no" display-inline="no-display-inline"
+                      id="ida3403d1a1e5e43c891341629e947cb06">
+                      <enum>(VI)</enum>
+ <text display-inline="yes-display-inline">Clinical social work.</text> </subclause> <subclause commented="no" display-inline="no-display-inline" id="idb10a9b1006094cdcb6a8199b5f5d16a1"> <enum>(VII)</enum> <text display-inline="yes-display-inline">Clinical counseling.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="ida831d425901640f4b59e9dba200bd28e">
+                  <enum>(B)</enum>
+                  <header>Outlier earnings growth</header>
+ <text>For purposes of subparagraph (A)(i), the Secretary may identify an eligible program as having outlier earnings growth if there is a growth in the median earnings for students who have completed the program that is reflected by a percent change in the median earnings of such students between the median earnings of such students measured 4 years after completion of the program and the median earnings of such students measured 10 years after completion of the program, that is more than 2 standard deviations above the average earnings growth for other programs with the same credential level, measured 4 years after completion and 10 years after completion.</text>
+                </subparagraph>
+              </paragraph>
+            </subsection>
+            <subsection id="id3f1dcdebe3b9400ba3e07388bab37d09">
+              <enum>(b)</enum>
+              <header>Standards</header>
+              <paragraph commented="no" display-inline="no-display-inline"
+                id="id238cb58a38204e6aae93228729c95923">
+                <enum>(1)</enum>
+                <header display-inline="yes-display-inline">In general</header>
+ <text>An eligible program does not meet the standards for debt-to-earnings if, for 2 of any 3 consecutive award years, the applicable cohort of students fails the debt-to-earnings rates, as described in paragraph (2).</text>
+              </paragraph>
+              <paragraph id="idc9054a39dbea482aadc31417709ac5b0" commented="no">
+                <enum>(2)</enum>
+                <header>Failing</header>
+ <text display-inline="yes-display-inline">A cohort of students who completed an eligible program during the cohort period ending on the last day of an award year fails the debt-to-earnings rates for the award year if the cohort has—</text>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="idd88c4299447348c2b43fc871d489157c">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">a discretionary debt-to-earnings rate for such cohort period equal to or greater than 20 percent; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline"
+                  id="id007961b531cf46c980116d3d002e6248">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">an annual debt-to-earnings rate for such cohort period equal to or greater than 8 percent.</text>
+                </subparagraph>
+              </paragraph>
+            </subsection>
+            <subsection id="idebc250488e7b4a53a5a796997c9e4e64">
+              <enum>(c)</enum>
+              <header>Process</header>
+              <paragraph commented="no" display-inline="no-display-inline"
+                id="idec9e6f54c3e44defab8b722939c30389">
+                <enum>(1)</enum>
+                <header>Data match</header>
+ <text display-inline="yes-display-inline">In order to ensure compliance with paragraph (2), the Commissioner of the Internal Revenue Service, the Commissioner of the Social Security Administration, and the head of any other Federal agency that administers the database of individual-level earnings data shall, in coordination with the Secretary, timely ensure secure, annual data matches of earnings data with Department of Education data to produce the median annual earnings of each eligible program.</text>
+              </paragraph>
+              <paragraph commented="no" display-inline="no-display-inline"
+                id="id872d5d12f5ee488aab7b5bba3f93a36e">
+                <enum>(2)</enum>
+                <header>Requirements of the Secretary</header>
+ <text display-inline="yes-display-inline">The Secretary shall—</text> <subparagraph id="id8343cbb699c343bea813a1b776752745"> <enum>(A)</enum> <text>on an annual calendar year basis—</text>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="id29f95820468344b990acd9af675df879">
+                    <enum>(i)</enum>
+ <text display-inline="yes-display-inline">for each eligible program—</text> <subclause commented="no" display-inline="no-display-inline" id="iddcbf55a6cd784f408ca1096df85585ab"> <enum>(I)</enum> <text display-inline="yes-display-inline">calculate for each award year the discretionary debt-to-earnings rate and the annual debt-to-earnings rate for the program; and</text>
+                    </subclause>
+                    <subclause commented="no" display-inline="no-display-inline"
+                      id="id289fe387112a4c5b96753957b84ab054">
+                      <enum>(II)</enum>
+ <text>publish the discretionary debt-to-earnings rate and the annual debt-to-earnings rate for the eligible program for each award year on a website established and maintained by the Secretary;</text>
+                    </subclause>
+                  </clause>
+                  <clause id="id7cb1c6bcd2dd4eebba3fd6231d1fe487">
+                    <enum>(ii)</enum>
+ <text>for each eligible program that is a program of training to prepare students for gainful employment in a recognized occupation or a graduate or professional degree program offered by an institution of higher education described in section 101(a), issue a notice of determination not later than 45 days after completing the data match described in paragraph (1), informing the institution that provides the program—</text>
+                    <subclause id="id5253c234c24945029597fa79f950e100">
+                      <enum>(I)</enum>
+ <text>of the final discretionary debt-to-earnings rate and the annual debt-to-earnings rate for the program, which may not be appealed by the institution unless the institution believes that the Secretary erred in the calculation of any such measure;</text>
+                    </subclause>
+                    <subclause id="id6580cc104bd3459dbcf76cd34588b05e">
+                      <enum>(II)</enum>
+ <text>of the final determination regarding whether the program meets the standards for debt-to-earnings, as described in subsection (b);</text>
+                    </subclause>
+                    <subclause id="ida68dd641d1e548d094f1606d2f6dc67c">
+                      <enum>(III)</enum>
+ <text>whether the program does not meet the standards for debt-to-earnings as described in subsection (b)(1) or could not meet such standards in the next year if it fails the debt-to-earnings rates, as described in subsection (b)(2), in such next year; and</text>
+                    </subclause>
+                    <subclause id="id287e7398fe0b44bd88f0360fb4b8cb8c">
+                      <enum>(IV)</enum>
+ <text>whether the institution is required to provide warnings to enrolled students and prospective students of the program’s failure, or risk of failure, to meet the standards, as determined under subclause (III); and</text>
+                    </subclause>
+                  </clause>
+                  <clause commented="no" display-inline="no-display-inline"
+                    id="ida1b6563695114f2589e1805a6586da7d">
+                    <enum>(iii)</enum>
+ <text>for each eligible program that is a program of training to prepare students for gainful employment in a recognized occupation that does not meet the standards for debt-to-earnings as described in subsection (b)(1), enforce the consequences under subsection (d); and</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="ide159ded57aba47f59d4edc7ceedd46bb">
+                  <enum>(B)</enum>
+ <text>develop processes to verify, on an annual calendar year basis—</text> <clause commented="no" display-inline="no-display-inline" id="id2c10c82c05304f6e9aff2139167f5842"> <enum>(i)</enum> <text display-inline="yes-display-inline">that each eligible program that is a program of training to prepare students for gainful employment in a recognized occupation, or a graduate or professional degree program offered by an institution of higher education described in section 101(a), provides the warning described in subparagraph (A)(ii)(IV), if applicable; and</text>
+                  </clause>
+                  <clause id="id50ce1c4aec0e4f2e8402e69d618d717c">
+                    <enum>(ii)</enum>
+ <text>that each eligible program that is a program of training to prepare students for gainful employment in a recognized occupation that does not meet the standards for debt-to-earnings as described in subsection (b)(1) does not receive funds as described in subsection (d).</text>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+            </subsection>
+            <subsection id="ide60f218131594f8eb4c2afd0c798da4b">
+              <enum>(d)</enum>
+              <header>Consequences of not meeting standards</header>
+              <paragraph id="id10b7fd7326644c9b894dcdbc77f4eca3">
+                <enum>(1)</enum>
+                <header>No disbursement of funds for enrollment in ineligible programs</header>
+ <text>An institution may not disburse program funds under this title to students enrolled in a program of training to prepare students for gainful employment in a recognized occupation that does not meet the standards for debt-to-earnings as described in this section.</text>
+              </paragraph>
+              <paragraph id="id3b52489465d14d718a58d02c395836c0">
+                <enum>(2)</enum>
+                <header>Time period to reestablish eligibility</header>
+ <text>An institution may not seek to reestablish the eligibility of a program of training to prepare students for gainful employment in a recognized occupation that does not meet the standards for debt-to-earnings as described in this section, or establish the eligibility of a program of training to prepare students for gainful employment in a recognized occupation that is substantially similar to the program that did not meet such standards, until the date that is 3 years after the date of the notice of determination issued under subsection (c)(2)(A)(ii) that the program of training to prepare students for gainful employment in a recognized occupation does not meet the standards.</text>
+              </paragraph>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline"
+              id="id62c2117134464761a516b9ab4e81b70a">
+              <enum>(e)</enum>
+              <header>Equal treatment of all programs and professions</header>
+ <text>In carrying out this section, the Secretary shall apply the requirements equally to all categories of programs and professions and shall not differentiate, delay implementation, or adjust any deadline, with respect to tipped professions or any other category of professions or programs unless explicitly authorized under this section.</text>
+            </subsection>
+            <subsection id="idc6404adeb1c641eea75717227f30f7f7">
+              <enum>(f)</enum>
+              <header>Regulations</header>
+ <text>The Secretary shall issue regulations to carry out this section not later than 1 year after the date of enactment of the <short-title>Protecting Students from Worthless Degrees Act</short-title>, except that such regulations shall not be subject to the requirements of sections 482 and 492.</text>
+            </subsection>
+          </section>
+          <after-quoted-block>.</after-quoted-block>
+        </quoted-block>
+ </subsection><subsection commented="no" display-inline="no-display-inline" id="idcc16754491424490b466c806a7c65e8b"><enum>(c)</enum><header>Program participation requirements</header><text display-inline="yes-display-inline">Section 487 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1094">20 U.S.C. 1094</external-xref>) is amended—</text><paragraph id="id8EBE1B12203D4C988EE42AD7115260BA"><enum>(1)</enum><text>in subsection (a), by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id6CAAE766D2974D47862E277EF59D922C"><paragraph id="id632A657CEFA54E0C97F36F290896AF45"><enum>(30)</enum><text>The institution will—</text><subparagraph id="idF1807F2615BC45EA8EEDD3C2849C0CA6"><enum>(A)</enum><text>provide to the Secretary not later than the first December 31 following the date of enactment of the <short-title>Protecting Students from Worthless Degrees Act</short-title> (or, for any institution that does not have an active program participation agreement as of such date, the first December 31 after the institution enters into the agreement), in accordance with procedures established by the Secretary, a certification signed by the most senior executive officer of the institution that the institution and each of the eligible gainful employment programs included on the eligibility and certification approval report of the institution under subpart 3 of part H meet the requirements of subsection (i); </text></subparagraph><subparagraph id="id7E3594CD2C924D18AC2ABBF63CAC17EC"><enum>(B)</enum><text>include with its certification an explanation of how each eligible gainful employment program is not substantially similar to any ineligible or discontinued program described in subsection (i)(2)(D); and</text></subparagraph><subparagraph id="id405458506CF549D4AF56BD5C6155C301"><enum>(C)</enum><text>update the certification within 10 days if there are any changes in the approvals for an eligible gainful employment program, or other changes for an eligible gainful employment program that make the existing certification no longer accurate.</text></subparagraph></paragraph><after-quoted-block>; </after-quoted-block></quoted-block></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idbd7cb64c9e7a4e30ae0e054c50db5331"><enum>(2)</enum><text>by redesignating subsections (i) and (j) as subsections (j) and (k), respectively; and</text></paragraph><paragraph id="id40E360D57F644EE4959F8E396DF85593"><enum>(3)</enum><text>by inserting after subsection (h) the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id7F464EF4A9D748FCA9E82E0171C64A45"><subsection id="idBF27ACDFDB5B4D34BF7E3C7D132399D1"><enum>(i)</enum><header>Certification requirements for gainful employment programs</header><paragraph id="id6af2c25cfd6c42359bc9fc0054e99819"><enum>(1)</enum><header>Definition of gainful employment program</header><text>In this subsection, the term <term>gainful employment program</term> means a program of training that—</text><subparagraph id="id88979089469545598cb828a910dcd7cb"><enum>(A)</enum><text>in order to qualify for assistance under this title, is required under subsection (b)(1)(A)(i) or (c)(1)(A) of section 102, or section 101(b)(1), to satisfy gainful employment requirements, including debt-to-earnings; and</text></subparagraph><subparagraph id="id15943c17191943d0a287b69645bf551f"><enum>(B)</enum><text>is offered by an institution eligible to receive assistance under this title.</text></subparagraph></paragraph><paragraph id="id33ED3A1A4DBE4CFA88F0EB0FE101364E"><enum>(2)</enum><header>In general</header><text>Each eligible gainful employment program included on the eligibility and certification approval report of an institution of higher education shall comply with each of the following:</text><subparagraph id="idead88d422dc4438ab283e44c60f2f285"><enum>(A)</enum><text>The gainful employment program is approved by a recognized accrediting agency or is otherwise included in the institution's accreditation by its recognized accrediting agency, or, if the institution is a public postsecondary vocational institution, the program is approved by a recognized State agency for the approval of public postsecondary vocational education in lieu of accreditation.</text></subparagraph><subparagraph id="ide81128166b774913a0e25d534b5d7541" commented="no"><enum>(B)</enum><text>The gainful employment program is programmatically accredited, if such accreditation is required by—</text><clause id="id84E147F08E3C4EA7BCB9AF3707B9B29D" commented="no"> <enum>(i)</enum> <text>a Federal governmental entity;</text>
+ </clause><clause id="id1D2DECD714CC431C84421DF0AAD3225B" commented="no"><enum>(ii)</enum><text>a governmental entity in the State in which the institution is located; or</text></clause><clause id="id8667BCA0A06549249A14ED742E65E410" commented="no"><enum>(iii)</enum><text>a governmental entity in a State in which the institution is not physically located, if the institution—</text><subclause id="id38107C29B92043DD9AEB29DBC74B9396" commented="no"><enum>(I)</enum><text>offers postsecondary education through distance education or correspondence courses to students located in that State; or</text></subclause><subclause id="id24598D22CDC1435797B8EFECD279DBE7" commented="no"><enum>(II)</enum><text>is otherwise subject to that State’s jurisdiction, as determined by that State.</text></subclause></clause></subparagraph><subparagraph id="idf9ffec6e4b6a4a5d8e5400e2230a1c1b" commented="no"><enum>(C)</enum><text>The gainful employment program satisfies the applicable educational prerequisites for professional licensure or certification requirements in the State in which the institution is located or a State described in subparagraph (B)(iii), so that a student who completes the program and seeks employment in any such State qualifies to take any licensure or certification examination that is needed for the student to practice or find employment in an occupation that the program prepares students to enter.</text></subparagraph><subparagraph id="id5ad5e12246b54ae59f6184663f567c25" commented="no"><enum>(D)</enum><text>The gainful employment program is not substantially similar to a program offered by the institution that, in any of the 3 years prior to the date of the eligibility and certification approval report—</text><clause commented="no" display-inline="no-display-inline" id="idb16461f34f9c4df689abf7be9d8bb771"><enum>(i)</enum><text display-inline="yes-display-inline">failed the standards for debt-to-earnings in section 498C, the low earnings outcome measure described in section 454(c)(2), or any subsequent outcome measure that the Secretary determines serves the best interests of students and taxpayers; and</text></clause><clause commented="no" display-inline="no-display-inline" id="id96be67e8e8174709a378b0c72281e9d8"><enum>(ii)</enum><subclause commented="no" display-inline="yes-display-inline" id="idd48f6c91925f41b0ab23b288a7348b98"><enum>(I)</enum><text display-inline="yes-display-inline">became ineligible for funding; or</text></subclause><subclause commented="no" display-inline="no-display-inline" id="idc0dbaec3134a4f2ca31cf36b21dfa310" indent="up1"><enum>(II)</enum><text display-inline="yes-display-inline">was voluntarily discontinued by the institution.</text></subclause></clause></subparagraph></paragraph><paragraph id="idE148AFAFEE6B4EE4AA5D9D91891EFB9F"><enum>(3)</enum><header>Requirements ensuring student awareness</header><text>Before an institution offering a gainful employment program enrolls any student who intends to reside, practice, or seek employment in a State for which the program does not satisfy the applicable educational prerequisites for professional licensure or certification requirements needed for that occupation in that State, the institution shall notify the student that the gainful employment program does not satisfy the prerequisites.</text></paragraph><paragraph id="idBEEF737383994B339F6B9DCC577BF2F5"><enum>(4)</enum><header>Requirements regarding reestablishment of eligibility</header><text>The institution shall not seek to reestablish the eligibility of a gainful employment program that is ineligible for funding under this subsection or subsection (a)(30) until not less than 3 years following the date specified in the notice of determination informing the institution of the program’s ineligibility.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection><subsection id="ida77c2bbc91d84288bfc99bcf3a360483"><enum>(d)</enum><header>Application of earnings outcomes requirements to undergraduate certificate or diploma programs</header><text>Section 454 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1087d">20 U.S.C. 1087d</external-xref>) is amended—</text><paragraph id="id004c42d6d74f420193016ce57e57161c"><enum>(1)</enum><text>in subsection (c)(2), by inserting <quote>undergraduate certificate or diploma,</quote> after <quote>if the program awards an</quote>;</text></paragraph><paragraph id="id218486bb69764f428ab6f7c693b8d1e9"><enum>(2)</enum><text>in subsection (c)(3)(A)(iii)(I), by inserting <quote>, or undergraduate certificate or diploma,</quote> after <quote>in the case of a determination made for an educational program that awards a baccalaureate or lesser degree</quote>; and</text></paragraph><paragraph id="id528eaf24a4104654a89b935d916da092"><enum>(3)</enum><text>in subsection (c)(3)(B)(i), by inserting <quote>, or undergraduate certificate or diploma,</quote> after <quote>with respect to an educational program that awards a baccalaureate or lesser degree</quote>.</text></paragraph></subsection><subsection id="idc424613bfde740c1a5cf23d16167cb94"><enum>(e)</enum><header>Applying earning outcomes requirements equally to all professions, including tipped professions</header><paragraph commented="no" display-inline="no-display-inline" id="id37cac486e85b448facef46bb46839d49"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Section 454(c) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1087d">20 U.S.C. 1087d(c)</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id48d509f11ffb4235915ccc219d007cce"><paragraph commented="no" display-inline="no-display-inline" id="id3fdd9319e519457ba3112c8c71244345"><enum>(8)</enum><header>Equal treatment of all programs and professions</header><text>In carrying out this subsection, the Secretary shall apply the requirements equally to all categories of programs and professions and shall not differentiate, delay implementation, or adjust any deadline, with respect to tipped professions or any other category of professions or programs unless explicitly authorized in this subsection.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idb0b45aacb23c46a4a895fa24e2b26ea3"><enum>(2)</enum><header>No regulations allowing delay for tipped professions</header><subparagraph commented="no" display-inline="no-display-inline" id="idec7d436715224b6ea287676c206181d5"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">Paragraph (3) of section 668.402(c) of title 34, Code of Federal Regulations, as amended by the final rule submitted by the Department of Education relating to <quote>Accountability in Higher Education and Access Through Demand-Driven Workforce Pell: Student Tuition and Transparency System (STATS) and Earnings Accountability</quote> (91 Fed. Reg. 40136 (July 1, 2026)), shall have no force or effect.</text></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idb60b74a9fa504a41b34f4c9490518dc8"><enum>(B)</enum><header>Effective date</header><text>Subparagraph (A) shall take effect on July 1, 2027.</text></subparagraph></paragraph></subsection></section><section commented="no" id="id490A6271007B48BAAD8F897C3AB6B467"><enum>5.</enum><header>State authorization requirements for distance education programs</header><text display-inline="no-display-inline">Section 101 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1001">20 U.S.C. 1001</external-xref>) is amended—</text><paragraph commented="no" id="idEF1C7226CB12423E86A652AF083155E3"><enum>(1)</enum><text>in subsection (a)(2), by inserting <quote>, in accordance with subsection (d)</quote> before the semicolon; and</text></paragraph><paragraph commented="no" id="id6C15FEED841A43FA863D0A13866EBD8C"><enum>(2)</enum><text>by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="idB12FF3E2FA424F5085A58A07E2A25F73"><subsection commented="no" id="id8B3EDF0BF6E24829B585A46BD0BF801D"><enum>(d)</enum><header>State authorization</header><paragraph commented="no" id="id03DFF30820794BF09A1AA808BD3A90D7"><enum>(1)</enum><header>In general</header><text>An institution that offers postsecondary education through distance education or correspondence courses shall meet the requirements of subsection (a)(2) by being legally authorized within each State in which the institution's enrolled students are located, subject to paragraph (2).</text></paragraph><paragraph commented="no" id="id4FE70A74A72B41BCB2B9C21BBCFA8FAC"><enum>(2)</enum><header>State authorization reciprocity agreements</header><text>An institution described in paragraph (1) that is located in a State that participates in a State authorization reciprocity agreement with another State and that is covered by such State authorization reciprocity agreement, is considered to meet State requirements for the institution to be legally offering postsecondary distance education or correspondence courses in the other State—</text><subparagraph commented="no" id="idB6D965E5469B4917B26751AB978CA794"><enum>(A)</enum><text>subject to any additional requirements of that State; and</text></subparagraph><subparagraph commented="no" id="idEA7CBEE51C2A47189B8F83E318105060"><enum>(B)</enum><text>if the institution documents, in the manner required by the Secretary, that each State in which the institution's enrolled students are located has a State process—</text><clause commented="no" id="id27C878374BBA482D9A5637EBA7134655"><enum>(i)</enum><text>to review and take appropriate action on complaints from any of such enrolled students concerning the institution, including enforcing applicable State law; and </text></clause><clause commented="no" id="id5675FA9411A84041BBB570E921309127"><enum>(ii)</enum><text>to make the complaints public.</text></clause></subparagraph></paragraph><paragraph id="id8a5cf4cbf9894c34a44b96d12ef4d8ee"><enum>(3)</enum><header>State authorization reciprocity agreement defined</header><text>In this subsection, the term <term>State authorization reciprocity agreement</term> means an agreement between 2 or more States that—</text><subparagraph id="idAC02AA25AFF3452692249B5C6162139D"><enum>(A)</enum><text>authorizes an institution located and legally authorized in a State covered by the agreement to provide postsecondary education through distance education or correspondence courses to students located in other States covered by the agreement; and </text></subparagraph><subparagraph id="idF976BE4570A14BAFAF851FF034AF2B2D"><enum>(B)</enum><text>does not prohibit any State in the agreement from enforcing the State's own statutes and regulations, regardless as to whether such statutes and regulations are general and apply to all educational institutions or specifically directed at a subset of educational institutions.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section></legis-body></bill>
+

@@ -1,0 +1,16 @@
+# Each intermediate commit of the branch passes the suites it touches, so the history can be bisected (2026-10-04 06:21-06:25).
+# A clean `git archive` export (autocrlf off) of each commit plus the 4 gitignored data files copied read-only from LIVE, GIT_DIR at the shared object store (read-only) so the tests that read a base commit run.
+# Run: python -m pytest fec/tests/surfaces/test_staffer_prewarm.py test_staffer_request_work_index.py test_staffer_office_covered_staff.py test_staffer_unreachable_hint.py test_staffer_distinct_routes.py -q
+#      node --test fec/tests/surfaces/test_staffer_left_out_staff.cjs
+# (the tip, 19a5c28bc, is the commit every other proof in this directory ran on: 598 passed in the worktree for the 16-file set, three times)
+
+c2dbf7148  Collect only after a router was replaced, keep one work index for a whole search request, and say that a request still running can defeat the memory saving
+    pytest: 148 passed   (prewarm 35, request_work_index 17, office_covered_staff 62, unreachable_hint 21, distinct_routes 13: the office, hint and page suites are still the v4 ones at this commit)
+    node:   pass 28, fail 0
+
+85be3cb4c  Name the staffer roster alone in the left-out line when the comparison reads no payroll evidence
+    pytest: 153 passed   (office_covered_staff 67 with the five basis tests, hint 21)
+    node:   pass 35, fail 0
+
+19a5c28bc  Make the explanation of an unreachable answer that has a reason the same text as its message
+    the tip: test_staffer_unreachable_hint.py 26 tests (see test_results_79ef9f1b7_vs_tip.txt and new_tests_three_in_a_row.txt)

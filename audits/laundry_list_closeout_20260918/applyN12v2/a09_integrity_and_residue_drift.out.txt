@@ -1,0 +1,14 @@
+﻿journal_mode after my wal_checkpoint(TRUNCATE): wal
+PRAGMA integrity_check -> ['ok']
+PRAGMA foreign_key_check -> no violations
+
+residue rows planned before the apply: 807
+residue rows a fresh dry run flags now:  657
+dropped out of the residue: 150    newly in the residue: 0
+of those 150 rows, how many differ from the backup: 0 []
+
+binding reason of the rows that dropped out: {'label_or_gold_record_points_here': 11, 'kept_text_under_min_turn_words': 136, 'credit_union_stance_channel_row': 3}
+binding reason of the 657 still flagged:      {'kept_text_under_min_turn_words': 538, 'label_or_gold_record_points_here': 103, 'credit_union_stance_channel_row': 16}
+of the rows that dropped out, protected-by-inventory ones: 14 (they stay protected: the inventory is a file, not a detection)
+
+VERDICT: integrity ok; the residue shrank purely by DETECTION and every affected row is byte-identical to the backup

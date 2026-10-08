@@ -1,0 +1,19 @@
+====================================================================================================
+H4  THE CURLY APOSTROPHE (U+2019) IS NOT IN THE NAME CLASS, SO THE TAG IS CUT IN HALF
+    turn_tags.NAMETOK = [A-Z][A-Z.'`\-]{0,24}: it holds the STRAIGHT quote and the BACKTICK
+    (added by the repair for MS NOW) but NOT U+2019, which ABC/this-week writes.
+    flagged rows whose KEPT text would END on a bare '’' : 10
+      rowid=80974   Hakeem Jeffries          show=this-week    tag='BRIEN (voice over)'       kept tail 'ns on Capitol Hill are nowhere to be found. O’'
+      rowid=81023   Mike Rounds              show=this-week    tag='BRIEN (voice over)'       kept tail "We can't. We simply can't. O’"
+      rowid=81316   Jay Obernolte            show=this-week    tag='BRIEN (voice-over)'       kept tail ' creates some really negative consequences. O’'
+      rowid=81318   Jake Auchincloss         show=this-week    tag='BRIEN (voice-over)'       kept tail 'ing any regulation of A.I. bots whatsoever. O’'
+      rowid=82120   Christopher Murphy       show=this-week    tag='BRIEN (voice over)'       kept tail 'r founding fathers were seeking to prevent. O’'
+      rowid=82245   Alexandria Ocasio-Cortez show=this-week    tag='BRIEN (voice over)'       kept tail 'yal. I think it is a huge slap in the face. O’'
+      rowid=82246   Charles Schumer          show=this-week    tag='BRIEN (voice over)'       kept tail 'e Senate to invoke closure on the House CR. O’'
+      rowid=305576  Susan Collins            show=this-week    tag='BRIEN (voice over)'       kept tail 'I never take any race for granted. O’'
+      rowid=308345  Brian Fitzpatrick        show=this-week    tag='BRIEN (voice over)'       kept tail 're going to have to resolve pretty quickly. O’'
+      rowid=308346  Elizabeth Warren         show=this-week    tag='BRIEN (voice over)'       kept tail 'he president and his team can come up with. O’'
+    the half-tags this produces: {'BRIEN': 10}
+    corpus-wide INTERVIEW rows carrying a curly-apostrophe ALL-CAPS tag: 176
+    of those, NOT flagged by the migration at all                      : 164
+    unflagged examples: [(81315, 'O’BRIEN:'), (81317, 'O’BRIEN:'), (82229, 'O’BRIEN:'), (82230, 'O’BRIEN:'), (82231, 'O’BRIEN:'), (82317, 'O’BRIEN:'), (263653, 'O’DONNELL:'), (263852, 'O’DONNELL:'), (263853, 'O’DONNELL:'), (263854, 'O’DONNELL:')]

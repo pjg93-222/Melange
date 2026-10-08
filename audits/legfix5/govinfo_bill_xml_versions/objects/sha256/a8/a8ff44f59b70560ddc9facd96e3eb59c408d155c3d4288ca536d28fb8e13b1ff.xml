@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HD3C935D8320144DD986E81DDB81A282A" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2924 IH: Housing for Women Veterans Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2924</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190522">May 22, 2019</action-date><action-desc><sponsor name-id="L000593">Mr. Levin of California</sponsor> (for himself and <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to reauthorize the Supportive Services for Veteran Families
+			 Grant Program, and for other purposes.</official-title></form>
+	<legis-body id="H8066AC3012E446AB9180B2AA7996F956" style="OLC">
+ <section id="H1F3B0403DDD54F3AB01183F3238FA2A3" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing for Women Veterans Act</short-title></quote>.</text> </section><section id="H5FEA77212CE541B7B23C5D2B64D995C1"><enum>2.</enum><header>Additional amount for supportive services for veteran families grant program to support organizations that have a focus on providing assistance to women veterans and their families</header><text display-inline="no-display-inline">Section 2044(e) of title 38, United States Code, is amended—</text>
+ <paragraph id="H04FC0232838E4F75AA27517566E02FB1"><enum>(1)</enum><text>in paragraph (1), by adding at the end the following new subparagraph:</text> <quoted-block id="H186AE12A0FAC484FB43197DCE43D4926" style="OLC"> <subparagraph id="H1F2A8EDA94C04D79B37C1DEA85B4C7FF"><enum>(H)</enum><text>$400,000,000 for each of fiscal years 2020 through 2022.</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="H7E9FAFC334A2407C9969669FB13062AD"><enum>(2)</enum><text>by adding at the end the following new paragraph:</text> <quoted-block id="H73A7CE8F81CA4A3E85163083F60FB901" style="OLC"> <paragraph id="HFB86D9D7102B4CE5BC5B0269AFC7C8C5"><enum>(4)</enum><text>Not less than $20,000,000 shall be available under paragraph (1)(H) for the provision of financial assistance under subsection (a) to organizations that have a focus on providing assistance to women veterans and their families.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section><section id="H75FA597B10434C5388F5AA0E4C9E1347"><enum>3.</enum><header>Gap analysis of department of veterans affairs programs that provide assistance to women veterans
+			 who are homeless</header>
+ <subsection id="H6EE5FC4770EE422A89F0DACCBF186094"><enum>(a)</enum><header>In general</header><text>The Secretary of Veterans Affairs shall complete an analysis of programs of the Department of Veterans Affairs that provide assistance to women veterans who are homeless or precariously housed to identify the areas in which such programs are failing to meet the needs of such women.</text>
+ </subsection><subsection id="H8B35D8E83C1447D89AA763D0C2259A48"><enum>(b)</enum><header>Report</header><text>Not later than 270 days after the date of the enactment of this Act, the Secretary shall submit to the Committee on Veterans’ Affairs of the Senate and the Committee on Veterans’ Affairs of the House of Representatives a report on the analysis completed under subsection (a).</text>
+			</subsection></section></legis-body></bill>
+
+

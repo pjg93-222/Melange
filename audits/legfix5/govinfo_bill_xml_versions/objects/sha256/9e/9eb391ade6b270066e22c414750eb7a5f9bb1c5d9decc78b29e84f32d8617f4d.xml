@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="HD85A83C0888F4E45A616EF2EB9010FC1" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HRES 892 IH: Authorizing the Speaker of the House of Representatives to initiate or intervene in civil actions on behalf of the House of Representatives regarding section 213 of title II of division C of the Continuing Appropriations, Agriculture, Legislative Branch, Military Construction and Veterans Affairs, and Extensions Act, 2026.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 892</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251119">November 19, 2025</action-date><action-desc><sponsor name-id="R000612">Mr. Rose</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HRU00">Committee on Rules</committee-name>, and in addition to the Committee on <committee-name committee-id="HHA00">House Administration</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Authorizing the Speaker of the House of Representatives to initiate or intervene in civil actions on behalf of the House of Representatives regarding section 213 of title II of division C of the Continuing Appropriations, Agriculture, Legislative Branch, Military Construction and Veterans Affairs, and Extensions Act, 2026.</official-title></form><preamble> 
+<whereas><text>Whereas section 213 of title II of division C of the Continuing Appropriations, Agriculture, Legislative Branch, Military Construction and Veterans Affairs, and Extensions Act, 2026, and amendments made by such section, provide for financial awards to Members of the Senate under circumstances that experts have said defy typical legal concepts;</text></whereas> <whereas> <text>Whereas the 27th Amendment to the Constitution states: <quote>No law, varying the compensation for the services of the Senators and Representatives, shall take effect, until an election of Representatives shall have intervened.</quote>; and</text>
+        </whereas> 
+<whereas>
+ <text>Whereas a credible argument exists that the financial provisions contained in such section 213 constitute a variation in compensation for Senators, potentially violating the requirements of the 27th Amendment: Now, therefore, be it</text>
+        </whereas></preamble><resolution-body style="OLC" id="HD86D2DAD7E024DA188094BA086218189">
+        <section id="HA264105DEDFB469B9492F44EF89EA1E1" section-type="section-one">
+            <enum>1.</enum>
+            <header>Civil action</header>
+ <text display-inline="no-display-inline">The Speaker of the House of Representatives is authorized to initiate or intervene in one or more civil actions in a Federal court of competent jurisdiction, on behalf of the House of Representatives, to argue that section 213 of title II of division C of the Continuing Appropriations, Agriculture, Legislative Branch, Military Construction and Veterans Affairs, and Extensions Act, 2026, and the amendments made by such section, violate the 27th Amendment to the United States Constitution.</text>
+        </section>
+        <section id="H5C9830B54EED4BD7AD1C279D6C6AB4FB">
+            <enum>2.</enum>
+            <header>Notification</header>
+ <text display-inline="no-display-inline">The Speaker shall notify the House of Representatives of any decision to initiate or intervene in any civil action pursuant to this resolution.</text>
+        </section>
+        <section id="H3EFBBB7E72FB47389097A7489B840320">
+            <enum>3.</enum>
+            <header>Process for civil action</header>
+            <subsection id="HD28C5A9237BC4298AE61DF0BE04BDBE0" display-inline="no-display-inline">
+                <enum>(a)</enum>
+                <header>Representation by General Counsel</header>
+ <text display-inline="yes-display-inline">The Office of the General Counsel of the House of Representatives, at the direction of the Speaker, shall represent the House in any civil action initiated, or in which the House intervenes, pursuant to this resolution, and may employ the services of outside counsel and other experts for this purpose.</text>
+            </subsection>
+            <subsection id="H8E5CAFE617FA43269AA96A5F5370FEA0">
+                <enum>(b)</enum>
+                <header>Statement of costs of outside counsel and experts</header>
+ <text display-inline="yes-display-inline">Not later than 30 days after the last day of each calendar quarter in which the Office of General Counsel employed the services of outside counsel or other experts pursuant to subsection (a), the chair of the Committee on House Administration shall cause to be printed in the Congressional Record a statement setting forth the aggregate amounts expended by such Office for such services.</text>
+            </subsection>
+        </section>
+        <section id="H0259FAF295F04CE5AB29E5806B9B482B">
+            <enum>4.</enum>
+            <header>Requirement to inform</header>
+ <text display-inline="no-display-inline">The Speaker shall keep the House regularly informed about developments in any litigation initiated, or in which the House intervenes, pursuant to this resolution.</text>
+        </section>
+        <section id="H0A27B82F17AA4E74A1B5C9B686762416">
+            <enum>5.</enum>
+            <header>Demand for reimbursement</header>
+ <text display-inline="no-display-inline">In the event that section 213 of title II of division C of the Continuing Appropriations, Agriculture, Legislative Branch, Military Construction and Veterans Affairs, and Extensions Act, 2026, is held to be unconstitutional in any ruling made in response to litigation initiated, or in which the House intervenes, pursuant to this resolution, the Speaker is authorized to—</text>
+            <paragraph id="H69CA255340ED41A89D7BF5C1530B505A" indent="up1">
+                <enum>(1)</enum>
+ <text>tally all costs incurred by the House of Representatives related to such litigation, including legal fees, expenses for outside counsel and other experts, and related administrative costs; and</text>
+            </paragraph>
+            <paragraph id="HDB2C1659FE2D4177AB47DBC06B71BA29" indent="up1">
+                <enum>(2)</enum>
+ <text>send a formal letter to the majority leader of the Senate demanding that the Senate reimburse the House of Representatives for all such litigation-related costs from funds allocated to the Senate, and cause that letter to be entered into the Congressional Record.</text>
+            </paragraph>
+        </section>
+    </resolution-body></resolution>
+

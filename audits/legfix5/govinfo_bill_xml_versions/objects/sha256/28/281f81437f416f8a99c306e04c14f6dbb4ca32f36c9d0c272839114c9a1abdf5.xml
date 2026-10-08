@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H346C459D8EC34F5BB568ECEA375FF917" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8082 IH: Competition and Openness in Markets to Promote Efficiency, Transparency, and Enhanced affordability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8082</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260325">March 25, 2026</action-date><action-desc><sponsor name-id="G000576">Mr. Grothman</sponsor> (for himself and <cosponsor name-id="F000469">Mr. Fulcher</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To ensure competition in health insurance markets.</official-title></form><legis-body id="HA73B2A3E8938450EB39B9FC66B8D2FEA" style="OLC"> 
+<section id="HE449046B4E434779B9A64C1D3C85404C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Competition and Openness in Markets to Promote Efficiency, Transparency, and Enhanced affordability Act</short-title></quote> or the <quote><short-title>COMPETE Act</short-title></quote>.</text></section> <section commented="no" display-inline="no-display-inline" id="HFA1B5B5236CD4D0D9CF20A5406262220"><enum>2.</enum><header>Short-term limited duration insurance</header><text display-inline="no-display-inline">Section 2791(b) of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/300gg-91">42 U.S.C. 300gg–91(b)</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" display-inline="no-display-inline" id="HA48CD1DB5524474F808448948940867E">
+<paragraph id="HD31F0BACB3C3436DBE88FF6B309B2C85"><enum>(6)</enum><header>Short-term limited duration insurance</header><text>The term <term>short-term limited duration insurance</term> means a plan providing health insurance coverage pursuant to a contract with a health insurance issuer—</text> <subparagraph commented="no" display-inline="no-display-inline" id="H65E4A93734FC487AAF89586DCE405619"><enum>(A)</enum><text display-inline="yes-display-inline">that has an expiration date specified in the contract that is not more than 12 months after the original effective date of the contract; and</text></subparagraph>
+<subparagraph commented="no" display-inline="no-display-inline" id="H968BBEA11A704B23AEEE18FBC305EBB6"><enum>(B)</enum><text display-inline="yes-display-inline">which may include a renewal guarantee that permits a policyholder to elect to purchase, for periods of time following expiration of the initial contract, another policy or policies at some future date, at a premium that would not reflect any additional underwriting.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body></bill>
+

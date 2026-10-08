@@ -1,0 +1,133 @@
+{
+ "by_detector_class": {
+  "A_anchored_caps": 4549,
+  "B_stop_name_paren": 142,
+  "B_unknown_surname_paren": 721,
+  "C_unanchored_paren": 243,
+  "D_mixed_case_label": 40,
+  "E_colonless_honorific": 289
+ },
+ "by_disposition": {
+  "ledger_only_duplicate_row": 1,
+  "ledger_only_short_turn": 49,
+  "ledger_only_unresolved": 6139,
+  "own_later_turn": 10,
+  "reattributed": 54,
+  "row_has_no_member_words": 4,
+  "rows_flagged": 5863,
+  "rows_skipped_row_has_no_member_words": 4
+ },
+ "census_check": {
+  "expected": 5835,
+  "got": 5863,
+  "missing_from_this_run": [
+   225128
+  ],
+  "n_missing": 1,
+  "n_new": 29,
+  "new_in_this_run": [
+   108613,
+   116271,
+   137948,
+   154423,
+   174172,
+   175673,
+   175681,
+   176057,
+   184653,
+   184980,
+   185146,
+   254901,
+   254977,
+   255752,
+   255829,
+   255904,
+   256034,
+   257343,
+   257660,
+   257913,
+   258130,
+   258713,
+   258736,
+   258820,
+   260196,
+   260197,
+   260198,
+   274661,
+   305584
+  ]
+ },
+ "chars_removed": 2182540,
+ "colonless_class_E": true,
+ "db": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\social_media.db",
+ "db_bytes": 481439744,
+ "every_row_reconstructs": true,
+ "interview_rows": 153576,
+ "rows_flagged": 5863,
+ "rows_would_insert": 64,
+ "rows_would_update": 5859,
+ "speeches_rows": 270489,
+ "tool_version": "interview-turn-bleed-v1",
+ "top_reattributed_members": [
+  [
+   "Pramila Jayapal",
+   4
+  ],
+  [
+   "Bennie Thompson",
+   3
+  ],
+  [
+   "Richard Blumenthal",
+   3
+  ],
+  [
+   "Patty Murray",
+   2
+  ],
+  [
+   "John Thune",
+   2
+  ],
+  [
+   "Bill Cassidy",
+   2
+  ],
+  [
+   "Susan Collins",
+   2
+  ],
+  [
+   "Tim Kaine",
+   2
+  ],
+  [
+   "Charles Schumer",
+   2
+  ],
+  [
+   "Richard Durbin",
+   2
+  ],
+  [
+   "Christopher Murphy",
+   2
+  ],
+  [
+   "Nancy Pelosi",
+   2
+  ],
+  [
+   "Carlos Gimenez",
+   1
+  ],
+  [
+   "Maxine Waters",
+   1
+  ],
+  [
+   "Adam Schiff",
+   1
+  ]
+ ]
+}

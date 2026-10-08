@@ -1,0 +1,1997 @@
+{
+  "generated_at_utc": "2026-09-07T07:44:08.169998+00:00",
+  "name_standard_version": "1.1",
+  "read_only": true,
+  "receipt": {
+    "inputs": {
+      "hill_person_spine": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260903_v6_primary\\hill_person_spine.ndjson.gz",
+        "sha256": "a6ffb3f5e683fd8741b51ddc971e39648271636f4ea46c9f856fd7d66bb3fad7"
+      },
+      "hill_person_office_spans": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260903_v6_primary\\hill_person_office_spans.ndjson.gz",
+        "sha256": "f2825bf7fb8a510e6c6ead3d395578f6ccf5442363d9403bb69b287ca628af90"
+      },
+      "current_staffer_links": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260903_v6_primary\\current_staffer_links.ndjson.gz",
+        "sha256": "b102ff44437577ac54bc46fcdb6429bdbd7204a5465b6f1c9f53fb573feab536"
+      },
+      "lda_spine_links": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260903_v6_primary\\lda_spine_links.ndjson.gz",
+        "sha256": "d474bb9cd263534ec48c1aa84f712dd38ceb7be35a9c06d65cc93e276afefeb8"
+      },
+      "lda_lobbyist_assertions": {
+        "path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\staffer_network\\normalized\\lda-source-native\\generation-20260830T231200Z\\lda_lobbyist_assertions.ndjson.gz",
+        "sha256": "80ac82346c435bb8f1231d9f3425d759ca9a8ae063db879ec104244f9fcd282e"
+      },
+      "quorum_seed": {
+        "path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\staffer_network\\normalized\\source-native-corpus\\generation-20260830T070000Z-a\\quorum_legacy_source_native_seed.ndjson",
+        "sha256": "439bb67f7093f28cd67010cdc12e9f7a86eeee9e8fd36c81709073260a17ff48"
+      },
+      "politico_profiles": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\politico_profile_crawl_20260903_raw\\profiles.ndjson",
+        "sha256": "b1900b9a905696c70c234ff14cc2e6ef66434c365751598865a9265582bdb49a"
+      },
+      "nickname_class_table_v2": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\first_name_nicknames_v2.json",
+        "sha256": "1cd1fc638b9c7efd4ebac83575850bafd0f4532ead8b3c5fadd2f55769186717"
+      },
+      "name_standard_module": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\staffer_network\\name_standard.py",
+        "sha256": "1ec715301376e25504bfde64b7fa499f834e1ac7043d98dc893a043cb53ffa6e"
+      },
+      "spine_builder": {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\build_hill_personnel_spine.py",
+        "sha256": "d872170575e037a8475a710ed274f8663b622c23bfc0be36eb722cd53ca72686"
+      }
+    },
+    "payroll_corpora": [
+      {
+        "chamber": "house",
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\house_personnel_ledger_20260903_v5_primary\\house_personnel_observations.ndjson.gz",
+        "sha256": "801916fa88de290386fc3b9bc3129cf671cc29fe50d480114129d931727902a1"
+      },
+      {
+        "chamber": "senate",
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\official_senate_payroll_2011_2026_employment_scope_v1\\senate_payroll_employment_candidates_2011_2026.ndjson.gz",
+        "sha256": "1fffbcea5528345af9ce6e591435b4cbd2b75978a8cfec46d4f12bfae9ca2cea"
+      },
+      {
+        "chamber": "senate",
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\senate_committee_payroll_20260903_v3_primary\\senate_committee_payroll_candidates_2011_2026.ndjson.gz",
+        "sha256": "4abfea6d561475035a17e992ec743fb7be81c0e3193fe5cdcd0520ab088dfd5d"
+      }
+    ],
+    "class_table_sha256": "1cd1fc638b9c7efd4ebac83575850bafd0f4532ead8b3c5fadd2f55769186717"
+  },
+  "key_source": {
+    "v1_0": "parts_from_payee_key(<spine payee_key triple>)",
+    "v1_1": "parse_name(<raw payee string>, <source>)",
+    "why_it_had_to_move": "R1 (bare V), R2 (particle surname) and R3 (glued annotation) are functions of the RAW string. payroll_payee_key deletes the V, splits the particle surname and absorbs the annotation before the triple exists, so no function of the triple can express them.",
+    "how_this_report_reaches_the_raw": "the v6 spine and spans carry no payee_raw, so the three bound payroll corpora are re-keyed with the builder's own payroll_payee_key and joined on the triple"
+  },
+  "totals": {
+    "payroll_rows_read": 1351463,
+    "distinct_payee_triples": 123658,
+    "spine_rows": 144693,
+    "span_rows": 204700
+  },
+  "key_change": {
+    "changed_v1_1_raw_route": 18640,
+    "unchanged_v1_1_raw_route": 126053,
+    "changed_v1_0_lift_route_for_comparison": 17351,
+    "cause_histogram": {
+      "annotation_strip": 39,
+      "ascii_punct": 5086,
+      "first_from_raw": 264,
+      "nickname_class": 12630,
+      "particle_surname": 262,
+      "suffix": 1,
+      "v_initial": 1150
+    },
+    "combination_histogram": {
+      "annotation_strip": 22,
+      "annotation_strip+first_from_raw": 2,
+      "ascii_punct": 4655,
+      "ascii_punct+annotation_strip": 11,
+      "ascii_punct+nickname_class": 360,
+      "ascii_punct+nickname_class+v_initial": 5,
+      "ascii_punct+particle_surname+first_from_raw": 4,
+      "ascii_punct+suffix+annotation_strip": 1,
+      "ascii_punct+v_initial": 50,
+      "nickname_class": 12178,
+      "nickname_class+annotation_strip": 3,
+      "nickname_class+v_initial": 84,
+      "particle_surname+first_from_raw": 254,
+      "v_initial": 1007,
+      "v_initial+particle_surname+first_from_raw": 4
+    },
+    "cause_vocabulary": {
+      "ascii_punct": "the fold to [a-z0-9] alone moves the key",
+      "suffix": "lifting a separator-delimited suffix out of the surname moves it further",
+      "nickname_class": "folding the given name onto its class stem",
+      "v_initial": "R1 -- a bare V the builder deleted is now the middle initial and reaches the key",
+      "particle_surname": "R2 -- a ruled particle joins the surname, so last grows and first/mi shift",
+      "annotation_strip": "R3 -- a glued job title leaves the surname, or a trailing party word stops supplying a phantom middle initial",
+      "first_from_raw": "the raw parse reads a different given name than the stored triple",
+      "other": "the key moved and none of the above explains it"
+    },
+    "examples": {
+      "nickname_class": [
+        {
+          "spine_person_id": "hill:person:00022d18dbda46433006c29f9c29dbc2e4c07cdd61ce97fb9e61f2d9fa75f6b1",
+          "key_before": "magana|christopher|w",
+          "key_lift_v1_0_route": "magana|chris|w",
+          "key_after_v1_1_raw_route": "magana|chris|w",
+          "raw_examples": [
+            "MAGANA,CHRISTOPHER W"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:000adf074099910a324ebb3f966db0dffe300b6ee03ed23a82e9788398a994dd",
+          "key_before": "bernstein|alec|j",
+          "key_lift_v1_0_route": "bernstein|alex|j",
+          "key_after_v1_1_raw_route": "bernstein|alex|j",
+          "raw_examples": [
+            "BERNSTEIN, ALEC JACOB"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:000cead323d5269796ccc2173b46130215f21397da135ecdff5e37338e7e30f8",
+          "key_before": "aldunate|isabel|a",
+          "key_lift_v1_0_route": "aldunate|isabella|a",
+          "key_after_v1_1_raw_route": "aldunate|isabella|a",
+          "raw_examples": [
+            "ALDUNATE, ISABEL A"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:000e9e9b748c853e3e7354436d1e8cf4dce07acc8855e35fe5b98a51ee10d6ac",
+          "key_before": "dix|teresa|",
+          "key_lift_v1_0_route": "dix|terry|",
+          "key_after_v1_1_raw_route": "dix|terry|",
+          "raw_examples": [
+            "DIX, TERESA"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:001326003fb73347256307152984bf8a9383d16d7404c80e818a58253bb89b51",
+          "key_before": "coats|alexander|c",
+          "key_lift_v1_0_route": "coats|alex|c",
+          "key_after_v1_1_raw_route": "coats|alex|c",
+          "raw_examples": [
+            "COATS ALEXANDER C."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:002029f94a0f0d584700f66f26e0b5daa270f4d4628e6c59a0cd7a767740ff5f",
+          "key_before": "barnhart|alexandra|d",
+          "key_lift_v1_0_route": "barnhart|alex|d",
+          "key_after_v1_1_raw_route": "barnhart|alex|d",
+          "raw_examples": [
+            "BARNHART ALEXANDRA D."
+          ]
+        }
+      ],
+      "ascii_punct+annotation_strip": [
+        {
+          "spine_person_id": "hill:person:00091ce4a780ed30288786052a70e4a78124171462b385f3e03763952c8488ce",
+          "key_before": "correspondent health stinson|nigel|a",
+          "key_lift_v1_0_route": "correspondenthealthstinson|nigel|a",
+          "key_after_v1_1_raw_route": "stinson|nigel|a",
+          "raw_examples": [
+            "CORRESPONDENT (HEALTH)STINSON, NIGEL A"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:29cbaa6843696daf9fed3cfd49d6eef24ec2d65aeb3e0f79ad51c5241b08bc45",
+          "key_before": "director fort worth nicholson|emily|j",
+          "key_lift_v1_0_route": "directorfortworthnicholson|emily|j",
+          "key_after_v1_1_raw_route": "nicholson|emily|j",
+          "raw_examples": [
+            "DIRECTOR (FORT WORTH)NICHOLSON, EMILY J"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:50d8c8742b8c305e06a8c4fd7e59819d2b7515dab3d206ba89a743871c9012b9",
+          "key_before": "ership liaison minority hawkins|thomas|p",
+          "key_lift_v1_0_route": "ershipliaisonminorityhawkins|thomas|p",
+          "key_after_v1_1_raw_route": "hawkins|thomas|p",
+          "raw_examples": [
+            "ERSHIP LIAISON (MINORITY)HAWKINS, THOMAS P",
+            "ERSHIP LIAISON(MINORITY)HAWKINS, THOMAS P"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:5ccfa7c88b2c686db12303f73629993355a7af59129b1a31cf7f214ddde78aea",
+          "key_before": "assistant republican sommer|matthew|",
+          "key_lift_v1_0_route": "assistantrepublicansommer|matthew|",
+          "key_after_v1_1_raw_route": "sommer|matthew|",
+          "raw_examples": [
+            "ASSISTANT(REPUBLICAN)SOMMER, MATTHEW"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:7cd4066e359ff9d0dca553eb9e78e3788ccba1fd1846e495879f4fbf4eaa641d",
+          "key_before": "hofmann-reardon|tyler|d",
+          "key_lift_v1_0_route": "hofmannreardon|tyler|d",
+          "key_after_v1_1_raw_route": "hofmannreardon|tyler|",
+          "raw_examples": [
+            "HOFMANN-REARDON, TYLER DEMOCRATIC"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:8ed3a52b69d5955868ca968da92cf074b4a464b9e06050a18518aeef72bbaddc",
+          "key_before": "counsel minority agnello|louis|t",
+          "key_lift_v1_0_route": "counselminorityagnello|louis|t",
+          "key_after_v1_1_raw_route": "agnello|louis|t",
+          "raw_examples": [
+            "COUNSEL (MINORITY)AGNELLO, LOUIS T"
+          ]
+        }
+      ],
+      "ascii_punct": [
+        {
+          "spine_person_id": "hill:person:0023b4fc5e7ed37fa5402ed7e430b8ae1b42c26c334d943ca6c3ad05b767630f",
+          "key_before": "of correspondence drivermapes|thomas|e",
+          "key_lift_v1_0_route": "ofcorrespondencedrivermapes|thomas|e",
+          "key_after_v1_1_raw_route": "ofcorrespondencedrivermapes|thomas|e",
+          "raw_examples": [
+            "OF CORRESPONDENCE/DRIVERMAPES, THOMAS E"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:002a250dc2a49765efd1ba5089ae79824269f573433700288880cf8dc68b7413",
+          "key_before": "stein-ross|claire|l",
+          "key_lift_v1_0_route": "steinross|claire|l",
+          "key_after_v1_1_raw_route": "steinross|claire|l",
+          "raw_examples": [
+            "STEIN-ROSS, CLAIRE L"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:003286226389a863736bc3310bb9b05be818234b5973b10587341217fee7832b",
+          "key_before": "saavedra perez|emanuel|",
+          "key_lift_v1_0_route": "saavedraperez|emanuel|",
+          "key_after_v1_1_raw_route": "saavedraperez|emanuel|",
+          "raw_examples": [
+            "SAAVEDRA PEREZ,EMANUEL"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0042543a9f3214a95b5e6aafbcd8f4cd21195acfd1b20b5e4aaaadb7eb2652a5",
+          "key_before": "d'angelo|ryan|e",
+          "key_lift_v1_0_route": "dangelo|ryan|e",
+          "key_after_v1_1_raw_route": "dangelo|ryan|e",
+          "raw_examples": [
+            "D'ANGELO RYAN E."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:00441da1d9ac8bfbe854303bfc85e6b7cfee4aac9b405eeaf6e1014e20223547",
+          "key_before": "for education and workforcematthews|brittany|w",
+          "key_lift_v1_0_route": "foreducationandworkforcematthews|brittany|w",
+          "key_after_v1_1_raw_route": "foreducationandworkforcematthews|brittany|w",
+          "raw_examples": [
+            "FOR EDUCATION AND WORKFORCEMATTHEWS, BRITTANY WEAVER"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:00919b2e60d513c36e2c269b0784254f9ad5dce4695ee41eb79b3825951db665",
+          "key_before": "edwards-jenks|jonas|k",
+          "key_lift_v1_0_route": "edwardsjenks|jonas|k",
+          "key_after_v1_1_raw_route": "edwardsjenks|jonas|k",
+          "raw_examples": [
+            "EDWARDS-JENKS JONAS K",
+            "EDWARDS-JENKS, JONAS K"
+          ]
+        }
+      ],
+      "v_initial": [
+        {
+          "spine_person_id": "hill:person:003ecc076f1ef7821749c0e8ecc5672d6a5f97f8c2ac44754e889122023cecae",
+          "key_before": "tommasini|john|",
+          "key_lift_v1_0_route": "tommasini|john|",
+          "key_after_v1_1_raw_route": "tommasini|john|v",
+          "raw_examples": [
+            "TOMMASINI JOHN V."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0050a7aa462741808457a40b3f5b368cb6de1e3e087d48ee6af8387f3d98fd7d",
+          "key_before": "medrano|annaly|",
+          "key_lift_v1_0_route": "medrano|annaly|",
+          "key_after_v1_1_raw_route": "medrano|annaly|v",
+          "raw_examples": [
+            "MEDRANO, ANNALY V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:00ab2d4ff19dfc42e5c0aa7671b05e8c529150ec042dbc18c0f1fa7cf27c26ff",
+          "key_before": "mitchell|toussaint|",
+          "key_lift_v1_0_route": "mitchell|toussaint|",
+          "key_after_v1_1_raw_route": "mitchell|toussaint|v",
+          "raw_examples": [
+            "MITCHELL TOUSSAINT V.",
+            "MITCHELL, TOUSSAINT V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:00e7849ba67c7ad766ff4777997b2d8942da8d3a3d3bd47fbf0abc2ea1affd9d",
+          "key_before": "blakeman|louis|",
+          "key_lift_v1_0_route": "blakeman|louis|",
+          "key_after_v1_1_raw_route": "blakeman|louis|v",
+          "raw_examples": [
+            "BLAKEMAN LOUIS V."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:012a7ceb8665dbb084ebef9b9ade172834b8752f881f6de1842b14014090bd9a",
+          "key_before": "travis|elysia|",
+          "key_lift_v1_0_route": "travis|elysia|",
+          "key_after_v1_1_raw_route": "travis|elysia|v",
+          "raw_examples": [
+            "TRAVIS ELYSIA V.",
+            "TRAVIS, ELYSIA V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:01bbd34e452074baed8d7bf16b2a87c88c251b5f6874334ae1cfd95f84ad3bef",
+          "key_before": "ghansiam|shivanie|",
+          "key_lift_v1_0_route": "ghansiam|shivanie|",
+          "key_after_v1_1_raw_route": "ghansiam|shivanie|v",
+          "raw_examples": [
+            "GHANSIAM SHIVANIE V."
+          ]
+        }
+      ],
+      "particle_surname+first_from_raw": [
+        {
+          "spine_person_id": "hill:person:00ec7ecf6cf4d7404c5bf8a176d7d3bb5a02b66a0f5a9d6c8212d7da96b9ed9f",
+          "key_before": "vander|voort|f",
+          "key_lift_v1_0_route": "vander|voort|f",
+          "key_after_v1_1_raw_route": "vandervoort|faith|c",
+          "raw_examples": [
+            "VANDER VOORT FAITH C",
+            "VANDER VOORT FAITH C."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0110a29f2c72d1cfef30f659166c8f9cdeedcfb7f7ba7173b8f2e7839d4df75b",
+          "key_before": "von|stein|j",
+          "key_lift_v1_0_route": "von|stein|j",
+          "key_after_v1_1_raw_route": "vonstein|jesse|w",
+          "raw_examples": [
+            "VON STEIN JESSE W",
+            "VON STEIN JESSE W."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:013d0c9a560ef0be8a16ad988e69abfd4eeadabb23cd2b03c19307a9b54fd023",
+          "key_before": "vander|voort|f",
+          "key_lift_v1_0_route": "vander|voort|f",
+          "key_after_v1_1_raw_route": "vandervoort|faith|c",
+          "raw_examples": [
+            "VANDER VOORT FAITH C",
+            "VANDER VOORT FAITH C."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:01bc507245f6f09bd8d3a92589fe3c4ac6d62b2d6c0d6f7601913e9b591af578",
+          "key_before": "van|bloem|b",
+          "key_lift_v1_0_route": "van|bloem|b",
+          "key_after_v1_1_raw_route": "vanbloem|benjamin|t",
+          "raw_examples": [
+            "VAN BLOEM BENJAMIN T"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0397b1258b293a7ce39e3bdcb253681457650a0df2d0e330beabe0f496abf0cd",
+          "key_before": "van|slingerland|r",
+          "key_lift_v1_0_route": "van|slingerland|r",
+          "key_after_v1_1_raw_route": "vanslingerland|ryan|j",
+          "raw_examples": [
+            "VAN SLINGERLAND RYAN J."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:03d7018a3c6052e0b341d3c7926e6a4d3ba72d1ea097bf9d8e642865434f1d52",
+          "key_before": "la|marr|s",
+          "key_lift_v1_0_route": "la|marr|s",
+          "key_after_v1_1_raw_route": "lamarr|sean|p",
+          "raw_examples": [
+            "LA MARR SEAN P."
+          ]
+        }
+      ],
+      "nickname_class+v_initial": [
+        {
+          "spine_person_id": "hill:person:0137804f2997659b3e8816ba0b795099d69ed604621c23151df99ac06c3f5371",
+          "key_before": "devers|james|",
+          "key_lift_v1_0_route": "devers|jamie|",
+          "key_after_v1_1_raw_route": "devers|jamie|v",
+          "raw_examples": [
+            "DEVERS, JAMES V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:03ee141b48a1a67c2bd33e0407cc91af0bab16d101bd879bb25af65fafc18762",
+          "key_before": "sarnitsky|sophie|",
+          "key_lift_v1_0_route": "sarnitsky|sophia|",
+          "key_after_v1_1_raw_route": "sarnitsky|sophia|v",
+          "raw_examples": [
+            "SARNITSKY SOPHIE V."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:05064369a4970cbb2836a9fce1f95e85b927cd8ea03264712c633b98d9f6313f",
+          "key_before": "goodfellow|stephen|w",
+          "key_lift_v1_0_route": "goodfellow|steven|w",
+          "key_after_v1_1_raw_route": "goodfellow|steven|v",
+          "raw_examples": [
+            "GOODFELLOW, STEPHEN V W"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:09164b8791bddc0bf14ad2a60a7dabc2ba07b949fdd692824eb362de4f0fae4d",
+          "key_before": "martinez|samuel|",
+          "key_lift_v1_0_route": "martinez|sam|",
+          "key_after_v1_1_raw_route": "martinez|sam|v",
+          "raw_examples": [
+            "MARTINEZ SAMUEL",
+            "MARTINEZ SAMUEL V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0bbd5630edc28fbb0df417a4ba91dc669115990cb40cde097116cb05a40f125c",
+          "key_before": "contreras|joanna|",
+          "key_lift_v1_0_route": "contreras|jo|",
+          "key_after_v1_1_raw_route": "contreras|jo|v",
+          "raw_examples": [
+            "CONTRERAS JOANNA V."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0e43282b8e1152542bde9d2f66a0a8a888318bb3dd6d5f01861b2b24dc658816",
+          "key_before": "ivory|alexandra|",
+          "key_lift_v1_0_route": "ivory|alex|",
+          "key_after_v1_1_raw_route": "ivory|alex|v",
+          "raw_examples": [
+            "IVORY, ALEXANDRA V"
+          ]
+        }
+      ],
+      "ascii_punct+nickname_class": [
+        {
+          "spine_person_id": "hill:person:0171890b9a078baac9277e49ac5ffcc0529f85eeccfbb6f5b79d1c297bf2d6c5",
+          "key_before": "skewes-cox|christina|j",
+          "key_lift_v1_0_route": "skewescox|chris|j",
+          "key_after_v1_1_raw_route": "skewescox|chris|j",
+          "raw_examples": [
+            "SKEWES-COX,CHRISTINA J"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:01934b4df4aa665d58b899aac734d4819ca6bdbaac4841b5ce3e00fb54575a47",
+          "key_before": "smith-driggs|eliza|",
+          "key_lift_v1_0_route": "smithdriggs|elizabeth|",
+          "key_after_v1_1_raw_route": "smithdriggs|elizabeth|",
+          "raw_examples": [
+            "SMITH-DRIGGS, ELIZA"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:01cab35efaddc0b91e04eb30192a0ddbf9ca3cbdecbb2b8a1c4a199c6cba12a9",
+          "key_before": "garcia zambrano|christopher|e",
+          "key_lift_v1_0_route": "garciazambrano|chris|e",
+          "key_after_v1_1_raw_route": "garciazambrano|chris|e",
+          "raw_examples": [
+            "GARCIA ZAMBRANO, CHRISTOPHER E"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:023574d1dafb73f558f17e6fc96302a9b667c2971eea915ceca090153e46ea45",
+          "key_before": "million-perez|stewart|s",
+          "key_lift_v1_0_route": "millionperez|stuart|s",
+          "key_after_v1_1_raw_route": "millionperez|stuart|s",
+          "raw_examples": [
+            "MILLION-PEREZ STEWART S"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:024d198a14ba549e0c69e7ff28c50d479463e09ca921b437f4012ecf3174779e",
+          "key_before": "to the vice presidentchung|kathy|s",
+          "key_lift_v1_0_route": "tothevicepresidentchung|katherine|s",
+          "key_after_v1_1_raw_route": "tothevicepresidentchung|katherine|s",
+          "raw_examples": [
+            "TO THE VICE PRESIDENTCHUNG, KATHY S"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:024f1b04e2c54aa4189d1107763402bfd3153d977ddb8c182d967cdb1379a5a8",
+          "key_before": "gonzalez-amaro|alexandra|s",
+          "key_lift_v1_0_route": "gonzalezamaro|alex|s",
+          "key_after_v1_1_raw_route": "gonzalezamaro|alex|s",
+          "raw_examples": [
+            "GONZALEZ-AMARO ALEXANDRA S."
+          ]
+        }
+      ],
+      "annotation_strip": [
+        {
+          "spine_person_id": "hill:person:06cd6aed514d3689098880ecb7e17d5327003d74a36ef5afc19e2aebaf8c2867",
+          "key_before": "lewis|jessica|d",
+          "key_lift_v1_0_route": "lewis|jessica|d",
+          "key_after_v1_1_raw_route": "lewis|jessica|",
+          "raw_examples": [
+            "LEWIS, JESSICA DEMOCRATIC"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:1ae92a0afc2ee2ab9ea5798fb16871098499fd624c9324ba730821104572febd",
+          "key_before": "mcmurry|kayla|r",
+          "key_lift_v1_0_route": "mcmurry|kayla|r",
+          "key_after_v1_1_raw_route": "mcmurry|kayla|",
+          "raw_examples": [
+            "MCMURRY, KAYLA REPUBLICAN"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:1c3a781624801c86731cb38ef467fcd7d2257adac1e1dffa88c341407ec53724",
+          "key_before": "weber|cullen|r",
+          "key_lift_v1_0_route": "weber|cullen|r",
+          "key_after_v1_1_raw_route": "weber|cullen|",
+          "raw_examples": [
+            "WEBER, CULLEN REPUBLICAN"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:1ca5493a074fb12f7a00eba7401b9c03f48f1c9c507a29a4789fc77f7b513955",
+          "key_before": "holstein|elwood|d",
+          "key_lift_v1_0_route": "holstein|elwood|d",
+          "key_after_v1_1_raw_route": "holstein|elwood|",
+          "raw_examples": [
+            "HOLSTEIN JR., ELWOOD DEMOCRATIC"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:25cb3589571a8c35ce7d6a24c884461d9bb9972d3a3bbdc5af59e0c2cde20ad8",
+          "key_before": "ward|benjamin|d",
+          "key_lift_v1_0_route": "ward|benjamin|d",
+          "key_after_v1_1_raw_route": "ward|benjamin|",
+          "raw_examples": [
+            "WARD, BENJAMIN DEMOCRATIC"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:33faf0253db460ca8ad0a8a0f961e4583ceae28316c5b9be2b4c2c8f8a00070b",
+          "key_before": "petit|bryan|d",
+          "key_lift_v1_0_route": "petit|bryan|d",
+          "key_after_v1_1_raw_route": "petit|bryan|",
+          "raw_examples": [
+            "PETIT, BRYAN DEMOCRATIC"
+          ]
+        }
+      ],
+      "ascii_punct+v_initial": [
+        {
+          "spine_person_id": "hill:person:0c310ea3f8b7a711ca391ff3a96310a6042c9d39ecac083c092eedb5d26cd3ca",
+          "key_before": "repgomez-ochoa|lucero|",
+          "key_lift_v1_0_route": "repgomezochoa|lucero|",
+          "key_after_v1_1_raw_route": "repgomezochoa|lucero|v",
+          "raw_examples": [
+            "REPGOMEZ-OCHOA, LUCERO V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0ca9c943d682caf3fdc8c344c08bf9f9659d71c8890e1294ff7db69134cfe0c7",
+          "key_before": "westbrook-scott|lavita|",
+          "key_lift_v1_0_route": "westbrookscott|lavita|",
+          "key_after_v1_1_raw_route": "westbrookscott|lavita|v",
+          "raw_examples": [
+            "WESTBROOK-SCOTT, LAVITA V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:0f531b60e30b56ddc96cc6fd59b3bb665c27b9f787c9cc4aaefef3be457ad156",
+          "key_before": "mcgrath-skrzydlewski|electra|",
+          "key_lift_v1_0_route": "mcgrathskrzydlewski|electra|",
+          "key_after_v1_1_raw_route": "mcgrathskrzydlewski|electra|v",
+          "raw_examples": [
+            "MCGRATH-SKRZYDLEWSKI, ELECTRA V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:1ca05b554853d970e53384e064082d397a67debb0533926222df68491f77f296",
+          "key_before": "o'hara|john|",
+          "key_lift_v1_0_route": "ohara|john|",
+          "key_after_v1_1_raw_route": "ohara|john|v",
+          "raw_examples": [
+            "O'HARA, JOHN V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:20132e36c03820f8c7aea21b21ec250ff2c0d3fdc4e60038a378363d002e55f9",
+          "key_before": "mcgrath-skrzydlewski|electra|s",
+          "key_lift_v1_0_route": "mcgrathskrzydlewski|electra|s",
+          "key_after_v1_1_raw_route": "mcgrathskrzydlewski|electra|v",
+          "raw_examples": [
+            "MCGRATH-SKRZYDLEWSKI, ELECTRA V SOUTHERN NEVADA"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:21e8581f3eb79a1bfcbbffdf729d6de12d42efe14c79cf227c415c5dce39d0c3",
+          "key_before": "le|faith-carmen|",
+          "key_lift_v1_0_route": "le|faithcarmen|",
+          "key_after_v1_1_raw_route": "le|faithcarmen|v",
+          "raw_examples": [
+            "LE, FAITH-CARMEN V"
+          ]
+        }
+      ],
+      "ascii_punct+particle_surname+first_from_raw": [
+        {
+          "spine_person_id": "hill:person:1205598b16a31fd0b0bd07fe562d4ed3e7590e6d5b6f9d851611c70df69366af",
+          "key_before": "de|loera-brust|a",
+          "key_lift_v1_0_route": "de|loerabrust|a",
+          "key_after_v1_1_raw_route": "deloerabrust|antonio|",
+          "raw_examples": [
+            "DE LOERA-BRUST ANTONIO"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:3e7320e42884a081cd259b64e8fb2de29e00e4e9ccdd0070af8363c7f8bca9ef",
+          "key_before": "de|leon-angel|j",
+          "key_lift_v1_0_route": "de|leonangel|j",
+          "key_after_v1_1_raw_route": "deleonangel|jose|",
+          "raw_examples": [
+            "DE LEON-ANGEL JOSE"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:6a9e63d4c754ad7b7406d97094497559a16024582c6b8fd6f4996fb85803836b",
+          "key_before": "de|leon-estrada|j",
+          "key_lift_v1_0_route": "de|leonestrada|j",
+          "key_after_v1_1_raw_route": "deleonestrada|josselyn|d",
+          "raw_examples": [
+            "DE LEON-ESTRADA JOSSELYN D",
+            "DE LEON-ESTRADA JOSSELYN D."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:f71b4d4a1a7093afc9b24843bb411dbf247702e6b6c31bda4bb6024c6b73ab7b",
+          "key_before": "de|forest-davis|s",
+          "key_lift_v1_0_route": "de|forestdavis|s",
+          "key_after_v1_1_raw_route": "deforestdavis|sam|g",
+          "raw_examples": [
+            "DE FOREST-DAVIS SAMANTHA G."
+          ]
+        }
+      ],
+      "v_initial+particle_surname+first_from_raw": [
+        {
+          "spine_person_id": "hill:person:3fc994b93e1c1c28817d12d71e2d01647ac983a6bdfb9d6580d14c7a567ea51c",
+          "key_before": "le|caroline|m",
+          "key_lift_v1_0_route": "le|caroline|m",
+          "key_after_v1_1_raw_route": "lecaroline|maila|v",
+          "raw_examples": [
+            "LE CAROLINE MAI-LA V."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:44533956e31affd47c93d6428c581d0391fb57e7a7622eae1840dce9f295e530",
+          "key_before": "van|flein|t",
+          "key_lift_v1_0_route": "van|flein|t",
+          "key_after_v1_1_raw_route": "vanflein|thomas|v",
+          "raw_examples": [
+            "VAN FLEIN THOMAS V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:74a96fb40e4c33bb1124f0ae7c460f573a4aab38774f6f4be1e183054b33d54b",
+          "key_before": "van|flein|t",
+          "key_lift_v1_0_route": "van|flein|t",
+          "key_after_v1_1_raw_route": "vanflein|thomas|v",
+          "raw_examples": [
+            "VAN FLEIN THOMAS V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:f9a4e41147cf26c47abda8340ee395f5ec5bbdd9b2f18e7ddefe740de848240a",
+          "key_before": "de|leon|j",
+          "key_lift_v1_0_route": "de|leon|j",
+          "key_after_v1_1_raw_route": "deleon|jessica|v",
+          "raw_examples": [
+            "DE LEON JESSICA V."
+          ]
+        }
+      ],
+      "nickname_class+annotation_strip": [
+        {
+          "spine_person_id": "hill:person:474d16993e7c2074e8a2917ce24260d01fbac44cec977d4bfb5cc68010709351",
+          "key_before": "carter|elisabeth|d",
+          "key_lift_v1_0_route": "carter|elizabeth|d",
+          "key_after_v1_1_raw_route": "carter|elizabeth|",
+          "raw_examples": [
+            "CARTER, ELISABETH DEMOCRATIC"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:99ec8ebf30b18fbdb4ad8785551a9b27f4f972ca5f0761dbfb1a5cfbd4741916",
+          "key_before": "hammon|beth|d",
+          "key_lift_v1_0_route": "hammon|elizabeth|d",
+          "key_after_v1_1_raw_route": "hammon|elizabeth|",
+          "raw_examples": [
+            "HAMMON, BETH DEMOCRATIC"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:fc3a79054a760b3d9bf8ee308696ba868ca4744dc357729da015ac0f57fd6f96",
+          "key_before": "carter|elisabeth|d",
+          "key_lift_v1_0_route": "carter|elizabeth|d",
+          "key_after_v1_1_raw_route": "carter|elizabeth|",
+          "raw_examples": [
+            "CARTER, ELISABETH DEMOCRATIC"
+          ]
+        }
+      ],
+      "annotation_strip+first_from_raw": [
+        {
+          "spine_person_id": "hill:person:4ca60eaa00fe45b5c8343ddeae253417b5ab7ba324c826fda1b45c9e07b60380",
+          "key_before": "simpson|renee|",
+          "key_lift_v1_0_route": "simpson|renee|",
+          "key_after_v1_1_raw_route": "simpson|v|r",
+          "raw_examples": [
+            "SIMPSON, V RENEE"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:7125320a9d9d80a8be8b1ff6c5a161c4197b57b8ab6a03de90bc190917a64b30",
+          "key_before": "steinbaum|m|",
+          "key_lift_v1_0_route": "steinbaum|m|",
+          "key_after_v1_1_raw_route": "steinbaum|v|m",
+          "raw_examples": [
+            "STEINBAUM, V M"
+          ]
+        }
+      ],
+      "ascii_punct+nickname_class+v_initial": [
+        {
+          "spine_person_id": "hill:person:4e378b98f6f663c0507392a37fd4b51c3328e1e8ca2df1b22a7b277ca6edd82a",
+          "key_before": "middle districtperdue|james|",
+          "key_lift_v1_0_route": "middledistrictperdue|jamie|",
+          "key_after_v1_1_raw_route": "middledistrictperdue|jamie|v",
+          "raw_examples": [
+            "MIDDLE DISTRICTPERDUE, JAMES V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:b7174d1daf3675935a4d2e6fa4faacca31cd0c4c5785c6a5f9d3ae007f391ecf",
+          "key_before": "el-hinn|catherine|",
+          "key_lift_v1_0_route": "elhinn|katherine|",
+          "key_after_v1_1_raw_route": "elhinn|katherine|v",
+          "raw_examples": [
+            "EL-HINN, CATHERINE V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:c858a71e2d9b69074912a67d01d39472db4ebdba03eb708ca5aaf6e07e096424",
+          "key_before": "jolly-marshall|lisa|",
+          "key_lift_v1_0_route": "jollymarshall|elizabeth|",
+          "key_after_v1_1_raw_route": "jollymarshall|elizabeth|v",
+          "raw_examples": [
+            "JOLLY-MARSHALL LISA V.",
+            "JOLLY-MARSHALL, LISA V."
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:cff3d6b61125635c8e82730918fc5a80df1fb3a5a5de8f2c18f57d7fa8f0573c",
+          "key_before": "o'hara|joan|",
+          "key_lift_v1_0_route": "ohara|jo|",
+          "key_after_v1_1_raw_route": "ohara|jo|v",
+          "raw_examples": [
+            "O'HARA, JOAN V"
+          ]
+        },
+        {
+          "spine_person_id": "hill:person:d4190e84b071f06e8dd2292b2dd336c6b56d734fca51babf87f6d66a9331938c",
+          "key_before": "to the vice presidento'hara|joan|",
+          "key_lift_v1_0_route": "tothevicepresidentohara|jo|",
+          "key_after_v1_1_raw_route": "tothevicepresidentohara|jo|v",
+          "raw_examples": [
+            "TO THE VICE PRESIDENTO'HARA, JOAN V"
+          ]
+        }
+      ],
+      "ascii_punct+suffix+annotation_strip": [
+        {
+          "spine_person_id": "hill:person:70140c5764a2795896f2fd6b9116cb9055d1be4bd8c45042b6b1238e744a4238",
+          "key_before": "ist cl-ii nji|malaika|a",
+          "key_lift_v1_0_route": "istclnji|malaika|a",
+          "key_after_v1_1_raw_route": "nji|malaika|a",
+          "raw_examples": [
+            "IST (CL-II)NJI, MALAIKA A"
+          ]
+        }
+      ]
+    }
+  },
+  "ambiguity": {
+    "note": "a triple whose raws disagree on the v1.1 key. The builder keys on ONE raw (the anchor node's first observation), which this report cannot see, so these people are the exact population on which a builder histogram may differ from this one.",
+    "ambiguous_triples": 64,
+    "spine_people_on_an_ambiguous_triple": 102,
+    "resolution_rule": "prefer a non-empty middle initial, then the most frequently recorded, then the lexicographic minimum",
+    "triples_absent_from_the_corpora": 0,
+    "examples": [
+      {
+        "triple": [
+          "northcross",
+          "christopher",
+          null
+        ],
+        "keys": {
+          "northcross|chris|": 2,
+          "northcross|chris|v": 4
+        },
+        "raws": [
+          "NORTHCROSS, CHRISTOPHER V",
+          "NORTHCROSS,CHRISTOPHER"
+        ]
+      },
+      {
+        "triple": [
+          "fischer",
+          "robert",
+          null
+        ],
+        "keys": {
+          "fischer|robert|v": 92,
+          "fischer|robert|": 7
+        },
+        "raws": [
+          "FISCHER III,ROBERT V",
+          "FISCHER JR ROBERT V.",
+          "FISCHER JR, ROBERT V.",
+          "FISCHER, ROBERT"
+        ]
+      },
+      {
+        "triple": [
+          "gural",
+          "harry",
+          "d"
+        ],
+        "keys": {
+          "gural|harry|d": 43,
+          "gural|harry|": 2
+        },
+        "raws": [
+          "GURAL HARRY D",
+          "GURAL, HARRY DEMOCRATIC",
+          "GURAL,HARRY D"
+        ]
+      },
+      {
+        "triple": [
+          "arredondo",
+          "brenda",
+          null
+        ],
+        "keys": {
+          "arredondo|brenda|v": 4,
+          "arredondo|brenda|": 3
+        },
+        "raws": [
+          "ARREDONDO, BRENDA",
+          "ARREDONDO, BRENDA V."
+        ]
+      },
+      {
+        "triple": [
+          "perez",
+          "rosa",
+          null
+        ],
+        "keys": {
+          "perez|rosa|": 16,
+          "perez|rosa|v": 7
+        },
+        "raws": [
+          "PEREZ, ROSA",
+          "PEREZ, ROSA V"
+        ]
+      },
+      {
+        "triple": [
+          "facchiano",
+          "gregory",
+          null
+        ],
+        "keys": {
+          "facchiano|gregory|": 55,
+          "facchiano|gregory|v": 5
+        },
+        "raws": [
+          "FACCHIANO GREGORY",
+          "FACCHIANO, GREGORY",
+          "FACCHIANO, GREGORY V"
+        ]
+      },
+      {
+        "triple": [
+          "stewart",
+          "kathryn",
+          null
+        ],
+        "keys": {
+          "stewart|katherine|": 8,
+          "stewart|katherine|v": 4
+        },
+        "raws": [
+          "STEWART, KATHRYN V",
+          "STEWART,KATHRYN"
+        ]
+      },
+      {
+        "triple": [
+          "jackson",
+          "james",
+          null
+        ],
+        "keys": {
+          "jackson|jamie|": 30,
+          "jackson|jamie|v": 15
+        },
+        "raws": [
+          "JACKSON, JAMES V",
+          "JACKSON,JAMES"
+        ]
+      },
+      {
+        "triple": [
+          "camacho",
+          "cara",
+          null
+        ],
+        "keys": {
+          "camacho|cara|": 12,
+          "camacho|cara|v": 19
+        },
+        "raws": [
+          "CAMACHO CARA V.",
+          "CAMACHO,CARA"
+        ]
+      },
+      {
+        "triple": [
+          "krovi",
+          "venkatasatya",
+          null
+        ],
+        "keys": {
+          "krovi|venkatasatya|": 10,
+          "krovi|venkatasatya|v": 35
+        },
+        "raws": [
+          "KROVI VENKATASATYA V",
+          "KROVI,VENKATASATYA",
+          "KROVI,VENKATASATYA V"
+        ]
+      },
+      {
+        "triple": [
+          "obrien",
+          "sean",
+          null
+        ],
+        "keys": {
+          "obrien|sean|": 18,
+          "obrien|sean|v": 49
+        },
+        "raws": [
+          "OBRIEN SEAN V",
+          "OBRIEN, SEAN",
+          "OBRIEN,SEAN V"
+        ]
+      },
+      {
+        "triple": [
+          "smith",
+          "matthew",
+          null
+        ],
+        "keys": {
+          "smith|matthew|": 89,
+          "smith|matthew|v": 2
+        },
+        "raws": [
+          "SMITH MATTHEW",
+          "SMITH MATTHEW V.",
+          "SMITH,MATTHEW"
+        ]
+      },
+      {
+        "triple": [
+          "kelly",
+          "kathleen",
+          null
+        ],
+        "keys": {
+          "kelly|kathleen|": 6,
+          "kelly|kathleen|v": 2
+        },
+        "raws": [
+          "KELLY, KATHLEEN V",
+          "KELLY,KATHLEEN"
+        ]
+      },
+      {
+        "triple": [
+          "edwards",
+          "bailey",
+          null
+        ],
+        "keys": {
+          "edwards|bailey|": 16,
+          "edwards|bailey|v": 16
+        },
+        "raws": [
+          "EDWARDS BAILEY V.",
+          "EDWARDS, BAILEY"
+        ]
+      },
+      {
+        "triple": [
+          "waters",
+          "monique",
+          null
+        ],
+        "keys": {
+          "waters|monique|": 10,
+          "waters|monique|v": 7
+        },
+        "raws": [
+          "WATERS, MONIQUE V",
+          "WATERS,MONIQUE"
+        ]
+      },
+      {
+        "triple": [
+          "woronoff",
+          "arielle",
+          null
+        ],
+        "keys": {
+          "woronoff|arielle|v": 23,
+          "woronoff|arielle|": 12
+        },
+        "raws": [
+          "WORONOFF ARIELLE V",
+          "WORONOFF, ARIELLE",
+          "WORONOFF,ARIELLE V"
+        ]
+      },
+      {
+        "triple": [
+          "tran",
+          "richard",
+          null
+        ],
+        "keys": {
+          "tran|richard|v": 15,
+          "tran|richard|": 2
+        },
+        "raws": [
+          "TRAN, RICHARD",
+          "TRAN, RICHARD V."
+        ]
+      },
+      {
+        "triple": [
+          "akers",
+          "lyndsey",
+          null
+        ],
+        "keys": {
+          "akers|lyndsey|v": 2,
+          "akers|lyndsey|": 3
+        },
+        "raws": [
+          "AKERS, LYNDSEY",
+          "AKERS,LYNDSEY V"
+        ]
+      },
+      {
+        "triple": [
+          "kane",
+          "sanjay",
+          null
+        ],
+        "keys": {
+          "kane|sanjay|": 8,
+          "kane|sanjay|v": 23
+        },
+        "raws": [
+          "KANE, SANJAY V",
+          "KANE,SANJAY"
+        ]
+      },
+      {
+        "triple": [
+          "gilliland",
+          "alexandra",
+          "c"
+        ],
+        "keys": {
+          "gilliland|alex|c": 12,
+          "gilliland|alex|v": 3
+        },
+        "raws": [
+          "GILLILAND ALEXANDRA C",
+          "GILLILAND, ALEXANDRA V CLIMATE",
+          "GILLILAND,ALEXANDRA C"
+        ]
+      },
+      {
+        "triple": [
+          "van",
+          "der",
+          "l"
+        ],
+        "keys": {
+          "vanderlugt|roelof|a": 27,
+          "vanderleest|tristan|": 1
+        },
+        "raws": [
+          "VAN DER LEEST TRISTAN",
+          "VAN DER LUGT ROELOF A."
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "r"
+        ],
+        "keys": {
+          "delarosa|adrian|d": 7,
+          "delarosa|martinez|a": 3
+        },
+        "raws": [
+          "DE LA ROSA ADRIAN D",
+          "DE LA ROSA MARTINEZ ANDREA A."
+        ]
+      },
+      {
+        "triple": [
+          "van",
+          "der",
+          "h"
+        ],
+        "keys": {
+          "vanderheide|jennifer|": 13,
+          "vanderheide|escobar|j": 20
+        },
+        "raws": [
+          "VAN DER HEIDE ESCOBAR JENNIFE",
+          "VAN DER HEIDE ESCOBAR JENNIFER",
+          "VAN DER HEIDE JENNIFER"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "t"
+        ],
+        "keys": {
+          "delatorre|lizeht|": 4,
+          "delatorre|marisol|i": 2,
+          "delatorre|diego|e": 24,
+          "delatorre|logan|g": 2,
+          "delatorre|maya|a": 1
+        },
+        "raws": [
+          "DE LA TORRE DIEGO E.",
+          "DE LA TORRE LIZEHT",
+          "DE LA TORRE LOGAN G.",
+          "DE LA TORRE MARISOL I.",
+          "DE LA TORRE MAYA A."
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "los",
+          "s"
+        ],
+        "keys": {
+          "delos|santos|k": 27,
+          "delos|santos|f": 2
+        },
+        "raws": [
+          "DE LOS SANTOS FLORES BABUR I",
+          "DE LOS SANTOS KAREN"
+        ]
+      },
+      {
+        "triple": [
+          "van",
+          "den",
+          "b"
+        ],
+        "keys": {
+          "vanden|berg|j": 4,
+          "vanden|bergh|j": 11
+        },
+        "raws": [
+          "VAN DEN BERG JAMES M",
+          "VAN DEN BERGH JESPER L"
+        ]
+      },
+      {
+        "triple": [
+          "khanna",
+          "raman",
+          null
+        ],
+        "keys": {
+          "khanna|raman|v": 33,
+          "khanna|raman|": 2
+        },
+        "raws": [
+          "KHANNA RAMAN V",
+          "KHANNA, RAMAN",
+          "KHANNA, RAMAN V"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "v"
+        ],
+        "keys": {
+          "delavega|juan|f": 3,
+          "delavega|lila|k": 4
+        },
+        "raws": [
+          "DE LA VEGA JUAN F",
+          "DE LA VEGA LILA K."
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "vreeze",
+          "m"
+        ],
+        "keys": {
+          "devreeze|maximilian|r": 9,
+          "devreeze|mariana|": 13
+        },
+        "raws": [
+          "DE VREEZE MARIANA",
+          "DE VREEZE MAXIMILIAN R."
+        ]
+      },
+      {
+        "triple": [
+          "vigo-portillo",
+          "ismael",
+          null
+        ],
+        "keys": {
+          "vigoportillo|ismael|v": 18,
+          "vigoportillo|ismael|": 21
+        },
+        "raws": [
+          "VIGO-PORTILLO ISMAEL",
+          "VIGO-PORTILLO ISMAEL V"
+        ]
+      },
+      {
+        "triple": [
+          "wickes",
+          "william",
+          null
+        ],
+        "keys": {
+          "wickes|william|v": 37,
+          "wickes|william|": 12
+        },
+        "raws": [
+          "WICKES V WILLIAM",
+          "WICKES WILLIAM V"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "g"
+        ],
+        "keys": {
+          "delagarza|jordan|m": 2,
+          "delagarza|marco|j": 1,
+          "delagarza|pablo|a": 1
+        },
+        "raws": [
+          "DE LA GARZA JORDAN M",
+          "DE LA GARZA MARCO J",
+          "DE LA GARZA PABLO A."
+        ]
+      },
+      {
+        "triple": [
+          "van",
+          "de",
+          "w"
+        ],
+        "keys": {
+          "vandewater|parker|": 33,
+          "vandewater|logan|e": 2
+        },
+        "raws": [
+          "VAN DE WATER LOGAN E.",
+          "VAN DE WATER PARKER"
+        ]
+      },
+      {
+        "triple": [
+          "martinez",
+          "samuel",
+          null
+        ],
+        "keys": {
+          "martinez|sam|v": 2,
+          "martinez|sam|": 2
+        },
+        "raws": [
+          "MARTINEZ SAMUEL",
+          "MARTINEZ SAMUEL V"
+        ]
+      },
+      {
+        "triple": [
+          "marc",
+          "shelly",
+          null
+        ],
+        "keys": {
+          "marc|shelly|v": 9,
+          "marc|shelly|": 4
+        },
+        "raws": [
+          "MARC SHELLY V",
+          "MARC, SHELLY"
+        ]
+      },
+      {
+        "triple": [
+          "gargiulo",
+          "blaise",
+          null
+        ],
+        "keys": {
+          "gargiulo|blaise|v": 2,
+          "gargiulo|blaise|": 1
+        },
+        "raws": [
+          "GARGIULO BLAISE V",
+          "GARGIULO, BLAISE"
+        ]
+      },
+      {
+        "triple": [
+          "roberson",
+          "drew",
+          null
+        ],
+        "keys": {
+          "roberson|andrew|": 1,
+          "roberson|andrew|v": 1
+        },
+        "raws": [
+          "ROBERSON DREW",
+          "ROBERSON, DREW V"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "m"
+        ],
+        "keys": {
+          "delamora|elizabeth|": 14,
+          "delamora|dairen|": 2
+        },
+        "raws": [
+          "DE LA MORA DAIREN",
+          "DE LA MORA ELIZABETH"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "p"
+        ],
+        "keys": {
+          "delapena|sebastian|g": 11,
+          "delapena|sebastian|": 30,
+          "delapena|diego|": 3
+        },
+        "raws": [
+          "DE LA PENA DIEGO",
+          "DE LA PENA SEBASTIAN",
+          "DE LA PENA SEBASTIAN G"
+        ]
+      },
+      {
+        "triple": [
+          "trubetskoy",
+          "vadim",
+          null
+        ],
+        "keys": {
+          "trubetskoy|vadim|v": 22,
+          "trubetskoy|vadim|": 1
+        },
+        "raws": [
+          "TRUBETSKOY VADIM V",
+          "TRUBETSKOY VADIM V.",
+          "TRUBETSKOY, VADIM"
+        ]
+      },
+      {
+        "triple": [
+          "mahoe",
+          "ikaika",
+          null
+        ],
+        "keys": {
+          "mahoe|ikaika|v": 11,
+          "mahoe|ikaika|": 3
+        },
+        "raws": [
+          "MAHOE IKAIKA V.",
+          "MAHOE, IKAIKA"
+        ]
+      },
+      {
+        "triple": [
+          "williamson",
+          "miranda",
+          null
+        ],
+        "keys": {
+          "williamson|miranda|v": 3,
+          "williamson|miranda|": 1
+        },
+        "raws": [
+          "WILLIAMSON MIRANDA V.",
+          "WILLIAMSON, MIRANDA"
+        ]
+      },
+      {
+        "triple": [
+          "anand",
+          "tarunika",
+          null
+        ],
+        "keys": {
+          "anand|tarunika|": 2,
+          "anand|tarunika|v": 4
+        },
+        "raws": [
+          "ANAND TARUNIKA",
+          "ANAND, TARUNIKA V"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "los",
+          "r"
+        ],
+        "keys": {
+          "delos|reyes|e": 20,
+          "delos|reyes|v": 2
+        },
+        "raws": [
+          "DE LOS REYES ELIZABETH",
+          "DE LOS REYES VANESSA M."
+        ]
+      },
+      {
+        "triple": [
+          "le",
+          "steven",
+          null
+        ],
+        "keys": {
+          "le|steven|v": 2,
+          "le|steven|": 2
+        },
+        "raws": [
+          "LE STEVEN V.",
+          "LE, STEVEN"
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "silva",
+          "e"
+        ],
+        "keys": {
+          "desilva|elizabeth|c": 1,
+          "desilva|elizabeth|": 1
+        },
+        "raws": [
+          "DE SILVA ELIZABETH",
+          "DE SILVA ELIZABETH C."
+        ]
+      },
+      {
+        "triple": [
+          "de",
+          "la",
+          "f"
+        ],
+        "keys": {
+          "delafuente|atwill|a": 13,
+          "delafuente|isabella|": 2
+        },
+        "raws": [
+          "DE LA FUENTE ATWILL ALESSANDR",
+          "DE LA FUENTE ISABELLA"
+        ]
+      },
+      {
+        "triple": [
+          "silvia",
+          "mariella",
+          null
+        ],
+        "keys": {
+          "silvia|mariella|": 2,
+          "silvia|mariella|v": 1
+        },
+        "raws": [
+          "SILVIA MARIELLA",
+          "SILVIA MARIELLA V."
+        ]
+      },
+      {
+        "triple": [
+          "van",
+          "orden",
+          "a"
+        ],
+        "keys": {
+          "vanorden|anna|": 2,
+          "vanorden|anna|l": 1
+        },
+        "raws": [
+          "VAN ORDEN ANNA",
+          "VAN ORDEN ANNA L."
+        ]
+      },
+      {
+        "triple": [
+          "subramanian",
+          "apoorva",
+          null
+        ],
+        "keys": {
+          "subramanian|apoorva|": 2,
+          "subramanian|apoorva|v": 1
+        },
+        "raws": [
+          "SUBRAMANIAN APOORVA",
+          "SUBRAMANIAN, APOORVA V"
+        ]
+      },
+      {
+        "triple": [
+          "graff",
+          "william",
+          null
+        ],
+        "keys": {
+          "graff|william|": 1,
+          "graff|william|v": 3
+        },
+        "raws": [
+          "GRAFF III, WILLIAM V.",
+          "GRAFF WILLIAM",
+          "GRAFF WILLIAM V."
+        ]
+      },
+      {
+        "triple": [
+          "woodruff",
+          "mia",
+          null
+        ],
+        "keys": {
+          "woodruff|mia|": 6,
+          "woodruff|mia|v": 1
+        },
+        "raws": [
+          "WOODRUFF MIA",
+          "WOODRUFF, MIA V."
+        ]
+      },
+      {
+        "triple": [
+          "russell",
+          "emma",
+          null
+        ],
+        "keys": {
+          "russell|emma|": 2,
+          "russell|emma|v": 2
+        },
+        "raws": [
+          "RUSSELL EMMA",
+          "RUSSELL, EMMA V"
+        ]
+      },
+      {
+        "triple": [
+          "morales",
+          "ana",
+          null
+        ],
+        "keys": {
+          "morales|ana|": 1,
+          "morales|ana|v": 5
+        },
+        "raws": [
+          "MORALES ANA",
+          "MORALES, ANA V"
+        ]
+      },
+      {
+        "triple": [
+          "mcbride",
+          "emily",
+          null
+        ],
+        "keys": {
+          "mcbride|emily|v": 2,
+          "mcbride|emily|": 19
+        },
+        "raws": [
+          "MCBRIDE EMILY V.",
+          "MCBRIDE, EMILY"
+        ]
+      },
+      {
+        "triple": [
+          "pryor",
+          "keijuan",
+          null
+        ],
+        "keys": {
+          "pryor|keijuan|": 1,
+          "pryor|keijuan|v": 1
+        },
+        "raws": [
+          "PRYOR KEIJUAN",
+          "PRYOR, KEIJUAN V"
+        ]
+      },
+      {
+        "triple": [
+          "spector",
+          "laura",
+          null
+        ],
+        "keys": {
+          "spector|laura|": 1,
+          "spector|laura|v": 2
+        },
+        "raws": [
+          "SPECTOR, LAURA",
+          "SPECTOR, LAURA V"
+        ]
+      },
+      {
+        "triple": [
+          "english",
+          "amy",
+          "a"
+        ],
+        "keys": {
+          "english|amy|a": 13,
+          "english|amy|v": 23
+        },
+        "raws": [
+          "ENGLISH, AMY A",
+          "ENGLISH, AMY AS TAFF",
+          "ENGLISH, AMY V.A.",
+          "ENGLISH, AMY V.A. FOREIGN"
+        ]
+      },
+      {
+        "triple": [
+          "love",
+          "olivia",
+          null
+        ],
+        "keys": {
+          "love|olivia|": 2,
+          "love|olivia|v": 2
+        },
+        "raws": [
+          "LOVE, OLIVIA",
+          "LOVE, OLIVIA V"
+        ]
+      },
+      {
+        "triple": [
+          "callaway",
+          "elizabeth",
+          "r"
+        ],
+        "keys": {
+          "callaway|elizabeth|": 2,
+          "callaway|elizabeth|r": 6
+        },
+        "raws": [
+          "CALLAWAY, ELIZABETH REP",
+          "CALLAWAY, ELIZABETH REPRESENTATIVE",
+          "CALLAWAY, ELIZABETH REPUBLICAN"
+        ]
+      },
+      {
+        "triple": [
+          "williams",
+          "kristi",
+          "r"
+        ],
+        "keys": {
+          "williams|kristi|r": 1,
+          "williams|kristi|": 2
+        },
+        "raws": [
+          "WILLIAMS, KRISTI REP",
+          "WILLIAMS, KRISTI REPUBLICAN"
+        ]
+      },
+      {
+        "triple": [
+          "brown",
+          "joseph",
+          "r"
+        ],
+        "keys": {
+          "brown|joseph|": 5,
+          "brown|joseph|r": 3
+        },
+        "raws": [
+          "BROWN, JOSEPH REP SR PROF",
+          "BROWN, JOSEPH REPUBLICAN"
+        ]
+      },
+      {
+        "triple": [
+          "abbott",
+          "jacob",
+          "d"
+        ],
+        "keys": {
+          "abbott|jacob|": 2,
+          "abbott|jacob|d": 3
+        },
+        "raws": [
+          "ABBOTT, JACOB DEMOCRATIC",
+          "ABBOTT, JACOB DEMOCRATIC COMM"
+        ]
+      },
+      {
+        "triple": [
+          "higgins",
+          "edward",
+          "d"
+        ],
+        "keys": {
+          "higgins|edward|d": 2,
+          "higgins|edward|": 1
+        },
+        "raws": [
+          "HIGGINS, EDWARD DEMOCRATIC",
+          "HIGGINS, EDWARD DEMOCRATIC WATER"
+        ]
+      }
+    ]
+  },
+  "merges": {
+    "grouping": "(chamber, office_key, first_period, key_after)",
+    "groups_of_2_or_more": 3,
+    "spine_people_in_those_groups": 6,
+    "distinct_ids_that_would_disappear": 3,
+    "group_size_histogram": {
+      "2": 3
+    },
+    "group_cause_histogram": {
+      "nickname_class": 3
+    },
+    "cooccurrence_guard_preview": {
+      "note": "PREVIEW of the ruled guard 'two legacy ids that ever appear as distinct payee lines in the same report period AND office are NOT merged'. A v6 span row carries first_period, last_period and an OBSERVATION COUNT -- not the list of periods observed -- so this report can only test whether two spans share an office and OVERLAPPING period windows. That is an UPPER BOUND on the ruled condition in general. It is EXACT for every pair listed below, because each overlap collapses to a single period ordinal (start == end), which is the same report period.",
+      "blocked_pairs": 3,
+      "blocked_pairs_whose_overlap_is_a_single_period": 3,
+      "consequence": "every merge group on this generation is blocked, so the guard makes the merge feature inert on the current data: spine_persons would stay at the baseline count and merge_ids_removed would be 0",
+      "examples": [
+        {
+          "pair": [
+            "hill:person:48356e7daa40ca16474661dbafa490566e9473b227e703c7f3cb9d8f4dc73e4b",
+            "hill:person:725ed4d6db4a29082d490b4fa770eb3b2afb7cbb7939c386cf846fb3bebef3fb"
+          ],
+          "shared_office_windows": [
+            [
+              "house",
+              "COMMITTEE ON FINANCIAL SERVICE",
+              733589,
+              733589
+            ]
+          ],
+          "name_key": "beresik|michael|t"
+        },
+        {
+          "pair": [
+            "hill:person:773fbc8a1e9e67d8ae93f375bb7b0236d7227139eb12e75694e457ed586da1aa",
+            "hill:person:ec998fbfdc17d4e12b428071bdbcc9610b3e436fde248978471d329c7671fc17"
+          ],
+          "shared_office_windows": [
+            [
+              "senate",
+              "OFFICE OF CONGRESSIONAL ACCESSIBILITY SERVICES",
+              737881,
+              737881
+            ]
+          ],
+          "name_key": "wood|katherine|r"
+        },
+        {
+          "pair": [
+            "hill:person:4ec106e67d2bbbcfe8d0f6581866d7b3ce0d026b5faef3895b2ed3f705aa8354",
+            "hill:person:82b487c7b1074398a13c3591821ca5ed46c1bb925965c02deea8d035160a85fd"
+          ],
+          "shared_office_windows": [
+            [
+              "senate",
+              "RESOLUTION AND REORGANIZATION RESERVE",
+              739160,
+              739160
+            ]
+          ],
+          "name_key": "cooper|elizabeth|m"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "chamber": "house",
+        "office_key": "COMMITTEE ON FINANCIAL SERVICE",
+        "first_period": "2009Q3",
+        "key_after": "beresik|michael|t",
+        "spine_person_ids": [
+          "hill:person:48356e7daa40ca16474661dbafa490566e9473b227e703c7f3cb9d8f4dc73e4b",
+          "hill:person:725ed4d6db4a29082d490b4fa770eb3b2afb7cbb7939c386cf846fb3bebef3fb"
+        ],
+        "keys_now": [
+          "beresik|michael|t",
+          "beresik|micheal|t"
+        ],
+        "blocked_by_cooccurrence": true
+      },
+      {
+        "chamber": "senate",
+        "office_key": "OFFICE OF CONGRESSIONAL ACCESSIBILITY SERVICES",
+        "first_period": "2021-04-01",
+        "key_after": "wood|katherine|r",
+        "spine_person_ids": [
+          "hill:person:773fbc8a1e9e67d8ae93f375bb7b0236d7227139eb12e75694e457ed586da1aa",
+          "hill:person:ec998fbfdc17d4e12b428071bdbcc9610b3e436fde248978471d329c7671fc17"
+        ],
+        "keys_now": [
+          "wood|catherine|r",
+          "wood|katherine|r"
+        ],
+        "blocked_by_cooccurrence": true
+      },
+      {
+        "chamber": "senate",
+        "office_key": "RESOLUTION AND REORGANIZATION RESERVE",
+        "first_period": "2024-10-01",
+        "key_after": "cooper|elizabeth|m",
+        "spine_person_ids": [
+          "hill:person:4ec106e67d2bbbcfe8d0f6581866d7b3ce0d026b5faef3895b2ed3f705aa8354",
+          "hill:person:82b487c7b1074398a13c3591821ca5ed46c1bb925965c02deea8d035160a85fd"
+        ],
+        "keys_now": [
+          "cooper|beth|m",
+          "cooper|elizabeth|m"
+        ],
+        "blocked_by_cooccurrence": true
+      }
+    ],
+    "name_key_collisions_ignoring_the_anchor": {
+      "note": "distinct spine ids sharing one name key, ignoring the office anchor -- what a name-only join collides on",
+      "before": {
+        "distinct_keys": 123658,
+        "keys_held_by_2_or_more_people": 15828,
+        "people_in_those_keys": 36863
+      },
+      "after": {
+        "distinct_keys": 123137,
+        "keys_held_by_2_or_more_people": 16162,
+        "people_in_those_keys": 37718
+      }
+    }
+  },
+  "splits": {
+    "count": 0,
+    "why_zero_is_expected": "the v1.1 key is resolved per TRIPLE and a spine person carries exactly one triple, so the map stays many-to-one and a split is structurally impossible; it is verified, not asserted",
+    "examples": {}
+  },
+  "suffix_population": {
+    "spine_rows_whose_lifted_surname_carries_a_suffix": 1,
+    "values": {
+      "II": 1
+    }
+  },
+  "nickname_transitions": {
+    "james -> jamie": 1311,
+    "christopher -> chris": 1178,
+    "alexander -> alex": 713,
+    "samuel -> sam": 709,
+    "alexandra -> alex": 550,
+    "patrick -> pat": 540,
+    "samantha -> sam": 503,
+    "stephen -> steven": 431,
+    "catherine -> katherine": 428,
+    "kathryn -> katherine": 413,
+    "sydney -> sidney": 297,
+    "christian -> chris": 276,
+    "christina -> chris": 248,
+    "lisa -> elizabeth": 238,
+    "patricia -> pat": 204,
+    "christine -> chris": 191,
+    "katie -> katherine": 170,
+    "kate -> katherine": 154,
+    "sophie -> sophia": 138,
+    "isabel -> isabella": 114,
+    "phillip -> philip": 107,
+    "jake -> jacob": 106,
+    "wendy -> gwendolyn": 98,
+    "alexandria -> alex": 95,
+    "theresa -> terry": 94,
+    "teresa -> terry": 93,
+    "isabelle -> isabella": 91,
+    "drew -> andrew": 90,
+    "katharine -> katherine": 88,
+    "nicolas -> nicholas": 85,
+    "elisabeth -> elizabeth": 73,
+    "maggie -> margaret": 60,
+    "alec -> alex": 59,
+    "joan -> jo": 59,
+    "abby -> abigail": 59,
+    "debra -> deborah": 58,
+    "larry -> lawrence": 57,
+    "beth -> elizabeth": 53,
+    "josephine -> jo": 51,
+    "eliza -> elizabeth": 51
+  },
+  "anchor_reconstruction": {
+    "method": "min over office spans of (period start ordinal, chamber, office_key); id re-digested over {chamber, first_office_key, first_period, payee_key}",
+    "verified": 144693,
+    "mismatched": 0
+  }
+}

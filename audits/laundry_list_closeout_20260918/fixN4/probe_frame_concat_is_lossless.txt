@@ -1,0 +1,40 @@
+archive frame: 10181 rows x 14 columns
+columns: ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary', 'ManualDirection']
+
+the provenance column is not already in use: True
+synthesised rows: 5
+
+column             before       after       
+Section            str          str         
+Role               str          str         
+Member             str          str         
+Name               str          str         
+Title              str          str         
+Sponsor            str          str         
+CosponsorCount     int64        int64       
+Committee          str          str         
+LastAction         str          str         
+Congress           int64        int64       
+DecayWeight        float64      float64     
+DetailLink         str          str         
+bill_summary       str          object         <-- CHANGED
+ManualDirection    str          str         
+EvidenceSource     (absent)     str         
+
+column order preserved, provenance appended last: True
+row count 10181 -> 10186 (+5)
+existing rows keep their position (source_row = index+2 is stable): True
+existing rows whose value/type fingerprint changed, over all 14 columns: 0
+
+numeric/int columns that changed dtype (would rewrite audit values): NONE
+text columns that changed dtype label only: ['bill_summary']
+  -- pandas 3.0.3 marks a missing value in BOTH the str and the object dtype with np.nan,
+  -- so the label moves and no value does; the fingerprint comparison above is the proof.
+
+the provenance marker is present on the new rows only: 5 of 10186
+and _clean() reads NOTHING on every pre-existing row: True
+
+VERDICT: the hook is additive only. 0 of 10181 existing frame rows change in value or type,
+         no int/float column changes dtype, the one text dtype LABEL that moves carries no
+         value with it, and the routing audit gains the provenance key on 5 rows and no
+         others. With LEG_SPONSOR_FROM_COLUMN=0 nothing is appended at all.

@@ -1,0 +1,221 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-08T06:18:07.416648+00:00",
+  "generation": "staffer_social_network_20260908_v8_math_primary",
+  "spine": "hill_personnel_spine_20260908_v8_primary",
+  "checks": {
+    "ready": true,
+    "payroll_counts": {
+      "source_rows_read": 1351523,
+      "invalid_or_absent_service_dates": 33,
+      "rows_not_admitted_by_spine": 108,
+      "episodes": 425825,
+      "employment_people": 135039,
+      "record_pairs": 231
+    },
+    "graph_receipt": {
+      "role": "graph_receipt",
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_network_receipt.json",
+      "sha256": "9c5384786f9b260edeca643297ab575c59324969077627ca6680788499d54723",
+      "verified": true,
+      "bytes": 72109
+    },
+    "network_inventory": {
+      "people": 180021,
+      "payroll_profiles": 144453,
+      "payroll_ids_in_profiles_or_aliases": 144692,
+      "invalid_payroll_ids": [],
+      "reconciliation": {
+        "sources": [
+          {
+            "source": "Payroll",
+            "source_people": 144692,
+            "scope": "Current and historical records"
+          },
+          {
+            "source": "LDA",
+            "source_people": 25340,
+            "scope": "Current and historical records"
+          },
+          {
+            "source": "Politico Pro",
+            "source_people": 18618,
+            "scope": "Held directory profiles"
+          }
+        ],
+        "source_people_before_matching": 188650,
+        "verified_lda_payroll_joins": 2757,
+        "accepted_alias_reductions": 5872,
+        "network_people": 180021,
+        "balance_holds": true,
+        "additional_source_person_records": {
+          "Quorum": 5777
+        },
+        "all_source_person_records": 185798,
+        "current_congressional_staff": 14216,
+        "quorum_directory_ids": 5773,
+        "quorum_contact_ids": 5777,
+        "quorum_contact_matches": 4511,
+        "note": "Network profiles combine accepted identity matches. Unresolved identities remain separate. Source counts include historical people, not just current staff. Contact matches do not establish identity merges."
+      }
+    },
+    "live_groups": {
+      "counts": {
+        "offices": 1745,
+        "organizations": 46811,
+        "office_memberships": 176707,
+        "organization_memberships": 184419,
+        "people_in_groups": 155855,
+        "people_available": 185798,
+        "littlesis_persons_scanned": 0,
+        "keys_outside_scope": 59580,
+        "memberships": {
+          "employee": 24170,
+          "listed": 176707,
+          "represents": 160249
+        },
+        "employment_people": 21494
+      },
+      "distinct_payroll_ids": 59432,
+      "invalid_payroll_ids": []
+    },
+    "preserved_splits": [
+      {
+        "old": "hill:person:0fec4a4f08171bb5ecf7a129a44561a5d319f9506acc325cba70ff78c6d40ce4",
+        "distinct_targets": [
+          {
+            "id": "person:hill:person:0fec4a4f08171bb5ecf7a129a44561a5d319f9506acc325cba70ff78c6d40ce4",
+            "label": "Katherine R Wood",
+            "ranking_math_version": "staffer-ranking-duration-v1",
+            "source": {
+              "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_node_scores.ndjson.gz",
+              "node_id": "person:hill:person:0fec4a4f08171bb5ecf7a129a44561a5d319f9506acc325cba70ff78c6d40ce4",
+              "identity_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260908_v8_primary\\hill_person_spine.ndjson.gz"
+            },
+            "stints": 2
+          },
+          {
+            "id": "person:hill:person:93c6f1180c275700ea8479519f8c39b67024283c707e969344c0aac0fd6db51f",
+            "label": "Catherine R Wood",
+            "ranking_math_version": "staffer-ranking-duration-v1",
+            "source": {
+              "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_node_scores.ndjson.gz",
+              "node_id": "person:hill:person:93c6f1180c275700ea8479519f8c39b67024283c707e969344c0aac0fd6db51f",
+              "identity_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260908_v8_primary\\hill_person_spine.ndjson.gz"
+            },
+            "stints": 1
+          }
+        ]
+      },
+      {
+        "old": "hill:person:cb7b04a4d08ba2809e0ae4f0755cbbfd4db16e5a1f0af54009e7f60f2251c461",
+        "distinct_targets": [
+          {
+            "id": "person:hill:person:5cf859754797d08f7f600f55c16a1639641d057e28236137af42825e0e4c79f3",
+            "label": "Beth M Cooper",
+            "ranking_math_version": "staffer-ranking-duration-v1",
+            "source": {
+              "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_node_scores.ndjson.gz",
+              "node_id": "person:hill:person:5cf859754797d08f7f600f55c16a1639641d057e28236137af42825e0e4c79f3",
+              "identity_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260908_v8_primary\\hill_person_spine.ndjson.gz"
+            },
+            "stints": 1
+          },
+          {
+            "id": "person:hill:person:cb7b04a4d08ba2809e0ae4f0755cbbfd4db16e5a1f0af54009e7f60f2251c461",
+            "label": "Elizabeth M Cooper",
+            "ranking_math_version": "staffer-ranking-duration-v1",
+            "source": {
+              "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_node_scores.ndjson.gz",
+              "node_id": "person:hill:person:cb7b04a4d08ba2809e0ae4f0755cbbfd4db16e5a1f0af54009e7f60f2251c461",
+              "identity_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260908_v8_primary\\hill_person_spine.ndjson.gz"
+            },
+            "stints": 1
+          }
+        ]
+      }
+    ],
+    "published_data": [
+      {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine\\staffer_network_section.json",
+        "sha256": "81ede5be4dbd81ee9da160c0134a496f1b29f743bc8248885b9353d23d80a0f8",
+        "bytes": 5393487
+      },
+      {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine\\staffer_offices_section.json",
+        "sha256": "a5a2199aaefb0816529402ad9454b2938d00376cbb1fbb5c8e064300d9b3554e",
+        "bytes": 4132653
+      },
+      {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine\\staffer_organisations_section.json",
+        "sha256": "5a80c945574901a77b9c0d6a40efe3df31ed7749b1ab84975642a54a928c7f7a",
+        "bytes": 3939693
+      },
+      {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine\\staffer_clients_section.json",
+        "sha256": "d20a98b72a215dcd5687a90ef5be10b38bf56b809dd6527bdd81bb168326ee2e",
+        "bytes": 3892182
+      }
+    ],
+    "published_pages": [
+      {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\staffer-network.html",
+        "sha256": "6ac5e3e59eab713ba940d947ba125a110d2cd6397a5eac599edd261d2e37aeb4",
+        "bytes": 12112545,
+        "data_islands": {
+          "SDATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 25
+          },
+          "GDATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 19161
+          },
+          "ODATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 0
+          },
+          "CDATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 0
+          }
+        }
+      },
+      {
+        "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\Moneyball_Redesign.html",
+        "sha256": "a4fc395f122d9565f33dba06ed2378701ed7421e541d6621d2b3d8c40365538d",
+        "bytes": 89305822,
+        "data_islands": {
+          "SDATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 25
+          },
+          "GDATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 19161
+          },
+          "ODATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 0
+          },
+          "CDATA": {
+            "generation": "staffer_social_network_20260908_v8_math_primary",
+            "distinct_payroll_ids": 0
+          }
+        }
+      }
+    ],
+    "http_dashboard": {
+      "url": "http://127.0.0.1:8841/Moneyball.html",
+      "served_file": "Moneyball_Redesign.html",
+      "sha256": "7dad2796682c55ed82425cf7218983a720bac8632ea1647eefb4521849e63c99",
+      "bytes": 27219994,
+      "transform": "Local navigation shell and identical member profiles served as a sibling script",
+      "member_profiles_sha256": "2d874bbac1148e86759be349c81f4180baf04e04860876eb6a974a452e83681b"
+    }
+  },
+  "limitations": [
+    "Historical source-ID provenance is preserved; invalid current v8 IDs are rejected.",
+    "Canonical Moneyball.html is locked by Carbonite; the live route serves the verified Moneyball_Redesign.html."
+  ]
+}

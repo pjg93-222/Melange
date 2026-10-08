@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL20336-N9M-WX-HM8"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3550 IS: Municipal Bonds Emergency Relief Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-03-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 3550</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20200320">March 20, 2020</action-date><action-desc><sponsor name-id="S306">Mr. Menendez</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Federal Reserve Act to permit to the Board of Governors of the Federal Reserve System to engage in certain open market operations during unusual and exigent circumstances.</official-title></form><legis-body><section id="id5CE39FEBCE264519A87F38D43B658058" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Municipal Bonds Emergency Relief Act</short-title></quote>.</text></section><section id="S1" section-type="subsequent-section"><enum>2.</enum><header>Open market operations</header><text display-inline="no-display-inline">Section 14(b) of the Federal Reserve Act (<external-xref legal-doc="usc" parsable-cite="usc/12/355">12 U.S.C. 355</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="idEF0FBC0A84A94C1ABA630E93BDFC0B92"><paragraph id="id39834c02b8d24c3e8afdb645e04f60bd"><enum>(3)</enum><text>In unusual and exigent circumstances, the Board of Governors of the Federal Reserve System, by the affirmative vote of not fewer than 5 members, may authorize any Federal reserve bank, during such periods as the Board may determine, to buy and sell, at home or abroad, bills, notes, revenue bonds, and warrants of any maturity, by any State, county, district, political subdivision, instrumentality of a political subdivision, territory, possession, or municipality in the United States, including irrigation, drainage and reclamation districts. All such actions shall be subject to such limitations, restrictions, and regulations as the Board may prescribe.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

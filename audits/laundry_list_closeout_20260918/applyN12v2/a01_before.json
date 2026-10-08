@@ -1,0 +1,138 @@
+{
+ "db_bytes": 481439744,
+ "db_mtime": 1789366006.8263636,
+ "db_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\social_media.db",
+ "db_sha256": "0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee",
+ "excel_processes": [],
+ "forbidden_processes": [],
+ "interview_rows": 153576,
+ "interviews_cu_glob_under_data": [
+  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\interviews_cu.csv",
+  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\interviews_cu.receipt.json"
+ ],
+ "journal_mode": "wal",
+ "other_lock_files_at_root": [
+  "collector_supervisor.lock"
+ ],
+ "pipeline_run_locks": [],
+ "probe_row": {
+  "chamber": "tom-steyer-on-performance-in-nevada-expectations-for-south-carolina",
+  "date": "2020-02-23",
+  "member": "James Risch",
+  "nwords": 33,
+  "package": "https://www.foxnews.com/transcript/tom-steyer-on-performance-in-nevada-expectations-for-south-carolina",
+  "rowid": 245771,
+  "source": "INTERVIEW",
+  "text": "Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.",
+  "text_chars": 209,
+  "text_sha256": "6389954091b9975f3dce700ce10a667b9693b1f81477fadb62b757c58b7292fb",
+  "text_words": 33
+ },
+ "python_r_excel_processes_with_cmdline": [
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 71928
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 71812
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 87888
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 35848
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 85048
+  },
+  {
+   "CommandLine": "\"C:\\Users\\pgoff\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\staffer_live_server.py\" --source-root \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\" --port 8841 --dashboard-file Moneyball_Redesign.html ",
+   "Name": "python.exe",
+   "ProcessId": 70008
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 68504
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 86552
+  },
+  {
+   "CommandLine": "C:\\Windows\\System32\\RuntimeBroker.exe -Embedding",
+   "Name": "RuntimeBroker.exe",
+   "ProcessId": 49136
+  },
+  {
+   "CommandLine": "\"C:\\Users\\pgoff\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe\" \"C:\\Users\\pgoff\\Mentat\\mentat\\app\\server.py\" \"--port\" \"8806\" \"--data-root\" \"C:\\Users\\pgoff\\AppData\\Local\\Mentat\\console\" ",
+   "Name": "python.exe",
+   "ProcessId": 14104
+  },
+  {
+   "CommandLine": "\"C:\\Users\\pgoff\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\.claude\\worktrees\\unfinished-work-handoff-a3bbad\\audits\\laundry_list_closeout_20260918\\applyN12v2\\a01_preconditions_and_before.py\"",
+   "Name": "python.exe",
+   "ProcessId": 58780
+  }
+ ],
+ "sidecar-main": {
+  "bytes": 481439744,
+  "exists": true
+ },
+ "sidecar-shm": {
+  "bytes": 32768,
+  "exists": true
+ },
+ "sidecar-wal": {
+  "bytes": 0,
+  "exists": true
+ },
+ "speeches_rows": 270489,
+ "stance_files": {
+  "interviews_cu.csv": {
+   "bytes": 23202,
+   "mtime": 1789802333.6342,
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\interviews_cu.csv",
+   "sha256": "9a23720580f682bf28dee8940bee8d6b0e325119089690f0ce7d6b1a30188cf5"
+  },
+  "interviews_cu.receipt.json": {
+   "bytes": 808,
+   "mtime": 1789802333.6362174,
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\interviews_cu.receipt.json",
+   "sha256": "3cdc071522e1763836c42f8d40f4b55cf26e1eed901a6ebafc52cfb23fb58d6c"
+  },
+  "press_component_meta.json": {
+   "bytes": 9652,
+   "mtime": 1789802733.2161343,
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_component_meta.json",
+   "sha256": "5356d7db745785d5e9cb024413f2ec9c338fd86e83e9b560a9a97ae6754fa1e7"
+  }
+ },
+ "table_row_counts": {
+  "cr_fetch_log": 7426,
+  "cspan_attribution_audit": 862,
+  "cspan_fetch_log": 862,
+  "fetch_log": 214,
+  "hearing_antag": 33955,
+  "hearing_antag2": 961,
+  "hearing_meta": 7174,
+  "hearing_meta2": 114,
+  "interactions": 404,
+  "iv_fetch_log": 168979,
+  "members": 515,
+  "posts": 29780,
+  "speeches": 270489,
+  "yt_fetch_log": 0
+ },
+ "wal_zero_or_absent": true
+}

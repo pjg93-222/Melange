@@ -1,0 +1,98 @@
+============================================================================================================
+M1  PRESS: one release under two URL FORMS -- enumeration + difference classes
+============================================================================================================
+tone rows after load_tone_rows() (url,identity) dedup: 2679
+(member, normalised title, date) groups with 2+ surviving rows: 12   surplus rows: 12
+
+--- the groups, with their difference class ---
+  Gabe Amo               (unparsed)    path alias
+      title: Leagues, credit unions connect with policymakers before Congress returns home for election
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380
+  Katie Britt            2023-03-16    path alias
+      title: SENATOR KATIE BRITT ON SVB FAILURE: ‘ALABAMIANS DON’T JUST WANT ANSWERS, THEY DESERVE ANSW
+      raw : https://www.britt.senate.gov/news/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+      canon: https://britt.senate.gov/news/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+      raw : https://www.britt.senate.gov/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+      canon: https://britt.senate.gov/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+  Katie Britt            2023-11-15    path alias
+      title: U.S. Senator Katie Britt: Basel III Endgame Proposal ‘Undermines Proven Strength of U.S. B
+      raw : https://www.britt.senate.gov/news/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+      canon: https://britt.senate.gov/news/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+      raw : https://www.britt.senate.gov/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+      canon: https://britt.senate.gov/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+  Katie Britt            2023-10-12    path alias
+      title: U.S. Senators Katie Britt, Marco Rubio, Colleagues Demand Answers on Iran’s Nuclear Progra
+      raw : https://www.britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marc
+      canon: https://britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marc
+      raw : https://www.britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-colleagues-demand-answers-on-irans-nuclear-program-violations-in-wake-of-barbaric-attacks-on-israel
+      canon: https://britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-colleagues-demand-answers-on-irans-nuclear-program-violations-in-wake-of-barbaric-attacks-on-israel
+  Katie Britt            2024-02-06    path alias
+      title: U.S. Senators Katie Britt, Marco Rubio, Maggie Hassan, Colleagues Urge Biden Administratio
+      raw : https://www.britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+      canon: https://britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+      raw : https://www.britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+      canon: https://britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+  Mike Crapo             (unparsed)    path alias
+      title: ncua borrowing authority
+      raw : https://www.crapo.senate.gov/media/videos/watch/fdic/ncua-borrowing-authority
+      canon: https://crapo.senate.gov/media/videos/watch/fdic/ncua-borrowing-authority
+      raw : https://www.crapo.senate.gov/news/videos/watch/2009/05/05/fdic/ncua-borrowing-authority
+      canon: https://crapo.senate.gov/news/videos/watch/2009/05/05/fdic/ncua-borrowing-authority
+  Mike Crapo             (unparsed)    path alias
+      title: small banks and credit unions need relief
+      raw : https://www.crapo.senate.gov/media/videos/watch/small-banks-and-credit-unions-need-relief
+      canon: https://crapo.senate.gov/media/videos/watch/small-banks-and-credit-unions-need-relief
+      raw : https://www.crapo.senate.gov/news/videos/watch/2018/03/06/small-banks-and-credit-unions-need-relief
+      canon: https://crapo.senate.gov/news/videos/watch/2018/03/06/small-banks-and-credit-unions-need-relief
+  Jon Husted             2026-01-12    path alias
+      title: Husted backs bill blocking Fed from issuing a Central Bank Digital Currency
+      raw : https://www.husted.senate.gov/media/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+      canon: https://husted.senate.gov/media/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+      raw : https://www.husted.senate.gov/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+      canon: https://husted.senate.gov/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+  Cynthia Lummis         (unparsed)    path alias
+      title: Leagues, credit unions connect with policymakers before Congress returns home for election
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571
+  Patty Murray           (unparsed)    path alias
+      title: Leagues, credit unions connect with policymakers before Congress returns home for election
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111
+  Roger Marshall         2022-08-11    path alias
+      title: sen marshall in washington examiner credit card swipe fees are hurting consumers
+      raw : https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+      canon: https://marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers
+      raw : https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+      canon: https://marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers
+  Seth Magaziner         (unparsed)    path alias
+      title: Leagues, credit unions connect with policymakers before Congress returns home for election
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+      raw : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223
+      canon: https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223
+
+--- difference-class census over the 12 groups ---
+  path alias                                 12
+
+--- per-group detail for the classes that matter ---
+  Gabe Amo               (unparsed)   queries=[{}, {}] fragments=["A000380", "A000380"]
+  Katie Britt            2023-03-16   queries=[{}, {}] fragments=["", ""]
+  Katie Britt            2023-11-15   queries=[{}, {}] fragments=["", ""]
+  Katie Britt            2023-10-12   queries=[{}, {}] fragments=["", ""]
+  Katie Britt            2024-02-06   queries=[{}, {}] fragments=["", ""]
+  Mike Crapo             (unparsed)   queries=[{}, {}] fragments=["", ""]
+  Mike Crapo             (unparsed)   queries=[{}, {}] fragments=["", ""]
+  Jon Husted             2026-01-12   queries=[{}, {}] fragments=["", ""]
+  Cynthia Lummis         (unparsed)   queries=[{}, {}] fragments=["L000571", "L000571"]
+  Patty Murray           (unparsed)   queries=[{}, {}] fragments=["M001111", "M001111"]
+  Roger Marshall         2022-08-11   queries=[{}, {}] fragments=["", ""]
+  Seth Magaziner         (unparsed)   queries=[{}, {}] fragments=["M001223", "M001223"]
+
+DONE M1

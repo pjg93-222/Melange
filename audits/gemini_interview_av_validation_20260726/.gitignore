@@ -1,0 +1,8 @@
+media/
+media_work/
+storyboards/
+outputs/
+node_modules/
+*.log
+__pycache__/
+*.pyc

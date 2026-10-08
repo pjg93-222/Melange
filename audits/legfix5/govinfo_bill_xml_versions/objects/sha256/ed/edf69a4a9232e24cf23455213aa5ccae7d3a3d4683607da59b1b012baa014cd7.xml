@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-FLO21437-JJ2-C9-RC6"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S1605 IS: To designate the National Pulse Memorial located at 1912 South Orange Avenue in Orlando, Florida, and for other purposes.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-05-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>1st Session</session><legis-num>S. 1605</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20210513">May 13, 2021</action-date><action-desc><sponsor name-id="S404">Mr. Scott of Florida</sponsor> (for himself, <cosponsor name-id="S350">Mr. Rubio</cosponsor>, and <cosponsor name-id="S413">Mr. Padilla</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSEG00">Committee on Energy and Natural Resources</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To designate the National Pulse Memorial located at 1912 South Orange Avenue in Orlando, Florida, and for other purposes.</official-title></form><legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H049D29E2D0294E46A6BD2719449C5B3D"><section section-type="section-one" id="HD2196A2C7CB54CADB3DB5FE60F07C616"><enum>1.</enum><header>Designation of national pulse memorial</header><subsection id="H444DD87AF86C4B15A66862705C071DE1"><enum>(a)</enum><header>In general</header><text>The Pulse Memorial located at 1912 South Orange Avenue in Orlando, Florida, is designated as the <quote>National Pulse Memorial</quote>.</text></subsection><subsection id="H8FC2099BE88844B89DCA40B50F7010AF"><enum>(b)</enum><header>Effect of designation</header><paragraph id="id401F8F73491C459BA74E56CFBD40DDC3"><enum>(1)</enum><header>In general</header><text>The national memorial designated by subsection (a) is not a unit of the National Park System.</text></paragraph><paragraph id="idC98A59CC583C4D4EABC05D09B144953D"><enum>(2)</enum><header>Use of Federal funds</header><text>The designation of the national memorial by subsection (a) shall not require or permit Federal funds to be expended for any purpose relating to the national memorial.</text></paragraph></subsection></section></legis-body></bill> 
+

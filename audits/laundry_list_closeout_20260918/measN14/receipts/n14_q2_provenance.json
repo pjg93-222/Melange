@@ -1,0 +1,186 @@
+{
+ "artifacts": {
+  "BASE tone CSV (engine)": {
+   "bytes": 1080244,
+   "exists": true,
+   "mtime": "2026-06-30T18:50:17",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Draft Systems\\cu_press_stance_tone.csv",
+   "sha256": "6f2f926d08196a12a9c8f59a92b523e6776a8e7b0e6959a29720c4385169d474"
+  },
+  "CU_Press_Stance_Tone.xlsx (Draft)": {
+   "bytes": 386737,
+   "exists": true,
+   "mtime": "2026-06-30T18:50:28",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Draft Systems\\CU_Press_Stance_Tone.xlsx",
+   "sha256": "de4f5ce2f6b21b29dacad0caf6706b1ffba25f60e7b6228cbc692f14e55678ac"
+  },
+  "CU_Press_Stance_Tone.xlsx (LIVE root)": {
+   "bytes": 489295,
+   "exists": true,
+   "mtime": "2026-06-30T18:59:20",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\CU_Press_Stance_Tone.xlsx",
+   "sha256": "1f45a8be2a47784b8dabb91075f13ce6cd148fc72bd45300ef48679808147ac4"
+  },
+  "REFRESH tone CSV (engine)": {
+   "bytes": 134925,
+   "exists": true,
+   "mtime": "2026-09-16T23:44:44",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_refresh_tone.csv",
+   "sha256": "393a983ce6d9c7fa92142a19d88178ac738db097ce0b1daa109e221727afde7a"
+  },
+  "WORKBOOK (the sheet)": {
+   "bytes": 11316197,
+   "exists": true,
+   "mtime": "2026-09-19T03:33:37",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\Moneyball Main Version - Blended.xlsx",
+   "sha256": "75e14042fd29333a0b184aeb48431c734217dbf86300a1657c3e292d8267f870"
+  },
+  "cfpb_stance_review_queue_2026-07-16.csv": {
+   "bytes": 35862,
+   "exists": true,
+   "mtime": "2026-07-16T21:12:22",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\cfpb_stance_review_queue_2026-07-16.csv",
+   "sha256": "bfac2023573d1e700197c566621f91e67a366e4815234c5cc58dc4fb4457c898"
+  },
+  "cu_press_releases_scored.xlsx (Draft)": {
+   "bytes": 1052014,
+   "exists": true,
+   "mtime": "2026-06-24T10:15:35",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Draft Systems\\cu_press_releases_scored.xlsx",
+   "sha256": "5dc64e07a0bf1d149332b3b78e640300a05faf99b55fbf16f2f69c8bb5044d18"
+  },
+  "cu_press_releases_scored.xlsx (LIVE)": {
+   "bytes": 1074978,
+   "exists": true,
+   "mtime": "2026-06-30T00:10:24",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\cu_press_releases_scored.xlsx",
+   "sha256": "52b44a175cbbacacd7ac6de45ebe9842e9d12132b115a43e927bb0a7a8d9e9cf"
+  },
+  "cu_stance_label_set.csv (Draft)": {
+   "bytes": 1454373,
+   "exists": true,
+   "mtime": "2026-06-30T18:56:09",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Draft Systems\\cu_stance_label_set.csv",
+   "sha256": "bcdd9e8f82937a8e82ec2a2aaf6b2bd746ba10eccc199c817cccc8fafdd101a4"
+  },
+  "cu_stance_label_set.csv (LIVE root)": {
+   "exists": false,
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\cu_stance_label_set.csv"
+  },
+  "cu_stance_label_set.xlsx (Draft)": {
+   "bytes": 576168,
+   "exists": true,
+   "mtime": "2026-06-23T22:45:01",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Draft Systems\\cu_stance_label_set.xlsx",
+   "sha256": "783d465c2a8813378bcc9b552d085c848c173219413fe6177428d6d96c5bb722"
+  },
+  "cu_stance_label_set.xlsx (LIVE root)": {
+   "bytes": 575997,
+   "exists": true,
+   "mtime": "2026-06-30T00:17:20",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\cu_stance_label_set.xlsx",
+   "sha256": "3a3bd0a2944d697bf8e57031ff35ac9a8d37c858f3c20e350b48a5717c398820"
+  },
+  "press_component_meta.json (engine press run receipt)": {
+   "bytes": 9652,
+   "exists": true,
+   "mtime": "2026-09-19T03:25:33",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_component_meta.json",
+   "sha256": "5356d7db745785d5e9cb024413f2ec9c338fd86e83e9b560a9a97ae6754fa1e7"
+  },
+  "press_date_overrides.json (LIVE)": {
+   "bytes": 43566,
+   "exists": true,
+   "mtime": "2026-06-28T23:31:55",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_date_overrides.json",
+   "sha256": "63fe7a48cf0a3163ed581b38d50321384603ddd7de9b84ed7fb5c18f37779da6"
+  },
+  "press_overrides_from_dashboard.json (the dashboard export queue)": {
+   "bytes": 1332,
+   "exists": true,
+   "mtime": "2026-07-16T21:06:04",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_overrides_from_dashboard.json",
+   "sha256": "2149fec1290f99b60771f263217b7d92fc71d988982396f913ef688f82e92d4c"
+  },
+  "press_stance_final.csv (the STACK the engine signs with)": {
+   "bytes": 769125,
+   "exists": true,
+   "mtime": "2026-09-19T03:19:23",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\press_stance_final.csv",
+   "sha256": "78f4babdec8eb4a97b5b9397611715c08f06809f7205e1ca9e2d169a2fb6fef9"
+  },
+  "press_stance_overrides PRE-CFPBFIX snapshot": {
+   "bytes": 1362,
+   "exists": true,
+   "mtime": "2026-06-29T19:21:18",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_stance_overrides.PRE-CFPBFIX-20260715_161807.json",
+   "sha256": "d040829928c39f0096d208b9306ecdc0558d37118a083b013ab0de96d494cf3c"
+  },
+  "press_stance_overrides.json (LIVE)": {
+   "bytes": 6205,
+   "exists": true,
+   "mtime": "2026-07-19T00:35:31",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_stance_overrides.json",
+   "sha256": "404d5a6240ee636d6a8d6c8df4dabcbc5d62bb6fdd8056f6c4c129912947c475"
+  },
+  "press_stance_overrides.json (worktree overlay)": {
+   "bytes": 6325,
+   "exists": true,
+   "mtime": "2026-09-18T19:22:05",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\.claude\\worktrees\\unfinished-work-handoff-a3bbad\\data\\stance\\press_stance_overrides.json",
+   "sha256": "e3b01f21f47299b0e896c44da0ae48af28a6884be3aef90a8fdd3818d3f959ea"
+  },
+  "refresh feed receipt": {
+   "bytes": 5404,
+   "exists": true,
+   "mtime": "2026-09-16T23:44:49",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\stance\\press_refresh_feed_receipt.json",
+   "sha256": "781ec2713ade3a586124317ca9d1c5c37e84f05d99c64aca17d0a05f7cbad22d"
+  },
+  "workbook copy in scratch": {
+   "bytes": 11316197,
+   "exists": true,
+   "mtime": "2026-09-19T12:47:33",
+   "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\\scratchpad\\measN14\\wb.xlsx",
+   "sha256": "75e14042fd29333a0b184aeb48431c734217dbf86300a1657c3e292d8267f870"
+  }
+ },
+ "cfpb_review_queue_rows": 94,
+ "dashboard_queue": {
+  "merged": 4,
+  "rows": 4,
+  "unmerged": 0
+ },
+ "pre_cfpbfix_snapshots": [
+  "category_stance.PRE-CFPBFIX-20260715_161807.json",
+  "cu_valence_registry.PRE-CFPBFIX-20260715_161807.json",
+  "press_stance_overrides.PRE-CFPBFIX-20260715_161807.json",
+  "tweet_stance_final.csv.PRE-CFPBFIX-20260715_161807.csv"
+ ],
+ "press_stance_overrides": {
+  "added_after_cfpbfix": 19,
+  "live": 23,
+  "overlay_only": 0,
+  "pre_cfpbfix": 4,
+  "stance_changed_after_cfpbfix": 0,
+  "worktree_overlay": 23
+ },
+ "refresh_accepted_runs": 3,
+ "refresh_receipt": {
+  "producer": null,
+  "promotion_mode": "CUMULATIVE_ACCEPTED_RUN_LEDGER",
+  "schema": "press-refresh-engine-feed-v1",
+  "script": null,
+  "status": "ACTIVE_TYPED_SUPPLEMENT"
+ },
+ "schema": "n14-q2-provenance-v1",
+ "sheet_writer_candidates": [
+  "./audit/dashboard_integrity.py",
+  "./network/corrected_signals.py",
+  "./surfaces/desk_press_source.py",
+  "./surfaces/make_member_desk.py",
+  "./tests/surfaces/test_desk_press_source.py"
+ ],
+ "workbook_newer_than_base_tone_days": 80.3634160995511,
+ "workbook_newer_than_refresh_tone_days": 2.158946176728717
+}

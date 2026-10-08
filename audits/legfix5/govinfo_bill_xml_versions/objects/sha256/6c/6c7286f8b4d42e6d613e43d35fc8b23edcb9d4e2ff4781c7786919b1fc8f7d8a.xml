@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution public-private="public" resolution-stage="Introduced-in-Senate" resolution-type="senate-resolution" star-print="no-star-print">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 SRES 32 IS: Recognizing January 27, 2019, as the anniversary of the first refugee and Muslim ban, and urging the President to demonstrate true leadership on refugee resettlement.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-01-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">III</distribution-code>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>S. RES. 32</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action display="yes">
+			<action-date date="20190128">January 28, 2019</action-date>
+			<action-desc><sponsor name-id="S341">Mr. Blumenthal</sponsor> (for himself, <cosponsor name-id="S277">Mr. Carper</cosponsor>, <cosponsor name-id="S369">Mr. Markey</cosponsor>, <cosponsor name-id="S361">Ms. Hirono</cosponsor>, <cosponsor name-id="S387">Ms. Harris</cosponsor>, <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>, <cosponsor name-id="S307">Mr. Brown</cosponsor>, <cosponsor name-id="S229">Mrs. Murray</cosponsor>, <cosponsor name-id="S057">Mr. Leahy</cosponsor>, <cosponsor name-id="S275">Ms. Cantwell</cosponsor>, <cosponsor name-id="S394">Ms. Smith</cosponsor>, <cosponsor name-id="S322">Mr. Merkley</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, and <cosponsor name-id="S386">Ms. Duckworth</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="SSJU00">Committee on the Judiciary</committee-name></action-desc>
+		</action>
+		<legis-type>RESOLUTION</legis-type>
+		<official-title display="yes">Recognizing January 27, 2019, as the anniversary of the first refugee and Muslim ban, and urging
+			 the President to demonstrate true leadership on refugee resettlement.</official-title>
+	</form>
+	<preamble>
+ <whereas><text>Whereas the world is in the midst of the worst global displacement crisis in history, with more than 25,400,000 refugees worldwide, according to estimates from the United Nations High Commissioner for Refugees (referred to in this Resolution as <quote>UNHCR</quote>);</text>
+ </whereas><whereas><text>Whereas UNHCR estimated that nearly 1,200,000 refugees were in need of resettlement to a third country in 2018, and this projection continues to grow in 2019;</text>
+ </whereas><whereas><text>Whereas the United States Refugee Admissions Program (referred to in this Resolution as <quote>USRAP</quote>) is a life-saving solution critical to global humanitarian efforts, which—</text>
+ <paragraph id="id4ACB063363334F68B2ABAA7AFB0C969A"><enum>(1)</enum><text>strengthens global security;</text> </paragraph><paragraph id="idEAF5DF2622114D1C94A815CF716A3459"><enum>(2)</enum><text>leverages United States foreign policy goals;</text>
+ </paragraph><paragraph id="idB54D608319DE4E8FBD3AC4B75503599E"><enum>(3)</enum><text>supports regional host countries; and</text> </paragraph><paragraph id="id1535A5FA0195471DB4636FB49A00CB02"><enum>(4)</enum><text>serves individuals and families in need;</text>
+ </paragraph></whereas><whereas><text>Whereas the United States has been a global leader in—</text> <paragraph id="id813465DFA35C4F3E94C782E1805BCA59"><enum>(1)</enum><text>responding to displacement crises around the world; and</text>
+ </paragraph><paragraph id="idA29CA6C9F8BF474FA5F1B98940119377"><enum>(2)</enum><text>promoting the safety, health, and well-being of refugees and displaced persons;</text> </paragraph></whereas><whereas><text>Whereas refugees are the most vetted travelers to enter the United States and are subject to extensive screening checks, including in person interviews, biometric data checks, and multiple interagency checks;</text>
+ </whereas><whereas><text>Whereas the United States leverages resettlement to encourage other countries—</text> <paragraph id="id28392E01BBE4493794EAC48A7DCE34E1"><enum>(1)</enum><text>to keep their doors open to refugees;</text>
+ </paragraph><paragraph id="idA5573D36CA314E5DAD74CEFF8A4A8886"><enum>(2)</enum><text>to allow refugee children to attend school; and</text> </paragraph><paragraph id="idE4CD6A8AB99D4711AFA3FDDE7C59293E"><enum>(3)</enum><text>to allow refugee adults to work;</text>
+ </paragraph></whereas><whereas><text>Whereas refugees contribute to their communities by starting businesses, paying taxes, sharing their cultural traditions, and being good neighbors;</text>
+ </whereas><whereas><text>Whereas refugees contribute more to society than they consume in State-funded services, including costs relating to schooling and health care;</text>
+ </whereas><whereas><text>Whereas, for more than 40 years the United States resettled up to 200,000 refugees per year, with an average ceiling of 95,000 refugees per year, and an average of 80,000 refugees per year actually being resettled in the United States;</text>
+ </whereas><whereas><text>Whereas the United States has abdicated its leadership by setting a record low refugee admissions goal in fiscal year 2019 of 30,000;</text>
+ </whereas><whereas><text>Whereas, on January 27, 2017, President Donald J. Trump issued Executive Order 13769, which placed a 90-day suspension on the admission into the United States of individuals from 7 Muslim-majority countries and suspended USRAP for 120 days; and</text>
+ </whereas><whereas><text>Whereas, since issuing that Executive order, President Trump has taken further executive and administrative actions—</text>
+ <paragraph id="idE04A2965C7E04EF18B7792A70C1EB74B"><enum>(1)</enum><text>to restrict the admission into the United States of people from certain Muslim-majority countries; and</text>
+ </paragraph><paragraph id="id4BCBA76A3F7B4FEA928C3F24B76A734C"><enum>(2)</enum><text>to dismantle USRAP, which has lowered the capacity of, and diminished the institutional memory and experience in, USRAP:</text>
+ </paragraph></whereas><whereas><text>Now, therefore, be it</text> </whereas></preamble> <resolution-body> <section display-inline="yes-display-inline" id="S1" section-type="undesignated-section"><enum></enum><text>That the Senate—</text>
+ <paragraph id="id27633e797ea54115bfae2e9867f607d1"><enum>(1)</enum><text>reaffirms our Nation’s proud history of refugee resettlement;</text> </paragraph><paragraph id="idd74584e421f04e97aa0a85bd72d669fd"><enum>(2)</enum><text>recognizes January 27, 2019, as the second anniversary of the Executive order that suspended the admission of refugees and individuals from specified Muslim-majority countries;</text>
+ </paragraph><paragraph id="idb3534aadc0104dd49b4786d612bbd98d"><enum>(3)</enum><text>reaffirms the strong bipartisan commitment of the United States to promote the safety, health, and well-being of refugees, including by facilitating the resettlement in the United States of refugees who cannot safely return to their homes or rebuild their lives in countries from which they fled to preserve their lives;</text>
+ </paragraph><paragraph id="id58004e26d4724fa8ac23aa784ae7a6fd"><enum>(4)</enum><text>emphasizes the importance of USRAP as a critical tool for United States global leadership;</text>
+ </paragraph><paragraph id="id2da269b782fe40098872a1103d30639a"><enum>(5)</enum><text>recognizes the profound consequences faced by refugees and their families who have been stranded, separated, and scarred by existing United States refugee policies, which have stranded many refugees who were in the middle of the refugee resettlement process and have left other refugees with little hope of anticipated entry into the United States; and</text>
+ </paragraph><paragraph id="ida8a72f6cf6db486692c979e2a069ac02"><enum>(6)</enum><text>calls upon the United States Government—</text> <subparagraph id="ide052cea009a041a284e21b046f9d969e"><enum>(A)</enum><text>to resettle a robust number of refugees to meet its share of the global need during fiscal years 2019 and 2020, with an emphasis on rebuilding USRAP and returning to historic levels of refugee admissions;</text>
+ </subparagraph><subparagraph id="id274d6e8dc2af4e14a17280a7af1f961b"><enum>(B)</enum><text>to operate USRAP in good faith in order to meet the stated objectives of the program and to restore historic levels of refugee arrivals;</text>
+ </subparagraph><subparagraph id="id984a3fb575144dd198ecbcad61d1e892"><enum>(C)</enum><text>to uphold its international leadership role in responding to displacement crises with humanitarian assistance and protection of the most vulnerable populations;</text>
+ </subparagraph><subparagraph id="id4675be15364c4d769a7729bceca81b6b"><enum>(D)</enum><text>to improve consultation with Congress and adherence to the clear congressional intent of the Refugee Act of 1980; and</text>
+ </subparagraph><subparagraph id="id02c7bf31127d420eb0b7738a69bb4d4e"><enum>(E)</enum><text>to recommit to offering freedom from oppression and resettling the most vulnerable refugees regardless of their country of origin or religious beliefs.</text>
+				</subparagraph></paragraph></section></resolution-body>
+</resolution>
+
+

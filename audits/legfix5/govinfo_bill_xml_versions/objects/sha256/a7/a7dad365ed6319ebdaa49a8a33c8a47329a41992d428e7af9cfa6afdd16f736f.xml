@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H80330936936B4153BCA089479EB63CBB" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8129 IH: To amend title XVIII of the Social Security Act to establish a full risk ACO program.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8129</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260326">March 26, 2026</action-date><action-desc><sponsor name-id="T000478">Ms. Tenney</sponsor> (for herself and <cosponsor name-id="S001190">Mr. Schneider</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name>, and in addition to the Committee on <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title XVIII of the Social Security Act to establish a full risk ACO program.</official-title></form><legis-body id="HB745A64A469442989E59CA8AB3A6C0DB" style="OLC"> 
+<section id="H1473C77818C248D79D6529635E115535" section-type="section-one"><enum>1.</enum><header>Full Risk ACO Program</header><text display-inline="no-display-inline">Title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395 et seq.</external-xref>) is amended by adding at the end the following new section:</text> 
+<quoted-block style="traditional" id="H41139C672D48405E9EDF356FFD141054" display-inline="no-display-inline"> 
+<section id="HCCC5D204DA604CB1A724675CFAC356AA"><enum>1899B.</enum><header>Full Risk Accountable Care Organization Program</header> 
+<subsection id="H4001A0D93CD4437D9736BB9417939FA8"><enum>(a)</enum><header>Findings</header><text display-inline="yes-display-inline">Congress finds as follows:</text> <paragraph id="HA2F2D57952144B9385C8D727AF6D7D0E"><enum>(1)</enum><text>Successful pilots over the last decade have demonstrated that full risk accountable care organizations (ACOs), including full risk ACOs that focus on a complex care population are successful at improving health outcomes while lowering costs in traditional Medicare.</text></paragraph> 
+<paragraph id="HC51D57F89700465CB518971403BE8B8B"><enum>(2)</enum><text>Traditional Medicare lacks a permanent program that allows providers flexibility to engage in full risk models outside of time-limited pilot projects.</text></paragraph> <paragraph id="H315409F2693A44FC9E10369678578B85"><enum>(3)</enum><text>A wide range of organizations serving a range of traditional Medicare beneficiaries, including rural and underserved areas, would benefit from permanent options for full risk accountable care.</text></paragraph> 
+<paragraph id="HF47D134693E04A4F99C2EF62209DBC85"><enum>(4)</enum><text>Full risk models can transform care by allowing more flexible and diverse payment options beyond fee-for-service reimbursement, impact cash flow, and tailor experiences for clinicians and beneficiaries.</text></paragraph> <paragraph id="H13FD15C6A91A40099C77971121D967C6"><enum>(5)</enum><text>ACO options must encourage better care coordination for complex care beneficiaries, those with six or more chronic conditions.</text></paragraph></subsection> 
+<subsection id="H915A15340A39407B8ECB79A465BAC6ED"><enum>(b)</enum><header>Establishment</header><text>By June 30, 2026, the Secretary shall establish a full risk ACO program (in this section referred to as the <quote>program</quote>) that adopts proven provider incentives to deliver high-quality care to better meet the needs of Traditional Medicare beneficiaries (as defined in subsection (l)). Under such program—</text> <paragraph id="H1A51B7FC294A45D19B585D4A203E9AD2"><enum>(1)</enum><text>groups of health care professionals shall work together to manage and coordinate care for Medicare fee-for-service beneficiaries through a <quote>standard</quote> or <quote>complex care</quote> full risk ACO.</text></paragraph> 
+<paragraph id="HF274AD28F5774C15AFE2A4DCBEB080EC"><enum>(2)</enum><text>providers and suppliers participating in this program shall be paid in a manner that incentivizes furnishing items and services in such practice to provide high-quality care tailored to meet the needs of Medicare fee-for-service beneficiaries while reducing the cost of care.</text></paragraph></subsection> <subsection id="H18FB014F489147CDAE43BE2BB998FCD2"> <enum>(c)</enum> <header>Full risk ACO program with standard and complex care track options</header> <paragraph id="H3F59862119074E95BB2B095446859020"> <enum>(1)</enum> <header>In general</header> <text>An ACO participating in this program is a group of providers and suppliers focused on individualizing care to meet the specific needs of Traditional Medicare beneficiaries by emphasizing advanced primary care, care coordination, and the delivery of care in alternate settings for beneficiaries needing medical and nonmedical assistance in managing their health.</text>
+            </paragraph>
+            <paragraph id="H3E5B440589134F3FA55BE50151D2CA25">
+              <enum>(2)</enum>
+              <header>Requirements</header>
+ <text>In order to participate in the program under this program, an ACO:</text> <subparagraph id="H7722978A271E4CB9B78A0575FEE60A99"> <enum>(A)</enum> <text>Must be formed by the following ACO participants or combinations of ACO participants, consistent with the Medicare Shared Savings Program:</text>
+                <clause id="H004991BCB0434FB7A3C738F91B80645E">
+                  <enum>(i)</enum>
+ <text>ACO professionals in group practice arrangements.</text> </clause> <clause id="H7121DC7068584A3E9D5E9F35027E5300"> <enum>(ii)</enum> <text>Networks of individual practices of ACO professionals.</text>
+                </clause>
+                <clause id="HB17E885840064B08B82537883F8820D3">
+                  <enum>(iii)</enum>
+ <text>Partnerships or joint venture arrangements between hospitals and ACO professionals.</text>
+                </clause>
+                <clause id="H84067D075B854351B7C87AD61B1E29D2">
+                  <enum>(iv)</enum>
+ <text>Hospitals employing ACO professionals.</text> </clause> <clause id="H3DC198BAE99E45A9AEB68A57C179CA9B"> <enum>(v)</enum> <text>CAHs that bill under Method II (as described in section 413.70(b)(3) of this chapter).</text>
+                </clause>
+                <clause id="H41766B53E0C043678A7CDDA53AD5062E">
+                  <enum>(vi)</enum>
+ <text>RHCs.</text> </clause> <clause id="HCF5BF881BD844A6B9CDF644A44EDA024"> <enum>(vii)</enum> <text>FQHCs.</text>
+                </clause>
+                <clause id="H65DA44700AAE45B9B5FC0BCFC997572F">
+                  <enum>(viii)</enum>
+ <text>Teaching hospitals that have elected under section 415.160 of this subchapter to receive payment on a reasonable cost basis for the direct medical and surgical services of their physicians.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H6CA06A5BCB894E69B1B21019951DBE50">
+                <enum>(B)</enum>
+ <text>Shall be structured to allow the organization to receive and distribute payments for services and performance incentives to participant and preferred providers and suppliers.</text>
+              </subparagraph>
+              <subparagraph id="HB18EFDCE070345598F89F41BFA8BC435">
+                <enum>(C)</enum>
+ <text>Shall include a sufficient number and type of providers for the Medicare fee-for-service beneficiaries aligned or assigned to the ACO, as determined by the Secretary.</text>
+              </subparagraph>
+              <subparagraph id="HC7263C3DED264EF59AAC091D199F5706">
+                <enum>(D)</enum>
+ <text>Shall serve a required minimum number of aligned and/or attributed beneficiaries.</text>
+                <clause id="H1BCCA4A900B84061BC3A65A91B6B536B">
+                  <enum>(i)</enum>
+ <text>A Standard Full Risk ACO shall have at least 2,500 aligned and/or assigned beneficiaries.</text>
+                </clause>
+                <clause id="H82B9388EE7D64567ACD0F98518D7455F">
+                  <enum>(ii)</enum>
+ <text>A complex care full risk ACO shall have at least 250 aligned and/or assigned beneficiaries in the first year; at least 500 aligned or assigned beneficiaries in the second year; and at least 1,000 aligned and/or assigned beneficiaries in the third year and in every participation year after that.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H6E33E21FD63248CF9E35E7A05F435DE2">
+                <enum>(E)</enum>
+ <text>May establish <quote>preferred provider</quote> relationships, and may pay such providers a portion or all of the provider’s fee-for-service claims in lieu of fee-for-service reimbursement from CMS.</text>
+              </subparagraph>
+              <subparagraph id="H9E6D081809164F77887B627596396D88">
+                <enum>(F)</enum>
+ <text>Shall have a financial guarantee mechanism in place commensurate with the financial arrangement selected in this program.</text>
+              </subparagraph>
+              <subparagraph id="HF1E78616C45A4AA599C12D3B7B4C3B3B">
+                <enum>(G)</enum>
+ <text>Shall enter into an agreement with the Secretary to participate in the program for a five-year period. The agreement may be renewed for additional performance periods.</text>
+              </subparagraph>
+              <subparagraph id="H253D322E20D643FDB738416E7F715BBE">
+                <enum>(H)</enum>
+ <text>Shall permit participation in the program at the TIN-NPI level.</text> </subparagraph> </paragraph> <paragraph id="H9F9EE77D9FB7461AAED9346E7BDD1488"> <enum>(3)</enum> <header>Clinical services</header> <text>An ACO participating in this program shall provide individualized care to meet the specific needs of Medicare fee-for-service beneficiaries attributed or aligned to the ACO. This may include the following:</text>
+              <subparagraph id="HE385E823E31E4BEFAD44674181FC18E3">
+                <enum>(A)</enum>
+ <text>Coordinated care across the care continuum, including transitions.</text> </subparagraph> <subparagraph id="H4B15EDC8FC7A47CB8B74909883CD4078"> <enum>(B)</enum> <text>Social support services.</text>
+              </subparagraph>
+              <subparagraph id="HD99DAD5037824EDF925ADDAF5313FCED">
+                <enum>(C)</enum>
+ <text>Behavioral health services.</text> </subparagraph> <subparagraph id="HC4773AEEC51B44F7A298AEFA6290DEFE"> <enum>(D)</enum> <text>Nonvisit-based care (including email, text, phone, video, or other technology).</text>
+              </subparagraph>
+              <subparagraph id="H0DAB7CF5873B4D34961E8D69A1E37418">
+                <enum>(E)</enum>
+ <text>Extended care access options and technology platforms enabling patient stratification, outcomes tracking, and practice-based population management.</text>
+              </subparagraph>
+              <subparagraph id="H0737F266ADA84AA98B946EB3068312CA">
+                <enum>(F)</enum>
+ <text>In-home care.</text> </subparagraph> <subparagraph id="H62BB8ADFABB04EC7A84C7B43EE548E8D"> <enum>(G)</enum> <text>Palliative care.</text>
+              </subparagraph>
+              <subparagraph id="H07278D5A7B044F5187D50BB8D6C112D5">
+                <enum>(H)</enum>
+ <text>Other items and services as determined appropriate by the Secretary.</text> </subparagraph> </paragraph> <paragraph id="H04A942F7231440B7AD46968065EE37EA"> <enum>(4)</enum> <header>Quality and reporting requirements</header> <text>The Secretary shall develop quality performance standards for full risk ACOs.</text>
+              <subparagraph id="H9E7A9C9A1EDB4BAAAD734870D63507FC">
+                <enum>(A)</enum>
+                <header>Standard Full Risk ACOs</header>
+ <text>The Secretary shall deploy a limited set of quality measures that prioritize patient experience and health outcomes while reducing clinician burden.</text>
+              </subparagraph>
+              <subparagraph id="H562912999B03495B964A7BDE646CFB5B">
+                <enum>(B)</enum>
+                <header>Additional Requirement for Quality Performance for Complex Care Full Risk
+                  ACOs</header>
+ <text>The Secretary shall deploy the quality measures in (c)(4)(A) and include a Days at Home measure.</text>
+              </subparagraph>
+              <subparagraph id="H046587ECE98C4BB9A80DBDFD76F8529F">
+                <enum>(C)</enum>
+                <header>Overlap with Medicare Access and CHIP Reauthorization Act</header>
+ <text>All full risk ACO program participants shall be exempt from the Merit-Based Incentive Payment System (MIPS).</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H4A21794D5AAD4834ACB9F53E5B606BAE">
+              <enum>(5)</enum>
+              <header>Beneficiary communications</header>
+ <text>The Secretary shall promulgate requirements for ACO marketing to Medicare fee-for-service beneficiaries that educates and informs beneficiaries about their care options.</text>
+            </paragraph>
+          </subsection> 
+<subsection id="HD5F1933FECDD4CFA9C2A6683574A0FD7">
+            <enum>(d)</enum>
+            <header>Payment arrangements for ACOs, participant and preferred providers</header>
+            <paragraph id="HA36C6E56C603483C9605F347860EA5B5">
+              <enum>(1)</enum>
+              <header>In general</header>
+ <text>A full risk ACO is eligible to receive the following payments under the program under this section:</text>
+              <subparagraph id="HAA2E890BF79042C6BDE5CE7ACEB8F55C">
+                <enum>(A)</enum>
+                <header>Primary care capitation</header>
+ <text>A per-beneficiary, per-month capitated payment for primary care services provided by Participant Providers and preferred providers who have opted into the capitated arrangement with the full risk ACO reflective of the predicted Medicare Part B costs representing professional services for which the ACO is directly responsible. In a given year, such payment may be up to 7 percent of the total health care spending for the beneficiary under this title for the year. The program shall include a repayment mechanism for the primary care capitation to ensure that this does not result in additional Medicare spending.</text>
+              </subparagraph>
+              <subparagraph id="H3D36D78C02384CFAA13191CD6B48102D">
+                <enum>(B)</enum>
+                <header>Total Care Capitation</header>
+ <text>A per-beneficiary, per-month capitated payment for all Medicare Part A and Part B services provided to aligned beneficiaries by all Participant Providers and by preferred providers who have opted into the capitated arrangement. The TCC payment amount will reflect the estimated total cost of care for the full risk ACO’s aligned population for services provided by the providers participating in the capitation mechanism. Providers that elect to participate in Total Care Capitation will agree to a 100 percent reduction of their fee-for-service claims.</text>
+              </subparagraph>
+              <subparagraph id="H37946E09ED1B4FBB99D235836D91AF53">
+                <enum>(C)</enum>
+                <header>Option for Claims Reduction and Population-Based Payment</header>
+ <text>Full Risk ACOs can enter into arrangements whereby CMS would reduce claims payments for aligned beneficiaries for Participant and Preferred Providers and CMS would make a monthly payment to the ACO equivalent to the estimated value of the FFS claims reductions for those services.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H1B82978F3848410CBCED4A33943B2F61">
+              <enum>(2)</enum>
+              <header>Financial arrangements</header>
+              <subparagraph id="H14A22D6E0E09475B9BE74F035B6E07DA">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>This program shall offer full financial risk for participant ACOs.</text> </subparagraph> <subparagraph id="HF99FBD437F8E4804A63824A5769756F0"> <enum>(B)</enum> <header>Financial arrangements</header> <text>The Secretary shall make multiple financial arrangements available to ACOs, reflecting varying experience with and ability to assume risk for Medicare fee-for-service beneficiaries. The Secretary shall make one or more financial arrangements available to ACOs under both of the following solutions:</text>
+                <clause id="HFB292B8D77074B5082EDDEC137E325DE">
+                  <enum>(i)</enum>
+                  <header>Full risk arrangement</header>
+ <text>ACOs participating in full risk arrangements shall share in 100 percent of savings and losses, subject to a discount and risk corridors.</text>
+                </clause>
+                <clause id="H55613A5A8F6D4753BF774E5B0D4C8384">
+                  <enum>(ii)</enum>
+                  <header>Discount</header>
+ <text>The Secretary shall determine and apply a discount to the full risk ACO’s benchmark.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="HDD95F12B299D47E38FFBDE59A2E85508">
+                <enum>(C)</enum>
+                <header>Benchmark for standard full risk acos</header>
+ <text>The benchmark for Standard Full Risk ACOs shall be developed by—</text> <clause id="HADC82604965040ADA358517A0226D07E"> <enum>(i)</enum> <text>calculating the ACOs historical baseline spending for its aligned beneficiary population;</text>
+                </clause>
+                <clause id="HF639900B29C74054BC8BA1D326BD7E8B">
+                  <enum>(ii)</enum>
+ <text>trending the historical baseline expenditures forward based on an adjusted version of the U.S. Per Capita Cost growth trend;</text>
+                </clause>
+                <clause id="H17308E089F4F4EBF962819E05FA5711E">
+                  <enum>(iii)</enum>
+ <text>blending the historical baseline expenditures with regional expenditures using an adjusted Medicare Advantage rate book;</text>
+                </clause>
+                <clause id="H701CDE4C704343E4B32F41636103E187">
+                  <enum>(iv)</enum>
+ <text>risk adjust the blended expenditures; and</text> </clause> <clause id="HB3CCDD630E524F16BE353384460D3F65"> <enum>(v)</enum> <text>apply the discount.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H9CED074DBE4244B985CF77798ED5BBBA">
+                <enum>(D)</enum>
+                <header>Benchmark for Complex Care Full Risk ACOs</header>
+ <text>The benchmarking methodology for Complex Care Full Risk ACOs shall be developed separately, taking into account the appropriate weighting of the regional component (at least half) and remove the ceiling on the regional blend.</text>
+              </subparagraph>
+              <subparagraph id="HF05F3DC5305242A5AD2B3E71669495E0">
+                <enum>(E)</enum>
+                <header>Risk Corridors</header>
+ <text>The Secretary shall develop risk corridors appropriate to this program.</text> </subparagraph> </paragraph> </subsection> <subsection id="H6AE45A9DC0C145159A04955F0A323759"><enum>(e)</enum><header>Risk adjustment</header> <paragraph id="H7EBA1CF20CF24A47B53BF71E26C6AF36"><enum>(1)</enum><header>Prospective risk adjustment</header><text>Subject to paragraph (2), the Secretary shall use prospective risk adjustment for a standard full risk ACO. Risk adjustment methodologies should be identical to Medicare Advantage to the extent practical.</text></paragraph> 
+<paragraph id="H288DCE988CF44C6DBF45068F60F67F67"><enum>(2)</enum><header>Concurrent risk adjustment for complex care full risk ACO</header><text>The Secretary shall use concurrent risk adjustment to adjust the benchmark for a complex care full risk ACO.</text></paragraph></subsection> <subsection id="H03CF88F1EEF5424CB5E39216BFC598B4"><enum>(f)</enum><header>Beneficiary assignment</header> <paragraph id="H6E4DEA3174DB44DEBE609F68B7BDD5F7"><enum>(1)</enum><header>In general</header><text>Full Risk ACO program participants shall use the Medicare Shared Savings Program alignment and assignment methodologies, including a choice of prospective assignment or prospective assignment with retrospective reconciliation.</text></paragraph> 
+<paragraph id="HD54A13F79C704A458452A08BCE9E61C9"><enum>(2)</enum><header>Signed Voluntary Alignment</header><text>In addition to the methodology in subsection (f)(1), Standard and Complex Care Full Risk ACOs shall be permitted to use signed voluntary alignment. Such alignment shall take effect on a monthly basis.</text></paragraph> <paragraph id="H765AF5E54959477AB3E2D220249AF007"><enum>(3)</enum><header>Opt-out</header><text>Medicare beneficiaries shall have the ability to opt out of participating in the full risk ACO program.</text></paragraph></subsection> 
+<subsection id="HA692EB4CA263493392C42F75AD2E07F5"><enum>(g)</enum><header>Waivers</header><text>The Secretary may waive such provisions of this title and title XI as the Secretary determines necessary in order to implement the demonstration program.</text></subsection> <subsection id="HA062C40567144EDEA7EEF39EBB832432"><enum>(h)</enum><header>Data</header><text>The Secretary shall provide to program participants under this section regular reports with up-to-date provider claims data and payment information with respect to Medicare fee-for-service beneficiaries attributed or aligned in the ACO and shall provide other data to ACOs as necessary.</text></subsection> 
+<subsection id="H7A9F498374C84813B1380D47D46161B9"><enum>(i)</enum><header>Treatment under the medicare access and CHIP Reauthorization Act</header><text>An ACO participating in this program shall be considered an <quote>advanced alternative payment model</quote>.</text></subsection> <subsection id="HFA9D2D02E680445BB0D3B89D3C229F6F"><enum>(j)</enum><header>Definitions</header><text>In this section:</text> 
+<paragraph id="H74A01A0AA00342289C769419D4E84CFA"><enum>(1)</enum><header>Concurrent risk adjustment</header><text>The term <quote>concurrent risk adjustment</quote> means a risk adjustment model that uses current year diagnoses, demographics, and other factors to predict cost in that same year.</text></paragraph> <paragraph id="H4633AF6FC2204B458832C78AD9586C5B"><enum>(2)</enum><header>Medicare fee-for-service beneficiary</header><text>The term <quote>Medicare fee-for-service beneficiary</quote> means an individual who is enrolled in the original Medicare fee-for-service program under parts A and B and is not enrolled in a Medicare Advantage plan under part C, an eligible organization under section 1876, or a PACE program under section 1894.</text></paragraph> 
+<paragraph id="HC80E24B6967B40B0B1A1B2BD515238CB"><enum>(3)</enum><header>Physician</header><text>The term <quote>physician</quote> means a physician as defined in section 1861(r)(1).</text></paragraph> <paragraph id="H2F3F3F00EF3C40C7B17EAC0BEA02D866"><enum>(4)</enum><header>Standard full risk ACO</header><text>The term <quote>standard full risk ACO</quote> means an ACO composed of Medicare fee-for-service beneficiaries, less than two-thirds of which have six or more chronic co-morbidities.</text></paragraph> 
+<paragraph id="H219BB38CBEA646D5B199593F46FFACF6"><enum>(5)</enum><header>Complex care full risk ACO</header><text>The term <quote>complex care full risk ACO</quote> means an ACO composed of Medicare fee-for-services beneficiaries, at least two-thirds of which have six or more chronic co-morbidities.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </section> </legis-body></bill>
+

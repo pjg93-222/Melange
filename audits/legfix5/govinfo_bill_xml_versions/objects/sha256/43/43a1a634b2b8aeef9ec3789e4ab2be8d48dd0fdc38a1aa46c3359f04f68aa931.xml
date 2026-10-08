@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" bill-type="olc" dms-id="H27B3B966E92640698F12B4EB3E5B57E5" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 758 : Cooperate with Law Enforcement Agencies and Watch Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IIB</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 758</legis-num>
+		<current-chamber display="yes">IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date date="20190312">March 12, 2019</action-date><action-desc>Received; read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To provide a safe harbor for financial institutions that maintain a customer account or customer
+			 transaction at the request of a Federal or State law enforcement agency.</official-title>
+	</form>
+	<legis-body id="HD989778E31504C97837BC4F30CE215F8" style="OLC">
+ <section id="H3CF6CA214A8047179537D3C3B774584C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Cooperate with Law Enforcement Agencies and Watch Act of 2019</short-title></quote>.</text> </section><section id="H600AE4FCA20449E7B912B85A34385A90"><enum>2.</enum><header>Safe harbor with respect to keep open letters</header> <subsection id="HC1BC432E06ED4C07A95A27D0DDC258C4"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subchapter II of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/53">chapter 53</external-xref> of title 31, United States Code, is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="HEFF2C6F3057B4C1F847BF80680BAE5B2" style="USC">
+					<section id="HBE3DFE42C5B74E2CADF4285B876B5DBF"><enum>5333.</enum><header>Safe harbor with respect to keep open letters</header>
+ <subsection id="H37ABC81BD5C84DE88D7CB3AACF124E1A"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">With respect to a customer account or customer transaction of a financial institution, if a Federal, State, Tribal, or local law enforcement agency requests, in writing, the financial institution to keep such account or transaction open—</text>
+ <paragraph id="H4AD01CE3AF154EC0A44E25296E1723CF"><enum>(1)</enum><text display-inline="yes-display-inline">the financial institution shall not be liable under this subchapter for maintaining such account or transaction consistent with the parameters of the request; and</text>
+ </paragraph><paragraph id="HE4A74D4597F840C2B28719C7649DFDB4"><enum>(2)</enum><text display-inline="yes-display-inline">no Federal or State department or agency may take any adverse supervisory action under this subchapter with respect to the financial institution for maintaining such account or transaction consistent with the parameters of the request.</text>
+ </paragraph></subsection><subsection id="H865D3398D32542C2BCBE1E904682D67A"><enum>(b)</enum><header>Rule of construction</header><text display-inline="yes-display-inline">Nothing in this section may be construed—</text> <paragraph id="H33E1E2341B08427F971A70B48A61578D"><enum>(1)</enum><text>from preventing a Federal or State department or agency from verifying the validity of a written request described under subsection (a) with the Federal, State, Tribal, or local law enforcement agency making the written request; or</text>
+ </paragraph><paragraph id="H1972EAF73B264FC7AC6C7A6AA9B3573D"><enum>(2)</enum><text>to relieve a financial institution from complying with any reporting requirements, including the reporting of suspicious transactions under section 5318(g).</text>
+ </paragraph></subsection><subsection id="H98F35C7C6C1748B1B1F70941F769A08D"><enum>(c)</enum><header>Letter termination date</header><text display-inline="yes-display-inline">For purposes of this section, any written request described under subsection (a) shall include a termination date after which such request shall no longer apply.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H5BAFF306DFE04344BE6D9E2AFAA160D3"><enum>(b)</enum><header>Clerical amendment</header><text>The table of contents for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/53">chapter 53</external-xref> of title 31, United States Code, is amended by inserting after the item relating to <external-xref legal-doc="usc" parsable-cite="usc/31/5332">section 5332</external-xref> the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H95D4975730DA4538821375E76FBBF578" style="USC">
+					<toc regeneration="no-regeneration">
+						<toc-entry level="section">5333. Safe harbor with respect to keep open letters.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection></section><section id="H0DB3C43ECC8242E8B8635D4CD2053105"><enum>3.</enum><header>Determination of Budgetary Effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text>
+		</section></legis-body>
+	<attestation><attestation-group><attestation-date chamber="House" date="20190311">Passed the House of Representatives March 11, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk</role></attestation-group></attestation>
+</bill>
+
+

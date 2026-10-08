@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H7B4EC21F49AA4807AD06CFCEBB776D85" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3018 IH: Ensuring Equal Access to Shelter Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3018</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190523">May 23, 2019</action-date><action-desc><sponsor name-id="W000825">Ms. Wexton</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To prohibit the Secretary of Housing and Urban Development from implementing a proposed rule
+			 regarding requirements under Community Planning and Development housing
+			 programs.</official-title></form>
+	<legis-body id="H605B6FA2F9404211A9E4C33325EA4EF7" style="OLC">
+ <section id="H043D199084D9459B893D59D3C9BD1CEA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Ensuring Equal Access to Shelter Act of 2019</short-title></quote>.</text> </section><section id="HC5BE4816536149B4BBBEB56D8B017C34" section-type="subsequent-section"><enum>2.</enum><header>Prohibition</header><text display-inline="no-display-inline">The Secretary of Housing and Urban Development may not implement, administer, enforce, or in any manner make effective the proposed rule entitled <quote>Revised Requirements Under Community Planning and Development Housing Programs</quote>, published by the Department of Housing and Urban Development in Spring 2019 (Docket No. FR–6152), or any final rule based substantially on such proposed rule.</text>
+		</section></legis-body></bill>
+
+

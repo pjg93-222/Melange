@@ -1,0 +1,242 @@
+== Q5 artifact mtime census (run window 2026-09-19 15:46-16:14 local) ==
+  Sentinel Bill Ledger.xlsx                                            2026-09-19 15:47:29    4121163 bytes  IN-WINDOW
+  data/members/collector_roster_updates.ndjson                         2026-09-19 15:46:36      59431 bytes  IN-WINDOW
+  data/members/collector_roster_pending.ndjson                         2026-09-19 15:46:36       5712 bytes  IN-WINDOW
+  data/members/sentinel_verified_membership_history.ndjson             2026-09-19 15:46:38     471958 bytes  IN-WINDOW
+  data/engine/sentinel_verified_membership_history_receipt.json        2026-09-19 15:46:38       9066 bytes  IN-WINDOW
+  data/engine/sentinel_bill_workbook_receipt.json                      2026-09-19 15:47:30     123819 bytes  IN-WINDOW
+  data/engine/collector_roster_updates_receipt.json                    2026-09-19 15:46:36      53811 bytes  IN-WINDOW
+  data/legislation/official_membership_movements.json                  2026-09-19 15:46:36    5240189 bytes  IN-WINDOW
+  data/legislation/sentinel_admissions.json                            2026-09-13 10:43:18     808859 bytes  outside
+  data/engine/sentinel_admission_policy.json                           2026-09-08 18:54:43        452 bytes  outside
+  bill_repository_live.json                                            2026-09-19 15:46:27    3817551 bytes  IN-WINDOW
+  bill_repository_live.json.lastgood                                   2026-09-14 00:38:29    3808966 bytes  outside
+  data/engine/congress_bill_refresh_receipt.json                       2026-09-19 16:13:43       1398 bytes  IN-WINDOW
+  archive_leg.json                                                     2026-09-19 15:47:37     120302 bytes  IN-WINDOW
+  legislation_routing_audit.json                                       2026-09-19 15:47:37    5756120 bytes  IN-WINDOW
+  congress_bills_archive_20260825_115305.xlsx                          2026-08-25 11:54:47     814147 bytes  outside
+  manual_bill_evidence.csv                                             2026-07-29 00:40:26     223983 bytes  outside
+  ranks_python.json                                                    2026-09-19 15:53:44     540471 bytes  IN-WINDOW
+  data/engine/live_legislative_pillar.json                             2026-09-19 15:53:44     306066 bytes  IN-WINDOW
+  data/engine/pillar_inputs_snapshot.json                              2026-09-03 21:04:35      39702 bytes  outside
+  data/money/fec_refresh_current.json                                  2026-09-16 23:33:22      93626 bytes  outside
+  member_desk_bundle.json                                              2026-09-19 16:08:06   77593780 bytes  IN-WINDOW
+  data/legislation/congress_advanced_current/congress_advanced_records.ndjson 2026-09-13 09:58:38   53177717 bytes  outside
+  legislation_adjudication_ledger.ndjson                               2026-07-28 19:55:26    4735717 bytes  outside
+  data/legislation/supplemental_adjudications.ndjson                   2026-09-06 18:15:09      13732 bytes  outside
+  data/members/formal_visibility_roles.json                            2026-07-14 16:57:19       4501 bytes  outside
+
+== sentinel_bill_workbook_receipt.json (written by sync_sentinel_bill_ledger.py) ==
+{
+ "artifact_process_exit": 3221226505,
+ "artifact_process_exit_hex": "0xc0000409",
+ "artifact_process_teardown_nonzero": true,
+ "artifact_report": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\outputs\\sentinel_bill_ledger_20260919T194638Z\\sentinel_bill_workbook_artifact_report.json",
+ "artifact_report_sha256": "05ba90b0e1dae45cf8ce909c34175dae78373979baee1e1f57ab60888b3ab8b4",
+ "automatic_admissions": {
+  "decisions": {
+   "119:hr:10017": {
+    "authority": "automated_official_evidence_policy",
+    "categories": [],
+    "confidence": "high",
+    "disposition": "exclude",
+    "policy": "official-cu-admission-2026-09-08-v1",
+    "rationale": "The bill's sole operative provision amends Section 16A of the Federal Reserve Act to permanently bar the Board of Governors of the Federal Reserve System or a Federal reserve bank from issuing or creating a central bank digital currency, by striking existing subsection (d) and redesignating subsection (e). The entire text of the bill (short title plus one substantive section) contains no reference to credit unions, the National Credit Union Administration, the Federal Credit Union Act, or any credit-union-specific payments, examination, capital, or charter provision. The measure governs only the Federal Reserve's own authority to issue a CBDC; it does not authorize, restrict, or condition any credit union activity, does not create a pilot program involving depository institutions, and does not alter any statute administered by NCUA. Because there is no operative textual hook establishing a material nexus to credit unions in any allowed category, and the full bill text is available (not partial or ambiguous), this is an affirmative off-topic determination rather than an uncertainty requiring hold."
+   },
+   "119:hr:10082": {
+    "authority": "automated_official_evidence_policy",
+    "categories": [
+     {
+      "category": "Charter Modernization",
+      "direction": 1,
+      "quote": "in the marketable obligations, bonds, notes, or other instruments of indebtedness of any agency, association, or company whose membership or ownership is not restricted to Federal credit unions and the members of credit unions or organizations of credit unions and that is not designed primarily to serve or otherwise assist credit union operations, except that no credit union may invest more than 10 per centum of its paid-in unimpaired capital and surplus in the obligations of any one issuer",
+      "rationale": "The bill amends Section 107(7) and 107(15) of the FCU Act to add two new categories of permissible investments (corporate debt obligations and asset-backed securities) that Federal credit unions were not previously authorized to hold, directly expanding the statutory powers/charter authority of FCUs. This is a positive, pro-credit-union modernization of investment powers, giving FCUs parity-like flexibility with other depository institutions to diversify balance sheets and manage interest-rate/liquidity risk, subject to prudential caps and future NCUA rulemaking.",
+      "source_url": "https://www.govinfo.gov/content/pkg/BILLS-119hr10082ih/xml/BILLS-119hr10082ih.xml"
+     }
+    ],
+    "confidence": "high",
+    "disposition": "include",
+    "policy": "official-cu-admission-2026-09-08-v1",
+    "rationale": "H.R. 10082 directly amends the Federal Credit Union Act's investment authority provisions (12 U.S.C. 1757(7) and (15)) to permit Federal credit unions to invest in corporate debt obligations of non-c
+
+== collector_roster_updates_receipt.json ==
+{
+ "accepted": [
+  {
+   "bill": "H.R.4686",
+   "bioguide": "L000596",
+   "congress": "118",
+   "date": "2023-07-17",
+   "member": "Anna Luna",
+   "role": "sponsor"
+  },
+  {
+   "bill": "H.R.6410",
+   "bioguide": "L000596",
+   "congress": "118",
+   "date": "2023-11-14",
+   "member": "Anna Luna",
+   "role": "sponsor"
+  },
+  {
+   "bill": "H.R.1181",
+   "bioguide": "M001235",
+   "congress": "119",
+   "date": "2025-02-11",
+   "member": "Riley Moore",
+   "role": "sponsor"
+  },
+  {
+   "bill": "H.R.2094",
+   "bioguide": "B001287",
+   "congress": "119",
+   "date": "2026-08-31",
+   "member": "Ami Bera",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.2094",
+   "bioguide": "L000607",
+   "congress": "119",
+   "date": "2026-08-31",
+   "member": "Sam Liccardo",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.4167",
+   "bioguide": "S001159",
+   "congress": "119",
+   "date": "2026-09-15",
+   "member": "Marilyn Strickland",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.4936",
+   "bioguide": "B001282",
+   "congress": "119",
+   "date": "2026-09-10",
+   "member": "Andy Barr",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.4936",
+   "bioguide": "G000606",
+   "congress": "119",
+   "date": "2026-09-14",
+   "member": "Adelita Grijalva",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.5689",
+   "bioguide": "H001081",
+   "congress": "119",
+   "date": "2026-09-16",
+   "member": "Jahana Hayes",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.7035",
+   "bioguide": "W000829",
+   "congress": "119",
+   "date": "2026-09-15",
+   "member": "Tony Wied",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.9668",
+   "bioguide": "W000830",
+   "congress": "119",
+   "date": "2026-09-15",
+   "member": "George Whitesides",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.987",
+   "bioguide": "S001212",
+   "congress": "119",
+   "date": "2026-08-31",
+   "member": "Pete Stauber",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.987",
+   "bioguide": "M001222",
+   "congress": "119",
+   "date": "2026-09-08",
+   "member": "Max Miller",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.987",
+   "bioguide": "M001235",
+   "congress": "119",
+   "date": "2026-09-08",
+   "member": "Riley Moore",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.987",
+   "bioguide": "R000610",
+   "congress": "119",
+   "date": "2026-09-08",
+   "member": "Guy Reschenthaler",
+   "role": "cosponsor"
+  },
+  {
+   "bill": "H.R.987",
+   "bioguide": "M001224",
+   "congress": "119",
+   "date": "2026-09-08",
+   "member": "Nathaniel Moran",
+   "rol
+
+== Q6 champions threat boards vs live crown set ==
+  boards.json path : C:\Users\pgoff\AppData\Local\Melange\lda_rebuild\derived\champions_v2\boards.json
+  boards.json mtime: 2026-09-19 16:04:08
+  threat rows: 30 | champion rows: 133 | sectors: ['bank', 'credit_union', 'crypto', 'fintech']
+  live tier-1 crowns in member_desk_bundle.json: 13
+  THE MISMATCH -- threat rows whose bioguide is a live tier-1 crown: 1
+    sector=bank                   bioguide=S000250  board name=Pete Sessions              live desk name=Pete Sessions              board tier=None
+  live desk tier histogram: {0: 448, 1: 13, 2: 24, 3: 48}
+  BEFORE member_desk_bundle.json: no before copy exists in backups\ -> before crown set UNKNOWN
+
+== Q7 staleness gates ==
+  evaluated at (UTC): 2026-09-19T20:48:11+00:00
+
+  [1] sentinel_admissions.json  (data/legislation/sentinel_admissions.json)
+      byte-identical to the before copy: True   (sha256 2eed6f0059d49194 vs 2eed6f0059d49194)
+      generation checked_at            : '2026-09-13T13:58:40.583324+00:00'
+      per-bill decision checked_at stamps found: 102
+      OLDEST per-bill decision checked_at: 2026-09-13T03:41:10.844790+00:00
+      NEWEST per-bill decision checked_at: 2026-09-13T13:58:40.583324+00:00
+      fail-closed code: fec/legislation/sentinel_admissions.py:24  def load(root, *, max_age_days=8)
+      fail-closed code: fec/legislation/sentinel_admissions.py:33  if not -300 <= age <= max_age_days * 86400: raise ValueError('sentinel admissions are outside their freshness window')
+      fail-closed code: fec/legislation/sentinel_admissions.py:45  per-bill: raise ValueError('individual bill admission is stale')
+      EXPIRY (generation)    : 2026-09-13T13:58:40.583324+00:00 + 8d = 2026-09-21T13:58:40.583324+00:00   (age now 6.28 d)
+      EXPIRY (oldest per-bill): 2026-09-13T03:41:10.844790+00:00 + 8d = 2026-09-21T03:41:10.844790+00:00   (age now 6.71 d)
+
+  [2] official_membership_movements.json
+      checked_at: 2026-09-19T19:46:30Z  (was 2026-09-14T04:38:34Z in the before copy)
+      fail-closed code: fec/legislation/official_membership_movements.py:74-75
+        age=(datetime.now(timezone.utc)-datetime.fromisoformat(d['checked_at'].replace('Z','+00:00'))).total_seconds()
+        if not -300<=age<=8*86400: raise ValueError('official membership facts are stale')
+      EXPIRY: 2026-09-19T19:46:30+00:00 + 8d = 2026-09-27T19:46:30+00:00  (age now 0.04 d)
+      ALSO hash-bound: official_membership_movements.py:71 refuses if repository_sha256 != sha256(bill_repository_live.json)
+
+  [3] data/money/fec_refresh_current.json
+      mtime 2026-09-16 23:33:22 | status 'PASS' | checked_at '2026-09-17T03:28:51.082845+00:00' | cycle 2026
+      latest_attributed_transaction_date '2026-08-21'
+
+  [4] data/engine/pillar_inputs_snapshot.json  ('pillar snapshot vintage <= 14 days')
+      stamped: '2026-09-03T21:04:35-04:00'  | file mtime 2026-09-03 21:04:35
+      gate code: fec/audit/audit_full.py:815  ck('pillar snapshot vintage <= 14 days (stale-basis tripwire)', _sn_age<=14, ...)
+      EXPIRY: 2026-09-03T21:04:35-04:00 + 14d = 2026-09-17T21:04:35-04:00  (age now 15 d -> ALREADY FAILING)
+
+  [5] Sentinel Bill Ledger.xlsx  ('sentinel_ledger_freshness')
+      mtime 2026-09-19 15:47:29
+
+== formal_visibility_roles.json (ROLE REGISTRY) ==
+  file  : data/members/formal_visibility_roles.json
+  field : valid_until = '2027-01-03'  | schema 'party-elite-influence-roles-v3' | members 27
+  gate  : fec/engine/compute_pillars.py:126 if datetime.date.today()>=date.fromisoformat(_roles['valid_until']): raise ValueError('registry expired')
+  warn  : fec/engine/compute_pillars.py:144-146 (<=120 days)

@@ -1,24 +1,29 @@
 """Cached live graph API and independent advocacy-routing overlay."""
 from __future__ import annotations
 
-from collections import OrderedDict, Counter, defaultdict
+from collections import OrderedDict, Counter, defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
+import gc
 import gzip
 import hashlib
 import json
+import os
 import re
 import threading
 import time
 from copy import copy, deepcopy
+from dataclasses import dataclass
 
 try:
     from .staffer_live_server import IncrementalProfiles, LIVE_LAYERS, POLL_SECONDS, digest, freshness_now, utcnow
     from .staffer_office_routes import office_index, search_offices
+    from .staffer_search_index import ProfileSearchIndex, search_people
     from .staffer_connection_facts import PersonFacts, identity_profile_episodes, VERSION as OVERLAP_VERSION
     from .staffer_overlap_routes import OverlapRoutes, VERSION as AFFINITY_VERSION
     from .staffer_routing import AdvocacyRouter, VERSION as WORK_ROUTING_VERSION
+    from .staffer_route_cancel import RouteCancelled, cancel_scope, check_cancelled
     from .staffer_routing_evidence import load_evidence
     from .staffer_person_inventory import load_inventory, apply_identity_overlay
     from .staffer_activity_index import ActivityIndex
@@ -42,9 +47,11 @@ except ImportError:  # direct script execution: no package context
         _bootstrap_sys.path.insert(0, _bootstrap_root)
     from fec.surfaces.staffer_live_server import IncrementalProfiles, LIVE_LAYERS, POLL_SECONDS, digest, freshness_now, utcnow
     from fec.surfaces.staffer_office_routes import office_index, search_offices
+    from fec.surfaces.staffer_search_index import ProfileSearchIndex, search_people
     from fec.surfaces.staffer_connection_facts import PersonFacts, identity_profile_episodes, VERSION as OVERLAP_VERSION
     from fec.surfaces.staffer_overlap_routes import OverlapRoutes, VERSION as AFFINITY_VERSION
     from fec.surfaces.staffer_routing import AdvocacyRouter, VERSION as WORK_ROUTING_VERSION
+    from fec.surfaces.staffer_route_cancel import RouteCancelled, cancel_scope, check_cancelled
     from fec.surfaces.staffer_routing_evidence import load_evidence
     from fec.surfaces.staffer_person_inventory import load_inventory, apply_identity_overlay
     from fec.surfaces.staffer_activity_index import ActivityIndex
@@ -94,6 +101,115 @@ def bounded_put(cache, key, value, maximum=32):
     return value
 
 
+def routing_signature(nodes):
+    """Digest of every node field the work router reads: label, kind (or node_kind) and name_status.
+
+    AdvocacyRouter._person_allowed decides from exactly these, so equal
+    signatures mean the same people may be route nodes. The router's
+    nodes_revision moves only when this changes, which lets the routing caches
+    survive a refresh that rebuilds an equal mapping.
+    """
+    hasher = hashlib.blake2b(digest_size=16)
+    for ident, node in nodes.items():
+        hasher.update(repr((ident, node.get('label'), node.get('kind'), node.get('node_kind'), node.get('name_status'))).encode())
+    return hasher.hexdigest()
+
+
+def resolve_id(value, nodes, aliases, activity_provider):
+    """The node id a typed or source id stands for: an LDA source id, or a confirmed-identity alias, resolves to its person.
+
+    A pure function of the state it is given, so lock-free readers can resolve against the one view they hold.
+    """
+    value = str(value).strip()
+    if value.startswith('lda:lobbyist:'):
+        value = getattr(activity_provider, 'to_node', {}).get(value, 'person:' + value)
+    elif value.startswith('person:lda:lobbyist:') and value not in nodes:
+        # The node-id form of an LDA id folded into a spine person resolves like the bare source id.
+        value = getattr(activity_provider, 'to_node', {}).get(value.removeprefix('person:'), value)
+    seen = set()
+    while value in aliases and value not in seen:
+        seen.add(value)
+        value = aliases[value]
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ServiceView:
+    """Everything typeahead and the map read, taken together as one set of references.
+
+    A refresh builds the next view off to the side and publishes it with a single assignment (LiveService._view), so a
+    reader that takes the attribute once holds one generation's references (revision, static graph, profile people and
+    their search index, aliases, router, office index): it can never pair one revision with another generation's router
+    or profile index, and it needs no lock. The view cannot be edited, but it is not a frozen copy of the state behind
+    it, because successive views share objects and a refresh touches some of them. Every view shares the static graph:
+    before it publishes, a refresh assigns each person node's `contacts`, outside the lock, on nodes the previous
+    view also reads (and one that rebuilds the router adds user-statement hub nodes to the graph's nodes).
+    A refresh that finds the same routing inputs keeps the router and, under the service lock, reassigns its `nodes`
+    mapping (and bumps `nodes_revision` only when a label, kind or name status differs), which a reader still holding
+    the previous view then sees. Each of those is a single reference assignment, so a reader gets the old object or
+    the new one, never a half-written one; but one answer can combine the view it took with the newer `router.nodes`
+    or `contacts` of the next generation. The live fields a snapshot reports are taken in the same lock hold as the
+    view (see `_snapshot`).
+    """
+    revision: str
+    static: object
+    profile_nodes: dict
+    profile_search: list
+    aliases: dict
+    activity_provider: object
+    router: object
+    office_index: dict
+    excluded: object
+    index: ProfileSearchIndex
+
+
+class _RefreshMemo:
+    """What an unchanged refresh derived, with every object it was derived from.
+
+    The key names the accepted profile snapshot (content revision, prefix hash, receipt digest); the environment is
+    the static graph and its pending assertions, the identity aliases, the activity provider, the profile reader, the
+    contacts and the router. The objects are held, so comparing them by identity is exact. A refresh whose inputs all
+    match keeps the structures it published and rebuilds nothing; any difference, or a forced refresh, rebuilds.
+    """
+    __slots__ = ('key', 'environment', 'profile_nodes', 'profile_edges', 'by_person', 'search', 'nodes', 'digests')
+
+    def __init__(self, key, environment, profile_nodes, profile_edges, by_person, search, nodes, digests):
+        self.key, self.environment = key, environment
+        self.profile_nodes, self.profile_edges, self.by_person, self.search = profile_nodes, profile_edges, by_person, search
+        self.nodes, self.digests = nodes, digests
+
+    def matches(self, service, key):
+        return self.key == key and all(a is b for a, b in zip(self.environment, service._memo_environment()))
+
+
+# A queued or running route search that no client has asked about for this long
+# is cancelled; the sweeper wakes every ROUTE_REAP_SECONDS to look. Chrome slows
+# the timers of a tab hidden for over five minutes to about one wake-up a minute,
+# so a poll can be a minute apart for a search the person still wants. Closing a
+# tab cancels at once (the page sends a cancel on pagehide); this sweeper is the fallback.
+ROUTE_ABANDON_SECONDS = 90.0
+ROUTE_REAP_SECONDS = 1.0
+
+# Identical requests share one search (its id is a digest of the request), so a search can matter to several pages at
+# once. Each page names itself with a holder token (it sends one random token per page load with every start, supersede
+# and cancel). A cancel, a supersede or a closing page drops only that page's claim, and the search is cancelled only
+# when no holder is left. A request that carries no token (an older page, a script) is the one shared anonymous holder:
+# tokenless clients behave exactly as before among themselves (one tokenless cancel ends the search for all of them),
+# and a tokenless cancel never ends a search another page holds under its own token. The sweeper above is unchanged:
+# it works on the search, not on its holders.
+ROUTE_ANONYMOUS_HOLDER = ''
+ROUTE_HOLDER_MAX_CHARS = 64
+
+
+def route_holder(value):
+    """The holder a request names: its token (at most ROUTE_HOLDER_MAX_CHARS characters), or the anonymous holder."""
+    if value is None:
+        return ROUTE_ANONYMOUS_HOLDER
+    if not isinstance(value, str):
+        raise TypeError('A search holder must be a string')
+    return value[:ROUTE_HOLDER_MAX_CHARS]
+
+
 INSTITUTION_EDGE_COUNT_KEYS = ('membership', 'policy_area_membership', 'revolving')
 IDENTITY_NOTES = {
     'USER_CONFIRMED': 'Identity confirmed by you; both source IDs and their dated evidence are retained',
@@ -124,6 +240,10 @@ except ImportError:  # direct script execution: no package context
 
 class LiveService:
     """Source polling and indexing run off-request; reads use immutable snapshots."""
+    _view = None  # the published ServiceView: None until a refresh (or the first read) composes one
+    _refresh_memo = None
+    prewarm_enabled = False  # start() turns it on; a service built any other way (tests, tools, the identity rebuild's working copy) never prewarms
+
     def __init__(self, source_root, static_graph):
         self.source_root = Path(source_root)
         self.static = static_graph
@@ -141,8 +261,18 @@ class LiveService:
         self.view_cache = OrderedDict()
         self.bytes_cache = OrderedDict()
         self.search_cache = OrderedDict()
+        # Typeahead and the map read one immutable ServiceView without the service lock; these small locks only guard
+        # their caches. They may be taken while holding the service lock; the service lock is never taken while holding one.
+        self._search_lock = threading.Lock()
+        self._view_cache_lock = threading.Lock()
+        self._view = None
+        self._refresh_memo = None
         self.route_jobs = OrderedDict()
         self.route_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="staffer-route")
+        # Tests replace the clock to age a search without waiting for it.
+        self.route_clock = time.monotonic
+        self.route_reap_interval = ROUTE_REAP_SECONDS
+        self._route_reaper = None
         self.evidence = {}
         self.inventory = {}
         self.identity_aliases = {}
@@ -177,6 +307,16 @@ class LiveService:
         self._full_network_payload = None
         self._explorer_lock = threading.Lock()
         self._explorer_index = None
+        # Prewarm (see _start_prewarm). The lock guards the sequence number and the published record and is never held
+        # while building; the serial lock lets one prewarm build at a time.
+        self._prewarm_lock = threading.Lock()
+        self._prewarm_serial = threading.Lock()
+        self._prewarm_seq = 0
+        self._prewarm_latest = None
+        self._prewarm_finished = deque(maxlen=4)
+        # Set when a publish replaced a router (_release_replaced_router), cleared by the prewarm that collects for it (under _prewarm_lock):
+        # a collection runs only then, since at a start nothing was replaced and a collection would only stall every request thread.
+        self._router_replaced = False
         self._groups_lock = threading.Lock()
         self._groups_index = None
         self.source_catalog = None
@@ -191,6 +331,11 @@ class LiveService:
         self.contacts = ContactIndex()
 
     def start(self):
+        # A started service prewarms; MELANGE_STAFFER_PREWARM=0 turns that off without a code change. The entry is
+        # published before the server's threads read the metrics, so the key never appears under a reader.
+        self.prewarm_enabled = os.environ.get('MELANGE_STAFFER_PREWARM', '1').strip().lower() not in ('0', 'off', 'false', 'no')
+        self.metrics['prewarm'] = {'enabled': self.prewarm_enabled, 'status': 'waiting' if self.prewarm_enabled else 'disabled',
+                                   'stages': {}, 'earlier': []}
         threading.Thread(target=self._run, daemon=True, name='staffer-live-readonly').start()
 
     def _run(self):
@@ -293,6 +438,7 @@ class LiveService:
             self.ready = True
             self.stage = 'Ready'
             self.metrics['initial_ready_ms'] = round((time.perf_counter() - started) * 1000, 2)
+            self._start_prewarm()
             threading.Thread(target=self.run_identity_reconciliation_loop, daemon=True, name='staffer-reference-resolver').start()
             threading.Thread(target=self.run_identity_apply_loop, daemon=True, name='staffer-profile-verifier').start()
         except Exception as exc:
@@ -407,46 +553,65 @@ class LiveService:
                 node['identity_candidate_count'] = len(candidates.get(ident, []))
         self.metrics['identity_review'] = self.identity_resolution.get('counts', {})
 
+    def _capture_probe(self):
+        """Refresh the reader, which runs every integrity check on its receipt and rows, and note what names the
+        snapshot it accepted. Call with profile_lock held.
+
+        'key' is set only for a reader that exposes a content revision, a prefix hash and a receipt digest: together
+        they name the accepted snapshot, so an unchanged key means the graph built from it is unchanged.
+        """
+        summary = self.profiles.refresh()
+        revision = getattr(self.profiles, 'profile_revision', None)
+        memoizable = bool(revision)
+        if not revision:
+            revision = digest([r for r in self.profiles.accepted if self.profiles.eligible(r)])
+        prefix, receipt = self.profiles.accepted_prefix_sha256, self.profiles.accepted_receipt_digest
+        return {'summary': summary, 'revision': revision, 'prefix_sha256': prefix, 'receipt_sha256': receipt,
+                'key': (revision, prefix, receipt) if memoizable and prefix is not None and receipt is not None else None}
+
+    def _capture_graph(self, probe):
+        """Bind graph, content digests and receipts to the snapshot `probe` refreshed. Call with profile_lock held."""
+        rows = [r for r in self.profiles.accepted if self.profiles.eligible(r)]
+        graph = self.profiles.graph('', max(1, len(self.profiles.accepted)))
+        revision = probe['revision']
+        content = getattr(self.profiles, 'profile_digests', {})
+        rows_by_id = {'politico:' + str(r.get('profile_uuid')): r for r in rows if r.get('profile_uuid')}
+        prefix = probe['prefix_sha256']
+        receipt = probe['receipt_sha256']
+        digests, captured = {}, []
+        for original in graph['nodes']:
+            node = dict(original)
+            if node.get('kind') == 'person':
+                ident = node['id']
+                uuid = node.get('source_profile_uuid') or ident.removeprefix('politico:')
+                fingerprint = node.get('profile_content_sha256') or content.get(uuid) or digest(rows_by_id.get(ident, original))
+                proof = {**node.get('provenance', {}), 'path': str(getattr(self.profiles, 'path', self.profiles.raw_dir)),
+                         'sha256': fingerprint, 'profile_uuid': uuid,
+                         'receipt_sha256': receipt, 'accepted_prefix_sha256': prefix}
+                node.update(source_profile_uuid=uuid, profile_content_sha256=fingerprint,
+                            profile_pending=False, profile_status='RECEIPT_VERIFIED', provenance=proof)
+                node['employment_history'] = [{**entry, 'provenance': proof}
+                    for entry in node.get('employment_history', []) if isinstance(entry, dict)]
+                source_row = rows_by_id.get(ident, {})
+                node['profile_records'] = [{**{key: source_row.get(key, []) for key in
+                    ('current_header_positions', 'employment_history', 'education', 'profile_issue_areas',
+                     'explicit_side_labels', 'partition', 'observed_at')},
+                    'profile_uuid': uuid, 'provenance': proof}]
+                node['education'] = [{**entry, 'provenance': proof}
+                    for entry in node.get('education', []) if isinstance(entry, dict)]
+                assertions = getattr(self.static, 'pending_source_assertions', {}).get(ident, [])
+                if assertions:
+                    node['review_assertions'] = list({entry['assertion_id']: entry for entry in
+                        [*node.get('review_assertions', []), *assertions]}.values())
+                digests[ident] = fingerprint
+            captured.append(node)
+        return {'summary': probe['summary'], 'revision': revision, 'digests': digests,
+                'graph': {**graph, 'nodes': captured}, 'prefix_sha256': prefix, 'receipt_sha256': receipt}
+
     def _capture_profiles(self):
         """Bind graph, content digests and receipts to one accepted reader snapshot."""
         with self.profile_lock:
-            summary = self.profiles.refresh()
-            rows = [r for r in self.profiles.accepted if self.profiles.eligible(r)]
-            graph = self.profiles.graph('', max(1, len(self.profiles.accepted)))
-            revision = getattr(self.profiles, 'profile_revision', None) or digest(rows)
-            content = getattr(self.profiles, 'profile_digests', {})
-            rows_by_id = {'politico:' + str(r.get('profile_uuid')): r for r in rows if r.get('profile_uuid')}
-            prefix = self.profiles.accepted_prefix_sha256
-            receipt = self.profiles.accepted_receipt_digest
-            digests, captured = {}, []
-            for original in graph['nodes']:
-                node = dict(original)
-                if node.get('kind') == 'person':
-                    ident = node['id']
-                    uuid = node.get('source_profile_uuid') or ident.removeprefix('politico:')
-                    fingerprint = node.get('profile_content_sha256') or content.get(uuid) or digest(rows_by_id.get(ident, original))
-                    proof = {**node.get('provenance', {}), 'path': str(getattr(self.profiles, 'path', self.profiles.raw_dir)),
-                             'sha256': fingerprint, 'profile_uuid': uuid,
-                             'receipt_sha256': receipt, 'accepted_prefix_sha256': prefix}
-                    node.update(source_profile_uuid=uuid, profile_content_sha256=fingerprint,
-                                profile_pending=False, profile_status='RECEIPT_VERIFIED', provenance=proof)
-                    node['employment_history'] = [{**entry, 'provenance': proof}
-                        for entry in node.get('employment_history', []) if isinstance(entry, dict)]
-                    source_row = rows_by_id.get(ident, {})
-                    node['profile_records'] = [{**{key: source_row.get(key, []) for key in
-                        ('current_header_positions', 'employment_history', 'education', 'profile_issue_areas',
-                         'explicit_side_labels', 'partition', 'observed_at')},
-                        'profile_uuid': uuid, 'provenance': proof}]
-                    node['education'] = [{**entry, 'provenance': proof}
-                        for entry in node.get('education', []) if isinstance(entry, dict)]
-                    assertions = getattr(self.static, 'pending_source_assertions', {}).get(ident, [])
-                    if assertions:
-                        node['review_assertions'] = list({entry['assertion_id']: entry for entry in
-                            [*node.get('review_assertions', []), *assertions]}.values())
-                    digests[ident] = fingerprint
-                captured.append(node)
-            return {'summary': summary, 'revision': revision, 'digests': digests,
-                    'graph': {**graph, 'nodes': captured}, 'prefix_sha256': prefix, 'receipt_sha256': receipt}
+            return self._capture_graph(self._capture_probe())
 
     @staticmethod
     def _merge_profile_node(prior, profile, ident):
@@ -680,8 +845,12 @@ class LiveService:
                 worked = self.identity_web.process_one()
                 if self.identity_web.revision() != before:
                     self._identity_wakeup.set()
+                # status() reads the reference database (a second or more as it grows): it runs before the
+                # lock is taken, and the lock only covers the dictionary update, the epoch bump and the cache clear.
+                status = self.identity_web.status()
+                heartbeat = identity_now()
                 with self.lock:
-                    self.identity_progress.update(self.identity_web.status(), loop_heartbeat_at=identity_now())
+                    self.identity_progress.update(status, loop_heartbeat_at=heartbeat)
                     self.metadata_epoch += 1
                     self.bytes_cache.clear()
                 if self._stop.wait(3 if worked else 30):
@@ -734,6 +903,7 @@ class LiveService:
                 self._assertion_update_pending = False
                 self.ready, self.stage = True, 'Ready'
                 self.bytes_cache.clear()
+            self._start_prewarm()
         except Exception as exc:
             with self.lock:
                 self.errors.append('Relationship update failed: ' + str(exc))
@@ -795,24 +965,34 @@ class LiveService:
                 if self.activity_provider:
                     working.activity_provider = ActivityIndex(self.activity_provider.database, graph.nodes)
                 working._refresh_profiles(force=True)
+                swapped = ('static', 'evidence', 'inventory', 'identity_aliases', 'activity_provider',
+                           'identity_resolution', 'candidates_by_person', 'automatic_resolution', 'identity_progress',
+                           'router', 'profile_nodes', 'profile_edges', 'profile_by_person', 'profile_search',
+                           'revision', '_profile_revision', '_assertion_revision', 'metadata', '_identity_profile_revision',
+                           '_identity_profile_digests', '_identity_reference_revision',
+                           'payroll_identity', '_payroll_identity_loaded',
+                           'lda_sidecar', '_lda_sidecar_loaded',
+                           'lda_employment', '_lda_employment_loaded')
                 with self.lock:
-                    for field in ('static', 'evidence', 'inventory', 'identity_aliases', 'activity_provider',
-                                  'identity_resolution', 'candidates_by_person', 'automatic_resolution', 'identity_progress',
-                                  'router', 'profile_nodes', 'profile_edges', 'profile_by_person', 'profile_search',
-                                  'revision', '_profile_revision', '_assertion_revision', 'metadata', '_identity_profile_revision',
-                                  '_identity_profile_digests', '_identity_reference_revision',
-                                  'payroll_identity', '_payroll_identity_loaded',
-                                  'lda_sidecar', '_lda_sidecar_loaded',
-                                  'lda_employment', '_lda_employment_loaded'):
+                    # The replaced structures are released after the lock is dropped: freeing them is not instant.
+                    retired = tuple(getattr(self, field) for field in swapped) + (self._view, self._refresh_memo)
+                    for field in swapped:
                         setattr(self, field, getattr(working, field))
                     self.metrics.update(working.metrics)
                     self.metadata_epoch += 1
                     self.ready, self.stage = True, 'Ready'
-                    self.view_cache.clear()
-                    self.search_cache.clear()
+                    # One assignment hands lock-free readers the replacement's view: they see the old state or the
+                    # new one, never a mixture of the two. (None, if it has none, makes the next read compose one.)
+                    self._view = working._view
+                    self._refresh_memo = None
+                    self._clear_view_caches()
                     self.bytes_cache.clear()
                     if self._identity_profile_revision != self._profile_revision:
                         self._identity_wakeup.set()
+                replaced, retired = retired[swapped.index('router')], None
+                self._release_replaced_router(replaced, self.router)
+                replaced = None
+                self._start_prewarm()
             except Exception as exc:
                 with self.lock:
                     self.identity_progress.update(status='reference_check_attention', errors=['Identity update failed: ' + str(exc)])
@@ -820,6 +1000,9 @@ class LiveService:
                 raise
 
     def _resolve_id(self, value):
+        # The same rules as resolve_id (which the lock-free readers apply to their view), kept in place here so a
+        # service that holds only some of this state still resolves what it can: the static graph and the activity
+        # provider are touched only for an LDA id. test_staffer_route_latency pins the two together.
         value = str(value).strip()
         if value.startswith('lda:lobbyist:'):
             value = getattr(self.activity_provider, 'to_node', {}).get(value, 'person:' + value)
@@ -888,41 +1071,92 @@ class LiveService:
         self.inventory.setdefault('sourcecoverage', {}).setdefault('politico', {}).update(
             validated_profiles=len(digests), identity_checked_profiles=checked, pending_identity_profiles=pending)
 
+    def _memo_environment(self):
+        """The objects a refresh derives its profile structures from, besides the accepted snapshot itself."""
+        return (self.static, getattr(self.static, 'pending_source_assertions', None), self.identity_aliases,
+                self.activity_provider, self.profiles, self.contacts, self.router)
+
+    def _compose_view(self, *, revision, router, profile_nodes, profile_search):
+        """The immutable view of this state, its typeahead index built. Call where the state is stable (under the
+        refresh lock) and before taking the service lock: building the index is the slow part."""
+        excluded = getattr(getattr(router, 'person_facts', None), 'network_excluded', ())
+        return ServiceView(revision, self.static, profile_nodes, profile_search, self.identity_aliases, self.activity_provider,
+                           router, getattr(router, 'office_index', {}), excluded,
+                           ProfileSearchIndex(profile_nodes, profile_search, excluded))
+
+    def _current_view(self):
+        view = self._view
+        if view is None:
+            # No refresh published one (the state was set by hand): compose it from what the service holds.
+            with self.lock:
+                view = self._view
+                if view is None:
+                    view = self._view = self._compose_view(revision=self.revision, router=self.router,
+                                                          profile_nodes=self.profile_nodes, profile_search=self.profile_search)
+        return view
+
+    def _clear_view_caches(self):
+        """Empty the map and typeahead caches. Each has its own lock, taken here inside the service lock."""
+        with self._view_cache_lock:
+            self.view_cache.clear()
+        with self._search_lock:
+            self.search_cache.clear()
+
     def _refresh_profiles_locked(self, force=False):
         started = time.perf_counter()
         as_of = local_date()
         assertions = load_coworker_assertions()
         assertion_revision = digest(assertions)
         self.evidence['user_assertions'] = assertions
-        captured = self._capture_profiles()
-        summary = captured['summary']
-        # Receipt-only exception/count changes do not rebuild the route graph.
-        profile_revision = captured['revision']
-        from fec.staffer_network.member_context import load_member_context
-        member_context = load_member_context(self.source_root)
-        member_context_revision = digest(member_context.provenance)
-        changed = force or member_context_revision != getattr(self, '_member_context_revision', None) or assertion_revision != getattr(self, '_assertion_revision', None) or profile_revision != getattr(self, '_profile_revision', None) or getattr(self.router, 'as_of', None) != as_of
-        full = captured['graph']
-        profile_nodes = {}
-        for node in full['nodes']:
-            original, ident = node['id'], self._resolve_id(node['id'])
-            if ident != original or self.static.nodes.get(ident, {}).get('identity_status') in ('USER_CONFIRMED_SAME_PERSON', 'REFERENCE_RESOLVED_SAME_PERSON'):
-                prior = profile_nodes.get(ident) or self.static.nodes.get(ident, {})
-                profile_nodes[ident] = self._merge_profile_node(prior, node, ident)
+        with self.profile_lock:
+            # The reader refreshes on every cycle, and with it runs every integrity check on its receipt and rows.
+            # When the accepted snapshot and everything the derived structures were built from are unchanged, those
+            # structures are not rebuilt (see _RefreshMemo).
+            probe = self._capture_probe()
+            summary = probe['summary']
+            # Receipt-only exception/count changes do not rebuild the route graph.
+            profile_revision = probe['revision']
+            from fec.staffer_network.member_context import load_member_context
+            member_context = load_member_context(self.source_root)
+            member_context_revision = digest(member_context.provenance)
+            changed = force or member_context_revision != getattr(self, '_member_context_revision', None) or assertion_revision != getattr(self, '_assertion_revision', None) or profile_revision != getattr(self, '_profile_revision', None) or getattr(self.router, 'as_of', None) != as_of
+            memo = self._refresh_memo
+            reuse = not changed and memo is not None and probe['key'] is not None and memo.matches(self, probe['key'])
+            if reuse:
+                captured = {'summary': summary, 'revision': profile_revision, 'digests': memo.digests, 'graph': None,
+                            'prefix_sha256': probe['prefix_sha256'], 'receipt_sha256': probe['receipt_sha256']}
             else:
-                profile_nodes[ident] = node
-        self._check_review_assertion_coverage({**self.static.nodes, **profile_nodes})
-        profile_edges = [{**edge, 'source': self._resolve_id(edge['source']),
-                          'target': self._resolve_id(edge['target'])} for edge in full['edges']]
-        by_person = {}
-        for edge in profile_edges:
-            by_person.setdefault(edge['source'], []).append(edge)
-        search = [(n['id'], ' '.join([n['id'], n['label'], *n.get('current_positions', []), *n.get('aliases', [])]).casefold())
-                  for n in profile_nodes.values() if n['kind'] == 'person']
+                captured = self._capture_graph(probe)
+        if reuse:
+            profile_nodes, profile_edges, by_person, search, nodes = memo.profile_nodes, memo.profile_edges, memo.by_person, memo.search, memo.nodes
+        else:
+            full = captured['graph']
+            profile_nodes = {}
+            for node in full['nodes']:
+                original, ident = node['id'], self._resolve_id(node['id'])
+                if ident != original or self.static.nodes.get(ident, {}).get('identity_status') in ('USER_CONFIRMED_SAME_PERSON', 'REFERENCE_RESOLVED_SAME_PERSON'):
+                    prior = profile_nodes.get(ident) or self.static.nodes.get(ident, {})
+                    profile_nodes[ident] = self._merge_profile_node(prior, node, ident)
+                else:
+                    profile_nodes[ident] = node
+            nodes = {**self.static.nodes, **profile_nodes}
+        # An integrity check: it runs on every cycle, over the nodes about to be (or already) served.
+        self._check_review_assertion_coverage(nodes)
+        if not reuse:
+            profile_edges = [{**edge, 'source': self._resolve_id(edge['source']),
+                              'target': self._resolve_id(edge['target'])} for edge in full['edges']]
+            by_person = {}
+            for edge in profile_edges:
+                by_person.setdefault(edge['source'], []).append(edge)
+            # Typeahead reads what a person reads: the id is not part of the text, so "co" does not match `politico:`.
+            search = [(n['id'], ProfileSearchIndex.haystack(n)) for n in profile_nodes.values() if n['kind'] == 'person']
+        self.metrics['profile_refresh_reused'] = reuse
+        retired = None
         if changed:
             # Politico source identities remain visibly separate and unrouted until
             # their employment dates and employer identities meet routing gates.
             user_episodes = self._user_episodes()
+            # The user-statement hubs were just added to the static nodes: merge again so the router has them.
             nodes = {**self.static.nodes, **profile_nodes}
             revision = digest([self.static.verification.get('primary'), self.static.sources,
                                self.evidence.get('sources'), self.inventory.get('sources'),
@@ -935,18 +1169,32 @@ class LiveService:
                 extra_episodes=[*self.evidence.get('episodes', []), *profile_work_episodes, *user_episodes],
                 revision=revision, as_of=as_of, activity_provider=self.activity_provider, nodes=nodes)
             router.nodes = nodes
+            router.nodes_revision, router.routing_signature = 0, routing_signature(nodes)
             router.member_context = member_context
             router.person_facts = PersonFacts(nodes, [*self.evidence.get('episodes', []), *profile_work_episodes, *user_episodes], as_of)
             router.operational_staffer_ids = set(self.inventory.get('operational_staffer_ids', ())) or None
             contacts = copy(self.contacts)
             contacts.bind(nodes, router.person_facts)
+            # bind() attaches a person's contacts by their node id; ContactIndex.get also accepts the person:
+            # spelling of a source id. The first poll after a rebuild used to re-attach every node's contacts through
+            # get(), and that is the state people saw from then on. It is attached here, once, so the next poll can
+            # reuse what this refresh built instead of building it a second time.
+            for ident, node in nodes.items():
+                if node.get('kind') == 'person':
+                    node['contacts'] = contacts.get(ident)
             self.metrics['contacts'] = contacts.coverage
             router.overlap_routes = OverlapRoutes(router, router.person_facts)
+            router.closeness()  # created before the router is published, so no request has to create it (or race to)
             router.office_index = office_index(nodes, router.person_facts)
             self.metrics['person_facts'] = router.person_facts.coverage
             self.metrics['searchable_person_nodes'] = sum(n.get('kind') == 'person' for n in nodes.values())
             self.metrics['routing_index_ms'] = round((time.perf_counter() - mark) * 1000, 2)
+            view = self._compose_view(revision=revision, router=router, profile_nodes=profile_nodes, profile_search=search)
             with self.lock:
+                # Everything was built above; this only swaps it in. The replaced structures are released after the
+                # lock is dropped, because freeing them is not instant.
+                retired = (self.router, self.contacts, self.profile_nodes, self.profile_edges, self.profile_by_person,
+                           self.profile_search, self._view, self._refresh_memo)
                 self.router = router
                 self._member_context_revision = member_context_revision
                 self.contacts = contacts
@@ -959,30 +1207,188 @@ class LiveService:
                 self.profile_by_person, self.profile_search = by_person, search
                 self.revision = revision
                 self._profile_revision = profile_revision
-                self.view_cache.clear()
-                self.search_cache.clear()
+                self._view = view
+                # What this refresh built is what an unchanged next cycle would build again: record it.
+                self._refresh_memo = (_RefreshMemo(probe['key'], self._memo_environment(), profile_nodes, profile_edges,
+                                                   by_person, search, nodes, captured['digests'])
+                                      if probe['key'] is not None else None)
+                self._clear_view_caches()
+            replaced, retired = retired[0], None
+            self._release_replaced_router(replaced, router)
+            replaced = None
+            self._start_prewarm()
             if self.identity_web and hasattr(self.identity_web, 'prioritize_people'):
                 self.identity_web.prioritize_people({n['id']: n for n in full['nodes'] if n.get('kind') == 'person'})
+        elif not reuse:
+            # Equal routing content, but the accepted snapshot (a new byte binding or receipt) or something it was
+            # built from moved: the profile structures are rebuilt (above) and the route index is kept. The merged
+            # mapping, its fingerprint, the contacts on the new profile nodes and the view are all built here,
+            # before the lock is taken.
+            signature = routing_signature(nodes)
+            for ident, node in nodes.items():
+                if node.get('kind') == 'person':
+                    node['contacts'] = self.contacts.get(ident)
+            view = self._compose_view(revision=self.revision, router=self.router, profile_nodes=profile_nodes, profile_search=search)
         with self.lock:
-            if not changed:
-                # A new byte binding/receipt can accompany unchanged content.
-                # Publish current provenance while preserving the route index.
+            if not changed and not reuse:
+                retired = (self.profile_nodes, self.profile_edges, self.profile_by_person, self.profile_search,
+                           self.router.nodes, self._view, self._refresh_memo)
                 self.profile_nodes, self.profile_edges = profile_nodes, profile_edges
                 self.profile_by_person, self.profile_search = by_person, search
-                self.router.nodes = {**self.static.nodes, **profile_nodes}
-                for ident, node in self.router.nodes.items():
-                    if node.get('kind') == 'person':
-                        node['contacts'] = self.contacts.get(ident)
+                self.router.nodes = nodes
+                # The same-name index holds the mapping it was built from: dropped, the replaced mapping is freed with the
+                # structures retired below, and the next request that needs the index builds it from this one.
+                self.router.forget_contact_groups()
+                if signature != getattr(self.router, 'routing_signature', None):
+                    # Routing reads these fields: only a real difference empties the route caches.
+                    self.router.routing_signature = signature
+                    self.router.nodes_revision = getattr(self.router, 'nodes_revision', 0) + 1
+                self._view = view
+                self._refresh_memo = (_RefreshMemo(probe['key'], self._memo_environment(), profile_nodes, profile_edges,
+                                                   by_person, search, nodes, captured['digests'])
+                                      if probe['key'] is not None else None)
             self.metadata = summary
             self._update_profile_progress(captured)
             if self.identity_web and self._identity_profile_revision != profile_revision:
                 self._identity_wakeup.set()
             self.metadata_epoch += 1
             self.bytes_cache.clear()
-            if profile_revision != self._full_network_revision:
+            if self._full_network_revision != (self._profile_revision, self.revision):
+                # The cached full network belongs to one (profile revision, source revision) pair: keep it while
+                # that pair is current, drop it when either moved.
                 self._full_network_revision = None
                 self._full_network_payload = None
+        retired = None
         self.metrics['source_refresh_ms'] = round((time.perf_counter() - started) * 1000, 2)
+
+    # ------------------------------------------------------------------ prewarm
+    # After a router is published and the service is ready (startup, the daily as_of rebuild, an evidence or identity
+    # rebuild), a background thread builds what the first search or page load would otherwise build while a person
+    # waits: the work index for the page's default options (about forty seconds on the live records), then the
+    # people index. The answers are the ones a lazy build gives, since it is the same build: a request that arrives
+    # during a prewarm waits for that build (ClosenessRoutes.index, network_index) instead of starting another.
+    # Memory is the constraint (D-087): a publish releases the replaced router's work state at once
+    # (_release_replaced_router), and the prewarm that follows a replacement runs one collection before its first build (a prewarm at a
+    # start follows none, so it runs none), which is meant to keep the old indexes and the new ones from being resident together. It is not
+    # guaranteed: a request that was already running on the replaced router keeps the index it holds until it ends, and a long one can
+    # outlast the collection and the new router's build, so the two can be resident together for that long.
+    PREWARM_STAGES = ('work_index', 'network_index')
+
+    def _release_replaced_router(self, replaced, current):
+        """Let go of what the router the service has just replaced kept for its searches (its work indexes, hop-row caches and
+        name index), so that they are not held while the new router's are built. A search still running on it keeps what it
+        holds, one that asks afterwards builds its own (the replaced router stores nothing from then on), and no answer changes
+        (AdvocacyRouter.release_search_state). The router itself is freed by the collection that the next prewarm runs, which this
+        call asks for. Never raises, never takes the service lock."""
+        if replaced is None or replaced is current:
+            return
+        with self._prewarm_lock:
+            self._router_replaced = True
+        try:
+            replaced.release_search_state()
+        except Exception as exc:
+            self.metrics['router_release_error'] = type(exc).__name__ + ': ' + str(exc)
+
+    def _start_prewarm(self):
+        """Queue a prewarm of the router now published. Never raises, and never takes the service lock."""
+        if not self.prewarm_enabled:
+            return
+        record = None
+        try:
+            router = self.router
+            if router is None or not self.ready or self._assertion_update_pending:
+                return
+            with self._prewarm_lock:
+                self._prewarm_seq += 1
+                record = {'seq': self._prewarm_seq, 'status': 'queued', 'router_revision': router.revision, 'as_of': router.as_of,
+                          'queued_utc': utcnow(), 'stages': {}}
+                self._publish_prewarm_locked(record['seq'], record)
+            threading.Thread(target=self._prewarm, args=(record, router), daemon=True, name='staffer-prewarm').start()
+        except Exception as exc:
+            if record is not None:
+                self._publish_prewarm(record['seq'], {**record, 'status': 'error', 'error': type(exc).__name__ + ': ' + str(exc)})
+
+    def _publish_prewarm(self, seq, record):
+        with self._prewarm_lock:
+            self._publish_prewarm_locked(seq, record)
+
+    def _publish_prewarm_locked(self, seq, record):
+        """Take `record` as the newest prewarm record if it is, and publish metrics['prewarm'], the entry of
+        /api/staffer-performance: the newest record and the finished ones before it. It is a fresh dict every time and
+        never edited after it is published, so a reader serializing the metrics sees one complete entry."""
+        if seq == self._prewarm_seq:
+            self._prewarm_latest = {**record, 'stages': {name: dict(stage) for name, stage in record['stages'].items()}}
+        latest = self._prewarm_latest
+        if latest is not None:
+            self.metrics['prewarm'] = {**latest, 'enabled': True,
+                                       'earlier': [dict(old) for old in self._prewarm_finished if old['seq'] != latest['seq']]}
+
+    def _prewarm(self, queued, router):
+        """Build the stages for `router`, one prewarm at a time, and stop as soon as the router has been replaced.
+
+        A newer router's thread waits on the serial lock until the older thread's current stage ends (a build cannot
+        be interrupted), and the older thread then abandons its remaining stages: it checks before each stage. What an
+        abandoned prewarm already built belongs to its own router (the work index) or carries its revision (the people
+        index), so a replacement never serves it. The service lock is never taken here except inside the stages' own
+        brief snapshots.
+        """
+        seq, record, waiting = queued['seq'], {**queued, 'stages': {}}, time.perf_counter()
+        with self._prewarm_serial:
+            started = time.perf_counter()
+            record.update(status='running', waited_ms=round((started - waiting) * 1000, 2), started_utc=utcnow())
+            self._publish_prewarm(seq, record)
+            failed = False
+            checked = False
+            for name in self.PREWARM_STAGES:
+                if self.router is not router or self._stop.is_set():
+                    record.update(status='abandoned', abandoned_before=name)
+                    break
+                if not checked:
+                    checked = True
+                    with self._prewarm_lock:
+                        replaced, self._router_replaced = self._router_replaced, False
+                    if replaced:
+                        # One full collection, before this prewarm builds anything, and only because a publish replaced a router since
+                        # the last one (a start replaced none: there was nothing to free, and the collection held every request thread
+                        # for ten seconds on the live heap). What the router the service replaced left behind (it is only reachable
+                        # from itself, so only a collection frees it) is gone before the new indexes are built, so the old indexes and
+                        # the new ones are not resident together, unless a request that was already running on the replaced router
+                        # still holds them: that request keeps its index until it ends, and no collection frees what it still refers to.
+                        mark = time.perf_counter()
+                        gc.collect()
+                        record['gc_ms'] = round((time.perf_counter() - mark) * 1000, 2)
+                mark = time.perf_counter()
+                try:
+                    stage = {'status': getattr(self, '_prewarm_' + name)(router)}
+                except Exception as exc:
+                    failed = True
+                    stage = {'status': 'error', 'error': type(exc).__name__ + ': ' + str(exc)}
+                stage['ms'] = round((time.perf_counter() - mark) * 1000, 2)
+                record['stages'][name] = stage
+                self._publish_prewarm(seq, record)
+            else:
+                record['status'] = 'error' if failed else 'done'
+                if self.router is not router:
+                    record.update(status='abandoned', abandoned_after=self.PREWARM_STAGES[-1])
+            record.update(total_ms=round((time.perf_counter() - started) * 1000, 2), finished_utc=utcnow())
+            with self._prewarm_lock:
+                self._prewarm_finished.append({**record, 'stages': {n: dict(s) for n, s in record['stages'].items()}})
+                self._publish_prewarm_locked(seq, record)
+        return record
+
+    def _prewarm_work_index(self, router):
+        # The options a person gets without touching a control: the Staffer model on payroll and directory history,
+        # dated work, no unresolved people (the page's defaults, which are also AdvocacyRouter._options').
+        options = router._options({'objective': 'work_time', 'work_sources': 'payroll_and_directory', 'include_historical': True,
+                                   'include_review': True, 'include_unresolved': False})
+        router.closeness().index(options)
+        return 'done'
+
+    def _prewarm_network_index(self, router):
+        if not self.ready or self._assertion_update_pending:
+            return 'skipped: the service is not ready'
+        self.network_index(compressed=False)
+        return 'done'
 
     def network_index(self, compressed=True, scope='sources'):
         """Cache the complete people inventory independently of changing coverage."""
@@ -1060,16 +1466,17 @@ class LiveService:
             return metadata
         return {**metadata, 'freshness': freshness_now(metadata.get('freshness'))}
 
-    def _model_totals(self):
+    def _model_totals(self, static=None):
         """People-only totals for the pinned model; institution vertices and their links keep their own keys."""
-        counts = self.static.receipt.get('edge_counts', {})
+        static = self.static if static is None else static
+        counts = static.receipt.get('edge_counts', {})
         institution_links = sum(counts.get(key, 0) for key in INSTITUTION_EDGE_COUNT_KEYS)
-        people = self.static.receipt.get('node_universe', {}).get('person')
+        people = static.receipt.get('node_universe', {}).get('person')
         if people is None:
-            people = sum(n.get('kind') == 'person' for n in self.static.nodes.values())
+            people = sum(n.get('kind') == 'person' for n in static.nodes.values())
         return {'nodes': people, 'edges': counts.get('total_rows_emitted', 0) - institution_links,
                 'scope': 'people and person-person edges only',
-                'source_nodes_including_institutions': getattr(self.static, 'source_node_count', 0) or len(self.static.nodes),
+                'source_nodes_including_institutions': getattr(static, 'source_node_count', 0) or len(static.nodes),
                 'source_edges_including_institution_links': counts.get('total_rows_emitted', 0)}
 
     def overview_status(self):
@@ -1137,12 +1544,13 @@ class LiveService:
                                'unknown_source' if result.get('status') == 'unknown_source'
                                else 'source_only')}
 
-    def _completion_state(self):
+    def _completion_state(self, static=None):
         """Separate service readiness, source collection and model verification."""
+        static = self.static if static is None else static
         metadata = self._current_metadata()
         collection = metadata.get('coverage', {}).get('completion_status') or metadata.get('freshness', {}).get('collection_status', 'INCOMPLETE')
-        graph = self.static.verification.get('status', 'UNVERIFIED')
-        errors = self.errors or metadata.get('errors') or self.static.errors
+        graph = static.verification.get('status', 'UNVERIFIED')
+        errors = self.errors or metadata.get('errors') or static.errors
         ready = self.ready and not self._assertion_update_pending
         status = 'IN_PROGRESS'
         if ready:
@@ -1170,8 +1578,13 @@ class LiveService:
                     'terminal_verified': False, 'revision': 'loading', 'nodes': [], 'edges': [],
                     'errors': list(self.errors)}
         revision = (self._profile_revision, self.revision)
-        if self._full_network_payload is not None and self._full_network_revision == revision:
-            return {**self._full_network_payload, **self._current_metadata(), **self._completion_state()}
+        # The cache survives polls now, so a poll can drop it between two reads here: take both once, revision first.
+        # The writer below stores the payload before the revision, so a matching revision always has its payload.
+        cached_revision, payload = self._full_network_revision, self._full_network_payload
+        if payload is not None and cached_revision == revision:
+            # The payload is built once per revision, but each answer is stamped when it is served, as when every poll
+            # rebuilt it: the cached copy carries the time it was built, not the time of the request.
+            return {**payload, **self._current_metadata(), **self._completion_state(), 'generated_at': utcnow()}
         excluded = getattr(getattr(self.router, 'person_facts', None), 'network_excluded', ())
         people = [dict(node) for node in list(self.profile_nodes.values())
                   if node.get('kind') == 'person' and node['id'] not in excluded]
@@ -1255,77 +1668,59 @@ class LiveService:
                                     'affiliation_groups': len(groups), 'large_groups_skipped': large_groups_skipped,
                                     'source_revision': source_revision}}
         if (self._profile_revision, self.revision) == revision:
-            self._full_network_revision = revision
             self._full_network_payload = payload
+            self._full_network_revision = revision
         return payload
 
     def search(self, query, limit=20):
-        with self.lock:
-            return self._search(query, limit)
-
-    def _search(self, query, limit=20):
+        """People matching a typed name, best first. Reads the one published view and takes no service lock."""
         if not self.ready or self._assertion_update_pending:
             return {'nodes': [], 'ready': False, 'stage': self.stage}
-        query = self._resolve_id(query)
-        key = (self.revision, query, limit)
-        with self.lock:
+        view = self._current_view()
+        query = resolve_id(query, view.static.nodes, view.aliases, view.activity_provider)
+        key = (view.revision, query, limit)
+        with self._search_lock:
             cached = self.search_cache.get(key)
         if cached is not None:
             return cached
-        ids = self.static.search_ids(query, max(limit * 3, 60))
-        nodes = {node_id: self.profile_nodes.get(node_id, self.static.nodes[node_id]) for node_id in ids}
-        tokens = query.casefold().split()
-        nodes.update((node_id, self.profile_nodes[node_id]) for node_id, text in self.profile_search if node_id == query or (tokens and all(t in text for t in tokens)))
-        excluded = getattr(getattr(self.router, 'person_facts', None), 'network_excluded', ())
-        nodes = [n for n in nodes.values() if n.get('kind') == 'person' and n['id'] not in excluded]
-        # Prefer named exact source people, retaining duplicate identities as choices.
-        nodes.sort(key=lambda n: (n.get('last_reported_at') or n.get('source_as_of') or '', n['label']), reverse=True)
-        nodes.sort(key=lambda n: (n['kind'] != 'person', n.get('source_only_identity', False)))
-        def name_rank(node):
-            words = re.findall(r'[\w]+', node.get('label', '').casefold())
-            terms = re.findall(r'[\w]+', query.casefold())
-            exact = words == terms
-            all_names = bool(terms) and all(any(w.startswith(t) for w in words) for t in terms)
-            return (not exact, not all_names)
-        nodes.sort(key=name_rank)
-        nodes.sort(key=lambda n: n['id'] != query)
-        result = {'nodes': [compact_node(n) for n in nodes[:limit]], 'ready': True, 'revision': self.revision}
-        with self.lock:
+        nodes = search_people(view.static, view.profile_nodes, view.index, view.excluded, query, limit)
+        result = {'nodes': [compact_node(n) for n in nodes], 'ready': True, 'revision': view.revision}
+        with self._search_lock:
             bounded_put(self.search_cache, key, result, 128)
         return result
 
-    def _graph(self, query, limit):
-        query = self._resolve_id(query)
+    def _graph(self, query, limit, view=None):
+        view = view or self._current_view()
+        query = resolve_id(query, view.static.nodes, view.aliases, view.activity_provider)
         limit = max(1, min(int(limit), NODE_LIMIT))  # one projection per effective node limit
-        key = (self.revision, query, limit)
-        with self.lock:
+        key = (view.revision, query, limit)
+        with self._view_cache_lock:
             if key in self.view_cache:
                 return self.view_cache[key]
-        base = project_people(self.static, self.router, query=query, limit=limit,
-                              profile_nodes=self.profile_nodes, identity_aliases=self.identity_aliases)
+        base = project_people(view.static, view.router, query=query, limit=limit,
+                              profile_nodes=view.profile_nodes, identity_aliases=view.aliases)
         # Keep affiliation identifiers on people as grouping metadata, never as vertices.
         nodes = []
         for node in base['nodes']:
-            if node['id'] in getattr(getattr(self.router, 'person_facts', None), 'network_excluded', ()):
+            if node['id'] in view.excluded:
                 continue
-            full = self.profile_nodes.get(node['id']) or self.static.nodes.get(node['id'], {})
+            full = view.profile_nodes.get(node['id']) or view.static.nodes.get(node['id'], {})
             nodes.append({**compact_node(full), **node})
         present = {n['id'] for n in nodes}
         base = {**base, 'edges': [e for e in base.get('edges', [])
                                  if e['source'] in present and e['target'] in present]}
         # The revision names the projected content, so a truncated map never shares one with the complete map.
-        result = {**base, 'nodes': nodes, 'revision': digest([self.revision, query, limit, 'people-v1',
+        result = {**base, 'nodes': nodes, 'revision': digest([view.revision, query, limit, 'people-v1',
                       [n.get('id') for n in nodes], [e.get('id') for e in base.get('edges', [])]])[:20],
-                  'totals': self._model_totals(),
-                  'verification_status': self.static.verification.get('status')}
+                  'totals': self._model_totals(view.static),
+                  'verification_status': view.static.verification.get('status')}
         if base.get('bounds', {}).get('time_limited'):
             return result  # a wall-clock cut is transient; the next request projects again instead of pinning it
-        with self.lock:
+        with self._view_cache_lock:
             return bounded_put(self.view_cache, key, result)
 
     def snapshot(self, query='', limit=700, since=None):
-        with self.lock:
-            return self._snapshot(query, limit, since)
+        return self._snapshot(query, limit, since)
 
     def _snapshot(self, query='', limit=700, since=None):
         started = time.perf_counter()
@@ -1333,39 +1728,70 @@ class LiveService:
             return {'schema': 'melange-staffer-live-v2', 'ready': False, 'stage': self.stage,
                     'status': 'IN_PROGRESS', 'terminal_verified': False, 'revision': 'loading',
                     'nodes': [], 'edges': [], 'errors': self.errors, 'generated_at': utcnow()}
-        graph = self._graph(query, limit)
+        # One short hold of the service lock takes the view together with every field of the response that other threads
+        # update in place (metadata, source coverage, identity progress and review, inventory, evidence sources, errors,
+        # metrics), so the response describes one moment: none of those can be a refresh newer than the view that is
+        # projected. The projection, the slow part, then reads the captured view and holds no lock.
         with self.lock:
-            metadata, current = self.metadata, self._current_metadata()
-        result = {**graph, **current, 'schema': 'melange-staffer-live-v2', 'ready': True, 'stage': self.stage,
-                  'source_revision': self.revision,
-                  **self._completion_state(), 'generated_at': utcnow(),
-                  'source_coverage': deepcopy(self.inventory.get('sourcecoverage', {})),
-                  'identity_aliases': self.identity_aliases,
-                  'identity_review': self.identity_resolution.get('counts', {}),
-                  'identity_resolution': deepcopy(self.identity_progress),
-                  'identity_review_errors': self.identity_resolution.get('errors', []),
-                  'inventory': {'counts': self.inventory.get('counts', {}),
-                      'headcount_semantics': self.inventory.get('headcount_semantics'),
-                      'searchable_person_nodes': self.metrics.get('searchable_person_nodes')},
-                  'errors': graph.get('errors', []) + self.errors + metadata.get('errors', [])
-                            + ['Identity review: ' + str(e) for e in self.identity_resolution.get('errors', [])],
-                  'sources': self.static.sources + self.evidence.get('sources', []) + self.inventory.get('sources', []) + [{'label': 'Politico crawl verification',
-                      'path': str(self.profiles.raw_dir / 'crawl_verification.json'), 'sha256': self.profiles.accepted_receipt_digest}],
-                  'routing': {'algorithm': 'A*', 'heuristic': 0, 'as_of': self.router.as_of,
-                              'lda_activity_index': self.activity_provider.receipt if self.activity_provider else None,
-                              'ambiguous_identity_links_kept_separate': len(set(self.evidence_exceptions)),
-                              'cost_overlay_only': True, 'named_examples': {k: {f: v.get(f) for f in ('person_id', 'lda_source_person_id', 'current_employment_verified', 'identity_note')}
-                                                                           for k, v in self.evidence.get('named_examples', {}).items()}},
+            view = self._current_view()
+            live = self._snapshot_state(view)
+        graph = self._graph(query, limit, view)
+        metadata, current = live['metadata'], live['current']
+        result = {**graph, **current, 'schema': 'melange-staffer-live-v2', 'ready': True, 'stage': live['stage'],
+                  'source_revision': view.revision,
+                  **live['completion'], 'generated_at': utcnow(),
+                  'source_coverage': live['source_coverage'],
+                  'identity_aliases': view.aliases,
+                  'identity_review': live['identity_review'],
+                  'identity_resolution': live['identity_progress'],
+                  'identity_review_errors': live['identity_review_errors'],
+                  'inventory': live['inventory'],
+                  'errors': graph.get('errors', []) + live['errors'] + metadata.get('errors', [])
+                            + ['Identity review: ' + str(e) for e in live['identity_review_errors']],
+                  'sources': live['sources'],
+                  'routing': live['routing'],
                   'people_only_notice': graph.get('notice'),
                   'notice': ' '.join(filter(None, [graph.get('notice'), 'Exploratory introduction routes use dated evidence and do not establish familiarity, access, or influence.']))}
-        result['metadata_revision'] = digest([metadata, self.errors, self.stage,
-                                              self.identity_progress.get('politico_ingestion'), current.get('freshness', {}).get('stale')])[:16]
+        result['metadata_revision'] = live['metadata_revision']
         result['unchanged'] = since == result['revision']
         if result['unchanged']:
             result['nodes'], result['edges'] = [], []
-        self.metrics['snapshot_ms'] = round((time.perf_counter() - started) * 1000, 2)
-        result['performance'] = dict(self.metrics)
+        elapsed = round((time.perf_counter() - started) * 1000, 2)
+        self.metrics['snapshot_ms'] = elapsed
+        result['performance'] = {**live['metrics'], 'snapshot_ms': elapsed}
         return result
+
+    def _snapshot_state(self, view):
+        """What a snapshot reports from the live service, copied where other threads update it in place.
+
+        Call with self.lock held, in the same hold that took `view`: the fields are then the service's state at the
+        moment the view was taken, not at the moment the projection finished. One gap remains, in the refresh and not
+        here: a refresh that rebuilds the router publishes its view in one lock hold and the poll's metadata in the
+        next, so a snapshot taken between the two pairs the new view with the previous poll's metadata.
+        """
+        metadata, current, stage = self.metadata, self._current_metadata(), self.stage
+        errors, identity_progress = list(self.errors), deepcopy(self.identity_progress)
+        identity_errors = list(self.identity_resolution.get('errors', []))
+        return {'metadata': metadata, 'current': current, 'stage': stage,
+                'completion': self._completion_state(view.static),
+                'source_coverage': deepcopy(self.inventory.get('sourcecoverage', {})),
+                'identity_review': deepcopy(self.identity_resolution.get('counts', {})),
+                'identity_progress': identity_progress,
+                'identity_review_errors': identity_errors,
+                'inventory': {'counts': deepcopy(self.inventory.get('counts', {})),
+                              'headcount_semantics': self.inventory.get('headcount_semantics'),
+                              'searchable_person_nodes': self.metrics.get('searchable_person_nodes')},
+                'errors': errors,
+                'sources': view.static.sources + self.evidence.get('sources', []) + self.inventory.get('sources', []) + [{'label': 'Politico crawl verification',
+                    'path': str(self.profiles.raw_dir / 'crawl_verification.json'), 'sha256': self.profiles.accepted_receipt_digest}],
+                'routing': {'algorithm': 'Bidirectional Dijkstra', 'heuristic': 0, 'as_of': view.router.as_of,
+                            'lda_activity_index': view.activity_provider.receipt if view.activity_provider else None,
+                            'ambiguous_identity_links_kept_separate': len(set(self.evidence_exceptions)),
+                            'cost_overlay_only': True, 'named_examples': {k: {f: v.get(f) for f in ('person_id', 'lda_source_person_id', 'current_employment_verified', 'identity_note')}
+                                                                         for k, v in self.evidence.get('named_examples', {}).items()}},
+                'metadata_revision': digest([metadata, errors, stage, identity_progress.get('politico_ingestion'),
+                                             current.get('freshness', {}).get('stale')])[:16],
+                'metrics': dict(self.metrics)}
 
     def encoded_snapshot(self, query='', limit=700, since=None, compressed=True):
         # A metadata refresh clears this cache; stale/fresh states still update.
@@ -1447,54 +1873,185 @@ class LiveService:
                 'search_limited': coworkers.get('search_limited'), 'revision': router.revision,
                 'as_of': router.as_of, 'user_assertions': assertions}
 
-    def start_route_search(self, origin, target, options=None, office=False):
+    def start_route_search(self, origin, target, options=None, office=False, supersedes=None, holder=None):
         options = {'objective': 'overlap_balanced', 'include_policy': True, **(options or {})}
-        AdvocacyRouter._options(options)  # Validate before enqueueing.
+        requested = AdvocacyRouter._options(options)['route_count']  # Validate before enqueueing.
+        holder = route_holder(holder)
         with self.lock:
+            key = digest([self.revision, origin, target, options, office])[:32]
+            if supersedes and supersedes != key:
+                # The caller is replacing that search, so it lets go of it; a search another page still holds keeps
+                # running. An identical request keeps its own job.
+                self._release_route_holder(supersedes, holder, 'superseded')
             if not self.ready or self._assertion_update_pending:
                 return {'ready': False, 'status': 'loading', 'stage': self.stage}
-            key = digest([self.revision, origin, target, options, office])[:32]
-            reused = key in self.route_jobs
-            if key not in self.route_jobs:
-                # Completed results can be reclaimed; active jobs always finish.
+            job = self.route_jobs.get(key)
+            if job is not None and job['cancelled']:
+                # A cancelled search is never reused: the same request is computed again.
+                del self.route_jobs[key]
+                job = None
+            reused = job is not None
+            if not reused:
+                # Completed results can be reclaimed; active jobs finish unless cancelled.
                 for old in list(self.route_jobs):
                     if len(self.route_jobs) < 64:
                         break
                     if self.route_jobs[old]['future'].done():
                         del self.route_jobs[old]
-                progress = {'expanded': 0, 'neighbor_checks': 0, 'elapsed_ms': 0}
-                def publish(value):
-                    with self.lock:
-                        progress.update(value)
-                function = self.office_route if office else self.route
-                future = self.route_executor.submit(function, origin, target, options, publish)
-                self.route_jobs[key] = {'future': future, 'progress': progress}
+                self.route_jobs[key] = self._submit_route_job(office, origin, target, options, requested)
+            self.route_jobs[key]['holders'].add(holder)  # a repeat from the same page changes nothing
         result = self.route_search_result(key)
         if reused and result.get('optimal'):
             result = {**result, 'cache_hit': True}
         return result
+
+    def _submit_route_job(self, office, origin, target, options, requested):
+        """Queue one search with its own cancel event. Call with self.lock held. The caller adds the first holder."""
+        progress = {'expanded': 0, 'neighbor_checks': 0, 'elapsed_ms': 0}
+        job = {'progress': progress, 'cancel': threading.Event(), 'cancelled': None,
+               'polled': self.route_clock(), 'partial': [], 'requested': requested, 'holders': set()}
+        def publish(value):
+            value = dict(value)
+            route = value.pop('partial_route', None)
+            with self.lock:
+                progress.update(value)
+                if route is not None:
+                    job['partial'].append(route)
+        function = self.office_route if office else self.route
+        job['future'] = self.route_executor.submit(self._run_route_job, job, function, origin, target, options, publish)
+        self._ensure_route_reaper()
+        return job
+
+    @staticmethod
+    def _run_route_job(job, function, origin, target, options, publish):
+        try:
+            with cancel_scope(job['cancel']):
+                check_cancelled()  # A search cancelled while it waited for a worker never starts.
+                return function(origin, target, options, publish)
+        finally:
+            # The finished payload carries every route; the partial copies are no longer needed.
+            job['partial'] = []
 
     def route_search_result(self, key):
         with self.lock:
             job = self.route_jobs.get(key)
             if job is None:
                 return {'ready': True, 'status': 'search_not_found', 'search_id': key}
+            # Asking about a search is what keeps it alive.
+            job['polled'] = self.route_clock()
+            if job['cancelled']:
+                return {'ready': True, 'status': 'cancelled', 'search_id': key, 'cancel_reason': job['cancelled']}
             if not job['future'].done():
-                return {'ready': True, 'status': 'searching' if job['future'].running() else 'queued',
-                        'search_id': key, 'progress': dict(job['progress'])}
+                response = {'ready': True, 'status': 'searching' if job['future'].running() else 'queued',
+                            'search_id': key, 'progress': dict(job['progress']),
+                            'routes_requested': job['requested']}
+                if job['partial']:
+                    response['partial_routes'] = list(job['partial'])
+                return response
             try:
                 result = job['future'].result()
+            except RouteCancelled:
+                return {'ready': True, 'status': 'cancelled', 'search_id': key, 'cancel_reason': 'requested'}
             except Exception as exc:
                 return {'ready': True, 'status': 'search_error', 'search_id': key, 'error': str(exc)}
             return {**result, 'search_id': key}
 
-    def offices(self, query, limit=20):
+    def cancel_route_search(self, key, holder=None):
+        """One page lets go of a search. It is stopped when no page still holds it; a finished search keeps its result.
+
+        Answers cancelled, released (other pages still hold it, so it keeps running), finished or search_not_found.
+        """
+        holder = route_holder(holder)
         with self.lock:
-            if not self.ready or self._assertion_update_pending:
-                return {'ready': False, 'nodes': [], 'stage': self.stage}
-            router = self.router
-        return {'ready': True, 'revision': router.revision,
-                'nodes': search_offices(router.office_index, query, max(1, min(int(limit), 100)))}
+            return {'ready': True, 'search_id': key, 'status': self._release_route_holder(key, holder, 'requested')}
+
+    def _release_route_holder(self, key, holder, reason):
+        """Drop one holder's claim on a job, and cancel the job only when no holder is left. Call with self.lock held.
+
+        Returns cancelled, released, finished or search_not_found. A holder that never held the job, or lets go twice,
+        changes nothing. Only the last holder to leave cancels, so `reason` is the reason that holder gave.
+        """
+        job = self.route_jobs.get(key)
+        if job is None:
+            return 'search_not_found'
+        if job['cancelled']:
+            return 'cancelled'
+        if job['future'].done():
+            return 'finished'
+        job['holders'].discard(holder)
+        if job['holders']:
+            return 'released'
+        return self._cancel_route_job(key, reason)
+
+    def _cancel_route_job(self, key, reason):
+        """Flag one job cancelled and tell its worker. Call with self.lock held.
+
+        Returns cancelled, finished or search_not_found. Setting an event and
+        cancelling a queued future are the only work done here.
+        """
+        job = self.route_jobs.get(key)
+        if job is None:
+            return 'search_not_found'
+        if job['cancelled']:
+            return 'cancelled'
+        if job['future'].done():
+            return 'finished'
+        job['cancelled'] = reason
+        job['cancel'].set()
+        job['future'].cancel()  # A search still waiting for a worker never starts.
+        return 'cancelled'
+
+    def reap_abandoned_route_jobs(self):
+        """Cancel searches nobody has asked about for ROUTE_ABANDON_SECONDS; returns their ids."""
+        with self.lock:
+            return self._reap_route_jobs()
+
+    def _reap_route_jobs(self):
+        now, reaped = self.route_clock(), []
+        for key, job in self.route_jobs.items():
+            if not job['cancelled'] and not job['future'].done() and now - job['polled'] >= ROUTE_ABANDON_SECONDS:
+                self._cancel_route_job(key, 'abandoned')
+                reaped.append(key)
+        return reaped
+
+    def _ensure_route_reaper(self):
+        """Start the abandonment sweeper if it is not running. Call with self.lock held."""
+        thread = self._route_reaper
+        if thread is None or not thread.is_alive():
+            thread = self._route_reaper = threading.Thread(
+                target=self._reap_route_jobs_loop, daemon=True, name='staffer-route-reaper')
+            thread.start()
+
+    def _reap_route_jobs_loop(self):
+        while not self._stop.wait(self.route_reap_interval):
+            with self.lock:
+                self._reap_route_jobs()
+                if all(job['future'].done() for job in self.route_jobs.values()):
+                    # Nothing left to watch; the next submission starts a new sweeper.
+                    self._route_reaper = None
+                    return
+
+    def _partial_progress(self, router, started, progress, finish=None):
+        """Wrap a job's progress callback so each route distinct_routes accepts also
+        arrives in the shape of a finished route. Without a callback nothing changes."""
+        if progress is None:
+            return None
+        def publish(value):
+            route = value.get('accepted_route')
+            if route is not None:
+                value = {key: item for key, item in value.items() if key != 'accepted_route'}
+                shaped = self._route_response(router, route, started)
+                value['partial_route'] = finish(shaped) if finish else shaped
+            progress(value)
+        return publish
+
+    def offices(self, query, limit=20):
+        """Offices matching a typed name. Reads the one published view and takes no service lock."""
+        if not self.ready or self._assertion_update_pending:
+            return {'ready': False, 'nodes': [], 'stage': self.stage}
+        view = self._current_view()
+        return {'ready': True, 'revision': view.router.revision,
+                'nodes': search_offices(view.office_index, query, max(1, min(int(limit), 100)))}
 
     def office_route(self, origin, office, options=None, progress=None):
         started = time.perf_counter()
@@ -1516,13 +2073,17 @@ class LiveService:
         if not candidates:
             return {'ready': True, 'found': False, 'status': 'no_office_staff', 'office': office_info,
                     'candidate_count': 0, 'message': 'No staff in the latest office records match these settings.'}
-        result = router.route_many(origin, candidates, {**options, '_target_office': office}, progress)
+        def with_office(route):
+            route.update(office=office_info, candidate_count=len(candidates),
+                         recommended_contact=destination['roster'].get(route.get('target')))
+            return route
+        result = router.route_many(origin, candidates, {**options, '_target_office': office},
+                                   self._partial_progress(router, started, progress, with_office))
         response = self._route_response(router, result, started)
         response.update(office=office_info, candidate_count=len(candidates),
                         recommended_contact=destination['roster'].get(result.get('target')))
         for route in response.get('routes', []):
-            route.update(office=office_info, candidate_count=len(candidates),
-                         recommended_contact=destination['roster'].get(route.get('target')))
+            with_office(route)
         return response
 
     def route(self, origin, target, options=None, progress=None):
@@ -1534,7 +2095,8 @@ class LiveService:
             router = self.router
         if self.identity_web and hasattr(self.identity_web, 'prioritize_people'):
             self.identity_web.prioritize_people({i: router.nodes[i] for i in (origin, target) if i in router.nodes})
-        result = router.route(origin, target, {"objective": "overlap_balanced", 'include_policy': True, **(options or {})}, progress)
+        result = router.route(origin, target, {"objective": "overlap_balanced", 'include_policy': True, **(options or {})},
+                              self._partial_progress(router, started, progress))
         return self._route_response(router, result, started)
 
     def _route_response(self, router, result, started):
@@ -1576,15 +2138,19 @@ class LiveService:
         elif result.get('objective') in ('overlap_strength', 'overlap_fewest_steps'):
             explanation = ('Fewest steps first, then shared-background scores.' if result['objective'] == 'overlap_fewest_steps' else
                 'Minimizes distance derived from shared-background scores; fewer steps break ties. Scores do not measure personal familiarity or access.')
+        # A Staffer answer that found no route says why (unreachable_reason, message): its explanation is that message, the text the page shows
+        # for it, so no consumer is handed the generic sentence beside a reason it contradicts. An answer with no reason keeps the generic one.
+        reasoned = result['status'] == 'unreachable' and bool(result.get('unreachable_reason') and result.get('message'))
         if result['status'] == 'unknown_person':
             explanation = 'No search was run: only known people with a resolved name can be route endpoints; institutions, activities and routing hubs are evidence, not endpoints.'
         elif result['status'] == 'search_limited':
             explanation = 'Search reached its effort limit; this does not establish that no route exists. No conclusion about reachability was reached.'
         elif result['status'] == 'unreachable':
-            explanation = 'No supported path exists in the currently indexed evidence under these filters. This does not establish that no real-world introduction is possible.'
+            explanation = (result['message'] if reasoned else
+                           'No supported path exists in the currently indexed evidence under these filters. This does not establish that no real-world introduction is possible.')
         elif result['status'] == 'insufficient_work_coverage':
             explanation = result['message']
-        if result.get('alternative_strategy') in ('distinct', 'independent'):
+        if not reasoned and result.get('alternative_strategy') in ('distinct', 'independent'):
             explanation += ' Alternatives are found by excluding contacts used in earlier choices, including records with the same displayed name. Each is best under those exclusions; the set is not globally optimized.'
             if result['alternative_strategy'] == 'independent':
                 explanation += ' Connections whose selected evidence repeats a workplace or organization are also excluded; missing context identifiers cannot establish independence.'

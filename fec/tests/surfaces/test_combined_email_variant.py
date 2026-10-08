@@ -34,9 +34,15 @@ is asserted against `melshell` instead of `snabody`.  The tab wraps its glyph in
 is why the fixture below does too: assemble() had to widen its pattern from `[^<]*` to a
 non-greedy match, and this fixture is what exercises that.
 
+2026-10-07, second trim.  The telecom sector pushed the all-in-one zip back over its budget, and
+the emailed copy now also ships the desk profiles payload with its bill_lobbying sidecar set to
+null.  Section [g] pins that: the helper is pure and lifted the same way, it refuses any payload
+shape it cannot trim exactly, and the four-surface Moneyball.html never sees it.
+
 Plain-assert style, no dependencies:  python fec/tests/surfaces/test_combined_email_variant.py
 """
 import ast
+import json
 import os
 import re
 import sys
@@ -268,6 +274,53 @@ def main():
        "if(!stf){window.gotoNetwork(null,nopush);return;}" in src)
     ok('the fallback forwards nopush, so Back/Forward does not double-push',
        'window.gotoNetwork(null,nopush)' in src)
+
+    print('[g] the email variant ships the desk profiles without the bill_lobbying sidecar (2026-10-07)')
+    email_profiles, _ = lift(src, 'email_profiles')
+    sidecar = ('{"bills":{"hr1-119":{"totals":{"filings":3}}},'
+               '"coverage_note":"finance committees","schema":"bill-lobbying-sidecar-v2"}')
+    heavy = '[{"articles":[1]},{"bills":[{"key":"hr1-119"}]}]'
+    profiles = ('<script>\nwindow.__melangeProfileMerge({"members_heavy":' + heavy +
+                ',"bill_lobbying":' + sidecar + '});\n</script>')
+    slim = email_profiles(profiles)
+    body = slim[len('<script>\nwindow.__melangeProfileMerge('):-len(');\n</script>')]
+    parsed = json.loads(body)
+    ok('the sidecar value is replaced by null and the members_heavy rows are untouched',
+       parsed == {'members_heavy': json.loads(heavy), 'bill_lobbying': None}, slim)
+    ok('no byte of the sidecar survives', 'bill-lobbying-sidecar-v2' not in slim and 'finance committees' not in slim)
+    ok('the result is still exactly one <script> element calling the merge hook',
+       slim.startswith('<script>\nwindow.__melangeProfileMerge(') and slim.endswith(');\n</script>')
+       and slim.count('<script>') == 1 and slim.count('</script>') == 1)
+    ok('the trim is smaller by exactly the sidecar text minus "null"',
+       len(profiles) - len(slim) == len(sidecar) - len('null'), len(profiles) - len(slim))
+    ok('a desk with no profiles script (DESK_SPLIT=0) passes through untouched', email_profiles('') == '')
+    for label, bad in (
+            ('no bill_lobbying key', profiles.replace(',"bill_lobbying":', ',"other":')),
+            ('two bill_lobbying keys', profiles.replace('});\n</script>', ',"bill_lobbying":{}});\n</script>')),
+            ('bill_lobbying not the last value',
+             profiles.replace('});\n</script>', ',"later":1});\n</script>')),
+            ('a payload that no longer ends with the merge call', profiles + '\n')):
+        try:
+            email_profiles(bad)
+            refused = False
+        except AssertionError:
+            refused = True
+        ok('email_profiles refuses %s rather than guessing' % label, refused)
+    assemble_names = {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+    ok('assemble() never touches the trim, so Moneyball.html keeps the whole payload',
+       'email_profiles' not in assemble_names)
+    i_four = src.index('assemble(PIECES, STF_PRESENT)')
+    i_trim = src.index("PIECES['mdprof'] = email_profiles(PIECES['mdprof'])")
+    i_email = src.index('assemble(PIECES, False)')
+    ok('the trim happens after the four-surface build and before the email build',
+       i_four < i_trim < i_email, (i_four, i_trim, i_email))
+    ok('the four-surface build is never given a trimmed piece',
+       src.count('email_profiles(') == 2, src.count('email_profiles('))      # the def and the one call
+    producer = read(os.path.join(FEC, 'surfaces', 'make_member_desk.py'))
+    ok('make_member_desk.py still writes bill_lobbying as the last key of the profiles payload',
+       "{'members_heavy': heavy_rows, 'bill_lobbying': bundle.get('bill_lobbying')}" in producer)
+    ok('the module header names the 2026-10-07 trim and the size it fixed',
+       '2026-10-07' in header and '14,990,864' in header and 'bill_lobbying' in header)
 
     print('\n%d passed, %d failed' % (P, F))
     return 1 if F else 0

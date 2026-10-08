@@ -1,0 +1,150 @@
+{
+ "legacy_rows": 2679,
+ "new_rows": 2667,
+ "merged": [
+  {
+   "member": "Cynthia Lummis",
+   "bioguide": "L000571",
+   "date": "NA",
+   "title": "Leagues, credit unions connect with policymakers before Congress returns home for election",
+   "kept_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+   "dropped_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571",
+   "release_key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Gabe Amo",
+   "bioguide": "A000380",
+   "date": "NA",
+   "title": "Leagues, credit unions connect with policymakers before Congress returns home for election",
+   "kept_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+   "dropped_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380",
+   "release_key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Jon Husted",
+   "bioguide": "H001104",
+   "date": "1/12/2026",
+   "title": "Husted backs bill blocking Fed from issuing a Central Bank Digital Currency",
+   "kept_url": "https://www.husted.senate.gov/media/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency",
+   "dropped_url": "https://www.husted.senate.gov/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency",
+   "release_key": "https://husted.senate.gov/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Juan Vargas",
+   "bioguide": "V000130",
+   "date": "9/30/2022",
+   "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+   "kept_url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+   "dropped_url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0",
+   "release_key": "https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Katie Britt",
+   "bioguide": "B001319",
+   "date": "3/16/2023",
+   "title": "SENATOR KATIE BRITT ON SVB FAILURE: ‘ALABAMIANS DON’T JUST WANT ANSWERS, THEY DESERVE ANSWERS’",
+   "kept_url": "https://www.britt.senate.gov/news/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers",
+   "dropped_url": "https://www.britt.senate.gov/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers",
+   "release_key": "https://britt.senate.gov/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Katie Britt",
+   "bioguide": "B001319",
+   "date": "11/15/2023",
+   "title": "U.S. Senator Katie Britt: Basel III Endgame Proposal ‘Undermines Proven Strength of U.S. Banking Sector’",
+   "kept_url": "https://www.britt.senate.gov/news/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector",
+   "dropped_url": "https://www.britt.senate.gov/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector",
+   "release_key": "https://britt.senate.gov/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Katie Britt",
+   "bioguide": "B001319",
+   "date": "2/6/2024",
+   "title": "U.S. Senators Katie Britt, Marco Rubio, Maggie Hassan, Colleagues Urge Biden Administration to Strengthen Iranian Sanctions Enforcement",
+   "kept_url": "https://www.britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement",
+   "dropped_url": "https://www.britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement",
+   "release_key": "https://britt.senate.gov/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Mike Crapo",
+   "bioguide": "C000880",
+   "date": "NA",
+   "title": "ncua borrowing authority",
+   "kept_url": "https://www.crapo.senate.gov/media/videos/watch/fdic/ncua-borrowing-authority",
+   "dropped_url": "https://www.crapo.senate.gov/news/videos/watch/2009/05/05/fdic/ncua-borrowing-authority",
+   "release_key": "https://crapo.senate.gov/ncua-borrowing-authority",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Mike Crapo",
+   "bioguide": "C000880",
+   "date": "NA",
+   "title": "small banks and credit unions need relief",
+   "kept_url": "https://www.crapo.senate.gov/media/videos/watch/small-banks-and-credit-unions-need-relief",
+   "dropped_url": "https://www.crapo.senate.gov/news/videos/watch/2018/03/06/small-banks-and-credit-unions-need-relief",
+   "release_key": "https://crapo.senate.gov/small-banks-and-credit-unions-need-relief",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Patty Murray",
+   "bioguide": "M001111",
+   "date": "NA",
+   "title": "Leagues, credit unions connect with policymakers before Congress returns home for election",
+   "kept_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+   "dropped_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111",
+   "release_key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Roger Marshall",
+   "bioguide": "M001198",
+   "date": "8/11/2022",
+   "title": "sen marshall in washington examiner credit card swipe fees are hurting consumers",
+   "kept_url": "https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/",
+   "dropped_url": "https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/",
+   "release_key": "https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers",
+   "reason": "duplicate-url-form: same release, aliased path"
+  },
+  {
+   "member": "Seth Magaziner",
+   "bioguide": "M001223",
+   "date": "NA",
+   "title": "Leagues, credit unions connect with policymakers before Congress returns home for election",
+   "kept_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+   "dropped_url": "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223",
+   "release_key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+   "reason": "duplicate-url-form: same release, aliased path"
+  }
+ ],
+ "additional_merges": [
+  {
+   "member": "Juan Vargas",
+   "bioguide": "V000130",
+   "date": "9/30/2022",
+   "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+   "kept_url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+   "dropped_url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0",
+   "release_key": "https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act",
+   "reason": "duplicate-url-form: same release, aliased path"
+  }
+ ],
+ "delta_cells": {
+  "General Credit Union|Cynthia Lummis": -0.020999999999999998,
+  "General Credit Union|Gabe Amo": -0.020999999999999998,
+  "General Credit Union|Juan Vargas": -0.011021747474570048,
+  "General Credit Union|Mike Crapo": -0.03,
+  "General Credit Union|Patty Murray": -0.020999999999999998,
+  "Interchange|Roger Marshall": 0.0033873019547749385,
+  "General Credit Union|Seth Magaziner": -0.020999999999999998
+ },
+ "pillar_movers": {
+  "Roger Marshall": 0.0010161905864324815
+ }
+}

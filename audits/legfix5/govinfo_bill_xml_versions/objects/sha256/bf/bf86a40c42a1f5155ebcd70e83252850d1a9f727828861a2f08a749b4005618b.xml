@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL19C92-BLK-2W-VV6"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3036 IS: Unsolicited Loan Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-12-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 3036</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191212">December 12, 2019</action-date><action-desc><sponsor name-id="S393">Mr. Jones</sponsor> (for himself, <cosponsor name-id="S374">Mr. Cotton</cosponsor>, and <cosponsor name-id="S322">Mr. Merkley</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Truth in Lending Act to prohibit the distribution of any check or other negotiable
+			 instrument as part of a solicitation by a creditor for an extension of
+			 credit, to limit the liability of consumers in conjunction with such
+			 solicitations, and for other purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Unsolicited Loan Act of 2019</short-title></quote>.</text>
+		</section><section id="id9da5214c06724a649050a31df36451e8"><enum>2.</enum><header>Unsolicited loan checks prohibited</header>
+ <subsection id="idf025e2dbc115499aa990fcaed4c70e32"><enum>(a)</enum><header>In general</header><text>Section 132 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1642">15 U.S.C. 1642</external-xref>) is amended—</text> <paragraph id="id7A674CE81EFF4F749C114E4D74708C89"><enum>(1)</enum><text>by striking the section heading and inserting <quote><header-in-text level="section" style="OLC">Unsolicited credit</header-in-text></quote>;</text>
+ </paragraph><paragraph id="id9c853b872fdd4a158ff36f42721df934"><enum>(2)</enum><text>by inserting <quote>(a) <header-in-text level="subsection" style="OLC">Credit cards</header-in-text>.—</quote> before <quote>No credit</quote>; and</text> </paragraph><paragraph id="id1fddc4a4ad484731845e481443e930b1"><enum>(3)</enum><text>by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="ide9c88b1e5dbb49949ecabf96dc68b306" style="OLC">
+ <subsection id="id9c9b0bbf06b64b7b981d407ccb39fce4"><enum>(b)</enum><header>Unsolicited loan checks or transfers</header><text>No person may extend any consumer credit that is otherwise subject to this title by—</text> <paragraph id="id2da573c7be6b4401be5a951af01488a7"><enum>(1)</enum><text>making an unsolicited transfer of funds to the consumer’s credit or asset account; or</text>
+ </paragraph><paragraph id="id7721448e2f8f4925adbf9fe165d4255f"><enum>(2)</enum><text>through the consumer’s use of an unsolicited check, other negotiable instrument, access device or other means of initiating an electronic fund transfer as defined in section 903 of the Electronic Fund Transfer Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1693a">15 U.S.C. 1693a</external-xref>), or such other similar instrument or device as the Bureau may, by rule, determine, that is sent to the consumer unless the consumer submitted a written application for, or otherwise requested in writing, the extension of credit before the date on which the creditor sent the check, negotiable instrument, access device or other similar instrument or device.</text>
+ </paragraph></subsection><subsection id="idb67d4abeac104f00accf6aa7afd6dae4"><enum>(c)</enum><header><quote>Look-Alike</quote> checks</header><text>A certificate, voucher, or other nonnegotiable instrument provided to a consumer in connection with a solicitation for an extension of credit that has the appearance of a check or other negotiable instrument is not an application or request for an extension of credit for purposes of this section.</text>
+						</subsection><subsection id="id4f6ebec46ccd441bbe63f4cd647bca08"><enum>(d)</enum><header>Liability of consumer</header>
+ <paragraph id="id3EEE6569C9B14989B2E6AAC81EFBC7E4"><enum>(1)</enum><header>Definitions</header><text>In this subsection, the terms <term>consumer</term>, <term>consumer reporting agency</term>, and <term>consumer report</term> have the meanings given the terms in section 603 of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681a">15 U.S.C. 1681a</external-xref>).</text>
+ </paragraph><paragraph id="id7e9a105c2154429395cda530efa8c418"><enum>(2)</enum><header>Agreement void</header><text>Any purported credit agreement entered into or debt purportedly incurred as a result of a violation of subsection (a) or (b) is void and the consumer or cardholder shall not be liable for and no person shall attempt to collect—</text>
+ <subparagraph id="ida6ba8a6b11e640659ef59a3654248ce9"><enum>(A)</enum><text>the principal amount sent or transferred to the consumer in violation of this section; or</text> </subparagraph><subparagraph id="id803e118a607949c39e91d85cf915da19"><enum>(B)</enum><text>any interest, charge, fee, or penalty.</text>
+ </subparagraph></paragraph><paragraph id="id1e8f4ce6f0a841148b51f9d0a20b762a"><enum>(3)</enum><header>Consumer reporting</header><text>No information relating to the liability of a consumer alleged by a creditor to have been established in violation of subsection (a) or (b) may be reported to or received by any consumer reporting agency or included in any consumer report.</text>
+ </paragraph></subsection><subsection id="id36d4a26a53254560bf2f54c9014398dd"><enum>(e)</enum><header>Regulations</header><text>Not later than 180 days after the date of enactment of this subsection, the Bureau shall prescribe final regulations to implement this section.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></subsection><subsection id="id781819919b204b15b4a8171569801d7a"><enum>(b)</enum><header>Clerical amendment</header><text>The item relating to section 132 in the table of sections for chapter 2 of the Consumer Credit Protection Act is amended to read as follows:</text><toc><toc-entry bold="off" level="section"><quote>132. Unsolicited credit.</quote>.</toc-entry></toc>
+ </subsection><subsection id="id950564b9dffd4ef4829a708d3aa55a4e"><enum>(c)</enum><header>Effective date</header><text>The requirements of this Act and the amendments made by this Act shall apply to solicitations for extensions of credit made to consumers 180 days after the date of enactment of this Act.</text></subsection></section></legis-body></bill>
+
+

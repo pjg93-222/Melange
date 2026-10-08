@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H5268524EFAF34FEC8594EAB833130E8A" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 6214 IH: False Claims Amendments Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-11-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 6214</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20231103">November 3, 2023</action-date>
+<action-desc><sponsor name-id="A000375">Mr. Arrington</sponsor> (for himself and <cosponsor name-id="P000613">Mr. Panetta</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend title 31, United States Code, to modify False Claims Act procedures, and for other purposes.</official-title>
+</form>
+<legis-body id="HE5EB495F691240C2A4F211681556020C" style="OLC"> 
+<section section-type="section-one" id="HFEE0BE5D5A9C4B198A4AC5F0004ABB54" changed="not-changed"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>False Claims Amendments Act of 2023</short-title></quote>.</text></section> <section id="H88EB5A237FB04DE4A05FF5063E2BFC7A" changed="not-changed"><enum>2.</enum><header>False claims procedure</header><text display-inline="no-display-inline">Section 3729 of title 31, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" display-inline="no-display-inline" id="HD7BDBD53425C4D378E1E7E160F7C6445" changed="not-changed"> 
+<subsection id="H5B2E62AF67D242C190C73ABE804088A8" changed="not-changed"><enum>(e)</enum><header>Proving materiality</header><text>In determining materiality, the decision of the Government to forego a refund or to pay a claim despite actual knowledge of fraud or falsity shall not be considered dispositive if other reasons exist for the decision of the Government with respect to such refund or payment.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> <section id="H8C06D9923D6543729FA08F219D0C02F6" changed="not-changed"><enum>3.</enum><header>Post-employment whistleblower retaliation</header><text display-inline="no-display-inline">Section 3730(h)(1) of title 31, United States Code, is amended by inserting <quote>current or former</quote> after <quote>Any</quote>.</text></section> 
+<section id="H747F021F76794CA9B0AF306A818F8B94" changed="not-changed"><enum>4.</enum><header>GAO report</header><text display-inline="no-display-inline">Not later than 18 months after the date of enactment of this Act, the Comptroller General of the United States shall submit a report to Congress on the effectiveness of sections 3729 through 3733 of title 31, United States Code (referred to in this Act as the <quote>False Claims Act</quote>) during the time period beginning on the date of enactment of the False Claims Amendments Act of 1986 (<external-xref legal-doc="public-law" parsable-cite="pl/99/562">Public Law 99–562</external-xref>; 100 Stat. 3153) and ending on the date of enactment of this Act, which shall include— </text> <paragraph id="HA6526C532F6D40B6978534353EEDED29" changed="not-changed"><enum>(1)</enum><text>a description of the benefits and challenges of enforcement efforts under the False Claims Act; and</text></paragraph> 
+<paragraph id="H87A37EB095944F958FDE39DB88DFB3CD" changed="not-changed"><enum>(2)</enum><text>information on the amounts recovered by the Government under the False Claims Act since the date of enactment of the False Claims Amendments Act of 1986 (<external-xref legal-doc="public-law" parsable-cite="pl/99/562">Public Law 99–562</external-xref>; 100 Stat. 3153). </text></paragraph></section> <section id="H19B5B6C868D84C948AC3CBF3913A8FFC" changed="not-changed"><enum>5.</enum><header>Applicability</header><text display-inline="no-display-inline">The amendments made by sections 2 and 3 of this Act shall apply to any case under the False Claims Act that is filed on or after the date of enactment of this Act.</text></section> 
+</legis-body>
+</bill> 
+
+

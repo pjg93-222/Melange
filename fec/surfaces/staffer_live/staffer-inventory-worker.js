@@ -19,14 +19,38 @@ function arrange(){
   }
   if(!rows.length)bounds={minX:-500,maxX:500,minY:-500,maxY:500};
 }
+// An identifier is searched whole, never by its pieces (D-083): column 0, the node id, and columns 3 to 5, the member, committee and policy ids, are not
+// part of the searched text. A query that is a row's whole id (trimmed, in any case), or the bare uuid of a politico:<uuid> id, finds that row and lists it
+// first; a query that is the whole member, committee or policy id of a row lists that row next, ahead of the rows that match by words.
+// One part of an id is text a person reads. A committee id is container:office:<chamber>:<committee name>; the name after the prefix is searched like any
+// other name (column 4 only, so a person's first committee), and the prefix before it never is. An id of any other shape adds nothing to the words.
+// The filter runs over every row on every keystroke, so the words of a committee name are worked out once per distinct committee id (about a hundred), not per row.
+const POLITICO='politico:';
+const COMMITTEE=/^container:office:(?:house|senate):(.+)$/i,NO_WORDS=[],committeeWords=new Map();
+function committeeTokens(code){
+  if(!code)return NO_WORDS;
+  let words=committeeWords.get(code);
+  if(words===undefined){
+    const m=COMMITTEE.exec(code);
+    if(!m)return NO_WORDS;
+    words=m[1].normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||NO_WORDS;
+    committeeWords.set(code,words);
+  }
+  return words;
+}
+const wholeId=(id,want)=>{id=String(id).toLowerCase();return id===want||(id.startsWith(POLITICO)&&id.length>POLITICO.length&&id.slice(POLITICO.length)===want);};
+const wholeCode=(code,want)=>code!==null&&code!==undefined&&String(code).toLowerCase()===want;
 function filter(){
-  const words=(query.text||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
-  matches=[];
+  const text=query.text||'',words=text.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+  const want=text.trim().toLowerCase(),named=[],attached=[],others=[];
   for(let i=0;i<rows.length;i++){
     const r=rows[i];
-    if(words.length){const tokens=[...r.slice(0,7),r[11]||''].join(' ').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];if(!words.every(w=>tokens.some(token=>token.startsWith(w))))continue;}
-    matches.push(i);
+    if(want&&wholeId(r[0],want)){named.push(i);continue;}
+    if(want&&(wholeCode(r[3],want)||wholeCode(r[4],want)||wholeCode(r[5],want))){attached.push(i);continue;}
+    if(words.length){const tokens=[r[1],r[2],r[6],r[11]||''].join(' ').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[],named=committeeTokens(r[4]);if(!words.every(w=>tokens.some(token=>token.startsWith(w))||named.some(token=>token.startsWith(w))))continue;}
+    others.push(i);
   }
+  matches=named.concat(attached,others);
 }
 function page(request){
   const pages=Math.max(1,Math.ceil(matches.length/50)),number=Math.min(Math.max(0,request.page||0),pages-1);

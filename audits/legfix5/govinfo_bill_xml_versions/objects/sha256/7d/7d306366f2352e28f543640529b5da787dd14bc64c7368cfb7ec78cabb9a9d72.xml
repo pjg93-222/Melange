@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H986CD163F59242059C04CFA80EF2B168" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 721 IH: Calling for the establishment of an app ratings board to enforce consistent and accurate age and content ratings of apps on internet-ready devices and calling on technology companies to ensure the implementation of user-friendly and streamlined parental controls on devices used by minors.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-11-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 721</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191120">November 20, 2019</action-date><action-desc><sponsor name-id="J000299">Mr. Johnson of Louisiana</sponsor> (for himself and <cosponsor name-id="M001209">Mr. McAdams</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Calling for the establishment of an app ratings board to enforce consistent and accurate age and
+			 content ratings of apps on internet-ready devices and calling on
+			 technology companies to ensure the implementation of user-friendly and
+			 streamlined parental controls on devices used by minors.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas internet-ready devices, and the applications that run on such devices, are used by millions of minors daily;</text>
+ </whereas><whereas><text>Whereas the most-downloaded apps often include content that is not consistent with the age rating or description of such apps;</text>
+ </whereas><whereas><text>Whereas clarity in the rating of apps is a critical part of social responsibility on the part of leading technology companies when including apps in their databases for their users to download;</text>
+ </whereas><whereas><text>Whereas parents of minors deserve transparency and accuracy in the ratings of apps and the meanings behind those ratings;</text>
+ </whereas><whereas><text>Whereas no third-party organization is holding app developers accountable to ensure that app age ratings are consistent and accurate across devices and that app descriptions adequately explain the content and advertising available to minors in such apps;</text>
+ </whereas><whereas><text>Whereas no third-party organization has the authority to impose sanctions for nondisclosure related to app content and advertising;</text>
+ </whereas><whereas><text>Whereas apps contain unique risks of both exposure to inappropriate content and predators, so a specific app rating system that takes these unique risks into account is needed;</text>
+ </whereas><whereas><text>Whereas social media is increasingly being used to recruit and sexually exploit young users for sexual abuse or sex trafficking;</text>
+ </whereas><whereas><text>Whereas social media is increasingly used for sexual harassment and sexualized bullying, including unsolicited sexually explicit images, repeated requests for sexually explicit imagery, sexual images that are not consensually shared, and unwanted exposure to pornographic images;</text>
+ </whereas><whereas><text>Whereas recent studies indicate that excessive use of social media, particularly in young girls, can lead to an increase in depressive symptoms;</text>
+ </whereas><whereas><text>Whereas suicide rates, depression, and mental health issues among adolescents in the United States have been found to increase as social media use has surged within the same age group;</text>
+ </whereas><whereas><text>Whereas many providers and users of interactive computer services covered by section 230 of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/230">47 U.S.C. 230</external-xref>), as added by section 509 of the Communications Decency Act of 1996, have failed to comply with basic best business practices in connection with the protection of minors from harmful content, therefore instigating interest in a review of the status of such providers and users under section 230 unless the business practices of such providers and users come into alignment with reasonable care and best business practices of such providers and users appropriate for protecting minors;</text>
+ </whereas><whereas><text>Whereas popular apps often do not include parental controls or have inadequate parental controls;</text> </whereas><whereas><text>Whereas the parental controls provided on internet-ready devices are often insufficient, ignore the age of users, contain loopholes, and are difficult to implement, leaving minors unprotected from sexual abuse and exploitation; and</text>
+ </whereas><whereas><text>Whereas the improper use of internet-ready devices during school hours contributes to student distraction and lower test scores and the use of such devices during bedtime hours can lead to sleep disturbance: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="H98ACC950BFED4713972D2A4ECF0000D2" style="OLC">
+ <section display-inline="yes-display-inline" id="H902E62048DCA40F98ABCF9563C676927" section-type="undesignated-section"><enum></enum><text>That the House of Representatives—</text> <paragraph id="H5EE6F076614F42EE8007274EDDC47F1E"><enum>(1)</enum><text>calls on technology and app development companies to establish an app rating board, comprised of industry representatives and child development, child protection, and internet safety subject matter experts to—</text>
+ <subparagraph id="HA6B0F64B6DE8462D9B8252F72147BF18"><enum>(A)</enum><text>establish new criteria for what content and in-app risks result in specified age-appropriate app ratings;</text>
+ </subparagraph><subparagraph id="H06CE0541930C483BAFE0723BFCE6A0AA"><enum>(B)</enum><text>review app ratings and descriptions of the most-downloaded apps; and</text> </subparagraph><subparagraph id="HA59D88772B274F658A1CCA5320CD7183"><enum>(C)</enum><text>impose sanctions for noncompliance; and</text>
+ </subparagraph></paragraph><paragraph id="H6AE14BEEDB1E4FA388BD91F693CF1019"><enum>(2)</enum><text>calls on technology companies to—</text> <subparagraph id="HC779894F8E804BCBB5EAB94CF056BD31"><enum>(A)</enum><text>manufacture internet-ready devices, including iPhones, Android devices, and Chromebooks, with user-friendly parental controls;</text>
+ </subparagraph><subparagraph id="H328BDCFD604D4CE98813E685224029D4"><enum>(B)</enum><text>close loopholes that permit the bypassing of parental controls;</text> </subparagraph><subparagraph id="H4CB03AFFEA584CAFBAB173A3FDDB6DAA"><enum>(C)</enum><text>build in age-based, default safety settings; and</text>
+ </subparagraph><subparagraph id="H2D894D6474DB496688BCFB409EABA10B"><enum>(D)</enum><text>provide selective app shutoff for bedtime and school hours.</text> </subparagraph></paragraph></section></resolution-body></resolution> 
+

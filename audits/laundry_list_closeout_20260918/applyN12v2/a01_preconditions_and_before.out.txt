@@ -1,0 +1,60 @@
+﻿==============================================================================
+STEP 1  PRECONDITIONS
+==============================================================================
+pipeline_run_lock glob (C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.pipeline_run.lock*):
+  NONE -- precondition met
+other *.lock files at the live root (not the pipeline lock, informational): ['collector_supervisor.lock']
+
+python / Rscript / R / EXCEL processes carrying a command line: 11
+  pid=71928   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=71812   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=87888   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=35848   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=85048   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=70008   python.exe   "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe" "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\surfaces\staffer_live_server.py" --source-root "C:\Users\pgoff\OneDri
+  pid=68504   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=86552   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=49136   RuntimeBroker.exe C:\Windows\System32\RuntimeBroker.exe -Embedding
+  pid=14104   python.exe   "C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" "C:\Users\pgoff\Mentat\mentat\app\server.py" "--port" "8806" "--data-root" "C:\Users\pgoff\AppData
+  pid=58780   python.exe   "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe" "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_clos
+run_pipeline / refresh / collector among them: NONE -- precondition met
+EXCEL processes: NONE -- precondition met
+social_media.db          exists=True  bytes=481439744
+social_media.db-wal      exists=True  bytes=0
+social_media.db-shm      exists=True  bytes=32768
+-wal absent or 0 bytes: True  -- precondition met
+
+==============================================================================
+STEP 2  BEFORE FINGERPRINTS
+==============================================================================
+social_media.db  bytes=481439744
+social_media.db  sha256=0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+journal_mode=wal   speeches rows=270489   INTERVIEW rows=153576
+tables: 14
+  cr_fetch_log                                 7426
+  cspan_attribution_audit                      862
+  cspan_fetch_log                              862
+  fetch_log                                    214
+  hearing_antag                                33955
+  hearing_antag2                               961
+  hearing_meta                                 7174
+  hearing_meta2                                114
+  interactions                                 404
+  iv_fetch_log                                 168979
+  members                                      515
+  posts                                        29780
+  speeches                                     270489
+  yt_fetch_log                                 0
+
+PROBE rowid 245771  member='James Risch' date=2020-02-23 source=INTERVIEW
+  nwords=33  len(text.split())=33  text_chars=209
+  text sha256=6389954091b9975f3dce700ce10a667b9693b1f81477fadb62b757c58b7292fb
+  text: Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.
+
+stance / interview-extract files (NOT touched by this lane):
+  interviews_cu.csv              bytes=23202     sha256=9a23720580f682bf28dee8940bee8d6b0e325119089690f0ce7d6b1a30188cf5
+  interviews_cu.receipt.json     bytes=808       sha256=3cdc071522e1763836c42f8d40f4b55cf26e1eed901a6ebafc52cfb23fb58d6c
+  press_component_meta.json      bytes=9652      sha256=5356d7db745785d5e9cb024413f2ec9c338fd86e83e9b560a9a97ae6754fa1e7
+  every interviews_cu.* under C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data: ['data\\stance\\interviews_cu.csv', 'data\\stance\\interviews_cu.receipt.json']
+
+wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_closeout_20260918\applyN12v2\a01_before.json

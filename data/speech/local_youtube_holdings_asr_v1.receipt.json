@@ -1,0 +1,32 @@
+{
+  "contract": {
+    "physical_hash_bound": true,
+    "speaker_identity_authority": false,
+    "title_channel_date_identity_authority": false,
+    "word_timestamps_present": true
+  },
+  "coverage": {
+    "members": 1,
+    "ready": 2,
+    "selected": 2
+  },
+  "generated_at": "2026-08-31T16:04:55.674086+00:00",
+  "inputs": {
+    "census": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\congress_audio_profile_census_full_v1.jsonl",
+      "sha256": "03d4c4d3ebdf14abd04713cae95145f6fcf0dae72a39b9ad37c464a9cc2cb58d"
+    },
+    "manifest": {
+      "path": "C:\\melange-data\\youtube_audio\\youtube_manifest.jsonl",
+      "sha256": "ba255182318a06b2a9ac8bcdafaf330d7f6f9be4e18ac855b651dd487939f64e"
+    },
+    "model": "C:\\melange-data\\models\\faster-whisper-small"
+  },
+  "output": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\local_youtube_holdings_asr_v1.jsonl",
+    "sha256": "18c705fad5208b2623f24b5c4147262b852ee49c76e052ac12fcaad1f08aaac6"
+  },
+  "schema": "local-youtube-holdings-asr-receipt-v1",
+  "status": "PASS_LOCALIZATION_ONLY",
+  "target_kind": "general"
+}

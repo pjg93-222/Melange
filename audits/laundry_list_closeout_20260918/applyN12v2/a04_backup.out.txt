@@ -1,0 +1,10 @@
+﻿-wal before the copy: 0 bytes
+live BEFORE copy  bytes=481439744 sha256=0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+copied -> C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\social_media.PRE-TURNSPLIT-20260919.db
+backup            bytes=481439744 sha256=0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+live AFTER  copy  bytes=481439744 sha256=0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+-wal after the copy: 0 bytes
+
+sizes equal (live before == backup == live after): True
+sha256 equal (live before == backup == live after): True
+wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_closeout_20260918\applyN12v2\a04_backup.json

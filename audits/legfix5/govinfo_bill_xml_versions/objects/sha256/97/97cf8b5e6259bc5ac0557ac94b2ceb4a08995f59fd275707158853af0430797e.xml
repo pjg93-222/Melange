@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-BAG25J08-Y9X-Y0-K0F">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3161 IS: Protecting DOD Data Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3161</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251107">November 7, 2025</action-date>
+            <action-desc><sponsor name-id="S436">Ms. Slotkin</sponsor> (for herself and <cosponsor name-id="S376">Ms. Ernst</cosponsor>) introduced the following bill; which was
+                read twice and referred to the <committee-name committee-id="SSAS00">Committee on
+                    Armed Services</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To enhance protection of data affecting operational security of Department
+            of Defense personnel, and for other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="id663ef7c7a45643eca3ebc741841b7a30" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting DOD Data Act of 2025</short-title></quote>.</text>
+        </section>
+        <section id="ide4185b8c60f34b28948250ebf10615d4">
+            <enum>2.</enum>
+            <header>Enhanced protection of data affecting operational security of Department of
+                Defense personnel</header>
+            <subsection id="id8a9acc8a9e2d4f30b496bca91c22f455">
+                <enum>(a)</enum>
+                <header>Priorities for protection of personal data for operational security</header>
+ <text>In carrying out the duties of the Secretary of Defense, the Secretary shall identify and prioritize the protection of personal data that is related to or may have impacts on the operational security of members of the Armed Forces and civilian employees of the Department of Defense through the prevention of collection, use, dissemination, or retention of such data that does not conform with provisions of law and practices relating to privacy that were in effect on the day before the date of the enactment of this Act.</text>
+            </subsection>
+            <subsection id="id9be5d5ea4fe6418e9d13a0c9dca8383a">
+                <enum>(b)</enum>
+                <header>Review and issuance of new guidance related to protection of personal data
+                    related to operational security</header>
+ <text>Not later than June 1, 2026, the Secretary of Defense shall review all applicable guidance and policy relating to the protection of personal data that is related to or may have impacts on the operational security of Department personnel and, if necessary, issue revised or new guidance for enhanced protection measures for such data. Such guidance shall cover provisions of law and practices relating to privacy and personnel security that were in effect on the day before the date of the enactment of this Act.</text>
+            </subsection>
+            <subsection id="idb69bfbe315b0422fa67eddff5a007d6c">
+                <enum>(c)</enum>
+                <header>Storage of data</header>
+                <paragraph id="idb1648eac0d2c470e8966537b2390d4ae">
+                    <enum>(1)</enum>
+                    <header>Limitation</header>
+ <text>The Secretary shall ensure that no Department personal data related to or that may have impacts on the operational security of Department personnel is stored on a non-Department server or cloud service except pursuant to a contract or other agreement entered into by the Secretary and a contractor or subcontractor of the Department or, for personnel data, with the permission of the data subject.</text>
+                </paragraph>
+                <paragraph id="iddd07adf2928e468ab608c462be9f6beb">
+                    <enum>(2)</enum>
+                    <header>Waivers</header>
+ <text>The Secretary may waive paragraph (1) in a case in which the Secretary certifies in writing that such waiver—</text>
+                    <subparagraph id="idc5d70a87f8144319adfed49c5bc635ae">
+                        <enum>(A)</enum>
+ <text>appropriately considers the operational security risks to an employee of the Department with respect to whom such data may relate;</text>
+                    </subparagraph>
+                    <subparagraph id="id7b33abaf2c92433f9fa12decb9fded3c">
+                        <enum>(B)</enum>
+ <text>does not pose a risk to national security; and</text> </subparagraph> <subparagraph id="idabaed17ab94b443393f3beb9a4941e09"> <enum>(C)</enum> <text>is necessary in the interest of national security.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="id72585349a74a4cfb917ab014544ec82e">
+                <enum>(d)</enum>
+                <header>Congressional notification of changes to Departmental issuances</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="id9d3c587384f241259605502b47d79ebc">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Not later than 30 days after the date on which the Secretary changes a Department issuance relating to the protection of personal data that is related to or may have impacts on the operational security of Department personnel, the Secretary shall submit to Congress notice of the change.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id2e602a324b6b4ff6940b416fd395cf6b">
+                    <enum>(2)</enum>
+                    <header>Sunset</header>
+ <text display-inline="yes-display-inline">The requirement of paragraph (1) shall terminate on the date that is five years after the date of the enactment of this Act.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="id829a07792db04474aa55e90b3b71cf4a">
+                <enum>(e)</enum>
+                <header>Congressional notification of events</header>
+                <paragraph id="ida9844356baf849f78faf056e5fbd0626">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>Not later than 30 days after the date of the occurrence of an event described in paragraph (2), the Secretary shall submit to Congress notice of the event.</text>
+                </paragraph>
+                <paragraph id="id0c66a5fcd6484709b84939f3f8943589">
+                    <enum>(2)</enum>
+                    <header>Events described</header>
+ <text>An event described in this paragraph is an occurrence of an event in which—</text>
+                    <subparagraph id="id6108aa0afd0b48f396330fb96ef0f410">
+                        <enum>(A)</enum>
+ <text>the Secretary issues a waiver under subsection (c)(2);</text> </subparagraph> <subparagraph id="id5ac300086dfc4e24b8f3cd55c372ae96"> <enum>(B)</enum> <text>personal data related to or that may have an impact on operational security of Department personnel is not stored according to Department regulations or exfiltrated in violation of Department regulations;</text>
+                    </subparagraph>
+                    <subparagraph id="id2e4892a55d084f41b7dfb916374c8d12">
+                        <enum>(C)</enum>
+ <text>personal data related to or that may have an impact on operational security of Department personnel is stored on a non-Department server or cloud service that has not undergone an authorization process in accordance with Department regulations; or</text>
+                    </subparagraph>
+                    <subparagraph id="idc94eb2b974f74f79856d4199b771f33d">
+                        <enum>(D)</enum>
+ <text>personal data related to or that may have an impact on operational security of Department of Defense personnel is exposed in any cybersecurity incident.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="ide66c87327d8c42f19f2f1e29fe77b940">
+                <enum>(f)</enum>
+                <header>Standards, training, and reporting processes for system owners</header>
+                <paragraph id="id93d6ee48106f4d6c829c3cac305e67d3">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>The Secretary shall develop standards, training, reporting, and security debriefing requirements for Department personnel who receive write or read access privileges as system owners across more than one platform of Department information systems that hosts personal data related to or that may have an impact on operational security of Department personnel.</text>
+                </paragraph>
+                <paragraph id="idd8fb1c55d29749d9bee2dbdf82d6dc9a">
+                    <enum>(2)</enum>
+                    <header>Security debriefings</header>
+ <text>The Secretary shall ensure that personnel described in paragraph (1) are provided regular security debriefings, including after departing the Department.</text>
+                </paragraph>
+                <paragraph id="id01ff2b16dcec48849bccdd6770f33e72">
+                    <enum>(3)</enum>
+                    <header>Notification of congress under certain circumstances</header>
+ <text>Not later than 30 days after the completion of the development of the standards, training, reporting, and security debriefing requirements in paragraph (1) the Secretary shall submit to Congress details of the requirements.</text>
+                </paragraph>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

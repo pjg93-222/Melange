@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H7374C4360292450DAC35603C3C2442BA" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 84 IH: Expressing the sense of the House of Representatives that Congress must amend the United States Code to prevent any future lapse in appropriations, and to permanently end government shutdowns. </dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IV</distribution-code>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>H. RES. 84</legis-num>
+		<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190128">January 28, 2019</action-date>
+			<action-desc><sponsor name-id="K000391">Mr. Krishnamoorthi</sponsor> (for himself, <cosponsor name-id="M001201">Mr. Mitchell</cosponsor>, <cosponsor name-id="C001059">Mr. Costa</cosponsor>, <cosponsor name-id="H001087">Ms. Hill of California</cosponsor>, <cosponsor name-id="J000032">Ms. Jackson Lee</cosponsor>, <cosponsor name-id="L000397">Ms. Lofgren</cosponsor>, and <cosponsor name-id="H001090">Mr. Harder of California</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HAP00">Committee on Appropriations</committee-name>, and in addition to the Committee on <committee-name committee-id="HGO00">Oversight and Reform</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc>
+		</action>
+		<legis-type>RESOLUTION</legis-type>
+		<official-title display="yes">Expressing the sense of the House of Representatives that Congress must amend the United States
+			 Code to prevent any future lapse in appropriations, and to permanently end
+			 government shutdowns. </official-title>
+	</form>
+	<preamble>
+ <whereas><text>Whereas government shutdowns halt or significantly limit the efficacy of critical government programs that Americans depend on for their health, safety, and prosperity;</text>
+ </whereas><whereas><text>Whereas both partial and full government shutdowns force hundreds of thousands of Federal employees and contractors to work without pay, which causes financial instability for working families and creates economic distress in local communities;</text>
+ </whereas><whereas><text>Whereas government shutdowns cause disarray in national and international financial markets, diminishing the strength of our economy and faith in our public institutions;</text>
+ </whereas><whereas><text>Whereas government shutdowns cause long-term damage to our national infrastructure, and hinder Americans’ ability to travel safely and securely;</text>
+ </whereas><whereas><text>Whereas government shutdowns create an immediate and pressing crisis across the country; and</text> </whereas><whereas><text>Whereas Congress and Administrations have an obligation to work on a collaborative basis to resolve policy issues and implement long-term solutions in a variety of areas, including but not limited to: economic growth, environmental sustainability, affordable healthcare, workforce development, education, veterans affairs, infrastructure, and national security, and government shutdowns interfere with these efforts: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="HBE09630B43954585B40E171A8C4483C4" style="traditional">
+ <section display-inline="yes-display-inline" id="H3508A20DE77141C7B97259C462308ECA" section-type="undesignated-section"><enum></enum><text>That the House of Representatives commits to—</text> <paragraph id="H7D08B04234A24D47AF1DE6BEA11D2BF1"><enum>(1)</enum><text>take meaningful bipartisan action to amend the United States Code to prevent any future lapse in appropriations, and to permanently end government shutdowns; and</text>
+ </paragraph><paragraph id="HBB75BEC0CA724F849E0E7FCF18872291"><enum>(2)</enum><text>ensuring that no Americans, including Federal employees, contractors, and citizens who depend on critical government services, have to suffer the consequences of future government shutdowns.</text>
+			</paragraph></section></resolution-body>
+</resolution>
+
+

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HACB450A02E6B494BACE78D22FEC68C14" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5599 IH: Fulfilling the Promise of the Housing Trust Fund Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-01-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 5599</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200114">January 14, 2020</action-date><action-desc><sponsor name-id="H001064">Mr. Heck</sponsor> (for himself, <cosponsor name-id="C001049">Mr. Clay</cosponsor>, <cosponsor name-id="B000574">Mr. Blumenauer</cosponsor>, and <cosponsor name-id="P000593">Mr. Perlmutter</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Housing and Community Development Act of 1992 to require the deposit of enterprise
+			 guarantee fees in the Housing Trust Fund, and for other purposes.</official-title></form>
+	<legis-body id="H62D8C88C945A4B5A9D609E4B130C7BA5" style="OLC">
+		<section id="H31312312E41B4E16ACE93353AAC6BABC" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fulfilling the Promise of the Housing Trust Fund Act</short-title></quote>.</text> </section><section id="id67FD13D2BD0543E08B639411248DADB7" section-type="subsequent-section"><enum>2.</enum><header>Deposit of fees</header><text display-inline="no-display-inline">Section 1327 of the Housing and Community Development Act of 1992 (<external-xref legal-doc="usc" parsable-cite="usc/12/4547">12 U.S.C. 4547</external-xref>) is amended—</text>
+ <paragraph id="HEAE529770B0B46219997A40035E834CA"><enum>(1)</enum><text>in subsection (b)—</text> <subparagraph id="HD99859FE72BA4883A08A7DE689D7E1D4"><enum>(A)</enum><text>in paragraph (3)—</text>
+ <clause id="H2656129A6D56410FB79AF48BC6B776ED"><enum>(i)</enum><text>by striking <quote>Amounts received</quote> and inserting the following: <quote>With regard to a mortgage-backed security guaranteed by the Federal National Mortgage Association before October 1, 2021, or a participation certificate guaranteed by the Federal Home Loan Mortgage Corporation before October 1, 2021,</quote>; and</text>
+ </clause><clause id="HA9912FEFFAB74F7C87D13C1EBA1CFB01"><enum>(ii)</enum><text>by striking <quote>The fees</quote> and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="H42004AD38B6441038B46D454E3E18E4B" style="OLC"> <paragraph id="H01B36311B0434FBD865D771E5586CE89"><enum>(5)</enum><header>Treatment of fees</header><text display-inline="yes-display-inline">The fees</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </clause></subparagraph><subparagraph id="HB9FD497A3E934392ABB0F0E709FF0BA6"><enum>(B)</enum><text>by inserting before paragraph (5), as designated by paragraph (1)(B), the following:</text> <quoted-block display-inline="no-display-inline" id="H84F11B6D9B5F4C62ACCA34B23AC816BE" style="OLC"> <paragraph id="H6A99A86738E3420EB09D85D7F3BD42C4"><enum>(4)</enum><header>Deposit in Housing Trust Fund</header><text display-inline="yes-display-inline">With regard to a mortgage-backed security guaranteed by the Federal National Mortgage Association on or after October 1, 2021, or a participation certificate guaranteed by the Federal Home Loan Mortgage Corporation on or after October 1, 2021, amounts received from fee increases imposed under this section shall be deposited directly into the Housing Trust Fund established under section 1338, and shall be available without further appropriation.</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="HA565E330329D45159DC9257FCB57191E"><enum>(2)</enum><text>by striking subsection (f).</text> </paragraph></section></legis-body></bill> 
+

@@ -71,6 +71,68 @@ def bpf():
         _c['bpf']={m:BP.get(m,24)/100.0 for m in congestion()}
     return _c['bpf']
 def recept_layer_on(): return os.environ.get('RECEPT_LAYER','1')!='0'   # QME 2026-10-01: single read, also recorded in optimize_result.json dials
+# COMPETITIVENESS MULTIPLIER c (COMPET_MULT; Paul 2026-10-05; DEFAULT ON since Paul 2026-10-06: unset or '' -> ON, '0' -> OFF, '1' -> ON, anything else RAISES;
+# the OFF path reads NO file and returns exactly 1.0).
+# c = 1 + AMPLITUDE*exp(-max(lean,0)/SCALE), range (1,2], 6 dp at the source (fec/engine/build_competitiveness.py);
+# lean = Cook PVI points toward the member's own party. It scales EFFECTIVE dollars on BOTH money legs of the flip family
+# (a: c*cu, b: c*ind; money_response.shift_lean r=c*amount/receipts; lt_priming money_units *c, dollars_for_units /c) -- the
+# per-member $10k cap and the pot stay REAL dollars. AMPLITUDE/SCALE are Paul's JUDGMENT constants: uncalibrated, and the
+# reciprocity they encode is NOT validated. COMPET_SRC overrides the artifact path (default data/money/competitiveness_c.json, written by the
+# chain step build_competitiveness.py); with the dial ON and only a .candidate on disk and COMPET_SRC unset, cmult RAISES (a candidate is never consumed by accident).
+COMPET_AMPLITUDE=1.0; COMPET_SCALE=5.0
+def compet_c(lean):
+    """The single copy of Paul's formula. lean None (unmatched / unoriented / territory) -> exactly 1.0."""
+    if lean is None: return 1.0
+    return round(1.0+COMPET_AMPLITUDE*math.exp(-max(lean,0.0)/COMPET_SCALE),6)
+def compet_on():
+    v=os.environ.get('COMPET_MULT','1').strip() or '1'   # unset or '' == ON (Paul 2026-10-06); '0' is the revert switch
+    if v not in ('0','1'): raise ValueError("COMPET_MULT must be '0' or '1' (got %r)"%v)
+    return v=='1'
+def compet_roster_hash(cong=None):
+    """sha256 over the sorted 'member|bioguide' lines of the 533-member roster (congestion.json)."""
+    import hashlib
+    rows=list(cong.values()) if isinstance(cong,dict) else (cong if cong is not None else list(congestion().values()))
+    return hashlib.sha256('\n'.join(sorted('%s|%s'%(m['member'],m.get('bioguide') or '') for m in rows)).encode('utf-8')).hexdigest()
+def compet_validate(doc,cong=None):
+    """Fail-closed validation of a competitiveness artifact against the roster. Returns {member: c}; RAISES ValueError."""
+    cong=cong if cong is not None else congestion()
+    names=set(cong) if isinstance(cong,dict) else {m['member'] for m in cong}
+    hd=doc.get('header') or {}; mem=doc.get('members')
+    if hd.get('schema')!='melange-competitiveness-c-v1' or not isinstance(mem,dict): raise ValueError('competitiveness artifact: bad schema/members')
+    if hd.get('amplitude')!=COMPET_AMPLITUDE or hd.get('scale')!=COMPET_SCALE:
+        raise ValueError('competitiveness artifact: header amplitude/scale %r/%r != kernel %r/%r'%(hd.get('amplitude'),hd.get('scale'),COMPET_AMPLITUDE,COMPET_SCALE))
+    if hd.get('roster_sha256')!=compet_roster_hash(cong): raise ValueError('competitiveness artifact: roster hash does not match congestion.json (roster drift; rebuild)')
+    if set(mem)!=names: raise ValueError('competitiveness artifact: member set != congestion roster (missing %s, extra %s)'%(sorted(names-set(mem))[:3],sorted(set(mem)-names)[:3]))
+    out={}
+    for n,r in mem.items():
+        c=r.get('c'); lean=r.get('lean')
+        if isinstance(c,bool) or not isinstance(c,(int,float)) or not math.isfinite(c) or not (1.0<=c<=2.0): raise ValueError('competitiveness artifact: c out of [1,2] for %s: %r'%(n,c))
+        if lean is not None and (isinstance(lean,bool) or not isinstance(lean,(int,float)) or not math.isfinite(lean)): raise ValueError('competitiveness artifact: non-numeric or non-finite lean for %s'%n)
+        if not (abs(c-compet_c(lean))<=1e-9): raise ValueError('competitiveness artifact: c for %s (%r) does not recompute from lean %r (%r)'%(n,c,lean,compet_c(lean)))
+        out[n]=float(c)
+    return out
+def compet_artifact_path():
+    src=os.environ.get('COMPET_SRC','').strip()
+    if src: return src if os.path.isabs(src) else p(src)
+    prod=p('data','money','competitiveness_c.json')
+    if os.path.exists(prod): return prod
+    if os.path.exists(prod+'.candidate'):
+        raise RuntimeError('COMPET_MULT=1 but only %s.candidate exists: a candidate is never consumed implicitly; set COMPET_SRC to it explicitly or promote it'%os.path.basename(prod))
+    raise FileNotFoundError('COMPET_MULT=1 but %s is absent (run fec/engine/build_competitiveness.py)'%prod)
+def compet_state():
+    if 'compet' not in _c:
+        path=compet_artifact_path()
+        with open(path,'rb') as fh: raw=fh.read()
+        import hashlib
+        _c['compet']=(compet_validate(json.loads(raw.decode('utf-8'))),path,hashlib.sha256(raw).hexdigest())
+    return _c['compet']
+def cmult(n):
+    """Per-member competitiveness multiplier: dial OFF -> exactly 1.0 and NO file is read; ON -> the validated artifact's c."""
+    if not compet_on(): return 1.0
+    return compet_state()[0][n]
+def compet_record():
+    """(dial, artifact sha256 or None) for engine result files that record their effective dials."""
+    return ('1',compet_state()[2]) if compet_on() else ('0',None)
 def receptivity():
     if 'rec' not in _c:
         try:

@@ -1,0 +1,16 @@
+record browser, rows 145000 (median of 7, ms)
+  2 letters "ab"                  before   199  after   164
+  a name "alex adams"             before   180  after   169
+  a whole node id                 before   184  after   174
+  an upper-case whole id          before   180  after   178
+  a piece of an id "3f2a"         before   179  after   208
+  a whole member id               before   177  after   173
+  a piece of a member id "a00"    before   204  after   175
+  a whole committee id            before   236  after   166
+map query filter, nodes 20000 (ms for one pass over every node; cold = index empty, warm = index filled; median of 7)
+  2 letters "ab"              cold before   19.6 after   38.7   warm before    8.1 after   10.5
+  a name "alex adams"         cold before   20.5 after   42.2   warm before   10.3 after   13.4
+  a whole node id             cold before   19.5 after   39.3   warm before    7.1 after    9.1
+  a piece of an id "3f2a"     cold before   16.3 after   34.6   warm before    8.6 after    8.3
+  a whole member id           cold before   19.5 after   38.7   warm before    8.3 after   10.4
+peak rss MB 588

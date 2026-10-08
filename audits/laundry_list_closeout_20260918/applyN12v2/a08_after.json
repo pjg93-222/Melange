@@ -1,0 +1,69 @@
+{
+ "after": {
+  "bytes": 500842496,
+  "sha256": "31f6545448b13c70f555c8b7a13a8134a5e39ac4c6e638b7653518feb8df7dfa",
+  "sidecars": {
+   "-shm": null,
+   "-wal": null,
+   "main": 500842496
+  }
+ },
+ "after_pre_checkpoint": {
+  "bytes": 500842496,
+  "sha256": "31f6545448b13c70f555c8b7a13a8134a5e39ac4c6e638b7653518feb8df7dfa",
+  "sidecars": {
+   "-shm": 32768,
+   "-wal": 0,
+   "main": 500842496
+  }
+ },
+ "backup": {
+  "bytes": 481439744,
+  "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\social_media.PRE-TURNSPLIT-20260919.db",
+  "sha256": "0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee"
+ },
+ "before_db_bytes": 481439744,
+ "before_db_sha256": "0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee",
+ "logical_state_after": {
+  "interview_rows": 153576,
+  "interview_words": 12156955,
+  "ledger_rows": 5477,
+  "ledger_unrestored": 5477,
+  "probe_identical_to_backup": true,
+  "rows_text_differs_from_backup": 5477,
+  "speeches_rows": 270489
+ },
+ "logical_state_pre_checkpoint": {
+  "interview_rows": 153576,
+  "interview_words": 12156955,
+  "ledger_rows": 5477,
+  "ledger_unrestored": 5477,
+  "probe_identical_to_backup": true,
+  "rows_text_differs_from_backup": 5477,
+  "speeches_rows": 270489
+ },
+ "logical_state_unchanged_across_checkpoint": true,
+ "stance_files_after": {
+  "interviews_cu.csv": {
+   "bytes": 23202,
+   "mtime": 1789802333.6342,
+   "sha256": "9a23720580f682bf28dee8940bee8d6b0e325119089690f0ce7d6b1a30188cf5"
+  },
+  "interviews_cu.receipt.json": {
+   "bytes": 808,
+   "mtime": 1789802333.6362174,
+   "sha256": "3cdc071522e1763836c42f8d40f4b55cf26e1eed901a6ebafc52cfb23fb58d6c"
+  },
+  "press_component_meta.json": {
+   "bytes": 9652,
+   "mtime": 1789802733.2161343,
+   "sha256": "5356d7db745785d5e9cb024413f2ec9c338fd86e83e9b560a9a97ae6754fa1e7"
+  }
+ },
+ "stance_files_unchanged": true,
+ "wal_checkpoint_truncate": [
+  0,
+  0,
+  0
+ ]
+}

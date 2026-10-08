@@ -1,0 +1,47 @@
+======================================================================================================
+N15 / CHECK A  the one WITHDRAWN pre-collapse row, and which source carried it
+======================================================================================================
+  bank_anchor_memberships.ndjson row: {"action": "Committee on Banking, Housing, and Urban Affairs. Hearings held.", "areas": ["Technology & Emerging"], "bill": "S.2669", "bioguide": "M001198", "congress": "118", "member": "Roger Marshall", "ncos": 19, "role": "original", "schema": "bank-anchor-membership-v1", "source": "official-govinf
+  official fact: member=Roger Marshall key=118:s:2669 role=original withdrawn=True withdrawn_date=2024-07-24 join=2023-07-27
+  -> apply_to_desk line 104 removed this pre-collapse row on the WITHDRAWN branch;
+     the triple is absent from the shipped desk, which is the observed state.
+
+======================================================================================================
+N15 / CHECK B  why the official record is silent on the 13 Robert Menendez rows
+======================================================================================================
+  engine roster bioguide for "Robert Menendez" (data/engine/congestion.json) = 'M001226'
+     117:s:3128   unresolved entry for that bioguide: NONE
+     118:s:2142   unresolved entry for that bioguide: NONE
+     117:s:910    unresolved entry for that bioguide: NONE
+     117:s:767    unresolved entry for that bioguide: NONE
+     117:s:2724   unresolved entry for that bioguide: NONE
+     118:s:869    unresolved entry for that bioguide: NONE
+     118:s:2860   unresolved entry for that bioguide: NONE
+     118:s:1323   unresolved entry for that bioguide: NONE
+     118:s:817    unresolved entry for that bioguide: NONE
+     118:s:1514   unresolved entry for that bioguide: NONE
+     118:s:2095   unresolved entry for that bioguide: NONE
+     117:s:2981   unresolved entry for that bioguide: NONE
+     118:s:2391   unresolved entry for that bioguide: NONE
+  keys where his bioguide is in unresolved[] = 0 / 13
+  -> official_membership_movements.build() line 35-37: a person whose bioguide is not in
+     build_ledger_view(bundle)["roster"] is appended to unresolved[] and NO fact is written,
+     so apply_to_desk has nothing to test and the row is kept unjudged.
+  THE ACTUAL CAUSE -- the two sides carry DIFFERENT bioguides for this person:
+     117:s:3128   BILLSTATUS Sen. Menendez, Robert [D-NJ]     bioguide=M000639 role=sponsor ; unresolved[] carries (M000639,sponsor)
+     117:s:910    BILLSTATUS Sen. Menendez, Robert [D-NJ]     bioguide=M000639 role=original ; unresolved[] carries (M000639,original)
+     118:s:2391   BILLSTATUS Sen. Menendez, Robert [D-NJ]     bioguide=M000639 role=cosponsor ; unresolved[] carries (M000639,cosponsor)
+     engine roster (data/engine/congestion.json) bioguide = 'M001226'
+     -> BILLSTATUS says M000639, the engine roster says 'M001226', so view["roster"].get("M000639")
+        is None, the person goes to unresolved[] under M000639 (not under 'M001226'), no fact is
+        written, and all 13 of his displayed rows are unjudgeable by apply_to_desk.
+        The same mismatch means build_archive_legislative.py:206 passes bioguide='M001226', finds no
+        fact either, and therefore never emits the disposition for him.
+
+======================================================================================================
+N15 / CHECK C  the staleness window OM.load enforces (line 68-69)
+======================================================================================================
+  checked_at = 2026-09-14T04:38:34Z ; age now = 5.51 days ; gate = -300s <= age <= 8 days
+  file mtime = 2026-09-17 00:29:58.840641 (the checked_at stamp is OLDER than the mtime)
+  the gate fails (ValueError, make_member_desk stops at :2296) once age > 8 days, i.e. after 2026-09-22 04:38:34 UTC
+DONE

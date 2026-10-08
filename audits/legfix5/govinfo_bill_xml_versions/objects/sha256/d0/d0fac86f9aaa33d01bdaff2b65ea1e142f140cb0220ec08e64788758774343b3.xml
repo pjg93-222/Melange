@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H5D3D6FC125BE4B38896B05E74A1E805D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 8616 IH: VA Loan Informed Disclosure Act of 2022</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-07-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8616</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20220729">July 29, 2022</action-date><action-desc><sponsor name-id="K000381">Mr. Kilmer</sponsor> (for himself, <cosponsor name-id="R000610">Mr. Reschenthaler</cosponsor>, and <cosponsor name-id="V000131">Mr. Veasey</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the National Housing Act to include information regarding VA home loans in the Informed Consumer Choice Disclosure required to be provided to a prospective FHA borrower who is a veteran.</official-title></form><legis-body id="H8307E4E0412542D99C94F12FE3527AD0" style="OLC"><section id="HE8E030E3C71D4A8E8925645F455AC558" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>VA Loan Informed Disclosure Act of 2022</short-title></quote> or the <quote><short-title>VALID Act of 2022</short-title></quote>.</text></section><section id="H1E31B0AD624F42EA8F9243AB5EACB532"><enum>2.</enum><header>FHA Informed Consumer Choice Disclosure</header><text display-inline="no-display-inline">Subparagraph (A) of section 203(f)(2) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(f)(2)(A)</external-xref>) is amended—</text><paragraph id="HB9E01CAE25FF417284D1402AC591EA30"><enum>(1)</enum><text>by inserting <quote>(i)</quote> after <quote>loan-to-value ratio</quote>; and</text></paragraph><paragraph id="HBB86B901C3A04F17909D2F6DE0EBACEE"><enum>(2)</enum><text>by inserting before the semicolon the following: <quote>, and (ii) in the case of a prospective borrower who is a veteran (as such term is defined in section 101 of title 38, United States Code), in connection with a loan guaranteed or insured under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/38/37">chapter 37</external-xref> of title 38, United States Code, assuming prevailing interest rates</quote>.</text></paragraph></section></legis-body></bill> 
+

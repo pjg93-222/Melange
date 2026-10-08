@@ -1,0 +1,253 @@
+{
+ "defect_cells": [
+  {
+   "bill": "H.R.4686",
+   "congress": "118",
+   "cat": "Mortgage & Housing",
+   "key": [
+    "h.r.4686",
+    "118"
+   ],
+   "sponsor": "Anna Luna",
+   "sponsor_cell": "Luna, Anna Paulina",
+   "rows_in_cell": 21,
+   "cell_rows_in_audit": 12,
+   "cell_selected_rows": 12,
+   "selected": true,
+   "dispositions": {
+    "selected": 12
+   },
+   "signs": [
+    1
+   ],
+   "decay_weights": [
+    0.8
+   ],
+   "sign": 1,
+   "dw": 0.8,
+   "direction_mechanism": [
+    "section-default"
+   ],
+   "member_rows_here": [
+    [
+     "sponsor",
+     "selected",
+     2.4000000000000004,
+     10190
+    ]
+   ],
+   "current_contribution": 2.4,
+   "current_role": "sponsor",
+   "current_weight": 3.0,
+   "would_be": 2.4,
+   "missing": 0.0,
+   "omm_roles": [
+    [
+     "sponsor",
+     false
+    ]
+   ],
+   "omm": "official repository CONFIRMS sponsor, not withdrawn -> admitted",
+   "old_verdict": "ABSENT-IN-OLD",
+   "old_cell_rows": 21,
+   "old_holders": []
+  },
+  {
+   "bill": "H.R.6410",
+   "congress": "118",
+   "cat": "Data Privacy & Cyber",
+   "key": [
+    "h.r.6410",
+    "118"
+   ],
+   "sponsor": "Anna Luna",
+   "sponsor_cell": "Luna, Anna Paulina",
+   "rows_in_cell": 5,
+   "cell_rows_in_audit": 4,
+   "cell_selected_rows": 4,
+   "selected": true,
+   "dispositions": {
+    "selected": 4
+   },
+   "signs": [
+    1
+   ],
+   "decay_weights": [
+    0.8
+   ],
+   "sign": 1,
+   "dw": 0.8,
+   "direction_mechanism": [
+    "section-default"
+   ],
+   "member_rows_here": [
+    [
+     "sponsor",
+     "selected",
+     2.4000000000000004,
+     10192
+    ]
+   ],
+   "current_contribution": 2.4,
+   "current_role": "sponsor",
+   "current_weight": 3.0,
+   "would_be": 2.4,
+   "missing": 0.0,
+   "omm_roles": [
+    [
+     "sponsor",
+     false
+    ]
+   ],
+   "omm": "official repository CONFIRMS sponsor, not withdrawn -> admitted",
+   "old_verdict": "ABSENT-IN-OLD",
+   "old_cell_rows": 5,
+   "old_holders": []
+  },
+  {
+   "bill": "S.3382",
+   "congress": "117",
+   "cat": "Member Business Lending",
+   "key": [
+    "s.3382",
+    "117"
+   ],
+   "sponsor": "Tim Scott",
+   "sponsor_cell": "Scott, Tim",
+   "rows_in_cell": 37,
+   "cell_rows_in_audit": 20,
+   "cell_selected_rows": 20,
+   "selected": true,
+   "dispositions": {
+    "selected": 20
+   },
+   "signs": [
+    1
+   ],
+   "decay_weights": [
+    0.64
+   ],
+   "sign": 1,
+   "dw": 0.64,
+   "direction_mechanism": [
+    "section-default"
+   ],
+   "member_rows_here": [],
+   "current_contribution": 0,
+   "current_role": null,
+   "current_weight": 0.0,
+   "would_be": 1.92,
+   "missing": 1.92,
+   "omm_roles": [
+    [
+     "sponsor",
+     false
+    ]
+   ],
+   "omm": "official repository CONFIRMS sponsor, not withdrawn -> admitted",
+   "old_verdict": "ABSENT-IN-OLD",
+   "old_cell_rows": 37,
+   "old_holders": []
+  },
+  {
+   "bill": "S.3992",
+   "congress": "118",
+   "cat": "Member Business Lending",
+   "key": [
+    "s.3992",
+    "118"
+   ],
+   "sponsor": "Tim Scott",
+   "sponsor_cell": "Scott, Tim",
+   "rows_in_cell": 28,
+   "cell_rows_in_audit": 16,
+   "cell_selected_rows": 16,
+   "selected": true,
+   "dispositions": {
+    "selected": 16
+   },
+   "signs": [
+    1
+   ],
+   "decay_weights": [
+    0.8
+   ],
+   "sign": 1,
+   "dw": 0.8,
+   "direction_mechanism": [
+    "section-default"
+   ],
+   "member_rows_here": [],
+   "current_contribution": 0,
+   "current_role": null,
+   "current_weight": 0.0,
+   "would_be": 2.4,
+   "missing": 2.4,
+   "omm_roles": [
+    [
+     "sponsor",
+     false
+    ]
+   ],
+   "omm": "official repository CONFIRMS sponsor, not withdrawn -> admitted",
+   "old_verdict": "ABSENT-IN-OLD",
+   "old_cell_rows": 28,
+   "old_holders": []
+  },
+  {
+   "bill": "S.762",
+   "congress": "117",
+   "cat": "Member Business Lending",
+   "key": [
+    "s.762",
+    "117"
+   ],
+   "sponsor": "Tim Scott",
+   "sponsor_cell": "Scott, Tim",
+   "rows_in_cell": 4,
+   "cell_rows_in_audit": 3,
+   "cell_selected_rows": 3,
+   "selected": true,
+   "dispositions": {
+    "selected": 3
+   },
+   "signs": [
+    1
+   ],
+   "decay_weights": [
+    0.64
+   ],
+   "sign": 1,
+   "dw": 0.64,
+   "direction_mechanism": [
+    "section-default"
+   ],
+   "member_rows_here": [],
+   "current_contribution": 0,
+   "current_role": null,
+   "current_weight": 0.0,
+   "would_be": 1.92,
+   "missing": 1.92,
+   "omm_roles": [
+    [
+     "sponsor",
+     false
+    ]
+   ],
+   "omm": "official repository CONFIRMS sponsor, not withdrawn -> admitted",
+   "old_verdict": "ABSENT-IN-OLD",
+   "old_cell_rows": 4,
+   "old_holders": []
+  }
+ ],
+ "per_member": {
+  "Anna Luna": 0.0,
+  "Tim Scott": 6.24
+ },
+ "old_tab": {
+  "ABSENT-IN-OLD": 5
+ },
+ "old_tab_all53": {
+  "ALSO-SPONSORLESS-IN-OLD": 53
+ }
+}

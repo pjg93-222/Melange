@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HDBC09EFA2763430FA375D939CD4D1A7F" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8175 IH: To amend title 10, United States Code, and the National Defense Authorization Act for Fiscal Year 1994, to codify and clarify gender neutral standards for members of certain Armed Forces, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8175</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260402">April 2, 2026</action-date><action-desc><sponsor name-id="H001085">Ms. Houlahan</sponsor> (for herself, <cosponsor name-id="G000604">Ms. Goodlander</cosponsor>, <cosponsor name-id="T000460">Mr. Thompson of California</cosponsor>, <cosponsor name-id="T000491">Mr. Tran</cosponsor>, <cosponsor name-id="C001121">Mr. Crow</cosponsor>, <cosponsor name-id="R000579">Mr. Ryan</cosponsor>, <cosponsor name-id="C001123">Mr. Cisneros</cosponsor>, <cosponsor name-id="C001069">Mr. Courtney</cosponsor>, <cosponsor name-id="E000301">Ms. Elfreth</cosponsor>, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="J000305">Ms. Jacobs</cosponsor>, <cosponsor name-id="P000197">Ms. Pelosi</cosponsor>, <cosponsor name-id="F000462">Ms. Lois Frankel of Florida</cosponsor>, <cosponsor name-id="L000606">Mr. Latimer</cosponsor>, <cosponsor name-id="C001112">Mr. Carbajal</cosponsor>, <cosponsor name-id="S000510">Mr. Smith of Washington</cosponsor>, <cosponsor name-id="B001324">Mr. Bell</cosponsor>, <cosponsor name-id="S001159">Ms. Strickland</cosponsor>, <cosponsor name-id="D000530">Mr. Deluzio</cosponsor>, <cosponsor name-id="G000587">Ms. Garcia of Texas</cosponsor>, <cosponsor name-id="T000487">Ms. Tokuda</cosponsor>, <cosponsor name-id="G000599">Mr. Goldman of New York</cosponsor>, <cosponsor name-id="K000375">Mr. Keating</cosponsor>, <cosponsor name-id="S001225">Mr. Sorensen</cosponsor>, <cosponsor name-id="D000631">Ms. Dean of Pennsylvania</cosponsor>, <cosponsor name-id="V000136">Mr. Vasquez</cosponsor>, <cosponsor name-id="G000559">Mr. Garamendi</cosponsor>, <cosponsor name-id="L000582">Mr. Lieu</cosponsor>, <cosponsor name-id="W000830">Mr. Whitesides</cosponsor>, <cosponsor name-id="E000299">Ms. Escobar</cosponsor>, <cosponsor name-id="Q000023">Mr. Quigley</cosponsor>, <cosponsor name-id="C001066">Ms. Castor of Florida</cosponsor>, <cosponsor name-id="K000402">Mr. Kennedy of New York</cosponsor>, <cosponsor name-id="M001245">Mr. Menefee</cosponsor>, and <cosponsor name-id="K000389">Mr. Khanna</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAS00">Committee on Armed Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 10, United States Code, and the National Defense Authorization Act for Fiscal Year 1994, to codify and clarify gender neutral standards for members of certain Armed Forces, and for other purposes.</official-title></form><legis-body id="H18AEB306B9434E5EBE04A049E7E2E835" style="OLC"> 
+<section id="H2B2FF59AFECB4C919AAB78531AA7C15F" section-type="section-one"><enum>1.</enum><header>Gender neutral standards in certain Armed Forces</header> 
+<subsection id="HA99DE954C0E741338BE55125968B1770"><enum>(a)</enum><header>Prohibition on exclusion of a member of certain Armed Forces from an assignment on the basis of gender</header> 
+<paragraph id="H246EA7DE89BE4969AC477D20E55A8C90"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Section 652 of title 10, United States Code, is amended to read as follows:</text> <quoted-block style="USC" id="HBC0718B80E314A328FD89D49E312D7C8" display-inline="no-display-inline"> <section id="HE1C985FBE74E4E47A3B0EF99213104DA"><enum>652.</enum><header>Prohibition of exclusion from assignments on the basis of gender</header> <subsection id="H28FA25E5A2E1450AB2872F6333FA4FC4" display-inline="no-display-inline"><enum>(a)</enum><header>Prohibition</header><text>A member of the Army, Navy, Marine Corps, Air Force, or Space Force may not be excluded from an occupational specialty, career field, or assignment on the basis of gender.</text></subsection> 
+<subsection id="HFAF7E62CC9EE455197631E0EAF91375C"><enum>(b)</enum><header>Annual report</header><text display-inline="yes-display-inline">The Secretary of Defense shall submit to the Committees on Armed Services of the Senate and House of Representatives an annual report that includes, with respect to the year preceding the date of the report, the following:</text> <paragraph id="H16E669C36D224E659DC58F31F8568953"><enum>(1)</enum><text display-inline="yes-display-inline">Any change to an occupational standard, including a description of how such change predicts performance of actual, regular, and recurring duties of a military occupational specialty.</text></paragraph> 
+<paragraph id="H2CDADB101F7043FF81E655C9E0B1C6DA"><enum>(2)</enum><text display-inline="yes-display-inline">The number of members, disaggregated by military occupational specialty and gender, who were involuntarily reclassified or separated for a reason other than discipline or pursuant to a sentence of a court-martial.</text></paragraph> <paragraph id="H535A4A2D004A47EF8DE343DFFA20EE1C"><enum>(3)</enum><text>The reasons for reclassifications or separations described in paragraph (2).</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="HB65D93EAFE7B4E45ABFAE89E525A6BC5"><enum>(2)</enum><header>Conforming amendment</header><text display-inline="yes-display-inline">Section 8225 of title 10, United States Code, is repealed.</text></paragraph> <paragraph id="H56F736AB328E4CEDB0C38680EA53FED3"><enum>(3)</enum><header>Effective date</header><text>The amendments made by this subsection shall take effect on September 30, 2026. The first report under subsection (b) of section 652 of such title, as amended by this section, shall be due on September 30, 2027.</text></paragraph></subsection> 
+<subsection id="H40509CA1EA654BC398DA3CD94DE386F6">
+        <enum>(b)</enum>
+        <header>Gender-Neutral occupational standard for a military career designator:
+          modernization; additional information to Congress To review a proposed change</header>
+        <paragraph id="H8F826365D4A749AE94533CA525119057">
+          <enum>(1)</enum>
+          <header>Modernization</header>
+ <text display-inline="yes-display-inline">Section 543 of the National Defense Authorization Act for Fiscal Year 1994 (<external-xref legal-doc="public-law" parsable-cite="pl/103/160">Public Law 103–160</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/10/113">10 U.S.C. 113</external-xref> note) is amended—</text>
+          <subparagraph id="H24224310BC9F44E3BB65D8F5CB1F8595">
+            <enum>(A)</enum>
+ <text>in subsection (a)—</text> <clause id="H6700A8D5001645AE9F966E1A821AC554"> <enum>(i)</enum> <text>in the matter preceding paragraph (1), by striking <quote>that is open to both male and female members of the Armed Forces</quote>; and</text>
+            </clause>
+            <clause id="HCEDAAA16553C47F9954796AFBF862D54">
+              <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">in paragraph (3), by striking <quote>women in that occupational career field</quote> and inserting <quote>individuals in such occupational career field on the basis of gender</quote>;</text>
+            </clause>
+          </subparagraph>
+          <subparagraph id="H23378B8AFB864D3CBD029DA02114DCE2">
+            <enum>(B)</enum>
+ <text>in subsection (b)—</text> <clause id="H4120EDF6F33E48BCB0B3B5DD1C4CEC31"> <enum>(i)</enum> <text>in the heading, by striking <quote><header-in-text level="subsection" style="OLC">Specific Physical Requirements</header-in-text></quote> and inserting <quote><header-in-text level="section" style="OLC">Occupational Performance Standards</header-in-text></quote>;</text>
+            </clause>
+            <clause id="HF9C62DD75BDC45078EA2A759984E5D67">
+              <enum>(ii)</enum>
+ <text>in paragraph (1)—</text> <subclause id="HADB3C004D3E248B1A0B586E967B690E0"> <enum>(I)</enum> <text>by striking <quote>physical</quote> both places it appears;</text>
+              </subclause>
+              <subclause id="H226E74323FD744B5BAEF94E28219A416">
+                <enum>(II)</enum>
+ <text>by inserting <quote>, based on a scientifically rigorous process,</quote> after <quote>determines</quote>;</text>
+              </subclause>
+              <subclause id="H7FE87922341F45EBBB3796BB7BF58C8B">
+                <enum>(III)</enum>
+ <text>by inserting <quote>technical, tactical, cognitive, or physical abilities, including</quote> before <quote>muscular strength</quote>; and</text>
+              </subclause>
+              <subclause id="H6DB84983CF664607B6162CFF2C1726C6">
+                <enum>(IV)</enum>
+ <text>by striking <quote>(in the case of a career designator that is open to both male and female members of the Armed Forces)</quote>; and</text>
+              </subclause>
+            </clause>
+            <clause id="H0236C1E03CAB49EBA000C8384FAF5EAA">
+              <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">in paragraph (2)—</text> <subclause id="HC24B35F23E974D4F988FB0801CF8C89E"> <enum>(I)</enum> <text>by inserting <quote>not shorter than 18 months</quote> after <quote>a reasonable period</quote>; and</text>
+              </subclause>
+              <subclause id="HE250A151FF1D41C7B4CDE6F232EA4786">
+                <enum>(II)</enum>
+ <text>by inserting <quote>that are based on input from health care providers and researchers of the Department of Defense</quote> after <quote>prescribed by the Secretary</quote>; and</text>
+              </subclause>
+            </clause>
+          </subparagraph>
+          <subparagraph id="HCCE88582F6E542A7A22B010DDF00F8B9">
+            <enum>(C)</enum>
+ <text display-inline="yes-display-inline">in subsection (c), by striking <quote>female members of the Armed Forces</quote> and inserting <quote>members of the Armed Forces, of any gender,</quote>.</text>
+          </subparagraph>
+        </paragraph>
+        <paragraph id="H7375ABD44A9040BAB1FE0DA1F001D59F">
+          <enum>(2)</enum>
+          <header>Information to Congress</header>
+ <text display-inline="yes-display-inline">Such section is further amended, in subsection (c)—</text>
+          <subparagraph id="H682C472CFA4949FCB411673103F87F12">
+            <enum>(A)</enum>
+ <text>by striking <quote>are expected to</quote> and inserting <quote>may</quote>;</text>
+          </subparagraph>
+          <subparagraph id="HEC2B6FF084F643A796F1F5D33BB7A9D0">
+            <enum>(B)</enum>
+ <text>by striking <quote>Congress</quote> and inserting <quote>the congressional defense committees</quote>;</text>
+          </subparagraph>
+          <subparagraph id="HDC7A0234C9F3404684EDAABD527F399D">
+            <enum>(C)</enum>
+ <text>by striking <quote>change and the justification and rationale</quote> and inserting <quote>proposed change, the estimated costs, the justification (including the relevant research and data that the Secretary reviewed and relied upon before making such proposal), and rationale</quote>; and</text>
+          </subparagraph>
+          <subparagraph id="H9442838EB77249E4B646E5B80C1E4C1A">
+            <enum>(D)</enum>
+ <text>by striking <quote>60-day period</quote> and inserting <quote>180-day period</quote>.</text>
+          </subparagraph>
+        </paragraph>
+      </subsection> 
+<subsection id="H6CF49E1106F44325B369F30006041C13"><enum>(c)</enum><header>Institute for Defense Analyses review of operational effectiveness of Army and Marine Corps ground combat units</header> 
+<paragraph id="H831CD0C09B5445FC97E2D043F6FCBC74"><enum>(1)</enum><header>Submission to Congress</header><text>Not later than seven days after the date of the enactment of this Act, the Secretary of Defense shall submit to Congress the full, unredacted review of operational effectiveness of Army and Marine Corps ground combat units prepared by the Institute for Defense Analyses.</text></paragraph> <paragraph id="H30666A5B0C3F4889A860E73366BD2EF6"><enum>(2)</enum><header>Comptroller General review</header><text>Not later than 180 days after the date of the date of the enactment of this Act, the Comptroller General of the United States shall submit to the congressional defense committees a report reviewing—</text> 
+<subparagraph id="H10CDA9D3C9074980A80D1E384A6FAF2F"><enum>(A)</enum><text>the review submitted to Congress under paragraph (1); and</text></subparagraph> <subparagraph id="HC33BAAC12A734E79BC5A3F1D918F65AA"><enum>(B)</enum><text>any actions taken by the Secretary of Defense in response to the review.</text></subparagraph></paragraph></subsection></section> 
+</legis-body></bill>
+

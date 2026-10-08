@@ -1,0 +1,80 @@
+============================================================================================
+ALL THREE FILTERS ON (the shipped default)   env={} (shipped defaults)
+============================================================================================
+producer exit=0
+   | (X mention pass skipped: [Errno 2] No such file or directory: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\cl)
+   | scored set: 2 | cached 0 | to classify 2 | est ~$0.01
+   |   2/2 (0 errors)
+   | member_references.json: 2 substantive directed edges | positive 2 | negative 0
+artifact top-level keys : ['admission_filters', 'dyad_cap', 'edges', 'model', 'provenance']
+admission_filters       : {"defaults": {"REF_IDENTICAL_ONCE": "1", "REF_PRESS_OWN_DOMAIN": "1", "REF_ROSTER_FILTER": "1"}, "dials": {"REF_IDENTICAL_ONCE": "1", "REF_PRESS_OWN_DOMAIN": "1", "REF_ROSTER_FILTER": "1"}, "excluded": {"identical_window_repeat": 1, "press_third_party_domain": 1, "roster_list_window": 11}, "excluded_total": 13, "provenance": "audits/laundry_list_closeout_20260918 FINDINGS.md B4/B5/B6; Paul-approved 2026-09-19. Each default is the admitted-set rule; '0' restores the prior behaviour exactly.", "rules": {"identical_window_repeat": "a window identical to an earlier window on the same edge after whitespace normalisation; counted once in n_scored and the pos/neg/neu tallies, still counted in n_raw", "press_third_party_domain": "PRESS pass: the article host is not the speaker's own .house.gov/.senate.gov domain (ratified 2-class rule)", "roster_list_window": "the window is a roll-call roster or signature block: >=10 distinct roster surnames AND >=35% of its tokens are roster surnames"}, "schema": "member-reference-admission-filters-v1"}
+edges (2):
+   Ada Alpher   -> Ben Bravo    n_raw=2  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1, 'INTERVIEW': 1}
+   Ada Alpher   -> Dee Delta    n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'PRESS': 1}
+
+============================================================================================
+ALL THREE FILTERS OFF (the documented rollback)   env={'REF_PRESS_OWN_DOMAIN': '0', 'REF_ROSTER_FILTER': '0', 'REF_IDENTICAL_ONCE': '0'}
+============================================================================================
+producer exit=0
+   | (X mention pass skipped: [Errno 2] No such file or directory: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\cl)
+   | scored set: 15 | cached 1 | to classify 14 | est ~$0.08
+   |   14/14 (0 errors)
+   | member_references.json: 11 substantive directed edges | positive 11 | negative 0
+artifact top-level keys : ['admission_filters', 'dyad_cap', 'edges', 'model', 'provenance']
+admission_filters       : {"defaults": {"REF_IDENTICAL_ONCE": "1", "REF_PRESS_OWN_DOMAIN": "1", "REF_ROSTER_FILTER": "1"}, "dials": {"REF_IDENTICAL_ONCE": "0", "REF_PRESS_OWN_DOMAIN": "0", "REF_ROSTER_FILTER": "0"}, "excluded": {"identical_window_repeat": 0, "press_third_party_domain": 0, "roster_list_window": 0}, "excluded_total": 0, "provenance": "audits/laundry_list_closeout_20260918 FINDINGS.md B4/B5/B6; Paul-approved 2026-09-19. Each default is the admitted-set rule; '0' restores the prior behaviour exactly.", "rules": {"identical_window_repeat": "a window identical to an earlier window on the same edge after whitespace normalisation; counted once in n_scored and the pos/neg/neu tallies, still counted in n_raw", "press_third_party_domain": "PRESS pass: the article host is not the speaker's own .house.gov/.senate.gov domain (ratified 2-class rule)", "roster_list_window": "the window is a roll-call roster or signature block: >=10 distinct roster surnames AND >=35% of its tokens are roster surnames"}, "schema": "member-reference-admission-filters-v1"}
+edges (11):
+   Ada Alpher   -> Ben Bravo    n_raw=3  n_scored=3  pos=3  neg=0  neu=0  form=0  net=+1.00 {'CREC': 2, 'INTERVIEW': 1}
+   Ada Alpher   -> Cy Charlie   n_raw=2  n_scored=2  pos=2  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1, 'PRESS': 1}
+   Ada Alpher   -> Dee Delta    n_raw=2  n_scored=2  pos=2  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1, 'PRESS': 1}
+   Ada Alpher   -> Eli Echo     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Fay Foxtrot  n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Gus Golf     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Hal Hotel    n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Ida India    n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Jay Juliet   n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Kim Kilo     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Lou Lima     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+
+============================================================================================
+ONLY REF_IDENTICAL_ONCE ON   env={'REF_PRESS_OWN_DOMAIN': '0', 'REF_ROSTER_FILTER': '0'}
+============================================================================================
+producer exit=0
+   | (X mention pass skipped: [Errno 2] No such file or directory: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\cl)
+   | scored set: 14 | cached 0 | to classify 14 | est ~$0.08
+   |   14/14 (0 errors)
+   | member_references.json: 11 substantive directed edges | positive 11 | negative 0
+artifact top-level keys : ['admission_filters', 'dyad_cap', 'edges', 'model', 'provenance']
+admission_filters       : {"defaults": {"REF_IDENTICAL_ONCE": "1", "REF_PRESS_OWN_DOMAIN": "1", "REF_ROSTER_FILTER": "1"}, "dials": {"REF_IDENTICAL_ONCE": "1", "REF_PRESS_OWN_DOMAIN": "0", "REF_ROSTER_FILTER": "0"}, "excluded": {"identical_window_repeat": 1, "press_third_party_domain": 0, "roster_list_window": 0}, "excluded_total": 1, "provenance": "audits/laundry_list_closeout_20260918 FINDINGS.md B4/B5/B6; Paul-approved 2026-09-19. Each default is the admitted-set rule; '0' restores the prior behaviour exactly.", "rules": {"identical_window_repeat": "a window identical to an earlier window on the same edge after whitespace normalisation; counted once in n_scored and the pos/neg/neu tallies, still counted in n_raw", "press_third_party_domain": "PRESS pass: the article host is not the speaker's own .house.gov/.senate.gov domain (ratified 2-class rule)", "roster_list_window": "the window is a roll-call roster or signature block: >=10 distinct roster surnames AND >=35% of its tokens are roster surnames"}, "schema": "member-reference-admission-filters-v1"}
+edges (11):
+   Ada Alpher   -> Ben Bravo    n_raw=3  n_scored=2  pos=2  neg=0  neu=0  form=0  net=+1.00 {'CREC': 2, 'INTERVIEW': 1}
+   Ada Alpher   -> Cy Charlie   n_raw=2  n_scored=2  pos=2  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1, 'PRESS': 1}
+   Ada Alpher   -> Dee Delta    n_raw=2  n_scored=2  pos=2  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1, 'PRESS': 1}
+   Ada Alpher   -> Eli Echo     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Fay Foxtrot  n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Gus Golf     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Hal Hotel    n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Ida India    n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Jay Juliet   n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Kim Kilo     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+   Ada Alpher   -> Lou Lima     n_raw=1  n_scored=1  pos=1  neg=0  neu=0  form=0  net=+1.00 {'CREC': 1}
+
+============================================================================================
+ASSERTIONS
+============================================================================================
+  OK   the duplicated window is two raw mentions and one scored window
+  OK   REF_IDENTICAL_ONCE removes exactly the repeat, and only from n_scored
+  OK   net is unchanged by the collapse (identical windows carry one label)
+  OK   the third-party PRESS article mints no edge
+  OK   the own-domain PRESS article still does
+  OK   the roll-call roster mints no edge at all
+  OK   with both dials off every roster name is an edge again
+  OK   the edge set shrinks from 11 to 2
+  OK   the census closes: 1 press + 11 roster + 1 repeat
+  OK   the rollback census is empty and the block still reports the dials
+  OK   the block is ADDITIVE: every pre-existing top-level key survives
+  OK   audit_full's edge invariant holds in both positions (n_scored >= pos+neg)
+  OK   consumer read pattern build_dashboard_bundle.py:236 tolerates the extra key
+  OK   consumer read pattern make_member_desk.py:403 tolerates the extra key
+  OK   consumer read pattern audit_full.py:1147 tolerates the extra key
+
+END-TO-END SYNTHETIC — 15 passed, 0 FAILED

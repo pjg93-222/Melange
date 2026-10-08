@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MCG21385-TK9-KL-YL3"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S948 IS: To protect American small businesses, gig workers, and freelancers by repealing the burdensome American Rescue Plan Act of 2021 transactions reporting threshold.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-03-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>1st Session</session><legis-num>S. 948</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20210324">March 24, 2021</action-date><action-desc><sponsor name-id="S404">Mr. Scott of Florida</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To protect American small businesses, gig workers, and freelancers by repealing the burdensome American Rescue Plan Act of 2021 transactions reporting threshold.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Repeal of modifications of exceptions for reporting of third party network transactions</header><subsection id="id7E443FD2032C426B821BD96D2ACB57BC"><enum>(a)</enum><header>In general</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/6050W">Section 6050W(e)</external-xref> of the Internal Revenue Code of 1986 is amended to read as follows:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id920F366581164824A69999D4B6B2306B"><subsection id="id310fa12eb38e47d6a86e285699904e26"><enum>(e)</enum><header>Exception for de minimis payments by third party settlement organizations</header><text>A third party settlement organization shall be required to report any information under subsection (a) with respect to third party network transactions of any participating payee only if—</text><paragraph id="idfa86c013ab284b8d89affad872a9a3f4"><enum>(1)</enum><text>the amount which would otherwise be reported under subsection (a)(2) with respect to such transactions exceeds $20,000, and</text></paragraph><paragraph id="idd5710f88e0264934b99ab0f19d396e06"><enum>(2)</enum><text>the aggregate number of such transactions exceeds 200.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection><subsection id="id3DC431C9AA334113BBEA933D25D3F197"><enum>(b)</enum><header>Effective date</header><text>The amendment made by this section shall apply to returns for calendar years beginning after December 31, 2021.</text></subsection></section></legis-body></bill> 
+

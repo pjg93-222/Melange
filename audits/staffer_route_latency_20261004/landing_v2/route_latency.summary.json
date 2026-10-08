@@ -1,0 +1,260 @@
+{
+ "base": "3248a6a02e42bd23665995e69dc649ac926aab95",
+ "tip": "86631c454815533798eb1ad81136ddb1a76a23b9",
+ "patch": "route_latency.patch",
+ "patch_sha256": "0b5db04b5d0cb785ab98b6f4e33e758d916102d421d75c27ec5a3bd2331c3076",
+ "files": [
+  {
+   "file": "fec/surfaces/install_staffer_live.py",
+   "kind": "edit",
+   "blocks": 2,
+   "live_pre_sha256": "0064f66430b228703f831f7481070b3a797ab7004b1726e3474f5fb9952679bc",
+   "post_sha256": "5aafbf8253a639ca5fcda7a037928770447b2921a8b2987913bb60371b04e2f4",
+   "live_pre_eol": "size=9293 crlf=180 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=9383 crlf=182 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_closeness_routes.py",
+   "kind": "edit",
+   "blocks": 24,
+   "live_pre_sha256": "a8d52fd8e73784f355eabe0ea6c7f9e57e7f948c853244a1c618b04c3115c874",
+   "post_sha256": "990838332bded29b9847f03eac94a1b486966f6678354369f4508abb48d02aaa",
+   "live_pre_eol": "size=15713 crlf=235 lf=8 lone_cr=0 class=MIXED",
+   "post_eol": "size=44146 crlf=770 lf=6 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_distinct_routes.py",
+   "kind": "edit",
+   "blocks": 4,
+   "live_pre_sha256": "f51d65c7906a3e292eebc2864f62a3c14b7f28122a22e0f2e06137a0fec628e1",
+   "post_sha256": "41a0edb6e39053acaf2acceab7e1509754f64e5e5955bdb021f9a5684965472b",
+   "live_pre_eol": "size=5681 crlf=0 lf=112 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=6317 crlf=0 lf=124 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/staffer_graph_snapshot.py",
+   "kind": "edit",
+   "blocks": 10,
+   "live_pre_sha256": "46e69b5b5d44736313dc7269299dfca570e75fd42f2420823a47ab855b1bf08d",
+   "post_sha256": "673d639778c0fd1358c6b4d1a33c65af25e1fcacb0e9e87ba74a44623e3238f3",
+   "live_pre_eol": "size=26944 crlf=418 lf=9 lone_cr=0 class=MIXED",
+   "post_eol": "size=32969 crlf=512 lf=9 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_identity_web.py",
+   "kind": "edit",
+   "blocks": 2,
+   "live_pre_sha256": "7c0fc7ebbb173408cc0dcabac6cbd2cdd68d7d9cae857d13483077a3a6629c25",
+   "post_sha256": "0fcb0cc9354a06b33d8ff59df608972529462f1e70c07817014176a002a35d88",
+   "live_pre_eol": "size=32593 crlf=555 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=33326 crlf=570 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/README.md",
+   "kind": "edit",
+   "blocks": 3,
+   "live_pre_sha256": "41b10a8d2da925523845460757b186aed30805b08ae78f7669d5e862c7169e41",
+   "post_sha256": "af8934ade0fe56c5b726e784a186716e9390b0b1989501070d065688a7bd27d2",
+   "live_pre_eol": "size=22995 crlf=110 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=29262 crlf=118 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/index.html",
+   "kind": "edit",
+   "blocks": 1,
+   "live_pre_sha256": "0ad2ad26483f49518aa23f171e6a49a07f849fe66ee7e08adede62dcff382dd1",
+   "post_sha256": "828cdaf56d6d08e0501011a03a22fdfa99da80f3edcf2e7b675c8e4aacd2bf39",
+   "live_pre_eol": "size=15667 crlf=65 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=15683 crlf=65 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-inventory-worker.js",
+   "kind": "edit",
+   "blocks": 4,
+   "live_pre_sha256": "8b001865ce3dc9bcf4c993ca1b452aa40c219794bc824b060b7910173217a855",
+   "post_sha256": "7a4960d7d5aba5aa755308dd4f4fac94adc06e88946382d286f4d0ce24fd572a",
+   "live_pre_eol": "size=5870 crlf=61 lf=27 lone_cr=0 class=MIXED",
+   "post_eol": "size=6467 crlf=67 lf=27 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-route.js",
+   "kind": "edit",
+   "blocks": 11,
+   "live_pre_sha256": "7a433d3a3d99a0070c67c5b47492eeb2c4d60e44c85dc51b4b12fced1714fd56",
+   "post_sha256": "77a7c19904f470ad01a5c03a8855406e8f78527fea71c430c6422c2f18d095ba",
+   "live_pre_eol": "size=36496 crlf=272 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=38691 crlf=285 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live_server.py",
+   "kind": "edit",
+   "blocks": 11,
+   "live_pre_sha256": "39745d4a57213ae233a1e1aeeabcf2f7e526eee72989f1d67341e2e8a7095385",
+   "post_sha256": "663dff5ffcf0e48cbf062d2b26e8b96123030ec80a7034276b84c7b9c875e137",
+   "live_pre_eol": "size=48349 crlf=737 lf=35 lone_cr=0 class=MIXED",
+   "post_eol": "size=52285 crlf=787 lf=35 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_live_service.py",
+   "kind": "edit",
+   "blocks": 74,
+   "live_pre_sha256": "792ab5987b93dc3dc17eb2f61288a52c79b83b55e238fdaa5834c82f7b797e33",
+   "post_sha256": "f311203438a6eca3bc89716d42a3c3b8f36a20d4d3d55e134c49d17afe15aa30",
+   "live_pre_eol": "size=106545 crlf=1595 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=131160 crlf=1998 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_overlap_routes.py",
+   "kind": "edit",
+   "blocks": 3,
+   "live_pre_sha256": "ddaef25278ea2fc636b7d690d1047d8ee7e6a73042dcea008894cf13de7394b1",
+   "post_sha256": "312bca42eede3304731af35075c6e8920717fb9c4b000d2dd01de3dd19a7cb54",
+   "live_pre_eol": "size=19436 crlf=0 lf=328 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=19624 crlf=0 lf=332 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/staffer_route_cancel.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "3e8b003f4bea16582927cb21de3d3276175763d55d45efed02a73ab754e4e9df",
+   "live_pre_eol": null,
+   "post_eol": "size=859 crlf=0 lf=33 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/staffer_routing.py",
+   "kind": "edit",
+   "blocks": 5,
+   "live_pre_sha256": "1f3b4e876b823b9b5f8807cc19fb6794f04b44247b7417694840a3322a73b0af",
+   "post_sha256": "05fa3f38b029d0bf94584122cdafbebaadd6c0f301f854e292cb0d024d55060f",
+   "live_pre_eol": "size=42179 crlf=644 lf=1 lone_cr=0 class=MIXED",
+   "post_eol": "size=42437 crlf=650 lf=1 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_search_index.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "0e03bf444a671909b87adbf7745c1dd0838eda56f726f05a6077872d2c16e497",
+   "live_pre_eol": null,
+   "post_eol": "size=11262 crlf=0 lf=208 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/surfaces/test_staffer_closeness_bidirectional.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "85b3eb48eaa8639db9d723c3efb2a28f8c7c2c9ef5bf07ed15af9c6ad7ccb6b5",
+   "live_pre_eol": null,
+   "post_eol": "size=88825 crlf=0 lf=1613 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/staffer_latency_fixtures.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "0df083bbcb82dab894970da11666a0db06c6029026b105a0127663ffc9045d5a",
+   "live_pre_eol": null,
+   "post_eol": "size=3376 crlf=0 lf=78 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_identity_status_count.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "6c578f6d53df8b3ca90ac2870a8d0d3db879ef2aa21051ccd1d9feeec395b081",
+   "live_pre_eol": null,
+   "post_eol": "size=7418 crlf=0 lf=137 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "c11062f5070344ca806cf9e0fc8a95cd81152d025581cde9f31a5bb867db2af0",
+   "live_pre_eol": null,
+   "post_eol": "size=12862 crlf=0 lf=186 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_lock_free_view.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "4964738780d9952ccad74593d20dbcfe1a6e3a6165acf091d6e59064966102e6",
+   "live_pre_eol": null,
+   "post_eol": "size=25374 crlf=0 lf=519 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_rebuild_view.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "5195bc23454ed430e61c211b1f5ae958f2b2a06e52feaab64e57e08696e2596c",
+   "live_pre_eol": null,
+   "post_eol": "size=5313 crlf=0 lf=106 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_refresh_memo.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "ab9a76b7417dbdc32b73c767cafa73194bb191bbd4579fc563a3c14a82704ee4",
+   "live_pre_eol": null,
+   "post_eol": "size=23049 crlf=0 lf=436 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_route_jobs.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "7fda7c29754fcc111319202d325f474acf6f84db5d8391eaecada0d82fd6aff4",
+   "live_pre_eol": null,
+   "post_eol": "size=63176 crlf=0 lf=1189 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_route_jobs_client.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "95e924b2a5413cde588667716ed0fa15b025516f6226739b49466b2c8096f40a",
+   "live_pre_eol": null,
+   "post_eol": "size=22137 crlf=0 lf=369 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_route_latency.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "4c329ef63732f3695a3e3da18eee42390ab710dbe6630a2181d237b3082ba8cc",
+   "live_pre_eol": null,
+   "post_eol": "size=10069 crlf=0 lf=180 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_search_differential.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "55cd97926c72887632c63b0042ffb5b9469796226c52f3d5ef052b04e7143e96",
+   "live_pre_eol": null,
+   "post_eol": "size=48048 crlf=0 lf=807 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_typeahead_http.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "72ac5519f8d963e37dee619377b90fd94259f8e570ea1297e779334528f1ec32",
+   "live_pre_eol": null,
+   "post_eol": "size=3633 crlf=0 lf=84 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_typeahead_identifiers.py",
+   "kind": "new",
+   "blocks": 1,
+   "live_pre_sha256": null,
+   "post_sha256": "8c31076e57f5b64b3dfe66e553dcf25e9eff030ec4c36ecb6a8959304994a1c8",
+   "live_pre_eol": null,
+   "post_eol": "size=15862 crlf=0 lf=272 lone_cr=0 class=PURE_LF"
+  }
+ ]
+}

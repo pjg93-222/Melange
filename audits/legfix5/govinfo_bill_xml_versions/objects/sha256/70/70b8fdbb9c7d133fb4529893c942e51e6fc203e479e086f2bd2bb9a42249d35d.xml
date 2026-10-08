@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H65BE548F0AD54C0BB5F401906DE620F0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7336 IH: ALS Better Care Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-02-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7336</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260203">February 3, 2026</action-date><action-desc><sponsor name-id="S001145">Ms. Schakowsky</sponsor> (for herself, <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>, <cosponsor name-id="C001121">Mr. Crow</cosponsor>, and <cosponsor name-id="Q000023">Mr. Quigley</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title XVIII of the Social Security Act to provide coverage of ALS-related services under the Medicare program for individuals diagnosed with amyotrophic lateral sclerosis, and for other purposes.</official-title></form><legis-body id="H57D9103BC9C64DDCB7F7AB5D02634726"><section id="H82DC7A32A017489ABB87E353CB0CADA9" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>ALS Better Care Act</short-title></quote>.</text></section><section id="H0D4CE90D8D234630AA9B865C00A98EF1"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress makes the following findings:</text><paragraph id="H85FB6AE6758C4BCFA8434D559CFBD22C"><enum>(1)</enum><text>Amyotrophic lateral sclerosis (in this section, referred to as <quote>ALS</quote>) is a progressive and debilitating neurodegenerative disease.</text></paragraph><paragraph id="HF8A4040CD7844D988B56579B9B3838AB"><enum>(2)</enum><text>Key services that include (but are not limited to) providing specialized physician or nurse practitioner support, occupational therapy support, speech pathology support, physical therapy, dietary support, respiratory support, registered nurse support, and coordination of the furnishing of durable medical equipment are crucial for managing the complex medical needs of ALS patients.</text></paragraph><paragraph id="H2EAAD28175C9419C96F4510A7104EDCB"><enum>(3)</enum><text>Studies have shown ALS clinics that provide these key services to ALS patients extend these patients’ lifespans and improve the quality of their lives.</text></paragraph><paragraph id="HA63E2A89AC5641C691B56F82D1A8CDDB"><enum>(4)</enum><text>These key services are furnished by a range of healthcare professionals.</text></paragraph><paragraph id="H7A3DB27CCD9D47F290365DB0D3F061FF"><enum>(5)</enum><text>Facilities providing care to ALS patients currently face inadequate Medicare reimbursement for the key services they offer to these patients.</text></paragraph><paragraph id="HA4F675539B7F4353927F2A036DA09263"><enum>(6)</enum><text>Insufficient reimbursement creates significant challenges for facilities specializing in ALS care, resulting in extended wait times for patients in need of crucial services and hampering the ability of these facilities to innovate and improve the quality of care provided to ALS patients.</text></paragraph><paragraph id="H504CC84F6C2B40AD8D6AF00941CB2DE5"><enum>(7)</enum><text>Improved reimbursement rates would encourage facilities to invest in research, innovation, and technology, leading to enhanced treatment options for ALS and improved patient outcomes.</text></paragraph><paragraph id="H099FFF57721B438F94F54B1D3474FEAE"><enum>(8)</enum><text>Remote medical management options for individuals suffering from ALS must be a crucial part of access to care for such individuals, especially those living in rural areas or care deserts.</text></paragraph><paragraph id="H5A6DE28C7691403DB0814C4C9A7B202F"> <enum>(9)</enum> <text>Telehealth is an essential management option referred to in paragraph (8) and can assist in delivering timely and comprehensive care, as ALS patients living in rural areas or care deserts often face challenges in accessing specialized ALS care and could otherwise be required to travel long distances—often with caregivers or family members.</text>
+ </paragraph><paragraph id="H40FE80869E564369B0218509B7ED7CD2"><enum>(10)</enum><text>Telehealth is especially important in maintaining access to care for ALS patients as the disease progresses and ALS patients have more limited mobility, which may make it challenging to attend in-person appointments regularly.</text></paragraph><paragraph id="H13E71F4ACF8B4B369C9F7943EC729A80"><enum>(11)</enum><text>Low funding and difficulty in staffing for ALS clinical trials delay the development and availability of potential treatments and therapies for individuals living with the disease.</text></paragraph><paragraph id="H3B9822FD7EC64349B75DB2B48AC53334"><enum>(12)</enum><text>Inadequate funding for ALS clinical trials also impedes the ability to attract and retain qualified researchers, clinicians, and support staff, limiting the overall progress and success of these trials.</text></paragraph></section><section id="HB9117989B6CC4D968727100889631C68"><enum>3.</enum><header>Providing for coverage of als-related services under the medicare program for individuals diagnosed with amyotrophic lateral sclerosis</header><subsection id="H1FA291BE170A4B508684FE914305C2BE"><enum>(a)</enum><header>In general</header><text>Section 1861 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395x">42 U.S.C. 1395x</external-xref>) is amended—</text><paragraph id="HFF195AE631B241AD90A99BE30BEC5EA6"><enum>(1)</enum><text>in subsection (s)(2)—</text><subparagraph id="HFA210BAC3FCB47DB939B63B268129924"><enum>(A)</enum><text>by adding <quote>and</quote> at the end of subparagraph (JJ); and</text></subparagraph><subparagraph id="H4821EC155F8A46739F4086F7B0DBC4FC"><enum>(B)</enum><text>by adding at the end the following new subparagraph:</text> <quoted-block id="HBC55E518D6EB4F628C57DAAEA384942C" style="OLC"> <subparagraph id="H8C151039BC86498CAF7DAFD30867D130"> <enum>(KK)</enum> <text>ALS-related services (as defined in subsection (nnn)) furnished on or after January 1, 2027;</text>
+                            </subparagraph>
+                            <after-quoted-block>; and</after-quoted-block>
+ </quoted-block></subparagraph></paragraph><paragraph id="H4A8A9E99F7D040E1B1B1A3994903B737"><enum>(2)</enum><text>by adding at the end the following new subsection:</text><quoted-block style="OLC" id="H06DEA20F47DC4292A034B7C053E6663A" display-inline="no-display-inline"><subsection id="HEBA9427578E34927AF086386ECBB9E76"> <enum>(nnn)</enum> <text>ALS-Related Services.—</text>
+                            <paragraph id="HBA1A3FB193684E05A882B0CA1CFE4D6C">
+                                <enum>(1)</enum>
+                                <header>Als-related services</header>
+ <text>The term <quote>ALS-related services</quote> means the following items and services that are furnished to a covered ALS individual in an outpatient setting by a qualified provider (as defined in section 1834(aa)(6)) (or by another provider of services under an arrangement made by a qualified provider) for the care and treatment of such an individual with respect to the progression of amyotrophic lateral sclerosis:</text>
+                                <subparagraph id="H9339A292EB69443DAEF649A8D074ABA4">
+                                    <enum>(A)</enum>
+ <text>Specialized physician or nurse practitioner support.</text>
+                                </subparagraph>
+                                <subparagraph id="HDFBB8369550C4859A52D2763C52E34EC">
+                                    <enum>(B)</enum>
+ <text>Occupational therapy support.</text> </subparagraph> <subparagraph id="HAAF951F780954D38A53EF7E3722A5C26"> <enum>(C)</enum> <text>Speech pathology support.</text>
+                                </subparagraph>
+                                <subparagraph id="H81666252BE2A48798254F5CBF5FB55EB">
+                                    <enum>(D)</enum>
+ <text>Physical therapy.</text> </subparagraph> <subparagraph id="HF83BFCFD076F4481B1A5AD5005C43D7A"> <enum>(E)</enum> <text>Dietary support.</text>
+                                </subparagraph>
+                                <subparagraph id="H855AFFADC93C473BAB8666C1735B48B4">
+                                    <enum>(F)</enum>
+ <text>Respiratory support.</text> </subparagraph> <subparagraph id="H510C607F0CFD42C0A9A468CE73384E38"> <enum>(G)</enum> <text>Registered nurse support.</text>
+                                </subparagraph>
+                                <subparagraph id="HCBF65509549F461AA344B7B10FB5ADD8">
+                                    <enum>(H)</enum>
+ <text>Coordination of the furnishing of durable medical equipment necessary for the management of the complex medical needs of a covered ALS individual.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="HAB7FC31DB298403AB00AFB0377481CE4">
+                                <enum>(2)</enum>
+                                <header>Covered als individual</header>
+ <text>The term <quote>covered ALS individual</quote> means an individual who is medically determined to have amyotrophic lateral sclerosis (as described in section 226(h)).</text>
+                            </paragraph>
+                        </subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection><subsection id="H761743C2EDB7450999692CE623A5DEF4">
+                <enum>(b)</enum>
+                <header>Payment for ALS-Related services</header>
+ <text>Section 1834 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395m">42 U.S.C. 1395m</external-xref>) is amended by adding at the end the following new subsections:</text>
+                <quoted-block style="OLC" id="H7B63588C6648413997C97062D7A06751" display-inline="no-display-inline">
+                    <subsection id="H7577ED59B6C8450EABB4BDDCF52C1BB9">
+                        <enum>(aa)</enum>
+ <text>Payment for ALS-Related Services.—</text> <paragraph id="H3E6816E557104935A2D66598D532F1DD"> <enum>(1)</enum> <header>In general</header> <text>The Secretary shall implement a payment system under which a single payment determined in accordance with the succeeding paragraphs is made to a qualified provider (as defined in paragraph (6)) for ALS-related services (as defined in paragraph (1) of section 1861(nnn)) furnished to a covered ALS individual (as defined in paragraph (2) of such section) during a visit, in addition to any other payment that may be made for such services under this title.</text>
+                        </paragraph>
+                        <paragraph id="H30A2B70BE015490BBCA55E561F5DCF56">
+                            <enum>(2)</enum>
+                            <header>Base payment amount</header>
+                            <subparagraph id="HEAAFB093AFC44E9FBD323D8849A19DDF">
+                                <enum>(A)</enum>
+                                <header>In general</header>
+ <text>The amount of the single payment described in paragraph (1) for ALS-related services furnished during a year is equal to—</text>
+                                <clause id="H492E90E41F4F4D1DB8BA888FDB4F3F7B">
+                                    <enum>(i)</enum>
+ <text>for 2027, $800;</text> </clause> <clause id="H60EEC852960D4E3BB5804CA09BF8396D"> <enum>(ii)</enum> <text>for 2028, $800 (or, if greater, the payment amount recommended by the Comptroller General of the United States in the report described in subparagraph (C)); and</text>
+                                </clause>
+                                <clause id="H2DDD0ECD712B4CD2A4C9623C6DDA0285">
+                                    <enum>(iii)</enum>
+ <text>for 2029 and each subsequent year—</text> <subclause id="H5F0A7AA8DAC3414987C3815987DF7A51"> <enum>(I)</enum> <text>the amount for the preceding year, increased by the ALS services market basket percentage increase (as defined in clause (i) of subparagraph (B)) for such year; or</text>
+                                    </subclause>
+                                    <subclause id="H982768323EAF44A2841DBA73DA224C7C">
+                                        <enum>(II)</enum>
+ <text>in the case such year is an applicable year (as defined in clause (ii) of such subparagraph), the payment amount recommended by the Comptroller General in the most recent report submitted under subparagraph (C), if greater than the amount that would be determined for such year under subclause (I).</text>
+                                    </subclause>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="H90B6B3A1239848CABC9FD54B030E89EF">
+                                <enum>(B)</enum>
+                                <header>Definitions</header>
+ <text>In this paragraph:</text> <clause id="HB5ED85CA46744F07851F18A332E6D410"> <enum>(i)</enum> <header>ALS services market basket percentage increase</header> <text>The term <quote>ALS services market basket percentage increase</quote> means, for a year, the Secretary’s estimate of the percentage increase in costs of an appropriate mix, as determined by the Secretary, of items and services that are ALS-related services over the preceding year.</text>
+                                </clause>
+                                <clause id="H401A7D99FB5442C9BEDFFD39803DE47E">
+                                    <enum>(ii)</enum>
+                                    <header>Applicable year</header>
+ <text>The term <quote>applicable year</quote> means 2030 and every third year thereafter.</text>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="HCBA78D9EB2834635952492EC0FCEEC1A">
+                                <enum>(C)</enum>
+                                <header>Report by the comptroller general</header>
+                                <clause id="H977A7590344741918331169FAD7B8DD9">
+                                    <enum>(i)</enum>
+                                    <header>In general</header>
+ <text>Not later than January 1, 2027, and not later than January 1 of every third year thereafter, the Comptroller General of the United States shall, in consultation with qualified providers eligible for payment under this subsection, submit to the Secretary a report that recommends a single payment amount for ALS-related services that takes into account the average amount of payment for each item or service included in ALS-related services that the Comptroller General estimates would have been payable—</text>
+                                    <subclause id="HA7F6AAAC2C584AC286BCC54A658E9DBF">
+                                        <enum>(I)</enum>
+ <text>under this title for such a service based on per patient utilization data from whichever single year during the covered period (as defined in clause (ii)) with respect to such report has the highest per patient utilization of ALS-related services, even if such service is not payable for a particular covered ALS individual because of the application of section 1862(a)(1)(A) with respect to an item or service provided to such individual;</text>
+                                    </subclause>
+                                    <subclause id="HB869C24EFEE14EAD8BD105BD7099CB9F">
+                                        <enum>(II)</enum>
+ <text>in the case an estimate is unable to be determined pursuant to subclause (I), by health insurance issuers and group health plans (as such terms are defined in section 2791 of the Public Health Service Act) and MA plans under part C for such a service, based on such data from whichever single year during the covered period with respect to such report has the highest per patient utilization of ALS-related services; and</text>
+                                    </subclause>
+                                    <subclause id="H86C3B2EEABF54EF890152F678AF4B01D">
+                                        <enum>(III)</enum>
+ <text>in the case an estimate is unable to be determined pursuant to subclause (II), based on the recommendation of the Specialty Society Relative Value Scale Update Committee of the American Medical Association or the estimate of the Comptroller General for such a service.</text>
+                                    </subclause>
+                                </clause>
+                                <clause id="HB5A93BB979B44A7EBCC4A7F5EFC36C2C">
+                                    <enum>(ii)</enum>
+                                    <header>Definition of covered period</header>
+ <text>In this subparagraph, the term <quote>covered period</quote> means—</text>
+                                    <subclause id="HA65A550E19254D8BB67DFF637EC08889">
+                                        <enum>(I)</enum>
+ <text>with respect to the first report submitted under this subparagraph, 2022 through 2024;</text>
+                                    </subclause>
+                                    <subclause id="HA66F026682BA4955B9D98E71687BC5FA">
+                                        <enum>(II)</enum>
+ <text>with respect to the second such report, 2026 through 2028; and</text>
+                                    </subclause>
+                                    <subclause id="HD2B58EF4413B4DBD9D244096349B50AF">
+                                        <enum>(III)</enum>
+ <text>with respect to the third report and each subsequent report, the period that begins 3 years after the covered period for the preceding report.</text>
+                                    </subclause>
+                                </clause>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="H095D799EE3AD4480BB81AD5E162C5ED1">
+                            <enum>(3)</enum>
+                            <header>Payment adjustments</header>
+ <text>The payment system under this subsection shall include a payment adjustment—</text>
+                            <subparagraph id="HDFB3092323A740108B9926552EA59BF1">
+                                <enum>(A)</enum>
+ <text>for each qualified provider that is participating in at least one clinical trial identified on the clinicaltrials.gov database (or any successor database) of the National Institutes of Health to account for the increased cost borne by such a qualified provider during such a clinical trial; and</text>
+                            </subparagraph>
+                            <subparagraph id="H1BD40C05DEAD4C5E9654B9B3C329C478">
+                                <enum>(B)</enum>
+ <text>for a medical service or technology which is furnished as a part of ALS-related services for which, as determined by the Secretary—</text>
+                                <clause id="HD9E28716B7764E50910EB7D0A224ACAD">
+                                    <enum>(i)</enum>
+ <text>payment under this subsection for such service or technology was not being made in the preceding year; and</text>
+                                </clause>
+                                <clause id="H9B83567B7CAD42D389C23A1C1340AF1F">
+                                    <enum>(ii)</enum>
+ <text>the cost of such service or technology is not insignificant in relation to the payment amount (as determined under this subsection) payable for ALS-related services.</text>
+                                </clause>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="H7CBE033878FF4A84A46AF60CF58083CC">
+                            <enum>(4)</enum>
+                            <header>Mechanism for payments</header>
+ <text>For purposes of making payments for ALS-related services, the Secretary shall establish a mechanism under the payment system under this subsection which makes payment when a qualified provider submits a claim for payment which includes, with respect to a covered ALS individual, an alphanumeric code issued under the International Classification of Diseases, 10th Revision, Clinical Modification (<quote>ICD–10–CM</quote>) and its subsequent revisions that is for the treatment of a diagnosis of amyotrophic lateral sclerosis.</text>
+                        </paragraph>
+                        <paragraph id="H25857FD13139431DBD1C59474E6142EF">
+                            <enum>(5)</enum>
+                            <header>No cost sharing</header>
+ <text>Payment under this subsection shall be made only on an assignment-related basis without any cost sharing.</text>
+                        </paragraph>
+                        <paragraph id="HFEC05FDA1C3C4B81919089726DA7E109">
+                            <enum>(6)</enum>
+                            <header>Qualified provider</header>
+ <text>In this section, the term <quote>qualified provider</quote> means a provider of services that—</text>
+                            <subparagraph id="H4BEC8F58F12A4E2899B12DFFAA07CE20">
+                                <enum>(A)</enum>
+ <text>is capable of furnishing ALS-related services; and</text> </subparagraph> <subparagraph id="HCF1A7E4473A04FC2AFDC0C5BBC2E4B67"> <enum>(B)</enum> <text>meets requirements as the Secretary prescribes by regulation to implement subparagraph (A), in consultation with—</text>
+                                <clause id="H621D42D069644041B2124C1344EEF869">
+                                    <enum>(i)</enum>
+ <text>covered ALS individuals and their representatives;</text> </clause> <clause id="H0A0FE03FE78544788276AFFB5669E8F1"> <enum>(ii)</enum> <text>physicians who provide ALS-related services and their representatives; and</text>
+                                </clause>
+                                <clause id="H1954C25F50C3491ABED8647AED5F7F9F">
+                                    <enum>(iii)</enum>
+ <text>professional and non-profit organizations with expertise in amyotrophic lateral sclerosis.</text>
+                                </clause>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="H16D85968BCB746DCA196E7FB9866B049">
+                            <enum>(7)</enum>
+                            <header>Implementation</header>
+                            <subparagraph id="H0E079889D3CC440593981BE7872A2F6B">
+                                <enum>(A)</enum>
+                                <header>In general</header>
+ <text>Except as provided under subparagraph (B), the Secretary may implement the provisions of this subsection by program instruction or otherwise.</text>
+                            </subparagraph>
+                            <subparagraph id="HB7AB3CB17CCC4F13B37182DAAB70DF2D">
+                                <enum>(B)</enum>
+                                <header>Rulemaking</header>
+ <text>The Secretary shall implement paragraph (6), through notice and comment rulemaking.</text>
+                            </subparagraph>
+                        </paragraph>
+                    </subsection>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+ </subsection><subsection id="H3615EFFEF04240E59ACE58288DF9DEFF"><enum>(c)</enum><header>Conforming amendments</header><paragraph id="HE6FC45B1F14B4EDF86790C4C0CB1409C"><enum>(1)</enum><header>Section 1833(t)</header><text>Section 1833(t) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395(t)</external-xref>) is amended by adding at the end the following new paragraph:</text><quoted-block id="HFE64CCAAFEE14D09BFF59DAD239F42D8" style="OLC"><paragraph id="H033F740C707E4095A3AEF04B1830C5F8"><enum>(23)</enum><header>Ensuring supplemental payments for als-related services</header><text>Any covered OPD service furnished to a covered ALS individual (as defined in section 1861(nnn)(2)) that is otherwise payable to a qualified provider (as defined in section 1834(aa)(6)) pursuant to paragraph (4) shall be payable under such paragraph notwithstanding any payment made under section 1834(aa).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph><paragraph id="HEBBD97DF8EEB40738C33E2CE18B73C11"><enum>(2)</enum><header>Definition of arrangements</header><text>Section 1861(w)(1) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395x">42 U.S.C. 1395x(w)(1)</external-xref>) is amended by inserting <quote>qualified provider (as defined in section 1834(aa)(6)) with respect to ALS-related services (as defined in subsection (nnn)),</quote> before <quote>or hospice program</quote>.</text></paragraph></subsection></section><section id="H4C56FC35014440FC897985B582A2957C"><enum>4.</enum><header>Report on challenges with respect to the administration and staffing of amyotrophic lateral sclerosis clinical trials</header><text display-inline="no-display-inline">Not later than 90 days after the date of the enactment of this Act, the Secretary of Health and Human Services, acting through the Director of the National Institute of Neurological Disorders and Stroke of the National Institutes of Health, shall submit to Congress and publish on the internet website of the agency a report that identifies—</text><paragraph id="H4E856A070D164AFBBCC97A14739EE663"><enum>(1)</enum><text>any challenges with respect to the administration and staffing of clinical trials for the prevention, diagnosis, mitigation, treatment, or cure of amyotrophic lateral sclerosis;</text></paragraph><paragraph id="HD1B241D60BA644549DD9522AE58EC590"><enum>(2)</enum><text>actions that the Director of the National Institute of Neurological Disorders and Stroke can take to address such challenges; and</text></paragraph><paragraph id="H7BCE4F8C5B5845EA8607A29124383A3B"><enum>(3)</enum><text>any legislative recommendations (including requests for appropriations) to further improve the administration of such clinical trials.</text></paragraph></section></legis-body></bill>
+

@@ -1,0 +1,102 @@
+# staffer_route_v4_1 patch: manifest (landing_v4_1)
+
+requires          landing_v4 (staffer_route_v4.patch) applied to LIVE first (landing_v2 and landing_v3_ids before it)
+LIVE main         3366a7840f90a204d496070da11354245d18f741  (LIVE HEAD when this patch was cut; informational: the pre-image gate is the hash of every edited working file, not HEAD)
+base content      79ef9f1b7440bcee21c7f7c677a93263d9fcc04a  (claude/staffer-route-v4-20261003, the v4 tip: what LIVE holds after landing_v4, up to terminators)
+branch tip        19a5c28bcf98f13e346ea27e4c7ca56bd1d9680b  (claude/staffer-route-v4-1-20261004)
+patch             staffer_route_v4_1.patch  100838 bytes  sha256 fcb52fbdad630b20dd9f98d0c3a3a558f40ef41873afc0c1ccb1ee8ce3a6844d
+files             11: 10 edited in place, 1 new
+
+The pre-image of an edited file is the LIVE working file as it is now, landing_v4 applied: byte for byte landing_v4's post-image (its summary hash, and the copy in landing_v4\post_images).
+apply_landing.py refuses unless every pre-image hash below matches.
+Terminator profiles are live_patch.py `eol` lines (crlf = CRLF-terminated lines, lf = bare-LF lines).
+verdict (worktree) = `live_patch.py drift <post-image> <branch tip file in the worktree>`: IDENTICAL_BYTES, or EOL_ONLY where the pre-image keeps its own terminators, or a new file (blob: LF) meets the worktree's git-checkout CRLF.
+verdict (blob)     = the same comparison against the tip's git blob (pure LF): a new file is IDENTICAL_BYTES, an edited file EOL_ONLY wherever its pre-image is not pure LF.
+
+EDIT  fec/surfaces/staffer_closeness_routes.py
+    pre-image       sha256 76c0347eb942e2457a2dbb8e9e028b83c6655194c0d1bff21d2c80d3ef97b933
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 2e21a33b910b0b75e5836eb7c1024f364aba983e0d5bc2b9a7be1a91864c81b3
+    profile before  size=56426 crlf=968 lf=5 lone_cr=0 class=MIXED
+    profile after   size=60933 crlf=1045 lf=5 lone_cr=0 class=MIXED
+    change          +88 / -11 lines   verdict (worktree): EOL_ONLY   verdict (blob): EOL_ONLY
+
+EDIT  fec/surfaces/staffer_distinct_routes.py
+    pre-image       sha256 8fab7ea38bc8eb5b917ff1d2a78c5faffa6127550f3ec6967618455a6fd634c4
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 4f9d8487f70be9190eecd5eeeab9eee6b73cfa9c6076132d2c45dfffeef7ec59
+    profile before  size=8063 crlf=0 lf=157 lone_cr=0 class=PURE_LF
+    profile after   size=8175 crlf=0 lf=158 lone_cr=0 class=PURE_LF
+    change          +3 / -2 lines   verdict (worktree): EOL_ONLY   verdict (blob): IDENTICAL_BYTES
+
+EDIT  fec/surfaces/staffer_live/README.md
+    pre-image       sha256 07a757393a05c5b06d581b0a9887b7b6280d749abc5c3af8bd1d18de7cb39ead
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 fcd33af85994ab06b0a53f48894b555a65a9fe39141fe11e9bb8582e2847040b
+    profile before  size=34095 crlf=120 lf=0 lone_cr=0 class=PURE_CRLF
+    profile after   size=35540 crlf=120 lf=0 lone_cr=0 class=PURE_CRLF
+    change          +2 / -2 lines   verdict (worktree): IDENTICAL_BYTES   verdict (blob): EOL_ONLY
+
+EDIT  fec/surfaces/staffer_live/staffer-route.js
+    pre-image       sha256 d5e5ad28823caef1af96685eedabf41a27bf90390963445b1a29c4c15daaa514
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 6499975ff5ebc33d6ad799bf02c8b0c7b8f7ad894171858a1f8577150c4bddc3
+    profile before  size=40785 crlf=300 lf=0 lone_cr=0 class=PURE_CRLF
+    profile after   size=41182 crlf=301 lf=0 lone_cr=0 class=PURE_CRLF
+    change          +3 / -2 lines   verdict (worktree): IDENTICAL_BYTES   verdict (blob): EOL_ONLY
+
+EDIT  fec/surfaces/staffer_live_service.py
+    pre-image       sha256 a512c5c7dcfe5726caa27552f28b27b90e254c118bb591124da00a29d87e3e78
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 6731a381575c99b1ce921eca8975e5ceeec9a4c9227916dd1c4c15236ca1f2d4
+    profile before  size=140654 crlf=2142 lf=0 lone_cr=0 class=PURE_CRLF
+    profile after   size=142626 crlf=2161 lf=0 lone_cr=0 class=PURE_CRLF
+    change          +33 / -14 lines   verdict (worktree): IDENTICAL_BYTES   verdict (blob): EOL_ONLY
+
+EDIT  fec/surfaces/staffer_routing.py
+    pre-image       sha256 c9b0896a00814b1d392564aa0801a497f83b2d5581539e64676a8ff6ee2a2d24
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 d4c717f4f8fed3a199137515553c1abaadfadb12adf520d2ac7bb10781c0c8a0
+    profile before  size=44816 crlf=691 lf=1 lone_cr=0 class=MIXED
+    profile after   size=45797 crlf=706 lf=1 lone_cr=0 class=MIXED
+    change          +21 / -6 lines   verdict (worktree): EOL_ONLY   verdict (blob): EOL_ONLY
+
+EDIT  fec/tests/surfaces/test_staffer_left_out_staff.cjs
+    pre-image       sha256 c34f37e52e63a28131867cf3ee4e730e75dffd639d50cb60d06affe3cf7feace
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 d2cafc128dcbaf947bbb3c17ea25367ef19c2b6742b9c60478b4098d8d0eddac
+    profile before  size=26381 crlf=0 lf=320 lone_cr=0 class=PURE_LF
+    profile after   size=32724 crlf=0 lf=386 lone_cr=0 class=PURE_LF
+    change          +70 / -4 lines   verdict (worktree): EOL_ONLY   verdict (blob): IDENTICAL_BYTES
+
+EDIT  fec/tests/surfaces/test_staffer_office_covered_staff.py
+    pre-image       sha256 72323acb4fdb574f661b49c4f1a7935bdc3e6e13982440acc333d75bfedab110
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 abe3979d841d0d4859843ad754f9cb7187fd506f7ccc499c0557a24d3bc8dbfa
+    profile before  size=44324 crlf=0 lf=678 lone_cr=0 class=PURE_LF
+    profile after   size=53061 crlf=0 lf=802 lone_cr=0 class=PURE_LF
+    change          +128 / -4 lines   verdict (worktree): EOL_ONLY   verdict (blob): IDENTICAL_BYTES
+
+EDIT  fec/tests/surfaces/test_staffer_prewarm.py
+    pre-image       sha256 bf8319795c04bfa102e09a94c985a9774ad6579c8ff16b15588aa2ea36cfbf16
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 f8199d50f26edf2224f375a40e4339cbcce199a9ac79828b43cf8bbf04db2b6b
+    profile before  size=33345 crlf=0 lf=685 lone_cr=0 class=PURE_LF
+    profile after   size=39000 crlf=0 lf=776 lone_cr=0 class=PURE_LF
+    change          +105 / -14 lines   verdict (worktree): EOL_ONLY   verdict (blob): IDENTICAL_BYTES
+
+NEW   fec/tests/surfaces/test_staffer_request_work_index.py
+    pre-image       sha256 (does not exist)
+    pre-image from  -
+    post-image      sha256 6fb10e4b9399c87a9f0adbcdc25ddf2e0355bfbb004c422ad0b8c6f7457e1a6e
+    profile before  -
+    profile after   size=20096 crlf=0 lf=416 lone_cr=0 class=PURE_LF
+    change          +416 lines (new file)   verdict (worktree): EOL_ONLY   verdict (blob): IDENTICAL_BYTES
+
+EDIT  fec/tests/surfaces/test_staffer_unreachable_hint.py
+    pre-image       sha256 15dbe2ef735960c65fb5c584797c31416ea747c98e33eab8cf93c2d1811eb66b
+    pre-image from  LIVE working file now = landing_v4 post-image
+    post-image      sha256 85e07cc4f2965e53068c1e640ece4bde5a6abc1364fc63cabafc61fffbc1237c
+    profile before  size=31989 crlf=0 lf=558 lone_cr=0 class=PURE_LF
+    profile after   size=37891 crlf=0 lf=649 lone_cr=0 class=PURE_LF
+    change          +93 / -2 lines   verdict (worktree): EOL_ONLY   verdict (blob): IDENTICAL_BYTES

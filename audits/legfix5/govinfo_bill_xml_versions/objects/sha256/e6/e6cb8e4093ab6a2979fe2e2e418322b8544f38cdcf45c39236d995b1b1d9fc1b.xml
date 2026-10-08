@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HC71956B748B348A5A7BCDAC91256A5AC" public-private="public" key="H" bill-type="olc" stage-count="1">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5921 EH: No U.S. Financing for Iran Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IB</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 5921</legis-num>
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<legis-type>AN ACT</legis-type>
+<official-title display="yes">To prohibit the Secretary of the Treasury from authorizing certain transactions by a United States financial institution in connection with Iran, to prevent the International Monetary Fund from providing financial assistance to Iran, to codify prohibitions on Export-Import Bank financing for the Government of Iran, and for other purposes.</official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC" id="H7D45CD141AA2464EA6C633FD741149ED">
+<section id="H1F6A589C8DCC44ED9E921816CE64AC82" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>No U.S. Financing for Iran Act of 2023</short-title></quote>.</text></section> <section id="H70A7763C513F4855B0516E7DAC718C34"><enum>2.</enum><header>Prohibition on authorizations for United States financial institutions</header><text display-inline="no-display-inline">The Secretary of the Treasury may not authorize a transaction by a U.S. financial institution (as defined in section 561.309 of title 31, Code of Federal Regulations) in connection with the importation from or exportation to the Islamic Republic of Iran of any goods, services, or technology, other than the sale of agricultural commodities, food, medicine, medical devices, or humanitarian assistance benefitting the civilian population of Iran.</text></section>
+<section id="H4E833B88A1DA49B58867182725D22E86"><enum>3.</enum><header>Opposition to IMF assistance</header><text display-inline="no-display-inline">The Secretary of the Treasury shall instruct the United States Executive Director at the International Monetary Fund to—</text> <paragraph id="H32F2ECC556E645ADA421E511552823D9"><enum>(1)</enum><text>oppose the provision of financial assistance by the Fund to the Islamic Republic of Iran, and the allocation to the Government of Iran of Special Drawing Rights; and</text></paragraph>
+<paragraph id="H94D0A40B527A4A3F9A3E03D4C16809F1"><enum>(2)</enum><text>seek to ensure that member countries of the Fund prohibit the exchange of Special Drawing Rights held by the Government of Iran.</text></paragraph></section> <section id="H450E22C3121545ED855D1F229927C5DD"><enum>4.</enum><header>Codification of export-import bank prohibition with respect to Iran</header><text display-inline="no-display-inline">Section 2(b) of the Export-Import Bank Act of 1945 (<external-xref legal-doc="usc" parsable-cite="usc/12/635">12 U.S.C. 635(b)</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" id="H7CE8EB554DCD4701838A418D4B9101D6">
+<paragraph id="H8D51C907BA974D3F8FF3F665F57BB27E"><enum>(14)</enum><header>Prohibition on financing for Iran</header><text>The Bank may not guarantee, insure, or extend (or participate in an extension of) credit in connection with any transaction, with respect to which credit assistance from the Bank is first sought after the effective date of this paragraph, for which a lender or obligor is the Government of Iran or an entity owned or controlled by the Government of Iran.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> <section id="H59A17075F39149EAA137706B936F67E1"><enum>5.</enum><header>Sunset</header><text display-inline="no-display-inline">This Act and the amendment made by this Act are hereby repealed effective on the earliest of—</text>
+<paragraph id="H4A3069C4ADA14E98AD2C5DE19D9E8DA1"><enum>(1)</enum><text>the date that is 30 days after the date the President of the United States certifies to the Congress that the Government of Iran—</text> <subparagraph id="HE97BB32819A74DB88E8148757C7BFFFE"><enum>(A)</enum><text>has ceased providing support for acts of international terrorism; and</text></subparagraph>
+<subparagraph id="H1A0929DC490840168142EEB499BAE9E8"><enum>(B)</enum><text>is not a jurisdiction of primary money laundering concern, as described under section 5318A of title 31, United States Code; or</text></subparagraph></paragraph> <paragraph id="H2A2715C417BD4198B4CC5C20225044CF"><enum>(2)</enum><text>10 years after the date of the enactment of this Act.</text></paragraph></section>
+</legis-body><attestation><attestation-group><attestation-date date="20240415" chamber="House">Passed the House of Representatives April 15, 2024.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

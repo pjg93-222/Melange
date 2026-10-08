@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 134 STAT. ?>
+<?I98 134 STAT. ?>
+<?I99 134 STAT. ?>
+<?I50 PUBLIC LAW 116–164—OCT. 10, 2020?>
+<?I51 PUBLIC LAW 116–164—OCT. 10, 2020?>
+<?I52 PUBLIC LAW 116–164—OCT. 10, 2020?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 116–164: To extend certain provisions of the Caribbean Basin Economic Recovery Act until September 30, 2030, and for other purposes.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>164</docNumber>
+<citableAs>Public Law 116–164</citableAs><citableAs>134 Stat. 758</citableAs>
+<approvedDate>2020-10-10</approvedDate>
+<dc:date>2020-10-10</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>116</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 116–164—OCT. 10, 2020</centerRunningHead>
+<page identifier="/us/stat/134/758">134 STAT. 758</page>
+<dc:type>Public Law</dc:type><docNumber>116–164</docNumber>
+<congress value="116">116th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To extend certain provisions of the Caribbean Basin Economic Recovery Act until September 30, 2030, and for other purposes.<sidenote><p class="centered fontsize8" id="x251abb76-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076"><approvedDate date="2020-10-10">Oct. 10, 2020</approvedDate></p><p class="centered fontsize8" id="x251abb77-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076">[<ref href="/us/bill/116/hr/991">H.R. 991</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x251ae288-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">Extension of the Caribbean Basin Economic Recovery Act.</p><p class="leftAlign firstIndent0 fontsize8" id="x251ae289-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180"><ref href="/us/usc/t19/s2701">19 USC 2701 note</ref>.</p></sidenote>
+<section id="d112764e92" identifier="/us/pl/116/164/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Extension of the Caribbean Basin Economic Recovery Act</shortTitle>”.</content></section>
+<section id="d112764e102" identifier="/us/pl/116/164/s2" role="instruction" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>EXTENSION OF THE CARIBBEAN BASIN ECONOMIC RECOVERY ACT.</heading><chapeau class="indentUp0 firstIndent0 fontsize10" id="x251b099a-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658120">  Section 213 of the Caribbean Basin Economic Recovery Act (<ref href="/us/usc/t19/s2703">19 U.S.C. 2703</ref>) <amendingAction type="amend">is amended</amendingAction> as follows:</chapeau><paragraph class="fontsize10" id="y251b099b-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s2/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><heading class="fontsize10"><inline class="smallCaps">Extension for certain knit apparel articles</inline>.—</heading><chapeau>In clause (iii) of subsection (b)(2)(A)—</chapeau><subparagraph class="fontsize10" id="y251b099c-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s2/1/A" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">(A) </num><content>in subclause (II)(cc), by <amendingAction type="delete">striking</amendingAction> “<quotedText>September 30, 2020</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>September 30, 2030</quotedText>”; and</content></subparagraph>
+<subparagraph class="fontsize10" id="y251b099d-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s2/1/B" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">(B) </num><content>in subclause (IV)(dd), by <amendingAction type="delete">striking</amendingAction> “<quotedText>September 30, 2020</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>September 30, 2030</quotedText>”.</content></subparagraph>
+</paragraph>
+<paragraph class="fontsize10" id="y251b099e-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s2/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><heading class="fontsize10"><inline class="smallCaps">Extension of limitation with respect to certain other apparel articles</inline>.—</heading><content>In clause (iv)(II) of such subsection, by <amendingAction type="delete">striking</amendingAction> “<quotedText>18</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>28</quotedText>”.</content></paragraph>
+<paragraph class="fontsize10" id="y251b099f-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s2/3" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="3">(3) </num><heading class="fontsize10"><inline class="smallCaps">Extension of transition period</inline>.—</heading><content>In subsection (b)(5)(D)(i), by <amendingAction type="delete">striking</amendingAction> “<quotedText>September 30, 2020</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>September 30, 2030</quotedText>”.</content></paragraph>
+</section>
+<section id="d112764e180" identifier="/us/pl/116/164/s3" style="-uslm-lc:I658141"><num class="fontsize12" value="3">SEC. 3. </num><heading>CUSTOMS USER FEES.</heading><subsection class="firstIndent0 fontsize10" id="y251b57c0-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s3/a" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><heading class="fontsize10"><inline class="smallCaps">In General</inline>.—</heading><chapeau>Section 13031(j)(3) of the Consolidated Omnibus Budget Reconciliation Act of 1985 (<ref href="/us/usc/t19/s58c/j/3">19 U.S.C. 58c(j)(3)</ref>) <amendingAction type="amend">is amended</amendingAction>—</chapeau><paragraph class="fontsize10" id="y251b57c1-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s3/a/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>in subparagraph (A), by <amendingAction type="delete">striking</amendingAction> “<quotedText>September 30, 2029</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>October 21, 2029</quotedText>”; and</content></paragraph>
+<paragraph class="fontsize10" id="y251b57c2-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s3/a/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>in subparagraph (B)(i), by <amendingAction type="delete">striking</amendingAction> “<quotedText>September 30, 2029</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>October 21, 2029</quotedText>”.</content></paragraph>
+</subsection>
+<subsection class="firstIndent0 fontsize10" id="y251b57c3-e828-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/164/s3/b" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">Rate for Merchandise Processing Fees</inline>.—</heading><content>Section 503 of the United States–Korea Free Trade Agreement Implementation Act (<ref href="/us/pl/112/41">Public Law 112–41</ref>; <ref href="/us/usc/t19/s3805">19 U.S.C. 3805 note</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="delete">striking</amendingAction> “<quotedText>September 30, 2029</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>October 21, 2029</quotedText>”.</content></subsection>
+</section>
+<section id="d112764e251" identifier="/us/pl/116/164/s4" style="-uslm-lc:I658141"><num class="fontsize12" value="4">SEC. 4. </num><heading>DETERMINATION OF BUDGETARY EFFECTS.</heading><content style="-uslm-lc:I658120">  The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled “Budgetary Effects of PAYGO Legislation” for this Act, submitted for printing in the <page identifier="/us/stat/134/759">134 STAT. 759</page>
+Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</content></section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2020-10-10">October 10, 2020</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/116/hr/991">H.R. 991</ref>:</heading>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 166 (2020):</heading>
+<p class="indentUp4 firstIndent-1" id="x251b57c4-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">Sept. 22, considered and passed House.</p><p class="indentUp4 firstIndent-1" id="x251b57c5-e828-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">Sept. 30, considered and passed Senate.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

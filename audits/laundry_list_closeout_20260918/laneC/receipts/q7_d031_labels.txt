@@ -1,0 +1,158 @@
+====================================================================================================
+Q7  PUBLISHED LABEL CENSUS  (dashboard_data.json)
+====================================================================================================
+members=533  len(gen)=533  issues=19  engine.categories=19
+
+-- [1] OVERALL label column dd['gen'] decoded by dashboard_honors.STANDING_BY_LETTER --
+   Highly Persuadable      206
+   Persuadable             122
+   Ally                    102
+   Lean Persuadable         37
+   True Neutral             21
+   Champion                 13
+   Highly Skeptical          9
+   Lean Skeptic              9
+   Skeptic                   7
+   Opponent                  4
+   Insufficient evidence     3
+   TOTAL 533
+   D-031 check: overall 'Champion' count == 13 ?  -> True (count=13)
+   overall 'Defender' count = 0  (D-031: Defender is a FIELD label, not an overall band)
+   crowned members (gen=='C'): ['Alex Padilla', 'Bill Huizenga', 'Brad Sherman', 'Brian Fitzpatrick', 'Dan Sullivan', 'Daniel Meuser', 'Juan Vargas', 'Maxine Waters', 'Scott Fitzgerald', 'Tim Scott', 'Vicente Gonzalez', 'William Timmons', 'Young Kim']
+
+-- [2] dd['overall_honors'][i]['stance'] (the honors projection's overall standing) --
+   Highly Persuadable      206
+   Persuadable             122
+   Ally                    102
+   Lean Persuadable         37
+   True Neutral             21
+   Champion                 13
+   Highly Skeptical          9
+   Lean Skeptic              9
+   Skeptic                   7
+   Opponent                  4
+   Insufficient evidence     3
+   identical to the decoded gen column? True
+   stance_reason values: {'analytic_overall_band': 533}
+   priority_tier distribution: {0: 448, 1: 13, 2: 24, 3: 48}
+   recognition values: {None: 520, 'Champion': 13}
+
+-- [3] dd['honors'][member][field]['recognition'] : the D-031 FIELD ladder --
+   honors rows=533 cols=18 ; field order == engine.categories[:-1]? True
+
+   all field-ladder recognition values across 533 x 18 cells:
+      None                     3735
+      Lean Persuadable         2810
+      Persuadable              1278
+      Lean Skeptic              542
+      Ally                      459
+      Champion                  225
+      Highly Persuadable        224
+      True Neutral              193
+      Skeptic                    71
+      Highly Skeptical           35
+      Opponent                   20
+      Defender                    2
+
+   per-field counts (D=defend field); '(none)' = recognition key absent/null
+   field                        Champio Defende    Ally Highly  Persuad Lean Pe True Ne Lean Sk Skeptic Highly  Opponen  (none)
+   Examination & Supervision         22       0      46      18     135     234      12      44       9       7       2       4
+   CU Capital Requirements           14       0      36       2      84     202      87      53       0       0       0      55
+   NCUA Budget & Insurance           16       0      20      27      60     206      30      30       0       0       1     143
+   Interchange                D       0       0       0       0       0       0       0      13       3       2       0     515
+   Payments                           1       0       2       1       8      12       1       0       0       0       0     508
+   Technology & Emerging             18       0      37      14     113     187       1     129       0      15       7      12
+   Fraud Prevention                  23       0      39      32     145     252       6       3       0       0       0      33
+   Data Privacy & Cyber              22       0      43      26     134     244      12       2       0       0       0      50
+   Charter Modernization             24       0      49      24     127     266       7       7       0       1       0      28
+   Defense CU Issues                 17       0      20       0       0     312      10      67      16       0       2      89
+   Field of Membership                1       0       3       0       5      23       0       0       0       0       0     501
+   CDFI Fund                          3       0      32       4      64     135       0       1       0       0       0     294
+   CFPB                              12       0      24      12      69     124      13     132      34       0       8     105
+   TCPA                               3       0       7       4      25      48       0       0       0       0       0     446
+   Credit Card Mandates       D       0       2       1       5       1      32       0      30       6       6       0     450
+   Member Business Lending           24       0      48      28     148     258       6      17       0       2       0       2
+   Mortgage & Housing                25       0      47      26     152     254       8      14       3       2       0       2
+   CU Tax Status              D       0       0       5       1       8      21       0       0       0       0       0     498
+
+   D-031 check: 'Champion' must NOT appear in the three defend fields; 'Defender' must not appear elsewhere
+      Interchange                  DEFEND  Champion=0    Defender=0     -> OK   evidence_status={'no_recorded_action': 515, 'observed': 18}
+      Credit Card Mandates         DEFEND  Champion=0    Defender=2     -> OK   evidence_status={'no_recorded_action': 450, 'observed': 83}
+      CU Tax Status                DEFEND  Champion=0    Defender=0     -> OK   evidence_status={'no_recorded_action': 498, 'observed': 35}
+      (fields not listed above are offense fields with Defender=0)
+
+   the 2 'Defender' field cells:
+      Katie Britt                Credit Card Mandates     cell={"action_count": 2, "evidence_status": "observed", "negative_action_count": 0, "positive_action_count": 2, "rank_end": 1, "rank_start": 1, "raw_field_score": "1.079025110782", "reason": "within_champion_rank_cutoff", "recognition": "Defender", "sub_cohort": "positive", "sub_cohort_size": 41}
+      Tim Scott                  Credit Card Mandates     cell={"action_count": 2, "evidence_status": "observed", "negative_action_count": 0, "positive_action_count": 2, "rank_end": 2, "rank_start": 2, "raw_field_score": "1.051583493282", "reason": "within_champion_rank_cutoff", "recognition": "Defender", "sub_cohort": "positive", "sub_cohort_size": 41}
+
+-- [4] honors_meta --
+   schema               'rank-honors-v2'
+   generation_id        '146219cc107361ce08fb43f0'
+   as_of                '2026-09-18'
+   overall_board_mode   'per_area_v1'
+   policy      = {"ally_pct": 15, "archive_conversion_tolerance": "1E-9", "boundary_rule": "entire_residual_tie_must_fit_floor_cutoff", "champion_pct": 5, "congress_decay": {"117": "0.64", "118": "0.8", "119": "1"}, "congress_decay_applied": false, "congresses": [117, 118, 119], "decimal_places": 12, "defensive_fields": ["Interchange", "Credit Card Mandates", "CU Tax Status"], "defensive_top_band_label": "Defender", "highly_persuadable_pct": 20, "highly_skeptical_pct": 15, "id": "field_rank_honors_v1", "ladder": "g", "lean_persuadable_pct": 100, "lean_skeptic_pct": 100, "opponent_pct": 5, "overall_champion_count": 13, "persuadable_pct": 50, "positive_support_required": true, "primary": "field_action_sum_v1", "role_weights": {"cosponsor": "1", "original-cosponsor": "2", "sponsor": "3"}, "score_form": "signed_per_service_year_rate_v1", "score_window_start": "2021-01-03", "sign_split": "rank_positive_and_negative_records_in_their_own_sub_cohort", "skeptic_pct": 30, "tensor_rule": "complete_equal_primary_block_only", "vote_weight": "0.4", "years_cap": "6", "years_min": "0.5", "zero_record_label": "True Neutral"}
+   overall_policy = {"adverse_scope": "explicit_negative_beneficiary_or_tensor_position", "ally_pct": 15, "boundary_rule": "active_board_rank_with_evidence_caps", "champion": "separate_active_board_top13_recognition", "deduplication": "overall_event_id_with_consistent_action_metadata", "highly_persuadable_pct": 20, "highly_skeptical_min_lead_measures": 2, "id": "overall_primacy_standing_v2", "lean_persuadable_pct": 75, "no_recorded_action": "Insufficient evidence", "opponent_min_congresses": 2, "opponent_min_lead_measures": 2, "opposition_denominator": "not_percentile_based", "opposition_order": "active_primacy_board", "opposition_rule": "persistent_leadership_then_current_leadership_then_repeated_actions", "persuadable_pct": 50, "positive_denominator": "active_board_members", "positive_order": "active_primacy_board", "primary": "active_primacy_board", "priority_tiers": "active_overall_board_tier_map", "representative": "lowest_signed_evidence_id_else_lowest_neutral_evidence_id", "skeptic_min_measures": 2, "tensor_rule": "retain_authoritative_board_and_report_coverage", "zero_record": "True Neutral"}
+   overall_board keys = ['generation', 'measure_primacy', 'minimum_cu_primary_credit', 'mode', 'order', 'priority_tiers', 'top13']
+   overall_board.top13 (n=13) = ['Alex Padilla', 'Vicente Gonzalez', 'Maxine Waters', 'Brian Fitzpatrick', 'William Timmons', 'Scott Fitzgerald', 'Tim Scott', 'Brad Sherman', 'Bill Huizenga', 'Young Kim', 'Dan Sullivan', 'Juan Vargas', 'Daniel Meuser']
+   evidence_window = {"as_of": "2026-09-18", "basis": "accepted_source_snapshot; event dates enforced where available", "congresses": [117, 118, 119], "legislative_source": "congress_bills_archive_20260825_115305.xlsx + Sentinel Bill Ledger", "vote_source_generated_at": "2026-09-17T06:12:34.228832+00:00"}
+
+-- [5] category_stance.json matrix : the per-cell stance ladder (the OTHER label layer) --
+   —                        4804
+   Ally                     1787
+   Champion                 1316
+   True Neutral              434
+   Lean Persuadable          357
+   Persuadable               296
+   Highly Persuadable        223
+   Highly Skeptical          112
+   Skeptic                    86
+   Opponent                   78
+   Lean Skeptic               64
+   Defender                   37
+   defensive set in artifact: ['CU Tax Status', 'Credit Card Mandates', 'Interchange']
+
+   per-field Champion/Defender counts in category_stance.json:
+      Examination & Supervision      Champion=87   Defender=0    Ally=96   Opponent=1   
+      CU Capital Requirements        Champion=105  Defender=0    Ally=122  Opponent=0   
+      NCUA Budget & Insurance        Champion=80   Defender=0    Ally=189  Opponent=1   
+      Interchange                  D Champion=0    Defender=0    Ally=2    Opponent=5   
+      Payments                       Champion=7    Defender=0    Ally=16   Opponent=1   
+      Technology & Emerging          Champion=103  Defender=0    Ally=120  Opponent=31  
+      Fraud Prevention               Champion=188  Defender=0    Ally=176  Opponent=0   
+      Data Privacy & Cyber           Champion=137  Defender=0    Ally=205  Opponent=0   
+      Charter Modernization          Champion=64   Defender=0    Ally=107  Opponent=1   
+      Defense CU Issues              Champion=5    Defender=0    Ally=176  Opponent=2   
+      Field of Membership            Champion=7    Defender=0    Ally=30   Opponent=1   
+      CU Tax Status                D Champion=0    Defender=28   Ally=7    Opponent=1   
+      CDFI Fund                      Champion=174  Defender=0    Ally=60   Opponent=0   
+      CFPB                           Champion=70   Defender=0    Ally=54   Opponent=4   
+      Credit Card Mandates         D Champion=0    Defender=9    Ally=33   Opponent=17  
+      TCPA                           Champion=23   Defender=0    Ally=62   Opponent=1   
+      Member Business Lending        Champion=149  Defender=0    Ally=179  Opponent=6   
+      Mortgage & Housing             Champion=117  Defender=0    Ally=153  Opponent=6   
+
+-- [6] dd['stance'] per-member-per-issue letter strings (what the page renders) --
+   n=533, each len=19 (issues incl. 'Overall CU stance')
+      [ 0] Examination & Supervision                      Champion=87   Defender=0    Ally=96   Opponent=1    —=318
+      [ 1] Credit Union Capital Requirements              Champion=105  Defender=0    Ally=122  Opponent=0    —=290
+      [ 2] NCUA Budget & Share Insurance Fund             Champion=80   Defender=0    Ally=189  Opponent=1    —=245
+      [ 3] Interchange                                    Champion=0    Defender=0    Ally=2    Opponent=5    —=477
+      [ 4] Payments                                       Champion=7    Defender=0    Ally=16   Opponent=1    —=355
+      [ 5] Technology & Emerging Issues                   Champion=103  Defender=0    Ally=120  Opponent=31   —=89
+      [ 6] Fraud Prevention                               Champion=188  Defender=0    Ally=176  Opponent=0    —=101
+      [ 7] Data Privacy & Cybersecurity                   Champion=137  Defender=0    Ally=205  Opponent=0    —=125
+      [ 8] Charter Modernization & Governance             Champion=64   Defender=0    Ally=107  Opponent=1    —=268
+      [ 9] Defense Credit Union Issues                    Champion=5    Defender=0    Ally=176  Opponent=2    —=237
+      [10] Field of Membership                            Champion=7    Defender=0    Ally=30   Opponent=1    —=479
+      [11] CDFI Fund                                      Champion=174  Defender=0    Ally=60   Opponent=0    —=269
+      [12] CFPB Restrain (pro-CU; limits agency reach)    Champion=70   Defender=0    Ally=54   Opponent=4    —=185
+      [13] Telephone Consumer Protection Act Issues       Champion=23   Defender=0    Ally=62   Opponent=1    —=412
+      [14] Credit Card & Consumer-Fee Mandates            Champion=0    Defender=9    Ally=33   Opponent=17   —=393
+      [15] Member Business Lending                        Champion=149  Defender=0    Ally=179  Opponent=6    —=9
+      [16] Mortgage Lending & Housing                     Champion=117  Defender=0    Ally=153  Opponent=6    —=103
+      [17] Credit Union Tax Status                        Champion=0    Defender=28   Ally=7    Opponent=1    —=449
+      [18] Overall CU stance                              Champion=13   Defender=0    Ally=102  Opponent=4    —=3
+
+-- [7] D-034 cross-post twins (a0c45a709 'Score every social post; cross-post twins noted, not excluded') --
+   category_stance.thresholds.press_policy = 'active_diminished; may affect issue and overall labels'
+   category_stance.source_contract = {"corroboration": "positive selected sponsor/original rows; current official advancement", "inputs_sha256": {"archive_leg.json": "c9e519f8ab9ecd0d5b71bf93dfe8cad08de8ca80e2208928ae7d16ab88b2c341", "bill_repository_live.json": "d4f63b660d69d09dfc34a67362cbb3848ef95bf6d196065f06698223db3f7020", "legislation_routing_audit.json": "50ef1c89ae4c7788de2d27f0b2c98b83bbb1cd4d4f3d7fd86a94ec583402b326", "vot

@@ -1,0 +1,178 @@
+﻿====================================================================================================
+R8  truncation isolation + press desk/engine overlap   run 2026-09-18T23:46:24
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+(a) ISOLATING THE 120-CHAR TRUNCATION  (media_rules.py:76-78)
+    def normalized_text(text):  text = re.sub(r'https?://\S+','',str(text or '').lower())
+                                return re.sub(r'[^a-z0-9]','',text)[:120]
+----------------------------------------------------------------------------------------------------
+dedup population: 9502 rows
+rows whose text exceeds 120 normalised chars (truncation is active): 8647
+
+PIPELINE key  (member, normalized_text[:120])  groups= 1434 surplus= 1544
+UNTRUNCATED   (member, full alphanumeric)      groups= 1015 surplus= 1084
+
+TRUNCATION FALSE COLLISIONS -- pipeline groups whose rows do NOT share the untruncated key:
+   groups: 445 of 1434   surplus rows wrongly treated as the same event: 490
+   CONSEQUENCE TODAY (CROSSPOST_DEDUP=0): the rows still score, but the desk note
+      "also posted on <platform> <date>" is attached to a DIFFERENT statement.
+   CONSEQUENCE AT CROSSPOST_DEDUP=1 (the documented revert switch): each of those
+      490 rows would be silently dropped as a duplicate of a post it is not.
+
+   Mark Harris  rows=7  platforms=['facebook', 'x']  dates=['2026-04-29']
+      len(norm)= 840  National security and constitutional liberty are not competing priorities. Congress has a responsibility to protect both
+                      ...tail: .  FISA is a critical tool for monitoring foreign adversaries and keeping Americ
+      len(norm)= 837  National security and constitutional liberty are not competing priorities. Congress has a responsibility to protect both
+                      ...tail: .  FISA is a critical tool for monitoring foreign adversaries and keeping Americ
+      len(norm)= 834  National security and constitutional liberty are not competing priorities. Congress has a responsibility to protect both
+                      ...tail: .  FISA is a critical tool for monitoring foreign adversaries and keeping Americ
+
+   Ritchie Torres  rows=5  platforms=['facebook', 'x']  dates=['2024-10-28']
+      len(norm)= 293  Today, Rep. Gregory Meeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage c
+                      ...tail: ollateral using VantageScore 4.0, which includes alternative data like rent paym
+      len(norm)= 221  Today, @RepGregoryMeeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage col
+                      ...tail: lateral using VantageScore 4.0, which includes alternative data like rent paymen
+      len(norm)= 221  Today, @RepGregoryMeeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage col
+                      ...tail: lateral using VantageScore 4.0, which includes alternative data like rent paymen
+
+   Sylvia Garcia  rows=4  platforms=['x']  dates=['2025-07-10']
+      len(norm)= 507  Imagine thinking that “support the troops” means letting banks keep $80 million they stole from service members, veteran
+                      ...tail: s, and their families. Trump is allowing this to happen under his watch.  We nee
+      len(norm)= 478  Imagine thinking that “support the troops” means letting banks keep $80 million they stole from service members, veteran
+                      ...tail: s, and their families. Trump is allowing this to happen under his watch.  We nee
+      len(norm)= 478  Imagine thinking that “support the troops” means letting banks keep $80 million they stole from servicemembers, veterans
+                      ...tail: , and their families. Trump is allowing this to happen under his watch.  We need
+
+   Kevin Kiley  rows=4  platforms=['x']  dates=['2025-07-05', '2025-07-08']
+      len(norm)= 207  President Trump has endorsed my bill, the No Tax Dollars for Riots Act, saying it "should be passed immediately."  The g
+                      ...tail: roup behind the LA riots, known as CHIRLA, received $34 million and tax-exempt s
+      len(norm)= 207  President Trump has endorsed my bill, the No Tax Dollars for Riots Act, saying it "should be passed immediately."  The g
+                      ...tail: roup behind the LA riots, known as CHIRLA, received $34 million and tax-exempt s
+      len(norm)= 207  President Trump has endorsed my bill, the No Tax Dollars for Riots Act, saying it "should be passed immediately."  The g
+                      ...tail: roup behind the LA riots, known as CHIRLA, received $34 million and tax-exempt s
+
+   Elise Stefanik  rows=4  platforms=['facebook', 'x']  dates=['2025-05-19']
+      len(norm)= 162  We must ensure that no American institution enables the CCP’s military modernization or the Iranian regime’s technologic
+                      ...tail: al ambitions, especially under the guise of academic exchange.  READ MORE:https:
+      len(norm)= 162  We must ensure that no American institution enables the CCP’s military modernization or the Iranian regime’s technologic
+                      ...tail: al ambitions, especially under the guise of academic exchange.  READ MORE: https
+      len(norm)= 158  We must ensure that no American institution enables the CCP’s military modernization or the Iranian regime’s technologic
+                      ...tail: al ambitions — especially under the guise of academic exchange.  READ⬇️ https://
+
+   Andy Barr  rows=4  platforms=['facebook', 'x']  dates=['2025-03-06']
+      len(norm)= 170  I’ll be joining @Eleanor_Mueller on a @Semafor panel to talk about my work to rein in the unaccountable CFPB — Senator W
+                      ...tail: arren’s favorite pet project. Tune in live at the link below. I’m on at 9:20, ri
+      len(norm)= 170  I’ll be joining @Eleanor_Mueller on a @Semafor panel to talk about my work to rein in the unaccountable CFPB — Senator W
+                      ...tail: arren’s favorite pet project. Tune in live at the link below. I’m on at 9:30, ri
+      len(norm)= 174  I’ll be joining Eleanor Mueller on a Semafor panel to talk about my work to rein in the unaccountable CFPB — Senator War
+                      ...tail: ren’s favorite pet project. Tune in live at the link below. I’m on at 9:20, righ
+
+-- class census recomputed on the UNTRUNCATED key (non-empty) --
+class                                                        groups  surplus
+cross-platform twin (D-034/R9: scores twice, RATIFIED)          900      940
+same member+platform, different dates (repeat posting)           38       48
+same member+platform+date == TRUE-DUPLICATE CANDIDATE            75       84
+TOTAL                                                          1013     1072
+
+----------------------------------------------------------------------------------------------------
+(b) DESK PRESS CORPUS vs ENGINE PRESS CORPUS
+----------------------------------------------------------------------------------------------------
+sheet 'Press Release Articles' columns: ['member', 'bioguide', 'chamber', 'state', 'party', 'date', 'title', 'url', 'categories', 'relevance', 'score', 'score_graded', 'score_label', 'stance', 'stance_sign', 'p_support', 'p_oppose', 'p_neutral', 'stance_conf', 'n_words', 'lsd_pos', 'lsd_neg', 'lsd_net', 'lsd_net_norm', 'lsd_charge', 'stance_src', 'press_value', 'recency_weight']
+desk press source rows: 3701
+   RULE (make_member_desk.py:1664)  if str(pv(r,'url') or '').startswith('billstatus:'): press_billstatus_excluded += 1; continue  -> 1310
+   unresolved member -> 3
+   DISPLAYED -> 2389
+
+distinct canonical urls -- engine tone rows: 2679   desk displayed rows: 2389
+   in BOTH                                  : 2386
+   engine-only (scored, NOT on the desk)     : 293
+   desk-only (displayed, engine never sees)  : 3
+
+   engine-only examples:
+      https://adams.house.gov/media-center/press-releases/rep-adams-speaks-bipartisan-housing-bill
+      https://adamsmith.house.gov/news/press-releases/reps-smith-khanna-sanchez-and-williams-introduce-protecting-american-homes
+      https://algreen.house.gov/media/press-releases/bipartisan-21st-century-road-housing-act-including-congressman-al-greens
+      https://americascreditunions.org/news-media/news/7-credit-union-supporters-win-colorado-primaries#D000197
+      https://americascreditunions.org/news-media/news/advocacy-win-credit-union-board-modernization-act-becomes-law#J000299
+      https://americascreditunions.org/news-media/news/advocacy-win-credit-union-board-modernization-act-becomes-law#S001184
+   desk-only examples:
+      https://collins.senate.gov/newsroom/with-senator-collins-support-senate-passes-bill-to-make-housing-more-affordable
+      https://durbin.senate.gov/newsroom/press-releases/durbin-urges-the-federal-reserve-to-hold-banks-and-card-networks-accountable-and
+      https://durbin.senate.gov/newsroom/press-releases/key-unions-announce-endorsement-of-durbin-marshal-credit-card-competition-act
+
+   engine rows with disposition "used": 1387  (distinct canonical urls 1387)
+      of those urls, present on the desk: 1166   absent from the desk: 221
+
+----------------------------------------------------------------------------------------------------
+(c) PRESS TRUE-DUPLICATE CLASS: same member + same normalised title + same date, 2+ urls
+----------------------------------------------------------------------------------------------------
+groups (member, normalised title, date) with 2+ rows: 12   surplus rows: 12
+   of those, groups spanning 2+ distinct canonical urls: 12   surplus rows: 12
+   (a group on ONE url is already collapsed at ingest by the (url,identity) turn key)
+
+   examples (up to 15), with the engine disposition of each row:
+
+    1. Cynthia Lummis  date=(unparsed)  rows=2
+       title: Leagues, credit unions connect with policymakers before Congress returns home for election
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+
+    2. Gabe Amo  date=(unparsed)  rows=2
+       title: Leagues, credit unions connect with policymakers before Congress returns home for election
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+
+    3. Jon Husted  date=2026-01-12  rows=2
+       title: Husted backs bill blocking Fed from issuing a Central Bank Digital Currency
+       pv=0          stance=neutral  disp=zero-intensity     https://husted.senate.gov/media/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-ce
+       pv=0          stance=neutral  disp=zero-intensity     https://husted.senate.gov/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-
+
+    4. Katie Britt  date=2023-03-16  rows=2
+       title: SENATOR KATIE BRITT ON SVB FAILURE: ‘ALABAMIANS DON’T JUST WANT ANSWERS, THEY DESERVE ANSWERS’
+       pv=0          stance=neutral  disp=neutral-zeroed     https://britt.senate.gov/news/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont
+       pv=0          stance=neutral  disp=neutral-zeroed     https://britt.senate.gov/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just
+
+    5. Katie Britt  date=2023-10-12  rows=2
+       title: U.S. Senators Katie Britt, Marco Rubio, Colleagues Demand Answers on Iran’s Nuclear Program Violations in Wake
+       pv=0          stance=neutral  disp=neutral-zeroed     https://britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marc
+       pv=0          stance=neutral  disp=neutral-zeroed     https://britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-colleagues-demand-
+
+    6. Katie Britt  date=2023-11-15  rows=2
+       title: U.S. Senator Katie Britt: Basel III Endgame Proposal ‘Undermines Proven Strength of U.S. Banking Sector’
+       pv=0          stance=neutral  disp=zero-intensity     https://britt.senate.gov/news/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal
+       pv=0          stance=neutral  disp=zero-intensity     https://britt.senate.gov/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-unde
+
+    7. Katie Britt  date=2024-02-06  rows=2
+       title: U.S. Senators Katie Britt, Marco Rubio, Maggie Hassan, Colleagues Urge Biden Administration to Strengthen Iran
+       pv=0          stance=neutral  disp=neutral-zeroed     https://britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan
+       pv=0          stance=neutral  disp=neutral-zeroed     https://britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-coll
+
+    8. Mike Crapo  date=(unparsed)  rows=2
+       title: ncua borrowing authority
+       pv=0          stance=neutral  disp=zero-intensity     https://crapo.senate.gov/media/videos/watch/fdic/ncua-borrowing-authority
+       pv=0          stance=neutral  disp=zero-intensity     https://crapo.senate.gov/news/videos/watch/2009/05/05/fdic/ncua-borrowing-authority
+
+    9. Mike Crapo  date=(unparsed)  rows=2
+       title: small banks and credit unions need relief
+       pv=0.03       stance=support  disp=used               https://crapo.senate.gov/media/videos/watch/small-banks-and-credit-unions-need-relief
+       pv=0.03       stance=support  disp=used               https://crapo.senate.gov/news/videos/watch/2018/03/06/small-banks-and-credit-unions-need-relief
+
+   10. Patty Murray  date=(unparsed)  rows=2
+       title: Leagues, credit unions connect with policymakers before Congress returns home for election
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+
+   11. Roger Marshall  date=2022-08-11  rows=2
+       title: sen marshall in washington examiner credit card swipe fees are hurting consumers
+       pv=-0.01411   stance=oppose   disp=used               https://marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swi
+       pv=-0.01406   stance=oppose   disp=used               https://marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-
+
+   12. Seth Magaziner  date=(unparsed)  rows=2
+       title: Leagues, credit unions connect with policymakers before Congress returns home for election
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+       pv=0.03       stance=support  disp=used               https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-con
+
+   groups where MORE THAN ONE row has disposition "used" (i.e. scores more than once today): 6
+
+DONE R8

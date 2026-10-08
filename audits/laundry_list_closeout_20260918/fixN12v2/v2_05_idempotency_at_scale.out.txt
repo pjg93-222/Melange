@@ -1,0 +1,14 @@
+malformed-inventory refusal:
+  REFUSED: not_the_inventory.json carries no label_rowids_interview and no cu_rowids: this is not the label-safety inventory. Rebuild it with audits/laundry_list_closeout_20260918/fixN12v2/v2_00_skipset.py.
+  apply without an inventory REFUSED: --apply needs the label-safety inventory: pass --protected <json> built by audits/laundry_list_closeout_202609
+
+start    speeches digest 614d017c69c721a818ec3c6b1fe2708755d0fe7b49286d1839c186369bada126 over 270489 rows
+apply 1  23.0s  truncated=5484 inserted=0 skipped=800 already=0
+apply 2  19.4s  truncated=0 inserted=0 skipped=650 already=5484
+  second apply was a no-op on the data: True
+  second apply truncated nothing        : True
+restore  0.5s  restored=5484
+
+end      speeches digest 614d017c69c721a818ec3c6b1fe2708755d0fe7b49286d1839c186369bada126 over 270489 rows
+BACK TO THE STARTING CONTENT, BYTE FOR BYTE: True
+DONE

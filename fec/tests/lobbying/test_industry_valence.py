@@ -86,6 +86,7 @@ class ValenceLedgerTests(unittest.TestCase):
         self.assertEqual(set(loaded["crypto"]), {"H.R.1|119"})
         self.assertEqual(loaded["bank"], {})
         self.assertEqual(loaded["fintech"], {})
+        self.assertEqual(loaded["telecom"], {})
 
     def test_rejects_each_missing_or_empty_required_field(self):
         tags = {"H.R.1|119": {"class": "crypto_primary"}}
@@ -616,7 +617,7 @@ class IndustryEvidencePriorityTests(unittest.TestCase):
         return names, qualified, result
 
     def test_sparse_non_cu_boards_keep_rows_but_no_unqualified_tier_one(self):
-        for industry, count in [("bank", 23), ("crypto", 40), ("fintech", 6)]:
+        for industry, count in [("bank", 23), ("crypto", 40), ("fintech", 6), ("telecom", 6)]:
             with self.subTest(industry=industry):
                 names, qualified, result = self._build_with_qualifiers(industry, count)
                 rows = result["rows"]
@@ -629,10 +630,52 @@ class IndustryEvidencePriorityTests(unittest.TestCase):
                 self.assertEqual(result["receipts"]["floor_qualified_count"], count)
                 for row in rows:
                     self.assertEqual(row["floor_qualified"], row["member"] in qualified)
-                if industry == "fintech":
+                if industry in ("fintech", "telecom"):
                     self.assertTrue(all(row["tier"] == 2 for row in rows[6:13]))
                     self.assertIn("demoted 7 unqualified slot-holders",
                                   result["receipts"]["tier1_floor"])
+
+    def test_telecom_with_zero_telecom_primary_acts_builds_an_empty_board_without_error(self):
+        # 2026-10-07: telecom ships before any telecom_primary tag or valence row
+        # exists. The board must still build (every member ranked, nobody
+        # qualified for tier 1) rather than crash or invent a tier-1 seat.
+        names, _qualified, result = self._build_with_qualifiers("telecom", 0)
+        rows = result["rows"]
+        self.assertEqual(len(rows), len(names))
+        self.assertEqual(sum(row["tier"] == 1 for row in rows), 0)
+        self.assertFalse(any(row["floor_qualified"] for row in rows))
+        self.assertEqual(result["receipts"]["floor_qualified_count"], 0)
+
+    def test_telecom_zero_valence_rows_leave_tags_and_weights_untouched(self):
+        tags = {"H.R.1|119": {"class": "shared"}, "H.R.2|119": {"class": "offtopic"}}
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "valence.ndjson")
+            open(path, "w", encoding="utf-8").close()
+            loaded, total = IT._load_valence_ledger(path, tags)
+        self.assertEqual(total, 0)
+        self.assertEqual(loaded["telecom"], {})
+        view, counts, cell_weights = IT._industry_tags_view(tags, {}, {}, "telecom")
+        self.assertEqual(view, tags)
+        self.assertEqual(counts, {"anti": 0, "neutral": 0, "pro": 0, "cells": 0})
+        self.assertEqual(cell_weights, {})
+        weights = IT._act_weight_map("telecom")
+        self.assertEqual(weights["telecom_primary"], 1.0)
+        self.assertEqual(IT._act_weight_map("fintech")["telecom_primary"], 0.15)
+        self.assertEqual(IT.PRIMARY_CLASS["telecom"], "telecom_primary")
+        self.assertEqual(IT.primacy_factors.ACT_W["telecom_primary"], 0.15)
+
+    def test_telecom_valence_rows_require_a_telecom_primary_or_oppose_tag(self):
+        row = _row(industry="telecom", bill="H.R.9", rationale="fixture")
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "valence.ndjson")
+            with open(path, "w", encoding="utf-8", newline="") as handle:
+                handle.write(json.dumps(row, separators=(",", ":")) + "\n")
+            loaded, _total = IT._load_valence_ledger(
+                path, {"H.R.9|119": {"class": "telecom_primary"}}
+            )
+            self.assertEqual(set(loaded["telecom"]), {"H.R.9|119"})
+            with self.assertRaisesRegex(IT.IndustryTiersError, "class must be telecom_primary or oppose"):
+                IT._load_valence_ledger(path, {"H.R.9|119": {"class": "shared"}})
 
     def test_private_cu_builder_retains_strict_qualification(self):
         with self.assertRaisesRegex(ValueError, "Infeasible tier seating"):

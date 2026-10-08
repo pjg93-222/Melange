@@ -5209,6 +5209,92 @@ def test_fintech_guard_excludes_token_collisions_keeps_real_families():
         assert disposition(legitimate) == "IN", legitimate
 
 
+def test_telecom_guard_excludes_token_collisions_keeps_real_families():
+    # 2026-10-07 telecom roster: token collisions (charter schools, Spectrum
+    # Health, Frontier Airlines, Optimum Nutrition, Cox Automotive/Health, Lumen
+    # Learning, the Telecommunications Training Institute) must not match, a
+    # non-telecom "Sprint" must not match, and the seventeen real families must.
+    # Name patterns only: the identity table is switched off so the test is
+    # hermetic (it is a gitignored data artifact).
+    import lobbying.sector_spend as SS
+
+    def disposition(name):
+        filing = {
+            "filing_uuid": "probe",
+            "filing_year": 2025,
+            "client": {"id": "0", "name": name},
+        }
+        assignments, exclusions = SS._match_client(filing, ("telecom",))
+        if assignments:
+            return "IN:" + assignments[0]["canonical_family"]
+        if exclusions:
+            return "EXCLUDED:" + exclusions[0]["reason"]
+        return "unmatched"
+
+    saved = SS.ENTITY_IDENTITY
+    SS.ENTITY_IDENTITY = False
+    try:
+        for collider in (
+            "CHARTER SCHOOLS ACTION FUND",
+            "NATIONAL ALLIANCE FOR PUBLIC CHARTER SCHOOLS",
+            "SPECTRUM HEALTH",
+            "SPECTRUM BRANDS HOLDINGS INC",
+            "FRONTIER AIRLINES INC",
+            "OPTIMUM NUTRITION",
+            "COX AUTOMOTIVE, INC.",
+            "COX HEALTH",
+            "LUMEN LEARNING",
+            "LUMEN BIOSCIENCE, INC.",
+            "UNITED STATES TELECOMMUNICATIONS TRAINING INSTITUTE",
+        ):
+            assert disposition(collider) == "EXCLUDED:nonsector_name_collision", collider
+        for not_telecom in (
+            "SPRINT HEALTH", "SPRINT LOGISTICS INC", "ATT MARKETING GROUP", "SPECTRUM",
+            "DISH WASHING SYSTEMS INC", "TDS ENGINEERING INC",
+        ):
+            assert disposition(not_telecom) == "unmatched", not_telecom
+        real = {
+            "VERIZON COMMUNICATIONS INC.": "VERIZON",
+            "CELLCO PARTNERSHIP": "VERIZON",
+            "AT&T SERVICES, INC.": "AT&T",
+            "AT & T": "AT&T",
+            "T-MOBILE USA, INC.": "T-MOBILE",
+            "SPRINT CORPORATION": "T-MOBILE",
+            "METROPCS WIRELESS": "T-MOBILE",
+            "COMCAST CORPORATION": "COMCAST",
+            "COMCAST NBCUNIVERSAL": "COMCAST",
+            "CHARTER COMMUNICATIONS, INC.": "CHARTER COMMUNICATIONS",
+            "TIME WARNER CABLE": "CHARTER COMMUNICATIONS",
+            "LUMEN TECHNOLOGIES, INC.": "LUMEN",
+            "CENTURYLINK, INC.": "LUMEN",
+            "COX COMMUNICATIONS": "COX",
+            "COX ENTERPRISES, INC.": "COX",
+            "ALTICE USA, INC.": "ALTICE USA",
+            "OPTIMUM COMMUNICATIONS": "ALTICE USA",
+            "FRONTIER COMMUNICATIONS": "FRONTIER COMMUNICATIONS",
+            "DISH NETWORK LLC": "DISH / ECHOSTAR",
+            "ECHOSTAR CORPORATION": "DISH / ECHOSTAR",
+            "ECHOSTAR CORPORATION D/B/A DISH": "DISH / ECHOSTAR",
+            "TDS TELECOMMUNICATIONS CORPORATION": "US CELLULAR / TDS",
+            "UNITED STATES CELLULAR CORPORATION": "US CELLULAR / TDS",
+            "TELEPHONE AND DATA SYSTEMS, INC.": "US CELLULAR / TDS",
+            "CTIA - THE WIRELESS ASSOCIATION": "CTIA",
+            "NCTA - THE INTERNET & TELEVISION ASSOCIATION": "NCTA",
+            "NATIONAL CABLE AND TELECOMMUNICATIONS ASSOCIATION": "NCTA",
+            "UNITED STATES TELECOM ASSOCIATION": "USTELECOM",
+            "USTELECOM - THE BROADBAND ASSOCIATION": "USTELECOM",
+            "COMPETITIVE CARRIERS ASSOCIATION": "COMPETITIVE CARRIERS ASSOCIATION",
+            "NATIONAL TELECOMMUNICATIONS COOPERATIVE ASSOCIATION": "NTCA",
+            "NTCA - THE RURAL BROADBAND ASSOCIATION": "NTCA",
+            "WIRELESS INTERNET SERVICE PROVIDERS ASSOCIATION": "WISPA",
+        }
+        for name, family in real.items():
+            assert disposition(name) == "IN:" + family, name
+        assert len(set(real.values())) == 17
+    finally:
+        SS.ENTITY_IDENTITY = saved
+
+
 def test_fullscope_classification_rows_obey_bank_guard():
     # 2026-08-05 bank tightening: a development bank in the frozen LobbyView
     # classification must NOT re-enter the universe through that source, and
@@ -9385,6 +9471,30 @@ def test_org_mentions_paywall_strip_removes_stub_but_keeps_real_prefix_mention()
     assert "AMERICA'S CREDIT UNIONS" not in names
 
 
+def test_org_mentions_telecom_names_do_not_match_ordinary_english_or_surnames():
+    # 2026-10-07 review: bare CHARTER (bank charter), COX (surname), LUMEN, DISH
+    # and TDS are Tier-B dictionary words; the real telecom names still match.
+    for word in ("CHARTER", "COX", "LUMEN", "DISH", "TDS"):
+        assert word in OM.ENGLISH_DICTIONARY_WORDS, word
+    assert "CHARTER" in OM.STRICT_TIER_B
+    candidates, _excluded, _merged = OM.build_candidates()
+    matcher = OM.CandidateMatcher(candidates)
+    telecom = {row["key"]: row["org"] for row in candidates if row["sector"] == "telecom"}
+    assert len(telecom) == 17
+
+    def matched(text):
+        hits, _topical = matcher.text_hits(text)
+        return {telecom[key] for key in hits if key in telecom}
+
+    assert matched("The bill would let a state or national charter bank operate.") == set()
+    assert matched("Ms. Cox said the committee would meet.") == set()
+    assert matched("Charter Communications announced a broadband plan.") == {"CHARTER COMMUNICATIONS"}
+    assert matched("AT&T and Verizon back the permitting bill.") == {"AT&T", "VERIZON"}
+    assert matched("Lumen Technologies lobbied on spectrum.") == {"LUMEN"}
+    assert matched("Dish Network and EchoStar merged.") == {"DISH / ECHOSTAR"}
+    assert matched("TDS Telecom and U.S. Cellular sold spectrum.") == {"US CELLULAR / TDS"}
+
+
 def test_org_mentions_strict_block_rejects_generic_qualifier_and_verb_use():
     candidates, _excluded, _merged = OM.build_candidates()
     matcher = OM.CandidateMatcher(candidates)
@@ -10233,6 +10343,33 @@ def test_champions_v2_identical_noncrown_profile_still_routes_to_threats():
     )
 
 
+def test_efficiency_layers_panel_without_att_telecom_loads_with_zero_telecom_attention():
+    # 2026-10-07: the live panel predates telecom. A panel lacking the column must
+    # load (telecom attention 0); a panel that carries it must be read faithfully.
+    fields = [
+        "bioguide", "congress", "chamber", "party_code", "portfolio_bills",
+        "att_bank", "att_credit_union", "att_crypto", "att_fintech",
+        "finance_committee",
+    ]
+    base = {
+        "bioguide": "A000001", "congress": 119, "chamber": "House", "party_code": "D",
+        "portfolio_bills": 4, "att_bank": 1, "att_credit_union": 2, "att_crypto": 0,
+        "att_fintech": 3, "finance_committee": 1,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        legacy = os.path.join(directory, "legacy_panel.csv")
+        _write_industry_csv(legacy, fields, [base])
+        records, total_119 = EL._load_panel(legacy)
+        assert total_119 == 1
+        assert records["A000001"]["att_telecom"] == 0
+        assert records["A000001"]["att_fintech"] == 3
+
+        current = os.path.join(directory, "current_panel.csv")
+        _write_industry_csv(current, fields + ["att_telecom"], [{**base, "att_telecom": 5}])
+        records, _total = EL._load_panel(current)
+        assert records["A000001"]["att_telecom"] == 5
+
+
 def test_champions_v2_assert_boards_rejects_crown_threat():
     boards = {
         "champions": [],
@@ -10266,6 +10403,11 @@ def test_champions_v2_receipts_champion_exclusivity_rule_and_sector_lists():
     )
     assert receipt["sectors"]["crypto"]["crown_threat_exclusions"] == []
     assert receipt["sectors"]["fintech"]["crown_threat_exclusions"] == []
+    # Telecom ships before any telecom_primary act is tagged: its board must
+    # exist, be empty, and not disturb the other sectors.
+    assert "telecom" in CV2.SECTORS
+    assert receipt["sectors"]["telecom"]["crown_threat_exclusions"] == []
+    assert payload["sectors"]["telecom"] == {"champions": [], "threats": [], "mixed": []}
 
 
 def test_champions_v2_cross_sector_threat_strips_champion_seat():
@@ -10388,6 +10530,7 @@ def _efficiency_layers_fixture():
             "att_bank": 1,
             "att_crypto": 0,
             "att_fintech": 0,
+            "att_telecom": 0,
             "att_credit_union": 0,
             "portfolio_bills": 100,
             "cu_pac_dollars": 1000,
@@ -10406,6 +10549,7 @@ def _efficiency_layers_fixture():
             "att_bank": 30,
             "att_crypto": 3,
             "att_fintech": 2,
+            "att_telecom": 0,
             "att_credit_union": 100,
             "portfolio_bills": 0,
             "cu_pac_dollars": 2000,
@@ -10425,6 +10569,7 @@ def _efficiency_layers_fixture():
             "att_bank": 8,
             "att_crypto": 1,
             "att_fintech": 1,
+            "att_telecom": 0,
             "att_credit_union": 8,
             "portfolio_bills": 8,
             "cu_pac_dollars": 0,
@@ -10443,6 +10588,7 @@ def _efficiency_layers_fixture():
             "att_bank": 2,
             "att_crypto": 0,
             "att_fintech": 0,
+            "att_telecom": 0,
             "att_credit_union": 1,
             "portfolio_bills": 20,
             "cu_pac_dollars": 500,
@@ -10718,6 +10864,7 @@ TESTS = (
     test_sector_spend_2026_is_partial_year,
     test_sector_spend_output_determinism,
     test_org_mentions_paywall_strip_removes_stub_but_keeps_real_prefix_mention,
+    test_org_mentions_telecom_names_do_not_match_ordinary_english_or_surnames,
     test_org_mentions_strict_block_rejects_generic_qualifier_and_verb_use,
     test_org_mentions_strict_family_aliases_cannot_mutually_corroborate,
     test_org_mentions_strict_tier_b_requires_second_same_org_alias,
@@ -10749,6 +10896,7 @@ TESTS = (
     test_efficiency_layers_headroom_rewards_active_under_lobbied_member,
     test_efficiency_layers_missing_pricing_is_omitted_and_receipted,
     test_efficiency_layers_missing_alignment_uses_available_signals_without_dropping_member,
+    test_efficiency_layers_panel_without_att_telecom_loads_with_zero_telecom_attention,
     test_efficiency_surface_percentiles_are_tie_aware_from_zero_to_one_hundred,
     test_industry_html_total_is_exact_component_sum_with_precision_note,
     test_industry_html_null_sector_score_renders_em_dash,
@@ -10789,6 +10937,7 @@ TESTS = (
     test_contest_screen_orders_by_residual_and_excludes_zero_shared,
     test_financial_other_discovery_surfaces_only_unrostered_finance_filers,
     test_fintech_guard_excludes_token_collisions_keeps_real_families,
+    test_telecom_guard_excludes_token_collisions_keeps_real_families,
     test_fullscope_classification_rows_obey_bank_guard,
     test_fullscope_sector_channel_adds_sweep_native_sector_org,
     test_bill_index_keeps_one_row_per_bill_and_organization,

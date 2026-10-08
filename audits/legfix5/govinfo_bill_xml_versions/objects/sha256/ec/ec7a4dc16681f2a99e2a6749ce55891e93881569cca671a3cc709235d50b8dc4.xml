@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H0403EBC73A3043888FF03919699A6525" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3871 IH: Protecting the Independent Funding of the Office of Financial Research Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3871</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190722">July 22, 2019</action-date><action-desc><sponsor name-id="F000454">Mr. Foster</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Financial Stability Act of 2010 to preserve the independent funding of the Office of
+			 Financial Research.</official-title></form>
+	<legis-body id="H717DF1BFA5B54D02A3E9AC2ED45BE9F3" style="OLC">
+ <section id="H45914202C4544A6E98168269F35680C0" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting the Independent Funding of the Office of Financial Research Act</short-title></quote>.</text> </section><section id="H7D264DF2165D45318DA0622D0D66ED73"><enum>2.</enum><header>Preserving independent funding</header><text display-inline="no-display-inline">The Financial Stability Act of 2010 (<external-xref legal-doc="usc" parsable-cite="usc/12/5311">12 U.S.C. 5311</external-xref> et seq.) is amended—</text>
+ <paragraph id="H112A5D65466140AFB595254834A53EBA"><enum>(1)</enum><text>in section 152—</text> <subparagraph id="HB1AB1EFF873F46D49EC5CEF8A878029D"><enum>(A)</enum><text>by amending subsection (c) to read as follows:</text>
+					<quoted-block display-inline="no-display-inline" id="H4D36AB7260DA4993AD14643121190E0B" style="OLC">
+						<subsection id="H725ED06AED9E4EDCB6036381ED40140A"><enum>(c)</enum><header>Budget</header>
+ <paragraph id="H9D5E9568DFD34A67B63EDD1B5D8AB965"><enum>(1)</enum><header>In general</header><text>The Director shall have sole discretion to establish the annual budget of the Office.</text> </paragraph><paragraph id="H5B897C919E564FE7A249933247DCAD16"><enum>(2)</enum><header>Minimum Funding Level of the Budget</header><text>The annual budget of the Office in any given fiscal year shall not be less than a dollar amount equal to the budget of the Office in fiscal year 2017.</text>
+ </paragraph><paragraph id="HA814F4346A354F68895482B108D4B70C"><enum>(3)</enum><header>Adjustment of Minimum Funding Level</header><text>The dollar amount referred to in paragraph (2) shall be adjusted annually by the Director, using the percent increase, if any, in the employment cost index for total compensation for State and local government workers published by the Federal Government, or the successor index thereto, for the 12-month period ending September 30 of the year preceding the annual budget.</text></paragraph></subsection><after-quoted-block>; </after-quoted-block></quoted-block>
+ </subparagraph><subparagraph id="H0B6E6A1C3AE04BB8B2D7AB539C611FED"><enum>(B)</enum><text>in subsection (d), by striking <quote>, in consultation with the Chairperson,</quote> each place such term appears;</text> </subparagraph><subparagraph id="HD50363FA9B644916BD4A43A7D78E21A5"><enum>(C)</enum><text>in subsection (h), by striking <quote>, in consultation with the Chairperson,</quote>; and</text>
+ </subparagraph><subparagraph id="H9FA678ABD01E4957BD5F9D5ABF2612EE"><enum>(D)</enum><text display-inline="yes-display-inline">in subsection (i), by striking <quote>, in consultation with the Chairperson,</quote>;</text> </subparagraph></paragraph><paragraph id="H0555F93B4F844A25B8020716CCFFA5D7"><enum>(2)</enum><text>in section 155—</text>
+ <subparagraph id="HF8113495DF4944E3A2A33119C4897B75"><enum>(A)</enum><text>in subsection (d), by inserting before the period the following: <quote>, as determined in the sole discretion of the Director</quote>; and</text> </subparagraph><subparagraph id="HA9FB57F24B31466F9CA651B1B751B815"><enum>(B)</enum><text>by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="H0B4A2263BD9345D6AEECC827539F301C" style="OLC">
+ <subsection id="HE9053DB5B12E4E6CA7CCF281EAC55BBB"><enum>(e)</enum><header>Reviewability</header><text display-inline="yes-display-inline">Notwithstanding any other provision of this subtitle, the funding pursuant to subsection (d) shall not be subject to review by the Committees on Appropriations of the House of Representatives and the Senate.</text>
+ </subsection><subsection id="HC97D88B2DB574053AEB98DCE1B01DA3A"><enum>(f)</enum><header>Preservation of the Office of Financial Research’s independence</header><text display-inline="yes-display-inline">Nothing in this section shall authorize the Secretary to influence the budget or the number or compensation of employees of the Office.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+				</subparagraph></paragraph></section></legis-body></bill>
+
+

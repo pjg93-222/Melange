@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-HEY25G41-0SD-72-PCP">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3139 IS: VA Zero Suicide Demonstration Project Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3139</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251106">November 6, 2025</action-date>
+            <action-desc><sponsor name-id="S402">Ms. Rosen</sponsor> (for herself and <cosponsor name-id="S433">Mr. McCormick</cosponsor>) introduced the following bill; which
+                was read twice and referred to the <committee-name committee-id="SSVA00">Committee
+                    on Veterans’ Affairs</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To direct the Secretary of Veterans Affairs to establish the Zero Suicide
+            Initiative pilot program of the Department of Veterans Affairs.</official-title>
+    </form>
+    <legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H0ADD83347939457B85B7A88D4A6EE991">
+        <section section-type="section-one" id="H4BF575890BF343358B7E6278C0EBE311">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>VA Zero Suicide Demonstration Project Act of 2025</short-title></quote>.</text>
+        </section>
+        <section id="HCBB584D5D5E44C969C29FEA7F9BBBA8C">
+            <enum>2.</enum>
+            <header>Zero Suicide Initiative pilot program</header>
+            <subsection id="HC1F46E5BA68C4E1C8125905F0A5AC3B1">
+                <enum>(a)</enum>
+                <header>Establishment</header>
+ <text>Not later than 180 days after the date of the enactment of this Act, the Secretary of Veterans Affairs shall establish a pilot program called the <quote>Zero Suicide Initiative</quote> (referred to in this section as the <quote>program</quote>).</text>
+            </subsection>
+            <subsection id="H9186EA1FA54241989A44C4BDF725D5EE">
+                <enum>(b)</enum>
+                <header>Curriculum</header>
+ <text display-inline="yes-display-inline">The program shall implement the curriculum of the Zero Suicide Institute of the Education Development Center (referred to in this section as the <quote>Institute</quote>) to improve safety and suicide care for veterans, thereby significantly reducing rates of suicide.</text>
+            </subsection>
+            <subsection id="H86C36DDA15F24978B2D196C841F5C374">
+                <enum>(c)</enum>
+                <header>Development</header>
+                <paragraph id="id4C9C803A92E947CC8B7ABC0EA01D79CC">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">The first year of the program shall be dedicated to program development, including planning and site selection.</text>
+                </paragraph>
+                <paragraph id="idC12CDA45BE544DE5AE06D574EC49B9B1">
+                    <enum>(2)</enum>
+                    <header>Consultation</header>
+ <text display-inline="yes-display-inline">In developing the program, the Secretary shall consult with—</text>
+                    <subparagraph id="H09BC203B0873487892BA83F653298916">
+                        <enum>(A)</enum>
+ <text>the Secretary of Health and Human Services;</text> </subparagraph> <subparagraph id="H7A10FC09491F4F39A25F2CBC5A1A2D72"> <enum>(B)</enum> <text>the National Institutes of Health;</text>
+                    </subparagraph>
+                    <subparagraph id="HDF064AA5562E4BE19B481FF2E5CABB4B">
+                        <enum>(C)</enum>
+ <text>public and private institutions of higher education;</text> </subparagraph> <subparagraph id="H8A6E87B42A8745BF872D4CD322EB42E0"> <enum>(D)</enum> <text>educators;</text>
+                    </subparagraph>
+                    <subparagraph id="HE5FF2A2A6CA6413282A949B198E2AD45">
+                        <enum>(E)</enum>
+ <text>experts in suicide assessment, treatment, and management;</text> </subparagraph> <subparagraph id="H4C3CAA218FE0475B913A57FD6285D5FB"> <enum>(F)</enum> <text>veterans service organizations; and</text>
+                    </subparagraph>
+                    <subparagraph id="HB0BAF8E9675B4DFFB2C675DBD60F1747">
+                        <enum>(G)</enum>
+ <text>professional associations the Secretary of Veterans Affairs determines relevant to the purposes of the program.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="HDDCC6293964C4CA5B01FB12D5368D272">
+                <enum>(d)</enum>
+                <header>Staff leaders; program elements</header>
+ <text>The program shall consist of not less than ten weeks of education regarding suicide care, beginning with the selection of not fewer than five and not more than ten staff leaders from each site selected under subsection (e) who shall carry out the following program elements:</text>
+                <paragraph id="H1EBCDDCB560643859BD60ED5324AD84B">
+                    <enum>(1)</enum>
+ <text>Complete the organizational self-study of the Institute as a team.</text> </paragraph> <paragraph id="HAB7E276695A74AD4A93E360FE13D88E2"> <enum>(2)</enum> <text>Attend the two-day Zero Suicide Academy of the Institute.</text>
+                </paragraph>
+                <paragraph id="H18F2E1EF718F464DA99461242E9FA97F">
+                    <enum>(3)</enum>
+ <text>Formulate a plan to collect data to support evaluation and quality improvement using the data elements worksheet of the Institute.</text>
+                </paragraph>
+                <paragraph id="HDD5F90B112B2470BAF0CD4944E5CD6C6">
+                    <enum>(4)</enum>
+ <text display-inline="yes-display-inline">Communicate to staff at the respective site the adoption of a specific suicide care approach.</text>
+                </paragraph>
+                <paragraph id="H714F5FABBBD0412E98203B9A7400D631">
+                    <enum>(5)</enum>
+ <text>Administer the workforce survey of the Institute to all staff at the respective site to learn more about perceived comfort with and competence in caring for patients at risk of suicide.</text>
+                </paragraph>
+                <paragraph id="H58AE00AE36644C9D8B1BFC24413A0E8A">
+                    <enum>(6)</enum>
+ <text display-inline="yes-display-inline">Review, develop, and implement training on processes and policies regarding patients at risk of suicide, including—</text>
+                    <subparagraph id="H90348224F0184546901697A94E04553A">
+                        <enum>(A)</enum>
+ <text>screening;</text> </subparagraph> <subparagraph id="HB98B101FCE6D411CAD6B07EAF3C63BD0"> <enum>(B)</enum> <text>assessment;</text>
+                    </subparagraph>
+                    <subparagraph id="HD87D655BC12B41BDA647C1BE63E70A25">
+                        <enum>(C)</enum>
+ <text>use of electronic health records;</text> </subparagraph> <subparagraph id="H4F49E7C1E99B49F5865391D6E1C88A96"> <enum>(D)</enum> <text>risk formulation;</text>
+                    </subparagraph>
+                    <subparagraph id="H0E38502B5AA445F1B203F75DA96CF69C">
+                        <enum>(E)</enum>
+ <text>treatment; and</text> </subparagraph> <subparagraph id="HDF9C6096282A498582BB1DA8548322C2"> <enum>(F)</enum> <text>care transition.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="H66139ACEEDB04E3BAF37FC3105067676">
+                <enum>(e)</enum>
+                <header>Sites</header>
+                <paragraph id="H4D94821F1FB64308ADCE15F5CFC25FE1">
+                    <enum>(1)</enum>
+                    <header>Number</header>
+ <text display-inline="yes-display-inline">The Secretary shall carry out the program at five medical centers of the Department of Veterans Affairs, one of which primarily serves veterans who live in rural and remote areas as determined by the Secretary.</text>
+                </paragraph>
+                <paragraph id="HCC2B133FBC284CBA805E65F2830D961C">
+                    <enum>(2)</enum>
+                    <header>Timeline</header>
+ <text display-inline="yes-display-inline">The Secretary shall select—</text> <subparagraph id="H0C4F7C588D56421E9D11F2EC96BC2BA4"> <enum>(A)</enum> <text display-inline="yes-display-inline">15 candidate sites for the program not later than 180 days after the date of the enactment of this Act; and</text>
+                    </subparagraph>
+                    <subparagraph id="H010C4A1821BF4D9A8C26AF535C02CDD5">
+                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the final five sites not later than 270 days after such date of enactment.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H6CA23E46E19C46E5ABF50699EF7319EB">
+                    <enum>(3)</enum>
+                    <header>Consultation</header>
+ <text>In selecting sites at which to carry out the program, the Secretary shall consult with experts, including officials of—</text>
+                    <subparagraph id="H703C8074F06F47A18E110DDBD40414E3">
+                        <enum>(A)</enum>
+ <text>the National Institute of Mental Health;</text> </subparagraph> <subparagraph id="H47A8CB9F668C44DBA2D37E36FE0ACFFC"> <enum>(B)</enum> <text>the Substance Abuse and Mental Health Services Administration of the Department of Health and Human Services;</text>
+                    </subparagraph>
+                    <subparagraph id="H71F3D80D3D804719A55C9999ABCA3835">
+                        <enum>(C)</enum>
+ <text>the Office of Mental Health and Suicide Prevention of the Department of Veterans Affairs;</text>
+                    </subparagraph>
+                    <subparagraph id="HFB4C203B0FD741ABBD4F900FB940F7FD">
+                        <enum>(D)</enum>
+ <text>the Health Services Research Division of the Department of Veterans Affairs;</text>
+                    </subparagraph>
+                    <subparagraph id="H46C4E4252E884A82A9C0C8142849BCF0">
+                        <enum>(E)</enum>
+ <text display-inline="yes-display-inline">the Office of Health Care Transformation of the Department of Veterans Affairs; and</text>
+                    </subparagraph>
+                    <subparagraph id="H7A07079157FE4141872C827295691B0B">
+                        <enum>(F)</enum>
+ <text>the Zero Suicide Institute.</text> </subparagraph> </paragraph> <paragraph id="H89057162DDF246B89DC8C7FBA16587A2"> <enum>(4)</enum> <header>Factors</header> <text display-inline="yes-display-inline">In selecting sites for the program, the Secretary shall consider the following factors:</text>
+                    <subparagraph id="H7BEE4B668D3049F381C76C172160B84B">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">Interest in, and capacity of, the staff of the medical centers to implement the program.</text>
+                    </subparagraph>
+                    <subparagraph id="HD206989102C646C890C25FD26C1E5BE1">
+                        <enum>(B)</enum>
+ <text>Geographic variation.</text> </subparagraph> <subparagraph id="H02D3081C09134DB1AFE64A3E6941E601"> <enum>(C)</enum> <text>Variations in size of medical centers.</text>
+                    </subparagraph>
+                    <subparagraph id="H2B90A43F65CE4299B5C50F6C978EF62D">
+                        <enum>(D)</enum>
+ <text>Regional suicide rates of veterans.</text> </subparagraph> <subparagraph id="HAB7BF0A3D2424DEE9DD6DC07DDDB13DA"> <enum>(E)</enum> <text>Demographic and health characteristics of populations served by each medical center.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="H3B1FA5223A2142B19DD0955D6D9C6D50">
+                <enum>(f)</enum>
+                <header>Annual progress report</header>
+                <paragraph id="HD56937498EB6472B95455CC0E3403080">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Not later than two years after the date on which the Secretary establishes the program, and annually thereafter until termination of the program, the Secretary shall submit to the Committee on Veterans’ Affairs of the Senate and the Committee on Veterans’ Affairs of the House of Representatives a report on the program.</text>
+                </paragraph>
+                <paragraph id="HE744A785943147DD99AF79C4413D5114">
+                    <enum>(2)</enum>
+                    <header>Elements</header>
+ <text display-inline="yes-display-inline">Each report under paragraph (1) shall include the following:</text>
+                    <subparagraph id="H2A11BD1C52C1445B8A7AEA454F4DE409">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">An assessment of the progress of staff leaders at each site in carrying out tasks under paragraphs (1) through (5) of subsection (d).</text>
+                    </subparagraph>
+                    <subparagraph display-inline="no-display-inline" id="H2F9B5B601F4C4898ADF9252EA3D612A2">
+                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">The percentage of staff at each site trained under paragraph (6) of subsection (d).</text>
+                    </subparagraph>
+                    <subparagraph id="H523775EA6FF34E42BE3D7307E7ED7F3C">
+                        <enum>(C)</enum>
+ <text>An assessment of whether policies and procedures implemented at each site align with standards of the Institute with regards to—</text>
+                        <clause id="H6E35BC2A49064FB0A90247EEA427348E">
+                            <enum>(i)</enum>
+ <text>suicide screening;</text> </clause> <clause id="HD3E829B64B294BCAA0848869DD66414F"> <enum>(ii)</enum> <text>lethal means counseling;</text>
+                        </clause>
+                        <clause id="H61250E6F51C348A9B756A164B7391282">
+                            <enum>(iii)</enum>
+ <text>referrals for comprehensive assessment of suicidality;</text> </clause> <clause id="H0A2F217273B64230B943E400E93C4542"> <enum>(iv)</enum> <text display-inline="yes-display-inline">safety planning for patients receiving referrals under clause (iii);</text>
+                        </clause>
+                        <clause id="H552241B6A6F544E8BFF4D9D06BC3C214">
+                            <enum>(v)</enum>
+ <text>risk management during care transitions; and</text> </clause> <clause id="H5E0395B16C384019B54AD376A9B1180D"> <enum>(vi)</enum> <text>outreach to high-risk patients.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="H7BE40CA7E6954E06B337671EEE3724EE">
+                        <enum>(D)</enum>
+ <text>A comparison of the suicide-related outcomes at program sites and those of other medical centers of the Department of Veterans Affairs, including—</text>
+                        <clause id="H0C079D633ABB4E538FDB7721E55253E9">
+                            <enum>(i)</enum>
+ <text>the percentage of patients screened for suicide risk;</text> </clause> <clause id="HEE65DCC7F4E546D4AE6AEB598B96D745"> <enum>(ii)</enum> <text>the percentage of patients counseled in lethal means safety;</text>
+                        </clause>
+                        <clause id="HD4996CAC33FE4C859F2A2426DCC2EF77">
+                            <enum>(iii)</enum>
+ <text>the percentage of patients screened for suicide risk referred for comprehensive assessment of suicidality;</text>
+                        </clause>
+                        <clause id="H55DC4066BC284A668BD5698D1831D83A">
+                            <enum>(iv)</enum>
+ <text>the percentage of patients referred for comprehensive assessment who complete safety planning;</text>
+                        </clause>
+                        <clause id="H3F0E9195E989443EAB6D93DF1CB170A5">
+                            <enum>(v)</enum>
+ <text>emergency department utilization;</text> </clause> <clause id="HC0ACECA055D04F72BF9A846EBF9860DA"> <enum>(vi)</enum> <text>inpatient psychiatric hospitalizations;</text>
+                        </clause>
+                        <clause id="H7F1F0EF117EA49579C67CAEB4AF77766">
+                            <enum>(vii)</enum>
+ <text>the number of suicide attempts among all patients and among patients referred for comprehensive assessment of suicidality; and</text>
+                        </clause>
+                        <clause id="HF9D840393C4A4BA0A2832B7AFD75CFD4">
+                            <enum>(viii)</enum>
+ <text>the number of suicide deaths among all patients and among patients referred for comprehensive assessment of suicidality.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="H44C565019C7645078D9619DAD4982D42">
+                <enum>(g)</enum>
+                <header>Final report</header>
+                <paragraph id="H9036A1F2C2744827947BBF44EAC70265">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Not later than one year after the termination of the program, the Secretary shall submit to the Committee on Veterans’ Affairs of the Senate and the Committee on Veterans’ Affairs of the House of Representatives a final report.</text>
+                </paragraph>
+                <paragraph id="HDC8B6C07BD4F40C1B1641FF4038EA741">
+                    <enum>(2)</enum>
+                    <header>Elements</header>
+ <text>The report under paragraph (1) shall include the following:</text> <subparagraph id="HFC50684852F3400C8A8EBDD3E1116D06"> <enum>(A)</enum> <text>A detailed analysis of information in the annual reports under subsection (f).</text>
+                    </subparagraph>
+                    <subparagraph id="id5051d1ff706e48bb89ea9a0a5cc2b54a">
+                        <enum>(B)</enum>
+ <text>An evaluation of the effectiveness and outcomes of the program, including an evaluation of all data collected during the program.</text>
+                    </subparagraph>
+                    <subparagraph id="H3785F99127D9482A8D7BE2BBC40DD69A">
+                        <enum>(C)</enum>
+ <text>The determination of the Secretary whether it is feasible to continue the program.</text>
+                    </subparagraph>
+                    <subparagraph id="H3254652BA16244D0BF8692D19F425E95">
+                        <enum>(D)</enum>
+ <text>The recommendations of the Secretary whether to expand the program to additional sites, extend the program, or make the program permanent.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="H22052594AEC34931B47722F40093AEFC">
+                <enum>(h)</enum>
+                <header>Termination; extension</header>
+                <paragraph id="HD1C6369CF5514C84B2A32873810A7152">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Subject to paragraph (2), the program shall terminate on the date that is five years after the date on which the Secretary establishes the program under subsection (a).</text>
+                </paragraph>
+                <paragraph id="HF3259FA84220415BB74CD9C4A1FC402E">
+                    <enum>(2)</enum>
+                    <header>Authority to extend</header>
+ <text display-inline="yes-display-inline">The Secretary may extend the program for not more than two years if the Secretary notifies Congress in writing of such extension not less than 180 days before the termination date under paragraph (1).</text>
+                </paragraph>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

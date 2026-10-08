@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-RYA19569-M7K-GK-3RC">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2599 IS: Seeding Rural Resilience Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-10-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2599</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20191015">October 15, 2019</action-date>
+			<action-desc><sponsor name-id="S314">Mr. Tester</sponsor> (for himself and <cosponsor name-id="S153">Mr. Grassley</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSAF00">Committee on Agriculture, Nutrition, and Forestry</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Department of Agriculture
+			 Reorganization Act of
+			 1994 to provide assistance to manage farmer and rancher stress and for the
+			 mental health of individuals in rural areas, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Seeding Rural Resilience Act</short-title></quote>.</text>
+ </section><section id="id47E3D86A739D487F86207C6299DA93BB"><enum>2.</enum><header>Definition of Secretary</header><text display-inline="no-display-inline">In this Act, the term <term>Secretary</term> means the Secretary of Agriculture.</text> </section><section id="idF5631CAC16624C4AB05BAD03398CB813"><enum>3.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds that—</text>
+ <paragraph commented="no" display-inline="no-display-inline" id="id76e57116b24243ba9604a5299055f8d0"><enum>(1)</enum><text display-inline="yes-display-inline">according to the Centers for Disease Control and Prevention, the suicide rate is 45 percent greater in rural areas of the United States than the suicide rate in urban areas of the United States;</text>
+ </paragraph><paragraph id="idee12ca8c02c9433fb2d8f83995931d25"><enum>(2)</enum><text>farmers face social isolation, the potential for financial losses, barriers to seeking mental health services, and access to lethal means to commit suicide; and</text>
+ </paragraph><paragraph id="id4984cc1f445f43e79c61b68520e84b46"><enum>(3)</enum><text>as commodity prices fall and farmers face uncertainty, reports of farmer suicides are increasing.</text> </paragraph></section><section id="idBAEAC1749C4947AC913821B478F526AE"><enum>4.</enum><header>Public service announcement campaign to address farm and ranch mental health</header> <subsection id="id82308D04694847F38A76D693EDE20E0E"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary, in consultation with the Secretary of Health and Human Services, shall carry out a public service announcement campaign to address the mental health of farmers and ranchers.</text>
+ </subsection><subsection id="id59CEB6C208C44790A82917D3F90AB0A2"><enum>(b)</enum><header>Requirements</header><text>The public service announcement campaign under subsection (a) shall include television, radio, print, outdoor, and digital public service announcements.</text>
+ </subsection><subsection id="id1AF9A9CF831347248D72296CC7D8D5B8"><enum>(c)</enum><header>Contractor</header><text>The Secretary may enter into a contract or other agreement with a third party to carry out the public service announcement campaign under subsection (a).</text>
+ </subsection><subsection id="id0231BCA8CD1A46EA8282DC752988EA2A"><enum>(d)</enum><header>Authorization of appropriations</header><text>There is authorized to be appropriated to the Secretary to carry out this section $3,000,000, to remain available until expended.</text>
+			</subsection></section><section id="id912A6515F68D4462AC8436F94704D79B"><enum>5.</enum><header>Employee training program to manage farmer and rancher stress</header>
+ <subsection id="id5BFC6A45E8A643A998D62CE6E4AF6AE4"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subtitle A of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/6912">7 U.S.C. 6912</external-xref> et seq.) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id99C9052309D047908358678EC75807D1" style="OLC">
+					<section id="id24395FFD4E3946AAA8DFB6C9D9BAE7EE"><enum>224B.</enum><header>Employee training program to manage farmer and rancher stress</header>
+ <subsection id="id0D93351753F04E76A85C349D5EA8780E"><enum>(a)</enum><header>In general</header><text>The Secretary shall establish a voluntary program to train employees of the Farm Service Agency, the Risk Management Agency, and the Natural Resources Conservation Service in the management of stress experienced by farmers and ranchers, including the detection of stress and suicide prevention.</text>
+ </subsection><subsection id="id8DF3D8313EE34E7CB72319DBF9DC719E"><enum>(b)</enum><header>Requirement</header><text>Not later than 180 days after the date on which the Secretary submits a report on the results of the pilot program being carried out by the Secretary as of the date of enactment of this section to train employees of the Department in the management of stress experienced by farmers and ranchers, and based on the recommendations contained in that report, the Secretary shall develop a training program to carry out subsection (a).</text>
+ </subsection><subsection id="id4D90512FDE5A4AEB8A173C6E2C477034"><enum>(c)</enum><header>Report</header><text>Not less frequently than once every 2 years, the Secretary shall submit to the Committee on Agriculture of the House of Representatives and the Committee on Agriculture, Nutrition, and Forestry of the Senate a report describing the implementation of this section.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection><subsection id="idAC39ABDE27EE423DA542ACEDEE950B06"><enum>(b)</enum><header>Conforming amendments</header>
+ <paragraph id="id6CDC1437B99349DA8EAE4BFBC8CD2DAA"><enum>(1)</enum><text>Subtitle A of the Department of Agriculture Reorganization Act of 1994 is amended by redesignating section 225 (<external-xref legal-doc="usc" parsable-cite="usc/7/6925">7 U.S.C. 6925</external-xref>) as section 224A.</text>
+ </paragraph><paragraph id="idFC33330824F94F7FBB9416B75D5D99D5"><enum>(2)</enum><text>Section 296(b) of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/7014">7 U.S.C. 7014(b)</external-xref>) is amended by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="id4765F747795A4B1E917AEF6D309038D8" style="OLC">
+ <paragraph id="id1888D62A1EB04E8AB6840C4D99E8A527"><enum>(11)</enum><text>The authority of the Secretary to carry out section 224B.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block> </paragraph></subsection></section><section id="id0DA647BB2D59442C844FC9F32E5D0E96"><enum>6.</enum><header>Task force for assessment of causes of mental stress and best practices for response</header> <subsection id="id19A11229570C4D7AB3EC5392C4C5288E"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary shall convene a task force of agricultural and rural stakeholders at the national, State, and local levels—</text>
+ <paragraph id="idED43CBE060D84562BF5A7CA6C0F583FD"><enum>(1)</enum><text display-inline="yes-display-inline">to assess the causes of mental stress in farmers and ranchers; and</text> </paragraph><paragraph id="id97338EB1A03E4812AEC014B2A8783FF1"><enum>(2)</enum><text display-inline="yes-display-inline">to identify best practices for responding to that mental stress.</text>
+ </paragraph></subsection><subsection commented="no" id="id5740E619EA1F45048C19EB181244EAD0"><enum>(b)</enum><header>Submission of report</header><text>Not later than 1 year after the date of enactment of this Act, the task force convened under subsection (a) shall submit to the Secretary a report containing the assessment and best practices under paragraphs (1) and (2), respectively, of subsection (a).</text>
+ </subsection><subsection id="idEA92E7B6ADCE4CD6A2D8DD72333750CA"><enum>(c)</enum><header>Collaboration</header><text display-inline="yes-display-inline">In carrying out this section, the task force convened under subsection (a) shall collaborate with nongovernmental organizations and State and local agencies.</text>
+			</subsection></section></legis-body>
+</bill>
+
+

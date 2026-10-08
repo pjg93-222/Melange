@@ -1,0 +1,215 @@
+CRITIQUE DISPATCH - metaloop run run-20260811T0346142906848Z-f61bfb225d, lane grok, node D1
+
+TARGET: The analysis document at
+C:\Users\pgoff\OneDrive\Desktop\Melange Systems\audits\BARR_CU_COURTSHIP_BATTERY_2026-08-11.md
+(sha256 d586a5e809e1c2fa472d7ad4ba1dd007e3a9c17230ac7670d353d03762d11e5a).
+READ THE FILE ITSELF from that absolute path. Begin your output by stating
+the path and the sha256 you were given, confirming you read the file
+(this is your receipt line). Critique the document, never a summary of it.
+
+ATTACK SURFACE (assault each, numbered):
+1. VERDICT VALIDITY: does the NO-BACKFIRE verdict actually follow from
+   tests A1-B3, or is it circular? Exposure is bill-mediated (lobbying on
+   the member's own sponsored bills) and alignment is sponsorship-derived
+   (board scores from sponsored acts) - both sides share bill-sponsorship
+   as a common cause. Does any test escape that circle? Name which, or
+   kill the verdict.
+2. DILUTION MECHANISM: is "dilution-limited, not reversed" (share-not-
+   warmth) a sound mechanism claim, or a relabeled tautology (his CU
+   share is low because his CU share is low)?
+3. ASK-MENU INFERENCE: the cosponsor-selectivity multiples (+955% CFPB,
+   +1668% Payments etc.) - base-rate abuse? Small-n areas (Payments
+   sig=1/opp=7)? Does the document distinguish stable lanes from noise?
+4. CAUSAL SMUGGLING: the Forecast section - does any sentence smuggle
+   causal or predictive language past the EXPLORATORY framing (e.g.
+   "has tracked with", "expected value")? Quote the exact spans.
+5. RISK-LAY COMPLETENESS: what is missing? Consider at minimum: chair
+   agenda-control invisible to sponsorship metrics; committee-position
+   confound (HFSC members mechanically attract financial lobbying AND
+   financial bills); party/majority confounds; the 2026 partial-year
+   exposure; whether "coalition 7" is a real political structure or a
+   clustering artifact.
+
+OUTPUT SHAPE: end with four labeled lists -
+KILLED: claims/steps that do not survive - each with the kill shot AND the exact target location (quoted span from the document)
+WOUNDED: survives only with the named repair - each with the exact target location
+SURVIVES: held up under attack, why the attack failed - each with location
+BLOCKED: lane-level trouble (missing file, auth, balance) or "none"
+A quoted span must include local negation or qualification - a quote
+clipped to invert its meaning is a false cite.
+
+PROHIBITIONS: no softening, no praise padding, no invented facts - every
+attack cites the target's own text or a checkable external fact;
+uncertainty stated as uncertainty, not dressed as a kill. You hold no
+veto; your verdicts are inputs to Fable's adjudication.
+
+=== VERBATIM TARGET DOCUMENT (BARR_CU_COURTSHIP_BATTERY_2026-08-11.md, sha256 d586a5e809e1c2fa472d7ad4ba1dd007e3a9c17230ac7670d353d03762d11e5a) - the full bytes travel here; do NOT open any other file ===
+
+# Andy Barr x credit unions: did the courtship backfire, and how to court him
+
+DATE: 2026-08-11 (run run-20260811T0346142906848Z-f61bfb225d). Follow-on to
+audits/CROSS_INDUSTRY_BACKFIRE_ANALYSIS_2026-08-11.md. Battery of 12
+read-only tests, run one by one, predictions stated before each.
+
+QUESTION (Paul): when credit unions courted Andy Barr, is that a case of
+the backfire effect? How would they best go about courting him — full risk
+lay + forecasts.
+
+STATUS: EXPLORATORY. Cross-sectional exposure constructs, selection
+unmodeled; trait scores carry the psych-ledger caveats (O/C/E validated,
+A gold-anchored, N affective re-anchor); nothing here feeds any engine
+without prereg.
+
+## Verdict up front
+
+NO — the Barr courtship did not backfire, on every test that could have
+shown it. Barr is the single most CU-courted member in Congress
+(exp_cu 5.56, roster max) and sits ABOVE the exposure-conditional
+expectation (simple residual +0.028, 82nd percentile; full-model residual
+-0.028, within noise). What the courtship bought is DILUTION-LIMITED, not
+reversed: his engagement surface is the largest in the roster and only a
+small slice of it is CU-specific, so his CU board seat (tier 2, rank 22,
+score +0.533) understates a rhetoric layer that reads like a champion's.
+The backfire pattern from the cross-industry analysis lives elsewhere — in
+the harm-author bloc (Durbin/Gooden/Marshall/Welch/Hawley), which is
+exactly the roster's under-deliverer list.
+
+## The tests, in order
+
+A1. PREMISE CHECK — prediction: backfire = negative residual.
+    Result: simple align_cu~exp_cu residual +0.028 (82nd pctile of 533);
+    full backfire-model fitted +0.561 vs actual +0.533 (residual -0.028,
+    ~zero). NO BACKFIRE.
+
+A2. ROSTER UNDER-DELIVERERS — who actually absorbs courtship without
+    aligning: Gooden (-0.333), Durbin (-0.311), Marshall (-0.300),
+    Lofgren, Welch, Hawley, Warren, Reed, AOC, Fetterman. The CU
+    red-flag list IS the harm-author bloc; Barr is its opposite.
+
+A3. DOSE-RESPONSE — deciles of exp_cu: d0 +0.438 rising to d9 +0.508;
+    quadratic vertex at exp 23.3, far beyond roster max 5.56. No
+    diminishing-returns knee inside the observed range: marginal CU
+    attention has not been going negative anywhere on the curve.
+
+A4. EXPOSURE COMPOSITION — Barr's CU lobbying surface is 77% shared-class
+    bills (his OWN agenda: CFPB Transparency & Accountability, TABS Act,
+    Rectifying UDAAP, SAFE Banking, Fair Access, 1071 repeal), 10%
+    cu_primary, 1% each bank/crypto-primary, ZERO defensive weight (no
+    CU-anti act in the top of his lobbied stack). Top CU lobbyers of his
+    bills: America's Credit Unions (79.0 role-weighted), GoWest (49.5),
+    NAFCU (45.5), CA/NV Leagues, Southeastern Leagues. CU courts Barr
+    where Barr already is — support on his bills, not asks against them.
+
+A5. PORTFOLIO DECOMPOSITION — the dilution mechanism, quantified: primacy
+    mix = 37.0 role-weighted credits, of which shared 29.0 (78%),
+    cu_primary 4.0, bank_primary 2.25, letter 1.0. LDA-visible holdings:
+    49 (largest of anyone measured) but cu_primary only 5 — vs CU tier-1
+    peers Cramer 11, Sherman 9, Padilla 8, Fitzpatrick 8 on the identical
+    basis. His five: FIRM Act (sponsor), Community Bank Regulatory
+    Tailoring (sponsor), Financial Reporting Threshold Modernization,
+    Keeping Deposits Local, CU Board Modernization (cosponsor). Rank 22 is
+    a SHARE problem, not a warmth problem.
+
+A6. CONFLICT SCREEN — prediction: zero CU-anti holdings. Result: zero
+    oppose-class acts, zero CU-negative tensor cells. Clean. (Contrast:
+    Kennedy passed the warmth screen for fintech yet authored the ILC
+    harm — the screen is necessary, not sufficient; Barr additionally
+    shows no adjacent-instrument candidates.)
+
+B1. RHETORIC GAP — category-stance labels (user-ratified, verbatim):
+    Champion on CDFI Fund, CFPB, CU Capital Requirements, Charter
+    Modernization, Examination & Supervision, Member Business Lending,
+    Mortgage & Housing, NCUA Budget & Insurance; Defender on Credit Card
+    Mandates; Ally on Data Privacy, Fraud Prevention, Interchange,
+    Technology & Emerging; True Neutral on Field of Membership; no data on
+    CU Tax Status/Defense CU/TCPA. Rhetoric OUTRUNS the board seat. Risk:
+    over-reading warmth as commitment (see B3-cross-check below: three
+    "Ally" areas have zero signatures).
+
+B2. TRAJECTORY — CU exposure on his bills rose 11 -> 22 -> 53 -> 48 -> 74
+    -> 52 (2021-2026 filings) while his cu_primary holdings went 1 (117th)
+    -> 0 (118th) -> 4 (119th), two as sponsor. The most recent congress is
+    his most CU-committed. Timing is consistent with the courtship
+    WORKING; a falling path under rising exposure (true backfire) is
+    absent.
+
+B3. MATCHED PEERS — all 25 top bank champions are above-median
+    CU-exposed; the 5 most CU-exposed each beat their nearest
+    same-chamber, same-bank-alignment, lower-CU-exposure twin on CU
+    alignment (Barr vs Garbarino +0.025; Meuser vs Flood +0.045; Daines
+    vs Risch +0.040; Hill vs Clarke +0.008; Williams vs Flood +0.027).
+    5/5 positive diffs. No backfire gradient among bank champions.
+
+C1. APPROACH PROFILE — desk rank 5/533, allocation $22,491 (he is already
+    a top-5 desk target); HFSC membership 3.0 / leadership 4.0 (chair
+    grade); coalition 7. Traits (caveats above): O +0.66 (75th pctile),
+    E -0.49 (28th), C -0.18 (38th), A +0.05 (52nd), N +0.16 (54th),
+    70k-token corpus, not low-confidence. Read: high-openness,
+    low-extraversion — substance-first, briefing-over-rally; neither
+    pushover nor antagonist on A.
+
+C2. ASK-MENU + COALITION PATHS — cosponsor selectivity vs roster base
+    rate (signatures/opportunities): CU Capital Requirements +363%, CFPB
+    +955%, Examination & Supervision +668%, Member Business Lending +172%
+    (11 signatures, his largest count), Charter Modernization +170%,
+    Fraud Prevention +140%, Technology & Emerging +192%. He does NOT
+    sign: Field of Membership (-75%, matches True Neutral rhetoric),
+    Interchange (-60%) and Data Privacy (-94%) DESPITE Ally rhetoric
+    (talk-only areas), TCPA, Defense CU, Mortgage & Housing (-27%,
+    despite Champion rhetoric — high-volume area, low selectivity).
+    Coalition 7 contains Cramer (CU tier-1, the 11-act portfolio model)
+    plus Meuser, Hill, Lummis, Mann — the in-circle carriers for a CU ask.
+
+C3. MONEY VIEW — electoral: average vote share 57.7, security 0.35,
+    leverage 1.52 (competitive-adjacent seat; money is a live channel).
+    Desk allocation already $22,491 at rank 5. GAP DISCLOSED: per-sector
+    FEC contribution totals to Barr live in the Mentat workbook lane
+    (undercount caveats) and were not read here.
+
+D1. ADVERSARIAL PASS — Grok critique of this document, Fable
+    adjudication recorded in the run ledger.
+
+## Risk lay (what could still go wrong)
+
+1. OVER-READING WARMTH: three Ally-rhetoric areas (Interchange, Data
+   Privacy) and one Champion area (Mortgage & Housing) have at-or-below
+   base signing — rhetoric there is not pen. Asks in those areas
+   under-deliver.
+2. DILUTION IS STRUCTURAL: he is chair-grade on HFSC with the widest
+   agenda measured; CU share-of-agenda rises only if the ask is small,
+   specific, and inside his existing lanes. Expecting Padilla-style
+   CU-primacy from Barr misreads the seat.
+3. THE CONFLICT-CELL CAVEAT TRAVELS: warmth screens did not protect
+   fintech from Kennedy (ILC). Barr currently holds no CU-conflict acts,
+   but any future bank-vs-CU cleavage (e.g. a taxation or FOM fight where
+   ABA and ACU split) would test his primary loyalty — his bank alignment
+   (+0.488) exceeds his CU alignment (+0.533 vs bank-roster-relative
+   position: bank rank is higher). Monitor the tensor for new
+   bank-pro/CU-anti cells he joins.
+4. SELECTION STORY UNMODELED: CU lobbies its friends; exposure is
+   bill-mediated. The positive gradients here cannot prove causation, and
+   nothing in this battery licenses a "lobbying causes alignment" claim.
+5. MEASUREMENT EDGES: LDA-visible holdings undercount letters and
+   amendments; rhetoric matrix covers measured members only; sector-money
+   gap (C3).
+
+## Forecast (exploratory, not engine input)
+
+Best-supported courtship model for Barr: continue the A4 pattern that has
+tracked with his 119th-congress jump — support his shared-class agenda
+(CFPB structure, tailoring, 1071) while attaching one small CU-primary ask
+per cycle inside his proven signing lanes (capital requirements, exam &
+supervision, MBL, charter modernization). Route asks through coalition-7
+carriers (Cramer first). Substance-first materials fit the trait profile.
+Expected value: continued above-expectation CU alignment and a plausible
+tier-1 approach if cu_primary holdings reach the 8-11 band of his peers;
+the board will keep understating him relative to rhetoric until that
+share moves. Do NOT spend asks on FOM, interchange, data privacy, TCPA,
+or defense issues — measured non-lanes for his pen regardless of warmth.
+
+## Caveats
+
+Everything cross-sectional; exposure bill-mediated; roles undercount
+non-sponsorship influence (chair agenda control is invisible to
+sponsorship-based boards — Barr's HFSC gavel moves CU outcomes without
+appearing in any holding count); prereg gates any engine use.

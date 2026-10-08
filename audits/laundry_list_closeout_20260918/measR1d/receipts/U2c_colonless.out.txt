@@ -1,0 +1,39 @@
+R5 colon-less (NOCOLON, non-self) rows : 307
+    already in D-U2 flagged            : 40
+    already in R1-R4                   : 5
+    NEW rows added by R5               : 262
+    top tags:
+         85  DR. ANTHONY FAUCI
+          8  REP. NANCY PELOSI (D-CA)
+          7  PRESIDENT OF THE UNITED STATES
+          7  DR. ROBERT REDFIELD
+          5  REP. BETO
+          5  SEN. ELIZABETH WARREN (D-MA)
+          3  PRESIDENT AND
+          3  SEN. KAMALA HARRIS
+          3  SEN. MITCH
+          3  SEN. CHUCK SCHUMER
+
+    6 NEW examples:
+    rowid=66438 mem=Carlos Gimenez show=ip tag='REP. TROY NEHIS'
+      B: ...We're not going to get much involved in their stuff. They shouldn't get involved in ours.
+      A: REP. TROY NEHIS, (R-TX). That's not a healthy situation when you start targeting other members and especially when the Republican conference does it -- can't do that....
+    rowid=66917 mem=Thomas Massie show=cnc tag='REP. MIKE JOHNSON'
+      B: ...s anybody doubt that? The motion will get called, and then he's going to lose more votes than Kevin McCarthy.
+      A: REP. MIKE JOHNSON, (R)...
+    rowid=66969 mem=Chuck Grassley show=cnc tag='SEN. PATTY MURRAY (D-WA)'
+      B: ...Security now pending, you will do impartial justice according to the Constitution and laws. So help you, God.
+      A: SEN. PATTY MURRAY (D-WA) I do. Yes. At this time, I will administer the oath to all Senators in the chamber in conformance with the Article I, Section 3, Clause 6 of the Constitution, and the Senate impeachment rules. Will all Senators now stand and...
+    rowid=66973 mem=Ted Cruz show=cnc tag='SEN. PATTY MURRAY (D-WA)'
+      B: ...nal way to resolve this question is actually to debate it, to consider the Constitution and consider the law.
+      A: SEN. PATTY MURRAY (D-WA). The Senator will recognize that the Senate is in a non-debatable position. The Senator has a right to offer his point of order but - or his motion. But we are in a non-debatable position....
+    rowid=67942 mem=Jamie Raskin show=cnc tag='DR. ANTHONY FAUCI'
+      B: ...ld you have any reason to cover up any new scientific evidence relating to the origins of the COVID-19 virus?
+      A: DR. ANTHONY FAUCI, FORMER CHIEF...
+    rowid=67948 mem=Jim Jordan show=cnr tag='DR. ANTHONY FAUCI'
+      B: ...You agree that there was a push to downplay the lab leak theory?
+      A: DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE...
+
+CORRECTED TOTAL affected INTERVIEW rows: 5835 of 153576 (3.799%)
+wrote U2c_colonless_new_ids.json, U2c_all_affected_ids.json
+DONE U2c

@@ -1,0 +1,4253 @@
+{
+ "Amy Klobuchar": {
+  "member": "Amy Klobuchar",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Andrea Salinas": {
+  "member": "Andrea Salinas",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Andrew Clyde": {
+  "member": "Andrew Clyde",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Andrew Garbarino": {
+  "member": "Andrew Garbarino",
+  "pessimism": 10,
+  "anxiety": 15,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Andrew Ogles": {
+  "member": "Andrew Ogles",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "André Carson": {
+  "member": "André Carson",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Andy Barr": {
+  "member": "Andy Barr",
+  "pessimism": 10,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Andy Biggs": {
+  "member": "Andy Biggs",
+  "pessimism": 18,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Andy Harris": {
+  "member": "Andy Harris",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Andy Kim": {
+  "member": "Andy Kim",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 25,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Angela Alsobrooks": {
+  "member": "Angela Alsobrooks",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Angie Craig": {
+  "member": "Angie Craig",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Adrian Smith": {
+  "member": "Adrian Smith",
+  "pessimism": 20,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Adriano Espaillat": {
+  "member": "Adriano Espaillat",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Al Green": {
+  "member": "Al Green",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Alan Armstrong": {
+  "member": "Alan Armstrong",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Alex Padilla": {
+  "member": "Alex Padilla",
+  "pessimism": 32,
+  "anxiety": 24,
+  "depression": 18,
+  "volatility": 16,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Alexandria Ocasio-Cortez": {
+  "member": "Alexandria Ocasio-Cortez",
+  "pessimism": 58,
+  "anxiety": 52,
+  "depression": 44,
+  "volatility": 38,
+  "reactive": 48,
+  "confidence": "high"
+ },
+ "Alma Adams": {
+  "member": "Alma Adams",
+  "pessimism": 28,
+  "anxiety": 36,
+  "depression": 26,
+  "volatility": 22,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Ami Bera": {
+  "member": "Ami Bera",
+  "pessimism": 26,
+  "anxiety": 32,
+  "depression": 21,
+  "volatility": 17,
+  "reactive": 19,
+  "confidence": "high"
+ },
+ "Aaron Bean": {
+  "member": "Aaron Bean",
+  "pessimism": 42,
+  "anxiety": 37,
+  "depression": 16,
+  "volatility": 16,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Adam Schiff": {
+  "member": "Adam Schiff",
+  "pessimism": 36,
+  "anxiety": 32,
+  "depression": 12,
+  "volatility": 16,
+  "reactive": 36,
+  "confidence": "medium"
+ },
+ "Adam Smith": {
+  "member": "Adam Smith",
+  "pessimism": 48,
+  "anxiety": 36,
+  "depression": 28,
+  "volatility": 42,
+  "reactive": 48,
+  "confidence": "medium"
+ },
+ "Adelita Grijalva": {
+  "member": "Adelita Grijalva",
+  "pessimism": 30,
+  "anxiety": 32,
+  "depression": 28,
+  "volatility": 28,
+  "reactive": 32,
+  "confidence": "medium"
+ },
+ "Barry Loudermilk": {
+  "member": "Barry Loudermilk",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Barry Moore": {
+  "member": "Barry Moore",
+  "pessimism": 20,
+  "anxiety": 12,
+  "depression": 12,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Becca Balint": {
+  "member": "Becca Balint",
+  "pessimism": 55,
+  "anxiety": 65,
+  "depression": 40,
+  "volatility": 50,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Ben Cline": {
+  "member": "Ben Cline",
+  "pessimism": 35,
+  "anxiety": 20,
+  "depression": 25,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Angus King": {
+  "member": "Angus King",
+  "pessimism": 35,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Ann Wagner": {
+  "member": "Ann Wagner",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Anna Luna": {
+  "member": "Anna Luna",
+  "pessimism": 35,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 35,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Ashley Hinson": {
+  "member": "Ashley Hinson",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Ben Luján": {
+  "member": "Ben Luján",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Bennie Thompson": {
+  "member": "Bennie Thompson",
+  "pessimism": 30,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 20,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Bernard Sanders": {
+  "member": "Bernard Sanders",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Bernie Moreno": {
+  "member": "Bernie Moreno",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Ashley Moody": {
+  "member": "Ashley Moody",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "August Pfluger": {
+  "member": "August Pfluger",
+  "pessimism": 35,
+  "anxiety": 40,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Austin Scott": {
+  "member": "Austin Scott",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Ayanna Pressley": {
+  "member": "Ayanna Pressley",
+  "pessimism": 40,
+  "anxiety": 35,
+  "depression": 40,
+  "volatility": 30,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Beth Van Duyne": {
+  "member": "Beth Van Duyne",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Betty McCollum": {
+  "member": "Betty McCollum",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Bill Cassidy": {
+  "member": "Bill Cassidy",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Bill Foster": {
+  "member": "Bill Foster",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "medium"
+ },
+ "Bill Hagerty": {
+  "member": "Bill Hagerty",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Bill Huizenga": {
+  "member": "Bill Huizenga",
+  "pessimism": 20,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Blake Moore": {
+  "member": "Blake Moore",
+  "pessimism": 20,
+  "anxiety": 30,
+  "depression": 25,
+  "volatility": 35,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Bonnie Watson Coleman": {
+  "member": "Bonnie Watson Coleman",
+  "pessimism": 40,
+  "anxiety": 45,
+  "depression": 35,
+  "volatility": 55,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Brad Sherman": {
+  "member": "Brad Sherman",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Bradley Schneider": {
+  "member": "Bradley Schneider",
+  "pessimism": 28,
+  "anxiety": 48,
+  "depression": 18,
+  "volatility": 35,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Brandon Gill": {
+  "member": "Brandon Gill",
+  "pessimism": 5,
+  "anxiety": 8,
+  "depression": 5,
+  "volatility": 12,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Brendan Boyle": {
+  "member": "Brendan Boyle",
+  "pessimism": 42,
+  "anxiety": 52,
+  "depression": 38,
+  "volatility": 32,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Brett Guthrie": {
+  "member": "Brett Guthrie",
+  "pessimism": 18,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "Brian Babin": {
+  "member": "Brian Babin",
+  "pessimism": 32,
+  "anxiety": 28,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Brian Fitzpatrick": {
+  "member": "Brian Fitzpatrick",
+  "pessimism": 28,
+  "anxiety": 38,
+  "depression": 18,
+  "volatility": 18,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Brian Mast": {
+  "member": "Brian Mast",
+  "pessimism": 42,
+  "anxiety": 38,
+  "depression": 16,
+  "volatility": 32,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Brian Schatz": {
+  "member": "Brian Schatz",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Brittany Pettersen": {
+  "member": "Brittany Pettersen",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Bruce Westerman": {
+  "member": "Bruce Westerman",
+  "pessimism": 20,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Bryan Steil": {
+  "member": "Bryan Steil",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Burgess Owens": {
+  "member": "Burgess Owens",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Byron Donalds": {
+  "member": "Byron Donalds",
+  "pessimism": 30,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 35,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Carlos Gimenez": {
+  "member": "Carlos Gimenez",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Carol Miller": {
+  "member": "Carol Miller",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Chellie Pingree": {
+  "member": "Chellie Pingree",
+  "pessimism": 35,
+  "anxiety": 15,
+  "depression": 25,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Chip Roy": {
+  "member": "Chip Roy",
+  "pessimism": 20,
+  "anxiety": 10,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Chris Van Hollen": {
+  "member": "Chris Van Hollen",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Chrissy Houlahan": {
+  "member": "Chrissy Houlahan",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Claudia Tenney": {
+  "member": "Claudia Tenney",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 18,
+  "confidence": "medium"
+ },
+ "Clay Fuller": {
+  "member": "Clay Fuller",
+  "pessimism": 8,
+  "anxiety": 8,
+  "depression": 8,
+  "volatility": 8,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Clay Higgins": {
+  "member": "Clay Higgins",
+  "pessimism": 80,
+  "anxiety": 75,
+  "depression": 65,
+  "volatility": 45,
+  "reactive": 50,
+  "confidence": "medium"
+ },
+ "Cleo Fields": {
+  "member": "Cleo Fields",
+  "pessimism": 28,
+  "anxiety": 32,
+  "depression": 35,
+  "volatility": 18,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Christian Menefee": {
+  "member": "Christian Menefee",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Christopher Coons": {
+  "member": "Christopher Coons",
+  "pessimism": 32,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "medium"
+ },
+ "Christopher Deluzio": {
+  "member": "Christopher Deluzio",
+  "pessimism": 28,
+  "anxiety": 28,
+  "depression": 18,
+  "volatility": 32,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Christopher Murphy": {
+  "member": "Christopher Murphy",
+  "pessimism": 38,
+  "anxiety": 24,
+  "depression": 18,
+  "volatility": 18,
+  "reactive": 28,
+  "confidence": "medium"
+ },
+ "Christopher Smith": {
+  "member": "Christopher Smith",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Chuck Edwards": {
+  "member": "Chuck Edwards",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Chuck Grassley": {
+  "member": "Chuck Grassley",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Cindy Hyde-Smith": {
+  "member": "Cindy Hyde-Smith",
+  "pessimism": 20,
+  "anxiety": 55,
+  "depression": 15,
+  "volatility": 55,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Dan Crenshaw": {
+  "member": "Dan Crenshaw",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 35,
+  "reactive": 70,
+  "confidence": "high"
+ },
+ "Dan Newhouse": {
+  "member": "Dan Newhouse",
+  "pessimism": 55,
+  "anxiety": 45,
+  "depression": 50,
+  "volatility": 20,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Dan Sullivan": {
+  "member": "Dan Sullivan",
+  "pessimism": 45,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 30,
+  "reactive": 60,
+  "confidence": "high"
+ },
+ "Daniel Goldman": {
+  "member": "Daniel Goldman",
+  "pessimism": 60,
+  "anxiety": 45,
+  "depression": 50,
+  "volatility": 40,
+  "reactive": 75,
+  "confidence": "high"
+ },
+ "Cliff Bentz": {
+  "member": "Cliff Bentz",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Cory Booker": {
+  "member": "Cory Booker",
+  "pessimism": 45,
+  "anxiety": 55,
+  "depression": 35,
+  "volatility": 40,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Cory Mills": {
+  "member": "Cory Mills",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 5,
+  "volatility": 20,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Cynthia Lummis": {
+  "member": "Cynthia Lummis",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Catherine Cortez Masto": {
+  "member": "Catherine Cortez Masto",
+  "pessimism": 25,
+  "anxiety": 18,
+  "depression": 15,
+  "volatility": 12,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Celeste Maloy": {
+  "member": "Celeste Maloy",
+  "pessimism": 12,
+  "anxiety": 12,
+  "depression": 12,
+  "volatility": 10,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "Charles Fleischmann": {
+  "member": "Charles Fleischmann",
+  "pessimism": 18,
+  "anxiety": 25,
+  "depression": 18,
+  "volatility": 32,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Charles Schumer": {
+  "member": "Charles Schumer",
+  "pessimism": 22,
+  "anxiety": 27,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Daniel Meuser": {
+  "member": "Daniel Meuser",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Daniel Webster": {
+  "member": "Daniel Webster",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Danny Davis": {
+  "member": "Danny Davis",
+  "pessimism": 40,
+  "anxiety": 35,
+  "depression": 30,
+  "volatility": 25,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Darin LaHood": {
+  "member": "Darin LaHood",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Darrell Issa": {
+  "member": "Darrell Issa",
+  "pessimism": 40,
+  "anxiety": 28,
+  "depression": 22,
+  "volatility": 23,
+  "reactive": 42,
+  "confidence": "high"
+ },
+ "Darren Soto": {
+  "member": "Darren Soto",
+  "pessimism": 22,
+  "anxiety": 18,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Dave Min": {
+  "member": "Dave Min",
+  "pessimism": 62,
+  "anxiety": 68,
+  "depression": 38,
+  "volatility": 48,
+  "reactive": 58,
+  "confidence": "medium"
+ },
+ "David Joyce": {
+  "member": "David Joyce",
+  "pessimism": 28,
+  "anxiety": 22,
+  "depression": 18,
+  "volatility": 22,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "David Kustoff": {
+  "member": "David Kustoff",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "David McCormick": {
+  "member": "David McCormick",
+  "pessimism": 28,
+  "anxiety": 45,
+  "depression": 18,
+  "volatility": 35,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "David Schweikert": {
+  "member": "David Schweikert",
+  "pessimism": 35,
+  "anxiety": 20,
+  "depression": 12,
+  "volatility": 15,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "David Valadao": {
+  "member": "David Valadao",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Dina Titus": {
+  "member": "Dina Titus",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 12,
+  "volatility": 10,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Don Bacon": {
+  "member": "Don Bacon",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Donald Beyer": {
+  "member": "Donald Beyer",
+  "pessimism": 40,
+  "anxiety": 50,
+  "depression": 42,
+  "volatility": 32,
+  "reactive": 28,
+  "confidence": "medium"
+ },
+ "Donald Davis": {
+  "member": "Donald Davis",
+  "pessimism": 25,
+  "anxiety": 32,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Delia Ramirez": {
+  "member": "Delia Ramirez",
+  "pessimism": 68,
+  "anxiety": 62,
+  "depression": 58,
+  "volatility": 38,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "Derek Tran": {
+  "member": "Derek Tran",
+  "pessimism": 38,
+  "anxiety": 43,
+  "depression": 28,
+  "volatility": 23,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Derrick Van Orden": {
+  "member": "Derrick Van Orden",
+  "pessimism": 28,
+  "anxiety": 23,
+  "depression": 23,
+  "volatility": 48,
+  "reactive": 72,
+  "confidence": "high"
+ },
+ "Diana DeGette": {
+  "member": "Diana DeGette",
+  "pessimism": 38,
+  "anxiety": 43,
+  "depression": 43,
+  "volatility": 33,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Deb Fischer": {
+  "member": "Deb Fischer",
+  "pessimism": 10,
+  "anxiety": 8,
+  "depression": 8,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Debbie Dingell": {
+  "member": "Debbie Dingell",
+  "pessimism": 42,
+  "anxiety": 55,
+  "depression": 45,
+  "volatility": 20,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Debbie Wasserman Schultz": {
+  "member": "Debbie Wasserman Schultz",
+  "pessimism": 18,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 30,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Deborah Ross": {
+  "member": "Deborah Ross",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 18,
+  "volatility": 15,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Edward Markey": {
+  "member": "Edward Markey",
+  "pessimism": 32,
+  "anxiety": 26,
+  "depression": 22,
+  "volatility": 18,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "Eleanor Norton": {
+  "member": "Eleanor Norton",
+  "pessimism": 28,
+  "anxiety": 22,
+  "depression": 18,
+  "volatility": 18,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Elijah Crane": {
+  "member": "Elijah Crane",
+  "pessimism": 48,
+  "anxiety": 42,
+  "depression": 38,
+  "volatility": 52,
+  "reactive": 62,
+  "confidence": "high"
+ },
+ "Elise Stefanik": {
+  "member": "Elise Stefanik",
+  "pessimism": 38,
+  "anxiety": 28,
+  "depression": 22,
+  "volatility": 22,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Donald Norcross": {
+  "member": "Donald Norcross",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Doris Matsui": {
+  "member": "Doris Matsui",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Dusty Johnson": {
+  "member": "Dusty Johnson",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Ed Case": {
+  "member": "Ed Case",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Elissa Slotkin": {
+  "member": "Elissa Slotkin",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Elizabeth Warren": {
+  "member": "Elizabeth Warren",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 40,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Emanuel Cleaver": {
+  "member": "Emanuel Cleaver",
+  "pessimism": 45,
+  "anxiety": 40,
+  "depression": 45,
+  "volatility": 30,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Emily Randall": {
+  "member": "Emily Randall",
+  "pessimism": 45,
+  "anxiety": 50,
+  "depression": 40,
+  "volatility": 28,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Eric Burlison": {
+  "member": "Eric Burlison",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Eric Schmitt": {
+  "member": "Eric Schmitt",
+  "pessimism": 10,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Eric Sorensen": {
+  "member": "Eric Sorensen",
+  "pessimism": 40,
+  "anxiety": 45,
+  "depression": 35,
+  "volatility": 35,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Erin Houchin": {
+  "member": "Erin Houchin",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Eugene Vindman": {
+  "member": "Eugene Vindman",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Frank Pallone": {
+  "member": "Frank Pallone",
+  "pessimism": 30,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Frederica Wilson": {
+  "member": "Frederica Wilson",
+  "pessimism": 40,
+  "anxiety": 45,
+  "depression": 40,
+  "volatility": 50,
+  "reactive": 65,
+  "confidence": "medium"
+ },
+ "French Hill": {
+  "member": "French Hill",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Gabe Amo": {
+  "member": "Gabe Amo",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 18,
+  "volatility": 8,
+  "reactive": 11,
+  "confidence": "high"
+ },
+ "Gabe Vasquez": {
+  "member": "Gabe Vasquez",
+  "pessimism": 16,
+  "anxiety": 13,
+  "depression": 14,
+  "volatility": 8,
+  "reactive": 11,
+  "confidence": "high"
+ },
+ "Gary Palmer": {
+  "member": "Gary Palmer",
+  "pessimism": 27,
+  "anxiety": 21,
+  "depression": 19,
+  "volatility": 18,
+  "reactive": 31,
+  "confidence": "medium"
+ },
+ "Gary Peters": {
+  "member": "Gary Peters",
+  "pessimism": 17,
+  "anxiety": 19,
+  "depression": 15,
+  "volatility": 12,
+  "reactive": 24,
+  "confidence": "high"
+ },
+ "Greg Landsman": {
+  "member": "Greg Landsman",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Greg Stanton": {
+  "member": "Greg Stanton",
+  "pessimism": 55,
+  "anxiety": 60,
+  "depression": 45,
+  "volatility": 35,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Gregory Meeks": {
+  "member": "Gregory Meeks",
+  "pessimism": 45,
+  "anxiety": 65,
+  "depression": 25,
+  "volatility": 30,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Gregory Murphy": {
+  "member": "Gregory Murphy",
+  "pessimism": 45,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Glenn Ivey": {
+  "member": "Glenn Ivey",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Glenn Thompson": {
+  "member": "Glenn Thompson",
+  "pessimism": 20,
+  "anxiety": 18,
+  "depression": 15,
+  "volatility": 12,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Grace Meng": {
+  "member": "Grace Meng",
+  "pessimism": 35,
+  "anxiety": 55,
+  "depression": 40,
+  "volatility": 50,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Greg Casar": {
+  "member": "Greg Casar",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 10,
+  "volatility": 25,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "George Latimer": {
+  "member": "George Latimer",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "George Whitesides": {
+  "member": "George Whitesides",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Gilbert Cisneros": {
+  "member": "Gilbert Cisneros",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Glenn Grothman": {
+  "member": "Glenn Grothman",
+  "pessimism": 40,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Gregory Steube": {
+  "member": "Gregory Steube",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Guy Reschenthaler": {
+  "member": "Guy Reschenthaler",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Gwen Moore": {
+  "member": "Gwen Moore",
+  "pessimism": 40,
+  "anxiety": 35,
+  "depression": 28,
+  "volatility": 32,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Hakeem Jeffries": {
+  "member": "Hakeem Jeffries",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Haley Stevens": {
+  "member": "Haley Stevens",
+  "pessimism": 12,
+  "anxiety": 8,
+  "depression": 10,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "Harold Rogers": {
+  "member": "Harold Rogers",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 12,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Harriet Hageman": {
+  "member": "Harriet Hageman",
+  "pessimism": 52,
+  "anxiety": 48,
+  "depression": 22,
+  "volatility": 38,
+  "reactive": 72,
+  "confidence": "high"
+ },
+ "Henry Cuellar": {
+  "member": "Henry Cuellar",
+  "pessimism": 32,
+  "anxiety": 38,
+  "depression": 28,
+  "volatility": 18,
+  "reactive": 24,
+  "confidence": "high"
+ },
+ "Hillary Scholten": {
+  "member": "Hillary Scholten",
+  "pessimism": 20,
+  "anxiety": 28,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 28,
+  "confidence": "medium"
+ },
+ "Ilhan Omar": {
+  "member": "Ilhan Omar",
+  "pessimism": 32,
+  "anxiety": 25,
+  "depression": 22,
+  "volatility": 32,
+  "reactive": 42,
+  "confidence": "medium"
+ },
+ "Jack Bergman": {
+  "member": "Jack Bergman",
+  "pessimism": 10,
+  "anxiety": 8,
+  "depression": 8,
+  "volatility": 8,
+  "reactive": 12,
+  "confidence": "high"
+ },
+ "Jack Reed": {
+  "member": "Jack Reed",
+  "pessimism": 28,
+  "anxiety": 18,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 22,
+  "confidence": "medium"
+ },
+ "James Justice": {
+  "member": "James Justice",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 25,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "James Lankford": {
+  "member": "James Lankford",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "James McGovern": {
+  "member": "James McGovern",
+  "pessimism": 35,
+  "anxiety": 15,
+  "depression": 20,
+  "volatility": 40,
+  "reactive": 65,
+  "confidence": "medium"
+ },
+ "James Risch": {
+  "member": "James Risch",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "James Clyburn": {
+  "member": "James Clyburn",
+  "pessimism": 28,
+  "anxiety": 22,
+  "depression": 18,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "James Comer": {
+  "member": "James Comer",
+  "pessimism": 22,
+  "anxiety": 15,
+  "depression": 14,
+  "volatility": 10,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "James Gallagher": {
+  "member": "James Gallagher",
+  "pessimism": 38,
+  "anxiety": 35,
+  "depression": 28,
+  "volatility": 42,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "James Himes": {
+  "member": "James Himes",
+  "pessimism": 42,
+  "anxiety": 48,
+  "depression": 32,
+  "volatility": 28,
+  "reactive": 26,
+  "confidence": "high"
+ },
+ "Jacky Rosen": {
+  "member": "Jacky Rosen",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 5,
+  "reactive": 8,
+  "confidence": "high"
+ },
+ "Jahana Hayes": {
+  "member": "Jahana Hayes",
+  "pessimism": 32,
+  "anxiety": 40,
+  "depression": 25,
+  "volatility": 28,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Jake Auchincloss": {
+  "member": "Jake Auchincloss",
+  "pessimism": 18,
+  "anxiety": 15,
+  "depression": 5,
+  "volatility": 8,
+  "reactive": 12,
+  "confidence": "high"
+ },
+ "James Baird": {
+  "member": "James Baird",
+  "pessimism": 14,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 6,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "James Walkinshaw": {
+  "member": "James Walkinshaw",
+  "pessimism": 30,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 60,
+  "confidence": "high"
+ },
+ "Jamie Raskin": {
+  "member": "Jamie Raskin",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Janelle Bynum": {
+  "member": "Janelle Bynum",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 35,
+  "reactive": 55,
+  "confidence": "high"
+ },
+ "Janice Schakowsky": {
+  "member": "Janice Schakowsky",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Jared Golden": {
+  "member": "Jared Golden",
+  "pessimism": 28,
+  "anxiety": 18,
+  "depression": 30,
+  "volatility": 12,
+  "reactive": 12,
+  "confidence": "medium"
+ },
+ "Jared Huffman": {
+  "member": "Jared Huffman",
+  "pessimism": 68,
+  "anxiety": 58,
+  "depression": 52,
+  "volatility": 28,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Jared Moskowitz": {
+  "member": "Jared Moskowitz",
+  "pessimism": 42,
+  "anxiety": 32,
+  "depression": 27,
+  "volatility": 42,
+  "reactive": 48,
+  "confidence": "high"
+ },
+ "Jasmine Crockett": {
+  "member": "Jasmine Crockett",
+  "pessimism": 42,
+  "anxiety": 32,
+  "depression": 18,
+  "volatility": 22,
+  "reactive": 72,
+  "confidence": "high"
+ },
+ "Jeff Hurd": {
+  "member": "Jeff Hurd",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Jeff Merkley": {
+  "member": "Jeff Merkley",
+  "pessimism": 20,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Jefferson Van Drew": {
+  "member": "Jefferson Van Drew",
+  "pessimism": 50,
+  "anxiety": 55,
+  "depression": 25,
+  "volatility": 55,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Jennifer Kiggans": {
+  "member": "Jennifer Kiggans",
+  "pessimism": 20,
+  "anxiety": 30,
+  "depression": 20,
+  "volatility": 35,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Jason Crow": {
+  "member": "Jason Crow",
+  "pessimism": 30,
+  "anxiety": 45,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Jason Smith": {
+  "member": "Jason Smith",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Jay Obernolte": {
+  "member": "Jay Obernolte",
+  "pessimism": 5,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 5,
+  "confidence": "low"
+ },
+ "Jeanne Shaheen": {
+  "member": "Jeanne Shaheen",
+  "pessimism": 40,
+  "anxiety": 55,
+  "depression": 30,
+  "volatility": 15,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Jill Tokuda": {
+  "member": "Jill Tokuda",
+  "pessimism": 55,
+  "anxiety": 65,
+  "depression": 60,
+  "volatility": 25,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Jim Banks": {
+  "member": "Jim Banks",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Jim Costa": {
+  "member": "Jim Costa",
+  "pessimism": 45,
+  "anxiety": 45,
+  "depression": 25,
+  "volatility": 35,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Jim Jordan": {
+  "member": "Jim Jordan",
+  "pessimism": 50,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 35,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Jodey Arrington": {
+  "member": "Jodey Arrington",
+  "pessimism": 65,
+  "anxiety": 48,
+  "depression": 18,
+  "volatility": 22,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Joe Courtney": {
+  "member": "Joe Courtney",
+  "pessimism": 50,
+  "anxiety": 45,
+  "depression": 25,
+  "volatility": 22,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Joe Neguse": {
+  "member": "Joe Neguse",
+  "pessimism": 58,
+  "anxiety": 60,
+  "depression": 40,
+  "volatility": 35,
+  "reactive": 48,
+  "confidence": "medium"
+ },
+ "Joe Wilson": {
+  "member": "Joe Wilson",
+  "pessimism": 32,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Jennifer McClellan": {
+  "member": "Jennifer McClellan",
+  "pessimism": 18,
+  "anxiety": 18,
+  "depression": 10,
+  "volatility": 8,
+  "reactive": 8,
+  "confidence": "high"
+ },
+ "Jerrold Nadler": {
+  "member": "Jerrold Nadler",
+  "pessimism": 35,
+  "anxiety": 32,
+  "depression": 16,
+  "volatility": 10,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Jerry Moran": {
+  "member": "Jerry Moran",
+  "pessimism": 22,
+  "anxiety": 28,
+  "depression": 12,
+  "volatility": 9,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Jesús García": {
+  "member": "Jesús García",
+  "pessimism": 38,
+  "anxiety": 48,
+  "depression": 28,
+  "volatility": 18,
+  "reactive": 24,
+  "confidence": "medium"
+ },
+ "Jimmy Gomez": {
+  "member": "Jimmy Gomez",
+  "pessimism": 20,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Jimmy Panetta": {
+  "member": "Jimmy Panetta",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Jimmy Patronis": {
+  "member": "Jimmy Patronis",
+  "pessimism": 25,
+  "anxiety": 25,
+  "depression": 10,
+  "volatility": 30,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Joaquin Castro": {
+  "member": "Joaquin Castro",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "John Barrasso": {
+  "member": "John Barrasso",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "John Carter": {
+  "member": "John Carter",
+  "pessimism": 12,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "John Cornyn": {
+  "member": "John Cornyn",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "John Curtis": {
+  "member": "John Curtis",
+  "pessimism": 30,
+  "anxiety": 28,
+  "depression": 20,
+  "volatility": 28,
+  "reactive": 18,
+  "confidence": "medium"
+ },
+ "John Fetterman": {
+  "member": "John Fetterman",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 25,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "John Garamendi": {
+  "member": "John Garamendi",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "John Hickenlooper": {
+  "member": "John Hickenlooper",
+  "pessimism": 35,
+  "anxiety": 40,
+  "depression": 30,
+  "volatility": 35,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "John Hoeven": {
+  "member": "John Hoeven",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "John Moolenaar": {
+  "member": "John Moolenaar",
+  "pessimism": 18,
+  "anxiety": 14,
+  "depression": 8,
+  "volatility": 9,
+  "reactive": 11,
+  "confidence": "high"
+ },
+ "John Rose": {
+  "member": "John Rose",
+  "pessimism": 22,
+  "anxiety": 16,
+  "depression": 10,
+  "volatility": 13,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "John Rutherford": {
+  "member": "John Rutherford",
+  "pessimism": 28,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "John Thune": {
+  "member": "John Thune",
+  "pessimism": 14,
+  "anxiety": 8,
+  "depression": 9,
+  "volatility": 9,
+  "reactive": 9,
+  "confidence": "high"
+ },
+ "John James": {
+  "member": "John James",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "John Kennedy": {
+  "member": "John Kennedy",
+  "pessimism": 30,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "John Larson": {
+  "member": "John Larson",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "John McGuire": {
+  "member": "John McGuire",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Johnny Olszewski": {
+  "member": "Johnny Olszewski",
+  "pessimism": 12,
+  "anxiety": 16,
+  "depression": 10,
+  "volatility": 9,
+  "reactive": 12,
+  "confidence": "high"
+ },
+ "Jon Husted": {
+  "member": "Jon Husted",
+  "pessimism": 16,
+  "anxiety": 14,
+  "depression": 8,
+  "volatility": 6,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Jon Ossoff": {
+  "member": "Jon Ossoff",
+  "pessimism": 28,
+  "anxiety": 32,
+  "depression": 18,
+  "volatility": 36,
+  "reactive": 50,
+  "confidence": "medium"
+ },
+ "Jonathan Jackson": {
+  "member": "Jonathan Jackson",
+  "pessimism": 30,
+  "anxiety": 26,
+  "depression": 22,
+  "volatility": 30,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Josh Harder": {
+  "member": "Josh Harder",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 30,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Josh Hawley": {
+  "member": "Josh Hawley",
+  "pessimism": 28,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Joyce Beatty": {
+  "member": "Joyce Beatty",
+  "pessimism": 32,
+  "anxiety": 35,
+  "depression": 28,
+  "volatility": 40,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Juan Ciscomani": {
+  "member": "Juan Ciscomani",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Keith Self": {
+  "member": "Keith Self",
+  "pessimism": 28,
+  "anxiety": 18,
+  "depression": 18,
+  "volatility": 22,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "Ken Calvert": {
+  "member": "Ken Calvert",
+  "pessimism": 18,
+  "anxiety": 12,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Kevin Cramer": {
+  "member": "Kevin Cramer",
+  "pessimism": 42,
+  "anxiety": 48,
+  "depression": 32,
+  "volatility": 38,
+  "reactive": 42,
+  "confidence": "medium"
+ },
+ "Kevin Hern": {
+  "member": "Kevin Hern",
+  "pessimism": 38,
+  "anxiety": 44,
+  "depression": 28,
+  "volatility": 42,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Kat Cammack": {
+  "member": "Kat Cammack",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 60,
+  "confidence": "medium"
+ },
+ "Katherine Clark": {
+  "member": "Katherine Clark",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Kathy Castor": {
+  "member": "Kathy Castor",
+  "pessimism": 40,
+  "anxiety": 50,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Katie Britt": {
+  "member": "Katie Britt",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 35,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Joni Ernst": {
+  "member": "Joni Ernst",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 32,
+  "volatility": 18,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Joseph Morelle": {
+  "member": "Joseph Morelle",
+  "pessimism": 22,
+  "anxiety": 28,
+  "depression": 12,
+  "volatility": 32,
+  "reactive": 48,
+  "confidence": "medium"
+ },
+ "Josh Brecheen": {
+  "member": "Josh Brecheen",
+  "pessimism": 52,
+  "anxiety": 62,
+  "depression": 42,
+  "volatility": 28,
+  "reactive": 54,
+  "confidence": "high"
+ },
+ "Josh Gottheimer": {
+  "member": "Josh Gottheimer",
+  "pessimism": 28,
+  "anxiety": 38,
+  "depression": 16,
+  "volatility": 28,
+  "reactive": 46,
+  "confidence": "medium"
+ },
+ "Juan Vargas": {
+  "member": "Juan Vargas",
+  "pessimism": 22,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 12,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Judy Chu": {
+  "member": "Judy Chu",
+  "pessimism": 32,
+  "anxiety": 42,
+  "depression": 22,
+  "volatility": 28,
+  "reactive": 12,
+  "confidence": "medium"
+ },
+ "Julia Letlow": {
+  "member": "Julia Letlow",
+  "pessimism": 16,
+  "anxiety": 14,
+  "depression": 22,
+  "volatility": 32,
+  "reactive": 12,
+  "confidence": "high"
+ },
+ "Julie Johnson": {
+  "member": "Julie Johnson",
+  "pessimism": 28,
+  "anxiety": 25,
+  "depression": 16,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Kevin Kiley": {
+  "member": "Kevin Kiley",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Kim Schrier": {
+  "member": "Kim Schrier",
+  "pessimism": 32,
+  "anxiety": 48,
+  "depression": 38,
+  "volatility": 28,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Kirsten Gillibrand": {
+  "member": "Kirsten Gillibrand",
+  "pessimism": 38,
+  "anxiety": 48,
+  "depression": 22,
+  "volatility": 35,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Kweisi Mfume": {
+  "member": "Kweisi Mfume",
+  "pessimism": 22,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "LaMonica McIver": {
+  "member": "LaMonica McIver",
+  "pessimism": 30,
+  "anxiety": 40,
+  "depression": 25,
+  "volatility": 20,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Lance Gooden": {
+  "member": "Lance Gooden",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Lateefah Simon": {
+  "member": "Lateefah Simon",
+  "pessimism": 10,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Laura Friedman": {
+  "member": "Laura Friedman",
+  "pessimism": 35,
+  "anxiety": 45,
+  "depression": 30,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Laurel Lee": {
+  "member": "Laurel Lee",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 5,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Lauren Boebert": {
+  "member": "Lauren Boebert",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 20,
+  "volatility": 45,
+  "reactive": 60,
+  "confidence": "high"
+ },
+ "Lauren Underwood": {
+  "member": "Lauren Underwood",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Linda Sánchez": {
+  "member": "Linda Sánchez",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Lindsey Graham": {
+  "member": "Lindsey Graham",
+  "pessimism": 15,
+  "anxiety": 18,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Lisa Blunt Rochester": {
+  "member": "Lisa Blunt Rochester",
+  "pessimism": 18,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "Lisa McClain": {
+  "member": "Lisa McClain",
+  "pessimism": 12,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 12,
+  "reactive": 32,
+  "confidence": "high"
+ },
+ "Lisa Murkowski": {
+  "member": "Lisa Murkowski",
+  "pessimism": 35,
+  "anxiety": 45,
+  "depression": 25,
+  "volatility": 25,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Lizzie Fletcher": {
+  "member": "Lizzie Fletcher",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Lloyd Doggett": {
+  "member": "Lloyd Doggett",
+  "pessimism": 55,
+  "anxiety": 60,
+  "depression": 40,
+  "volatility": 30,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Lloyd Smucker": {
+  "member": "Lloyd Smucker",
+  "pessimism": 25,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Lois Frankel": {
+  "member": "Lois Frankel",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 35,
+  "volatility": 40,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Marc Veasey": {
+  "member": "Marc Veasey",
+  "pessimism": 36,
+  "anxiety": 25,
+  "depression": 21,
+  "volatility": 16,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Marcy Kaptur": {
+  "member": "Marcy Kaptur",
+  "pessimism": 48,
+  "anxiety": 42,
+  "depression": 28,
+  "volatility": 22,
+  "reactive": 24,
+  "confidence": "medium"
+ },
+ "Margaret Hassan": {
+  "member": "Margaret Hassan",
+  "pessimism": 52,
+  "anxiety": 52,
+  "depression": 42,
+  "volatility": 28,
+  "reactive": 42,
+  "confidence": "high"
+ },
+ "Maria Cantwell": {
+  "member": "Maria Cantwell",
+  "pessimism": 42,
+  "anxiety": 43,
+  "depression": 26,
+  "volatility": 18,
+  "reactive": 52,
+  "confidence": "high"
+ },
+ "Lori Trahan": {
+  "member": "Lori Trahan",
+  "pessimism": 20,
+  "anxiety": 20,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Lucy McBath": {
+  "member": "Lucy McBath",
+  "pessimism": 30,
+  "anxiety": 20,
+  "depression": 45,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Madeleine Dean": {
+  "member": "Madeleine Dean",
+  "pessimism": 45,
+  "anxiety": 50,
+  "depression": 30,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Maggie Goodlander": {
+  "member": "Maggie Goodlander",
+  "pessimism": 35,
+  "anxiety": 55,
+  "depression": 20,
+  "volatility": 30,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Mario Diaz-Balart": {
+  "member": "Mario Diaz-Balart",
+  "pessimism": 32,
+  "anxiety": 28,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Mark Alford": {
+  "member": "Mark Alford",
+  "pessimism": 38,
+  "anxiety": 28,
+  "depression": 22,
+  "volatility": 16,
+  "reactive": 24,
+  "confidence": "high"
+ },
+ "Mark Amodei": {
+  "member": "Mark Amodei",
+  "pessimism": 28,
+  "anxiety": 18,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Mark DeSaulnier": {
+  "member": "Mark DeSaulnier",
+  "pessimism": 52,
+  "anxiety": 38,
+  "depression": 24,
+  "volatility": 18,
+  "reactive": 26,
+  "confidence": "medium"
+ },
+ "Maria Salazar": {
+  "member": "Maria Salazar",
+  "pessimism": 10,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Mariannette Miller-Meeks": {
+  "member": "Mariannette Miller-Meeks",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Marie Gluesenkamp Perez": {
+  "member": "Marie Gluesenkamp Perez",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 20,
+  "volatility": 20,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Marilyn Strickland": {
+  "member": "Marilyn Strickland",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Mark Warner": {
+  "member": "Mark Warner",
+  "pessimism": 60,
+  "anxiety": 65,
+  "depression": 45,
+  "volatility": 35,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Marlin Stutzman": {
+  "member": "Marlin Stutzman",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Marsha Blackburn": {
+  "member": "Marsha Blackburn",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 20,
+  "volatility": 35,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Martin Heinrich": {
+  "member": "Martin Heinrich",
+  "pessimism": 55,
+  "anxiety": 40,
+  "depression": 50,
+  "volatility": 30,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Mark Harris": {
+  "member": "Mark Harris",
+  "pessimism": 18,
+  "anxiety": 16,
+  "depression": 12,
+  "volatility": 16,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Mark Kelly": {
+  "member": "Mark Kelly",
+  "pessimism": 38,
+  "anxiety": 42,
+  "depression": 28,
+  "volatility": 32,
+  "reactive": 48,
+  "confidence": "medium"
+ },
+ "Mark Pocan": {
+  "member": "Mark Pocan",
+  "pessimism": 22,
+  "anxiety": 16,
+  "depression": 12,
+  "volatility": 38,
+  "reactive": 42,
+  "confidence": "high"
+ },
+ "Mark Takano": {
+  "member": "Mark Takano",
+  "pessimism": 28,
+  "anxiety": 32,
+  "depression": 18,
+  "volatility": 28,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Mary Miller": {
+  "member": "Mary Miller",
+  "pessimism": 32,
+  "anxiety": 26,
+  "depression": 16,
+  "volatility": 20,
+  "reactive": 34,
+  "confidence": "medium"
+ },
+ "Mary Scanlon": {
+  "member": "Mary Scanlon",
+  "pessimism": 28,
+  "anxiety": 31,
+  "depression": 21,
+  "volatility": 16,
+  "reactive": 31,
+  "confidence": "medium"
+ },
+ "Matt Van Epps": {
+  "member": "Matt Van Epps",
+  "pessimism": 18,
+  "anxiety": 13,
+  "depression": 13,
+  "volatility": 12,
+  "reactive": 16,
+  "confidence": "high"
+ },
+ "Max Miller": {
+  "member": "Max Miller",
+  "pessimism": 39,
+  "anxiety": 51,
+  "depression": 29,
+  "volatility": 42,
+  "reactive": 61,
+  "confidence": "high"
+ },
+ "Michael Guest": {
+  "member": "Michael Guest",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Michael Lawler": {
+  "member": "Michael Lawler",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 35,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Michael McCaul": {
+  "member": "Michael McCaul",
+  "pessimism": 50,
+  "anxiety": 60,
+  "depression": 25,
+  "volatility": 25,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Michael Rulli": {
+  "member": "Michael Rulli",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 30,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Melanie Stansbury": {
+  "member": "Melanie Stansbury",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 12,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Michael Baumgartner": {
+  "member": "Michael Baumgartner",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Michael Bennet": {
+  "member": "Michael Bennet",
+  "pessimism": 50,
+  "anxiety": 45,
+  "depression": 28,
+  "volatility": 32,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Michael Cloud": {
+  "member": "Michael Cloud",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Maxine Dexter": {
+  "member": "Maxine Dexter",
+  "pessimism": 20,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Maxine Waters": {
+  "member": "Maxine Waters",
+  "pessimism": 45,
+  "anxiety": 55,
+  "depression": 25,
+  "volatility": 35,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Maxwell Frost": {
+  "member": "Maxwell Frost",
+  "pessimism": 25,
+  "anxiety": 25,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Mazie Hirono": {
+  "member": "Mazie Hirono",
+  "pessimism": 35,
+  "anxiety": 30,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 50,
+  "confidence": "medium"
+ },
+ "Michael Simpson": {
+  "member": "Michael Simpson",
+  "pessimism": 40,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Michael Turner": {
+  "member": "Michael Turner",
+  "pessimism": 50,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Michelle Fischbach": {
+  "member": "Michelle Fischbach",
+  "pessimism": 50,
+  "anxiety": 52,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 42,
+  "confidence": "medium"
+ },
+ "Mike Bost": {
+  "member": "Mike Bost",
+  "pessimism": 45,
+  "anxiety": 48,
+  "depression": 38,
+  "volatility": 42,
+  "reactive": 50,
+  "confidence": "medium"
+ },
+ "Mike Carey": {
+  "member": "Mike Carey",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Mike Collins": {
+  "member": "Mike Collins",
+  "pessimism": 22,
+  "anxiety": 12,
+  "depression": 18,
+  "volatility": 12,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Mike Crapo": {
+  "member": "Mike Crapo",
+  "pessimism": 18,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Mike Flood": {
+  "member": "Mike Flood",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 28,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Mike Haridopolos": {
+  "member": "Mike Haridopolos",
+  "pessimism": 10,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Mike Johnson": {
+  "member": "Mike Johnson",
+  "pessimism": 15,
+  "anxiety": 25,
+  "depression": 10,
+  "volatility": 30,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Mike Kelly": {
+  "member": "Mike Kelly",
+  "pessimism": 30,
+  "anxiety": 40,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Mike Kennedy": {
+  "member": "Mike Kennedy",
+  "pessimism": 35,
+  "anxiety": 20,
+  "depression": 25,
+  "volatility": 15,
+  "reactive": 12,
+  "confidence": "medium"
+ },
+ "Mike Lee": {
+  "member": "Mike Lee",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Mike Levin": {
+  "member": "Mike Levin",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Mike Quigley": {
+  "member": "Mike Quigley",
+  "pessimism": 45,
+  "anxiety": 50,
+  "depression": 25,
+  "volatility": 25,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Mike Rogers": {
+  "member": "Mike Rogers",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Mike Rounds": {
+  "member": "Mike Rounds",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Mike Thompson": {
+  "member": "Mike Thompson",
+  "pessimism": 30,
+  "anxiety": 15,
+  "depression": 25,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Mitch McConnell": {
+  "member": "Mitch McConnell",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Monica De La Cruz": {
+  "member": "Monica De La Cruz",
+  "pessimism": 30,
+  "anxiety": 45,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Morgan Griffith": {
+  "member": "Morgan Griffith",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Morgan McGarvey": {
+  "member": "Morgan McGarvey",
+  "pessimism": 60,
+  "anxiety": 55,
+  "depression": 40,
+  "volatility": 45,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Nancy Mace": {
+  "member": "Nancy Mace",
+  "pessimism": 35,
+  "anxiety": 45,
+  "depression": 30,
+  "volatility": 50,
+  "reactive": 60,
+  "confidence": "medium"
+ },
+ "Nancy Pelosi": {
+  "member": "Nancy Pelosi",
+  "pessimism": 20,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Nanette Barragán": {
+  "member": "Nanette Barragán",
+  "pessimism": 22,
+  "anxiety": 35,
+  "depression": 18,
+  "volatility": 12,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Nathaniel Moran": {
+  "member": "Nathaniel Moran",
+  "pessimism": 12,
+  "anxiety": 8,
+  "depression": 7,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Nicholas Langworthy": {
+  "member": "Nicholas Langworthy",
+  "pessimism": 38,
+  "anxiety": 42,
+  "depression": 15,
+  "volatility": 38,
+  "reactive": 68,
+  "confidence": "high"
+ },
+ "Nick LaLota": {
+  "member": "Nick LaLota",
+  "pessimism": 28,
+  "anxiety": 22,
+  "depression": 12,
+  "volatility": 22,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Pat Fallon": {
+  "member": "Pat Fallon",
+  "pessimism": 35,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 55,
+  "confidence": "high"
+ },
+ "Pat Harrigan": {
+  "member": "Pat Harrigan",
+  "pessimism": 40,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Patrick Ryan": {
+  "member": "Patrick Ryan",
+  "pessimism": 20,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 45,
+  "reactive": 60,
+  "confidence": "high"
+ },
+ "Patty Murray": {
+  "member": "Patty Murray",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Nicole Malliotakis": {
+  "member": "Nicole Malliotakis",
+  "pessimism": 20,
+  "anxiety": 12,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Nikema Williams": {
+  "member": "Nikema Williams",
+  "pessimism": 10,
+  "anxiety": 8,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Norma Torres": {
+  "member": "Norma Torres",
+  "pessimism": 35,
+  "anxiety": 42,
+  "depression": 32,
+  "volatility": 40,
+  "reactive": 50,
+  "confidence": "high"
+ },
+ "Nydia Velázquez": {
+  "member": "Nydia Velázquez",
+  "pessimism": 40,
+  "anxiety": 28,
+  "depression": 25,
+  "volatility": 30,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Paul Gosar": {
+  "member": "Paul Gosar",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 55,
+  "confidence": "high"
+ },
+ "Paul Tonko": {
+  "member": "Paul Tonko",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Pete Aguilar": {
+  "member": "Pete Aguilar",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Pete Ricketts": {
+  "member": "Pete Ricketts",
+  "pessimism": 35,
+  "anxiety": 30,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Raja Krishnamoorthi": {
+  "member": "Raja Krishnamoorthi",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Ralph Norman": {
+  "member": "Ralph Norman",
+  "pessimism": 55,
+  "anxiety": 50,
+  "depression": 35,
+  "volatility": 40,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Rand Paul": {
+  "member": "Rand Paul",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 35,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Randy Fine": {
+  "member": "Randy Fine",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Pete Sessions": {
+  "member": "Pete Sessions",
+  "pessimism": 15,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Pete Stauber": {
+  "member": "Pete Stauber",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Peter Welch": {
+  "member": "Peter Welch",
+  "pessimism": 45,
+  "anxiety": 55,
+  "depression": 35,
+  "volatility": 40,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Pramila Jayapal": {
+  "member": "Pramila Jayapal",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 30,
+  "confidence": "medium"
+ },
+ "Randy Weber": {
+  "member": "Randy Weber",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Raphael Warnock": {
+  "member": "Raphael Warnock",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Rashida Tlaib": {
+  "member": "Rashida Tlaib",
+  "pessimism": 40,
+  "anxiety": 65,
+  "depression": 30,
+  "volatility": 50,
+  "reactive": 60,
+  "confidence": "high"
+ },
+ "Raul Ruiz": {
+  "member": "Raul Ruiz",
+  "pessimism": 25,
+  "anxiety": 30,
+  "depression": 20,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Richard Blumenthal": {
+  "member": "Richard Blumenthal",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Richard Durbin": {
+  "member": "Richard Durbin",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 12,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Richard Hudson": {
+  "member": "Richard Hudson",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 8,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Richard McCormick": {
+  "member": "Richard McCormick",
+  "pessimism": 35,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 30,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Riley Moore": {
+  "member": "Riley Moore",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Ritchie Torres": {
+  "member": "Ritchie Torres",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 35,
+  "reactive": 55,
+  "confidence": "high"
+ },
+ "Ro Khanna": {
+  "member": "Ro Khanna",
+  "pessimism": 20,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Robert Bresnahan": {
+  "member": "Robert Bresnahan",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Robert Garcia": {
+  "member": "Robert Garcia",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Robert Latta": {
+  "member": "Robert Latta",
+  "pessimism": 10,
+  "anxiety": 20,
+  "depression": 5,
+  "volatility": 15,
+  "reactive": 35,
+  "confidence": "medium"
+ },
+ "Robert Menendez": {
+  "member": "Robert Menendez",
+  "pessimism": 35,
+  "anxiety": 45,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Robert Onder": {
+  "member": "Robert Onder",
+  "pessimism": 20,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Richard Neal": {
+  "member": "Richard Neal",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 10,
+  "volatility": 12,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Rick Allen": {
+  "member": "Rick Allen",
+  "pessimism": 28,
+  "anxiety": 33,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 22,
+  "confidence": "medium"
+ },
+ "Rick Larsen": {
+  "member": "Rick Larsen",
+  "pessimism": 22,
+  "anxiety": 25,
+  "depression": 18,
+  "volatility": 18,
+  "reactive": 23,
+  "confidence": "high"
+ },
+ "Rick Scott": {
+  "member": "Rick Scott",
+  "pessimism": 52,
+  "anxiety": 45,
+  "depression": 35,
+  "volatility": 48,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Robert Scott": {
+  "member": "Robert Scott",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Robert Wittman": {
+  "member": "Robert Wittman",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Robin Kelly": {
+  "member": "Robin Kelly",
+  "pessimism": 45,
+  "anxiety": 50,
+  "depression": 40,
+  "volatility": 40,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Roger Marshall": {
+  "member": "Roger Marshall",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Russell Fry": {
+  "member": "Russell Fry",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Ryan Mackenzie": {
+  "member": "Ryan Mackenzie",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Ryan Zinke": {
+  "member": "Ryan Zinke",
+  "pessimism": 18,
+  "anxiety": 12,
+  "depression": 8,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Sam Graves": {
+  "member": "Sam Graves",
+  "pessimism": 12,
+  "anxiety": 14,
+  "depression": 6,
+  "volatility": 12,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Roger Wicker": {
+  "member": "Roger Wicker",
+  "pessimism": 12,
+  "anxiety": 8,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 12,
+  "confidence": "high"
+ },
+ "Roger Williams": {
+  "member": "Roger Williams",
+  "pessimism": 8,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 8,
+  "confidence": "high"
+ },
+ "Ron Johnson": {
+  "member": "Ron Johnson",
+  "pessimism": 28,
+  "anxiety": 32,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Ron Wyden": {
+  "member": "Ron Wyden",
+  "pessimism": 48,
+  "anxiety": 38,
+  "depression": 18,
+  "volatility": 12,
+  "reactive": 12,
+  "confidence": "medium"
+ },
+ "Ronny Jackson": {
+  "member": "Ronny Jackson",
+  "pessimism": 28,
+  "anxiety": 18,
+  "depression": 12,
+  "volatility": 12,
+  "reactive": 18,
+  "confidence": "high"
+ },
+ "Rosa DeLauro": {
+  "member": "Rosa DeLauro",
+  "pessimism": 22,
+  "anxiety": 24,
+  "depression": 18,
+  "volatility": 16,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Ruben Gallego": {
+  "member": "Ruben Gallego",
+  "pessimism": 28,
+  "anxiety": 22,
+  "depression": 14,
+  "volatility": 18,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Russ Fulcher": {
+  "member": "Russ Fulcher",
+  "pessimism": 12,
+  "anxiety": 10,
+  "depression": 8,
+  "volatility": 8,
+  "reactive": 12,
+  "confidence": "high"
+ },
+ "Scott DesJarlais": {
+  "member": "Scott DesJarlais",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Scott Fitzgerald": {
+  "member": "Scott Fitzgerald",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Scott Perry": {
+  "member": "Scott Perry",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Scott Peters": {
+  "member": "Scott Peters",
+  "pessimism": 50,
+  "anxiety": 55,
+  "depression": 35,
+  "volatility": 15,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Sam Liccardo": {
+  "member": "Sam Liccardo",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Sara Jacobs": {
+  "member": "Sara Jacobs",
+  "pessimism": 28,
+  "anxiety": 35,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Sarah Elfreth": {
+  "member": "Sarah Elfreth",
+  "pessimism": 25,
+  "anxiety": 35,
+  "depression": 30,
+  "volatility": 25,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Sarah McBride": {
+  "member": "Sarah McBride",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "medium"
+ },
+ "Sean Casten": {
+  "member": "Sean Casten",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Seth Magaziner": {
+  "member": "Seth Magaziner",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Seth Moulton": {
+  "member": "Seth Moulton",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 20,
+  "volatility": 30,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Sharice Davids": {
+  "member": "Sharice Davids",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Steny Hoyer": {
+  "member": "Steny Hoyer",
+  "pessimism": 20,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Stephanie Bice": {
+  "member": "Stephanie Bice",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 25,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Stephen Lynch": {
+  "member": "Stephen Lynch",
+  "pessimism": 30,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 25,
+  "reactive": 30,
+  "confidence": "high"
+ },
+ "Steve Cohen": {
+  "member": "Steve Cohen",
+  "pessimism": 35,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 35,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Steve Daines": {
+  "member": "Steve Daines",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Steve Scalise": {
+  "member": "Steve Scalise",
+  "pessimism": 10,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Steve Womack": {
+  "member": "Steve Womack",
+  "pessimism": 35,
+  "anxiety": 30,
+  "depression": 25,
+  "volatility": 20,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Steven Horsford": {
+  "member": "Steven Horsford",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Suzan DelBene": {
+  "member": "Suzan DelBene",
+  "pessimism": 10,
+  "anxiety": 5,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Suzanne Bonamici": {
+  "member": "Suzanne Bonamici",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Sydney Kamlager-Dove": {
+  "member": "Sydney Kamlager-Dove",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Sylvia Garcia": {
+  "member": "Sylvia Garcia",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Suhas Subramanyam": {
+  "member": "Suhas Subramanyam",
+  "pessimism": 28,
+  "anxiety": 42,
+  "depression": 18,
+  "volatility": 25,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Summer Lee": {
+  "member": "Summer Lee",
+  "pessimism": 22,
+  "anxiety": 32,
+  "depression": 15,
+  "volatility": 28,
+  "reactive": 48,
+  "confidence": "high"
+ },
+ "Susan Collins": {
+  "member": "Susan Collins",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 12,
+  "volatility": 15,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Susie Lee": {
+  "member": "Susie Lee",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 10,
+  "volatility": 12,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Sheldon Whitehouse": {
+  "member": "Sheldon Whitehouse",
+  "pessimism": 35,
+  "anxiety": 20,
+  "depression": 30,
+  "volatility": 20,
+  "reactive": 55,
+  "confidence": "medium"
+ },
+ "Shelley Capito": {
+  "member": "Shelley Capito",
+  "pessimism": 15,
+  "anxiety": 30,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "Shomari Figures": {
+  "member": "Shomari Figures",
+  "pessimism": 10,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Shontel Brown": {
+  "member": "Shontel Brown",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 30,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Tammy Baldwin": {
+  "member": "Tammy Baldwin",
+  "pessimism": 12,
+  "anxiety": 8,
+  "depression": 5,
+  "volatility": 5,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Tammy Duckworth": {
+  "member": "Tammy Duckworth",
+  "pessimism": 20,
+  "anxiety": 38,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 42,
+  "confidence": "high"
+ },
+ "Ted Budd": {
+  "member": "Ted Budd",
+  "pessimism": 22,
+  "anxiety": 15,
+  "depression": 8,
+  "volatility": 10,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Ted Cruz": {
+  "member": "Ted Cruz",
+  "pessimism": 38,
+  "anxiety": 42,
+  "depression": 12,
+  "volatility": 32,
+  "reactive": 58,
+  "confidence": "medium"
+ },
+ "Ted Lieu": {
+  "member": "Ted Lieu",
+  "pessimism": 48,
+  "anxiety": 38,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 38,
+  "confidence": "high"
+ },
+ "Teresa Leger Fernandez": {
+  "member": "Teresa Leger Fernandez",
+  "pessimism": 50,
+  "anxiety": 32,
+  "depression": 40,
+  "volatility": 20,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Terri Sewell": {
+  "member": "Terri Sewell",
+  "pessimism": 52,
+  "anxiety": 43,
+  "depression": 35,
+  "volatility": 20,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "Thom Tillis": {
+  "member": "Thom Tillis",
+  "pessimism": 38,
+  "anxiety": 38,
+  "depression": 18,
+  "volatility": 28,
+  "reactive": 33,
+  "confidence": "high"
+ },
+ "Tim Sheehy": {
+  "member": "Tim Sheehy",
+  "pessimism": 15,
+  "anxiety": 12,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Tim Walberg": {
+  "member": "Tim Walberg",
+  "pessimism": 12,
+  "anxiety": 8,
+  "depression": 8,
+  "volatility": 20,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Timothy Kennedy": {
+  "member": "Timothy Kennedy",
+  "pessimism": 50,
+  "anxiety": 48,
+  "depression": 48,
+  "volatility": 60,
+  "reactive": 58,
+  "confidence": "medium"
+ },
+ "Tina Smith": {
+  "member": "Tina Smith",
+  "pessimism": 42,
+  "anxiety": 52,
+  "depression": 48,
+  "volatility": 48,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Tim Burchett": {
+  "member": "Tim Burchett",
+  "pessimism": 55,
+  "anxiety": 25,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 40,
+  "confidence": "high"
+ },
+ "Tim Kaine": {
+  "member": "Tim Kaine",
+  "pessimism": 30,
+  "anxiety": 45,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 25,
+  "confidence": "high"
+ },
+ "Tim Moore": {
+  "member": "Tim Moore",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Tim Scott": {
+  "member": "Tim Scott",
+  "pessimism": 35,
+  "anxiety": 15,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Todd Young": {
+  "member": "Todd Young",
+  "pessimism": 35,
+  "anxiety": 30,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Tom Barrett": {
+  "member": "Tom Barrett",
+  "pessimism": 48,
+  "anxiety": 42,
+  "depression": 38,
+  "volatility": 32,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Tom Cole": {
+  "member": "Tom Cole",
+  "pessimism": 32,
+  "anxiety": 25,
+  "depression": 16,
+  "volatility": 16,
+  "reactive": 22,
+  "confidence": "high"
+ },
+ "Tom Cotton": {
+  "member": "Tom Cotton",
+  "pessimism": 38,
+  "anxiety": 18,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 52,
+  "confidence": "high"
+ },
+ "Tom Emmer": {
+  "member": "Tom Emmer",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Tom McClintock": {
+  "member": "Tom McClintock",
+  "pessimism": 40,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 35,
+  "reactive": 45,
+  "confidence": "medium"
+ },
+ "Tommy Tuberville": {
+  "member": "Tommy Tuberville",
+  "pessimism": 45,
+  "anxiety": 40,
+  "depression": 30,
+  "volatility": 35,
+  "reactive": 40,
+  "confidence": "medium"
+ },
+ "Troy Balderson": {
+  "member": "Troy Balderson",
+  "pessimism": 20,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Thomas Kean": {
+  "member": "Thomas Kean",
+  "pessimism": 30,
+  "anxiety": 25,
+  "depression": 55,
+  "volatility": 15,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Thomas Massie": {
+  "member": "Thomas Massie",
+  "pessimism": 15,
+  "anxiety": 20,
+  "depression": 10,
+  "volatility": 25,
+  "reactive": 55,
+  "confidence": "high"
+ },
+ "Thomas Suozzi": {
+  "member": "Thomas Suozzi",
+  "pessimism": 20,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Thomas Tiffany": {
+  "member": "Thomas Tiffany",
+  "pessimism": 40,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 35,
+  "reactive": 65,
+  "confidence": "high"
+ },
+ "Troy Carter": {
+  "member": "Troy Carter",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 5,
+  "reactive": 10,
+  "confidence": "high"
+ },
+ "Troy Nehls": {
+  "member": "Troy Nehls",
+  "pessimism": 40,
+  "anxiety": 35,
+  "depression": 20,
+  "volatility": 35,
+  "reactive": 65,
+  "confidence": "medium"
+ },
+ "Vern Buchanan": {
+  "member": "Vern Buchanan",
+  "pessimism": 35,
+  "anxiety": 25,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 15,
+  "confidence": "high"
+ },
+ "Veronica Escobar": {
+  "member": "Veronica Escobar",
+  "pessimism": 50,
+  "anxiety": 55,
+  "depression": 40,
+  "volatility": 20,
+  "reactive": 15,
+  "confidence": "medium"
+ },
+ "Zoe Lofgren": {
+  "member": "Zoe Lofgren",
+  "pessimism": 32,
+  "anxiety": 28,
+  "depression": 12,
+  "volatility": 18,
+  "reactive": 18,
+  "confidence": "medium"
+ },
+ "Vicente Gonzalez": {
+  "member": "Vicente Gonzalez",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 10,
+  "volatility": 15,
+  "reactive": 20,
+  "confidence": "high"
+ },
+ "Victoria Spartz": {
+  "member": "Victoria Spartz",
+  "pessimism": 35,
+  "anxiety": 40,
+  "depression": 20,
+  "volatility": 35,
+  "reactive": 55,
+  "confidence": "high"
+ },
+ "Virginia Foxx": {
+  "member": "Virginia Foxx",
+  "pessimism": 25,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 20,
+  "reactive": 45,
+  "confidence": "high"
+ },
+ "Warren Davidson": {
+  "member": "Warren Davidson",
+  "pessimism": 25,
+  "anxiety": 20,
+  "depression": 15,
+  "volatility": 20,
+  "reactive": 35,
+  "confidence": "high"
+ },
+ "Wesley Bell": {
+  "member": "Wesley Bell",
+  "pessimism": 23,
+  "anxiety": 28,
+  "depression": 15,
+  "volatility": 10,
+  "reactive": 18,
+  "confidence": "medium"
+ },
+ "Wesley Hunt": {
+  "member": "Wesley Hunt",
+  "pessimism": 10,
+  "anxiety": 10,
+  "depression": 5,
+  "volatility": 10,
+  "reactive": 28,
+  "confidence": "high"
+ },
+ "William Keating": {
+  "member": "William Keating",
+  "pessimism": 20,
+  "anxiety": 15,
+  "depression": 10,
+  "volatility": 10,
+  "reactive": 25,
+  "confidence": "medium"
+ },
+ "William Timmons": {
+  "member": "William Timmons",
+  "pessimism": 38,
+  "anxiety": 32,
+  "depression": 10,
+  "volatility": 25,
+  "reactive": 38,
+  "confidence": "medium"
+ },
+ "Yassamin Ansari": {
+  "member": "Yassamin Ansari",
+  "pessimism": 35,
+  "anxiety": 36,
+  "depression": 21,
+  "volatility": 21,
+  "reactive": 31,
+  "confidence": "medium"
+ },
+ "Young Kim": {
+  "member": "Young Kim",
+  "pessimism": 15,
+  "anxiety": 10,
+  "depression": 6,
+  "volatility": 6,
+  "reactive": 16,
+  "confidence": "medium"
+ },
+ "Yvette Clarke": {
+  "member": "Yvette Clarke",
+  "pessimism": 38,
+  "anxiety": 41,
+  "depression": 28,
+  "volatility": 20,
+  "reactive": 31,
+  "confidence": "medium"
+ },
+ "Zachary Nunn": {
+  "member": "Zachary Nunn",
+  "pessimism": 32,
+  "anxiety": 30,
+  "depression": 20,
+  "volatility": 15,
+  "reactive": 29,
+  "confidence": "medium"
+ },
+ "Earl Carter": {
+  "member": "Earl Carter",
+  "pessimism": 72,
+  "anxiety": 58,
+  "depression": 45,
+  "volatility": 28,
+  "reactive": 35,
+  "confidence": "high",
+  "amendment": "coverage-extension 2026-07-17 (Paul-authorized; verbatim round-7b rubric; direct-API temp0 transport)"
+ },
+ "Henry Johnson": {
+  "member": "Henry Johnson",
+  "pessimism": 48,
+  "anxiety": 42,
+  "depression": 35,
+  "volatility": 22,
+  "reactive": 28,
+  "confidence": "high",
+  "amendment": "coverage-extension 2026-07-17 (Paul-authorized; verbatim round-7b rubric; direct-API temp0 transport)"
+ },
+ "Luis Correa": {
+  "member": "Luis Correa",
+  "pessimism": 52,
+  "anxiety": 48,
+  "depression": 38,
+  "volatility": 25,
+  "reactive": 32,
+  "confidence": "high",
+  "amendment": "coverage-extension 2026-07-17 (Paul-authorized; verbatim round-7b rubric; direct-API temp0 transport)"
+ }
+}

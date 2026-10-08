@@ -83,7 +83,7 @@ reserve_text <- substr(fec_api_text, reserve_start, reserve_end - 1L)
 stopifnot(
   grepl("PRAGMA journal_mode=WAL", lane_text, fixed = TRUE),
   grepl(
-    "startup_jitter_seconds <- lane_startup_delay(lane_number)",
+    "startup_jitter_seconds <- (lane_index - 1L) * 0.25",
     lane_text,
     fixed = TRUE
   ),

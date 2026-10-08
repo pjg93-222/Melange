@@ -1,0 +1,870 @@
+[
+ {
+  "i": 1,
+  "member": "Richard Durbin",
+  "date": "2011-10-04",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "Interchange",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/bank-of-america-backlash"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   100625
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 488,
+  "text": "The Wall Street Journal published a story on Friday and they had one of their people that they invited in to comment. He said that this new bank fee that is being charged by Bank of America on debit cards is the \"Durbin fee\" -- the \"Durbin fee.\" The same thing was said by the Chicago Tribune on Saturday. Let me say at the outset, that I am honored to be associated with an effort to reduce costs to retailers and consumers across America. Bank of America customers, vote with your feet.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 2,
+  "member": "Mitch McConnell",
+  "date": "2013-01-26",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://hughhewitt.com/senator-mitch-mcconnell-on-the-senate-filibuster-reform-rules-and-the-d-c-circuit-court-decision-today"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   99450
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 413,
+  "text": "It would have been a significant decision even if it were a little bit less broad, but it’s a very broad decision, and the practical implications of this, just for the two agencies that I mentioned, the NLRB, the National Labor Relations Board, and the CFPB, the Consumer Financial Protection Board, could well mean, likely will mean that any action they took this year is inoperative, ineffective, null and void.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 3,
+  "member": "Mitch McConnell",
+  "date": "2013-01-26",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://hughhewitt.com/senator-mitch-mcconnell-on-the-senate-filibuster-reform-rules-and-the-d-c-circuit-court-decision-today"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   99453
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 497,
+  "text": "Boy, this court didn’t have any reluctance at all. And for those who have been, you know, who thought Dodd-Frank was a mistake, you know, there’s a good chance that people all over America will be going to court, that the regulations that have been issued by the director of the CFPB will be considered invalid decisions by the National Labor Relations Board, which has been a runaway board anyway, their decisions this year will probably be considered invalid. This is hugely, hugely significant.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 4,
+  "member": "Ted Cruz",
+  "date": "2016-02-29",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/trump-fires-back-at-critics-as-super-tuesday-nears-cruz-urges-unity-to-beat-trump"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   248593
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 533,
+  "text": "Now, all of those you can do immediately. I also will instruct the Department of Education that Common Core ends today. All of that can happen instantly. The next step is pulling back regulations, pulling back the EPA, pulling back the BLM, pulling back the CFPB, all of the government regulators. A president can do that immediately. Now, what takes longer is passing legislation. And the two big legislative initiatives I'm campaigning on are repealing every word of ObamaCare, and passing a simple flat tax and abolishing the IRS.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 5,
+  "member": "Maxine Waters",
+  "date": "2016-12-27",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/amb-oren-israel-was-hurt-by-this-appalling-resolution-do-american-muslims-need-to-speak-out-against-radical-islam"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   99924
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 320,
+  "text": "I have no intention of pretending everything's all right, that we're going to work together. For me, as the ranking member of the Financial Services committee, where he said he's going to bring down Dodd-Frank and he's going to get rid of the Consumer Financial Protection Bureau, I will fight him every inch of the way.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 6,
+  "member": "Nancy Pelosi",
+  "date": "2017-02-05",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.nbcnews.com/meet-the-press/meet-press-02-05-17-n717011"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   103678
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 531,
+  "text": "And what did he do right from the start is go right to his friends in Wall Street. And this is Super Bowl Sunday. So let's give a scorecard. Right away he said-- his people said they were going to overturn Dodd-Frank, that they were going to do away with the Consumer Financial Protection Bureau, that they were going to do away with the Fiduciary Rule, all of the things that protect consumers, retail investors, taxpayers. They showed whose side that they were on. So they're about trickle-down economics. We're about trickle-up.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 7,
+  "member": "Elizabeth Warren",
+  "date": "2017-10-25",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.ms.now/transcript/2017-10-25-msna1033291"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   263846
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 524,
+  "text": "And we better show them some return on their investment or they won`t invest in the next election. That`s how the game is rigged in Washington. All of those families, all those veterans, all those active duty service members who said please keep the Consumer Financial Protection Bureau Rule, please hang on to that rule because that rule gives me a chance to have a day in court, that rule gives me a chance to hold some bank accountable when they cheat me. The Republicans couldn`t even hear them, couldn`t even hear them.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 8,
+  "member": "John Thune",
+  "date": "2017-11-26",
+  "stance": "support",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/carly-fiorina-on-sexual-harassment-claims-rocking-washington"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   119907
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 502,
+  "text": "I think Mick Mulvaney will be in charge. And I think very much it sounds like now the Justice Department has come out in support of the president's position on this. Ultimately this may end up in court. But the CFPB was created as an agency, Chris, in the first place that had very little accountability, very little transparency, really no oversight to Congress, and it's an agency that needs to be reformed. So I expect that Mick Mulvaney will be on the job and he'll be calling the shots over there.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 9,
+  "member": "Jamie Raskin",
+  "date": "2017-11-27",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/sen-lankford-i-want-to-be-able-to-get-to-yes-on-tax-bill"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   236664
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 220,
+  "text": "The appointment of the OMB director, temporarily as acting director of the CFPB is a naked effort to destroy the independence of the bureau and to neutralize it as a proactive force for consumers in the financial sector.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 10,
+  "member": "Kirsten Gillibrand",
+  "date": "2018-04-26",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://www.ms.now/transcript/2018-04-26-msna1095321"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   264906
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 970,
+  "text": "Well, unfortunately, President Trump said he would drain the swamp. He has filled it up. And he`s putting in place people in his cabinet that are directly opposed to the agencies they`re supposed to be running. Look at Mick Mulvaney, for example. You know, head of the CFPB. He`s supposed to be protecting consumers. And we hear that he`s bragging to bankers and bank lobbyists that the way to get access is to give money, and that`s how he conducted himself as a member of congress, which is one of the reasons why I dropped a bill today to have postal banking, to try to unwind and get rid of some of the most predatory practices that payday lenders have right now. And he was somebody vastly supported by payday lenders. So, it`s a question of judgment. He`s got people around him that aren`t doing the mission of the agencies they`re supposed to be running. Mick Mulvaney gave that speech to bankers. Afterwards your colleague Sherrod Brown called for him to resign.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 11,
+  "member": "Nancy Pelosi",
+  "date": "2019-05-23",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "Fraud Prevention;Defense Credit Union Issues",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/ath/date/2019-05-23/segment/01"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   196145
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 644,
+  "text": "Today, in the same legislation that contains the kitty tax act, the tax fix, to fix what the Republicans did in their tax scam, we're passing the secure act. We're passing strong measures to help workers have a secure retirement. And yesterday, Congressman Waters' Consumer First Act, reversing the administration's destruction of the consumer bureau, which the consumer bureau returned nearly $12 billion to 30 million seniors, servicemembers, and veterans before being gutted by the Trump administration. [11:15:12] Also to honor our oath, we're hoping to have a disaster supplemental bill passed before we leave for the district work period.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 12,
+  "member": "Bernard Sanders",
+  "date": "2019-06-16",
+  "stance": "support",
+  "tier": "gold",
+  "cats": "CU-Bank Competitive Dynamics",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/sen-bernie-sanders-says-employer-sponsored-insurance-would-end-under-his-plan"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   234737
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 539,
+  "text": "A lot of electric departments all over this country are publicly owned. Do I believe that workers should have more say and be sitting on the boards of large corporations? Yes, I do. Do I believe that we should break up some of the major banks on Wall Street and support credit unions and community banks? Yes, I do. So, I think really one of the things we have to look at is the fact that power in this country rests with just a handful of people. You've got six financial institutions that have assets equivalent to 54 percent of the GDP.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 13,
+  "member": "Sam Liccardo",
+  "date": "2019-11-07",
+  "stance": "support",
+  "tier": "gold",
+  "cats": "General Credit Union",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.pbs.org/newshour/show/could-selling-pge-to-its-customers-help-solve-californias-power-problems"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   255262
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 551,
+  "text": "Well, I certainly am not going to be running the utility, and I don't want any elected officials on the board either. We see plenty of examples of customer-owned businesses, particularly the financial industry, for example, credit unions or mutual insurance companies, that are very competently run. They simply have, as their boss, the customers. And this is not a new concept in the utility context either. There are hundreds of customer-owned utilities in this country. Most of them are very small and rural, but there are some larger ones as well.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 14,
+  "member": "Roger Marshall",
+  "date": "2020-01-15",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "General Credit Union",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.c-span.org/program/washington-journal/representative-roger-marshall-on-us-china-trade/539397"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   316540
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 515,
+  "text": "THE FARMERS WERE HURT MORE THAN ANYBODY ELSE FOR THE PAST TWO YEARS ON THE TRADE TARIFFS. SHORT-TERM PAIN WE ARE TALKING ABOUT. EVERY TIME I GO BACK. THEY SAY THANKS FOR THE HELP THEY GOT. EVERY TIME I TALK TO THE BANKS, CREDIT UNIONS, THEY ARE SAYING THE FEDERAL GOVERNMENT HELPED A LOT OF FARMERS THROUGH THESE TOUGH TIMES. I THINK THE SMALL FARMER BENEFITED AS WELL AS SOME OF THE LARGER. YOU CANNOT MAKE IT AGRICULTURALLY WITH A 168 ACRE FARM. A LOT OF THESE FAMILIES HAVE COME TOGETHER SO THE FARMS ARE LARGER.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 15,
+  "member": "James Risch",
+  "date": "2020-02-23",
+  "stance": "support",
+  "tier": "gold",
+  "cats": "General Credit Union",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.foxnews.com/transcript/tom-steyer-on-performance-in-nevada-expectations-for-south-carolina"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   245771
+  ],
+  "overlap_affected": [
+   245771
+  ],
+  "passage_tags": [
+   [
+    54,
+    "WALLACE (voice over)"
+   ]
+  ],
+  "after": [
+   {
+    "rowid": 245771,
+    "first_tag": "WALLACE (voice over)",
+    "tag_at_norm": 53,
+    "passage_at_norm": 0,
+    "starts_after": false
+   }
+  ],
+  "nchars": 209,
+  "text": "Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.",
+  "verdict": "FOREIGN TAG INSIDE PASSAGE"
+ },
+ {
+  "i": 16,
+  "member": "Tammy Duckworth",
+  "date": "2020-04-17",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "Member Business Lending",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://www.ms.now/transcript/2020-04-17-msna1349821"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   271290
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 802,
+  "text": "We need to make sure that we know who is getting back into the economy, whether those people are safe or whether, you know, whether or not they have the virus or whether or not if we have the antibody test, whether or not they`ve had the virus, and then we need contact tracing to make sure that we know where folks are who have been in contact with others, with the virus. We need more money for small businesses. If you`re a small business and you have been banking with a small credit union, or a co-op or something like that, you missed out on this money that went out for small businesses. I want to make sure that if we are going to move the economy forward, we do it in a methodical way and we don`t do it in such a way that in two weeks or a month we`ll have to shut everything back down again.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 17,
+  "member": "Charles Schumer",
+  "date": "2020-04-28",
+  "stance": "support",
+  "tier": "gold",
+  "cats": "General Credit Union",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.pbs.org/newshour/show/schumer-senate-shouldnt-return-just-for-hearings-on-crony-judge"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   255958
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 542,
+  "text": "The bottom line is that Secretary (AUDIO GAP) to instruct the banks to not go for big boys and their former -- and their big clients, but to small -- small, little businesses like Ms. Goslin. And what we did in COVID 3.5, which is just happening now, we walled off $125 billion that can't go to the big boys, that goes to minority banks, that goes to small banks, that goes to credit unions, that goes to rural areas. We need to make sure the administration gets this money out. And just let me make one more point. One of the big problems...",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 18,
+  "member": "Adriano Espaillat",
+  "date": "2020-07-23",
+  "stance": "support",
+  "tier": "gold",
+  "cats": "CU-Bank Competitive Dynamics",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.c-span.org/program/washington-journal/representative-adriano-espaillat-on-coronavirus-relief-legislation/549971"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   316913
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 787,
+  "text": "CERTAINLY, WE WOULD LIKE TO SEE A BIGGER CARVEOUT FOR COMMUNITY BANKS AND THE CREDIT UNIONS THAT HAVE A LONG-STANDING RELATIONSHIP WITH SMALL BUSINESSES ON MAIN STREET, AND WE WANT TO SEE MAIN STREET HELP. IN THE PAST WE HAVE BAILED OUT WALL STREET, WE BAILED OUT THE AIRLINE INDUSTRY. I THINK MAIN STREET DESERVES TO GET AN INJECTION OF OXYGEN IN THEIR ECONOMY. THEY ARE THE BIGGEST REPORTERS IN THE COUNTRY AND AS SUCH, THEY ARE HAVING A ROUGH TIME REOPENING. WE NEED TO HELP OUT. WE CARVEOUT A BIGGER PERCENTAGE OF THE FUNDING FOR THESE COMMUNITY-BASED BANKS AND CREDIT UNIONS, WE ARE GUARANTEEING THAT THE MONEY IS GOING TO GO WHERE IT MAKES THE MOST SENSE, MAIN STREET, SMALL BUSINESSES, TO THE MOM-AND-POP STORES. THE PEOPLE THAT HAVE A LONG-STANDING RELATIONSHIP WITH COMMUNITIES.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 19,
+  "member": "Sheldon Whitehouse",
+  "date": "2020-10-13",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cnr/date/2020-10-13/segment/08"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   214292
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 769,
+  "text": "They don't wind their way to the court, Your Honor, they get shoved to the court by these legal groups, many of which asked to lose below, so they can get quickly to the court to get their business done there. And then they turn up in an chorus, an orchestrated chorus of any key. Now I've had a chance to have a look at this. And I was in a case actually, as an anarchist myself, the Consumer Financial Protection Board case. And in that case, there were one, two, three, four, five, six, seven, eight, nine, 10, 11 Amicus briefs filed. And every single one of them was a group funded by something called Donors Trust. Donors Trust is a gigantic identity scrubbing device for the right wing, so that it says Donors Trust is the donor without whoever the real donor is.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 20,
+  "member": "Sheldon Whitehouse",
+  "date": "2020-10-13",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cnr/date/2020-10-13/segment/08"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   214292
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 933,
+  "text": "That seems weird to me when you have Amicus briefs coming in little flotillas that are funded by the same groups but nominally separate in the court. So actually attach this to my brief as an appendix. Center for Media and Democracy saw it and they did better work. They went on to say which foundations funded the brief writers in that CFPB case. Here's the Bradley Foundation for 5.6 million to those groups. Here's Donors Trust, 23 million to those brief writing groups. The grand total across all the donor groups was $68 million to the groups that were filing Amicus briefs, pretending that they were different groups. And it's not just in the Consumer Financial Protection Board case. You might say, well, that was just a one off. Here's Janus, the anti- labor case that had a long trail through the court through Friedrichs and through Knox and through other decisions. And SourceWatch and ProPublica did some work about this.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 21,
+  "member": "Elizabeth Warren",
+  "date": "2021-05-27",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/es/date/2021-05-27/segment/03"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   219820
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 251,
+  "text": "You are the star of the overdraft show. Your bank, JPMorgan, collects more than seven times as much money in overdraft fees per account than your competitors. So, Mr. Dimon, how much did JPMorgan collect in overdraft fees from their consumers in 2020?",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 22,
+  "member": "Elizabeth Warren",
+  "date": "2021-05-27",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/es/date/2021-05-27/segment/03",
+   "https://www.foxnews.com/transcript/your-world-on-bidens-infrastructure-plan-san-jose-mass-shooting"
+  ],
+  "npkgs": 2,
+  "overlap_rows": [
+   219820,
+   253948
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 93,
+  "text": "Mr. Diamond, how much did J.P. Morgan collect in overdraft fees from their consumers in 2020?",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 23,
+  "member": "Judy Chu",
+  "date": "2023-01-11",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CU-Bank Competitive Dynamics",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://www.c-span.org/program/washington-journal/rep-judy-chu-on-republican-efforts-to-rescind-irs-funding-and-congressional-news-of-the-day/622600"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   319674
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 496,
+  "text": "URN THOSE LOANS. THEY WERE SHAMED INTO DOING THAT. THIS IS WHY WE IN THE SMALL BUSINESS COMMITTEE GIVE A $60 BILLION SET-ASIDE IN THE PPP LOAN SO THAT THE FINANCIAL INSTITUTIONS THAT HAVE THE CLOSEST RELATIONSHIP WITH THE MOST VULNERABLE BUSINESSES, CREDIT UNIONS, COMMUNITY BANKS, THEY WERE ABLE TO GET THE LOANS TO THOSE WHO HAD THE GREATEST NEED, LIKE VETERANS, PEOPLE OF COLOR, WOMAN, AND THOSE IN UNDERSERVED COMMUNITIES. AS A RESULT, THE BOOK OF THE PPP LOANS THEY GO TO THOSE MOST IN NEED.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 24,
+  "member": "Elizabeth Warren",
+  "date": "2023-02-22",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform;Credit Card & Consumer-Fee Mandates",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.pbs.org/newshour/show/sen-elizabeth-warren-on-the-economy-immigration-and-how-to-shore-up-social-security"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   258395
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 877,
+  "text": "Well, so I'm going to push back on this just a little bit. I'm not sure we need a bill for much of this. I want to applaud the agencies that are starting to step up in this area. The Consumer Financial Protection Bureau has stepped up and said, what do you mean you're charging $30 for a late credit card fee -- credit card payment? There's not much additional risk associated with that. I think that should be down around $8. How it is that the banking regulators are stepping up and pressure from Congress, so that they are reducing the charges on check overdrafts. Department of Transportation, come on, step up on this idea of charging fees for families to be able to sit together. So I want to start with the notion that a lot of these junk fees basically fit under the idea that there's one advertised price for the service or for the good. Same thing with hotels, right?",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 25,
+  "member": "Al Green",
+  "date": "2025-02-06",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.c-span.org/program/washington-journal/rep-al-green-on-pres-trumps-proposal-for-a-us-takeover-of-gaza/655418"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   322165
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 813,
+  "text": "I DON'T KNOW IF THAT EXCUSES ME IN ANY WAY. THE PRESIDENT OF MEXICO SAID THEY WOULD NOT PAY FOR THE WALL AND THEY DIDN'T. I THINK THAT THE PRESIDENT IN SAYING HE'S GOING TO DO THESE THINGS LIKE ILLUMINATE THE DEPARTMENT OF EDUCATION IN SOME WAY, THE DEPARTMENT -- THE FINANCIAL PROTECTION BUREAU. CONSUMERS HAVE AN AGENCY DEVOTED TO PROTECTING THEM. MY REPUBLICAN COLLEAGUES ON A DAILY BASIS ARE DOING ALL THAT THEY CAN TO LEMONADE THAT AGENCY. THE PRESIDENT IS CONSPIRING WITH THEM TO GET IT DONE. I'M GOING TO TRY TO PROTECT CONSUMERS AND THE CONSUMER FINANCIAL PROTECTION BUREAU. WE NEED THE DEPARTMENT OF EDUCATION. THESE ARE IMPORTANT TO THE COUNTRY. WE ALSO NEED TO MAKE SURE THE PRESIDENT IS NOT THE PERSON WHO GIVES ORDERS TO THE CIA AND FBI AND PREVENT THEM -- TO PREVENT THEM FROM LOOKING INTO HIS PAST.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 26,
+  "member": "Bill Hagerty",
+  "date": "2025-02-09",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.cbsnews.com/news/face-the-nation-full-transcript-02-09-2025/"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   92994
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 362,
+  "text": "So, I have had significant conversations with Russ Vought, who is our new OMB director. The CFPB has been out of control for some time. The way it's designed, I think, is unconstitutional. It has no oversight. It's been basically a reckless agency that's been allowed to go way beyond any mandate that I think was originally intended. So it's time to rein it in.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 27,
+  "member": "Andy Kim",
+  "date": "2025-02-11",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://www.pbs.org/newshour/show/democratic-sen-andy-kim-explains-why-he-thinks-u-s-is-nearing-a-constitutional-crisis"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   146805
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 493,
+  "text": "In fact, Marco Rubio, when he was a senator, was a strong supporter, said that USAID is not charity, that this is a part of our national interest and our national security. So that's the kind of information the American people need to hear about this. I am pushing forward on that because I used to work there. Other Democratic leaders will lean in on whether it's CFPB, FEMA, Department of Education, other aspects. Each of us can be able to engage and tell that story to the American people.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 28,
+  "member": "Elizabeth Warren",
+  "date": "2025-02-11",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cnc/date/2025-02-11/segment/08"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   74319
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 145,
+  "text": "If the CFPB is not there examining these giant banks to make sure they are following the laws, are not cheating consumers, who is doing that job?",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 29,
+  "member": "Elizabeth Warren",
+  "date": "2025-02-11",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cnr/date/2025-02-11/segment/24"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   74324
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 143,
+  "text": "If the CFPB is not there examining these giant banks to make sure they are following the laws on not cheating consumers, who is doing that job?",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 30,
+  "member": "Elizabeth Warren",
+  "date": "2025-02-11",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "Fraud Prevention;CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.npr.org/transcripts/nx-s1-5293105"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   98591
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 244,
+  "text": "No more cop on the beat looking out for your grandma whose bank account has just been taken over by a scammer. No more cop on the beat looking out for people getting ripped off by giant credit card companies that are charging illegal junk fees.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 31,
+  "member": "Chris Van Hollen",
+  "date": "2025-02-12",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "Fraud Prevention;CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cnr/date/2025-02-12/segment/25"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   74360
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 654,
+  "text": "There is a common theme to what's going on across all these agencies, and that is that President Trump has illegally installed Elon Musk to conduct a raid on U.S. government agencies, not for the purpose of efficiency, but for the kind of purposes that you've seen. For example, they now have access to the personal private data of millions of Americans. They told the folks at the Consumer Financial Protection Bureau, these are the cops on the beat to look out for consumers when they're scammed, they told them not to come to work. That means more scammers can take advantage of the American people. The common theme is implementation of Project 2025.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 32,
+  "member": "Glenn Ivey",
+  "date": "2025-02-13",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.c-span.org/program/washington-journal/rep-glenn-ivey-on-trump-administration-actions-and-democrats-response/655747"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   322264
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 511,
+  "text": "THE ISSUE POTENTIALLY THAT WAS RAISED WITH RESPECT TO THE CONSUMER PROTECTION BOARD, THAT WAS JUST SHUTTERED, OR THEY ARE TRYING TO SHUT DOWN, WAS THAT HE HAS AN INTEREST IN MOVING FORWARD IF A BUSINESS INTEREST THAT COULD BE REGULATED OR LIMITED BY WHAT THE CFPB DOES, AND THEY WANTED TO GET IT OUT OF THE WAY. I DON'T KNOW IF THAT IS TRUE OR NOT, BACK TO MY ORIGINAL POINT OF VETTING THESE PEOPLE. WE NEED TO MAKE SURE WE KNOW WHAT INTERESTS HE HAS GOT, WHAT CONFLICTS THERE MIGHT SO WE CAN SEPARATE THAT OUT.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 33,
+  "member": "Jamie Raskin",
+  "date": "2025-02-16",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform;Credit Card & Consumer-Fee Mandates",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://www.cbsnews.com/news/face-the-nation-full-transcript-02-16-2025/"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   93098
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 754,
+  "text": "They have to notify Congress first, 30 days in advance, and they have to set forth the specific reasons for why an inspector general is being fired. They never did that. And the reason, of course, is because they want to pursue agendas of corruption across the board. They're saying they're not going to enforce the Foreign Corrupt Practices Act. They are shutting down the Consumer Financial Protection Bureau, which has saved American consumers $31 million in bank overdraft charges, credit card late fees from corporations completely inflated and having nothing to do with the actual charges and so on. They're getting rid of anything in the government that supports consumers, that supports citizens against the rip-off artists who are their friends.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 34,
+  "member": "Bernard Sanders",
+  "date": "2025-02-25",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cg/date/2025-02-25/segment/02"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   74707
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 446,
+  "text": "Well, Jake, my response is that you have a government run by oligarchs who concern them up, making the very wealthy and large corporations even richer. So you should not be surprised that they're going to defang completely the Consumer Financial Protection Board, which has saved consumers billions of dollars, taking on the illegal activities of banks and large corporations. No surprise there. This will continue to happen every day. [17:20:09]",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 35,
+  "member": "Elizabeth Warren",
+  "date": "2025-02-28",
+  "stance": "oppose",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": true,
+  "in_use_why": "",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/cnc/date/2025-02-28/segment/01"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   74869
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 474,
+  "text": "Literally, while you've been sitting here and you've been talking about the importance of following the law, we get the news that the CFPB is dropping lawsuits against companies that are cheating American families or alleged to be cheating American families. They will not go forward in court. It seems to me the timing of that announcement is designed to embarrass you and to show exactly who is in charge of this agency right now, Elon Musk and his little band of hackers.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 36,
+  "member": "Rand Paul",
+  "date": "2025-09-28",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "CFPB Issues & Structural Reform",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://www.cbsnews.com/news/face-the-nation-full-transcript-09-28-2025/"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   95285
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 496,
+  "text": "For hiring and firing people in the executive branch, I think he has a great deal of leeway. The court has upheld this repeatedly. And so I suspect they will. Even when Congress – the Democrats tried to protect this agency called the Consumer Financial Protection board. And they say, well, the funding will come from the Fed, you won't get to vote on the funding and the person hired can't be fired. Well, he did fire that person in 2020. And the courts upheld that in 2021 in the Supreme Court.",
+  "verdict": "CLEAN"
+ },
+ {
+  "i": 37,
+  "member": "John Fetterman",
+  "date": "2025-11-12",
+  "stance": "neutral",
+  "tier": "gold",
+  "cats": "General Credit Union",
+  "in_use": false,
+  "in_use_why": "neutral/unrelated stance (SIGN=0)",
+  "pkgs": [
+   "https://transcripts.cnn.com/show/acd/date/2025-11-12/segment/01"
+  ],
+  "npkgs": 1,
+  "overlap_rows": [
+   84482
+  ],
+  "overlap_affected": [],
+  "passage_tags": [],
+  "after": [],
+  "nchars": 629,
+  "text": "And now, people are going to realize, if you think shutting our government down is the right solution, we'll have that opportunity to do that in January. And I've encountered plenty of people, hey, I haven't been paid in five weeks. All the unions that have directly impacted by this shutdown, they've had to borrow almost $0.5 billion from their credit union just to pay their bills. We're getting paid. We're not getting touched in the same directly way that so many people in Americans are being doing that. And now, thankfully, my family is not in SNAP, but my wife works closely with people that suffer from food insecurity.",
+  "verdict": "CLEAN"
+ }
+]

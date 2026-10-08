@@ -1,0 +1,761 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H1387E6DDE0AE4E7DBF80A7BDD995A86D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8890 IH: Enhancing Clinical Laboratory Innovation and Access Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-05-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8890</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260519">May 19, 2026</action-date><action-desc><sponsor name-id="D000628">Mr. Dunn of Florida</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Public Health Services Act, commonly referred to as the <quote>Clinical Laboratory Improvement Amendments</quote> or <quote>CLIA</quote>, with respect to laboratory developed tests, and for other purposes.</official-title></form><legis-body id="H66DCDBA56ACD402C960FE9EF4E24680A" style="OLC"> 
+<section id="HF9C261369B3A4EB49E24F76962BB119F" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Enhancing Clinical Laboratory Innovation and Access Act of 2026</short-title></quote> or the <quote><short-title>Enhancing CLIA Act of 2026</short-title></quote>.</text></section> 
+<section id="HC8ABB41EC8744450B188B5780C6D0459"><enum>2.</enum><header>Enhanced regulation of laboratory developed tests</header> 
+<subsection id="HFC1D485EF6B7487196F0C562B241E9EC">
+        <enum>(a)</enum>
+        <header>Amendments to the public health services act, commonly referred to as the
+            <quote>clinical laboratory improvement amendments</quote> or <quote>clia</quote>
+        </header>
+ <text display-inline="yes-display-inline">Section 353 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a</external-xref>) is amended—</text>
+        <paragraph id="HD2E8B5996AD44A93BD612367CF90CE7E">
+          <enum>(1)</enum>
+ <text>by striking subsection (a) and inserting:</text> <quoted-block style="USC" id="H77C793D39E584F5EBC72E51288144311" display-inline="no-display-inline"> <subsection id="H180455CA286E44DA81FE08C44BF3CCF5"> <enum>(a)</enum> <header>Scope of authority; definitions</header> <paragraph id="H65A01EA0CB1B447386B4A8AB19F59E5F"> <enum>(1)</enum> <header>Scope of authority</header> <text display-inline="yes-display-inline">Laboratory operations shall be regulated by the Secretary under this section and not under the Federal Food, Drug, and Cosmetic Act (21 U.S.C. 301 et. seq.).</text>
+              </paragraph>
+              <paragraph id="H19161EB375AF44C9B5F2A6B02E2D6DC0">
+                <enum>(2)</enum>
+                <header>Definitions</header>
+ <text>In this section:</text> <subparagraph id="HB2C09549B52F48B8B1EEBC5AB0C98CEF"> <enum>(A)</enum> <header>Analytical validity</header> <text>The term <term>analytical validity</term> means, with respect to an examination or procedure performed by a laboratory, the ability of the examination or procedure to provide information that is accurate and reliable with respect to the identification, measurement, detection, or calculation of the target analyte in a specimen, within a reportable range.</text>
+                </subparagraph>
+                <subparagraph id="HCA859D0768BA438FBD1D8F59C38AAB8C">
+                  <enum>(B)</enum>
+                  <header>Applicable standard</header>
+ <text>The term <term>applicable standard</term> means—</text> <clause id="H438DFD0E2A2A4E97B56A1304CCA570A1"> <enum>(i)</enum> <text>for a laboratory developed test for clinical use, that the test has a reasonable assurance of analytical and clinical validity; and</text>
+                  </clause>
+                  <clause id="H9105A687618B4213B0637B6D8249B66E">
+                    <enum>(ii)</enum>
+ <text>for a laboratory developed test for investigational use, that the test has a reasonable assurance of analytical validity.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H2693E9891F994080B2297F466011A8E4">
+                  <enum>(C)</enum>
+                  <header>Clinical use</header>
+ <text>The term <term>clinical use</term>—</text> <clause id="H6DCC881C186E4949B53CE42A4AF1A88A"> <enum>(i)</enum> <text>means that an examination or procedure is used for the purpose of providing information for the diagnosis, prognosis, identification, monitoring, screening, prevention, or treatment of any disease or impairment of, or the assessment of the health of, human beings; and</text>
+                  </clause>
+                  <clause id="H5EC859587D1740EBA828D66F1FE12B07">
+                    <enum>(ii)</enum>
+ <text>does not include—</text> <subclause id="HBBD66464CF8B4FAA8CC017B78410F2BC"> <enum>(I)</enum> <text>investigational use;</text>
+                    </subclause>
+                    <subclause id="HDFBB971AA00D47D6A0792C37A5259494">
+                      <enum>(II)</enum>
+ <text>research use; or</text> </subclause> <subclause id="HD15B70D819FA41F19C4DF2DDB5932423"> <enum>(III)</enum> <text>forensic use.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HCC891929F515452D88A2E23AA8326828">
+                  <enum>(D)</enum>
+                  <header>Clinical validity</header>
+ <text>The term <term>clinical validity</term> means, with respect to an examination or procedure performed by a laboratory, the ability of the examination or procedure to provide information that is accurate and reliable for its stated clinical purpose.</text>
+                </subparagraph>
+                <subparagraph id="H2C80D21B19EE4177B76FED8C02A5FCA2">
+                  <enum>(E)</enum>
+                  <header>Digital laboratory data</header>
+ <text>The term <term>digital laboratory data</term>—</text> <clause id="H3C70C374C5C64F7EAA47C45926C3582D"> <enum>(i)</enum> <text>means digital data derived from a laboratory examination or procedure performed by a laboratory on materials taken or derived from the human body, including—</text>
+                    <subclause id="HC19DF905DCC9470F9F07FDF3607B3AF3">
+                      <enum>(I)</enum>
+ <text>a digital image derived from a glass slide;</text> </subclause> <subclause id="H1575E79C9A7B4874810333EA737E253C"> <enum>(II)</enum> <text>flow cytometry plots;</text>
+                    </subclause>
+                    <subclause id="H74522000D2D343B8B8910FA1926E482E">
+                      <enum>(III)</enum>
+ <text>cytogenetic karyograms;</text> </subclause> <subclause id="H1633F41E422B49C1A119765C6D9A7FBA"> <enum>(IV)</enum> <text>chromatographic, mass spectrometric, clinical chemistry, immunological, hematological and microbiological data;</text>
+                    </subclause>
+                    <subclause id="H8E52FB94855A4817B54499CD7276BA13">
+                      <enum>(V)</enum>
+ <text>electropherograms;</text> </subclause> <subclause id="HC924676342864849A4B58A481D0E13FC"> <enum>(VI)</enum> <text>gel images;</text>
+                    </subclause>
+                    <subclause id="H6C814069433F4A30AC8A5C1F6F871DC5">
+                      <enum>(VII)</enum>
+ <text>genetic expression, array and sequencing data; and</text> </subclause> <subclause id="H1BB190CE2C2B481B834073CF58AACE29"> <enum>(VIII)</enum> <text>subsequent analyses of such data; and</text>
+                    </subclause>
+                  </clause>
+                  <clause id="H3A9C90722CD6483EB1553BFF94CBE218">
+                    <enum>(ii)</enum>
+ <text>is patient-specific when it is accompanied by information that can be used to identify the individual from whose specimen the information was derived.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H5EF73797A6DC472D99DA7AD7A0F3C8BB">
+                  <enum>(F)</enum>
+                  <header>Investigational use</header>
+ <text>The term <term>investigational use</term> means, with respect to a laboratory developed test, that the test is used in a clinical investigation, at least 1 purpose of which is to gather data to establish the clinical validity of the test.</text>
+                </subparagraph>
+                <subparagraph id="HEE551E963A5A40C98F2E09BD1FDB2880">
+                  <enum>(G)</enum>
+                  <header>Laboratory; clinical laboratory</header>
+ <text>The term <term>laboratory</term> or <term>clinical laboratory</term> means a facility for the examination of materials taken or derived from the human body, including analysis of patient-specific digital laboratory data, for clinical use or investigational use.</text>
+                </subparagraph>
+                <subparagraph id="H629B21874A8249BFB31BBCDBD28DCB17">
+                  <enum>(H)</enum>
+                  <header>Laboratory developed test</header>
+ <text display-inline="yes-display-inline">The term <term>laboratory developed test</term>—</text>
+                  <clause id="HAD8C8351EA034F009262C5E4406DA850">
+                    <enum>(i)</enum>
+ <text>means an examination or procedure, including an examination or procedure that modifies an in vitro diagnostic device regulated under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>), that is—</text>
+                    <subclause id="HD26B3EB910504C288F333E77A195E26F">
+                      <enum>(I)</enum>
+ <text>developed in a clinical laboratory certified under this section to perform tests of high-complexity; and</text>
+                    </subclause>
+                    <subclause id="HF44B28B4200C4CA798F76415F3872533">
+                      <enum>(II)</enum>
+ <text>performed only within—</text> <item id="HB1D9DC40119B4E32B46AC0BE96D87AF8"> <enum>(aa)</enum> <text>the same clinical laboratory in which it was developed; or</text>
+                      </item>
+                      <item id="H70BB7F14D8DC454D8DAEBD1F743311AD">
+                        <enum>(bb)</enum>
+ <text>another clinical laboratory certified under this section to perform tests of high-complexity that is within—</text>
+                        <subitem id="H99BF238454E14BDBB3C3F11A6C7F8D12">
+                          <enum>(AA)</enum>
+ <text>the same corporate organization and has common ownership by the same parent corporation as the developing laboratory; or</text>
+                        </subitem>
+                        <subitem id="H5619462731BB465DBA5D018623A2F5CD">
+                          <enum>(BB)</enum>
+ <text>a public health laboratory network coordinated or managed by the Centers for Disease Control and Prevention or other Federal public health agency, if the developing laboratory is a public health laboratory or a laboratory managed by the Centers for Disease Control and Prevention or other Federal public health agency; </text>
+                        </subitem>
+                      </item>
+                    </subclause>
+                  </clause>
+                  <clause id="H1D792479222B45339D0F92500B5833DA">
+                    <enum>(ii)</enum>
+ <text>does not include a protocol for an examination or procedure that is commercially distributed for performance in laboratories not under common ownership by the same parent corporation as the laboratory that developed the protocol;</text>
+                  </clause>
+                  <clause id="H1DF7BDA8D1124E29BD73E3D95080AFAF">
+                    <enum>(iii)</enum>
+ <text>is not a medical device subject to regulation under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>), even if the laboratory developed test—</text>
+                    <subclause id="H2DEE561EE4254F2880B6E4B9F556D5CC">
+                      <enum>(I)</enum>
+ <text>modifies the use of a device that is lawfully marketed under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>);</text>
+                    </subclause>
+                    <subclause id="HEE6F58CDD9484376B306FBC03758BF94">
+                      <enum>(II)</enum>
+ <text>requires preparation or modification within the laboratory of equipment, reagents, instruments, software, or other materials for use within the laboratory;</text>
+                    </subclause>
+                    <subclause id="HBF376E31D17747949C3E574451A0AF1B">
+                      <enum>(III)</enum>
+ <text>includes processes, materials, research, or intellectual property developed by third parties if the developing laboratory remains responsible for compliance with applicable requirements for laboratory developed tests under this section; or</text>
+                    </subclause>
+                    <subclause id="H50C8139AF37C4EC8BC2E77A8B0B903C4">
+                      <enum>(IV)</enum>
+ <text>examines a specimen that was self-collected by an individual, regardless of the setting in which the specimen was collected; and</text>
+                    </subclause>
+                  </clause>
+                  <clause id="HFC9328A4A0824BF6BAD17DC36B031AA9">
+                    <enum>(iv)</enum>
+ <text>is performed in a laboratory described in clause (i)(II) even if software used in the test is executed outside of the laboratory.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H55D143C924CA442591464137B9C9A065">
+                  <enum>(I)</enum>
+                  <header>Laboratory operations</header>
+ <text>The term <term>laboratory operations</term>—</text> <clause id="H4BE7ED8309294DFCABA94F5AD7ACBB29"> <enum>(i)</enum> <text>means the conduct of examinations and other procedures on material taken or derived from the human body and associated activities, including analysis of patient-specific digital laboratory data, for a purpose described in subparagraph (E), including the development and performance of laboratory developed tests; and</text>
+                  </clause>
+                  <clause id="H5A797326C9394910A6CAA8C6963B4E4F">
+                    <enum>(ii)</enum>
+ <text>includes—</text> <subclause id="H2DECC898E98E414793C743CDE7D5EED7"> <enum>(I)</enum> <text>the preparation and transfer of equipment, reagents, instruments, software, or other materials between laboratories that are under common ownership by the same parent corporation; and</text>
+                    </subclause>
+                    <subclause id="H13E64E56CE1D4F108A5B8AB2CD017BA9">
+                      <enum>(II)</enum>
+ <text>the distribution of specimen collection kits for use with laboratory developed tests if the components of such specimen collection kits are intended to be used consistent with the established intended uses for which they may otherwise be lawfully distributed.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HA2003BE77DCC416BB26B409C68D61BF9">
+                  <enum>(J)</enum>
+                  <header>Performance specifications</header>
+ <text>The term <term>performance specification</term> means a value or range of values for a characteristic of an examination or procedure, such as accuracy, precision, analytical sensitivity, analytical specificity, reportable range, or other characteristic required for test performance.</text>
+                </subparagraph>
+                <subparagraph id="H9EC930CD5E0C467F944DAEC232C20915">
+                  <enum>(K)</enum>
+                  <header>Research use</header>
+ <text>The term <term>research use</term> means, with respect to a laboratory developed test, that the test’s purpose is solely for analytical development or scientific research, and not for use in making clinical decisions for individual patients.</text>
+                </subparagraph>
+              </paragraph>
+            </subsection>
+            <after-quoted-block>;</after-quoted-block>
+          </quoted-block>
+        </paragraph>
+        <paragraph id="H651A55D213AF40B485E21855D0CDA370">
+          <enum>(2)</enum>
+ <text>by adding at the end:</text> <quoted-block style="USC" id="HD15E66C83CDE410583169DCB9024E741" display-inline="no-display-inline"> <subsection id="H0CB1B5D0DE1142F08448E67B7715E3C2"> <enum>(r)</enum> <header>Laboratory developed tests</header> <paragraph id="HF0A7CA0DD1E74241962ABEC2EA495430"> <enum>(1)</enum> <header>Reasonable assurance of analytical and clinical validity of laboratory developed tests</header> <subparagraph id="HF379BD55947745C2843C43667FA58454"> <enum>(A)</enum> <header>Standard</header> <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, no laboratory may perform a laboratory developed test unless the test meets the applicable standard.</text>
+                </subparagraph>
+                <subparagraph id="H437E0382BE9547A2B7815671C967CBAE">
+                  <enum>(B)</enum>
+                  <header>Analytical validity</header>
+ <text>For purposes of meeting the applicable standard under this section, a laboratory developed test has a reasonable assurance of analytical validity if—</text>
+                  <clause id="H7A1EDA652CC8414CB083999D47E2203C">
+                    <enum>(i)</enum>
+ <text>the laboratory that develops the test establishes performance specifications that support the ability of the test to identify, measure, detect, calculate, or analyze 1 or more analytes, biomarkers, substances, or other targets intended to be identified, measured, detected, calculated, or analyzed by the test; and</text>
+                  </clause>
+                  <clause id="H6EF8CA21C10D4103864F5C3FBBE8C28E">
+                    <enum>(ii)</enum>
+ <text>the laboratory that performs the test, if different than the laboratory that develops the test, verifies such performance specifications prior to use.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H74CD898A7D3346C3ADD36AB31096EB79">
+                  <enum>(C)</enum>
+                  <header>Clinical validity</header>
+ <text>For purposes of meeting the applicable standard under this section, a laboratory developed test has a reasonable assurance of clinical validity if the laboratory that develops the test has documented evidence, which may include 1 or more of the following that supports the ability of the laboratory developed test to reliably and accurately achieve its stated purpose—</text>
+                  <clause id="H859D82C24A3B4A1392D4AFF5CE9006B2">
+                    <enum>(i)</enum>
+ <text>peer-reviewed literature;</text> </clause> <clause id="H2C10D44930394C888C679036900921AD"> <enum>(ii)</enum> <text>clinical guidelines;</text>
+                  </clause>
+                  <clause id="H82CD293330874DA08B301B07F370AF4E">
+                    <enum>(iii)</enum>
+ <text>bench studies;</text> </clause> <clause id="H699A7B5B2B9740AFA46FF4027DF9F2E1"> <enum>(iv)</enum> <text>case studies or histories;</text>
+                  </clause>
+                  <clause id="HE05026AAD8CD494F916B191F98826099">
+                    <enum>(v)</enum>
+ <text>consensus standards;</text> </clause> <clause id="H734241A365E34EAF999D6628E93C260D"> <enum>(vi)</enum> <text>reference standards;</text>
+                  </clause>
+                  <clause id="HB06D6A0CA2C64179A04D812BBF46BE5C">
+                    <enum>(vii)</enum>
+ <text>data registries;</text> </clause> <clause id="HA2DD53EB066A43A29B7F9031B7AA39F6"> <enum>(viii)</enum> <text>postmarket data;</text>
+                  </clause>
+                  <clause id="H3A40E8501A31447285E12CABD0B62671">
+                    <enum>(ix)</enum>
+ <text>real world data;</text> </clause> <clause id="H2FDAD366934743D1BA0164F8466B7BD9"> <enum>(x)</enum> <text>1 or more clinical validation studies; or</text>
+                  </clause>
+                  <clause id="H79E22BD1111E4B34A3C9583F6A66FFDF">
+                    <enum>(xi)</enum>
+ <text>other evidence deemed appropriate by the Secretary.</text> </clause> </subparagraph> <subparagraph id="HEA7DC3881C34460C81867A0E75CBEC6A"> <enum>(D)</enum> <header>Supplemental affirmation that standard has been met</header> <clause id="H0AF4F43EC92849E39201357F5B64AB67"> <enum>(i)</enum> <text>At any time, a laboratory may, but is not required to, obtain 1 or more supplemental affirmations that the laboratory developed test meets the applicable standard from a third party approved under subparagraph (E), pursuant to the process in subparagraph (F). Subject to clause (ii) of this subparagraph, such supplemental affirmation does not expire.</text>
+                  </clause>
+                  <clause id="H1F493A448F964AD887D4AE7FA27FF833">
+                    <enum>(ii)</enum>
+ <text>If a third party approved under subparagraph (E) has its approval withdrawn by the Secretary, a supplemental affirmation that a laboratory developed test meets the applicable standard issued by that third party shall remain in effect for no longer than the later of—</text>
+                    <subclause id="HC5424BA7BEF0404C9072A948B46D851D">
+                      <enum>(I)</enum>
+ <text>90 days after the date that a third party notifies a laboratory under subparagraph (E)(iv) that its approval has been withdrawn; or</text>
+                    </subclause>
+                    <subclause id="HDA19852884BC414794DD8C0713CACDBE">
+                      <enum>(II)</enum>
+ <text>if within 60 days of receiving the notification under subparagraph (E)(iv) the laboratory submits information to a different third party requesting a supplemental affirmation that the laboratory developed test meets the applicable standard, the date on which such approved third party determines whether the laboratory developed test meets the applicable standard under subparagraph (F)(i)(II).</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H36DDCF8AAC094BC19666DD520EE78FA3">
+                  <enum>(E)</enum>
+                  <header>Approved third parties</header>
+ <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, the Secretary shall approve third parties to provide a supplemental affirmation that a laboratory developed test meets the applicable standard if—</text>
+                  <clause id="H2D3AEC6E00874DBBAD26D5525D32DA8B">
+                    <enum>(i)</enum>
+ <text>the standards and procedures applied by the third party in determining whether the laboratory developed test meets the applicable standard are determined by the Secretary to be sufficiently risk-based, rigorous, and not overly burdensome;</text>
+                  </clause>
+                  <clause id="H44D228E68C954C77B4580CAA9BC991F0">
+                    <enum>(ii)</enum>
+ <text>in the case that the third party determines under subparagraph (F)(ii)(III)(cc) that the data and information provided by the laboratory demonstrates that the laboratory developed test does not meet the applicable standard, the laboratory developed test is being offered with false or deceptive claims, or that it is probable that the test will cause serious adverse health consequences, the third party agrees to notify the Secretary within 10 days of such determination unless the laboratory stops offering, and notifies the third party that it no longer offers, the laboratory developed test;</text>
+                  </clause>
+                  <clause id="H54901B9C69E747CCAC9037C7EA2F85B0">
+                    <enum>(iii)</enum>
+ <text>the third party agrees to notify the Secretary at least 30 days before it changes its standards and procedures for determining that a laboratory developed test meets the applicable standard; and</text>
+                  </clause>
+                  <clause id="H631B866B25C543ABA774C791CF309EEA">
+                    <enum>(iv)</enum>
+ <text>if the third party has its approval withdrawn by the Secretary, the third party agrees to notify each laboratory that obtained a supplemental affirmation that the applicable standard was met for any laboratory developed test of the withdrawal within 10 days of the withdrawal.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H066C8EE7DC424893B0B5129D0D95746A">
+                  <enum>(F)</enum>
+                  <header>Process for supplemental affirmation by approved third party</header>
+                  <clause id="H1E11357C82FE42528433A5469586F634">
+                    <enum>(i)</enum>
+ <text>If a laboratory submits information to a third party approved by the Secretary under subparagraph (E) requesting a supplemental affirmation that a laboratory developed test meets the applicable standard, the approved third party shall within 60 calendar days of receipt of the submitted information—</text>
+                    <subclause id="HF993A7C07DD843F8ABE190E37AFE7D9B">
+                      <enum>(I)</enum>
+ <text>review the submitted information, which may include communication with the laboratory; and</text>
+                    </subclause>
+                    <subclause id="H16BC89C98E3140D388A6DE555D8669D7">
+                      <enum>(II)</enum>
+ <text>determine whether the laboratory developed test meets the applicable standard and communicate such determination with the laboratory as described in clause (ii).</text>
+                    </subclause>
+                  </clause>
+                  <clause id="H1DA0077E61FC4739B2B37B61090672FA">
+                    <enum>(ii)</enum>
+ <text>The approved third party shall provide written notice to the laboratory of the approved third party’s determination under clause (i)(II) as follows:</text>
+                    <subclause id="HA7ABCF17BF69430F94BA3ED2A59E0B4B">
+                      <enum>(I)</enum>
+ <text>The approved third party shall notify the laboratory if the approved third party determines that the laboratory developed test—</text>
+                      <item id="HC2AB05AB0B90427FA90D6B2B4D43F433">
+                        <enum>(aa)</enum>
+ <text>meets the applicable standard; or</text> </item> <item id="H6D63C4779CA04FD7A0FC90B48D956408"> <enum>(bb)</enum> <text>does not meet the applicable standard and subclauses (II) and (III) do not apply.</text>
+                      </item>
+                    </subclause>
+                    <subclause id="HEE7C71CCC5724939888BE2592F43B88D">
+                      <enum>(II)</enum>
+ <text>If the approved third party determines that the laboratory developed test does not meet the applicable standard but that such determination may be resolved within a reasonable time—</text>
+                      <item id="HCC6E71EEA78842D08AFC12C796345382">
+                        <enum>(aa)</enum>
+ <text>the approved third party shall notify the laboratory of such determination and the reasons therefore, and allow the laboratory to seek a teleconference to discuss the finding;</text>
+                      </item>
+                      <item id="H44A73B3048E842C798F361CCA116C25C">
+                        <enum>(bb)</enum>
+ <text>the laboratory shall submit information demonstrating resolution of the determination within 60 days of receiving such notification; and</text>
+                      </item>
+                      <item id="H0E95E35A3CAB414EB2EDB606DC97E2D3">
+                        <enum>(cc)</enum>
+ <text>the approved third party shall make a determination within 30 days of the receipt of such submission of information as to whether the laboratory developed test continues not to meet the applicable standard.</text>
+                      </item>
+                    </subclause>
+                    <subclause id="H516C8F39C9094D3EA3D15B33A0CA1FBE">
+                      <enum>(III)</enum>
+ <text>If the approved third party determines that there is a lack of credible and verifiable information supporting that the laboratory developed test meets the applicable standard, the laboratory developed test is being offered with false or deceptive claims, or that it is probable that the test will cause serious adverse health consequences—</text>
+                      <item id="H6BD0B11DE4154FDA9561C2F2CB62F7E0">
+                        <enum>(aa)</enum>
+ <text>the approved third party shall notify the laboratory of such determination and the reasons therefore, and allow the laboratory to seek a teleconference to discuss the finding;</text>
+                      </item>
+                      <item id="HA0772C50C01748D1B7FF5DE8151CBA62">
+                        <enum>(bb)</enum>
+ <text>the laboratory shall submit information demonstrating resolution of the determination within 60 days of receiving such notification; and</text>
+                      </item>
+                      <item id="H00C2E8077EA2458E8D697BEC37B917F2">
+                        <enum>(cc)</enum>
+ <text>the approved third party shall make a determination within 30 days of the receipt of such submission of information as to whether such determination continues to apply.</text>
+                      </item>
+                    </subclause>
+                  </clause>
+                  <clause id="H830E66EDCAF3495FA09C00D8DE3A389A">
+                    <enum>(iii)</enum>
+ <text>In the case that the third party determines under subparagraph (F)(ii)(I)(bb) that a laboratory developed test does not meet the applicable standard, the laboratory may resubmit a request for supplemental affirmation by the same or different third party for review without prejudice at any time.</text>
+                  </clause>
+                  <clause id="H18143B11D7784250BF44D84F18F52F7E">
+                    <enum>(iv)</enum>
+ <text>In the case that the third party determines under subparagraph (F)(ii)(III)(cc) that there is a lack of credible and verifiable information supporting the analytical or clinical validity of the laboratory developed test, the laboratory developed test is being offered with false or deceptive claims, or that it is probable that the test will cause serious adverse health consequences—</text>
+                    <subclause id="H3DBB8F5709A14859BD5E0BA0CD55468A">
+                      <enum>(I)</enum>
+ <text>the third party will not notify the Secretary of such determination if the laboratory stops performing such laboratory developed test, and notifies the third party that it has stopped performing such laboratory test, within 10 days; and</text>
+                    </subclause>
+                    <subclause id="H4D9FCF71DC4245978B4A5D51E4F4A01F">
+                      <enum>(II)</enum>
+ <text>the laboratory may resubmit a request for supplemental affirmation by the same or different third party for review without prejudice at any time.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HCEA2A114F5C84D158E8755C10C73C2AE">
+                  <enum>(G)</enum>
+                  <header>Deemed supplemental affirmation</header>
+ <text>A laboratory developed test shall be deemed to have obtained a supplemental affirmation that it meets the applicable standard under subparagraph (D) if it is—</text>
+                  <clause id="H8CB572DCD39D47A5996DB01B99BEFE0F">
+                    <enum>(i)</enum>
+ <text>approved by the New York State Department of Health;</text> </clause> <clause id="H9CA7AB33A206422183656355EAA10B14"> <enum>(ii)</enum> <text>determined to be reasonable and necessary under Medicare pursuant to a favorable review of a technical assessment under the MolDX Program;</text>
+                  </clause>
+                  <clause id="H90F9887E2B7D423FB66BF7C9A90280AF">
+                    <enum>(iii)</enum>
+ <text>within a category of tests identified by the Secretary in regulation that shall be deemed to have obtained a supplemental approval.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HBB79C9C82EB2444D83AD6DD8E4B877DE">
+                  <enum>(H)</enum>
+                  <header>Food and drug administration an approved third party</header>
+                  <clause id="HA5AF46C305014C2C8FB2C427310C8E7D">
+                    <enum>(i)</enum>
+ <text>The Food and Drug Administration shall be deemed an approved third party under subparagraph (E).</text>
+                  </clause>
+                  <clause id="H20158C8C7C55439C860B781FBBD1D205">
+                    <enum>(ii)</enum>
+ <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, a laboratory may request a supplemental affirmation from the Food and Drug Administration that a laboratory developed test for clinical use meets the applicable standard.</text>
+                  </clause>
+                  <clause id="H942750F0F84E4BA79999E989213FFA1B">
+                    <enum>(iii)</enum>
+ <text>Any laboratory seeking supplemental affirmation from the Food and Drug Administration under clause (ii) shall pay a fee for such review that is no greater than the applicable user fee for a premarket notification submission under section 738 of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/379j">21 U.S.C. 379j</external-xref>).</text>
+                  </clause>
+                  <clause id="H5C6240E4B67B49A2A7869D3BDC3CFD63">
+                    <enum>(iv)</enum>
+ <text>If a laboratory seeks supplemental affirmation from the Food and Drug Administration under clause (ii) and pays the fee under clause (iii), the Food and Drug Administration—</text>
+                    <subclause id="H0F1B9CE7A8194234B00F359B843D226A">
+                      <enum>(I)</enum>
+ <text>shall review the information for the laboratory developed test only in accordance with the standards applied by the Secretary under subparagraph (A) and the procedure applied by approved third parties under subparagraph (F); and</text>
+                    </subclause>
+                    <subclause id="HD84DA1D7744B447F861E054BEE7D500F">
+                      <enum>(II)</enum>
+ <text display-inline="yes-display-inline">shall not apply to the laboratory developed test the standards or other requirements that apply to devices or any other product regulated under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>).</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H87FE9721CA1D437F83EC77C00B433065">
+                <enum>(2)</enum>
+                <header>Centralized database for laboratory developed tests for clinical
+                  use</header>
+ <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, each laboratory performing 1 or more laboratory developed tests for clinical use shall submit to the Secretary the information described in subparagraph (A) in accordance with the applicable schedule described in subparagraph (B). Such information shall be submitted electronically to the centralized database established by the Secretary under subparagraph (C). If multiple laboratories within the same corporate organization and with common ownership by the same parent corporation perform the same laboratory developed test, a corporate entity with common ownership of such laboratories may submit the information described in subparagraph (A) on behalf of such laboratories, provided that each laboratory performing a laboratory developed test is separately identified with respect to each laboratory developed test it performs.</text>
+                <subparagraph id="H4E6CA954770B4859ADC98775DABFA51A">
+                  <enum>(A)</enum>
+                  <header>Submission</header>
+ <text>For each laboratory developed test performed for clinical use by the laboratory, the laboratory shall submit the following information, as applicable:</text>
+                  <clause id="HA73B4A28AE8E42CBA261FA88B48BF9FC">
+                    <enum>(i)</enum>
+ <text>Name and certificate number of the laboratory.</text> </clause> <clause id="H91D4994CF77042638CC6054CAC84459F"> <enum>(ii)</enum> <text>Name and certificate number of the laboratory that developed the laboratory developed test, if different than the laboratory performing the laboratory developed test.</text>
+                  </clause>
+                  <clause id="H83BEC2E9F35E4B109CE517F2D0AEFF4F">
+                    <enum>(iii)</enum>
+ <text>Name of the laboratory developed test.</text> </clause> <clause id="H21AD585BD2B0468EA37858FF35452B58"> <enum>(iv)</enum> <text>Purpose of the laboratory developed test, including—</text>
+                    <subclause id="H8B3986D12B09434D9F7D4E1C96EE3859">
+                      <enum>(I)</enum>
+ <text>analyte(s) measured;</text> </subclause> <subclause id="H1DDB9F60CA7B41399CEAD0CF580E63F2"> <enum>(II)</enum> <text>disease(s), impairment(s) or assessment(s) of the health of human beings for which the laboratory developed test is used; and</text>
+                    </subclause>
+                    <subclause id="H8FC4442E6BAB47D2BB71B6B4F74552C9">
+                      <enum>(III)</enum>
+ <text>for what purpose(s) the information from the laboratory developed test will be used, such as for the screening, diagnosis, prognosis, or other type of assessment.</text>
+                    </subclause>
+                  </clause>
+                  <clause id="H89E836FF57F54EA4AA1CCCEE2087DDE2">
+                    <enum>(v)</enum>
+ <text>Specimen type(s) used with the laboratory developed test, which may include digital laboratory data.</text>
+                  </clause>
+                  <clause id="H3E6778FD2EBF4D438B539E4153036F47">
+                    <enum>(vi)</enum>
+ <text>Type of examination, such as biological, microbiological, serological, chemical, immuno-hematological, hematological, biophysical, cytological, pathological, flow cytometric, molecular, genomic, or other type of examination.</text>
+                  </clause>
+                  <clause id="HE0B8B3B1308A4A1493C695AF854A21E2">
+                    <enum>(vii)</enum>
+ <text>Summary of performance specifications for the laboratory developed test.</text>
+                  </clause>
+                  <clause id="H718989ECD91C4340A89772973A9844AF">
+                    <enum>(viii)</enum>
+ <text>Whether the laboratory developed test modifies the use of a device that is lawfully marketed under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>) and, if applicable, information identifying the specific device that is modified.</text>
+                  </clause>
+                  <clause id="H53622BF88EBC41BAAFA6088D0F4FD6FF">
+                    <enum>(ix)</enum>
+ <text>Whether the test is deemed to have a supplemental affirmation under regulations issued by the Secretary or an approved third party has supplementally affirmed that the laboratory developed test meets the applicable standard and, if the latter, the name of such approved third party.</text>
+                  </clause>
+                  <clause id="H383077A390AB42B099B9AF2E16B69C47">
+                    <enum>(x)</enum>
+ <text>If the laboratory developed test is first performed for clinical use by the laboratory 2 or more years after enactment of the Enhancing CLIA Act of 2026, is not deemed to have a supplemental affirmation under regulations issued by the Secretary, and an approved third party has not supplementally affirmed that the test meets the applicable standard, a brief summary of the information in paragraph (1)(B)(c) that supports that the laboratory developed test has a reasonable assurance of clinical validity.</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H4024C706C7664C14AC8B6CC2A2688064">
+                  <enum>(B)</enum>
+                  <header>Submission schedule</header>
+                  <clause id="H183A2A4A874A4323B5844FFF7F46C662">
+                    <enum>(i)</enum>
+                    <header>Tests offered 2 or more years after enactment of the Enhancing CLIA Act
+                      of 2026</header>
+ <text>If the laboratory developed test is first performed for clinical use by the laboratory 2 or more years after the date of enactment of the Enhancing CLIA Act of 2026, the laboratory must submit the information in subparagraph (A) for the laboratory developed test by the later of—</text>
+                    <subclause id="HCF9C8FA5CDF14687A415610D1BCFE81D">
+                      <enum>(I)</enum>
+ <text>30 days after such laboratory developed test is first performed for clinical use; or</text>
+                    </subclause>
+                    <subclause id="HCFFC8C9C22534AA4AC45115E003FDA3C">
+                      <enum>(II)</enum>
+ <text>60 days after the centralized database described in subparagraph (C) is established.</text>
+                    </subclause>
+                  </clause>
+                  <clause id="H307BFD651702496881C992C05673E5E2">
+                    <enum>(ii)</enum>
+                    <header>Tests offered prior to the date that is 2 years after enactment of the
+                      Enhancing CLIA Act of 2026</header>
+ <text>If the laboratory developed test is first performed for clinical use by the laboratory prior to the date that is 2 years after enactment of the Enhancing CLIA Act of 2026, the laboratory must submit the information in subparagraph (A) for the laboratory developed test by the later of—</text>
+                    <subclause id="H17AE33FA2724472F9ED5B52698EB95F6">
+                      <enum>(I)</enum>
+ <text>3 years after enactment of the Enhancing CLIA Act of 2026; or</text> </subclause> <subclause id="H3D5648FA785B48238C4CBA5E428558A1"> <enum>(II)</enum> <text>60 days after the centralized database described in subparagraph (C) is established.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HE0B0632F89EC4712B34A06CADBB76A1E">
+                  <enum>(C)</enum>
+                  <header>Establishment of centralized database</header>
+ <text>Not later than 2 years after enactment of the Enhancing CLIA Act of 2026, the Secretary shall make available a centralized database that is designed to—</text>
+                  <clause id="H5FC9FC137F304C29A8A32BC4A63B2FD1">
+                    <enum>(i)</enum>
+ <text>provide a transparent interface on the website of the Centers for Medicare and Medicaid Services for stakeholders, to the extent permitted by applicable laws, which may include access to—</text>
+                    <subclause id="H0AE919C0BFBB440FB91F8994727D56DB">
+                      <enum>(I)</enum>
+ <text>information submitted by laboratories under subparagraph (A); and</text> </subclause> <subclause id="H692ABB6E64F64EA786A15B63A954764E"> <enum>(II)</enum> <text>information about test errors submitted under paragraph (3); and</text>
+                    </subclause>
+                  </clause>
+                  <clause id="H4A55146BBF3A4DEB82C01E1BFC73CE36">
+                    <enum>(ii)</enum>
+ <text>provide a secure portal for electronic submission of information under subparagraph (A) and reports of test errors under paragraph (3), which provides protections from unauthorized disclosure of information, including of—</text>
+                    <subclause id="HC063AC88F43B4419B18C2430857D9EA8">
+                      <enum>(I)</enum>
+ <text>trade secret or confidential commercial financial information;</text> </subclause> <subclause id="H8A0BD81607D5442499A1845A81974630"> <enum>(II)</enum> <text>information that could compromise national security; and</text>
+                    </subclause>
+                    <subclause id="HF7CABF1EEBED40B1AC0DDB56529E061B">
+                      <enum>(III)</enum>
+ <text>identifiable patient data.</text> </subclause> </clause> </subparagraph> <subparagraph id="HA1CEEF5227D94AA8A1FB0090F6629100"> <enum>(D)</enum> <header>Updates and corrections</header> <clause id="H8F609AF2BFE34553A4D3A8707E2EA7D8"> <enum>(i)</enum> <text>A laboratory must update or correct the information submitted under this paragraph for a laboratory developed test within 30 days of—</text>
+                    <subclause id="H7C82783EEBCF4082828B739B2D7E7E11">
+                      <enum>(I)</enum>
+ <text>determining that an update or correction is necessary to maintain the accuracy of the previously submitted information; or</text>
+                    </subclause>
+                    <subclause id="H54F66A5202A345D2B51675761CFEFDFF">
+                      <enum>(II)</enum>
+ <text>a request from the Secretary to make a specific correction, unless the laboratory demonstrates within 21 days of such request that a correction is not necessary.</text>
+                    </subclause>
+                  </clause>
+                  <clause id="H44F566628597415D96BF1DFB6F47C096">
+                    <enum>(ii)</enum>
+ <text>A laboratory may supplement or modify the information submitted under this paragraph for a laboratory developed test when new information becomes available.</text>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="HB5E7DF6611C04FAA96865B0EBB1E8688">
+                <enum>(3)</enum>
+                <header>Test error reporting</header>
+                <subparagraph id="HA9E00546BFED49319572183152CD54B0">
+                  <enum>(A)</enum>
+                  <header>Definitions</header>
+ <text>In this section:</text> <clause id="H01A8315761F44BCA8498FAF3DB79DE80"> <enum>(i)</enum> <header>Serious harm</header> <text>The term <term>serious harm</term> means a misdiagnosis or failure to diagnose that results in the absence, delay, or discontinuation of critical medical treatment, or administration of unnecessary medical treatment, that causes death or serious injury to the patient.</text>
+                  </clause>
+                  <clause id="H299D2EFF9BA947A6863980A23125854D">
+                    <enum>(ii)</enum>
+                    <header>Serious injury</header>
+ <text>The term <term>serious injury</term> means an injury that—</text> <subclause id="H0E9681DE5A7747E5A337BE6CA759554E"> <enum>(I)</enum> <text>is life threatening;</text>
+                    </subclause>
+                    <subclause id="H6265FF95E463453190AEBACE29F0014F">
+                      <enum>(II)</enum>
+ <text>results in permanent impairment of a body function or permanent damage to a body structure; or</text>
+                    </subclause>
+                    <subclause id="H77CF8FE42A974BC794A1A868626B2B6B">
+                      <enum>(III)</enum>
+ <text>necessitates further medical or surgical intervention to preclude permanent impairment of a body function or permanent damage to a body structure.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HDDA088B7FE564D779277BE80C4662C6D">
+                  <enum>(B)</enum>
+                  <header>Submission of individual reports</header>
+ <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, a laboratory shall submit a report not later than 5 calendar days after becoming aware of an undetected inaccurate result for a laboratory developed test for clinical use that reasonably suggests—</text>
+                  <clause id="H580244A8FAE14156A94E0EEF5A2A9AE1">
+                    <enum>(i)</enum>
+ <text>that a laboratory developed test caused serious harm that resulted in death; or</text>
+                  </clause>
+                  <clause id="HE51706C8411D4472821D1E2D2F0C4EBA">
+                    <enum>(ii)</enum>
+ <text>an imminent threat to public health.</text> </clause> </subparagraph> <subparagraph id="HC7E266B34A01433785BF8EF0673731BC"> <enum>(C)</enum> <header>Submission of quarterly reports</header> <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, a laboratory shall submit quarterly reports that include any undetected inaccurate results of which the laboratory becomes aware for laboratory developed tests for clinical use that reasonably suggest that the laboratory developed test caused serious harm other than death. Such quarterly reports shall be submitted not later than the end of the quarter following the quarter in which the laboratory becomes aware of such undetected inaccurate results.</text>
+                </subparagraph>
+                <subparagraph id="HB2DE806B927447B1B37C21EED0E8B0DF">
+                  <enum>(D)</enum>
+                  <header>Report not an admission</header>
+ <text>A report submitted by a laboratory under this paragraph and the Secretary’s release of such report or information does not constitute an admission by the laboratory that the laboratory developed test caused or contributed to serious harm.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H83F9238AFAD442EA9B4DA2A2CFDAADCF">
+                <enum>(4)</enum>
+                <header>Review of analytical and clinical validity</header>
+                <subparagraph id="H9851C8A0F55B45B98ECA9ED1B4153CAD">
+                  <enum>(A)</enum>
+ <text>The criteria described in this subparagraph are that a laboratory developed test in clinical use—</text>
+                  <clause id="H1CE44CF2F6D943DFB73B2A4ABA90139F">
+                    <enum>(i)</enum>
+ <text>does not have a supplemental affirmation under paragraph (1)(D) that the applicable standard is met, and the test does not meet the applicable standard; or</text>
+                  </clause>
+                  <clause id="H7E6CD801772046428DADD1BC4D38DACF">
+                    <enum>(ii)</enum>
+ <text>has a supplemental affirmation under subparagraph (1)(D) that the applicable standard is met, and the test—</text>
+                    <subclause id="HC84CDF2E1D2B4AB6A0F1FEC429FD7F8F">
+                      <enum>(I)</enum>
+ <text>is represented for a purpose that is not supported by the supplemental affirmation; and</text>
+                    </subclause>
+                    <subclause id="H84D24B898427459688D4E77A166F0D04">
+                      <enum>(II)</enum>
+ <text>does not meet the applicable standard for such purpose.</text> </subclause> </clause> </subparagraph> <subparagraph id="H35F4D3165F9B4803ABFA3ED071E26772"> <enum>(B)</enum> <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, the Secretary may issue to the developing laboratory of a laboratory developed test a written request for information that—</text>
+                  <clause id="HD12781DF6DAB45E9A1310E204C869CCE">
+                    <enum>(i)</enum>
+ <text>identifies specific scientific concerns, based on credible and verifiable information, which indicate that 1 or more of the criteria described in subparagraph (A) apply to the laboratory developed test; and</text>
+                  </clause>
+                  <clause id="H4F2ECCAAA5574D05A489A1A4D833EC40">
+                    <enum>(ii)</enum>
+ <text>requesting information that would resolve such concern.</text> </clause> </subparagraph> <subparagraph id="H11A6A9714F3E46DF82355F9323566523"> <enum>(C)</enum> <text>Not later than 45 days after receiving a request for information under subparagraph (B)—</text>
+                  <clause id="HE2A713E9070D4601BB8B5C10FCE5F6CC">
+                    <enum>(i)</enum>
+ <text>the laboratory—</text> <subclause id="HD7945458E46040058BDD65BB6A8F19CD"> <enum>(I)</enum> <text>may seek a teleconference prior to the submission of information under subclause (II) to discuss the Secretary’s request; and</text>
+                    </subclause>
+                    <subclause id="H4ADC0EA25E3D409AB565BD1CA3F81E65">
+                      <enum>(II)</enum>
+ <text>shall submit the information requested pursuant to subparagraph (B), and may include in such submission a request for a teleconference; and</text>
+                    </subclause>
+                  </clause>
+                  <clause id="HD6A601DA1C384F68A3D55C040C8ED177">
+                    <enum>(ii)</enum>
+ <text>the Secretary shall—</text> <subclause id="H66B22A569BFE40AF9BD72007952FAC53"> <enum>(I)</enum> <text>schedule a teleconference requested under clause (i)(I); and</text>
+                    </subclause>
+                    <subclause id="HC306772891DD4C65A660E1F9ED25C425">
+                      <enum>(II)</enum>
+ <text>hold a teleconference if requested within 10 days of the Secretary’s receipt of the information submitted under clause (i)(II).</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H6D4D416380114A3E85201556DF417496">
+                  <enum>(D)</enum>
+ <text>Upon receiving a submission under subparagraph (C), the Secretary shall—</text>
+                  <clause id="H2E9B58C27E26402BAF14F45A1B8966C0">
+                    <enum>(i)</enum>
+ <text>review the submitted information within 45 calendar days of such receipt, which may include communication with the laboratory; and</text>
+                  </clause>
+                  <clause id="H7399F029FB1A4631AD9A66715E3EF664">
+                    <enum>(ii)</enum>
+ <text>determine whether the criteria listed in subparagraph (A) apply to the laboratory developed test and communicate such determination with the laboratory as described in subparagraph (E).</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HF998ED72A9BE419983FDDE315974C547">
+                  <enum>(E)</enum>
+ <text>The Secretary shall provide written notice to the laboratory of the Secretary’s determination under subparagraph (D) as follows:</text>
+                  <clause id="H7F7D3C486FBB439690857999E2324AD3">
+                    <enum>(i)</enum>
+ <text>The Secretary shall notify the laboratory if the Secretary determines that the criteria in subparagraph (A)—</text>
+                    <subclause id="H431F76E10A2B47E6BDD5F042E293B31A">
+                      <enum>(I)</enum>
+ <text>do not apply to the laboratory developed test; or</text> </subclause> <subclause id="H32D18BE943E14ACC8CC9F486F8D0B0CA"> <enum>(II)</enum> <text>apply to the laboratory developed test and clause (ii) does not apply.</text>
+                    </subclause>
+                  </clause>
+                  <clause id="HED2DD0DC1EA942A2B65F202AD2FB1C63">
+                    <enum>(ii)</enum>
+ <text>If the Secretary determines that the criteria in subparagraph (A) apply to the laboratory developed test but that such determination may be resolved within a reasonable time, and the laboratory developed test has not previously been subject to this paragraph on the basis of the same or substantially similar concerns identified in the written request issued under subparagraph (B)—</text>
+                    <subclause id="H3A5C8D8E5AB1415ABBA9B82B82CE5779">
+                      <enum>(I)</enum>
+ <text>the Secretary shall notify the laboratory of such a determination and allow the laboratory to seek a teleconference to discuss the finding;</text>
+                    </subclause>
+                    <subclause id="H48B6E8FC99AE449A91472F1A5F3D599D">
+                      <enum>(II)</enum>
+ <text>the laboratory shall submit information demonstrating resolution of the determination within 60 days of receiving such notification; and</text>
+                    </subclause>
+                    <subclause id="H7692E75333294DC58A42561635007211">
+                      <enum>(III)</enum>
+ <text>the Secretary shall make a determination within 30 days of the receipt of such submission of information as to whether the criteria in subparagraph (A) continue to apply to the laboratory developed test.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H4A393D498A1648A28E7BFA5F4FEE272E">
+                  <enum>(F)</enum>
+ <text>If the Secretary notifies the laboratory under subparagraph (E)(i)(II) or (E)(ii)(III) that the criteria in subparagraph (A) apply to the laboratory developed test, the laboratory must—</text>
+                  <clause id="HDED931D24152491BAB2D797657C50BFB">
+                    <enum>(i)</enum>
+ <text>cease performing the laboratory developed test until the laboratory obtains a confirmation from the Secretary under subparagraph (G) that the criteria under subparagraph (A) no longer apply to the laboratory developed test; and</text>
+                  </clause>
+                  <clause id="H986E114D8F49456C811B1AD2FBA75C1D">
+                    <enum>(ii)</enum>
+ <text>instruct all laboratories within the same corporate organization and under common ownership by the same parent corporation to cease performing the laboratory developed test until the developing laboratory obtains the confirmation described in clause (i).</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H74D6002BE20C40FC82F66C1E10E16778">
+                  <enum>(G)</enum>
+ <text>The Secretary shall, within 30 days of receiving the information described in this subparagraph, provide a confirmation that the criteria in subparagraph (A) no longer apply to a laboratory developed test that was previously issued a notification under subparagraph (F) if the laboratory that developed the test submits evidence that—</text>
+                  <clause id="H0188F291755B42CAA1E1122D5C3BC448">
+                    <enum>(i)</enum>
+ <text>it has obtained a supplemental affirmation from an approved third party under paragraph (1)(D) that the test meets the applicable standard; and</text>
+                  </clause>
+                  <clause id="HA5C7552689DC489894FE088D194A3C2F">
+                    <enum>(ii)</enum>
+ <text>the criteria in subparagraph (A) no longer apply to the test.</text> </clause> </subparagraph> </paragraph> <paragraph id="H8E8914BEB0FB493EA3CE3FAA9C668294" commented="no"> <enum>(5)</enum> <header>Investigational use</header> <text>Beginning 2 years after enactment of the Enhancing CLIA Act of 2026, a laboratory developed test may not be offered for investigational use unless it meets the applicable standard for such use and the test report and all other advertising and promotional materials for the test clearly state, <quote>For investigational use only</quote>. Clinical validity has not yet been established.</text>
+              </paragraph>
+            </subsection>
+            <after-quoted-block>;</after-quoted-block>
+          </quoted-block>
+        </paragraph>
+        <paragraph id="H09400FD0CB794FFBA1918C7DF08F43D9" commented="no">
+          <enum>(3)</enum>
+ <text>in subsection (e)(2)(A)(ii) by adding at the end <quote>except that such standards shall not require that laboratory developed tests offered by the laboratory have a supplemental affirmation from any approved third party that the applicable standard has been met,</quote>;</text>
+        </paragraph>
+        <paragraph id="H29549361407645DEA11F58C01FEC528F">
+          <enum>(4)</enum>
+ <text>in subsection (i)(1)(C) by inserting <quote>or (r)</quote> after <quote>subsection (d)</quote>; and</text>
+        </paragraph>
+        <paragraph id="HC8C2B25AB96B4792AFE0F8D1752F405C">
+          <enum>(5)</enum>
+ <text>in subsection (o) by striking the period and inserting <quote>, except that the Secretary may not delegate to the Food and Drug Administration the responsibility or authority for determining whether any laboratory developed test meets the applicable standard under subsection (r)(4) of this section. Notwithstanding the prior sentence, the Food and Drug Administration may provide a supplemental affirmation that a laboratory developed test meets the applicable standard pursuant to subsection (r)(4)(F).</quote>.</text>
+        </paragraph>
+      </subsection> 
+<subsection id="HEAA966A1325B421CAF74567B893F1EED">
+        <enum>(b)</enum>
+        <header>Amendments to the Federal Food, Drug, and Cosmetic Act</header>
+ <text>The Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>) is amended—</text> <paragraph id="HAF2574D1B0CD44588C67396BD8860741"> <enum>(1)</enum> <text>in section 201(h)(1) by striking the period after <quote>pursuant to section 520(o)</quote> and inserting <quote>or laboratory developed tests as defined in the Enhancing CLIA Act of 2026. For clarity, the term <term>device</term> does not include articles intended solely for medical and scientific research using materials derived from the body of man or other animals, which are not intended for any use described in subparagraphs (A) through (C).</quote>.</text>
+        </paragraph>
+        <paragraph id="H67FE29E3F5084ACDA245FC6EFD2AA346">
+          <enum>(2)</enum>
+ <text>in section 501(f)(1)(C) by striking the period at the end and inserting <quote>, except that this paragraph does not apply to a device that is distributed for use with a laboratory developed test as defined under the Enhancing CLIA Act of 2026 if the device could otherwise be lawfully distributed under this Act.</quote>.</text>
+        </paragraph>
+        <paragraph id="H896D8959DD394118A9D00F730C950B30">
+          <enum>(3)</enum>
+ <text>in section 502(o) by striking the period at the end and inserting, <quote>except that this subsection does not apply to a device that is distributed for use with a laboratory developed test as defined under the Enhancing CLIA Act of 2026 if the device could otherwise be lawfully distributed under this Act.</quote>.</text>
+        </paragraph>
+      </subsection> 
+<subsection id="HEBF5ED52E06E4FB68602DE22C3C9DF42">
+        <enum>(c)</enum>
+        <header>National coverage determinations for laboratory developed tests</header>
+ <text>Section 1862(l)(1) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395y">42 U.S.C. 1395y(l)(1)</external-xref>) is amended by adding at the end, <quote>For purposes of all existing and future national coverage determinations for a clinical laboratory diagnostic test, a supplemental affirmation from any approved third party that the applicable standard has been met under section 353 of the Public Health Services Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a et seq.</external-xref>), as amended by the Enhancing CLIA Act of 2026 shall be considered equivalent to an approval or clearance under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>).</quote>.</text>
+      </subsection> 
+<subsection id="H830E06016F124532B9EB89BE856FC238">
+        <enum>(d)</enum>
+        <header>Companion diagnostics</header>
+ <text>If a diagnostic test result is required for the approval of a drug under section 505 of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/355">21 U.S.C. 355</external-xref>) or the licensure of a biologic under section 351 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/262">42 U.S.C. 262</external-xref>), such test result may be determined by use of a device regulated under the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>) or based on a laboratory developed test with a supplemental affirmation from any approved third party under section 353 of the Public Health Services Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a et seq.</external-xref>) as amended by this Act.</text>
+      </subsection></section> 
+<section id="H5002BECA8D934AA880EBD382EDA99D0B"><enum>3.</enum><header>Transition</header> 
+<subsection id="H29F7EB27629B4B78A2758F7B51494B07"><enum>(a)</enum><header>Effective date</header><text>Except as otherwise provided in this section, the amendments made by this Act shall take effect immediately upon enactment.</text></subsection> <subsection id="H791E349C3FF14B4FBE400B0FEE92CEBA"><enum>(b)</enum><header>Transition and regulations</header> <paragraph id="H9B2450F146F4490288C9CAFC69F9C999"><enum>(1)</enum><text>The Secretary of Health and Human Services (in this subsection referred to as the <quote>Secretary</quote>) shall take the following actions, and may expend such funds as the Secretary determines necessary to ensure an orderly transition—</text> 
+<subparagraph id="H04059DDFF1AC4695BCA04078E578D565"><enum>(A)</enum><text>within 180 days of enactment, promulgate proposed regulations required under the amendments made by this Act;</text></subparagraph> <subparagraph id="H7ED8E1B1D2D94E89BBF4CB1E0DB376EB"><enum>(B)</enum><text>within 2 years of enactment, establish the centralized database for laboratory developed tests under section 353(r)(2) of the Public Health Service Act, as added by section 2(a) of this Act;</text></subparagraph> 
+<subparagraph id="HC43F7F6AA8A346DCA7A911D1CABA2364">
+            <enum>(C)</enum>
+ <text>within 2 years of enactment, promulgate final regulations to mitigate potential conflict of interest by organizations that provide multiple oversight services under section 353 of the Public Health Services Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a</external-xref>), including accreditation of laboratories, proficiency testing, and supplemental affirmation for laboratory developed tests; and</text>
+          </subparagraph> 
+<subparagraph id="H603CA28E65AA4D768929B4673576B43B" commented="no">
+            <enum>(D)</enum>
+ <text>within 30 days of enactment, revise the definition of <quote>in vitro diagnostic products</quote> at section 809.3 of Title 21 of the Code of Federal Regulations, effective immediately, to clarify that such term—</text>
+            <clause id="H85B2C090D2E8442D9C418D00A14F977B" commented="no">
+              <enum>(i)</enum>
+ <text>does not include laboratory developed tests as defined in subsection (a) of section 2 of this Act; and</text>
+            </clause>
+            <clause id="H37F2B41789A2455A91E1F04B6B17BF48" commented="no">
+              <enum>(ii)</enum>
+ <text>includes protocols for use in the diagnosis of disease or other conditions, including a determination of the state of health, in order to cure, mitigate, treat, or prevent disease or its sequelae when such protocols are—</text>
+              <subclause id="H66A5767C71A14A40A93BF1B43125E99F" commented="no">
+                <enum>(I)</enum>
+ <text>commercially distributed for performance in laboratories not under common ownership by the same parent corporation as the laboratory that developed the protocol; or</text>
+              </subclause>
+              <subclause id="HADB8FC9A0F99464C84D2295A2FAD0AEB" commented="no">
+                <enum>(II)</enum>
+ <text>commercially distributed by an entity or individual that is not a laboratory;</text>
+              </subclause>
+              <continuation-text continuation-text-level="clause" commented="no">except that such
+                protocols are not commercially distributed solely because they are published,
+                including in public or scientific presentations, or patented.</continuation-text>
+            </clause>
+          </subparagraph></paragraph> 
+<paragraph id="H975A5E03D1D547DBAC412BE7A1FF2C72"><enum>(2)</enum><header>Applicability of regulations</header><text>Notwithstanding the date on which regulations are issued under paragraph (1), no regulations issued pursuant to the amendments made by this Act shall be implemented or take effect until 2 years after enactment, except as otherwise specified in this section.</text></paragraph></subsection> <subsection id="HEBDB9ACE6CDB4DDD9D2B67AA0AF4C42D"><enum>(c)</enum><header>Conversion</header> <paragraph id="H03D393AFDFCA46F3944470C64117FAB7"><enum>(1)</enum><text>This subsection applies to a laboratory developed test as defined in subsection (a) of section 2 of this Act that has—</text> 
+<subparagraph id="H6183D32CC26644F19BC642F30E85C86F"><enum>(A)</enum><text>a premarket approval under section 515 of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360e">21 U.S.C. 360e</external-xref>), an approved humanitarian device exemption under section 520(m) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360j">21 U.S.C. 360j(m)</external-xref>), a clearance under section 510(k) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360">21 U.S.C. 360(k)</external-xref>), an authorization under section 513(f)(2) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/370c">21 U.S.C. 370c(f)(2)</external-xref>), an investigational device exemption under section 520(g) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360j">21 U.S.C. 360j(g)</external-xref>), or a licensure under section 351 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/262">42 U.S.C. 262</external-xref>); or</text></subparagraph> <subparagraph id="HC2A4EECD8B76495F972A50646038A06E"><enum>(B)</enum><text>a premarket approval application under section 515 of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360e">21 U.S.C. 360e</external-xref>), an application for humanitarian device exemption under section 520(m) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360j">21 U.S.C. 360j(m)</external-xref>), a premarket notification under section 510(k) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360">21 U.S.C. 360(k)</external-xref>), a de novo classification request under section 513(f)(2) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/370c">21 U.S.C. 370c(f)(2)</external-xref>), an investigational device exemption under section 520(g) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/360j">21 U.S.C. 360j(g)</external-xref>), or an application for licensure under section 351 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/262">42 U.S.C. 262</external-xref>) pending on the date of enactment.</text></subparagraph></paragraph> 
+<paragraph id="H8AB1239350A24FDE99D68022E7E9631D"><enum>(2)</enum><text>Notwithstanding any other provision of this Act, a laboratory developed test under paragraph (1) shall be a device under section 201(h)(1) of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/321">21 U.S.C. 321(h)(1)</external-xref>) until—</text> <subparagraph id="H79413CAC91254F2182A182453F8C9687"><enum>(A)</enum><text>if a notification is submitted under paragraph (3)(A), the date of such notification; or</text></subparagraph> 
+<subparagraph id="H8DF4FD72A3A84AA9AA8E47087220F21B"><enum>(B)</enum><text>if a notification is submitted under paragraph (3)(B), the earlier of—</text> <clause id="H800F028EA41646FFA8EAB969FFAA8192"><enum>(i)</enum><text>approval, clearance, authorization, exemption, or licensure of a modification to such test such that it meets the definition of device under section 201(h)(1) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/21/321">21 U.S.C. 321(h)(1)</external-xref>);</text></clause> 
+<clause id="HAC4916F4550041CE9BD03ECFC09C79FD"><enum>(ii)</enum><text>2 years after enactment;</text></clause> <clause id="HF3699B1BC4F94711A1EDAF318479EB43"><enum>(iii)</enum><text>the date a subsequent notification is submitted under paragraph (3)(A); or</text></clause> 
+<clause id="HE66A07CA220A40D3B7B2DBC4489DE4B3"><enum>(iv)</enum><text>60 days after enactment if no notification is submitted under paragraph (3).</text></clause></subparagraph></paragraph> <paragraph id="HD429701394B24C95A1B38322E6F41CB1"><enum>(3)</enum><text>For a laboratory developed test under paragraph (1), within 60 days of enactment, a laboratory may submit to the Food and Drug Administration a notification that the laboratory—</text> 
+<subparagraph id="HBF645F2058B64927A4F394C01DF420FE">
+            <enum>(A)</enum>
+ <text>does not intend to modify the test to meet the definition of a device under section 201(h)(1) of the Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/321">21 U.S.C. 321(h)(1)</external-xref>); or</text>
+          </subparagraph> 
+<subparagraph id="H407155CCC088411AAFEE8FDD2931023E">
+            <enum>(B)</enum>
+ <text>intends to modify the test to meet the definition of a device under section 201(h)(1) of the Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/321">21 U.S.C. 321(h)(1)</external-xref>).</text>
+          </subparagraph></paragraph> 
+<paragraph id="H8C4E601553B147FF81349FC2A42428FB"><enum>(4)</enum><text>For a laboratory developed test under paragraph (1)(A), upon the applicable date in paragraph (2) that such test is no longer a device, such test is deemed to have a supplemental affirmation from the Food and Drug Administration under section 353(r)(1)(D) of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a(r)(1)(D)</external-xref>), as added by section 2(a) of this Act, that the laboratory developed test meets the applicable standard.</text></paragraph></subsection></section> <section id="H87BD248E06CB49FB8837CEC5F174A768"> <enum>4.</enum> <header>Clinical laboratory improvement amendments (clia) updates</header> <subsection id="H77704674A9234DB5883F28599AC5CE22"> <enum>(a)</enum> <header>CLIA specialties</header> <text>No later than 180 days after enactment, the Secretary shall issue a proposed regulation to establish new types of examinations that may be performed by laboratories under section 353 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a</external-xref>) consistent with the current state of clinical laboratory science and technology, including the advancements with respect to molecular diagnostics, digital pathology, and next generation sequencing. Within 1 year of finalizing such regulations, the Secretary must evaluate whether additional proficiency testing programs should be approved for these new specialties under section 353(f)(3)(C) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a(f)(3)(C)</external-xref>).</text>
+      </subsection>
+      <subsection id="HC24094BA80C144CF9B3B4BF2E671633E">
+        <enum>(b)</enum>
+        <header>Notice of subregulatory changes</header>
+ <text>If the Centers for Medicare and Medicaid Services intend to issue new or revised sub-regulatory guidance and policies related to the regulation of laboratories under section 353 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a</external-xref>), including new or revised State operations manuals applicable to the regulation of laboratories, it must describe such proposed action in a public report at least 90 days prior to taking such action and allow an opportunity for public comment.</text>
+      </subsection>
+      <subsection id="HB811AE4EE1264882872D72DCFB164FAC">
+        <enum>(c)</enum>
+        <header>Engagement with laboratories</header>
+ <text>The Centers for Medicare and Medicaid Services must hold regular open door forums with clinical laboratories, no less frequently than annually, to discuss issues related to the regulation of laboratories under section 353 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a</external-xref>).</text>
+      </subsection>
+      <subsection id="HF082E8F0E61F4329BB87DAECF6B7A240">
+        <enum>(d)</enum>
+        <header>Regulation updates</header>
+ <text>At least once every 5 years, the Centers for Medicare and Medicaid Services must review the regulations promulgated under section 353 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/263a">42 U.S.C. 263a</external-xref>), and—</text>
+        <paragraph id="H0DB0ED8DEB1A4DC298CD51001C9C6983">
+          <enum>(1)</enum>
+ <text>issue a request for information in the Federal Register regarding whether updates to such regulations are necessary to reflect advancements in laboratory science and technology; and</text>
+        </paragraph>
+        <paragraph id="H73E28E758946407784A4A5730300ED7E">
+          <enum>(2)</enum>
+ <text>establish a public docket, to remain open for no less than 180 days, to solicit public comments on the request for information issued under paragraph (1).</text>
+        </paragraph>
+      </subsection>
+    </section> 
+</legis-body></bill>
+

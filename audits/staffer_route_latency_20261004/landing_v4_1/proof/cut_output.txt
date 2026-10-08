@@ -1,0 +1,13 @@
+tip 19a5c28bcf98f13e346ea27e4c7ca56bd1d9680b  base 79ef9f1b7  files 11  LIVE HEAD (informational) 3366a7840
+prove(): {'ok': True, 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+edit fec/surfaces/staffer_closeness_routes.py                           size=56426 crlf=968 lf=5 lone_cr=0 class=MIXED -> size=60933 crlf=1045 lf=5 lone_cr=0 class=MIXED
+edit fec/surfaces/staffer_distinct_routes.py                            size=8063 crlf=0 lf=157 lone_cr=0 class=PURE_LF -> size=8175 crlf=0 lf=158 lone_cr=0 class=PURE_LF
+edit fec/surfaces/staffer_live/README.md                                size=34095 crlf=120 lf=0 lone_cr=0 class=PURE_CRLF -> size=35540 crlf=120 lf=0 lone_cr=0 class=PURE_CRLF
+edit fec/surfaces/staffer_live/staffer-route.js                         size=40785 crlf=300 lf=0 lone_cr=0 class=PURE_CRLF -> size=41182 crlf=301 lf=0 lone_cr=0 class=PURE_CRLF
+edit fec/surfaces/staffer_live_service.py                               size=140654 crlf=2142 lf=0 lone_cr=0 class=PURE_CRLF -> size=142626 crlf=2161 lf=0 lone_cr=0 class=PURE_CRLF
+edit fec/surfaces/staffer_routing.py                                    size=44816 crlf=691 lf=1 lone_cr=0 class=MIXED -> size=45797 crlf=706 lf=1 lone_cr=0 class=MIXED
+edit fec/tests/surfaces/test_staffer_left_out_staff.cjs                 size=26381 crlf=0 lf=320 lone_cr=0 class=PURE_LF -> size=32724 crlf=0 lf=386 lone_cr=0 class=PURE_LF
+edit fec/tests/surfaces/test_staffer_office_covered_staff.py            size=44324 crlf=0 lf=678 lone_cr=0 class=PURE_LF -> size=53061 crlf=0 lf=802 lone_cr=0 class=PURE_LF
+edit fec/tests/surfaces/test_staffer_prewarm.py                         size=33345 crlf=0 lf=685 lone_cr=0 class=PURE_LF -> size=39000 crlf=0 lf=776 lone_cr=0 class=PURE_LF
+new  fec/tests/surfaces/test_staffer_request_work_index.py              - -> size=20096 crlf=0 lf=416 lone_cr=0 class=PURE_LF
+edit fec/tests/surfaces/test_staffer_unreachable_hint.py                size=31989 crlf=0 lf=558 lone_cr=0 class=PURE_LF -> size=37891 crlf=0 lf=649 lone_cr=0 class=PURE_LF

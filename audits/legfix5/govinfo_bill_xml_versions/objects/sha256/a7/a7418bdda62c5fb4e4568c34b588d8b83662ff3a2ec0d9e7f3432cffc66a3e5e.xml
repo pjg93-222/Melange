@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H62D00CD89ADF477996B3F0D4D6DCE61B" public-private="public" key="H" bill-type="olc" stage-count="1">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 7734 EH: Timely Delivery of Bank Secrecy Act Reports Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IB</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 7734</legis-num>
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<legis-type>AN ACT</legis-type>
+<official-title display="yes">To amend title 31, United States Code, to require the timely production of reports to Congress under the Bank Secrecy Act, and for other purposes.</official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC" id="H8E429CDD220B40E294FE1B666C6EAFA9">
+<section id="H3A5244C6E5094DF78C4A3FDF906EA32C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Timely Delivery of Bank Secrecy Act Reports Act</short-title></quote>. </text></section> <section id="HA0635B0B1CD64D91AA13C4A837099DFB" section-type="subsequent-section"><enum>2.</enum><header>Timely production of Bank Secrecy Act reports to Congress</header><text display-inline="no-display-inline">Section 5319 of title 31, United States Code, is amended—</text>
+<paragraph id="HA29F8AF4E2154D40BF57DFF55B820B5C"><enum>(1)</enum><text>by striking <quote>The Secretary of the Treasury</quote> and inserting the following:</text> <quoted-block style="OLC" id="HA6B2B9DB0E2949569A4F45CEE570975B" display-inline="no-display-inline"> <subsection id="H7861581E91A44AA3B15E102A69DFEFB5"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of the Treasury</text></subsection><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph>
+<paragraph id="HA282143C0F4941849838B6BBFA6AC6E9"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block style="USC" id="HEDC783BD49074CD7B88905FBBED4077B" display-inline="no-display-inline"> <subsection id="H4C28529E05064141B38B66F4B50EDD9D"><enum>(b)</enum><header>Timely production of reports to Congress</header> <paragraph id="HE9B47B9CA109478880124F34439270F1"><enum>(1)</enum><header>Production by the Secretary</header><text display-inline="yes-display-inline">Upon the request of the congressional committees or subcommittees of appropriate jurisdiction for any report filed under this subchapter, the Secretary of the Treasury shall deliver the requested report to the committee or subcommittee not later than 30 days after such request is made.</text></paragraph>
+<paragraph id="H7F5FFF8367F4463EA2EF9962B300C9DB"><enum>(2)</enum><header>Production by a financial institution pursuant to a subpoena</header><text display-inline="yes-display-inline">Upon subpoena by the congressional committees or subcommittees of appropriate jurisdiction, a financial institution shall deliver a report filed under this subchapter by the financial institution, and any information on which such report is based, to the committee or subcommittee not later than the return date specified for such report in the subpoena.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> </legis-body><attestation><attestation-group><attestation-date date="20220726" chamber="House">Passed the House of Representatives July 26, 2022.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation> <endorsement display="yes"></endorsement> </bill> 
+

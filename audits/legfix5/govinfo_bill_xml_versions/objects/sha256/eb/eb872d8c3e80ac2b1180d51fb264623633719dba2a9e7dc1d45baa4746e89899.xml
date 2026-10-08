@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H93BDAF975DDB4270ACDF85BE1D149755" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4501 IH: Consumer Transaction Account Protection Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-09-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4501</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190926">September 26, 2019</action-date><action-desc><sponsor name-id="W000816">Mr. Williams</sponsor> (for himself and <cosponsor name-id="M001160">Ms. Moore</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Federal Deposit Insurance Act to provide that the consumer transaction account
+			 deposits of an insured depository institution are not considered to be
+			 funds obtained by or through a deposit broker, and for other purposes.</official-title></form>
+	<legis-body id="H039AA74392D242FC9A965AE1A15CE1E7" style="OLC">
+ <section id="HD9FAAE77A92D4766BDF8F84CCE05B554" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Consumer Transaction Account Protection Act of 2019</short-title></quote>.</text> </section><section id="HAE27434B0DEE469CA77064DB46A0D54B"><enum>2.</enum><header>Limited exception for consumer transaction account deposits</header><text display-inline="no-display-inline">Section 29 of the Federal Deposit Insurance Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1831f">12 U.S.C. 1831f</external-xref>) is amended by adding at the end the following new subsection:</text>
+			<quoted-block display-inline="no-display-inline" id="HF69BE3D8202E4FCB96B4BA469682EAF2" style="OLC">
+				<subsection id="H76C11CB6A93D4357891BB3460CA85138"><enum>(j)</enum><header>Limited exception for consumer transaction account deposits</header>
+ <paragraph id="H0DEC0C00A83642B09A42D60BCD02D621"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Consumer transaction account deposits of an insured depository institution shall not be considered to be funds obtained, directly or indirectly, by or through a deposit broker.</text>
+ </paragraph><paragraph id="H59DB92FC7E594252AEC5554E73FA08FE"><enum>(2)</enum><header>Consumer transaction account deposit defined</header><text display-inline="yes-display-inline">For purposes of this subsection, the term <quote>consumer transaction account deposit</quote> means a deposit in a transaction account, as defined in section 19(b)(1) of the Federal Reserve Act, with an insured depository institution—</text>
+ <subparagraph id="H1065333B84474364BA9C303BAAAA142A"><enum>(A)</enum><text>that is entirely covered by deposit insurance;</text> </subparagraph><subparagraph id="H37E4083E65A848F693ACF9E43E998FFA"><enum>(B)</enum><text>that is opened by a natural person;</text>
+ </subparagraph><subparagraph id="HBCB17872DFDA439E99A68F71BA5C374A"><enum>(C)</enum><text>that is held in the name of such natural person;</text> </subparagraph><subparagraph id="H813A29B2494D4860975C3BE477B9A9E8"><enum>(D)</enum><text>that is used monthly by such natural person to make payments to, and to receive deposits from, third parties; and</text>
+ </subparagraph><subparagraph id="H2FE01B68AF654B66874A528FDE1C6BEB"><enum>(E)</enum><text>with respect to which only such natural person is recognized by the insured depository institution as being authorized to designate that withdrawals or payments be made from the account.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

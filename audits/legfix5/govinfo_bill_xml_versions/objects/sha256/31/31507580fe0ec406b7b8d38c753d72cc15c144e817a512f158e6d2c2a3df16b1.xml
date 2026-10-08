@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H6A67F15459A14606810CC6B15E3ACD2A" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 1810 IH: Bank Loan Privacy Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-03-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 1810</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230327">March 27, 2023</action-date>
+<action-desc><sponsor name-id="L000569">Mr. Luetkemeyer</sponsor> (for himself, <cosponsor name-id="H001072">Mr. Hill</cosponsor>, and <cosponsor name-id="W000816">Mr. Williams of Texas</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require the Bureau of Consumer Financial Protection to issue a rule before deleting or modifying certain small business loan data, and for other purposes.</official-title>
+</form>
+<legis-body id="H2EB517A93ED14406864BEA5E07513255" style="OLC">
+<section id="H6133756977054BB79599337CA65D91AD" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Bank Loan Privacy Act</short-title></quote>.</text></section> <section id="H5408904AA86F477DAF9C33F2D1E97283"><enum>2.</enum><header>Rulemaking requirement</header><text display-inline="no-display-inline">Section 704B(e)(4) of the Equal Credit Opportunity Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1691c-2">15 U.S.C. 1691c–2(e)(4)</external-xref>) is amended—</text>
+<paragraph id="H079D55E1FE6740BEB6F03695BFB741D0"><enum>(1)</enum><text>by striking <quote>The Bureau may,</quote> and inserting:</text> <quoted-block style="OLC" id="H06F0213F36C0444E94B7B5C18FADEC50" display-inline="no-display-inline"> <subparagraph id="H7CDD44D0905A473198620AC21E4820B6"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">The Bureau may,</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph>
+<paragraph id="H2A614C08E36147D5AF7529A15652CBD8"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block style="OLC" id="H429FEA1256824071995AB3D46B22CB9B" display-inline="no-display-inline"> <subparagraph id="H32605721B1CF4616A550043BCA6FDBCA"><enum>(B)</enum><header>Rulemaking requirement</header><text display-inline="yes-display-inline">The Bureau shall, before deleting or modifying data under this paragraph issue, through advance notice and comment, a rule that includes a description of what modifications and deletions the Bureau intends to make to the data and how such modifications and deletions will advance a privacy interest. </text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section>
+</legis-body>
+</bill> 
+
+

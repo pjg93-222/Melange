@@ -1,0 +1,120 @@
+====================================================================================================
+N1a  DESK PRESS SOURCE: sheet vs engine   run 2026-09-19T02:09:49
+====================================================================================================
+worktree   : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad
+live root  : C:\Users\pgoff\OneDrive\Desktop\Melange Systems
+base tone  : C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv
+refresh    : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\stance\press_refresh_tone.csv
+dial default as imported: 'engine'
+
+lifted the desk press loop from make_member_desk.py lines 1669-1704 (36 lines)
+press_date_overrides rows 232 | press_stance_overrides corrections 23
+roster 533 members (from the shipped bundle)
+sheet rows 3701, header 28 columns
+
+----------------------------------------------------------------------------------------------------
+-- 2. RUN BOTH DIAL POSITIONS --
+
+[sheet]  press_source_rows  3701 = press_displayed  2389 + unknown_member   3 + billstatus_routed  1309   CLOSES: YES
+        members with press 383
+        source ledger: {"press_engine_dates_normalised": 0, "press_engine_rows_already_in_sheet": 0, "press_engine_rows_appended": 0, "press_engine_rows_no_url": 0, "press_engine_rows_read": 0, "press_source": "sheet", "schema": "desk-press-source-v1"}
+
+[engine]  press_source_rows  3992 = press_displayed  2677 + unknown_member   6 + billstatus_routed  1309   CLOSES: YES
+        members with press 397
+        source ledger: {"press_engine_dates_normalised": 0, "press_engine_rows_already_in_sheet": 2377, "press_engine_rows_appended": 291, "press_engine_rows_no_url": 0, "press_engine_rows_read": 2668, "press_rows_walked": 3992, "press_sheet_billstatus_rows": 1310, "press_sheet_keys_absent_from_engine": 3, "press_sheet_press_rows": 2391, "press_sheet_rows": 3701, "press_source": "engine", "schema": "desk-press-source-v1"}
+        A5 tone ingest: read 2679 -> returned 2668 (exact 0, url-form 11, conflict kept 1, official mention 0, no url 0)  CLOSES: YES
+
+----------------------------------------------------------------------------------------------------
+-- 3. ROW-LEVEL DIFF (sheet -> engine) --
+desk press rows  sheet  2389   engine  2677   (+288)
+rows ADDED   :   288
+rows REMOVED :     0   <- must be 0
+rows CHANGED :     0   <- must be 0
+identical-display-key collisions within one run: sheet 0, engine 0
+
+----------------------------------------------------------------------------------------------------
+-- 4. THE ADDED ROWS --
+added rows 288 across 146 members
+by tone source file: {'refresh': 288}
+by the engine's own scoring disposition (laneA r1 census):
+   used                      221
+   no-policy-domain           28
+   zero-intensity             20
+   neutral-zeroed             19
+by displayed direction: {'pol=+1': 258, 'pol=+0': 22, 'pol=-1': 8}
+added rows rendering with a BLANK date: 0
+
+top 20 members by rows gained:
+   Josh Riley                          9  (sheet had 1)
+   George Whitesides                   9  (sheet had 0)
+   Peter Welch                         7  (sheet had 20)
+   Raphael Warnock                     7  (sheet had 35)
+   Barry Loudermilk                    6  (sheet had 22)
+   Jack Reed                           5  (sheet had 26)
+   John Hickenlooper                   5  (sheet had 10)
+   Lisa Blunt Rochester                5  (sheet had 16)
+   Margaret Hassan                     5  (sheet had 5)
+   Ruben Gallego                       5  (sheet had 20)
+   Bill Hagerty                        4  (sheet had 51)
+   Jacky Rosen                         4  (sheet had 4)
+   Janelle Bynum                       4  (sheet had 4)
+   Jeanne Shaheen                      4  (sheet had 7)
+   Martin Heinrich                     4  (sheet had 14)
+   Mike Crapo                          4  (sheet had 36)
+   Richard Durbin                      4  (sheet had 21)
+   Steven Horsford                     4  (sheet had 5)
+   Susan Collins                       4  (sheet had 3)
+   Tim Moore                           4  (sheet had 9)
+
+members gaining at least one row: 146
+first 10 added rows as the desk built them:
+   Adam Schiff                2026-07-06 pol=+1 Weakly positive            https://www.schiff.senate.gov/news/press-releases/photos-sen-schiff-tours-san-
+   Adam Smith                 2026-07-13 pol=+1 Weakly positive            https://adamsmith.house.gov/news/press-releases/reps-smith-khanna-sanchez-and-
+   Adam Smith                 2026-07-09 pol=+0 Neutral                    https://www.americascreditunions.org/news-media/news/emphasizing-credit-union-
+   Adelita Grijalva           2026-07-09 pol=+0 Neutral                    https://www.americascreditunions.org/news-media/news/emphasizing-credit-union-
+   Al Green                   2026-07-10 pol=+1 Weakly positive            https://algreen.house.gov/media/press-releases/bipartisan-21st-century-road-ho
+   Alex Padilla               2026-07-10 pol=+1 Positive                   https://www.americascreditunions.org/news-media/news/advocating-credit-unions-
+   Alex Padilla               2026-07-27 pol=+1 Weakly positive            https://www.padilla.senate.gov/newsroom/press-releases/as-trump-escalates-atta
+   Alex Padilla               2026-07-10 pol=+1 Weakly positive            https://www.padilla.senate.gov/newsroom/press-releases/padilla-statement-on-bi
+   Alma Adams                 2026-07-01 pol=+1 Weakly positive            https://adams.house.gov/media-center/press-releases/rep-adams-speaks-bipartisa
+   Ami Bera                   2026-08-03 pol=+1 Weakly positive            https://bera.house.gov/news/press-releases/reps-bera-matsui-thompson-hold-pres
+
+----------------------------------------------------------------------------------------------------
+-- 5. THE OVERLAP: what the two sources say about the SAME release --
+engine rows whose release key the sheet also carries: 2377
+fields on which the two sources DISAGREE for the same release:
+   score_graded     1208 of 2377
+        B001314    sheet=0.000000                                       csv=0.200000
+        B001314    sheet=0.400000                                       csv=0.000000
+        B001314    sheet=0.400000                                       csv=0.000000
+   stance_src        494 of 2377
+        S001150    sheet=debate                                         csv=human_label
+        S000510    sheet=debate                                         csv=human_label
+        B001287    sheet=debate                                         csv=human_label
+   stance_sign        57 of 2377
+        B001282    sheet=1                                              csv=0
+        C001113    sheet=-1                                             csv=0
+        P000614    sheet=0                                              csv=1
+   stance             57 of 2377
+        B001282    sheet=support                                        csv=neutral
+        C001113    sheet=oppose                                         csv=neutral
+        P000614    sheet=neutral                                        csv=support
+   title              37 of 2377
+        B001287    sheet=ICYMI â€“ Bera on CNN: â€œTrump Could End This csv=ICYMI – Bera on CNN: “Trump Could End This Shu
+        B001296    sheet=BOYLE RE-INTRODUCES â€œMEMBERSâ€ RESOLUTION   csv=BOYLE RE-INTRODUCES “MEMBERS” RESOLUTION
+        S001198    sheet=Sullivan Recognizes Longtime Staff Member Kath csv=Sullivan Recognizes Longtime Staff Member Kath
+   url                 1 of 2377
+        V000130    sheet=https://vargas.house.gov/media/press-releases/ csv=https://vargas.house.gov/media/press-releases/
+   stance_conf         1 of 2377
+        V000130    sheet=0.999800                                       csv=0.999900
+   date                1 of 2377
+        V000130    sheet=2022-09-30                                     csv=2023-01-30
+
+THE PRECEDENCE RULE THIS MEASURES: the sheet supplies every row it has, so all 2377
+shared rows render exactly as today; taking the CSV instead would rewrite the fields
+above, including the DISPLAYED STANCE LABEL, which is the owner's domain.
+
+----------------------------------------------------------------------------------------------------
+VERDICT  added 288 / removed 0 / changed 0   census closes under both dials
+wrote n1_desk_press_union.json
+DONE N1a

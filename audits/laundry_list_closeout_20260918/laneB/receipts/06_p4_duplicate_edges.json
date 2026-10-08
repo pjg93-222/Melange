@@ -1,0 +1,4416 @@
+{
+ "edges_with_surplus": [
+  {
+   "a": "Ritchie Torres",
+   "b": "Gregory Meeks",
+   "windows": 4,
+   "distinct": 1,
+   "surplus": 3,
+   "distinct400": 1,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 4
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 4,
+     "src": "X",
+     "w": "Today, @RepGregoryMeeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage collateral using VantageScore 4.0, which includes alternative d"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Chuck Grassley",
+   "windows": 4,
+   "distinct": 2,
+   "surplus": 2,
+   "distinct400": 2,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 15,
+    "CHRG": 1,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, the Public Company Accounting Oversight Board PCAOB Enforcement Transparency Act, which I am reintroducing today with Senator Grassley, will bring needed transparenc"
+    },
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today, I am introducing the Stronger Enforcement of Civil Penalties Act along with Senator Grassley. Our bipartisan bill will help securities regulators better prote"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Lisa Murkowski",
+   "windows": 4,
+   "distinct": 2,
+   "surplus": 2,
+   "distinct400": 2,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 9,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, I am pleased to be introducing the Educating Medical Professionals and Optimizing Workforce Efficiency and Readiness, EMPOWER, for Health Act with Senator Murkowski."
+    },
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today, along with Senator Murkowski, we are introducing legislation to provide relief to all Federal student loan borrowers during this public health and economic cr"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Margaret Hassan",
+   "windows": 4,
+   "distinct": 2,
+   "surplus": 2,
+   "distinct400": 2,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 4
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "and their families. Today, I am pleased to introduce the Direct Creation, Advancement, and Retention of Employment Opportunity Act, or Direct CARE Opportunity Act, with Senator Has"
+    },
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ade their health worse. Today, I am pleased to introduce the Supporting Our Direct Care Workforce and Family Caregivers Act along with my colleagues Senators Bob Casey, Maggie Hass"
+    }
+   ]
+  },
+  {
+   "a": "Mitch McConnell",
+   "b": "Steve Daines",
+   "windows": 7,
+   "distinct": 5,
+   "surplus": 2,
+   "distinct400": 5,
+   "n_scored": 7,
+   "pos": 2,
+   "neg": 0,
+   "neu": 1,
+   "form": 4,
+   "net": 0.667,
+   "sources": {
+    "CREC": 8,
+    "INTERVIEW": 5,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 3,
+     "src": "INTERVIEW",
+     "w": "Rally to Ken Paxton in Texas May 27 Senate Majority Leader John Thune Returns To The Program May 13 President Donald Trump Returns To The Hugh Hewitt Show May 4 Montana Senator Ste"
+    }
+   ]
+  },
+  {
+   "a": "Andy Biggs",
+   "b": "James Comer",
+   "windows": 3,
+   "distinct": 1,
+   "surplus": 2,
+   "distinct400": 1,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 3,
+     "src": "INTERVIEW",
+     "w": "tious Capitol Hill hearing, United States Secret Service Director Kimberly Cheatle found few allies. Now bipartisan calls for her to resign as House Oversight Committee Chairman Ja"
+    }
+   ]
+  },
+  {
+   "a": "Mike Lee",
+   "b": "Ted Cruz",
+   "windows": 5,
+   "distinct": 3,
+   "surplus": 2,
+   "distinct400": 3,
+   "n_scored": 5,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 6,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 3,
+     "src": "INTERVIEW",
+     "w": "It was an all-out attack against Ted Cruz and me. It was unflattering, it was unfair, it was demeaning. It was demeaning to Senator Cruz and to me, but more than anything, it was d"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Alma Adams",
+   "windows": 4,
+   "distinct": 2,
+   "surplus": 2,
+   "distinct400": 2,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 6
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Hollen, Wyden, Stabenow, Merkley, and Heinrich, I am reintroducing the EDUCATORS for America Act to provide the blueprint for building this pipeline. I am pleased that Representati"
+    },
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Stabenow, Merkley, and Heinrich, I am reintroducing the EDUCATORS for America Act to provide the blueprint for building this pipeline. I am pleased that Representative Alma Adams i"
+    }
+   ]
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Chuck Grassley",
+   "windows": 4,
+   "distinct": 2,
+   "surplus": 2,
+   "distinct400": 2,
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "CREC": 1,
+    "INTERVIEW": 9,
+    "PRESS_OFFICIAL_MENTION": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "e margin for error and several senators are uncommitted, like Utah's Mitt Romney. And some senators in the past have been wary about an election year confirmation, like senator Chu"
+    },
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "for error and several senators are uncommitted, like Utah's Mitt Romney. And some senators in the past have been wary about an election year confirmation, like senator Chuck Grassl"
+    }
+   ]
+  },
+  {
+   "a": "Derrick Van Orden",
+   "b": "Nancy Pelosi",
+   "windows": 4,
+   "distinct": 2,
+   "surplus": 2,
+   "distinct400": 2,
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 4,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 4
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 3,
+     "src": "INTERVIEW",
+     "w": "claiming to be fiscal conservatives, just voted with every single Democrat in the House of Representatives. That would be the equivalent of every Republican voting for Nancy Pelosi"
+    }
+   ]
+  },
+  {
+   "a": "Pete Stauber",
+   "b": "Steve Daines",
+   "windows": 3,
+   "distinct": 1,
+   "surplus": 2,
+   "distinct400": 1,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 3,
+     "src": "X",
+     "w": "Hunting is a big part of our way of life in northern Minnesota. Glad to see my friend @SteveDaines has been freed on Twitter. @SafariClubIntl https://t.co/T8DwjCvqcx Safari Club In"
+    }
+   ]
+  },
+  {
+   "a": "Roger Marshall",
+   "b": "Steve Daines",
+   "windows": 3,
+   "distinct": 1,
+   "surplus": 2,
+   "distinct400": 1,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 3,
+     "src": "X",
+     "w": "I stand with Steve! Glad Senator @SteveDaines’s twitter account is unlocked! https://t.co/VOF2oM08z2 Safari Club International (@SafariClubIntl): Safari Club International stands w"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Sheldon Whitehouse",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3,
+    "PRESS_OFFICIAL_MENTION": 19
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "environmentalists and industry stakeholders alike who recognize the urgent need to reduce emissions from the shipping sector. I want to thank my colleagues, especially Senator Shel"
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Angus King",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 17
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Madam President, I rise to introduce a bill with my colleague, Senator King, that will help the hard-working loggers across this country affected by severe storms and natural disas"
+    }
+   ]
+  },
+  {
+   "a": "Joe Wilson",
+   "b": "Mike Rogers",
+   "windows": 8,
+   "distinct": 7,
+   "surplus": 1,
+   "distinct400": 7,
+   "n_scored": 8,
+   "pos": 6,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "CREC": 8,
+    "INTERVIEW": 4
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Thank you, Chairman Mike Rogers, for your leadership working with President Donald Trump. As the grateful father of four sons who served overseas in Iraq, Egypt and Afghanistan, I "
+    }
+   ]
+  },
+  {
+   "a": "John Thune",
+   "b": "Tim Scott",
+   "windows": 6,
+   "distinct": 5,
+   "surplus": 1,
+   "distinct400": 5,
+   "n_scored": 6,
+   "pos": 5,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 26,
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Tim Scott is the real deal. MCKEND (voice-over): Scott joins a growing field of GOP hopefuls."
+    }
+   ]
+  },
+  {
+   "a": "Maria Cantwell",
+   "b": "Chuck Grassley",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 5,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 15,
+    "INTERVIEW": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ress plays in ensuring our economy remains strong, and very important for the American people, to lower costs. That is why today I am inducing legislation by myself and Senator Gra"
+    }
+   ]
+  },
+  {
+   "a": "John Cornyn",
+   "b": "Tim Scott",
+   "windows": 6,
+   "distinct": 5,
+   "surplus": 1,
+   "distinct400": 5,
+   "n_scored": 6,
+   "pos": 6,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 22,
+    "INTERVIEW": 2,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "their partnership on this legislation. I especially want to recognize the chairman of the Banking Committee, which has principal jurisdiction over this subject matter, Senator Tim "
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Adelita Grijalva",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 8
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ng regularly reading for fun outside of school. We need urgent action to ensure that all children have the means and the right to read. That is why I am pleased to join Representat"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Jared Huffman",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 7,
+    "PRESS_OFFICIAL_MENTION": 5
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "am determined to do my part to protect our public lands and waters at the Federal level. I would like to thank my colleagues and conservation champions, Representatives Jared Huffm"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Salud Carbajal",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 7
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "o do my part to protect our public lands and waters at the Federal level. I would like to thank my colleagues and conservation champions, Representatives Jared Huffman, Salud Carba"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Judy Chu",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ect our public lands and waters at the Federal level. I would like to thank my colleagues and conservation champions, Representatives Jared Huffman, Salud Carbajal, and Judy Chu, f"
+    }
+   ]
+  },
+  {
+   "a": "Charles Schumer",
+   "b": "Elizabeth Warren",
+   "windows": 8,
+   "distinct": 7,
+   "surplus": 1,
+   "distinct400": 7,
+   "n_scored": 8,
+   "pos": 6,
+   "neg": 0,
+   "neu": 1,
+   "form": 1,
+   "net": 0.857,
+   "sources": {
+    "CREC": 13,
+    "INTERVIEW": 9
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "dges. And what that will do, I believe, is unite not only Democrats in the Senate. You've seen in our leadership team this kind of message has gotten Bernie Sanders and Elizabeth W"
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Jack Reed",
+   "windows": 7,
+   "distinct": 6,
+   "surplus": 1,
+   "distinct400": 6,
+   "n_scored": 7,
+   "pos": 4,
+   "neg": 0,
+   "neu": 1,
+   "form": 2,
+   "net": 0.8,
+   "sources": {
+    "CREC": 18,
+    "CHRG": 39
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ation Act, legislation to help preserve access by our Nation's fishermen and maritime workers to the waterfronts in coastal communities. I would like to thank my friend Senator Jac"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Robert Scott",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ake them healthy and safe learning environments. It will also improve student learning, reduce carbon emissions, and create jobs. That is why I am proud to partner with Representat"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "John Larson",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 7
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ssing inequality, strengthening civil society and democratic institutions, and leaving a healthy, resilient planet to future generations. That is why I am proud to join Congressman"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Tim Scott",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 6,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today, I am pleased to introduce the Stem Cell Therapeutic and Research Reauthorization Act of 2026 with Senators Tim Scott, Tina Smith, and James Lankford. Our bipa"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Tina Smith",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 4,
+    "PRESS_OFFICIAL_MENTION": 9
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today, I am pleased to introduce the Stem Cell Therapeutic and Research Reauthorization Act of 2026 with Senators Tim Scott, Tina Smith, and James Lankford. Our bipa"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "James Lankford",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 6,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today, I am pleased to introduce the Stem Cell Therapeutic and Research Reauthorization Act of 2026 with Senators Tim Scott, Tina Smith, and James Lankford. Our bipa"
+    }
+   ]
+  },
+  {
+   "a": "Charles Schumer",
+   "b": "Raphael Warnock",
+   "windows": 8,
+   "distinct": 7,
+   "surplus": 1,
+   "distinct400": 7,
+   "n_scored": 8,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 4,
+   "net": 1.0,
+   "sources": {
+    "CREC": 9,
+    "INTERVIEW": 10
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Madam President, if there is no further business to come before the Senate, I ask that it stand adjourned under the previous order following the remarks of Senator Raphael Warnock,"
+    }
+   ]
+  },
+  {
+   "a": "John Kennedy",
+   "b": "Brian Schatz",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 8,
+    "CHRG": 2
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CHRG",
+     "w": "o the foreign satellite companies and let them sell it to the 5G companies and keep the money. And I didn't like that, and neither did Senator Cantwell, and neither did Senator Sch"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Tim Sheehy",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 5,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "it sets up a situation where our heroes are sometimes required to go without pay. This is unacceptable, and we must end this arbitrary cap. I want to thank my colleague Senator She"
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Mark Warner",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 12
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "oving Retirement Security for Family Caregiver Act and the Catching Up Family Caregivers Act. These bills, which I am introducing today with my colleague from Virginia, Senator War"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Tammy Duckworth",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 5,
+    "PRESS_OFFICIAL_MENTION": 5
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "h worse. Today, I am pleased to introduce the Supporting Our Direct Care Workforce and Family Caregivers Act along with my colleagues Senators Bob Casey, Maggie Hassan, Tammy Duckw"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Susan Collins",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 4,
+   "neg": 0,
+   "neu": 1,
+   "form": 0,
+   "net": 0.8,
+   "sources": {
+    "CREC": 30,
+    "CHRG": 4
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "the Federal Government's response to homelessness. In 2009, the Homeless Emergency Assistance and Rapid Transition to Housing, HEARTH, Act, which I authored along with Senator Coll"
+    }
+   ]
+  },
+  {
+   "a": "Elizabeth Warren",
+   "b": "Amy Klobuchar",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "form": 4,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 9,
+    "PRESS_OFFICIAL_MENTION": 6
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "SEIU -- all the unions are in the house. LAH (voice-over): -- to Minnesota Sen. Amy Klobuchar."
+    }
+   ]
+  },
+  {
+   "a": "Ron Wyden",
+   "b": "Mike Rogers",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "CREC": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "s. Senators Cotton and I are not alone in recognizing the seriousness of this national security threat. Last year, then-Director of the National Security Agency Admiral Michael Rog"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Angus King",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ity, and skilled workforce we need to confront the public health threats of today and tomorrow. Today, I am pleased to introduce with my colleagues, Senator Isakson and Senator Kin"
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Shelley Capito",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "CHRG": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "nd provide many of the supports that they need to prepare for, succeed in, and graduate from higher education programs. I would very much like to thank Senator Baldwin, Senator Cap"
+    }
+   ]
+  },
+  {
+   "a": "Mazie Hirono",
+   "b": "Doris Matsui",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Patsy T. Mink and Louise M. Slaughter Gender Equity in Education Act, which I was proud to reintroduce today with several of my Senate colleagues. I also want to thank Congresswoma"
+    }
+   ]
+  },
+  {
+   "a": "Ron Wyden",
+   "b": "Debbie Dingell",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today I am joined by my colleagues Senator Joni Ernst, Congressman Rob Bishop, and Congresswoman Debbie Dingell to introduce the bipartisan Recreation Not Red Tape ("
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Gary Peters",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 5
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, I rise today to join my colleague from Michigan, Senator Peters, in introducing legislation to expand Medicare beneficiaries' access to Medical Nutrition Therapy, or"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Robert Scott",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 5
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "cy, Choose Clean Water Coalition, American Flood Coalition Action, the Nature Conservancy, Southern Environmental Law Center, and Wetlands Watch. I was glad to see that Representat"
+    }
+   ]
+  },
+  {
+   "a": "John Kennedy",
+   "b": "Maria Cantwell",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 5,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 5,
+    "CHRG": 2
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CHRG",
+     "w": "h a proposal to give that C-band to the foreign satellite companies and let them sell it to the 5G companies and keep the money. And I didn't like that, and neither did Senator Can"
+    }
+   ]
+  },
+  {
+   "a": "John Cornyn",
+   "b": "Steve Daines",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "CREC": 1,
+    "INTERVIEW": 2,
+    "PRESS_OFFICIAL_MENTION": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Rally to Ken Paxton in Texas May 27 Senate Majority Leader John Thune Returns To The Program May 13 President Donald Trump Returns To The Hugh Hewitt Show May 4 Montana Senator Ste"
+    }
+   ]
+  },
+  {
+   "a": "James McGovern",
+   "b": "Elizabeth Warren",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 3,
+   "neg": 0,
+   "neu": 2,
+   "form": 0,
+   "net": 0.6,
+   "sources": {
+    "CREC": 3,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Count me in, @SenWarren. After the 2008 financial crisis, Congress said “never again,” yet Trump rolled back regulations after Big Banks spent millions in lobbying. Americans deser"
+    }
+   ]
+  },
+  {
+   "a": "Tom Cotton",
+   "b": "Richard Durbin",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 3,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 12
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "I didn't hear it. And I was sitting no further away from Donald Trump than Dick Durbin was. And I know -- and I know what Dick Durbin has said about Donald, or about the president'"
+    }
+   ]
+  },
+  {
+   "a": "Bernard Sanders",
+   "b": "Charles Schumer",
+   "windows": 7,
+   "distinct": 6,
+   "surplus": 1,
+   "distinct400": 6,
+   "n_scored": 7,
+   "pos": 2,
+   "neg": 3,
+   "neu": 2,
+   "form": 0,
+   "net": -0.143,
+   "sources": {
+    "CREC": 13,
+    "INTERVIEW": 15
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Leaders of our country, President Trump, President-elect Biden, Minority Leader Chuck Schumer, the speaker of the House, Nancy Pelosi, are all in agreement: We have got to raise th"
+    }
+   ]
+  },
+  {
+   "a": "Amy Klobuchar",
+   "b": "Ted Cruz",
+   "windows": 6,
+   "distinct": 5,
+   "surplus": 1,
+   "distinct400": 5,
+   "n_scored": 6,
+   "pos": 0,
+   "neg": 5,
+   "neu": 0,
+   "form": 1,
+   "net": -1.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 16
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "will drive women to the polls and men, anyone, that 80 percent of the public who believes that health care decisions should be made by a woman and her doctor and not by Ted Cruz."
+    }
+   ]
+  },
+  {
+   "a": "Dan Sullivan",
+   "b": "Brian Schatz",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Well, I think that's changing. So, just - we just introduced this last week. Senator Brian Schatz from Hawaii, Mazie Hirono from Hawaii, Joe Manchin from West Virginia -"
+    }
+   ]
+  },
+  {
+   "a": "Mike Lee",
+   "b": "Chuck Grassley",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 14
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "her Enforcement Against Monopolists Act, or the TEAM Act. I am grateful that my good friend and ranking member of the Judiciary Committee, the senior Senator from Iowa, Chuck Grass"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Tammy Baldwin",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 11,
+    "PRESS_OFFICIAL_MENTION": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ely on the capacity and competence of the child welfare workforce. This is why I am pleased to introduce today the Child Welfare Workforce Support Act with my colleague Senator Bal"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Bill Cassidy",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3,
+    "INTERVIEW": 1,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Madam President, today I am introducing the Auto Reenroll Act of 2023, alongside Senator Cassidy. Enacting this bill would improve financial security for Americans by strengthening"
+    }
+   ]
+  },
+  {
+   "a": "Mazie Hirono",
+   "b": "Grace Meng",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 7
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "eunions. Time is of the essence for those who have been seeking the opportunity to reconnect with their loved ones for nearly seven decades. Thanks to the leadership of Rep. Grace "
+    }
+   ]
+  },
+  {
+   "a": "Ron Wyden",
+   "b": "John Larson",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 1,
+   "form": 0,
+   "net": 0.75,
+   "sources": {
+    "CREC": 13
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "isability Rights Education Fund, and the Consortium for Constituents with Disabilities, CCD, Social Security Task Force. I am grateful that Social Security Subcommittee Ranking Mem"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Angus King",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "CREC": 9
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today I am introducing the Historic Lighthouse Resiliency Act with Senator King. This legislation would authorize the Army Corps of Engineers to partner with State, "
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Jack Reed",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 2,
+   "neg": 0,
+   "neu": 1,
+   "form": 0,
+   "net": 0.667,
+   "sources": {
+    "CREC": 4,
+    "INTERVIEW": 1,
+    "PRESS_OFFICIAL_MENTION": 4
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "am pleased to introduce the Supporting Our Direct Care Workforce and Family Caregivers Act along with my colleagues Senators Bob Casey, Maggie Hassan, Tammy Duckworth, Jack Reed, R"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Jeff Merkley",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 9,
+    "PRESS_OFFICIAL_MENTION": 11
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, today I am introducing the Food and Fuel Family Savings Act, FFFSA, along with Senator Whitehouse, Senator Feinstein, and Senator Merkley. Price increases, particula"
+    }
+   ]
+  },
+  {
+   "a": "Charles Schumer",
+   "b": "Mitch McConnell",
+   "windows": 8,
+   "distinct": 7,
+   "surplus": 1,
+   "distinct400": 7,
+   "n_scored": 8,
+   "pos": 5,
+   "neg": 2,
+   "neu": 1,
+   "form": 0,
+   "net": 0.375,
+   "sources": {
+    "CREC": 642,
+    "INTERVIEW": 267
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "The Netanyahu coalition no longer fits the needs of Israel after October 7th. SEN. MITCH McCONNELL: This is unprecedented. We should not treat fellow democracies this way at all."
+    }
+   ]
+  },
+  {
+   "a": "Jamie Raskin",
+   "b": "Jim Jordan",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 2,
+   "neg": 1,
+   "neu": 0,
+   "form": 2,
+   "net": 0.333,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 5
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Thank you, Chairman Jordan. There are just three basic points that all Americans need to understand about Mr. Hur's report. Number one, the special counsel exonerates President Bid"
+    }
+   ]
+  },
+  {
+   "a": "Ted Lieu",
+   "b": "Jim Jordan",
+   "windows": 7,
+   "distinct": 6,
+   "surplus": 1,
+   "distinct400": 6,
+   "n_scored": 7,
+   "pos": 0,
+   "neg": 7,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 3,
+    "X": 6
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW",
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Dear Chair @Jim_Jordan: Censoring someone would be to prevent them from saying something. Like when Trump tried to take down tweets critical of him. Inviting RFK Jr. to a congressi"
+    }
+   ]
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Mitch McConnell",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 1,
+   "neg": 0,
+   "neu": 1,
+   "form": 3,
+   "net": 0.5,
+   "sources": {
+    "CREC": 8,
+    "INTERVIEW": 2,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "E. Schumer, Majority Leader, U.S. Senate, Washington, DC. Hon. Mitch McConnell, Minority Leader, U.S. Senate, Washington, DC. Dear Majority Leader Schumer and Minority Leader McCon"
+    }
+   ]
+  },
+  {
+   "a": "Ron Johnson",
+   "b": "Rick Scott",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 5,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Working with President Trump, he's going to (INAUDIBLE) Rick Scott. So I urge the president to come out and endorse Rick Scott publicly. It's probably what Rick is going to need to"
+    }
+   ]
+  },
+  {
+   "a": "Jared Moskowitz",
+   "b": "Byron Donalds",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "what she is doing when it comes to FEMA. Look, FEMA needed reform. The emergency management industry has been saying that for a long period of time. I have a bill with Byron Donald"
+    }
+   ]
+  },
+  {
+   "a": "Mark Kelly",
+   "b": "John James",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "ple about the issues that they care about. So I was outside of Detroit there in Warren talking to folks who don't get to hear from their member of Congress, a guy named John James."
+    }
+   ]
+  },
+  {
+   "a": "Daniel Goldman",
+   "b": "James Comer",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 5
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "There's nothing new. This is all a charade. This is all an effort by the DOJ at Trump's direction to collaborate with Chairman James Comer and the top Republicans in Congress to gi"
+    }
+   ]
+  },
+  {
+   "a": "Chris Van Hollen",
+   "b": "Josh Hawley",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 1,
+   "neg": 3,
+   "neu": 0,
+   "form": 0,
+   "net": -0.5,
+   "sources": {
+    "INTERVIEW": 3,
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "This is just grossly irresponsible by Senator Hawley."
+    }
+   ]
+  },
+  {
+   "a": "Elizabeth Warren",
+   "b": "Charles Schumer",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 1,
+   "form": 0,
+   "net": 0.75,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 2,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW",
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": ".@MOHELA, one of the nation’s largest student loan servicers, is reportedly failing to do the most basic functions of the job, delaying relief for public servants and missing payme"
+    }
+   ]
+  },
+  {
+   "a": "Adelita Grijalva",
+   "b": "Mike Johnson",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 1,
+   "neg": 2,
+   "neu": 2,
+   "form": 0,
+   "net": -0.2,
+   "sources": {
+    "INTERVIEW": 4,
+    "CREC": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "We're using texts and signal and Google Chat. CONTORNO (voice-over): Speaker Mike Johnson says he'll swear her in when the House comes back in session and reopens the government. U"
+    }
+   ]
+  },
+  {
+   "a": "Wesley Hunt",
+   "b": "John Cornyn",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "In 2004, I graduated from West Point and joined the army. By then, John Cornyn had already been a politician for 20 years. Now John Cornyn is spending millions lying about me in a "
+    }
+   ]
+  },
+  {
+   "a": "Tim Scott",
+   "b": "John Cornyn",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "If President Trump endorses John Cornyn, it's a guaranteed win for us in Texas. If it's not John Cornyn, it's a guaranteed 100 plus million dollars spent, and no guarantee that we "
+    }
+   ]
+  },
+  {
+   "a": "Mike Johnson",
+   "b": "Hakeem Jeffries",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 1,
+   "neg": 4,
+   "neu": 0,
+   "form": 0,
+   "net": -0.6,
+   "sources": {
+    "INTERVIEW": 38,
+    "CREC": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Hakeem Jeffries, my counterpart, you know, the Democrat leader here in the House, was booed at some of these return parties last night. Hakeem Jeffries has a tall task ahead of him"
+    }
+   ]
+  },
+  {
+   "a": "Nancy Mace",
+   "b": "Lindsey Graham",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 1,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -0.333,
+   "sources": {
+    "INTERVIEW": 4,
+    "CREC": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "I want President Trump to take Lindsey Graham out of the Situation Room."
+    }
+   ]
+  },
+  {
+   "a": "Henry Cuellar",
+   "b": "Vicente Gonzalez",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "hite House, I've spoken to the CBP acting commissioner, I've talked-- talked to a lot of folks on the ground. But I-- certainly myself, the other congressmen down here, Congressman"
+    }
+   ]
+  },
+  {
+   "a": "Ted Cruz",
+   "b": "Lindsey Graham",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "INTERVIEW": 12,
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "I-- I think it'd make a lot of sense for Rudy to testify before the Senate Judiciary Committee. That's-- that's ultimately a question for the Committee Chairman Lindsey Graham. But"
+    }
+   ]
+  },
+  {
+   "a": "Mike Lee",
+   "b": "Mitch McConnell",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 1,
+   "neg": 2,
+   "neu": 1,
+   "form": 1,
+   "net": -0.25,
+   "sources": {
+    "INTERVIEW": 5,
+    "CREC": 1
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Absolutely not. No, never, under any circumstances would I ever support that. Look, I like Senator McConnell, I respect him as our Senate minority leader. But this was a bad idea. "
+    }
+   ]
+  },
+  {
+   "a": "Rand Paul",
+   "b": "Mike Lee",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 5,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 5,
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Oh, and my buddy, Mike Lee as well."
+    }
+   ]
+  },
+  {
+   "a": "Rick Scott",
+   "b": "Mike Haridopolos",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Well, I think we’re going to have a lot of good Republicans running, it appears. I work well with Senate President Mike Haridopolos, but it looks like we’re going to have three or "
+    }
+   ]
+  },
+  {
+   "a": "Mazie Hirono",
+   "b": "Dan Sullivan",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, I rise today to introduce the ``Korean War Divided Families Reunification Act'' with my colleague Senator Sullivan. This bipartisan piece of legislation would open o"
+    }
+   ]
+  },
+  {
+   "a": "Mike Rogers",
+   "b": "Mitch McConnell",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "You're watching Mitch McConnell eat a manure sandwich in this whole process."
+    }
+   ]
+  },
+  {
+   "a": "Chris Van Hollen",
+   "b": "Cindy Hyde-Smith",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 6,
+    "CHRG": 4
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "tunity and more shared prosperity for all. As chair of the Financial Services and General Government Appropriations Subcommittee, I developed this bill with the help of Ranking Mem"
+    }
+   ]
+  },
+  {
+   "a": "Alexandria Ocasio-Cortez",
+   "b": "Paul Gosar",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 0,
+   "neg": 5,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "CREC": 1,
+    "INTERVIEW": 9
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "What is so hard -- what is so hard about saying that this is wrong? This is not about me. This is not about Representative Gosar. But this is about what we are willing to accept."
+    }
+   ]
+  },
+  {
+   "a": "James McGovern",
+   "b": "Steve Scalise",
+   "windows": 7,
+   "distinct": 6,
+   "surplus": 1,
+   "distinct400": 6,
+   "n_scored": 7,
+   "pos": 0,
+   "neg": 2,
+   "neu": 5,
+   "form": 0,
+   "net": -0.286,
+   "sources": {
+    "CREC": 4,
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "blicans are bitterly divided, the race to elect the next speaker is in full swing. Two leading contenders for the role are emerging, including House Republican majority leader Stev"
+    }
+   ]
+  },
+  {
+   "a": "Tim Scott",
+   "b": "Bernard Sanders",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "CREC": 1,
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "I do think so. If there is a second choice other than himself, it would be Bernie Sanders. Bernie Sanders brings that outside game in a similar fashion that President Trump did in "
+    }
+   ]
+  },
+  {
+   "a": "Nancy Pelosi",
+   "b": "Nikema Williams",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 5,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "I do want to acknowledge Nikema Williams, who is here, because, in some ways, she made today possible. Thank you. BASH (voice-over): High praise for Congresswoman Nikema Williams, "
+    }
+   ]
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Rick Scott",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Roy Blunt, Shelley Moore Capito, Patrick J. Leahy, Kyrsten Sinema, Jon Tester, Ron Johnson, Amy Klobuchar, Jon Ossoff, John Barrasso, Patty Murray, Sheldon Whitehouse, Rick Scott. "
+    }
+   ]
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Mark Kelly",
+   "windows": 6,
+   "distinct": 5,
+   "surplus": 1,
+   "distinct400": 5,
+   "n_scored": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "form": 2,
+   "net": 0.0,
+   "sources": {
+    "CREC": 2,
+    "INTERVIEW": 5,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "a replacement before November. Yet if a vote slips there's another complication if Arizona's appointed senator Martha McSally loses in November. That means the Democrat Mark Kelly "
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Martin Heinrich",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 12
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. President, I rise today to join my colleague from New Mexico, Senator Heinrich, in introducing the Two-Generation Economic Empowerment Act. Our bipartisan bill would support an"
+    }
+   ]
+  },
+  {
+   "a": "John Thune",
+   "b": "Amy Klobuchar",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 20,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "cisions about their operations. We need to see more of this kind of analysis. That is why, earlier this year, I introduced my bipartisan Agriculture Innovation Act with Senator Klo"
+    }
+   ]
+  },
+  {
+   "a": "Raphael Warnock",
+   "b": "Richard Durbin",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "wing problems before additional consumers or legitimate American businesses pay the price. The common-sense measures of the INFORM Consumers Act, introduced by Senators Dick Durbin"
+    }
+   ]
+  },
+  {
+   "a": "Raphael Warnock",
+   "b": "Bill Cassidy",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ditional consumers or legitimate American businesses pay the price. The common-sense measures of the INFORM Consumers Act, introduced by Senators Dick Durbin (D-IL) and Bill Cassid"
+    }
+   ]
+  },
+  {
+   "a": "Raphael Warnock",
+   "b": "Gus Bilirakis",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "nse measures of the INFORM Consumers Act, introduced by Senators Dick Durbin (D-IL) and Bill Cassidy (R-LA) in the Senate, and Representatives Jan Schakowsky (D-IL) and Gus Bilirak"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Donald Beyer",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "h as the Syphax, Burke, Parks, and Gray families. I am pleased that companion legislation is also being introduced in the U.S. House of Representatives by my colleague, Representat"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Elizabeth Warren",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "form": 3,
+   "net": 1.0,
+   "sources": {
+    "CREC": 1,
+    "INTERVIEW": 2,
+    "CHRG": 1,
+    "PRESS_OFFICIAL_MENTION": 13
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Thank you, Senator Tillis. Let me recognize Senator Warren. And I'm going over for the vote. Senator Hirono will preside in my absence. Senator Warren, please?"
+    }
+   ]
+  },
+  {
+   "a": "Mark Takano",
+   "b": "Sanford Bishop",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. Speaker, I yield 3 minutes to the gentleman from Georgia (Mr. Bishop). Chairman Sanford Bishop is a very good friend who serves as a subcommittee chair on the Appropriations Co"
+    }
+   ]
+  },
+  {
+   "a": "Pramila Jayapal",
+   "b": "Mark Takano",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Mr. Speaker, I rise in strong support of the Veteran Service Recognition Act to stop the deportation of immigrant veterans. I thank my colleague, Representative Mark Takano, for br"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Todd Young",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 12
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "duce bipartisan legislation--the Adult Education Workforce Opportunity and Reskilling for Knowledge and Success Act, or the Adult Education WORKS Act--with my colleague Senator You"
+    }
+   ]
+  },
+  {
+   "a": "Tim Kaine",
+   "b": "Kim Schrier",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "profit entities. Language to reauthorize the IECMH program was included in the Supporting Children's Mental Health Care Access Act of 2022 introduced by Representatives Kim Schrier"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Katie Britt",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 8,
+    "CHRG": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Madam President, today I am introducing the Helping More Families Save Act with Senator Britt. This bipartisan legislation would help more families in HUD-assisted housing build sa"
+    }
+   ]
+  },
+  {
+   "a": "James McGovern",
+   "b": "Jim Jordan",
+   "windows": 6,
+   "distinct": 5,
+   "surplus": 1,
+   "distinct400": 5,
+   "n_scored": 6,
+   "pos": 0,
+   "neg": 2,
+   "neu": 4,
+   "form": 0,
+   "net": -0.333,
+   "sources": {
+    "CREC": 12,
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "ded, the race to elect the next speaker is in full swing. Two leading contenders for the role are emerging, including House Republican majority leader Steve Scalise and Representat"
+    }
+   ]
+  },
+  {
+   "a": "Charles Schumer",
+   "b": "Bernard Sanders",
+   "windows": 8,
+   "distinct": 7,
+   "surplus": 1,
+   "distinct400": 7,
+   "n_scored": 8,
+   "pos": 0,
+   "neg": 0,
+   "neu": 5,
+   "form": 3,
+   "net": 0.0,
+   "sources": {
+    "CREC": 22,
+    "INTERVIEW": 14
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "ugh. To do small things with 50 votes is rough. To pass such a major piece of legislation with only 50 votes, an intransigent Republican minority, a caucus running from Bernie Sand"
+    }
+   ]
+  },
+  {
+   "a": "Jack Reed",
+   "b": "Brian Fitzpatrick",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "olence and abuse that is occurring on commercial flights across the country. I am pleased to be joined in this effort by Representatives Eric Swalwell of California and Brian Fitzp"
+    }
+   ]
+  },
+  {
+   "a": "Susan Collins",
+   "b": "Richard Durbin",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 13,
+    "CHRG": 1
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Madam President, I rise today to introduce the Clean Cooking Support Act. I am pleased to be joined in this effort by my friend and colleague Senator Durbin. Our bill aims to addre"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Dan Newhouse",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "o thank my colleagues from California, Washington, and Oregon for joining me to introduce this bill and for our partners in the House, Representatives Mike Thompson and Dan Newhous"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Ted Lieu",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "sing funding sources. Affordable housing is essential infrastructure. Every person deserves dignity, security, and a space of their own. I want to thank Representatives Ted Lieu an"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Suzanne Bonamici",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "fits for millions of low-income college students, this bill works to tackle barriers students face with the eligibility requirements currently in place. I want to thank Representat"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Zoe Lofgren",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 3,
+    "PRESS_OFFICIAL_MENTION": 8
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "to thank Senators Steve Daines, Martin Heinrich, Ben Ray Lujan, Catherine Cortez Masto, Jacky Rosen, and Jon Tester for joining me in introducing this bill, as well as Representati"
+    }
+   ]
+  },
+  {
+   "a": "Lindsey Graham",
+   "b": "Tommy Tuberville",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 0,
+   "neg": 5,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 9,
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "No matter whether you believe it or not, Senator Tuberville, this is doing great damage to our military."
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Steve Daines",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ork. The ``Wlldfand Firefighter Fair Pay Act'' complements these efforts by ensuring that any pay bump would not be limited by a pay cap. I would like to thank Senators Steve Daine"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Martin Heinrich",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 12
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "dfand Firefighter Fair Pay Act'' complements these efforts by ensuring that any pay bump would not be limited by a pay cap. I would like to thank Senators Steve Daines, Martin Hein"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Jacky Rosen",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 12
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ts by ensuring that any pay bump would not be limited by a pay cap. I would like to thank Senators Steve Daines, Martin Heinrich, Ben Ray Lujan, Catherine Cortez Masto, Jacky Rosen"
+    }
+   ]
+  },
+  {
+   "a": "Mike Collins",
+   "b": "Jim Jordan",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 1,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Chairman @Jim_Jordan brought receipts. https://t.co/MYE2Avbetl Greg Price (@greg_price11): Rep. Daniel Goldman (who bought a congressional seat) says \"you cannot find actual eviden"
+    }
+   ]
+  },
+  {
+   "a": "Delia Ramirez",
+   "b": "Ayanna Pressley",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Thank you @RepPressley for standing up for the people of Chicago! Congresswoman Ayanna Pressley (@RepPressley): The @CFPB is an essential agency doing exactly what it's meant to do"
+    }
+   ]
+  },
+  {
+   "a": "Thom Tillis",
+   "b": "Charles Schumer",
+   "windows": 8,
+   "distinct": 7,
+   "surplus": 1,
+   "distinct400": 7,
+   "n_scored": 8,
+   "pos": 0,
+   "neg": 8,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "CREC": 9,
+    "INTERVIEW": 12,
+    "CHRG": 2
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "The first vote that Cal Cunningham would make would be for Chuck Schumer for leader, and Chuck Schumer will absolutely work to pack the courts and take this country in a direction "
+    }
+   ]
+  },
+  {
+   "a": "Chip Roy",
+   "b": "Steve Scalise",
+   "windows": 5,
+   "distinct": 4,
+   "surplus": 1,
+   "distinct400": 4,
+   "n_scored": 5,
+   "pos": 4,
+   "neg": 1,
+   "neu": 0,
+   "form": 0,
+   "net": 0.6,
+   "sources": {
+    "CREC": 1,
+    "INTERVIEW": 4
+   },
+   "srcs_of_dupes": [
+    "CREC",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Leader Scalise, he's a good friend. I've had great conversations with him, Jim, Kevin, other people. We're -- we're working hard. We're going to unite. FOX (voice-over): House Judi"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "John Garamendi",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 4
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ifornia's and the Biden-Harris Administration's goals to conserve 30 percent of our public lands and waters by 2030. I would like to thank my colleagues Representatives John Garame"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Mike Thompson",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 9,
+    "PRESS_OFFICIAL_MENTION": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "sed data for actual risk management and mitigation tools to protect the U.S. wine industry. I would like to thank my colleagues Senator Jeff Merkley and Representatives Mike Thomps"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Ken Calvert",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2,
+    "PRESS_OFFICIAL_MENTION": 3
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "tive testimony from the Bureau of Reclamation and passed through the Senate Committee on Energy and Natural Resources by voice vote last Congress. I would like to thank Congressman"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Jeff Merkley",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 1,
+   "net": 1.0,
+   "sources": {
+    "CREC": 4,
+    "PRESS_OFFICIAL_MENTION": 24
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "Act, to ensure we have strong science-based data for actual risk management and mitigation tools to protect the U.S. wine industry. I would like to thank my colleagues Senator Jeff"
+    }
+   ]
+  },
+  {
+   "a": "Alex Padilla",
+   "b": "Sam Liccardo",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CREC": 2
+   },
+   "srcs_of_dupes": [
+    "CREC"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CREC",
+     "w": "ion visitors each year and strives to be an accessible recreational area for all people. Thanks to continuing efforts by the Peninsula Open Space Trust, local partners, Congressman"
+    }
+   ]
+  },
+  {
+   "a": "Gregory Meeks",
+   "b": "Bernard Sanders",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 3,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Look, the difference for me is Bernie Sanders is not a Democrat. So I don't understand why Bernie Sanders, who does not want to become a member of the Democratic Party..."
+    }
+   ]
+  },
+  {
+   "a": "Christopher Coons",
+   "b": "Nancy Pelosi",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "form": 2,
+   "net": 0.0,
+   "sources": {
+    "INTERVIEW": 12
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "rt of what all of us in public life do. Speaker Johnson of the House just confused Iran and Israel. He said, we are beginning to send aid to Iran. Donald Trump confused Nancy Pelos"
+    }
+   ]
+  },
+  {
+   "a": "Daniel Goldman",
+   "b": "Adam Schiff",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 8
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "ree witnesses. They were also allowed to call their own witnesses for the depositions. They chose not to do that. The only witness they requested for the deposition was Chairman Sc"
+    }
+   ]
+  },
+  {
+   "a": "Steve Cohen",
+   "b": "Susan Collins",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 1,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -0.333,
+   "sources": {
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Thank you very much. After President Trump was not impeached, Susan Collins said, he -- Susan Collins said, he's learned a pretty big lesson. He was impeached. [14:00:06]"
+    }
+   ]
+  },
+  {
+   "a": "Nancy Pelosi",
+   "b": "Patty Murray",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 5
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "As you can see, the distinguished leader on the Appropriations Committee, Senator Patty Murray on--"
+    }
+   ]
+  },
+  {
+   "a": "Adam Schiff",
+   "b": "Ron Johnson",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 3,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 5
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "I now want to look even more deeply at the fake electors scheme -- COOPER (voice-over): According to the January 6th Select Committee, an aide to Wisconsin Sen. Ron Johnson, tried "
+    }
+   ]
+  },
+  {
+   "a": "Ted Lieu",
+   "b": "Nancy Pelosi",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "INTERVIEW": 11
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "All of us, including Speaker Pelosi, would prefer that Donald Trump simply do the right thing and resign or that vice president Pence actually show some spine, at least for himself"
+    }
+   ]
+  },
+  {
+   "a": "Lauren Boebert",
+   "b": "Andy Biggs",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 2,
+   "neg": 0,
+   "neu": 1,
+   "form": 0,
+   "net": 0.667,
+   "sources": {
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "right onto the floor without being screened. Congressmen Mullin yelling at Capitol Hill police, \"It is my constitutional right to walk through and they cannot stop me.\" Congressman"
+    }
+   ]
+  },
+  {
+   "a": "Nancy Pelosi",
+   "b": "Tim Scott",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Yes, I think so. I'm very proud of Karen Bass, who has authored the bill in the House, now working in a bipartisan way in the House and in the Senate with Senator Tim Scott."
+    }
+   ]
+  },
+  {
+   "a": "Adam Schiff",
+   "b": "Andy Biggs",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "INTERVIEW": 2
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Did you also receive a call from U.S. Representative Andy Biggs of Arizona on the morning of January 6th?"
+    }
+   ]
+  },
+  {
+   "a": "Raphael Warnock",
+   "b": "Tim Scott",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 3,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "If you liked my remarks, my name is Raphael Warnock. If you didn't, I'm Senator Tim Scott. Good night, everybody. [13:27:49]"
+    }
+   ]
+  },
+  {
+   "a": "Michael Turner",
+   "b": "Nancy Pelosi",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 4,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 13
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Democrat votes to try to avert a shutdown. But they're using Democrat votes to try to cause a shutdown. And these individuals, these Republican holdouts are voting with Nancy Pelos"
+    }
+   ]
+  },
+  {
+   "a": "Thomas Kean",
+   "b": "Nancy Pelosi",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "INTERVIEW": 3
+   },
+   "srcs_of_dupes": [
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "INTERVIEW",
+     "w": "Since going down to Washington D.C. he has voted with Nancy Pelosi 97 percent of the time. And when you vote with Nancy Pelosi 97 percent of the time, it means you're voting agains"
+    }
+   ]
+  },
+  {
+   "a": "Chris Van Hollen",
+   "b": "John Fetterman",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "form": 2,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 1,
+    "CHRG": 3,
+    "PRESS_OFFICIAL_MENTION": 1
+   },
+   "srcs_of_dupes": [
+    "CHRG",
+    "INTERVIEW"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CHRG",
+     "w": "Mr. Chairman, I would like to return the favor to Senator Fetterman. The other day I had to run and he allowed me to go first. So, Senator Fetterman, please."
+    }
+   ]
+  },
+  {
+   "a": "Byron Donalds",
+   "b": "Tammy Baldwin",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "CHRG": 3
+   },
+   "srcs_of_dupes": [
+    "CHRG"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CHRG",
+     "w": "Okay. I need to get from your public calendar if you actually met with Senator Baldwin. I think the committee would like to know that. In this meeting with Senator Baldwin's staff,"
+    }
+   ]
+  },
+  {
+   "a": "Tom Emmer",
+   "b": "Ritchie Torres",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "CHRG": 2
+   },
+   "srcs_of_dupes": [
+    "CHRG"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "CHRG",
+     "w": "Yes. Madam Secretary, are you familiar with the Securing Facilities for Mental Health Services Act? It is a bipartisan bill that I have been working on with Congressman Ritchie Tor"
+    }
+   ]
+  },
+  {
+   "a": "Paul Tonko",
+   "b": "Hakeem Jeffries",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Only under @SpeakerJohnson and his MAGA @HouseGOP can this tweet by Leader @RepJeffries become evergreen in week 2. Hakeem Jeffries (@RepJeffries): House Democrats are focused on l"
+    }
+   ]
+  },
+  {
+   "a": "Anna Luna",
+   "b": "Thomas Massie",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "As I stated earlier: Suggested fine + investigation (in this case) and your case with Pelosi are totally separate. This is directly from the bill text. Has nothing to do with const"
+    }
+   ]
+  },
+  {
+   "a": "Claudia Tenney",
+   "b": "Thomas Massie",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "This is why I appreciate @RepThomasMassie! Thomas Massie (@RepThomasMassie): Don’t act like you and Liz have clean hands. Both of you donated to my primary opponent last cycle and "
+    }
+   ]
+  },
+  {
+   "a": "Jonathan Jackson",
+   "b": "Elizabeth Warren",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "SecScottBessent @SenWarren @SenAmyKlobuchar @JMilei @SecScottBessent I must’ve missed the part where #AmericaFirst meant tweeting nonstop about #Argentina while Americans suffer th"
+    }
+   ]
+  },
+  {
+   "a": "Jonathan Jackson",
+   "b": "Amy Klobuchar",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "SecScottBessent @SenWarren @SenAmyKlobuchar @JMilei @SecScottBessent I must’ve missed the part where #AmericaFirst meant tweeting nonstop about #Argentina while Americans suffer th"
+    }
+   ]
+  },
+  {
+   "a": "Bill Huizenga",
+   "b": "Charles Schumer",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "How many things can @SenSchumer get wrong in one tweet? NY has moved to ban gas stoves in new builds. Meanwhile the @HouseGOP has passed the Limit, Save, Grow Act to raise the debt"
+    }
+   ]
+  },
+  {
+   "a": "Thomas Massie",
+   "b": "Anna Luna",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "pkcapitol @RepLuna @JaxAlemany Now that the story has been debunked, it seems like the proper course is to apologize to @RepLuna and delete this tweet."
+    }
+   ]
+  },
+  {
+   "a": "Thomas Massie",
+   "b": "Danny Davis",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 2,
+   "neu": 0,
+   "form": 0,
+   "net": -1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "It’s likely @RepDannyDavis doesn’t know his staff chose to tweet a character attack on his colleagues, rather than a reasoned critique of our anti-war position. Rep. Danny K. Davis"
+    }
+   ]
+  },
+  {
+   "a": "John Boozman",
+   "b": "Tim Scott",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "PRESS_OFFICIAL_MENTION": 2,
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "CFPB's rule will decrease the availability of credit card products for those who need them most, raise rates for many borrowers who carry a balance but pay on time and increase the"
+    }
+   ]
+  },
+  {
+   "a": "Bill Hagerty",
+   "b": "French Hill",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "The public’s trust in our nation’s central bank is of paramount importance, and accounting gimmicks and backdoor transfers erode that trust. Pleased to introduce this legislation w"
+    }
+   ]
+  },
+  {
+   "a": "Jimmy Gomez",
+   "b": "Maxwell Frost",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 7
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Joined @RepMaxwellFrost to lead our colleagues in urging the @FTC to take action against rental jumk fees.#RentersCaucus is working to protect renters' rights & affordability. Reli"
+    }
+   ]
+  },
+  {
+   "a": "Sam Graves",
+   "b": "Emanuel Cleaver",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Folks across North Missouri keep getting stuck paying late fees on bills because of Postal Service delays. I've introduced the Pony Up Act with @repcleaver and @RepMarkAlford, whic"
+    }
+   ]
+  },
+  {
+   "a": "Sam Graves",
+   "b": "Mark Alford",
+   "windows": 3,
+   "distinct": 2,
+   "surplus": 1,
+   "distinct400": 2,
+   "n_scored": 3,
+   "pos": 3,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 3
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Folks across North Missouri keep getting stuck paying late fees on bills because of Postal Service delays. I've introduced the Pony Up Act with @repcleaver and @RepMarkAlford, whic"
+    }
+   ]
+  },
+  {
+   "a": "Tom Emmer",
+   "b": "Ted Cruz",
+   "windows": 4,
+   "distinct": 3,
+   "surplus": 1,
+   "distinct400": 3,
+   "n_scored": 4,
+   "pos": 4,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 4
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Any CBDC that is not open, permissionless, and private – like cash – is a surveillance tool that will be mobilized to oppress the American way of life. I am proud to have @SenTedCr"
+    }
+   ]
+  },
+  {
+   "a": "Bill Hagerty",
+   "b": "Ted Cruz",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 1,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Government bureaucrats have been far too willing to exploit the financial system to advance political agendas & target Americans. I joined @SenTedCruz in introducing legislation to"
+    }
+   ]
+  },
+  {
+   "a": "Russell Fry",
+   "b": "James Comer",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "form": 0,
+   "net": 0.0,
+   "sources": {
+    "CREC": 1,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "The Biden administration could be improperly sharing Americans' data.@RepJamesComer and I sent letters to the Treasury Department, Consumer Financial Protection Bureau, and IRS to "
+    }
+   ]
+  },
+  {
+   "a": "Daniel Goldman",
+   "b": "Maxwell Frost",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "Even as rent skyrockets, corporate landlords in NY keep burdening renters with junk fees that make it even harder for families to pay their bills.@RepMaxwellFrost's End Junk Fees f"
+    }
+   ]
+  },
+  {
+   "a": "Andrew Ogles",
+   "b": "Byron Donalds",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "CFPB has got to go. Proud to join @RepDonaldsPress effort. https://t.co/DHPBt0azRq Congressman Byron Donalds (@RepDonaldsPress): Thank you @RepMcCormick @SenRandPaul @SenKevinCrame"
+    }
+   ]
+  },
+  {
+   "a": "Suzanne Bonamici",
+   "b": "Elizabeth Warren",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "I agree with @SenWarren; we must repeal Trump's rollback of bank reforms. I'm supporting the House version of her legislation. https://t.co/sq0fpj06fU Elizabeth Warren (@SenWarren)"
+    }
+   ]
+  },
+  {
+   "a": "Seth Moulton",
+   "b": "Elizabeth Warren",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "INTERVIEW": 2,
+    "PRESS_OFFICIAL_MENTION": 2,
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "I agree with @SenWarren and @RepKatiePorter that we must reinstate these vital regulations on #BigBanks. I am proud to join their bill as a cosponsor and call on @SpeakerMcCarthy t"
+    }
+   ]
+  },
+  {
+   "a": "Dwight Evans",
+   "b": "Jesús García",
+   "windows": 2,
+   "distinct": 1,
+   "surplus": 1,
+   "distinct400": 1,
+   "n_scored": 2,
+   "pos": 2,
+   "neg": 0,
+   "neu": 0,
+   "form": 0,
+   "net": 1.0,
+   "sources": {
+    "X": 2
+   },
+   "srcs_of_dupes": [
+    "X"
+   ],
+   "dupe_groups": [
+    {
+     "n": 2,
+     "src": "X",
+     "w": "A Nov. @CFPB report on tenant background checks showed false or misleading information that prevents access to safe & stable housing. I’m proud to cosign @RepCori & @RepChuyGarcia'"
+    }
+   ]
+  }
+ ]
+}

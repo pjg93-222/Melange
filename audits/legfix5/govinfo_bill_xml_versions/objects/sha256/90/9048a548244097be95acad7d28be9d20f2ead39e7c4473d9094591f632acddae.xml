@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" dms-id="H3227712DA1AC43438FCC8E595B4575F5" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 190 RH: Saving Gig Economy Taxpayers Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-12-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IB</distribution-code>
+<calendar display="yes">Union Calendar No. 696</calendar>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 190</legis-num>
+<associated-doc role="report" display="yes">[Report No. 118–857]</associated-doc>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230109">January 9, 2023</action-date>
+<action-desc><sponsor name-id="M001205">Mrs. Miller of West Virginia</sponsor> (for herself, <cosponsor name-id="B001260">Mr. Buchanan</cosponsor>, <cosponsor name-id="F000465">Mr. Ferguson</cosponsor>, <cosponsor name-id="E000298">Mr. Estes</cosponsor>, <cosponsor name-id="K000376">Mr. Kelly of Pennsylvania</cosponsor>, <cosponsor name-id="A000375">Mr. Arrington</cosponsor>, <cosponsor name-id="S001183">Mr. Schweikert</cosponsor>, <cosponsor name-id="M001210">Mr. Murphy</cosponsor>, <cosponsor name-id="K000392">Mr. Kustoff</cosponsor>, <cosponsor name-id="S001199">Mr. Smucker</cosponsor>, <cosponsor name-id="S001172">Mr. Smith of Nebraska</cosponsor>, <cosponsor name-id="W000815">Mr. Wenstrup</cosponsor>, <cosponsor name-id="L000585">Mr. LaHood</cosponsor>, and <cosponsor name-id="H001082">Mr. Hern</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc>
+</action>
+<action display="yes">
+<action-date date="20241210">December 10, 2024</action-date>
+<action-desc>Additional sponsors: <cosponsor name-id="M000317">Ms. Malliotakis</cosponsor>, <cosponsor name-id="V000134">Ms. Van Duyne</cosponsor>, <cosponsor name-id="S001192">Mr. Stewart</cosponsor>, <cosponsor name-id="T000478">Ms. Tenney</cosponsor>, <cosponsor name-id="M001213">Mr. Moore of Utah</cosponsor>, <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>, <cosponsor name-id="S001214">Mr. Steube</cosponsor>, <cosponsor name-id="F000446">Mr. Feenstra</cosponsor>, <cosponsor name-id="M001194">Mr. Moolenaar</cosponsor>, <cosponsor name-id="C001126">Mr. Carey</cosponsor>, <cosponsor name-id="F000470">Mrs. Fischbach</cosponsor>, <cosponsor name-id="S001135">Mrs. Steel</cosponsor>, <cosponsor name-id="N000190">Mr. Norman</cosponsor>, <cosponsor name-id="D000615">Mr. Duncan</cosponsor>, <cosponsor name-id="P000605">Mr. Perry</cosponsor>, <cosponsor name-id="M001177">Mr. McClintock</cosponsor>, <cosponsor name-id="S001222">Mr. Santos</cosponsor>, <cosponsor name-id="F000475">Mr. Finstad</cosponsor>, <cosponsor name-id="V000129">Mr. Valadao</cosponsor>, <cosponsor name-id="C001118">Mr. Cline</cosponsor>, <cosponsor name-id="M001215">Mrs. Miller-Meeks</cosponsor>, <cosponsor name-id="L000597">Ms. Lee of Florida</cosponsor>, <cosponsor name-id="B000740">Mrs. Bice</cosponsor>, <cosponsor name-id="W000828">Mr. Williams of New York</cosponsor>, <cosponsor name-id="H001086">Mrs. Harshbarger</cosponsor>, <cosponsor name-id="M001224">Mr. Moran</cosponsor>, <cosponsor name-id="E000235">Mr. Ezell</cosponsor>, <cosponsor name-id="Y000067">Mr. Yakym</cosponsor>, <cosponsor name-id="B001302">Mr. Biggs</cosponsor>, <cosponsor name-id="C001039">Mrs. Cammack</cosponsor>, <cosponsor name-id="M001195">Mr. Mooney</cosponsor>, <cosponsor name-id="L000598">Mr. LaLota</cosponsor>, <cosponsor name-id="C000059">Mr. Calvert</cosponsor>, <cosponsor name-id="G000579">Mr. Gallagher</cosponsor>, and <cosponsor name-id="P000599">Mr. Posey</cosponsor></action-desc>
+</action>
+<action display="yes">
+<action-date date="20241210">December 10, 2024</action-date>
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc>
+<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+<action-instruction>For text of introduced bill, see copy of bill as introduced on January 9, 2023</action-instruction>
+<action-desc><pagebreak/></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Internal Revenue Code of 1986 to reinstate the exception for de minimis payments by third party settlement organizations with respect to returns relating to payments made in settlement of payment card and third party network transactions, as in effect prior to the enactment of the American Rescue Plan Act.<pagebreak/></official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" changed="added" style="OLC" committee-id="HWM00" reported-display-style="italic" id="HB1EB5BA9466C43B68A2B7994A75B1C67"> 
+<section id="H3A1F97AECE0C483894C1A8346B76CB7F" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Saving Gig Economy Taxpayers Act</short-title></quote>. </text></section> <section id="H989D559E85674DA78403C383FD50F5AF"><enum>2.</enum><header>Reinstatement of exception for de minimis payments as in effect prior to enactment of American Rescue Plan Act</header> <subsection id="H0BCC649A252249FA81D3E4E7BA627E93"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline"><external-xref legal-doc="usc" parsable-cite="usc/26/6050W">Section 6050W(e)</external-xref> of the Internal Revenue Code of 1986 is amended to read as follows: </text> 
+<quoted-block style="OLC" id="HA70FFE3248B8404E96F13203ADA7A363" display-inline="no-display-inline"> 
+<subsection id="HDE8F07706D924C55AA113796674D5338"><enum>(e)</enum><header>Exception for de minimis payments by third party settlement organizations</header><text display-inline="yes-display-inline">A third party settlement organization shall be required to report any information under subsection (a) with respect to third party network transactions of any participating payee only if—</text> <paragraph id="HDFE7CAD979D24DF1AA9B78CAE0B523CB"><enum>(1)</enum><text display-inline="yes-display-inline">the amount which would otherwise be reported under subsection (a)(2) with respect to such transactions exceeds $20,000, and</text></paragraph> 
+<paragraph id="H18AF03366A93420B835272D4B3F415D6"><enum>(2)</enum><text>the aggregate number of such transactions exceeds 200. </text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H5106160EBA414288A88139E7FD23026B"><enum>(b)</enum><header>Effective date</header><text display-inline="yes-display-inline">The amendment made by this section shall apply to returns for calendar years beginning after December 31, 2021.</text></subsection></section> 
+</legis-body>
+<endorsement display="yes"> 
+<action-date date="20241210">December 10, 2024</action-date> 
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc></endorsement>
+</bill> 
+
+

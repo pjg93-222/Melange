@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H0863379242F4443EB563FC006658C757" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 8537 IH: To direct the Administrator of the Small Business Administration to modify any caps on emergency EIDL advances to certain veterans service organizations, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-10-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8537</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20201006">October 6, 2020</action-date><action-desc><sponsor name-id="G000592">Mr. Golden</sponsor> (for himself and <cosponsor name-id="K000388">Mr. Kelly of Mississippi</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HSM00">Committee on Small Business</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Administrator of the Small Business Administration to modify any caps on emergency EIDL advances to certain veterans service organizations, and for other purposes.</official-title></form><legis-body id="H2CA330F3991D493FA5ED388C2EA4B194" style="OLC"><section id="H2AC699CC8F234A50A7DFB4F3BD5013E3" section-type="section-one"><enum>1.</enum><header>Amount of emergency EIDL advances for certain veterans service organizations</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, the Administrator of the Small Business Administration shall ensure that a veterans service organization with not more than one employee that applies for an advance under section 1110(e) of the CARES Act (<external-xref legal-doc="usc" parsable-cite="usc/15/9005">15 U.S.C. 9005(e)</external-xref>) is not subject to a cap on such advance that is less than $5,000.</text></section></legis-body></bill> 
+

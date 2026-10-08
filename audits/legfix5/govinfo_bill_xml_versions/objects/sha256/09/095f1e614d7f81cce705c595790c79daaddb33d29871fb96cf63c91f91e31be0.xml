@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Enrolled-Bill" dms-id="H02E4CBF70BB746DE91ADEAD6A028BDA2" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title> HR 55 ENR: Emmett Till Antilynching Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">One Hundred Seventeenth Congress of the United States of America</congress><session display="yes">At the Second Session</session><enrolled-dateline>Begun and held at the City of Washington on Monday, the third day of January, two thousand and twenty-two</enrolled-dateline> 
+<legis-num display="yes">H. R. 55</legis-num> 
+<current-chamber display="no"></current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend section 249 of title 18, United States Code, to specify lynching as a hate crime act.</official-title> 
+</form> 
+<legis-body id="H2B1074A1F6AE46EC98E11FE3D16F3166" style="OLC"> 
+<section id="HCF4F7C83443F47ECA5C3026386400C54" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Emmett Till Antilynching Act</short-title></quote>.</text></section> <section id="H6FB6A2BD6A384B4EAD41EFA1A37BF38F"><enum>2.</enum><header>Lynching; other conspiracies</header><text display-inline="no-display-inline">Section 249(a) of title 18, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block id="H1D8EEF6D880541F6A46D353F24B1B24C" style="OLC"> 
+<paragraph id="HB55AC05551734F1A937DC24A6828A240"><enum>(5)</enum><header>Lynching</header><text>Whoever conspires to commit any offense under paragraph (1), (2), or (3) shall, if death or serious bodily injury (as defined in section 2246 of this title) results from the offense, be imprisoned for not more than 30 years, fined in accordance with this title, or both.</text></paragraph> <paragraph id="HBA296CECEB6B4090A3B356838DFFF225"><enum>(6)</enum><header>Other conspiracies</header><text>Whoever conspires to commit any offense under paragraph (1), (2), or (3) shall, if death or serious bodily injury (as defined in section 2246 of this title) results from the offense, or if the offense includes kidnapping or an attempt to kidnap, aggravated sexual abuse or an attempt to commit aggravated sexual abuse, or an attempt to kill, be imprisoned for not more than 30 years, fined in accordance with this title, or both.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+<section id="H2B2B9177E8BE474EB1EE22068E25B7AC"><enum>3.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text></section> </legis-body> <attestation><attestation-group><role>Speaker of the House of Representatives.</role></attestation-group><attestation-group><role>Vice President of the United States and President of the Senate.</role></attestation-group></attestation> </bill> 
+

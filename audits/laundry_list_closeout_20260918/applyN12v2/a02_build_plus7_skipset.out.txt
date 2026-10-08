@@ -1,0 +1,21 @@
+﻿base   C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_closeout_20260918\fixN12v2\v2_skipset.json
+       sha256=73d29fe5cc30094d4b9871d4755171003692749b4ff89f27b84400be191cc063 bytes=198139
+       label_rowids_interview=1895  cu_rowids=207
+of the 7, already protected by the graded skipset: NONE
+
+wrote  C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_closeout_20260918\fixN12v2\v2_skipset_plus7.json
+       sha256=37e587481d461556b93ca35e645898d6e02ed9d566bbd4923f71396e1d4872fc bytes=199742
+       label_rowids_interview 1895 -> 1902   (+7)
+       cu_rowids 207 -> 207
+       protected union (interview) -> 2105
+
+Protection.load(plus7): len=2105
+  rowid 83061   reason=label_or_gold_record_points_here
+  rowid 83158   reason=label_or_gold_record_points_here
+  rowid 105315  reason=label_or_gold_record_points_here
+  rowid 106055  reason=label_or_gold_record_points_here
+  rowid 106388  reason=label_or_gold_record_points_here
+  rowid 109799  reason=label_or_gold_record_points_here
+  rowid 110715  reason=label_or_gold_record_points_here
+rowids the loaded Protection does NOT protect: NONE
+every rowid the graded skipset protected is still protected: True

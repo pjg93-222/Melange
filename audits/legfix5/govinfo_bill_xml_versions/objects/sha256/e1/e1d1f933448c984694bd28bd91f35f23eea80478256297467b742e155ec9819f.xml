@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H035ED12B2B234142A90A2631F76EF86A" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4867 IH: Veterans Members Business Loan Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-07-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4867</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230725">July 25, 2023</action-date><action-desc><sponsor name-id="G000581">Mr. Vicente Gonzalez of Texas</sponsor> (for himself and <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Federal Credit Union Act to exclude extensions of credit made to veterans from the definition of a member business loan.</official-title></form><legis-body id="H681564731D1845BAA9076F9896EC3FEA" style="OLC"> 
+<section id="H2D3606C9C7FA461CA4E24A6CD66C9D51" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Veterans Members Business Loan Act</short-title></quote>.</text></section> <section id="H2828D68525E440A9AB0775565F149ECE" section-type="subsequent-section"><enum>2.</enum><header>Member business loan definition</header> <subsection id="H2399D5A38D3A4ADE9BF145A030FDF281"><enum>(a)</enum><header>In general</header><text>Section 107A(c) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1757a">12 U.S.C. 1757a(c)</external-xref>) is amended—</text>
+<paragraph id="H0789DF1AB7294FD7B5AB57B78EF68254"><enum>(1)</enum><text>in paragraph (1)(B)—</text> <subparagraph id="HB6C31F167AE84D969D22C97511187073"><enum>(A)</enum><text>in clause (iv), by striking <quote>or</quote> at the end;</text></subparagraph>
+<subparagraph id="H9F391B90E6DC4702B90DE0F27DC58726"><enum>(B)</enum><text>in clause (v), by striking the period and inserting <quote>; or</quote>; and</text></subparagraph> <subparagraph id="H602FBD5DEEA6436BA22EFB5CD701E442"><enum>(C)</enum><text>by adding at the end the following:</text>
+<quoted-block display-inline="no-display-inline" id="HD4D3AFE2AF084F948AAE2F4C643CD34C" style="OLC">
+<clause id="HA0B2E36B2E8C47058494F0AC4B70E7A6"><enum>(vi)</enum><text>made to a veteran;</text></clause><after-quoted-block>;</after-quoted-block></quoted-block></subparagraph></paragraph> <paragraph id="H861C5A30E5324F959B7FA119DACEE1DE"><enum>(2)</enum><text>in paragraph (2), by striking <quote>and</quote> at the end;</text></paragraph>
+<paragraph id="H4552EA84C1CD44C7967153238E7E8601"><enum>(3)</enum><text>in paragraph (3), by striking the period and inserting <quote>; and</quote>; and</text></paragraph> <paragraph id="H07331AD401114588AFE84DD7763AD81E"><enum>(4)</enum><text>by adding at the end the following:</text>
+<quoted-block display-inline="no-display-inline" id="H8BA4474A15274BC29B01A26CDB44DC41" style="OLC">
+<paragraph id="H7B8E3F30773146B2AC80F1747106CEFC"><enum>(4)</enum><text>the term <term>veteran</term> has the meaning given such term under section 101 of title 38, United States Code.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> <subsection id="H5ACAC9A1A2CF4C7A9ED70A7A060AE808"><enum>(b)</enum><header>Effective date</header><text>The amendments made by subsection (a) shall take effect after the end of the 6-month period beginning on the date of the enactment of this Act.</text></subsection></section> 
+</legis-body></bill>
+

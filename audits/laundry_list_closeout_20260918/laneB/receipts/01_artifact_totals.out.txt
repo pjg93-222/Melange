@@ -1,0 +1,116 @@
+﻿==============================================================================
+FILE MTIMES / SIZES
+==============================================================================
+member_references.json                               2026-09-17 01:25:27  4200039 bytes
+member_reference_cache_fable.jsonl                   2026-09-14 01:15:04  2953398 bytes
+member_reference_classification_receipt.json         2026-09-14 01:15:04  359 bytes
+member_reference_cache_baseline_v2.json              2026-09-08 19:24:46  2020069 bytes
+member_reference_verify.csv                          2026-07-04 18:51:02  221780 bytes
+sentinel_admission_policy.json                       2026-09-08 18:54:43  452 bytes
+
+==============================================================================
+ARTIFACT member_references.json
+==============================================================================
+top-level keys        : ['dyad_cap', 'edges', 'model', 'provenance']
+dyad_cap              : 4
+model (as written)    : 'claude-fable-5, sonnet'
+provenance            : 'substantive member references (formality discarded per user 2026-07-04); speeches+press+X; Fable-valenced'
+edges                 : 8017
+edge keys (first edge): ['a', 'b', 'examples', 'formality_dropped', 'n_raw', 'n_scored', 'neg', 'net', 'neu', 'pos', 'sources']
+sum n_raw             : 36335
+sum n_scored          : 15892
+sum pos/neg/neu/form  : 9805 / 2583 / 1943 / 1561
+edges n_scored>=2     : 3562   (consumer drawing floor, build_dashboard_bundle.py:238)
+edges n_scored<2      : 4455
+edges n_scored==0     : 0
+signed edges (pos+neg>0): 7248
+net>0.2 / net<-0.2    : 5967 / 1194
+examples attached     : 8017 edges with >=1 example, 3083 with 2
+
+RAW MENTIONS BY SOURCE (artifact `sources` counters, summed over edges)
+  CREC                        22795
+  INTERVIEW                    9792
+  PRESS_OFFICIAL_MENTION       2538
+  CHRG                          633
+  X                             545
+  PRESS                          32
+  TOTAL                       36335   (== sum n_raw: True)
+
+EDGES TOUCHING EACH SOURCE (an edge can touch several)
+  CREC                         6304 edges
+  INTERVIEW                    2640 edges
+  PRESS_OFFICIAL_MENTION        853 edges
+  X                             380 edges
+  CHRG                          276 edges
+  PRESS                          26 edges
+
+EXAMPLES BY SOURCE (the only window text the artifact retains)
+  CREC                         8065
+  INTERVIEW                    2453
+  X                             382
+  CHRG                          155
+  PRESS_OFFICIAL_MENTION         26
+  PRESS                          19
+  NOTE: artifact stores at most 2 windows/edge -> per-source SCORED counts are NOT
+        recoverable from the artifact; they require re-derivation (script 02).
+
+==============================================================================
+CACHE member_reference_cache_fable.jsonl
+==============================================================================
+cache lines            : 19793  (unparseable 0)
+distinct keys          : 19395
+duplicate-key lines    : 398  (first-wins per member_reference_layer.py:238-243)
+keys with v2: prefix   : 256   legacy/other prefix: 19537
+model field            : {'<absent>': 19537, 'sonnet': 256}
+transport field        : {'<absent>': 19537, 'claude-cli': 256}
+cls distribution       : {'positive': 10464, 'formality': 4414, 'neutral-substantive': 2109, 'negative': 2806}
+classifier-provenance keys present: {'transport': 256, 'model': 256, 'model_usage': 256, 'response_id': 256, 'tools_enabled': 256}
+classifier.model values: {'sonnet': 256}
+per-row timestamps found: 0  -> CACHE DATE RANGE FROM ROWS = UNKNOWN (no timestamp field in any row)
+
+==============================================================================
+CLASSIFICATION RECEIPT
+==============================================================================
+{
+  "batch_limit": 128,
+  "cache_key_schema": "complete-classifier-window-v2",
+  "checked_at": "2026-09-14T05:15:04.697307+00:00",
+  "classified": 128,
+  "deferred_contexts": 19855,
+  "error_details": [],
+  "errors": 0,
+  "legacy_ambiguous_contexts_at_start": 384,
+  "model": "sonnet",
+  "schema": "member-reference-classification-v1",
+  "status": "PASS",
+  "transport": "claude-cli"
+}
+
+SENTINEL ADMISSION POLICY (reference_* keys drive model/transport at line 213-216)
+{
+  "reference_model": "sonnet",
+  "reference_transport": "claude-cli"
+}
+full policy keys: ['authority', 'automatic_movements', 'institutional_endorsements_inferred', 'live_legislative_pillar', 'minimum_confidence', 'model', 'reference_model', 'reference_transport', 'schema', 'tools_enabled', 'transport']
+
+==============================================================================
+BASELINE member_reference_cache_baseline_v2.json
+==============================================================================
+schema     : 'reference-cache-baseline-v2'
+provenance : 'Inherited legacy classifications; no new model judgment.'
+bindings   : 18623
+ambiguous  : 384
+
+==============================================================================
+STEP 7: member_reference_verify.csv vs artifact
+==============================================================================
+path      : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\members\member_reference_verify.csv
+mtime     : 2026-07-04 18:51:02
+artifact  : 2026-09-17 01:25:27
+OLDER THAN ARTIFACT: True   (delta 74.3 days)
+header    : ['speaker', 'about', 'net', 'pos', 'neg', 'neu', 'n_raw', 'sources', 'evidence_1', 'evidence_2', 'wrong_person_or_wrong_valence?']
+data rows : 500   (writer caps at 500, member_reference_layer.py:364)
+artifact edges now: 8017  -> rows cover 6.24% of current edges
+owner verdict column filled: 0 of 500 rows
+
+DONE 01

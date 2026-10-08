@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution public-private="public" resolution-stage="Introduced-in-Senate" resolution-type="senate-resolution" star-print="no-star-print">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 SRES 273 IS: Expressing the sense of the Senate with respect to health care rights.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">III</distribution-code>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>S. RES. 273</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action display="yes">
+			<action-date date="20190709">July 9, 2019</action-date>
+			<action-desc><sponsor name-id="S322">Mr. Merkley</sponsor> (for himself, <cosponsor name-id="S306">Mr. Menendez</cosponsor>, <cosponsor name-id="S353">Mr. Schatz</cosponsor>, <cosponsor name-id="S354">Ms. Baldwin</cosponsor>, <cosponsor name-id="S324">Mrs. Shaheen</cosponsor>, <cosponsor name-id="S364">Mr. Murphy</cosponsor>, <cosponsor name-id="S313">Mr. Sanders</cosponsor>, <cosponsor name-id="S388">Ms. Hassan</cosponsor>, <cosponsor name-id="S308">Mr. Cardin</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>, <cosponsor name-id="S386">Ms. Duckworth</cosponsor>, <cosponsor name-id="S307">Mr. Brown</cosponsor>, <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>, <cosponsor name-id="S366">Ms. Warren</cosponsor>, <cosponsor name-id="S369">Mr. Markey</cosponsor>, and <cosponsor name-id="S221">Mrs. Feinstein</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+		</action>
+		<legis-type>RESOLUTION</legis-type>
+		<official-title display="yes">Expressing the sense of the Senate with respect to health care rights.</official-title>
+	</form>
+	<resolution-body>
+ <section display-inline="yes-display-inline" id="S1" section-type="undesignated-section"><enum></enum><text>That it is the sense of the Senate that all people of the United States have the right—</text> <paragraph id="id4956E2106A214ABC98928B51DFC962EF"><enum>(1)</enum><text>to affordable health insurance coverage, including—</text>
+ <subparagraph id="idE7381185498D4353BDF36DC308F9B230"><enum>(A)</enum><text>the right of individuals with pre-existing conditions to secure health insurance with the same terms, benefits, and price as individuals who do not have pre-existing conditions;</text>
+ </subparagraph><subparagraph id="id155E8EA9E0CF4A2EA2B97D665218CBDE"><enum>(B)</enum><text>the right to a comprehensive set of essential health benefits in the individual and small group markets;</text>
+ </subparagraph><subparagraph id="id629694D9786F462A8E25B0E2AB1D9D1F"><enum>(C)</enum><text>the right to stay on a parent’s policy until age 26 for young adults who meet certain requirements;</text> </subparagraph><subparagraph id="id3F7AAEC66729455DA691F4719A60C49E"><enum>(D)</enum><text>the right to keep health coverage after getting sick, even if the individual made an honest mistake on his or her insurance application;</text>
+ </subparagraph><subparagraph id="id45A1548682DD45C29D32E601022F46BA"><enum>(E)</enum><text>the right to use an individual's own resources to purchase and pay for treatment or services; and</text> </subparagraph><subparagraph id="id284629421F9C470AB7104A43A53FC359"><enum>(F)</enum><text>the right to a cap on the yearly deductibles and other out-of-pocket costs an individual is required to pay for covered services under a health insurance plan;</text>
+ </subparagraph></paragraph><paragraph id="idC4F5E9EEEE8A45748A9190BF25D97EC9"><enum>(2)</enum><text>to coverage and access to health care services, including—</text> <subparagraph id="idFE47F3DE125D4F2DB8E36E5DEF7FA579"><enum>(A)</enum><text>the right to health insurance coverage regardless of an individual's pre-existing medical conditions or health status;</text>
+ </subparagraph><subparagraph id="id8B8001917AD8451E8E33DAA1B62DAD74"><enum>(B)</enum><text>the right to certain preventive screenings without paying out-of-pocket fees or copayments;</text> </subparagraph><subparagraph id="id70011824BCF449D1A1D4C8C09ACE5FD4"><enum>(C)</enum><text>the right to health insurance that provides value relative to the premium cost;</text>
+ </subparagraph><subparagraph id="idEA5ABEDB547F4EDA93AF34DD5B80E932"><enum>(D)</enum><text>the right to be held harmless from surprise medical bills;</text> </subparagraph><subparagraph id="id5784410204D649DD822F83B644A9C29F"><enum>(E)</enum><text>the right to coverage of mental health and substance abuse services with no annual or lifetime limits (including behavioral health treatment, mental and behavioral health inpatient services, substance use disorder treatment);</text>
+ </subparagraph><subparagraph id="id7F053920B35149BCBF09F712ABF24224"><enum>(F)</enum><text>the right to mental health and substance abuse benefits without financial, treatment, or care management limitations that only apply to such benefits;</text>
+ </subparagraph><subparagraph id="idC0E837CD7A424B28B5AE0CA3E5D3CBCB"><enum>(G)</enum><text>the right to access all smoking cessation medications that are approved by the Food and Drug Administration;</text>
+ </subparagraph><subparagraph id="idF29026EF66C5469396073FFE1595B70E"><enum>(H)</enum><text>the right to choose a provider, and to receive an accurate list of all participating providers;</text> </subparagraph><subparagraph id="id34557FBCCAA2406B83B4DD60FE3D122A"><enum>(I)</enum><text>the right to access doctors, specialists, and hospitals;</text>
+ </subparagraph><subparagraph id="id70695042A1DF45E38C6B04E2532F1C4A"><enum>(J)</enum><text>the right to emergency medical services without—</text> <clause id="id9b13618e676c470bafb3b0ca2d59a540"><enum>(i)</enum><text>preauthorization for emergency services;</text>
+ </clause><clause id="id7996b78359b24c91a2496f1df994803f"><enum>(ii)</enum><text>extra administrative hurdles for out-of-network emergency services; or</text> </clause><clause id="id451135d6d9514d67a1ef4650663e2a28"><enum>(iii)</enum><text>higher cost-sharing for out-of-network emergency services than in-network emergency services;</text>
+ </clause></subparagraph><subparagraph id="ida735584387e246ad8180c66904b9b653"><enum>(K)</enum><text>the right to affordable medications;</text> </subparagraph><subparagraph id="id592B18D20E89477CBB5C6AF0BF6CA7EA"><enum>(L)</enum><text>the right to physical, mental, and oral care;</text>
+ </subparagraph><subparagraph id="idF3EAAD1BC23B411EA6FF2DDA967CB1B5"><enum>(M)</enum><text>the right to a treatment plan from provider for a complex or serious medical condition;</text> </subparagraph><subparagraph id="id90CFDF91ADAD49C092B25CAE4F808787"><enum>(N)</enum><text>the right to go directly to a women’s health care specialist (including obstetricians and gynecologists) without a referral for routine and preventive health care services;</text>
+ </subparagraph><subparagraph id="id78BCCBDFC55F44329BD4B1CBDB7BF262"><enum>(O)</enum><text>the right to a full scope of reproductive health services, including contraceptive care, pregnancy-related care, prenatal care, miscarriage management, family planning services, abortion care, labor and delivery services, and postnatal care;</text>
+ </subparagraph><subparagraph id="id19e5a5cc889b4965bebb9fbc8b415de7"><enum>(P)</enum><text>the right to breastfeeding support, counseling, and equipment (including manual and electric pumping equipment);</text>
+ </subparagraph><subparagraph id="idf9d35c5dd91e40be8e1dfc0a6828aa05"><enum>(Q)</enum><text>the right to prescription medications and medical and surgical services related to gender transition;</text>
+ </subparagraph><subparagraph id="idB0D90D9CA1E54A2EB94F53AC185AB7CF"><enum>(R)</enum><text>the right to try investigational drugs;</text> </subparagraph><subparagraph id="id42CFB8E6224D4782ACA39E27DE41AB48"><enum>(S)</enum><text>the right to a second medical opinion;</text>
+ </subparagraph><subparagraph id="id8E7A15B69EE54F8193E4E587D608947A"><enum>(T)</enum><text>the right to home care services;</text> </subparagraph><subparagraph id="id587860AEA7A44FB294CD98604E6F95D0"><enum>(U)</enum><text>the right to a full scope of hospice and palliative care, and end-of-life options; and</text>
+ </subparagraph><subparagraph id="id5B249F294E074E4F992732C3A6878D5E"><enum>(V)</enum><text>the right of pediatric patients to a full scope of services offered to adult patients;</text> </subparagraph></paragraph><paragraph id="id6441D0D3287745EFA0CC62B57E094EA9"><enum>(3)</enum><text>to health information and records privacy;</text>
+ </paragraph><paragraph id="idC2BE8D1974A3462CBC9F53596B907222"><enum>(4)</enum><text>to explanations of coverage decisions, including—</text> <subparagraph id="idC3B9DA1E6F3947729642D82D4B53717A"><enum>(A)</enum><text>the right to an explanation and appeal if a plan denies payment for a medical treatment or service;</text>
+ </subparagraph><subparagraph id="id0AF3DE60A8F6407383CE617CC68E5C7A"><enum>(B)</enum><text>the right to an internal appeal of payment decisions of private health plans if the health plan refuses to make a payment;</text>
+ </subparagraph><subparagraph id="id1DBC4BED134D4915A95AD9C314AB4E9D"><enum>(C)</enum><text>the right to a review by an outside review, by an independent organization; and</text> </subparagraph><subparagraph id="id941D7774E5A04FDD9C21CED2D1F2121B"><enum>(D)</enum><text>the right to complain, through grievances processes;</text>
+ </subparagraph></paragraph><paragraph id="id56A78508D2294661AA6C4B6F4DF20858"><enum>(5)</enum><text>to transparency, including—</text> <subparagraph id="id2B3C6732521E4D538748643962853AAF"><enum>(A)</enum><text>the right to an easy-to-understand summary of benefits and coverage;</text>
+ </subparagraph><subparagraph id="id6A10E2D5961F46D8A3622D034A8002EF"><enum>(B)</enum><text>the right to at least 30 days’ notice if an insurer cancels coverage;</text> </subparagraph><subparagraph id="id708904B04C024EB3858B57A9FA616332"><enum>(C)</enum><text>the right to clear justification and explanation for premium increases that are unreasonable;</text>
+ </subparagraph><subparagraph id="id947EF5BDAA474CB3AB090DF208F58DA5"><enum>(D)</enum><text>the right to know how an enrollee's plan pays its providers;</text> </subparagraph><subparagraph id="id7EDBE393697A4616B38F6EE3B972C8BE"><enum>(E)</enum><text>the right to give informed consent and understanding about medical conditions, risks and benefits of treatment, and appropriate alternatives;</text>
+ </subparagraph><subparagraph id="id0C226AE9AD094B75A939D00568A20C8B"><enum>(F)</enum><text>the right to know how drug companies set drug prices; and</text> </subparagraph><subparagraph id="id72379F2DCDDF4BBF9F9B487603FF5E55"><enum>(G)</enum><text>the right to know the amount of money pharmacy benefit managers keep and the amount of savings from pharmacy benefits managers that reach patients and consumers;</text>
+ </subparagraph></paragraph><paragraph id="idA1FE72CD07844B3FB8BE6DA879E8FAF3"><enum>(6)</enum><text>to protection from discrimination, including on the basis of race, color, national origin, sex (including sexual orientation and gender identity), age, disability, or documentation status; and</text>
+ </paragraph><paragraph id="idEF2B9CB790654E1B87ED64463D5FD763"><enum>(7)</enum><text>to culturally appropriate care, including health care services in a language that the patient understands and that is culturally sensitive.</text>
+			</paragraph></section></resolution-body>
+</resolution>
+
+

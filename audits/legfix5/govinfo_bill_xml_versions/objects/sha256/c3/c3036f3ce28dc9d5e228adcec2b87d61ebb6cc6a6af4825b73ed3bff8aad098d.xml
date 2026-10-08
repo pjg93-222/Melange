@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-DUN21478-JND-VD-L2T">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S2131 IS: Improving FHA Support for Small-Dollar Mortgages Act of 2021</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-06-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>117th CONGRESS</congress><session>1st Session</session>
+<legis-num>S. 2131</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20210617">June 17, 2021</action-date>
+<action-desc><sponsor name-id="S314">Mr. Tester</sponsor> (for himself and <cosponsor name-id="S410">Ms. Lummis</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To require a review of the effects of FHA mortgage insurance policies, practices, and products on small-dollar mortgage lending, and for other purposes.</official-title>
+</form>
+<legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H91F891FE25A64AF29B19C1A9A6FF14D6">
+<section section-type="section-one" id="HB7FE5C6F1DC34625A449E91C600E799D"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Improving FHA Support for Small-Dollar Mortgages Act of 2021</short-title></quote>.</text></section> <section section-type="subsequent-section" id="H45AA2DA0D99746C4A080E40FE51B21E4"><enum>2.</enum><header>Review of FHA small-dollar mortgage practices</header> <subsection id="H2B868A9BD64441D0BA9736DB38BA341B"><enum>(a)</enum><header>Congressional findings</header><text display-inline="yes-display-inline">The Congress finds that—</text>
+<paragraph id="H6F9CEE9D461F4B9EBE7B8EA37799574B"><enum>(1)</enum><text display-inline="yes-display-inline">affordable homeownership opportunities are being hindered due to the lack of financing available for home purchases under $100,000;</text></paragraph> <paragraph id="HD9D31D1FEF2D44D2B45F790CDEEFC942"><enum>(2)</enum><text display-inline="yes-display-inline">according to the Urban Institute, small-dollar mortgage loan applications in 2019 were significantly more likely to be denied by lenders than large mortgage loans, and this difference in denial rates cannot be fully explained by differences in the applicants’ credit profiles;</text></paragraph>
+<paragraph id="HD0BFF542ED804791AEBB6550925C3A35"><enum>(3)</enum><text>according to data compiled by Attom Data solutions, mortgage originations for loans of $70,000 or less have decreased 38 percent since 2009, while there has been a 65-percent increase in origination of mortgages for more than $150,000;</text></paragraph> <paragraph id="HC6E249BC4834474EAA50B3AAEACAE7ED"><enum>(4)</enum><text display-inline="yes-display-inline">the mission of the Federal Housing Administration (referred to in this section as the <quote>FHA</quote>) is to serve creditworthy borrowers who are underserved and disproportionately serve borrowers with lower incomes, but, according to the Urban Institute, the FHA serves a smaller share of borrowers seeking small-dollar mortgage loans than borrowers seeking larger loans at every income level; and</text></paragraph>
+<paragraph id="HEC8AB69DBC824308BE38699ABBA4DE92"><enum>(5)</enum><text display-inline="yes-display-inline">the causes behind these variations are not fully understood but merit study that could assist in furthering the Department of Housing and Urban Development’s mission, including meeting the housing needs of borrowers the program is designed to serve and reducing barriers to homeownership, while protecting the solvency of the Mutual Mortgage Insurance Fund.</text></paragraph></subsection> <subsection id="H5A85021CBA094684A219B0BD83366C68" commented="no" display-inline="no-display-inline"><enum>(b)</enum><header>Review</header><text display-inline="yes-display-inline">The Secretary of Housing and Urban Development (referred to in this section as the <quote>Secretary</quote>) shall conduct a review of its FHA single-family mortgage insurance policies, practices, and products to identify any barriers or impediments to supporting, facilitating, and making available mortgage insurance for mortgages having an original principal obligation of $100,000 or less. Not later than the expiration of the 12-month period beginning on the date of the enactment of this Act, the Secretary shall submit a report to the Congress describing the findings of such review and the actions that the Secretary will take, without adversely affecting the solvency of the Mutual Mortgage Insurance Fund.</text></subsection></section>
+</legis-body>
+</bill> 
+
+

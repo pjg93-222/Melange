@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL22002-W31-22-L9D"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S3441 IS: CDFI Bond Guarantee Program Improvement Act of 2022</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2022-01-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>2d Session</session><legis-num>S. 3441</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20220105">January 5, 2022</action-date><action-desc><sponsor name-id="S394">Ms. Smith</sponsor> (for herself and <cosponsor name-id="S381">Mr. Rounds</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Community Development Banking and Financial Institutions Act of 1994 to reauthorize and improve the community development financial institutions bond guarantee program, and for other purposes. </official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause"><section section-type="section-one" id="S1"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>CDFI Bond Guarantee Program Improvement Act of 2022</short-title></quote>.</text></section><section id="idED2FB1902B2645088717CCD0611B1573"><enum>2.</enum><header>Guarantees for bonds and notes issued for community or economic development purposes</header><text display-inline="no-display-inline">Section 114A of the Community Development Banking and Financial Institutions Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/12/4713a">12 U.S.C. 4713a</external-xref>) is amended—</text><paragraph id="id6866FF8C84B446F490725A207488D665"><enum>(1)</enum><text>in subsection (c)(2), by striking <quote>, multiplied by an amount equal to the outstanding principal balance of issued notes or bonds</quote>; </text></paragraph><paragraph id="idCAD76EF9BB0E44AFAB3AE2BD6DAF53FA"><enum>(2)</enum><text display-inline="yes-display-inline">in subsection (e)(2)(B), by striking <quote>$100,000,000</quote> and inserting <quote>$25,000,000</quote>; and</text></paragraph><paragraph id="id1F66C318B4954835B33F953CA9E62EBA"><enum>(3)</enum><text>by striking subsection (k).</text></paragraph></section></legis-body></bill> 
+

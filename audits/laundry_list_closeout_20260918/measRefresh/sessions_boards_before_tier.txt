@@ -1,0 +1,89 @@
+boards.json keys: ['generated_utc', 'method_note', 'receipt', 'schema', 'sectors']
+generated/meta: {"generated_utc": "2026-09-19T20:04:08.600471+00:00", "method_note": "Signed attention is inferred (leads, not disclosures) except canonical rows, which carry Paul's marks; boards are DESCRIPTIVE decision aids - no engine, rank, or receptivity input reads them.", "schema": "champions-v2-v1"}
+sectors: ['bank', 'credit_union', 'crypto', 'fintech']
+
+== S000250 / Pete Sessions occurrences in boards.json ==
+  sector=bank           board=threats    idx=0 tier=None threat=3.643101 composite=1.64908
+    components={"O": null, "invested": null, "net_directional": null, "opp_cosponsored": 2, "opp_sponsored": 0, "opposition_att": 6, "rapport": 3, "sign_source_counts": {"canonical": 0, "kim": 6, "prior": 0}, "supportive_att": 30}
+    issues=["Postal Service Reform Act of 2022", "CFPB:Reduce", "To prohibit the Administrator of the Small Business Administration from directly making loans under the 7(a) loan program, and for other purposes."]
+
+== BEFORE desk tier recorded on credit_union rows: 123 members ==
+  tier==1 among CU candidates (BEFORE, as read by champions_v2 at 16:04): 11
+    Alex Padilla               P000145   via cu_row/champions
+    Bill Huizenga              H001058   via cu_row/champions
+    Brad Sherman               S000344   via cu_row/mixed
+    Brian Fitzpatrick          F000466   via cu_row/champions
+    Dan Sullivan               S001198   via cu_row/champions
+    Daniel Meuser              M001204   via cu_row/champions
+    Maxine Waters              W000187   via cu_row/mixed
+    Scott Fitzgerald           F000471   via cu_row/champions
+    Tim Scott                  S001184   via cu_row/champions
+    William Timmons            T000480   via cu_row/champions
+    Young Kim                  K000397   via cu_row/champions
+  tier distribution BEFORE among CU candidates: {"0": 83, "1": 11, "2": 15, "3": 14}
+
+== crown_threat_exclusions (proven BEFORE tier-1 crowns) ==
+
+== on a RETAINED threat board at 16:04 => provably NOT tier 1 BEFORE: 29 ==
+    Abraham Hamadeh            H001098  sectors=credit_union
+    Alexandria Ocasio-Cortez   O000172  sectors=bank,credit_union
+    Andy Barr                  B001282  sectors=bank
+    Andy Harris                H001052  sectors=credit_union
+    Bernard Sanders            S000033  sectors=credit_union
+    Cory Booker                B001288  sectors=credit_union
+    Debbie Wasserman Schultz   W000797  sectors=credit_union
+    Elise Stefanik             S001196  sectors=credit_union
+    Elizabeth Warren           W000817  sectors=credit_union
+    James McGovern             M000312  sectors=credit_union
+    Jeff Hurd                  H001100  sectors=credit_union
+    Jefferson Van Drew         V000133  sectors=credit_union
+    Jerrold Nadler             N000002  sectors=credit_union
+    Jim Jordan                 J000289  sectors=credit_union
+    Jimmy Patronis             P000622  sectors=credit_union
+    Josh Hawley                H001089  sectors=credit_union
+    Lance Gooden               G000589  sectors=credit_union
+    Lauren Boebert             B000825  sectors=credit_union
+    Marcy Kaptur               K000009  sectors=bank
+    Mark DeSaulnier            D000623  sectors=credit_union
+    Melanie Stansbury          S001218  sectors=credit_union
+    Pete Sessions              S000250  sectors=bank
+    Peter Welch                W000800  sectors=credit_union
+    Richard Blumenthal         B001277  sectors=credit_union
+    Richard Durbin             D000563  sectors=credit_union
+    Roger Marshall             M001198  sectors=credit_union
+    Steve Cohen                C001068  sectors=bank
+    Thomas Tiffany             T000165  sectors=credit_union
+    Zoe Lofgren                L000397  sectors=credit_union
+
+== NOW tier from member_desk_bundle.json (16:08:06) ==
+  bundle top-level keys: ['adj', 'art_extra_cats', 'bill_live', 'bill_lobbying', 'cats', 'cats_short', 'coalitions', 'community_meta', 'cospon', 'dadj', 'defensive', 'demo_axes', 'demo_short', 'demographic_potential_meta', 'district_briefs_meta', 'freshness', 'gh_meta', 'industry_meta', 'influence_policy', 'integrity', 'legislation_culling', 'members', 'pricing', 'rank_honors', 'selectivity', 'source_updates', 'speech_descriptive', 'speech_profile_method', 'stance_curves', 'tiername', 'weights']
+  members: 533  (type list)
+  tier==1 NOW: 13
+    tierrank=1   Alex Padilla               None  chamber=Senate
+    tierrank=2   Vicente Gonzalez           None  chamber=House
+    tierrank=3   Maxine Waters              None  chamber=House
+    tierrank=4   Brian Fitzpatrick          None  chamber=House
+    tierrank=5   William Timmons            None  chamber=House
+    tierrank=6   Scott Fitzgerald           None  chamber=House
+    tierrank=7   Tim Scott                  None  chamber=Senate
+    tierrank=8   Brad Sherman               None  chamber=House
+    tierrank=9   Bill Huizenga              None  chamber=House
+    tierrank=10  Young Kim                  None  chamber=House
+    tierrank=11  Dan Sullivan               None  chamber=Senate
+    tierrank=12  Juan Vargas                None  chamber=House
+    tierrank=13  Pete Sessions              None  chamber=House
+  tier distribution NOW: {"0": 448, "1": 13, "2": 24, "3": 48}
+
+== LOSS CHECK ==
+   BEFORE t1 Brian Fitzpatrick          F000466 : NOW tier=1  KEPT
+   BEFORE t1 Scott Fitzgerald           F000471 : NOW tier=1  KEPT
+   BEFORE t1 Bill Huizenga              H001058 : NOW tier=1  KEPT
+   BEFORE t1 Young Kim                  K000397 : NOW tier=1  KEPT
+   BEFORE t1 Daniel Meuser              M001204 : NOW tier=2  *** LOST tier 1 -> 2 ***
+   BEFORE t1 Alex Padilla               P000145 : NOW tier=1  KEPT
+   BEFORE t1 Brad Sherman               S000344 : NOW tier=1  KEPT
+   BEFORE t1 Tim Scott                  S001184 : NOW tier=1  KEPT
+   BEFORE t1 Dan Sullivan               S001198 : NOW tier=1  KEPT
+   BEFORE t1 William Timmons            T000480 : NOW tier=1  KEPT
+   BEFORE t1 Maxine Waters              W000187 : NOW tier=1  KEPT
+   BEFORE non-t1 (on threat board) Pete Sessions          S000250 : NOW tier=1  *** GAINED ***

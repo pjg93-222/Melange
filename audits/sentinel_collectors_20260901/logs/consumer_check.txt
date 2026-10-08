@@ -1,0 +1,10 @@
+﻿=== STAGED candidate feed ===
+  receipt : C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sentinel-collectors-progress-f7de7d\d573ef55-b2ca-4ec1-a60f-2784a7960ad4\scratchpad\staging\data\stance\press_refresh_feed_receipt.json
+  RESULT  : NO EXCEPTION (receipt accepted)
+            promotion_mode = 'CUMULATIVE_ACCEPTED_RUN_LEDGER'
+            accepted_runs  = 4
+            counts         = {'accepted_runs': 4, 'fulltext_rows': 294, 'official_mentions': 22243, 'tone_rows': 294}
+
+=== MAIN live production feed (read-only) ===
+  receipt : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\stance\press_refresh_feed_receipt.json
+  RESULT  : RuntimeError: press refresh receipt is not a cumulative accepted-run ledger

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public" slc-id="S1-MIR19D40-NWR-T0-J6Z"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2835 IS: Access to Affordable Housing for Veterans Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-11-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2835</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191112">November 12, 2019</action-date><action-desc><sponsor name-id="S402">Ms. Rosen</sponsor> (for herself and <cosponsor name-id="S260">Mr. Roberts</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To include information regarding VA home loans in the Informed Consumer Choice Disclosure required
+			 to be provided to a prospective FHA borrower who is a veteran, to amend
+			 title 10, United States Code, to authorize the provision of a certificate
+			 of eligibility for VA home loans during the preseparation counseling for
+			 members of the Armed Forces, and for other purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" id="H403F9CED046948EB9D50F5125E940524" style="OLC">
+ <section id="H10859B8A7548430E88D89B76A3578365" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Access to Affordable Housing for Veterans Act of 2019</short-title></quote>.</text> </section><section id="H5DE17EDF2D5D41A0BDC3966DCADD6EF9"><enum>2.</enum><header>FHA Informed Consumer Choice Disclosure</header><text display-inline="no-display-inline">Section 203(f)(2)(A) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(f)(2)(A)</external-xref>) is amended—</text>
+ <paragraph id="H760176A5428F489F9F999CC07715B1EC"><enum>(1)</enum><text>by inserting <quote>(i)</quote> after <quote>loan-to-value ratio</quote>; and</text> </paragraph><paragraph id="H96A3C9DE1ACD49D199AE7A9CFEAA6536"><enum>(2)</enum><text>by inserting before the semicolon the following: <quote>, and (ii) in the case of a prospective borrower who is a veteran (as defined in section 101 of title 38, United States Code) who would qualify for a loan guaranteed or insured under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/38/37">chapter 37</external-xref> of title 38, United States Code, in connection with such a loan, assuming prevailing interest rates</quote>.</text>
+			</paragraph></section><section id="H5F26E6AFFF7449CA958D678FCD8F2546"><enum>3.</enum><header>Uniform Residential Loan Application</header>
+ <subsection id="idAC41F775A79D46F893E58B8AC8465667"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Director of the Federal Housing Finance Agency shall direct the Federal National Mortgage Association and the Federal Home Loan Mortgage Corporation to revise the Uniform Residential Loan Application developed by those enterprises, not later than December 31, 2020, to include—</text>
+ <paragraph id="id684267FA50004A4793C6C3771A42081A"><enum>(1)</enum><text display-inline="yes-display-inline">in the borrower information portion of the application, a check box for the applicant to check to indicate that the applicant is a veteran;</text>
+ </paragraph><paragraph id="H1541A76B01EC44F6A9E24AE6FE0C2F9B"><enum>(2)</enum><text>adjacent to the matter required by paragraph (1) and in boldface type, the following statement: <quote>If you are a veteran, you may be eligible for a VA mortgage.</quote>; and</text> </paragraph><paragraph id="H7BA2985CF8684AC49120258CB56BB711"><enum>(3)</enum><text display-inline="yes-display-inline">adjacent to the matter required by paragraph (2), a blank line for the borrower to initial, and a statement that all applicants must initial the blank line to confirm that they have read the statement required by paragraph (2).</text>
+ </paragraph></subsection><subsection id="id62D0E8CE670841C19BA185E9FAAF7D60"><enum>(b)</enum><header>Prohibition</header><text>The information required to be included under subsection (a) shall not appear after the borrower signature line of the Uniform Residential Loan Application.</text>
+			</subsection></section><section id="HBC344B4EF97E448F80DF38F73C65A732"><enum>4.</enum><header>Preseparation counseling for members of the Armed Forces regarding Department of Veterans Affairs
+ home loan services and housing assistance benefits</header><text display-inline="no-display-inline">Section 1142(b) of title 10, United States Code, is amended—</text> <paragraph id="HFDF099AFF86243ADB06EC12DF7D40DEA"><enum>(1)</enum><text>by redesignating paragraphs (17) and (18) as paragraphs (18) and (19), respectively; and</text>
+ </paragraph><paragraph id="HBAF70F285F1346A6BFF9C391D95ADB63"><enum>(2)</enum><text>by striking paragraph (16) and inserting the following new paragraphs:</text> <quoted-block display-inline="no-display-inline" id="H2EAC3373553948A18165045034B50862" style="OLC"> <paragraph id="H5287C4509A704589ADDC7A94BA626BCA"><enum>(16)</enum><text display-inline="yes-display-inline">Information on the availability of home loan services by and housing assistance benefits of the Department of Veterans Affairs, including the authority of the member—</text>
+ <subparagraph id="H144BDC2BF4BE4A97A262A33DB55E2926"><enum>(A)</enum><text>to use an honorable discharge certificate as a certificate of eligibility to apply for a guaranteed housing loan from the Department of Veterans Affairs; or</text>
+ </subparagraph><subparagraph id="H6759634CE6DE4962A2107FDD4524FEB6"><enum>(B)</enum><text>to request, during the preseparation process or after separation, a specific certificate of eligibility for such a loan under section 3702(c) of title 38.</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="H7F9F257E760B4D4897677CA0DAC4BC19"><enum>(17)</enum><text>Counseling on responsible borrowing practices.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section></legis-body></bill> 
+

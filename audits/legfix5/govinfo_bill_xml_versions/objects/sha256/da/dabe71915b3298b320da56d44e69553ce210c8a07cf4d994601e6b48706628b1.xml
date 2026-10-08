@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HC4D213DC5A4D4DB3AD28F4F459DB4767" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 2872 EH: To amend the Permanent Electronic Duck Stamp Act of 2013 to allow the Secretary of the Interior to issue electronic stamps under such Act, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IB</distribution-code> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 2872</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the Permanent Electronic Duck Stamp Act of 2013 to allow the Secretary of the Interior to issue electronic stamps under such Act, and for other purposes.</official-title> 
+</form> 
+<legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC" id="H78A0022C34EB4ACF89454CBE3880DE3D"> 
+<section id="HED1DF65100AA49D98BC9C89CFA372C14"><enum>1.</enum><header>Authorizing fully electronic stamps</header> 
+<subsection id="H0FF6CD9415B2491C9D6907EEA2CB8C14"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 5 of the Permanent Electronic Duck Stamp Act of 2013 (<external-xref legal-doc="usc" parsable-cite="usc/16/718r">16 U.S.C. 718r</external-xref>) is amended—</text> <paragraph id="H395E2499200D40FBB9C2D8619826AE16"><enum>(1)</enum><text>in subsection (a)—</text> 
+<subparagraph id="HB873E799148645DB96C40515B33F41DC"><enum>(A)</enum><text>in the heading, by striking <quote><header-in-text level="subsection" style="OLC">actual stamp</header-in-text></quote> and inserting <quote><header-in-text level="subsection" style="OLC">electronic stamp</header-in-text></quote>;</text></subparagraph> <subparagraph id="HF8D346E5F96043D79601ED5978938D0B"><enum>(B)</enum><text>by striking <quote>actual stamp</quote> and inserting <quote>electronic stamp</quote>; and</text></subparagraph> 
+<subparagraph id="HF9BF3A88522E48839519938AF97AB631"><enum>(C)</enum><text>by amending paragraph (1) to read as follows:</text> <quoted-block style="OLC" id="H8DCF2AA0BA2D49B988416286F33709F4" display-inline="no-display-inline"> <paragraph id="HFC4B57485EA14E73A5B4CEBB03204EF8"><enum>(1)</enum><text display-inline="yes-display-inline">upon the date of purchase; and</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block></subparagraph></paragraph> 
+<paragraph id="H703D6C8A9C3E4B159ECE3AFD8F3CA0CF"><enum>(2)</enum><text>in subsection (c), by inserting <quote>under subsection (e)</quote> before the period at the end; and</text></paragraph> <paragraph id="H067EFD475DE5427183B2A605446DF818"><enum>(3)</enum><text>by redesignating subsection (e) as subsection (f) and inserting after subsection (d) the following new subsection:</text> 
+<quoted-block style="OLC" id="HC432543B10F94FD29E1133FC2554031C" display-inline="no-display-inline"> 
+<subsection id="HB6D32B27473745EFB85995F87C9F57F2"><enum>(e)</enum><header>Delivery of actual stamps</header><text display-inline="yes-display-inline">The Secretary shall issue an actual stamp after March 10 of each year to each individual that purchased an electronic stamp for the preceding waterfowl seasons.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> <subsection id="HC394880A81B348EDAB56EA44CC6151F1"><enum>(b)</enum><header>Stamp valid through close of hunting season</header><text>Section 6 of the Permanent Electronic Duck Stamp Act of 2013 (<external-xref legal-doc="usc" parsable-cite="usc/16/718s">16 U.S.C. 718s(c)</external-xref>) is amended—</text> 
+<paragraph id="HBDCC30A1D0CC487688D245A2B500C65F"><enum>(1)</enum><text>in subsection (b), by striking <quote>shall, during the effective period of the electronic stamp—</quote> and inserting <quote>shall—</quote>; and</text></paragraph> <paragraph id="HF7EE3F2078A1438B8200FF9002DD02F8"><enum>(2)</enum><text>in subsection (c), by striking <quote>for a period agreed to by the State and the Secretary, which shall not exceed 45 days</quote> and inserting <quote>until the first June 30 that occurs after the date of issuance of such stamp</quote>. </text></paragraph></subsection> 
+<subsection id="H5777373D2A374036AB0ACAE0D40A5FA7"><enum>(c)</enum><header>Electronic stamps as permit</header><text>Section 1(a)(1) of the Migratory Bird Hunting and Conservation Stamp Act (<external-xref legal-doc="usc" parsable-cite="usc/16/718a">16 U.S.C. 718a(a)(1)</external-xref>) is amended—</text> <paragraph id="HE2FFBFDC36AA4492B9DC54B7CA046B71"><enum>(1)</enum><text>by inserting <quote>as an electronic stamp or</quote> after <quote>Conservation Stamp,</quote>; and</text></paragraph> 
+<paragraph id="H8438ED7B0BC14A4B8C842141257F6072"><enum>(2)</enum><text>by inserting <quote>actual</quote> after <quote>face of the</quote>.</text></paragraph></subsection> <subsection id="HB345362314004E5FAEA8BDD0925E584D"><enum>(d)</enum><header>Contents of electronic stamp</header><text>Section 2(3) of the Permanent Electronic Duck Stamp Act of 2013 (<external-xref legal-doc="usc" parsable-cite="usc/16/718o">16 U.S.C. 718o(3)</external-xref>) is amended—</text> 
+<paragraph id="H772432F9BD9146E5B5743B372604D8EA"><enum>(1)</enum><text>in subparagraph (D), by striking <quote>and</quote>;</text></paragraph> <paragraph id="H6A4D588238A748E5B1FC3539CDEEDFFE"><enum>(2)</enum><text>in subparagraph (E), by striking the period at the end and inserting <quote>; and</quote>; and</text></paragraph> 
+<paragraph id="HAC980865E6BD408F800687ADE744407F"><enum>(3)</enum><text>by adding at the end the following:</text> <quoted-block style="OLC" id="H7D5870E1931D4DC9A4BD0FC5AE0E1984" display-inline="no-display-inline"> <subparagraph id="H05B87CE7D4684A0BA60FA4A249E4D675"><enum>(F)</enum><text display-inline="yes-display-inline">may contain an image of the actual stamp.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20230920" chamber="House">Passed the House of Representatives September 20, 2023.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MDM19D47-VT8-WR-M6T">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2482 IS: Protect American Values Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-09-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2482</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190917">September 17, 2019</action-date>
+			<action-desc><sponsor name-id="S361">Ms. Hirono</sponsor> (for herself, <cosponsor name-id="S369">Mr. Markey</cosponsor>, <cosponsor name-id="S221">Mrs. Feinstein</cosponsor>, <cosponsor name-id="S387">Ms. Harris</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S229">Mrs. Murray</cosponsor>, <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S386">Ms. Duckworth</cosponsor>, <cosponsor name-id="S308">Mr. Cardin</cosponsor>, <cosponsor name-id="S307">Mr. Brown</cosponsor>, <cosponsor name-id="S330">Mr. Bennet</cosponsor>, <cosponsor name-id="S366">Ms. Warren</cosponsor>, <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, <cosponsor name-id="S247">Mr. Wyden</cosponsor>, <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>, <cosponsor name-id="S313">Mr. Sanders</cosponsor>, <cosponsor name-id="S309">Mr. Casey</cosponsor>, <cosponsor name-id="S259">Mr. Reed</cosponsor>, <cosponsor name-id="S326">Mr. Udall</cosponsor>, <cosponsor name-id="S362">Mr. Kaine</cosponsor>, <cosponsor name-id="S385">Ms. Cortez Masto</cosponsor>, <cosponsor name-id="S354">Ms. Baldwin</cosponsor>, <cosponsor name-id="S337">Mr. Coons</cosponsor>, <cosponsor name-id="S306">Mr. Menendez</cosponsor>, <cosponsor name-id="S359">Mr. Heinrich</cosponsor>, and <cosponsor name-id="S322">Mr. Merkley</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSJU00">Committee on the Judiciary</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To prohibit the use of Federal funds to carry out the final rule of the Department of Homeland
+			 Security entitled <quote>Inadmissibility on Public Charge Grounds</quote>.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protect American Values Act</short-title></quote>.</text>
+ </section><section id="id6d44b7efbb7a413db6a1da89a7c0a844"><enum>2.</enum><header>Sense of Congress</header><text display-inline="no-display-inline">It is the sense of Congress that—</text> <paragraph id="id2c5a1eb6eb5d41269e8d5bb65cfc49d4"><enum>(1)</enum><text>immigrants and their families are a core part of our Nation;</text>
+ </paragraph><paragraph id="idcf1ef4fc159743f88d848039e9e913d8"><enum>(2)</enum><text>the health and safety of immigrants is critical to the health and safety of our communities;</text> </paragraph><paragraph id="id2d379d9238c5436caf3986f07c1d3f9f"><enum>(3)</enum><text>Federal, State, and local assistance programs promote self-sufficiency by ensuring that families, including immigrant and mixed-status families, maintain their health, strength, and stability to enable them to continue contributing to the Nation’s social and economic life;</text>
+ </paragraph><paragraph id="id8a32456dcfc24a709e925a6f555b06c0"><enum>(4)</enum><text>the final rule of the Department of Homeland Security entitled <quote>Inadmissibility on Public Charge Grounds</quote>, published August 14, 2019, is a sweeping and dangerous policy that will impede access to essential food, medical care, housing, and other critical forms of assistance for many families, including those not directly subject to the rule due to its widespread chilling effect;</text>
+ </paragraph><paragraph id="ide25ce60ad9c7419abad67028e063b9c4"><enum>(5)</enum><text>this rule will harm families and children, including United States citizens as the Department of Homeland Security’s own assessment of the impacts of the rule acknowledge that the rule—</text>
+ <subparagraph id="id8405257F9ED44B11822075C2ABCA89F6"><enum>(A)</enum><text><quote>may decrease disposable income and increase the poverty of certain families and children, including U.S. citizen children</quote>; and</text>
+ </subparagraph><subparagraph id="id38775778198D4386985C7BE4165B578D"><enum>(B)</enum><text>could lead to <quote>[a]dverse health effects</quote>, <quote>[a]dditional medical expenses due to delayed health care treatment</quote>, <quote>[i]ncreased disability insurance claims</quote>, and <quote>[p]otential lost productivity</quote>;</text>
+ </subparagraph></paragraph><paragraph id="idE56BA388CA0E45CFB592B91EC6DA43EE"><enum>(6)</enum><text>this rule will damage State and local economies, while burdening health care and other service providers, as the Department of Homeland Security’s own assessment of the impacts of the rule recognizes that the rule may <quote>result in reduced revenues for healthcare providers</quote>, <quote>companies that manufacture medical supplies or pharmaceuticals</quote>, <quote>grocery retailers</quote>, <quote>agricultural producers</quote>, and <quote>landlords participating in Federally funded housing programs</quote>; and</text>
+ </paragraph><paragraph id="id5c3da24ed9814271b2f163e9d07d9d80"><enum>(7)</enum><text>this rule circumvents Congress and reverses 100 years of United States law and policy by restricting immigration and decreasing the diversity of our Nation through factors such as family size, financial status, education and skills, and employability and chilling access to services for which immigrants and their citizen family members are eligible, in a manner not authorized or contemplated by Congress.</text>
+ </paragraph></section><section id="id0528710614774ad1b7f14547909bc747"><enum>3.</enum><header>Prohibition on use of funds</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, no Federal funds appropriated or otherwise made available for any fiscal year may be used to implement, administer, enforce, or carry out the final rule of the Department of Homeland Security entitled <quote>Inadmissibility on Public Charge Grounds</quote>, published August 14, 2019.</text>
+		</section></legis-body>
+</bill>
+
+

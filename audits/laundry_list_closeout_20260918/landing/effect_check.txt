@@ -1,0 +1,19 @@
+N4 routing audit: legislation_routing_audit.json | rows 10825 | synthesised sponsor rows 5
+     Luna, Anna Paulina | H.R.6410 118 | Data Privacy & Cyber | duplicate-same-role | contribution 2.4000000000000004
+     Scott, Tim | S.3382 117 | Member Business Lending | selected | contribution 1.9200000000000004
+     Scott, Tim | S.762 117 | Member Business Lending | selected | contribution 1.9200000000000004
+     Scott, Tim | S.3992 118 | Member Business Lending | selected | contribution 2.4000000000000004
+     Luna, Anna Paulina | H.R.4686 118 | Mortgage & Housing | duplicate-same-role | contribution 2.4000000000000004
+N4 archive_leg Tim Scott / Member Business Lending: 17.0 (was 10.76; predicted 17.00)
+A5 press meta tone_ingest_dedup: {'rows_read': 2679, 'official_mention_skipped': 0, 'no_url_skipped': 0, 'exact_url_turn_collapsed': 0, 'duplicate_url_form_collapsed': 11, 'release_key_conflict_kept': 1, 'rows_returned': 2668, 'schema': 'press-tone-ingest-dedup-v1', 'canon': '2'}
+R1 member_references: edges 8010 | drawn (n_scored>=2) 3482 | admission_filters: {"press_third_party_domain": 8, "roster_list_window": 749, "identical_window_repeat": 191} | dials {'REF_PRESS_OWN_DOMAIN': '1', 'REF_ROSTER_FILTER': '1', 'REF_IDENTICAL_ONCE': '1'}
+N1a desk press ledger: NOT FOUND in bundle top-level/meta
+     media_audit press keys: {}
+  mtime ranks_python.json            2026-09-19 03:26:22
+  mtime category_stance.json         2026-09-19 03:26:02
+  mtime dashboard_data.json          2026-09-19 03:39:30
+  mtime member_desk_bundle.json      2026-09-19 03:43:59
+  mtime member_references.json       2026-09-19 03:25:11
+  mtime Moneyball Dashboard.html     2026-09-19 03:39:34
+  mtime cu-member-desk.html          2026-09-19 03:44:01
+  mtime Moneyball.html               2026-09-19 03:44:07

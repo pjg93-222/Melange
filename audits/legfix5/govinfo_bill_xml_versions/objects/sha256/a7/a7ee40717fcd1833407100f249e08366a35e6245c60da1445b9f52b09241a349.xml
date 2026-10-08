@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HAD86B415AC7F41B28DCD77433430C26A" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 592 IH: Protect Veterans from Financial Fraud Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 592</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190116">January 16, 2019</action-date><action-desc><sponsor name-id="B001285">Ms. Brownley of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to ensure that the Secretary of Veterans Affairs repays the
+			 misused benefits of veterans with fiduciaries, to establish an appeals
+			 process for determinations by the Secretary of Veterans Affairs of
+			 veterans’ mental capacity, and for other purposes.</official-title></form>
+	<legis-body id="H7188BF325B4B4210B7B386E7CAD7F0E0" style="OLC">
+ <section id="H40343CEBD9DF41609BB5BE9779C33B74" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protect Veterans from Financial Fraud Act of 2019</short-title></quote>.</text> </section><section id="H496FD69DD6DE42F990E744666B67B997" section-type="subsequent-section"><enum>2.</enum><header>Repayment of misused benefits</header> <subsection id="H262F0A5E14C54072A6B51B82350CFAF5"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 6107(b) of title 38, United States Code, is amended—</text>
+ <paragraph id="HA981F3A36CDA4B87BC94A09D792A943E"><enum>(1)</enum><text>in paragraph (1), by striking <quote>In any case in which a fiduciary described in paragraph (2)</quote> and inserting <quote>In any case not covered by subsection (a) in which a fiduciary</quote>;</text> </paragraph><paragraph id="H0A5D6F900BF140938CFE6C3E1B734E67"><enum>(2)</enum><text display-inline="yes-display-inline">by striking paragraph (2); and</text>
+ </paragraph><paragraph id="HAD158A762E534CA991697F030EEE1826"><enum>(3)</enum><text>by redesignating paragraph (3) as paragraph (2).</text> </paragraph></subsection><subsection commented="no" id="H20874C951A6C4D3FAEF7EC20293A465C"><enum>(b)</enum><header>Application</header><text display-inline="yes-display-inline">The amendments made by subsection (a) shall apply with respect to the misuse of benefits by a fiduciary occurring on or after the date of the enactment of this Act.</text>
+ </subsection></section><section id="H59A5FB3D7E4E40D084E000C80CB9B135"><enum>3.</enum><header>Appeals for determinations of mental capacity</header><text display-inline="no-display-inline">Section 5501A of title 38, United States Code, is amended—</text> <paragraph id="H27744954E0064F9C8DF0A3F4E953AD94"><enum>(1)</enum><text>by striking <quote>The Secretary</quote> and inserting <quote><header-in-text level="subsection" style="USC"><enum-in-header>(a) </enum-in-header>In general</header-in-text>.—The Secretary</quote>; and</text>
+ </paragraph><paragraph id="H2782103F0EBE444DB5CB123D59885E90"><enum>(2)</enum><text>by adding at the end the following new subsection:</text> <quoted-block display-inline="no-display-inline" id="H0059FF41431B41E290F7974AE11D7D6E" style="USC"> <subsection id="H31E066BB70874D3EB2D0FDD73DB94218"><enum>(b)</enum><header>Appeals</header><text display-inline="yes-display-inline">A determination under subsection (a) may be appealed in accordance with chapters 71 and 72 of this title.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section></legis-body></bill>
+
+

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H932506CA56E54FCE9C5964F57AEB2E55" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3605 IH: Protecting American Consumers from Robocalls Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3605</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190628">June 28, 2019</action-date><action-desc><sponsor name-id="S001145">Ms. Schakowsky</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To expand the private right of action under the Telephone Consumer Protection Act for calls in
+			 violation of the Do Not Call rules.</official-title></form>
+	<legis-body id="H489E7448928F49808726456A9334D99F" style="OLC">
+ <section id="H42BFEE309DF648B1BA46D132C484877B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting American Consumers from Robocalls Act</short-title></quote>.</text> </section><section id="HFB9359DDA99644998CEACE082AADAD78"><enum>2.</enum><header>Private right of action for calls in violation of Do Not Call rules</header><text display-inline="no-display-inline">Section 227(c)(5) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(c)(5)</external-xref>) is amended—</text>
+ <paragraph id="H588E5AC84C404B968AA17BEB7DD24D2C"><enum>(1)</enum><text display-inline="yes-display-inline">in the matter preceding subparagraph (A), by striking <quote>more than one telephone call within any 12-month period by or on behalf of the same entity</quote> and inserting <quote>a telephone call by or on behalf of an entity</quote>; and</text> </paragraph><paragraph id="H42E077E3334C48CBA45AF47A57BC9361"><enum>(2)</enum><text>in subparagraph (B), by striking <quote>up to</quote>.</text>
+			</paragraph></section></legis-body></bill>
+
+

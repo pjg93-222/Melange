@@ -1,0 +1,80 @@
+{
+ "base": "86631c454815533798eb1ad81136ddb1a76a23b9",
+ "live_head": "3248a6a02e42bd23665995e69dc649ac926aab95",
+ "tip": "f23a40aee4c749bae9db132599a853a52c81d9bf",
+ "patch": "ids_followup.patch",
+ "patch_sha256": "1d4089913b279dd566efaf80b4da347f5aa613743a4ab3aff97b3123e5bee338",
+ "requires": "landing_v2 (route_latency.patch, tip 86631c454815533798eb1ad81136ddb1a76a23b9) applied to LIVE",
+ "files": [
+  {
+   "file": "fec/surfaces/staffer_closeness_routes.py",
+   "kind": "edit",
+   "blocks": 1,
+   "pre_sha256": "990838332bded29b9847f03eac94a1b486966f6678354369f4508abb48d02aaa",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "02922dffd027f784ff66a384258c1ccc85cabca38348ca82ceb551eab478852f",
+   "pre_eol": "size=44146 crlf=770 lf=6 lone_cr=0 class=MIXED",
+   "post_eol": "size=44373 crlf=772 lf=6 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/README.md",
+   "kind": "edit",
+   "blocks": 2,
+   "pre_sha256": "af8934ade0fe56c5b726e784a186716e9390b0b1989501070d065688a7bd27d2",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "8efd198264c850d8e4242ecae2fdf9221c961658620a69fe8094d58bb46726e2",
+   "pre_eol": "size=29262 crlf=118 lf=0 lone_cr=0 class=PURE_CRLF",
+   "post_eol": "size=29994 crlf=118 lf=0 lone_cr=0 class=PURE_CRLF"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-inventory-worker.js",
+   "kind": "edit",
+   "blocks": 5,
+   "pre_sha256": "7a4960d7d5aba5aa755308dd4f4fac94adc06e88946382d286f4d0ce24fd572a",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "4a420d5fdff86d7b1eba055b4af306995af107597625038a583720cbf4b6adec",
+   "pre_eol": "size=6467 crlf=67 lf=27 lone_cr=0 class=MIXED",
+   "post_eol": "size=6882 crlf=70 lf=27 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/surfaces/staffer_live/staffer-live.js",
+   "kind": "edit",
+   "blocks": 1,
+   "pre_sha256": "bf1c11a20ca718627a9d7f7fcb6b2ac0c18ec7714474302c0c0ce9a3b94edb5e",
+   "pre_source": "LIVE working file now (landing_v2 does not touch it)",
+   "post_sha256": "5c479e200b84195c80e89995bd8ede1a2d0af4882293db2c85a19238a0bf49ca",
+   "pre_eol": "size=41255 crlf=149 lf=4 lone_cr=0 class=MIXED",
+   "post_eol": "size=41969 crlf=153 lf=4 lone_cr=0 class=MIXED"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "900e0523f0da143608e312051adb7d4fcac140678afffe204e1465d6f4c5c4ac",
+   "pre_eol": null,
+   "post_eol": "size=19639 crlf=0 lf=248 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs",
+   "kind": "edit",
+   "blocks": 8,
+   "pre_sha256": "c11062f5070344ca806cf9e0fc8a95cd81152d025581cde9f31a5bb867db2af0",
+   "pre_source": "LIVE working file now = landing_v2 post-image",
+   "post_sha256": "bc2de815d2e37fb72533b9b42e8104f4b413194b70fae22987aab495ba4234ac",
+   "pre_eol": "size=12862 crlf=0 lf=186 lone_cr=0 class=PURE_LF",
+   "post_eol": "size=13272 crlf=0 lf=188 lone_cr=0 class=PURE_LF"
+  },
+  {
+   "file": "fec/tests/surfaces/test_staffer_live_query_ids.cjs",
+   "kind": "new",
+   "blocks": 1,
+   "pre_sha256": null,
+   "pre_source": null,
+   "post_sha256": "ed319888f16b3ba35b92ffa2de04ca41e137dc3872cc05bb4235fc65afc19298",
+   "pre_eol": null,
+   "post_eol": "size=24414 crlf=0 lf=290 lone_cr=0 class=PURE_LF"
+  }
+ ]
+}

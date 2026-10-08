@@ -102,19 +102,21 @@ ck('contest entry mix not partisan-skewed (>80%% enforced only at n>=12)',
 # D16/R156 90.7%). Gating verified correct both times; this is a tripwire, not a parity requirement.
 ck('defend plays not partisan-skewed (<=92%% -- allies skew R, see note)',max(dp['D'],dp['R'])<=0.92*max(1,sum(dp.values())),'D%d R%d'%(dp['D'],dp['R']))
 # 6. QME 2026-10-01 (was: 'knee within funded range', VACUOUS -- the engine can only emit a knee in range). Now: independently re-derive the knee from the
-# STORED path with the engine's 25% rule via a second computation path (reverse scan; the engine scans forward) and compare knee + knee_found. Uses
+# STORED path with the 25% rule via Decimal arithmetic (independent of the producer's integer-tenths implementation), then compare knee + knee_found. Uses
 # spread_raw when the whole path has it (FRONTIER_KNEE_RAW=0 = clamped, as the engine's revert), else the clamped spread of older artifacts.
-KCAP=50000; KRAW=os.environ.get('FRONTIER_KNEE_RAW','1')!='0'
-def knee_rederive(path,raw=True,cap=50000):
+KRAW=os.environ.get('FRONTIER_KNEE_RAW','1')!='0'
+def knee_rederive(path,raw=True):
+    from decimal import Decimal
+    if len(path)<2: return 0,False
     k='spread_raw' if raw and all('spread_raw' in p for p in path) else 'spread'
-    mg=[path[i][k]-path[i-1][k] for i in range(1,len(path))]
-    if not mg: return 0,False
-    thr=0.25*max(mg); knee=0
-    for j in range(len(mg)-1,-1,-1):
-        if mg[j]>=thr: knee=(j+1)*cap; break
+    values=[Decimal(str(p[k])) for p in path]
+    mg=[right-left for left,right in zip(values,values[1:])]
+    threshold=max(mg)/Decimal(4); knee=0
+    for point,gain in reversed(list(zip(path[1:],mg))):
+        if gain>=threshold: knee=point['b']; break
     return knee,(0<knee<path[-1]['b'])
 for mode,FR in [('coalition',CO),('electoral',EL)]:
-    kbad=[t for t,d in FR['topics'].items() if (d['knee'],d['knee_found'])!=knee_rederive(d['path'],KRAW,KCAP)]
+    kbad=[t for t,d in FR['topics'].items() if (d['knee'],d['knee_found'])!=knee_rederive(d['path'],KRAW)]
     ck('[%s] stored knee == independent re-derivation from stored path (25%% rule)'%mode,not kbad,'%d topics differ %s'%(len(kbad),kbad[:3]))
 # 7. QME 2026-10-01: 'paths nested (no repeated seeds)' REPLACED by the stance-gate check below -- repeats are impossible by construction (a seed leaves the heap when taken).
 # Stance gate: with FRONTIER_STANCE_GATE on, no coalition-seed or

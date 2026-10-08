@@ -1,0 +1,6 @@
+roster_baseline (population, agenda-credit-weighted mean of factor_raw) = 0.482222  K = 0.25  shrink_anchor = 15.0
+Pete Sessions   agenda_credit= 12.25 lambda=0.816667 factor_raw= 0.532653 factor_ranked= 0.521096  d(fr)/d(baseline)= 0.229166  mult= 0.993054  score=0.517476467184
+Daniel Meuser   agenda_credit= 22.75 lambda=1.000000 factor_raw= 0.515934 factor_ranked= 0.515934  d(fr)/d(baseline)= 0.000000  mult= 0.999536  score=0.515694606624
+Jim Costa       agenda_credit=  7.25 lambda=0.483333 factor_raw= 0.598276 factor_ranked= 0.523325  d(fr)/d(baseline)= 0.645834  mult= 0.982870  score=0.514360442750
+baseline at which Sessions score == Meuser score (all else held at AFTER values): 0.474393
+  -> Sessions holds seat 13 for roster_baseline > 0.474393 ; live baseline = 0.482222 (margin +0.007829)

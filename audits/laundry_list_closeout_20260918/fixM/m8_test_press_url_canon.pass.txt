@@ -1,0 +1,34 @@
+test_canonical_url_rules_are_exactly_the_shipped_five (__main__.CanonicalUrlIsUnchanged.test_canonical_url_rules_are_exactly_the_shipped_five) ... ok
+test_canonical_url_still_keeps_the_whole_path (__main__.CanonicalUrlIsUnchanged.test_canonical_url_still_keeps_the_whole_path) ... ok
+test_the_baseline_fold_divergence_pin_still_holds (__main__.CanonicalUrlIsUnchanged.test_the_baseline_fold_divergence_pin_still_holds) ... ok
+test_a_merged_row_is_named_in_the_ledger_not_deleted (__main__.IngestAndLedger.test_a_merged_row_is_named_in_the_ledger_not_deleted) ... C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\stance\test_press_url_canon.py:278: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\pgoff\\AppData\\Local\\Temp\\a5-tone-6x3h1fw5\\base.csv' mode='r' encoding='utf-8'>
+  self.assertIn(self.right, io.open(self.base, encoding='utf-8').read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_dial_one_ingests_both_forms (__main__.IngestAndLedger.test_dial_one_ingests_both_forms) ... ok
+test_the_dial_reads_the_environment_at_call_time (__main__.IngestAndLedger.test_the_dial_reads_the_environment_at_call_time) ... ok
+test_the_first_row_wins_which_is_the_historical_row (__main__.IngestAndLedger.test_the_first_row_wins_which_is_the_historical_row)
+press_stream's stated precedence: 'Historical rows win exact collisions.' ... ok
+test_the_ledger_accounts_for_every_row_read (__main__.IngestAndLedger.test_the_ledger_accounts_for_every_row_read) ... ok
+test_the_ledger_is_also_reachable_without_the_out_parameter (__main__.IngestAndLedger.test_the_ledger_is_also_reachable_without_the_out_parameter) ... ok
+test_the_two_url_forms_ingest_as_one_row (__main__.IngestAndLedger.test_the_two_url_forms_ingest_as_one_row) ... ok
+test_a_short_path_segment_is_never_used_as_the_key (__main__.ReleaseUrlKey.test_a_short_path_segment_is_never_used_as_the_key)
+A one-hyphen tail like 'press-releases' is a SECTION, not a release. ... ok
+test_a_truncated_stored_url_is_left_alone (__main__.ReleaseUrlKey.test_a_truncated_stored_url_is_left_alone)
+Not a URL-form difference: one of the two stored urls is cut mid-slug. ... ok
+test_an_unrecognised_dial_value_fails_at_import (__main__.ReleaseUrlKey.test_an_unrecognised_dial_value_fails_at_import) ... ok
+test_an_unrecognised_dial_value_fails_closed (__main__.ReleaseUrlKey.test_an_unrecognised_dial_value_fails_closed)
+A misspelled dial must never fall through to either behaviour silently. ... ok
+test_dial_one_is_canonical_url_byte_for_byte (__main__.ReleaseUrlKey.test_dial_one_is_canonical_url_byte_for_byte) ... ok
+test_distinct_releases_never_merge (__main__.ReleaseUrlKey.test_distinct_releases_never_merge) ... ok
+test_every_measured_alias_shape_merges (__main__.ReleaseUrlKey.test_every_measured_alias_shape_merges) ... ok
+test_the_dial_defaults_to_the_new_behaviour (__main__.ReleaseUrlKey.test_the_dial_defaults_to_the_new_behaviour) ... ok
+test_the_duplicate_slug_rule_only_strips_a_zero_marker (__main__.ReleaseUrlKey.test_the_duplicate_slug_rule_only_strips_a_zero_marker) ... ok
+test_the_key_is_pure_and_deterministic (__main__.ReleaseUrlKey.test_the_key_is_pure_and_deterministic) ... ok
+test_the_query_and_fragment_survive_the_path_rule (__main__.ReleaseUrlKey.test_the_query_and_fragment_survive_the_path_rule) ... ok
+test_the_turn_key_uses_the_release_key (__main__.ReleaseUrlKey.test_the_turn_key_uses_the_release_key) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.037s
+
+OK
