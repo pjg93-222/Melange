@@ -16,7 +16,9 @@ ScopeError is a ValueError, so server.py's existing handlers answer 400 with
 `{"error": str(error)}`. No new except clause is needed anywhere.
 
 Every entry point takes either a report directory or an already-built registry,
-so a route that needs the registry for another reason builds it once.
+so a route that needs the registry for another reason builds it once. `sources`
+(contribution_data._sources()) lets a request that already scanned the folder
+build that registry from its scan instead of scanning again.
 """
 from __future__ import annotations
 
@@ -29,11 +31,11 @@ class ScopeError(ValueError):
     """A request named an industry this console cannot address."""
 
 
-def _registry(report_directory_or_registry):
+def _registry(report_directory_or_registry, sources=None):
     if (isinstance(report_directory_or_registry, dict)
             and 'snapshots' in report_directory_or_registry):
         return report_directory_or_registry
-    return snapshot_registry.registry(report_directory_or_registry)
+    return snapshot_registry.registry(report_directory_or_registry, sources)
 
 
 def labels(report_directory_or_registry):
@@ -48,13 +50,13 @@ def _refusal(registry):
     return ScopeError('Choose a registered industry: ' + ', '.join(known) + '.')
 
 
-def resolve(report_directory_or_registry, industry=None, dataset=None):
+def resolve(report_directory_or_registry, industry=None, dataset=None, sources=None):
     """The registry entry this request addresses, or None for the legacy path."""
     if industry is None and dataset is None:
         # Nothing to resolve, so nothing is read: a route with no scope on it
         # must not pay for a directory scan it will not use.
         return None
-    registry = _registry(report_directory_or_registry)
+    registry = _registry(report_directory_or_registry, sources)
     if industry is not None:
         if not isinstance(industry, str) or not industry:
             raise _refusal(registry)
@@ -84,10 +86,10 @@ def from_query(report_directory_or_registry, parsed_query):
     return resolve(report_directory_or_registry, industry=parsed_query.get('industry', [None])[0])
 
 
-def from_body(report_directory_or_registry, body):
+def from_body(report_directory_or_registry, body, sources=None):
     """Resolve `industry` (and check it against `dataset`) from a POST body."""
     return resolve(report_directory_or_registry, industry=body.get('industry'),
-                   dataset=body.get('dataset'))
+                   dataset=body.get('dataset'), sources=sources)
 
 
 def echo(entry):

@@ -87,9 +87,20 @@ def cycle_totals(stamp):
         return result
 
 
-def verify_sources(report_directory, dataset=None, strict=True):
+def changed_since_scan(source):
+    """Whether a file `_sources` hashed for this source has changed since. A request's guard and reader
+    share one scan, so their hashes agree by construction; this is what still notices a report replaced
+    in between. The hash is keyed by the file's stamp: a file that did not move costs one stat."""
+    pairs=[(source['workbook'],source['workbook_sha256'])]
+    if source.get('hydration_manifest'):pairs.append((source['database'],source['database_sha256']))
+    try:return any(contributions._hash(path)!=expected for path,expected in pairs)
+    except OSError:return True
+
+
+def verify_sources(report_directory, dataset=None, strict=True, sources=None):
+    # `sources` lets one request reuse a scan it already paid for.
     result=[]
-    for source in contributions._sources(report_directory):
+    for source in (contributions._sources(report_directory) if sources is None else sources):
         if not source.get('available') or (dataset is not None and source['id']!=dataset):continue
         try:
             actual=cycle_totals(contributions._stamp(source['workbook']))

@@ -130,7 +130,7 @@ class Fixture(unittest.TestCase):
                                     (sidecar, '_verified', {}), (sidecar, '_totals', {}), (query, '_jobs', {}),
                                     (query, '_raw_memo', query.OrderedDict())):
             self.enterContext(patch.object(target, name, value))
-        self.enterContext(patch.object(data, '_source', side_effect=lambda directory, request: self.source))
+        self.enterContext(patch.object(data, '_source', side_effect=lambda directory, request, sources=None: self.source))
         self.enterContext(patch.object(data, '_ready', side_effect=lambda source, wait=False, retry=False: (self.path, None)))
         self.enterContext(patch.object(data, '_token', side_effect=lambda source: self.token))
         self.enterContext(patch.object(data, '_provenance', return_value={'workbook_sha256': 'w'}))

@@ -298,10 +298,10 @@ def _ready_sidecar(path):
 
 
 # ----------------------------------------------------------------------------- query
-def query(report_directory,request):
+def query(report_directory,request,sources=None):
     _check_loaded()
     basis,dims,measures,limit,offset=semantics.validate(request)
-    source=data._source(report_directory,request)
+    source=data._source(report_directory,request,sources)
     path,pending=data._ready(source,retry=request.get('retry') is True)
     if pending:return pending
     token=data._token(source)
@@ -381,12 +381,12 @@ def _query_uncached(path,request,source,basis,dims,measures,limit,offset,stamp,s
 
 
 # ----------------------------------------------------------------------------- records
-def records(report_directory,request):
+def records(report_directory,request,sources=None):
     _check_loaded()
     basis,_,_,limit,offset=semantics.validate(request)
     if limit>5000:raise ValueError('Drill-through page size must be at most 5,000.')
     if request.get('aggregate_filters'):raise ValueError('Drill through a selected group using its dimension filters.')
-    source=data._source(report_directory,request);path,pending=data._ready(source,retry=request.get('retry') is True)
+    source=data._source(report_directory,request,sources);path,pending=data._ready(source,retry=request.get('retry') is True)
     if pending:return pending
     token=data._token(source);stamp=data._stamp(path);column=data.BASES[basis][1]
     raw_path=Path(source['database']) if source.get('database') else None;raw_stamp=data._stamp(raw_path) if raw_path else None

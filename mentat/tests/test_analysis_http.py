@@ -33,7 +33,7 @@ class InsightsHTTPTests(unittest.TestCase):
         self.assertEqual(status, 200, records)
         self.assertEqual(sum(r['amount_cents'] for r in records['rows']), favorite['amount_cents'])
         self.assertEqual(headers['Cache-Control'], 'no-store')
-        self.proof.assert_called_with(self.report_root, 'Example')
+        self.proof.assert_called_with(self.report_root, 'Example', sources=[])
 
     def test_host_origin_token_scope_and_source_proof_fail_closed(self):
         for endpoint in ('/api/insights/query', '/api/insights/records'):

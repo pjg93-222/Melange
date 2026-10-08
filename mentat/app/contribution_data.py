@@ -12,6 +12,7 @@ from datetime import date
 from decimal import Decimal, ROUND_HALF_EVEN
 from functools import lru_cache
 from itertools import groupby
+import copy
 import hashlib
 import json
 import os
@@ -71,9 +72,15 @@ BASES = {
 }
 
 
-def _json(path):
-    with Path(path).open(encoding='utf-8-sig') as stream:
+@lru_cache(maxsize=128)
+def _json_stamped(stamp):
+    with Path(stamp[0]).open(encoding='utf-8-sig') as stream:
         return json.load(stream)
+
+
+def _json(path):
+    # Parsed once per file state (stamp), like _hash_stamp. The object is shared: read it, never edit it.
+    return _json_stamped(_stamp(path))
 
 
 def _stamp(path):
@@ -108,15 +115,22 @@ def _ro(path):
     return db
 
 
-def _payload_metadata(path):
+@lru_cache(maxsize=64)
+def _payload_metadata_stamped(stamp):
     # Metadata is the first object of the generator's JSON, never load a 1GB
     # payload merely to find its source path.
-    with Path(path).open(encoding='utf-8-sig') as stream:
+    with Path(stamp[0]).open(encoding='utf-8-sig') as stream:
         head = stream.read(2_000_000)
     match = re.search(r'"metadata"\s*:\s*', head)
     if not match:
         raise ValueError('The report payload has no source metadata.')
     return json.JSONDecoder().raw_decode(head[match.end():])[0]
+
+
+def _payload_metadata(path):
+    # Read once per file state (stamp), so a scan does not re-read the 2 MB head of every payload.
+    # The object is shared: read it, never edit it.
+    return _payload_metadata_stamped(_stamp(path))
 
 
 def _payload_rows(path, name='raw_rows'):
@@ -248,7 +262,7 @@ def _sources(directory):
             item.update(available=True, database=database, database_sha256=db_hash,
                         original_database_sha256=original_hash,hydration_manifest=hydration_path,
                         payload=payload, payload_sha256=manifest.get('data_sha256'),
-                        manifest=manifest_path, expected_cycle_totals=metadata.get('expected_cycle_totals', {}),
+                        manifest=manifest_path, expected_cycle_totals=copy.deepcopy(metadata.get('expected_cycle_totals', {})),
                         destination_schema=metadata.get('destination_schema',0))
         except (OSError, ValueError, KeyError, zipfile.BadZipFile) as error:
             item.update(available=False, message=str(error) if isinstance(error, ValueError) else 'Pinned report source evidence is unavailable.')
@@ -309,11 +323,12 @@ def _token(source):
     return hashlib.sha256(json.dumps([_stamp(p) for p in paths],sort_keys=True).encode()).hexdigest()
 
 
-def _source(report_directory, request):
+def _source(report_directory, request, sources=None):
+    # `sources` lets one request reuse a scan it already paid for.
     if not isinstance(request,dict) or any(k in request for k in ('path','database','file','source_path')):
         raise ValueError('Choose a configured contribution dataset, not a file path.')
     name=request.get('dataset')
-    found=next((s for s in _sources(report_directory) if s['id']==name),None)
+    found=next((s for s in (_sources(report_directory) if sources is None else sources) if s['id']==name),None)
     if not found:raise ValueError('Choose an available contribution dataset.')
     if not found['available']:raise ValueError(found['message'])
     fields=set(request.get('dimensions',[]))|{f.get('field') for f in request.get('filters',[]) if isinstance(f,dict)}

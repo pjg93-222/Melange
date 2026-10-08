@@ -166,7 +166,7 @@ class IndustryRouteTests(RouteBase):
         super().setUp()
         self.calls = []
 
-        def reader(directory, request):
+        def reader(directory, request, sources=None):
             self.calls.append((directory, json.loads(json.dumps(request))))
             return json.loads(json.dumps(self.payload))
 

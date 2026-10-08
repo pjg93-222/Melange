@@ -46,6 +46,11 @@ def worksheet_data(*args, **kwargs):
     return implementation(*args, **kwargs)
 
 
+def worksheet_entry(*args, **kwargs):
+    from report_insights import worksheet_entry as implementation
+    return implementation(*args, **kwargs)
+
+
 def stamp(*args, **kwargs):
     from report_insights import stamp as implementation
     return implementation(*args, **kwargs)
@@ -156,6 +161,7 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/funding-comparison.js': ('funding-comparison.js', 'text/javascript'),
                  '/comparison.css': ('comparison.css', 'text/css'),
                  '/chart-export.js': ('chart-export.js', 'text/javascript'),
+                 '/figure-pdf.js': ('figure-pdf.js', 'text/javascript'),
                  '/worksheet-comparison.js': ('worksheet-comparison.js', 'text/javascript'),
                  '/graph.css': ('graph.css', 'text/css'),
                  '/acu-theme.css': ('acu-theme.css', 'text/css'),
@@ -2966,28 +2972,32 @@ class Handler(BaseHTTPRequestHandler):
     def valid_host(self):
         return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
 
-    def scope_body(self, data):
+    def scope_body(self, data, sources=None):
         """Resolve this body's industry, fill the legacy dataset, drop the key.
 
         The readers select by `dataset`, and neither of their validators knows
         `industry`, so it is removed before the reader sees it rather than left
         for a future stricter validator to refuse.
         """
-        entry = industry_scope.from_body(self.server.app.report_directory, data)
+        entry = industry_scope.from_body(self.server.app.report_directory, data, sources)
         if entry and 'dataset' not in data:
             data['dataset'] = entry['dataset']
         data.pop('industry', None)
         return entry
 
-    def contribution_result(self, reader, data):
+    def contribution_result(self, reader, data, sources=None):
         directory = self.server.app.report_directory
-        checked = contribution_workbook_guard.verify_sources(directory, data.get('dataset'))
-        result = reader(directory, data)
+        checked = contribution_workbook_guard.verify_sources(directory, data.get('dataset'), sources=sources)
+        result = reader(directory, data, sources)
         pinned = next((item for item in checked if item['dataset'] == data.get('dataset')), None)
         if pinned:
             provenance = result.get('provenance', {})
-            if any(pinned.get(key) is not None and provenance.get(key) != pinned[key]
-                   for key in ('workbook_sha256', 'database_sha256')):
+            # The guard and the reader share one scan, so their hashes agree by construction; a report
+            # replaced since that scan is caught by hashing its file again.
+            scanned = next((item for item in sources or () if item['id'] == pinned['dataset']), None)
+            if (any(pinned.get(key) is not None and provenance.get(key) != pinned[key]
+                    for key in ('workbook_sha256', 'database_sha256'))
+                    or (scanned and contribution_workbook_guard.changed_since_scan(scanned))):
                 raise ValueError('The published report or contribution source changed while the view was being prepared. Refresh the source before continuing.')
             provenance.update(source_financial_universe_verified=pinned.get('source_financial_universe_verified'),
                               source_proof_token=pinned.get('source_proof_token'))
@@ -3043,7 +3053,7 @@ class Handler(BaseHTTPRequestHandler):
                 # catalogue and the registry annotation below read the same list.
                 sources = contribution_data._sources(app.report_directory)
                 catalog = contribution_query.semantics.catalog(app.report_directory, sources)
-                checks = {item['dataset']: item for item in contribution_workbook_guard.verify_sources(app.report_directory, strict=False)}
+                checks = {item['dataset']: item for item in contribution_workbook_guard.verify_sources(app.report_directory, strict=False, sources=sources)}
                 for dataset in catalog['datasets']:
                     check = checks.get(dataset['id'])
                     if check and not check['matched']:
@@ -3189,7 +3199,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(app.report_sources())
             if parsed.path == '/api/report-data':
                 path = app.report_path(query.get('id', [''])[0], int(query.get('index', ['-1'])[0]))
-                return self.send(worksheet_data(stamp(path), query.get('sheet', [''])[0], int(query.get('header', ['0'])[0])))
+                return self.send_entry(worksheet_entry(path, query.get('sheet', [''])[0], int(query.get('header', ['0'])[0])))
             if parsed.path == '/api/graph-catalog':
                 return self.send(app.graph_catalog(query.get('id',[''])[0]))
             if parsed.path == '/api/cross-reference':
@@ -3298,8 +3308,9 @@ class Handler(BaseHTTPRequestHandler):
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/evidence-geocode'):
             self.discard_body()
             return self.send({'error': geocode.M_READ_ONLY}, 403)
+        # /api/export/pdf (figure_pdf.py) writes only a temporary file, so the read-only preview serves it.
         if getattr(self.server.app, 'read_only', False) and self.path not in (
-                analytical_paths | {'/api/evidence-csv', '/api/evidence-files'}):
+                analytical_paths | {'/api/evidence-csv', '/api/evidence-files', '/api/export/pdf'}):
             self.discard_body()
             return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
         if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
@@ -3339,6 +3350,11 @@ class Handler(BaseHTTPRequestHandler):
                     upload.abort()
                     raise
                 return self.send(upload.finish())
+            if self.path == '/api/export/pdf':
+                # One figure to one PDF (figure-pdf.js). It reads its own body: a figure with a map
+                # raster can pass the 7 MB cap below, and it answers a download, not JSON.
+                import figure_pdf
+                return figure_pdf.respond(self, STATIC_ASSETS, Path(__file__).parent, CONSOLE_CSP)
             length = int(self.headers.get("Content-Length", "0"))
             if length < 1 or length > 7_000_000:
                 self.discard_body()
@@ -3358,9 +3374,11 @@ class Handler(BaseHTTPRequestHandler):
                     self.path in ('/api/insights/query', '/api/contributions/query') else None)
             if self.path in ('/api/insights/query', '/api/insights/records'):
                 import analysis_data
-                entry = self.scope_body(data)
+                # One scan of the report folder for this request: scope, guard and reader share it.
+                sources = contribution_data._sources(self.server.app.report_directory)
+                entry = self.scope_body(data, sources)
                 reader = analysis_data.query if self.path.endswith('/query') else analysis_data.records
-                result = self.contribution_result(reader, data)
+                result = self.contribution_result(reader, data, sources)
                 result.update(industry_scope.echo(entry))
                 self.send(result)
                 if sent is not None and not (isinstance(result, dict) and result.get('status') in ('building', 'queued', 'preparing')):
@@ -3368,9 +3386,10 @@ class Handler(BaseHTTPRequestHandler):
                     record_access(self, 'insights_query', sent, started)
                 return
             if self.path in ('/api/contributions/query', '/api/contributions/records'):
-                entry = self.scope_body(data)
+                sources = contribution_data._sources(self.server.app.report_directory)
+                entry = self.scope_body(data, sources)
                 reader = contribution_query.query if self.path.endswith('/query') else contribution_query.records
-                result = self.contribution_result(reader, data)
+                result = self.contribution_result(reader, data, sources)
                 if isinstance(result, dict):
                     result.update(industry_scope.echo(entry))
                 self.send(result)

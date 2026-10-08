@@ -47,8 +47,11 @@ Task kinds, in priority order. Industries are ordered by their most recent Insig
   comparison_flows   Per industry, when response_cache is installed: comparison_data.flows_entry, the
                      /api/comparison-flows answer stored in the response cache's disk tier.
   drawer_sidecars    Per industry, when drawer_sidecars is installed: build_sidecars, every sidecar the
-                     Graph drawer reads (it no longer loads the 1.1 GB inventory of perf.md H8). These two
-                     kinds need ARTIFACT_EXTRA_FREE_BYTES more free memory than the 1.5 GB floor.
+                     Graph drawer reads (it no longer loads the 1.1 GB inventory of perf.md H8).
+  worksheets         Per industry, when response_cache is installed: report_insights.worksheet_entry, the
+                     /api/report-data answer for the sheet list and every sheet of each of the industry's
+                     published workbooks (a sheet the route refuses is cached as its refusal and skipped).
+                     These three kinds need ARTIFACT_EXTRA_FREE_BYTES more free memory than the 1.5 GB floor.
 The planning Graph views (first loads and company views) land in the response cache's disk tier too.
 A missing analytical index is reported as index_missing. Only --allow-index-builds builds it.
 
@@ -948,7 +951,8 @@ PROBE_SECONDS = 0.2                     # an Insights scope is only probed at st
 # Rebuild seconds assumed when neither access_stats nor the ledger measured one (perf.md orders of magnitude).
 DEFAULT_COST_SECONDS = {'graph_default': 2.0, 'graph_view': 2.0, 'graph_drawer': 3.0, 'comparison_flows': 3.5,
                         'insights_scope': 12.0, 'query_view': 20.0, 'insights_default': 12.0,
-                        'insights_neighbor': 5.0, 'insights_company': 5.0, 'graph_spark': 5.0, 'drawer_sidecars': 10.0}
+                        'insights_neighbor': 5.0, 'insights_company': 5.0, 'graph_spark': 5.0, 'drawer_sidecars': 10.0,
+                        'worksheets': 60.0}
 DEFAULT_KINDS = ('graph_default', 'comparison_flows', 'query_view', 'insights_default')
 # The kinds server.py records (record_access) and the prime replays.
 ACCESS_GRAPH_KINDS = ('graph_view', 'graph_drawer')
@@ -1201,12 +1205,12 @@ class AccessRecorder:
 # Plan order. 'other_basis' orders the newest hint's other-basis neighbours after every company of every
 # industry; those tasks keep the insights_neighbor kind (and so their task ids and ledger history).
 KIND_RANK = {'query_view': 1, 'insights_default': 2, 'insights_neighbor': 3, 'insights_company': 4,
-             'other_basis': 5, 'graph_spark': 6, 'comparison_flows': 7, 'drawer_sidecars': 8}
+             'other_basis': 5, 'graph_spark': 6, 'comparison_flows': 7, 'drawer_sidecars': 8, 'worksheets': 9}
 INSIGHTS_KINDS = ('insights_default', 'insights_neighbor', 'insights_company')
 QUERY_KINDS = ('query_view', 'graph_spark')
 # Kinds that build another builder's cache (SP build/cache and build/drawer receipts): no analytical index
 # and no contribution-query response is involved, and each needs more memory headroom than a query.
-ARTIFACT_KINDS = ('comparison_flows', 'drawer_sidecars')
+ARTIFACT_KINDS = ('comparison_flows', 'drawer_sidecars', 'worksheets')
 ARTIFACT_EXTRA_FREE_BYTES = 768 * 1024 ** 2   # Banking: flows about +0.5 GB transient, drawer 0.6 GB peak
 
 
@@ -1371,7 +1375,8 @@ def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_b
             for rank, dataset in enumerate(order):
                 tasks.append(make_task(kind, dataset, {'artifact': kind, 'industry': dataset}, [rank],
                                        {'comparison_flows': 'comparison-flows answer (cache receipt hook)',
-                                        'drawer_sidecars': 'Graph drawer sidecars (drawer receipt hook)'}[kind],
+                                        'drawer_sidecars': 'Graph drawer sidecars (drawer receipt hook)',
+                                        'worksheets': 'report-data answers (worksheet cache hook)'}[kind],
                                        by_dataset[dataset]))
 
     # One task per request: a hint that is the default body (or repeats a neighbour) is warmed once.
@@ -2043,6 +2048,10 @@ class AppBackend:
             import drawer_sidecars
             if callable(getattr(drawer_sidecars, 'build_sidecars', None)):
                 found.append('drawer_sidecars')
+        with contextlib.suppress(Exception):
+            import report_insights
+            if callable(getattr(report_insights, 'worksheet_entry', None)):
+                found.append('worksheets')
         return tuple(found)
 
     def _configure_caches(self):
@@ -2081,6 +2090,28 @@ class AppBackend:
         meta = Path(root) / entry.namespace / (entry.key + '.json') if root is not None else None
         return {'status': 'ready', 'key': entry.key, 'polls': 0, 'statuses': [entry.hit], 'as_of': None,
                 'response_path': str(meta) if meta is not None and meta.is_file() else None}
+
+    def warm_worksheets(self, industry):
+        """report_insights.worksheet_entry (the /api/report-data route's cache): the sheet list and every sheet
+        of each of this industry's published workbooks, so Chart Studio's pick of a sheet is a cache hit. A
+        sheet the route refuses (WorksheetRefused) is stored as its refusal and skipped."""
+        import report_insights
+        stub = self._console_stub()
+        registry = self.snapshot_registry.registry(self.report_directory)
+        label = self.industry_scope.label_or_value(registry, industry) if registry else industry
+        sheets = refused = 0
+        for row in stub.published_reports():
+            if row['industry'] != label:
+                continue
+            path = stub.report_path('published-reports', row['index'])
+            for sheet in json.loads(report_insights.worksheet_entry(path).body)['sheets']:
+                try:
+                    report_insights.worksheet_entry(path, sheet)
+                    sheets += 1
+                except report_insights.WorksheetRefused:
+                    refused += 1
+        return {'status': 'ready', 'key': None, 'polls': 0, 'statuses': ['warm'], 'as_of': None,
+                'response_path': None, 'sheets': sheets, 'refused': refused}
 
     def warm_drawer_sidecars(self, industry):
         """drawer_sidecars.build_sidecars (the drawer receipt's hook): every sidecar a Graph drawer reads for

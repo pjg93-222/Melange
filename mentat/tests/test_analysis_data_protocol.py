@@ -444,7 +444,7 @@ def _child(config):
     """One console-like process: poll one Insights scope until it is ready."""
     source = {'id': 'Example', 'industry': 'Example'}
     for target, name, value in ((a.history, 'ROOT', Path(config['history'])), (a.store, 'ROOT', Path(config['store'])),
-                                (a.data, '_source', lambda directory, request: source),
+                                (a.data, '_source', lambda directory, request, sources=None: source),
                                 (a.data, '_ready', lambda source, retry=False: (Path(config['index']), None)),
                                 (a.data, '_token', lambda source: 'fixture-token'),
                                 (a.data, '_provenance', lambda source: {}),

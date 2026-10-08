@@ -95,7 +95,8 @@ class ContributionHTTPTests(unittest.TestCase):
         # the catalogue producer, so the call carries the directory and the list.
         self.assertEqual(self.catalog.call_count, 1)
         self.assertEqual(self.catalog.call_args.args[0], self.report_root)
-        self.guard.assert_called_once_with(self.report_root, strict=False)
+        # ...and into the guard, so the folder is scanned once for the whole request.
+        self.guard.assert_called_once_with(self.report_root, strict=False, sources=[])
         status, _, body = self.request("/api/contributions/geography/catalog")
         self.assertEqual((status, body["congresses"]), (200, ["119", "120"]))
         self.geo_catalog.assert_called_once_with()
@@ -146,10 +147,11 @@ class ContributionHTTPTests(unittest.TestCase):
         status, _, body = self.request("/api/contributions/query", method="POST", data=request)
         self.assertEqual(status, 200)
         self.assertEqual(body["totals"]["amount"], 12300)
-        self.query.assert_called_once_with(self.report_root, request)
+        # The third argument is the request's one scan of the report folder (empty here).
+        self.query.assert_called_once_with(self.report_root, request, [])
         status, _, _ = self.request("/api/contributions/records", method="POST", data=request)
         self.assertEqual(status, 200)
-        self.records.assert_called_once_with(self.report_root, request)
+        self.records.assert_called_once_with(self.report_root, request, [])
         geometry = {"zips": ["02134"], "layers": ["states", "districts", "zip_areas"], "congress": "119", "bbox": [-72, 41, -70, 43]}
         status, _, _ = self.request("/api/contributions/geography", method="POST", data=geometry)
         self.assertEqual(status, 200)

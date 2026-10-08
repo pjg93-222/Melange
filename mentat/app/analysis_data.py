@@ -294,8 +294,10 @@ def validate(request, records=False):
 
 
 def catalog(directory, sources=None):
+    # One scan of the report folder for this request: the catalogue and the guard read the same list.
+    sources = data._sources(directory) if sources is None else sources
     result = data.catalog(directory, sources)
-    checks = {item['dataset']: item for item in guard.verify_sources(directory, strict=False)}
+    checks = {item['dataset']: item for item in guard.verify_sources(directory, strict=False, sources=sources)}
     for dataset in result['datasets']:
         check = checks.get(dataset['id'])
         if check and (not check['matched'] or any(check.get(k) is not None and dataset.get('provenance', {}).get(k) != check[k]
@@ -496,19 +498,19 @@ def _stable(path, source, stamp, token):
     return store.source_stable(path, stamp) and data._token(source) == token
 
 
-def query(directory, request):
+def query(directory, request, sources=None):
     _loaded()
     body = request
     request = validate(request)
-    source = data._source(directory, request)
+    source = data._source(directory, request, sources)
     path, pending = data._ready(source, retry=request.get('retry') is True)
     if pending:
         return pending
     token, stamp = data._token(source), data._stamp(path)
     comparator = None
     if request.get('comparison_dataset'):
-        guard.verify_sources(directory, request['comparison_dataset'])
-        other = data._source(directory, {'dataset': request['comparison_dataset']})
+        guard.verify_sources(directory, request['comparison_dataset'], sources=sources)
+        other = data._source(directory, {'dataset': request['comparison_dataset']}, sources)
         other_path, pending = data._ready(other, retry=request.get('retry') is True)
         if pending:
             return {**pending, 'provenance': data._provenance(source), 'message': 'Preparing the selected comparison industry.'}
@@ -703,10 +705,10 @@ def _projected_page(projection, index, where, params, column, cutoff, eligible, 
     return count, [found[source_id] for source_id in ids]
 
 
-def records(directory, request):
+def records(directory, request, sources=None):
     _loaded()
     request = validate(request, records=True)
-    source = data._source(directory, request)
+    source = data._source(directory, request, sources)
     if request.get('index_token') and data._token(source) != request['index_token']:
         raise ValueError('The source changed since this analysis. Refresh Insights before opening its records.')
     # The engine emits exact event/cycle constraints for each row. The global

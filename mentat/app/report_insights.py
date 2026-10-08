@@ -24,6 +24,8 @@ from openpyxl.worksheet._reader import WorkSheetParser
 from openpyxl.xml.constants import ARC_CONTENT_TYPES, SHARED_STRINGS, SHEET_MAIN_NS
 from openpyxl.xml.functions import fromstring, iterparse
 
+import response_cache
+
 MAX_ROWS = 50000
 MAX_COLUMNS = 200
 RECEIPT_SHEETS = ('Source Freshness', 'Source Receipts')
@@ -32,6 +34,12 @@ RECEIPT_LIMIT = 2000
 # RECEIPT_LIMIT + 1 more; openpyxl parses one row past a max_row to stop there.
 _LAST_RECEIPT_ROW = 30 + RECEIPT_LIMIT + 1
 _SHARED_STRING = '{%s}si' % SHEET_MAIN_NS
+WORKSHEET_NAMESPACE = 'report-data'
+
+
+class WorksheetRefused(ValueError):
+    """A refusal that follows from the workbook and the question alone (too many rows, an unknown
+    sheet, no header), never from a locked file or a read error. worksheet_entry stores these."""
 
 
 def stamp(path):
@@ -369,6 +377,13 @@ def split_sheet_base(sheet_name):
     return SPLIT_SHEET_BASES.get(base, base)
 
 
+def _audit_book(path):
+    """The book whose audit bundle names the not-traced cycles: a Data book's Overview sibling when it exists."""
+    path = Path(path)
+    overview = path.with_name(re.sub(r' Industry Spending Data\.xlsx$', ' Industry Spending Overview.xlsx', path.name))
+    return overview if overview.is_file() else path
+
+
 def untraced_sheet_notes(path, sheet_name):
     """The not-traced sentences for one worksheet, from its workbook's audit bundle (F2).
 
@@ -379,15 +394,28 @@ def untraced_sheet_notes(path, sheet_name):
     if base not in TRANSFER_DERIVED_SHEETS | DIRECT_ONLY_SHEETS:
         return []
     import graph_data  # graph_data imports this module, so it is read on use
-    path = Path(path)
-    overview = path.with_name(re.sub(r' Industry Spending Data\.xlsx$', ' Industry Spending Overview.xlsx', path.name))
-    rows = [row for row in graph_data.transfer_index(overview if overview.is_file() else path).values()
+    rows = [row for row in graph_data.transfer_index(_audit_book(path)).values()
             if row['status'] != 'current']
     if base in DIRECT_ONLY_SHEETS:
         return [f"Direct only; transfers not traced for {row['cycle']}: the transfer index for {row['cycle']} "
                 f"is {row['status']}." for row in rows]
     return [f"{row['note']}: {row['cycle']} has no transfer-derived rows or values here; blank is not zero."
             for row in rows]
+
+
+def _notes_identity(path, sheet_name):
+    """What untraced_sheet_notes reads for this sheet, as a cache dependency: None for a sheet with no
+    such note; otherwise the book carrying the audit bundle and the bundle's manifest (None when it has
+    none), each by stamp and content. The manifest is bound to its book by hash, so the book counts too."""
+    if split_sheet_base(sheet_name) not in TRANSFER_DERIVED_SHEETS | DIRECT_ONLY_SHEETS:
+        return None
+    import graph_data
+    def state(file):
+        version = stamp(file)
+        return [list(version), digest_stamp(version)]
+    book = _audit_book(path)
+    manifest = graph_data.audit_manifest_path(book)
+    return {'book': state(book), 'manifest': state(manifest) if manifest.is_file() else None}
 
 
 def worksheet_accounting(sheet_name, headers, rows, row_numbers):
@@ -447,23 +475,23 @@ def worksheet_data(file_stamp, sheet_name='', header=0):
             sheets = [node.get('name') for node in tree.iter('{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheet')]
             return {'sheets': sheets, 'sha256': digest_stamp(file_stamp)}
         except ET.ParseError as error:
-            raise ValueError('Workbook metadata is malformed.') from error
+            raise WorksheetRefused('Workbook metadata is malformed.') from error
     book = openpyxl.load_workbook(file_stamp[0], read_only=True, data_only=True)
     try:
         if sheet_name not in book.sheetnames:
-            raise ValueError('Choose a worksheet from this report.')
+            raise WorksheetRefused('Choose a worksheet from this report.')
         sheet = book[sheet_name]
         start = header or header_row(sheet)
         if not 1 <= start <= 100:
-            raise ValueError('Header row must be between 1 and 100.')
+            raise WorksheetRefused('Header row must be between 1 and 100.')
         if sheet.max_column and sheet.max_column > MAX_COLUMNS:
-            raise ValueError(f'This worksheet exceeds {MAX_COLUMNS} columns.')
+            raise WorksheetRefused(f'This worksheet exceeds {MAX_COLUMNS} columns.')
         iterator = sheet.iter_rows(min_row=start, max_col=min(sheet.max_column or MAX_COLUMNS, MAX_COLUMNS), values_only=True)
         raw_headers = list(next(iterator, ()))
         while raw_headers and raw_headers[-1] is None:
             raw_headers.pop()
         if not raw_headers:
-            raise ValueError('No column headers found. Choose another header row.')
+            raise WorksheetRefused('No column headers found. Choose another header row.')
         used = set()
         headers = []
         for i, value in enumerate(raw_headers):
@@ -478,7 +506,7 @@ def worksheet_data(file_stamp, sheet_name='', header=0):
         rows, row_numbers = [], []
         for number, row in enumerate(iterator, start + 1):
             if number > start + MAX_ROWS:
-                raise ValueError(f'Worksheet exceeds {MAX_ROWS:,} rows. Choose a smaller report subsection; no partial chart was created.')
+                raise WorksheetRefused(f'Worksheet exceeds {MAX_ROWS:,} rows. Choose a smaller report subsection; no partial chart was created.')
             values = [cell_value(v) for v in row[:len(headers)]]
             if any(v is not None and v != '' for v in values):
                 rows.append(values)
@@ -491,3 +519,53 @@ def worksheet_data(file_stamp, sheet_name='', header=0):
                 'note': ' '.join(notes + ['Worksheet formulas use their last saved results; empty caches remain missing. The contribution dataset provides the explicit accounting basis and transaction geography.'])}
     finally:
         book.close()
+
+
+def worksheet_entry(path, sheet_name='', header=0):
+    """/api/report-data as a response_cache entry: exactly the bytes Handler.send writes for a fresh
+    worksheet_data answer (response_cache.json_body), and their gzip, built once per workbook version.
+
+    Key: the workbook's resolved path, the sheet and the header row. Dependencies: the workbook's stamp
+    and content SHA-256, what untraced_sheet_notes reads for the sheet (_notes_identity: the audit
+    manifest and the book it is bound to), and the code identity of this module and every application
+    module it imports, with the openpyxl that reads the cells. The sheet list (no sheet) and each
+    sheet's data are separate keys in one byte-bounded cache, so they do not push each other out.
+
+    A refusal that follows from the workbook (WorksheetRefused: over 50,000 rows, an unknown sheet) is
+    stored the same way as an answer, and raised again as the same WorksheetRefused. Any other error
+    (a locked or unreadable file, a broken archive) propagates and stores nothing. Nothing is stored
+    when the workbook or the manifest moved while the answer was built; that answer is served once."""
+    version = stamp(path)
+    key_parts = {'report': version[0], 'sheet': sheet_name, 'header': header}
+
+    def reads():
+        return stamp(path), _notes_identity(path, sheet_name)
+
+    try:
+        before = reads()
+        content = digest_stamp(version)
+        steady = before[0] == version and reads() == before
+        code = response_cache.code_identity(__name__, extra={'openpyxl': openpyxl.__version__}) if steady else None
+    except OSError:
+        before, content, steady, code = (None, None), None, False, None
+    deps = {'stamp': list(version), 'content_sha256': content, 'notes': before[1], 'code': code or 'this process only'}
+    moved = []
+
+    def compute():
+        # lru_cache's __wrapped__: the uncached read; this cache replaces worksheet_data's own.
+        try:
+            value = worksheet_data.__wrapped__(version, sheet_name, header)
+        except WorksheetRefused as error:
+            value = {'error': str(error)}
+        try:
+            moved.append(reads() != before)
+        except OSError:
+            moved.append(True)
+        return value
+
+    entry = response_cache.get_or_compute(WORKSHEET_NAMESPACE, key_parts, deps, compute,
+                                          persist=lambda value: not moved[-1], memory=steady, disk=code is not None)
+    # Every refusal body is small and starts {"error": - no worksheet answer does (they start {"sheet).
+    if entry.body_bytes < 1024 and entry.body.startswith(b'{"error":'):
+        raise WorksheetRefused(json.loads(entry.body)['error'])
+    return entry
