@@ -45,8 +45,9 @@ import threading
 import zipfile
 
 import contribution_data as data
+from report_identity import identity, companion_name, lineage_paths
 
-PATTERN = '* Industry Spending Overview.xlsx'
+PATTERN = '* Industry Spending Overview*.xlsx'
 LIMIT = 8  # kept entries: report directory x project root x the helpers in use
 
 _lock = threading.RLock()
@@ -130,10 +131,11 @@ def _discover(directory):
             return spec, values, False
         project, cache_root = data.PROJECT, None
         for name in names:
-            if name.startswith('~$'):
+            info = identity(name)
+            if name.startswith('~$') or info is None or info['kind'] != 'overview':
                 continue
             workbook = root / name
-            industry = name.removesuffix(' Industry Spending Overview.xlsx')
+            industry = info['industry']
             if not Path(watch('real', str(workbook))).is_relative_to(root):
                 return spec, values, False  # _sources() raises for this report
             watch('stat', str(workbook))
@@ -142,7 +144,7 @@ def _discover(directory):
             except OSError as error:
                 keep = keep and explained(error)
                 continue
-            sibling = workbook.with_name(industry + ' Industry Spending Data.xlsx')
+            sibling = workbook.with_name(companion_name(info))
             if watch('stat', str(sibling))[0] == 'file':
                 if Path(watch('real', str(sibling))).is_relative_to(root):
                     try:
@@ -159,8 +161,7 @@ def _discover(directory):
             try:
                 db_hash = data._workbook_source(data._stamp(workbook))
                 cache = project / '.cache' / 'industry-report' / data._slug(industry)
-                manifest_path = cache / f'manifest-{db_hash[:16]}.json'
-                payload = cache / f'industry_data-{db_hash[:16]}.json'
+                manifest_path, payload = lineage_paths(cache, db_hash, info['cycle_label'])
                 watch('stat', str(manifest_path))
                 if data._json(manifest_path).get('database_sha256') != db_hash:
                     continue

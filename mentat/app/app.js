@@ -1052,10 +1052,11 @@ function render(run) {
     ? 'Continue this collection in its own run folder. Lane data already collected is kept and only unfinished company/cycle work is collected again.'
     : run.resumed_from ? `Resumed from run ${run.resumed_from}.`
     : 'Resume is available for a stopped or failed collection with saved lane data';
-  const inactiveReason = active ? '' : 'No collection is running';
-  $('stop').disabled = !active; $('stop').title = active ? 'Shift-click to stop gracefully and let in-flight lanes finish first.' : inactiveReason;
-  $('worker-target').disabled = !active; $('worker-target').title = inactiveReason;
-  $('apply-workers').disabled = !active; $('apply-workers').title = inactiveReason;
+  const canControl = active && !readOnly;
+  const inactiveReason = readOnly ? 'Read-only preview. Manage collection in the original console.' : active ? '' : 'No collection is running';
+  $('stop').disabled = !canControl; $('stop').title = canControl ? 'Shift-click to stop gracefully and let in-flight lanes finish first.' : inactiveReason;
+  $('worker-target').disabled = !canControl; $('worker-target').title = inactiveReason;
+  $('apply-workers').disabled = !canControl; $('apply-workers').title = inactiveReason;
   $('completed').textContent = fanout.total == null ? '—' : `${number(fanout.completed)} / ${number(fanout.total)}`;
   $('workers').textContent = number(fanout.running); $('failed').textContent = number(fanout.failed);
   const recordedWorkers = terminal || run.age_seconds == null || run.age_seconds > 60;

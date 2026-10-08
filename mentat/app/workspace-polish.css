@@ -532,6 +532,9 @@ body[data-view] #view-loading .loading-setup-note{max-width:265px}
 
 /* Canvas: serif title, muted subtitle, three figures, the chart. */
 #view-chart-studio .studio-canvas-wrap{display:flex;flex-direction:column;padding:6px 18px 16px;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow)}
+/* A tall map scrolls inside the canvas; it must not compress the title,
+   scope or verified figures below their text's natural line height. */
+#view-chart-studio .studio-canvas-wrap>:is(#studio-title,#studio-subtitle,#studio-verified-summary,.studio-foot){flex-shrink:0}
 #view-chart-studio .studio-canvas-wrap h2#studio-title{margin:0;font:400 28px/34px var(--font-serif);letter-spacing:0;color:#1d173b}
 #view-chart-studio .studio-subtitle{margin:2px 0 0;font:400 14.5px/20px var(--font-sans);color:#69696e}
 #view-chart-studio .studio-verified-summary{display:grid;grid-template-columns:repeat(3,minmax(0,256px));gap:0;margin:12px 0 6px;padding:0;border:0;font:400 13px/16px var(--font-sans);color:#69696e}
