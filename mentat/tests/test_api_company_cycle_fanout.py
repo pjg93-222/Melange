@@ -452,6 +452,7 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 lane / "receipt.json",
                 {
                     "status": "failed",
+                    "quick_check": "ok",
                     "tasks": [
                         {"task_id": "alpha-2022", "status": "succeeded"},
                         {"task_id": "alpha-2024", "status": "failed"},
@@ -462,6 +463,7 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 lane / "receipt.recovery-1.json",
                 {
                     "status": "succeeded",
+                    "quick_check": "ok",
                     "tasks": [
                         {"task_id": "alpha-2024", "status": "succeeded"},
                     ],
@@ -491,6 +493,43 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             if latest.get(task["task_id"], {}).get("status") != "succeeded"
         ]
         self.assertEqual(pending, [{"task_id": "alpha-2026"}])
+
+    def test_resume_rejects_unverified_raw_r_success_receipt(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-r-postflight-") as temp:
+            lane = Path(temp)
+            path = lane / "receipt.json"
+            task = {"task_id": "alpha-2024", "status": "succeeded"}
+            fanout.atomic_json(
+                path,
+                {"status": "succeeded", "quick_check": "corrupt", "tasks": [task]},
+            )
+            attempts = fanout.existing_lane_attempts(lane, 1)
+            latest = fanout.latest_tasks_from_attempts(attempts)
+            self.assertEqual(latest["alpha-2024"]["status"], "failed")
+            self.assertEqual(fanout.read_json(path)["tasks"], [task])
+
+            # An R receipt with a passing postflight is sufficient if Python
+            # died before it could append exit_code to that receipt.
+            fanout.atomic_json(
+                path,
+                {"status": "succeeded", "quick_check": "ok", "tasks": [task]},
+            )
+            latest = fanout.latest_tasks_from_attempts(
+                fanout.existing_lane_attempts(lane, 1)
+            )
+            self.assertEqual(latest["alpha-2024"]["status"], "succeeded")
+
+            # A later Python receipt with a failed process exit cannot certify
+            # a succeeded task, regardless of its earlier postflight result.
+            fanout.atomic_json(
+                path,
+                {"status": "succeeded", "quick_check": "ok", "exit_code": 3,
+                 "tasks": [task]},
+            )
+            latest = fanout.latest_tasks_from_attempts(
+                fanout.existing_lane_attempts(lane, 1)
+            )
+            self.assertEqual(latest["alpha-2024"]["status"], "failed")
 
     def test_disposable_end_to_end_merge_and_restart_guard(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-fanout-e2e-") as temp:
@@ -692,6 +731,7 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                     "status": "failed" if failed else "succeeded",
                     "key_id": lane_run.key_id,
                     "wall_clock_seconds": 0.01,
+                    "quick_check": "ok",
                     "tasks": tasks,
                 }
                 fanout.atomic_json(lane_run.receipt, lane_receipt)

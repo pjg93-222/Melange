@@ -9,9 +9,9 @@ TARGET must already exist. Shards are attached read-only, schemas and
 quick_check are verified before any write, and the entire merge is committed
 as one transaction. A company may be assigned to exactly one shard. More than
 --merge-batch-limit shards (default 10, SQLite's attached-database limit) are
-merged into a staged copy of TARGET across consecutive batches; TARGET is
-replaced, atomically, only once every batch has committed, and is left
-untouched if any batch fails.
+merged into a staged copy of TARGET across consecutive batches; the prepared
+state is published through one TARGET SQLite transaction, and TARGET is left
+untouched if preparation or publication fails.
 """
 
 from __future__ import annotations
@@ -23,12 +23,182 @@ import shutil
 import sqlite3
 import sys
 import tempfile
-import time
 from collections import defaultdict
-from contextlib import closing
+from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Callable, Iterable, Iterator, Sequence
+
+
+COMMIT_TABLE = "mentat_merge_commits"
+
+
+def canonical_json(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False,
+                      separators=(",", ":")).encode("utf-8")
+
+
+def content_sha256(value: object) -> str:
+    return hashlib.sha256(canonical_json(value)).hexdigest()
+
+
+def logical_database_sha256(connection: sqlite3.Connection) -> str:
+    """Hash every material schema object and typed row, excluding the ledger.
+
+    This is independent of SQLite page layout, checkpoints and journal mode.
+    Rows use a type-tagged, order-independent cryptographic multiset digest.
+    This avoids unstable ties under SQLite collations or nullable composite PKs.
+    """
+    digest = hashlib.sha256()
+
+    def add(value: object) -> None:
+        encoded = canonical_json(value)
+        digest.update(len(encoded).to_bytes(8, "big"))
+        digest.update(encoded)
+
+    schema = connection.execute(
+        "SELECT type,name,tbl_name,sql FROM sqlite_master "
+        "WHERE tbl_name<>? AND name<>? ORDER BY type,name",
+        (COMMIT_TABLE, COMMIT_TABLE),
+    ).fetchall()
+    for item in schema:
+        add(["schema", *item])
+    for kind, name, _, _ in schema:
+        if kind != "table":
+            continue
+        columns = [row[1] for row in connection.execute(
+            f"PRAGMA table_xinfo({quoted(name)})"
+        ) if row[6] != 1]  # hidden virtual-table columns are not SELECT * rows
+        if not columns:
+            continue
+        add(["table", name, columns])
+        sql = (f"SELECT {','.join(quoted(column) for column in columns)} "
+               f"FROM {quoted(name)}")
+        count = 0
+        sum256 = 0
+        xor256 = 0
+        mask256 = (1 << 256) - 1
+        for row in connection.execute(sql):
+            typed = []
+            for value in row:
+                if value is None:
+                    typed.append(["null"])
+                elif isinstance(value, bytes):
+                    typed.append(["blob", value.hex()])
+                elif isinstance(value, str):
+                    typed.append(["text", value])
+                elif isinstance(value, int):
+                    typed.append(["int", str(value)])
+                elif isinstance(value, float):
+                    typed.append(["real", value.hex()])
+                else:
+                    raise TypeError(f"Unsupported SQLite value type: {type(value)}")
+            row_hash = int.from_bytes(hashlib.sha256(canonical_json(typed)).digest(), "big")
+            count += 1
+            sum256 = (sum256 + row_hash) & mask256
+            xor256 ^= row_hash
+        add(["rows", name, count, f"{sum256:064x}", f"{xor256:064x}"])
+    return digest.hexdigest()
+
+
+def ensure_commit_table(connection: sqlite3.Connection) -> None:
+    connection.execute(f"""
+        CREATE TABLE IF NOT EXISTS {quoted(COMMIT_TABLE)} (
+            run_id TEXT PRIMARY KEY,
+            intent_sha256 TEXT NOT NULL,
+            intent_path TEXT NOT NULL,
+            prepared_receipt_sha256 TEXT NOT NULL,
+            output_logical_sha256 TEXT NOT NULL,
+            committed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+
+def write_commit_marker(
+    connection: sqlite3.Connection, intent: dict[str, object] | None,
+    intent_path: Path | None,
+) -> str | None:
+    if intent is None:
+        return None
+    if intent_path is None or not connection.in_transaction:
+        raise RuntimeError("Merge marker requires a live target transaction")
+    ensure_commit_table(connection)
+    output_hash = logical_database_sha256(connection)
+    connection.execute(
+        f"INSERT INTO {quoted(COMMIT_TABLE)} "
+        "(run_id,intent_sha256,intent_path,prepared_receipt_sha256,"
+        "output_logical_sha256) VALUES (?,?,?,?,?)",
+        (intent["run_id"], content_sha256(intent), str(intent_path),
+         intent["prepared_receipt_sha256"], output_hash),
+    )
+    return output_hash
+
+
+@contextmanager
+def committed_merge_lease(target: Path, run_id: str) -> Iterator[dict[str, str] | None]:
+    """Keep one target write lease across evidence checks and receipt writing."""
+    with merge_writer_lock(target):
+        connection = target_connection(target)
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            exists = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+                (COMMIT_TABLE,),
+            ).fetchone()
+            if not exists:
+                yield None
+            else:
+                row = connection.execute(
+                    f"SELECT run_id,intent_sha256,intent_path,prepared_receipt_sha256,"
+                    f"output_logical_sha256 FROM {quoted(COMMIT_TABLE)} WHERE run_id=?",
+                    (run_id,),
+                ).fetchone()
+                if row is None:
+                    yield None
+                else:
+                    names = ("run_id", "intent_sha256", "intent_path",
+                             "prepared_receipt_sha256", "output_logical_sha256")
+                    result = dict(zip(names, row))
+                    if logical_database_sha256(connection) != result["output_logical_sha256"]:
+                        raise RuntimeError(
+                            "Committed merge source contents changed after publication"
+                        )
+                    yield result
+        finally:
+            connection.rollback()
+            connection.close()
+
+
+def committed_merge(target: Path, run_id: str) -> dict[str, str] | None:
+    with committed_merge_lease(target, run_id) as marker:
+        return marker
+
+
+def load_merge_intent(
+    path: Path, target: Path,
+    specifications: Sequence[tuple[Path, tuple[str, ...]]],
+    expected_target_sha256: str | None,
+) -> dict[str, object]:
+    intent = json.loads(path.read_text(encoding="utf-8"))
+    expected_specs = [
+        {"database": str(shard), "sha256": quiescent_file_sha256(shard),
+         "companies": list(companies)}
+        for shard, companies in specifications
+    ]
+    if (
+        intent.get("version") != 1
+        or not isinstance(intent.get("run_id"), str)
+        or not intent["run_id"]
+        or intent.get("source_database") != str(target)
+        or intent.get("source_state_before") != expected_target_sha256
+        or intent.get("specifications") != expected_specs
+        or not isinstance(intent.get("prepared_receipt_sha256"), str)
+    ):
+        raise RuntimeError("Merge intent does not match target and shard inputs")
+    prepared = Path(str(intent["prepared_receipt_path"]))
+    if not prepared.is_file() or file_sha256(prepared) != intent["prepared_receipt_sha256"]:
+        raise RuntimeError("Prepared fanout receipt changed before merge")
+    return intent
 
 
 # Tables populated or updated by collection. Static roster/register tables
@@ -1204,6 +1374,51 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def quiescent_file_sha256(path: Path) -> str:
+    wal = Path(f"{path}-wal")
+    if wal.is_file() and wal.stat().st_size:
+        raise RuntimeError(f"Merge shard has uncheckpointed WAL data: {wal}")
+    return file_sha256(path)
+
+
+def merge_lock_path(target: Path) -> Path:
+    return target.with_name(f".{target.name}.merge-lock.sqlite")
+
+
+@contextmanager
+def merge_writer_lock(target: Path) -> Iterator[None]:
+    """Serialize merge children even if their Python supervisors die."""
+    connection = sqlite3.connect(
+        merge_lock_path(target), timeout=0, isolation_level=None
+    )
+    try:
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as error:
+            if "locked" in str(error).lower():
+                raise RuntimeError(
+                    f"Another merge child owns the target database: {target}"
+                ) from error
+            raise
+        try:
+            yield
+        finally:
+            connection.rollback()
+    finally:
+        connection.close()
+
+
+def assert_supervisor_owner(owner_path: Path | None, token: str | None) -> None:
+    if owner_path is None:
+        return
+    try:
+        owner = json.loads(owner_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise RuntimeError("Merge supervisor ownership receipt is unavailable") from error
+    if owner.get("token") != token or owner.get("active") is not True:
+        raise RuntimeError("Merge child belongs to a superseded supervisor")
+
+
 def assert_expected_target_state(
     connection: sqlite3.Connection,
     target: Path,
@@ -1227,33 +1442,12 @@ def assert_expected_target_state(
         )
 
 
-ATOMIC_REPLACE_ATTEMPTS = 10
-ATOMIC_REPLACE_INITIAL_DELAY_SECONDS = 0.002
-
-
-def atomic_replace_target(target: Path, staged: Path) -> None:
-    for attempt in range(ATOMIC_REPLACE_ATTEMPTS):
-        try:
-            os.replace(staged, target)
-            return
-        except PermissionError:
-            if attempt + 1 >= ATOMIC_REPLACE_ATTEMPTS:
-                staged.unlink(missing_ok=True)
-                raise
-            time.sleep(
-                ATOMIC_REPLACE_INITIAL_DELAY_SECONDS * (2**attempt)
-            )
-
-
 def snapshot_target_for_batched_merge(
     target: Path,
     expected_target_sha256: str | None,
 ) -> Path:
-    # A batched merge never touches the real target directly: it is verified
-    # and copied here, under the same write lease assert_expected_target_state
-    # requires, and the copy is what run_batched_merge actually merges into
-    # across consecutive batches. Only a fully committed copy ever replaces
-    # the real target.
+    # Prepare consecutive batches in a private copy. Final publication later
+    # uses one target SQLite transaction, so the real target stays atomic.
     connection = target_connection(target)
     try:
         quick_check(connection, "main")
@@ -1289,6 +1483,9 @@ def run_batched_merge(
     company_order: Sequence[str],
     expected_target_sha256: str | None,
     merge_batch_limit: int,
+    assert_owner: Callable[[], None] = lambda: None,
+    intent: dict[str, object] | None = None,
+    intent_path: Path | None = None,
 ) -> int:
     staged = snapshot_target_for_batched_merge(target, expected_target_sha256)
     all_stats: list[tuple[Path, tuple[str, ...], dict[str, int]]] = []
@@ -1365,9 +1562,51 @@ def run_batched_merge(
         staged.unlink(missing_ok=True)
         raise
 
-    # Every batch committed into the staged copy; only now does the real
-    # target ever change, in one atomic replace.
-    atomic_replace_target(target, staged)
+    # Publish the fully merged staged state through SQLite while holding the
+    # real target write lease. File replacement would allow an external writer
+    # to commit after a SHA check but before os.replace.
+    try:
+        assert_owner()
+        with closing(sqlite3.connect(staged.as_uri() + "?mode=ro", uri=True)) as staged_read:
+            staged_hash = logical_database_sha256(staged_read)
+        target_guard = target_connection(target)
+        try:
+            target_guard.execute(
+                "ATTACH DATABASE ? AS shard_0",
+                (staged.as_uri() + "?mode=ro",),
+            )
+            ensure_schema_compatible(target_guard, "shard_0", staged)
+            target_guard.execute("BEGIN IMMEDIATE")
+            try:
+                assert_expected_target_state(
+                    target_guard, target, expected_target_sha256
+                )
+                publish_spec = [(staged, tuple(company_order))]
+                resolutions = audit_exact_pk_collisions(
+                    target_guard, publish_spec, company_order
+                )
+                apply_attribution_resolutions(target_guard, resolutions)
+                merge_shard(
+                    target_guard, 0, "shard_0", staged, tuple(company_order)
+                )
+                if logical_database_sha256(target_guard) != staged_hash:
+                    raise RuntimeError(
+                        "Transactional staged publication differs from its "
+                        "prepared database; refusing partial merge."
+                    )
+                write_commit_marker(target_guard, intent, intent_path)
+                quick_check(target_guard, "main")
+                assert_owner()
+                target_guard.execute("COMMIT")
+            except BaseException:
+                target_guard.execute("ROLLBACK")
+                raise
+        finally:
+            target_guard.close()
+    except BaseException:
+        raise
+    finally:
+        staged.unlink(missing_ok=True)
 
     print("quick_check=ok")
     for resolution in attribution_resolutions:
@@ -1402,6 +1641,9 @@ def main(arguments: Sequence[str]) -> int:
     remaining = list(arguments[1:])
     encoded_company_order: str | None = None
     expected_target_sha256: str | None = None
+    supervisor_owner_path: Path | None = None
+    supervisor_token: str | None = None
+    intent_path: Path | None = None
     merge_batch_limit = 10
     while remaining and remaining[0].startswith("--"):
         option = remaining.pop(0)
@@ -1412,6 +1654,12 @@ def main(arguments: Sequence[str]) -> int:
             encoded_company_order = value
         elif option == "--expected-target-sha256":
             expected_target_sha256 = value
+        elif option == "--supervisor-owner-path":
+            supervisor_owner_path = Path(value).resolve()
+        elif option == "--supervisor-token":
+            supervisor_token = value
+        elif option == "--merge-intent-json":
+            intent_path = Path(value).resolve(strict=True)
         elif option == "--merge-batch-limit":
             try:
                 merge_batch_limit = int(value)
@@ -1421,15 +1669,39 @@ def main(arguments: Sequence[str]) -> int:
                 raise SystemExit("--merge-batch-limit must be >= 2")
         else:
             raise SystemExit(f"Unknown option: {option}")
+    if (supervisor_owner_path is None) != (supervisor_token is None):
+        raise SystemExit("Merge supervisor path and token must be supplied together")
     specifications = parse_specifications(remaining, target)
     company_order = parse_company_order(encoded_company_order, specifications)
+    intent = (
+        load_merge_intent(intent_path, target, specifications, expected_target_sha256)
+        if intent_path else None
+    )
+    assert_owner = lambda: assert_supervisor_owner(
+        supervisor_owner_path, supervisor_token
+    )
+    with merge_writer_lock(target):
+        assert_owner()
+        return merge_locked(
+            target, specifications, company_order, expected_target_sha256,
+            merge_batch_limit, assert_owner, intent, intent_path,
+        )
+
+
+def merge_locked(
+    target: Path,
+    specifications: Sequence[tuple[Path, tuple[str, ...]]],
+    company_order: Sequence[str],
+    expected_target_sha256: str | None,
+    merge_batch_limit: int,
+    assert_owner: Callable[[], None],
+    intent: dict[str, object] | None,
+    intent_path: Path | None,
+) -> int:
     if len(specifications) > merge_batch_limit:
         return run_batched_merge(
-            target,
-            specifications,
-            company_order,
-            expected_target_sha256,
-            merge_batch_limit,
+            target, specifications, company_order, expected_target_sha256,
+            merge_batch_limit, assert_owner, intent, intent_path,
         )
     connection = target_connection(target)
     attached: list[str] = []
@@ -1479,6 +1751,8 @@ def main(arguments: Sequence[str]) -> int:
                 )
                 all_stats.append((shard, companies, stats))
             quick_check(connection, "main")
+            write_commit_marker(connection, intent, intent_path)
+            assert_owner()
             connection.execute("COMMIT")
         except BaseException:
             connection.execute("ROLLBACK")

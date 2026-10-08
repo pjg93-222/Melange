@@ -22,6 +22,58 @@ INVALID_KEY_BODY='{"error":{"code":"API_KEY_INVALID","message":"The API key supp
 
 
 class PoolTests(unittest.TestCase):
+    def test_r_crash_resumes_durable_page_through_local_http_pool(self):
+        binary=Path('C:/Program Files/R/R-4.6.0/bin/Rscript.exe')
+        if not binary.exists():self.skipTest('Rscript unavailable')
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);calls=[]
+            def fetch(spec,key):
+                cursor=spec['params'].get('last_index')
+                calls.append((spec['id'],cursor))
+                number='2' if cursor else '1'
+                next_cursor={} if cursor else {'last_index':'1','last_contribution_receipt_date':'2026-01-01'}
+                return {'status':200,'headers':{},'body':json.dumps({'results':[{'sub_id':number}],
+                    'pagination':{'count':2,'is_count_exact':True,'last_indexes':next_cursor}})}
+            pool=RequestPool(['fixture-a','fixture-b'],root/'budget.db',2,transport=fetch)
+            try:
+                url=pool.start();project=(Path(__file__).resolve().parents[1]/'R').as_posix()
+                script=root/'checkpoint.R'
+                script.write_text(f'''args<-commandArgs(trailingOnly=TRUE)
+for(f in c("paths.R","schema.R","ingest.R","collect.R","fec_api.R"))source(file.path("{project}",f))
+con<-DBI::dbConnect(RSQLite::SQLite(),args[[1]])
+DBI::dbExecute(con,"PRAGMA busy_timeout=60000")
+init_schema(con)
+unit<-list(id="fixture-unit",company="Fixture",cycle=2026L,kind="employer",phase="P1_employer",
+  variants="FIXTURE",company_variants="FIXTURE",exclusions=character(),query_field="contributor_employer",query_filters=list())
+prior<-fec_api_load_progress(con,list(unit))
+result<-fec_api_collect_work_units(list(unit),api_key="unused",concurrency=2L,
+  transport=fec_api_default_transport,initial_states=prior,sleep=function(...)NULL,jitter=function(...)0,
+  page_callback=function(state,page){{
+    fec_api_checkpoint_page(con,state,page)
+    if(args[[2]]=="crash")quit(save="no",status=17L,runLast=FALSE)
+  }})
+stopifnot(result$units[[unit$id]]$rows_seen==2L,result$units[[unit$id]]$complete)
+DBI::dbDisconnect(con)
+''',encoding='utf-8')
+                env=os.environ.copy();env.update(MENTAT_REQUEST_POOL_URL=url,
+                    MENTAT_REQUEST_POOL_TOKEN=pool.token,MENTAT_REQUEST_POOL_LANE='fixture-lane')
+                database=root/'lane.db'
+                first=subprocess.run([str(binary),str(script),str(database),'crash'],env=env,
+                    capture_output=True,text=True,timeout=30)
+                self.assertEqual(first.returncode,17,first.stderr+first.stdout)
+                with closing(sqlite3.connect(database)) as db:
+                    self.assertEqual(db.execute('SELECT COUNT(*) FROM api_page_checkpoints').fetchone()[0],1)
+                    self.assertEqual(db.execute('SELECT last_page,rows_seen FROM api_work_progress').fetchone(),(0,1))
+                second=subprocess.run([str(binary),str(script),str(database),'resume'],env=env,
+                    capture_output=True,text=True,timeout=30)
+                self.assertEqual(second.returncode,0,second.stderr+second.stdout)
+                self.assertEqual(calls, [('fixture-unit',None),('fixture-unit','1')])
+                with closing(sqlite3.connect(database)) as db:
+                    self.assertEqual(db.execute('SELECT COUNT(*) FROM api_page_checkpoints').fetchone()[0],2)
+                    self.assertEqual(db.execute('SELECT last_page,rows_seen FROM api_work_progress').fetchone(),(1,2))
+                    self.assertEqual(db.execute('PRAGMA quick_check').fetchone()[0],'ok')
+            finally:pool.close()
+
     def test_r_transport_uses_shared_pool_and_preserves_batch_results(self):
         binary=Path('C:/Program Files/R/R-4.6.0/bin/Rscript.exe')
         if not binary.exists():self.skipTest('Rscript unavailable')

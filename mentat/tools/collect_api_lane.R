@@ -61,7 +61,7 @@ assign("MENTAT_INDUSTRY", industry, envir = .GlobalEnv)
 
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
-  "fec_api.R", "reconcile.R", "report.R"
+  "fec_api.R", "reconcile.R", "report.R", "lane_owner.R"
 )) {
   source(file.path(project_root, "R", module), local = .GlobalEnv)
 }
@@ -141,6 +141,8 @@ parse_assignments <- function(path) {
   list(
     lane = suppressWarnings(as.integer(payload$lane %||% 0L)),
     resume = isTRUE(payload$resume),
+    supervisor_owner_path = as.character(payload$supervisor_owner_path %||% ""),
+    supervisor_token = as.character(payload$supervisor_token %||% ""),
     tasks = normalized[order(ids, method = "radix")]
   )
 }
@@ -230,9 +232,15 @@ run_lane <- function() {
     unset = paste0(receipt_path, ".status.json")
   ))
 
+  writer_owner <- acquire_lane_writer(database_path)
+  on.exit(release_lane_writer(writer_owner), add = TRUE)
+  check_lane_supervisor(assignment$supervisor_owner_path,
+                        assignment$supervisor_token)
+
   connection <- DBI::dbConnect(RSQLite::SQLite(), database_path)
   DBI::dbExecute(connection, "PRAGMA busy_timeout=60000")
-  on.exit(DBI::dbDisconnect(connection), add = TRUE)
+  # Close the data connection before releasing the separate writer lease.
+  on.exit(DBI::dbDisconnect(connection), add = TRUE, after = FALSE)
   journal_mode <- DBI::dbGetQuery(
     connection,
     "PRAGMA journal_mode=WAL"
@@ -289,7 +297,7 @@ run_lane <- function() {
       budget_database_path
     )
     DBI::dbExecute(budget_connection, "PRAGMA busy_timeout=60000")
-    on.exit(DBI::dbDisconnect(budget_connection), add = TRUE)
+    on.exit(DBI::dbDisconnect(budget_connection), add = TRUE, after = FALSE)
     budget_journal_mode <- DBI::dbGetQuery(
       budget_connection,
       "PRAGMA journal_mode=WAL"
@@ -534,6 +542,10 @@ run_lane <- function() {
 exit_status <- tryCatch(
   run_lane(),
   error = function(condition) {
+    if (inherits(condition, "mentat_lane_owned")) {
+      message("FEC API lane writer refused: ", conditionMessage(condition))
+      return(4L)
+    }
     receipt <- list(
       status = "failed",
       industry = industry,

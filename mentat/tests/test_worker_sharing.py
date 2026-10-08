@@ -5,6 +5,7 @@ import concurrent.futures
 import copy
 import json
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import threading
@@ -102,6 +103,135 @@ class WorkerSharingTest(unittest.TestCase):
         gate.release(('busy',))
         self.assertFalse(gate.acquire())
 
+    def test_second_supervisor_is_fenced_and_crash_releases_run_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ready = root / 'ready'
+            script = '\n'.join([
+                'import pathlib, sys, time',
+                'sys.path.insert(0, sys.argv[1])',
+                'from api_company_cycle_fanout import supervisor_lock',
+                'path = pathlib.Path(sys.argv[2])',
+                'ready = pathlib.Path(sys.argv[3])',
+                'with supervisor_lock(path):',
+                '    ready.write_text("ready")',
+                '    time.sleep(30)',
+            ])
+            # A real second process must hold the operating-system SQLite lock.
+            # Keep its script in a file so Python's compound with statement parses.
+            helper = root / 'hold.py'
+            helper.write_text(script, encoding='utf-8')
+            process = subprocess.Popen(
+                [sys.executable, str(helper), str(Path(f.__file__).parent), str(root), str(ready)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            try:
+                deadline = time.monotonic() + 5
+                while not ready.exists() and process.poll() is None and time.monotonic() < deadline:
+                    time.sleep(.02)
+                self.assertTrue(ready.exists(), process.stderr.read() if process.poll() is not None else '')
+                first = f.read_json(root / 'supervisor-owner.json')
+                self.assertTrue(first['active'])
+                with self.assertRaisesRegex(RuntimeError, 'Another fanout supervisor'):
+                    with f.supervisor_lock(root):
+                        self.fail('duplicate supervisor entered the run')
+                with mock.patch.object(f, '_main_unlocked') as dispatched:
+                    with self.assertRaisesRegex(RuntimeError, 'Another fanout supervisor'):
+                        f.main(['--source-database', str(root/'unused.db'),
+                                '--industry', 'Fintech', '--run-directory', str(root)])
+                    dispatched.assert_not_called()
+            finally:
+                process.kill()
+                process.communicate(timeout=5)
+            # The old receipt is still marked active after a hard crash. Its
+            # token cannot fence a new owner once the OS has freed the lock.
+            self.assertTrue(f.read_json(root / 'supervisor-owner.json')['active'])
+            with f.supervisor_lock(root) as replacement:
+                self.assertNotEqual(replacement, first['token'])
+                self.assertEqual(f.read_json(root / 'supervisor-owner.json')['token'], replacement)
+            self.assertFalse(f.read_json(root / 'supervisor-owner.json')['active'])
+
+    def test_child_writer_conflict_does_not_replace_receipt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            assignment = root / 'assignments.json'
+            receipt = root / 'receipt.json'
+            task = {'task_id': 'fixture-2026', 'company': 'Fixture', 'cycle': 2026}
+            f.atomic_json(assignment, {'industry': 'Fintech', 'tasks': [task]})
+            f.atomic_json(receipt, {'status': 'succeeded', 'checkpoint': 'preserved'})
+            before = receipt.read_bytes()
+            run = f.LaneRun(1, root/'lane.db', assignment, receipt,
+                            root/'status.json', root/'process.log', 'fixture-key',
+                            f.key_id('fixture-key'), (task,), 1)
+            with mock.patch.object(f.subprocess, 'run', return_value=mock.Mock(returncode=4)):
+                with self.assertRaisesRegex(RuntimeError, 'Another R lane writer'):
+                    f.execute_lane(run, rscript_path=root/'Rscript.exe',
+                        lane_script=root/'tools'/'collect_api_lane.R',
+                        r_library_path=None, concurrency=1, sqlite_cache_mb=32,
+                        budget_database=root/'budget.db')
+            self.assertEqual(receipt.read_bytes(), before)
+
+    def test_nonzero_lane_exit_cannot_certify_successful_task_receipt(self):
+        with tempfile.TemporaryDirectory(prefix="mentat-lane-exit-") as directory:
+            root = Path(directory)
+            task = {'task_id': 'fixture-2026', 'company': 'Fixture', 'cycle': 2026}
+            assignment = root / 'assignments.json'
+            receipt = root / 'receipt.json'
+            f.atomic_json(assignment, {'industry': 'Fintech', 'tasks': [task]})
+            child = root / 'fake-collector.py'
+            child.write_text(
+                "import json,sys\n"
+                "from pathlib import Path\n"
+                "Path(sys.argv[4]).write_text(json.dumps({'status':'succeeded',"
+                "'quick_check':'corrupt','tasks':[{'task_id':'fixture-2026',"
+                "'company':'Fixture','cycle':2026,'status':'succeeded'}]}))\n"
+                "raise SystemExit(3)\n",
+                encoding='utf-8',
+            )
+            run = f.LaneRun(1, root/'lane.db', assignment, receipt,
+                            root/'status.json', root/'process.log', 'fixture-key',
+                            f.key_id('fixture-key'), (task,), 1)
+            result = f.execute_lane(
+                run, rscript_path=Path(sys.executable), lane_script=child,
+                r_library_path=None, concurrency=1, sqlite_cache_mb=32,
+                budget_database=root/'budget.db',
+            )
+            self.assertEqual(result['exit_code'], 3)
+            self.assertEqual(result['receipt']['status'], 'failed')
+            self.assertEqual(result['receipt']['tasks'][0]['status'], 'failed')
+            self.assertIn('code 3', result['receipt']['tasks'][0]['error'])
+
+    def test_resume_before_any_receipt_uses_new_attempt_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'source.db'
+            fixture.create_database(source)
+            with closing(sqlite3.connect(source)) as db, db:
+                db.execute('CREATE TABLE companies(industry TEXT, company TEXT, variant TEXT)')
+                db.execute("INSERT INTO companies VALUES ('Fintech', 'Fixture', 'FIXTURE')")
+            run = root / 'run'
+            arguments = ['--source-database', str(source), '--industry', 'Fintech',
+                         '--cycles', '2024', '--run-directory', str(run),
+                         '--rscript-path', sys.executable,
+                         '--budget-database', str(root/'budget.db'),
+                         '--max-parallel', '1', '--no-shared-requests']
+            lane = run / 'lanes' / 'lane-01'
+            with mock.patch.object(f, 'discover_keys', return_value=['fixture-key']), \
+                 mock.patch.object(f, 'execute_lane', side_effect=RuntimeError('injected crash')):
+                with self.assertRaisesRegex(RuntimeError, 'injected crash'):
+                    f.main(arguments)
+                original = list(lane.glob('assignments.work-1-*.json'))
+                self.assertEqual(len(original), 1)
+                first_bytes = original[0].read_bytes()
+                with self.assertRaisesRegex(RuntimeError, 'injected crash'):
+                    f.main([*arguments, '--resume'])
+            attempts = list(lane.glob('assignments.work-1-*.json'))
+            self.assertEqual(len(attempts), 2)
+            self.assertEqual(original[0].read_bytes(), first_bytes)
+            self.assertNotEqual(attempts[0].name, attempts[1].name)
+            manifest = f.read_json(run/'manifest.json')
+            self.assertIn('process.resume-1-', manifest['lanes'][0]['log'])
+
     def test_borrowed_work_merges_every_cycle_once_and_resume_skips_successes(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory); source=root/'source.db'; fixture.create_database(source)
@@ -124,7 +254,8 @@ class WorkerSharingTest(unittest.TestCase):
                     with closing(sqlite3.connect(run.database)) as con, con:
                         con.executemany('INSERT OR REPLACE INTO contributions(sub_id,company,amount) VALUES(?,?,?)',
                             [(t['task_id'],t['company'],t['cycle']) for t in tasks])
-                receipt={'status':'succeeded' if succeeded else 'failed','tasks':tasks}
+                receipt={'status':'succeeded' if succeeded else 'failed',
+                         'quick_check':'ok','tasks':tasks}
                 f.atomic_json(run.receipt,receipt)
                 executions.extend((t['company'],t['cycle']) for t in tasks)
                 return {'lane':run.lane,'attempt':run.attempt,'receipt':receipt,'exit_code':0 if succeeded else 2}
@@ -140,6 +271,14 @@ class WorkerSharingTest(unittest.TestCase):
                 fail_b=False; executions.clear()
                 self.assertEqual(f.main([*args,'--resume']),0)
                 self.assertEqual(sorted(executions),[('B',2024),('B',2026)])
+                # Simulate a lost terminal receipt after the source commit.
+                # Ownership handoffs in the manifest must still bind to the
+                # committed intent, with no extra lane dispatch or ingestion.
+                (root/'run/receipt.json').unlink()
+                executions.clear()
+                self.assertEqual(f.main([*args,'--resume']),0)
+                self.assertEqual(executions, [])
+                self.assertTrue(f.read_json(root/'run/receipt.json')['merge']['recovered_after_commit'])
             with closing(sqlite3.connect(source)) as con:
                 rows=con.execute('SELECT company,amount FROM contributions ORDER BY company,amount').fetchall()
             self.assertEqual(rows,[(c,y) for c in 'ABCDE' for y in (2024,2026)])

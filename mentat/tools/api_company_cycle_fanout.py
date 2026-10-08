@@ -23,12 +23,14 @@ import json
 import math
 import os
 import re
+import secrets
 import sqlite3
 import subprocess
 import sys
 import threading
 import time
 from dataclasses import dataclass
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Sequence
@@ -36,6 +38,10 @@ from typing import Any, Iterable, Sequence
 from sqlite_snapshot import create_snapshot, verify_database
 from fec_key_store import load_keys
 from api_request_pool import RequestPool
+from merge_company_shards import (
+    committed_merge_lease, content_sha256, file_sha256, merge_lock_path,
+    parse_specifications,
+)
 
 
 SUPPORTED_CYCLES = (2022, 2024, 2026)
@@ -44,6 +50,98 @@ DEFAULT_MEMORY_PER_LANE_MB = 640
 DEFAULT_MEMORY_RESERVE_MB = 1024
 ATOMIC_REPLACE_ATTEMPTS = 10
 ATOMIC_REPLACE_INITIAL_DELAY_SECONDS = 0.002
+
+
+@contextmanager
+def supervisor_lock(run_directory: Path):
+    """Fence another supervisor from the same run, including on resume.
+
+    SQLite's writer lock is released by the OS if this process dies. The
+    separate owner receipt survives a crash, while the transaction prevents
+    two live coordinators from dispatching
+    against the same lane databases and checkpoint files.
+    """
+    run_directory.mkdir(parents=True, exist_ok=True)
+    path = run_directory / ".supervisor-lock.sqlite"
+    owner_path = run_directory / "supervisor-owner.json"
+    connection = sqlite3.connect(path, timeout=0, isolation_level=None)
+    token = secrets.token_hex(16)
+    acquired = False
+    owner_written = False
+    try:
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as error:
+            if "locked" in str(error).lower():
+                raise RuntimeError(
+                    f"Another fanout supervisor owns this run directory: {run_directory}"
+                ) from error
+            raise
+        acquired = True
+        atomic_json(owner_path, {
+            "token": token, "pid": os.getpid(),
+            "started_at": utc_now(), "active": True,
+        })
+        owner_written = True
+        yield token
+    finally:
+        try:
+            if acquired:
+                if owner_written:
+                    atomic_json(owner_path, {
+                        "token": token, "pid": os.getpid(),
+                        "ended_at": utc_now(), "active": False,
+                    })
+                connection.rollback()
+        finally:
+            connection.close()
+
+
+def assert_no_active_lane_writers(run_directory: Path) -> None:
+    """Refuse a restart while an orphaned R child owns a lane snapshot.
+
+    This runs before the coordinator rewrites assignments, lane pointers or
+    aggregate status. A second check in R protects the database if a child
+    acquires its lock after this probe.
+    """
+    for path in sorted((run_directory / "lanes").glob(
+        "lane-*/mentat.db.writer-lock.sqlite"
+    )):
+        connection = sqlite3.connect(path, timeout=0, isolation_level=None)
+        try:
+            try:
+                connection.execute("BEGIN IMMEDIATE")
+            except sqlite3.OperationalError as error:
+                if "locked" in str(error).lower():
+                    raise RuntimeError(
+                        f"An R lane writer still owns {path.parent / 'mentat.db'}; "
+                        "resume after that process exits."
+                    ) from error
+                raise
+            connection.rollback()
+        finally:
+            connection.close()
+
+
+def assert_no_active_merge_writer(source_database: Path) -> None:
+    """Refuse takeover while an orphaned merge child can still write source."""
+    path = merge_lock_path(source_database)
+    if not path.exists():
+        return
+    connection = sqlite3.connect(path, timeout=0, isolation_level=None)
+    try:
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as error:
+            if "locked" in str(error).lower():
+                raise RuntimeError(
+                    f"A merge child still owns source database {source_database}; "
+                    "resume after that process exits."
+                ) from error
+            raise
+        connection.rollback()
+    finally:
+        connection.close()
 
 
 def utc_now() -> str:
@@ -553,6 +651,11 @@ def execute_lane(
             stderr=subprocess.STDOUT,
             check=False,
         )
+    if process.returncode == 4:
+        raise RuntimeError(
+            f"Another R lane writer still owns {lane_run.database}; "
+            "resume after that process exits."
+        )
     elapsed = round(time.monotonic() - started, 3)
     last_log_line = last_nonempty_log_line(lane_run.log)
     receipt: dict[str, Any] = {}
@@ -587,6 +690,22 @@ def execute_lane(
         latest_tasks[str(task["task_id"])]
         for task in lane_run.tasks
     ]
+    if process.returncode != 0:
+        # A collector can write all task rows and then fail its postflight
+        # quick_check (or another final integrity step). Never promote those
+        # rows to a successful lane just because the receipt says succeeded.
+        normalized_tasks = [
+            {
+                **task,
+                "status": "failed",
+                "error": (
+                    f"Managed Rscript exited with code {int(process.returncode)} "
+                    "after reporting task success; postflight not trusted."
+                ),
+            }
+            if task.get("status") == "succeeded" else task
+            for task in normalized_tasks
+        ]
     failed_count = sum(
         1 for task in normalized_tasks if task.get("status") != "succeeded"
     )
@@ -834,7 +953,7 @@ def receipt_attempt_number(path: Path) -> int:
     )
     if split:
         return int(split.group(1))
-    resume = re.fullmatch(r"receipt\.resume-(\d+)\.json", path.name)
+    resume = re.fullmatch(r"receipt\.resume-(\d+)(?:-[a-z0-9]+)?\.json", path.name)
     return int(resume.group(1)) if resume else 1
 
 
@@ -852,6 +971,31 @@ def existing_lane_attempts(lane_directory: Path, lane: int) -> list[dict[str, An
             receipt = read_json(path)
         except (OSError, ValueError):
             continue
+        recorded_exit = receipt.get("exit_code")
+        postflight = receipt.get("quick_check")
+        verified_exit = type(recorded_exit) is int and recorded_exit == 0
+        verified_postflight = postflight == "ok"
+        # R publishes the receipt after quick_check but before its process has
+        # exited. A supervisor killed in that interval never gets to record
+        # the exit code. Trust that raw receipt only when its postflight passed;
+        # likewise, never skip successful tasks after a recorded bad exit.
+        trusted_success = (
+            (verified_exit and postflight in (None, "ok"))
+            or (recorded_exit is None and verified_postflight)
+        )
+        if not trusted_success:
+            receipt = dict(receipt)
+            receipt["status"] = "failed"
+            receipt["tasks"] = [
+                {
+                    **task,
+                    "status": "failed",
+                    "error": "Lane postflight or process exit was not verified.",
+                }
+                if isinstance(task, dict) and task.get("status") == "succeeded"
+                else task
+                for task in receipt.get("tasks", [])
+            ]
         attempts.append(
             {
                 "lane": lane,
@@ -967,11 +1111,165 @@ def parse_arguments(arguments: Sequence[str]) -> argparse.Namespace:
     return parsed
 
 
-def main(arguments: Sequence[str] | None = None) -> int:
+def settle_source_journals(source_database: Path) -> None:
+    """Rollback a hot DELETE journal and checkpoint committed WAL after death."""
+    connection = sqlite3.connect(
+        source_database.as_uri() + "?mode=rw", uri=True,
+        timeout=60, isolation_level=None,
+    )
+    try:
+        # Opening a read-only connection can fail on a hot rollback journal;
+        # acquiring this write lease makes SQLite recover it first.
+        connection.execute("BEGIN IMMEDIATE")
+        connection.execute("ROLLBACK")
+        busy, _, _ = connection.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+        if busy:
+            raise RuntimeError(
+                "Source WAL is still owned by a live writer; retry resume later."
+            )
+    finally:
+        connection.close()
+
+
+def recover_committed_fanout(
+    source_database: Path, run_directory: Path,
+    manifest: dict[str, Any], output_receipt: Path,
+    current_source_fingerprint: str,
+) -> bool:
+    """Finish a receipt only after proving the same target transaction committed."""
+    run_id = str(manifest["run_id"])
+    with committed_merge_lease(source_database, run_id) as marker:
+        if marker is None:
+            return False
+        stable_fingerprint = quiescent_database_fingerprint(source_database)
+        if stable_fingerprint != current_source_fingerprint:
+            raise RuntimeError("Source database changed while recovering merge receipt")
+        return finish_committed_fanout(
+            source_database, run_directory, manifest, output_receipt,
+            stable_fingerprint, marker,
+        )
+
+
+def finish_committed_fanout(
+    source_database: Path, run_directory: Path,
+    manifest: dict[str, Any], output_receipt: Path,
+    current_source_fingerprint: str, marker: dict[str, str],
+) -> bool:
+    run_id = str(manifest["run_id"])
+    intent_path = Path(marker["intent_path"]).resolve(strict=True)
+    if intent_path.parent != run_directory:
+        raise RuntimeError("Committed merge intent is outside its run directory")
+    intent = read_json(intent_path)
+    if content_sha256(intent) != marker["intent_sha256"]:
+        raise RuntimeError("Committed merge intent changed after publication")
+    prepared_path = Path(str(intent.get("prepared_receipt_path", ""))).resolve(strict=True)
+    if prepared_path.parent != run_directory:
+        raise RuntimeError("Prepared merge receipt is outside its run directory")
+    if (
+        intent.get("version") != 1
+        or intent.get("run_id") != run_id
+        or intent.get("source_database") != str(source_database)
+        or intent.get("source_state_before") != manifest.get("source_state_before")
+        or intent.get("industry") != manifest.get("industry")
+        or intent.get("cycles") != manifest.get("cycles")
+        or marker["prepared_receipt_sha256"] != intent.get("prepared_receipt_sha256")
+        or file_sha256(prepared_path) != marker["prepared_receipt_sha256"]
+    ):
+        raise RuntimeError("Committed merge intent does not match this fanout run")
+    manifest_specs = {
+        (str(Path(lane["database"]).resolve()), tuple(sorted(lane["companies"])))
+        for lane in manifest.get("lanes", []) if lane.get("companies")
+    }
+    intent_specs = {
+        (str(Path(item["database"]).resolve()), tuple(sorted(item["companies"])))
+        for item in intent.get("specifications", [])
+    }
+    if manifest_specs != intent_specs or not intent_specs:
+        raise RuntimeError("Committed merge shards do not match the run manifest")
+    for specification in intent.get("specifications", []):
+        shard = Path(specification["database"]).resolve(strict=True)
+        if not shard.is_relative_to(run_directory / "lanes"):
+            raise RuntimeError("Committed merge shard is outside this run")
+        if quiescent_database_fingerprint(shard) != specification["sha256"]:
+            raise RuntimeError("Committed merge shard changed after publication")
+    prepared = read_json(prepared_path)
+    expected_task_ids = {
+        str(task["task_id"])
+        for lane in manifest.get("lanes", [])
+        for task in lane.get("tasks", [])
+    }
+    observed_task_ids = [str(task.get("task_id", ""))
+                         for task in prepared.get("tasks", [])]
+    if (
+        prepared.get("status") != "merge_prepared"
+        or prepared.get("run_id") != run_id
+        or prepared.get("source_state_before") != manifest.get("source_state_before")
+        or prepared.get("source_database") != str(source_database)
+        or prepared.get("failed") != 0
+        or prepared.get("failures") != []
+        or prepared.get("task_count") != prepared.get("succeeded")
+        or len(observed_task_ids) != prepared.get("task_count")
+        or len(set(observed_task_ids)) != len(observed_task_ids)
+        or set(observed_task_ids) != expected_task_ids
+        or any(task.get("status") != "succeeded" for task in prepared.get("tasks", []))
+    ):
+        raise RuntimeError("Prepared fanout receipt is not a complete successful run")
+    ended = utc_now()
+    receipt = dict(prepared)
+    receipt.update({
+        "status": "succeeded", "merged": True,
+        "source_state_after_merge": current_source_fingerprint,
+        "ended_at": ended, "failed": 0, "failures": [],
+    })
+    receipt["merge"] = {
+        **prepared.get("merge", {}), "attempted": True,
+        "exit_code": 0, "recovered_after_commit": True,
+        "intent_sha256": marker["intent_sha256"],
+        "output_logical_sha256": marker["output_logical_sha256"],
+    }
+    status_path = Path(prepared["status_path"])
+    status = read_json(status_path) if status_path.is_file() else {}
+    status.update(
+        run_id=run_id, industry=prepared["industry"], status="succeeded",
+        completed=prepared["task_count"], total=prepared["task_count"],
+        failed=0, running=0, current=[], updated_at=ended,
+        estimated_remaining_seconds=0,
+    )
+    atomic_json(status_path, status)
+    workers_path = run_directory / "workers.json"
+    workers = read_json(workers_path) if workers_path.is_file() else {}
+    pool_state = workers.get("request_pool")
+    if isinstance(pool_state, dict):
+        pool_state = {**pool_state, "active_workers": 0, "queued_requests": 0}
+    workers.update(
+        active_workers=0, database_writers=0, pending_companies=0,
+        request_pool=pool_state, stopping=False, finished=True,
+        updated_at=ended,
+    )
+    atomic_json(workers_path, workers)
+    request_workers_path = run_directory / "request-workers.json"
+    if request_workers_path.is_file():
+        request_workers = read_json(request_workers_path)
+        request_workers.update(
+            active_workers=0, queued_requests=0, stopped=True,
+            updated_at_epoch=time.time(),
+        )
+        atomic_json(request_workers_path, request_workers)
+    atomic_json(output_receipt, receipt)
+    print(f"MENTAT API FANOUT RECOVERED COMMITTED MERGE receipt={output_receipt}",
+          flush=True)
+    return True
+
+
+def _main_unlocked(arguments: Sequence[str] | None = None,
+                   *, owner_token: str | None = None,
+                   lifecycle: dict[str, Any] | None = None) -> int:
     options = parse_arguments(sys.argv[1:] if arguments is None else arguments)
     source_database = options.source_database.resolve(strict=True)
     run_directory = options.run_directory.resolve(strict=False)
     run_directory.mkdir(parents=True, exist_ok=True)
+    ownership = ({"supervisor_owner_path": str(run_directory / "supervisor-owner.json"),
+                  "supervisor_token": owner_token} if owner_token else {})
     output_receipt = (
         options.output_receipt.resolve(strict=False)
         if options.output_receipt
@@ -1014,8 +1312,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
         raise RuntimeError(
             f"--resume requires an existing manifest: {manifest_path}"
         )
-    verify_database(source_database)
-    current_source_fingerprint = quiescent_database_fingerprint(source_database)
     existing_manifest: dict[str, Any] | None = None
     if options.resume:
         existing_manifest = read_json(manifest_path)
@@ -1025,6 +1321,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             raise RuntimeError("Resume industry does not match manifest.")
         if tuple(existing_manifest.get("cycles", [])) != tuple(options.cycles):
             raise RuntimeError("Resume cycles do not match manifest.")
+        settle_source_journals(source_database)
+    verify_database(source_database)
+    current_source_fingerprint = quiescent_database_fingerprint(source_database)
     if options.resume and output_receipt.is_file():
         prior_final = read_json(output_receipt)
         if (
@@ -1044,6 +1343,13 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 f"receipt={output_receipt}",
                 flush=True,
             )
+            return 0
+    if options.resume:
+        assert existing_manifest is not None
+        if recover_committed_fanout(
+            source_database, run_directory, existing_manifest,
+            output_receipt, current_source_fingerprint,
+        ):
             return 0
 
     keys = discover_keys(options.keys_file, dict(os.environ))
@@ -1108,6 +1414,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             lane_count = min(lane_count, options.max_lane_ceiling)
         plans = schedule_companies(companies, options.cycles, lane_count)
         run_id = f"{datetime.now().strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
+    invocation_id = secrets.token_hex(8)
     spare_keys = keys[lane_count:]
     started_wall = utc_now()
     started_monotonic = time.monotonic()
@@ -1146,25 +1453,29 @@ def main(arguments: Sequence[str] | None = None) -> int:
             + 1
         )
         assignment_path = lane_directory / (
-            f"assignments.resume-{resume_number}.json"
+            f"assignments.resume-{resume_number}-{invocation_id}.json"
             if options.resume
             else "assignments.json"
         )
         receipt_path = lane_directory / (
-            f"receipt.resume-{resume_number}.json"
+            f"receipt.resume-{resume_number}-{invocation_id}.json"
             if options.resume
             else "receipt.json"
         )
         state_path = lane_directory / (
-            f"status.resume-{resume_number}.json"
+            f"status.resume-{resume_number}-{invocation_id}.json"
             if options.resume
             else "status.json"
         )
-        log_path = lane_directory / "process.log"
+        log_path = lane_directory / (
+            f"process.resume-{resume_number}-{invocation_id}.log"
+            if options.resume else "process.log"
+        )
         if not options.resume or pending_tasks:
             atomic_json(
                 assignment_path,
                 {
+                    **ownership,
                     "run_id": run_id,
                     "industry": options.industry.strip(),
                     "lane": lane_number,
@@ -1188,7 +1499,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         )
         merge_runs.append(merge_run)
         if prior_attempts:
-            baseline_state = lane_directory / "status.resume-baseline.json"
+            baseline_state = lane_directory / f"status.resume-baseline-{invocation_id}.json"
             prior_tasks = list(latest_prior.values())
             atomic_json(
                 baseline_state,
@@ -1305,9 +1616,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         tasks, resuming = claimed
         template = lane_templates[lane]
         token = hashlib.sha256(tasks[0]["company"].encode("utf-8")).hexdigest()[:16]
-        suffix = f"work-{template.attempt}-{token}.json"
+        suffix = (f"work-{template.attempt}-{token}"
+                  f"{'-' + invocation_id if options.resume else ''}.json")
         assignment = template.assignments.with_name("assignments." + suffix)
         atomic_json(assignment, {
+            **ownership,
             "industry": options.industry.strip(), "run_id": run_id,
             "lane": lane, "resume": resuming, "tasks": tasks,
             "initialization_markers": initialization_markers(lane, tasks),
@@ -1338,8 +1651,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         # keys are the rate limit. R lanes stay bounded by execution_limiter.
         pool_width = options.pool_width if options.pool_width > 0 else worker_ceiling
         request_pool = RequestPool(keys, budget_database, pool_width)
+        if lifecycle is not None:
+            lifecycle["request_pool"] = request_pool
         request_pool.url = request_pool.start()
-        atexit.register(request_pool.close)
+        if lifecycle is None:
+            atexit.register(request_pool.close)
     control_path = options.run_directory / "control.json"
     workers_path = options.run_directory / "workers.json"
     stop_requested = threading.Event()
@@ -1399,11 +1715,16 @@ def main(arguments: Sequence[str] | None = None) -> int:
             publish_workers()
 
     publish_workers()
+    if lifecycle is not None:
+        lifecycle["telemetry_owned"] = True
     control_watcher = threading.Thread(
         target=watch_control,
         name="mentat-api-control",
         daemon=True,
     )
+    if lifecycle is not None:
+        lifecycle["control_finished"] = control_finished
+        lifecycle["control_watcher"] = control_watcher
     control_watcher.start()
     with concurrent.futures.ThreadPoolExecutor(
         max_workers=lane_count,
@@ -1479,17 +1800,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 if stop_requested.is_set():
                     continue
                 recovery_assignment = run.assignments.with_name(
-                    f"assignments.recovery-{run.attempt}.json"
+                    f"assignments.recovery-{run.attempt}-{invocation_id}.json"
                 )
                 recovery_receipt = run.receipt.with_name(
-                    f"receipt.recovery-{run.attempt}.json"
+                    f"receipt.recovery-{run.attempt}-{invocation_id}.json"
                 )
                 recovery_state = run.state.with_name(
-                    f"status.recovery-{run.attempt}.json"
+                    f"status.recovery-{run.attempt}-{invocation_id}.json"
                 )
                 atomic_json(
                     recovery_assignment,
                     {
+                        **ownership,
                         "run_id": run_id,
                         "industry": options.industry.strip(),
                         "lane": run.lane,
@@ -1578,17 +1900,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     token = f"unit-{recovery_run.lane}"
                 split_attempt = recovery_run.attempt + 1
                 split_assignment = recovery_run.assignments.with_name(
-                    f"assignments.split-{split_attempt}-{token}.json"
+                    f"assignments.split-{split_attempt}-{token}-{invocation_id}.json"
                 )
                 split_receipt = recovery_run.receipt.with_name(
-                    f"receipt.split-{split_attempt}-{token}.json"
+                    f"receipt.split-{split_attempt}-{token}-{invocation_id}.json"
                 )
                 split_state = recovery_run.state.with_name(
-                    f"status.split-{split_attempt}-{token}.json"
+                    f"status.split-{split_attempt}-{token}-{invocation_id}.json"
                 )
                 atomic_json(
                     split_assignment,
                     {
+                        **ownership,
                         "run_id": run_id,
                         "industry": options.industry.strip(),
                         "lane": recovery_run.lane,
@@ -1660,13 +1983,71 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     split_pending.add(next_future)
 
     combined_tasks, final_failed = combine_task_results(plans, attempts)
-    merge_log = run_directory / "merge.log"
+    merge_log = run_directory / (
+        f"merge.resume-{invocation_id}.log" if options.resume else "merge.log"
+    )
+
+    def receipt_document(
+        status: str, after: str | None, ended: str | None,
+        failures: list[dict[str, Any]], is_merged: bool,
+        merge_details: dict[str, Any],
+    ) -> dict[str, Any]:
+        return {
+            "run_id": run_id,
+            "status": status,
+            "industry": options.industry.strip(),
+            "source_database": str(source_database),
+            "source_state_before": current_source_fingerprint,
+            "source_state_after_merge": after,
+            "run_directory": str(run_directory),
+            "manifest": str(manifest_path),
+            "status_path": str(status_path),
+            "started_at": started_wall,
+            "ended_at": ended,
+            "wall_clock_seconds": round(time.monotonic() - started_monotonic, 3),
+            "company_count": len(companies),
+            "task_count": task_total,
+            "succeeded": task_total - len(failures),
+            "failed": len(failures),
+            "merged": is_merged,
+            "configured_key_count": len(keys),
+            "spare_key_count": len(spare_keys),
+            "request_pool": request_pool.snapshot() if request_pool else None,
+            "lane_count": lane_count,
+            "execution_worker_count": primary_worker_count,
+            "final_worker_count": execution_limiter.target(),
+            "stopped_early": stop_requested.is_set(),
+            "resource_cap": resources,
+            "recovery_ladder": [
+                "primary_lane", "fresh_lane_retry", "fresh_company_cycle_split",
+            ],
+            "runtimes": {
+                "python_path": str(Path(sys.executable).resolve()),
+                "rscript_path": str(rscript_path),
+                "r_library_path": str(r_library_path) if r_library_path else None,
+            },
+            "budget_database": str(budget_database),
+            "telemetry": {
+                "status_write_failures": status_write_failures,
+                "company_handoffs": len(work_queue.handoffs),
+                "scheduling": "company_work_sharing",
+            },
+            "tasks": combined_tasks,
+            "failures": failures,
+            "lane_attempts": [
+                {key: value for key, value in attempt.items() if key != "receipt"}
+                for attempt in attempts
+            ],
+            "merge": merge_details,
+        }
+
     merge_result: dict[str, Any] = {
         "attempted": False,
         "exit_code": None,
         "log": str(merge_log),
     }
     merged = False
+    merge_intent: dict[str, Any] | None = None
     # A stopped run never writes the source database, even if every lane that
     # did run happened to succeed. Resume it later instead.
     if not final_failed and not stop_requested.is_set():
@@ -1689,6 +2070,40 @@ def main(arguments: Sequence[str] | None = None) -> int:
             final_failed=0,
         ):
             status_write_failures += 1
+        merge_specifications = [
+            f"{run.database}::{'|'.join(plans[run.lane - 1]['companies'])}"
+            for run in merge_runs
+            if plans[run.lane - 1]["companies"]
+        ]
+        intent_path: Path | None = None
+        if owner_token:
+            prepared_path = run_directory / f"merge-prepared-{invocation_id}.json"
+            prepared = receipt_document(
+                "merge_prepared", None, None, [], False,
+                {"attempted": True, "exit_code": None, "log": str(merge_log)},
+            )
+            atomic_json(prepared_path, prepared)
+            grouped_specs = parse_specifications(
+                merge_specifications, source_database
+            )
+            merge_intent = {
+                "version": 1,
+                "run_id": run_id,
+                "industry": options.industry.strip(),
+                "cycles": list(options.cycles),
+                "source_database": str(source_database),
+                "source_state_before": current_source_fingerprint,
+                "prepared_receipt_path": str(prepared_path),
+                "prepared_receipt_sha256": file_sha256(prepared_path),
+                "specifications": [
+                    {"database": str(shard),
+                     "sha256": quiescent_database_fingerprint(shard),
+                     "companies": list(owned_companies)}
+                    for shard, owned_companies in grouped_specs
+                ],
+            }
+            intent_path = run_directory / f"merge-intent-{invocation_id}.json"
+            atomic_json(intent_path, merge_intent)
         merge_command = [
             sys.executable,
             str(merge_script),
@@ -1697,13 +2112,12 @@ def main(arguments: Sequence[str] | None = None) -> int:
             json.dumps(canonical_company_order, ensure_ascii=False),
             "--expected-target-sha256",
             current_source_fingerprint,
+            *(["--supervisor-owner-path", str(run_directory / "supervisor-owner.json"),
+               "--supervisor-token", owner_token] if owner_token else []),
+            *(["--merge-intent-json", str(intent_path)] if intent_path else []),
             "--merge-batch-limit",
             str(options.merge_batch_limit),
-            *[
-                f"{run.database}::{'|'.join(plans[run.lane - 1]['companies'])}"
-                for run in merge_runs
-                if plans[run.lane - 1]["companies"]
-            ],
+            *merge_specifications,
         ]
         merge_started = time.monotonic()
         with merge_log.open("w", encoding="utf-8", errors="replace") as log:
@@ -1738,78 +2152,46 @@ def main(arguments: Sequence[str] | None = None) -> int:
             ]
 
     final_status = "succeeded" if merged and not final_failed else "failed"
-    source_state_after_merge = quiescent_database_fingerprint(source_database)
-    ended_wall = utc_now()
-    if not write_status(
-        status_path,
-        run_id=run_id,
-        industry=options.industry.strip(),
-        total=task_total,
-        lane_runs=all_lane_runs,
-        stage=final_status,
-        started_monotonic=started_monotonic,
-        final_failed=len(final_failed),
-    ):
-        status_write_failures += 1
-    receipt = {
-        "run_id": run_id,
-        "status": final_status,
-        "industry": options.industry.strip(),
-        "source_database": str(source_database),
-        "source_state_before": current_source_fingerprint,
-        "source_state_after_merge": source_state_after_merge,
-        "run_directory": str(run_directory),
-        "manifest": str(manifest_path),
-        "status_path": str(status_path),
-        "started_at": started_wall,
-        "ended_at": ended_wall,
-        "wall_clock_seconds": round(time.monotonic() - started_monotonic, 3),
-        "company_count": len(companies),
-        "task_count": task_total,
-        "succeeded": task_total - len(final_failed),
-        "failed": len(final_failed),
-        "merged": merged,
-        "configured_key_count": len(keys),
-        "spare_key_count": len(spare_keys),
-        "request_pool": request_pool.snapshot() if request_pool else None,
-        "lane_count": lane_count,
-        "execution_worker_count": primary_worker_count,
-        "final_worker_count": execution_limiter.target(),
-        "stopped_early": stop_requested.is_set(),
-        "resource_cap": resources,
-        "recovery_ladder": [
-            "primary_lane",
-            "fresh_lane_retry",
-            "fresh_company_cycle_split",
-        ],
-        "runtimes": {
-            "python_path": str(Path(sys.executable).resolve()),
-            "rscript_path": str(rscript_path),
-            "r_library_path": (
-                str(r_library_path) if r_library_path else None
-            ),
-        },
-        "budget_database": str(budget_database),
-        "telemetry": {
-            "status_write_failures": status_write_failures,
-            "company_handoffs": len(work_queue.handoffs),
-            "scheduling": "company_work_sharing",
-        },
-        "tasks": combined_tasks,
-        "failures": final_failed,
-        "lane_attempts": [
-            {
-                key: value
-                for key, value in attempt.items()
-                if key != "receipt"
-            }
-            for attempt in attempts
-        ],
-        "merge": merge_result,
-    }
-    control_finished.set()
-    publish_workers()
-    atomic_json(output_receipt, receipt)
+
+    def publish_final_receipt() -> dict[str, Any]:
+        nonlocal status_write_failures
+        if final_status != "succeeded":
+            settle_source_journals(source_database)
+        source_state_after_merge = quiescent_database_fingerprint(source_database)
+        ended_wall = utc_now()
+        if not write_status(
+            status_path,
+            run_id=run_id,
+            industry=options.industry.strip(),
+            total=task_total,
+            lane_runs=all_lane_runs,
+            stage=final_status,
+            started_monotonic=started_monotonic,
+            final_failed=len(final_failed),
+        ):
+            status_write_failures += 1
+        receipt = receipt_document(
+            final_status, source_state_after_merge, ended_wall,
+            final_failed, merged, merge_result,
+        )
+        control_finished.set()
+        publish_workers()
+        atomic_json(output_receipt, receipt)
+        return receipt
+
+    if merged and merge_intent is not None:
+        with committed_merge_lease(source_database, run_id) as marker:
+            if (
+                marker is None
+                or marker["intent_sha256"] != content_sha256(merge_intent)
+            ):
+                raise RuntimeError(
+                    "Merge child exited successfully without its matching "
+                    "transactional source-DB commit marker."
+                )
+            receipt = publish_final_receipt()
+    else:
+        receipt = publish_final_receipt()
     print(
         f"MENTAT API FANOUT {final_status.upper()} "
         f"succeeded={receipt['succeeded']}/{task_total} merged={merged} "
@@ -1820,10 +2202,79 @@ def main(arguments: Sequence[str] | None = None) -> int:
         # Distinct from a real failure: the operator stopped this run, the
         # source database was never merged, and --resume can continue it.
         return 3
-    if request_pool:
+    if request_pool and lifecycle is None:
         request_pool.close()
         atexit.unregister(request_pool.close)
     return 0 if final_status == "succeeded" else 2
+
+
+def cleanup_fanout_lifecycle(
+    run_directory: Path, lifecycle: dict[str, Any], *, interrupted: bool,
+) -> None:
+    """Stop local background work before releasing supervisor ownership."""
+    finished = lifecycle.get("control_finished")
+    if finished is not None:
+        finished.set()
+    pool = lifecycle.get("request_pool")
+    if pool is not None:
+        pool.stop()
+    watcher = lifecycle.get("control_watcher")
+    if watcher is not None and watcher.ident is not None:
+        watcher.join(timeout=10)
+        if watcher.is_alive():
+            raise RuntimeError("Fanout control watcher did not stop")
+    if pool is not None:
+        pool.close()
+    if not interrupted or not lifecycle.get("telemetry_owned"):
+        return
+    # The caller may catch this exception and keep its Python process alive.
+    # Clear telemetry while the supervisor lock still excludes a replacement.
+    try:
+        status_path = run_directory / "status.json"
+        if status_path.is_file():
+            status = read_json(status_path)
+            status.update(status="interrupted", running=0, current=[],
+                          updated_at=utc_now())
+            atomic_json(status_path, status)
+        workers_path = run_directory / "workers.json"
+        if workers_path.is_file():
+            workers = read_json(workers_path)
+            workers.update(active_workers=0, database_writers=0,
+                           stopping=True, interrupted=True, updated_at=utc_now())
+            if pool is not None:
+                workers["request_pool"] = pool.snapshot()
+            atomic_json(workers_path, workers)
+        request_workers_path = run_directory / "request-workers.json"
+        if request_workers_path.is_file():
+            request_workers = read_json(request_workers_path)
+            request_workers.update(active_workers=0, queued_requests=0,
+                                   stopped=True, updated_at_epoch=time.time())
+            atomic_json(request_workers_path, request_workers)
+    except (OSError, ValueError) as error:
+        print(f"WARNING: could not finalize interrupted fanout telemetry: {error}",
+              file=sys.stderr, flush=True)
+
+
+def main(arguments: Sequence[str] | None = None) -> int:
+    arguments = sys.argv[1:] if arguments is None else arguments
+    options = parse_arguments(arguments)
+    run_directory = options.run_directory.resolve(strict=False)
+    with supervisor_lock(run_directory) as owner_token:
+        lifecycle: dict[str, Any] = {}
+        interrupted = False
+        try:
+            assert_no_active_lane_writers(run_directory)
+            assert_no_active_merge_writer(options.source_database.resolve(strict=True))
+            return _main_unlocked(
+                arguments, owner_token=owner_token, lifecycle=lifecycle,
+            )
+        except BaseException:
+            interrupted = True
+            raise
+        finally:
+            cleanup_fanout_lifecycle(
+                run_directory, lifecycle, interrupted=interrupted,
+            )
 
 
 if __name__ == "__main__":
