@@ -707,9 +707,11 @@
       cycle: (scope.filters.find(f => f.field === 'cycle') || {}).value || '',
       notCarried: [...(scope.notCarried || []),
         ...missing.map(field => field + ': not carried (not in this data)')]};
-    if (!pills.length && !missing.length) return;
     commit(() => {
-      const kept = (sheet().filters || []).filter(f => !pills.some(p => p.column === Number(f.column)));
+      // An empty Graph control means "all", so it must remove a previously
+      // carried filter too. Keep only the sheet's unrelated analytical filters.
+      const controlled = new Set(['company', 'cycle', 'funding_source']);
+      const kept = (sheet().filters || []).filter(f => !controlled.has((columns()[Number(f.column)] || {}).id));
       sheet().filters = [...kept, ...pills];
     });
     failure(missing.length ? 'This source has no ' + missing.join(' or ') + ' field, so that part of the Graph scope was not carried.' : '');
@@ -859,6 +861,7 @@
   }
   async function renderContributionView(view, again=null) {
     view=view||mainSurface();const node=view.el,state=view.state;
+    node('reconcile').hidden=true;
     if(!data||!dataset()){node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
     const ticket=view.bump(),sheetBasis=basisOf(state);
     // r7: a pending answer draws its progress on this surface's canvas and
@@ -975,6 +978,7 @@
     view.scope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(drawnMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(drawnMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
     node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(drawnMap.data.coverage_notes||[]),...(geometry.warnings||[]),...notes].join(' ');
     node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(drawnMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
+    await renderReconcile(result,view,ticket).catch(()=>{node('reconcile').hidden=true;});
   }
   /* F3 (2026-09-24): ActBlue and WinRed filings have no FEC page image ("Error#1896: Image is
      not processed yet" on 14 of 14 tried), so a record filed by either links its whole
@@ -1016,12 +1020,13 @@
       else el('records').replaceChildren();}}
   }
   async function downloadContributions(format) {
-    const view=activeSurface();if(!view.result||!lastResult||exporting)return;const result=view.result,query=structuredClone(view.request),ticket=view.ticket();
+    const view=activeSurface();if(exporting)return;if(!view.result||!lastResult){failure('Wait for the chart to finish loading before exporting.');return;}const result=view.result,query=structuredClone(view.request),ticket=view.ticket();
+    const exportStatus=message=>{status(message);el('status').textContent=message;};
     // Two reports cannot share one CSV: each row of it names one workbook's
     // provenance. The image carries both scopes in its legend and caption.
     if(format==='csv'&&compareDrawn&&compareDrawn.kind==='industry'&&view.el===el){failure('Export the CSV one industry at a time: each report carries its own workbook provenance. Clear the comparison, or export the image.');return;}
-    try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000},null,{current:()=>!view.stale(ticket)});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
-      else{const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');}
+    try{if(format==='csv'){exporting=true;exportStatus('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000},null,{current:()=>!view.stale(ticket)});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');exportStatus('CSV download requested: '+fmt(rows.length)+' groups with source and accounting provenance.');}
+      else{exporting=true;exportStatus('Preparing '+format.toUpperCase()+' image…');const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');exportStatus(format.toUpperCase()+' download requested.');}
     }catch(error){failure(error.name==='AbortError'?(view.stale(ticket)?'View changed during export. Start the download again.':'Export cancelled. Start the download again.'):error.message);}finally{exporting=false;}
   }
 
@@ -1422,13 +1427,14 @@
         renderAll();
       }).catch(error=>{if(error.name==='AbortError'){memberCache.delete(key);return;}memberCache.set(key,{values:[],at:Date.now(),error:error.message});failure(error.message);});return [];
     }
-    const seen = [];
+    // Every distinct value: Pages steps through this list, the filter checklist
+    // searches it and Select all copies it into the filter, so a cap drops members.
+    const seen = new Set();
     for (const row of data.rows) {
       const value = String(row[column] == null ? '' : row[column]);
-      if (value !== '' && !seen.includes(value)) seen.push(value);
-      if (seen.length >= 500) break;
+      if (value !== '') seen.add(value);
     }
-    return seen.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+    return [...seen].sort(new Intl.Collator(undefined, {numeric: true}).compare);
   }
   const firstMember = column => verified() ? String(data?.rows.find(row=>row[column]!=null&&row[column]!=='')?.[column]??'') : members(column)[0] || '';
 
@@ -4925,6 +4931,7 @@
     const shownCycle = cyclePair(graphNow.cycle || ((graphHere || {}).filters || {}).cycle || '');
     const state = contributions.reconcile(result, basisOf(view.state), graphView,
       Object.assign({}, graphFilterState(), {funding: studioFunding === graphNow.funding ? 'all' : graphNow.funding,
+        fundingClassification: studioFunding !== 'all' && studioFunding === graphNow.funding,
         studioCycle: scope.cycle, graphCycle: graphCycle}));
     // Why: the sentence and the verdict the strip used to print, the way to
     // Cross-reference, and the caveat paragraph that sat under the chart.
@@ -4972,7 +4979,8 @@
     } else if (level) {
       text.textContent = level.trim();
     } else {
-      text.textContent = 'Same scope as Graph; the totals differ by ' + money(Math.abs(state.differenceCents || 0)) + '.';
+      text.textContent = 'Same scope as Graph; the totals differ by ' + money(Math.abs(state.differenceCents || 0)) + '.'
+        + (state.reasonId === 'funding_classification' ? ' Graph uses published giving categories; this sheet uses verified funding classifications.' : '');
     }
     node.hidden = false;
   }
@@ -5322,7 +5330,19 @@
   if (el('param-groups-all')) el('param-groups-all').onchange = () => commit(() => {
     sheet().params.maxGroups = el('param-groups-all').checked ? 'all' : 0;
   });
-  for (const id of ['marks', 'analytics', 'filters']) el('tab-' + id).onclick = () => setInspectorTab(id);
+  const inspectorTabs = ['marks', 'analytics', 'filters'];
+  for (const id of inspectorTabs) el('tab-' + id).onclick = () => setInspectorTab(id);
+  document.querySelector('.studio-inspector-tabs').addEventListener('keydown', event => {
+    const index = inspectorTabs.findIndex(id => event.target === el('tab-' + id));
+    if (index < 0) return;
+    const next = {ArrowRight: (index + 1) % inspectorTabs.length,
+      ArrowLeft: (index + inspectorTabs.length - 1) % inspectorTabs.length,
+      Home: 0, End: inspectorTabs.length - 1}[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    setInspectorTab(inspectorTabs[next]);
+    el('tab-' + inspectorTabs[next]).focus();
+  });
   el('view-builder').onclick = () => setViewMode('builder');
   el('view-canvas').onclick = () => setViewMode('canvas');
   // A radiogroup the keyboard can cross: the unselected options carry

@@ -1570,3 +1570,21 @@ test('normalizeBoard copies the slots out, so a caller cannot edit the view thro
   board.slots[0] = null;
   assert.deepStrictEqual(view.board.slots, [0, 1]);
 });
+
+test('worksheet members() lists every distinct value, sorted across the whole column', () => {
+  const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
+  const source = fs.readFileSync(path.join(__dirname, '../chart-studio.js'), 'utf8');
+  const start = source.indexOf('  function members(column) {');
+  const end = source.indexOf('\n  const firstMember', start);
+  assert.ok(start >= 0 && end > start, 'members() not found in chart-studio.js');
+  // 600 officeholders, each on two rows, listed in reverse so the alphabetical
+  // first sits past the 500th distinct value read.
+  const rows = [];
+  for (let i = 600; i >= 1; i--) rows.push(['Member ' + i], ['Member ' + i]);
+  const context = vm.createContext({data: {rows}, verified: () => false});
+  vm.runInContext(source.slice(start, end), context);
+  const list = context.members(0);
+  assert.strictEqual(list.length, 600);
+  assert.strictEqual(list[0], 'Member 1');
+  assert.strictEqual(list[599], 'Member 600');
+});

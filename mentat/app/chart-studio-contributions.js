@@ -340,6 +340,7 @@
     graph_filter:'a Graph filter (employee level or giving type) is not carried',
     workbook:'the workbook version differs',
     aggregate:'grouped filters apply after aggregation',
+    funding_classification:'Graph uses published giving categories while this sheet uses verified funding classifications, which can leave organization receipts unverified',
     cycle:'the Graph view shows one election cycle and this sheet shows all of them',
     unavailable:'the Graph view has no total for this scope',
     unexplained:'the cause is unknown; report it'
@@ -362,6 +363,7 @@
       :scope.tier||(scope.funding&&scope.funding!=='all')?'graph_filter'
       :workbook&&books.length&&!books.includes(workbook)?'workbook'
       :(result.reconciliation||{}).aggregate_filters_applied?'aggregate'
+      :scope.fundingClassification?'funding_classification'
       :'unexplained';
     out.reason=RECONCILE_REASONS[out.reasonId];
     return out;
