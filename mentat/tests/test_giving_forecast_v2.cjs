@@ -26,7 +26,7 @@ function load(fetchImpl = () => {}) {
   assert.match(src, /\}\)\(\);\s*$/, 'unexpected file ending');
   src = src.replace(/\}\)\(\);\s*$/, `globalThis.__t={isV2,configureForSchema,pacCell,shareCell,lobbyCell,pacCellV2,shareCellV2,lobbyCellV2,render,renderV2,renderRefusal,renderEvidence,renderEvidenceV2,
     getRequest,getRequestV2,buildInputs,historicalExample,anchorNote,calculate,setCatalog:c=>{catalog=c;},industry};\n})();\n`);
-  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date});
+  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout, clearTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date});
   vm.runInContext(src, ctx, {filename: SOURCE});
   return {t: ctx.__t, els, document};
 }
@@ -247,7 +247,6 @@ test('a refusal is reported as not calculated: no success message and no export'
   assert.match(stale.els['gf-status'].textContent, /Rebuild the anchors/);
   assert.doesNotMatch(stale.els['gf-status'].textContent, /calculated/);
   assert.equal(stale.els['gf-status'].classList.contains('gf-error'), true);
-  assert.equal(stale.els['gf-calculate'].disabled, false);
   const fine = session('commercial_banks', reply(DATA.runs.banks));
   fine.t.buildInputs();
   await fine.t.calculate();

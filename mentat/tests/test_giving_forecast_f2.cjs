@@ -8,6 +8,10 @@
 //   * tests/fixtures/giving_forecast_f2_live_p1.json  the same requests answered with P1 applied: new fields condition the open cycle on the giving already
 //                                                     observed. The legacy fields keep the unconditioned values, so the view has to read the new ones.
 //
+//   * tests/fixtures/giving_forecast_cycle_live.json the cycle-aware calculator (50/50 model for general giving, the panel nowcast R8 for company PACs, D-116; recorded 2026-10-08): the real catalog (cycle_model_view) and the real answers to the page's
+//                                                     default requests. The two older fixtures' catalogs carry that cycle_model_view too, so every session opens as the page does
+//                                                     today; session({cycle: false}) takes it away again, which is what a console on the earlier module (the rollback) serves.
+//
 // What these tests pin (spec F2 section 3c and 6): one dollar basis on the chart, intervals drawn exactly as the model returned them (never clipped),
 // no account ever added to another, a blank input staying unknown, every flag the model raises showing up as a chip (looked up by name), and the corrected
 // historical-example message.
@@ -21,6 +25,7 @@ const SOURCE = path.join(__dirname, '..', 'app', 'giving-forecast.js');
 const LEGACY = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_f2_live.json'), 'utf8'));
 const WITH_P1 = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_f2_live_p1.json'), 'utf8'));
 const LANDED = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_f2_live_landed.json'), 'utf8'));
+const CYCLE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_cycle_live.json'), 'utf8'));
 const FIXTURE = LEGACY;                 // the catalog (identical for both paths apart from the P1 `waivers` key) and the runs of the calculator without the fix
 const RUN = LEGACY.runs, P1 = WITH_P1.runs;
 const AMBER = 'warn', NEUTRAL = 'info';
@@ -32,27 +37,29 @@ function el(tag) {
   const classes = new Set();
   return {tag, textContent: '', className: '', children: [], dataset: {}, style: {}, value: '', hidden: false, scope: '', disabled: false,
     classList: {toggle(name, on) { (on === undefined ? !classes.has(name) : on) ? classes.add(name) : classes.delete(name); }, contains: name => classes.has(name)},
-    append(...c) { this.children.push(...c); }, replaceChildren(...c) { this.children = c; }, setAttribute() {}, addEventListener() {}, after() {}, dispatchEvent() {}, focus() {}, firstChild: {}};
+    append(...c) { this.children.push(...c); }, replaceChildren(...c) { this.children = c; }, setAttribute(name, value) { (this.attrs = this.attrs || {})[name] = String(value); }, removeAttribute(name) { if (this.attrs) delete this.attrs[name]; }, addEventListener(type, fn) { (this.on = this.on || {})[type] = fn; }, after() {}, before() {}, prepend() {}, remove() {}, dispatchEvent() {}, focus() {}, firstChild: {},
+    querySelector: () => null, querySelectorAll: () => [], closest: () => null, getBoundingClientRect: () => ({width: 800, height: 300, left: 0, top: 0})};
 }
 
-function load() {
+function load(fetchImpl = () => {}, timers = {setTimeout, clearTimeout}) {
   const els = {};
   const create = tag => { const e = el(tag); let id = ''; Object.defineProperty(e, 'id', {get: () => id, set: v => { id = v; els[v] = e; }}); return e; };
-  const document = {getElementById: id => els[id] || (els[id] = el('div')), createElement: create};
+  const document = {getElementById: id => els[id] || (els[id] = el('div')), createElement: create, createElementNS: create, createTextNode: text => ({textContent: text}), querySelector: () => null, querySelectorAll: () => [], addEventListener() {}};
   let src = fs.readFileSync(SOURCE, 'utf8');
   assert.match(src, /\}\)\(\);\s*$/, 'unexpected file ending');
-  src = src.replace(/\}\)\(\);\s*$/, `globalThis.__t={niceScale,axisLabel,chartModel,mixModel,lobbyModel,footerFacts,referenceRequest,getRequest,buildInputs,historicalExample,industry,anchorExample,
-    refreshControls,parseNumber,formatNumber,exampleText,exampleParts,exampleTip,conditioning,refreshExample,waiverChips,waiverEntries,conditionedTables,givenOf,allocationOf,hasFlag,generalName,getControls:()=>controls,getPills:()=>pills,clearSaved,
+  src = src.replace(/\}\)\(\);\s*$/, `globalThis.__t={render,renderEvidence,niceScale,axisLabel,chartModel,mixModel,lobbyModel,footerFacts,referenceRequest,getRequest,buildInputs,historicalExample,industry,anchorExample,
+    refreshControls,parseNumber,formatNumber,exampleText,exampleParts,exampleTip,conditioning,refreshExample,waiverChips,waiverEntries,conditionedTables,givenOf,allocationOf,hasFlag,generalName,getControls:()=>controls,getPills:()=>pills,clearSaved,resetDefaults,stickyMax,shortPeriod,chartMoney,outlookSource,setAccount,paintWarnings,drawMix,drawChart,calculate,anchorNote,paintAccountChrome,
     setCatalog:c=>{catalog=c;},setRuns:(r,b)=>{result=r;refRun=b;}};\n})();\n`);
-  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout, fetch: () => {}, AbortController, Object, JSON, Array, Date, Map, Set, Event: function Event(type, init) { this.type = type; Object.assign(this, init); }});
+  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date, Map, Set, Event: function Event(type, init) { this.type = type; Object.assign(this, init); }});
   vm.runInContext(src, ctx, {filename: SOURCE});
   return {t: ctx.__t, els};
 }
 const clone = value => JSON.parse(JSON.stringify(value));
 const plain = clone;    // a value built inside the vm has the sandbox's Object and Array: compare it as plain data
-function session({sector = 'commercial_banks', outlook = true, waivers = undefined, source = FIXTURE} = {}) {
-  const s = load();
+function session({sector = 'commercial_banks', outlook = true, waivers = undefined, source = FIXTURE, cycle = true, fetchImpl, timers} = {}) {
+  const s = load(fetchImpl, timers);
   const catalog = clone(source.catalog);
+  if (!cycle) delete catalog.cycle_model_view;      // a console on the earlier module (rollback): schema 2 without the cycle model
   if (!outlook) delete catalog.saved_outlook;
   if (waivers) catalog.waivers = clone(waivers);
   s.els['gf-industry'] = Object.assign(el('select'), {value: sector});
@@ -272,7 +279,7 @@ test('before a calculation the chart holds real data only: the Mentat level and 
   for (const column of [cur, next]) { assert.equal(column.total, undefined); assert.equal(column.low, undefined); assert.equal(column.high, undefined); }
   assert.equal(next.state, 'pending');
   assert.equal(model.axisMax, anchor.value, 'the scale follows the data on the chart, not a projection that is not there');
-  assert.match(cur.aria, /observed through 2026-06-30; Set a scenario and calculate/);
+  assert.match(cur.aria, /observed through 2026-06-30; Set growth to see a projection/);
 });
 
 test('a missing input shows a dash with the reason in its tooltip; the observed segment stays', () => {
@@ -365,7 +372,7 @@ test('candidate mix, without the model fix: the bar is the projected FULL-cycle 
   const {t} = session();
   const house = t.mixModel(RUN.banks, null, 'House');
   const bases = RUN.banks.horizons[0].shares.House.bases;
-  assert.deepEqual(plain(house.rows.map(r => r.label)), ['Employees', 'Roster PACs']);
+  assert.deepEqual(plain(house.rows.map(r => r.label)), ['Employees', 'Company PACs']);
   assert.equal(house.rows[0].share, bases[0].projected_cycle_R_share);
   assert.equal(house.rows[0].conditioned, false);
   assert.notEqual(house.rows[0].share, bases[0].projected_remaining_R_share, 'the remaining share (42.16%) is a different denominator');
@@ -442,7 +449,7 @@ test('out-of-range input: a neutral chip with the model\'s own sentence; the mod
 test('candidate mix: thin bases and out-of-range inputs are neutral; a share outside 0-100% is not drawn and not clipped', () => {
   const {t} = session({sector: 'credit_unions'});
   const house = t.mixModel(RUN.credit_unions, null, 'House');
-  assert.deepEqual(plain(house.chips.filter(c => c.kind === NEUTRAL).map(c => c.text).sort()), ['An input is outside the range this model was fitted on.', 'Thin base: Employees and Roster PACs'], 'one chip per kind of flag; the tooltip names each base');
+  assert.deepEqual(plain(house.chips.filter(c => c.kind === NEUTRAL).map(c => c.text).sort()), ['An input is outside the range this model was fitted on.', 'Thin base: Employees and Company PACs'], 'one chip per kind of flag; the tooltip names each base');
   assert.equal(house.chips.filter(c => c.kind === AMBER).length, 1, 'the House employee basis is budget_inconsistent');
   const senate = t.mixModel(RUN.credit_unions_growth_down, null, 'Senate');
   const pacRow = senate.rows[1];
@@ -689,40 +696,69 @@ test('the footer line states only what the response says: coverage end, work uni
   assert.deepEqual(plain(t.footerFacts(null)), []);
 });
 
-test('unset inputs send no value: nothing defaults a slider to a number', () => {
+test('unset inputs send no value: nothing defaults a slider to a number, except revenue growth at its IBIS default', () => {
   const {t} = session({outlook: false});
   t.buildInputs();
   const controls = t.getControls();
   assert.equal(controls.length, 6, 'growth and two control scores for each of the two horizons');
-  assert.ok(controls.every(c => c.holder.value === ''), 'every holder starts blank');
+  assert.deepEqual(plain(controls.map(c => c.holder.value)), ['11.778', '-1.848', '', '', '', ''], 'only the two growth holders open filled (banks default); every other holder starts blank');
   const request = t.getRequest();
   for (const end of [2026, 2028]) {
     const a = request.horizons[end];
-    assert.equal(a.growth_pct, ''); assert.equal(a.prior_growth_pct, '');
+    assert.equal(a.growth_pct, end === 2026 ? '11.778' : '-1.848'); assert.equal(a.prior_growth_pct, '');
     assert.deepEqual({...a.control_scores}, {House: '', Senate: ''});
     assert.deepEqual({...a.current_control}, {House: '', Senate: ''});
   }
   assert.deepEqual({...request.horizons[2026].annual_forecast_changes}, {2026: ''});
   assert.deepEqual({...request.horizons[2028].annual_forecast_changes}, {2027: '', 2028: ''});
   t.refreshControls();
-  assert.ok(controls.every(c => c.slider.classList.contains('is-unset')), 'every slider is in its unset state');
+  assert.deepEqual(plain(controls.map(c => c.slider.classList.contains('is-unset'))), [false, false, true, true, true, true], 'every slider but the two growth ones is in its unset state');
 });
 
-test('the saved outlook stays an editable prefill of the 2026 control scores; growth and the 2027-2028 inputs stay blank', () => {
+test('the saved outlook stays an editable prefill of the 2026 control scores; growth opens at its IBIS default and the 2027-2028 control inputs stay blank', () => {
   const {t} = session();
   t.buildInputs();
   const request = t.getRequest();
   assert.equal(Number(request.horizons[2026].control_scores.House), FIXTURE.catalog.saved_outlook.control.House.value);
-  assert.equal(request.horizons[2026].growth_pct, '');
+  assert.equal(request.horizons[2026].growth_pct, '11.778');
   assert.equal(request.horizons[2028].control_scores.House, '');
   t.refreshControls();
-  const [growth2026, house2026] = t.getControls();
-  assert.equal(growth2026.slider.classList.contains('is-unset'), true);
+  const [growth2026, , house2026] = t.getControls();
+  assert.equal(growth2026.slider.classList.contains('is-unset'), false);
   assert.equal(house2026.slider.classList.contains('is-unset'), false);
 });
 
-test('the reference request reads Mentat\'s levels with the anchor cycle\'s own growth and control, never what the user typed', () => {
-  const {t, els} = session();
+test('revenue growth opens at the industry IBIS default with its caption; a change says so, Reset restores it, blank stays blank; an input recalculates once after a pause', async () => {
+  const sources = {commercial_banks: 'IBIS 2026-08 · avg 2023–2025 · drives 2026 (one-year lag)', credit_unions: 'IBIS 2026-05 · avg 2023–2025 · drives 2026 (one-year lag)', property_casualty: 'IBIS 2024-11 · avg 2023–2025 · drives 2026 (one-year lag)'};
+  const defaults = {commercial_banks: ['11.778', '-1.848'], credit_unions: ['13.362', '1.665'], property_casualty: ['3.657', '1.832']};
+  for (const [sector, [g26, g28]] of Object.entries(defaults)) {
+    const {t} = session({sector}); t.buildInputs();
+    const [a, b] = t.getControls(), request = t.getRequest();
+    assert.deepEqual([a.holder.value, b.holder.value, request.horizons[2026].growth_pct, request.horizons[2028].growth_pct], [g26, g28, g26, g28], sector);
+    assert.equal(a.dflt.label.textContent, sources[sector], sector); assert.equal(a.dflt.reset.hidden, true);
+    assert.equal(a.view.value, t.formatNumber(Number(g26)), 'the box shows the same number the holder holds');
+  }
+  const {t} = session(); t.buildInputs();
+  const [g26] = t.getControls();
+  g26.holder.value = '5'; t.refreshControls();
+  assert.equal(g26.dflt.label.textContent, 'Changed from default 11.78% ·'); assert.equal(g26.dflt.reset.hidden, false);
+  g26.holder.value = ''; t.refreshControls();
+  assert.equal(t.getRequest().horizons[2026].growth_pct, '', 'a cleared row stays blank: nothing re-fills it'); assert.equal(g26.dflt.reset.hidden, false);
+  g26.dflt.reset.on.click();
+  assert.equal(g26.holder.value, '11.778'); assert.equal(g26.dflt.reset.hidden, true); assert.equal(g26.slider.classList.contains('is-unset'), false);
+  // the form's own input listener: three quick edits make one timer of 300 ms; nothing is asked before it fires, one calculation after
+  const queue = new Map(), requests = []; let next = 1;
+  const reply = (path, init) => { requests.push(JSON.parse(init.body)); return Promise.resolve({ok: true, status: 200, headers: {get: () => 'application/json'}, json: () => Promise.resolve(RUN.banks)}); };
+  const live = session({fetchImpl: reply, timers: {setTimeout: (fn, ms) => { queue.set(next, {fn, ms}); return next++; }, clearTimeout: id => queue.delete(id)}});
+  live.t.buildInputs();
+  for (let i = 0; i < 3; i++) live.els['gf-form'].on.input();
+  assert.equal(queue.size, 1); assert.equal([...queue.values()][0].ms, 300); assert.equal(requests.length, 0);
+  await [...queue.values()][0].fn();
+  assert.equal(requests.length, 1); assert.equal(requests[0].horizons[2026].growth_pct, '11.778');
+});
+
+test('rollback (no cycle model): the reference request reads Mentat\'s levels with the anchor cycle\'s own growth and control, never what the user typed', () => {
+  const {t, els} = session({cycle: false});
   t.buildInputs();
   const typed = t.getControls()[0].holder; typed.value = '99';
   els['gf-industry'].value = 'commercial_banks';
@@ -740,6 +776,327 @@ test('the reference request reads Mentat\'s levels with the anchor cycle\'s own 
     assert.deepEqual({...a.annual_forecast_changes}, {}, 'no lobbying value is invented');
   }
   assert.notEqual(body.horizons[2026].growth_pct, '99');
+  assert.equal('growth_basis' in body, false, 'the earlier calculator knows no growth basis');
+});
+
+
+// ---- the cycle model (owner 2026-10-07): the page reads the cycle-aware calculator's answers and still reads the earlier one's -----------------------------------------------
+// CYCLE holds the console's own answers to the page's default requests (port 8806 after the apply): the cycle_model_view the catalog carries, a pac block without change_pct,
+// slope, ordinary_p or log-change intervals (model_kind 'cycle_model', growth_input, interval_kind), per-measure model{} blocks, layer R8 (the panel nowcast, D-116; no budget change) on the roster PAC and P1 on general giving, and a
+// chained 2027-28 step whose coefficient interval is null. The first render of exactly this answer threw "Cannot read properties of undefined (reading '0')": pacCellV2 read
+// p.coefficient_interval_pct[0] of a block that has none.
+const textOf = node => node == null ? '' : typeof node === 'string' ? node : [node.textContent || '', ...(node.children || []).map(textOf)].join(' ');
+const CYC = CYCLE.runs, CYC_SECTORS = [['commercial_banks', CYC.banks], ['credit_unions', CYC.credit_unions], ['property_casualty', CYC.property_casualty]];
+const cycleSession = sector => session({sector, source: CYCLE});
+
+test('the recorded cycle answers are what the apply report says (company PACs on the panel nowcast R8, D-116): schema 2, cycle_model, R8 and P1, no old pac fields, a null chained coefficient interval', () => {
+  assert.equal(CYC.banks.cycle_model.layers.pac_to_candidates, 'R8'); assert.equal(CYC.banks.cycle_model.layers.general_giving, 'P1');
+  assert.deepEqual(plain(CYC.banks.cycle_model.growth_applies), {pac_to_candidates: false, general_giving: true});
+  for (const [, run] of CYC_SECTORS) {
+    assert.equal(run.status, 'ready');
+    for (const h of run.horizons) {
+      assert.equal(h.pac.model_kind, 'cycle_model'); assert.equal(h.pac.slope, null); assert.equal(h.pac.change_pct, undefined); assert.equal(h.pac.coefficient_interval_pct, undefined);
+      for (const m of h.pac.measures.filter(m => m.status === 'ready')) assert.ok(m.model && Number.isFinite(m.model.budget_growth_pct));
+    }
+    for (const m of run.horizons[1].pac.measures.filter(m => m.status === 'ready')) { assert.equal(m.cycle_coefficient_low, null); assert.ok(m.chained_from); }
+  }
+  assert.equal(measure(CYC.banks, 0, 'pac_to_candidates').layer, 'R8'); assert.equal(measure(CYC.banks, 0, 'general_giving').layer, 'P1');
+  // company PACs: no budget change on either horizon, a range of the three prior cycles (not a 95% interval) in the open cycle, and a chain from the nowcast
+  for (const [, run] of CYC_SECTORS) for (const h of run.horizons) {
+    const pac = h.pac.measures.find(m => m.id === 'pac_to_candidates'); if (pac.status !== 'ready') continue;
+    assert.deepEqual([pac.model.budget_change, pac.model.growth_applies], [0, false]);
+    assert.ok(/not a 95% interval/.test(pac.interval_kind) || /chained on the panel nowcast/.test(pac.interval_kind));
+  }
+  assert.deepEqual(plain(measure(CYC.banks, 1, 'pac_to_candidates').chained_from), {layer: 'R8', cycle: 2026});
+});
+
+test('the cycle answers render for every offered industry: no throw, the growth line and the interval definition replace the old change line, nothing prints NaN, null or Unavailable', () => {
+  for (const [sector, run] of CYC_SECTORS) {
+    const {t, els} = cycleSession(sector); t.buildInputs();
+    assert.doesNotThrow(() => t.render(clone(run)), sector);
+    const text = textOf(els['gf-results']);
+    assert.match(text, /Industry revenue growth [+-][\d.]+% \(IBIS \d{4}-\d{2} default\), on the Mentat 2023–2024 level\./, sector + ': open cycle growth line');
+    assert.match(text, /Industry revenue growth [+-][\d.]+% \(IBIS \d{4}-\d{2} default\), chained on the open cycle\./, sector + ': next cycle growth line');
+    assert.ok(text.includes(run.horizons[0].pac.interval_kind + '.'), sector + ': the interval says what it excludes');
+    assert.doesNotMatch(text, /NaN|undefined|null|Unavailable to/, sector);
+    assert.doesNotMatch(text, /vs the Mentat 2023–2024 level \(|ordinary p = not retained/, sector + ': none of the earlier model\'s PAC lines');
+  }
+  // an entered growth says so
+  const user = clone(CYC.banks); for (const h of user.horizons) h.pac.growth_input = {...h.pac.growth_input, source: 'user'};
+  const {t, els} = cycleSession('commercial_banks'); t.buildInputs(); t.render(user);
+  assert.match(textOf(els['gf-results']), /Industry revenue growth [+-][\d.]+% \(entered\)/);
+});
+
+test('the earlier calculator\'s answers still render: with its own catalog (rollback) and, as during the switch-over, under a catalog that already carries the cycle model', () => {
+  for (const [name, cycle] of [['rollback catalog', false], ['cycle catalog', true]]) {
+    for (const [sector, run] of [['commercial_banks', RUN.banks], ['credit_unions', RUN.credit_unions], ['property_casualty', RUN.property_casualty], ['commercial_banks', P1.banks], ['commercial_banks', LANDED.runs.banks]]) {
+      const {t, els} = session({sector, cycle}); t.buildInputs();
+      assert.doesNotThrow(() => t.render(clone(run)), name + ' ' + sector);
+      const text = textOf(els['gf-results']);
+      assert.match(text, /vs the Mentat 2023–2024 level \((previous cycle|chained on a projection, \d steps)\); coefficient interval [+-]?[\d.]+% to [+-]?[\d.]+%; prediction interval/, name + ' ' + sector + ': the earlier model\'s change line');
+      assert.match(text, /pooled slope|industry-specific slope|partially pooled slope|ordinary p = /, name + ' ' + sector + ': and its slope line');
+      assert.doesNotMatch(text, /Industry revenue growth [+-]/, name + ' ' + sector);
+    }
+  }
+});
+
+test('the chart reads the cycle answer: banks 2025-26 general giving $14.47M (D-121; was $13.86M) and company PACs $6.06M (the panel nowcast, D-116), 2027-28 the chained step; credit unions likewise', () => {
+  const {t} = cycleSession('commercial_banks');
+  const general = t.chartModel(CYC.banks, CYC.banks, 'general'), pac = t.chartModel(CYC.banks, CYC.banks, 'pac');
+  assert.equal(general.basis, '2025 dollars');
+  assert.equal(general.columns[1].total, measure(CYC.banks, 0, 'general_giving').cycle_given_observed_median);
+  assert.equal(pac.columns[1].total, measure(CYC.banks, 0, 'pac_to_candidates').cycle_given_observed_median);
+  assert.equal(general.columns[1].conditioned, true);
+  assert.equal((general.columns[1].total / 1e6).toFixed(2), '14.47'); assert.equal((pac.columns[1].total / 1e6).toFixed(2), '6.06');
+  assert.equal(general.columns[2].total, measure(CYC.banks, 1, 'general_giving').projected_cycle_real_2025);
+  assert.equal(pac.columns[2].total, measure(CYC.banks, 1, 'pac_to_candidates').projected_cycle_real_2025);
+  const cu = cycleSession('credit_unions').t;
+  assert.equal(cu.chartModel(CYC.credit_unions, CYC.credit_unions, 'pac').columns[1].total, measure(CYC.credit_unions, 0, 'pac_to_candidates').cycle_given_observed_median);
+  // the tooltip's model-change line: the industry budget change, half applied; no change_pct to read
+  assert.match(texts(general.columns[2].tip), /chained on the open cycle, industry budget change [+-][\d.]+%, half applied/);
+  assert.match(texts(general.columns[1].tip), /industry budget change \+12\.89%, half applied/, 'the open cycle: the budget change the model derived from the default growth');
+  // company PACs (D-116): no budget change on either horizon, and the tooltip says so
+  assert.match(texts(pac.columns[2].tip), /chained on the open cycle, no industry budget change: growth does not affect company PACs/);
+  assert.match(texts(pac.columns[1].tip), /no industry budget change: growth does not affect company PACs/);
+  assert.doesNotMatch(texts(pac.columns[1].tip) + texts(pac.columns[2].tip), /half applied/);
+});
+
+test('company PACs: the 2025-26 whisker is the range of the three prior cycles (not a 95% interval) and says so everywhere it is named; the 2027-28 whisker and every general-giving label keep the 95% interval', () => {
+  const {t} = cycleSession('commercial_banks');
+  const m26 = measure(CYC.banks, 0, 'pac_to_candidates'), m28 = measure(CYC.banks, 1, 'pac_to_candidates');
+  const general = t.chartModel(CYC.banks, CYC.banks, 'general'), pac = t.chartModel(CYC.banks, CYC.banks, 'pac');
+  // the whisker is exactly what the response returned: the range, converted once
+  assert.equal(pac.columns[1].low, m26.cycle_given_observed_low); assert.equal(pac.columns[1].high, m26.cycle_given_observed_high);
+  assert.ok(pac.columns[1].low < pac.columns[1].total && pac.columns[1].total < pac.columns[1].high);
+  assert.equal(pac.rangeLabel, 'Range of prior cycles'); assert.equal(general.rangeLabel, '95% range');
+  // tooltip rows, aria, remainder tip
+  assert.ok(row(pac.columns[1].tip, 'Range of prior cycles') && !row(pac.columns[1].tip, '95% prediction interval'), texts(pac.columns[1].tip));
+  assert.ok(texts(pac.columns[1].tip).includes("Range of the three prior cycles' pace (2020, 2022, 2024), not a 95% interval"));
+  assert.match(pac.columns[1].aria, /range of prior cycles \$[\d.]+M to \$[\d.]+M/); assert.doesNotMatch(pac.columns[1].aria, /95% prediction interval/);
+  assert.ok(row(pac.columns[1].remainderTip, 'Remainder, range of prior cycles') && !row(pac.columns[1].remainderTip, 'Remainder prediction interval'));
+  // 2027-28 chains with a step interval, said in its own words
+  assert.ok(row(pac.columns[2].tip, '95% prediction interval')); assert.ok(texts(pac.columns[2].tip).includes(m28.interval_kind));
+  assert.match(pac.columns[2].aria, /95% prediction interval/);
+  // general giving is untouched
+  assert.ok(row(general.columns[1].tip, '95% prediction interval')); assert.match(general.columns[1].aria, /95% prediction interval/);
+  // the Methods table of the conditioned open-cycle amounts names the range
+  const rows = plain(t.conditionedTables(CYC.banks).amounts), pacRow = rows.find(r => r[0].startsWith('Roster companies')), genRow = rows.find(r => !r[0].startsWith('Roster companies'));
+  assert.match(pacRow[2], /\(range of prior cycles\)$/); assert.match(pacRow[4], /\(range of prior cycles\)$/); assert.doesNotMatch(genRow[2], /range of prior cycles/);
+  // the earlier layers keep their wording (an answer without R8)
+  const earlier = clone(CYC.banks); delete measure(earlier, 0, 'pac_to_candidates').layer;
+  assert.equal(t.chartModel(earlier, earlier, 'pac').rangeLabel, '95% range');
+});
+
+test('under the Company PACs account the growth captions say growth does not affect company PACs; General giving keeps its own, and an older catalog (no growth_applies) keeps them under both', () => {
+  const PAC_TEXT = 'Growth does not affect company PACs (panel nowcast)', IBIS = ['IBIS 2026-08 · avg 2023–2025 · drives 2026 (one-year lag)', 'IBIS 2026-08 · avg 2025–2027 · drives 2028 (one-year lag)'];
+  const {t} = cycleSession('commercial_banks'); t.buildInputs(); t.refreshControls();
+  const growth = () => t.getControls().filter(c => c.dflt), captions = () => growth().map(c => c.dflt.label.textContent);
+  assert.equal(growth().length, 2); assert.deepEqual(plain(captions()), IBIS);
+  t.setAccount('pac');
+  assert.deepEqual(plain(captions()), [PAC_TEXT, PAC_TEXT]); assert.ok(growth().every(c => c.dflt.reset.hidden && c.hint.textContent.startsWith(PAC_TEXT + '.')));
+  growth()[0].holder.value = '14'; t.setAccount('pac'); assert.equal(growth()[0].dflt.label.textContent, PAC_TEXT); assert.equal(growth()[0].dflt.reset.hidden, true);        // a changed growth says the same under Company PACs
+  t.setAccount('lobby'); assert.deepEqual(plain(captions()), ['Changed from default 11.78% ·', IBIS[1]], 'Lobbying is not company PACs');
+  t.setAccount('general'); assert.equal(growth()[0].dflt.label.textContent, 'Changed from default 11.78% ·'); assert.equal(growth()[0].dflt.reset.hidden, false); assert.equal(growth()[1].dflt.label.textContent, IBIS[1]);
+  // an older catalog does not say growth is ignored: the captions stay
+  const old = session({sector: 'commercial_banks', source: CYCLE}), view = clone(CYCLE.catalog.cycle_model_view); delete view.growth_applies;
+  old.t.setCatalog(Object.assign(clone(CYCLE.catalog), {cycle_model_view: view})); old.t.buildInputs(); old.t.refreshControls(); old.t.setAccount('pac');
+  assert.deepEqual(plain(old.t.getControls().filter(c => c.dflt).map(c => c.dflt.label.textContent)), IBIS);
+  // the help under the growth input says the same
+  const {t: help, els} = cycleSession('commercial_banks'); help.buildInputs(); help.renderEvidence();
+  assert.match(textOf(els['gf-input-notes']), /the projection moves by half of it \(the 50\/50 rule\), except company PACs, which it does not affect \(panel nowcast\)\. Blank uses the IBIS default\./);
+});
+
+test('company PACs, credit unions (D-117): the chart and the Methods fold name the population ("16 PACs, published panel cohort"; banks stay "19 bank companies"), each account keeps its own observed-to date, and the split says it is on the earlier roster', () => {
+  const PANEL = 'Credit unions: 16 PACs (published panel cohort)', BANKS19 = 'Banks: 19 bank companies';
+  const NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.';
+  const {t, els} = cycleSession('credit_unions');
+  const pac = t.chartModel(CYC.credit_unions, CYC.credit_unions, 'pac'), general = t.chartModel(CYC.credit_unions, CYC.credit_unions, 'general');
+  // the population, from the response, on the account that is a total of it (the anchor column's tooltip) and nowhere on general giving
+  assert.equal(pac.population.label, PANEL); assert.equal(general.population, null);
+  assert.equal(row(pac.columns[0].tip, 'Population')[1], PANEL); assert.equal(row(general.columns[0].tip, 'Population'), undefined);
+  assert.ok(texts(pac.columns[0].tip).includes("The published PAC panel's cohort"));
+  assert.equal(pac.columns[0].nominal, measure(CYC.credit_unions, 0, 'pac_to_candidates').anchor_cycle_nominal);          // the 2023-24 bar is the cohort's total, not one committee's
+  // each account is observed to its own date; the cut-back chip is general giving's and is not on the panel's account
+  assert.equal(pac.columns[1].through, '2026-09-26'); assert.equal(general.columns[1].through, '2026-05-31');
+  assert.ok(texts(pac.columns[1].observedTip).includes('2026-09-26') && !texts(pac.columns[1].observedTip).includes('2026-05-31'));
+  assert.ok(texts(general.columns[1].observedTip).includes('2026-05-31') && !texts(general.columns[1].observedTip).includes('2026-09-26'));
+  assert.ok(!pac.flags.some(f => /^Coverage cut back/.test(f.text)), 'the panel account is not cut back'); assert.ok(general.flags.some(f => f.text === 'Coverage cut back to 2026-05-31'));
+  assert.ok(!pac.flags.some(f => /One PAC|single-PAC/i.test(f.text)), 'no single-PAC thin-base flag on the cohort');
+  // the line under the chart title: the population and the account's own date; General giving keeps "2025 dollars"
+  t.setAccount('pac'); t.paintAccountChrome({chart: pac});
+  assert.equal(els['gf-basis'].textContent, '2025 dollars · ' + PANEL + ', observed to 2026-09-26');
+  t.setAccount('general'); t.paintAccountChrome({chart: general});
+  assert.equal(els['gf-basis'].textContent, '2025 dollars');
+  const banks = cycleSession('commercial_banks'), bankPac = banks.t.chartModel(CYC.banks, CYC.banks, 'pac');
+  assert.equal(bankPac.population.label, BANKS19);
+  assert.equal(pac.accountLabel, 'Panel cohort PACs: own giving to House and Senate candidates'); assert.match(bankPac.accountLabel, /^Roster companies' PACs: /);          // the cohort is not "roster companies"
+  banks.t.setAccount('pac'); banks.t.paintAccountChrome({chart: bankPac});
+  assert.equal(banks.els['gf-basis'].textContent, '2025 dollars · ' + BANKS19 + ', observed to 2026-06-30');
+  // the Methods fold (Sources and notes): the population with the panel's own date, then the split note; banks name theirs and carry no split note
+  t.anchorNote(t.industry());
+  const notes = textOf(els['gf-anchors-note']);
+  assert.ok(notes.includes('Company PACs: ' + PANEL + '; observed to 2026-09-26 (the published PAC panel\'s own date).'), notes);
+  assert.ok(notes.includes(NOTE)); assert.ok(notes.includes('observed through 2026-05-31'), 'general giving keeps its own date');
+  banks.t.anchorNote(banks.t.industry());
+  const bankNotes = textOf(banks.els['gf-anchors-note']);
+  assert.ok(bankNotes.includes('Company PACs: ' + BANKS19 + '; observed to 2026-06-30.') && !bankNotes.includes(NOTE));
+  // the party split: the Company PACs bar says so in its tooltip and the results table says so; the Employees bar does not; banks do not
+  const mix = t.mixModel(CYC.credit_unions, CYC.credit_unions, 'House');
+  assert.ok(texts(mix.rows.find(r => r.id === 'pac_candidate').tip).includes(NOTE)); assert.ok(!texts(mix.rows.find(r => r.id === 'employee_candidate').tip).includes(NOTE));
+  assert.ok(!texts(banks.t.mixModel(CYC.banks, CYC.banks, 'House').rows.find(r => r.id === 'pac_candidate').tip).includes(NOTE));
+  t.buildInputs(); t.render(clone(CYC.credit_unions));
+  assert.ok(textOf(els['gf-results']).includes(NOTE)); assert.ok(textOf(els['gf-results']).includes('The 16 PACs of the published panel cohort: own giving to House and Senate candidates'));
+  banks.t.buildInputs(); banks.t.render(clone(CYC.banks));
+  assert.ok(!textOf(banks.els['gf-results']).includes(NOTE)); assert.ok(textOf(banks.els['gf-results']).includes("The roster companies' PACs' own giving"));
+  // an answer from the earlier calculator (no population, no note) draws as it did
+  const earlier = clone(CYC.credit_unions);
+  for (const h of earlier.horizons) { for (const m of h.pac.measures) delete m.population; for (const c of ['House', 'Senate']) for (const b of h.shares[c].bases || []) delete b.roster_note; }
+  const old = cycleSession('credit_unions'), oldPac = old.t.chartModel(earlier, earlier, 'pac');
+  assert.equal(oldPac.population, null); assert.equal(row(oldPac.columns[0].tip, 'Population'), undefined);
+  old.t.setAccount('pac'); old.t.paintAccountChrome({chart: oldPac}); assert.equal(old.els['gf-basis'].textContent, '2025 dollars');
+  assert.ok(oldPac.flags.some(f => /^Coverage cut back/.test(f.text)));
+});
+
+test('presidential-cycle factors (D-118, D-119, D-121): company PACs +9% on the 2027-28 tooltip, general giving ×1.86 on both tooltips, one Methods line each; an answer or catalog without them says nothing', () => {
+  const PAC_WORDS = '+9% (owner rule; national PAC data show 0.98)', PAC_LINE = 'Presidential cycle uplift for company PACs: ' + PAC_WORDS;
+  const GEN_WORDS = '×1.86 (owner rule; OpenSecrets total election cost)', GEN_LINE = 'Presidential cycle factor for general giving: ' + GEN_WORDS;
+  const count = (text, line) => text.split(line).length - 1;
+  for (const [sector, run] of [['commercial_banks', CYC.banks], ['credit_unions', CYC.credit_unions], ['property_casualty', CYC.property_casualty]]) {
+    const {t, els} = cycleSession(sector);
+    const pac = t.chartModel(run, run, 'pac'), general = t.chartModel(run, run, 'general');
+    // general giving: the factor on BOTH columns, the midterm step said to divide by it; no company-PAC wording
+    const g26 = measure(run, 0, 'general_giving').model.presidential_uplift, g28 = measure(run, 1, 'general_giving').model.presidential_uplift;
+    assert.ok(Math.abs(g26.factor - 12.56 / 6.74) < 1e-12 && Object.keys(g26.ratio_by_pair).length === 8 && JSON.stringify(g26) === JSON.stringify(g28), sector + ': the eight totals and 12.56 / 6.74');
+    assert.equal(row(general.columns[1].tip, 'Presidential cycle factor')[1], GEN_WORDS + '; this midterm step divides by it', sector);
+    assert.equal(row(general.columns[2].tip, 'Presidential cycle factor')[1], GEN_WORDS, sector);
+    assert.equal(row(general.columns[1].tip, 'Presidential cycle uplift'), undefined, sector);
+    t.anchorNote(t.industry());
+    const notes = textOf(els['gf-anchors-note']);
+    assert.equal(count(notes, GEN_LINE), 1, sector + ': one general-giving Methods line');
+    if (sector === 'property_casualty') { assert.ok(!notes.includes('Presidential cycle uplift'), 'no company PACs, no company-PAC line'); continue; }
+    // company PACs: the uplift only on the step into 2027-28
+    const uplift = measure(run, 1, 'pac_to_candidates').model.presidential_uplift;
+    assert.equal(uplift.factor, 1.09); assert.equal(uplift.source, 'owner rule D-118/D-121: +9% (PAC spending less cyclical; national FEC all-PAC ratio 0.98)');
+    assert.equal(row(pac.columns[2].tip, 'Presidential cycle uplift')[1], PAC_WORDS, sector);
+    assert.equal(row(pac.columns[1].tip, 'Presidential cycle uplift'), undefined, sector + ': the 2025-26 column is the nowcast');
+    assert.equal(row(pac.columns[2].tip, 'Presidential cycle factor'), undefined, sector);
+    assert.equal(count(notes, PAC_LINE), 1, sector + ': one company-PAC Methods line');
+    // an answer from before the rules (no factor in the model blocks) draws as it did
+    const earlier = clone(run);
+    for (const [h, id] of [[0, 'general_giving'], [1, 'general_giving'], [1, 'pac_to_candidates']]) delete measure(earlier, h, id).model.presidential_uplift;
+    assert.equal(row(t.chartModel(earlier, earlier, 'pac').columns[2].tip, 'Presidential cycle uplift'), undefined);
+    assert.equal(row(t.chartModel(earlier, earlier, 'general').columns[2].tip, 'Presidential cycle factor'), undefined);
+  }
+  // a catalog without the rules: no line at all, the rest of the note is unchanged
+  const old = cycleSession('commercial_banks'), view = clone(CYCLE.catalog.cycle_model_view); delete view.presidential_uplift;
+  old.t.setCatalog(Object.assign(clone(CYCLE.catalog), {cycle_model_view: view})); old.t.anchorNote(old.t.industry());
+  const oldNotes = textOf(old.els['gf-anchors-note']);
+  assert.ok(!oldNotes.includes('Presidential cycle'));
+  assert.ok(oldNotes.includes('Company PACs: Banks: 19 bank companies'), 'the rest of the line is unchanged');
+});
+
+test('banks 2025-26 general giving (P1, observed $11.4M above the unconditioned $11.1M): the Methods table and the chart say what is drawn, not "already exceeds"; an answer without a layer keeps the server\'s text', () => {
+  // The live recording no longer has this case (D-121: the unconditioned banks point rose from $11.1M to $12.5M, above the $11.4M observed). The page's wording for it stays covered by the previous
+  // recording's own values for exactly those fields, laid over the current answer.
+  const OLD = 'Observed giving already exceeds the projected cycle total';
+  const NEW = 'The model\'s unconditioned total is below what has already been given, so the chart shows the total conditioned on observed giving (the model conditioned on the giving already observed).';
+  const exceeded = clone(CYC.banks);
+  Object.assign(measure(exceeded, 0, 'general_giving'), {projected_cycle_real_2025: 11095557.125896035, flags: ['observed_exceeds_unconditional_projection'], excess_observed: 257273.3606386222, projected_remaining: null,
+    remainder_status: 'baseline_exceeded', remainder_reason: OLD + '. Revise the scenario; no zero or negative future-giving forecast is substituted.',
+    remaining_coefficient_low: null, remaining_coefficient_high: null, remaining_prediction_low: null, remaining_prediction_high: null});
+  const general = measure(exceeded, 0, 'general_giving');
+  assert.equal(general.layer, 'P1'); assert.equal(general.remainder_status, 'baseline_exceeded'); assert.ok(general.remainder_reason.startsWith(OLD), 'the recorded server text is the unconditioned sentence');
+  assert.ok(general.projected_cycle_real_2025 < general.observed.amount_real_2025, 'the unconditioned total is below what is observed');
+  const {t, els} = cycleSession('commercial_banks'); t.buildInputs(); t.render(clone(exceeded));
+  const table = textOf(els['gf-results']);
+  assert.ok(table.includes(NEW), 'the Methods table'); assert.ok(!table.includes(OLD));
+  const chart = JSON.stringify(t.chartModel(exceeded, exceeded, 'general'));
+  assert.ok(!chart.includes('already exceeds'), 'no tooltip or flag of the conditioned chart prints it');
+  // the earlier schema-2 answer has no layer: the server's text is printed as before
+  const earlier = clone(exceeded); delete measure(earlier, 0, 'general_giving').layer;
+  const old = cycleSession('commercial_banks'); old.t.buildInputs(); old.t.render(earlier);
+  const oldText = textOf(old.els['gf-results']);
+  assert.ok(oldText.includes(OLD) && !oldText.includes('unconditioned total is below'));
+  // under the current answer (unconditioned total above what is observed) there is nothing to say
+  assert.equal(measure(CYC.banks, 0, 'general_giving').remainder_status, 'ready');
+  const live = cycleSession('commercial_banks'); live.t.buildInputs(); live.t.render(clone(CYC.banks));
+  assert.ok(!textOf(live.els['gf-results']).includes('unconditioned total is below') && !textOf(live.els['gf-results']).includes(OLD));
+});
+
+test('under the cycle model every project request carries growth_basis "ibis_window_avg"; the earlier calculator\'s requests do not', async () => {
+  const {t} = cycleSession('commercial_banks'); t.buildInputs();
+  assert.equal(t.getRequest().growth_basis, 'ibis_window_avg');
+  assert.equal(t.referenceRequest().growth_basis, 'ibis_window_avg');
+  const queue = new Map(), requests = []; let next = 1;
+  const reply = (path, init) => { requests.push(JSON.parse(init.body)); return Promise.resolve({ok: true, status: 200, headers: {get: () => 'application/json'}, json: () => Promise.resolve(CYC.banks)}); };
+  const live = session({source: CYCLE, fetchImpl: reply, timers: {setTimeout: (fn, ms) => { queue.set(next, {fn, ms}); return next++; }, clearTimeout: id => queue.delete(id)}});
+  live.t.buildInputs(); live.els['gf-form'].on.input();
+  await [...queue.values()][0].fn();
+  assert.equal(requests.length, 1); assert.equal(requests[0].growth_basis, 'ibis_window_avg'); assert.equal(requests[0].horizons[2026].growth_pct, '11.778');
+  const old = session({cycle: false}); old.t.buildInputs();
+  assert.equal('growth_basis' in old.t.getRequest(), false); assert.equal('growth_basis' in old.t.referenceRequest(), false);
+});
+
+test('the cycle model\'s reference request asks for the catalog growth defaults, not the anchor cycle\'s two-year growth (banks 48.885 would be read as an average annual growth)', () => {
+  for (const [sector, [g26, g28]] of Object.entries({commercial_banks: ['11.778', '-1.848'], credit_unions: ['13.362', '1.665'], property_casualty: ['3.657', '1.832']})) {
+    const {t} = session({sector, source: CYCLE}); t.buildInputs();
+    t.getControls()[0].holder.value = '99';                                  // what the user typed never goes into the reference run either
+    const body = t.referenceRequest(), anchorInputs = CYCLE.catalog.political_inputs.anchor_cycles['2024'];
+    assert.deepEqual([body.horizons[2026].growth_pct, body.horizons[2028].growth_pct], [g26, g28], sector);
+    assert.match(body.assumption_source, /^Reference levels only: the 2023–2024 control and the industry growth defaults, no scenario/);
+    assert.equal(body.horizons[2026].control_scores.House, anchorInputs.House.p_rep * 100);        // the anchor shares come from the anchor cycle's own control
+    assert.equal(body.horizons[2028].prior_growth_pct, '');
+  }
+  const history = CYCLE.catalog.industries.find(i => i.id === 'commercial_banks').history.find(r => r.cycle === 2024);
+  assert.ok(history.growth_pct > 40, 'the number the old reference sent (' + history.growth_pct + ') is a two-year revenue growth');
+});
+
+test('under the cycle model the growth slider spans the default -10 to +10 points (never below -99.9) and names no fitted range; the earlier path keeps the fitted range and its warning', () => {
+  for (const [sector, defaults] of Object.entries({commercial_banks: [11.778, -1.848], credit_unions: [13.362, 1.665], property_casualty: [3.657, 1.832]})) {
+    const {t} = session({sector, source: CYCLE}); t.buildInputs();
+    const [g26, g28] = t.getControls();
+    [g26, g28].forEach((c, i) => {
+      assert.ok(Math.abs(c.min - (defaults[i] - 10)) < 1e-9 && Math.abs(c.max - (defaults[i] + 10)) < 1e-9, `${sector} ${i}: ${c.min}..${c.max}`);
+      t.refreshControls();
+      assert.equal(c.slider.classList.contains('is-outside'), false, `${sector} ${i}: the default is inside its own range`);
+      assert.doesNotMatch(c.hint.textContent, /fitted range/);
+      c.holder.value = String(defaults[i] + 25); t.refreshControls();                      // typed beyond the slider: allowed, and nothing claims a fitted range
+      assert.equal(c.slider.classList.contains('is-outside'), false); assert.doesNotMatch(c.hint.textContent, /fitted range/);
+      assert.doesNotMatch(c.slider.attrs['aria-valuetext'], /fitted range/);
+    });
+  }
+  const {t} = session({sector: 'property_casualty', source: CYCLE}); t.buildInputs();
+  assert.equal(t.getControls()[1].holder.value, '1.832'); assert.equal(t.getControls()[1].hint.textContent.includes('Outside the fitted range'), false, 'the P&C 2027-28 default opens inside its range');
+  // the floor: a default below -89.9 would put the lower end under -99.9
+  const view = clone(CYCLE.catalog.cycle_model_view); view.growth.commercial_banks['2026'].growth_default = -95;
+  const edge = session({source: CYCLE}); edge.t.setCatalog(Object.assign(clone(CYCLE.catalog), {cycle_model_view: view})); edge.t.buildInputs();
+  assert.equal(edge.t.getControls()[0].min, -99.9); assert.equal(edge.t.getControls()[0].max, -85);
+  // the earlier calculator: the fitted range of the industry, and the warning outside it
+  const old = session({sector: 'property_casualty', cycle: false}); old.t.buildInputs();
+  const [o26] = old.t.getControls(), sector = old.t.industry();
+  assert.deepEqual([o26.min, o26.max], [sector.growth_min, sector.growth_max]);
+  o26.holder.value = String(sector.growth_max + 5); old.t.refreshControls();
+  assert.equal(o26.slider.classList.contains('is-outside'), true); assert.match(o26.hint.textContent, /^Outside the fitted range/);
+});
+
+test('copy under the cycle model: a blank 2027-28 prior growth says it uses the bundle\'s IBIS cycle growth (not the current-cycle growth above); the Methods fold names each measure\'s open-cycle layer', () => {
+  const {t, els} = cycleSession('property_casualty'); t.buildInputs(); t.renderEvidence();
+  const notes = textOf(els['gf-input-notes']);
+  assert.doesNotMatch(notes, /current-cycle growth assumption above/);
+  assert.match(notes, /Prior cycle: blank \(auto\) uses the previous completed cycle when available\./);
+  assert.match(notes, /Prior cycle: blank \(auto\) uses the bundle's IBIS cycle growth \(4\.77%\) for 2025–2026; it feeds the party split\./);
+  assert.match(els['gf-2028-prior'].attrs['aria-label'], /^Prior-cycle growth override, .*Blank \(auto\) uses the bundle's IBIS cycle growth \(4\.77%\)/);
+  assert.match(els['gf-2026-prior'].attrs['aria-label'], /Blank \(auto\) uses the previous completed cycle when available\.$/);
+  const methods = textOf(els['gf-evidence-content']);
+  assert.match(methods, /Company PACs: panel nowcast \(R8\)\./);
+  assert.doesNotMatch(methods, /Company PACs: open-cycle layer/);
+  assert.match(methods, /Company PACs: Open cycle: the published PAC panel's nowcast \(R8\) O \+ \(1 - s\) B[^]*not a 95% interval[^]*does not affect company PACs/);
+  assert.match(methods, /General giving: open-cycle layer P1, the model conditioned on the giving already observed\./);
+  // the earlier path keeps its own wording, and has no cycle fold
+  const old = session({cycle: false}); old.t.buildInputs(); old.t.renderEvidence();
+  assert.match(textOf(old.els['gf-input-notes']), /Prior cycle: blank \(auto\) uses the current-cycle growth assumption above\./);
+  assert.match(old.els['gf-2028-prior'].attrs['aria-label'], /Blank uses the current-cycle growth assumption above\.$/);
+  assert.doesNotMatch(textOf(old.els['gf-evidence-content']), /open-cycle layer/);
 });
 
 test('the historical example fills the controls and the request with the anchor cycle', () => {
@@ -942,7 +1299,7 @@ test('the scope pill tooltip agrees with the bars: the model\'s change is labell
   const live = session({source: LANDED}).t;
   live.setRuns(LANDED.runs.banks, LANDED.runs.banks);
   const senate = rowsOf(live.exampleTip()).find(r => r[0] === 'Senate change in R share, drawn (conditioned)');
-  assert.equal(senate[1], 'Employees 51.44% to 48.17% (-3.27 pp) · Roster PACs 64.5% to 75.76% (+11.26 pp)');
+  assert.equal(senate[1], 'Employees 51.44% to 48.17% (-3.27 pp) · Company PACs 64.5% to 75.76% (+11.26 pp)');
   assert.match(rowsOf(live.exampleTip()).find(r => r[0] === 'Senate change in R share, model, before conditioning on the giving already observed')[1], /^\+6\.06 pp · prior-cycle growth \+6\.06 pp$/);
   // a calculator without the fix names no input and conditions nothing: no change rows at all
   const plainTip = session().t; plainTip.setRuns(RUN.banks, RUN.banks);
@@ -1008,18 +1365,20 @@ test('a mix row whose drawn share interval leaves 0-100% gets an amber chip and 
   assert.deepEqual(plain(synthetic.rows.map(r => r.wide)), [true, false]);
 });
 
-test('the 2026 control rows open filled from the saved outlook and say where the numbers come from; every other input opens blank', () => {
+test('the 2026 control rows open filled from the saved outlook and say where the numbers come from; every other input opens blank (revenue growth opens at its IBIS default)', () => {
   for (const [name, source] of [['the published catalog', FIXTURE], ['the live catalog', LANDED]]) {
     const {t} = session({source}), snapshot = source.catalog.saved_outlook;
     t.buildInputs();
-    const [g26, h26, s26, g28, h28, s28] = t.getControls(), [ph26, ps26, ph28, ps28] = t.getPills();
+    const [g26, g28, h26, s26, h28, s28] = t.getControls(), [ph26, ps26, ph28, ps28] = t.getPills();
     assert.equal(Number(h26.holder.value), snapshot.control.House.value, name);
     assert.equal(Number(s26.holder.value), snapshot.control.Senate.value, name);
     assert.deepEqual([ph26.value, ps26.value].map(String), [String(snapshot.control.House.current_control), String(snapshot.control.Senate.current_control)]);
-    for (const c of [g26, g28, h28, s28]) { assert.equal(c.holder.value, '', name + ': blank'); assert.equal(c.saved, undefined, name + ': no saved outlook behind it'); }
+    assert.deepEqual([g26, g28].map(c => c.holder.value), ['11.778', '-1.848'], name + ': growth opens at the banks default');
+    for (const c of [g26, g28, h28, s28]) assert.equal(c.saved, undefined, name + ': no saved outlook behind it');
+    for (const c of [h28, s28]) assert.equal(c.holder.value, '', name + ': blank');
     assert.deepEqual([ph28.value, ps28.value].map(String), ['', ''], name + ': the 2027-2028 pills are unset');
     // the source is said beside each row, from the catalog
-    const text = `Saved outlook · Polymarket Jan–Jun · as of ${snapshot.control.House.as_of}`;
+    const text = 'Polymarket, Jan–Jun 2026';
     for (const c of [h26, s26]) {
       assert.equal(c.saved.source.children[0].textContent, text, name);
       assert.equal(c.saved.source.title, c.saved.title);
@@ -1033,7 +1392,7 @@ test('the 2026 control rows open filled from the saved outlook and say where the
     assert.equal(Number(request.horizons[2026].control_scores.House), snapshot.control.House.value);
     assert.equal(String(request.horizons[2026].current_control.Senate), String(snapshot.control.Senate.current_control));
     assert.deepEqual({...request.horizons[2028].control_scores}, {House: '', Senate: ''});
-    assert.equal(request.horizons[2026].growth_pct, '');
+    assert.equal(request.horizons[2026].growth_pct, '11.778');
     // typing another score, or changing the pill, ends the claim for that row only; typing the saved score back restores it
     h26.holder.value = '30'; t.refreshControls();
     assert.deepEqual([h26, s26].map(c => c.saved.source.classList.contains('is-quiet')), [true, false]);
@@ -1059,7 +1418,7 @@ test('the 2026 control rows open filled from the saved outlook and say where the
   for (const strip of [catalog => { delete catalog.saved_outlook; }, catalog => { catalog.saved_outlook.cycle = 2024; }]) {
     const {t} = session(), catalog = clone(FIXTURE.catalog);
     strip(catalog); t.setCatalog(catalog); t.buildInputs();
-    assert.ok(t.getControls().every(c => c.holder.value === '' && c.saved === undefined));
+    assert.ok(t.getControls().every((c, i) => c.saved === undefined && (c.holder.value === '') === ![0, 1].includes(i)), 'only the two growth rows open filled');
   }
 });
 
@@ -1068,4 +1427,195 @@ test('a refusal or a missing run draws nothing and invents nothing', () => {
   assert.deepEqual(plain(t.chartModel({status: 'anchor_stale', reason: 'old'}, null, 'general')), {empty: true, account: 'general', message: ''});
   assert.deepEqual(plain(t.mixModel({status: 'anchor_stale'}, null, 'House').rows), []);
   assert.equal(t.lobbyModel({status: 'anchor_stale'}, 2026, 2028).state, 'empty');
+});
+
+// ---- board A: the fixed axis, the rail's Reset, the party split and the warnings text -------------------------------------------------------------------------------------------
+
+test('the axis top is sticky per industry, account and as-of date: it only grows while those stay the same, starts over when one changes, and never clips an interval', () => {
+  const {t, els} = session();
+  const small = () => t.chartModel(null, RUN.banks, 'general').axisMax, big = () => t.chartModel(RUN.banks, null, 'general').axisMax;
+  const first = small(), grown = big();
+  assert.ok(grown > first * 1.5, 'a calculation with an interval reaches well above the reference levels');
+  assert.equal(small(), grown, 'the same industry, account and date: the top never comes back down (the root cause of "moving an assumption has no effect": the scale followed the data)');
+  assert.equal(t.chartModel(RUN.banks_blank, RUN.banks, 'general').axisMax, grown);
+  const model = t.chartModel(RUN.banks, null, 'general'), values = [model.columns[0].value, model.columns[1].total, model.columns[1].high, model.columns[2].total, model.columns[2].high];
+  assert.ok(t.niceScale(model.axisMax).top >= Math.max(...values), 'every interval end fits under the axis top');
+  // the other account has its own top; the unchanged account is not affected by it
+  const pac = t.chartModel(RUN.banks, null, 'pac').axisMax;
+  assert.ok(pac < grown / 3);
+  assert.equal(small(), grown);
+  // a different as-of date starts over (the date of the run being drawn, not the form's), and so does a different industry
+  const later = clone(RUN.banks); later.as_of = '2026-10-02';
+  assert.equal(t.chartModel(null, later, 'general').axisMax, first, 'a run for a new as-of date resets the top');
+  assert.equal(big(), grown, 'and the old date starts over again too: one key per account');
+  const cuSmall = t.chartModel(null, RUN.credit_unions, 'general').axisMax;
+  assert.ok(cuSmall < grown, 'a different industry starts over: the banks top is gone');
+  assert.equal(t.chartModel(null, RUN.credit_unions, 'general').axisMax, cuSmall);
+  // the lobbying chart takes its axis the same way
+  const lobby = t.lobbyModel(RUN.banks_lobby, 2026, 2028).axisMax;
+  assert.equal(t.lobbyModel(RUN.banks_lobby, 2026, 2028).axisMax, lobby);
+  assert.equal(els['gf-industry'].value, 'commercial_banks', 'the form was never consulted');
+});
+
+test('the sticky axis is keyed on the run being drawn: the form names the new industry while the old industry\'s run is still on screen, and its scale must not carry over', () => {
+  for (const to of ['credit_unions', 'property_casualty']) for (const account of ['general', 'pac']) {
+    const {t, els} = session();
+    const own = session().t.chartModel(null, RUN[to], account).axisMax;     // the new industry's levels on a fresh scale
+    const stale = t.chartModel(RUN.banks, null, account).axisMax;
+    assert.notEqual(own, stale, `${to} ${account}: the two scales differ, so the test can tell them apart`);
+    // what the page did: the form changes first, the old run is repainted once with the new form value, then the new industry's levels arrive
+    els['gf-industry'].value = to;
+    t.chartModel(RUN.banks, null, account);
+    assert.equal(t.chartModel(null, RUN[to], account).axisMax, own, `${to} ${account}: drawn on its own scale, not on the banks one`);
+    assert.equal(t.niceScale(t.chartModel(RUN[to], null, account).axisMax).top >= t.niceScale(own).top, true, 'and it only grows from there');
+  }
+  // the lobbying chart too
+  const {t, els} = session(), fresh = session().t.lobbyModel(RUN.credit_unions_lobby, 2026, 2028).axisMax;
+  t.lobbyModel(RUN.banks_lobby, 2026, 2028); els['gf-industry'].value = 'credit_unions'; t.lobbyModel(RUN.banks_lobby, 2026, 2028);
+  assert.equal(t.lobbyModel(RUN.credit_unions_lobby, 2026, 2028).axisMax, fresh, 'credit unions have their own lobbying scale');
+});
+
+test('Reset to defaults puts EVERYTHING back: growth defaults, the saved outlook (both pills), and every input that opens blank (prior-cycle growth, the 2027-28 scores and selects, lobbying by year); one recalculation', () => {
+  const queue = new Map(); let next = 1;
+  const {t, els} = session({timers: {setTimeout: (fn, ms) => { queue.set(next, {fn, ms}); return next++; }, clearTimeout: id => queue.delete(id)}});
+  t.buildInputs();
+  const [g26, g28, h26, s26, h28, s28] = t.getControls(), [ph26, ps26, ph28, ps28] = t.getPills(), saved = FIXTURE.catalog.saved_outlook.control;
+  g26.holder.value = '9'; g28.holder.value = ''; h26.holder.value = '30'; ph26.value = '0'; s26.holder.value = ''; ps26.value = ''; h28.holder.value = '44'; s28.holder.value = '55'; ph28.value = '1'; ps28.value = '0';
+  els['gf-2026-prior'].value = '4'; els['gf-2028-prior'].value = '-2';
+  for (const id of ['gf-2026-lobby', 'gf-2027-lobby', 'gf-2028-lobby']) els[id].value = '1.5';
+  t.refreshControls();
+  t.resetDefaults();
+  assert.deepEqual(plain([g26, g28].map(c => c.holder.value)), ['11.778', '-1.848']);
+  assert.equal(Number(h26.holder.value), saved.House.value); assert.equal(Number(s26.holder.value), saved.Senate.value);
+  assert.deepEqual([ph26.value, ps26.value].map(String), [String(saved.House.current_control), String(saved.Senate.current_control)]);
+  assert.deepEqual(plain([h28, s28].map(c => c.holder.value)), ['', ''], 'the 2027-2028 control scores go back to blank');
+  assert.deepEqual([ph28.value, ps28.value], ['', ''], 'and so do both of its control-before-election selects');
+  assert.deepEqual(['gf-2026-prior', 'gf-2028-prior'].map(id => els[id].value), ['', ''], 'prior-cycle growth is blank again');
+  assert.deepEqual(['gf-2026-lobby', 'gf-2027-lobby', 'gf-2028-lobby'].map(id => els[id].value), ['', '', ''], 'so is lobbying by year');
+  const request = t.getRequest();
+  assert.equal(request.horizons[2026].prior_growth_pct, ''); assert.equal(request.horizons[2028].control_scores.House, ''); assert.equal(request.horizons[2028].current_control.Senate, '');
+  assert.deepEqual({...request.horizons[2028].annual_forecast_changes}, {2027: '', 2028: ''});
+  assert.equal(g26.view.value, '11.78', 'the visible numbers follow (two decimals; the request keeps the exact default)');
+  assert.equal(g26.dflt.reset.hidden, true);
+  assert.equal(queue.size, 1, 'one recalculation is queued'); assert.equal([...queue.values()][0].ms, 300);
+  // an industry without a growth default and a catalog without a saved outlook: the same rows reset to blank
+  const bare = session({outlook: false, timers: {setTimeout: () => 1, clearTimeout() {}}});
+  bare.t.buildInputs();
+  const rows = bare.t.getControls();
+  rows.forEach(c => { c.holder.value = '7'; }); bare.t.getPills().forEach(select => { select.value = '1'; });
+  bare.t.resetDefaults();
+  assert.deepEqual(plain(rows.map(c => c.holder.value)), ['11.778', '-1.848', '', '', '', ''], 'only the growth defaults come back');
+  assert.deepEqual(plain(bare.t.getPills().map(select => select.value)), ['', '', '', '']);
+});
+
+test('the form-wide input listener ignores the industry, the date and the assumption-source fields and the published PAC panels; any other input recalculates after one pause', () => {
+  const queue = new Map(); let next = 1;
+  const {els} = session({timers: {setTimeout: (fn, ms) => { queue.set(next, {fn, ms}); return next++; }, clearTimeout: id => queue.delete(id)}});
+  const listener = els['gf-form'].on.input;
+  for (const id of ['gf-industry', 'gf-date', 'gf-source', 'gf-source-date']) { listener({target: {id, closest: () => null}}); assert.equal(queue.size, 0, id + ' schedules nothing'); }
+  listener({target: {id: 'pac-political-variant', closest: selector => selector === '.pac-selected' ? {} : null}}); assert.equal(queue.size, 0, 'the published PAC panels schedule nothing');
+  listener({target: {id: 'gf-2026-growth', closest: () => null}}); listener({target: {id: 'gf-2026-House-political', closest: () => null}});
+  assert.equal(queue.size, 1, 'a scenario input schedules one timer, however many edits'); assert.equal([...queue.values()][0].ms, 300);
+});
+
+test('calculate() refuses silently, without a request, when the as-of date is not valid; with a valid date it asks once', async () => {
+  const requests = [];
+  const reply = (path, init) => { requests.push(JSON.parse(init.body)); return Promise.resolve({ok: true, status: 200, headers: {get: () => 'application/json'}, json: () => Promise.resolve(RUN.banks)}); };
+  const {t, els} = session({fetchImpl: reply});
+  t.buildInputs();
+  els['gf-date'].validity = {valid: false};
+  els['gf-alert'] = Object.assign(el('div'), {hidden: true}); els['gf-status'] = el('div');
+  const status = els['gf-status'].textContent;
+  await t.calculate({preventDefault() { this.prevented = true; }});
+  await t.calculate();
+  assert.equal(requests.length, 0, 'no request leaves for an incomplete or out-of-range date');
+  assert.equal(els['gf-alert'].hidden, true, 'and nothing is said about it'); assert.equal(els['gf-status'].textContent, status);
+  els['gf-date'].validity = {valid: true};
+  await t.calculate();
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].as_of, '2026-09-30');
+});
+
+test('a failed calculation says so in the alert with a "Try again" button that runs it again, once; the copy no longer tells anyone to calculate', async () => {
+  let failing = true; const requests = [];
+  const reply = (path, init) => { requests.push(JSON.parse(init.body)); return Promise.resolve(failing
+    ? {ok: false, status: 500, headers: {get: () => 'application/json'}, json: () => Promise.resolve({error: 'The forecast service could not finish this calculation.'})}
+    : {ok: true, status: 200, headers: {get: () => 'application/json'}, json: () => Promise.resolve(RUN.banks)}); };
+  const {t, els} = session({fetchImpl: reply});
+  t.buildInputs();
+  await t.calculate();
+  assert.equal(requests.length, 1);
+  const alert = els['gf-alert'], flat = node => [node.textContent || '', ...(node.children || []).map(flat)].join('');
+  assert.equal(alert.hidden, false);
+  const retry = alert.children.find(child => child.tag === 'button');
+  assert.ok(retry, 'the alert has a button'); assert.equal(retry.textContent, 'Try again'); assert.equal(retry.type, 'button');
+  assert.match(flat(alert), /The forecast service could not finish this calculation\./); assert.match(flat(alert), /then try again\./);
+  assert.doesNotMatch(flat(alert), /calculate again/i);
+  failing = false;
+  await retry.on.click();
+  assert.equal(requests.length, 2, 'pressing it sends exactly one request');
+  assert.equal(alert.hidden, true, 'and the alert is gone once it succeeds');
+  // no instruction left says "calculate"
+  const source = fs.readFileSync(SOURCE, 'utf8');
+  assert.doesNotMatch(source.replace(/schema 1|Schema 1|Calculate both horizons to update the comparison/g, ''), /(?:and|then|to) calculate\b(?! both)/);
+  assert.match(source, /Inputs changed\. Set growth to see a projection\./);
+});
+
+test('under Lobbying the warnings list does not repeat the bar chart\'s flags (the Party split\'s notes and the lobbying flags stay); the Party split caption has a real space before it', () => {
+  const {t, els} = session();
+  const model = {chart: t.chartModel(RUN.banks, null, 'pac'), mixes: ['House', 'Senate'].map(chamber => t.mixModel(RUN.banks, null, chamber)), lobby: t.lobbyModel(RUN.banks, 2026, 2028)};
+  assert.ok(model.chart.flags.length > 0);
+  t.setAccount('pac'); t.paintWarnings(model);
+  const lines = () => els['gf-warnings-list'].children.map(li => li.children.map(c => c.textContent).join(''));
+  assert.ok(lines().some(line => line.includes('· Company PACs: ')), 'the PAC account\'s own flags are listed under it: ' + lines().join(' | '));
+  t.setAccount('lobby'); t.paintWarnings(model);
+  assert.equal(lines().filter(line => /· (Company PACs|General giving|PAC to candidates): /.test(line)).length, 0, 'nothing of the bar chart under Lobbying');
+  assert.ok(lines().some(line => /· (House|Senate): /.test(line)), 'the Party split stays on screen, so its notes stay');
+});
+
+test('chart figures are one-decimal millions, periods are 2025–26 style, and a caption reads "Polymarket, Jan–Jun 2026"', () => {
+  const {t} = session();
+  assert.deepEqual(plain([27.0e6, 30.2e6 - 4, 53.6e6, 999499, 999500, 12345, 800, 62.94e6].map(t.chartMoney)), ['$27.0M', '$30.2M', '$53.6M', '$999K', '$1.0M', '$12K', '$800', '$62.9M']);
+  assert.equal(t.shortPeriod(2026), '2025–26'); assert.equal(t.shortPeriod(2028), '2027–28');
+  const snapshot = FIXTURE.catalog.saved_outlook;
+  assert.equal(t.outlookSource(snapshot, snapshot.control.House).text, 'Polymarket, Jan–Jun 2026');
+  assert.match(t.outlookSource(snapshot, snapshot.control.House).title, /^Saved 2026 outlook, as of /);
+});
+
+test('the party split draws one 100% bar per basis: Democratic from the left, Republican from the right, a tick at the anchor cycle\'s Republican share, one-decimal shares inside the ends', () => {
+  const {t, els} = session();
+  els['gf-house-body'] = el('div'); els['gf-senate-body'] = el('div');
+  const model = t.mixModel(P1.banks, null, 'House'), host = els['gf-house-body'];
+  t.drawMix(model, host, false);
+  const groups = host.children;
+  assert.equal(groups.length, 2, 'Employees and Company PACs, never a pooled third');
+  assert.deepEqual(plain(groups.map(g => g.children[0].textContent)), ['Employees', 'Company PACs']);
+  groups.forEach((group, i) => {
+    const track = group.children[1], [dem, rep, tick] = track.children, row = model.rows[i];
+    assert.equal(parseFloat(dem.style.width).toFixed(1), ((1 - row.share) * 100).toFixed(1));
+    assert.equal(parseFloat(rep.style.width).toFixed(1), (row.share * 100).toFixed(1));
+    assert.equal(dem.children[0].textContent, ((1 - row.share) * 100).toFixed(1) + '%'); assert.equal(rep.children[0].textContent, (row.share * 100).toFixed(1) + '%');
+    assert.equal(dem.className, 'gf-pd'); assert.equal(rep.className, 'gf-pr');
+    assert.equal(tick.className, 'gf-ptick'); assert.equal(parseFloat(tick.style.left).toFixed(1), ((1 - row.anchorShare) * 100).toFixed(1), 'the tick is the anchor cycle share, measured from the left like the Democratic part');
+    assert.equal(track.tabIndex, 0, 'a bar can be focused for its tooltip');
+  });
+  // nothing to draw yet: an empty track and no tick
+  t.drawMix(t.mixModel(null, null, 'Senate'), els['gf-senate-body'], false);
+  assert.ok(els['gf-senate-body'].children.every(g => g.children[1].children.every(c => c.className !== 'gf-ptick' && c.className !== 'gf-pd')));
+});
+
+test('every flag the old chips carried is a line of plain text, scope first, warnings before notes', () => {
+  const {t, els} = session({waivers: REGISTRY_WAIVERS});
+  const model = {chart: t.chartModel(P1.banks, null, 'general'), mixes: ['House', 'Senate'].map(chamber => t.mixModel(P1.banks, null, chamber)), lobby: t.lobbyModel(P1.banks, 2026, 2028)};
+  t.paintWarnings(model);
+  const list = els['gf-warnings-list'], lines = list.children.map(li => li.children.map(c => c.textContent).join(''));
+  assert.ok(lines.length >= 2);
+  assert.equal(els['gf-warnings'].hidden, false);
+  for (const chip of [...model.chart.flags, ...model.mixes[0].chips, ...model.mixes[1].chips]) assert.ok(lines.some(line => line.includes(chip.text)), 'no flag is lost: ' + chip.text);
+  assert.ok(lines.every(line => /^(Warning|Note) · /.test(line)));
+  assert.ok(lines.some(line => /House: .*Gate waived/.test(line)), 'a waiver is a note under its chamber');
+  const warnAt = lines.findIndex(l => l.startsWith('Warning')), noteAt = lines.findIndex(l => l.startsWith('Note'));
+  if (warnAt >= 0) assert.ok(warnAt < noteAt || noteAt < 0);
+  t.paintWarnings({chart: t.chartModel(null, null, 'general'), mixes: [{chamber: 'House', chips: []}, {chamber: 'Senate', chips: []}], lobby: {state: 'empty', text: ''}});
+  assert.equal(els['gf-warnings'].hidden, true, 'no warnings: the section is not drawn');
 });

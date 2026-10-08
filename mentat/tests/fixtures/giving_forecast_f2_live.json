@@ -898,6 +898,299 @@
   "built_on": "2026-09-30",
   "currency": "2025 USD",
   "current_cycle": 2026,
+  "cycle_model_view": {
+   "version": 1,
+   "inflation": {
+    "annual_rate": 0.025726436,
+    "base_year": 2025,
+    "convention": "cycle_midpoint",
+    "source": "Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)"
+   },
+   "layers": {
+    "pac_to_candidates": "R8",
+    "general_giving": "P1"
+   },
+   "growth_applies": {
+    "pac_to_candidates": false,
+    "general_giving": true
+   },
+   "presidential_uplift": {
+    "pac_to_candidates": {
+     "factor": 1.09,
+     "source": "owner rule D-118/D-121: +9% (PAC spending less cyclical; national FEC all-PAC ratio 0.98)",
+     "ratio_by_pair": {
+      "2016/2014": 0.9969291514830991,
+      "2020/2018": 0.9639711510629424,
+      "2024/2022": 0.9829388610358335
+     }
+    },
+    "general_giving": {
+     "factor": 1.8635014836795252,
+     "source": "owner rule D-118/D-121: OpenSecrets total cost of elections, presidential avg 2012-2024 vs midterm avg 2010-2022",
+     "ratio_by_pair": {
+      "2010": 5.24,
+      "2012": 8.59,
+      "2014": 5.09,
+      "2016": 8.51,
+      "2018": 7.15,
+      "2020": 18.34,
+      "2022": 9.5,
+      "2024": 14.8
+     }
+    }
+   },
+   "growth": {
+    "commercial_banks": {
+     "2026": {
+      "status": "ready",
+      "growth_default": 11.778,
+      "growth_window": [
+       2023,
+       2025
+      ],
+      "growth_source": "IBISWorld 52211 2026-08 edition (CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture))",
+      "report_id": "52211",
+      "edition": "2026-08",
+      "price_basis": "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)",
+      "annual": {
+       "2023": 0.359241928174159,
+       "2024": 0.0576696912627952,
+       "2025": -0.028555082037994
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "ready",
+        "budget_growth_pct": 0.0,
+        "s_odd": 0.5099692577953447,
+        "G_odd": 1.4376289905234092,
+        "G_even": 1.0274678464596863,
+        "growth_applies": false
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 12.889782316309773,
+        "s_odd": 0.24729299245287184,
+        "G_odd": 1.4376289905234092,
+        "G_even": 1.0274678464596863
+       }
+      }
+     },
+     "2028": {
+      "status": "ready",
+      "growth_default": -1.848,
+      "growth_window": [
+       2025,
+       2027
+      ],
+      "growth_source": "IBISWorld 52211 2026-08 edition (CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture))",
+      "report_id": "52211",
+      "edition": "2026-08",
+      "price_basis": "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)",
+      "annual": {
+       "2025": -0.028555082037994,
+       "2026": -0.0283718915926393,
+       "2027": 0.00178969625482694
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "ready",
+        "budget_growth_pct": 0.0,
+        "s_odd": 0.5099692577953447,
+        "G_odd": 0.9438831880613676,
+        "G_even": 0.9733670275940619,
+        "growth_applies": false
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": -3.392411931297834,
+        "s_odd": 0.24729299245287184,
+        "G_odd": 0.9438831880613676,
+        "G_even": 0.9733670275940619
+       }
+      }
+     }
+    },
+    "credit_unions": {
+     "2026": {
+      "status": "ready",
+      "growth_default": 13.362,
+      "growth_window": [
+       2023,
+       2025
+      ],
+      "growth_source": "IBISWorld 52213 2026-05 edition (CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture))",
+      "report_id": "52213",
+      "edition": "2026-05",
+      "price_basis": "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)",
+      "annual": {
+       "2023": 0.244476006049941,
+       "2024": 0.125432556348819,
+       "2025": 0.0401437881080231
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "ready",
+        "budget_growth_pct": 0.0,
+        "s_odd": 0.5593785280361271,
+        "G_odd": 1.4005738128035534,
+        "G_even": 1.1706116824207569,
+        "growth_applies": false
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 21.6514524250484,
+        "s_odd": 0.19961043913324747,
+        "G_odd": 1.4005738128035534,
+        "G_even": 1.1706116824207569
+       }
+      }
+     },
+     "2028": {
+      "status": "ready",
+      "growth_default": 1.665,
+      "growth_window": [
+       2025,
+       2027
+      ],
+      "growth_source": "IBISWorld 52213 2026-05 edition (CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture))",
+      "report_id": "52213",
+      "edition": "2026-05",
+      "price_basis": "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)",
+      "annual": {
+       "2025": 0.0401437881080231,
+       "2026": 0.00256978821760567,
+       "2027": 0.00763427842432751
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "ready",
+        "budget_growth_pct": 0.0,
+        "s_odd": 0.5593785280361271,
+        "G_odd": 1.042816737359319,
+        "G_even": 1.0102236851206778,
+        "growth_applies": false
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 1.672959859072587,
+        "s_odd": 0.19961043913324747,
+        "G_odd": 1.042816737359319,
+        "G_even": 1.0102236851206778
+       }
+      }
+     }
+    },
+    "property_casualty": {
+     "2026": {
+      "status": "ready",
+      "growth_default": 3.657,
+      "growth_window": [
+       2023,
+       2025
+      ],
+      "growth_source": "IBISWorld 52412 2024-11 edition (CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024'))",
+      "report_id": "52412",
+      "edition": "2024-11",
+      "price_basis": "CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024')",
+      "annual": {
+       "2023": 0.057,
+       "2024": 0.027,
+       "2025": 0.026
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "unavailable",
+        "reason": "No roster PAC committees are resolved for this industry"
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 6.288203858603247,
+        "s_odd": 0.2883449629686373,
+        "G_odd": 1.0855389999999998,
+        "G_even": 1.053702
+       }
+      }
+     },
+     "2028": {
+      "status": "ready",
+      "growth_default": 1.832,
+      "growth_window": [
+       2025,
+       2027
+      ],
+      "growth_source": "IBISWorld 52412 2024-11 edition (CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024'))",
+      "report_id": "52412",
+      "edition": "2024-11",
+      "price_basis": "CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024')",
+      "annual": {
+       "2025": 0.026,
+       "2026": 0.015,
+       "2027": 0.014
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "unavailable",
+        "reason": "No roster PAC committees are resolved for this industry"
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 3.272204164895798,
+        "s_odd": 0.2883449629686373,
+        "G_odd": 1.0413899999999998,
+        "G_even": 1.02921
+       }
+      }
+     }
+    }
+   },
+   "company_pacs": {
+    "commercial_banks": {
+     "kind": "chart_roster",
+     "count": 19,
+     "label": "Banks: 19 bank companies",
+     "status": "ready",
+     "observed_to": "2026-06-30",
+     "split_note": null
+    },
+    "credit_unions": {
+     "kind": "panel_cohort",
+     "count": 16,
+     "label": "Credit unions: 16 PACs (published panel cohort)",
+     "observed_to": "2026-09-26",
+     "bundle_sha256": "ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb",
+     "cohort_ids_sha256": "d0e1b16b3bfb54f6e827dbae865c5d1935adb472ac3ea2651de959791077902c",
+     "status": "ready",
+     "split_note": "Credit-union company-PAC party split still reflects the earlier single-PAC roster."
+    },
+    "property_casualty": null
+   },
+   "g_prior_defaults": {
+    "commercial_banks": {
+     "2028": -1.54957838148121
+    },
+    "credit_unions": {
+     "2028": 10.2943295917814
+    },
+    "property_casualty": {
+     "2028": 4.76766134862934
+    }
+   },
+   "notes": [
+    "No backtest covers the 50/50 overlay or the error of the IBISWorld path: G6 and G9 measure the phase-and-drift model only, and the intervals exclude the IBIS projection error.",
+    "The 2026-edition IBISWorld price basis is inferred as constant dollars (the 2026 captures print no basis; the 2024 editions print inflation-adjusted dollars and the 2023 growth agrees to 0.1 pp).",
+    "The 50/50 rule is untested on general giving.",
+    "The general-giving phase coefficient is phi_gen = 0.738 (the selected specification PT-noG-damp-pool)."
+   ],
+   "measure_notes": {
+    "pac_to_candidates": [
+     "Open cycle: the published PAC panel's nowcast (R8) O + (1 - s) B: O the giving observed to the cut, B the prior cycle's total of the same roster, s the geometric mean of the share of each of the three prior cycles' totals given by the same date. The range is the same formula with each cycle's own share, lowest to highest; it is not a 95% interval. Industry revenue growth does not affect company PACs on either horizon (D-116); the next cycle chains from the nowcast."
+    ],
+    "general_giving": [
+     "50/50 untested on general giving",
+     "Open cycle stays on the model plus the observed-giving conditioning (P1): Mentat holds dated general giving for two complete cycles (2022, 2024), fewer than the three the pace test needs."
+    ]
+   }
+  },
   "evidence": [
    {
     "Holm_all_48": 1,

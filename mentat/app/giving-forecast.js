@@ -4,9 +4,21 @@
   const $ = id => document.getElementById(id);
   const open = $('giving-forecast-open');
   if (!open) return;
-  let catalog, sessionToken, result, requestController, generation = 0, loading = null;
-  let account = 'general', activeTab = 0, exampleLoaded = false, refRun = null, referenceKey = '', referenceLoading = false, referenceFailure = '', referenceSeq = 0, painted = null, controls = [];
+  let catalog, sessionToken, result, requestController, generation = 0, loading = null, recalc = 0;
+  let account = 'general', exampleLoaded = false, refRun = null, referenceKey = '', referenceLoading = false, referenceFailure = '', referenceSeq = 0, painted = null, controls = [];
   const chambers = ['House', 'Senate'];
+  // The growth defaults come from the bundle (catalog.cycle_model_view.growth[industry][cycle]): value, lag window, edition and source in ONE place (owner 2026-10-07: "Use the IBIS defaults").
+  const hasCycleModel = () => Boolean(catalog && catalog.cycle_model_view);
+  // The marker every project request carries under the cycle model: growth_pct is the AVERAGE ANNUAL growth of the IBIS window, not the anchor cycle's two-year revenue growth.
+  const growthBasis = () => hasCycleModel() ? {growth_basis: 'ibis_window_avg'} : {};
+  // What a blank prior-cycle growth means. It feeds the party split: the previous completed cycle's growth when Mentat has it, else (2027-28 under the cycle model) the bundle's IBIS cycle growth.
+  const priorBlank = (sector, end, index) => {
+    if (index === 0) return 'blank (auto) uses the previous completed cycle when available';
+    if (!hasCycleModel()) return 'blank (auto) uses the current-cycle growth assumption above';
+    const v = catalog.cycle_model_view.g_prior_defaults, g = v && v[sector.id] && v[sector.id][String(end)];
+    return `blank (auto) uses the bundle's IBIS cycle growth${g == null ? '' : ' (' + formatNumber(g) + '%)'} for ${period(end - 2)}; it feeds the party split`;
+  };
+  const cycleDefault = (sector, end) => { const v = catalog && catalog.cycle_model_view, g = v && v.growth && v.growth[sector.id] && v.growth[sector.id][String(end)]; return g && g.status === 'ready' ? g : null; };
   const money = value => value == null ? 'Unavailable' : new Intl.NumberFormat('en-US', {style:'currency',currency:'USD',notation:'compact',maximumFractionDigits:2}).format(Math.abs(value) < .005 ? 0 : value);
   const number = value => value == null ? 'Unavailable' : (Math.abs(value) < .005 ? 0 : Number(value)).toLocaleString('en-US', {maximumFractionDigits:2});
   const signed = value => (value >= .005 ? '+' : '') + number(value);
@@ -22,11 +34,13 @@
     $('gf-status').textContent = text; $('gf-status-copy').textContent = text;
     $('gf-status').classList.toggle('gf-error', error);
   }
+  // Schema 2 recalculates after every input and draws no Calculate button; only the schema-1 rollback form has one (configureForSchema adds it).
+  function lockCalculate(on) { const button = $('gf-calculate'); if (button) button.disabled = on; }
   function invalidate() {
     generation++; requestController?.abort(); result = null;
-    $('gf-export').disabled = true; $('gf-calculate').disabled = false;
+    $('gf-export').disabled = true; lockCalculate(false);
     $('gf-results').setAttribute('aria-busy', 'false'); $('gf-results').replaceChildren();
-    message('Inputs changed. Calculate both horizons to update the comparison.');
+    message(isV2() ? 'Inputs changed. Set growth to see a projection.' : 'Inputs changed. Calculate both horizons to update the comparison.');
     inputsChanged();
   }
   async function api(path, body, signal) {
@@ -202,19 +216,23 @@
     root.append(section);
   }
   async function calculate(event) {
-    event?.preventDefault(); requestController?.abort(); const rev=++generation;
-    requestController=new AbortController(); $('gf-calculate').disabled=true; $('gf-export').disabled=true;
-    result=null; $('gf-results').replaceChildren(); $('gf-results').setAttribute('aria-busy','true');message('Calculating both horizons…');
+    event?.preventDefault(); clearTimeout(recalc);
+    // An incomplete or out-of-range date asks the calculator for nothing (the date field's own change handler rebuilds the view once the date is valid again).
+    const date=$('gf-date'); if(date.validity && !date.validity.valid)return;
+    requestController?.abort(); const rev=++generation;
+    // The previous result and chart stay until the answer replaces them (an auto-recalculation must not flash blank); a failure below clears them.
+    requestController=new AbortController(); lockCalculate(true); $('gf-export').disabled=true;
+    $('gf-results').setAttribute('aria-busy','true');message('Calculating both horizons…');
     clearAlert(); busy(true);
     try {
       const data=await api('/api/forecast/project',getRequest(),requestController.signal);
       if(rev!==generation)return;result=data;render(data);
-      if(data.status && data.status!=='ready'){message(data.reason || 'The forecast was not calculated.',true);showAlert((data.industry_label || 'Forecast') + ' · not calculated.',data.reason || 'The forecast was not calculated.',refusalAdvice(data));paintView(false);return;}
+      if(data.status && data.status!=='ready'){message(data.reason || 'The forecast was not calculated.',true);showAlert((data.industry_label || 'Forecast') + ' · not calculated.',data.reason || 'The forecast was not calculated.',refusalAdvice(data),true);paintView(false);return;}
       $('gf-export').disabled=false;
       message('Both horizons calculated. Missing inputs are shown beside the affected outcome.');
       paintView(true);
-    } catch(error) {if(error.name!=='AbortError' && rev===generation){message(error.message,true);showAlert('Not calculated.',error.message,'Change the input it names, or reload the page, and calculate again.');paintView(false);}}
-    finally {if(rev===generation){$('gf-calculate').disabled=false;$('gf-results').setAttribute('aria-busy','false');busy(false);}}
+    } catch(error) {if(error.name!=='AbortError' && rev===generation){result=null;$('gf-results').replaceChildren();message(error.message,true);showAlert('Not calculated.',error.message,'Change the input it names, or reload the page, then try again.',true);paintView(false);}}
+    finally {if(rev===generation){lockCalculate(false);$('gf-results').setAttribute('aria-busy','false');busy(false);}}
   }
   function evidenceTable(parent,caption,headers,rows) {
     const wrap=node('div',null,'gf-table-wrap'),table=node('table',null,'gf-table gf-evidence-table');table.append(node('caption',caption));
@@ -291,7 +309,11 @@
     if ($('gf-sources-summary')) $('gf-sources-summary').textContent = v2 ? 'Sources and assumption notes' : 'Sources and remainder amounts';
     if (v2 && $('gf-sources-note')) $('gf-sources-note').textContent = 'Note where your assumptions come from. Observed amounts come from Mentat and need no entry. PAC, candidate-share and lobbying amounts are separate accounts.';
     if (v2) $('gf-signal').value = 'control';
-    else $('gf-notes').hidden = false;
+    else {
+      // Schema 1 (rollback): no cycle view, so the Methods fold stays open and the form keeps a Calculate button of its own.
+      $('gf-methods').open = true;
+      if (!$('gf-calculate')) { const button = node('button', 'Calculate', 'primary gf-calculate'); button.id = 'gf-calculate'; button.type = 'submit'; button.setAttribute('aria-label', 'Calculate both horizons'); $('gf-horizons').after(button); }
+    }
   }
   function anchorStatus(sector) {
     const status = catalog.anchors && catalog.anchors.industries && catalog.anchors.industries[sector.id];
@@ -303,6 +325,15 @@
     const info = anchorStatus(sector);
     if (info.status !== 'ready') { holder.append(node('span', (info.reason || 'The Mentat anchors are not available.') + ' Forecasts need a current anchor snapshot.', 'gf-error')); return; }
     holder.append(node('span', `Mentat anchors: ${info.workbook}; collected ${info.collection_date}; observed through ${info.coverage_end}, the remainder starts the day after. ${info.current_cycle ? period(info.current_cycle) + ' is the open cycle.' : ''}`));
+    // D-117: what the company-PAC account is a total of, with the date that account is observed to (the published panel's own date is not general giving's); then the split's note.
+    const pop = hasCycleModel() && catalog.cycle_model_view.company_pacs && catalog.cycle_model_view.company_pacs[sector.id];
+    const uplifts = hasCycleModel() && catalog.cycle_model_view.presidential_uplift || {};          // D-118/D-119/D-121: the owner's presidential-cycle rule of each measure, {measure id: {factor, source, ratio_by_pair}}
+    if (pop) {
+      holder.append(node('div', pop.status === 'ready' ? `Company PACs: ${pop.label}; observed to ${pop.observed_to}${pop.kind === 'panel_cohort' ? " (the published PAC panel's own date)" : ''}.` : `Company PACs: ${pop.reason}`, 'gf-detail'));
+      if (pop.split_note) holder.append(node('div', pop.split_note, 'gf-detail'));
+      if (pop.status === 'ready' && uplifts.pac_to_candidates) holder.append(node('div', 'Presidential cycle uplift for company PACs: ' + upliftText('pac_to_candidates', uplifts.pac_to_candidates), 'gf-detail'));          // D-118/D-119
+    }
+    if (uplifts.general_giving) holder.append(node('div', 'Presidential cycle factor for general giving: ' + upliftText('general_giving', uplifts.general_giving), 'gf-detail'));          // D-121
     for (const text of info.flags || []) holder.append(node('div', text, 'gf-detail'));
   }
   function getRequestV2() {
@@ -313,7 +344,7 @@
       for (let year = end === current ? Number($('gf-date').value.slice(0,4)) : end - 1; year <= end; year++) a.annual_forecast_changes[year] = value(`gf-${year}-lobby`);
       horizons[end] = a;
     }
-    return {industry:value('gf-industry'),as_of:value('gf-date'),assumption_source:value('gf-source'),assumption_date:value('gf-source-date') || value('gf-date'),horizons};
+    return {industry:value('gf-industry'),as_of:value('gf-date'),assumption_source:value('gf-source'),assumption_date:value('gf-source-date') || value('gf-date'),horizons,...growthBasis()};
   }
   function updateModelNoteV2() {
     $('gf-model-note').textContent = 'Expected control: the January–June average of Polymarket, both for the 2024 anchor cycle and for 2026. Each slope follows the rule the model package records for its term (pooled slope, industry-specific slope or partially pooled slope). Seat forecasts are evidence only: no signal.';
@@ -324,12 +355,12 @@
     if (m.status !== 'ready') { detail(col, m.reason || 'Unavailable.'); return col; }
     const remaining = current && m.projected_remaining != null;
     col.append(node('strong', remaining ? money(m.projected_remaining) : money(m.projected_cycle_real_2025), 'gf-value gf-value-small'));
-    detail(col, remaining ? 'Remainder from ' + m.remainder_starts : current ? (m.remainder_reason || 'Full cycle') : 'Full-cycle projection');
-    if (m.remainder_status === 'baseline_exceeded' || m.remainder_status === 'no_observed') flag(col, m.remainder_reason);
+    detail(col, remaining ? 'Remainder from ' + m.remainder_starts : current ? (remainderText(m) || 'Full cycle') : 'Full-cycle projection');
+    if (m.remainder_status === 'baseline_exceeded' || m.remainder_status === 'no_observed') flag(col, remainderText(m));
     if (current) detail(col, 'Projected full cycle: ' + money(m.projected_cycle_real_2025));
     if (m.observed) detail(col, `Observed through ${m.observed.through}: ${money(m.observed.amount_nominal)}${m.observed.face_value ? ' (face value; no ' + (p.anchor_cycle + 2) + ' CPI yet)' : ''}.`);
     detail(col, `Mentat ${period(p.anchor_cycle)}: ${money(m.anchor_cycle_nominal)} nominal · ${money(m.anchor_cycle_real_2025)} in 2025 USD.`);
-    detail(col, 'Full-cycle coefficient interval: ' + range(m.cycle_coefficient_low, m.cycle_coefficient_high) + '.');
+    if (m.cycle_coefficient_low != null) detail(col, 'Full-cycle coefficient interval: ' + range(m.cycle_coefficient_low, m.cycle_coefficient_high) + '.');   // the cycle model's chained 2027-28 step has none
     detail(col, 'Full-cycle prediction interval: ' + range(m.cycle_prediction_low, m.cycle_prediction_high) + '.');
     if (remaining) {
       detail(col, 'Remainder coefficient interval: ' + range(m.remaining_coefficient_low, m.remaining_coefficient_high) + '.');
@@ -342,8 +373,13 @@
     const cell = node('td');
     if (p.status !== 'ready') { detail(cell, p.reason || 'Enter expected cycle revenue growth.'); if (p.slope) detail(cell, slopeText(p.slope, p.ordinary_p)); return cell; }
     cell.append(pair(p.measures.map(m => pacMeasureColumn(m, p, current))));
-    detail(cell, `${pct(p.change_pct)} vs the Mentat ${period(p.anchor_cycle)} level (${p.chained ? 'chained on a projection, ' + p.steps + ' steps' : 'previous cycle'}); coefficient interval ${pct(p.coefficient_interval_pct[0])} to ${pct(p.coefficient_interval_pct[1])}; prediction interval ${pct(p.prediction_interval_pct[0])} to ${pct(p.prediction_interval_pct[1])}.`);
-    detail(cell, slopeText(p.slope, p.ordinary_p));
+    if (p.model_kind === 'cycle_model') {   // the cycle response has no change_pct, slope or log-change intervals: growth input and the interval's own definition instead
+      const g = p.growth_input || {};
+      detail(cell, `Industry revenue growth ${pct(p.growth_pct)} (${g.source === 'user' ? 'entered' : 'IBIS ' + g.edition + ' default'}), ${p.chained ? 'chained on the open cycle' : 'on the Mentat ' + period(p.anchor_cycle) + ' level'}. ${p.interval_kind}.`);
+    } else {
+      detail(cell, `${pct(p.change_pct)} vs the Mentat ${period(p.anchor_cycle)} level (${p.chained ? 'chained on a projection, ' + p.steps + ' steps' : 'previous cycle'}); coefficient interval ${pct(p.coefficient_interval_pct[0])} to ${pct(p.coefficient_interval_pct[1])}; prediction interval ${pct(p.prediction_interval_pct[0])} to ${pct(p.prediction_interval_pct[1])}.`);
+      detail(cell, slopeText(p.slope, p.ordinary_p));
+    }
     if (p.extrapolation) flag(cell, 'Growth is outside this industry\'s historical range.');
     return cell;
   }
@@ -363,6 +399,7 @@
     if (current && b.remainder_status === 'budget_inconsistent') { flag(col, 'budget_inconsistent: ' + b.remainder_reason); detail(col, `Projected total ${money(b.projected_total_real_2025)}; remaining R ${money(b.projected_remaining_R_real_2025)} · D ${money(b.projected_remaining_D_real_2025)} (not clipped).`); }
     if (current && ['needs_inputs', 'no_observed', 'cycle_closed'].includes(b.remainder_status)) detail(col, b.remainder_reason);
     if (b.observed) detail(col, `Observed through ${b.observed.through}: R ${money(b.observed.R)} · D ${money(b.observed.D)}.`);
+    if (b.roster_note) detail(col, b.roster_note);
     return col;
   }
   // The share anchor the model package chose for this industry and chamber (previous cycle or same phase), with its recorded reason.
@@ -392,7 +429,7 @@
     const remaining = s.projected_remaining != null;
     col.append(node('strong', money(remaining ? s.projected_remaining : s.projected), 'gf-value gf-value-small'));
     detail(col, remaining ? 'Remainder after the observed quarters' : 'Full-year projection');
-    if (s.remainder_status === 'baseline_exceeded' || s.remainder_status === 'no_observed') flag(col, s.remainder_reason);
+    if (s.remainder_status === 'baseline_exceeded' || s.remainder_status === 'no_observed') flag(col, remainderText(s));
     detail(col, `${row.base_year} level ${money(s.base_level)} · ${pct(row.change_pct)}${row.chained ? ' (chained, ' + row.steps + ' steps)' : ''}.`);
     if (remaining) detail(col, `Observed ${s.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + s.observed.through_quarter}: ${money(s.observed.amount_nominal)}; full year ${money(s.projected)}.`);
     detail(col, 'Coefficient interval: ' + range(s.coefficient_low, s.coefficient_high) + '.');
@@ -417,7 +454,7 @@
     const section = node('div', null, 'gf-comparison');
     section.append(node('h3', data.industry_label + ' · not calculated'));
     section.append(node('p', data.reason || 'The Mentat anchors cannot be used.', 'gf-error'));
-    section.append(node('p', data.status === 'anchor_stale' ? 'The anchors were built from an earlier version of the published Mentat report. The forecast refuses rather than mix old levels with a new report.' : 'Build the Mentat anchor snapshot (mentat/forecast/anchors/build_giving_anchors.py), then calculate again.', 'gf-notice'));
+    section.append(node('p', data.status === 'anchor_stale' ? 'The anchors were built from an earlier version of the published Mentat report. The forecast refuses rather than mix old levels with a new report.' : 'Build the Mentat anchor snapshot (mentat/forecast/anchors/build_giving_anchors.py), then try again.', 'gf-notice'));
     root.append(section);
   }
   function renderV2(data) {
@@ -432,7 +469,8 @@
     head.append(hr); table.append(head);
     const body = node('tbody');
     const outcomes = [
-      ['PAC giving', 'The roster companies\' PACs\' own giving to House and Senate candidates, beside ' + generalName(data) + '. Never added.', h => pacCellV2(h.pac, h.horizon === 'current_remainder')],
+      ['PAC giving', panelPopulation(data) ? `The ${panelPopulation(data).count} PACs of the published panel cohort: own giving to House and Senate candidates, beside ` + generalName(data) + '. Never added.'
+        : 'The roster companies\' PACs\' own giving to House and Senate candidates, beside ' + generalName(data) + '. Never added.', h => pacCellV2(h.pac, h.horizon === 'current_remainder')],
       ...chambers.map(chamber => [chamber + ' candidate mix', 'Republican share of two-party candidate giving, on two bases: employees and roster PACs.', h => shareCellV2(h.shares[chamber], h.horizon === 'current_remainder', chamber)]),
       ['Lobbying (Melange LDA)', 'Annual level: outside-firm fees beside in-house expenses, never summed.', h => lobbyCellV2(h.lobbying)]
     ];
@@ -475,6 +513,13 @@
     for (const [id, info] of Object.entries(catalog.anchors.industries || {})) anchors.append(node('p', info.status === 'ready' ? `${id}: ${info.workbook}; collected ${info.collection_date}; observed through ${info.coverage_end}.` : `${id}: ${info.reason}`));
     if (catalog.not_offered.length) anchors.append(node('p', 'Not shown: ' + catalog.not_offered.map(n => n.label + ' (' + n.reason + ')').join(' ')));
     root.append(anchors);
+    if (hasCycleModel()) {
+      const methods = node('details', null, 'gf-disclosure'); methods.append(node('summary', 'Cycle model: how the projection is built and what it leaves out'));
+      for (const text of catalog.cycle_model_view.notes) methods.append(node('p', text));
+      for (const [id, notes] of Object.entries(catalog.cycle_model_view.measure_notes || {})) for (const text of notes) methods.append(node('p', (ACCOUNT_LABELS[id === 'pac_to_candidates' ? 'pac' : 'general'] || id) + ': ' + text));
+      for (const [id, layer] of Object.entries(catalog.cycle_model_view.layers || {})) methods.append(node('p', (ACCOUNT_LABELS[id === 'pac_to_candidates' ? 'pac' : 'general'] || id) + ': ' + (layer === 'R8' ? 'panel nowcast (R8)' : 'open-cycle layer ' + layer + (LAYERS[layer] ? ', ' + LAYERS[layer] : '')) + '.'));
+      root.append(methods);
+    }
     const sources = node('details', null, 'gf-disclosure'); sources.append(node('summary', 'Model provenance'));
     const snapshot = catalog.saved_outlook;
     if (snapshot) {
@@ -501,6 +546,7 @@
     // built from the data by exampleText() (view layer): amounts equal the Mentat level, the party mixes still move, and why.
     const text = exampleText();
     message('Anchor-cycle values loaded as an example: growth and control as in ' + period(anchorCycle) + '. ' + text + ' Change them to explore.'); refreshControls(); showExample(text);
+    recalcSoon();    // the example goes through the same pause-then-calculate path as any edit; showExample (unlike scheduleCalculate) keeps the example marked
   }
   function savedOutlookV2() {
     const snapshot = catalog.saved_outlook, current = cycle();
@@ -512,9 +558,9 @@
     message('Saved ' + current + ' outlook loaded, dated ' + snapshot.available_on + '. Enter cycle growth and next-cycle expectations.');
   }
   // ------------------------------------------------------------------------------------------------------------------
-  // The cycle view (board F2, picked by Paul 2026-09-30): a column chart of giving by cycle, the scenario panel, the House and
-  // Senate candidate-mix cards, the lobbying card and a footer line. Everything the comparison table prints stays reachable:
-  // in a tooltip, in "Sources and notes" (the table itself lives there), or in both.
+  // The cycle view (board A, picked by Paul 2026-10-07; it replaced board F2): ONE card with the chart of giving by cycle (or, under Lobbying, the lobbying chart) beside the
+  // Assumptions rail, the Party split card (House and Senate candidate mix) and one disclosure line, "Methods, tests and all populations". Everything the comparison table
+  // prints stays reachable: in a tooltip, in "Sources and notes" inside that fold (the table itself lives there), or in both; the model's flags are plain text in the fold.
   //
   // Rules this layer keeps (spec section 3c):
   //   * one dollar basis per chart: every dollar on the cycle chart is 2025 USD (the 2023-2024 Mentat level is the deflated
@@ -524,7 +570,7 @@
   //     are two lines; no pooled figure of the two candidate-share bases is ever read or drawn;
   //   * a blank input stays unknown and the request carries '' for it. The ONE exception is deliberate (owner ruling 2026-10-01, a deviation from spec 3d,
   //     kept from the old console): the two 2026 control scores and their pills open filled from catalog.saved_outlook, say so beside each row (source and
-  //     date from the catalog) and can be cleared back to the unset state; growth, prior-cycle growth, lobbying and every 2027-2028 input open blank;
+  //     date from the catalog) and can be cleared back to the unset state; revenue growth opens at the industry's IBIS default where the catalog growth default (cycle_model_view) has one (owner ruling 2026-10-07), blank otherwise, and prior-cycle growth, lobbying and every other 2027-2028 input open blank;
   //   * every text agrees with the mark it sits beside: the model's own change is the UNCONDITIONED one, so where the model fix draws figures conditioned on
   //     the giving already observed the tooltips label the model's number as "before conditioning" and print the change actually drawn next to it.
   //
@@ -539,7 +585,7 @@
   // ------------------------------------------------------------------------------------------------------------------
   const SVGNS = 'http://www.w3.org/2000/svg';
   const ACCOUNT_MEASURE = {pac: 'pac_to_candidates', general: 'general_giving'};
-  const HINT = 'Set a scenario and calculate';
+  const HINT = 'Set growth to see a projection';
   const WARN = 'warn', INFO = 'info';
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   // Texts the model's flags are shown with (kept verbatim: the owner reads these).
@@ -563,6 +609,20 @@
   const hasFlag = (item, name) => Boolean(item && Array.isArray(item.flags) && item.flags.includes(name));
   // The model fix P1 is present on a measure of the open cycle: the full-cycle predictive conditioned on the giving already observed.
   const givenOf = m => Boolean(m && m.status === 'ready' && m.cycle_given_observed_median != null && m.remaining_given_observed_median != null);
+  // The open-cycle layer a cycle-model measure carries, in words. Used by the Methods fold and by remainderText below.
+  const LAYERS = {BLEND: 'the model blended with the historical pace of the giving observed so far', P1: 'the model conditioned on the giving already observed', R8: "the panel nowcast: the giving observed so far plus the prior cycle's share still to come"};
+  // D-116 (owner 2026-10-08): the company PACs' open cycle is the published PAC panel's nowcast (layer R8) and the IBIS growth does not move them. The panel gives a point, so the
+  // whisker of that column is the range of the three prior cycles' pace, not a 95% interval; the catalog says which measures growth moves (an older catalog says nothing: it moves them).
+  const PAC_GROWTH_TEXT = 'Growth does not affect company PACs (panel nowcast)';
+  const isRange = m => Boolean(m && m.layer === 'R8');
+  const intervalName = m => isRange(m) ? 'Range of prior cycles' : '95% prediction interval';
+  const pacIgnoresGrowth = () => hasCycleModel() && ((catalog.cycle_model_view.growth_applies || {}).pac_to_candidates === false);
+  const growthIgnored = () => account === 'pac' && pacIgnoresGrowth();
+  // The remainder reason the page prints for a measure. The server's baseline_exceeded sentence describes the UNCONDITIONED total, which reads as a contradiction beside a
+  // column drawn from the total conditioned on the giving already observed; so under the cycle model (the measure carries a `layer`) the page says what it draws instead.
+  // A response without `layer` (the earlier schema 2) and every other reason keep the server's text.
+  const remainderText = m => m.layer && m.remainder_status === 'baseline_exceeded'
+    ? `The model's unconditioned total is below what has already been given, so the chart shows the total conditioned on observed giving (${LAYERS[m.layer] || m.layer}).` : m.remainder_reason;
   // ... and on a candidate basis: the projected share applied to the remaining two-party money, with the implied full-cycle share.
   const allocationOf = b => b && b.status === 'ready' && b.remaining_allocation && b.remaining_allocation.implied_cycle_R_share != null ? b.remaining_allocation : null;
   function svg(tag, attributes, text) {
@@ -584,6 +644,18 @@
       if (count <= 11) return {step, top: count * step, ticks: Array.from({length: count + 1}, (_, i) => i * step)};
     }
     return {step: max, top: max, ticks: [0, max]};
+  }
+  // The axis top is sticky per (industry, account, as-of date): it only ever grows while those three stay the same and starts over when any changes.
+  // Root cause of "moving an assumption has no effect": every redraw re-fitted the axis to the new data, so a bar that grew and the scale that grew with it looked the same.
+  // chartModel and lobbyModel both take their axis through here, so every draw path (calculation, account switch, resize) shares one scale; an interval is never clipped.
+  // The key is the run being DRAWN (its own industry and as-of date), never the form: the form already names the new industry while the old industry's run is still on
+  // screen, and a key read from the form carried the old scale into the new industry.
+  const axisTops = {};
+  function stickyMax(accountId, view, raw) {
+    const key = view.industry + '|' + view.as_of, kept = axisTops[accountId];
+    const top = kept && kept.key === key && Number.isFinite(kept.max) ? Math.max(kept.max, raw) : raw;
+    axisTops[accountId] = {key, max: top};
+    return top;
   }
   function axisLabel(value) {
     if (value === 0) return '$0';
@@ -649,30 +721,42 @@
   const NON_GIVING_NOTE = 'Receipts the accounting engine marks non-giving (interest, refunds, insurance claims, loans) are left out; the amounts are in Sources and notes.';
   const excludesNonGiving = m => Boolean(m && /non-giving/i.test(m.label || ''));
   const generalName = data => { const measures = (((data && data.horizons || [])[0] || {}).pac || {}).measures || [], general = measures.find(m => m.id === 'general_giving'); return general && general.label ? general.label : 'Mentat general giving'; };
-  const accountLabel = (accountId, measure) => accountId === 'pac' ? "Roster companies' PACs: own giving to House and Senate candidates" : measure && measure.label || 'Mentat general giving';
+  const panelPopulation = data => { const pac = (((((data && data.horizons || [])[0] || {}).pac || {}).measures) || []).find(m => m.id === 'pac_to_candidates'); return pac && panelCohort(pac) ? pac.population : null; };
+  const panelCohort = measure => Boolean(measure && measure.population && measure.population.kind === 'panel_cohort');          // D-117: the credit unions' company PACs are the published panel's cohort, not roster companies
+  const accountLabel = (accountId, measure) => accountId === 'pac' ? (panelCohort(measure) && measure.label || "Roster companies' PACs: own giving to House and Senate candidates") : measure && measure.label || 'Mentat general giving';
   const zeroInterval = p => Boolean(p && p.coefficient_interval_pct && Math.abs(p.coefficient_interval_pct[0]) < 1e-9 && Math.abs(p.coefficient_interval_pct[1]) < 1e-9);
+  // D-118/D-119/D-121: the owner's presidential-cycle rule of a measure in words. Company PACs: +9% (the national FEC all-PAC ratio, geometric mean of the pairs, beside it); general giving: the
+  // factor of OpenSecrets' total cost of elections. The numbers come from the response ({factor, source, ratio_by_pair}); nothing is fixed here.
+  const upliftText = (measureId, u) => {
+    if (measureId === 'general_giving') return `×${u.factor.toFixed(2)} (owner rule; OpenSecrets total election cost)`;
+    const r = Object.values(u.ratio_by_pair || {});
+    return `${pct((u.factor - 1) * 100)} (owner rule; national PAC data show ${number(Math.exp(r.reduce((sum, x) => sum + Math.log(x), 0) / r.length))})`;
+  };
+  const UPLIFT_LABELS = {pac_to_candidates: 'Presidential cycle uplift', general_giving: 'Presidential cycle factor'};
   // The tooltip of a projection (a column's whisker, band and body). `cond` is the conditioned view of the open cycle (P1) or null.
   function projectionTip(m, p, label, cond) {
     const lines = [H(label + ' · projection')];
     if (cond) {
-      lines.push(R('Full cycle, median (2025 USD)', money(cond.total)), R('95% prediction interval', range(cond.low, cond.high)));
+      lines.push(R('Full cycle, median (2025 USD)', money(cond.total)), R(intervalName(m), range(cond.low, cond.high)));
       lines.push(R('Observed through ' + cond.through, money(cond.observed)));
     } else {
-      lines.push(R('Projected full cycle (2025 USD)', money(m.projected_cycle_real_2025)), R('95% prediction interval', range(m.cycle_prediction_low, m.cycle_prediction_high)));
+      lines.push(R('Projected full cycle (2025 USD)', money(m.projected_cycle_real_2025)), R(intervalName(m), range(m.cycle_prediction_low, m.cycle_prediction_high)));
     }
     lines.push(R('Coefficient interval' + (cond ? ' (before conditioning)' : ''), range(m.cycle_coefficient_low, m.cycle_coefficient_high) + (zeroInterval(p) ? ' (no input change)' : '')));
     // The model's change is the unconditioned one. With the model fix the column draws the figure conditioned on the giving already observed, so the change
     // actually drawn (the conditioned median against the Mentat level) is printed next to it and the model's own number says what it is.
-    const modelChange = `${pct(p.change_pct)} (${p.chained ? 'chained on a projection, ' + p.steps + ' steps' : 'previous cycle'})`;
+    const modelChange = m.model ? `${pct((m.projected_cycle_real_2025 / m.anchor_cycle_real_2025 - 1) * 100)} (${p.chained ? 'chained on the open cycle, ' : ''}${m.model.growth_applies === false ? 'no industry budget change: growth does not affect company PACs' : 'industry budget change ' + signed(m.model.budget_growth_pct) + '%, half applied'})`
+      : `${pct(p.change_pct)} (${p.chained ? 'chained on a projection, ' + p.steps + ' steps' : 'previous cycle'})`;
     if (cond && m.anchor_cycle_real_2025 > 0) {
       lines.push(R('Change vs Mentat ' + period(p.anchor_cycle) + ', drawn (conditioned)', pct((cond.total / m.anchor_cycle_real_2025 - 1) * 100)));
       lines.push(R('Model change before conditioning on the giving already observed', modelChange));
     } else lines.push(R('Change vs Mentat ' + period(p.anchor_cycle), modelChange));
+    if (m.model && m.model.presidential_uplift) lines.push(R(UPLIFT_LABELS[m.id] || 'Presidential cycle factor', upliftText(m.id, m.model.presidential_uplift) + (m.model.dP < 0 ? '; this midterm step divides by it' : '')));
     if (cond) {
       lines.push(R('Unconditioned model', `${money(m.projected_cycle_real_2025)}, interval ${range(m.cycle_prediction_low, m.cycle_prediction_high)}`));
       if (m.prob_full_below_observed != null) lines.push(R('Unconditioned chance below observed', percent(m.prob_full_below_observed)));
     }
-    lines.push(N((cond && m.given_observed_kind ? m.given_observed_kind : p.interval_kind) + '.'));
+    lines.push(N((cond && m.given_observed_kind ? m.given_observed_kind : m.interval_kind || p.interval_kind) + '.'));
     if (p.extrapolation) lines.push(N('Growth is outside this industry\'s historical range.', WARN));
     return lines;
   }
@@ -690,13 +774,15 @@
     if (!levels) return {empty: true, account: accountId, message: missing ? missing.reason : 'No Mentat level is available for this account.', flags: missing ? [{kind: INFO, text: missing.reason}] : []};
     const cpi = view.anchors && view.anchors.cpi_multiplier;
     const anchor = {id: 'anchor', label: period(anchorCycle), sub: 'Mentat level', value: levels.anchor_cycle_real_2025, nominal: levels.anchor_cycle_nominal, cycle: anchorCycle};
-    anchor.tip = [H(`${anchor.label} · Mentat level`), R('Account', accountLabel(accountId, levels)), R('In 2025 USD (this chart)', money(anchor.value)), R('Nominal', money(anchor.nominal))];
+    const population = levels.population || null;          // D-117: what the company-PAC total is a total of (the chart roster's committees or the published panel's cohort)
+    anchor.tip = [H(`${anchor.label} · Mentat level`), R('Account', accountLabel(accountId, levels))].concat(population ? [R('Population', population.label)] : [], [R('In 2025 USD (this chart)', money(anchor.value)), R('Nominal', money(anchor.nominal))]);
     if (cpi) anchor.tip.push(R('Deflator', 'CPI multiplier ' + number(cpi) + ' to 2025 dollars'));
-    anchor.tip.push(N("Mentat's own data for the tracked companies, in 2025 dollars so every column on this chart shares one dollar basis."));
+    anchor.tip.push(N(population && population.kind === 'panel_cohort' ? "The published PAC panel's cohort, in 2025 dollars so every column on this chart shares one dollar basis."
+      : "Mentat's own data for the tracked companies, in 2025 dollars so every column on this chart shares one dollar basis."));
     if (accountId === 'general' && excludesNonGiving(levels)) anchor.tip.push(N(NON_GIVING_NOTE));
     anchor.aria = `${anchor.label} Mentat level: ${money(anchor.value)} in 2025 dollars, ${money(anchor.nominal)} nominal`;
 
-    const cur = {id: 'current', label: period(head[0].cycle), cycle: head[0].cycle, state: 'pending'};
+    const cur = {id: 'current', label: period(head[0].cycle), cycle: head[0].cycle, state: 'pending', word: isRange(mCur) ? 'range of prior cycles' : '95% prediction interval'};
     if (seen) { const o = seen.observed; Object.assign(cur, {observed: o.amount_real_2025, observedNominal: o.amount_nominal, through: o.through, faceValue: o.face_value, starts: seen.remainder_starts}); }
     const flags = [];
     const addFlag = (kind, text, tip) => { if (!flags.some(f => f.text === text)) flags.push({kind, text, tip}); };
@@ -719,20 +805,21 @@
       if (cur.starts) cur.observedTip.push(N('The remainder starts the next day, ' + cur.starts + '.'));
     }
     if (cur.state === 'stacked' || cur.state === 'conflict') {
-      cur.aria = `${cur.label}: projected ${money(cur.total)} in 2025 dollars${cur.conditioned ? ' (given the giving already observed)' : ''}; ${money(cur.observed)} observed through ${cur.through}${cur.remainder != null ? ' plus ' + money(cur.remainder) + ' remainder' : ''}; 95% prediction interval ${range(cur.low, cur.high)}`;
+      cur.aria = `${cur.label}: projected ${money(cur.total)} in 2025 dollars${cur.conditioned ? ' (given the giving already observed)' : ''}; ${money(cur.observed)} observed through ${cur.through}${cur.remainder != null ? ' plus ' + money(cur.remainder) + ' remainder' : ''}; ${cur.word} ${range(cur.low, cur.high)}`;
       const cond = cur.conditioned ? {total: cur.total, low: cur.low, high: cur.high, observed: cur.observed, through: cur.through} : null;
       if (cur.state === 'stacked') {
         const lines = [H(`${cur.label} · remainder`), R('Remainder from', cur.starts || '-'),
           R(cur.conditioned ? 'Remainder, median (given the giving already observed)' : 'Projected remainder', money(cur.remainder)),
           R('Full cycle', `${money(cur.total)} = ${money(cur.observed)} observed + ${money(cur.remainder)} remainder`)];
         if (!cur.conditioned) lines.push(R('Remainder coefficient interval', range(mCur.remaining_coefficient_low, mCur.remaining_coefficient_high)));
-        lines.push(R('Remainder prediction interval', range(cur.remainderLow, cur.remainderHigh)));
+        lines.push(R(isRange(mCur) ? 'Remainder, range of prior cycles' : 'Remainder prediction interval', range(cur.remainderLow, cur.remainderHigh)));
         if (!cur.conditioned && cur.remainderLow < 0) lines.push(N('The remainder prediction interval reaches below zero; it is shown as the model returned it.', WARN));
-        lines.push(N('Observed giving is at face value (no ' + cur.cycle + ' CPI yet); the full cycle is the model\'s own arithmetic.'));
+        lines.push(N(cur.faceValue ? 'Observed giving is at face value (no ' + cur.cycle + ' CPI yet); the full cycle is the model\'s own arithmetic.'
+          : 'Observed giving is deflated at the expected inflation (no ' + cur.cycle + ' CPI yet); the full cycle is the model\'s own arithmetic.'));
         cur.remainderTip = lines;
       } else {
-        cur.remainderTip = [H(`${cur.label} · remainder`), N(mCur.remainder_reason || 'No remainder is shown.', WARN)];
-        addFlag(WARN, 'Observed giving already exceeds the projected cycle total', [H(`${cur.label} · remainder`), N(mCur.remainder_reason, WARN), R('Observed', money(cur.observed)), R('Projected full cycle', money(cur.total))]);
+        cur.remainderTip = [H(`${cur.label} · remainder`), N(remainderText(mCur) || 'No remainder is shown.', WARN)];
+        addFlag(WARN, 'Observed giving already exceeds the projected cycle total', [H(`${cur.label} · remainder`), N(remainderText(mCur), WARN), R('Observed', money(cur.observed)), R('Projected full cycle', money(cur.total))]);
       }
       cur.intervalTip = projectionTip(mCur, pacCur, cur.label, cond);
       cur.tip = [cur.intervalTip[0], cur.intervalTip[1], R('Observed through ' + cur.through, money(cur.observed))].concat(cur.remainder != null ? [R('Remainder', money(cur.remainder))] : [], cur.intervalTip.slice(2));
@@ -746,7 +833,7 @@
          R('Remainder prediction interval', range(cur.remainderLow, cur.remainderHigh)),
          N('The model returned an interval whose lower end is under the amount already observed (a negative remainder at the low end). It is drawn exactly as returned, not clipped. ' + BUDGET_TEXT + '.', WARN)]);
     } else if (cur.state === 'projection') {
-      cur.aria = `${cur.label}: projected ${money(cur.total)} in 2025 dollars; 95% prediction interval ${range(cur.low, cur.high)}`;
+      cur.aria = `${cur.label}: projected ${money(cur.total)} in 2025 dollars; ${cur.word} ${range(cur.low, cur.high)}`;
       cur.intervalTip = cur.tip = projectionTip(mCur, pacCur, cur.label, null);
       if (mCur.remainder_reason) addFlag(INFO, 'No observed giving for this cycle', [H(cur.label), N(mCur.remainder_reason)]);
     } else {
@@ -772,16 +859,18 @@
         addFlag(WARN, INTERVAL_TEXT, tip);
       }
     }
-    if (view.anchors && view.anchors.coverage_reason) addFlag(INFO, 'Coverage cut back to ' + view.anchors.coverage_end, [H('Coverage cut back'), R('Rule coverage end', view.anchors.rule_coverage_end), R('Observed through', view.anchors.coverage_end), N(view.anchors.coverage_reason)]);
+    // The cut-back is general giving's: a panel cohort is observed to the panel's own date, so its account does not carry it.
+    if (view.anchors && view.anchors.coverage_reason && !(population && population.kind === 'panel_cohort')) addFlag(INFO, 'Coverage cut back to ' + view.anchors.coverage_end, [H('Coverage cut back'), R('Rule coverage end', view.anchors.rule_coverage_end), R('Observed through', view.anchors.coverage_end), N(view.anchors.coverage_reason)]);
     const caveats = (catalog && industry() && industry().caveats) || [];
     if (caveats.length) addFlag(INFO, caveats[0], [H('Industry scope'), ...caveats.map(text => N(text))]);
     for (const chip of waiverChips('pac', view)) addFlag(chip.kind, chip.text, chip.tip);
     const values = [anchor.value, cur.observed, cur.total, cur.high, next.total, next.high].filter(Number.isFinite);
-    const model = {empty: false, account: accountId, accountLabel: accountLabel(accountId, levels), basis: '2025 dollars', columns: [anchor, cur, next], flags, axisMax: Math.max(...values), cpi, conditioned: Boolean(cur.conditioned)};
+    const model = {empty: false, account: accountId, accountLabel: accountLabel(accountId, levels), basis: '2025 dollars', population, columns: [anchor, cur, next], flags, axisMax: stickyMax(accountId, view, Math.max(...values)), cpi, conditioned: Boolean(cur.conditioned), rangeLabel: isRange(mCur) ? 'Range of prior cycles' : '95% range'};
     model.summary = `Giving by cycle, ${ACCOUNT_LABELS[accountId]}, 2025 dollars. ` + model.columns.map(c => c.aria).join('. ') + '.';
     return model;
   }
-  const ACCOUNT_LABELS = {pac: 'PAC giving', general: 'General giving'};
+  // D-064: the chart's PAC account is the roster companies' own PACs (the Party split row says "Company PACs" too); the published PAC table in the fold has its own title.
+  const ACCOUNT_LABELS = {pac: 'Company PACs', general: 'General giving'};
 
   // ---- tooltips, chips and icons ---------------------------------------------------------------------------------------
   let tipTarget = null;
@@ -814,7 +903,6 @@
     if (focusable) { target.addEventListener('focus', () => showTip(target, lines)); target.addEventListener('blur', hideTip); }
   }
   const ICONS = {
-    warn: 'M10 3.1 18.2 17H1.8zM10 8v4.4M10 14.5v.1',
     external: 'M8 4H5.2A1.7 1.7 0 0 0 3.5 5.7v9.1A1.7 1.7 0 0 0 5.2 16.5h9.1A1.7 1.7 0 0 0 16 14.8V12M11.2 3.5h5.3v5.3M16.5 3.5 9.2 10.8'
   };
   function icon(name) {
@@ -822,20 +910,13 @@
     element.append(svg('path', {d: ICONS[name]}));
     return element;
   }
-  function chip(kind, text, tipLines) {
-    const element = node('span', null, 'gf-chip gf-chip-' + kind);
-    if (kind === WARN && canPaint()) element.append(icon('warn'));
-    element.append(node('span', text));
-    if (tipLines) { element.tabIndex = 0; element.setAttribute('role', 'note'); element.setAttribute('aria-label', text + '. ' + plain(tipLines)); bindTip(element, tipLines, true); }
-    return element;
-  }
-  function paintChips(host, flags, reserve) {
-    host.replaceChildren();
-    for (const flag of flags || []) host.append(chip(flag.kind, flag.text, flag.tip));
-    host.hidden = !((flags && flags.length) || reserve);
-  }
 
-  // ---- drawing the cycle chart ---------------------------------------------------------------------------------------------
+  // ---- drawing the cycle chart (board A) --------------------------------------------------------------------------------------------
+  // Observed is solid plum, expected (a remainder or a projection) hatched, the 95% range a thin line with end caps, a hollow median mark and its two values; the 2025-26 value
+  // carries the one gold mark of the screen. The figures print in millions to one decimal ($30.2M); every tooltip keeps the exact amount. No band, no teal, no chips: a
+  // flag the model raises is plain text in the Methods fold (paintWarnings).
+  const chartMoney = value => { const a = Math.abs(value), sign = value < 0 ? '−' : ''; return a >= 999500 ? sign + '$' + (a / 1e6).toFixed(1) + 'M' : a >= 1e3 ? sign + '$' + Math.round(a / 1e3) + 'K' : sign + '$' + Math.round(a); };
+  const shortPeriod = end => (end - 1) + '–' + String(end).slice(-2);
   function drawChart(model, host, animate) {
     host.replaceChildren(); flip(host, 'gf-static', !animate);
     if (model.empty) {
@@ -844,49 +925,58 @@
     }
     const W = Math.max(300, Math.floor(host.clientWidth || 640)), narrow = W < 560;
     host.dataset.drawn = String(host.clientWidth);
-    const dims = {H: narrow ? 290 : 308, l: narrow ? 40 : 46, r: narrow ? 6 : 13, t: 14, b: narrow ? 48 : 44};
+    const dims = {H: narrow ? 330 : 348, l: narrow ? 44 : 56, r: narrow ? 4 : 0, t: 20, b: narrow ? 74 : 54};
     const plotW = W - dims.l - dims.r, plotH = dims.H - dims.t - dims.b, scale = niceScale(model.axisMax);
     const y = value => dims.t + plotH * (1 - value / scale.top);
-    const slot = plotW / 3, colW = Math.round(slot * (narrow ? .64 : .52)), cx = i => dims.l + slot * (i + .5), left = i => Math.round(cx(i) - colW / 2);
+    // The columns sit left of their slot's centre so the range line has room on their right.
+    const slot = plotW / 3, colW = narrow ? Math.round(slot * .46) : Math.min(92, Math.round(slot * .41)), shift = narrow ? 8 : 16, gap = narrow ? 12 : 20;
+    const cx = i => dims.l + slot * (i + .5) - shift, left = i => Math.round(cx(i) - colW / 2);
     const root = svg('svg', {class: 'gf-svg' + (narrow ? ' gf-narrow' : ''), width: W, height: dims.H, viewBox: `0 0 ${W} ${dims.H}`, focusable: 'false'});
     const defs = svg('defs'), pattern = svg('pattern', {id: 'gf-hatch', width: 7, height: 7, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'});
-    pattern.append(svg('rect', {class: 'gf-hatch-bg', width: 7, height: 7}), svg('rect', {class: 'gf-hatch-line', width: 2.2, height: 7})); defs.append(pattern); root.append(defs);
+    pattern.append(svg('rect', {class: 'gf-hatch-bg', width: 7, height: 7}), svg('line', {class: 'gf-hatch-line', x1: 0, y1: 0, x2: 0, y2: 7})); defs.append(pattern); root.append(defs);
+    const anchor = model.columns[0], cur = model.columns[1], next = model.columns[2];
     const grid = svg('g', {'aria-hidden': 'true'});
     for (const tick of scale.ticks) {
-      grid.append(svg('line', {class: tick === 0 ? 'gf-baseline' : 'gf-gridline', x1: dims.l, x2: dims.l + plotW, y1: y(tick), y2: y(tick)}));
-      grid.append(svg('text', {class: 'gf-axis-label', x: dims.l - 8, y: y(tick) + 4, 'text-anchor': 'end'}, axisLabel(tick)));
+      grid.append(svg('line', {class: tick === 0 ? 'gf-baseline' : 'gf-gridline', x1: dims.l, x2: W, y1: y(tick), y2: y(tick)}));
+      grid.append(svg('text', {class: 'gf-axis-label', x: dims.l - 10, y: y(tick) + 4, 'text-anchor': 'end'}, axisLabel(tick)));
     }
-    grid.append(svg('line', {class: 'gf-axis', x1: dims.l, x2: dims.l, y1: y(scale.top), y2: y(0)}));
-    for (const i of [1, 2]) grid.append(svg('line', {class: 'gf-gridline', x1: dims.l + slot * i, x2: dims.l + slot * i, y1: y(scale.top), y2: y(0)}));
+    // x labels: the period (15 px) over what the column is (12 px). The open cycle says what has been observed and to when.
+    const subs = [anchor.sub, cur.observed != null ? `${chartMoney(cur.observed)} observed to ${shortDate(cur.through)}` : 'Projection', 'Projection'];
     model.columns.forEach((col, i) => {
-      grid.append(svg('text', {class: 'gf-x-label', x: cx(i), y: y(0) + 21, 'text-anchor': 'middle'}, col.label));
-      if (col.sub) grid.append(svg('text', {class: 'gf-x-sub', x: cx(i), y: y(0) + 39, 'text-anchor': 'middle'}, col.sub));
+      grid.append(svg('text', {class: 'gf-x-label', x: cx(i), y: y(0) + 24, 'text-anchor': 'middle'}, shortPeriod(col.cycle)));
+      const parts = narrow && / observed to /.test(subs[i]) ? [subs[i].split(' to ')[0], 'to ' + subs[i].split(' to ')[1]] : [subs[i]];
+      parts.forEach((part, k) => grid.append(svg('text', {class: 'gf-x-sub', x: cx(i), y: y(0) + 42 + k * 15, 'text-anchor': 'middle'}, part)));
     });
     root.append(grid);
     const mark = (col, i) => { const g = svg('g', {class: 'gf-mark gf-mark-' + col.id, tabindex: 0, role: 'img', 'aria-label': col.aria}); cssVar(g, '--i', i); bindTip(g, col.tip || col.pendingTip, true); return g; };
-    const text = (cls, x, yy, value, anchor) => svg('text', {class: cls, x, y: yy, 'text-anchor': anchor || 'middle'}, value);
+    const text = (cls, x, yy, value, anchorAt) => svg('text', {class: cls, x, y: yy, 'text-anchor': anchorAt || 'middle'}, value);
     const hit = (x, yy, w, h, lines) => { const r = svg('rect', {class: 'gf-hit', x, y: yy, width: Math.max(1, w), height: Math.max(1, h)}); bindTip(r, lines); return r; };
-    const whisker = (col, x, cls) => {
-      const top = y(col.high), bottom = y(col.low), g = svg('g', {class: 'gf-whisker gf-fade ' + cls});
-      g.append(svg('line', {x1: x, x2: x, y1: top, y2: bottom}), svg('line', {x1: x - 5, x2: x + 5, y1: top, y2: top}), svg('line', {x1: x - 5, x2: x + 5, y1: bottom, y2: bottom}));
-      g.append(hit(x - 9, top - 6, 18, bottom - top + 12, col.intervalTip));
+    // The value above a column; the 2025-26 one is underlined in gold.
+    const valueLabel = (g, i, topY, gold) => {
+      const at = Math.max(16, topY - 11);
+      g.append(text('gf-val gf-fade', cx(i), at, chartMoney(i === 0 ? anchor.value : model.columns[i].total)));
+      if (gold) g.append(svg('rect', {class: 'gf-gold gf-fade', x: cx(i) - 15, y: at + 4, width: 30, height: 3, rx: 1.5}));
+    };
+    // The 95% range: a dashed run from the column to the line, the line with its end caps, a hollow mark at the median and the two values (wide screens).
+    const whisker = (col, barRight) => {
+      const wx = barRight + gap, top = y(col.high), bottom = y(col.low), mid = y(col.total), g = svg('g', {class: 'gf-whisker gf-fade'}), close = bottom - top < 16;
+      g.append(svg('line', {class: 'gf-connector', x1: barRight, x2: wx, y1: mid, y2: mid}));
+      g.append(svg('line', {class: 'gf-range', x1: wx, x2: wx, y1: top, y2: bottom}), svg('line', {class: 'gf-range', x1: wx - 5, x2: wx + 5, y1: top, y2: top}), svg('line', {class: 'gf-range', x1: wx - 5, x2: wx + 5, y1: bottom, y2: bottom}));
+      g.append(svg('circle', {class: 'gf-median', cx: wx, cy: mid, r: 3}));
+      g.append(hit(wx - 9, top - 6, 18, bottom - top + 12, col.intervalTip));
+      if (!narrow) { g.append(text('gf-val-side', wx + 10, close ? top - 2 : top + 4, chartMoney(col.high), 'start')); g.append(text('gf-val-side', wx + 10, close ? bottom + 12 : bottom + 4, chartMoney(col.low), 'start')); }
       return g;
     };
-    // The 2023-2024 Mentat level: one solid column, in the same 2025 dollars as everything after it.
-    const anchor = model.columns[0], anchorGroup = mark(anchor, 0), anchorTop = y(anchor.value);
+    // The 2023-24 Mentat level: one solid column, in the same 2025 dollars as everything after it.
+    const anchorGroup = mark(anchor, 0), anchorTop = y(anchor.value);
     anchorGroup.append(svg('rect', {class: 'gf-col-anchor gf-grow', x: left(0), y: anchorTop, width: colW, height: Math.max(1, y(0) - anchorTop)}));
-    anchorGroup.append(text('gf-val gf-halo gf-fade', cx(0), anchorTop - 8, money(anchor.value)));
+    valueLabel(anchorGroup, 0, anchorTop, false);
     root.append(anchorGroup);
-    // A projected cycle with no observed segment under it: a teal outline, the interval band and a whisker through the centre.
+    // A projected cycle with nothing observed under it: one hatched column, its range and its value.
     const projection = (col, i) => {
-      const g = mark(col, i), x = left(i), top = y(col.total), bandTop = y(col.high), bandBottom = y(col.low), base = y(0);
+      const g = mark(col, i), x = left(i), top = y(col.total), base = y(0);
       const body = svg('rect', {class: 'gf-col-projection gf-grow', x, y: top, width: colW, height: Math.max(1, base - top)}); bindTip(body, col.tip); g.append(body);
-      const band = svg('rect', {class: 'gf-band gf-fade', x, y: bandTop, width: colW, height: Math.max(1, bandBottom - bandTop)}); bindTip(band, col.intervalTip); g.append(band);
-      g.append(svg('rect', {class: 'gf-col-outline gf-grow', x: x + 1, y: top + 1, width: colW - 2, height: Math.max(1, base - top - 2)}));
-      g.append(whisker(col, cx(i), 'gf-whisker-projection'));
-      g.append(text('gf-val gf-val-projection gf-halo gf-fade', cx(i), bandTop - 8, money(col.high)));
-      g.append(text('gf-val gf-val-projection gf-halo gf-fade', cx(i), top - bandTop < 24 ? top + 17 : top - 8, money(col.total)));
-      g.append(text('gf-val gf-val-projection gf-halo gf-fade', cx(i), base - bandBottom < 26 ? bandBottom - 7 : bandBottom + 17, money(col.low)));
+      g.append(whisker(col, x + colW)); valueLabel(g, i, top, i === 1);
       return g;
     };
     // A column with nothing to draw yet: the observed segment when Mentat has one, then the hint or the missing-input mark.
@@ -895,39 +985,23 @@
       let floor = base;
       // The whole slot above the observed segment answers a hover with the reason (a missing input) or the hint, drawn first so the observed bar keeps its own tooltip.
       g.append(hit(left(i), y(scale.top), colW, Math.max(1, (col.observed != null ? y(col.observed) : base) - y(scale.top)), col.pendingTip));
-      if (col.observed != null) { floor = y(col.observed); const bar = svg('rect', {class: 'gf-col-observed gf-grow', x: left(i), y: floor, width: colW, height: Math.max(1, base - floor)}); bindTip(bar, col.observedTip); g.append(bar); observedLabels(g, col, i); }
+      if (col.observed != null) { floor = y(col.observed); const bar = svg('rect', {class: 'gf-col-observed gf-grow', x: left(i), y: floor, width: colW, height: Math.max(1, base - floor)}); bindTip(bar, col.observedTip); g.append(bar); }
       if (col.reason && col.reason !== HINT) g.append(text('gf-dash', cx(i), (col.observed != null ? floor : base) - 12, '-'));
       else {
-        const lines = HINT.split(' and ').map((part, k, all) => k ? 'and ' + part : part), at = col.observed != null ? floor : (y(0) + y(scale.top)) / 2;
+        const lines = HINT.split(' to ').map((part, k) => k ? 'to ' + part : part), at = col.observed != null ? floor : (y(0) + y(scale.top)) / 2;
         lines.forEach((line, k) => g.append(text('gf-hint gf-fade', cx(i), at - (col.observed != null ? 26 : 0) + k * 16, line)));
       }
       return g;
     };
-    const observedLabels = (g, col, i) => {
-      const segment = y(0) - y(col.observed), middle = y(col.observed) + segment / 2;
-      if (segment >= 46) { g.append(text('gf-val gf-val-inside gf-fade', cx(i), middle - 3, money(col.observed))); g.append(text('gf-sub gf-fade', cx(i), middle + 14, 'observed to ' + shortDate(col.through))); }
-      else if (segment >= 24) g.append(text('gf-val gf-val-inside gf-fade', cx(i), middle + 5, money(col.observed)));
-    };
-    const cur = model.columns[1], next = model.columns[2];
     if (cur.state === 'stacked' || cur.state === 'conflict') {
       const g = mark(cur, 1), x = left(1), observedTop = y(cur.observed), base = y(0), totalTop = y(cur.total);
       const observedBar = svg('rect', {class: 'gf-col-observed gf-grow', x, y: observedTop, width: colW, height: Math.max(1, base - observedTop)}); bindTip(observedBar, cur.observedTip); g.append(observedBar);
       if (cur.state === 'stacked') {
-        const remainderBar = svg('rect', {class: 'gf-col-remainder gf-grow', x: x + .5, y: totalTop + .5, width: colW - 1, height: Math.max(1, observedTop - totalTop - 1)}); bindTip(remainderBar, cur.remainderTip); g.append(remainderBar);
-        const remainderHeight = observedTop - totalTop, middle = totalTop + remainderHeight / 2;
-        if (remainderHeight >= 40) { g.append(text('gf-val gf-halo gf-fade', cx(1), middle - 2, money(cur.remainder))); g.append(text('gf-sub gf-halo gf-fade', cx(1), middle + 14, 'remainder')); }
-        else if (remainderHeight >= 22) g.append(text('gf-val gf-halo gf-fade', cx(1), middle + 5, money(cur.remainder)));
+        const remainderBar = svg('rect', {class: 'gf-col-remainder gf-grow', x, y: totalTop, width: colW, height: Math.max(1, observedTop - totalTop)}); bindTip(remainderBar, cur.remainderTip); g.append(remainderBar);
       } else {
         g.append(svg('line', {class: 'gf-total-marker gf-fade', x1: x - 4, x2: x + colW + 4, y1: totalTop, y2: totalTop}));
       }
-      observedLabels(g, cur, 1);
-      g.append(text('gf-val gf-halo gf-fade', cx(1), Math.min(totalTop, observedTop) - 8, money(cur.total)));
-      const wx = x + colW + (narrow ? 7 : 9), high = y(cur.high), low = y(cur.low), close = low - high < 18;
-      g.append(whisker(cur, wx, 'gf-whisker-observed'));
-      if (!narrow) {
-        g.append(text('gf-val gf-val-side gf-fade', wx + 10, close ? high - 3 : high + 4, money(cur.high), 'start'));
-        g.append(text('gf-val gf-val-side gf-fade', wx + 10, close ? low + 13 : low + 4, money(cur.low), 'start'));
-      }
+      g.append(whisker(cur, x + colW)); valueLabel(g, 1, Math.min(totalTop, observedTop), true);
       root.append(g);
     } else if (cur.state === 'projection') root.append(projection(cur, 1));
     else root.append(pending(cur, 1));
@@ -935,23 +1009,24 @@
     host.append(root);
     if (narrow && cur.low != null) {
       const notes = node('ul', null, 'gf-interval-notes');
-      for (const col of [cur, next]) if (col.low != null) notes.append(node('li', `${col.label} 95% prediction interval ${range(col.low, col.high)}`));
+      for (const col of [cur, next]) if (col.low != null) notes.append(node('li', `${col.label} ${col.word || '95% prediction interval'} ${range(col.low, col.high)}`));
       host.append(notes);
     }
   }
 
-  // ---- the House and Senate candidate-mix cards ------------------------------------------------------------------------------
+  // ---- the candidate mix, drawn as the Party split card (House | Senate) ----------------------------------------------------------
   // A 100% bar of the projected FULL-CYCLE Republican share (never the share of what remains: that mixes denominators with the
-  // full-cycle ticks), Democratic blue from the left, Republican red from the right. The teal tick is the next cycle's full-cycle
-  // share on the same scale, and the caption is Mentat's anchor-cycle share.
+  // full-cycle ticks), Democratic blue from the left, Republican red from the right. The dark tick is Mentat's anchor-cycle full-cycle
+  // share on the same scale ("Tick = 2023-24").
   //   * P1 present on a basis (remaining_allocation): the bar is the implied full-cycle share, i.e. the money already observed plus the
   //     projected share applied to the money still to come (observed giving is a fact and is not re-estimated), so no remaining amount
   //     is negative and the bar agrees with the amounts in its tooltip;
-  //   * P1 absent: the model's own projected full-cycle share, and a row the model marks budget_inconsistent gets the amber outline and
-  //     the amber chip (its negative remaining amounts are shown in the tooltip, not clipped).
-  // Either way a row whose DRAWN 95% share interval leaves 0-100% (a linear share model on a thin base) is not clipped: it gets the amber outline and the amber chip SHARE_WIDE_TEXT.
+  //   * P1 absent: the model's own projected full-cycle share, and a row the model marks budget_inconsistent gets an amber warning line in the
+  //     fold (its negative remaining amounts are shown in the tooltip, not clipped).
+  // Either way a row whose DRAWN 95% share interval leaves 0-100% (a linear share model on a thin base) is not clipped: the warning line SHARE_WIDE_TEXT says so.
+  // (The model objects still carry `chips`: the flags, as data. paintWarnings prints them as plain text; nothing is drawn as a chip.)
   // Where the bars are conditioned, the tooltips print the change actually drawn next to the model's own (unconditioned) change and label the latter as such.
-  const BASES = [['employee_candidate', 'Employees'], ['pac_candidate', 'Roster PACs']];
+  const BASES = [['employee_candidate', 'Employees'], ['pac_candidate', 'Company PACs']];
   const basisOf = (share, id) => share && Array.isArray(share.bases) ? share.bases.find(b => b.id === id) || null : null;
   const TERM_NAMES = {Pres: 'presidential or midterm cycle', G_prior: 'prior-cycle growth', G_current: 'cycle growth', Forecast: 'expected control', RMajNow: 'control before the election'};
   const termName = term => TERM_NAMES[term] || term;
@@ -1014,6 +1089,7 @@
       }
     } else if (['needs_inputs', 'no_observed', 'cycle_closed'].includes(b0.remainder_status)) lines.push(N(b0.remainder_reason));
     if (b0.thin_base) lines.push(N(`Thin base: ${money(b0.anchor_total_nominal)} of two-party ${chamber} giving in ${period(s0.anchor_cycle)} (under ${money(100000)}).`));
+    if (b0.roster_note) lines.push(N(b0.roster_note));
     if (hasFlag(b0, 'anchor_share_outside_fitted_range') || b0.anchor_share_outside_fitted_range) {
       const fit = s0.fitted_share_range;
       lines.push(N(`The ${period(s0.anchor_cycle)} Mentat share is outside the shares the model was fitted on${fit ? ` (${range(fit[0], fit[1], percent)})` : ''}.`));
@@ -1089,33 +1165,28 @@
     else if (!run) model.caption = HINT;
     return model;
   }
-  function drawMix(model, bodyHost, footHost, animate) {
-    bodyHost.replaceChildren(); footHost.replaceChildren(); flip(bodyHost, 'gf-static', !animate);
-    const grid = node('div', null, 'gf-mix-grid');
-    grid.append(node('span', '50%', 'gf-mix-50'));
+  // Party split (board A): one column per chamber, a 100% bar per basis, Democratic blue from the left and Republican red from the right, each share printed inside its end.
+  // The dark tick is the Mentat anchor cycle's Republican share (the full-cycle share the bar is compared with). The model's flags are not drawn here: they are plain text in the Methods fold.
+  const pct1 = share => (share * 100).toFixed(1) + '%';
+  function drawMix(model, bodyHost, animate) {
+    bodyHost.replaceChildren(); flip(bodyHost, 'gf-static', !animate);
     const rows = model.rows.length ? model.rows : BASES.map(([id, label]) => ({id, label, state: 'pending', aria: `${model.chamber} ${label}: ${HINT}`}));
     rows.forEach((row, index) => {
-      grid.append(node('span', row.label, 'gf-mix-label'));
-      const bar = node('div', null, 'gf-bar' + (row.flagged || row.wide ? ' is-flagged' : '')), fill = node('div', null, 'gf-bar-fill');
-      bar.tabIndex = 0; bar.setAttribute('role', 'img'); bar.setAttribute('aria-label', row.aria); cssVar(bar, '--i', index);
+      const group = node('div', null, 'gf-pb'), track = node('div', null, 'gf-ptrack');
+      track.tabIndex = 0; track.setAttribute('role', 'img'); track.setAttribute('aria-label', row.aria); cssVar(track, '--i', index);
       if (row.state === 'ready') {
-        cssVar(fill, '--d', ((1 - row.share) * 100).toFixed(3) + '%'); cssVar(fill, '--r', (row.share * 100).toFixed(3) + '%');
-        fill.append(node('i', null, 'gf-bar-d'), node('i', null, 'gf-bar-r')); bar.append(fill, node('span', percent(row.share) + ' R', 'gf-bar-label'));
-      } else { flip(fill, 'is-empty', true); bar.append(fill, node('span', row.state === 'missing' ? '-' : '', 'gf-bar-dash')); }
-      if (row.next != null) { const tick = node('b', null, 'gf-tick'); cssVar(tick, '--x', ((1 - row.next) * 100).toFixed(3) + '%'); bar.append(tick); }
-      bindTip(bar, row.tip, true);
-      grid.append(bar);
-      const labels = node('div', null, 'gf-tick-row');
-      if (row.next != null) { const label = node('span', percent(row.next), 'gf-tick-label'); cssVar(label, '--x', ((1 - row.next) * 100).toFixed(3) + '%'); labels.append(label); }
-      grid.append(labels);
+        const dem = node('span', null, 'gf-pd'), rep = node('span', null, 'gf-pr');
+        dem.style.width = ((1 - row.share) * 100).toFixed(3) + '%'; rep.style.width = (row.share * 100).toFixed(3) + '%';
+        dem.append(node('em', pct1(1 - row.share))); rep.append(node('em', pct1(row.share)));
+        track.append(dem, rep);
+        if (row.anchorShare != null) { const tick = node('s', null, 'gf-ptick'); tick.style.left = ((1 - row.anchorShare) * 100).toFixed(3) + '%'; track.append(tick); }
+      } else { flip(track, 'is-empty', true); track.append(node('span', row.state === 'missing' ? '-' : '', 'gf-bar-dash')); }
+      bindTip(track, row.tip, true);
+      group.append(node('div', row.label, 'gf-pbl'), track); bodyHost.append(group);
     });
-    grid.append(node('i', null, 'gf-mix-mid'), node('i', null, 'gf-mix-axis'));
-    bodyHost.append(grid);
-    if (model.caption) footHost.append(node('p', model.caption, 'gf-mix-caption' + (model.pending && model.caption === HINT ? ' is-hint' : '')));
-    for (const c of model.chips) footHost.append(chip(c.kind, c.text, c.tip));
   }
 
-  // ---- the lobbying card (Melange LDA): two series, never summed -----------------------------------------------------------------
+  // ---- the lobbying chart (Melange LDA, under the Lobbying account): two series, never summed -----------------------------------------------------------------
   // Levels are Melange LDA's reported amounts; a projection is the real-terms change from the log refit applied to the latest complete year, so
   // with the model fix (which says so in `dollars`) the card names that year's dollars, and without it keeps the model's own wording ("nominal").
   // A year with observed quarters is drawn from the interval conditioned on them when the model returned one (P1); otherwise as returned,
@@ -1145,7 +1216,7 @@
           coefLow: s.coefficient_low, coefHigh: s.coefficient_high, observed: s.observed || null,
           remaining: g ? s.remaining_given_observed_median : s.projected_remaining == null ? null : s.projected_remaining,
           remainingLow: g ? s.remaining_given_observed_low : s.remaining_prediction_low, remainingHigh: g ? s.remaining_given_observed_high : s.remaining_prediction_high,
-          remainderStatus: s.remainder_status, remainderReason: s.remainder_reason, changePct: row.change_pct, steps: row.steps, chained: row.chained});
+          remainderStatus: s.remainder_status, remainderReason: remainderText(s), changePct: row.change_pct, steps: row.steps, chained: row.chained});
       }
       series.push({id, tone, label: first.label, points});
     }
@@ -1180,11 +1251,11 @@
     }
     for (const chip of waiverChips('lobby', run)) chips.push(chip);
     const values = [].concat(...series.map(item => item.points.map(p => Math.max(p.value, p.high || 0))));
-    return {state: 'ready', series, chips, dollars, years: [baseYear].concat(rows.map(row => row.year).filter((year, i, all) => all.indexOf(year) === i)), axisMax: Math.max(...values)};
+    return {state: 'ready', series, chips, dollars, years: [baseYear].concat(rows.map(row => row.year).filter((year, i, all) => all.indexOf(year) === i)), axisMax: stickyMax('lobby', run, Math.max(...values))};
   }
   function drawLobby(model, host, animate) {
     host.replaceChildren(); flip(host, 'gf-static', !animate); host.setAttribute('role', 'group'); host.dataset.drawn = String(host.clientWidth);
-    const W = Math.max(240, Math.floor(host.clientWidth || 400)), Ht = Math.max(136, Math.floor(host.clientHeight || 136)), pad = {l: model.state === 'ready' ? 46 : 8, r: 10, t: 8, b: 24};
+    const W = Math.max(240, Math.floor(host.clientWidth || 640)), Ht = Math.max(240, Math.floor(host.clientHeight || 348)), pad = {l: model.state === 'ready' ? 56 : 8, r: 16, t: 20, b: 40};
     host.dataset.drawnH = String(Ht);
     const plotW = W - pad.l - pad.r, plotH = Ht - pad.t - pad.b;
     const root = svg('svg', {class: 'gf-svg gf-svg-lobby', width: W, height: Ht, viewBox: `0 0 ${W} ${Ht}`, focusable: 'false'});
@@ -1192,20 +1263,18 @@
       // Empty or closed: the frame only. No line is drawn without data.
       const grid = svg('g', {'aria-hidden': 'true'});
       for (const at of [0, .5, 1]) grid.append(svg('line', {class: at === 1 ? 'gf-baseline' : 'gf-gridline', x1: pad.l, x2: pad.l + plotW, y1: pad.t + plotH * at, y2: pad.t + plotH * at}));
-      grid.append(svg('line', {class: 'gf-axis', x1: pad.l, x2: pad.l, y1: pad.t, y2: pad.t + plotH}));
       root.append(grid);
       host.append(root, node('p', model.text, 'gf-lobby-note')); host.setAttribute('aria-label', model.text);
       return;
     }
     const scale = niceScale(model.axisMax), y = value => pad.t + plotH * (1 - value / scale.top), n = model.years.length;
     const x = year => pad.l + 12 + (plotW - 24) * (n === 1 ? .5 : model.years.indexOf(year) / (n - 1));
-    const grid = svg('g', {'aria-hidden': 'true'}), every = Math.ceil(scale.ticks.length / 4);
-    scale.ticks.forEach((tick, i) => {
+    const grid = svg('g', {'aria-hidden': 'true'});
+    scale.ticks.forEach(tick => {
       grid.append(svg('line', {class: tick === 0 ? 'gf-baseline' : 'gf-gridline', x1: pad.l, x2: pad.l + plotW, y1: y(tick), y2: y(tick)}));
-      if (i % every === 0) grid.append(svg('text', {class: 'gf-axis-label gf-axis-small', x: pad.l - 6, y: y(tick) + 4, 'text-anchor': 'end'}, axisLabel(tick)));
+      grid.append(svg('text', {class: 'gf-axis-label', x: pad.l - 10, y: y(tick) + 4, 'text-anchor': 'end'}, axisLabel(tick)));
     });
-    grid.append(svg('line', {class: 'gf-axis', x1: pad.l, x2: pad.l, y1: y(scale.top), y2: y(0)}));
-    for (const year of model.years) grid.append(svg('text', {class: 'gf-x-label gf-axis-small', x: x(year), y: Ht - 7, 'text-anchor': 'middle'}, String(year)));
+    for (const year of model.years) grid.append(svg('text', {class: 'gf-x-label', x: x(year), y: Ht - 12, 'text-anchor': 'middle'}, String(year)));
     root.append(grid);
     model.series.forEach((item, index) => {
       const g = svg('g', {class: `gf-series gf-series-${item.tone}`, tabindex: 0, role: 'img', 'aria-label': item.aria}); cssVar(g, '--i', index);
@@ -1235,18 +1304,22 @@
     return facts;
   }
 
-  // ---- the scenario panel: sliders with a real unset state, control pills, a lobbying popover ---------------------------------------
+  // ---- the Assumptions rail: sliders with a real unset state, control selects, a lobbying popover ---------------------------------------
   // Each number lives in a hidden holder input that keeps the id the request reads (gf-2026-growth, gf-2026-House-political, ...) at
   // full precision; the visible number and the slider are views of it. A blank holder is the unset state: the value reads "-", the
-  // thumb is hollow at the left end, and the request carries '' for it. Every input opens blank EXCEPT the two 2026 control rows (House and
+  // thumb is hollow at the left end, and the request carries '' for it. Every input opens blank EXCEPT the revenue-growth rows (last sentence) and the two 2026 control rows (House and
   // Senate): they open filled from catalog.saved_outlook (the Polymarket January-June control input), exactly as the old console did. That is a
   // deliberate deviation from spec 3d (owner ruling 2026-10-01), so each of the two rows says where its number comes from (source and date from the
   // catalog) and has a clear button that puts the score and the pill back to the unset state; the caption goes quiet as soon as the row no longer
-  // holds the saved value. Growth, prior-cycle growth, lobbying and every 2027-2028 input stay blank by default.
-  let pills = [], pops = [];
+  // holds the saved value. Revenue growth opens at the catalog growth default (cycle_model_view) where the industry has one (growthDefault, owner ruling 2026-10-07); otherwise it, prior-cycle growth, lobbying and every other 2027-2028 input stay blank by default.
+  let pills = [], pops = [], extras = [];      // extras: the prior-cycle growth and lobbying inputs (they open blank; Reset blanks them)
   function refreshControl(c, reformat) {
-    const value = parseNumber(c.holder.value), unset = value == null, outside = !unset && (value < c.min - 1e-9 || value > c.max + 1e-9);
-    cssVar(c.slider, '--p', unset ? 0 : clamp((value - c.min) / ((c.max - c.min) || 1), 0, 1));
+    const value = parseNumber(c.holder.value), unset = value == null, outside = !unset && !c.noFit && (value < c.min - 1e-9 || value > c.max + 1e-9);
+    const at = unset ? 0 : clamp((value - c.min) / ((c.max - c.min) || 1), 0, 1);
+    // The plum fill runs from the row's reference (growth: the industry default; control: the saved outlook) to the thumb, with a tick at the reference; with none it runs from the left end.
+    const ref = c.dflt ? c.dflt.value : c.saved ? c.saved.value : null, from = ref == null ? 0 : clamp((ref - c.min) / ((c.max - c.min) || 1), 0, 1);
+    cssVar(c.slider, '--p', at); cssVar(c.slider, '--a', Math.min(from, at)); cssVar(c.slider, '--w', Math.abs(at - from)); cssVar(c.slider, '--d', from);
+    flip(c.slider, 'has-default', ref != null); flip(c.row, 'is-changed', ref != null && !unset && Math.abs(value - ref) > 1e-9);
     c.slider.setAttribute('aria-valuenow', String(unset ? c.min : clamp(value, c.min, c.max)));
     c.slider.setAttribute('aria-valuetext', unset ? 'Not set' : formatNumber(value) + (c.unitText || '') + (outside ? ', outside the fitted range' : ''));
     flip(c.slider, 'is-unset', unset); flip(c.slider, 'is-outside', outside); flip(c.view, 'is-outside', outside);
@@ -1255,6 +1328,7 @@
     if (reformat) c.view.value = unset ? '' : formatNumber(value);
     c.unit.hidden = unset;
     if (c.saved) refreshSaved(c);
+    if (c.dflt) refreshDefault(c);
   }
   const refreshPill = select => { select.dataset.value = String(select.value == null ? '' : select.value); };
   // The saved outlook behind a control row: where the number comes from, from the catalog (market, window, as-of date), and the way back to the unset state.
@@ -1262,8 +1336,8 @@
   const monthOf = iso => /^\d{4}-\d{2}-\d{2}/.test(String(iso)) ? MONTHS[Number(String(iso).slice(5, 7)) - 1] : '';
   function outlookSource(snapshot, row) {
     const market = marketName(row.market), win = row.window || {}, from = monthOf(win.start), to = monthOf(win.end), months = from && to ? (from === to ? from : from + '–' + to) : '';
-    const asOf = row.as_of || snapshot.available_on, what = [market, months].filter(Boolean).join(' ');
-    return {text: ['Saved outlook'].concat(what ? [what] : [], asOf ? ['as of ' + asOf] : []).join(' · '),
+    const asOf = row.as_of || snapshot.available_on, year = /^\d{4}/.test(String(win.end || win.start || '')) ? String(win.end || win.start).slice(0, 4) : snapshot.cycle != null ? String(snapshot.cycle) : '';
+    return {text: [market, [months, year].filter(Boolean).join(' ')].filter(Boolean).join(', ') || 'Saved outlook',
       title: `Saved ${snapshot.cycle} outlook${asOf ? ', as of ' + asOf : ''}: ${market ? market + ' ' : ''}mean of the daily probability of Republican control${win.start && win.end ? ' from ' + win.start + ' to ' + win.end : ''}. It is an editable assumption, not a live feed. Clear it to leave the control unset.`};
   }
   // The row still holds exactly what the saved outlook gave it (the score and the pill)? Then its caption and clear button show; otherwise they go quiet (hidden, the
@@ -1279,14 +1353,29 @@
     c.holder.dispatchEvent(new Event('input', {bubbles: true})); c.view.focus();
   }
   function savedSource(c, select, chamber, snapshot, row) {
-    const info = outlookSource(snapshot, row), source = node('div', null, 'gf-source'), clear = node('button', '×', 'gf-source-clear');
-    source.append(node('span', info.text, 'gf-source-text')); source.title = info.title; source.id = c.holder.id.replace(/-political$/, '-source');
+    const info = outlookSource(snapshot, row), source = node('div', null, 'gf-source'), clear = node('button', 'Clear', 'gf-link gf-source-clear');
+    source.append(node('span', info.text, 'gf-source-text'), ' · ', clear); source.title = info.title; source.id = c.holder.id.replace(/-political$/, '-source');
     clear.type = 'button'; clear.title = `Clear: leave ${chamber} control unset`;
     clear.setAttribute('aria-label', `Clear the saved ${chamber} control score and its control before the election: leave both unset`);
-    c.numbox.after(clear); c.slider.after(source);
+    c.slider.after(source);
     c.saved = {value: row.value, control: String(row.current_control), select, source, clear, title: info.title};
     clear.addEventListener('click', () => clearSaved(c));
     select.addEventListener('change', () => refreshSaved(c));
+  }
+  // The industry default behind a revenue-growth row (the catalog growth default (cycle_model_view)): the holder opens at it (refreshControls then syncs the box and the slider), a muted caption says where it
+  // comes from, and once the row holds anything else (a blank included, which stays blank) the caption says so and Reset puts the default back.
+  function refreshDefault(c) {
+    const d = c.dflt, value = parseNumber(c.holder.value), same = value != null && Math.abs(value - d.value) < 1e-9, ignored = growthIgnored();
+    const said = ignored ? PAC_GROWTH_TEXT : same ? d.source : `Changed from default ${formatNumber(d.value)}%`;
+    d.label.textContent = same || ignored ? said : said + ' ·'; d.reset.hidden = same || ignored;
+    c.hint.textContent = said + '. ' + c.hint.textContent;
+  }
+  function growthDefault(c, value, source) {
+    const label = node('span'), reset = node('button', 'Reset', 'gf-link gf-caption-link'), text = node('span', null, 'gf-source-text'), caption = node('div', null, 'gf-source');
+    reset.type = 'button';
+    text.append(label, ' ', reset); caption.append(text); c.slider.after(caption);
+    c.holder.value = String(value); c.dflt = {value, source, label, reset};
+    reset.addEventListener('click', () => { c.holder.value = String(value); refreshControl(c, true); c.holder.dispatchEvent(new Event('input', {bubbles: true})); c.view.focus(); });
   }
   function refreshControls() { for (const c of controls) refreshControl(c, true); for (const select of pills) refreshPill(select); }
   function wireControl(c) {
@@ -1303,8 +1392,8 @@
     view.addEventListener('blur', () => { c.invalid = false; refreshControl(c, true); });
     let dragging = false;
     const fromPointer = event => {
-      const rect = slider.getBoundingClientRect(), inset = 9, usable = Math.max(1, rect.width - inset * 2);
-      commit(c.min + clamp((event.clientX - rect.left - inset) / usable, 0, 1) * (c.max - c.min));
+      const rect = slider.getBoundingClientRect();
+      commit(c.min + clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1) * (c.max - c.min));
     };
     slider.addEventListener('pointerdown', event => {
       if (event.button > 0) return;
@@ -1323,36 +1412,44 @@
     });
   }
   function numberControl(parent, spec) {
-    const row = node('div', null, 'gf-row' + (spec.inline ? ' gf-row-inline' : ''));
+    const row = node('div', null, 'gf-row' + (spec.compact ? ' gf-row-compact' : ''));
     const label = node('label', spec.label, 'gf-row-label'); label.id = spec.id + '-label'; label.htmlFor = spec.id + '-view';
     const holder = node('input'); holder.type = 'hidden'; holder.id = spec.id; holder.name = spec.id;
     const view = node('input', null, 'gf-num'); view.type = 'text'; view.id = spec.id + '-view'; view.inputMode = 'decimal'; view.autocomplete = 'off'; view.spellcheck = false; view.placeholder = '-';
     view.setAttribute('aria-describedby', spec.id + '-hint');
     const unit = node('span', spec.unit || '', 'gf-unit'), value = node('span', null, 'gf-numbox'); value.append(view, unit);
-    const head = node('div', null, 'gf-row-head'); head.append(label, value); if (spec.pill) head.append(spec.pill);
-    const slider = node('div', null, 'gf-slider'); slider.tabIndex = 0; slider.setAttribute('role', 'slider'); slider.setAttribute('aria-labelledby', label.id);
+    const head = node('div', null, 'gf-row-head'); head.append(label, value);
+    // The accessible name carries the horizon where two rows share a label (spec.name, e.g. "House: chance of Republican control, 2027–28"); it starts with the visible label.
+    const name = spec.name || spec.label; view.setAttribute('aria-label', name);
+    const slider = node('div', null, 'gf-slider'); slider.tabIndex = 0; slider.setAttribute('role', 'slider'); slider.setAttribute('aria-label', name);
     slider.setAttribute('aria-valuemin', String(spec.min)); slider.setAttribute('aria-valuemax', String(spec.max)); slider.setAttribute('aria-describedby', spec.id + '-hint');
-    const track = node('span', null, 'gf-track'); track.append(node('span', null, 'gf-fill')); slider.append(track, node('span', null, 'gf-thumb'));
+    const track = node('span', null, 'gf-track'); track.append(node('span', null, 'gf-fill')); slider.append(track, node('span', null, 'gf-default'), node('span', null, 'gf-thumb'));
     const hint = node('span', null, 'gf-sr'); hint.id = spec.id + '-hint';
     row.append(head, slider, holder, hint); parent.append(row);
-    const c = {holder, view, slider, unit, hint, numbox: value, min: spec.min, max: spec.max, unitText: spec.unit || '', invalid: false};
+    const c = {row, holder, view, slider, unit, hint, numbox: value, min: spec.min, max: spec.max, noFit: Boolean(spec.noFit), unitText: spec.unit || '', invalid: false};
     controls.push(c); wireControl(c);
     return c;
   }
-  function pillSelect(id, chamber) {
+  function pillSelect(id, name) {
     const select = node('select', null, 'gf-pill-select'); select.id = id; select.name = id;
-    select.setAttribute('aria-label', chamber + ' control before election'); select.title = chamber + ' control before election';
+    select.setAttribute('aria-label', name);
     const choose = node('option', 'Choose'), dem = node('option', 'Democratic'), rep = node('option', 'Republican');
     choose.value = ''; choose.hidden = true; dem.value = '0'; rep.value = '1'; select.append(choose, dem, rep);
     select.addEventListener('change', () => refreshPill(select));
     return select;
   }
+  // "House control before election": a labelled select (the pill look is gone), kept in the More assumptions disclosure.
+  function pillField(id, chamber, end) {
+    const select = pillSelect(id, `${chamber} control before election, ${shortPeriod(end)}`), wrap = node('label', null, 'gf-pillfield');
+    wrap.htmlFor = id; wrap.append(node('span', chamber + ' control before election'), select); pills.push(select);
+    return {wrap, select};
+  }
   function priorLine(end, index) {
     const id = `gf-${end}-prior`, line = node('label', null, 'gf-prior');
     const input = node('input', null, 'gf-inline'); input.type = 'text'; input.inputMode = 'decimal'; input.autocomplete = 'off'; input.spellcheck = false; input.id = id; input.name = id; input.placeholder = 'auto';
-    input.setAttribute('aria-label', 'Prior-cycle growth override, percent. ' + (index === 0 ? 'Blank uses the previous completed cycle when available.' : 'Blank uses the current-cycle growth assumption above.'));
+    input.setAttribute('aria-label', `Prior-cycle growth override, ${shortPeriod(end)}, percent. ` + (hasCycleModel() ? (blank => blank[0].toUpperCase() + blank.slice(1) + '.')(priorBlank(industry(), end, index)) : index === 0 ? 'Blank uses the previous completed cycle when available.' : 'Blank uses the current-cycle growth assumption above.'));
     input.addEventListener('input', () => { const cleaned = input.value.replace(/[^0-9.\-]/g, ''); if (cleaned !== input.value) input.value = cleaned; });
-    line.htmlFor = id; line.append(node('span', 'Prior cycle:', 'gf-prior-label'), input, node('span', '%', 'gf-unit'));
+    extras.push(input); line.htmlFor = id; line.append(node('span', 'Prior-cycle growth', 'gf-prior-label'), input, node('span', '%', 'gf-unit'));
     return line;
   }
   function closeLobby(returnFocus) {
@@ -1361,12 +1458,12 @@
   function lobbyBlock(end, index) {
     const wrap = node('div', null, 'gf-lobby-wrap'), link = node('button', null, 'gf-link gf-lobby-link'), pop = node('div', null, 'gf-pop');
     link.type = 'button'; link.append('Lobbying by year'); if (canPaint()) link.append(icon('external'));
-    link.setAttribute('aria-haspopup', 'dialog'); link.setAttribute('aria-expanded', 'false');
+    link.setAttribute('aria-haspopup', 'dialog'); link.setAttribute('aria-expanded', 'false'); link.setAttribute('aria-label', 'Lobbying by year, ' + shortPeriod(end));
     pop.id = 'gf-lobby-pop-' + (index ? 'next' : 'current'); link.setAttribute('aria-controls', pop.id);
-    pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Lobbying by year, ' + horizonTitle(end, index)); pop.hidden = true;
+    pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Lobbying by year, ' + shortPeriod(end)); pop.hidden = true;
     pop.append(node('p', 'Change in forecast annual industry growth from the preceding year, in percentage points. A relative change applies to the latest complete Melange LDA year; years beyond the next one need every change in between.', 'gf-help'));
     const fields = node('div', null, 'gf-pop-fields');
-    for (let year = index === 0 ? Number($('gf-date').value.slice(0, 4)) : end - 1; year <= end; year++) field(fields, `gf-${year}-lobby`, year + ' growth-forecast change (pp)', {min: -100, max: 100});
+    for (let year = index === 0 ? Number($('gf-date').value.slice(0, 4)) : end - 1; year <= end; year++) extras.push(field(fields, `gf-${year}-lobby`, year + ' growth-forecast change (pp)', {min: -100, max: 100}));
     const done = node('button', 'Done', 'primary gf-pop-done'); done.type = 'button';
     pop.append(fields, done);
     link.addEventListener('click', () => {
@@ -1377,48 +1474,51 @@
     wrap.append(link, pop); pops.push({link, pop});
     return wrap;
   }
-  function selectTab(index, focus) {
-    activeTab = index === 1 ? 1 : 0;
-    const tabs = [$('gf-tab-current'), $('gf-tab-next')];
-    tabs.forEach((tab, i) => { tab.setAttribute('aria-selected', String(i === activeTab)); tab.tabIndex = i === activeTab ? 0 : -1; });
-    // The panel that is not shown is invisible and inert (nothing in it can be focused or read), but it is NOT display:none: both panels share one grid cell, so the Scenario
-    // column keeps the height of the taller one and Calculate does not move when the horizon changes. (The page's own [hidden] rule is display:none!important, so the hidden attribute cannot be used.)
-    [$('gf-panel-current'), $('gf-panel-next')].forEach((panel, i) => {
-      if (!panel) return;
-      const off = i !== activeTab;
-      flip(panel, 'is-off', off); panel.setAttribute('aria-hidden', String(off)); panel.inert = off;
-    });
-    closeLobby(false);
-    if (focus) tabs[activeTab].focus();
-  }
   function anchorExample() {
     const sector = industry(), current = cycle(), info = anchorStatus(sector), anchorCycle = (info.current_cycle || current) - 2;
     return {sector, current, anchorCycle, ref: sector.history.find(row => row.cycle === anchorCycle), inputs: catalog.political_inputs && catalog.political_inputs.anchor_cycles[String(anchorCycle)]};
   }
+  // The rail shows both revenue-growth horizons and the open cycle's two control scores at once; "More assumptions" holds the rest, per horizon: the control before the election,
+  // prior-cycle growth, the 2027-2028 control scores and lobbying by year. Every input keeps the id the request reads.
   function buildInputsV2() {
-    $('gf-horizons').replaceChildren(); $('gf-observed').replaceChildren();
-    controls = []; pills = []; pops = [];
-    const {sector, current} = anchorExample();
+    $('gf-horizons').replaceChildren(); $('gf-more-body').replaceChildren(); $('gf-observed').replaceChildren();
+    controls = []; pills = []; pops = []; extras = [];
+    const {sector, current} = anchorExample(), ends = [current, current + 2], rail = $('gf-horizons'), more = $('gf-more-body');
     const outlook = catalog.saved_outlook && catalog.saved_outlook.cycle === current ? catalog.saved_outlook.control : null;
     const span = Number.isFinite(sector.growth_min) && Number.isFinite(sector.growth_max) && sector.growth_max > sector.growth_min ? [sector.growth_min, sector.growth_max] : [-99.9, 500];
-    $('gf-tab-current').textContent = 'Rest of ' + current; $('gf-tab-next').textContent = period(current + 2);
-    [current, current + 2].forEach((end, index) => {
-      const key = index ? 'next' : 'current', panel = node('div', null, 'gf-tabpanel'); panel.id = 'gf-panel-' + key;
-      panel.setAttribute('role', 'tabpanel'); panel.setAttribute('aria-labelledby', 'gf-tab-' + key);
-      numberControl(panel, {id: `gf-${end}-growth`, label: 'Revenue growth', unit: '%', min: span[0], max: span[1]});
-      panel.append(priorLine(end, index));
-      for (const chamber of chambers) {
-        const select = pillSelect(`gf-${end}-${chamber}-majority`, chamber); pills.push(select);
-        const political = numberControl(panel, {id: `gf-${end}-${chamber}-political`, label: chamber + ' R control', min: 0, max: 100, inline: true, pill: select});
-        if (end === current && outlook) {
-          political.holder.value = outlook[chamber].value; select.value = outlook[chamber].current_control;
-          savedSource(political, select, chamber, catalog.saved_outlook, outlook[chamber]);
-        }
-      }
-      panel.append(lobbyBlock(end, index));
-      $('gf-horizons').append(panel);
+    for (const end of ends) {
+      const g = cycleDefault(sector, end), w = g && g.growth_window;
+      // under the cycle model the slider is the default -10 to +10 pp (the server's floor, 1 + g > 0, caps the low end) and no fitted range exists to warn about
+      const growth = numberControl(rail, {id: `gf-${end}-growth`, label: g ? 'Industry revenue growth, avg ' + w[0] + '–' + String(w[1]).slice(2) : 'Revenue growth, ' + shortPeriod(end), unit: '%', min: g ? Math.max(-99.9, Math.round((g.growth_default - 10) * 1000) / 1000) : span[0], max: g ? Math.round((g.growth_default + 10) * 1000) / 1000 : span[1], noFit: Boolean(g)});
+      if (g) growthDefault(growth, g.growth_default, `IBIS ${g.edition} · avg ${w[0]}–${w[1]} · drives ${end} (one-year lag)`);
+    }
+    const fields = {};
+    for (const end of ends) for (const chamber of chambers) fields[end + chamber] = pillField(`gf-${end}-${chamber}-majority`, chamber, end);
+    const control = (parent, end, chamber, compact) => numberControl(parent, {id: `gf-${end}-${chamber}-political`, label: `${chamber}: chance of Republican control`, name: `${chamber}: chance of Republican control, ${shortPeriod(end)}`, unit: '%', min: 0, max: 100, compact});
+    for (const chamber of chambers) {
+      const political = control(rail, current, chamber, false);
+      if (outlook) { political.holder.value = outlook[chamber].value; fields[current + chamber].select.value = outlook[chamber].current_control; savedSource(political, fields[current + chamber].select, chamber, catalog.saved_outlook, outlook[chamber]); }
+    }
+    ends.forEach((end, index) => {
+      const group = node('div', null, 'gf-more-group'), title = node('h3', shortPeriod(end), 'gf-more-title');
+      title.id = 'gf-more-title-' + end; group.setAttribute('role', 'group'); group.setAttribute('aria-labelledby', title.id); group.append(title);
+      for (const chamber of chambers) group.append(fields[end + chamber].wrap);
+      group.append(priorLine(end, index));
+      if (index) for (const chamber of chambers) control(group, end, chamber, true);
+      group.append(lobbyBlock(end, index)); more.append(group);
     });
-    selectTab(activeTab, false); anchorNote(sector); updateModelNote(); renderInputNotes(); refreshControls();
+    anchorNote(sector); updateModelNote(); renderInputNotes(); refreshControls();
+  }
+  // "Reset to defaults" puts EVERYTHING back to how the rail opened: the industry's growth defaults and the saved political outlook (both pills too), and every input
+  // that opens blank (prior-cycle growth, the 2027-2028 control scores and pills, lobbying by year) blank again; then the scenario recalculates once.
+  function resetDefaults() {
+    for (const select of pills) select.value = '';
+    for (const input of extras) input.value = '';
+    for (const c of controls) {
+      c.holder.value = c.dflt ? String(c.dflt.value) : c.saved ? String(c.saved.value) : '';
+      if (c.saved) c.saved.select.value = c.saved.control;
+    }
+    refreshControls(); scheduleCalculate();
   }
   function renderInputNotes() {
     const host = $('gf-input-notes'); if (!host) return; host.replaceChildren();
@@ -1428,9 +1528,9 @@
       const block = node('div', null, 'gf-input-block');
       block.append(node('b', horizonTitle(end, index)));
       block.append(node('p', index === 0 ? 'Model the full cycle from Mentat\'s previous cycle, then subtract what Mentat has observed to its coverage end.' : 'The next complete two-year election cycle, chained on the previous-cycle anchor.', 'gf-help'));
-      block.append(node('p', `Revenue growth: 100 × (total revenue in ${end - 1}–${end} ÷ total revenue in ${end - 3}–${end - 2} − 1), on the historical revenue price basis.${ref ? ` ${anchorCycle} (the Mentat anchor cycle): ${number(ref.growth_pct)}%.` : ''} Fitted range ${number(sector.growth_min)}% to ${number(sector.growth_max)}%.`, 'gf-help'));
+      block.append(hasCycleModel() ? node('p', 'Industry revenue growth: the average annual growth of this industry\'s real revenue over the IBISWorld window that feeds the cycle (one-year lag: years c-3 to c-1). Every annual growth of the window moves by the same amount; each measure then derives its own industry budget change from its odd and even year mix and the projection moves by half of it (the 50/50 rule)' + (pacIgnoresGrowth() ? ', except company PACs, which it does not affect (panel nowcast)' : '') + '. Blank uses the IBIS default.', 'gf-help') : node('p', `Revenue growth: 100 × (total revenue in ${end - 1}–${end} ÷ total revenue in ${end - 3}–${end - 2} − 1), on the historical revenue price basis.${ref ? ` ${anchorCycle} (the Mentat anchor cycle): ${number(ref.growth_pct)}%.` : ''} Fitted range ${number(sector.growth_min)}% to ${number(sector.growth_max)}%.`, 'gf-help'));
       block.append(node('p', `Control scores: ${end === current && outlook ? 'Polymarket January–June mean, 0–100 (saved, editable).' : '0–100: Polymarket-style probability of Republican control, scaled like the January–June averages.'} The pill is the control before the election (Democratic or Republican).`, 'gf-help'));
-      block.append(node('p', index === 0 ? 'Prior cycle: blank (auto) uses the previous completed cycle when available.' : 'Prior cycle: blank (auto) uses the current-cycle growth assumption above.', 'gf-help'));
+      block.append(node('p', 'Prior cycle: ' + priorBlank(sector, end, index) + '.', 'gf-help'));
       block.append(node('p', 'Lobbying by year: change in forecast annual industry growth from the preceding year, in percentage points. A relative change applies to the latest complete Melange LDA year; years beyond the next one need every change in between.', 'gf-help'));
       host.append(block);
     });
@@ -1439,13 +1539,15 @@
   // ---- painting, the reference run, and the states around the chart ------------------------------------------------------------
   const ANCHOR_REFUSAL = {anchor_stale: 'The anchors were built from an earlier version of the published Mentat report. The forecast refuses rather than mix old levels with a new report.'};
   function clearAlert() { const alert = $('gf-alert'); alert.hidden = true; alert.replaceChildren(); }
-  function showAlert(title, text, advice) {
+  // retry adds a "Try again" text button that runs the calculation again (a failed request or a refusal; not a drawing error).
+  function showAlert(title, text, advice, retry) {
     const alert = $('gf-alert'); alert.replaceChildren(node('b', title), node('span', ' ' + text));
     if (advice) alert.append(node('span', ' ' + advice, 'gf-alert-advice'));
+    if (retry) { const again = node('button', 'Try again', 'gf-link gf-retry'); again.type = 'button'; again.addEventListener('click', () => calculate()); alert.append(' ', again); }
     alert.hidden = false;
   }
-  function busy(on) { $('gf-progress').hidden = !on; $('gf-chart').setAttribute('aria-busy', String(on)); }
-  function refusalAdvice(data) { return data.status === 'anchor_stale' ? ANCHOR_REFUSAL.anchor_stale + ' Rebuild the anchors, then calculate again.' : 'Build the Mentat anchor snapshot (mentat/forecast/anchors/build_giving_anchors.py), then calculate again.'; }
+  function busy(on) { $('gf-progress').hidden = !on; $('gf-chart').setAttribute('aria-busy', String(on)); $('gf-lobby-chart').setAttribute('aria-busy', String(on)); }
+  function refusalAdvice(data) { return data.status === 'anchor_stale' ? ANCHOR_REFUSAL.anchor_stale + ' Rebuild the anchors, then try again.' : 'Build the Mentat anchor snapshot (mentat/forecast/anchors/build_giving_anchors.py), then try again.'; }
   function currentInfo() {
     const run = readyRun(result) || readyRun(refRun);
     if (run) return run.anchors;
@@ -1456,14 +1558,14 @@
   }
   function paintFooter() {
     const facts = footerFacts(currentInfo());
-    $('gf-footnote-text').textContent = 'Mentat levels; OpenSecrets data only estimates the relationships.' + (facts.length ? ' ' + facts.join(' · ') + ' ·' : '');
+    $('gf-footnote-text').textContent = 'Mentat levels; OpenSecrets data only estimates the relationships.' + (facts.length ? ' ' + facts.join(' · ') : '');
   }
   // ---- "Sources and notes": the figures conditioned on the giving already observed (model fix P1) and the owner waivers ---------------
   // They sit beside the comparison table, which keeps printing the model's own unconditioned arithmetic exactly as before.
   function conditionedTables(run) {
     const h = run.horizons[0], amounts = [], mixes = [], lobby = [];
-    for (const m of h.pac.measures || []) if (givenOf(m)) amounts.push([m.label || m.id, money(m.cycle_given_observed_median), range(m.cycle_given_observed_low, m.cycle_given_observed_high), money(m.remaining_given_observed_median),
-      range(m.remaining_given_observed_low, m.remaining_given_observed_high), m.prob_full_below_observed == null ? '-' : percent(m.prob_full_below_observed), `${money(m.projected_cycle_real_2025)} (${range(m.cycle_prediction_low, m.cycle_prediction_high)})`]);
+    for (const m of h.pac.measures || []) if (givenOf(m)) amounts.push([m.label || m.id, money(m.cycle_given_observed_median), range(m.cycle_given_observed_low, m.cycle_given_observed_high) + (isRange(m) ? ' (range of prior cycles)' : ''), money(m.remaining_given_observed_median),
+      range(m.remaining_given_observed_low, m.remaining_given_observed_high) + (isRange(m) ? ' (range of prior cycles)' : ''), m.prob_full_below_observed == null ? '-' : percent(m.prob_full_below_observed), `${money(m.projected_cycle_real_2025)} (${range(m.cycle_prediction_low, m.cycle_prediction_high)})`]);
     for (const chamber of chambers) for (const b of (h.shares[chamber] && h.shares[chamber].bases) || []) {
       const a = allocationOf(b); if (!a) continue;
       mixes.push([`${chamber} · ${b.label || b.id}`, `R ${money(a.remaining_R_real_2025)} · D ${money(a.remaining_D_real_2025)} of ${money(a.remaining_total_real_2025)}`, percent(a.remaining_R_share),
@@ -1482,7 +1584,7 @@
     if (note) { note.hidden = !any; note.textContent = any ? 'The table below is the model\'s own unconditioned arithmetic: for the open cycle it can show a full-cycle interval or a remainder below the giving already observed. The chart and the cards draw the figures conditioned on that giving, listed above.' : ''; }
     if (!any) return;
     host.append(node('h3', 'Conditioned on the giving already observed', 'gf-notes-heading'));
-    host.append(node('p', 'For the open cycle the model also returns the full-cycle prediction interval conditioned on the giving already observed (the full cycle cannot fall below it) and a candidate-mix allocation that applies the projected share only to the money still to come. These are the figures the chart and the cards draw. Observed giving is at face value; every amount is 2025 USD.', 'gf-help'));
+    host.append(node('p', 'For the open cycle the model also returns the full-cycle prediction interval conditioned on the giving already observed (the full cycle cannot fall below it) and a candidate-mix allocation that applies the projected share only to the money still to come. These are the figures the chart and the cards draw. ' + (hasCycleModel() ? 'Observed giving is deflated at the expected inflation until a CPI exists; every amount is 2025 USD.' : 'Observed giving is at face value; every amount is 2025 USD.') + '', 'gf-help'));
     if (tables.amounts.length) evidenceTable(host, 'Open-cycle amounts', ['Account', 'Full cycle, median', '95% prediction interval', 'Remainder, median', 'Remainder 95% interval', 'Unconditioned chance below observed', 'Unconditioned model (full cycle)'], tables.amounts);
     if (tables.mixes.length) evidenceTable(host, 'Open-cycle candidate mix', ['Basis', 'Remaining giving (median)', 'Projected R share applied to it', 'Implied full-cycle R share (95% interval)', 'Implied two-party total', 'Unconditioned remainder'], tables.mixes);
     if (tables.lobby.length) evidenceTable(host, 'Lobbying, open year', ['Year and series', 'Full year, median', '95% prediction interval', 'Remainder, median', 'Remainder 95% interval', 'Unconditioned model'], tables.lobby);
@@ -1500,17 +1602,55 @@
       w.show_warning !== false && waiverCard(w) && (!w.industry || w.industry === id) ? 'chip shown' : 'listed here only']));
   }
   function paintNotes() { renderConditioned(readyRun(result)); renderWaivers(); }
+  // The account control (General giving | Company PACs | Lobbying) swaps what the main chart area shows; Lobbying draws the lobbying chart in place of the bars.
+  const barAccount = () => account === 'lobby' ? 'general' : account;
+  // D-116: the company PACs' whisker is the range of the three prior cycles' pace, so the legend names it (the chart model says which words).
+  function paintLegend(model) {
+    const swatch = $('gf-legend').querySelector('.gf-sw-range');
+    if (swatch && swatch.parentNode.lastChild !== swatch) swatch.parentNode.lastChild.textContent = (model && model.chart && model.chart.rangeLabel) || '95% range';
+  }
+  function paintAccountChrome(model) {
+    const lobby = account === 'lobby';
+    for (const id of ['general', 'pac', 'lobby']) $('gf-account-' + id).setAttribute('aria-pressed', String(account === id));
+    $('gf-chart').hidden = lobby; $('gf-lobby-chart').hidden = !lobby; $('gf-legend').hidden = lobby; $('gf-legend-lobby').hidden = !lobby;
+    paintLegend(model);
+    $('gf-hero-title').textContent = lobby ? 'Lobbying by year' : 'Giving by cycle';
+    const pop = !lobby && account === 'pac' && model && model.chart && model.chart.population, seen = pop && model.chart.columns[1].through;          // D-117
+    $('gf-basis').textContent = lobby ? (model && model.lobby && model.lobby.state === 'ready' ? 'Annual, ' + model.lobby.dollars : 'Annual, two series')
+      : '2025 dollars' + (pop ? ' · ' + pop.label + (seen ? ', observed to ' + seen : '') : '');
+  }
+  function paintParty() {
+    const view = readyRun(result) || readyRun(refRun), pac = view && view.horizons[0].pac;
+    $('gf-party-sub').textContent = view ? shortPeriod(view.horizons[0].cycle) + ', expected' : '';
+    $('gf-party-cap').textContent = pac && pac.anchor_cycle ? 'Tick = ' + shortPeriod(pac.anchor_cycle) : '';
+  }
+  // Every flag and warning the cycle view used to show as a chip is plain text in the Methods fold, scope first: the model's own words, then what its tooltip said.
+  function paintWarnings(model) {
+    const host = $('gf-warnings-list'), kind = item => item.kind === WARN ? 0 : 1;
+    // Under Lobbying the bar chart is not on screen, so its flags are not listed (the Party split stays, and so do its notes).
+    const groups = [...(account === 'lobby' ? [] : [[ACCOUNT_LABELS[model.chart.account] || 'Giving', model.chart.flags]]), ...model.mixes.map(mix => [mix.chamber, mix.chips]), ['Lobbying', model.lobby.chips]];
+    host.replaceChildren(); let any = false;
+    for (const [scope, items] of groups) for (const item of (items || []).slice().sort((a, b) => kind(a) - kind(b))) {
+      any = true;
+      const li = node('li', null, 'gf-warning' + (item.kind === WARN ? ' is-warn' : ''));
+      li.append(node('b', (item.kind === WARN ? 'Warning' : 'Note') + ' · ' + scope + ': '), node('span', item.text));
+      if (item.tip && item.tip.length) li.append(node('small', plain(item.tip).replace(/\.\.(?!\.)/g, '.'), 'gf-warning-detail'));
+      host.append(li);
+    }
+    $('gf-warnings').hidden = !any;
+  }
   function drawAll(model, animate) {
-    drawChart(model.chart, $('gf-chart'), animate); paintChips($('gf-chart-flags'), model.chart.flags, otherAccountHasFlags());
-    model.mixes.forEach(mix => drawMix(mix, $('gf-' + mix.chamber.toLowerCase() + '-body'), $('gf-' + mix.chamber.toLowerCase() + '-foot'), animate));
-    drawLobby(model.lobby, $('gf-lobby-chart'), animate); paintChips($('gf-lobby-foot'), model.lobby.chips);
+    paintAccountChrome(model);
+    if (account === 'lobby') drawLobby(model.lobby, $('gf-lobby-chart'), animate); else drawChart(model.chart, $('gf-chart'), animate);
+    model.mixes.forEach(mix => drawMix(mix, $('gf-' + mix.chamber.toLowerCase() + '-body'), animate));
+    paintParty(); paintWarnings(model);
   }
   function paintView(animate) {
     if (!canPaint() || !catalog || !isV2()) return;
     // A response the models cannot read must never blank the page: the comparison table behind "Sources and notes" is drawn first and stays.
     try {
       const first = Number($('gf-date').value.slice(0, 4)) || cycle() - 1;
-      painted = {projected: Boolean(readyRun(result)), chart: chartModel(result, refRun, account), mixes: chambers.map(chamber => mixModel(result, refRun, chamber)), lobby: lobbyModel(result, first, cycle() + 2)};
+      painted = {projected: Boolean(readyRun(result)), chart: chartModel(result, refRun, barAccount()), mixes: chambers.map(chamber => mixModel(result, refRun, chamber)), lobby: lobbyModel(result, first, cycle() + 2)};
       hideTip(); drawAll(painted, animate); paintFooter(); paintNotes(); refreshExample();
     } catch (error) {
       if (typeof console !== 'undefined' && console.error) console.error('Forecast giving: the cycle view could not be drawn', error);
@@ -1580,46 +1720,59 @@
     return lines;
   }
   function setAccount(next) {
-    account = next === 'pac' ? 'pac' : 'general';
-    $('gf-account-pac').setAttribute('aria-pressed', String(account === 'pac')); $('gf-account-general').setAttribute('aria-pressed', String(account === 'general'));
+    account = next === 'pac' || next === 'lobby' ? next : 'general';
+    for (const c of controls) if (c.dflt) refreshControl(c, false);       // the growth captions follow the account (growth does not affect company PACs)
+    paintAccountChrome(painted);
     if (!canPaint() || !painted) return;
-    painted.chart = chartModel(result, refRun, account); hideTip();
-    drawChart(painted.chart, $('gf-chart'), true); paintChips($('gf-chart-flags'), painted.chart.flags, otherAccountHasFlags());
+    hideTip();
+    if (account === 'lobby') drawLobby(painted.lobby, $('gf-lobby-chart'), true);
+    else { painted.chart = chartModel(result, refRun, account); paintAccountChrome(painted); drawChart(painted.chart, $('gf-chart'), true); }          // the legend and the basis line follow the chart model just built
+    paintWarnings(painted);
   }
-  // The chip row keeps its height when the other account has chips, so switching accounts does not move the cards below.
-  function otherAccountHasFlags() { const other = chartModel(result, refRun, account === 'pac' ? 'general' : 'pac'); return Boolean(other.flags && other.flags.length); }
   // The levels Mentat already holds, read with the anchor cycle's own growth and control (no change from the previous cycle). Only the
   // anchor level, the observed amounts and the anchor shares of that run are ever drawn; none of its projections is.
   function referenceRequest() {
-    const {current, ref, inputs, anchorCycle} = anchorExample();
+    const {sector, current, ref, inputs, anchorCycle} = anchorExample();
     if (!ref) return null;
     const horizons = {};
     for (const end of [current, current + 2]) {
-      const a = {growth_pct: ref.growth_pct, prior_growth_pct: '', current_control: {}, control_scores: {}, annual_forecast_changes: {}};
+      const d = hasCycleModel() ? cycleDefault(sector, end) : null;   // the cycle model reads growth_pct as an average annual growth: the anchor cycle's two-year growth would be a different quantity
+      const a = {growth_pct: d ? String(d.growth_default) : ref.growth_pct, prior_growth_pct: '', current_control: {}, control_scores: {}, annual_forecast_changes: {}};
       if (inputs) for (const chamber of chambers) { a.current_control[chamber] = inputs.current_control[chamber]; a.control_scores[chamber] = inputs[chamber].p_rep * 100; }
       horizons[end] = a;
     }
-    return {industry: value('gf-industry'), as_of: value('gf-date'), assumption_source: 'Reference levels only: the ' + period(anchorCycle) + ' growth and control, no scenario', assumption_date: value('gf-date'), horizons};
+    return {industry: value('gf-industry'), as_of: value('gf-date'), assumption_source: 'Reference levels only: the ' + period(anchorCycle) + (hasCycleModel() ? ' control and the industry growth defaults, no scenario' : ' growth and control, no scenario'), assumption_date: value('gf-date'), horizons, ...growthBasis()};
   }
   async function loadReference() {
     const key = value('gf-industry') + '|' + value('gf-date');
     if (refRun && referenceKey === key) return;
     const seq = ++referenceSeq; refRun = null; referenceKey = key; referenceFailure = '';
-    const body = referenceRequest(); if (!body) return;
+    const body = referenceRequest(); if (!body) { paintView(false); return; }
     referenceLoading = true; paintView(false);
     try {
       const data = await api('/api/forecast/project', body);
       if (seq !== referenceSeq) return;
       refRun = data;
-      if (data.status !== 'ready' && !result) showAlert(data.industry_label + ' · not calculated.', data.reason || 'The Mentat anchors cannot be used.', refusalAdvice(data));
+      if (data.status !== 'ready' && !result) showAlert(data.industry_label + ' · not calculated.', data.reason || 'The Mentat anchors cannot be used.', refusalAdvice(data), true);
     } catch (error) { if (seq === referenceSeq) referenceFailure = 'Mentat levels could not be loaded: ' + error.message; }
     finally { if (seq === referenceSeq) { referenceLoading = false; paintView(true); } }
   }
+  // A different industry or as-of date: neither the old calculation nor the old reference levels may stay on screen (or in the sticky axis) under the new scope.
+  function forgetRuns() { result = null; refRun = null; referenceKey = ''; }
   function inputsChanged() {
     exampleLoaded = false; $('gf-example-pill').hidden = true; $('gf-example-note').hidden = true;
     clearAlert(); busy(false);
     if (painted && painted.projected) paintView(false);
   }
+  // Any form input recalculates after a pause (calculate() drops a pending timer and ignores every answer but the latest request's). The previous chart stays up meanwhile.
+  function recalcSoon() { clearTimeout(recalc); recalc = setTimeout(calculate, 300); }
+  function scheduleCalculate() {
+    if (!isV2()) return invalidate();
+    exampleLoaded = false; $('gf-example-pill').hidden = true; $('gf-example-note').hidden = true;
+    recalcSoon();
+  }
+  // After the inputs are rebuilt (first open, industry change): both growth rows filled (an industry with a default) -> project now instead of waiting for an edit.
+  function autoCalculate() { if (isV2() && (hasCycleModel() || [cycle(), cycle() + 2].every(end => value(`gf-${end}-growth`) !== ''))) calculate(); }
   function showExample(text) {
     const {anchorCycle} = anchorExample(), pill = $('gf-example-pill');
     exampleLoaded = true; pill.textContent = 'Historical example: ' + period(anchorCycle) + ' growth and control'; pill.hidden = false;
@@ -1634,8 +1787,12 @@
     $('gf-view-insights').setAttribute('aria-pressed', String(!show)); $('gf-export').hidden = !show;
     if (show) initialize(); else { hideTip(); closeLobby(false); }
   }
-  function toggleNotes() {
-    const opening = $('gf-notes').hidden; $('gf-notes').hidden = !opening; $('gf-notes-toggle').setAttribute('aria-expanded', String(opening));
+  // "Sources" (bottom right) opens the Methods fold at its Sources and notes section.
+  function openSources() {
+    $('gf-methods').open = true;
+    const notes = $('gf-notes'), title = $('gf-notes-title');
+    if (notes.scrollIntoView) notes.scrollIntoView({block: 'start'});
+    if (title.focus) title.focus({preventScroll: true});
   }
   // Page-level listeners and the size watcher are attached once the view first opens (not when the script loads).
   let chromeReady = false;
@@ -1651,8 +1808,8 @@
       const redraw = () => {
         timer = 0; if (!painted || $('giving-forecast').hidden) return;
         const chart = $('gf-chart'), lobby = $('gf-lobby-chart');
-        if (chart.clientWidth && chart.clientWidth !== Number(chart.dataset.drawn)) drawChart(painted.chart, chart, false);
-        if (lobby.clientWidth && (lobby.clientWidth !== Number(lobby.dataset.drawn) || Math.max(136, lobby.clientHeight) !== Number(lobby.dataset.drawnH))) drawLobby(painted.lobby, lobby, false);
+        if (account !== 'lobby' && chart.clientWidth && chart.clientWidth !== Number(chart.dataset.drawn)) drawChart(painted.chart, chart, false);
+        if (account === 'lobby' && lobby.clientWidth && (lobby.clientWidth !== Number(lobby.dataset.drawn) || Math.max(240, lobby.clientHeight) !== Number(lobby.dataset.drawnH))) drawLobby(painted.lobby, lobby, false);
       };
       const observer = new ResizeObserver(() => { if (!timer) timer = requestAnimationFrame(redraw); });
       observer.observe($('gf-chart')); observer.observe($('gf-lobby-chart'));
@@ -1669,36 +1826,37 @@
         configureForSchema();
         for(const row of data.industries){const option=node('option',row.label+(row.code?' · '+row.code:''));option.value=row.id;$('gf-industry').append(option);}
         $('gf-date').value=data.as_of;$('gf-date').min=data.built_on;$('gf-date').max=data.as_of;$('gf-source-date').max=data.as_of;
-        buildInputs();renderEvidence();$('gf-form').hidden=false;$('gf-load-status').hidden=true;
+        buildInputs();renderEvidence();$('gf-form').hidden=false;$('gf-notes').hidden=false;$('gf-example').hidden=hasCycleModel();   // under the cycle model the anchor cycle's growth is not an input (it would read as an average annual growth), so there is no historical example
+        $('gf-load-status').hidden=true;
         const snapshot=data.saved_outlook;
         if(snapshot && snapshot.cycle===cycle() && !isV2()) {
           const row=node('div',null,'gf-saved-outlook'),button=node('button','Use saved '+snapshot.cycle+' outlook','secondary');button.type='button';button.addEventListener('click',savedOutlook);
           row.append(button,node('span','Saved '+snapshot.available_on+' · editable, not a live feed','gf-help'));$('gf-model-note').after(row);
         }
-        message('Enter your assumptions, or load a clearly labeled historical example to explore the model.');
-        setupChrome();paintView(false);loadReference();
+        message(hasCycleModel() ? 'Assumptions open at the IBIS growth defaults and the saved outlook; change any of them to explore.' : 'Enter your assumptions, or load a clearly labeled historical example to explore the model.');
+        setupChrome();paintView(false);loadReference();autoCalculate();
       } catch(error){$('gf-load-status').textContent=error.message+' Select Observed insights, then Forecast giving, to retry.';}
       finally{loading=null;}
     })();return loading;
   }
   open.addEventListener('click',()=>showForecast(true));
   $('gf-view-insights').addEventListener('click',()=>showForecast(false));
-  for(const id of ['pac','general'])$('gf-account-'+id).addEventListener('click',()=>setAccount(id));
-  [$('gf-tab-current'),$('gf-tab-next')].forEach((tab,index)=>{
-    tab.addEventListener('click',()=>selectTab(index,false));
-    tab.addEventListener('keydown',event=>{const to={ArrowRight:1,ArrowLeft:0,Home:0,End:1}[event.key];if(to!==undefined){event.preventDefault();selectTab(to,true);}});
-  });
-  $('gf-notes-toggle').addEventListener('click',toggleNotes);
+  for(const id of ['general','pac','lobby'])$('gf-account-'+id).addEventListener('click',()=>setAccount(id));
+  $('gf-reset').addEventListener('click',resetDefaults);
+  $('gf-sources-link').addEventListener('click',openSources);
   $('gf-form').addEventListener('submit',calculate);
-  $('gf-form').addEventListener('input',invalidate);
-  $('gf-industry').addEventListener('change',()=>{buildInputs();renderEvidence();$('gf-source').value='';$('gf-source-date').value='';invalidate();message(isV2()?'Industry changed. Enter your assumptions; Mentat supplies the observed amounts.':'Industry changed. Enter assumptions and observed amounts for this whole-industry scope.');loadReference();});
+  // Only the scenario's own inputs recalculate. Industry and date have their own change handlers (they rebuild the view first), the assumption-source notes are not
+  // model inputs, and the published PAC panels in the Methods fold have controls of their own.
+  const NOT_SCENARIO = ['gf-industry','gf-date','gf-source','gf-source-date'];
+  $('gf-form').addEventListener('input',event=>{const target=event&&event.target;if(target&&(NOT_SCENARIO.includes(target.id)||(target.closest&&target.closest('.pac-selected'))))return;scheduleCalculate();});
+  $('gf-industry').addEventListener('change',()=>{buildInputs();renderEvidence();$('gf-source').value='';$('gf-source-date').value='';forgetRuns();invalidate();message(isV2()?'Industry changed. Enter your assumptions; Mentat supplies the observed amounts.':'Industry changed. Enter assumptions and observed amounts for this whole-industry scope.');loadReference();autoCalculate();});
   $('gf-signal').addEventListener('change',()=>{
     const seats=$('gf-signal').value==='seats';
     for(const end of [cycle(),cycle()+2])for(const chamber of chambers){const input=$(`gf-${end}-${chamber}-political`);input.value='';input.min=seats?(chamber==='House'?-435:-100):0;input.max=seats?(chamber==='House'?435:100):100;input.parentNode.firstChild.textContent=chamber+(seats?' expected R seat gain':' R control score');$(input.id+'-help').textContent=seats?'Net seats gained by Republicans; losses are negative.':'0–100, on the historical IEM score scale.';}
     $('gf-source').value='';$('gf-source-date').value='';updateModelNote();invalidate();
   });
   $('gf-slopes').addEventListener('change',()=>{updateModelNote();invalidate();});
-  $('gf-date').addEventListener('change',()=>{if($('gf-date').validity.valid){buildInputs();invalidate();loadReference();}});
+  $('gf-date').addEventListener('change',()=>{if($('gf-date').validity.valid){buildInputs();forgetRuns();invalidate();loadReference();autoCalculate();}});
   $('gf-reference').addEventListener('click',historicalExample);
   $('gf-export').addEventListener('click',()=>{
     if(!result)return;
