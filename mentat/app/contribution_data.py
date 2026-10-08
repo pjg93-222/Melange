@@ -195,13 +195,17 @@ def _sources(directory):
     if not directory.is_dir():
         raise ValueError('The configured report directory is unavailable.')
     result = []
-    for workbook in sorted(directory.glob('* Industry Spending Overview.xlsx')):
-        if workbook.name.startswith('~$'):
+    from report_identity import identity, companion_name, lineage_paths
+    for workbook in sorted(directory.glob('* Industry Spending Overview*.xlsx')):
+        info = identity(workbook.name)
+        if workbook.name.startswith('~$') or info is None or info['kind'] != 'overview':
             continue
         if not workbook.resolve().is_relative_to(directory):
             raise ValueError('A report resolves outside its configured directory.')
-        industry = workbook.name.removesuffix(' Industry Spending Overview.xlsx')
-        item = {'id':industry, 'industry':industry, 'label':industry, 'workbook':workbook}
+        industry = info['industry']
+        item = {'id':info['label'], 'industry':industry, 'label':info['label'], 'workbook':workbook}
+        if info['cycle_label']:
+            item.update(snapshot_label=info['label'], cycle_label=info['cycle_label'])
         try:
             item['workbook_sha256'] = _hash(workbook)
         except OSError:
@@ -220,7 +224,7 @@ def _sources(directory):
         # the pinned payload, so a Data book that is stale, hand-edited or
         # simply absent cannot become a substitute report source. A lineage
         # mismatch is reported, never silently accepted.
-        sibling = workbook.with_name(industry + ' Industry Spending Data.xlsx')
+        sibling = workbook.with_name(companion_name(info))
         if sibling.is_file() and sibling.resolve().is_relative_to(directory):
             item['data_workbook'] = sibling
             try:
@@ -239,12 +243,20 @@ def _sources(directory):
             db_hash = _workbook_source(_stamp(workbook))
             # The P&C cache historically omits the ampersand, which slug() also does.
             cache = PROJECT / '.cache' / 'industry-report' / _slug(industry)
-            manifest_path = cache / f'manifest-{db_hash[:16]}.json'
-            payload = cache / f'industry_data-{db_hash[:16]}.json'
+            manifest_path, payload = lineage_paths(cache, db_hash, info['cycle_label'])
             manifest = _json(manifest_path)
             if manifest.get('database_sha256') != db_hash:
                 raise ValueError('Report source fingerprint disagrees with its payload manifest.')
             metadata = _payload_metadata(payload)
+            if info['cycle_label']:
+                if (manifest.get('cycle_label') != info['cycle_label']
+                        or set(metadata.get('expected_cycle_totals', {})) != {info['cycle_label']}
+                        or metadata.get('industry') != industry
+                        or manifest.get('published_workbook') != workbook.name
+                        or manifest.get('workbook_sha256') != item['workbook_sha256']
+                        or not re.fullmatch(r'[a-f0-9]{64}', str(manifest.get('data_sha256', '')))
+                        or _hash(payload) != manifest['data_sha256']):
+                    raise ValueError('Cycle-specific report payload does not match its published scope and fingerprint.')
             database = Path(metadata['database_path']).resolve()
             original_hash = db_hash
             hydration_path = None
@@ -299,6 +311,7 @@ def catalog(report_directory, sources=None):
     datasets=[]
     for source in (_sources(report_directory) if sources is None else sources):
         datasets.append({k:source[k] for k in ('id','industry','label','available')})
+        datasets[-1]['industry'] = source.get('snapshot_label', source['industry'])
         datasets[-1].update(fields=_fields(), bases=[{'id':k,'label':v[0],'status':'provisional' if k=='original_observed' else 'supported_subset' if k=='original_supported' else 'observed'} for k,v in BASES.items()],
                             provenance=_provenance(source), message=source.get('message'), default_basis='receipt')
     return {'schema_version':VERSION,'datasets':datasets,'fields':_fields(),'amount_unit':'cents'}
@@ -411,7 +424,8 @@ def _compatible_ledger(source):
         try:
             report=_json(path);scope=report.get('scope',{})
             if (report.get('status')=='completed' and scope.get('database_sha256')==source['database_sha256']
-                and scope.get('industries')==[source['industry']] and sorted(scope.get('cycles',[]))==[2022,2024,2026]):
+                and scope.get('industries')==[source['industry']]
+                and sorted(scope.get('cycles',[]))==([int(source['cycle_label'][-4:])] if source.get('cycle_label') else [2022,2024,2026])):
                 fingerprints={k.replace('\\','/'):v for k,v in scope.get('rule_fingerprints',{}).items()}
                 required=[p for p in RULE_PATHS if p!=Path(__file__)]
                 if all(fingerprints.get(p.relative_to(PROJECT).as_posix())==_hash(p) for p in required):
@@ -525,6 +539,7 @@ def _stage_sources(target, source, receipts, progress=lambda n,phase:None):
             for item in db.execute('SELECT * FROM '+table+' WHERE industry=?',(source['industry'],)):
                 row=dict(item);sid=str(row['sub_id']);day=date.fromisoformat(str(row.get('contribution_receipt_date') or '')[:10]);cycle=day.year+day.year%2
                 if cycle not in (2022,2024,2026):continue
+                if source.get('cycle_label') and cycle != int(source['cycle_label'][-4:]):continue
                 receipt=receipts.get(sid)
                 row.update(sub_id=sid,source_table=table,source_query_cycle=row.get(period),cycle=cycle,
                     current_receipt_cents=_cents(receipt['amount']) if receipt and receipt.get('include_in_analysis')=='Yes' else 0,

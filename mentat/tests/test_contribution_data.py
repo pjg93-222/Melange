@@ -150,6 +150,20 @@ class ContributionQueryTests(unittest.TestCase):
             self.assertEqual(row['source_conflicts'][0]['reason'],'conflicting_source')
             self.assertEqual(c.analyze([row])['decisions'][0]['bucket'],'conflicting_source_evidence')
 
+    def test_cycle_snapshot_excludes_other_cycles_from_shared_source_database(self):
+        source_path=Path(self.tmp.name)/'cycles.sqlite'
+        with closing(sqlite3.connect(source_path)) as db, db:
+            db.execute('CREATE TABLE contributions(sub_id TEXT,company TEXT,industry TEXT,contribution_receipt_amount REAL,contribution_receipt_date TEXT,committee_id TEXT,contributor_name TEXT,two_year_transaction_period INTEGER)')
+            db.executemany('INSERT INTO contributions VALUES (?,?,?,?,?,?,?,?)',[
+                ('selected','A','Example',100,'2024-01-01','C00000001','DONOR',2026),
+                ('other','A','Example',900,'2026-01-01','C00000001','DONOR',2024)])
+        with closing(sqlite3.connect(':memory:')) as target:
+            c._stage_sources(target,{'database':source_path,'industry':'Example','cycle_label':'2023-2024'}, {})
+            rows=[json.loads(row[0]) for row in target.execute('SELECT payload FROM canonical_sources')]
+            self.assertEqual([row['sub_id'] for row in rows], ['selected'])
+            self.assertEqual(rows[0]['cycle'], 2024)
+            self.assertEqual(rows[0]['source_query_cycle'], 2026)
+
     def test_rejected_source_conflict_cannot_resurrect_money(self):
         rows=[{'sub_id':'same','company':'A','industry':'Example','company_match_status':'rejected',
             'company_match_reason':'adjudicated: verified employer is not company A',

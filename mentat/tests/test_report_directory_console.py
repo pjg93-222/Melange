@@ -80,6 +80,22 @@ class ReportDirectoryConsoleTests(unittest.TestCase):
         original.unlink()
         with self.assertRaises(ValueError): self.console.report_path('published-reports',first['index'])
 
+    def test_cycle_snapshots_stay_distinct_in_report_and_graph_catalogs(self):
+        self.report('Fixture')
+        for cycle in ('2021-2022', '2023-2024'):
+            for kind in ('Overview', 'Data'):
+                path = self.reports / f'Fixture Industry Spending {kind} {cycle}.xlsx'
+                path.write_bytes(b'catalog only')
+        reports = self.console.report_catalog('published-reports')['reports']
+        expected = {'Fixture', 'Fixture 2021-2022', 'Fixture 2023-2024'}
+        self.assertEqual({row['industry'] for row in reports}, expected)
+        with patch.object(app, 'graph_schema', return_value=['2023-2024']):
+            graph = self.console.graph_catalog('published-reports')
+        self.assertEqual({row['name'] for row in graph['industries']}, expected)
+        selected = next(row for row in graph['industries'] if row['name'] == 'Fixture 2023-2024')
+        self.assertTrue(all('2023-2024.xlsx' in self.console.report_path('published-reports', i).name
+                            for i in selected['indices']))
+
     def test_legacy_outside_path_is_rejected_not_remapped_to_same_filename(self):
         inside = self.report('Banking')
         outside = self.root / inside.name
