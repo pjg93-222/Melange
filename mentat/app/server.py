@@ -103,6 +103,8 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/insights.css': ('insights.css', 'text/css'),
                  '/giving-forecast.js': ('giving-forecast.js', 'text/javascript'),
                  '/giving-forecast.css': ('giving-forecast.css', 'text/css'),
+                 '/pac-giving-forecast.js': ('pac-giving-forecast.js', 'text/javascript'),
+                 '/pac-giving-forecast.css': ('pac-giving-forecast.css', 'text/css'),
                  '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
                  '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
                  '/contribution-studio.js': ('contribution-studio.js', 'text/javascript'),
@@ -3030,6 +3032,9 @@ class Handler(BaseHTTPRequestHandler):
                 import analysis_data
                 import response_cache
                 return self.send_entry(response_cache.from_value(analysis_data.catalog(app.report_directory)))
+            if parsed.path == '/api/forecast/pac':
+                import pac_giving_forecast
+                return self.send(pac_giving_forecast.catalog())
             if parsed.path == '/api/forecast/catalog':
                 import giving_forecast
                 return self.send(giving_forecast.catalog())
