@@ -207,9 +207,19 @@
   const stylesheetPaths = () => [...document.querySelectorAll('link[rel~="stylesheet"][href]')]
     .map(link => new URL(link.getAttribute('href'), location.href)).filter(url => url.origin === location.origin).map(url => url.pathname);
 
+  // The strip the button sits in is screen furniture, like the button: the export leaves it out.
+  function stripOf(element) {
+    if (!element.classList.contains('figure-pdf-strip')) return 0;
+    const on = parseFloat(getComputedStyle(element).paddingTop) || 0;
+    element.classList.remove('figure-pdf-strip');
+    const off = parseFloat(getComputedStyle(element).paddingTop) || 0;
+    element.classList.add('figure-pdf-strip');
+    return Math.max(0, on - off);
+  }
   async function build(element, options) {
     const box = element.getBoundingClientRect();
     const width = Math.ceil(box.width), height = Math.ceil(Math.max(box.height, element.scrollHeight || 0));
+    const lift = stripOf(element);
     if (width < 24 || height < 24) throw new Error('This figure is not on screen, so there is nothing to draw.');
     const doc = document.implementation.createHTMLDocument('');
     const clone = doc.importNode(element, true);
@@ -218,10 +228,11 @@
     carryControls(element, clone);
     for (const node of clone.querySelectorAll(CHROME + ',[hidden]')) node.remove();
     if (twin) twin.remove();
-    pin(clone, width, height);
+    clone.classList.remove('figure-pdf-strip');
+    pin(clone, width, height - lift);
     const now = new Date(), meta = {title: options.title || '', scope: options.scope || '', source: options.source || ''};
     const head = header(doc, meta, now), headHeight = measure(head, width);
-    const page = pageSize(width, height, headHeight);
+    const page = pageSize(width, height - lift, headHeight);
     if (page.height > MAX_SIDE || page.width > MAX_SIDE) throw new Error('This figure is too large for one image.');
     const sheet = doc.createElement('div');
     sheet.className = 'figure-pdf-sheet';
@@ -304,6 +315,8 @@
           button.title = 'Download an image of this figure';
           host.append(button);
         }
+        // The button has a strip of its own across the top of the figure, so it never sits on the figure.
+        if (!host.classList.contains('figure-pdf-strip')) host.classList.add('figure-pdf-strip');
         // The button is absolutely placed; a figure that is not positioned yet becomes the anchor.
         if (!checked.has(host)) {
           checked.add(host);

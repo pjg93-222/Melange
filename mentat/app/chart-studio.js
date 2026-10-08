@@ -3168,8 +3168,10 @@
     if (drawnWidth > 0) out.labelGap = Math.round(200000 / drawnWidth) / 100;
     return out;
   }
+  // The canvas's room for a chart is its content box; the figure button's strip pads its top.
+  const roomHeight = canvas => { const style = getComputedStyle(canvas); return canvas.clientHeight - (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0); };
   function roomFit(canvas) {
-    return canvas === el('canvas') && chartRoomy() ? {fitHeight: canvas.clientHeight, barPitchMax: ROOM_PITCH} : {};
+    return canvas === el('canvas') && chartRoomy() ? {fitHeight: roomHeight(canvas), barPitchMax: ROOM_PITCH} : {};
   }
   // Paul, 2026-09-24: a pie or doughnut on screen fits the chart box it is
   // drawn in - the whole pie, no scrolling, nothing clipped, and no title,
@@ -4689,7 +4691,7 @@
     // toward 14px until the bars, the axis and the legend fit it; a board tile
     // or a narrow page grows with the chart instead. With a pane put away
     // (ruling c) the pitch may also grow, up to ROOM_PITCH, to fill the room.
-    const fitHeight = node('canvas') === el('canvas') && !(window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) ? node('canvas').clientHeight : 0;
+    const fitHeight = node('canvas') === el('canvas') && !(window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) ? roomHeight(node('canvas')) : 0;
     const scopeColumn = {id: 'scope', name: (kind === 'industry' ? 'Industry' : kind === 'cycle' ? 'Election cycle' : 'Company') + (colourDim ? ' \u00b7 ' + name(colourDim) : ''), role: 'dimension', type: 'category'};
     const spec = Object.assign({}, compiled.spec, {dimensions: [...plotted, 'scope'], labelDimensions: plotted.length ? plotted : ['scope'], color: 'scope', barPitch: 28, barPitchMin: 14, barPitchMax: fitHeight && chartRoomy() ? ROOM_PITCH : 0, fitHeight: fitHeight, niceTicks: true, panelTitles: compiled.spec.measures.length !== 1, width: node('canvas').clientWidth, barLeftMax: 190,
       colorMap: colourMap || undefined, title: title,
@@ -5569,7 +5571,7 @@
     // and scrolled), so the size settles here, in at most three passes,
     // rather than on a later frame a background tab never runs.
     for (let pass = 0; pass < 3; pass++) {
-      const room = canvas.clientWidth, tall = canvas.clientHeight;
+      const room = canvas.clientWidth, tall = roomHeight(canvas);
       if (!room || !tall) return;
       const contain = Math.min(room, tall * box[2] / box[3]);
       if (contain < 0.7 * Math.min(room, box[2])) {
