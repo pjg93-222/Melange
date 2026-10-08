@@ -1,0 +1,114 @@
+--- a/mentat/app/scope.js
++++ b/mentat/app/scope.js
+@@ -23,7 +23,10 @@
+   // S8 adds `map`: the direction of the district map open on that pane
+   // ('raised' or 'spent'). Absent means the pane grid is showing, so an
+   // ordinary permalink is unchanged and a map permalink reopens the map.
+-  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle', 'map'];
++  // Console redesign build 06, fix round 1 (R06-09): `compare` is the second
++  // cycle of an open two-cycle map compare (board M13), a four-digit cycle
++  // like `cycle`. Absent means one map.
++  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle', 'map', 'compare'];
+   const PANE_KEYS = [];
+   for (let pane = 0; pane < PANES.length; pane += 1) {
+     for (let field = 0; field < PANE_FIELDS.length; field += 1) {
+@@ -92,6 +95,7 @@
+       if (field === 'committee' && !PANE_COMMITTEE.test(text)) return {ok: false, value: text, reason: PANE_COMMITTEE_REASON};
+       if (field === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
+       if (field === 'map' && PANE_MAP.indexOf(text) < 0) return {ok: false, value: text, reason: PANE_MAP_REASON};
++      if (field === 'compare' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
+       return {ok: true, value: text};
+     }
+     if (key === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
+--- a/mentat/app/tests/scope.test.js
++++ b/mentat/app/tests/scope.test.js
+@@ -156,6 +156,19 @@
+   assert.equal(state.location.search, '?studioPane=B&industry=Banking&cycle=2024');
+ });
+ 
++test('[url_scope] build 06: a pane map compare cycle is the flat key <pane>.compare', () => {
++  const state = fakeWindow('/?a.source=csv&a.id=csv-1&a.committee=C00000001&a.map=raised#evidence');
++  scope.write({'a.compare': '2024'}, {location: state.location, history: state.history, target: state.events});
++  assert.equal(state.location.search, '?a.source=csv&a.id=csv-1&a.committee=C00000001&a.map=raised&a.compare=2024');
++  assert.equal(scope.read(state.location.search.slice(1))['a.compare'], '2024');
++  // Not a cycle: refused on read and never written.
++  const refused = scope.read('a.source=csv&a.id=csv-1&a.committee=C00000001&a.compare=2023-2024');
++  assert.equal(refused['a.compare'], undefined);
++  assert.ok(refused.invalid.some(item => item.key === 'a.compare'));
++  scope.write({'a.compare': ''}, {location: state.location, history: state.history, target: state.events});
++  assert.ok(!state.location.search.includes('a.compare'));
++});
++
+ test('[url_scope] write() never writes a reserved key, even when asked', () => {
+   const state = fakeWindow('/#graph');
+   const asked = Object.fromEntries(contract.reserved.map(key => [key, 'x']));
+--- a/audits/mentat_failings_20260915/contracts/url_scope.json
++++ b/audits/mentat_failings_20260915/contracts/url_scope.json
+@@ -216,6 +216,16 @@
+         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+       ]
+     },
++    "a.compare": {
++      "value": "Pane A. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
++      "writers": [
++        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
++      ],
++      "readers": [
++        "mentat/app/scope.js:read",
++        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
++      ]
++    },
+     "b.source": {
+       "value": "Pane B. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+       "writers": [
+@@ -266,6 +276,16 @@
+         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+       ]
+     },
++    "b.compare": {
++      "value": "Pane B. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
++      "writers": [
++        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
++      ],
++      "readers": [
++        "mentat/app/scope.js:read",
++        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
++      ]
++    },
+     "c.source": {
+       "value": "Pane C. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+       "writers": [
+@@ -316,6 +336,16 @@
+         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+       ]
+     },
++    "c.compare": {
++      "value": "Pane C. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
++      "writers": [
++        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
++      ],
++      "readers": [
++        "mentat/app/scope.js:read",
++        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
++      ]
++    },
+     "d.source": {
+       "value": "Pane D. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+       "writers": [
+@@ -365,6 +395,16 @@
+         "mentat/app/scope.js:read",
+         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+       ]
++    },
++    "d.compare": {
++      "value": "Pane D. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
++      "writers": [
++        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
++      ],
++      "readers": [
++        "mentat/app/scope.js:read",
++        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
++      ]
+     }
+   },
+   "reserved": [

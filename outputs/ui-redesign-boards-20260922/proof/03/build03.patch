@@ -1,0 +1,1645 @@
+diff --git a/mentat/app/chart-studio-core.js b/mentat/app/chart-studio-core.js
+--- a/mentat/app/chart-studio-core.js
++++ b/mentat/app/chart-studio-core.js
+@@ -122,7 +122,9 @@
+       types: {},
+       params: {start: 0, end: 0, limit: 0, subject: '', maxGroups: 0, splitMulti: false},
+       sort: 'none',
+-      showLabels: false,
++      // S1 (build 03): a new sheet writes each bar's value at its end. Labels
++      // stays a toggle, and a saved sheet keeps its own choice.
++      showLabels: true,
+       fit: 'standard'
+     };
+   }
+diff --git a/mentat/app/chart-studio.css b/mentat/app/chart-studio.css
+--- a/mentat/app/chart-studio.css
++++ b/mentat/app/chart-studio.css
+@@ -833,3 +833,12 @@
+ @media (max-width:1000px){
+   .studio-board-2,.studio-board-4 {grid-template-columns:1fr}
+ }
++
++/* Build 03 (S1): the structure the new header, note line and Inspector rail
++   need wherever this file loads; the look is in workspace-polish.css. */
++.studio-source-anchor {position:relative;display:inline-flex}
++.studio-source-popover {position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:320px;padding:12px 14px;background:white;border:1px solid var(--line);border-radius:10px}
++.studio-reconcile {position:relative}
++.studio-reconcile-detail {position:absolute;left:0;bottom:calc(100% + 12px);z-index:20;width:min(520px,100%);padding:12px 14px;background:white;border:1px solid var(--line);border-radius:10px}
++.studio-inspector-rail {display:none}
++.studio-icon {width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.3}
+diff --git a/mentat/app/chart-studio.js b/mentat/app/chart-studio.js
+--- a/mentat/app/chart-studio.js
++++ b/mentat/app/chart-studio.js
+@@ -71,6 +71,14 @@
+   let openedSaved = '', holdingSavedId = false;
+   let inspectorTab = 'marks', overviewMode = false, overviewRevision = 0, overviewCompany = '';
+   let queryRequests = 0;
++  // "+ Compare with..." (build 03): the scopes each sheet is split into, kept in
++  // this tab by sheet id. None of it reaches the URL: the query string is shared
++  // with Graph, and a comparison written there would open Graph in it too.
++  const compareBySheet = new Map();
++  let comparePills = null, compareMenu = null, compareDrawn = null;
++  const compareFlights = [{waiting: null}, {waiting: null}, {waiting: null}], menuFlight = {waiting: null};
++  // What "Match Graph scope" applies, worked out when the note line is drawn.
++  let graphMatchTarget = null;
+   // The Data source panel opens on arrival and folds itself away once, after
+   // the first load that actually produced fields. sourceReady is what the
+   // folded summary reports; it is cleared whenever a load starts again.
+@@ -216,6 +224,13 @@
+     mark.className = sourceReady ? 'is-ready' : 'is-waiting';
+     mark.textContent = sourceReady ? '✓ Ready' : (el('loading').textContent || 'Data source');
+     summary.append(mark);
++    // The header row carries the same state (S1 "Ready"), so it is readable
++    // while the source popover is closed.
++    const ready = el('ready');
++    if (ready) {
++      ready.textContent = sourceReady ? 'Ready' : (el('loading').textContent || '');
++      ready.classList.toggle('is-ready', sourceReady);
++    }
+   }
+ 
+   // The panel stays open (item 16). Its selects are the way into every report,
+@@ -463,6 +478,7 @@
+     for(const state of sheets)state.source={...state.source,mode:'contributions',dataset:d.id,industry:d.industry,basis:state.source.basis||'receipt',reportName:d.provenance.workbook,sheet:'Verified source observations',runName:'Configured completed-report folder',sha256:d.provenance.workbook_sha256};
+     data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
+     if(!restored){sheet().columns=[{column:data.columns.findIndex(f=>f.id==='company'),aggregation:'sum'}];sheet().rows=[{column:data.columns.findIndex(f=>f.id==='amount'),aggregation:'sum'}];sheet().marks.type='bar';}
++    for(const [id,entry] of compareBySheet)if(entry.kind==='industry')compareBySheet.delete(id);
+     persist();renderAll();
+     // Four call sites reach this function - the Data panel picker, the shelf
+     // source buttons, openView() and the permalink path - and every one of them
+@@ -636,6 +652,8 @@
+     const ticket=view.bump(),sheetBasis=basisOf(state);
+     try {
+       const compiled=contributions.compile(state,columns(),{dataset:dataset().id,industry:dataset().industry,basis:sheetBasis,offset:view.offset});
++      if(view.el===el)compareDrawn=null;
++      if(view.el===el&&compareActive(state)){await renderCompareView(view,compiled,ticket);return;}
+       const query=compiled.query,key=JSON.stringify(query),previous=view.request;
+       if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
+       if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
+@@ -647,10 +665,13 @@
+       node('verified-summary').replaceChildren();
+       for(const [label,value]of [[sheetBasis==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));node('verified-summary').append(item);}
+       node('verified-summary').title='Totals cover all matching source records before grouped filters. Group distinct identity counts are not added together.';
+-      node('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups · totals cover all ${fmt(result.group_count)}`:'No matching observations';
++      node('group-count').textContent=result.group_count?`Groups ${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)}`:'No matching observations';
++      node('group-count').title=result.group_count?`Totals cover all ${fmt(result.group_count)} groups`:'';
+       node('groups-prev').disabled=!query.offset;node('groups-next').disabled=!result.has_more;node('result-controls').hidden=false;
+-      node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
+-      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:title},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
++      // The arrows appear only when there is another page of groups (S1).
++      node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none'||(!query.offset&&!result.has_more);
++      node('inspect-all').disabled=false;node('inspect-all').title='';
++      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:title,barPitch:28,niceTicks:true,panelTitles:compiled.spec.measures.length!==1,width:node('canvas').clientWidth,barLeft:185},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
+       if(spec.type==='histogram'&&result.has_more)throw new Error('This histogram has more than 10,000 occupied bins. Increase the bin width or narrow the filters to display the complete distribution.');
+       if(compiled.transform!=='none'&&compiled.transform!=='annual'){
+         if(result.has_more)throw new Error('Period analysis requires every selected period. Narrow the filters.');
+@@ -684,12 +705,20 @@
+         drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
+         :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
+       node('note').textContent=[contributions.BASIS[sheetBasis][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
+-      node('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+(view.primary?' · '+fmt(queryRequests)+' verified queries this session':'');
++      node('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'reconciles to the workbook':'verified source records');
++      node('status').title=view.primary?fmt(queryRequests)+' verified queries this session':'';
+       if(view.primary)status('Verified contribution fields · '+data.columns.length+' fields');
+       if(view.primary)renderPager();
+       renderReconcile(result,view,ticket).catch(()=>{node('reconcile').hidden=true;});
+-    }catch(error){if(!view.stale(ticket)&&error.name!=='AbortError'){node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=error.message;if(view.primary){failure(error.message);lastResult=null;}}}
+-    finally{if(!view.stale(ticket))node('canvas').setAttribute('aria-busy','false');}
++    }catch(error){if(!view.stale(ticket)&&error.name!=='AbortError'){
++      // Final fix round (R03-10): a sheet that draws nothing keeps nothing of
++      // the last answer (title, figures, counter, status); a sheet with no
++      // measure yet gets muted guidance under its empty title, not the red error.
++      const guidance=/^Add a dollar or count measure/.test(error.message);
++      node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=guidance?'':error.message;
++      node('title').textContent='';node('subtitle').textContent=guidance?error.message:'';node('verified-summary').replaceChildren();node('result-controls').hidden=true;node('status').textContent='';node('status').title='';
++      if(view.primary){failure(guidance?'':error.message);lastResult=null;}}}
++    finally{if(!view.stale(ticket)){node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
+   }
+   async function renderContributionMap(ticket,compiled,bbox=null,view=null) {
+     view=view||mainSurface();const node=view.el;
+@@ -705,15 +734,22 @@
+     node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[])].join(' ');
+     node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
+   }
+-  async function inspectContributions(row=null,offset=0) {
+-    if(!contributionResult)return;recordSelection=row;recordOffset=offset;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
+-    try{const query={...contributionRequest,filters:contributions.markFilters(contributionRequest,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===contributionResult.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
++  let recordSource = null;
++  async function inspectContributions(row=null,offset=0,source=null) {
++    if(!contributionResult)return;recordSelection=row;recordOffset=offset;recordSource=source;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
++    // A compared scope that is its own report (industry) brings its own query
++    // and provenance; every other drill reads the sheet's one query.
++    const request=(source&&source.request)||contributionRequest,known=(source&&source.result)||contributionResult;
++    try{const query={...request,filters:contributions.markFilters(request,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===known.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
+       const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
+       for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'){const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}tr.append(td);}body.append(tr);}el('records').append(table);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
+     }catch(error){if(ticket===recordRevision)el('record-count').textContent=error.message;}
+   }
+   async function downloadContributions(format) {
+     const view=activeSurface();if(!view.result||!lastResult||exporting)return;const result=view.result,query=structuredClone(view.request),ticket=view.ticket();
++    // Two reports cannot share one CSV: each row of it names one workbook's
++    // provenance. The image carries both scopes in its legend and caption.
++    if(format==='csv'&&compareDrawn&&compareDrawn.kind==='industry'&&view.el===el){failure('Export the CSV one industry at a time: each report carries its own workbook provenance. Clear the comparison, or export the image.');return;}
+     try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
+       else{const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');}
+     }catch(error){failure(error.message);}finally{exporting=false;}
+@@ -1151,7 +1187,14 @@
+     el('field-table-label').hidden=!verified();const table=el('field-table').value;fill(el('field-table'),[['','All related tables'],...[...new Set(meta.fields.map(f=>f.table).filter(Boolean))].map(t=>[t,t])]);el('field-table').value=table;
+     const query = el('search').value.trim().toLowerCase();
+     const matches = field => (!verified()||!table||field.table===table)&&(!query || [field.name,field.id,field.table,field.data_type,field.description].filter(Boolean).join(' ').toLowerCase().includes(query));
+-    const into = (node, fields) => node.replaceChildren(...fields.filter(matches).map(f => pillNode(f, {})));
++    // S1: a 6px dot marks every field the sheet already uses, on any shelf.
++    const used = usedColumns(sheet());
++    const into = (node, fields) => node.replaceChildren(...fields.filter(matches).map(f => {
++      const pill = pillNode(f, {});
++      if (used.has(f.index)) { pill.classList.add('is-used'); pill.setAttribute('aria-label', pill.getAttribute('aria-label') + ' In use on this sheet.'); }
++      return pill;
++    }));
++    el('search').placeholder = data ? 'Search ' + fmt(columns().length) + ' fields' : 'Search fields';
+     into(el('dimensions'), meta.dimensions);
+     into(el('measures'), meta.measures);
+     into(el('hidden'), meta.hidden);
+@@ -1175,10 +1218,10 @@
+     };
+     shelfInto(el('columns'), 'columns', state.columns, 'Drop a field here');
+     shelfInto(el('rows'), 'rows', state.rows, 'Drop a field here');
+-    shelfInto(el('detail'), 'detail', state.marks.detail, 'Detail');
+-    shelfInto(el('tooltip'), 'tooltip', state.marks.tooltip, 'Tooltip');
++    shelfInto(el('detail'), 'detail', state.marks.detail, 'Drop a field here');
++    shelfInto(el('tooltip'), 'tooltip', state.marks.tooltip, 'Drop a field here');
+     for (const zone of ['color', 'size', 'label']) {
+-      shelfInto(el(zone), zone, state.marks[zone] == null ? [] : [state.marks[zone]], zone === 'color' ? 'Colour' : zone === 'size' ? 'Size' : 'Label');
++      shelfInto(el(zone), zone, state.marks[zone] == null ? [] : [state.marks[zone]], 'Drop a field here');
+     }
+     shelfInto(el('pages'), 'pages', state.pages == null ? [] : [state.pages], 'One dimension');
+     const filterPills = state.filters.map((filter, position) => {
+@@ -2249,6 +2292,16 @@
+         : hint);
+       el(id).setAttribute('aria-pressed', String(!locked && pressed === direction));
+     }
++    // None is the worksheet path's source order. The verified path always
++    // orders groups by their measure ('none' is stored as descending), so there
++    // None would be a second Descending and is switched off, saying why.
++    const none = el('sort-none');
++    if (none) {
++      none.disabled = !!locked || onVerified;
++      none.title = onVerified ? 'Verified groups are always ordered by their measure; the default is Descending'
++        : (locked || 'Keep the order the source gives');
++      none.setAttribute('aria-pressed', String(!locked && !onVerified && pressed === 'none'));
++    }
+   }
+   // Labels are render-only, so this changes no query: it only stops the button
+   // claiming a toggle on a mark whose renderer never reads spec.labels. The
+@@ -2316,6 +2369,7 @@
+     renderSheets();
+     renderDataSource();
+     renderScopeChip();
++    renderCompareChip();
+     renderDatasetMessage();
+     renderSourceSummary();
+     renderFilterRows();
+@@ -2870,15 +2924,293 @@
+     if (carried || company) parts.push(company || 'All companies');
+     return (carried ? 'Carried from Graph \u00b7 ' : '') + parts.filter(Boolean).join(' \u00b7 ');
+   }
++  /* ------------------------------------------------ compare (build 03, S1) */
++
++  // One sheet split into two or three scopes, one coloured series each. Cycle
++  // and company are ONE verified query with an 'in' filter; industry is one
++  // query per report, because a report is one industry's workbook. The split
++  // itself is a browser-only 'scope' series: the server refuses a dimension it
++  // does not define (contribution_semantics.py validate), so it is never sent.
++  const COMPARE_KINDS = ['industry', 'cycle', 'company'];
++  const COMPARE_MARKS = ['bar', 'line', 'area', 'scatter', 'table'];
++  const COMPARE_NOUN = {industry: 'industries', cycle: 'cycles', company: 'companies'};
++  const compareState = state => (verified() && compareBySheet.get((state || sheet()).id)) || null;
++  const compareActive = state => { const entry = compareState(state); return !!entry && entry.values.length >= 2; };
++  // --scope-1/2/3 resolved to colours, because an exported SVG keeps no CSS.
++  function scopeColours() {
++    const style = getComputedStyle(document.documentElement);
++    return ['#57447b', '#327a7a', '#8d6a9f'].map((fallback, i) => (style.getPropertyValue('--scope-' + (i + 1)) || '').trim() || fallback);
++  }
++  function usedColumns(state) {
++    const used = new Set();
++    const add = list => { for (const p of core.shelf(list)) used.add(Number(p.column)); };
++    add(state.columns); add(state.rows);
++    const marks = state.marks || {};
++    for (const zone of ['color', 'size', 'label']) if (marks[zone] != null) add([marks[zone]]);
++    add(marks.detail || []); add(marks.tooltip || []);
++    if (state.pages != null) add([state.pages]);
++    for (const filter of state.filters || []) used.add(Number(filter.column));
++    return used;
++  }
++  // The one value a sheet's row filter pins a field to, or '' when it does not.
++  function pinnedValue(state, id) {
++    const meta = core.classifyFields(columns(), state.types);
++    for (const filter of state.filters || []) {
++      if (!core.filterActive(filter) || filter.stage === 'aggregate') continue;
++      const field = meta.fields.find(f => f.index === Number(filter.column));
++      if (!field || field.id !== id) continue;
++      const values = core.filterValues(filter);
++      return values.length === 1 ? String(values[0]) : '';
++    }
++    return '';
++  }
++  // The menu's values: reports for industry, the verified index's own members
++  // for cycle and company (company by giving, largest first).
++  async function compareValues(kind) {
++    if (kind === 'industry') return ((contributionCatalog && contributionCatalog.datasets) || [])
++      .filter(d => d.available).map(d => ({value: d.id, label: d.label || d.id}));
++    if (!dataset()) return [];
++    const query = {dataset: dataset().id, basis: basis(), dimensions: [kind], measures: ['amount'], filters: [],
++      aggregate_filters: [], sort: [{field: kind === 'cycle' ? 'cycle' : 'amount', direction: kind === 'cycle' ? 'asc' : 'desc'}],
++      limit: kind === 'cycle' ? 200 : 1000, offset: 0};
++    const result = await queryCached(query, {flight: menuFlight});
++    return result.rows.map(row => String(row[kind] ?? '')).filter(Boolean).map(value => ({value, label: value}));
++  }
++  // Scope 1 is what the sheet already shows: its report, its one cycle (else
++  // the newest, which is what Graph opens on), its one company (else the
++  // largest company it draws).
++  async function compareBase(kind) {
++    if (kind === 'industry') { const d = dataset(); return d ? {value: d.id, label: d.label || d.id} : null; }
++    const pinned = pinnedValue(sheet(), kind);
++    if (pinned) return {value: pinned, label: pinned};
++    if (kind === 'cycle') { const list = (await compareValues('cycle')).map(v => v.value).sort(); return list.length ? {value: list.at(-1), label: list.at(-1)} : null; }
++    const row = lastResult && contributionRequest && contributionRequest.dimensions.includes('company') ? lastResult.rows[0] : null;
++    return row && row.company ? {value: String(row.company), label: String(row.company)} : null;
++  }
++  async function pickCompare(kind, value) {
++    const label = kind === 'industry' ? (((contributionCatalog.datasets || []).find(d => d.id === value) || {}).label || value) : value;
++    const current = compareState();
++    let entry;
++    if (current && current.kind === kind) {
++      if (current.values.some(v => v.value === value) || current.values.length >= 3) return;
++      entry = {kind, values: [...current.values, {value, label}]};
++    } else {
++      let base = null;
++      try { base = await compareBase(kind); } catch (error) { base = null; }
++      entry = {kind, values: base && base.value !== value ? [base, {value, label}] : [{value, label}]};
++    }
++    compareBySheet.set(sheet().id, entry);
++    contributionOffset = 0;
++    renderAll();
++  }
++  let compareOpening = 0;
++  async function openCompare(anchor, kinds) {
++    const menu = globalThis.MentatCompareMenu;
++    if (!menu) { failure('Compare needs a console restart.'); return; }
++    const token = ++compareOpening;
++    const entry = compareState(), exclude = {};
++    if (entry) exclude[entry.kind] = entry.values.map(v => v.value);
++    if (dataset()) exclude.industry = [...new Set([...(exclude.industry || []), dataset().id])];
++    for (const kind of ['cycle', 'company']) { const pinned = pinnedValue(sheet(), kind); if (pinned && !(entry && entry.kind === kind)) exclude[kind] = [pinned]; }
++    // Final fix round (R03-4): scope 1 (the sheet's one cycle, else the newest;
++    // its one company, else the largest it draws) is already on the sheet, so
++    // the menu never offers it (build 02's menu leaves out the current value too).
++    for (const kind of ['cycle', 'company']) {
++      if ((entry && entry.kind === kind) || !(kinds || COMPARE_KINDS).includes(kind)) continue;
++      let base = null;
++      try { base = await compareBase(kind); } catch (error) { base = null; }
++      if (base) exclude[kind] = [...new Set([...(exclude[kind] || []), base.value])];
++    }
++    if (token !== compareOpening) return;
++    if (compareMenu) compareMenu.close();
++    compareMenu = menu.open(anchor, {kinds: kinds || COMPARE_KINDS, valuesFor: compareValues, exclude,
++      onPick: (kind, value) => { pickCompare(kind, value); }, onClose: () => { compareMenu = null; }});
++  }
++  function clearCompare() {
++    compareBySheet.delete(sheet().id);
++    contributionOffset = 0;
++    renderAll();
++  }
++  function renderCompareChip() {
++    const entry = compareState(), on = !!entry;
++    el('compare-add').hidden = on;
++    el('compare-add').disabled = !verified() || !data;
++    el('compare-add').title = verified() ? 'Add another industry, cycle or company to this sheet as a coloured series'
++      : 'Comparing scopes needs Verified contributions';
++    el('compare-pills').hidden = !on;
++    el('compare-clear').hidden = !on;
++    // Two reports cannot share one CSV or one briefing slide's provenance, so
++    // while industries are compared both say so and wait (explicit state).
++    const twoReports = on && entry.kind === 'industry' && entry.values.length >= 2;
++    el('download-csv').disabled = twoReports;
++    el('download-csv').title = twoReports ? 'Export the CSV one industry at a time: each report carries its own workbook provenance' : '';
++    el('briefing-add').disabled = twoReports;
++    el('briefing-add').title = twoReports ? 'Add to briefing takes one report at a time; clear the comparison first' : 'Add this chart to the briefing';
++    const note = el('compare-note');
++    note.hidden = !(on && entry.values.length < 2);
++    note.textContent = on && entry.values.length < 2 ? 'Choose a second ' + (entry.kind === 'company' ? 'company' : entry.kind) + ' to compare' : '';
++    if (!on) { if (comparePills) { comparePills.destroy(); comparePills = null; } return; }
++    if (!globalThis.MentatCompareMenu) return;
++    if (comparePills && comparePills.kind !== entry.kind) { comparePills.destroy(); comparePills = null; }
++    if (!comparePills) {
++      comparePills = globalThis.MentatCompareMenu.pills(el('compare-pills'), {kind: entry.kind, values: entry.values, max: 3,
++        label: 'Compared ' + COMPARE_NOUN[entry.kind],
++        onRemove: at => {
++          const now = compareState();
++          if (!now) return;
++          const values = now.values.filter((_, i) => i !== at);
++          if (values.length < 2) { clearCompare(); el('compare-add').focus(); return; }
++          compareBySheet.set(sheet().id, {kind: now.kind, values});
++          renderAll();
++        },
++        onAdd: button => openCompare(button, [entry.kind])});
++      comparePills.kind = entry.kind;
++    } else comparePills.update(entry.values);
++  }
++  // The compared sheet: one query per scope for industry, one 'in' query for
++  // cycle and company, merged here under the 'scope' series with the pills'
++  // own colours. Drill-down, CSV, totals, reconciliation and the briefing each
++  // say what they do with more than one scope instead of assuming one source.
++  async function renderCompareView(view, compiled, ticket) {
++    const node = view.el, state = view.state, entry = compareState(state), sheetBasis = basisOf(state);
++    const values = entry.values.slice(0, 3), kind = entry.kind, colours = scopeColours();
++    if (!COMPARE_MARKS.includes(compiled.spec.type) || compiled.transform !== 'none')
++      throw new Error('Comparing scopes needs a bar, line, area, circle or text-table mark without a period analysis. Choose one, or clear the comparison.');
++    if (compiled.spec.color) throw new Error('Colour already splits this sheet. Remove the Colour field to compare scopes, or clear the comparison.');
++    if (kind !== 'industry' && !columns().some(f => f.id === kind)) throw new Error('This report has no ' + kind + ' field to compare.');
++    const base = compiled.query;
++    let queries;
++    if (kind === 'industry') {
++      queries = values.map(v => {
++        const report = ((contributionCatalog && contributionCatalog.datasets) || []).find(d => d.id === v.value);
++        if (!report || !report.available) throw new Error(v.label + ' has no verified report on this console.');
++        return Object.assign(structuredClone(base), {dataset: report.id, industry: report.industry || report.id});
++      });
++    } else {
++      const query = structuredClone(base);
++      query.filters = (query.filters || []).filter(f => f.field !== kind);
++      query.filters.push({field: kind, op: 'in', value: values.map(v => v.value)});
++      if (!query.dimensions.includes(kind)) query.dimensions = [...query.dimensions, kind];
++      queries = [query];
++    }
++    if (!view.request || JSON.stringify(view.request) !== JSON.stringify(queries[0])) {
++      node('canvas').setAttribute('aria-busy', 'true'); node('verified-summary').textContent = 'Reading verified totals…';
++      status('Reading verified source observations…'); el('inspection').hidden = true; ++recordRevision; lastResult = null;
++    }
++    const results = await Promise.all(queries.map((query, i) => queryCached(query, {flight: compareFlights[i]})));
++    if (view.stale(ticket) || !verified()) return;
++    view.result = results[0]; view.request = queries[0];
++    failure(''); lastResult = results[0]; lastConfig = compiled;
++    data.row_count = results.reduce((n, r) => n + r.totals.records, 0);
++    data.rows = results[0].rows.map(row => data.columns.map(f => row[f.id] ?? ''));
++    compareDrawn = {kind, values, queries, results};
++    const labelOf = new Map(values.map(v => [String(v.value), v.label]));
++    const plotted = compiled.spec.dimensions.filter(d => d !== kind);
++    let rows = [];
++    if (kind === 'industry') results.forEach((result, i) => { for (const row of result.rows) rows.push(Object.assign({}, row, {scope: values[i].label})); });
++    else for (const row of results[0].rows) rows.push(Object.assign({}, row, {scope: labelOf.get(String(row[kind])) || String(row[kind] ?? 'Unknown')}));
++    // Groups keep the order their largest scope gave them; inside a group the
++    // scopes follow the pills, so each group reads as one cluster of bars.
++    const groupKey = row => JSON.stringify(plotted.map(d => row[d] ?? null)), order = new Map();
++    for (const row of rows) if (!order.has(groupKey(row))) order.set(groupKey(row), order.size);
++    const rank = new Map(values.map((v, i) => [v.label, i]));
++    rows.sort((a, b) => order.get(groupKey(a)) - order.get(groupKey(b)) || rank.get(a.scope) - rank.get(b.scope));
++    const colourMap = {};
++    values.forEach((v, i) => { colourMap[v.label] = colours[i]; });
++    const name = id => (data.columns.find(f => f.id === id) || {}).name || id;
++    // Final fix round (R03-5): when the compared field is the sheet's only
++    // dimension, the bars are the scopes themselves: the title says so and
++    // each bar carries its scope's name, not "Selected population".
++    let title = contributions.BASIS[sheetBasis][0] + ' by ' + (plotted.length ? plotted.map(name).join(' / ') : kind === 'industry' ? 'Industry' : name(kind));
++    if (compiled.spec.measures.length !== 1 || compiled.spec.measures[0] !== 'amount')
++      title = compiled.spec.measures.map(id => (results[0].columns.find(c => c.id === id) || {}).name || id).join(' / ') + ' · ' + title;
++    view.title = title;
++    view.scope = results.map((result, i) => sourceScope(result, queries[i])).join(' | ');
++    node('title').textContent = title;
++    node('subtitle').textContent = scopeSubtitle(state) + ' · compared: ' + values.map(v => v.label).join(' vs ');
++    // Totals: each report's own for industry; one query's combined totals for
++    // cycle and company, said as combined (group identities are not additive).
++    const money = value => contributionPlot.format(value, 'amount');
++    const summary = node('verified-summary');
++    summary.replaceChildren();
++    const figures = [[sheetBasis === 'original_supported' ? 'Selected gross amount' : 'Selected net amount', r => money(r.totals.amount)],
++      ['Source observations', r => fmt(r.totals.records)], ['Reported donor identities', r => fmt(r.totals.contributors)]];
++    for (const [label, read] of figures) {
++      const item = document.createElement('span');
++      if (kind === 'industry') {
++        results.forEach((result, i) => {
++          const strong = document.createElement('strong'), dot = document.createElement('i');
++          dot.className = 'studio-scope-dot studio-scope-dot--' + (i + 1); dot.setAttribute('aria-hidden', 'true');
++          strong.append(dot, document.createTextNode(read(result)));
++          strong.title = values[i].label;
++          item.append(strong);
++        });
++        item.append(document.createTextNode(label));
++      } else {
++        const strong = document.createElement('strong');
++        strong.textContent = read(results[0]);
++        item.append(strong, document.createTextNode(label + ' · combined'));
++        item.title = 'One total across the ' + values.length + ' compared ' + COMPARE_NOUN[kind];
++      }
++      summary.append(item);
++    }
++    summary.title = kind === 'industry' ? 'Each figure is its own report\u2019s total, in pill order.'
++      : 'One query covers every compared ' + (kind === 'company' ? 'company' : kind) + '; identity counts are not added per scope.';
++    const range = result => result.group_count ? fmt(result.offset + 1) + '–' + fmt(result.offset + result.rows.length) + ' of ' + fmt(result.group_count) : 'none';
++    // Final fix round (R03-9): two or three reports say only their counts on
++    // the note line (the full ranges, per industry, are in the title), so the
++    // note text keeps the row instead of wrapping to three lines.
++    const short = result => !result.group_count ? 'none' : result.offset || result.has_more ? range(result) : fmt(result.group_count);
++    node('group-count').textContent = 'Groups ' + (results.length > 1 ? results.map(short) : results.map(range)).join(' · ');
++    node('group-count').title = results.map((result, i) => (kind === 'industry' ? values[i].label + ' ' : '') + range(result)).join(' · ') + '. Totals cover every matching group of each scope';
++    const more = results.some(result => result.has_more);
++    node('groups-prev').disabled = !base.offset; node('groups-next').disabled = !more; node('result-controls').hidden = false;
++    node('groups-prev').hidden = node('groups-next').hidden = !base.offset && !more;
++    // One scope's records at a time for industry: pick a bar. The one query of
++    // cycle or company already carries every compared scope.
++    node('inspect-all').disabled = kind === 'industry';
++    node('inspect-all').title = kind === 'industry' ? 'Choose a bar: each industry is its own report' : '';
++    node('canvas').hidden = false; node('table').hidden = true;
++    node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
++    const spec = Object.assign({}, compiled.spec, {dimensions: [...plotted, 'scope'], labelDimensions: plotted.length ? plotted : ['scope'], color: 'scope', barPitch: 28, niceTicks: true, panelTitles: compiled.spec.measures.length !== 1, width: node('canvas').clientWidth, barLeft: 185,
++      colorMap: colourMap, title: title,
++      columns: [...results[0].columns.filter(c => c.id !== kind || plotted.includes(kind)),
++        {id: 'scope', name: kind === 'industry' ? 'Industry' : kind === 'cycle' ? 'Election cycle' : 'Company', role: 'dimension', type: 'category'}]});
++    contributionPlot.render(node('canvas'), rows, spec, row => {
++      const at = values.findIndex(v => v.label === row.scope);
++      if (kind === 'industry' && at >= 0) inspectContributions(row, 0, {request: queries[at], result: results[at]});
++      else inspectContributions(row);
++    });
++    const records = results.reduce((n, result) => n + result.totals.records, 0), groupCount = results.reduce((n, result) => n + result.group_count, 0);
++    node('note').textContent = [contributions.BASIS[sheetBasis][1], 'Comparing ' + values.map(v => v.label).join(', ') + '.',
++      kind === 'industry' ? 'Each industry is its own report and its own query.' : 'One verified query covers every compared ' + (kind === 'company' ? 'company' : kind) + '.',
++      more ? 'Additional groups are on later pages; each scope pages its own top groups.' : 'All selected groups shown.', ...compiled.notes].join(' ');
++    node('status').textContent = fmt(records) + ' source observations · ' + fmt(groupCount) + ' groups · ' +
++      (results.every(result => result.reconciliation?.receipt_matches_workbook === true) ? 'reconciles to the workbook' : 'verified source records');
++    node('status').title = fmt(queryRequests) + ' verified queries this session';
++    status('Verified contribution fields · ' + data.columns.length + ' fields');
++    renderPager();
++    renderReconcile(results[0], view, ticket).catch(() => { node('reconcile').hidden = true; });
++  }
++
+   /* ------------------------------------------------------- reconciliation */
+ 
+   // The Graph controls that have no verified field. They are read at the
+   // moment of the comparison, because they decide which question Graph was
+   // asked, and therefore which difference has to be explained.
+-  const graphFilterState = () => ({
+-    tier: (document.getElementById('graph-tier') || {}).value || '',
+-    funding: (document.getElementById('graph-funding') || {}).value || 'all'
+-  });
++  // Graph's current scope, read through MentatScope (the URL scope Graph
++  // writes, contracts/url_scope.json) and, where that module is not loaded,
++  // from Graph's own controls.
++  function currentGraphScope() {
++    const url = globalThis.MentatScope && typeof globalThis.MentatScope.read === 'function' ? globalThis.MentatScope.read() : null;
++    const dom = id => (document.getElementById('graph-' + id) || {}).value || '';
++    const pick = key => url ? String(url[key] || '') : dom(key);
++    return {company: pick('company'), cycle: pick('cycle'), tier: pick('tier'), funding: pick('funding') || 'all'};
++  }
++  const graphFilterState = () => {
++    const now = currentGraphScope();
++    return {tier: now.tier, funding: now.funding};
++  };
+ 
+   // The same question, asked of Graph. One request per scope, remembered for
+   // the session, because the strip is redrawn on every display edit and a
+@@ -2937,13 +3269,13 @@
+   // cycle, or both - each one exact single value - and nothing else.
+   function reconcileScope(state) {
+     const meta = core.classifyFields(columns(), state.types);
+-    const scope = {company: '', cycle: ''};
++    const scope = {company: '', cycle: '', funding_source: ''};
+     for (const filter of state.filters || []) {
+       if (!core.filterActive(filter)) continue;
+       const field = meta.fields.find(f => f.index === Number(filter.column));
+       const id = field ? field.id : '';
+       const values = core.filterValues(filter);
+-      if ((id !== 'company' && id !== 'cycle') || filter.stage === 'aggregate' ||
++      if ((id !== 'company' && id !== 'cycle' && id !== 'funding_source') || filter.stage === 'aggregate' ||
+           ['equals', 'in'].indexOf(filter.op) === -1 || values.length !== 1 || scope[id]) return null;
+       scope[id] = values[0];
+     }
+@@ -2952,9 +3284,18 @@
+ 
+   // A Graph request that fails, or a scope Graph cannot express, leaves the
+   // strip away entirely. An absent strip is honest; a guessed one is not.
++  const FUNDING_OF_SOURCE = {employee_original: 'personal', corporate_original: 'corporate'};
++  const FUNDING_TEXT = {all: 'all giving', personal: 'personal giving', corporate: 'corporate giving'};
++  const cyclePair = value => value ? String(core.carriedFilterValue('cycle', String(value))) : '';
++  function setWhy(open) {
++    el('reconcile-detail').hidden = !open;
++    el('reconcile-why').setAttribute('aria-expanded', String(!!open));
++  }
+   async function renderReconcile(result, view, ticket) {
+     view = view || mainSurface();
+     const node = view.el('reconcile');
++    const main = node === el('reconcile');
++    if (main) return renderNoteLine(result, view, ticket);
+     node.hidden = true;
+     if (!verified() || !result) return;
+     const scope = reconcileScope(view.state);
+@@ -2992,6 +3333,102 @@
+     node.replaceChildren(lead, verdict, document.createTextNode(' '), link);
+     node.hidden = false;
+   }
++  // The main canvas's note line. It names how the sheet's scope differs from
++  // Graph's, offers to match it, and keeps today's full explanation behind
++  // "Why". It hides when the scopes and the totals agree. No red.
++  async function renderNoteLine(result, view, ticket) {
++    const node = el('reconcile'), text = el('reconcile-text'), match = el('match-graph'), detail = el('reconcile-detail');
++    node.hidden = true; match.hidden = true; graphMatchTarget = null;
++    if (!verified() || !result) { setWhy(false); return; }
++    if (compareActive(view.state)) {
++      text.textContent = 'Graph reconciliation pauses while this sheet compares scopes.';
++      detail.replaceChildren(); el('reconcile-why').hidden = true; setWhy(false);
++      node.hidden = false;
++      return;
++    }
++    el('reconcile-why').hidden = false;
++    const scope = reconcileScope(view.state);
++    if (!scope) { setWhy(false); return; }
++    const graphNow = currentGraphScope();
++    const studioFunding = FUNDING_OF_SOURCE[scope.funding_source] || 'all';
++    let graphView, graphHere;
++    try {
++      [graphView, graphHere] = await Promise.all([graphTotals(scope.company, scope.cycle), graphTotals(graphNow.company, graphNow.cycle)]);
++    } catch { return; }
++    if (view.stale(ticket) || !verified()) return;
++    const graphCycle = String(((graphView || {}).filters || {}).cycle || '');
++    const shownCycle = cyclePair(graphNow.cycle || ((graphHere || {}).filters || {}).cycle || '');
++    const state = contributions.reconcile(result, basisOf(view.state), graphView,
++      Object.assign({}, graphFilterState(), {funding: studioFunding === graphNow.funding ? 'all' : graphNow.funding,
++        studioCycle: scope.cycle, graphCycle: graphCycle}));
++    // Why: the sentence and the verdict the strip used to print, the way to
++    // Cross-reference, and the caveat paragraph that sat under the chart.
++    const money = value => contributionPlot.format(value, 'amount');
++    const lead = document.createElement('span');
++    const verdict = document.createElement('strong');
++    if (state.reasonId === 'unavailable') {
++      lead.textContent = 'Graph has no total for this scope.';
++      verdict.textContent = '';
++    } else {
++      const where = [scope.company || 'All companies', scope.cycle || cyclePair(graphCycle) || 'All cycles'].join(' · ');
++      lead.textContent = 'Graph shows ' + money(state.graphCents) + ' for ' + where + '. Studio shows ' + money(state.studioCents) + '. ';
++      verdict.className = state.agree ? 'studio-reconcile-agree' : 'studio-reconcile-diff';
++      verdict.textContent = state.agree ? 'Agree.'
++        : 'They differ by ' + money(Math.abs(state.differenceCents)) + ' because ' + state.reason + '.';
++    }
++    const why = document.createElement('p');
++    why.append(lead, verdict);
++    const link = document.createElement('button');
++    link.type = 'button';
++    link.className = 'studio-reconcile-link';
++    link.textContent = 'Why Cross-reference differs';
++    link.onclick = () => {
++      setWhy(false);
++      globalThis.MentatReturn?.arrive('chart-studio', 'cross-reference');
++      if (typeof showView === 'function') showView('cross-reference');
++      else location.hash = '#cross-reference';
++    };
++    const caveat = document.createElement('p');
++    caveat.className = 'studio-reconcile-caveat';
++    caveat.textContent = el('note').textContent;
++    detail.replaceChildren(why, link, caveat);
++    // The scopes, named from the sheet's filters and Graph's current scope.
++    const differ = [];
++    if (scope.cycle !== shownCycle) differ.push([scope.cycle || 'all cycles', shownCycle || 'all cycles']);
++    if (scope.company !== graphNow.company) differ.push([scope.company || 'all companies', graphNow.company || 'all companies']);
++    if (studioFunding !== graphNow.funding) differ.push([FUNDING_TEXT[studioFunding] || studioFunding, FUNDING_TEXT[graphNow.funding] || graphNow.funding]);
++    const level = graphNow.tier ? ' Graph also narrows to the ' + graphNow.tier + ' employee level, which verified data cannot match.' : '';
++    if (!differ.length && !graphNow.tier && state.agree) { setWhy(false); return; }
++    if (differ.length) {
++      text.textContent = 'This sheet covers ' + differ.map(d => d[0]).join(' and ') + '. Graph shows ' + differ.map(d => d[1]).join(' · ') + '.' + level;
++      graphMatchTarget = {company: graphNow.company, cycle: shownCycle,
++        funding: Object.keys(FUNDING_OF_SOURCE).find(key => FUNDING_OF_SOURCE[key] === graphNow.funding) || ''};
++      match.hidden = false;
++    } else if (level) {
++      text.textContent = level.trim();
++    } else {
++      text.textContent = 'Same scope as Graph; the totals differ by ' + money(Math.abs(state.differenceCents || 0)) + '.';
++    }
++    node.hidden = false;
++  }
++  // Match Graph scope: the sheet's cycle, company and giving type become
++  // Graph's. Employee level has no verified field, so it is left as it is and
++  // the note line says so.
++  function matchGraphScope() {
++    const target = graphMatchTarget;
++    if (!target) return;
++    commit(() => {
++      const idOf = filter => (columns()[Number(filter.column)] || {}).id;
++      const kept = (sheet().filters || []).filter(filter => !['company', 'cycle', 'funding_source'].includes(idOf(filter)));
++      const add = [];
++      for (const [id, value] of [['company', target.company], ['cycle', target.cycle], ['funding_source', target.funding]]) {
++        const column = columns().find(f => f.id === id);
++        if (column && value) add.push({column: column.index, op: 'equals', value: String(value), stage: 'row'});
++      }
++      sheet().filters = [...kept, ...add];
++    });
++    setWhy(false);
++  }
+ 
+   function renderScopeChip() {
+     // The Data source button is permanent. The one way back to the report
+@@ -3008,6 +3445,8 @@
+     const notes = (appliedScope && appliedScope.notCarried) || [];
+     el('scope-note').textContent = notes.join(' · ');
+     el('scope-note').hidden = !notes.length;
++    const basisLabel = verified() ? ((contributions.BASIS[basis()] || [])[0] || '') : (data ? 'Worksheet values' : '');
++    el('scope-basis').textContent = host.children.length ? basisLabel : 'Choose data';
+   }
+ 
+   // Canvas only hides the builder surfaces; the control that does it never
+@@ -3104,6 +3543,9 @@
+   };
+   el('sort-asc').onclick = () => chooseSort('asc');
+   el('sort-desc').onclick = () => chooseSort('desc');
++  el('sort-none').onclick = () => chooseSort('none');
++  // A choice closes the Sort menu, the way a menu does.
++  el('sort').addEventListener('click', event => { if (event.target.closest('#studio-sort > div button')) el('sort').open = false; });
+   el('labels').onclick = () => commit(() => { sheet().showLabels = !sheet().showLabels; });
+   el('fit').onchange = () => commit(() => { sheet().fit = el('fit').value; });
+   el('clear').onclick = () => commit(() => { sheets[active] = core.clearSheet(sheet()); });
+@@ -3153,6 +3595,7 @@
+   // puts the Marks pane in front, and scrolls the block into view.
+   el('showme-toggle').onclick = () => {
+     const details = el('showme-details'), open = !details.open;
++    if (open) setInspectorCollapsed(false, true);
+     details.open = open;
+     if (open) {
+       if (el('inspector').hidden) {
+@@ -3195,7 +3638,7 @@
+   el('report').onchange = loadSheets;
+   el('sheet').onchange = () => scan(false);
+   el('rescan').onclick = () => scan(true);
+-  el('source-mode').onchange=()=>{persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
++  el('source-mode').onchange=()=>{compareBySheet.clear();persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
+   el('dataset').onchange=()=>{persist();selectContributionDataset();};
+   el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;activeSurface().offset=0;});
+   el('refresh-data').onclick=()=>{++contributionCacheEpoch;abortContributionRequests();contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
+@@ -3204,8 +3647,8 @@
+   el('groups-next').onclick=()=>{const view=activeSurface();view.offset+=Number(view.state.params.maxGroups)||60;renderView(view);};
+   el('inspect-all').onclick=()=>inspectContributions();
+   el('inspection-close').onclick=()=>{++recordRevision;el('inspection').hidden=true;};
+-  el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100));
+-  el('record-next').onclick=()=>inspectContributions(recordSelection,recordOffset+100);
++  el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100),recordSource);
++  el('record-next').onclick=()=>inspectContributions(recordSelection,recordOffset+100,recordSource);
+   for(const id of ['layer-states','layer-districts','layer-zips','congress'])el(id).onchange=()=>commit(()=>{sheet().map={congress:el('congress').value,layers:[['states','states'],['districts','districts'],['zips','zip_areas']].filter(([id])=>el('layer-'+id).checked).map(([,layer])=>layer)};});
+   el('pager-prev').onclick = () => stepPage(-1);
+   el('pager-next').onclick = () => stepPage(1);
+@@ -3244,8 +3687,19 @@
+     el('data-toggle').setAttribute('aria-expanded', String(open));
+   };
+   el('data-toggle').onclick = () => setDataPanel(el('data-toggle').getAttribute('aria-expanded') !== 'true');
++  // The source chip (S1) opens a popover holding the Data source controls.
++  // Their ids are unchanged; the disclosure inside stays open, and its summary
++  // is the popover's heading line.
++  const setSourcePopover = open => {
++    el('source-popover').hidden = !open;
++    el('scope-change').setAttribute('aria-expanded', String(!!open));
++  };
+   el('scope-change').onclick = () => {
+-    setDataPanel(true);
++    const open = el('source-popover').hidden;
++    setSourcePopover(open);
++    if (!open) return;
++    // The source controls are in the popover now, so the chip no longer opens
++    // the narrow-screen fields drawer.
+     // An explicit open outlives the prepare that may have opened the panel
+     // for its own reasons, so nothing closes it behind the reader's back.
+     progressOpened = false;
+@@ -3253,7 +3707,64 @@
+     renderSourceSummary();
+     el('source-details').querySelector('summary').focus();
+   };
++  el('source-summary').addEventListener('click', event => event.preventDefault());
+   el('source-details').addEventListener('toggle', renderSourceSummary);
++  el('source-popover').addEventListener('keydown', event => {
++    if (event.key !== 'Escape') return;
++    event.preventDefault(); setSourcePopover(false); el('scope-change').focus();
++  });
++  el('reconcile').addEventListener('keydown', event => {
++    if (event.key !== 'Escape' || el('reconcile-detail').hidden) return;
++    event.preventDefault(); setWhy(false); el('reconcile-why').focus();
++  });
++  // A click outside a popover or menu puts it away. On click, not on
++  // pointerdown: closing a popover must not move what the click lands on.
++  document.addEventListener('click', event => {
++    const target = event.target;
++    if (!(target instanceof Element)) return;
++    if (!el('source-popover').hidden && !target.closest('.studio-source-anchor')) setSourcePopover(false);
++    if (!el('reconcile-detail').hidden && !target.closest('#studio-reconcile-why, #studio-reconcile-detail')) setWhy(false);
++    if (el('sort').open && !target.closest('#studio-sort')) el('sort').open = false;
++  }, true);
++  el('compare-add').onclick = () => openCompare(el('compare-add'));
++  el('compare-clear').onclick = () => { clearCompare(); el('compare-add').focus(); };
++  el('reconcile-why').onclick = () => setWhy(el('reconcile-detail').hidden);
++  el('match-graph').onclick = matchGraphScope;
++  // Collapse folds the docked Inspector to a 56px rail of three buttons that
++  // bring it back on Marks, Analytics or Filters; the choice is remembered in
++  // this browser through ui-state.js (which guards the storage itself).
++  const INSPECTOR_KEY = 'mentat-chart-studio-inspector-collapsed';
++  function setInspectorCollapsed(collapsed, remember) {
++    const host = document.querySelector('#view-chart-studio .studio');
++    if (host) host.classList.toggle('studio-inspector-collapsed', !!collapsed);
++    el('inspector-collapse').setAttribute('aria-expanded', String(!collapsed));
++    if (remember) globalThis.MentatState?.remember?.(INSPECTOR_KEY, collapsed ? '1' : '0');
++  }
++  el('inspector-collapse').onclick = () => { setInspectorCollapsed(true, true); el('rail-marks').focus(); };
++  for (const id of ['marks', 'analytics', 'filters']) el('rail-' + id).onclick = () => {
++    setInspectorCollapsed(false, true);
++    setInspectorTab(id);
++    el('tab-' + id).focus();
++  };
++  setInspectorCollapsed(globalThis.MentatState?.recall?.(INSPECTOR_KEY) === '1', false);
++  // A bar chart is drawn at the canvas's own width (S1), so a change of that
++  // width - the window, the Inspector's collapse, Canvas mode - redraws it
++  // from the answer already held, which costs no query.
++  if (typeof ResizeObserver === 'function') {
++    let drawnWidth = 0, resizeTimer = 0;
++    new ResizeObserver(entries => {
++      const width = Math.round(entries[0].contentRect.width);
++      if (!width || Math.abs(width - drawnWidth) < 8) return;
++      const first = !drawnWidth;
++      drawnWidth = width;
++      if (first) return;
++      clearTimeout(resizeTimer);
++      resizeTimer = setTimeout(() => {
++        if (!el('canvas').querySelector('svg[data-native]') || !verified() || overviewMode || dataSourceTab || boardTiles() > 1) return;
++        renderView();
++      }, 150);
++    }).observe(el('canvas'));
++  }
+   // Cancelling aborts the request that is preparing and leaves the last good
+   // view exactly where it was: renderContributionView ignores AbortError.
+   el('progress-cancel').onclick = () => {
+@@ -3329,9 +3840,13 @@
+   // What Graph can narrow by and this source cannot. Naming each one on the
+   // scope chip is the difference between a total that looks wrong and a
+   // total the reader knows is wider than the one they just left.
++  // Giving type IS verified data: funding_source ("Funding source",
++  // contribution_data.py DIMENSIONS), the field Graph's own sparklines narrow
++  // with for personal and corporate giving (graph.js sparkRequest). So it is
++  // carried with that same mapping, and only employee level stays behind.
++  const GRAPH_FUNDING = {personal: 'employee_original', corporate: 'corporate_original'};
+   const GRAPH_NOT_CARRIED = [
+     ['tier', 'Employee level', 'not in verified data', ''],
+-    ['funding', 'Giving type', 'not in verified data', 'all'],
+     ['mode', 'Candidate view', 'Graph only', 'direct'],
+     ['direction', 'Support or opposition', 'Graph only', 'Support']
+   ];
+@@ -3345,6 +3860,7 @@
+       // than filtered on a spelling the index never holds.
+       if (value) scope.filters.push({field, value: core.carriedFilterValue(field, value)});
+     }
++    if (GRAPH_FUNDING[read('funding')]) scope.filters.push({field: 'funding_source', value: GRAPH_FUNDING[read('funding')]});
+     for (const [control, label, why, ignored] of GRAPH_NOT_CARRIED) {
+       const value = read(control);
+       if (value && value !== ignored) scope.notCarried.push(label + ': not carried (' + why + ')');
+diff --git a/mentat/app/contribution-plot.js b/mentat/app/contribution-plot.js
+--- a/mentat/app/contribution-plot.js
++++ b/mentat/app/contribution-plot.js
+@@ -51,7 +51,13 @@
+   if(!plotted.length){const note=document.createElement('p');note.className='empty-view';note.textContent=timed?'No valid dated groups remain. Use Table view to inspect missing or invalid dates.':'No complete measure pairs remain. Use Table view to inspect missing values.';container.append(note);return null;}
+   if(plotted.length<rows.length){const note=document.createElement('p');note.className='plot-note';note.textContent=(rows.length-plotted.length)+(timed?' groups have missing or invalid dates.':' groups are missing one or both measures.')+' They remain available in Table view.';container.append(note);}
+   const svg=document.createElementNS(NS,'svg');svg.setAttribute('class','plot-svg');svg.setAttribute('role','group');svg.setAttribute('aria-label',spec.type+' chart. Select a mark to inspect its source records. The Table view provides all displayed values.');
+-  const width=1000,panelH=spec.type==='bar'?Math.max(350,rows.length*29+105):420,panels=spec.type==='scatter'?1:measures.length;
++  // spec.barPitch (Chart Studio, S1): a taller row per bar; 29 otherwise.
++  const pitch=spec.type==='bar'&&Number(spec.barPitch)>0?Number(spec.barPitch):29;
++  // spec.width (bars only): draw at the container's own width, one unit per
++  // CSS pixel; spec.barLeft is then the label column. Otherwise 1000 units.
++  const native=spec.type==='bar'&&Number(spec.width)>0,barLeft=native&&Number(spec.barLeft)>0?Number(spec.barLeft):255;
++  if(native)svg.setAttribute('data-native','');
++  const width=native?Math.max(560,Math.round(Number(spec.width))):1000,barRight=width-(native?110:125),panelH=spec.type==='bar'?Math.max(spec.panelTitles===false?300:350,rows.length*pitch+(spec.panelTitles===false?70:105)):420,panels=spec.type==='scatter'?1:measures.length;
+   svg.setAttribute('viewBox',`0 0 ${width} ${panelH*panels}`);svg.setAttribute('width',width);svg.setAttribute('height',panelH*panels);svg.setAttribute('font-family','Arial, sans-serif');svg.setAttribute('font-size','15');
+   const title=document.createElementNS(NS,'title');title.textContent=spec.title||'Contribution analysis';svg.append(title);
+   const node=(tag,attrs={},text,parent=svg)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!=null)n.textContent=text;parent.append(n);return n;};
+@@ -62,8 +68,14 @@
+   const wrap=(value,available,size=15)=>{let chars=Array.from(String(value).replace(/\s+/g,' ').trim());const lines=[];while(chars.length){let count=Math.max(1,fittingLength(chars,available,size));if(count<chars.length){const space=chars.slice(0,count).lastIndexOf(' ');if(space>0)count=space;}lines.push(chars.slice(0,count).join(''));chars=Array.from(chars.slice(count).join('').trimStart());}return lines.length?lines:[''];};
+   const fittedText=(attrs,value,available,parent)=>{const t=node('text',attrs,fit(value,available,attrs['font-size']||15),parent);node('title',{},value,t);return t;};
+   node('rect',{width,height:panelH*panels,fill:'#ffffff'});
+-  const colorValues=[...new Set(plotted.map(r=>spec.color?String(r[spec.color]??'Unknown'):'Giving'))].sort((a,b)=>a.localeCompare(b));
+-  const color=row=>palette[Math.max(0,colorValues.indexOf(spec.color?String(row[spec.color]??'Unknown'):'Giving'))%palette.length];
++  // spec.colorMap (value -> colour) pins a series to a colour and its legend
++  // order, as Chart Studio's compared scopes do with --scope-1/2/3; without it
++  // series take the palette in alphabetical order, as before.
++  const mapped=spec.color&&spec.colorMap?Object.keys(spec.colorMap):null;
++  const seen=[...new Set(plotted.map(r=>spec.color?String(r[spec.color]??'Unknown'):'Giving'))];
++  const colorValues=mapped?[...mapped.filter(v=>seen.includes(v)),...seen.filter(v=>!mapped.includes(v)).sort((a,b)=>a.localeCompare(b))]:seen.sort((a,b)=>a.localeCompare(b));
++  const colorOf=value=>(mapped&&spec.colorMap[value])||palette[Math.max(0,colorValues.indexOf(value))%palette.length];
++  const color=row=>colorOf(spec.color?String(row[spec.color]??'Unknown'):'Giving');
+   const encodedFields=[...new Set([...measures,...(spec.tooltip||[]),...(spec.labelFields||[]),...(spec.size?[spec.size]:[])])];
+   const valueText=(row,id)=>dims.includes(id)||columns.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'||c.type==='date'))?String(row[id]??'Unknown'):format(row[id],id,columns);
+   const labelText=(row,fallback)=>spec.labelFields?.length?spec.labelFields.map(id=>valueText(row,id)).join(' / '):fallback;
+@@ -71,11 +83,25 @@
+   const mark=(tag,attrs,row,parent)=>{if(spec.size&&tag==='circle')attrs={...attrs,r:3+12*Math.sqrt(Math.abs(row[spec.size]||0)/maxSize)};const detail=encodedFields.map(m=>`${name(m,columns)}: ${valueText(row,m)}`).join('\n');const n=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':label(row,dims)+'; '+detail},null,parent);node('title',{},label(row,dims)+'\n'+detail,n);n.addEventListener('click',()=>onSelect?.(row));n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}});return n;};
+   for(let p=0;p<panels;p++){
+    const g=node('g',{transform:`translate(0 ${p*panelH})`}),m=measures[p];
+-   node('text',{x:20,y:23,fill:'#202522','font-size':18,'font-weight':600},spec.type==='scatter'?`${name(measures[1],columns)} by ${name(measures[0],columns)}`:name(m,columns),g);
++   // spec.panelTitles===false (Chart Studio, one measure): the canvas title
++   // above the drawing already names the measure, so the panel skips its own.
++   if(spec.panelTitles!==false)node('text',{x:20,y:23,fill:'#202522','font-size':18,'font-weight':600},spec.type==='scatter'?`${name(measures[1],columns)} by ${name(measures[0],columns)}`:name(m,columns),g);
+    if(spec.type==='bar'){
+-    const left=255,right=875,top=55,bottom=panelH-43,[lo,hi]=extent(rows.map(r=>r[m])),x=v=>left+(v-lo)/(hi-lo)*(right-left),zero=x(0);
+-    for(let tick=0;tick<=5;tick++){const v=lo+(hi-lo)*tick/5;node('line',{x1:x(v),x2:x(v),y1:top-8,y2:bottom,stroke:'#e8ebe6'},null,g);fittedText({x:x(v),y:panelH-17,'text-anchor':'middle',fill:'#68706b','font-size':15},format(v,m,columns,true),110,g);}
+-    rows.forEach((r,i)=>{const y=top+i*29;fittedText({x:left-14,y:y+14,'text-anchor':'end',fill:'#444c46','font-size':16,'data-label':'category'},label(r,dims),left-30,g);if(r[m]==null)return;mark('rect',{x:Math.min(zero,x(r[m])),y,width:Math.max(1,Math.abs(x(r[m])-zero)),height:20,rx:2,fill:color(r)},r,g);if(spec.labels)fittedText({x:right+12,y:y+14,'text-anchor':'start',fill:'#35483b','font-size':15,'data-label':'value'},labelText(r,format(r[m],m,columns,true)),width-right-28,g);});
++    const left=barLeft,right=barRight,top=spec.panelTitles===false?20:55,bottom=panelH-43,[lo,hi]=extent(rows.map(r=>r[m])),x=v=>left+(v-lo)/(hi-lo)*(right-left),zero=x(0);
++    // spec.niceTicks (S1): round steps ("$2.0M") and the axis end, instead of
++    // five equal fifths of the range.
++    const niceStep=span=>{const raw=span/6,mag=Math.pow(10,Math.floor(Math.log10(raw||1))),n=raw/mag;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*mag;};
++    let ticks=[0,1,2,3,4,5].map(t=>lo+(hi-lo)*t/5);
++    if(spec.niceTicks&&hi>lo){const step=niceStep(hi-lo);ticks=[];for(let v=Math.ceil(lo/step)*step;v<=hi+step*1e-9;v+=step)ticks.push(v);if(lo<ticks[0])ticks.unshift(lo);const endGap=x(hi)-x(ticks.at(-1));if(endGap>=1){if(endGap<56&&ticks.length>1)ticks.pop();ticks.push(hi);}}
++    const tickText=v=>spec.niceTicks&&isMoney(m,columns)?(v===0?'$0':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',notation:'compact',minimumFractionDigits:1,maximumFractionDigits:1}).format(v/100)):format(v,m,columns,true);
++    for(const v of ticks){node('line',{x1:x(v),x2:x(v),y1:top-8,y2:bottom,stroke:'#e8ebe6'},null,g);fittedText({x:x(v),y:panelH-17,'text-anchor':'middle',fill:'#68706b','font-size':native?13.5:15},tickText(v),110,g);}
++    // spec.labelDimensions names a group once for a cluster of bars (one bar
++    // per compared scope); the value label sits at the end of its own bar.
++    const groupLabel=r=>label(r,spec.labelDimensions||dims);
++    // Money at a bar's end reads in whole dollars (S1: "$10,892,411").
++    const barValue=v=>isMoney(m,columns)&&Number.isFinite(Number(v))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(v)/100):format(v,m,columns,true);
++    const barH=pitch===29?20:Math.round(pitch*.62),textY=pitch===29?14:Math.round(barH/2+5);
++    rows.forEach((r,i)=>{const y=top+i*pitch,text=groupLabel(r);if(!spec.labelDimensions||!i||text!==groupLabel(rows[i-1]))fittedText({x:left-14,y:y+textY,'text-anchor':'end',fill:'#444c46','font-size':native?13.5:16,'data-label':'category'},text,left-(native?22:30),g);if(r[m]==null)return;mark('rect',{x:Math.min(zero,x(r[m])),y,width:Math.max(1,Math.abs(x(r[m])-zero)),height:barH,rx:2,fill:color(r)},r,g);if(spec.labels&&!native)fittedText({x:right+12,y:y+textY,'text-anchor':'start',fill:'#35483b','font-size':15,'data-label':'value'},labelText(r,format(r[m],m,columns,true)),width-right-28,g);else if(spec.labels){const end=x(r[m]),negative=r[m]<0;fittedText({x:negative?Math.max(left+4,end-8):end+8,y:y+textY,'text-anchor':negative?'end':'start',fill:'#35483b','font-size':native?13.5:15,'data-label':'value'},labelText(r,barValue(r[m])),Math.max(60,negative?end-left:width-end-16),g);}});
+    }else if(spec.type==='scatter'){
+     const [mx,my]=measures,left=100,right=935,top=65,bottom=345,[xl,xh]=extent(plotted.map(r=>r[mx]),false),[yl,yh]=extent(plotted.map(r=>r[my]),false),x=v=>left+(v-xl)/(xh-xl)*(right-left),y=v=>bottom-(v-yl)/(yh-yl)*(bottom-top);
+     for(let i=0;i<=5;i++){const vx=xl+(xh-xl)*i/5,vy=yl+(yh-yl)*i/5;node('line',{x1:x(vx),x2:x(vx),y1:top,y2:bottom,stroke:'#e8ebe6'},null,g);node('line',{x1:left,x2:right,y1:y(vy),y2:y(vy),stroke:'#e8ebe6'},null,g);fittedText({x:x(vx),y:bottom+23,'text-anchor':'middle',fill:'#68706b','font-size':15},format(vx,mx,columns,true),110,g);fittedText({x:left-10,y:y(vy)+3,'text-anchor':'end',fill:'#68706b','font-size':15},format(vy,my,columns,true),78,g);}
+@@ -98,7 +124,7 @@
+     const id=measures[p],values=plotted.map(row=>row[id]).filter(v=>typeof v==='number'&&Number.isFinite(v)).sort((a,b)=>a-b);if(!values.length)continue;
+     const average=values.reduce((a,b)=>a+b,0)/values.length,middle=Math.floor(values.length/2),median=values.length%2?values[middle]:(values[middle-1]+values[middle])/2,[lo,hi]=extent(values),bar=spec.type==='bar';
+     for(const [kind,value]of [['average',average],['median',median]])if(spec.references[kind]){
+-     const g=node('g',{transform:`translate(0 ${p*panelH})`,'data-reference':kind});const at=bar?255+(value-lo)/(hi-lo)*620:345-(value-lo)/(hi-lo)*285;
++     const g=node('g',{transform:`translate(0 ${p*panelH})`,'data-reference':kind});const at=bar?barLeft+(value-lo)/(hi-lo)*(barRight-barLeft):345-(value-lo)/(hi-lo)*285;
+      node('line',bar?{x1:at,x2:at,y1:48,y2:panelH-43,stroke:'#745079','stroke-dasharray':'6 4'}:{x1:100,x2:940,y1:at,y2:at,stroke:'#745079','stroke-dasharray':'6 4'},null,g);
+      node('text',{x:bar?at+3:938,y:bar?42:at-5,'text-anchor':bar?'start':'end',fill:'#745079','font-size':12},`${kind==='average'?'Mean':'Median'} of shown marks: ${format(value,id,columns,true)}`,g);
+     }
+@@ -112,7 +138,7 @@
+    for(const [i,value]of legends.entries()){
+     const lines=wrap(value,width-78),itemWidth=30+Math.max(...lines.map(line=>measure(line)));
+     if(x>24&&x+itemWidth>width-24){x=24;y+=rowHeight;rowHeight=28;}
+-    node('rect',{x,y:y-11,width:11,height:11,rx:2,fill:palette[i%palette.length]},null,legend);
++    node('rect',{x,y:y-11,width:11,height:11,rx:2,fill:mapped?colorOf(value):palette[i%palette.length]},null,legend);
+     lines.forEach((line,j)=>node('text',{x:x+18,y:y+j*20,fill:'#59645c','font-size':15},line,legend));
+     rowHeight=Math.max(rowHeight,lines.length*20+8);x+=itemWidth+14;
+    }
+diff --git a/mentat/app/templates/view_chart_studio.html b/mentat/app/templates/view_chart_studio.html
+--- a/mentat/app/templates/view_chart_studio.html
++++ b/mentat/app/templates/view_chart_studio.html
+@@ -2,10 +2,37 @@
+ <div class="studio">
+ <div class="studio-header">
+ <button id="studio-data-toggle" class="secondary studio-data-toggle" type="button" aria-expanded="false" aria-controls="studio-data-panel">Data &amp; fields</button>
+-<span class="studio-scope-block"><span id="studio-scope-chip" class="studio-scope-chip" role="status"></span><small id="studio-scope-note" class="studio-scope-note" hidden></small></span>
+-<button id="studio-scope-change" class="studio-scope-change" type="button" title="Open the Data source panel and choose a report">Change data</button>
++<div class="studio-source-anchor">
++<button id="studio-scope-change" class="studio-scope-change" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="studio-source-popover" title="Industry, cycles and accounting basis of this sheet. Open to change the data source"><span id="studio-scope-chip" class="studio-scope-chip"></span><span id="studio-scope-basis" class="studio-scope-basis"></span></button>
++<div id="studio-source-popover" class="studio-source-popover" role="dialog" aria-label="Data source" hidden>
++<details class="studio-source-disclosure" id="studio-source-details" open><summary id="studio-source-summary">Data source</summary>
++<div class="studio-source">
++<label for="studio-source-mode">Data source<select id="studio-source-mode"><option value="contributions">Verified contributions</option><option value="worksheet">Report worksheet</option></select></label>
++<div id="studio-contribution-source">
++<label for="studio-dataset">Report<select id="studio-dataset"></select></label>
++<p id="studio-dataset-message" class="studio-note" hidden></p>
++<label for="studio-basis">Accounting basis<select id="studio-basis"></select></label>
++<label for="studio-destination">State location view<select id="studio-destination"><option value="">Choose a state view</option><option value="recipient_state">Recipient committee address</option><option value="represented_state">Candidate represented state</option><option value="state">Contributor state</option></select></label>
++<p id="studio-basis-note" class="studio-note"></p>
++<button id="studio-refresh-data" class="studio-rescan secondary" type="button">Refresh verified data</button>
++</div>
++<div id="studio-worksheet-source" hidden>
++<label for="studio-run">Report folder<select id="studio-run"></select></label>
++<label for="studio-report">Report<select id="studio-report"></select></label>
++<label for="studio-sheet">Worksheet<select id="studio-sheet"></select></label>
++<label for="studio-header">Header row<input id="studio-header" type="number" min="1" max="100" value="5"></label><button id="studio-rescan" class="studio-rescan secondary" type="button">Rescan columns</button>
++</div>
++<p id="studio-loading" role="status">Reading verified contribution fields&#8230;</p>
++</div>
++</details>
++</div>
++</div>
++<small id="studio-scope-note" class="studio-scope-note" hidden></small>
++<div id="studio-compare" class="studio-compare"><button id="studio-compare-add" class="chip-add studio-compare-add" type="button" aria-haspopup="menu" aria-expanded="false" title="Add another industry, cycle or company to this sheet as a coloured series">+ Compare with&#8230;</button><span id="studio-compare-pills" class="studio-compare-pills" hidden></span><button id="studio-compare-clear" class="compare-clear" type="button" aria-label="Clear comparison" title="Clear comparison" hidden>Clear</button><span id="studio-compare-note" class="studio-compare-note" role="status" hidden></span></div>
++<span id="studio-ready" class="studio-ready" role="status"></span>
++<div id="studio-progress" class="studio-progress" role="status" hidden><span id="studio-progress-message"></span><span id="studio-progress-elapsed"></span><button id="studio-progress-cancel" class="secondary" type="button">Cancel</button></div>
+ <span class="studio-header-gap"></span>
+-<div id="studio-view-mode" class="studio-segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
++<div id="studio-view-mode" class="studio-segmented segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
+ <button id="studio-view-builder" type="button" role="radio" aria-checked="true" title="Data panel, shelves and Inspector">Builder</button>
+ <button id="studio-overview-toggle" class="studio-overview-toggle" type="button" role="radio" aria-checked="false" aria-pressed="false" tabindex="-1" title="Four preset views of one company">Company overview</button>
+ <button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own, or a board of 2 or 4 charts">Canvas</button>
+@@ -13,13 +40,11 @@
+ <button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector<span id="studio-inspector-count" class="studio-inspector-badge" hidden></span></button>
+ </div>
+ <div class="studio-toolbar" role="toolbar" aria-label="Chart Studio toolbar">
+-<div class="studio-group"><button id="studio-undo" type="button" title="Undo the last change">&#8630; Undo</button><button id="studio-redo" type="button" title="Redo the change just undone">&#8631; Redo</button></div>
+-<span class="studio-divider" aria-hidden="true"></span>
+-<div class="studio-group"><button id="studio-swap" type="button" title="Exchange the Columns and Rows shelves">&#8644; Swap</button><button id="studio-sort-asc" type="button" aria-pressed="false" title="Sort the grouping smallest first">&#8593; Sort ascending</button><button id="studio-sort-desc" type="button" aria-pressed="false" title="Sort the grouping largest first">&#8595; Sort descending</button><button id="studio-labels" type="button" aria-pressed="false" title="Write each mark's value beside it">Show mark labels</button></div>
++<div class="studio-group"><button id="studio-undo" class="studio-tool" type="button" title="Undo the last change"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.5 2.5 6.5l3 3"/><path d="M2.5 6.5h7a3.5 3.5 0 0 1 0 7H6.5"/></svg>Undo</button><button id="studio-redo" class="studio-tool" type="button" title="Redo the change just undone"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m10.5 3.5 3 3-3 3"/><path d="M13.5 6.5h-7a3.5 3.5 0 0 0 0 7h3"/></svg>Redo</button></div>
+ <span class="studio-divider" aria-hidden="true"></span>
+-<div class="studio-group"><select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select></div>
++<div class="studio-group"><button id="studio-swap" class="studio-tool" type="button" title="Exchange the Columns and Rows shelves"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 5.5h11M10.5 2.5l3 3-3 3"/><path d="M13.5 10.5h-11M5.5 7.5l-3 3 3 3"/></svg>Swap</button><details class="studio-menu studio-sort-menu" id="studio-sort"><summary class="studio-tool" title="Sort the grouping"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 2.5v11M2.5 11 5 13.5 7.5 11"/><path d="M11 13.5v-11M8.5 5 11 2.5 13.5 5"/></svg>Sort</summary><div><button id="studio-sort-asc" type="button" aria-pressed="false" title="Sort the grouping smallest first">Ascending</button><button id="studio-sort-desc" type="button" aria-pressed="false" title="Sort the grouping largest first">Descending</button><button id="studio-sort-none" type="button" aria-pressed="false" title="Keep the order the source gives">None</button></div></details><button id="studio-labels" class="studio-tool" type="button" aria-pressed="false" title="Write each mark's value beside it"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 8.2V2.5h5.7l5.3 5.3-5.7 5.7z"/><circle cx="5.3" cy="5.3" r="1"/></svg>Labels</button><label class="studio-fit studio-tool" for="studio-fit"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/><path d="M5 6.5V5h1.5M11 9.5V11H9.5"/></svg><select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select></label></div>
+ <span class="studio-divider" aria-hidden="true"></span>
+-<div class="studio-group"><button id="studio-clear" type="button" title="Empty this sheet but keep the data source">Clear</button><button id="studio-duplicate" type="button" title="Copy this sheet into a new one">Duplicate</button></div>
++<div class="studio-group"><button id="studio-clear" class="studio-tool" type="button" title="Empty this sheet but keep the data source"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="5.8"/><path d="m5.9 5.9 4.2 4.2M10.1 5.9l-4.2 4.2"/></svg>Clear</button><button id="studio-duplicate" class="studio-tool" type="button" title="Copy this sheet into a new one"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/></svg>Duplicate</button></div>
+ <span class="studio-toolbar-gap"></span>
+ <div class="studio-group studio-board-control" id="studio-board-tiles" role="group" aria-label="Board"><span class="studio-board-label">Board</span><button id="studio-board-1" type="button" aria-pressed="true" title="One chart on the Canvas">1</button><button id="studio-board-2" type="button" aria-pressed="false" title="Two charts side by side on the Canvas">2</button><button id="studio-board-4" type="button" aria-pressed="false" title="Four charts, two by two, on the Canvas">4</button></div>
+ <button id="studio-showme-toggle" class="studio-showme-toggle" type="button" aria-pressed="false" aria-controls="studio-showme" title="Open Show Me in the Inspector">Show Me</button>
+@@ -40,29 +65,8 @@
+ <aside class="studio-side" id="studio-data-panel" aria-label="Data">
+ <div class="studio-pane" id="studio-pane-data">
+ <h3 class="studio-panel-title">Data</h3>
+-<details class="studio-source-disclosure" id="studio-source-details" open><summary id="studio-source-summary">Data source</summary>
+-<div class="studio-source">
+-<label for="studio-source-mode">Data source<select id="studio-source-mode"><option value="contributions">Verified contributions</option><option value="worksheet">Report worksheet</option></select></label>
+-<div id="studio-contribution-source">
+-<label for="studio-dataset">Report<select id="studio-dataset"></select></label>
+-<p id="studio-dataset-message" class="studio-note" hidden></p>
+-<label for="studio-basis">Accounting basis<select id="studio-basis"></select></label>
+-<label for="studio-destination">State location view<select id="studio-destination"><option value="">Choose a state view</option><option value="recipient_state">Recipient committee address</option><option value="represented_state">Candidate represented state</option><option value="state">Contributor state</option></select></label>
+-<p id="studio-basis-note" class="studio-note"></p>
+-<button id="studio-refresh-data" class="studio-rescan secondary" type="button">Refresh verified data</button>
+-</div>
+-<div id="studio-worksheet-source" hidden>
+-<label for="studio-run">Report folder<select id="studio-run"></select></label>
+-<label for="studio-report">Report<select id="studio-report"></select></label>
+-<label for="studio-sheet">Worksheet<select id="studio-sheet"></select></label>
+-<label for="studio-header">Header row<input id="studio-header" type="number" min="1" max="100" value="5"></label><button id="studio-rescan" class="studio-rescan secondary" type="button">Rescan columns</button>
+-</div>
+-<p id="studio-loading" role="status">Reading verified contribution fields&#8230;</p>
+-<div id="studio-progress" class="studio-progress" role="status" hidden><span id="studio-progress-message"></span><span id="studio-progress-elapsed"></span><button id="studio-progress-cancel" class="secondary" type="button">Cancel</button></div>
+-</div>
+-</details>
+-<label for="studio-search">Search fields<input id="studio-search" type="search" placeholder="Filter this list" autocomplete="off"></label>
+-<label id="studio-field-table-label" for="studio-field-table">Fields from<select id="studio-field-table"><option value="">All related tables</option></select></label>
++<label class="studio-search" for="studio-search"><span class="studio-search-label">Search fields</span><input id="studio-search" type="search" placeholder="Search fields" autocomplete="off"></label>
++<label id="studio-field-table-label" class="studio-from" for="studio-field-table"><span class="studio-from-label">From:</span><select id="studio-field-table" aria-label="Fields from"><option value="">All related tables</option></select></label>
+ <h3>Dimensions</h3>
+ <div id="studio-dimensions" class="studio-fields"></div>
+ <h3>Measures</h3>
+@@ -73,9 +77,9 @@
+ </aside>
+ 
+ <div class="studio-view">
+-<div class="studio-quick-tools"><label for="studio-mark">Chart variant<select id="studio-mark"></select></label><label for="studio-aggregation">Primary measure aggregation<select id="studio-aggregation"></select></label></div>
++<div class="studio-quick-tools" hidden><label for="studio-aggregation">Primary measure aggregation<select id="studio-aggregation"></select></label></div>
+ <div class="studio-shelves" id="studio-shelves">
+-<div class="studio-shelf"><span class="studio-shelf-name" id="studio-columns-name">Columns</span><div id="studio-columns" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-columns-name"></div></div>
++<div class="studio-shelf"><span class="studio-shelf-name" id="studio-columns-name">Columns</span><div id="studio-columns" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-columns-name"></div><label class="studio-mark-chip" for="studio-mark"><span>Chart:</span><select id="studio-mark" aria-label="Chart variant"></select></label></div>
+ <div class="studio-shelf"><span class="studio-shelf-name" id="studio-rows-name">Rows</span><div id="studio-rows" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-rows-name"></div></div>
+ <div class="studio-shelf"><span class="studio-shelf-name" id="studio-filters-name">Filters</span><div id="studio-filters" class="studio-drop" data-placeholder="Drop a field to filter" aria-labelledby="studio-filters-name"></div></div>
+ </div>
+@@ -89,15 +93,19 @@
+ <div id="studio-table" class="studio-table table-scroll" hidden></div>
+ <div id="studio-board" class="studio-board" aria-label="Board" hidden></div>
+ <div class="studio-foot">
+-<p id="studio-reconcile" class="studio-reconcile" role="status" hidden></p>
+-<div class="studio-foot-line"><p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p><div id="studio-result-controls" class="studio-result-controls" hidden><button id="studio-groups-prev" type="button">Previous groups</button><span id="studio-group-count"></span><button id="studio-groups-next" type="button">Next groups</button><button id="studio-inspect-all" type="button">View source records</button></div></div>
++<div id="studio-note-line" class="studio-note-line">
++<div id="studio-reconcile" class="studio-reconcile" role="status" hidden><span id="studio-reconcile-text" class="studio-reconcile-text"></span><button id="studio-match-graph" class="secondary studio-match-graph" type="button" title="Set this sheet's cycle, company and giving type to Graph's current scope. Employee level has no verified field, so it is not matched." hidden>Match Graph scope</button><button id="studio-reconcile-why" class="studio-reconcile-why" type="button" aria-expanded="false" aria-controls="studio-reconcile-detail">Why</button><div id="studio-reconcile-detail" class="studio-reconcile-detail" role="dialog" aria-label="Why Graph and this sheet differ" hidden></div></div>
++<div id="studio-result-controls" class="studio-result-controls" hidden><button id="studio-groups-prev" type="button" aria-label="Previous groups" title="Previous groups">&#8249;</button><span id="studio-group-count"></span><button id="studio-groups-next" type="button" aria-label="Next groups" title="Next groups">&#8250;</button><span class="studio-result-sep" aria-hidden="true">&#183;</span><button id="studio-inspect-all" type="button">View source records</button></div>
++</div>
++<div class="studio-foot-line"><p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p></div>
+ </div>
+ <section id="studio-inspection" class="studio-inspection" hidden aria-label="Source records"><div class="studio-inline"><h3>Source records</h3><button id="studio-inspection-close" type="button">Close</button></div><p id="studio-record-count" class="studio-note" role="status"></p><div id="studio-records" class="table-scroll"></div><button id="studio-record-prev" type="button">Previous records</button><button id="studio-record-next" type="button">Next records</button></section>
+ </div>
+ </div>
+ 
+ <aside class="studio-inspector" id="studio-inspector" aria-label="Inspector">
+-<div class="studio-inspector-head"><h3 class="studio-panel-title">Inspector</h3><button id="studio-inspector-close" class="studio-inspector-close" type="button">Close</button></div>
++<div class="studio-inspector-rail" id="studio-inspector-rail" role="group" aria-label="Inspector (collapsed)"><button id="studio-rail-marks" type="button" aria-label="Expand the Inspector on Marks" title="Marks"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 13.5v-5M8 13.5v-11M12.5 13.5v-7.5"/></svg></button><button id="studio-rail-analytics" type="button" aria-label="Expand the Inspector on Analytics" title="Analytics"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 12 6 8l3 2.5 4.5-6"/><path d="M11 4.5h2.5V7"/></svg></button><button id="studio-rail-filters" type="button" aria-label="Expand the Inspector on Filters" title="Filters"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 3h11L9.3 8.2v4.3l-2.6 1V8.2z"/></svg></button></div>
++<div class="studio-inspector-head"><h3 class="studio-panel-title">Inspector</h3><button id="studio-inspector-collapse" class="studio-inspector-collapse" type="button" aria-expanded="true" aria-controls="studio-inspector" title="Fold the Inspector to a rail">Collapse</button><button id="studio-inspector-close" class="studio-inspector-close" type="button">Close</button></div>
+ <div class="studio-inspector-tabs" role="tablist" aria-label="Inspector">
+ <button id="studio-tab-marks" type="button" role="tab" aria-selected="true" aria-controls="studio-pane-marks">Marks</button>
+ <button id="studio-tab-analytics" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="studio-pane-analytics">Analytics</button>
+@@ -106,11 +114,11 @@
+ <div class="studio-pane" id="studio-pane-marks" role="tabpanel" aria-labelledby="studio-tab-marks">
+ <h3>Marks</h3>
+ <div class="studio-mark-props">
+-<div class="studio-prop"><span>Colour</span><div id="studio-color" class="studio-drop" data-placeholder="Colour" aria-label="Colour property"></div></div>
+-<div class="studio-prop"><span>Size</span><div id="studio-size" class="studio-drop" data-placeholder="Size" aria-label="Size property"></div></div>
+-<div class="studio-prop"><span>Label</span><div id="studio-label" class="studio-drop" data-placeholder="Label" aria-label="Label property"></div></div>
+-<div class="studio-prop"><span>Detail</span><div id="studio-detail" class="studio-drop" data-placeholder="Detail" aria-label="Detail property"></div></div>
+-<div class="studio-prop"><span>Tooltip</span><div id="studio-tooltip" class="studio-drop" data-placeholder="Tooltip" aria-label="Tooltip property"></div></div>
++<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.5a5.5 5.5 0 1 0 0 11c.9 0 1.3-.6 1.3-1.2 0-.9-.7-1.1-.7-1.9 0-.7.6-1.2 1.3-1.2h1.2a2.4 2.4 0 0 0 2.4-2.4C13.5 4.6 11.1 2.5 8 2.5z"/><circle cx="5.2" cy="7" r=".8"/><circle cx="7.3" cy="4.9" r=".8"/><circle cx="10.2" cy="5.3" r=".8"/></svg>Colour</span><div id="studio-color" class="studio-drop" data-placeholder="Drop a field here" aria-label="Colour property"></div></div>
++<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/></svg>Size</span><div id="studio-size" class="studio-drop" data-placeholder="Drop a field here" aria-label="Size property"></div></div>
++<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 3h10M8 3v10.5"/></svg>Label</span><div id="studio-label" class="studio-drop" data-placeholder="Drop a field here" aria-label="Label property"></div></div>
++<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="4" cy="4" r=".9"/><circle cx="8" cy="4" r=".9"/><circle cx="12" cy="4" r=".9"/><circle cx="4" cy="8" r=".9"/><circle cx="8" cy="8" r=".9"/><circle cx="12" cy="8" r=".9"/><circle cx="4" cy="12" r=".9"/><circle cx="8" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/></svg>Detail</span><div id="studio-detail" class="studio-drop" data-placeholder="Drop a field here" aria-label="Detail property"></div></div>
++<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 2.5h9a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H7l-3 2.5v-2.5h-.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg>Tooltip</span><div id="studio-tooltip" class="studio-drop" data-placeholder="Drop a field here" aria-label="Tooltip property"></div></div>
+ </div>
+ <p id="studio-marks-note" class="studio-note">Colour separates series; Detail sets the grouping behind each mark. Select a mark to inspect its source records.</p>
+ <details class="studio-disclosure" id="studio-showme-details"><summary>Show Me<span id="studio-showme-hint" class="studio-disclosure-hint"></span></summary>
+@@ -185,8 +193,8 @@
+ <button id="studio-sheet-source" type="button" aria-selected="false">Data Source</button>
+ <div id="studio-sheet-tabs" class="studio-sheet-tabs"></div>
+ <button id="studio-new-sheet" type="button">+ New sheet</button>
+-</div>
+ <div class="studio-status" id="studio-status" role="status"></div>
+ </div>
++</div>
+ </section>
+ 
+diff --git a/mentat/app/tests/chart-studio-contributions-sort.test.js b/mentat/app/tests/chart-studio-contributions-sort.test.js
+--- a/mentat/app/tests/chart-studio-contributions-sort.test.js
++++ b/mentat/app/tests/chart-studio-contributions-sort.test.js
+@@ -149,6 +149,8 @@ test('[studio-labels] labelLock answers with the empty string only where labels
+ 
+ test('[studio-labels] the labels toggle is render-only: it never changes the query', () => {
+   const off = sheet(), on = sheet();
++  // Build 03 (S1): a new sheet starts with its labels on, so "off" is set.
++  off.showLabels = false;
+   on.showLabels = true;
+   assert.deepEqual(compile(on).query, compile(off).query, 'the query must be identical');
+   assert.equal(compile(on).spec.labels, true);
+diff --git a/mentat/app/ui-state.js b/mentat/app/ui-state.js
+--- a/mentat/app/ui-state.js
++++ b/mentat/app/ui-state.js
+@@ -29,6 +29,15 @@
+     else if(typeof remaining==='number'&&remaining>0)result.remaining=remaining-age-since>0?'About '+clockText(remaining-age-since):'Estimate exceeded';
+     return result;
+   }
+-  const api={normalizeName,titlePosition,clockText,timer};
++  // Per-browser display memory (build 03: the Chart Studio Inspector's
++  // collapse). Storage can be missing or throw (a private window, blocked site
++  // data), so a read answers null and a write answers false instead of failing.
++  function recall(key) {
++    try { return root.localStorage ? root.localStorage.getItem(String(key)) : null; } catch (error) { return null; }
++  }
++  function remember(key, value) {
++    try { if (!root.localStorage) return false; root.localStorage.setItem(String(key), String(value)); return true; } catch (error) { return false; }
++  }
++  const api={normalizeName,titlePosition,clockText,timer,recall,remember};
+   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatState=api;
+ })(globalThis);
+diff --git a/mentat/app/workspace-polish.css b/mentat/app/workspace-polish.css
+--- a/mentat/app/workspace-polish.css
++++ b/mentat/app/workspace-polish.css
+@@ -307,11 +307,272 @@ body[data-view]{background-color:var(--analysis-paper)}
+   body[data-view] .graph-trail-part[aria-current=page]{color:#69696e;font-weight:400}
+   body[data-view] .graph-trail-part[aria-current=page]:not(:only-of-type){color:var(--acu-plum);font-weight:600}
+ }
+-/* The 200px sidebar still leaves Chart Studio narrower than before, so at 1440
+-   its toolbar wraps "Views" to the far left, where the right-anchored menu was
+-   clipped by .studio{overflow:hidden}. Wrapped items now sit right and open into
+-   room. (Scope deviation into Chart Studio; prompt 03 owns the toolbar.) */
+-@media(min-width:761px){#view-chart-studio .studio-toolbar{justify-content:flex-end}}
++/* ------------------------------------------- Chart Studio redesign, build 03 (2026-09-22)
++   Board S1 (boards\S1_chart_studio.webp, 1600x900 at 1.25x). Replaces build 01's
++   interim D1 toolbar rule. Two rows of chrome above the chart (D-041): the header
++   row beside the page title (source chip, "+ Compare with...", Ready, Builder |
++   Company overview | Canvas) and one toolbar row; then Fields, the shelves and
++   canvas, the Inspector; sheet tabs and status share the bottom bar. One gold
++   (Show Me); no red in the builder. Sizes land the fallback faces on S1's ink. */
++
++/* The panel look moves from the whole studio to its pieces. */
++#view-chart-studio .studio{display:block;margin:0;border:0;border-radius:0;background:none;overflow:visible}
++#view-chart-studio .studio-header{position:relative;z-index:8;display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-height:0;padding:0;background:none;border:0}
++#view-chart-studio .studio-header-gap{flex:1 1 auto}
++/* Source chip: industry · cycle scope · basis, opening the Data source popover. */
++#view-chart-studio .studio-source-anchor{position:relative;display:inline-flex;flex:0 4 auto;min-width:130px}
++#view-chart-studio button.studio-scope-change{display:block;min-width:0;box-sizing:border-box;height:30px;min-height:30px;max-width:420px;margin:0;padding:0 30px 0 11px;border:1px solid #dcd6df;border-radius:6px;background:white;color:#2f273f;font:500 13px/28px var(--font-sans);text-align:left;white-space:nowrap;cursor:pointer;position:relative;overflow:hidden;text-overflow:ellipsis}
++#view-chart-studio button.studio-scope-change::after{content:"";position:absolute;right:12px;top:50%;width:5px;height:5px;margin-top:-4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg)}
++#view-chart-studio button.studio-scope-change:hover{border-color:var(--acu-purple)}
++#view-chart-studio .studio-scope-change .studio-scope-chip{display:inline;font:inherit;color:inherit;max-width:none;padding:0;margin:0;background:none;border:0;border-radius:0;white-space:nowrap;overflow:visible}
++#view-chart-studio .studio-scope-change .studio-scope-chip>span{display:inline;padding:0;margin:0;background:none;border:0;border-radius:0;font:inherit;color:inherit}
++#view-chart-studio .studio-scope-change .studio-scope-chip>span+span::before,
++#view-chart-studio .studio-scope-change .studio-scope-chip:not(:empty)+.studio-scope-basis:not(:empty)::before{content:"\00a0\00b7\00a0"}
++#view-chart-studio .studio-scope-basis{font:inherit;color:inherit}
++#view-chart-studio .studio-scope-note{flex:0 1 auto;max-width:260px;font-size:11px;line-height:1.3;color:var(--muted)}
++#view-chart-studio .studio-source-popover{position:absolute;left:0;top:calc(100% + 6px);z-index:30;box-sizing:border-box;width:320px;max-height:calc(100vh - 120px);overflow:auto;padding:12px 14px;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:0 10px 28px rgba(52,38,73,.16)}
++#view-chart-studio .studio-source-popover[hidden]{display:none}
++#view-chart-studio .studio-source-popover .studio-source-disclosure{margin:0;padding:0;border:0}
++#view-chart-studio .studio-source-popover .studio-source-disclosure>summary{cursor:default;margin-bottom:6px}
++#view-chart-studio .studio-source-popover .studio-source-disclosure>summary::before{content:none}
++#view-chart-studio .studio-source-popover label{display:block;margin:0 0 8px;font-size:12px;color:var(--muted)}
++#view-chart-studio .studio-source-popover :is(select,input){display:block;width:100%;min-height:34px;margin:3px 0 0;font-size:12px}
++#view-chart-studio .studio-source-popover .studio-rescan{margin:2px 0 8px}
++#view-chart-studio .studio-source-popover p{margin:0 0 8px;font-size:11px;line-height:1.45;color:var(--muted)}
++/* "+ Compare with...": one line, dashed; pills replace it while comparing. */
++#view-chart-studio .studio-compare{display:inline-flex;flex:0 1 auto;align-items:center;gap:8px;min-width:0}
++#view-chart-studio .studio-compare>*{flex:none}
++#view-chart-studio .studio-compare>:is(.studio-compare-pills,.studio-compare-note){flex:0 1 auto;min-width:0}
++#view-chart-studio .studio-compare .chip-add{height:30px;min-height:30px;padding:0 12px;border-radius:6px;font:400 13px/1 var(--font-sans)}
++#view-chart-studio .studio-compare .chip-add:disabled{opacity:.5;cursor:default}
++#view-chart-studio .studio-compare-pills[hidden],#view-chart-studio .studio-compare-note[hidden]{display:none}
++#view-chart-studio .studio-compare-pills .scope-pill{max-width:150px;height:22px;padding:0 10px;font-size:12px}
++#view-chart-studio .studio-compare .compare-clear{min-height:0;padding:0;border:0;background:none;color:var(--acu-purple);font:400 12px/1 var(--font-sans);text-decoration:underline;cursor:pointer}
++#view-chart-studio .studio-compare-note{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++/* Ready: S1's teal dot and word, the source summary's own state. */
++#view-chart-studio .studio-ready{display:inline-flex;flex:none;align-items:center;gap:6px;max-width:260px;font:400 13px/1.2 var(--font-sans);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++#view-chart-studio .studio-ready.is-ready::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--acu-teal)}
++#view-chart-studio .studio-ready:empty{display:none}
++#view-chart-studio .studio-header .studio-progress{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
++#view-chart-studio .studio-header .studio-progress[hidden]{display:none}
++/* Builder | Company overview | Canvas: build 01's .segmented at S1's size. */
++#view-chart-studio .studio-segmented.segmented{height:30px;border:1px solid #dcd6df;border-radius:6px;overflow:hidden;background:white}
++#view-chart-studio .studio-segmented.segmented>button{height:auto;min-height:0;padding:0 17px;border:0;border-right:1px solid #e3dee6;background:white;color:#2f273f;font:400 13px/1 var(--font-sans)}
++#view-chart-studio .studio-segmented.segmented>button:last-child{border-right:0}
++#view-chart-studio .studio-segmented.segmented>button[aria-checked=true]{background:#362d74;color:white;font-weight:500}
++
++/* Toolbar: one row of labelled icon buttons. */
++#view-chart-studio .studio-toolbar{position:relative;z-index:7;flex-wrap:nowrap;gap:6px;min-height:0;padding:9px 8px 8px 16px;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow)}
++#view-chart-studio .studio-toolbar .studio-group{flex-wrap:nowrap;gap:2px}
++#view-chart-studio .studio-toolbar .studio-divider{height:26px;margin:0 8px;background:#e6e1e8}
++#view-chart-studio .studio-icon{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
++#view-chart-studio .studio-toolbar :is(.studio-tool,button.studio-tool){display:inline-flex;align-items:center;gap:7px;height:31px;min-height:31px;margin:0;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#2f273f;font:400 13px/1 var(--font-sans);white-space:nowrap;cursor:pointer}
++#view-chart-studio .studio-toolbar .studio-tool:hover:not(:disabled){background:#f4f0f7}
++#view-chart-studio .studio-toolbar button.studio-tool:disabled{opacity:.55;cursor:default}
++/* Labels: pressed is a lilac fill, never gold (Show Me is the one gold). */
++#view-chart-studio .studio-toolbar button.studio-tool[aria-pressed=true]{background:transparent;border-color:transparent;font-weight:400}
++#view-chart-studio .studio-toolbar button.studio-tool[aria-pressed=true] .studio-icon{color:var(--acu-purple);stroke-width:1.6}
++#view-chart-studio .studio-toolbar .studio-board-control button[aria-pressed=true]{background:rgba(214,200,226,.45)}
++#view-chart-studio .studio-toolbar .studio-menu>summary{list-style:none}
++#view-chart-studio .studio-toolbar .studio-menu>summary::after,#view-chart-studio .studio-fit::after{content:"";width:5px;height:5px;margin:-3px 0 0 3px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg)}
++#view-chart-studio .studio-sort-menu>div{left:0;right:auto;min-width:150px}
++#view-chart-studio .studio-sort-menu>div button{display:block;width:100%;min-height:30px;padding:6px 10px;border:0;border-radius:5px;background:none;color:#2f273f;font:400 13px/1.2 var(--font-sans);text-align:left}
++#view-chart-studio .studio-sort-menu>div button[aria-pressed=true]{background:rgba(214,200,226,.45);font-weight:600}
++#view-chart-studio .studio-sort-menu>div button:disabled{opacity:.5}
++#view-chart-studio .studio-fit{position:relative;padding-right:10px}
++#view-chart-studio .studio-toolbar .studio-fit select{width:auto;max-width:130px;height:31px;min-height:31px;margin:0 -6px 0 0;padding:0 14px 0 0;border:0;background:transparent;color:#2f273f;font:400 13px/1 var(--font-sans);appearance:none;-webkit-appearance:none;cursor:pointer}
++#view-chart-studio .studio-fit::after{position:absolute;right:6px;top:50%}
++/* The right-hand group: bordered buttons, and the one gold one. */
++#view-chart-studio .studio-toolbar>button,#view-chart-studio .studio-toolbar>.studio-menu>summary{display:inline-flex;align-items:center;gap:8px;height:31px;min-height:31px;margin:0;padding:0 14px;border:1px solid #dcd6df;border-radius:6px;background:white;color:#2f273f;font:400 13px/1 var(--font-sans);white-space:nowrap}
++#view-chart-studio .studio-toolbar>.studio-menu>summary{padding-right:12px}
++#view-chart-studio .studio-toolbar>.studio-menu>summary::after{margin-left:6px}
++#view-chart-studio .studio-toolbar>button#studio-showme-toggle{padding:0 11px;border-color:var(--acu-gold);background:var(--acu-gold);color:#2f273f;font-weight:500}
++#view-chart-studio .studio-toolbar>button#studio-showme-toggle:hover:not(:disabled){background:#f2bb4b;border-color:#f2bb4b}
++#view-chart-studio .studio-toolbar>button#studio-showme-toggle[aria-pressed=true]{background:#f2bb4b;border-color:#d1900f}
++#view-chart-studio .studio-toolbar>.studio-menu>div{right:0;left:auto}
++
++/* Fields pane: search, "From:", headed lists with type glyphs and in-use dots. */
++#view-chart-studio .studio-side{background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow)}
++#view-chart-studio #studio-pane-data{padding:11px 10px 12px}
++#view-chart-studio #studio-pane-data>.studio-panel-title{display:none}
++#view-chart-studio .studio-search{position:relative;display:block;margin:0 0 6px}
++#view-chart-studio .studio-search-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
++#view-chart-studio .studio-search input{box-sizing:border-box;width:100%;height:35px;min-height:35px;margin:0;padding:0 10px 0 34px;border:1px solid #dcd6df;border-radius:6px;background:white;color:#2f273f;font:400 13px/1 var(--font-sans)}
++#view-chart-studio .studio-search input::placeholder{color:#6b6770}
++/* The magnifier is drawn in CSS: the console's CSP allows no data: images. */
++#view-chart-studio .studio-search::before{content:"";position:absolute;left:13px;top:11px;width:8px;height:8px;border:1.3px solid #2f273f;border-radius:50%;pointer-events:none}
++#view-chart-studio .studio-search::after{content:"";position:absolute;left:22.5px;top:21px;width:5px;height:1.4px;background:#2f273f;transform:rotate(45deg);transform-origin:0 50%;pointer-events:none}
++#view-chart-studio .studio-from{display:flex;align-items:center;gap:4px;margin:0 0 4px;padding:0 2px;font:400 12px/1 var(--font-sans);color:var(--muted)}
++#view-chart-studio .studio-from[hidden]{display:none}
++#view-chart-studio .studio-from select{width:auto;max-width:100%;min-height:24px;height:24px;margin:0;padding:0 16px 0 2px;border:0;background:transparent;color:#2f273f;font:400 12px/1 var(--font-sans)}
++#view-chart-studio #studio-pane-data>h3:not(.studio-panel-title){margin:16px 0 6px;padding:0 3px;font:500 11px/14px var(--font-sans);letter-spacing:.09em;text-transform:uppercase;color:#4a4552}
++#view-chart-studio .studio-fields{gap:0}
++#view-chart-studio .studio-fields .studio-pill{display:flex;align-items:center;gap:0;box-sizing:border-box;width:100%;height:28.2px;min-height:0;padding:0 24px 0 3px;border:0;border-radius:5px;background:transparent;color:#2f273f;font:400 13px/1 var(--font-sans)}
++#view-chart-studio .studio-fields .studio-pill:hover{background:#f4f0f7}
++#view-chart-studio .studio-fields .studio-pill .studio-glyph{flex:none;justify-content:flex-start;width:31px;font:400 11.5px/1 var(--font-sans);letter-spacing:0;color:#6b6770;opacity:1}
++#view-chart-studio .studio-fields .studio-pill.is-measure .studio-glyph{font-size:17px;color:#4a4552}
++#view-chart-studio .studio-fields .studio-pill .studio-glyph svg{width:15px;height:15px}
++#view-chart-studio .studio-fields .studio-pill.is-used .studio-pill-name::after{content:"";display:inline-block;width:6px;height:6px;margin:0 0 1px 9px;border-radius:50%;background:var(--acu-purple);vertical-align:middle}
++#view-chart-studio .studio-fields .studio-pill .studio-pill-name{flex:0 1 auto}
++#view-chart-studio .studio-fields .studio-pill::after{background:#efe9f4}
++
++/* Shelves: Columns, Rows, Filters; the chart-type select ends the Columns row. */
++#view-chart-studio .studio-view{background:none;gap:12px}
++#view-chart-studio .studio-shelves{position:relative;padding:11px 134px 7px 10px;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow)}
++#view-chart-studio .studio-shelf{position:static;display:flex;align-items:center;gap:0;box-sizing:border-box;height:30px;margin:0 0 8.4px;padding:0 0 0 10px;border:1px solid #efedea;border-radius:6px;background:#fcfbfa}
++#view-chart-studio .studio-shelves .studio-shelf:last-child{margin-bottom:0}
++#view-chart-studio .studio-shelf-name{flex:0 0 88px;padding:0;font:400 13px/1 var(--font-sans);letter-spacing:0;text-transform:none;color:#5d5864}
++#view-chart-studio .studio-shelf .studio-drop{flex:1;align-items:center;align-content:center;min-height:28px;padding:0;border:0;background:transparent}
++#view-chart-studio .studio-shelf .studio-drop .studio-pill{height:26px;padding:0 12px;border-radius:6px;font:500 13px/1 var(--font-sans);gap:9px}
++#view-chart-studio .studio-shelf .studio-drop .studio-pill .studio-glyph{font:400 11.5px/1 var(--font-sans);opacity:.9}
++#view-chart-studio .studio-shelf .studio-drop .studio-pill .studio-pill-menu{padding:0 0 0 6px;border:0;background:none;color:inherit;font:400 12px/1 var(--font-sans)}
++#view-chart-studio .studio-shelf #studio-filters{align-self:stretch;align-content:center;margin:3px 0;padding:0 14px;border:1px dashed #d4ccd9;border-radius:5px;background:white}
++#view-chart-studio .studio-shelf .studio-drop[data-empty=true]::after{padding:0;font:400 13px/1 var(--font-sans);color:#77727d}
++#view-chart-studio .studio-mark-chip{position:absolute;right:14px;top:12px;display:flex;align-items:center;gap:0;box-sizing:border-box;width:113px;height:30px;margin:0;padding:0 26px 0 10px;border:1px solid #dcd6df;border-radius:6px;background:white;font:400 12px/1 var(--font-sans);color:#2f273f;white-space:nowrap}
++#view-chart-studio .studio-mark-chip::after{content:"";position:absolute;right:11px;top:50%;width:5px;height:5px;margin-top:-4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);pointer-events:none}
++#view-chart-studio .studio-mark-chip>span{flex:none;margin-right:3px}
++#view-chart-studio .studio-mark-chip select{flex:1;width:100%;min-width:0;height:28px;min-height:0;margin:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;appearance:none;-webkit-appearance:none;cursor:pointer}
++
++/* Canvas: serif title, muted subtitle, three figures, the chart. */
++#view-chart-studio .studio-canvas-wrap{display:flex;flex-direction:column;padding:6px 18px 16px;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow)}
++#view-chart-studio .studio-canvas-wrap h2#studio-title{margin:0;font:400 28px/34px var(--font-serif);letter-spacing:0;color:#1d173b}
++#view-chart-studio .studio-subtitle{margin:2px 0 0;font:400 14.5px/20px var(--font-sans);color:#69696e}
++#view-chart-studio .studio-verified-summary{display:grid;grid-template-columns:repeat(3,minmax(0,256px));gap:0;margin:12px 0 6px;padding:0;border:0;font:400 13px/16px var(--font-sans);color:#69696e}
++#view-chart-studio .studio-verified-summary>span{display:flex;flex-direction:column;gap:4px;min-width:0;padding:0 0 0 1px}
++#view-chart-studio .studio-verified-summary>span+span{padding-left:32px;border-left:1px solid #e3e0dc}
++#view-chart-studio .studio-verified-summary strong{font:400 21px/26px var(--font-sans);letter-spacing:.01em;color:#1d173b}
++#view-chart-studio .studio-verified-summary .studio-scope-dot{display:inline-block;width:8px;height:8px;margin:0 6px 2px 0;border-radius:50%;vertical-align:middle}
++#view-chart-studio .studio-scope-dot--1{background:var(--scope-1)}
++#view-chart-studio .studio-scope-dot--2{background:var(--scope-2)}
++#view-chart-studio .studio-scope-dot--3{background:var(--scope-3)}
++/* A bar chart drawn at the canvas's own width (one unit per CSS px) reads at S1's size. */
++#view-chart-studio .studio-canvas svg[data-native] text{font-size:13.5px}
++/* The drawing scrolls inside its own region, so the title, the figures and
++   the note line stay in view however tall the chart is. */
++#view-chart-studio .studio-canvas-wrap>.studio-canvas{flex:1 1 auto;min-height:180px;overflow:auto}
++
++/* The note line under the chart (keeps #studio-reconcile): lilac, no red. */
++#view-chart-studio .studio-foot{margin-top:auto;padding:8px 0 0;border:0}
++#view-chart-studio .studio-note-line{display:flex;align-items:center;gap:12px;min-height:40px;box-sizing:border-box;padding:0 12px 0 0;border-radius:8px}
++#view-chart-studio .studio-note-line:has(#studio-reconcile:not([hidden])){background:#f3f2fb;padding:6px 12px 6px 14px}
++#view-chart-studio .studio-reconcile{position:relative;display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;margin:0;padding:0;border:0;background:none;font:400 13px/1.35 var(--font-sans);color:#4a4552}
++#view-chart-studio .studio-reconcile[hidden]{display:none}
++#view-chart-studio .studio-reconcile-text{min-width:0}
++#view-chart-studio button.studio-match-graph{flex:none;height:28px;min-height:28px;margin:0;padding:0 14px;border:1px solid #dcd6df;border-radius:6px;background:white;color:#2f273f;font:500 13px/1 var(--font-sans);white-space:nowrap;cursor:pointer}
++#view-chart-studio button.studio-match-graph[hidden]{display:none}
++#view-chart-studio button.studio-match-graph:hover{border-color:var(--acu-purple)}
++#view-chart-studio button.studio-reconcile-why{flex:none;min-height:0;margin:0;padding:0;border:0;background:none;color:var(--acu-purple);font:600 13px/1 var(--font-sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
++#view-chart-studio button.studio-reconcile-why[hidden]{display:none}
++#view-chart-studio .studio-reconcile-detail{position:absolute;left:0;bottom:calc(100% + 12px);z-index:20;box-sizing:border-box;width:min(520px,100%);padding:12px 14px;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:0 10px 28px rgba(52,38,73,.16);font:400 13px/1.5 var(--font-sans);color:#2f273f}
++#view-chart-studio .studio-reconcile-detail[hidden]{display:none}
++#view-chart-studio .studio-reconcile-detail p{margin:0 0 8px;color:#2f273f}
++#view-chart-studio .studio-reconcile-detail .studio-reconcile-caveat{margin:8px 0 0;color:var(--muted);font-size:12px}
++#view-chart-studio .studio-reconcile-diff{font-weight:600;color:#2f273f}
++#view-chart-studio .studio-note-line .studio-result-controls{flex:none;gap:6px;margin:0 0 0 auto;font:400 12.5px/1 var(--font-sans);color:#69696e}
++#view-chart-studio .studio-note-line .studio-result-controls[hidden]{display:none}
++#view-chart-studio .studio-note-line .studio-result-controls span{flex:none}
++#view-chart-studio .studio-note-line .studio-result-controls button{min-height:0;padding:2px 4px;border:0;background:none;color:#2f273f;font:inherit}
++#view-chart-studio .studio-note-line .studio-result-controls button[hidden]{display:none}
++#view-chart-studio .studio-note-line #studio-inspect-all{color:var(--acu-purple);text-decoration:underline;text-underline-offset:3px}
++#view-chart-studio .studio-note-line #studio-inspect-all:disabled{color:var(--muted);text-decoration:none}
++/* The caveat under the chart moves into Why while the note line shows. */
++#view-chart-studio .studio-foot:has(#studio-reconcile:not([hidden])) .studio-foot-line{display:none}
++#view-chart-studio .studio-foot-line{margin-top:6px}
++
++/* Inspector: serif head with Collapse, tabs, Marks rows with icons. */
++#view-chart-studio .studio-inspector{background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow)}
++#view-chart-studio .studio-inspector-head{padding:9px 10px 0 13px}
++#view-chart-studio .studio-inspector-head .studio-panel-title{font:400 24px/30px var(--font-serif);letter-spacing:0;color:#1d173b}
++#view-chart-studio button.studio-inspector-collapse{display:inline-flex;align-items:center;gap:8px;height:29px;min-height:29px;margin:0;padding:0 12px;border:1px solid #dcd6df;border-radius:6px;background:white;color:#2f273f;font:400 12px/1 var(--font-sans);cursor:pointer}
++#view-chart-studio button.studio-inspector-collapse::after{content:"";width:5px;height:5px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg)}
++#view-chart-studio .studio-inspector-tabs{margin:6px 13px 0;border-bottom:1px solid #ebe7ee}
++#view-chart-studio .studio-inspector-tabs button{flex:0 0 auto;min-height:0;padding:12px 11px 13px;border-bottom-width:3px;color:#4a4552;font:400 14px/1 var(--font-sans)}
++#view-chart-studio .studio-inspector-tabs button+button{margin-left:18px}
++#view-chart-studio .studio-inspector-tabs button[aria-selected=true]{color:#2f273f;font-weight:600;border-bottom-color:var(--acu-gold)}
++#view-chart-studio #studio-pane-marks>h3:first-child,#view-chart-studio #studio-marks-note{display:none}
++#view-chart-studio .studio-inspector .studio-pane{padding:9px 10px 12px 13px}
++#view-chart-studio .studio-inspector .studio-disclosure-hint{display:none}
++#view-chart-studio .studio-mark-props{gap:0;margin:0}
++#view-chart-studio .studio-prop{grid-template-columns:100px minmax(0,1fr);align-items:center;gap:0;height:65.2px}
++#view-chart-studio .studio-prop>span{display:flex;align-items:center;gap:13px;padding:0 0 0 7px;font:400 14px/1 var(--font-sans);color:#2f273f}
++#view-chart-studio .studio-prop>span .studio-icon{width:18px;height:18px;color:#4a4552}
++#view-chart-studio .studio-prop .studio-drop{box-sizing:border-box;min-height:38px;padding:0 10px;align-content:center;border:1px dashed #d4ccd9;border-radius:6px;background:#fdfcfb}
++#view-chart-studio .studio-prop .studio-drop[data-empty=true]::after{padding:0;font:400 12px/1 var(--font-sans);color:#77727d}
++#view-chart-studio .studio-inspector .studio-disclosure{margin:14px 0 0;padding:0;border-top:1px solid #ebe7ee}
++#view-chart-studio .studio-inspector .studio-disclosure+.studio-disclosure{margin-top:0}
++#view-chart-studio .studio-inspector .studio-disclosure:last-of-type{border-bottom:1px solid #ebe7ee}
++#view-chart-studio .studio-inspector .studio-disclosure>summary{display:flex;align-items:center;height:44px;padding:0 0 0 7px;font:400 16px/1 var(--font-serif);letter-spacing:0;text-transform:none;color:#2f273f}
++#view-chart-studio .studio-inspector .studio-disclosure>summary::before{content:"";flex:none;width:6px;height:6px;margin:0 22px 0 0;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg)}
++#view-chart-studio .studio-inspector .studio-disclosure[open]>summary::before{content:"";transform:rotate(45deg)}
++/* Collapse: a 56px rail of three icon buttons. */
++#view-chart-studio .studio-inspector-rail{display:none}
++#view-chart-studio .studio-inspector-rail button{display:flex;align-items:center;justify-content:center;width:38px;height:38px;min-height:0;margin:0;padding:0;border:1px solid transparent;border-radius:8px;background:none;color:#2f273f;cursor:pointer}
++#view-chart-studio .studio-inspector-rail button:hover{background:#f4f0f7;border-color:#e3dce9}
++#view-chart-studio .studio-inspector-rail .studio-icon{width:20px;height:20px}
++
++/* Bottom bar: sheet tabs, and the status line at its right. */
++#view-chart-studio .studio-sheets{display:flex;align-items:stretch;gap:0;box-sizing:border-box;height:44px;padding:0 14px 0 0;background:white;border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow);overflow:hidden}
++#view-chart-studio .studio-sheets .studio-sheet-tabs{display:flex;gap:0}
++#view-chart-studio .studio-sheets button{height:auto;min-height:0;margin:0;padding:0 16px;border:0;border-right:1px solid #ebe7ee;border-bottom:3px solid transparent;border-top:3px solid transparent;border-radius:0;background:none;color:#2f273f;font:400 14px/1 var(--font-sans)}
++#view-chart-studio .studio-sheets #studio-sheet-source{padding:0 27px 0 15px}
++#view-chart-studio .studio-sheets button[aria-selected=true]{border-bottom-color:#6968a8;color:#4b3f8a;font-weight:500}
++#view-chart-studio .studio-sheets #studio-new-sheet{border-right:0}
++#view-chart-studio .studio-sheets .studio-status{display:flex;align-items:center;margin:0 0 0 auto;padding:0;border:0;background:none;font:400 12px/1 var(--font-sans);color:#69696e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++
++/* Board-size buttons only in Canvas mode (D-061), already hidden in Builder. */
++#view-chart-studio .studio-options-hidden .studio-toolbar .studio-board-control button{height:31px;min-height:31px}
++
++@media(min-width:1100px){
++  /* The page title shares S1's header row: it floats, the header (a flex box)
++     sits beside it, and every other studio row clears it. */
++  body[data-view=chart-studio] .workspace-heading{float:left;margin:4px 24px 0 4px}
++  body[data-view=chart-studio] .workspace-heading h1{font:500 40px/48px var(--font-serif);letter-spacing:0;color:#1d173b}
++  body[data-view=chart-studio] .workspace-heading :is(#stage,#split-view){display:none}
++  #view-chart-studio .studio-header{min-height:56px;flex-wrap:nowrap;margin:0 0 6px}
++  #view-chart-studio .studio>:not(.studio-header){clear:both}
++  #view-chart-studio .studio-data-toggle,#view-chart-studio .studio:not(.studio-options-hidden) .studio-inspector-toggle{display:none}
++  /* S1's cards run wider than the shell's 226px content edge. */
++  #view-chart-studio .studio-toolbar{margin:0 -14px 0 -20px}
++  #view-chart-studio .studio-grid,#view-chart-studio .studio-sheets,#view-chart-studio .studio-overview,#view-chart-studio .studio-datasource{margin-left:-10px;margin-right:-7px}
++  #view-chart-studio .studio-grid{grid-template-columns:205px minmax(0,1fr) 302px;gap:13px;height:calc(100vh - 218px);min-height:520px;margin-top:14px;border:0;background:none}
++  #view-chart-studio .studio-grid>*{border-right:0}
++  #view-chart-studio .studio:not(.studio-options-hidden) .studio-grid>:is(.studio-side,.studio-inspector){max-height:none;overflow-y:auto}
++  #view-chart-studio .studio-view{min-height:0;overflow:hidden}
++  #view-chart-studio .studio-canvas-wrap{flex:1 1 auto;min-height:0;overflow:auto}
++  #view-chart-studio .studio-sheets{margin-top:13.6px}
++  #view-chart-studio .studio.studio-inspector-collapsed:not(.studio-options-hidden) .studio-grid{grid-template-columns:205px minmax(0,1fr) 56px}
++  #view-chart-studio .studio.studio-inspector-collapsed:not(.studio-options-hidden) .studio-inspector>:not(.studio-inspector-rail){display:none}
++  #view-chart-studio .studio.studio-inspector-collapsed:not(.studio-options-hidden) .studio-inspector-rail{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0}
++  #view-chart-studio .studio.studio-options-hidden .studio-inspector-collapse{display:none}
++  #view-chart-studio .studio-canvas-wrap>.studio-foot:not(:has(#studio-reconcile:not([hidden]))){display:flex;align-items:center;gap:16px;min-height:40px}
++  #view-chart-studio .studio-canvas-wrap>.studio-foot:not(:has(#studio-reconcile:not([hidden])))>.studio-note-line{order:2;flex:none;margin-left:auto}
++  #view-chart-studio .studio-canvas-wrap>.studio-foot:not(:has(#studio-reconcile:not([hidden])))>.studio-foot-line{order:1;flex:1 1 auto;min-width:0;margin:0}
++  #view-chart-studio .studio-canvas-wrap>.studio-foot:not(:has(#studio-reconcile:not([hidden]))) #studio-note{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;min-width:0;overflow:hidden;font-size:12px;line-height:17px}
++}
++/* Narrower than S1's 1600px frame: the same one toolbar row, tighter; below
++   1300px the header and the toolbar may wrap rather than scroll sideways. */
++@media(min-width:1100px) and (max-width:1499px){
++  #view-chart-studio .studio-toolbar :is(.studio-tool,button.studio-tool){padding:0 5px}
++  #view-chart-studio .studio-toolbar .studio-divider{margin:0 4px}
++  #view-chart-studio .studio-toolbar>button,#view-chart-studio .studio-toolbar>.studio-menu>summary{padding:0 10px}
++  #view-chart-studio .studio-toolbar>button#studio-showme-toggle{padding:0 11px}
++  #view-chart-studio .studio-header{gap:8px}
++  #view-chart-studio .studio-canvas-wrap{padding-bottom:10px}
++}
++@media(min-width:1100px) and (max-width:1299px){
++  #view-chart-studio .studio-header{height:auto;min-height:56px;flex-wrap:wrap;row-gap:6px;padding:8px 0}
++  #view-chart-studio .studio-toolbar{flex-wrap:wrap;row-gap:4px}
++  #view-chart-studio .studio-grid{grid-template-columns:190px minmax(0,1fr) 260px}
++  #view-chart-studio .studio.studio-inspector-collapsed:not(.studio-options-hidden) .studio-grid{grid-template-columns:190px minmax(0,1fr) 56px}
++}
++@media(max-width:1099px){
++  #view-chart-studio .studio-inspector-collapse{display:none}
++  #view-chart-studio .studio-header{flex-wrap:wrap}
++  #view-chart-studio .studio-toolbar,#view-chart-studio .studio-toolbar .studio-group{flex-wrap:wrap}
++  #view-chart-studio .studio>*+*{margin-top:10px}
++}
++@media(prefers-reduced-motion:reduce){#view-chart-studio .studio-source-popover,#view-chart-studio .studio-reconcile-detail{transition:none}}
++@media print{#view-chart-studio .studio-note-line,#view-chart-studio .studio-source-popover{display:none!important}}
+ 
+ /* ---- Shared primitives for prompts 02-08. Every name below is new to the
+    console. .primary keeps today's look everywhere; .primary--gold is the one
+diff --git a/mentat/tests/test_original_studio_contributions_browser.cjs b/mentat/tests/test_original_studio_contributions_browser.cjs
+--- a/mentat/tests/test_original_studio_contributions_browser.cjs
++++ b/mentat/tests/test_original_studio_contributions_browser.cjs
+@@ -90,10 +90,15 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP
+   const descending=await bars();
+   assert.equal(descending.length,2);
+   const beforeSort=await page.evaluate(()=>calls.query.length);
++  // Build 03 (S1): Ascending and Descending live in the one Sort menu; the
++  // source popover opened above is put away first, as a reader would.
++  if(await page.locator('#studio-source-popover').isVisible())await page.locator('#studio-scope-change').click();
++  await page.locator('#studio-sort > summary').click();
+   await page.locator('#studio-sort-desc').click();
+   assert.equal(await page.locator('#studio-undo').isDisabled(),true,'pressing the direction the view is already in is not an edit');
+   assert.equal(await page.evaluate(()=>calls.query.length),beforeSort,'and costs no query');
+   assert.deepEqual(await bars(),descending,'and leaves the bars where they were');
++  if(!(await page.locator('#studio-sort-asc').isVisible()))await page.locator('#studio-sort > summary').click();
+   await page.locator('#studio-sort-asc').click();
+   await settled();
+   assert.equal(await page.locator('#studio-sort-asc').getAttribute('aria-pressed'),'true');
+@@ -106,6 +111,9 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP
+   assert.equal(await page.locator('#studio-sort-desc').getAttribute('aria-pressed'),'true');
+ 
+   const firstQueries=await page.evaluate(()=>calls.query.length);
++  // Build 03 (S1): a new sheet starts with labels on, so the toggle goes off
++  // and back on - two render-only edits - and labels stay on for what follows.
++  await page.locator('#studio-labels').click();
+   await page.locator('#studio-labels').click();
+   await page.locator('#studio-fit').selectOption('entire');
+   await page.waitForFunction(()=>document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true');
+@@ -155,6 +163,7 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP
+   assert.equal(await page.locator('#studio-records tbody tr').count(),0,'new-source records must not attach to old marks');
+   const beforeRefresh=await page.evaluate(()=>calls.query.length);
+   await page.evaluate(()=>window.version=2);
++  if(!(await page.locator('#studio-refresh-data').isVisible()))await page.locator('#studio-scope-change').click();
+   await page.locator('#studio-refresh-data').click();
+   await page.waitForFunction(count=>calls.query.length>count&&document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true',beforeRefresh);
+   await page.locator('#studio-download summary').click();
+@@ -173,6 +182,7 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP
+   await page.getByRole('button',{name:/^MA:/}).last().click();
+   await page.waitForFunction(()=>document.querySelectorAll('#studio-records tbody tr').length===1);
+   assert.deepEqual(await page.evaluate(()=>calls.records.at(-1).filters),[{field:'state',op:'in',value:['MA']}],'state marks must not drill the entire dataset');
++  if(!(await page.locator('#studio-source-mode').isVisible()))await page.locator('#studio-scope-change').click();
+   await page.locator('#studio-source-mode').selectOption('worksheet');
+   await page.waitForFunction(()=>document.querySelector('#studio-loading').textContent.includes('2 rows'));
+   assert.equal(await page.locator('#studio-worksheet-source').isVisible(),true);
+diff --git a/mentat/tests/test_studio_board_browser.cjs b/mentat/tests/test_studio_board_browser.cjs
+--- a/mentat/tests/test_studio_board_browser.cjs
++++ b/mentat/tests/test_studio_board_browser.cjs
+@@ -983,7 +983,7 @@ const VISIBLE_SOURCE = `node => {
+       await until(page, () => /of /.test((document.getElementById('studio-group-count') || {}).textContent || ''),
+         'the selected tile paging three at a time');
+       await page.click('#studio-groups-next');
+-      await until(page, () => !/^1.{1,3}3 /.test((document.getElementById('studio-group-count') || {}).textContent || ''),
++      await until(page, () => !/^Groups 1.{1,3}3 /.test((document.getElementById('studio-group-count') || {}).textContent || ''),
+         'the selected tile leaving its first page',
+         () => ({label: (document.getElementById('studio-group-count') || {}).textContent}));
+       const movedOn = await page.evaluate(() => (document.getElementById('studio-group-count') || {}).textContent);
+@@ -1015,7 +1015,7 @@ const VISIBLE_SOURCE = `node => {
+       assert.ok(!after.some(text => money.test(text)),
+         'no tile may keep the other report figures, got '
+         + JSON.stringify(after.map(text => text.slice(0, 60))));
+-      assert.match(label, /^1.{1,3}[0-9]+ of/,
++      assert.match(label, /^Groups 1.{1,3}[0-9]+ of/,
+         'the new report opens on its own first page, got "' + label + '" after "' + movedOn + '"');
+       pass('the first report was on "' + movedOn + '"; the new one opens on "' + label + '"');
+     });
+diff --git a/mentat/tests/test_studio_data_source_browser.cjs b/mentat/tests/test_studio_data_source_browser.cjs
+--- a/mentat/tests/test_studio_data_source_browser.cjs
++++ b/mentat/tests/test_studio_data_source_browser.cjs
+@@ -26,7 +26,9 @@ test('the data source panel opens, stays open, names what it cannot read, and sh
+ 
+   // The picker is the first thing in the pane, before any script has run.
+   assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),true,'the panel arrives open');
+-  assert.equal(await page.locator('#studio-scope-change').textContent(),'Change data');
++  // Build 03 (S1): the source chip is the way in; it names the popover it opens.
++  assert.equal(await page.locator('#studio-scope-change').getAttribute('aria-controls'),'studio-source-popover');
++  assert.equal(await page.locator('#studio-scope-change #studio-scope-chip').count(),1);
+ 
+   await page.evaluate(([blocked,preparing])=>{
+     document.querySelectorAll('[role="tabpanel"][id^="view-"]').forEach(panel=>{panel.hidden=panel.id!=='view-chart-studio';});
+@@ -119,6 +121,9 @@ test('the data source panel opens, stays open, names what it cannot read, and sh
+   const drawn=await page.locator('#studio-canvas svg').count();
+   assert.equal(drawn,1);
+   await page.evaluate(()=>{window.preparingForever=true;});
++  // Build 03 (S1): the source popover is put away before the reader reaches
++  // for a field (it can lie over the Data pane).
++  if(await page.locator('#studio-source-popover').isVisible())await page.locator('#studio-scope-change').click();
+   await page.locator('#studio-measures .studio-pill').filter({hasText:'Observation count'}).first().click();
+   await page.locator('#studio-progress').waitFor({state:'visible'});
+   await page.locator('#studio-progress-cancel').click();
+diff --git a/mentat/tests/test_studio_industry_browser.cjs b/mentat/tests/test_studio_industry_browser.cjs
+--- a/mentat/tests/test_studio_industry_browser.cjs
++++ b/mentat/tests/test_studio_industry_browser.cjs
+@@ -399,7 +399,8 @@ async function nodeDrivenFallback(reason) {
+     // The Data source panel folds itself away after the first successful load
+     // (chart-studio.js el('source-details').addEventListener('toggle', ...)), so
+     // it has to be reopened with the "Data source" button before a second pick.
+-    if (!(await page.locator('#studio-source-details').evaluate(el => el.open))) await page.click('#studio-scope-change');
++    // Build 03 (S1): the pickers live in the source chip's popover.
++    if (!(await page.locator('#studio-dataset').isVisible())) await page.click('#studio-scope-change');
+     await page.waitForSelector('#studio-dataset', {state: 'visible'});
+     await page.selectOption('#studio-dataset', 'Credit Union');
+     await page.waitForFunction(() => document.querySelector('#studio-canvas svg'));
+diff --git a/mentat/tests/test_studio_reconciliation_browser.cjs b/mentat/tests/test_studio_reconciliation_browser.cjs
+--- a/mentat/tests/test_studio_reconciliation_browser.cjs
++++ b/mentat/tests/test_studio_reconciliation_browser.cjs
+@@ -103,9 +103,13 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
+   await page.waitForFunction(()=>document.querySelectorAll('#studio-filters .studio-pill').length===2);
+   assert.deepEqual(await page.evaluate(()=>calls.query.at(-1).filters),
+     [{field:'company',op:'eq',value:'Alpha Bank'},{field:'cycle',op:'eq',value:'2023-2024'}]);
+-  await page.waitForSelector('#studio-reconcile:not([hidden])');
+-  const agreed=await page.locator('#studio-reconcile').textContent();
++  // Build 03 (S1): the strip is a note line; its full explanation sits behind
++  // "Why" (#studio-reconcile-detail), and the line hides when the scopes and
++  // the totals agree.
++  await page.waitForFunction(()=>/Agree\./.test(document.getElementById('studio-reconcile-detail').textContent));
++  const agreed=await page.locator('#studio-reconcile-detail').textContent();
+   assert.match(agreed,/^Graph shows \$12,090,412\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\. Agree\./);
++  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile').hidden),true,'the note line hides when scope and totals agree');
+   assert.equal(await page.locator('#studio-reconcile .studio-reconcile-agree').textContent(),'Agree.');
+   assert.equal(await page.locator('#studio-reconcile .studio-reconcile-link').textContent(),'Why Cross-reference differs');
+   // The strip asked Graph the question the studio is showing, not Graph's own.
+@@ -120,7 +124,8 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
+   assert.deepEqual(await page.locator('#studio-scope-chip span').allTextContents(),
+     ['Carried from Graph','Banking','2023-2024','Alpha Bank']);
+   // Totals cover every group, not only the page that is drawn.
+-  assert.match(await page.locator('#studio-group-count').textContent(),/^1–1 of 1 groups · totals cover all 1$/);
++  assert.match(await page.locator('#studio-group-count').textContent(),/^Groups 1–1 of 1$/);
++  assert.equal(await page.locator('#studio-group-count').getAttribute('title'),'Totals cover all 1 groups');
+ 
+   // An employee-level filter has no verified field, so the two totals part and
+   // the strip says which filter did it.
+@@ -130,10 +135,36 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
+   const differed=await page.locator('#studio-reconcile').textContent();
+   assert.match(differed,/Graph shows \$9,000,000\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\./);
+   assert.match(differed,/They differ by \$3,090,412\.00 because a Graph filter \(employee level or giving type\) is not carried\./);
++  // The note line names the level Chart Studio cannot match, offers no Match
++  // (nothing it could change), and prints no red.
++  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile').hidden),false);
++  assert.equal(await page.locator('#studio-reconcile-text').textContent(),'Graph also narrows to the Chief employee level, which verified data cannot match.');
++  assert.equal(await page.evaluate(()=>document.getElementById('studio-match-graph').hidden),true);
++  assert.equal(await page.locator('#studio-reconcile .studio-reconcile-differ').count(),0,'no red verdict in the builder');
+   await page.waitForFunction(()=>!document.getElementById('studio-scope-note').hidden);
+   assert.equal(await page.locator('#studio-scope-note').textContent(),
+     'Employee level: not carried (not in verified data)');
+ 
++  // Match Graph scope (S1): Graph now shows every company while the sheet is
++  // narrowed to Alpha Bank; the note says so, and Match takes the sheet to
++  // Graph's scope (the cycle stays, the company filter goes).
++  await page.evaluate(()=>{document.getElementById('graph-tier').value='';document.getElementById('graph-company').value='';
++    document.getElementById('studio-fit').dispatchEvent(new Event('change'));});
++  await page.waitForFunction(()=>!document.getElementById('studio-match-graph').hidden);
++  assert.equal(await page.locator('#studio-reconcile-text').textContent(),'This sheet covers Alpha Bank. Graph shows all companies.');
++  // Build 03 final fix round (R03-6): Escape closes Why while focus is still
++  // on the Why button, where a click leaves it.
++  await page.locator('#studio-reconcile-why').click();
++  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile-detail').hidden),false);
++  await page.keyboard.press('Escape');
++  assert.deepEqual(await page.evaluate(()=>[document.getElementById('studio-reconcile-detail').hidden,document.activeElement.id]),[true,'studio-reconcile-why']);
++  await page.locator('#studio-match-graph').click();
++  await page.waitForFunction(()=>document.querySelectorAll('#studio-filters .studio-pill').length===1);
++  await page.waitForFunction(()=>/Same scope as Graph/.test(document.getElementById('studio-reconcile-text').textContent));
++  assert.deepEqual(await page.evaluate(()=>calls.query.filter(q=>q.measures.includes('amount')).at(-1).filters),[{field:'cycle',op:'eq',value:'2023-2024'}]);
++  assert.equal(await page.evaluate(()=>document.getElementById('studio-match-graph').hidden),true,'nothing left to match');
++  await page.evaluate(()=>{document.getElementById('graph-company').value='Alpha Bank';});
++
+   // A basis that is not the workbook's included receipts is a different
+   // question, and the strip refuses to call two numbers the same answer.
+   await page.evaluate(()=>{document.getElementById('graph-tier').value='';
+@@ -142,7 +173,8 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
+   await page.locator('#studio-scope-change').click();
+   await page.locator('#studio-basis').selectOption('original_observed');
+   await page.waitForFunction(()=>/uses a different basis than Graph/.test(document.getElementById('studio-reconcile').textContent));
+-  assert.match(await page.locator('#studio-reconcile').textContent(),/^Graph shows .+ Studio shows .+ They differ by .+ because this sheet uses a different basis than Graph\./);
++  assert.match(await page.locator('#studio-reconcile-detail').textContent(),/^Graph shows .+ Studio shows .+ They differ by .+ because this sheet uses a different basis than Graph\./);
++  assert.match(await page.locator('#studio-reconcile-text').textContent(),/^Same scope as Graph; the totals differ by \$/);
+ 
+   // A worksheet view has no verified total to reconcile, so the strip goes away.
+   await page.locator('#studio-source-mode').selectOption('worksheet');
+diff --git a/mentat/tests/test_studio_ride1_browser.cjs b/mentat/tests/test_studio_ride1_browser.cjs
+--- a/mentat/tests/test_studio_ride1_browser.cjs
++++ b/mentat/tests/test_studio_ride1_browser.cjs
+@@ -157,9 +157,12 @@ test('a Graph scope carried before Chart Studio has its data is still carried',{
+   // agrees with Graph to the cent.
+   assert.deepEqual(await page.evaluate(()=>calls.query.at(-1).filters),
+     [{field:'company',op:'eq',value:'Alpha Bank'},{field:'cycle',op:'eq',value:'2023-2024'}]);
+-  await page.waitForSelector('#studio-reconcile:not([hidden])');
+-  assert.match(await page.locator('#studio-reconcile').textContent(),
++  // Build 03 (S1): the explanation sits behind "Why" (#studio-reconcile-detail)
++  // and the note line hides when the scopes and totals agree.
++  await page.waitForFunction(()=>/Agree\./.test(document.getElementById('studio-reconcile-detail').textContent));
++  assert.match(await page.locator('#studio-reconcile-detail').textContent(),
+     /^Graph shows \$12,090,412\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\. Agree\./);
++  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile').hidden),true);
+   assert.deepEqual(errors,[]);
+ });
+ 
+diff --git a/mentat/tests/test_studio_wording.cjs b/mentat/tests/test_studio_wording.cjs
+--- a/mentat/tests/test_studio_wording.cjs
++++ b/mentat/tests/test_studio_wording.cjs
+@@ -75,9 +75,11 @@ test('the default empty state names the mode the console starts in',()=>{
+ 
+ test('the header keeps a permanent, plainly named way back to the report picker',()=>{
+   const html=read('index.html');
+-  // The label became "Change data" in the 2026-09-17 UI clean-up (item 13):
+-  // the header now carries the scope as chips, so the button names the act.
+-  assert.match(html,/<button id="studio-scope-change" class="studio-scope-change" type="button" title="[^"]*">Change data<\/button>/);
++  // Build 03 (S1): the way back is the source chip itself - industry, cycle
++  // scope and basis - and it opens the Data source popover; its title names
++  // the act the old "Change data" label named.
++  assert.match(html,/<button id="studio-scope-change" class="studio-scope-change" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="studio-source-popover" title="[^"]*change the data source"><span id="studio-scope-chip" class="studio-scope-chip"><\/span><span id="studio-scope-basis" class="studio-scope-basis"><\/span><\/button>/);
++  assert.match(html,/<div id="studio-source-popover" class="studio-source-popover" role="dialog" aria-label="Data source" hidden>\s*<details class="studio-source-disclosure" id="studio-source-details" open>/);
+   assert.doesNotMatch(html,/id="studio-scope-change"[^>]*\shidden/);
+   assert.match(html,/<details class="studio-source-disclosure" id="studio-source-details" open>/);
+ });
+@@ -97,8 +99,10 @@ test('the group limit says what it means, and is sixty everywhere',()=>{
+   assert.ok(read('chart-studio.js').includes(label),'the verified label opens with the same sentence as the markup');
+   assert.doesNotMatch(read('index.html'),/default 40/);
+   assert.doesNotMatch(read('index.html'),/40 per page/);
+-  // The page counter says the totals are not the page.
+-  assert.match(read('chart-studio.js'),/groups · totals cover all \$\{fmt\(result\.group_count\)\}/);
++  // The page counter says the totals are not the page: since build 03 (S1) the
++  // line reads "Groups 1–10 of 10" and its title carries "Totals cover all".
++  assert.match(read('chart-studio.js'),/`Groups \$\{fmt\(result\.offset\+1\)\}–\$\{fmt\(result\.offset\+result\.rows\.length\)\} of \$\{fmt\(result\.group_count\)\}`/);
++  assert.match(read('chart-studio.js'),/`Totals cover all \$\{fmt\(result\.group_count\)\} groups`/);
+ });
+ 
+ // The cross-reference tab was dwarfed on the owner's ruling: the published
+diff --git a/mentat/tests/test_studio_worksheet_guard_browser.cjs b/mentat/tests/test_studio_worksheet_guard_browser.cjs
+--- a/mentat/tests/test_studio_worksheet_guard_browser.cjs
++++ b/mentat/tests/test_studio_worksheet_guard_browser.cjs
+@@ -86,6 +86,8 @@ const pills=page=>page.locator('#studio-filters .studio-pill .studio-pill-name')
+ // Put a grouping and a measure on the shelves the way a reader does: the Data
+ // panel's field pills are click-to-add.
+ async function buildChart(page,dimension,measure){
++  // Build 03 (S1): the source popover is put away before reaching for a field.
++  if(await page.locator('#studio-source-popover').isVisible())await page.locator('#studio-scope-change').click();
+   await page.locator('#studio-dimensions .studio-pill').filter({hasText:dimension}).first().click();
+   await page.locator('#studio-measures .studio-pill').filter({hasText:measure}).first().click();
+   await page.waitForFunction(()=>!!document.querySelector('#studio-canvas svg'));
+@@ -122,6 +124,8 @@ test('a cycle sheet opens on the Recipient partition, says why, and lets the rea
+   assert.deepEqual(await pills(page),[],'a re-render never re-arms the guard');
+ 
+   // A fresh load of the same worksheet does arm it again.
++  // Build 03 (S1): the worksheet pickers live in the source chip's popover.
++  if(!(await page.locator('#studio-sheet').isVisible()))await page.locator('#studio-scope-change').click();
+   await page.locator('#studio-sheet').selectOption('Recipient Detail');
+   await page.waitForFunction(()=>document.getElementById('studio-loading').textContent.includes('2 rows'));
+   assert.deepEqual(await pills(page),[],'a sheet with no polymorphic column is not guarded');
+diff --git a/mentat/tests/test_ui_cleanup_browser.cjs b/mentat/tests/test_ui_cleanup_browser.cjs
+--- a/mentat/tests/test_ui_cleanup_browser.cjs
++++ b/mentat/tests/test_ui_cleanup_browser.cjs
+@@ -598,6 +598,8 @@ const VISIBLE_SOURCE = `node => {
+     pass(`Show Me: ${openShowMe.tiles} tiles, one block, hint "${closedShowMe.hint}"`);
+ 
+     step('the Data source disclosure stays open and reads as a chip line with a ready mark');
++    // Build 03 (S1): the disclosure lives in the source chip's popover.
++    await studio.click('#studio-scope-change');
+     const source = await studio.evaluate(visibleSource => {
+       const visible = eval(visibleSource);
+       return {
+diff --git a/mentat/tests/test_workspace_polish_browser.cjs b/mentat/tests/test_workspace_polish_browser.cjs
+--- a/mentat/tests/test_workspace_polish_browser.cjs
++++ b/mentat/tests/test_workspace_polish_browser.cjs
+@@ -81,6 +81,10 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+         });
+         if(tab==='graph'){
+           if(width>=1100)assert.equal(shell.navigationPadding.split(' ')[0],'20px',`Graph's desktop sidebar keeps board M4's 20px top padding at ${width}px`);
++        }else if(tab==='chart-studio'&&width>=1100&&shellByWidth.has(width)){
++          // Build 03: Chart Studio's page title is board S1's serif 40px; the rest of the shell is shared.
++          assert.equal(shell.titleSize,'40px',`Chart Studio keeps board S1's 40px title at ${width}px`);
++          assert.deepEqual({...shell,titleSize:shellByWidth.get(width).titleSize},shellByWidth.get(width),`${tab}: navigation and page styling must stay consistent at ${width}px`);
+         }else if(shellByWidth.has(width))assert.deepEqual(shell,shellByWidth.get(width),`${tab}: navigation and page styling must stay consistent at ${width}px`);
+         else shellByWidth.set(width,shell);
+         if(process.env.MENTAT_UI_SCREENSHOTS){
+@@ -113,8 +117,11 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     await page.evaluate(()=>{const notice=document.getElementById('error');notice.classList.remove('error');notice.textContent='Run restored.';notice.hidden=false;});
+     await page.click('#tab-graph');await page.waitForSelector('#graph-results:not([hidden])');assert.equal(await page.locator('#error').isHidden(),true,'Completed actions do not leak between tabs');await capture('graph');
+     await page.click('#tab-chart-studio');
++    // Build 03 (S1): the Data source controls live in the source chip's popover.
++    await page.click('#studio-scope-change');
+     await page.selectOption('#studio-source-mode','worksheet');
+     await page.waitForFunction(()=>document.querySelectorAll('#studio-dimensions .studio-pill').length>0);
++    await page.click('#studio-scope-change');
+     await page.click('#studio-clear');
+     await page.locator('#studio-dimensions .studio-pill').filter({hasText:'Company'}).first().click();
+     await page.locator('#studio-measures .studio-pill').filter({hasText:'Amount'}).first().click();
+@@ -126,8 +133,12 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     assert.equal(await page.locator('#studio-data-panel').isVisible(),false,'Mobile canvas is not pushed below the entire field list');
+     await page.click('#studio-data-toggle');assert.equal(await page.locator('#studio-data-panel').isVisible(),true);
+     await page.click('#studio-data-toggle');await page.click('#studio-scope-change');
+-    assert.equal(await page.locator('#studio-data-panel').isVisible(),true,'Change data reveals and focuses its source controls');
++    // Build 03 (S1): the source chip opens its popover (not the fields drawer).
++    assert.equal(await page.locator('#studio-source-popover').isVisible(),true,'the source chip reveals and focuses its source controls');
+     assert.equal(await page.evaluate(()=>document.activeElement.parentElement.id),'studio-source-details');
++    // Build 03: Escape puts the source popover away and returns focus to its chip.
++    await page.keyboard.press('Escape');
++    assert.equal(await page.evaluate(()=>document.activeElement.id),'studio-scope-change');
+     await page.click('#studio-data-toggle');
+     await page.click('#studio-inspector-toggle');assert.equal(await page.locator('#studio-inspector').isVisible(),true);
+     await page.click('#studio-inspector-close');assert.equal(await page.locator('#studio-inspector-toggle').evaluate(el=>el===document.activeElement),true);

@@ -1,0 +1,14 @@
+--- a/mentat/tests/test_workspace_polish_browser.cjs
++++ b/mentat/tests/test_workspace_polish_browser.cjs
+@@ -155,8 +155,9 @@
+     await page.click('#tab-evidence');
+     await page.waitForFunction(()=>document.querySelector('#evidence-source option[value="snapshot:fixture-evidence"]'));
+     await page.selectOption('#evidence-source','snapshot:fixture-evidence');
+-    await page.waitForFunction(()=>!document.getElementById('evidence-add').disabled);
+-    await page.click('#evidence-add');
++    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
++    await page.waitForFunction(()=>document.querySelector('#evidence-list input[type=checkbox]'));
++    await page.locator('#evidence-list input[type=checkbox]').first().check();
+     await page.waitForSelector('.evidence-pane h2');
+     await capture('evidence');
+     assert.deepEqual(errors,[]);assert.deepEqual(remote,[]);

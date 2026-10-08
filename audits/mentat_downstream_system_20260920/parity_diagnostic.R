@@ -1,0 +1,210 @@
+script_argument <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+stopifnot(length(script_argument) == 1L)
+script_path <- normalizePath(
+  sub("^--file=", "", script_argument[[1L]]),
+  winslash = "/",
+  mustWork = TRUE
+)
+project_root <- normalizePath(
+  "C:/Users/pgoff/Mentat/mentat",
+  winslash = "/",
+  mustWork = TRUE
+)
+source(file.path(project_root, "R", "paths.R"), local = .GlobalEnv)
+source(file.path(project_root, "R", "ingest.R"), local = .GlobalEnv)
+
+fec_mode_text_reference <- function(values) {
+  value <- trim_text(values)
+  value <- value[nzchar(value)]
+  if (!length(value)) return("")
+  counts <- sort(table(value), decreasing = TRUE)
+  sort(names(counts)[counts == counts[[1L]]])[[1L]]
+}
+fec_join_unique_reference <- function(values) {
+  value <- sort(unique(trim_text(values)))
+  paste(value[nzchar(value)], collapse = "; ")
+}
+fec_min_text_reference <- function(values) {
+  value <- sort(unique(trim_text(values)))
+  value <- value[nzchar(value)]
+  if (length(value)) value[[1L]] else ""
+}
+fec_max_text_reference <- function(values) {
+  value <- sort(unique(trim_text(values)))
+  value <- value[nzchar(value)]
+  if (length(value)) value[[length(value)]] else ""
+}
+
+source(
+  file.path(project_root, "R", "collect.R"),
+  local = .GlobalEnv
+)
+source(
+  file.path(project_root, "R", "fec_beneficiary.R"),
+  local = .GlobalEnv
+)
+source(
+  file.path(project_root, "R", "export_guards.R"),
+  local = .GlobalEnv
+)
+require_package("data.table")
+
+set.seed(20260723)
+pool <- c("", " ", NA_character_, "Alpha", "ALPHA", "Beta", "Gamma", "Zeta")
+for (case in seq_len(5000L)) {
+  values <- sample(pool, sample.int(50L, 1L) - 1L, replace = TRUE)
+  stopifnot(
+    identical(fec_mode_text(values), fec_mode_text_reference(values)),
+    identical(fec_join_unique(values), fec_join_unique_reference(values)),
+    identical(fec_min_text(values), fec_min_text_reference(values)),
+    identical(fec_max_text(values), fec_max_text_reference(values))
+  )
+}
+
+# Candidate/source fields are normally constant within downstream groups.
+# This benchmark pins the fast path that matters for the 870k-row workload.
+constant_groups <- rep(list(rep("Candidate Name", 8L)), 20000L)
+reference_seconds <- unname(system.time(
+  reference <- vapply(
+    constant_groups,
+    fec_mode_text_reference,
+    character(1L)
+  )
+)[["elapsed"]])
+optimized_seconds <- unname(system.time(
+  optimized <- vapply(constant_groups, fec_mode_text, character(1L))
+)[["elapsed"]])
+stopifnot(identical(optimized, reference))
+
+fec_build_beneficiary_tables_reference <- function(raw_export, downstream_activity) {
+  downstream <- downstream_activity[include_in_total == "Yes", .(
+    preliminary_downstream_amount = sum(transaction_amount, na.rm = TRUE),
+    support_amount = sum(
+      transaction_amount[support_oppose == "Support"], na.rm = TRUE
+    ),
+    oppose_amount = sum(
+      transaction_amount[support_oppose == "Oppose"], na.rm = TRUE
+    ),
+    transaction_count = .N,
+    activity_relationships = fec_join_unique_reference(activity_type),
+    directions = fec_join_unique_reference(support_oppose),
+    first_activity_date = fec_min_text_reference(transaction_date),
+    last_activity_date = fec_max_text_reference(transaction_date),
+    candidate_name = fec_mode_text_reference(candidate_name),
+    candidate_party = fec_mode_text_reference(candidate_party),
+    office = fec_mode_text_reference(office),
+    office_label = fec_mode_text_reference(office_label),
+    office_state = fec_mode_text_reference(office_state),
+    district = fec_mode_text_reference(district)
+  ), by = .(cycle, source_committee_id = committee_id, candidate_id)]
+  funded <- raw_export[
+    include_in_analysis == "Yes" & nzchar(committee_id),
+    .(
+      preliminary_crypto_funding = sum(amount, na.rm = TRUE),
+      source_committee = fec_mode_text_reference(recipient)
+    ),
+    by = .(cycle, company, source_committee_id = committee_id)
+  ]
+  industry <- funded[, .(
+    preliminary_crypto_funding = sum(preliminary_crypto_funding, na.rm = TRUE),
+    source_committee = fec_mode_text_reference(source_committee)
+  ), by = .(cycle, source_committee_id)]
+  industry[, `:=`(view = "Industry", company = "Industry Total")]
+  company <- data.table::copy(funded)
+  company[, view := "Company"]
+  funding <- data.table::rbindlist(list(industry, company), use.names = TRUE, fill = TRUE)
+  bridge <- merge(
+    funding, downstream,
+    by = c("cycle", "source_committee_id"),
+    allow.cartesian = TRUE,
+    sort = FALSE
+  )
+  bridge[, candidate_key := ifelse(
+    nzchar(candidate_id),
+    paste0("CAND:", candidate_id),
+    paste0("NAME:", normalize_variant_key(candidate_name))
+  )]
+  bridge[, bridge_key := paste(
+    cycle, view, company, source_committee_id, candidate_key, sep = "|"
+  )]
+  data.table::setorder(
+    bridge, cycle, view, company, -preliminary_downstream_amount,
+    candidate_name
+  )
+  summary <- bridge[, .(
+    preliminary_downstream_amount = sum(preliminary_downstream_amount, na.rm = TRUE),
+    support_amount = sum(support_amount, na.rm = TRUE),
+    oppose_amount = sum(oppose_amount, na.rm = TRUE),
+    preliminary_crypto_funding = sum(preliminary_crypto_funding, na.rm = TRUE),
+    source_committee_count = data.table::uniqueN(source_committee_id),
+    source_committees = fec_join_unique_reference(paste0(
+      source_committee, " (", source_committee_id, ")"
+    )),
+    activity_relationships = fec_join_unique_reference(activity_relationships),
+    directions = fec_join_unique_reference(directions),
+    candidate_name = fec_mode_text_reference(candidate_name),
+    candidate_party = fec_mode_text_reference(candidate_party),
+    office = fec_mode_text_reference(office),
+    office_label = fec_mode_text_reference(office_label),
+    office_state = fec_mode_text_reference(office_state),
+    district = fec_mode_text_reference(district)
+  ), by = .(cycle, view, company, candidate_id, candidate_key)]
+  data.table::setorder(
+    summary, cycle, view, company, -preliminary_downstream_amount,
+    candidate_name
+  )
+  summary <- summary[office %in% c("H", "S")]
+  summary[, preliminary_rank := seq_len(.N), by = .(cycle, view, company)]
+  summary <- summary[preliminary_rank <= 100L]
+  retained <- unique(summary[, .(cycle, view, company, candidate_key)])
+  bridge <- merge(
+    bridge,
+    retained,
+    by = c("cycle", "view", "company", "candidate_key"),
+    sort = FALSE
+  )
+  data.table::setorder(
+    bridge, cycle, view, company, -preliminary_downstream_amount,
+    candidate_name
+  )
+  list(bridge = bridge, summary = summary)
+}
+
+data.table::setDTthreads(2L)
+set.seed(737)
+downstream_rows <- 15000L
+downstream_fixture <- data.table::data.table(
+  cycle = sample(c(2022L, 2024L, 2026L), downstream_rows, replace = TRUE),
+  committee_id = sample(sprintf("C%03d", 1:30), downstream_rows, replace = TRUE),
+  candidate_id = sample(sprintf("H%03d", 1:80), downstream_rows, replace = TRUE),
+  include_in_total = sample(c("Yes", "No"), downstream_rows, replace = TRUE, prob = c(0.94, 0.06)),
+  transaction_amount = sample(c(-500, 0, 100, 250, 1000), downstream_rows, replace = TRUE),
+  activity_type = sample(c("Support", "Oppose", "Contribution", ""), downstream_rows, replace = TRUE),
+  support_oppose = sample(c("Support", "Oppose", "Contribution / Other"), downstream_rows, replace = TRUE),
+  transaction_date = sample(c("", "2022-01-01", "2024-05-10", "2026-07-23"), downstream_rows, replace = TRUE),
+  candidate_name = sample(c("ALPHA, ALEX", "BETA, BLAKE", "GAMMA, GREY", ""), downstream_rows, replace = TRUE),
+  candidate_party = sample(c("D", "R", "Other / Unclassified"), downstream_rows, replace = TRUE),
+  office = sample(c("H", "S", ""), downstream_rows, replace = TRUE),
+  office_label = sample(c("House", "Senate", ""), downstream_rows, replace = TRUE),
+  office_state = sample(c("CA", "MN", "NY", ""), downstream_rows, replace = TRUE),
+  district = sample(c("01", "02", "00", ""), downstream_rows, replace = TRUE)
+)
+raw_fixture <- unique(downstream_fixture[, .(cycle, committee_id)])[rep(
+  seq_len(.N), each = 2L
+)]
+raw_fixture[, `:=`(
+  company = rep(c("Company A", "Company B"), length.out = .N),
+  include_in_analysis = "Yes",
+  amount = rep(c(10, 25), length.out = .N),
+  recipient = paste("Committee", committee_id)
+)]
+reference_tables <- fec_build_beneficiary_tables_reference(
+  raw_fixture, downstream_fixture
+)
+optimized_tables <- fec_build_beneficiary_tables(
+  raw_fixture, downstream_fixture
+)
+print(all.equal(optimized_tables$bridge[, names(reference_tables$bridge), with=FALSE], reference_tables$bridge))
+print(all.equal(optimized_tables$summary, reference_tables$summary))
+x <- optimized_tables$bridge[,names(reference_tables$bridge),with=FALSE]; y <- reference_tables$bridge
+for (col in names(y)) if(!identical(x[[col]],y[[col]])) {cat(col, "\n"); print(head(data.table::data.table(a=x[[col]],b=y[[col]])[a!=b],5))}

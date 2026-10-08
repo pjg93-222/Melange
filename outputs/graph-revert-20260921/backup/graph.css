@@ -1,0 +1,346 @@
+/* Scope, analysis, and tools share a quiet 8px spacing rhythm. */
+:root{--teal:#258b8c;--line:#dce6ed;--navy:#122f48}
+header{height:64px;gap:28px;background:var(--navy)}
+.wordmark{font-size:24px;letter-spacing:1px;flex-shrink:0}
+header .workspace-tabs{margin:0;align-self:stretch;border:0;gap:12px;align-items:stretch}
+header .workspace-tabs button{color:#c5d6e4;background:none;font-weight:400;padding:12px 14px}
+header .workspace-tabs button[aria-selected=true]{color:white;background:none;border-color:#73d2cf;border-radius:0;font-weight:600}
+.local-indicator{margin-left:auto;font-size:13px;white-space:nowrap;color:#d6e5ef}
+#connection{font-size:12px;max-width:190px}
+.workspace{max-width:1760px;padding:28px 32px 40px}
+.workspace-heading{margin-bottom:26px;gap:16px}
+.workspace-heading h1{font-size:32px;margin:0}
+.graph-actions{display:flex;gap:12px;align-items:center}
+.graph-actions .secondary{border-color:#b7ccd9;padding:8px 14px}
+#graph-open-builder{border-color:#428da5;color:#09667c}
+.graph-controls{margin:0;padding:16px 20px;background:white}
+.scope-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.scope-heading .section-label{font-size:11px;letter-spacing:1px}
+.graph-filter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+.graph-filter-grid label[for=graph-run]{grid-column:1/-1}
+#graph-run{max-width:640px}
+.graph-filter-grid label,.graph-candidate-controls label{font-size:13px;font-weight:400;color:#526e84;min-width:0}
+.graph-filter-grid select{margin:4px 0 0;border-color:var(--line);padding:8px 11px;font-size:14px}
+.graph-chips{display:flex;gap:8px;flex-wrap:wrap}
+.graph-chips:not(:empty){margin-top:12px}
+.graph-chips button{padding:4px 10px;font-size:12px}
+.analysis-tabs{display:flex;gap:16px;border-bottom:1px solid var(--line);margin:24px 0 0;overflow:auto}
+.analysis-tabs button{padding:12px 14px;border:0;border-bottom:3px solid transparent;background:none;color:#38556b;font-size:14px;white-space:nowrap}
+.analysis-tabs button[aria-selected=true]{border-color:var(--teal);color:#087b85;font-weight:600}
+#graph-status{font-size:12px;margin:9px 0 16px;color:#607c8f}
+.graph-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 24px;background:white;border:1px solid var(--line);border-radius:6px;padding:18px 0}
+.graph-metrics>div{padding:0 24px;border:0;border-right:1px solid var(--line);background:none;border-radius:0}
+.graph-metrics>div:last-child{border:0}
+.graph-metrics span,.graph-metrics small{display:block;font-size:13px;color:#516e83}
+.graph-metrics strong{display:block;font-size:30px;line-height:1.45;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+.graph-metrics small{font-size:12px}
+.graph-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:stretch}
+.graph-panels[data-analysis=recipients],.graph-panels[data-analysis=companies]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.graph-panels[data-analysis=candidates]{grid-template-columns:1fr}
+.graph-panels>.panel{margin:0;padding:22px 24px;border-radius:6px;min-width:0}
+.graph-panels .panel-heading{align-items:center;flex-wrap:wrap;gap:8px}
+.graph-panels h2{font-size:20px;margin:0}
+.graph-panels p{margin:8px 0 16px}
+.graph-panels details{margin-top:16px}
+.graph-panels[data-analysis=overview] #graph-categories>details:not([open]),.graph-panels[data-analysis=overview] #graph-candidates>details:not([open]){display:none}
+.graph-bars{display:block;min-width:0;width:100%;height:auto}
+#graph-categories,#graph-candidates,#graph-organizations,#graph-companies,#graph-levels{max-width:100%;overflow:auto}
+[data-analysis=candidates] #graph-candidates>.graph-bars{max-width:none}
+.graph-bar-button{cursor:pointer}
+.graph-bar-button:focus{outline:2px solid #b48b21}
+.graph-text-button{border:0;padding:0;background:none;color:#087b92;font-size:13px;text-align:left}
+.graph-text-button:hover{text-decoration:underline}
+.chart-note{font-size:12px;line-height:1.6;color:#586f82;overflow-wrap:anywhere}
+.graph-candidate-controls{display:flex;gap:16px;margin-top:16px;max-width:740px}
+.graph-candidate-controls label{flex:1}
+.graph-candidate-controls select{font-size:14px}
+.graph-empty{padding:20px;margin:8px 0;background:#f4f8fa;color:#627888;border-radius:4px;font-size:14px}
+.graph-details-tools{display:flex;align-items:start;justify-content:space-between;gap:24px;margin-top:24px;padding:14px 20px;background:white;border:1px solid var(--line);border-radius:6px}
+.graph-details-tools>details{flex:1;min-width:180px;padding-top:7px}
+.graph-details-tools summary{color:var(--navy);font-weight:500}
+.graph-export-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.graph-export-tools select{width:auto;max-width:190px;font-size:13px;margin:0;padding:7px;border-color:var(--line)}
+.graph-export-tools .secondary{font-size:13px;padding:7px 12px}
+#graph-method{font-size:13px;max-width:640px;margin:12px 0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+dialog{color:var(--navy);background:white;border:1px solid var(--line);border-radius:8px;padding:28px;max-height:calc(100vh - 64px);overflow:auto}
+dialog::backdrop{background:rgba(18,47,72,.18)}
+#graph-builder{width:1440px;max-width:calc(100vw - 64px)}
+#graph-builder>.panel-heading{align-items:center;margin-bottom:16px;position:sticky;top:-28px;background:white;padding:16px 0;z-index:2;border-bottom:1px solid var(--line)}
+#graph-builder h2{margin:4px 0 0}
+#graph-advanced{margin:0;padding:0;border:0}
+#graph-advanced>summary{font-size:14px;color:#526e84}
+#graph-advanced>.view-intro{font-size:14px;margin:16px 0 24px}
+.chart-layout{grid-template-columns:300px minmax(0,1fr);gap:32px}
+.chart-controls{padding-right:24px;border-right:1px solid var(--line)}
+.chart-controls h3{font-size:17px}
+.chart-controls select{font-size:13px;margin:5px 0 12px;padding:8px;border-color:var(--line)}
+.chart-preview{min-width:0}
+.chart-preview h2{font-size:21px}
+.chart-image svg{min-width:0}
+.chart-image:empty{min-height:180px}
+.sources-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:440px;max-width:100vw;max-height:100vh;height:100vh;border-radius:0;border-width:0 0 0 1px;padding:28px 24px}
+.sources-drawer .panel-heading{align-items:center;flex-wrap:nowrap}
+.sources-drawer h2{font-size:21px;margin:0}
+.sources-drawer>p:first-of-type{padding:10px 12px;background:#edf6fb;border:1px solid #d5e8f4;font-size:13px;border-radius:4px;margin:20px 0}
+.sources-drawer>label{font-size:13px}
+.source-receipt{padding:18px 0;border-top:1px solid var(--line);font-size:12px}
+.source-receipt h3{font-size:14px;overflow-wrap:anywhere;margin:0 0 14px}
+.source-receipt .source-receipt{margin-top:16px;padding-bottom:0}
+.source-field{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px;margin:10px 0;color:#526e84}
+.source-field>span:last-child{color:var(--navy);overflow-wrap:anywhere}
+.source-field .freshness-unknown{color:#805c11!important}
+#graph-provenance{overflow-wrap:anywhere;margin:12px 0}
+#graph-provenance p{font-size:11px}
+button:disabled{cursor:default}
+@media(min-width:1600px){.graph-panels[data-analysis=overview]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1100px){#connection{display:none}.graph-filter-grid{gap:12px}.graph-panels{gap:16px}.graph-panels>.panel{padding:18px}.graph-details-tools{flex-direction:column;gap:12px}.graph-actions{gap:8px}.graph-actions .secondary{font-size:12px}}
+@media(max-width:850px){header{height:auto;min-height:64px;flex-wrap:wrap;gap:0 12px;padding:14px 20px 0}.local-indicator{order:1}.wordmark{order:0}header .workspace-tabs{order:2;width:100%;margin-top:10px;gap:8px}.workspace{padding:24px 20px}.workspace-heading{flex-wrap:wrap}.graph-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.graph-panels,.graph-panels[data-analysis=recipients],.graph-panels[data-analysis=companies]{grid-template-columns:1fr}.graph-metrics strong{font-size:23px}.graph-metrics>div{padding:0 16px}.chart-layout{grid-template-columns:1fr}.chart-controls{border:0;border-bottom:1px solid var(--line);padding:0 0 24px}#graph-builder{max-width:calc(100vw - 24px);padding:20px}.graph-candidate-controls{flex-wrap:wrap}}
+@media(max-width:500px){header .workspace-tabs{gap:0}header .workspace-tabs button{padding:10px 8px;font-size:13px;flex:1}.workspace{padding:20px 14px}.workspace-heading h1{font-size:28px}.graph-actions{width:100%;justify-content:space-between}.graph-filter-grid{gap:12px}.graph-controls{padding:14px}.analysis-tabs{gap:0}.analysis-tabs button{font-size:13px;padding:12px 10px;flex:1}.graph-metrics{grid-template-columns:1fr;padding:0}.graph-metrics>div{display:block;padding:12px 18px;border:0;border-bottom:1px solid var(--line)}.graph-metrics strong{font-size:25px}.graph-metrics small{font-size:11px}.graph-export-tools{gap:12px;width:100%}.graph-export-tools select{max-width:150px}.graph-details-tools{padding:14px}.sources-drawer{padding:24px 18px}.graph-candidate-controls{flex-direction:column}}
+
+/* ===========================================================================
+   Return navigation, the downstream drawer and expressive motion (2026-09-19).
+   Every rule this lane adds lives in this file. The panel-header rules it has
+   to beat live in workspace.css, which this lane does not own, so each override
+   names #view-graph: graph.css is read BEFORE workspace.css, so equal
+   specificity would lose. The overrides are marked FOLD-BACK - they belong in
+   workspace.css beside the rules they answer.
+   =========================================================================== */
+
+/* One switch for all of it. Every animation below and the JS number roll alike
+   read these tokens, so the media query is the only place motion is decided. */
+:root{--motion:680ms;--motion-stagger:42ms;--motion-ease:cubic-bezier(.2,1.25,.3,1)}
+@media(prefers-reduced-motion:reduce){
+  :root{--motion:1ms;--motion-stagger:0ms;--motion-ease:linear}
+}
+
+/* --- FOLD-BACK: the card header from the approved board -------------------
+   Title left, tools right, on one row down to a 480px card. workspace.css
+   drops them onto a second row at 600px; the board keeps them together, and
+   only two visible candidate selects - the activity view - may take the
+   second row. */
+#view-graph .graph-panels h2{font-size:22px;line-height:1.2}
+#view-graph .graph-panels>.panel{padding:22px 24px 16px}
+#view-graph .graph-panels .panel-heading{align-items:center;gap:8px 14px;margin-bottom:14px}
+@container (max-width:600px){
+  #view-graph .graph-panels .panel-heading>h2{grid-column:1}
+  #view-graph .graph-panels .panel-heading .graph-panel-tools{grid-column:2;margin-left:auto;
+    justify-content:flex-end;flex-wrap:nowrap}
+  #view-graph .graph-panel-tools .graph-candidate-controls label{flex:0 0 auto}
+  #view-graph .graph-panel-tools .graph-candidate-controls select{max-width:180px}
+}
+/* Both candidate selects showing is the cramped case, and the one exception. */
+@container (max-width:600px){
+  #view-graph .graph-panels .panel-heading:has(.graph-candidate-controls label:not([hidden])~label:not([hidden]))>h2{grid-column:1/-1}
+  #view-graph .graph-panels .panel-heading:has(.graph-candidate-controls label:not([hidden])~label:not([hidden])) .graph-panel-tools{
+    grid-column:1/-1;margin-left:0;justify-content:flex-start;flex-wrap:wrap}
+  #view-graph .graph-panel-tools .graph-candidate-controls:has(label:not([hidden])~label:not([hidden])){flex:1 1 100%}
+}
+@container (max-width:480px){
+  #view-graph .graph-panels .panel-heading>h2{grid-column:1/-1}
+  #view-graph .graph-panels .panel-heading .graph-panel-tools{grid-column:1/-1;margin-left:0;
+    justify-content:flex-start;flex-wrap:wrap}
+}
+/* The selects carry their own names now - "Top 10", "Direct contributions" -
+   so the captions stay in the accessibility tree and out of the picture. */
+#view-graph .graph-panel-tools .graph-caption{position:absolute;width:1px;height:1px;padding:0;
+  margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#view-graph .graph-topn{gap:0}
+#view-graph .graph-topn select{min-width:86px;font-size:12.5px;padding:5px 9px;min-height:32px}
+#view-graph .graph-panel-tools .graph-candidate-controls select{font-size:12.5px;padding:5px 9px;min-height:32px}
+#view-graph .graph-panels .panel-heading .graph-text-button{font-size:13px;color:var(--acu-purple);white-space:nowrap}
+
+/* --- the scope trail ---------------------------------------------------- */
+.graph-trail{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0}
+.graph-trail-parts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.graph-trail-part{border:0;background:none;padding:2px 0;font:inherit;font-size:14px;
+  color:var(--acu-purple);text-align:left;min-height:0;cursor:pointer}
+.graph-trail-part:hover{text-decoration:underline}
+.graph-trail-part[aria-current=page]{color:var(--acu-plum);font-weight:600}
+.graph-trail-mark{color:var(--muted);font-size:14px}
+.graph-trail-back{margin-left:auto;flex:none;border:1px solid #ded4e2;background:white;
+  border-radius:6px;padding:7px 15px;font:inherit;font-size:13px;color:var(--acu-plum);cursor:pointer}
+.graph-trail-back:hover{border-color:var(--acu-purple);background:#f7f2fa}
+.graph-copy-link{font-size:12px;color:var(--acu-purple)}
+.graph-copy-fallback{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
+.graph-copy-fallback input{flex:1;min-width:0;font:inherit;font-size:12px;padding:6px 8px;
+  border:1px solid var(--line);border-radius:5px;background:white;color:var(--acu-plum)}
+
+/* --- the reader came from somewhere ------------------------------------- */
+.return-chip{margin:0 0 14px}
+.return-chip button{display:inline-flex;align-items:center;gap:8px;border:1px solid #ded4e2;
+  background:white;border-radius:999px;padding:7px 16px;font:inherit;font-size:13px;
+  color:var(--acu-plum);min-height:0;cursor:pointer}
+.return-chip button:hover{border-color:var(--acu-purple);background:#f7f2fa}
+
+/* --- the downstream drawer ---------------------------------------------- */
+.graph-panels[data-analysis=recipients][data-drawer=open]{
+  grid-template-columns:minmax(0,.8fr) minmax(0,1.15fr) minmax(0,1.2fr)}
+.graph-drawer{animation:graph-drawer-in 420ms var(--motion-ease) both}
+.graph-drawer.is-closing{animation:graph-drawer-out 420ms var(--motion-ease) both;pointer-events:none}
+@keyframes graph-drawer-in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes graph-drawer-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(24px)}}
+@media(prefers-reduced-motion:reduce){
+  .graph-drawer,.graph-drawer.is-closing{animation-duration:1ms}
+}
+/* The close mark is not a tools row: it stays beside the title at every
+   width, and the title wraps beside it rather than pushing it down. */
+#view-graph .graph-drawer .panel-heading{align-items:start;
+  grid-template-columns:minmax(0,1fr) auto;margin-bottom:12px}
+#view-graph .graph-drawer .panel-heading>h2{grid-column:1;font-size:21px;line-height:1.25}
+#view-graph .graph-drawer .panel-heading>.graph-drawer-close{grid-column:2;justify-self:end}
+.graph-drawer-close{font-size:15px;line-height:1;padding:2px 5px;color:var(--muted)}
+.graph-drawer-directions{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;
+  border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:2px 0 16px;background:white}
+.graph-drawer-side{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;
+  border-right:1px solid var(--line);background:white;padding:10px 8px;font:inherit;
+  color:var(--acu-plum);min-height:0;cursor:pointer}
+.graph-drawer-side:last-child{border-right:0}
+.graph-drawer-side-name{font-size:12.5px;color:var(--muted)}
+.graph-drawer-side strong{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.graph-drawer-side[aria-pressed=true]{background:#f1eaf6}
+.graph-drawer-side[aria-pressed=true] .graph-drawer-side-name{color:var(--acu-purple)}
+.graph-drawer-evidence{margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+  font-size:13px;color:var(--acu-purple)}
+#graph-drawer-rows{max-width:100%;overflow:auto;min-height:40px}
+@media(max-width:1000px){
+  .graph-panels[data-analysis=recipients][data-drawer=open]{grid-template-columns:1fr}
+}
+
+/* --- rows: the tint, the selected rule, the press ------------------------ */
+.graph-row{fill:transparent;pointer-events:all;transition:fill 120ms linear}
+.graph-bar-button:hover .graph-row,.graph-bar-button:focus-visible .graph-row{fill:#f0e9f5}
+.graph-bar-button.is-selected .graph-row{fill:var(--acu-lilac);fill-opacity:.5}
+.graph-row-rule{fill:var(--acu-plum)}
+.graph-bar-button:hover .graph-mark{filter:brightness(1.12)}
+#view-graph button:active{transform:translateY(1px)}
+
+/* --- the entrance ------------------------------------------------------- */
+/* Transform and opacity only, so nothing is relaid: the bar grows from its own
+   left edge, and the stagger is capped at seven steps (294ms) so a fifty-row
+   panel finishes with the rest. */
+.graph-bars.graph-enter .graph-mark{transform-box:fill-box;transform-origin:left center;
+  animation:graph-grow var(--motion) var(--motion-ease) both;
+  animation-delay:calc(var(--i,0) * var(--motion-stagger))}
+@keyframes graph-grow{from{transform:scaleX(0);opacity:.3}to{transform:scaleX(1);opacity:1}}
+/* The sparklines arrive on their own request, after the bars have settled, and
+   are drawn on from the left. The group is inside the slot's transform, never
+   on it: a CSS transform on the slot would replace its translate attribute. */
+.graph-spark-draw{transform-box:fill-box;transform-origin:left center;
+  animation:graph-grow var(--motion) ease-out both}
+
+/* --- four cards while the report is being read -------------------------- */
+.graph-skeleton{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:18px 0 0}
+.graph-skeleton-card{background:white;border:1px solid var(--line);border-radius:8px;
+  padding:22px 24px 16px;min-height:238px}
+.graph-skeleton-card i,.graph-skeleton-card b{display:block;position:relative;overflow:hidden;
+  background:#ece5df;border-radius:4px}
+.graph-skeleton-card i{height:20px;width:46%;margin-bottom:22px}
+.graph-skeleton-card b{height:13px;margin:0 0 18px}
+.graph-skeleton-card b:nth-of-type(2){width:92%}
+.graph-skeleton-card b:nth-of-type(3){width:78%}
+.graph-skeleton-card b:nth-of-type(4){width:64%}
+.graph-skeleton-card b:nth-of-type(5){width:52%}
+.graph-skeleton-card b:nth-of-type(6){width:38%}
+.graph-skeleton-card i::after,.graph-skeleton-card b::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85),rgba(255,255,255,0));
+  transform:translateX(-100%);animation:graph-shimmer 2400ms linear infinite}
+@keyframes graph-shimmer{to{transform:translateX(100%)}}
+@media(max-width:1000px){.graph-skeleton{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){
+  .graph-skeleton-card i::after,.graph-skeleton-card b::after{animation:none}
+}
+#graph-drawer-rows details p { overflow-wrap: anywhere; }
+#graph-drawer-rows table th:nth-child(2),
+#graph-drawer-rows table td:nth-child(2),
+#graph-drawer-rows table td:nth-child(3) { white-space: nowrap; }
+.graph-explorer { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 18px; }
+.graph-explorer h3 { margin: 0 0 8px; font-size: 17px; }
+.graph-explorer-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 18px 0; }
+.graph-explorer-tools label { display: grid; gap: 5px; font-size: 12px; color: var(--muted); min-width:0; max-width:100%; }
+.graph-explorer-tools input[type=search] { width:210px; min-width:0; max-width:100%; height:40px; padding:9px 10px; border:1px solid var(--line); border-radius:6px; background:white; color:inherit; font:inherit; }
+.graph-explorer-tools .graph-explorer-check { display: flex; align-items: center; max-width: 200px; }
+.graph-explorer .graph-text-button { color: var(--acu-plum, #57447b); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; text-align: left; font-size: 12px; }
+.graph-explorer .graph-text-button:hover { background: #f0e9f5; }
+.graph-explorer .graph-text-button:focus-visible { outline: 2px solid #327a7a; outline-offset: 2px; }
+.graph-route-chain { display: grid; gap: 10px; margin: 12px 0; }
+.graph-route-links { display: flex; flex-wrap: wrap; gap: 7px; max-height: 220px; overflow: auto; }
+.graph-explorer-pager { display: flex; gap: 8px; justify-content: end; margin-top: 12px; }
+.graph-explorer-inspector { margin-top: 16px; border: 1px solid var(--line); padding: 16px; background: #f5faf9; overflow-wrap: anywhere; }
+.graph-explorer-inspector > button { margin: 6px 8px 0 0; }
+#graph-drawer-panel.graph-drawer-wide { grid-column: 1 / -1; grid-row: 1; }
+@media(min-width:1001px) {
+  .graph-panels[data-analysis=recipients][data-drawer=open]:has(.graph-drawer-wide) { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+/* Comparison-led composition. Specialized drawer/collection behavior stays intact. */
+#view-graph .graph-controls{padding:12px 16px;margin:0}
+#view-graph .graph-header{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+#view-graph .graph-filter-grid{flex:1 1 100%;grid-template-columns:1.3fr 1.3fr 1fr 1fr 1fr;gap:12px}
+#view-graph .graph-actions{margin-left:auto}
+#view-graph .graph-chips:empty{display:none}
+#view-graph .analysis-strip{margin:8px 0 16px}
+#view-graph .analysis-tabs{margin:0;gap:8px}
+#view-graph .analysis-tabs button{border-radius:0;background:transparent;color:var(--acu-plum);border-bottom:3px solid transparent;min-height:40px;font-size:14px;padding:10px 12px}
+#view-graph .analysis-tabs button[aria-selected=true]{border-bottom-color:var(--acu-purple)}
+#view-graph .graph-panels{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+#view-graph .graph-panels>.panel{padding:16px;border-radius:7px;min-height:0}
+#view-graph .graph-panels[data-analysis=overview],#view-graph .graph-panels[data-analysis=recipients],#view-graph .graph-panels[data-analysis=companies]{grid-template-columns:minmax(0,1fr)}
+#view-graph #graph-organization-panel{order:0}
+#view-graph #graph-drawer-panel{order:1}
+#view-graph #graph-company-panel,#view-graph #graph-category-panel{order:2}
+#view-graph .graph-panel>.panel-heading{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+#view-graph .graph-panel-tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#view-graph .graph-panel-tools :is(button,select,summary){min-height:40px;font-size:12px}
+#view-graph .graph-panel-tools .graph-text-button{padding:8px 12px}
+#view-graph .graph-bars{width:100%;height:auto;display:block;overflow:visible}
+#view-graph .graph-bars[hidden]{display:none}
+#view-graph .graph-bar-button:focus-visible{outline:2px solid var(--acu-purple);outline-offset:2px}
+#view-graph .graph-bar-button.is-selected .graph-row{fill:#e8f3f1}
+#view-graph .graph-panel-foot{margin-top:6px;font-size:12px}
+#view-graph .graph-values>summary{font-size:12px}
+#view-graph .graph-metrics{display:flex;flex-wrap:wrap;gap:24px;padding:12px 0;margin:16px 0;background:transparent;border:0;border-top:1px solid var(--line);border-radius:0}
+#view-graph .graph-metrics>div{padding:0;flex:1;min-width:190px;border:0}
+#view-graph .graph-metrics strong,#view-graph .graph-metrics>div:first-child strong{font-size:20px}
+#view-graph .graph-share-track{display:none}
+#view-graph .graph-metrics small{font-size:12px}
+#graph-results{display:flex;flex-direction:column}#graph-results[hidden]{display:none}
+#graph-analysis-panel{order:0}.graph-metrics{order:1}.graph-details-tools{order:2}
+#view-graph #graph-drawer-panel{align-self:start}
+#view-graph #graph-drawer-detail{margin-top:16px}
+#view-graph #graph-drawer-detail>summary{cursor:pointer;font-size:13px;min-height:40px;align-content:center}
+#view-graph #graph-drawer-panel .graph-panel-foot{flex-wrap:wrap;gap:12px;margin-top:12px}
+#view-graph #graph-drawer-panel .graph-drawer-evidence{min-height:40px;font-size:13px}
+#view-graph #graph-trail{margin:0 0 4px;flex:none}
+#view-graph #graph-trail[hidden]{display:none}
+#view-graph #graph-status{display:none}
+#view-graph .analysis-strip{align-items:center}
+#view-graph #graph-drawer-panel>.panel-heading{position:relative;padding-right:0;flex-wrap:nowrap;align-items:start}
+#view-graph #graph-drawer-title{font-size:20px;text-wrap:initial;line-height:1.25;flex:1;margin:0}
+#view-graph #graph-drawer-close{margin-left:auto;min-height:32px;padding:4px 0;white-space:nowrap}
+#view-graph #graph-selection-summary .analysis-detail-amount{margin:8px 0 4px;color:var(--acu-plum);font-weight:700;line-height:1.2}
+#graph-selection-summary .graph-selection-basis{margin:0 0 16px}
+.graph-selection-identity{font-size:12px;line-height:1.4;margin:0 0 8px}.graph-selection-identity>summary{cursor:pointer}.graph-selection-identity p{margin:8px 0}.graph-selection-facts{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;font-size:13px;line-height:1.45;margin:0 0 16px}
+.graph-selection-facts dt{color:var(--muted)}
+.graph-selection-facts dd{margin:0;overflow-wrap:anywhere}
+#view-graph #graph-drawer-panel .graph-panel-foot{display:flex;flex-direction:column-reverse;align-items:stretch;padding:0;gap:12px}
+#view-graph #graph-drawer-evidence{background:var(--acu-plum);color:white;border:0;border-radius:5px;padding:10px 12px;text-align:center;width:100%;font-size:14px}
+#view-graph #graph-drawer-committee{font-size:12px;line-height:1.5;display:block}
+#view-graph #graph-drawer-detail{margin-top:8px}
+#view-graph #graph-trail-parts[hidden]{display:none}
+@media(min-width:1250px){#view-graph #graph-drawer-panel:not(.graph-drawer-wide):has(#graph-drawer-detail[open]){max-height:680px;overflow:auto}}
+#view-graph .graph-drawer{animation:none;max-height:none}
+#graph-selection-summary p{font-size:13px;line-height:1.6}
+#graph-selection-summary .analysis-detail-amount{font-size:26px}
+#view-graph .graph-drawer-close{font-size:12px}
+@media(min-width:1250px){#view-graph .graph-panels[data-drawer=open]{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)}#view-graph .graph-panels[data-drawer=open] :is(#graph-company-panel,#graph-category-panel){grid-column:1/-1}}
+@media(max-width:760px){#view-graph .graph-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#view-graph .graph-panel-tools{margin-left:0}#view-graph .graph-panel-tools :is(button,select,summary){min-height:44px}#view-graph .graph-panels>.panel{padding:12px}#view-graph .analysis-tabs button{padding:10px 8px;min-height:44px}#view-graph .analysis-caption{display:none}}
+
+#view-graph #graph-candidate-panel{order:3}
+#view-graph #graph-level-panel{order:4}
+#view-graph .graph-panels h2{font:700 22px/1.2 var(--font-serif)}
+#view-graph .graph-bars{max-width:none;min-width:0}
+#view-graph .graph-panels[data-drawer=open] #graph-candidate-panel{grid-column:1/-1}
+#view-graph .graph-header:has(.graph-actions:empty){gap:0}
+#view-graph .graph-actions:empty{display:none}
+#view-graph .graph-panel-tools .graph-export-menu{align-self:center;margin:0}

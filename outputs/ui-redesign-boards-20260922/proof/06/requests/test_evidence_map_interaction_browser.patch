@@ -1,0 +1,36 @@
+--- a/mentat/tests/test_evidence_map_interaction_browser.cjs
++++ b/mentat/tests/test_evidence_map_interaction_browser.cjs
+@@ -200,14 +200,12 @@
+     await page.click('#evidence-path-read');
+     await page.waitForFunction(() => document.querySelectorAll('#evidence-pac option').length >= 1,
+       null, {timeout: 180000});
+-    await page.selectOption('#evidence-pac', 'C00804179');
+     await page.waitForFunction(() =>
+       [...document.querySelectorAll('#evidence-cycle option')].some(option => option.value === '2024'),
+       null, {timeout: 120000});
+     await page.selectOption('#evidence-cycle', '2024');
+-    await page.waitForFunction(() => !document.getElementById('evidence-add').disabled,
+-      null, {timeout: 60000});
+-    await page.click('#evidence-add');
++    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
++    await page.check('#evidence-list input[type=checkbox][value="C00804179"]');
+     // A pane that is still reading has the figure boxes but an em dash in
+     // them, and the distinct-contributor count arrives on its own request, so
+     // this waits for BOTH to carry a value rather than for the box to exist.
+@@ -639,14 +637,12 @@
+     await stillPage.selectOption('#evidence-source', {index: 1});
+     await stillPage.waitForFunction(() => document.querySelectorAll('#evidence-pac option').length >= 1,
+       null, {timeout: 60000});
+-    await stillPage.selectOption('#evidence-pac', 'C00804179');
+     await stillPage.waitForFunction(() =>
+       [...document.querySelectorAll('#evidence-cycle option')].some(option => option.value === '2024'),
+       null, {timeout: 60000});
+     await stillPage.selectOption('#evidence-cycle', '2024');
+-    await stillPage.waitForFunction(() => !document.getElementById('evidence-add').disabled,
+-      null, {timeout: 60000});
+-    await stillPage.click('#evidence-add');
++    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
++    await stillPage.check('#evidence-list input[type=checkbox][value="C00804179"]');
+     await stillPage.waitForSelector('#evidence-panes [data-pane=a] .pane-map', {timeout: 120000});
+     await stillPage.click('#evidence-panes [data-pane=a] .pane-map');
+     await stillPage.waitForSelector('#evidence-map svg.map-canvas', {timeout: 120000});

@@ -1,0 +1,74 @@
+--- cross-reference.before.js
++++ mentat/app/cross-reference.js
+@@ -105,7 +105,7 @@
+   const api = {html, money};
+   if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
+   root.MentatCrossReference = api;
+-  let active = false, fetching = false, lastHtml = '', lastIndustry = null;
++  let active = false, pending = null, lastHtml = '', lastIndustry = null;
+   // The industry the URL names, through the one module that owns that
+   // vocabulary (audits/mentat_failings_20260915/contracts/url_scope.json).
+   const scopeIndustry = () => (globalThis.MentatScope ? globalThis.MentatScope.read().industry : '') || '';
+@@ -125,35 +125,52 @@
+     return 'Latest run';
+   };
+   async function refresh() {
+-    if (!active || fetching || document.hidden) return;
+-    fetching = true;
++    if (!active || document.hidden) return;
+     const message = document.getElementById('xref-refresh-status');
+     const industry = scopeIndustry();
++    if (pending && industry === lastIndustry) return;
++    pending?.abort();
++    const request = new AbortController();
++    pending = request;
++    if (industry !== lastIndustry) {
++      document.getElementById('xref-results').replaceChildren();
++      lastHtml = '';
++    }
+     lastIndustry = industry;
++    message.textContent = 'Loading saved evidence for ' + (industry || 'the latest run') + '…';
++    const current = () => pending === request && active && scopeIndustry() === industry;
+     try {
+       // industry is the only query key this route accepts (server.py:1918-1928);
+       // without one it still answers for the latest saved run, as before.
+       const response = await fetch('/api/cross-reference' +
+-        (industry ? '?industry=' + encodeURIComponent(industry) : ''), {cache:'no-store'});
++        (industry ? '?industry=' + encodeURIComponent(industry) : ''), {cache:'no-store', signal:request.signal});
+       if (!response.ok) throw new Error('The cross-reference view could not refresh.');
+-      const data = await response.json(), next = html(data);
++      const data = await response.json();
++      if (!current()) return;
++      const next = html(data);
+       if (next !== lastHtml) { document.getElementById('xref-results').innerHTML = next; lastHtml = next; }
+       message.textContent = runText(data) + ' · Saved evidence refreshed. This page is read-only.';
+     } catch (error) {
+-      message.textContent = `${error.message} Any previously displayed result is an older snapshot.`;
+-    } finally { fetching = false; }
++      if (!current() || error.name === 'AbortError') return;
++      message.textContent = error.message + (lastHtml
++        ? ' Any previously displayed result is an older snapshot.'
++        : ' No saved evidence is displayed for this scope. Use Refresh to retry.');
++    } finally { if (pending === request) pending = null; }
+   }
+-  api.setActive = value => { active = !!value; if (active) refresh(); };
++  api.setActive = value => {
++    active = !!value;
++    if (active) refresh();
++    else { pending?.abort(); pending = null; }
++  };
+   api.refresh = refresh;
+   // A scope written elsewhere in this document, or a Back button, can change the
+   // industry. Only a change matters, and only while this view is the one on
+-  // screen; lastHtml is cleared so two runs that happen to render identically
+-  // still repaint under their own status line.
++  // screen. Refresh replaces the pending request and clears the old scope
++  // before loading the new one, so a late reply cannot relabel old evidence.
+   globalThis.MentatScope?.subscribe(next => {
+     if (!active) return;
+     const industry = (next && next.industry) || '';
+     if (industry === lastIndustry) return;
+-    lastHtml = '';
+     refresh();
+   });
+   document.getElementById('xref-refresh')?.addEventListener('click', refresh);

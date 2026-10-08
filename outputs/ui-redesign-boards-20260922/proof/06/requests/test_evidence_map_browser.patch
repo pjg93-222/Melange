@@ -1,0 +1,30 @@
+--- a/mentat/tests/test_evidence_map_browser.cjs
++++ b/mentat/tests/test_evidence_map_browser.cjs
+@@ -292,12 +292,11 @@
+ 
+     step('choose the PAC and cycle 2024 in the scope bar, and add the pane');
+     await waitFor(() => document.querySelectorAll('#evidence-pac option').length >= 1, null, 20000, 'a page condition');
+-    await page.selectOption('#evidence-pac', 'C00804179');
+     await waitFor(() => [...document.querySelectorAll('#evidence-cycle option')].some(option => option.value === '2024'),
+       null, 20000, 'a page condition');
+     await page.selectOption('#evidence-cycle', '2024');
+-    await waitFor(() => !document.getElementById('evidence-add').disabled, null, 20000, 'a page condition');
+-    await page.click('#evidence-add');
++    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
++    await page.check('#evidence-list input[type=checkbox][value="C00804179"]');
+     await waitPanes(1);
+     const paneSel = '#evidence-panes [data-pane=a]';
+     assert.equal((await page.textContent(`${paneSel} h2`)).trim(), 'COINBASE INNOVATION PAC');
+@@ -511,10 +510,9 @@
+     // A SECOND committee, so this is a fresh pane key with no remembered map
+     // state: reusing pane A's key would carry its 2024 cycle over and the
+     // fallback under test would never run.
+-    await page.selectOption('#evidence-pac', 'C00835959');
+     await page.selectOption('#evidence-cycle', '');
+-    await waitFor(() => !document.getElementById('evidence-add').disabled, null, 20000, 'a page condition');
+-    await page.click('#evidence-add');
++    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
++    await page.check('#evidence-list input[type=checkbox][value="C00835959"]');
+     await waitPanes(2);
+     await page.click('#evidence-panes [data-pane=b] .pane-map');
+     await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});

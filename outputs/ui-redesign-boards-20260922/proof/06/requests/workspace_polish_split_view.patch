@@ -1,0 +1,11 @@
+--- a/mentat/app/workspace-polish.css
++++ b/mentat/app/workspace-polish.css
+@@ -237,6 +237,8 @@
+ body[data-view=graph] .app-navigation .workspace-tabs button{color:var(--muted);font-size:14px}
+ body[data-view=graph] .app-navigation .workspace-tabs button[aria-selected=true]{color:white}
+ body[data-view=graph] #split-view{margin-right:0;max-width:none}
++/* Build 06, fix round 1 (R06-12): B19 draws Split with Graph flush with the content edge. */
++body[data-view=evidence] #split-view{margin-right:0}
+ #view-graph{--muted:#716a64;--line:#e4d9d0;--chart-grid:#e8e0da;--workspace-panel-border:#e7e0dc}
+ /* Build 02 (2026-09-22) retired the rollback's scope-card, tab, figure and card
+    rules that stood here: graph.css's build-02 block lays those out now. */

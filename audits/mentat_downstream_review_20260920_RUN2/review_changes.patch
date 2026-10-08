@@ -1,0 +1,888 @@
+--- before/mentat/app/downstream.py
++++ after/mentat/app/downstream.py
+@@ -16,7 +16,28 @@
+         'Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved.')
+ 
+ def memo(row):
+-    return str(row.get('memoed_subtotal') or '').strip().upper() in ('1','TRUE') or str(row.get('memo_code') or '').upper() == 'X'
++    return str(row.get('memoed_subtotal') or '').strip().upper() in ('1','TRUE') or str(row.get('memo_code') or '').strip().upper() == 'X'
++
++def observations(unit, schedule):
++    """One observation per source ID; equal dollars never identify a duplicate.
++
++    Notices are an alternative disclosure, excluded only when explicitly marked.
++    Legacy rows without IDs/notice metadata remain provisional observations.
++    """
++    seen = {}
++    for row in unit.get(schedule) or []:
++        if not isinstance(row, dict):
++            raise ValueError('Invalid saved downstream observation.')
++        identifier = str(row.get('sub_id') or '').strip()
++        if identifier and identifier in seen:
++            if row != seen[identifier]:
++                raise ValueError('Conflicting saved downstream facts for one source ID.')
++            continue
++        if identifier:
++            seen[identifier] = row
++        if schedule == 'expenditures' and str(row.get('is_notice') or '').strip().lower() in ('true','1'):
++            continue
++        yield row
+ 
+ def amount(value):
+     try:
+@@ -40,12 +61,16 @@
+         fingerprint = hashlib.sha256(raw).hexdigest()
+         if not isinstance(units, list):
+             raise ValueError('Saved downstream snapshot must contain committee units.')
++        file_units = {}
+         for unit in units:
+             if not all(isinstance(unit.get(field), list) for field in ('receipts','disbursements','expenditures')):
+                 raise ValueError('Saved downstream unit is missing a complete schedule array.')
+             if not isinstance(unit.get('totals'), dict) or 'disbursements' not in unit['totals']:
+                 raise ValueError('Saved downstream unit is missing its reported disbursements.')
+             key = (str(unit['cycle']), unit['committee_id'])
++            if key in file_units and file_units[key] != unit:
++                raise ValueError('Conflicting committee/cycle units inside one saved snapshot.')
++            file_units[key] = unit
+             priority = (str((unit.get('totals') or {}).get('coverage_end_date') or ''), modified, path)
+             if key not in selected or priority > selected[key][0]:
+                 selected[key] = (priority, {**unit, '_source': path, '_sha256':fingerprint})
+@@ -55,7 +80,7 @@
+     return {key: value[1] for key, value in selected.items()}
+ 
+ def transfers(unit):
+-    for row in unit.get('disbursements') or []:
++    for row in observations(unit, 'disbursements'):
+         destination = str(row.get('recipient_committee_id') or '')
+         if not memo(row) and str(row.get('line_number')) in ('22', '23') and destination:
+             yield destination, amount(row.get('disbursement_amount')), row
+@@ -82,11 +107,12 @@
+         if unit is None:
+             missing.add(key)
+         destinations = defaultdict(Decimal)
+-        candidate_destinations = set()
++        candidate_destinations = defaultdict(Decimal)
+         for destination, value, row in transfers(unit or {}):
+-            destinations[destination] += value
+             if row.get('candidate_id'):
+-                candidate_destinations.add(destination)
++                candidate_destinations[destination] += value
++            else:
++                destinations[destination] += value
+         if unit is None:
+             destinations.update(fallback[key])
+         for destination, value in destinations.items():
+@@ -94,15 +120,18 @@
+                 continue
+             target = (key[0], destination)
+             edges.append({'cycle':key[0], 'source':key[1], 'destination':destination, 'amount':float(value)})
+-            if destination not in candidate_destinations:
+-                pending.append(target)
++            pending.append(target)
++        for destination, value in candidate_destinations.items():
++            if value > 0:
++                edges.append({'cycle':key[0], 'source':key[1], 'destination':destination,
++                              'amount':float(value), 'terminal_candidate':True})
+     return {'keys':visited, 'units':{key:units[key] for key in visited if key in units},
+             'missing':sorted(missing), 'edges':edges, 'note':NOTE}
+ 
+ def activity(network):
+     grouped, labels = defaultdict(Decimal), {}
+     for (year, committee), unit in network['units'].items():
+-        for row in unit.get('expenditures') or []:
++        for row in observations(unit, 'expenditures'):
+             if memo(row):
+                 continue
+             candidate = str(row.get('candidate_id') or '')
+@@ -110,11 +139,11 @@
+             key = (year, committee, candidate, direction)
+             grouped[key] += amount(row.get('expenditure_amount'))
+             labels[key] = str(row.get('candidate_name') or candidate or 'Unidentified candidate')
+-        for destination, value, row in transfers(unit):
+-            if not row.get('candidate_id'):
++        for row in observations(unit, 'disbursements'):
++            if memo(row) or str(row.get('line_number')) not in ('22','23') or not row.get('candidate_id'):
+                 continue
+             key = (year,committee,str(row['candidate_id']),'Contribution / Other')
+-            grouped[key] += value
++            grouped[key] += amount(row.get('disbursement_amount'))
+             labels[key] = str(row.get('candidate_name') or row.get('recipient_name') or row['candidate_id'])
+     return [{'cycle':k[0], 'committee':k[1], 'candidate_id':k[2], 'direction':k[3],
+              'candidate':labels[k], 'party':'', 'amount':value,
+@@ -133,22 +162,27 @@
+                 'contributions' if row['direction'] == 'Contribution / Other' else 'independent_expenditures')
+     old, new = defaultdict(Decimal), defaultdict(Decimal)
+     old_details, new_details = defaultdict(lambda:defaultdict(Decimal)), defaultdict(lambda:defaultdict(Decimal))
++    rows = [row for row in rows if (row['cycle'], row['committee']) in found['keys']]
+     for row in rows:
+         old[partition(row)] += row['amount']
+         old_details[partition(row)][row['candidate_id'],row['direction']] += row['amount']
+     for row in saved:
+         new[partition(row)] += row['amount']
+         new_details[partition(row)][row['candidate_id'],row['direction']] += row['amount']
+-    for key, value in sorted(old.items()):
++    for key in sorted(set(old) | set(new)):
+         if key[:2] in found['units'] and dict(old_details[key]) != dict(new_details[key]):
+             comparisons.append({'cycle':key[0], 'committee':key[1], 'schedule':key[2],
+-                                'workbook_amount':float(value), 'snapshot_amount':float(new[key]),
++                                'workbook_amount':float(old[key]) if key in old else None,
++                                'snapshot_amount':float(new[key]),
+                                 'basis':'Different saved sources; coverage/filing changes are not reconciled.'})
+     found['measurement_comparisons'] = comparisons
+     result = [r for r in rows if (r['cycle'],r['committee']) in found['keys']
+               and (r['cycle'],r['committee']) not in found['units']]
+-    parties = {(r['cycle'],r['candidate_id']):r.get('party','') for r in rows if r.get('party')}
+-    result.extend({**r,'party':parties.get((r['cycle'],r['candidate_id']),'')} for r in saved)
++    parties = defaultdict(set)
++    for row in rows:
++        if row.get('party'):
++            parties[row['cycle'],row['candidate_id']].add(row['party'])
++    result.extend({**r,'party':' / '.join(sorted(parties[r['cycle'],r['candidate_id']]))} for r in saved)
+     return result, found
+ 
+ 
+@@ -167,6 +201,8 @@
+     queue = list(roots)
+     outgoing = defaultdict(list)
+     for edge in found['edges']:
++        if edge.get('terminal_candidate'):
++            continue
+         outgoing[edge['cycle'],edge['source']].append(edge['destination'])
+     for key in queue:
+         for destination in outgoing[key]:
+--- before/mentat/app/evidence.js
++++ after/mentat/app/evidence.js
+@@ -403,7 +403,9 @@
+     if (!finances.length) throw new Error(`${pane.committee} is not in the snapshot ${pane.id}.`);
+     const cycles = [...new Set(finances.map(row => String(row.cycle)))].sort().reverse();
+     const inCycle = pane.cycle ? finances.filter(row => String(row.cycle) === pane.cycle) : finances;
+-    const sum = (rows, field) => rows.reduce((total, row) => total + Number(row[field] || 0), 0);
++    if (!inCycle.length) throw new Error(`No saved financial coverage for ${pane.committee} in ${pane.cycle}.`);
++    const sum = (rows, field) => !rows.length || rows.some(row => row[field] == null || row[field] === '' || !Number.isFinite(Number(row[field])))
++      ? null : rows.reduce((total, row) => total + Number(row[field]), 0);
+     pane.name = finances[0].committee_name || pane.committee;
+     pane.category = finances[0].category || 'Unclassified';
+     pane.categorySource = finances[0].category_source || 'From the saved snapshot';
+@@ -427,20 +429,24 @@
+     }
+     const receipts = (body.receipts || []).filter(row => row.committee_id === pane.committee
+       && (!pane.cycle || String(row.cycle) === pane.cycle));
+-    const outgoing = (body.transfers || []).filter(row => row.source === pane.committee
++    const outgoing = (body.transfers || []).filter(row => !row.candidate_id && row.source === pane.committee
+       && (!pane.cycle || String(row.cycle) === pane.cycle));
+     const incoming = (body.transfers || []).filter(row => row.destination === pane.committee
+       && (!pane.cycle || String(row.cycle) === pane.cycle));
+     const activity = (body.candidate_activity || []).filter(row => row.committee_id === pane.committee
+       && (!pane.cycle || String(row.cycle) === pane.cycle));
+-    const support = activity.filter(row => /support/i.test(row.direction || ''));
+-    const oppose = activity.filter(row => !/support/i.test(row.direction || ''));
++    const support = activity.filter(row => row.direction === 'Support');
++    const oppose = activity.filter(row => row.direction === 'Oppose');
++    const contributions = activity.filter(row => row.direction === 'Contribution / Other');
++    const unknown = activity.filter(row => !['Support','Oppose','Contribution / Other'].includes(row.direction));
+     pane.counterparties = [
+-      {name: `${body.company || 'Company'} receipt legs`, amount: receipts.reduce((t, r) => t + Number(r.amount || 0), 0), rows: receipts.length},
+-      {name: 'Transfers out to other committees', amount: outgoing.reduce((t, r) => t + Number(r.amount || 0), 0), rows: outgoing.length},
+-      {name: 'Transfers in from other committees', amount: incoming.reduce((t, r) => t + Number(r.amount || 0), 0), rows: incoming.length},
+-      {name: 'Candidate activity · support', amount: support.reduce((t, r) => t + Number(r.committee_spending || 0), 0), rows: support.length},
+-      {name: 'Candidate activity · oppose', amount: oppose.reduce((t, r) => t + Number(r.committee_spending || 0), 0), rows: oppose.length},
++      {name: `${body.company || 'Company'} receipt legs`, amount: sum(receipts,'amount'), rows: receipts.length},
++      {name: 'Transfers out to other committees', amount: sum(outgoing,'amount'), rows: outgoing.length},
++      {name: 'Transfers in from other committees', amount: sum(incoming,'amount'), rows: incoming.length},
++      {name: 'Candidate activity · support', amount: sum(support,'committee_spending'), rows: support.length},
++      {name: 'Candidate activity · oppose', amount: sum(oppose,'committee_spending'), rows: oppose.length},
++      {name: 'Candidate activity · contribution / other', amount: sum(contributions,'committee_spending'), rows: contributions.length},
++      {name: 'Candidate activity · unknown direction', amount: sum(unknown,'committee_spending'), rows: unknown.length},
+     ].filter(item => item.rows);
+     pane.contributors = new Set((body.receipts || [])
+       .filter(row => row.committee_id === pane.committee
+@@ -448,9 +454,15 @@
+       .map(row => row.reported_name || row.contributor_name || NOT_REPORTED)).size;
+     pane.legCount = (pane.counterparties || []).reduce((total, item) => total + (item.rows || 0), 0);
+     pane.provenance = `Snapshot ${pane.id} · openFEC · receipts as reported`;
+-    pane.warnings = [finances.every(row => row.regular_ie_reconciles)
++    pane.warnings = [inCycle.some(row => row.regular_ie_reconciles == null)
++      ? 'The expenditure/financial-summary comparison is unavailable for part of this selection.'
++      : inCycle.every(row => row.regular_ie_reconciles)
+       ? 'The collected regular-report expenditure total matches the committee financial summary.'
+       : 'The collected regular-report expenditure total differs from the financial summary. Coverage remains unresolved; no donor allocation is calculated.'];
++    const gaps = (body.downstream_coverage || []).filter(row => !pane.cycle || String(row.cycle) === pane.cycle);
++    if (gaps.length) pane.warnings.push('Downstream collection gaps: ' + gaps.map(row => `${row.committee_id} (${row.cycle}: ${row.status})`).join(', ') + '. Missing evidence is not zero spending.');
++    if ((body.temporal_routes || []).some(row => row.status === 'depth_limit' && (!pane.cycle || String(row.cycle) === pane.cycle)))
++      pane.warnings.push('Some dated routes exceed the temporal search depth. Their downstream activity is unresolved by that search.');
+     pane.detail = `Evidence collected ${String(body.retrieved_at || '').slice(0, 10) || 'date unavailable'}. ${body.scope || ''}`;
+     pane.legs = {receipts, outgoing, incoming, activity, finances: inCycle, body};
+   }
+--- before/mentat/app/evidence_geo.py
++++ after/mentat/app/evidence_geo.py
+@@ -606,7 +606,7 @@
+     unlocated = Unlocated()
+     aliases = company_keys(evidence)
+ 
+-    for row in unit.get('expenditures') or []:
++    for row in downstream.observations(unit, 'expenditures'):
+         if is_memo(row):
+             continue
+         amount = downstream.amount(row.get('expenditure_amount'))
+@@ -616,7 +616,7 @@
+                         who=str(row.get('candidate_name') or row.get('candidate_id') or ''),
+                         direction=direction, filing=row)
+ 
+-    for row in unit.get('disbursements') or []:
++    for row in downstream.observations(unit, 'disbursements'):
+         if is_memo(row):
+             continue
+         amount = downstream.amount(row.get('disbursement_amount'))
+@@ -624,13 +624,12 @@
+         recipient = str(row.get('recipient_committee_id') or '').strip().upper()
+         name = str(row.get('recipient_name') or row.get('recipient_committee') or '')
+         if line in ('22', '23'):
++            if row.get('candidate_id'):
++                place_candidate(buckets['candidates'], unlocated, amount, row['candidate_id'],
++                                cycle, who=name, direction='', filing=row)
++                continue
+             if not COMMITTEE.fullmatch(recipient):
+                 unlocated.add(f'a line {line} payment with no recipient committee id', amount)
+-                continue
+-            seat = district_geo.district_for_candidate(row.get('candidate_id'), cycle) if row.get('candidate_id') else None
+-            if seat:
+-                place_candidate(buckets['candidates'], unlocated, amount, row.get('candidate_id'),
+-                                cycle, who=name, direction='support', filing=row)
+                 continue
+             state = district_geo.committee_state(recipient, cycle)
+             if state:
+@@ -664,9 +663,9 @@
+     for key, unit in found['units'].items():
+         internal = {id(row) for destination, value, row in downstream.transfers(unit)
+                     if (key[0], destination) in found['units']}
+-        removed = sum((money(row.get('disbursement_amount')) for row in unit.get('disbursements') or []
++        removed = sum((money(row.get('disbursement_amount')) for row in downstream.observations(unit, 'disbursements')
+                        if id(row) in internal), Decimal(0))
+-        visible = {**unit, 'disbursements':[row for row in unit.get('disbursements') or []
++        visible = {**unit, 'disbursements':[row for row in downstream.observations(unit, 'disbursements')
+                                           if id(row) not in internal]}
+         own, missing, total = snapshot_spent(visible, evidence, cycle)
+         reported += total - removed
+--- before/mentat/app/graph.js
++++ after/mentat/app/graph.js
+@@ -887,7 +887,7 @@
+       details.append(summary);
+       for(const row of drawer.comparisons){
+         const p=document.createElement('p');
+-        p.textContent=`${row.committee} · ${row.cycle} · ${row.schedule}: workbook ${dollars(row.workbook_amount)}; selected snapshot ${dollars(row.snapshot_amount)}. ${row.basis}`;
++        p.textContent=`${row.committee} · ${row.cycle} · ${row.schedule}: workbook ${row.workbook_amount == null ? 'not present in saved activity' : dollars(row.workbook_amount)}; selected snapshot ${dollars(row.snapshot_amount)}. ${row.basis}`;
+         details.append(p);
+       }
+       host.append(details);
+--- before/mentat/R/fec_beneficiary.R
++++ after/mentat/R/fec_beneficiary.R
+@@ -358,7 +358,7 @@
+ #   3 = version key scoped to the transaction-date year
+ #   4 = competing report versions remain unresolved without filing evidence
+ #   5 = rows inside a reused transaction id are partitioned by identity
+-FEC_PAS2_PARSER_VERSION <- "6"
++FEC_PAS2_PARSER_VERSION <- "7"
+ 
+ # Mirror the Python default: distinct observations remain provisional until
+ # supersession is established. PAS2 has no preserved filing-family headers,
+@@ -377,7 +377,7 @@
+     c(
+       paste0("p", FEC_PAS2_PARSER_VERSION,
+              FEC_PAS2_AMBIGUOUS_VERSION_POLICY),
+-      substr(unname(tools::md5sum(paths)), 1L, 10L)
++      paste0(cycles, "_", substr(unname(tools::md5sum(paths)), 1L, 10L))
+     ),
+     collapse = "-"
+   )
+@@ -437,7 +437,8 @@
+         stop("Conflicting FEC sub-ID; reconcile preserved source evidence before indexing.", call. = FALSE)
+       }
+     }
+-    if (any(!is.finite(rows$transaction_amount))) {
++    if (any(!is.finite(rows$transaction_amount)) ||
++        any(abs(rows$transaction_amount * 100 - round(rows$transaction_amount * 100)) > 1e-6)) {
+       stop("Missing or invalid PAS2 amount; no zero-valued measurement may be published.", call. = FALSE)
+     }
+     rows[, original_order := .I]
+@@ -560,6 +561,10 @@
+     rows[, unverified_version := 0L]
+     if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all")) {
+       rows[conflicted == TRUE, `:=`(unresolved_version = 0L, unverified_version = 1L)]
++      # An unidentified candidate is a coverage gap, not a reason to erase a
++      # reported expenditure. Keep its dollars in the unknown-identity bucket.
++      rows[live & !nzchar(candidate_id) & memo_code != "X",
++           `:=`(unresolved_version = 0L, unverified_version = 1L)]
+       rows[live == TRUE, unverified_version := pmax(unverified_version, as.integer(.N > 1L)),
+            by = .(version_key, identity_key)]
+     }
+@@ -646,8 +651,8 @@
+   # On Schedule E/PAS2 the recipient can be an advertising vendor. Its name
+   # cannot identify the candidate. Even a historical candidate-master match
+   # may conflict with the name as filed, so do not infer an identity here.
+-  # A PAS2 row can also carry no candidate ID at all - it is retained as
+-  # evidence but never counted - so name that case instead of printing an
++  # A PAS2 row can also carry no candidate ID at all - keep its provisional
++  # amount in an unknown-identity bucket, named instead of printing an
+   # empty parenthesis.
+   activity[is.na(candidate_name) | !nzchar(candidate_name),
+            candidate_name := paste0(
+@@ -864,8 +869,9 @@
+     scope <- scopes[i]
+     seeds <- funding[cycle == scope$cycle & view == scope$view & company == scope$company]
+     seeds <- seeds[order(source_committee_id)]
+-    visited <- seeds[preliminary_crypto_funding > 0, source_committee_id]
+-    frontier <- seeds[preliminary_crypto_funding > 0, source_committee_id]
++    seed_mask <- if ("traversal_seed" %in% names(seeds)) seeds$traversal_seed else seeds$preliminary_crypto_funding > 0
++    visited <- seeds$source_committee_id[seed_mask]
++    frontier <- visited
+     roots <- stats::setNames(visited, visited)
+     routes <- stats::setNames(visited, visited)
+     stops <- if (is.null(candidate_links)) character() else
+@@ -899,8 +905,6 @@
+ fec_build_beneficiary_tables <- function(raw_export, downstream_activity, transfer_edges = NULL,
+                                         candidate_links = NULL) {
+   downstream <- fec_aggregate_beneficiary_downstream(downstream_activity)
+-  if (!nrow(downstream)) return(list(bridge = data.table::data.table(), summary = data.table::data.table(),
+-    reach = data.table::data.table(), measurement_ledger = data.table::data.table()))
+   funded <- raw_export[
+     include_in_analysis == "Yes" & nzchar(committee_id),
+     .(
+@@ -911,15 +915,18 @@
+   ]
+   industry <- funded[, .(
+     preliminary_crypto_funding = sum(preliminary_crypto_funding, na.rm = TRUE),
+-    source_committee = fec_mode_text(source_committee)
++    source_committee = fec_mode_text(source_committee),
++    traversal_seed = any(preliminary_crypto_funding > 0)
+   ), by = .(cycle, source_committee_id)]
+   industry[, `:=`(view = "Industry", company = "Industry Total")]
+   company <- data.table::copy(funded)
+-  company[, view := "Company"]
++  company[, `:=`(view = "Company", traversal_seed = preliminary_crypto_funding > 0)]
+   funding <- data.table::rbindlist(list(industry, company), use.names = TRUE, fill = TRUE)
++  reach <- fec_beneficiary_reach(funding, transfer_edges, candidate_links)
++  if (!nrow(downstream)) return(list(bridge = data.table::data.table(), bridge_all = data.table::data.table(),
++    summary = data.table::data.table(), reach = reach, measurement_ledger = data.table::data.table()))
+   old_bridge <- merge(funding, downstream, by = c("cycle", "source_committee_id"),
+                       allow.cartesian = TRUE, sort = FALSE)
+-  reach <- fec_beneficiary_reach(funding, transfer_edges, candidate_links)
+   # Preserve funding at its actual recipient. A descendant's observed spending
+   # does not prove it received the root's company dollars.
+   if (is.null(transfer_edges) || !nrow(transfer_edges)) {
+@@ -953,6 +960,7 @@
+   measurement_ledger[is.na(after_amount), after_amount := 0]
+   measurement_ledger[, delta := after_amount - before_amount]
+   measurement_ledger[, basis := "Same source rows: direct-only association versus unique reachable spending committees; not a published-report comparison"]
++  bridge_all <- data.table::copy(bridge)
+ 
+   summary <- fec_aggregate_beneficiary_summary(bridge)[office %in% c("H", "S")]
+   data.table::setorder(summary, cycle, view, company, -preliminary_downstream_amount, candidate_name)
+@@ -966,5 +974,5 @@
+     sort = FALSE
+   )
+   data.table::setorder(bridge, cycle, view, company, -preliminary_downstream_amount, candidate_name)
+-  list(bridge = bridge, summary = summary, reach = reach, measurement_ledger = measurement_ledger)
+-}
++  list(bridge = bridge, bridge_all = bridge_all, summary = summary, reach = reach, measurement_ledger = measurement_ledger)
++}
+--- before/mentat/R/fec_transfer_graph.R
++++ after/mentat/R/fec_transfer_graph.R
+@@ -17,6 +17,14 @@
+         status = "stale_transfer_index", unresolved_all_sources = TRUE)
+       next
+     }
++    raw_path <- file.path(dirname(path), "itoth.txt")
++    if (file.exists(raw_path) && (is.null(index$source_sha256) ||
++        digest::digest(file = raw_path, algo = "sha256") != index$source_sha256)) {
++      coverage[[length(coverage) + 1L]] <- list(cycle = target_cycle,
++        status = "stale_transfer_index", unresolved_all_sources = TRUE,
++        reason = "Transfer index does not match the current raw OTH source")
++      next
++    }
+     edge_path <- file.path(dirname(path), "transfer-edges.csv")
+     if (is.null(index$edges_sha256) ||
+         digest::digest(file = edge_path, algo = "sha256") != index$edges_sha256)
+@@ -24,6 +32,7 @@
+     rows <- data.table::fread(edge_path, showProgress = FALSE)
+     coverage[[length(coverage) + 1L]] <- list(cycle = target_cycle, status = "indexed",
+       source_sha256 = index$source_sha256, counts = index$counts,
++      raw_source_available = file.exists(raw_path),
+       ledger_path = index$ledger_path, max_depth = if (is.finite(max_depth)) max_depth else NULL,
+       traversal = "cycle-safe observed network",
+       unresolved_sources = as.list(index$unresolved_sources),
+@@ -34,8 +43,9 @@
+       unresolved_all_sources = isTRUE(index$unresolved_all_sources))
+     if (!nrow(rows)) next
+     stops <- candidate_links[cycle == target_cycle & designation %in% c("A", "P"), committee_id]
+-    visited <- roots[cycle == target_cycle & preliminary_crypto_funding > 0, committee_id]
+-    frontier <- visited
++    seed_mask <- if ("traversal_seed" %in% names(roots)) roots$traversal_seed else roots$preliminary_crypto_funding > 0
++    visited <- roots$committee_id[roots$cycle == target_cycle & seed_mask]
++    frontier <- setdiff(visited, stops)
+     depth <- 0L
+     while (length(frontier) && depth < max_depth) {
+       depth <- depth + 1L
+@@ -44,7 +54,7 @@
+       visited <- unique(c(visited, next_ids)); frontier <- next_ids
+       if (!length(frontier)) break
+     }
+-    edges[[length(edges) + 1L]] <- rows[source %in% visited]
++    edges[[length(edges) + 1L]] <- rows[source %in% setdiff(visited, stops)]
+     missing <- setdiff(visited, expanded[cycle == target_cycle, committee_id])
+     if (length(missing)) expanded <- data.table::rbindlist(list(expanded,
+       data.table::data.table(cycle = target_cycle, committee_id = missing,
+--- before/mentat/R/tidy_stage.R
++++ after/mentat/R/tidy_stage.R
+@@ -140,10 +140,10 @@
+     included_rows = "INTEGER", excluded_rows = "INTEGER",
+     superseded_rows = "INTEGER", memo_rows = "INTEGER",
+     duplicate_rows = "INTEGER",
+-    # Rows counted on the strength of the highest filing number rather than
+-    # filing evidence. The dollars are in net_included_amount; this says how
+-    # many of them rest on that convention.
+-    unverified_version_rows = "INTEGER", reported_amount = "REAL",
++    # Retained observations with unresolved filing relationships are provisional.
++    unverified_version_rows = "INTEGER", unresolved_version_rows = "INTEGER",
++    unresolved_version_amount = "REAL", repeated_itemization_rows = "INTEGER",
++    reported_amount = "REAL",
+     excluded_amount = "REAL", net_included_amount = "REAL",
+     fec_committee_url = "TEXT", fec_candidate_url = "TEXT",
+     source_url = "TEXT", transfer_records = "TEXT"
+@@ -156,6 +156,7 @@
+     office = "TEXT", state = "TEXT", district = "TEXT",
+     transaction_count = "INTEGER", first_activity_date = "TEXT",
+     last_activity_date = "TEXT", downstream_activity = "REAL",
++    support_amount = "REAL", oppose_amount = "REAL", other_activity_amount = "REAL",
+     associated_funding = "REAL"
+     # plus one INTEGER `has_<token>` flag column per observed relationship and
+     # direction token; appended at build time because the vocabulary is data.
+@@ -187,6 +188,7 @@
+ # fec_aggregate_downstream_activity groups by candidate_name as well as
+ # candidate_id, so two rows differing only in spelling are two legitimate rows.
+ # Keying without `candidate` would make the guard refuse a correct export.
++MENTAT_TIDY_TABLE_SPECS$beneficiary_activity <- MENTAT_TIDY_TABLE_SPECS$beneficiary_bridge
+ MENTAT_TIDY_TABLE_KEYS <- list(
+   contributions = "source_id",
+   giving_facts = c("cycle_label", "company", "employee_tier",
+@@ -201,7 +203,8 @@
+   downstream_activity = c("cycle_label", "source_committee_id", "candidate_id",
+                           "candidate", "activity_type", "support_oppose",
+                           "transaction_type"),
+-  beneficiary_bridge = "bridge_key"
++  beneficiary_bridge = "bridge_key",
++  beneficiary_activity = c("cycle_label", "source_committee_id", "candidate_id")
+ )
+ 
+ # ---------------------------------------------------------------------------
+@@ -866,6 +869,9 @@
+     unverified_version_rows = mentat_tidy_count(
+       mentat_tidy_column(rows, "unverified_version_rows", count)
+     ),
++    unresolved_version_rows = mentat_tidy_count(mentat_tidy_column(rows, "unresolved_version_rows", count)),
++    unresolved_version_amount = mentat_tidy_money(mentat_tidy_column(rows, "unresolved_version_amount", count)),
++    repeated_itemization_rows = mentat_tidy_count(mentat_tidy_column(rows, "repeated_itemization_rows", count)),
+     reported_amount = reported,
+     excluded_amount = excluded,
+     net_included_amount = included,
+@@ -881,23 +887,26 @@
+   result[]
+ }
+ 
+-# 2.11 beneficiary_bridge. Company rows only: the exporter's `Industry` view is
+-# a SUM of the company rows, and shipping both in one tall sheet is the exact
+-# double-count the Overview's `View` column exists to suppress.
++# 2.11 beneficiary_bridge is company ASSOCIATION, so shared PAC spending repeats
++# between companies. beneficiary_activity stores the unique Industry view as a
++# separate additive fact table. Neither table is truncated to the Overview's 100.
+ #
+ # `activity_relationships` and `directions` are `;`-joined sets. They become one
+ # 0/1 flag column per observed token, which is the tidy form of a set-valued
+ # attribute and lets Tableau filter on "has oppose activity" without parsing.
+-mentat_tidy_beneficiary_bridge <- function(bridge) {
++mentat_tidy_beneficiary_bridge <- function(bridge, selected_view = "Company") {
+   require_package("data.table")
+   if (is.null(bridge) || !nrow(bridge)) return(mentat_tidy_empty("beneficiary_bridge"))
+   rows <- data.table::as.data.table(bridge)
+-  if ("view" %in% names(rows)) rows <- rows[view == "Company"]
++  if ("view" %in% names(rows)) rows <- rows[view == selected_view]
+   if (!nrow(rows)) return(mentat_tidy_empty("beneficiary_bridge"))
+   count <- nrow(rows)
+   cycle <- mentat_tidy_count(mentat_tidy_column(rows, "cycle", count))
+   committee_id <- mentat_tidy_id(mentat_tidy_column(rows, "source_committee_id", count))
+   candidate_id <- mentat_tidy_id(mentat_tidy_column(rows, "candidate_id", count))
++  net <- mentat_tidy_money(mentat_tidy_column(rows, "preliminary_downstream_amount", count))
++  support <- mentat_tidy_money(mentat_tidy_column(rows, "support_amount", count))
++  oppose <- mentat_tidy_money(mentat_tidy_column(rows, "oppose_amount", count))
+   result <- data.table::data.table(
+     bridge_key = mentat_tidy_text(mentat_tidy_column(rows, "bridge_key", count)),
+     cycle_label = mentat_tidy_cycle_label(cycle),
+@@ -926,6 +935,9 @@
+     downstream_activity = mentat_tidy_money(
+       mentat_tidy_column(rows, "preliminary_downstream_amount", count)
+     ),
++    support_amount = mentat_tidy_money(mentat_tidy_column(rows, "support_amount", count)),
++    oppose_amount = mentat_tidy_money(mentat_tidy_column(rows, "oppose_amount", count)),
++    other_activity_amount = net - support - oppose,
+     associated_funding = mentat_tidy_money(
+       mentat_tidy_column(rows, "preliminary_crypto_funding", count)
+     )
+@@ -1110,6 +1122,7 @@
+     candidates = candidates,
+     downstream_activity = downstream,
+     beneficiary_bridge = bridge_rows,
++    beneficiary_activity = mentat_tidy_beneficiary_bridge(bridge, "Industry"),
+     state_destinations = mentat_tidy_state_destinations(state_destinations),
+     recipient_locations = mentat_tidy_recipient_locations(recipient_locations),
+     data_quality = mentat_tidy_data_quality(guard_results)
+--- before/mentat/tools/build_industry_report.ps1
++++ after/mentat/tools/build_industry_report.ps1
+@@ -465,7 +465,7 @@
+   (Join-Path $projectRoot 'tools\crypto_workbook_builder.mjs'),
+   (Join-Path $projectRoot 'tools\finalize_crypto_excel.ps1'),
+   (Join-Path $projectRoot 'inputs\trade_committee_overrides.csv')
+-) + $committeeFiles + $beneficiaryFiles + @(Get-ChildItem -LiteralPath $BeneficiaryDirectory -Recurse -File | Where-Object { $_.Name -in @('transfer-current.json','transfer-info.json','transfer-edges.csv') } | ForEach-Object FullName) + @(Get-ChildItem -LiteralPath $sourceRoot -Recurse -Filter 'source-receipt.json' | ForEach-Object FullName)
++) + $committeeFiles + $beneficiaryFiles + @(Get-ChildItem -LiteralPath $BeneficiaryDirectory -Recurse -File | Where-Object { $_.Name -in @('itoth.txt','transfer-current.json','transfer-info.json','transfer-edges.csv') } | ForEach-Object FullName) + @(Get-ChildItem -LiteralPath $sourceRoot -Recurse -Filter 'source-receipt.json' | ForEach-Object FullName)
+ $dataInputPaths = $dataInputPaths | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+ $inputFingerprint = Get-CombinedFingerprint $dataInputPaths (
+   "industry=$Industry|cycle=$CycleLabel"
+--- before/mentat/tools/build_tidy_workbook.py
++++ after/mentat/tools/build_tidy_workbook.py
+@@ -262,6 +262,10 @@
+     ("source_rows", "Source Rows", "I"), ("included_rows", "Included Rows", "I"),
+     ("excluded_rows", "Excluded Rows", "I"), ("superseded_rows", "Superseded Rows", "I"),
+     ("memo_rows", "Memo Rows", "I"), ("duplicate_rows", "Duplicate Rows", "I"),
++    ("unverified_version_rows", "Unverified Version Rows", "I"),
++    ("unresolved_version_rows", "Unresolved Version Rows", "I"),
++    ("unresolved_version_amount", "Unresolved Version Amount", "R"),
++    ("repeated_itemization_rows", "Repeated Itemization Rows", "I"),
+     ("reported_amount", "Reported Amount", "R"),
+     ("excluded_amount", "Excluded Amount", "R"),
+     ("net_included_amount", "Net Included Amount", "R"),
+@@ -283,6 +287,9 @@
+     ("first_activity_date", "First Activity Date", "D"),
+     ("last_activity_date", "Last Activity Date", "D"),
+     ("downstream_activity", "Downstream Activity", "R"),
++    ("support_amount", "Support Activity", "R"),
++    ("oppose_amount", "Oppose Activity", "R"),
++    ("other_activity_amount", "Contribution / Other Activity", "R"),
+     ("associated_funding", "Associated Funding", "R"),
+ )
+ 
+@@ -382,6 +389,8 @@
+            "support_oppose", "transaction_type", "candidate")),
+     Sheet("beneficiary_bridge", "Beneficiary Bridge", BENEFICIARY_BRIDGE,
+           ("bridge_key",), dynamic=True),
++    Sheet("beneficiary_activity", "Network Candidate Activity", BENEFICIARY_BRIDGE,
++          ("cycle_label", "source_committee_id", "candidate_id"), dynamic=True),
+     Sheet("transfer_paths", "Transfer Paths", TRANSFER_PATHS,
+           ("cycle_label", "funded_committee", "source_committee",
+            "destination_committee")),
+@@ -975,6 +984,7 @@
+         ("Exporter Version", metadata.get("exporter_version") or ""),
+         ("Writer Version", WRITER_VERSION),
+         ("Accounting Note", metadata.get("accounting_note") or ""),
++        ("Downstream accounting", "Network Candidate Activity counts each reachable spending committee once per cycle/candidate, without a top-100 cutoff. Beneficiary Bridge is company association: shared PAC activity repeats across companies. Do not sum company associations or add either table to receipts, transfers, or the other activity table."),
+         ("Split Rows Threshold", arguments.split_rows),
+     ]
+     # About's own row count is the only self-referential one: 14 fixed rows, one
+--- before/mentat/tools/crypto_workbook_builder.mjs
++++ after/mentat/tools/crypto_workbook_builder.mjs
+@@ -191,6 +191,10 @@
+     null,
+     row.source_url,
+     deferFormulas ? "PENDING" : null,
++    Number(row.unverified_version_rows || 0),
++    Number(row.unresolved_version_rows || 0),
++    Number(row.unresolved_version_amount || 0),
++    Number(row.repeated_itemization_rows || 0),
+   ];
+ }
+ 
+@@ -277,18 +281,23 @@
+       sheet: "Downstream Activity",
+       table: "DownstreamActivityTable",
+       row_count: payload.downstream_activity.length,
+-      column_count: 28,
+-      numeric_columns: [15, 16, 17, 18, 19, 20, 21, 22, 23],
++      column_count: 32,
++      numeric_columns: [15, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31],
+     },
+     beneficiary_bridge: {
+       path: bridgePath,
+       sheet: "Beneficiary Bridge",
+       table: "BeneficiaryBridgeTable",
+-      row_count: payload.beneficiary_bridge.length,
++      row_count: (payload.beneficiary_bridge ?? []).length,
+       column_count: 22,
+       numeric_columns: [13, 16, 17],
+     },
+   };
++  // Empty candidate selections have no body to hydrate (for example, a
++  // network containing only unknown/non-congressional candidates).
++  for (const [key, spec] of Object.entries(largeTableSidecars)) {
++    if (!spec.row_count) delete largeTableSidecars[key];
++  }
+ }
+ await fs.writeFile(
+   finalizerDataPath,
+@@ -2303,9 +2312,10 @@
+     "Excluded Rows", "Superseded Rows", "Memo Rows", "Duplicate Rows",
+     "Reported Amount", "Excluded Amount", "Net Included Amount", "FEC Committee URL",
+     "FEC Candidate URL", "Source URL", "Logic Check",
++    "Unverified Version Rows", "Unresolved Version Rows", "Unresolved Version Amount", "Repeated Itemization Rows",
+   ];
+   const sourceRows = payload.downstream_activity ?? [];
+-  const rows = deferLargeTables
++  const rows = deferLargeTables && sourceRows.length
+     ? [downstreamActivityValues(sourceRows[0])]
+     : sourceRows.map(downstreamActivityValues);
+   titleBlock(
+@@ -2313,18 +2323,22 @@
+     "Downstream Committee-to-Candidate Activity",
+     `This is same-cycle activity by committees funded in the ${industry} dataset; it is not dollar-level pass-through attribution. Reported minus excluded amendment/memo rows equals Net Included Amount.`,
+     `${payload.metadata.downstream_rows.toLocaleString("en-US")} exact source rows condensed to ${sourceRows.length.toLocaleString("en-US")} committee-candidate-activity groups | ${payload.metadata.downstream_superseded_rows.toLocaleString("en-US")} superseded and ${payload.metadata.downstream_memo_rows.toLocaleString("en-US")} memo rows excluded.`,
+-    "AB",
++    "AF",
+   );
+   const last = 5 + rows.length;
+-  sheet.getRange(`A5:AB${last}`).values = [headers, ...rows];
+-  const table = sheet.tables.add(`A5:AB${last}`, true, "DownstreamActivityTable");
++  sheet.getRange(`A5:AF${last}`).values = [headers, ...rows];
++  const table = sheet.tables.add(`A5:AF${last}`, true, "DownstreamActivityTable");
+   styleTable(table);
+   sheet.freezePanes.freezeRows(5);
++  if (!rows.length) return sheet;
+   sheet.getRange(`N6:O${last}`).format.numberFormat = "yyyy-mm-dd";
+   sheet.getRange(`P6:U${last}`).format.numberFormat = countFormat;
+   sheet.getRange(`V6:X${last}`).format.numberFormat = currencyFormat;
++  sheet.getRange(`AC6:AD${last}`).format.numberFormat = countFormat;
++  sheet.getRange(`AE6:AE${last}`).format.numberFormat = currencyFormat;
++  sheet.getRange(`AF6:AF${last}`).format.numberFormat = countFormat;
+   applyIntegrityFormatting(sheet.getRange(`AB6:AB${last}`), 6, "AB");
+-  const widths = [14,38,15,20,34,15,16,22,9,10,34,18,15,14,14,12,12,12,14,10,12,18,18,18,42,42,54,15];
++  const widths = [14,38,15,20,34,15,16,22,9,10,34,18,15,14,14,12,12,12,14,10,12,18,18,18,42,42,54,15,20,20,22,22];
+   widths.forEach((width, index) => {
+     const column = excelColumn(index + 1);
+     sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+@@ -2344,7 +2358,7 @@
+     "Reference Key", "Integrity Check",
+   ];
+   const sourceRows = payload.beneficiary_bridge ?? [];
+-  const rows = deferLargeTables
++  const rows = deferLargeTables && sourceRows.length
+     ? [beneficiaryBridgeValues(sourceRows[0])]
+     : sourceRows.map(beneficiaryBridgeValues);
+   titleBlock(
+@@ -2359,6 +2373,7 @@
+   const table = sheet.tables.add(`A5:V${last}`, true, "BeneficiaryBridgeTable");
+   styleTable(table);
+   sheet.freezePanes.freezeRows(5);
++  if (!rows.length) return sheet;
+   sheet.getRange(`N6:N${last}`).format.numberFormat = countFormat;
+   sheet.getRange(`O6:P${last}`).format.numberFormat = "yyyy-mm-dd";
+   sheet.getRange(`Q6:R${last}`).format.numberFormat = currencyFormat;
+--- before/mentat/tools/enrich_downstream.py
++++ after/mentat/tools/enrich_downstream.py
+@@ -257,7 +257,13 @@
+         unresolved_nodes=set()
+         if any(r.get('unresolved_all_sources') or r['status']=='stale_transfer_index' for r in source_coverage):
+             unresolved_nodes.update(funding)
+-        cycle_paths=reachable({key for key,value in funding.items() if value>0},edges,max_depth=None,stop_nodes=direct_ids)
++        company_funding=defaultdict(float)
++        for row in payload['raw_rows']:
++            if row['cycle']==cycle and row['include_in_analysis']=='Yes':
++                company_funding[row.get('company',''),row['committee_id']]+=row['amount']
++        route_roots={committee for (_,committee),value in company_funding.items()
++                     if value>0 and committee and committee not in direct_ids}
++        cycle_paths=reachable(route_roots,edges,max_depth=None,stop_nodes=direct_ids)
+         paths.extend(cycle_paths)
+         assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids,
+             candidate_links={committee:links[cycle,committee] for committee in direct_ids},
+--- before/mentat/tools/export_crypto_spending_data.R
++++ after/mentat/tools/export_crypto_spending_data.R
+@@ -636,6 +636,12 @@
+ downstream_universe <- recipient_universe[
+   !paste(cycle, committee_id, sep = "|") %in% direct_candidate_keys
+ ]
++# Collect routes needed by ANY company view. A different company's refunds can
++# make the industry net nonpositive without invalidating this company's route.
++positive_company_roots <- raw_export[include_in_analysis == "Yes" & nzchar(committee_id),
++  .(net = sum(amount)), by = .(cycle, company, committee_id)][net > 0]
++downstream_universe[, traversal_seed := paste(cycle, committee_id, sep = "|") %in%
++  paste(positive_company_roots$cycle, positive_company_roots$committee_id, sep = "|")]
+ transfer_context <- fec_transfer_context(beneficiary_dir, downstream_universe, candidate_links, supported_cycles)
+ downstream_activity <- fec_read_downstream_activity(
+   beneficiary_dir,
+@@ -773,7 +779,7 @@
+     candidate_links = candidate_links,
+     candidate_master = candidate_master,
+     downstream_activity_export = downstream_activity_export,
+-    bridge = beneficiary_tables$bridge,
++    bridge = beneficiary_tables$bridge_all,
+     state_destinations = mentat_state_destinations(workbook_raw_export),
+     recipient_locations = unique(workbook_raw_export[
+       , c("cycle", "committee_id", "recipient", mentat_destination_fields),
+@@ -975,6 +981,7 @@
+   downstream_measurement_ledger = beneficiary_tables$measurement_ledger,
+   downstream_sources = data.table::rbindlist(lapply(supported_cycles, function(year) {
+     paths <- c(file.path(beneficiary_dir, paste0("pas2", substr(year, 3, 4)), "itpas2.txt"),
++               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "itoth.txt"),
+                file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "transfer-info.json"),
+                file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "transfer-edges.csv"))
+     data.table::data.table(cycle = year, source = basename(paths), path = paths,
+--- before/mentat/tools/fec_transfer_graph.py
++++ after/mentat/tools/fec_transfer_graph.py
+@@ -448,11 +448,13 @@
+     candidate_links=candidate_links or {}
+     uncertain={node:'unresolved_transfer_records' for node in unresolved_nodes}
+     withheld={node:float(value) for node,value in (unresolved_amounts or {}).items() if float(value)>0}
+-    grouped=defaultdict(float)
++    grouped=defaultdict(float); unidentified=defaultdict(float)
+     for row in activity:
+         grouped[(row['source'],row['candidate'],row['direction'])]+=row['amount']
+     for (source,candidate,direction),value in grouped.items():
+-        if value>0:terminal[source].append((candidate,direction,value))
++        if value>0:
++            if candidate:terminal[source].append((candidate,direction,value))
++            else:unidentified[source]+=value
+     used=set()
+     for edge in edges:
+         if edge['amount']<=0:continue
+@@ -498,9 +500,11 @@
+                 break
+             if node in uncertain:unresolved[uncertain[node]]+=amount;continue
+             outgoing=adjacency[node];destinations=terminal[node];reserve=withheld.get(node,0.)
+-            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)+reserve
++            unknown=unidentified.get(node,0.)
++            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)+reserve+unknown
+             if denominator<=0:unresolved['no_observed_outflow']+=amount;continue
+             if reserve:unresolved['unresolved_transfer_records']+=amount*reserve/denominator
++            if unknown:unresolved['unidentified_candidate_activity']+=amount*unknown/denominator
+             for candidate,direction,value in destinations:allocated[candidate,direction]+=amount*value/denominator
+             for destination,value in outgoing:
+                 portion=amount*value/denominator
+--- before/mentat/tools/finalize_crypto_excel.ps1
++++ after/mentat/tools/finalize_crypto_excel.ps1
+@@ -14,7 +14,7 @@
+ function Set-TableColumnFormula($Table, [string]$ColumnName, [string]$Formula) {
+   $column = $Table.ListColumns.Item($ColumnName)
+   $range = $column.DataBodyRange
+-  try { $range.Formula = $Formula } finally { Release-ComObject $range; Release-ComObject $column }
++  try { if ($null -ne $range) { $range.Formula = $Formula } } finally { Release-ComObject $range; Release-ComObject $column }
+ }
+ 
+ function Cycle-Dispatch([scriptblock]$Builder) {
+--- before/mentat/tools/pac_evidence.py
++++ after/mentat/tools/pac_evidence.py
+@@ -6,7 +6,7 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from collections import defaultdict
++from collections import defaultdict, deque
+ from concurrent.futures import ThreadPoolExecutor
+ from datetime import datetime, timezone
+ from decimal import Decimal, InvalidOperation
+@@ -221,19 +221,29 @@
+     Candidate-linked Schedule B gifts are terminal activity. The collection
+     budget bounds requests, never silently defines the financial network.
+     """
+-    pending = sorted(set(roots), key=lambda key: (key[1], key[0]))
++    roots = set(roots)
++    pending = deque(sorted(roots, key=lambda key: (key[1], key[0])))
+     if max_units < len(pending) or max_units < 1:
+         raise ValueError('Collection budget must cover every selected root.')
+     visited, snapshots, missing = set(), [], []
++    attempts = 0
+     while pending:
+-        committee, cycle = pending.pop(0)
++        committee, cycle = pending.popleft()
+         if (committee, cycle) in visited:
+             continue
+         visited.add((committee, cycle))
+-        if len(snapshots) >= max_units:
++        if attempts >= max_units:
+             missing.append({'committee_id': committee, 'cycle': cycle, 'status': 'collection_limit'})
+             continue
+-        unit = collect_committee(client, committee, cycle)
++        attempts += 1
++        try:
++            unit = collect_committee(client, committee, cycle)
++        except (ValueError, OSError) as error:
++            if (committee, cycle) in roots:
++                raise
++            missing.append({'committee_id':committee, 'cycle':cycle,
++                            'status':'collection_failed', 'detail':str(error)})
++            continue
+         snapshots.append(unit)
+         destinations = defaultdict(Decimal)
+         for row in unit['disbursements']:
+@@ -281,15 +291,27 @@
+                              'transaction_id': row.get('transaction_id'), 'source_url': source_link(row)})
+         for row in snapshot['disbursements']:
+             destination = row.get('recipient_committee_id')
+-            if not destination or is_memo(row):
++            if is_memo(row):
+                 continue
+             # A committee ID can also identify a vendor/refund recipient. Admit
+             # contribution/transfer Schedule B lines, never all committee payees.
+-            if row.get('line_number') not in ('22', '23'):
+-                continue
+-            transfers.append({'cycle': cycle, 'source': committee, 'destination': destination,
++            if str(row.get('line_number')) not in ('22', '23'):
++                continue
++            if destination:
++                transfers.append({'cycle': cycle, 'source': committee, 'destination': destination,
++                              'candidate_id': row.get('candidate_id') or '',
+                               'destination_name': row.get('recipient_name'), 'date': row.get('disbursement_date'),
+                               'amount': float(money(row.get('disbursement_amount'))), 'sub_id': row['sub_id'], 'source_url': source_link(row)})
++            if row.get('candidate_id'):
++                day = str(row.get('disbursement_date') or '')[:10]
++                activity.append({'cycle':cycle, 'committee_id':committee,
++                    'candidate_id_as_filed':row['candidate_id'],
++                    'candidate_name_as_filed':row.get('candidate_name') or row['candidate_id'],
++                    'direction':'Contribution / Other', 'activity_type':'Schedule B candidate payment',
++                    'committee_spending':float(money(row.get('disbursement_amount'))),
++                    'first_date':day, 'last_date':day, 'source_rows':1,
++                    'source_urls':[source_link(row)], 'company_attributed_amount':None,
++                    'evidence':'Reported committee activity; donor allocation unidentifiable'})
+         grouped = defaultdict(list)
+         for row in snapshot['expenditures']:
+             if is_memo(row):
+@@ -320,7 +342,7 @@
+     outbound = defaultdict(list)
+     activity = defaultdict(list)
+     for transfer in evidence['transfers']:
+-        if transfer.get('date') and money(transfer.get('amount')) > 0:
++        if not transfer.get('candidate_id') and transfer.get('date') and money(transfer.get('amount')) > 0:
+             outbound[transfer['cycle'], transfer['source']].append(transfer)
+     for item in evidence['candidate_activity']:
+         if money(item['committee_spending']) > 0:
+@@ -355,6 +377,11 @@
+                                 'candidate_name_as_filed': item['candidate_name_as_filed'], 'direction': item['direction']})
+                 emitted += 1
+             if len(path) - 1 >= max_hops:
++                for transfer in outbound[receipt['cycle'], committee]:
++                    if transfer['date'][:10] >= available and transfer['destination'] not in path:
++                        results.append({**initial, 'status':'depth_limit',
++                            'path':[*path, transfer['destination']], 'max_hops':max_hops})
++                        emitted += 1
+                 continue
+             for transfer in outbound[receipt['cycle'], committee]:
+                 day = transfer['date'][:10]
+@@ -397,7 +424,6 @@
+     client = Client(args.output / 'source-cache')
+     work = [(committee, cycle) for committee in committees for cycle in cycles]
+     snapshots, missing = collect_network(client, work, args.max_units)
+-    atomic_json(args.output / 'snapshots.json', snapshots)
+     result = summarize(snapshots, args.company, args.aliases.split('|'))
+     reconcile_candidates(client, result)
+     result['temporal_routes'] = temporal_routes(result)
+@@ -405,6 +431,7 @@
+     result['downstream_coverage'] = missing
+     result['unexpanded_committees'] = sorted({row['committee_id'] for row in missing})
+     result['retrieved_at'] = datetime.now(timezone.utc).isoformat()
++    atomic_json(args.output / 'snapshots.json', snapshots)
+     result['source_snapshot_sha256'] = hashlib.sha256((args.output / 'snapshots.json').read_bytes()).hexdigest()
+     atomic_json(args.output / 'evidence.json', result)
+     from pac_cash_model import write_estimates
