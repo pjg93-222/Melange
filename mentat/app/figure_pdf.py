@@ -438,9 +438,14 @@ def render(document):
                 data = _finished(out)
                 if data is not None:
                     break
-                if process.poll() is not None:
+                exit_code = process.poll()
+                if exit_code is not None:
                     data = _finished(out)
-                    break
+                    # Edge's launcher can hand the job to a relaunched copy and exit 0 at once
+                    # (here: after 0.07 s, the PDF follows about a second later), so only a
+                    # failing exit, or a finished file, ends the wait before the deadline.
+                    if data is not None or exit_code != 0:
+                        break
                 if time.monotonic() > deadline:
                     raise RenderTimeout('The PDF took longer than %d seconds to draw.' % RENDER_TIMEOUT_SECONDS)
                 time.sleep(0.05)
