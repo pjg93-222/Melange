@@ -134,6 +134,14 @@ test('the cross-reference says what it is, in the approved plain words',()=>{
 
 test('the reconciliation strip has a reason for every way two totals can part',()=>{
   assert.deepStrictEqual(Object.keys(contributions.RECONCILE_REASONS),
-    ['basis','graph_filter','workbook','aggregate','cycle','unavailable','unexplained']);
-  for(const reason of Object.values(contributions.RECONCILE_REASONS)) assert.match(reason,/^[a-z]/,'a reason reads as the tail of a sentence');
+    ['basis','graph_filter','workbook','aggregate','funding_classification','cycle','unavailable','unexplained']);
+  for(const [id,reason] of Object.entries(contributions.RECONCILE_REASONS)){
+    assert.ok(reason.trim().length>0,id+' has wording');
+    assert.match(reason,/^[a-z]/,'a reason reads as the tail of a sentence');
+  }
+  // funding_classification is emitted, not just listed: published giving categories vs verified funding classifications.
+  const part=contributions.reconcile({totals:{amount:0}},'receipt',{totals:{giving:51000000}},
+    {studioCycle:'2023-2024',graphCycle:'2024',funding:'all',fundingClassification:true});
+  assert.strictEqual(part.reasonId,'funding_classification');
+  assert.strictEqual(part.reason,contributions.RECONCILE_REASONS.funding_classification);
 });
