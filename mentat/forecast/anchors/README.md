@@ -64,3 +64,10 @@ changed no publish or refresh script. `--check` exits 2 when a workbook was repu
 D-049 cases, the non_giving exclusion in every sum, coverage rule table, read-only and refusal guarantees, the shared negative controls).
 `MENTAT_ANCHORS_REAL=1` also re-derives the credit-union numbers of ADDENDUM section F (less the non_giving receipts) from the real tree, `=all` the
 banks and property & casualty too (about four minutes).
+
+## Odd-year split (cycle model, 2026-10-07)
+
+`general_giving.odd_year` and `pac_to_candidates.odd_year` give, for every COMPLETE cycle, the amount dated on or before December 31 of the cycle's first year (same population and
+basis as `cycles`: general giving after the non_giving exclusion; the roster PACs through the same D-049 aggregation, cut at that date; an undated row is in the cycle total and in no
+odd-year amount). The cycle model's industry budget change needs the anchor cycle's share `odd_year[a] / cycles[a]` per measure. Optional fields: a snapshot built before them stays valid,
+but the cycle model then offers no default budget change for that measure ("Rebuild the anchors").

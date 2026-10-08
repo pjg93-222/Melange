@@ -1453,6 +1453,54 @@
       "purpose": "raw",
       "vintage": "IBISWorld 52412 edition 2024-11, current-year (2024) ESTIMATE",
       "supplied_by": "tools/make_pc_ibis_current.R (feeds ingester parser on the 2024-11 edition, sha256 f484c65f...)"
+    },
+    {
+      "role": "cycle:ibis_captured_paths",
+      "path": "{CYCLE}/ibis2026_captured_paths.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "86c96b9b0e9c4408784bdfb0b3a987e1fd563cc7e09ad5c09c43b5037a15ccbb",
+      "bytes": 5639,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "IBISWorld Key Statistics revenue levels of 52211 (editions 2026-08), 52213 (2026-05) and 33611, 2002-2032, captured 2026-09-25",
+      "supplied_by": "browser capture log lines of the IBIS lane (phase20261001/ibis/ibis2026_captured_paths.csv; 20 of 20 history years agree with workbook 07)"
+    },
+    {
+      "role": "cycle:ibis_pc_2024_11",
+      "path": "{CYCLE}/ibis_52412_2024-11_p81_p83.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "83ca21f4726dde52dce37fdd44adb138ff6fef1dafcb41e9f24d6331941e3f0a",
+      "bytes": 716,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "IBISWorld 52412 edition 2024-11: revenue levels p.81 and reported annual change p.83, 2022-2027",
+      "supplied_by": "transcribed from extracted_evidence/2024_11_52412.json (evidence sha256 e9ed0de0cf875a9dea64f2c900a1ae5f66786101f58f3cab5568573dedd04659)"
+    },
+    {
+      "role": "cycle:pace_banks",
+      "path": "{CYCLE}/pace_series_banks.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "f847a1a691169183fa4f00c3d4e1d9bdbff68e57b79dfe01dcda979b214eac69",
+      "bytes": 773,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "Roster PAC pace series (banks), cycles 2012-2024, cents to March 31 / June 30 / September 30 of the election year",
+      "supplied_by": "pace_test/impl_py/out/series.csv (frozen output of the pace test)"
+    },
+    {
+      "role": "cycle:pace_credit_unions",
+      "path": "{CYCLE}/pace_series_credit_unions.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "161c29111a8ecb795e88a10a4bfd4db12b4cbc76f478d6e93be029befaeb7661",
+      "bytes": 675,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "Roster PAC pace series (credit unions), cycles 2012-2024, cents to March 31 / June 30 / September 30 of the election year",
+      "supplied_by": "pace_test/impl_py/out/cu_series.csv (frozen output of the pace test)"
     }
   ]
 }

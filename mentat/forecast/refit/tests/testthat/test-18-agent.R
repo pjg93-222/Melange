@@ -177,7 +177,7 @@ test_that("the agent's refit run and its gates are tolerance-based against anoth
   b <- test_bundle2(); noisy <- b
   noisy$pac_model$slopes$commercial_banks$applied$beta <- b$pac_model$slopes$commercial_banks$applied$beta * (1 + 3e-14)
   expect_equal(nrow(rf_bundle_diff(rf_canonical_json(b), rf_canonical_json(noisy))), 0L)
-  g <- rf_gate_nondegradation(test_v2(), noisy)       # published baseline read from a bundle whose evidence differs at the 1e-14 level
+  g <- rf_gate_nondegradation(test_v2(), noisy, cycle = FALSE)       # published baseline read from a bundle whose evidence differs at the 1e-14 level
   expect_identical(g$gate$status, "PASS")
 })
 

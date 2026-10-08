@@ -168,6 +168,7 @@ rf_review_packet <- function(res, dir, b_random = RF$B_RANDOM) {
     if (nrow(shown)) c("## Owner waivers shown as warnings", "", .rf_md_table(shown[, c("cell", "reason", "owner", "date", "new_MAE", "published_MAE")]), "") else NULL,
     "## Calculator paths against last-period naive", "", .rf_md_table(v$backtests[v$backtests$rule %in% c("R0", "R1", "R2") & v$backtests$design %in% c("loeo", "rolling") & v$backtests$path %in% c("prevchg", "calc"),
                                                                                   c("term", "base", "design", "path", "rule", "n", "MAE", "units", "beats_naive", "coverage_95")]), "",
+    if (!is.null(b$cycle_model)) rf_cycle_model_review(b$cycle_model) else NULL,
     "## Lobbying log refit", "",
     sprintf("Relative change per +1 pp of predicted growth: %.3f%% (95%% coefficient interval %.3f%% to %.3f%%), p = %.4f, n = %d; step residual sigma2 = %.6f over %d pairs.",
             v$lobby_log$relative_change_pct_per_point, v$lobby_log$coefficient_interval_pct$low, v$lobby_log$coefficient_interval_pct$high, v$lobby_log$ordinary_p, v$lobby_log$n,
@@ -249,6 +250,8 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
     base <- rbind(g0, g1, g2, g3)
     gb$stage_start("gates")
     b1 <- rf_bundle_v2(v, previous_model_version = published$model_version)
+    if (rf_cycle_model_on() && is.null(b1$cycle_model))                   # the owner's cycle-aware model was asked for: a bundle without it is not what was ordered
+      stop("RF_CYCLE_MODEL is on but the bundle has no cycle_model: ", paste(rf_cycle_model_gap(v), collapse = "; "), call. = FALSE)
     staged <- file.path(dir, "bundle", "giving-models-v2.staged.json")
     rf_write_json_atomic(b1, staged)
     res_g <- rf_gates(v, b1, published = published, base = base, bundle_path = staged, consumer_cmd = consumer_cmd)
@@ -268,6 +271,8 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
     run <- list(run_id = run_id, mode = "refit", started_utc = started, inputs = inputs, packages = pkgs, gates = res_g$gates, parity = parity, decision = res_g$decision)
     receipt <- rf_receipt(run, bundle_path)
     receipt$rule_selection <- lapply(v$selection, function(s) list(reported_rule = s$reported_rule, reason = s$reason))
+    if (!is.null(bundle$cycle_model)) receipt$cycle_model <- list(version = bundle$cycle_model$version, pac_to_candidates = bundle$cycle_model$measures$pac_to_candidates$candidate,
+                                                                  general_giving = bundle$cycle_model$measures$general_giving$candidate, panel_sha256 = bundle$cycle_model$source$panel_sha256)
     receipt$anchor_selection <- lapply(v$anchors$entries, function(ch) lapply(ch, function(e) list(anchor = e$anchor, slope_rule = e$rule, reason = e$reason)))
     w6 <- res_g$g6$waivers                                                   # every owner waiver on the list, applied or not, whether or not it is shown as a warning
     receipt$waivers <- lapply(seq_len(nrow(w6)), function(i) as.list(w6[i, ]))

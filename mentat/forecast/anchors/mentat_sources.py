@@ -145,11 +145,11 @@ def index_aggregates(index_path, source_db, open_cycle, cuts):
     {'cycles': {'2024': cents}, 'analysis_cycles': {'2024': cents}, 'excluded': {'2024': cents}, 'by_source': {'2024': {source: cents}},
      'general_cuts': [(cut, cents)], 'after_cut': cents,
      'candidates': {'2024': {'House': {'D','R','other'}, 'Senate': {...}}}, 'candidates_excluded': {same shape}, 'candidate_cuts': [(cut, {'House':..., 'Senate':...})],
-     'unmatched': (n, cents), 'type_conflicts': n}
+     'unmatched': (n, cents), 'type_conflicts': n, 'odd_year': {'2024': cents}}
     FORECAST BASIS (owner ruling 2026-10-01): `cycles`, `general_cuts`, `after_cut`, `candidates`, `candidate_cuts` and `unmatched` count only the receipts whose
     funding source is NOT in FORECAST_EXCLUDED_FUNDING_SOURCES. `analysis_cycles` is the published Analysis Amount before that exclusion (what the index's own
     manifest records), `excluded` / `candidates_excluded` what the rule left out (cycles + excluded = analysis_cycles), and `by_source` the full split by the
-    engine's bucket. `cuts` are month-end ISO dates of the open cycle (ending on the coverage end)."""
+    engine's bucket. `odd_year` is the forecast-basis amount of each COMPLETE cycle dated on or before December 31 of its first year (cents). `cuts` are month-end ISO dates of the open cycle (ending on the coverage end)."""
     label = f'{open_cycle - 1}-{open_cycle}'
     counted, excluded = forecast_conditions('f')
     kept_sum = f'SUM(CASE WHEN {counted} THEN f.receipt_cents ELSE 0 END)'
@@ -165,6 +165,13 @@ def index_aggregates(index_path, source_db, open_cycle, cuts):
         by_source = {}
         for c, source, v in db.execute('SELECT cycle, funding_source, SUM(receipt_cents) FROM idx.facts WHERE receipt_cents != 0 GROUP BY 1, 2'):
             by_source.setdefault(_cycle_key(c), {})[source] = v
+        # Odd-year split of every COMPLETE cycle (cycle model, 2026-10-07): the receipts dated on or before December 31 of the cycle's first year. An undated row
+        # is part of the cycle total and of no odd-year amount, as for the observed cuts.
+        odd_year = {}
+        for c, v in db.execute(f"SELECT f.cycle, SUM(CASE WHEN {counted} AND COALESCE(f.date, '') != '' AND f.date <= substr(f.cycle, 1, 4) || '-12-31' "
+                               'THEN f.receipt_cents ELSE 0 END) FROM idx.facts f WHERE f.receipt_cents != 0 GROUP BY f.cycle'):
+            if int(_cycle_key(c)) < open_cycle:
+                odd_year[_cycle_key(c)] = v
         monthly = {m: v for m, v in db.execute('SELECT substr(f.date, 1, 7), SUM(f.receipt_cents) FROM idx.facts f '
                                                f'WHERE f.cycle=? AND f.receipt_cents != 0 AND {counted} GROUP BY 1', (label,))}
         last_cut = cuts[-1] if cuts else None
@@ -209,6 +216,6 @@ def index_aggregates(index_path, source_db, open_cycle, cuts):
             candidate_cuts.append((cut, running))
         return {'cycles': cycles, 'analysis_cycles': analysis, 'excluded': left_out, 'by_source': by_source, 'general_cuts': _cumulative(monthly, cuts),
                 'after_cut': after_cut, 'candidates': candidates, 'candidates_excluded': candidates_excluded, 'candidate_cuts': candidate_cuts,
-                'unmatched': tuple(unmatched), 'type_conflicts': conflicts}
+                'unmatched': tuple(unmatched), 'type_conflicts': conflicts, 'odd_year': odd_year}
     finally:
         db.close()

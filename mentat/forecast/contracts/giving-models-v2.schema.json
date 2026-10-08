@@ -1209,6 +1209,9 @@
         "checks"
       ],
       "additionalProperties": false
+    },
+    "cycle_model": {
+      "$ref": "#/$defs/cycle_model"
     }
   },
   "required": [
@@ -2050,6 +2053,409 @@
       ],
       "additionalProperties": false,
       "description": "Owner ruling 2026-09-30: the anchor of each share model x industry x chamber is auto-picked by backtest; same_phase replaces the default previous_cycle only when it beats it by min_gain in every design."
+    },
+    "cycle_step": {
+      "type": "object",
+      "properties": {
+        "sigma2": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pairs": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "df": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "critical_95": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "sigma2",
+        "pairs",
+        "df",
+        "critical_95"
+      ],
+      "additionalProperties": false,
+      "description": "The anchored-step residual block of one industry: df = pairs - 1, critical_95 = qt(.975, df), sigma2 = the step variance."
+    },
+    "cycle_measure": {
+      "type": "object",
+      "properties": {
+        "candidate": {
+          "type": "string"
+        },
+        "handling_2022": {
+          "enum": [
+            "drop",
+            "none"
+          ]
+        },
+        "phi": {
+          "type": "number"
+        },
+        "phi_se": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "phi_df": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "drift": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "damped_linear_trend"
+            },
+            "b0": {
+              "type": "number"
+            },
+            "b1": {
+              "type": "number"
+            },
+            "k_max": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "damp": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "pair_cycles": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "integer"
+              }
+            },
+            "d": {
+              "type": "object",
+              "properties": {
+                "1": {
+                  "type": "number"
+                },
+                "2": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "1",
+                "2"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "b0",
+            "b1",
+            "k_max",
+            "damp",
+            "pair_cycles",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "step": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/cycle_step"
+          }
+        },
+        "open_cycle_layer": {
+          "enum": [
+            "BLEND",
+            "P1"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "candidate",
+        "handling_2022",
+        "phi",
+        "phi_se",
+        "phi_df",
+        "drift",
+        "step",
+        "open_cycle_layer",
+        "notes"
+      ],
+      "additionalProperties": false,
+      "description": "Phase coefficient (presidential-cycle difference), damped drift d_h = b0 + b1 (k_max + sum_{j<=h} damp^j) and per-industry step variance of one measure."
+    },
+    "cycle_growth": {
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "type": "string"
+        },
+        "edition": {
+          "type": "string"
+        },
+        "price_basis": {
+          "type": "string"
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "annual": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^\\d{4}$"
+          },
+          "additionalProperties": {
+            "type": "number"
+          },
+          "minProperties": 5
+        }
+      },
+      "required": [
+        "report_id",
+        "edition",
+        "price_basis",
+        "annual"
+      ],
+      "additionalProperties": false,
+      "description": "IBISWorld annual REAL (constant-dollar) revenue growth by reference year, 2023..2027, as fractions."
+    },
+    "cycle_pace_cycle": {
+      "type": "object",
+      "properties": {
+        "F": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "O15": {
+          "type": "number"
+        },
+        "O18": {
+          "type": "number"
+        },
+        "O21": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "F",
+        "O15",
+        "O18",
+        "O21"
+      ],
+      "additionalProperties": false,
+      "description": "Dollars of one completed cycle: F the full cycle, O15 / O18 / O21 the amount dated on or before March 31 / June 30 / September 30 of the election year."
+    },
+    "cycle_model": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "rulings": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "window_cycles": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "integer"
+              }
+            },
+            "panel_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "rebuild_reference": {
+              "type": "string"
+            },
+            "lookback_note": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "window_cycles",
+            "panel_sha256",
+            "rebuild_reference",
+            "lookback_note"
+          ],
+          "additionalProperties": false
+        },
+        "inflation": {
+          "type": "object",
+          "properties": {
+            "annual_rate": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 0.2
+            },
+            "base_year": {
+              "const": 2025
+            },
+            "convention": {
+              "const": "cycle_midpoint"
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "annual_rate",
+            "base_year",
+            "convention",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "measures": {
+          "type": "object",
+          "properties": {
+            "pac_to_candidates": {
+              "$ref": "#/$defs/cycle_measure"
+            },
+            "general_giving": {
+              "$ref": "#/$defs/cycle_measure"
+            }
+          },
+          "required": [
+            "pac_to_candidates",
+            "general_giving"
+          ],
+          "additionalProperties": false
+        },
+        "budget_rule": {
+          "type": "object",
+          "properties": {
+            "weight_model": {
+              "type": "number"
+            },
+            "lag_years": {
+              "const": 1
+            },
+            "growth_basis": {
+              "const": "real"
+            },
+            "growth": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/cycle_growth"
+              }
+            }
+          },
+          "required": [
+            "weight_model",
+            "lag_years",
+            "growth_basis",
+            "growth"
+          ],
+          "additionalProperties": false
+        },
+        "g_prior": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "description": "The prior-cycle growth (percent) of the share models for the horizon that has no history row: industry -> cycle -> percent."
+        },
+        "pace": {
+          "type": "object",
+          "properties": {
+            "months": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "series": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "cycles": {
+                    "type": "object",
+                    "minProperties": 3,
+                    "propertyNames": {
+                      "pattern": "^\\d{4}$"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/cycle_pace_cycle"
+                    }
+                  }
+                },
+                "required": [
+                  "source",
+                  "sha256",
+                  "cycles"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "months",
+            "series"
+          ],
+          "additionalProperties": false
+        },
+        "notes": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "rulings",
+        "source",
+        "inflation",
+        "measures",
+        "budget_rule",
+        "g_prior",
+        "pace",
+        "notes"
+      ],
+      "additionalProperties": false,
+      "description": "Cycle-aware 50/50 projection parameters (owner rulings 2026-10-07). Optional: the calculator takes the cycle path only when it is present."
     }
   }
 }

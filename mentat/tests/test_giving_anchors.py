@@ -720,6 +720,60 @@ class ExclusionTests(unittest.TestCase):
             self.assertEqual(snapshot['industries']['commercial_banks']['general_giving']['excluded_non_giving']['2024'], 145.0)
 
 
+class OddYearTests(unittest.TestCase):
+    """The odd-year split of every COMPLETE cycle (cycle model, 2026-10-07): the receipts dated on or before December 31 of the cycle's first year, same population and
+    basis as the cycle totals, for general giving (forecast basis) and for the roster PACs (D-049 aggregation)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.world = World(self.tmp.name)
+        H, S = 'H2AA00001', 'S2BB00002'
+        for yy, extra in (('24', [pas2_line('C00000001', '24K', 700, H, '11152023', 'O1', 100, 1010),            # odd year: House D
+                                  pas2_line('C00000002', '24Z', 300, S, '12312023', 'O2', 100, 1011),            # odd year, the last day: Senate R (in kind)
+                                  pas2_line('C00000001', '24K', 900, H, '01012024', 'O3', 100, 1012)]),          # the first day of the even year: not odd
+                          ('22', [pas2_line('C00000001', '24K', 200, H, '12202021', 'O4', 50, 5010)])):
+            folder = self.world.fec / 'fec_beneficiary' / ('pas2' + yy)
+            path = folder / 'itpas2.txt'
+            path.write_text(path.read_text(encoding='latin-1') + '\n'.join(extra) + '\n', encoding='latin-1')
+            (folder / 'source-receipt.json').write_text(json.dumps({'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'last_modified': 'Sun, 06 Sep 2026 15:55:17 GMT'}))
+        self.snap, _ = self.world.build()
+        self.ind = self.snap['industries']['commercial_banks']
+
+    def test_general_giving_odd_year_is_the_receipts_dated_in_the_first_year_of_each_complete_cycle(self):
+        g = self.ind['general_giving']
+        self.assertEqual(g['odd_year'], {'2022': 0.0, '2024': 1000.0})        # FACTS: sub 1 (2023-05-10) is the only 2023 receipt; the 2022 receipt is dated 2022-06-01
+        self.assertNotIn('2026', g['odd_year'])                                  # the open cycle has no odd-year split
+        for cycle, amount in g['odd_year'].items():
+            self.assertLessEqual(amount, g['cycles'][cycle])
+
+    def test_pac_odd_year_is_the_d049_aggregation_cut_at_december_31_of_the_first_year(self):
+        odd = self.ind['pac_to_candidates']['odd_year']
+        self.assertEqual(odd['2024'], {'House': {'D': 700.0, 'R': 0.0, 'other': 0.0}, 'Senate': {'D': 0.0, 'R': 300.0, 'other': 0.0}, 'to_house_senate': 1000.0})
+        self.assertEqual(odd['2022']['to_house_senate'], 200.0)
+        self.assertEqual(sorted(odd), ['2022', '2024'])
+        year = self.ind['pac_to_candidates']['cycles']['2024']
+        self.assertEqual(year['to_house_senate'], 3200.0 + 700.0 + 300.0 + 900.0)            # the extra rows are in the cycle total; only the dated-odd ones in the odd split
+
+    def test_the_snapshot_validates_and_an_industry_without_a_roster_has_no_pac_odd_year(self):
+        self.assertEqual(contract.validate_kind(self.snap, 'anchors'), [])
+        self.assertEqual(contract.check_anchor_invariants(self.snap), [])
+        pc = self.snap['industries'].get('property_casualty')
+        if pc is not None:
+            self.assertNotIn('odd_year', pc['pac_to_candidates'])
+
+    def test_an_undated_receipt_is_in_the_cycle_total_and_in_no_odd_year_amount(self):
+        agg = ms.index_aggregates(self.world.index, self.world.source_db, 2026, ['2026-06-30'])
+        self.assertEqual(agg['odd_year'], {'2022': 0, '2024': 100000})                          # cents; the open cycle (2026) is not a complete cycle
+        db = sqlite3.connect(self.world.index)
+        db.execute("UPDATE facts SET date = '' WHERE source_id = '1'")
+        db.commit()
+        db.close()
+        agg = ms.index_aggregates(self.world.index, self.world.source_db, 2026, ['2026-06-30'])
+        self.assertEqual(agg['odd_year']['2024'], 0)
+        self.assertEqual(agg['cycles']['2024'], 1504900)                                          # the blank-dated receipt is still in the cycle total
+
+
 class PartsTests(unittest.TestCase):
     def test_an_undated_fec_row_is_in_the_cycle_total_and_in_no_observed_cut(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -805,6 +859,8 @@ class RealMentatTests(unittest.TestCase):
         self.assertEqual(ind['candidate_receipts']['thin_base']['2024'], {'House': True, 'Senate': True})                             # the Senate base was not thin while it held the interest
         self.assertEqual(ind['pac_to_candidates']['cycles']['2024']['to_house_senate'], 80800.0)
         self.assertEqual(ind['pac_to_candidates']['observed'][-1]['to_house_senate'], 54500.0)
+        self.assertEqual(ind['general_giving']['odd_year']['2024'], 123767.83)                                                        # SPEC 2.4: the odd-year (2023) share of the 2024 cycle
+        self.assertEqual(ind['pac_to_candidates']['odd_year']['2024']['to_house_senate'], 15000.0)
 
     @unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL') == 'all', 'banks need the 861 MB join: MENTAT_ANCHORS_REAL=all')
     def test_banks_reproduce_section_f_without_non_giving(self):
@@ -817,6 +873,8 @@ class RealMentatTests(unittest.TestCase):
         self.assertEqual(ind['candidate_receipts']['cycles']['2024']['Senate'], {'D': 751277.47, 'R': 795893.13, 'other': 36101.0})   # none of it reached a House / Senate committee
         self.assertEqual(ind['pac_to_candidates']['cycles']['2024']['to_house_senate'], 5692500.0)
         self.assertEqual(ind['pac_to_candidates']['observed'][-1]['to_house_senate'], 4673000.0)
+        self.assertEqual(ind['general_giving']['odd_year']['2024'], 6408717.29)                                                       # SPEC 2.4
+        self.assertEqual(ind['pac_to_candidates']['odd_year']['2024']['to_house_senate'], 2903000.0)
 
     @unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL') == 'all', 'property & casualty: MENTAT_ANCHORS_REAL=all')
     def test_property_casualty_leaves_out_its_non_giving_receipts(self):
@@ -827,6 +885,7 @@ class RealMentatTests(unittest.TestCase):
         senate = ind['candidate_receipts']['cycles']['2024']['Senate']
         self.assertEqual((senate['D'], senate['R'], senate['other']), (88516.96, 136741.02, 52.0))                                    # D was 159839.94: Progressive's claim payments to Fetterman for PA
         self.assertEqual(ind['candidate_receipts']['excluded_non_giving']['2024']['Senate'], {'D': 71322.98, 'R': 4609.88, 'other': 5197.68})
+        self.assertEqual(ind['general_giving']['odd_year']['2024'], 2238275.03)                                                       # SPEC 2.4
 
 
 if __name__ == '__main__':

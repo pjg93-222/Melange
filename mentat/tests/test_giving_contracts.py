@@ -88,6 +88,65 @@ class ContractTests(unittest.TestCase):
         accepted = self._accepted_controls(lambda doc: [])
         self.assertEqual(len(accepted), len([c for c in contract.negative_controls() if c['target'] == 'models']))
 
+    # --- the optional cycle model (owner rulings 2026-10-07): the cycle example is the models example carrying `cycle_model` and the Pres term in the Senate model --------------
+    def test_the_cycle_example_validates_and_the_plain_example_still_does(self):
+        for kind in ('models', 'models_cycle'):
+            with self.subTest(kind=kind):
+                self.assertEqual(contract.validate_kind(contract.example(kind), 'models'), [])
+                self.assertEqual(contract.validate_model(contract.example(kind)), [])
+        self.assertNotIn('cycle_model', contract.example('models'))                 # a bundle without it is valid: the earlier calculator path (pointer rollback)
+        cm = contract.example('models_cycle')['cycle_model']
+        self.assertEqual(sorted(cm['measures']), ['general_giving', 'pac_to_candidates'])
+        self.assertEqual(cm['budget_rule']['weight_model'], 0.5)
+        self.assertEqual(sorted(cm['budget_rule']['growth']['commercial_banks']['annual']), ['2023', '2024', '2025', '2026', '2027'])
+
+    def test_every_cycle_model_negative_control_fails_validation(self):
+        controls = [c for c in contract.negative_controls() if c['target'] == 'models_cycle']
+        self.assertGreaterEqual(len(controls), 8)
+        self.assertEqual(self._accepted_controls(contract.validate_model, 'models_cycle'), [])
+        # ... and a schema-only validator misses exactly the invariant ones; a permissive validator misses all
+        missed = self._accepted_controls(lambda doc: contract.validate_kind(doc, 'models'), 'models_cycle')
+        self.assertEqual(sorted(missed), sorted(c['id'] for c in controls if c['kind'] == 'invariant'))
+        self.assertEqual(len(self._accepted_controls(lambda doc: [], 'models_cycle')), len(controls))
+
+    def test_the_cycle_model_invariants_are_what_they_claim(self):
+        import copy
+        base = contract.example('models_cycle')
+        self.assertEqual(contract.check_cycle_model(base), [])
+        def problems(edit):
+            doc = copy.deepcopy(base)
+            edit(doc)
+            return contract.check_cycle_model(doc)
+        self.assertTrue(any('drift.d.1' in p for p in problems(lambda d: d['cycle_model']['measures']['pac_to_candidates']['drift']['d'].update({'1': 0.0}))))
+        self.assertTrue(any('df is not pairs - 1' in p for p in problems(lambda d: d['cycle_model']['measures']['general_giving']['step']['credit_unions'].update(df=2))))
+        self.assertTrue(any('no entry for property_casualty' in p for p in problems(lambda d: d['cycle_model']['budget_rule']['growth'].pop('property_casualty'))))
+        self.assertTrue(any('no growth for 2027' in p for p in problems(lambda d: d['cycle_model']['budget_rule']['growth']['credit_unions']['annual'].pop('2027'))))
+        self.assertTrue(any('step: no entry for credit_unions' in p for p in problems(lambda d: d['cycle_model']['measures']['general_giving']['step'].pop('credit_unions'))))
+        self.assertTrue(any('weight_model' in p for p in problems(lambda d: d['cycle_model']['budget_rule'].update(weight_model=0.5000001))))
+        self.assertTrue(any('Pres' in p for p in problems(lambda d: d['share_models']['control_Senate'].update(terms=['Intercept']))))
+        # the optional block is not required by the plain bundle: the Senate rule only applies when a cycle model is present
+        plain = copy.deepcopy(contract.example('models'))
+        self.assertNotIn('Pres', plain['share_models']['control_Senate']['terms'])
+        self.assertEqual(contract.validate_model(plain), [])
+
+    def test_the_anchor_odd_year_block_is_optional_typed_and_bounded_by_the_cycle_total(self):
+        import copy
+        example = contract.example('anchors')
+        self.assertEqual(self._anchor_validator(example), [])
+        self.assertIn('odd_year', example['industries']['commercial_banks']['general_giving'])
+        without = copy.deepcopy(example)
+        for ind in without['industries'].values():
+            ind['general_giving'].pop('odd_year', None)
+            ind['pac_to_candidates'].pop('odd_year', None)
+        self.assertEqual(self._anchor_validator(without), [])                       # a snapshot built before the cycle model stays valid
+        for edit in (lambda i: i['general_giving'].update(odd_year={'FY24': 1.0}), lambda i: i['general_giving'].update(odd_year={'2024': 'x'}),
+                     lambda i: i['general_giving'].update(odd_year=[1.0]), lambda i: i['pac_to_candidates']['odd_year']['2024'].pop('to_house_senate'),
+                     lambda i: i['pac_to_candidates']['odd_year']['2024'].update(extra=1)):
+            self.assertTrue(self._problems(example, edit))
+        self.assertTrue(any('outside 0' in p for p in self._problems(example, lambda i: i['general_giving']['odd_year'].update({'2024': -1.0}))))
+        self.assertTrue(any('odd_year.2024: to_house_senate differs' in p for p in self._problems(
+            example, lambda i: i['pac_to_candidates']['odd_year']['2024'].update(to_house_senate=1.0))))
+
     def test_the_anchor_example_validates_and_is_consistent(self):
         example = contract.example('anchors')
         self.assertEqual(contract.validate_kind(example, 'anchors'), [])
@@ -185,7 +244,7 @@ class ContractTests(unittest.TestCase):
 
     def test_every_anchor_negative_control_fails_validation_or_the_invariants(self):
         self.assertEqual(self._accepted_controls(self._anchor_validator, 'anchors'), [])
-        self.assertEqual(len([c for c in contract.negative_controls() if c['target'] == 'anchors']), 18)
+        self.assertEqual(len([c for c in contract.negative_controls() if c['target'] == 'anchors']), 20)
 
     def test_a_schema_only_validator_misses_the_invariant_controls(self):
         # The invariant controls are schema-valid by design: only the cross-field checks catch them.

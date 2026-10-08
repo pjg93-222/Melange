@@ -46,6 +46,21 @@ test_v2 <- function() memo("v2", { v <- rf_v2_context(test_ctx(), run_id = "unit
                                    v$adequacy <- rf_gate_adequacy(test_ctx()); v })
 test_bundle2 <- function() memo("bundle2", rf_bundle_v2(test_v2()))
 
+# The v2 ESTIMATION sample of a production refit: the frozen sample plus the ready property and casualty pilot. The cycle model (phase fit, steps, IBISWorld paths) needs every industry the
+# console offers, so test-23 and the G6 cycle tests run on it; the frozen-sample context above keeps every earlier assertion of the suite on its own numbers.
+test_ctx_pilot <- function() memo("ctx_pilot", rf_parity_context(test_inputs(), rf_v2_registry(RF_TEST_REG, test_inputs()), RF_TEST_MODELS))
+test_v2_pilot <- function() memo("v2_pilot", { v <- rf_v2_context(test_ctx_pilot(), run_id = "unit", packages = RF_TEST_PKGS, built_at_utc = "2026-10-07T12:00:00Z", b_random = 999L, frozen_ctx = test_ctx())
+                                              v$adequacy <- rf_gate_adequacy(test_ctx_pilot()); v })
+test_bundle2_pilot <- function() memo("bundle2_pilot", rf_bundle_v2(test_v2_pilot()))
+
+# The bundle published before the cycle model (model_version refit-20260930-377f7324-c3f221343515), read from the immutable versions folder of the publish directory; NULL when this tree has none
+# (a mimic tree without mentat/app/data), so the tests that need it skip with a reason.
+RF_PRE_CYCLE_SHA <- "7bc7bcf175f7a3c291cc67300f981d610ef7b52059eefb7cb21e2dc4e020e0bb"
+published_before_cycle <- function() memo("pre_cycle", {
+  f <- file.path(rf_publish_dir(), "versions", RF_PRE_CYCLE_SHA, "giving-models-v2.json")
+  if (file.exists(f) && identical(rf_sha256(f), RF_PRE_CYCLE_SHA)) jsonlite::fromJSON(f, simplifyVector = FALSE) else NA
+})
+
 # A Codex design file (parity reference) by name, read from the vault.
 ref_path <- function(name) rf_input_path(test_inputs(), paste0("parity_ref:", name))
 ref_csv <- function(name) utils::read.csv(ref_path(name), stringsAsFactors = FALSE, check.names = FALSE)

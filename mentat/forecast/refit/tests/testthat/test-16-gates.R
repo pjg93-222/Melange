@@ -59,7 +59,7 @@ test_that("G5 fails a flipped slope and a low sign consistency (negative control
 test_that("G6 is the hard backtest gate: PAC improves for every existing industry, and the previous-cycle House share anchor is worse for banks", {
   v <- test_v2()
   waivers <- rf_read_waivers()
-  g6 <- rf_gate_nondegradation(v, published_v1(), waivers = waivers[waivers$term == "lobby", ])
+  g6 <- rf_gate_nondegradation(v, published_v1(), cycle = FALSE, waivers = waivers[waivers$term == "lobby", ])
   tab <- g6$table
   pac <- tab[tab$term == "pac", ]
   expect_equal(nrow(pac), 3L)
@@ -81,27 +81,32 @@ test_that("G6 is the hard backtest gate: PAC improves for every existing industr
 test_that("G6 waivers: a listed cell is WAIVED (not HOLD), every other cell stays strict, show_warning decides whether the gate speaks", {
   v <- test_v2()
   registered <- rf_read_waivers()
-  expect_setequal(registered$cell, c("lobby / commercial_banks", "control_House / commercial_banks", "control_House / credit_unions", "control_House / auto_light_duty_manufacturing"))
+  expect_setequal(registered$cell, c("lobby / commercial_banks", "control_House / commercial_banks", "control_House / credit_unions", "control_House / auto_light_duty_manufacturing",
+                                     "control_Senate / commercial_banks", "control_Senate / credit_unions", "control_Senate / property_casualty", "control_Senate / auto_light_duty_manufacturing",
+                                     "pac / auto_light_duty_manufacturing"))                                       # 2026-10-07: "2. Keep senate in" (every Senate cell) and "1. Yes" (PAC specification, auto cell)
   expect_true(all(registered$show_warning[registered$term == "control_House"]))
   w0 <- registered[registered$term == "lobby", ]
   expect_identical(w0$cell, "lobby / commercial_banks"); expect_identical(w0$owner, "Paul Goff"); expect_identical(w0$date, "2026-09-30")
   expect_identical(w0$reason, "owner ruling: keep log refit"); expect_false(w0$show_warning)
-  none <- rf_gate_nondegradation(v, published_v1(), waivers = w0[0, ])
+  none <- rf_gate_nondegradation(v, published_v1(), cycle = FALSE, waivers = w0[0, ])
   expect_match(none$gate$detail, "lobby / commercial_banks")                        # without the list both cells hold
   expect_false(any(none$table$waived))
-  one <- rf_gate_nondegradation(v, published_v1(), waivers = w0)
+  one <- rf_gate_nondegradation(v, published_v1(), cycle = FALSE, waivers = w0)
   expect_identical(one$gate$status, "HOLD"); expect_match(one$gate$detail, "control_House / commercial_banks"); expect_false(grepl("lobby / commercial_banks", one$gate$detail))
   expect_true(one$waivers$applied)
-  both <- rbind(w0, transform(w0, cell = "control_House / commercial_banks", term = "control_House", industry = "commercial_banks", reason = "test"))
-  quiet <- rf_gate_nondegradation(v, published_v1(), waivers = both)
-  expect_identical(quiet$gate$status, "PASS"); expect_false(grepl("waived", quiet$gate$detail))       # show_warning false on both: the gate is silent
-  expect_identical(nrow(quiet$waivers), 2L); expect_true(all(quiet$waivers$applied))                   # ...but both are still listed
+  # the refit's Senate model carries the owner-mandated Pres term (section 8, conflict 3), so control_Senate / commercial_banks is a third degradation; the test waives it explicitly
+  # (the registered file does not: it stays a HOLD in the real gate, see the next test)
+  both <- rbind(w0, transform(w0, cell = "control_House / commercial_banks", term = "control_House", industry = "commercial_banks", reason = "test"),
+                transform(w0, cell = "control_Senate / commercial_banks", term = "control_Senate", industry = "commercial_banks", reason = "test"))
+  quiet <- rf_gate_nondegradation(v, published_v1(), cycle = FALSE, waivers = both)
+  expect_identical(quiet$gate$status, "PASS"); expect_false(grepl("waived", quiet$gate$detail))       # show_warning false on all: the gate is silent
+  expect_identical(nrow(quiet$waivers), 3L); expect_true(all(quiet$waivers$applied))                   # ...but all are still listed
   loud <- both; loud$show_warning[2] <- TRUE
-  warned <- rf_gate_nondegradation(v, published_v1(), waivers = loud)
+  warned <- rf_gate_nondegradation(v, published_v1(), cycle = FALSE, waivers = loud)
   expect_identical(warned$gate$status, "WARN"); expect_match(warned$gate$detail, "control_House / commercial_banks (test)", fixed = TRUE); expect_false(grepl("lobby / commercial_banks", warned$gate$detail))
   # a waiver whose cell no longer fails is listed as not applied
   pac <- transform(w0, cell = "pac / commercial_banks", term = "pac", industry = "commercial_banks")
-  un <- rf_gate_nondegradation(v, published_v1(), waivers = pac)
+  un <- rf_gate_nondegradation(v, published_v1(), cycle = FALSE, waivers = pac)
   expect_false(un$waivers$applied); expect_identical(un$gate$status, "HOLD")
 })
 
@@ -116,15 +121,15 @@ test_that("the waiver file is validated: a waiver without its reason, owner or d
 
 test_that("G6 passes when the refit equals the published calculator within 1e-9 and fails a hair above it (boundary controls)", {
   v <- test_v2(); b <- test_bundle2()
-  self <- rf_gate_nondegradation(v, b)                    # a v2 bundle published earlier supplies its recorded MAE
+  self <- rf_gate_nondegradation(v, b, cycle = FALSE)                    # a v2 bundle published earlier supplies its recorded MAE
   expect_identical(self$gate$status, "PASS")
   expect_match(self$baseline, "published bundle")
   pub <- b
   mae <- pub$pac_model$evidence$calculator_path_loeo_mae_by_industry$commercial_banks
   pub$pac_model$evidence$calculator_path_loeo_mae_by_industry$commercial_banks <- mae - 5e-10     # published slightly better, inside the 1e-9 slack
-  expect_identical(rf_gate_nondegradation(v, pub)$gate$status, "PASS")
+  expect_identical(rf_gate_nondegradation(v, pub, cycle = FALSE)$gate$status, "PASS")
   pub$pac_model$evidence$calculator_path_loeo_mae_by_industry$commercial_banks <- mae - 2e-9      # published better by more than the slack
-  expect_identical(rf_gate_nondegradation(v, pub)$gate$status, "HOLD")
+  expect_identical(rf_gate_nondegradation(v, pub, cycle = FALSE)$gate$status, "HOLD")
 })
 
 test_that("G7 validates the bundle against the contract and fails a bad one", {
@@ -212,7 +217,7 @@ test_that("G9 is a warning only: a calculator path that does not beat last-perio
   expect_true(g9$status %in% c("PASS", "WARN"))
   expect_false(g9$status %in% c("HOLD", "FAIL"))
   lose <- test_v2(); lose$backtests$MAE[lose$backtests$term == "pac" & lose$backtests$rule == "naive_prev"] <- 1
-  g <- rf_gate_naive(lose)
+  g <- rf_gate_naive(lose, cycle = FALSE)
   expect_identical(g$status, "WARN"); expect_match(g$detail, "pac")
 })
 
@@ -223,13 +228,16 @@ test_that("decision: any FAIL is FAIL, else any HOLD is HOLD, else PUBLISH; WARN
   expect_identical(rf_decision(mk("HOLD", "FAIL", "PASS")), "FAIL")
 })
 
-test_that("all gates of today's refit: HOLD because G8 is deliberately absent; owner-waived G6 degradations remain visible as WARN; nothing FAILs", {
+test_that("all gates of today's refit: HOLD because G8 is deliberately absent; owner-waived G6 degradations (House, Senate Pres) remain visible as WARN; nothing FAILs", {
   v <- test_v2(); b <- test_bundle2()
   base <- data.frame(gate = c("G0 environment", "G1 inputs", "G2 parity", "G3 panel validity"), status = "PASS", detail = "", stringsAsFactors = FALSE)
   g <- rf_gates(v, b, published = published_v1(), base = base, bundle_path = NULL, consumer_cmd = "")
   expect_identical(g$decision, "HOLD")
   st <- stats::setNames(g$gates$status, substr(g$gates$gate, 1, 2))
-  expect_identical(st[["G4"]], "WARN"); expect_identical(st[["G5"]], "PASS"); expect_identical(st[["G6"]], "WARN")
+  expect_identical(st[["G4"]], "WARN"); expect_identical(st[["G5"]], "PASS")
+  expect_identical(st[["G6"]], "WARN")                                                                    # the Senate Pres term and the House shares degrade, every failing cell is an owner waiver (2026-09-30, 2026-10-07)
+  expect_match(g$gates$detail[grepl("^G6", g$gates$gate)], "waived by the owner")
+  expect_match(g$gates$detail[grepl("^G6", g$gates$gate)], "control_Senate / commercial_banks")
   expect_identical(st[["G7"]], "PASS"); expect_identical(st[["G8"]], "HOLD")
   expect_false(any(g$gates$status == "FAIL"))
   # the finalized bundle carries its own gate summary and still validates against the contract
@@ -246,4 +254,75 @@ test_that("the default G8 command is MENTAT_G8_CMD when set, else the smoke scri
   app <- file.path(dirname(dirname(rf_home())), "app", "giving_forecast.py")
   if (file.exists(app) && nzchar(Sys.which("python"))) expect_match(rf_g8_default_cmd(), "g8_consumer_smoke.py", fixed = TRUE)
   else expect_identical(rf_g8_default_cmd(), "")        # a pod snapshot carries mentat/forecast only: G8 holds there, with the reason stated
+})
+
+# ---- G6 / G9 under the cycle model (owner rulings 2026-10-07), on the v2 estimation sample that includes the property and casualty pilot, against the bundle published before the model -------------------
+
+OWNER_SENATE <- paste("control_Senate", c("commercial_banks", "credit_unions", "property_casualty", "auto_light_duty_manufacturing"))
+OWNER_PAC <- "pac auto_light_duty_manufacturing"
+
+test_that("G6 under the cycle model: the PAC cell scores the selected candidate, general giving joins, and the owner's two rulings make the gate a WARN", {
+  pub <- published_before_cycle()
+  if (!is.list(pub)) skip("this tree's publish directory holds no bundle published before the cycle model (versions/7bc7bcf1...)")
+  v <- test_v2_pilot()
+  all_w <- rf_read_waivers()
+  g6 <- rf_gate_nondegradation(v, pub, waivers = all_w)
+  tab <- g6$table
+  expect_identical(g6$gate$status, "WARN")
+  expect_match(g6$baseline, "cycle model: PAC = PT-noG-damp-pool@x22, general giving = PT-noG-damp-pool", fixed = TRUE)
+  expect_setequal(tab$industry[tab$term == "general"], c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing", "property_casualty"))
+  expect_true(all(tab$ok[tab$term == "general"]))                                          # REPORT table 3b: the general-giving cell passes in every industry
+  expect_true(all(tab$ok[tab$term == "pac" & tab$industry != "auto_light_duty_manufacturing"]))
+  failing <- tab[!tab$ok, ]
+  expect_setequal(paste(failing$term, failing$industry), c(OWNER_PAC, OWNER_SENATE))       # every failing cell is one of the two rulings; nothing else fails
+  expect_true(all(failing$waived))
+  a <- failing[failing$term == "pac", ]
+  expect_equal(a$new_MAE, 18.69, tolerance = 1e-3); expect_equal(a$published_MAE, 14.99, tolerance = 1e-3)          # REPORT table 3a: PT-noG-damp-pool@x22 vs PUB-R1, auto
+  s <- failing[failing$term == "control_Senate" & failing$industry == "commercial_banks", ]
+  expect_equal(s$new_MAE, 8.007, tolerance = 1e-3); expect_equal(s$published_MAE, 5.294, tolerance = 1e-3)          # REPORT table 3c: Senate with Pres vs the published Senate model
+  # the waiver file records the measured values of this very table
+  measured <- Filter(function(w) !is.null(w$measured) && (w$term == "pac" || w$term == "control_Senate"), rf_read_json(file.path(rf_home(), "registry", "gate_waivers.json"))$waivers)
+  expect_length(measured, 5L)
+  for (w in measured) {
+    r <- tab[tab$term == w$term & tab$industry == w$industry, ]
+    expect_equal(w$measured$comparator_value, r$published_MAE, tolerance = 1e-9, info = w$cell)
+    expect_equal(w$measured$model_value_at_ruling, r$new_MAE, tolerance = 1e-9, info = w$cell)
+    expect_match(w$reason, if (w$term == "pac") "\"1. Yes\"" else "\"2. Keep senate in\"", info = w$cell)
+    expect_identical(w$owner, "Paul Goff"); expect_identical(w$date, "2026-10-07")
+  }
+  expect_true(all(g6$waivers$applied[g6$waivers$cell %in% paste(sub(" ", " / ", c(OWNER_PAC, OWNER_SENATE)))]))
+})
+
+test_that("G6 under the cycle model HOLDs without the owner's rulings, and any other failing cell stays strict", {
+  pub <- published_before_cycle()
+  if (!is.list(pub)) skip("this tree's publish directory holds no bundle published before the cycle model (versions/7bc7bcf1...)")
+  v <- test_v2_pilot()
+  all_w <- rf_read_waivers()
+  none <- rf_gate_nondegradation(v, pub, waivers = all_w[!(all_w$term %in% c("pac", "control_Senate")), ])
+  expect_identical(none$gate$status, "HOLD")
+  expect_match(none$gate$detail, "pac / auto_light_duty_manufacturing"); expect_match(none$gate$detail, "control_Senate / commercial_banks")
+  no_pac <- rf_gate_nondegradation(v, pub, waivers = all_w[all_w$term != "pac", ])
+  holds <- function(g) sub("; also waived: .*$", "", g$gate$detail)                          # the cells that HOLD; waived cells are listed after "also waived:"
+  expect_identical(no_pac$gate$status, "HOLD"); expect_match(holds(no_pac), "pac / auto_light_duty_manufacturing"); expect_false(grepl("control_Senate", holds(no_pac)))
+  expect_match(no_pac$gate$detail, "also waived: control_Senate / commercial_banks")
+  no_sen <- rf_gate_nondegradation(v, pub, waivers = all_w[all_w$term != "control_Senate" | all_w$industry != "credit_unions", ])
+  expect_identical(no_sen$gate$status, "HOLD"); expect_match(holds(no_sen), "control_Senate / credit_unions"); expect_false(grepl("control_Senate / commercial_banks", holds(no_sen)))
+  # a published PAC error 1e-3 below the candidate's error in a cell without a waiver is a HOLD (the waiver list is cell-exact, not blanket)
+  tight <- pub
+  tight$pac_model$evidence$calculator_path_loeo_mae_by_industry$commercial_banks <- v$phase$pac$consistency$selection$industry$MAE[
+    v$phase$pac$consistency$selection$industry$sector == "commercial_banks" & v$phase$pac$consistency$selection$industry$candidate == v$phase$pac$consistency$selection$choice &
+      v$phase$pac$consistency$selection$industry$design == "loeo"] - 1e-3
+  hit <- rf_gate_nondegradation(v, tight, waivers = all_w)
+  expect_identical(hit$gate$status, "HOLD"); expect_match(hit$gate$detail, "pac / commercial_banks")
+})
+
+test_that("G9 under the cycle model scores the selected PAC and general-giving candidates against last-cycle naive (REPORT 3a, 3b) and stays a warning", {
+  v <- test_v2_pilot()
+  g9 <- rf_gate_naive(v)
+  expect_identical(g9$status, "WARN")                                                      # the House chronological loss (REPORT 3c) keeps G9 at WARN
+  expect_match(g9$detail, "control_House/chrono")
+  expect_false(grepl("pac/", g9$detail, fixed = TRUE)); expect_false(grepl("general_giving", g9$detail, fixed = TRUE))   # the new paths beat naive in both designs
+  bad <- v
+  bad$phase$pac$pred$err[bad$phase$pac$pred$candidate == "naive_prev"] <- 0.001                 # a naive that cannot be beaten
+  expect_match(rf_gate_naive(bad)$detail, "pac/loeo")
 })

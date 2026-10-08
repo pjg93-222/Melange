@@ -6,7 +6,7 @@
 #   Rscript run_refit.R --rollback <model_version>                                         make an earlier published (or the kept v1) bundle active again
 # Exit status: 0 = parity green / PUBLISH / HOLD / WAITING_FOR_DATA (clean outcomes), 1 = FAIL or an error, 2 = unknown mode.
 # Environment: RF_RUNTIME, RF_RLIB, RF_INPUT_ROOT / RF_ROOT_<ALIAS>, RF_GLASSBOX_DIR, REFIT_OUT, REFIT_CORES, RF_PUBLISH_DIR, RF_REPORT_DIR,
-# MENTAT_G8_CMD (see R/rf_config.R, R/rf_publish.R, R/rf_agent.R). Nothing here commits to git.
+# MENTAT_G8_CMD, RF_CYCLE_MODEL (1 = cycle-aware 50/50 model, default; 0 = the bundle as published before it) (see R/rf_config.R, R/rf_publish.R, R/rf_agent.R). Nothing here commits to git.
 fa <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
 here <- if (length(fa)) dirname(normalizePath(sub("^--file=", "", fa[1]), winslash = "/")) else getwd()
 assign(".RF_HOME", here, envir = globalenv())

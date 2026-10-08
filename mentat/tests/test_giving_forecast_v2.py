@@ -1074,8 +1074,18 @@ class WaiverTests(unittest.TestCase):
         self.assertEqual(path, gf.WAIVER_FILE)
         stat = path.stat()
         entries = {w['cell']: w for w in gf._load_waivers(str(path), stat.st_mtime_ns, stat.st_size)}
-        self.assertEqual(sorted(entries), ['control_House / auto_light_duty_manufacturing', 'control_House / commercial_banks', 'control_House / credit_unions', 'lobby / commercial_banks'])
+        self.assertEqual(sorted(entries), ['control_House / auto_light_duty_manufacturing', 'control_House / commercial_banks', 'control_House / credit_unions',
+                                           'control_Senate / auto_light_duty_manufacturing', 'control_Senate / commercial_banks', 'control_Senate / credit_unions',
+                                           'control_Senate / property_casualty', 'lobby / commercial_banks', 'pac / auto_light_duty_manufacturing'])
         self.assertIs(entries['lobby / commercial_banks']['show_warning'], False)
+        # 2026-10-07 (owner: "2. Keep senate in", "1. Yes"): the Senate share model keeps the presidential-cycle term, the PAC model is the 10-01 rebuild's phase specification;
+        # the Senate waivers of banks, credit unions and P&C are shown, the auto cells (not offered on the card) are quiet
+        for cell, shown in (('control_Senate / commercial_banks', True), ('control_Senate / credit_unions', True), ('control_Senate / property_casualty', True),
+                            ('control_Senate / auto_light_duty_manufacturing', False), ('pac / auto_light_duty_manufacturing', False)):
+            with self.subTest(cell=cell):
+                self.assertEqual((entries[cell]['gate'], entries[cell]['owner'], entries[cell]['date'], entries[cell]['show_warning']), ('G6', 'Paul Goff', '2026-10-07', shown))
+        self.assertIn('2. Keep senate in', entries['control_Senate / commercial_banks']['reason'])
+        self.assertIn('1. Yes', entries['pac / auto_light_duty_manufacturing']['reason'])
         # forecast/BUILD_NOTES.md: House-share LOEO MAE 1.053 to 1.550 (banks), 1.522 to 1.836 (credit unions), 1.338 to 1.766 (auto)
         figures = {'control_House / commercial_banks': (1.053, 1.550), 'control_House / credit_unions': (1.522, 1.836), 'control_House / auto_light_duty_manufacturing': (1.338, 1.766)}
         for cell, (before, after) in figures.items():

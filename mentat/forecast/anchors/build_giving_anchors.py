@@ -162,7 +162,8 @@ def general_and_candidates(side, threshold):
         'by_funding_source': {cy: {k: dollars(v) for k, v in sorted(src.items())} for cy, src in sorted(agg['by_source'].items())},
         'observed': [{'through': cut, 'amount': dollars(v)} for cut, v in agg['general_cuts']],
         'excluded_funding_sources': left_out,
-        'excluded_non_giving': {cy: dollars(v) for cy, v in sorted(agg['excluded'].items())}}
+        'excluded_non_giving': {cy: dollars(v) for cy, v in sorted(agg['excluded'].items())},
+        'odd_year': {cy: dollars(v) for cy, v in sorted(agg['odd_year'].items())}}
     cycles = {cy: _chambers(blocks) for cy, blocks in sorted(agg['candidates'].items())}
     candidates = {
         'status': 'ready', 'reason': None,
@@ -238,7 +239,9 @@ def build_pac(group, root, open_cycle, sides, threshold):
         if f['family'] != 'pas2':
             continue
         cycle = int(f['role'].split(':')[1])
-        results[cycle] = fec_pas2.aggregate_file(f['path'], f['yy'], parties, membership, cuts if cycle == open_cycle else None)
+        # A complete cycle also gets the one cut at December 31 of its first year (the odd-year split of the cycle model).
+        results[cycle] = fec_pas2.aggregate_file(f['path'], f['yy'], parties, membership,
+                                                 cuts if cycle == open_cycle else {spec['id']: [f'{cycle - 1}-12-31'] for spec in group})
     for spec in group:
         ident = spec['id']
         by_cycle, through, observed = {}, {}, []
@@ -252,6 +255,12 @@ def build_pac(group, root, open_cycle, sides, threshold):
             cut_block = block['cuts'][cut] if block else fec_pas2.blank_block()
             d = fec_pas2.dollars(cut_block)
             observed.append({'through': cut, 'House': d['House'], 'Senate': d['Senate'], 'to_house_senate': d['to_house_senate']})
+        odd_year = {}
+        for cycle in cycles:
+            if cycle < open_cycle:
+                block_c = results[cycle].get(ident)
+                d = fec_pas2.dollars(block_c['cuts'][f'{cycle - 1}-12-31'] if block_c else fec_pas2.blank_block())
+                odd_year[str(cycle)] = {'House': d['House'], 'Senate': d['Senate'], 'to_house_senate': d['to_house_senate']}
         roster = spec['pac_roster']
         missing = sorted(c['id'] for c in roster if c['id'] not in in_master)
         out[ident] = {
@@ -260,7 +269,7 @@ def build_pac(group, root, open_cycle, sides, threshold):
             'committees': [dict(c) for c in roster],
             'inputs': [{'role': f['role'], 'file': f['file'], 'sha256': f['sha256'], 'fec_last_modified': f['fec_last_modified']} for f in inputs],
             'cycles': by_cycle, 'file_through': through, 'observed': observed,
-            'thin_base': _thin({cy: row for cy, row in by_cycle.items()}, threshold)}
+            'thin_base': _thin({cy: row for cy, row in by_cycle.items()}, threshold), 'odd_year': odd_year}
         found = []
         if missing:
             found.append('Roster committee(s) absent from the FEC committee masters: ' + ', '.join(missing))

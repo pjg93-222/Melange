@@ -146,3 +146,25 @@ and `giving-models-current.json` for the active immutable version and SHA256. Th
 Python consumer and Chromium were exercised using real aggregate anchors and measured
 current workbook hashes. Missing or stale anchors refuse projection. Local console restart
 and Windows scheduled-task registration remain dormant under the owner's pod-only instruction.
+
+## Phase 6 (candidate, scratch): phase, trajectory, inflation, the consistency rule, BLEND, the party-share layer
+
+Owner rulings of 2026-10-01 (brain D-078 / D-079): every projected quantity except lobbying accounts for the midterm / presidential disparity, the trajectory from past cycles and inflation; the open-cycle roster PAC projection is BLEND. **Nothing here is published and nothing here is wired into the v1 parity output.**
+
+* `R/rf_phase.R`: first-difference candidates for the PAC and general-giving level models (`PA` same-phase anchor, `PB` previous-cycle anchor + `phi` x change in the presidential flag, `PBL`, `PT-<G|noG>-<full|rec3|damp>-<pool|ind>` = phase + drift (trajectory), `PBLT`), the 2022 shock handlings (none / drop / indicator), 95% intervals (published anchored-step construction), the Senate share model with the Pres term (`rf_phase_ctx`), parameters, chains and projections (`rf_ph_chain`, with the growth-projection error variance), the inflation convention (`rf_ph_cycle_factor`), the phase block and its bundle evidence (`rf_phase_block`, `rf_v2_phase_evidence`).
+* `R/rf_consistency.R`: the coordinator's consistency rule. A candidate replaces the published rule only if (a) pooled MAE >= 5% lower in both designs, (b) every industry within +2% of the published MAE in both designs, (c) 95% coverage >= 90% in both designs; the owner-mandated components stay in, so a failing family is a CONFLICT carried with both versions.
+* `R/rf_blend.R`: BLEND (precision-weighted log-scale average of the model prior and the pace projection, truncated at the giving observed) on the pace test's frozen roster series, and the same construction on the roster PACs' party share (logit scale). Reproduces the pace test's python implementation to 1e-12.
+* Tests: `test-20-phase.R`, `test-21-consistency.R`, `test-22-blend.R` (helper `helper-synth.R`).
+* Drivers and outputs: `work/scripts/`, `work/out/`; the report is `REPORT.md`.
+
+## Phase 7: the cycle-aware 50/50 model (owner rulings of 2026-10-07)
+
+Paul, 2026-10-07: "1. Yes 2. Keep senate in 3. We use the 50/50 4. Yes; Use the IBIS defaults, auto-recalculate". The phase, trajectory, inflation and BLEND code of phase 6 is now ported from the scratch rebuild and wired into the bundle.
+
+* `R/rf_bundle2.R` `rf_v2_cycle_model()` writes the optional top-level `cycle_model` (contracts/giving-models-v2.schema.json): per measure (roster PAC `PT-noG-damp-pool@x22`, general giving `PT-noG-damp-pool`) the phase coefficient with its standard error and df, the damped drift `d_h = b0 + b1 (k_max + sum 0.8^j)`, the anchored-step variance per offered industry; the REAL IBISWorld growth paths 2023-2027 of the 50/50 budget rule (banks 52211 and credit unions 52213 from the 2026 captured levels, property and casualty 52412 from the 2024-11 edition's own reported change), the prior-cycle growth of the share models for 2028, and the roster pace series of BLEND. It STOPS if the consistency rule picks anything but the two adopted specifications, and the bundle gets no `cycle_model` (the refit run refuses that outcome) when the context lacks an offered industry (the frozen v1 sample has no property and casualty pilot).
+* `RF_CYCLE_MODEL=1` (default) builds all of it and gives the Senate share model the presidential-cycle term; `RF_CYCLE_MODEL=0` reproduces the bundle published before it (tested against `versions/7bc7bcf1...` in test-23).
+* Inputs: `inputs/cycle_model/*.csv`, pinned in `registry/inputs.json` (roles `cycle:*`, alias `{CYCLE}`, override `RF_ROOT_CYCLE`).
+* `R/rf_schema.R` mirrors `contracts/contract.py::check_cycle_model`; `tools/check_bundle_contract.py` also applies the `models_cycle` negative controls when a bundle carries a `cycle_model`.
+* G6 with a `cycle_model`: the `pac` cell scores the selected candidate's leave-one-election-out MAE against the published rule on common rows, and a `general` cell (general giving, against PUBPAC-R1) joins; G9 scores the same two candidates against last-cycle naive. `registry/gate_waivers.json` carries the owner's two rulings as cell waivers ("2. Keep senate in": every `control_Senate` cell; "1. Yes": `pac / auto_light_duty_manufacturing`).
+* Tests: `test-23-cycle-model.R` (oracles: the build spec's independent re-fit), the cycle cases of `test-16-gates.R`.
+* Final run (staging): `run_final_refit.ps1` at the staging root = `Rscript mentat/forecast/refit/run_refit.R --mode refit --publish auto --no-tests` with `RF_CYCLE_MODEL=1` (`-PublishDir <copy of mentat/app/data>` makes a trial run that cannot touch the staged pointer); `run_staged_suite.ps1` runs the whole testthat suite on the staged code. A HOLD publishes nothing.

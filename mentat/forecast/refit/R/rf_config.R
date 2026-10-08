@@ -12,7 +12,8 @@
 #   RF_INPUT_ROOT    one folder that mirrors every pinned raw-input root (for another machine, e.g. a compute pod):
 #                    <root>/LOO, <root>/CHE, <root>/SGSD, <root>/SGSA, <root>/RLIBX and
 #                    <root>/House_Senate_Control_Forecasts_CSV.zip. The manifest hashes still pin every file.
-#   RF_ROOT_<ALIAS>  one of LOO, CHE, SGSD, SGSA, ZIPC, RLIBX, BUNDLE_V1; overrides RF_INPUT_ROOT and the local defaults
+#   RF_ROOT_<ALIAS>  one of LOO, CHE, SGSD, SGSA, ZIPC, RLIBX, INGEST, RFDATA, BUNDLE_V1, CYCLE; overrides RF_INPUT_ROOT and the local defaults
+#   RF_CYCLE_MODEL   1 (default) = cycle-aware 50/50 model (phase, trajectory, inflation, BLEND, Senate Pres term); 0 = the bundle as published before it
 #
 # The pipeline reads inputs read-only, writes only under the runtime folder, and never touches the network.
 
@@ -26,7 +27,7 @@ rf_env_path <- function(name, default) {
 # The module load order (rf_config.R and rf_rng.R first; the rest only call each other at run time).
 RF_MODULES <- c("rf_config.R", "rf_rng.R", "rf_io.R", "rf_parallel.R", "rf_glassbox.R", "rf_packages.R", "rf_registry.R", "rf_inputs.R",
                 "rf_growth.R", "rf_opensecrets.R", "rf_political.R", "rf_lobbying.R", "rf_panels.R", "rf_fit.R",
-                "rf_stepwise.R", "rf_robust.R", "rf_pool.R", "rf_intervals.R", "rf_backtest.R", "rf_select.R", "rf_v2model.R",
+                "rf_stepwise.R", "rf_robust.R", "rf_pool.R", "rf_intervals.R", "rf_backtest.R", "rf_select.R", "rf_phase.R", "rf_consistency.R", "rf_blend.R", "rf_v2model.R",
                 "rf_report.R", "rf_bundle.R", "rf_bundle2.R", "rf_schema.R", "rf_gates.R", "rf_publish.R", "rf_agent.R", "rf_run.R", "rf_parity.R")
 
 rf_source_all <- function(home = rf_home()) {
@@ -85,9 +86,14 @@ rf_roots <- function() {
               RLIBX = file.path(umbrella, "RLIBX"), INGEST = file.path(umbrella, "INGEST"), RFDATA = file.path(umbrella, "RFDATA"))
   }
   d$BUNDLE_V1 <- file.path(dirname(dirname(rf_home())), "app", "data", "giving-models-v1.json")
+  d$CYCLE <- file.path(rf_home(), "inputs", "cycle_model")          # the pinned IBISWorld paths and roster pace series of the cycle model travel with the code (also under RF_INPUT_ROOT)
   for (k in names(d)) d[[k]] <- rf_env_path(paste0("RF_ROOT_", k), d[[k]])
   d
 }
+
+# The cycle-aware 50/50 model (owner rulings 2026-10-07): RF_CYCLE_MODEL=1 (default) builds the phase / trajectory / inflation model, writes the bundle's `cycle_model`
+# and gives the Senate share model the presidential-cycle term; RF_CYCLE_MODEL=0 reproduces the bundle published before it (parity switch).
+rf_cycle_model_on <- function() !identical(trimws(Sys.getenv("RF_CYCLE_MODEL", unset = "1")), "0")
 
 # "{LOO}/outputs/x.csv" -> the real path; a path with no alias is returned unchanged.
 rf_expand <- function(path, roots = rf_roots()) {

@@ -12,7 +12,9 @@
 RF_FULL_RHS <- "sector + RMajNow + G_prior + G_current + Pres"   # the bundle *_industry base (mask 15, "Original full model")
 
 # The backtest specs of tailoring.R, built from the rebuilt panels. Keys: "pac", "lobby" and "<id>.<base>" for the share models.
-rf_backtest_specs <- function(ctx) {
+# phase = TRUE: the v2 specs (owner ruling 2026-10-01: the Senate share model carries the presidential-cycle term like the House model). The v1 parity layer
+# and the G6 baseline of the published v1 calculator use phase = FALSE (the frozen selections).
+rf_backtest_specs <- function(ctx, phase = FALSE) {
   lob <- ctx$lobby$diffs
   lob$sector <- factor(lob$study_sector)
   lob$cycle_end <- lob$year
@@ -25,7 +27,7 @@ rf_backtest_specs <- function(ctx) {
     control_House.full = mk("control_House", "full", "share", sh("control_House"), "RShare", "P_R", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
     control_House.selected = mk("control_House", "selected", "share", sh("control_House"), "RShare", "P_R", "sector + RMajNow + G_prior + Pres", TRUE, 100, "share pp", "prevchg"),
     control_Senate.full = mk("control_Senate", "full", "share", sh("control_Senate"), "RShare", "P_R", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
-    control_Senate.selected = mk("control_Senate", "selected", "share", sh("control_Senate"), "RShare", "P_R", "sector + RMajNow + G_prior", TRUE, 100, "share pp", "prevchg"),
+    control_Senate.selected = mk("control_Senate", "selected", "share", sh("control_Senate"), "RShare", "P_R", if (phase) "sector + RMajNow + G_prior + Pres" else "sector + RMajNow + G_prior", TRUE, 100, "share pp", "prevchg"),
     seats_House.full = mk("seats_House", "full", "share", sh("seats_House"), "RShare", "pred_rep_net_change", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
     seats_Senate.full = mk("seats_Senate", "full", "share", sh("seats_Senate"), "RShare", "pred_rep_net_change", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
     pac = mk("pac", "bundle", "pac", pac, "log_pac", "G_current", "sector + factor(cycle_end)", TRUE, 100, "log points x100", "prevchg"),

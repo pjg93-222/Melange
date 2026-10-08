@@ -8,6 +8,7 @@
 #   G6 non-degradation   HARD backtest gate: no existing industry's calculator-path leave-one-election-out MAE may exceed the published
 #                        bundle's on the common folds (new <= published + 1e-9), each share industry under the anchor the auto-pick chose.
 #                        A cell on the owner waiver list (registry/gate_waivers.json) is WAIVED, not HOLD; every other cell stays strict.  HOLD
+#                        With a cycle_model the `pac` cell scores the selected phase / trajectory candidate and a `general` cell (general giving) joins.
 #   G7 bundle            schema-valid, every number finite, every calculator industry has a capability or a stated reason per model. FAIL
 #   G8 consumer smoke    the v2-capable Python calculator loads the staged bundle (MENTAT_G8_CMD); HOLD until it exists.
 #   G9 vs naive          a calculator path that does not beat last-cycle naive is a WARNING only.
@@ -21,12 +22,14 @@ RF_G6_SLACK <- 1e-9
 
 # -> list(table = data.frame(industry, model, n, need, pooled_df, interaction_df, ok), withheld = list(industry = list(list(model, reason))), gate)
 rf_gate_adequacy <- function(ctx, reg = ctx$reg, min_n = 5L, min_pooled_df = 3L, min_interaction_df = 2L) {
+  cyc <- rf_cycle_model_on()
+  if (cyc) ctx <- rf_phase_ctx(ctx)
   rows <- list()
   counts <- list(pac = table(ctx$pac_panel$sector), control = table(ctx$share$control_House$sector), lobbying = NULL)
   lobc <- table(ctx$lobby$diffs$study_sector)
   pooled_df <- c(pac = stats::df.residual(ctx$fits$pac), control = min(stats::df.residual(ctx$fits$control_House), stats::df.residual(ctx$fits$control_Senate)), lobbying = stats::df.residual(ctx$fits$lobby))
   inter_df <- c(pac = NA_integer_, control = NA_integer_, lobbying = NA_integer_)
-  specs <- rf_backtest_specs(ctx)
+  specs <- rf_backtest_specs(ctx, phase = cyc)
   inter_df["pac"] <- rf_partial_pool(specs$pac, specs$pac$d)$df_interaction
   inter_df["control"] <- min(rf_partial_pool(specs$control_House.selected, specs$control_House.selected$d)$df_interaction, rf_partial_pool(specs$control_Senate.selected, specs$control_Senate.selected$d)$df_interaction)
   inter_df["lobbying"] <- rf_partial_pool(specs$lobby, specs$lobby$d)$df_interaction
@@ -136,7 +139,10 @@ rf_read_waivers <- function(path = file.path(rf_home(), "registry", "gate_waiver
 # -> list(table = data.frame(term, industry, new_MAE, published_MAE, ok, waived), waivers = the listed waivers with whether each applied, gate)
 #    A failing cell listed in `waivers` is WAIVED (waived = TRUE, ok stays FALSE); the gate is HOLD while any other cell fails, WARN when every failing cell
 #    is waived and at least one waiver has show_warning, else PASS.
-rf_gate_nondegradation <- function(v, published = NULL, existing = NULL, slack = RF_G6_SLACK, waivers = rf_read_waivers()) {
+#    cycle = TRUE (a bundle with a cycle_model; default when the context holds the phase block): the PAC projection is the consistency rule's selected phase / trajectory candidate, so the `pac` cell's
+#    new MAE is that candidate's leave-one-election-out MAE on the rows it shares with the published rule PUB-R1 (REPORT table 3a), and a `general` cell joins: the selected general-giving candidate
+#    against the published form PUBPAC-R1 on their common rows (table 3b). The published PAC baseline stays the published calculator's recorded MAE (= PUB-R1).
+rf_gate_nondegradation <- function(v, published = NULL, existing = NULL, slack = RF_G6_SLACK, waivers = rf_read_waivers(), cycle = !is.null(v$phase)) {
   ctx <- v$ctx
   base <- rf_published_baseline(v, published)
   bt <- v$backtests
@@ -145,6 +151,15 @@ rf_gate_nondegradation <- function(v, published = NULL, existing = NULL, slack =
   new <- list(pac = .rf_cell_mae(bt, "pac", "bundle", "loeo", "prevchg", rule[["pac"]]),
               control_House = chosen("control_House"), control_Senate = chosen("control_Senate"),
               lobby = .rf_cell_mae(bt, "lobby", "log", "rolling", "calc", "R0"))
+  if (cycle) {
+    if (is.null(v$phase)) stop("rf_gate_nondegradation: cycle = TRUE needs the phase block of the context", call. = FALSE)
+    loeo <- function(nm) { s <- v$phase[[nm]]$consistency$selection; t <- s$industry; t[t$candidate == s$choice & t$design == "loeo", , drop = FALSE] }
+    p <- loeo("pac"); g <- loeo("general")
+    new$pac <- stats::setNames(p$MAE, p$sector)
+    new$general <- stats::setNames(g$MAE, g$sector); base$general <- stats::setNames(g$MAE_base, g$sector)
+    base$source <- sprintf("%s; cycle model: PAC = %s, general giving = %s against %s on common rows", base$source, v$phase$pac$consistency$selection$choice,
+                           v$phase$general$consistency$selection$choice, v$phase$general$consistency$baseline)
+  }
   existing <- existing %||% (if (!is.null(published)) names(published$industries) else names(ctx$reg$industries)[vapply(ctx$reg$industries, function(i) i$status == "fitted", logical(1))])
   study <- stats::setNames(vapply(ctx$reg$industries, function(i) i$lobbyview$study_sector %||% NA_character_, ""), names(ctx$reg$industries))
   rows <- list()
@@ -246,18 +261,28 @@ rf_gate_consumer <- function(bundle_path, cmd = rf_g8_default_cmd()) {
 
 # Both designs of the rulings of 2026-09-30 (leave-one-election-out AND chronological): a path that loses to last-period naive in either one
 # is reported. Warning only, as before; the chronological design is the one that matches how the calculator is used (data up to the anchor).
-rf_gate_naive <- function(v, designs = c("loeo", "chrono")) {
+# With a cycle_model (cycle = TRUE) the PAC path is the selected phase / trajectory candidate and general giving is a calculator path too: each is compared with last-cycle naive on the rows it
+# shares with the published rule (REPORT tables 3a, 3b) instead of the retired PUB-R1 prevchg cell.
+rf_gate_naive <- function(v, designs = c("loeo", "chrono"), cycle = !is.null(v$phase)) {
   bt <- v$backtests
   rule <- c(pac = v$selection$pac$reported_rule, control_House = v$selection$control_House$reported_rule, control_Senate = v$selection$control_Senate$reported_rule)
   path_of <- function(id) if (!is.null(v$anchors) && all(vapply(v$anchors$entries[[id]], function(e) identical(e$anchor, "same_phase"), logical(1)))) "calc" else "prevchg"
   cells <- list()
   for (ds in designs) {
-    cells[[paste0("pac/", ds)]] <- c("pac", "bundle", ds, "prevchg", rule[["pac"]])
+    if (!cycle) cells[[paste0("pac/", ds)]] <- c("pac", "bundle", ds, "prevchg", rule[["pac"]])
     cells[[paste0("control_House/", ds)]] <- c("control_House", "selected", ds, path_of("control_House"), rule[["control_House"]])
     cells[[paste0("control_Senate/", ds)]] <- c("control_Senate", "selected", ds, path_of("control_Senate"), rule[["control_Senate"]])
   }
   cells[["lobby_log/rolling"]] <- c("lobby", "log", "rolling", "calc", "R0")
   lose <- character()
+  if (cycle) for (nm in c("pac", "general")) {
+    b <- v$phase[[nm]]; ch <- b$consistency$selection$choice
+    pt <- rf_cons_pooled(b$pred, b$consistency$baseline, c(ch, "naive_prev"), designs)
+    for (ds in designs) {
+      a <- pt[pt$candidate == ch & pt$design == ds, ]; n <- pt[pt$candidate == "naive_prev" & pt$design == ds, ]
+      if (nrow(a) && nrow(n) && a$MAE >= n$MAE) lose <- c(lose, sprintf("%s/%s (%.3f vs naive %.3f)", if (nm == "pac") "pac" else "general_giving", ds, a$MAE, n$MAE))
+    }
+  }
   for (nm in names(cells)) {
     c <- cells[[nm]]
     r <- bt[bt$term == c[1] & bt$base == c[2] & bt$design == c[3] & bt$path == c[4] & bt$rule == c[5], ]

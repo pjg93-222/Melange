@@ -113,6 +113,7 @@ test_that("RF_INPUT_ROOT and RF_ROOT_<ALIAS> redirect the pinned input roots (sa
   mirror <- file.path(tempdir(), "input_mirror")
   dir.create(file.path(mirror, "SGSD"), recursive = TRUE, showWarnings = FALSE)
   local_roots <- rf_roots()
+  Sys.unsetenv("RF_ROOT_SGSD")             # a caller's override (the staged runs point SGSD at a mirror inside staging) must not outrank the umbrella this test checks; restored on exit
   file.copy(file.path(local_roots$SGSD, c("00_controls.xlsx", "07_actual_industry_growth.xlsx")), file.path(mirror, "SGSD"), overwrite = TRUE)
   Sys.setenv(RF_INPUT_ROOT = mirror)
   r <- rf_roots()

@@ -69,6 +69,46 @@ class PublicationTests(unittest.TestCase):
         self.v2.write_text('incomplete compatibility alias', encoding='utf-8')
         self.assertEqual(gf.models()['model_version'], self.bundle['model_version'])
 
+    def versioned(self, bundle):
+        """Install `bundle` as an immutable version (versions/<sha256>/giving-models-v2.json) and return its path."""
+        raw = json.dumps(bundle).encode('utf-8')
+        target = self.dir / 'versions' / hashlib.sha256(raw).hexdigest() / 'giving-models-v2.json'
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+        return target
+
+    def test_a_cycle_model_version_and_the_previous_version_both_load_under_the_same_code_and_the_pointer_moves_between_them(self):
+        previous = self.versioned(self.bundle)                                   # the bundle without a cycle_model: what was published before
+        cycle_bundle = contract.example('models_cycle')
+        cycle_bundle['model_version'] = 'refit-20261007-cycle'
+        current = self.versioned(cycle_bundle)
+        before = self.pointer(previous)
+        self.assertNotIn('cycle_model', gf.models())
+        pointer = self.pointer(current, previous=dict(active=before['active'], sha256=before['sha256'], model_version=before['model_version']))
+        loaded = gf.models()
+        self.assertEqual((loaded['model_version'], loaded['cycle_model']['version']), ('refit-20261007-cycle', 1))
+        self.assertEqual(json.loads((self.dir / 'giving-models-current.json').read_text())['previous']['model_version'], self.bundle['model_version'])
+        # the rollback is a pointer move to `previous` (rf_rollback): the new code serves the earlier bundle on its earlier path, with no code rollback
+        self.pointer(self.dir / pointer['previous']['active'])
+        back = gf.models()
+        self.assertEqual(back['model_version'], self.bundle['model_version'])
+        self.assertNotIn('cycle_model', back)
+        self.assertNotIn('cycle_model_view', gf.catalog('2026-10-07'))
+        self.pointer(current)
+        self.assertIn('cycle_model_view', gf.catalog('2026-10-07'))
+
+    def test_a_cycle_model_bundle_that_breaks_its_contract_is_refused_and_never_served_with_wrong_numbers(self):
+        broken = contract.example('models_cycle')
+        broken['cycle_model']['measures']['general_giving']['drift']['d']['2'] += 1e-6
+        self.pointer(self.versioned(broken))
+        with self.assertRaisesRegex(ValueError, 'contract'):
+            gf.models()
+        no_pres = contract.example('models_cycle')
+        no_pres['share_models']['control_Senate']['terms'] = ['Intercept']
+        self.pointer(self.versioned(no_pres))
+        with self.assertRaisesRegex(ValueError, 'contract'):
+            gf.models()
+
     def test_invalid_pointer_never_falls_back_to_an_existing_bundle(self):
         variants = [({'schema_version': 2}, 'pointer schema'), ({'schema_version': True}, 'pointer schema'),
                     ({'sha256': '0' * 64}, 'SHA-256'), ({'model_version': 'wrong'}, 'model version'),

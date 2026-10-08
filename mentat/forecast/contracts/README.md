@@ -143,3 +143,28 @@ the sha256 of the workbook file now published in the report directory.
   when a general-giving block reports them, its levels + the excluded amounts equal the by-funding-source total and the excluded amount equals the excluded sources' share of
   that split; the candidate block then has one `excluded_non_giving` entry per candidate cycle and the same `excluded_funding_sources` as the general-giving block (its amounts
   have no by-source split to be checked against). Each industry's anchor cycle (`current_cycle - 2`) has a CPI multiplier (a missing one must never read as 1.0); a ready LDA block carries both series over the same complete years.
+
+## Optional `cycle_model` (owner rulings 2026-10-07: "1. Yes 2. Keep senate in 3. We use the 50/50 4. Yes; Use the IBIS defaults, auto-recalculate")
+
+`giving-models-v2` keeps `schema_version` 2 and its file name. One OPTIONAL top-level object, `cycle_model`, switches the console calculator to the cycle-aware
+50/50 projection; a bundle without it is served by the earlier calculator path unchanged, so a pointer rollback to the previous version needs no code rollback.
+
+* Fixture: `giving-models-v2.cycle.example.json` is the models example carrying a real-valued `cycle_model` (and the presidential-cycle term in the Senate model);
+  `contract.example('models_cycle')` loads it. The plain example stays without it. Negative controls `C01`-`C08` have `"target": "models_cycle"`: apply them to the cycle example
+  AND to a writer's output, every one must be rejected.
+* `cycle_model.measures.{pac_to_candidates,general_giving}`: `phi` (presidential-cycle coefficient, with `phi_se`, `phi_df`), the damped linear drift
+  `d_h = b0 + b1 (k_max + sum_{j<=h} damp^j)` for the first and second step ahead (`d` = {"1","2"}), and per industry the anchored-step block (`sigma2`, `pairs`, `df` = pairs - 1,
+  `critical_95`); `open_cycle_layer` is `BLEND` (roster PAC: model and pace, D-099) or `P1` (the model conditioned on the giving already observed; general giving: Mentat holds dated
+  general giving for two complete cycles only).
+* `cycle_model.budget_rule`: weight_model 0.5 (the 50/50 rule), one-year lag, and per industry the IBISWorld REAL annual revenue growth 2023-2027 (report, edition, price basis,
+  source sha256). The calculator turns the lag window of a horizon (c-3 .. c-1) into the industry budget change of each measure with that measure's odd/even-year mix of the anchor
+  cycle (`odd_year` of the anchor snapshot); the ONE input of a horizon, "Industry revenue growth" (request field `growth_pct`, average annual %, blank = the default), shifts every
+  annual growth of the window by the same amount.
+* `cycle_model.inflation`, `g_prior` (the share models' prior-cycle growth of the horizon that has no history row), `pace` (completed cycles' full-cycle and to-date amounts at March 31 /
+  June 30 / September 30 of the election year), `notes` (Methods: no backtest of the 50/50 overlay or of the IBIS path error; the 2026-edition price basis is inferred as constant dollars;
+  the 50/50 rule is untested on general giving; the general-giving phase coefficient).
+* Invariants (`contract.py::check_cycle_model`, run by `check_model_invariants` when the block is present): drift `d` follows `b0`, `b1`, `k_max`, `damp`; every step block has
+  `df = pairs - 1`; every offered industry has a general-giving step block and a complete IBIS path 2023-2027 (each above -100%); `weight_model` is 0.5; every pace cycle has
+  `0 < O15 <= O18 <= O21 <= F`; the Senate share model carries `Pres`.
+* Anchor snapshot (`giving-anchors-v1`): optional `general_giving.odd_year` ({cycle: dollars}) and `pac_to_candidates.odd_year` ({cycle: {House, Senate, to_house_senate}}) = the
+  forecast-basis receipts of each COMPLETE cycle dated on or before December 31 of its first year. The old contract closes the measure blocks, so APPLY THE CODE BEFORE THE ANCHORS.

@@ -83,7 +83,7 @@ rf_schema_check <- function(x, node, root, path = "$") {
 rf_canonical_json <- function(b) jsonlite::fromJSON(as.character(jsonlite::toJSON(b, auto_unbox = TRUE, digits = NA, null = "null", na = "null")), simplifyVector = FALSE)
 
 # Validate an already parsed JSON value (no round trip: NaN / Inf survive and are rejected).
-# Cross-field rules of a schema-valid bundle (a port of contracts/contract.py check_model_invariants: the anchor auto-pick of the 2026-09-30 ruling).
+# Cross-field rules of a schema-valid bundle (a port of contracts/contract.py check_model_invariants: the anchor auto-pick of the 2026-09-30 ruling). With a cycle_model the rules of check_cycle_model run too.
 rf_model_invariants <- function(b, tolerance = 1e-9) {
   problems <- character()
   for (mid in names(b$share_models)) {
@@ -110,6 +110,43 @@ rf_model_invariants <- function(b, tolerance = 1e-9) {
       if (identical(e$anchor, "previous_cycle") && wins) problems <- c(problems, sprintf("%s: previous_cycle kept although same_phase beats it by min_gain in every design", tag))
     }
   }
+  if (!is.null(b$cycle_model)) problems <- c(problems, rf_cycle_model_invariants(b, tolerance))
+  problems
+}
+
+# Cross-field rules of the optional `cycle_model` (a port of contracts/contract.py check_cycle_model; owner rulings 2026-10-07): per measure d_h = b0 + b1 (k_max + sum_{j<=h} damp^j) for h = 1, 2
+# and df = pairs - 1 in every step block; every offered industry (calculator and a Mentat key) has a general-giving step block and a complete REAL IBISWorld growth path 2023..2027, each above -100%;
+# the budget rule weights the model by 0.5; every pace cycle satisfies 0 < O15 <= O18 <= O21 <= F; the Senate share model carries the presidential-cycle term ("2. Keep senate in").
+RF_CYCLE_YEARS <- c("2023", "2024", "2025", "2026", "2027")
+
+rf_cycle_model_invariants <- function(b, tolerance = 1e-9) {
+  problems <- character()
+  cm <- b$cycle_model
+  for (mid in names(cm$measures)) {
+    m <- cm$measures[[mid]]; tag <- paste0("cycle_model.measures.", mid); dr <- m$drift
+    for (h in c("1", "2")) {
+      want <- dr$b0 + dr$b1 * (dr$k_max + sum(dr$damp^seq_len(as.integer(h))))
+      if (abs(dr$d[[h]] - want) > tolerance) problems <- c(problems, sprintf("%s.drift.d.%s does not follow from b0, b1, k_max and damp", tag, h))
+    }
+    for (id in names(m$step)) if (m$step[[id]]$df != m$step[[id]]$pairs - 1) problems <- c(problems, sprintf("%s.step.%s: df is not pairs - 1", tag, id))
+  }
+  offered <- names(b$industries)[vapply(b$industries, function(i) isTRUE(i$calculator) && !is.null(i$mentat_key) && nzchar(i$mentat_key), logical(1))]
+  for (id in offered) {
+    if (is.null(cm$measures$general_giving$step[[id]])) problems <- c(problems, sprintf("cycle_model.measures.general_giving.step: no entry for %s, which the console offers", id))
+    gr <- cm$budget_rule$growth[[id]]
+    if (is.null(gr)) { problems <- c(problems, sprintf("cycle_model.budget_rule.growth: no entry for %s", id)); next }
+    for (yr in RF_CYCLE_YEARS) {
+      value <- gr$annual[[yr]]
+      if (is.null(value)) problems <- c(problems, sprintf("cycle_model.budget_rule.growth.%s: no growth for %s", id, yr))
+      else if (!(value > -1)) problems <- c(problems, sprintf("cycle_model.budget_rule.growth.%s.%s: a growth of -100%% or less", id, yr))
+    }
+  }
+  if (!identical(as.numeric(cm$budget_rule$weight_model), 0.5)) problems <- c(problems, "cycle_model.budget_rule.weight_model must be 0.5 (the 50/50 rule)")
+  for (id in names(cm$pace$series)) for (cyc in names(cm$pace$series[[id]]$cycles)) {
+    r <- cm$pace$series[[id]]$cycles[[cyc]]
+    if (!(0 < r$O15 && r$O15 <= r$O18 && r$O18 <= r$O21 && r$O21 <= r$F)) problems <- c(problems, sprintf("cycle_model.pace.series.%s.%s: needs 0 < O15 <= O18 <= O21 <= F", id, cyc))
+  }
+  if (!("Pres" %in% unlist(b$share_models$control_Senate$terms))) problems <- c(problems, "share_models.control_Senate: the presidential-cycle term Pres is required with a cycle_model (owner ruling 2026-10-07)")
   problems
 }
 

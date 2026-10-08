@@ -134,7 +134,7 @@ test_that("share models: pooled slope (R0, tau2 = 0), per-industry anchors (defa
     expect_gt(m$prediction$industries$commercial_banks$pairs, 10L)
   }
   expect_identical(b$share_models$control_House$formula, "RShare ~ sector + RMajNow + Forecast + G_prior + Pres")
-  expect_identical(b$share_models$control_Senate$formula, "RShare ~ sector + RMajNow + Forecast + G_prior")
+  expect_identical(b$share_models$control_Senate$formula, "RShare ~ sector + RMajNow + Forecast + G_prior + Pres")     # the owner-mandated Pres term (phase) is in the refit Senate model
 })
 
 test_that("lobbying: the log refit is in the bundle and reproduces ADDENDUM F.4 and the contract example's values", {

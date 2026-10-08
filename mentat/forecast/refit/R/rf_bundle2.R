@@ -39,8 +39,10 @@ rf_fold_sign_consistency <- function(m, d, var, key) {
 # `frozen_ctx`: when the v2 sample holds pilot industries beyond the frozen v1 sample, the context of the frozen sample. The v1 calculator the gates compare against
 # (G6 baseline) was fitted on the frozen sample, so its per-industry backtest MAE is recomputed there (`baseline_backtests`), never on the extended sample.
 rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = rf_now_utc(), b_random = RF$B_RANDOM, min_gain = RF$RULE_MIN_GAIN, frozen_ctx = NULL) {
+  cyc <- rf_cycle_model_on()                                # RF_CYCLE_MODEL=0: the bundle as published before the cycle-aware 50/50 model (parity switch)
+  if (cyc) ctx <- rf_phase_ctx(ctx)                         # v2 layer: the Senate share model carries Pres (owner rulings 2026-10-01 and 2026-10-07); the frozen v1 fits stay in ctx0 / the parity layer
   ms <- ctx$models$models
-  specs <- rf_backtest_specs(ctx)
+  specs <- rf_backtest_specs(ctx, phase = cyc)
   selection <- rf_select_rules(specs, min_gain = min_gain)
   pac <- rf_pac_v2(specs$pac, selection$pac)
   vm <- rf_v1_models(ctx)
@@ -85,10 +87,11 @@ rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = 
                rf_backtest_metrics(rf_backtest(fs$lobby, fs$lobby$d, "rolling", rules = "R0")))
     baseline_bt <- rf_rbind_fill(bl)
   }
+  phase <- if (cyc) rf_phase_block(ctx, selection$pac$reported_rule) else NULL
   raw <- ctx$inputs[ctx$inputs$purpose == "raw", ]
   input_hash <- substr(rf_sha256_of_strings(raw$actual), 1, 8)
-  list(ctx = ctx, frozen_ctx = frozen_ctx, baseline_backtests = baseline_bt, specs = specs, selection = selection, anchors = anchors, pac = pac, shares = shares, lobby_pp = lob_pp, lobby_log_fit = lob_log_fit, lobby_log = lob_log,
-       evidence = ev, sign = sign, backtests = backtests, lobby_log_pred = lg_pred, run_id = run_id, packages = packages, built_at_utc = built_at_utc,
+  list(ctx = ctx, phase = phase, frozen_ctx = frozen_ctx, baseline_backtests = baseline_bt, specs = specs, selection = selection, anchors = anchors, pac = pac, shares = shares, lobby_pp = lob_pp, lobby_log_fit = lob_log_fit, lobby_log = lob_log,
+       cycle_model_on = cyc, evidence = ev, sign = sign, backtests = backtests, lobby_log_pred = lg_pred, run_id = run_id, packages = packages, built_at_utc = built_at_utc,
        model_version = rf_model_version(input_hash, run_id, built_at_utc, rf_code_sha256()), input_hash = input_hash, min_gain = min_gain,
        adequacy = NULL)
 }
@@ -155,6 +158,10 @@ rf_v2_pac_model <- function(v) {
   ev$calculator_path_loeo_mae_by_industry <- .rf_mae_record(v$backtests, "pac", "bundle", "loeo", "prevchg", pac$rule)
   ev$sign_consistency <- list(leave_one_election_out = v$sign$pac$loeo$share, leave_one_industry_out = v$sign$pac$loco$share)
   ev$rule_selection <- rf_v2_rule_selection(v$selection$pac)
+  if (!is.null(v$phase)) {
+    ev$phase <- rf_v2_phase_evidence(v)
+    if (!length(rf_cycle_model_gap(v))) ev$phase$status <- "evidence behind the bundle's cycle_model: the calculator applies the selected specifications through cycle_model (phase, trajectory, inflation, BLEND, the 50/50 budget rule); this record is not read by it"
+  }
   list(beta = m1$beta, ordinary_se = m1$ordinary_se, ordinary_p = m1$ordinary_p, critical_95 = m1$critical_95, n = m1$n, cycles = m1$cycles, specification = m1$specification,
        selection_repeated_p = m1$selection_repeated_p, formula = "log_pac ~ sector + factor(cycle_end) + G_current", industries = as.list(levels(ctx$fits_data$pac$sector)),
        residual_df = as.integer(stats::df.residual(f)), residual_sd = summary(f)$sigma, slope_rule = pac$rule, slope_rule_reason = pac$reason, tau2 = pac$tau2, Q = pac$Q,
@@ -196,8 +203,11 @@ rf_v2_share_model <- function(v, ch) {
   ev$calculator_path_loeo_mae_by_industry <- as.list(rf_chosen_anchor_mae(v$backtests, v$anchors, id, "loeo", rule))
   ev$sign_consistency <- list(leave_one_election_out = v$sign[[id]]$loeo$share)
   ev$rule_selection <- rf_v2_rule_selection(v$selection[[id]])
-  formula <- if (ch == "House") "RShare ~ sector + RMajNow + Forecast + G_prior + Pres" else "RShare ~ sector + RMajNow + Forecast + G_prior"
-  list(id = id, signal = "control", chamber = ch, calculator = TRUE, specification = b$specification, formula = formula, terms = b$terms, beta = b$beta, covariance = b$covariance,
+  has_pres <- "Pres" %in% unlist(b$terms)
+  formula <- if (has_pres) "RShare ~ sector + RMajNow + Forecast + G_prior + Pres" else "RShare ~ sector + RMajNow + Forecast + G_prior"
+  spec_text <- if (ch == "Senate" && has_pres && isTRUE(v$ctx$senate_phase)) "AICc-selected pooled model plus the presidential-cycle term (owner ruling 2026-10-01: every projected quantity except lobbying accounts for the midterm / presidential difference)" else b$specification
+  if (ch == "Senate" && has_pres && isTRUE(v$ctx$senate_phase)) ev$selection_repeated_p_scope <- "frozen v1 selection (mask 3, without Pres); the Pres term is owner-mandated, not selected"
+  list(id = id, signal = "control", chamber = ch, calculator = TRUE, specification = spec_text, formula = formula, terms = b$terms, beta = b$beta, covariance = b$covariance,
        ordinary_p = b$ordinary_p, critical_95 = b$critical_95, residual_df = b$residual_df, n = b$n, adjusted_r2 = b$adjusted_r2, residual_sd = b$residual_sd,
        training_cycles = b$training_cycles, history = b$history, slope_rule = rule, slope_rule_reason = v$selection[[id]]$reason, tau2 = pp$tau2, application = application,
        slopes = rows, offset = offset, anchor_rule = "by_industry", anchors = anchors,
@@ -323,6 +333,160 @@ rf_v2_anchor_contract <- function() {
                        never_summed = TRUE))
 }
 
+# ---- the cycle model (owner rulings 2026-10-07) -------------------------------------------------------------------------------------------------------------------
+# The optional top-level `cycle_model` of the bundle (contracts/giving-models-v2.schema.json): the phase coefficient, the damped drift and the per-industry step variance of the
+# two measures (roster PAC, general giving) read off the fitted phase block (v$phase), the IBISWorld REAL growth paths of the 50/50 budget rule, the prior-cycle growth of the share
+# models for the horizon without history, and the roster pace series of BLEND. The calculator takes the cycle-aware path only when it is present. Nothing here is typed in except the
+# owner's wording and the report/edition identities of the pinned IBISWorld inputs (registry/inputs.json, roles cycle:*).
+
+# The specifications the owner adopted on 2026-10-07 ("1. Yes" to the 10-01 rebuild's selections, decision (a)). The builder STOPS if the consistency rule picks anything else:
+# a different selection is a different owner decision.
+RF_CYCLE_ADOPTED <- c(pac = "PT-noG-damp-pool@x22", general = "PT-noG-damp-pool")
+RF_CYCLE_C0 <- 2026L                                                # the open cycle; growth years c0-3 .. c0+1, G_prior of c0 + 2
+RF_CYCLE_IBIS <- list(                                              # report identities of the newest IBISWorld edition per industry (R9: no splicing of editions)
+  commercial_banks = list(role = "cycle:ibis_captured_paths", code = "52211", edition = "2026-08", from = "levels", price_basis = "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)"),
+  credit_unions = list(role = "cycle:ibis_captured_paths", code = "52213", edition = "2026-05", from = "levels", price_basis = "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)"),
+  property_casualty = list(role = "cycle:ibis_pc_2024_11", code = "52412", edition = "2024-11", from = "reported", price_basis = "CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024')"))
+RF_CYCLE_PACE <- list(commercial_banks = list(role = "cycle:pace_banks", source = "pace_test/impl_py/out/series.csv"),
+                      credit_unions = list(role = "cycle:pace_credit_unions", source = "pace_test/impl_py/out/cu_series.csv"))
+RF_CYCLE_PANEL_COLS <- c("sector", "cycle_end", "log_pac", "log_individual", "G_current", "presidential_cycle")
+
+# sha256 of the panel the cycle model is fitted on: the text of write.csv(panel[, RF_CYCLE_PANEL_COLS], row.names = FALSE) in the panel's row order, CRLF line endings
+# (the bytes R writes on Windows; the same bytes as modelspec/panel.csv of the 2026-10-07 spec), hashed as UTF-8.
+rf_cycle_panel_sha256 <- function(panel) {
+  p <- panel[, intersect(RF_CYCLE_PANEL_COLS, names(panel)), drop = FALSE]
+  con <- textConnection("csv_lines", "w", local = TRUE)
+  utils::write.csv(p, con, row.names = FALSE)
+  close(con)
+  tf <- tempfile(fileext = ".csv")
+  on.exit(unlink(tf), add = TRUE)
+  writeBin(charToRaw(enc2utf8(paste0(paste(csv_lines, collapse = "\r\n"), "\r\n"))), tf)
+  rf_sha256(tf)
+}
+
+# IBISWorld growth inputs of the offered industries -> list(growth = list(id = cycle_growth block), g_prior = list(id = list(`<c0+2>` = percent)))
+#   banks / credit unions: REAL annual growth = ratio of consecutive Key Statistics revenue levels of the captured path (2026-edition captures);
+#   property and casualty: the 2024-11 edition's own reported annual change p.83 (2023-2027 incl. its 2026 +1.5% and 2027 +1.4% forecasts; coordinator ruling 2026-10-07: one P&C path).
+#   g_prior = the revenue-sum cycle growth of c0 in percent, (L[c0-1] + L[c0]) / (L[c0-3] + L[c0-2]) - 1, from the same edition's levels.
+rf_cycle_ibis_growth <- function(inputs, ids, c0 = RF_CYCLE_C0) {
+  years <- (c0 - 3L):(c0 + 1L)
+  growth <- list(); prior <- list()
+  for (id in ids) {
+    s <- RF_CYCLE_IBIS[[id]]
+    path <- rf_input_path(inputs, s$role)
+    d <- utils::read.csv(path, stringsAsFactors = FALSE)
+    d <- d[as.character(d$code) == s$code, ]
+    lv <- stats::setNames(as.numeric(d$revenue_million), d$year)
+    lvl <- function(y) { x <- lv[as.character(y)]; if (is.na(x)) stop("rf_cycle_ibis_growth: no revenue level for ", id, " (", s$code, ") in ", y, call. = FALSE); unname(x) }
+    annual <- if (s$from == "levels") vapply(years, function(y) lvl(y) / lvl(y - 1L) - 1, 0)
+              else vapply(years, function(y) { r <- d$reported_change_pct[d$year == y]; if (length(r) != 1L || is.na(r)) stop("rf_cycle_ibis_growth: no reported change for ", id, " in ", y, call. = FALSE); r / 100 }, 0)
+    growth[[id]] <- list(report_id = s$code, edition = s$edition, price_basis = s$price_basis, source_sha256 = inputs$actual[match(s$role, inputs$role)], annual = stats::setNames(as.list(annual), years))
+    prior[[id]] <- stats::setNames(list(100 * ((lvl(c0 - 1L) + lvl(c0)) / (lvl(c0 - 3L) + lvl(c0 - 2L)) - 1)), c0 + 2L)
+  }
+  list(growth = growth, g_prior = prior)
+}
+
+# Roster pace series in dollars (the pace test's frozen files, cents / 100): cycle -> F, O15, O18, O21.
+rf_cycle_pace_series <- function(inputs, id) {
+  s <- RF_CYCLE_PACE[[id]]
+  d <- rf_blend_read_series(rf_input_path(inputs, s$role))
+  cyc <- lapply(seq_len(nrow(d)), function(i) list(F = d$F_cents[i] / 100, O15 = d$O15_cents[i] / 100, O18 = d$O18_cents[i] / 100, O21 = d$O21_cents[i] / 100))
+  list(source = s$source, sha256 = inputs$actual[match(s$role, inputs$role)], cycles = stats::setNames(cyc, as.integer(d$cycle)))
+}
+
+# The industries the console offers (calculator and a Mentat key: the contract's reading) and what the cycle model still lacks for them in this context; character(0) = complete.
+# A context without them (the frozen v1 estimation sample, which excludes the property and casualty pilot) builds no cycle_model; the refit run refuses that outcome.
+rf_cycle_model_offered <- function(v) { ind <- rf_v2_industries(v); names(ind)[vapply(ind, function(i) isTRUE(i$calculator) && !is.null(i$mentat_key), NA)] }
+rf_cycle_model_gap <- function(v) {
+  if (is.null(v$phase)) return("the context holds no phase block (RF_CYCLE_MODEL=0)")
+  ind <- rf_v2_industries(v)
+  out <- character()
+  for (id in rf_cycle_model_offered(v)) {
+    have <- function(nm) { sv <- v$phase[[nm]]$step_variance; id %in% sv$sector[is.finite(sv$sigma2)] }
+    if (!have("general")) out <- c(out, sprintf("%s: no general-giving step variance (not in the phase panel)", id))
+    if (isTRUE(ind[[id]]$capabilities$pac) && !have("pac")) out <- c(out, sprintf("%s: no PAC step variance", id))
+    if (is.null(RF_CYCLE_IBIS[[id]])) out <- c(out, sprintf("%s: no IBISWorld growth source registered (RF_CYCLE_IBIS)", id))
+  }
+  out
+}
+
+# One measure's block from its phase block `b` (rf_phase_block()[[pac|general]]): phi and its standard error (classical vcov of the first-difference fit), the damped linear drift
+# d_h = b0 + b1 (k_max + sum_{j<=h} damp^j) and the anchored-step residual variance of each offered industry. The drift line is re-derived from the fit's own residual table
+# (pooled election means of dy - phi dPres on k = 0..k_max, the construction of rf_ph_drift_est) and must reproduce the model's drift function; otherwise the build stops.
+rf_cycle_measure <- function(b, offered, layer, notes) {
+  p <- b$params
+  phis <- unlist(p$phi); ses <- unlist(p$phi_se)
+  if (max(abs(phis - phis[1])) > 1e-12 || max(abs(ses - ses[1])) > 1e-12) stop("rf_cycle_measure: the phase coefficient is not pooled across industries", call. = FALSE)
+  ser <- stats::aggregate(r ~ cycle_end, p$resid, mean)
+  ser <- ser[order(ser$cycle_end), ]
+  if (nrow(ser) < 3L) stop("rf_cycle_measure: fewer than three election means to fit the drift line", call. = FALSE)
+  k <- (ser$cycle_end - min(ser$cycle_end)) / 2
+  cf <- unname(stats::coef(stats::lm(r ~ k, data.frame(r = ser$r, k = k))))
+  b0 <- cf[1]; b1 <- cf[2]; kmax <- max(k)
+  damp <- RF_PH_DAMP
+  d <- vapply(1:2, function(h) b0 + b1 * (kmax + sum(damp^seq_len(h))), 0)
+  dm <- vapply(1:2, function(h) p$drift(p$secs[1], h), 0)
+  if (max(abs(d - dm)) > 1e-10) stop("rf_cycle_measure: the drift line does not reproduce the model's drift (", paste(format(d - dm), collapse = ", "), ")", call. = FALSE)
+  sv <- b$step_variance
+  step <- list()
+  for (id in offered) {
+    r <- sv[sv$sector == id, ]
+    if (nrow(r) == 1L && is.finite(r$sigma2)) step[[id]] <- list(sigma2 = r$sigma2, pairs = as.integer(r$pairs), df = as.integer(r$pairs) - 1L, critical_95 = r$crit)
+  }
+  if (!length(step)) stop("rf_cycle_measure: no step variance for any offered industry", call. = FALSE)
+  list(candidate = b$consistency$selection$choice, handling_2022 = if (identical(b$spec$handling, "x22")) "drop" else "none",
+       phi = unname(phis[1]), phi_se = unname(ses[1]), phi_df = as.integer(p$df),
+       drift = list(kind = "damped_linear_trend", b0 = b0, b1 = b1, k_max = as.integer(kmax), damp = damp, pair_cycles = as.list(as.integer(ser$cycle_end)), d = list(`1` = d[1], `2` = d[2])),
+       step = step, open_cycle_layer = layer, notes = as.list(notes))
+}
+
+# The bundle's cycle_model (SPEC 2.2). Stops (never falls back) when the consistency rule did not pick the specifications the owner adopted, or when the context lacks an offered industry.
+rf_v2_cycle_model <- function(v, inputs = v$ctx$inputs) {
+  ph <- v$phase
+  if (is.null(ph)) stop("rf_v2_cycle_model: the context holds no phase block (RF_CYCLE_MODEL=0?)", call. = FALSE)
+  got <- c(pac = ph$pac$consistency$selection$choice, general = ph$general$consistency$selection$choice)
+  if (!identical(unname(got), unname(RF_CYCLE_ADOPTED)))
+    stop(sprintf("rf_v2_cycle_model: the consistency selection is %s (PAC) / %s (general giving), not the owner-adopted %s / %s; a different specification is a different owner decision",
+                 got[["pac"]], got[["general"]], RF_CYCLE_ADOPTED[["pac"]], RF_CYCLE_ADOPTED[["general"]]), call. = FALSE)
+  gap <- rf_cycle_model_gap(v)
+  if (length(gap)) stop("rf_v2_cycle_model: ", paste(gap, collapse = "; "), call. = FALSE)
+  offered <- rf_cycle_model_offered(v)
+  pac <- rf_cycle_measure(ph$pac, offered, "BLEND", character())
+  gen <- rf_cycle_measure(ph$general, offered, "P1",
+                          c("50/50 untested on general giving",
+                            "Open cycle stays on the model plus the observed-giving conditioning (P1): Mentat holds dated general giving for two complete cycles (2022, 2024), fewer than the three the pace test needs."))
+  ibis <- rf_cycle_ibis_growth(inputs, offered)
+  panel <- v$ctx$pac_panel
+  pace <- list(); for (id in intersect(names(RF_CYCLE_PACE), offered)) pace[[id]] <- rf_cycle_pace_series(inputs, id)
+  list(version = 1L,
+       rulings = list(phase_trajectory_inflation = "D-092", blend = "D-099", budget_rule = "R9/R11/R12 50/50 (Paul 2026-10-05 'Lets do the 50/50')",
+                      owner_2026_10_07 = "1. Yes 2. Keep senate in 3. We use the 50/50 4. Yes; Use the IBIS defaults, auto-recalculate", coordinator = "C1-C5 (2026-10-07)"),
+       source = list(window_cycles = as.list(as.integer(range(panel$cycle_end))), panel_sha256 = rf_cycle_panel_sha256(panel),
+                     rebuild_reference = paste("phase20261001/refit (ctx.rds e2ff5b1c...); panel_sha256 = sha256 of write.csv(pac_panel[, sector, cycle_end, log_pac, log_individual, G_current, presidential_cycle], row.names = FALSE) as UTF-8 text with CRLF line endings"),
+                     lookback_note = "Fitted on the rebuild's tested window; D-100's six-year lookback is scoped to the PAC accuracy lane (C4)."),
+       inflation = list(annual_rate = RF_INFLATION$rate, base_year = RF_INFLATION$base_year, convention = "cycle_midpoint",
+                        source = "Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)"),
+       measures = list(pac_to_candidates = pac, general_giving = gen),
+       budget_rule = list(weight_model = 0.5, lag_years = 1L, growth_basis = "real", growth = ibis$growth),
+       g_prior = c(list(source = "IBIS revenue-sum cycle growth of 2026 (2025+2026 over 2023+2024) from the same editions as the budget growth"), ibis$g_prior),
+       pace = list(months = list(`15` = "03-31", `18` = "06-30", `21` = "09-30"), series = pace),
+       notes = list("No backtest covers the 50/50 overlay or the error of the IBISWorld path: G6 and G9 measure the phase-and-drift model only, and the intervals exclude the IBIS projection error.",
+                    "The 2026-edition IBISWorld price basis is inferred as constant dollars (the 2026 captures print no basis; the 2024 editions print inflation-adjusted dollars and the 2023 growth agrees to 0.1 pp).",
+                    "The 50/50 rule is untested on general giving.",
+                    sprintf("The general-giving phase coefficient is phi_gen = %.3f (the selected specification %s).", gen$phi, gen$candidate)))
+}
+
+# The cycle model as lines of the review packet.
+rf_cycle_model_review <- function(cm) {
+  one <- function(m, label) sprintf("%s: %s (2022 %s), phi %.4f (SE %.4f, df %d), drift d1 %.4f / d2 %.4f over pairs %s, open-cycle layer %s; step sigma2 %s.", label, m$candidate, m$handling_2022, m$phi, m$phi_se, m$phi_df,
+                                    m$drift$d$`1`, m$drift$d$`2`, paste(unlist(m$drift$pair_cycles), collapse = "/"), m$open_cycle_layer,
+                                    paste(sprintf("%s %.4f (%d pairs)", names(m$step), vapply(m$step, function(s) s$sigma2, 0), vapply(m$step, function(s) s$pairs, 1L)), collapse = ", "))
+  c("## Cycle model (owner rulings 2026-10-07)", "", one(cm$measures$pac_to_candidates, "Roster PAC"), "", one(cm$measures$general_giving, "General giving"), "",
+    sprintf("Inflation %.7f per year (base %d, cycle mid-point). 50/50 budget rule: model weight %.1f, IBISWorld REAL growth %s, lag %d year.", cm$inflation$annual_rate, cm$inflation$base_year, cm$budget_rule$weight_model,
+            paste(sprintf("%s %s %s", names(cm$budget_rule$growth), vapply(cm$budget_rule$growth, function(g) g$report_id, ""), vapply(cm$budget_rule$growth, function(g) g$edition, "")), collapse = ", "), cm$budget_rule$lag_years),
+    sprintf("Panel sha256 %s.", cm$source$panel_sha256), unlist(cm$notes), "")
+}
+
 rf_v2_sources <- function(v) {
   inp <- v$ctx$inputs
   raw <- inp[inp$purpose == "raw", ]
@@ -343,11 +507,12 @@ rf_code_sha256 <- function() rf_sha256_of_strings(vapply(list.files(file.path(rf
 # The bundle object. `gates` = data.frame(gate, status, detail) or NULL (a pending placeholder, for gating the bundle itself).
 rf_bundle_v2 <- function(v, gates = NULL, previous_model_version = RF$V1_MODEL_VERSION) {
   ctx <- v$ctx
+  cycle_model <- if (!is.null(v$phase) && !length(rf_cycle_model_gap(v))) rf_v2_cycle_model(v) else NULL      # the optional block: absent = the calculator's earlier path (RF_CYCLE_MODEL=0, or the frozen v1 sample)
   pk <- v$packages
   pkgs <- if (is.null(pk)) list() else stats::setNames(as.list(as.character(pk$version)), pk$package)
   gate_block <- if (is.null(gates)) list(decision = "HOLD", checks = list(list(gate = "pending", status = "HOLD", detail = "gates not evaluated yet")))
                 else list(decision = rf_decision(gates), checks = lapply(seq_len(nrow(gates)), function(i) list(gate = gates$gate[i], status = gates$status[i], detail = gates$detail[i])))
-  list(schema_version = 2L, model_version = v$model_version, built_on = substr(v$built_at_utc, 1, 10), built_at_utc = v$built_at_utc, previous_model_version = previous_model_version,
+  b <- list(schema_version = 2L, model_version = v$model_version, built_on = substr(v$built_at_utc, 1, 10), built_at_utc = v$built_at_utc, previous_model_version = previous_model_version,
        producer = list(pipeline = RF$PIPELINE, run_id = v$run_id, code_sha256 = rf_code_sha256(), R_version = R.version.string, packages = pkgs),
        currency = "2025 USD",
        deflator = list(series = "CPI-U annual average (1982-84=100)", source = "00_controls.xlsx data", base_year = 2025L, cycle_rule = "cpi[2025] / mean of the two calendar-year averages of the cycle"),
@@ -357,4 +522,6 @@ rf_bundle_v2 <- function(v, gates = NULL, previous_model_version = RF$V1_MODEL_V
        evidence_models = rf_v2_evidence_models(v), lobby_model = rf_v2_lobby_model(v), political_inputs = rf_v2_political_inputs(v),
        evidence = rf_records(ctx$stepwise$effects), industry_slopes = rf_records(ctx$stepwise$industry_slopes), validation_metrics = rf_v1_validation_rows(ctx),
        backtests = rf_v2_backtests(v), saved_outlook = rf_v2_saved_outlook(v), sources = rf_v2_sources(v), gates = gate_block)
+  if (!is.null(cycle_model)) b$cycle_model <- cycle_model
+  b
 }

@@ -259,6 +259,16 @@
                   "pattern": "^\\d{4}$"
                 },
                 "description": "Dollars per cycle the exclusion left out (the excluded sources' share of the published Analysis Amount): cycles + excluded_non_giving = the sum of by_funding_source. by_funding_source is the full split, including the excluded sources."
+              },
+              "odd_year": {
+                "type": "object",
+                "propertyNames": {
+                  "pattern": "^\\d{4}$"
+                },
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "description": "Forecast-basis receipts of each COMPLETE cycle dated on or before December 31 of its first year (the odd-year split of the cycle model)."
               }
             },
             "required": [
@@ -472,6 +482,16 @@
                 "propertyNames": {
                   "pattern": "^\\d{4}$"
                 }
+              },
+              "odd_year": {
+                "type": "object",
+                "propertyNames": {
+                  "pattern": "^\\d{4}$"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/odd_pac"
+                },
+                "description": "The D-049 aggregation of each COMPLETE cycle cut at December 31 of its first year."
               }
             },
             "required": [
@@ -800,6 +820,26 @@
         "label",
         "annual",
         "partial"
+      ],
+      "additionalProperties": false
+    },
+    "odd_pac": {
+      "type": "object",
+      "properties": {
+        "House": {
+          "$ref": "#/$defs/dr"
+        },
+        "Senate": {
+          "$ref": "#/$defs/dr"
+        },
+        "to_house_senate": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "House",
+        "Senate",
+        "to_house_senate"
       ],
       "additionalProperties": false
     }

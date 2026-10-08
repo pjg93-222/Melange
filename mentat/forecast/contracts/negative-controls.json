@@ -41,6 +41,16 @@
     {"id": "A15", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "general_giving", "observed"], "why": "a ready measure carries observed cuts", "value": []},
     {"id": "A16", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "lda", "series", "income_total", "partial", "total"], "why": "a partial LDA total equals its quarters", "value": 1},
     {"id": "A17", "target": "anchors", "kind": "invariant", "op": "delete", "path": ["cpi", "multipliers", "2024"], "why": "the anchor cycle needs a CPI multiplier: a missing one must never read as 1.0"},
-    {"id": "A18", "target": "anchors", "kind": "invariant", "op": "delete", "path": ["industries", "<industry>", "lda", "series", "expenses_total"], "why": "both LDA series are required (never one series alone)"}
+    {"id": "A18", "target": "anchors", "kind": "invariant", "op": "delete", "path": ["industries", "<industry>", "lda", "series", "expenses_total"], "why": "both LDA series are required (never one series alone)"},
+    {"id": "C01", "target": "models_cycle", "kind": "schema", "op": "delete", "path": ["cycle_model", "budget_rule"], "why": "a cycle model carries its IBIS budget rule"},
+    {"id": "C02", "target": "models_cycle", "kind": "invariant", "op": "set", "path": ["cycle_model", "measures", "general_giving", "drift", "d", "2"], "value": -0.26056272705276223, "why": "d_2 follows from b0, b1, k_max and the damping (a 1e-6 slip is a different model)"},
+    {"id": "C03", "target": "models_cycle", "kind": "schema", "op": "delete", "path": ["cycle_model", "budget_rule", "growth", "commercial_banks", "annual", "2027"], "why": "the IBIS growth path covers 2023-2027: a missing year must never read as zero growth"},
+    {"id": "C04", "target": "models_cycle", "kind": "invariant", "op": "set", "path": ["cycle_model", "budget_rule", "weight_model"], "value": 0.6, "why": "the budget rule is the 50/50 rule: the model weight is 0.5"},
+    {"id": "C05", "target": "models_cycle", "kind": "invariant", "op": "set", "path": ["cycle_model", "pace", "series", "commercial_banks", "cycles", "2024", "O18"], "value": 99999999.0, "why": "the amount to date cannot exceed the full cycle"},
+    {"id": "C06", "target": "models_cycle", "kind": "invariant", "op": "set", "path": ["share_models", "control_Senate", "terms"], "value": ["Intercept", "industry:commercial_banks", "industry:credit_unions", "RMajNow", "Forecast", "G_prior"], "why": "the Senate share model keeps the presidential-cycle term (owner ruling 2026-10-07: \"2. Keep senate in\")"},
+    {"id": "C07", "target": "models_cycle", "kind": "schema", "op": "set", "path": ["cycle_model", "inflation", "annual_rate"], "value": 0, "why": "the expected inflation rate is positive"},
+    {"id": "C08", "target": "models_cycle", "kind": "invariant", "op": "set", "path": ["cycle_model", "budget_rule", "growth", "credit_unions", "annual", "2025"], "value": -1.0, "why": "a growth of -100% is not a growth path"},
+    {"id": "A19", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "general_giving", "odd_year", "2024"], "why": "the odd-year amount cannot exceed the cycle total", "value": 1000000000000},
+    {"id": "A20", "target": "anchors", "kind": "schema", "op": "set", "path": ["industries", "<industry>", "pac_to_candidates", "odd_year", "2024", "to_house_senate"], "why": "dollars are numbers", "value": "x"}
   ]
 }

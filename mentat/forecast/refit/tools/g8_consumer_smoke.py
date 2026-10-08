@@ -50,6 +50,8 @@ def scenario(bundle, industry):
         horizons[str(cycle)] = dict(growth_pct=growth, current_control={'House': outlook['House']['current_control'], 'Senate': outlook['Senate']['current_control']},
                                     control_scores={'House': outlook['House']['value'], 'Senate': outlook['Senate']['value']},
                                     annual_forecast_changes={str(current): 0, str(current + 1): 0, str(current + 2): 0})
+        if bundle.get('cycle_model') is not None:
+            del horizons[str(cycle)]['growth_pct']          # with a cycle model the growth input is the Industry revenue growth: blank = the IBIS default of the bundle
     return dict(industry=industry['id'], as_of=today.isoformat(), horizons=horizons)
 
 

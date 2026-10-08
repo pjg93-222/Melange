@@ -30,6 +30,13 @@ class G8SmokeTests(unittest.TestCase):
         self.assertIn('commercial_banks', out)
         self.assertIn('credit_unions', out)
 
+    def test_a_cycle_model_bundle_passes_with_the_ibis_defaults_and_still_projects_every_offered_industry(self):
+        code, out = smoke(contract.example('models_cycle'))
+        self.assertEqual(code, 0, out)
+        self.assertIn('G8 PASS', out)
+        self.assertIn('commercial_banks', out)
+        self.assertIn('projected 2 horizon(s)', out)
+
     def test_a_bundle_the_calculator_refuses_fails(self):
         bad = contract.example('models')
         bad['industries']['commercial_banks']['withheld'] = []       # the empty-map-written-as-list defect the contract rejects

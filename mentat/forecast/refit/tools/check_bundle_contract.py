@@ -1,5 +1,5 @@
 """Second opinion on a bundle: validate it (schema + cross-field invariants) with the contract's own Python validator (contracts/contract.py) and apply every shared
-negative control of target 'models'. Verification tool only (the pipeline itself is R).
+negative control of target 'models' (and, when the bundle carries a `cycle_model`, of target 'models_cycle'). Verification tool only (the pipeline itself is R).
 usage: python check_bundle_contract.py <giving-models-v2.json> [<contracts dir>]   exit 0 = valid and every control rejected
 """
 import json
@@ -19,7 +19,7 @@ for p in problems[:10]:
     print('  ', p)
 accepted = []
 for control in contract.negative_controls():
-    if control['target'] != 'models':
+    if control['target'] != 'models' and not (control['target'] == 'models_cycle' and 'cycle_model' in doc):
         continue
     mutated = contract.apply_mutation(doc, control)
     if not (contract.validate(mutated, schema) or contract.check_model_invariants(mutated)):

@@ -369,6 +369,9 @@ SHARE_ANCHORS = {'previous_cycle': dict(cycle_offset=2, chained=True, label='pre
 ANCHOR_FILE = Path(__file__).resolve().parents[1] / 'state' / 'giving-anchors' / 'giving-anchors-v1.json'
 CONTRACT_DIR = Path(__file__).resolve().parents[1] / 'forecast' / 'contracts'
 SEATS_TEXT = 'Seat forecasts are evidence only ("no signal"); the calculator uses expected control.'
+# Under the cycle model `growth_pct` is the AVERAGE ANNUAL IBIS-window growth, not the anchor cycle's two-year revenue growth it used to be; the page says which it means.
+GROWTH_BASIS = 'ibis_window_avg'
+STALE_PAGE_TEXT = 'This page is out of date. Reload the page to use the current growth inputs.'
 
 
 @lru_cache(maxsize=1)
@@ -476,6 +479,8 @@ def _v2_contract_problems(b):
     for model_id, model in b['share_models'].items():
         if 'Forecast' not in model['terms']:
             problems.append(model_id + ' has no Forecast term')
+    if b.get('cycle_model') is not None and 'Pres' not in b['share_models'].get('control_Senate', {}).get('terms', []):
+        problems.append('control_Senate has no Pres term (owner ruling 2026-10-07: the Senate share model keeps the presidential-cycle term)')
     return problems
 
 
@@ -608,6 +613,8 @@ def _catalog_v2(b, today):
                 interval_labels=b['interval_labels'], inference=b['inference'], validation=b['validation'], anchors=_anchors_status(b, offered),
                 # Owner waivers of the refit gates that the card shows (refit/registry/gate_waivers.json, show_warning true), each beside the model in force.
                 waivers=_v2_waivers(b, offered),
+                # The cycle-aware model (bundle `cycle_model`, owner rulings 2026-10-07): defaults of the one growth input per horizon, the layers and the Methods notes.
+                **({'cycle_model_view': _cycle_view(b, cycle, offered)} if b.get('cycle_model') else {}),
                 scope='Mentat levels for the industry\'s tracked companies (the published Mentat report scope); the models only supply the relationships. '
                       'Report company, donor-role and subindustry filters do not apply.',
                 interval_label=b['interval_labels']['coefficient'] + '; ' + b['interval_labels']['prediction'])
@@ -978,6 +985,8 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
     for bid, label in SHARE_BASES:
         block = ctx['snap']['candidate_receipts' if bid == 'employee_candidate' else 'pac_to_candidates']
         basis = dict(id=bid, label=label, status='needs_inputs', flags=[])
+        if bid == 'pac_candidate' and ((ctx.get('panel') or {}).get('pac_to_candidates') or {}).get('status') == 'ready':
+            basis['roster_note'] = SPLIT_NOTE          # D-117: the dollars of this account are the panel cohort's, the split is not
         bases[bid] = basis
         out['bases'].append(basis)
         if block['status'] != 'ready':
@@ -1018,7 +1027,7 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
         remaining = _v2_basis_remaining(ctx, pac, chamber)
         for bid, basis in bases.items():
             if basis['status'] == 'ready':
-                basis.update(_v2_share_remainder(ctx, chamber, basis['projected_cycle_R_share'], totals.get(bid), bid, growth is not None))
+                basis.update(_v2_share_remainder(ctx, chamber, basis['projected_cycle_R_share'], totals.get(bid), bid, growth is not None or ctx.get('cm') is not None))
                 allocation = _v2_remaining_allocation(ctx, chamber, basis, remaining.get(bid), bid)
                 if allocation:
                     basis['remaining_allocation'] = allocation
@@ -1176,6 +1185,531 @@ def _v2_lobbying(ctx, changes, cycle):
     return out
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Cycle model (bundle `cycle_model`): the cycle-aware 50/50 "Giving by cycle" projection (owner rulings of 2026-10-07; modelspec/SPEC.md and the coordinator calls)
+#
+# Full cycle   M = B exp(phi dP + d_h) (1 + x / 2)
+#   B   the anchor cycle's Mentat level in 2025 dollars (levels come from the anchor snapshot; the bundle only supplies the relationships),
+#   dP  the presidential-cycle difference Pres(c) - Pres(c - 2), phi its coefficient, d_h the damped drift of the h-th step ahead,
+#   x   the industry budget change the IBISWorld REAL growth path implies for the cycle with the one-year lag (G_odd, G_even) given this measure's odd/even mix in
+#       the anchor cycle. The ONE growth input of a horizon ("Industry revenue growth", average annual %, blank = the IBIS default) shifts every annual growth of the
+#       lag window c-3 .. c-1 by the same amount; each measure then derives its own x from its own odd-year share.
+# The open cycle's published layer conditions M on the giving already observed (P1); the next cycle chains from that layer. Company PACs are the exception (D-116, Paul
+# 2026-10-08, "use the panel's nowcast for company PACs, drop the 50/50"): no budget change (x = 0) on either horizon and, in the open cycle, the published PAC panel's
+# R8_REMAINING nowcast O + (1 - s) B in place of the model (R8; it replaced the D-099 BLEND); the step into the next (presidential) cycle takes the owner's
+# factor in place of phi (D-118/D-119/D-121, PAC_UPLIFT_FACTOR x1.09; general giving takes GENERAL_UPLIFT_FACTOR x1.8635 on both steps). A bundle without `cycle_model` takes the earlier path unchanged (the pointer can be rolled back without a code rollback).
+# ----------------------------------------------------------------------------------------------------------------------
+from fractions import Fraction  # noqa: E402
+from statistics import NormalDist  # noqa: E402
+
+CYCLE_GRID = 400               # midpoint quantile grid of each factor of the chained next-cycle distribution (the reference build used 1000: medians agree to 0.01%)
+PANEL_NOWCAST = frozenset({'pac_to_candidates'})      # D-116: the measures on the panel nowcast, which the IBIS budget change does not move
+
+# D-118 / D-119 / D-121 (Paul, 2026-10-08, "use +9% and restart 8806"; then "Different for both PAC and General", with OpenSecrets data): a fixed presidential-cycle factor u replaces the
+# fitted cycle effect phi (phi = log u) in the two measures; the drift d_h, the 50/50, P1 and the step's prediction interval stay the fitted ones.
+#   Company PACs ("less cyclical"): u = 1.09 (+9%), on the step INTO a presidential cycle only (2027-28, dP = +1). The midterm step (2025-26, dP = -1; an unconditioned point the chart does
+#     not draw) keeps the fitted phi, which avoids a false observed-exceeds flag. ratio_by_pair: FEC committee-to-candidate giving of all PACs in real 2025 dollars, a presidential cycle over its
+#     preceding midterm (geometric mean 0.981), the data the rule was set against.
+#   General giving ("roughly 86% higher"): u = the presidential average of OpenSecrets' total cost of elections over the midterm average, inflation-adjusted $bn, 12.56 (2012-2024) / 6.74
+#     (2010-2022) = 1.8635, on BOTH steps, symmetrically: dP = -1 gives -log u (2025-26) and dP = +1 gives +log u (2027-28). The two averages are Paul's, as he gave them (the eight totals
+#     average 12.56 and 6.745); the totals are the response's ratio_by_pair.
+PAC_UPLIFT_FACTOR = 1.09
+PAC_UPLIFT_SOURCE = 'owner rule D-118/D-121: +9% (PAC spending less cyclical; national FEC all-PAC ratio 0.98)'
+PAC_UPLIFT_RATIOS = {'2016/2014': 0.9969291514830991, '2020/2018': 0.9639711510629424, '2024/2022': 0.9829388610358335}
+GENERAL_COST_BN = {'2010': 5.24, '2012': 8.59, '2014': 5.09, '2016': 8.51, '2018': 7.15, '2020': 18.34, '2022': 9.50, '2024': 14.80}
+GENERAL_AVERAGES_BN = dict(presidential=12.56, midterm=6.74)
+GENERAL_UPLIFT_FACTOR = GENERAL_AVERAGES_BN['presidential'] / GENERAL_AVERAGES_BN['midterm']
+GENERAL_UPLIFT_SOURCE = 'owner rule D-118/D-121: OpenSecrets total cost of elections, presidential avg 2012-2024 vs midterm avg 2010-2022'
+UPLIFT_BOTH_STEPS = frozenset({'general_giving'})      # D-121: the factor is applied on the midterm step too (symmetrically); the company PACs take it on the presidential step only
+
+
+def _presidential_uplift(mid):
+    """The owner's presidential-cycle rule of a measure as the response states it ({factor, source, ratio_by_pair}), or None for a measure without one."""
+    if mid == 'pac_to_candidates':
+        return dict(factor=PAC_UPLIFT_FACTOR, source=PAC_UPLIFT_SOURCE, ratio_by_pair=dict(PAC_UPLIFT_RATIOS))
+    if mid == 'general_giving':
+        return dict(factor=GENERAL_UPLIFT_FACTOR, source=GENERAL_UPLIFT_SOURCE, ratio_by_pair=dict(GENERAL_COST_BN))
+    return None
+
+
+def _open_layer(cm, mid):
+    """The open-cycle layer of a measure: R8 for the company PACs (D-116, whatever the bundle's `open_cycle_layer` says), else the bundle's."""
+    return 'R8' if mid in PANEL_NOWCAST else cm['measures'][mid]['open_cycle_layer']
+
+
+def _pres(cycle):
+    return 1. if cycle % 4 == 0 else 0.
+
+
+def _price_level(infl, year):
+    return 1. if year <= infl['base_year'] else (1. + infl['annual_rate']) ** (year - infl['base_year'])
+
+
+def _cycle_factor(infl, cycle):
+    """Nominal / real 2025 dollars of a cycle: the mean price level of its two years (years after the base year at the expected rate)."""
+    return (_price_level(infl, cycle - 1) + _price_level(infl, cycle)) / 2.
+
+
+def _real_multiplier(snapshot, infl, cycle):
+    """Real 2025 dollars per nominal dollar of a cycle: the snapshot's CPI multiplier when the cycle has one, else the expected-inflation factor."""
+    m = snapshot['cpi']['multipliers'].get(str(cycle))
+    return m if m is not None else 1. / _cycle_factor(infl, cycle)
+
+
+def _ibis_path(cm, ident, cycle):
+    """[(year, g)] of the lag window cycle-3 .. cycle-1 (IBISWorld REAL annual revenue growth, fractions), or None when the bundle's path does not cover it."""
+    entry = cm['budget_rule']['growth'].get(ident)
+    if entry is None:
+        return None
+    try:
+        return [(y, float(entry['annual'][str(y)])) for y in (cycle - 3, cycle - 2, cycle - 1)]
+    except KeyError:
+        return None
+
+
+def _path_average_pct(path):
+    """Geometric mean of the window's annual growth, in percent."""
+    product = 1.
+    for _year, g in path:
+        product *= 1. + g
+    return 100. * (product ** (1. / len(path)) - 1.)
+
+
+def _growth_source(entry):
+    return 'IBISWorld ' + entry['report_id'] + ' ' + entry['edition'] + ' edition (' + entry['price_basis'] + ')'
+
+
+def _growth_input(cm, ident, cycle, value):
+    """(annual path used, info) of the growth input of one horizon. `value` is the user's average annual growth in percent (None = the IBIS default).
+
+    The shift is delta = value - default average, added to every annual growth of the lag window. A value equal to the default as the catalog shows it (3 decimals)
+    is the default."""
+    path = _ibis_path(cm, ident, cycle)
+    entry = cm['budget_rule']['growth'].get(ident)
+    if path is None:
+        return None, dict(status='unavailable', reason='The IBISWorld growth path in the model package does not cover ' + str(cycle - 3) + '-' + str(cycle - 1) +
+                          ', the years that feed the ' + _period(cycle) + ' cycle (one-year lag).')
+    default = _path_average_pct(path)
+    info = dict(status='ready', default_pct=round(default, 3), used_pct=default, shift_pp=0., source='default', window=[cycle - 3, cycle - 1], report_id=entry['report_id'],
+                edition=entry['edition'], source_text=_growth_source(entry))
+    if value is not None and abs(value - round(default, 3)) > 1e-9:
+        shift = (value - default) / 100.
+        path = [(y, g + shift) for y, g in path]
+        if any(1. + g <= 0. for _y, g in path):
+            raise ValueError('Industry revenue growth is outside its supported range.')
+        info.update(used_pct=value, shift_pp=100. * shift, source='user')
+    return path, info
+
+
+def _budget_change(s_odd, path):
+    """(x, G_odd, G_even): the industry budget change of the cycle with the one-year lag. The odd (first) year of the cycle follows the revenue of years c-3 and c-2, the
+    even year that of c-2 and c-1; the measure's own odd-year share s_odd of the anchor cycle weights the two."""
+    (_y1, g1), (_y2, g2), (_y3, g3) = path
+    odd, even = (1. + g1) * (1. + g2), (1. + g2) * (1. + g3)
+    return s_odd * odd + (1. - s_odd) * even - 1., odd, even
+
+
+def _measure_level(block, mid, cycle):
+    row = block['cycles'].get(str(cycle))
+    return row.get('to_house_senate') if mid == 'pac_to_candidates' and isinstance(row, dict) else row
+
+
+def _measure_odd(block, mid, cycle):
+    row = (block.get('odd_year') or {}).get(str(cycle))
+    return row.get('to_house_senate') if isinstance(row, dict) else row
+
+
+def _default_budget(block, mid, anchor_cycle, path):
+    """The default industry budget change of one measure (at the IBIS default growth), or the reason it is unavailable."""
+    level, odd = _measure_level(block, mid, anchor_cycle), _measure_odd(block, mid, anchor_cycle)
+    if block['status'] != 'ready' or level is None or level <= 0:
+        return dict(status='unavailable', reason=block.get('reason') or 'The snapshot has no ' + str(anchor_cycle) + ' level for this measure.')
+    if odd is None:
+        return dict(status='unavailable', reason='Rebuild the anchors: the budget rule needs the ' + str(anchor_cycle) + ' cycle\'s odd-year split.')
+    s_odd = odd / level
+    x, g_odd, g_even = _budget_change(s_odd, path)
+    return dict(status='ready', budget_growth_pct=100. * x, s_odd=s_odd, G_odd=g_odd, G_even=g_even)
+
+
+def _cycle_view(b, cycle, offered):
+    """What the catalog tells the display about the cycle model: the defaults of the one growth input per industry and horizon (value, window, source), the budget
+    change they imply for each measure, the layers, the inflation convention and the Methods notes."""
+    cm = b['cycle_model']
+    growth, company = {}, {}
+    for row in offered:
+        ident, entry = row['id'], cm['budget_rule']['growth'].get(row['id'])
+        try:
+            _snapshot, anchored = _anchor_industry(ident)
+            anchor_cycle = anchored['coverage']['current_cycle'] - 2
+        except AnchorProblem:
+            anchored, anchor_cycle = None, None
+        blocks = {} if anchored is None else _panel_blocks(ident, anchor_cycle + 2)          # D-117: the credit unions' company PACs are the published panel's cohort
+        if anchored is not None:
+            company[ident] = _company_pacs(ident, anchored, blocks)
+        per = {}
+        for c in (cycle, cycle + 2):
+            path = _ibis_path(cm, ident, c)
+            if entry is None or path is None:
+                per[str(c)] = dict(status='unavailable', reason='The IBISWorld growth path in the model package does not cover ' + str(c - 3) + '-' + str(c - 1) + '.')
+                continue
+            item = dict(status='ready', growth_default=round(_path_average_pct(path), 3), growth_window=[c - 3, c - 1], growth_source=_growth_source(entry),
+                        report_id=entry['report_id'], edition=entry['edition'], price_basis=entry['price_basis'],
+                        annual={str(y): g for y, g in path}, budget_defaults={})
+            for mid, _label in PAC_MEASURES:
+                item['budget_defaults'][mid] = (dict(status='unavailable', reason='The Mentat anchors are not available.') if anchored is None
+                                                else _default_budget(blocks.get(mid) or anchored[mid], mid, anchor_cycle, path))
+                if mid in PANEL_NOWCAST and item['budget_defaults'][mid]['status'] == 'ready':        # D-116: the growth does not move this measure
+                    item['budget_defaults'][mid].update(budget_growth_pct=0., growth_applies=False)
+            per[str(c)] = item
+        growth[ident] = per
+    return dict(version=cm['version'], inflation=cm['inflation'], layers={mid: _open_layer(cm, mid) for mid, _l in PAC_MEASURES},
+                growth_applies={mid: mid not in PANEL_NOWCAST for mid, _l in PAC_MEASURES}, presidential_uplift={mid: _presidential_uplift(mid) for mid, _l in PAC_MEASURES},
+                growth=growth, company_pacs=company, g_prior_defaults={k: v for k, v in cm['g_prior'].items() if k != 'source'}, notes=list(cm['notes']),
+                measure_notes={mid: list(cm['measures'][mid]['notes']) + ([R8_NOTE] if mid in PANEL_NOWCAST else []) for mid, _l in PAC_MEASURES})
+
+
+# --- t quantiles (stdlib) for the chained distribution ------------------------------------------------------------------------
+def _t_pdf(z, df):
+    return math.exp(math.lgamma((df + 1.) / 2.) - math.lgamma(df / 2.) - .5 * math.log(df * math.pi) - (df + 1.) / 2. * math.log1p(z * z / df))
+
+
+def _t_quantile_upper(u, df):
+    """z with P(T_df > z) = u (0 < u < 1): safeguarded Newton from a normal start, the bisection bracket of _t_upper_inverse as the fallback."""
+    lo, hi = -1e4, 1e4
+    z = NormalDist().inv_cdf(1. - u)
+    for _ in range(100):
+        f = _t_upper(z, df) - u
+        if f > 0:
+            lo = z
+        else:
+            hi = z
+        if abs(f) <= 1e-14 * max(u, 1e-300):
+            return z
+        step = f / max(_t_pdf(z, df), 1e-300)
+        new = z + step
+        if not lo < new < hi:
+            new = .5 * (lo + hi)
+        if abs(new - z) <= 1e-13 * max(1., abs(z)):
+            return new
+        z = new
+    return _t_upper_inverse(u, df)
+
+
+@lru_cache(maxsize=64)
+def _t_crit(df):
+    """qt(.975, df)."""
+    return _t_upper_inverse(.025, df)
+
+
+@lru_cache(maxsize=64)
+def _t_grid(df, n):
+    """The n midpoint quantiles qt((l - .5) / n, df), l = 1 .. n (n even: the lower half is computed, the upper half mirrors it)."""
+    lower = [-_t_quantile_upper((l - .5) / n, df) for l in range(1, n // 2 + 1)]
+    return tuple(lower + [-v for v in reversed(lower)])
+
+
+def _quantile(ordered, q):
+    """Linear-interpolation quantile of a sorted list (numpy's default)."""
+    pos = q * (len(ordered) - 1)
+    low = int(math.floor(pos))
+    high = min(low + 1, len(ordered) - 1)
+    return ordered[low] * (1. - (pos - low)) + ordered[high] * (pos - low)
+
+
+def _layer_dist(center, scale, df, observed):
+    """The log-t distribution of an open-cycle layer: centre, scale, df and above = P(full cycle >= observed); None when the observed giving leaves no probability."""
+    above = 1. if observed <= 0 else _t_upper((math.log(observed) - center) / scale, df)
+    return dict(center=center, scale=scale, df=df, above=above) if above > 1e-12 else None
+
+
+def _chain(layer, mu2, s2, df2, n=CYCLE_GRID):
+    """(2.5%, 50%, 97.5%) of exp(L + mu2 + s2 t): L the layer's log distribution conditioned on full >= observed (a midpoint quantile grid, qt(1 - (1 - u) above)),
+    t a Student t with df2 degrees of freedom (its own grid)."""
+    above = layer['above']
+    base = [layer['center'] + layer['scale'] * _t_quantile_upper((1. - (k - .5) / n) * above, layer['df']) for k in range(1, n + 1)]
+    grid = _t_grid(df2, n)
+    ordered = sorted(v + mu2 + s2 * t for v in base for t in grid)
+    return tuple(math.exp(_quantile(ordered, q)) for q in (.025, .5, .975))
+
+
+# --- Company PACs on the published PAC panel's nowcast (D-116) -------------------------------------------------------------------
+R8_KIND = ("Range of the three prior cycles' pace ({}), not a 95% interval: the panel nowcast O + (1 - s) B with each cycle's own completion share, lowest to highest")
+R8_CHAIN_KIND = ('95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself')
+R8_NOTE = ("Open cycle: the published PAC panel's nowcast (R8) O + (1 - s) B: O the giving observed to the cut, B the prior cycle's total of the same roster, s the geometric mean of the "
+           "share of each of the three prior cycles' totals given by the same date. The range is the same formula with each cycle's own share, lowest to highest; it is not a 95% interval. "
+           "Industry revenue growth does not affect company PACs on either horizon (D-116); the next cycle chains from the nowcast.")
+
+
+def _r8_pace(cm, ident, block, mid, open_cycle, anchor_cycle, cut_through):
+    """The chart roster's inputs of the nowcast, from the bundle's pace series: ((pace month p, the three prior cycles, O at p, [(O_p,j, F_j)]), None) or (None, why it is unavailable).
+    p is the latest of March / June / September on or before the effective cut (the panel's m15 / m18 / m21 cuts)."""
+    series = cm['pace']['series'].get(ident)
+    if series is None:
+        return None, 'The model package has no pace series for this industry.'
+    level, ref = _measure_level(block, mid, anchor_cycle), series['cycles'].get(str(anchor_cycle))
+    if level is None or ref is None or abs(ref['F'] - level) > .005:
+        return None, 'The pace series was built for a different roster (its ' + str(anchor_cycle) + ' full cycle differs from the anchor level).'
+    months = {int(q): str(open_cycle) + '-' + md for q, md in cm['pace']['months'].items()}
+    usable = [q for q, cut in months.items() if cut <= cut_through]
+    if not usable:
+        return None, 'The observed giving ends before the first pace month (' + months[min(months)] + ').'
+    p = max(usable)
+    seen = [c for c in block['observed'] if c['through'] <= months[p]]
+    observed_p = seen[-1]['to_house_senate'] if seen else None
+    if observed_p is None or observed_p <= 0:
+        return None, 'No giving is observed by the pace month (' + months[p] + ').'
+    window = [open_cycle - 6, open_cycle - 4, open_cycle - 2]
+    rows = [series['cycles'].get(str(c)) for c in window]
+    if any(r is None or r['F'] <= 0 or r['O%d' % p] <= 0 for r in rows):
+        return None, 'The pace series lacks giving at the pace month in one of the three prior cycles (' + ', '.join(str(c) for c in window) + ').'
+    return (p, window, observed_p, [(r['O%d' % p], r['F']) for r in rows]), None
+
+
+def _r8(cm, ident, block, mid, open_cycle, anchor_cycle, cut_through, mult, observed_real):
+    """(nowcast dict, None) or (None, why it is unavailable): the panel's R8_REMAINING, mirrored from pac_giving_forecast.calculate (lines 189-217; that function takes a frame
+    pinned to the panel's own rosters, so it cannot be fed this chart's roster). nowcast = O + (1 - s) B in NOMINAL dollars as in the panel: O the giving observed through the pace
+    month p, B the anchor cycle's total of the same roster, s the geometric mean over the three prior cycles of O_p,j / F_j (exact fractions, the equal-shares and share-capped-at-one
+    rules of the panel). The nominal total is converted ONCE to 2025 USD at the open cycle's deflator `mult`. The range is O + (1 - s_j) B for each cycle j alone (min to max); the panel
+    publishes no interval.
+    The inputs come from the bundle's pace series for the chart's roster (`_r8_pace`) or, for a block that carries `panel` (D-117: the credit unions' 16-PAC cohort), straight from the
+    panel's current frame: its own cut, its own observed amount and its own history at the same date, in integer cents. Everything after the inputs is this one code path."""
+    panel = block.get('panel')
+    found, why = ((None, panel['window'], panel['observed_nominal'], panel['pairs']), None) if panel else _r8_pace(cm, ident, block, mid, open_cycle, anchor_cycle, cut_through)
+    if found is None:
+        return None, why
+    p, window, observed_p, pairs = found
+    level = _measure_level(block, mid, anchor_cycle)
+    shares = [Fraction(o) / Fraction(f) for o, f in pairs]
+    mean_log = math.fsum(math.log(o) - math.log(f) for o, f in pairs) / 3
+    product_share = shares[0] * shares[1] * shares[2]
+    if product_share >= 1:
+        s = 1.
+    elif shares[0] == shares[1] == shares[2]:
+        s = float(shares[0])
+    else:
+        s = math.exp(mean_log)
+    if not math.isfinite(s) or not 0 < s <= 1:
+        return None, 'The completion share of the three prior cycles is not usable.'
+    floor = observed_real / mult          # the nominal total cannot fall below the giving already observed (the cut may lie after the pace month)
+    raw, raw_point = [observed_p + (1. - float(share)) * level for share in shares], observed_p + (1. - s) * level
+    nominal, point = [max(v, floor) for v in raw], max(raw_point, floor)
+    low, high = min(nominal), max(nominal)
+    kind = R8_KIND.format(', '.join(str(c) for c in window))
+    layer = dict(cycle_given_observed_low=low * mult, cycle_given_observed_median=point * mult, cycle_given_observed_high=high * mult,
+                 remaining_given_observed_low=low * mult - observed_real, remaining_given_observed_median=point * mult - observed_real,
+                 remaining_given_observed_high=high * mult - observed_real,
+                 given_observed_kind=kind, interval_kind=kind)
+    info = dict(pace_month=p, cycles=window, shares=[float(x) for x in shares], completion_share=s, share_capped_at_one=product_share > 1,
+                observed_nominal=observed_p, anchor_total_nominal=level, remaining_nominal=(1. - s) * level, nowcast_nominal=raw_point,
+                range_nominal=[low, high], deflator=mult, floored_at_observed=min(raw + [raw_point]) < floor, **({'panel_cut': panel['cut']} if panel else {}))
+    return dict(layer=layer, dist=dict(center=math.log(point * mult), scale=0., df=1, above=1.), info=info), None
+
+
+# --- Credit-union company PACs on the published PAC panel's 16-PAC cohort (D-117) ---------------------------------------------------
+# Paul, 2026-10-08: "use the 16 credit union PACs". The company-PAC measure of the credit unions is the published PAC panel's cohort (pac-giving-current.json -> the active bundle), not
+# the anchors' single committee (SchoolsFirst): every piece comes from the panel's CURRENT frame for the open cycle (B the cohort's total of the anchor cycle, O the giving observed at
+# the panel's own cut, the three prior cycles' totals and their observed amounts on the same date), so the nowcast is the panel's own published one (`_r8` is the same code path as
+# the banks'). Banks keep the chart's 19 committees. The panel's cut (2026-09-26) is not the general-giving cut: the measure carries its own `observed.through`, and the two dates are
+# never put in one figure. The party split has no D/R amounts for this cohort in the panel bundle (totals only; the partisan panel holds forecast ranges at its own cut, not the anchor
+# cycle's D/R by chamber nor the observed D/R the split divides), so it stays on the anchors' own roster and says so (SPLIT_NOTE).
+PANEL_COHORT = {'credit_unions': 'credit_unions'}      # chart industry -> PAC panel sector
+SPLIT_NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.'
+PANEL_LABELS = {'credit_unions': 'Credit unions: {n} PACs (published panel cohort)'}
+PANEL_MEASURE_LABEL = 'Panel cohort PACs: own giving to House and Senate candidates'
+ROSTER_LABELS = {'commercial_banks': 'Banks: {n} bank companies'}
+PANEL_NOTICE = "Company PACs: {label}, observed to {through} (the panel's own date). General giving and the party split are observed to {general}. The two dates are never mixed in one figure."
+
+
+def _panel_block(ident, open_cycle):
+    """(block, None) for the `pac_to_candidates` block built from the published PAC panel's current frame of this industry's sector, or (None, why it is unavailable).
+    Shaped like the anchors' block where the cycle model reads it, plus `panel`: the cut, the integer-cent history `_r8` takes and the identity of the bundle and cohort."""
+    sector = PANEL_COHORT[ident]
+    try:
+        import pac_giving_forecast as panel
+        published = panel.catalog()
+    except (ImportError, OSError, ValueError):
+        return None, 'The published PAC panel could not be read, so the credit-union company PACs cannot be shown.'
+    item = next((s for s in published['sectors'] if s['sector'] == sector), None)
+    now = item and item['current']
+    origin = item and next((f for f in item['forecasts'] if f['target'] == open_cycle and f['product'] == 'ORIGIN' and f['status'] == 'ready'), None)
+    if not now or now['target'] != open_cycle or now['product'] == 'ORIGIN' or now['status'] != 'ready' or not origin:
+        return None, 'The published PAC panel has no current ' + _period(open_cycle) + ' nowcast for this industry.'
+    trace = now['trace']
+    history = trace['history']
+    cycles = {str(h['cycle']): {'to_house_senate': h['total_cents'] / 100.} for h in history}
+    odd = origin['trace']['annual'].get(open_cycle - 3)          # the anchor cycle's odd-year calendar piece (the budget rule's s_odd)
+    cut = now['cut']
+    return dict(status='ready', reason=None, single_pac=False, committee_count=item['cohort']['count'], committees=[], cycles=cycles,
+                odd_year=None if odd is None else {str(open_cycle - 2): {'to_house_senate': odd / 100.}},
+                observed=[dict(through=cut, to_house_senate=now['observed_cents'] / 100.)], coverage_end=cut,
+                panel=dict(cut=cut, window=[h['cycle'] for h in history], observed_nominal=now['observed_cents'] / 100., pairs=[(h['observed_cents'], h['total_cents']) for h in history],
+                           published_nowcast_nominal=now['prediction_cents'] / 100., bundle_sha256=published['bundle_sha256'], cohort=item['cohort'])), None
+
+
+def _panel_blocks(ident, open_cycle):
+    """{measure id: block} to read in place of the anchors' own: the company PACs of an industry that is on the published panel's cohort; {} for the others."""
+    if ident not in PANEL_COHORT:
+        return {}
+    block, why = _panel_block(ident, open_cycle)
+    return {'pac_to_candidates': block or dict(status='unavailable', reason=why, single_pac=False, cycles={}, observed=[])}
+
+
+def _population(ident, block):
+    """What a company-PAC total is a total of, named for the page: the chart roster's committees or the published panel's cohort."""
+    n, panel = block['committee_count'], block.get('panel')
+    if panel:
+        return dict(kind='panel_cohort', count=n, label=PANEL_LABELS[ident].format(n=n), observed_to=panel['cut'], bundle_sha256=panel['bundle_sha256'], cohort_ids_sha256=panel['cohort']['ids_sha256'])
+    return dict(kind='chart_roster', count=n, label=ROSTER_LABELS.get(ident, '{n} roster PACs').format(n=n))
+
+
+def _company_pacs(ident, anchored, blocks):
+    """The catalog's statement of what an industry's company-PAC account is, with its own 'observed to' date; None when the industry has no company PACs."""
+    block = blocks.get('pac_to_candidates') or anchored['pac_to_candidates']
+    if block['status'] != 'ready':
+        return dict(kind='panel_cohort', status='unavailable', reason=block['reason']) if ident in PANEL_COHORT else None
+    return dict(_population(ident, block), status='ready', observed_to=block.get('coverage_end') or anchored['coverage']['coverage_end'], split_note=SPLIT_NOTE if block.get('panel') else None)
+
+
+def _cycle_pac(ctx, assumptions, cycle, chains):
+    """The PAC block of one horizon under the cycle model. `chains` carries {measure id: open-cycle layer distribution} from the open cycle to the next one."""
+    cm, ind, snap, panel = ctx['cm'], ctx['industry'], ctx['snap'], ctx.get('panel', {})
+    k = (cycle - ctx['anchor_cycle']) // 2
+    out = dict(status='needs_inputs', anchor_cycle=ctx['anchor_cycle'], steps=k, chained=k > 1, measures=[], slope=None, ordinary_p=None, model_kind='cycle_model',
+               interval_kind='Prediction interval of the phase-and-drift step (coefficient of the presidential-cycle term and the anchored-step residual); it excludes the error of the IBISWorld growth path')
+    if not ind['capabilities']['pac']:
+        return out | dict(status='withheld', reason=ind['withheld'].get('pac') or 'The PAC model is withheld for this industry.')
+    if ctx['current'] != ctx['open_cycle'] or k not in (1, 2):
+        return out | dict(status='unavailable', reason='The cycle model projects the open cycle of the anchor snapshot (' + _period(ctx['open_cycle']) +
+                          ') and the cycle after it; this as-of date is outside them.')
+    value = _number(assumptions.get('growth_pct'), 'Industry revenue growth', -99.9, 500)
+    path, info = _growth_input(cm, ind['id'], cycle, value)
+    if path is None:
+        return out | dict(status='unavailable', reason=info['reason'])
+    out.update(growth_input=info, growth_pct=info['used_pct'])
+    wstatus, wreason = _window(ctx, cycle)
+    anchor = ctx['anchor_cycle']
+    for mid, label in PAC_MEASURES:
+        block = panel.get(mid) or snap[mid]          # D-117: the credit unions' company PACs are the published panel's cohort
+        measure = dict(id=mid, label=label, status='ready', flags=[])
+        if mid == 'pac_to_candidates' and block.get('committee_count'):
+            measure['population'] = _population(ind['id'], block)
+            if block.get('panel'):
+                measure['label'] = PANEL_MEASURE_LABEL          # not "roster companies": the cohort is the panel's
+        params, step = cm['measures'][mid], cm['measures'][mid]['step'].get(ind['id'])
+        level, odd = _measure_level(block, mid, anchor), _measure_odd(block, mid, anchor)
+        if block['status'] != 'ready':
+            out['measures'].append(measure | dict(status='unavailable', reason=block['reason']))
+            continue
+        if level is None or level <= 0:
+            out['measures'].append(measure | dict(status='unavailable', reason='The snapshot has no ' + str(anchor) + ' level for this measure.'))
+            continue
+        if step is None:
+            out['measures'].append(measure | dict(status='unavailable', reason='The model package has no residual variance for this industry and measure.'))
+            continue
+        if odd is None:
+            out['measures'].append(measure | dict(status='unavailable', reason='Rebuild the anchors: the budget rule needs the ' + str(anchor) + ' cycle\'s odd-year split.'))
+            continue
+        base, s_odd = level * ctx['multiplier'], odd / level
+        x, g_odd, g_even = _budget_change(s_odd, path)
+        growth_applies = mid not in PANEL_NOWCAST
+        if not growth_applies:          # D-116: no 50/50 for the company PACs, the budget factor is 1 on both horizons
+            x = 0.
+        d_p, phi, se, drift = _pres(cycle) - _pres(cycle - 2), params['phi'], params['phi_se'], params['drift']['d'][str(k)]
+        factor = 1. + x / 2.
+        uplift = _presidential_uplift(mid)          # D-118/D-119/D-121: log u in place of the fitted phi; company PACs on the presidential step only, general giving on both (symmetric)
+        uplifted = uplift is not None and (d_p > 0 or mid in UPLIFT_BOTH_STEPS)
+        phi_fitted, phi = phi, (math.log(uplift['factor']) if uplifted else phi)
+        model = dict(B_real_2025=base, dP=d_p, phi=phi, drift=drift, h=k, s_odd=s_odd, G_odd=g_odd, G_even=g_even, growth_by_year={str(y): g for y, g in path},
+                     budget_change=x, budget_growth_pct=100. * x, budget_growth_source=info['source'], budget_factor=factor, growth_applies=growth_applies)
+        if uplifted:
+            model.update(phi_fitted=phi_fitted, presidential_uplift=uplift)
+        measure.update(anchor_cycle_nominal=level, anchor_cycle_real_2025=base, model=model)
+        crit = step['critical_95']
+        if k == 1:
+            point = base * math.exp(phi * d_p + drift) * factor
+            half = crit * math.sqrt(d_p ** 2 * se ** 2 + step['sigma2'])
+            coef_half = _t_crit(params['phi_df']) * abs(d_p) * se
+            values = dict(projected_cycle_real_2025=point, cycle_coefficient_low=point * math.exp(-coef_half), cycle_coefficient_high=point * math.exp(coef_half),
+                          cycle_prediction_low=point * math.exp(-half), cycle_prediction_high=point * math.exp(half))
+            measure.update(values)
+            measure['layer'] = None
+            dist, layer_name = None, 'model'
+            if mid == 'pac_to_candidates' and block['single_pac']:
+                measure['flags'].append('single_pac_thin_base')
+                measure['flag_text'] = 'One PAC (' + block['committees'][0]['company'] + '): a thin base, not the industry\'s PAC giving.'
+            if wstatus and wstatus != 'window':
+                measure.update(remainder_status=wstatus, remainder_reason=wreason)
+            elif wstatus:
+                cut = _effective_cut(block['observed'], ctx['as_of'], block.get('coverage_end', ctx['coverage_end']))          # the panel's cut is its own (09-26), not general giving's
+                if cut is None:
+                    measure.update(remainder_status='no_observed', remainder_reason='The as-of date precedes the first observed Mentat month-end.')
+                else:
+                    observed = cut['amount'] if mid == 'general_giving' else cut['to_house_senate']
+                    observed_real = observed * ctx['open_multiplier']
+                    measure.update(observed=dict(through=cut['through'], amount_nominal=observed, amount_real_2025=observed_real, face_value=ctx['face_value']),
+                                   remainder_starts=_next_day(cut['through']),
+                                   **_remainder(point, dict(remaining_coefficient_low=values['cycle_coefficient_low'], remaining_coefficient_high=values['cycle_coefficient_high'],
+                                                            remaining_prediction_low=values['cycle_prediction_low'], remaining_prediction_high=values['cycle_prediction_high']),
+                                                observed_real))
+                    scale = half / crit
+                    nowcast = None
+                    if _open_layer(cm, mid) == 'R8':
+                        nowcast, why = _r8(cm, ind['id'], block, mid, ctx['open_cycle'], anchor, cut['through'], ctx['open_multiplier'], observed_real)
+                        if nowcast is None:
+                            measure['flags'].append('nowcast_unavailable_pace')
+                            measure['nowcast_reason'] = why
+                    if nowcast:
+                        measure.update(nowcast['layer'], layer='R8', nowcast=nowcast['info'])
+                        if nowcast['info']['floored_at_observed']:
+                            measure['flags'].append('nowcast_floored_at_observed')
+                        dist, layer_name = nowcast['dist'], 'R8'
+                    else:
+                        given = _given_observed(point, half, crit, step['df'], observed_real)
+                        if given:
+                            measure.update(given, layer='P1')
+                            dist, layer_name = _layer_dist(math.log(point), scale, step['df'], observed_real), 'P1'
+                    if measure.get('cycle_given_observed_median') is not None and point < observed_real:
+                        measure['flags'].append('observed_exceeds_unconditional_projection')
+            chains[mid] = (dist, layer_name) if dist else (_layer_dist(math.log(point), half / crit, step['df'], 0.), 'model')
+        else:
+            layer, layer_name = chains.get(mid, (None, None))
+            if layer is None:
+                out['measures'].append(measure | dict(status='unavailable', reason='The next cycle chains from the open cycle\'s projection, which is not available for this measure.'))
+                continue
+            mu2 = phi * d_p + drift + math.log(factor)
+            low, median, high = _chain(layer, mu2, math.sqrt(se ** 2 + step['sigma2']), step['df'])
+            measure.update(projected_cycle_real_2025=median, cycle_coefficient_low=None, cycle_coefficient_high=None, cycle_prediction_low=low, cycle_prediction_high=high,
+                           chained_from=dict(layer=layer_name, cycle=cycle - 2))
+            if layer_name == 'R8':
+                measure['interval_kind'] = R8_CHAIN_KIND
+        out['measures'].append(measure)
+    ready = [m for m in out['measures'] if m['status'] == 'ready']
+    if ready:
+        out['status'] = 'ready'
+    else:
+        out.update(status='unavailable', reason=(out['measures'][0].get('reason') if out['measures'] else None) or 'No measure is available for this industry.')
+    return out
+
+
+def _cycle_response_info(cm):
+    return dict(version=cm['version'], inflation=cm['inflation'], layers={mid: _open_layer(cm, mid) for mid, _l in PAC_MEASURES}, notes=list(cm['notes']),
+                growth_applies={mid: mid not in PANEL_NOWCAST for mid, _l in PAC_MEASURES})
+
+
+FACE_VALUE_FLAG = re.compile(r'^No (\d{4}) CPI exists yet: .* compared at face value\.$')
+
+
+def _cycle_flags(flags, infl):
+    """The open cycle has no CPI yet; under the cycle model its observed amounts are deflated at the expected inflation, not compared at face value."""
+    rate = '%.7f' % (100. * infl['annual_rate'])
+    out = []
+    for text in flags:
+        match = FACE_VALUE_FLAG.match(text)
+        out.append(('No %s CPI exists yet: %d-%s observed amounts are deflated at the expected %s%%/yr (cycle mid-point).' % (match.group(1), int(match.group(1)) - 1, match.group(1), rate))
+                   if match else text)
+    return out
+
+
 # --- request -> response ---------------------------------------------------------------------------------------------------
 def _project_v2(request, b):
     sector = request.get('industry')
@@ -1203,6 +1737,9 @@ def _project_v2(request, b):
     horizons = _mapping(request.get('horizons'), 'Horizon assumptions')
     if set(horizons) - {str(current), str(current + 2)}:
         raise ValueError('Only the current cycle remainder and next complete cycle are supported.')
+    if b.get('cycle_model') and request.get('growth_basis') != GROWTH_BASIS and any(       # a stale page's cycle revenue growth must not be read as the IBIS-window average
+            _mapping(h, 'Horizon assumptions').get('growth_pct') not in (None, '') for h in horizons.values()):
+        raise ValueError(STALE_PAGE_TEXT)
     _finite(request, 'Forecast request')
     head = dict(schema_version=2, product='Mentat-anchored industry scenarios', model_version=b['model_version'], model_sha256=b['sha256'], industry=sector,
                 industry_label=industry['label'], industry_code=industry['code'], scope=industry['scope'], currency=b['currency'], as_of=as_of.isoformat(),
@@ -1215,9 +1752,14 @@ def _project_v2(request, b):
     open_cycle = entry['coverage']['current_cycle']
     multiplier = snapshot['cpi']['multipliers'][str(open_cycle - 2)]
     open_multiplier = snapshot['cpi']['multipliers'].get(str(open_cycle))
-    ctx = dict(b=b, industry=industry, snap=entry, as_of=as_of, current=current, open_cycle=open_cycle, anchor_cycle=open_cycle - 2,
+    cm = b.get('cycle_model')
+    panel = _panel_blocks(sector, open_cycle) if cm else {}          # D-117: measure blocks read in place of the anchors' own (credit-union company PACs)
+    ctx = dict(b=b, industry=industry, snap=entry, as_of=as_of, current=current, open_cycle=open_cycle, anchor_cycle=open_cycle - 2, panel=panel,
                coverage_end=entry['coverage']['coverage_end'], threshold=snapshot['thin_base_threshold_usd'], multiplier=multiplier,
-               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'])
+               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'], cm=cm)
+    if cm:       # the open cycle has no CPI yet: its observed amounts are deflated at the expected inflation instead of compared at face value
+        ctx.update(open_multiplier=_real_multiplier(snapshot, cm['inflation'], open_cycle), face_value=False)
+    chains, split_chains = {}, {}
     changes_all = {}
     for cycle in (current, current + 2):
         changes_all.update(_mapping(_mapping(horizons.get(str(cycle)), str(cycle) + ' assumptions').get('annual_forecast_changes'), 'Annual growth-forecast changes'))
@@ -1227,10 +1769,16 @@ def _project_v2(request, b):
         prior = a.get('prior_growth_pct')
         if prior is None or prior == '':
             history = next((r for r in industry['history'] if r['cycle'] == cycle - 2), None)
-            prior = history['growth_pct'] if history else _mapping(horizons.get(str(cycle - 2)), 'Previous horizon').get('growth_pct')
+            if history:
+                prior = history['growth_pct']
+            elif cm:       # the share models' prior-cycle growth of a cycle with no history row: the IBIS cycle growth, no longer the removed slider
+                prior = (cm['g_prior'].get(industry['id']) or {}).get(str(cycle))
+            else:
+                prior = _mapping(horizons.get(str(cycle - 2)), 'Previous horizon').get('growth_pct')
         prior = _number(prior, 'Prior cycle revenue growth', -99.9, 500)
-        growth = _number(a.get('growth_pct'), 'Cycle revenue growth', -99.9, 500)
-        pac = _v2_pac(ctx, a, cycle)
+        growth = None if cm else _number(a.get('growth_pct'), 'Cycle revenue growth', -99.9, 500)       # with a cycle model growth_pct is the Industry revenue growth input of the PAC block
+        pac = _cycle_pac(ctx, a, cycle, chains) if cm else _v2_pac(ctx, a, cycle)
+        split_pac = _cycle_pac(dict(ctx, panel={}), a, cycle, split_chains) if panel else pac          # D-117: the party split stays on the anchors' own roster (no D/R amounts for the panel cohort)
         wstatus, _reason = _window(ctx, cycle)
         through = _cut_through(ctx) if wstatus == 'window' else None
         result = dict(cycle=cycle, period=_period(cycle), horizon='current_remainder' if cycle == current else 'next_complete',
@@ -1238,19 +1786,24 @@ def _project_v2(request, b):
                                                                    if cycle == current else f'{cycle - 1}-01-01')),
                       ends=f'{cycle}-12-31', prior_growth_pct=prior, coverage_through=through, pac=pac, shares={})
         for chamber in CHAMBERS:
-            result['shares'][chamber] = _v2_chamber(ctx, a, cycle, chamber, prior, growth, pac)
+            result['shares'][chamber] = _v2_chamber(ctx, a, cycle, chamber, prior, growth, split_pac)
         result['lobbying'] = _v2_lobbying(ctx, changes_all, cycle)
         output.append(result)
+    pb = panel.get('pac_to_candidates')
+    panel_notice = [PANEL_NOTICE.format(label=_population(sector, pb)['label'], through=pb['coverage_end'], general=entry['coverage']['coverage_end'])] if pb and pb['status'] == 'ready' else []
     return head | dict(status='ready', anchors=dict(built_at_utc=snapshot['built_at_utc'], workbook=entry['mentat']['workbook'],
                                                          workbook_sha256=entry['mentat']['workbook_sha256'], index_token=entry['mentat']['index_token'],
                                                          dataset=entry['mentat']['dataset'], collection_date=entry['coverage']['collection_date'],
                                                          coverage_end=entry['coverage']['coverage_end'], rule_coverage_end=entry['coverage']['rule_coverage_end'],
                                                          coverage_reason=entry['coverage']['reason'], anchor_cycle=ctx['anchor_cycle'], current_cycle=open_cycle,
-                                                         flags=entry['coverage']['flags'] + entry['flags'], thin_base_threshold_usd=ctx['threshold'],
-                                                         cpi_multiplier=multiplier, face_value_current_cycle=ctx['face_value'], measures=entry['status']),
+                                                         flags=(_cycle_flags(entry['coverage']['flags'] + entry['flags'], cm['inflation']) if cm else entry['coverage']['flags'] + entry['flags']),
+                                                         thin_base_threshold_usd=ctx['threshold'],
+                                                         cpi_multiplier=multiplier, face_value_current_cycle=ctx['face_value'], measures=entry['status'],
+                                                         **({'cpi_multiplier_current_cycle': ctx['open_multiplier']} if cm else {})),
+                       **({'cycle_model': _cycle_response_info(cm)} if cm else {}),
                        horizons=output,
                        notices=['Levels come from Mentat\'s own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.',
                                 'PAC, candidate-share and lobbying amounts are separate accounts and must not be added. The two lobbying series are never summed.',
                                 'Observed amounts run to the Mentat coverage end (declared by rule) and the remainder starts the day after; rows dated later stay in the remainder.',
                                 'Historical associations and scenario inputs are not validated future-giving predictions; the prediction interval adds the residual variance of the anchored step.']
-                       + list(industry.get('caveats', [])))
+                       + panel_notice + list(industry.get('caveats', [])))

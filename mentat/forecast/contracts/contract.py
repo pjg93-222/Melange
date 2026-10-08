@@ -21,7 +21,8 @@ from pathlib import Path
 
 CONTRACT_DIR = Path(__file__).resolve().parent
 SCHEMAS = {'models': 'giving-models-v2.schema.json', 'anchors': 'giving-anchors-v1.schema.json'}
-EXAMPLES = {'models': 'giving-models-v2.example.json', 'anchors': 'giving-anchors-v1.example.json'}
+EXAMPLES = {'models': 'giving-models-v2.example.json', 'anchors': 'giving-anchors-v1.example.json',
+            'models_cycle': 'giving-models-v2.cycle.example.json'}       # the same bundle fixture carrying the optional `cycle_model` (and the Pres term in the Senate model)
 NEGATIVES = 'negative-controls.json'
 
 SUPPORTED_KEYWORDS = {
@@ -210,6 +211,56 @@ def check_model_invariants(bundle, tolerance=1e-9):
                 problems.append(tag + ': same_phase chosen without beating previous_cycle by min_gain in every design')
             if entry['anchor'] == 'previous_cycle' and wins:
                 problems.append(tag + ': previous_cycle kept although same_phase beats it by min_gain in every design')
+    if 'cycle_model' in bundle:
+        problems.extend(check_cycle_model(bundle, tolerance))
+    return problems
+
+
+CYCLE_YEARS = ('2023', '2024', '2025', '2026', '2027')       # the IBIS reference years the 2026 and 2028 budget rules read (lag window c-3..c-1 of both horizons)
+
+
+def check_cycle_model(bundle, tolerance=1e-9):
+    """Cross-field rules of the optional `cycle_model` (owner rulings 2026-10-07). Returns a list of problems (empty = consistent).
+
+    * per measure: d_h = b0 + b1 (k_max + sum_{j<=h} damp^j) for h = 1, 2; every step block has df = pairs - 1;
+    * every industry the console offers (calculator and a Mentat key) has a general-giving step block and a complete REAL IBIS growth path 2023..2027 (each above -100%);
+    * the budget rule weights the model by 0.5; the pace series carry F > 0 and 0 < O15 <= O18 <= O21 <= F in every cycle;
+    * the Senate share model carries the presidential-cycle term (owner ruling 2026-10-07, "2. Keep senate in").
+    """
+    problems = []
+    cm = bundle['cycle_model']
+    for mid, m in cm['measures'].items():
+        tag = 'cycle_model.measures.' + mid
+        drift = m['drift']
+        for h in ('1', '2'):
+            want = drift['b0'] + drift['b1'] * (drift['k_max'] + sum(drift['damp'] ** j for j in range(1, int(h) + 1)))
+            if abs(drift['d'][h] - want) > tolerance:
+                problems.append(tag + '.drift.d.' + h + ' does not follow from b0, b1, k_max and damp')
+        for ident, step in m['step'].items():
+            if step['df'] != step['pairs'] - 1:
+                problems.append(tag + '.step.' + ident + ': df is not pairs - 1')
+    offered = [i for i, row in bundle['industries'].items() if row['calculator'] and row['mentat_key']]
+    for ident in offered:
+        if ident not in cm['measures']['general_giving']['step']:
+            problems.append('cycle_model.measures.general_giving.step: no entry for ' + ident + ', which the console offers')
+        growth = cm['budget_rule']['growth'].get(ident)
+        if growth is None:
+            problems.append('cycle_model.budget_rule.growth: no entry for ' + ident)
+            continue
+        for year in CYCLE_YEARS:
+            value = growth['annual'].get(year)
+            if value is None:
+                problems.append('cycle_model.budget_rule.growth.' + ident + ': no growth for ' + year)
+            elif not value > -1:
+                problems.append('cycle_model.budget_rule.growth.' + ident + '.' + year + ': a growth of -100% or less')
+    if cm['budget_rule']['weight_model'] != 0.5:
+        problems.append('cycle_model.budget_rule.weight_model must be 0.5 (the 50/50 rule)')
+    for ident, series in cm['pace']['series'].items():
+        for cyc, row in series['cycles'].items():
+            if not (0 < row['O15'] <= row['O18'] <= row['O21'] <= row['F']):
+                problems.append('cycle_model.pace.series.' + ident + '.' + cyc + ': needs 0 < O15 <= O18 <= O21 <= F')
+    if 'Pres' not in bundle['share_models'].get('control_Senate', {}).get('terms', []):
+        problems.append('share_models.control_Senate: the presidential-cycle term Pres is required with a cycle_model (owner ruling 2026-10-07)')
     return problems
 
 
@@ -279,6 +330,16 @@ def check_anchor_invariants(snapshot, tolerance=0.011):
             if reporting.get('general_giving') and sorted(candidates['excluded_funding_sources']) != sorted(general['excluded_funding_sources']):
                 problems.append(tag + '.candidate_receipts.excluded_funding_sources: differs from general_giving.excluded_funding_sources')
         pac = ind['pac_to_candidates']
+        # The odd-year split of the cycle model: an optional block per measure; each cycle's odd-year amount lies between 0 and its cycle total (a cycle the block no longer lists is not compared).
+        for cyc, amount in general.get('odd_year', {}).items():
+            if not 0 <= amount or (cyc in general['cycles'] and amount > general['cycles'][cyc] + tolerance):
+                problems.append(tag + '.general_giving.odd_year.' + cyc + ': outside 0..the cycle total')
+        for cyc, row in pac.get('odd_year', {}).items():
+            parts = _sum_dr(row['House']) + _sum_dr(row['Senate'])
+            if abs(parts - row['to_house_senate']) > tolerance:
+                problems.append(tag + '.pac_to_candidates.odd_year.' + cyc + ': to_house_senate differs from the House + Senate parts')
+            if not 0 <= row['to_house_senate'] or (cyc in pac['cycles'] and row['to_house_senate'] > pac['cycles'][cyc]['to_house_senate'] + tolerance):
+                problems.append(tag + '.pac_to_candidates.odd_year.' + cyc + ': outside 0..the cycle total')
         if pac['committee_count'] != len(pac['committees']):
             problems.append(tag + '.pac_to_candidates: committee_count differs from the committee list')
         if pac['single_pac'] != (pac['committee_count'] == 1):
