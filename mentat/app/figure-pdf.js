@@ -25,9 +25,10 @@
 
   const text = node => (node ? node.textContent : '').replace(/\s+/g, ' ').trim();
   const query = selector => text(document.querySelector(selector));
-  const forecastScope = () => {
+  const forecastScope = host => {
     const industry = document.getElementById('gf-industry'), date = document.getElementById('gf-date');
-    return [industry && industry.selectedOptions[0] ? text(industry.selectedOptions[0]) : '', query('#gf-basis'),
+    // The chart card prints its own basis line ("2025 dollars"); the header says it only for figures that do not.
+    return [industry && industry.selectedOptions[0] ? text(industry.selectedOptions[0]) : '', host && host.querySelector('#gf-basis') ? '' : query('#gf-basis'),
       date && date.value ? 'As of ' + date.value : ''].filter(Boolean).join(' · ');
   };
 
@@ -63,10 +64,14 @@
     {view: 'insights', host: '.gf-chart-col', title: '#gf-hero-title', scope: forecastScope},
     {view: 'insights', host: '#gf-party', title: '#gf-party-title', scope: forecastScope, source: () => query('#gf-footnote-text')}
   ];
+  // titleNode: the title's own element when it sits inside the figure; build() drops it from the clone so the title prints once, in the header.
   const describe = (host, spec) => {
-    const named = typeof spec.title === 'function' ? spec.title(host) : spec.title ? text(host.querySelector(spec.title) || document.querySelector(spec.title)) : '';
+    let node = null, named = '';
+    if (typeof spec.title === 'function') named = spec.title(host);
+    else if (spec.title) { node = host.querySelector(spec.title); named = text(node || document.querySelector(spec.title)); }
+    if (!named) { node = host.querySelector('h1, h2, h3, h4, figcaption'); named = text(node); }
     return {
-      title: named || text(host.querySelector('h1, h2, h3, h4, figcaption')) || host.getAttribute('aria-label') || VIEW_LABEL[spec.view],
+      title: named || host.getAttribute('aria-label') || VIEW_LABEL[spec.view], titleNode: named ? node : null,
       scope: spec.scope ? spec.scope(host) : '', source: spec.source ? spec.source(host) : ''};
   };
 
@@ -208,9 +213,11 @@
     if (width < 24 || height < 24) throw new Error('This figure is not on screen, so there is nothing to draw.');
     const doc = document.implementation.createHTMLDocument('');
     const clone = doc.importNode(element, true);
+    const twin = options.titleNode && clone.querySelectorAll('*')[[...element.querySelectorAll('*')].indexOf(options.titleNode)];
     await freeze(element, clone, doc);
     carryControls(element, clone);
     for (const node of clone.querySelectorAll(CHROME + ',[hidden]')) node.remove();
+    if (twin) twin.remove();
     pin(clone, width, height);
     const now = new Date(), meta = {title: options.title || '', scope: options.scope || '', source: options.source || ''};
     const head = header(doc, meta, now), headHeight = measure(head, width);
