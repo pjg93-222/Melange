@@ -23,6 +23,7 @@ import hashlib
 from pathlib import Path
 
 import contribution_data
+from report_identity import identity
 
 SCHEMA_VERSION = 1
 PROJECT = Path(__file__).resolve().parents[1]
@@ -97,7 +98,7 @@ def entry(source):
                        if companion else None)
     database = _database(source)
     payload_sha256 = source.get('payload_sha256')
-    industry = source['industry']
+    industry = source.get('snapshot_label', source['industry'])
     # A workbook that could not be hashed and one that is no longer on disk
     # are the same fact to a reader: this entry cannot be read. Both report
     # it the same way, and a hash measured before the file went away is
@@ -182,7 +183,8 @@ def validate_entry(entry_value):
         raise ValueError('A snapshot workbook needs its published file name.')
     if any(character in name for character in ('/', '\\', ':')) or Path(name).is_absolute():
         raise ValueError('A snapshot workbook is recorded by name only, never by path.')
-    if industry != name.removesuffix(WORKBOOK_SUFFIX):
+    info = identity(name)
+    if info is None or info['kind'] != 'overview' or industry != info['label']:
         raise ValueError('A snapshot industry must be the label its workbook name carries.')
     if entry_value.get('slug') != slug(industry):
         raise ValueError('A snapshot slug must be the console slug of its industry label.')
