@@ -307,30 +307,72 @@ class SectionFTests(unittest.TestCase):
         self.assertEqual(ready['remainder_status'], 'ready')
         self.assertAlmostEqual(ready['projected_remaining_R_share'], ready['projected_remaining_R_real_2025'] / (ready['projected_remaining_R_real_2025'] + ready['projected_remaining_D_real_2025']))
 
-    # --- F.4 ---------------------------------------------------------------------------------------------------------------------
+    # --- F.4: the lobbying nowcast and its empirical bands (owner rulings 2026-10-08) --------------------------------------------
     def lobby(self, sector, dg=0, year=2026):
-        rows = self.out[sector + ':lob'][dg]['horizons'][0]['lobbying']['rows']
+        rows = self.out[sector + ':lob'][dg]['horizons'][0 if year == 2026 else 1]['lobbying']['rows']
         return {s['id']: s for s in next(r for r in rows if r['year'] == year)['series']}
 
-    def test_lobbying_table_reproduces_section_f4(self):
-        # (2025 level, dg=-1, dg=0, dg=+1, prediction low/high at dg=0, observed Q1+Q2, Q3+Q4 remainder at dg=0)
-        table = {(BANKS, 'income_total'): (23824000, 24018902, 23824000, 23630679, 17523803, 32389257, 13367000, 10457000),
-                 (BANKS, 'expenses_total'): (65696931, 66234392, 65696931, 65163831, 48323544, 89316437, 38975000, 26721931),
-                 (CUS, 'income_total'): (2054500, 2071308, 2054500, 2037829, 1511193, 2793138, 1311000, 743500),
-                 (CUS, 'expenses_total'): (6233000, 6283992, 6233000, 6182422, 4584699, 8473902, 3424000, 2809000)}
-        for (sector, sid), (level, m1, p0, p1, plow, phigh, observed, remainder) in table.items():
+    def test_lobbying_nowcast_table_reproduces_the_study(self):
+        # (2025 level, nowcast, 80% low, 80% high, ~95% low, ~95% high, observed Q1+Q2, Q3+Q4 remainder) at no growth change: the 2026 Q2-cut table of the blind-test study
+        table = {(BANKS, 'income_total'): (23824000, 25655818, 23235661, 28328051, 21357900, 30818619, 13367000, 12288818),
+                 (BANKS, 'expenses_total'): (65696931, 71862522, 65083609, 79347506, 59823957, 86323645, 38975000, 32887522),
+                 (CUS, 'income_total'): (2054500, 2372976, 2149129, 2620138, 1975450, 2850498, 1311000, 1061976),
+                 (CUS, 'expenses_total'): (6233000, 6337214, 5739414, 6997280, 5275591, 7612472, 3424000, 2913214)}
+        for (sector, sid), (level, point, lo80, hi80, lo95, hi95, observed, remainder) in table.items():
             with self.subTest(sector=sector, series=sid):
-                lo, mid, hi = self.lobby(sector, -1)[sid], self.lobby(sector, 0)[sid], self.lobby(sector, 1)[sid]
-                for actual, e in ((lo['base_level'], level), (lo['projected'], m1), (mid['projected'], p0), (hi['projected'], p1),
-                                  (mid['prediction_low'], plow), (mid['prediction_high'], phigh), (mid['observed']['amount_nominal'], observed), (mid['projected_remaining'], remainder)):
+                s = self.lobby(sector, 0)[sid]
+                for actual, e in ((s['base_level'], level), (s['projected'], point), (s['band80_low'], lo80), (s['band80_high'], hi80), (s['band95_low'], lo95), (s['band95_high'], hi95),
+                                  (s['observed']['amount_nominal'], observed), (s['projected_remaining'], remainder)):
                     self.assertLessEqual(abs(round(actual) - e), 1, f'{actual} vs {e}')
+                self.assertEqual((s['nowcast']['through_quarter'], s['nowcast']['share_years']), ('Q2', [2023, 2024, 2025]))
+                self.assertEqual(s['remainder_status'], 'ready')
 
-    def test_lobbying_coefficient_interval_at_dg_minus_one_matches_the_log_refit(self):
-        s = self.lobby(BANKS, -1)['income_total']
-        self.assertLessEqual(abs(round(s['coefficient_low']) - 23844485), 1)
-        self.assertLessEqual(abs(round(s['coefficient_high']) - 24194595), 1)
-        self.assertLessEqual(abs(round(s['prediction_low']) - 17665651), 1)
-        self.assertLessEqual(abs(round(s['prediction_high']) - 32657027), 1)
+    def test_the_bands_are_the_blind_test_errors_of_the_cut_not_a_model_interval(self):
+        errors = contract.example('anchors')['lda_nowcast_errors']['by_cut']['2']
+        self.assertEqual(errors['n'], 32)
+        for sector in (BANKS, CUS):
+            for sid, s in self.lobby(sector, 0).items():
+                with self.subTest(sector=sector, series=sid):
+                    self.assertAlmostEqual(math.log(s['band80_high'] / s['projected']), errors['q80'], places=12)
+                    self.assertAlmostEqual(math.log(s['projected'] / s['band80_low']), errors['q80'], places=12)
+                    self.assertAlmostEqual(math.log(s['band95_high'] / s['projected']), errors['max'], places=12)
+                    self.assertAlmostEqual(math.log(s['projected'] / s['band95_low']), errors['max'], places=12)
+                    self.assertGreater(s['band95_high'], s['band80_high'])
+        bands = self.out[BANKS + ':lob'][0]['horizons'][0]['lobbying']['bands']
+        self.assertEqual(bands['blind_tests'], 32)
+        self.assertIn('80% band', bands['label_80'])
+        self.assertIn('largest blind miss', bands['label_95'])
+        self.assertIn('n=32 blind tests', bands['label_95'])
+        self.assertNotIn('persistence', bands['label_95'])                                  # the 2026 block has no later year
+        later = self.out[BANKS + ':lob'][0]['horizons'][1]['lobbying']['bands']
+        self.assertIn('added in quadrature to the pooled 95th percentile of the LobbyView persistence error', later['label_95'])        # 2027-28
+        self.assertIn('largest blind miss (n=32 blind tests)', later['label_95'])
+        for key in ('coefficient_low', 'coefficient_high', 'prediction_low', 'prediction_high', 'cycle_given_observed_median'):          # the old year-effect interval is gone
+            self.assertNotIn(key, self.lobby(BANKS, 0)['income_total'])
+
+    def test_a_growth_change_moves_the_nowcast_by_the_pooled_slope_and_leaves_the_bands(self):
+        beta = contract.example('models')['lobby_model']['log_refit']['beta']
+        for sid in ('income_total', 'expenses_total'):
+            lo, mid, hi = (self.lobby(BANKS, dg)[sid] for dg in (-1, 0, 1))
+            with self.subTest(series=sid):
+                self.assertAlmostEqual(lo['projected'] / mid['projected'], math.exp(-beta), places=12)
+                self.assertAlmostEqual(hi['projected'] / mid['projected'], math.exp(beta), places=12)
+                for s in (lo, hi):
+                    self.assertEqual((s['half_width_80'], s['half_width_95']), (mid['half_width_80'], mid['half_width_95']))
+
+    def test_later_years_carry_the_nowcast_and_add_the_persistence_error_in_quadrature(self):
+        errors = contract.example('anchors')['lda_nowcast_errors']['by_cut']['2']
+        persistence = contract.example('models')['lobby_model']['log_refit']['persistence']
+        for sector in (BANKS, CUS):
+            now = self.lobby(sector, 0)
+            for year, h in ((2027, 1), (2028, 2)):
+                for sid, s in self.lobby(sector, 0, year).items():
+                    with self.subTest(sector=sector, year=year, series=sid):
+                        self.assertAlmostEqual(s['projected'], now[sid]['projected'], places=6)           # no growth change: carried forward unchanged
+                        self.assertEqual(s['years_after_nowcast'], h)
+                        self.assertAlmostEqual(s['half_width_80'], math.hypot(errors['q80'], persistence['industries'][sector][str(h)]['q80']), places=12)
+                        self.assertAlmostEqual(s['half_width_95'], math.hypot(errors['max'], persistence['pooled'][str(h)]['q95']), places=12)
+                        self.assertNotIn('observed', s)
 
     def test_both_lda_series_are_side_by_side_and_never_summed(self):
         block = self.out[BANKS + ':lob'][0]['horizons'][0]['lobbying']
@@ -339,13 +381,13 @@ class SectionFTests(unittest.TestCase):
         self.assertEqual(block['sector'], 'bank')
         self.assertNotIn('total', row)
         self.assertEqual(block['base_year'], 2025)
-        near(self, row['change_pct'], 0, 9)
+        near(self, row['slope_change_pct'], 0, 9)
 
-    def test_lobbying_uses_the_log_refit_with_its_ordinary_p(self):
+    def test_lobbying_growth_changes_use_the_log_refit_slope_with_its_ordinary_p(self):
         block = self.out[BANKS + ':lob'][-1]['horizons'][0]['lobbying']
         self.assertAlmostEqual(block['ordinary_p'], 0.029125763521828413, places=12)
         self.assertEqual(block['slope']['label'], 'pooled slope')
-        self.assertAlmostEqual(block['rows'][0]['change_pct'], 100 * math.expm1(-0.00814763405915353 * -1), places=6)
+        self.assertAlmostEqual(block['rows'][0]['slope_change_pct'], 100 * math.expm1(-0.00814763405915353 * -1), places=6)
 
 
 class ContractAndRefusalTests(unittest.TestCase):
@@ -474,7 +516,7 @@ class ContractAndRefusalTests(unittest.TestCase):
             h = out['horizons'][0]
             self.assertEqual(h['pac']['status'], 'needs_inputs')
             self.assertEqual(h['shares']['House']['status'], 'needs_inputs')
-            self.assertEqual(h['lobbying']['rows'][0]['status'], 'needs_inputs')
+            self.assertEqual((h['lobbying']['rows'][0]['status'], h['lobbying']['rows'][0]['cumulative_change_pp']), ('ready', 0))       # the nowcast needs no input: blank is no change
             self.assertEqual([r['cycle'] for r in out['horizons']], [2026, 2028])
 
     def test_an_earlier_as_of_date_uses_the_latest_observed_cut_on_or_before_it(self):
@@ -558,7 +600,7 @@ class ContractAndRefusalTests(unittest.TestCase):
         self.assertEqual(pac['slope']['beta'], -0.168)
         self.assertEqual(pac['ordinary_p'], 0.0006)
 
-    def test_chained_lobbying_needs_every_intermediate_year(self):
+    def test_chained_lobbying_treats_a_blank_change_as_no_change(self):
         with tempfile.TemporaryDirectory() as tmp, World(tmp):
             r = scenario(BANKS)
             r['horizons']['2026']['annual_forecast_changes'] = {'2027': 1, '2028': 1}
@@ -566,12 +608,11 @@ class ContractAndRefusalTests(unittest.TestCase):
             out = gf.project(r)
             rows = out['horizons'][1]['lobbying']['rows']
             self.assertEqual([x['year'] for x in rows], [2027, 2028])
-            self.assertEqual(rows[0]['status'], 'needs_inputs')
-            self.assertIn('2026', rows[0]['reason'])
+            self.assertEqual([(x['status'], x['cumulative_change_pp']) for x in rows], [('ready', 1), ('ready', 2)])         # 2026 is blank: no change
             r['horizons']['2028']['annual_forecast_changes'] = {'2026': 1, '2027': 1, '2028': 1}
             rows = gf.project(r)['horizons'][1]['lobbying']['rows']
             self.assertEqual([(x['steps'], x['chained'], x['cumulative_change_pp']) for x in rows], [(2, True, 2), (3, True, 3)])
-            near(self, rows[1]['change_pct'], 100 * math.expm1(-0.00814763405915353 * 3), 6)
+            near(self, rows[1]['slope_change_pct'], 100 * math.expm1(-0.00814763405915353 * 3), 6)
 
     def test_lobbying_remainder_needs_the_as_of_date_to_reach_the_ldas_last_quarter(self):
         bundle = contract.example('models')
@@ -1094,6 +1135,110 @@ class WaiverTests(unittest.TestCase):
                 self.assertIs(w['show_warning'], True)
                 self.assertEqual((w['gate'], w['owner'], w['date']), ('G6', 'Paul Goff', '2026-09-30'))
                 self.assertEqual((round(w['measured']['comparator_value'], 3), round(w['measured']['model_value_at_ruling'], 3)), (before, after))
+
+
+# Telecom (owner ruling 2026-10-08): offered for lobbying only. The refit writes it as an industry with a Mentat key and the lobbying capability and no OpenSecrets capture; the anchors
+# builder reads its workbook and the Melange LDA sector `telecom`. The series below are the real LDA telecom levels with the nowcast the builder computes from them.
+TELECOM = 'telecom'
+TELECOM_REASON = 'Telecom is offered for lobbying only (owner ruling 2026-10-08): there is no OpenSecrets capture and no roster PAC for this industry, so no giving forecast is made.'
+TELECOM_PERSISTENCE = {'1': dict(n=10, q80=0.12977393486852762), '2': dict(n=10, q80=0.18041710178986747), '3': dict(n=10, q80=0.2550267185327719)}
+TELECOM_SERIES = {
+    'income_total': {'label': 'Outside-firm fees (LDA income_total)', 'annual': {'2021': 35530250.0, '2022': 37020000.0, '2023': 36448000.0, '2024': 36967000.0, '2025': 37000500.0},
+                     'partial': {'year': 2026, 'through_quarter': 'Q2', 'quarters': {'Q1': 9108000.0, 'Q2': 8480500.0}, 'total': 17588500.0,
+                                 'nowcast': {'year': 2026, 'through_quarter': 'Q2', 'observed': 17588500.0, 'prior_total': 37000500.0, 'share': 0.4989584775218408,
+                                             'share_years': [2023, 2024, 2025], 'shares': [0.4962823748902546, 0.5040711986366219, 0.49656085728571236], 'point': 36127286.85245313}}},
+    'expenses_total': {'label': 'In-house expenses (LDA expenses_total)', 'annual': {'2021': 95333890.0, '2022': 98212019.0, '2023': 100554138.0, '2024': 101098642.0, '2025': 102385884.55},
+                       'partial': {'year': 2026, 'through_quarter': 'Q2', 'quarters': {'Q1': 28287640.0, 'Q2': 23778530.0}, 'total': 52066170.0,
+                                   'nowcast': {'year': 2026, 'through_quarter': 'Q2', 'observed': 52066170.0, 'prior_total': 102385884.55, 'share': 0.4928507304003711,
+                                               'share_years': [2023, 2024, 2025], 'shares': [0.4879265336648801, 0.49633794289739325, 0.4943269648198786], 'point': 103991096.56684443}}}}
+
+
+def telecom_files():
+    """The contract examples with telecom added as the refit and the anchors builder produce it: a lobbying-only industry with its own LDA sector."""
+    bundle, anchors = copy.deepcopy(contract.example('models')), copy.deepcopy(contract.example('anchors'))
+    row = copy.deepcopy(bundle['industries']['property_casualty'])
+    row.update(id=TELECOM, label='Telecommunications', mentat_key=TELECOM, ibisworld_code='51721+51711a', lobbyview_sector=TELECOM, history=[], scope='no OpenSecrets capture; lobbying only', lobbying_only=True,
+               withheld=dict(pac=TELECOM_REASON, control=TELECOM_REASON), lobbying_history=[])
+    row.pop('caveats', None)
+    bundle['industries'][TELECOM] = row
+    log = bundle['lobby_model']['log_refit']
+    log['slopes'][TELECOM] = copy.deepcopy(log['slopes'][BANKS])
+    log['prediction']['industries'][TELECOM] = copy.deepcopy(log['prediction']['industries'][BANKS])
+    log['persistence']['industries'][TELECOM] = copy.deepcopy(TELECOM_PERSISTENCE)
+    entry = copy.deepcopy(anchors['industries']['property_casualty'])
+    entry.update(id=TELECOM, label='Telecommunications (Mentat Telecom)', forecast_industry=TELECOM)
+    entry['mentat'].update(dataset='Telecom', workbook='Telecom Industry Spending Overview.xlsx')
+    entry['status']['lda'] = 'ready'
+    entry['lda'] = dict(entry['lda'], status='ready', reason=None, sector=TELECOM, label='Melange LDA telecom sector', source_file='sector_spend.csv', source_sha256='0' * 64,
+                        through='2026-06-30', series=copy.deepcopy(TELECOM_SERIES))
+    anchors['industries'][TELECOM] = entry
+    assert contract.validate_model(bundle) == [] and contract.validate_kind(anchors, 'anchors') == [] and contract.check_anchor_invariants(anchors) == []
+    return bundle, anchors
+
+
+class TelecomLobbyingOnlyTests(unittest.TestCase):
+    def project(self, bundle=None, anchors=None, request=None):
+        files = telecom_files()
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=bundle or files[0], anchors=anchors or files[1]):
+            return gf.project(request or {'industry': TELECOM, 'as_of': '2026-09-30'})
+
+    def test_telecom_is_listed_with_the_lobbying_capability_only(self):
+        bundle, anchors = telecom_files()
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=bundle, anchors=anchors):
+            catalog = gf.catalog('2026-09-30')
+        row = next(i for i in catalog['industries'] if i['id'] == TELECOM)
+        self.assertEqual(row['capabilities'], dict(pac=False, control=False, lobbying=True))
+        self.assertEqual((row['withheld']['pac'], row['withheld']['control']), (TELECOM_REASON, TELECOM_REASON))
+        self.assertEqual(catalog['anchors']['industries'][TELECOM]['status'], 'ready')
+        self.assertEqual({i['id'] for i in catalog['industries']}, {BANKS, CUS, 'property_casualty', TELECOM})
+
+    def test_giving_is_unavailable_with_the_reason_and_lobbying_is_the_nowcast_with_bands(self):
+        out = self.project()
+        self.assertEqual(out['status'], 'ready')
+        errors = contract.example('anchors')['lda_nowcast_errors']['by_cut']['2']
+        for h in out['horizons']:
+            self.assertEqual((h['pac']['status'], h['pac']['reason']), ('withheld', TELECOM_REASON))
+            for chamber in ('House', 'Senate'):
+                self.assertEqual((h['shares'][chamber]['status'], h['shares'][chamber]['reason']), ('withheld', TELECOM_REASON))
+            self.assertEqual(h['lobbying']['status'], 'ready')
+        fees, expenses = out['horizons'][0]['lobbying']['rows'][0]['series']
+        self.assertLessEqual(abs(fees['projected'] - 36127287), 1)
+        self.assertLessEqual(abs(expenses['projected'] - 103991097), 1)
+        self.assertAlmostEqual(fees['band80_high'] / fees['projected'], math.exp(errors['q80']), places=12)
+        self.assertAlmostEqual(fees['band95_low'] / fees['projected'], math.exp(-errors['max']), places=12)
+        self.assertEqual(fees['remainder_status'], 'ready')
+        self.assertLessEqual(abs(fees['projected_remaining'] - (36127287 - 17588500)), 1)
+        rows = out['horizons'][1]['lobbying']['rows']
+        self.assertEqual([r['year'] for r in rows], [2027, 2028])
+        for r, h in zip(rows, ('1', '2')):                                      # the telecom persistence error of 1 and 2 years, in quadrature with the nowcast's blind error
+            self.assertAlmostEqual(r['series'][0]['half_width_80'], math.hypot(errors['q80'], TELECOM_PERSISTENCE[h]['q80']), places=12)
+
+    def test_a_bundle_without_the_persistence_errors_gives_the_nowcast_year_but_no_later_year(self):
+        bundle, anchors = telecom_files()
+        del bundle['lobby_model']['log_refit']['persistence']
+        out = self.project(bundle, anchors)
+        self.assertEqual(out['horizons'][0]['lobbying']['rows'][0]['status'], 'ready')
+        later = out['horizons'][1]['lobbying']['rows']
+        self.assertEqual([r['status'] for r in later], ['unavailable', 'unavailable'])
+        self.assertIn('persistence', later[0]['reason'])
+
+    def test_a_snapshot_that_predates_the_nowcast_is_not_made_up(self):
+        bundle, anchors = telecom_files()
+        for ind in anchors['industries'].values():
+            for series in ind['lda']['series'].values():
+                if series['partial']:
+                    series['partial'].pop('nowcast')
+        del anchors['lda_nowcast_errors']
+        row = self.project(bundle, anchors)['horizons'][0]['lobbying']['rows'][0]
+        self.assertEqual(row['status'], 'unavailable')
+        self.assertIn('Rebuild the anchors', row['reason'])
+
+    def test_a_missing_blind_error_table_leaves_the_bands_unavailable_not_invented(self):
+        bundle, anchors = telecom_files()
+        del anchors['lda_nowcast_errors']
+        row = self.project(bundle, anchors)['horizons'][0]['lobbying']['rows'][0]
+        self.assertEqual(row['status'], 'unavailable')
+        self.assertIn('no blind-test errors', row['reason'])
 
 
 class RenderFixtureTests(unittest.TestCase):

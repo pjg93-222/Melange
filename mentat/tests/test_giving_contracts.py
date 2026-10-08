@@ -129,6 +129,37 @@ class ContractTests(unittest.TestCase):
         self.assertNotIn('Pres', plain['share_models']['control_Senate']['terms'])
         self.assertEqual(contract.validate_model(plain), [])
 
+    def test_an_offered_industry_without_the_pac_capability_needs_no_giving_inputs(self):
+        """Owner ruling 2026-10-08 (Telecom is offered for lobbying only): the cycle model checks the general-giving step and the IBIS path of the industries offered for giving."""
+        import copy
+        bundle = copy.deepcopy(contract.example('models_cycle'))
+        row = copy.deepcopy(bundle['industries']['property_casualty'])
+        row.update(id='telecom', label='Telecommunications', mentat_key='telecom', capabilities=dict(pac=False, control=False, lobbying=True), withheld=dict(pac='no giving model', control='no giving model'))
+        row['lobbying_only'] = True
+        bundle['industries']['telecom'] = row
+        self.assertEqual(contract.check_cycle_model(bundle), [])                                  # flagged lobbying only: no step block, no growth path
+        self.assertEqual(contract.validate_model(bundle), [])
+        for edit in (lambda r: r.update(lobbying_only=False), lambda r: r.pop('lobbying_only')):       # flag false, or no flag with the PAC capability merely withheld: checked
+            doc = copy.deepcopy(bundle)
+            edit(doc['industries']['telecom'])
+            self.assertTrue(any('no entry for telecom' in p for p in contract.check_cycle_model(doc)))
+
+    def test_the_lobbying_persistence_block_is_optional_and_typed(self):
+        import copy
+        example = contract.example('models')
+        self.assertIn('persistence', example['lobby_model']['log_refit'])
+        without = copy.deepcopy(example)
+        del without['lobby_model']['log_refit']['persistence']
+        self.assertEqual(contract.validate_model(without), [])                                     # a bundle published before the ruling stays valid (pointer rollback)
+        for edit in (lambda p: p['pooled']['1'].pop('q95'), lambda p: p['pooled']['4'], lambda p: p['industries']['commercial_banks']['1'].update(q80=-1), lambda p: p.pop('window'),
+                     lambda p: p['industries']['commercial_banks']['1'].update(extra=1)):
+            doc = copy.deepcopy(example)
+            try:
+                edit(doc['lobby_model']['log_refit']['persistence'])
+            except KeyError:
+                doc['lobby_model']['log_refit']['persistence']['pooled']['4'] = dict(n=1, q80=0.1, q95=0.2)
+            self.assertTrue(contract.validate_kind(doc, 'models'))
+
     def test_the_anchor_odd_year_block_is_optional_typed_and_bounded_by_the_cycle_total(self):
         import copy
         example = contract.example('anchors')

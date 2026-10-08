@@ -223,7 +223,7 @@ def check_cycle_model(bundle, tolerance=1e-9):
     """Cross-field rules of the optional `cycle_model` (owner rulings 2026-10-07). Returns a list of problems (empty = consistent).
 
     * per measure: d_h = b0 + b1 (k_max + sum_{j<=h} damp^j) for h = 1, 2; every step block has df = pairs - 1;
-    * every industry the console offers (calculator and a Mentat key) has a general-giving step block and a complete REAL IBIS growth path 2023..2027 (each above -100%);
+    * every industry the console offers for giving (calculator and a Mentat key, unless it is flagged `lobbying_only`) has a general-giving step block and a complete REAL IBIS growth path 2023..2027 (each above -100%);
     * the budget rule weights the model by 0.5; the pace series carry F > 0 and 0 < O15 <= O18 <= O21 <= F in every cycle;
     * the Senate share model carries the presidential-cycle term (owner ruling 2026-10-07, "2. Keep senate in").
     """
@@ -239,7 +239,7 @@ def check_cycle_model(bundle, tolerance=1e-9):
         for ident, step in m['step'].items():
             if step['df'] != step['pairs'] - 1:
                 problems.append(tag + '.step.' + ident + ': df is not pairs - 1')
-    offered = [i for i, row in bundle['industries'].items() if row['calculator'] and row['mentat_key']]
+    offered = [i for i, row in bundle['industries'].items() if row['calculator'] and row['mentat_key'] and not row.get('lobbying_only')]       # only an explicit lobbying-only industry (telecom) is not checked for giving inputs: a withheld PAC capability alone is not enough
     for ident in offered:
         if ident not in cm['measures']['general_giving']['step']:
             problems.append('cycle_model.measures.general_giving.step: no entry for ' + ident + ', which the console offers')
@@ -376,4 +376,23 @@ def check_anchor_invariants(snapshot, tolerance=0.011):
                     problems.append(tag + '.lda.series.' + sid + ': partial total differs from its quarters')
                 if partial is not None and str(partial['year']) in series['annual']:
                     problems.append(tag + '.lda.series.' + sid + ': a partial year must not also be listed as a complete annual value')
+                now = None if partial is None else partial.get('nowcast')
+                if now is not None:
+                    where = tag + '.lda.series.' + sid + '.partial.nowcast'
+                    geo = math.exp(sum(math.log(v) for v in now['shares']) / len(now['shares']))
+                    cut_quarters = ['Q' + str(i) for i in range(1, int(now['through_quarter'][1]) + 1)]
+                    if len(now['shares']) != len(now['share_years']) or len(now['shares']) > 3 or now['year'] != partial['year'] or now['through_quarter'] != partial['through_quarter']:
+                        problems.append(where + ': year, cut and the (at most three) prior shares must match the partial year')
+                    if abs(geo - now['share']) > 1e-9:
+                        problems.append(where + ': share is not the geometric mean of shares')
+                    if abs(sum(partial['quarters'].get(q, 0.) for q in cut_quarters) - now['observed']) > tolerance:
+                        problems.append(where + ': observed differs from the filed quarters through the cut')
+                    if str(now['year'] - 1) in series['annual'] and abs(series['annual'][str(now['year'] - 1)] - now['prior_total']) > tolerance:
+                        problems.append(where + ': prior_total differs from the annual value of the prior year')
+                    if abs(now['observed'] + (1. - now['share']) * now['prior_total'] - now['point']) > max(tolerance, 1e-9 * now['point']):
+                        problems.append(where + ': point is not observed + (1 - share) * prior_total')
+    errors = snapshot.get('lda_nowcast_errors')
+    for cut, row in ({} if errors is None else errors['by_cut']).items():
+        if row['q80'] > row['max'] + 1e-12:
+            problems.append('lda_nowcast_errors.by_cut.' + cut + ': the 80th percentile exceeds the largest miss')
     return problems

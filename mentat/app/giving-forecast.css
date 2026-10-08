@@ -121,6 +121,7 @@
 .gf-svg .gf-series-fees .gf-dot.is-base{stroke:var(--chart-series-1)}
 .gf-svg .gf-series-inhouse .gf-dot.is-base{stroke:var(--acu-mauve)}
 .gf-svg .gf-lobby-whisker{fill:none;stroke-width:1.4;opacity:.55}
+.gf-svg .gf-lobby-whisker-95{stroke-width:1;opacity:.4;stroke-dasharray:3 2}
 .gf-svg .gf-series-fees .gf-lobby-whisker{stroke:var(--chart-series-1)}
 .gf-svg .gf-series-inhouse .gf-lobby-whisker{stroke:var(--acu-mauve)}
 

@@ -44,6 +44,12 @@ against the shared schema and invariants; an invalid build leaves the previous s
   report due date (the 15th of the following month) was on or before the collection date. Banks, P&C, Community Banks: 2026-06-30. Credit
   unions are cut back to 2026-05-31 ("June incomplete") for as long as the rule end is 2026-06-30. Observed amounts are cumulative month-end
   cuts of the open cycle up to the coverage end; rows dated later stay in the remainder window.
+* **Lobbying nowcast** (owner rulings 2026-10-08): each LDA series carries `partial.nowcast` = `O + (1 - s) B` (`lda.nowcast`): `O` = filed so far this year through the latest complete quarter,
+  `B` = the prior full-year total, `s` = the geometric mean of the share filed by that quarter in up to the 3 prior years. It is the remaining-share form of the PAC panel's R8 nowcast, not the pace
+  `O / s`. The snapshot's `lda_nowcast_errors` is the blind-test table that bounds it: for each quarter cut, the errors `log(nowcast / actual)` of every complete year with a complete prior year,
+  both series, the pool sectors bank, credit union, telecom and fintech (n = 32 with the 2022-2025 targets; crypto is left out, its early years are too thin), as `{n, q80, max}`. They are computed here, at
+  anchor-build time, from the same `sector_spend.csv` (the console cannot see the other pool sectors); the LobbyView persistence errors that bound the years after the nowcast year come from the refit bundle.
+  A quarter counts as complete once it has filings (an LDA quarter is due 20 days after it ends); a partially filed latest quarter would understate the nowcast.
 * **Thin base**: under $100,000 of D + R per chamber, per cycle, per basis (`thin_base`).
 * **Roster PACs**: `registry.json`. Trade-association PACs are not counted. Credit unions have one PAC (SchoolsFirst), flagged `single_pac`.
 * **Separate datasets**: `community_banks` is its own entry (`forecast_industry: null`), never merged into banks. Auto has no Mentat workbook

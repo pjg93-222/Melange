@@ -189,11 +189,48 @@ test_that("industries: banks and credit unions are offered, auto stays in estima
   expect_true(ind$property_casualty$capabilities$lobbying)
   expect_length(ind$property_casualty$history, 0L)
   expect_null(ind$life_insurance)
+  # telecom (owner ruling 2026-10-08) is offered for lobbying only: a Mentat key, the lobbying capability, a stated reason for the two giving models
+  expect_true(ind$telecom$calculator); expect_identical(ind$telecom$mentat_key, "telecom"); expect_identical(ind$telecom$lobbyview_sector, "telecom")
+  expect_true(ind$telecom$lobbying_only); expect_false(ind$commercial_banks$lobbying_only); expect_false(ind$property_casualty$lobbying_only)       # the registry's flag, emitted for every industry
+  expect_identical(ind$telecom$capabilities, list(pac = FALSE, control = FALSE, lobbying = TRUE))
+  expect_match(ind$telecom$withheld$pac, "offered for lobbying only"); expect_match(ind$telecom$withheld$control, "no giving forecast")
+  expect_length(ind$telecom$history, 0L)
   # auto has one lobbying pair: sample adequacy withholds lobbying (a stated reason, never silent)
   expect_false(ind$auto_light_duty_manufacturing$capabilities$lobbying)
   expect_match(ind$auto_light_duty_manufacturing$withheld$lobbying, "sample adequacy")
   expect_identical(unlist(ind$commercial_banks$growth_scaling_cycles), seq(2012L, 2024L, 2L))
   expect_equal(length(ind$commercial_banks$history), 7L)
+})
+
+test_that("lobbying persistence: the split-conformal quantiles of the h-year log differences over the 2014-2023 targets, per sector and pooled (hand-computed case)", {
+  k <- 0:17
+  lv <- data.frame(study_sector = rep(c("a", "b"), each = 18), year = rep(2008:2025, 2), y_real_m = c(exp(0.005 * k * (k + 1)), exp(-0.005 * k * (k + 1))), stringsAsFactors = FALSE)
+  pe <- rf_lobby_persistence(lv)
+  # log level = +-0.005 k (k + 1), k = year - 2008: the one-year difference at target t is +-0.01 (t - 2008), t = 2014..2023, i.e. |e| = 0.06 ... 0.15
+  expect_identical(pe$sector$a$`1`$n, 10L)
+  expect_equal(pe$sector$a$`1`$q80, 0.14, tolerance = 1e-12)                       # ceil(11 x 0.8) = the 9th smallest of 10
+  expect_equal(pe$sector$b$`1`$q80, 0.14, tolerance = 1e-12)
+  expect_identical(pe$pooled$`1`$n, 20L)
+  expect_equal(pe$pooled$`1`$q80, 0.14, tolerance = 1e-12)                          # ceil(21 x 0.8) = 17 of 20 sorted |e| (each value twice)
+  expect_equal(pe$pooled$`1`$q95, 0.15, tolerance = 1e-12)                          # ceil(21 x 0.95) = 20: the largest
+  expect_equal(pe$sector$a$`2`$q80, 0.01 * (2 * 2022 - 2 * 2008 - 1) , tolerance = 1e-9)   # h = 2: e = 0.01 (2 t - 2 x 2008 - 1); the 9th smallest target is 2022
+  # a sector too short for the quantile has no entry rather than a made-up one; targets outside the window are not used
+  short <- rf_lobby_persistence(lv[lv$study_sector == "a" & lv$year %in% 2012:2015, ])
+  expect_true(is.na(short$sector$a$`1`$q80)); expect_identical(short$sector$a$`1`$n, 2L)
+})
+
+test_that("the bundle carries the lobbying persistence errors (owner rulings 2026-10-08): the blind-test table of the study, per offered industry and pooled over every LobbyView sector", {
+  pe <- test_bundle2()$lobby_model$log_refit$persistence
+  expect_match(pe$window, "target years 2014-2023")
+  expect_true(all(c("commercial_banks", "credit_unions", "telecom") %in% names(pe$industries)))
+  expect_false("life_insurance" %in% names(pe$industries))                           # not an industry of the bundle; it still counts in the pooled table
+  b1 <- pe$industries$commercial_banks$`1`
+  expect_identical(b1$n, 10L); expect_equal(b1$q80, 0.11332135689014677, tolerance = 1e-9)
+  expect_equal(pe$industries$telecom$`1`$q80, 0.12977393486852762, tolerance = 1e-9)
+  expect_equal(pe$industries$credit_unions$`2`$q80, 0.17338143912568071, tolerance = 1e-9)
+  expect_identical(pe$pooled$`1`$n, 60L)                                             # six sectors x ten targets
+  expect_equal(pe$pooled$`1`$q80, 0.1852509758693479, tolerance = 1e-9); expect_equal(pe$pooled$`1`$q95, 0.25920943482670467, tolerance = 1e-9)
+  expect_equal(pe$pooled$`2`$q95, 0.3364104872238478, tolerance = 1e-9); expect_equal(pe$pooled$`3`$q95, 0.43865571483590315, tolerance = 1e-9)
 })
 
 test_that("backtests rows carry exactly the contract's keys and the chosen-rule comparisons", {

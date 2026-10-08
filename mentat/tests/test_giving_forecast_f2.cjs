@@ -589,38 +589,51 @@ test('lobbying: two series on one chart, never summed; empty and closed states s
   assert.equal(fees.points.length, 4); assert.equal(inhouse.points.length, 4);
   for (let i = 0; i < 4; i++) assert.ok(lobby.series.every(s => Math.abs(s.points[i].value - (fees.points[i].value + inhouse.points[i].value)) > 1), 'a point equals the two series added');
   assert.match(fees.points[1].tip.map(l => l.note || '').join(' '), /never added/);
-  assert.ok(lobby.axisMax >= Math.max(...inhouse.points.map(p => p.high || p.value)));
-  assert.deepEqual(plain(t.lobbyModel(RUN.banks, 2026, 2028)), {state: 'empty', text: 'Enter yearly growth to project 2026–2028'});
-  assert.deepEqual(plain(t.lobbyModel(null, 2026, 2028)), {state: 'empty', text: 'Enter yearly growth to project 2026–2028'});
+  assert.ok(lobby.axisMax >= Math.max(...inhouse.points.map(p => p.high95 || p.value)));
+  assert.equal(t.lobbyModel(RUN.banks, 2026, 2028).state, 'ready', 'blank growth inputs are no change: the nowcast is drawn');
+  assert.deepEqual(plain(t.lobbyModel(null, 2026, 2028)), {state: 'empty', text: 'No lobbying projection for 2026–2028'});
   assert.match(t.lobbyModel(RUN.property_casualty, 2026, 2028).text, /^Not shown: No Melange-LDA sector for this industry/);
   assert.equal(lobby.dollars, 'nominal dollars');
 });
 
-test('lobbying, model fix P1: the open year is drawn from the interval conditioned on the observed quarters, in the base year\'s dollars', () => {
+test('lobbying (owner rulings 2026-10-08): the open year is the nowcast with an 80% and a ~95% band and the observed quarters; later years carry it with the persistence error', () => {
   const {t} = session();
   const lobby = t.lobbyModel(P1.banks_lobby, 2026, 2028);
   const s = P1.banks_lobby.horizons[0].lobbying.rows[0].series[0];
-  const point = lobby.series[0].points[1];
-  assert.equal(point.conditioned, true);
-  assert.equal(point.value, s.cycle_given_observed_median);
-  assert.equal(point.low, s.cycle_given_observed_low);
-  assert.equal(point.high, s.cycle_given_observed_high);
-  assert.equal(point.remaining, s.remaining_given_observed_median);
-  assert.equal(lobby.dollars, '2025 dollars');
-  assert.match(texts(point.tip), /given the observed quarters/);
-  assert.match(texts(point.tip), /Observed Q1\+Q2: \$13\.37M \(face value\)/);
-  assert.equal(lobby.series[0].points[2].conditioned, false, 'a year with no observed quarters is the model\'s own interval');
+  const [base, open, next] = lobby.series[0].points;
+  assert.equal(open.value, s.projected);
+  assert.deepEqual(plain([open.low, open.high, open.low95, open.high95]), [s.band80_low, s.band80_high, s.band95_low, s.band95_high]);
+  assert.ok(open.low95 < open.low && open.low < open.value && open.value < open.high && open.high < open.high95, 'the ~95% band (largest blind miss) encloses the 80% band');
+  assert.equal(open.remaining, s.projected_remaining);
+  assert.equal(lobby.dollars, 'nominal dollars');
+  assert.match(texts(open.tip), /Nowcast, Q2 cut: \$13\.37M filed \+ 51\.58% of 2025/);
+  assert.match(texts(open.tip), /80% band/); assert.match(texts(open.tip), /~95% band \(largest blind miss\)/);
+  assert.match(texts(open.tip), /Observed Q1\+Q2: \$13\.37M \(face value\)/);
+  assert.match(texts(open.tip), /80% band: the 80th percentile of the blind nowcast errors \(n=32 blind tests\)/);
+  assert.equal(base.base, true); assert.equal(open.ahead, 0); assert.equal(next.ahead, 1);
+  assert.match(texts(next.tip), /Carried 1 year past the nowcast: the bands add the LobbyView persistence error, in quadrature/);
   assert.deepEqual(plain(lobby.chips), []);
 });
 
-test('lobbying, without the model fix: an interval that starts below the observed quarters is an amber chip (synthetic case)', () => {
+test('a lobbying-only industry (Telecom): the giving chart says why it has no giving forecast; the lobbying chart explains its two bands', () => {
+  const {t} = session();
+  const run = clone(RUN.banks);
+  for (const h of run.horizons) h.pac = {status: 'withheld', reason: 'Telecom is offered for lobbying only (owner ruling 2026-10-08).', measures: []};
+  const model = t.chartModel(run, null, 'general');
+  assert.equal(model.empty, true);
+  assert.equal(model.message, 'Telecom is offered for lobbying only (owner ruling 2026-10-08).');
+  assert.deepEqual(plain(model.flags.map(f => f.text)), ['Telecom is offered for lobbying only (owner ruling 2026-10-08).']);
+  assert.equal(t.lobbyModel(RUN.banks_lobby, 2026, 2028).caption, 'Bars: 80% band · dashed: ~95% band, the largest blind miss (n=32)');
+});
+
+test('lobbying: a ~95% band that starts below the observed quarters is an amber chip (synthetic case)', () => {
   const {t} = session();
   const run = clone(RUN.banks_lobby), s = run.horizons[0].lobbying.rows[0].series[0];
-  s.prediction_low = s.observed.amount_nominal * 0.9;
+  s.band95_low = s.observed.amount_nominal * 0.9;
   const chips = t.lobbyModel(run, 2026, 2028).chips;
   assert.equal(chips.length, 1);
   assert.equal(chips[0].kind, AMBER);
-  assert.match(chips[0].text, /interval starts below the amount already observed/);
+  assert.match(chips[0].text, /~95% band starts below the amount already observed/);
 });
 
 test('the notes carry the conditioned figures only when the model fix is present, and every waiver', () => {
@@ -628,10 +641,9 @@ test('the notes carry the conditioned figures only when the model fix is present
   const fix = t.conditionedTables(P1.banks_lobby);
   assert.equal(fix.amounts.length, 2);
   assert.equal(fix.mixes.length, 4);
-  assert.equal(fix.lobby.length, 2);
   assert.match(fix.mixes[3][5], /negative before conditioning/);
   assert.match(fix.amounts[0][0], /Roster companies' PACs/);
-  assert.deepEqual(plain(t.conditionedTables(RUN.banks_lobby)), {amounts: [], mixes: [], lobby: []});
+  assert.deepEqual(plain(t.conditionedTables(RUN.banks_lobby)), {amounts: [], mixes: []});
 });
 
 test('logical validity across every scenario of the fixtures: with the model fix nothing drawn contradicts the giving already observed; without it every contradiction carries an amber chip', () => {
@@ -1306,7 +1318,7 @@ test('the scope pill tooltip agrees with the bars: the model\'s change is labell
   assert.deepEqual(plain(rowsOf(plainTip.exampleTip())), []);
 });
 
-test('the lobbying tooltip agrees with the point it sits on: the change against the base level is the one drawn, and the model\'s own change says what it is', () => {
+test('the lobbying tooltip agrees with the point it sits on: the change against the base level is the one drawn', () => {
   let checked = 0;
   for (const [pathName, runs, source] of THREE_PATHS) {
     const {t} = session({sector: 'commercial_banks', source}), model = t.lobbyModel(runs.banks_lobby, 2026, 2028);
@@ -1315,14 +1327,9 @@ test('the lobbying tooltip agrees with the point it sits on: the change against 
       for (const p of item.points.slice(1)) {
         const drawn = (p.value / base - 1) * 100, where = `${pathName}/${item.label}/${p.year}`;
         checked++;
-        if (p.conditioned) {
-          assert.deepEqual(plain(row(p.tip, 'Change vs the 2025 level, drawn (conditioned)')), ['Change vs the 2025 level, drawn (conditioned)', sgn(drawn) + '%'], where);
-          assert.ok(row(p.tip, 'Model change before conditioning on the observed quarters'), where);
-          assert.equal(row(p.tip, 'Change vs the 2025 level'), undefined, where);
-        } else {
-          const own = row(p.tip, 'Change vs the 2025 level');
-          assert.ok(own && Math.abs(parseFloat(own[1].replace(/,/g, '')) - drawn) < 0.01, `${where}: ${own && own[1]} against ${drawn}`);
-        }
+        const own = row(p.tip, 'Change vs the 2025 level');
+        assert.ok(own && Math.abs(parseFloat(own[1].replace(/,/g, '')) - drawn) < 0.01, `${where}: ${own && own[1]} against ${drawn}`);
+        assert.ok(row(p.tip, '80% band') && row(p.tip, '~95% band (largest blind miss)'), where + ': both bands are in the tooltip');
       }
     }
   }

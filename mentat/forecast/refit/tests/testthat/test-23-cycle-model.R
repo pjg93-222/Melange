@@ -188,6 +188,19 @@ test_that("a context that lacks an offered industry (the frozen v1 sample has no
   expect_length(rf_cycle_model_gap(test_v2_pilot()), 0L)
 })
 
+test_that("a lobbying-only industry (telecom, owner ruling 2026-10-08) is offered by the console but not checked for giving inputs: no step block, no IBIS path, and the bundle still validates", {
+  v <- test_v2_pilot(); b <- test_bundle2_pilot()
+  expect_true(b$industries$telecom$calculator); expect_false(b$industries$telecom$capabilities$pac)
+  expect_false("telecom" %in% rf_cycle_model_offered(v))
+  expect_setequal(rf_cycle_model_offered(v), c("commercial_banks", "credit_unions", "property_casualty"))
+  expect_null(b$cycle_model$measures$general_giving$step$telecom); expect_null(b$cycle_model$budget_rule$growth$telecom)
+  expect_identical(rf_validate_parsed(rf_canonical_json(b)), character(0))
+  # offered for giving, or merely PAC-withheld without the flag, it would be checked (the contract skips on lobbying_only alone)
+  expect_true(b$industries$telecom$lobbying_only)
+  for (f in list(function(x) { x$industries$telecom$lobbying_only <- FALSE; x }, function(x) { x$industries$telecom$lobbying_only <- NULL; x }))
+    expect_true(any(grepl("no entry for telecom", rf_validate_parsed(f(rf_canonical_json(b))), fixed = TRUE)))
+})
+
 test_that("RF_CYCLE_MODEL=0 reproduces the bundle published before the cycle model (rf_bundle_diff over the model blocks), and says so in its context", {
   pub <- published_before_cycle()
   if (!is.list(pub)) skip("this tree's publish directory holds no bundle published before the cycle model (versions/7bc7bcf1...)")
@@ -205,11 +218,15 @@ test_that("RF_CYCLE_MODEL=0 reproduces the bundle published before the cycle mod
   a <- rf_canonical_json(b0)[keep]; p <- pub[keep]
   d <- rf_bundle_diff(a, p, ignore = c("built_at_utc", "model_version", "run_id", "code_sha256", "R_version", "packages", "note", "as_of", "evidence"))
   if (nrow(d)) print(utils::head(d, 12))
-  # the one text that differs is code text, not model content: the anchor-contract label of the general-giving measure gained its exclusion clause ("excluding receipts Mentat marks non-giving ...")
-  # in the writer after 2026-09-30, the day the published bundle was built
-  known <- "$.anchor_contract.pac.measures[1].label"
-  expect_true(all(d$path == known), info = paste(setdiff(d$path, known), collapse = "; "))
-  if (nrow(d)) expect_match(d$a, "^Mentat general giving \\(included receipt amount, all channels\\)")
+  # the text that differs is code text, not model content: the anchor-contract label of the general-giving measure gained its exclusion clause ("excluding receipts Mentat marks non-giving ...")
+  # in the writer after 2026-09-30, the day the published bundle was built. The other differences are the additions of the owner rulings of 2026-10-08: Telecom as a lobbying-only industry
+  # (its entry, its pooled lobbying slope and residual block) and the lobbying persistence errors; nothing the published bundle had changed.
+  label <- "$.anchor_contract.pac.measures[1].label"
+  known <- c(label, "$.industries.telecom", "$.lobby_model.log_refit.persistence", "$.lobby_model.log_refit.slopes.telecom", "$.lobby_model.log_refit.prediction.industries.telecom",
+             paste0("$.industries.", c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing", "property_casualty"), ".lobbying_only"))       # the explicit lobbying_only flag the rulings added to every industry
+  expect_true(all(d$path %in% known), info = paste(setdiff(d$path, known), collapse = "; "))
+  expect_true(all(d$b[d$path != label] == "missing on one side"), info = "the rulings only add keys")
+  if (label %in% d$path) expect_match(d$a[d$path == label], "^Mentat general giving \\(included receipt amount, all channels\\)")
   expect_lt(attr(d, "max_dev"), 1e-9)
 })
 

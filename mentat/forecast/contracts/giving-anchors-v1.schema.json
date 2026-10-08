@@ -599,6 +599,70 @@
         "type": "string"
       },
       "description": "Industries the builder could not anchor (id -> reason); the console refuses them with that reason."
+    },
+    "lda_nowcast_errors": {
+      "type": "object",
+      "properties": {
+        "pool": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1
+        },
+        "by_cut": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "n": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "q80": {
+                "type": "number",
+                "minimum": 0
+              },
+              "max": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "n",
+              "q80",
+              "max"
+            ],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[123]$"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "pool",
+        "series",
+        "targets",
+        "by_cut"
+      ],
+      "additionalProperties": false,
+      "description": "Pooled blind errors of the lobbying nowcast, log(prediction / actual), by quarter cut (1 = Q1 ... 3 = Q3): n blind tests (every complete year with a complete prior year x both series x every pool sector), q80 the split-conformal 80th percentile of the absolute error, max the largest blind miss. They are the half-widths (log scale) of the 80% and ~95% bands. Optional: absent in snapshots built before the ruling."
     }
   },
   "required": [
@@ -805,6 +869,69 @@
             "total": {
               "type": "number",
               "minimum": 0
+            },
+            "nowcast": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "year": {
+                  "type": "integer"
+                },
+                "through_quarter": {
+                  "enum": [
+                    "Q1",
+                    "Q2",
+                    "Q3"
+                  ]
+                },
+                "observed": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "prior_total": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "share": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1
+                },
+                "share_years": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "minItems": 1
+                },
+                "shares": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 1
+                },
+                "point": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "year",
+                "through_quarter",
+                "observed",
+                "prior_total",
+                "share",
+                "share_years",
+                "shares",
+                "point"
+              ],
+              "additionalProperties": false,
+              "description": "The in-year nowcast (owner rulings 2026-10-08): point = observed + (1 - share) * prior_total, observed = filed so far this year through the latest complete quarter cut, prior_total = the prior full-year total, share = geometric mean of the share filed by the same cut in up to the 3 prior years (shares, share_years). null when a prior year is missing. Optional: absent in snapshots built before the ruling."
             }
           },
           "required": [

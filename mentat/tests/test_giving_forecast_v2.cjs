@@ -216,7 +216,13 @@ test('both lobbying series are side by side, never summed, with observed quarter
   assert.match(all, /Observed Q1\+Q2: \$38\.98M/);
   assert.match(all, /never added/);
   assert.match(all, /Melange LDA bank sector \(total, not a bank tier\), nominal dollars/);
-  assert.match(all, /pooled slope · ordinary p = 0\.0291/);
+  assert.match(all, /Nowcast, Q2 cut: \$13\.37M filed \+ 51\.58% of 2025 \(\$23\.82M\) still to come\./);
+  assert.match(all, /80% band: \$[\d.]+M to \$[\d.]+M\./);
+  assert.match(all, /~95% band \(largest blind miss\): \$[\d.]+M to \$[\d.]+M\./);
+  assert.match(all, /80% band: the 80th percentile of the blind nowcast errors \(n=32 blind tests\)\./);
+  assert.match(all, /~95% band: the largest blind miss \(n=32 blind tests\); with so few tests it is a worst-observed bound, not an estimated 95% interval\./);
+  assert.doesNotMatch(all, /Coefficient interval|Prediction interval/);
+  assert.doesNotMatch(all, /pooled slope · ordinary p/, 'no growth change entered: the slope plays no part');
   assert.doesNotMatch(all, /[Tt]otal lobbying/);
 });
 
@@ -274,12 +280,12 @@ test('credit unions show the June cut-back in the coverage note', () => {
   assert.match(all, /observed through 2026-05-31 \(cut back from 2026-06-30: June incomplete/);
 });
 
-test('blank inputs stay unknown in every outcome, never zero', () => {
+test('blank inputs stay unknown in the giving outcomes, never zero; lobbying is the nowcast', () => {
   const {t} = session();
   const h = horizon('banks_blank', 0);
   assert.match(flat(t.pacCellV2(h.pac, true)), /Enter expected two-year cycle revenue growth\./);
   assert.match(flat(t.shareCellV2(h.shares.House, true, 'House')), /Enter House current-control assumption, House control score\./);
-  assert.match(flat(t.lobbyCellV2(h.lobbying)), /Enter the growth-forecast change for 2026\./);
+  assert.match(flat(t.lobbyCellV2(h.lobbying)), /Nowcast, Q2 cut/, 'lobbying needs no input: blank is no change from the nowcast');
 });
 
 test('the request has no seat signal, slope selector, observed amounts or budgets', () => {

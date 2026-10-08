@@ -6173,7 +6173,13 @@
      "ends": "2026-12-31",
      "horizon": "current_remainder",
      "lobbying": {
+      "bands": {
+       "blind_tests": 32,
+       "label_80": "80% band: the 80th percentile of the blind nowcast errors (n=32 blind tests)",
+       "label_95": "~95% band: the largest blind miss (n=32 blind tests); with so few tests it is a worst-observed bound, not an estimated 95% interval"
+      },
       "base_year": 2025,
+      "method": "In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a growth-forecast change is entered, which moves it by the pooled log slope.",
       "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
       "ordinary_p": 0.0291257635218316,
       "reason": null,
@@ -6181,77 +6187,105 @@
        {
         "base_year": 2025,
         "chained": false,
-        "change_pct": 0.0,
         "cumulative_change_pp": 0.0,
         "forecast_change_pp": 0.0,
         "series": [
          {
+          "band80_high": 28328050.629450742,
+          "band80_low": 23235661.190034103,
+          "band95_high": 30818619.48229448,
+          "band95_low": 21357899.791007917,
           "base_level": 23824000.0,
-          "coefficient_high": 23824000.0,
-          "coefficient_low": 23824000.0,
-          "cycle_given_observed_high": 32389656.22099717,
-          "cycle_given_observed_low": 17532198.745555747,
-          "cycle_given_observed_median": 23824825.032332137,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+          "change_pct": 7.688959840760501,
+          "half_width_80": 0.09908214164700152,
+          "half_width_95": 0.18334867555240086,
           "id": "income_total",
           "label": "Outside-firm fees",
+          "nowcast": {
+           "observed": 13367000.0,
+           "point": 25655817.79246278,
+           "prior_total": 23824000.0,
+           "share": 0.4841832692888354,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4820431549433134,
+            0.5024575407521853,
+            0.46864506380120885
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
           "observed": {
            "amount_nominal": 13367000.0,
            "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
-          "prediction_high": 32389257.22265841,
-          "prediction_low": 17523803.404881373,
-          "prob_full_below_observed": 0.00017878506340718303,
-          "projected": 23824000.0,
-          "projected_remaining": 10457000.0,
+          "projected": 25655817.79246278,
+          "projected_remaining": 12288817.792462781,
           "remainder_reason": null,
           "remainder_starts": "2026-07-01",
           "remainder_status": "ready",
-          "remaining_coefficient_high": 10457000.0,
-          "remaining_coefficient_low": 10457000.0,
-          "remaining_given_observed_high": 19022656.22099717,
-          "remaining_given_observed_low": 4165198.7455557473,
-          "remaining_given_observed_median": 10457825.032332137,
-          "remaining_prediction_high": 19022257.22265841,
-          "remaining_prediction_low": 4156803.404881373
+          "remaining_band80_high": 14961050.629450742,
+          "remaining_band80_low": 9868661.190034103,
+          "remaining_band95_high": 17451619.48229448,
+          "remaining_band95_low": 7990899.791007917,
+          "years_after_nowcast": 0
          },
          {
+          "band80_high": 79347506.1245302,
+          "band80_low": 65083608.91825641,
+          "band95_high": 86323645.42509788,
+          "band95_low": 59823957.06085906,
           "base_level": 65696931.0,
-          "coefficient_high": 65696931.0,
-          "coefficient_low": 65696931.0,
-          "cycle_given_observed_high": 89319975.75673869,
-          "cycle_given_observed_low": 48397541.57189574,
-          "cycle_given_observed_median": 65704247.078321286,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+          "change_pct": 9.384899461733953,
+          "half_width_80": 0.09908214164700152,
+          "half_width_95": 0.18334867555240086,
           "id": "expenses_total",
           "label": "In-house expenses",
+          "nowcast": {
+           "observed": 38975000.0,
+           "point": 71862521.92379473,
+           "prior_total": 65696931.0,
+           "share": 0.499405506114209,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.518229977805709,
+            0.5124841050491841,
+            0.4689829422929969
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
           "observed": {
            "amount_nominal": 38975000.0,
            "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
-          "prediction_high": 89316437.07598393,
-          "prediction_low": 48323543.61769882,
-          "prob_full_below_observed": 0.0005748989470836241,
-          "projected": 65696931.0,
-          "projected_remaining": 26721931.0,
+          "projected": 71862521.92379473,
+          "projected_remaining": 32887521.92379473,
           "remainder_reason": null,
           "remainder_starts": "2026-07-01",
           "remainder_status": "ready",
-          "remaining_coefficient_high": 26721931.0,
-          "remaining_coefficient_low": 26721931.0,
-          "remaining_given_observed_high": 50344975.75673869,
-          "remaining_given_observed_low": 9422541.57189574,
-          "remaining_given_observed_median": 26729247.078321286,
-          "remaining_prediction_high": 50341437.07598393,
-          "remaining_prediction_low": 9348543.617698818
+          "remaining_band80_high": 40372506.124530196,
+          "remaining_band80_low": 26108608.91825641,
+          "remaining_band95_high": 47348645.42509788,
+          "remaining_band95_low": 20848957.06085906,
+          "years_after_nowcast": 0
          }
         ],
+        "slope_change_pct": -0.0,
         "status": "ready",
         "steps": 1,
         "year": 2026
@@ -6802,7 +6836,13 @@
      "ends": "2028-12-31",
      "horizon": "next_complete",
      "lobbying": {
+      "bands": {
+       "blind_tests": null,
+       "label_80": "80% band: the 80th percentile of the blind nowcast errors",
+       "label_95": "~95% band: the largest blind miss; with so few tests it is a worst-observed bound, not an estimated 95% interval"
+      },
       "base_year": 2025,
+      "method": "In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a growth-forecast change is entered, which moves it by the pooled log slope.",
       "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
       "ordinary_p": 0.0291257635218316,
       "reason": null,
@@ -6810,68 +6850,24 @@
        {
         "base_year": 2025,
         "chained": true,
-        "change_pct": 0.0,
         "cumulative_change_pp": 0.0,
         "forecast_change_pp": 0.0,
-        "series": [
-         {
-          "base_level": 23824000.0,
-          "coefficient_high": 23824000.0,
-          "coefficient_low": 23824000.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "income_total",
-          "label": "Outside-firm fees",
-          "prediction_high": 36783360.7412662,
-          "prediction_low": 15430427.360685533,
-          "projected": 23824000.0
-         },
-         {
-          "base_level": 65696931.0,
-          "coefficient_high": 65696931.0,
-          "coefficient_low": 65696931.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "expenses_total",
-          "label": "In-house expenses",
-          "prediction_high": 101433592.70345342,
-          "prediction_low": 42550861.38412817,
-          "projected": 65696931.0
-         }
-        ],
-        "status": "ready",
+        "reason": "The model package has no lobbying persistence error for 1 year(s) ahead of the nowcast year.",
+        "series": [],
+        "slope_change_pct": -0.0,
+        "status": "unavailable",
         "steps": 2,
         "year": 2027
        },
        {
         "base_year": 2025,
         "chained": true,
-        "change_pct": 0.0,
         "cumulative_change_pp": 0.0,
         "forecast_change_pp": 0.0,
-        "series": [
-         {
-          "base_level": 23824000.0,
-          "coefficient_high": 23824000.0,
-          "coefficient_low": 23824000.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "income_total",
-          "label": "Outside-firm fees",
-          "prediction_high": 40555199.589999616,
-          "prediction_low": 13995319.508671792,
-          "projected": 23824000.0
-         },
-         {
-          "base_level": 65696931.0,
-          "coefficient_high": 65696931.0,
-          "coefficient_low": 65696931.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "expenses_total",
-          "label": "In-house expenses",
-          "prediction_high": 111834794.70934491,
-          "prediction_low": 38593415.88667582,
-          "projected": 65696931.0
-         }
-        ],
-        "status": "ready",
+        "reason": "The model package has no lobbying persistence error for 2 year(s) ahead of the nowcast year.",
+        "series": [],
+        "slope_change_pct": -0.0,
+        "status": "unavailable",
         "steps": 3,
         "year": 2028
        }
@@ -7340,7 +7336,13 @@
      "ends": "2026-12-31",
      "horizon": "current_remainder",
      "lobbying": {
+      "bands": {
+       "blind_tests": 32,
+       "label_80": "80% band: the 80th percentile of the blind nowcast errors (n=32 blind tests)",
+       "label_95": "~95% band: the largest blind miss (n=32 blind tests); with so few tests it is a worst-observed bound, not an estimated 95% interval"
+      },
       "base_year": 2025,
+      "method": "In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a growth-forecast change is entered, which moves it by the pooled log slope.",
       "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
       "ordinary_p": 0.0291257635218316,
       "reason": null,
@@ -7348,77 +7350,105 @@
        {
         "base_year": 2025,
         "chained": false,
-        "change_pct": 0.0,
         "cumulative_change_pp": 0.0,
         "forecast_change_pp": 0.0,
         "series": [
          {
+          "band80_high": 2620138.0889618453,
+          "band80_low": 2149129.204214547,
+          "band95_high": 2850497.5443256265,
+          "band95_low": 1975449.969171956,
           "base_level": 2054500.0,
-          "coefficient_high": 2054500.0,
-          "coefficient_low": 2054500.0,
-          "cycle_given_observed_high": 2793595.2739705094,
-          "cycle_given_observed_low": 1520490.7610926616,
-          "cycle_given_observed_median": 2055443.972181792,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+          "change_pct": 15.501389142174826,
+          "half_width_80": 0.09908214164700152,
+          "half_width_95": 0.18334867555240086,
           "id": "income_total",
           "label": "Outside-firm fees",
+          "nowcast": {
+           "observed": 1311000.0,
+           "point": 2372976.039925982,
+           "prior_total": 2054500.0,
+           "share": 0.48309757122123054,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4558610709117221,
+            0.5076263107721639,
+            0.48722316865417375
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
           "observed": {
            "amount_nominal": 1311000.0,
            "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
-          "prediction_high": 2793138.388345857,
-          "prediction_low": 1511192.6668623565,
-          "prob_full_below_observed": 0.0023715654405042086,
-          "projected": 2054500.0,
-          "projected_remaining": 743500.0,
+          "projected": 2372976.039925982,
+          "projected_remaining": 1061976.0399259818,
           "remainder_reason": null,
           "remainder_starts": "2026-07-01",
           "remainder_status": "ready",
-          "remaining_coefficient_high": 743500.0,
-          "remaining_coefficient_low": 743500.0,
-          "remaining_given_observed_high": 1482595.2739705094,
-          "remaining_given_observed_low": 209490.76109266165,
-          "remaining_given_observed_median": 744443.9721817919,
-          "remaining_prediction_high": 1482138.3883458572,
-          "remaining_prediction_low": 200192.66686235648
+          "remaining_band80_high": 1309138.0889618453,
+          "remaining_band80_low": 838129.2042145468,
+          "remaining_band95_high": 1539497.5443256265,
+          "remaining_band95_low": 664449.969171956,
+          "years_after_nowcast": 0
          },
          {
+          "band80_high": 6997279.572452681,
+          "band80_low": 5739414.247884292,
+          "band95_high": 7612472.15261817,
+          "band95_low": 5275590.5400261115,
           "base_level": 6233000.0,
-          "coefficient_high": 6233000.0,
-          "coefficient_low": 6233000.0,
-          "cycle_given_observed_high": 8473967.847396318,
-          "cycle_given_observed_low": 4586086.7038460225,
-          "cycle_given_observed_median": 6233136.2448052615,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+          "change_pct": 1.6719778300137378,
+          "half_width_80": 0.09908214164700152,
+          "half_width_95": 0.18334867555240086,
           "id": "expenses_total",
           "label": "In-house expenses",
+          "nowcast": {
+           "observed": 3424000.0,
+           "point": 6337214.378144756,
+           "prior_total": 6233000.0,
+           "share": 0.5326144106939266,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.51461752963004,
+            0.5547138047138047,
+            0.5292796406224932
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
           "observed": {
            "amount_nominal": 3424000.0,
            "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
-          "prediction_high": 8473901.958899844,
-          "prediction_low": 4584698.901218334,
-          "prob_full_below_observed": 0.00011284973561609402,
-          "projected": 6233000.0,
-          "projected_remaining": 2809000.0,
+          "projected": 6337214.378144756,
+          "projected_remaining": 2913214.378144756,
           "remainder_reason": null,
           "remainder_starts": "2026-07-01",
           "remainder_status": "ready",
-          "remaining_coefficient_high": 2809000.0,
-          "remaining_coefficient_low": 2809000.0,
-          "remaining_given_observed_high": 5049967.847396318,
-          "remaining_given_observed_low": 1162086.7038460225,
-          "remaining_given_observed_median": 2809136.2448052615,
-          "remaining_prediction_high": 5049901.958899844,
-          "remaining_prediction_low": 1160698.9012183342
+          "remaining_band80_high": 3573279.572452681,
+          "remaining_band80_low": 2315414.247884292,
+          "remaining_band95_high": 4188472.15261817,
+          "remaining_band95_low": 1851590.5400261115,
+          "years_after_nowcast": 0
          }
         ],
+        "slope_change_pct": -0.0,
         "status": "ready",
         "steps": 1,
         "year": 2026
@@ -7983,7 +8013,13 @@
      "ends": "2028-12-31",
      "horizon": "next_complete",
      "lobbying": {
+      "bands": {
+       "blind_tests": null,
+       "label_80": "80% band: the 80th percentile of the blind nowcast errors",
+       "label_95": "~95% band: the largest blind miss; with so few tests it is a worst-observed bound, not an estimated 95% interval"
+      },
       "base_year": 2025,
+      "method": "In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a growth-forecast change is entered, which moves it by the pooled log slope.",
       "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
       "ordinary_p": 0.0291257635218316,
       "reason": null,
@@ -7991,68 +8027,24 @@
        {
         "base_year": 2025,
         "chained": true,
-        "change_pct": 0.0,
         "cumulative_change_pp": 0.0,
         "forecast_change_pp": 0.0,
-        "series": [
-         {
-          "base_level": 2054500.0,
-          "coefficient_high": 2054500.0,
-          "coefficient_low": 2054500.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "income_total",
-          "label": "Outside-firm fees",
-          "prediction_high": 3172070.7959591756,
-          "prediction_low": 1330667.1009288293,
-          "projected": 2054500.0
-         },
-         {
-          "base_level": 6233000.0,
-          "coefficient_high": 6233000.0,
-          "coefficient_low": 6233000.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "expenses_total",
-          "label": "In-house expenses",
-          "prediction_high": 9623517.77620518,
-          "prediction_low": 4037015.3517105826,
-          "projected": 6233000.0
-         }
-        ],
-        "status": "ready",
+        "reason": "The model package has no lobbying persistence error for 1 year(s) ahead of the nowcast year.",
+        "series": [],
+        "slope_change_pct": -0.0,
+        "status": "unavailable",
         "steps": 2,
         "year": 2027
        },
        {
         "base_year": 2025,
         "chained": true,
-        "change_pct": 0.0,
         "cumulative_change_pp": 0.0,
         "forecast_change_pp": 0.0,
-        "series": [
-         {
-          "base_level": 2054500.0,
-          "coefficient_high": 2054500.0,
-          "coefficient_low": 2054500.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "income_total",
-          "label": "Outside-firm fees",
-          "prediction_high": 3497341.2339512347,
-          "prediction_low": 1206908.3248222885,
-          "projected": 2054500.0
-         },
-         {
-          "base_level": 6233000.0,
-          "coefficient_high": 6233000.0,
-          "coefficient_low": 6233000.0,
-          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
-          "id": "expenses_total",
-          "label": "In-house expenses",
-          "prediction_high": 10610332.397769796,
-          "prediction_low": 3661552.488983852,
-          "projected": 6233000.0
-         }
-        ],
-        "status": "ready",
+        "reason": "The model package has no lobbying persistence error for 2 year(s) ahead of the nowcast year.",
+        "series": [],
+        "slope_change_pct": -0.0,
+        "status": "unavailable",
         "steps": 3,
         "year": 2028
        }

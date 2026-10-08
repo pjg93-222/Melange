@@ -168,3 +168,14 @@ Paul, 2026-10-07: "1. Yes 2. Keep senate in 3. We use the 50/50 4. Yes; Use the 
 * G6 with a `cycle_model`: the `pac` cell scores the selected candidate's leave-one-election-out MAE against the published rule on common rows, and a `general` cell (general giving, against PUBPAC-R1) joins; G9 scores the same two candidates against last-cycle naive. `registry/gate_waivers.json` carries the owner's two rulings as cell waivers ("2. Keep senate in": every `control_Senate` cell; "1. Yes": `pac / auto_light_duty_manufacturing`).
 * Tests: `test-23-cycle-model.R` (oracles: the build spec's independent re-fit), the cycle cases of `test-16-gates.R`.
 * Final run (staging): `run_final_refit.ps1` at the staging root = `Rscript mentat/forecast/refit/run_refit.R --mode refit --publish auto --no-tests` with `RF_CYCLE_MODEL=1` (`-PublishDir <copy of mentat/app/data>` makes a trial run that cannot touch the staged pointer); `run_staged_suite.ps1` runs the whole testthat suite on the staged code. A HOLD publishes nothing.
+
+## Phase 8: lobbying nowcast bands and Telecom (owner rulings of 2026-10-08)
+
+* `R/rf_lobbying.R` `rf_lobby_persistence()`: the persistence errors of the LobbyView level series `log(level[t+h]) - log(level[t])`, h = 1..3, over the blind targets 2014-2023, per study sector and pooled
+  (split-conformal quantiles: the ceil((n + 1) p)-th smallest |e|). `rf_v2_lobby_model()` writes them as the optional `lobby_model.log_refit.persistence` (per bundle industry: q80; pooled: q80, q95);
+  the console adds them in quadrature to the in-year nowcast's blind error (the anchors carry the nowcast and its pooled blind errors) for the years after the nowcast year. The old year-effect
+  `log_refit.prediction` interval is not read any more (it never beat last-period naive: G9 WARN).
+* Telecom is a lobbying-only calculator industry (`registry/industries.json`: `calculator` and `lobbying_only` true, a Mentat key, `models {pac false, control false, lobbying true}`, a stated `reason`).
+  The writer emits it per industry as the bundle key `lobbying_only`; `rf_cycle_model_offered()`, `contract.py::check_cycle_model` and its mirror in `rf_schema.R` all skip the cycle model's checks (no general-giving step
+  block, no IBIS growth path) for exactly the industries flagged `lobbying_only`, never for one whose PAC capability is merely withheld (negative control C09).
+* Tests: `test-01-registry.R` (telecom), `test-15-bundle-v2.R` (the persistence helper on a hand-computed case, the bundle's table against the study, telecom in `industries`), `test-23-cycle-model.R` (a lobbying-only industry is not checked for giving inputs).

@@ -80,12 +80,14 @@
       "label": "Telecommunications",
       "mentat_key": "telecom",
       "mentat_workbook": "Telecom Industry Spending Overview.xlsx",
-      "calculator": false,
+      "calculator": true,
       "opensecrets": { "codes": [], "level": "none", "name": "", "totals": null, "recipients": null, "presidential": null, "status": "missing" },
       "ibisworld": { "code": "51721+51711a", "actual_sector": null, "predicted_study_sector": "telecom", "predicted_rule": "revenue_weighted_components", "components": ["51721", "51711a"], "vintage_note": "wireless + cable, weighted by each report's same-vintage baseline revenue" },
       "lobbyview": { "study_sector": "telecom", "confidence": ["naics"], "naics": [] },
       "models": { "pac": false, "control": false, "lobbying": true },
-      "status": "fitted"
+      "status": "fitted",
+      "lobbying_only": true,
+      "reason": "Telecom is offered for lobbying only (owner ruling 2026-10-08): there is no OpenSecrets capture and no roster PAC for this industry, so no giving forecast is made."
     },
     {
       "id": "property_casualty",

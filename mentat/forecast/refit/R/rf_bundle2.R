@@ -124,7 +124,7 @@ rf_v2_industries <- function(v) {
     ls <- i$lobbyview$study_sector
     lh <- if (!is.null(ls)) lv[lv$study_sector == ls, ] else lv[0, ]
     ind <- list(id = id, label = i$label, code = NULL, opensecrets_codes = as.list(unlist(i$opensecrets$codes)), mentat_key = NULL, ibisworld_code = NULL, lobbyview_sector = NULL,
-      calculator = isTRUE(i$calculator), growth_mean = NULL, growth_sd = NULL, growth_min = NULL, growth_max = NULL,
+      calculator = isTRUE(i$calculator), lobbying_only = isTRUE(i$lobbying_only), growth_mean = NULL, growth_sd = NULL, growth_min = NULL, growth_max = NULL,
       history = lapply(seq_len(nrow(g)), function(k) list(cycle = as.integer(g$cycle_end[k]), growth_pct = g$cycle_revenue_growth_pct[k],
         prior_growth_pct = g$prior_cycle_revenue_growth_pct[k], pac_real_2025 = g$pac_real_2025[k], individual_real_2025 = g$individual_real_2025[k],
         total_real_2025 = g$total_real_2025[k], source_url = g$source_url[k])),
@@ -240,7 +240,8 @@ rf_v2_lobby_model <- function(v) {
   study <- vapply(ids, function(i) reg$industries[[i]]$lobbyview$study_sector %||% NA_character_, "")
   ids <- ids[!is.na(study)]; study <- study[ids]
   df <- lb$residual_df
-  slopes <- list(); pred <- list()
+  pers <- rf_lobby_persistence(ctx$lobby$lv)                                  # owner rulings 2026-10-08: the empirical (blind) persistence errors that bound the years after the in-year nowcast
+  slopes <- list(); pred <- list(); pers_ind <- list()
   for (id in ids) {
     k <- match(study[[id]], lb$own$sector)
     has <- !is.na(k) && is.finite(lb$own$beta[k]) && is.finite(lb$own$se[k])
@@ -249,6 +250,8 @@ rf_v2_lobby_model <- function(v) {
                          applied = list(rule = "R0", beta = lb$beta, se = lb$se, df = as.integer(df), critical_95 = lb$critical_95, ordinary_p = lb$ordinary_p))
     for (nm in c("own_beta", "own_se", "own_p", "dl_weight", "dl_beta", "dl_se")) if (is.null(slopes[[id]][[nm]])) slopes[[id]][nm] <- list(NULL)
     pred[[id]] <- list(sigma2 = lb$prediction$sigma2, pairs = lb$prediction$pairs, df = lb$prediction$df, critical_95 = lb$prediction$critical_95)
+    ph <- Filter(function(x) is.finite(x$q80), pers$sector[[study[[id]]]])
+    if (length(ph)) pers_ind[[id]] <- lapply(ph, function(x) list(n = as.integer(x$n), q80 = x$q80))
   }
   ev <- list(dollar_model = rf_evidence_record(v$evidence$lobby), log_model = rf_evidence_record(v$evidence$lobby_log),
              log_sign_consistency = list(leave_one_year_out = v$sign$lobby_log$loeo, leave_one_sector_out = v$sign$lobby_log$loco),
@@ -263,7 +266,10 @@ rf_v2_lobby_model <- function(v) {
        log_refit = list(formula = "dly ~ dg + factor(year)", unit = "log points of the lobbying level per +1 pp of dg", beta = lb$beta, se = lb$se, ordinary_p = lb$ordinary_p,
                         critical_95 = lb$critical_95, residual_df = as.integer(df), n = lb$n, slope_rule = "R0", slopes = slopes,
                         prediction = list(method = "anchored_step_residual", industries = pred),
-                        provenance = "lm(dly ~ dg + factor(year)) on the same LobbyView pairs as the dollar model; dly = log(level) - log(last year's level); pooled slope applied to every industry (R0)"),
+                        provenance = "lm(dly ~ dg + factor(year)) on the same LobbyView pairs as the dollar model; dly = log(level) - log(last year's level); pooled slope applied to every industry (R0)",
+                        persistence = list(window = "LobbyView sector-year levels (real 2025 dollars), target years 2014-2023, origin = the earlier year",
+                                           method = "e = log(level[t+h]) - log(level[t]), h = 1..3; q = the ceil((n + 1) * p)-th smallest |e| (split-conformal); per industry p = 0.80, pooled p = 0.80 and 0.95",
+                                           industries = pers_ind, pooled = lapply(Filter(function(x) is.finite(x$q95), pers$pooled), function(x) list(n = as.integer(x$n), q80 = x$q80, q95 = x$q95)))),
        evidence = ev)
 }
 
@@ -394,9 +400,10 @@ rf_cycle_pace_series <- function(inputs, id) {
   list(source = s$source, sha256 = inputs$actual[match(s$role, inputs$role)], cycles = stats::setNames(cyc, as.integer(d$cycle)))
 }
 
-# The industries the console offers (calculator and a Mentat key: the contract's reading) and what the cycle model still lacks for them in this context; character(0) = complete.
+# The industries the console offers for giving (calculator and a Mentat key, except the registry's lobbying-only industries such as telecom, which have no giving model to check) and what the cycle model still lacks for them in this context; character(0) = complete.
+# (The bundle carries the registry's flag as `lobbying_only`, and the contract's check skips on that flag only: a capability the context merely lacks, such as the property and casualty pilot's in the frozen sample, is still refused.)
 # A context without them (the frozen v1 estimation sample, which excludes the property and casualty pilot) builds no cycle_model; the refit run refuses that outcome.
-rf_cycle_model_offered <- function(v) { ind <- rf_v2_industries(v); names(ind)[vapply(ind, function(i) isTRUE(i$calculator) && !is.null(i$mentat_key), NA)] }
+rf_cycle_model_offered <- function(v) { ind <- rf_v2_industries(v); names(ind)[vapply(ind, function(i) isTRUE(i$calculator) && !is.null(i$mentat_key) && !isTRUE(i$lobbying_only), NA)] }
 rf_cycle_model_gap <- function(v) {
   if (is.null(v$phase)) return("the context holds no phase block (RF_CYCLE_MODEL=0)")
   ind <- rf_v2_industries(v)

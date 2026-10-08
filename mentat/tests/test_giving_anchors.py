@@ -5,6 +5,7 @@ MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks and property & casualty too
 import copy
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -289,7 +290,9 @@ class BuilderTests(unittest.TestCase):
         self.assertEqual(lda['status'], 'ready')
         self.assertEqual(lda['series']['income_total']['annual'], {'2024': 400.0, '2025': 500.0})
         self.assertEqual(lda['series']['expenses_total']['annual'], {'2024': 900.0, '2025': 1000.0})
-        self.assertEqual(lda['series']['income_total']['partial'], {'year': 2026, 'through_quarter': 'Q2', 'quarters': {'Q1': 100.0, 'Q2': 200.0}, 'total': 300.0})
+        self.assertEqual(lda['series']['income_total']['partial'], {'year': 2026, 'through_quarter': 'Q2', 'quarters': {'Q1': 100.0, 'Q2': 200.0}, 'total': 300.0,
+                                                                    'nowcast': {'year': 2026, 'through_quarter': 'Q2', 'observed': 300.0, 'prior_total': 500.0, 'share': 0.5,
+                                                                                'share_years': [2024, 2025], 'shares': [0.5, 0.5], 'point': 550.0}})
         self.assertEqual(lda['series']['expenses_total']['partial']['total'], 600.0)
         self.assertEqual(lda['through'], '2026-06-30')
 
@@ -831,6 +834,81 @@ class PartsTests(unittest.TestCase):
         self.assertEqual(levels['series']['expenses_total']['annual'], {'2025': 900.0})
         self.assertNotIn('total_both', levels['series'])
         self.assertIsNone(lda_mod.sector_levels(rows, 'missing'))
+
+
+# Melange LDA bank income_total by quarter (Q1..Q4), the data of the 2026-10-08 blind-test study of the lobbying nowcast.
+BANK_INCOME = {2021: (4553000., 4462500., 4533000., 4627000.), 2022: (4558500., 4623500., 4664000., 4794000.), 2023: (4940000., 4945500., 5329500., 5292500.),
+               2024: (5049500., 5170000., 5071532., 5048000.), 2025: (5232000., 5933000., 6066000., 6593000.)}
+
+
+class NowcastTests(unittest.TestCase):
+    """The in-year lobbying nowcast pred = O + (1 - s) B (owner rulings 2026-10-08) and the blind errors that bound it."""
+    QUARTERS = {year: {i + 1: v for i, v in enumerate(values)} for year, values in BANK_INCOME.items()}
+
+    def test_the_nowcast_reproduces_a_row_of_the_blind_test_study(self):
+        # study row: bank / income_total / cut Q2 / target 2025: s = 0.4923, O = 11,165,000, B = 20,339,032, prediction 21,491,225 against 23,824,000 filed (-9.79%)
+        now = lda_mod.nowcast(self.QUARTERS, 2025, 2)
+        self.assertEqual((now['observed'], now['prior_total'], now['share_years'], now['through_quarter']), (11165000., 20339032., [2022, 2023, 2024], 'Q2'))
+        self.assertAlmostEqual(now['share'], 0.4923, places=4)
+        self.assertLessEqual(abs(now['point'] - 21491225), 1)
+        self.assertAlmostEqual(now['point'], now['observed'] + (1 - now['share']) * now['prior_total'], places=6)          # the remaining-share form
+        self.assertGreater(abs(now['point'] - now['observed'] / now['share']), 1e5)                                       # and not the pace O / s
+        self.assertAlmostEqual(math.log(now['point'] / sum(BANK_INCOME[2025])), math.log(1 - 0.0979), places=3)
+
+    def test_the_share_uses_up_to_three_prior_years_and_at_least_one(self):
+        self.assertEqual(lda_mod.nowcast(self.QUARTERS, 2025, 1)['share_years'], [2022, 2023, 2024])
+        self.assertEqual(lda_mod.nowcast(self.QUARTERS, 2022, 3)['share_years'], [2021])                                   # only 2021 is on file before 2022
+        self.assertEqual(lda_mod.nowcast(self.QUARTERS, 2023, 2)['share_years'], [2021, 2022])
+        only = lda_mod.nowcast(self.QUARTERS, 2022, 3)
+        self.assertAlmostEqual(only['share'], sum(BANK_INCOME[2021][:3]) / sum(BANK_INCOME[2021]), places=12)
+        self.assertIsNone(lda_mod.nowcast(self.QUARTERS, 2021, 2))                                                         # no prior full year, no nowcast
+        thin = {y: dict(q) for y, q in self.QUARTERS.items()}
+        del thin[2025][2]
+        self.assertIsNone(lda_mod.nowcast(thin, 2025, 2))                                                                  # the cut quarter is not filed yet
+
+    def test_the_live_nowcast_rides_on_the_partial_year(self):
+        head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'
+        rows = []
+        for year, values in BANK_INCOME.items():
+            rows.append(dict(zip(head.split(','), ['x', str(year), 'annual', 'false', '1', '4', str(sum(values)), str(2 * sum(values))])))
+            for i, v in enumerate(values):
+                rows.append(dict(zip(head.split(','), ['x', str(year), 'Q%d' % (i + 1), 'false', '1', '1', str(v), str(2 * v)])))
+        rows += [dict(zip(head.split(','), ['x', '2026', 'Q1', 'true', '1', '1', '6000000', '12000000'])), dict(zip(head.split(','), ['x', '2026', 'Q2', 'true', '1', '1', '6500000', '13000000'])),
+                 dict(zip(head.split(','), ['x', '2026', 'Q3', 'true', '0', '0', '0', '0']))]
+        now = lda_mod.sector_levels(rows, 'x')['series']['income_total']['partial']['nowcast']
+        self.assertEqual((now['year'], now['through_quarter'], now['observed'], now['prior_total'], now['share_years']), (2026, 'Q2', 12500000., sum(BANK_INCOME[2025]), [2023, 2024, 2025]))
+        self.assertAlmostEqual(now['point'], now['observed'] + (1 - now['share']) * sum(BANK_INCOME[2025]), places=6)
+        self.assertEqual(contract.check_anchor_invariants(self._snapshot_with(lda_mod.sector_levels(rows, 'x'))), [])
+
+    @staticmethod
+    def _snapshot_with(levels):
+        snapshot = contract.example('anchors')
+        snapshot['industries']['commercial_banks']['lda']['series'] = levels['series']
+        return snapshot
+
+    def test_the_invariants_catch_a_nowcast_that_is_not_the_formula(self):
+        for edit, needle in ((lambda n: n.update(point=n['point'] + 1000.), 'point is not observed'), (lambda n: n.update(share=n['share'] * 0.99), 'geometric mean'),
+                             (lambda n: n.update(observed=n['observed'] + 1000.), 'observed differs'), (lambda n: n.update(prior_total=n['prior_total'] + 1000.), 'prior_total differs')):
+            snapshot = contract.example('anchors')
+            edit(snapshot['industries']['commercial_banks']['lda']['series']['income_total']['partial']['nowcast'])
+            with self.subTest(needle=needle):
+                self.assertTrue(any(needle in problem for problem in contract.check_anchor_invariants(snapshot)))
+
+    def test_the_blind_errors_are_pooled_by_cut_with_a_split_conformal_80th_percentile_and_the_largest_miss(self):
+        head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'
+        rows = []
+        for year, values in BANK_INCOME.items():
+            for i, v in enumerate(values):
+                rows.append(dict(zip(head.split(','), ['x', str(year), 'Q%d' % (i + 1), 'false', '1', '1', str(v), str(v)])))
+        errors = lda_mod.nowcast_errors(rows, pool=('x',))
+        self.assertEqual(errors['pool'], ['x'])
+        self.assertEqual(errors['targets'], [2022, 2023, 2024, 2025])
+        self.assertEqual({cut: row['n'] for cut, row in errors['by_cut'].items()}, {'1': 8, '2': 8, '3': 8})            # 4 target years x 2 series
+        self.assertAlmostEqual(errors['by_cut']['2']['max'], abs(math.log(21491225.2107 / sum(BANK_INCOME[2025]))), places=6)         # the 2025 miss of the study row above
+        self.assertEqual(errors['by_cut']['2']['q80'], errors['by_cut']['2']['max'])                                      # ceil((8 + 1) 0.8) = 8th of 8
+        self.assertIsNone(lda_mod.nowcast_errors(rows[:8], pool=('x',)))                                                 # one target year: too few blind tests, no bands
+        self.assertEqual(lda_mod.conformal_quantile([0.3, -0.1, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 0.8), 0.9)       # ceil(11 x 0.8) = 9th smallest |e|
+        self.assertIsNone(lda_mod.conformal_quantile([0.1, 0.2], 0.8))
 
 
 @unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL'), 'set MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks and property & casualty too) to read the real Mentat tree')

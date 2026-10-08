@@ -1125,6 +1125,41 @@ def _v2_share_remainder(ctx, chamber, share, total, bid, growth_given):
 
 
 # --- lobbying ------------------------------------------------------------------------------------------------------------------
+# Owner rulings 2026-10-08: the projection of a Melange LDA series is the in-year NOWCAST of the year the LDA has begun filing (the anchors carry it: observed + (1 - s) x the
+# prior full-year total, `partial.nowcast`), carried forward unchanged to the years after it; a growth-forecast change that is entered moves it by the pooled log slope, as it
+# moved the old projection. Its bands are EMPIRICAL, not model-based: the 80% band is the blind-test 80th percentile of the nowcast error of the quarter cut (pooled, log scale),
+# the ~95% band the largest blind miss; a year after the nowcast year adds, in quadrature, the LobbyView persistence error of that many years (the industry's 80th percentile;
+# the pooled 95th percentile for the ~95% band). The old year-effect slope interval never beat last-period naive (G9) and is no longer used.
+LOBBY_METHOD = ('In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the '
+                'geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a '
+                'growth-forecast change is entered, which moves it by the pooled log slope.')
+
+
+def _lobby_changes(changes, base_year, year):
+    """The growth-forecast changes (pp) of the years after the base year, up to `year`; a blank input is no change."""
+    return [_number(changes.get(str(y)), 'Annual forecast-growth change', -100, 100) or 0. for y in range(base_year + 1, year + 1)]
+
+
+def _lobby_halves(ident, now_year, partial, year, errors, persistence):
+    """(half-width 80%, half-width 95%, reason) of one projected year on the log scale; (None, None, reason) when the blind or the persistence errors are missing.
+    The nowcast year takes the blind errors of its quarter cut; a later year adds the persistence error of (year - nowcast year) years in quadrature."""
+    h80 = h95 = 0.
+    if partial is not None:
+        cut = partial['through_quarter'][1]
+        row = ((errors or {}).get('by_cut') or {}).get(cut)
+        if row is None:
+            return None, None, 'The anchor snapshot has no blind-test errors for the lobbying nowcast at the ' + partial['through_quarter'] + ' cut. Rebuild the anchors.'
+        h80, h95 = row['q80'], row['max']
+    horizon = year - now_year
+    if horizon > 0:
+        per = ((persistence or {}).get('industries') or {}).get(ident, {}).get(str(horizon))
+        pooled = ((persistence or {}).get('pooled') or {}).get(str(horizon))
+        if per is None or pooled is None:
+            return None, None, 'The model package has no lobbying persistence error for ' + str(horizon) + ' year(s) ahead of the nowcast year.'
+        h80, h95 = math.hypot(h80, per['q80']), math.hypot(h95, pooled['q95'])
+    return h80, h95, None
+
+
 def _v2_lobbying(ctx, changes, cycle):
     b, ind = ctx['b'], ctx['industry']
     lda = ctx['snap']['lda']
@@ -1135,53 +1170,58 @@ def _v2_lobbying(ctx, changes, cycle):
     if lda['status'] != 'ready':
         return out | dict(status='unavailable', reason=lda['reason'])
     row = model['slopes'].get(ind['id'])
-    step = model['prediction']['industries'].get(ind['id'])
-    if row is None or step is None:
-        return out | dict(status='withheld', reason='The model package has no lobbying slope or residual variance for this industry.')
+    if row is None:
+        return out | dict(status='withheld', reason='The model package has no lobbying slope for this industry.')
     slope = row['applied']
     annual = {sid: {int(y): v for y, v in lda['series'][sid]['annual'].items()} for sid, _label in LOBBY_SERIES}
     base_year = max(annual['income_total'])
+    errors, persistence = ctx.get('nowcast_errors'), model.get('persistence')
     out.update(slope=dict(rule=slope['rule'], label=SLOPE_LABELS[slope['rule']], beta=slope['beta'], se=slope['se'], df=slope['df']), ordinary_p=slope['ordinary_p'],
-               sector=lda['sector'], sector_label=lda['label'], source_file=lda['source_file'], base_year=base_year, through=lda['through'], note=lda['note'])
+               sector=lda['sector'], sector_label=lda['label'], source_file=lda['source_file'], base_year=base_year, through=lda['through'], note=lda['note'], method=LOBBY_METHOD)
     first = ctx['as_of'].year if cycle == ctx['current'] else cycle - 1
+    cut_n, later = None, False                           # the number of blind tests behind the bands of the cut in use; whether a year after the nowcast year is among the rows
     for year in range(first, cycle + 1):
-        item = dict(year=year, status='needs_inputs', series=[])
+        item = dict(year=year, status='ready', series=[])
         out['rows'].append(item)
         if year <= base_year:
             item.update(status='complete', reason='Melange LDA already has the full year ' + str(year) + '.')
             continue
-        needed = list(range(base_year + 1, year + 1))
-        values = [_number(changes.get(str(y)), 'Annual forecast-growth change', -100, 100) for y in needed]
-        if any(v is None for v in values):
-            item.update(reason='Enter the growth-forecast change for ' + ', '.join(str(y) for y, v in zip(needed, values) if v is None) + '.')
-            continue
-        total, k = sum(values), len(needed)
-        point = slope['beta'] * total + 0.
-        coef_half = slope['critical_95'] * slope['se'] * abs(total)
-        pred_half = _half(step['critical_95'], total ** 2 * slope['se'] ** 2 + k * step['sigma2'])
-        item.update(status='ready', base_year=base_year, steps=k, chained=k > 1, forecast_change_pp=values[-1], cumulative_change_pp=total,
-                    change_pct=100 * math.expm1(point))
+        values = _lobby_changes(changes, base_year, year)
+        total, k = sum(values), len(values)
+        move = slope['beta'] * total                     # 0 with no growth change entered: the slope no longer moves the point
+        item.update(base_year=base_year, steps=k, chained=k > 1, forecast_change_pp=values[-1], cumulative_change_pp=total, slope_change_pct=100 * math.expm1(move))
         for sid, label in LOBBY_SERIES:
-            level = annual[sid][base_year]
-            s = dict(id=sid, label=label, base_level=level, projected=level * math.exp(point), coefficient_low=level * math.exp(point - coef_half),
-                     coefficient_high=level * math.exp(point + coef_half), prediction_low=level * math.exp(point - pred_half), prediction_high=level * math.exp(point + pred_half))
-            partial = lda['series'][sid]['partial']
+            level, partial = annual[sid][base_year], lda['series'][sid]['partial']
+            now = partial.get('nowcast') if partial else None
+            if partial and now is None:
+                item.update(status='unavailable', series=[], reason=('The ' + str(partial['year']) + ' nowcast needs the complete prior year and a prior-year share filed by the same quarter; the anchors have none.')
+                            if 'nowcast' in partial else 'The anchor snapshot predates the lobbying nowcast. Rebuild the anchors (mentat/forecast/anchors/build_giving_anchors.py).')
+                break
+            now_year = partial['year'] if now else base_year
+            h80, h95, why = _lobby_halves(ind['id'], now_year, partial if now else None, year, errors, persistence)
+            if why:
+                item.update(status='unavailable', series=[], reason=why)
+                break
+            if now:
+                cut_n = errors['by_cut'][partial['through_quarter'][1]]['n']
+            later = later or year > now_year
+            point = (now['point'] if now else level) * math.exp(move)
+            lo80, hi80, lo95, hi95 = point * math.exp(-h80), point * math.exp(h80), point * math.exp(-h95), point * math.exp(h95)
+            s = dict(id=sid, label=label, base_level=level, projected=point, change_pct=100 * (point / level - 1), nowcast=now, nowcast_year=now_year, years_after_nowcast=year - now_year,
+                     half_width_80=h80, half_width_95=h95, band80_low=lo80, band80_high=hi80, band95_low=lo95, band95_high=hi95)
             if partial and partial['year'] == year and cycle == ctx['current']:
-                covered = date.fromisoformat(lda['through'])
-                if ctx['as_of'] < covered:
+                if ctx['as_of'] < date.fromisoformat(lda['through']):
                     s.update(remainder_status='no_observed', remainder_reason='The Melange LDA quarters run past the as-of date; use a later as-of date.')
                 else:
-                    # The log refit is a real-terms change, so the projection is in the base year's dollars; the year's observed quarters are
-                    # nominal and are compared at face value (no CPI for that year yet), as the PAC remainder does.
+                    # The nowcast and the observed quarters are both the LDA's own nominal dollars, so the remainder needs no deflation.
                     s.update(observed=dict(through=lda['through'], through_quarter=partial['through_quarter'], amount_nominal=partial['total'], face_value=True),
                              remainder_starts=_next_day(lda['through']),
-                             **_remainder(s['projected'], dict(remaining_coefficient_low=s['coefficient_low'], remaining_coefficient_high=s['coefficient_high'],
-                                                               remaining_prediction_low=s['prediction_low'], remaining_prediction_high=s['prediction_high']), partial['total']))
-                    given = _given_observed(s['projected'], pred_half, step['critical_95'], step['df'], partial['total'])
-                    if given:
-                        s.update(given)
-            s['dollars'] = 'base year ' + str(base_year) + ' dollars (real-terms change applied to the latest complete LDA year)'
+                             **_remainder(point, dict(remaining_band80_low=lo80, remaining_band80_high=hi80, remaining_band95_low=lo95, remaining_band95_high=hi95), partial['total']))
             item['series'].append(s)
+    out['bands'] = dict(blind_tests=cut_n, label_80='80% band: the 80th percentile of the blind nowcast errors' + (' (n=%d blind tests)' % cut_n if cut_n else ''),
+                        label_95='~95% band: the largest blind miss' + (' (n=%d blind tests)' % cut_n if cut_n else '')
+        + ('; for the later years, added in quadrature to the pooled 95th percentile of the LobbyView persistence error' if later else '')
+        + '; with so few tests it is a worst-observed bound, not an estimated 95% interval')
     return out
 
 
@@ -1756,7 +1796,7 @@ def _project_v2(request, b):
     panel = _panel_blocks(sector, open_cycle) if cm else {}          # D-117: measure blocks read in place of the anchors' own (credit-union company PACs)
     ctx = dict(b=b, industry=industry, snap=entry, as_of=as_of, current=current, open_cycle=open_cycle, anchor_cycle=open_cycle - 2, panel=panel,
                coverage_end=entry['coverage']['coverage_end'], threshold=snapshot['thin_base_threshold_usd'], multiplier=multiplier,
-               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'], cm=cm)
+               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'], cm=cm, nowcast_errors=snapshot.get('lda_nowcast_errors'))
     if cm:       # the open cycle has no CPI yet: its observed amounts are deflated at the expected inflation instead of compared at face value
         ctx.update(open_multiplier=_real_multiplier(snapshot, cm['inflation'], open_cycle), face_value=False)
     chains, split_chains = {}, {}

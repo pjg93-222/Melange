@@ -44,7 +44,9 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
     owner ruling of 2026-10-01 the anchors' level leaves out the receipts the accounting engine buckets as non_giving: see "Anchor snapshot v1" below).
   * `share`: `control_House` / `control_Senate` give a **pp change** added to the previous cycle's Mentat R share, on two bases side by
     side: `employee_candidate` (employees' included giving to candidate committees) and `pac_candidate` (the roster PACs' own giving to candidates).
-  * `lobbying`: `lobby_model.log_refit` applied as a relative change to the **latest complete year's** Melange-LDA level, both LDA series
+  * `lobbying`: the in-year **nowcast** of the anchors (`lda.series[sid].partial.nowcast`, owner rulings 2026-10-08) carried to the later years; a growth-forecast change that is
+    entered moves it by `lobby_model.log_refit` (the relative change of the old calculator, now applied on top of the nowcast). The bands are empirical, not the model's interval:
+    the anchors' pooled blind errors of the nowcast (`lda_nowcast_errors`) and, for the years after the nowcast year, `log_refit.persistence` in quadrature. Both LDA series
     (`income_total` outside-firm fees, `expenses_total` in-house) side by side, never summed.
 * **`industries[id]`**: v1 fields (`id label code growth_mean growth_sd growth_min growth_max history scope`) plus `opensecrets_codes`,
   `mentat_key` (null = no Mentat data: the console does not offer the industry, it stays in estimation), `ibisworld_code`,
@@ -82,6 +84,13 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
   `unit`, `beta se ordinary_p critical_95 residual_df n`, `slope_rule`, `slopes[id]` (as above, `applied` per industry), `prediction.industries[id]`
   (F.4: one pooled residual variance over 71 pairs repeated per industry, `critical_95 = qt(.975, 70)`), `provenance`.
   A relative change `exp(beta * dg) - 1` per +1 pp of the change in predicted growth; the level it multiplies is Mentat's (Melange LDA).
+  `log_refit.prediction` (the year-effect residual variance) is no longer read for the bands (it never beat last-period naive: G9). **`log_refit.persistence`** (optional; owner rulings
+  2026-10-08) is the empirical persistence error of the LobbyView level series, `e = log(level[t + h]) - log(level[t])` over the blind targets 2014-2023: `industries[id][h] = {n, q80}`
+  (the split-conformal 80th percentile of `|e|`, h = 1..3) per bundle industry and `pooled[h] = {n, q80, q95}` over every LobbyView sector; the console adds the persistence error of
+  the years after the nowcast year to the nowcast's blind error in quadrature (the industry's q80 for the 80% band, the pooled q95 for the ~95% band). A bundle without it leaves those years without bands.
+* **Lobbying-only industries** (Telecom, owner ruling 2026-10-08): an industry with `calculator`, a `mentat_key` and `capabilities {pac false, control false, lobbying true}` (a stated `withheld`
+  reason for the two giving models) is offered by the console for lobbying alone and carries `lobbying_only: true` (optional key, absent = false; the writer emits it from the registry). `check_cycle_model`
+  checks the general-giving step block and the IBIS growth path for every offered industry EXCEPT one flagged `lobbying_only`; a PAC capability that is merely withheld does not exempt an industry.
 * **`political_inputs.anchor_cycles["2024"]`**: the expected-control input of the anchor cycle, which has no row in the model history:
   `current_control {House, Senate}` (RMajNow), `window`, and per chamber `{p_rep, market, days, expected_days, first_day, partial_window, note}`.
   **Polymarket January-June 2024** (Kalshi has no 2024 January-June data; House covers 131 of 182 days, from 2024-02-21; `partial_window` must be true
@@ -135,10 +144,14 @@ the sha256 of the workbook file now published in the report directory.
     chamber from the CAND_ID prefix, party from the candidate master), `committees`, `inputs` (file sha256 + FEC last_modified), per cycle `{House, Senate, to_house_senate,
     presidential, no_candidate, all_recipients}`, `observed` cuts, `thin_base`, `single_pac` (true for credit unions: SchoolsFirst only).
   * `lda`: Melange LDA `income_total` and `expenses_total` (two series, never summed; bank total for banks) annual + the partial year's quarters, `source_sha256`.
-    `status: unavailable` with a `reason` for industries without a Melange-LDA sector (P&C).
+    `status: unavailable` with a `reason` for industries without a Melange-LDA sector (P&C). `partial.nowcast` (optional; owner rulings 2026-10-08) is the in-year nowcast
+    `point = observed + (1 - share) * prior_total`: `observed` = filed through the latest complete quarter cut, `prior_total` = the prior full-year total, `share` = the geometric mean of
+    `shares`, the share filed by the same cut in `share_years` (up to the 3 prior years, at least 1); null when no prior year allows it. The snapshot's top-level `lda_nowcast_errors`
+    (optional) pools the blind errors `log(point / actual)` of that nowcast over the complete years, both series and the pool sectors (bank, credit_union, telecom, fintech) by quarter
+    cut: `{n, q80, max}`, the half-widths of the 80% band (split-conformal 80th percentile of |error|) and of the ~95% band (the largest blind miss).
   * Every measure has `status` ready | unavailable (+ `reason`); a consumer never reads numbers from an unavailable block.
 * Cross-field invariants (`contract.py::check_anchor_invariants`): cut dates strictly increasing and ending on `coverage_end`; `to_house_senate` equals the House +
-  Senate parts; `all_recipients` equals its parts; thin-base flags agree with the dollars; `single_pac` agrees with the committee list; partial LDA totals equal their quarters;
+  Senate parts; `all_recipients` equals its parts; thin-base flags agree with the dollars; `single_pac` agrees with the committee list; partial LDA totals equal their quarters; a nowcast equals `observed + (1 - share) * prior_total` with `share` the geometric mean of `shares`, `observed` the filed quarters through its cut and `prior_total` the prior year's annual value;
   a ready block that reports one of `excluded_funding_sources` / `excluded_non_giving` reports both, and the general-giving and candidate blocks either both report them or neither;
   when a general-giving block reports them, its levels + the excluded amounts equal the by-funding-source total and the excluded amount equals the excluded sources' share of
   that split; the candidate block then has one `excluded_non_giving` entry per candidate cycle and the same `excluded_funding_sources` as the general-giving block (its amounts

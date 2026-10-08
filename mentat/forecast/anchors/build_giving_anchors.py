@@ -41,7 +41,7 @@ import mentat_sources as ms  # noqa: E402
 VERSION = '1'
 SNAPSHOT_NAME = 'giving-anchors-v1.json'
 RECEIPT_NAME = 'giving-anchors-v1.receipt.json'
-LDA_UNAVAILABLE = 'No Melange-LDA sector for this industry (sector_spend ROSTERS: crypto, credit_union, bank, fintech)'
+LDA_UNAVAILABLE = 'No Melange-LDA sector for this industry (sector_spend ROSTERS: crypto, credit_union, bank, fintech, telecom)'
 
 
 class Unavailable(Exception):
@@ -300,8 +300,8 @@ def build_lda(spec, rows, lda_path, lda_sha):
     if levels is None:
         return {'status': 'unavailable', 'reason': 'The Melange LDA output has no rows for sector ' + spec['lda_sector'], 'sector': spec['lda_sector'],
                 'label': None, 'source_file': lda_path.name, 'source_sha256': lda_sha, 'through': None, 'series': {}, 'note': lda_reader.NOTE}
-    label = {'bank': 'Melange LDA bank sector (total, not a bank tier)', 'credit_union': 'Melange LDA credit-union sector'}.get(spec['lda_sector'],
-                                                                                                                              'Melange LDA sector ' + spec['lda_sector'])
+    label = {'bank': 'Melange LDA bank sector (total, not a bank tier)', 'credit_union': 'Melange LDA credit-union sector',
+             'telecom': 'Melange LDA telecom sector'}.get(spec['lda_sector'], 'Melange LDA sector ' + spec['lda_sector'])
     return {'status': 'ready', 'reason': None, 'sector': spec['lda_sector'], 'label': label, 'source_file': lda_path.name, 'source_sha256': lda_sha,
             'through': levels['through'], 'series': levels['series'], 'note': lda_reader.NOTE}
 
@@ -427,6 +427,9 @@ def build_snapshot(project_root, registry, options):
         'cpi': {'series': cpi_reader.SERIES, 'source_file': Path(options['controls']).name, 'source_sha256': controls_sha,
                 'base_year': cpi_reader.BASE_YEAR, 'multipliers': multipliers},
         'thin_base_threshold_usd': threshold, 'industries': industries, 'unavailable': unavailable}
+    nowcast_errors = lda_reader.nowcast_errors(lda_rows) if lda_rows else None          # the pooled blind errors that give the lobbying nowcast its bands
+    if nowcast_errors:
+        snapshot['lda_nowcast_errors'] = nowcast_errors
     done('assemble')
     return snapshot, inputs
 

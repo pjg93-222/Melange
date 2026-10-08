@@ -80,3 +80,17 @@ rf_lobby_diffs <- function(levels) {
   rownames(m) <- NULL
   m
 }
+
+# Persistence errors of the LobbyView level series (owner rulings 2026-10-08): e = log(level[t + h]) - log(level[t]) for h = 1..3 and target years `targets` (the blind backtest
+# window), by study sector and pooled over every sector in `lv` (before the merge with predicted growth, so every sector the registry lists is in). A quantile is split-conformal:
+# the ceiling((n + 1) p)-th smallest |e|, NA when n is too small for it. -> list(sector = list(<study sector> = list(<h> = list(n, q80))), pooled = list(<h> = list(n, q80, q95))).
+rf_lobby_persistence <- function(lv, targets = 2014:2023, horizons = 1:3) {
+  q <- function(e, p) { a <- sort(abs(e)); k <- ceiling((length(a) + 1) * p); if (k >= 1 && k <= length(a)) unname(a[k]) else NA_real_ }
+  lv <- lv[lv$year >= 2008L & lv$year <= 2025L, ]
+  err <- lapply(split(lv, lv$study_sector), function(g) {
+    y <- stats::setNames(log(g$y_real_m), g$year)
+    stats::setNames(lapply(horizons, function(h) { t <- targets[targets %in% g$year & (targets - h) %in% g$year]; unname(y[as.character(t)] - y[as.character(t - h)]) }), horizons)
+  })
+  list(sector = lapply(err, function(by_h) lapply(by_h, function(e) list(n = length(e), q80 = q(e, 0.80)))),
+       pooled = stats::setNames(lapply(as.character(horizons), function(h) { e <- unlist(lapply(err, function(x) x[[h]])); list(n = length(e), q80 = q(e, 0.80), q95 = q(e, 0.95)) }), horizons))
+}

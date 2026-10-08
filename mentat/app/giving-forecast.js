@@ -430,22 +430,29 @@
     col.append(node('strong', money(remaining ? s.projected_remaining : s.projected), 'gf-value gf-value-small'));
     detail(col, remaining ? 'Remainder after the observed quarters' : 'Full-year projection');
     if (s.remainder_status === 'baseline_exceeded' || s.remainder_status === 'no_observed') flag(col, remainderText(s));
-    detail(col, `${row.base_year} level ${money(s.base_level)} · ${pct(row.change_pct)}${row.chained ? ' (chained, ' + row.steps + ' steps)' : ''}.`);
+    detail(col, `${row.base_year} level ${money(s.base_level)} · ${pct(s.change_pct)}${row.chained ? ' (chained, ' + row.steps + ' steps)' : ''}.`);
+    if (s.nowcast) detail(col, `Nowcast, ${s.nowcast.through_quarter} cut: ${money(s.nowcast.observed)} filed + ${percent(1 - s.nowcast.share)} of ${s.nowcast.year - 1} (${money(s.nowcast.prior_total)}) still to come.`);
     if (remaining) detail(col, `Observed ${s.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + s.observed.through_quarter}: ${money(s.observed.amount_nominal)}; full year ${money(s.projected)}.`);
-    detail(col, 'Coefficient interval: ' + range(s.coefficient_low, s.coefficient_high) + '.');
-    detail(col, 'Prediction interval: ' + range(s.prediction_low, s.prediction_high) + '.');
+    detail(col, '80% band: ' + range(s.band80_low, s.band80_high) + '.');
+    detail(col, '~95% band (largest blind miss): ' + range(s.band95_low, s.band95_high) + '.');
     return col;
   }
   function lobbyCellV2(block) {
     const cell = node('td');
     if (block.status !== 'ready') { flag(cell, 'Not shown: ' + block.reason); return cell; }
+    let moved = false;
     for (const row of block.rows) {
       detail(cell, String(row.year));
       if (row.status === 'complete') { detail(cell, row.reason); continue; }
-      if (row.status !== 'ready') { detail(cell, row.reason || 'Enter an annual growth-forecast change.'); continue; }
+      if (row.status !== 'ready') { detail(cell, row.reason || 'No lobbying projection for this year.'); continue; }
+      moved = moved || Boolean(row.cumulative_change_pp);
       cell.append(pair(row.series.map(s => seriesColumn(s, row))));
+      const ahead = row.series.length ? row.series[0].years_after_nowcast : 0;
+      if (ahead > 0) detail(cell, `Bands add the LobbyView persistence error of ${ahead} year${ahead > 1 ? 's' : ''} to the nowcast's blind error, in quadrature.`);
     }
-    detail(cell, `${block.sector_label}, nominal dollars; relative change from the log refit on the latest complete year (${block.base_year}); ${slopeText(block.slope, block.ordinary_p)}.`);
+    detail(cell, `${block.sector_label}, nominal dollars. ${block.method}`);
+    if (block.bands) { detail(cell, block.bands.label_80 + '.'); detail(cell, block.bands.label_95 + '.'); }
+    if (moved) detail(cell, `Growth-forecast changes entered move the nowcast by the ${slopeText(block.slope, block.ordinary_p)}.`);
     detail(cell, 'The two series are different flows and are never added.');
     return cell;
   }
@@ -770,7 +777,7 @@
     const levels = [mCur, baseCur, mNext].find(m => ready(m) && m.anchor_cycle_real_2025 != null) || null;
     const seen = [mCur, baseCur].find(m => ready(m) && m.observed) || null;
     const pacCur = head[0].pac, pacNext = head[1].pac, anchorCycle = pacCur.anchor_cycle;
-    const missing = [mCur, baseCur, mNext].find(m => m && m.status === 'unavailable');
+    const missing = [mCur, baseCur, mNext].find(m => m && m.status === 'unavailable') || [pacCur, pacNext].find(p => p && p.status === 'withheld');          // a withheld model (Telecom: lobbying only) says why
     if (!levels) return {empty: true, account: accountId, message: missing ? missing.reason : 'No Mentat level is available for this account.', flags: missing ? [{kind: INFO, text: missing.reason}] : []};
     const cpi = view.anchors && view.anchors.cpi_multiplier;
     const anchor = {id: 'anchor', label: period(anchorCycle), sub: 'Mentat level', value: levels.anchor_cycle_real_2025, nominal: levels.anchor_cycle_nominal, cycle: anchorCycle};
@@ -1187,22 +1194,19 @@
   }
 
   // ---- the lobbying chart (Melange LDA, under the Lobbying account): two series, never summed -----------------------------------------------------------------
-  // Levels are Melange LDA's reported amounts; a projection is the real-terms change from the log refit applied to the latest complete year, so
-  // with the model fix (which says so in `dollars`) the card names that year's dollars, and without it keeps the model's own wording ("nominal").
-  // A year with observed quarters is drawn from the interval conditioned on them when the model returned one (P1); otherwise as returned,
-  // and an interval that starts below what the observed quarters already add up to gets the amber chip.
+  // Levels are Melange LDA's reported nominal amounts. A projection is the in-year nowcast of the year being filed (carried forward unchanged to the later years unless a
+  // growth-forecast change is entered), drawn with two empirical bands from the blind tests: the 80% band (inner whisker) and the ~95% band, the largest blind miss (outer, dashed).
   const LOBBY_SERIES = [['income_total', 'fees'], ['expenses_total', 'inhouse']];
   function lobbyModel(run, firstYear, lastYear) {
-    const emptyText = `Enter yearly growth to project ${firstYear}–${lastYear}`;
+    const emptyText = `No lobbying projection for ${firstYear}–${lastYear}`;
     run = readyRun(run);
     if (!run) return {state: 'empty', text: emptyText};
     const blocks = run.horizons.map(h => h.lobbying);
     const closed = blocks.find(block => block.status !== 'ready');
     if (closed) return {state: 'unavailable', text: 'Not shown: ' + closed.reason};
-    const rows = [].concat(...blocks.map(block => block.rows)).filter(row => row.status === 'ready').sort((a, b) => a.year - b.year);
-    if (!rows.length) return {state: 'empty', text: emptyText};
-    const block = blocks[0], baseYear = block.base_year, series = [], chips = [];
-    const dollars = rows.some(row => (row.series || []).some(s => s.dollars)) ? `${baseYear} dollars` : 'nominal dollars';
+    const all = [].concat(...blocks.map(block => block.rows)), rows = all.filter(row => row.status === 'ready').sort((a, b) => a.year - b.year);
+    if (!rows.length) { const why = all.find(row => row.status === 'unavailable'); return why ? {state: 'unavailable', text: 'Not shown: ' + why.reason} : {state: 'empty', text: emptyText}; }
+    const block = blocks[0], baseYear = block.base_year, series = [], chips = [], dollars = 'nominal dollars';
     for (const [id, tone] of LOBBY_SERIES) {
       const first = rows[0].series.find(s => s.id === id);
       if (!first) continue;
@@ -1210,48 +1214,41 @@
       for (const row of rows) {
         const s = row.series.find(item => item.id === id);
         if (!s) continue;
-        const g = s.cycle_given_observed_median != null && s.remaining_given_observed_median != null;
-        points.push({year: row.year, conditioned: g, value: g ? s.cycle_given_observed_median : s.projected, low: g ? s.cycle_given_observed_low : s.prediction_low, high: g ? s.cycle_given_observed_high : s.prediction_high,
-          unconditioned: g ? {value: s.projected, low: s.prediction_low, high: s.prediction_high, chanceBelow: s.prob_full_below_observed} : null,
-          coefLow: s.coefficient_low, coefHigh: s.coefficient_high, observed: s.observed || null,
-          remaining: g ? s.remaining_given_observed_median : s.projected_remaining == null ? null : s.projected_remaining,
-          remainingLow: g ? s.remaining_given_observed_low : s.remaining_prediction_low, remainingHigh: g ? s.remaining_given_observed_high : s.remaining_prediction_high,
-          remainderStatus: s.remainder_status, remainderReason: remainderText(s), changePct: row.change_pct, steps: row.steps, chained: row.chained});
+        points.push({year: row.year, value: s.projected, low: s.band80_low, high: s.band80_high, low95: s.band95_low, high95: s.band95_high, nowcast: s.nowcast, ahead: s.years_after_nowcast, observed: s.observed || null,
+          remaining: s.projected_remaining == null ? null : s.projected_remaining, remainingLow: s.remaining_band80_low, remainingHigh: s.remaining_band80_high,
+          remainderStatus: s.remainder_status, remainderReason: remainderText(s), changePct: s.change_pct, steps: row.steps, chained: row.chained});
       }
       series.push({id, tone, label: first.label, points});
     }
-    const sourceNote = dollars === 'nominal dollars'
-      ? `${block.sector_label}, nominal dollars (source ${block.source_file}). ${block.note}`
-      : `${block.sector_label}: reported levels in nominal dollars; projections apply the real-terms change from the log refit to the latest complete year (${baseYear}), so they are in ${dollars} (source ${block.source_file}). ${block.note}`;
+    const sourceNote = `${block.sector_label}, nominal dollars (source ${block.source_file}). ${block.note}`;
+    const bandNotes = block.bands ? [N(block.bands.label_80), N(block.bands.label_95)] : [];
     for (const item of series) {
       for (const p of item.points) {
         const lines = [H(`${item.label} · ${p.year}`)];
         if (p.base) lines.push(R(`${p.year} level (latest complete Melange LDA year)`, money(p.value)));
         else {
-          const modelChange = `${pct(p.changePct)}${p.chained ? ' (chained, ' + p.steps + ' steps)' : ''}`, baseLevel = item.points[0].value;
-          lines.push(R(p.conditioned ? `Projected full year, median (${dollars}, given the observed quarters)` : `Projected full year (${dollars === 'nominal dollars' ? 'nominal' : dollars})`, money(p.value)));
-          // The model's change is the unconditioned one: where the point is drawn from the figure conditioned on the observed quarters, the change actually drawn is printed beside it.
-          if (p.conditioned && baseLevel > 0) lines.push(R(`Change vs the ${baseYear} level, drawn (conditioned)`, pct((p.value / baseLevel - 1) * 100)), R('Model change before conditioning on the observed quarters', modelChange));
-          else lines.push(R(`Change vs the ${baseYear} level`, modelChange));
-          lines.push(R(p.conditioned ? '95% prediction interval, given the observed quarters' : '95% prediction interval', range(p.low, p.high)), R('Coefficient interval', range(p.coefLow, p.coefHigh)));
+          const change = `${pct(p.changePct)}${p.chained ? ' (chained, ' + p.steps + ' steps)' : ''}`;
+          lines.push(R(p.nowcast && !p.ahead ? 'Nowcast, full year' : 'Projected full year', money(p.value)), R(`Change vs the ${baseYear} level`, change), R('80% band', range(p.low, p.high)), R('~95% band (largest blind miss)', range(p.low95, p.high95)));
+          if (p.nowcast) lines.push(R(`Nowcast, ${p.nowcast.through_quarter} cut`, `${money(p.nowcast.observed)} filed + ${percent(1 - p.nowcast.share)} of ${p.nowcast.year - 1} (${money(p.nowcast.prior_total)}) to come; filed share ${percent(p.nowcast.share)}`));
+          if (p.ahead > 0) lines.push(N(`Carried ${p.ahead} year${p.ahead > 1 ? 's' : ''} past the nowcast: the bands add the LobbyView persistence error, in quadrature.`));
           if (p.observed) lines.push(R(`Observed ${p.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + p.observed.through_quarter}`, money(p.observed.amount_nominal) + (p.observed.face_value ? ' (face value)' : '')));
-          if (p.remaining != null) lines.push(R(p.conditioned ? 'Remainder after the observed quarters, median' : 'Remainder after the observed quarters', money(p.remaining)));
+          if (p.remaining != null) lines.push(R('Remainder after the observed quarters', money(p.remaining)), R('Remainder, 80% band', range(p.remainingLow, p.remainingHigh)));
           else if (p.remainderStatus === 'baseline_exceeded' || p.remainderStatus === 'no_observed') lines.push(N(p.remainderReason, WARN));
-          if (p.unconditioned) lines.push(R('Unconditioned model', `${money(p.unconditioned.value)}, interval ${range(p.unconditioned.low, p.unconditioned.high)}`));
-          if (!p.conditioned && p.observed && p.low < p.observed.amount_nominal - 0.5) {
-            chips.push({kind: WARN, text: `${item.label}: interval starts below the amount already observed`, tip: [H(`${item.label} · ${p.year}`), R('95% prediction interval, full year', range(p.low, p.high)),
-              R(`Observed ${p.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + p.observed.through_quarter}`, money(p.observed.amount_nominal)), N('The model returned an interval whose lower end is under what is already observed. It is drawn as returned, not clipped.', WARN)]});
+          if (p.observed && p.low95 < p.observed.amount_nominal - 0.5) {
+            chips.push({kind: WARN, text: `${item.label}: ~95% band starts below the amount already observed`, tip: [H(`${item.label} · ${p.year}`), R('~95% band, full year', range(p.low95, p.high95)),
+              R(`Observed ${p.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + p.observed.through_quarter}`, money(p.observed.amount_nominal)), N('The band is drawn as returned, not clipped.', WARN)]});
           }
         }
-        lines.push(R('Slope rule', slopeText(block.slope, block.ordinary_p)), N(sourceNote));
+        lines.push(...bandNotes, N(sourceNote));
         p.tip = lines;
       }
       item.aria = `${item.label}, ${dollars}: ` + item.points.map(p => `${p.year} ${money(p.value)}${p.base ? ' observed' : ' projected'}`).join(', ');
-      item.tip = [H(`${item.label} · ${dollars}`)].concat(item.points.map(p => R(String(p.year) + (p.base ? ' (observed)' : ' (projected)'), p.base ? money(p.value) : `${money(p.value)}, interval ${range(p.low, p.high)}`)), [N('The two series are different flows and are never added.')]);
+      item.tip = [H(`${item.label} · ${dollars}`)].concat(item.points.map(p => R(String(p.year) + (p.base ? ' (observed)' : ' (projected)'), p.base ? money(p.value) : `${money(p.value)}, 80% band ${range(p.low, p.high)}`)), [N('The two series are different flows and are never added.')]);
     }
     for (const chip of waiverChips('lobby', run)) chips.push(chip);
-    const values = [].concat(...series.map(item => item.points.map(p => Math.max(p.value, p.high || 0))));
-    return {state: 'ready', series, chips, dollars, years: [baseYear].concat(rows.map(row => row.year).filter((year, i, all) => all.indexOf(year) === i)), axisMax: stickyMax('lobby', run, Math.max(...values))};
+    const values = [].concat(...series.map(item => item.points.map(p => Math.max(p.value, p.high95 || 0))));
+    const caption = block.bands ? 'Bars: 80% band · dashed: ~95% band, the largest blind miss' + (block.bands.blind_tests ? ` (n=${block.bands.blind_tests})` : '') : '';
+    return {state: 'ready', series, chips, dollars, caption, years: [baseYear].concat(rows.map(row => row.year).filter((year, i, all) => all.indexOf(year) === i)), axisMax: stickyMax('lobby', run, Math.max(...values))};
   }
   function drawLobby(model, host, animate) {
     host.replaceChildren(); flip(host, 'gf-static', !animate); host.setAttribute('role', 'group'); host.dataset.drawn = String(host.clientWidth);
@@ -1275,6 +1272,7 @@
       grid.append(svg('text', {class: 'gf-axis-label', x: pad.l - 10, y: y(tick) + 4, 'text-anchor': 'end'}, axisLabel(tick)));
     });
     for (const year of model.years) grid.append(svg('text', {class: 'gf-x-label', x: x(year), y: Ht - 12, 'text-anchor': 'middle'}, String(year)));
+    if (model.caption) grid.append(svg('text', {class: 'gf-axis-label', x: pad.l, y: 10, 'text-anchor': 'start'}, model.caption));
     root.append(grid);
     model.series.forEach((item, index) => {
       const g = svg('g', {class: `gf-series gf-series-${item.tone}`, tabindex: 0, role: 'img', 'aria-label': item.aria}); cssVar(g, '--i', index);
@@ -1282,7 +1280,8 @@
       g.append(svg('path', {class: 'gf-line', pathLength: 1, d: item.points.map((p, i) => (i ? 'L' : 'M') + x(p.year).toFixed(1) + ' ' + y(p.value).toFixed(1)).join(' ')}));
       for (const p of item.points) {
         const px = x(p.year), py = y(p.value);
-        if (!p.base) g.append(svg('path', {class: 'gf-lobby-whisker gf-fade', d: `M${px} ${y(p.high)}V${y(p.low)}M${px - 3} ${y(p.high)}h6M${px - 3} ${y(p.low)}h6`}));
+        if (!p.base) g.append(svg('path', {class: 'gf-lobby-whisker gf-lobby-whisker-95 gf-fade', d: `M${px} ${y(p.high95)}V${y(p.low95)}M${px - 5} ${y(p.high95)}h10M${px - 5} ${y(p.low95)}h10`}),
+          svg('path', {class: 'gf-lobby-whisker gf-fade', d: `M${px} ${y(p.high)}V${y(p.low)}M${px - 3} ${y(p.high)}h6M${px - 3} ${y(p.low)}h6`}));
         g.append(svg('circle', {class: 'gf-dot gf-fade' + (p.base ? ' is-base' : ''), cx: px, cy: py, r: 3.6}));
         const target = svg('circle', {class: 'gf-hit', cx: px, cy: py, r: 9}); bindTip(target, p.tip); g.append(target);
       }
@@ -1531,7 +1530,7 @@
       block.append(hasCycleModel() ? node('p', 'Industry revenue growth: the average annual growth of this industry\'s real revenue over the IBISWorld window that feeds the cycle (one-year lag: years c-3 to c-1). Every annual growth of the window moves by the same amount; each measure then derives its own industry budget change from its odd and even year mix and the projection moves by half of it (the 50/50 rule)' + (pacIgnoresGrowth() ? ', except company PACs, which it does not affect (panel nowcast)' : '') + '. Blank uses the IBIS default.', 'gf-help') : node('p', `Revenue growth: 100 × (total revenue in ${end - 1}–${end} ÷ total revenue in ${end - 3}–${end - 2} − 1), on the historical revenue price basis.${ref ? ` ${anchorCycle} (the Mentat anchor cycle): ${number(ref.growth_pct)}%.` : ''} Fitted range ${number(sector.growth_min)}% to ${number(sector.growth_max)}%.`, 'gf-help'));
       block.append(node('p', `Control scores: ${end === current && outlook ? 'Polymarket January–June mean, 0–100 (saved, editable).' : '0–100: Polymarket-style probability of Republican control, scaled like the January–June averages.'} The pill is the control before the election (Democratic or Republican).`, 'gf-help'));
       block.append(node('p', 'Prior cycle: ' + priorBlank(sector, end, index) + '.', 'gf-help'));
-      block.append(node('p', 'Lobbying by year: change in forecast annual industry growth from the preceding year, in percentage points. A relative change applies to the latest complete Melange LDA year; years beyond the next one need every change in between.', 'gf-help'));
+      block.append(node('p', 'Lobbying by year: optional. Blank is no change from the Melange LDA nowcast; a change in forecast annual industry growth from the preceding year, in percentage points, moves the nowcast by the pooled slope (years beyond the next one use every change in between).', 'gf-help'));
       host.append(block);
     });
   }
@@ -1563,7 +1562,7 @@
   // ---- "Sources and notes": the figures conditioned on the giving already observed (model fix P1) and the owner waivers ---------------
   // They sit beside the comparison table, which keeps printing the model's own unconditioned arithmetic exactly as before.
   function conditionedTables(run) {
-    const h = run.horizons[0], amounts = [], mixes = [], lobby = [];
+    const h = run.horizons[0], amounts = [], mixes = [];
     for (const m of h.pac.measures || []) if (givenOf(m)) amounts.push([m.label || m.id, money(m.cycle_given_observed_median), range(m.cycle_given_observed_low, m.cycle_given_observed_high) + (isRange(m) ? ' (range of prior cycles)' : ''), money(m.remaining_given_observed_median),
       range(m.remaining_given_observed_low, m.remaining_given_observed_high) + (isRange(m) ? ' (range of prior cycles)' : ''), m.prob_full_below_observed == null ? '-' : percent(m.prob_full_below_observed), `${money(m.projected_cycle_real_2025)} (${range(m.cycle_prediction_low, m.cycle_prediction_high)})`]);
     for (const chamber of chambers) for (const b of (h.shares[chamber] && h.shares[chamber].bases) || []) {
@@ -1571,15 +1570,13 @@
       mixes.push([`${chamber} · ${b.label || b.id}`, `R ${money(a.remaining_R_real_2025)} · D ${money(a.remaining_D_real_2025)} of ${money(a.remaining_total_real_2025)}`, percent(a.remaining_R_share),
         `${percent(a.implied_cycle_R_share)} (${range(a.implied_cycle_R_share_prediction_low, a.implied_cycle_R_share_prediction_high, percent)})`, money(a.implied_cycle_total_real_2025), b.remainder_status === 'budget_inconsistent' ? 'negative before conditioning' : 'consistent']);
     }
-    for (const row of (h.lobbying && h.lobbying.rows) || []) for (const s of row.series || []) if (s.cycle_given_observed_median != null) lobby.push([`${row.year} · ${s.label}`, money(s.cycle_given_observed_median),
-      range(s.cycle_given_observed_low, s.cycle_given_observed_high), money(s.remaining_given_observed_median), range(s.remaining_given_observed_low, s.remaining_given_observed_high), `${money(s.projected)} (${range(s.prediction_low, s.prediction_high)})`]);
-    return {amounts, mixes, lobby};
+    return {amounts, mixes};
   }
   function renderConditioned(run) {
     const host = $('gf-conditioned'), note = $('gf-results-note');
     if (!host) return;
     host.replaceChildren();
-    const tables = run ? conditionedTables(run) : {amounts: [], mixes: [], lobby: []}, any = tables.amounts.length || tables.mixes.length || tables.lobby.length;
+    const tables = run ? conditionedTables(run) : {amounts: [], mixes: []}, any = tables.amounts.length || tables.mixes.length;
     host.hidden = !any;
     if (note) { note.hidden = !any; note.textContent = any ? 'The table below is the model\'s own unconditioned arithmetic: for the open cycle it can show a full-cycle interval or a remainder below the giving already observed. The chart and the cards draw the figures conditioned on that giving, listed above.' : ''; }
     if (!any) return;
@@ -1587,7 +1584,6 @@
     host.append(node('p', 'For the open cycle the model also returns the full-cycle prediction interval conditioned on the giving already observed (the full cycle cannot fall below it) and a candidate-mix allocation that applies the projected share only to the money still to come. These are the figures the chart and the cards draw. ' + (hasCycleModel() ? 'Observed giving is deflated at the expected inflation until a CPI exists; every amount is 2025 USD.' : 'Observed giving is at face value; every amount is 2025 USD.') + '', 'gf-help'));
     if (tables.amounts.length) evidenceTable(host, 'Open-cycle amounts', ['Account', 'Full cycle, median', '95% prediction interval', 'Remainder, median', 'Remainder 95% interval', 'Unconditioned chance below observed', 'Unconditioned model (full cycle)'], tables.amounts);
     if (tables.mixes.length) evidenceTable(host, 'Open-cycle candidate mix', ['Basis', 'Remaining giving (median)', 'Projected R share applied to it', 'Implied full-cycle R share (95% interval)', 'Implied two-party total', 'Unconditioned remainder'], tables.mixes);
-    if (tables.lobby.length) evidenceTable(host, 'Lobbying, open year', ['Year and series', 'Full year, median', '95% prediction interval', 'Remainder, median', 'Remainder 95% interval', 'Unconditioned model'], tables.lobby);
   }
   function renderWaivers() {
     const host = $('gf-waivers'); if (!host) return;

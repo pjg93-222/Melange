@@ -50,6 +50,17 @@
       "pac_roster": []
     },
     {
+      "id": "telecom",
+      "label": "Telecommunications (Mentat Telecom)",
+      "forecast_industry": "telecom",
+      "mentat_dataset": "Telecom",
+      "workbook": "Telecom Industry Spending Overview.xlsx",
+      "source_db_candidates": [".cache/receipt-metadata-repair-*/telecom/mentat.db", ".cache/report-repairs/telecom-*/data/mentat.db"],
+      "lda_sector": "telecom",
+      "coverage_cut_back": null,
+      "pac_roster": []
+    },
+    {
       "id": "community_banks",
       "label": "Community banks (Mentat Community Banks; separate from commercial banks)",
       "forecast_industry": null,

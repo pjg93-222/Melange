@@ -357,6 +357,10 @@
           "calculator": {
             "type": "boolean"
           },
+          "lobbying_only": {
+            "type": "boolean",
+            "description": "True for an industry offered for lobbying alone (Telecom, owner ruling 2026-10-08): it has no giving model, so the cycle model checks no general-giving step block and no IBIS growth path for it. Optional (absent = false: the industry is offered for giving and is checked); the writer emits it explicitly from the registry."
+          },
           "growth_mean": {
             "type": [
               "number",
@@ -753,6 +757,9 @@
             },
             "provenance": {
               "type": "string"
+            },
+            "persistence": {
+              "$ref": "#/$defs/lobby_persistence"
             }
           },
           "required": [
@@ -1266,6 +1273,86 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "lobby_persistence": {
+      "type": "object",
+      "properties": {
+        "window": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "industries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "q80": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "n",
+                "q80"
+              ],
+              "additionalProperties": false
+            },
+            "propertyNames": {
+              "pattern": "^[123]$"
+            },
+            "minProperties": 1
+          },
+          "minProperties": 1,
+          "description": "Per industry (bundle industry id), per horizon h = 1..3 years: the n persistence errors and their split-conformal 80th percentile of |log(level[t+h]) - log(level[t])|."
+        },
+        "pooled": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "n": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "q80": {
+                "type": "number",
+                "minimum": 0
+              },
+              "q95": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "n",
+              "q80",
+              "q95"
+            ],
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "pattern": "^[123]$"
+          },
+          "minProperties": 1,
+          "description": "All LobbyView sectors pooled, per horizon: the 80th and 95th split-conformal percentiles of the persistence error."
+        }
+      },
+      "required": [
+        "window",
+        "method",
+        "industries",
+        "pooled"
+      ],
+      "additionalProperties": false,
+      "description": "Empirical persistence errors of the LobbyView lobbying level series (owner rulings 2026-10-08): how far the level of a year lies from the level h years earlier on the log scale, over the blind targets 2014-2023. The console adds them in quadrature to the in-year nowcast's blind error for the years after the nowcast year. Optional: a bundle without it leaves the later years without bands."
     },
     "step_residual": {
       "type": "object",

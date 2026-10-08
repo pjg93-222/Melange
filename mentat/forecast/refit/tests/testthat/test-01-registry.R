@@ -13,6 +13,18 @@ test_that("the shipped registry is valid and carries the six fitted industries a
   }
 })
 
+test_that("telecom is a lobbying-only calculator industry (owner ruling 2026-10-08): a Mentat key, the lobbying model only, a stated reason, and the registry checks the flag", {
+  tel <- RF_TEST_REG$industries$telecom
+  expect_true(isTRUE(tel$calculator) && isTRUE(tel$lobbying_only)); expect_identical(tel$mentat_key, "telecom")
+  expect_identical(unlist(tel$models), c(pac = FALSE, control = FALSE, lobbying = TRUE))
+  expect_match(rf_withheld_reason(tel, "pac"), "offered for lobbying only"); expect_match(rf_withheld_reason(tel, "control"), "no giving forecast")
+  expect_true(is.na(rf_withheld_reason(tel, "lobbying")))
+  bad <- RF_TEST_REG; bad$industries$telecom$models$pac <- TRUE
+  expect_true(any(grepl("a lobbying-only industry is a calculator industry with the lobbying model only", rf_validate_registry(bad))))
+  bad <- RF_TEST_REG; bad$industries$telecom$reason <- NULL
+  expect_true(any(grepl("lobbying-only", rf_validate_registry(bad))))
+})
+
 test_that("capabilities follow the inputs that exist: the frozen v1 sample has three industries, property and casualty (F09) is a ready pilot", {
   fr <- rf_frozen_registry(RF_TEST_REG)
   three <- c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing")

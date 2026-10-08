@@ -115,7 +115,7 @@ rf_model_invariants <- function(b, tolerance = 1e-9) {
 }
 
 # Cross-field rules of the optional `cycle_model` (a port of contracts/contract.py check_cycle_model; owner rulings 2026-10-07): per measure d_h = b0 + b1 (k_max + sum_{j<=h} damp^j) for h = 1, 2
-# and df = pairs - 1 in every step block; every offered industry (calculator and a Mentat key) has a general-giving step block and a complete REAL IBISWorld growth path 2023..2027, each above -100%;
+# and df = pairs - 1 in every step block; every industry offered for giving (calculator and a Mentat key, unless flagged lobbying_only: a lobbying-only industry has no giving model to check) has a general-giving step block and a complete REAL IBISWorld growth path 2023..2027, each above -100%;
 # the budget rule weights the model by 0.5; every pace cycle satisfies 0 < O15 <= O18 <= O21 <= F; the Senate share model carries the presidential-cycle term ("2. Keep senate in").
 RF_CYCLE_YEARS <- c("2023", "2024", "2025", "2026", "2027")
 
@@ -130,7 +130,7 @@ rf_cycle_model_invariants <- function(b, tolerance = 1e-9) {
     }
     for (id in names(m$step)) if (m$step[[id]]$df != m$step[[id]]$pairs - 1) problems <- c(problems, sprintf("%s.step.%s: df is not pairs - 1", tag, id))
   }
-  offered <- names(b$industries)[vapply(b$industries, function(i) isTRUE(i$calculator) && !is.null(i$mentat_key) && nzchar(i$mentat_key), logical(1))]
+  offered <- names(b$industries)[vapply(b$industries, function(i) isTRUE(i$calculator) && !is.null(i$mentat_key) && nzchar(i$mentat_key) && !isTRUE(i$lobbying_only), logical(1))]
   for (id in offered) {
     if (is.null(cm$measures$general_giving$step[[id]])) problems <- c(problems, sprintf("cycle_model.measures.general_giving.step: no entry for %s, which the console offers", id))
     gr <- cm$budget_rule$growth[[id]]

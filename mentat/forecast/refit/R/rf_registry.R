@@ -33,6 +33,8 @@ rf_validate_registry <- function(reg) {
     }
     if (!is.logical(i$calculator) || length(i$calculator) != 1L) out <- c(out, sprintf("%s: calculator is not boolean", i$id))
     else if (isTRUE(i$calculator) && !any(unlist(i$models))) out <- c(out, sprintf("%s: calculator industry with no model", i$id))
+    if (isTRUE(i$lobbying_only) && (!isTRUE(i$calculator) || isTRUE(i$models$pac) || isTRUE(i$models$control) || !isTRUE(i$models$lobbying) || !nzchar(i$reason %||% "")))
+      out <- c(out, sprintf("%s: a lobbying-only industry is a calculator industry with the lobbying model only and a stated reason for the others", i$id))
     if (identical(i$status, "declined") && any(unlist(i$models))) out <- c(out, sprintf("%s: declined industry with a model", i$id))
     if (identical(i$status, "declined") && !nzchar(i$reason %||% "")) out <- c(out, sprintf("%s: declined industry without a reason", i$id))
   }

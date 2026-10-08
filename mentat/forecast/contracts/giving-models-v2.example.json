@@ -2639,7 +2639,86 @@
           }
         }
       },
-      "provenance": "FIXTURE computed from SP phase2 p09_lobby_relative.R (lm(dly ~ dg + factor(year)) on the 71 LobbyView pairs); the R pipeline replaces it with its own log refit."
+      "provenance": "FIXTURE computed from SP phase2 p09_lobby_relative.R (lm(dly ~ dg + factor(year)) on the 71 LobbyView pairs); the R pipeline replaces it with its own log refit.",
+      "persistence": {
+        "window": "LobbyView sector-year levels (real 2025 dollars), target years 2014-2023, origin = the earlier year",
+        "method": "e = log(level[t+h]) - log(level[t]), h = 1..3; q = the ceil((n + 1) * p)-th smallest |e| (split-conformal); per industry p = 0.80, pooled p = 0.80 and 0.95",
+        "industries": {
+          "commercial_banks": {
+            "1": {
+              "n": 10,
+              "q80": 0.11332135689014677
+            },
+            "2": {
+              "n": 10,
+              "q80": 0.21942210388709427
+            },
+            "3": {
+              "n": 10,
+              "q80": 0.2463397701705361
+            }
+          },
+          "credit_unions": {
+            "1": {
+              "n": 10,
+              "q80": 0.11297249885039307
+            },
+            "2": {
+              "n": 10,
+              "q80": 0.17338143912568071
+            },
+            "3": {
+              "n": 10,
+              "q80": 0.2256476438143764
+            }
+          },
+          "auto_light_duty_manufacturing": {
+            "1": {
+              "n": 10,
+              "q80": 0.2132070857966717
+            },
+            "2": {
+              "n": 10,
+              "q80": 0.3952265255073293
+            },
+            "3": {
+              "n": 10,
+              "q80": 0.31082567627808544
+            }
+          },
+          "property_casualty": {
+            "1": {
+              "n": 10,
+              "q80": 0.25920943482670467
+            },
+            "2": {
+              "n": 10,
+              "q80": 0.17643879884819214
+            },
+            "3": {
+              "n": 10,
+              "q80": 0.24458202838496845
+            }
+          }
+        },
+        "pooled": {
+          "1": {
+            "n": 60,
+            "q80": 0.1852509758693479,
+            "q95": 0.25920943482670467
+          },
+          "2": {
+            "n": 60,
+            "q80": 0.21942210388709427,
+            "q95": 0.3364104872238478
+          },
+          "3": {
+            "n": 60,
+            "q80": 0.2767932067765173,
+            "q95": 0.43865571483590315
+          }
+        }
+      }
     },
     "evidence": {}
   },

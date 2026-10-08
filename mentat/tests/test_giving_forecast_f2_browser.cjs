@@ -628,7 +628,7 @@ for (const dataPath of ['legacy', 'p1']) {
       });
       assert.equal(area.chartHidden, true); assert.ok(area.lobby.w > area.chartCol.w - 70 && area.lobby.h >= 340, 'it fills the main chart area: ' + JSON.stringify(area.lobby));
       assert.equal(area.title, 'Lobbying by year'); assert.deepEqual(area.legend, ['Outside-firm fees', 'In-house expenses']); assert.equal(area.barLegendHidden, true);
-      assert.deepEqual(area.pressed, ['false', 'false', 'true']); assert.match(area.text, /Enter yearly growth to project 2026–2028/); assert.equal(await page.$$eval('#gf-lobby-chart .gf-line', all => all.length), 0, 'no line without data');
+      assert.deepEqual(area.pressed, ['false', 'false', 'true']); assert.match(area.text, /Bars: 80% band · dashed: ~95% band, the largest blind miss \(n=32\)/); assert.equal(await page.$$eval('#gf-lobby-chart .gf-line', all => all.length), 2, 'blank growth is no change: the nowcast is drawn, two series');
       // enter yearly lobbying growth in More assumptions (both horizons), then two series that are never summed
       await page.click('#gf-more > summary');
       await page.click('#gf-more-body .gf-more-group:nth-child(1) .gf-lobby-link');
@@ -725,7 +725,7 @@ for (const dataPath of ['legacy', 'p1']) {
       const notes = await page.textContent('#gf-notes');
       assert.match(await page.textContent('#gf-footnote'), /Mentat levels; OpenSecrets data only estimates the relationships\. Observed through 2026-06-30 · 41 of 67 work units complete · No 2026 CPI yet$/);
       for (const needle of ['Mentat levels for the industry\'s tracked companies', 'Mentat anchors: Banking Industry Spending Overview.xlsx', 'Included receipts the accounting engine buckets as non_giving',
-        'Full numbers by outcome', 'Model evidence and ordinary p-values', 'Industry revenue growth: the average annual growth', 'Lobbying by year: change in forecast annual industry growth', 'must not be added', 'Observed through 2026-06-30', 'Assumption source', 'Assumptions dated']) {
+        'Full numbers by outcome', 'Model evidence and ordinary p-values', 'Industry revenue growth: the average annual growth', 'Lobbying by year: optional. Blank is no change from the Melange LDA nowcast', 'must not be added', 'Observed through 2026-06-30', 'Assumption source', 'Assumptions dated']) {
         assert.ok(notes.includes(needle) || notes.replace(/\s+/g, ' ').includes(needle), 'Sources and notes keeps: ' + needle);
       }
       assert.match(notes, /Remainder prediction interval: -\$937\.21K to \$4\.73M/, 'the model\'s own unconditioned numbers are in the table behind the notes');
