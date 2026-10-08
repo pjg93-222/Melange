@@ -1,10 +1,10 @@
-"""One figure to one vector PDF, rendered on this computer by headless Edge.
+"""One figure to one PNG image, rendered on this computer by headless Edge.
 
 figure-pdf.js posts the figure's markup, the page's stylesheet paths and the
 page size it measured; this module builds one self-contained HTML document from
-them and has the browser print it. Nothing leaves the machine and nothing is
-installed: Edge ships with Windows, Chrome is the fallback, and
-MENTAT_PDF_BROWSER names any other Chromium.
+them and has the browser photograph it at twice the screen's resolution. Nothing
+leaves the machine and nothing is installed: Edge ships with Windows, Chrome is
+the fallback, and MENTAT_PDF_BROWSER names any other Chromium.
 
 The document is built to be inert and faithful:
 
@@ -19,7 +19,7 @@ The document is built to be inert and faithful:
   printed is not the page being looked at), @media screen becomes @media all,
   and width/height media queries are decided against the viewport the reader
   had on screen instead of the printed page's width.
-* The page is sized to the figure and its header, so the PDF is one page.
+* The window is sized to the figure and its header, so the image is exactly that.
 
 Nothing here logs the markup it is given.
 """
@@ -41,8 +41,10 @@ from urllib.parse import urlparse
 MAX_REQUEST_BYTES = 40 * 1024 * 1024
 RENDER_TIMEOUT_SECONDS = 60
 MAX_CONCURRENT_RENDERS = 2
-# Chrome prints at most 200 inches a side (19200 CSS px); stay inside it.
 MIN_PAGE_PX, MAX_PAGE_PX = 100, 19000
+# The image is drawn at SCALE x; a figure over MAX_SHARP_PIXELS (CSS px) is drawn at 1x to bound memory.
+SCALE, MAX_SHARP_PIXELS = 2, 24_000_000
+PNG_SIGNATURE, PNG_END = b'\x89PNG\r\n\x1a\n', b'\x00\x00\x00\x00IEND\xaeB`\x82'
 MAX_STYLESHEETS = 64
 MAX_ATTRIBUTES = 64
 
@@ -366,16 +368,16 @@ def find_browser():
 
 
 def _finished(path):
-    """The PDF's bytes once the browser has closed the file, else None."""
+    """The PNG's bytes once the browser has written all of it (its IEND chunk), else None."""
     try:
         data = path.read_bytes()
     except OSError:
         return None
-    return data if data.startswith(b'%PDF') and data.rstrip().endswith(b'%%EOF') else None
+    return data if data.startswith(PNG_SIGNATURE) and data.endswith(PNG_END) else None
 
 
 def _kill_tree(process):
-    """End the browser and everything it started; a PDF already on disk is safe."""
+    """End the browser and everything it started; an image already on disk is safe."""
     # Unconditional: children can outlive the main process and keep the profile open.
     if os.name == 'nt':
         subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.pid)], capture_output=True,
@@ -389,7 +391,7 @@ def _kill_tree(process):
 
 
 def _reap(process, folder):
-    """Off the request thread: ending a browser tree takes seconds, the PDF is already in hand."""
+    """Off the request thread: ending a browser tree takes seconds, the image is already in hand."""
     try:
         if process is not None:
             _kill_tree(process)
@@ -409,30 +411,32 @@ def _sweep_stale(max_age=600):
             pass
 
 
-def render(document):
-    """PDF bytes for one HTML document. Raises PdfError (503, 504 or 500)."""
+def render(document, width, height):
+    """PNG bytes (SCALE x width by SCALE x height pixels) for one HTML document. Raises PdfError (503, 504 or 500)."""
     browser = find_browser()
     if not browser:
-        raise BrowserMissing('PDF export needs Microsoft Edge or Chrome, and neither was found on this computer.')
+        raise BrowserMissing('Image export needs Microsoft Edge or Chrome, and neither was found on this computer.')
+    scale = SCALE if width * height <= MAX_SHARP_PIXELS else 1
     with _slots:
         _sweep_stale()
         folder = tempfile.TemporaryDirectory(prefix='mentat-pdf-', ignore_cleanup_errors=True)
         process, data = None, None
         try:
             root = Path(folder.name)
-            page, out = root / 'figure.html', root / 'out.pdf'
+            page, out = root / 'figure.html', root / 'out.png'
             page.write_text(document, encoding='utf-8')
             command = [browser, '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
-                       '--disable-extensions', '--user-data-dir=%s' % (root / 'profile'), '--no-pdf-header-footer',
-                       '--print-to-pdf=%s' % out, page.as_uri()]
+                       '--disable-extensions', '--user-data-dir=%s' % (root / 'profile'), '--hide-scrollbars',
+                       '--force-device-scale-factor=%d' % scale, '--window-size=%d,%d' % (width, height),
+                       '--screenshot=%s' % out, page.as_uri()]
             try:
                 process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                            stderr=subprocess.DEVNULL,
                                            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
             except OSError:
-                raise RenderFailed('The PDF browser could not be started.') from None
+                raise RenderFailed('The image browser could not be started.') from None
             deadline = time.monotonic() + RENDER_TIMEOUT_SECONDS
-            # The browser writes the PDF in a second or two and then lingers
+            # The browser writes the image in a second or two and then lingers
             # while it shuts down; the finished file is the finish line.
             while data is None:
                 data = _finished(out)
@@ -442,30 +446,30 @@ def render(document):
                 if exit_code is not None:
                     data = _finished(out)
                     # Edge's launcher can hand the job to a relaunched copy and exit 0 at once
-                    # (here: after 0.07 s, the PDF follows about a second later), so only a
+                    # (here: after 0.07 s, the file follows about a second later), so only a
                     # failing exit, or a finished file, ends the wait before the deadline.
                     if data is not None or exit_code != 0:
                         break
                 if time.monotonic() > deadline:
-                    raise RenderTimeout('The PDF took longer than %d seconds to draw.' % RENDER_TIMEOUT_SECONDS)
+                    raise RenderTimeout('The image took longer than %d seconds to draw.' % RENDER_TIMEOUT_SECONDS)
                 time.sleep(0.05)
         finally:
             threading.Thread(target=_reap, args=(process, folder), daemon=True).start()
     if not data:
-        raise RenderFailed('The PDF could not be drawn.')
+        raise RenderFailed('The image could not be drawn.')
     return data
 
 
 def file_name(requested):
-    """A safe .pdf file name for Content-Disposition."""
+    """A safe .png file name for Content-Disposition."""
     stem = re.sub(r'[^A-Za-z0-9._-]+', '-', requested if isinstance(requested, str) else '')
     stem = re.sub(r'\.{2,}', '.', stem).strip('.-_')
-    stem = re.sub(r'(?i)\.pdf$', '', stem)[:120].strip('.-_')
-    return (stem or 'mentat-figure') + '.pdf'
+    stem = re.sub(r'(?i)\.(?:png|pdf)$', '', stem)[:120].strip('.-_')
+    return (stem or 'mentat-figure') + '.png'
 
 
 def export(raw, static_assets, directory):
-    """(pdf bytes, file name) for a raw JSON request body."""
+    """(png bytes, file name) for a raw JSON request body."""
     if len(raw) > MAX_REQUEST_BYTES:
         raise BadRequest('That figure is too large to export.')
     try:
@@ -473,14 +477,16 @@ def export(raw, static_assets, directory):
     except (ValueError, UnicodeDecodeError):
         raise BadRequest('Expected a JSON figure request.') from None
     document = build_document(data, static_assets, directory)
-    return render(document), file_name(data.get('filename'))
+    # build_document has already checked both numbers.
+    size = (_number(data, 'width', MIN_PAGE_PX, MAX_PAGE_PX), _number(data, 'height', MIN_PAGE_PX, MAX_PAGE_PX))
+    return render(document, *size), file_name(data.get('filename'))
 
 
 def respond(handler, static_assets, directory, policy):
-    """Answer POST /api/export/pdf on a console Handler.
+    """Answer POST /api/export/pdf on a console Handler (the path keeps its old name).
 
     Reads the body itself because it may be larger than the console's ordinary
-    7 MB request cap, then writes the PDF as a download.
+    7 MB request cap, then writes the PNG as a download.
     """
     try:
         length = int(handler.headers.get('Content-Length', '0'))
@@ -490,15 +496,15 @@ def respond(handler, static_assets, directory, policy):
         handler.close_connection = True
         return handler.send({'error': 'Request is empty or too large.'}, 400)
     try:
-        pdf, name = export(handler.rfile.read(length), static_assets, directory)
+        png, name = export(handler.rfile.read(length), static_assets, directory)
     except PdfError as error:
         return handler.send({'error': str(error)}, error.status)
-    handler._sent_bytes = len(pdf)
+    handler._sent_bytes = len(png)
     handler.send_response(200)
-    for header, value in (('Content-Type', 'application/pdf'), ('Content-Length', str(len(pdf))),
+    for header, value in (('Content-Type', 'image/png'), ('Content-Length', str(len(png))),
                           ('Content-Disposition', 'attachment; filename="%s"' % name),
                           ('Cache-Control', 'no-store'), ('X-Content-Type-Options', 'nosniff'),
                           ('Content-Security-Policy', policy)):
         handler.send_header(header, value)
     handler.end_headers()
-    handler.wfile.write(pdf)
+    handler.wfile.write(png)

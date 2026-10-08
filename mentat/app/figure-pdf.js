@@ -1,8 +1,8 @@
-/* One-click vector PDF of a single figure (PAC evidence, Graph, Chart Studio, Insights).
+/* One-click PNG image of a single figure (PAC evidence, Graph, Chart Studio, Insights).
    Nothing is printed from this window. The figure is cloned with the classes of its
    ancestors, its canvases and blob images are frozen into data: images, and the markup
-   goes to POST /api/export/pdf, where headless Edge draws it from the console's own
-   stylesheets. The reply is a download. */
+   goes to POST /api/export/pdf (the path keeps its old name), where headless Edge photographs it
+   from the console's own stylesheets. The reply is a download. */
 (() => {
   'use strict';
   const PAD = 16, MAX_SIDE = 19000, SLACK = 2;
@@ -13,8 +13,8 @@
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
   const two = number => String(number).padStart(2, '0');
   const stamp = date => `${date.getFullYear()}${two(date.getMonth() + 1)}${two(date.getDate())}-${two(date.getHours())}${two(date.getMinutes())}`;
-  const fileName = (view, title, date) => `${VIEW_SLUG[view] || slug(view) || 'figure'}-${slug(title) || 'figure'}-${stamp(date || new Date())}.pdf`;
-  // The page is the figure, the header above it and one margin around both.
+  const fileName = (view, title, date) => `${VIEW_SLUG[view] || slug(view) || 'figure'}-${slug(title) || 'figure'}-${stamp(date || new Date())}.png`;
+  // The image is the figure, the header above it and one margin around both.
   const pageSize = (width, height, headerHeight) => ({
     width: width + 2 * PAD, height: Math.ceil(PAD + headerHeight + height + PAD + SLACK)});
 
@@ -32,14 +32,14 @@
       date && date.value ? 'As of ' + date.value : ''].filter(Boolean).join(' · ');
   };
 
-  // The map's own controls say what it shows; the PDF carries that as words instead of buttons.
+  // The map's own controls say what it shows; the image carries that as words instead of buttons.
   const mapScope = host => {
     const direction = host.querySelector('.map-direction.on'), cycle = host.querySelector('#evidence-map-cycle');
     return [text(host.querySelector('.map-overline')), direction && direction.firstChild ? text(direction.firstChild) : '',
       cycle && cycle.selectedOptions[0] ? text(cycle.selectedOptions[0]) : '', text(host.querySelector('.map-layer.on'))].filter(Boolean).join(' · ');
   };
 
-  // What each kind of figure says about itself in the PDF header. host: where the button lives and
+  // What each kind of figure says about itself in the image header. host: where the button lives and
   // what is drawn. title: a selector inside the figure, or a function; else its first heading.
   // scope and source: functions of the figure.
   const STUDIO_CANVAS = {view: 'studio', host: '#studio-canvas', title: () => query('#studio-title'), scope: () => query('#studio-subtitle'),
@@ -222,7 +222,7 @@
     const now = new Date(), meta = {title: options.title || '', scope: options.scope || '', source: options.source || ''};
     const head = header(doc, meta, now), headHeight = measure(head, width);
     const page = pageSize(width, height, headHeight);
-    if (page.height > MAX_SIDE || page.width > MAX_SIDE) throw new Error('This figure is too large for one PDF page.');
+    if (page.height > MAX_SIDE || page.width > MAX_SIDE) throw new Error('This figure is too large for one image.');
     const sheet = doc.createElement('div');
     sheet.className = 'figure-pdf-sheet';
     sheet.append(head, wrap(clone, element, doc));
@@ -251,7 +251,7 @@
       if (!response.ok) {
         let message = '';
         try { message = (await response.json()).error; } catch (error) { message = ''; }
-        throw new Error(message || `The PDF could not be drawn (${response.status}).`);
+        throw new Error(message || `The image could not be drawn (${response.status}).`);
       }
       return response.blob();
     }
@@ -264,7 +264,7 @@
     const payload = await build(element, settings);
     const blob = await render(payload);
     if (!globalThis.MentatExport || typeof globalThis.MentatExport.download !== 'function') throw new Error('Downloads are unavailable until the page finishes loading.');
-    globalThis.MentatExport.download(blob, 'application/pdf', payload.filename);
+    globalThis.MentatExport.download(blob, 'image/png', payload.filename);
     return {filename: payload.filename, bytes: blob.size, width: payload.width, height: payload.height};
   }
 
@@ -283,7 +283,7 @@
     try {
       await exportElement(host, {...describe(host, spec), view: spec.view});
     } catch (error) {
-      report('PDF export: ' + (error && error.message ? error.message : 'the figure could not be drawn.'));
+      report('Image export: ' + (error && error.message ? error.message : 'the figure could not be drawn.'));
     } finally {
       busy.delete(control);
       control.removeAttribute('aria-busy');
@@ -291,7 +291,7 @@
   }
   function control(host, spec) {
     const node = document.createElement('button');
-    node.type = 'button'; node.className = 'figure-pdf-btn'; node.textContent = 'PDF';
+    node.type = 'button'; node.className = 'figure-pdf-btn'; node.textContent = 'Image';
     node.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); run(node, host, spec); });
     return node;
   }
@@ -300,8 +300,8 @@
       for (const host of document.querySelectorAll(spec.host)) {
         if (!host.querySelector(':scope > .figure-pdf-btn')) {
           const button = control(host, spec);
-          button.setAttribute('aria-label', 'Download PDF of this figure');
-          button.title = 'Download a PDF of this figure';
+          button.setAttribute('aria-label', 'Download image of this figure');
+          button.title = 'Download an image of this figure';
           host.append(button);
         }
         // The button is absolutely placed; a figure that is not positioned yet becomes the anchor.

@@ -1,4 +1,4 @@
-"""One figure to one PDF: the document builder, and one real render.
+"""One figure to one PNG image: the document builder, and one real render.
 
 The builder test needs no browser and no console. The render test draws a small
 SVG figure through headless Edge or Chrome and is skipped on a computer that has
@@ -6,6 +6,7 @@ neither.
 """
 import importlib.util
 import re
+import struct
 import tempfile
 import unittest
 from pathlib import Path
@@ -78,7 +79,7 @@ class DocumentTests(unittest.TestCase):
 
 @unittest.skipUnless(figure_pdf.find_browser(), 'no Edge or Chrome on this computer')
 class RenderTests(unittest.TestCase):
-    def test_a_small_svg_figure_is_one_vector_page_of_the_requested_size(self):
+    def test_a_small_svg_figure_is_one_png_at_twice_the_requested_size(self):
         with tempfile.TemporaryDirectory() as folder:
             (Path(folder) / 'a.css').write_text('.panel{border:1px solid #333;font:14px Arial}', encoding='utf-8')
             markup = ('<div class="figure-pdf-sheet"><div class="figure-pdf-head"><div class="figure-pdf-title">Test</div></div>'
@@ -88,13 +89,11 @@ class RenderTests(unittest.TestCase):
             document = figure_pdf.build_document(
                 request_body(body=markup, stylesheets=['/a.css'], width=400, height=300),
                 {'/a.css': ('a.css', 'text/css')}, Path(folder))
-            pdf = figure_pdf.render(document)
-        self.assertTrue(pdf.startswith(b'%PDF'))
-        self.assertEqual(len(re.findall(rb'/Type\s*/Page[^s]', pdf)), 1)
-        width, height = [float(value) for value in re.search(rb'/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)', pdf).groups()]
-        self.assertAlmostEqual(width / 0.75, 400, delta=2)
-        self.assertAlmostEqual(height / 0.75, 300, delta=2)
-        self.assertIn(b'/Subtype /Type0', pdf)          # the text is text, not a picture
+            png = figure_pdf.render(document, 400, 300)
+        self.assertTrue(png.startswith(b'\x89PNG\r\n\x1a\n'))
+        self.assertTrue(png.endswith(b'\x00\x00\x00\x00IEND\xaeB`\x82'))   # the whole file, not a half-written one
+        width, height = struct.unpack('>II', png[16:24])                   # IHDR
+        self.assertEqual((width, height), (800, 600))                      # 400 x 300 CSS px at 2x: no padding, no clipping
 
 
 if __name__ == '__main__':
