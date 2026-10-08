@@ -41,6 +41,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import downstream  # noqa: E402
 import flow_data  # noqa: E402
+import pac_flow_access  # noqa: E402
 
 CONTRACT = (Path(__file__).resolve().parents[2] / 'audits' / 'mentat_failings_20260915'
             / 'contracts' / 'flow.json')
@@ -337,6 +338,33 @@ class FlowContract(unittest.TestCase):
             with self.assertRaises(ValueError):
                 flow_data.parse_request(query)
         self.assertEqual(flow_data.parse_request({'cycle': ['2023-2024'], 'root': ['committee:C00835959']})['cycle'], '2024')
+        with self.assertRaises(ValueError):
+            flow_data.parse_request({'cycle': ['2024'], 'root': ['industry'], 'direct': ['1']})
+        with self.assertRaises(ValueError):
+            flow_data.parse_request({'cycle': ['2024'], 'root': ['committee:C00835959'],
+                                     'direct': ['1'], 'id': ['saved']})
+
+
+class DirectCommitteeFlow(unittest.TestCase):
+    def test_existing_unit_is_used_without_a_snapshot_choice_or_fec_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            write_fixture(directory)
+            with patch.object(pac_flow_access, 'direct_evidence', side_effect=AssertionError('unexpected FEC collection')):
+                body = flow_data.flow({'root': ['committee:' + ROOT_ID], 'cycle': ['2024'],
+                                       'direct': ['1']}, root=Path(directory))
+            self.assertEqual(body['root']['id'], ROOT_ID)
+
+    def test_unselected_committee_collects_once_and_draws_a_flow(self):
+        with tempfile.TemporaryDirectory() as directory:
+            query = {'root': ['committee:' + ROOT_ID], 'cycle': ['2024'], 'direct': ['1']}
+            with patch.object(pac_flow_access.pac_evidence, 'Client'), \
+                 patch.object(pac_flow_access.pac_evidence, 'collect_network', return_value=(fixture_units(), [])) as collect:
+                first = flow_data.flow(query, root=Path(directory))
+                second = flow_data.flow(query, root=Path(directory))
+            self.assertEqual(first['root']['id'], ROOT_ID)
+            self.assertEqual(second['root']['id'], ROOT_ID)
+            self.assertEqual(collect.call_count, 1)
+            self.assertTrue((Path(directory) / f'direct-{ROOT_ID.lower()}-2024' / 'snapshots.json').is_file())
 
 
 class DonorRefunds(unittest.TestCase):

@@ -2501,10 +2501,10 @@ class Console:
             # industry literally called "Credit Union Industry Spending Data";
             # `kind` is what lets a caller tell the two apart without parsing
             # the filename again.
-            stem = re.sub(r'\s+Industry Spending (Overview|Data)$', '', path.stem,
-                          flags=re.IGNORECASE)
-            kind = 'data' if re.search(r'\s+Industry Spending Data$', path.stem,
-                                       flags=re.IGNORECASE) else 'overview'
+            from report_identity import identity
+            report_identity = identity(path.name)
+            stem = report_identity['label'] if report_identity else path.stem
+            kind = report_identity['kind'] if report_identity else 'overview'
             rows.append({'index':index,'name':path.name,'industry':stem,'kind':kind,
                          'source_directory':str(self.report_directory)})
         return rows
@@ -2548,7 +2548,10 @@ class Console:
             except (OSError, ValueError, KeyError, zipfile.BadZipFile):
                 unavailable.append(str(industry.get('industry') or 'Unnamed report'))
                 continue
-            name = re.sub(r'\s+\d{4}[-–]\d{4}$', '', str(industry.get('industry') or path.stem))
+            from report_identity import identity
+            report_identity = identity(path.name)
+            name = (report_identity['label'] if report_identity and report_identity['cycle_label'] else
+                    re.sub(r'\s+\d{4}[-–]\d{4}$', '', str(industry.get('industry') or path.stem)))
             groups.setdefault(name, []).append(index)
         return {'industries':[{'name':name,'indices':indices} for name,indices in sorted(groups.items())],
                 'unavailable_reports':unavailable,
@@ -3121,8 +3124,10 @@ class Handler(BaseHTTPRequestHandler):
                 if not identifier:
                     return self.send({'snapshots': [
                         {'id': p.parent.name, 'company': value.get('company'), 'retrieved_at': value.get('retrieved_at'),
-                         'cycles': sorted({row.get('cycle') for row in value.get('committee_finances', []) if row.get('cycle')})}
-                        for p in sorted(root.glob('*/evidence.json'))
+                         'cycles': sorted({row.get('cycle') for row in value.get('committee_finances', []) if row.get('cycle')}),
+                         'committees': [{'id': row.get('committee_id'), 'cycle': str(row.get('cycle'))}
+                                        for row in value.get('committee_finances', []) if row.get('committee_id')]}
+                        for p in sorted(root.glob('*/evidence.json')) if not p.parent.name.startswith('direct-')
                         if (value := read_json(p)).get('version') == 1]})
                 if not re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,99}', identifier):
                     raise ValueError('Invalid evidence snapshot.')
@@ -3154,6 +3159,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(snapshot_view(query.get('id', [''])[0],
                     query.get('committee', [''])[0], query.get('cycle', [''])[0],
                     PROJECT / '.cache/pac-evidence'))
+            if parsed.path == '/api/pac-flow-catalog':
+                from pac_flow_access import catalog
+                return self.send(catalog(app, query.get('industry', [''])[0], query.get('q', [''])[0]))
             if parsed.path == '/api/flow':
                 # Lane F (boards #44-#46): where a committee's (or an industry's) money came
                 # from and where it went, built from the same downstream measurement as
@@ -3173,7 +3181,8 @@ class Handler(BaseHTTPRequestHandler):
                     return [app.report_path(run, index) for index in chosen['indices']]
                 try:
                     return self.send(flow_data.flow(query, report_directory=app.report_directory,
-                                                    root=PROJECT / '.cache/pac-evidence', workbooks=workbooks))
+                                                    root=PROJECT / '.cache/pac-evidence', workbooks=workbooks,
+                                                    allow_direct_collect=not getattr(app, 'read_only', False)))
                 except flow_data.FlowRefused as error:
                     return self.send(error.body(), 409)
             if parsed.path == '/api/evidence-job':

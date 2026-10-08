@@ -268,8 +268,11 @@ def parse_request(query):
     identifier = get('id')
     if identifier and not SNAPSHOT_ID.fullmatch(identifier):
         raise ValueError('Invalid evidence snapshot.')
+    direct = get('direct') == '1'
+    if direct and (kind != 'committee' or identifier):
+        raise ValueError('Direct Flow needs a committee and no selected snapshot.')
     return {'root_kind': kind, 'committee': committee, 'cycle': cycle, 'basis': basis, 'top': top,
-            'depth': depth, 'id': identifier, 'industry': get('industry')}
+            'depth': depth, 'id': identifier, 'industry': get('industry'), 'direct': direct}
 
 
 # ------------------------------------------------------------------ the saved units
@@ -1273,8 +1276,11 @@ def notes_of(built, totals):
         through = ' and '.join(pooled) if len(pooled) <= 2 else f'{len(pooled)} committees'
         notes.append({'key': 'pooled', 'text': f'routes through {through} show where pooled money went'})
     retrieved = built['facts']['retrieved_at']
-    notes.append({'key': 'source', 'text': 'FEC filings, snapshot of ' + day_label(retrieved) if retrieved
-                  else 'FEC filings, saved snapshot'})
+    if built['identifier'].startswith('direct-'):
+        source = 'FEC filings retrieved ' + day_label(retrieved) if retrieved else 'FEC filings'
+    else:
+        source = 'FEC filings, snapshot of ' + day_label(retrieved) if retrieved else 'FEC filings, saved snapshot'
+    notes.append({'key': 'source', 'text': source})
     unreached = totals.get('unreached_count', 0)
     if unreached:
         plural = unreached != 1
@@ -2225,7 +2231,7 @@ def industry_payload(label, cycle, paths, *, basis='reported', top=DEFAULT_TOP, 
     }
 
 
-def flow(query, *, report_directory=None, root=None, workbooks=None):
+def flow(query, *, report_directory=None, root=None, workbooks=None, allow_direct_collect=True):
     """The route: parse, resolve the industry label when one is named, build or refuse."""
     request = parse_request(query)
     industry, build_stamp = None, None
@@ -2247,7 +2253,17 @@ def flow(query, *, report_directory=None, root=None, workbooks=None):
             raise FlowRefused('This console cannot read the industry workbooks.', 'industry_unavailable')
         return industry_payload(industry, request['cycle'], workbooks(industry), basis=request['basis'],
                                 top=request['top'], depth=request['depth'], root=root, build_stamp=build_stamp)
-    return committee_payload(request['committee'], request['cycle'], identifier=request['id'], basis=request['basis'],
+    identifier = request['id']
+    if request['direct']:
+        # A saved unit is reusable without asking the reader to choose a
+        # snapshot. Only an uncovered committee/cycle needs a new FEC read.
+        try:
+            identifier = newest_snapshot(request['committee'], request['cycle'], Path(root or downstream.ROOT))
+        except ValueError:
+            from pac_flow_access import direct_evidence
+            identifier = direct_evidence(request['committee'], request['cycle'], root or downstream.ROOT,
+                                         allow_collect=allow_direct_collect)
+    return committee_payload(request['committee'], request['cycle'], identifier=identifier, basis=request['basis'],
                              top=request['top'], depth=request['depth'], root=root, industry=industry,
                              build_stamp=build_stamp)
 

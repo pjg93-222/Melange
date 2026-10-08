@@ -1,5 +1,5 @@
 <section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
-<p class="view-intro sr-only">Follow the reported money for one PAC, or several side by side, from any industry file or saved snapshot.</p>
+<p class="view-intro sr-only">Choose a PAC from a sector or search by FEC ID to examine its reported flow. Saved snapshots and imported files remain available for side-by-side evidence.</p>
 <div class="evidence-layout">
 <aside class="card evidence-rail" aria-label="Choose PACs">
 <label class="evidence-find" for="evidence-find"><svg viewBox="0 0 16 16" aria-hidden="true" class="evidence-find-glyph"><circle cx="7" cy="7" r="5"></circle><line x1="10.6" y1="10.6" x2="15" y2="15"></line></svg><span class="sr-only">Find a PAC</span><input id="evidence-find" type="search" placeholder="Find a PAC" autocomplete="off" disabled></label>
@@ -8,6 +8,15 @@
 <label class="chip-select" for="evidence-type"><span class="sr-only">Type</span><select id="evidence-type" disabled><option value="">All types</option></select></label>
 <label class="chip-select" for="evidence-cycle"><span class="sr-only">Cycle</span><select id="evidence-cycle" disabled><option value="">All cycles</option></select></label>
 </div>
+<section class="pac-direct" aria-label="Open any PAC flow">
+<strong>Explore a PAC flow</strong>
+<label for="pac-direct-sector">Sector<select id="pac-direct-sector"><option value="">Any PAC</option></select></label>
+<label for="pac-direct-search">PAC name or FEC ID<input id="pac-direct-search" type="search" placeholder="Search PACs" autocomplete="off"></label>
+<label for="pac-direct-cycle">Election year<input id="pac-direct-cycle" type="number" min="1980" max="2100" step="2" value="2024"></label>
+<div id="pac-direct-results" class="pac-direct-results" role="group" aria-label="PAC flow results"></div>
+<p id="pac-direct-status" class="muted" role="status">Choose a sector or search by PAC name or FEC ID.</p>
+<p class="muted pac-direct-basis">A sector finds PACs; each Flow shows that PAC&rsquo;s full reported activity.</p>
+</section>
 <label class="evidence-follow" for="evidence-follow-graph"><input id="evidence-follow-graph" type="checkbox" role="switch"><span>Follow Graph selection</span></label>
 <p id="evidence-rail-note" class="evidence-rail-note" role="status" hidden></p>
 <div id="evidence-list" class="evidence-list" role="group" aria-label="PACs in this source"></div>

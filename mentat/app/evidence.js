@@ -224,6 +224,7 @@
   let startup = null, restored = false;
   let collectorAvailable = false, collectorReadOnly = false;
   let evidenceJob = '', evidenceJobTimer = 0;
+  let directTicket = 0, directTimer = 0;
 
   const scope = () => (typeof MentatScope === 'undefined' ? null : MentatScope);
   const sourceValue = () => $('evidence-source').value;
@@ -388,7 +389,7 @@
     if (!chosen.kind) {
       html = `<p class="evidence-list-empty">${imports.length || snapshots.length
         ? 'Choose a source above to list its PACs.'
-        : 'Nothing imported yet. Import a file or collect a new snapshot below.'}</p>`;
+        : 'Choose a sector or search above for a PAC flow. Import a file or collect a snapshot for detailed panes.'}</p>`;
     } else if (chosen.kind === 'snapshot' && !snapshotBodies.has(chosen.id)) {
       // While a saved snapshot is read, the rail lists nothing: the previous
       // source's rows left under the new Source chip opened a pane for a
@@ -428,7 +429,7 @@
     const chosen = parseSourceValue(sourceValue());
     if (!chosen.kind) return imports.length || snapshots.length
       ? `${number(imports.length)} imported file${imports.length === 1 ? '' : 's'} and ${number(snapshots.length)} saved snapshot${snapshots.length === 1 ? '' : 's'} on this computer · choose a source`
-      : 'Nothing imported yet. Import a file, or collect a snapshot.';
+      : 'Explore a PAC flow above, or import a file for detailed panes.';
     const all = chosenCommittees(), visible = visibleCommittees();
     const type = $('evidence-type').value, text = $('evidence-find').value.trim();
     const source = chosen.kind === 'csv' ? importById(chosen.id) : snapshotById(chosen.id);
@@ -1257,7 +1258,16 @@
     const cycle = graphContext.filters?.cycle || '';
     const match = snapshots.find(row => wanted.has(MentatState.normalizeName(row.company))
       && (!cycle || (row.cycles || []).some(value => String(value) === cycle)));
-    if (!match) { say('No saved PAC evidence matches the loaded graph companies and cycle.'); return; }
+    if (!match) {
+      const sector = graphContext.industry || '';
+      if (sector && [...$('pac-direct-sector').options].some(option => option.value === sector)) {
+        $('pac-direct-sector').value = sector;
+        if (cycle) $('pac-direct-cycle').value = cycle;
+        refreshDirectCatalog();
+        say('Choose a PAC from this sector above to open its flow.');
+      } else say('Choose a sector or search for a PAC above to open its flow.');
+      return;
+    }
     let body = snapshotBodies.get(match.id);
     if (!body) { body = await api2Evidence(match.id); snapshotBodies.set(match.id, body); }
     const finances = (body.committee_finances || []).filter(row => !cycle || String(row.cycle) === cycle);
@@ -2723,7 +2733,7 @@
       if (state.body.reason) state.message = state.body.reason;
       if (!state.body.reconciles) {
         state.message = (state.message ? state.message + ' ' : '')
-          + 'Located and unlocated do not add up to the reported total; the gap is listed below.';
+          + 'Saved itemized records leave an unresolved source gap; the amount is listed below.';
       }
     } catch (error) {
       if(ticket!==state.requestTicket)return;
@@ -2845,7 +2855,8 @@
     $('evidence-empty').hidden = true;
     window.MentatEvidenceFlow.open({
       pane: {key, source: pane.source, id: pane.id, committee: pane.committee, cycle: pane.cycle,
-        cycles: pane.cycles, name: pane.name, industry: pane.industry, category: pane.category},
+        cycles: pane.cycles, name: pane.name, industry: pane.industry, industryLabel: pane.industry,
+        category: pane.category},
       basis, onChange: writeScope,
       onBack: closeFlow,
       onView: (view, detail) => {
@@ -2868,6 +2879,73 @@
     $('evidence-panes').hidden = false;
     renderPanes(); renderRail(); renderCompare(); writeScope();
   }
+
+  async function refreshDirectCatalog() {
+    const ticket = ++directTicket;
+    const industry = $('pac-direct-sector').value;
+    const q = $('pac-direct-search').value.trim();
+    const results = $('pac-direct-results');
+    if (!industry && !q) {
+      results.replaceChildren();
+      $('pac-direct-status').textContent = 'Choose a sector or search by PAC name or FEC ID.';
+      return;
+    }
+    $('pac-direct-status').textContent = 'Finding PACs…';
+    try {
+      const body = await api('/api/pac-flow-catalog?' + new URLSearchParams({industry, q}));
+      if (ticket !== directTicket) return;
+      results.replaceChildren();
+      for (const item of body.committees || []) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pac-direct-result';
+        button.dataset.committee = item.id;
+        button.dataset.name = item.name;
+        button.dataset.cycles = (item.cycles || []).join(',');
+        const name = document.createElement('span'); name.textContent = item.name;
+        const meta = document.createElement('small');
+        meta.textContent = [item.id, item.category, (item.cycles || []).join(', ')].filter(Boolean).join(' · ');
+        button.append(name, meta);
+        results.append(button);
+      }
+      $('pac-direct-status').textContent = body.total
+        ? `${number(body.total)} PAC${body.total === 1 ? '' : 's'} found${body.total > 500 ? ' · first 500 shown; narrow the search' : ''}. Choose one to open its flow.`
+        : 'No PAC matches this search.';
+    } catch (error) {
+      if (ticket === directTicket) $('pac-direct-status').textContent = error.message;
+    }
+  }
+
+  function openDirectFlow(committee, name, cycles) {
+    if (!window.MentatEvidenceFlow) return;
+    const industry = $('pac-direct-sector').value;
+    const cycle = $('pac-direct-cycle').value;
+    if (!/^\d{4}$/.test(cycle) || Number(cycle) % 2 || Number(cycle) < 1980 || Number(cycle) > 2100) {
+      $('pac-direct-status').textContent = 'Enter an even election year from 1980 to 2100.';
+      $('pac-direct-cycle').focus();
+      return;
+    }
+    if (mapPane) closeMap();
+    flowPane = 'direct';
+    $('view-evidence').classList.add('flow-open');
+    $('evidence-panes').hidden = true;
+    $('evidence-compare').hidden = true;
+    $('evidence-empty').hidden = true;
+    window.MentatEvidenceFlow.open({pane: {key: 'direct', source: 'direct', id: '', committee, cycle,
+      cycles: [...new Set([cycle, ...cycles])], name, industry, industryLabel: industry, category: 'PAC'},
+      onBack: closeFlow, onView: closeFlow});
+  }
+
+  $('pac-direct-sector').addEventListener('change', refreshDirectCatalog);
+  $('pac-direct-search').addEventListener('input', () => {
+    clearTimeout(directTimer);
+    directTimer = setTimeout(refreshDirectCatalog, 250);
+  });
+  $('pac-direct-results').addEventListener('click', event => {
+    const button = event.target.closest('[data-committee]');
+    if (button) openDirectFlow(button.dataset.committee, button.dataset.name,
+      (button.dataset.cycles || '').split(',').filter(Boolean));
+  });
 
   /* Board 6's "Collapse" (r5, audit men-b F2): the enlarged map folds back into
      the pane it was opened from, and the reader lands on that pane's small map
@@ -3344,6 +3422,11 @@
   async function initialize() {
     say('Finding imported files and saved snapshots…');
     await refreshSources();
+    try {
+      const catalog = await api('/api/pac-flow-catalog');
+      $('pac-direct-sector').replaceChildren(new Option('Any PAC', ''),
+        ...(catalog.sectors || []).map(name => new Option(name, name)));
+    } catch (error) { $('pac-direct-status').textContent = error.message; }
     await restorePanes();
     if (!panes.size) { fillTypes(); fillCycles(); applyFilter(); }
     sayScope();
@@ -3363,28 +3446,33 @@
       document.querySelector(`[data-pane="${existing.key}"]`)?.scrollIntoView({block: 'nearest'});
       return existing.key;
     }
-    if (!freeKey()) { say('Three panes are open. Close a pane to open ' + committee + '.'); return null; }
     say('Finding saved evidence for ' + committee + '…');
     let chosen = null;
-    for (const source of snapshots) {
-      if (cycle && !(source.cycles || []).map(String).includes(cycle)) continue;
-      try {
-        if (!snapshotBodies.has(source.id)) snapshotBodies.set(source.id,
-          await api('/api/evidence?id=' + encodeURIComponent(source.id)));
-        const body = snapshotBodies.get(source.id);
-        if ((body.committee_finances || []).some(row => row.committee_id === committee
-            && (!cycle || String(row.cycle) === cycle))) {
-          chosen = {kind: 'snapshot', id: source.id}; break;
-        }
-      } catch { /* Another saved source may still cover this committee. */ }
-    }
+    const saved = snapshots.find(source => (source.committees || []).some(row =>
+      row.id === committee && (!cycle || row.cycle === cycle)));
+    if (saved) chosen = {kind: 'snapshot', id: saved.id};
     if (!chosen) {
       const source = imports.find(item => !item.reread
         && (!cycle || (item.cycles || []).map(String).includes(cycle))
         && (item.committees || []).some(row => row.id === committee));
       if (source) chosen = {kind: 'csv', id: source.id};
     }
-    if (!chosen) { say(`No saved source covers ${committee}${cycle ? ' in ' + cycle : ''}. Import or collect its evidence.`); return null; }
+    if (!chosen) {
+      // Graph can name a committee from a published sector report even when no
+      // PAC evidence snapshot or import has ever been made. Open its direct
+      // Flow instead of turning that valid selection into a dead end.
+      const sector = graphContext?.industry || '';
+      if (sector && [...$('pac-direct-sector').options].some(option => option.value === sector))
+        $('pac-direct-sector').value = sector;
+      if (cycle) $('pac-direct-cycle').value = cycle;
+      let name = committee;
+      try {
+        const listing = await api('/api/pac-flow-catalog?' + new URLSearchParams({q: committee}));
+        name = (listing.committees || []).find(item => item.id === committee)?.name || committee;
+      } catch { /* The FEC ID is enough to collect and draw the Flow. */ }
+      openDirectFlow(committee, name, cycle ? [cycle] : []);
+      return 'direct';
+    }
     // Source lookup awaits I/O; recheck capacity and duplicate requests here.
     const duplicate = [...panes.values()].find(pane => pane.committee === committee && pane.cycle === cycle);
     if (duplicate) return duplicate.key;

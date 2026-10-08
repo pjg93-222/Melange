@@ -15,10 +15,6 @@
   if (!root.document) return;
   const doc = root.document;
   const RAIL_LENGTH = 6;
-  // An import pane's flow: the Spent map's words for the same case (evidence_geo.M_NO_OUTBOUND).
-  const IMPORT_TEXT = 'This import records money this committee received, not where it went. A flow is drawn '
-    + 'from a saved FEC snapshot of the committee\u2019s network: open a saved FEC snapshot for this committee to '
-    + 'see where its money went.';
   let state = null;
   let resizeTimer = 0;
 
@@ -169,17 +165,19 @@
 
   async function load() {
     const ticket = state.ticket = (state.ticket || 0) + 1;
-    if (state.pane.source !== 'snapshot' && !state.stack.length) {
+    if (!/^C\d{8}$/.test(state.committee)) {
       clearChart();
-      $('evidence-flow').removeAttribute('aria-busy');
-      status(IMPORT_TEXT);
+      status('Choose a PAC with a FEC committee ID to examine its flow.');
       return;
     }
     const query = new URLSearchParams({root: 'committee:' + state.committee, cycle: state.cycle, basis: state.basis,
       top: String(state.top), depth: '3'});
     if (state.snapshot) query.set('id', state.snapshot);
+    if (state.pane.source === 'direct' || state.pane.source === 'csv') query.set('direct', '1');
     if (state.pane.industryLabel) query.set('industry', state.pane.industryLabel);
-    status('Reading the flow…');
+    status(state.pane.source === 'direct' || state.pane.source === 'csv'
+      ? 'Collecting FEC filings and drawing the flow…'
+      : 'Reading the flow…');
     $('evidence-flow').setAttribute('aria-busy', 'true');
     let response, body;
     try {
@@ -210,6 +208,7 @@
 
   function clearChart() {
     if (state.chart) { state.chart.destroy(); state.chart = null; }
+    if (state) state.payload = null;
     $('evidence-flow-canvas').replaceChildren();
     $('evidence-flow-routes').replaceChildren();
     $('evidence-flow-foot').textContent = '';
