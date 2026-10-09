@@ -161,6 +161,23 @@ def scope_block(totals_rows, category_rows, party_rows, all_recipients, cycle_re
     return block
 
 
+def compact_gaps(gaps):
+    """The catalogue's `collection_gaps` for one dataset, as the snapshot keeps it, or None.
+
+    The console parses the report's own Data Quality check (collection_gaps.py): the company x
+    cycle cells whose stored rows are materially fewer than FEC reported, and how many more short
+    cells the check did not itemize. Only a failed check is carried; a console that predates the
+    field, or a passing check, adds no block. Nothing is recounted here: the cells are copied as
+    the console states them, [company, cycle, destination, held, reported, percent], and the
+    page words them (mentat-pocket.html gapNotice, held to coverage-view.js by a test).
+    """
+    if not isinstance(gaps, dict) or not gaps.get('failed'):
+        return None
+    return {'f': 1, 'u': int(gaps.get('unitemized') or 0), 's': str(gaps.get('source') or ''),
+            'c': [[c['company'], c['cycle'], c['destination'], c['held'], c['reported'], c['percent']]
+                  for c in gaps.get('cells') or []]}
+
+
 def group(rows, key):
     out = {}
     for row in rows:
@@ -255,6 +272,9 @@ def industry_snapshot(console, dataset, spot_checks, log):
         'rec': recipient_table.values, 'co': company_table.values,
         'S': industry_block, 'C': company_blocks,
         'tot': [totals.get('amount', 0), totals.get('records', 0)]}
+    gaps = compact_gaps(dataset.get('collection_gaps'))
+    if gaps:
+        snapshot['gp'] = gaps
     audit = {
         'industry': name, 'companies': len(companies), 'cycles': list(cycles),
         'complete_group_sets': complete,

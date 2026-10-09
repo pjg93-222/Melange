@@ -74,8 +74,11 @@ def workbook_audit(path):
         result['industry_beneficiaries_with_opposition']={'count':len(affected),
             'oppose_dollars':round(sum(row['reconstructed_oppose'] for row in affected),2),
             'examples':sorted(affected,key=lambda row:row['reconstructed_oppose'],reverse=True)[:6]}
-        result['conduit_superpac']=[{key:row.get(key) for key in ('_row','Cycle','Recipient','Committee ID','Recipient Category','Total Giving','Category Source')}
+        # ActBlue and WinRed are their own Conduit category (2026-10-09). A book built
+        # before that files them under Carey or Super PAC; earmark_conduits_not_conduit counts those rows.
+        result['earmark_conduits']=[{key:row.get(key) for key in ('_row','Cycle','Recipient','Committee ID','Recipient Category','Total Giving','Category Source')}
             for row in recipient if row.get('View')=='Industry' and row.get('Committee ID') in ('C00401224','C00694323')]
+        result['earmark_conduits_not_conduit']=sum(1 for row in result['earmark_conduits'] if row['Recipient Category']!='Conduit')
         cycle_results={}
         for name in ('2021-2022','2023-2024','2025-2026'):
             data=rows(book,name,4)

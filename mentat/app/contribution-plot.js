@@ -333,7 +333,7 @@
   const fittingLength=(chars,available,size)=>{let lo=0,hi=chars.length;while(lo<hi){const mid=Math.ceil((lo+hi)/2);if(measure(chars.slice(0,mid).join(''),size)<=available)lo=mid;else hi=mid-1;}return lo;};
   const fit=(value,available,size=15)=>{const text=String(value);if(measure(text,size)<=available)return text;const chars=Array.from(text);return chars.slice(0,fittingLength(chars,Math.max(0,available-measure('…',size)),size)).join('')+'…';};
   const wrap=(value,available,size=15)=>{let chars=Array.from(String(value).replace(/\s+/g,' ').trim());const lines=[];while(chars.length){let count=Math.max(1,fittingLength(chars,available,size));if(count<chars.length){const space=chars.slice(0,count).lastIndexOf(' ');if(space>0)count=space;}lines.push(chars.slice(0,count).join(''));chars=Array.from(chars.slice(count).join('').trimStart());}return lines.length?lines:[''];};
-  const fittedText=(attrs,value,available,parent)=>{const t=node('text',attrs,fit(value,available,attrs['font-size']||15),parent);node('title',{},value,t);return t;};
+  const fittedText=(attrs,value,available,parent)=>{const t=node('text',attrs,fit(value,available,attrs['font-size']||15),parent),hint=conduitNote(String(value));node('title',{},hint?value+'\n'+hint:value,t);return t;};
   const background=node('rect',{width,height:panelH*panels,fill:'#ffffff'});
   // spec.colorMap (value -> colour) pins a series to a colour and its legend
   // order, as Chart Studio's compared scopes do with --scope-1/2/3; without it
@@ -341,8 +341,13 @@
   const mapped=spec.color&&spec.colorMap?Object.keys(spec.colorMap):null;
   const seen=[...new Set(plotted.map(r=>spec.color?String(r[spec.color]??'Unknown'):'Giving'))];
   const colorValues=mapped?[...mapped.filter(v=>seen.includes(v)),...seen.filter(v=>!mapped.includes(v)).sort((a,b)=>a.localeCompare(b))]:seen.sort((a,b)=>a.localeCompare(b));
-  const colorOf=value=>(mapped&&spec.colorMap[value])||categoryColour(Math.max(0,colorValues.indexOf(value)));
+  // Conduit (theme.js categoryColours) has a colour of its own and takes no slot, so the other members keep the colours they have without it.
+  const slotColours=typeof root.MentatTheme?.categoryColours==='function'?root.MentatTheme.categoryColours(colorValues):colorValues.map((_,i)=>categoryColour(i));
+  const colorOf=value=>(mapped&&spec.colorMap[value])||slotColours[Math.max(0,colorValues.indexOf(value))]||categoryColour(0);
   const color=row=>colorOf(spec.color?String(row[spec.color]??'Unknown'):'Giving');
+  // The hover note a Conduit value carries wherever the recipient category is drawn (theme.js categoryNote).
+  const conduitNote=value=>spec.color==='recipient_category'||dims.includes('recipient_category')?(root.MentatTheme?.categoryNote?.(value)||''):'';
+  const markNote=row=>[...new Set([spec.color,...dims].filter(id=>id==='recipient_category'))].map(id=>conduitNote(row[id])).find(Boolean)||'';
   const encodedFields=[...new Set([...measures,...(spec.tooltip||[]),...(spec.labelFields||[]),...(sizeId?[sizeId]:[]),...(spec.colorMeasure?[spec.colorMeasure]:[])])];
   const valueText=(row,id)=>dims.includes(id)||columns.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'||c.type==='date'))?String(row[id]??'Unknown'):format(row[id],id,columns);
   const labelText=(row,fallback)=>spec.labelFields?.length?spec.labelFields.map(id=>valueText(row,id)).join(' / '):fallback;
@@ -380,7 +385,7 @@
   const shade=row=>heat&&typeof row[spec.colorMeasure]==='number'?{fill:palette[0],'fill-opacity':.25+.75*(heat[1]>heat[0]?(row[spec.colorMeasure]-heat[0])/(heat[1]-heat[0]):1)}:null;
   // Per-panel value axes of the r3 layouts, so reference lines use the drawn scale.
   const axes=[];
-  const mark=(tag,attrs,row,parent,keepRadius)=>{if(sizeId&&tag==='circle'&&!keepRadius)attrs={...attrs,r:3+12*Math.sqrt(Math.abs(row[sizeId]||0)/maxSize)};const detail=encodedFields.map(m=>`${name(m,columns)}: ${valueText(row,m)}`).join('\n');const n=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':label(row,dims)+'; '+detail},null,parent);node('title',{},label(row,dims)+'\n'+detail,n);n.addEventListener('click',()=>onSelect?.(row));n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}});return n;};
+  const mark=(tag,attrs,row,parent,keepRadius)=>{if(sizeId&&tag==='circle'&&!keepRadius)attrs={...attrs,r:3+12*Math.sqrt(Math.abs(row[sizeId]||0)/maxSize)};const note=markNote(row),detail=encodedFields.map(m=>`${name(m,columns)}: ${valueText(row,m)}`).join('\n')+(note?'\n'+note:'');const n=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':label(row,dims)+'; '+detail},null,parent);node('title',{},label(row,dims)+'\n'+detail,n);n.addEventListener('click',()=>onSelect?.(row));n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}});return n;};
   // Marks v3: a point drawn as a shape from the palette (Square, Shape), one per
   // member of a Shape field; without either it is today's circle.
   const shapeMembers=spec.shape?[...new Set(plotted.map(r=>String(r[spec.shape]??'Unknown')))].sort((a,b)=>a.localeCompare(b)):[];
@@ -394,7 +399,7 @@
   const T=18,legendRight=f2bPlot&&spec.legendPlacement==='right',legendCards=[];let rightCol=0,ends=null;
   if(legendRight){
    const series=spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):[];
-   if(series.length)legendCards.push({kind:'series',title:spec.color?name(spec.color,columns):dims.slice(1).map(d=>name(d,columns)).join(' / '),items:series.map((value,i)=>({text:value,fill:spec.color?colorOf(value):categoryColour(i)}))});
+   if(series.length)legendCards.push({kind:'series',title:spec.color?name(spec.color,columns):dims.slice(1).map(d=>name(d,columns)).join(' / '),items:series.map((value,i)=>({text:value,fill:spec.color?colorOf(value):categoryColour(i),note:spec.color==='recipient_category'?conduitNote(value):''}))});
    if(sizeId&&spec.type==='scatter'){
     const nice=v=>{if(!(v>0))return 0;const mag=Math.pow(10,Math.floor(Math.log10(v))),n=v/mag;return (n>=5?5:n>=2?2:1)*mag;};
     const values=[...new Set([maxSize/20,maxSize/4,maxSize].map(nice))].filter(v=>v>0).sort((a,b)=>a-b);
@@ -753,8 +758,9 @@
   if(legends.length){
    const legend=node('g',{'data-legend':'series','aria-label':'Series legend'}),plan=legendPlan(legends),base=panelH*panels;
    for(const {i,value,lines,x,y}of plan.items){
-    node('rect',{x,y:base+y-11,width:11,height:11,rx:2,fill:mapped?colorOf(value):categoryColour(i)},null,legend);
-    lines.forEach((line,j)=>node('text',{x:x+18,y:base+y+j*20,fill:'#59645c','font-size':15},line,legend));
+    const swatch=node('rect',{x,y:base+y-11,width:11,height:11,rx:2,fill:spec.color?colorOf(value):categoryColour(i)},null,legend),hint=conduitNote(value);
+    if(hint)node('title',{},hint,swatch);
+    lines.forEach((line,j)=>{const t=node('text',{x:x+18,y:base+y+j*20,fill:'#59645c','font-size':15},line,legend);if(hint)node('title',{},hint,t);});
    }
    const height=base+plan.height;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);
   }
@@ -784,8 +790,8 @@
     c.items.forEach((item,i)=>{const mid=at+c.rows[i]/2,tx=c.x+12+(item.r?2*Math.max(item.r,6)+10:24);
      if(item.r)node('circle',{cx:f2(c.x+12+Math.max(item.r,6)),cy:f2(mid),r:f2(item.r),fill:'#b9b3c2','fill-opacity':.55,stroke:'#8a8690','stroke-width':1},null,card);
      else if(item.glyph)node('path',{d:glyphD(item.glyph,c.x+18,mid,6),...(glyphOpen(item.glyph)?{fill:'none',stroke:'#59645c','stroke-width':1.5}:{fill:'#59645c'})},null,card);
-     else node('circle',{cx:f2(c.x+18),cy:f2(mid),r:6,fill:item.fill,...(item.opacity!=null?{'fill-opacity':item.opacity}:{})},null,card);
-     const t=node('text',{x:f2(tx),y:f2(mid+6),fill:'#4a4552','font-size':15},fit(item.text,c.x+c.w-12-tx,T),card);node('title',{},item.text,t);at+=c.rows[i];});
+     else{const dot=node('circle',{cx:f2(c.x+18),cy:f2(mid),r:6,fill:item.fill,...(item.opacity!=null?{'fill-opacity':item.opacity}:{})},null,card);if(item.note)node('title',{},item.note,dot);}
+     const t=node('text',{x:f2(tx),y:f2(mid+6),fill:'#4a4552','font-size':15},fit(item.text,c.x+c.w-12-tx,T),card);node('title',{},item.note?item.text+'\n'+item.note:item.text,t);at+=c.rows[i];});
     if(c.more)node('text',{x:f2(c.x+12),y:f2(at+17),fill:'#77727d','font-size':15},'+ '+c.more+' more',card);}}
   container.append(svg);
   return svg;

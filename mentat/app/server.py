@@ -83,6 +83,7 @@ import contribution_data
 import contribution_query
 import contribution_geo
 import contribution_workbook_guard
+import collection_gaps
 import snapshot_registry
 import industry_scope
 
@@ -3044,7 +3045,9 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == '/api/insights/catalog':
                 import analysis_data
                 import response_cache
-                return self.send_entry(response_cache.from_value(analysis_data.catalog(app.report_directory)))
+                # FIX 4: each dataset names what its report's own Data Quality check says was collected short.
+                return self.send_entry(response_cache.from_value(
+                    collection_gaps.attach(app.report_directory, analysis_data.catalog(app.report_directory))))
             if parsed.path == '/api/forecast/pac':
                 import pac_giving_forecast
                 return self.send(pac_giving_forecast.catalog())
@@ -3073,7 +3076,7 @@ class Handler(BaseHTTPRequestHandler):
                     dataset['build_stamp'] = stamps.get(dataset.get('id'))
                 catalog['industry'] = entry['industry'] if entry else None
                 import response_cache
-                return self.send_entry(response_cache.from_value(catalog))
+                return self.send_entry(response_cache.from_value(collection_gaps.attach(app.report_directory, catalog)))
             if parsed.path == '/api/contributions/geography/catalog':
                 # geo_catalog() is industry-independent; the parameter is accepted
                 # and echoed so one client call carries one scope everywhere.
@@ -3388,6 +3391,10 @@ class Handler(BaseHTTPRequestHandler):
                 entry = self.scope_body(data, sources)
                 reader = analysis_data.query if self.path.endswith('/query') else analysis_data.records
                 result = self.contribution_result(reader, data, sources)
+                # The records come straight off the stored facts, which still file ActBlue and WinRed under
+                # their old category; analysis_data's code hash keys every Insights analysis, so the label
+                # is applied to the answer here rather than there.
+                evidence_csv.relabel_conduit_rows(result.get('rows'))
                 result.update(industry_scope.echo(entry))
                 self.send(result)
                 if sent is not None and not (isinstance(result, dict) and result.get('status') in ('building', 'queued', 'preparing')):
@@ -3400,6 +3407,9 @@ class Handler(BaseHTTPRequestHandler):
                 reader = contribution_query.query if self.path.endswith('/query') else contribution_query.records
                 result = self.contribution_result(reader, data, sources)
                 if isinstance(result, dict):
+                    # Same label as the Insights route above, whichever store the records came from.
+                    if self.path.endswith('/records'):
+                        evidence_csv.relabel_conduit_rows(result.get('rows'))
                     result.update(industry_scope.echo(entry))
                 self.send(result)
                 if sent is not None and not (isinstance(result, dict) and result.get('status') in ('building', 'queued', 'preparing')):

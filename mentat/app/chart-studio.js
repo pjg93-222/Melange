@@ -43,7 +43,7 @@
   let loadedSources = false, revision = 0;
   let pageTimer = 0;
   let hoverTile = '';
-  let lastResult = null, lastConfig = null, lastTitle = '', lastScope = '';
+  let lastResult = null, lastConfig = null, lastTitle = '', lastScope = '', lastCoverage = null;
   let contributionCatalog = null, contributionToken = '', contributionResult = null, contributionRequest = null;
   // The snapshot registry folded into GET /api/contributions/session as
   // industries[] (S4_DESIGN.md section 2). Left null on an older server that
@@ -776,13 +776,25 @@
       get request() { return contributionRequest; }, set request(value) { contributionRequest = value; },
       get result() { return contributionResult; }, set result(value) { contributionResult = value; },
       get title() { return lastTitle; }, set title(value) { lastTitle = value; },
-      get scope() { return lastScope; }, set scope(value) { lastScope = value; }};
+      get scope() { return lastScope; }, set scope(value) { lastScope = value; },
+      get coverage() { return lastCoverage; }, set coverage(value) { setCoverage(value); }};
   }
   const basisOf = state => (state || sheet()).source.basis || 'receipt';
   function sourceScope(result,request) {
     const p=result.provenance;
     return [request.dataset,contributions.BASIS[request.basis]?.[0],p.workbook,'Workbook SHA256 '+p.workbook_sha256,'Analytical index '+p.index_token,'Query engine SHA256 '+p.query_engine_sha256,'Field semantics SHA256 '+p.field_semantics_sha256,'Groups '+(result.offset+1)+'–'+(result.offset+result.rows.length)+' of '+result.group_count,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents}),p.scope].join(' · ');
   }
+  // FIX 4 (collection gaps): the report's own Data Quality check names the company x cycle cells whose stored
+  // rows are materially fewer than FEC reported. Each query says which report (dataset) and which companies
+  // and cycles (filters) it reads; coverage-view.js words what they touch, once, for the chip, the subtitle,
+  // the exported scope line and the CSV. The catalogue carries each report's cells (collection_gaps).
+  function gapNotice(queries) {
+    const api = globalThis.MentatCoverage, datasets = (contributionCatalog && contributionCatalog.datasets) || [];
+    if (!api) return null;
+    return api.gapNotice(queries.map(query => ({gaps: (datasets.find(d => d.id === query.dataset) || {}).collection_gaps,
+      scope: api.filtersScope(query.filters)})));
+  }
+  const withGap = (text, notice) => (notice ? globalThis.MentatCoverage.withGap(text, notice) : text);
   // The charts.js family on the verified path: each draws one measure from the
   // server's groups, so the others ride in each mark's hover detail.
   const CANVAS_TYPES = ['pie','doughnut','waterfall','pareto','radar'];
@@ -862,7 +874,7 @@
   async function renderContributionView(view, again=null) {
     view=view||mainSurface();const node=view.el,state=view.state;
     node('reconcile').hidden=true;
-    if(!data||!dataset()){node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
+    if(!data||!dataset()){view.coverage=null;node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
     const ticket=view.bump(),sheetBasis=basisOf(state);
     // r7: a pending answer draws its progress on this surface's canvas and
     // status line; a panel an earlier render of it left goes first.
@@ -889,7 +901,7 @@
       const result=await queryCached(query,view,{retry:again?.retry===true,onProgress});if(view.stale(ticket)||!verified())return;clearPending(node('canvas'));
       view.result=result;view.request=query;
       if(view.primary){failure('');lastResult=result;lastConfig=compiled;data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));}
-      let title=contributions.BASIS[sheetBasis][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')title=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+title;view.scope=sourceScope(result,query);view.title=showTitle(node,title,state,sheetBasis);node('subtitle').textContent=scopeSubtitle(state);
+      let title=contributions.BASIS[sheetBasis][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')title=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+title;const gap=gapNotice([query]);view.coverage=gap;view.scope=withGap(sourceScope(result,query),gap);view.title=showTitle(node,title,state,sheetBasis);node('subtitle').textContent=withGap(scopeSubtitle(state),gap);
       const money=value=>contributionPlot.format(value,'amount');
       node('verified-summary').replaceChildren();
       for(const [label,value]of [[sheetBasis==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));node('verified-summary').append(item);}
@@ -954,7 +966,7 @@
       // measure yet gets muted guidance under its empty title, not the red error.
       const guidance=/^Add a dollar or count measure/.test(error.message),retry=!guidance&&error.retryable===true;
       node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=guidance||retry?'':error.message;
-      node('title').textContent='';node('subtitle').textContent=guidance?error.message:'';node('verified-summary').replaceChildren();node('result-controls').hidden=true;node('status').textContent='';node('status').title='';
+      view.coverage=null;node('title').textContent='';node('subtitle').textContent=guidance?error.message:'';node('verified-summary').replaceChildren();node('result-controls').hidden=true;node('status').textContent='';node('status').title='';
       // r7: a request that failed, or a wait that reached its ceiling, says so on
       // the canvas, once, with a Retry that asks again with retry:true.
       if(retry)drawStopped(node('canvas'),error.message,()=>renderContributionView(view,{retry:true}));
@@ -1012,7 +1024,7 @@
     try{const query={...request,filters:contributions.markFilters(request,row),aggregate_filters:[],limit:100,offset};const current=()=>ticket===recordRevision&&sourceRevision===contributionRevision;
       const result=await contributionReady('records',query,null,{retry:again?.retry===true,current,onProgress:progress=>{if(current())drawPending(el('records'),progress);}});if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===known.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
       el('records').replaceChildren();const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
-      const conduitCells=[];for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'){if(conduitRecord(record)){conduitCells.push([td,record]);drawConduitFiling(td,record,undefined);}else{const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}}tr.append(td);}body.append(tr);}el('records').append(table);if(conduitCells.length)fillConduitFilings(query,result,conduitCells,()=>ticket===recordRevision&&sourceRevision===contributionRevision);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
+      const conduitCells=[];for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='recipient_category'&&globalThis.MentatTheme?.categoryNote?.(value))td.title=globalThis.MentatTheme.categoryNote(value);if(id==='source_url'){if(conduitRecord(record)){conduitCells.push([td,record]);drawConduitFiling(td,record,undefined);}else{const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}}tr.append(td);}body.append(tr);}el('records').append(table);if(conduitCells.length)fillConduitFilings(query,result,conduitCells,()=>ticket===recordRevision&&sourceRevision===contributionRevision);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
     }catch(error){if(ticket===recordRevision){
       // r7: a stopped wait (Cancel, the ceiling) or a failed request can be asked again, with retry:true.
       el('record-count').textContent=error.name==='AbortError'?'Stopped reading source records.':error.message;
@@ -1025,7 +1037,7 @@
     // Two reports cannot share one CSV: each row of it names one workbook's
     // provenance. The image carries both scopes in its legend and caption.
     if(format==='csv'&&compareDrawn&&compareDrawn.kind==='industry'&&view.el===el){failure('Export the CSV one industry at a time: each report carries its own workbook provenance. Clear the comparison, or export the image.');return;}
-    try{if(format==='csv'){exporting=true;exportStatus('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000},null,{current:()=>!view.stale(ticket)});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');exportStatus('CSV download requested: '+fmt(rows.length)+' groups with source and accounting provenance.');}
+    try{if(format==='csv'){exporting=true;exportStatus('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000},null,{current:()=>!view.stale(ticket)});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query,view.coverage?view.coverage.text:''),'text/csv;charset=utf-8','mentat-chart-studio.csv');exportStatus('CSV download requested: '+fmt(rows.length)+' groups with source and accounting provenance.');}
       else{exporting=true;exportStatus('Preparing '+format.toUpperCase()+' image…');const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');exportStatus(format.toUpperCase()+' download requested.');}
     }catch(error){failure(error.name==='AbortError'?(view.stale(ticket)?'View changed during export. Start the download again.':'Export cancelled. Start the download again.'):error.message);}finally{exporting=false;}
   }
@@ -2603,9 +2615,12 @@
     fill(el('overview-company'), list.length ? list.map(m => [m, m]) : [['', 'Reading companies\u2026']]);
     el('overview-company').value = overviewCompany;
     const cycle = overviewCycle();
-    el('overview-scope').textContent = [overviewCompany || 'No company selected',
+    // FIX 4: the four cards read this company (and cycle) of this report; a short cell among them is named here.
+    const gap = overviewCompany && dataset() ? gapNotice([{dataset: dataset().id, filters: [
+      {field: 'company', op: 'eq', value: overviewCompany}, ...(cycle ? [{field: 'cycle', op: 'eq', value: cycle}] : [])]}]) : null;
+    el('overview-scope').textContent = withGap([overviewCompany || 'No company selected',
       (dataset() || {}).label || (dataset() || {}).id || '', cycle ? 'Cycle ' + cycle : 'All cycles',
-      contributions.BASIS[basis()][0]].filter(Boolean).join(' \u00b7 ');
+      contributions.BASIS[basis()][0]].filter(Boolean).join(' \u00b7 '), gap);
     const ticket = ++overviewRevision;
     const grid = el('overview-grid');
     grid.replaceChildren();
@@ -2711,7 +2726,7 @@
     const key = tileKey(state);
     if (!tileMemory.has(key)) {
       tileMemory.set(key, {revision: 0, waiting: null, request: null, result: null,
-        title: '', scope: '', offset: 0});
+        title: '', scope: '', coverage: null, offset: 0});
     }
     return tileMemory.get(key);
   }
@@ -2759,7 +2774,9 @@
       get title() { return record.title; },
       set title(value) { record.title = value; if (selected) lastTitle = value; },
       get scope() { return record.scope; },
-      set scope(value) { record.scope = value; if (selected) lastScope = value; }};
+      set scope(value) { record.scope = value; if (selected) lastScope = value; },
+      get coverage() { return record.coverage; },
+      set coverage(value) { record.coverage = value; if (selected) setCoverage(value); }};
   }
   // Export, Copy image, Print and Add to briefing act on the selected tile when
   // a board is up, and on the single canvas when it is not.
@@ -3863,7 +3880,9 @@
       title: view.title || view.el('title').textContent || 'Chart Studio',
       scope: view.scope || scopeText() || '',
       // Lane P: a map sheet's caption names its layers' sources, as its chip does.
-      chip: ((verified() && globalThis.MentatMapStudio && MentatMapStudio.scopeChip && MentatMapStudio.scopeChip(state)) || {}).text || scopeText(),
+      // FIX 4: the slide, the printed sheet and the drawer print this line first; the gap rides on it.
+      chip: withGap(((verified() && globalThis.MentatMapStudio && MentatMapStudio.scopeChip && MentatMapStudio.scopeChip(state)) || {}).text || scopeText(),
+        verified() ? view.coverage : null),
       note: view.el('note').textContent || '',
       basis: basisLabel,
       sheetId: state.id,
@@ -4638,10 +4657,12 @@
     if (compiled.spec.measures.length !== 1 || compiled.spec.measures[0] !== 'amount')
       title = compiled.spec.measures.map(id => (results[0].columns.find(c => c.id === id) || {}).name || id).join(' / ') + ' · ' + title;
     view.title = title;
-    view.scope = results.map((result, i) => sourceScope(result, queries[i])).join(' | ');
+    const gap = gapNotice(queries);
+    view.coverage = gap;
+    view.scope = withGap(results.map((result, i) => sourceScope(result, queries[i])).join(' | '), gap);
     node('title').textContent = title;
     node('title').title = title;
-    node('subtitle').textContent = scopeSubtitle(state) + ' · compared: ' + values.map(v => v.label).join(' vs ');
+    node('subtitle').textContent = withGap(scopeSubtitle(state) + ' · compared: ' + values.map(v => v.label).join(' vs '), gap);
     // Totals: each report's own for industry; one query's combined totals for
     // cycle and company, said as combined (group identities are not additive).
     const money = value => contributionPlot.format(value, 'amount');
@@ -5006,6 +5027,16 @@
     setWhy(false);
   }
 
+  // FIX 4: the Coverage gap chip sits with the scope chips whenever the selected chart reads a short cell.
+  // Its caption is the subtitle under the chart's title; the chip's tooltip carries it and its source.
+  function paintGapChip(host) {
+    for (const old of host.querySelectorAll('.coverage-gap-chip')) old.remove();
+    if (verified() && lastCoverage && globalThis.MentatCoverage) host.append(globalThis.MentatCoverage.chipNode(lastCoverage));
+  }
+  function setCoverage(value) {
+    lastCoverage = value;
+    if (el('scope-chip')) paintGapChip(el('scope-chip'));
+  }
   function renderScopeChip() {
     // The Data source button is permanent. The one way back to the report
     // picker must never depend on there being a scope to describe.
@@ -5020,6 +5051,7 @@
       chip.textContent = part;
       host.append(chip);
     }
+    paintGapChip(host);
     // What the hand-off could not bring across is stated beside the scope,
     // not left for the reader to meet as a number that looks too large.
     const notes = (appliedScope && appliedScope.notCarried) || [];

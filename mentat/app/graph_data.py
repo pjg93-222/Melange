@@ -14,7 +14,9 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 import openpyxl
+import collection_gaps
 import downstream
+import evidence_csv
 import native_scan
 from view_cache import ViewCache, file_signature
 
@@ -25,7 +27,7 @@ TIERS = {'Chief': 'Chief', 'Middle Management': 'Middle-Management', 'Employee':
 # saved report so far; levels_by_company keeps each company's levels in it.
 LEVEL_ORDER = (TIERS['Employee'], TIERS['Middle Management'], TIERS['Chief'])
 CATEGORIES = ['Super PAC', 'Trade Association', 'JFC', 'Company PAC', 'Leadership PAC',
-              'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified']
+              'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified', 'Conduit']
 AUTHORIZED = {'Principal campaign committee', 'Authorized candidate committee'}
 MAX_SOURCE_ROWS = 1000000
 # The drawer's sides, in the order the console offers them. direction_totals
@@ -188,14 +190,34 @@ def activity_xml_rows(path, metadata, sheet_name='Downstream Activity', required
                 element.clear()
 
 
-def report_transfers(file_stamp):
-    dependencies = file_signature(p for p in transfer_source(file_stamp[0]) if p is not None)
-    return _report_transfers((file_stamp, dependencies))
+def report_transfers(file_stamp, audited=False):
+    """The workbook's transfers: its own sheet, else its pinned full source. `audited` also lets the audited
+    per-cycle books fill in; only the Graph view asks (the flow and the sidecar warmers read the served build)."""
+    return _transfers(file_stamp, audited)[0]
 
 
-@singleflight_cache(maxsize=4)
-def _report_transfers(version):
-    file_stamp, dependencies = version
+def transfer_basis(file_stamp, audited=False):
+    """[{'cycles': [end years], 'text': a sentence}] saying where the transfers that were not the workbook's own
+    complete Transfer Paths sheet were read from; [] when they all were. The Graph's trace note carries the text."""
+    return _transfers(file_stamp, audited)[1]
+
+
+def _transfers(file_stamp, audited):
+    return _report_transfers((file_stamp, file_signature(transfer_files(file_stamp[0], audited)), audited))
+
+
+# FIX 6 (P2): the transfers behind a workbook, in this order. (1) Its own Transfer Paths sheet. (2) The full source
+# pinned to it, when that sheet is capped (transfer_source). (3) The audited per-cycle book of the same industry and
+# cycle, <Industry> Industry Spending Overview <yyyy-yyyy>.xlsx in the reports folder: its audit CSV, else its pinned
+# tidy store (both full), else its own sheet when that is complete. A source that is not the workbook's own is always
+# said (transfer_basis); a full source is never presented as the capped sheet it replaces.
+TRANSFER_CSV = 'transfer_paths.csv'
+SHEET_RECORDS = re.compile(r'([\d,]+)\s+records;')
+SHEET_SHOWN = re.compile(r'([\d,]+)\s+records;\s*([\d,]+)\s+shown')
+
+
+def sheet_transfers(path):
+    """(edges, note, rows): the workbook's own Transfer Paths sheet. ([], '', 0) when it has none."""
     metadata = {}
     result = []
     required = {'cycle','source_committee','destination_committee','reported_net_transfer','traversal_status'}
@@ -204,7 +226,7 @@ def _report_transfers(version):
     # repeated it once per funded root; both shapes carry these five columns). A
     # transfer seen twice must agree on its amount, as in the full-source read below.
     seen = {}
-    for row in activity_xml_rows(file_stamp[0], metadata, 'Transfer Paths', required, optional=True):
+    for row in activity_xml_rows(path, metadata, TRANSFER_PATHS, required, optional=True):
         if not row.get('source_committee'):
             continue
         count += 1
@@ -221,44 +243,270 @@ def _report_transfers(version):
             continue
         seen[identity] = edge['amount']
         result.append(edge)
-    note = str(metadata.get('note') or '')
-    expected = re.search(r'([\d,]+)\s+records;', note)
-    if 'first ' in note.lower() or (expected and int(expected[1].replace(',','')) != count):
-        payload, manifest = transfer_source(file_stamp[0])
-        if not payload or not manifest.is_file() or not payload.is_file():
-            raise ValueError('Transfer Paths is a partial display; its pinned full report source is unavailable.')
-        import contribution_data as source_data
-        proof = json.loads(manifest.read_text(encoding='utf-8-sig'))
-        if (proof.get('database_sha256') != source_data._workbook_source(file_stamp)
-                or not proof.get('data_sha256') or digest(payload) != proof['data_sha256']):
-            raise ValueError('Full transfer source does not match the published report fingerprint.')
-        payload_stamp = stamp(payload)
-        native = native_scan.tables(payload_stamp, [], payload_table='transfer_paths')
-        if native is not None:
-            table = native['tables']['transfer_paths']
-            rows = (dict(zip(table['headers'], row)) for row in table['rows'])
-        else:
-            rows = source_data._payload_rows(payload, 'transfer_paths')
-        unique = {}
-        for row in rows:
-            if row.get('status') == 'candidate_committee':
-                continue
-            identity = (cycle(row['cycle']), str(row['source']), str(row['destination']))
-            if not identity[0] or not all(re.fullmatch(r'C\d{8}', value) for value in identity[1:]):
-                raise ValueError('The full transfer source has invalid committee or cycle identifiers.')
-            value = amount(row['amount'])
-            if identity in unique and unique[identity] != value:
-                raise ValueError('Full report paths disagree on one transfer amount.')
-            unique[identity] = value
-        if (stamp(payload) != payload_stamp or stamp(file_stamp[0]) != file_stamp
-                or file_signature(p for p in transfer_source(file_stamp[0]) if p is not None) != dependencies):
-            raise ValueError('Full report source changed while reading transfers.')
-        return [dict(cycle=k[0], source=k[1], destination=k[2], amount=v) for k,v in sorted(unique.items())]
-    return result
+    return result, str(metadata.get('note') or ''), count
+
+
+def sheet_note(path):
+    """The count line of a workbook's Transfer Paths sheet ('230,075 records; 10,000 shown. ...'), '' without one."""
+    metadata = {}
+    try:
+        for _ in activity_xml_rows(path, metadata, TRANSFER_PATHS, {'cycle'}, optional=True):
+            break
+    except ValueError:
+        return ''
+    return str(metadata.get('note') or '')
+
+
+def sheet_is_partial(note, count):
+    expected = SHEET_RECORDS.search(note)
+    return 'first ' in note.lower() or bool(expected and int(expected[1].replace(',','')) != count)
+
+
+def sheet_shown(note):
+    """(shown, total) as the sheet's count line states them, or None."""
+    found = SHEET_SHOWN.search(note)
+    return (int(found[2].replace(',', '')), int(found[1].replace(',', ''))) if found else None
+
+
+def sheet_capped(note):
+    """Whether the count line says the sheet lists fewer rows than the workbook holds (or does not say)."""
+    counts = sheet_shown(note)
+    return 'first ' in note.lower() or counts is None or counts[0] != counts[1]
+
+
+def sheet_sentence(note, rows, name, whose):
+    """'The Transfer Paths sheet shows the first 10,000 of 230,075 rows; all 230,075 were read from <file>.'"""
+    counts = sheet_shown(note)
+    if counts is None:
+        return f'{whose} Transfer Paths sheet is a partial display; the full list was read from {name}.'
+    shown, total = counts
+    read = ('the full list was read' if rows is None else f'all {total:,} were read' if rows == total
+            else f'{rows:,} rows were read')
+    return f'{whose} Transfer Paths sheet shows the first {shown:,} of {total:,} rows; {read} from {name}.'
+
+
+def unique_transfers(rows):
+    """({(cycle, source, destination): amount}, rows read) for a full source: a transfer once per cycle, a
+    candidate gift never expanded, committee ids checked, and one amount per transfer."""
+    unique, count = {}, 0
+    for row in rows:
+        count += 1
+        if row.get('status') == 'candidate_committee':
+            continue
+        identity = (cycle(row['cycle']), str(row['source']), str(row['destination']))
+        if not identity[0] or not all(re.fullmatch(r'C\d{8}', value) for value in identity[1:]):
+            raise ValueError('The full transfer source has invalid committee or cycle identifiers.')
+        value = amount(row['amount'])
+        if identity in unique and unique[identity] != value:
+            raise ValueError('Full report paths disagree on one transfer amount.')
+        unique[identity] = value
+    return unique, count
+
+
+def edge_list(unique):
+    return [dict(cycle=k[0], source=k[1], destination=k[2], amount=v) for k,v in sorted(unique.items())]
+
+
+@singleflight_cache(maxsize=4)
+def _report_transfers(version):
+    """(edges, basis) for one workbook; `dependencies` is the signature of every file they may come from, and
+    `use_audited` whether the audited per-cycle books may fill in (the Graph view) or not (everything else)."""
+    file_stamp, dependencies, use_audited = version
+    path = file_stamp[0]
+    result, note, count = sheet_transfers(path)
+    if not has_transfer_paths(file_stamp):
+        return read_audited(file_stamp, audited_sources(path), dependencies) if use_audited else ([], [])
+    if not sheet_is_partial(note, count):
+        return result, []
+    payload, manifest = transfer_source(path)
+    if not payload or not manifest.is_file() or not payload.is_file():
+        # No pinned full source: the audited books may supply every cycle of this workbook, else the display
+        # stays partial and is refused rather than shown as the whole.
+        audited = audited_sources(path) if use_audited else {}
+        if audited and set(audited) == {cycle(label) for label in graph_schema(file_stamp)}:
+            return read_audited(file_stamp, audited, dependencies)
+        raise ValueError('Transfer Paths is a partial display; its pinned full report source is unavailable.')
+    import contribution_data as source_data
+    proof = json.loads(manifest.read_text(encoding='utf-8-sig'))
+    if (proof.get('database_sha256') != source_data._workbook_source(file_stamp)
+            or not proof.get('data_sha256') or digest(payload) != proof['data_sha256']):
+        raise ValueError('Full transfer source does not match the published report fingerprint.')
+    payload_stamp = stamp(payload)
+    native = native_scan.tables(payload_stamp, [], payload_table='transfer_paths')
+    if native is not None:
+        table = native['tables']['transfer_paths']
+        rows = (dict(zip(table['headers'], row)) for row in table['rows'])
+    else:
+        rows = source_data._payload_rows(payload, 'transfer_paths')
+    unique, _ = unique_transfers(rows)
+    if (stamp(payload) != payload_stamp or stamp(path) != file_stamp
+            or file_signature(transfer_files(path, use_audited)) != dependencies):
+        raise ValueError('Full report source changed while reading transfers.')
+    # The payload's raw row count is not known here (native_scan collapses repeats and candidate gifts first),
+    # so the sentence does not claim one.
+    return edge_list(unique), [{'cycles': sorted({k[0] for k in unique}),
+                                'text': sheet_sentence(note, None, payload.name, 'The')}]
 
 
 report_transfers.cache_clear = _report_transfers.cache_clear
 report_transfers.cache_info = _report_transfers.cache_info
+
+
+def audited_reports_directory():
+    """Where the audited per-cycle books live: the repository's reports folder, as tools/audit_collection_outputs.py
+    and the collection-gap tests name it. The console's report folder holds the served books, never these."""
+    import contribution_data as source_data
+    return source_data.PROJECT.parent / 'reports'
+
+
+def audited_book(path, label):
+    """The audited per-cycle book of the Overview `path` names for one cycle label ('2025-2026'), whether or not
+    it exists yet; None for a workbook that is not a published Overview or is that book itself."""
+    from report_identity import identity
+    info = identity(Path(path).name)
+    if info is None or info['kind'] != 'overview':
+        return None
+    book = audited_reports_directory() / f"{info['industry']} Industry Spending Overview {label}.xlsx"
+    return None if book.resolve() == Path(path).resolve() else book
+
+
+def audited_store(book, label):
+    """(tidy staging store, manifest) pinned to an audited per-cycle book's Source DB, or (None, None)."""
+    import contribution_data as source_data
+    from report_identity import identity, lineage_paths
+    try:
+        fingerprint = source_data._workbook_source(stamp(book))
+    except (ValueError, OSError, KeyError, zipfile.BadZipFile):
+        return None, None
+    cache = source_data.PROJECT / '.cache/industry-report' / source_data._slug(identity(Path(book).name)['industry'])
+    manifest, payload = lineage_paths(cache, fingerprint, label)
+    return tidy_beside(payload), manifest
+
+
+def audited_source(path, label):
+    """How the audited per-cycle book supplies one cycle's transfers, or None. A full source (its audit CSV, then
+    its pinned tidy store) comes before the book's Transfer Paths sheet, which counts only when it is complete."""
+    book = audited_book(path, label)
+    if book is None or not book.is_file():
+        return None
+    found = {'cycle': cycle(label), 'label': label, 'book': book}
+    csv_path = audit_manifest_path(book).with_name(TRANSFER_CSV)
+    if csv_path.is_file():
+        return {**found, 'kind': 'csv', 'path': csv_path}
+    store, manifest = audited_store(book, label)
+    if store is not None and store.is_file() and manifest.is_file():
+        return {**found, 'kind': 'store', 'path': store, 'manifest': manifest}
+    if has_transfer_paths(stamp(book)) and not sheet_capped(sheet_note(book)):
+        return {**found, 'kind': 'sheet', 'path': book}
+    return None
+
+
+def audited_sources(path):
+    """{cycle end year: source} for the cycles of an Overview that an audited per-cycle book can supply. Whether
+    they are used is the caller's: a workbook's own complete Transfer Paths sheet comes first."""
+    sources = (audited_source(path, label.replace('–', '-')) for label in graph_schema(stamp(path)))
+    return {source['cycle']: source for source in sources if source}
+
+
+def transfer_files(path, audited=True):
+    """Every file this workbook's transfers may be read from, present or not, for the dependency signatures of
+    the caches that hold transfers or Graph views: a changed CSV, or a book that appears later, is a new key.
+    With audited=False, the pinned full source alone (what the flow and the sidecar warmers read)."""
+    files = [p for p in transfer_source(path) if p is not None]
+    if not audited:
+        return files
+    try:
+        labels = graph_schema(stamp(path))
+    except (OSError, ValueError, KeyError, zipfile.BadZipFile):
+        return files
+    for label in labels:
+        label = label.replace('–', '-')
+        book = audited_book(path, label)
+        if book is None:
+            continue
+        audit = audit_manifest_path(book)
+        files += [book, audit, audit.with_name(TRANSFER_CSV)]
+        if book.is_file():
+            files += [p for p in audited_store(book, label) if p is not None]
+    return files
+
+
+def audit_csv_rows(book, path):
+    """The rows of an audit CSV, once its bundle manifest has bound it to its workbook and its own hash."""
+    try:
+        manifest = audit_manifest(book)
+    except ValueError as error:
+        raise ValueError('The audited transfer paths do not match their audited workbook.') from error
+    if manifest is None:
+        raise ValueError('The audited transfer paths have no audit manifest to check them against.')
+    if (manifest.get('csv_sha256') or {}).get(path.name) != digest(path):
+        raise ValueError('The audited transfer paths file is missing or changed.')
+    with path.open(encoding='utf-8-sig', newline='') as stream:
+        for number, row in enumerate(csv.DictReader(stream), 1):
+            if number > MAX_SOURCE_ROWS:
+                raise ValueError('The audited transfer paths exceed the local graph reading limit.')
+            yield row
+
+
+def store_rows(store, manifest, year):
+    """One cycle's rows of the tidy store's transfer_path_detail, once the store matches its published fingerprint."""
+    version = _pinned_detail_store(stamp(store), stamp(manifest))
+    connection = sqlite3.connect(Path(version[0]).resolve().as_uri() + '?mode=ro', uri=True)
+    try:
+        connection.execute('PRAGMA query_only=ON')
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if 'transfer_path_detail' not in tables:
+            raise ValueError('This build predates the transfer path detail table (F14).')
+        for row in connection.execute(
+                'SELECT "cycle", "source_committee", "destination_committee", "reported_net_transfer", '
+                '"traversal_status" FROM "transfer_path_detail" WHERE "cycle" = ?', (int(year),)):
+            yield dict(zip(('cycle', 'source', 'destination', 'amount', 'status'), row))
+    finally:
+        connection.close()
+
+
+def audited_build(book):
+    """The audited book's Source DB fingerprint, shortened as a report's source note prints it."""
+    import contribution_data as source_data
+    try:
+        return source_data._workbook_source(stamp(book))[:8] + '…'
+    except (ValueError, OSError, KeyError, zipfile.BadZipFile):
+        return 'unrecorded'
+
+
+def audited_transfers(source):
+    """([edge], sentence) read from one audited source, the way the pinned full source is read."""
+    kind, book, label, year = source['kind'], source['book'], source['label'], source['cycle']
+    name = source['path'].name
+    if kind == 'sheet':
+        edges, note, rows = sheet_transfers(book)
+        if sheet_is_partial(note, rows):
+            raise ValueError(f'The audited {label} Transfer Paths sheet is a partial display and has no full source.')
+        unique = {(e['cycle'], e['source'], e['destination']): e['amount'] for e in edges}
+        where = f', from its Transfer Paths sheet ({rows:,} rows).'
+    else:
+        unique, rows = unique_transfers(audit_csv_rows(book, source['path']) if kind == 'csv'
+                                        else store_rows(source['path'], source['manifest'], year))
+        note = sheet_note(book)
+        where = f', from {name} ({rows:,} rows).'
+    if any(k[0] != year for k in unique):
+        raise ValueError(f'The audited {label} transfer paths include another cycle.')
+    head = f'Transfers for {label} were read from the audited {label} workbook (build {audited_build(book)}), not the served workbook'
+    if kind != 'sheet' and note and sheet_capped(note):
+        return edge_list(unique), head + '. ' + sheet_sentence(note, rows, name, 'Its')
+    return edge_list(unique), head + where
+
+
+def read_audited(file_stamp, sources, dependencies):
+    """(edges, basis) from the audited sources, cycle by cycle; ([], []) when there are none."""
+    edges, basis = [], []
+    for year in sorted(sources):
+        found, sentence = audited_transfers(sources[year])
+        edges += found
+        basis.append({'cycles': [year], 'text': sentence})
+    if sources and (stamp(file_stamp[0]) != file_stamp or file_signature(transfer_files(file_stamp[0])) != dependencies):
+        raise ValueError('An audited transfer source changed while reading transfers.')
+    return edges, basis
 
 
 def transfer_source(path):
@@ -286,12 +534,17 @@ TRANSFER_PATH_DETAIL_COLUMNS = ('cycle_label', 'cycle', 'funded_committee', 'sou
                                 'representative_path', 'traversal_status', 'via_carryover')
 
 
+def tidy_beside(payload):
+    """The tidy staging store a build writes beside its pinned payload."""
+    return payload.with_name('tidy-' + payload.name.removeprefix('industry_data-').removesuffix('.json') + '.sqlite')
+
+
 def transfer_detail_source(path):
     """(tidy staging store, manifest) pinned to this workbook, or (None, None)."""
     payload, manifest = transfer_source(path)
     if payload is None:
         return None, None
-    return payload.with_name('tidy-' + payload.name.removeprefix('industry_data-').removesuffix('.json') + '.sqlite'), manifest
+    return tidy_beside(payload), manifest
 
 
 @lru_cache(maxsize=8)
@@ -451,9 +704,13 @@ def report_facts(file_stamp):
                 candidate = str(mapping.get('candidate_id_s') or '')
                 linked = (category == 'Candidate' and mapping.get('recipient_category') == 'Candidate'
                           and mapping.get('relationship') in AUTHORIZED and re.fullmatch(r'[HSP][A-Z0-9]{8}', candidate))
-                identity = (*scope, recipient)
+                # A workbook built before 2026-09-08 files ActBlue and WinRed under Super PAC. They are named
+                # here, on the recipient fact, and only as a label: `scope` above still holds the workbook's
+                # own category, which is what the Master rows (they carry no committee) reconcile against.
+                shown = evidence_csv.conduit_category(identifier, category)
+                identity = (year, company, tier, shown, recipient)
                 if identity not in facts:
-                    facts[identity] = {'cycle':year, 'company':company, 'tier':tier, 'category':category,
+                    facts[identity] = {'cycle':year, 'company':company, 'tier':tier, 'category':shown,
                         'recipient_id':identifier or recipient,
                         'recipient':str(mapping.get('recipient_committee') or names.get((year,recipient)) or row.get('recipient') or recipient),
                         'candidate_id':candidate if linked else '',
@@ -468,7 +725,8 @@ def report_facts(file_stamp):
             raise ValueError('The workbook changed while it was being read. Refresh Graph.')
         return {'facts':list(facts.values()), 'people':people, 'companies':sorted(companies), 'cycles':sorted(cycle(s) for s in sheets),
                 'committees':[{'cycle':year, 'id':identifier, 'label':str(row.get('recipient_committee') or identifier),
-                               'category':str(row.get('recipient_category') or 'Unclassified')} for (year,identifier),row in maps.items()],
+                               'category':evidence_csv.conduit_category(identifier, str(row.get('recipient_category') or 'Unclassified'))}
+                              for (year,identifier),row in maps.items()],
                 'sha256':digest_stamp(file_stamp), 'report':Path(file_stamp[0]).name}
     finally:
         if book is not None:
@@ -778,26 +1036,31 @@ def levels_by_company(rows):
 # report_edges). With no such sheet - or with F2's stale or missing transfer
 # index, which publishes none of that cycle's paths - nothing past that
 # committee is traced, and Graph says so in words instead of a generic note.
+# FIX 6: "no such sheet" now means no source at all - neither the sheet, nor its
+# pinned full source, nor an audited per-cycle book (report_transfers).
 NO_TRANSFER_PATHS = 'no saved network, and this workbook has no Transfer Paths sheet'
 
 
 def trace_coverage(stamps, reports, index):
-    """{cycle: (the covering workbook has Transfer Paths, F2's row for the cycle or None)}."""
+    """{cycle: (some source covers its transfers, F2's row for the cycle or None)}: the covering workbook's own
+    Transfer Paths sheet, or an audited per-cycle book for the cycle (audited_sources)."""
     covered = {}
     for version, report in zip(stamps, reports):
         sheet = has_transfer_paths(version)
+        audited = {} if sheet else audited_sources(version[0])
         for year in report['cycles']:
-            covered[year] = (sheet, index.get(year))
+            covered[year] = (sheet or year in audited, index.get(year))
     return covered
 
 
-def transfer_trace(network, roots, covered):
+def transfer_trace(network, roots, covered, basis=()):
     """Which committees' transfers this view could not follow, and the words for it.
 
     roots are the view's funded committee/cycles; network['missing'] the ones
-    reached without a saved snapshot. Returns {'committees': [...],
-    'root_traced': False when every root is untraced, 'note': the sentences,
-    'command': the rebuild commands for a tooltip}.
+    reached without a saved snapshot. `basis` are the sentences saying where the
+    transfers it did follow were read from (transfer_basis), after the untraced
+    ones. Returns {'committees': [...], 'root_traced': False when every root is
+    untraced, 'note': the sentences, 'command': the rebuild commands for a tooltip}.
     """
     rows = []
     for year, committee in network['missing']:
@@ -837,6 +1100,7 @@ def transfer_trace(network, roots, covered):
         count = len(group)
         sentences.append(f"Transfers from {count:,} other {'committee' if count == 1 else 'committees'} "
                          f"in this network are not traced: {reason}.")
+    sentences.extend(basis)
     untraced_roots = {(row['cycle'], row['committee']) for row in rows if row['root']}
     return {'committees': rows,
             'root_traced': not (single and bool(roots) and set(roots) <= untraced_roots),
@@ -911,9 +1175,9 @@ def graph_view(paths, filters):
         return _graph_view(paths, filters)
     def dependencies():
         snapshots = list(downstream.ROOT.glob('*/snapshots.json')) if filters.get('mode') == 'activity' else []
-        full_sources = [p for path in paths for p in transfer_source(path) if p is not None] if filters.get('mode') == 'activity' else []
+        full_sources = [p for path in paths for p in transfer_files(path)] if filters.get('mode') == 'activity' else []
         bundles = [audit_manifest_path(path) for path in paths] if filters.get('mode') == 'activity' else []
-        return file_signature([*paths, *snapshots, *full_sources, *bundles])
+        return file_signature([*paths, *snapshots, *full_sources, *bundles, *map(collection_gaps.quality_csv, paths)])
     before = dependencies()
     selection = tuple((k,str(filters.get(k) or '')) for k in
                       ('company','tier','cycle','category','recipient','latest','funding','mode','direction'))
@@ -986,7 +1250,7 @@ def _graph_view(paths, filters):
             if mode == 'activity':
                 activity_rows, network = downstream.merge_activity(
                     [r for version in stamps for r in report_activity(version)], eligible,
-                    report_edges=[r for version in stamps for r in report_transfers(version)])
+                    report_edges=[r for version in stamps for r in report_transfers(version, audited=True)])
                 # Split after the merge: merge_activity compares whole recorded
                 # partitions between a snapshot and the workbook, and those
                 # still read 'Contribution / Other' on both sides. The recorded
@@ -1000,7 +1264,10 @@ def _graph_view(paths, filters):
                 for path in paths:
                     index.update(transfer_index(path))
                 index_rows = sorted(index.values(), key=lambda row: row['cycle'])
-                trace = transfer_trace(network, eligible, trace_coverage(stamps, reports, index))
+                reached = {key[0] for key in network['keys']}
+                trace = transfer_trace(network, eligible, trace_coverage(stamps, reports, index),
+                                       [b['text'] for version in stamps for b in transfer_basis(version, audited=True)
+                                        if reached & set(b['cycles'])])
                 note_title = trace['command']
                 rows = activity_rows
             else:
@@ -1050,6 +1317,16 @@ def _graph_view(paths, filters):
             # report, and four rows of '0 candidates' would be read as a
             # measurement rather than as the absence of one.
             available, note, buckets = False, str(error), None
+    # Activity is what the committees that received this industry's money did, not
+    # what the industry gave. Each identified candidate carries the industry's own
+    # direct amount for the same filters (the direct view's row, 0 when it has
+    # none), on the ranking and on every side group alike, so a reader never takes
+    # the reached amount for the giving. A recipient category or a recipient
+    # committee narrows the direct rows to none (a PAC is not a candidate
+    # committee): that 0 would say the industry gave nothing, so those views carry
+    # no direct amount rather than a false one.
+    own = ({row['id']: row['amount'] for row in grouped(direct,'candidate_id','candidate')}
+           if mode == 'activity' and not selected['category'] and not selected['recipient'] else None)
     def candidate_groups(rows):
         result = grouped(rows,'candidate_id','candidate')
         parties = defaultdict(set)
@@ -1058,6 +1335,8 @@ def _graph_view(paths, filters):
                 parties[row['candidate_id']].add(row['party'])
         for candidate in result:
             candidate['party'] = ' / '.join(sorted(parties[candidate['id']]))
+            if own is not None and candidate['id'] != 'unidentified-candidate':
+                candidate['direct'] = own.get(candidate['id'], 0.0)
         return result
     chart_candidates = candidate_groups(candidate_rows) if available else []
     side_groups = ({name:candidate_groups(rows) for name,rows in buckets.items()}
@@ -1105,4 +1384,7 @@ def _graph_view(paths, filters):
                                  'recipient':r.get('recipient',r.get('committee','')), 'cycle':r['cycle'], 'amount':money(r['amount'])}
                                  for r in candidate_rows] if available else [],
             'reports':[{'name':r['report'],'sha256':r['sha256']} for r in reports],
+            # FIX 4: what each report's own Data Quality check says the collection fell short of, for the
+            # cycles shown here; the page names a cell only when its company x cycle scope touches it.
+            'collection_gaps':collection_gaps.scoped(collection_gaps.merge(map(collection_gaps.workbook_gaps, paths)), years),
             'note':'Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks.'}

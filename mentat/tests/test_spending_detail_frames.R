@@ -250,4 +250,39 @@ stopifnot(
   grepl("2023-2024/recipient_detail", detail_failure$detail, fixed = TRUE)
 )
 
+# Conduit (ActBlue, WinRed) is a category like any other to the detail sheets:
+# its committees keep their own rows labelled Conduit, an ordinary Carey stays
+# Carey, and the extra dollars reconcile to the cycle totals through the guard.
+conduit_fixture <- rbind(
+  fixture,
+  fixture[1L][, `:=`(
+    committee_id = "C00401224", recipient = "ACTBLUE", committee_type = "N",
+    committee_designation = "U", recipient_category = "Conduit", amount = 35,
+    person_key = "pC1", date = "2024-03-05"
+  )],
+  fixture[1L][, `:=`(
+    committee_id = "C00694323", recipient = "WINRED", committee_type = "N",
+    committee_designation = "U", recipient_category = "Conduit", amount = 45,
+    person_key = "pC2", date = "2024-03-06"
+  )],
+  fixture[1L][, `:=`(
+    committee_id = "C00000005", recipient = "ORDINARY HYBRID PAC",
+    committee_type = "V", committee_designation = "", recipient_category = "Carey",
+    amount = 10, person_key = "pC3", date = "2024-03-07"
+  )]
+)
+conduit_frames <- spending_detail_frames(conduit_fixture)
+conduit_recipients <- conduit_frames$recipient_detail
+stopifnot(
+  nrow(conduit_recipients) == nrow(recipients) + 3L,
+  conduit_recipients[committee_id == "C00401224", recipient_category] == "Conduit",
+  conduit_recipients[committee_id == "C00694323", recipient_category] == "Conduit",
+  conduit_recipients[committee_id == "C00000005", recipient_category] == "Carey",
+  conduit_recipients[recipient_category == "Conduit", sum(total_giving)] == 80,
+  conduit_recipients[recipient_category == "Carey", sum(total_giving)] == 10,
+  mentat_guard_detail_reconciliation(
+    conduit_frames, list(`2023-2024` = 1950 + 90, `2021-2022` = 910)
+  )$passed
+)
+
 cat("test_spending_detail_frames: PASS\n")

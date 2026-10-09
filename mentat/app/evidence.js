@@ -241,6 +241,8 @@
   // file never categorised reads as Unclassified, the same word the FEC
   // committee master falls back to, so one option covers both.
   const categoryOf = item => item.category || 'Unclassified';
+  // The hover note a Conduit committee (ActBlue, WinRed) carries; theme.js owns the words.
+  const conduitNote = category => (globalThis.MentatTheme && globalThis.MentatTheme.categoryNote ? globalThis.MentatTheme.categoryNote(category) : '');
   const committeeOrder = item => item.id === 'unassigned' ? '￿' : String(item.name || item.id).toLowerCase();
 
   function chosenCommittees() {
@@ -401,7 +403,7 @@
         const open = panesFor(chosen.kind, chosen.id, item.id);
         const elsewhere = open.filter(pane => String(pane.cycle || '') !== String(cycle || ''))
           .map(pane => cycleLabel(pane.cycle));
-        const title = `${item.name || item.id} · ${item.id} · ${categoryOf(item)}`
+        const title = `${item.name || item.id} · ${item.id} · ${categoryOf(item)}${conduitNote(item.category) ? ` (${conduitNote(item.category)})` : ''}`
           + (elsewhere.length ? ` · open on ${elsewhere.join(' and ')}` : '');
         return `<label class="evidence-rail-row${open.length ? ' on' : ''}" data-committee="${escapeHtml(item.id)}" title="${escapeHtml(title)}">`
           + `<input type="checkbox" value="${escapeHtml(item.id)}"${open.length ? ' checked' : ''}>`
@@ -804,7 +806,7 @@
           <div class="pane-kind" title="${escapeHtml(pane.industry || 'Imported file')} · ${escapeHtml(pane.sourceKind)}">${escapeHtml(pane.industry || 'Imported file')} · ${escapeHtml(pane.sourceKind)}</div>
           <h2 title="${escapeHtml(pane.name)}">${escapeHtml(pane.name)}</h2>
           <div class="pane-tags">
-            <span class="badge pane-category" title="${escapeHtml(pane.categorySource)}">${escapeHtml(pane.category)}</span>
+            <span class="badge pane-category" title="${escapeHtml([conduitNote(pane.category), pane.categorySource].filter(Boolean).join(' '))}">${escapeHtml(pane.category)}</span>
             <span class="muted pane-committee">${escapeHtml(pane.committee)}</span>
             <span class="muted pane-cycle-tag"><span class="pane-tag-dot" aria-hidden="true">&middot;&nbsp; </span>${escapeHtml(cycleLabel(pane.cycle))}</span>
             ${pane.follows ? '<span class="badge">follows Graph</span>' : ''}

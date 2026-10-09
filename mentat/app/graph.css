@@ -24,6 +24,9 @@ header .workspace-tabs button[aria-selected=true]{color:white;background:none;bo
 .graph-chips{display:flex;gap:8px;flex-wrap:wrap}
 .graph-chips:not(:empty){margin-top:12px}
 .graph-chips button{padding:4px 10px;font-size:12px}
+.graph-chips .graph-coverage{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.graph-chips .graph-coverage .quality-chip{margin:0}
+.graph-chips .graph-coverage-caption{margin:0;max-width:110ch}
 .analysis-tabs{display:flex;gap:16px;border-bottom:1px solid var(--line);margin:24px 0 0;overflow:auto}
 .analysis-tabs button{padding:12px 14px;border:0;border-bottom:3px solid transparent;background:none;color:#38556b;font-size:14px;white-space:nowrap}
 .analysis-tabs button[aria-selected=true]{border-color:var(--teal);color:#087b85;font-weight:600}

@@ -301,7 +301,9 @@ try {
     Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Total Giving]]-[@Democratic]-[@Republican]-[@[Other / Unclassified]])<0.01,"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
-  $masterCategories = @('Super PAC','Carey','Other PAC','Company PAC','Leadership PAC','Trade Association','Candidate','Party Committee','JFC','Unclassified')
+  # Must match masterCategories in crypto_workbook_builder.mjs, which creates
+  # these columns (Conduit = ActBlue and WinRed, directly after Carey).
+  $masterCategories = @('Super PAC','Carey','Conduit','Other PAC','Company PAC','Leadership PAC','Trade Association','Candidate','Party Committee','JFC','Unclassified')
   $masterTiers = @('Corporate','Chief','Middle Management','Employee')
   $cycleEntries = @($payload.cycles | Sort-Object { [int]$_.cycle })
   $masterSpecs = @()

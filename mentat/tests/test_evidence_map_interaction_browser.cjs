@@ -259,10 +259,16 @@ const median = values => {
     await page.waitForSelector('#evidence-panes [data-pane=a] .pane-drawer', {state: 'detached', timeout: 30000});
     pass('Summary | Map | Flow | Rows, with aria-pressed following the view');
 
-    step('Flow opens from the pane header and returns to Map; an import says where its flow comes from');
+    step('Flow opens from the pane header and returns to Map; an import collects its flow directly');
     const flowRequests = [];
     const onFlowRequest = request => { if (request.url().includes('/api/flow')) flowRequests.push(request.url()); };
     page.on('request', onFlowRequest);
+    // Since 7b1cc259d (evidence-flow.js load()) an import pane no longer explains that a flow needs a saved
+    // snapshot: it asks /api/flow for a direct flow (direct=1), which collects the committee's FEC filings.
+    // Hold that request so the status stays on "Collecting FEC filings…" and the run never reaches FEC.
+    const heldFlowRoutes = [];
+    const isFlowUrl = url => url.pathname === '/api/flow';
+    await page.route(isFlowUrl, route => { heldFlowRoutes.push(route); });
     await page.click('#evidence-panes [data-pane=a] .pane-flow');
     await page.waitForFunction(() => document.querySelector('#view-evidence').classList.contains('flow-open')
       && !document.getElementById('evidence-flow').hidden && !document.getElementById('evidence-flow-status').hidden,
@@ -272,20 +278,26 @@ const median = values => {
       status: document.getElementById('evidence-flow-status').textContent.trim(),
       panesHidden: document.getElementById('evidence-panes').hidden, url: location.search}));
     assert.deepEqual(flowOpen.pressed, ['flow'], JSON.stringify(flowOpen));
-    assert.match(flowOpen.status, /saved FEC snapshot/, 'an import pane says its flow is read from a saved snapshot');
+    assert.match(flowOpen.status, /Collecting FEC filings and drawing the flow/, 'an import pane says its flow is collected from FEC filings');
     assert.equal(flowOpen.panesHidden, true, 'the Flow view takes the evidence view');
     assert.match(flowOpen.url, /[?&]a\.flow=reported(&|$)/, 'the URL remembers the Flow view (D-039)');
-    assert.deepEqual(flowRequests, [], 'an import pane asks /api/flow nothing');
+    assert.equal(flowRequests.length, 1, 'an import pane asks /api/flow once: ' + JSON.stringify(flowRequests));
+    const flowQuery = new URL(flowRequests[0]).searchParams;
+    assert.equal(flowQuery.get('direct'), '1', 'an import pane asks for a direct flow');
+    assert.match(flowQuery.get('root'), /^committee:C\d{8}$/, 'the direct flow is rooted on the pane’s committee');
+    assert.equal(flowQuery.get('id'), null, 'an import pane names no saved snapshot');
     await page.click('#evidence-flow .flow-views [data-view="map"]');
     await page.waitForSelector('#evidence-map svg.map-canvas', {timeout: 120000});
     const flowClosed = await page.evaluate(() => ({flowOpen: document.querySelector('#view-evidence').classList.contains('flow-open'),
       flowKey: /[?&]a\.flow=/.test(location.search), flowHidden: document.getElementById('evidence-flow').hidden}));
     assert.deepEqual(flowClosed, {flowOpen: false, flowKey: false, flowHidden: true}, JSON.stringify(flowClosed));
     page.off('request', onFlowRequest);
+    await page.unroute(isFlowUrl);
+    await Promise.all(heldFlowRoutes.map(route => route.abort().catch(() => {})));
     // Back to the panes: the next step opens the map from the pane header.
     await page.click('#evidence-map-back');
     await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 30000});
-    pass(`Flow pressed, "${flowOpen.status.slice(0, 60)}…", no /api/flow request; Map from the Flow view closed it`);
+    pass(`Flow pressed, "${flowOpen.status.slice(0, 60)}…", one direct /api/flow request; Map from the Flow view closed it`);
 
     step('open the map: it opens on the side that HAS data, and the empty side says why');
     const openedAt = Date.now();

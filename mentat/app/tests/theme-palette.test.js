@@ -64,3 +64,54 @@ test('[theme-palette] a token it cannot read keeps that slot’s fallback', () =
   const theme = themeWith({'--acu-teal': 'teal', '--acu-purple': 'rgb(300, 0, 0)', '--acu-mauve': '#12345'});
   assert.deepEqual(plain(theme.categorical.slice(0, 4)), fallback.categorical.slice(0, 4));
 });
+
+// OKLab x100, the measure theme.js's palette notes use. `mode` simulates protan or deutan colour
+// blindness (Machado, Oliveira and Fernandes 2009, severity 1, in linear light) before measuring:
+// the 10.6 floor below is the colour-blind one the twelve slots were validated to.
+const FLOOR = 10.6;
+const CVD = {
+  none: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+  protan: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+  deutan: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.01182, 0.04294, 0.968881]]
+};
+const linear = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+  .map(c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+function oklab(hex, mode) {
+  const rgb = linear(hex);
+  const [r, g, b] = CVD[mode].map(row => Math.min(1, Math.max(0, row[0] * rgb[0] + row[1] * rgb[1] + row[2] * rgb[2])));
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
+}
+const distance = (a, b, mode) => 100 * Math.hypot(...oklab(a, mode).map((v, i) => v - oklab(b, mode)[i]));
+const luminance = hex => { const [r, g, b] = linear(hex); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+
+test('[theme-palette] slots 5-12 are the literals the colour checks were run on', () => {
+  assert.deepEqual(fallback.categorical.slice(4),
+    ['#de8aab', '#7d4b00', '#3cb0a3', '#83333e', '#99973f', '#a09eea', '#d88766', '#509ecd']);
+  assert.equal(fallback.categorical.length, 12);
+});
+
+test('[theme-palette] Conduit’s own colour clears the slots’ 10.6 floor against all twelve, in normal, protan and deutan vision', () => {
+  const conduit = fallback.conduitColour;
+  assert.match(conduit, /^#[0-9a-f]{6}$/);
+  assert.ok(!fallback.categorical.includes(conduit), 'Conduit takes no categorical slot');
+  for (const mode of ['none', 'protan', 'deutan']) {
+    fallback.categorical.forEach((slot, at) => {
+      const gap = distance(conduit, slot, mode);
+      assert.ok(gap >= FLOOR, `Conduit ${conduit} is ${gap.toFixed(1)} from slot ${at + 1} (${slot}) in ${mode} vision; the floor is ${FLOOR}`);
+    });
+  }
+});
+
+test('[theme-palette] Conduit’s colour holds 3:1 against the chart backgrounds, and white text on it 4.5:1', () => {
+  const conduit = fallback.conduitColour;
+  for (const background of ['#ffffff', declared('--acu-paper')]) {
+    const ratio = contrast(conduit, background);
+    assert.ok(ratio >= 3, `Conduit ${conduit} is ${ratio.toFixed(2)}:1 on ${background}; a mark needs 3:1`);
+  }
+  assert.ok(contrast(conduit, '#ffffff') >= 4.5, 'a label drawn in white on a Conduit mark stays readable');
+});

@@ -18,7 +18,10 @@ import math
 import os
 import re
 from pathlib import Path
+from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
+import zipfile
+import zlib
 
 MODEL_FILE = Path(__file__).parent / 'data' / 'giving-models-v1.json'
 MODEL_FILE_V2 = Path(__file__).parent / 'data' / 'giving-models-v2.json'
@@ -563,6 +566,86 @@ def _lda_history(lda):
                 partial=None if part is None or hpart is None else dict(row(part['year'], part['total'], hpart['total']), through_quarter=part['through_quarter']))
 
 
+@lru_cache(maxsize=8)
+def _workbook_cycle_totals(path, mtime_ns, size):
+    """{'2023-2024': total} from the 'Total Giving' rows (column B) of a Mentat workbook's 'Spending Overview' sheet (column A the cycle, column C its total, as cached in the file).
+    Read straight from the zip: that one small sheet and the shared strings its first rows point at, never the whole workbook (the 60 MB ones take 10 s through openpyxl)."""
+    main, rel = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}', '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
+    with zipfile.ZipFile(path) as book:
+        rid = next(s.get(rel + 'id') for s in ET.fromstring(book.read('xl/workbook.xml')).iter(main + 'sheet') if s.get('name') == 'Spending Overview')
+        target = next(r.get('Target') for r in ET.fromstring(book.read('xl/_rels/workbook.xml.rels')) if r.get('Id') == rid).lstrip('/')
+        cells, wanted = {}, set()            # 'A6' -> ('s', shared string index) | ('t', text) | ('n', number text)
+        with book.open(target if target.startswith('xl/') else 'xl/' + target) as sheet:
+            for _event, row in ET.iterparse(sheet):
+                if row.tag != main + 'row':
+                    continue
+                if int(row.get('r')) > 200:
+                    break
+                for c in row.iter(main + 'c'):
+                    ref, kind, v = c.get('r'), c.get('t'), c.find(main + 'v')
+                    if ref[0] not in 'ABC' or ref[1:] != row.get('r'):
+                        continue
+                    if kind == 'inlineStr':
+                        cells[ref] = ('t', ''.join(t.text or '' for t in c.iter(main + 't')))
+                    elif v is not None and v.text is not None and kind in (None, 'n', 's', 'str'):
+                        cells[ref] = ({'s': 's', 'str': 't'}.get(kind, 'n'), v.text)
+                        if kind == 's':
+                            wanted.add(int(v.text))
+                row.clear()
+        strings = {}
+        if wanted:
+            with book.open('xl/sharedStrings.xml') as stream:
+                index = 0
+                for _event, si in ET.iterparse(stream):
+                    if si.tag != main + 'si':
+                        continue
+                    if index in wanted:
+                        strings[index] = ''.join(t.text or '' for t in si.iter(main + 't'))
+                    si.clear()
+                    index += 1
+                    if index > max(wanted):
+                        break
+
+    def text(ref):
+        kind, raw = cells.get(ref, (None, None))
+        return strings.get(int(raw)) if kind == 's' else raw if kind == 't' else None
+    out = {}
+    for n in range(1, 201):
+        cycle, total = text('A%d' % n), cells.get('C%d' % n)
+        if text('B%d' % n) == 'Total Giving' and re.fullmatch(r'\d{4}-\d{4}', cycle or '') and total and total[0] == 'n':
+            out[cycle] = float(total[1])
+    return out
+
+
+def _own_cycle_ratio(totals, dataset):
+    """The industry's own presidential-cycle step from its audited workbook totals ({'2023-2024': total, ...}): the latest presidential cycle (it ends in a year divisible by
+    four) over the midterm cycle before it. None unless both totals exist and the midterm one is positive. Display only: the forecast takes the owner rule (D-121)."""
+    ends = {int(label[-4:]): label for label in totals}
+    presidential = [end for end in ends if end % 4 == 0]
+    if not presidential or max(presidential) - 2 not in ends:
+        return None
+    high, low = ends[max(presidential)], ends[max(presidential) - 2]
+    if not totals[low] > 0:
+        return None
+    return dict(dataset=dataset, presidential_cycle=high, presidential_total=totals[high], midterm_cycle=low, midterm_total=totals[low], ratio=totals[high] / totals[low])
+
+
+def _industry_cycle_ratio(entry):
+    """own_cycle_ratio of one anchored industry, read from the published workbook the anchors cite; None when that workbook or its rows cannot be read."""
+    import sys
+    tools = str(Path(__file__).resolve().parents[1] / 'tools')
+    if tools not in sys.path:
+        sys.path.insert(0, tools)
+    from report_directory import report_directory
+    try:
+        path = (report_directory() / entry['mentat']['workbook']).resolve()
+        stat = path.stat()
+        return _own_cycle_ratio(_workbook_cycle_totals(str(path), stat.st_mtime_ns, stat.st_size), entry['mentat']['dataset'])
+    except (OSError, ValueError, StopIteration, KeyError, IndexError, TypeError, AttributeError, EOFError, zlib.error, zipfile.BadZipFile, ET.ParseError):
+        # An odd sheet row (a cell or row with no 'r', an empty one, a cut-off zip stream) is a note left out, never a catalog that fails: _anchors_status catches only AnchorProblem.
+        return None
+
+
 def _anchors_status(b, offered):
     """What the catalog says about the anchors, per offered industry, without failing the catalog when they are missing or stale."""
     try:
@@ -576,6 +659,9 @@ def _anchors_status(b, offered):
             out[row['id']] = dict(status='ready', workbook=entry['mentat']['workbook'], collection_date=entry['coverage']['collection_date'],
                                   coverage_end=entry['coverage']['coverage_end'], current_cycle=entry['coverage']['current_cycle'], flags=entry['coverage']['flags'] + entry['flags'],
                                   measures=entry['status'], lda_history=_lda_history(entry['lda']))
+            ratio = _industry_cycle_ratio(entry)          # display only; absent (not null) when the workbook's two totals cannot be read
+            if ratio:
+                out[row['id']]['own_cycle_ratio'] = ratio
         except AnchorProblem as problem:
             out[row['id']] = dict(status=problem.status, reason=str(problem))
     return dict(status='ready' if out and all(v['status'] == 'ready' for v in out.values()) else 'partial', reason=None,

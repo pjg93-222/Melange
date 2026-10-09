@@ -4,12 +4,27 @@ No source schema changes: derived dimensions are SQL expressions and audit
 fields are related by the already-verified physical row identity.
 """
 from decimal import Decimal, ROUND_HALF_EVEN
+from functools import lru_cache
+import hashlib
 from pathlib import Path
 import math
+import re
+import sqlite3
 import contribution_data as data
+import contribution_query_store as store
+import evidence_csv
 
 STAMP=data._stamp(__file__)
-SHA=data._hash(__file__)
+
+def identity():
+    """This file's content plus the earmark-conduit registry it reads: a changed registry is a different
+    semantics, so no cached answer carrying a recipient category outlives it."""
+    return hashlib.sha256((data._hash(__file__)+evidence_csv.conduit_fingerprint()).encode()).hexdigest()
+
+# SHA is identity(): this file's hash plus the earmark-conduit registry's fingerprint (evidence_csv.conduit_fingerprint),
+# so it is not the sha256 of this file alone and cannot be checked against one. Code that caches an answer carrying a
+# recipient category keys it on this value, which is why a registry change must move it.
+SHA=identity()
 AUDIT={'source_id':'Source observation ID','raw_zip':'Recorded postal code','source_table':'Original source table',
        'source_url':'Source filing URL','reasons':'Accounting reasons (complete list)','evidence_ids':'Evidence references (complete list)'}
 DERIVED={'month':'Contribution month','quarter':'Contribution quarter','weekday':'Contribution weekday',
@@ -128,8 +143,44 @@ def raw_relation(db,source,refs):
         selects.append("SELECT '"+name+"' AS _raw_table,CAST(sub_id AS TEXT) AS _raw_id,industry AS _raw_industry,"+','.join(fields)+' FROM receipt_source.'+name+' NOT INDEXED'+('' if unique else ' GROUP BY sub_id,industry'))
     return '('+' UNION ALL '.join(selects)+')' if selects else None
 
+@lru_cache(maxsize=1)
+def _index_columns():
+    """The columns of an analytical index's facts table, in table order, from the schema that creates it."""
+    with sqlite3.connect(':memory:') as db:
+        data._schema(db)
+        return [row[1] for row in db.execute('PRAGMA table_info(facts)')]
+
+def _relation_columns(base):
+    """The columns, in order, of one of the tables a chart or a record is read from: the analytical index
+    ('facts'), its query view ('facts_full') or a records sidecar ('ordered'); None for any other name."""
+    # 'facts' is the analytical index's table (data._schema), never the query projection's own 'facts' table: that one
+    # holds only store.CORE, contributor_key and store.MONEY, with no recipient_category or committee_id. A projection
+    # read that needs the category goes through its 'facts_full' view, so _conduit_relation may wrap only the
+    # analytical index's facts, the projection's facts_full and a records sidecar's ordered table.
+    if base=='facts':return _index_columns()
+    if base=='facts_full':return ['fact_id',*store.CORE,'contributor_key',*store.MONEY,*store.DETAIL]
+    if base=='ordered':
+        import records_sidecar   # it imports this module
+        return ['record_rank',*records_sidecar.COLUMNS]
+    return None
+
+def _conduit_relation(base):
+    """`base` with recipient_category read through the earmark-conduit registry.
+
+    The contribution facts stores were built from payloads that file ActBlue and WinRed under Super PAC
+    (and the same label sits in each store's query view and records sidecar). Rebuilding every industry's
+    store for a label would cost hundreds of megabytes apiece, so the label is applied where it is read:
+    the same columns, in the same order, with this one computed. Amounts are not touched."""
+    columns=_relation_columns(base)
+    if columns is None:return base
+    ids=sorted(evidence_csv.EARMARK_CONDUITS)
+    if not all(re.fullmatch(r'C\d{8}',item) for item in ids):raise ValueError('The earmark conduit registry holds an invalid committee ID.')
+    label="CASE WHEN committee_id IN ("+','.join("'"+item+"'" for item in ids)+") THEN '"+evidence_csv.CONDUIT+"' ELSE \"recipient_category\" END AS \"recipient_category\""
+    return '(SELECT '+','.join(label if name=='recipient_category' else '"'+name+'"' for name in columns)+' FROM '+base+')'
+
 def table(base,refs,request,original=False,raw_relation=None):
     refs=set(refs);extra=[]
+    if 'recipient_category' in refs:base=_conduit_relation(base)
     if refs&set(AUDIT) and not original:extra += ['a."'+key+'" AS "'+key+'"' for key in AUDIT if key in refs]
     expressions={'month':"substr(date,1,7)",'quarter':"substr(date,1,4)||'-Q'||CAST((CAST(substr(date,6,2) AS INTEGER)+2)/3 AS INTEGER)",
         'weekday':"CASE strftime('%w',date) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' WHEN '6' THEN 'Saturday' END",

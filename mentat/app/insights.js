@@ -182,7 +182,27 @@
   }
   // Two query bodies ask the same thing: the same fields and values, in any key order.
   function sameQuery(a, b) { const canonical = value => JSON.stringify(Object.keys(value || {}).sort().map(key => [key, value[key]])); return canonical(a) === canonical(b); }
-  if (typeof module !== 'undefined' && module.exports) { module.exports = {display, csvCell, exportCSV, PANELS, SHORT_TITLES, cycleEnd, electionDay, daysBefore, runningTotals, channelMagnitudes, rankChannels, defaultChannel, niceTicks, millions, tickMoney, DIAGNOSTIC_CHANNELS, pollDelay, earlyQuery, sameQuery}; return; }
+  // FIX 4 (collection gaps): the report's own Data Quality check names the company x cycle cells whose stored
+  // rows are materially fewer than FEC reported (the catalogue's dataset carries them as collection_gaps).
+  // The company is this scope's. The cycles are all of the dataset's for the Sources copy, the notices and
+  // the card source lines, because the trends and favourites panels draw every observed cycle; `periods`
+  // narrows them to the two cycles being compared, which is what the period summary above the cards states.
+  // coverage-view.js words it.
+  function coverageNotice(result, catalog, periods = false) {
+    const api = root.MentatCoverage, scope = result && result.scope || {}, datasets = catalog && catalog.datasets || [];
+    if (!api) return null;
+    const compared = periods ? [scope.baseline_cycle, scope.current_cycle].filter(Boolean) : [];
+    const part = id => ({gaps: (datasets.find(d => d.id === id) || {}).collection_gaps, scope: {companies: scope.company ? [scope.company] : null, cycles: compared.length ? compared : null}});
+    return api.gapNotice([part(scope.dataset), ...(scope.comparison_dataset ? [part(scope.comparison_dataset)] : [])]);
+  }
+  // The answer as every surface reads it: the caption is among its scope-and-coverage notices, which the
+  // screen lists, the CSV puts in its notices column and the JSON export carries. Extending twice adds it once.
+  function withCoverage(result, catalog) {
+    const notice = coverageNotice(result, catalog);
+    if (!notice || (result.notices || []).includes(notice.text)) return result;
+    return {...result, notices: [...(result.notices || []), notice.text]};
+  }
+  if (typeof module !== 'undefined' && module.exports) { module.exports = {coverageNotice, withCoverage, display, csvCell, exportCSV, PANELS, SHORT_TITLES, cycleEnd, electionDay, daysBefore, runningTotals, channelMagnitudes, rankChannels, defaultChannel, niceTicks, millions, tickMoney, DIAGNOSTIC_CHANNELS, pollDelay, earlyQuery, sameQuery}; return; }
   if (!root.document.getElementById('view-insights')) return;
   const el = id => root.document.getElementById('insights-' + id);
   function node(tag, text, className) { const out = document.createElement(tag); if (text !== undefined) out.textContent = text; if (className) out.className = className; return out; }
@@ -427,8 +447,8 @@
       pollTimer = setTimeout(() => { queryReady(nextQuery, ticket, signal, attempts + 1).catch(error => fail(error, ticket)); }, Math.max(0, pollDelay(attempts, data.retry_after_ms) - (held ? performance.now() - held.at : 0)));
       return;
     }
-    result = data; result._request = query; loading = false; el('results').setAttribute('aria-busy','false');
-    installOptions(data); renderResult(data);
+    result = withCoverage(data, catalog); result._request = query; loading = false; el('results').setAttribute('aria-busy','false');
+    installOptions(data); renderResult(result);
   }
   // A failed query reports inside each card, with its own "Try again".
   function fail(error, ticket) {
@@ -436,6 +456,8 @@
     loading = false; el('results').setAttribute('aria-busy', 'false'); status(error.message, 'error'); exporting(false);
     shells('error', error.message);
   }
+  // The card's source line (what the per-figure Image header prints as the source) carries the gap too.
+  function gapTail() { const gap = coverageNotice(result, catalog); return gap ? ' · ' + gap.text : ''; }
   function addNotices(target, notices) { for (const notice of notices || []) target.append(node('p', noticeText(notice), 'insights-notice')); }
   function renderScope(data) {
     const scope = data.scope || {}, provenance = data.provenance || {};
@@ -446,6 +468,9 @@
     if (scope.baseline_cycle || scope.current_cycle) parts.push('Cycles: ' + (scope.baseline_cycle || 'automatic') + ' → ' + (scope.current_cycle || 'automatic'));
     if (scope.comparison_dataset) parts.push('Industry comparison: ' + scope.comparison_dataset);
     target.append(node('div', parts.join(' · ')+' · Through '+(scope.as_of||'latest available date')+' · Coverage unverified'));
+    // FIX 4: a short collection cell under this company's scope gets the console's quality chip and its caption.
+    const gap = coverageNotice(data, catalog);
+    if (gap) { const line = node('div', undefined, 'insights-coverage-gap'); line.append(root.MentatCoverage.chipNode(gap), node('span', gap.caption, 'chart-note')); target.append(line); }
     if (enabled.some(key=>PANEL_CONTEXT[key])) target.append(node('div','Identity, spending and legislative panels use this selection to find related entities. Each has its own source coverage and accounting context.'));
     const details = node('details'), summary = node('summary','Source and accounting provenance'), list = node('dl',undefined,'insights-provenance');
     for (const [key, value] of Object.entries(provenance)) { list.append(node('dt',key.replace(/_/g,' ')), node('dd', typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value === null ? 'not supplied' : value))); }
@@ -489,7 +514,20 @@
   // chips' order: Swap exchanges the chips only, never the sign of a change.
   function timeOrdered() { const a = chipValue('baseline-cycle'), b = chipValue('current-cycle'), x = cycleEnd(a), y = cycleEnd(b); return x !== null && y !== null && x > y ? [b, a] : [a, b]; }
   function samePair(scope, a, b) { const [earlier, later] = cycleEnd(a) > cycleEnd(b) ? [b, a] : [a, b]; return Boolean(scope && earlier && later && sameCycle(earlier, scope.baseline_cycle) && sameCycle(later, scope.current_cycle)); }
+  // FIX 4: the Coverage gap chip and caption for the company and the two compared periods, in the summary
+  // card that is always on the page. (The copy in the Sources panel is hidden until Sources is pressed.)
+  // Rebuilt on every summary render, so a refresh replaces it and a scope with no gap leaves none behind.
+  function renderCoverageLine(data) {
+    const host = el('summary'), gap = data ? coverageNotice(data, catalog, true) : null;
+    for (const old of host.querySelectorAll('.insights-coverage-gap')) old.remove();
+    if (!gap) return;
+    const line = node('div', undefined, 'insights-coverage-gap');
+    line.id = 'insights-coverage';
+    line.append(root.MentatCoverage.chipNode(gap), node('span', gap.caption, 'chart-note'));
+    host.append(line);
+  }
   function renderSummary(data) {
+    renderCoverageLine(data);
     const [left, right] = timeOrdered(), channel = data ? summaryChannel : null;
     // The channel phrase wraps as one unit when a narrow strip cannot hold the label.
     for (const [id, cycle] of [['summary-left-label', left], ['summary-right-label', right]]) {
@@ -594,7 +632,7 @@
       if (!(panel.sources || []).length) sources.append(node('p', 'No verified source snapshot is available for this panel.'));
       for (const source of panel.sources || []) { const list = node('dl', undefined, 'insights-provenance'); for (const [field, value] of Object.entries(source)) list.append(node('dt', field.replace(/_/g, ' ')), node('dd', typeof value === 'object' ? JSON.stringify(value) : String(value))); sources.append(list); }
       method.append(sources);
-    } else method.append(node('p', (context.basis_label || context.basis || '') + ' · cutoff ' + (context.as_of || 'latest available') + ' · amounts in USD' + (result && result.provenance && result.provenance.workbook ? '\nSource: ' + result.provenance.workbook : ''), 'insights-card-source'));
+    } else method.append(node('p', (context.basis_label || context.basis || '') + ' · cutoff ' + (context.as_of || 'latest available') + ' · amounts in USD' + (result && result.provenance && result.provenance.workbook ? '\nSource: ' + result.provenance.workbook : '') + gapTail(), 'insights-card-source'));
     return method;
   }
   // Chart view for one card and one channel: {node, legend} or null (no chart).

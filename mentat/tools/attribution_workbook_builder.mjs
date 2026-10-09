@@ -65,7 +65,7 @@ sheet('Methodology',['Topic','Method'],[
  ['Limitations','Negative activity does not enter allocation weights. Unobserved operating expenses and retained cash are not modelled. Estimates are neither causal tracing nor lower bounds.'],
  ['Period','Each two-year filing cycle is separate. Refreshed FEC bulk files do not imply that historical company/employer searches are current or exhaustive.'],
  ['Transfers','Only outgoing cash transfer codes 24G and 24K enter the graph. Incoming mirrors and independent expenditures are not counted again as transfers. Candidate committee transfers already represented as candidate activity are not traversed again.'],
- ['Classification','Hybrid Carey committees are separate from Super PACs. Registered ordinary PACs remain separate as Other PACs. Unresolved classifications stay visible.'],
+ ['Classification','Hybrid Carey committees are separate from Super PACs. The earmark conduits ActBlue and WinRed are their own Conduit category. Registered ordinary PACs remain separate as Other PACs. Unresolved classifications stay visible.'],
  ['Entity matching','Results depend on supplied canonical names, aliases and source fields. Missing or erroneous employer data remains a coverage limit.']
 ], 'Read this before interpreting any estimate. All values are USD.');
 workbook.worksheets.getItem('Methodology').getRange('B:B').format.columnWidth=120;

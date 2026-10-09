@@ -85,8 +85,10 @@ def verify(path):
             totals[name]=round(amount,2)
             counts['cycle_rows']+=len(raw)
         for row in records(book,'Recipient List'):
-            if row['Committee ID'] in ('C00401224','C00694323') and row['Recipient Category']!='Carey':
-                raise ValueError('Registered hybrid conduit is misclassified')
+            # ActBlue and WinRed are their own Conduit category (Paul, 2026-10-09);
+            # a book built before that ruling files them under Carey and fails here.
+            if row['Committee ID'] in ('C00401224','C00694323') and row['Recipient Category']!='Conduit':
+                raise ValueError('Registered earmark conduit is misclassified')
         for row in records(book,'Allocation Coverage'):
             near(row['Nonnegative Model Funding'],float(row['Estimated Candidate Activity'] or 0)+float(row['Unresolved'] or 0),'Allocation conservation')
         for row in records(book,'Data Quality'):

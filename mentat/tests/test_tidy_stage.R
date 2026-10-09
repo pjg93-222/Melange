@@ -396,6 +396,58 @@ check("location_facts reconciles to the cycle totals",
         c(5110, 265)
       )))
 
+# --- Conduit ---------------------------------------------------------------
+# ActBlue and WinRed receipts carry the category Conduit (Paul, 2026-10-09). The
+# store treats a category as free text, so it must carry the label through every
+# fact table, give it its own rows, and leave each dollar in exactly one
+# category: the cycle totals do not move when a category is relabelled.
+conduit_export <- data.table::copy(raw_export)
+conduit_export[source_id %in% c("1", "3", "5"), `:=`(
+  recipient_category = "Conduit",
+  category_source = "fec:registered_conduit:earmark_platform"
+)]
+conduit_frames <- mentat_build_tidy_frames(
+  raw_export = conduit_export,
+  committee_map = committee_map,
+  committee_master = fec_committee_master,
+  candidate_links = candidate_links,
+  candidate_master = candidate_master,
+  downstream_activity_export = downstream_activity_export,
+  bridge = bridge,
+  state_destinations = state_destinations,
+  recipient_locations = recipient_locations,
+  guard_results = guard_results,
+  mappings = mappings
+)
+conduit_giving <- conduit_frames$giving_facts
+check("a Conduit receipt keeps its category and source in contributions",
+      conduit_frames$contributions[source_id == "1", recipient_category] ==
+        "Conduit" &&
+        conduit_frames$contributions[source_id == "1", category_source] ==
+          "fec:registered_conduit:earmark_platform")
+check("giving_facts gives Conduit its own rows, counting included receipts only",
+      conduit_giving[recipient_category == "Conduit" &
+                       cycle_label == "2021-2022", sum(giving)] == 35)
+check("relabelling a category moves no dollars between cycles",
+      isTRUE(all.equal(
+        conduit_giving[, sum(giving), by = cycle_label][order(cycle_label)]$V1,
+        c(5110, 265)
+      )))
+check("every dollar stays in exactly one category",
+      isTRUE(all.equal(
+        sum(conduit_giving[recipient_category == "Conduit", giving]) +
+          sum(conduit_giving[recipient_category != "Conduit", giving]),
+        sum(giving$giving)
+      )) &&
+        !anyDuplicated(conduit_giving[, .(
+          cycle_label, company, employee_tier, recipient_category, party
+        )]))
+check("recipient_facts and committees carry Conduit for the committee",
+      conduit_frames$recipient_facts[committee_id == "C00000001",
+                                     unique(recipient_category)] == "Conduit" &&
+        conduit_frames$committees[committee_id == "C00000001",
+                                  recipient_category] == "Conduit")
+
 # --- dimensions ------------------------------------------------------------
 committees <- frames$committees
 check("committees covers every committee that appears in contributions",

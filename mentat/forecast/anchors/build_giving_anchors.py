@@ -289,14 +289,18 @@ def unavailable_pac(reason):
 # ---------------------------------------------------------------------------------------------------------------------------------
 # LDA
 # ---------------------------------------------------------------------------------------------------------------------------------
-def build_lda(spec, rows, lda_path, lda_sha):
+def build_lda(spec, rows, lda_path, lda_sha, as_of, receipts):
     if spec.get('lda_sector') and rows is None:
         return {'status': 'unavailable', 'reason': 'The Melange LDA output ' + lda_path.name + ' was not found.', 'sector': spec['lda_sector'], 'label': None,
                 'source_file': None, 'source_sha256': None, 'through': None, 'series': {}, 'note': lda_reader.NOTE}
     if not spec.get('lda_sector'):
         return {'status': 'unavailable', 'reason': LDA_UNAVAILABLE, 'sector': None, 'label': None, 'source_file': None, 'source_sha256': None,
                 'through': None, 'series': {}, 'note': lda_reader.NOTE}
-    levels = lda_reader.sector_levels(rows, spec['lda_sector'])
+    if rows and as_of is None:          # fail closed: without the producer's sweep date the filings-only rule is NOT used
+        why = ('record no sweep date for ' + str(max(int(r['year']) for r in rows))) if receipts.is_file() else 'were not found'
+        return {'status': 'unavailable', 'reason': 'The Melange LDA receipts (' + receipts.name + ') ' + why + ', so the partial year cannot be dated.', 'sector': spec['lda_sector'],
+                'label': None, 'source_file': lda_path.name, 'source_sha256': lda_sha, 'through': None, 'series': {}, 'note': lda_reader.NOTE}
+    levels = lda_reader.sector_levels(rows, spec['lda_sector'], as_of)
     if levels is None:
         return {'status': 'unavailable', 'reason': 'The Melange LDA output has no rows for sector ' + spec['lda_sector'], 'sector': spec['lda_sector'],
                 'label': None, 'source_file': lda_path.name, 'source_sha256': lda_sha, 'through': None, 'series': {}, 'note': lda_reader.NOTE}
@@ -340,7 +344,8 @@ def industry_flags(spec, side, pac_note, cpi_multipliers):
 
 
 def build_snapshot(project_root, registry, options):
-    """-> (snapshot dict, receipt inputs list, problems). `options`: report_dir, fec_root, lda_csv, controls, only (ids or None), run (glassbox.Run)."""
+    """-> (snapshot dict, receipt inputs list, problems). `options`: report_dir, fec_root, lda_csv, controls, only (ids or None), run (glassbox.Run), and optionally
+    lda_receipts (default: fullscope_receipts.json beside the lda_csv's folder, Melange's data-root layout)."""
     run = options.get('run')
     stage = (lambda name, summary=None: run and run.stage_start(name, summary))
     done = (lambda name, summary=None, **kw: run and run.stage_finish(name, summary, **kw))
@@ -358,6 +363,10 @@ def build_snapshot(project_root, registry, options):
     lda_sha = ms.sha256_file(lda_path) if lda_path.is_file() else None
     if lda_sha:
         inputs.append({'role': 'lda', 'path': str(lda_path), 'sha256': lda_sha})
+    receipts = Path(options.get('lda_receipts') or lda_path.absolute().parents[1] / 'fullscope_receipts.json')          # the producer's own sweep date dates the partial year
+    lda_as_of = lda_reader.sweep_as_of(receipts, max(int(r['year']) for r in lda_rows)) if lda_rows and receipts.is_file() else None
+    if lda_as_of:
+        inputs.append({'role': 'lda_receipts', 'path': str(receipts), 'sha256': ms.sha256_file(receipts)})
     done('inputs')
 
     ctx = dict(project_root=project_root, report_dir=options['report_dir'], index_dir=project_root / ms.STATE_INDEX_DIR, hashes={})
@@ -408,7 +417,7 @@ def build_snapshot(project_root, registry, options):
             pac_block = pac[ident]
         else:
             pac_block = unavailable_pac(pac_reason.get(ident) or 'No roster PAC committees are resolved for this industry')
-        lda = build_lda(spec, lda_rows, lda_path, lda_sha)
+        lda = build_lda(spec, lda_rows, lda_path, lda_sha, lda_as_of, receipts)
         cov_flags, flags = industry_flags(spec, side, pac_notes.get(ident), multipliers)
         prov = side['manifest']['provenance']
         industries[ident] = {
@@ -427,7 +436,7 @@ def build_snapshot(project_root, registry, options):
         'cpi': {'series': cpi_reader.SERIES, 'source_file': Path(options['controls']).name, 'source_sha256': controls_sha,
                 'base_year': cpi_reader.BASE_YEAR, 'multipliers': multipliers},
         'thin_base_threshold_usd': threshold, 'industries': industries, 'unavailable': unavailable}
-    nowcast_errors = lda_reader.nowcast_errors(lda_rows) if lda_rows else None          # the pooled blind errors that give the lobbying nowcast its bands
+    nowcast_errors = lda_reader.nowcast_errors(lda_rows, lda_as_of) if lda_as_of else None          # the pooled blind errors that give the lobbying nowcast its bands
     if nowcast_errors:
         snapshot['lda_nowcast_errors'] = nowcast_errors
     done('assemble')
@@ -517,7 +526,7 @@ def check_fresh(snapshot_path, project_root, report_dir):
     return out
 
 
-def run_build(project_root, output_dir=None, only=None, registry_path=None, fec=None, lda_csv=None, controls=None, report_dir=None, run_id=None):
+def run_build(project_root, output_dir=None, only=None, registry_path=None, fec=None, lda_csv=None, controls=None, report_dir=None, run_id=None, lda_receipts=None):
     started = time.time()
     project_root = Path(project_root)
     registry = read_json(registry_path or HERE / 'registry.json')
@@ -526,7 +535,8 @@ def run_build(project_root, output_dir=None, only=None, registry_path=None, fec=
     run.start('Building the Giving Forecast anchor snapshot', 'project ' + str(project_root))
     try:
         options = dict(report_dir=Path(report_dir) if report_dir else report_directory(project_root), fec_root=fec_root(project_root, fec),
-                       lda_csv=lda_csv or default_lda_csv(), controls=Path(controls) if controls else default_controls(project_root), only=only, run=run)
+                       lda_csv=lda_csv or default_lda_csv(), controls=Path(controls) if controls else default_controls(project_root), only=only, run=run,
+                       lda_receipts=lda_receipts)
         snapshot, inputs = build_snapshot(project_root, registry, options)
         if only:
             snapshot = merge_with_published(snapshot, output_dir / SNAPSHOT_NAME, only)

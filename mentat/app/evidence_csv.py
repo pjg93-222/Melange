@@ -186,9 +186,54 @@ WARNINGS = (
 # because graph_data pulls the report stack in with it and S3e made this
 # module's imports lazy on purpose; tests/test_evidence_categories.py asserts
 # the two lists are equal.
+#
+# Conduit is appended after Unclassified, not slotted in beside Super PAC: the
+# colour of a group in a chart is its position, so a new name anywhere but the
+# end would move every category after it.
 CATEGORIES = ('Super PAC', 'Trade Association', 'JFC', 'Company PAC', 'Leadership PAC',
-              'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified')
+              'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified', 'Conduit')
 CATEGORY_INDEX = {name.lower():name for name in CATEGORIES}
+
+# The earmark conduits: platforms that pass individual donors' earmarked
+# contributions through to other committees. The FEC files ActBlue and WinRed as
+# type V (hybrid) committees, which the reports read as Super PAC (until
+# 2026-09-08) and then as Carey; neither is right for money that is the donors',
+# not the committee's. The registry is the single list of them: these are the
+# two IDs fec_citation.CONDUIT_COMMITTEES uses for the filing links (the
+# tests/test_conduit_category.py pins the two together), and it is read before
+# any file, designation or type rule, so a stale label in a workbook or an
+# import cannot override it.
+CONDUIT = 'Conduit'
+EARMARK_CONDUITS = {'C00401224':'ActBlue', 'C00694323':'WinRed'}
+CONDUIT_SOURCE = 'earmark_conduit_registry:'
+
+
+def conduit_name(committee_id):
+    """'ActBlue' or 'WinRed' for a registered earmark conduit, else ''. Reads FEC:C... and any case."""
+    return EARMARK_CONDUITS.get(re.sub(r'^FEC:', '', str(committee_id or '').strip().upper()), '')
+
+
+def conduit_category(committee_id, category):
+    """`category`, or Conduit when the committee is a registered earmark conduit."""
+    return CONDUIT if conduit_name(committee_id) else category
+
+
+def relabel_conduit_rows(rows):
+    """Say Conduit in the recipient_category of every row of a registered conduit, in place.
+
+    For answers that read the stored contribution facts as they are: those stores were built when the
+    reports still filed ActBlue and WinRed under Super PAC, and rebuilding each industry's store for a
+    label would cost hundreds of megabytes apiece."""
+    for row in rows or ():
+        if isinstance(row, dict) and row.get('recipient_category') is not None and conduit_name(row.get('committee_id')):
+            row['recipient_category'] = CONDUIT
+    return rows
+
+
+def conduit_fingerprint():
+    """What decides the label. Code that caches answers carrying a category folds this into its identity,
+    so a change to the registry or to the name is a different key and an old label is never served."""
+    return hashlib.sha256(json.dumps([CONDUIT, sorted(EARMARK_CONDUITS.items())]).encode()).hexdigest()
 # Not a bare `category`: an FEC bulk oppexp file has a CATEGORY column
 # carrying the commission's purpose code, which would read as a committee
 # category, canonicalise to Unclassified and then stop the committee master
@@ -447,7 +492,7 @@ def excluded_issue(reason):
 def canonical_category(value):
     """One category name from the file, in the Graph vocabulary.
 
-    Case-insensitive exact match; text that is not one of the ten names is
+    Case-insensitive exact match; text that is not one of the eleven names is
     Unclassified, which is itself one of them; a blank cell stays blank, so a
     committee the file never labelled can be told from one the file calls
     Unclassified, and only the first kind reaches the committee master.
@@ -549,7 +594,14 @@ def classify_committee(committee_id, has_file_categories=False):
     workbook means one of the industry's OWN companies' PACs - a label the
     file assigns - and a payment processor's PAC that happens to be
     registered to a corporation must not land in that bucket.
+
+    An earmark conduit (EARMARK_CONDUITS) is answered first, from the registry
+    alone: its FEC record is a hybrid type V, which would read as Carey, and a
+    designation or type rule must never turn it back into one.
     """
+    name = conduit_name(committee_id)
+    if name:
+        return CONDUIT, CONDUIT_SOURCE + name
     master = committee_master()
     entry = master['rows'].get(str(committee_id or '').strip().upper())
     if entry is None:
@@ -597,7 +649,14 @@ def committee_category(counts, identifier, header, unclassified=False):
     master cannot do better either, the source names both, so a reader can
     tell 'nobody knows' from 'the file never said'. `consulted` reports
     whether the master was asked, which is what the catalog sentence counts.
+
+    The one exception to "the file wins" is an earmark conduit: the registry
+    answers before the file, because the files that file ActBlue under Super
+    PAC are the stale ones.
     """
+    name = conduit_name(identifier)
+    if name:
+        return CONDUIT, CONDUIT_SOURCE + name, False
     category = modal_from_counts(counts or {})
     if category:
         return category, f'file:{header}', False
@@ -723,6 +782,10 @@ def normalize(raw, row_number, columns, extra_cells=()):
     if excluded:
         issues.append(excluded_issue(first(row, INCLUSION_REASON_FIELDS)))
     channel = {'receipt':'Receipts', 'disbursement':'Disbursements'}.get(kind)
+    # The file's own word for the committee, except that a registered earmark
+    # conduit is a Conduit whatever a stale file calls it (a blank stays blank,
+    # so the catalog still knows the file never labelled the committee).
+    file_category = canonical_category(first(row, CATEGORY_FIELDS))
     if kind == 'independent_spending':
         channel = 'Independent spending · ' + direction.lower()
     if kind == 'reported_aggregate':
@@ -742,7 +805,7 @@ def normalize(raw, row_number, columns, extra_cells=()):
         # had one of the others keeps the id it had.
         'record_id':first(row, ('sub_id', 'transaction_id', 'tran_id', 'record_id', 'source_id')),
         'source_url':_source_url(first(row, ('source_url', 'pdf_url', 'filing_url'))),
-        'category':canonical_category(first(row, CATEGORY_FIELDS)),
+        'category':conduit_category(committee, file_category) if file_category else '',
         'status':'excluded' if excluded else ('unsupported' if issues else 'supported'), 'issues':issues,
     }
 
@@ -825,6 +888,17 @@ def stored_catalog(record, state='ready', reread=False, stale=False):
     filled = {'categories':[], 'excluded_rows':0, **descriptive(record), **catalog}
     filled['committees'] = [{'category':'', 'category_source':'', 'excluded_rows':0, **item}
                             for item in filled.get('committees') or []]
+    # An import already on disk was read when a workbook still filed ActBlue
+    # and WinRed under Super PAC. The registry is read here, at listing time,
+    # so no import is re-read (CATALOG_VERSION stays) for a label.
+    relabelled = False
+    for item in filled['committees']:
+        name = conduit_name(item.get('id'))
+        if name and item.get('category') != CONDUIT:
+            item['category'], item['category_source'] = CONDUIT, CONDUIT_SOURCE + name
+            relabelled = True
+    if relabelled:
+        filled['categories'] = category_buckets(filled['committees'])
     filled['catalog_version'] = int(record.get('catalog_version') or 0)
     # Derived here rather than written at ingest, so every import already on
     # disk answers with it on the first listing and none has to be re-read for

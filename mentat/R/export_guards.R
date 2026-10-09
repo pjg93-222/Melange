@@ -261,10 +261,13 @@ mentat_guard_collection_completeness <- function(progress, stored, tolerance = 0
     paste0(
       "walks stored materially fewer rows than FEC reported - the cell looks ",
       "populated but is short, recollect before trusting it: ",
+      # Every short cell is itemized, not the first 12 and "... and N more": the
+      # console reads this detail (app/collection_gaps.py) to say which cells are
+      # short, and a count of the rest leaves it nothing to name.
       mentat_guard_summarise(sprintf(
         "%s/%s %s %.0f of %.0f", short$company, short$cycle, short$destination,
         short$rows, short$reported
-      ))
+      ), limit = nrow(short))
     ),
     sum(short$gap)
   )
@@ -441,9 +444,13 @@ mentat_guard_category_agreement <- function(view_a, view_b, tolerance = 0.02) {
 # A category the template renders but nothing ever populates is invisible: the
 # Trade Association row read $0.00 in all six shipped books for months because
 # no committee could ever match it. Warn, because a genuine zero is possible.
-mentat_guard_category_population <- function(declared, populated) {
+# An `optional` category is rendered but is allowed to be empty without a note:
+# Conduit (ActBlue, WinRed) is a real zero for any industry or cycle whose
+# people never gave through an earmark platform.
+mentat_guard_category_population <- function(declared, populated,
+                                             optional = character()) {
   declared <- unique(declared[nzchar(declared)])
-  empty <- setdiff(declared, unique(populated))
+  empty <- setdiff(setdiff(declared, optional), unique(populated))
   if (!length(empty)) {
     return(mentat_guard_result(
       "category_population", "warn", TRUE, "every declared category is populated"

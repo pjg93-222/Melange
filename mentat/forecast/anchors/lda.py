@@ -9,6 +9,7 @@ relative change to it and never treats it as the Mentat roster's own spending. T
 import csv
 from datetime import date
 import calendar
+import json
 import math
 
 SERIES = {'income_total': 'Outside-firm fees (LDA income_total)', 'expenses_total': 'In-house expenses (LDA expenses_total)'}
@@ -20,6 +21,18 @@ def read_sector_rows(path):
     with open(path, encoding='utf-8-sig', newline='') as stream:
         return list(csv.DictReader(stream))
 
+
+def sweep_as_of(path, year):
+    """The date of the producer's own sweep of `year`: scope_sweeps[year].sweep_through_dt_posted of Melange's fullscope_receipts.json (never today's clock).
+    None when the receipts record none or it does not parse. The caller checks that the file exists."""
+    with open(path, encoding='utf-8-sig') as stream:
+        raw = ((json.load(stream).get('scope_sweeps') or {}).get(str(year)) or {}).get('sweep_through_dt_posted')
+    try:
+        return date.fromisoformat(str(raw or '')[:10])
+    except ValueError:
+        return None
+
+
 # --- in-year nowcast (owner rulings 2026-10-08) -------------------------------------------------------------------------------
 # pred_year = O + (1 - s) * B   (the PAC panel's R8_REMAINING form; not the pace O / s)
 #   O  filed so far this year through the latest complete quarter cut k, B  the prior full-year total,
@@ -28,14 +41,20 @@ def read_sector_rows(path):
 NOWCAST_POOL = ('bank', 'credit_union', 'telecom', 'fintech')
 NOWCAST_WINDOW = 3
 NOWCAST_CUTS = (1, 2, 3)
+# LD-2 filing deadlines: (years after the quarter's year, month, day); the rule of the Melange industry page (fec/surfaces/make_lobby_network_html.py QUARTER_DEADLINES).
+QUARTER_DEADLINES = {1: (0, 4, 20), 2: (0, 7, 20), 3: (0, 10, 20), 4: (1, 1, 20)}
 
 
-def quarter_table(rows, sector, series):
-    """{year: {1..4: amount}} of the quarters with filings (a quarter without a filing is not a figure)."""
+def quarter_table(rows, sector, series, as_of):
+    """{year: {1..4: amount}} of the quarters with filings whose LD-2 deadline is on or before `as_of`, the producer's sweep date (a quarter without a filing is not a figure,
+    and neither is one whose deadline falls after the sweep: an early filing is not the quarter)."""
     out = {}
     for r in rows:
         if r['sector'] == sector and r['period'] in ('Q1', 'Q2', 'Q3', 'Q4') and int(r['filings'] or 0) > 0:
-            out.setdefault(int(r['year']), {})[int(r['period'][1])] = float(r[series])
+            year, quarter = int(r['year']), int(r['period'][1])
+            years_after, month, day = QUARTER_DEADLINES[quarter]
+            if date(year + years_after, month, day) <= as_of:
+                out.setdefault(year, {})[quarter] = float(r[series])
     return out
 
 
@@ -66,13 +85,13 @@ def conformal_quantile(values, q):
     return a[k - 1] if 0 < k <= len(a) else None
 
 
-def nowcast_errors(rows, pool=NOWCAST_POOL):
+def nowcast_errors(rows, as_of, pool=NOWCAST_POOL):
     """Pooled blind errors of the nowcast, log(pred / actual), by quarter cut: every complete year with a complete prior year, both series, every pool sector.
     -> {'pool', 'series', 'targets', 'by_cut': {'1'|'2'|'3': {'n', 'q80', 'max'}}} (q80 = split-conformal 80th percentile of |error|, max = the largest blind miss), or None."""
     errors, targets = {c: [] for c in NOWCAST_CUTS}, set()
     for sector in pool:
         for sid in SERIES:
-            q = quarter_table(rows, sector, sid)
+            q = quarter_table(rows, sector, sid, as_of)
             for year in sorted(y for y in q if len(q[y]) == 4):
                 for cut in NOWCAST_CUTS:
                     n = nowcast(q, year, cut)
@@ -85,8 +104,9 @@ def nowcast_errors(rows, pool=NOWCAST_POOL):
     return {'pool': list(pool), 'series': list(SERIES), 'targets': sorted(targets), 'by_cut': by_cut}
 
 
-def sector_levels(rows, sector):
-    """Annual + partial-year levels of one sector, both series. None when the sector has no rows."""
+def sector_levels(rows, sector, as_of):
+    """Annual + partial-year levels of one sector, both series. None when the sector has no rows. The partial year runs through the last quarter that has a filing AND whose
+    LD-2 deadline is on or before `as_of` (quarter_table); the nowcast is cut there too."""
     mine = [r for r in rows if r['sector'] == sector]
     if not mine:
         return None
@@ -100,14 +120,13 @@ def sector_levels(rows, sector):
         partial = None
         if partial_years:
             year = partial_years[-1]
-            quarters = {r['period']: float(r[sid]) for r in mine
-                        if int(r['year']) == year and r['period'] in ('Q1', 'Q2', 'Q3', 'Q4') and int(r['filings'] or 0) > 0}
+            table = quarter_table(mine, sector, sid, as_of)
+            quarters = {'Q' + str(i): v for i, v in sorted(table.get(year, {}).items())}
             if quarters:
-                last = max(int(q[1]) for q in quarters)
-                partial = {'year': year, 'through_quarter': 'Q' + str(last), 'quarters': dict(sorted(quarters.items())),
-                           'total': round(sum(quarters.values()), 2)}
+                last = max(table[year])
+                partial = {'year': year, 'through_quarter': 'Q' + str(last), 'quarters': quarters, 'total': round(sum(quarters.values()), 2)}
                 if last in NOWCAST_CUTS:
-                    partial['nowcast'] = nowcast(quarter_table(mine, sector, sid), year, last)
+                    partial['nowcast'] = nowcast(table, year, last)
                 through = date(year, last * 3, calendar.monthrange(year, last * 3)[1]).isoformat()
         series[sid] = {'label': label, 'annual': dict(sorted(annual.items())), 'partial': partial}
     if through is None:

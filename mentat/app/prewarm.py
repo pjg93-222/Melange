@@ -107,7 +107,8 @@ RESULT_CODE = ('prewarm.py', 'server.py', 'analysis_data.py', 'analysis_metrics.
                'contribution_query_store.py', 'contribution_semantics.py', 'contribution_workbook_guard.py',
                'contribution_source_guard.py', 'industry_scope.py', 'snapshot_registry.py', 'graph_data.py',
                'report_insights.py', 'native_scan.py', 'view_cache.py', 'source_memo.py',
-               'response_cache.py', 'comparison_data.py', 'drawer_sidecars.py', 'downstream.py')
+               'response_cache.py', 'comparison_data.py', 'drawer_sidecars.py', 'downstream.py',
+               'collection_gaps.py', 'evidence_csv.py')
 
 MIN_FREE_BYTES = int(1.5 * 1024 ** 3)
 PAUSE_SECONDS = 60

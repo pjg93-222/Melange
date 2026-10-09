@@ -729,6 +729,29 @@
   function graphPrefetcher(reader, env) {
     return prefetchScheduler(Object.assign({}, env, {busy: reader.busy, has: reader.has, read: reader.prefetch}));
   }
+  /* Downstream PAC activity is not the industry's giving. The view ranks what
+     every committee the industry's money reached did with it (downstream.py
+     NOTE), so a chart of it that is called "Top candidates" reads as the
+     industry's own giving: Telecom 2025-26 reached Bill Hagerty for $142,494
+     and gave him $100. In that view the title says what it measures, and the
+     amount a row reached is always printed beside the industry's own direct
+     amount, which /api/graph attaches to the row as `direct`. A report name
+     carries its cycle ("Telecom 2025-2026"); the industry is the name alone. */
+  const industryName = value => String(value == null ? '' : value).replace(/\s+\d{4}[-–]\d{4}$/, '');
+  function activityTitle(industries) {
+    const industry = [...new Set([].concat(industries).map(industryName).filter(Boolean))].join(' / ');
+    return `Activity of committees that received ${industry} money, not ${industry}'s own giving`;
+  }
+  const isActivity = data => Boolean(data && data.filters && data.filters.mode === 'activity');
+  // "$142,494 reached · $100 direct"; a row with no direct amount (the
+  // unidentified-candidate row, an older answer) keeps its one amount.
+  const reachedText = (row, said, money) => row && row.direct != null ? `${said} reached · ${money(row.direct)} direct` : said;
+  function reachedForms(row, money) {
+    const reached = money(row.amount);
+    if (row.direct == null) return [reached];
+    const direct = money(row.direct);
+    return [`${reached} reached · ${direct} direct`, `${reached} · ${direct} direct`, reached];
+  }
   const COMPARE_MENU = {KINDS: COMPARE_KINDS, LABELS: COMPARE_LABELS, MAX: COMPARE_MAX,
     menuKinds, menuValues, menuFilter, menuMove, createMenuController, pillsModel};
   const layout = {layoutColumns: layoutColumns, labelParts: labelParts,
@@ -750,7 +773,9 @@
     FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel,
     graphMemoryModel: graphMemoryModel, MEMORY_ENTRIES: MEMORY_ENTRIES, MEMORY_CHARS: MEMORY_CHARS,
     prefetchPlan: prefetchPlan, prefetchScheduler: prefetchScheduler, PREFETCH_MAX: PREFETCH_MAX,
-    graphReader: graphReader, graphPrefetcher: graphPrefetcher, PREFETCH_HEADER: PREFETCH_HEADER};
+    graphReader: graphReader, graphPrefetcher: graphPrefetcher, PREFETCH_HEADER: PREFETCH_HEADER,
+    industryName: industryName, activityTitle: activityTitle, isActivity: isActivity,
+    reachedText: reachedText, reachedForms: reachedForms};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
   globalThis.MentatGraphLayout = layout;
   if (typeof document === 'undefined') return;
@@ -975,6 +1000,13 @@
   // ruling R6); the exact amount is their tooltip. Card rows keep cents.
   const wholeDollars = n => Number(n).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0});
   const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};
+  // The title a card, an export and a briefing slide carry. The activity view's
+  // candidates are named for what they measure (activityTitle), whichever
+  // surface prints them; every other card keeps its own.
+  const compareIndustries = () => compare && compare.dim === 'industry' ? compare.values : get('industry').value;
+  function titleOf(name, data = view, industry = get('industry').value) {
+    return name === 'candidates' && isActivity(data) ? activityTitle(industry) : titleFor[name];
+  }
   let analysis = 'overview';
   let loaded = false, revision = 0, view = null, category = '', recipient = '', controller = null, unavailable = [];
   // Whether this console has a report to show. The Candidate view select is
@@ -1327,6 +1359,35 @@
     if(typeof ResizeObserver!=='undefined'){let frame=0;const watch=new ResizeObserver(()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(fitChips);});
       watch.observe(chipGrid);for(const chip of chipGrid.querySelectorAll('.chip-select'))watch.observe(chip);}
   }
+  // FIX 4 (collection gaps): the report's own Data Quality check names the company x cycle cells whose stored
+  // rows are materially fewer than FEC reported (view.collection_gaps, already limited to the cycles shown).
+  // The scope this page is showing is every loaded scope's company and cycle: one view, or while comparing
+  // each compared scope plus the all-company ranking Company comparison draws. coverage-view.js words it.
+  function coverageNotice() {
+    const api=globalThis.MentatCoverage;
+    if(!api||!view)return null;
+    const datas=compare?[...compareScopes().map(scope=>scope.data),compare.dim==='company'&&compareAll&&compareAll.data].filter(Boolean):[view];
+    return api.gapNotice(datas.map(data=>({gaps:data.collection_gaps,
+      scope:{companies:data.filters.company?[data.filters.company]:null,cycles:data.filters.cycle?[data.filters.cycle]:null}})));
+  }
+  // The scope line is what the CSV, the image caption, the SVG <desc>, the briefing chip and the per-figure
+  // Image header all quote, so the gap is appended to it here and travels with every one of them. On screen
+  // the chip and caption sit in the chips row.
+  let scopeBase='';
+  function paintScope(base) {
+    if(base!==undefined)scopeBase=base;
+    const notice=coverageNotice();
+    get('scope').textContent=notice?globalThis.MentatCoverage.withGap(scopeBase,notice):scopeBase;
+    paintCoverage(notice);
+  }
+  function paintCoverage(notice) {
+    const host=get('chips');
+    for(const old of host.querySelectorAll('.graph-coverage'))old.remove();
+    if(!notice)return;
+    const line=document.createElement('span'),caption=document.createElement('span');
+    line.className='graph-coverage';caption.className='chart-note graph-coverage-caption';caption.textContent=notice.caption;
+    line.append(globalThis.MentatCoverage.chipNode(notice),caption);host.append(line);
+  }
   function render() {
     const opts=view.options;
     options(get('company'),[['','All companies'],...opts.companies.map(c=>[c,c])],view.filters.company);
@@ -1345,7 +1406,7 @@
     // it is still built here, because the CSV, the image caption, the SVG
     // <desc> and the briefing slide all quote it as their scope line.
     const scope=[get('industry').value,view.filters.company||'All companies',view.filters.tier||'All levels',(get('funding').value==='all'?'All giving':get('funding').selectedOptions[0].textContent),get('cycle').selectedOptions[0].textContent,category,recipient].filter(Boolean).join(' · ');
-    get('scope').textContent=scope;
+    paintScope(scope);
     get('source-label').textContent=get('run').selectedOptions[0].textContent+(unavailable.length?' · Unavailable saved reports: '+unavailable.join(', '):'');
     // R7: the loaded sentence leaves the screen and joins the Net giving
     // tooltip, beside the exact amount and the basis note.
@@ -1517,8 +1578,12 @@
       if(!details.open||valuesBuilt)return;
       const scroll=document.createElement('div');scroll.className='table-scroll';
       const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody');
-      head.innerHTML='<tr><th>Name</th><th>Net amount</th></tr>';
-      rows.forEach(row=>{const tr=document.createElement('tr'),label=document.createElement('td'),value=document.createElement('td'),button=document.createElement('button');button.type='button';button.className='graph-text-button';button.textContent=row.label;button.onclick=()=>onClick(row.id);label.append(button);value.textContent=dollars(row.amount);tr.append(label,value);body.append(tr);});
+      // Downstream activity rows carry the industry's own direct amount: it gets its column.
+      const withDirect=rows.some(row=>row.direct!=null);
+      head.innerHTML=withDirect?'<tr><th>Name</th><th>Net amount reached</th><th>Direct</th></tr>':'<tr><th>Name</th><th>Net amount</th></tr>';
+      rows.forEach(row=>{const tr=document.createElement('tr'),label=document.createElement('td'),value=document.createElement('td'),button=document.createElement('button');button.type='button';button.className='graph-text-button';button.textContent=row.label;button.onclick=()=>onClick(row.id);label.append(button);value.textContent=dollars(row.amount);tr.append(label,value);
+        if(withDirect){const direct=document.createElement('td');direct.textContent=row.direct==null?'—':dollars(row.direct);tr.append(direct);}
+        body.append(tr);});
       table.append(head,body);scroll.append(table);details.append(scroll);valuesBuilt=true;
     });
     details.append(summary);container.append(details);
@@ -1583,7 +1648,7 @@
     const twoLine=opts.twoLine===undefined?TWO_LINE.includes(name):opts.twoLine;
     const leftRead=twoLine||(opts.leftRead===undefined?LEFT_LABELLED.includes(name):opts.leftRead);
     const forms=opts.forms===undefined?(name==='companies'?'company':name==='candidates'?'person':''):opts.forms;
-    const heading=opts.title||titleFor[name],denom=opts.denom||denomLabel(name,data);
+    const heading=opts.title||titleOf(name,data,opts.industry),denom=opts.denom||denomLabel(name,data);
     const pitch=twoLine?TWO_LINE_PITCH:(opts.pitch||ROW_HEIGHT);
     // Compare halves (02b) print whole dollars (R6c), and a category a scope
     // lacks arrives as amount null: a dash, no bar, nothing to click.
@@ -1595,7 +1660,12 @@
     const selected=opts.selected===undefined?(name==='organizations'?recipient:''):opts.selected;
     // The value column is as wide as the widest figure it has to hold, measured
     // at the size it is drawn at, rather than a fixed 96px guess.
-    const valueWidth=shown.filter(has).reduce((wide,row)=>Math.max(wide,MentatTheme.measureText(money(row.amount),LABEL_SIZE,MentatTheme.sans)),0);
+    // An activity row prints what it reached beside what the industry gave, in
+    // the longest of reachedForms that fits; a compare half is too narrow for
+    // the pair and keeps its one amount, with the direct amount in its tooltip.
+    const activity=name==='candidates'&&isActivity(data),pair=activity&&!opts.compact;
+    const valueForms=row=>pair&&row.direct!=null?reachedForms(row,wholeDollars):[money(row.amount)];
+    const valueWidth=shown.filter(has).reduce((wide,row)=>Math.max(wide,MentatTheme.measureText(valueForms(row)[0],LABEL_SIZE,MentatTheme.sans)),0);
     // A narrow half (1440: ~265px) has no room for the "new" tag after the
     // name, so there it takes the chip column; a wider half keeps G2's place.
     const tagInChips=Boolean(opts.compact)&&compactWidth(container)<340;
@@ -1624,12 +1694,14 @@
     const percentages=total>0&&shown.every(row=>!has(row)||row.amount>=0);
     const height=shown.length*pitch+ROW_TOP+(twoLine?18:-13); // a single-line row ends at top+pitch-19 (its hover box): 6px under the last row, as on M4 (fix round 2, R02c-M1; it was 29)
     const svg=svgNode('svg',{viewBox:`0 0 ${CHART_WIDTH} ${height}`,role:'img','aria-label':heading,class:'graph-bars'+(opts.animate?' graph-enter':'')});
-    svg.append(svgNode('title',{},heading),svgNode('desc',{},`${opts.caption??get('scope').textContent}. ${shown.length} of ${rows.length} groups. Values in USD.`));
+    svg.append(svgNode('title',{},heading),svgNode('desc',{},`${activity?heading+'. ':''}${opts.caption??get('scope').textContent}. ${shown.length} of ${rows.length} groups. Values in USD.`));
     const amounts=shown.filter(has).map(r=>r.amount);
     const positive=Math.max(0,...amounts),negative=Math.min(0,...amounts);
     const scale=barMax/(positive-negative||1),zero=BAR_LEFT-negative*scale;
     // Group i takes the theme's categoryColour(i), as Chart Studio's groups do (2026-09-25); a theme without it cycles the palette.
     const colors=MentatTheme.palette,colourOf=typeof MentatTheme.categoryColour==='function'?MentatTheme.categoryColour:i=>colors[i%colors.length];
+    // Recipient types: Conduit (ActBlue, WinRed) has a colour of its own and takes no slot, so every other type is the colour it is without it (theme.js categoryColours).
+    const typed=name==='categories'&&typeof MentatTheme.categoryColours==='function'?MentatTheme.categoryColours(shown.map(row=>row.id)):null;
     let covered=0;
     shown.forEach((row,i)=>{
       const top=ROW_TOP+i*pitch;
@@ -1663,14 +1735,15 @@
       // per-cycle figures ride in <title>, which is the hover detail (item 12).
       // A drawer row is a reading, not a control: there is nothing behind it
       // to open, so it is not announced as a button and not in the tab order.
-      const said=has(row)?dollars(row.amount):'not recorded in this scope';
+      const said=has(row)?reachedText(row,dollars(row.amount),dollars):'not recorded in this scope';
       const inert=opts.click===false||!has(row);
       const group=svgNode('g',inert
         ?{role:'listitem','aria-label':`${label}: ${said}`,class:'graph-bar-row'}
         :{role:'button',tabindex:0,'aria-label':`${label}: ${said}`,
           class:'graph-bar-button'+(selected&&row.id===selected?' is-selected':'')});
       group.append(svgNode('title',{},`${label} · ${said}`+(percent!==null?` · ${percent.toFixed(1)}% of ${denom}`:'')
-        +(mark&&mark.change&&mark.change.against?` · ${mark.change.text} against ${mark.change.against}`:'')));
+        +(mark&&mark.change&&mark.change.against?` · ${mark.change.text} against ${mark.change.against}`:'')
+        +(name==='categories'&&MentatTheme.categoryNote&&MentatTheme.categoryNote(row.id)?`\n${MentatTheme.categoryNote(row.id)}`:'')));
       const lit=opts.litIds instanceof Set&&opts.litIds.has(String(row.id));
       group.append(svgNode('rect',{x:0,y:top-15,width:CHART_WIDTH,height:pitch-4,rx:4,
         class:'graph-row'+((tint&&tint.has(String(row.id)))||lit?' is-shared':'')}));
@@ -1685,12 +1758,12 @@
         group.append(svgNode('text',{x:at+tagWidth/2,y:y-1,'text-anchor':'middle','font-family':MentatTheme.sans,'font-size':NEW_TAG_SIZE,'font-weight':600,class:'graph-new-text'},'new'));
       }
       if(has(row)&&box.barMax>0){
-        const fill=typeof opts.colorFor==='function'?opts.colorFor(row,i):row.amount<0?MentatTheme.negative:colourOf(i);
+        const fill=typeof opts.colorFor==='function'?opts.colorFor(row,i):row.amount<0?MentatTheme.negative:typed?typed[i]:colourOf(i);
         const bar=svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:barBase-barRise,width:Math.max(1,Math.abs(row.amount*scale)),height:barH,rx:2,fill,class:'graph-mark'});
         if(opts.animate)bar.style.setProperty('--i',String(Math.min(i,MOTION_STEPS)));
         group.append(bar);
       }
-      group.append(svgNode('text',{x:valueRight,y:barBase,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':LABEL_SIZE,class:'graph-value'},has(row)?money(row.amount):'—'));
+      group.append(svgNode('text',{x:valueRight,y:barBase,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':LABEL_SIZE,class:'graph-value'},has(row)?(pair&&row.direct!=null?fitForm(valueForms(row),box.valueWidth,LABEL_SIZE):money(row.amount)):'—'));
       if(newChip){
         const chipWidth=MentatTheme.measureText('new',NEW_TAG_SIZE,MentatTheme.sans)+14;
         group.append(svgNode('rect',{x:shareRight-chipWidth,y:barBase-12,width:chipWidth,height:16,rx:8,class:'graph-new-box'}));
@@ -2424,16 +2497,23 @@
     // ranking, the shared industry's, with the compared companies in it.
     if(compare&&!(name==='companies'&&compare.dim==='company')){
       const scopes=compareScopes(),joined=tableRows(name,scopes);
-      const lines=[['Graph',titleFor[name]],['Comparing',`${DIM_CAPTION[compare.dim]}: ${scopes.map(scope=>scope.label).join(' | ')}`],['Scope',get('scope').textContent],
+      // Every scope answers the same candidate view, so the activity view's
+      // reached amounts come with each scope's direct amount beside them.
+      const withDirect=name==='candidates'&&isActivity(view);
+      const lines=[['Graph',titleOf(name,view,compareIndustries())],['Comparing',`${DIM_CAPTION[compare.dim]}: ${scopes.map(scope=>scope.label).join(' | ')}`],['Scope',get('scope').textContent],
         ...scopes.flatMap(scope=>((scope.data&&scope.data.reports)||[]).map(r=>['Report SHA-256',`${scope.label} · ${r.name} ${r.sha256}`])),
-        ['Name',...scopes.map(scope=>`${scope.label} (USD)`),'Identifier'],...joined.map(row=>[row.label,...row.amounts.map(value=>value===null?'':value),row.id])];
+        ['Name',...scopes.map(scope=>withDirect?`${scope.label} reached (USD)`:`${scope.label} (USD)`),...(withDirect?scopes.map(scope=>`${scope.label} direct (USD)`):[]),'Identifier'],
+        ...joined.map(row=>[row.label,...row.amounts.map(value=>value===null?'':value),...(withDirect?row.directs.map(value=>value===null?'':value):[]),row.id])];
       const url=URL.createObjectURL(new Blob(['\uFEFF'+lines.map(r=>r.map(safe).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
       const link=document.createElement('a');link.href=url;link.download='mentat-compare-'+name+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
       return;
     }
     const source=compare&&compareAll&&compareAll.data?compareAll.data:view;
-    const rows=[['Graph',titleFor[name]],['Scope',get('scope').textContent],['Candidate view',get('mode').selectedOptions[0].textContent],['Direction',source.filters.mode==='direct'?'Direct':source.filters.direction],
-      ['Note',name==='candidates'?source.candidate_note:source.note],...source.reports.map(r=>['Report SHA-256',r.name+' '+r.sha256]),['Name','USD','Identifier'],...source[name].map(r=>[r.label,r.amount,r.id])];
+    const withDirect=name==='candidates'&&isActivity(source);
+    const rows=[['Graph',titleOf(name,source)],['Scope',get('scope').textContent],['Candidate view',get('mode').selectedOptions[0].textContent],['Direction',source.filters.mode==='direct'?'Direct':source.filters.direction],
+      ['Note',name==='candidates'?source.candidate_note:source.note],...source.reports.map(r=>['Report SHA-256',r.name+' '+r.sha256]),
+      ['Name',...(withDirect?['Reached (USD)','Direct (USD)']:['USD']),'Identifier'],
+      ...source[name].map(r=>[r.label,r.amount,...(withDirect?[r.direct==null?'':r.direct]:[]),r.id])];
     const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.map(safe).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
     const link=document.createElement('a');link.href=url;link.download='mentat-'+name+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -2450,6 +2530,12 @@
   let unresolvedNote='',serverNote='',serverNoteTitle='';
   const SEPARATION='Direct contributions only. Downstream PAC activity, and conditional estimates are separate candidate views.';
   function candidateAside() {
+    // The card's heading is what its drawing, its image header (figure-pdf.js
+    // prints the card's own <h2>) and its exports are called: the activity
+    // view says it is not the industry's giving. It follows the answer on
+    // screen, not the select, which has moved ahead of it while one is read.
+    const title=get('candidate-panel')?.querySelector(':scope>.panel-heading>h2');
+    if(title)title.textContent=titleOf('candidates',view,compareIndustries());
     const direct=get('mode').value==='direct',note=get('candidate-note');
     note.textContent=direct?SEPARATION:serverNote;
     note.title=direct?'':serverNoteTitle;
@@ -2633,7 +2719,8 @@
     if(!svg)return null;
     const note=name==='candidates'?view.candidate_note:view.note;
     const context=`${get('scope').textContent}. ${name==='candidates'?get('mode').selectedOptions[0].textContent+'. '+(view.filters.mode==='direct'?'':view.filters.direction+'. '):''}${note} Preview: ${get(name).querySelectorAll('svg .graph-bar-button').length} of ${view[name].length} groups. `+view.reports.map(r=>`${r.name} SHA-256 ${r.sha256}`).join('; ');
-    return {name,svg,title:titleFor[name],context,reports:view.reports};
+    const title=titleOf(name),scope=get('scope').textContent;
+    return {name,svg,title,context,chip:title===titleFor[name]?scope:`${scope} · ${title}`,reports:view.reports};
   }
   get('export').onclick=async()=>{
     if(!view)return;
@@ -2659,7 +2746,7 @@
     error('');
     const report=(subject.reports||[])[0]||{};
     window.MentatBriefing.capture({svg:subject.svg,title:subject.title,scope:subject.context,
-      chip:get('scope').textContent,note:'',basis:'Graph totals',sheetId:subject.name,sheetName:subject.title,
+      chip:subject.chip,note:'',basis:'Graph totals',sheetId:subject.name,sheetName:subject.title,
       source:report.name||'',provenance:report.sha256||'',origin:'graph'});
   };
   function renderFreshness() {
@@ -2825,6 +2912,7 @@
     const host=document.getElementById('view-graph');
     if(!host)return;
     const scopes=compareScopes();
+    paintScope();
     host.dataset.compare=compare?compare.dim:'';
     host.dataset.compareState=!compare?'':scopes.some(scope=>scope.status==='loading')||(compare.dim==='company'&&(!compareAll||compareAll.status==='loading'))?'loading':'ready';
     // How long a comparison took from the pick to every half painted.
@@ -2855,6 +2943,7 @@
   function compareArrived(index) {
     if(!view||!compare){markCompareState();return;}
     compareEntering=index;
+    paintScope();
     try{renderCompareFigures();paintAll(false);renderCompareTable();}
     finally{compareEntering=-1;}
     markCompareState();
@@ -3232,6 +3321,7 @@
       const spark=name==='companies',narrow=width<HALF_SPARK_MIN;
       const bar=!(narrow&&(spark||(name==='candidates'&&compare.dim==='cycle'))),share=width>=COMPACT_SHARE_MIN_W;
       const options={data,container:body,foot:null,values:false,animate:grow,topN:aligned?aligned.length:top,caption,
+        industry:compare.dim==='industry'?scope.value:undefined,
         compact:true,pitch:COMPARE_PITCH,money:wholeDollars,spark,bar,share,tint:info.shared,marks:marksFor(name,scopes,index,aligned?Infinity:top,info),
         click:name==='companies'&&compare.dim!=='cycle'?false:undefined,yieldOrder:halfYieldOrder(name,width)};
       drawn.push({scope,body,rows,click,data,spark,options,plan:draw(name,rows,click,options)});
@@ -3329,8 +3419,10 @@
         if(!joinable(kind,row))continue;
         const id=rowId(kind,row);
         let entry=joined.get(id);
-        if(!entry){entry={id,label:String(row.label==null?id:row.label),party:row.party||'',amounts:scopes.map(()=>null)};joined.set(id,entry);}
+        if(!entry){entry={id,label:String(row.label==null?id:row.label),party:row.party||'',amounts:scopes.map(()=>null),directs:scopes.map(()=>null)};joined.set(id,entry);}
         entry.amounts[index]=Number(row.amount)||0;
+        // The industry's own direct amount, on the activity view's rows only.
+        if(row.direct!=null)entry.directs[index]=Number(row.direct)||0;
         if(!entry.party&&row.party)entry.party=row.party;
       }
     });
@@ -3373,7 +3465,7 @@
     card.hidden=false;
     if(table.kind!==kind){table={kind,filter:'all',query:'',sort:'s0',dir:'desc',page:0};get('compare-search').value='';}
     const text=TABLE_TEXT[kind],scopes=compareScopes();
-    get('compare-table-title').textContent=text.title;
+    get('compare-table-title').textContent=kind==='candidates'?titleOf('candidates',view,compareIndustries()):text.title;
     get('compare-table-sub').textContent=kind==='candidates'&&get('mode').value!=='direct'?get('mode').selectedOptions[0].textContent+'.':text.sub;
     get('compare-search').placeholder=text.find;get('compare-search').setAttribute('aria-label',text.find);
     // The candidates' own "Direct contributions" select rides into the table's
@@ -3450,6 +3542,8 @@
           if(holder.tagName==='BUTTON'){holder.type='button';holder.title=`Open ${row.label}'s downstream activity for ${scopes[column.index].label}`;holder.onclick=()=>openDrawer(row.id,'',column.index);}
           const money=document.createElement('span');money.className='graph-compare-money';money.textContent=value===null?'—':wholeDollars(value);
           holder.append(money);
+          // The activity view's amount is what the industry's money reached; its tooltip says what the industry gave.
+          if(value!==null&&row.directs[column.index]!==null)holder.title=`${row.label} · ${scopes[column.index].label} · ${reachedText({direct:row.directs[column.index]},dollars(value),dollars)}`;
           if(value!==null){
             const track=document.createElement('span');track.className='graph-compare-track';track.setAttribute('aria-hidden','true');
             const bar=document.createElement('i');bar.className='scope-bar--'+(column.index+1);bar.style.width=Math.max(1,100*Math.abs(value)/peak).toFixed(1)+'%';
@@ -3473,9 +3567,12 @@
     const kind=tableKind();if(!kind)return;
     const scopes=compareScopes(),rows=tableApply(tableRows(kind,scopes),scopes);
     const safe=value=>'"'+String(typeof value==='string'&&/^[=+\-@\t\r]/.test(value)?"'"+value:value).replaceAll('"','""')+'"';
-    const header=[TABLE_TEXT[kind].noun,'Party',...scopes.map(scope=>scope.label),...(scopes.length===2?['Difference']:[])];
-    const lines=[header,...rows.map(row=>[row.label,row.party||'',...row.amounts.map(value=>value===null?'':value),
-      ...(scopes.length===2?[(row.amounts[0]||0)-(row.amounts[1]||0)]:[])])];
+    // The activity view's table says what it is and gives each scope's direct amount after the difference.
+    const activity=kind==='candidates'&&isActivity(view);
+    const header=[TABLE_TEXT[kind].noun,'Party',...scopes.map(scope=>activity?`${scope.label} reached (USD)`:scope.label),...(scopes.length===2?['Difference']:[]),
+      ...(activity?scopes.map(scope=>`${scope.label} direct (USD)`):[])];
+    const lines=[...(activity?[['Graph',titleOf('candidates',view,compareIndustries())]]:[]),header,...rows.map(row=>[row.label,row.party||'',...row.amounts.map(value=>value===null?'':value),
+      ...(scopes.length===2?[(row.amounts[0]||0)-(row.amounts[1]||0)]:[]),...(activity?row.directs.map(value=>value===null?'':value):[])])];
     const url=URL.createObjectURL(new Blob(['﻿'+lines.map(line=>line.map(safe).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
     const link=document.createElement('a');link.href=url;link.download=`mentat-compare-${kind}.csv`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }

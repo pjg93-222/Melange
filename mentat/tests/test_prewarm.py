@@ -791,6 +791,26 @@ class ConsoleEntryPointTests(Harness):
         self.assertTrue((self.root / 'state' / 'prewarm' / f'warmer-{os.getpid()}.log').exists())
 
 
+class ResultCodeTests(unittest.TestCase):
+    """P2-7: collection_gaps.py (the Graph payload's gaps) and evidence_csv.py (the Conduit label and the
+    category vocabulary) decide warmed results, so a change to either re-plans like any other result code."""
+
+    def test_the_gap_and_label_modules_are_result_code(self):
+        self.assertLessEqual({'collection_gaps.py', 'evidence_csv.py'}, set(prewarm.RESULT_CODE))
+        for name in ('collection_gaps.py', 'evidence_csv.py'):
+            self.assertTrue((APP / name).is_file(), name)
+
+    def test_the_code_fingerprint_moves_when_either_changes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            for name in prewarm.RESULT_CODE:
+                (Path(folder) / name).write_text('x', encoding='utf-8')
+            for name in ('collection_gaps.py', 'evidence_csv.py'):
+                with self.subTest(name):
+                    before = prewarm.code_fingerprint(app_dir=folder)
+                    (Path(folder) / name).write_text('a changed module', encoding='utf-8')
+                    self.assertNotEqual(prewarm.code_fingerprint(app_dir=folder), before)
+
+
 class VerifyHelperTests(Harness):
     def test_only_the_journals_own_clock_and_counters_are_ignored(self):
         payload = {'history': {'inspected_at': 'a', 'newly_inspected_versions': 3, 'observations_inspected': 9},

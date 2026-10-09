@@ -168,10 +168,56 @@ stopifnot(
     silverberg$sub_id,
     c("silverberg-conduit", "silverberg-earmark", "silverberg-memo")
   ),
-  silverberg[sub_id == "silverberg-conduit", recipient_category] == "Carey",
+  silverberg[sub_id == "silverberg-conduit", recipient_category] == "Conduit",
+  silverberg_categories$category_source[
+    silverberg$sub_id == "silverberg-conduit"
+  ] == "fec:registered_conduit:earmark_platform",
   silverberg[sub_id == "silverberg-earmark", recipient_category] == "JFC",
   silverberg[sub_id == "silverberg-memo", recipient_category] == "Super PAC",
   all(silverberg$contribution_receipt_amount == 10.41)
+)
+
+# Paul's ruling (2026-10-09): the registered earmark conduits are their own
+# Conduit category, matched by committee ID or by exact name and tried before
+# every other rule (even a Super PAC type). An ordinary hybrid (type V) PAC is
+# still a Carey.
+insert_contribution(
+  "conduit-by-name", "PERSON, NAMED", "COINBASE", "ANALYST",
+  "Coinbase", "WINRED", "C99999991", "N", "U", "2026-01-12", 20
+)
+insert_contribution(
+  "conduit-actblue-super", "PERSON, BLUEISH", "COINBASE", "ANALYST",
+  "Coinbase", "ACTBLUE", "C00401224", "O", "U", "2026-01-13", 15
+)
+insert_contribution(
+  "ordinary-carey", "PERSON, HYBRID", "COINBASE", "ANALYST",
+  "Coinbase", "ORDINARY HYBRID PAC", "C99999992", "V", "", "2026-01-14", 10
+)
+conduit_rows <- spending_report_rows(connection)[
+  sub_id %in% c("conduit-by-name", "conduit-actblue-super", "ordinary-carey")
+]
+conduit_categories <- spending_recipient_classification(connection, conduit_rows)
+conduit_rows[, `:=`(
+  recipient_category = conduit_categories$recipient_category,
+  category_source = conduit_categories$category_source
+)]
+stopifnot(
+  nrow(conduit_rows) == 3L,
+  conduit_rows[sub_id == "conduit-by-name", recipient_category] == "Conduit",
+  conduit_rows[sub_id == "conduit-actblue-super", recipient_category] == "Conduit",
+  conduit_rows[sub_id == "ordinary-carey", recipient_category] == "Carey",
+  conduit_rows[sub_id == "conduit-by-name", category_source] ==
+    "fec:registered_conduit:earmark_platform",
+  conduit_rows[sub_id == "ordinary-carey", category_source] ==
+    "fec:hybrid_committee_type",
+  !any(conduit_rows$recipient_category == "Super PAC")
+)
+DBI::dbExecute(
+  connection,
+  paste(
+    "DELETE FROM contributions WHERE sub_id IN",
+    "('conduit-by-name', 'conduit-actblue-super', 'ordinary-carey')"
+  )
 )
 legitimate_split <- data.table::data.table(
   sub_id = paste0("balachander-", seq_len(10L)),
@@ -644,10 +690,107 @@ stopifnot(
     reliability_lines,
     fixed = TRUE
   )),
-  length(spending_stats_headers(2026L)) == 86L,
-  identical(dim(spending_stats_sheet()), c(84L, 87L)),
-  length(spending_stats_company_formulas(2026L, "$B3", 4L)) == 85L,
+  # 85 metrics before Conduit got its own column group (3 each in the company
+  # block, the three role blocks and the Company PAC allocation).
+  length(spending_stats_headers(2026L)) == 101L,
+  spending_stats_metric_count() == 100L,
+  identical(dim(spending_stats_sheet()), c(84L, 102L)),
+  length(spending_stats_company_formulas(2026L, "$B3", 4L)) == 100L,
   spending_report_company_labels("Foris Dax Inc") == "Crypto.com"
+)
+
+# Conduit layout: one group directly after each Carey group, four in all, plus
+# its own Company PAC allocation group, in both the headers and the formulas.
+conduit_headers <- spending_stats_headers(2026L)
+conduit_positions <- which(conduit_headers == "Conduit")
+stopifnot(
+  length(conduit_positions) == 4L,
+  all(conduit_headers[conduit_positions - 3L] == "Carey"),
+  all(conduit_headers[conduit_positions + 3L] == "Company PAC"),
+  identical(
+    conduit_headers[conduit_positions + 1:2][1:2],
+    c("% of Total Giving", "Partisan Split")
+  ),
+  identical(
+    tail(conduit_headers, 6L),
+    c(
+      "Company PAC: Carey", "% to Carey", "Partisan Split",
+      "Company PAC: Conduit", "% to Conduit", "Partisan Split"
+    )
+  ),
+  identical(names(spending_stats_category_groups())[2:3], c("Carey", "Conduit")),
+  !anyDuplicated(unlist(spending_stats_category_groups())),
+  identical(
+    spending_stats_allocation_categories(),
+    c("Super PAC", "Candidate", "Trade Association", "Carey", "Conduit")
+  )
+)
+conduit_formulas <- spending_stats_company_formulas(2026L, "$B3", 4L)
+stopifnot(
+  # Company block, three role blocks and the allocation: five Conduit totals.
+  sum(grepl('"Conduit"', conduit_formulas, fixed = TRUE)) == 4L * 3L + 3L,
+  grepl("PAC_DISBURSEMENT", conduit_formulas[[98L]], fixed = TRUE),
+  grepl('"Conduit"', conduit_formulas[[98L]], fixed = TRUE),
+  !grepl('"Carey"', conduit_formulas[[98L]], fixed = TRUE)
+)
+
+# Company PAC allocation: every disbursement category, Conduit included, has its
+# own share column, so shares over a fully classified disbursement set still sum
+# to 100%, and a Conduit disbursement can no longer fall out of the allocation.
+allocation_fixture <- data.table::data.table(
+  record_type = "PAC_DISBURSEMENT", year = 2026L, company = "Coinbase",
+  employee_tier = "",
+  recipient_category = c(
+    "Super PAC", "Candidate", "Trade Association", "Carey", "Conduit"
+  ),
+  party = c("R", "D", "", "D", "R"),
+  amount = c(400, 300, 100, 50, 150), records = 1L
+)
+allocation_values <- spending_stats_company_cached_values(
+  allocation_fixture, 2026L, "Coinbase"
+)
+allocation_base <- spending_stats_metric_count() - 14L
+allocation_shares <- allocation_values[allocation_base + c(2L, 5L, 8L, 10L, 13L)]
+allocation_totals <- allocation_values[allocation_base + c(1L, 4L, 7L, 9L, 12L)]
+no_conduit_values <- spending_stats_company_cached_values(
+  allocation_fixture[recipient_category != "Conduit"], 2026L, "Coinbase"
+)
+stopifnot(
+  length(allocation_values) == 100L,
+  isTRUE(all.equal(allocation_totals, c(400, 300, 100, 50, 150))),
+  isTRUE(all.equal(sum(allocation_shares), 1)),
+  isTRUE(all.equal(allocation_shares[[5L]], 0.15)),
+  # Conduit money is R only in this fixture: its own Partisan Split is 100% R.
+  isTRUE(all.equal(allocation_values[[allocation_base + 14L]], 1)),
+  # Carey keeps only its own 50, not the conduit 150.
+  isTRUE(all.equal(allocation_values[[allocation_base + 9L]], 50)),
+  # With no conduit disbursement the other four shares still make up 100%.
+  isTRUE(all.equal(
+    sum(no_conduit_values[allocation_base + c(2L, 5L, 8L, 10L)]), 1
+  )),
+  no_conduit_values[[allocation_base + 12L]] == 0
+)
+
+# Category reconciliation: Conduit is a destination of its own, every dollar
+# lands in exactly one category group, and an unknown label is still refused.
+reconciliation_categories <- c(
+  "Super PAC", "Carey", "Conduit", "Company PAC", "Leadership PAC",
+  "Trade Association", "Candidate", "Party Committee", "JFC", "Unclassified"
+)
+reconciliation_facts <- data.table::data.table(
+  record_type = c(rep("CONTRIBUTION", 10L), "EXCLUDED_527_501C"),
+  year = 2026L, company = "Coinbase",
+  recipient_category = c(reconciliation_categories, "527"),
+  amount = c(seq_len(10L) * 10, 99)
+)
+stopifnot(
+  isTRUE(spending_assert_category_reconciliation(reconciliation_facts)),
+  inherits(try(
+    spending_assert_category_reconciliation(data.table::copy(
+      reconciliation_facts
+    )[, recipient_category := sub("^Conduit$", "Conduits", recipient_category)]),
+    silent = TRUE
+  ), "try-error")
 )
 original_industry <- MENTAT_INDUSTRY
 MENTAT_INDUSTRY <- "Coverage Test"
@@ -692,13 +835,13 @@ stopifnot(identical(
 stats <- readxl::read_excel(
   workbook,
   sheet = "Stats (XXX Company)",
-  range = "A1:CI84",
+  range = "A1:CX84",
   col_names = FALSE,
   .name_repair = "minimal"
 )
 stopifnot(
   nrow(stats) == 84L,
-  ncol(stats) == 87L,
+  ncol(stats) == 102L,
   grepl("flagged 1 row", stats[[2L]][[1L]], fixed = TRUE),
   stats[[2L]][[2L]] == "Company 2026",
   stats[[3L]][[2L]] == "Total Giving",
@@ -755,7 +898,11 @@ template_cols <- vapply(1:4, function(sheet) {
     paste0("sheet", sheet, ".xml")
   )))
 }, character(1L))
-expected_stats_cols <- spending_set_column_width(template_cols[[1L]], 9L, 14)
+expected_stats_cols <- spending_set_column_width(
+  spending_stats_expand_template_cols(template_cols[[1L]]),
+  9L,
+  14
+)
 formula_matches <- gregexpr("<f>", stats_xml, fixed = TRUE)[[1L]]
 formula_count <- if (formula_matches[[1L]] == -1L) 0L else length(formula_matches)
 formula_blocks <- regmatches(
@@ -811,8 +958,8 @@ stopifnot(
   identical(output_cols[[2L]], template_cols[[2L]]),
   all(!nzchar(output_cols[3:6])),
   identical(output_cols[[6L]], template_cols[[4L]]),
-  formula_count == 6035L,
-  length(formula_blocks) == 6035L,
+  formula_count == 7100L,
+  length(formula_blocks) == 7100L,
   max(nchar(formula_text), na.rm = TRUE) <= 8192L,
   sum(!is.na(formula_cache_numeric) & formula_cache_numeric != 0) > 0L,
   grepl(person_formula, stats_xml, fixed = TRUE),
@@ -968,6 +1115,43 @@ stopifnot(
   any(grepl("1 row(s) were flagged", support[[8L]], fixed = TRUE), na.rm = TRUE)
 )
 
+# Conduit (ActBlue C00401224, WinRed C00694323) is its own category in Sheet4 and
+# its own Stats column group; Carey no longer holds them, and every dollar is
+# still in exactly one category group.
+support_fact <- support[[1L]] %in% c("CONTRIBUTION", "CORPORATE")
+conduit_fact <- support_fact & support[[5L]] %in% "Conduit"
+conduit_2026_coinbase <- sum(as.numeric(support[[7L]][
+  conduit_fact & support[[2L]] %in% "2026" & support[[3L]] %in% "Coinbase"
+]))
+group_cells <- paste0(c("I", "L", "O", "R", "U", "X"), "3")
+stopifnot(
+  setequal(
+    support[[12L]][conduit_fact],
+    c("actblue-primary", "winred-primary", paste0("balachander-", 1:10))
+  ),
+  all(support[[13L]][conduit_fact] == "fec:registered_conduit:earmark_platform"),
+  isTRUE(all.equal(sum(as.numeric(support[[7L]][conduit_fact])), 35 + 45 + 16.7)),
+  !any(support[[5L]][support_fact] %in% "Carey"),
+  conduit_2026_coinbase == 80,
+  identical(
+    as.character(unlist(stats[2L, 3:102], use.names = FALSE)),
+    spending_stats_headers(2026L)[-1L]
+  ),
+  stats[[12L]][[2L]] == "Carey",
+  stats[[15L]][[2L]] == "Conduit",
+  stats[[18L]][[2L]] == "Company PAC",
+  stats[[102L]][[2L]] == "Partisan Split",
+  stats[[100L]][[2L]] == "Company PAC: Conduit",
+  grepl('"Conduit"', stats_xml, fixed = TRUE),
+  isTRUE(all.equal(formula_cache_value("O3"), conduit_2026_coinbase)),
+  formula_cache_value("L3") == 0,
+  isTRUE(all.equal(
+    sum(vapply(group_cells, formula_cache_value, numeric(1L))),
+    formula_cache_value("C3"),
+    tolerance = 1e-12
+  ))
+)
+
 DBI::dbExecute(
   connection,
   paste(
@@ -1042,6 +1226,56 @@ stopifnot(
   ) == "ERROR"
 )
 
+# The template's Stats widths predate the Conduit groups. Encode each template
+# column's index as its width, expand, and check every new column carries the
+# width of the template column that header was sized for: a Conduit column the
+# width of the Carey column it follows, every later column shifted right by the
+# groups inserted before it.
+width_fixture <- paste0(
+  "<cols>",
+  paste0(
+    '<col min="', 2:87, '" max="', 2:87, '" width="', 2:87,
+    '" bestFit="1" customWidth="1"/>',
+    collapse = ""
+  ),
+  "</cols>"
+)
+expanded_cols <- spending_stats_expand_template_cols(width_fixture)
+expanded_blocks <- regmatches(
+  expanded_cols,
+  gregexpr("<col\\s[^>]*/>", expanded_cols, perl = TRUE)
+)[[1L]]
+expanded_attribute <- function(name) {
+  as.numeric(sub(
+    paste0('^.*\\b', name, '="([0-9.]+)".*$'),
+    "\\1",
+    expanded_blocks,
+    perl = TRUE
+  ))
+}
+expanded_min <- expanded_attribute("min")
+expanded_max <- expanded_attribute("max")
+expanded_width <- expanded_attribute("width")
+new_headers <- spending_stats_headers(2026L)[-1L]
+conduit_starts <- which(new_headers %in% c("Conduit", "Company PAC: Conduit"))
+is_conduit_column <- rep(FALSE, length(new_headers))
+for (start in conduit_starts) is_conduit_column[start + 0:2] <- TRUE
+legacy_column <- integer(length(new_headers))
+legacy_column[!is_conduit_column] <- seq_len(sum(!is_conduit_column)) + 2L
+for (start in conduit_starts) legacy_column[start + 0:2] <- legacy_column[start - 3:1]
+stopifnot(
+  length(conduit_starts) == 5L,
+  identical(expanded_min, expanded_max),
+  !anyDuplicated(expanded_min),
+  expanded_width[match(2L, expanded_min)] == 2,
+  identical(
+    expanded_width[match(seq_along(new_headers) + 2L, expanded_min)],
+    as.numeric(legacy_column)
+  ),
+  # A template that was never sized is left alone.
+  identical(spending_stats_expand_template_cols(""), "")
+)
+
 template_cols_fixture <- '<cols><col min="1" max="1" width="18"/></cols>'
 large_sheet_data <- paste0(
   "<sheetData>",
@@ -1089,6 +1323,6 @@ cat("test_report: exact template column layouts verified\n")
 cat("test_report: large worksheet column restoration verified\n")
 cat("test_report: contribution and corporate receipt counts verified\n")
 cat("test_report: amendment versions and signed redesignation legs verified\n")
-cat("test_report: 6,035 uniform Stats formulas and cross-sheet references verified\n")
+cat("test_report: 7,100 uniform Stats formulas and cross-sheet references verified\n")
 cat("test_report: Stats caches and fast automatic calculation mode verified\n")
 cat("test_report: PASS\n")

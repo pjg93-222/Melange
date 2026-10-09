@@ -248,6 +248,11 @@ main{
 .tile .value.neg{color:var(--negative)}
 .tile .under{margin:7px 0 0;font-size:13px;color:var(--ink-soft)}
 .tile .means{margin:4px 0 0;font-size:12px;color:var(--ink-soft)}
+/* Collection gaps: the report's own Data Quality check says the stored rows fall short of what FEC reported. */
+.gapline{margin:9px 0 0;font-size:12px;line-height:1.5;color:var(--ink-soft)}
+.gapline[hidden]{display:none}
+.gapchip{display:inline-block;margin-right:6px;padding:1px 8px;border:1px solid var(--action);border-radius:999px;
+  background:var(--band);color:var(--ink);font-size:11px;font-weight:600}
 
 .card{padding:15px 14px 14px}
 .card h2{font-size:21px;line-height:1.2;margin:0;letter-spacing:-.005em;font-weight:400}
@@ -329,6 +334,7 @@ footer p:last-child{margin-bottom:0}
     <p class="value num" id="tile-value">&nbsp;</p>
     <p class="under" id="tile-under"></p>
     <p class="means" id="tile-means"></p>
+    <p class="gapline" id="tile-gap" hidden></p>
   </section>
 
   <section class="card" id="card-categories">
@@ -351,6 +357,7 @@ footer p:last-child{margin-bottom:0}
       </div>
       <button class="toggle" type="button" data-card="cycles" aria-pressed="false">Table</button>
     </div>
+    <p class="gapline" id="gap-cycles" hidden></p>
     <div class="plot" id="plot-cycles"></div>
     <p class="readout empty" id="read-cycles" aria-live="polite">Tap a bar for its value and share.</p>
   </section>
@@ -447,6 +454,63 @@ var DATA = /*__DATA_START__*/{"g":"2026-09-14T02:01:41Z","b":"Published included
       value:function(a, r){ return r ? a / r : 0; }, format:exactDollars, exact:exactDollars,
       means:'Net amount divided by the number of included receipt records, cents dropped.' }
   ];
+
+  /* ------------------------------------------------------ collection gaps */
+  /* The report's own Data Quality check names the company x cycle cells whose
+     stored rows are materially fewer than FEC reported. The snapshot carries
+     them as industry.gp = { f:1, u:<more cells the check did not itemize>,
+     s:<where the console read the check>, c:[[company, cycle, destination,
+     held, reported, percent], ...] }. The words and the matching rules are
+     coverage-view.js gapNotice's (Chart Studio, Graph and Insights use that
+     one); app/tests/pocket-gaps.test.js runs both over the same scopes and
+     fails if this copy ever says something else. */
+  function gapYear(value){
+    var found = String(value == null ? '' : value).match(/(\d{4})\D*$/);
+    return found ? found[1] : '';
+  }
+  function gapCycle(cycle){
+    var found = String(cycle).match(/^(\d{4})\D+(\d{4})$/);
+    return found ? found[1] + '-' + found[2].slice(2) : String(cycle);
+  }
+  /* company: a name, or '' for every company. cycles: raw cycle labels, or
+     null for every cycle. A cell is named only when the scope touches it; the
+     count of cells the check did not itemize is always said, so a cell that is
+     not listed is never shown as complete. */
+  function gapNotice(gaps, company, cycles){
+    if (!gaps || !gaps.f) return null;
+    var years = (cycles || []).map(gapYear);
+    var all = gaps.c || [];
+    var more = Number(gaps.u) || 0;
+    var lines = all.filter(function(cell){
+      return (!company || cell[0] === company) && (!years.length || years.indexOf(gapYear(cell[1])) !== -1);
+    }).map(function(cell){
+      var shown = typeof cell[5] === 'number' && isFinite(cell[5]) ? cell[5] : Math.round(cell[3] / cell[4] * 100);
+      return cell[0] + ' ' + gapCycle(cell[1]) + ': ' + shown + '% of FEC-reported records ('
+        + commas(cell[3]) + ' of ' + commas(cell[4]) + ' ' + cell[2] + ')';
+    });
+    if (more){
+      lines.push(commas(more) + ' more ' + (more === 1 ? 'short cell is' : 'short cells are')
+        + " not itemized in the workbook's Data Quality check");
+    } else if (!all.length){
+      lines.push("The workbook's Data Quality check reports short collection cells that are not itemized");
+    }
+    if (!lines.length) return null;
+    return { chip:'Coverage gap', caption:lines.join('; '), source:gaps.s || '' };
+  }
+  function renderGap(id, notice){
+    var host = document.getElementById(id);
+    host.textContent = '';
+    host.hidden = !notice;
+    if (!notice) return;
+    var chip = document.createElement('span');
+    chip.className = 'gapchip';
+    chip.textContent = notice.chip;
+    chip.title = notice.caption + (notice.source ? ' · Source: ' + notice.source : '');
+    var words = document.createElement('span');
+    words.textContent = ' ' + notice.caption;
+    host.appendChild(chip);
+    host.appendChild(words);
+  }
 
   /* ------------------------------------------------------- party mapping */
   var PARTY_ORDER = [
@@ -666,6 +730,14 @@ var DATA = /*__DATA_START__*/{"g":"2026-09-14T02:01:41Z","b":"Published included
   function scopeName(industry){
     return state.company < 0 ? industry.n + ', all companies' : industry.co[state.company];
   }
+  /* The company and cycle the gap line reads: '' is every company, and the
+     raw label (2025-2026) is what the check names, not the card's 2025-26. */
+  function gapCompany(industry){
+    return state.company < 0 ? '' : industry.co[state.company];
+  }
+  function rawCycle(industry, index){
+    return (industry.cyc_raw || industry.cyc)[index];
+  }
 
   function buildIndustryChips(){
     var host = document.getElementById('industries');
@@ -880,6 +952,7 @@ var DATA = /*__DATA_START__*/{"g":"2026-09-14T02:01:41Z","b":"Published included
     document.getElementById('sub-cycles').textContent =
       'Included receipts for ' + scopeName(industry)
       + ', one bar per election cycle. The cycle control above does not narrow this card.';
+    renderGap('gap-cycles', gapNotice(industry.gp, gapCompany(industry), null));
     var describe = function(item){
       return item.name + ' · ' + measure().exact(item.value) + ' · '
         + plural(item.records, 'receipt', 'receipts') + ' · '
@@ -1070,6 +1143,8 @@ var DATA = /*__DATA_START__*/{"g":"2026-09-14T02:01:41Z","b":"Published included
       plural(totals.records, 'receipt', 'receipts') + ' · '
       + (state.company < 0 ? plural(industry.co.length, 'company', 'companies') : '1 company');
     document.getElementById('tile-means').textContent = measure().means;
+    renderGap('tile-gap', gapNotice(industry.gp, gapCompany(industry),
+      state.cycle < 0 ? null : [rawCycle(industry, state.cycle)]));
   }
 
   function render(){

@@ -88,7 +88,33 @@
     return Number.isNaN(date.getTime()) ? '' : pad(date.getHours()) + ':' + pad(date.getMinutes());
   };
 
-  const model = {CAP, add: addItem, move: moveItem, remove: removeItem,
+  // Slide geometry (inches) around the scope line. One line, as before, leaves the picture its 5.0; a long
+  // line (a Coverage gap caption names every short cell in scope, so it can run to a dozen) takes the extra
+  // room from the picture and never from the source note below it.
+  const SCOPE_LINE = 165;
+  const slideLayout = text => {
+    const lines = Math.max(1, Math.ceil(String(text || '').length / SCOPE_LINE));
+    const extra = Math.min(0.7, Math.max(0, 0.15 * lines - 0.35));
+    return {pictureH: 5.0 - extra, ruleY: 6.15 - extra, scopeY: 6.3 - extra, scopeH: 0.35 + extra};
+  };
+
+  // The box above is sized for 9 pt text at SCOPE_LINE characters a line, and it stops growing at 0.7 in. A
+  // caption that still does not fit it (the Coverage gap caption of an all-company view runs past a thousand
+  // characters) steps the face down to a 7 pt floor and, past that, is cut on the slide with a pointer to the
+  // speaker notes, which carry the whole caption (speakerNotes). So it never runs on into the source note.
+  const SCOPE_PT = 9, SCOPE_MIN_PT = 7, SCOPE_CUT = '… (full coverage note in the speaker notes)';
+  const slideScope = (text, layout) => {
+    const flat = String(text || '').replace(/\s*\n\s*/g, ' ').trim();
+    // A line of the box holds proportionally more characters in a smaller face; a line is 1.2 times the face tall.
+    const capacity = pt => Math.floor(SCOPE_LINE * SCOPE_PT / pt) * Math.max(1, Math.floor(layout.scopeH / (pt * 1.2 / 72) + 1e-9));
+    for (let pt = SCOPE_PT; pt >= SCOPE_MIN_PT; pt -= 0.5) {
+      if (flat.length <= capacity(pt)) return {fontSize: pt, text: flat, truncated: false};
+    }
+    const room = capacity(SCOPE_MIN_PT) - SCOPE_CUT.length, head = flat.slice(0, room), space = head.lastIndexOf(' ');
+    return {fontSize: SCOPE_MIN_PT, text: (space > room / 2 ? head.slice(0, space) : head).trimEnd() + SCOPE_CUT, truncated: true};
+  };
+
+  const model = {CAP, add: addItem, move: moveItem, remove: removeItem, slideLayout, slideScope, SCOPE_CUT,
     provenanceSha, sourceText, sourceRecord, provenanceRecord, sourceNoteText,
     shortSha: item => provenanceSha(item).slice(0, 12), pad, timeLabel};
 
@@ -545,20 +571,22 @@
     deck.layout = 'LAYOUT_WIDE';
     for (const item of items) {
       const slide = deck.addSlide();
+      const scopeLine = item.chip || item.scope || '', fit = slideLayout(scopeLine);
+      const scope = slideScope(scopeLine, fit);
       slide.addText(item.title || 'Chart',
         {x: 0.5, y: 0.35, w: 12.3, h: 0.7, fontSize: 22, fontFace: 'Georgia', color: '342649', valign: 'top'});
       try {
         const png = await pngFor(item);
-        slide.addImage({data: png, x: 0.5, y: 1.15, w: 12.3, h: 5.0,
-          sizing: {type: 'contain', w: 12.3, h: 5.0}});
+        slide.addImage({data: png, x: 0.5, y: 1.15, w: 12.3, h: fit.pictureH,
+          sizing: {type: 'contain', w: 12.3, h: fit.pictureH}});
       } catch {
         slide.addText('Chart no longer on this console.',
           {x: 0.5, y: 1.15, w: 12.3, h: 0.5, fontSize: 12, fontFace: 'Arial', color: 'BF3F36'});
       }
       const line = (deck.ShapeType && deck.ShapeType.line) || 'line';
-      slide.addShape(line, {x: 0.5, y: 6.15, w: 12.3, h: 0, line: {color: 'ECA91C', width: 1}});
-      slide.addText(item.chip || item.scope || '',
-        {x: 0.5, y: 6.3, w: 12.3, h: 0.35, fontSize: 9, fontFace: 'Arial', color: '716A64'});
+      slide.addShape(line, {x: 0.5, y: fit.ruleY, w: 12.3, h: 0, line: {color: 'ECA91C', width: 1}});
+      slide.addText(scope.text,
+        {x: 0.5, y: fit.scopeY, w: 12.3, h: fit.scopeH, fontSize: scope.fontSize, fontFace: 'Arial', color: '716A64', valign: 'top'});
       slide.addText(sourceNote(item),
         {x: 0.5, y: 6.8, w: 9.0, h: 0.35, fontSize: 8, fontFace: 'Arial', color: '716A64'});
       slide.addText('MENTAT',

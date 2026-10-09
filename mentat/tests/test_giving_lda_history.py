@@ -6,6 +6,7 @@ anchors builder reads) and compares dollar for dollar, to the cent, for every in
 published anchors are not on the machine; the shape tests are hermetic.
 """
 import copy
+from datetime import date
 import json
 from pathlib import Path
 import sys
@@ -22,7 +23,15 @@ from test_giving_cycle_model import ANCHORS, CycleWorld  # noqa: E402
 
 MELANGE_CSV = bga.default_lda_csv()
 MELANGE_JSON = MELANGE_CSV.with_name('sector_spend.json')
+MELANGE_RECEIPTS = MELANGE_CSV.parents[1] / 'fullscope_receipts.json'          # the anchors builder's own derivation (Melange's data-root layout)
+LD2_DEADLINES = {'Q1': (0, 4, 20), 'Q2': (0, 7, 20), 'Q3': (0, 10, 20), 'Q4': (1, 1, 20)}          # (years after, month, day): the oracle keeps its own copy of the rule
 cents = lambda value: round(float(value) * 100)       # noqa: E731  (the CSV carries up to two decimals)
+
+
+def melange_as_of(year):
+    """The producer's sweep date of `year` (fullscope_receipts.json, scope_sweeps.<year>.sweep_through_dt_posted), read straight from the file."""
+    with MELANGE_RECEIPTS.open(encoding='utf-8-sig') as stream:
+        return date.fromisoformat(json.load(stream)['scope_sweeps'][str(year)]['sweep_through_dt_posted'][:10])
 
 
 def melange_years(sector):
@@ -72,7 +81,7 @@ class HistoryShapeTests(unittest.TestCase):
         self.assertIsNone(industries['property_casualty']['lda_history'])
 
 
-@unittest.skipUnless(MELANGE_JSON.is_file(), 'Melange sector_spend.json is not on this machine')
+@unittest.skipUnless(MELANGE_JSON.is_file() and MELANGE_RECEIPTS.is_file(), 'Melange sector_spend.json or fullscope_receipts.json is not on this machine')
 class MelangeReconciliationTests(unittest.TestCase):
     """The published anchors' history equals Melange's sector_spend.json, year by year, to the cent."""
 
@@ -103,7 +112,9 @@ class MelangeReconciliationTests(unittest.TestCase):
                     self.assertEqual(row['orgs'], entry['distinct_organizations'], f"{ident} {row['year']} organizations")
                     self.assertEqual(row['lobbyists'], entry['distinct_named_lobbyists'], f"{ident} {row['year']} named lobbyists")
                 if history['partial']:
-                    last = max(q['quarter'] for q in years[history['partial']['year']]['quarters'] if q['filings'])
+                    year, as_of = history['partial']['year'], melange_as_of(history['partial']['year'])
+                    last = max(q['quarter'] for q in years[year]['quarters']                                    # a filing AND its LD-2 deadline on or before the sweep date
+                               if q['filings'] and date(year + LD2_DEADLINES[q['quarter']][0], *LD2_DEADLINES[q['quarter']][1:]) <= as_of)
                     self.assertEqual(history['partial']['through_quarter'], last)
 
     def test_the_snapshot_was_built_from_the_csv_beside_that_json(self):
