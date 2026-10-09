@@ -26,6 +26,9 @@ const LEGACY = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'givi
 const WITH_P1 = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_f2_live_p1.json'), 'utf8'));
 const LANDED = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_f2_live_landed.json'), 'utf8'));
 const CYCLE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_cycle_live.json'), 'utf8'));
+// Melange's own LDA rows as the console's catalog carries them (catalog.anchors.industries.<id>.lda_history; the real values, reconciled to Melange's sector_spend.json by test_giving_lda_history.py).
+// The recorded catalogs above predate the field, so every session adds it, as a console on the current anchor snapshot serves it.
+const LDA_HISTORY = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_lda_history.json'), 'utf8')).industries;
 const FIXTURE = LEGACY;                 // the catalog (identical for both paths apart from the P1 `waivers` key) and the runs of the calculator without the fix
 const RUN = LEGACY.runs, P1 = WITH_P1.runs;
 const AMBER = 'warn', NEUTRAL = 'info';
@@ -56,12 +59,16 @@ function load(fetchImpl = () => {}, timers = {setTimeout, clearTimeout}) {
 }
 const clone = value => JSON.parse(JSON.stringify(value));
 const plain = clone;    // a value built inside the vm has the sandbox's Object and Array: compare it as plain data
-function session({sector = 'commercial_banks', outlook = true, waivers = undefined, source = FIXTURE, cycle = true, fetchImpl, timers} = {}) {
+function session({sector = 'commercial_banks', outlook = true, waivers = undefined, source = FIXTURE, cycle = true, history = true, fetchImpl, timers} = {}) {
   const s = load(fetchImpl, timers);
   const catalog = clone(source.catalog);
   if (!cycle) delete catalog.cycle_model_view;      // a console on the earlier module (rollback): schema 2 without the cycle model
   if (!outlook) delete catalog.saved_outlook;
   if (waivers) catalog.waivers = clone(waivers);
+  if (history) {
+    catalog.anchors = catalog.anchors || {status: 'ready', industries: {}};
+    for (const [id, lda] of Object.entries(LDA_HISTORY)) catalog.anchors.industries[id] = Object.assign({status: 'ready'}, catalog.anchors.industries[id], {lda_history: clone(lda)});
+  }
   s.els['gf-industry'] = Object.assign(el('select'), {value: sector});
   s.els['gf-date'] = Object.assign(el('input'), {value: source === FIXTURE ? '2026-09-30' : source.catalog.as_of});
   s.t.setCatalog(catalog);
@@ -577,41 +584,69 @@ test('the live calculator: the general-giving name and its exclusion come from i
   assert.doesNotMatch(texts(t.chartModel(LANDED.runs.banks, null, 'pac').columns[0].tip), /non-giving/, 'the roster PAC account has no such exclusion');
 });
 
-test('lobbying: two series on one chart, never summed; empty and closed states say so', () => {
+test('lobbying (Melange card, 2026-10-09): the history is Melange\'s own rows stacked hired firms under in-house, then the projected years; empty, closed and missing-history states say so', () => {
   const {t} = session();
-  const lobby = t.lobbyModel(RUN.banks_lobby, 2026, 2028);
+  const lobby = t.lobbyModel(RUN.banks_lobby, 2026, 2028), banks = LDA_HISTORY.commercial_banks, projected = RUN.banks_lobby.horizons.flatMap(h => h.lobbying.rows).filter(r => r.status === 'ready');
   assert.equal(lobby.state, 'ready');
-  assert.deepEqual(plain(lobby.series.map(s => s.label)), ['Outside-firm fees', 'In-house expenses']);
-  assert.deepEqual(plain(lobby.years), [2025, 2026, 2027, 2028]);
-  const [fees, inhouse] = lobby.series;
-  assert.equal(fees.points[0].value, 23824000);
-  assert.equal(inhouse.points[0].value, 65696931);
-  assert.equal(fees.points.length, 4); assert.equal(inhouse.points.length, 4);
-  for (let i = 0; i < 4; i++) assert.ok(lobby.series.every(s => Math.abs(s.points[i].value - (fees.points[i].value + inhouse.points[i].value)) > 1), 'a point equals the two series added');
-  assert.match(fees.points[1].tip.map(l => l.note || '').join(' '), /never added/);
-  assert.ok(lobby.axisMax >= Math.max(...inhouse.points.map(p => p.high95 || p.value)));
+  assert.deepEqual([lobby.sector, lobby.title], ['bank', 'Bank']);
+  assert.deepEqual(plain(lobby.bars.map(b => b.label)), ['2021', '2022', '2023', '2024', '2025', '2026 partial', '2026 projected', '2027 projected', '2028 projected']);
+  assert.deepEqual(plain(lobby.bars.map(b => b.kind)), ['annual', 'annual', 'annual', 'annual', 'annual', 'partial', 'projected', 'projected', 'projected']);
+  // the history bars ARE the catalog's rows (Melange's: hired firms = income_total, in-house = expenses_total); the model's base level agrees with the last complete year
+  banks.annual.forEach((r, i) => assert.deepEqual([lobby.bars[i].hired, lobby.bars[i].inhouse, lobby.bars[i].total], [r.hired_firms, r.in_house, r.hired_firms + r.in_house], String(r.year)));
+  assert.deepEqual([lobby.bars[5].hired, lobby.bars[5].inhouse], [banks.partial.hired_firms, banks.partial.in_house]);
+  assert.deepEqual([lobby.bars[4].hired, lobby.bars[4].inhouse], [RUN.banks_lobby.horizons[0].lobbying.rows[0].series[0].base_level, RUN.banks_lobby.horizons[0].lobbying.rows[0].series[1].base_level]);
+  // the projected bars are the model's own projections, hired firms under in-house, and the whisker adds the lows and adds the highs
+  projected.forEach((r, i) => {
+    const bar = lobby.bars[6 + i], fees = r.series.find(s => s.id === 'income_total'), house = r.series.find(s => s.id === 'expenses_total');
+    assert.deepEqual([bar.year, bar.hired, bar.inhouse, bar.total], [r.year, fees.projected, house.projected, fees.projected + house.projected]);
+    assert.deepEqual([bar.whisker.low, bar.whisker.high], [fees.band80_low + house.band80_low, fees.band80_high + house.band80_high]);
+    assert.match(bar.whisker.tip, /80% band of the total: \$/); assert.match(bar.whisker.tip, /lows with lows and highs with highs/); assert.match(bar.whisker.tip, /not an estimated band of the total/);
+    assert.match(bar.tips.hired, new RegExp(`^${r.year} projected · Hired firms\\n`)); assert.match(bar.tips.inhouse, new RegExp(`^${r.year} projected · In-house\\n`));
+    assert.ok(/\n80% band: \$/.test(bar.tips.hired) && /\n80% band: \$/.test(bar.tips.inhouse), 'each segment\'s tooltip gives its band');
+  });
+  // the card's words and figures
+  assert.equal(lobby.subtitle, '97 organizations · 463 named lobbyists');
+  assert.deepEqual(plain(lobby.figs), [{value: '$89.5M', label: '2025 total lobbying spend'}, {value: '$52.3M', label: '2026 so far, through Q2'}]);
+  assert.equal(lobby.bars[5].tips.inhouse, '2026 partial · In-house · $39M');
+  assert.match(lobby.aria, /^Bank lobbying spend by year, hired firms under in-house, nominal dollars\. 2021: hired firms \$/); assert.match(lobby.aria, /2026 partial \(partial year\): hired firms \$13\.4M, in-house \$39M, total \$52\.3M/);
+  assert.match(lobby.aria, /2026 projected: hired firms \$.*, 80% band of the total \$/);
+  // the axis covers history, projections and the whisker tops
+  assert.ok(lobby.axisMax >= Math.max(...lobby.bars.map(b => Math.max(b.total, b.whisker ? b.whisker.high : 0))));
+  assert.equal(lobby.dollars, 'nominal dollars'); assert.equal(lobby.caption, undefined, 'the old "Bars: 80% band" caption is gone');
   assert.equal(t.lobbyModel(RUN.banks, 2026, 2028).state, 'ready', 'blank growth inputs are no change: the nowcast is drawn');
   assert.deepEqual(plain(t.lobbyModel(null, 2026, 2028)), {state: 'empty', text: 'No lobbying projection for 2026–2028'});
   assert.match(t.lobbyModel(RUN.property_casualty, 2026, 2028).text, /^Not shown: No Melange-LDA sector for this industry/);
-  assert.equal(lobby.dollars, 'nominal dollars');
+  // a console on the earlier anchor snapshot carries no lda_history: the card says so instead of drawing a made-up history
+  const none = session({history: false}).t.lobbyModel(RUN.banks_lobby, 2026, 2028);
+  assert.equal(none.state, 'unavailable'); assert.match(none.text, /^Not shown: the Melange LDA history is not in the anchor snapshot\. Rebuild the anchors/);
+});
+
+test('lobbying (Melange card): credit unions, and a snapshot without the roster counts leaves the subtitle out', () => {
+  const {t} = cycleSession('credit_unions'), lobby = t.lobbyModel(CYC.credit_unions, 2026, 2028);
+  assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['credit_union', 'Credit Union', '26 organizations · 72 named lobbyists']);
+  assert.deepEqual(plain(lobby.figs), [{value: '$8.3M', label: '2025 total lobbying spend'}, {value: '$4.7M', label: '2026 so far, through Q2'}]);
+  const catalog = clone(CYCLE.catalog), history = clone(LDA_HISTORY.credit_unions);
+  for (const r of [...history.annual, history.partial]) { r.orgs = null; r.lobbyists = null; }
+  catalog.anchors.industries.credit_unions = Object.assign({status: 'ready'}, catalog.anchors.industries.credit_unions, {lda_history: history});
+  t.setCatalog(catalog);
+  assert.equal(t.lobbyModel(CYC.credit_unions, 2026, 2028).subtitle, '', 'no counts, no subtitle (nothing is invented)');
 });
 
 test('lobbying (owner rulings 2026-10-08): the open year is the nowcast with an 80% and a ~95% band and the observed quarters; later years carry it with the persistence error', () => {
   const {t} = session();
   const lobby = t.lobbyModel(P1.banks_lobby, 2026, 2028);
   const s = P1.banks_lobby.horizons[0].lobbying.rows[0].series[0];
-  const [base, open, next] = lobby.series[0].points;
-  assert.equal(open.value, s.projected);
-  assert.deepEqual(plain([open.low, open.high, open.low95, open.high95]), [s.band80_low, s.band80_high, s.band95_low, s.band95_high]);
-  assert.ok(open.low95 < open.low && open.low < open.value && open.value < open.high && open.high < open.high95, 'the ~95% band (largest blind miss) encloses the 80% band');
-  assert.equal(open.remaining, s.projected_remaining);
+  const [open, next] = lobby.bars.filter(b => b.kind === 'projected');
+  assert.equal(open.hired, s.projected);
+  assert.match(open.tips.hired, /^2026 projected · Hired firms\n/);
+  assert.ok(s.band95_low < s.band80_low && s.band80_low < s.projected && s.projected < s.band80_high && s.band80_high < s.band95_high, 'the ~95% band (largest blind miss) encloses the 80% band');
   assert.equal(lobby.dollars, 'nominal dollars');
-  assert.match(texts(open.tip), /Nowcast, Q2 cut: \$13\.37M filed \+ 51\.58% of 2025/);
-  assert.match(texts(open.tip), /80% band/); assert.match(texts(open.tip), /~95% band \(largest blind miss\)/);
-  assert.match(texts(open.tip), /Observed Q1\+Q2: \$13\.37M \(face value\)/);
-  assert.match(texts(open.tip), /80% band: the 80th percentile of the blind nowcast errors \(n=32 blind tests\)/);
-  assert.equal(base.base, true); assert.equal(open.ahead, 0); assert.equal(next.ahead, 1);
-  assert.match(texts(next.tip), /Carried 1 year past the nowcast: the bands add the LobbyView persistence error, in quadrature/);
+  assert.match(open.tips.hired, /Nowcast, Q2 cut: \$13\.37M filed \+ 51\.58% of 2025/);
+  assert.match(open.tips.hired, /\n80% band: \$/); assert.match(open.tips.hired, /~95% band \(largest blind miss\)/);
+  assert.match(open.tips.hired, /Observed Q1\+Q2: \$13\.37M \(face value\)/);
+  assert.match(open.tips.hired, /Remainder after the observed quarters: /);
+  assert.match(open.tips.hired, /80% band: the 80th percentile of the blind nowcast errors \(n=32 blind tests\)/);
+  assert.doesNotMatch(open.tips.hired, /Carried/); assert.match(next.tips.hired, /Carried 1 year past the nowcast: the bands add the LobbyView persistence error, in quadrature/);
   assert.deepEqual(plain(lobby.chips), []);
 });
 
@@ -623,7 +658,7 @@ test('a lobbying-only industry (the mechanism; Telecom was the first, until the 
   assert.equal(model.empty, true);
   assert.equal(model.message, 'This industry is offered for lobbying only.');
   assert.deepEqual(plain(model.flags.map(f => f.text)), ['This industry is offered for lobbying only.']);
-  assert.equal(t.lobbyModel(RUN.banks_lobby, 2026, 2028).caption, 'Bars: 80% band · dashed: ~95% band, the largest blind miss (n=32)');
+  assert.match(t.lobbyModel(RUN.banks_lobby, 2026, 2028).bars[6].tips.hired, /~95% band: the largest blind miss \(n=32 blind tests\)/, 'the segment tooltip explains its two bands');
 });
 
 test('lobbying: a ~95% band that starts below the observed quarters is an amber chip (synthetic case)', () => {
@@ -999,7 +1034,9 @@ test('Telecom (owner ruling 2026-10-08, OpenSecrets B09 and IBISWorld wireless +
   assert.equal(view.company_pacs.telecom.label, PANEL);
   // lobbying is as it was: the nowcast chart is drawn
   const lobby = t.lobbyModel(TEL, 2026, 2028);
-  assert.equal(lobby.state, 'ready'); assert.deepEqual(plain(lobby.series.map(x => x.id)), ['income_total', 'expenses_total']); assert.ok(lobby.series.every(x => x.points.length >= 3), 'each lobbying series has its base year, the nowcast year and the next');
+  assert.equal(lobby.state, 'ready'); assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['telecom', 'Telecom', '23 organizations · 479 named lobbyists']);
+  assert.deepEqual(plain(lobby.figs), [{value: '$139.4M', label: '2025 total lobbying spend'}, {value: '$69.7M', label: '2026 so far, through Q2'}]);
+  assert.deepEqual(plain(lobby.bars.map(b => b.label)), ['2021', '2022', '2023', '2024', '2025', '2026 partial', '2026 projected', '2027 projected', '2028 projected']);
   // the party split: the chamber model is withheld, so each row says why instead of drawing a bar
   for (const chamber of ['House', 'Senate']) {
     const mix = t.mixModel(TEL, TEL, chamber);
@@ -1363,22 +1400,20 @@ test('the scope pill tooltip agrees with the bars: the model\'s change is labell
   assert.deepEqual(plain(rowsOf(plainTip.exampleTip())), []);
 });
 
-test('the lobbying tooltip agrees with the point it sits on: the change against the base level is the one drawn', () => {
+test('the lobbying tooltip agrees with the bar it sits on: the change against the base level is the one drawn', () => {
   let checked = 0;
   for (const [pathName, runs, source] of THREE_PATHS) {
-    const {t} = session({sector: 'commercial_banks', source}), model = t.lobbyModel(runs.banks_lobby, 2026, 2028);
-    for (const item of model.series) {
-      const base = item.points[0].value;
-      for (const p of item.points.slice(1)) {
-        const drawn = (p.value / base - 1) * 100, where = `${pathName}/${item.label}/${p.year}`;
+    const {t} = session({sector: 'commercial_banks', source}), model = t.lobbyModel(runs.banks_lobby, 2026, 2028), done = model.bars[4];
+    for (const bar of model.bars.filter(b => b.kind === 'projected')) {
+      for (const [key, base] of [['hired', done.hired], ['inhouse', done.inhouse]]) {
+        const drawn = (bar[key] / base - 1) * 100, where = `${pathName}/${key}/${bar.year}`, change = /Change vs the 2025 level: ([-+]?[\d.,]+)%/.exec(bar.tips[key]);
         checked++;
-        const own = row(p.tip, 'Change vs the 2025 level');
-        assert.ok(own && Math.abs(parseFloat(own[1].replace(/,/g, '')) - drawn) < 0.01, `${where}: ${own && own[1]} against ${drawn}`);
-        assert.ok(row(p.tip, '80% band') && row(p.tip, '~95% band (largest blind miss)'), where + ': both bands are in the tooltip');
+        assert.ok(change && Math.abs(parseFloat(change[1].replace(/,/g, '')) - drawn) < 0.01, `${where}: ${change && change[1]} against ${drawn}`);
+        assert.ok(/\n80% band: /.test(bar.tips[key]) && /\n~95% band \(largest blind miss\): /.test(bar.tips[key]), where + ': both bands are in the tooltip');
       }
     }
   }
-  assert.ok(checked >= 6, 'the comparison covered ' + checked + ' drawn points');
+  assert.ok(checked >= 6, 'the comparison covered ' + checked + ' drawn segments');
 });
 
 const WIDE_TEXT = 'Share interval extends outside 0-100% (linear share model on a thin base); treat it as unreliable.';

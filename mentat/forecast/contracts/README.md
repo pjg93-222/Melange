@@ -144,6 +144,7 @@ the sha256 of the workbook file now published in the report directory.
     chamber from the CAND_ID prefix, party from the candidate master), `committees`, `inputs` (file sha256 + FEC last_modified), per cycle `{House, Senate, to_house_senate,
     presidential, no_candidate, all_recipients}`, `observed` cuts, `thin_base`, `single_pac` (true for credit unions: SchoolsFirst only).
   * `lda`: Melange LDA `income_total` and `expenses_total` (two series, never summed; bank total for banks) annual + the partial year's quarters, `source_sha256`.
+    `counts` (optional; 2026-10-09) is `{year: {organizations, lobbyists}}` from the same annual rows, the partial year's included; a snapshot built before it has none and the lobbying card leaves the counts out.
     `status: unavailable` with a `reason` for industries without a Melange-LDA sector (P&C). `partial.nowcast` (optional; owner rulings 2026-10-08) is the in-year nowcast
     `point = observed + (1 - share) * prior_total`: `observed` = filed through the latest complete quarter cut, `prior_total` = the prior full-year total, `share` = the geometric mean of
     `shares`, the share filed by the same cut in `share_years` (up to the 3 prior years, at least 1); null when no prior year allows it. The snapshot's top-level `lda_nowcast_errors`

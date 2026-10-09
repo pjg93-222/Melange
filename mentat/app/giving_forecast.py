@@ -496,6 +496,23 @@ def _v2_offered(b):
     return offered, not_offered
 
 
+def _lda_history(lda):
+    """Melange's own LDA levels as the lobbying card draws them (the same sector_spend rows the anchors read): annual rows {year, hired_firms, in_house, orgs, lobbyists}
+    (hired_firms = income_total, in_house = expenses_total, never added here), the partial year with the quarter it runs through, and the source sha256. None when the
+    industry has no Melange-LDA sector. orgs and lobbyists are None for a snapshot built before the counts were carried."""
+    if lda['status'] != 'ready':
+        return None
+    fees, house, counts = lda['series']['income_total'], lda['series']['expenses_total'], lda.get('counts') or {}
+
+    def row(year, hired, inhouse):
+        c = counts.get(str(year)) or {}
+        return dict(year=year, hired_firms=hired, in_house=inhouse, orgs=c.get('organizations'), lobbyists=c.get('lobbyists'))
+    part, hpart = fees['partial'], house['partial']
+    return dict(sector=lda['sector'], source_file=lda['source_file'], source_sha256=lda['source_sha256'], through=lda['through'],
+                annual=[row(int(year), value, house['annual'][year]) for year, value in sorted(fees['annual'].items())],
+                partial=None if part is None or hpart is None else dict(row(part['year'], part['total'], hpart['total']), through_quarter=part['through_quarter']))
+
+
 def _anchors_status(b, offered):
     """What the catalog says about the anchors, per offered industry, without failing the catalog when they are missing or stale."""
     try:
@@ -508,7 +525,7 @@ def _anchors_status(b, offered):
             _snap, entry = _anchor_industry(row['id'])
             out[row['id']] = dict(status='ready', workbook=entry['mentat']['workbook'], collection_date=entry['coverage']['collection_date'],
                                   coverage_end=entry['coverage']['coverage_end'], current_cycle=entry['coverage']['current_cycle'], flags=entry['coverage']['flags'] + entry['flags'],
-                                  measures=entry['status'])
+                                  measures=entry['status'], lda_history=_lda_history(entry['lda']))
         except AnchorProblem as problem:
             out[row['id']] = dict(status=problem.status, reason=str(problem))
     return dict(status='ready' if out and all(v['status'] == 'ready' for v in out.values()) else 'partial', reason=None,

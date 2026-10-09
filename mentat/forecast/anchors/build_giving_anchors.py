@@ -303,7 +303,7 @@ def build_lda(spec, rows, lda_path, lda_sha):
     label = {'bank': 'Melange LDA bank sector (total, not a bank tier)', 'credit_union': 'Melange LDA credit-union sector',
              'telecom': 'Melange LDA telecom sector'}.get(spec['lda_sector'], 'Melange LDA sector ' + spec['lda_sector'])
     return {'status': 'ready', 'reason': None, 'sector': spec['lda_sector'], 'label': label, 'source_file': lda_path.name, 'source_sha256': lda_sha,
-            'through': levels['through'], 'series': levels['series'], 'note': lda_reader.NOTE}
+            'through': levels['through'], 'series': levels['series'], 'counts': levels['counts'], 'note': lda_reader.NOTE}
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------

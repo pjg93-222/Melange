@@ -37,6 +37,10 @@ const LANDED = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'givi
 // cycle_model_view too (growth defaults, notes, layers), so the page opens as it does today; open({cycle: false}) takes it away: a console still on the earlier module (rollback).
 const CYCLE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_forecast_cycle_live.json'), 'utf8'));
 const PATHS = {legacy: LEGACY.runs, p1: WITH_P1.runs, landed: LANDED.runs, cycle: CYCLE.runs};
+// Melange's own LDA rows as the console's catalog carries them (catalog.anchors.industries.<id>.lda_history; real values, reconciled to sector_spend.json by test_giving_lda_history.py).
+// The recorded catalogs predate the field, so every page gets it, as a console on the current anchor snapshot serves it.
+const LDA_HISTORY = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'giving_lda_history.json'), 'utf8')).industries;
+const addLdaHistory = catalog => { catalog.anchors = catalog.anchors || {status: 'ready', industries: {}}; for (const [id, lda] of Object.entries(LDA_HISTORY)) catalog.anchors.industries[id] = Object.assign({status: 'ready'}, catalog.anchors.industries[id], {lda_history: JSON.parse(JSON.stringify(lda))}); return catalog; };
 const BUDGET_TEXT = 'Budget inconsistent — revise scenario';
 const RANGE_TEXT = 'An input is outside the range this model was fitted on.';
 const INTERVAL_TEXT = "Mentat's own last change for this series was far outside this band; treat the band as too narrow.";
@@ -100,7 +104,7 @@ function answerFor(runs, body, byGrowth) {
 
 /* A page on the real console with the forecast calls stubbed. options: path ('legacy' | 'p1' | 'landed'), width, height, waivers, reducedMotion, delay (ms), failure (status). */
 async function open(options = {}) {
-  const {path: dataPath = 'legacy', width = 1600, height = 900, waivers = null, reducedMotion = 'no-preference', delay = 0, failure = 0, malformed = false, byGrowth = false, catalogFailure = 0, pac = null, cycle = true} = options;
+  const {path: dataPath = 'legacy', width = 1600, height = 900, waivers = null, reducedMotion = 'no-preference', delay = 0, failure = 0, malformed = false, byGrowth = false, catalogFailure = 0, pac = null, cycle = true, history = true} = options;
   const context = await browser.newContext({viewport: {width, height}, deviceScaleFactor: 1, reducedMotion, acceptDownloads: true});
   const page = await context.newPage();
   page.errors = []; page.requests = []; page.setDefaultTimeout(20000);
@@ -108,6 +112,7 @@ async function open(options = {}) {
   page.on('console', message => { if (message.type() === 'error' && !/Failed to load resource/.test(message.text())) page.errors.push(message.text()); });
   const catalog = JSON.parse(JSON.stringify(dataPath === 'landed' ? LANDED.catalog : dataPath === 'cycle' ? CYCLE.catalog : LEGACY.catalog));
   if (!cycle) delete catalog.cycle_model_view;       // a console on the earlier module: schema 2 without the cycle model
+  if (history) addLdaHistory(catalog);
   if (dataPath === 'p1') catalog.waivers = WITH_P1.catalog_waivers;       // the one key the model fix adds to the catalog
   if (waivers) catalog.waivers = waivers;
   page.stub = {catalog, runs: PATHS[dataPath], delay, failure, malformed, byGrowth};
@@ -620,7 +625,7 @@ for (const dataPath of ['legacy', 'p1']) {
         assert.ok(pac.includes(M1(pacMeasure.cycle_prediction_low)) && pac.includes(M1(pacMeasure.cycle_prediction_high)), 'the unconditioned interval, drawn as returned (below the observed amount)');
         assert.match(pacLines.find(l => l.warn).detail, /not clipped/);
       }
-      // Lobbying: the lobbying chart takes the main chart area; the bars and their legend step aside
+      // Lobbying: the lobbying card takes the main chart area; the bars and their legend step aside
       await page.click('#gf-account-lobby'); await page.waitForTimeout(400);
       const area = await page.evaluate(() => {
         const box = el => { const r = el.getBoundingClientRect(); return {w: r.width, h: r.height, x: r.x, y: r.y}; };
@@ -628,9 +633,10 @@ for (const dataPath of ['legacy', 'p1']) {
           barLegendHidden: document.getElementById('gf-legend').hidden, svgs: document.querySelectorAll('#gf-lobby-chart svg').length, pressed: [...document.querySelectorAll('.gf-account > button')].map(b => b.getAttribute('aria-pressed')), text: document.getElementById('gf-lobby-chart').textContent};
       });
       assert.equal(area.chartHidden, true); assert.ok(area.lobby.w > area.chartCol.w - 70 && area.lobby.h >= 340, 'it fills the main chart area: ' + JSON.stringify(area.lobby));
-      assert.equal(area.title, 'Lobbying by year'); assert.deepEqual(area.legend, ['Outside-firm fees', 'In-house expenses']); assert.equal(area.barLegendHidden, true);
-      assert.deepEqual(area.pressed, ['false', 'false', 'true']); assert.match(area.text, /Bars: 80% band · dashed: ~95% band, the largest blind miss \(n=32\)/); assert.equal(await page.$$eval('#gf-lobby-chart .gf-line', all => all.length), 2, 'blank growth is no change: the nowcast is drawn, two series');
-      // enter yearly lobbying growth in More assumptions (both horizons), then two series that are never summed
+      assert.equal(area.title, 'Lobbying by year'); assert.deepEqual(area.legend, ['Hired firms', 'In-house', 'Projected (dashed)']); assert.equal(area.barLegendHidden, true);
+      assert.deepEqual(area.pressed, ['false', 'false', 'true']); assert.doesNotMatch(area.text, /Bars: 80% band/, 'the old caption is gone'); assert.equal(await page.$$eval('#gf-lobby-chart .gf-line', all => all.length), 0, 'no line chart any more');
+      assert.equal(await page.$$eval('#gf-lobby-chart .gf-ld-bar', all => all.length), 9, 'blank growth is no change: the nowcast is drawn, with the history');
+      // enter yearly lobbying growth in More assumptions (both horizons): the projected bars are drawn again from the answer
       await page.click('#gf-more > summary');
       await page.click('#gf-more-body .gf-more-group:nth-child(1) .gf-lobby-link');
       assert.equal(await page.$eval('#gf-lobby-pop-current', el => el.hidden), false);
@@ -639,11 +645,35 @@ for (const dataPath of ['legacy', 'p1']) {
       await page.click('#gf-more-body .gf-more-group:nth-child(2) .gf-lobby-link');
       await page.fill('#gf-2027-lobby', '0'); await page.fill('#gf-2028-lobby', '0'); await page.click('#gf-lobby-pop-next .gf-pop-done');
       await recalculated(page, before);
-      assert.equal(await page.$$eval('#gf-lobby-chart .gf-line', all => all.length), 2, 'two lines, one per series');
-      assert.deepEqual(await page.$$eval('#gf-lobby-chart .gf-series', all => all.map(el => el.getAttribute('aria-label').split(',')[0])), ['Outside-firm fees', 'In-house expenses']);
-      assert.deepEqual(await page.$$eval('#gf-lobby-chart .gf-line', all => all.map(el => getComputedStyle(el).stroke)), ['rgb(43, 155, 153)', 'rgb(139, 105, 132)'], 'teal and mauve (tokens), not the party colours');
-      assert.match(await hoverTip(page, '#gf-lobby-chart .gf-series-fees .gf-hit >> nth=1'), /never added/);
-      assert.match(await page.textContent('#gf-basis'), /^Annual, /);
+      // the Melange card: five complete years stacked, the partial year hatched, three projected bars with a whisker each, the two big figures
+      const card = await page.evaluate(() => {
+        const text = el => (el ? el.textContent : '');
+        const bars = [...document.querySelectorAll('#gf-lobby-chart .gf-ld-bar')].map(g => ({kind: g.dataset.kind, year: g.dataset.year, rects: [...g.querySelectorAll('rect.gf-ld-seg')].map(r => ({fill: r.getAttribute('fill') || getComputedStyle(r).fill, dash: getComputedStyle(r).strokeDasharray, opacity: getComputedStyle(r).fillOpacity, title: text(r.querySelector('title')), y: +r.getAttribute('y')})),
+          whiskers: g.querySelectorAll('path.gf-ld-whisker').length, whiskerTitle: text(g.querySelector('.gf-ld-whisker-hit title')), tick: text(g.querySelector('text.gf-ld-xt'))}));
+        const svg = document.querySelector('#gf-lobby-chart svg');
+        return {bars, title: text(document.querySelector('.gf-ld-title')), sub: text(document.querySelector('.gf-ld-sub')), figs: [...document.querySelectorAll('.gf-ld-fig')].map(f => [text(f.querySelector('.gf-ld-big')), text(f.querySelector('.gf-ld-figlabel'))]),
+          role: svg.getAttribute('role'), aria: svg.getAttribute('aria-label'), yTicks: [...svg.querySelectorAll('.gf-ld-yt')].map(t => t.textContent), patterns: svg.querySelectorAll('pattern').length, dot: getComputedStyle(document.querySelector('.gf-ld-dot')).backgroundColor,
+          titleFont: getComputedStyle(document.querySelector('.gf-ld-title')).fontFamily, bigSize: getComputedStyle(document.querySelector('.gf-ld-big')).fontSize, stacks: document.querySelectorAll('#gf-lobby-chart .gf-line, #gf-lobby-chart .gf-series').length};
+      });
+      assert.deepEqual(card.bars.map(b => [b.kind, b.year, b.tick]), [['annual', '2021', '2021'], ['annual', '2022', '2022'], ['annual', '2023', '2023'], ['annual', '2024', '2024'], ['annual', '2025', '2025'], ['partial', '2026', '2026 partial'],
+        ['projected', '2026', '2026 projected'], ['projected', '2027', '2027 projected'], ['projected', '2028', '2028 projected']]);
+      for (const bar of card.bars) {
+        assert.equal(bar.rects.length, 2, `${bar.tick}: hired firms under in-house`); assert.ok(bar.rects[0].y > bar.rects[1].y, `${bar.tick}: the in-house segment is on top`);
+        assert.ok(bar.rects.every(r => r.title.length > 0), `${bar.tick}: a <title> on each segment`);
+        assert.match(bar.rects[0].title, /Hired firms/); assert.match(bar.rects[1].title, /In-house/);
+        if (bar.kind === 'partial') assert.ok(bar.rects.every(r => /^url\(#gf-ld-hatch-\d+[hi]\)$/.test(r.fill)), '2026 partial is hatched: ' + bar.rects.map(r => r.fill));
+        if (bar.kind === 'projected') {
+          assert.ok(bar.rects.every(r => r.opacity === '0.55' && r.dash !== 'none'), `${bar.tick}: 55% fill and a dashed outline`);
+          assert.equal(bar.whiskers, 1, `${bar.tick}: one whisker for the 80% band of the total`); assert.match(bar.whiskerTitle, /80% band of the total: \$/); assert.match(bar.whiskerTitle, /lows with lows and highs with highs/);
+          assert.ok(bar.rects.every(r => /80% band: \$/.test(r.title)), `${bar.tick}: each segment's tooltip gives value and band`);
+        } else assert.equal(bar.whiskers, 0);
+      }
+      assert.equal(card.patterns, 2); assert.equal(card.title, 'Bank'); assert.equal(card.sub, '97 organizations · 463 named lobbyists');
+      assert.deepEqual(card.figs, [['$89.5M', '2025 total lobbying spend'], ['$52.3M', '2026 so far, through Q2']]);
+      assert.equal(card.role, 'img'); assert.match(card.aria, /^Bank lobbying spend by year, hired firms under in-house, nominal dollars\. 2021: hired firms \$18\.2M, in-house \$50\.2M, total \$68\.4M;/);
+      assert.equal(card.yTicks[0], '$0'); assert.equal(card.dot, 'rgb(118, 83, 153)', "Melange's bank colour (dot-1)"); assert.match(card.titleFont, /Freight|Georgia|serif/); assert.equal(card.bigSize, '50px'); assert.equal(card.stacks, 0);
+      assert.match(await page.textContent('#gf-basis'), /^Annual, nominal dollars$/);
+      assert.deepEqual(page.errors, []);
       // back to General giving: the bars return
       await page.click('#gf-account-general'); await page.waitForTimeout(300);
       assert.equal(await page.$eval('#gf-lobby-chart', el => el.hidden), true); assert.equal(await page.$eval('#gf-chart svg', el => !!el), true);
@@ -1295,6 +1325,45 @@ test('the published PAC table and the partisan panel render whatever the catalog
     assert.equal(await page.isVisible('#pac-political-forecast h2'), true);
     assert.equal(await page.isVisible('#gf-notes'), false, 'the scenario\'s Sources and notes wait for the catalog');
     assert.equal(await page.isVisible('#gf-reference'), false, '... and so does "Use historical example"');
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+// The lobbying card as Melange draws it (fec/surfaces/approved/clean/industry-ui.js renderFocus, 2026-10-09): the same figures, colours and bars for the three industries that have a Melange sector,
+// and the refusal for the one that has none. MENTAT_LOBBY_SHOTS=<folder> also saves the card at 1440 px (lobby_telecom.png, lobby_banks.png, lobby_credit_unions.png).
+test('the Lobbying account draws Melange\'s stacked card for Telecom, banks and credit unions (figures, colours, bars; screenshots on request) and refuses property and casualty with its reason', async () => {
+  const cases = [['telecom', 'lobby_telecom', 'Telecom', '23 organizations · 479 named lobbyists', [['$139.4M', '2025 total lobbying spend'], ['$69.7M', '2026 so far, through Q2']], 'rgb(161, 46, 57)', ['$0', '$50M', '$100M', '$150M', '$200M']],
+    ['commercial_banks', 'lobby_banks', 'Bank', '97 organizations · 463 named lobbyists', [['$89.5M', '2025 total lobbying spend'], ['$52.3M', '2026 so far, through Q2']], 'rgb(118, 83, 153)', null],
+    ['credit_unions', 'lobby_credit_unions', 'Credit Union', '26 organizations · 72 named lobbyists', [['$8.3M', '2025 total lobbying spend'], ['$4.7M', '2026 so far, through Q2']], 'rgb(88, 166, 255)', null]];
+  const page = await open({path: 'cycle', width: 1440, height: 1000, reducedMotion: 'reduce'});          // no entrance animation: the screenshots show the settled card
+  try {
+    for (const [industry, shot, title, sub, figs, colour, ticks] of cases) {
+      const before = own(page).length;
+      await page.selectOption('#gf-industry', industry); await recalculated(page, before);
+      await page.click('#gf-account-lobby'); await page.waitForTimeout(500);
+      const got = await page.evaluate(() => {
+        const text = el => (el ? el.textContent : '');
+        const bars = [...document.querySelectorAll('#gf-lobby-chart .gf-ld-bar')].map(g => [g.dataset.kind, text(g.querySelector('text.gf-ld-xt')), g.querySelectorAll('rect.gf-ld-seg').length, g.querySelectorAll('.gf-ld-whisker').length]);
+        const inhouse = [...document.querySelectorAll('#gf-lobby-chart .gf-ld-bar[data-kind=annual] rect.gf-ld-seg-i')].map(r => getComputedStyle(r).fill);
+        return {title: text(document.querySelector('.gf-ld-title')), sub: text(document.querySelector('.gf-ld-sub')), figs: [...document.querySelectorAll('.gf-ld-fig')].map(f => [text(f.querySelector('.gf-ld-big')), text(f.querySelector('.gf-ld-figlabel'))]),
+          bars, inhouse, dot: getComputedStyle(document.querySelector('.gf-ld-dot')).backgroundColor, ticks: [...document.querySelectorAll('#gf-lobby-chart .gf-ld-yt')].map(t => t.textContent),
+          keys: [...document.querySelectorAll('#gf-legend-lobby li i')].map(i => getComputedStyle(i).backgroundColor), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth};
+      });
+      assert.deepEqual([got.title, got.sub, got.figs], [title, sub, figs], industry);
+      assert.deepEqual(got.bars.map(b => b[0]), ['annual', 'annual', 'annual', 'annual', 'annual', 'partial', 'projected', 'projected', 'projected'], industry);
+      assert.deepEqual(got.bars.map(b => b[1]), ['2021', '2022', '2023', '2024', '2025', '2026 partial', '2026 projected', '2027 projected', '2028 projected'], industry);
+      assert.ok(got.bars.every(b => b[2] === 2) && got.bars.slice(0, 6).every(b => b[3] === 0) && got.bars.slice(6).every(b => b[3] === 1), industry + ': two segments each, a whisker on the projected bars only');
+      assert.ok(got.inhouse.length === 5 && got.inhouse.every(fill => fill === colour) && got.dot === colour, industry + ": in-house and the dot are Melange's colour " + colour + ': ' + got.inhouse + ' ' + got.dot);
+      assert.equal(got.keys[0] === got.keys[1], false, 'hired firms are the tint, in-house the colour'); assert.equal(got.keys[1], colour);
+      if (ticks) assert.deepEqual(got.ticks, ticks, industry + ': the axis reaches the whisker tops (nice(): $50M steps)');
+      assert.equal(got.overflow, 0, 'no horizontal scroll');
+      if (process.env.MENTAT_LOBBY_SHOTS) { fs.mkdirSync(process.env.MENTAT_LOBBY_SHOTS, {recursive: true}); await page.locator('.gf-chart-col').screenshot({path: path.join(process.env.MENTAT_LOBBY_SHOTS, shot + '.png')}); }
+    }
+    // property and casualty has no Melange LDA sector: today's refusal text, no card
+    const before = own(page).length;
+    await page.selectOption('#gf-industry', 'property_casualty'); await recalculated(page, before);
+    assert.match(await page.textContent('#gf-lobby-chart'), /Not shown: No Melange-LDA sector for this industry/);
+    assert.equal(await page.$$eval('#gf-lobby-chart .gf-ld', all => all.length), 0);
     assert.deepEqual(page.errors, []);
   } finally { await closePage(page); }
 });

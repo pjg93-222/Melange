@@ -50,6 +50,10 @@ against the shared schema and invariants; an invalid build leaves the previous s
   both series, the pool sectors bank, credit union, telecom and fintech (n = 32 with the 2022-2025 targets; crypto is left out, its early years are too thin), as `{n, q80, max}`. They are computed here, at
   anchor-build time, from the same `sector_spend.csv` (the console cannot see the other pool sectors); the LobbyView persistence errors that bound the years after the nowcast year come from the refit bundle.
   A quarter counts as complete once it has filings (an LDA quarter is due 20 days after it ends); a partially filed latest quarter would understate the nowcast.
+* **Lobbying history** (Paul, 2026-10-09, "visualized in the same manner" as Melange's lobbying card): each ready `lda` block also carries `counts`, `{year: {organizations, lobbyists}}`, the `distinct_organizations` and
+  `distinct_named_lobbyists` of the same `annual` rows of `sector_spend.csv` (the partial year's too), so the console can print what Melange prints under the card. The catalog serves the history per industry as
+  `catalog.anchors.industries.<id>.lda_history` (`giving_forecast._lda_history`): annual rows `{year, hired_firms, in_house, orgs, lobbyists}` (`income_total`, `expenses_total`), the partial row with its `through_quarter`,
+  and the source `sha256`. `tests/test_giving_lda_history.py` reconciles it to Melange's `sector_spend.json` to the cent.
 * **Thin base**: under $100,000 of D + R per chamber, per cycle, per basis (`thin_base`).
 * **Roster PACs**: `registry.json`. Trade-association PACs are not counted. Credit unions have one PAC (SchoolsFirst), flagged `single_pac`.
 * **Separate datasets**: `community_banks` is its own entry (`forecast_industry: null`), never merged into banks. Auto has no Mentat workbook

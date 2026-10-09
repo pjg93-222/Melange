@@ -161,13 +161,13 @@ class World:
             (folder / 'source-receipt.json').write_text(json.dumps({'sha256': sha, 'last_modified': 'Sun, 06 Sep 2026 15:55:17 GMT'}))
 
     def _lda(self):
-        head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'
+        head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total,distinct_named_lobbyists'
         rows = [head]
-        for year, inc, exp in ((2024, 400, 900), (2025, 500, 1000)):
-            rows.append(f'bank,{year},annual,false,9,9,{inc},{exp}')
+        for year, inc, exp, lobbyists in ((2024, 400, 900, 40), (2025, 500, 1000, 41)):
+            rows.append(f'bank,{year},annual,false,9,9,{inc},{exp},{lobbyists}')
             for q in (1, 2, 3, 4):
-                rows.append(f'bank,{year},Q{q},false,9,9,{inc / 4},{exp / 4}')
-        rows += ['bank,2026,annual,true,9,9,300,600', 'bank,2026,Q1,true,9,9,100,200', 'bank,2026,Q2,true,9,9,200,400', 'bank,2026,Q3,true,0,0,0,0', 'bank,2026,Q4,true,0,0,0,0']
+                rows.append(f'bank,{year},Q{q},false,9,9,{inc / 4},{exp / 4},{lobbyists - 10}')
+        rows += ['bank,2026,annual,true,9,9,300,600,33', 'bank,2026,Q1,true,9,9,100,200,20', 'bank,2026,Q2,true,9,9,200,400,25', 'bank,2026,Q3,true,0,0,0,0,0', 'bank,2026,Q4,true,0,0,0,0,0']
         (self.base / 'sector_spend.csv').write_text('\n'.join(rows) + '\n')
 
     def _cpi(self):
@@ -295,6 +295,15 @@ class BuilderTests(unittest.TestCase):
                                                                                 'share_years': [2024, 2025], 'shares': [0.5, 0.5], 'point': 550.0}})
         self.assertEqual(lda['series']['expenses_total']['partial']['total'], 600.0)
         self.assertEqual(lda['through'], '2026-06-30')
+
+    def test_lda_counts_are_the_annual_rows_organizations_and_lobbyists_partial_year_included(self):
+        snap, _ = self.world.build()
+        lda = snap['industries']['commercial_banks']['lda']
+        self.assertEqual(lda['counts'], {'2024': {'organizations': 9, 'lobbyists': 40}, '2025': {'organizations': 9, 'lobbyists': 41}, '2026': {'organizations': 9, 'lobbyists': 33}})
+        # a file without the lobbyist column (an older Melange build) carries no counts instead of inventing them
+        head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'
+        rows = [dict(zip(head.split(','), line.split(','))) for line in ('x,2025,annual,false,1,4,100,900', 'x,2026,annual,true,1,2,40,80', 'x,2026,Q1,true,1,1,40,80')]
+        self.assertEqual(lda_mod.sector_levels(rows, 'x')['counts'], {})
 
     def test_cpi_multiplier_exists_only_for_cycles_with_a_published_cpi(self):
         snap, _ = self.world.build()

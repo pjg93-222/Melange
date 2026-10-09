@@ -113,4 +113,7 @@ def sector_levels(rows, sector):
     if through is None:
         last_year = max(int(y) for y in series['income_total']['annual'])
         through = date(last_year, 12, 31).isoformat()
-    return {'series': series, 'through': through}
+    # The roster counts Melange prints under each sector card (its `annual` rows, the partial year's included): distinct organizations and named lobbyists.
+    counts = {r['year']: {'organizations': int(r['distinct_organizations']), 'lobbyists': int(r['distinct_named_lobbyists'])}
+              for r in mine if r['period'] == 'annual' and (r.get('distinct_organizations') or '').strip() and (r.get('distinct_named_lobbyists') or '').strip()}
+    return {'series': series, 'through': through, 'counts': dict(sorted(counts.items()))}

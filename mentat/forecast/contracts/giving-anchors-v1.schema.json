@@ -552,6 +552,31 @@
                   "$ref": "#/$defs/lda_series"
                 }
               },
+              "counts": {
+                "description": "The roster counts Melange prints under each sector card, by year (annual rows, the partial year's included): distinct organizations and distinct named lobbyists. Optional: a snapshot built before the Melange-style lobbying chart has none, and the chart then leaves the counts out.",
+                "type": "object",
+                "propertyNames": {
+                  "pattern": "^\\d{4}$"
+                },
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "organizations": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "lobbyists": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "organizations",
+                    "lobbyists"
+                  ],
+                  "additionalProperties": false
+                }
+              },
               "note": {
                 "type": "string"
               }

@@ -88,6 +88,57 @@
        "No 2026 CPI exists yet: 2025-2026 observed amounts are compared at face value.",
        "Excluded from the forecast (owner ruling 2026-10-01): receipts Mentat's accounting engine marks non-giving - FEC-reported interest, refunds, insurance claims and loans - $191,721.37 in 2023-2024; $67,940.35 in 2025-2026 to date. They stay in the published workbook's Analysis Amount; the general-giving levels, observed amounts and employee House and Senate candidate bases of this forecast leave them out."
       ],
+      "lda_history": {
+       "annual": [
+        {
+         "hired_firms": 18175500.0,
+         "in_house": 50243352.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2021
+        },
+        {
+         "hired_firms": 18640000.0,
+         "in_house": 57554279.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2022
+        },
+        {
+         "hired_firms": 20507500.0,
+         "in_house": 61400925.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2023
+        },
+        {
+         "hired_firms": 20339032.0,
+         "in_house": 57136855.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2024
+        },
+        {
+         "hired_firms": 23824000.0,
+         "in_house": 65696931.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2025
+        }
+       ],
+       "partial": {
+        "hired_firms": 13367000.0,
+        "in_house": 38975000.0,
+        "lobbyists": null,
+        "orgs": null,
+        "through_quarter": "Q2",
+        "year": 2026
+       },
+       "sector": "bank",
+       "source_file": "sector_spend.csv",
+       "source_sha256": "22d1ab59d1c9282ab34d58294ebc1379357d2a9c6cd85b305fb6c0fbe901a56c",
+       "through": "2026-06-30"
+      },
       "measures": {
        "candidate_receipts": "ready",
        "general_giving": "ready",
@@ -108,6 +159,57 @@
        "Excluded from the forecast (owner ruling 2026-10-01): receipts Mentat's accounting engine marks non-giving - FEC-reported interest, refunds, insurance claims and loans - $110,478.54 in 2021-2022; $159,041.47 in 2023-2024; $3,010.49 in 2025-2026 to date. They stay in the published workbook's Analysis Amount; the general-giving levels, observed amounts and employee House and Senate candidate bases of this forecast leave them out.",
        "PAC channel = one committee (SchoolsFirst Federal Credit Union); it is not the industry's PAC giving (thin base)."
       ],
+      "lda_history": {
+       "annual": [
+        {
+         "hired_firms": 1573000.0,
+         "in_house": 8374000.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2021
+        },
+        {
+         "hired_firms": 1736000.0,
+         "in_house": 9037068.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2022
+        },
+        {
+         "hired_firms": 1727500.0,
+         "in_house": 9258678.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2023
+        },
+        {
+         "hired_firms": 2098000.0,
+         "in_house": 7128000.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2024
+        },
+        {
+         "hired_firms": 2054500.0,
+         "in_house": 6233000.0,
+         "lobbyists": null,
+         "orgs": null,
+         "year": 2025
+        }
+       ],
+       "partial": {
+        "hired_firms": 1311000.0,
+        "in_house": 3424000.0,
+        "lobbyists": null,
+        "orgs": null,
+        "through_quarter": "Q2",
+        "year": 2026
+       },
+       "sector": "credit_union",
+       "source_file": "sector_spend.csv",
+       "source_sha256": "22d1ab59d1c9282ab34d58294ebc1379357d2a9c6cd85b305fb6c0fbe901a56c",
+       "through": "2026-06-30"
+      },
       "measures": {
        "candidate_receipts": "ready",
        "general_giving": "ready",
@@ -126,6 +228,7 @@
        "No 2026 CPI exists yet: 2025-2026 observed amounts are compared at face value.",
        "Excluded from the forecast (owner ruling 2026-10-01): receipts Mentat's accounting engine marks non-giving - FEC-reported interest, refunds, insurance claims and loans - $83,448.45 in 2021-2022; $94,954.94 in 2023-2024; $57,099.62 in 2025-2026 to date. They stay in the published workbook's Analysis Amount; the general-giving levels, observed amounts and employee House and Senate candidate bases of this forecast leave them out."
       ],
+      "lda_history": null,
       "measures": {
        "candidate_receipts": "ready",
        "general_giving": "ready",

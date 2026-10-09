@@ -1195,10 +1195,33 @@
     });
   }
 
-  // ---- the lobbying chart (Melange LDA, under the Lobbying account): two series, never summed -----------------------------------------------------------------
-  // Levels are Melange LDA's reported nominal amounts. A projection is the in-year nowcast of the year being filed (carried forward unchanged to the later years unless a
-  // growth-forecast change is entered), drawn with two empirical bands from the blind tests: the 80% band (inner whisker) and the ~95% band, the largest blind miss (outer, dashed).
-  const LOBBY_SERIES = [['income_total', 'fees'], ['expenses_total', 'inhouse']];
+  // ---- the lobbying card (Melange LDA, under the Lobbying account) -----------------------------------------------------------------------------------------------
+  // Melange's own industry card (fec/surfaces/approved/clean/industry-ui.js renderFocus and barChart, industry-ui.css; Paul, 2026-10-09, "visualized in the same manner"): the industry dot and
+  // serif title, the roster counts, two big figures (the last complete year's total and the partial year's so far) and one stacked bar per year, hired firms (income_total, a tint of the industry
+  // colour) under in-house (expenses_total, the industry colour), the partial year hatched. Melange's own rows come with the anchors (catalog.anchors.industries.<id>.lda_history), nominal dollars.
+  // After them come the projected years (the lobbying model's nowcast and the years carried from it): the same two colours at 55% inside a dashed outline, and a thin whisker for the 80% band of the
+  // TOTAL at the bar's right edge. That band is the two series' bands ADDED, lows with lows and highs with highs: a conservative combination, not an estimated band of the total (its tooltip says so).
+  // The ~95% band is in each segment's tooltip. money(), nice() and the axes below are Melange's own, copied; the hatch is a 7 x 7 pattern turned 45 degrees.
+  const LD_SEGMENTS = [['income_total', 'hired', 'Hired firms'], ['expenses_total', 'inhouse', 'In-house']];
+  const ldCount = value => (Number(value) || 0).toLocaleString('en-US');
+  function ldMoney(value) {
+    const n = Number(value) || 0, a = Math.abs(n);
+    let amount, suffix;
+    if (a >= 1e9) { amount = n / 1e9; suffix = 'B'; } else if (a >= 1e6) { amount = n / 1e6; suffix = 'M'; } else if (a >= 1e3) { amount = n / 1e3; suffix = 'k'; } else return '$' + ldCount(Math.round(n));
+    let text = amount.toFixed(1);
+    if (text.endsWith('.0')) text = text.slice(0, -2);
+    return '$' + text + suffix;
+  }
+  function ldNice(max, target = 6) {
+    if (!(max > 0)) return {top: 1, step: 1};
+    const raw = max / target, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw * (1 - 1e-9));
+    return {top: Math.ceil(max / step - 1e-9) * step, step};
+  }
+  const ldName = sector => String(sector || '').replaceAll('_', ' ').split(' ').map(w => (w ? w[0].toUpperCase() + w.slice(1) : w)).join(' ');
+  const ldText = lines => lines.map(line => line.head || (line.row ? line.row[0] + ': ' + line.row[1] : line.note)).join('\n');          // a segment's tooltip is the <title> text, one fact a line
+  const ldHistory = run => { const entry = catalog && catalog.anchors && catalog.anchors.industries && catalog.anchors.industries[run.industry]; return (entry && entry.lda_history) || null; };
+  let ldUid = 0;
   function lobbyModel(run, firstYear, lastYear) {
     const emptyText = `No lobbying projection for ${firstYear}–${lastYear}`;
     run = readyRun(run);
@@ -1208,88 +1231,114 @@
     if (closed) return {state: 'unavailable', text: 'Not shown: ' + closed.reason};
     const all = [].concat(...blocks.map(block => block.rows)), rows = all.filter(row => row.status === 'ready').sort((a, b) => a.year - b.year);
     if (!rows.length) { const why = all.find(row => row.status === 'unavailable'); return why ? {state: 'unavailable', text: 'Not shown: ' + why.reason} : {state: 'empty', text: emptyText}; }
-    const block = blocks[0], baseYear = block.base_year, series = [], chips = [], dollars = 'nominal dollars';
-    for (const [id, tone] of LOBBY_SERIES) {
-      const first = rows[0].series.find(s => s.id === id);
-      if (!first) continue;
-      const points = [{year: baseYear, value: first.base_level, base: true}];
-      for (const row of rows) {
-        const s = row.series.find(item => item.id === id);
-        if (!s) continue;
-        points.push({year: row.year, value: s.projected, low: s.band80_low, high: s.band80_high, low95: s.band95_low, high95: s.band95_high, nowcast: s.nowcast, ahead: s.years_after_nowcast, observed: s.observed || null,
-          remaining: s.projected_remaining == null ? null : s.projected_remaining, remainingLow: s.remaining_band80_low, remainingHigh: s.remaining_band80_high,
-          remainderStatus: s.remainder_status, remainderReason: remainderText(s), changePct: s.change_pct, steps: row.steps, chained: row.chained});
-      }
-      series.push({id, tone, label: first.label, points});
-    }
+    const history = ldHistory(run);
+    if (!history) return {state: 'unavailable', text: 'Not shown: the Melange LDA history is not in the anchor snapshot. Rebuild the anchors (mentat/forecast/anchors/build_giving_anchors.py).'};
+    const block = blocks[0], baseYear = block.base_year, chips = [], dollars = 'nominal dollars';
     const sourceNote = `${block.sector_label}, nominal dollars (source ${block.source_file}). ${block.note}`;
     const bandNotes = block.bands ? [N(block.bands.label_80), N(block.bands.label_95)] : [];
-    for (const item of series) {
-      for (const p of item.points) {
-        const lines = [H(`${item.label} · ${p.year}`)];
-        if (p.base) lines.push(R(`${p.year} level (latest complete Melange LDA year)`, money(p.value)));
-        else {
-          const change = `${pct(p.changePct)}${p.chained ? ' (chained, ' + p.steps + ' steps)' : ''}`;
-          lines.push(R(p.nowcast && !p.ahead ? 'Nowcast, full year' : 'Projected full year', money(p.value)), R(`Change vs the ${baseYear} level`, change), R('80% band', range(p.low, p.high)), R('~95% band (largest blind miss)', range(p.low95, p.high95)));
-          if (p.nowcast) lines.push(R(`Nowcast, ${p.nowcast.through_quarter} cut`, `${money(p.nowcast.observed)} filed + ${percent(1 - p.nowcast.share)} of ${p.nowcast.year - 1} (${money(p.nowcast.prior_total)}) to come; filed share ${percent(p.nowcast.share)}`));
-          if (p.ahead > 0) lines.push(N(`Carried ${p.ahead} year${p.ahead > 1 ? 's' : ''} past the nowcast: the bands add the LobbyView persistence error, in quadrature.`));
-          if (p.observed) lines.push(R(`Observed ${p.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + p.observed.through_quarter}`, money(p.observed.amount_nominal) + (p.observed.face_value ? ' (face value)' : '')));
-          if (p.remaining != null) lines.push(R('Remainder after the observed quarters', money(p.remaining)), R('Remainder, 80% band', range(p.remainingLow, p.remainingHigh)));
-          else if (p.remainderStatus === 'baseline_exceeded' || p.remainderStatus === 'no_observed') lines.push(N(p.remainderReason, WARN));
-          if (p.observed && p.low95 < p.observed.amount_nominal - 0.5) {
-            chips.push({kind: WARN, text: `${item.label}: ~95% band starts below the amount already observed`, tip: [H(`${item.label} · ${p.year}`), R('~95% band, full year', range(p.low95, p.high95)),
-              R(`Observed ${p.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + p.observed.through_quarter}`, money(p.observed.amount_nominal)), N('The band is drawn as returned, not clipped.', WARN)]});
-          }
+    const annual = history.annual.slice().sort((a, b) => a.year - b.year), part = history.partial || null;
+    const historyBar = (row, partial) => {
+      const label = partial ? `${row.year} partial` : String(row.year);
+      return {kind: partial ? 'partial' : 'annual', year: row.year, label, hired: row.hired_firms, inhouse: row.in_house, total: row.hired_firms + row.in_house,
+        tips: {hired: `${label} · Hired firms · ${ldMoney(row.hired_firms)}`, inhouse: `${label} · In-house · ${ldMoney(row.in_house)}`}};
+    };
+    const bars = annual.map(row => historyBar(row, false)).concat(part ? [historyBar(part, true)] : []);
+    for (const row of rows) {
+      const label = `${row.year} projected`, segs = {};
+      for (const [id, key, name] of LD_SEGMENTS) {
+        const s = row.series.find(item => item.id === id);
+        if (!s) break;
+        const now = s.nowcast, observed = s.observed || null, change = `${pct(s.change_pct)}${row.chained ? ' (chained, ' + row.steps + ' steps)' : ''}`;
+        const lines = [H(`${label} · ${name}`), R(now && !s.years_after_nowcast ? 'Nowcast, full year' : 'Projected full year', money(s.projected)), R('80% band', range(s.band80_low, s.band80_high)),
+          R('~95% band (largest blind miss)', range(s.band95_low, s.band95_high)), R(`Change vs the ${baseYear} level`, change)];
+        if (now) lines.push(R(`Nowcast, ${now.through_quarter} cut`, `${money(now.observed)} filed + ${percent(1 - now.share)} of ${now.year - 1} (${money(now.prior_total)}) to come; filed share ${percent(now.share)}`));
+        if (s.years_after_nowcast > 0) lines.push(N(`Carried ${s.years_after_nowcast} year${s.years_after_nowcast > 1 ? 's' : ''} past the nowcast: the bands add the LobbyView persistence error, in quadrature.`));
+        if (observed) lines.push(R(`Observed ${observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + observed.through_quarter}`, money(observed.amount_nominal) + (observed.face_value ? ' (face value)' : '')));
+        if (s.projected_remaining != null) lines.push(R('Remainder after the observed quarters', money(s.projected_remaining)), R('Remainder, 80% band', range(s.remaining_band80_low, s.remaining_band80_high)));
+        else if (s.remainder_status === 'baseline_exceeded' || s.remainder_status === 'no_observed') lines.push(N(remainderText(s), WARN));
+        if (observed && s.band95_low < observed.amount_nominal - 0.5) {
+          chips.push({kind: WARN, text: `${s.label}: ~95% band starts below the amount already observed`, tip: [H(`${s.label} · ${row.year}`), R('~95% band, full year', range(s.band95_low, s.band95_high)),
+            R(`Observed ${observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + observed.through_quarter}`, money(observed.amount_nominal)), N('The band is drawn as returned, not clipped.', WARN)]});
         }
         lines.push(...bandNotes, N(sourceNote));
-        p.tip = lines;
+        segs[key] = {value: s.projected, low: s.band80_low, high: s.band80_high, tip: ldText(lines)};
       }
-      item.aria = `${item.label}, ${dollars}: ` + item.points.map(p => `${p.year} ${money(p.value)}${p.base ? ' observed' : ' projected'}`).join(', ');
-      item.tip = [H(`${item.label} · ${dollars}`)].concat(item.points.map(p => R(String(p.year) + (p.base ? ' (observed)' : ' (projected)'), p.base ? money(p.value) : `${money(p.value)}, 80% band ${range(p.low, p.high)}`)), [N('The two series are different flows and are never added.')]);
+      if (!segs.hired || !segs.inhouse) continue;
+      const total = segs.hired.value + segs.inhouse.value, low = segs.hired.low + segs.inhouse.low, high = segs.hired.high + segs.inhouse.high;
+      bars.push({kind: 'projected', year: row.year, label, hired: segs.hired.value, inhouse: segs.inhouse.value, total, tips: {hired: segs.hired.tip, inhouse: segs.inhouse.tip},
+        whisker: {low, high, tip: ldText([H(`${label} · Total`), R('Projected total, hired firms + in-house', money(total)), R('80% band of the total', range(low, high)),
+          N('Conservative: the two series\' 80% bands are added, lows with lows and highs with highs, as if they moved together. It is not an estimated band of the total.')])}});
     }
     for (const chip of waiverChips('lobby', run)) chips.push(chip);
-    const values = [].concat(...series.map(item => item.points.map(p => Math.max(p.value, p.high95 || 0))));
-    const caption = block.bands ? 'Bars: 80% band · dashed: ~95% band, the largest blind miss' + (block.bands.blind_tests ? ` (n=${block.bands.blind_tests})` : '') : '';
-    return {state: 'ready', series, chips, dollars, caption, years: [baseYear].concat(rows.map(row => row.year).filter((year, i, all) => all.indexOf(year) === i)), axisMax: stickyMax('lobby', run, Math.max(...values))};
+    const title = ldName(history.sector), latest = part || annual[annual.length - 1] || null, done = annual[annual.length - 1] || null;
+    const subtitle = latest && latest.orgs != null && latest.lobbyists != null ? `${ldCount(latest.orgs)} organization${latest.orgs === 1 ? '' : 's'} · ${ldCount(latest.lobbyists)} named lobbyists` : '';
+    const figs = [done ? {value: ldMoney(done.hired_firms + done.in_house), label: `${done.year} total lobbying spend`} : {value: '—', label: 'No complete year on file'}];
+    if (part) figs.push({value: ldMoney(part.hired_firms + part.in_house), label: `${part.year} so far, through ${part.through_quarter}`});
+    const aria = `${title} lobbying spend by year, hired firms under in-house, ${dollars}. ` + bars.map(b => `${b.label}${b.kind === 'partial' ? ' (partial year)' : ''}: hired firms ${ldMoney(b.hired)}, in-house ${ldMoney(b.inhouse)}, total ${ldMoney(b.total)}`
+      + (b.whisker ? `, 80% band of the total ${ldMoney(b.whisker.low)} to ${ldMoney(b.whisker.high)}` : '')).join('; ');
+    const raw = Math.max(0, ...bars.map(b => Math.max(b.total, b.whisker ? b.whisker.high : 0)));
+    return {state: 'ready', sector: history.sector, title, subtitle, figs, bars, chips, dollars, aria, axisMax: stickyMax('lobby', run, raw)};
   }
   function drawLobby(model, host, animate) {
-    host.replaceChildren(); flip(host, 'gf-static', !animate); host.setAttribute('role', 'group'); host.dataset.drawn = String(host.clientWidth);
-    const W = Math.max(240, Math.floor(host.clientWidth || 640)), Ht = Math.max(240, Math.floor(host.clientHeight || 348)), pad = {l: model.state === 'ready' ? 56 : 8, r: 16, t: 20, b: 40};
-    host.dataset.drawnH = String(Ht);
-    const plotW = W - pad.l - pad.r, plotH = Ht - pad.t - pad.b;
-    const root = svg('svg', {class: 'gf-svg gf-svg-lobby', width: W, height: Ht, viewBox: `0 0 ${W} ${Ht}`, focusable: 'false'});
-    if (model.state !== 'ready') {
-      // Empty or closed: the frame only. No line is drawn without data.
-      const grid = svg('g', {'aria-hidden': 'true'});
+    const ready = model.state === 'ready';
+    host.replaceChildren(); flip(host, 'gf-static', !animate); flip(host, 'is-card', ready); host.setAttribute('role', 'group'); host.dataset.drawn = String(host.clientWidth);
+    if (!ready) {
+      // Empty or closed: the frame only. No bar is drawn without data.
+      const W = Math.max(240, Math.floor(host.clientWidth || 640)), Ht = Math.max(240, Math.floor(host.clientHeight || 348)), pad = {l: 8, r: 16, t: 20, b: 40}, plotW = W - pad.l - pad.r, plotH = Ht - pad.t - pad.b;
+      const root = svg('svg', {class: 'gf-svg gf-svg-lobby', width: W, height: Ht, viewBox: `0 0 ${W} ${Ht}`, focusable: 'false'}), grid = svg('g', {'aria-hidden': 'true'});
       for (const at of [0, .5, 1]) grid.append(svg('line', {class: at === 1 ? 'gf-baseline' : 'gf-gridline', x1: pad.l, x2: pad.l + plotW, y1: pad.t + plotH * at, y2: pad.t + plotH * at}));
       root.append(grid);
       host.append(root, node('p', model.text, 'gf-lobby-note')); host.setAttribute('aria-label', model.text);
       return;
     }
-    const scale = niceScale(model.axisMax), y = value => pad.t + plotH * (1 - value / scale.top), n = model.years.length;
-    const x = year => pad.l + 12 + (plotW - 24) * (n === 1 ? .5 : model.years.indexOf(year) / (n - 1));
-    const grid = svg('g', {'aria-hidden': 'true'});
-    scale.ticks.forEach(tick => {
-      grid.append(svg('line', {class: tick === 0 ? 'gf-baseline' : 'gf-gridline', x1: pad.l, x2: pad.l + plotW, y1: y(tick), y2: y(tick)}));
-      grid.append(svg('text', {class: 'gf-axis-label', x: pad.l - 10, y: y(tick) + 4, 'text-anchor': 'end'}, axisLabel(tick)));
-    });
-    for (const year of model.years) grid.append(svg('text', {class: 'gf-x-label', x: x(year), y: Ht - 12, 'text-anchor': 'middle'}, String(year)));
-    if (model.caption) grid.append(svg('text', {class: 'gf-axis-label', x: pad.l, y: 10, 'text-anchor': 'start'}, model.caption));
-    root.append(grid);
-    model.series.forEach((item, index) => {
-      const g = svg('g', {class: `gf-series gf-series-${item.tone}`, tabindex: 0, role: 'img', 'aria-label': item.aria}); cssVar(g, '--i', index);
-      bindTip(g, item.tip, true);
-      g.append(svg('path', {class: 'gf-line', pathLength: 1, d: item.points.map((p, i) => (i ? 'L' : 'M') + x(p.year).toFixed(1) + ' ' + y(p.value).toFixed(1)).join(' ')}));
-      for (const p of item.points) {
-        const px = x(p.year), py = y(p.value);
-        if (!p.base) g.append(svg('path', {class: 'gf-lobby-whisker gf-lobby-whisker-95 gf-fade', d: `M${px} ${y(p.high95)}V${y(p.low95)}M${px - 5} ${y(p.high95)}h10M${px - 5} ${y(p.low95)}h10`}),
-          svg('path', {class: 'gf-lobby-whisker gf-fade', d: `M${px} ${y(p.high)}V${y(p.low)}M${px - 3} ${y(p.high)}h6M${px - 3} ${y(p.low)}h6`}));
-        g.append(svg('circle', {class: 'gf-dot gf-fade' + (p.base ? ' is-base' : ''), cx: px, cy: py, r: 3.6}));
-        const target = svg('circle', {class: 'gf-hit', cx: px, cy: py, r: 9}); bindTip(target, p.tip); g.append(target);
+    const legend = $('gf-legend-lobby');
+    if (legend) legend.dataset.sector = model.sector;
+    const W = Math.max(280, Math.floor(host.clientWidth || 800)), n = model.bars.length, padR = 2, T = 8;
+    const { top, step } = ldNice(model.axisMax), L = Math.round(14 + 8.2 * ldMoney(top).length), col = (W - L - padR) / (n || 1), bw = Math.min(col * (n > 6 ? 0.72 : 0.56), 120);
+    const narrow = col < 46, wrap = !narrow && model.bars.some(bar => bar.label !== String(bar.year) && bar.label.length * 7.4 > col - 6);          // "2026 projected" does not fit one line: the year over its word; under 46 px not even a year does: turned upright
+    const plotH = 174, B = narrow ? Math.ceil(Math.max(...model.bars.map(bar => bar.label.length)) * 7.4) + 18 : wrap ? 48 : 30, Ht = T + plotH + B, base = T + plotH, y = value => T + plotH - plotH * value / top, id = `gf-ld-hatch-${++ldUid}`;
+    const root = svg('svg', {class: 'gf-ld-svg', viewBox: `0 0 ${W} ${Ht}`, width: W, height: Ht, role: 'img', 'aria-label': model.aria, focusable: 'false'}), defs = svg('defs', {});
+    for (const [suffix, cls] of [['h', 'gf-ld-seg-h'], ['i', 'gf-ld-seg-i']]) {
+      const pattern = svg('pattern', {id: id + suffix, width: 7, height: 7, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'});
+      pattern.append(svg('rect', {class: cls, width: 7, height: 7}), svg('line', {class: 'gf-ld-hl', x1: 0, y1: 0, x2: 0, y2: 7}));
+      defs.append(pattern);
+    }
+    root.append(defs);
+    for (let i = 0; i * step <= top * (1 + 1e-9); i++) {
+      const value = i * step, yy = y(value).toFixed(1);
+      root.append(svg('line', {class: 'gf-ld-gl', x1: L, y1: yy, x2: W - padR, y2: yy}), svg('line', {class: 'gf-ld-ax', x1: L - 5, y1: yy, x2: L, y2: yy}),
+        svg('text', {class: 'gf-ld-yt', x: L - 9, y: (+yy + 5).toFixed(1), 'text-anchor': 'end'}, ldMoney(value)));
+    }
+    root.append(svg('line', {class: 'gf-ld-ax', x1: L, y1: T, x2: L, y2: base}));
+    model.bars.forEach((bar, i) => {
+      const x = L + i * col + (col - bw) / 2, cx = (x + bw / 2).toFixed(1), hh = plotH * bar.hired / top, ih = plotH * bar.inhouse / top, g = svg('g', {class: 'gf-ld-bar gf-fade', 'data-kind': bar.kind, 'data-year': bar.year});
+      cssVar(g, '--i', i);
+      const seg = (key, kind, y0, height) => {
+        if (!(height > 0)) return;
+        const attrs = {x: x.toFixed(1), y: y0.toFixed(2), width: bw.toFixed(1), height: height.toFixed(2),
+          class: bar.kind === 'projected' ? `gf-ld-seg gf-ld-proj gf-ld-proj-${kind}` : bar.kind === 'annual' ? `gf-ld-seg gf-ld-seg-${kind}` : 'gf-ld-seg'};
+        if (bar.kind === 'partial') attrs.fill = `url(#${id}${kind})`;
+        const rect = svg('rect', attrs); rect.append(svg('title', {}, bar.tips[key])); g.append(rect);
+      };
+      seg('hired', 'h', base - hh, hh); seg('inhouse', 'i', base - hh - ih, ih);
+      const inside = (value, height, cls, centre) => { if (height >= 18 && ldMoney(value).length * 8.2 <= bw + 8) g.append(svg('text', {class: cls, x: cx, y: (centre + 5).toFixed(1), 'text-anchor': 'middle', 'aria-hidden': 'true'}, ldMoney(value))); };
+      inside(bar.inhouse, ih, bar.kind === 'projected' ? 'gf-ld-lab-p' : 'gf-ld-lab-i', base - hh - ih / 2); inside(bar.hired, hh, bar.kind === 'projected' ? 'gf-ld-lab-p' : 'gf-ld-lab-h', base - hh / 2);
+      if (bar.whisker) {
+        const xr = (x + bw).toFixed(1), top95 = y(bar.whisker.high).toFixed(1), low95 = y(bar.whisker.low).toFixed(1);
+        const hit = svg('rect', {class: 'gf-ld-whisker-hit', x: (x + bw - 6).toFixed(1), y: (+top95 - 3).toFixed(1), width: 12, height: (+low95 - +top95 + 6).toFixed(1)});
+        hit.append(svg('title', {}, bar.whisker.tip));
+        g.append(svg('path', {class: 'gf-ld-whisker', d: `M${xr} ${top95}V${low95}M${(+xr - 3).toFixed(1)} ${top95}h6M${(+xr - 3).toFixed(1)} ${low95}h6`}), hit);
       }
-      root.append(g);
+      const word = bar.label.slice(String(bar.year).length + 1), tick = svg('text', {class: 'gf-ld-xt', x: cx, 'text-anchor': 'middle'});
+      if (narrow) { tick.setAttribute('x', String(+cx + 5)); tick.setAttribute('y', String(base + 8)); tick.setAttribute('text-anchor', 'end'); tick.setAttribute('transform', `rotate(-90 ${+cx + 5} ${base + 8})`); tick.textContent = bar.label; }
+      else if (wrap) { tick.append(svg('tspan', {x: cx, y: Ht - 26}, String(bar.year))); if (word) tick.append(svg('tspan', {x: cx, y: Ht - 8}, ' ' + word)); } else { tick.setAttribute('y', String(Ht - 8)); tick.textContent = bar.label; }
+      g.append(tick); root.append(g);
     });
-    host.append(root); host.setAttribute('aria-label', 'Lobbying, ' + (model.dollars || 'nominal dollars'));
+    const card = node('div', null, 'gf-ld'), head = node('div', null, 'gf-ld-head'), title = node('h3', null, 'gf-ld-title'), dot = node('span', null, 'gf-ld-dot'), figs = node('div', null, 'gf-ld-figs'), chart = node('div', null, 'gf-ld-chart');
+    card.dataset.sector = model.sector; dot.setAttribute('aria-hidden', 'true'); title.append(dot, model.title); head.append(title);
+    if (model.subtitle) head.append(node('p', model.subtitle, 'gf-ld-sub'));
+    for (const f of model.figs) { const fig = node('div', null, 'gf-ld-fig'); fig.append(node('strong', f.value, 'gf-ld-big'), node('span', f.label, 'gf-ld-figlabel')); figs.append(fig); }
+    chart.append(root); card.append(head, figs, chart); host.append(card); host.setAttribute('aria-label', 'Lobbying, ' + (model.dollars || 'nominal dollars'));
   }
 
   // ---- the footer line: every fact comes from the response (or, before a calculation, from the catalog's anchor entry) -------
@@ -1808,7 +1857,7 @@
         timer = 0; if (!painted || $('giving-forecast').hidden) return;
         const chart = $('gf-chart'), lobby = $('gf-lobby-chart');
         if (account !== 'lobby' && chart.clientWidth && chart.clientWidth !== Number(chart.dataset.drawn)) drawChart(painted.chart, chart, false);
-        if (account === 'lobby' && lobby.clientWidth && (lobby.clientWidth !== Number(lobby.dataset.drawn) || Math.max(240, lobby.clientHeight) !== Number(lobby.dataset.drawnH))) drawLobby(painted.lobby, lobby, false);
+        if (account === 'lobby' && lobby.clientWidth && lobby.clientWidth !== Number(lobby.dataset.drawn)) drawLobby(painted.lobby, lobby, false);
       };
       const observer = new ResizeObserver(() => { if (!timer) timer = requestAnimationFrame(redraw); });
       observer.observe($('gf-chart')); observer.observe($('gf-lobby-chart'));

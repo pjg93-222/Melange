@@ -73,7 +73,6 @@
 .gf-sw-range{width:14px;background:linear-gradient(var(--acu-plum),var(--acu-plum)) center/1.5px 100% no-repeat}
 .gf-sw-range::before,.gf-sw-range::after{content:"";position:absolute;left:3px;right:3px;height:1.5px;background:var(--acu-plum)}
 .gf-sw-range::before{top:0}.gf-sw-range::after{bottom:0}
-.gf-sw-fees{background:var(--chart-series-1)}.gf-sw-inhouse{background:var(--acu-mauve)}
 .gf-progress{position:relative;height:3px;margin:8px 0 0;overflow:hidden;border-radius:2px;background:var(--chart-grid)}
 .gf-progress span{position:absolute;inset:0 auto 0 0;width:38%;border-radius:2px;background:var(--acu-purple);animation:gf-progress 1.1s var(--motion-ease) infinite}
 .giving-forecast .gf-alert{max-width:none;margin:10px 0 0;padding:8px 0 8px 12px;border-left:3px solid var(--chart-negative);color:var(--chart-negative);font:400 13px/18px var(--font-sans)}
@@ -83,6 +82,50 @@
 .gf-chart{position:relative;min-height:240px}
 .gf-lobby-chart{position:relative;min-height:348px;margin-top:8px}
 .gf-lobby-chart>.gf-svg{position:absolute;left:0;top:0;margin-top:0}
+.gf-lobby-chart.is-card{min-height:0}
+/* ---- the lobbying card: Melange's industry card (fec/surfaces/approved/clean/industry-ui.css), its sizes and tokens copied. The industry colour is Melange's own dot colour for the sector (make_lobby_network_html.py .dot-N,
+   with the clean skin's restored.css tokens): credit union dot-0, bank dot-1, crypto dot-2, fintech dot-3, telecom dot-4. Hired firms are 42% of it over #fcf7f4; the partial year is hatched; projected years are the
+   same two colours at 55% inside a 1px dashed outline. The card sits in the chart column: no frame of its own (no card inside a card). ---- */
+.gf-ld,.gf-ld-legend{--ld-c:var(--acu-plum);--ld-tint:color-mix(in srgb,var(--ld-c) 42%,#fcf7f4);--ld-ink:#342649;--ld-muted:#6b5e73;--ld-rule:#d8cbbc;--ld-strong:#bcaaa0;--ld-surface:#fcf7f4;--ld-on-dark:#f7ede4}
+:is(.gf-ld,.gf-ld-legend)[data-sector=credit_union]{--ld-c:#58a6ff}
+:is(.gf-ld,.gf-ld-legend)[data-sector=bank]{--ld-c:#765399}
+:is(.gf-ld,.gf-ld-legend)[data-sector=crypto]{--ld-c:#216444}
+:is(.gf-ld,.gf-ld-legend)[data-sector=fintech]{--ld-c:#d29922}
+:is(.gf-ld,.gf-ld-legend)[data-sector=telecom]{--ld-c:#a12e39}
+.gf-ld{box-sizing:border-box;padding:12px 0 0;font-family:var(--font-sans);color:var(--ld-ink)}
+.gf-ld-title{display:flex;align-items:center;gap:11px;margin:0;font:400 30px/34px var(--font-serif);letter-spacing:0;text-transform:none;color:var(--ld-ink)}
+.gf-ld-dot{display:inline-block;flex:none;width:21px;height:21px;border-radius:50%;background:var(--ld-c)}
+.giving-forecast .gf-ld-sub{max-width:none;margin:1px 0 0;font:400 15px/20px var(--font-sans);color:var(--ld-muted)}
+.gf-ld-figs{display:flex;align-items:stretch;margin-top:15px}
+.gf-ld-fig{display:flex;flex-direction:column;min-width:0}
+.gf-ld-fig:first-child{box-sizing:border-box;width:257px;padding-right:16px;border-right:1px solid var(--ld-rule)}
+.gf-ld-fig+.gf-ld-fig{padding-left:46px}
+.gf-ld-big{font:500 50px/44px var(--font-serif);font-variant-numeric:lining-nums;color:var(--ld-ink);letter-spacing:0;white-space:nowrap}
+.gf-ld-figlabel{margin-top:7px;font:400 16px/22px var(--font-sans);color:var(--ld-ink)}
+.gf-ld-fig+.gf-ld-fig .gf-ld-figlabel{color:var(--ld-muted)}
+.gf-ld-chart{position:relative;min-height:212px;margin-top:14px}
+.gf-ld-chart>svg{display:block;width:100%;overflow:visible}
+.gf-ld-svg text{font-family:var(--font-sans);pointer-events:none}
+.gf-ld-gl{stroke:var(--ld-rule);stroke-width:1}
+.gf-ld-ax{stroke:var(--ld-strong);stroke-width:1}
+.gf-ld-yt{fill:var(--ld-muted);font-size:14px;font-weight:400}
+.gf-ld-xt{fill:var(--ld-ink);font-size:14px;font-weight:400}
+.gf-ld-seg-i{fill:var(--ld-c)}
+.gf-ld-seg-h{fill:var(--ld-tint)}
+.gf-ld-hl{stroke:var(--ld-surface);stroke-width:1.6;opacity:.6}
+.gf-ld-proj{fill-opacity:.55;stroke:var(--ld-c);stroke-width:1;stroke-dasharray:4 3}
+.gf-ld-proj-i{fill:var(--ld-c)}
+.gf-ld-proj-h{fill:var(--ld-tint)}
+.gf-ld-lab-i{fill:var(--ld-on-dark);font-size:14px;font-weight:500}
+.gf-ld-lab-h,.gf-ld-lab-p{fill:var(--ld-ink);font-size:14px;font-weight:500}
+.gf-ld-whisker{fill:none;stroke:var(--ld-c);stroke-width:1.5}
+.gf-ld-whisker-hit{fill:transparent;pointer-events:all}
+.giving-forecast .gf-ld-legend{max-width:none;gap:8px 28px;padding:0;font:400 14px/20px var(--font-sans);color:var(--ld-ink)}
+.gf-ld-legend li{gap:8px;white-space:nowrap}
+.gf-ld-legend i{display:inline-block;flex:none;width:14px;height:14px;border-radius:50%;background:var(--ld-c)}
+.gf-ld-legend .gf-ld-key-h i{background:var(--ld-tint)}
+.gf-ld-legend .gf-ld-key-p{color:var(--ld-muted)}
+.gf-ld-legend .gf-ld-key-p i{box-sizing:border-box;background:color-mix(in srgb,var(--ld-c) 14%,transparent);border:1px dashed var(--ld-c)}
 .giving-forecast p.gf-chart-empty{margin:96px 0;max-width:none;text-align:center;color:var(--muted);font:400 13px/20px var(--font-sans)}
 .giving-forecast p.gf-lobby-note{position:absolute;left:50%;top:calc(50% - 8px);transform:translate(-50%,-50%);box-sizing:border-box;max-width:calc(100% - 28px);margin:0;padding:2px 10px;background:#fff;color:var(--muted);font:400 13px/20px var(--font-sans);text-align:center}
 .giving-forecast .gf-interval-notes{max-width:none;margin:4px 0 0;padding:0;list-style:none;color:var(--muted);font:400 12px/18px var(--font-sans)}
@@ -107,23 +150,10 @@
 .gf-svg .gf-gold{fill:var(--acu-gold)}
 .gf-svg .gf-total-marker{stroke:var(--acu-plum);stroke-width:1.5;stroke-dasharray:4 3}
 .gf-svg .gf-hit{fill:transparent;pointer-events:all}
-.gf-svg .gf-mark,.gf-svg .gf-series{outline:none}
-.gf-svg .gf-mark:focus-visible,.gf-svg .gf-series:focus-visible{outline:2px solid var(--acu-purple);outline-offset:4px}
+.gf-svg .gf-mark{outline:none}
+.gf-svg .gf-mark:focus-visible{outline:2px solid var(--acu-purple);outline-offset:4px}
 .gf-svg .gf-mark:hover :is(.gf-col-anchor,.gf-col-observed),.gf-svg .gf-mark:focus-visible :is(.gf-col-anchor,.gf-col-observed){filter:brightness(1.15)}
 .gf-svg .gf-mark:hover .gf-range{stroke-width:2.1}
-.gf-svg .gf-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1}
-.gf-svg .gf-series-fees .gf-line{stroke:var(--chart-series-1)}
-.gf-svg .gf-series-inhouse .gf-line{stroke:var(--acu-mauve)}
-.gf-svg .gf-dot{stroke:#fff;stroke-width:1.5}
-.gf-svg .gf-series-fees .gf-dot{fill:var(--chart-series-1)}
-.gf-svg .gf-series-inhouse .gf-dot{fill:var(--acu-mauve)}
-.gf-svg .gf-dot.is-base{fill:#fff;stroke-width:2}
-.gf-svg .gf-series-fees .gf-dot.is-base{stroke:var(--chart-series-1)}
-.gf-svg .gf-series-inhouse .gf-dot.is-base{stroke:var(--acu-mauve)}
-.gf-svg .gf-lobby-whisker{fill:none;stroke-width:1.4;opacity:.55}
-.gf-svg .gf-lobby-whisker-95{stroke-width:1;opacity:.4;stroke-dasharray:3 2}
-.gf-svg .gf-series-fees .gf-lobby-whisker{stroke:var(--chart-series-1)}
-.gf-svg .gf-series-inhouse .gf-lobby-whisker{stroke:var(--acu-mauve)}
 
 /* ---- the rail: Assumptions ---- */
 .gf-rail{display:flex;flex-direction:column;min-width:0;padding:22px 28px 18px;border-left:1px solid var(--line)}
@@ -303,7 +333,6 @@
 @keyframes gf-fade{from{opacity:0}to{opacity:1}}
 @keyframes gf-sweep{from{width:50%}}
 @keyframes gf-pop{from{transform:scaleY(0);opacity:0}to{transform:scaleY(1);opacity:1}}
-@keyframes gf-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes gf-progress{from{transform:translateX(-110%)}to{transform:translateX(290%)}}
 @keyframes gf-tip-in{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 .gf-chart:not(.gf-static) .gf-grow{transform-box:fill-box;transform-origin:50% 100%;animation:gf-grow var(--motion) var(--motion-ease) both;animation-delay:calc(var(--i,0) * var(--motion-stagger))}
@@ -311,7 +340,6 @@
 .gf-chart:not(.gf-static) .gf-fade,.gf-lobby-chart:not(.gf-static) .gf-fade{animation:gf-fade calc(var(--motion) * .8) ease-out both;animation-delay:calc((var(--i,0) + 6) * var(--motion-stagger))}
 .gf-mix-body:not(.gf-static) :is(.gf-pd,.gf-pr){animation:gf-sweep var(--motion) var(--motion-ease) both;animation-delay:calc(var(--i,0) * var(--motion-stagger))}
 .gf-mix-body:not(.gf-static) .gf-ptick{transform-origin:50% 50%;animation:gf-pop calc(var(--motion) * .7) var(--motion-ease) both;animation-delay:calc((var(--i,0) + 8) * var(--motion-stagger))}
-.gf-lobby-chart:not(.gf-static) .gf-line{animation:gf-draw calc(var(--motion) * 1.3) ease-out both;animation-delay:calc(var(--i,0) * var(--motion-stagger) * 3)}
 @media(prefers-reduced-motion:reduce){
   .giving-forecast *,.giving-forecast *::before,.giving-forecast *::after{animation:none!important;transition:none!important}
   .gf-progress span{width:100%;opacity:.45}
@@ -332,6 +360,9 @@
   .gf-chart-col{padding:16px 16px 8px}
   .gf-rail{padding:18px 16px 16px}
   .gf-chart-head{flex-wrap:wrap}
+  .gf-ld-figs{flex-wrap:wrap;row-gap:12px}
+  .gf-ld-fig:first-child{width:auto;border-right:0}
+  .gf-ld-fig+.gf-ld-fig{padding-left:0}
   .gf-account{width:100%;margin-left:0}
   .gf-account>button,.gf-view-switch>button{flex:1 1 auto;min-width:0;height:auto;min-height:44px;padding:0 8px;white-space:normal;line-height:1.25}
   .giving-forecast .gf-party{padding:16px}
