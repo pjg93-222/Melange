@@ -548,7 +548,7 @@
    {
     "calculator": true,
     "capabilities": {
-     "control": false,
+     "control": true,
      "lobbying": true,
      "pac": true
     },
@@ -722,9 +722,8 @@
      "B09"
     ],
     "scope": "OpenSecrets B09 whole-industry accounting; separate from company/subindustry report scopes",
-    "withheld": {
-     "control": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
-    }
+    "withheld": {},
+    "share_scoring": "pooled"
    }
   ],
   "not_offered": [
@@ -10941,7 +10940,7 @@
   "scope": "Mentat levels for the industry's tracked companies (the published Mentat report scope); the models only supply the relationships. Report company, donor-role and subindustry filters do not apply.",
   "interval_label": "Ordinary 95% coefficient interval; 95% prediction interval (adds the anchored-step residual variance)"
  },
- "recorded_from": "in-process gf.catalog('2026-10-07') and gf.project(request) on the live bundle (model_version refit-20261007-d861bf29-79211caa154e) and anchors on 2026-10-08, after owner ruling D-116 (company PACs on the panel nowcast R8, no 50/50); requests are the page defaults (IBIS growth defaults, saved outlook, blank prior growth, no lobbying) plus the growth_basis marker the page sends; re-recorded 2026-10-08 after owner ruling D-117 (credit-union company PACs = the published PAC panel's 16-PAC cohort, PAC bundle ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb; banks, general giving and the party split unchanged); re-recorded 2026-10-08 after owner rulings D-118, D-119 and D-121 (presidential-cycle factors in place of the fitted phi: company PACs x1.09 on the 2027-28 step; general giving x1.8635 = 12.56 / 6.74 on both steps, -log u at 2025-26 and +log u at 2027-28; the general-giving figures, the 2027-28 company-PAC figures, the model blocks, the party split's remainder dollars that divide general giving's remainder, and cycle_model_view.presidential_uplift differ from the previous recording); re-recorded 2026-10-08 after the credit-union party-split fix (the company-PAC candidate basis of the split divides the same 16-PAC panel cohort as the dollars: its 2023-24 anchor share, observed D/R to the panel cut 2026-09-26 and R8 remainder; the earlier single-PAC split note is gone; only the credit_unions run's pac_candidate bases, its Company PACs notice and the catalog company_pacs split_note differ from the previous recording); Telecom added 2026-10-08 (owner ruling: OpenSecrets B09, IBISWorld wireless + cable; company PACs = the published panel's 8 telecom PACs): its catalog row, cycle_model_view.growth / company_pacs / g_prior_defaults entries, request and run were recorded in process on the test world (contract example + tests/fixtures/giving_telecom_cycle.json + tests/fixtures/giving_anchors_cycle.json); nothing else of this file changed",
+ "recorded_from": "in-process gf.catalog('2026-10-07') and gf.project(request) on the live bundle (model_version refit-20261007-d861bf29-79211caa154e) and anchors on 2026-10-08, after owner ruling D-116 (company PACs on the panel nowcast R8, no 50/50); requests are the page defaults (IBIS growth defaults, saved outlook, blank prior growth, no lobbying) plus the growth_basis marker the page sends; re-recorded 2026-10-08 after owner ruling D-117 (credit-union company PACs = the published PAC panel's 16-PAC cohort, PAC bundle ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb; banks, general giving and the party split unchanged); re-recorded 2026-10-08 after owner rulings D-118, D-119 and D-121 (presidential-cycle factors in place of the fitted phi: company PACs x1.09 on the 2027-28 step; general giving x1.8635 = 12.56 / 6.74 on both steps, -log u at 2025-26 and +log u at 2027-28; the general-giving figures, the 2027-28 company-PAC figures, the model blocks, the party split's remainder dollars that divide general giving's remainder, and cycle_model_view.presidential_uplift differ from the previous recording); re-recorded 2026-10-08 after the credit-union party-split fix (the company-PAC candidate basis of the split divides the same 16-PAC panel cohort as the dollars: its 2023-24 anchor share, observed D/R to the panel cut 2026-09-26 and R8 remainder; the earlier single-PAC split note is gone; only the credit_unions run's pac_candidate bases, its Company PACs notice and the catalog company_pacs split_note differ from the previous recording); Telecom added 2026-10-08 (owner ruling: OpenSecrets B09, IBISWorld wireless + cable; company PACs = the published panel's 8 telecom PACs): its catalog row, cycle_model_view.growth / company_pacs / g_prior_defaults entries, request and run were recorded in process on the test world (contract example + tests/fixtures/giving_telecom_cycle.json + tests/fixtures/giving_anchors_cycle.json); nothing else of this file changed; Telecom's party split re-recorded 2026-10-09 (owner ruling, option A: scored on the pooled share models; its catalog row now has the control capability, share_scoring 'pooled' and no withheld reason, and its run's shares compute; recorded in process on the same test world; nothing else of this file changed)",
  "requests": {
   "commercial_banks": {
    "as_of": "2026-10-07",
@@ -14796,7 +14795,7 @@
      },
      "shares": {
       "House": {
-       "status": "withheld",
+       "status": "ready",
        "chamber": "House",
        "model_id": "control_House",
        "anchor_cycle": 2024,
@@ -14814,15 +14813,185 @@
         2020,
         2022
        ],
-       "bases": [],
+       "bases": [
+        {
+         "id": "employee_candidate",
+         "label": "Employees' candidate giving",
+         "status": "ready",
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
+         "anchor_share": 0.3775028981972845,
+         "anchor_total_nominal": 770849.87,
+         "anchor_D": 479851.81,
+         "anchor_R": 290998.06,
+         "thin_base": false,
+         "raw_projected_cycle_R_share": 0.3465834667323454,
+         "cycle_coefficient_low": 0.33110952105022345,
+         "cycle_coefficient_high": 0.36205741241446737,
+         "cycle_prediction_low": 0.3108252320288074,
+         "cycle_prediction_high": 0.3823417014358834,
+         "interval_outside_share_range": false,
+         "prediction_outside_share_range": false,
+         "anchor_share_outside_fitted_range": true,
+         "projected_cycle_R_share": 0.3465834667323454,
+         "projected_total_real_2025": 360072.50280720036,
+         "observed": {
+          "through": "2026-06-30",
+          "D": 314821.05,
+          "R": 230410.78,
+          "D_real_2025": 310822.86769347364,
+          "R_real_2025": 227484.59604937493,
+          "face_value": false
+         },
+         "remainder_starts": "2026-07-01",
+         "remainder_status": "budget_inconsistent",
+         "projected_remaining_R_share": null,
+         "projected_remaining_R_real_2025": -102689.41975146325,
+         "projected_remaining_D_real_2025": -75545.54118418496,
+         "remainder_reason": "The projected total and share are incompatible with the giving already observed (a remaining amount is negative). Revise the scenario; no clipping is applied.",
+         "remaining_allocation": {
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated",
+          "remaining_total_real_2025": 126353.74792292099,
+          "remaining_R_real_2025": 43792.11998975084,
+          "remaining_D_real_2025": 82561.62793317014,
+          "remaining_R_share": 0.3465834667323454,
+          "implied_cycle_total_real_2025": 664661.2116657696,
+          "implied_cycle_R_share": 0.40814284221468833,
+          "implied_cycle_R_share_prediction_low": 0.4013451129435969,
+          "implied_cycle_R_share_prediction_high": 0.41494057148577973
+         }
+        },
+        {
+         "id": "pac_candidate",
+         "label": "Roster PACs' candidate giving",
+         "status": "ready",
+         "flags": [],
+         "population": {
+          "kind": "panel_cohort",
+          "count": 8,
+          "label": "Telecom: 8 PACs (published panel cohort)",
+          "observed_to": "2026-09-26",
+          "bundle_sha256": "ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb",
+          "cohort_ids_sha256": "d555b708f2b781afd84a9cbaff59b0bbf82980227326ab05de2d05b32d95afe6"
+         },
+         "anchor_share": 0.5200926284416069,
+         "anchor_total_nominal": 6844550.0,
+         "anchor_D": 3284750.0,
+         "anchor_R": 3559800.0,
+         "thin_base": false,
+         "raw_projected_cycle_R_share": 0.4891731969766678,
+         "cycle_coefficient_low": 0.4736992512945458,
+         "cycle_coefficient_high": 0.5046471426587897,
+         "cycle_prediction_low": 0.4534149622731298,
+         "cycle_prediction_high": 0.5249314316802058,
+         "interval_outside_share_range": false,
+         "prediction_outside_share_range": false,
+         "anchor_share_outside_fitted_range": false,
+         "projected_cycle_R_share": 0.4891731969766678,
+         "projected_total_real_2025": 6952811.69975448,
+         "observed": {
+          "through": "2026-09-26",
+          "D": 1941000.0,
+          "R": 1821500.0,
+          "D_real_2025": 1916349.5776188802,
+          "R_real_2025": 1798367.21052694,
+          "face_value": false
+         },
+         "remainder_starts": "2026-09-27",
+         "remainder_status": "ready",
+         "remainder_reason": null,
+         "projected_remaining_R_share": 0.49497064180323824,
+         "projected_remaining_R_real_2025": 1602761.9166187388,
+         "projected_remaining_D_real_2025": 1635332.9949899218,
+         "remaining_allocation": {
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated",
+          "remaining_total_real_2025": 1203760.953452582,
+          "remaining_R_real_2025": 588847.5939960813,
+          "remaining_D_real_2025": 614913.3594565007,
+          "remaining_R_share": 0.4891731969766678,
+          "implied_cycle_total_real_2025": 4918477.741598402,
+          "implied_cycle_R_share": 0.4853564313879006,
+          "implied_cycle_R_share_prediction_low": 0.47660486861544743,
+          "implied_cycle_R_share_prediction_high": 0.4941079941603538
+         }
+        }
+       ],
        "anchor": "previous_cycle",
        "anchor_label": "Mentat 2023–2024 (previous cycle)",
        "anchor_reason": null,
        "anchor_backtest": null,
-       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+       "share_scoring": "pooled",
+       "share_scoring_note": "Scored on the pooled share model: this industry has no share-model rows of its own, so it takes the pooled slopes and residual variance and the reference level of the sector term (its own level is its Mentat share of the anchor cycle).",
+       "anchor_input": {
+        "cycle": 2024,
+        "p_rep": 0.4491603053435114,
+        "market": "polymarket",
+        "days": 131,
+        "expected_days": 182,
+        "first_day": "2024-02-21",
+        "partial_window": true,
+        "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
+        "current_control": 1,
+        "source": "political_inputs"
+       },
+       "change_pp": -3.091943146493906,
+       "political_change_pp": -0.9875691777072794,
+       "political_low_pp": -1.6510237177949083,
+       "political_high_pp": -0.3241146376196503,
+       "forecast": 0.17752326519337,
+       "baseline_forecast": 0.4491603053435114,
+       "expected_advantaged_party": "D",
+       "materiality": [
+        {
+         "threshold_pp": 1,
+         "toward_expected_party_pp": 0.9875691777072794,
+         "point_meets": false,
+         "ordinary_interval_meets": false
+        },
+        {
+         "threshold_pp": 3,
+         "toward_expected_party_pp": 0.9875691777072794,
+         "point_meets": false,
+         "ordinary_interval_meets": false
+        },
+        {
+         "threshold_pp": 5,
+         "toward_expected_party_pp": 0.9875691777072794,
+         "point_meets": false,
+         "ordinary_interval_meets": false
+        }
+       ],
+       "change_by_term_pp": {
+        "RMajNow": 0.0,
+        "Forecast": -0.9875691777072794,
+        "G_prior": 0.1121769496842093,
+        "Pres": -2.216550918470836
+       },
+       "extrapolation": true,
+       "extrapolated_inputs": [
+        {
+         "term": "Forecast",
+         "value": 0.17752326519337,
+         "fitted_min": 0.2308353648255959,
+         "fitted_max": 0.93219318824138,
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ]
+        }
+       ],
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ]
       },
       "Senate": {
-       "status": "withheld",
+       "status": "ready",
        "chamber": "Senate",
        "model_id": "control_Senate",
        "anchor_cycle": 2024,
@@ -14840,12 +15009,167 @@
         2020,
         2022
        ],
-       "bases": [],
+       "bases": [
+        {
+         "id": "employee_candidate",
+         "label": "Employees' candidate giving",
+         "status": "ready",
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
+         "anchor_share": 0.33767190544163805,
+         "anchor_total_nominal": 1027216.6100000001,
+         "anchor_D": 680354.42,
+         "anchor_R": 346862.19,
+         "thin_base": false,
+         "raw_projected_cycle_R_share": 0.4153464353463874,
+         "cycle_coefficient_low": 0.3948981727490633,
+         "cycle_coefficient_high": 0.43579469794371145,
+         "cycle_prediction_low": 0.2857177216214143,
+         "cycle_prediction_high": 0.5449751490713605,
+         "interval_outside_share_range": false,
+         "prediction_outside_share_range": false,
+         "anchor_share_outside_fitted_range": true,
+         "projected_cycle_R_share": 0.4153464353463874,
+         "projected_total_real_2025": 479824.24345200695,
+         "observed": {
+          "through": "2026-06-30",
+          "D": 457955.11,
+          "R": 195380.66,
+          "D_real_2025": 452139.145603765,
+          "R_real_2025": 192899.3535630593,
+          "face_value": false
+         },
+         "remainder_starts": "2026-07-01",
+         "remainder_status": "budget_inconsistent",
+         "projected_remaining_R_share": null,
+         "projected_remaining_R_real_2025": 6393.93554750894,
+         "projected_remaining_D_real_2025": -171608.19126232626,
+         "remainder_reason": "The projected total and share are incompatible with the giving already observed (a remaining amount is negative). Revise the scenario; no clipping is applied.",
+         "remaining_allocation": {
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated",
+          "remaining_total_real_2025": 168376.06601941498,
+          "remaining_R_real_2025": 69934.398818812,
+          "remaining_D_real_2025": 98441.66720060298,
+          "remaining_R_share": 0.4153464353463874,
+          "implied_cycle_total_real_2025": 813414.5651862393,
+          "implied_cycle_R_share": 0.3231239808469534,
+          "implied_cycle_R_share_prediction_low": 0.29629095646513576,
+          "implied_cycle_R_share_prediction_high": 0.349957005228771
+         }
+        },
+        {
+         "id": "pac_candidate",
+         "label": "Roster PACs' candidate giving",
+         "status": "ready",
+         "flags": [],
+         "population": {
+          "kind": "panel_cohort",
+          "count": 8,
+          "label": "Telecom: 8 PACs (published panel cohort)",
+          "observed_to": "2026-09-26",
+          "bundle_sha256": "ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb",
+          "cohort_ids_sha256": "d555b708f2b781afd84a9cbaff59b0bbf82980227326ab05de2d05b32d95afe6"
+         },
+         "anchor_share": 0.539105246218217,
+         "anchor_total_nominal": 932100.0,
+         "anchor_D": 429600.0,
+         "anchor_R": 502500.0,
+         "thin_base": false,
+         "raw_projected_cycle_R_share": 0.6167797761229663,
+         "cycle_coefficient_low": 0.5963315135256422,
+         "cycle_coefficient_high": 0.6372280387202904,
+         "cycle_prediction_low": 0.4871510623979932,
+         "cycle_prediction_high": 0.7464084898479394,
+         "interval_outside_share_range": false,
+         "prediction_outside_share_range": false,
+         "anchor_share_outside_fitted_range": false,
+         "projected_cycle_R_share": 0.6167797761229663,
+         "projected_total_real_2025": 946843.2234903903,
+         "observed": {
+          "through": "2026-09-26",
+          "D": 169000.0,
+          "R": 463500.0,
+          "D_real_2025": 166853.7241718654,
+          "R_real_2025": 457613.6162938439,
+          "face_value": false
+         },
+         "remainder_starts": "2026-09-27",
+         "remainder_status": "ready",
+         "remainder_reason": null,
+         "projected_remaining_R_share": 0.3920272631077404,
+         "projected_remaining_R_real_2025": 126380.13511410676,
+         "projected_remaining_D_real_2025": 195995.74791057422,
+         "remaining_allocation": {
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated",
+          "remaining_total_real_2025": 163929.78131698235,
+          "remaining_R_real_2025": 101108.5738205752,
+          "remaining_D_real_2025": 62821.20749640715,
+          "remaining_R_share": 0.6167797761229663,
+          "implied_cycle_total_real_2025": 788397.1217826917,
+          "implied_cycle_R_share": 0.7086811641968696,
+          "implied_cycle_R_share_prediction_low": 0.6817277341218245,
+          "implied_cycle_R_share_prediction_high": 0.7356345942719146
+         }
+        }
+       ],
        "anchor": "previous_cycle",
        "anchor_label": "Mentat 2023–2024 (previous cycle)",
        "anchor_reason": null,
        "anchor_backtest": null,
-       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+       "share_scoring": "pooled",
+       "share_scoring_note": "Scored on the pooled share model: this industry has no share-model rows of its own, so it takes the pooled slopes and residual variance and the reference level of the sector term (its own level is its Mentat share of the anchor cycle).",
+       "anchor_input": {
+        "cycle": 2024,
+        "p_rep": 0.7064560439560439,
+        "market": "polymarket",
+        "days": 182,
+        "expected_days": 182,
+        "first_day": "2024-01-01",
+        "partial_window": false,
+        "note": null,
+        "current_control": 0,
+        "source": "political_inputs"
+       },
+       "change_pp": 7.767452990474931,
+       "political_change_pp": -0.5428711055910995,
+       "political_low_pp": -0.9039010127847181,
+       "political_high_pp": -0.18184119839748103,
+       "forecast": 0.557135972375691,
+       "baseline_forecast": 0.7064560439560439,
+       "expected_advantaged_party": "R",
+       "materiality": [
+        {
+         "threshold_pp": 1,
+         "toward_expected_party_pp": -0.5428711055910995,
+         "point_meets": false,
+         "ordinary_interval_meets": false
+        },
+        {
+         "threshold_pp": 3,
+         "toward_expected_party_pp": -0.5428711055910995,
+         "point_meets": false,
+         "ordinary_interval_meets": false
+        },
+        {
+         "threshold_pp": 5,
+         "toward_expected_party_pp": -0.5428711055910995,
+         "point_meets": false,
+         "ordinary_interval_meets": false
+        }
+       ],
+       "change_by_term_pp": {
+        "RMajNow": 10.414698064852656,
+        "Forecast": -0.5428711055910995,
+        "G_prior": 0.1121769496842093,
+        "Pres": -2.216550918470836
+       },
+       "extrapolation": false,
+       "extrapolated_inputs": [],
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ]
       }
      },
      "lobbying": {
@@ -15126,7 +15450,7 @@
      },
      "shares": {
       "House": {
-       "status": "withheld",
+       "status": "needs_inputs",
        "chamber": "House",
        "model_id": "control_House",
        "anchor_cycle": 2024,
@@ -15149,10 +15473,24 @@
        "anchor_label": "Mentat 2023–2024 (previous cycle)",
        "anchor_reason": null,
        "anchor_backtest": null,
-       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+       "share_scoring": "pooled",
+       "share_scoring_note": "Scored on the pooled share model: this industry has no share-model rows of its own, so it takes the pooled slopes and residual variance and the reference level of the sector term (its own level is its Mentat share of the anchor cycle).",
+       "anchor_input": {
+        "cycle": 2024,
+        "p_rep": 0.4491603053435114,
+        "market": "polymarket",
+        "days": 131,
+        "expected_days": 182,
+        "first_day": "2024-02-21",
+        "partial_window": true,
+        "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
+        "current_control": 1,
+        "source": "political_inputs"
+       },
+       "reason": "Enter House current-control assumption, House control score."
       },
       "Senate": {
-       "status": "withheld",
+       "status": "needs_inputs",
        "chamber": "Senate",
        "model_id": "control_Senate",
        "anchor_cycle": 2024,
@@ -15175,7 +15513,21 @@
        "anchor_label": "Mentat 2023–2024 (previous cycle)",
        "anchor_reason": null,
        "anchor_backtest": null,
-       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+       "share_scoring": "pooled",
+       "share_scoring_note": "Scored on the pooled share model: this industry has no share-model rows of its own, so it takes the pooled slopes and residual variance and the reference level of the sector term (its own level is its Mentat share of the anchor cycle).",
+       "anchor_input": {
+        "cycle": 2024,
+        "p_rep": 0.7064560439560439,
+        "market": "polymarket",
+        "days": 182,
+        "expected_days": 182,
+        "first_day": "2024-01-01",
+        "partial_window": false,
+        "note": null,
+        "current_control": 0,
+        "source": "political_inputs"
+       },
+       "reason": "Enter Senate current-control assumption, Senate control score."
       }
      },
      "lobbying": {

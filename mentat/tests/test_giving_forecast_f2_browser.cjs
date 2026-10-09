@@ -1170,7 +1170,7 @@ test('credit-union company PACs (D-117): the page names the 16-PAC panel cohort 
   } finally { await closePage(page); }
 });
 
-test('Telecom (owner ruling 2026-10-08): it is offered with the wireless + cable IBIS defaults, General giving and Company PACs draw (the 8-PAC panel cohort named, its own observed-to date), Lobbying draws, and the party split says why it is withheld', async () => {
+test('Telecom (owner ruling 2026-10-08): it is offered with the wireless + cable IBIS defaults, General giving and Company PACs draw (the 8-PAC panel cohort named, its own observed-to date), Lobbying draws, and the party split is scored on the pooled share models', async () => {
   const PANEL = 'Telecom: 8 PACs (published panel cohort)';
   const page = await open({path: 'cycle'});
   try {
@@ -1198,13 +1198,17 @@ test('Telecom (owner ruling 2026-10-08): it is offered with the wireless + cable
     await page.click('#gf-account-lobby'); await page.waitForTimeout(500);
     const lobby = await chartText(page);
     assert.ok(lobby.length > 20 && !/NaN|undefined/.test(lobby), lobby);
-    // the party split: the chamber model is withheld, so both bases show a dash (an empty track, no bar) and the results table says why
+    // the party split (owner ruling 2026-10-09, option A): scored on the pooled share models, so each chamber draws a bar and a tick for each basis, and the caption is the tick's, not a reason
+    const shares = {house: ['40.8%', '48.5%'], senate: ['32.3%', '70.9%']};
     for (const chamber of ['house', 'senate']) {
-      assert.deepEqual(await page.$$eval('#gf-' + chamber + '-body .gf-bar-dash', all => all.map(el => el.textContent)), ['-', '-'], chamber + ': a dash for each basis');
+      assert.equal(await page.$$eval('#gf-' + chamber + '-body .gf-bar-dash', all => all.length), 0, chamber + ': no dash');
+      assert.deepEqual(await page.$$eval('#gf-' + chamber + '-body .gf-pr em', all => all.map(el => el.textContent)), shares[chamber], chamber + ': the drawn Republican shares');
+      assert.equal(await page.$$eval('#gf-' + chamber + '-body .gf-ptick', all => all.length), 2, chamber + ': a tick on each basis');
     }
-    assert.match(await page.textContent('#gf-party-cap'), /^Not shown: Telecom has a general-giving model only \(owner ruling 2026-10-08, OpenSecrets B09\)/, 'the card says why in sight');
-    assert.match(await page.textContent('#gf-results'), /Telecom has a general-giving model only \(owner ruling 2026-10-08, OpenSecrets B09\)/);
+    assert.equal(await page.textContent('#gf-party-cap'), 'Tick = 2023–24');
+    assert.doesNotMatch(await page.textContent('#gf-results'), /general-giving model only/);
     await openMethods(page);
+    assert.ok((await page.textContent('#gf-warnings')).includes('Scored on the pooled share model.'), 'the Methods fold says the pooled model was used');
     const notes = await page.textContent('#gf-anchors-note');
     assert.ok(notes.includes('Company PACs: ' + PANEL + '; observed to 2026-09-26'), notes);
     assert.ok((await page.textContent('#gf-results')).includes('The 8 PACs of the published panel cohort: own giving to House and Senate candidates'));

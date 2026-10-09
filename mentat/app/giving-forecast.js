@@ -1168,6 +1168,8 @@
       const off = BASES.map(([id, label]) => [label, basisOf(s0, id)]).filter(([, b]) => b && (hasFlag(b, 'anchor_share_outside_fitted_range') || b.anchor_share_outside_fitted_range));
       if (off.length) model.chips.push({kind: INFO, text: 'A Mentat share is outside the shares this model was fitted on.', tip: [H(`${chamber} candidate mix`), ...off.map(([label, b]) => R(`${label}: Mentat ${period(s0.anchor_cycle)} share`, `${percent(b.anchor_share)} (fitted ${s0.fitted_share_range ? range(s0.fitted_share_range[0], s0.fitted_share_range[1], percent) : 'range not given'})`))]});
     }
+    // An industry with no share-model rows of its own (Telecom) is scored on the pooled model; the card says so, in the Methods fold, in the model's own words.
+    if (run && s0 && s0.share_scoring === 'pooled') model.chips.push({kind: INFO, text: 'Scored on the pooled share model.', tip: [H(`${chamber} candidate mix`), N(s0.share_scoring_note || 'Scored on the pooled share model.')]});
     for (const chip of waiverChips(chamber, view)) model.chips.push(chip);
     model.chips.sort((a, b) => (a.kind === WARN ? 0 : 1) - (b.kind === WARN ? 0 : 1));
     if (anchors.length && anchorSide) model.caption = `${period(anchorSide.anchor_cycle)}: ` + (anchors.length === 2 ? `${percent(anchors[0][1])} and ${percent(anchors[1][1])}` : `${percent(anchors[0][1])} (${anchors[0][0].toLowerCase()})`);
@@ -1669,7 +1671,7 @@
   function paintParty() {
     const view = readyRun(result) || readyRun(refRun), pac = view && view.horizons[0].pac;
     $('gf-party-sub').textContent = view ? shortPeriod(view.horizons[0].cycle) + ', expected' : '';
-    const withheld = view ? ['House', 'Senate'].map(chamber => view.horizons[0].shares[chamber]).filter(s => s && s.status === 'withheld' && s.reason) : [];          // a chamber model that is withheld (Telecom: no share model) says why, in sight, instead of leaving dashes
+    const withheld = view ? ['House', 'Senate'].map(chamber => view.horizons[0].shares[chamber]).filter(s => s && s.status === 'withheld' && s.reason) : [];          // a chamber model that is withheld (an industry the bundle gives no share model, and none is scored for) says why, in sight, instead of leaving dashes
     $('gf-party-cap').textContent = withheld.length === 2 ? 'Not shown: ' + withheld[0].reason : pac && pac.anchor_cycle ? 'Tick = ' + shortPeriod(pac.anchor_cycle) : '';
   }
   // Every flag and warning the cycle view used to show as a chip is plain text in the Methods fold, scope first: the model's own words, then what its tooltip said.

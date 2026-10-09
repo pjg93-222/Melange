@@ -97,5 +97,7 @@ unavailable). The calculator reads them through the same code path as the credit
 "Telecom: 8 PACs (published panel cohort)". Their D/R split is pinned in `panel_cohort_split_telecom.json` (one file per cohort; the credit unions' `panel_cohort_split.json` is untouched),
 written by the same `build_panel_cohort_split.py` (it now writes and `--check`s both) from the partisan-dollar lane's ledgers, with the same to-the-cent reconciliation against the panel: the
 2023-24 total $7,834,150 and the observed $4,427,500 to the cut 2026-09-26 (D + R + other / unknown recipients + the lane's unresolved-office pool). One of the cohort's 8 ids (C00377044) has no
-row in either ledger; the file lists it in `silent_committees`. The chamber split itself needs a House / Senate share model, which Telecom does not have (registry `withheld_by_model.control`), so the
-file is ready but the party split stays withheld for Telecom, with that reason, until such a model exists.
+row in either ledger; the file lists it in `silent_committees`. The chamber split itself needs a House / Senate share model, which Telecom does not have of its own (registry `withheld_by_model.control`: no B09 recipient capture in the
+refit). Since the owner ruling of 2026-10-09 (option A) it is SCORED on the pooled share models every industry uses (`POOLED_SHARE_SCORED` in `app/giving_forecast.py`): the employees' basis divides
+Telecom's Mentat candidate receipts, the company-PAC basis this cohort's D / R; the pooled coefficients, the pooled residual variance and the reference level of the sector term (the models are
+applied as a change from the anchor cycle, so Intercept and the industry terms are 0 in it) are all that is used, and the Methods fold says so.

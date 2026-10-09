@@ -1009,7 +1009,7 @@ test('company PACs, credit unions (D-117): the chart and the Methods fold name t
   assert.ok(oldPac.flags.some(f => /^Coverage cut back/.test(f.text)));
 });
 
-test('Telecom (owner ruling 2026-10-08, OpenSecrets B09 and IBISWorld wireless + cable): general giving and company PACs read like the other industries, the company PACs name "Telecom: 8 PACs (published panel cohort)", lobbying is there, and the party split is withheld with its reason', () => {
+test('Telecom (owner ruling 2026-10-08, OpenSecrets B09 and IBISWorld wireless + cable): general giving and company PACs read like the other industries, the company PACs name "Telecom: 8 PACs (published panel cohort)", lobbying is there, and the party split is scored on the pooled share models', () => {
   const TEL = CYC.telecom, PANEL = 'Telecom: 8 PACs (published panel cohort)';
   assert.equal(TEL.status, 'ready');
   const {t, els} = cycleSession('telecom');
@@ -1037,10 +1037,23 @@ test('Telecom (owner ruling 2026-10-08, OpenSecrets B09 and IBISWorld wireless +
   assert.equal(lobby.state, 'ready'); assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['telecom', 'Telecom', '23 organizations · 479 named lobbyists']);
   assert.deepEqual(plain(lobby.figs), [{value: '$139.4M', label: '2025 total lobbying spend'}, {value: '$69.7M', label: '2026 so far, through Q2'}]);
   assert.deepEqual(plain(lobby.bars.map(b => b.label)), ['2021', '2022', '2023', '2024', '2025', '2026 partial', '2026 projected', '2027 projected', '2028 projected']);
-  // the party split: the chamber model is withheld, so each row says why instead of drawing a bar
+  // the party split (owner ruling 2026-10-09, option A): scored on the pooled share models, so both bases of both chambers draw a bar, the drawn share is the implied full-cycle one, the tick is
+  // Mentat's 2023-24 share, and the Methods fold says in one note that the pooled model was used
+  const drawn = {House: {employee_candidate: 0.40814284221468833, pac_candidate: 0.48535643138790063}, Senate: {employee_candidate: 0.3231239808469534, pac_candidate: 0.7086811641968696}};
   for (const chamber of ['House', 'Senate']) {
     const mix = t.mixModel(TEL, TEL, chamber);
-    assert.ok(mix.rows.length > 0 && mix.rows.every(r => r.state === 'missing' && /general-giving model only/.test(r.reason)), chamber);
+    assert.equal(mix.rows.length, 2, chamber);
+    for (const r of mix.rows) {
+      const b = basis(TEL, 0, chamber, r.id);
+      assert.equal(r.state, 'ready', chamber + ' ' + r.id);
+      assert.equal(r.share, b.remaining_allocation.implied_cycle_R_share); assert.ok(Math.abs(r.share - drawn[chamber][r.id]) < 1e-12, chamber + ' ' + r.id);
+      assert.equal(r.anchorShare, b.anchor_share); assert.equal(r.conditioned, true);
+    }
+    const note = mix.chips.find(c => c.text === 'Scored on the pooled share model.');
+    assert.ok(note && note.kind === NEUTRAL, chamber + ': the pooled-model note');
+    assert.match(texts(note.tip), /no share-model rows of its own/);
+    assert.equal(mix.chips.filter(c => c.kind === AMBER).length, 0, chamber + ': no warning');
+    assert.equal(chipTexts(t.mixModel(CYC.banks, CYC.banks, chamber).chips).includes('Scored on the pooled share model.'), false, 'an industry with rows of its own carries no such note');
   }
   // the whole answer renders, nothing prints NaN, null or undefined
   t.buildInputs(); assert.doesNotThrow(() => t.render(clone(TEL)));

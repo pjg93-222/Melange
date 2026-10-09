@@ -499,12 +499,47 @@ def _v2_contract_problems(b):
     return problems
 
 
+# Owner ruling 2026-10-09 (Paul, option A: "keep it uniform"): Telecom's House / Senate party split is scored on the POOLED share models every industry uses (control_House, control_Senate),
+# not withheld. The bundle withholds it only because Telecom has no share-model rows of its own (the refit captures no B09 recipients). The models are applied as a change from the
+# anchor cycle's inputs (_v2_share_effect), and the sector terms are 0 in that change, so Telecom takes the reference level of the coding (all industry dummies 0; the refit's design, rf_stepwise.R
+# rf_matrices, drops the alphabetically first sector, auto_light_duty_manufacturing) and its own level is its own Mentat anchor share. The residual variance is the pooled one, which the
+# bundle records identically for every industry. Nothing else of the bundle changes.
+POOLED_SHARE_SCORED = ('telecom',)
+POOLED_SHARE_NOTE = ('Scored on the pooled share model: this industry has no share-model rows of its own, so it takes the pooled slopes and residual variance and the reference level of the sector term '
+                     '(its own level is its Mentat share of the anchor cycle).')
+
+
+def _pooled_scored(b, row):
+    """`row` as the console serves it: an industry in POOLED_SHARE_SCORED that the bundle withholds the chamber split from only for want of share-model rows has the control capability on
+    and no withheld reason, marked share_scoring 'pooled'. Any other row, and a bundle whose share models are not pooled, is returned as it is."""
+    models = [b['share_models'].get('control_' + chamber) for chamber in CHAMBERS]
+    if (row['id'] not in POOLED_SHARE_SCORED or row['capabilities']['control'] or not row['capabilities']['pac'] or row.get('lobbying_only')
+            or not all(m and m['application'] == 'pooled' for m in models)):
+        return row
+    return dict(row, capabilities=dict(row['capabilities'], control=True), withheld={k: v for k, v in row['withheld'].items() if k != 'control'}, share_scoring='pooled')
+
+
+def _pooled_step(m):
+    """The pooled model's anchored-step residual (the previous-cycle step) for an industry with no step of its own: the one step the bundle records for every industry, or None when they differ."""
+    steps = {json.dumps(e['prediction']['previous_cycle'], sort_keys=True) for e in m['anchors'].values()}
+    return json.loads(steps.pop()) if len(steps) == 1 else None
+
+
+def _fitted_growth(b, m, ind, key):
+    """The growth values (%) the share model was fitted on, in this industry's units: its own rows, or, with none, the pooled rows' standardised growth put back on this industry's mean and sd."""
+    own = [r[key] for r in m['history'] if r['industry'] == ind['id']]
+    if own:
+        return own
+    z = lambda r: (r[key] - b['industries'][r['industry']]['growth_mean']) / b['industries'][r['industry']]['growth_sd']
+    return [ind['growth_mean'] + ind['growth_sd'] * z(r) for r in m['history']]
+
+
 def _v2_offered(b):
     """(offered industries, not offered): an industry without Mentat data is not displayed; it stays in the estimation samples."""
     offered, not_offered = [], []
     for ident, row in b['industries'].items():
         if row['calculator'] and row['mentat_key']:
-            offered.append(row)
+            offered.append(_pooled_scored(b, row))
         else:
             reason = 'No Mentat data for this industry; it stays in the estimation samples but is not displayed.' if not row['mentat_key'] else 'Not offered by the model package.'
             not_offered.append(dict(id=ident, label=row['label'], reason=reason))
@@ -972,12 +1007,15 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
                specification=m['specification'], n=m['n'], training_cycles=m['training_cycles'], bases=[],
                anchor=anchor_id, anchor_label='Mentat ' + _period(a) + ' (' + SHARE_ANCHORS[anchor_id]['label'] + ')',
                anchor_reason=entry['reason'] if entry else None, anchor_backtest=copy.deepcopy(entry['backtest']) if entry else None)
+    if ind.get('share_scoring') == 'pooled':
+        out.update(share_scoring='pooled', share_scoring_note=POOLED_SHARE_NOTE)
     if not ind['capabilities']['control']:
         return out | dict(status='withheld', reason=ind['withheld'].get('control') or 'The control model is withheld for this industry.')
     if a > ctx['open_cycle'] - 2:
         return out | dict(status='unavailable', reason='Mentat\'s ' + _period(a) + ' cycle is still open in the anchor snapshot, so it cannot anchor this share.')
+    pooled = ind.get('share_scoring') == 'pooled'          # no share-model rows of its own: the pooled step and fitted range stand in (POOLED_SHARE_SCORED)
     found = _share_anchor_inputs(b, m, ind, chamber, a)
-    step = m['prediction']['industries'].get(ind['id'])
+    step = m['prediction']['industries'].get(ind['id']) or (_pooled_step(m) if pooled else None)
     if found is None or step is None:
         return out | dict(status='withheld', reason='The model package has no anchor-cycle control input, growth history or residual variance for this industry.')
     at_anchor, out['anchor_input'] = found
@@ -1001,9 +1039,8 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
                materiality=[dict(threshold_pp=t, toward_expected_party_pp=directed if favored else None, point_meets=directed >= t if favored else None,
                                  ordinary_interval_meets=directed_low >= t if favored else None) for t in (1, 3, 5)])
     out['change_by_term_pp'] = _v2_share_terms(m, ind['id'], target, at_anchor)
-    hist = [r for r in m['history'] if r['industry'] == ind['id']]
-    fitted = [('Forecast', forecast, [r['forecast'] for r in m['history']]), ('G_prior', prior, [r['prior_growth_pct'] for r in hist]),
-              ('G_current', growth, [r['growth_pct'] for r in hist])]
+    fitted = [('Forecast', forecast, [r['forecast'] for r in m['history']]), ('G_prior', prior, _fitted_growth(b, m, ind, 'prior_growth_pct')),
+              ('G_current', growth, _fitted_growth(b, m, ind, 'growth_pct'))]
     out['extrapolation'] = any(x is not None and (x < min(xs) - 1e-9 or x > max(xs) + 1e-9) for term, x, xs in fitted if term in m['terms'])
     # Name each input outside the fitted range (values as entered: control as a probability, growth in %), so the flag says which and how far.
     out['extrapolated_inputs'] = [dict(term=term, value=x, fitted_min=min(xs), fitted_max=max(xs), fitted_cycles=m['training_cycles'])

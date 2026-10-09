@@ -944,11 +944,10 @@ class TelecomTests(unittest.TestCase):
     # ---- offered, with its defaults ----------------------------------------------------------------------------------------------------------------------------------------------
     def test_telecom_is_offered_for_general_giving_company_pacs_and_lobbying_and_is_no_longer_lobbying_only(self):
         row = next(i for i in self.cat['industries'] if i['id'] == TELECOM)
-        self.assertEqual(row['capabilities'], dict(pac=True, control=False, lobbying=True))
+        self.assertEqual(row['capabilities'], dict(pac=True, control=True, lobbying=True))          # the chamber split is scored on the pooled share models (owner ruling 2026-10-09, option A)
         self.assertFalse(row['lobbying_only'])
         self.assertEqual((row['code'], row['opensecrets_codes'], row['ibisworld_code']), ('B09', ['B09'], '51721+51711a'))
-        self.assertEqual(list(row['withheld']), ['control'])          # the giving model is not withheld any more; the chamber split is, with its reason
-        self.assertIn('general-giving model only', row['withheld']['control'])
+        self.assertEqual((row['withheld'], row['share_scoring']), ({}, 'pooled'))          # nothing is withheld any more
         self.assertTrue(any('B08 Telephone Utilities left out' in c for c in row['caveats']))
         self.assertEqual(self.out['status'], 'ready')
         for h in self.out['horizons']:
@@ -1171,13 +1170,102 @@ class TelecomTests(unittest.TestCase):
                 self.assertEqual(block['status'], 'ready')          # the dollars do not need the split
                 self.assertNotIn('D', block['cycles']['2024'].get('House', {}))
 
-    def test_the_chamber_split_is_withheld_with_its_stated_reason_no_control_model_is_made_up(self):
+    # ---- the party split: scored on the pooled share models (owner ruling 2026-10-09, option A) -----------------------------------------------------------------------------
+    def test_the_chamber_split_is_computed_not_withheld_and_says_it_is_scored_on_the_pooled_model(self):
         for h in self.full['horizons']:
             for chamber in gf.CHAMBERS:
                 s = h['shares'][chamber]
-                self.assertEqual(s['status'], 'withheld')
-                self.assertIn('general-giving model only', s['reason'])
-                self.assertEqual(s['bases'], [])
+                self.assertEqual((s['status'], s.get('reason'), s['model_id'], s['share_scoring']), ('ready', None, 'control_' + chamber, 'pooled'))
+                self.assertEqual(s['share_scoring_note'], gf.POOLED_SHARE_NOTE)
+                self.assertEqual([b['id'] for b in s['bases']], ['employee_candidate', 'pac_candidate'])
+                self.assertTrue(all(b['status'] == 'ready' for b in s['bases']))
+        self.assertNotIn('share_scoring', self.other[BANKS]['horizons'][0]['shares']['House'])          # an industry with share-model rows of its own is scored as before
+
+    def test_a_telecom_share_is_the_mentat_anchor_share_plus_the_pooled_models_change_by_hand(self):
+        """House, employees, 2025-26: raw share = R/(D+R) of Telecom's 2023-24 employee giving + sum(beta x (target - anchor input)) over the pooled model's non-sector terms; the sector terms
+        (Intercept, industry:*) are 0 in the change, so Telecom, which has none of its own, takes the reference level and the pooled coefficients are all that is used. Coefficients, covariance and
+        the pooled step are read straight from the bundle, the inputs from the anchors, the fixture's growth history and the saved outlook, not from the calculator."""
+        model, h = self.bundle['share_models']['control_House'], self.full['horizons'][0]
+        terms, cov = model['terms'], model['covariance']
+        beta = dict(zip(terms, model['beta']))
+        row = self.fx['anchor']['candidate_receipts']['cycles']['2024']['House']
+        share_anchor = row['R'] / (row['D'] + row['R'])
+        ind = self.fx['industry']
+        hist = {r['cycle']: r for r in ind['history']}
+        z = lambda pct: (pct - ind['growth_mean']) / ind['growth_sd']
+        outlook = self.bundle['saved_outlook']['control']['House']
+        political = self.bundle['political_inputs']['anchor_cycles']['2024']
+        target = dict(RMajNow=1., Forecast=outlook['value'] / 100, G_prior=z(hist[2024]['growth_pct']), Pres=0.)          # 2026: the 2024 growth is the prior cycle's; a midterm
+        anchor = dict(RMajNow=float(political['current_control']['House']), Forecast=political['House']['p_rep'], G_prior=z(hist[2024]['prior_growth_pct']), Pres=1.)          # 2024
+        delta = [0. if t == 'Intercept' or t.startswith('industry:') else target[t] - anchor[t] for t in terms]
+        effect = sum(beta[t] * d for t, d in zip(terms, delta))
+        var = sum(delta[i] * cov[i][j] * delta[j] for i in range(len(terms)) for j in range(len(terms)))
+        step = next(iter(model['anchors'].values()))['prediction']['previous_cycle']          # the pooled residual: the bundle records the same one for every industry
+        self.assertEqual({json.dumps(e['prediction']['previous_cycle'], sort_keys=True) for e in model['anchors'].values()}, {json.dumps(step, sort_keys=True)})
+        half = step['critical_95'] * math.sqrt(var + 1 * step['sigma2'])
+        got = next(b for b in h['shares']['House']['bases'] if b['id'] == 'employee_candidate')
+        self.assertAlmostEqual(got['anchor_share'], share_anchor, delta=1e-15)
+        self.assertAlmostEqual(got['raw_projected_cycle_R_share'], share_anchor + effect, delta=1e-12)
+        self.assertAlmostEqual(got['projected_cycle_R_share'], share_anchor + effect, delta=1e-12)
+        self.assertAlmostEqual(got['cycle_prediction_low'], share_anchor + effect - half, delta=1e-12)
+        self.assertAlmostEqual(got['cycle_prediction_high'], share_anchor + effect + half, delta=1e-12)
+        self.assertAlmostEqual(h['shares']['House']['change_pp'], 100 * effect, delta=1e-10)
+        self.assertAlmostEqual(got['anchor_total_nominal'], row['D'] + row['R'], delta=1e-9)
+        by_term = h['shares']['House']['change_by_term_pp']
+        self.assertEqual(sorted(by_term), ['Forecast', 'G_prior', 'Pres', 'RMajNow'])          # no Intercept and no industry term: the sector level does not move the share
+        self.assertEqual(by_term['RMajNow'], 0.)          # House control is Republican before both elections
+
+    def test_the_sector_coefficients_do_not_move_telecoms_split_it_takes_the_reference_level(self):
+        """The refit codes the sector as treatment dummies against the first sector alphabetically (no dummy for it): the pooled models are applied as a CHANGE from the anchor cycle, in which
+        Intercept and industry:* are 0. Shift every sector coefficient of both models by a lot: Telecom's whole split is exactly what it was."""
+        bundle, anchors = telecom_files()
+        for model in (bundle['share_models']['control_House'], bundle['share_models']['control_Senate']):
+            self.assertEqual([t for t in model['terms'] if t.startswith('industry:')], ['industry:commercial_banks', 'industry:credit_unions'])          # no dummy for the reference sector
+            model['beta'] = [x + 0.4 if t == 'Intercept' or t.startswith('industry:') else x for t, x in zip(model['terms'], model['beta'])]
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp, bundle=bundle, anchors=anchors) as world:
+            shifted = gf.project(full_request(TELECOM, world.bundle))
+        split = lambda out: json.dumps({c: [h['shares'][c] for h in out['horizons']] for c in gf.CHAMBERS}, sort_keys=True)
+        self.assertEqual(split(shifted), split(self.full))
+
+    def test_the_pooled_scoring_is_for_the_named_industry_only_and_only_for_pooled_share_models(self):
+        bundle, _anchors = telecom_files()
+        row = bundle['industries'][TELECOM]
+        self.assertEqual(gf._pooled_scored(bundle, row)['capabilities']['control'], True)
+        self.assertEqual(row['capabilities']['control'], False)          # the bundle's own row is not modified
+        for edit, why in ((lambda b: b['share_models']['control_House'].update(application='offset'), 'a share model that is not pooled'),
+                          (lambda b: b['industries'][TELECOM].update(lobbying_only=True), 'a lobbying-only industry'),
+                          (lambda b: b['industries'][TELECOM].update(id='crypto'), 'an industry that is not named')):
+            doc = copy.deepcopy(bundle)
+            edit(doc)
+            with self.subTest(why):
+                got = gf._pooled_scored(doc, doc['industries'][TELECOM])
+                self.assertIs(got, doc['industries'][TELECOM])
+                self.assertEqual(got['capabilities']['control'], False)
+                self.assertIn('control', got['withheld'])
+        done = copy.deepcopy(bundle)          # a bundle that already gives the industry a control capability is served as it is
+        done['industries'][TELECOM]['capabilities']['control'] = True
+        self.assertIs(gf._pooled_scored(done, done['industries'][TELECOM]), done['industries'][TELECOM])
+
+    def test_telecoms_fitted_range_is_the_pooled_rows_in_its_own_growth_units(self):
+        """With no rows of its own, Telecom's growth is checked against the pooled rows' standardised growth put back on its mean and sd (the model sees z-scores)."""
+        model, ind = self.bundle['share_models']['control_House'], self.fx['industry']
+        got = gf._fitted_growth(self.bundle, model, ind, 'prior_growth_pct')
+        self.assertEqual(len(got), len(model['history']))
+        for r, x in zip(model['history'], got):
+            other = self.bundle['industries'][r['industry']]
+            self.assertAlmostEqual((x - ind['growth_mean']) / ind['growth_sd'], (r['prior_growth_pct'] - other['growth_mean']) / other['growth_sd'], delta=1e-12)
+        own = gf._fitted_growth(self.bundle, model, self.bundle['industries'][BANKS], 'prior_growth_pct')          # an industry with rows keeps its own raw values
+        self.assertEqual(own, [r['prior_growth_pct'] for r in model['history'] if r['industry'] == BANKS])
+
+    def test_telecoms_company_pac_basis_divides_the_panel_cohort_and_its_employee_basis_the_mentat_receipts(self):
+        h = self.full['horizons'][0]
+        for chamber in gf.CHAMBERS:
+            employees, pacs = h['shares'][chamber]['bases']
+            row = self.fx['anchor']['candidate_receipts']['cycles']['2024'][chamber]
+            self.assertAlmostEqual(employees['anchor_share'], row['R'] / (row['D'] + row['R']), delta=1e-15)
+            d, r = self.SPLIT['anchor'][chamber]['D'] / 100., self.SPLIT['anchor'][chamber]['R'] / 100.
+            self.assertAlmostEqual(pacs['anchor_share'], r / (d + r), delta=1e-15)          # the 8-PAC cohort's own D / R, in cents -> dollars
+            self.assertEqual(pacs['population']['label'], 'Telecom: 8 PACs (published panel cohort)')
 
     # ---- nothing else moves ------------------------------------------------------------------------------------------------------------------------------------------------------
     def test_banks_credit_unions_and_property_casualty_are_unchanged_by_adding_telecom(self):
