@@ -734,6 +734,8 @@
     if (m.observed) out.observed = Object.assign({}, m.observed, {amount_real_2025: m.nominal.observed != null ? m.nominal.observed : m.observed.amount_nominal});
     return out;
   }
+  // The Party split's amounts are 2025 dollars; in nominal dollars they are multiplied by the open cycle's own `nominal.factor` (sent with its measures), here and nowhere else. An answer without one stays in 2025 dollars.
+  const splitUsd = horizon => { const m = (horizon && horizon.pac && horizon.pac.measures || []).find(x => x.nominal && x.nominal.factor), factor = m ? m.nominal.factor : 1; return value => money(value != null && dollars === 'nominal' ? value * factor : value); };
 
   // ---- the cycle chart: model first (pure, tested), drawing second -------------------------------------------------------
   function measureOf(horizon, accountId) {
@@ -1083,8 +1085,8 @@
   const MODEL_CHANGE_BY_INPUT = 'Model change by input, before conditioning on the giving already observed';
   // The tooltip of one bar: what the bar says, where it comes from, and what to watch. The slope rule, the anchor's reason, the control input and the
   // coefficient interval are printed with the rest of the numbers in "Sources and notes".
-  function mixTip(chamber, label, s0, b0, b1, curPeriod, nextPeriod) {
-    const lines = [H(`${chamber} · ${b0.label || label}`)];
+  function mixTip(chamber, label, s0, b0, b1, curPeriod, nextPeriod, usd) {
+    const lines = [H(`${chamber} · ${b0.label || label}`)], seenRD = o => `R ${usd(o.R_real_2025 != null ? o.R_real_2025 : o.R)} · D ${usd(o.D_real_2025 != null ? o.D_real_2025 : o.D)}${o.face_value ? ' (face value)' : ''}`;
     if (b0.population) lines.push(R('Population', b0.population.label));          // the credit unions' company PACs: the published panel's 16-PAC cohort, as on the dollars chart
     const alloc = allocationOf(b0);
     if (b0.status === 'ready') {
@@ -1092,15 +1094,15 @@
         const seen = b0.observed;
         lines.push(R(`${curPeriod} Republican share, full cycle`, percent(alloc.implied_cycle_R_share)));
         lines.push(R('95% prediction interval', range(alloc.implied_cycle_R_share_prediction_low, alloc.implied_cycle_R_share_prediction_high, percent)));
-        if (seen) lines.push(R(`Observed through ${seen.through}`, `R ${money(seen.R_real_2025 != null ? seen.R_real_2025 : seen.R)} · D ${money(seen.D_real_2025 != null ? seen.D_real_2025 : seen.D)}${seen.face_value ? ' (face value)' : ''}`));
-        lines.push(R('Remaining' + (b0.remainder_starts ? ' from ' + b0.remainder_starts : '') + ' (median)', `R ${money(alloc.remaining_R_real_2025)} · D ${money(alloc.remaining_D_real_2025)} of ${money(alloc.remaining_total_real_2025)}`));
+        if (seen) lines.push(R(`Observed through ${seen.through}`, seenRD(seen)));
+        lines.push(R('Remaining' + (b0.remainder_starts ? ' from ' + b0.remainder_starts : '') + ' (median)', `R ${usd(alloc.remaining_R_real_2025)} · D ${usd(alloc.remaining_D_real_2025)} of ${usd(alloc.remaining_total_real_2025)}`));
         lines.push(R('Projected share, applied to the remaining giving', percent(alloc.remaining_R_share)));
       } else {
         lines.push(R(`${curPeriod} Republican share (full cycle)`, percent(b0.projected_cycle_R_share)));
         lines.push(R('Prediction interval', range(b0.cycle_prediction_low, b0.cycle_prediction_high, percent)));
         if (b0.projected_remaining_R_share != null) lines.push(R('Share of the remaining giving', `${percent(b0.projected_remaining_R_share)} (from ${b0.remainder_starts})`));
-        if (b0.observed) lines.push(R(`Observed through ${b0.observed.through}`, `R ${money(b0.observed.R)} · D ${money(b0.observed.D)}${b0.observed.face_value ? ' (face value)' : ''}`));
-        if (b0.remainder_status === 'ready') lines.push(R('Remaining allocation', `R ${money(b0.projected_remaining_R_real_2025)} · D ${money(b0.projected_remaining_D_real_2025)} of a projected ${money(b0.projected_total_real_2025)} two-party total`));
+        if (b0.observed) lines.push(R(`Observed through ${b0.observed.through}`, seenRD(b0.observed)));
+        if (b0.remainder_status === 'ready') lines.push(R('Remaining allocation', `R ${usd(b0.projected_remaining_R_real_2025)} · D ${usd(b0.projected_remaining_D_real_2025)} of a projected ${usd(b0.projected_total_real_2025)} two-party total`));
       }
       if (b1 && b1.status === 'ready') lines.push(R(`${nextPeriod} Republican share (full cycle)`, percent(b1.projected_cycle_R_share)));
       lines.push(R(`Mentat ${period(s0.anchor_cycle)} share`, percent(b0.anchor_share)));
@@ -1117,10 +1119,10 @@
     } else lines.push(N(b0.reason || s0.reason || 'Not shown.', WARN));
     if (b0.remainder_status === 'budget_inconsistent') {
       if (alloc) {
-        lines.push(N(`Before conditioning, the model's projected two-party total (${money(b0.projected_total_real_2025)}) was below the giving already observed, so subtracting gave negative remaining amounts (R ${money(b0.projected_remaining_R_real_2025)} · D ${money(b0.projected_remaining_D_real_2025)}). The amounts shown are conditioned on the giving already observed.`));
+        lines.push(N(`Before conditioning, the model's projected two-party total (${usd(b0.projected_total_real_2025)}) was below the giving already observed, so subtracting gave negative remaining amounts (R ${usd(b0.projected_remaining_R_real_2025)} · D ${usd(b0.projected_remaining_D_real_2025)}). The amounts shown are conditioned on the giving already observed.`));
       } else {
         lines.push(N('budget_inconsistent: ' + b0.remainder_reason, WARN));
-        lines.push(R('Projected total, remaining (not clipped)', `${money(b0.projected_total_real_2025)}; R ${money(b0.projected_remaining_R_real_2025)} · D ${money(b0.projected_remaining_D_real_2025)}`));
+        lines.push(R('Projected total, remaining (not clipped)', `${usd(b0.projected_total_real_2025)}; R ${usd(b0.projected_remaining_R_real_2025)} · D ${usd(b0.projected_remaining_D_real_2025)}`));
       }
     } else if (['needs_inputs', 'no_observed', 'cycle_closed'].includes(b0.remainder_status)) lines.push(N(b0.remainder_reason));
     if (b0.thin_base) lines.push(N(`Thin base: ${money(b0.anchor_total_nominal)} of two-party ${chamber} giving in ${period(s0.anchor_cycle)} (under ${money(100000)}).`));
@@ -1141,7 +1143,7 @@
     if (!view) return model;
     const s0 = run ? run.horizons[0].shares[chamber] : null, s1 = run ? run.horizons[1].shares[chamber] : null, sBase = base ? base.horizons[0].shares[chamber] : null;
     const anchorSide = s0 && s0.anchor_cycle != null ? s0 : sBase;
-    const curPeriod = period(view.horizons[0].cycle), nextPeriod = period(view.horizons[1].cycle);
+    const curPeriod = period(view.horizons[0].cycle), nextPeriod = period(view.horizons[1].cycle), usd = splitUsd(view.horizons[0]);
     const anchors = [], inconsistent = [], thin = [], outside = [];
     for (const [id, label] of BASES) {
       const b0 = basisOf(s0, id), b1 = basisOf(s1, id), bBase = basisOf(sBase, id), anchorShare = (b0 && b0.anchor_share != null ? b0 : bBase && bBase.anchor_share != null ? bBase : {}).anchor_share;
@@ -1158,7 +1160,7 @@
           // The interval drawn for this row (the tooltip's 95% interval) can leave 0-100% on a thin base: drawn as returned, never clipped, and flagged.
           row.wide = (row.low != null && row.low < -1e-9) || (row.high != null && row.high > 1 + 1e-9);
         } else { row.state = 'missing'; row.reason = (b0 && b0.reason) || (s0 && s0.reason) || 'Enter the control inputs.'; }
-        row.tip = b0 ? mixTip(chamber, label, s0, b0, b1, curPeriod, nextPeriod) : [H(`${chamber} · ${label}`), N(row.reason, WARN)];
+        row.tip = b0 ? mixTip(chamber, label, s0, b0, b1, curPeriod, nextPeriod, usd) : [H(`${chamber} · ${label}`), N(row.reason, WARN)];
         row.aria = row.state === 'ready'
           ? `${chamber} ${label}: ${row.conditioned ? 'implied full-cycle' : 'projected'} ${percent(row.share)} Republican share for ${curPeriod}${row.next != null ? ', ' + percent(row.next) + ' in ' + nextPeriod : ''}${row.flagged ? '. Budget inconsistent: revise the scenario' : ''}${row.wide ? '. Share interval extends outside 0-100%' : ''}`
           : `${chamber} ${label}: ${row.reason}`;
@@ -1185,7 +1187,7 @@
     // Without the model fix the legacy remainder is negative: the chip says so and the numbers stay in the tooltip, unclipped.
     if (inconsistent.length) {
       const tip = [H(`${chamber} · budget inconsistent`)];
-      for (const [label, b] of inconsistent) tip.push(N(`${label}: budget_inconsistent: ${b.remainder_reason}`, WARN), R(`${label}: projected total; remaining, not clipped`, `${money(b.projected_total_real_2025)}; R ${money(b.projected_remaining_R_real_2025)} · D ${money(b.projected_remaining_D_real_2025)}`));
+      for (const [label, b] of inconsistent) tip.push(N(`${label}: budget_inconsistent: ${b.remainder_reason}`, WARN), R(`${label}: projected total; remaining, not clipped`, `${usd(b.projected_total_real_2025)}; R ${usd(b.projected_remaining_R_real_2025)} · D ${usd(b.projected_remaining_D_real_2025)}`));
       model.chips.push({kind: WARN, text: BUDGET_TEXT, tip});
     }
     if (run && s0 && s0.extrapolation) {
@@ -1825,6 +1827,8 @@
     if (!canPaint() || !painted) return;
     hideTip();
     if (account !== 'lobby') { painted.chart = chartModel(result, refRun, barAccount()); paintAccountChrome(painted); drawChart(painted.chart, $('gf-chart'), true); }
+    painted.mixes = chambers.map(chamber => mixModel(result, refRun, chamber));          // the Party split's tooltips and notes carry dollars too
+    painted.mixes.forEach(mix => drawMix(mix, $('gf-' + mix.chamber.toLowerCase() + '-body'), false));
     paintWarnings(painted);
   }
   // The levels Mentat already holds, read with the anchor cycle's own growth and control (no change from the previous cycle). Only the

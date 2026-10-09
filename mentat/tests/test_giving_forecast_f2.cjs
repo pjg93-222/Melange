@@ -51,7 +51,7 @@ function load(fetchImpl = () => {}, timers = {setTimeout, clearTimeout}, storage
   let src = fs.readFileSync(SOURCE, 'utf8');
   assert.match(src, /\}\)\(\);\s*$/, 'unexpected file ending');
   src = src.replace(/\}\)\(\);\s*$/, `globalThis.__t={render,renderEvidence,niceScale,axisLabel,chartModel,mixModel,lobbyModel,footerFacts,referenceRequest,getRequest,buildInputs,historicalExample,industry,anchorExample,
-    refreshControls,parseNumber,formatNumber,exampleText,exampleParts,exampleTip,conditioning,refreshExample,waiverChips,waiverEntries,conditionedTables,givenOf,allocationOf,hasFlag,generalName,getControls:()=>controls,getPills:()=>pills,clearSaved,resetDefaults,stickyMax,shortPeriod,chartMoney,outlookSource,setAccount,setDollars,getDollars:()=>dollars,paintWarnings,drawMix,drawChart,calculate,anchorNote,paintAccountChrome,
+    refreshControls,parseNumber,formatNumber,exampleText,exampleParts,exampleTip,conditioning,refreshExample,waiverChips,waiverEntries,conditionedTables,givenOf,allocationOf,hasFlag,generalName,getControls:()=>controls,getPills:()=>pills,clearSaved,resetDefaults,stickyMax,shortPeriod,chartMoney,outlookSource,setAccount,setDollars,getDollars:()=>dollars,paintView,getPainted:()=>painted,paintWarnings,drawMix,drawChart,calculate,anchorNote,paintAccountChrome,
     setCatalog:c=>{catalog=c;},setRuns:(r,b)=>{result=r;refRun=b;}};\n})();\n`);
   const globals = {document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date, Map, Set, Event: function Event(type, init) { this.type = type; Object.assign(this, init); }};
   if (storage) globals.localStorage = storage;          // without one the page's localStorage is undeclared, as when the browser blocks it
@@ -1835,4 +1835,21 @@ test('no control and 2025 dollars where the answer has no nominal twin (the roll
   u.setAccount('lobby'); u.paintAccountChrome({chart: u.chartModel(CYC.banks, CYC.banks, 'general'), lobby: u.lobbyModel(CYC.banks, 2026, 2028)});
   assert.equal(ue['gf-dollars'].hidden, true, 'the lobbying chart is nominal already');
   assert.match(ue['gf-basis'].textContent, /^Annual, nominal dollars/);
+});
+
+test('the Party split\'s dollars follow the dollar basis: 2025-dollar amount x the open cycle\'s nominal.factor in nominal dollars, as sent in 2025 dollars; the toggle redraws the split', () => {
+  const {t} = nominalSession('commercial_banks');
+  const run = CYC.banks, F = measure(run, 0, 'pac_to_candidates').nominal.factor, usd = v => new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 2}).format(v);
+  const house = basis(run, 0, 'House', 'pac_candidate'), a = house.remaining_allocation, seen = house.observed, sen = basis(run, 0, 'Senate', 'pac_candidate');
+  const want = k => [`Remaining from 2026-07-01 (median): R ${usd(a.remaining_R_real_2025 * k)} · D ${usd(a.remaining_D_real_2025 * k)} of ${usd(a.remaining_total_real_2025 * k)}`, `Observed through ${seen.through}: R ${usd(seen.R_real_2025 * k)} · D ${usd(seen.D_real_2025 * k)}`];
+  const senate = k => `projected two-party total (${usd(sen.projected_total_real_2025 * k)})`, tip = chamber => texts(t.mixModel(run, run, chamber).rows[1].tip), has = (text, k) => want(k).every(w => text.includes(w));
+  assert.ok(F > 1 && usd(a.remaining_R_real_2025 * F) !== usd(a.remaining_R_real_2025), 'the two bases differ in print');
+  assert.ok(has(tip('House'), F) && tip('Senate').includes(senate(F)), 'nominal: real x factor'); assert.ok(!tip('House').includes(want(1)[0]));
+  assert.ok(Math.abs(seen.R_real_2025 * F / seen.R - 1) < 1e-9, 'the factor turns the observed 2025-dollar amount back into the nominal one Mentat holds');
+  t.setRuns(run, run); t.paintView(false);          // the toggle redraws the split from the same response
+  assert.ok(has(texts(t.getPainted().mixes[0].rows[1].tip), F));
+  t.setDollars('real');
+  assert.ok(has(texts(t.getPainted().mixes[0].rows[1].tip), 1), 'the painted split follows the toggle');
+  assert.ok(has(tip('House'), 1) && tip('Senate').includes(senate(1)), '2025 dollars: as sent'); assert.ok(!tip('House').includes(want(F)[0]));
+  assert.equal(t.mixModel(run, run, 'House').rows[1].share, house.remaining_allocation.implied_cycle_R_share, 'percentages do not move');
 });
