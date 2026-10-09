@@ -1139,8 +1139,8 @@ validate_ingest_counts <- function(
       leadership[cycle == 2026L, .N] != 788L) {
     stop("Leadership register counts do not match the verified CSV files.", call. = FALSE)
   }
-  if (nrow(trade) != 335L) {
-    stop("Trade-association register must contain 335 exact-name-deduplicated rows.", call. = FALSE)
+  if (nrow(trade) != 342L) {
+    stop("Trade-association register must contain 342 exact-name-deduplicated rows.", call. = FALSE)
   }
   if (nrow(executives) != 50L || nrow(assets) != 5L) {
     stop("Template registers must contain 50 company rows and five asset rows.", call. = FALSE)

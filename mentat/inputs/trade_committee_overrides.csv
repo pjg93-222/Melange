@@ -1,4 +1,5 @@
 association_name,committee_id,source,note
+ACA Connects,C00364109,manual:adjudicated,FEC name is AMERICAN CABLE ASSOCIATION INC PAC (ACA PAC)
 ACA International,C00034785,auto:exact_token_set,
 "Air Conditioning, Heating and Refrigeration Institute",C00570655,auto:exact_token_set,
 Ambulatory Surgery Center Association,C00424788,auto:exact_token_set,
@@ -50,6 +51,7 @@ CTIA (– The Wireless Association),C00262295,auto:exact_token_set,
 Career Education Colleges and Universities,C00213066,auto:exact_token_set,
 Commercial Spaceflight Federation,C00893917,auto:exact_token_set,
 Community Associations Institute,C00495481,auto:exact_token_set,
+Competitive Carriers Association,C00490698,manual:adjudicated,FEC name is COMPETITIVE CARRIERS ASSOCIATION PAC (CCA PAC)
 Computer & Communications Industry Association,C00094185,auto:exact_token_set,
 Consumer Bankers Association,C00035535,auto:exact_token_set,
 Consumer Brands Association,C00250068,auto:exact_token_set,
@@ -60,6 +62,7 @@ Distilled Spirits Council of the United States,C00030734,auto:exact_token_set,
 Edison Electric Institute,C00095869,auto:exact_token_set,
 Entertainment Software Association,C00439216,auto:exact_token_set,
 Federation of American Hospitals,C00002261,auto:exact_token_set,
+Fiber Broadband Association,C00851287,manual:adjudicated,FEC name is FIBER BROADBAND ALLIANCE POLITICAL ACTION COMMITTEE (PAC)
 Financial Services Forum,C00717686,auto:exact_token_set,
 "Hearth, Patio & Barbecue Association",C00930735,auto:exact_token_set,
 Household & Commercial Products Association,C00675827,auto:exact_token_set,
@@ -72,6 +75,8 @@ International Council of Shopping Centers,C00217638,auto:exact_token_set,
 Managed Funds Association,C00306894,auto:exact_token_set,
 Mortgage Bankers Association,C00004812,auto:exact_token_set,
 Motorcycle Industry Council,C00692855,auto:exact_token_set,
+NCTA (The Internet & Television Association),C00010082,manual:adjudicated,FEC name is NCTA - THE INTERNET & TELEVISION ASSOCIATION POLITICAL ACTION COMMITTEE (NCTAPAC)
+NTCA–The Rural Broadband Association,C00004473,manual:adjudicated,FEC name is NATIONAL TELECOMMUNICATIONS COOPERATIVE ASSOCIATION RURAL BROADBAND PAC
 National Association for Home Care & Hospice,C00188987,auto:exact_token_set,
 National Association of Broadcasters,C00009985,auto:exact_token_set,
 National Association of Home Builders,C00000901,auto:exact_token_set,
@@ -96,8 +101,10 @@ Securities Industry and Financial Markets Association,C00431312,auto:exact_token
 Security Industry Association,C00633107,auto:exact_token_set,
 Society of Chemical Manufacturers and Affiliates,C00550228,auto:exact_token_set,
 Solar Energy Industries Association,C00421982,auto:exact_token_set,
+Telecommunications Industry Association,C00383356,manual:adjudicated,FEC name is TIA BROADBAND PAC
 Texas and Southwestern Cattle Raisers Association,C00211524,manual:adjudicated,org also files C00817049; schema allows one committee per association
 The Aluminum Association,C00570606,auto:exact_token_set,
 United States Chamber of Commerce,C00082040,manual:word_order,FEC name is CHAMBER OF COMMERCE OF THE UNITED STATES OF AMERICA
 United States Telecom Association,C00000984,auto:exact_token_set,
+WISPA,C00609263,manual:adjudicated,FEC name is WIRELESS INTERNET SERVICE PROVIDERS ASSOCIATION PAC (WISPA PAC)
 Wine and Spirits Wholesalers of America,C00147173,auto:exact_token_set,

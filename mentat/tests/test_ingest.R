@@ -246,8 +246,8 @@ stopifnot(
 )
 
 stopifnot(
-  nrow(result$trade) == 335L,
-  data.table::uniqueN(result$trade$association_name) == 335L,
+  nrow(result$trade) == 342L,
+  data.table::uniqueN(result$trade$association_name) == 342L,
   !any(grepl("\\]\\]\\[1\\]", result$trade$association_name, perl = TRUE)),
   "National Automatic Merchandising Association (NAMA)" %in%
     result$trade$association_name
