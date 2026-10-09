@@ -618,7 +618,7 @@ test('lobbying (Melange card, 2026-10-09): the history is Melange\'s own rows st
   assert.match(t.lobbyModel(RUN.property_casualty, 2026, 2028).text, /^Not shown: No Melange-LDA sector for this industry/);
   // a console on the earlier anchor snapshot carries no lda_history: the card says so instead of drawing a made-up history
   const none = session({history: false}).t.lobbyModel(RUN.banks_lobby, 2026, 2028);
-  assert.equal(none.state, 'unavailable'); assert.match(none.text, /^Not shown: the Melange LDA history is not in the anchor snapshot\. Rebuild the anchors/);
+  assert.equal(none.state, 'unavailable'); assert.match(none.text, /^Not shown: the Melange LDA history is not available \(this console or its anchor snapshot predates it\)\. Restart the console and rebuild the anchors/);
 });
 
 test('lobbying (Melange card): credit unions, and a snapshot without the roster counts leaves the subtitle out', () => {

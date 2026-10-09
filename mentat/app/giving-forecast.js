@@ -1232,7 +1232,7 @@
     const all = [].concat(...blocks.map(block => block.rows)), rows = all.filter(row => row.status === 'ready').sort((a, b) => a.year - b.year);
     if (!rows.length) { const why = all.find(row => row.status === 'unavailable'); return why ? {state: 'unavailable', text: 'Not shown: ' + why.reason} : {state: 'empty', text: emptyText}; }
     const history = ldHistory(run);
-    if (!history) return {state: 'unavailable', text: 'Not shown: the Melange LDA history is not in the anchor snapshot. Rebuild the anchors (mentat/forecast/anchors/build_giving_anchors.py).'};
+    if (!history) return {state: 'unavailable', text: 'Not shown: the Melange LDA history is not available (this console or its anchor snapshot predates it). Restart the console and rebuild the anchors (mentat/forecast/anchors/build_giving_anchors.py).'};
     const block = blocks[0], baseYear = block.base_year, chips = [], dollars = 'nominal dollars';
     const sourceNote = `${block.sector_label}, nominal dollars (source ${block.source_file}). ${block.note}`;
     const bandNotes = block.bands ? [N(block.bands.label_80), N(block.bands.label_95)] : [];
