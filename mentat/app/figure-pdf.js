@@ -78,7 +78,7 @@
   // Export-only controls and anything that is chrome rather than the figure.
   const CHROME = ['.figure-pdf-btn', 'details.graph-export-menu', '.graph-text-button[data-values]', '.pane-buttons', '.pane-about',
     '.map-head button', '.map-toolbar-card', '.ev-toolbar', '.map-enlarge', '.map-collapse',
-    '.insights-card-tools', '.studio-menu', '.studio-board-tile-sheet', 'input[type=file]', 'script', 'iframe'].join(',');
+    '.insights-card-tools', '#gf-dollars', '.studio-menu', '.studio-board-tile-sheet', 'input[type=file]', 'script', 'iframe'].join(',');
 
   /* ------------------------------------------------------------ freezing */
 

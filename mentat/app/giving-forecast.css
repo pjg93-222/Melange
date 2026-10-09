@@ -64,6 +64,10 @@
 .gf-chart-col{min-width:0;padding:22px 28px 14px}
 .gf-chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .gf-basis{margin-top:0;font:400 12px/16px var(--font-sans);color:var(--muted)}
+.gf-basis-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:4px}
+.gf-basis-row .gf-basis{margin-top:0}
+.gf-seg-sm{padding:2px;border-radius:7px}
+.gf-seg-sm>button{height:22px;padding:0 9px;border-radius:5px;font-size:12px}
 .gf-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0;padding:4px 0 0;list-style:none;font:400 12px/16px var(--font-sans);color:var(--muted)}
 .giving-forecast .gf-legend{max-width:none}
 .gf-legend li{display:inline-flex;align-items:center;gap:6px}
@@ -365,6 +369,7 @@
   .gf-ld-fig+.gf-ld-fig{padding-left:0}
   .gf-account{width:100%;margin-left:0}
   .gf-account>button,.gf-view-switch>button{flex:1 1 auto;min-width:0;height:auto;min-height:44px;padding:0 8px;white-space:normal;line-height:1.25}
+  .gf-seg-sm>button{height:auto;min-height:44px;padding:0 12px}
   .giving-forecast .gf-party{padding:16px}
   .gf-pcols{grid-template-columns:minmax(0,1fr);gap:20px}
   .gf-row-head{flex-wrap:wrap}

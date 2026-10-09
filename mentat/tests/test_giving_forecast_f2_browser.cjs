@@ -104,8 +104,12 @@ function answerFor(runs, body, byGrowth) {
 
 /* A page on the real console with the forecast calls stubbed. options: path ('legacy' | 'p1' | 'landed'), width, height, waivers, reducedMotion, delay (ms), failure (status). */
 async function open(options = {}) {
-  const {path: dataPath = 'legacy', width = 1600, height = 900, waivers = null, reducedMotion = 'no-preference', delay = 0, failure = 0, malformed = false, byGrowth = false, catalogFailure = 0, pac = null, cycle = true, history = true} = options;
+  const {path: dataPath = 'legacy', width = 1600, height = 900, waivers = null, reducedMotion = 'no-preference', delay = 0, failure = 0, malformed = false, byGrowth = false, catalogFailure = 0, pac = null, cycle = true, history = true, dollars = 'real'} = options;
   const context = await browser.newContext({viewport: {width, height}, deviceScaleFactor: 1, reducedMotion, acceptDownloads: true});
+  // The dollar basis of the bars (D-092) is a stored per-viewer choice. Most tests pin 2025-dollar figures, so a page opens with that choice stored ('real'); 'nominal' stores the other;
+  // 'default' stores nothing (a viewer on a first visit); 'blocked' makes the browser's storage throw, as a private window or blocked site data does.
+  if (dollars === 'blocked') await context.addInitScript(() => { Storage.prototype.getItem = Storage.prototype.setItem = function () { throw new Error('blocked'); }; });
+  else if (dollars !== 'default') await context.addInitScript(choice => { try { if (!localStorage.getItem('mentat.givingForecast.dollars')) localStorage.setItem('mentat.givingForecast.dollars', choice); } catch (error) { /* blocked */ } }, dollars);
   const page = await context.newPage();
   page.errors = []; page.requests = []; page.setDefaultTimeout(20000);
   page.on('pageerror', error => page.errors.push(error.message));
@@ -924,7 +928,7 @@ for (const dataPath of ['legacy', 'p1']) {
           const box = el => { const r = el.getBoundingClientRect(); return {x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom}; };
           const q = s => document.querySelector(s);
           return {main: box(q('.gf-main')), chart: box(q('.gf-chart-col')), rail: box(q('.gf-rail')), house: box(q('#gf-house')), senate: box(q('#gf-senate')), party: box(q('#gf-party')), chartSvg: box(q('#gf-chart svg')), account: box(q('.gf-account')),
-            targets: [...document.querySelectorAll('.gf-account > button, #gf-view-switch > button, #gf-more > summary, #gf-methods > summary, #gf-reset, #gf-sources-link, #gf-export')].map(el => Math.round(el.getBoundingClientRect().height)),
+            targets: [...document.querySelectorAll('.gf-account > button, #gf-view-switch > button, #gf-dollars > button, #gf-more > summary, #gf-methods > summary, #gf-reset, #gf-sources-link, #gf-export')].map(el => Math.round(el.getBoundingClientRect().height)),
             scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth, overflowing: [...document.querySelectorAll('#giving-forecast *')].filter(el => el.getBoundingClientRect().right > document.documentElement.clientWidth + 1 && el.getBoundingClientRect().width > 0 && !el.closest('svg') && !el.closest('.gf-sr') && !el.closest('#gf-tip') && !el.closest('[hidden]') && !el.closest('details:not([open])') && !el.closest('.pac-selected-scroll, .gf-table-wrap')).map(el => el.id || el.className).slice(0, 5)};
         });
         assert.ok(sizes.scrollWidth <= sizes.clientWidth, `no horizontal scroll at ${width}: ${sizes.scrollWidth} > ${sizes.clientWidth}`);
@@ -1393,6 +1397,118 @@ test('Export downloads the calculated scenario and the model evidence', async ()
     assert.match(download.suggestedFilename(), /^Mentat-commercial_banks-\d{4}-\d{2}-\d{2}-scenario\.json$/);
     const saved = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
     assert.equal(saved.industry, 'commercial_banks'); assert.ok(saved.model_evidence && saved.model_evidence.model_version); assert.ok(saved.exported_at);
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+// ---- nominal dollars by default (D-092, Paul 2026-10-09) ---------------------------------------------------------------------------------------------------------------------------
+// Every other test of this file opens the page with the 2025-dollar choice stored (open() default), because they pin 2025-dollar figures; these open it as a viewer with no stored choice sees it.
+const F_2026 = 1.012863218, F_2028 = 1.0656483025330452;          // 2.5726436% a year at the cycle mid-point against 2025 (D-092)
+const STORE = 'mentat.givingForecast.dollars';
+const stored = page => page.evaluate(key => { try { return localStorage.getItem(key); } catch (error) { return 'blocked'; } }, STORE);
+
+test('nominal dollars are the default: the caption, the control and the figures; the toggle switches to 2025 dollars and the choice persists across a reload', async () => {
+  const page = await open({path: 'cycle', dollars: 'default'});
+  try {
+    const g = measureOf(CYCLE.runs.banks, 0, 'general_giving'), g28 = measureOf(CYCLE.runs.banks, 1, 'general_giving'), pac = measureOf(CYCLE.runs.banks, 0, 'pac_to_candidates'), pac28 = measureOf(CYCLE.runs.banks, 1, 'pac_to_candidates');
+    assert.equal(await stored(page), null, 'nothing stored yet');
+    assert.equal(await page.textContent('#gf-basis'), 'Nominal dollars');
+    assert.equal(await page.$eval('#gf-dollars', el => el.hidden), false);
+    assert.deepEqual(await page.$$eval('#gf-dollars > button', all => all.map(el => [el.textContent, el.getAttribute('aria-pressed')])), [['Nominal', 'true'], ['2025 dollars', 'false']]);
+    assert.equal(await page.$eval('#gf-dollars', el => el.classList.contains('gf-seg')), true, 'the existing segmented control, not a pill');
+    // General giving: the 2023-24 bar is the anchors' own nominal level, the open cycle and 2027-28 are nominal = 2025 dollars x the mid-cycle factor
+    let text = await chartText(page);
+    assert.ok(text.includes(M1(g.anchor_cycle_nominal)) && text.includes(M1(g.nominal.cycle_given_observed_median)) && text.includes(M1(g28.nominal.projected_cycle)), text);
+    assert.equal(M1(g.anchor_cycle_nominal), '$25.9M'); assert.equal(M1(g.nominal.cycle_given_observed_median), '$14.7M'); assert.equal(M1(g28.nominal.projected_cycle), '$22.5M');
+    assert.ok(Math.abs(g.nominal.cycle_given_observed_median / (g.cycle_given_observed_median * F_2026) - 1) < 1e-9 && Math.abs(g28.nominal.projected_cycle / (g28.projected_cycle_real_2025 * F_2028) - 1) < 1e-9);
+    assert.match(await hoverTip(page, '#gf-chart .gf-mark-anchor .gf-col-anchor'), /Nominal \(this chart\)\$25\.92M[^]*In 2025 USD\$26\.98M/);
+    assert.match(await hoverTip(page, '#gf-chart .gf-mark-next .gf-col-projection'), /Projected full cycle \(nominal\)\$22\.54M/);
+    assert.match(await page.$eval('#gf-chart .gf-mark-next', el => el.getAttribute('aria-label')), /in nominal dollars/);
+    // Company PACs: nominal as well, the population on the caption line
+    await page.click('#gf-account-pac'); await page.waitForTimeout(500);
+    assert.equal(await page.textContent('#gf-basis'), 'Nominal dollars · Banks: 19 bank companies, observed to 2026-06-30');
+    text = await chartText(page);
+    assert.ok(text.includes(M1(pac.nominal.cycle_given_observed_median)) && text.includes(M1(pac28.nominal.projected_cycle)) && text.includes(M1(pac.anchor_cycle_nominal)), text);
+    assert.equal(await page.$eval('#gf-dollars', el => el.hidden), false);
+    // the toggle: 2025 dollars, the figures the page showed before, the caption, the pressed state
+    await page.click('#gf-dollars-real'); await page.waitForTimeout(500);
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars · Banks: 19 bank companies, observed to 2026-06-30');
+    assert.deepEqual(await page.$$eval('#gf-dollars > button', all => all.map(el => el.getAttribute('aria-pressed'))), ['false', 'true']);
+    text = await chartText(page);
+    assert.ok(text.includes(M1(pac.cycle_given_observed_median)) && text.includes(M1(pac28.projected_cycle_real_2025)) && text.includes(M1(pac.anchor_cycle_real_2025)), text);
+    await page.click('#gf-account-general'); await page.waitForTimeout(400);
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars');
+    text = await chartText(page);
+    assert.ok(text.includes(M1(g.anchor_cycle_real_2025)) && text.includes(M1(g.cycle_given_observed_median)) && text.includes(M1(g28.projected_cycle_real_2025)), text);
+    assert.match(await hoverTip(page, '#gf-chart .gf-mark-anchor .gf-col-anchor'), /In 2025 USD \(this chart\)\$26\.98M[^]*Nominal\$25\.92M/);
+    assert.equal(await stored(page), 'real', 'the choice is stored');
+    // a reload (a later visit): the page opens in 2025 dollars, and choosing nominal again is stored too
+    await page.reload(); await page.waitForSelector('#giving-forecast-open', {state: 'visible'}); await page.click('#giving-forecast-open'); await page.waitForSelector('#gf-form:not([hidden])'); await settled(page);
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars');
+    assert.deepEqual(await page.$$eval('#gf-dollars > button', all => all.map(el => el.getAttribute('aria-pressed'))), ['false', 'true']);
+    assert.ok((await chartText(page)).includes(M1(g.cycle_given_observed_median)));
+    await page.click('#gf-dollars-nominal'); await page.waitForTimeout(400);
+    assert.equal(await page.textContent('#gf-basis'), 'Nominal dollars'); assert.equal(await stored(page), 'nominal');
+    assert.ok((await chartText(page)).includes(M1(g.nominal.cycle_given_observed_median)));
+    // Lobbying is nominal already: no control, its own caption
+    await page.click('#gf-account-lobby'); await page.waitForTimeout(400);
+    assert.equal(await page.$eval('#gf-dollars', el => el.hidden), true);
+    assert.match(await page.textContent('#gf-basis'), /^Annual, nominal dollars/);
+    await page.click('#gf-account-general'); await page.waitForTimeout(400);
+    assert.equal(await page.$eval('#gf-dollars', el => el.hidden), false); assert.equal(await page.textContent('#gf-basis'), 'Nominal dollars');
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+test('the published PAC table and the party-split percentages are not touched by the dollar basis; the Telecom panel bar is the cohort\'s own nominal total', async () => {
+  const page = await open({path: 'cycle', dollars: 'default'});
+  try {
+    let before = own(page).length;
+    await page.selectOption('#gf-industry', 'telecom'); await recalculated(page, before);
+    await page.click('#gf-account-pac'); await page.waitForTimeout(500);
+    const pac = measureOf(CYCLE.runs.telecom, 0, 'pac_to_candidates');
+    assert.equal(await page.textContent('#gf-basis'), 'Nominal dollars · Telecom: 8 PACs (published panel cohort), observed to 2026-09-26');
+    const text = await chartText(page);
+    assert.ok(text.includes('$7.8M') && text.includes(M1(pac.nominal.cycle_given_observed_median)), text);          // the cohort's 2023-24 total as the panel holds it, and its nowcast, both nominal
+    assert.equal(M1(pac.nominal.cycle_given_observed_median), '$5.8M');
+    const shares = async () => page.$$eval('#gf-house-body .gf-pr em, #gf-senate-body .gf-pr em', all => all.map(el => el.textContent));
+    const nominalShares = await shares();
+    await page.click('#gf-dollars-real'); await page.waitForTimeout(400);
+    assert.deepEqual(await shares(), nominalShares, 'percentages do not move with the dollar basis');
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+test('where the browser blocks storage the page still opens in nominal dollars and the toggle works for the page', async () => {
+  const page = await open({path: 'cycle', dollars: 'blocked'});
+  try {
+    assert.equal(await stored(page), 'blocked');
+    assert.equal(await page.textContent('#gf-basis'), 'Nominal dollars');
+    const g = measureOf(CYCLE.runs.banks, 0, 'general_giving');
+    assert.ok((await chartText(page)).includes(M1(g.nominal.cycle_given_observed_median)));
+    await page.click('#gf-dollars-real'); await page.waitForTimeout(400);
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars');
+    assert.ok((await chartText(page)).includes(M1(g.cycle_given_observed_median)));
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+test('an answer with no nominal twin (the earlier module) is drawn in 2025 dollars: no control, the caption says so', async () => {
+  const page = await open({path: 'legacy', dollars: 'default'});
+  try {
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars');
+    assert.equal(await page.$eval('#gf-dollars', el => el.hidden), true);
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+test('at 390 px the dollar control stays inside the card, its buttons are 44 px targets and nothing scrolls sideways', async () => {
+  const page = await open({path: 'cycle', width: 390, height: 844, dollars: 'default'});
+  try {
+    const got = await page.evaluate(() => ({heights: [...document.querySelectorAll('#gf-dollars > button')].map(el => Math.round(el.getBoundingClientRect().height)), right: document.getElementById('gf-dollars').getBoundingClientRect().right,
+      width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth}));
+    assert.ok(got.heights.length === 2 && got.heights.every(h => h >= 44), String(got.heights));
+    assert.ok(got.right <= got.width && got.scroll <= got.width, JSON.stringify(got));
     assert.deepEqual(page.errors, []);
   } finally { await closePage(page); }
 });

@@ -1055,6 +1055,9 @@ class TelecomTests(unittest.TestCase):
         self.assertAlmostEqual(m['cycle_given_observed_median'] / 1e6, 5.74907, delta=5e-6)
         self.assertEqual((m['layer'], m['flags']), ('R8', []))
         self.assertEqual(m['anchor_cycle_nominal'], h['B'])          # the 2023-24 bar is the cohort's total
+        self.assertEqual(m['nominal']['anchor_cycle'], h['B'])          # and its nominal bar is the same number
+        self.assertAlmostEqual(m['nominal']['cycle_given_observed_median'], h['nominal'], delta=.01)          # nominal dollars: the panel's own published nowcast, to the cent (no conversion at all)
+        self.assertEqual(m['nominal']['observed'], h['O'])
         self.assertEqual((m['observed']['through'], self.by[(2026, GEN)]['observed']['through']), ('2026-09-26', '2026-06-30'))          # the two dates stay apart
 
     def test_the_population_is_named_and_2027_28_is_the_nowcast_times_1_09_times_the_drift(self):
@@ -1451,6 +1454,95 @@ class PresidentialFactorTests(unittest.TestCase):
             out = gf.project(dict(industry=BANKS, as_of='2026-10-07', horizons={'2026': {'growth_pct': 7.0}, '2028': {'growth_pct': 7.0}}))
         self.assertNotIn('cycle_model_view', cat)
         self.assertNotIn('presidential_uplift', json.dumps(out))
+
+
+class NominalDollarTests(unittest.TestCase):
+    """D-092 (Paul, 2026-10-09, "Confirm"): projections are shown in nominal dollars by default. Every cycle-model measure carries an explicit nominal twin of its 2025-dollar amounts
+    (`nominal`), so the page does no inflation arithmetic. The factor is the inverse of the multiplier the model deflates the cycle with: the expected inflation of 2.5726436% a year at the
+    cycle mid-point (2025-26 x1.01286, 2027-28 x1.06565), or the snapshot's CPI of the cycle once it has one. The anchor cycle's level and the observed amount are Mentat's own nominal values."""
+
+    RATE = 0.025726436
+
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp) as world:
+            cls.bundle = world.bundle
+            cls.out = {i: gf.project(request(i)) for i in (BANKS, CUS, PC)}
+        cls.by = {i: measures(out) for i, out in cls.out.items()}
+
+    @staticmethod
+    def factor(cycle, rate=RATE):
+        """Mean price level of the cycle's two years against 2025 (= 1), worked here from the rate."""
+        level = lambda y: (1 + rate) ** max(y - 2025, 0)
+        return (level(cycle - 1) + level(cycle)) / 2
+
+    def test_the_factors_are_the_mid_cycle_expected_inflation_of_d092(self):
+        self.assertEqual(self.bundle['cycle_model']['inflation']['annual_rate'], self.RATE)
+        self.assertAlmostEqual(self.factor(2026), 1.01286, places=5)
+        self.assertAlmostEqual(self.factor(2028), 1.06565, places=5)
+        for ident, by in self.by.items():
+            for (cycle, mid), m in by.items():
+                if m['status'] == 'ready':
+                    with self.subTest(ident=ident, cycle=cycle, measure=mid):
+                        self.assertAlmostEqual(m['nominal']['factor'], self.factor(cycle), delta=1e-12)
+
+    def test_nominal_is_the_2025_dollar_amount_times_the_factor_for_every_amount_of_every_measure_and_horizon(self):
+        seen = set()
+        for ident, by in self.by.items():
+            for (cycle, mid), m in by.items():
+                if m['status'] != 'ready':
+                    continue
+                for real, nominal in gf.NOMINAL_FIELDS:
+                    if m.get(real) is None:
+                        self.assertNotIn(nominal, m['nominal'], (ident, cycle, mid, real))
+                        continue
+                    seen.add((cycle, nominal))
+                    if nominal == 'anchor_cycle':
+                        continue          # the anchors' own nominal level, checked below
+                    self.assertAlmostEqual(m['nominal'][nominal] / (m[real] * self.factor(cycle)), 1., delta=1e-12, msg=(ident, cycle, mid, real))
+        for want in ((2026, 'projected_cycle'), (2026, 'cycle_given_observed_median'), (2026, 'remaining_given_observed_median'), (2028, 'projected_cycle'), (2028, 'cycle_prediction_low'), (2028, 'cycle_prediction_high')):
+            self.assertIn(want, seen)
+        # one value per horizon, by hand: banks' general giving
+        m26, m28 = self.by[BANKS][(2026, GEN)], self.by[BANKS][(2028, GEN)]
+        self.assertAlmostEqual(m26['nominal']['cycle_given_observed_median'], m26['cycle_given_observed_median'] * 1.012863218, delta=1e-6)
+        self.assertAlmostEqual(m28['nominal']['projected_cycle'], m28['projected_cycle_real_2025'] * 1.0656483025330452, delta=1e-6)
+        self.assertAlmostEqual(m28['nominal']['projected_cycle'] / m28['projected_cycle_real_2025'], 1.06565, places=5)
+
+    def test_the_2023_24_bar_and_the_observed_amount_are_the_anchors_own_nominal_values_and_the_stack_adds_up_in_nominal_dollars(self):
+        for ident, by in self.by.items():
+            for (cycle, mid), m in by.items():
+                if m['status'] != 'ready':
+                    continue
+                n = m['nominal']
+                if mid == GEN:
+                    self.assertEqual(n['anchor_cycle'], ANCHORS['industries'][ident]['general_giving']['cycles']['2024'], (ident, cycle))          # the anchors' number, not real / CPI
+                self.assertEqual(n['anchor_cycle'], m['anchor_cycle_nominal'])
+                if cycle == 2026:
+                    self.assertEqual(n['observed'], m['observed']['amount_nominal'], (ident, mid))          # not the 2025-dollar amount converted back
+                    self.assertAlmostEqual(n['observed'] + n['remaining_given_observed_median'], n['cycle_given_observed_median'], delta=1e-6, msg=(ident, mid))
+                else:
+                    self.assertNotIn('observed', n)
+
+    def test_a_cpi_for_the_open_cycle_replaces_the_expected_inflation_factor_for_that_cycle_only(self):
+        anchors = copy.deepcopy(ANCHORS)
+        anchors['cpi']['multipliers']['2026'] = 0.97
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp, anchors=anchors):
+            by = measures(gf.project(request(BANKS)))
+        self.assertAlmostEqual(by[(2026, GEN)]['nominal']['factor'], 1 / 0.97, delta=1e-12)
+        self.assertAlmostEqual(by[(2028, GEN)]['nominal']['factor'], self.factor(2028), delta=1e-12)
+        self.assertEqual(by[(2026, GEN)]['nominal']['observed'], by[(2026, GEN)]['observed']['amount_nominal'])
+
+    def test_the_nominal_block_says_where_the_factor_comes_from(self):
+        text = self.by[BANKS][(2028, GEN)]['nominal']['source']
+        for part in ('x1.06565', '2.5726436%', 'D-092', 'cycle mid-point'):
+            self.assertIn(part, text)
+
+    def test_an_unavailable_measure_has_no_nominal_block_and_a_bundle_without_a_cycle_model_has_none_at_all(self):
+        self.assertEqual(self.by[PC][(2026, PAC)]['status'], 'unavailable')
+        self.assertNotIn('nominal', self.by[PC][(2026, PAC)])
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp, bundle=contract.example('models')):
+            out = gf.project(dict(industry=BANKS, as_of='2026-10-07', horizons={'2026': {'growth_pct': 7.0}, '2028': {'growth_pct': 7.0}}))
+        self.assertTrue(all('nominal' not in m for h in out['horizons'] for m in h['pac']['measures']))
 
 
 class AnchorAndDisplayTests(unittest.TestCase):

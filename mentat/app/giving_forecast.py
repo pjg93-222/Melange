@@ -1372,6 +1372,36 @@ def _real_multiplier(snapshot, infl, cycle):
     return m if m is not None else 1. / _cycle_factor(infl, cycle)
 
 
+# D-092 (Paul): projections are shown in nominal dollars by default. The models work in 2025 dollars; the nominal twin of a measure is each 2025-dollar amount x the inverse of the multiplier
+# the model deflates that cycle with (_real_multiplier: the snapshot's CPI when the cycle has one, else the expected inflation, 2.5726436%/yr at the cycle mid-point: 2025-26 x1.01286,
+# 2027-28 x1.06565 against 2025). The 2023-24 level and the observed amount are Mentat's own nominal values and are never reconverted. The page does no inflation arithmetic.
+NOMINAL_FIELDS = (('projected_cycle_real_2025', 'projected_cycle'), ('anchor_cycle_real_2025', 'anchor_cycle'),
+                  ('cycle_coefficient_low', 'cycle_coefficient_low'), ('cycle_coefficient_high', 'cycle_coefficient_high'),
+                  ('cycle_prediction_low', 'cycle_prediction_low'), ('cycle_prediction_high', 'cycle_prediction_high'),
+                  ('cycle_given_observed_low', 'cycle_given_observed_low'), ('cycle_given_observed_median', 'cycle_given_observed_median'), ('cycle_given_observed_high', 'cycle_given_observed_high'),
+                  ('remaining_given_observed_low', 'remaining_given_observed_low'), ('remaining_given_observed_median', 'remaining_given_observed_median'),
+                  ('remaining_given_observed_high', 'remaining_given_observed_high'), ('projected_remaining', 'projected_remaining'),
+                  ('remaining_coefficient_low', 'remaining_coefficient_low'), ('remaining_coefficient_high', 'remaining_coefficient_high'),
+                  ('remaining_prediction_low', 'remaining_prediction_low'), ('remaining_prediction_high', 'remaining_prediction_high'), ('excess_observed', 'excess_observed'))
+
+
+def _nominal_factor(ctx, cycle):
+    """Nominal dollars per 2025 dollar of a cycle: the inverse of the multiplier the model deflates it with."""
+    m = ctx['snap_cpi'].get(str(cycle))
+    return 1. / m if m else _cycle_factor(ctx['cm']['inflation'], cycle)
+
+
+def _nominal(measure, factor, inflation):
+    """The explicit nominal-dollar twin of a ready cycle-model measure: every 2025-dollar amount it carries x `factor`; the anchor cycle's level and the observed amount are the anchors' own nominal values."""
+    out = {nominal: measure[real] * factor for real, nominal in NOMINAL_FIELDS if measure.get(real) is not None}
+    out.update(factor=factor, anchor_cycle=measure['anchor_cycle_nominal'],
+               source='x%.5f against 2025 dollars: expected inflation of %.7f%% a year at the cycle mid-point (%s). The anchor-cycle level and the observed amount are the nominal values Mentat holds.'
+               % (factor, 100. * inflation['annual_rate'], inflation['source']))
+    if measure.get('observed'):
+        out['observed'] = measure['observed']['amount_nominal']
+    return out
+
+
 def _ibis_path(cm, ident, cycle):
     """[(year, g)] of the lag window cycle-3 .. cycle-1 (IBISWorld REAL annual revenue growth, fractions), or None when the bundle's path does not cover it."""
     entry = cm['budget_rule']['growth'].get(ident)
@@ -1739,6 +1769,7 @@ def _cycle_pac(ctx, assumptions, cycle, chains):
     out.update(growth_input=info, growth_pct=info['used_pct'])
     wstatus, wreason = _window(ctx, cycle)
     anchor = ctx['anchor_cycle']
+    nominal_factor = _nominal_factor(ctx, cycle)
     for mid, label in PAC_MEASURES:
         block = panel.get(mid) or snap[mid]          # D-117: the credit unions' company PACs are the published panel's cohort
         measure = dict(id=mid, label=label, status='ready', flags=[])
@@ -1833,6 +1864,7 @@ def _cycle_pac(ctx, assumptions, cycle, chains):
                            chained_from=dict(layer=layer_name, cycle=cycle - 2))
             if layer_name == 'R8':
                 measure['interval_kind'] = R8_CHAIN_KIND
+        measure['nominal'] = _nominal(measure, nominal_factor, cm['inflation'])
         out['measures'].append(measure)
     ready = [m for m in out['measures'] if m['status'] == 'ready']
     if ready:

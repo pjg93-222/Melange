@@ -10940,7 +10940,7 @@
   "scope": "Mentat levels for the industry's tracked companies (the published Mentat report scope); the models only supply the relationships. Report company, donor-role and subindustry filters do not apply.",
   "interval_label": "Ordinary 95% coefficient interval; 95% prediction interval (adds the anchored-step residual variance)"
  },
- "recorded_from": "in-process gf.catalog('2026-10-07') and gf.project(request) on the live bundle (model_version refit-20261007-d861bf29-79211caa154e) and anchors on 2026-10-08, after owner ruling D-116 (company PACs on the panel nowcast R8, no 50/50); requests are the page defaults (IBIS growth defaults, saved outlook, blank prior growth, no lobbying) plus the growth_basis marker the page sends; re-recorded 2026-10-08 after owner ruling D-117 (credit-union company PACs = the published PAC panel's 16-PAC cohort, PAC bundle ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb; banks, general giving and the party split unchanged); re-recorded 2026-10-08 after owner rulings D-118, D-119 and D-121 (presidential-cycle factors in place of the fitted phi: company PACs x1.09 on the 2027-28 step; general giving x1.8635 = 12.56 / 6.74 on both steps, -log u at 2025-26 and +log u at 2027-28; the general-giving figures, the 2027-28 company-PAC figures, the model blocks, the party split's remainder dollars that divide general giving's remainder, and cycle_model_view.presidential_uplift differ from the previous recording); re-recorded 2026-10-08 after the credit-union party-split fix (the company-PAC candidate basis of the split divides the same 16-PAC panel cohort as the dollars: its 2023-24 anchor share, observed D/R to the panel cut 2026-09-26 and R8 remainder; the earlier single-PAC split note is gone; only the credit_unions run's pac_candidate bases, its Company PACs notice and the catalog company_pacs split_note differ from the previous recording); Telecom added 2026-10-08 (owner ruling: OpenSecrets B09, IBISWorld wireless + cable; company PACs = the published panel's 8 telecom PACs): its catalog row, cycle_model_view.growth / company_pacs / g_prior_defaults entries, request and run were recorded in process on the test world (contract example + tests/fixtures/giving_telecom_cycle.json + tests/fixtures/giving_anchors_cycle.json); nothing else of this file changed; Telecom's party split re-recorded 2026-10-09 (owner ruling, option A: scored on the pooled share models; its catalog row now has the control capability, share_scoring 'pooled' and no withheld reason, and its run's shares compute; recorded in process on the same test world; nothing else of this file changed)",
+ "recorded_from": "in-process gf.catalog('2026-10-07') and gf.project(request) on the live bundle (model_version refit-20261007-d861bf29-79211caa154e) and anchors on 2026-10-08, after owner ruling D-116 (company PACs on the panel nowcast R8, no 50/50); requests are the page defaults (IBIS growth defaults, saved outlook, blank prior growth, no lobbying) plus the growth_basis marker the page sends; re-recorded 2026-10-08 after owner ruling D-117 (credit-union company PACs = the published PAC panel's 16-PAC cohort, PAC bundle ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb; banks, general giving and the party split unchanged); re-recorded 2026-10-08 after owner rulings D-118, D-119 and D-121 (presidential-cycle factors in place of the fitted phi: company PACs x1.09 on the 2027-28 step; general giving x1.8635 = 12.56 / 6.74 on both steps, -log u at 2025-26 and +log u at 2027-28; the general-giving figures, the 2027-28 company-PAC figures, the model blocks, the party split's remainder dollars that divide general giving's remainder, and cycle_model_view.presidential_uplift differ from the previous recording); re-recorded 2026-10-08 after the credit-union party-split fix (the company-PAC candidate basis of the split divides the same 16-PAC panel cohort as the dollars: its 2023-24 anchor share, observed D/R to the panel cut 2026-09-26 and R8 remainder; the earlier single-PAC split note is gone; only the credit_unions run's pac_candidate bases, its Company PACs notice and the catalog company_pacs split_note differ from the previous recording); Telecom added 2026-10-08 (owner ruling: OpenSecrets B09, IBISWorld wireless + cable; company PACs = the published panel's 8 telecom PACs): its catalog row, cycle_model_view.growth / company_pacs / g_prior_defaults entries, request and run were recorded in process on the test world (contract example + tests/fixtures/giving_telecom_cycle.json + tests/fixtures/giving_anchors_cycle.json); nothing else of this file changed; Telecom's party split re-recorded 2026-10-09 (owner ruling, option A: scored on the pooled share models; its catalog row now has the control capability, share_scoring 'pooled' and no withheld reason, and its run's shares compute; recorded in process on the same test world; nothing else of this file changed); nominal dollars added 2026-10-09 (D-092, Paul: nominal by default): every ready cycle-model measure of every run carries `nominal`, the calculator's explicit nominal twin of its 2025-dollar amounts, added with the calculator's own helper (giving_forecast._nominal) to the recorded values at x1.01286 (2025-26) and x1.06565 (2027-28); nothing else of this file changed",
  "requests": {
   "commercial_banks": {
    "as_of": "2026-10-07",
@@ -11290,6 +11290,28 @@
          ],
          "deflator": 0.9873001430287894,
          "floored_at_observed": false
+        },
+        "nominal": {
+         "projected_cycle": 5856921.546371539,
+         "anchor_cycle": 5692500.0,
+         "cycle_coefficient_low": 5370349.747589001,
+         "cycle_coefficient_high": 6387578.3911004355,
+         "cycle_prediction_low": 4452122.090067216,
+         "cycle_prediction_high": 7704984.119119985,
+         "cycle_given_observed_low": 5868000.0,
+         "cycle_given_observed_median": 6132939.949812336,
+         "cycle_given_observed_high": 6306723.792601343,
+         "remaining_given_observed_low": 1195000.0000000002,
+         "remaining_given_observed_median": 1459939.9498123361,
+         "remaining_given_observed_high": 1633723.7926013428,
+         "projected_remaining": 1183921.5463715391,
+         "remaining_coefficient_low": 697349.7475890017,
+         "remaining_coefficient_high": 1714578.391100435,
+         "remaining_prediction_low": -220877.90993278363,
+         "remaining_prediction_high": 3031984.1191199846,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 4673000.0
         }
        },
        {
@@ -11361,7 +11383,29 @@
         "remaining_given_observed_low": 140574.2534441892,
         "remaining_given_observed_median": 3118234.096078016,
         "remaining_given_observed_high": 17696020.894772716,
-        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)"
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+        "nominal": {
+         "projected_cycle": 12615475.0759184,
+         "anchor_cycle": 25915482.79,
+         "cycle_coefficient_low": 10686926.344183855,
+         "cycle_coefficient_high": 14892047.186021142,
+         "cycle_prediction_low": 6066149.672403623,
+         "cycle_prediction_high": 26235787.111407924,
+         "cycle_given_observed_low": 11641246.910711428,
+         "cycle_given_observed_median": 14657209.0410309,
+         "cycle_given_observed_high": 29422513.089274734,
+         "remaining_given_observed_low": 142382.49071142907,
+         "remaining_given_observed_median": 3158344.6210309006,
+         "remaining_given_observed_high": 17923648.669274736,
+         "projected_remaining": 1116610.6559184007,
+         "remaining_coefficient_low": -811938.0758161446,
+         "remaining_coefficient_high": 3393182.7660211422,
+         "remaining_prediction_low": -5432714.747596377,
+         "remaining_prediction_high": 14736922.691407923,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 11498864.42
+        }
        }
       ],
       "slope": null,
@@ -12002,7 +12046,15 @@
          "layer": "R8",
          "cycle": 2026
         },
-        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself"
+        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself",
+        "nominal": {
+         "projected_cycle": 6480635.415535511,
+         "anchor_cycle": 5692500.0,
+         "cycle_prediction_low": 4951723.43737123,
+         "cycle_prediction_high": 8481619.767396936,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
+        }
        },
        {
         "id": "general_giving",
@@ -12054,6 +12106,14 @@
         "chained_from": {
          "layer": "P1",
          "cycle": 2026
+        },
+        "nominal": {
+         "projected_cycle": 22539515.06027134,
+         "anchor_cycle": 25915482.79,
+         "cycle_prediction_low": 10135269.580206089,
+         "cycle_prediction_high": 59894328.97024753,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
         }
        }
       ],
@@ -12591,6 +12651,28 @@
          "deflator": 0.9873001430287894,
          "floored_at_observed": false,
          "panel_cut": "2026-09-26"
+        },
+        "nominal": {
+         "projected_cycle": 3062123.0793937845,
+         "anchor_cycle": 2976160.0,
+         "cycle_coefficient_low": 2807733.000401315,
+         "cycle_coefficient_high": 3339561.7574804514,
+         "cycle_prediction_low": 2295636.030073836,
+         "cycle_prediction_high": 4084531.5330995605,
+         "cycle_given_observed_low": 2510690.0000000005,
+         "cycle_given_observed_median": 2582166.4430847475,
+         "cycle_given_observed_high": 2625954.4949961794,
+         "remaining_given_observed_low": 432300.0000000002,
+         "remaining_given_observed_median": 503776.4430847473,
+         "remaining_given_observed_high": 547564.4949961791,
+         "projected_remaining": 983733.0793937845,
+         "remaining_coefficient_low": 729343.0004013145,
+         "remaining_coefficient_high": 1261171.7574804514,
+         "remaining_prediction_low": 217246.0300738358,
+         "remaining_prediction_high": 2006141.5330995605,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 2078390.0
         }
        },
        {
@@ -12662,7 +12744,29 @@
         "remaining_given_observed_low": 6630.048857864866,
         "remaining_given_observed_median": 172133.85020281153,
         "remaining_given_observed_high": 1667991.2947530723,
-        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)"
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+        "nominal": {
+         "projected_cycle": 314256.7364826162,
+         "anchor_cycle": 620046.88,
+         "cycle_coefficient_low": 266215.78464089846,
+         "cycle_coefficient_high": 370967.0955759417,
+         "cycle_prediction_low": 65840.88498782786,
+         "cycle_prediction_high": 1499938.7757768135,
+         "cycle_given_observed_low": 275846.0026216742,
+         "cycle_given_observed_median": 443478.7154431496,
+         "cycle_given_observed_high": 1958577.7003995837,
+         "remaining_given_observed_low": 6715.332621674233,
+         "remaining_given_observed_median": 174348.04544314966,
+         "remaining_given_observed_high": 1689447.0303995835,
+         "projected_remaining": 45126.066482616254,
+         "remaining_coefficient_low": -2914.885359101523,
+         "remaining_coefficient_high": 101836.42557594176,
+         "remaining_prediction_low": -203289.78501217213,
+         "remaining_prediction_high": 1230808.1057768136,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 269130.67
+        }
        }
       ],
       "slope": null,
@@ -13324,7 +13428,15 @@
          "layer": "R8",
          "cycle": 2026
         },
-        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself"
+        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself",
+        "nominal": {
+         "projected_cycle": 2728557.500448773,
+         "anchor_cycle": 2976160.0,
+         "cycle_prediction_low": 2056685.3665517652,
+         "cycle_prediction_high": 3619914.914714007,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
+        }
        },
        {
         "id": "general_giving",
@@ -13376,6 +13488,14 @@
         "chained_from": {
          "layer": "P1",
          "cycle": 2026
+        },
+        "nominal": {
+         "projected_cycle": 729163.7258043644,
+         "anchor_cycle": 620046.88,
+         "cycle_prediction_low": 133022.4467999385,
+         "cycle_prediction_high": 5859742.537518797,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
         }
        }
       ],
@@ -13900,7 +14020,29 @@
         "remaining_given_observed_low": 46994.58415628737,
         "remaining_given_observed_median": 1158355.4424512126,
         "remaining_given_observed_high": 8179814.067791157,
-        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)"
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+        "nominal": {
+         "projected_cycle": 3661549.950970331,
+         "anchor_cycle": 7762490.48,
+         "cycle_coefficient_low": 3101802.698359438,
+         "cycle_coefficient_high": 4322308.459703723,
+         "cycle_prediction_low": 1386551.762965818,
+         "cycle_prediction_high": 9669273.3740957,
+         "cycle_given_observed_low": 3579779.9757371093,
+         "cycle_given_observed_median": 4705436.511028949,
+         "cycle_given_observed_high": 11817213.689344624,
+         "remaining_given_observed_low": 47599.085737109046,
+         "remaining_given_observed_median": 1173255.621028949,
+         "remaining_given_observed_high": 8285032.7993446225,
+         "projected_remaining": 129369.06097033079,
+         "remaining_coefficient_low": -430378.191640562,
+         "remaining_coefficient_high": 790127.5697037228,
+         "remaining_prediction_low": -2145629.1270341827,
+         "remaining_prediction_high": 6137092.484095699,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 3532180.89
+        }
        }
       ],
       "slope": null,
@@ -14340,6 +14482,14 @@
         "chained_from": {
          "layer": "P1",
          "cycle": 2026
+        },
+        "nominal": {
+         "projected_cycle": 7598431.562112592,
+         "anchor_cycle": 7762490.48,
+         "cycle_prediction_low": 2655340.4486824377,
+         "cycle_prediction_high": 27631457.561031643,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
         }
        }
       ],
@@ -14699,6 +14849,28 @@
          "deflator": 0.9873001430287894,
          "floored_at_observed": false,
          "panel_cut": "2026-09-26"
+        },
+        "nominal": {
+         "projected_cycle": 8060430.730348066,
+         "anchor_cycle": 7834150.0,
+         "cycle_coefficient_low": 7390799.380777163,
+         "cycle_coefficient_high": 8790732.938540082,
+         "cycle_prediction_low": 5999150.064022069,
+         "cycle_prediction_high": 10829958.054954974,
+         "cycle_given_observed_low": 5389050.0,
+         "cycle_given_observed_median": 5823026.3280817615,
+         "cycle_given_observed_high": 6150660.885387406,
+         "remaining_given_observed_low": 961550.0000000001,
+         "remaining_given_observed_median": 1395526.3280817613,
+         "remaining_given_observed_high": 1723160.8853874053,
+         "projected_remaining": 3632930.730348066,
+         "remaining_coefficient_low": 2963299.3807771634,
+         "remaining_coefficient_high": 4363232.938540082,
+         "remaining_prediction_low": 1571650.0640220686,
+         "remaining_prediction_high": 6402458.054954973,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 4427500.0
         }
        },
        {
@@ -14770,7 +14942,29 @@
         "remaining_given_observed_low": 131336.40049852524,
         "remaining_given_observed_median": 2943154.983184634,
         "remaining_given_observed_high": 18760832.5533174,
-        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)"
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
+        "nominal": {
+         "projected_cycle": 8495046.512901057,
+         "anchor_cycle": 17955388.53,
+         "cycle_coefficient_low": 7196394.573129473,
+         "cycle_coefficient_high": 10028051.480919547,
+         "cycle_prediction_low": 3156863.4953900944,
+         "cycle_prediction_high": 22859973.31266769,
+         "cycle_given_observed_low": 7349417.579249472,
+         "cycle_given_observed_median": 10197405.197341124,
+         "cycle_given_observed_high": 26218549.00231222,
+         "remaining_given_observed_low": 133025.8092494731,
+         "remaining_given_observed_median": 2981013.4273411245,
+         "remaining_given_observed_high": 19002157.23231222,
+         "projected_remaining": 1278654.742901056,
+         "remaining_coefficient_low": -19997.19687052652,
+         "remaining_coefficient_high": 2811659.710919547,
+         "remaining_prediction_low": -4059528.2746099057,
+         "remaining_prediction_high": 15643581.542667689,
+         "factor": 1.0128632180000001,
+         "source": "x1.01286 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds.",
+         "observed": 7216391.77
+        }
        }
       ],
       "slope": null,
@@ -15373,7 +15567,15 @@
          "layer": "R8",
          "cycle": 2026
         },
-        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself"
+        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself",
+        "nominal": {
+         "projected_cycle": 6153151.825417391,
+         "anchor_cycle": 7834150.0,
+         "cycle_prediction_low": 4605138.725791158,
+         "cycle_prediction_high": 8221528.088739685,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
+        }
        },
        {
         "id": "general_giving",
@@ -15425,6 +15627,14 @@
         "chained_from": {
          "layer": "P1",
          "cycle": 2026
+        },
+        "nominal": {
+         "projected_cycle": 16813666.029397197,
+         "anchor_cycle": 17955388.53,
+         "cycle_prediction_low": 5682183.100888528,
+         "cycle_prediction_high": 63223670.68074697,
+         "factor": 1.0656483025330452,
+         "source": "x1.06565 against 2025 dollars: expected inflation of 2.5726436% a year at the cycle mid-point (Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)). The anchor-cycle level and the observed amount are the nominal values Mentat holds."
         }
        }
       ],

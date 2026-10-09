@@ -44,16 +44,18 @@ function el(tag) {
     querySelector: () => null, querySelectorAll: () => [], closest: () => null, getBoundingClientRect: () => ({width: 800, height: 300, left: 0, top: 0})};
 }
 
-function load(fetchImpl = () => {}, timers = {setTimeout, clearTimeout}) {
+function load(fetchImpl = () => {}, timers = {setTimeout, clearTimeout}, storage = undefined) {
   const els = {};
   const create = tag => { const e = el(tag); let id = ''; Object.defineProperty(e, 'id', {get: () => id, set: v => { id = v; els[v] = e; }}); return e; };
   const document = {getElementById: id => els[id] || (els[id] = el('div')), createElement: create, createElementNS: create, createTextNode: text => ({textContent: text}), querySelector: () => null, querySelectorAll: () => [], addEventListener() {}};
   let src = fs.readFileSync(SOURCE, 'utf8');
   assert.match(src, /\}\)\(\);\s*$/, 'unexpected file ending');
   src = src.replace(/\}\)\(\);\s*$/, `globalThis.__t={render,renderEvidence,niceScale,axisLabel,chartModel,mixModel,lobbyModel,footerFacts,referenceRequest,getRequest,buildInputs,historicalExample,industry,anchorExample,
-    refreshControls,parseNumber,formatNumber,exampleText,exampleParts,exampleTip,conditioning,refreshExample,waiverChips,waiverEntries,conditionedTables,givenOf,allocationOf,hasFlag,generalName,getControls:()=>controls,getPills:()=>pills,clearSaved,resetDefaults,stickyMax,shortPeriod,chartMoney,outlookSource,setAccount,paintWarnings,drawMix,drawChart,calculate,anchorNote,paintAccountChrome,
+    refreshControls,parseNumber,formatNumber,exampleText,exampleParts,exampleTip,conditioning,refreshExample,waiverChips,waiverEntries,conditionedTables,givenOf,allocationOf,hasFlag,generalName,getControls:()=>controls,getPills:()=>pills,clearSaved,resetDefaults,stickyMax,shortPeriod,chartMoney,outlookSource,setAccount,setDollars,getDollars:()=>dollars,paintWarnings,drawMix,drawChart,calculate,anchorNote,paintAccountChrome,
     setCatalog:c=>{catalog=c;},setRuns:(r,b)=>{result=r;refRun=b;}};\n})();\n`);
-  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date, Map, Set, Event: function Event(type, init) { this.type = type; Object.assign(this, init); }});
+  const globals = {document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date, Map, Set, Event: function Event(type, init) { this.type = type; Object.assign(this, init); }};
+  if (storage) globals.localStorage = storage;          // without one the page's localStorage is undeclared, as when the browser blocks it
+  const ctx = vm.createContext(globals);
   vm.runInContext(src, ctx, {filename: SOURCE});
   return {t: ctx.__t, els};
 }
@@ -834,7 +836,10 @@ test('rollback (no cycle model): the reference request reads Mentat\'s levels wi
 // p.coefficient_interval_pct[0] of a block that has none.
 const textOf = node => node == null ? '' : typeof node === 'string' ? node : [node.textContent || '', ...(node.children || []).map(textOf)].join(' ');
 const CYC = CYCLE.runs, CYC_SECTORS = [['commercial_banks', CYC.banks], ['credit_unions', CYC.credit_unions], ['property_casualty', CYC.property_casualty]];
-const cycleSession = sector => session({sector, source: CYCLE});
+// The recorded cycle answers carry the calculator's nominal twin (D-092); the page opens in nominal dollars. The older tests below pin the 2025-dollar figures, so this session asks for that basis
+// explicitly (the same control the page offers); nominalSession is the page as a viewer with no stored choice sees it.
+const cycleSession = (sector, dollars = 'real') => { const s = session({sector, source: CYCLE}); s.t.setDollars(dollars); return s; };
+const nominalSession = sector => session({sector, source: CYCLE});
 
 test('the recorded cycle answers are what the apply report says (company PACs on the panel nowcast R8, D-116): schema 2, cycle_model, R8 and P1, no old pac fields, a null chained coefficient interval', () => {
   assert.equal(CYC.banks.cycle_model.layers.pac_to_candidates, 'R8'); assert.equal(CYC.banks.cycle_model.layers.general_giving, 'P1');
@@ -1718,4 +1723,94 @@ test('every flag the old chips carried is a line of plain text, scope first, war
   if (warnAt >= 0) assert.ok(warnAt < noteAt || noteAt < 0);
   t.paintWarnings({chart: t.chartModel(null, null, 'general'), mixes: [{chamber: 'House', chips: []}, {chamber: 'Senate', chips: []}], lobby: {state: 'empty', text: ''}});
   assert.equal(els['gf-warnings'].hidden, true, 'no warnings: the section is not drawn');
+});
+
+// ---- nominal dollars by default (D-092, Paul 2026-10-09) ---------------------------------------------------------------------------------------------------------------------------
+// The calculator sends every cycle-model measure with its nominal twin (`nominal`); the chart lays it over the 2025-dollar fields, the page does no inflation arithmetic, and the choice is a
+// Nominal | 2025 dollars control that is remembered per viewer. The 2023-24 bar and the observed amount are Mentat's own nominal values.
+const F_2026 = 1.012863218, F_2028 = 1.0656483025330452;          // 2.5726436% a year at the cycle mid-point against 2025 (D-092)
+const near = (actual, expected, tolerance = 1e-9) => Math.abs(actual / expected - 1) <= tolerance;
+
+test('a viewer with no stored choice sees nominal dollars: the caption, the control and every column are nominal, and the toggle gives 2025 dollars back', () => {
+  const {t, els} = nominalSession('commercial_banks');
+  const run = CYC.banks, g = measure(run, 0, 'general_giving'), g28 = measure(run, 1, 'general_giving');
+  let model = t.chartModel(run, run, 'general');
+  assert.deepEqual([model.basis, model.dollars, model.nominalAvailable], ['Nominal dollars', 'nominal', true]);
+  const [anchor, cur, next] = model.columns;
+  // the 2023-24 bar is the anchors' own nominal level, not the 2025-dollar level converted back; the observed amount likewise
+  assert.equal(anchor.value, g.anchor_cycle_nominal); assert.equal(anchor.value, g.nominal.anchor_cycle); assert.notEqual(anchor.value, g.anchor_cycle_real_2025);
+  assert.equal(cur.observed, g.observed.amount_nominal);
+  // one value per horizon, by hand: nominal = 2025 dollars x the mid-cycle expected-inflation factor
+  assert.ok(near(cur.total, g.cycle_given_observed_median * F_2026), '2025-26 full cycle'); assert.equal(cur.total, g.nominal.cycle_given_observed_median);
+  assert.ok(near(cur.low, g.cycle_given_observed_low * F_2026) && near(cur.high, g.cycle_given_observed_high * F_2026), '2025-26 interval');
+  assert.ok(near(cur.remainder, g.remaining_given_observed_median * F_2026), '2025-26 remainder'); assert.ok(Math.abs(cur.observed + cur.remainder - cur.total) < 1e-6, 'the stack adds up in nominal dollars');
+  assert.ok(near(next.total, g28.projected_cycle_real_2025 * F_2028), '2027-28 full cycle'); assert.equal(next.total, g28.nominal.projected_cycle);
+  assert.ok(near(next.low, g28.cycle_prediction_low * F_2028) && near(next.high, g28.cycle_prediction_high * F_2028), '2027-28 interval');
+  assert.equal(model.summary.startsWith('Giving by cycle, General giving, nominal dollars. '), true);
+  // the words: the anchor's tooltip says both amounts, this chart's first; the projection tooltips name the unit
+  assert.deepEqual(plain(row(anchor.tip, 'Nominal (this chart)')), ['Nominal (this chart)', '$25.92M']); assert.deepEqual(plain(row(anchor.tip, 'In 2025 USD')), ['In 2025 USD', '$26.98M']);
+  assert.ok(row(cur.intervalTip, 'Full cycle, median (nominal)') && row(next.intervalTip, 'Projected full cycle (nominal)'));
+  assert.match(texts(anchor.tip), /in the nominal dollars Mentat holds; the projections are converted at the expected inflation/);
+  t.paintAccountChrome({chart: model});
+  assert.equal(els['gf-basis'].textContent, 'Nominal dollars'); assert.equal(els['gf-dollars'].hidden, false);
+  assert.deepEqual([els['gf-dollars-nominal'].attrs['aria-pressed'], els['gf-dollars-real'].attrs['aria-pressed']], ['true', 'false']);
+  // the toggle: the same response, back in 2025 dollars, exactly as before
+  t.setDollars('real');
+  model = t.chartModel(run, run, 'general');
+  assert.deepEqual([model.basis, model.dollars], ['2025 dollars', 'real']);
+  assert.equal(model.columns[0].value, g.anchor_cycle_real_2025); assert.equal(model.columns[1].total, g.cycle_given_observed_median); assert.equal(model.columns[2].total, g28.projected_cycle_real_2025);
+  assert.deepEqual(plain(row(model.columns[0].tip, 'In 2025 USD (this chart)')), ['In 2025 USD (this chart)', '$26.98M']);
+  t.paintAccountChrome({chart: model});
+  assert.equal(els['gf-basis'].textContent, '2025 dollars'); assert.deepEqual([els['gf-dollars-nominal'].attrs['aria-pressed'], els['gf-dollars-real'].attrs['aria-pressed']], ['false', 'true']);
+  t.setDollars('nominal'); assert.equal(t.chartModel(run, run, 'general').columns[1].total, g.nominal.cycle_given_observed_median);
+});
+
+test('the axis follows the basis it is drawn in: switching back to 2025 dollars does not keep the larger nominal scale', () => {
+  const {t} = nominalSession('commercial_banks');
+  const nominalTop = t.chartModel(CYC.banks, CYC.banks, 'general').axisMax;
+  t.setDollars('real');
+  const realTop = t.chartModel(CYC.banks, CYC.banks, 'general').axisMax;
+  assert.ok(realTop < nominalTop, `${realTop} < ${nominalTop}`);
+  assert.equal(realTop, Math.max(...[measure(CYC.banks, 0, 'general_giving').anchor_cycle_real_2025, measure(CYC.banks, 0, 'general_giving').observed.amount_real_2025, measure(CYC.banks, 0, 'general_giving').cycle_given_observed_median,
+    measure(CYC.banks, 0, 'general_giving').cycle_given_observed_high, measure(CYC.banks, 1, 'general_giving').projected_cycle_real_2025, measure(CYC.banks, 1, 'general_giving').cycle_prediction_high]));
+});
+
+test('company PACs, Telecom: the 2023-24 bar is the cohort total as the panel holds it and the open cycle is the panel\'s own nominal nowcast, in nominal dollars', () => {
+  const {t, els} = nominalSession('telecom');
+  const run = CYC.telecom, m = measure(run, 0, 'pac_to_candidates'), model = t.chartModel(run, run, 'pac');
+  assert.equal(model.columns[0].value, 7834150); assert.equal(model.columns[1].observed, 4427500);          // the panel's 2023-24 total and its observed amount, nominal
+  assert.ok(Math.abs(model.columns[1].total - 5823026.33) < 0.01, String(model.columns[1].total));          // the panel's published nowcast, to the cent: no conversion at all
+  t.setAccount('pac'); t.paintAccountChrome({chart: model});
+  assert.equal(els['gf-basis'].textContent, 'Nominal dollars · Telecom: 8 PACs (published panel cohort), observed to 2026-09-26');
+  assert.equal(m.nominal.cycle_given_observed_median, model.columns[1].total);
+});
+
+test('the choice is remembered per viewer in localStorage; blocked storage falls back to nominal and the toggle still works for the page', () => {
+  const key = 'mentat.givingForecast.dollars';
+  const kept = {};
+  const storage = {getItem: k => (k in kept ? kept[k] : null), setItem: (k, v) => { kept[k] = String(v); }};
+  let s = load(undefined, undefined, storage); s.t.setCatalog(clone(CYCLE.catalog));
+  assert.equal(s.t.getDollars(), 'nominal');          // nothing stored: nominal
+  s.t.setDollars('real'); assert.equal(kept[key], 'real');
+  s.t.setDollars('nominal'); assert.equal(kept[key], 'nominal');
+  s.t.setDollars('real');
+  s = load(undefined, undefined, storage); assert.equal(s.t.getDollars(), 'real', 'a later page opens in the stored basis');
+  kept[key] = 'junk'; s = load(undefined, undefined, storage); assert.equal(s.t.getDollars(), 'nominal', 'a stored value that is not one of the two is ignored');
+  const blocked = {getItem() { throw new Error('SecurityError'); }, setItem() { throw new Error('QuotaExceededError'); }};
+  s = load(undefined, undefined, blocked); assert.equal(s.t.getDollars(), 'nominal');
+  assert.doesNotThrow(() => s.t.setDollars('real')); assert.equal(s.t.getDollars(), 'real');
+  s = load(); assert.equal(s.t.getDollars(), 'nominal', 'no storage object at all');
+});
+
+test('no control and 2025 dollars where the answer has no nominal twin (the rollback module) and under Lobbying', () => {
+  const {t, els} = session();
+  const old = t.chartModel(RUN.banks, RUN.banks, 'general');
+  assert.deepEqual([old.basis, old.dollars, old.nominalAvailable], ['2025 dollars', 'real', false]);
+  t.paintAccountChrome({chart: old});
+  assert.equal(els['gf-dollars'].hidden, true); assert.equal(els['gf-basis'].textContent, '2025 dollars');
+  const {t: u, els: ue} = nominalSession('commercial_banks');
+  u.paintAccountChrome({chart: u.chartModel(CYC.banks, CYC.banks, 'general')}); assert.equal(ue['gf-dollars'].hidden, false);
+  u.setAccount('lobby'); u.paintAccountChrome({chart: u.chartModel(CYC.banks, CYC.banks, 'general'), lobby: u.lobbyModel(CYC.banks, 2026, 2028)});
+  assert.equal(ue['gf-dollars'].hidden, true, 'the lobbying chart is nominal already');
+  assert.match(ue['gf-basis'].textContent, /^Annual, nominal dollars/);
 });

@@ -718,6 +718,22 @@
     return waiversOf(card, run).filter(w => w.show_warning !== false).map(w => ({kind: INFO, text: waiverText(w) || 'Gate waived by owner: ' + waiverLabel(w), tip: waiverTip(w)}));
   }
 
+  // ---- the dollar basis of the cycle chart (D-092, Paul 2026-10-09: nominal dollars by default; 2025 dollars on request) ------------------
+  // The calculator sends every cycle-model measure with an explicit nominal twin of its 2025-dollar amounts (`nominal`: the expected-inflation factor of the cycle is applied there, and the
+  // 2023-24 level and the observed amount are Mentat's own nominal values), so the page does no inflation arithmetic: `inBasis` lays that twin over the fields the chart reads. A measure
+  // without one (the answer of an earlier module) is drawn in 2025 dollars and says so. The choice is remembered per viewer in localStorage; where storage is blocked it is nominal.
+  const DOLLARS = {nominal: 'Nominal dollars', real: '2025 dollars'}, DOLLARS_KEY = 'mentat.givingForecast.dollars';
+  let dollars = 'nominal';
+  try { const saved = localStorage.getItem(DOLLARS_KEY); if (saved === 'real' || saved === 'nominal') dollars = saved; } catch (ignored) { /* no storage: the default stands */ }
+  const NOMINAL_FIELD = {projected_cycle: 'projected_cycle_real_2025', anchor_cycle: 'anchor_cycle_real_2025'};
+  function inBasis(m, nominal) {
+    if (!nominal || !m || !m.nominal) return m;
+    const out = Object.assign({}, m, {asRecorded: m});
+    for (const [key, amount] of Object.entries(m.nominal)) if (typeof amount === 'number' && key !== 'factor' && key !== 'observed') out[NOMINAL_FIELD[key] || key] = amount;
+    if (m.observed) out.observed = Object.assign({}, m.observed, {amount_real_2025: m.nominal.observed != null ? m.nominal.observed : m.observed.amount_nominal});
+    return out;
+  }
+
   // ---- the cycle chart: model first (pure, tested), drawing second -------------------------------------------------------
   function measureOf(horizon, accountId) {
     const measures = horizon && horizon.pac && horizon.pac.measures || [];
@@ -742,23 +758,24 @@
   };
   const UPLIFT_LABELS = {pac_to_candidates: 'Presidential cycle uplift', general_giving: 'Presidential cycle factor'};
   // The tooltip of a projection (a column's whisker, band and body). `cond` is the conditioned view of the open cycle (P1) or null.
-  function projectionTip(m, p, label, cond) {
-    const lines = [H(label + ' · projection')];
+  function projectionTip(m, p, label, cond, nominal) {
+    const lines = [H(label + ' · projection')], unit = nominal ? 'nominal' : '2025 USD';
     if (cond) {
-      lines.push(R('Full cycle, median (2025 USD)', money(cond.total)), R(intervalName(m), range(cond.low, cond.high)));
+      lines.push(R(`Full cycle, median (${unit})`, money(cond.total)), R(intervalName(m), range(cond.low, cond.high)));
       lines.push(R('Observed through ' + cond.through, money(cond.observed)));
     } else {
-      lines.push(R('Projected full cycle (2025 USD)', money(m.projected_cycle_real_2025)), R(intervalName(m), range(m.cycle_prediction_low, m.cycle_prediction_high)));
+      lines.push(R(`Projected full cycle (${unit})`, money(m.projected_cycle_real_2025)), R(intervalName(m), range(m.cycle_prediction_low, m.cycle_prediction_high)));
     }
     lines.push(R('Coefficient interval' + (cond ? ' (before conditioning)' : ''), range(m.cycle_coefficient_low, m.cycle_coefficient_high) + (zeroInterval(p) ? ' (no input change)' : '')));
     // The model's change is the unconditioned one. With the model fix the column draws the figure conditioned on the giving already observed, so the change
     // actually drawn (the conditioned median against the Mentat level) is printed next to it and the model's own number says what it is.
     const modelChange = m.model ? `${pct((m.projected_cycle_real_2025 / m.anchor_cycle_real_2025 - 1) * 100)} (${p.chained ? 'chained on the open cycle, ' : ''}${m.model.growth_applies === false ? 'no industry budget change: growth does not affect company PACs' : 'industry budget change ' + signed(m.model.budget_growth_pct) + '%, half applied'})`
       : `${pct(p.change_pct)} (${p.chained ? 'chained on a projection, ' + p.steps + ' steps' : 'previous cycle'})`;
+    const inUnit = nominal ? ', nominal dollars' : '';          // a change between two drawn nominal amounts includes the expected inflation between the cycles
     if (cond && m.anchor_cycle_real_2025 > 0) {
-      lines.push(R('Change vs Mentat ' + period(p.anchor_cycle) + ', drawn (conditioned)', pct((cond.total / m.anchor_cycle_real_2025 - 1) * 100)));
-      lines.push(R('Model change before conditioning on the giving already observed', modelChange));
-    } else lines.push(R('Change vs Mentat ' + period(p.anchor_cycle), modelChange));
+      lines.push(R('Change vs Mentat ' + period(p.anchor_cycle) + ', drawn (conditioned)' + inUnit, pct((cond.total / m.anchor_cycle_real_2025 - 1) * 100)));
+      lines.push(R('Model change before conditioning on the giving already observed' + inUnit, modelChange));
+    } else lines.push(R('Change vs Mentat ' + period(p.anchor_cycle) + inUnit, modelChange));
     if (m.model && m.model.presidential_uplift) lines.push(R(UPLIFT_LABELS[m.id] || 'Presidential cycle factor', upliftText(m.id, m.model.presidential_uplift) + (m.model.dP < 0 ? '; this midterm step divides by it' : '')));
     if (cond) {
       lines.push(R('Unconditioned model', `${money(m.projected_cycle_real_2025)}, interval ${range(m.cycle_prediction_low, m.cycle_prediction_high)}`));
@@ -773,8 +790,10 @@
     const view = run || base;
     if (!view) return {empty: true, account: accountId, message: ''};
     const head = view.horizons;
-    const mCur = run ? measureOf(run.horizons[0], accountId) : null, mNext = run ? measureOf(run.horizons[1], accountId) : null;
-    const baseCur = base ? measureOf(base.horizons[0], accountId) : null;
+    const recorded = [run ? measureOf(run.horizons[0], accountId) : null, run ? measureOf(run.horizons[1], accountId) : null, base ? measureOf(base.horizons[0], accountId) : null];
+    const available = recorded.some(ready) && recorded.filter(ready).every(m => m.nominal);          // every measure drawn carries the calculator's nominal twin
+    const nominal = dollars === 'nominal' && available, unit = nominal ? 'nominal dollars' : '2025 dollars';
+    const [mCur, mNext, baseCur] = recorded.map(m => inBasis(m, nominal));
     const levels = [mCur, baseCur, mNext].find(m => ready(m) && m.anchor_cycle_real_2025 != null) || null;
     const seen = [mCur, baseCur].find(m => ready(m) && m.observed) || null;
     const pacCur = head[0].pac, pacNext = head[1].pac, anchorCycle = pacCur.anchor_cycle;
@@ -783,12 +802,14 @@
     const cpi = view.anchors && view.anchors.cpi_multiplier;
     const anchor = {id: 'anchor', label: period(anchorCycle), sub: 'Mentat level', value: levels.anchor_cycle_real_2025, nominal: levels.anchor_cycle_nominal, cycle: anchorCycle};
     const population = levels.population || null;          // D-117: what the company-PAC total is a total of (the chart roster's committees or the published panel's cohort)
-    anchor.tip = [H(`${anchor.label} · Mentat level`), R('Account', accountLabel(accountId, levels))].concat(population ? [R('Population', population.label)] : [], [R('In 2025 USD (this chart)', money(anchor.value)), R('Nominal', money(anchor.nominal))]);
+    const amounts = nominal ? [R('Nominal (this chart)', money(anchor.nominal)), R('In 2025 USD', money(levels.asRecorded.anchor_cycle_real_2025))] : [R('In 2025 USD (this chart)', money(anchor.value)), R('Nominal', money(anchor.nominal))];
+    anchor.tip = [H(`${anchor.label} · Mentat level`), R('Account', accountLabel(accountId, levels))].concat(population ? [R('Population', population.label)] : [], amounts);
     if (cpi) anchor.tip.push(R('Deflator', 'CPI multiplier ' + number(cpi) + ' to 2025 dollars'));
-    anchor.tip.push(N(population && population.kind === 'panel_cohort' ? "The published PAC panel's cohort, in 2025 dollars so every column on this chart shares one dollar basis."
-      : "Mentat's own data for the tracked companies, in 2025 dollars so every column on this chart shares one dollar basis."));
+    const whose = population && population.kind === 'panel_cohort' ? "The published PAC panel's cohort" : "Mentat's own data for the tracked companies";
+    anchor.tip.push(N(nominal ? `${whose}, in the nominal dollars Mentat holds; the projections are converted at the expected inflation, so every column on this chart shares one dollar basis.`
+      : `${whose}, in 2025 dollars so every column on this chart shares one dollar basis.`));
     if (accountId === 'general' && excludesNonGiving(levels)) anchor.tip.push(N(NON_GIVING_NOTE));
-    anchor.aria = `${anchor.label} Mentat level: ${money(anchor.value)} in 2025 dollars, ${money(anchor.nominal)} nominal`;
+    anchor.aria = `${anchor.label} Mentat level: ${money(anchor.value)} in ${unit}, ${money(nominal ? levels.asRecorded.anchor_cycle_real_2025 : anchor.nominal)} ${nominal ? 'in 2025 dollars' : 'nominal'}`;
 
     const cur = {id: 'current', label: period(head[0].cycle), cycle: head[0].cycle, state: 'pending', word: isRange(mCur) ? 'range of prior cycles' : '95% prediction interval'};
     if (seen) { const o = seen.observed; Object.assign(cur, {observed: o.amount_real_2025, observedNominal: o.amount_nominal, through: o.through, faceValue: o.face_value, starts: seen.remainder_starts}); }
@@ -809,11 +830,11 @@
 
     if (cur.observed != null) {
       cur.observedTip = [H(`${cur.label} · observed to ${shortDate(cur.through)}`), R('Observed through', cur.through), R('Amount', money(cur.observed)),
-        R('Basis', cur.faceValue ? `Face value: no ${cur.cycle} CPI yet` : '2025 USD')];
+        R('Basis', cur.faceValue ? `Face value: no ${cur.cycle} CPI yet` : nominal ? 'Nominal (as Mentat holds it)' : '2025 USD')];
       if (cur.starts) cur.observedTip.push(N('The remainder starts the next day, ' + cur.starts + '.'));
     }
     if (cur.state === 'stacked' || cur.state === 'conflict') {
-      cur.aria = `${cur.label}: projected ${money(cur.total)} in 2025 dollars${cur.conditioned ? ' (given the giving already observed)' : ''}; ${money(cur.observed)} observed through ${cur.through}${cur.remainder != null ? ' plus ' + money(cur.remainder) + ' remainder' : ''}; ${cur.word} ${range(cur.low, cur.high)}`;
+      cur.aria = `${cur.label}: projected ${money(cur.total)} in ${unit}${cur.conditioned ? ' (given the giving already observed)' : ''}; ${money(cur.observed)} observed through ${cur.through}${cur.remainder != null ? ' plus ' + money(cur.remainder) + ' remainder' : ''}; ${cur.word} ${range(cur.low, cur.high)}`;
       const cond = cur.conditioned ? {total: cur.total, low: cur.low, high: cur.high, observed: cur.observed, through: cur.through} : null;
       if (cur.state === 'stacked') {
         const lines = [H(`${cur.label} · remainder`), R('Remainder from', cur.starts || '-'),
@@ -823,13 +844,14 @@
         lines.push(R(isRange(mCur) ? 'Remainder, range of prior cycles' : 'Remainder prediction interval', range(cur.remainderLow, cur.remainderHigh)));
         if (!cur.conditioned && cur.remainderLow < 0) lines.push(N('The remainder prediction interval reaches below zero; it is shown as the model returned it.', WARN));
         lines.push(N(cur.faceValue ? 'Observed giving is at face value (no ' + cur.cycle + ' CPI yet); the full cycle is the model\'s own arithmetic.'
+          : nominal ? 'Observed giving is the nominal amount Mentat holds; the full cycle is the model\'s own arithmetic in 2025 dollars, converted at the expected inflation (no ' + cur.cycle + ' CPI yet).'
           : 'Observed giving is deflated at the expected inflation (no ' + cur.cycle + ' CPI yet); the full cycle is the model\'s own arithmetic.'));
         cur.remainderTip = lines;
       } else {
         cur.remainderTip = [H(`${cur.label} · remainder`), N(remainderText(mCur) || 'No remainder is shown.', WARN)];
         addFlag(WARN, 'Observed giving already exceeds the projected cycle total', [H(`${cur.label} · remainder`), N(remainderText(mCur), WARN), R('Observed', money(cur.observed)), R('Projected full cycle', money(cur.total))]);
       }
-      cur.intervalTip = projectionTip(mCur, pacCur, cur.label, cond);
+      cur.intervalTip = projectionTip(mCur, pacCur, cur.label, cond, nominal);
       cur.tip = [cur.intervalTip[0], cur.intervalTip[1], R('Observed through ' + cur.through, money(cur.observed))].concat(cur.remainder != null ? [R('Remainder', money(cur.remainder))] : [], cur.intervalTip.slice(2));
       if (cur.conditioned) {
         // P1: the interval is drawn from the conditioned distribution and cannot start below what is observed; the legacy fields stay for the notes.
@@ -841,8 +863,8 @@
          R('Remainder prediction interval', range(cur.remainderLow, cur.remainderHigh)),
          N('The model returned an interval whose lower end is under the amount already observed (a negative remainder at the low end). It is drawn exactly as returned, not clipped. ' + BUDGET_TEXT + '.', WARN)]);
     } else if (cur.state === 'projection') {
-      cur.aria = `${cur.label}: projected ${money(cur.total)} in 2025 dollars; ${cur.word} ${range(cur.low, cur.high)}`;
-      cur.intervalTip = cur.tip = projectionTip(mCur, pacCur, cur.label, null);
+      cur.aria = `${cur.label}: projected ${money(cur.total)} in ${unit}; ${cur.word} ${range(cur.low, cur.high)}`;
+      cur.intervalTip = cur.tip = projectionTip(mCur, pacCur, cur.label, null, nominal);
       if (mCur.remainder_reason) addFlag(INFO, 'No observed giving for this cycle', [H(cur.label), N(mCur.remainder_reason)]);
     } else {
       cur.aria = `${cur.label}: ${cur.observed != null ? money(cur.observed) + ' observed through ' + cur.through + '; ' : ''}${cur.reason || HINT}`;
@@ -850,8 +872,8 @@
     }
     if (cur.state === 'pending' && cur.observedTip && cur.reason && cur.reason !== HINT) cur.observedTip.push(N(cur.reason, WARN));
     if (next.state === 'projection') {
-      next.aria = `${next.label}: projected ${money(next.total)} in 2025 dollars; 95% prediction interval ${range(next.low, next.high)}`;
-      next.intervalTip = next.tip = projectionTip(mNext, pacNext, next.label, null);
+      next.aria = `${next.label}: projected ${money(next.total)} in ${unit}; 95% prediction interval ${range(next.low, next.high)}`;
+      next.intervalTip = next.tip = projectionTip(mNext, pacNext, next.label, null, nominal);
     } else {
       next.aria = `${next.label}: ${next.reason || HINT}`;
       next.pendingTip = [H(next.label + ' · not calculated'), N(next.reason || HINT)];
@@ -873,8 +895,9 @@
     if (caveats.length) addFlag(INFO, caveats[0], [H('Industry scope'), ...caveats.map(text => N(text))]);
     for (const chip of waiverChips('pac', view)) addFlag(chip.kind, chip.text, chip.tip);
     const values = [anchor.value, cur.observed, cur.total, cur.high, next.total, next.high].filter(Number.isFinite);
-    const model = {empty: false, account: accountId, accountLabel: accountLabel(accountId, levels), basis: '2025 dollars', population, columns: [anchor, cur, next], flags, axisMax: stickyMax(accountId, view, Math.max(...values)), cpi, conditioned: Boolean(cur.conditioned), rangeLabel: isRange(mCur) ? 'Range of prior cycles' : '95% range'};
-    model.summary = `Giving by cycle, ${ACCOUNT_LABELS[accountId]}, 2025 dollars. ` + model.columns.map(c => c.aria).join('. ') + '.';
+    const model = {empty: false, account: accountId, accountLabel: accountLabel(accountId, levels), basis: nominal ? DOLLARS.nominal : DOLLARS.real, dollars: nominal ? 'nominal' : 'real', nominalAvailable: available, population, columns: [anchor, cur, next], flags,
+      axisMax: stickyMax(accountId + '|' + (nominal ? 'nominal' : 'real'), view, Math.max(...values)), cpi, conditioned: Boolean(cur.conditioned), rangeLabel: isRange(mCur) ? 'Range of prior cycles' : '95% range'};
+    model.summary = `Giving by cycle, ${ACCOUNT_LABELS[accountId]}, ${unit}. ` + model.columns.map(c => c.aria).join('. ') + '.';
     return model;
   }
   // D-064: the chart's PAC account is the roster companies' own PACs (the Party split row says "Company PACs" too); the published PAC table in the fold has its own title.
@@ -1665,8 +1688,13 @@
     paintLegend(model);
     $('gf-hero-title').textContent = lobby ? 'Lobbying by year' : 'Giving by cycle';
     const pop = !lobby && account === 'pac' && model && model.chart && model.chart.population, seen = pop && model.chart.columns[1].through;          // D-117
+    // The dollar basis of the bars (D-092): the caption names what is drawn, and the Nominal | 2025 dollars control follows it. The lobbying chart is nominal already (no control there), and an answer
+    // without the calculator's nominal twin (an earlier module) can only be drawn in 2025 dollars.
+    const chart = model && model.chart, drawn = chart && !chart.empty ? chart.dollars || 'real' : dollars;
     $('gf-basis').textContent = lobby ? (model && model.lobby && model.lobby.state === 'ready' ? 'Annual, ' + model.lobby.dollars : 'Annual, two series')
-      : '2025 dollars' + (pop ? ' · ' + pop.label + (seen ? ', observed to ' + seen : '') : '');
+      : (chart && !chart.empty && chart.basis ? chart.basis : DOLLARS[drawn]) + (pop ? ' · ' + pop.label + (seen ? ', observed to ' + seen : '') : '');
+    $('gf-dollars').hidden = lobby || !hasCycleModel() || Boolean(chart && !chart.empty && !chart.nominalAvailable);
+    for (const id of ['nominal', 'real']) $('gf-dollars-' + id).setAttribute('aria-pressed', String(drawn === id));
   }
   function paintParty() {
     const view = readyRun(result) || readyRun(refRun), pac = view && view.horizons[0].pac;
@@ -1777,6 +1805,16 @@
     hideTip();
     if (account === 'lobby') drawLobby(painted.lobby, $('gf-lobby-chart'), true);
     else { painted.chart = chartModel(result, refRun, account); paintAccountChrome(painted); drawChart(painted.chart, $('gf-chart'), true); }          // the legend and the basis line follow the chart model just built
+    paintWarnings(painted);
+  }
+  // The Nominal | 2025 dollars control: the choice is remembered per viewer (try/catch: storage can be blocked), the bars and their tooltips are drawn again from the same response.
+  function setDollars(next) {
+    dollars = next === 'real' ? 'real' : 'nominal';
+    try { localStorage.setItem(DOLLARS_KEY, dollars); } catch (ignored) { /* the choice holds for this page only */ }
+    paintAccountChrome(painted);
+    if (!canPaint() || !painted) return;
+    hideTip();
+    if (account !== 'lobby') { painted.chart = chartModel(result, refRun, barAccount()); paintAccountChrome(painted); drawChart(painted.chart, $('gf-chart'), true); }
     paintWarnings(painted);
   }
   // The levels Mentat already holds, read with the anchor cycle's own growth and control (no change from the previous cycle). Only the
@@ -1892,6 +1930,7 @@
   open.addEventListener('click',()=>showForecast(true));
   $('gf-view-insights').addEventListener('click',()=>showForecast(false));
   for(const id of ['general','pac','lobby'])$('gf-account-'+id).addEventListener('click',()=>setAccount(id));
+  for(const id of ['nominal','real'])$('gf-dollars-'+id).addEventListener('click',()=>setDollars(id));
   $('gf-reset').addEventListener('click',resetDefaults);
   $('gf-sources-link').addEventListener('click',openSources);
   $('gf-form').addEventListener('submit',calculate);
