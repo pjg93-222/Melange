@@ -85,3 +85,13 @@ split the "Company PACs" row of the party split divides is pinned here: `panel_c
 (basis `canonical_cycle_office_nominal_pac_D_R`; the 2023-24 cycle by chamber, and 2025-26 D/R to the panel's cut). Only the rows the panel counts (`hs` == 1) are split, so D + R + other / unknown
 recipients + the lane's unresolved-office pool equals the panel's 2023-24 total and its observed amount to the cent. The calculator reads the file only when its cohort, cut and both totals match the
 published panel (otherwise the row says so and the dollars are unaffected). When the panel's cut or totals move, rerun the builder (`--check` exits 1 when the file is stale); the snapshot itself is not touched.
+
+## Telecom's company PACs (2026-10-08)
+
+Telecom's company PACs are the published PAC panel's 8 telecom PACs (`COHORTS['telecom']` in `app/pac_giving_forecast.py`; the snapshot has no roster PAC for Telecom: its `pac_to_candidates` stays
+unavailable). The calculator reads them through the same code path as the credit unions' (`PANEL_COHORT`, `_r8`: the panel's own nowcast O + (1 - s) B, then x1.09 for 2027-28), labelled
+"Telecom: 8 PACs (published panel cohort)". Their D/R split is pinned in `panel_cohort_split_telecom.json` (one file per cohort; the credit unions' `panel_cohort_split.json` is untouched),
+written by the same `build_panel_cohort_split.py` (it now writes and `--check`s both) from the partisan-dollar lane's ledgers, with the same to-the-cent reconciliation against the panel: the
+2023-24 total $7,834,150 and the observed $4,427,500 to the cut 2026-09-26 (D + R + other / unknown recipients + the lane's unresolved-office pool). One of the cohort's 8 ids (C00377044) has no
+row in either ledger; the file lists it in `silent_committees`. The chamber split itself needs a House / Senate share model, which Telecom does not have (registry `withheld_by_model.control`), so the
+file is ready but the party split stays withheld for Telecom, with that reason, until such a model exists.

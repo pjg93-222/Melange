@@ -1390,9 +1390,10 @@ def _cycle_view(b, cycle, offered):
             anchor_cycle = anchored['coverage']['current_cycle'] - 2
         except AnchorProblem:
             anchored, anchor_cycle = None, None
-        blocks = {} if anchored is None else _panel_blocks(ident, anchor_cycle + 2)          # D-117: the credit unions' company PACs are the published panel's cohort
+        pac_model = row['capabilities']['pac']          # an industry whose PAC model is withheld (offered for lobbying only) has no company PACs to name
+        blocks = {} if anchored is None or not pac_model else _panel_blocks(ident, anchor_cycle + 2)          # D-117: the credit unions' company PACs are the published panel's cohort
         if anchored is not None:
-            company[ident] = _company_pacs(ident, anchored, blocks)
+            company[ident] = _company_pacs(ident, anchored, blocks) if pac_model else None
         per = {}
         for c in (cycle, cycle + 2):
             path = _ibis_path(cm, ident, c)
@@ -1561,10 +1562,13 @@ def _r8(cm, ident, block, mid, open_cycle, anchor_cycle, cut_through, mult, obse
 # partisan-dollar lane's own canonical classification, pinned in forecast/anchors/panel_cohort_split.json (build_panel_cohort_split.py), so the company-PAC candidate basis of the
 # party split divides the same population as the dollars: the anchor share, the observed D/R, the R8 remainder and the cut are all the cohort's (Paul, 2026-10-08, "fix the credit union
 # party split"). The employees' basis is untouched.
-PANEL_COHORT = {'credit_unions': 'credit_unions'}      # chart industry -> PAC panel sector
-SPLIT_FILE = Path(__file__).resolve().parents[1] / 'forecast' / 'anchors' / 'panel_cohort_split.json'
+# Telecom (2026-10-08, coordinator call consistent with D-117): the published panel's 8 telecom PACs, the same code path as the credit unions' 16 (the anchors have no roster PAC for Telecom).
+PANEL_COHORT = {'credit_unions': 'credit_unions', 'telecom': 'telecom'}      # chart industry -> PAC panel sector
+SPLIT_FILE = Path(__file__).resolve().parents[1] / 'forecast' / 'anchors' / 'panel_cohort_split.json'          # the credit unions'; the other cohorts have a file of their own
+SPLIT_FILES = {'telecom': SPLIT_FILE.with_name('panel_cohort_split_telecom.json')}
 SPLIT_SCHEMA = 'panel-cohort-party-split-v1'
-PANEL_LABELS = {'credit_unions': 'Credit unions: {n} PACs (published panel cohort)'}
+PANEL_LABELS = {'credit_unions': 'Credit unions: {n} PACs (published panel cohort)', 'telecom': 'Telecom: {n} PACs (published panel cohort)'}
+PANEL_NAMES = {'credit_unions': 'credit-union', 'telecom': 'Telecom'}
 PANEL_MEASURE_LABEL = 'Panel cohort PACs: own giving to House and Senate candidates'
 ROSTER_LABELS = {'commercial_banks': 'Banks: {n} bank companies'}
 PANEL_NOTICE = ("Company PACs: {label}, observed to {through} (the panel's own date), and so is their party split. General giving and the employees' party split are observed to {general}. "
@@ -1579,7 +1583,7 @@ def _panel_block(ident, open_cycle):
         import pac_giving_forecast as panel
         published = panel.catalog()
     except (ImportError, OSError, ValueError):
-        return None, 'The published PAC panel could not be read, so the credit-union company PACs cannot be shown.'
+        return None, 'The published PAC panel could not be read, so the ' + PANEL_NAMES.get(ident, ident) + ' company PACs cannot be shown.'
     item = next((s for s in published['sectors'] if s['sector'] == sector), None)
     now = item and item['current']
     origin = item and next((f for f in item['forecasts'] if f['target'] == open_cycle and f['product'] == 'ORIGIN' and f['status'] == 'ready'), None)
@@ -1606,10 +1610,10 @@ def _cohort_split(item, now, anchor):
     """({anchor: {House: {D, R}, Senate: {D, R}}, observed: {House: {D, R}, Senate: {D, R}}} in nominal dollars, None) or (None, why it is unavailable): the pinned D/R split of the panel's
     cohort (build_panel_cohort_split.py). It is taken only when it divides the very population the panel's dollars are: the same cohort and cut, the anchor cycle's total and the observed
     amount equal to the cent, and every bucket (D, R, other / unknown recipients, the lane's unresolved-office pool) adding up to them."""
-    why = ('The D/R split of the panel cohort (forecast/anchors/panel_cohort_split.json) is missing or does not match the published PAC panel (cohort, cut or totals), so the company-PAC '
+    why = ('The D/R split of the panel cohort (forecast/anchors/panel_cohort_split' + ('' if item['sector'] == 'credit_unions' else '_' + item['sector']) + '.json) is missing or does not match the published PAC panel (cohort, cut or totals), so the company-PAC '
            'party split cannot be shown. Rebuild it with forecast/anchors/build_panel_cohort_split.py.')
     try:
-        data = json.loads(SPLIT_FILE.read_text(encoding='utf-8'))
+        data = json.loads(SPLIT_FILES.get(item['sector'], SPLIT_FILE).read_text(encoding='utf-8'))
         total = next(h['total_cents'] for h in now['trace']['history'] if h['cycle'] == anchor)
         cycle, seen = data['cycles'][str(anchor)], data['observed']
 
@@ -1831,7 +1835,7 @@ def _project_v2(request, b):
     multiplier = snapshot['cpi']['multipliers'][str(open_cycle - 2)]
     open_multiplier = snapshot['cpi']['multipliers'].get(str(open_cycle))
     cm = b.get('cycle_model')
-    panel = _panel_blocks(sector, open_cycle) if cm else {}          # D-117: measure blocks read in place of the anchors' own (credit-union company PACs)
+    panel = _panel_blocks(sector, open_cycle) if cm and industry['capabilities']['pac'] else {}          # D-117: measure blocks read in place of the anchors' own (the panel cohorts' company PACs)
     ctx = dict(b=b, industry=industry, snap=entry, as_of=as_of, current=current, open_cycle=open_cycle, anchor_cycle=open_cycle - 2, panel=panel,
                coverage_end=entry['coverage']['coverage_end'], threshold=snapshot['thin_base_threshold_usd'], multiplier=multiplier,
                open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'], cm=cm, nowcast_errors=snapshot.get('lda_nowcast_errors'))

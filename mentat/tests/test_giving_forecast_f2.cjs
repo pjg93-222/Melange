@@ -615,14 +615,14 @@ test('lobbying (owner rulings 2026-10-08): the open year is the nowcast with an 
   assert.deepEqual(plain(lobby.chips), []);
 });
 
-test('a lobbying-only industry (Telecom): the giving chart says why it has no giving forecast; the lobbying chart explains its two bands', () => {
+test('a lobbying-only industry (the mechanism; Telecom was the first, until the owner ruling of 2026-10-08 made it a giving industry): the giving chart says why it has no giving forecast; the lobbying chart explains its two bands', () => {
   const {t} = session();
   const run = clone(RUN.banks);
-  for (const h of run.horizons) h.pac = {status: 'withheld', reason: 'Telecom is offered for lobbying only (owner ruling 2026-10-08).', measures: []};
+  for (const h of run.horizons) h.pac = {status: 'withheld', reason: 'This industry is offered for lobbying only.', measures: []};
   const model = t.chartModel(run, null, 'general');
   assert.equal(model.empty, true);
-  assert.equal(model.message, 'Telecom is offered for lobbying only (owner ruling 2026-10-08).');
-  assert.deepEqual(plain(model.flags.map(f => f.text)), ['Telecom is offered for lobbying only (owner ruling 2026-10-08).']);
+  assert.equal(model.message, 'This industry is offered for lobbying only.');
+  assert.deepEqual(plain(model.flags.map(f => f.text)), ['This industry is offered for lobbying only.']);
   assert.equal(t.lobbyModel(RUN.banks_lobby, 2026, 2028).caption, 'Bars: 80% band · dashed: ~95% band, the largest blind miss (n=32)');
 });
 
@@ -972,6 +972,46 @@ test('company PACs, credit unions (D-117): the chart and the Methods fold name t
   assert.equal(oldPac.population, null); assert.equal(row(oldPac.columns[0].tip, 'Population'), undefined);
   old.t.setAccount('pac'); old.t.paintAccountChrome({chart: oldPac}); assert.equal(old.els['gf-basis'].textContent, '2025 dollars');
   assert.ok(oldPac.flags.some(f => /^Coverage cut back/.test(f.text)));
+});
+
+test('Telecom (owner ruling 2026-10-08, OpenSecrets B09 and IBISWorld wireless + cable): general giving and company PACs read like the other industries, the company PACs name "Telecom: 8 PACs (published panel cohort)", lobbying is there, and the party split is withheld with its reason', () => {
+  const TEL = CYC.telecom, PANEL = 'Telecom: 8 PACs (published panel cohort)';
+  assert.equal(TEL.status, 'ready');
+  const {t, els} = cycleSession('telecom');
+  const pac = t.chartModel(TEL, TEL, 'pac'), general = t.chartModel(TEL, TEL, 'general');
+  assert.ok(!pac.empty && !general.empty, 'both giving charts are drawn');
+  assert.equal(general.columns[1].total, measure(TEL, 0, 'general_giving').cycle_given_observed_median); assert.equal(general.columns[1].conditioned, true);
+  assert.equal(pac.columns[1].total, measure(TEL, 0, 'pac_to_candidates').cycle_given_observed_median);
+  assert.equal((pac.columns[1].total / 1e6).toFixed(2), '5.75'); assert.equal((pac.columns[2].total / 1e6).toFixed(2), '5.77');          // the panel's nowcast (2025 USD) and the 2027-28 step with the +9%
+  assert.equal(pac.columns[2].total, measure(TEL, 1, 'pac_to_candidates').projected_cycle_real_2025);
+  assert.equal(pac.rangeLabel, 'Range of prior cycles'); assert.equal(general.rangeLabel, '95% range');
+  // the population, from the response: the published panel's 8 PACs, with the panel's own date; general giving keeps its own
+  assert.equal(pac.population.label, PANEL); assert.equal(general.population, null);
+  assert.equal(row(pac.columns[0].tip, 'Population')[1], PANEL); assert.equal(pac.accountLabel, 'Panel cohort PACs: own giving to House and Senate candidates');
+  assert.equal(pac.columns[1].through, '2026-09-26'); assert.equal(general.columns[1].through, '2026-06-30');
+  t.setAccount('pac'); t.paintAccountChrome({chart: pac}); assert.equal(els['gf-basis'].textContent, '2025 dollars · ' + PANEL + ', observed to 2026-09-26');
+  t.setAccount('general'); t.paintAccountChrome({chart: general}); assert.equal(els['gf-basis'].textContent, '2025 dollars');
+  // the growth input: the wireless + cable window average of the IBIS path, which moves general giving only
+  const view = CYCLE.catalog.cycle_model_view;
+  assert.deepEqual(plain([view.growth.telecom['2026'].growth_default, view.growth.telecom['2028'].growth_default]), [2.049, 4.241]);
+  assert.equal(view.growth.telecom['2026'].edition, '2024-10 (51721) + 2024-12 (51711a)');
+  assert.deepEqual(plain(view.growth_applies), {pac_to_candidates: false, general_giving: true});
+  assert.equal(view.company_pacs.telecom.label, PANEL);
+  // lobbying is as it was: the nowcast chart is drawn
+  const lobby = t.lobbyModel(TEL, 2026, 2028);
+  assert.equal(lobby.state, 'ready'); assert.deepEqual(plain(lobby.series.map(x => x.id)), ['income_total', 'expenses_total']); assert.ok(lobby.series.every(x => x.points.length >= 3), 'each lobbying series has its base year, the nowcast year and the next');
+  // the party split: the chamber model is withheld, so each row says why instead of drawing a bar
+  for (const chamber of ['House', 'Senate']) {
+    const mix = t.mixModel(TEL, TEL, chamber);
+    assert.ok(mix.rows.length > 0 && mix.rows.every(r => r.state === 'missing' && /general-giving model only/.test(r.reason)), chamber);
+  }
+  // the whole answer renders, nothing prints NaN, null or undefined
+  t.buildInputs(); assert.doesNotThrow(() => t.render(clone(TEL)));
+  const text = textOf(els['gf-results']);
+  assert.doesNotMatch(text, /NaN|undefined|null|Unavailable to/); assert.ok(text.includes('The 8 PACs of the published panel cohort: own giving to House and Senate candidates'));          // the results table names the cohort
+  t.anchorNote(t.industry());
+  const notes = textOf(els['gf-anchors-note']);
+  assert.ok(notes.includes('Company PACs: ' + PANEL + '; observed to 2026-09-26'), notes);
 });
 
 test('presidential-cycle factors (D-118, D-119, D-121): company PACs +9% on the 2027-28 tooltip, general giving ×1.86 on both tooltips, one Methods line each; an answer or catalog without them says nothing', () => {

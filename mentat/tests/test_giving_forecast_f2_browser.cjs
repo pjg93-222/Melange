@@ -90,6 +90,7 @@ function answerFor(runs, body, byGrowth) {
   const blank = horizons.every(h => h.growth_pct === '' || h.growth_pct == null);
   const lobbying = horizons.some(h => Object.values(h.annual_forecast_changes || {}).some(v => v !== '' && v != null));
   if (body.industry === 'property_casualty') return runs.property_casualty;
+  if (body.industry === 'telecom') return runs.telecom;
   if (body.industry === 'credit_unions') return (lobbying && runs.credit_unions_lobby) || runs.credit_unions;
   if (blank) return runs.banks_blank || runs.banks;
   const g = Number(body.horizons['2026'].growth_pct);
@@ -1135,6 +1136,48 @@ test('credit-union company PACs (D-117): the page names the 16-PAC panel cohort 
     const bankNotes = await page.textContent('#gf-anchors-note');
     assert.ok(bankNotes.includes('Company PACs: Banks: 19 bank companies; observed to 2026-06-30.') && !bankNotes.includes('single-PAC'), bankNotes);
     assert.ok(!(await page.textContent('#gf-results')).includes('Population: '), 'banks name no population on the split row');
+    assert.deepEqual(page.errors, []);
+  } finally { await closePage(page); }
+});
+
+test('Telecom (owner ruling 2026-10-08): it is offered with the wireless + cable IBIS defaults, General giving and Company PACs draw (the 8-PAC panel cohort named, its own observed-to date), Lobbying draws, and the party split says why it is withheld', async () => {
+  const PANEL = 'Telecom: 8 PACs (published panel cohort)';
+  const page = await open({path: 'cycle'});
+  try {
+    const pac = measureOf(CYCLE.runs.telecom, 0, 'pac_to_candidates'), general = measureOf(CYCLE.runs.telecom, 0, 'general_giving');
+    assert.ok((await page.$$eval('#gf-industry option', all => all.map(o => o.value))).includes('telecom'), 'the industry control offers Telecom');
+    let before = own(page).length;
+    await page.selectOption('#gf-industry', 'telecom'); await recalculated(page, before);
+    const sent = lastOwn(page);
+    assert.deepEqual([sent.industry, sent.horizons['2026'].growth_pct, sent.horizons['2028'].growth_pct, sent.growth_basis], ['telecom', '2.049', '4.241', 'ibis_window_avg']);
+    assert.equal(await page.$eval('#gf-horizons .gf-row:first-child .gf-source-text > span', el => el.textContent), 'IBIS 2024-10 (51721) + 2024-12 (51711a) · avg 2023–2025 · drives 2026 (one-year lag)');
+    assert.equal(await page.$eval('#gf-alert', el => el.hidden), true, 'no alert');
+    // General giving: drawn, observed to June 30, no population line
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars');
+    let text = await chartText(page);
+    assert.ok(text.includes(M1(general.cycle_given_observed_median)) && text.includes('observed to Jun 30'), text);
+    // Company PACs: the panel cohort, its own date
+    await page.click('#gf-account-pac'); await page.waitForTimeout(500);
+    assert.equal(await page.textContent('#gf-basis'), '2025 dollars · ' + PANEL + ', observed to 2026-09-26');
+    text = await chartText(page);
+    assert.ok(text.includes(M1(pac.cycle_given_observed_median)) && text.includes(M1(pac.anchor_cycle_real_2025)) && text.includes('observed to Sep 26') && !text.includes('Jun 30'), text);
+    assert.equal(M1(pac.cycle_given_observed_median), '$5.7M'); assert.equal(M1(general.cycle_given_observed_median), '$10.1M');          // the two accounts stay in their own figures
+    assert.match(await hoverTip(page, '#gf-chart .gf-mark-anchor .gf-col-anchor'), /PopulationTelecom: 8 PACs \(published panel cohort\)/);
+    assert.match(await hoverTip(page, '#gf-chart .gf-mark-current .gf-col-observed'), /Observed through2026-09-26/);
+    // Lobbying draws its own chart
+    await page.click('#gf-account-lobby'); await page.waitForTimeout(500);
+    const lobby = await chartText(page);
+    assert.ok(lobby.length > 20 && !/NaN|undefined/.test(lobby), lobby);
+    // the party split: the chamber model is withheld, so both bases show a dash (an empty track, no bar) and the results table says why
+    for (const chamber of ['house', 'senate']) {
+      assert.deepEqual(await page.$$eval('#gf-' + chamber + '-body .gf-bar-dash', all => all.map(el => el.textContent)), ['-', '-'], chamber + ': a dash for each basis');
+    }
+    assert.match(await page.textContent('#gf-party-cap'), /^Not shown: Telecom has a general-giving model only \(owner ruling 2026-10-08, OpenSecrets B09\)/, 'the card says why in sight');
+    assert.match(await page.textContent('#gf-results'), /Telecom has a general-giving model only \(owner ruling 2026-10-08, OpenSecrets B09\)/);
+    await openMethods(page);
+    const notes = await page.textContent('#gf-anchors-note');
+    assert.ok(notes.includes('Company PACs: ' + PANEL + '; observed to 2026-09-26'), notes);
+    assert.ok((await page.textContent('#gf-results')).includes('The 8 PACs of the published panel cohort: own giving to House and Senate candidates'));
     assert.deepEqual(page.errors, []);
   } finally { await closePage(page); }
 });

@@ -778,7 +778,7 @@
     const levels = [mCur, baseCur, mNext].find(m => ready(m) && m.anchor_cycle_real_2025 != null) || null;
     const seen = [mCur, baseCur].find(m => ready(m) && m.observed) || null;
     const pacCur = head[0].pac, pacNext = head[1].pac, anchorCycle = pacCur.anchor_cycle;
-    const missing = [mCur, baseCur, mNext].find(m => m && m.status === 'unavailable') || [pacCur, pacNext].find(p => p && p.status === 'withheld');          // a withheld model (Telecom: lobbying only) says why
+    const missing = [mCur, baseCur, mNext].find(m => m && m.status === 'unavailable') || [pacCur, pacNext].find(p => p && p.status === 'withheld');          // a withheld giving model (an industry offered for lobbying only) says why
     if (!levels) return {empty: true, account: accountId, message: missing ? missing.reason : 'No Mentat level is available for this account.', flags: missing ? [{kind: INFO, text: missing.reason}] : []};
     const cpi = view.anchors && view.anchors.cpi_multiplier;
     const anchor = {id: 'anchor', label: period(anchorCycle), sub: 'Mentat level', value: levels.anchor_cycle_real_2025, nominal: levels.anchor_cycle_nominal, cycle: anchorCycle};
@@ -1620,7 +1620,8 @@
   function paintParty() {
     const view = readyRun(result) || readyRun(refRun), pac = view && view.horizons[0].pac;
     $('gf-party-sub').textContent = view ? shortPeriod(view.horizons[0].cycle) + ', expected' : '';
-    $('gf-party-cap').textContent = pac && pac.anchor_cycle ? 'Tick = ' + shortPeriod(pac.anchor_cycle) : '';
+    const withheld = view ? ['House', 'Senate'].map(chamber => view.horizons[0].shares[chamber]).filter(s => s && s.status === 'withheld' && s.reason) : [];          // a chamber model that is withheld (Telecom: no share model) says why, in sight, instead of leaving dashes
+    $('gf-party-cap').textContent = withheld.length === 2 ? 'Not shown: ' + withheld[0].reason : pac && pac.anchor_cycle ? 'Tick = ' + shortPeriod(pac.anchor_cycle) : '';
   }
   // Every flag and warning the cycle view used to show as a chip is plain text in the Methods fold, scope first: the model's own words, then what its tooltip said.
   function paintWarnings(model) {

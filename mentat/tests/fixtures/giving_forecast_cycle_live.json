@@ -544,6 +544,187 @@
      "OpenSecrets baseline F09 = all insurance; Mentat P&C roster and IBISWorld 52412 are P&C only.",
      "P&C 2024 revenue is IBISWorld's current-year estimate from the 2024-11 edition; replaced automatically when a 2025+ edition is ingested."
     ]
+   },
+   {
+    "calculator": true,
+    "capabilities": {
+     "control": false,
+     "lobbying": true,
+     "pac": true
+    },
+    "caveats": [
+     "OpenSecrets baseline B09 = Telecom Services & Equipment (B08 Telephone Utilities left out); Mentat's Telecom roster and IBISWorld wireless (51721) + cable (51711a) are narrower or different scopes.",
+     "Telecom 2024 revenue is IBISWorld's current-year estimate from the 2024-10 (wireless 51721) and 2024-12 (cable 51711a) editions; replaced automatically when a 2025+ edition is ingested."
+    ],
+    "code": "B09",
+    "growth_max": 10.0921254022237,
+    "growth_mean": 1.1746774823612,
+    "growth_min": -2.74431496811007,
+    "growth_scaling_cycles": [
+     2012,
+     2014,
+     2016,
+     2018,
+     2020,
+     2022,
+     2024
+    ],
+    "growth_sd": 4.51633987634364,
+    "history": [
+     {
+      "cycle": 2012,
+      "growth_pct": 10.0921254022237,
+      "individual_real_2025": 12091170.2627063,
+      "pac_real_2025": 11684559.2145215,
+      "prior_growth_pct": 9.09537741737729,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 27865504.0356436
+     },
+     {
+      "cycle": 2014,
+      "growth_pct": 3.80445093588253,
+      "individual_real_2025": 7122231.79135618,
+      "pac_real_2025": 12661503.7134341,
+      "prior_growth_pct": 10.0921254022237,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 20987418.086864
+     },
+     {
+      "cycle": 2016,
+      "growth_pct": 0.760154682919301,
+      "individual_real_2025": 20832126.2893082,
+      "pac_real_2025": 12846954.7672956,
+      "prior_growth_pct": 3.80445093588253,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 34771187.2050314
+     },
+     {
+      "cycle": 2018,
+      "growth_pct": -1.73384528107846,
+      "individual_real_2025": 10553621.8948005,
+      "pac_real_2025": 12619362.2732769,
+      "prior_growth_pct": 0.760154682919301,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 25348976.2696493
+     },
+     {
+      "cycle": 2020,
+      "growth_pct": 0.18187714700777,
+      "individual_real_2025": 23751451.2501458,
+      "pac_real_2025": 12233201.0495627,
+      "prior_growth_pct": -1.73384528107846,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 42712108.2833819
+     },
+     {
+      "cycle": 2022,
+      "growth_pct": -2.74431496811007,
+      "individual_real_2025": 11228373.3805216,
+      "pac_real_2025": 9711078.28632251,
+      "prior_growth_pct": 0.18187714700777,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 24516700.0415114
+     },
+     {
+      "cycle": 2024,
+      "growth_pct": -2.13770554231635,
+      "individual_real_2025": 15745957.1254851,
+      "pac_real_2025": 8991441.55886158,
+      "prior_growth_pct": -2.74431496811007,
+      "source_url": "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026",
+      "total_real_2025": 29228338.8531695
+     }
+    ],
+    "ibisworld_code": "51721+51711a",
+    "id": "telecom",
+    "label": "Telecommunications",
+    "lobbying_history": [
+     {
+      "lobbying_real_2025_million": 64.8144149301001,
+      "predicted_growth_pct": 5.67540319050039,
+      "year": 2009
+     },
+     {
+      "lobbying_real_2025_million": 86.6908907576799,
+      "predicted_growth_pct": 4.47386012697797,
+      "year": 2010
+     },
+     {
+      "lobbying_real_2025_million": 96.152262136986,
+      "predicted_growth_pct": 5.8298903714632,
+      "year": 2011
+     },
+     {
+      "lobbying_real_2025_million": 82.0798839163444,
+      "predicted_growth_pct": 3.86140812817193,
+      "year": 2012
+     },
+     {
+      "lobbying_real_2025_million": 70.4271387977042,
+      "predicted_growth_pct": 4.56985232412963,
+      "year": 2013
+     },
+     {
+      "lobbying_real_2025_million": 68.5302919219269,
+      "predicted_growth_pct": 4.41532294654035,
+      "year": 2014
+     },
+     {
+      "lobbying_real_2025_million": 64.0414630670289,
+      "predicted_growth_pct": 3.6103470320966,
+      "year": 2015
+     },
+     {
+      "lobbying_real_2025_million": 61.13129533625,
+      "predicted_growth_pct": 2.49364536129147,
+      "year": 2016
+     },
+     {
+      "lobbying_real_2025_million": 68.3516628780396,
+      "predicted_growth_pct": 2.85603457382105,
+      "year": 2017
+     },
+     {
+      "lobbying_real_2025_million": 60.0328526698735,
+      "predicted_growth_pct": 6.58124933173751,
+      "year": 2018
+     },
+     {
+      "lobbying_real_2025_million": 60.1256489980401,
+      "predicted_growth_pct": 2.72203070675982,
+      "year": 2019
+     },
+     {
+      "lobbying_real_2025_million": 52.9654160501567,
+      "predicted_growth_pct": 2.60266974353326,
+      "year": 2020
+     },
+     {
+      "lobbying_real_2025_million": 52.8880037035155,
+      "predicted_growth_pct": 0.220866059447861,
+      "year": 2021
+     },
+     {
+      "lobbying_real_2025_million": 51.323303794738,
+      "predicted_growth_pct": 0.70491125075697,
+      "year": 2022
+     },
+     {
+      "lobbying_real_2025_million": 41.5565399213812,
+      "predicted_growth_pct": 1.04141443948388,
+      "year": 2023
+     }
+    ],
+    "lobbying_only": false,
+    "lobbyview_sector": "telecom",
+    "mentat_key": "telecom",
+    "opensecrets_codes": [
+     "B09"
+    ],
+    "scope": "OpenSecrets B09 whole-industry accounting; separate from company/subindustry report scopes",
+    "withheld": {
+     "control": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+    }
    }
   ],
   "not_offered": [
@@ -10627,6 +10808,76 @@
        }
       }
      }
+    },
+    "telecom": {
+     "2026": {
+      "status": "ready",
+      "growth_default": 2.049,
+      "growth_window": [
+       2023,
+       2025
+      ],
+      "growth_source": "IBISWorld 51721+51711a 2024-10 (51721) + 2024-12 (51711a) edition (CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue)",
+      "report_id": "51721+51711a",
+      "edition": "2024-10 (51721) + 2024-12 (51711a)",
+      "price_basis": "CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue",
+      "annual": {
+       "2023": -0.0293719772164781,
+       "2024": 0.049919321326964,
+       "2025": 0.0428472150829719
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "ready",
+        "budget_growth_pct": 0.0,
+        "s_odd": 0.5215115870898566,
+        "G_odd": 1.0190811149418082,
+        "G_even": 1.0949054403076284,
+        "growth_applies": false
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 6.90999294082304,
+        "s_odd": 0.34033287833287557,
+        "G_odd": 1.0190811149418082,
+        "G_even": 1.0949054403076284
+       }
+      }
+     },
+     "2028": {
+      "status": "ready",
+      "growth_default": 4.241,
+      "growth_window": [
+       2025,
+       2027
+      ],
+      "growth_source": "IBISWorld 51721+51711a 2024-10 (51721) + 2024-12 (51711a) edition (CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue)",
+      "report_id": "51721+51711a",
+      "edition": "2024-10 (51721) + 2024-12 (51711a)",
+      "price_basis": "CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue",
+      "annual": {
+       "2025": 0.0428472150829719,
+       "2026": 0.0432473536164869,
+       "2027": 0.0411302605192927
+      },
+      "budget_defaults": {
+       "pac_to_candidates": {
+        "status": "ready",
+        "budget_growth_pct": 0.0,
+        "s_odd": 0.5215115870898566,
+        "G_odd": 1.0879475973616337,
+        "G_even": 1.0861563890567956,
+        "growth_applies": false
+       },
+       "general_giving": {
+        "status": "ready",
+        "budget_growth_pct": 8.676599613487479,
+        "s_odd": 0.34033287833287557,
+        "G_odd": 1.0879475973616337,
+        "G_even": 1.0861563890567956
+       }
+      }
+     }
     }
    },
    "company_pacs": {
@@ -10646,7 +10897,16 @@
      "cohort_ids_sha256": "d0e1b16b3bfb54f6e827dbae865c5d1935adb472ac3ea2651de959791077902c",
      "status": "ready"
     },
-    "property_casualty": null
+    "property_casualty": null,
+    "telecom": {
+     "kind": "panel_cohort",
+     "count": 8,
+     "label": "Telecom: 8 PACs (published panel cohort)",
+     "observed_to": "2026-09-26",
+     "bundle_sha256": "ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb",
+     "cohort_ids_sha256": "d555b708f2b781afd84a9cbaff59b0bbf82980227326ab05de2d05b32d95afe6",
+     "status": "ready"
+    }
    },
    "g_prior_defaults": {
     "commercial_banks": {
@@ -10657,6 +10917,9 @@
     },
     "property_casualty": {
      "2028": 4.76766134862934
+    },
+    "telecom": {
+     "2028": 9.13418006717868
     }
    },
    "notes": [
@@ -10678,7 +10941,7 @@
   "scope": "Mentat levels for the industry's tracked companies (the published Mentat report scope); the models only supply the relationships. Report company, donor-role and subindustry filters do not apply.",
   "interval_label": "Ordinary 95% coefficient interval; 95% prediction interval (adds the anchored-step residual variance)"
  },
- "recorded_from": "in-process gf.catalog('2026-10-07') and gf.project(request) on the live bundle (model_version refit-20261007-d861bf29-79211caa154e) and anchors on 2026-10-08, after owner ruling D-116 (company PACs on the panel nowcast R8, no 50/50); requests are the page defaults (IBIS growth defaults, saved outlook, blank prior growth, no lobbying) plus the growth_basis marker the page sends; re-recorded 2026-10-08 after owner ruling D-117 (credit-union company PACs = the published PAC panel's 16-PAC cohort, PAC bundle ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb; banks, general giving and the party split unchanged); re-recorded 2026-10-08 after owner rulings D-118, D-119 and D-121 (presidential-cycle factors in place of the fitted phi: company PACs x1.09 on the 2027-28 step; general giving x1.8635 = 12.56 / 6.74 on both steps, -log u at 2025-26 and +log u at 2027-28; the general-giving figures, the 2027-28 company-PAC figures, the model blocks, the party split's remainder dollars that divide general giving's remainder, and cycle_model_view.presidential_uplift differ from the previous recording); re-recorded 2026-10-08 after the credit-union party-split fix (the company-PAC candidate basis of the split divides the same 16-PAC panel cohort as the dollars: its 2023-24 anchor share, observed D/R to the panel cut 2026-09-26 and R8 remainder; the earlier single-PAC split note is gone; only the credit_unions run's pac_candidate bases, its Company PACs notice and the catalog company_pacs split_note differ from the previous recording)",
+ "recorded_from": "in-process gf.catalog('2026-10-07') and gf.project(request) on the live bundle (model_version refit-20261007-d861bf29-79211caa154e) and anchors on 2026-10-08, after owner ruling D-116 (company PACs on the panel nowcast R8, no 50/50); requests are the page defaults (IBIS growth defaults, saved outlook, blank prior growth, no lobbying) plus the growth_basis marker the page sends; re-recorded 2026-10-08 after owner ruling D-117 (credit-union company PACs = the published PAC panel's 16-PAC cohort, PAC bundle ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb; banks, general giving and the party split unchanged); re-recorded 2026-10-08 after owner rulings D-118, D-119 and D-121 (presidential-cycle factors in place of the fitted phi: company PACs x1.09 on the 2027-28 step; general giving x1.8635 = 12.56 / 6.74 on both steps, -log u at 2025-26 and +log u at 2027-28; the general-giving figures, the 2027-28 company-PAC figures, the model blocks, the party split's remainder dollars that divide general giving's remainder, and cycle_model_view.presidential_uplift differ from the previous recording); re-recorded 2026-10-08 after the credit-union party-split fix (the company-PAC candidate basis of the split divides the same 16-PAC panel cohort as the dollars: its 2023-24 anchor share, observed D/R to the panel cut 2026-09-26 and R8 remainder; the earlier single-PAC split note is gone; only the credit_unions run's pac_candidate bases, its Company PACs notice and the catalog company_pacs split_note differ from the previous recording); Telecom added 2026-10-08 (owner ruling: OpenSecrets B09, IBISWorld wireless + cable; company PACs = the published panel's 8 telecom PACs): its catalog row, cycle_model_view.growth / company_pacs / g_prior_defaults entries, request and run were recorded in process on the test world (contract example + tests/fixtures/giving_telecom_cycle.json + tests/fixtures/giving_anchors_cycle.json); nothing else of this file changed",
  "requests": {
   "commercial_banks": {
    "as_of": "2026-10-07",
@@ -10784,6 +11047,41 @@
     }
    },
    "industry": "property_casualty"
+  },
+  "telecom": {
+   "as_of": "2026-10-07",
+   "assumption_date": "2026-10-07",
+   "assumption_source": "",
+   "growth_basis": "ibis_window_avg",
+   "horizons": {
+    "2026": {
+     "annual_forecast_changes": {},
+     "control_scores": {
+      "House": 17.752326519337,
+      "Senate": 55.7135972375691
+     },
+     "current_control": {
+      "House": "1",
+      "Senate": "1"
+     },
+     "growth_pct": "2.049",
+     "prior_growth_pct": ""
+    },
+    "2028": {
+     "annual_forecast_changes": {},
+     "control_scores": {
+      "House": "",
+      "Senate": ""
+     },
+     "current_control": {
+      "House": "",
+      "Senate": ""
+     },
+     "growth_pct": "4.241",
+     "prior_growth_pct": ""
+    }
+   },
+   "industry": "telecom"
   }
  },
  "runs": {
@@ -14192,6 +14490,886 @@
     "Historical associations and scenario inputs are not validated future-giving predictions; the prediction interval adds the residual variance of the anchored step.",
     "OpenSecrets baseline F09 = all insurance; Mentat P&C roster and IBISWorld 52412 are P&C only.",
     "P&C 2024 revenue is IBISWorld's current-year estimate from the 2024-11 edition; replaced automatically when a 2025+ edition is ingested."
+   ]
+  },
+  "telecom": {
+   "schema_version": 2,
+   "product": "Mentat-anchored industry scenarios",
+   "model_version": "fixture-20260930-anchors",
+   "model_sha256": "f88b4a0f798ab7fee06feecaf758e166d7ae757a9266da7ace5eac2b08b7c22d",
+   "industry": "telecom",
+   "industry_label": "Telecommunications",
+   "industry_code": "B09",
+   "scope": "OpenSecrets B09 whole-industry accounting; separate from company/subindustry report scopes",
+   "currency": "2025 USD",
+   "as_of": "2026-10-07",
+   "assumption_source": "User scenario assumptions; not an automatically updated live forecast",
+   "assumption_date": "2026-10-07",
+   "inputs": {
+    "as_of": "2026-10-07",
+    "assumption_date": "2026-10-07",
+    "assumption_source": "",
+    "growth_basis": "ibis_window_avg",
+    "horizons": {
+     "2026": {
+      "annual_forecast_changes": {},
+      "control_scores": {
+       "House": 17.752326519337,
+       "Senate": 55.7135972375691
+      },
+      "current_control": {
+       "House": "1",
+       "Senate": "1"
+      },
+      "growth_pct": "2.049",
+      "prior_growth_pct": ""
+     },
+     "2028": {
+      "annual_forecast_changes": {},
+      "control_scores": {
+       "House": "",
+       "Senate": ""
+      },
+      "current_control": {
+       "House": "",
+       "Senate": ""
+      },
+      "growth_pct": "4.241",
+      "prior_growth_pct": ""
+     }
+    },
+    "industry": "telecom"
+   },
+   "inference": "Ordinary OLS p-values are primary. Industry slopes follow the refit auto-pick (pooled, own or DerSimonian-Laird blend); conditional on model selection",
+   "interval_labels": {
+    "coefficient": "Ordinary 95% coefficient interval",
+    "prediction": "95% prediction interval (adds the anchored-step residual variance)"
+   },
+   "interval_label": "Ordinary 95% coefficient interval; 95% prediction interval (adds the anchored-step residual variance)",
+   "status": "ready",
+   "anchors": {
+    "built_at_utc": "2026-10-07T16:02:08Z",
+    "workbook": "Telecom Industry Spending Overview.xlsx",
+    "workbook_sha256": "40a6ac01a5ad62f0aa166d051aa8bfcfd8b4a35f00dbfa88b32fd7368376282e",
+    "index_token": "c8157782aa05e04a16aa57ac627a8ec41697cdc48fc999147cd9e4a397abd54c",
+    "dataset": "Telecom",
+    "collection_date": "2026-07-29",
+    "coverage_end": "2026-06-30",
+    "rule_coverage_end": "2026-06-30",
+    "coverage_reason": null,
+    "anchor_cycle": 2024,
+    "current_cycle": 2026,
+    "flags": [
+     "No 2026 CPI exists yet: 2025-2026 observed amounts are deflated at the expected 2.5726436%/yr (cycle mid-point).",
+     "Excluded from the forecast (owner ruling 2026-10-01): receipts Mentat's accounting engine marks non-giving - FEC-reported interest, refunds, insurance claims and loans - $139,000.50 in 2021-2022; $22,765.36 in 2023-2024; $39,701.68 in 2025-2026 to date. They stay in the published workbook's Analysis Amount; the general-giving levels, observed amounts and employee House and Senate candidate bases of this forecast leave them out."
+    ],
+    "thin_base_threshold_usd": 100000.0,
+    "cpi_multiplier": 1.0410737386804656,
+    "face_value_current_cycle": false,
+    "measures": {
+     "candidate_receipts": "ready",
+     "general_giving": "ready",
+     "lda": "ready",
+     "pac_to_candidates": "unavailable"
+    },
+    "cpi_multiplier_current_cycle": 0.9873001430287894
+   },
+   "cycle_model": {
+    "version": 1,
+    "inflation": {
+     "annual_rate": 0.025726436,
+     "base_year": 2025,
+     "convention": "cycle_midpoint",
+     "source": "Federal Reserve 10-year expected inflation, supplied by Paul 2026-10-01 (D-092)"
+    },
+    "layers": {
+     "pac_to_candidates": "R8",
+     "general_giving": "P1"
+    },
+    "notes": [
+     "No backtest covers the 50/50 overlay or the error of the IBISWorld path: G6 and G9 measure the phase-and-drift model only, and the intervals exclude the IBIS projection error.",
+     "The 2026-edition IBISWorld price basis is inferred as constant dollars (the 2026 captures print no basis; the 2024 editions print inflation-adjusted dollars and the 2023 growth agrees to 0.1 pp).",
+     "The 50/50 rule is untested on general giving.",
+     "The general-giving phase coefficient is phi_gen = 0.738 (the selected specification PT-noG-damp-pool)."
+    ],
+    "growth_applies": {
+     "pac_to_candidates": false,
+     "general_giving": true
+    }
+   },
+   "horizons": [
+    {
+     "cycle": 2026,
+     "period": "2025–2026",
+     "horizon": "current_remainder",
+     "starts": "2026-07-01",
+     "ends": "2026-12-31",
+     "prior_growth_pct": -2.13770554231635,
+     "coverage_through": "2026-06-30",
+     "pac": {
+      "status": "ready",
+      "anchor_cycle": 2024,
+      "steps": 1,
+      "chained": false,
+      "measures": [
+       {
+        "id": "pac_to_candidates",
+        "label": "Panel cohort PACs: own giving to House and Senate candidates",
+        "status": "ready",
+        "flags": [],
+        "population": {
+         "kind": "panel_cohort",
+         "count": 8,
+         "label": "Telecom: 8 PACs (published panel cohort)",
+         "observed_to": "2026-09-26",
+         "bundle_sha256": "ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb",
+         "cohort_ids_sha256": "d555b708f2b781afd84a9cbaff59b0bbf82980227326ab05de2d05b32d95afe6"
+        },
+        "anchor_cycle_nominal": 7834150.0,
+        "anchor_cycle_real_2025": 8155927.82988357,
+        "model": {
+         "B_real_2025": 8155927.82988357,
+         "dP": -1.0,
+         "phi": -0.025004444813599647,
+         "drift": -0.04956364268768301,
+         "h": 1,
+         "s_odd": 0.5215115870898566,
+         "G_odd": 1.0190811149418082,
+         "G_even": 1.0949054403076284,
+         "growth_by_year": {
+          "2023": -0.0293719772164781,
+          "2024": 0.049919321326964,
+          "2025": 0.0428472150829719
+         },
+         "budget_change": 0.0,
+         "budget_growth_pct": 0.0,
+         "budget_growth_source": "default",
+         "budget_factor": 1.0,
+         "growth_applies": false
+        },
+        "projected_cycle_real_2025": 7958064.412946295,
+        "cycle_coefficient_low": 7296937.285738382,
+        "cycle_coefficient_high": 8679091.887548514,
+        "cycle_prediction_low": 5922961.716260159,
+        "cycle_prediction_high": 10692419.136652835,
+        "layer": "R8",
+        "observed": {
+         "through": "2026-09-26",
+         "amount_nominal": 4427500.0,
+         "amount_real_2025": 4371271.383259965,
+         "face_value": false
+        },
+        "remainder_starts": "2026-09-27",
+        "remainder_status": "ready",
+        "projected_remaining": 3586793.02968633,
+        "remainder_reason": null,
+        "remaining_coefficient_low": 2925665.9024784165,
+        "remaining_coefficient_high": 4307820.504288549,
+        "remaining_prediction_low": 1551690.3330001943,
+        "remaining_prediction_high": 6321147.75339287,
+        "cycle_given_observed_low": 5320609.835789298,
+        "cycle_given_observed_median": 5749074.726575529,
+        "cycle_given_observed_high": 6072548.371864566,
+        "remaining_given_observed_low": 949338.4525293326,
+        "remaining_given_observed_median": 1377803.343315564,
+        "remaining_given_observed_high": 1701276.9886046005,
+        "given_observed_kind": "Range of the three prior cycles' pace (2020, 2022, 2024), not a 95% interval: the panel nowcast O + (1 - s) B with each cycle's own completion share, lowest to highest",
+        "interval_kind": "Range of the three prior cycles' pace (2020, 2022, 2024), not a 95% interval: the panel nowcast O + (1 - s) B with each cycle's own completion share, lowest to highest",
+        "nowcast": {
+         "pace_month": null,
+         "cycles": [
+          2020,
+          2022,
+          2024
+         ],
+         "shares": [
+          0.8112499168239676,
+          0.7800449461157363,
+          0.8772617322874849
+         ],
+         "completion_share": 0.8218662741865089,
+         "share_capped_at_one": false,
+         "observed_nominal": 4427500.0,
+         "anchor_total_nominal": 7834150.0,
+         "remaining_nominal": 1395526.328081761,
+         "nowcast_nominal": 5823026.328081761,
+         "range_nominal": [
+          5389050.0,
+          6150660.885387405
+         ],
+         "deflator": 0.9873001430287894,
+         "floored_at_observed": false,
+         "panel_cut": "2026-09-26"
+        }
+       },
+       {
+        "id": "general_giving",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
+        "status": "ready",
+        "flags": [],
+        "anchor_cycle_nominal": 17955388.53,
+        "anchor_cycle_real_2025": 18692883.46638745,
+        "model": {
+         "B_real_2025": 18692883.46638745,
+         "dP": -1.0,
+         "phi": 0.6224572361158369,
+         "drift": -0.21295012652389184,
+         "h": 1,
+         "s_odd": 0.34033287833287557,
+         "G_odd": 1.0190811149418082,
+         "G_even": 1.0949054403076284,
+         "growth_by_year": {
+          "2023": -0.0293719772164781,
+          "2024": 0.049919321326964,
+          "2025": 0.0428472150829719
+         },
+         "budget_change": 0.0690999294082304,
+         "budget_growth_pct": 6.90999294082304,
+         "budget_growth_source": "default",
+         "budget_factor": 1.0345499647041152,
+         "growth_applies": true,
+         "phi_fitted": 0.7380555183437122,
+         "presidential_uplift": {
+          "factor": 1.8635014836795252,
+          "source": "owner rule D-118/D-121: OpenSecrets total cost of elections, presidential avg 2012-2024 vs midterm avg 2010-2022",
+          "ratio_by_pair": {
+           "2010": 5.24,
+           "2012": 8.59,
+           "2014": 5.09,
+           "2016": 8.51,
+           "2018": 7.15,
+           "2020": 18.34,
+           "2022": 9.5,
+           "2024": 14.8
+          }
+         }
+        },
+        "projected_cycle_real_2025": 8387160.637223431,
+        "cycle_coefficient_low": 7105001.391342333,
+        "cycle_coefficient_high": 9900696.661411932,
+        "cycle_prediction_low": 3116771.780521004,
+        "cycle_prediction_high": 22569654.921231117,
+        "layer": "P1",
+        "observed": {
+         "through": "2026-06-30",
+         "amount_nominal": 7216391.77,
+         "amount_real_2025": 7124744.626672778,
+         "face_value": false
+        },
+        "remainder_starts": "2026-07-01",
+        "remainder_status": "ready",
+        "projected_remaining": 1262416.0105506526,
+        "remainder_reason": null,
+        "remaining_coefficient_low": -19743.235330445692,
+        "remaining_coefficient_high": 2775952.0347391535,
+        "remaining_prediction_low": -4007972.8461517743,
+        "remaining_prediction_high": 15444910.294558339,
+        "prob_full_below_observed": 0.34472728563675714,
+        "cycle_given_observed_low": 7256081.0271713035,
+        "cycle_given_observed_median": 10067899.609857412,
+        "cycle_given_observed_high": 25885577.17999018,
+        "remaining_given_observed_low": 131336.40049852524,
+        "remaining_given_observed_median": 2943154.983184634,
+        "remaining_given_observed_high": 18760832.5533174,
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)"
+       }
+      ],
+      "slope": null,
+      "ordinary_p": null,
+      "model_kind": "cycle_model",
+      "interval_kind": "Prediction interval of the phase-and-drift step (coefficient of the presidential-cycle term and the anchored-step residual); it excludes the error of the IBISWorld growth path",
+      "growth_input": {
+       "status": "ready",
+       "default_pct": 2.049,
+       "used_pct": 2.0492490179654377,
+       "shift_pp": 0.0,
+       "source": "default",
+       "window": [
+        2023,
+        2025
+       ],
+       "report_id": "51721+51711a",
+       "edition": "2024-10 (51721) + 2024-12 (51711a)",
+       "source_text": "IBISWorld 51721+51711a 2024-10 (51721) + 2024-12 (51711a) edition (CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue)"
+      },
+      "growth_pct": 2.0492490179654377
+     },
+     "shares": {
+      "House": {
+       "status": "withheld",
+       "chamber": "House",
+       "model_id": "control_House",
+       "anchor_cycle": 2024,
+       "steps": 1,
+       "slope_rule": "R0",
+       "slope_label": "pooled slope",
+       "ordinary_p": 0.007383125948010718,
+       "specification": "AICc-selected pooled model",
+       "n": 18,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ],
+       "bases": [],
+       "anchor": "previous_cycle",
+       "anchor_label": "Mentat 2023–2024 (previous cycle)",
+       "anchor_reason": null,
+       "anchor_backtest": null,
+       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+      },
+      "Senate": {
+       "status": "withheld",
+       "chamber": "Senate",
+       "model_id": "control_Senate",
+       "anchor_cycle": 2024,
+       "steps": 1,
+       "slope_rule": "R0",
+       "slope_label": "pooled slope",
+       "ordinary_p": 0.000721705456463732,
+       "specification": "AICc-selected pooled model",
+       "n": 18,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ],
+       "bases": [],
+       "anchor": "previous_cycle",
+       "anchor_label": "Mentat 2023–2024 (previous cycle)",
+       "anchor_reason": null,
+       "anchor_backtest": null,
+       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+      }
+     },
+     "lobbying": {
+      "status": "ready",
+      "reason": null,
+      "rows": [
+       {
+        "year": 2026,
+        "status": "ready",
+        "series": [
+         {
+          "id": "income_total",
+          "label": "Outside-firm fees",
+          "base_level": 37000500.0,
+          "projected": 36127286.85245313,
+          "change_pct": -2.360003641969355,
+          "nowcast": {
+           "observed": 17588500.0,
+           "point": 36127286.85245313,
+           "prior_total": 37000500.0,
+           "share": 0.4989584775218408,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4962823748902546,
+            0.5040711986366219,
+            0.49656085728571236
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
+          "years_after_nowcast": 0,
+          "half_width_80": 0.09908214164700152,
+          "half_width_95": 0.18334867555240086,
+          "band80_low": 32719338.89651287,
+          "band80_high": 39890196.42015245,
+          "band95_low": 30075165.7404729,
+          "band95_high": 43397295.51558275,
+          "observed": {
+           "through": "2026-06-30",
+           "through_quarter": "Q2",
+           "amount_nominal": 17588500.0,
+           "face_value": true
+          },
+          "remainder_starts": "2026-07-01",
+          "remainder_status": "ready",
+          "projected_remaining": 18538786.852453128,
+          "remainder_reason": null,
+          "remaining_band80_low": 15130838.89651287,
+          "remaining_band80_high": 22301696.420152448,
+          "remaining_band95_low": 12486665.740472902,
+          "remaining_band95_high": 25808795.515582748
+         },
+         {
+          "id": "expenses_total",
+          "label": "In-house expenses",
+          "base_level": 102385884.55,
+          "projected": 103991096.56684443,
+          "change_pct": 1.5678059762823437,
+          "nowcast": {
+           "observed": 52066170.0,
+           "point": 103991096.56684443,
+           "prior_total": 102385884.55,
+           "share": 0.4928507304003711,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4879265336648801,
+            0.49633794289739325,
+            0.4943269648198786
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
+          "years_after_nowcast": 0,
+          "half_width_80": 0.09908214164700152,
+          "half_width_95": 0.18334867555240086,
+          "band80_low": 94181440.87837972,
+          "band80_high": 114822496.49524377,
+          "band95_low": 86570283.49664184,
+          "band95_high": 124917555.1746259,
+          "observed": {
+           "through": "2026-06-30",
+           "through_quarter": "Q2",
+           "amount_nominal": 52066170.0,
+           "face_value": true
+          },
+          "remainder_starts": "2026-07-01",
+          "remainder_status": "ready",
+          "projected_remaining": 51924926.56684443,
+          "remainder_reason": null,
+          "remaining_band80_low": 42115270.87837972,
+          "remaining_band80_high": 62756326.49524377,
+          "remaining_band95_low": 34504113.496641845,
+          "remaining_band95_high": 72851385.1746259
+         }
+        ],
+        "base_year": 2025,
+        "steps": 1,
+        "chained": false,
+        "forecast_change_pp": 0.0,
+        "cumulative_change_pp": 0.0,
+        "slope_change_pct": -0.0
+       }
+      ],
+      "slope": {
+       "rule": "R0",
+       "label": "pooled slope",
+       "beta": -0.00814763405915339,
+       "se": 0.00363672120086187,
+       "df": 55
+      },
+      "ordinary_p": 0.0291257635218315,
+      "sector": "telecom",
+      "sector_label": "Melange LDA telecom sector",
+      "source_file": "sector_spend.csv",
+      "base_year": 2025,
+      "through": "2026-06-30",
+      "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
+      "method": "In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a growth-forecast change is entered, which moves it by the pooled log slope.",
+      "bands": {
+       "blind_tests": 32,
+       "label_80": "80% band: the 80th percentile of the blind nowcast errors (n=32 blind tests)",
+       "label_95": "~95% band: the largest blind miss (n=32 blind tests); with so few tests it is a worst-observed bound, not an estimated 95% interval"
+      }
+     }
+    },
+    {
+     "cycle": 2028,
+     "period": "2027–2028",
+     "horizon": "next_complete",
+     "starts": "2027-01-01",
+     "ends": "2028-12-31",
+     "prior_growth_pct": 9.13418006717868,
+     "coverage_through": null,
+     "pac": {
+      "status": "ready",
+      "anchor_cycle": 2024,
+      "steps": 2,
+      "chained": true,
+      "measures": [
+       {
+        "id": "pac_to_candidates",
+        "label": "Panel cohort PACs: own giving to House and Senate candidates",
+        "status": "ready",
+        "flags": [],
+        "population": {
+         "kind": "panel_cohort",
+         "count": 8,
+         "label": "Telecom: 8 PACs (published panel cohort)",
+         "observed_to": "2026-09-26",
+         "bundle_sha256": "ad485f5a24a5b96d4e8fe69c20f40745eb833d5235a8b7305d1be754e89b40eb",
+         "cohort_ids_sha256": "d555b708f2b781afd84a9cbaff59b0bbf82980227326ab05de2d05b32d95afe6"
+        },
+        "anchor_cycle_nominal": 7834150.0,
+        "anchor_cycle_real_2025": 8155927.82988357,
+        "model": {
+         "B_real_2025": 8155927.82988357,
+         "dP": 1.0,
+         "phi": 0.08617769624105241,
+         "drift": -0.08183552723773754,
+         "h": 2,
+         "s_odd": 0.5215115870898566,
+         "G_odd": 1.0879475973616337,
+         "G_even": 1.0861563890567956,
+         "growth_by_year": {
+          "2025": 0.0428472150829719,
+          "2026": 0.0432473536164869,
+          "2027": 0.0411302605192927
+         },
+         "budget_change": 0.0,
+         "budget_growth_pct": 0.0,
+         "budget_growth_source": "default",
+         "budget_factor": 1.0,
+         "growth_applies": false,
+         "phi_fitted": -0.025004444813599647,
+         "presidential_uplift": {
+          "factor": 1.09,
+          "source": "owner rule D-118/D-121: +9% (PAC spending less cyclical; national FEC all-PAC ratio 0.98)",
+          "ratio_by_pair": {
+           "2016/2014": 0.9969291514830991,
+           "2020/2018": 0.9639711510629424,
+           "2024/2022": 0.9829388610358335
+          }
+         }
+        },
+        "projected_cycle_real_2025": 5774092.456949778,
+        "cycle_coefficient_low": null,
+        "cycle_coefficient_high": null,
+        "cycle_prediction_low": 4321443.308120275,
+        "cycle_prediction_high": 7715048.266109108,
+        "chained_from": {
+         "layer": "R8",
+         "cycle": 2026
+        },
+        "interval_kind": "95% prediction interval of the phase-and-drift step chained on the panel nowcast (R8); it excludes the error of the nowcast itself"
+       },
+       {
+        "id": "general_giving",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
+        "status": "ready",
+        "flags": [],
+        "anchor_cycle_nominal": 17955388.53,
+        "anchor_cycle_real_2025": 18692883.46638745,
+        "model": {
+         "B_real_2025": 18692883.46638745,
+         "dP": 1.0,
+         "phi": 0.6224572361158369,
+         "drift": -0.2605637270527622,
+         "h": 2,
+         "s_odd": 0.34033287833287557,
+         "G_odd": 1.0879475973616337,
+         "G_even": 1.0861563890567956,
+         "growth_by_year": {
+          "2025": 0.0428472150829719,
+          "2026": 0.0432473536164869,
+          "2027": 0.0411302605192927
+         },
+         "budget_change": 0.08676599613487479,
+         "budget_growth_pct": 8.676599613487479,
+         "budget_growth_source": "default",
+         "budget_factor": 1.0433829980674374,
+         "growth_applies": true,
+         "phi_fitted": 0.7380555183437122,
+         "presidential_uplift": {
+          "factor": 1.8635014836795252,
+          "source": "owner rule D-118/D-121: OpenSecrets total cost of elections, presidential avg 2012-2024 vs midterm avg 2010-2022",
+          "ratio_by_pair": {
+           "2010": 5.24,
+           "2012": 8.59,
+           "2014": 5.09,
+           "2016": 8.51,
+           "2018": 7.15,
+           "2020": 18.34,
+           "2022": 9.5,
+           "2024": 14.8
+          }
+         }
+        },
+        "projected_cycle_real_2025": 15777875.298474295,
+        "cycle_coefficient_low": null,
+        "cycle_coefficient_high": null,
+        "cycle_prediction_low": 5332137.33591278,
+        "cycle_prediction_high": 59328833.47204172,
+        "chained_from": {
+         "layer": "P1",
+         "cycle": 2026
+        }
+       }
+      ],
+      "slope": null,
+      "ordinary_p": null,
+      "model_kind": "cycle_model",
+      "interval_kind": "Prediction interval of the phase-and-drift step (coefficient of the presidential-cycle term and the anchored-step residual); it excludes the error of the IBISWorld growth path",
+      "growth_input": {
+       "status": "ready",
+       "default_pct": 4.241,
+       "used_pct": 4.24078717429226,
+       "shift_pp": 0.0,
+       "source": "default",
+       "window": [
+        2025,
+        2027
+       ],
+       "report_id": "51721+51711a",
+       "edition": "2024-10 (51721) + 2024-12 (51711a)",
+       "source_text": "IBISWorld 51721+51711a 2024-10 (51721) + 2024-12 (51711a) edition (CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue)"
+      },
+      "growth_pct": 4.24078717429226
+     },
+     "shares": {
+      "House": {
+       "status": "withheld",
+       "chamber": "House",
+       "model_id": "control_House",
+       "anchor_cycle": 2024,
+       "steps": 2,
+       "slope_rule": "R0",
+       "slope_label": "pooled slope",
+       "ordinary_p": 0.007383125948010718,
+       "specification": "AICc-selected pooled model",
+       "n": 18,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ],
+       "bases": [],
+       "anchor": "previous_cycle",
+       "anchor_label": "Mentat 2023–2024 (previous cycle)",
+       "anchor_reason": null,
+       "anchor_backtest": null,
+       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+      },
+      "Senate": {
+       "status": "withheld",
+       "chamber": "Senate",
+       "model_id": "control_Senate",
+       "anchor_cycle": 2024,
+       "steps": 2,
+       "slope_rule": "R0",
+       "slope_label": "pooled slope",
+       "ordinary_p": 0.000721705456463732,
+       "specification": "AICc-selected pooled model",
+       "n": 18,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ],
+       "bases": [],
+       "anchor": "previous_cycle",
+       "anchor_label": "Mentat 2023–2024 (previous cycle)",
+       "anchor_reason": null,
+       "anchor_backtest": null,
+       "reason": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made."
+      }
+     },
+     "lobbying": {
+      "status": "ready",
+      "reason": null,
+      "rows": [
+       {
+        "year": 2027,
+        "status": "ready",
+        "series": [
+         {
+          "id": "income_total",
+          "label": "Outside-firm fees",
+          "base_level": 37000500.0,
+          "projected": 36127286.85245313,
+          "change_pct": -2.360003641969355,
+          "nowcast": {
+           "observed": 17588500.0,
+           "point": 36127286.85245313,
+           "prior_total": 37000500.0,
+           "share": 0.4989584775218408,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4962823748902546,
+            0.5040711986366219,
+            0.49656085728571236
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
+          "years_after_nowcast": 1,
+          "half_width_80": 0.16327444675948885,
+          "half_width_95": 0.317500028236218,
+          "band80_low": 30685002.016083624,
+          "band80_high": 42534814.0643862,
+          "band95_low": 26299460.352764424,
+          "band95_high": 49627666.79667785
+         },
+         {
+          "id": "expenses_total",
+          "label": "In-house expenses",
+          "base_level": 102385884.55,
+          "projected": 103991096.56684443,
+          "change_pct": 1.5678059762823437,
+          "nowcast": {
+           "observed": 52066170.0,
+           "point": 103991096.56684443,
+           "prior_total": 102385884.55,
+           "share": 0.4928507304003711,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4879265336648801,
+            0.49633794289739325,
+            0.4943269648198786
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
+          "years_after_nowcast": 1,
+          "half_width_80": 0.16327444675948885,
+          "half_width_95": 0.317500028236218,
+          "band80_low": 88325675.294703,
+          "band80_high": 122434933.32026978,
+          "band95_low": 75702051.260307,
+          "band95_high": 142851454.94921306
+         }
+        ],
+        "base_year": 2025,
+        "steps": 2,
+        "chained": true,
+        "forecast_change_pp": 0.0,
+        "cumulative_change_pp": 0.0,
+        "slope_change_pct": -0.0
+       },
+       {
+        "year": 2028,
+        "status": "ready",
+        "series": [
+         {
+          "id": "income_total",
+          "label": "Outside-firm fees",
+          "base_level": 37000500.0,
+          "projected": 36127286.85245313,
+          "change_pct": -2.360003641969355,
+          "nowcast": {
+           "observed": 17588500.0,
+           "point": 36127286.85245313,
+           "prior_total": 37000500.0,
+           "share": 0.4989584775218408,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4962823748902546,
+            0.5040711986366219,
+            0.49656085728571236
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
+          "years_after_nowcast": 2,
+          "half_width_80": 0.20583391705841625,
+          "half_width_95": 0.38313020337870285,
+          "band80_low": 29406464.503468964,
+          "band80_high": 44384147.40967809,
+          "band95_low": 24628843.22483184,
+          "band95_high": 52993997.460810274
+         },
+         {
+          "id": "expenses_total",
+          "label": "In-house expenses",
+          "base_level": 102385884.55,
+          "projected": 103991096.56684443,
+          "change_pct": 1.5678059762823437,
+          "nowcast": {
+           "observed": 52066170.0,
+           "point": 103991096.56684443,
+           "prior_total": 102385884.55,
+           "share": 0.4928507304003711,
+           "share_years": [
+            2023,
+            2024,
+            2025
+           ],
+           "shares": [
+            0.4879265336648801,
+            0.49633794289739325,
+            0.4943269648198786
+           ],
+           "through_quarter": "Q2",
+           "year": 2026
+          },
+          "nowcast_year": 2026,
+          "years_after_nowcast": 2,
+          "half_width_80": 0.20583391705841625,
+          "half_width_95": 0.38313020337870285,
+          "band80_low": 84645451.02318078,
+          "band80_high": 127758172.8782239,
+          "band95_low": 70893239.90985638,
+          "band95_high": 152541316.75919157
+         }
+        ],
+        "base_year": 2025,
+        "steps": 3,
+        "chained": true,
+        "forecast_change_pp": 0.0,
+        "cumulative_change_pp": 0.0,
+        "slope_change_pct": -0.0
+       }
+      ],
+      "slope": {
+       "rule": "R0",
+       "label": "pooled slope",
+       "beta": -0.00814763405915339,
+       "se": 0.00363672120086187,
+       "df": 55
+      },
+      "ordinary_p": 0.0291257635218315,
+      "sector": "telecom",
+      "sector_label": "Melange LDA telecom sector",
+      "source_file": "sector_spend.csv",
+      "base_year": 2025,
+      "through": "2026-06-30",
+      "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
+      "method": "In-year nowcast: the amount filed so far this year (through the latest complete quarter) plus the share still to come of the prior full year, where the filed share is the geometric mean of the share filed by that quarter in up to the three prior years (Melange LDA, nominal dollars). Later years carry it forward unchanged unless a growth-forecast change is entered, which moves it by the pooled log slope.",
+      "bands": {
+       "blind_tests": 32,
+       "label_80": "80% band: the 80th percentile of the blind nowcast errors (n=32 blind tests)",
+       "label_95": "~95% band: the largest blind miss (n=32 blind tests); for the later years, added in quadrature to the pooled 95th percentile of the LobbyView persistence error; with so few tests it is a worst-observed bound, not an estimated 95% interval"
+      }
+     }
+    }
+   ],
+   "notices": [
+    "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",
+    "PAC, candidate-share and lobbying amounts are separate accounts and must not be added. The two lobbying series are never summed.",
+    "Observed amounts run to the Mentat coverage end (declared by rule) and the remainder starts the day after; rows dated later stay in the remainder.",
+    "Historical associations and scenario inputs are not validated future-giving predictions; the prediction interval adds the residual variance of the anchored step.",
+    "Company PACs: Telecom: 8 PACs (published panel cohort), observed to 2026-09-26 (the panel's own date), and so is their party split. General giving and the employees' party split are observed to 2026-06-30. The two dates are never mixed in one figure.",
+    "OpenSecrets baseline B09 = Telecom Services & Equipment (B08 Telephone Utilities left out); Mentat's Telecom roster and IBISWorld wireless (51721) + cable (51711a) are narrower or different scopes.",
+    "Telecom 2024 revenue is IBISWorld's current-year estimate from the 2024-10 (wireless 51721) and 2024-12 (cable 51711a) editions; replaced automatically when a 2025+ edition is ingested."
    ]
   }
  }

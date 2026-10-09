@@ -46,6 +46,26 @@ OLD_VERSION = ROOT / 'app' / 'data' / 'versions' / '7bc7bcf175f7a3c291cc67300f98
 
 PANEL_POINTER = ROOT / 'app' / 'data' / 'pac-giving-current.json'
 
+TELECOM = 'telecom'
+TELECOM_FIXTURE = json.loads((FIXTURES / 'giving_telecom_cycle.json').read_text(encoding='utf-8'))
+
+
+def telecom_files():
+    """The contract's cycle example and the fixture anchors with Telecom added as the refit and the anchors builder produce it (owner ruling 2026-10-08: OpenSecrets B09, IBISWorld
+    wireless + cable, scored on the pooled phase and drift): the industry row, its two step blocks, its IBISWorld path, its lobbying terms and its anchor block, all recorded from the real files."""
+    bundle, anchors, fx = contract.example('models_cycle'), copy.deepcopy(ANCHORS), copy.deepcopy(TELECOM_FIXTURE)
+    bundle['industries'][TELECOM] = fx['industry']
+    cm = bundle['cycle_model']
+    for measure, step in fx['cycle_model']['step'].items():
+        cm['measures'][measure]['step'][TELECOM] = step
+    cm['budget_rule']['growth'][TELECOM] = fx['cycle_model']['growth']
+    cm['g_prior'][TELECOM] = fx['cycle_model']['g_prior']
+    log = bundle['lobby_model']['log_refit']
+    log['slopes'][TELECOM], log['prediction']['industries'][TELECOM], log['persistence']['industries'][TELECOM] = fx['lobby']['slopes'], fx['lobby']['prediction'], fx['lobby']['persistence']
+    anchors['industries'][TELECOM] = fx['anchor']
+    return bundle, anchors
+
+
 # D-118 / D-119 / D-121: the company PACs' fixed +9%; general giving's u is Paul's two averages of OpenSecrets' total cost of elections (inflation-adjusted $bn, presidential 2012-2024 over midterm
 # 2010-2022), and the eight cycle totals they come from.
 PAC_UPLIFT = 1.09
@@ -889,6 +909,305 @@ class PanelCohortTests(unittest.TestCase):
         self.assertFalse(any('population' in m for h in out['horizons'] for m in h['pac'].get('measures', [])))
         self.assertFalse(any(n.startswith('Company PACs:') for n in out['notices']))
         self.assertFalse(any('roster_note' in b for h in out['horizons'] for c in gf.CHAMBERS for b in h['shares'][c].get('bases', [])))
+
+
+class TelecomTests(unittest.TestCase):
+    """Telecom as a giving industry (owner ruling 2026-10-08: OpenSecrets B09 and IBISWorld wireless + cable for the general-giving model; coordinator call, consistent with D-117: the company
+    PACs are the published PAC panel's 8 telecom PACs). Telecom is scored on the pooled phase and drift (never estimated in them), so nothing of another industry may move. The telecom parts
+    of the bundle and of the anchors are the refit's and the anchors builder's real output (tests/fixtures/giving_telecom_cycle.json); every expected number below is worked by hand from them,
+    from the panel bundle file or from the pinned inputs, never from the calculator's own arithmetic."""
+
+    DEFLATOR = PanelNowcastTests.DEFLATOR
+    CSV = ROOT / 'forecast' / 'refit' / 'inputs' / 'cycle_model' / 'ibis_telecom_2024_p87_p89_p45_p46.csv'
+    # Cents, worked by hand from the partisan-dollar lane's canonical ledgers (candidate, office and party of the target cycle) for the rows the panel counts (hs == 1) of the 7 telecom PACs
+    # that gave (the 8th id of the cohort, C00377044, has no row in either ledger): the 2023-24 cycle and 2025-26 to the panel's cut 2026-09-26.
+    SPLIT = dict(anchor=dict(House=dict(D=328475000, R=355980000, Other=0, Unknown=350000), Senate=dict(D=42960000, R=50250000, Other=4500000, Unknown=300000), pool=600000),
+                 observed=dict(House=dict(D=194100000, R=182150000, Other=100000, Unknown=0), Senate=dict(D=16900000, R=46350000, Other=0, Unknown=0), pool=3150000))
+    LANE = PanelCohortTests.LANE
+    HISTORY_LEDGER, CURRENT_LEDGER = PanelCohortTests.HISTORY_LEDGER, PanelCohortTests.CURRENT_LEDGER
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle, cls.anchors = telecom_files()
+        cls.fx = TELECOM_FIXTURE
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp, bundle=cls.bundle, anchors=cls.anchors) as world:
+            cls.out = gf.project(request(TELECOM))
+            cls.by = measures(cls.out)
+            cls.cat = gf.catalog('2026-10-07')
+            cls.other = {i: gf.project(request(i)) for i in (BANKS, CUS, PC)}
+            cls.full = gf.project(full_request(TELECOM, world.bundle))
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp):          # the same requests on the world WITHOUT telecom
+            cls.before = {i: gf.project(request(i)) for i in (BANKS, CUS, PC)}
+            cls.before_cat = gf.catalog('2026-10-07')
+        cls.hand = panel_by_hand(TELECOM)
+
+    # ---- offered, with its defaults ----------------------------------------------------------------------------------------------------------------------------------------------
+    def test_telecom_is_offered_for_general_giving_company_pacs_and_lobbying_and_is_no_longer_lobbying_only(self):
+        row = next(i for i in self.cat['industries'] if i['id'] == TELECOM)
+        self.assertEqual(row['capabilities'], dict(pac=True, control=False, lobbying=True))
+        self.assertFalse(row['lobbying_only'])
+        self.assertEqual((row['code'], row['opensecrets_codes'], row['ibisworld_code']), ('B09', ['B09'], '51721+51711a'))
+        self.assertEqual(list(row['withheld']), ['control'])          # the giving model is not withheld any more; the chamber split is, with its reason
+        self.assertIn('general-giving model only', row['withheld']['control'])
+        self.assertTrue(any('B08 Telephone Utilities left out' in c for c in row['caveats']))
+        self.assertEqual(self.out['status'], 'ready')
+        for h in self.out['horizons']:
+            self.assertEqual(h['pac']['status'], 'ready')
+            self.assertEqual(sorted(m['id'] for m in h['pac']['measures']), [GEN, PAC])
+            self.assertTrue(all(m['status'] == 'ready' for m in h['pac']['measures']))
+            self.assertEqual(h['lobbying']['status'], 'ready')          # lobbying is as it was
+
+    def test_the_ibis_defaults_are_the_wireless_plus_cable_revenue_weighted_window_averages(self):
+        with open(self.CSV, encoding='utf-8', newline='') as stream:
+            level = {(r['code'], int(r['year'])): float(r['revenue_million']) for r in csv.DictReader(stream)}
+        total = lambda y: level[('51721', y)] + level[('51711a', y)]          # both constant 2024 USD: the growth of the summed revenue = the previous-year-revenue-weighted average
+        annual = {y: total(y) / total(y - 1) - 1 for y in range(2023, 2028)}
+        for y, g in annual.items():
+            self.assertAlmostEqual(self.fx['cycle_model']['growth']['annual'][str(y)], g, delta=1e-12)
+        view = self.cat['cycle_model_view']['growth'][TELECOM]
+        for cycle in (2026, 2028):
+            window = [annual[y] for y in (cycle - 3, cycle - 2, cycle - 1)]
+            want = 100 * (math.prod(1 + g for g in window) ** (1 / 3) - 1)
+            self.assertEqual(view[str(cycle)]['growth_default'], round(want, 3))
+            self.assertEqual(view[str(cycle)]['growth_window'], [cycle - 3, cycle - 1])
+            self.assertEqual(view[str(cycle)]['edition'], '2024-10 (51721) + 2024-12 (51711a)')
+        self.assertEqual((view['2026']['growth_default'], view['2028']['growth_default']), (2.049, 4.241))
+        self.assertAlmostEqual(self.cat['cycle_model_view']['g_prior_defaults'][TELECOM]['2028'], 100 * ((total(2025) + total(2026)) / (total(2023) + total(2024)) - 1), delta=1e-9)          # 2028's prior-cycle growth
+        # the weights are revenue, not equal: an equal-weight average of the two components' growth would differ by more than a point
+        equal = (level[('51721', 2025)] / level[('51721', 2024)] + level[('51711a', 2025)] / level[('51711a', 2024)]) / 2 - 1
+        self.assertGreater(abs(equal - annual[2025]), .0005)
+        for h in self.out['horizons']:
+            info = h['pac']['growth_input']
+            self.assertEqual((info['source'], info['shift_pp']), ('default', 0.))
+        # the default budget change of the general giving is the 50/50 rule's, company PACs take none (D-116)
+        self.assertTrue(self.by[(2026, GEN)]['model']['growth_applies'])
+        self.assertEqual((self.by[(2026, PAC)]['model']['budget_change'], self.by[(2026, PAC)]['model']['growth_applies']), (0., False))
+
+    def test_telecoms_step_variances_are_the_pooled_models_residual_variance_on_its_own_history_recomputed_here(self):
+        """Telecom is SCORED on the pooled phase and drift, not estimated in them: its anchored-step residual variance is sum(e^2) / (pairs - 1) over its own two-cycle pairs, with
+        e = (y[t] - y[t-2]) - (phi (Pres[t] - Pres[t-2]) + d_1), y the log of its OpenSecrets B09 amount in 2025 dollars, phi and d_1 the pooled parameters; the pooled company-PAC measure drops 2022."""
+        h = {r['cycle']: r for r in self.fx['industry']['history']}
+        self.assertEqual(sorted(h), [2012, 2014, 2016, 2018, 2020, 2022, 2024])
+        for measure, key, skip_2022, pairs in ((GEN, 'individual_real_2025', False, 6), (PAC, 'pac_real_2025', True, 4)):
+            p = self.bundle['cycle_model']['measures'][measure]
+            errors = [(math.log(h[c][key]) - math.log(h[c - 2][key])) - (p['phi'] * ((c % 4 == 0) - ((c - 2) % 4 == 0)) + p['drift']['d']['1'])
+                      for c in h if c - 2 in h and not (skip_2022 and 2022 in (c, c - 2))]
+            step = self.fx['cycle_model']['step'][measure]
+            with self.subTest(measure=measure):
+                self.assertEqual((len(errors), step['pairs'], step['df']), (pairs, pairs, pairs - 1))
+                self.assertAlmostEqual(math.fsum(e * e for e in errors) / (pairs - 1), step['sigma2'], delta=1e-12)
+        # and no other industry's parameters moved: the pooled phi and drift are the contract example's, which the fixture's variances reproduce
+        self.assertEqual(self.bundle['cycle_model']['measures'][GEN]['phi'], contract.example('models_cycle')['cycle_model']['measures'][GEN]['phi'])
+
+    # ---- general giving ----------------------------------------------------------------------------------------------------------------------------------------------------------
+    def test_general_giving_2025_26_is_the_formula_by_hand(self):
+        """M = B exp(-log u + d_1)(1 + x/2), B the 2023-24 level in 2025 dollars, u = 12.56 / 6.74, x the 50/50 budget change of the lag window 2023-25 (the anchor cycle's odd-year share
+        weighting the two years); the interval is exp(+-half) around it, half = t crit x sqrt(phi_se^2 + sigma2 of Telecom's own step)."""
+        g = self.bundle['cycle_model']['measures'][GEN]
+        block = self.fx['anchor']['general_giving']
+        base = block['cycles']['2024'] * ANCHORS['cpi']['multipliers']['2024']
+        s_odd = block['odd_year']['2024'] / block['cycles']['2024']
+        a = self.fx['cycle_model']['growth']['annual']
+        go, ge = (1 + a['2023']) * (1 + a['2024']), (1 + a['2024']) * (1 + a['2025'])
+        x = s_odd * go + (1 - s_odd) * ge - 1
+        point = base * math.exp(-math.log(GENERAL_UPLIFT) + g['drift']['d']['1']) * (1 + x / 2)
+        step = self.fx['cycle_model']['step'][GEN]
+        half = step['critical_95'] * math.sqrt(g['phi_se'] ** 2 + step['sigma2'])
+        m = self.by[(2026, GEN)]
+        self.assertAlmostEqual(m['model']['B_real_2025'] / base, 1., delta=1e-12)
+        self.assertAlmostEqual(m['model']['budget_change'], x, delta=1e-12)
+        self.assertAlmostEqual(m['projected_cycle_real_2025'] / point, 1., delta=1e-12)
+        self.assertAlmostEqual(m['cycle_prediction_low'] / (point * math.exp(-half)), 1., delta=1e-12)
+        self.assertAlmostEqual(m['cycle_prediction_high'] / (point * math.exp(half)), 1., delta=1e-12)
+        self.assertEqual((step['pairs'], step['df']), (6, 5))          # Telecom's own six two-cycle pairs; the t critical value is its own, not the pool's
+        self.assertAlmostEqual(step['critical_95'], 2.570581835636314, delta=1e-12)
+        self.assertEqual(m['layer'], 'P1')          # conditioned on the giving already observed, as for every industry
+        self.assertEqual((m['observed']['through'], m['observed']['amount_nominal']), ('2026-06-30', block['observed'][-1]['amount']))
+        self.assertGreaterEqual(m['cycle_given_observed_low'], m['observed']['amount_real_2025'] - 1.)
+        self.assertEqual(m['model']['presidential_uplift']['factor'], GENERAL_UPLIFT)
+
+    def test_general_giving_2027_28_chains_from_the_conditioned_open_cycle_with_the_same_factor(self):
+        m26, m28 = self.by[(2026, GEN)], self.by[(2028, GEN)]
+        self.assertEqual(m28['chained_from'], dict(layer='P1', cycle=2026))
+        self.assertAlmostEqual(m28['model']['phi'], math.log(GENERAL_UPLIFT), delta=1e-15)          # +log u on the presidential step
+        self.assertGreater(m28['projected_cycle_real_2025'], m26['cycle_given_observed_median'])
+        self.assertLess(m28['cycle_prediction_low'], m28['projected_cycle_real_2025'])
+        self.assertGreater(m28['cycle_prediction_high'], m28['projected_cycle_real_2025'])
+
+    # ---- company PACs: the panel's 8 telecom PACs ---------------------------------------------------------------------------------------------------------------------------
+    def test_company_pacs_are_the_panels_eight_telecom_pacs_by_hand_and_equal_its_published_nowcast_to_the_cent(self):
+        import pac_giving_forecast as panel
+        h, m = self.hand, self.by[(2026, PAC)]
+        self.assertEqual((h['item']['cohort']['count'], h['frame']['cut'], h['O'], h['B']), (8, '2026-09-26', 4427500., 7834150.))
+        self.assertAlmostEqual(h['s'], .8218662742, delta=1e-10)          # the cube root of 732,724,900/903,204,900 x 610,900,000/783,160,000 x 687,260,000/783,415,000
+        self.assertAlmostEqual(h['nominal'], 5823026.33, delta=.01)       # 4,427,500 + (1 - s) 7,834,150
+        published = next(s for s in panel.catalog()['sectors'] if s['sector'] == TELECOM)['current']
+        self.assertEqual((published['product'], published['cut']), ('L', '2026-09-26'))
+        cents = m['nowcast']['nowcast_nominal'] * 100
+        self.assertEqual(round(cents), round(published['prediction_cents']))          # the chart's nowcast IS the panel's published Telecom nowcast, to the cent (nominal)
+        self.assertAlmostEqual(cents, published['prediction_cents'], delta=1e-3)
+        self.assertEqual(m['nowcast']['completion_share'], published['trace']['completion_share'])          # the same exact fractions, the same s, bit for bit
+        self.assertEqual(round(m['observed']['amount_nominal'] * 100), published['observed_cents'])
+        self.assertEqual(round(m['nowcast']['anchor_total_nominal'] * 100), published['trace']['B'])
+        self.assertAlmostEqual(m['cycle_given_observed_median'], h['nominal'] * self.DEFLATOR, delta=1e-6)          # converted to 2025 USD once, at the open cycle's deflator
+        self.assertAlmostEqual(m['cycle_given_observed_low'], h['low'] * self.DEFLATOR, delta=1e-6)
+        self.assertAlmostEqual(m['cycle_given_observed_high'], h['high'] * self.DEFLATOR, delta=1e-6)
+        self.assertAlmostEqual(m['remaining_given_observed_median'], (1 - h['s']) * h['B'] * self.DEFLATOR, delta=1e-6)
+        self.assertAlmostEqual(m['cycle_given_observed_median'] / 1e6, 5.74907, delta=5e-6)
+        self.assertEqual((m['layer'], m['flags']), ('R8', []))
+        self.assertEqual(m['anchor_cycle_nominal'], h['B'])          # the 2023-24 bar is the cohort's total
+        self.assertEqual((m['observed']['through'], self.by[(2026, GEN)]['observed']['through']), ('2026-09-26', '2026-06-30'))          # the two dates stay apart
+
+    def test_the_population_is_named_and_2027_28_is_the_nowcast_times_1_09_times_the_drift(self):
+        h = self.hand
+        label = 'Telecom: 8 PACs (published panel cohort)'
+        for cycle in (2026, 2028):
+            self.assertEqual(self.by[(cycle, PAC)]['population'], dict(kind='panel_cohort', count=8, label=label, observed_to='2026-09-26', bundle_sha256=h['pointer']['sha256'],
+                                                                         cohort_ids_sha256=h['item']['cohort']['ids_sha256']))
+            self.assertEqual(self.by[(cycle, PAC)]['label'], 'Panel cohort PACs: own giving to House and Senate candidates')
+            self.assertNotIn('population', self.by[(cycle, GEN)])
+        self.assertEqual(self.cat['cycle_model_view']['company_pacs'][TELECOM], dict(kind='panel_cohort', count=8, label=label, observed_to='2026-09-26', status='ready',
+                                                                                    bundle_sha256=h['pointer']['sha256'], cohort_ids_sha256=h['item']['cohort']['ids_sha256']))
+        self.assertEqual(h['item']['cohort']['ids_sha256'], 'd555b708f2b781afd84a9cbaff59b0bbf82980227326ab05de2d05b32d95afe6')
+        p = self.bundle['cycle_model']['measures'][PAC]
+        m26, m28 = self.by[(2026, PAC)], self.by[(2028, PAC)]
+        self.assertAlmostEqual(m28['projected_cycle_real_2025'] / (m26['cycle_given_observed_median'] * 1.09 * math.exp(p['drift']['d']['2'])), 1., delta=1e-9)          # D-121: the fixed +9%
+        self.assertEqual((m28['chained_from'], m28['model']['budget_change'], m28['model']['growth_applies']), (dict(layer='R8', cycle=2026), 0., False))
+        self.assertAlmostEqual(m28['model']['phi'], math.log(1.09), delta=1e-15)
+        self.assertAlmostEqual(m28['projected_cycle_real_2025'] / 1e6, 5.77409, delta=5e-6)
+        self.assertGreater(m28['projected_cycle_real_2025'], m26['cycle_given_observed_median'])          # a presidential cycle always projects higher (D-118)
+        step = self.fx['cycle_model']['step'][PAC]
+        self.assertEqual((step['pairs'], step['df']), (4, 3))          # Telecom's own four pairs (2022 dropped, as the pooled PAC measure handles it)
+
+    def test_growth_does_not_move_telecoms_company_pacs_but_moves_its_general_giving(self):
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp, bundle=self.bundle, anchors=self.anchors):
+            up = measures(gf.project(request(TELECOM, shift={'2026': 2., '2028': 2.})))
+        for cycle in (2026, 2028):
+            self.assertEqual(up[(cycle, PAC)]['projected_cycle_real_2025'], self.by[(cycle, PAC)]['projected_cycle_real_2025'])
+            self.assertGreater(up[(cycle, GEN)]['projected_cycle_real_2025'], self.by[(cycle, GEN)]['projected_cycle_real_2025'])
+
+    # ---- the party split ---------------------------------------------------------------------------------------------------------------------------------------------------------
+    def test_the_cohorts_party_split_adds_up_to_the_panels_own_total_and_observed_amount_to_the_cent(self):
+        h = self.hand
+        for name, want in (('anchor', h['B']), ('observed', h['O'])):          # D + R + other + unknown recipients + the lane's unresolved-office pool == the panel's 2023-24 total / observed amount
+            part = self.SPLIT[name]
+            self.assertEqual(sum(part[c][k] for c in gf.CHAMBERS for k in part[c]) + part['pool'], round(want * 100), name)
+        data = json.loads(gf.SPLIT_FILES[TELECOM].read_text(encoding='utf-8'))          # and the pinned file the calculator reads is these numbers
+        self.assertEqual((data['schema'], data['sector'], data['basis'], data['cohort_ids_sha256'], data['count']),
+                         (gf.SPLIT_SCHEMA, TELECOM, 'canonical_cycle_office_nominal_pac_D_R', h['item']['cohort']['ids_sha256'], 8))
+        for name, part in (('anchor', data['cycles']['2024']), ('observed', data['observed'])):
+            self.assertEqual({c: part[c] for c in gf.CHAMBERS}, {c: self.SPLIT[name][c] for c in gf.CHAMBERS}, name)
+            self.assertEqual(part['unresolved_office_pool'], self.SPLIT[name]['pool'], name)
+            self.assertEqual(part['sum_cents'], round((h['B'] if name == 'anchor' else h['O']) * 100), name)
+        self.assertEqual((data['observed']['through'], data['silent_committees']), (h['frame']['cut'], ['C00377044']))          # one cohort id has no row in either ledger
+        credit_unions = json.loads(gf.SPLIT_FILE.read_text(encoding='utf-8'))
+        self.assertNotIn('silent_committees', credit_unions)          # the credit unions' file is as it was
+
+    @unittest.skipUnless(PanelCohortTests.HISTORY_LEDGER.is_file() and PanelCohortTests.CURRENT_LEDGER.is_file(), 'the partisan-dollar lane ledgers are not on this machine')
+    def test_the_hand_numbers_are_the_lanes_ledgers_read_directly(self):
+        def dr(path, cycle, cut=None):
+            out = {}
+            with open(path, encoding='utf-8-sig', newline='') as stream:
+                for r in csv.DictReader(stream):
+                    if (r['sector'], r['cycle'], r['hs'], r['canonical_hs_eligibility']) == (TELECOM, str(cycle), '1', 'include_hs') and (cut is None or r['date'] <= cut) and r['canonical_party'] in ('D', 'R'):
+                        key = r['canonical_chamber'], r['canonical_party']
+                        out[key] = out.get(key, 0) + int(r['cents'])
+            return out
+        got = {'anchor': dr(self.HISTORY_LEDGER, 2024), 'observed': dr(self.CURRENT_LEDGER, 2026, cut=self.hand['frame']['cut'])}
+        for name in ('anchor', 'observed'):
+            for chamber in gf.CHAMBERS:
+                for party in 'DR':
+                    self.assertEqual(got[name][(chamber, party)], self.SPLIT[name][chamber][party], (name, chamber, party))
+
+    @unittest.skipUnless(PanelCohortTests.HISTORY_LEDGER.is_file() and PanelCohortTests.CURRENT_LEDGER.is_file(), 'the partisan-dollar lane ledgers are not on this machine')
+    def test_the_builder_rederives_both_pinned_files_and_reconciles_them_to_the_cent(self):
+        sys.path.insert(0, str(ROOT / 'forecast' / 'anchors'))
+        import build_panel_cohort_split as builder
+        import pac_giving_forecast as panel
+        items = {s['sector']: s for s in panel.catalog()['sectors']}
+        for sector, (out, ids_path) in builder.SECTORS.items():
+            if not Path(ids_path).is_file():
+                self.skipTest('the cohort ids file is not on this machine')
+            fresh = builder.derive(items[sector], builder.rows(builder.HISTORY, sector), builder.rows(builder.CURRENT, sector), ids_path)
+            self.assertEqual(out.read_text(encoding='utf-8'), json.dumps(fresh, indent=2, sort_keys=True) + '\n', sector)          # the file in the tree IS the fresh derivation (credit unions byte for byte as before)
+        # a ledger that is one cent off the panel is refused, not rounded
+        item = items[TELECOM]
+        history, current = builder.rows(builder.HISTORY, TELECOM), builder.rows(builder.CURRENT, TELECOM)
+        bumped = [dict(r) for r in history]
+        next(r for r in bumped if r['cycle'] == '2024' and r['hs'] == '1')['cents'] = str(int(next(r for r in bumped if r['cycle'] == '2024' and r['hs'] == '1')['cents']) + 1)
+        with self.assertRaisesRegex(ValueError, 'cents, the panel has'):
+            builder.derive(item, bumped, current, builder.SECTORS[TELECOM][1])
+
+    def test_the_panel_block_carries_the_cohorts_dr_by_chamber_when_the_file_matches_the_panel(self):
+        block, why = gf._panel_block(TELECOM, 2026)
+        self.assertIsNone(why)
+        self.assertIsNone(block['split_reason'])
+        self.assertEqual((block['committee_count'], block['single_pac']), (8, False))
+        for chamber in gf.CHAMBERS:
+            self.assertEqual(block['cycles']['2024'][chamber], {c: self.SPLIT['anchor'][chamber][c] / 100. for c in 'DR'})
+            self.assertEqual({k: block['observed'][0][chamber][k] for k in 'DR'}, {c: self.SPLIT['observed'][chamber][c] / 100. for c in 'DR'})
+        self.assertEqual(block['observed'][0]['through'], '2026-09-26')
+
+    def test_a_split_that_does_not_match_the_panel_is_withheld_with_the_files_name_and_the_dollars_stay(self):
+        good = json.loads(gf.SPLIT_FILES[TELECOM].read_text(encoding='utf-8'))
+
+        def edited(edit):
+            data = copy.deepcopy(good)
+            edit(data)
+            return data
+        cases = {'a different cut': edited(lambda d: d['observed'].update(through='2026-06-30')),
+                 'a total that is off by a cent': edited(lambda d: d['cycles']['2024']['House'].update(D=d['cycles']['2024']['House']['D'] + 1)),
+                 'another cohort': edited(lambda d: d.update(cohort_ids_sha256='0' * 64)),
+                 'the credit unions\' file': json.loads(gf.SPLIT_FILE.read_text(encoding='utf-8')),
+                 'no file': None}
+        for name, data in cases.items():
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'split.json'
+                if data is not None:
+                    path.write_text(json.dumps(data))
+                with patch.dict(gf.SPLIT_FILES, {TELECOM: path}):
+                    block, _why = gf._panel_block(TELECOM, 2026)
+                self.assertIn('panel_cohort_split_telecom.json', block['split_reason'])
+                self.assertEqual(block['status'], 'ready')          # the dollars do not need the split
+                self.assertNotIn('D', block['cycles']['2024'].get('House', {}))
+
+    def test_the_chamber_split_is_withheld_with_its_stated_reason_no_control_model_is_made_up(self):
+        for h in self.full['horizons']:
+            for chamber in gf.CHAMBERS:
+                s = h['shares'][chamber]
+                self.assertEqual(s['status'], 'withheld')
+                self.assertIn('general-giving model only', s['reason'])
+                self.assertEqual(s['bases'], [])
+
+    # ---- nothing else moves ------------------------------------------------------------------------------------------------------------------------------------------------------
+    def test_banks_credit_unions_and_property_casualty_are_unchanged_by_adding_telecom(self):
+        def without_hash(value):          # the bundle's own sha256 is the one thing that differs: it is the hash of a bundle that now holds one more industry
+            if isinstance(value, dict):
+                return {k: without_hash(v) for k, v in value.items() if k != 'model_sha256'}
+            return [without_hash(v) for v in value] if isinstance(value, list) else value
+        for ident in (BANKS, CUS, PC):
+            with self.subTest(industry=ident):
+                self.assertEqual(json.dumps(without_hash(self.other[ident]), sort_keys=True), json.dumps(without_hash(self.before[ident]), sort_keys=True))
+        old, new = self.before_cat['cycle_model_view'], self.cat['cycle_model_view']
+        for key in ('growth', 'company_pacs'):
+            for ident in (BANKS, CUS, PC):
+                self.assertEqual(old[key][ident], new[key][ident], (key, ident))
+        self.assertEqual({i['id'] for i in self.cat['industries']} - {i['id'] for i in self.before_cat['industries']}, {TELECOM})
+        for row in self.before_cat['industries']:
+            self.assertEqual(row, next(i for i in self.cat['industries'] if i['id'] == row['id']), row['id'])
+
+    def test_the_lobbying_only_mechanism_still_exempts_an_industry_that_is_flagged(self):
+        """The flag is kept for future industries (contract.py); only an explicit lobbying_only industry is exempt from the giving checks."""
+        bundle, anchors = telecom_files()
+        bundle['industries'][TELECOM].update(lobbying_only=True, capabilities=dict(pac=False, control=False, lobbying=True), withheld=dict(pac='lobbying only', control='lobbying only'))
+        self.assertEqual(contract.check_cycle_model(bundle), [])          # still has its step blocks: nothing is required of a flagged industry
+        for measure in bundle['cycle_model']['measures'].values():
+            measure['step'].pop(TELECOM)
+        bundle['cycle_model']['budget_rule']['growth'].pop(TELECOM)
+        bundle['cycle_model']['g_prior'].pop(TELECOM)
+        self.assertEqual(contract.check_cycle_model(bundle), [])
+        bundle['industries'][TELECOM]['lobbying_only'] = False
+        self.assertTrue(any('no entry for telecom' in p for p in contract.check_cycle_model(bundle)))
 
 
 class PresidentialFactorTests(unittest.TestCase):
