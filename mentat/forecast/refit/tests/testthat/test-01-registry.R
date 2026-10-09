@@ -13,23 +13,37 @@ test_that("the shipped registry is valid and carries the six fitted industries a
   }
 })
 
-test_that("telecom is a lobbying-only calculator industry (owner ruling 2026-10-08): a Mentat key, the lobbying model only, a stated reason, and the registry checks the flag", {
+test_that("telecom is a scored-only calculator industry (owner ruling 2026-10-08: OpenSecrets B09 only, IBISWorld wireless + cable): the PAC and lobbying models, no control model, a stated reason for it, no lobbying_only flag", {
   tel <- RF_TEST_REG$industries$telecom
-  expect_true(isTRUE(tel$calculator) && isTRUE(tel$lobbying_only)); expect_identical(tel$mentat_key, "telecom")
-  expect_identical(unlist(tel$models), c(pac = FALSE, control = FALSE, lobbying = TRUE))
-  expect_match(rf_withheld_reason(tel, "pac"), "offered for lobbying only"); expect_match(rf_withheld_reason(tel, "control"), "no giving forecast")
-  expect_true(is.na(rf_withheld_reason(tel, "lobbying")))
-  bad <- RF_TEST_REG; bad$industries$telecom$models$pac <- TRUE
+  expect_true(isTRUE(tel$calculator)); expect_null(tel$lobbying_only); expect_identical(tel$mentat_key, "telecom")
+  expect_identical(unlist(tel$models), c(pac = TRUE, control = FALSE, lobbying = TRUE))
+  expect_identical(tel$estimation, "scored_only"); expect_identical(tel$status, "pilot")
+  # OpenSecrets scope = category B09 only: B08 (Telephone Utilities) is not part of it, as F09 is the one code of property and casualty
+  expect_identical(unlist(tel$opensecrets$codes), "B09"); expect_identical(tel$opensecrets$code_status, "owner_ruling_b09_only")
+  expect_match(tel$opensecrets$baseline_scope_caveat, "B09 = Telecom Services & Equipment; B08 (Telephone Utilities) is left out", fixed = TRUE)
+  expect_match(tel$opensecrets$totals, "B09_totals.json", fixed = TRUE); expect_null(tel$opensecrets$recipients); expect_null(tel$opensecrets$presidential)
+  # IBISWorld = wireless (51721) + cable (51711a), revenue-weighted
+  expect_identical(unlist(tel$ibisworld$components), c("51721", "51711a")); expect_identical(unlist(tel$ibisworld$actual_components), c("telecom_wireless", "telecom_cable"))
+  expect_identical(tel$ibisworld$actual_sector, "telecom"); expect_identical(tel$ibisworld$predicted_rule, "revenue_weighted_components")
+  expect_true(is.na(rf_withheld_reason(tel, "pac"))); expect_true(is.na(rf_withheld_reason(tel, "lobbying")))
+  expect_match(rf_withheld_reason(tel, "control"), "general-giving model only")
+  # the registry checks the mode; the lobbying-only flag mechanism is kept for future industries
+  bad <- RF_TEST_REG; bad$industries$telecom$models$control <- TRUE
+  expect_true(any(grepl("a scored-only industry is a pilot with the PAC model, no control model", rf_validate_registry(bad))))
+  bad <- RF_TEST_REG; bad$industries$telecom$status <- "fitted"
+  expect_true(any(grepl("a scored-only industry", rf_validate_registry(bad))))
+  bad <- RF_TEST_REG; bad$industries$telecom$estimation <- "pooled"
+  expect_true(any(grepl("unknown estimation mode", rf_validate_registry(bad))))
+  bad <- RF_TEST_REG; bad$industries$telecom$lobbying_only <- TRUE
   expect_true(any(grepl("a lobbying-only industry is a calculator industry with the lobbying model only", rf_validate_registry(bad))))
-  bad <- RF_TEST_REG; bad$industries$telecom$reason <- NULL
-  expect_true(any(grepl("lobbying-only", rf_validate_registry(bad))))
+  expect_identical(rf_scored_ids(RF_TEST_REG), "telecom")
 })
 
 test_that("capabilities follow the inputs that exist: the frozen v1 sample has three industries, property and casualty (F09) is a ready pilot", {
   fr <- rf_frozen_registry(RF_TEST_REG)
   three <- c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing")
   expect_setequal(rf_capable(fr, "pac"), three); expect_setequal(rf_capable(fr, "control"), three)
-  expect_setequal(rf_capable(RF_TEST_REG, "pac"), c(three, "property_casualty"))          # F09 supplied, the 2024-11 IBISWorld edition is its one vintage
+  expect_setequal(rf_capable(RF_TEST_REG, "pac"), c(three, "property_casualty", "telecom"))          # F09 supplied, the 2024-11 IBISWorld edition is its one vintage; B09 supplied, the 2024-10 / 2024-12 wireless + cable editions are telecom's
   expect_setequal(rf_capable(RF_TEST_REG, "lobbying"), c(three, "life_insurance", "telecom", "property_casualty"))
   expect_setequal(rf_capable(fr, "lobbying"), rf_capable(RF_TEST_REG, "lobbying"))         # the lobbying panel is LobbyView's: pilots keep it
   pc <- RF_TEST_REG$industries$property_casualty
@@ -39,14 +53,20 @@ test_that("capabilities follow the inputs that exist: the frozen v1 sample has t
   expect_length(pc$caveats, 1L); expect_match(pc$ibisworld$actual_current_year$caveat, "current-year estimate from the 2024-11 edition; replaced automatically when a 2025\\+ edition is ingested")
   # the OpenSecrets code -> id map used by the panel builders
   expect_identical(rf_code_map(fr), c(F03 = "commercial_banks", F05 = "credit_unions", T2100 = "auto_light_duty_manufacturing"))
-  expect_identical(rf_code_map(RF_TEST_REG), c(F03 = "commercial_banks", F05 = "credit_unions", T2100 = "auto_light_duty_manufacturing", F09 = "property_casualty"))
+  expect_identical(rf_code_map(RF_TEST_REG), c(F03 = "commercial_banks", F05 = "credit_unions", T2100 = "auto_light_duty_manufacturing", B09 = "telecom", F09 = "property_casualty"))
 })
 
-test_that("a ready pilot joins the v2 sample; without its 2024 growth it waits for data", {
+test_that("a ready pilot joins the v2 sample; without its 2024 growth it waits for data; a scored-only industry (telecom) never joins the pooled sample", {
   inp <- test_inputs()
   expect_identical(rf_ready_pilots(RF_TEST_REG, inp), "property_casualty")
   v2 <- rf_v2_registry(RF_TEST_REG, inp)
   expect_setequal(rf_capable(v2, "pac"), c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing", "property_casualty"))
+  expect_identical(v2$scored, "telecom")                                                                                         # ready (B09 totals, wireless + cable with the 2024 estimates), listed beside the pool
+  expect_null(rf_v2_registry(RF_TEST_REG, inp[inp$role != "ibis_actual_current:telecom", ])$scored)                           # without its 2024 estimates it waits like any other
+  st <- rf_agent_data_status(RF_TEST_REG, "telecom", inp[inp$role != "ibis_actual_current:telecom", ])
+  expect_false(st$ready); expect_match(st$missing[[1]]$detail, "revenue ends before the 2024 cycle")
+  expect_true(rf_agent_data_status(RF_TEST_REG, "telecom", inp)$ready)                                                         # no recipient captures are asked of an industry without a control model
+  expect_null(rf_v2_registry(RF_TEST_REG, inp)$industries$telecom$lobbying_only)
   no_est <- inp[inp$role != "ibis_actual_current:property_casualty", ]
   expect_identical(rf_ready_pilots(RF_TEST_REG, no_est), character(0))                      # workbook 07 ends 2023: the 2024 cycle needs the estimate row
   st <- rf_agent_data_status(RF_TEST_REG, "property_casualty", no_est)

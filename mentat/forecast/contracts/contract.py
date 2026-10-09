@@ -239,7 +239,7 @@ def check_cycle_model(bundle, tolerance=1e-9):
         for ident, step in m['step'].items():
             if step['df'] != step['pairs'] - 1:
                 problems.append(tag + '.step.' + ident + ': df is not pairs - 1')
-    offered = [i for i, row in bundle['industries'].items() if row['calculator'] and row['mentat_key'] and not row.get('lobbying_only')]       # only an explicit lobbying-only industry (telecom) is not checked for giving inputs: a withheld PAC capability alone is not enough
+    offered = [i for i, row in bundle['industries'].items() if row['calculator'] and row['mentat_key'] and not row.get('lobbying_only')]       # only an explicit lobbying-only industry (none today; Telecom was one until the owner ruling of 2026-10-08) is not checked for giving inputs: a withheld PAC capability alone is not enough
     for ident in offered:
         if ident not in cm['measures']['general_giving']['step']:
             problems.append('cycle_model.measures.general_giving.step: no entry for ' + ident + ', which the console offers')

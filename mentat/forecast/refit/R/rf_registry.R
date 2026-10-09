@@ -35,6 +35,9 @@ rf_validate_registry <- function(reg) {
     else if (isTRUE(i$calculator) && !any(unlist(i$models))) out <- c(out, sprintf("%s: calculator industry with no model", i$id))
     if (isTRUE(i$lobbying_only) && (!isTRUE(i$calculator) || isTRUE(i$models$pac) || isTRUE(i$models$control) || !isTRUE(i$models$lobbying) || !nzchar(i$reason %||% "")))
       out <- c(out, sprintf("%s: a lobbying-only industry is a calculator industry with the lobbying model only and a stated reason for the others", i$id))
+    if (!is.null(i$estimation) && !identical(i$estimation, "scored_only")) out <- c(out, sprintf("%s: unknown estimation mode '%s' (only 'scored_only' exists)", i$id, paste(i$estimation, collapse = "/")))
+    if (identical(i$estimation, "scored_only") && (!identical(i$status, "pilot") || !isTRUE(i$models$pac) || isTRUE(i$models$control) || is.null(i$opensecrets$totals) || is.null(i$ibisworld$actual_sector)))
+      out <- c(out, sprintf("%s: a scored-only industry is a pilot with the PAC model, no control model, an OpenSecrets totals capture and an IBISWorld actual series", i$id))
     if (identical(i$status, "declined") && any(unlist(i$models))) out <- c(out, sprintf("%s: declined industry with a model", i$id))
     if (identical(i$status, "declined") && !nzchar(i$reason %||% "")) out <- c(out, sprintf("%s: declined industry without a reason", i$id))
   }
@@ -43,7 +46,7 @@ rf_validate_registry <- function(reg) {
 
 # Why an industry has no `model` ("pac", "control", "lobbying"), or NA when it has everything that model needs.
 rf_withheld_reason <- function(i, model) {
-  if (!isTRUE(i$models[[model]])) return(i$reason %||% paste0("model '", model, "' is not configured for this industry"))
+  if (!isTRUE(i$models[[model]])) return(i$withheld_by_model[[model]] %||% i$reason %||% paste0("model '", model, "' is not configured for this industry"))     # withheld_by_model: a stated reason for one model only (Telecom: control); not named reason_*: `$` would partial-match it for `reason`
   if (model %in% c("pac", "control")) {
     os <- i$opensecrets
     if (is.null(os$totals) || (model == "control" && (is.null(os$recipients) || is.null(os$presidential)))) {
@@ -94,10 +97,16 @@ rf_ready_pilots <- function(reg, inputs) {
   Filter(function(id) rf_agent_data_status(reg, id, inputs)$ready, ids)
 }
 
-# The v2 estimation registry: the frozen sample plus the ready pilots.
+# Industries that are SCORED, not estimated (registry `estimation: "scored_only"`; Telecom, owner ruling 2026-10-08): their OpenSecrets history and IBISWorld growth are real, but they do not join the
+# pooled phase / drift estimation, so the pooled numbers of every other industry stay exactly what they were. Their step variance is the pooled model's residual variance on their own history.
+rf_scored_ids <- function(reg) names(reg$industries)[vapply(reg$industries, function(i) identical(i$estimation, "scored_only"), logical(1))]
+
+# The v2 estimation registry: the frozen sample plus the ready pilots; `$scored` = the scored-only industries whose data is ready (the context builds their panel).
 rf_v2_registry <- function(reg, inputs) {
   pil <- rf_ready_pilots(reg, inputs)
   frozen <- rf_frozen_registry(reg)
   for (id in pil) frozen$industries[[id]] <- reg$industries[[id]]
+  scored <- Filter(function(id) rf_agent_data_status(reg, id, inputs)$ready, rf_scored_ids(reg))
+  if (length(scored)) frozen$scored <- scored
   frozen
 }

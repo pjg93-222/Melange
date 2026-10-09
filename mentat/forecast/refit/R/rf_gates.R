@@ -26,6 +26,7 @@ rf_gate_adequacy <- function(ctx, reg = ctx$reg, min_n = 5L, min_pooled_df = 3L,
   if (cyc) ctx <- rf_phase_ctx(ctx)
   rows <- list()
   counts <- list(pac = table(ctx$pac_panel$sector), control = table(ctx$share$control_House$sector), lobbying = NULL)
+  if (!is.null(ctx$scored)) counts$pac <- c(counts$pac, table(ctx$scored$panel$sector))      # scored-only industries (Telecom) have their own cycles; the pooled df of the pool apply to their step
   lobc <- table(ctx$lobby$diffs$study_sector)
   pooled_df <- c(pac = stats::df.residual(ctx$fits$pac), control = min(stats::df.residual(ctx$fits$control_House), stats::df.residual(ctx$fits$control_Senate)), lobbying = stats::df.residual(ctx$fits$lobby))
   inter_df <- c(pac = NA_integer_, control = NA_integer_, lobbying = NA_integer_)
@@ -37,7 +38,7 @@ rf_gate_adequacy <- function(ctx, reg = ctx$reg, min_n = 5L, min_pooled_df = 3L,
     i <- reg$industries[[id]]
     if (identical(i$status, "declined")) next
     for (m in c("pac", "control", "lobbying")) {
-      if (!id %in% rf_capable(reg, m)) next
+      if (!id %in% c(rf_capable(reg, m), if (m == "pac") ctx$scored$ids)) next
       n <- if (m == "lobbying") { ls <- i$lobbyview$study_sector; if (ls %in% names(lobc)) as.integer(lobc[[ls]]) else 0L } else { t <- counts[[m]]; if (id %in% names(t)) as.integer(t[[id]]) else 0L }
       ok <- n >= min_n && pooled_df[[m]] >= min_pooled_df && inter_df[[m]] >= min_interaction_df
       rows[[length(rows) + 1L]] <- data.frame(industry = id, model = m, n = n, need = min_n, pooled_df = unname(pooled_df[[m]]), interaction_df = unname(inter_df[[m]]), ok = ok, stringsAsFactors = FALSE)

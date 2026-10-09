@@ -81,13 +81,14 @@
       "mentat_key": "telecom",
       "mentat_workbook": "Telecom Industry Spending Overview.xlsx",
       "calculator": true,
-      "opensecrets": { "codes": [], "level": "none", "name": "", "totals": null, "recipients": null, "presidential": null, "status": "missing" },
-      "ibisworld": { "code": "51721+51711a", "actual_sector": null, "predicted_study_sector": "telecom", "predicted_rule": "revenue_weighted_components", "components": ["51721", "51711a"], "vintage_note": "wireless + cable, weighted by each report's same-vintage baseline revenue" },
+      "opensecrets": { "codes": ["B09"], "level": "industry", "name": "Telecom Services & Equipment (OpenSecrets B09 only; B08 Telephone Utilities is not used)", "code_status": "owner_ruling_b09_only", "baseline_scope_caveat": "OpenSecrets baseline B09 = Telecom Services & Equipment; B08 (Telephone Utilities) is left out by the owner ruling of 2026-10-08, and Mentat's Telecom roster (wireless and cable carriers) is not the whole of B09.", "totals": "{RFDATA}/B09_totals.json", "recipients": null, "presidential": null, "status": "supplied" },
+      "ibisworld": { "code": "51721+51711a", "actual_sector": "telecom", "actual_components": ["telecom_wireless", "telecom_cable"], "predicted_study_sector": "telecom", "predicted_rule": "revenue_weighted_components", "components": ["51721", "51711a"], "vintage_note": "wireless + cable, weighted by each report's same-vintage baseline revenue; the actual series is the revenue-weighted growth of workbook 07's telecom_wireless (51721, edition 2024-10) and telecom_cable (51711a, edition 2024-12), both constant 2024 USD, with 2024 from the same editions' current-year estimates (replaced automatically when a 2025+ edition puts 2024 in the main series)", "actual_current_year": { "role": "ibis_actual_current:telecom", "year": 2024, "kind": "current-year estimate", "caveat": "Telecom 2024 revenue is IBISWorld's current-year estimate from the 2024-10 (wireless 51721) and 2024-12 (cable 51711a) editions; replaced automatically when a 2025+ edition is ingested." } },
       "lobbyview": { "study_sector": "telecom", "confidence": ["naics"], "naics": [] },
-      "models": { "pac": false, "control": false, "lobbying": true },
-      "status": "fitted",
-      "lobbying_only": true,
-      "reason": "Telecom is offered for lobbying only (owner ruling 2026-10-08): there is no OpenSecrets capture and no roster PAC for this industry, so no giving forecast is made."
+      "models": { "pac": true, "control": false, "lobbying": true },
+      "estimation": "scored_only",
+      "caveats": ["OpenSecrets baseline B09 = Telecom Services & Equipment (B08 Telephone Utilities left out); Mentat's Telecom roster and IBISWorld wireless (51721) + cable (51711a) are narrower or different scopes."],
+      "status": "pilot",
+      "withheld_by_model": { "control": "Telecom has a general-giving model only (owner ruling 2026-10-08, OpenSecrets B09): no House or Senate recipient capture of B09 is part of the refit, so no chamber share model is fitted and no chamber split is made." }
     },
     {
       "id": "property_casualty",

@@ -33,12 +33,12 @@ rf_cycle_multiplier <- function(cpi, cycle_end, base_year = RF$BASE_YEAR) {
 # `supplement` = 07-shaped rows of a current-year ESTIMATE (property and casualty 2024, IBISWorld 52412 edition 2024-11; owner ruling 2026-09-30). A supplement row is
 # used only for a (sector, year) that workbook 07 does not hold, and only from the SAME report vintage as that sector's series (vintages are never spliced): the day a later
 # edition puts the year in the main series the estimate drops out. attr "estimates" lists the supplement rows that were used.
-rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024, 2), supplement = NULL) {
+rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024, 2), supplement = NULL, components = NULL) {
   g <- rf_read_xlsx(actual_xlsx, "data")
   need <- c("sector", "year", "revenue_million_constant_2026_usd", "revenue_million_report_price_basis", "status")
   if (!all(need %in% names(g))) rf_raise("PanelError", paste("workbook 07 lacks columns:", paste(setdiff(need, names(g)), collapse = ", ")))
   if (!all(g$status == "observed")) rf_raise("PanelError", "workbook 07 has rows whose status is not 'observed'")
-  if (!is.null(sectors)) g <- g[g$sector %in% sectors, ]
+  if (!is.null(sectors)) g <- g[g$sector %in% c(sectors, unlist(components)), ]
   used <- NULL
   if (!is.null(supplement) && nrow(supplement)) {
     sp <- supplement[supplement$sector %in% unique(g$sector) & !(paste(supplement$sector, supplement$year) %in% paste(g$sector, g$year)), , drop = FALSE]
@@ -51,6 +51,10 @@ rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024
       g <- rf_rbind_fill(list(g, sp[, cols, drop = FALSE]))
       used <- sp[, intersect(c("sector", "year", "report_vintage", "value_type", "source_pdf_sha256"), names(sp)), drop = FALSE]
     }
+  }
+  if (length(components)) {
+    g <- rf_combine_components(g, components)
+    if (!is.null(used)) for (s in names(components)) used$sector[used$sector %in% components[[s]]] <- s     # an estimate row of a component is the combined industry's
   }
   out <- lapply(split(g, g$sector), function(q) {
     lvl <- ifelse(is.na(q$revenue_million_constant_2026_usd), q$revenue_million_report_price_basis, q$revenue_million_constant_2026_usd)
@@ -68,6 +72,31 @@ rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024
   attr(out, "inputs") <- list(actual = actual_xlsx)
   attr(out, "estimates") <- used
   out
+}
+
+# A combined industry as the REVENUE-WEIGHTED sum of workbook-07 components (Telecom, owner ruling 2026-10-08: wireless + cable): its revenue in a year is the sum of the components' levels, defined
+# only for the years every component has. The cycle growth of the sum equals the average of the components' cycle growths weighted by each one's baseline-cycle revenue. The components must be on
+# one price basis; their editions may differ (each is a single vintage of its own). `components` = list(<combined sector> = c(<07 sector>, ...)). The component rows are replaced by the combined ones.
+rf_combine_components <- function(g, components) {
+  level <- function(q) ifelse(is.na(q$revenue_million_constant_2026_usd), q$revenue_million_report_price_basis, q$revenue_million_constant_2026_usd)
+  keep <- g[!(g$sector %in% unlist(components)), , drop = FALSE]
+  for (s in names(components)) {
+    cs <- components[[s]]
+    parts <- lapply(cs, function(cc) g[g$sector == cc, , drop = FALSE])
+    if (any(vapply(parts, nrow, 0L) == 0L)) rf_raise("PanelError", sprintf("workbook 07 has no rows for a component of %s (%s)", s, paste(cs, collapse = ", ")))
+    basis <- unique(unlist(lapply(parts, function(q) q$revenue_price_basis[!is.na(q$revenue_price_basis)])))
+    if (length(basis) != 1L) rf_raise("PanelError", sprintf("the components of %s are on different price bases (%s): their revenue cannot be weighted", s, paste(basis, collapse = " / ")))
+    yrs <- sort(Reduce(intersect, lapply(parts, function(q) q$year)))
+    tot <- rowSums(do.call(cbind, lapply(parts, function(q) level(q)[match(yrs, q$year)])))
+    row <- parts[[1]][match(yrs, parts[[1]]$year), , drop = FALSE]
+    for (cl in setdiff(names(row), c("year", "status"))) row[[cl]] <- NA
+    row$sector <- s; row$revenue_million_report_price_basis <- tot; row$revenue_million_constant_2026_usd <- NA_real_; row$revenue_price_basis <- basis
+    row$report_vintage <- paste(vapply(parts, function(q) q$report_vintage[1], ""), collapse = "+")
+    row$source_url <- paste(vapply(parts, function(q) q$source_url[1], ""), collapse = " ; ")
+    row$ibisworld_code <- paste(vapply(parts, function(q) as.character(q$ibisworld_code[1]), ""), collapse = "+")
+    keep <- rf_rbind_fill(list(keep, row))
+  }
+  keep
 }
 
 # The 07-shaped estimate rows of the manifest (roles "ibis_actual_current:<industry>"), for the industries of `ids`. NULL when there are none.

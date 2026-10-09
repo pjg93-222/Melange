@@ -144,6 +144,27 @@ class ContractTests(unittest.TestCase):
             edit(doc['industries']['telecom'])
             self.assertTrue(any('no entry for telecom' in p for p in contract.check_cycle_model(doc)))
 
+    def test_a_full_telecom_row_is_checked_for_giving_inputs_and_passes_with_them(self):
+        """Owner ruling 2026-10-08 (B09, wireless + cable): Telecom is offered for giving and lobbying, carries no lobbying_only flag, and has a general-giving step block and an IBIS path."""
+        import copy
+        bundle = copy.deepcopy(contract.example('models_cycle'))
+        row = copy.deepcopy(bundle['industries']['property_casualty'])
+        row.update(id='telecom', label='Telecommunications', mentat_key='telecom', opensecrets_codes=['B09'], code='B09', ibisworld_code='51721+51711a', lobbying_only=False,
+                   capabilities=dict(pac=True, control=False, lobbying=True), withheld=dict(control='general-giving model only'))
+        bundle['industries']['telecom'] = row
+        cm = bundle['cycle_model']
+        self.assertTrue(any('no entry for telecom' in p for p in contract.check_cycle_model(bundle)))                  # offered for giving: the step block and the path are required
+        for measure in ('pac_to_candidates', 'general_giving'):
+            cm['measures'][measure]['step']['telecom'] = copy.deepcopy(cm['measures'][measure]['step']['property_casualty'])
+        self.assertTrue(any('budget_rule.growth: no entry for telecom' in p for p in contract.check_cycle_model(bundle)))
+        cm['budget_rule']['growth']['telecom'] = dict(copy.deepcopy(cm['budget_rule']['growth']['property_casualty']), report_id='51721+51711a', edition='2024-10 (51721) + 2024-12 (51711a)')
+        cm['g_prior']['telecom'] = copy.deepcopy(cm['g_prior']['property_casualty'])
+        self.assertEqual(contract.check_cycle_model(bundle), [])
+        self.assertEqual(contract.validate_model(bundle), [])
+        doc = copy.deepcopy(bundle)
+        doc['cycle_model']['budget_rule']['growth']['telecom']['annual'].pop('2027')
+        self.assertTrue(any('telecom: no growth for 2027' in p for p in contract.check_cycle_model(doc)))
+
     def test_the_lobbying_persistence_block_is_optional_and_typed(self):
         import copy
         example = contract.example('models')

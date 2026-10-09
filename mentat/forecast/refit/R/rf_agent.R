@@ -103,11 +103,11 @@ rf_agent_data_status <- function(reg, id, inputs = NULL) {
   os <- i$opensecrets
   if (is.null(os$totals)) add("OpenSecrets totals", os$reason %||% sprintf("OpenSecrets %s capture not supplied", paste(unlist(os$codes), collapse = "/")))
   else if (!file.exists(rf_expand(os$totals))) add("OpenSecrets totals", sprintf("capture file missing: %s", os$totals))
-  if (is.null(os$recipients) || is.null(os$presidential)) add("OpenSecrets recipients and presidential lists", "21 captures (cycles 2012-2024 x House, Senate, presidential) not supplied")
+  if (isTRUE(i$models$control) && (is.null(os$recipients) || is.null(os$presidential))) add("OpenSecrets recipients and presidential lists", "21 captures (cycles 2012-2024 x House, Senate, presidential) not supplied")     # only the control (share) model reads them
   ib <- i$ibisworld
   if (is.null(ib$actual_sector)) add("IBISWorld actual revenue", "no workbook-07 sector mapped")
   else if (!is.null(inputs) && "ibis_actual" %in% inputs$role) {
-    g <- tryCatch(rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = ib$actual_sector, supplement = rf_growth_supplement(inputs, id)), error = function(e) NULL)
+    g <- tryCatch(rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = ib$actual_sector, supplement = rf_growth_supplement(inputs, id), components = rf_actual_components(reg, id)), error = function(e) NULL)
     ok <- if (is.null(g)) NULL else g[!is.na(g$cycle_revenue_growth_pct) & !is.na(g$prior_cycle_revenue_growth_pct), ]
     if (is.null(ok) || !nrow(ok)) add("IBISWorld actual revenue", sprintf("no cycle growth for sector '%s' in workbook 07", ib$actual_sector))
     else if (!(2024 %in% ok$cycle_end)) add("IBISWorld actual revenue", sprintf("revenue ends before the 2024 cycle (latest cycle with growth: %d); a 2025+ vintage covering 2006-2024 is needed (%s)", max(ok$cycle_end), ib$vintage_note %||% ""))
@@ -146,6 +146,7 @@ rf_review_packet <- function(res, dir, b_random = RF$B_RANDOM) {
   rb <- do.call(rbind, lapply(names(v$evidence), function(k) v$evidence[[k]]))
   csv("robustness_pvalues.csv", rb)
   csv("g4_adequacy.csv", res$gates$g4$table); csv("g5_stability.csv", res$gates$g5$table); csv("g6_nondegradation.csv", res$gates$g6$table)
+  sbt <- rf_scored_backtest(v); if (!is.null(sbt)) csv("scored_only.csv", sbt)
   csv("inputs.csv", v$ctx$inputs)
   rf_write_json_atomic(list(decision = res$gates$decision, gates = lapply(seq_len(nrow(gates)), function(i) as.list(gates[i, ]))), file.path(rd, "gates.json")); files <- c(files, "gates.json")
   diff_rows <- if (!is.null(res$published)) rf_bundle_diff(rf_canonical_json(b), res$published) else data.frame(path = character(), a = character(), b = character(), dev = numeric())
@@ -169,6 +170,7 @@ rf_review_packet <- function(res, dir, b_random = RF$B_RANDOM) {
     "## Calculator paths against last-period naive", "", .rf_md_table(v$backtests[v$backtests$rule %in% c("R0", "R1", "R2") & v$backtests$design %in% c("loeo", "rolling") & v$backtests$path %in% c("prevchg", "calc"),
                                                                                   c("term", "base", "design", "path", "rule", "n", "MAE", "units", "beats_naive", "coverage_95")]), "",
     if (!is.null(b$cycle_model)) rf_cycle_model_review(b$cycle_model) else NULL,
+    rf_scored_review(v),
     "## Lobbying log refit", "",
     sprintf("Relative change per +1 pp of predicted growth: %.3f%% (95%% coefficient interval %.3f%% to %.3f%%), p = %.4f, n = %d; step residual sigma2 = %.6f over %d pairs.",
             v$lobby_log$relative_change_pct_per_point, v$lobby_log$coefficient_interval_pct$low, v$lobby_log$coefficient_interval_pct$high, v$lobby_log$ordinary_p, v$lobby_log$n,
@@ -232,9 +234,11 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
     ctx0$manifest <- manifest
     g3 <- rf_gate_panels(ctx0)
     pilots <- rf_ready_pilots(reg, inputs)
-    ctx <- if (length(pilots)) { x <- rf_parity_context(inputs, rf_v2_registry(reg, inputs), models); x$manifest <- manifest; x } else ctx0   # + ready pilots (property and casualty)
+    reg2 <- rf_v2_registry(reg, inputs)
+    ctx <- if (length(pilots) || length(reg2$scored)) { x <- rf_parity_context(inputs, reg2, models); x$manifest <- manifest; x } else ctx0   # + ready pilots (property and casualty) and the scored-only panel (Telecom)
     gb$stage_finish("panels", g3$detail); gb$gate("G3 panel validity", g3$status, g3$detail)
-    say("panels, fits and stepwise grid built; G3 ", g3$status, if (length(pilots)) paste0("; pilot industries in the v2 sample: ", paste(pilots, collapse = ", ")) else "")
+    say("panels, fits and stepwise grid built; G3 ", g3$status, if (length(pilots)) paste0("; pilot industries in the v2 sample: ", paste(pilots, collapse = ", ")) else "",
+        if (length(reg2$scored)) paste0("; scored-only industries (outside the pooled fit): ", paste(reg2$scored, collapse = ", ")) else "")
     gb$stage_start("models")
     v <- rf_v2_context(ctx, run_id = run_id, packages = pkgs, b_random = b_random, frozen_ctx = if (length(pilots)) ctx0 else NULL)
     v$adequacy <- rf_gate_adequacy(ctx)

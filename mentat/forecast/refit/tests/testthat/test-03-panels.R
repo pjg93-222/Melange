@@ -199,6 +199,46 @@ test_that("telecom growth is the revenue-weighted wireless + cable component for
   expect_lte(max_abs(m$g, m$g.ref), 3.6e-15 * 100)
 })
 
+test_that("telecom scored panel (owner ruling 2026-10-08): OpenSecrets B09 totals only, actual growth = the revenue-weighted wireless + cable series with 2024 from the same editions' estimates", {
+  inp <- test_inputs()
+  sc <- rf_scored_panel(rf_v2_registry(RF_TEST_REG, inp), inp)
+  expect_identical(sc$ids, "telecom"); p <- sc$panel
+  expect_identical(p$cycle_end, seq(2012L, 2024L, 2L)); expect_true(all(p$sector == "telecom")); expect_true(all(p$opensecrets_code == "B09"))
+  expect_true(all(p$source_url == "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026"))
+  expect_equal(sum(attr(p, "checks")$failures), 0L)
+  # the B09 page's own numbers (Totals by Election Cycle), nominal dollars; B08 (Telephone Utilities) is not in them
+  expect_identical(p$total_nominal, c(19672059, 15311883, 25762436, 19537375, 34133861, 21466393, 28075186))
+  expect_identical(p$individual_nominal, c(8535938, 5196198, 15434800, 8134059, 18981239, 9831367, 15124728))
+  expect_identical(p$pac_nominal, c(8248885, 9237509, 9518480, 9726200, 9776300, 8502850, 8636700))
+  expect_identical(p$outside_nominal, p$total_nominal - p$individual_nominal - p$pac_nominal)
+  # growth: independent re-computation from workbook 07's two components + the 2024 estimate rows, as the growth of the SUMMED revenue
+  w7 <- rf_read_xlsx(rf_input_path(inp, "ibis_actual"), "data")
+  cur <- utils::read.csv(rf_input_path(inp, "ibis_actual_current:telecom"), stringsAsFactors = FALSE, colClasses = c(report_vintage = "character"))
+  lvl <- function(sec) { q <- w7[w7$sector == sec, ]; x <- stats::setNames(q$revenue_million_report_price_basis, q$year); r <- cur[cur$sector == sec, ]; x[as.character(r$year)] <- r$revenue_million_report_price_basis; x }
+  wl <- lvl("telecom_wireless"); cb <- lvl("telecom_cable")
+  expect_identical(names(wl), as.character(2006:2024)); expect_identical(names(cb), as.character(2006:2024))
+  expect_identical(unname(cur$report_vintage), c("2024-10", "2024-12"))                                  # wireless 2024-10, cable 2024-12: each component its own single vintage
+  tot <- wl + cb
+  cyc <- function(e) tot[[as.character(e - 1)]] + tot[[as.character(e)]]
+  rate <- function(e) 100 * (cyc(e) / cyc(e - 2) - 1)
+  expect_equal(p$cycle_revenue_growth_pct, vapply(p$cycle_end, rate, 0), tolerance = 1e-12)
+  expect_equal(p$prior_cycle_revenue_growth_pct, vapply(p$cycle_end - 2L, rate, 0), tolerance = 1e-12)
+  # = the average of the two components' cycle growth weighted by each one's baseline-cycle revenue
+  ccyc <- function(x, e) x[[as.character(e - 1)]] + x[[as.character(e)]]
+  wavg <- function(e) { w <- c(ccyc(wl, e - 2), ccyc(cb, e - 2)); g <- c(ccyc(wl, e) / ccyc(wl, e - 2) - 1, ccyc(cb, e) / ccyc(cb, e - 2) - 1); 100 * sum(w * g) / sum(w) }
+  expect_equal(p$cycle_revenue_growth_pct, vapply(p$cycle_end, wavg, 0), tolerance = 1e-12)
+  expect_true(any(attr(p, "estimates")$sector == "telecom") && all(attr(p, "estimates")$year == 2024L))
+  # the same panel construction as the pooled industries: deflated by cpi[2025] / mean(cpi[t-1], cpi[t]), standardized within the industry
+  expect_equal(p$pac_real_2025, p$pac_nominal * p$multiplier_to_2025_dollars, tolerance = 1e-12)
+  expect_equal(mean(p$G_current), 0, tolerance = 1e-12); expect_equal(stats::sd(p$G_current), 1, tolerance = 1e-12)
+  # components on different price bases cannot be weighted
+  g <- data.frame(sector = rep(c("a", "b"), each = 2), year = rep(2020:2021, 2), revenue_million_constant_2026_usd = NA_real_, revenue_million_report_price_basis = c(10, 11, 20, 22),
+                  revenue_price_basis = rep(c("constant 2024 USD", "current USD"), each = 2), report_vintage = "v", source_url = "u", ibisworld_code = "1", status = "observed", stringsAsFactors = FALSE)
+  expect_error(rf_combine_components(g, list(ab = c("a", "b"))), "different price bases")
+  g$revenue_price_basis <- "constant 2024 USD"
+  expect_equal(rf_combine_components(g, list(ab = c("a", "b")))$revenue_million_report_price_basis, c(30, 33))
+})
+
 test_that("rf_market_window gives the Jan-Jun 2026 expected-control inputs, per market and equal-weighted", {
   ctx <- test_ctx()
   mw <- ctx$market_window

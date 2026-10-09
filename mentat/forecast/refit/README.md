@@ -175,7 +175,28 @@ Paul, 2026-10-07: "1. Yes 2. Keep senate in 3. We use the 50/50 4. Yes; Use the 
   (split-conformal quantiles: the ceil((n + 1) p)-th smallest |e|). `rf_v2_lobby_model()` writes them as the optional `lobby_model.log_refit.persistence` (per bundle industry: q80; pooled: q80, q95);
   the console adds them in quadrature to the in-year nowcast's blind error (the anchors carry the nowcast and its pooled blind errors) for the years after the nowcast year. The old year-effect
   `log_refit.prediction` interval is not read any more (it never beat last-period naive: G9 WARN).
-* Telecom is a lobbying-only calculator industry (`registry/industries.json`: `calculator` and `lobbying_only` true, a Mentat key, `models {pac false, control false, lobbying true}`, a stated `reason`).
+* (Superseded by Phase 9, which makes Telecom a full industry; the `lobbying_only` mechanism below stays for future industries.) Telecom was a lobbying-only calculator industry (`registry/industries.json`: `calculator` and `lobbying_only` true, a Mentat key, `models {pac false, control false, lobbying true}`, a stated `reason`).
   The writer emits it per industry as the bundle key `lobbying_only`; `rf_cycle_model_offered()`, `contract.py::check_cycle_model` and its mirror in `rf_schema.R` all skip the cycle model's checks (no general-giving step
   block, no IBIS growth path) for exactly the industries flagged `lobbying_only`, never for one whose PAC capability is merely withheld (negative control C09).
 * Tests: `test-01-registry.R` (telecom), `test-15-bundle-v2.R` (the persistence helper on a hand-computed case, the bundle's table against the study, telecom in `industries`), `test-23-cycle-model.R` (a lobbying-only industry is not checked for giving inputs).
+
+## Phase 9: Telecom giving (owner ruling of 2026-10-08: "use B09 and wireless+cable for Telecom giving")
+
+Telecom is now a full forecast industry (general giving + lobbying) and no longer carries `lobbying_only` (the flag and the contract's exemption stay as a mechanism for future industries).
+
+* **OpenSecrets scope = category B09 only** (Telecom Services & Equipment; B08 Telephone Utilities is not used), wired like the F09 all-insurance ruling of property and casualty: `registry/industries.json` telecom
+  `opensecrets {codes ["B09"], code_status "owner_ruling_b09_only", baseline_scope_caveat, totals "{RFDATA}/B09_totals.json"}` and a `caveats` entry that reaches the bundle and the console. The totals table is the
+  one the 2026-10-01 standardized collector saved (`outputs/opensecrets-2008-2026-20261001/raw/<sha>.html`, B09 page); `tools/make_telecom_inputs.R` parses it into the capture envelope `rf_os_totals` already reads
+  (cycles 1990-2024, the identity total = individuals + PACs + outside money asserted) and pins it as input `os_totals:telecom`. No recipient / presidential captures of B09 exist or are asked for: Telecom has no control (share) model.
+* **IBISWorld = wireless (51721, edition 2024-10) + cable (51711a, edition 2024-12), revenue-weighted** (both constant 2024 USD, both prices "inflation adjusted to 2024"). Each year's growth is the average of the
+  two components' growth weighted by their PREVIOUS-year revenue (the registry's "same-vintage baseline revenue" convention), which is the growth of the summed revenue: 2023 -2.94%, 2024 +4.99%, 2025 +4.28%, 2026 +4.32%,
+  2027 +4.11% (wireless weight 78-81%), `g_prior` 2028 +9.13% (`R/rf_bundle2.R` `RF_CYCLE_IBIS$telecom`, `rf_ibis_weighted()`, input `cycle:ibis_telecom_2024` = the two editions' pages 87/89 and 45/46). The ACTUAL growth of the
+  panel (workbook 07 `telecom_wireless` + `telecom_cable`, registry `ibisworld.actual_components`, `rf_combine_components()` in `R/rf_growth.R`) is the same revenue-weighted combination, with 2024 taken from the same two editions'
+  current-year estimates (input `ibis_actual_current:telecom`; editions are never spliced and the estimate drops out when a 2025+ edition puts 2024 in the main series).
+* **Scored-only, not pooled** (`registry: estimation "scored_only"`, `status pilot`, `models {pac true, control false, lobbying true}`): Telecom's panel (`ctx$scored`, built by `rf_scored_panel()`, 7 cycles 2012-2024) NEVER joins the
+  pooled phase / drift / slope estimation or the share models. The phase block (`rf_ph_scored_step_variance()`) gives it the pooled model's anchored-step residual variance on its own history, with the pooled phase coefficient and
+  drift of the fitted candidate (the adopted `PT-noG-damp-pool` candidates have no growth term, so this is defined). Hence phi, drift, the panel hash and every other industry's step variance, projections and gates are identical to the
+  bundle built without Telecom. Telecom's own step blocks: PAC measure 4 pairs (2022 dropped), general giving 6 pairs. Its roster PACs stay unavailable (empty roster, the anchors' existing reason); the calculator (`app/giving_forecast.py`, not this pipeline) takes Telecom's company PACs from the published PAC panel's 8 telecom PACs instead (`PANEL_COHORT`, the credit unions' code path of D-117: the panel's nowcast, x1.09 for 2027-28; their D/R split is pinned in `forecast/anchors/panel_cohort_split_telecom.json`). The chamber (party) split needs a House / Senate share model, which Telecom does not have: it stays withheld with `withheld_by_model.control`.
+  `rf_scored_backtest()` writes its one-step errors against last-cycle naive (review packet section "Scored-only industries", `review/scored_only.csv`); G4 counts its cycles.
+* Tests: `test-01-registry.R` (the registry entry, the mode checks, readiness), `test-03-panels.R` (the scored panel: B09 numbers, the revenue-weighted growth re-computed from workbook 07), `test-23-cycle-model.R` (the full cycle-model
+  check for Telecom, the IBIS path = the wireless + cable combination, the OpenSecrets scope = B09, the independent step variance, the flag mechanism kept), `test-15-bundle-v2.R`.

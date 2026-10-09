@@ -110,16 +110,19 @@ rf_model_version <- function(input_hash, run_id, built_at_utc, code_sha256) {
 rf_v2_industries <- function(v) {
   ctx <- v$ctx; reg <- ctx$reg
   p <- ctx$pac_panel
+  sc <- ctx$scored                                                          # scored-only industries (Telecom): their own panel, never part of the pooled estimation
   lv <- ctx$lobby$levels
   out <- list()
   for (id in names(reg$industries)) {
     i <- reg$industries[[id]]
     if (!(isTRUE(i$calculator) || id %in% rf_capable(reg, "pac"))) next
-    caps <- list(pac = id %in% rf_capable(reg, "pac"), control = id %in% rf_capable(reg, "control"), lobbying = id %in% rf_capable(reg, "lobbying"))
+    scored <- !is.null(sc) && id %in% sc$ids
+    caps <- list(pac = id %in% rf_capable(reg, "pac") || (scored && !is.null(v$phase)), control = id %in% rf_capable(reg, "control"), lobbying = id %in% rf_capable(reg, "lobbying"))      # a scored industry is scored on the cycle model's pooled phase and drift
     withheld <- stats::setNames(list(), character(0))                       # written as {} (an empty object), never []
-    for (m in c("pac", "control", "lobbying")) if (!caps[[m]]) withheld[[m]] <- rf_withheld_reason(i, m)
+    for (m in c("pac", "control", "lobbying")) if (!caps[[m]]) withheld[[m]] <- if (m == "pac" && scored) "Scored on the cycle model's pooled phase and drift (RF_CYCLE_MODEL=1); this bundle was built without the cycle model." else rf_withheld_reason(i, m)
     for (w in v$adequacy$withheld[[id]] %||% list()) { caps[[w$model]] <- FALSE; withheld[[w$model]] <- w$reason }
-    g <- p[p$sector == id, ]; g <- g[order(g$cycle_end), ]
+    pp <- if (scored) sc$panel else p
+    g <- pp[pp$sector == id, ]; g <- g[order(g$cycle_end), ]
     has <- nrow(g) > 0L
     ls <- i$lobbyview$study_sector
     lh <- if (!is.null(ls)) lv[lv$study_sector == ls, ] else lv[0, ]
@@ -132,7 +135,7 @@ rf_v2_industries <- function(v) {
       capabilities = caps, withheld = withheld, growth_scaling_cycles = as.list(as.integer(g$cycle_end)),
       lobbying_history = lapply(seq_len(nrow(lh)), function(k) list(year = as.integer(lh$year[k]), lobbying_real_2025_million = lh$y[k], predicted_growth_pct = lh$g[k])))
     cav <- as.list(unlist(i$caveats %||% list()))            # scope caveats of the registry (property and casualty: OpenSecrets F09 = all insurance)
-    est <- attr(p, "estimates")
+    est <- attr(pp, "estimates")
     if (!is.null(est) && id %in% est$sector) {                # IBISWorld current-year estimates that entered this industry's growth series
       yrs <- sort(est$year[est$sector == id])
       txt <- i$ibisworld$actual_current_year$caveat %||% sprintf("%s revenue is IBISWorld's current-year estimate; replaced automatically when a later edition is ingested.", paste(yrs, collapse = ", "))
@@ -352,7 +355,11 @@ RF_CYCLE_C0 <- 2026L                                                # the open c
 RF_CYCLE_IBIS <- list(                                              # report identities of the newest IBISWorld edition per industry (R9: no splicing of editions)
   commercial_banks = list(role = "cycle:ibis_captured_paths", code = "52211", edition = "2026-08", from = "levels", price_basis = "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)"),
   credit_unions = list(role = "cycle:ibis_captured_paths", code = "52213", edition = "2026-05", from = "levels", price_basis = "CONSTANT_USD (IBIS Key Statistics convention; not printed in the capture)"),
-  property_casualty = list(role = "cycle:ibis_pc_2024_11", code = "52412", edition = "2024-11", from = "reported", price_basis = "CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024')"))
+  property_casualty = list(role = "cycle:ibis_pc_2024_11", code = "52412", edition = "2024-11", from = "reported", price_basis = "CONSTANT_USD (p.82 'Figures are inflation adjusted to 2024')"),
+  # Telecom (owner ruling 2026-10-08, "wireless+cable"): the revenue-weighted combination of IBISWorld 51721 (wireless, edition 2024-10, p.87 / p.89) and 51711a (cable, edition 2024-12, p.45 / p.46): each year's
+  # growth is the average of the two components' growth weighted by their previous-year revenue (the registry's "same-vintage baseline revenue" convention), i.e. the growth of the summed revenue.
+  telecom = list(role = "cycle:ibis_telecom_2024", code = "51721+51711a", components = c("51721", "51711a"), edition = "2024-10 (51721) + 2024-12 (51711a)", from = "weighted",
+                 price_basis = "CONSTANT_USD (both editions print 'Figures are inflation adjusted to 2024'); wireless and cable revenue-weighted by previous-year revenue"))
 RF_CYCLE_PACE <- list(commercial_banks = list(role = "cycle:pace_banks", source = "pace_test/impl_py/out/series.csv"),
                       credit_unions = list(role = "cycle:pace_credit_unions", source = "pace_test/impl_py/out/cu_series.csv"))
 RF_CYCLE_PANEL_COLS <- c("sector", "cycle_end", "log_pac", "log_individual", "G_current", "presidential_cycle")
@@ -381,15 +388,37 @@ rf_cycle_ibis_growth <- function(inputs, ids, c0 = RF_CYCLE_C0) {
     s <- RF_CYCLE_IBIS[[id]]
     path <- rf_input_path(inputs, s$role)
     d <- utils::read.csv(path, stringsAsFactors = FALSE)
-    d <- d[as.character(d$code) == s$code, ]
-    lv <- stats::setNames(as.numeric(d$revenue_million), d$year)
-    lvl <- function(y) { x <- lv[as.character(y)]; if (is.na(x)) stop("rf_cycle_ibis_growth: no revenue level for ", id, " (", s$code, ") in ", y, call. = FALSE); unname(x) }
-    annual <- if (s$from == "levels") vapply(years, function(y) lvl(y) / lvl(y - 1L) - 1, 0)
-              else vapply(years, function(y) { r <- d$reported_change_pct[d$year == y]; if (length(r) != 1L || is.na(r)) stop("rf_cycle_ibis_growth: no reported change for ", id, " in ", y, call. = FALSE); r / 100 }, 0)
-    growth[[id]] <- list(report_id = s$code, edition = s$edition, price_basis = s$price_basis, source_sha256 = inputs$actual[match(s$role, inputs$role)], annual = stats::setNames(as.list(annual), years))
+    if (identical(s$from, "weighted")) {                                     # Telecom: wireless + cable, revenue-weighted (levels of both editions, one price basis)
+      w <- rf_ibis_weighted(d, s$components, years)
+      annual <- w$growth[as.character(years)]
+      lvl <- function(y) w$level[[as.character(y)]]
+    } else {
+      d <- d[as.character(d$code) == s$code, ]
+      lv <- stats::setNames(as.numeric(d$revenue_million), d$year)
+      lvl <- function(y) { x <- lv[as.character(y)]; if (is.na(x)) stop("rf_cycle_ibis_growth: no revenue level for ", id, " (", s$code, ") in ", y, call. = FALSE); unname(x) }
+      annual <- if (s$from == "levels") vapply(years, function(y) lvl(y) / lvl(y - 1L) - 1, 0)
+                else vapply(years, function(y) { r <- d$reported_change_pct[d$year == y]; if (length(r) != 1L || is.na(r)) stop("rf_cycle_ibis_growth: no reported change for ", id, " in ", y, call. = FALSE); r / 100 }, 0)
+    }
+    growth[[id]] <- list(report_id = s$code, edition = s$edition, price_basis = s$price_basis, source_sha256 = inputs$actual[match(s$role, inputs$role)], annual = stats::setNames(as.list(unname(annual)), years))
     prior[[id]] <- stats::setNames(list(100 * ((lvl(c0 - 1L) + lvl(c0)) / (lvl(c0 - 3L) + lvl(c0 - 2L)) - 1)), c0 + 2L)
   }
   list(growth = growth, g_prior = prior)
+}
+
+# Revenue-weighted combination of IBISWorld components. `d` = rows (code, year, revenue_million) of the components `codes`, one price basis. For each year y with every component's level in y and y - 1:
+#   growth[y] = sum_c w_c g_c(y) / sum_c w_c, g_c(y) = L_c(y) / L_c(y - 1) - 1, w_c = L_c(y - 1)   (= the growth of the summed revenue);
+# level[y] = sum_c L_c(y). The two-year cycle growth the g_prior reads is then the baseline-cycle revenue-weighted average of the components' cycle growths.
+# -> list(growth = named numeric by year, weights = matrix (year x component, rows sum to 1), level = named numeric by year). Stops when a component lacks a level for a requested year.
+rf_ibis_weighted <- function(d, codes, years) {
+  lv <- lapply(codes, function(cc) { q <- d[as.character(d$code) == cc, ]; stats::setNames(as.numeric(q$revenue_million), q$year) })
+  names(lv) <- codes
+  at <- function(cc, y) { x <- lv[[cc]][as.character(y)]; if (is.na(x)) stop("rf_ibis_weighted: no revenue level for ", cc, " in ", y, call. = FALSE); unname(x) }
+  ys <- sort(unique(c(min(years) - 1L, years)))
+  gy <- sort(unique(years))
+  wt <- t(vapply(gy, function(y) { w <- vapply(codes, function(cc) at(cc, y - 1L), 0); w / sum(w) }, stats::setNames(numeric(length(codes)), codes)))
+  rownames(wt) <- gy
+  g <- vapply(gy, function(y) sum(vapply(codes, function(cc) at(cc, y - 1L) * (at(cc, y) / at(cc, y - 1L) - 1), 0)) / sum(vapply(codes, function(cc) at(cc, y - 1L), 0)), 0)
+  list(growth = stats::setNames(g, gy), weights = wt, level = stats::setNames(vapply(ys, function(y) sum(vapply(codes, function(cc) at(cc, y), 0)), 0), ys))
 }
 
 # Roster pace series in dollars (the pace test's frozen files, cents / 100): cycle -> F, O15, O18, O21.
@@ -477,10 +506,12 @@ rf_v2_cycle_model <- function(v, inputs = v$ctx$inputs) {
        budget_rule = list(weight_model = 0.5, lag_years = 1L, growth_basis = "real", growth = ibis$growth),
        g_prior = c(list(source = "IBIS revenue-sum cycle growth of 2026 (2025+2026 over 2023+2024) from the same editions as the budget growth"), ibis$g_prior),
        pace = list(months = list(`15` = "03-31", `18` = "06-30", `21` = "09-30"), series = pace),
-       notes = list("No backtest covers the 50/50 overlay or the error of the IBISWorld path: G6 and G9 measure the phase-and-drift model only, and the intervals exclude the IBIS projection error.",
+       notes = Filter(Negate(is.null), list("No backtest covers the 50/50 overlay or the error of the IBISWorld path: G6 and G9 measure the phase-and-drift model only, and the intervals exclude the IBIS projection error.",
                     "The 2026-edition IBISWorld price basis is inferred as constant dollars (the 2026 captures print no basis; the 2024 editions print inflation-adjusted dollars and the 2023 growth agrees to 0.1 pp).",
                     "The 50/50 rule is untested on general giving.",
-                    sprintf("The general-giving phase coefficient is phi_gen = %.3f (the selected specification %s).", gen$phi, gen$candidate)))
+                    sprintf("The general-giving phase coefficient is phi_gen = %.3f (the selected specification %s).", gen$phi, gen$candidate),
+                    if (!is.null(v$ctx$scored)) sprintf("%s: scored on the pooled phase coefficient and drift without being estimated in them (registry estimation scored_only): its step variance is the pooled model's residual variance on its own history, so no other industry's parameters move.",
+                                                         paste(v$ctx$scored$ids, collapse = ", ")))))
 }
 
 # The cycle model as lines of the review packet.
@@ -492,6 +523,51 @@ rf_cycle_model_review <- function(cm) {
     sprintf("Inflation %.7f per year (base %d, cycle mid-point). 50/50 budget rule: model weight %.1f, IBISWorld REAL growth %s, lag %d year.", cm$inflation$annual_rate, cm$inflation$base_year, cm$budget_rule$weight_model,
             paste(sprintf("%s %s %s", names(cm$budget_rule$growth), vapply(cm$budget_rule$growth, function(g) g$report_id, ""), vapply(cm$budget_rule$growth, function(g) g$edition, "")), collapse = ", "), cm$budget_rule$lag_years),
     sprintf("Panel sha256 %s.", cm$source$panel_sha256), unlist(cm$notes), "")
+}
+
+# The backtest of the SCORED-ONLY industries (Telecom): the one-step error of the pooled phase-and-drift step on the industry's own pairs (t - 2, t), the construction behind its step variance:
+#   error = (y[t] - y[t-2]) - (phi dPres + d1)      phi and d1 = the pooled phase coefficient and first-step drift of the fitted candidate (no growth term), the 2022 handling of that measure;
+#   naive = y[t] - y[t-2]                            last-cycle naive (no change).
+# The pooled parameters were estimated WITHOUT the industry, so these are out-of-sample for it (not leave-one-election-out: the pool never saw the industry at all).
+# -> data.frame(industry, measure, cycle, actual_change, predicted_change, error, naive_error), NULL when the context scores no industry.
+rf_scored_backtest <- function(v) {
+  ph <- v$phase; sc <- v$ctx$scored
+  if (is.null(ph) || is.null(sc)) return(NULL)
+  rows <- list()
+  for (nm in names(RF_PH_SERIES)) {
+    b <- ph[[nm]]; y <- RF_PH_SERIES[[nm]]; pr <- b$params
+    p <- rf_ph_panel_handling(sc$panel, y, b$spec$handling)
+    phi <- unname(pr$phi[[1]])
+    for (id in sc$ids) {
+      d <- p[p$sector == id, ]; d <- d[order(d$cycle_end), ]
+      for (t in d$cycle_end) {
+        a <- d[d$cycle_end == t, ]; z <- d[d$cycle_end == t - 2L, ]
+        if (nrow(z) != 1L) next
+        dy <- a[[y]] - z[[y]]; pred <- phi * (a$presidential_cycle - z$presidential_cycle) + pr$drift(id, 1L)
+        rows[[length(rows) + 1L]] <- data.frame(industry = id, measure = c(pac = "pac_to_candidates", general = "general_giving")[[nm]], cycle = as.integer(t), actual_change = dy, predicted_change = pred,
+                                                 error = dy - pred, naive_error = dy, stringsAsFactors = FALSE)
+      }
+    }
+  }
+  do.call(rbind, rows)
+}
+
+# Per industry and measure: pairs, MAE of the step against the naive, and whether it beats it (log points).
+rf_scored_summary <- function(bt) {
+  if (is.null(bt)) return(NULL)
+  do.call(rbind, lapply(split(bt, list(bt$industry, bt$measure), drop = TRUE), function(q)
+    data.frame(industry = q$industry[1], measure = q$measure[1], pairs = nrow(q), MAE = mean(abs(q$error)), naive_MAE = mean(abs(q$naive_error)), beats_naive = mean(abs(q$error)) < mean(abs(q$naive_error)), stringsAsFactors = FALSE)))
+}
+
+# Review lines of the scored-only industries.
+rf_scored_review <- function(v) {
+  bt <- rf_scored_backtest(v)
+  if (is.null(bt)) return(NULL)
+  sm <- rf_scored_summary(bt)
+  c("## Scored-only industries (outside the pooled estimation)", "",
+    "Registry `estimation: scored_only` (Telecom, owner ruling 2026-10-08: OpenSecrets B09, IBISWorld wireless 51721 + cable 51711a). They are NOT part of the pooled phase / drift fit, so every other industry's numbers are unchanged;",
+    "their step variance is the pooled model's anchored-step residual variance on their own history. Backtest = that step's one-step error on their own pairs (out-of-sample: the pool never saw them), against last-cycle naive.", "",
+    .rf_md_table(sm), "", .rf_md_table(bt), "")
 }
 
 rf_v2_sources <- function(v) {

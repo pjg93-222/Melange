@@ -1455,6 +1455,30 @@
       "supplied_by": "tools/make_pc_ibis_current.R (feeds ingester parser on the 2024-11 edition, sha256 f484c65f...)"
     },
     {
+      "role": "os_totals:telecom",
+      "path": "{RFDATA}/B09_totals.json",
+      "member": null,
+      "sheet": null,
+      "sha256": "1cf7005613599b72fe5443ecc22ed34cabf977167306a28af664f5eaa3456ff4",
+      "bytes": 5087,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "OpenSecrets B09 (Telecom Services & Equipment) totals table, page saved 2026-10-01 by the standardized collector (owner ruling 2026-10-08: B09 only, not B08)",
+      "supplied_by": "tools/make_telecom_inputs.R (page outputs/opensecrets-2008-2026-20261001/raw/c3fbb06a...a500.html, html sha256 567cdb6e...)"
+    },
+    {
+      "role": "ibis_actual_current:telecom",
+      "path": "{RFDATA}/ibis_telecom_2024_current_year.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "f1f387d713e0dd04ee5d89024ab2fd892ed232db86097845d1607937ef7c15ed",
+      "bytes": 1526,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "IBISWorld 51721 edition 2024-10 and 51711a edition 2024-12, current-year (2024) ESTIMATES of wireless and cable (owner ruling 2026-10-08: wireless + cable)",
+      "supplied_by": "tools/make_telecom_inputs.R (evidence files of the telecom source check; PDFs sha256 62c696e0... and 76022804...)"
+    },
+    {
       "role": "cycle:ibis_captured_paths",
       "path": "{CYCLE}/ibis2026_captured_paths.csv",
       "member": null,
@@ -1477,6 +1501,18 @@
       "purpose": "raw",
       "vintage": "IBISWorld 52412 edition 2024-11: revenue levels p.81 and reported annual change p.83, 2022-2027",
       "supplied_by": "transcribed from extracted_evidence/2024_11_52412.json (evidence sha256 e9ed0de0cf875a9dea64f2c900a1ae5f66786101f58f3cab5568573dedd04659)"
+    },
+    {
+      "role": "cycle:ibis_telecom_2024",
+      "path": "{CYCLE}/ibis_telecom_2024_p87_p89_p45_p46.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "33201909b9e14a8be63b369021435baeb45c61028621207346f83353f18a69ee",
+      "bytes": 1347,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "IBISWorld 51721 edition 2024-10 (p.87 revenue, p.89 annual change) and 51711a edition 2024-12 (p.45, p.46), 2022-2027; both inflation adjusted to 2024",
+      "supplied_by": "tools/make_telecom_inputs.R (transcribed from the extracted evidence of the two editions)"
     },
     {
       "role": "cycle:pace_banks",

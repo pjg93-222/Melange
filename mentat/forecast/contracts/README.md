@@ -88,7 +88,7 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
   2026-10-08) is the empirical persistence error of the LobbyView level series, `e = log(level[t + h]) - log(level[t])` over the blind targets 2014-2023: `industries[id][h] = {n, q80}`
   (the split-conformal 80th percentile of `|e|`, h = 1..3) per bundle industry and `pooled[h] = {n, q80, q95}` over every LobbyView sector; the console adds the persistence error of
   the years after the nowcast year to the nowcast's blind error in quadrature (the industry's q80 for the 80% band, the pooled q95 for the ~95% band). A bundle without it leaves those years without bands.
-* **Lobbying-only industries** (Telecom, owner ruling 2026-10-08): an industry with `calculator`, a `mentat_key` and `capabilities {pac false, control false, lobbying true}` (a stated `withheld`
+* **Lobbying-only industries** (a mechanism kept for future industries; Telecom was the first, until the second owner ruling of 2026-10-08 made it a full giving + lobbying industry, B09 and wireless + cable): an industry with `calculator`, a `mentat_key` and `capabilities {pac false, control false, lobbying true}` (a stated `withheld`
   reason for the two giving models) is offered by the console for lobbying alone and carries `lobbying_only: true` (optional key, absent = false; the writer emits it from the registry). `check_cycle_model`
   checks the general-giving step block and the IBIS growth path for every offered industry EXCEPT one flagged `lobbying_only`; a PAC capability that is merely withheld does not exempt an industry.
 * **`political_inputs.anchor_cycles["2024"]`**: the expected-control input of the anchor cycle, which has no row in the model history:

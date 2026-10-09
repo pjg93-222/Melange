@@ -12,6 +12,16 @@ ORACLE <- list(
                  step = list(commercial_banks = c(0.07470106921955001, 6, 2.5705818356363146), credit_unions = c(0.3632584812079982, 6, 2.5705818356363146), property_casualty = c(0.13627189657369346, 6, 2.5705818356363146))))
 cycle_of <- function() test_bundle2_pilot()$cycle_model
 cycle_controls <- function() Filter(function(c) identical(c$target, "models_cycle"), rf_negative_controls())
+# A control that REPLACES a whole industry row (C09: a Telecom row with no giving model) tests that such a row is checked for giving inputs. Telecom now has them in the writer's output (owner ruling
+# 2026-10-08), so the control is applied to the output without that industry's step blocks and IBIS path, which is what the replaced row would lack; every other control is applied as it is.
+without_giving_inputs <- function(doc, ctl) {
+  p <- unlist(ctl$path)
+  if (length(p) == 2L && identical(p[[1]], "industries") && !is.null(doc$cycle_model)) {
+    for (m in names(doc$cycle_model$measures)) doc$cycle_model$measures[[m]]$step[[p[[2]]]] <- NULL
+    doc$cycle_model$budget_rule$growth[[p[[2]]]] <- NULL; doc$cycle_model$g_prior[[p[[2]]]] <- NULL
+  }
+  doc
+}
 cycle_example <- function() jsonlite::fromJSON(file.path(rf_contracts_dir(), "giving-models-v2.cycle.example.json"), simplifyVector = FALSE)
 
 test_that("the cycle model is selected, not assumed: the consistency rule picks the owner-adopted specifications, otherwise the build stops", {
@@ -54,7 +64,7 @@ test_that("the damped drift: b0, b1, k_max, the pairs, and d_h = b0 + b1 (k_max 
 test_that("the anchored-step residual variance per industry equals the independent re-fit (1e-7), with df = pairs - 1 and the t critical value", {
   for (nm in c("pac", "general")) {
     m <- cycle_of()$measures[[c(pac = "pac_to_candidates", general = "general_giving")[[nm]]]]; o <- ORACLE[[nm]]
-    expect_setequal(names(m$step), names(o$step))
+    expect_setequal(names(m$step), c(names(o$step), "telecom"))                         # telecom is scored on the pooled model (checked below); the others are the independent re-fit's, unchanged
     for (id in names(o$step)) {
       s <- m$step[[id]]
       expect_lt(abs(s$sigma2 - o$step[[id]][1]), 1e-7, label = paste(nm, id)); expect_identical(s$pairs, as.integer(o$step[[id]][2]))
@@ -83,9 +93,9 @@ test_that("with the budget growth at zero the cycle chain reproduces the 10-01 r
 test_that("the IBISWorld growth paths are REAL, computed from the pinned inputs (banks / credit unions: level ratios; property and casualty: the 2024-11 edition's reported change), one P&C path", {
   g <- cycle_of()$budget_rule$growth
   expect_identical(cycle_of()$budget_rule$weight_model, 0.5); expect_identical(cycle_of()$budget_rule$growth_basis, "real"); expect_identical(cycle_of()$budget_rule$lag_years, 1L)
-  expect_setequal(names(g), c("commercial_banks", "credit_unions", "property_casualty"))
+  expect_setequal(names(g), c("commercial_banks", "credit_unions", "property_casualty", "telecom"))
   want <- list(commercial_banks = c(0.3592419282, 0.0576696913, -0.0285550820, -0.0283718916, 0.0017896963), credit_unions = c(0.2444760060, 0.1254325563, 0.0401437881, 0.0025697882, 0.0076342784),
-               property_casualty = c(0.057, 0.027, 0.026, 0.015, 0.014))
+               property_casualty = c(0.057, 0.027, 0.026, 0.015, 0.014), telecom = c(-0.0293719772, 0.0499193213, 0.0428472151, 0.0432473536, 0.0411302605))
   for (id in names(want)) {
     expect_identical(names(g[[id]]$annual), as.character(2023:2027))
     expect_lt(max(abs(unlist(g[[id]]$annual) - want[[id]])), 1e-9, label = id)
@@ -148,7 +158,7 @@ test_that("the built cycle_model passes the R validator and the contract's Pytho
   expect_gte(length(ctls), 8L)                                                                  # C01-C08
   for (ctl in ctls) {
     expect_gt(length(rf_validate_parsed(rf_apply_control(ex, ctl))), 0L, label = paste("example", ctl$id, ctl$why))
-    expect_gt(length(rf_validate_parsed(rf_apply_control(parsed, ctl))), 0L, label = paste("writer", ctl$id, ctl$why))
+    expect_gt(length(rf_validate_parsed(rf_apply_control(without_giving_inputs(parsed, ctl), ctl))), 0L, label = paste("writer", ctl$id, ctl$why))
   }
   py <- Sys.which(c("python3", "python")); py <- py[nzchar(py)][1]
   skip_if(is.na(py), "no Python on this machine")
@@ -188,17 +198,89 @@ test_that("a context that lacks an offered industry (the frozen v1 sample has no
   expect_length(rf_cycle_model_gap(test_v2_pilot()), 0L)
 })
 
-test_that("a lobbying-only industry (telecom, owner ruling 2026-10-08) is offered by the console but not checked for giving inputs: no step block, no IBIS path, and the bundle still validates", {
-  v <- test_v2_pilot(); b <- test_bundle2_pilot()
-  expect_true(b$industries$telecom$calculator); expect_false(b$industries$telecom$capabilities$pac)
-  expect_false("telecom" %in% rf_cycle_model_offered(v))
-  expect_setequal(rf_cycle_model_offered(v), c("commercial_banks", "credit_unions", "property_casualty"))
-  expect_null(b$cycle_model$measures$general_giving$step$telecom); expect_null(b$cycle_model$budget_rule$growth$telecom)
+test_that("telecom (owner ruling 2026-10-08: B09 and wireless + cable) goes through the full cycle-model check: offered for giving, a general-giving step block and a weighted IBIS path, and the bundle validates", {
+  v <- test_v2_pilot(); b <- test_bundle2_pilot(); cm <- b$cycle_model
+  expect_true(b$industries$telecom$calculator); expect_false(b$industries$telecom$lobbying_only)
+  expect_identical(b$industries$telecom$capabilities, list(pac = TRUE, control = FALSE, lobbying = TRUE))
+  expect_true("telecom" %in% rf_cycle_model_offered(v))
+  expect_setequal(rf_cycle_model_offered(v), c("commercial_banks", "credit_unions", "property_casualty", "telecom"))
+  expect_false(is.null(cm$measures$general_giving$step$telecom)); expect_false(is.null(cm$measures$pac_to_candidates$step$telecom)); expect_false(is.null(cm$budget_rule$growth$telecom))
+  expect_length(rf_cycle_model_gap(v), 0L)
   expect_identical(rf_validate_parsed(rf_canonical_json(b)), character(0))
-  # offered for giving, or merely PAC-withheld without the flag, it would be checked (the contract skips on lobbying_only alone)
-  expect_true(b$industries$telecom$lobbying_only)
-  for (f in list(function(x) { x$industries$telecom$lobbying_only <- FALSE; x }, function(x) { x$industries$telecom$lobbying_only <- NULL; x }))
-    expect_true(any(grepl("no entry for telecom", rf_validate_parsed(f(rf_canonical_json(b))), fixed = TRUE)))
+  # offered for giving, it is checked: without its step block or its growth path the contract refuses the bundle
+  one <- function(f) rf_validate_parsed(f(rf_canonical_json(b)))
+  expect_true(any(grepl("no entry for telecom", one(function(x) { x$cycle_model$measures$general_giving$step$telecom <- NULL; x }), fixed = TRUE)))
+  expect_true(any(grepl("cycle_model.budget_rule.growth: no entry for telecom", one(function(x) { x$cycle_model$budget_rule$growth$telecom <- NULL; x }), fixed = TRUE)))
+  # the flag mechanism is kept for future industries: only an explicit lobbying_only industry is exempt (a withheld PAC capability alone is not enough)
+  flagged <- function(x) { x$industries$telecom$lobbying_only <- TRUE; x$cycle_model$measures$general_giving$step$telecom <- NULL; x$cycle_model$measures$pac_to_candidates$step$telecom <- NULL
+                           x$cycle_model$budget_rule$growth$telecom <- NULL; x$cycle_model$g_prior$telecom <- NULL; x }
+  expect_identical(one(flagged), character(0))
+  for (f in list(function(x) { x <- flagged(x); x$industries$telecom$lobbying_only <- FALSE; x }, function(x) { x <- flagged(x); x$industries$telecom$lobbying_only <- NULL; x }))
+    expect_true(any(grepl("no entry for telecom", one(f), fixed = TRUE)))
+})
+
+test_that("telecom: the IBISWorld growth path IS the wireless (51721) + cable (51711a) revenue-weighted combination, and the OpenSecrets scope IS category B09 only", {
+  b <- test_bundle2_pilot(); cm <- b$cycle_model; tel <- cm$budget_rule$growth$telecom
+  # IBIS: the two editions' own pages (51721 edition 2024-10 p.87; 51711a edition 2024-12 p.45), constant 2024 USD; weights = each component's previous-year revenue
+  W <- c(`2022` = 326191.4, `2023` = 313011.9, `2024` = 333793.2, `2025` = 352026.9, `2026` = 370782.2, `2027` = 389124.4)
+  C <- c(`2022` = 87107.3, `2023` = 88147.4, `2024` = 87391.7, `2025` = 87204.6, `2026` = 87444.9, `2027` = 87949.7)
+  yr <- 2023:2027; p0 <- as.character(yr - 1); p1 <- as.character(yr)
+  weighted <- (W[p0] * (W[p1] / W[p0] - 1) + C[p0] * (C[p1] / C[p0] - 1)) / (W[p0] + C[p0])
+  expect_equal(unlist(tel$annual), stats::setNames(unname(weighted), yr), tolerance = 1e-12)
+  expect_equal(unname(unlist(tel$annual)), unname((W[p1] + C[p1]) / (W[p0] + C[p0]) - 1), tolerance = 1e-12)       # = the growth of the summed revenue
+  w25 <- W[["2024"]] / (W[["2024"]] + C[["2024"]])                                                                  # wireless weight of the 2025 growth: 79.25%
+  expect_equal(w25, 0.7925099, tolerance = 1e-7)
+  equal <- (W[p1] / W[p0] - 1 + C[p1] / C[p0] - 1) / 2
+  expect_gt(max(abs(unname(unlist(tel$annual)) - unname(equal))), 0.01)                                            # not an equal-weight average: the weights are revenue
+  expect_equal(cm$g_prior$telecom$`2028`, 100 * ((W[["2025"]] + C[["2025"]] + W[["2026"]] + C[["2026"]]) / (W[["2023"]] + C[["2023"]] + W[["2024"]] + C[["2024"]]) - 1), tolerance = 1e-12)
+  expect_identical(tel$report_id, "51721+51711a"); expect_identical(tel$edition, "2024-10 (51721) + 2024-12 (51711a)"); expect_match(tel$price_basis, "^CONSTANT_USD")
+  expect_identical(tel$source_sha256, "33201909b9e14a8be63b369021435baeb45c61028621207346f83353f18a69ee")
+  # the pinned file carries each component's printed annual change, which the levels reproduce (rounded to 0.1)
+  d <- utils::read.csv(rf_input_path(test_inputs(), "cycle:ibis_telecom_2024"), stringsAsFactors = FALSE)
+  for (cc in c("51721", "51711a")) {
+    q <- d[d$code == cc & d$year >= 2023, ]
+    lv <- stats::setNames(d$revenue_million[d$code == cc], d$year[d$code == cc])
+    expect_lt(max(abs(100 * (lv[as.character(q$year)] / lv[as.character(q$year - 1)] - 1) - q$reported_change_pct)), 0.0501)
+  }
+  # OpenSecrets scope = B09 only
+  ind <- b$industries$telecom
+  expect_identical(unlist(ind$opensecrets_codes), "B09"); expect_identical(ind$code, "B09"); expect_match(ind$scope, "^OpenSecrets B09 whole-industry accounting")
+  expect_true(any(grepl("B08 Telephone Utilities left out", unlist(ind$caveats), fixed = TRUE)))
+  expect_true(any(grepl("current-year estimate from the 2024-10 (wireless 51721) and 2024-12 (cable 51711a) editions", unlist(ind$caveats), fixed = TRUE)))
+  tot <- rf_os_totals(rf_input_path(test_inputs(), "os_totals:telecom"))
+  expect_match(RF_TEST_MANIFEST$path[RF_TEST_MANIFEST$role == "os_totals:telecom"], "B09_totals.json", fixed = TRUE)
+  expect_identical(tot$cycle_end, 1990L + 2L * (0:17)); expect_identical(tot$individual_nominal[tot$cycle_end == 2024], 15124728); expect_identical(tot$pac_nominal[tot$cycle_end == 2024], 8636700)
+  expect_identical(vapply(ind$history, function(r) r$cycle, 0L), seq(2012L, 2024L, 2L))
+  expect_true(all(vapply(ind$history, function(r) identical(r$source_url, "https://www.opensecrets.org/industries/totals?ind=B09&cycle=2026"), NA)))
+  pnl <- test_ctx_pilot()$scored$panel
+  expect_equal(vapply(ind$history, function(r) r$individual_real_2025, 0), pnl$individual_nominal * pnl$multiplier_to_2025_dollars, tolerance = 1e-12)
+  expect_equal(vapply(ind$history, function(r) r$pac_real_2025, 0), pnl$pac_nominal * pnl$multiplier_to_2025_dollars, tolerance = 1e-12)
+})
+
+test_that("telecom is scored on the pooled model, not estimated in it: its step variance is the independent residual variance, the pool (panel hash) and every other industry are untouched", {
+  b <- test_bundle2_pilot(); cm <- b$cycle_model; ctx <- test_ctx_pilot()
+  expect_false("telecom" %in% as.character(ctx$pac_panel$sector))                                                  # not in the pooled estimation sample
+  expect_identical(ctx$scored$ids, "telecom"); expect_identical(cm$source$panel_sha256, "782a79c3db443f9a17ddde9c943f846dcd879c4da6e502f3f750eb4cc768ea49")
+  expect_match(paste(unlist(cm$notes), collapse = " "), "telecom: scored on the pooled phase coefficient and drift without being estimated in them", fixed = TRUE)
+  h <- b$industries$telecom$history
+  cyc <- vapply(h, function(r) r$cycle, 0L)
+  one <- function(series, o, drop2022) {
+    y <- stats::setNames(log(vapply(h, function(r) r[[series]], 0)), cyc)
+    t <- cyc[(cyc - 2L) %in% cyc]
+    if (drop2022) t <- t[t != 2022L & t - 2L != 2022L]
+    e <- vapply(t, function(c1) (y[[as.character(c1)]] - y[[as.character(c1 - 2L)]]) - (o$phi * (as.numeric(c1 %% 4 == 0) - as.numeric((c1 - 2L) %% 4 == 0)) + o$d1), 0)
+    list(sigma2 = sum(e^2) / (length(e) - 1L), pairs = length(e))
+  }
+  pac <- one("pac_real_2025", ORACLE$pac, TRUE); gen <- one("individual_real_2025", ORACLE$general, FALSE)
+  sp <- cm$measures$pac_to_candidates$step$telecom; sg <- cm$measures$general_giving$step$telecom
+  expect_identical(sp$pairs, 4L); expect_identical(sg$pairs, 6L); expect_identical(sp$pairs, as.integer(pac$pairs)); expect_identical(sg$pairs, as.integer(gen$pairs))
+  expect_lt(abs(sp$sigma2 - pac$sigma2), 1e-7); expect_lt(abs(sg$sigma2 - gen$sigma2), 1e-7)
+  expect_identical(sg$df, sg$pairs - 1L); expect_lt(abs(sg$critical_95 - stats::qt(0.975, 5)), 1e-12); expect_lt(abs(sp$critical_95 - stats::qt(0.975, 3)), 1e-12)
+  # the scored backtest: the step's one-step errors on the industry's own pairs, against last-cycle naive
+  bt <- rf_scored_backtest(test_v2_pilot()); sm <- rf_scored_summary(bt)
+  expect_setequal(paste(sm$industry, sm$measure), c("telecom general_giving", "telecom pac_to_candidates")); expect_identical(sm$pairs[sm$measure == "general_giving"], 6L)
+  expect_equal(sm$MAE[sm$measure == "general_giving"], mean(abs(bt$error[bt$measure == "general_giving"])), tolerance = 1e-12)
+  expect_equal(sum(bt$error[bt$measure == "general_giving"]^2) / 5, sg$sigma2, tolerance = 1e-12)
 })
 
 test_that("RF_CYCLE_MODEL=0 reproduces the bundle published before the cycle model (rf_bundle_diff over the model blocks), and says so in its context", {

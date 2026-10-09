@@ -37,6 +37,7 @@ rf_parity_context <- function(inputs, reg, models) {
   ctx$inputs <- inputs
   ctx$reg <- reg
   ctx$models <- models
+  ctx$scored <- rf_scored_panel(reg, inputs)                                  # scored-only industries (Telecom): a panel beside the estimation sample, never in it
   fp <- rf_fit_panels(ctx, models)
   ctx$fits <- fp$fits
   ctx$fits_data <- fp$data

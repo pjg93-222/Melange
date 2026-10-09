@@ -463,6 +463,23 @@ rf_ph_step_variance <- function(panel, y, pr) {
   }))
 }
 
+# Anchored-step residual variance of an industry SCORED on the pooled model without being estimated in it (registry `estimation: "scored_only"`; Telecom, owner ruling 2026-10-08): the same
+# construction as rf_ph_step_variance, on the scored panel, with the pooled phase coefficient and the pooled drift of the fitted candidate and no growth term. Only the pooled no-growth
+# trajectory candidates (PT-noG-*-pool) are defined outside the pool (their slope is zero and their phi and drift do not depend on the industry), and only with the 2022 handling none / drop.
+# Nothing in the pooled fit changes, so every other industry's parameters, residuals and step variance stay exactly what they were. -> data.frame(sector, sigma2, pairs, crit)
+rf_ph_scored_step_variance <- function(scored_panel, y, pr, handling = "none") {
+  if (!identical(pr$base, "noG") || !identical(pr$drift_scope, "pool") || !identical(pr$gap, 2L))
+    stop("rf_ph_scored_step_variance: only the pooled no-growth trajectory candidates (PT-noG-*-pool) can score an industry outside the pool; the selected candidate is ", pr$candidate, call. = FALSE)
+  if (!handling %in% c("none", "x22")) stop("rf_ph_scored_step_variance: the 2022 handling '", handling, "' needs the pool (only none and drop are defined for a scored industry)", call. = FALSE)
+  sp <- rf_ph_panel_handling(scored_panel, y, handling)
+  sp$sector <- factor(sp$sector)
+  secs <- levels(sp$sector)
+  pr$secs <- secs
+  pr$slope <- stats::setNames(rep(0, length(secs)), secs)
+  pr$phi <- stats::setNames(rep(unname(pr$phi[[1]]), length(secs)), secs)
+  rf_ph_step_variance(sp, y, pr)
+}
+
 # Projection of one industry's level over a chain of cycles (anchor -> ... -> target). `G` = named numeric of the standardized growth of every cycle in the chain
 # (anchor included); `chain` = cycle vector anchor, ..., target. A same-phase candidate (PA) takes ONE four-year step (k = 2 cycle steps of variance: the empirical
 # gap-4 residual variance already contains both); the others chain two-year steps (phase terms cancel over a full phase cycle) with k x sigma2.
@@ -573,12 +590,14 @@ rf_phase_block <- function(ctx, today_rule = "R1", shocks = c("none", "drop", "i
     panel_h <- rf_ph_panel_handling(pac, y, h)
     params <- rf_ph_params(panel_h, y, pick$id, borrow)
     params_g <- rf_ph_params(rf_ph_panel_handling(pac, y, pickG$handling), y, pickG$id, borrow)
+    sv <- rf_ph_step_variance(panel_h, y, params)
+    if (!is.null(ctx$scored)) sv <- rbind(sv, rf_ph_scored_step_variance(ctx$scored$panel, y, params, h))         # scored-only industries (Telecom): rows beside the pool's, which are untouched
     shock_cmp <- if (length(shocks) > 1L) do.call(rbind, lapply(RF_PH_SHOCK_CORE, function(cd) rf_ph_shock_choice(pred_all, cd)$table)) else NULL
     out[[nm]] <- list(series = y, pred = pred_all, feasibility = feas, metrics = rf_ph_metrics(pred), selection = sel, selection_ext = sel_ext, slope_rules = sr,
                       trajectory = list(single = tsel, stage1 = s1, growth_drop = gdrop, growth_retaining = alt, default = RF_PH_TRAJ_DEFAULT),
                       consistency = list(baseline = base_cand, selection = csel, growth_retaining = cselG), shock = shock, shock_cmp = shock_cmp,
                       spec = list(candidate = pick$id, handling = h, label = csel$choice), spec_growth = list(candidate = pickG$id, handling = pickG$handling, label = cselG$choice),
-                      params = params, params_growth = params_g, step_variance = rf_ph_step_variance(panel_h, y, params),
+                      params = params, params_growth = params_g, step_variance = sv,
                       step_variance_growth = rf_ph_step_variance(rf_ph_panel_handling(pac, y, pickG$handling), y, params_g),
                       today = base_cand, phi_folds = rf_ph_phi_folds(pac, y),
                       next_cycle = rf_ph_select_next(pred), next_cycle_trajectory = rf_ph_select_next(pred, RF_PH_NEXT_CHALLENGERS_T, trajectory = TRUE))

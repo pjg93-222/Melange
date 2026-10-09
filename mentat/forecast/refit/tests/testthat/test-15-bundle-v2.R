@@ -189,11 +189,12 @@ test_that("industries: banks and credit unions are offered, auto stays in estima
   expect_true(ind$property_casualty$capabilities$lobbying)
   expect_length(ind$property_casualty$history, 0L)
   expect_null(ind$life_insurance)
-  # telecom (owner ruling 2026-10-08) is offered for lobbying only: a Mentat key, the lobbying capability, a stated reason for the two giving models
+  # telecom (owner ruling 2026-10-08) is a scored-only industry, no longer lobbying-only: a Mentat key, OpenSecrets B09, the lobbying capability; the frozen v1 sample has no scored panel, so its giving capability is withheld here
   expect_true(ind$telecom$calculator); expect_identical(ind$telecom$mentat_key, "telecom"); expect_identical(ind$telecom$lobbyview_sector, "telecom")
-  expect_true(ind$telecom$lobbying_only); expect_false(ind$commercial_banks$lobbying_only); expect_false(ind$property_casualty$lobbying_only)       # the registry's flag, emitted for every industry
+  expect_false(ind$telecom$lobbying_only); expect_false(ind$commercial_banks$lobbying_only); expect_false(ind$property_casualty$lobbying_only)       # the registry's flag, emitted for every industry
+  expect_identical(unlist(ind$telecom$opensecrets_codes), "B09"); expect_identical(ind$telecom$code, "B09"); expect_identical(ind$telecom$ibisworld_code, "51721+51711a")
   expect_identical(ind$telecom$capabilities, list(pac = FALSE, control = FALSE, lobbying = TRUE))
-  expect_match(ind$telecom$withheld$pac, "offered for lobbying only"); expect_match(ind$telecom$withheld$control, "no giving forecast")
+  expect_identical(ind$telecom$withheld$pac, "model 'pac' is not configured for this industry"); expect_match(ind$telecom$withheld$control, "general-giving model only")
   expect_length(ind$telecom$history, 0L)
   # auto has one lobbying pair: sample adequacy withholds lobbying (a stated reason, never silent)
   expect_false(ind$auto_light_duty_manufacturing$capabilities$lobbying)

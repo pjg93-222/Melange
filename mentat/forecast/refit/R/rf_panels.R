@@ -11,7 +11,7 @@ rf_pac_panel <- function(reg, inputs) {
   ids <- rf_capable(reg, "pac")
   actual <- vapply(ids, function(id) reg$industries[[id]]$ibisworld$actual_sector, "")
   supp <- rf_growth_supplement(inputs, ids)
-  growth <- rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = actual, supplement = supp)
+  growth <- rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = actual, supplement = supp, components = rf_actual_components(reg, ids))
   estimates <- attr(growth, "estimates")
   used <- c("cpi", "ibis_actual", if (!is.null(estimates)) attr(supp, "roles"))
   parts <- lapply(ids, function(id) {
@@ -43,6 +43,24 @@ rf_pac_panel <- function(reg, inputs) {
   attr(p, "inputs") <- rf_input_records(inputs, used)
   attr(p, "checks") <- rf_panel_checks(p, "pac")
   p
+}
+
+# The workbook-07 components of the industries whose actual growth is a revenue-weighted combination (Telecom: wireless + cable), as rf_cycle_growth takes them: list(<actual sector> = c(<07 sector>, ...)), or NULL.
+rf_actual_components <- function(reg, ids) {
+  cs <- stats::setNames(lapply(ids, function(id) unlist(reg$industries[[id]]$ibisworld$actual_components)), vapply(ids, function(id) reg$industries[[id]]$ibisworld$actual_sector %||% id, ""))
+  cs <- Filter(length, cs)
+  if (length(cs)) cs else NULL
+}
+
+# The panel of the SCORED-ONLY industries (registry `estimation: "scored_only"`, ready data; Telecom): the same construction as the PAC panel (OpenSecrets totals, IBISWorld cycle growth, CPI deflator),
+# built for those industries alone. It never enters the pooled estimation; the phase block scores it on the pooled parameters (rf_ph_scored_step_variance) and the bundle writer reads its history.
+# -> list(ids, panel) or NULL when the registry names none.
+rf_scored_panel <- function(reg, inputs) {
+  ids <- reg$scored
+  if (!length(ids)) return(NULL)
+  only <- reg
+  for (id in names(only$industries)) only$industries[[id]]$models$pac <- id %in% ids
+  list(ids = ids, panel = rf_pac_panel(only, inputs))
 }
 
 # Share-model panel for one signal ("control": IEM Jan-Jun score; "seats": Crystal Ball final call) and chamber.
