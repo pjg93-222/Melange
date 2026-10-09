@@ -49,7 +49,8 @@ against the shared schema and invariants; an invalid build leaves the previous s
   `O / s`. The snapshot's `lda_nowcast_errors` is the blind-test table that bounds it: for each quarter cut, the errors `log(nowcast / actual)` of every complete year with a complete prior year,
   both series, the pool sectors bank, credit union, telecom and fintech (n = 32 with the 2022-2025 targets; crypto is left out, its early years are too thin), as `{n, q80, max}`. They are computed here, at
   anchor-build time, from the same `sector_spend.csv` (the console cannot see the other pool sectors); the LobbyView persistence errors that bound the years after the nowcast year come from the refit bundle.
-  A quarter counts as complete once it has filings (an LDA quarter is due 20 days after it ends); a partially filed latest quarter would understate the nowcast.
+  A quarter counts only once it has a filing AND its LD-2 deadline (Q1 Apr 20, Q2 Jul 20, Q3 Oct 20, Q4 Jan 20 of the next year) is on or before the producer's sweep date (`scope_sweeps.<year>.sweep_through_dt_posted`
+  of `fullscope_receipts.json` in Melange's data root), so a few early filings never move the cut (`lda.quarter_table`; the Melange industry page's rule). Without that date the LDA block is unavailable.
 * **Lobbying history** (Paul, 2026-10-09, "visualized in the same manner" as Melange's lobbying card): each ready `lda` block also carries `counts`, `{year: {organizations, lobbyists}}`, the `distinct_organizations` and
   `distinct_named_lobbyists` of the same `annual` rows of `sector_spend.csv` (the partial year's too), so the console can print what Melange prints under the card. The catalog serves the history per industry as
   `catalog.anchors.industries.<id>.lda_history` (`giving_forecast._lda_history`): annual rows `{year, hired_firms, in_house, orgs, lobbyists}` (`income_total`, `expenses_total`), the partial row with its `through_quarter`,

@@ -3,6 +3,7 @@ against the shared contract (schema, invariants, negative controls), plus read-o
 Mentat tree (ADDENDUM section F numbers, less the non_giving receipts left out of the forecast by the 2026-10-01 ruling) is opt-in:
 MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks and property & casualty too)."""
 import copy
+from datetime import date
 import hashlib
 import json
 import math
@@ -30,6 +31,9 @@ import openpyxl  # noqa: E402
 
 PAS2_HEAD = ['CMTE_ID', 'AMNDT_IND', 'RPT_TP', 'TRANSACTION_PGI', 'IMAGE_NUM', 'TRANSACTION_TP', 'ENTITY_TP', 'NAME', 'CITY', 'STATE', 'ZIP_CODE',
              'EMPLOYER', 'OCCUPATION', 'TRANSACTION_DT', 'TRANSACTION_AMT', 'OTHER_ID', 'CAND_ID', 'TRAN_ID', 'FILE_NUM', 'MEMO_CD', 'MEMO_TEXT', 'SUB_ID']
+
+
+AFTER_EVERY_DEADLINE = date(2030, 1, 1)          # the as_of of the direct lda calls below: past every LD-2 deadline of their fixtures (latest quarter: 2026 Q4, due 2027-01-20)
 
 
 def pas2_line(cmte, tp, amount, cand, dt, tran, file_num, sub, amndt='N', memo=''):
@@ -70,7 +74,8 @@ class World:
             'id': 'property_casualty', 'label': 'P&C (test)', 'forecast_industry': 'property_casualty', 'mentat_dataset': 'Property & Casualty Insurance',
             'workbook': 'Property & Casualty Insurance Industry Spending Overview.xlsx', 'source_db_candidates': ['.cache/none/mentat.db'], 'lda_sector': None,
             'coverage_cut_back': None, 'pac_roster': []}]}
-        self.options = dict(report_dir=self.report, fec_root=self.fec, lda_csv=self.base / 'sector_spend.csv', controls=self.base / '00_controls.xlsx', only=None, run=None)
+        self.options = dict(report_dir=self.report, fec_root=self.fec, lda_csv=self.base / 'sector_spend.csv', controls=self.base / '00_controls.xlsx', only=None, run=None,
+                            lda_receipts=self.base / 'fullscope_receipts.json')          # base IS the temp root, so the data-root default (csv folder's parent) would be the shared temp folder
 
     # (sub_id, cycle label, date, party, funding source, receipt cents, committee type)
     FACTS = [
@@ -169,6 +174,7 @@ class World:
                 rows.append(f'bank,{year},Q{q},false,9,9,{inc / 4},{exp / 4},{lobbyists - 10}')
         rows += ['bank,2026,annual,true,9,9,300,600,33', 'bank,2026,Q1,true,9,9,100,200,20', 'bank,2026,Q2,true,9,9,200,400,25', 'bank,2026,Q3,true,0,0,0,0,0', 'bank,2026,Q4,true,0,0,0,0,0']
         (self.base / 'sector_spend.csv').write_text('\n'.join(rows) + '\n')
+        (self.base / 'fullscope_receipts.json').write_text(json.dumps({'scope_sweeps': {'2026': {'sweep_through_dt_posted': '2026-08-01T11:57:13-04:00'}}}))
 
     def _cpi(self):
         book = openpyxl.Workbook()
@@ -303,7 +309,7 @@ class BuilderTests(unittest.TestCase):
         # a file without the lobbyist column (an older Melange build) carries no counts instead of inventing them
         head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'
         rows = [dict(zip(head.split(','), line.split(','))) for line in ('x,2025,annual,false,1,4,100,900', 'x,2026,annual,true,1,2,40,80', 'x,2026,Q1,true,1,1,40,80')]
-        self.assertEqual(lda_mod.sector_levels(rows, 'x')['counts'], {})
+        self.assertEqual(lda_mod.sector_levels(rows, 'x', AFTER_EVERY_DEADLINE)['counts'], {})
 
     def test_cpi_multiplier_exists_only_for_cycles_with_a_published_cpi(self):
         snap, _ = self.world.build()
@@ -330,6 +336,40 @@ class BuilderTests(unittest.TestCase):
         self.assertEqual(lda['status'], 'unavailable')
         self.assertIn('sector_spend.csv was not found', lda['reason'])
         self.assertEqual(bga.validate_snapshot(snap), [])
+
+    def test_missing_lda_receipts_leave_the_lda_unavailable_and_without_nowcast_errors_never_the_filings_only_rule(self):
+        receipts = self.world.options['lda_receipts']
+        errors = {'pool': ['bank'], 'series': ['income_total', 'expenses_total'], 'targets': [2025], 'by_cut': {}}          # a stand-in: the fixture is too thin for real bands
+        with patch.object(lda_mod, 'nowcast_errors', return_value=errors) as spy:
+            receipts.unlink()
+            snap, inputs = self.world.build()
+            lda = snap['industries']['commercial_banks']['lda']
+            self.assertEqual((lda['status'], lda['series'], lda['through']), ('unavailable', {}, None))
+            self.assertEqual(lda['reason'], 'The Melange LDA receipts (fullscope_receipts.json) were not found, so the partial year cannot be dated.')
+            self.assertEqual(snap['industries']['commercial_banks']['status']['lda'], 'unavailable')
+            self.assertNotIn('lda_nowcast_errors', snap)
+            spy.assert_not_called()
+            self.assertNotIn('lda_receipts', {i['role'] for i in inputs})
+            self.assertEqual(bga.validate_snapshot(snap), [])
+            receipts.write_text(json.dumps({'scope_sweeps': {'2026': {}, '2025': {'sweep_through_dt_posted': '2026-01-05T00:00:00-05:00'}}}))      # no date for the data's last year
+            snap, _ = self.world.build()
+            self.assertEqual(snap['industries']['commercial_banks']['lda']['reason'],
+                             'The Melange LDA receipts (fullscope_receipts.json) record no sweep date for 2026, so the partial year cannot be dated.')
+            self.assertNotIn('lda_nowcast_errors', snap)
+            spy.assert_not_called()
+
+    def test_the_lda_receipts_are_a_recorded_input_and_their_sweep_date_dates_the_partial_year(self):
+        receipts = self.world.options['lda_receipts']
+        with patch.object(lda_mod, 'nowcast_errors', return_value={'stand_in': True}) as spy:
+            snap, inputs = self.world.build()
+        self.assertEqual([i for i in inputs if i['role'] == 'lda_receipts'],
+                         [{'role': 'lda_receipts', 'path': str(receipts), 'sha256': hashlib.sha256(receipts.read_bytes()).hexdigest()}])
+        self.assertEqual(spy.call_args.args[1], date(2026, 8, 1))
+        self.assertEqual(snap['lda_nowcast_errors'], {'stand_in': True})
+        self.assertEqual(snap['industries']['commercial_banks']['lda']['series']['income_total']['partial']['through_quarter'], 'Q2')
+        receipts.write_text(json.dumps({'scope_sweeps': {'2026': {'sweep_through_dt_posted': '2026-04-19T08:00:00-04:00'}}}))      # Q1 is due April 20: not yet covered
+        snap, _ = self.world.build()
+        self.assertIsNone(snap['industries']['commercial_banks']['lda']['series']['income_total']['partial'])
 
     RULED = {'general_giving': {'excluded_funding_sources': ['non_giving']}, 'candidate_receipts': {'excluded_funding_sources': ['non_giving']}}   # on the 2026-10-01 basis
 
@@ -427,7 +467,7 @@ class BuilderTests(unittest.TestCase):
             for path in sorted(folder.rglob('*')):
                 if path.is_file():
                     out[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
-        for name in ('sector_spend.csv', '00_controls.xlsx'):
+        for name in ('sector_spend.csv', 'fullscope_receipts.json', '00_controls.xlsx'):
             out[name] = hashlib.sha256((self.world.base / name).read_bytes()).hexdigest()
         return out
 
@@ -435,7 +475,7 @@ class BuilderTests(unittest.TestCase):
         registry_path = Path(out) / 'registry.json'
         registry_path.write_text(json.dumps(self.world.registry))
         return (self.world.project, Path(out) / 'state', None, registry_path, self.world.fec, self.world.base / 'sector_spend.csv',
-                self.world.base / '00_controls.xlsx', self.world.report, run_id)
+                self.world.base / '00_controls.xlsx', self.world.report, run_id, self.world.options['lda_receipts'])
 
     def test_the_build_changes_no_input_file(self):
         before = self._hashes()
@@ -725,7 +765,8 @@ class ExclusionTests(unittest.TestCase):
             registry_path = Path(out) / 'registry.json'
             registry_path.write_text(json.dumps(self.world.registry))
             final, receipt, snapshot = bga.run_build(self.world.project, Path(out) / 'state', None, registry_path, self.world.fec,
-                                                     self.world.base / 'sector_spend.csv', self.world.base / '00_controls.xlsx', self.world.report)
+                                                     self.world.base / 'sector_spend.csv', self.world.base / '00_controls.xlsx', self.world.report,
+                                                     lda_receipts=self.world.options['lda_receipts'])
             self.assertEqual(list(snapshot['industries']), ['commercial_banks'])            # not refused as "index not trustworthy" although levels differ from the manifest
             self.assertEqual(sorted(p.name for p in final.parent.iterdir()), sorted([bga.RECEIPT_NAME, bga.SNAPSHOT_NAME]))
             self.assertEqual(receipt['snapshot_sha256'], hashlib.sha256(final.read_bytes()).hexdigest())
@@ -838,11 +879,37 @@ class PartsTests(unittest.TestCase):
         head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'
         rows = [dict(zip(head.split(','), line.split(','))) for line in (
             'x,2025,annual,false,1,4,100,900', 'x,2026,annual,true,1,2,40,80', 'x,2026,Q1,true,1,1,10,20', 'x,2026,Q2,true,1,1,30,60', 'x,2026,Q3,true,0,0,0,0')]
-        levels = lda_mod.sector_levels(rows, 'x')
+        levels = lda_mod.sector_levels(rows, 'x', AFTER_EVERY_DEADLINE)
         self.assertEqual(levels['series']['income_total']['partial']['quarters'], {'Q1': 10.0, 'Q2': 30.0})
         self.assertEqual(levels['series']['expenses_total']['annual'], {'2025': 900.0})
         self.assertNotIn('total_both', levels['series'])
-        self.assertIsNone(lda_mod.sector_levels(rows, 'missing'))
+        self.assertIsNone(lda_mod.sector_levels(rows, 'missing', AFTER_EVERY_DEADLINE))
+
+    def test_an_early_filing_before_the_ld2_deadline_does_not_extend_the_partial_year(self):
+        # crypto, 2026: Q1 and Q2 filed, and one early $0 filing for Q3 (its LD-2 deadline is October 20), as in Melange's output of 2026-10-07
+        head = 'sector,year,period,is_partial_year,distinct_organizations,filings,income_total,expenses_total'.split(',')
+        row = lambda *values: dict(zip(head, values))       # noqa: E731
+        income = {2023: (100, 110, 120, 130), 2024: (140, 150, 160, 170), 2025: (180, 190, 200, 210)}
+        rows = []
+        for year, values in income.items():
+            rows.append(row('crypto', str(year), 'annual', 'false', '5', '40', str(sum(values)), str(2 * sum(values))))
+            rows += [row('crypto', str(year), 'Q%d' % (i + 1), 'false', '5', '10', str(v), str(2 * v)) for i, v in enumerate(values)]
+        rows += [row('crypto', '2026', 'annual', 'true', '5', '21', '620', '1240'), row('crypto', '2026', 'Q1', 'true', '5', '10', '300', '600'),
+                 row('crypto', '2026', 'Q2', 'true', '5', '10', '320', '640'), row('crypto', '2026', 'Q3', 'true', '1', '1', '0', '0'), row('crypto', '2026', 'Q4', 'true', '0', '0', '0', '0')]
+        swept = lda_mod.sector_levels(rows, 'crypto', date(2026, 8, 1))                                      # the producer's sweep date: Q3 is not due yet
+        for sid, (q1, q2) in (('income_total', (300.0, 320.0)), ('expenses_total', (600.0, 640.0))):
+            partial = swept['series'][sid]['partial']
+            self.assertEqual((partial['through_quarter'], partial['quarters'], partial['total']), ('Q2', {'Q1': q1, 'Q2': q2}, q1 + q2), sid)
+            self.assertEqual((partial['nowcast']['through_quarter'], partial['nowcast']['observed']), ('Q2', q1 + q2), sid)
+        self.assertEqual(swept['through'], '2026-06-30')
+        for as_of, last in ((date(2026, 10, 19), 'Q2'), (date(2026, 10, 20), 'Q3')):                          # the deadline day itself counts (<=), the day before does not
+            with self.subTest(as_of=as_of.isoformat()):
+                levels = lda_mod.sector_levels(rows, 'crypto', as_of)
+                self.assertEqual({sid: s['partial']['through_quarter'] for sid, s in levels['series'].items()}, {'income_total': last, 'expenses_total': last})
+                self.assertEqual(levels['through'], '2026-06-30' if last == 'Q2' else '2026-09-30')
+        early_q4 = [row('crypto', '2026', 'Q4', 'true', '1', '1', '5', '7')]                                  # Q4 is due January 20 of the next year
+        self.assertEqual(lda_mod.quarter_table(early_q4, 'crypto', 'income_total', date(2027, 1, 19)), {})
+        self.assertEqual(lda_mod.quarter_table(early_q4, 'crypto', 'income_total', date(2027, 1, 20)), {2026: {4: 5.0}})
 
 
 # Melange LDA bank income_total by quarter (Q1..Q4), the data of the 2026-10-08 blind-test study of the lobbying nowcast.
@@ -884,10 +951,10 @@ class NowcastTests(unittest.TestCase):
                 rows.append(dict(zip(head.split(','), ['x', str(year), 'Q%d' % (i + 1), 'false', '1', '1', str(v), str(2 * v)])))
         rows += [dict(zip(head.split(','), ['x', '2026', 'Q1', 'true', '1', '1', '6000000', '12000000'])), dict(zip(head.split(','), ['x', '2026', 'Q2', 'true', '1', '1', '6500000', '13000000'])),
                  dict(zip(head.split(','), ['x', '2026', 'Q3', 'true', '0', '0', '0', '0']))]
-        now = lda_mod.sector_levels(rows, 'x')['series']['income_total']['partial']['nowcast']
+        now = lda_mod.sector_levels(rows, 'x', AFTER_EVERY_DEADLINE)['series']['income_total']['partial']['nowcast']
         self.assertEqual((now['year'], now['through_quarter'], now['observed'], now['prior_total'], now['share_years']), (2026, 'Q2', 12500000., sum(BANK_INCOME[2025]), [2023, 2024, 2025]))
         self.assertAlmostEqual(now['point'], now['observed'] + (1 - now['share']) * sum(BANK_INCOME[2025]), places=6)
-        self.assertEqual(contract.check_anchor_invariants(self._snapshot_with(lda_mod.sector_levels(rows, 'x'))), [])
+        self.assertEqual(contract.check_anchor_invariants(self._snapshot_with(lda_mod.sector_levels(rows, 'x', AFTER_EVERY_DEADLINE))), [])
 
     @staticmethod
     def _snapshot_with(levels):
@@ -909,13 +976,13 @@ class NowcastTests(unittest.TestCase):
         for year, values in BANK_INCOME.items():
             for i, v in enumerate(values):
                 rows.append(dict(zip(head.split(','), ['x', str(year), 'Q%d' % (i + 1), 'false', '1', '1', str(v), str(v)])))
-        errors = lda_mod.nowcast_errors(rows, pool=('x',))
+        errors = lda_mod.nowcast_errors(rows, AFTER_EVERY_DEADLINE, pool=('x',))
         self.assertEqual(errors['pool'], ['x'])
         self.assertEqual(errors['targets'], [2022, 2023, 2024, 2025])
         self.assertEqual({cut: row['n'] for cut, row in errors['by_cut'].items()}, {'1': 8, '2': 8, '3': 8})            # 4 target years x 2 series
         self.assertAlmostEqual(errors['by_cut']['2']['max'], abs(math.log(21491225.2107 / sum(BANK_INCOME[2025]))), places=6)         # the 2025 miss of the study row above
         self.assertEqual(errors['by_cut']['2']['q80'], errors['by_cut']['2']['max'])                                      # ceil((8 + 1) 0.8) = 8th of 8
-        self.assertIsNone(lda_mod.nowcast_errors(rows[:8], pool=('x',)))                                                 # one target year: too few blind tests, no bands
+        self.assertIsNone(lda_mod.nowcast_errors(rows[:8], AFTER_EVERY_DEADLINE, pool=('x',)))                                            # one target year: too few blind tests, no bands
         self.assertEqual(lda_mod.conformal_quantile([0.3, -0.1, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 0.8), 0.9)       # ceil(11 x 0.8) = 9th smallest |e|
         self.assertIsNone(lda_mod.conformal_quantile([0.1, 0.2], 0.8))
 
