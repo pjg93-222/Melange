@@ -36,7 +36,7 @@ spending_stats_headers <- function(year) {
       paste(role, "Spending"),
       "% of Company Spending",
       "Super PAC", "% of Total Giving", "Partisan Split",
-      "Super PAC", "% of Total Giving", "Partisan Split",
+      "Carey", "% of Total Giving", "Partisan Split",
       "Company PAC", "% of Total Giving", "Partisan Split",
       "Trade Association", "% of Total Giving", "Partisan Split",
       "Candidate", "% of Total Giving", "Partisan Split"
@@ -3136,7 +3136,7 @@ spending_calculation_support <- function(
     "% Left = Company PAC cash on hand / Company PAC total receipts.",
     "Company PAC allocation share = category disbursements / all Company PAC disbursements.",
     "Refunds retain their negative sign; only accepted, countable contribution rows enter calculations.",
-    "The second repeated Super PAC header in each role block is retained from the template but calculates Carey.",
+    "The second category column in each role block is headed Carey and calculates Carey; the template once repeated the Super PAC header there.",
     "Company PAC cash, receipts, and disbursement cells stay blank until Phase 3 supplies those fact records."
   )
   methods <- data.table::data.table(

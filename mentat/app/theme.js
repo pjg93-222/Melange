@@ -147,11 +147,25 @@
     if (at < CATEGORICAL.length) return base;
     return at < 2 * CATEGORICAL.length ? mixHex(base, '#ffffff', 0.45) : mixHex(base, '#000000', 0.30);
   }
+  // Conduit (ActBlue, WinRed) is an earmark platform: the money that comes through it is individual
+  // donors' earmarked giving, not a committee's own. It is the one recipient category with a colour of
+  // its own - a neutral slate that no categorical slot uses (8.5 OKLab x100 from the nearest of the
+  // twelve, slot 2's purple) - and it takes no slot, so every other group in a chart is coloured as it
+  // would be were Conduit not there. categoryColours(names) is the list a renderer colours a named set
+  // of groups with; categoryNote(name) is the hover text a Conduit mark, row or legend item carries.
+  const CONDUIT = 'Conduit', CONDUIT_COLOUR = '#555b66';
+  const CONDUIT_NOTE = 'Conduit: an earmark platform (ActBlue, WinRed). These are individual donors\' earmarked contributions passed through it, not super PAC money.';
+  function categoryColours(names) {
+    let slot = 0;
+    return Array.from(names || [], name => name === CONDUIT ? CONDUIT_COLOUR : categoryColour(slot++));
+  }
+  function categoryNote(name) { return name === CONDUIT ? CONDUIT_NOTE : ''; }
   const theme = Object.freeze({
     sans:token('--font-sans'),serif:token('--font-serif'),
     ink:token('--chart-ink'),muted:token('--muted'),grid:token('--chart-grid'),negative:token('--chart-negative'),
     palette:['--acu-teal','--acu-purple','--acu-mauve','--acu-gold','--acu-aqua','--acu-lilac','--acu-taupe'].map(token),
     categorical: CATEGORICAL, categoryColour: categoryColour,
+    categoryColours: categoryColours, categoryNote: categoryNote, conduitColour: CONDUIT_COLOUR,
     measureText: measureText, fitText: fitText, wrapText: wrapText
   });
 

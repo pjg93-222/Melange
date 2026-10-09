@@ -115,7 +115,8 @@ class CycleWorld:
         (self.dir / 'anchors.json').write_text(json.dumps(self.anchors))
         shas = {i['mentat']['workbook']: i['mentat']['workbook_sha256'] for i in self.anchors['industries'].values()}
         self.patches = [patch.dict(os.environ, {'MENTAT_GIVING_MODELS': str(models_path or self.dir / 'models.json'), 'MENTAT_GIVING_ANCHORS': str(self.dir / 'anchors.json'),
-                                                'MENTAT_GIVING_WAIVERS': str(self.dir / 'no-waivers.json')}),
+                                                'MENTAT_GIVING_WAIVERS': str(self.dir / 'no-waivers.json'),
+                                                'MENTAT_REPORT_DIRECTORY': str(self.dir)}),      # no published workbook in the world: the catalog's display-only own_cycle_ratio (read from the report workbooks, not from the bundle) is left out, as in the golden
                         patch.object(gf, 'date', CycleToday), patch.object(gf, '_published_workbook_sha256', lambda name: shas.get(name))]
 
     def clear(self):

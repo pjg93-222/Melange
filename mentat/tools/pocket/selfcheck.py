@@ -7,6 +7,7 @@ for the industry, dimensions [company, cycle] for the companies), so the check
 has an independent source of truth and can actually fail.
 """
 import argparse
+from decimal import Decimal, ROUND_HALF_UP
 import json
 import re
 import struct
@@ -230,6 +231,28 @@ def check_data(payload, label):
                         check(False, '{} / {}: recipient index out of range'.format(name, scope_name))
     check(True, 'category and party partitions, index ranges and recipient ranking verified '
                 'for {} scopes'.format(sum(1 + len(i['C']) for i in payload['ind'])))
+
+    # 4. Collection gaps (FIX 4). The page words each cell as "N% of FEC-reported records", so the
+    #    percent it prints must be the cell's own counts, rounded half up: recomputed here with
+    #    Decimal, not read back. A held count at or above what FEC reported is not a shortfall.
+    for industry in payload['ind']:
+        gaps = industry.get('gp')
+        if gaps is None:
+            continue
+        bad = []
+        for cell in gaps.get('c', []):
+            if len(cell) != 6:
+                bad.append(repr(cell))
+                continue
+            company, cycle, destination, held, reported, shown = cell
+            exact = (Decimal(held) * 100 / Decimal(reported)).quantize(Decimal('1'), rounding=ROUND_HALF_UP) \
+                if isinstance(reported, int) and reported > 0 else None
+            if not (company and cycle and destination and isinstance(held, int) and 0 <= held < (reported or 0)
+                    and exact is not None and shown == exact):
+                bad.append('{}/{} {} {} of {} printed as {}%'.format(company, cycle, destination, held, reported, shown))
+        check(gaps.get('f') == 1 and isinstance(gaps.get('u'), int) and gaps['u'] >= 0 and not bad,
+              '{} collection gaps: {} cells, each percent recomputed from its counts{}'.format(
+                  industry['n'], len(gaps.get('c', [])), '' if not bad else ' -- ' + '; '.join(bad[:4])))
 
 
 def check_icon(path):

@@ -88,7 +88,7 @@
 .gf-lobby-chart>.gf-svg{position:absolute;left:0;top:0;margin-top:0}
 .gf-lobby-chart.is-card{min-height:0}
 /* ---- the lobbying card: Melange's industry card (fec/surfaces/approved/clean/industry-ui.css), its sizes and tokens copied. The industry colour is Melange's own dot colour for the sector (make_lobby_network_html.py .dot-N,
-   with the clean skin's restored.css tokens): credit union dot-0, bank dot-1, crypto dot-2, fintech dot-3, telecom dot-4. Hired firms are 42% of it over #fcf7f4; the partial year is hatched; projected years are the
+   with the clean skin's restored.css tokens): credit union dot-0, bank dot-1, crypto dot-2, fintech dot-3, telecom dot-4. The outside firms' fees are 42% of it over #fcf7f4; the two series sit side by side, never stacked; the partial year is hatched; projected years are the
    same two colours at 55% inside a 1px dashed outline. The card sits in the chart column: no frame of its own (no card inside a card). ---- */
 .gf-ld,.gf-ld-legend{--ld-c:var(--acu-plum);--ld-tint:color-mix(in srgb,var(--ld-c) 42%,#fcf7f4);--ld-ink:#342649;--ld-muted:#6b5e73;--ld-rule:#d8cbbc;--ld-strong:#bcaaa0;--ld-surface:#fcf7f4;--ld-on-dark:#f7ede4}
 :is(.gf-ld,.gf-ld-legend)[data-sector=credit_union]{--ld-c:#58a6ff}
@@ -106,7 +106,7 @@
 .gf-ld-fig+.gf-ld-fig{padding-left:46px}
 .gf-ld-big{font:500 50px/44px var(--font-serif);font-variant-numeric:lining-nums;color:var(--ld-ink);letter-spacing:0;white-space:nowrap}
 .gf-ld-figlabel{margin-top:7px;font:400 16px/22px var(--font-sans);color:var(--ld-ink)}
-.gf-ld-fig+.gf-ld-fig .gf-ld-figlabel{color:var(--ld-muted)}
+.giving-forecast .gf-ld-partial{max-width:none;margin:12px 0 0;font:400 15px/20px var(--font-sans);color:var(--ld-muted)}
 .gf-ld-chart{position:relative;min-height:212px;margin-top:14px}
 .gf-ld-chart>svg{display:block;width:100%;overflow:visible}
 .gf-ld-svg text{font-family:var(--font-sans);pointer-events:none}
@@ -122,7 +122,7 @@
 .gf-ld-proj-h{fill:var(--ld-tint)}
 .gf-ld-lab-i{fill:var(--ld-on-dark);font-size:14px;font-weight:500}
 .gf-ld-lab-h,.gf-ld-lab-p{fill:var(--ld-ink);font-size:14px;font-weight:500}
-.gf-ld-whisker{fill:none;stroke:var(--ld-c);stroke-width:1.5}
+.gf-ld-whisker{fill:none;stroke:var(--ld-ink);stroke-width:1.5}
 .gf-ld-whisker-hit{fill:transparent;pointer-events:all}
 .giving-forecast .gf-ld-legend{max-width:none;gap:8px 28px;padding:0;font:400 14px/20px var(--font-sans);color:var(--ld-ink)}
 .gf-ld-legend li{gap:8px;white-space:nowrap}

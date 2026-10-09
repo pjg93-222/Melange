@@ -4,6 +4,7 @@ A check that has never been seen to fail is not evidence. Each mutant below
 injects one specific defect; the harness must reject every one of them, and must
 still accept the unmutated page.
 """
+import json
 import os
 import subprocess
 import sys
@@ -11,7 +12,9 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).parent
-PAGE = HERE / 'mentat-pocket.html'
+# POCKET_PAGE names a built page whose inlined data is the snapshot the harness reads
+# (POCKET_DATA); the template next to this file carries an older snapshot of its own.
+PAGE = Path(os.environ.get('POCKET_PAGE') or HERE / 'mentat-pocket.html')
 HARNESS = HERE / 'render_harness.js'
 
 MUTANTS = [
@@ -33,10 +36,28 @@ MUTANTS = [
     ('the value gutter is too narrow for a long value label',
      'var GUTTER = 84;',
      'var GUTTER = 10;'),
+    ('the gap line names every company, whatever company is chosen',
+     "return (!company || cell[0] === company) && (!years.length ||",
+     "return (!years.length ||"),
+    ('the gap line names every cycle, whatever cycle is chosen',
+     "(!years.length || years.indexOf(gapYear(cell[1])) !== -1);\n    }).map(",
+     "true;\n    }).map("),
+    ('the gap line drops the count of cells the check did not itemize',
+     "    if (more){\n      lines.push(commas(more)",
+     "    if (false){\n      lines.push(commas(more)"),
     ('the average measure is abbreviated like a large total',
      "{ id:'average', label:'Average receipt',\n      value:function(a, r){ return r ? a / r : 0; }, format:exactDollars, exact:exactDollars,",
      "{ id:'average', label:'Average receipt',\n      value:function(a, r){ return r ? a / r : 0; }, format:dollars, exact:exactDollars,"),
 ]
+
+
+def snapshot_has_gaps():
+    """Whether the snapshot the harness reads (POCKET_DATA, else pocket-data.json here) carries `gp`."""
+    data = Path(os.environ.get('POCKET_DATA') or HERE / 'pocket-data.json')
+    try:
+        return any('gp' in industry for industry in json.loads(data.read_text(encoding='utf-8'))['ind'])
+    except (OSError, ValueError, KeyError):
+        return False
 
 
 def run(page_path):
@@ -55,14 +76,20 @@ def main():
     if code != 0:
         failures += 1
 
+    gaps = snapshot_has_gaps()
     for label, needle, replacement in MUTANTS:
+        if label.startswith('the gap line') and not gaps:
+            # Nothing to render without a failed Data Quality check in the snapshot, so the harness
+            # cannot tell a broken gap line from a working one; a snapshot that carries gaps tests it.
+            print('  SKIPPED  {}\n           the snapshot carries no collection gaps'.format(label))
+            continue
         if needle not in source:
             print('  SETUP FAIL  mutant anchor not found: ' + label)
             failures += 1
             continue
         mutated = source.replace(needle, replacement, 1)
         with tempfile.NamedTemporaryFile('w', suffix='.html', delete=False,
-                                         encoding='utf-8', dir=str(HERE)) as handle:
+                                         encoding='utf-8', dir=str(PAGE.parent)) as handle:
             handle.write(mutated)
             target = Path(handle.name)
         try:

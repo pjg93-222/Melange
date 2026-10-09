@@ -80,7 +80,7 @@ class World:
         shas = {i['mentat']['workbook']: i['mentat'].get('workbook_sha256') for i in self.anchors['industries'].values()}
         self.published = published if published is not None else shas
         self.patches = [patch.dict(os.environ, {'MENTAT_GIVING_MODELS': str(self.dir / 'models.json'), 'MENTAT_GIVING_ANCHORS': str(self.dir / 'anchors.json'),
-                                                'MENTAT_GIVING_WAIVERS': str(self.dir / 'waivers.json')}),
+                                                'MENTAT_GIVING_WAIVERS': str(self.dir / 'waivers.json'), 'MENTAT_REPORT_DIRECTORY': str(self.dir)}),          # the report directory is this folder: no machine workbook leaks in
                         patch.object(gf, 'date', Today), patch.object(gf, '_published_workbook_sha256', lambda name: self.published.get(name))]
 
     def __enter__(self):

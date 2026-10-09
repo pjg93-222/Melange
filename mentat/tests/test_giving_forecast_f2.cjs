@@ -586,7 +586,7 @@ test('the live calculator: the general-giving name and its exclusion come from i
   assert.doesNotMatch(texts(t.chartModel(LANDED.runs.banks, null, 'pac').columns[0].tip), /non-giving/, 'the roster PAC account has no such exclusion');
 });
 
-test('lobbying (Melange card, 2026-10-09): the history is Melange\'s own rows stacked hired firms under in-house, then the projected years; empty, closed and missing-history states say so', () => {
+test('lobbying (Melange card, 2026-10-09; D-064 side by side, never summed): the history is Melange\'s own rows, in-house beside the fees outside firms report, then the projected years; empty, closed and missing-history states say so', () => {
   const {t} = session();
   const lobby = t.lobbyModel(RUN.banks_lobby, 2026, 2028), banks = LDA_HISTORY.commercial_banks, projected = RUN.banks_lobby.horizons.flatMap(h => h.lobbying.rows).filter(r => r.status === 'ready');
   assert.equal(lobby.state, 'ready');
@@ -594,26 +594,28 @@ test('lobbying (Melange card, 2026-10-09): the history is Melange\'s own rows st
   assert.deepEqual(plain(lobby.bars.map(b => b.label)), ['2021', '2022', '2023', '2024', '2025', '2026 partial', '2026 projected', '2027 projected', '2028 projected']);
   assert.deepEqual(plain(lobby.bars.map(b => b.kind)), ['annual', 'annual', 'annual', 'annual', 'annual', 'partial', 'projected', 'projected', 'projected']);
   // the history bars ARE the catalog's rows (Melange's: hired firms = income_total, in-house = expenses_total); the model's base level agrees with the last complete year
-  banks.annual.forEach((r, i) => assert.deepEqual([lobby.bars[i].hired, lobby.bars[i].inhouse, lobby.bars[i].total], [r.hired_firms, r.in_house, r.hired_firms + r.in_house], String(r.year)));
+  banks.annual.forEach((r, i) => assert.deepEqual([lobby.bars[i].hired, lobby.bars[i].inhouse], [r.hired_firms, r.in_house], String(r.year)));
+  assert.ok(lobby.bars.every(b => !('total' in b) && !('whisker' in b)), 'no bar carries the two series added or a combined band');
   assert.deepEqual([lobby.bars[5].hired, lobby.bars[5].inhouse], [banks.partial.hired_firms, banks.partial.in_house]);
   assert.deepEqual([lobby.bars[4].hired, lobby.bars[4].inhouse], [RUN.banks_lobby.horizons[0].lobbying.rows[0].series[0].base_level, RUN.banks_lobby.horizons[0].lobbying.rows[0].series[1].base_level]);
-  // the projected bars are the model's own projections, hired firms under in-house, and the whisker adds the lows and adds the highs
+  // the projected bars are the model's own projections, one per series, and each whisker is the 80% band of its own series (no band of a sum)
   projected.forEach((r, i) => {
     const bar = lobby.bars[6 + i], fees = r.series.find(s => s.id === 'income_total'), house = r.series.find(s => s.id === 'expenses_total');
-    assert.deepEqual([bar.year, bar.hired, bar.inhouse, bar.total], [r.year, fees.projected, house.projected, fees.projected + house.projected]);
-    assert.deepEqual([bar.whisker.low, bar.whisker.high], [fees.band80_low + house.band80_low, fees.band80_high + house.band80_high]);
-    assert.match(bar.whisker.tip, /80% band of the total: \$/); assert.match(bar.whisker.tip, /lows with lows and highs with highs/); assert.match(bar.whisker.tip, /not an estimated band of the total/);
-    assert.match(bar.tips.hired, new RegExp(`^${r.year} projected · Hired firms\\n`)); assert.match(bar.tips.inhouse, new RegExp(`^${r.year} projected · In-house\\n`));
-    assert.ok(/\n80% band: \$/.test(bar.tips.hired) && /\n80% band: \$/.test(bar.tips.inhouse), 'each segment\'s tooltip gives its band');
+    assert.deepEqual([bar.year, bar.hired, bar.inhouse], [r.year, fees.projected, house.projected]);
+    assert.deepEqual([bar.whiskers.hired.low, bar.whiskers.hired.high, bar.whiskers.inhouse.low, bar.whiskers.inhouse.high], [fees.band80_low, fees.band80_high, house.band80_low, house.band80_high]);
+    assert.match(bar.whiskers.inhouse.tip, new RegExp(`^${r.year} projected · In-house · 80% band\\n`)); assert.match(bar.whiskers.hired.tip, new RegExp(`^${r.year} projected · Fees reported by outside firms · 80% band\\n`));
+    assert.match(bar.tips.hired, new RegExp(`^${r.year} projected · Fees reported by outside firms\\n`)); assert.match(bar.tips.inhouse, new RegExp(`^${r.year} projected · In-house\\n`));
+    assert.ok(/\n80% band: \$/.test(bar.tips.hired) && /\n80% band: \$/.test(bar.tips.inhouse), 'each bar\'s tooltip gives its band');
   });
   // the card's words and figures
-  assert.equal(lobby.subtitle, '97 organizations · 463 named lobbyists');
-  assert.deepEqual(plain(lobby.figs), [{value: '$89.5M', label: '2025 total lobbying spend'}, {value: '$52.3M', label: '2026 so far, through Q2'}]);
+  assert.equal(lobby.subtitle, '2025: 100 organizations · 495 named lobbyists', 'the counts are those of the headline year, named (not the 2026 partial year\'s 97 and 463)');
+  assert.deepEqual(plain(lobby.figs), [{value: '$65.7M', label: '2025 in-house lobbying'}, {value: '$23.8M', label: '2025 fees reported by outside firms'}]);
+  assert.equal(lobby.partialLine, '2026 through Q2: in-house $39.0M · outside-firm fees $13.4M');          // headline format: always one decimal; the tooltip below keeps ldMoney ($39M)
   assert.equal(lobby.bars[5].tips.inhouse, '2026 partial · In-house · $39M');
-  assert.match(lobby.aria, /^Bank lobbying spend by year, hired firms under in-house, nominal dollars\. 2021: hired firms \$/); assert.match(lobby.aria, /2026 partial \(partial year\): hired firms \$13\.4M, in-house \$39M, total \$52\.3M/);
-  assert.match(lobby.aria, /2026 projected: hired firms \$.*, 80% band of the total \$/);
-  // the axis covers history, projections and the whisker tops
-  assert.ok(lobby.axisMax >= Math.max(...lobby.bars.map(b => Math.max(b.total, b.whisker ? b.whisker.high : 0))));
+  assert.match(lobby.aria, /^Bank lobbying by year, in-house and fees reported by outside firms side by side and never added, nominal dollars\. 2021: in-house \$/); assert.match(lobby.aria, /2026 partial \(partial year\): in-house \$39M, fees reported by outside firms \$13\.4M(;|$)/);
+  assert.match(lobby.aria, /2026 projected: in-house \$[\d.]+[MBk] \(80% band \$[\d.]+[MBk] to \$[\d.]+[MBk]\), fees reported by outside firms \$[\d.]+[MBk] \(80% band /); assert.doesNotMatch(lobby.aria, /total/i);
+  // the axis covers history, projections and the whisker tops of the single series
+  assert.equal(lobby.axisMax, Math.max(...lobby.bars.flatMap(b => [b.inhouse, b.hired, ...Object.values(b.whiskers || {}).map(w => w.high)])));
   assert.equal(lobby.dollars, 'nominal dollars'); assert.equal(lobby.caption, undefined, 'the old "Bars: 80% band" caption is gone');
   assert.equal(t.lobbyModel(RUN.banks, 2026, 2028).state, 'ready', 'blank growth inputs are no change: the nowcast is drawn');
   assert.deepEqual(plain(t.lobbyModel(null, 2026, 2028)), {state: 'empty', text: 'No lobbying projection for 2026–2028'});
@@ -625,8 +627,9 @@ test('lobbying (Melange card, 2026-10-09): the history is Melange\'s own rows st
 
 test('lobbying (Melange card): credit unions, and a snapshot without the roster counts leaves the subtitle out', () => {
   const {t} = cycleSession('credit_unions'), lobby = t.lobbyModel(CYC.credit_unions, 2026, 2028);
-  assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['credit_union', 'Credit Union', '26 organizations · 72 named lobbyists']);
-  assert.deepEqual(plain(lobby.figs), [{value: '$8.3M', label: '2025 total lobbying spend'}, {value: '$4.7M', label: '2026 so far, through Q2'}]);
+  assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['credit_union', 'Credit Union', '2025: 25 organizations · 83 named lobbyists']);
+  assert.deepEqual(plain(lobby.figs), [{value: '$6.2M', label: '2025 in-house lobbying'}, {value: '$2.1M', label: '2025 fees reported by outside firms'}]);
+  assert.equal(lobby.partialLine, '2026 through Q2: in-house $3.4M · outside-firm fees $1.3M');
   const catalog = clone(CYCLE.catalog), history = clone(LDA_HISTORY.credit_unions);
   for (const r of [...history.annual, history.partial]) { r.orgs = null; r.lobbyists = null; }
   catalog.anchors.industries.credit_unions = Object.assign({status: 'ready'}, catalog.anchors.industries.credit_unions, {lda_history: history});
@@ -640,7 +643,7 @@ test('lobbying (owner rulings 2026-10-08): the open year is the nowcast with an 
   const s = P1.banks_lobby.horizons[0].lobbying.rows[0].series[0];
   const [open, next] = lobby.bars.filter(b => b.kind === 'projected');
   assert.equal(open.hired, s.projected);
-  assert.match(open.tips.hired, /^2026 projected · Hired firms\n/);
+  assert.match(open.tips.hired, /^2026 projected · Fees reported by outside firms\n/);
   assert.ok(s.band95_low < s.band80_low && s.band80_low < s.projected && s.projected < s.band80_high && s.band80_high < s.band95_high, 'the ~95% band (largest blind miss) encloses the 80% band');
   assert.equal(lobby.dollars, 'nominal dollars');
   assert.match(open.tips.hired, /Nowcast, Q2 cut: \$13\.37M filed \+ 51\.58% of 2025/);
@@ -1039,8 +1042,9 @@ test('Telecom (owner ruling 2026-10-08, OpenSecrets B09 and IBISWorld wireless +
   assert.equal(view.company_pacs.telecom.label, PANEL);
   // lobbying is as it was: the nowcast chart is drawn
   const lobby = t.lobbyModel(TEL, 2026, 2028);
-  assert.equal(lobby.state, 'ready'); assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['telecom', 'Telecom', '23 organizations · 479 named lobbyists']);
-  assert.deepEqual(plain(lobby.figs), [{value: '$139.4M', label: '2025 total lobbying spend'}, {value: '$69.7M', label: '2026 so far, through Q2'}]);
+  assert.equal(lobby.state, 'ready'); assert.deepEqual([lobby.sector, lobby.title, lobby.subtitle], ['telecom', 'Telecom', '2025: 24 organizations · 532 named lobbyists']);
+  assert.deepEqual(plain(lobby.figs), [{value: '$102.4M', label: '2025 in-house lobbying'}, {value: '$37.0M', label: '2025 fees reported by outside firms'}]);
+  assert.equal(lobby.partialLine, '2026 through Q2: in-house $52.1M · outside-firm fees $17.6M'); assert.ok(!JSON.stringify(plain(lobby)).includes('139.4M'), 'the two series added ($139.4M) appear nowhere');
   assert.deepEqual(plain(lobby.bars.map(b => b.label)), ['2021', '2022', '2023', '2024', '2025', '2026 partial', '2026 projected', '2027 projected', '2028 projected']);
   // the party split (owner ruling 2026-10-09, option A): scored on the pooled share models, so both bases of both chambers draw a bar, the drawn share is the implied full-cycle one, the tick is
   // Mentat's 2023-24 share, and the Methods fold says in one note that the pooled model was used
@@ -1105,6 +1109,24 @@ test('presidential-cycle factors (D-118, D-119, D-121): company PACs +9% on the 
   const oldNotes = textOf(old.els['gf-anchors-note']);
   assert.ok(!oldNotes.includes('Presidential cycle'));
   assert.ok(oldNotes.includes('Company PACs: Banks: 19 bank companies'), 'the rest of the line is unchanged');
+});
+
+test('presidential-cycle factor (D-121, display only): the industry\'s own ratio from its audited workbooks stands beside the owner rule only when the catalog carries both totals; the rule itself is untouched', () => {
+  const OWN = {dataset: 'Telecom', presidential_cycle: '2023-2024', presidential_total: 17978153.890000038, midterm_cycle: '2021-2022', midterm_total: 12463873.750000043, ratio: 1.4424210522832017};
+  const GEN_LINE = 'Presidential cycle factor for general giving: ×1.86 (owner rule; OpenSecrets total election cost)';
+  const OWN_LINE = 'Telecom\'s own giving: 2023-24 $17,978,154 ÷ 2021-22 $12,463,874 = ×1.44 (audited Mentat workbooks; display only, the forecast uses the owner rule)';
+  const noteOf = own => {
+    const {t, els} = cycleSession('telecom'), catalog = clone(CYCLE.catalog);
+    catalog.anchors.industries.telecom = Object.assign({status: 'ready', workbook: 'Telecom Industry Spending Overview.xlsx', collection_date: '2026-09-26', coverage_end: '2026-06-30', current_cycle: 2026}, catalog.anchors.industries.telecom, own ? {own_cycle_ratio: own} : {});
+    t.setCatalog(catalog); t.anchorNote(t.industry());
+    return els['gf-anchors-note'].children.map(textOf);
+  };
+  const without = noteOf(null), withOwn = noteOf(OWN);
+  assert.ok(without.includes(GEN_LINE) && !without.some(line => line.includes('own giving')), 'no totals, no line');
+  assert.equal(withOwn.filter(line => line === OWN_LINE).length, 1);
+  assert.equal(withOwn.indexOf(OWN_LINE), withOwn.indexOf(GEN_LINE) + 1, 'beside the owner rule');
+  assert.deepEqual(withOwn.filter(line => line !== OWN_LINE), without, 'the rest of the note is unchanged');
+  assert.ok(Math.abs(measure(CYC.telecom, 0, 'general_giving').model.presidential_uplift.factor - 12.56 / 6.74) < 1e-12, 'the forecast still takes the owner factor');
 });
 
 test('banks 2025-26 general giving (P1, observed $11.4M above the unconditioned $11.1M): the Methods table and the chart say what is drawn, not "already exceeds"; an answer without a layer keeps the server\'s text', () => {

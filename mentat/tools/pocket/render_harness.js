@@ -14,7 +14,8 @@ const HERE = __dirname;
 const PAGE = process.env.POCKET_PAGE || path.join(HERE, 'mentat-pocket.html');
 const page = fs.readFileSync(PAGE, 'utf8');
 const script = page.split('<script>')[1].split('</script>')[0];
-const snapshot = JSON.parse(fs.readFileSync(path.join(HERE, 'pocket-data.json'), 'utf8'));
+const DATA = process.env.POCKET_DATA || path.join(HERE, 'pocket-data.json');
+const snapshot = JSON.parse(fs.readFileSync(DATA, 'utf8'));
 
 /* ------------------------------------------------------------- DOM stub */
 let nodeCount = 0;
@@ -82,7 +83,7 @@ function matches(node, selector){
 const IDS = ['industries','company','cycles','measures','tile-scope','tile-value','tile-under',
   'tile-means','sub-categories','plot-categories','read-categories','sub-cycles','plot-cycles',
   'read-cycles','sub-recipients','plot-recipients','read-recipients','sub-party','plot-party',
-  'legend-party','read-party','note-party','foot-line','foot-caveat'];
+  'legend-party','read-party','note-party','foot-line','foot-caveat','tile-gap','gap-cycles'];
 const byId = Object.create(null);
 const root = makeNode('div');
 IDS.forEach(id => { const node = makeNode('div'); node.id = id; byId[id] = node; root.appendChild(node); });
@@ -259,6 +260,45 @@ function checkGeometry(tag, plotId){
   }
 }
 
+/* Collection gaps. The expectations come from the RAW cells in their own words
+ * (a rounded percent and comma-grouped counts), never from the page's gapNotice:
+ * a gap line must name each cell the chosen company and cycle touch, name no cell
+ * it does not touch, say how many more cells the check did not itemize, and be
+ * absent for a report whose check passed. */
+let gapScopes = 0;
+const gapSeen = [];
+const shortCycle = raw => {
+  const found = /^(\d{4})\D+(\d{4})$/.exec(String(raw));
+  return found ? found[1] + '-' + found[2].slice(2) : String(raw);
+};
+const grouped = n => Number(n).toLocaleString('en-US');
+function checkGapLine(tag, node, industry, company, year, label){
+  const gaps = industry.gp;
+  const text = node.textContent;
+  if (!gaps || !gaps.f){
+    if (!node.hidden || text) note(`${tag}: ${label} shows a gap line for a report with no failed check: "${text}"`);
+    return;
+  }
+  gapScopes++;
+  const touched = gaps.c.filter(c => (!company || c[0] === company) && (!year || String(c[1]).slice(-4) === year));
+  const lines = touched.length + (gaps.u ? 1 : (gaps.c.length ? 0 : 1));
+  if (!lines){
+    if (!node.hidden || text) note(`${tag}: ${label} shows a gap line where the scope touches no short cell: "${text}"`);
+    return;
+  }
+  if (node.hidden || !text.startsWith('Coverage gap')){
+    note(`${tag}: ${label} does not show the Coverage gap line: "${text}"`);
+    return;
+  }
+  for (const c of gaps.c){
+    const label_ = `${c[0]} ${shortCycle(c[1])}: `;
+    const phrase = `${label_}${Math.round(c[3] / c[4] * 100)}% of FEC-reported records (${grouped(c[3])} of ${grouped(c[4])} ${c[2]})`;
+    if (touched.includes(c) && !text.includes(phrase)) note(`${tag}: ${label} does not say "${phrase}"`);
+    if (!touched.includes(c) && text.includes(label_)) note(`${tag}: ${label} names ${label_.trim()} though this scope does not touch it`);
+  }
+  if (gaps.u && !text.includes(`${grouped(gaps.u)} more short cell`)) note(`${tag}: ${label} drops the ${gaps.u} cells the check did not itemize`);
+}
+
 snapshot.ind.forEach((industry, industryIndex) => {
   clickNth('industries', industryIndex);
   for (let cycleIndex = -1; cycleIndex < industry.cyc.length; cycleIndex++){
@@ -272,6 +312,10 @@ snapshot.ind.forEach((industry, industryIndex) => {
 
         const tag = `${industry.n}/co${companyIndex}/cy${cycleIndex}/m${measureIndex}`;
         checkTile(tag, industry, companyIndex, cycleIndex, measureIndex);
+        const gapCompany = companyIndex < 0 ? '' : industry.co[companyIndex];
+        checkGapLine(tag, byId['tile-gap'], industry, gapCompany,
+          cycleIndex < 0 ? '' : String((industry.cyc_raw || industry.cyc)[cycleIndex]).slice(-4), 'tile gap line');
+        checkGapLine(tag, byId['gap-cycles'], industry, gapCompany, '', 'cycles card gap line');
         CARDS.forEach(card => {
           const sub = byId['sub-' + card].textContent;
           if (!sub || sub.length < 20) note(`${tag}: ${card} subline too short: ${sub}`);
@@ -304,6 +348,27 @@ snapshot.ind.forEach((industry, industryIndex) => {
   }
 });
 
+/* The scopes the check itemizes, chosen the way a reader would (industry, then
+ * cycle, then company), printed as the tile then says them. */
+const gapNamed = new Set();
+snapshot.ind.forEach((industry, industryIndex) => {
+  if (!industry.gp || !industry.gp.f) return;
+  clickNth('industries', industryIndex);
+  clickNth('measures', 0);
+  for (const cell of industry.gp.c){
+    const companyIndex = industry.co.indexOf(cell[0]);
+    const cycleIndex = (industry.cyc_raw || []).indexOf(cell[1]);
+    const key = industry.n + '/' + cell[0] + '/' + cell[1];
+    if (companyIndex < 0 || cycleIndex < 0 || gapNamed.has(key)) continue;
+    gapNamed.add(key);
+    clickNth('cycles', cycleIndex + 1);
+    byId['company'].value = String(companyIndex);
+    byId['company'].dispatch('change', { target: byId['company'] });
+    checkGapLine(key, byId['tile-gap'], industry, cell[0], String(cell[1]).slice(-4), 'tile gap line');
+    gapSeen.push(`gap scope  : ${industry.n} / ${cell[0]} / ${shortCycle(cell[1])} -> ${byId['tile-gap'].textContent}`);
+  }
+});
+
 /* Persistence: the page must have written its scope to storage. */
 const saved = store['mentat-pocket-scope-v1'];
 if (!saved) note('no scope written to localStorage');
@@ -327,6 +392,8 @@ console.log('marks clicked         : ' + marksClicked);
 console.log('nodes built           : ' + nodeCount);
 console.log('empty plots seen      : ' + emptyPlots + ' (a scope with no receipts in a cycle)');
 console.log('geometry assertions   : ' + geometryChecks);
+console.log('coverage gaps checked : ' + gapScopes + ' scopes');
+gapSeen.forEach(line => console.log(line));
 if (problems.length){
   console.log('\nPROBLEMS (' + problems.length + '):');
   problems.slice(0, 40).forEach(message => console.log('  - ' + message));

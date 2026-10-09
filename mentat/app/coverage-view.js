@@ -90,7 +90,70 @@
     const legend = '<p class="coverage-legend">' + [['current','Verified · data available'],['stale','Stale · behind the policy date'],['unverifiable','Unverifiable'],['none','Not collected']].map(([state, text]) => `<span><i class="coverage-key" data-state="${state}" aria-hidden="true"></i>${text}</span>`).join('') + '</p>';
     return `<div class="coverage-grid-layout"><div class="coverage-grid-main"><div class="table-scroll coverage-grid-scroll"><table class="coverage-grid">${head}<tbody>${body}</tbody></table></div>${legend}</div><div class="coverage-detail">${detail(selected)}</div></div>`;
   }
-  const api = {select, html, matrix, grid, detail, cycleLabel, formatDate, CYCLES};
+  /* Collection gaps (FIX 4). A report's own Data Quality check names the company x cycle cells whose stored
+     rows are materially fewer than FEC reported (the server parses it: collection_gaps.py). Chart Studio,
+     Graph and Insights ask this module whether the company x cycle scope on screen touches one, and what to
+     say. The wording is built once, here, so the chip, the caption under a chart, an image, a CSV row and a
+     slide cannot disagree. Nothing here counts rows or touches an amount.
+     gaps: {failed, cells: [{company, cycle, destination, held, reported, percent}], unitemized}.
+     scope: {companies, cycles}; a missing or empty list is "all". A cycle may be 2026 or 2025-2026. */
+  const GAP_CHIP = 'Coverage gap';
+  const endYear = value => { const found = String(value ?? '').match(/(\d{4})\D*$/); return found ? found[1] : ''; };
+  const asList = value => (Array.isArray(value) ? value : value == null || value === '' ? [] : [value]).map(String).filter(Boolean);
+  const gapCount = value => Number(value).toLocaleString('en-US');
+  const gapCycle = cycle => { const found = String(cycle).match(/^(\d{4})\D+(\d{4})$/); return found ? `${found[1]}-${found[2].slice(2)}` : String(cycle); };
+  function gapLine(cell) {
+    const percent = Number.isFinite(cell.percent) ? cell.percent : Math.round(cell.held / cell.reported * 100);
+    return `${cell.company} ${gapCycle(cell.cycle)}: ${percent}% of FEC-reported records (${gapCount(cell.held)} of ${gapCount(cell.reported)} ${cell.destination})`;
+  }
+  // The company and cycle a contribution query's filters name. Equals and "is one of" restrict; any other
+  // operation leaves that field open, which only ever warns about more.
+  function filtersScope(filters) {
+    const scope = {companies: null, cycles: null};
+    for (const filter of filters || []) {
+      const key = filter && filter.field === 'company' ? 'companies' : filter && filter.field === 'cycle' ? 'cycles' : '';
+      const values = key ? asList(filter.value) : [];
+      if (!key || !['eq', 'equals', 'in'].includes(filter.op) || !values.length) continue;
+      scope[key] = scope[key] ? scope[key].filter(value => values.includes(value)) : values;
+    }
+    return scope;
+  }
+  // parts: one {gaps, scope} or a list of them (compared scopes, compared reports). A cell shared by two
+  // parts is named once; the unitemized remainder is the largest one, never a sum (the same check is
+  // printed in every workbook of an industry). Null when nothing about this scope is short or unlisted.
+  function gapNotice(parts) {
+    const cells = new Map(), sources = new Set();
+    let more = 0, unlisted = false;
+    for (const part of [].concat(parts || [])) {
+      const gaps = part && part.gaps;
+      if (!gaps || !gaps.failed) continue;
+      if (gaps.source) sources.add(gaps.source);
+      const scope = part.scope || {}, companies = asList(scope.companies), years = asList(scope.cycles).map(endYear);
+      for (const cell of gaps.cells || []) {
+        if ((companies.length && !companies.includes(cell.company)) || (years.length && !years.includes(endYear(cell.cycle)))) continue;
+        cells.set([cell.company, cell.cycle, cell.destination].join('\u0001'), cell);
+      }
+      more = Math.max(more, Number(gaps.unitemized) || 0);
+      unlisted = unlisted || (!(gaps.cells || []).length && !gaps.unitemized);
+    }
+    if (!cells.size && !more && !unlisted) return null;
+    const lines = [...cells.values()].map(gapLine);
+    if (more) lines.push(`${gapCount(more)} more ${more === 1 ? 'short cell is' : 'short cells are'} not itemized in the workbook's Data Quality check`);
+    else if (unlisted && !lines.length) lines.push("The workbook's Data Quality check reports short collection cells that are not itemized");
+    const caption = lines.join('; ');
+    return {chip: GAP_CHIP, caption, text: `${GAP_CHIP}: ${caption}`, cells: [...cells.values()], unitemized: more, sources: [...sources]};
+  }
+  const withGap = (text, notice) => (notice && notice.text ? (text ? `${text} · ` : '') + notice.text : text);
+  // The console's own quality chip (style.css); the caption, and where the check was read from, are its
+  // tooltip, and the caption is printed beside it.
+  function chipNode(notice, doc = document) {
+    const chip = doc.createElement('span');
+    chip.className = 'quality-chip coverage-gap-chip';
+    chip.textContent = notice.chip;
+    chip.title = notice.caption + ((notice.sources || []).length ? ` · Source: ${notice.sources.join(', ')}` : '');
+    return chip;
+  }
+  const api = {select, html, matrix, grid, detail, cycleLabel, formatDate, CYCLES, GAP_CHIP, filtersScope, gapNotice, withGap, chipNode};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatCoverage = api;
 })(typeof window === 'undefined' ? globalThis : window);

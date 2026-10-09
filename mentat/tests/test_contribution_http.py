@@ -142,6 +142,18 @@ class ContributionHTTPTests(unittest.TestCase):
         self.assertEqual(body['provenance']['source_proof_token'],'proof')
         self.assertTrue(body['provenance']['source_financial_universe_verified'])
 
+    def test_records_of_a_registered_conduit_say_conduit_as_the_insights_route_does(self):
+        # P2-1: ActBlue is C00401224. A store built before the label read Super PAC for it; the route says Conduit.
+        self.records.return_value = {"rows": [{"source_id": "a", "committee_id": "C00401224", "recipient_category": "Super PAC"},
+                                              {"source_id": "b", "committee_id": "C00000001", "recipient_category": "Super PAC"}]}
+        status, _, body = self.request("/api/contributions/records", method="POST", data={"dataset": "Banking"})
+        self.assertEqual(status, 200)
+        self.assertEqual([r["recipient_category"] for r in body["rows"]], ["Conduit", "Super PAC"])
+        # An answer with no rows (a build in progress) passes through untouched.
+        self.records.return_value = {"status": "building"}
+        status, _, body = self.request("/api/contributions/records", method="POST", data={"dataset": "Banking"})
+        self.assertEqual((status, body["status"]), (200, "building"))
+
     def test_read_only_mode_allows_only_analytical_post_routes(self):
         request = {"dataset": "Banking", "basis": "original_observed", "dimensions": ["zip5"], "measures": ["amount"]}
         status, _, body = self.request("/api/contributions/query", method="POST", data=request)

@@ -41,7 +41,13 @@
   // V08: Colour (spec.color) separates every type by member; the legend is drawn inside the SVG.
   const colorId=spec.color&&rows.some(r=>r[spec.color]!==undefined)?spec.color:'';
   const member=r=>String(r[colorId]??'Unknown'),members=colorId?[...new Set(rows.map(member))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})):[];
-  const fillOf=name=>spec.colorMap&&spec.colorMap[name]||categoryColour(Math.max(0,members.indexOf(name)));
+  // Conduit (theme.js categoryColours) has a colour of its own and takes no slot, so the other members keep the colours they have without it.
+  const memberColours=names=>typeof root.MentatTheme?.categoryColours==='function'?root.MentatTheme.categoryColours(names):names.map((_,i)=>categoryColour(i));
+  const memberSlots=memberColours(members);
+  const fillOf=name=>spec.colorMap&&spec.colorMap[name]||memberSlots[Math.max(0,members.indexOf(name))]||categoryColour(0);
+  // The hover note a Conduit value carries wherever the recipient category is drawn (theme.js categoryNote).
+  const conduitNote=value=>spec.color==='recipient_category'||dims.includes('recipient_category')?(root.MentatTheme?.categoryNote?.(String(value))||''):'';
+  const rowNote=r=>['recipient_category'].filter(id=>spec.color===id||dims.includes(id)).map(id=>conduitNote(r[id])).find(Boolean)||'';
   const memberFill=r=>fillOf(member(r));
   // V05: Label and Tooltip fields reach every mark's hover text, and Label replaces the drawn value.
   const isDim=id=>dims.includes(id)||cols.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'));
@@ -69,7 +75,7 @@
   const shadeRange=shadeValues.length?[Math.min(...shadeValues),Math.max(...shadeValues)]:null;
   const shadeMark=(attrs,row)=>{if(!shadeRange||!row||typeof row[spec.colorMeasure]!=='number'||attrs.fill==='none'||Number(attrs['fill-opacity'])<.05)return attrs;
    const t=shadeRange[1]>shadeRange[0]?(row[spec.colorMeasure]-shadeRange[0])/(shadeRange[1]-shadeRange[0]):1;return {...attrs,fill:palette[0],'fill-opacity':Number((.25+.75*t).toFixed(3))};};
-  const mark=(tag0,attrs0,row,detail)=>{const [tag,attrs]=asGlyph(tag0,shadeMark(attrs0,row),row);const extra=extraText(row),n=node(tag,{...attrs,tabindex:0,role:'button',class:'plot-mark','aria-label':label(row)+'; '+(detail||ms.map(id=>name(id)+': '+fmt(row[id],id)).join('; '))+(extra?'; '+extra:'')});node('title',{},n.getAttribute('aria-label'),n);n.onclick=()=>onSelect?.(row);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}};return n;};
+  const mark=(tag0,attrs0,row,detail)=>{const [tag,attrs]=asGlyph(tag0,shadeMark(attrs0,row),row);const extra=[extraText(row),rowNote(row)].filter(Boolean).join('; '),n=node(tag,{...attrs,tabindex:0,role:'button',class:'plot-mark','aria-label':label(row)+'; '+(detail||ms.map(id=>name(id)+': '+fmt(row[id],id)).join('; '))+(extra?'; '+extra:'')});node('title',{},n.getAttribute('aria-label'),n);n.onclick=()=>onSelect?.(row);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}};return n;};
   const axis=(values,left=265,right=940,y=H-34)=>{const[lo,hi]=base.extent(values),scale=v=>left+(v-lo)/(hi-lo)*(right-left);for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5;node('line',{x1:scale(v),x2:scale(v),y1:70,y2:y-18,stroke:'#ece8ef'});text(scale(v),y,base.format(v,m,cols,true),{'text-anchor':'middle'});}return scale;};
   // The SVG grows downward for a legend or a note, so nothing is clipped from an export.
   const grow=h=>{const box=svg.getAttribute('viewBox').split(' ').map(Number),top=box[3];box[3]+=h;svg.setAttribute('viewBox',box.join(' '));svg.setAttribute('height',box[3]);svg.firstChild.setAttribute('height',box[3]);return top;};
@@ -87,9 +93,9 @@
    if(!labels.length)return;const width=Number(svg.getAttribute('viewBox').split(' ')[2]),items=[];let x=22,line=0;
    labels.forEach((l,i)=>{const s=cut(l,40),w=26+s.length*7.2;if(x+w>width-10&&x>22){x=22;line++;}items.push({i,s,x,line});x+=w+14;});
    const top=grow(30+line*20),g=node('g',{'data-legend':'series','aria-label':'Series legend'});
-   for(const it of items){const y=top+18+it.line*20;node('rect',{x:it.x,y:y-10,width:11,height:11,rx:2,fill:fills[it.i]},null,g);if(dashed[it.i])node('line',{x1:it.x,x2:it.x+11,y1:y+3,y2:y+3,stroke:fills[it.i],'stroke-dasharray':'3 2'},null,g);text(it.x+17,y,it.s,{'font-size':12,fill:'#59645c'},g);}
+   for(const it of items){const y=top+18+it.line*20,swatch=node('rect',{x:it.x,y:y-10,width:11,height:11,rx:2,fill:fills[it.i]},null,g),hint=conduitNote(labels[it.i]);if(hint)node('title',{},hint,swatch);if(dashed[it.i])node('line',{x1:it.x,x2:it.x+11,y1:y+3,y2:y+3,stroke:fills[it.i],'stroke-dasharray':'3 2'},null,g);const caption=text(it.x+17,y,it.s,{'font-size':12,fill:'#59645c'},g);if(hint)node('title',{},hint,caption);}
   };
-  const seriesFills=list=>list.map((name,i)=>spec.colorMap&&spec.colorMap[name]||categoryColour(i));
+  const seriesFills=list=>{const slots=memberColours(list);return list.map((name,i)=>spec.colorMap&&spec.colorMap[name]||slots[i]);};
   if(['heatmap','highlight'].includes(spec.type)){
    // V07: one dimension gives one column (or one column per measure); three or more key the rows by
    // the tuple of dims[1..] with dims[0] across; no dimension is one row. V09: Colour measure shades.

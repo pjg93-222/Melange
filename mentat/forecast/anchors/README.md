@@ -53,7 +53,10 @@ against the shared schema and invariants; an invalid build leaves the previous s
 * **Lobbying history** (Paul, 2026-10-09, "visualized in the same manner" as Melange's lobbying card): each ready `lda` block also carries `counts`, `{year: {organizations, lobbyists}}`, the `distinct_organizations` and
   `distinct_named_lobbyists` of the same `annual` rows of `sector_spend.csv` (the partial year's too), so the console can print what Melange prints under the card. The catalog serves the history per industry as
   `catalog.anchors.industries.<id>.lda_history` (`giving_forecast._lda_history`): annual rows `{year, hired_firms, in_house, orgs, lobbyists}` (`income_total`, `expenses_total`), the partial row with its `through_quarter`,
-  and the source `sha256`. `tests/test_giving_lda_history.py` reconciles it to Melange's `sector_spend.json` to the cent.
+  and the source `sha256`. `tests/test_giving_lda_history.py` reconciles it to Melange's `sector_spend.json` to the cent. The two series are never added anywhere (D-064: an in-house filer's expenses already include
+  what it pays outside firms); `tests/test_lobby_series_never_summed.py` pins that.
+* **Own presidential-cycle ratio** (display only; the forecast keeps the owner rule, D-121): the catalog adds `catalog.anchors.industries.<id>.own_cycle_ratio` (`giving_forecast._industry_cycle_ratio`), the latest presidential cycle's
+  `Total Giving` over the midterm cycle before it, read from the `Spending Overview` sheet (column A cycle, B scope, C total) of the published workbook the anchors cite. It is absent when either total cannot be read.
 * **Thin base**: under $100,000 of D + R per chamber, per cycle, per basis (`thin_base`).
 * **Roster PACs**: `registry.json`. Trade-association PACs are not counted. Credit unions have one PAC (SchoolsFirst), flagged `single_pac`.
 * **Separate datasets**: `community_banks` is its own entry (`forecast_industry: null`), never merged into banks. Auto has no Mentat workbook

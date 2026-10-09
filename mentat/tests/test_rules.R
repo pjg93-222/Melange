@@ -268,7 +268,12 @@ stopifnot(
   identical(names(spending_stats_category_groups()), c(
     "Super PAC", "Carey", "Company PAC", "Trade Association", "Candidate"
   )),
-  sum(headers == "Super PAC") == 7L,
+  # One Super PAC and one Carey column in the company block and in each of
+  # the three role blocks. The second Super PAC header in a role block used
+  # to be the Carey column's, so Carey read as a super PAC.
+  sum(headers == "Super PAC") == 4L,
+  sum(headers == "Carey") == 4L,
+  identical(headers[which(headers == "Super PAC") + 3L], rep("Carey", 4L)),
   any(grepl("Leadership PAC", formulas, fixed = TRUE)),
   !any(grepl("EXCLUDED_527_501C", formulas, fixed = TRUE))
 )
