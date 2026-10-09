@@ -4246,7 +4246,8 @@
       const paint = () => {
         const available = members(field.index);
         const query = search.value.trim().toLowerCase();
-        const shown = available.filter(value => !query || value.toLowerCase().includes(query)).slice(0, 400);
+        const matches = available.filter(value => !query || value.toLowerCase().includes(query));
+        const shown = matches.slice(0, 400);
         list.replaceChildren();
         if (!available.length) {
           const note = document.createElement('p');
@@ -4262,9 +4263,9 @@
           row.append(box, document.createTextNode(value === '' ? '(blank)' : value));
           list.append(row);
         }
-        if (available.length > shown.length) {
+        if (matches.length > shown.length) {
           const note = document.createElement('p');
-          note.textContent = (available.length - shown.length) + ' more values \u2014 narrow the search.';
+          note.textContent = (matches.length - shown.length) + ' more values \u2014 narrow the search.';
           list.append(note);
         }
         return available.length;
