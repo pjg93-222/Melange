@@ -1098,8 +1098,8 @@ test('the cycle-aware calculator as recorded now: the page draws its answers (ba
   } finally { await closePage(page); }
 });
 
-test('credit-union company PACs (D-117): the page names the 16-PAC panel cohort and its own observed-to date, General giving keeps May 31, banks stay "19 bank companies", and the Methods fold carries the split note', async () => {
-  const PANEL = 'Credit unions: 16 PACs (published panel cohort)', NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.';
+test('credit-union company PACs (D-117): the page names the 16-PAC panel cohort and its own observed-to date, General giving keeps May 31, banks stay "19 bank companies", and the party split\'s Company PACs row names the same cohort (no single-PAC note)', async () => {
+  const PANEL = 'Credit unions: 16 PACs (published panel cohort)', OLD_NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.';
   const page = await open({path: 'cycle'});
   try {
     const cuPac = measureOf(CYCLE.runs.credit_unions, 0, 'pac_to_candidates'), cuGeneral = measureOf(CYCLE.runs.credit_unions, 0, 'general_giving');
@@ -1117,14 +1117,15 @@ test('credit-union company PACs (D-117): the page names the 16-PAC panel cohort 
     const anchor = await hoverTip(page, '#gf-chart .gf-mark-anchor .gf-col-anchor');
     assert.match(anchor, /PopulationCredit unions: 16 PACs \(published panel cohort\)/); assert.match(anchor, /published PAC panel's cohort/);
     assert.match(await hoverTip(page, '#gf-chart .gf-mark-current .gf-col-observed'), /Observed through2026-09-26/);
-    // no cut-back chip on the panel's account (it is general giving's), and the split note and the date are in the Methods fold, with the population
+    // no cut-back chip on the panel's account (it is general giving's), and the date is in the Methods fold, with the population (and no single-PAC split note any more)
     await openMethods(page);
     const warnings = await page.$$eval('#gf-warnings-list li', all => all.map(li => li.textContent));
     assert.ok(!warnings.some(line => /Coverage cut back/.test(line) && /Company PACs/.test(line)), warnings.join(' | '));
     const notes = await page.textContent('#gf-anchors-note');
     assert.ok(notes.includes('Company PACs: ' + PANEL + '; observed to 2026-09-26 (the published PAC panel\'s own date).'), notes);
-    assert.ok(notes.includes(NOTE)); assert.ok(notes.includes('observed through 2026-05-31'));
-    assert.ok((await page.textContent('#gf-results')).includes('The 16 PACs of the published panel cohort: own giving to House and Senate candidates'));
+    assert.ok(!notes.includes(OLD_NOTE) && !notes.includes('single-PAC')); assert.ok(notes.includes('observed through 2026-05-31'));
+    const results = await page.textContent('#gf-results');
+    assert.ok(results.includes('The 16 PACs of the published panel cohort: own giving to House and Senate candidates') && results.includes('Population: ' + PANEL + '.') && !results.includes(OLD_NOTE), results);
     // back on General giving the chrome is the old one; banks name their 19
     await page.click('#gf-account-general'); assert.equal(await page.textContent('#gf-basis'), '2025 dollars');
     before = own(page).length;
@@ -1132,7 +1133,8 @@ test('credit-union company PACs (D-117): the page names the 16-PAC panel cohort 
     await page.click('#gf-account-pac'); await page.waitForTimeout(500);
     assert.equal(await page.textContent('#gf-basis'), '2025 dollars · Banks: 19 bank companies, observed to 2026-06-30');
     const bankNotes = await page.textContent('#gf-anchors-note');
-    assert.ok(bankNotes.includes('Company PACs: Banks: 19 bank companies; observed to 2026-06-30.') && !bankNotes.includes(NOTE), bankNotes);
+    assert.ok(bankNotes.includes('Company PACs: Banks: 19 bank companies; observed to 2026-06-30.') && !bankNotes.includes('single-PAC'), bankNotes);
+    assert.ok(!(await page.textContent('#gf-results')).includes('Population: '), 'banks name no population on the split row');
     assert.deepEqual(page.errors, []);
   } finally { await closePage(page); }
 });

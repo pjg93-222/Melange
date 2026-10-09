@@ -983,14 +983,14 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
     wstatus, wreason = _window(ctx, cycle)
     bases = {}
     for bid, label in SHARE_BASES:
-        block = ctx['snap']['candidate_receipts' if bid == 'employee_candidate' else 'pac_to_candidates']
+        block = _share_block(ctx, bid)
         basis = dict(id=bid, label=label, status='needs_inputs', flags=[])
-        if bid == 'pac_candidate' and ((ctx.get('panel') or {}).get('pac_to_candidates') or {}).get('status') == 'ready':
-            basis['roster_note'] = SPLIT_NOTE          # D-117: the dollars of this account are the panel cohort's, the split is not
+        if bid == 'pac_candidate' and block.get('panel'):
+            basis['population'] = _population(ind['id'], block)          # D-117: the split divides the same cohort as the dollars
         bases[bid] = basis
         out['bases'].append(basis)
-        if block['status'] != 'ready':
-            basis.update(status='unavailable', reason=block['reason'])
+        if block['status'] != 'ready' or block.get('split_reason'):
+            basis.update(status='unavailable', reason=block['reason'] or block.get('split_reason'))
             continue
         parts = block['cycles'].get(str(a), {}).get(chamber)
         total = None if parts is None else parts['D'] + parts['R']
@@ -1046,9 +1046,9 @@ def _v2_basis_remaining(ctx, pac, chamber):
     cand_part = cand['cycles'].get(a, {}).get(chamber) if cand['status'] == 'ready' else None
     if general and general_level and cand_part and general.get('remaining_given_observed_median') is not None:
         out['employee_candidate'] = general['remaining_given_observed_median'] * (cand_part['D'] + cand_part['R']) / general_level
-    pac_measure, block = measures.get('pac_to_candidates'), ctx['snap']['pac_to_candidates']
+    pac_measure, block = measures.get('pac_to_candidates'), _share_block(ctx, 'pac_candidate')
     pac_row = block['cycles'].get(a) if block['status'] == 'ready' else None
-    if pac_measure and pac_row and pac_row['to_house_senate'] and pac_measure.get('remaining_given_observed_median') is not None:
+    if pac_measure and pac_row and pac_row.get(chamber) and pac_row['to_house_senate'] and pac_measure.get('remaining_given_observed_median') is not None:
         part = pac_row[chamber]
         out['pac_candidate'] = pac_measure['remaining_given_observed_median'] * (part['D'] + part['R']) / pac_row['to_house_senate']
     return out
@@ -1084,18 +1084,25 @@ def _v2_basis_totals(ctx, pac, chamber):
     cand_part = cand['cycles'].get(a, {}).get(chamber) if cand['status'] == 'ready' else None
     if general and general_level and cand_part:
         out['employee_candidate'] = general['projected_cycle_real_2025'] * (cand_part['D'] + cand_part['R']) / general_level
-    pac_measure, block = measures.get('pac_to_candidates'), ctx['snap']['pac_to_candidates']
+    pac_measure, block = measures.get('pac_to_candidates'), _share_block(ctx, 'pac_candidate')
     pac_row = block['cycles'].get(a) if block['status'] == 'ready' else None
-    if pac_measure and pac_row and pac_row['to_house_senate']:
+    if pac_measure and pac_row and pac_row.get(chamber) and pac_row['to_house_senate']:
         part = pac_row[chamber]
         out['pac_candidate'] = pac_measure['projected_cycle_real_2025'] * (part['D'] + part['R']) / pac_row['to_house_senate']
     return out
 
 
+def _share_block(ctx, bid):
+    """The candidate-giving block a share basis divides: the employees' receipts, or the company PACs' (D-117: the published panel's cohort for an industry on it, else the anchors' roster)."""
+    if bid == 'employee_candidate':
+        return ctx['snap']['candidate_receipts']
+    return (ctx.get('panel') or {}).get('pac_to_candidates') or ctx['snap']['pac_to_candidates']
+
+
 def _observed_dr(ctx, chamber, bid):
-    """(cut, D, R) observed through the effective cut for one basis."""
-    block = ctx['snap']['candidate_receipts' if bid == 'employee_candidate' else 'pac_to_candidates']
-    cut = _effective_cut(block['observed'], ctx['as_of'], ctx['coverage_end'])
+    """(cut, D, R) observed through the effective cut for one basis (the panel cohort's own cut for its company PACs, not general giving's)."""
+    block = _share_block(ctx, bid)
+    cut = _effective_cut(block['observed'], ctx['as_of'], block.get('coverage_end', ctx['coverage_end']))
     return None if cut is None else (cut['through'], cut[chamber]['D'], cut[chamber]['R'])
 
 
@@ -1550,14 +1557,18 @@ def _r8(cm, ident, block, mid, open_cycle, anchor_cycle, cut_through, mult, obse
 # the anchors' single committee (SchoolsFirst): every piece comes from the panel's CURRENT frame for the open cycle (B the cohort's total of the anchor cycle, O the giving observed at
 # the panel's own cut, the three prior cycles' totals and their observed amounts on the same date), so the nowcast is the panel's own published one (`_r8` is the same code path as
 # the banks'). Banks keep the chart's 19 committees. The panel's cut (2026-09-26) is not the general-giving cut: the measure carries its own `observed.through`, and the two dates are
-# never put in one figure. The party split has no D/R amounts for this cohort in the panel bundle (totals only; the partisan panel holds forecast ranges at its own cut, not the anchor
-# cycle's D/R by chamber nor the observed D/R the split divides), so it stays on the anchors' own roster and says so (SPLIT_NOTE).
+# never put in one figure. The panel bundle holds the cohort's totals only; the D/R split of the same 16 PACs (the 2023-24 anchor by chamber, and the observed D/R to the panel's cut) is the
+# partisan-dollar lane's own canonical classification, pinned in forecast/anchors/panel_cohort_split.json (build_panel_cohort_split.py), so the company-PAC candidate basis of the
+# party split divides the same population as the dollars: the anchor share, the observed D/R, the R8 remainder and the cut are all the cohort's (Paul, 2026-10-08, "fix the credit union
+# party split"). The employees' basis is untouched.
 PANEL_COHORT = {'credit_unions': 'credit_unions'}      # chart industry -> PAC panel sector
-SPLIT_NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.'
+SPLIT_FILE = Path(__file__).resolve().parents[1] / 'forecast' / 'anchors' / 'panel_cohort_split.json'
+SPLIT_SCHEMA = 'panel-cohort-party-split-v1'
 PANEL_LABELS = {'credit_unions': 'Credit unions: {n} PACs (published panel cohort)'}
 PANEL_MEASURE_LABEL = 'Panel cohort PACs: own giving to House and Senate candidates'
 ROSTER_LABELS = {'commercial_banks': 'Banks: {n} bank companies'}
-PANEL_NOTICE = "Company PACs: {label}, observed to {through} (the panel's own date). General giving and the party split are observed to {general}. The two dates are never mixed in one figure."
+PANEL_NOTICE = ("Company PACs: {label}, observed to {through} (the panel's own date), and so is their party split. General giving and the employees' party split are observed to {general}. "
+                "The two dates are never mixed in one figure.")
 
 
 def _panel_block(ident, open_cycle):
@@ -1579,11 +1590,38 @@ def _panel_block(ident, open_cycle):
     cycles = {str(h['cycle']): {'to_house_senate': h['total_cents'] / 100.} for h in history}
     odd = origin['trace']['annual'].get(open_cycle - 3)          # the anchor cycle's odd-year calendar piece (the budget rule's s_odd)
     cut = now['cut']
-    return dict(status='ready', reason=None, single_pac=False, committee_count=item['cohort']['count'], committees=[], cycles=cycles,
+    observed = dict(through=cut, to_house_senate=now['observed_cents'] / 100.)
+    split, why = _cohort_split(item, now, open_cycle - 2)          # the D/R of the same PACs: the party split's company-PAC basis divides this block, not the anchors' roster
+    if split:
+        cycles[str(open_cycle - 2)].update(split['anchor'])
+        observed.update(split['observed'])
+    return dict(status='ready', reason=None, single_pac=False, committee_count=item['cohort']['count'], committees=[], cycles=cycles, split_reason=why,
                 odd_year=None if odd is None else {str(open_cycle - 2): {'to_house_senate': odd / 100.}},
-                observed=[dict(through=cut, to_house_senate=now['observed_cents'] / 100.)], coverage_end=cut,
+                observed=[observed], coverage_end=cut,
                 panel=dict(cut=cut, window=[h['cycle'] for h in history], observed_nominal=now['observed_cents'] / 100., pairs=[(h['observed_cents'], h['total_cents']) for h in history],
                            published_nowcast_nominal=now['prediction_cents'] / 100., bundle_sha256=published['bundle_sha256'], cohort=item['cohort'])), None
+
+
+def _cohort_split(item, now, anchor):
+    """({anchor: {House: {D, R}, Senate: {D, R}}, observed: {House: {D, R}, Senate: {D, R}}} in nominal dollars, None) or (None, why it is unavailable): the pinned D/R split of the panel's
+    cohort (build_panel_cohort_split.py). It is taken only when it divides the very population the panel's dollars are: the same cohort and cut, the anchor cycle's total and the observed
+    amount equal to the cent, and every bucket (D, R, other / unknown recipients, the lane's unresolved-office pool) adding up to them."""
+    why = ('The D/R split of the panel cohort (forecast/anchors/panel_cohort_split.json) is missing or does not match the published PAC panel (cohort, cut or totals), so the company-PAC '
+           'party split cannot be shown. Rebuild it with forecast/anchors/build_panel_cohort_split.py.')
+    try:
+        data = json.loads(SPLIT_FILE.read_text(encoding='utf-8'))
+        total = next(h['total_cents'] for h in now['trace']['history'] if h['cycle'] == anchor)
+        cycle, seen = data['cycles'][str(anchor)], data['observed']
+
+        def add(b):
+            return sum(b[c][k] for c in CHAMBERS for k in ('D', 'R', 'Other', 'Unknown')) + b['unresolved_office_pool']
+
+        if (data['schema'], data['cohort_ids_sha256'], seen['through']) != (SPLIT_SCHEMA, item['cohort']['ids_sha256'], now['cut']) or (add(cycle), add(seen)) != (total, now['observed_cents']):
+            return None, why
+        dollars = lambda b: {c: dict(D=b[c]['D'] / 100., R=b[c]['R'] / 100.) for c in CHAMBERS}
+        return dict(anchor=dollars(cycle), observed=dollars(seen)), None
+    except (OSError, ValueError, KeyError, TypeError, StopIteration):
+        return None, why
 
 
 def _panel_blocks(ident, open_cycle):
@@ -1607,7 +1645,7 @@ def _company_pacs(ident, anchored, blocks):
     block = blocks.get('pac_to_candidates') or anchored['pac_to_candidates']
     if block['status'] != 'ready':
         return dict(kind='panel_cohort', status='unavailable', reason=block['reason']) if ident in PANEL_COHORT else None
-    return dict(_population(ident, block), status='ready', observed_to=block.get('coverage_end') or anchored['coverage']['coverage_end'], split_note=SPLIT_NOTE if block.get('panel') else None)
+    return dict(_population(ident, block), status='ready', observed_to=block.get('coverage_end') or anchored['coverage']['coverage_end'])
 
 
 def _cycle_pac(ctx, assumptions, cycle, chains):
@@ -1799,7 +1837,7 @@ def _project_v2(request, b):
                open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'], cm=cm, nowcast_errors=snapshot.get('lda_nowcast_errors'))
     if cm:       # the open cycle has no CPI yet: its observed amounts are deflated at the expected inflation instead of compared at face value
         ctx.update(open_multiplier=_real_multiplier(snapshot, cm['inflation'], open_cycle), face_value=False)
-    chains, split_chains = {}, {}
+    chains = {}
     changes_all = {}
     for cycle in (current, current + 2):
         changes_all.update(_mapping(_mapping(horizons.get(str(cycle)), str(cycle) + ' assumptions').get('annual_forecast_changes'), 'Annual growth-forecast changes'))
@@ -1818,7 +1856,6 @@ def _project_v2(request, b):
         prior = _number(prior, 'Prior cycle revenue growth', -99.9, 500)
         growth = None if cm else _number(a.get('growth_pct'), 'Cycle revenue growth', -99.9, 500)       # with a cycle model growth_pct is the Industry revenue growth input of the PAC block
         pac = _cycle_pac(ctx, a, cycle, chains) if cm else _v2_pac(ctx, a, cycle)
-        split_pac = _cycle_pac(dict(ctx, panel={}), a, cycle, split_chains) if panel else pac          # D-117: the party split stays on the anchors' own roster (no D/R amounts for the panel cohort)
         wstatus, _reason = _window(ctx, cycle)
         through = _cut_through(ctx) if wstatus == 'window' else None
         result = dict(cycle=cycle, period=_period(cycle), horizon='current_remainder' if cycle == current else 'next_complete',
@@ -1826,7 +1863,7 @@ def _project_v2(request, b):
                                                                    if cycle == current else f'{cycle - 1}-01-01')),
                       ends=f'{cycle}-12-31', prior_growth_pct=prior, coverage_through=through, pac=pac, shares={})
         for chamber in CHAMBERS:
-            result['shares'][chamber] = _v2_chamber(ctx, a, cycle, chamber, prior, growth, split_pac)
+            result['shares'][chamber] = _v2_chamber(ctx, a, cycle, chamber, prior, growth, pac)
         result['lobbying'] = _v2_lobbying(ctx, changes_all, cycle)
         output.append(result)
     pb = panel.get('pac_to_candidates')

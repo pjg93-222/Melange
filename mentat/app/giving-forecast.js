@@ -399,6 +399,7 @@
     if (current && b.remainder_status === 'budget_inconsistent') { flag(col, 'budget_inconsistent: ' + b.remainder_reason); detail(col, `Projected total ${money(b.projected_total_real_2025)}; remaining R ${money(b.projected_remaining_R_real_2025)} · D ${money(b.projected_remaining_D_real_2025)} (not clipped).`); }
     if (current && ['needs_inputs', 'no_observed', 'cycle_closed'].includes(b.remainder_status)) detail(col, b.remainder_reason);
     if (b.observed) detail(col, `Observed through ${b.observed.through}: R ${money(b.observed.R)} · D ${money(b.observed.D)}.`);
+    if (b.population) detail(col, `Population: ${b.population.label}.`);
     if (b.roster_note) detail(col, b.roster_note);
     return col;
   }
@@ -1058,6 +1059,7 @@
   // coefficient interval are printed with the rest of the numbers in "Sources and notes".
   function mixTip(chamber, label, s0, b0, b1, curPeriod, nextPeriod) {
     const lines = [H(`${chamber} · ${b0.label || label}`)];
+    if (b0.population) lines.push(R('Population', b0.population.label));          // the credit unions' company PACs: the published panel's 16-PAC cohort, as on the dollars chart
     const alloc = allocationOf(b0);
     if (b0.status === 'ready') {
       if (alloc) {

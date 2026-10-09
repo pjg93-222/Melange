@@ -10,7 +10,8 @@ carry the 50/50 and the D-099 blend, no longer apply); general giving keeps the 
 
 The credit unions' company PACs left the anchors' single committee (SchoolsFirst) on 2026-10-08 (owner ruling D-117, "use the 16 credit union PACs"): the measure is the published PAC
 panel's 16-PAC cohort, taken from the active PAC bundle (app/data/pac-giving-current.json) and checked here against the bundle file read directly (PanelCohortTests). Banks keep
-the chart's 19 committees; the party split and general giving are untouched.
+the chart's 19 committees; general giving is untouched. The party split's company-PAC candidate basis divides the same 16-PAC cohort (Paul, 2026-10-08, "fix the credit union party split"):
+its anchor share, observed D/R and R8 remainder are the cohort's, from the partisan-dollar lane's ledgers pinned in forecast/anchors/panel_cohort_split.json (worked by hand in PanelCohortTests).
 
 The presidential-cycle factors (owner rulings D-118, D-119 and D-121, 2026-10-08): in place of the fitted cycle effect phi the company PACs take a fixed +9% on the step into the presidential
 cycle (2027-28 = nowcast x 1.09 x exp(d_2)); general giving takes u = 12.56 / 6.74 = 1.8635 (OpenSecrets total cost of elections, presidential average over midterm average) on BOTH steps,
@@ -18,6 +19,7 @@ cycle (2027-28 = nowcast x 1.09 x exp(d_2)); general giving takes u = 12.56 / 6.
 independently with numpy/scipy (FORECAST_OVERNIGHT.../d121/targets_d121.py, which first reproduces the original fixture rows to the bit with the fitted phi).
 """
 import copy
+import csv
 from datetime import date
 import json
 import math
@@ -580,6 +582,7 @@ class PanelCohortTests(unittest.TestCase):
             cls.cus, cls.banks = (measures(gf.project(request(i))) for i in (CUS, BANKS))
             cls.out = gf.project(request(CUS))
             cls.view = gf.catalog('2026-10-07')['cycle_model_view']
+            cls.full, cls.full_banks = (gf.project(full_request(i, world.bundle)) for i in (CUS, BANKS))          # with the control inputs, so the party split is calculated
         cls.hand = panel_by_hand(CUS)
 
     def test_the_population_is_named_and_the_cohort_is_the_panels(self):
@@ -594,8 +597,8 @@ class PanelCohortTests(unittest.TestCase):
             self.assertEqual(self.banks[(cycle, PAC)]['label'], "Roster companies' PACs: own giving to House and Senate candidates")
         self.assertEqual(h['item']['cohort']['count'], 16)
         self.assertEqual(self.view['company_pacs'][CUS], dict(kind='panel_cohort', count=16, label='Credit unions: 16 PACs (published panel cohort)', observed_to='2026-09-26', status='ready',
-                                                              bundle_sha256=h['pointer']['sha256'], cohort_ids_sha256=h['item']['cohort']['ids_sha256'], split_note=gf.SPLIT_NOTE))
-        self.assertEqual(self.view['company_pacs'][BANKS], dict(kind='chart_roster', count=19, label='Banks: 19 bank companies', observed_to='2026-06-30', status='ready', split_note=None))
+                                                              bundle_sha256=h['pointer']['sha256'], cohort_ids_sha256=h['item']['cohort']['ids_sha256']))          # no split note: the split is the cohort's too
+        self.assertEqual(self.view['company_pacs'][BANKS], dict(kind='chart_roster', count=19, label='Banks: 19 bank companies', observed_to='2026-06-30', status='ready'))
         self.assertIsNone(self.view['company_pacs'][PC])          # no roster PAC, nothing to name
 
     def test_the_anchor_bar_the_observed_amount_and_the_shares_are_the_panels_by_hand(self):
@@ -668,28 +671,198 @@ class PanelCohortTests(unittest.TestCase):
         for key in ('cycle_prediction_low', 'cycle_prediction_high'):          # the step's prediction interval is unchanged: the same distance from the median
             self.assertAlmostEqual((m28[key] / m28['projected_cycle_real_2025']) / (old[key] / old['projected_cycle_real_2025']), 1., delta=1e-12, msg=key)
 
-    def test_the_party_split_of_the_credit_unions_stays_on_the_earlier_roster_and_says_so(self):
-        """No D/R amounts of the 16-PAC cohort exist in the PAC bundle (totals only), so the split is exactly what it was, with the note. Same request with the panel switched off."""
-        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp) as world:
-            on = gf.project(full_request(CUS, world.bundle))
-            with patch.object(gf, 'PANEL_COHORT', {}):
-                off = gf.project(full_request(CUS, world.bundle))
-            banks = gf.project(full_request(BANKS, world.bundle))
-        self.assertEqual([h['shares']['House']['status'] for h in on['horizons']], ['ready', 'ready'])
-        for i in (0, 1):
-            self.assertEqual(on['horizons'][i]['lobbying'], off['horizons'][i]['lobbying'])
-            self.assertEqual([m for m in on['horizons'][i]['pac']['measures'] if m['id'] == GEN], [m for m in off['horizons'][i]['pac']['measures'] if m['id'] == GEN])
+    # ---- the party split's company-PAC basis is the same 16 PACs (Paul, 2026-10-08: "fix the credit union party split") ------------------------------------------------------------
+    # Cents, worked by hand from the partisan-dollar lane's canonical ledgers (candidate, office and party of the target cycle) for the rows the panel counts (hs == 1):
+    # the 2023-24 cycle (ledger pac_party_chamber_v3) and 2025-26 to the panel's cut 2026-09-26 (ledger current2026). `pool` is the lane's rows of unresolved office, pooled over both chambers.
+    SPLIT = dict(anchor=dict(House=dict(D=128256000, R=127060000, Other=0, Unknown=500000), Senate=dict(D=21550000, R=17200000, Other=1200000, Unknown=250000), pool=1600000),
+                 observed=dict(House=dict(D=94689000, R=88175000, Other=0, Unknown=500000), Senate=dict(D=6200000, R=17075000, Other=0, Unknown=750000), pool=450000))
+    LANE = Path(os.environ.get('LOCALAPPDATA', '')) / 'Mentat' / 'forecast'
+    HISTORY_LEDGER = LANE / 'partisan-refinement-round2-20261005' / 'inputs' / 'pac_party_chamber_v3' / 'ledger.csv'
+    CURRENT_LEDGER = LANE / 'political-model-20261006' / 'inputs' / 'current2026' / 'ledger.csv'
+
+    @staticmethod
+    def basis(out, i, chamber, bid='pac_candidate'):
+        return next(b for b in out['horizons'][i]['shares'][chamber]['bases'] if b['id'] == bid)
+
+    @staticmethod
+    def ledger_dr(path, cycle, cut=None):
+        """{(chamber, party): cents} straight from a lane ledger, no code of the app: credit-union rows the panel counts (hs == 1) that the lane resolves to a House / Senate candidate with a D or R."""
+        out = {}
+        with open(path, encoding='utf-8-sig', newline='') as stream:
+            for r in csv.DictReader(stream):
+                if (r['sector'], r['cycle'], r['hs'], r['canonical_hs_eligibility']) == (CUS, str(cycle), '1', 'include_hs') and (cut is None or r['date'] <= cut) and r['canonical_party'] in ('D', 'R'):
+                    key = r['canonical_chamber'], r['canonical_party']
+                    out[key] = out.get(key, 0) + int(r['cents'])
+        return out
+
+    def test_the_hand_numbers_add_up_to_the_panels_own_total_and_observed_amount_to_the_cent(self):
+        h = self.hand
+        for name, want in (('anchor', h['B']), ('observed', h['O'])):          # D + R + other + unknown recipients + the unresolved-office pool == the panel's 2023-24 total / observed amount
+            part = self.SPLIT[name]
+            self.assertEqual(sum(part[c][k] for c in gf.CHAMBERS for k in part[c]) + part['pool'], round(want * 100), name)
+        data = json.loads(gf.SPLIT_FILE.read_text(encoding='utf-8'))          # and the pinned file the calculator reads is these numbers
+        self.assertEqual((data['schema'], data['basis'], data['cohort_ids_sha256']), (gf.SPLIT_SCHEMA, 'canonical_cycle_office_nominal_pac_D_R', h['item']['cohort']['ids_sha256']))
+        for name, part in (('anchor', data['cycles']['2024']), ('observed', data['observed'])):
+            self.assertEqual({c: part[c] for c in gf.CHAMBERS}, {c: self.SPLIT[name][c] for c in gf.CHAMBERS}, name)
+            self.assertEqual(part['unresolved_office_pool'], self.SPLIT[name]['pool'], name)
+        self.assertEqual(data['observed']['through'], h['frame']['cut'])
+
+    @unittest.skipUnless(HISTORY_LEDGER.is_file() and CURRENT_LEDGER.is_file(), 'the partisan-dollar lane ledgers are not on this machine')
+    def test_the_hand_numbers_are_the_lanes_ledgers_read_directly(self):
+        got = {'anchor': self.ledger_dr(self.HISTORY_LEDGER, 2024), 'observed': self.ledger_dr(self.CURRENT_LEDGER, 2026, cut=self.hand['frame']['cut'])}
+        for name in ('anchor', 'observed'):
             for chamber in gf.CHAMBERS:
-                got, want = copy.deepcopy(on['horizons'][i]['shares'][chamber]), off['horizons'][i]['shares'][chamber]
-                noted = [b for b in got['bases'] if 'roster_note' in b]
-                self.assertEqual([b['id'] for b in noted], ['pac_candidate'])
-                self.assertEqual(noted[0]['roster_note'], 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.')
-                del noted[0]['roster_note']
-                self.assertEqual(got, want)          # every other leaf, the single-PAC dollars of the split included, is what it was
-        self.assertNotEqual(on['horizons'][0]['pac']['measures'][0]['projected_cycle_real_2025'], off['horizons'][0]['pac']['measures'][0]['projected_cycle_real_2025'])
-        self.assertEqual(off['horizons'][0]['pac']['measures'][0]['observed']['through'], '2026-05-31')          # (the earlier roster, as it was)
-        self.assertFalse(any('roster_note' in b for h in banks['horizons'] for c in gf.CHAMBERS for b in h['shares'][c]['bases']))
-        self.assertFalse(any(n.startswith('Company PACs:') for n in banks['notices']))
+                for party in 'DR':
+                    self.assertEqual(got[name][(chamber, party)], self.SPLIT[name][chamber][party], (name, chamber, party))
+
+    def test_the_company_pac_anchor_share_is_the_cohorts_2024_republican_share_by_hand(self):
+        want = {'House': 127060000 / (127060000 + 128256000), 'Senate': 17200000 / (17200000 + 21550000)}          # R / (R + D), 49.77% and 44.39%
+        for i in (0, 1):
+            for chamber in gf.CHAMBERS:
+                d, r = self.SPLIT['anchor'][chamber]['D'] / 100, self.SPLIT['anchor'][chamber]['R'] / 100
+                b = self.basis(self.full, i, chamber)
+                self.assertEqual((b['status'], b['anchor_D'], b['anchor_R'], b['anchor_total_nominal']), ('ready', d, r, d + r))
+                self.assertAlmostEqual(b['anchor_share'], want[chamber], delta=1e-15)
+                self.assertFalse(b['thin_base'])          # $2.55M (House) and $387,500 (Senate) of two-party giving, no longer one PAC's $80,800
+        self.assertAlmostEqual(want['House'], .4976578, delta=5e-8)
+        self.assertAlmostEqual(want['Senate'], .4438710, delta=5e-8)
+
+    def test_the_observed_dr_is_the_cohorts_to_the_panels_cut(self):
+        for chamber in gf.CHAMBERS:
+            d, r = self.SPLIT['observed'][chamber]['D'] / 100, self.SPLIT['observed'][chamber]['R'] / 100
+            b = self.basis(self.full, 0, chamber)
+            seen = b['observed']
+            self.assertEqual((seen['through'], seen['D'], seen['R']), (self.hand['frame']['cut'], d, r))          # 2026-09-26, the cut of the company-PAC dollars
+            self.assertAlmostEqual(seen['D_real_2025'], d * self.DEFLATOR, delta=1e-6)
+            self.assertAlmostEqual(seen['R_real_2025'], r * self.DEFLATOR, delta=1e-6)
+            self.assertEqual(b['remainder_starts'], '2026-09-27')
+            self.assertEqual(self.basis(self.full, 0, chamber, 'employee_candidate')['observed']['through'], '2026-05-31')          # the employees' basis keeps general giving's own date
+
+    def test_the_remainder_budget_is_the_cohorts_r8_remainder_and_the_share_change_is_the_models_own(self):
+        m = self.cus[(2026, PAC)]
+        for chamber in gf.CHAMBERS:
+            s, b = self.full['horizons'][0]['shares'][chamber], self.basis(self.full, 0, chamber)
+            two_party = (self.SPLIT['anchor'][chamber]['D'] + self.SPLIT['anchor'][chamber]['R']) / 100
+            self.assertAlmostEqual(b['raw_projected_cycle_R_share'], b['anchor_share'] + s['change_pp'] / 100, delta=1e-15)          # anchor share + the share model's predicted change, as for every industry
+            self.assertEqual(b['raw_projected_cycle_R_share'], b['projected_cycle_R_share'])
+            a = b['remaining_allocation']
+            self.assertAlmostEqual(a['remaining_total_real_2025'], m['remaining_given_observed_median'] * two_party / self.hand['B'], delta=1e-6)          # the cohort's R8 remainder x its two-party part
+            seen = self.SPLIT['observed'][chamber]
+            self.assertAlmostEqual(a['implied_cycle_total_real_2025'], (seen['D'] + seen['R']) / 100 * self.DEFLATOR + a['remaining_total_real_2025'], delta=1e-6)
+            self.assertAlmostEqual(a['remaining_R_real_2025'], b['projected_cycle_R_share'] * a['remaining_total_real_2025'], delta=1e-6)
+            self.assertAlmostEqual(a['implied_cycle_R_share'], (seen['R'] / 100 * self.DEFLATOR + a['remaining_R_real_2025']) / a['implied_cycle_total_real_2025'], delta=1e-12)
+            self.assertEqual(b['remainder_status'], 'ready')
+
+    def test_the_old_single_pac_note_is_gone_and_the_row_names_its_population(self):
+        label = 'Credit unions: 16 PACs (published panel cohort)'
+        self.assertFalse(hasattr(gf, 'SPLIT_NOTE'))
+        for i in (0, 1):
+            for chamber in gf.CHAMBERS:
+                self.assertEqual(self.basis(self.full, i, chamber)['population'], self.cus[(2026, PAC)]['population'])          # the very population of the dollars
+                self.assertEqual(self.basis(self.full, i, chamber)['population']['label'], label)
+                self.assertNotIn('population', self.basis(self.full, i, chamber, 'employee_candidate'))
+                self.assertFalse(any('roster_note' in b for b in self.full['horizons'][i]['shares'][chamber]['bases']))
+        self.assertNotIn('single-PAC', json.dumps(self.full['notices']) + json.dumps(self.view))
+        notice = next(n for n in self.full['notices'] if n.startswith('Company PACs:'))
+        self.assertIn('and so is their party split', notice)
+
+    def test_an_anchor_share_outside_the_fitted_range_keeps_its_flag_and_the_intervals_are_as_returned(self):
+        for chamber in gf.CHAMBERS:
+            s, b = self.full['horizons'][0]['shares'][chamber], self.basis(self.full, 0, chamber)
+            lo, hi = s['fitted_share_range']
+            outside = not lo - 1e-9 <= b['anchor_share'] <= hi + 1e-9
+            self.assertEqual(b['anchor_share_outside_fitted_range'], outside)
+            self.assertEqual('anchor_share_outside_fitted_range' in b['flags'], outside)
+            self.assertEqual(b['prediction_outside_share_range'], b['cycle_prediction_low'] < 0 or b['cycle_prediction_high'] > 1)          # the flag is the existing one; nothing is clipped
+            self.assertAlmostEqual(b['cycle_prediction_high'] - b['cycle_prediction_low'], 2 * (b['cycle_prediction_high'] - b['raw_projected_cycle_R_share']), delta=1e-12)
+
+    def test_observed_giving_beyond_the_projection_is_budget_inconsistent_and_not_clipped_as_for_the_other_industries(self):
+        data = json.loads(gf.SPLIT_FILE.read_text(encoding='utf-8'))
+        data['observed']['House']['R'] += 80000000          # $800,000 moved from D to R: the sums still equal the panel's observed amount
+        data['observed']['House']['D'] -= 80000000
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp) as world:
+            path = Path(tmp) / 'split.json'
+            path.write_text(json.dumps(data))
+            with patch.object(gf, 'SPLIT_FILE', path):
+                out = gf.project(full_request(CUS, world.bundle))
+        b = self.basis(out, 0, 'House')
+        self.assertEqual((b['status'], b['remainder_status']), ('ready', 'budget_inconsistent'))
+        self.assertLess(b['projected_remaining_R_real_2025'], 0)          # drawn as returned
+        self.assertIsNone(b['projected_remaining_R_share'])
+        self.assertIn('no clipping', b['remainder_reason'])
+
+    def test_a_split_that_does_not_match_the_panel_is_withheld_for_the_company_pacs_only(self):
+        good = json.loads(gf.SPLIT_FILE.read_text(encoding='utf-8'))
+
+        def edited(edit):
+            data = copy.deepcopy(good)
+            edit(data)
+            return data
+        cases = {'a different cut': edited(lambda d: d['observed'].update(through='2026-06-30')),
+                 'a total that is off by a cent': edited(lambda d: d['cycles']['2024']['House'].update(D=d['cycles']['2024']['House']['D'] + 1)),
+                 'another cohort': edited(lambda d: d.update(cohort_ids_sha256='0' * 64)),
+                 'another schema': edited(lambda d: d.update(schema='panel-cohort-party-split-v0')),
+                 'a missing field': edited(lambda d: d['observed'].pop('unresolved_office_pool')),
+                 'no file': None}
+        for name, data in cases.items():
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp) as world:
+                path = Path(tmp) / 'split.json'
+                if data is not None:
+                    path.write_text(json.dumps(data))
+                with patch.object(gf, 'SPLIT_FILE', path):
+                    out = gf.project(full_request(CUS, world.bundle))
+                for i in (0, 1):
+                    for chamber in gf.CHAMBERS:
+                        b = self.basis(out, i, chamber)
+                        self.assertEqual(b['status'], 'unavailable')          # not the single PAC Paul turned down
+                        self.assertIn('panel_cohort_split.json', b['reason'])
+                        self.assertEqual(self.basis(out, i, chamber, 'employee_candidate'), self.basis(self.full, i, chamber, 'employee_candidate'))
+                got = measures(out)
+                self.assertEqual([got[(c, PAC)]['status'] for c in (2026, 2028)], ['ready', 'ready'])          # the dollars do not need the split
+                self.assertEqual(got[(2026, PAC)]['cycle_given_observed_median'], self.cus[(2026, PAC)]['cycle_given_observed_median'])
+
+    def test_an_unreadable_panel_withholds_the_company_pac_split_too_not_the_single_pac(self):
+        import pac_giving_forecast as panel
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp) as world:
+            with patch.object(panel, 'catalog', side_effect=ValueError('bundle hash mismatch')):
+                out = gf.project(full_request(CUS, world.bundle))
+        for chamber in gf.CHAMBERS:
+            self.assertEqual(self.basis(out, 0, chamber)['status'], 'unavailable')
+            self.assertIn('published PAC panel could not be read', self.basis(out, 0, chamber)['reason'])
+            self.assertEqual(self.basis(out, 0, chamber, 'employee_candidate')['status'], 'ready')          # the employees' split does not need the panel
+
+    def test_banks_and_the_employees_splits_are_unchanged_by_the_credit_union_fix(self):
+        anchors = ANCHORS['industries']
+        for chamber in gf.CHAMBERS:
+            for i in (0, 1):
+                b = self.basis(self.full_banks, i, chamber)          # banks: the chart's 19 committees, by hand from the anchors snapshot
+                part = anchors[BANKS]['pac_to_candidates']['cycles']['2024'][chamber]
+                self.assertEqual((b['anchor_D'], b['anchor_R'], b['anchor_total_nominal']), (part['D'], part['R'], part['D'] + part['R']))
+                self.assertAlmostEqual(b['anchor_share'], part['R'] / (part['D'] + part['R']), delta=1e-15)
+                self.assertNotIn('population', b)
+                self.assertNotIn('roster_note', b)
+                e = self.basis(self.full, i, chamber, 'employee_candidate')          # credit-union employees: general giving's receipts, not the cohort
+                part = anchors[CUS]['candidate_receipts']['cycles']['2024'][chamber]
+                self.assertEqual((e['anchor_D'], e['anchor_R']), (part['D'], part['R']))
+            seen, cut = self.basis(self.full_banks, 0, chamber)['observed'], anchors[BANKS]['pac_to_candidates']['observed'][-1]
+            self.assertEqual((seen['through'], seen['D'], seen['R']), (cut['through'], cut[chamber]['D'], cut[chamber]['R']))          # banks stay on their own cut, 2026-06-30
+            self.assertEqual(seen['through'], '2026-06-30')
+            self.assertEqual(self.basis(self.full, 0, chamber, 'employee_candidate')['observed']['through'], '2026-05-31')
+        self.assertFalse(any(n.startswith('Company PACs:') for n in self.full_banks['notices']))
+
+    def test_the_schema_2_rollback_split_is_still_the_anchors_own_roster(self):
+        bundle = contract.example('models')
+        with tempfile.TemporaryDirectory() as tmp, CycleWorld(tmp, bundle=bundle):
+            outlook = bundle['saved_outlook']['control']
+            horizons = {c: dict(growth_pct=7.0, current_control={'House': 1, 'Senate': 1}, control_scores={'House': outlook['House']['value'], 'Senate': outlook['Senate']['value']}) for c in ('2026', '2028')}
+            with patch.object(gf, '_panel_block', side_effect=AssertionError('the rollback path read the panel')), patch.object(gf, '_cohort_split', side_effect=AssertionError('the rollback path read the split')):
+                out = gf.project(dict(industry=CUS, as_of='2026-10-07', horizons=horizons))
+        for chamber in gf.CHAMBERS:
+            b = self.basis(out, 0, chamber)
+            part = ANCHORS['industries'][CUS]['pac_to_candidates']['cycles']['2024'][chamber]
+            self.assertEqual((b['status'], b['anchor_D'], b['anchor_R']), ('ready', part['D'], part['R']))          # SchoolsFirst, as before the cycle model
+            self.assertNotIn('population', b)
+            self.assertNotIn('roster_note', b)
 
     def test_an_unreadable_panel_withholds_the_credit_union_company_pacs_and_nothing_else(self):
         import pac_giving_forecast as panel

@@ -918,9 +918,9 @@ test('under the Company PACs account the growth captions say growth does not aff
   assert.match(textOf(els['gf-input-notes']), /the projection moves by half of it \(the 50\/50 rule\), except company PACs, which it does not affect \(panel nowcast\)\. Blank uses the IBIS default\./);
 });
 
-test('company PACs, credit unions (D-117): the chart and the Methods fold name the population ("16 PACs, published panel cohort"; banks stay "19 bank companies"), each account keeps its own observed-to date, and the split says it is on the earlier roster', () => {
+test('company PACs, credit unions (D-117): the chart and the Methods fold name the population ("16 PACs, published panel cohort"; banks stay "19 bank companies"), each account keeps its own observed-to date, and the party split\'s Company PACs row names the same cohort (no single-PAC note)', () => {
   const PANEL = 'Credit unions: 16 PACs (published panel cohort)', BANKS19 = 'Banks: 19 bank companies';
-  const NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.';
+  const OLD_NOTE = 'Credit-union company-PAC party split still reflects the earlier single-PAC roster.';
   const {t, els} = cycleSession('credit_unions');
   const pac = t.chartModel(CYC.credit_unions, CYC.credit_unions, 'pac'), general = t.chartModel(CYC.credit_unions, CYC.credit_unions, 'general');
   // the population, from the response, on the account that is a total of it (the anchor column's tooltip) and nowhere on general giving
@@ -944,25 +944,30 @@ test('company PACs, credit unions (D-117): the chart and the Methods fold name t
   assert.equal(pac.accountLabel, 'Panel cohort PACs: own giving to House and Senate candidates'); assert.match(bankPac.accountLabel, /^Roster companies' PACs: /);          // the cohort is not "roster companies"
   banks.t.setAccount('pac'); banks.t.paintAccountChrome({chart: bankPac});
   assert.equal(banks.els['gf-basis'].textContent, '2025 dollars · ' + BANKS19 + ', observed to 2026-06-30');
-  // the Methods fold (Sources and notes): the population with the panel's own date, then the split note; banks name theirs and carry no split note
+  // the Methods fold (Sources and notes): the population with the panel's own date (the split's too, the server notice says so); no split note any more; banks name theirs
   t.anchorNote(t.industry());
   const notes = textOf(els['gf-anchors-note']);
   assert.ok(notes.includes('Company PACs: ' + PANEL + '; observed to 2026-09-26 (the published PAC panel\'s own date).'), notes);
-  assert.ok(notes.includes(NOTE)); assert.ok(notes.includes('observed through 2026-05-31'), 'general giving keeps its own date');
+  assert.ok(!notes.includes(OLD_NOTE) && !notes.includes('single-PAC')); assert.ok(notes.includes('observed through 2026-05-31'), 'general giving keeps its own date');
   banks.t.anchorNote(banks.t.industry());
   const bankNotes = textOf(banks.els['gf-anchors-note']);
-  assert.ok(bankNotes.includes('Company PACs: ' + BANKS19 + '; observed to 2026-06-30.') && !bankNotes.includes(NOTE));
-  // the party split: the Company PACs bar says so in its tooltip and the results table says so; the Employees bar does not; banks do not
-  const mix = t.mixModel(CYC.credit_unions, CYC.credit_unions, 'House');
-  assert.ok(texts(mix.rows.find(r => r.id === 'pac_candidate').tip).includes(NOTE)); assert.ok(!texts(mix.rows.find(r => r.id === 'employee_candidate').tip).includes(NOTE));
-  assert.ok(!texts(banks.t.mixModel(CYC.banks, CYC.banks, 'House').rows.find(r => r.id === 'pac_candidate').tip).includes(NOTE));
+  assert.ok(bankNotes.includes('Company PACs: ' + BANKS19 + '; observed to 2026-06-30.') && !bankNotes.includes('single-PAC'));
+  // the party split: the Company PACs bar names the cohort in its tooltip (the very population of the dollars) and the results table does too; the Employees bar does not; banks do not; no single-PAC note anywhere
+  for (const chamber of ['House', 'Senate']) {
+    const mix = t.mixModel(CYC.credit_unions, CYC.credit_unions, chamber), pacRow = mix.rows.find(r => r.id === 'pac_candidate'), empRow = mix.rows.find(r => r.id === 'employee_candidate');
+    assert.equal(row(pacRow.tip, 'Population')[1], PANEL, chamber); assert.equal(row(empRow.tip, 'Population'), undefined, chamber);
+    assert.ok(!texts(pacRow.tip).includes(OLD_NOTE) && !texts(empRow.tip).includes(OLD_NOTE), chamber);
+    assert.equal(pacRow.state, 'ready', chamber); assert.ok(pacRow.anchorShare > 0.4 && pacRow.anchorShare < 0.5, chamber + ': the 2023-24 tick is the cohort\'s share, no longer 0% for the Senate');
+    assert.equal(row(banks.t.mixModel(CYC.banks, CYC.banks, chamber).rows.find(r => r.id === 'pac_candidate').tip, 'Population'), undefined, chamber);
+  }
   t.buildInputs(); t.render(clone(CYC.credit_unions));
-  assert.ok(textOf(els['gf-results']).includes(NOTE)); assert.ok(textOf(els['gf-results']).includes('The 16 PACs of the published panel cohort: own giving to House and Senate candidates'));
+  assert.ok(!textOf(els['gf-results']).includes(OLD_NOTE)); assert.ok(textOf(els['gf-results']).includes('Population: ' + PANEL + '.')); assert.ok(textOf(els['gf-results']).includes('The 16 PACs of the published panel cohort: own giving to House and Senate candidates'));
   banks.t.buildInputs(); banks.t.render(clone(CYC.banks));
-  assert.ok(!textOf(banks.els['gf-results']).includes(NOTE)); assert.ok(textOf(banks.els['gf-results']).includes("The roster companies' PACs' own giving"));
-  // an answer from the earlier calculator (no population, no note) draws as it did
+  assert.ok(!textOf(banks.els['gf-results']).includes('Population: ') && !textOf(banks.els['gf-results']).includes(OLD_NOTE)); assert.ok(textOf(banks.els['gf-results']).includes("The roster companies' PACs' own giving"));
+  // an answer from the earlier calculator (no population, the single-PAC note) draws as it did
   const earlier = clone(CYC.credit_unions);
-  for (const h of earlier.horizons) { for (const m of h.pac.measures) delete m.population; for (const c of ['House', 'Senate']) for (const b of h.shares[c].bases || []) delete b.roster_note; }
+  for (const h of earlier.horizons) { for (const m of h.pac.measures) delete m.population; for (const c of ['House', 'Senate']) for (const b of h.shares[c].bases || []) { delete b.population; if (b.id === 'pac_candidate') b.roster_note = OLD_NOTE; } }
+  assert.ok(texts(t.mixModel(earlier, earlier, 'House').rows.find(r => r.id === 'pac_candidate').tip).includes(OLD_NOTE), 'an older answer still carries its own note');
   const old = cycleSession('credit_unions'), oldPac = old.t.chartModel(earlier, earlier, 'pac');
   assert.equal(oldPac.population, null); assert.equal(row(oldPac.columns[0].tip, 'Population'), undefined);
   old.t.setAccount('pac'); old.t.paintAccountChrome({chart: oldPac}); assert.equal(old.els['gf-basis'].textContent, '2025 dollars');

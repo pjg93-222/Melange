@@ -77,3 +77,11 @@ banks and property & casualty too (about four minutes).
 basis as `cycles`: general giving after the non_giving exclusion; the roster PACs through the same D-049 aggregation, cut at that date; an undated row is in the cycle total and in no
 odd-year amount). The cycle model's industry budget change needs the anchor cycle's share `odd_year[a] / cycles[a]` per measure. Optional fields: a snapshot built before them stays valid,
 but the cycle model then offers no default budget change for that measure ("Rebuild the anchors").
+
+## Party split of the credit unions' company PACs (2026-10-08)
+
+The credit unions' company PACs are the published PAC panel's 16-PAC cohort (D-117), not the snapshot's single committee. The panel bundle holds that cohort's House+Senate totals only, so the D/R
+split the "Company PACs" row of the party split divides is pinned here: `panel_cohort_split.json`, written by `build_panel_cohort_split.py` from the partisan-dollar lane's own canonical ledgers
+(basis `canonical_cycle_office_nominal_pac_D_R`; the 2023-24 cycle by chamber, and 2025-26 D/R to the panel's cut). Only the rows the panel counts (`hs` == 1) are split, so D + R + other / unknown
+recipients + the lane's unresolved-office pool equals the panel's 2023-24 total and its observed amount to the cent. The calculator reads the file only when its cohort, cut and both totals match the
+published panel (otherwise the row says so and the dollars are unaffected). When the panel's cut or totals move, rerun the builder (`--check` exits 1 when the file is stale); the snapshot itself is not touched.
