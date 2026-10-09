@@ -36,6 +36,10 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
 `inference`, `validation`, `interval_labels`, `anchor_contract`, `industries`, `pac_model`, `share_models`, `evidence_models`, `lobby_model`,
 `political_inputs`, `evidence`, `industry_slopes`, `validation_metrics`, `backtests`, `saved_outlook`, `sources`, `gates`.
 
+Availability date: `built_on` is the UTC date of `built_at_utc`. The calculator does not compare it with the as-of date directly (the page's calendar is Eastern, America/New_York, one day behind UTC from 20:00 to 24:00);
+`giving_forecast._model_vintage` reads `built_at_utc` in the Eastern calendar and takes the earlier of that day and `built_on`, so a bundle built at 23:30 Eastern is usable that same Eastern day (2026-10-09). Bundles
+stamped before the rule need no change; a bundle with no `built_at_utc` (schema 1) keeps its `built_on`.
+
 * **`anchor_contract`** names which Mentat measure each model applies to, and the change kind the consumer must apply. The consumer
   refuses a bundle whose contract it does not implement (unknown measure ids or change kinds).
   * `pac`: `pac_model` applied as a **relative (log) change** to the **previous cycle's Mentat level**, twice, side by side:

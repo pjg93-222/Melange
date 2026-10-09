@@ -10,7 +10,7 @@ own anchor snapshot (owner rulings of 2026-09-30, see the section "Schema 2" bel
 shared contract in mentat/forecast/contracts (brain DE-021).
 """
 import copy
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from functools import lru_cache
 import hashlib
 import json
@@ -18,6 +18,7 @@ import math
 import os
 import re
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 MODEL_FILE = Path(__file__).parent / 'data' / 'giving-models-v1.json'
 MODEL_FILE_V2 = Path(__file__).parent / 'data' / 'giving-models-v2.json'
@@ -100,6 +101,20 @@ def _date(value, label):
         raise ValueError(label + ' must be a calendar date (YYYY-MM-DD).') from None
 
 
+CALENDAR = ZoneInfo('America/New_York')       # the console's calendar: the as-of date and date.today() are Eastern days (tzdata is pinned in requirements-console.txt)
+
+
+def _model_vintage(b):
+    """The first calendar day the model package is usable. `built_on` is the UTC date of `built_at_utc`, which is one day ahead of the console's calendar from 20:00 to 24:00
+    Eastern, so a refit finished that evening would be refused "at that historical cutoff" until Eastern midnight (2026-10-09). The build instant is read in the console's
+    calendar instead; a bundle with no instant (schema 1) keeps its built_on, and a built_on dated earlier than the build (an owner-dated vintage) stays earlier."""
+    day = _date(b['built_on'], 'Model vintage')
+    stamp = b.get('built_at_utc')
+    if stamp:
+        day = min(day, datetime.fromisoformat(stamp.replace('Z', '+00:00')).astimezone(CALENDAR).date())
+    return day
+
+
 def _number(value, label, low=None, high=None):
     if value is None or value == '':
         return None
@@ -161,7 +176,7 @@ def catalog(as_of=None):
     if b['schema_version'] == 2:
         return _catalog_v2(b, today)
     cycle = today.year + today.year % 2
-    return dict(model_version=b['model_version'], model_sha256=b['sha256'], built_on=b['built_on'],
+    return dict(model_version=b['model_version'], model_sha256=b['sha256'], built_on=_model_vintage(b).isoformat(),
                 as_of=today.isoformat(), current_cycle=cycle, next_cycle=cycle + 2,
                 currency=b['currency'], industries=list(b['industries'].values()),
                 share_models=b['share_models'], pac_model=b['pac_model'], lobby_model=b['lobby_model'],
@@ -300,7 +315,7 @@ def project(request):
         raise ValueError('Choose a supported research industry. Company and subindustry models are not interchangeable.')
     industry=b['industries'][sector];as_of=_date(request.get('as_of') or date.today().isoformat(),'As-of date')
     if as_of>date.today():raise ValueError('The as-of date cannot be in the future.')
-    if as_of<_date(b['built_on'],'Model vintage'):raise ValueError('The model package was not available at that historical cutoff.')
+    if as_of<_model_vintage(b):raise ValueError('The model package was not available at that historical cutoff.')
     current=as_of.year+as_of.year%2;signal=request.get('signal','control');varying=request.get('industry_slopes',False)
     if signal not in ('control','seats'):raise ValueError('Choose control or seats; they are alternative models.')
     if not isinstance(varying,bool):raise ValueError('Industry slopes must be true or false.')
@@ -621,7 +636,7 @@ def _v2_waivers(b, offered):
 def _catalog_v2(b, today):
     cycle = today.year + today.year % 2
     offered, not_offered = _v2_offered(b)
-    return dict(schema_version=2, model_version=b['model_version'], model_sha256=b['sha256'], built_on=b['built_on'], as_of=today.isoformat(),
+    return dict(schema_version=2, model_version=b['model_version'], model_sha256=b['sha256'], built_on=_model_vintage(b).isoformat(), as_of=today.isoformat(),
                 current_cycle=cycle, next_cycle=cycle + 2, currency=b['currency'], industries=offered, not_offered=not_offered,
                 share_models=b['share_models'], pac_model=b['pac_model'], lobby_model=b['lobby_model'], evidence=b['evidence'],
                 evidence_models={k: {f: v[f] for f in ('id', 'signal', 'chamber', 'specification', 'n', 'ordinary_p', 'training_cycles', 'calculator')} for k, v in b['evidence_models'].items()},
@@ -1819,7 +1834,7 @@ def _project_v2(request, b):
     as_of = _date(request.get('as_of') or date.today().isoformat(), 'As-of date')
     if as_of > date.today():
         raise ValueError('The as-of date cannot be in the future.')
-    if as_of < _date(b['built_on'], 'Model vintage'):
+    if as_of < _model_vintage(b):
         raise ValueError('The model package was not available at that historical cutoff.')
     if request.get('signal', 'control') != 'control':
         raise ValueError(SEATS_TEXT)

@@ -1,11 +1,13 @@
 """The G8 consumer smoke (tools/g8_consumer_smoke.py) against the contract example bundle (must PASS) and against a bundle the calculator refuses (must FAIL).
 Runs locally only: it needs mentat/app (a pod snapshot carries mentat/forecast). usage: python -m unittest mentat/forecast/refit/tests/test_g8_smoke.py"""
+from datetime import date, datetime, time, timezone
 import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from zoneinfo import ZoneInfo
 
 HERE = Path(__file__).resolve().parent
 SMOKE = HERE.parent / 'tools' / 'g8_consumer_smoke.py'
@@ -36,6 +38,17 @@ class G8SmokeTests(unittest.TestCase):
         self.assertIn('G8 PASS', out)
         self.assertIn('commercial_banks', out)
         self.assertIn('projected 2 horizon(s)', out)
+
+    def test_a_bundle_built_at_2330_eastern_passes_on_that_same_local_day(self):
+        # 23:30 Eastern is 03:30Z/04:30Z on the next UTC day, so the refit stamps built_on one day ahead of the console's calendar until Eastern midnight (2026-10-09)
+        built = datetime.combine(date.today(), time(23, 30), tzinfo=ZoneInfo('America/New_York')).astimezone(timezone.utc)
+        bundle = contract.example('models')
+        bundle.update(built_at_utc=built.strftime('%Y-%m-%dT%H:%M:%SZ'), built_on=built.date().isoformat())
+        self.assertGreater(bundle['built_on'], date.today().isoformat())
+        code, out = smoke(bundle)
+        self.assertEqual(code, 0, out)
+        self.assertIn('G8 PASS', out)
+        self.assertNotIn('historical cutoff', out)
 
     def test_a_bundle_the_calculator_refuses_fails(self):
         bad = contract.example('models')
