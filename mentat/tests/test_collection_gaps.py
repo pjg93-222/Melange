@@ -104,6 +104,19 @@ class ParseDetailTests(unittest.TestCase):
         self.assertEqual([(c['company'], c['cycle'], c['percent']) for c in parsed['cells']],
                          [('Comcast', '2025-2026', 33), ('Verizon', '2023-2024', 50)])
 
+    def test_a_detail_that_lists_every_short_cell_reads_cell_for_cell_like_the_truncated_one(self):
+        # export_guards.R lists every short cell now; a build made before that prints the first twelve and
+        # "... and N more". Both forms keep the Detail's format and order, so the full one extends the short one.
+        head = REAL_DETAIL.rpartition(' ... and 19 more')[0]
+        extra = [f'Extra Co {n}/2024 contributions {n * 100} of {n * 200}' for n in range(1, 20)]
+        full = collection_gaps.parse_detail(head + '; ' + '; '.join(extra))
+        truncated = collection_gaps.parse_detail(REAL_DETAIL)
+        self.assertEqual((len(full['cells']), full['unitemized']), (31, 0))
+        self.assertEqual(full['cells'][:12], truncated['cells'])
+        self.assertEqual([c['company'] for c in full['cells'][12:]], [f'Extra Co {n}' for n in range(1, 20)])
+        self.assertEqual({c['percent'] for c in full['cells'][12:]}, {50})
+        self.assertEqual((len(truncated['cells']), truncated['unitemized']), (12, 19))
+
     def test_nothing_to_itemize_is_empty_not_an_error(self):
         for text in (None, '', 'every company x cycle cell walks stored what FEC reported'):
             self.assertEqual(collection_gaps.parse_detail(text), {'cells': [], 'unitemized': 0})

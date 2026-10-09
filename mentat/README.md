@@ -178,7 +178,7 @@ The existing partisan percentages remain conditional on D+R receipts, with Party
 
 `reports/spending_report.xlsx` contains:
 
-- `Stats (XXX Company)`, preserving the supplied formula layout and its repeated-Super-PAC/Carey header quirk, with Corporate Giving appended;
+- `Stats (XXX Company)`, preserving the supplied formula layout and its repeated-Super-PAC/Carey header quirk, with Corporate Giving appended and, since 2026-10-09, a Conduit (ActBlue, WinRed) column group directly after each Carey group (100 metrics; the template supplies only the column widths, and each Conduit group borrows the widths of the Carey group it follows);
 - `Employees (XXX Company)` for individual contributors only;
 - one presentation sheet for every organization/cycle with rows;
 - one `Crypto Industry <cycle>` presentation rollup for every cycle with rows;

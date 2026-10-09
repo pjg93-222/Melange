@@ -58,4 +58,27 @@ for (damage in c("partial", "mismatch", "orphan", "unstored")) {
   if (damage == "unstored") broken[1L, stored_complete := 0L]
   stopifnot(!mentat_guard_progress_views(p, broken)$api_guard$passed)
 }
+# G8: the detail itemizes EVERY short cell, "<Company>/<year> <destination> <held> of <reported>",
+# largest gap first, so the console (collection_gaps.py) can name them all instead of "... and N more".
+reported <- data.table(company = sprintf("Co%02d", 1:15), cycle = 2024L, destination = "contributions",
+  records_total = 1000 + 10 * (1:15))
+held <- data.table(company = reported$company, cycle = 2024L, destination = "contributions", rows = 500)
+extra <- data.table(company = c("Whole", "ShortCorp"), cycle = 2026L, destination = c("contributions", "corporate"),
+  records_total = c(1000, 4365))
+reported <- rbind(reported, extra)
+held <- rbind(held, data.table(company = c("Whole", "ShortCorp"), cycle = 2026L,
+  destination = c("contributions", "corporate"), rows = c(990, 1369)))
+g8 <- mentat_guard_collection_completeness(reported, held)
+cells <- strsplit(sub("^.*recollect before trusting it: ", "", g8$detail), "; ", fixed = TRUE)[[1L]]
+stopifnot(!g8$passed, !grepl("more", g8$detail, fixed = TRUE), length(cells) == 16L,
+  identical(cells[[1L]], "ShortCorp/2026 corporate 1369 of 4365"),
+  identical(cells[[2L]], "Co15/2024 contributions 500 of 1150"),
+  identical(cells[[16L]], "Co01/2024 contributions 500 of 1010"),
+  !any(grepl("Whole", cells, fixed = TRUE)),
+  g8$metric == (4365 - 1369) + sum(1000 + 10 * (1:15) - 500))
+# Few cells read as before, and a complete collection still passes.
+few <- mentat_guard_collection_completeness(reported[company %in% c("Co01", "Whole")], held)
+stopifnot(!few$passed, grepl("recollect before trusting it: Co01/2024 contributions 500 of 1010$", few$detail))
+done <- mentat_guard_collection_completeness(reported[company == "Whole"], held)
+stopifnot(done$passed, done$detail == "1 company x cycle walks stored what FEC reported")
 cat("test_export_progress_guards: PASS\n")

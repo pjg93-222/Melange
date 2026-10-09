@@ -996,8 +996,14 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.equal(await railBox(onePac).isChecked(), true, 'and the other cycle\'s pane on its own cycle');
     pass(`the same PAC opened on ${JSON.stringify(cycles)} as two panes`);
 
-    step('Graph opens the exact committee and cycle, reuses its pane, and refuses missing evidence');
+    step('Graph opens the exact committee and cycle, reuses its pane, and opens a direct Flow when no evidence is saved');
     const linked = await browser.newPage({viewport: {width: 1600, height: 1000}});
+    // A committee with no saved evidence opens its direct Flow (evidence.js openCommittee(), 7b1cc259d), and
+    // that Flow asks /api/flow?...&direct=1 to collect FEC filings. Record and hold the request so this run
+    // never reaches FEC; the Flow's "Collecting FEC filings…" status then stays put.
+    const directFlowRequests = [], heldDirectRoutes = [];
+    const isFlowUrl = url => url.pathname === '/api/flow';
+    await linked.route(isFlowUrl, route => { directFlowRequests.push(route.request().url()); heldDirectRoutes.push(route); });
     await linked.goto(`${origin}/#chart-studio`, {waitUntil: 'load'});
     const opened = await linked.evaluate(async ({committee, cycle}) => {
       const opening = window.MentatEvidence.openCommittee(committee, cycle);
@@ -1014,11 +1020,21 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       return window.MentatEvidence.panes();
     }, {committee: onePac, cycle: twoCycles[0]});
     assert.deepEqual(reopened, opened.panes);
-    assert.equal(await linked.evaluate(() => window.MentatEvidence.openCommittee('C99999999', '2098')), null);
-    assert.match(await linked.locator('#evidence-status').textContent(), /No saved source covers C99999999 in 2098/);
+    assert.deepEqual(directFlowRequests, [], 'a saved source opens its pane without asking /api/flow');
+    // No saved source covers this committee, so it is not a dead end: Graph's selection opens a direct Flow.
+    assert.equal(await linked.evaluate(() => window.MentatEvidence.openCommittee('C99999999', '2098')), 'direct');
+    await linked.waitForFunction(() => document.querySelector('#view-evidence').classList.contains('flow-open')
+      && /Collecting FEC filings and drawing the flow/.test(document.getElementById('evidence-flow-status').textContent));
+    assert.equal(directFlowRequests.length, 1, 'the direct Flow asks /api/flow once: ' + JSON.stringify(directFlowRequests));
+    const directQuery = new URL(directFlowRequests[0]).searchParams;
+    assert.equal(directQuery.get('direct'), '1');
+    assert.equal(directQuery.get('root'), 'committee:C99999999');
+    assert.equal(directQuery.get('cycle'), '2098');
+    assert.deepEqual(await linked.evaluate(() => window.MentatEvidence.panes()), opened.panes, 'a direct Flow opens no pane');
     assert.equal(await linked.locator('#graph-trail').isVisible(), false);
+    await Promise.all(heldDirectRoutes.map(route => route.abort().catch(() => {})));
     await linked.close();
-    pass('cold start, exact cycle, duplicate reuse, unavailable source, and hidden Graph trail');
+    pass('cold start, exact cycle, duplicate reuse, unavailable source opens a direct Flow, and hidden Graph trail');
 
     step('a view that is not this one does not fetch the evidence catalogs');
     // app.js dispatches mentat:view on every tab change. start() used to run on

@@ -494,9 +494,11 @@ the local test dependencies. Neither test suite reads credentials or collects da
 Rebuilt workbooks include committee cash-transfer paths through three transfers,
 coverage, source receipts, and a separate conditional pro-rata estimate. These
 estimates are not traced company dollars or lower bounds. Opposition stays
-against its named target. ActBlue and WinRed use their registered hybrid (Carey)
-category; ordinary registered PACs have a separate Other PAC category. Historical
-workbooks keep their original evidence and may predate these corrections.
+against its named target. ActBlue and WinRed are their own Conduit category
+(since 2026-10-09; earlier rebuilds filed them under Carey, which is now only
+the ordinary registered hybrid committees); ordinary registered PACs have a
+separate Other PAC category. Historical workbooks keep their original evidence
+and may predate these corrections.
 The September 8 audit and repair evidence are in `audits/mentat_20260908/`.
 
 Graph row counts are editable through **Rows per chart** or **Show all rows**.

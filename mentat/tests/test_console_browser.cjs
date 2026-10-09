@@ -98,6 +98,10 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     assert.deepEqual(await page.locator('#evidence-source option').evaluateAll(options=>options.map(option=>option.value)),
       ['','snapshot:fixture-evidence'],'The scope bar offers the saved snapshot by its real id before Graph has loaded.');
     assert.equal(await page.locator('#evidence-source').inputValue(),'','No source is chosen until the reader picks one.');
+    // evidence.js initialize() says "Finding imported files and saved snapshots…", awaits the sources and
+    // /api/pac-flow-catalog, and only then sayScope()s the counts; the source option appears before that
+    // last step, so wait (bounded by the page timeout) for the final status instead of reading it at once.
+    await page.waitForFunction(()=>/0 imported files and 1 saved snapshot/.test(document.querySelector('#evidence-status').textContent)).catch(()=>{});
     assert.match(await page.locator('#evidence-status').innerText(),/0 imported files and 1 saved snapshot/);
     // 500,000,001 bytes exceeds the 500 MB cap without a 500 MB write: a sparse
     // file (open + ftruncate) reports the right file.size for the client's

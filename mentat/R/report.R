@@ -18,6 +18,9 @@ spending_stats_category_groups <- function() {
   list(
     "Super PAC" = "Super PAC",
     "Carey" = "Carey",
+    # ActBlue and WinRed (spending_recipient_classification). Its own column
+    # group directly after Carey, where the same two committees used to land.
+    "Conduit" = "Conduit",
     "Company PAC" = c("Company PAC", "Leadership PAC"),
     "Trade Association" = "Trade Association",
     "Candidate" = c(
@@ -30,6 +33,20 @@ spending_supplementary_categories <- function() {
   c("527", "501c")
 }
 
+# The recipient categories a Company PAC's disbursements are split across, in
+# column order. Every one of them has its own share column, so a disbursement
+# to a conduit is reported as a conduit disbursement rather than falling out of
+# the allocation (it used to be counted under Carey).
+spending_stats_allocation_categories <- function() {
+  c("Super PAC", "Candidate", "Trade Association", "Carey", "Conduit")
+}
+
+# The Conduit column groups are inserted directly after each Carey group, so
+# the header vector below stays the single description of the sheet's layout.
+spending_stats_metric_count <- function() {
+  length(spending_stats_headers(2026L)) - 1L
+}
+
 spending_stats_headers <- function(year) {
   role_headers <- function(role) {
     c(
@@ -37,6 +54,7 @@ spending_stats_headers <- function(year) {
       "% of Company Spending",
       "Super PAC", "% of Total Giving", "Partisan Split",
       "Carey", "% of Total Giving", "Partisan Split",
+      "Conduit", "% of Total Giving", "Partisan Split",
       "Company PAC", "% of Total Giving", "Partisan Split",
       "Trade Association", "% of Total Giving", "Partisan Split",
       "Candidate", "% of Total Giving", "Partisan Split"
@@ -48,6 +66,7 @@ spending_stats_headers <- function(year) {
     "Corporate Giving", "% of Total Giving", "Partisan Split",
     "Super PAC", "% of Total Giving", "Partisan Split",
     "Carey", "% of Total Giving", "Partisan Split",
+    "Conduit", "% of Total Giving", "Partisan Split",
     "Company PAC", "% of Total Giving", "Partisan Split",
     "Trade Association", "% of Total Giving", "Partisan Split",
     "Candidate", "% of Total Giving", "Partisan Split",
@@ -58,7 +77,8 @@ spending_stats_headers <- function(year) {
     "Company PAC: To Super PAC", "% to Super PAC", "Partisan Split",
     "Company PAC: Direct to Candidate", "% to Candidate", "Partisan Split",
     "Company PAC: Trade Association", "% to Trade Association",
-    "Company PAC: Carey", "% to Carey", "Partisan Split"
+    "Company PAC: Carey", "% to Carey", "Partisan Split",
+    "Company PAC: Conduit", "% to Conduit", "Partisan Split"
   )
 }
 
@@ -395,7 +415,7 @@ spending_stats_company_formulas <- function(year, company_ref, last_fact_row) {
       cash, "/", receipts, ")"
     )
   )
-  for (category in c("Super PAC", "Candidate", "Trade Association", "Carey")) {
+  for (category in spending_stats_allocation_categories()) {
     category_total <- spending_sumifs(
       ranges,
       year,
@@ -429,9 +449,10 @@ spending_stats_company_formulas <- function(year, company_ref, last_fact_row) {
       )
     }
   }
-  if (length(formulas) != 85L) {
+  if (length(formulas) != spending_stats_metric_count()) {
     stop(
-      "Spending Report formula contract drifted: expected 85 metrics, got ",
+      "Spending Report formula contract drifted: expected ",
+      spending_stats_metric_count(), " metrics, got ",
       length(formulas),
       call. = FALSE
     )
@@ -445,18 +466,19 @@ spending_stats_sheet <- function(last_fact_row = 2L, memo_duplicate_count = 0L,
   # Column B carries the ten company labels that every Stats formula matches
   # facts against ($B<row>), so they must be the CURRENT industry's companies -
   # a crypto-labelled grid laid over telecom facts resolves nothing and computes
-  # zeros across all 85 metrics. Crypto keeps its curated template order (the
+  # zeros across every metric. Crypto keeps its curated template order (the
   # ordering came from the source Spending Report workbook, not from the data),
   # so existing crypto output stays byte-identical; other industries have no
   # curated order and fall back to the roster's alphabetical order.
   template_companies <- spending_stats_companies(companies)
-  values <- matrix("", nrow = 84L, ncol = 87L)
+  metric_count <- spending_stats_metric_count()
+  values <- matrix("", nrow = 84L, ncol = metric_count + 2L)
   values[1L, 2L] <- paste0(
     "R8 memo-X dedup rule: exclude a memo-X row only when a non-memo row has ",
     "the same company, committee_id, date, amount, and contributor_name; flagged ",
     as.integer(memo_duplicate_count), " row(s)."
   )
-  formulas <- matrix(NA_character_, nrow = 84L, ncol = 85L)
+  formulas <- matrix(NA_character_, nrow = 84L, ncol = metric_count)
   for (index in seq_along(2026:2021)) {
     year <- (2026:2021)[[index]]
     header_row <- 2L + (index - 1L) * 14L
@@ -616,7 +638,7 @@ spending_stats_company_cached_values <- function(aggregate, year, company) {
     if (cash_count == 0) NA_real_ else cash,
     if (cash_count == 0 || receipts == 0) NA_real_ else cash / receipts
   )
-  for (category in c("Super PAC", "Candidate", "Trade Association", "Carey")) {
+  for (category in spending_stats_allocation_categories()) {
     category_total <- sum_metric(
       "PAC_DISBURSEMENT",
       recipient_category = category
@@ -636,9 +658,10 @@ spending_stats_company_cached_values <- function(aggregate, year, company) {
       )
     }
   }
-  if (length(values) != 85L) {
+  if (length(values) != spending_stats_metric_count()) {
     stop(
-      "Spending Report cached-value contract drifted: expected 85 metrics, got ",
+      "Spending Report cached-value contract drifted: expected ",
+      spending_stats_metric_count(), " metrics, got ",
       length(values),
       call. = FALSE
     )
@@ -690,7 +713,11 @@ spending_stats_cached_values <- function(support, companies = NULL) {
     cells <<- c(
       cells,
       paste0(
-        vapply(3:87, spending_excel_column, character(1L)),
+        vapply(
+          seq_len(spending_stats_metric_count()) + 2L,
+          spending_excel_column,
+          character(1L)
+        ),
         as.integer(row)
       )
     )
@@ -712,7 +739,9 @@ spending_stats_cached_values <- function(support, companies = NULL) {
       )
     }
   }
-  if (length(cells) != 6035L || anyDuplicated(cells)) {
+  # Six years x (10 companies + Average) + five Change rows = 71 value rows.
+  if (length(cells) != spending_stats_metric_count() * 71L ||
+      anyDuplicated(cells)) {
     stop("Spending Report formula-cache cell map is incomplete.", call. = FALSE)
   }
   data.frame(cell = cells, value = values, stringsAsFactors = FALSE)
@@ -915,6 +944,57 @@ spending_xml_cols_block <- function(xml) {
     perl = TRUE
   )
   if (match[[1L]] == -1L) "" else regmatches(xml, match)
+}
+
+# The template's Stats column widths predate the Conduit column groups. Each
+# Conduit group (three columns, directly after a Carey group) takes the widths
+# of the Carey group it follows, and every later template column moves right by
+# the width of the groups inserted before it, so each width stays on the header
+# it was set for. A column the template never sized stays unsized.
+spending_stats_expand_template_cols <- function(template_cols) {
+  if (!nzchar(template_cols)) return(template_cols)
+  headers <- spending_stats_headers(2026L)[-1L]
+  group_width <- 3L
+  group_starts <- which(headers %in% c("Conduit", "Company PAC: Conduit")) + 2L
+  blocks <- regmatches(
+    template_cols,
+    gregexpr("<col\\s[^>]*/>", template_cols, perl = TRUE)
+  )[[1L]]
+  attribute <- function(name) {
+    as.integer(sub(
+      paste0('^.*\\b', name, '="([0-9]+)".*$'),
+      "\\1",
+      blocks,
+      perl = TRUE
+    ))
+  }
+  template_min <- attribute("min")
+  if (!length(blocks) || anyNA(template_min) ||
+      !identical(template_min, attribute("max"))) {
+    stop(
+      "Spending Report template column widths must be one column per entry.",
+      call. = FALSE
+    )
+  }
+  template_column <- function(column) {
+    if (any(column >= group_starts & column < group_starts + group_width)) {
+      column <- column - group_width
+    }
+    column - group_width * sum(group_starts < column)
+  }
+  new_columns <- seq(
+    min(template_min),
+    max(template_min) + group_width * length(group_starts)
+  )
+  source <- match(vapply(new_columns, template_column, numeric(1L)), template_min)
+  keep <- !is.na(source)
+  expanded <- vapply(which(keep), function(index) {
+    column <- new_columns[[index]]
+    block <- blocks[[source[[index]]]]
+    block <- sub('\\bmin="[0-9]+"', paste0('min="', column, '"'), block, perl = TRUE)
+    sub('\\bmax="[0-9]+"', paste0('max="', column, '"'), block, perl = TRUE)
+  }, character(1L))
+  paste0("<cols>", paste0(expanded, collapse = ""), "</cols>")
 }
 
 spending_set_xml_cols_block <- function(xml, template_cols) {
@@ -1243,7 +1323,7 @@ spending_transplant_column_layouts <- function(
   if (any(!file.exists(template_paths))) {
     stop("Spending Report template must contain four worksheet XML files.", call. = FALSE)
   }
-  restore_layout <- function(template_index, output_index) {
+  restore_layout <- function(template_index, output_index, adjust = identity) {
     output_sheet <- file.path(
       output_sheet_dir,
       paste0("sheet", output_index, ".xml")
@@ -1251,9 +1331,9 @@ spending_transplant_column_layouts <- function(
     if (!file.exists(output_sheet)) {
       stop("Generated Spending Report is missing ", basename(output_sheet), call. = FALSE)
     }
-    template_cols <- spending_xml_cols_block(
+    template_cols <- adjust(spending_xml_cols_block(
       spending_read_xml(template_paths[[template_index]])
-    )
+    ))
     output_xml <- spending_set_xml_cols_block(
       spending_read_xml(output_sheet),
       template_cols
@@ -1263,7 +1343,7 @@ spending_transplant_column_layouts <- function(
       stop("Could not restore template column layout for ", basename(output_sheet), call. = FALSE)
     }
   }
-  restore_layout(1L, 1L)
+  restore_layout(1L, 1L, spending_stats_expand_template_cols)
   restore_layout(2L, 2L)
   for (sheet_index in raw_sheet_indices) restore_layout(3L, sheet_index)
   restore_layout(4L, support_sheet_index)
@@ -2695,12 +2775,17 @@ spending_recipient_classification <- function(connection, rows, lookups = NULL) 
   registered_conduit <- row_committee_id %in%
     c("C00401224", "C00694323") |
     row_committee_key %in% c("ACTBLUE", "WINRED")
-  # These registered hybrid committees have separate contribution and
-  # non-contribution accounts. Routing receipts through them is not evidence
-  # of independent-expenditure-only Super PAC giving.
-  category[registered_conduit] <- "Carey"
+  # ActBlue and WinRed are registered hybrid committees, but a receipt routed
+  # through them is earmarked money passed on to the committee named on the
+  # row, not giving to a Carey and not independent-expenditure-only Super PAC
+  # giving. They are filed under their own Conduit category, ahead of every
+  # other rule. Same IDs and name as app/evidence_csv.py EARMARK_CONDUITS and
+  # CONDUIT, which relabel the same two committees when the console reads an
+  # older book. Only the label moves: the receipt still counts once, to this
+  # row's recipient, exactly as before.
+  category[registered_conduit] <- "Conduit"
   category_source[registered_conduit] <-
-    "fec:hybrid_committee_type:registered_conduit"
+    "fec:registered_conduit:earmark_platform"
 
   category_rows <- which(!registered_conduit & !is.na(category_match))
   if (length(category_rows)) {
@@ -3137,6 +3222,7 @@ spending_calculation_support <- function(
     "Company PAC allocation share = category disbursements / all Company PAC disbursements.",
     "Refunds retain their negative sign; only accepted, countable contribution rows enter calculations.",
     "The second category column in each role block is headed Carey and calculates Carey; the template once repeated the Super PAC header there.",
+    "Conduit holds receipts to the registered earmark conduits ActBlue and WinRed. It has its own column group directly after Carey in the company block, in each role block and in the Company PAC allocation; Carey no longer includes them, and every dollar stays in exactly one category column.",
     "Company PAC cash, receipts, and disbursement cells stay blank until Phase 3 supplies those fact records."
   )
   methods <- data.table::data.table(

@@ -555,6 +555,7 @@ const scopes = [
   "Employee",
   "Super PAC",
   "Carey",
+  "Conduit",
   "Other PAC",
   "Company PAC",
   "Leadership PAC",
@@ -564,9 +565,13 @@ const scopes = [
   "JFC",
   "Unclassified",
 ];
+// ActBlue and WinRed (R/report.R spending_recipient_classification) have their
+// own Conduit row and Master Overview channel, directly after Carey. It stays
+// declared even for an industry with none: a real zero shows as "-".
 const masterCategories = [
   "Super PAC",
   "Carey",
+  "Conduit",
   "Other PAC",
   "Company PAC",
   "Leadership PAC",
@@ -732,6 +737,7 @@ function scopeFormula(rangeInfo, scope, extraCriteria = []) {
   const categoryMap = {
     "Super PAC": ["Super PAC"],
     Carey: ["Carey"],
+    Conduit: ["Conduit"],
     "Other PAC": ["Other PAC"],
     "Company PAC": ["Company PAC"],
     "Leadership PAC": ["Leadership PAC"],
@@ -2698,7 +2704,9 @@ void bridgeSheet;
 
 const previewRanges = new Map([
   // Each cycle block gained an Average row, so the third block now ends at 48.
-  ["Master Overview", "A1:CE48"],
+  // The last column is the Integrity Check: 17 summary columns, five per category
+  // and per contributor role, then the check, so it follows masterCategories.
+  ["Master Overview", `A1:${excelColumn(18 + (masterCategories.length + masterTiers.length) * 5)}48`],
   [overviewSheetName, "A1:J52"],
   ["Company List", "A1:O36"],
   ...(aggregateFacts ? [["Employee Rank Facts", "A1:D25"]] : []),

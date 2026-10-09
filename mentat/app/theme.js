@@ -149,11 +149,16 @@
   }
   // Conduit (ActBlue, WinRed) is an earmark platform: the money that comes through it is individual
   // donors' earmarked giving, not a committee's own. It is the one recipient category with a colour of
-  // its own - a neutral slate that no categorical slot uses (8.5 OKLab x100 from the nearest of the
-  // twelve, slot 2's purple) - and it takes no slot, so every other group in a chart is coloured as it
-  // would be were Conduit not there. categoryColours(names) is the list a renderer colours a named set
-  // of groups with; categoryNote(name) is the hover text a Conduit mark, row or legend item carries.
-  const CONDUIT = 'Conduit', CONDUIT_COLOUR = '#555b66';
+  // its own - a dark slate that no categorical slot uses - and it takes no slot, so every other group in
+  // a chart is coloured as it would be were Conduit not there. #1f242b is 19.1 OKLab x100 from the
+  // nearest of the twelve (slot 2's purple) and 12.5 from the nearest under protan or deutan simulation
+  // (slot 8's wine), so it clears the 10.6 colour-blind floor the slots keep; it holds 14.7:1 on the
+  // paper and 15.6:1 on white, so white text on it reads. The earlier #555b66 was 8.5 from slot 2: no
+  // neutral lighter than about OKLab L 0.27 clears the floor, because the dark slots (purple, wine,
+  // brown) are far enough from grey only by lightness. theme-palette.test.js holds all of this.
+  // categoryColours(names) is the list a renderer colours a named set of groups with; categoryNote(name)
+  // is the hover text a Conduit mark, row or legend item carries.
+  const CONDUIT = 'Conduit', CONDUIT_COLOUR = '#1f242b';
   const CONDUIT_NOTE = 'Conduit: an earmark platform (ActBlue, WinRed). These are individual donors\' earmarked contributions passed through it, not super PAC money.';
   function categoryColours(names) {
     let slot = 0;

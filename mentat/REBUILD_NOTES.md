@@ -44,6 +44,7 @@ The legitimate ActBlue split-receipt change does not itself add or remove dollar
 | --- | --- |
 | Super PAC | Super PAC |
 | Carey | Carey |
+| Conduit | Conduit |
 | Company PAC | Company PAC |
 | Leadership PAC | Company PAC |
 | Trade Association | Trade Association |
@@ -53,6 +54,8 @@ The legitimate ActBlue split-receipt change does not itself add or remove dollar
 | Unclassified | Candidate |
 
 Registered `527` and `501c` rows remain visible in support data as `EXCLUDED_527_501C` and are excluded from the Stats giving range.
+
+Conduit (2026-10-09, Paul's ruling): the registered earmark conduits ActBlue (`C00401224`) and WinRed (`C00694323`) are filed under their own `Conduit` category (`category_source` `fec:registered_conduit:earmark_platform`) instead of Carey. Only the label moved; the receipts count once, to the same recipient, as before. The Stats sheet gives Conduit its own column group directly after each Carey group (company block, the three role blocks) and its own Company PAC allocation group, so the contract in B4 is now 101 headers, 100 formula metrics, an 84 × 102 grid and 7,100 formulas. The industry workbooks give Conduit its own Spending Overview row and Master Overview channel (directly after Carey). A book built before this ruling still files them under Carey (or, before 2026-09-08, Super PAC).
 
 ## Group C — API correctness
 

@@ -74,8 +74,8 @@ spending_recipient_classification_reference <- function(
         )
     ]
     if (is_registered_conduit) {
-      category <- "Carey"
-      category_source <- "fec:hybrid_committee_type:registered_conduit"
+      category <- "Conduit"
+      category_source <- "fec:registered_conduit:earmark_platform"
     } else if (nrow(category_match)) {
       category <- category_match$category[[1L]]
       category_source <- if (
@@ -297,6 +297,20 @@ if (!identical(as.data.frame(observed), as.data.frame(expected))) {
   ))
   stop("Vectorized recipient classification changed output.", call. = FALSE)
 }
+
+# The registered earmark conduits are Conduit by committee ID or exact name, and
+# only they: an ordinary hybrid (type V) committee named "CAREY" stays Carey.
+conduit_case <- fixture_rows$committee_id == "C00401224" |
+  fixture_rows$committee_name == "WINRED"
+carey_case <- fixture_rows$committee_name == "CAREY"
+stopifnot(
+  any(conduit_case), any(carey_case),
+  all(observed$recipient_category[conduit_case] == "Conduit"),
+  all(observed$category_source[conduit_case] ==
+    "fec:registered_conduit:earmark_platform"),
+  all(observed$recipient_category[carey_case] == "Carey"),
+  !"Conduit" %in% observed$recipient_category[!conduit_case]
+)
 
 entity_rows <- data.table(
   entity_type = rep(c("IND", "ORG", "COM", "IND"), 2500L),

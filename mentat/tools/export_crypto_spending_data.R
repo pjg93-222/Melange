@@ -302,10 +302,14 @@ classifications$party_source[party_fill] <- paste0(
   "fec_committee_master:",
   analysis_rows$two_year_transaction_period[party_fill]
 )
+# A registered earmark conduit (ActBlue, WinRed) is Conduit by committee ID, not
+# by type or designation, so its source keeps saying so instead of being
+# rewritten to the committee master's type-and-designation wording.
 master_category_fill <- (
   analysis_rows$type_filled_from_master |
     analysis_rows$designation_filled_from_master
-) & grepl("^fec:", classifications$category_source)
+) & grepl("^fec:", classifications$category_source) &
+  classifications$recipient_category != "Conduit"
 classifications$category_source[master_category_fill] <- paste0(
   "fec_committee_master:",
   analysis_rows$two_year_transaction_period[master_category_fill],
@@ -874,11 +878,14 @@ guard_results <- mentat_run_export_guards(
     # (tools/crypto_workbook_builder.mjs masterCategories). Kept here so a
     # category the template shows but nothing ever populates is reported rather
     # than silently rendering $0.00, as Trade Association did in six books.
+    # Conduit (ActBlue, WinRed) is rendered too, but an industry or cycle with no
+    # earmark-platform receipts has a real zero there, so it is optional.
     mentat_guard_category_population(
-      c("Super PAC", "Carey", "Other PAC", "Company PAC", "Leadership PAC",
-        "Trade Association", "Candidate", "Party Committee", "JFC",
-        "Unclassified"),
-      workbook_raw_export$recipient_category
+      c("Super PAC", "Carey", "Conduit", "Other PAC", "Company PAC",
+        "Leadership PAC", "Trade Association", "Candidate", "Party Committee",
+        "JFC", "Unclassified"),
+      workbook_raw_export$recipient_category,
+      optional = "Conduit"
     )
   ),
   context = MENTAT_INDUSTRY

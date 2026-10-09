@@ -210,4 +210,40 @@ try {
   Remove-Item -LiteralPath $packageDir -Recurse -Force
 }
 
+# Recipient categories. The builder creates one Master Overview channel and one
+# Spending Overview row per category, the finalizer fills each channel by column
+# NAME, and the export guard reports a rendered category nothing populates. The
+# lists must agree, in order, or a channel is built without formulas or formulas
+# are written to a column that does not exist. Conduit (ActBlue, WinRed) is its
+# own category directly after Carey and may legitimately be empty.
+function Get-QuotedItems([string]$Text, [string]$Quote) {
+  @([regex]::Matches($Text, "$Quote([^$Quote]+)$Quote") | ForEach-Object { $_.Groups[1].Value })
+}
+$exportPath = Join-Path $projectRoot 'tools\export_crypto_spending_data.R'
+$exportText = Get-Content -Raw -LiteralPath $exportPath
+$builderChannels = Get-QuotedItems ([regex]::Match($builderText, 'const masterCategories = \[(.*?)\];', 'Singleline').Groups[1].Value) '"'
+$builderScopes = Get-QuotedItems ([regex]::Match($builderText, 'const scopes = \[(.*?)\];', 'Singleline').Groups[1].Value) '"'
+$finalizerChannels = Get-QuotedItems ([regex]::Match($finalizerText, '\$masterCategories = @\((.*?)\)').Groups[1].Value) "'"
+$guardCategories = Get-QuotedItems ([regex]::Match($exportText, 'mentat_guard_category_population\(\s*c\((.*?)\),', 'Singleline').Groups[1].Value) '"'
+if ($builderChannels.Count -lt 10) { throw 'Could not read masterCategories from the workbook builder.' }
+if (($builderChannels -join '|') -ne ($finalizerChannels -join '|')) {
+  throw "Finalizer masterCategories do not match the builder's: builder=[$($builderChannels -join ', ')] finalizer=[$($finalizerChannels -join ', ')]"
+}
+if ((@($builderScopes | Select-Object -Skip 5) -join '|') -ne ($builderChannels -join '|')) {
+  throw "Spending Overview scopes are not the five role scopes followed by the Master Overview channels: [$($builderScopes -join ', ')]"
+}
+if ((@($guardCategories | Sort-Object) -join '|') -ne (@($builderChannels | Sort-Object) -join '|')) {
+  throw "The export category_population guard does not declare the categories the workbook renders: [$($guardCategories -join ', ')]"
+}
+$carey = [array]::IndexOf($builderChannels, 'Carey')
+if ($carey -lt 0 -or $builderChannels[$carey + 1] -ne 'Conduit') {
+  throw 'Conduit (ActBlue, WinRed) must be its own channel directly after Carey in the workbook builder.'
+}
+if (-not $builderText.Contains('Conduit: ["Conduit"],')) {
+  throw 'The builder scope formulas must map the Conduit scope to the Conduit recipient category.'
+}
+if (-not $exportText.Contains('optional = "Conduit"')) {
+  throw 'An industry or cycle with no earmark-platform receipts is a real zero: Conduit must be an optional category in the population guard.'
+}
+
 Write-Host 'Test-MentatWorkbookBuilderGuards: PASS'

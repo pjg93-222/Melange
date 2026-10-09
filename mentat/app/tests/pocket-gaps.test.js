@@ -64,6 +64,23 @@ test('Comcast 2025-26 reads 77% of FEC-reported records, with the cells the chec
   assert.equal(found.source, 'pinned payload export_guards');
 });
 
+test('a check that itemizes every short cell (export_guards.R no longer stops at twelve) reads the same in both copies and names them all', () => {
+  const all = Array.from({length: 31}, (_, n) => [`Company ${n + 1}`, '2025-2026', 'contributions', 500, 1000 + n, Math.round(50000 / (1000 + n))]);
+  const here = pocketNotice(pocket(all, 0), '', null);
+  const there = coverage.gapNotice([{gaps: console_(all, 0), scope: {companies: null, cycles: null}}]);
+  assert.equal(here.caption, there.caption);
+  assert.equal(there.cells.length, 31);
+  assert.equal(there.unitemized, 0);
+  assert.equal(there.caption.split('; ').length, 31, 'one line per cell, none summarised');
+  assert.doesNotMatch(there.caption, /not itemized/);
+  assert.match(there.caption, /Company 31 2025-26: 49% of FEC-reported records \(500 of 1,030 contributions\)$/);
+  // A build made before that change still prints the first twelve and a count: same cells, plus the sentence.
+  const truncated = coverage.gapNotice([{gaps: console_(all.slice(0, 12), 19), scope: {}}]);
+  assert.equal(truncated.caption, there.caption.split('; ').slice(0, 12).join('; ') +
+    "; 19 more short cells are not itemized in the workbook's Data Quality check");
+  assert.equal(pocketNotice(pocket(all.slice(0, 12), 19), '', null).caption, truncated.caption);
+});
+
 test('a report whose check passed, or a snapshot from before the field, says nothing', () => {
   assert.equal(pocketNotice(pocket(CELLS, 21, false), '', null), null);
   assert.equal(pocketNotice(undefined, 'Comcast', ['2025-2026']), null);

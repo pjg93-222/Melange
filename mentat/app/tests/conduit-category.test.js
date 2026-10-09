@@ -50,7 +50,7 @@ test('[conduit] theme: the note, and a colour of its own that takes no slot', ()
   assert.deepEqual(theme.categoryColours(['Conduit', 'Conduit']), [theme.conduitColour, theme.conduitColour]);
   const slots = Array.from({length: 36}, (_, i) => theme.categoryColour(i));
   assert.ok(!slots.includes(theme.conduitColour), 'no categorical slot is the Conduit colour');
-  for (const slot of slots.slice(0, 12)) assert.ok(distance(theme.conduitColour, slot) >= 8, `Conduit is ${distance(theme.conduitColour, slot).toFixed(1)} from ${slot}`);
+  for (const slot of slots.slice(0, 12)) assert.ok(distance(theme.conduitColour, slot) >= 10.6, `Conduit is ${distance(theme.conduitColour, slot).toFixed(1)} from ${slot}; the slots' own floor is 10.6 (theme-palette.test.js holds it for protan and deutan too)`);
   assert.ok(Object.isFrozen(theme));
 });
 

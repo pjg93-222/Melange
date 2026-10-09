@@ -262,11 +262,12 @@ category_lookup <- setNames(
   unlist(category_groups, use.names = FALSE)
 )
 stopifnot(
-  length(headers) == 86L,
-  length(formulas) == 85L,
+  length(headers) == 101L,
+  length(formulas) == 100L,
   sum(headers == "Corporate Giving") == 1L,
   identical(names(spending_stats_category_groups()), c(
-    "Super PAC", "Carey", "Company PAC", "Trade Association", "Candidate"
+    "Super PAC", "Carey", "Conduit", "Company PAC", "Trade Association",
+    "Candidate"
   )),
   # One Super PAC and one Carey column in the company block and in each of
   # the three role blocks. The second Super PAC header in a role block used
@@ -274,16 +275,20 @@ stopifnot(
   sum(headers == "Super PAC") == 4L,
   sum(headers == "Carey") == 4L,
   identical(headers[which(headers == "Super PAC") + 3L], rep("Carey", 4L)),
+  # ActBlue and WinRed have their own Conduit column group straight after each
+  # Carey group, not a share of the Carey column.
+  sum(headers == "Conduit") == 4L,
+  identical(headers[which(headers == "Carey") + 3L], rep("Conduit", 4L)),
   any(grepl("Leadership PAC", formulas, fixed = TRUE)),
   !any(grepl("EXCLUDED_527_501C", formulas, fixed = TRUE))
 )
 stopifnot(identical(
   unname(category_lookup[c(
-    "Super PAC", "Carey", "Company PAC", "Leadership PAC",
+    "Super PAC", "Carey", "Conduit", "Company PAC", "Leadership PAC",
     "Trade Association", "Candidate", "Party Committee", "JFC", "Unclassified"
   )]),
   c(
-    "Super PAC", "Carey", "Company PAC", "Company PAC",
+    "Super PAC", "Carey", "Conduit", "Company PAC", "Company PAC",
     "Trade Association", "Candidate", "Candidate", "Candidate", "Candidate"
   )
 ))

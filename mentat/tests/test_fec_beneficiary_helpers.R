@@ -270,6 +270,30 @@ stopifnot(mentat_guard_date_sanity(rep("2026-01-02", 1500))$passed,
           !mentat_guard_date_sanity("0021-12-12")$passed,
           !mentat_guard_date_sanity("not-a-date")$passed)
 
+# G7: a rendered category nothing populates is reported, except an optional one.
+# Conduit (ActBlue, WinRed) is a real zero for an industry with no earmark-platform
+# receipts, so its absence is not a finding; a missing Carey still is.
+population_declared <- c("Super PAC", "Carey", "Conduit", "Candidate")
+stopifnot(
+  mentat_guard_category_population(
+    population_declared, c("Super PAC", "Carey", "Candidate"),
+    optional = "Conduit"
+  )$passed,
+  !mentat_guard_category_population(
+    population_declared, c("Super PAC", "Candidate"), optional = "Conduit"
+  )$passed,
+  grepl("Carey", mentat_guard_category_population(
+    population_declared, c("Super PAC", "Candidate"), optional = "Conduit"
+  )$detail, fixed = TRUE),
+  !grepl("Conduit", mentat_guard_category_population(
+    population_declared, c("Super PAC", "Candidate"), optional = "Conduit"
+  )$detail, fixed = TRUE),
+  # Without the optional argument the old behaviour stands.
+  !mentat_guard_category_population(
+    population_declared, c("Super PAC", "Carey", "Candidate")
+  )$passed
+)
+
 # Dates cannot establish whether repeated transaction IDs are amendments or
 # separate quarterly reports. Retain distinct observations provisionally by
 # default, and exercise the two explicitly selected sensitivity policies.
