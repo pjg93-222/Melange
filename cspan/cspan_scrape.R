@@ -391,7 +391,7 @@ run_rebuild <- function() {
 # and concat: URLs as readily as https ones. Only web URLs may reach it.
 is_web_media_url <- function(url) {
   is.character(url) && length(url) == 1L && !is.na(url) &&
-    grepl("^https?://[^[:space:][:cntrl:]\"]+$", url, ignore.case = TRUE)
+    grepl("^https?://[^[:space:][:cntrl:]\"\\\\]+$", url, ignore.case = TRUE)
 }
 
 download_audio <- function(id, media = NULL) {

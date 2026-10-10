@@ -41,6 +41,8 @@ rejected <- list(
   " https://example.org/a.mp4",
   "https://example.org/a b.mp4",
   "https://example.org/a\".mp4",
+  "https://example.org/a\\",
+  "https://example.org/a\\b.mp4",
   "https://example.org/a\nfile:///etc/passwd",
   "https://",
   "",
