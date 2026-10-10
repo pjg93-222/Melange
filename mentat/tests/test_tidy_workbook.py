@@ -12,6 +12,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 import openpyxl
@@ -454,6 +455,85 @@ class HelperTest(unittest.TestCase):
     def test_year_columns_are_not_thousands_formatted(self):
         self.assertEqual(writer.YEAR_FORMAT, writer.number_format("I", "Cycle End Year"))
         self.assertEqual(writer.INTEGER_FORMAT, writer.number_format("I", "Gift Count"))
+
+
+class FormulaGuardTest(unittest.TestCase):
+    """Text from an FEC filing must reach the workbook as text, never as a formula.
+
+    openpyxl turns a string that begins with '=' into a live formula; the writer
+    stores every string that begins with = + - @ tab or CR as an explicit string.
+    """
+
+    COLUMNS = [("employer", "Employer", "T"), ("occupation", "Occupation", "T"),
+               ("amount", "Amount", "R")]
+    HOSTILE = ['=HYPERLINK("http://x","y")', "+1+1", "@SUM(A1)", "-2+3",
+               "\t=1+1", "\r=1+1"]
+
+    def written(self, rows):
+        """Rows through the real append_rows, saved and reloaded formulas-intact."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "guard.xlsx"
+            book = openpyxl.Workbook(write_only=True)
+            sheet = writer.open_sheet(book, "Guard", self.COLUMNS)
+            writer.append_rows(sheet, self.COLUMNS, rows)
+            book.save(path)
+            with zipfile.ZipFile(path) as archive:
+                xml = archive.read("xl/worksheets/sheet1.xml").decode("utf-8")
+            loaded = openpyxl.load_workbook(path, data_only=False)
+            return [[cell for cell in row] for row in loaded["Guard"].iter_rows(min_row=2)], xml
+
+    def test_hostile_text_stays_text_and_numbers_stay_numbers(self):
+        rows = [(value, "x", 1.0) for value in self.HOSTILE]
+        rows += [("Acme Corp", "Legit & Sons", -5), ("-", "", -0.25)]
+        cells, xml = self.written(rows)
+        self.assertNotIn("<f>", xml)
+        for row, value in zip(cells, self.HOSTILE):
+            self.assertEqual("s", row[0].data_type, repr(value))
+            # XML normalizes a bare CR to LF on the way back, so compare stripped.
+            self.assertEqual(value.strip(), row[0].value.strip(), repr(value))
+        legit = cells[len(self.HOSTILE)]
+        self.assertEqual(("Acme Corp", "Legit & Sons"), (legit[0].value, legit[1].value))
+        # A real negative number is not a string and keeps its numeric cell.
+        self.assertEqual("n", legit[2].data_type)
+        self.assertEqual(-5, legit[2].value)
+        self.assertEqual(writer.MONEY_FORMAT, legit[2].number_format)
+        self.assertEqual("-", cells[-1][0].value)
+        self.assertEqual(-0.25, cells[-1][2].value)
+
+    def test_the_check_can_fail(self):
+        # Negative control: with the guard off, openpyxl writes the '=' value as a formula.
+        original = writer.FORMULA_LEADERS
+        writer.FORMULA_LEADERS = ()
+        try:
+            cells, xml = self.written([(self.HOSTILE[0], "x", 1.0)])
+        finally:
+            writer.FORMULA_LEADERS = original
+        self.assertEqual("f", cells[0][0].data_type)
+        self.assertIn("<f>", xml)
+
+    def test_employer_and_occupation_survive_the_full_writer(self):
+        with tempfile.TemporaryDirectory(prefix="tidy-guard-") as directory:
+            store = Path(directory) / "tidy.sqlite"
+            out = Path(directory) / "Guard Industry Spending Data.xlsx"
+            build_store(store)
+            with closing(sqlite3.connect(store)) as connection, connection:
+                for table in ("contributions", "contributor_facts"):
+                    connection.execute(f"UPDATE {table} SET employer=?, occupation=?",
+                                       (self.HOSTILE[0], self.HOSTILE[2]))
+            self.assertEqual(0, writer.main(["--staging", str(store), "--out", str(out)]))
+            book = openpyxl.load_workbook(out, data_only=False)
+            for name in ("Contributions", "Contributor Facts"):
+                headers = [c.value for c in book[name][1]]
+                row = {h: book[name].cell(2, i + 1) for i, h in enumerate(headers)}
+                for header, value in (("Employer", self.HOSTILE[0]),
+                                      ("Occupation", self.HOSTILE[2])):
+                    self.assertEqual("s", row[header].data_type, (name, header))
+                    self.assertEqual(value, row[header].value, (name, header))
+            book.close()
+            with zipfile.ZipFile(out) as archive:
+                self.assertFalse([n for n in archive.namelist()
+                                  if n.startswith("xl/worksheets/")
+                                  and b"<f>" in archive.read(n)])
 
 
 class SheetNameTest(unittest.TestCase):

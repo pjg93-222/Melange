@@ -116,6 +116,10 @@ MULTIVALUE_EXEMPT_HEADERS_DOC = (
 TRUE_WORDS = frozenset(("1", "y", "yes", "true", "t"))
 FALSE_WORDS = frozenset(("0", "n", "no", "false", "f"))
 
+# A text value that opens with one of these is a spreadsheet formula in waiting
+# (OWASP CSV injection list). openpyxl would turn a leading '=' into a live formula.
+FORMULA_LEADERS = ("=", "+", "-", "@", "\t", "\r")
+
 
 # --------------------------------------------------------------------------
 # Column registry (contract section 2). (store column, sheet header, kind)
@@ -595,7 +599,12 @@ def append_rows(worksheet, columns, rows):
         cells = []
         for index, kind in enumerate(kinds):
             value = convert(row[index], kind)
-            if value is None or formats[index] is None:
+            if isinstance(value, str) and value.startswith(FORMULA_LEADERS):
+                # Strings only: a real -5 is a float here and keeps its number cell.
+                cell = WriteOnlyCell(worksheet, value=value)
+                cell.data_type = "s"
+                cells.append(cell)
+            elif value is None or formats[index] is None:
                 cells.append(value)
             else:
                 cell = WriteOnlyCell(worksheet, value=value)
