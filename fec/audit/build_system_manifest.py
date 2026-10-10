@@ -418,14 +418,14 @@ REGISTRY = (
        'Re-collect; note 97.7% of rows are TRUNCATED, so counts derived from it are floors.',
        'on press refresh', 2, 'hash_never'),
     _s('repo.data_stance', 'live_tree', 'data/stance', 'DERIVED',
-       'fec/stance/* — notably own_source_stance_model.py:700-702 writes '
+       'fec/stance/* — notably own_source_stance_model.py:702-704 writes '
        'own_source_stance_model.joblib via its own tmp+os.replace, not dump_atomic',
        ['fec/stance/{speech,hearing,interview,bluesky}_stance_stack.py (via run_channel)',
         'engines'],
        'Regenerate with the stance stack; the fitted model artifact is a retrain, not a recompute.',
        'on stance refresh', 2, 'sentinel_files',
        # CHAIN-WRITTEN (DE-011). own_source_stance_model.joblib is retrained by load_or_train()
-       # (fec/stance/own_source_stance_model.py:700-702 — joblib.dump to a .tmp then os.replace),
+       # (fec/stance/own_source_stance_model.py:702-704 — joblib.dump to a .tmp then os.replace),
        # reached through run_channel from the four stance stacks, which are chain steps at
        # fec/run_pipeline.py:102 (speech), :103 (hearing), :105 (interview) and :106 (bluesky).
        # It reached by_size rank 2 and disagreed on sha256 (15:47 run).

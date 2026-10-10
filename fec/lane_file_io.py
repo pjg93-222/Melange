@@ -46,9 +46,11 @@ library.
 
 from __future__ import annotations
 
+import hashlib
 import os
 from pathlib import Path
 import random
+import sys
 import tempfile
 import time
 from typing import IO, Iterator
@@ -180,3 +182,45 @@ def atomic_write_text(path: Path, body: str, *, encoding: str = "utf-8") -> None
     """Text convenience wrapper around :func:`atomic_write_bytes`."""
 
     atomic_write_bytes(path, body.encode(encoding))
+
+
+def sha256_file(path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def write_sha256_sidecar(path) -> str:
+    """Record the saved model's digest in ``<path>.sha256`` for :func:`safe_to_unpickle`."""
+
+    digest = sha256_file(path)
+    atomic_write_text(Path(str(path) + ".sha256"), digest + "\n")
+    return digest
+
+
+def safe_to_unpickle(path) -> bool:
+    """Check ``<path>.sha256`` before the caller unpickles ``path``; unpickling runs code.
+
+    A matching sidecar returns True. A mismatched, empty or unreadable one
+    returns False, loudly: the caller must not load the file. An absent sidecar
+    warns and returns True, so a model saved before sidecars existed loads
+    exactly as it did (refusing it would force a retrain that can move ranks).
+    """
+
+    sidecar = str(path) + ".sha256"
+    try:
+        with open(sidecar, "r", encoding="ascii") as handle:
+            recorded = (handle.read().split() or [""])[0].lower()
+    except FileNotFoundError:
+        print(f"WARNING: no integrity sidecar {sidecar}; loading {path} unverified", file=sys.stderr, flush=True)
+        return True
+    except (OSError, UnicodeDecodeError) as error:
+        recorded = f"unreadable sidecar: {error}"
+    actual = sha256_file(path)
+    if recorded == actual:
+        return True
+    print(f"SECURITY: {path} does not match its integrity sidecar {sidecar} "
+          f"(recorded {recorded[:16]!r}, actual {actual[:16]!r}); refusing to unpickle it", file=sys.stderr, flush=True)
+    return False

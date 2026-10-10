@@ -3,6 +3,7 @@
 import datetime
 import os
 import smtplib
+import ssl
 from email.message import EmailMessage
 
 _HOST='smtp.mail.me.com'
@@ -72,11 +73,11 @@ def send_report(log_path,started_at,status_word) -> bool:
         msg.set_content(body)
         with smtplib.SMTP(_HOST,_PORT,timeout=30) as smtp:
             smtp.ehlo()
-            smtp.starttls()
+            smtp.starttls(context=ssl.create_default_context())
             smtp.ehlo()
             smtp.login(apple_id,password)
             smtp.send_message(msg)
         return True
-    except BaseException as e:
+    except Exception as e:
         _log(log_path,'EMAIL REPORT FAILED - %s'%type(e).__name__)
         return False

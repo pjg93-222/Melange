@@ -1,6 +1,12 @@
 # --- secrets (never track) ---
 fec/govinfo_key.txt
 *.key
+# Local-only secrets, databases and the mail bundle. Narrow on purpose: NOT *.zip, the FEC
+# bulk zips under fec/ are tracked deliberately. Ignoring does not untrack anything.
+.env
+*.pw
+*.sqlite
+data/money/*.zip
 
 # --- data artifacts: generated/derived, regenerable from pipeline ---
 *.json

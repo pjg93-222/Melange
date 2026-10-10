@@ -122,6 +122,38 @@ class IdentityHTTPTests(unittest.TestCase):
                 self.assertIn("error", payload)
         self.assertEqual(self.service.calls, [])
 
+    def test_foreign_host_header_is_refused_on_post_without_dispatch(self):
+        # DNS rebinding: Origin is the page's own (rebound) name or absent, so Host is the only tell.
+        for host in ("evil.example", f"evil.example:{self.port}", "127.0.0.1", f"127.0.0.1:{self.port + 1}"):
+            for path in ("/api/staffer-identity", "/unexpected"):
+                with self.subTest(host=host, path=path):
+                    status, payload, _ = self.post(path=path, headers={"Host": host})
+                    self.assertEqual(status, 403)
+                    self.assertEqual(payload, {"error": "Local access only."})
+        self.assertEqual(self.service.calls, [])
+
+    def test_loopback_host_names_with_the_bound_port_are_accepted_on_post(self):
+        for host in (f"127.0.0.1:{self.port}", f"localhost:{self.port}", f"LocalHost:{self.port}", f"[::1]:{self.port}"):
+            with self.subTest(host=host):
+                status, _, _ = self.post(headers={"Host": host})
+                self.assertEqual(status, 202)
+        self.assertEqual(len(self.service.calls), 4)
+
+    def test_foreign_host_header_is_refused_on_get_but_loopback_is_served(self):
+        for host, expected in (("evil.example", 403), (f"evil.example:{self.port}", 403), (f"127.0.0.1:{self.port}", 200),
+                               (f"localhost:{self.port}", 200)):
+            with self.subTest(host=host):
+                connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=2)
+                try:
+                    connection.request("GET", "/staffer-live/staffer-assertions.js", headers={"Host": host})
+                    response = connection.getresponse()
+                    body = response.read()
+                    self.assertEqual(response.status, expected)
+                    if expected == 403:
+                        self.assertNotIn(b"assertion-records", body)
+                finally:
+                    connection.close()
+
     def test_unexpected_post_path_is_404_without_dispatch(self):
         for path in ("/api/staffer-route", "/api/staffer-identity/", "/unexpected"):
             with self.subTest(path=path):

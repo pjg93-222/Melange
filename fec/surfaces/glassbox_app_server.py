@@ -971,17 +971,26 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- routing ------------------------------------------------------------
 
+    def valid_host(self):
+        """DNS-rebinding guard: a rebound hostname still arrives with its own name in Host."""
+        port = self.server.server_port
+        return (self.headers.get("Host") or "").lower() in (
+            "127.0.0.1:%d" % port, "localhost:%d" % port, "[::1]:%d" % port)
+
     def do_GET(self):
+        if not self.valid_host():
+            self._json({"error": "Local access only."}, 403)
+            return
         try:
             parsed = urlparse(self.path)
             route = parsed.path.rstrip("/") or "/"
             query = parse_qs(parsed.query)
             self.route(route, query)
         except Exception:
+            # The traceback stays in this process's log; the caller gets nothing to mine.
+            sys.stderr.write("[%s] request failed: %s\n%s\n" % (APP_NAME, self.path.split("?", 1)[0], traceback.format_exc()))
             try:
-                self._json(
-                    {"error": "server", "detail": traceback.format_exc(limit=3)}, 500
-                )
+                self._json({"error": "server", "detail": "Internal server error."}, 500)
             except Exception:
                 pass
 

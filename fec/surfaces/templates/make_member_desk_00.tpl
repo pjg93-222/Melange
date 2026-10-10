@@ -684,7 +684,8 @@ let POV={}; try{POV=JSON.parse(localStorage.getItem(POVKEY))||{}}catch(e){POV={}
 const POVCOL={support:'#34d399',oppose:'#ef4444',neutral:'#9ca3af'};
 function savePOV(){localStorage.setItem(POVKEY,JSON.stringify(POV));}
 function setPOV(url,stance,title){ if(!url)return; if(!stance){delete POV[url];} else {POV[url]={stance:stance,title:title||''};} savePOV(); }
-function povOf(url){return (POV[url]&&POV[url].stance)||null;}
+/* POV is imported JSON: only the three labels the desk knows may reach innerHTML or the POVCOL lookup */
+function povOf(url){const s=POV[url]&&POV[url].stance;return typeof s==='string'&&/^(support|oppose|neutral)$/.test(s)?s:null;}
 function povCount(){return Object.keys(POV).length;}
 function updatePovHint(){const h=$('#povhint');if(h)h.textContent=povCount()?('✎ '+povCount()+' pending override'+(povCount()>1?'s':'')+' — Export to apply'):'';}
 
@@ -933,7 +934,7 @@ function renderRanked(){
     const rk=rstate.sort==='tier'&&HONORS?honorAt(m,'').rank:potentialMode?(pv.rank==null?'—':'#'+pv.rank):area?(HONORS?honorRank(honorAt(m,area)):('#'+(m.adjrank[area]||'—'))):standingSort?standingRank(honorAt(m,'')):(HONORS?(honorAt(m,'').rank??'—'):(m.rank??'—'));
     return `<tr data-i=${byName[m.name]}>
       <td class=num><span class=rk>${rk}</span></td>
-      <td><div class=nm>${mlink(m.name)}${tierChip(m)}${potentialChip(m)}</div><div class=dist>${m.chamber} · ${m.party||'—'} · ${m.district||''}</div></td>
+      <td><div class=nm>${mlink(m.name)}${tierChip(m)}${potentialChip(m)}</div><div class=dist>${esc(m.chamber)} · ${esc(m.party||'—')} · ${esc(m.district||'')}</div></td>
       <td>${publicBadge(m,area)}</td>
       <td>${sparkHTML(m)}</td>
       <td>${scoreCell}</td></tr>`;
@@ -984,7 +985,7 @@ function openMember(i){
   const provSet=new Set(m.proven||[]), gcapSet=new Set(m.gcap||[]);
   const areaRows=HONORS?[]:CATS.map((cat,ix)=>({cat,ix,st:(m.stances&&m.stances[ix])||'-',score:m.radar[ix],rank:m.adjrank[cat],def:DEF.has(cat),curved:STANCE_CURVES.has(cat)}))
     .sort((a,b)=>{const na=STANCE_ORDER.indexOf(a.st),nb=STANCE_ORDER.indexOf(b.st);return (na<0?99:na)-(nb<0?99:nb)||(b.score-a.score);});
-  const stanceByArea=HONORS?honorFieldRows(m):areaRows.map(a=>`<div class=arow><span class=aname>${a.cat}${a.def?' <span style=color:var(--faint)>(def)</span>':''}${a.curved?' <span title="Label is curved within positive and negative evidence for this legislative area; the raw score and rank are unchanged" style=color:#EECD5C>(curved)</span>':''}${provSet.has(a.ix)?' <span title="Proven: sponsored bill in this area advanced past introduction" style=color:#f59e0b>★</span>':''}${gcapSet.has(a.ix)?' <span title="Capped from Champion: no sponsored bill in this area backs the rhetoric" style=color:var(--faint)>°</span>':''}</span>${stanceBadge(a.st)}<span class=arank>#${a.rank||'—'} · ${f2(a.score)}</span></div>`).join('');
+  const stanceByArea=HONORS?honorFieldRows(m):areaRows.map(a=>`<div class=arow><span class=aname>${esc(a.cat)}${a.def?' <span style=color:var(--faint)>(def)</span>':''}${a.curved?' <span title="Label is curved within positive and negative evidence for this legislative area; the raw score and rank are unchanged" style=color:#EECD5C>(curved)</span>':''}${provSet.has(a.ix)?' <span title="Proven: sponsored bill in this area advanced past introduction" style=color:#f59e0b>★</span>':''}${gcapSet.has(a.ix)?' <span title="Capped from Champion: no sponsored bill in this area backs the rhetoric" style=color:var(--faint)>°</span>':''}</span>${stanceBadge(a.st)}<span class=arank>#${a.rank||'—'} · ${f2(a.score)}</span></div>`).join('');
   const legRadar=radar(m.radar,D.cats_short,'#34d399',90);
   const evLbl=m.ev_play, evVal=m.ev_value;
   // pillars
@@ -995,7 +996,7 @@ function openMember(i){
   let h=`<div class=mhead>
     <div>
       ${HONORS?`<div class=verdict>${publicBadge(m,'')}</div><details style="font-size:10px;color:var(--faint);margin-top:8px"><summary>Classification evidence</summary><p>${esc(honorFacts(m,''))}</p><p>${esc(overallPolicyText())}</p></details>`:`<div class=verdict style="color:${col};background:${col}26"><span class=d></span>${verdictName} · ${POSTURE[os]||'qualify'} <span style=opacity:.7;font-weight:500>· overall${m.overall_say_do?' · say-do capped':''}</span></div>`}
-      <h2>${m.name}${potentialChip(m)}</h2><div class=meta>${m.chamber} · ${m.party||'—'} · ${m.district||''}</div>
+      <h2>${esc(m.name)}${potentialChip(m)}</h2><div class=meta>${esc(m.chamber)} · ${esc(m.party||'—')} · ${esc(m.district||'')}</div>
     </div>
     <div style=display:flex;gap:8px>
       <button class=backbtn id=backbtn>◀ Members</button>
@@ -1146,7 +1147,7 @@ function stfCard(sf,office){
   const starred=st.star!=null?st.star:sf.star;
   const sourceId=`quorum:${sf.id}`;
   const peopleHref=`/?v=staffer&s=${encodeURIComponent(office)}&person=${encodeURIComponent(sourceId)}&source_only=1`;
-  const media=(st.media||[]).map((mm,k)=>`<span class=chip><a href="${esc(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a><span class=x data-act=delmedia data-sid=${sf.id} data-k=${k}>×</span></span>`).join('');
+  const media=(st.media||[]).map((mm,k)=>`<span class=chip>${safeUrl(mm.u)?`<a href="${safeUrl(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a>`:`<span>${esc(mm.l||mm.u)}</span>`}<span class=x data-act=delmedia data-sid=${sf.id} data-k=${k}>×</span></span>`).join('');
   return `<div class="stfcard${st.gold?' gold':''}" data-sid=${sf.id}>
     <div class=stfhead><span class="stfstar${starred?' on':''}" data-act=star data-sid=${sf.id} title="${esc(sf.why||'industry-relevant')} — click to toggle">${starred?'★':'☆'}</span><a class=staffer-people-link href="${peopleHref}" data-staffer-source="${attr(sourceId)}" data-staffer-office="${attr(office)}" title="Open ${attr(sf.n)} in People and prepare path finding">${esc(sf.n)}</a><span class=stftitle>${esc(sf.t)}</span>${starred?'<span style="font-size:9px;font-weight:700;color:#c2862a;border:1px solid #c2862a66;border-radius:8px;padding:0 5px;margin-left:6px">CU-relevant</span>':''}</div>
     ${(sf.dom&&sf.dom.length)?`<div style="margin:2px 0 2px 20px">${sf.dom.map(dd=>{const cu=/banking|financial|credit union|consumer|housing|\btax|small business|insurance|securities|fintech|monetary|treasur|econom/i.test(dd);return `<span style="font-size:9.5px;border-radius:8px;padding:0 6px;margin-right:4px;border:1px solid ${cu?'#c2862a66':'var(--line,#433317)'};color:${cu?'#c2862a':'var(--faint)'}">${esc(dd)}</span>`;}).join('')}<span style="font-size:9px;color:var(--muted)"> ${sf.dsrc==='quorum'?'':'· from title'}</span></div>`:''}
@@ -1171,7 +1172,7 @@ function staffHTML(m){
     <div class=stflist>${dir.map(sf=>stfCard(sf,m.name)).join('')}</div>`:`<div class=empty>No staffer directory rows matched for this office.</div>`;
   return `<div id=staff-view>${dirHTML}<hr style="border-color:var(--line,#433317);margin:10px 0">
   ${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No office-level staff notes yet.</div>`}
-    ${files.length?`<div class=filelist>`+files.map((f,k)=>`<div class=fileitem><a href="${f.data}" download="${esc(f.name)}">📎 ${esc(f.name)}</a><span class=del data-f=${k} data-field=staff>remove</span></div>`).join('')+`</div>`:''}
+    ${files.length?`<div class=filelist>`+files.map((f,k)=>`<div class=fileitem>${/^data:/i.test(f.data)?`<a href="${attr(f.data)}" download="${esc(f.name)}">📎 ${esc(f.name)}</a>`:`<span>📎 ${esc(f.name)}</span>`}<span class=del data-f=${k} data-field=staff>remove</span></div>`).join('')+`</div>`:''}
     <button class=btn data-edit=staff>${note?'Edit':'Add'} note</button><label class=btn for=file-staff style=cursor:pointer>Upload file</label><input id=file-staff type=file data-field=staff hidden multiple>
     <div id=staff-edit hidden><textarea class=notebox data-field=staff>${esc(note||'')}</textarea><button class=btn data-save=staff>Save</button><button class="btn ghost" data-cancel=staff>Cancel</button></div></div>`;
 }
@@ -1183,7 +1184,7 @@ function respHTML(m){
       <div class=mrow><span>${P.basis==='behavioral'?'Record-based':'Presentation-based'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
       ${P.persona_susc_z!=null?`<div class=mrow><span>Presentation-based (public)</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
-  const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#D2CDBC);background:#2E2514;border:1px solid var(--line,#433317);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
+  const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#D2CDBC);background:#2E2514;border:1px solid var(--line,#433317);border-radius:8px;padding:7px 9px">${esc(P.approach)}</div>`:'';
   return `${suscRows}${appr}`;
 }
 /* Approach brief. Promoted out of psychHTML (Paul 2026-08-31) so it is the first thing
@@ -1208,7 +1209,7 @@ function narrativeHTML(m){
   const LF=MP&&MP.observed_longform;
   const longform=LF?`<div style="margin:7px 0;padding:7px 8px;background:#172033;border-left:3px solid #7dd3fc;border-radius:4px">
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em">Reviewed long-form example</div>
-        <div>${LF.url?`<a href="${esc(LF.url)}" target=_blank rel=noopener>${esc(LF.title||'Source')}</a>`:esc(LF.title||'Source')} · ${esc(LF.recorded_at||LF.published||'date unavailable')} · ${esc((LF.source_era||'').replaceAll('_',' '))}</div>
+        <div>${safeUrl(LF.url)?`<a href="${safeUrl(LF.url)}" target=_blank rel=noopener>${esc(LF.title||'Source')}</a>`:esc(LF.title||'Source')} · ${esc(LF.recorded_at||LF.published||'date unavailable')} · ${esc((LF.source_era||'').replaceAll('_',' '))}</div>
         <div>${esc(LF.summary||'')}</div>${(LF.findings||[]).map(x=>`<div style="margin-top:4px"><b>Observed:</b> ${esc(x.finding)}${x.meeting_implication?` <b>Meeting use:</b> ${esc(x.meeting_implication)}`:''}</div>`).join('')}
         <div class=muted style="margin-top:4px">${esc(LF.scope||'')}</div>
       </div>`:'';
@@ -1254,7 +1255,7 @@ function speechHTML(m){
     V?`<div class=eyebrow style=margin-top:12px>Audio baseline · verified voiceprint, not clip-segmented</div><div style="font-size:10px;color:var(--faint);line-height:1.5;margin:2px 0 6px">${n(V.minutes)} min of identity-verified audio, standardized within source. Values are z-scores and are not directly comparable to the clip-based measures ${G?'shown above':'shown for other members'}.</div><div class=mrow><span>Verified audio</span><b>${n(V.minutes)} min · ${esc((V.coverage_strength||'limited').replaceAll('_',' '))}</b></div><div style="overflow:auto"><table class=tbl><thead><tr><th>Channel</th><th>Standardized value (z)</th></tr></thead><tbody>${vchannels}</tbody></table></div>`:''
   ].filter(Boolean).join('');
   const lfc=LD&&LD.candidate_only||{},lfb=LD&&LD.qualified_baseline||{},lfr=LD&&LD.qualified_role_conditioned||{};
-  const longformSources=(L&&L.source_records||[]).map(x=>x.url?`<a href="${esc(x.url)}" target=_blank rel=noopener>${esc(x.title||x.channel||'Source')}</a>`:esc(x.title||x.channel||'Source')).join(' · ');
+  const longformSources=(L&&L.source_records||[]).map(x=>safeUrl(x.url)?`<a href="${safeUrl(x.url)}" target=_blank rel=noopener>${esc(x.title||x.channel||'Source')}</a>`:esc(x.title||x.channel||'Source')).join(' · ');
   const longformQualified=(Number(lfb.turns||0)+Number(lfr.turns||0))>0;
   const longform=LD?(longformQualified
     ?`<div class=eyebrow style=margin-top:12px>Long-form complement · source-bound review passed</div><div class=mrow><span>Qualified complete turns</span><b>${Number(lfb.turns||0).toLocaleString()} baseline · ${Number(lfr.turns||0).toLocaleString()} current-role conditioned</b></div>${longformSources?`<div style="font-size:10px;color:var(--faint);line-height:1.5;margin-top:3px">${longformSources}</div>`:''}`
@@ -1380,13 +1381,13 @@ function bioHTML(m){
   add('Full name',(b.first_name&&b.last_name)?[b.first_name,b.middle_name,b.last_name,b.suffix].filter(Boolean).join(' '):m.name);
   add('State',b.state);add('Born',b.birthday);add('Gender',b.gender==='M'?'Male':b.gender==='F'?'Female':b.gender);
   add('Congress ID',b.bioguide);
-  const links=[];if(b.url)links.push(`<a href="${attr(b.url)}" target=_blank rel=noopener>Official site</a>`);
+  const links=[];if(safeUrl(b.url))links.push(`<a href="${safeUrl(b.url)}" target=_blank rel=noopener>Official site</a>`);
   if(b.twitter)links.push(`<a href="https://x.com/${encodeURIComponent(b.twitter)}" target=_blank rel=noopener>X/@${esc(b.twitter)}</a>`);
   if(b.facebook)links.push(`<a href="https://www.facebook.com/${encodeURIComponent(b.facebook)}" target=_blank rel=noopener>Facebook</a>`);
   if(b.youtube)links.push(`<a href="https://www.youtube.com/user/${encodeURIComponent(b.youtube)}" target=_blank rel=noopener>YouTube</a>`);
   if(b.ballotpedia_id)links.push(`<a href="https://ballotpedia.org/${encodeURIComponent(b.ballotpedia_id)}" target=_blank rel=noopener>Ballotpedia</a>`);
-  if(b.wikipedia_id)links.push(`<a href="${attr((b.wikipedia||{}).url||('https://en.wikipedia.org/wiki/'+encodeURIComponent(b.wikipedia_id)))}" target=_blank rel=noopener>Wikipedia</a>`);
-  if(b.bioguide)links.push(`<a href="https://bioguide.congress.gov/search/bio/${b.bioguide}" target=_blank rel=noopener>Congress bio</a>`);
+  if(b.wikipedia_id)links.push(`<a href="${safeUrl((b.wikipedia||{}).url)||safeUrl('https://en.wikipedia.org/wiki/'+encodeURIComponent(b.wikipedia_id))}" target=_blank rel=noopener>Wikipedia</a>`);
+  if(b.bioguide)links.push(`<a href="https://bioguide.congress.gov/search/bio/${encodeURIComponent(b.bioguide)}" target=_blank rel=noopener>Congress bio</a>`);
   const ws=(b.wikipedia||{}).summary||{};
   const wikiLabels={overview:'Overview',early_life:'Early life & education',career:'Career',family_personal:'Family & personal life',life_experiences:'Notable life experiences'};
   const wikiRows=Object.keys(wikiLabels).filter(k=>ws[k]).map(k=>`<div style="margin-top:10px"><div class=eyebrow>${wikiLabels[k]}</div><div style="font-size:12px;line-height:1.55">${esc(ws[k])}</div></div>`).join('');
@@ -1421,7 +1422,7 @@ function personalHTML(m){
   if(!items.length) return `<div class=empty>No additional speaker-verified personal details found in the current corpus.${suppressed}</div>`;
   const groups={};items.forEach(x=>(groups[x.category]||(groups[x.category]=[])).push(x));
   const src=x=>{const bits=[x.source,x.date].filter(Boolean).map(esc);const lab=bits.join(' · ')||'source';
-    return x.url?`<a href="${attr(x.url)}" target=_blank rel=noopener>${lab} ↗</a>`:`<span>${lab}${x.locator?' · '+esc(x.locator):''}</span>`;};
+    return safeUrl(x.url)?`<a href="${safeUrl(x.url)}" target=_blank rel=noopener>${lab} ↗</a>`:`<span>${lab}${x.locator?' · '+esc(x.locator):''}</span>`;};
   const cards=Object.keys(groups).sort((a,b)=>(PERSCAT[a]||a).localeCompare(PERSCAT[b]||b)).map(cat=>
     `<div class=eyebrow style="margin-top:12px">${esc(PERSCAT[cat]||cat)} <span style=color:var(--faint)>· ${groups[cat].length}</span></div>`+
     groups[cat].map(x=>`<div style="background:#2E2514;border:1px solid var(--line,#433317);border-radius:8px;padding:8px 10px;margin:5px 0">
@@ -1435,17 +1436,17 @@ function relHTML(m){
   const ptHTML=partners.length?partners.map(p=>{const col=PTCOL[{D:'Democrat',R:'Republican',I:'Independent'}[p.party]||'']||'#6b7280';
     return `<div class=partner data-i=${byName[p.name]??-1}><span class=pn>${mlink(p.name)}</span><span class=track style="height:8px;background:#433317;border-radius:4px;overflow:hidden"><i style="display:block;height:100%;width:${(p.w/maxw)*100}%;background:${col}"></i></span><span style=color:var(--muted);text-align:right>#${p.rank} · ${p.w}</span></div>`;}).join(''):'<div class=empty>No cosponsorship ties in the network for this member.</div>';
   const st=m.state;const sm=st?M.filter(x=>x.state===st&&x.name!==m.name).sort((a,b)=>(a.rank||9999)-(b.rank||9999)):[];
-  const smHTML=sm.length?sm.map(x=>`<div class=partner data-i=${byName[x.name]}><span class=pn>${mlink(x.name)}</span><span style=color:var(--muted)>${x.chamber}</span><span style=color:var(--muted);text-align:right>#${x.rank??'—'}</span></div>`).join(''):'<div class=empty>No other members parsed for this state.</div>';
+  const smHTML=sm.length?sm.map(x=>`<div class=partner data-i=${byName[x.name]}><span class=pn>${mlink(x.name)}</span><span style=color:var(--muted)>${esc(x.chamber)}</span><span style=color:var(--muted);text-align:right>#${x.rank??'—'}</span></div>`).join(''):'<div class=empty>No other members parsed for this state.</div>';
   const rf=m.refs||{};
   const rfRow=(r,arrow)=>{const col=r.net>0.15?'#34d399':(r.net<-0.15?'#ef4444':'#8b949e');
     const SRCL={CREC:'floor',CHRG:'hearing',INTERVIEW:'interview',PRESS:'press',X:'X'};
-    return `<div class=partner data-i=${byName[r.who]??-1}><span class=pn>${arrow} ${mlink(r.who)}</span><span style="color:${col};font-weight:700">${r.net>0?'+':''}${r.net}</span><span style=color:var(--muted);text-align:right>${r.pos}+ / ${r.neg}&minus; · n=${r.n}</span></div>${r.q?`<div style="color:var(--faint);font-size:11px;margin:-2px 0 6px 4px">“…${esc(r.q)}…”${r.src?` <span style="color:var(--muted)">(${SRCL[r.src]||r.src})</span>`:''}</div>`:''}`;};
+    return `<div class=partner data-i=${byName[r.who]??-1}><span class=pn>${arrow} ${mlink(r.who)}</span><span style="color:${col};font-weight:700">${r.net>0?'+':''}${r.net}</span><span style=color:var(--muted);text-align:right>${r.pos}+ / ${r.neg}&minus; · n=${r.n}</span></div>${r.q?`<div style="color:var(--faint);font-size:11px;margin:-2px 0 6px 4px">“…${esc(r.q)}…”${r.src?` <span style="color:var(--muted)">(${esc(SRCL[r.src]||r.src)})</span>`:''}</div>`:''}`;};
   const rofHTML=(rf.out||[]).map(r=>rfRow(r,'→')).join('')||'<div class=empty>No scored references by this member in the speech/interview/social corpus.</div>';
   const rifHTML=(rf['in']||[]).map(r=>rfRow(r,'←')).join('')||'<div class=empty>No scored references to this member.</div>';
   return `<div class=eyebrow>Top cosponsorship partners</div>${ptHTML}
     <div class=eyebrow style=margin-top:14px>Cross-media references — makes <span style=color:var(--faint)>· green +, red − · quote window centered on the mention · floor speeches, hearings, interviews, press, X</span></div>${rofHTML}
     <div class=eyebrow style=margin-top:14px>Cross-media references — receives</div>${rifHTML}
-    <div class=eyebrow style=margin-top:14px>Same-state delegation — ${st||'?'}</div>${smHTML}`;
+    <div class=eyebrow style=margin-top:14px>Same-state delegation — ${esc(st||'?')}</div>${smHTML}`;
 }
 const RELCOL={Highly:'#16a34a',Moderately:'#f59e0b',Slightly:'#8b949e'};
 function committeeHTML(m){
@@ -1455,8 +1456,8 @@ function committeeHTML(m){
   const rank={Highly:0,Moderately:1,Slightly:2};
   const rows=cs.slice().sort((a,b)=>(rank[a.rel]??9)-(rank[b.rel]??9)).map(c=>{
     const rc=RELCOL[c.rel]||'#6b7280';
-    const role=c.role?`<span style="font-size:11px;font-weight:700;color:#1D1912;background:#cbb46a;padding:1px 6px;border-radius:4px;margin-left:6px">${c.role}</span>`:'';
-    return `<div class=arow><span class=aname>${c.name}${role}</span><span style="font-size:11px;font-weight:700;color:${rc};background:${rc}22;border:1px solid ${rc}55;padding:1px 8px;border-radius:10px">${c.rel}</span></div>`;}).join('');
+    const role=c.role?`<span style="font-size:11px;font-weight:700;color:#1D1912;background:#cbb46a;padding:1px 6px;border-radius:4px;margin-left:6px">${esc(c.role)}</span>`:'';
+    return `<div class=arow><span class=aname>${esc(c.name)}${role}</span><span style="font-size:11px;font-weight:700;color:${rc};background:${rc}22;border:1px solid ${rc}55;padding:1px 8px;border-radius:10px">${esc(c.rel)}</span></div>`;}).join('');
   const sc=m.committee_score!=null?(+m.committee_score).toFixed(2):'—';
   return `<div class=eyebrow>Committee &amp; subcommittee seats <span style=color:var(--faint)>· badge = jurisdictional relevance to CU issues · committee score ${sc}</span></div>${rows}`;
 }
@@ -1512,7 +1513,7 @@ function demoHTML(m){
   /* Plain-language pass 2026-09-02. The Senate scaling note keeps every number, the link and the
      arithmetic; the term of art 'Senate population normalization' and the phrase
      'equivalent-district population' move to the hover so the provenance is still findable. */
-  const popBasisNote=popBasis.method?`<div class=empty style="margin:-4px 0 12px" title="${attr('Senate population normalization: state population divided by apportioned House seats, applied before demographic percentile normalization')}"><b>Putting a state on a district scale:</b> ${n0(popBasis.raw_state_population)} people in the state &divide; ${n0(popBasis.house_seats)} House districts = <b>${n0(popBasis.normalization_population)}</b> people per district-sized share, so senators and representatives rank on the same scale. <a href="${attr(popBasis.source)}" target=_blank rel=noopener>Britannica seat table &nearr;</a></div>`:'';
+  const popBasisNote=popBasis.method?`<div class=empty style="margin:-4px 0 12px" title="${attr('Senate population normalization: state population divided by apportioned House seats, applied before demographic percentile normalization')}"><b>Putting a state on a district scale:</b> ${n0(popBasis.raw_state_population)} people in the state &divide; ${n0(popBasis.house_seats)} House districts = <b>${n0(popBasis.normalization_population)}</b> people per district-sized share, so senators and representatives rank on the same scale. ${safeUrl(popBasis.source)?`<a href="${safeUrl(popBasis.source)}" target=_blank rel=noopener>Britannica seat table &nearr;</a>`:'Britannica seat table'}</div>`:'';
   const populationValue=popBasis.method?popBasis.normalization_population:(ce.population??d.constituents);
   const populationLabel=popBasis.method?'People per district-sized share':(ce.population!=null?'Population':'People counted for poverty');
   const populationTitle=popBasis.method?'Equivalent-district population: state population divided by apportioned House seats, before demographic percentile normalization':(ce.population!=null?'2024 ACS total population':'ACS poverty-universe population — the people for whom poverty status is determined, slightly below total population');
@@ -1555,7 +1556,7 @@ function demoHTML(m){
   const communityLinks=['DP05','DP03','DP04'].map(key=>{
     const url=(cm.official_urls||{})[key],name=COMMUNITY_LINK_NAMES[key]||key;
     const tip=attr('Census profile '+key+(profileFamilies[key]?' · '+profileFamilies[key]:''));
-    return url?`<a href="${attr(url)}" target=_blank rel=noopener title="${tip}">${esc(name)} ↗</a>`:`<span title="${tip}">${esc(name)}</span>`;
+    return safeUrl(url)?`<a href="${safeUrl(url)}" target=_blank rel=noopener title="${tip}">${esc(name)} ↗</a>`:`<span title="${tip}">${esc(name)}</span>`;
   }).join(' · ');
   const communityCard=community&&community.complete?`<div class=eyebrow style="margin-top:13px" title="${attr('Structural community context · ACS 1-year: the Census Bureau American Community Survey, one-year estimates')}">Community snapshot · ${esc(String(community.vintage||cm.vintage||'2024'))} ACS 1-year${m.chamber==='Senate'?' · state':' · district'}</div>
     <div class=dgrid style="margin-bottom:8px">
@@ -1655,7 +1656,7 @@ function demoHTML(m){
     const links=(def.sources||[]).map(key=>{
       const source=potentialSources[key]||{};
       const label=source.agency||key;
-      return source.official_url?`<a href="${attr(source.official_url)}" target=_blank rel=noopener>${esc(label)}</a>`:esc(label);
+      return safeUrl(source.official_url)?`<a href="${safeUrl(source.official_url)}" target=_blank rel=noopener>${esc(label)}</a>`:esc(label);
     }).join(' + ');
     return `<div class=dcell style="grid-column:1/-1"><div class=v style="font-size:12px">${esc(def.label||def.key)} (${Math.round(Number(def.weight)*100)}%)</div>
       <div class=l><b>Source:</b> ${links||'—'}<br><b>Caveat:</b> ${esc(def.caveat||'—')}</div></div>`;
@@ -1765,7 +1766,7 @@ function demoHTML(m){
       <div class=dcell title="${attr('Growth quotient '+exact3(cuProxy.growth_quotient)+' · '+cuProxyNaics)}"><div class=v>${exact3(cuProxy.growth_quotient)}</div><div class=l>How fast the sector is growing · ${esc(cuProxy.name||'Finance and Insurance')} stand-in${cuWindow?' · '+esc(cuWindow):''}</div></div>
       <div class=dcell style="grid-column:1/-1" title="${attr('Shift-share analysis · longitudinal proxy for '+cuProxyNaics+': the total job change split into national growth, industry mix, and the local (competitive) shift left over')}"><div class=v style="font-size:12px">${exact1(cuShift.delta)} jobs = ${exact1(cuShift.national_growth)} national + ${exact1(cuShift.industry_mix)} industry mix + ${exact1(cuShift.competitive_shift)} local</div><div class=l>Where the job change came from · ${esc(cuProxy.name||'Finance and Insurance')} used as a stand-in${cuWindow?' · '+esc(cuWindow):''}</div></div>
     </div>
-    <div class=empty style="margin-top:7px">${esc(cuProxy.reason||'')}${cuSource?` <a href="${attr(cuSource)}" target=_blank rel=noopener title="${attr('County Business Patterns (CBP), U.S. Census Bureau')}">Official business-census source ↗</a>`:''}</div>
+    <div class=empty style="margin-top:7px">${esc(cuProxy.reason||'')}${safeUrl(cuSource)?` <a href="${safeUrl(cuSource)}" target=_blank rel=noopener title="${attr('County Business Patterns (CBP), U.S. Census Bureau')}">Official business-census source ↗</a>`:''}</div>
   </div>`:'';
   const lodes=meta.lodes||{};
   let vintage=`<span title="${attr('LODES: the Census Bureau Longitudinal Employer-Household Dynamics Origin-Destination Employment Statistics, the source for the district job counts on this card')}">Jobs data: LODES ${esc(lodes.version||'—')} ${esc(lodes.job_type||'—')}</span>, latest year ${yearText(ind.latest_year)}, window ${y0}–${y1}.`;
@@ -1810,7 +1811,7 @@ function legBody(m,area,role){
   return `<div class=cnt>${bills.length} bill${bills.length>1?'s':''}</div>`+bills.map(b=>{const r=ROLEBADGE[b.role]||['',''];
     return `<div class=billrow>
       <div class=billtop><span class=rolebadge style="color:${r[1]};background:${r[1]}1f">${r[0]}</span>
-        ${b.url?`<a class=billno href="${b.url}" target=_blank rel=noopener>${esc(b.bill)}</a>`:`<span class=billno>${esc(b.bill)}</span>`}
+        ${safeUrl(b.url)?`<a class=billno href="${safeUrl(b.url)}" target=_blank rel=noopener>${esc(b.bill)}</a>`:`<span class=billno>${esc(b.bill)}</span>`}
         <span class=billcong>${b.congress?b.congress+'th Cong.':''}</span></div>
       <div class=billtitle>${esc(b.title)}</div>
       <div class=billmeta>${(b.areas||[]).map(esc).join(' · ')} · ${esc(b.sponsor)}${b.ncos?` · ${b.ncos} cosponsors`:''}</div>
@@ -1879,16 +1880,18 @@ function pressBody(m,area,sent,src,limit=50){
     const tag=(ov&&ov!==base)?`<span class=ovtag style="color:${POVCOL[ov]};background:${POVCOL[ov]}1A">✎ edited → ${ov} (was ${base})</span>`:(a.corr?`<span class=ovtag style="color:#a78bfa;background:#a78bfa1A">✎ file-corrected</span>`:'');
     const basis=FOOTPRINT_SRC[a.source]||(a.source==='social'?('social stance: '+esc(a.stance||'n/a')):(a.ssrc==='bill'?'via tracked-bill direction':('DEBATE stance: '+esc(a.stance||'n/a')+(a.sconf?` (${Math.round(a.sconf*100)}% conf)`:''))));
     return `<div class=ev data-pol="${effPol}">
-    <div class=ev-top><span>${a.date||''}${a.dest==='est'?' <span style=color:var(--faint)>(est.)</span>':''}</span><span>${(a.cats||[]).slice(0,3).map(esc).join(' · ')}</span></div>
+    <div class=ev-top><span>${esc(a.date||'')}${a.dest==='est'?' <span style=color:var(--faint)>(est.)</span>':''}</span><span>${(a.cats||[]).slice(0,3).map(esc).join(' · ')}</span></div>
     <div class=ev-top><span>Source: ${esc(a.source||'press')}</span><span>${a.scored===false?(a.gstance?'appearance record · CU stance graded from transcript':'visible, not scored: '+esc(a.exclusion||'excluded')):'scored evidence'}</span></div>
-    <a class=ev-title href="${a.url}" target=_blank rel=noopener title="${esc(a.title||'')}">${esc(clipTitle(a.title||''))}</a>
+    ${safeUrl(a.url)?`<a class=ev-title href="${safeUrl(a.url)}" target=_blank rel=noopener title="${esc(a.title||'')}">${esc(clipTitle(a.title||''))}</a>`:`<span class=ev-title title="${esc(a.title||'')}">${esc(clipTitle(a.title||''))}</span>`}
     <div class=ev-sig>${a.label?`<b style="color:${sentCol(a.label)}">${esc(a.label)}</b>`:''}<span class=ev-basis> · ${basis}${a.rel?' · '+esc(a.rel):''}${a.also?' · '+esc(a.also):''}</span></div>
     ${a.gstance?`<div class=ev-grade><span class=ovtag style="color:${POVCOL[a.gstance]||'#9ca3af'};background:${POVCOL[a.gstance]||'#9ca3af'}1A">CU stance: ${esc(a.gstance)}${!HONORS&&a.gtier?' · '+esc(a.gtier):''}</span>${a.gn>1?`<span class=ev-basis> · first of ${a.gn} graded passages on this record</span>`:''}</div>`:''}
     ${a.snip?`<div class=ev-snip>“${esc(clipSnip(a.snip))}”</div>`:''}
     ${foot?'':`<div class=ev-ov>${tag}<span class=ovlabel>CU stance:</span><select class=povsel data-povurl="${eu}" data-povtitle="${et}" data-base="${base}">${opts}</select></div>`}</div>`;
   }).join('')+(more?`<button class=btn id=pressmore data-next="${Math.min(arts.length,limit+50)}">Show 50 more (${(arts.length-shown.length).toLocaleString()} remaining)</button>`:'');
 }
-function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+/* href-safe URL: attribute-escaped http(s) only; anything else (javascript:, data:, relative, empty) -> '' so callers render no link */
+function safeUrl(u){const s=String(u==null?'':u).trim();return /^https?:\/\//i.test(s)?attr(s):'';}
 /* ---------- member addressing ----------
    A member is addressed by NAME through the ?m= query parameter (the same address the network
    dashboard writes into its "Member details" link). mlink() is the ONE place that mints that
@@ -2093,12 +2096,12 @@ function billCard(bill){
   const areas=(bill.areas||[]).map(a=>`<span class=rolebadge style="background:#D2A63C22;color:#93c5fd">${esc(a)}</span>`).join(' ');
   const people=(label,rows)=>`<div class=mrow><span>${label}</span><b>${rows.length?esc(rows.slice(0,8).join(', '))+(rows.length>8?' +'+(rows.length-8):''):'-'}</b></div>`;
   const nextHtml=next.map(([i,s])=>{const rp=rolePriorAt(i,(bill.areas||[])[0]||''),role=s.role!=='-'?` | ${esc(rp.label)}`:'';return `<div class=sugg billnext data-mi=${i} data-key="${attr(bill.key)}"><span>${esc(M[i].name)} <span style=color:var(--faint)>${esc(M[i].party||'')}${role}</span><br><small style=color:var(--faint)>adds ~${s.gain.toFixed(1)} members of new reach | ${(s.already*100).toFixed(0)}% already covered by this set</small></span><span class=nextscore>+${s.score.toFixed(1)}</span></div>`;}).join('');
-  const amendHtml=amendments.length?amendments.map(a=>`<div class=billrow><div class=billtop><b>${esc(a.display||'Amendment note')}</b><span class=billcong>${esc(((a.latest_action||{}).date)||a.date||'')}</span></div><div class=billmeta>${esc(a.description||((a.latest_action||{}).text)||'No description supplied.')}</div>${a.url?`<a href="${attr(a.url)}" target=_blank rel=noopener>Congress.gov amendment -&gt;</a>`:''}</div>`).join(''):'<div class=empty>No amendments returned by the live cache.</div>';
-  const pressHtml=press.length?press.map(a=>`<div class=ev><a class=ev-title href="${attr(a.url||'#')}" target=_blank rel=noopener>${esc(a.title||'Untitled item')}</a><div class=ev-top><span>${esc(a.member)} | ${esc(a.source||'press')}</span><span>${esc(a.date||'')}</span></div><div class=ev-note>${a.direct?'Direct bill reference':'Shared legislative area'}</div></div>`).join(''):'<div class=empty>No directly or area-linked press items in the current source bundle.</div>';
+  const amendHtml=amendments.length?amendments.map(a=>`<div class=billrow><div class=billtop><b>${esc(a.display||'Amendment note')}</b><span class=billcong>${esc(((a.latest_action||{}).date)||a.date||'')}</span></div><div class=billmeta>${esc(a.description||((a.latest_action||{}).text)||'No description supplied.')}</div>${safeUrl(a.url)?`<a href="${safeUrl(a.url)}" target=_blank rel=noopener>Congress.gov amendment -&gt;</a>`:''}</div>`).join(''):'<div class=empty>No amendments returned by the live cache.</div>';
+  const pressHtml=press.length?press.map(a=>`<div class=ev>${safeUrl(a.url)?`<a class=ev-title href="${safeUrl(a.url)}" target=_blank rel=noopener>${esc(a.title||'Untitled item')}</a>`:`<span class=ev-title>${esc(a.title||'Untitled item')}</span>`}<div class=ev-top><span>${esc(a.member)} | ${esc(a.source||'press')}</span><span>${esc(a.date||'')}</span></div><div class=ev-note>${a.direct?'Direct bill reference':'Shared legislative area'}</div></div>`).join(''):'<div class=empty>No directly or area-linked press items in the current source bundle.</div>';
   const anecdoteHtml=anecdotes.length?anecdotes.map(a=>`<div class=ev><div class=ev-title>${esc(a.claim)}</div><div class=ev-top><span>${esc(a.member)} | ${esc(a.source||'')}</span><span>${esc(a.date||'')}</span></div></div>`).join(''):'<div class=empty>No source-grounded anecdotes matched this bill or its distinctive title terms.</div>';
   return `<details class=billcard data-key="${attr(bill.key)}"><summary><div class=billhead><div class=billtop><span class=billno>${esc(bill.display)}</span>${badge}<span class=billcong>${bill.congress}th</span></div><div class=billtitle>${esc(bill.title||bill.display)}</div><div class=billmeta>${esc(bill.action||'No latest action in cache')} | ${later.length+originals.length} cosponsors</div></div><button class="pinbtn${state.pinned?' on':''}" data-pin="${attr(bill.key)}" aria-label="Pin ${attr(bill.display)}">${state.pinned?'* Pinned':'Pin'}</button></summary>
     <div class=bbody><div>${areas}</div><div class=billsum>${esc(bill.summary||'No summary available.')}</div>
-      <div style="margin-top:9px"><a href="${attr(bill.url||live.url||'#')}" target=_blank rel=noopener>Open on Congress.gov -&gt;</a></div>
+      ${(safeUrl(bill.url)||safeUrl(live.url))?`<div style="margin-top:9px"><a href="${safeUrl(bill.url)||safeUrl(live.url)}" target=_blank rel=noopener>Open on Congress.gov -&gt;</a></div>`:''}
       <div class=repo-cols><div class=repo-block><div class=eyebrow>Current coalition</div>${people('Sponsor',sponsors)}${people('Original cosponsors',originals)}${people('Additional cosponsors',later)}</div>
       <div class=repo-block><div class=eyebrow>Potential next people</div><div class=repo-list>${nextHtml||'<div class=empty>No candidates available.</div>'}</div></div></div>
       ${lobbyingHtml}
@@ -2640,7 +2643,7 @@ function renderCoal(){
     // is checkable without trusting the shrinkage. `lift` (ledger-only) follows as the weaker view.
     if(selc)cosBits.push(`<b>signed ${selc[0]} of ${selc[1]}</b> eligible ${esc(cbArea.split(' ')[0])} bills${sel!=null?` (sel ${sel.toFixed(2)})`:''}`);
     if(lift!=null)cosBits.push(`${lift>=1.15?'concentrates':lift<=0.85?'spread across issues':'broad'} on ${esc(cbArea.split(' ')[0])} (${lift.toFixed(1)}×)`);
-    return `<div class=sugg data-i=${i}><span><span class=pdot style="background:${col};display:inline-block;margin-right:6px"></span>${mlink(m.name)} <span style=color:var(--faint)>${m.chamber} · #${m.rank??'—'}${role}${cbArea?' · '+f2(m.radar[CATS.indexOf(cbArea)])+' '+cbArea.split(' ')[0]:''}</span><br><small style=color:var(--faint)>${cosBits.join(' · ')}</small><br><small style=color:var(--faint)>adds ~${gain.toFixed(1)} members of new reach · ${(already*100).toFixed(0)}% already covered by this set</small></span><span class=add>+ ${((s-lo)/mx*100).toFixed(0)}</span></div>`;}).join(''):'<div class=empty>No eligible members remain under the current party and committee filters.</div>'):'<div class=empty>Add the bill\'s sponsor to see who to recruit as cosponsors.</div>';
+    return `<div class=sugg data-i=${i}><span><span class=pdot style="background:${col};display:inline-block;margin-right:6px"></span>${mlink(m.name)} <span style=color:var(--faint)>${esc(m.chamber)} · #${m.rank??'—'}${role}${cbArea?' · '+f2(m.radar[CATS.indexOf(cbArea)])+' '+cbArea.split(' ')[0]:''}</span><br><small style=color:var(--faint)>${cosBits.join(' · ')}</small><br><small style=color:var(--faint)>adds ~${gain.toFixed(1)} members of new reach · ${(already*100).toFixed(0)}% already covered by this set</small></span><span class=add>+ ${((s-lo)/mx*100).toFixed(0)}</span></div>`;}).join(''):'<div class=empty>No eligible members remain under the current party and committee filters.</div>'):'<div class=empty>Add the bill\'s sponsor to see who to recruit as cosponsors.</div>';
   const drop=el=>{coal.delete(+el.dataset.i);renderCoal();};
   document.querySelectorAll('#cblist .x').forEach(el=>{el.onclick=()=>drop(el);
     el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();drop(el);}};});
@@ -2720,7 +2723,7 @@ function renderEff(){
     const gapCol=gap>0?'#34d399':gap<0?'#ef4444':'var(--muted)';
     return `<tr data-i=${byName[m.name]}>
       <td class=num><span class=rk>${HONORS?(honorAt(m,'').rank??'—'):(m.rank??'—')}</span></td>
-      <td><div class=nm>${mlink(m.name)}${potentialChip(m)}<\/div><div class=dist>${m.chamber} · ${m.party||'—'}${HONORS?`<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:5px"><div><div>Overall priority</div>${priorityBadge(m)}</div><div><div>Behavioral standing</div>${publicBadge(m,'')}</div></div>`:` · <span style="color:${STCOL[m.overall_stance]||'#888'}">${stanceName(m.overall_stance)}</span>`}</div></td>
+      <td><div class=nm>${mlink(m.name)}${potentialChip(m)}<\/div><div class=dist>${esc(m.chamber)} · ${esc(m.party||'—')}${HONORS?`<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:5px"><div><div>Overall priority</div>${priorityBadge(m)}</div><div><div>Behavioral standing</div>${publicBadge(m,'')}</div></div>`:` · <span style="color:${STCOL[m.overall_stance]||'#888'}">${stanceName(m.overall_stance)}</span>`}</div></td>
       <td class=num>${money(m.invested)}</td>
       <td class=num>${m.opt_alloc>0?money(m.opt_alloc):'—'}</td>
       <td class=num style="color:${gapCol}">${gapTxt}</td>
@@ -2780,8 +2783,8 @@ document.addEventListener('click',e=>{
   else if(act==='star'){const cur=(st.star!=null?st.star:(STFIDX[id]?STFIDX[id].s.star:0)); setStf(id,'star',cur?0:1); el.classList.toggle('on',!cur); el.textContent=!cur?'★':'☆';}
   else if(act==='meet'){setStf(id,'meet',!st.meet); if(el.classList){el.classList.toggle('on',!st.meet); el.textContent=!st.meet?'🤝 Meeting set':'Set up meeting';} if(!$('#view-contact').hidden)renderContact();}
   else if(act==='note'){const box=card.querySelector('.stfnote'); box.hidden=!box.hidden; if(!box.hidden)box.querySelector('textarea').focus();}
-  else if(act==='media'){const u=prompt('Media URL (article, clip, photo, doc link):'); if(!u)return; const l=prompt('Label (optional):')||u.replace(/^https?:\/\//,'').slice(0,40); const md=(st.media||[]).concat([{u:u,l:l}]); setStf(id,'media',md); const wrap=card.querySelector('.stfmedia'); const k=md.length-1; wrap.insertAdjacentHTML('beforeend',`<span class=chip><a href="${esc(u)}" target=_blank rel=noopener>${esc(l)}</a><span class=x data-act=delmedia data-sid=${id} data-k=${k}>×</span></span>`);}
-  else if(act==='delmedia'){const md=(st.media||[]); md.splice(+el.dataset.k,1); setStf(id,'media',md); const wrap=el.closest('.stfmedia'); if(wrap){wrap.innerHTML=md.map((mm,k)=>`<span class=chip><a href="${esc(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a><span class=x data-act=delmedia data-sid=${id} data-k=${k}>×</span></span>`).join('');}}
+  else if(act==='media'){const u=prompt('Media URL (article, clip, photo, doc link):'); if(!u)return; const l=prompt('Label (optional):')||u.replace(/^https?:\/\//,'').slice(0,40); const md=(st.media||[]).concat([{u:u,l:l}]); setStf(id,'media',md); const wrap=card.querySelector('.stfmedia'); const k=md.length-1; wrap.insertAdjacentHTML('beforeend',`<span class=chip>${safeUrl(u)?`<a href="${safeUrl(u)}" target=_blank rel=noopener>${esc(l)}</a>`:`<span>${esc(l)}</span>`}<span class=x data-act=delmedia data-sid=${id} data-k=${k}>×</span></span>`);}
+  else if(act==='delmedia'){const md=(st.media||[]); md.splice(+el.dataset.k,1); setStf(id,'media',md); const wrap=el.closest('.stfmedia'); if(wrap){wrap.innerHTML=md.map((mm,k)=>`<span class=chip>${safeUrl(mm.u)?`<a href="${safeUrl(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a>`:`<span>${esc(mm.l||mm.u)}</span>`}<span class=x data-act=delmedia data-sid=${id} data-k=${k}>×</span></span>`).join('');}}
   else if(act==='openmem'){openMember(+el.dataset.mi); setView('member');}
 });
 document.addEventListener('change',e=>{

@@ -11,6 +11,7 @@ function section(start, end) {
 
 const renderers = section('function cookPviSourceHTML(){', 'const ROLEBADGE=');
 const method = section('function methodHTML(m){', '/* One step quieter than section()');
+const safeUrl = section('function safeUrl(u){', '\n');   // the shipped link guard, not a copy
 const sourceUrl = 'https://www.cookpolitical.com/cook-pvi/2026-partisan-voting-index/district-map-and-list';
 const metadata = {article_publication_date: '2026-07-29', retrieval_date: '2026-10-05', source_page_url: sourceUrl};
 function harness(meta = metadata) {
@@ -20,7 +21,7 @@ function harness(meta = metadata) {
     radar: () => '', money: () => '—', n0: () => '—', pc: () => '—',
     f2: n => Number(n).toFixed(2)};
   vm.createContext(ctx);
-  vm.runInContext(renderers + '\n' + method, ctx);
+  vm.runInContext(safeUrl + '\n' + renderers + '\n' + method, ctx);
   return ctx;
 }
 function member(overrides = {}) {

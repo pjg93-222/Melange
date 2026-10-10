@@ -337,7 +337,8 @@ def private_target_reason(url):
 def assert_output_path(out_dir, path):
     real_out_dir = os.path.realpath(os.fspath(out_dir))
     real_path = os.path.realpath(os.fspath(path))
-    if not real_path.startswith(real_out_dir):
+    # A bare startswith() let a sibling such as <out_dir>2 pass; compare whole path components instead.
+    if os.path.commonpath([real_out_dir, real_path]) != real_out_dir:
         raise ValueError("output path escapes out-dir: {}".format(path))
 
 

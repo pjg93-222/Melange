@@ -5,7 +5,8 @@ capped press accuracy twice tonight; the long-form research says body text matte
 production article URL (member .gov press releases mostly), extracts main text (all <p> blocks,
 capped), caches resumable jsonl. Polite: 0.5s spacing, honest UA, per-URL once.
 Usage: python fec/collect/fetch_press_text.py   (resumable; press_text_cache.jsonl)"""
-import csv, datetime, io, json, os, re, socket, sys, time, urllib.request
+import csv, datetime, io, ipaddress, json, os, re, socket, sys, time, urllib.parse, urllib.request
+from collect.campaign_sites_2026 import private_target_reason
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 CACHE = B + r'\press_text_cache.jsonl'
@@ -18,6 +19,37 @@ def _ipv4_first(host, port, family=0, type=0, proto=0, flags=0):
     rows = _SYSTEM_GETADDRINFO(host, port, family, type, proto, flags)
     return sorted(rows, key=lambda row: row[0] != socket.AF_INET)
 socket.getaddrinfo = _ipv4_first
+
+
+def _require_public(url):
+    """The URLs come from a CSV, so refuse any that is not http(s) to a public address.
+
+    Literal private hosts are refused by the campaign-site guard; the DNS answer is checked too, because a
+    public-looking name can resolve inward. ponytail: urlopen resolves again after this, so a DNS server that
+    answers differently the second time still gets through; pin the checked address if that ever matters."""
+    reason = private_target_reason(url)
+    if reason:
+        raise ValueError(reason)
+    parsed = urllib.parse.urlparse(url)
+    try:
+        answers = socket.getaddrinfo(parsed.hostname, parsed.port or (443 if parsed.scheme.lower() == 'https' else 80),
+                                     type=socket.SOCK_STREAM)
+    except socket.gaierror as e:
+        raise ValueError('target host does not resolve: %s' % e)
+    for answer in answers:
+        address = ipaddress.ip_address(answer[4][0].split('%')[0])
+        address = getattr(address, 'ipv4_mapped', None) or address
+        if not address.is_global:
+            raise ValueError('target host resolves to non-public address %s' % address)
+
+
+class _PublicOnlyRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _require_public(newurl)   # a public page can still redirect inward
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_opener = urllib.request.build_opener(_PublicOnlyRedirects)
 
 done = set()
 if os.path.exists(CACHE):
@@ -51,7 +83,8 @@ ok = fail = 0
 for i, r in enumerate(todo):
     u = (r.get('url') or '').strip()
     try:
-        with urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=25) as resp:
+        _require_public(u)
+        with _opener.open(urllib.request.Request(u, headers=UA), timeout=25) as resp:
             body = extract(resp.read().decode('utf-8', 'replace'))
         if len(body.split()) < 20:
             raise _NoArticleBody('HTTP response contained no extractable article body')
