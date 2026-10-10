@@ -475,6 +475,29 @@ fec_url_with_date_range <- function(url, min_date, max_date) {
   )
 }
 
+# The export URL is read out of page storage, so it is untrusted: download.file()
+# would fetch whatever scheme and host it names. Allow https on fec.gov hosts only.
+fec_require_fec_https_url <- function(url) {
+  if (!(is.character(url) && length(url) == 1L && !is.na(url))) {
+    stop("FEC export URL refused: not a single string.", call. = FALSE)
+  }
+  authority <- sub("^https://([^/?#]*).*$", "\\1", url, ignore.case = TRUE)
+  host <- tolower(sub(":443$", "", authority))
+  if (
+    !grepl("^https://", url, ignore.case = TRUE) ||
+      !grepl("^[a-z0-9.-]+$", host) ||
+      !(host == "fec.gov" || endsWith(host, ".fec.gov"))
+  ) {
+    stop(
+      "FEC export URL refused: it must be https on fec.gov or a subdomain (got '",
+      substr(gsub("[^[:alnum:].:/-]", "?", authority), 1, 60),
+      "').",
+      call. = FALSE
+    )
+  }
+  invisible(url)
+}
+
 fec_export_current_query <- function(
   session,
   expected_rows,
@@ -537,6 +560,7 @@ fec_export_current_query <- function(
     }
     Sys.sleep(2)
   }
+  fec_require_fec_https_url(download_url)
   require_package("data.table")
   csv_path <- tempfile("mentat-fec-export-", fileext = ".csv")
   on.exit(unlink(csv_path, force = TRUE), add = TRUE)
