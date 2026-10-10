@@ -516,44 +516,46 @@ local({
   )
 })
 
-# The export URL comes from page storage: only https on fec.gov hosts may reach
-# download.file(). Nothing here touches the network.
+# The export URL comes from page storage: only https URLs may reach
+# download.file(). The host is not pinned (openFEC returns presigned S3 URLs).
+# Nothing here touches the network.
 refuses <- function(url) {
-  inherits(tryCatch(fec_require_fec_https_url(url), error = identity), "error")
+  inherits(tryCatch(fec_require_https_url(url), error = identity), "error")
 }
+presigned <- "https://cg-abc.s3-us-gov-west-1.amazonaws.com/x.zip?X-Amz-Foo=1"
 stopifnot(
   !refuses("https://www.fec.gov/files/x.csv"),
-  !refuses("https://fec.gov/files/x.csv"),
-  !refuses("https://FILES.FEC.GOV:443/downloads/x.csv?sig=abc"),
-  identical(fec_require_fec_https_url("https://fec.gov/x.csv"), "https://fec.gov/x.csv"),
+  !refuses(presigned),
+  !refuses("HTTPS://Example.org:8443/x.csv"),
+  identical(fec_require_https_url(presigned), presigned),
   refuses("javascript:alert(1)"),
-  refuses("file:///C:/Windows/win.ini"),
-  refuses("http://www.fec.gov/files/x.csv"),
-  refuses("https://evil.com/x.csv"),
-  refuses("https://evilfec.gov/x.csv"),
-  refuses("https://fec.gov.evil.com/x.csv"),
-  refuses("https://evil.com/fec.gov/x.csv"),
-  refuses("https://evil.com?x=.fec.gov"),
+  refuses("file:///C:/x"),
+  refuses("http://www.fec.gov/x.csv"),
+  refuses("https://user@host/x"),
+  refuses("ftp://www.fec.gov/x.csv"),
+  refuses("//www.fec.gov/x.csv"),
   refuses("https://www.fec.gov@evil.com/x.csv"),
   refuses("https://evil.com\\@www.fec.gov/x.csv"),
-  refuses("https://www.fec.gov:8443/x.csv"),
+  refuses("https://example.org/a\\b"),
+  refuses("https://example.org/a b"),
+  refuses("https://example.org/a\nfile:///x"),
+  refuses(" https://example.org/x"),
   refuses("https://"),
+  refuses("https:///x.csv"),
+  refuses("https://:443/x.csv"),
   refuses(""),
   refuses(NA_character_),
   refuses(NULL),
   refuses(c("https://www.fec.gov/a", "https://www.fec.gov/b"))
 )
 refusal_message <- tryCatch(
-  fec_require_fec_https_url("https://evil.com/x.csv"),
+  fec_require_https_url("http://www.fec.gov/x.csv"),
   error = conditionMessage
 )
-stopifnot(
-  grepl("must be https on fec.gov", refusal_message, fixed = TRUE),
-  grepl("evil.com", refusal_message, fixed = TRUE)
-)
+stopifnot(grepl("must be an https URL", refusal_message, fixed = TRUE))
 export_body <- paste(deparse(body(fec_export_current_query)), collapse = "\n")
 stopifnot(
-  regexpr("fec_require_fec_https_url(download_url)", export_body, fixed = TRUE) <
+  regexpr("fec_require_https_url(download_url)", export_body, fixed = TRUE) <
     regexpr("download.file", export_body, fixed = TRUE)
 )
 
@@ -565,5 +567,5 @@ cat("test_fec_page: redundant redraw and page reads avoided\n")
 cat("test_fec_page: dead sessions bypass inner retries\n")
 cat("test_fec_page: canary failures remain bounded and fail closed\n")
 cat("test_fec_page: employer partition direct calls use active session\n")
-cat("test_fec_page: export download URL limited to https on fec.gov\n")
+cat("test_fec_page: export download URL limited to https\n")
 cat("test_fec_page: PASS\n")
