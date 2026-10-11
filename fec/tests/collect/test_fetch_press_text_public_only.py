@@ -7,6 +7,7 @@ import csv
 import email.message
 import http.client
 import io
+import ipaddress
 import runpy
 import socket
 import sys
@@ -30,6 +31,10 @@ DNS = {
     "v6.example": ["fd00::1"],
     "mapped.example": ["::ffff:127.0.0.1"],
     "multi.example": [PUBLIC, "127.0.0.1"],
+    "nat64.example": ["64:ff9b::a00:1"],
+    "sixtofour.example": ["2002:a00:1::"],
+    "multicast.example": ["224.0.0.1"],
+    "multi6.example": [PUBLIC, "64:ff9b::7f00:1"],
     "2130706433": ["127.0.0.1"],
     "gone.example": socket.gaierror(11001, "no such host"),
 }
@@ -47,7 +52,10 @@ def run(tmp_path, monkeypatch):
     redirects = {}
 
     def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-        answer = DNS.get(host, [PUBLIC])
+        try:
+            answer = [str(ipaddress.ip_address(host))]      # a literal address resolves to itself
+        except ValueError:
+            answer = DNS.get(host, [PUBLIC])
         if isinstance(answer, Exception):
             raise answer
         return [(socket.AF_INET6 if ":" in a else socket.AF_INET, type, proto, "", (a, port)) for a in answer]
@@ -103,6 +111,29 @@ HOSTILE = [
     ("http://multi.example/", "non-public address 127.0.0.1"),
     ("http://2130706433/", "non-public address 127.0.0.1"),     # decimal spelling of 127.0.0.1
     ("http://gone.example/", "does not resolve"),
+    # ranges ipaddress.is_global alone passes
+    ("http://224.0.0.1/", "non-public address 224.0.0.1"),
+    ("http://239.255.255.250/", "non-public address 239.255.255.250"),
+    ("http://[ff02::1]/", "non-public address ff02::1"),
+    ("http://[::10.0.0.1]/", "non-public address ::a00:1"),                    # IPv4-compatible
+    ("http://[::127.0.0.1]/", "non-public address ::7f00:1"),
+    ("http://[fec0::1]/", "non-public address fec0::1"),                        # site-local
+    ("http://multicast.example/", "non-public address 224.0.0.1"),
+    # a non-public IPv4 carried inside an IPv6 address
+    ("http://[64:ff9b::10.0.0.1]/", "non-public address 64:ff9b::a00:1"),      # NAT64
+    ("http://[64:ff9b::127.0.0.1]/", "non-public address 64:ff9b::7f00:1"),
+    ("http://[64:ff9b::169.254.169.254]/", "non-public address 64:ff9b::a9fe:a9fe"),
+    ("http://[64:ff9b::224.0.0.1]/", "non-public address 64:ff9b::e000:1"),
+    ("http://[64:ff9b:1::a00:1]/", "non-public address 64:ff9b:1::a00:1"),     # local-use NAT64
+    ("http://[2002:a00:1::]/", "non-public address 2002:a00:1::"),             # 6to4
+    ("http://[2002:7f00:1::1]/", "non-public address 2002:7f00:1::1"),
+    ("http://[2002:a9fe:a9fe::]/", "non-public address 2002:a9fe:a9fe::"),
+    ("http://[2001::]/", "non-public address 2001::"),                          # Teredo
+    ("http://[2001:0:a00:1::f5ff:fffe]/", "non-public address 2001:0:a00:1::f5ff:fffe"),
+    ("http://[2001:0:5db8:d822::a247:27dd]/", "non-public address 2001:"),     # both inner IPv4 public: the range is still refused
+    ("http://nat64.example/", "non-public address 64:ff9b::a00:1"),
+    ("http://sixtofour.example/", "non-public address 2002:a00:1::"),
+    ("http://multi6.example/", "non-public address 64:ff9b::7f00:1"),
 ]
 
 
@@ -120,6 +151,22 @@ def test_public_https_and_http_hosts_are_fetched(run):
     assert all(row["text"] and "err" not in row for row in rows.values())
 
 
+# literal public addresses, including IPv6 forms that wrap a public IPv4 and must not be refused for it
+PUBLIC_LITERALS = [
+    "https://93.184.216.34/press/1",
+    "https://[2606:4700::1111]/press/1",
+    "http://[64:ff9b::5db8:d822]/press/1",      # NAT64 wrapping 93.184.216.34
+    "http://[2002:5db8:d822::1]/press/1",       # 6to4 wrapping 93.184.216.34
+]
+
+
+@pytest.mark.parametrize("url", PUBLIC_LITERALS)
+def test_public_literal_addresses_are_fetched(run, url):
+    row = run([url])[url]
+    assert row["text"] and "err" not in row
+    assert run.opened == [url]
+
+
 def test_a_redirect_to_a_private_address_is_refused(run):
     run.redirects["https://www.example.gov/old"] = "http://169.254.169.254/latest/meta-data/"
     row = run(["https://www.example.gov/old"])["https://www.example.gov/old"]
@@ -130,6 +177,7 @@ def test_a_redirect_to_a_private_address_is_refused(run):
 @pytest.mark.parametrize("target, why", [
     ("http://rebind.example/x", "non-public address 192.168.1.5"),
     ("http://127.0.0.1:8806/", "loopback"),
+    ("http://[64:ff9b::10.0.0.1]/", "non-public address 64:ff9b::a00:1"),
     ("file:///etc/passwd", "not allowed"),                       # urllib's own redirect scheme check
 ])
 def test_redirects_are_rechecked_at_every_hop(run, target, why):

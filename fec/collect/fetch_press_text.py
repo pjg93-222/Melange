@@ -21,6 +21,30 @@ def _ipv4_first(host, port, family=0, type=0, proto=0, flags=0):
 socket.getaddrinfo = _ipv4_first
 
 
+_LOCAL_NAT64 = ipaddress.ip_network('64:ff9b:1::/48')   # RFC 8215 local-use prefix: never a public host
+
+
+def _embedded_ipv4(address):
+    """The IPv4 address inside a NAT64 (64:ff9b::/96) or 6to4 (2002::/16) IPv6 address, else None."""
+    raw = address.packed
+    if raw[:12] == bytes.fromhex('0064ff9b') + bytes(8):
+        return ipaddress.IPv4Address(raw[12:])
+    if raw[:2] == b'\x20\x02':
+        return ipaddress.IPv4Address(raw[2:6])
+
+
+def _is_public(address):
+    """Global unicast only. is_global alone passes multicast, site-local fec0::/10 and IPv4-compatible ::a.b.c.d, so
+    those are refused here as well. A NAT64 or 6to4 address is only as public as the IPv4 inside it (the wrapper's own
+    range reads reserved or private, so it is ignored). Teredo 2001::/32 is refused as a whole range."""
+    inner = _embedded_ipv4(address) if address.version == 6 else None
+    if inner is not None:
+        return _is_public(inner)
+    return address.is_global and address not in _LOCAL_NAT64 and not (
+        address.is_multicast or address.is_reserved or address.is_unspecified or address.is_loopback
+        or address.is_link_local or address.is_private or getattr(address, 'is_site_local', False))
+
+
 def _require_public(url):
     """The URLs come from a CSV, so refuse any that is not http(s) to a public address.
 
@@ -39,7 +63,7 @@ def _require_public(url):
     for answer in answers:
         address = ipaddress.ip_address(answer[4][0].split('%')[0])
         address = getattr(address, 'ipv4_mapped', None) or address
-        if not address.is_global:
+        if not _is_public(address):
             raise ValueError('target host resolves to non-public address %s' % address)
 
 
