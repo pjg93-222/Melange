@@ -475,6 +475,38 @@ fec_url_with_date_range <- function(url, min_date, max_date) {
   )
 }
 
+# The export URL is read out of page storage, so it is untrusted: download.file()
+# would fetch whatever scheme it names. Allow https only. The host is NOT pinned:
+# openFEC returns presigned S3 URLs and the real export host is unverified, so a
+# fec.gov allowlist could break live exports.
+fec_require_https_url <- function(url) {
+  if (!(is.character(url) && length(url) == 1L && !is.na(url))) {
+    stop("FEC export URL refused: not a single string.", call. = FALSE)
+  }
+  # A real export URL is ASCII (percent-encoded where needed). Refuse any other
+  # byte first, so lookalikes (NBSP, fullwidth quote/backslash/@, zero-width,
+  # bidi override, homoglyph hosts) fail whatever the string's encoding mark.
+  if (grepl("[^\\x01-\\x7e]", url, perl = TRUE, useBytes = TRUE)) {
+    stop(
+      "FEC export URL refused: it must be ASCII (percent-encode any other character).",
+      call. = FALSE
+    )
+  }
+  authority <- sub("^https://([^/?#]*).*$", "\\1", url, ignore.case = TRUE)
+  if (
+    !grepl("^https://", url, ignore.case = TRUE) ||
+      grepl("[[:space:][:cntrl:]\\\\]", url) ||
+      !grepl("^[^@:]+(:[0-9]+)?$", authority)
+  ) {
+    stop(
+      "FEC export URL refused: it must be an https URL with a plain host ",
+      "(no userinfo, backslash, whitespace or control characters).",
+      call. = FALSE
+    )
+  }
+  invisible(url)
+}
+
 fec_export_current_query <- function(
   session,
   expected_rows,
@@ -537,6 +569,7 @@ fec_export_current_query <- function(
     }
     Sys.sleep(2)
   }
+  fec_require_https_url(download_url)
   require_package("data.table")
   csv_path <- tempfile("mentat-fec-export-", fileext = ".csv")
   on.exit(unlink(csv_path, force = TRUE), add = TRUE)

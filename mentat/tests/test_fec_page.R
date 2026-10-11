@@ -453,6 +453,77 @@ local({
   )
 })
 
+# The export URL comes from page storage: only https URLs may reach
+# download.file(). The host is not pinned (openFEC returns presigned S3 URLs).
+# Nothing here touches the network.
+refuses <- function(url) {
+  inherits(tryCatch(fec_require_https_url(url), error = identity), "error")
+}
+presigned <- "https://cg-abc.s3-us-gov-west-1.amazonaws.com/x.zip?X-Amz-Foo=1"
+stopifnot(
+  !refuses("https://www.fec.gov/files/x.csv"),
+  !refuses(presigned),
+  !refuses("HTTPS://Example.org:8443/x.csv"),
+  identical(fec_require_https_url(presigned), presigned),
+  refuses("javascript:alert(1)"),
+  refuses("file:///C:/x"),
+  refuses("http://www.fec.gov/x.csv"),
+  refuses("https://user@host/x"),
+  refuses("ftp://www.fec.gov/x.csv"),
+  refuses("//www.fec.gov/x.csv"),
+  refuses("https://www.fec.gov@evil.com/x.csv"),
+  refuses("https://evil.com\\@www.fec.gov/x.csv"),
+  refuses("https://example.org/a\\b"),
+  refuses("https://example.org/a b"),
+  refuses("https://example.org/a\nfile:///x"),
+  refuses(" https://example.org/x"),
+  refuses("https://"),
+  refuses("https:///x.csv"),
+  refuses("https://:443/x.csv"),
+  refuses(""),
+  refuses(NA_character_),
+  refuses(NULL),
+  refuses(c("https://www.fec.gov/a", "https://www.fec.gov/b"))
+)
+# Non-ASCII lookalikes (NBSP, fullwidth quote/backslash/@, zero-width space, RTL
+# override, Cyrillic homoglyph host) are refused whatever the string's encoding
+# mark. Built from \u escapes so this file stays ASCII. A percent-encoded URL is
+# still accepted.
+lookalikes <- c(
+  "https://x.org/a\u00a0b",
+  "https://x.org/a\uff02b",
+  "https://x.org/a\uff3cb",
+  "https://www.fec.gov\uff20evil.example/x",
+  "https://x.org/a\u200bb",
+  "https://x.org/a\u202eb",
+  "https://www.f\u0435c.gov/x.csv"
+)
+latin1_nbsp <- iconv("https://x.org/a\u00a0b", "UTF-8", "latin1")
+bytes_nbsp <- "https://x.org/a\u00a0b"
+Encoding(bytes_nbsp) <- "bytes"
+invalid_utf8 <- paste0("https://x.org/a", rawToChar(as.raw(0xc3)), "b")
+stopifnot(
+  identical(Encoding(latin1_nbsp), "latin1"),
+  identical(Encoding(bytes_nbsp), "bytes"),
+  all(vapply(
+    c(lookalikes, latin1_nbsp, bytes_nbsp, invalid_utf8),
+    refuses,
+    logical(1L),
+    USE.NAMES = FALSE
+  )),
+  !refuses("https://x.org/a%20b?X-Amz-Signature=abc%2Fdef")
+)
+refusal_message <- tryCatch(
+  fec_require_https_url("http://www.fec.gov/x.csv"),
+  error = conditionMessage
+)
+stopifnot(grepl("must be an https URL", refusal_message, fixed = TRUE))
+export_body <- paste(deparse(body(fec_export_current_query)), collapse = "\n")
+stopifnot(
+  regexpr("fec_require_https_url(download_url)", export_body, fixed = TRUE) <
+    regexpr("download.file", export_body, fixed = TRUE)
+)
+
 cat("test_fec_page: transient whole-query retry verified\n")
 cat("test_fec_page: incomplete browser API batches retried atomically\n")
 cat("test_fec_page: scoped ZIP/city URL filters verified\n")
@@ -460,4 +531,5 @@ cat("test_fec_page: redundant redraw and page reads avoided\n")
 cat("test_fec_page: dead sessions bypass inner retries\n")
 cat("test_fec_page: canary failures remain bounded and fail closed\n")
 cat("test_fec_page: employer partition direct calls use active session\n")
+cat("test_fec_page: export download URL limited to https\n")
 cat("test_fec_page: PASS\n")

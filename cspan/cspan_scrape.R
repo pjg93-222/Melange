@@ -478,13 +478,29 @@ run_rebuild <- function() {
 }
 
 # ------------------------------- audio (ffmpeg) ------------------------------
+# The media URL is scraped from the page, so it is untrusted: ffmpeg opens file:
+# and concat: URLs as readily as https ones. Only web URLs may reach it, and only
+# ASCII ones: a media URL is percent-encoded, and a non-ASCII lookalike (NBSP,
+# fullwidth quote/backslash/@, zero-width, homoglyph host) is refused byte-wise.
+is_web_media_url <- function(url) {
+  is.character(url) && length(url) == 1L && !is.na(url) &&
+    !grepl("[^\\x01-\\x7e]", url, perl = TRUE, useBytes = TRUE) &&
+    grepl("^https?://[^[:space:][:cntrl:]\"\\\\]+$", url, ignore.case = TRUE)
+}
+
 download_audio <- function(id, media = NULL) {
   if (is.null(media) || media == "") media <- media_url_for(id)
+  if (!is_web_media_url(media)) {
+    log_msg(sprintf("  audio REFUSED for %s (media URL is not http(s); see media_url in its transcript json)", id))
+    return(invisible(NULL))
+  }
   dir.create(file.path(OUT, "audio"), showWarnings = FALSE)
   out_mp3 <- file.path(OUT, "audio", paste0(id, ".mp3"))
   if (file.exists(out_mp3) && !has_flag("force")) { log_msg("  audio exists: ", id); return(out_mp3) }
   ff <- Sys.which(FFMPEG); if (ff == "") ff <- FFMPEG
-  code <- suppressWarnings(system2(ff, c("-y", "-user_agent", shQuote(UA), "-i", shQuote(media),
+  code <- suppressWarnings(system2(ff, c("-y", "-user_agent", shQuote(UA),
+                                         "-protocol_whitelist", shQuote("https,tls,tcp,crypto,http"),
+                                         "-i", shQuote(media),
                                          "-vn", "-acodec", "libmp3lame", "-q:a", "4", shQuote(out_mp3)),
                                    stdout = FALSE, stderr = FALSE))
   if (code == 0 && file.exists(out_mp3)) log_msg("  audio -> ", out_mp3)
