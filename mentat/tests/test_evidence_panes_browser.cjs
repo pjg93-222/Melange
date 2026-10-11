@@ -3,8 +3,9 @@
  * saved snapshot, the compare strip, the URL round trip and the Import drawer.
  * Build 06 re-homed every #evidence-add click and chip-row assertion onto the
  * rail's ticks (the prompt's "keep #evidence-add hidden ... re-home those
- * assertions"); #evidence-pac and #evidence-add stay in the page, hidden, as
- * the data behind the rail, so their option and disabled assertions still hold.
+ * assertions"); #evidence-pac stays in the page, hidden, as the data behind
+ * the rail, so its option assertions still hold. #evidence-add, never visible
+ * and never clicked by the app, is gone; openCommittee is the programmatic path.
  *
  * Spawns the actual `python app/server.py` console under a temp data root, so
  * imports really land on disk and the permalink really restores from them. Run
@@ -323,7 +324,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.ok(/Choose a source above|Nothing imported yet/.test(railEmpty), railEmpty);
     assert.equal(await page.isVisible('#evidence-import-open'), true);
     assert.equal(await page.isVisible('#evidence-snapshot-open'), true);
-    assert.equal(await page.isVisible('#evidence-add'), false, '#evidence-add stays in the page, hidden');
+    assert.equal(await page.locator('#evidence-add').count(), 0, 'the hidden Add pane button is gone');
     pass(`tab open, status ${JSON.stringify(await status())}, empty line ${JSON.stringify(empty)}, rail ${JSON.stringify(railEmpty)}`);
 
     step('PORTED: the path box, the Browse panel and the worksheet picker exist in the page');
@@ -389,10 +390,9 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.ok(/matching "dccc"/.test(await status()), await status());
     pass(`search narrowed to DCCC: ${JSON.stringify(await status())}`);
 
-    step('PORTED: a search that matches nothing empties the PAC list and disables Add pane');
+    step('PORTED: a search that matches nothing empties the PAC list and the rail');
     await page.fill('#evidence-find', 'no-such-committee');
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 0, null, 20000, 'a page condition');
-    assert.equal(await page.isDisabled('#evidence-add'), true);
     assert.ok(/0 shown/.test(await status()), await status());
     assert.match((await page.textContent('#evidence-list')).trim(), /No PAC in this source matches/);
     assert.equal(await page.locator('#evidence-panes [data-pane]').count(), 0);
@@ -475,12 +475,11 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.equal(await page.locator('#evidence-panes .pane-map').count(), 2);
     assert.equal(await page.locator('#evidence-compare #evidence-compare-map').count(), 1);
     assert.equal(await page.locator('#evidence-panes .pane-map:disabled').count(), 0);
-    // Add pane is legitimately disabled (the chosen PAC is already open, or four
-    // panes are); what Paul objected to was a control that is NEVER clickable.
+    // What Paul objected to was a control that is NEVER clickable.
     const stuck = await page.locator('#view-evidence button:disabled').evaluateAll(
-      nodes => nodes.filter(node => node.id !== 'evidence-add').map(node => node.id || node.className));
-    assert.deepEqual(stuck, [], `disabled controls other than Add pane: ${JSON.stringify(stuck)}`);
-    pass('two pane Map buttons and one on Compare, all enabled; the only disabled control is Add pane');
+      nodes => nodes.map(node => node.id || node.className));
+    assert.deepEqual(stuck, [], `disabled controls: ${JSON.stringify(stuck)}`);
+    pass('two pane Map buttons and one on Compare, all enabled; no button is disabled');
 
     step('the URL carries the prefixed pane keys and never the single-pane ones');
     const query = await page.evaluate(() => location.search);
@@ -585,7 +584,6 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     });
     // Fix round 1 (D10): the refusal note is --muted, not merely coloured.
     assert.equal(noteColour[0], noteColour[1], `the refusal note is not --muted: ${JSON.stringify(noteColour)}`);
-    assert.equal(await page.isDisabled('#evidence-add'), true, 'three panes is the ceiling');
     assert.ok(/3 panes open/.test(await status()), await status());
     const columns = await page.evaluate(() => document.getElementById('evidence-panes').style.gridTemplateColumns);
     assert.ok(/repeat\(3, minmax\(0px?, 1fr\)\)/.test(columns), columns);
@@ -698,7 +696,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       await page.selectOption('#evidence-source', snapshotOption);
       await waitFor(previous => {
         const now = [...document.querySelectorAll('#evidence-pac option')].map(node => node.value).join('|');
-        return now.length > 0 && document.querySelector('#evidence-status').textContent !== previous && !document.querySelector('#evidence-add').disabled
+        return now.length > 0 && document.querySelector('#evidence-status').textContent !== previous
           && document.querySelectorAll('#evidence-list input[type=checkbox]').length > 0;
       }, pacBefore, 30000, 'the PAC picker to be rebuilt for the snapshot');
       await page.locator('#evidence-list input[type=checkbox]').first().check();
@@ -955,14 +953,14 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       pass('snapshot body read exactly once across three source changes');
     }
 
-    step('the same PAC on two cycles opens as two panes, and Add says so rather than going dead');
+    step('the same PAC on two cycles opens as two panes, and the exact same pane is reused');
     // Pane identity is (source, committee, cycle). Before the fix it was
     // (source, committee), so asking for one committee on a second cycle - the
     // comparison the panes exist for - silently disabled #evidence-add.
     // Build 06, fix round 1 (R06-03): the rail's row is the PAC, so its tick
     // follows the PAC's open pane whatever the Cycle chip says, and a tick is
     // never refused for a PAC that is already open. The second cycle is added
-    // through the programmatic path #evidence-add keeps (hidden in the page).
+    // through the programmatic path, openCommittee (Graph's route in).
     while ((await page.locator('#evidence-panes [data-pane]').count()) > 0) {
       await page.click('#evidence-panes [data-pane] .pane-remove');
       await page.waitForTimeout(200);
@@ -980,17 +978,15 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.equal(await railBox(onePac).isChecked(), true, 'the PAC is open, so its row stays ticked on the second cycle');
     assert.match(await page.getAttribute(`#evidence-list .evidence-rail-row[data-committee="${onePac}"]`, 'title'),
       /open on /, 'the row says which cycle its pane is on');
-    assert.equal(await page.locator('#evidence-add').isDisabled(), false,
-      'a second cycle of the same PAC must be addable');
-    await page.evaluate(() => document.getElementById('evidence-add').click());
+    await page.evaluate(([pac, cycle]) => window.MentatEvidence.openCommittee(pac, cycle), [onePac, twoCycles[1]]);
     await waitPanes(2);
     const cycles = await page.locator('#evidence-panes [data-pane]').evaluateAll(
       nodes => nodes.map(node => node.dataset.cycle || ''));
     assert.deepEqual([...cycles].sort(), [...twoCycles].sort(),
       `two panes, one per cycle: ${JSON.stringify(cycles)}`);
+    await page.evaluate(([pac, cycle]) => window.MentatEvidence.openCommittee(pac, cycle), [onePac, twoCycles[1]]);
+    assert.equal(await page.locator('#evidence-panes [data-pane]').count(), 2, 'the exact same pane is reused, not added');
     await page.selectOption('#evidence-cycle', twoCycles[1]);
-    assert.equal(await page.locator('#evidence-add').isDisabled(), true,
-      'the exact same pane stays refused');
     assert.equal(await railBox(onePac).isChecked(), true, 'the rail shows that exact pane as open');
     await page.selectOption('#evidence-cycle', twoCycles[0]);
     assert.equal(await railBox(onePac).isChecked(), true, 'and the other cycle\'s pane on its own cycle');

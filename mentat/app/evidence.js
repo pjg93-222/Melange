@@ -344,8 +344,8 @@
   /* --------------------------------------------------------------- the rail */
   // Build 06: the rail lists the chosen source's PACs, filtered by Type and Find
   // exactly as #evidence-pac is (visibleCommittees), each with a tick that opens
-  // or closes its pane. #evidence-pac and #evidence-add stay in the page, hidden,
-  // as the data behind the rail and the programmatic open path (openCommittee).
+  // or closes its pane. #evidence-pac stays in the page, hidden, as the data
+  // behind the rail; openCommittee is the programmatic open path.
   //
   // The figure at the right is receipts: a saved snapshot's receipts as
   // reported, or an import's `receipts` / `receipts_by_cycle` from the listing
@@ -452,22 +452,8 @@
     node.textContent = text; node.title = text; node.classList.add('is-scope');
   }
 
-  function updateAdd() {
-    const chosen = parseSourceValue(sourceValue());
-    const committee = $('evidence-pac').value;
-    // A pane is identified by its cycle as well as its source and committee: the
-    // same PAC on two cycles is a comparison a reader asks for, and treating it as
-    // a duplicate left #evidence-add permanently disabled with no way to say why.
-    const cycle = $('evidence-cycle').value;
-    const already = [...panes.values()].some(pane => pane.source === chosen.kind
-      && pane.id === chosen.id && pane.committee === committee
-      && String(pane.cycle || '') === String(cycle || ''));
-    $('evidence-add').disabled = !chosen.kind || !committee || already || panes.size >= MAX_PANES;
-  }
-
   function applyFilter() {
     fillPacs();
-    updateAdd();
     renderRail();
     sayScope();
   }
@@ -3076,7 +3062,7 @@
     panes.delete(key);
     // Fix round 1 (D6): the "Close a pane" note is only true at the ceiling.
     if (panes.size < MAX_PANES) railNote('');
-    renderPanes(); renderRail(); renderCompare(); updateAdd(); sayScope(); writeScope();
+    renderPanes(); renderRail(); renderCompare(); sayScope(); writeScope();
   }
 
   async function addPane() {
@@ -3085,7 +3071,6 @@
     if (!chosen.kind || !key) return;
     const pane = paneFrom(key, chosen.kind, chosen.id, $('evidence-pac').value, $('evidence-cycle').value);
     panes.set(key, pane);
-    updateAdd();
     await loadPane(pane);
     writeScope();
   }
@@ -3093,9 +3078,7 @@
   $('evidence-source').addEventListener('change', () => { syncSourceTitle(); chooseSource().then(writeScope); });
   $('evidence-type').addEventListener('change', () => { applyFilter(); writeScope(); });
   $('evidence-find').addEventListener('input', applyFilter);
-  $('evidence-pac').addEventListener('change', updateAdd);
-  $('evidence-cycle').addEventListener('change', () => { updateAdd(); renderRail(); });
-  $('evidence-add').addEventListener('click', addPane);
+  $('evidence-cycle').addEventListener('change', () => renderRail());
   $('evidence-import-open').addEventListener('click', () => toggleDrawer('evidence-import-open', 'evidence-import-drawer'));
   $('evidence-snapshot-open').addEventListener('click', () => toggleDrawer('evidence-snapshot-open', 'evidence-snapshot-drawer'));
   $('evidence-follow-graph').addEventListener('change', () => {
@@ -3486,7 +3469,7 @@
     await chooseSource();
     $('evidence-pac').value = committee; $('evidence-cycle').value = cycle;
     const pane = paneFrom(key, chosen.kind, chosen.id, committee, cycle);
-    panes.set(key, pane); updateAdd();
+    panes.set(key, pane);
     await loadPane(pane); writeScope();
     document.querySelector(`[data-pane="${key}"]`)?.scrollIntoView({block: 'nearest'});
     return key;
