@@ -1032,7 +1032,8 @@ fec_api_collect_windows_verified <- function(
   state, windows, api_key, concurrency, transport, sleep, jitter,
   initial_states = list(), page_callback = NULL,
   before_request = function(count) invisible(NULL), reset_callback = NULL,
-  limit = fec_api_reconcile_passes(), probe_rows = list()
+  limit = fec_api_reconcile_passes(), probe_rows = list(),
+  abandon_unproven = FALSE
 ) {
   requests <- 0L; retries <- 0L; rate_limits <- 0L; child_reconciles <- 0L
   absorb <- function(outcome) {
@@ -1070,6 +1071,16 @@ fec_api_collect_windows_verified <- function(
     page
   }
   child_states <- collect(windows, initial_states)$units
+  # A window that was itself unservable comes back as narrower spellings, which
+  # can never prove the window's population; re-walking it repeats the same
+  # outcome every pass. When the split was optional (the parent query served
+  # its first page), hand back state = NULL so the caller walks the parent
+  # cursor instead of failing a query that was never unservable.
+  if (isTRUE(abandon_unproven) && any(vapply(child_states,
+      function(child) identical(child$coverage_verified, FALSE), logical(1L)))) {
+    return(list(state = NULL, request_count = requests, retry_count = retries,
+      rate_limit_count = rate_limits, reconcile_count = child_reconciles))
+  }
   # One page-1 request per window, shared by the window-count sum and the
   # stale-window search so that one pass never asks the same window twice.
   probe_windows <- function(allow_estimate) {
@@ -1460,21 +1471,28 @@ fec_api_collect_work_units <- function(
       # date windows, let the shared pool fetch those windows, and retain one
       # coordinator for all checkpoint/database writes.
       pool_width <- suppressWarnings(as.integer(Sys.getenv("MENTAT_REQUEST_POOL_WIDTH", "0")))
-      children <- if (!is.na(pool_width) && pool_width > 1L && !is.na(page$count) && page$count >= 2000L) fec_api_date_windows(state$unit) else list()
+      children <- if (!is.na(pool_width) && pool_width > 1L && !is.na(page$count) && page$count >= 2000L && !isTRUE(state$windows_abandoned)) fec_api_date_windows(state$unit) else list()
       if (length(children)) {
         cat(sprintf("Shared workers: %s -> %d date windows; expected %d rows\n", state$unit$id, length(children), page$count))
         verified <- fec_api_collect_windows_verified(state, children, api_key, concurrency,
           transport, sleep, jitter, initial_states = initial_states,
           page_callback = page_callback, before_request = before_request,
-          reset_callback = reset_callback, limit = reconcile_limit, probe_rows = page$rows)
-        state <- verified$state
-        if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
-        states[[index]] <- state
+          reset_callback = reset_callback, limit = reconcile_limit, probe_rows = page$rows,
+          abandon_unproven = TRUE)
         request_count <- request_count + verified$request_count
         retry_count <- retry_count + verified$retry_count
         rate_limit_count <- rate_limit_count + verified$rate_limit_count
         reconcile_count <- reconcile_count + verified$reconcile_count
-        next
+        if (!is.null(verified$state)) {
+          state <- verified$state
+          if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
+          states[[index]] <- state
+          next
+        }
+        cat(sprintf("Shared workers: %s has unservable date windows; walking the parent cursor serially\n",
+          state$unit$id))
+        # Later pages report the same count; never re-split this walk.
+        state$windows_abandoned <- TRUE
       }
       page_sub_ids <- vapply(
         page$rows,
