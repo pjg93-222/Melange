@@ -482,6 +482,15 @@ fec_require_https_url <- function(url) {
   if (!(is.character(url) && length(url) == 1L && !is.na(url))) {
     stop("FEC export URL refused: not a single string.", call. = FALSE)
   }
+  # A real export URL is ASCII (percent-encoded where needed). Refuse any other
+  # byte first, so lookalikes (NBSP, fullwidth quote/backslash/@, zero-width,
+  # bidi override, homoglyph hosts) fail whatever the string's encoding mark.
+  if (grepl("[^\\x01-\\x7e]", url, perl = TRUE, useBytes = TRUE)) {
+    stop(
+      "FEC export URL refused: it must be ASCII (percent-encode any other character).",
+      call. = FALSE
+    )
+  }
   authority <- sub("^https://([^/?#]*).*$", "\\1", url, ignore.case = TRUE)
   if (
     !grepl("^https://", url, ignore.case = TRUE) ||

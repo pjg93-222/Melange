@@ -388,9 +388,12 @@ run_rebuild <- function() {
 
 # ------------------------------- audio (ffmpeg) ------------------------------
 # The media URL is scraped from the page, so it is untrusted: ffmpeg opens file:
-# and concat: URLs as readily as https ones. Only web URLs may reach it.
+# and concat: URLs as readily as https ones. Only web URLs may reach it, and only
+# ASCII ones: a media URL is percent-encoded, and a non-ASCII lookalike (NBSP,
+# fullwidth quote/backslash/@, zero-width, homoglyph host) is refused byte-wise.
 is_web_media_url <- function(url) {
   is.character(url) && length(url) == 1L && !is.na(url) &&
+    !grepl("[^\\x01-\\x7e]", url, perl = TRUE, useBytes = TRUE) &&
     grepl("^https?://[^[:space:][:cntrl:]\"\\\\]+$", url, ignore.case = TRUE)
 }
 
