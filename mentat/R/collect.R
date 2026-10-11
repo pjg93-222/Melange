@@ -1541,6 +1541,8 @@ mentat_record_row_evidence <- function(connection, table, rows, stage) {
   invisible(NULL)
 }
 
+MENTAT_SQL_IN_CHUNK <- 900L
+
 insert_rows_or_ignore <- function(connection, table, rows, columns) {
   if (!nrow(rows)) {
     return(invisible(0L))
@@ -1560,14 +1562,19 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
     ))
     ids <- unique(incoming$sub_id[nzchar(incoming$sub_id)])
     if (length(ids)) {
-      placeholders <- paste(rep("?", length(ids)), collapse = ", ")
-      stored <- data.table::as.data.table(DBI::dbGetQuery(
-        connection,
-        paste0(
-          "SELECT sub_id, company AS stored_company FROM ", table, " ",
-          "WHERE sub_id IN (", placeholders, ")"
-        ),
-        params = as.list(ids)
+      # SQLite caps bound variables per statement (32766 in RSQLite), so a large
+      # unit's sub_ids are looked up in chunks; the union of chunk results is
+      # the same row set as one IN over every id.
+      stored <- data.table::rbindlist(lapply(
+        split(ids, ceiling(seq_along(ids) / MENTAT_SQL_IN_CHUNK)),
+        function(chunk) data.table::as.data.table(DBI::dbGetQuery(
+          connection,
+          paste0(
+            "SELECT sub_id, company AS stored_company FROM ", table, " ",
+            "WHERE sub_id IN (", paste(rep("?", length(chunk)), collapse = ", "), ")"
+          ),
+          params = as.list(chunk)
+        ))
       ))
       if (nrow(stored)) {
         conflicts <- merge(incoming, stored, by = "sub_id", allow.cartesian = TRUE)
