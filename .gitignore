@@ -7,6 +7,8 @@ fec/govinfo_key.txt
 *.pw
 *.sqlite
 data/money/*.zip
+outputs/email_package/
+outputs/email_allinone_*/
 
 # --- data artifacts: generated/derived, regenerable from pipeline ---
 *.json
