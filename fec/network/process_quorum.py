@@ -128,6 +128,8 @@ df['cu_relevant']=[1 if CU_TERMS.search((t or '')+' '+(c or '')) else 0
                    for t,c in zip(df['Title'].fillna(''),df['Content'].fillna(''))]
 df['is_rt']=df['Content'].fillna('').str.match(r'\s*RT @').astype(int)
 # --- step 4: stance on the member+relevant corpus
+from lane_file_io import safe_to_unpickle
+if not safe_to_unpickle(M+r'\data\stance\stance_clf_composed.pkl'): sys.exit('refusing to unpickle stance_clf_composed.pkl: it fails its integrity sidecar')
 clf=pickle.load(open(M+r'\data\stance\stance_clf_composed.pkl','rb'))
 mem=df[(df['bucket']=='member')]
 score_ix=mem[mem['cu_relevant']==1].index

@@ -14,7 +14,7 @@ import pandas as pd
 import requests
 from threadpoolctl import threadpool_limits
 
-from common import CODE, OLD, OUT, digest, log, read_json, stamp, write_json
+from common import CODE, OLD, OUT, digest, log, read_json, stamp, write_json, safe_to_unpickle
 from audit_data import parse_bill
 from build_panel import (FEATURES, TOPIC_NAMES, get_bills, get_members, get_ideology,
                           prior_stats, term_at, ordinal, topic_for)
@@ -148,7 +148,9 @@ def issue():
     np.save(SNAPSHOT/'features.npy',x)
     frame=pd.DataFrame(rows);model_hashes={}
     for name in CONTROL_MODELS:
-        path=OLD/'models'/f'final_{name}.joblib';artifact=joblib.load(path);model_hashes[name]=digest(path)
+        path=OLD/'models'/f'final_{name}.joblib'
+        if not safe_to_unpickle(path):raise SystemExit(f'refusing to unpickle {path}: it fails its integrity sidecar')
+        artifact=joblib.load(path);model_hashes[name]=digest(path)
         frame[name]=calibrate(predict(artifact,x),artifact['calibration'])
         frame[name+'_rank']=frame.groupby('bill')[name].rank(method='first',ascending=False).astype(int)
     frame.to_parquet(SNAPSHOT/'forecasts.parquet',index=False)

@@ -423,9 +423,10 @@ def cmd_discover(limit=None):
 def cmd_classify():
     """Score every collected post with the domain stance classifier (train_stance_domain.py --save) +
     the relevance filter -> member-level social stance signals, same shape stance_dynamics.py consumes."""
-    import pickle
+    import pickle; from lane_file_io import safe_to_unpickle   # refuse a swapped model before unpickling it
     pk=B+r'\data\stance\stance_clf_composed.pkl'
     if not os.path.exists(pk): print('train first: python fec/stance/train_stance_domain.py --save'); return
+    if not safe_to_unpickle(pk): print('refusing to load %s: it fails its integrity sidecar; retrain: python fec/stance/train_stance_domain.py --save'%pk); return
     clf=pickle.load(open(pk,'rb')); c=db()
     rows=c.execute('SELECT platform,post_id,bioguide,created_at,text FROM posts').fetchall()
     rel=[(p,pid,bg,dt,tx) for p,pid,bg,dt,tx in rows if relevance(tx)]

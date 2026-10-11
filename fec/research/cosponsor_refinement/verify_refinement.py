@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from threadpoolctl import threadpool_limits
 
-from common import CODE, OLD, OUT, digest, log, read_json, stamp, write_json
+from common import CODE, OLD, OUT, digest, log, read_json, stamp, write_json, safe_to_unpickle
 from prospective import SNAPSHOT, current_bills, serving_roster, CONTROL_MODELS
 from run_models import predict, calibrate
 
@@ -64,6 +64,7 @@ def run():
     assert np.isfinite(x).all() and x.shape==(len(frame),len(manifest['feature_names']))
     for name in CONTROL_MODELS:
         path=OLD/'models'/f'final_{name}.joblib';assert digest(path)==manifest['model_sha256'][name]
+        if not safe_to_unpickle(path):raise SystemExit(f'refusing to unpickle {path}: it fails its integrity sidecar')
         artifact=joblib.load(path);expected=calibrate(predict(artifact,x[idx]),artifact['calibration'])
         np.testing.assert_allclose(frame[name].to_numpy()[idx],expected,atol=1e-7,rtol=1e-6)
         rank=frame.groupby('bill')[name].rank(method='first',ascending=False).astype(int)
@@ -82,7 +83,9 @@ def run():
     from fit_extensions import COV
     network=np.load(SNAPSHOT/'network_features.npy',mmap_mode='r')
     design=np.column_stack([x[idx][:,[manifest['feature_names'].index(n) for n in COV]],network[idx]])
-    artifact=joblib.load(SNAPSHOT/'boosted_network_refit.joblib')
+    refit_path=SNAPSHOT/'boosted_network_refit.joblib'
+    if not safe_to_unpickle(refit_path):raise SystemExit(f'refusing to unpickle {refit_path}: it fails its integrity sidecar')
+    artifact=joblib.load(refit_path)
     expected=calibrate(artifact['model'].predict_proba(design)[:,1],artifact['calibration'])
     np.testing.assert_allclose(nf[name].to_numpy()[idx],expected,atol=1e-7,rtol=1e-6)
     rankfreeze=read_json(OUT/'network_ranker_freeze.json')

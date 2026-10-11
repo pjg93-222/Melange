@@ -74,6 +74,30 @@ def test_review_app_requires_personal_decisions_and_emits_source_bound_surface(t
     assert doc["contract"]["preaccepted_decisions"] is False
 
 
+def test_source_link_is_only_emitted_for_http_and_https_urls():
+    rendered = mod.render([], "queue", "draft")
+    line = next(line for line in rendered.splitlines() if line.lstrip().startswith("$('source').innerHTML="))
+    assert "/^https?:\\/\\//i.test(r.url||'')" in line
+    node = shutil.which("node")
+    if node:
+        code = """
+const esc=s=>String(s??'').replace(/[&<>\\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const out={};const $=id=>out[id]=out[id]||{};
+const show=r=>{""" + line + """;return out.source.innerHTML};
+for(const bad of ['javascript:alert(1)','JaVaScRiPt:alert(1)',' javascript:alert(1)','data:text/html,x','file:///C:/x','//evil.example/x','vbscript:x']){
+  const html=show({url:bad,title:'T',channel:'C'});
+  if(html.includes('href=')||html.includes('<a'))throw new Error('link emitted for '+bad+': '+html);
+  if(!html.includes('T'))throw new Error('title dropped for '+bad);
+}
+for(const good of ['https://example.gov/a?b=1&c=2','HTTP://Example.gov/a']){
+  const html=show({url:good,title:'T',channel:'C'});
+  if(!html.includes('<a href="'+esc(good)+'"'))throw new Error('link missing for '+good+': '+html);
+}
+if(show({url:null,title:'T',channel:'C'}).includes('href='))throw new Error('link emitted without a url');
+"""
+        subprocess.run([node, "-e", code], text=True, check=True)
+
+
 def test_descriptive_finding_validation_and_optional_legacy_phase():
     rendered = mod.render([], "queue", "draft")
     match = re.search(r"function semanticProblems\(fs\).*?\n", rendered)

@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from threadpoolctl import threadpool_limits
 
-from common import CODE, OLD, OUT, digest, log, read_json, stamp, write_json
+from common import CODE, OLD, OUT, digest, log, read_json, stamp, write_json, safe_to_unpickle, write_sha256_sidecar
 from fit_extensions import Panel, COV, NETWORK
 from member_network import prior_graph, exposure
 from prospective import SNAPSHOT, current_bills, serving_roster
@@ -30,7 +30,9 @@ def run():
     candidates={k:v for k,v in selection['models'].items() if k.startswith('boosted_') and not v['exploratory_staff']}
     winner=max(candidates,key=lambda k:candidates[k]['selection_2023']['precision_at_8'])
     if winner!='boosted_network':raise RuntimeError(f'Prespecified best boosted variant changed: {winner}')
-    old=joblib.load(OUT/'extension_models/boosted_network.joblib');names=COV+NETWORK
+    old_path=OUT/'extension_models/boosted_network.joblib'
+    if not safe_to_unpickle(old_path):raise SystemExit(f'refusing to unpickle {old_path}: it fails its integrity sidecar')
+    old=joblib.load(old_path);names=COV+NETWORK
     blocks=[];labels=[];weights=[];counts={}
     for cg in [117,118]:
         panel=Panel(cg);y=panel.meta.y.to_numpy();mature=panel.meta.mature.to_numpy().astype(bool)
@@ -44,7 +46,7 @@ def run():
          l2_regularization=10,min_samples_leaf=50,early_stopping=False,random_state=SEED)
     model.fit(x,y,sample_weight=weight);del x,y,weight;gc.collect()
     artifact=dict(model=model,features=names,calibration=old['calibration_2023'],training_congresses=[117,118],configuration=old['config'])
-    modelpath=SNAPSHOT/'boosted_network_refit.joblib';joblib.dump(artifact,modelpath)
+    modelpath=SNAPSHOT/'boosted_network_refit.joblib';joblib.dump(artifact,modelpath);write_sha256_sidecar(modelpath)
     frame=pd.read_parquet(SNAPSHOT/'forecasts.parquet');day=dt.date.fromisoformat(original['forecast_date']).toordinal()
     # The new graph consumes no 119 outcomes: all historical edges are from 118 only.
     history=[b for b in get_bills() if b['congress']<=118]

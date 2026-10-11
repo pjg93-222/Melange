@@ -144,7 +144,7 @@ function show(i){{if(!ROWS.length){{$('card').hidden=true;$('empty').hidden=fals
  $('member').textContent=r.member;$('position').textContent=`${{index+1}} / ${{ROWS.length}}`;
  updateProgress();
  $('meta').innerHTML=`<span class=pill>${{esc(r.source_era)}}</span><span class=pill>${{Number(r.duration_seconds).toFixed(1)}} sec</span><span class=pill>${{esc(r.consecutive_acoustic_windows)}} continuity windows</span>`;
- $('source').innerHTML=`${{r.url?`<a href="${{esc(r.url)}}" target=_blank rel=noopener>${{esc(r.title||r.url)}}</a>`:esc(r.title||'')}} · ${{esc(r.channel||'')}}`;
+ $('source').innerHTML=`${{/^https?:\\/\\//i.test(r.url||'')?`<a href="${{esc(r.url)}}" target=_blank rel=noopener>${{esc(r.title||r.url)}}</a>`:esc(r.title||'')}} · ${{esc(r.channel||'')}}`;
  $('audio').src=r.review_audio_uri||'';$('audioHint').textContent=`Name cue begins at ${{r.identity_cue_start_in_review_audio_sec??'?'}}s; turn begins at ${{r.turn_start_in_review_audio_sec??'?'}}s and ends at ${{r.turn_end_in_review_audio_sec??'?'}}s in this review file. SHA-256: ${{r.review_audio_sha256||'missing'}}`;
  const c=r.selected_identity_cue||{{}};$('cue').textContent=`[${{c.start_sec??'?'}}–${{c.end_sec??'?'}}s] ${{c.phrase||'missing'}} · first: ${{c.first_match||'exact'}} · surname similarity: ${{c.surname_similarity??'n/a'}} · cue-to-turn gap: ${{r.identity_cue_to_turn_gap_seconds??'?'}}s`;
  $('before').textContent=r.preceding_context;$('turn').textContent=r.turn_transcript;$('after').textContent=r.following_context;

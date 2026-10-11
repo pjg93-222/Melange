@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+from types import SimpleNamespace
 
 import pytest
 
@@ -356,3 +357,70 @@ def test_secret_redaction_never_persists_api_key_shape():
     )
     assert "sk-ant-" not in redacted
     assert "ANTHROPIC_API_KEY=" not in redacted
+
+
+def run_cli_transport(monkeypatch):
+    seen = {}
+
+    def fake_run(command, **kwargs):
+        seen.update(command=command, kwargs=kwargs)
+        envelope = {
+            "structured_output": model_decision(),
+            "usage": {"input_tokens": 7, "output_tokens": 3},
+            "total_cost_usd": 0.002,
+            "session_id": "cli-1",
+        }
+        return SimpleNamespace(returncode=0, stdout=json.dumps(envelope), stderr="")
+
+    monkeypatch.setattr(REVIEW.subprocess, "run", fake_run)
+    result = REVIEW.ClaudeCliTransport("claude").review(
+        system_prompt="SYSTEM POLICY",
+        user_prompt="EVIDENCE TEXT",
+        schema={"type": "object"},
+        model="sonnet",
+        effort="low",
+        max_output_tokens=100,
+        remaining_budget_usd=Decimal("0.5"),
+    )
+    return seen, result
+
+
+def test_cli_transport_is_locked_down_and_runs_outside_the_repo(monkeypatch):
+    seen, result = run_cli_transport(monkeypatch)
+    command, kwargs = seen["command"], seen["kwargs"]
+    for flag in ("--safe-mode", "--disable-slash-commands", "--tools", "--strict-mcp-config", "--mcp-config",
+                 "--no-session-persistence", "--no-chrome", "--permission-mode"):
+        assert flag in command, flag
+    assert command[command.index("--tools") + 1] == ""
+    assert json.loads(command[command.index("--mcp-config") + 1]) == {"mcpServers": {}}
+    assert command[command.index("--permission-mode") + 1] == "dontAsk"
+    cwd = Path(kwargs["cwd"]).resolve()
+    assert cwd == Path(tempfile.gettempdir()).resolve()
+    assert cwd != ROOT and ROOT not in cwd.parents
+    assert kwargs["shell"] is False
+    # Legitimate use is unchanged: evidence goes over stdin, never argv; the structured result parses.
+    assert kwargs["input"] == "EVIDENCE TEXT" and "EVIDENCE TEXT" not in command
+    assert command[command.index("--system-prompt") + 1] == "SYSTEM POLICY"
+    assert result.output == model_decision()
+    assert (result.input_tokens, result.output_tokens) == (7, 3)
+    assert result.cost_usd == Decimal("0.002")
+
+
+def test_cli_transport_lockdown_flags_match_the_classifier_runtime_sibling(monkeypatch):
+    import classifier_runtime
+
+    classifier = {}
+
+    def fake_run(command, **kwargs):
+        classifier["command"] = command
+        return SimpleNamespace(returncode=0, stdout=json.dumps({"structured_output": {"ok": 1}}), stderr="")
+
+    monkeypatch.setenv("MELANGE_CLASSIFIER_COMMAND", "claude")
+    monkeypatch.setattr(classifier_runtime.subprocess, "run", fake_run)
+    classifier_runtime.classify_json("Policy", "Evidence", {"type": "object"})
+    sibling = classifier["command"]
+    lockdown = sibling[sibling.index("-p") + 1 : sibling.index("--output-format")]
+    assert "--safe-mode" in lockdown and "--tools" in lockdown  # the slice really is the lockdown set
+    seen, _ = run_cli_transport(monkeypatch)
+    command = seen["command"]
+    assert command[command.index("-p") + 1 : command.index("--output-format")] == lockdown

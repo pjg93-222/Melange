@@ -43,7 +43,7 @@ button:hover{background:#EECD5C}button:active{transform:translateY(1px)}button:d
 <body><div class=wrap><div class=box>
 <svg class=glyph width="54" height="88" viewBox="0 0 128 208" aria-hidden="true"><path d="M108 20 L64 64 L28 104 L64 144 L20 188 M64 64 L100 104 L64 144" fill="none" stroke="#EECD5C" stroke-width="18" stroke-linejoin="miter" stroke-miterlimit="6"/></svg>
 <h2 class="rise d1">Melange</h2><p class="rise d2">Influence dashboard — enter the password to view. <span class=note>(case-sensitive)</span></p>
-<div class="rise d3"><input id=pw type=text autocapitalize=none autocorrect=off autocomplete=off spellcheck=false placeholder=Password aria-label=Password autofocus><button id=go>Unlock</button><div class=err id=err role=alert></div></div>
+<div class="rise d3"><input id=pw type=password autocapitalize=none autocorrect=off autocomplete=off spellcheck=false placeholder=Password aria-label=Password autofocus><button id=go>Unlock</button><div class=err id=err role=alert></div></div>
 </div></div>
 <script>
 var D={s:"__SALT__",i:"__IV__",c:"__CT__",n:__ITERS__};
@@ -61,7 +61,7 @@ async function unlock(){if(!SECURE)return;err.textContent='Decrypting…';
   var key=await crypto.subtle.importKey('raw',bits,{name:'AES-GCM'},false,['decrypt']);
   var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:u8(D.i)},key,u8(D.c));
   document.open();document.write(new TextDecoder().decode(pt));document.close();
- }catch(e){err.textContent='Wrong password — check capitalization and spacing (you can see it above as you type).';}}
+ }catch(e){err.textContent='Wrong password — check capitalization and spacing.';}}
 go.onclick=unlock;
 document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')unlock();});
 </script></body></html>'''

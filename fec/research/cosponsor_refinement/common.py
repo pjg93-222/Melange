@@ -9,6 +9,8 @@ ROOT = CODE.parents[2]
 ORIGINAL_CODE = CODE.parent / "cosponsor_challengers"
 sys.path.insert(0, str(ORIGINAL_CODE))
 from audit_data import digest
+sys.path.append(str(CODE.parents[1]))  # fec/, for lane_file_io
+from lane_file_io import safe_to_unpickle, write_sha256_sidecar  # noqa: E402,F401 (re-exported to this package's scripts)
 
 OLD = ROOT / "outputs/cosponsor_challengers_20260905"
 OUT = ROOT / "outputs/cosponsor_refinement_20260905"

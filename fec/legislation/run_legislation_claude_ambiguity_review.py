@@ -42,6 +42,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 from typing import Any, Iterable, Mapping, Protocol, Sequence
 
 try:
@@ -699,7 +700,13 @@ class AnthropicApiTransport:
 
 
 class ClaudeCliTransport:
-    """Claude CLI transport using stdin; no prompt or secret is on the command line."""
+    """Claude CLI transport, locked down like fec/classifier_runtime.py.
+
+    The evidence-bearing user prompt goes over stdin. Only the fixed SYSTEM_PROMPT policy text is
+    on the command line (no file/stdin form for it is used anywhere in this repo); no evidence or
+    secret is. Tools, MCP servers, slash commands and session persistence are off, and the child runs in
+    the temp directory so it cannot pick up the repo's CLAUDE.md, settings or files.
+    """
 
     def __init__(self, command: str) -> None:
         self.command = command
@@ -719,6 +726,17 @@ class ClaudeCliTransport:
         command = [
             self.command,
             "-p",
+            "--safe-mode",
+            "--disable-slash-commands",
+            "--tools",
+            "",
+            "--strict-mcp-config",
+            "--mcp-config",
+            '{"mcpServers":{}}',
+            "--no-session-persistence",
+            "--no-chrome",
+            "--permission-mode",
+            "dontAsk",
             "--output-format",
             "json",
             "--json-schema",
@@ -742,6 +760,7 @@ class ClaudeCliTransport:
                 capture_output=True,
                 check=False,
                 shell=False,
+                cwd=tempfile.gettempdir(),
             )
         except OSError as exc:
             raise ReviewError(f"cannot execute Claude CLI: {redact_secrets(exc)}") from exc

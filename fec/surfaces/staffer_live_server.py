@@ -454,6 +454,25 @@ class LiveDashboard:
 
 
 class Handler(BaseHTTPRequestHandler):
+    def valid_host(self):
+        """DNS-rebinding guard: a rebound hostname still arrives with its own name in Host."""
+        port = self.server.server_port
+        return (self.headers.get('Host') or '').lower() in {f'127.0.0.1:{port}', f'localhost:{port}', f'[::1]:{port}'}
+
+    def discard_body(self):
+        # Consume a small, declared request body before closing. Otherwise
+        # Windows may reset the socket with unread bytes and hide the response.
+        previous_timeout = self.connection.gettimeout()
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if 0 < length <= 16384:
+                self.connection.settimeout(1.0)
+                self.rfile.read(length)
+        except (ValueError, OSError):
+            pass
+        finally:
+            self.connection.settimeout(previous_timeout)
+
     def do_POST(self):
         """Identity decisions, relationship statements and route search cancellation.
 
@@ -462,20 +481,13 @@ class Handler(BaseHTTPRequestHandler):
         which stops when no page still holds it. The holder is optional; a cancel without one lets go of the shared
         anonymous holder that every request without a token uses.
         """
+        if not self.valid_host():
+            self.discard_body()
+            self.send_bytes(b'{"error":"Local access only."}', 'application/json', 403)
+            return
         endpoint = urlsplit(self.path).path
         if endpoint not in {'/api/staffer-identity', '/api/staffer-assertions', '/api/staffer-route-cancel'}:
-            # Consume a small, declared request body before closing. Otherwise
-            # Windows may reset the socket with unread bytes and hide the 404.
-            previous_timeout = self.connection.gettimeout()
-            try:
-                length = int(self.headers.get('Content-Length', '0'))
-                if 0 < length <= 16384:
-                    self.connection.settimeout(1.0)
-                    self.rfile.read(length)
-            except (ValueError, OSError):
-                pass
-            finally:
-                self.connection.settimeout(previous_timeout)
+            self.discard_body()
             self.send_error(404)
             return
         cancel = endpoint == '/api/staffer-route-cancel'
@@ -539,6 +551,9 @@ class Handler(BaseHTTPRequestHandler):
         return options
 
     def do_GET(self):
+        if not self.valid_host():
+            self.send_bytes(b'{"error":"Local access only."}', 'application/json', 403)
+            return
         parts = urlsplit(self.path)
         if parts.path == '/api/staffer-person-activities':
             query = parse_qs(parts.query)

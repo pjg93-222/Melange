@@ -50,6 +50,7 @@ if FEC_BOOTSTRAP not in sys.path:
     sys.path.insert(0, FEC_BOOTSTRAP)
 
 from paths import ROOT
+from lane_file_io import safe_to_unpickle, write_sha256_sidecar
 import config_overlay as CO
 import stance.media_rules as MR
 
@@ -688,7 +689,8 @@ def _sha256_file(path):
 
 def load_or_train(force=False):
     fingerprint = input_fingerprint()
-    if not force and os.path.exists(CACHE):
+    # joblib.load unpickles, which runs code: a sidecar mismatch skips the load and retrains instead.
+    if not force and os.path.exists(CACHE) and safe_to_unpickle(CACHE):
         try:
             bundle = joblib.load(CACHE)
             if bundle.get("schema") == SCHEMA and bundle.get("fingerprint") == fingerprint:
@@ -700,6 +702,7 @@ def load_or_train(force=False):
     tmp = CACHE + ".tmp"
     joblib.dump(bundle, tmp)
     os.replace(tmp, CACHE)
+    write_sha256_sidecar(CACHE)
     _atomic_json(REPORT, bundle["report"])
     return bundle
 

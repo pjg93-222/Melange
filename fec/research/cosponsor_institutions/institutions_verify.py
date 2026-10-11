@@ -10,6 +10,7 @@ import gc
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
 for _key in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS'):
@@ -23,6 +24,8 @@ import institutions_models as models
 from institutions_common import OUT, OLD, UNIVERSE, REFINEMENT, CODE
 import universe_verify as independent_helpers
 from universe_verify import CHECKS, check, close, sha, read, manual_metrics, summary, compare_summary
+sys.path.append(str(CODE.parents[1]))  # fec/, for lane_file_io
+from lane_file_io import safe_to_unpickle  # noqa: E402
 
 RECEIPT = OUT / 'verification_receipt.json'
 
@@ -189,6 +192,8 @@ def run():
         probabilities = np.load(pp, mmap_mode='r')
         check(name + ':prediction_length', probabilities.ndim == 1 and len(probabilities) == len(meta))
         check(name + ':probability_range', bool(np.isfinite(probabilities).all() and ((probabilities >= 0) & (probabilities <= 1)).all()))
+        if not safe_to_unpickle(mp):
+            raise SystemExit(f'refusing to unpickle {mp}: it fails its integrity sidecar')
         artifact = joblib.load(mp)
         for key in ('kind', 'features'):
             check(name + ':artifact_' + key, artifact[key] == spec[key])

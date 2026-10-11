@@ -103,7 +103,8 @@ if not a.transformer:
         print('BEST classical: %s macro-F1 %.3f  (Khan et al. ordering: RF>SVM>LogReg>DT>NB; transformer should beat all)'%(best[0],best[1]))
     if a.save:
         import pickle; pickle.dump(best[2],open(B+r'\stance_clf_%s.pkl'%a.task,'wb'))
-        print('saved stance_clf_%s.pkl (pipeline: TF-IDF + %s)'%(a.task,best[0]))
+        from lane_file_io import write_sha256_sidecar; write_sha256_sidecar(B+r'\stance_clf_%s.pkl'%a.task)   # loaders verify this before unpickling
+        print('saved stance_clf_%s.pkl + .sha256 sidecar (pipeline: TF-IDF + %s)'%(a.task,best[0]))
 else:
     try:
         import torch,numpy as np

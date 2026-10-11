@@ -889,7 +889,20 @@ _LANE_PYTEST=(
     'test_competitiveness_c',
     # Exact stored frontier cutoff and its independent audit/display contracts.
     'test_frontier_coalition_fixes',
-    'test_frontier_knee_display')
+    'test_frontier_knee_display',
+    # 2026-10-10 security baseline suites
+    'test_fetch_press_text_public_only',
+    'test_campaign_sites_output_path',
+    'test_refresh_email',
+    'test_security_baseline_config',
+    'test_build_member_longform_review_app',
+    'test_model_integrity_sidecar',
+    'test_glassbox_app_server_host_guard',
+    'test_member_desk_template_escaping',
+    'test_staffer_identity_api',
+    'test_lock_dashboard',
+    'test_press_recovery_monitor_host',
+    'test_bug_report_regressions')
 
 # Of the 20 originally held, 18 are now registered: eight via the PYTHONPATH lane, four via
 # pytest proper, five rescued from vacuous-green via pytest collection, and one slow suite at

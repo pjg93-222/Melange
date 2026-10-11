@@ -4,13 +4,13 @@
     {
       "name": "static-preview",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8802"],
+      "runtimeArgs": ["-m", "http.server", "8802", "--bind", "127.0.0.1"],
       "port": 8802
     },
     {
       "name": "moneyball-ui-audit",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8802", "--directory", "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems"],
+      "runtimeArgs": ["-m", "http.server", "8802", "--bind", "127.0.0.1", "--directory", "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems"],
       "port": 8802
     }
   ]

@@ -46,7 +46,7 @@ def stalled(base):
 def burst(port, path, n, timeout=30):
     """n connections opened back to back without waiting, each sending one GET; returns outcome -> count."""
     selector, outcome, pending = selectors.DefaultSelector(), {}, {}
-    request = f'GET {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n'.encode()
+    request = f'GET {path} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: close\r\n\r\n'.encode()
     for _ in range(n):
         sock = socket.socket()
         sock.setblocking(False)

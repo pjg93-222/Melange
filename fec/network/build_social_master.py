@@ -40,6 +40,8 @@ for bg,pid,dt,tx in con.execute("SELECT bioguide,post_id,created_at,text FROM po
 con.commit()
 print('mention backfill: %d member-member mention events extracted from post text'%n_ment)
 rows=con.execute("SELECT bioguide,created_at,text,repost_of,post_id FROM posts WHERE platform='bluesky'").fetchall()
+from lane_file_io import safe_to_unpickle
+if not safe_to_unpickle(M+r'\data\stance\stance_clf_composed.pkl'): sys.exit('refusing to unpickle stance_clf_composed.pkl: it fails its integrity sidecar')
 clf=pickle.load(open(M+r'\data\stance\stance_clf_composed.pkl','rb'))
 brec=[]
 for bg,dt,tx,rp,pid in rows:
