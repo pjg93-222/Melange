@@ -105,7 +105,7 @@
   // own id, so a tile is never redrawn from another tile's answer.
   let board = null, boardSurfaces = [], boardNodes = [];
   const tileMemory = new Map();
-  const contributionCache = new Map(), memberCache = new Map(), geometryCache = new Map(), geometryPending = new Map();
+  const contributionCache = new Map(), memberCache = new Map(), worksheetMembers = new WeakMap(), geometryCache = new Map(), geometryPending = new Map();
   let contributionCacheEpoch=0;
   const verified = () => el('source-mode').value === 'contributions';
   const basis = () => sheet().source.basis || 'receipt';
@@ -1433,20 +1433,29 @@
       const cached=memberCache.get(key);
       if(cached&&(!cached.error||Date.now()-cached.at<30000))return cached.values||[];
       memberCache.set(key,{values:(cached&&cached.values)||[],at:Date.now()});const selectedDataset=dataset().id;
-      contributionReady('query',facet,null,{current:()=>verified()&&dataset()?.id===selectedDataset}).then(result=>{
-        const values=result.rows.map(r=>String(r[field.id]??''));memberCache.set(key,{values,at:Date.now()});
+      // A field can hold more members than one 100,000-group page; read every
+      // page, as the CSV export does, so Pages and Select all miss none.
+      (async()=>{const values=[];for(let offset=0;;){const page=await contributionReady('query',{...facet,offset},null,{current:()=>verified()&&dataset()?.id===selectedDataset});for(const r of page.rows)values.push(String(r[field.id]??''));if(!page.has_more||!page.rows.length)return values;offset+=page.rows.length;}})().then(values=>{
+        memberCache.set(key,{values,at:Date.now()});
         if(verified()&&dataset()?.id===selectedDataset&&pageMembersKey===key&&core.pill(sheet().pages)?.column===column&&!values.includes(sheet().pageMember)){sheet().pageMember=values[0]||'';persist();}
         renderAll();
       }).catch(error=>{if(error.name==='AbortError'){memberCache.delete(key);return;}memberCache.set(key,{values:[],at:Date.now(),error:error.message});failure(error.message);});return [];
     }
     // Every distinct value: Pages steps through this list, the filter checklist
     // searches it and Select all copies it into the filter, so a cap drops members.
+    // Remembered per rows array (a reload assigns a new one), so a render or a
+    // keystroke in the filter search does not rescan every row.
+    let lists = worksheetMembers.get(data.rows);
+    if (!lists) worksheetMembers.set(data.rows, lists = new Map());
+    if (lists.has(column)) return lists.get(column);
     const seen = new Set();
     for (const row of data.rows) {
       const value = String(row[column] == null ? '' : row[column]);
       if (value !== '') seen.add(value);
     }
-    return [...seen].sort(new Intl.Collator(undefined, {numeric: true}).compare);
+    const list = [...seen].sort(new Intl.Collator(undefined, {numeric: true}).compare);
+    lists.set(column, list);
+    return list;
   }
   const firstMember = column => verified() ? String(data?.rows.find(row=>row[column]!=null&&row[column]!=='')?.[column]??'') : members(column)[0] || '';
 

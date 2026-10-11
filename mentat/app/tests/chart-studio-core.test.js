@@ -1581,10 +1581,37 @@ test('worksheet members() lists every distinct value, sorted across the whole co
   // first sits past the 500th distinct value read.
   const rows = [];
   for (let i = 600; i >= 1; i--) rows.push(['Member ' + i], ['Member ' + i]);
-  const context = vm.createContext({data: {rows}, verified: () => false});
+  const context = vm.createContext({data: {rows}, verified: () => false, worksheetMembers: new WeakMap()});
   vm.runInContext(source.slice(start, end), context);
   const list = context.members(0);
   assert.strictEqual(list.length, 600);
   assert.strictEqual(list[0], 'Member 1');
   assert.strictEqual(list[599], 'Member 600');
+  // Remembered per rows array: a second call does not rescan, a reload does.
+  assert.strictEqual(context.members(0), list);
+  context.data.rows = [['Only']];
+  assert.deepStrictEqual([...context.members(0)], ['Only']);
+});
+
+test('verified members() reads every facet page, not only the first 100,000 groups', async () => {
+  const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
+  const source = fs.readFileSync(path.join(__dirname, '../chart-studio.js'), 'utf8');
+  const start = source.indexOf('  function members(column) {');
+  const end = source.indexOf('\n  const firstMember', start);
+  const offsets = [];
+  const pages = {0: {rows: [{name: 'A'}, {name: 'B'}], has_more: true}, 2: {rows: [{name: 'C'}], has_more: false}};
+  let rendered;
+  const done = new Promise(resolve => { rendered = resolve; });
+  const context = vm.createContext({
+    data: {rows: []}, verified: () => true, dataset: () => ({id: 'd'}), sheet: () => ({pages: []}),
+    core: {pill: () => null}, memberCache: new Map(), pageMembersKey: '', persist() {}, failure() {},
+    facetSpec: () => ({key: 'k', facet: {dimensions: ['name'], limit: 2, offset: 0}, field: {id: 'name'}}),
+    contributionReady: async (route, query) => { offsets.push(query.offset); return pages[query.offset]; },
+    renderAll: () => rendered()
+  });
+  vm.runInContext(source.slice(start, end), context);
+  context.members(0);
+  await done;
+  assert.deepStrictEqual(offsets, [0, 2]);
+  assert.deepStrictEqual([...context.members(0)], ['A', 'B', 'C']);
 });
