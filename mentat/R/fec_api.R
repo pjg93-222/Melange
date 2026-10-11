@@ -246,7 +246,7 @@ fec_api_request_spec <- function(unit, last_indexes = NULL) {
   unknown <- setdiff(names(unit$query_filters %||% list()), supported_filters)
   if (length(unknown)) stop("Unsupported FEC query filter(s): ",paste(unknown,collapse=", "),
     ". An ignored filter would silently broaden collection.",call.=FALSE)
-  if (!unit$query_field %in% c("contributor_employer","contributor_name")) {
+  if (!unit$query_field %in% c("contributor_employer","contributor_name","contributor_id")) {
     stop("Unsupported FEC contributor query field: ",unit$query_field,call.=FALSE)
   }
   query_values <- trim_text(unit$variants)
@@ -1887,6 +1887,55 @@ fec_api_corporate_units <- function(connection, cycles, rosters = NULL) {
   units
 }
 
+# FEC's contributor_name search is token-based, so a recipient that spells the
+# company PAC "SCHOOLS FIRST FCU EMPLOYEES FEDERAL PAC" matches neither
+# "SchoolsFirst" nor "Schools First Federal Credit Union", although its filing
+# carries the PAC's committee id. Re-query Schedule A by that id. The ids come
+# only from stored committee rows whose own contributor name already names the
+# company, so a misattributed committee never seeds a query; the rows found are
+# attributed by the same name rules as every other corporate row.
+fec_api_company_committee_ids <- function(connection, rosters) {
+  rows <- data.table::as.data.table(DBI::dbGetQuery(connection, paste(
+    "SELECT DISTINCT company, UPPER(TRIM(contributor_id)) AS contributor_id,",
+    "contributor_name, entity_type, company_match_status, company_match_reason,",
+    "excluded_reason FROM corporate_giving WHERE contributor_id IS NOT NULL"
+  )))
+  rows <- rows[grepl("^C[0-9]{8}$", contributor_id) &
+    toupper(trim_text(entity_type)) != "IND" & company %in% names(rosters)]
+  if (!nrow(rows)) return(list())
+  status <- fec_attribution_status(rows, lapply(rosters, function(roster) roster$variant))
+  rows <- rows[status %in% c("accepted", "company_named_unverified")]
+  lapply(split(rows$contributor_id, rows$company), function(ids) sort(unique(ids), method = "radix"))
+}
+
+fec_api_corporate_id_units <- function(connection, cycles, rosters = NULL) {
+  rosters <- rosters %||% fec_api_company_rosters(connection)
+  ids <- fec_api_company_committee_ids(connection, rosters)
+  units <- list()
+  for (company in sort(as.character(names(ids)), method = "radix")) {
+    roster <- rosters[[company]]
+    for (cycle in sort(as.integer(cycles))) {
+      for (committee_id in ids[[company]]) {
+        units[[length(units) + 1L]] <- list(
+          # The P2_company_name prefix keeps export guards routing it to corporate.
+          id = paste("P2_company_name", company, cycle, paste0("contributor_id=", committee_id), sep = ":"),
+          kind = "corporate",
+          industry = MENTAT_INDUSTRY,
+          company = company,
+          cycle = as.integer(cycle),
+          variants = committee_id,
+          company_variants = roster$variant,
+          phase = "P2_company_name",
+          query_field = "contributor_id",
+          query_filters = list(),
+          exclusions = fec_api_roster_exclusions(roster)
+        )
+      }
+    }
+  }
+  units
+}
+
 fec_api_rescue_cap <- function(
   value = Sys.getenv("MENTAT_RESCUE_CAP", unset = "50")
 ) {
@@ -2934,8 +2983,31 @@ collect_crypto_api <- function(
   fec_api_record_metric(connection, run_id, "collect_corporate", corporate)
   total_requests <- total_requests + corporate$request_count
   total_retries <- total_retries + corporate$retry_count
+  # Runs after the name pass has stored its rows, so this run's own committee
+  # ids are known (fec_api_company_committee_ids).
+  corporate_id_units <- fec_api_corporate_id_units(
+    connection,
+    cycles,
+    rosters = lookup_cache$rosters
+  )
+  corporate_id <- list(rows = 0L, request_count = 0L, retry_count = 0L)
+  if (length(corporate_id_units)) {
+    corporate_id <- collect_phase(corporate_id_units)
+    if (is_pause_condition(corporate_id)) {
+      return(pause_result(
+        corporate_id,
+        employer$rows + rescue$rows + identity$rows + corporate$rows,
+        total_retries
+      ))
+    }
+    fec_api_log_phase("corporate_id", corporate_id)
+    fec_api_record_metric(connection, run_id, "collect_corporate_id", corporate_id)
+  }
+  total_requests <- total_requests + corporate_id$request_count
+  total_retries <- total_retries + corporate_id$retry_count
   resolve_recipient_register_committee_ids(connection, log = TRUE)
-  total_rows <- employer$rows + rescue$rows + identity$rows + corporate$rows
+  total_rows <- employer$rows + rescue$rows + identity$rows + corporate$rows +
+    corporate_id$rows
   wall_clock_seconds <- proc.time()[["elapsed"]] - run_started
   rows_per_second <- if (wall_clock_seconds > 0) {
     total_rows / wall_clock_seconds
