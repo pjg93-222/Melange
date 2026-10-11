@@ -3,6 +3,7 @@ FEC_API_ENDPOINT <- "https://api.open.fec.gov/v1/schedules/schedule_a/"
 FEC_API_PER_PAGE <- 100L
 FEC_API_MAX_ATTEMPTS <- 5L
 FEC_API_MAX_PAGES_PER_UNIT <- 10000L
+FEC_API_MAX_QUERY_VALUES <- 10L
 FEC_API_RETRY_AFTER_CAP_SECONDS <- 120
 FEC_API_HOURLY_REQUEST_CAP <- 1000L
 FEC_API_BUDGET_WINDOW_SECONDS <- 3600
@@ -1758,8 +1759,12 @@ fec_api_employer_units <- function(
         home_states = home_states
       )
       for (phase in names(phases)) {
-        variants <- phases[[phase]]
-        if (!length(variants)) next
+        # The FEC API answers HTTP 422 to more than 10 contributor_employer
+        # values, so a longer phase list is queried as disjoint <=10-value
+        # units. Their rows union by sub_id; lists of 10 or fewer are unchanged.
+        phase_variants <- phases[[phase]]
+        for (variants in split(phase_variants,
+            ceiling(seq_along(phase_variants) / FEC_API_MAX_QUERY_VALUES))) {
         id <- paste(phase, company, cycle, paste(variants, collapse = "||"), sep = ":")
         units[[length(units) + 1L]] <- list(
           id = id,
@@ -1776,6 +1781,7 @@ fec_api_employer_units <- function(
           decomposition_variants = decomposition$values,
           decomposition_source = decomposition$source
         )
+        }
       }
     }
   }
