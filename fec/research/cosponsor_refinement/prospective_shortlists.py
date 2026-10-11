@@ -5,7 +5,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from common import OLD, OUT, digest, log, read_json, stamp, write_json
+from common import OLD, OUT, digest, log, read_json, stamp, write_json, safe_to_unpickle
 from prospective import SNAPSHOT
 from fit_extensions import EARLY_END
 from run_models import topk_vectors, calibrate
@@ -20,7 +20,9 @@ def run():
     m=pd.read_parquet(OLD/'meta_118.parquet');m=m[m.mature.astype(bool)].reset_index(drop=True)
     early=m.day.to_numpy()<EARLY_END
     probabilities={}
-    name='boosted_public_coverage';artifact=joblib.load(OLD/'models'/f'final_{name}.joblib')
+    name='boosted_public_coverage';model_path=OLD/'models'/f'final_{name}.joblib'
+    if not safe_to_unpickle(model_path):raise SystemExit(f'refusing to unpickle {model_path}: it fails its integrity sidecar')
+    artifact=joblib.load(model_path)
     probabilities[name]=calibrate(np.load(OLD/f'development_prediction_{name}.npy'),artifact['calibration'])
     probabilities['boosted_network_refit']=np.load(OUT/'extension_predictions/boosted_network.npy')
     controls=pd.read_parquet(SNAPSHOT/'forecasts.parquet');network=pd.read_parquet(SNAPSHOT/'network_forecasts.parquet')

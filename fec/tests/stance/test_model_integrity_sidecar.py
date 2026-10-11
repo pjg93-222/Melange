@@ -5,6 +5,7 @@ A Tripwire object stands in for a malicious pickle: its __reduce__ records that 
 """
 from __future__ import annotations
 
+import ast
 import json
 import os
 import pickle
@@ -218,3 +219,102 @@ def test_every_model_load_is_preceded_by_the_integrity_check(relative, loader):
     source = (FEC / relative).read_text(encoding="utf-8")
     first_load = source.index(loader)
     assert "safe_to_unpickle(" in source[:first_load], relative
+
+
+# -- fec/research: every unpickle of a frozen model is gated, and the gate refuses a tampered file -------------------
+# The cosponsor scripts load licensed multi-GB panels, so they are not run here: the tests read their source, pull out
+# each `if not safe_to_unpickle(X): raise SystemExit(...)` guard and run that very statement against a Tripwire file.
+
+RESEARCH = FEC / "research"
+# Hash-bound by cosponsor_institutions/institutions_verify.py ('prior_verifier_helper_code'): editing this file would
+# fail that check on the sealed universe receipt, so its load stays unguarded until the experiments are re-sealed.
+HASH_BOUND = {"cosponsor_universe/universe_verify.py"}
+
+
+def _own_calls(statement):
+    """Calls in a statement's own expressions, not in the statements nested inside it."""
+    pending = [n for n in ast.iter_child_nodes(statement) if not isinstance(n, ast.stmt)]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.Call):
+            yield node
+        pending.extend(n for n in ast.iter_child_nodes(node) if not isinstance(n, ast.stmt))
+
+
+def _research_loads():
+    """(file, statement before the load, load call) for every joblib/pickle load under fec/research."""
+    for path in sorted(RESEARCH.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            for field in ("body", "orelse", "finalbody"):
+                block = getattr(node, field, None)
+                if not (isinstance(block, list) and block and isinstance(block[0], ast.stmt)):
+                    continue
+                for index, statement in enumerate(block):
+                    for call in _own_calls(statement):
+                        func = call.func
+                        if (isinstance(func, ast.Attribute) and func.attr == "load"
+                                and isinstance(func.value, ast.Name) and func.value.id in ("joblib", "pickle")):
+                            yield (path.relative_to(RESEARCH).as_posix(), block[index - 1] if index else None, call)
+
+
+def _guarded_path(guard):
+    """X from `if not safe_to_unpickle(X): raise ...`, else None."""
+    if (isinstance(guard, ast.If) and isinstance(guard.test, ast.UnaryOp) and isinstance(guard.test.op, ast.Not)
+            and isinstance(guard.test.operand, ast.Call) and getattr(guard.test.operand.func, "id", "") == "safe_to_unpickle"
+            and len(guard.body) == 1 and isinstance(guard.body[0], ast.Raise)):
+        return guard.test.operand.args[0]
+    return None
+
+
+LOADS = list(_research_loads())
+GATED = [(f, g, c) for f, g, c in LOADS if f not in HASH_BOUND]
+SITE_IDS = [f"{f}:{c.lineno}" for f, _, c in GATED]
+
+
+def test_every_research_load_site_is_known():
+    assert len(LOADS) == 7 and {f for f, _, _ in LOADS if f in HASH_BOUND} == HASH_BOUND
+
+
+@pytest.mark.parametrize("relative, guard, call", GATED, ids=SITE_IDS)
+def test_research_load_follows_a_guard_on_the_same_path(relative, guard, call):
+    guarded = _guarded_path(guard)
+    assert guarded is not None, f"{relative}:{call.lineno} unpickles without the integrity check right before it"
+    assert ast.dump(guarded) == ast.dump(call.args[0]), f"{relative}:{call.lineno} guards a different path than it loads"
+
+
+def _run_site(guard, call, path):
+    """Execute the site's own guard statement and then its load, with its path variable bound to `path`."""
+    variable = _guarded_path(guard)
+    assert isinstance(variable, ast.Name)
+    module = ast.fix_missing_locations(ast.Module(body=[guard, ast.Expr(call)], type_ignores=[]))
+    exec(compile(module, "<research site>", "exec"),
+         {"joblib": joblib, "safe_to_unpickle": L.safe_to_unpickle, variable.id: path})
+
+
+@pytest.mark.parametrize("relative, guard, call", GATED, ids=SITE_IDS)
+def test_research_site_refuses_a_tampered_model_without_unpickling_it(relative, guard, call, tmp_path, capsys):
+    path = tmp_path / "m.joblib"
+    joblib.dump({"good": 1}, path)
+    L.write_sha256_sidecar(path)
+    joblib.dump(Tripwire(), path)
+    with pytest.raises(SystemExit, match="refusing to unpickle"):
+        _run_site(guard, call, path)
+    assert TRIPPED == [] and "SECURITY" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("relative, guard, call", GATED, ids=SITE_IDS)
+def test_research_site_loads_a_verified_model_and_an_unsidecarred_one_as_before(relative, guard, call, tmp_path, capsys):
+    path = tmp_path / "m.joblib"
+    joblib.dump(Tripwire(), path)
+    _run_site(guard, call, path)                       # absent sidecar: warns, loads
+    assert TRIPPED == [True] and "WARNING" in capsys.readouterr().err
+    TRIPPED.clear()
+    L.write_sha256_sidecar(path)
+    _run_site(guard, call, path)                       # matching sidecar: loads silently
+    assert TRIPPED == [True] and capsys.readouterr().err == ""
+
+
+def test_the_refit_model_is_saved_with_its_sidecar():
+    source = (RESEARCH / "cosponsor_refinement" / "prospective_network.py").read_text(encoding="utf-8")
+    assert source.index("joblib.dump(artifact,modelpath)") < source.index("write_sha256_sidecar(modelpath)")
