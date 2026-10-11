@@ -485,6 +485,34 @@ stopifnot(
   refuses(NULL),
   refuses(c("https://www.fec.gov/a", "https://www.fec.gov/b"))
 )
+# Non-ASCII lookalikes (NBSP, fullwidth quote/backslash/@, zero-width space, RTL
+# override, Cyrillic homoglyph host) are refused whatever the string's encoding
+# mark. Built from \u escapes so this file stays ASCII. A percent-encoded URL is
+# still accepted.
+lookalikes <- c(
+  "https://x.org/a\u00a0b",
+  "https://x.org/a\uff02b",
+  "https://x.org/a\uff3cb",
+  "https://www.fec.gov\uff20evil.example/x",
+  "https://x.org/a\u200bb",
+  "https://x.org/a\u202eb",
+  "https://www.f\u0435c.gov/x.csv"
+)
+latin1_nbsp <- iconv("https://x.org/a\u00a0b", "UTF-8", "latin1")
+bytes_nbsp <- "https://x.org/a\u00a0b"
+Encoding(bytes_nbsp) <- "bytes"
+invalid_utf8 <- paste0("https://x.org/a", rawToChar(as.raw(0xc3)), "b")
+stopifnot(
+  identical(Encoding(latin1_nbsp), "latin1"),
+  identical(Encoding(bytes_nbsp), "bytes"),
+  all(vapply(
+    c(lookalikes, latin1_nbsp, bytes_nbsp, invalid_utf8),
+    refuses,
+    logical(1L),
+    USE.NAMES = FALSE
+  )),
+  !refuses("https://x.org/a%20b?X-Amz-Signature=abc%2Fdef")
+)
 refusal_message <- tryCatch(
   fec_require_https_url("http://www.fec.gov/x.csv"),
   error = conditionMessage

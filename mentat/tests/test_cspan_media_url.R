@@ -56,6 +56,35 @@ stopifnot(
   !any(vapply(rejected, scraper$is_web_media_url, logical(1L)))
 )
 
+# Non-ASCII lookalikes of the characters refused above (NBSP, fullwidth quote,
+# backslash and @), plus zero-width space, RTL override and a Cyrillic homoglyph
+# host, are refused whatever the string's encoding mark. Built from \u escapes so
+# this file stays ASCII. A percent-encoded URL is still accepted.
+lookalikes <- c(
+  "https://x.org/a\u00a0b",
+  "https://x.org/a\uff02b",
+  "https://x.org/a\uff3cb",
+  "https://x.org\uff20evil.example/a",
+  "https://x.org/a\u200bb",
+  "https://x.org/a\u202eb",
+  "https://\u0430pple.example/a.mp4"
+)
+latin1_nbsp <- iconv("https://x.org/a\u00a0b", "UTF-8", "latin1")
+bytes_nbsp <- "https://x.org/a\u00a0b"
+Encoding(bytes_nbsp) <- "bytes"
+invalid_utf8 <- paste0("https://x.org/a", rawToChar(as.raw(0xc3)), "b")
+stopifnot(
+  identical(Encoding(latin1_nbsp), "latin1"),
+  identical(Encoding(bytes_nbsp), "bytes"),
+  !any(vapply(
+    c(lookalikes, latin1_nbsp, bytes_nbsp, invalid_utf8),
+    scraper$is_web_media_url,
+    logical(1L),
+    USE.NAMES = FALSE
+  )),
+  scraper$is_web_media_url("https://x.org/a%20b?X-Amz-Signature=abc%2Fdef")
+)
+
 # download_audio: a refused URL never reaches ffmpeg; an accepted one reaches it
 # with the protocol whitelist placed before -i. system2 is stubbed to record calls.
 calls <- list()
