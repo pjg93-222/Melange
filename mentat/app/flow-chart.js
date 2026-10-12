@@ -341,8 +341,8 @@
     if (node.pooled && (node.share_from_upstream || []).length) lines.push(shares(node, cycle));
     if (node.balance === 'unspent') lines.push(`cash on hand ${full(node.cash || 0)} at the end of the window`
       + ((node.held || 0) > 0 ? ` + ${heldWords(node.held_kinds)} ${full(node.held)} still held` : ''));
-    if (node.bucket === 'other') lines.push(`${node.member_count} grouped: ` + (node.members || []).slice(0, 4)
-      .map(member => `${member.label} ${short(member.value)}`).join(', ') + (node.member_count > 4 ? ', …' : ''));
+    if (node.bucket === 'other') lines.push(`${node.member_count} grouped` + ((node.members || []).length ? ': ' + node.members.slice(0, 4)
+      .map(member => `${member.label} ${short(member.value)}`).join(', ') + (node.member_count > 4 ? ', …' : '') : ''));  // hosted unlisted bodies drop members
     if (node.name_as_filed && node.name_as_filed !== node.label) lines.push(`As filed: ${node.name_as_filed}`);
     // The lines the drawing leaves off (FL6: one line under a label at most): here, every one.
     for (const line of node.sublines || []) if (line !== node.subline_shown) lines.push(line);

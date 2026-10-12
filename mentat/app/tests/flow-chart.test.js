@@ -103,6 +103,18 @@ test('the pooled-money tooltip names the route, the spender and the share', () =
     'cash on hand $64,244,197.94 at the end of the window + bitcoin $23,000,000.00 still held'));
 });
 
+test('the Other bucket tooltip lists its members, and says only the count when the body dropped them (hosted, unlisted)', () => {
+  const result = layout.layout(FAIRSHAKE);
+  const context = {result, format: {short: chart.short, full: chart.full}};
+  const node = Object.assign({}, result.nodes[0], {bucket: 'other', member_count: 399, members: [{label: 'Acme PAC', value: 1500000}]});
+  const listed = chart.describe({node}, context, FAIRSHAKE).lines;
+  assert.ok(listed.some(line => line.startsWith('399 grouped: Acme PAC ')), listed.join(' | '));
+  delete node.members;
+  const lines = chart.describe({node}, context, FAIRSHAKE).lines;
+  assert.ok(lines.includes('399 grouped'), lines.join(' | '));
+  assert.ok(!lines.some(line => /grouped:/.test(line)));
+});
+
 test('carryover (b): a carried-over committee\u2019s tooltip says where its gate came from, in the payload\u2019s words', () => {
   const body = JSON.parse(JSON.stringify(FIXTURE));
   const bridge = body.nodes.find(node => node.kind === 'committee' && !node.root && !node.stub);
