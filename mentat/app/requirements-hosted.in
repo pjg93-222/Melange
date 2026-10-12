@@ -1,0 +1,20 @@
+# Direct dependencies of the hosted, read-only Mentat console (Lane M). Input to `uv pip compile
+# --generate-hashes` for the Linux image; the compiled, hashed lock is made where there is network.
+#
+# Found by an AST census of everything server.py reaches (65 first-party modules, lazy imports included)
+# and a runtime import of server plus every module its read-only routes load. Nothing else is imported:
+# no pandas, numpy, geopandas, geopy, psutil, pyarrow, requests. The console serves routes from
+# stdlib http.server; access_gate.py is stdlib only (no PyJWT, no cryptography).
+#
+# Versions are the ones the local console runs on (%LOCALAPPDATA%\Mentat\venv, mentat/requirements-console.txt).
+
+openpyxl==3.1.5     # report workbooks: server.py, graph_data.py, report_insights.py, flow_data.py. Brings et_xmlfile.
+Jinja2==3.1.6       # console_page.py renders "/" from app/templates; without it "/" falls back to the golden index.html. Brings MarkupSafe.
+tzdata==2026.3      # giving_forecast.py: ZoneInfo('America/New_York') at import; slim Linux images may ship no zone database.
+
+# python-calamine is left out on purpose. app/evidence_csv.py switches to it for .xlsx only inside
+# workbook_reader(), which only the evidence import routes (POST /api/evidence-csv with a file or a path)
+# reach, and a hosted console refuses those. Leaving it out also matches the interpreter the local console
+# really runs (mentat/requirements-console.txt omits it; app/requirements-console.txt pins 0.8.2 but the
+# launcher's venv does not install it), so hosted reads every workbook with openpyxl, as local does.
+# Not installed on purpose either: numpy (openpyxl uses it only if present), PIL, defusedxml.

@@ -3578,11 +3578,12 @@ def redirect_state_writes(root):
     prewarm.READ_ONLY_STATE (analytical indexes, accepted sources) and the rest of state/. Two small caches
     that are also shipped inputs, the source proofs and the Census geography, are seeded into `root` once.
     A missing analytical index is refused, as prewarm's own sandbox does, instead of built."""
-    import analysis_data, contribution_data, drawer_sidecars, glassbox_emit, prewarm
+    import access_stats, analysis_data, contribution_data, drawer_sidecars, glassbox_emit, prewarm
     root = Path(root).resolve()
     for module_name, attribute, relative in prewarm.STATE_REDIRECTS:
         setattr(importlib.import_module(module_name), attribute, root / relative)
     analysis_data.HINTS_PATH = root / 'prewarm' / 'hints.json'
+    access_stats.configure(root / 'prewarm' / 'access.sqlite')
     contribution_geo.CACHE = root / 'geography' / 'census-v1'
     drawer_sidecars.configure(state_root=root / 'drawer-sidecars', emit=False)
     glassbox_emit.EVENTS_DIR = root / 'glassbox'

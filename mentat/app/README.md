@@ -139,7 +139,13 @@ moved on.
 
 The server binds only to loopback and checks local host, origin, and a session
 token for changes. This is a local single-user application, not a remote hosted
-service. Closing the browser does not stop collection. Keep the app server
+service. The one exception is the hosted, read-only console behind Cloudflare
+Access: `BIND_HOST`, `ALLOWED_HOSTS`, `ACCESS_AUD`, `ACCESS_ISSUER` and
+`ACCESS_JWKS_FILE` (see `access_gate.py`) turn it on, it refuses to start
+without `--read-only`, it serves only the analytical read routes, and
+`MENTAT_STATE_WRITE_ROOT` moves the caches it writes (`requirements-hosted.in`
+lists its dependencies). With none of those set nothing changes. Closing the
+browser does not stop collection. Keep the app server
 running for its process exit receipt; underlying runner receipts remain available
 if the app restarts. A failed startup's diagnostic is in the upload's
 `launcher.log`. No collection starts until the user presses the start button.
