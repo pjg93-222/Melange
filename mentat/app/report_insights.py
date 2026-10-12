@@ -96,6 +96,41 @@ def header_row(sheet):
     return -max(candidates)[1] if candidates else 1
 
 
+# Header names that identify a person, or where one gives from, in the report workbooks: Employee List (Person,
+# Person Key, Titles, Zips, Cities / States) and Cycle Exceptions, Contributions, Contributor Detail (Contributor,
+# Street 1, City, ZIP, Employer, Occupation). 'Contributor Tier', 'Employee Tier' and 'Name / Recipient' are
+# aggregate columns and do not match; 'Name' alone does.
+PERSON_HEADER = re.compile(r'\b(person|contributor|donor|address|street|city|cities|zip|zips|employer|occupation|titles?)\b'
+                           r'|^((first|last|full) )?name$')
+
+
+def person_header(value):
+    text = ' '.join(re.findall(r'[a-z0-9]+', str(value).lower()))
+    return text != 'contributor tier' and bool(PERSON_HEADER.search(text))
+
+
+@lru_cache(maxsize=64)
+def _header_candidates(file_stamp, sheet_name):
+    """(the row header_row() chooses, the sheet's first 100 rows): the rows a header can be."""
+    book = openpyxl.load_workbook(file_stamp[0], read_only=True, data_only=True)
+    try:
+        sheet = book[sheet_name]
+        return header_row(sheet), tuple(sheet.iter_rows(max_row=100, max_col=MAX_COLUMNS, values_only=True))
+    finally:
+        book.close()
+
+
+def person_level_sheet(file_stamp, sheet_name, header=0):
+    """True when the sheet's own header row (header_row's choice) or the one asked for (worksheet_data takes
+    1-100) names a person-level column. Fail closed: a sheet that cannot be read counts as person-level."""
+    try:
+        chosen, rows = _header_candidates(file_stamp, sheet_name)
+        return any(person_header(cell) for number in {chosen, header} if 1 <= number <= len(rows)
+                   for cell in rows[number - 1] if isinstance(cell, str))
+    except Exception:  # noqa: BLE001 - unreadable means refused
+        return True
+
+
 def records(sheet, limit=RECEIPT_LIMIT):
     start = header_row(sheet)
     rows = sheet.iter_rows(min_row=start, max_row=start + limit + 1, max_col=MAX_COLUMNS, values_only=True)

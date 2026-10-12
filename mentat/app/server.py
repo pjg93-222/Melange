@@ -492,12 +492,44 @@ HOSTED_REFUSED = 'This route is not available on the hosted read-only console.'
 # (comma-separated, case-insensitive; default empty, so nobody) lists its email. Pending Paul's governance ruling.
 DONOR_ROW_PATHS = ('/api/contributions/records', '/api/insights/records')
 HOSTED_DONOR_ROWS_REFUSED = 'Donor-level rows are not available to this account on the hosted console.'
+HOSTED_PERSON_LEVEL_REFUSED = 'Person-level fields are not available to this account on the hosted console.'
+HOSTED_IO_ERROR = 'The server could not read that data.'
+# Hosted GET is an allowlist (do_POST's is analytical_paths): the page, its static and map files (STATIC_ASSETS,
+# /geo/v2/, /basemap/), /healthz and /version (access_gate.HEALTH_ROUTES, answered first) and exactly these routes.
+# Anything else, including every evidence, run, publish and studio route and the raw workbook download, is 403.
+HOSTED_GET_ROUTES = frozenset({
+    '/', '/api/health', '/api/session', '/api/contributions/session', '/api/runs',
+    '/api/insights/catalog', '/api/forecast/pac', '/api/forecast/catalog', '/api/contributions/catalog',
+    '/api/contributions/geography/catalog', '/api/graph-catalog', '/api/reports', '/api/report-sources',
+    '/api/pac-flow-catalog', '/api/snapshots', '/api/graph', '/api/comparison', '/api/comparison-flows',
+    '/api/flow', '/api/cross-reference', '/api/report-data'})
+# Person-level fields: every dimension the contribution index can group or filter by except these coarse ones. Derived
+# from contribution_semantics.DIMENSIONS (the contributor, street, city, ZIP, employer, occupation and date dimensions,
+# plus every AUDIT and RAW field), so a field added there is person-level until it is listed here on purpose.
+# ponytail: no small-cell suppression (minimum group size) on the aggregate fields; that threshold is Paul's call.
+AGGREGATE_FIELDS = frozenset({'industry', 'cycle', 'year', 'company', 'state', 'recipient', 'committee_id',
+                              'recipient_category', 'party', 'funding_source', 'decision_status', 'receipt_role',
+                              *contribution_data.DESTINATIONS, *contribution_query.semantics.DERIVED})
+PERSON_LEVEL_FIELDS = frozenset(contribution_query.semantics.DIMENSIONS) - AGGREGATE_FIELDS
 _SERVER_PATH = re.compile(r'[A-Za-z]:[\\/]|\\\\|/')
 
 
 def donor_rows_allowed(email):
     listed = {item.strip().lower() for item in os.environ.get('MENTAT_DONOR_ROW_EMAILS', '').split(',') if item.strip()}
     return bool(email) and email.strip().lower() in listed
+
+
+def names_person_level_field(body):
+    """True when a query body names a person-level field as a dimension or measure or in a filter, aggregate
+    filter or sort. An item that is not an object is read as the field name itself (fail closed)."""
+    named = []
+    for key, value in body.items():
+        items = value if isinstance(value, list) else [value]
+        if key in ('dimensions', 'measures'):
+            named += items
+        elif key in ('filters', 'aggregate_filters', 'sort'):
+            named += [item.get('field') if isinstance(item, dict) else item for item in items]
+    return any(isinstance(name, str) and name in PERSON_LEVEL_FIELDS for name in named)
 
 
 def without_server_paths(value):
@@ -2849,6 +2881,8 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
         super().end_headers()
 
     def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None):
+        if self.access_cfg.enforced and isinstance(value, (dict, list)):
+            value = without_server_paths(value)   # hosted: no absolute server path leaves in any JSON body
         content = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode() if content_type == "application/json" else value
         compressible = content_type.startswith(('application/json', 'text/', 'image/svg+xml'))
         compressed = compressible and status != 304 and len(content) >= 2048 and accepts_gzip(self.headers.get('Accept-Encoding'))
@@ -3068,9 +3102,9 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                               source_proof_token=pinned.get('source_proof_token'))
         return result
 
-    def public(self, body):
-        """Hosted: the answer without absolute server paths."""
-        return without_server_paths(body) if self.access_cfg.enforced else body
+    def error_text(self, error):
+        """The reader's own sentence; hosted, an OSError (an errno, a file name) is one fixed sentence instead."""
+        return HOSTED_IO_ERROR if self.access_cfg.enforced and isinstance(error, OSError) else str(error)
 
     def do_GET(self):
         if not self.valid_host():
@@ -3083,17 +3117,18 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 if parsed.path in access_gate.HEALTH_ROUTES:
                     return self.send({'status': 'ok'} if parsed.path == '/healthz'
                                      else access_gate.version_payload(self.access_app))
-                if parsed.path == '/api/report':   # the raw workbook: a download
+                if not (parsed.path in HOSTED_GET_ROUTES or parsed.path in STATIC_ASSETS
+                        or parsed.path.startswith(('/geo/v2/', '/basemap/'))):
                     return self.send({'error': HOSTED_REFUSED}, 403)
             if parsed.path == '/api/health':
-                return self.send(self.public({'application': 'MENTAT', 'project': str(PROJECT),
+                return self.send({'application': 'MENTAT', 'project': str(PROJECT),
                                   'data_root': app.configured_root,
                                   'resolved_data_root': str(app.root),
                                   'server_code_sha256': SERVER_CODE_SHA256,
                                   'contribution_studio_revision': CONTRIBUTION_STUDIO_REVISION,
                                   'read_only': bool(getattr(app, 'read_only', False)),
                                   'report_directory':str(app.report_directory),
-                                  **build_status(app, self.server.server_port)}))
+                                  **build_status(app, self.server.server_port)})
             if parsed.path == '/api/prime-status':
                 # Read-only on every console: this process's startup prime (prewarm.prime_status), which
                 # Start-MentatApp.ps1 waits on before it opens the app window.
@@ -3102,10 +3137,10 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             if parsed.path == "/api/session":
                 if query.get('light', ['0'])[0] == '1':
                     build = build_status(app, self.server.server_port)
-                    return self.send(self.public({'token':self.session_token(), 'read_only':bool(getattr(app, 'read_only', False)),
+                    return self.send({'token':self.session_token(), 'read_only':bool(getattr(app, 'read_only', False)),
                                       'evidence_collection_available':True, 'api_version':2,
-                                      'report_directory':str(app.report_directory), 'build': build, **build}))
-                return self.send(self.public({"token": self.session_token(), **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))}))
+                                      'report_directory':str(app.report_directory), 'build': build, **build})
+                return self.send({"token": self.session_token(), **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
             if parsed.path == '/api/contributions/session':
                 registry = snapshot_registry.registry(app.report_directory)
                 entry = industry_scope.from_query(registry, parsed.query)
@@ -3159,7 +3194,7 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 entry = industry_scope.from_query(registry, parsed.query)
                 return self.send({**registry, 'snapshots': [entry]} if entry else registry)
             if parsed.path == "/api/runs":
-                return self.send(self.public(app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))))
+                return self.send(app.summary(query.get('include_archived', ['0'])[0] in ('1','true')))
             if parsed.path == '/api/evidence-csv':
                 if query.get('job', [''])[0]:
                     return self.send(app.evidence_csv_job(query.get('job', [''])[0]))
@@ -3282,7 +3317,12 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 return self.send(app.report_sources())
             if parsed.path == '/api/report-data':
                 path = app.report_path(query.get('id', [''])[0], int(query.get('index', ['-1'])[0]))
-                return self.send_entry(worksheet_entry(path, query.get('sheet', [''])[0], int(query.get('header', ['0'])[0])))
+                sheet, header = query.get('sheet', [''])[0], int(query.get('header', ['0'])[0])
+                if sheet and self.access_cfg.enforced and not donor_rows_allowed(self.access_user):
+                    import report_insights
+                    if report_insights.person_level_sheet(report_insights.stamp(path), sheet, header):
+                        return self.send({'error': HOSTED_PERSON_LEVEL_REFUSED}, 403)
+                return self.send_entry(worksheet_entry(path, sheet, header))
             if parsed.path == '/api/graph-catalog':
                 return self.send(app.graph_catalog(query.get('id',[''])[0]))
             if parsed.path == '/api/cross-reference':
@@ -3377,7 +3417,7 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                                  content_type=mime, cache_control='private, no-cache', etag=etag)
             return self.send({"error": "Not found."}, 404)
         except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
-            return self.send({"error": str(error)}, 400)
+            return self.send({"error": self.error_text(error)}, 400)
 
     def do_POST(self):
         analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography',
@@ -3456,6 +3496,8 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Expected an upload or run request.")
+            if hosted and not donor_rows_allowed(self.access_user) and names_person_level_field(data):
+                return self.send({'error': HOSTED_PERSON_LEVEL_REFUSED}, 403)
             if self.path == '/api/forecast/project':
                 import giving_forecast
                 return self.send(giving_forecast.project(data))
@@ -3587,7 +3629,7 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 return self.send({'error': str(error)}, 400)
             return self.send({"error": "The encrypted key store could not be accessed for this Windows user."}, 400)
         except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
-            return self.send({"error": str(error)}, 400)
+            return self.send({"error": self.error_text(error)}, 400)
 
 
 # The stdlib listen backlog is 5: while query threads hold the GIL the accept
@@ -3597,12 +3639,14 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
 CONSOLE_LISTEN_BACKLOG = 128
 
 
-def redirect_state_writes(root):
+def redirect_state_writes(root, report_directory=None):
     """MENTAT_STATE_WRITE_ROOT: every cache the console writes while it serves moves under `root`, so the
     checkout's state/ and the report folder can be mounted read-only. The inputs stay where they are:
     prewarm.READ_ONLY_STATE (analytical indexes, accepted sources) and the rest of state/. Two small caches
     that are also shipped inputs, the source proofs and the Census geography, are seeded into `root` once.
-    A missing analytical index is refused, as prewarm's own sandbox does, instead of built."""
+    A missing analytical index is refused, as prewarm's own sandbox does, instead of built.
+    With a `report_directory` (hosted), a write to the checkout or the report folder that was not redirected is
+    refused too (prewarm.install_write_guard, process-wide: only `root` and the temp directory may be written)."""
     import access_stats, analysis_data, contribution_data, drawer_sidecars, glassbox_emit, prewarm
     root = Path(root).resolve()
     for module_name, attribute, relative in prewarm.STATE_REDIRECTS:
@@ -3622,6 +3666,8 @@ def redirect_state_writes(root):
         contribution_data._progress(token, status='error', failed_at=time.time(), message=prewarm.INDEX_REFUSED)
 
     contribution_data._materialize = refuse_build
+    if report_directory is not None:
+        prewarm.install_write_guard(guarded=(PROJECT, report_directory), allowed=(root, tempfile.gettempdir()))
     return root
 
 
@@ -3652,6 +3698,10 @@ def main():
     if access.enforced and not options.read_only:
         sys.stderr.write("access gate: a hosted console (Cloudflare Access enforced) must run with --read-only\n")
         sys.exit(2)
+    write_root = os.environ.get('MENTAT_STATE_WRITE_ROOT', '').strip()
+    if access.enforced and not write_root:
+        sys.stderr.write("access gate: a hosted console (Cloudflare Access enforced) must set MENTAT_STATE_WRITE_ROOT\n")
+        sys.exit(2)
     Handler.access_cfg = access
     data_root = Path(options.data_root).resolve()
     keys_file = str(Path(options.keys_file).resolve()) if options.keys_file else ''
@@ -3674,11 +3724,8 @@ def main():
     warm = choice == '1' or (choice != '0' and own_root)
     # MENTAT_STATE_WRITE_ROOT (see redirect_state_writes). Neither a hosted console nor one with redirected state
     # warms: the warmer's own state and its calls back into the console are not redirected or authorised.
-    write_root = os.environ.get('MENTAT_STATE_WRITE_ROOT', '').strip()
     if write_root:
-        redirect_state_writes(write_root)
-    elif access.enforced:
-        sys.stderr.write("mentat: hosted without MENTAT_STATE_WRITE_ROOT; caches will be written under the checkout's state/\n")
+        redirect_state_writes(write_root, server.app.report_directory if access.enforced else None)
     warm = warm and not (access.enforced or write_root)
     # Encoded Graph views and comparison flows persist across restarts in mentat/state/response-cache,
     # content-verified by every new process (perf lane 2026-09-24, cache). Like the warm caches, only

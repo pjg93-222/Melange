@@ -25,11 +25,13 @@ import socket
 import subprocess
 import sys
 import tempfile
+import textwrap
 import threading
 import time
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
+from urllib.parse import quote
 
 try:
     from cryptography.hazmat.primitives import hashes
@@ -37,6 +39,11 @@ try:
     HAVE_CRYPTO = True
 except ImportError:
     HAVE_CRYPTO = False
+
+try:
+    import openpyxl
+except ImportError:
+    openpyxl = None
 
 from test_contribution_http import app
 
@@ -48,6 +55,7 @@ import source_memo
 
 gate = app.access_gate
 needs_crypto = unittest.skipUnless(HAVE_CRYPTO, 'cryptography is not installed')
+needs_openpyxl = unittest.skipUnless(openpyxl, 'openpyxl is not installed')
 
 AUD = 'mentat-test-aud'
 ISS = 'https://example-team.cloudflareaccess.com'
@@ -63,6 +71,31 @@ GATE_SHA256 = 'dc7ef05085044601884ce037f21c1b44d774e7dffba3a0276a3ea5423227e58d'
 
 def b64u(raw):
     return base64.urlsafe_b64encode(raw).rstrip(b'=').decode('ascii')
+
+
+PERSON_SHEETS = ('Employee List', 'Receipts', 'Names')
+AGGREGATE_SHEETS = ('Giving Summary', 'Tier Totals')
+
+
+def synthetic_report(path):
+    """A small report workbook built at test time, fake values only: two aggregate sheets and three person-level
+    ones, each with a title block above its header row, as the published reports have."""
+    book = openpyxl.Workbook()
+    del book['Sheet']
+    for name, header, rows in (
+            ('Giving Summary', ['Company', 'Cycle', 'Total giving'], [['Example Co', '2024', 100], ['Other Co', '2024', 50]]),
+            ('Tier Totals', ['Contributor Tier', 'Distinct Contributors', 'Amount'], [['Employee', 3, 10], ['Chief', 1, 5]]),
+            ('Employee List', ['Person', 'Person Key', 'Titles', 'Total'], [['Test Person A', 'k1', 'Engineer', 5], ['Test Person B', 'k2', 'Manager', 7]]),
+            ('Receipts', ['Date', 'Contributor', 'Street 1', 'City', 'ZIP', 'Employer', 'Occupation', 'Amount'],
+             [['2024-01-02', 'Test Person A', '1 Test St', 'Testville', '00000', 'Example Co', 'Engineer', 5]] * 2),
+            ('Names', ['Name', 'Amount'], [['Test Person A', 5], ['Test Person B', 7]])):
+        sheet = book.create_sheet(name)
+        sheet.append([name + ' (synthetic)'])
+        sheet.append([])
+        sheet.append(header)
+        for row in rows:
+            sheet.append(row)
+    book.save(path)
 
 
 class Idp:
@@ -271,6 +304,41 @@ class DefaultModeIsUnchanged(unittest.TestCase):
         self.assertEqual(status, 403)
         self.assertIn('read-only while the original console', body['error'])
         self.console.restart.assert_not_called()
+
+    def test_local_get_routes_are_not_allowlisted(self):
+        for route in ('/api/prime-status', '/api/evidence'):
+            status, _, body = self.plain.request(route)
+            self.assertEqual(status, 200, route)
+            self.assertNotEqual(body, {'error': app.HOSTED_REFUSED}, route)
+        self.assertEqual(self.plain.request('/api/not-a-route')[:3:2], (404, {'error': 'Not found.'}))
+
+    def test_local_person_level_queries_are_not_refused(self):
+        body = {'dataset': 'Example', 'dimensions': ['contributor', 'city'], 'filters': [{'field': 'zip5', 'op': 'eq', 'value': '0'}]}
+        with patch.object(app.contribution_workbook_guard, 'verify_sources', return_value=[]), \
+                patch.object(app.contribution_query, 'query', return_value={'rows': []}) as reader:
+            status, _, answer = self.post(self.plain, '/api/contributions/query', body)
+        self.assertEqual((status, answer['rows']), (200, []))
+        reader.assert_called_once()
+
+    def test_local_errors_keep_their_text_and_bodies_keep_their_paths(self):
+        error = OSError(2, 'No such file or directory', '/srv/mentat/x.sqlite')
+        with patch.object(self.console, 'summary', Mock(side_effect=error), create=True):
+            status, _, body = self.plain.request('/api/runs')
+        self.assertEqual(status, 400)
+        self.assertIn('No such file or directory', body['error'])
+        self.assertIn('x.sqlite', body['error'])
+        catalog = {'path': '/srv/x', 'files': ['C:\\x']}
+        with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
+            self.assertEqual(self.plain.request('/api/reports?id=a')[2], catalog)
+
+    @needs_openpyxl
+    def test_local_worksheets_have_no_person_level_rule(self):
+        path = Path(self.temp.name) / 'synthetic-report.xlsx'
+        synthetic_report(path)
+        with patch.object(self.console, 'report_path', Mock(return_value=path), create=True):
+            for name in PERSON_SHEETS:
+                status, _, body = self.plain.request(f'/api/report-data?id=r&index=0&sheet={quote(name)}')
+                self.assertEqual((status, body['row_count']), (200, 2), name)
 
 
 @needs_crypto
@@ -518,6 +586,134 @@ class HostedMode(unittest.TestCase):
         denied = json.loads(self.served.stderr.strip().splitlines()[-1])
         self.assertEqual((denied['user'], denied['status'], denied['reason']), ('-', 403, 'no token'))
 
+    def test_every_get_route_is_allowlisted_or_refused(self):
+        literals = set(re.findall(r"""['"](/[a-z0-9/_-]*)['"]""", inspect.getsource(app.Handler.do_GET)))
+        prefixes = {item for item in literals if item.endswith('/') and item != '/'}
+        routes = literals - prefixes - set(gate.HEALTH_ROUTES)   # /healthz and /version are answered before the gate
+        self.assertEqual(prefixes, {'/geo/v2/', '/basemap/'}, 'the two file trees are the only prefixes')
+        self.assertEqual(app.HOSTED_GET_ROUTES - routes, set(), 'an allowlisted route do_GET no longer has')
+        refused = sorted(routes - app.HOSTED_GET_ROUTES)
+        for needed in ('/api/report', '/api/run', '/api/evidence', '/api/evidence-csv', '/api/evidence-job',
+                       '/api/evidence-stats', '/api/evidence-geo', '/api/evidence-geocode', '/api/evidence-network',
+                       '/api/publish/pocket', '/api/prime-status', '/api/studio/briefing', '/api/studio/briefing/item',
+                       '/api/studio/views'):
+            self.assertIn(needed, refused)
+        for route in (*refused, '/api/not-a-route', '/api/evidence-csv?job=x', '/api/studio/views?id=a'):
+            with self.subTest(route=route):
+                status, _, body = self.get(route)
+                self.assertEqual((status, body), (403, {'error': app.HOSTED_REFUSED}))
+        # the page, every static file and the two file trees pass the gate (their own answers are 200 or 404)
+        for route in (*app.STATIC_ASSETS, '/geo/v2/albers/none.json', '/basemap/none'):
+            with self.subTest(route=route):
+                status, _, body = self.get(route)
+                self.assertNotEqual((status, body), (403, {'error': app.HOSTED_REFUSED}))
+        self.assert_untouched()
+
+    def query(self, route, body, email=EMAIL):
+        return self.served.request(route, method='POST', data={'dataset': 'Example', **body}, headers={
+            'Host': HOST, 'X-Mentat-Token': 'hosted-read-only', 'Cf-Access-Jwt-Assertion': self.idp.token(email=email)})
+
+    def test_the_person_level_field_set_is_computed_from_the_semantics(self):
+        semantics = app.contribution_query.semantics
+        self.assertEqual(app.PERSON_LEVEL_FIELDS,
+                         {'contributor', 'street_1', 'street_2', 'city', 'zip5', 'employer', 'occupation', 'date'}
+                         | set(semantics.AUDIT) | set(semantics.RAW))
+        self.assertGreater(len(semantics.RAW), 40)
+        self.assertEqual(app.AGGREGATE_FIELDS & app.PERSON_LEVEL_FIELDS, set())
+        self.assertEqual(app.AGGREGATE_FIELDS | app.PERSON_LEVEL_FIELDS, set(semantics.DIMENSIONS),
+                         'every dimension is one or the other; a new one is person-level until listed')
+
+    def test_a_person_level_query_is_refused_unless_the_email_is_listed(self):
+        person = ({'dimensions': ['contributor']}, {'dimensions': ['company', 'city'], 'measures': ['amount']},
+                  {'dimensions': ['company'], 'filters': [{'field': 'zip5', 'op': 'eq', 'value': '00000'}]},
+                  {'dimensions': ['company'], 'aggregate_filters': [{'field': 'source_id', 'op': 'gte', 'value': 1}]},
+                  {'dimensions': ['company'], 'sort': [{'field': 'employer', 'direction': 'asc'}]},
+                  {'dimensions': ['date']}, {'dimensions': ['street_1', 'street_2']}, {'dimensions': ['occupation']},
+                  {'dimensions': ['reasons']}, {'filters': [{'field': 'raw_zip', 'op': 'eq', 'value': '0'}]},
+                  {'dimensions': ['reported_memo_text']}, {'filters': [{'field': 'reported_filing_form', 'op': 'eq', 'value': 'F3'}]},
+                  {'dimensions': 'contributor'}, {'filters': ['city']}, {'filters': {'field': 'employer'}})
+        aggregate = {'dimensions': ['company', 'cycle', 'state'], 'measures': ['amount', 'records', 'contributors'],
+                     'filters': [{'field': 'cycle', 'op': 'eq', 'value': '2024'}, {'field': 'amount', 'op': 'gte', 'value': 100},
+                                 {'field': 'recipient_category', 'op': 'eq', 'value': 'Candidate'}],
+                     'aggregate_filters': [{'field': 'amount', 'op': 'gte', 'value': 1}],
+                     'sort': [{'field': 'amount', 'direction': 'desc'}]}
+        with patch.object(app.contribution_workbook_guard, 'verify_sources', return_value=[]), \
+                patch.object(app.contribution_query, 'query', return_value={'rows': []}) as contribution, \
+                patch('analysis_data.query', return_value={'rows': []}) as insights, patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            readers = {'/api/contributions/query': contribution, '/api/insights/query': insights}
+            for route, reader in readers.items():
+                for body in person:
+                    status, _, answer = self.query(route, body)
+                    self.assertEqual((status, answer), (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}), (route, body))
+                self.assertEqual(self.query(route, aggregate)[0], 200, route)
+                self.assertEqual(reader.call_count, 1, 'only the aggregate query reached the reader')
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ' Someone@Example.test , ' + EMAIL.upper()
+            for route, reader in readers.items():
+                before = reader.call_count
+                for body in person:
+                    self.assertEqual(self.query(route, body)[0], 200, (route, body))
+                self.assertEqual(reader.call_count, before + len(person))
+                status, _, answer = self.query(route, person[0], email='stranger@example.test')
+                self.assertEqual((status, answer), (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}))
+            # the other analytical POSTs name no field, so they are not touched by the rule
+            with patch('giving_forecast.project', return_value={'ok': True}):
+                self.assertEqual(self.post('/api/forecast/project', {'industry': 'x'})[0], 200)
+        self.assert_untouched()
+
+    @needs_openpyxl
+    def test_a_person_level_worksheet_is_refused_unless_the_email_is_listed(self):
+        path = Path(self.temp.name) / 'synthetic-report.xlsx'
+        synthetic_report(path)
+        broken = Path(self.temp.name) / 'broken-report.xlsx'
+        broken.write_bytes(b'this is not a workbook')
+
+        def sheet(name, *, header=0, **headers):
+            return self.get(f'/api/report-data?id=r&index=0&sheet={quote(name)}' + (f'&header={header}' if header else ''),
+                            **headers)
+
+        with patch.object(self.console, 'report_path', Mock(return_value=path)), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            self.assertEqual(self.get('/api/report-data?id=r&index=0')[2]['sheets'], [*AGGREGATE_SHEETS, *PERSON_SHEETS],
+                             'the sheet list is names only')
+            for name in AGGREGATE_SHEETS:
+                status, _, body = sheet(name)
+                self.assertEqual((status, body['sheet'], body['row_count']), (200, name, 2), name)
+            for name in PERSON_SHEETS:
+                self.assertEqual(sheet(name)[:3:2], (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}), name)
+            # asking for another header row does not get past the sheet's own header row
+            for header in (5, 6, 50, 100):
+                self.assertEqual(sheet('Employee List', header=header)[0], 403, header)
+            # an aggregate sheet stays available at its own header row and at any other row that names no person
+            self.assertEqual((sheet('Giving Summary', header=3)[0], sheet('Giving Summary', header=1)[0]), (200, 200))
+            self.assertEqual(sheet('Nonexistent Sheet')[0], 403, 'fail closed on a sheet that cannot be read')
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = EMAIL
+            for name in PERSON_SHEETS:
+                status, _, body = sheet(name)
+                self.assertEqual((status, body['row_count']), (200, 2), name)
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS')
+            self.console.report_path.return_value = broken
+            self.assertEqual(sheet('Giving Summary')[:3:2], (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}),
+                             'fail closed when the headers cannot be read')
+
+    def test_hosted_errors_carry_no_os_text_or_server_path(self):
+        error = OSError(2, 'No such file or directory', '/srv/mentat/secret.sqlite')
+        with patch.object(self.console, 'summary', Mock(side_effect=error)):
+            status, _, body = self.get('/api/runs')
+        self.assertEqual((status, body), (400, {'error': app.HOSTED_IO_ERROR}))
+        with patch('giving_forecast.project', side_effect=error):
+            status, _, body = self.post('/api/forecast/project')
+        self.assertEqual((status, body), (400, {'error': app.HOSTED_IO_ERROR}))
+        with patch.object(self.console, 'summary', Mock(side_effect=PermissionError('prewarm sandbox refused open: /srv/x'))):
+            self.assertEqual(self.get('/api/runs')[2], {'error': app.HOSTED_IO_ERROR})
+        with patch.object(self.console, 'summary', Mock(side_effect=ValueError('Choose a run.'))):
+            self.assertEqual(self.get('/api/runs')[:3:2], (400, {'error': 'Choose a run.'}), 'a reader sentence is unchanged')
+        # every JSON body is scrubbed in send(), not only the routes that used to call public()
+        catalog = {'name': 'ok', 'path': '/srv/x', 'files': ['C:\\x', 'y'], 'nested': [{'p': '\\\\host\\s', 'n': 1}]}
+        with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
+            status, _, body = self.get('/api/reports?id=a')
+        self.assertEqual((status, body), (200, {'name': 'ok', 'files': ['y'], 'nested': [{'n': 1}]}))
+
 
 class StateWriteRoot(unittest.TestCase):
     """MENTAT_STATE_WRITE_ROOT: the caches the console writes move; the inputs stay put."""
@@ -598,6 +794,15 @@ class StateWriteRoot(unittest.TestCase):
         self.assertEqual((self.root / 'contribution-source-proofs' / 'a.json').read_text(), 'changed here')
         self.assertEqual((self.shipped / 'contribution-source-proofs' / 'a.json').read_text(), '{"proof": 1}')
 
+    def test_hosted_installs_the_write_guard_and_a_local_redirect_does_not(self):
+        reports = Path(self.temp.name) / 'reports'
+        with patch.object(self.prewarm, 'DEFAULT_STATE_ROOT', self.shipped), \
+                patch.object(self.prewarm, 'install_write_guard') as guard:
+            app.redirect_state_writes(self.root)
+            guard.assert_not_called()
+            app.redirect_state_writes(self.root, reports)
+        guard.assert_called_once_with(guarded=(app.PROJECT, reports), allowed=(self.root.resolve(), tempfile.gettempdir()))
+
     def test_a_missing_index_is_refused_not_built(self):
         self.redirect()
         built = Path(self.temp.name) / 'index.sqlite'
@@ -605,6 +810,56 @@ class StateWriteRoot(unittest.TestCase):
         job = contribution_data._jobs['tok']
         self.assertEqual((job['status'], job['message']), ('error', self.prewarm.INDEX_REFUSED))
         self.assertFalse(built.exists())
+
+
+WRITE_GUARD_PROBE = textwrap.dedent("""
+    import json, os, sys
+    from pathlib import Path
+    app_dir, shipped, root, reports, attempts = sys.argv[1:6]
+    sys.path.insert(0, app_dir)
+    import server, prewarm
+    prewarm.DEFAULT_STATE_ROOT = Path(shipped)
+    server.redirect_state_writes(root, reports)
+    out = {}
+    for name, path in json.loads(attempts).items():
+        try:
+            Path(path).write_text('x')
+            out[name] = 'written'
+        except PermissionError:
+            out[name] = 'refused'
+    try:
+        os.makedirs(Path(reports) / 'new')
+        out['mkdir'] = 'made'
+    except PermissionError:
+        out['mkdir'] = 'refused'
+    out['read'] = len(Path(server.__file__).read_text(encoding='utf-8')) > 0
+    print(json.dumps(out))
+""")
+
+
+class HostedWriteGuard(unittest.TestCase):
+    """What a hosted start does after redirect_state_writes, in its own process: the guard is process-wide."""
+
+    def test_a_write_outside_the_write_root_is_refused(self):
+        probe = Path(app.PROJECT) / '_write_guard_probe.tmp'
+        self.addCleanup(lambda: probe.unlink(missing_ok=True))
+        with tempfile.TemporaryDirectory() as base:
+            base = Path(base)
+            for name in ('tmp', 'write-root', 'reports', 'shipped'):
+                (base / name).mkdir()
+            attempts = {'write root': base / 'write-root' / 'x.txt', 'temp dir': base / 'tmp' / 'x.txt',
+                        'report folder': base / 'reports' / 'x.txt', 'checkout': probe}
+            env = {**os.environ, 'TMP': str(base / 'tmp'), 'TEMP': str(base / 'tmp'), 'TMPDIR': str(base / 'tmp'),
+                   'PYTHONDONTWRITEBYTECODE': '1'}
+            done = subprocess.run([sys.executable, '-B', '-c', WRITE_GUARD_PROBE, str(SERVER_PY.parent),
+                                   str(base / 'shipped'), str(base / 'write-root'), str(base / 'reports'),
+                                   json.dumps({key: str(value) for key, value in attempts.items()})],
+                                  env=env, capture_output=True, text=True, timeout=120)
+            self.assertEqual(done.returncode, 0, done.stderr)
+            self.assertEqual(json.loads(done.stdout.strip().splitlines()[-1]),
+                             {'write root': 'written', 'temp dir': 'written', 'report folder': 'refused',
+                              'checkout': 'refused', 'mkdir': 'refused', 'read': True})
+        self.assertFalse(probe.exists())
 
 
 class ReceiptPaths(unittest.TestCase):
@@ -744,6 +999,15 @@ class HostedStartup(unittest.TestCase):
         self.assertEqual(done.returncode, 2, done.stderr)
         self.assertIn('--read-only', done.stderr)
         self.assertNotIn('Mentat app', done.stdout)
+
+    @needs_crypto
+    def test_a_hosted_console_without_a_state_write_root_does_not_start(self):
+        idp = Idp(self.temp.name)
+        for name, extra in (('unset', {}), ('blank', {'MENTAT_STATE_WRITE_ROOT': '  '})):
+            done = self.run_to_exit(self.environment(**idp.env(**extra)), '--read-only')
+            self.assertEqual(done.returncode, 2, (name, done.stderr))
+            self.assertIn('MENTAT_STATE_WRITE_ROOT', done.stderr)
+            self.assertNotIn('Mentat app', done.stdout)
 
     @needs_crypto
     def test_a_hosted_console_serves_only_behind_access(self):

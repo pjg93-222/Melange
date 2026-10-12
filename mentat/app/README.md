@@ -142,10 +142,20 @@ token for changes. This is a local single-user application, not a remote hosted
 service. The one exception is the hosted, read-only console behind Cloudflare
 Access: `BIND_HOST`, `ALLOWED_HOSTS`, `ACCESS_AUD`, `ACCESS_ISSUER` and
 `ACCESS_JWKS_FILE` (see `access_gate.py`) turn it on, it refuses to start
-without `--read-only`, it serves only the analytical read routes (the two
-`/records` routes, which return donor rows, only to an Access email listed in
-`MENTAT_DONOR_ROW_EMAILS`), and `MENTAT_STATE_WRITE_ROOT` moves the caches it writes (`requirements-hosted.in`
-lists its dependencies). With none of those set nothing changes. Closing the
+without `--read-only` or without `MENTAT_STATE_WRITE_ROOT` (exit 2), it serves only an allowlist of read routes
+(`HOSTED_GET_ROUTES` and the analytical POSTs in `server.py`; any other route is 403), the two
+`/records` routes, which return donor rows, and any query or worksheet that names a person-level field or column
+(contributor, street, city, ZIP, employer, occupation, date, source ID, the audit and reported fields; the
+`Employee List` and `Cycle Exceptions` kind of sheet) only to an Access email listed in
+`MENTAT_DONOR_ROW_EMAILS`, and `MENTAT_STATE_WRITE_ROOT` moves the caches it writes and refuses every other write
+under the checkout or the report folder (`requirements-hosted.in` lists its dependencies). With none of those set
+nothing changes.
+
+Startup self-check (by hand, no code): the portable index tokens name each data input by its relative path, size and
+`mtime_ns`. Copy the report folder and the contribution sources to the host in a way that keeps sub-second
+modification times (`rsync -a`, `tar`, `cp -p`; not a zip or a transfer that rounds to seconds), then compare one
+file's mtime to the nanosecond on both sides (`stat -c %.9Y`). A rounded copy names a different source, every analytical
+index then looks stale, and the hosted console, which never builds one, refuses it. Closing the
 browser does not stop collection. Keep the app server
 running for its process exit receipt; underlying runner receipts remain available
 if the app restarts. A failed startup's diagnostic is in the upload's

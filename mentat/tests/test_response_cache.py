@@ -549,6 +549,8 @@ class HttpTests(CacheCase):
                 self.assertEqual(rc.accepts_gzip(header), server.accepts_gzip(header))
 
         class Fake:
+            access_cfg = server.Handler.access_cfg   # send() reads whether Access is enforced (hosted: scrubs paths)
+
             def __init__(self, accept):
                 self.headers, self.wfile, self.sent = {'Accept-Encoding': accept}, io.BytesIO(), []
 
