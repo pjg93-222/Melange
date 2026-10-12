@@ -579,18 +579,20 @@ def without_person_keys(value):
 
 
 # Hosted /api/flow, same viewers: no individual contributor's identity at all (Claude's default pending Paul's
-# governance ruling). Every individual donor node becomes the one aggregate node below; the "Other" bucket keeps its
-# count but not its member names; the refunded sink's text names no one.
+# governance ruling). Every donor node that is not explicitly an organization or committee becomes the one aggregate
+# node below; the "Other" bucket keeps its count but not its member names; the refunded sink's text names no one.
 INDIVIDUALS_ID = 'donor:individuals'
 REFUNDS_HIDDEN = 'Refunds to individual contributors are not itemized on the hosted console.'
 
 
 def is_individual_donor(node):
-    """flow_data.committee_flow's own reading of a donor node as a person: FEC entity type IND, or no type and a
-    "LAST, FIRST" name. Companies, committees and the unitemized node are not."""
-    entity = node.get('entity') or ''
+    """A donor node that is not explicitly an organization or committee: FEC entity type IND, and also no type, or a
+    type this does not know, whatever the name looks like (flow_data draws an untyped name without a comma as an
+    organization, and a filer's "Acme Hardware" can be a sole proprietor). Only ORG, CAN and
+    flow_data.COMMITTEE_ENTITIES (PAC, CCM, PTY, COM, ORG_PAC) keep their names; the unitemized node is no one."""
+    from flow_data import COMMITTEE_ENTITIES
     return (node.get('kind') == 'donor' and str(node.get('id')).startswith('donor:') and not node.get('unitemized')
-            and (entity == 'IND' or (not entity and ',' in (node.get('name_as_filed') or ''))))
+            and str(node.get('entity') or '').upper() not in COMMITTEE_ENTITIES | {'ORG', 'CAN'})
 
 
 def without_individual_donors(body):
@@ -638,6 +640,19 @@ def without_individual_donors(body):
         if link.get('date_unverified'):
             merged['date_unverified'] = True
     return {**body, 'nodes': nodes, 'links': links}
+
+
+# Hosted /api/comparison, same viewers: its Person subjects (comparison_data.subjects) are the report's employees, each
+# with a name, a company and per-cycle totals. They are dropped, and a query that selects one is refused.
+def without_person_subjects(body):
+    return {**body, 'subjects': [subject for subject in body.get('subjects', []) if subject.get('kind') != 'Person']}
+
+
+def names_person_subject(query):
+    """True when a /api/comparison query (parse_qs) other than its run and industry says 'Person' (kind=Person) or
+    gives a subject id of that kind (comparison_data.subjects: '["Person", [company, person id]]')."""
+    return any(re.fullmatch(r'\s*person\s*', value, re.I) or re.match(r'\s*\[\s*"person"', value, re.I)
+               for key, values in query.items() if key not in ('id', 'industry') for value in values)
 
 
 GEO_V2_DIR = Path(__file__).resolve().parent / 'geo' / 'v2'
@@ -3466,6 +3481,10 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                     self.send_entry(app.comparison_entry(query.get('id',[''])[0], label))
                     return record_access(self, 'comparison_flows', {'id': query.get('id',[''])[0], 'industry': label},
                                          started)
+                if self.access_cfg.enforced and not donor_rows_allowed(self.access_user):
+                    if names_person_subject(query):
+                        return self.send({'error': HOSTED_PERSON_LEVEL_REFUSED}, 403)
+                    return self.send(without_person_subjects(app.comparison(query.get('id',[''])[0], label, False)))
                 return self.send(app.comparison(query.get('id',[''])[0], label, False))
             if parsed.path == '/api/publish/pocket':
                 job = app.publication(query.get('id', [''])[0])
@@ -3818,6 +3837,12 @@ def main():
     reports = report_directory(PROJECT)
     os.chdir(reports)
     server = console_server(options.port, host=access.bind_host)
+    try:
+        access_gate.assert_bind_consistent(access, server.server_address[0])    # the address really bound, before anything serves
+    except access_gate.AccessConfigError as error:
+        server.server_close()
+        sys.stderr.write(f"access gate: {error}\n")
+        sys.exit(2)
     server.app = Console(data_root, keys_file, rscript, options.read_only)
     server.app.port = options.port or server.server_port
     # One source discovery per stamp change, not per request (perf lane 2026-09-24).

@@ -148,18 +148,35 @@ without `--read-only` or without `MENTAT_STATE_WRITE_ROOT` (exit 2), it serves o
 (contributor, street, city, ZIP, employer, occupation, date, source ID, the audit and reported fields; the
 `Employee List` and `Cycle Exceptions` kind of sheet) only to an Access email listed in
 `MENTAT_DONOR_ROW_EMAILS`, and `MENTAT_STATE_WRITE_ROOT` moves the caches it writes and refuses every other write
-under the checkout or the report folder (`requirements-hosted.in` lists its dependencies). `/api/flow` drops the
+under the checkout or the report folder (`requirements-hosted.in` lists its dependencies). That write guard covers the
+checkout and the report folder only; in the container the root filesystem and the data mounts are read-only at the OS
+level, which covers the rest. At startup `main()` also asks `access_gate.assert_bind_consistent` about the address it
+really bound, and exits 2 before serving if the gate refuses it. `/api/flow` drops the
 same person-level keys from its records (`FLOW_PERSON_KEYS`, counterparty, the filing pointers and the free-text
 `purpose` included) for an email not listed there, and every hosted JSON body is scrubbed of server paths and OSError
-text. With none of those set nothing changes.
+text. `/api/comparison` drops its Person subjects (the report's employees: name, company, totals) for an email not
+listed, and refuses a query that selects one (`kind=Person` or a Person subject id) with 403. With none of those set
+nothing changes.
+
+A worksheet is person-level, and refused to an email not listed, when a header of its own header row (or of the
+`header` row asked for) has any of these words: name, person, people, contributor, donor, employee, payee, contact,
+email, phone, address, street, city, zip, employer, occupation, title, given, surname (`report_insights.PERSON_HEADER`;
+whole words, plurals included, camelCase split, digits ignored). Only the headers in `report_insights.AGGREGATE_HEADERS` are
+excepted, each checked against the real report workbooks: the tier label (`Contributor Tier`, `Employee Tier`), the
+per-tier giving columns (`Employee`, `Employee %`, `Employee D`, `Employee R %`) and the contributor counts
+(`Contributors`, `Distinct Contributors`). `Name / Recipient` is not excepted: on the Top Contributor rows of the
+`* Summary` and `<Company> View` sheets it holds the contributor's name (and `Reference Key` the name key), so those
+sheets are refused to an unlisted email until a decision is made to show them with those rows redacted.
 
 Decision (Claude's default, pending Paul's governance ruling): a hosted viewer who is not in
 `MENTAT_DONOR_ROW_EMAILS` learns no individual contributor's identity from `/api/flow`
 (`without_individual_donors` in `server.py`, applied to the response only; `flow_data.py` is unchanged). Every
-individual donor node (`donor:<NAME KEY>` with FEC entity type IND, or untyped with a "LAST, FIRST" name: the same
-test `flow_data.committee_flow` uses to draw a person) becomes one `donor:individuals` node labelled "Individual
-contributors (N)" with its amounts summed and no name as filed or other per-person field; the links into it are
-summed, so every total is unchanged. Companies, PACs, committees and the unitemized node stay as built. The
+donor node (`donor:<NAME KEY>`) that is not explicitly an organization or committee (FEC entity type ORG, CAN, PAC,
+CCM, PTY, COM or ORG_PAC; so IND, an untyped one whatever its name looks like, and a type not listed here: where
+`flow_data.committee_flow` draws an untyped name without a comma as an organization, the hosted body treats it as a
+person) becomes one `donor:individuals` node labelled "Individual contributors (N)" with its amounts summed and no
+name as filed or other per-person field; the links into it are summed, so every total is unchanged. Named
+organizations, PACs, committees and the unitemized node stay as built. The
 "Other" bucket keeps its label and `member_count` but not its member list, and the refunded sink's details are one
 generic sentence. A listed email and local mode get the body as built.
 

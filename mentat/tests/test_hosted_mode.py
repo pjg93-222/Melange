@@ -100,6 +100,35 @@ def synthetic_report(path):
     book.save(path)
 
 
+def comparison_body(directory):
+    """A real /api/comparison body (comparison_data.subjects) over a report-shaped workbook that has one employee,
+    fake values only."""
+    import comparison_data
+    from graph_fixture import add_graph_sheets
+    path = Path(directory) / 'comparison-report.xlsx'
+    book = openpyxl.Workbook()
+    add_graph_sheets(book)
+    book['2025-2026'].cell(4, 8, 'Person Key')
+    book['2025-2026'].append(['Employee', 'Harborlight Credit Union', 'Chief', 100, None, None, 'Yes', 'PERSON:1'])
+    people = book.create_sheet('Employee List')
+    for row in [[], [], [], [], ['Person Key', 'Person', 'Company'], ['PERSON:1', 'Alex Example', 'Harborlight Credit Union']]:
+        people.append(row)
+    book.save(path)
+    return json.loads(json.dumps(comparison_data.subjects([path], 'Credit Unions')))
+
+
+def header_workbook(path, headers):
+    """One sheet per header (S0, S1, ...), each with a title block above a header row of Company, that header and
+    Amount, and one fake data row."""
+    book = openpyxl.Workbook()
+    del book['Sheet']
+    for number, header in enumerate(headers):
+        sheet = book.create_sheet(f'S{number}')
+        for row in ([f'S{number} (synthetic)'], [], ['Company', header, 'Amount'], ['Example Co', 'x', 1]):
+            sheet.append(row)
+    book.save(path)
+
+
 class Idp:
     """A throw-away Access: one RSA key, its JWKS file in `directory`, and a way to sign tokens."""
 
@@ -294,6 +323,25 @@ class ServerPaths(unittest.TestCase):
             'a': app.HOSTED_IO_ERROR, 'b': [app.HOSTED_IO_ERROR, 'ok'], 'c': {'d': app.HOSTED_IO_ERROR, 'n': 1},
             'e': 'a [text] in brackets'})
 
+    def test_only_an_explicit_organization_or_committee_keeps_its_flow_donor_name(self):
+        donor = lambda entity: {'kind': 'donor', 'id': 'donor:X', 'name_as_filed': 'ACME HARDWARE', 'entity': entity}
+        for entity in ('ORG', 'COM', 'PAC', 'PTY', 'CCM', 'CAN', 'ORG_PAC', 'org'):
+            self.assertFalse(app.is_individual_donor(donor(entity)), entity)
+        for entity in ('IND', '', None, 'XYZ', 'OTHER'):    # a person, no type, a type nothing here knows
+            self.assertTrue(app.is_individual_donor(donor(entity)), entity)
+        self.assertFalse(app.is_individual_donor({**donor(''), 'unitemized': True}))
+        self.assertFalse(app.is_individual_donor({**donor(''), 'kind': 'committee', 'id': 'committee:C00000001'}))
+
+    def test_a_person_subject_query_is_read_from_the_subject_and_kind_keys_only(self):
+        person = json.dumps(['Person', ['Harborlight Credit Union', 'PERSON:1']])
+        for query in ({'kind': ['Person']}, {'kind': [' person ']}, {'subject': [person]}, {'subjects': ['x', person]},
+                      {'anything': ['["person", ["c", "p"]]']}):
+            self.assertTrue(app.names_person_subject(query), query)
+        company = json.dumps(['Company', 'Harborlight Credit Union'])
+        for query in ({}, {'id': ['Person'], 'industry': ['Person']}, {'kind': ['Company']}, {'measure': ['personal']},
+                      {'subject': [company]}):
+            self.assertFalse(app.names_person_subject(query), query)
+
     def test_only_a_json_cached_body_is_scrubbed_when_hosted(self):
         class Fake:
             access_cfg = SimpleNamespace(enforced=True)
@@ -483,6 +531,16 @@ class DefaultModeIsUnchanged(unittest.TestCase):
             status, _, answer = self.plain.request('/api/flow?root=industry&cycle=2024')
         self.assertEqual((status, answer), (200, json.loads(json.dumps(body))))
         self.assertIn('TEST PERSON A', json.dumps(answer))
+
+    @needs_openpyxl
+    def test_local_comparison_keeps_its_person_subjects(self):
+        body = comparison_body(self.temp.name)
+        self.assertIn('Person', {subject['kind'] for subject in body['subjects']})
+        with patch.object(self.console, 'comparison', Mock(return_value=body), create=True):
+            for query in ('', '&kind=Person'):
+                status, _, answer = self.plain.request('/api/comparison?id=published-reports' + query)
+                self.assertEqual((status, answer), (200, body), query)
+        self.assertIn('Alex Example', json.dumps(answer))
 
     def test_local_json_bodies_keep_their_os_error_text(self):
         catalog = {'note': "[Errno 2] No such file or directory: 'x'", 'rows': ['[WinError 3] gone']}
@@ -973,6 +1031,102 @@ class HostedMode(unittest.TestCase):
                              json.dumps(body, ensure_ascii=False, separators=(',', ':')),
                              'a listed account gets the body as built, byte for byte')
 
+    def test_flow_aggregates_donors_of_no_known_type_unless_the_email_is_listed(self):
+        body = individuals_flow_body()
+        # an untyped name without a comma and a type nothing here knows are people until a filing says otherwise;
+        # each explicit organization or committee type keeps its name
+        added = [('ACME HARDWARE', '', 70.0), ('MYSTERY HOLDINGS', 'XYZ', 30.0), ('NAMED ORG', 'ORG', 11.0),
+                 ('NAMED COM', 'COM', 12.0), ('NAMED PTY', 'PTY', 13.0), ('NAMED CCM', 'CCM', 14.0),
+                 ('NAMED CAN', 'CAN', 15.0)]
+        for name, entity, value in added:
+            body['nodes'].append({'id': 'donor:' + name, 'stage': 0, 'label': name.title(), 'kind': 'donor',
+                                  'contribution': True, 'value_in': 0.0, 'value_out': value, 'name_as_filed': name,
+                                  'entity': entity})
+            body['links'].append({'source': 'donor:' + name, 'target': 'committee:C00000001', 'value': value,
+                                  'kind': 'receipt', 'rows': 1})
+        with patch('flow_data.flow', return_value=body), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            for email in (EMAIL, 'stranger@example.test'):
+                status, _, answer = self.flow(email)
+                self.assertEqual(status, 200)
+                text = json.dumps(answer).upper()
+                for hidden in ('ACME', 'MYSTERY'):
+                    self.assertNotIn(hidden, text, email)
+                nodes = {node['id']: node for node in answer['nodes']}
+                for name, entity, _ in added[2:]:
+                    self.assertEqual(nodes['donor:' + name]['label'], name.title(), name)
+                # the two typed people and the two of unknown type, in one node
+                self.assertEqual((nodes[app.INDIVIDUALS_ID]['label'], nodes[app.INDIVIDUALS_ID]['value_out']),
+                                 ('Individual contributors (4)', 400.3), email)
+                self.assertEqual([link['value'] for link in answer['links'] if link['source'] == app.INDIVIDUALS_ID],
+                                 [400.3])
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = EMAIL
+            status, _, answer = self.flow()
+            self.assertEqual((status, answer), (200, json.loads(json.dumps(body))), 'a listed account gets it as built')
+
+    def comparison(self, query='', email=EMAIL):
+        return self.served.request('/api/comparison?id=published-reports' + query, headers={
+            'Host': HOST, 'Cf-Access-Jwt-Assertion': self.idp.token(email=email)})
+
+    @needs_openpyxl
+    def test_comparison_has_no_person_subject_unless_the_email_is_listed(self):
+        body = comparison_body(self.temp.name)
+        self.assertEqual({subject['kind'] for subject in body['subjects']},
+                         {'Industry', 'Company', 'Recipient', 'Candidate', 'Person'}, 'the fixture must carry a Person')
+        person = next(subject for subject in body['subjects'] if subject['kind'] == 'Person')
+        kept = [subject for subject in body['subjects'] if subject['kind'] != 'Person']
+        with patch.object(self.console, 'comparison', Mock(return_value=body), create=True) as reader, \
+                patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            for email in (EMAIL, 'stranger@example.test'):
+                status, _, answer = self.comparison(email=email)
+                self.assertEqual(status, 200)
+                # a recursive walk of every key and string: no employee's name, person id or Person subject id
+                leaks = [text for text in strings_of(answer) if text == 'Person' or any(piece in text for piece in (
+                    'Alex', 'PERSON:1', '"Person"'))]
+                self.assertEqual(leaks, [], email)
+                # company, industry, recipient and candidate subjects, and everything else, are as built
+                self.assertEqual(answer['subjects'], kept)
+                self.assertEqual({key: value for key, value in answer.items() if key != 'subjects'},
+                                 {key: value for key, value in body.items() if key != 'subjects'})
+                self.assertTrue(any(subject['kind'] == 'Company' for subject in answer['subjects']))
+            # a request that selects a Person subject is refused before anything is read
+            reader.reset_mock()
+            for query in ('&kind=Person', '&kind=person', '&subject=' + quote(person['id']),
+                          '&subjects=' + quote(person['id'])):
+                status, _, answer = self.comparison(query)
+                self.assertEqual((status, answer), (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}), query)
+            reader.assert_not_called()
+            self.assertEqual(self.comparison('&kind=Company')[0], 200)
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ' Someone@Example.test , ' + EMAIL.upper()
+            status, _, answer = self.comparison()
+            self.assertEqual((status, answer), (200, body), 'a listed account gets the body as built')
+            self.assertEqual(self.comparison('&kind=Person')[0], 200)
+            self.assertEqual(self.comparison('', 'stranger@example.test')[2]['subjects'], kept)
+
+    @needs_openpyxl
+    def test_a_header_with_any_person_word_is_refused_unless_the_email_is_listed(self):
+        path = Path(self.temp.name) / 'header-report.xlsx'
+        refused = ['Employee Name', 'Email', 'E-mail', 'Payee', 'Given Name', 'Contact', 'Phone', 'Telephone', 'Surname',
+                   'First Name', 'Last Name', 'Donor', 'Contributor', 'Mailing Address', 'Street 1', 'City', 'ZIP5',
+                   'Employer', 'Occupation', 'Job Title', 'Person Key', 'EmployeeName', 'Company Name', 'Employee Emails',
+                   # on the real '* Summary' and '<Company> View' sheets, the Top Contributor rows' contributor
+                   'Name / Recipient']
+        kept = ['Contributor Tier', 'Employee Tier', 'Employee', 'Employee %', 'Employee D', 'Employee R %',
+                'Contributors', 'Distinct Contributors', 'Total Giving', 'Candidate / Officeholder', 'Reference Key']
+        header_workbook(path, refused + kept)
+        sheet = lambda number, **headers: self.get(f'/api/report-data?id=r&index=0&sheet=S{number}', **headers)
+        with patch.object(self.console, 'report_path', Mock(return_value=path)), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            for number, header in enumerate(refused):
+                self.assertEqual(sheet(number)[:3:2], (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}), header)
+            for number, header in enumerate(kept, len(refused)):
+                status, _, body = sheet(number)
+                self.assertEqual((status, body['row_count']), (200, 1), header)
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = EMAIL
+            for number, header in enumerate(refused):
+                self.assertEqual(sheet(number)[0], 200, header)
+
     def test_json_bodies_carry_no_os_error_text_when_hosted(self):
         catalog = {'name': 'ok', 'note': "[Errno 2] No such file or directory: 'x'", 'rows': ['[WinError 3] gone', 'fine']}
         with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
@@ -1281,6 +1435,50 @@ class HostedStartup(unittest.TestCase):
         done = self.run_to_exit(self.environment(BIND_HOST='0.0.0.0'), '--read-only')
         self.assertEqual(done.returncode, 2, done.stderr)
         self.assertIn('ACCESS_AUD', done.stderr)
+
+    def run_main(self, bound, env, *, gate_check=None):
+        """server.main() in this process with everything past the bind stubbed (so that, without the bind check, it
+        runs on to serve_forever and touches nothing). Returns (the SystemExit code or None, stderr, the stand-ins)."""
+        server = SimpleNamespace(server_address=(bound, 1), serve_forever=Mock(), server_close=Mock())
+        argv = ['server.py', '--read-only', '--data-root', str(Path(self.temp.name) / 'data')]
+        stderr, code = io.StringIO(), None
+        with patch.dict(os.environ, env, clear=True), patch.object(sys, 'argv', argv), \
+                patch.object(app, 'console_server', return_value=server), patch.object(app, 'Console') as console, \
+                patch.object(app, 'redirect_state_writes'), patch('source_memo.install'), patch.object(app.os, 'chdir'), \
+                patch.object(app.Handler, 'access_cfg', app.Handler.access_cfg), \
+                patch.object(app.access_gate, 'assert_bind_consistent', gate_check or app.access_gate.assert_bind_consistent), \
+                contextlib.redirect_stderr(stderr), contextlib.redirect_stdout(io.StringIO()):
+            try:
+                app.main()
+            except SystemExit as stop:
+                code = stop.code
+        return code, stderr.getvalue(), SimpleNamespace(server=server, console=console)
+
+    def test_main_does_not_serve_when_the_address_bound_is_not_the_gates(self):
+        # not enforced, yet bound to every interface: the gate's own check, before a console exists
+        code, stderr, stubs = self.run_main('0.0.0.0', self.environment())
+        self.assertEqual(code, 2, stderr)
+        self.assertIn("access gate: bound to '0.0.0.0' but the access gate is not enforced", stderr)
+        stubs.console.assert_not_called()
+        stubs.server.serve_forever.assert_not_called()
+        stubs.server.server_close.assert_called_once()
+        # the same stand-in bound where the gate expects it serves
+        code, stderr, stubs = self.run_main('127.0.0.1', self.environment())
+        self.assertEqual((code, stderr), (None, ''))
+        stubs.server.serve_forever.assert_called_once()
+
+    @needs_crypto
+    def test_a_hosted_main_asks_the_gate_about_the_address_it_bound(self):
+        idp = Idp(self.temp.name)
+        env = self.environment(**idp.env(MENTAT_STATE_WRITE_ROOT=str(Path(self.temp.name) / 'state-write')))
+        refuse = Mock(side_effect=gate.AccessConfigError('bound to the wrong address'))
+        code, stderr, stubs = self.run_main('127.0.0.1', env, gate_check=refuse)
+        self.assertEqual((code, stderr), (2, 'access gate: bound to the wrong address\n'))
+        refuse.assert_called_once()
+        config, bound = refuse.call_args.args
+        self.assertEqual((config.enforced, bound), (True, '127.0.0.1'))
+        stubs.console.assert_not_called()
+        stubs.server.serve_forever.assert_not_called()
 
     def test_an_enforced_console_must_be_read_only(self):
         env = self.environment(ACCESS_ENFORCE='1', ACCESS_AUD=AUD, ACCESS_ISSUER=ISS,

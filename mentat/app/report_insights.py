@@ -96,17 +96,27 @@ def header_row(sheet):
     return -max(candidates)[1] if candidates else 1
 
 
-# Header names that identify a person, or where one gives from, in the report workbooks: Employee List (Person,
-# Person Key, Titles, Zips, Cities / States) and Cycle Exceptions, Contributions, Contributor Detail (Contributor,
-# Street 1, City, ZIP, Employer, Occupation). 'Contributor Tier', 'Employee Tier' and 'Name / Recipient' are
-# aggregate columns and do not match; 'Name' alone does.
-PERSON_HEADER = re.compile(r'\b(person|contributor|donor|address|street|city|cities|zip|zips|employer|occupation|titles?)\b'
-                           r'|^((first|last|full) )?name$')
+# A header is person-level (a person, or where one gives from) if it has any of these words: the report workbooks'
+# Employee List (Person, Person Key, Titles, Zips, Cities / States), Cycle Exceptions, Contributions and Contributor
+# Detail (Contributor, Street 1, City, ZIP, Employer, Occupation), and the names, e-mail, phone, address, payee and
+# contact columns another workbook may carry. Fail closed: a header not on AGGREGATE_HEADERS and with one of these
+# words is refused.
+PERSON_HEADER = re.compile(r'\b(?:names?|persons?|people|contributors?|donors?|employees?|payees?|contacts?|e ?mails?'
+                           r'|phones?|telephones?|address(?:es)?|streets?|cit(?:y|ies)|zips?|employers?|occupations?'
+                           r'|titles?|given|surnames?)\b')
+# The headers with one of those words that the real report workbooks (Mentat Complete Files, 2026-10-12) carry on
+# aggregate columns only, as header_row() reads them, lower-cased with everything but letters spaced out
+# ('Employee R %' is 'employee r'): the four-way tier label (Employee, Middle Management, Chief, Corporate) and the
+# per-tier giving columns of Master Overview, Company List and Recipient List (numbers), and the contributor counts
+# (whole numbers). 'Name / Recipient' is not here: on the Top Contributor rows of every '* Summary' and '<Company> View'
+# sheet it holds the contributor's name.
+AGGREGATE_HEADERS = frozenset({'contributor tier', 'employee tier', 'employee', 'employee d', 'employee r',
+                               'contributors', 'distinct contributors'})
 
 
 def person_header(value):
-    text = ' '.join(re.findall(r'[a-z0-9]+', str(value).lower()))
-    return text != 'contributor tier' and bool(PERSON_HEADER.search(text))
+    text = ' '.join(re.findall(r'[a-z]+', re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', str(value)).lower()))
+    return text not in AGGREGATE_HEADERS and bool(PERSON_HEADER.search(text))
 
 
 @lru_cache(maxsize=64)
