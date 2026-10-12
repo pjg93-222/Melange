@@ -9,6 +9,7 @@ from functools import lru_cache
 from contextlib import contextmanager
 import gzip
 import hashlib
+import importlib
 import io
 import json
 import os
@@ -98,6 +99,7 @@ from validate_industry_coverage import workbook_roster
 from collection_coverage import inspect as inspect_coverage, cycles_from
 from fec_key_store import load_keys, save_keys, environment_keys, status as key_status
 from runtime_inputs import copy_fec_sources
+import access_gate
 
 # Files this console serves. Hoisted out of the request handler so the build
 # identity below can hash exactly the set the browser can ask for.
@@ -480,6 +482,12 @@ def static_asset(file_stamp):
 # 'self', and nothing else in the policy moves.
 CONSOLE_CSP = ("default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; "
                "worker-src 'self'; connect-src 'self'; frame-ancestors 'none'")
+# Hosted mode: Cloudflare Access is enforced (access_gate.py, ACCESS_* environment). Access authenticates; the
+# console's per-process token no longer does, so it is never handed out. The page still insists on a session
+# token before it will POST, so it is given this fixed marker instead, and a POST must send it back: a cross-site
+# form or fetch cannot add the header without a CORS preflight, which this server never answers.
+HOSTED_SESSION_TOKEN = 'hosted-read-only'
+HOSTED_REFUSED = 'This route is not available on the hosted read-only console.'
 GEO_V2_DIR = Path(__file__).resolve().parent / 'geo' / 'v2'
 GEO_V2_ROUTE = re.compile(r'/geo/v2/((?:albers|wgs84|lookup)(?:/[A-Za-z0-9_@.-]+){1,4}\.(?:json|geojson))')
 BASEMAP_DIR = PROJECT / '.cache' / 'basemap'
@@ -2787,7 +2795,7 @@ def record_access(handler, kind, body, started):
         pass
 
 
-class Handler(BaseHTTPRequestHandler):
+class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
     # The page loads about 35 small files. Under HTTP/1.0 each was a new
     # connection, and with Nagle on, the header write and the body write
     # became two segments that tripped Windows' 200 ms delayed-ACK stall,
@@ -2795,9 +2803,28 @@ class Handler(BaseHTTPRequestHandler):
     # removes both; every response already carries a Content-Length.
     protocol_version = 'HTTP/1.1'
     disable_nagle_algorithm = True
+    access_app = 'mentat-console'
+    access_cfg = access_gate.AccessConfig()   # not enforced; main() installs the environment's
+    access_frame_options = 'DENY'             # CONSOLE_CSP already carries frame-ancestors 'none' (D-061)
 
     def log_message(self, *_):
         pass
+
+    def log_request(self, code='-', size='-'):
+        """Hosted: one audit line per answered request (who, method, route without query, status).
+        Everywhere else, silent as ever."""
+        if self.access_cfg.enforced:
+            sys.stderr.write(access_gate.audit_line(self.access_app, self.access_user, self.command, self.path,
+                                                    code if isinstance(code, int) else 0) + '\n')
+
+    def end_headers(self):
+        """Hosted: add the gate's security headers that this response has not already set."""
+        if self.access_cfg.enforced:
+            sent = {line.split(b':', 1)[0].strip().lower() for line in getattr(self, '_headers_buffer', ())}
+            for name, value in access_gate.security_headers(self.access_cfg, self.access_frame_options):
+                if name.lower().encode('latin-1') not in sent:
+                    self.send_header(name, value)
+        super().end_headers()
 
     def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None):
         content = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode() if content_type == "application/json" else value
@@ -2974,7 +3001,19 @@ class Handler(BaseHTTPRequestHandler):
                 pass
 
     def valid_host(self):
-        return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
+        host = self.headers.get("Host")
+        return (host in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
+                or (self.access_cfg.enforced and access_gate.host_ok(host, self.access_cfg)))
+
+    def valid_origin(self, origin):
+        port = self.server.server_port
+        return (origin in (f"http://localhost:{port}", f"http://127.0.0.1:{port}")
+                or (self.access_cfg.enforced
+                    and origin.lower() in {'https://' + host for host in self.access_cfg.allowed_hosts - access_gate.LOOPBACK}))
+
+    def session_token(self):
+        """What the page is told to send back: this console's token, or HOSTED_SESSION_TOKEN once hosted."""
+        return HOSTED_SESSION_TOKEN if self.access_cfg.enforced else self.server.app.token
 
     def scope_body(self, data, sources=None):
         """Resolve this body's industry, fill the legacy dataset, drop the key.
@@ -3008,12 +3047,20 @@ class Handler(BaseHTTPRequestHandler):
         return result
 
     def do_GET(self):
+        if self.access_cfg.enforced and not self.access_check():
+            return
         if not self.valid_host():
             return self.send({"error": "Local access only."}, 403)
         parsed = urlparse(self.path)
         query = parse_qs(parsed.query)
         app = self.server.app
         try:
+            if self.access_cfg.enforced:
+                if parsed.path in access_gate.HEALTH_ROUTES:
+                    return self.send({'status': 'ok'} if parsed.path == '/healthz'
+                                     else access_gate.version_payload(self.access_app))
+                if parsed.path == '/api/report':   # the raw workbook: a download
+                    return self.send({'error': HOSTED_REFUSED}, 403)
             if parsed.path == '/api/health':
                 return self.send({'application': 'MENTAT', 'project': str(PROJECT),
                                   'data_root': app.configured_root,
@@ -3031,14 +3078,14 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == "/api/session":
                 if query.get('light', ['0'])[0] == '1':
                     build = build_status(app, self.server.server_port)
-                    return self.send({'token':app.token, 'read_only':bool(getattr(app, 'read_only', False)),
+                    return self.send({'token':self.session_token(), 'read_only':bool(getattr(app, 'read_only', False)),
                                       'evidence_collection_available':True, 'api_version':2,
                                       'report_directory':str(app.report_directory), 'build': build, **build})
-                return self.send({"token": app.token, **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
+                return self.send({"token": self.session_token(), **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
             if parsed.path == '/api/contributions/session':
                 registry = snapshot_registry.registry(app.report_directory)
                 entry = industry_scope.from_query(registry, parsed.query)
-                return self.send({'token': app.token, 'read_only': bool(getattr(app, 'read_only', False)),
+                return self.send({'token': self.session_token(), 'read_only': bool(getattr(app, 'read_only', False)),
                                   'industry': entry['industry'] if entry else None,
                                   'industries': [{key: item[key] for key in ('industry','slug','available','build_stamp')}
                                                  for item in registry['snapshots']]})
@@ -3309,27 +3356,34 @@ class Handler(BaseHTTPRequestHandler):
             return self.send({"error": str(error)}, 400)
 
     def do_POST(self):
+        if self.access_cfg.enforced and not self.access_check():
+            return
         analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography',
                             '/api/insights/query', '/api/insights/records', '/api/forecast/project'}
-        if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/briefing'):
+        hosted = self.access_cfg.enforced
+        read_only = hosted or getattr(self.server.app, 'read_only', False)
+        if read_only and self.path.startswith('/api/studio/briefing'):
             self.discard_body()
             return self.send({'error': 'Read-only preview. Briefing changes are not saved.'}, 403)
-        if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/views'):
+        if read_only and self.path.startswith('/api/studio/views'):
             self.discard_body()
             return self.send({'error': 'Read-only preview. Save views from the main console.'}, 403)
-        if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/evidence-geocode'):
+        if read_only and self.path.startswith('/api/evidence-geocode'):
             self.discard_body()
             return self.send({'error': geocode.M_READ_ONLY}, 403)
-        # /api/export/pdf (figure_pdf.py) writes only a temporary file, so the read-only preview serves it.
-        if getattr(self.server.app, 'read_only', False) and self.path not in (
-                analytical_paths | {'/api/evidence-csv', '/api/evidence-files', '/api/export/pdf'}):
+        # /api/export/pdf (figure_pdf.py) writes only a temporary file, so the read-only preview serves it. A hosted
+        # console serves none of the three: /api/evidence-files lists folders, /api/evidence-csv reads any path it is
+        # given and takes uploads, and /api/export/pdf is a download.
+        if read_only and self.path not in (analytical_paths if hosted else
+                                           analytical_paths | {'/api/evidence-csv', '/api/evidence-files', '/api/export/pdf'}):
             self.discard_body()
-            return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
-        if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
+            return self.send({"error": HOSTED_REFUSED if hosted else
+                              "This preview is read-only while the original console manages collection."}, 403)
+        if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.session_token()):
             self.discard_body()
             return self.send({"error": "Refresh the app before continuing."}, 403)
         origin = self.headers.get("Origin")
-        if origin and origin not in (f"http://localhost:{self.server.server_port}", f"http://127.0.0.1:{self.server.server_port}"):
+        if origin and not self.valid_origin(origin):
             self.discard_body()
             return self.send({"error": "Local access only."}, 403)
         try:
@@ -3518,11 +3572,38 @@ class Handler(BaseHTTPRequestHandler):
 CONSOLE_LISTEN_BACKLOG = 128
 
 
-def console_server(port, handler=None):
+def redirect_state_writes(root):
+    """MENTAT_STATE_WRITE_ROOT: every cache the console writes while it serves moves under `root`, so the
+    checkout's state/ and the report folder can be mounted read-only. The inputs stay where they are:
+    prewarm.READ_ONLY_STATE (analytical indexes, accepted sources) and the rest of state/. Two small caches
+    that are also shipped inputs, the source proofs and the Census geography, are seeded into `root` once.
+    A missing analytical index is refused, as prewarm's own sandbox does, instead of built."""
+    import analysis_data, contribution_data, drawer_sidecars, glassbox_emit, prewarm
+    root = Path(root).resolve()
+    for module_name, attribute, relative in prewarm.STATE_REDIRECTS:
+        setattr(importlib.import_module(module_name), attribute, root / relative)
+    analysis_data.HINTS_PATH = root / 'prewarm' / 'hints.json'
+    contribution_geo.CACHE = root / 'geography' / 'census-v1'
+    drawer_sidecars.configure(state_root=root / 'drawer-sidecars', emit=False)
+    glassbox_emit.EVENTS_DIR = root / 'glassbox'
+    for relative in ('contribution-source-proofs', 'geography/census-v1'):
+        shipped, target = prewarm.DEFAULT_STATE_ROOT / relative, root / relative
+        if shipped.is_dir() and not target.exists():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(shipped, target)
+
+    def refuse_build(source, token, destination):
+        contribution_data._progress(token, status='error', failed_at=time.time(), message=prewarm.INDEX_REFUSED)
+
+    contribution_data._materialize = refuse_build
+    return root
+
+
+def console_server(port, handler=None, host='127.0.0.1'):
     """The console's listener: ThreadingHTTPServer with a deeper listen backlog.
     Built through the module's ThreadingHTTPServer name, bound after the backlog
     is set, so a test that replaces that name still gets its stand-in."""
-    server = ThreadingHTTPServer(("127.0.0.1", port), handler or Handler, bind_and_activate=False)
+    server = ThreadingHTTPServer((host, port), handler or Handler, bind_and_activate=False)
     server.request_queue_size = CONSOLE_LISTEN_BACKLOG
     try:
         server.server_bind()
@@ -3541,12 +3622,17 @@ def main():
     parser.add_argument("--rscript", default="")
     parser.add_argument("--read-only", action="store_true", help="Inspect reports without allowing mutations or collection")
     options = parser.parse_args()
+    access = access_gate.require_config_or_exit()
+    if access.enforced and not options.read_only:
+        sys.stderr.write("access gate: a hosted console (Cloudflare Access enforced) must run with --read-only\n")
+        sys.exit(2)
+    Handler.access_cfg = access
     data_root = Path(options.data_root).resolve()
     keys_file = str(Path(options.keys_file).resolve()) if options.keys_file else ''
     rscript = str(Path(options.rscript).resolve()) if options.rscript else ''
     reports = report_directory(PROJECT)
     os.chdir(reports)
-    server = console_server(options.port)
+    server = console_server(options.port, host=access.bind_host)
     server.app = Console(data_root, keys_file, rscript, options.read_only)
     server.app.port = options.port or server.server_port
     # One source discovery per stamp change, not per request (perf lane 2026-09-24).
@@ -3560,11 +3646,19 @@ def main():
     choice = os.environ.get('MENTAT_PREWARM', '').strip()
     own_root = data_root == (Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Mentat" / "console").resolve()
     warm = choice == '1' or (choice != '0' and own_root)
+    # MENTAT_STATE_WRITE_ROOT (see redirect_state_writes). Neither a hosted console nor one with redirected state
+    # warms: the warmer's own state and its calls back into the console are not redirected or authorised.
+    write_root = os.environ.get('MENTAT_STATE_WRITE_ROOT', '').strip()
+    if write_root:
+        redirect_state_writes(write_root)
+    elif access.enforced:
+        sys.stderr.write("mentat: hosted without MENTAT_STATE_WRITE_ROOT; caches will be written under the checkout's state/\n")
+    warm = warm and not (access.enforced or write_root)
     # Encoded Graph views and comparison flows persist across restarts in mentat/state/response-cache,
     # content-verified by every new process (perf lane 2026-09-24, cache). Like the warm caches, only
     # the console on the user's own data root writes there; set before the startup warm below, which
     # then refills memory from disk.
-    if own_root:
+    if own_root and not write_root:
         import response_cache
         response_cache.configure()
     analysis_data.HINTS_ENABLED = warm and not options.read_only
@@ -3579,7 +3673,8 @@ def main():
         # prepared in the background (flow_data.warm_cycles; MENTAT_FLOW_WARM=0 turns it off).
         import flow_data
         flow_data.WARM_CYCLES = True
-    print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)
+    print(f"Mentat app: http://127.0.0.1:{options.port}" if not access.enforced else
+          f"Mentat app (hosted, read-only): bind {access.bind_host or '*'}:{options.port}", flush=True)
     server.serve_forever()
 
 

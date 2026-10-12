@@ -17,7 +17,7 @@ import io
 import json
 import math
 import os
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import re
 import shutil
 import sqlite3
@@ -904,7 +904,7 @@ def stored_catalog(record, state='ready', reread=False, stale=False):
     # disk answers with it on the first listing and none has to be re-read for
     # a label that is a function of its own file name.
     filled['industry'] = (industry_of(filled.get('name'))
-                          or industry_of(Path(str(record.get('source_path') or '')).name))
+                          or industry_of(PureWindowsPath(str(record.get('source_path') or '')).name))
     filled['rows_read'] = int(record.get('rows_read') or catalog.get('row_count') or 0)
     filled['state'], filled['reread'], filled['stale'] = state, bool(reread), bool(stale)
     return filled

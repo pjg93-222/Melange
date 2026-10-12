@@ -16,6 +16,8 @@ import re
 import sqlite3
 import uuid
 
+from receipt_path import receipt_path
+
 PROJECT=Path(__file__).resolve().parents[1]
 ACCEPTED_ROOT=PROJECT/'state/accepted-report-sources'
 CACHE_ROOT=PROJECT/'state/contribution-source-proofs'
@@ -95,7 +97,7 @@ def _verify_cached(database_stamp,pointer_stamp,snapshot_stamp,current_hash,orig
     accepted=_read(pointer_stamp[0])
     if (accepted.get('status')!='verified' or accepted.get('industry')!=industry
             or tuple(sorted(accepted.get('cycles',[])))!=CYCLES or accepted.get('database_sha256')!=original_hash
-            or Path(accepted.get('snapshot','')).resolve()!=Path(snapshot_stamp[0])):
+            or receipt_path(accepted.get('snapshot','')).resolve()!=Path(snapshot_stamp[0])):
         raise ValueError('The accepted financial snapshot does not match the original published source scope.')
     if _hash(database_stamp)!=current_hash:raise ValueError('The recovered database changed while its source lineage was checked.')
     snapshot_hash=_hash(snapshot_stamp)
@@ -147,7 +149,7 @@ def verify(source):
     industry=source['industry'];slug=re.sub(r'[^a-z0-9]+','_',industry.lower()).strip('_')
     pointer=ACCEPTED_ROOT/slug/'2022-2024-2026/current.json'
     pointer_stamp=_stamp(pointer);accepted=_read(pointer)
-    snapshot=Path(accepted['snapshot']).resolve()
+    snapshot=receipt_path(accepted['snapshot']).resolve()
     if not snapshot.is_relative_to(ACCEPTED_ROOT.resolve()):raise ValueError('The accepted source snapshot is outside its preserved lineage directory.')
     database_stamp=_stamp(source['database']);snapshot_stamp=_stamp(snapshot)
     _quiescent(database_stamp[0]);_quiescent(snapshot_stamp[0])

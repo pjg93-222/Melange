@@ -31,6 +31,7 @@ sys.path.insert(0, str(PROJECT / 'tools'))
 from cross_reference_engine import analyze
 from run_cross_reference import coalesce_source_observations
 from cross_reference_store import EvidenceStore
+from receipt_path import receipt_path
 
 CACHE_ROOT = PROJECT / 'state' / 'contribution-analytics'
 VERSION = 3
@@ -257,7 +258,7 @@ def _sources(directory):
                         or not re.fullmatch(r'[a-f0-9]{64}', str(manifest.get('data_sha256', '')))
                         or _hash(payload) != manifest['data_sha256']):
                     raise ValueError('Cycle-specific report payload does not match its published scope and fingerprint.')
-            database = Path(metadata['database_path']).resolve()
+            database = receipt_path(metadata['database_path']).resolve()
             original_hash = db_hash
             hydration_path = None
             if not database.is_file():
@@ -267,7 +268,7 @@ def _sources(directory):
                 hydration=_json(hydration_path)
                 if hydration.get('source_sha256') != original_hash:
                     raise ValueError('Recovered source lineage does not match this workbook.')
-                database=Path(hydration['output']).resolve()
+                database=receipt_path(hydration['output']).resolve()
                 if not database.is_relative_to((PROJECT/'.cache').resolve()) or not database.is_file():
                     raise ValueError('The pinned recovered contribution database is unavailable.')
                 db_hash=_hash(database)

@@ -45,6 +45,7 @@ import threading
 import zipfile
 
 import contribution_data as data
+from receipt_path import receipt_path
 from report_identity import identity, companion_name, lineage_paths
 
 PATTERN = '* Industry Spending Overview*.xlsx'
@@ -166,7 +167,7 @@ def _discover(directory):
                 if data._json(manifest_path).get('database_sha256') != db_hash:
                     continue
                 watch('stat', str(payload))
-                database = data._payload_metadata(payload)['database_path']
+                database = str(receipt_path(data._payload_metadata(payload)['database_path']))
                 # Path(database).resolve().is_file(): stat() follows the same links. Only
                 # an existing database's resolved path is reported, so only then resolve.
                 if watch('stat', database)[0] == 'file':
@@ -178,7 +179,7 @@ def _discover(directory):
                 hydration = data._json(hydration_path)
                 if hydration.get('source_sha256') != db_hash:
                     continue
-                output = watch('real', hydration['output'])
+                output = watch('real', str(receipt_path(hydration['output'])))
                 if cache_root is None:
                     cache_root = watch('real', str(project / '.cache'))
                 if not Path(output).is_relative_to(cache_root) or watch('stat', output)[0] != 'file':

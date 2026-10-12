@@ -1,7 +1,7 @@
 """User-scoped Windows DPAPI storage. Never emit or log key values."""
 import argparse
 import ctypes
-from ctypes import wintypes
+import functools
 import json
 import hashlib
 import os
@@ -32,12 +32,18 @@ def environment_keys(environment=None):
     return normalize([env.get(k,'') for k in names])
 
 
-class Blob(ctypes.Structure):
-    _fields_=[('size',wintypes.DWORD),('data',ctypes.POINTER(ctypes.c_ubyte))]
+@functools.lru_cache(maxsize=None)
+def _windows():
+    """(wintypes, Blob), built on first use so this module also imports where there is no Windows."""
+    from ctypes import wintypes
+    class Blob(ctypes.Structure):
+        _fields_=[('size',wintypes.DWORD),('data',ctypes.POINTER(ctypes.c_ubyte))]
+    return wintypes,Blob
 
 
 def crypt(value, decrypt=False):
     if os.name!='nt':raise RuntimeError('The encrypted key store requires Windows.')
+    wintypes,Blob=_windows()
     buffer=ctypes.create_string_buffer(value)
     source=Blob(len(value),ctypes.cast(buffer,ctypes.POINTER(ctypes.c_ubyte)))
     output=Blob()
