@@ -149,9 +149,19 @@ without `--read-only` or without `MENTAT_STATE_WRITE_ROOT` (exit 2), it serves o
 `Employee List` and `Cycle Exceptions` kind of sheet) only to an Access email listed in
 `MENTAT_DONOR_ROW_EMAILS`, and `MENTAT_STATE_WRITE_ROOT` moves the caches it writes and refuses every other write
 under the checkout or the report folder (`requirements-hosted.in` lists its dependencies). `/api/flow` drops the
-same person-level keys from its records (`FLOW_PERSON_KEYS`, counterparty and the filing pointers included) for an
-email not listed there, and a hosted cached body is scrubbed of server paths and OSError text like any other. With
-none of those set nothing changes.
+same person-level keys from its records (`FLOW_PERSON_KEYS`, counterparty, the filing pointers and the free-text
+`purpose` included) for an email not listed there, and every hosted JSON body is scrubbed of server paths and OSError
+text. With none of those set nothing changes.
+
+Decision (Claude's default, pending Paul's governance ruling): a hosted viewer who is not in
+`MENTAT_DONOR_ROW_EMAILS` learns no individual contributor's identity from `/api/flow`
+(`without_individual_donors` in `server.py`, applied to the response only; `flow_data.py` is unchanged). Every
+individual donor node (`donor:<NAME KEY>` with FEC entity type IND, or untyped with a "LAST, FIRST" name: the same
+test `flow_data.committee_flow` uses to draw a person) becomes one `donor:individuals` node labelled "Individual
+contributors (N)" with its amounts summed and no name as filed or other per-person field; the links into it are
+summed, so every total is unchanged. Companies, PACs, committees and the unitemized node stay as built. The
+"Other" bucket keeps its label and `member_count` but not its member list, and the refunded sink's details are one
+generic sentence. A listed email and local mode get the body as built.
 
 Startup self-check (by hand, no code): the portable index tokens name each data input by its relative path, size and
 `mtime_ns`. Copy the report folder and the contribution sources to the host in a way that keeps sub-second

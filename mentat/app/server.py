@@ -564,8 +564,9 @@ def without_os_error_text(value):
 # M1's person-level query fields in that body (PERSON_LEVEL_FIELDS: contributor, street, city, ZIP, employer,
 # occupation, date, every AUDIT and RAW field, source_url among them), nor the record's own names for them:
 # counterparty (the contributor), zip, and the row pointers sub_id and transaction_id (source_id and
-# reported_transaction_id there). 'state' and the committee and candidate ids are aggregates and stay.
-FLOW_PERSON_KEYS = PERSON_LEVEL_FIELDS | {'counterparty', 'zip', 'sub_id', 'transaction_id'}
+# reported_transaction_id there), nor purpose (free text that can name a payee). 'state' and the committee and
+# candidate ids are aggregates and stay.
+FLOW_PERSON_KEYS = PERSON_LEVEL_FIELDS | {'counterparty', 'zip', 'sub_id', 'transaction_id', 'purpose'}
 
 
 def without_person_keys(value):
@@ -575,6 +576,68 @@ def without_person_keys(value):
     if isinstance(value, list):
         return [without_person_keys(item) for item in value]
     return value
+
+
+# Hosted /api/flow, same viewers: no individual contributor's identity at all (Claude's default pending Paul's
+# governance ruling). Every individual donor node becomes the one aggregate node below; the "Other" bucket keeps its
+# count but not its member names; the refunded sink's text names no one.
+INDIVIDUALS_ID = 'donor:individuals'
+REFUNDS_HIDDEN = 'Refunds to individual contributors are not itemized on the hosted console.'
+
+
+def is_individual_donor(node):
+    """flow_data.committee_flow's own reading of a donor node as a person: FEC entity type IND, or no type and a
+    "LAST, FIRST" name. Companies, committees and the unitemized node are not."""
+    entity = node.get('entity') or ''
+    return (node.get('kind') == 'donor' and str(node.get('id')).startswith('donor:') and not node.get('unitemized')
+            and (entity == 'IND' or (not entity and ',' in (node.get('name_as_filed') or ''))))
+
+
+def without_individual_donors(body):
+    """A /api/flow body with its individual donor nodes merged into one aggregate node (amounts summed, the links
+    repointed and summed, every per-person field dropped), the "Other" bucket's member list and the refunded sink's
+    details replaced by counts and a generic sentence. Totals, committees and everything else are as built."""
+    from flow_data import EVIDENCE_LIMIT
+    people = [node for node in body.get('nodes', []) if is_individual_donor(node)]
+    ids = {node['id'] for node in people}
+    nodes = []
+    for node in body.get('nodes', []):
+        if node['id'] in ids:
+            if node is people[0]:
+                nodes.append({'id': INDIVIDUALS_ID, 'stage': node.get('stage', 0),
+                              'label': f'Individual contributors ({len(people)})', 'kind': 'donor',
+                              'contribution': all(item.get('contribution', True) for item in people),
+                              'value_in': round(sum(item.get('value_in', 0) for item in people), 2),
+                              'value_out': round(sum(item.get('value_out', 0) for item in people), 2)})
+            continue
+        node = dict(node)
+        if node.get('bucket') == 'other' and any(str(member.get('id')).startswith('donor:')
+                                                 for member in node.get('members', [])):
+            node.pop('members')                      # member_count stays
+        if node.get('balance') == 'refunded' and 'details' in node:
+            node['details'] = [REFUNDS_HIDDEN]
+        nodes.append(node)
+    links, repointed = [], {}
+    for link in body.get('links', []):
+        if link['source'] not in ids and link['target'] not in ids:
+            links.append(link)
+            continue
+        link = {**link, 'source': INDIVIDUALS_ID if link['source'] in ids else link['source'],
+                'target': INDIVIDUALS_ID if link['target'] in ids else link['target']}
+        key = (link['source'], link['target'], link['kind'])
+        if key not in repointed:
+            repointed[key] = link
+            links.append(link)
+            continue
+        # ponytail: group()'s merge without its 'committee' rule (a donor receipt link has none); copy it if one ever does
+        merged = repointed[key]
+        merged['value'] = round(merged['value'] + link['value'], 2)
+        merged['rows'] = merged.get('rows', 0) + link.get('rows', 0)
+        if merged.get('evidence') or link.get('evidence'):
+            merged['evidence'] = (merged.get('evidence', []) + link.get('evidence', []))[:EVIDENCE_LIMIT]
+        if link.get('date_unverified'):
+            merged['date_unverified'] = True
+    return {**body, 'nodes': nodes, 'links': links}
 
 
 GEO_V2_DIR = Path(__file__).resolve().parent / 'geo' / 'v2'
@@ -2917,7 +2980,7 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
 
     def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None):
         if self.access_cfg.enforced and isinstance(value, (dict, list)):
-            value = without_server_paths(value)   # hosted: no absolute server path leaves in any JSON body
+            value = without_os_error_text(without_server_paths(value))   # hosted: no server path or OSError text in any JSON body
         content = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode() if content_type == "application/json" else value
         compressible = content_type.startswith(('application/json', 'text/', 'image/svg+xml'))
         compressed = compressible and status != 304 and len(content) >= 2048 and accepts_gzip(self.headers.get('Accept-Encoding'))
@@ -3335,7 +3398,7 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 except flow_data.FlowRefused as error:
                     return self.send(error.body(), 409)
                 if self.access_cfg.enforced and not donor_rows_allowed(self.access_user):
-                    body = without_person_keys(body)
+                    body = without_person_keys(without_individual_donors(body))
                 return self.send(body)
             if parsed.path == '/api/evidence-job':
                 identifier = query.get('id', [''])[0]

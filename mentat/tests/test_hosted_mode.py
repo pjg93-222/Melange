@@ -13,6 +13,7 @@ public JWKS is written (to a temp dir). The enforced-mode tests skip without `cr
 """
 import base64
 import contextlib
+from decimal import Decimal
 import hashlib
 import http.client
 import inspect
@@ -198,6 +199,70 @@ def flow_body():
                        'committee_id': 'C00000001', 'state': 'ZZ', 'value_in': 250.0, 'value_out': 250.0}],
             'links': [link, {**link, 'evidence': [wider]}], 'routes': [{'committee': 'C00000001', 'value': 250.0}],
             'totals': {'in': 250.0}, 'coverage': {'through': '2024-12-31'}, 'deep': {'records': [wider]}}
+
+
+def strings_of(value):
+    """Every dict key and string value at any depth."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield key
+            yield from strings_of(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from strings_of(item)
+    elif isinstance(value, str):
+        yield value
+
+
+def individuals_flow_body():
+    """A /api/flow-shaped body with named individuals among its donors, fake values only: two individuals (one typed
+    IND, one untyped "LAST, FIRST", the two kinds flow_data draws as people), a company, a PAC and the unitemized node
+    (none of them people), an "Other" bucket that lists named donors, and a refunded sink whose text names a
+    contributor. Every receipt link carries a real evidence record whose purpose names a payee."""
+    from decimal import Decimal
+    import downstream
+    import flow_data
+
+    def receipt(source, value, name):
+        record = downstream.filing_record({
+            'sub_id': '1', 'transaction_id': 'T1', 'image_number': '202401019999', 'contribution_receipt_amount': value,
+            'contribution_receipt_date': '2024-01-02', 'contributor_name': name, 'contributor_city': 'TESTVILLE',
+            'contributor_state': 'ZZ', 'contributor_zip': '00000', 'expenditure_description': f'Paid {name} for consulting'})
+        return flow_data._link_out({'source': source, 'target': 'committee:C00000001', 'value': Decimal(str(value)),
+                                    'kind': 'receipt', 'rows': 1, 'evidence': [record]})
+
+    donor = lambda ident, label, value, **fields: {'id': 'donor:' + ident, 'stage': 0, 'label': label, 'kind': 'donor',
+                                                   'contribution': True, 'value_in': 0.0, 'value_out': value, **fields}
+    return {
+        'version': 1,
+        'nodes': [
+            {'id': 'committee:C00000001', 'stage': 1, 'label': 'Example PAC', 'kind': 'committee', 'root': True,
+             'committee_id': 'C00000001', 'name_as_filed': 'EXAMPLE PAC', 'state': 'ZZ', 'value_in': 1000.37,
+             'value_out': 1000.37},
+            donor('TEST PERSON A', 'Test Person A', 100.1, name_as_filed='TEST PERSON A', entity='IND', held=5.5,
+                  held_kinds=['stock']),
+            donor('PERSON JANE', 'Jane Person', 200.2, name_as_filed='PERSON, JANE'),
+            donor('EXAMPLE CORP', 'Example Corp', 300.03, name_as_filed='EXAMPLE CORP', entity='ORG'),
+            donor('SAMPLE PAC', 'Sample PAC', 150.0, name_as_filed='SAMPLE PAC', entity='PAC'),
+            donor('unitemized', 'Unitemized contributions', 50.04, unitemized=True),
+            {'id': 'other:0', 'stage': 0, 'label': 'All other contributors', 'kind': 'bucket', 'bucket': 'other',
+             'member_count': 2, 'value_in': 0.0, 'value_out': 200.0,
+             'members': [{'id': 'donor:TEST PERSON C', 'label': 'Test Person C', 'kind': 'donor', 'value': 120.0},
+                         {'id': 'donor:TEST PERSON D', 'label': 'Test Person D', 'kind': 'donor', 'value': 80.0}]},
+            {'id': 'balance:refunded:1', 'stage': 1, 'label': 'Refunded to donors', 'kind': 'balance',
+             'balance': 'refunded', 'value_in': 50.0, 'value_out': 0.0,
+             'details': ["$50.00 in negative receipts from 1 contributor beyond their receipts in this window: "
+                         "Test Person E $50.00 (line 17)"]}],
+        'links': [receipt('donor:TEST PERSON A', 100.1, 'TEST PERSON A'), receipt('donor:PERSON JANE', 200.2, 'PERSON, JANE'),
+                  receipt('donor:EXAMPLE CORP', 300.03, 'EXAMPLE CORP'), receipt('donor:SAMPLE PAC', 150.0, 'SAMPLE PAC'),
+                  {'source': 'donor:unitemized', 'target': 'committee:C00000001', 'value': 50.04, 'kind': 'receipt', 'rows': 0},
+                  receipt('other:0', 200.0, 'TEST PERSON C'),
+                  {'source': 'committee:C00000001', 'target': 'balance:refunded:1', 'value': 50.0, 'kind': 'operating',
+                   'rows': 0}],
+        'routes': [{'committee': 'C00000001', 'value': 50.0}], 'totals': {'donors': 1000.37, 'refunds_to_donors': 50.0},
+        'coverage': {'through': '2024-12-31'},
+        'notes': [{'key': 'refunds_to_donors', 'text': 'Refunds to donors $50.00: 1 contributor whose receipts in this '
+                                                       'window net below zero (negative entries as filed); not drawn as donors'}]}
 
 
 CACHED_BODY = {'sheet': 'Sources', 'rows': [['Company', '/srv/mentat/report.xlsx', 5], ['Other', 'C:\\Users\\x\\r.xlsx', 6]],
@@ -411,6 +476,18 @@ class DefaultModeIsUnchanged(unittest.TestCase):
         with patch('flow_data.flow', return_value=body):
             status, _, answer = self.plain.request('/api/flow?root=industry&cycle=2024')
         self.assertEqual((status, answer), (200, json.loads(json.dumps(body))))
+
+    def test_local_flow_keeps_its_individual_contributors(self):
+        body = individuals_flow_body()
+        with patch('flow_data.flow', return_value=body):
+            status, _, answer = self.plain.request('/api/flow?root=industry&cycle=2024')
+        self.assertEqual((status, answer), (200, json.loads(json.dumps(body))))
+        self.assertIn('TEST PERSON A', json.dumps(answer))
+
+    def test_local_json_bodies_keep_their_os_error_text(self):
+        catalog = {'note': "[Errno 2] No such file or directory: 'x'", 'rows': ['[WinError 3] gone']}
+        with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
+            self.assertEqual(self.plain.request('/api/reports?id=a')[2], catalog)
 
     def test_local_cached_bodies_and_geography_errors_are_sent_as_they_are(self):
         entry = response_cache.from_value(CACHED_BODY)
@@ -825,8 +902,9 @@ class HostedMode(unittest.TestCase):
     def test_flow_has_no_person_level_key_unless_the_email_is_listed(self):
         body = flow_body()
         self.assertTrue(set(keys_of(body)) & app.FLOW_PERSON_KEYS, 'the fixture must carry what is to be stripped')
-        # amounts, committee ids and the aggregates (state) stay; the evidence keeps its amount and purpose
-        kept = {'amount': 250.0, 'purpose': 'Test purpose'}
+        # amounts, committee ids and the aggregates (state) stay; the evidence keeps its amount (purpose is free text
+        # that can name a payee: it goes)
+        kept = {'amount': 250.0}
         kept_wide = {**kept, 'state': 'ZZ'}
         with patch('flow_data.flow', return_value=body), patch.dict(os.environ):
             os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
@@ -844,6 +922,63 @@ class HostedMode(unittest.TestCase):
             status, _, answer = self.flow()
             self.assertEqual((status, answer), (200, json.loads(json.dumps(body))), 'a listed account gets the body as built')
             self.assertEqual(self.flow('stranger@example.test')[2]['links'][0]['evidence'], [kept])
+
+    def test_flow_names_no_individual_contributor_unless_the_email_is_listed(self):
+        body = individuals_flow_body()
+        before = json.dumps(body)
+        into = lambda flow: sum(Decimal(str(link['value'])) for link in flow['links']
+                                if link['target'] == 'committee:C00000001')
+        with patch('flow_data.flow', return_value=body), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            for email in (EMAIL, 'stranger@example.test'):
+                status, _, answer = self.flow(email)
+                self.assertEqual(status, 200)
+                # a recursive walk of every key and string: no individual's id, label, name as filed, payee or refund text
+                leaks = [text for text in strings_of(answer) if any(piece in text.upper() for piece in (
+                    'TEST PERSON', 'PERSON, JANE', 'JANE PERSON', 'CONSULTING')) or text in ('purpose', 'held')]
+                self.assertEqual(leaks, [], email)
+                self.assertEqual({text for text in strings_of(answer) if text.startswith('donor:')},
+                                 {app.INDIVIDUALS_ID, 'donor:EXAMPLE CORP', 'donor:SAMPLE PAC', 'donor:unitemized'})
+                nodes = {node['id']: node for node in answer['nodes']}
+                self.assertEqual(list(nodes), ['committee:C00000001', app.INDIVIDUALS_ID, 'donor:EXAMPLE CORP',
+                                               'donor:SAMPLE PAC', 'donor:unitemized', 'other:0', 'balance:refunded:1'])
+                # one aggregate node: no per-person field, amounts summed to the cent
+                self.assertEqual(nodes[app.INDIVIDUALS_ID], {
+                    'id': app.INDIVIDUALS_ID, 'stage': 0, 'label': 'Individual contributors (2)', 'kind': 'donor',
+                    'contribution': True, 'value_in': 0.0, 'value_out': 300.3})
+                # committees, companies, PACs and the unitemized node are as built
+                original = {node['id']: node for node in body['nodes']}
+                for ident in ('committee:C00000001', 'donor:EXAMPLE CORP', 'donor:SAMPLE PAC', 'donor:unitemized',
+                              'balance:refunded:1'):
+                    expected = dict(original[ident], **({'details': [app.REFUNDS_HIDDEN]} if 'details' in original[ident] else {}))
+                    self.assertEqual(nodes[ident], expected, ident)
+                # the Other bucket keeps its label and count, not its members
+                self.assertEqual(nodes['other:0'], {k: v for k, v in original['other:0'].items() if k != 'members'})
+                # links are repointed and summed: what flows into the committee is what was built, and rows add up
+                self.assertEqual(into(answer), into(body))
+                self.assertEqual(into(answer), Decimal('1000.37'))
+                link = next(link for link in answer['links'] if link['source'] == app.INDIVIDUALS_ID)
+                self.assertEqual((link['target'], link['kind'], link['value'], link['rows']),
+                                 ('committee:C00000001', 'receipt', 300.3, 2))
+                self.assertEqual(link['evidence'], [{'amount': 100.1}, {'amount': 200.2}])
+                self.assertEqual(len(answer['links']), len(body['links']) - 1)
+                # everything outside nodes and links is as built
+                self.assertEqual({k: v for k, v in answer.items() if k not in ('nodes', 'links')},
+                                 {k: v for k, v in body.items() if k not in ('nodes', 'links')})
+            self.assertEqual(json.dumps(body), before, 'the builder\'s own body is not changed')
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ' Someone@Example.test , ' + EMAIL.upper()
+            status, _, answer = self.flow()
+            self.assertEqual(status, 200)
+            self.assertEqual(json.dumps(answer, ensure_ascii=False, separators=(',', ':')),
+                             json.dumps(body, ensure_ascii=False, separators=(',', ':')),
+                             'a listed account gets the body as built, byte for byte')
+
+    def test_json_bodies_carry_no_os_error_text_when_hosted(self):
+        catalog = {'name': 'ok', 'note': "[Errno 2] No such file or directory: 'x'", 'rows': ['[WinError 3] gone', 'fine']}
+        with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
+            status, _, body = self.get('/api/reports?id=a')
+        self.assertEqual((status, body), (200, {'name': 'ok', 'note': app.HOSTED_IO_ERROR,
+                                                'rows': [app.HOSTED_IO_ERROR, 'fine']}))
 
     def test_a_cached_body_is_scrubbed_when_hosted(self):
         entry = response_cache.from_value(CACHED_BODY)
