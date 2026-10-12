@@ -287,10 +287,13 @@ def run(name, run_id, extra, env=None, dry_run=False):
 
 
 def _host(path, maps):
-    for container, host in maps:
-        if str(path).startswith(container):
-            return Path(host + str(path)[len(container):])
-    return Path(path)
+    """The host path of a container path: the longest mapped prefix that ends on a path boundary (a mount nested under another wins)."""
+    text = str(path)
+    hits = [(container, host) for container, host in maps if text == container or text.startswith(container.rstrip('/') + '/')]
+    if not hits:
+        return Path(path)
+    container, host = max(hits, key=lambda pair: len(pair[0]))
+    return Path(host + text[len(container):])
 
 
 def verify(receipt, job, run_id, maps=()):

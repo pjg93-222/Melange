@@ -9,6 +9,7 @@
 #     ever created on the host by Docker (create_host_path: false).
 # Host paths arrive as forward-slash variables from run_job.ps1: DIGEST, MENTAT_HOST (C:/Users/pgoff/Mentat), LOCALAPPDATA_HOST,
 # GLASSBOX_HOST are required; the rest only for the job that mounts them (an unset one fails that job with "bind source does not exist").
+# ANCHORS_OUT_HOST, when set, replaces the live state/giving-anchors folder as the anchors job's output (a parity run writes to scratch).
 name: mentat-compute
 
 x-job: &job
@@ -54,7 +55,7 @@ services:
     cpus: 2
     volumes:
       - *m-mentat
-      - {type: bind, source: "${MENTAT_HOST}/mentat/state/giving-anchors", target: /mentat/mentat/state/giving-anchors, bind: {create_host_path: false}}
+      - {type: bind, source: "${ANCHORS_OUT_HOST:-${MENTAT_HOST}/mentat/state/giving-anchors}", target: /mentat/mentat/state/giving-anchors, bind: {create_host_path: false}}
       - *m-reports
       - {type: bind, source: "${LOCALAPPDATA_HOST}/Melange", target: /localappdata/Melange, read_only: true, bind: {create_host_path: false}}
       - *m-receipts

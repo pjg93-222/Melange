@@ -180,6 +180,13 @@ class JobTests(Temp):
         page.unlink()
         self.assertTrue(any('changed or missing' in p for p in cj.verify(receipt, 'pocket-build', 'pocket-1')))
 
+    def test_verify_maps_a_container_path_to_its_longest_mounted_prefix_on_a_path_boundary(self):
+        maps = [('/mentat', 'C:/live'), ('/mentat/mentat/state/giving-anchors', 'D:/scratch'), ('/reports', 'C:/r')]
+        self.assertEqual(cj._host('/mentat/mentat/state/giving-anchors/a.json', maps), Path('D:/scratch/a.json'))
+        self.assertEqual(cj._host('/mentat/mentat/state/other/a.json', maps), Path('C:/live/mentat/state/other/a.json'))
+        self.assertEqual(cj._host('/mentat2/x', maps), Path('/mentat2/x'))                    # not a path boundary: unmapped
+        self.assertEqual(cj._host('/reports', maps), Path('C:/r'))
+
     def test_pocket_build_refuses_to_rewrite_the_template_in_place(self):
         with self.assertRaises(cj.JobError):
             self.run_job('pocket-build', 'pocket-2', ['--data', 'x.json'])
@@ -205,6 +212,17 @@ class JobTests(Temp):
         self.assertEqual(self.run_job('anchors', 'anchors-bad', extra, env), 1)
         record = json.loads((self.base / 'world' / 'receipts' / 'anchors-bad.json').read_text())
         self.assertEqual((record['status'], record['outputs']), ('failed', []))
+
+    def test_the_runbook_table_matches_the_job_table(self):
+        rows = {}
+        for line in (ROOT / 'COMPUTE.md').read_text(encoding='utf-8').splitlines():
+            cells = [c.strip() for c in line.strip().strip('|').split('|')]
+            if line.startswith('| `') and len(cells) == 6:
+                rows[cells[0].strip('`')] = cells
+        self.assertEqual(sorted(rows), sorted(cj.JOBS))
+        for name, job in cj.JOBS.items():
+            _, _, network, keys, cap, service = rows[name]
+            self.assertEqual((network != 'none', keys == 'yes', cap, service.strip('`')), (job.network, job.keys, str(job.minutes) + ' min', name), name)
 
     def test_the_event_command_writes_a_glass_box_event(self):
         with patch.object(cj.glassbox_emit, 'EVENTS_DIR', self.base / 'gb'):

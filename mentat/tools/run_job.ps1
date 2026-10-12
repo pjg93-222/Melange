@@ -16,7 +16,7 @@
   parity runs and Paul's go; the two Windows tasks are not touched by this script (mentat\COMPUTE.md).
 
   Optional caller environment (forward or back slashes): REPORTS_HOST, LOO_HOST, CHE_HOST, ZIPC_HOST, COLLECT_HOST, EVIDENCE_HOST,
-  POCKET_IN_HOST, POCKET_OUT_HOST (the host folders the job that names them mounts), GLASSBOX_EVENTS_DIR, MENTAT_REPORT_DIRECTORY.
+  POCKET_IN_HOST, POCKET_OUT_HOST, ANCHORS_OUT_HOST (the host folders the job that names them mounts), GLASSBOX_EVENTS_DIR, MENTAT_REPORT_DIRECTORY.
 
 .PARAMETER JobArgs
   Arguments after the `--` of compute_job.py run. An array: from a console `-JobArgs '--industry','Banking'`. Under `powershell -File` a
@@ -144,7 +144,8 @@ $hosts = [ordered]@{
 if ($Job -in 'anchors', 'refit-detect', 'refit-parity', 'refit' -and -not $env:REPORTS_HOST) {
   $hosts['REPORTS_HOST'] = ConvertTo-Slash (Resolve-MentatReportDirectory -ProjectRoot $projectRoot)
 }
-$containerOf = [ordered]@{ REPORTS_HOST = '/reports'; COLLECT_HOST = '/collect'; EVIDENCE_HOST = '/evidence'; POCKET_IN_HOST = '/work/in'; POCKET_OUT_HOST = '/work/out' }
+$containerOf = [ordered]@{ REPORTS_HOST = '/reports'; COLLECT_HOST = '/collect'; EVIDENCE_HOST = '/evidence'; POCKET_IN_HOST = '/work/in'; POCKET_OUT_HOST = '/work/out'
+                           ANCHORS_OUT_HOST = '/mentat/mentat/state/giving-anchors' }
 foreach ($name in @($containerOf.Keys) + 'LOO_HOST', 'CHE_HOST', 'ZIPC_HOST') {
   $given = [Environment]::GetEnvironmentVariable($name)
   if ($given) { $hosts[$name] = ConvertTo-Slash $given }

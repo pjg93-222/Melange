@@ -133,6 +133,11 @@ class RunJobTests(unittest.TestCase):
         self.assertEqual(plan['environment']['POCKET_OUT_HOST'], 'C:/out dir')
         self.assertIn('/work/out=C:/out dir', plan['verify_maps'])
 
+    def test_a_scratch_output_for_the_anchors_job_is_passed_through_and_mapped_for_verification(self):
+        plan = json.loads(self.wrapper('-Job', 'anchors', '-RunId', 'plan-5', '-PlanOnly', env={'ANCHORS_OUT_HOST': 'D:/scratch/anchors-B/'}).stdout)
+        self.assertEqual(plan['environment']['ANCHORS_OUT_HOST'], 'D:/scratch/anchors-B')
+        self.assertIn('/mentat/mentat/state/giving-anchors=D:/scratch/anchors-B', plan['verify_maps'])
+
     def test_job_arguments_follow_the_double_dash_as_separate_arguments(self):
         command = ['-Command', "& '%s' -Job pac-evidence -RunId plan-4 -PlanOnly -PythonPath '%s' -ImageLock '%s' -JobArgs '--output','C:\\x y\\out','--company','X'"
                    % (SCRIPT, sys.executable, self.lock)]
@@ -252,6 +257,15 @@ class ComposeConfigTests(unittest.TestCase):
             done = self.config({k: v for k, v in self.HOSTS.items() if k != name})
             self.assertNotEqual(done.returncode, 0, name)
             self.assertIn(name, done.stderr)
+
+    def test_the_anchors_output_mount_defaults_to_the_live_folder_and_moves_with_ANCHORS_OUT_HOST(self):
+        def output_source(env):
+            done = self.config({**self.HOSTS, **env})
+            self.assertEqual(done.returncode, 0, done.stderr)
+            mounts = json.loads(done.stdout)['services']['anchors']['volumes']
+            return next(m['source'] for m in mounts if m['target'] == '/mentat/mentat/state/giving-anchors').replace(chr(92), '/')
+        self.assertEqual(output_source({}), 'C:/m/mentat/state/giving-anchors')
+        self.assertEqual(output_source({'ANCHORS_OUT_HOST': 'D:/scratch/B'}), 'D:/scratch/B')
 
     def test_the_keys_secret_is_the_staged_file_when_given(self):
         done = self.config({**self.HOSTS, 'FEC_KEYS_FILE': 'C:/run/x/fec_api_keys'})
