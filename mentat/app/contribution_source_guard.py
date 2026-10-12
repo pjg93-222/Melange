@@ -153,8 +153,10 @@ def verify(source):
     if not snapshot.is_relative_to(ACCEPTED_ROOT.resolve()):raise ValueError('The accepted source snapshot is outside its preserved lineage directory.')
     database_stamp=_stamp(source['database']);snapshot_stamp=_stamp(snapshot)
     _quiescent(database_stamp[0]);_quiescent(snapshot_stamp[0])
+    # The code half of the proof key reads CRLF as LF, as the index token does: every checkout names the same proof.
+    import contribution_data as data
     proof=_verify_cached(database_stamp,pointer_stamp,snapshot_stamp,source['database_sha256'],
-                         source['original_database_sha256'],industry,_hash(LOADED_ALGORITHM_STAMP),str(CACHE_ROOT))
+                         source['original_database_sha256'],industry,data._rule_digest_stamped(LOADED_ALGORITHM_STAMP),str(CACHE_ROOT))
     # A WAL can appear without changing the database-file stamp or the LRU key.
     _quiescent(database_stamp[0]);_quiescent(snapshot_stamp[0])
     return proof

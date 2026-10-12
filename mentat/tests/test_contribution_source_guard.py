@@ -113,6 +113,16 @@ class RecoveredSourceGuardTests(unittest.TestCase):
         with patch.object(guard,'LOADED_ALGORITHM_STAMP',('old-code',0,0,0)):
             with self.assertRaisesRegex(ValueError,'Restart the app'):guard.verify(self.source)
 
+    def test_proof_key_names_the_code_by_content_not_line_endings(self):
+        def token(body,newline):
+            copy=self.root/('algorithm-%d.py'%len(list(self.root.glob('algorithm-*.py'))))
+            copy.write_bytes(body.replace('\n',newline).encode());guard._verify_cached.cache_clear()
+            with patch.object(guard,'__file__',str(copy)),patch.object(guard,'LOADED_ALGORITHM_STAMP',guard._stamp(copy)):
+                return guard.verify(self.source)['proof_token']
+        lf=token('A=1\nB=2\n','\n')
+        self.assertEqual(token('A=1\nB=2\n','\r\n'),lf)
+        self.assertNotEqual(token('A=1\nB=3\n','\n'),lf)
+
     def test_original_database_fingerprint_is_checked_on_every_source_epoch(self):
         original={**self.source,'hydration_manifest':None,'original_database_sha256':self.source['database_sha256']}
         self.assertTrue(guard.verify(original)['full_financial_universe_preserved'])
