@@ -165,8 +165,24 @@ whole words, plurals included, camelCase split, digits ignored). Only the header
 excepted, each checked against the real report workbooks: the tier label (`Contributor Tier`, `Employee Tier`), the
 per-tier giving columns (`Employee`, `Employee %`, `Employee D`, `Employee R %`) and the contributor counts
 (`Contributors`, `Distinct Contributors`). `Name / Recipient` is not excepted: on the Top Contributor rows of the
-`* Summary` and `<Company> View` sheets it holds the contributor's name (and `Reference Key` the name key), so those
-sheets are refused to an unlisted email until a decision is made to show them with those rows redacted.
+`* Summary` and `<Company> View` sheets it holds the contributor's name (and `Reference Key` the name key); those sheets
+are redacted, not refused (next paragraph). Every other sheet with a person-level header is refused.
+
+Decision (Claude's default, pending Paul's governance ruling): a hosted viewer who is not in
+`MENTAT_DONOR_ROW_EMAILS` gets the `* Summary` and `<Company> View` sheets with their contributors' names blanked, not
+a 403. `report_insights.person_level_sheet` returns `ALLOW`, `REDACT` or `REFUSE` (the most restrictive over the sheet's
+own header row and the `header` row asked for): `REDACT` when `Name / Recipient` is the sheet's only person-level header
+and it has exactly one `Section` column, `REFUSE` for any other person-level header (`Employer`, `Person Key`, a second
+`Section`, no `Section` at all), `ALLOW` for none. `without_contributor_names` in `server.py` (applied to the response only;
+`worksheet_data` and its cache are unchanged) sets `Name / Recipient` and `Reference Key` to null on every row whose
+`Section` is not `Top Direct Recipient`, `Top Downstream Beneficiary` or `Company Total` (`RECIPIENT_SECTIONS`; an exact
+match, so `Top Contributor`, a blank, a differently spelled or a new section is blanked), keeps every other cell and the
+row count, and recomputes those two columns' profile (`missing`, `distinct`) from the rows sent. A `REDACT` sheet read at a
+`header` row that is not its own has no single `Section` column to go by and is refused. A listed email and local mode get
+the sheet as built. Checked against the 11 workbooks in `Mentat Complete Files` (2026-10-12): the Section column holds exactly
+those three values and `Top Contributor`; 106 sheets (the `<cycle> Summary` and `<Company> View` sheets of nine workbooks)
+are `REDACT`, 52 `REFUSE`, 122 `ALLOW`. What stays on a `Top Contributor` row is its rank, amounts, party split and
+`Relationship` label, which carry no name.
 
 Decision (Claude's default, pending Paul's governance ruling): a hosted viewer who is not in
 `MENTAT_DONOR_ROW_EMAILS` learns no individual contributor's identity from `/api/flow`

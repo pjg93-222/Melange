@@ -129,6 +129,48 @@ def header_workbook(path, headers):
     book.save(path)
 
 
+SUMMARY_HEADER = ['Cycle', 'Section', 'Rank', 'Company', 'Name / Recipient', 'Relationship', 'Total / Activity', 'Reference Key']
+# (Name / Recipient and Reference Key are columns 4 and 7.) Rows of a '* Summary' or '<Company> View' sheet, fake values
+# only: two contributors, the three recipient and aggregate sections, a section nobody knows, a blank one and a
+# near-miss spelling of a contributor's.
+SUMMARY_ROWS = [
+    ['2024', 'Top Contributor', 1, 'Example Co', 'Zed Quill', 'Person Key', 500, 'key-zed'],
+    ['2024', 'Top Contributor', 2, 'Example Co', 'Ida Marsh', 'Person Key', 400, 'key-ida'],
+    ['2024', 'Top Direct Recipient', 1, 'Example Co', 'Example PAC', 'Committee', 300, 'key-pac'],
+    ['2024', 'Top Downstream Beneficiary', 1, 'Example Co', 'Sample Candidate', 'Candidate', 200, 'key-cand'],
+    ['2024', 'Company Total', None, 'Example Co', 'Example Co', 'Company', 1400, 'key-co'],
+    ['2024', 'Top Mystery Section', 1, 'Example Co', 'Unknown Kind', 'Other', 100, 'key-new'],
+    ['2024', None, 1, 'Example Co', 'Blank Section', 'Other', 50, 'key-blank'],
+    ['2024', 'top contributor', 1, 'Example Co', 'Lower Case', 'Other', 25, 'key-lower']]
+SUMMARY_KEPT = (2, 3, 4)                       # the indexes of SUMMARY_ROWS a hosted viewer who is not listed still sees whole
+SUMMARY_HIDDEN = ('Zed Quill', 'key-zed', 'Ida Marsh', 'key-ida', 'Unknown Kind', 'key-new', 'Blank Section', 'key-blank',
+                  'Lower Case', 'key-lower')
+SUMMARY_SHEETS = {   # sheet name -> (header, rows)
+    'Example Co View': (SUMMARY_HEADER, SUMMARY_ROWS),
+    '2024 Summary': (SUMMARY_HEADER, SUMMARY_ROWS[:3]),
+    'Twice View': (['Section', 'Name / Recipient', 'Name / Recipient', 'Reference Key', 'Total'],
+                   [['Top Contributor', 'Zed Quill', 'Zed Q', 'key-zed', 5], ['Company Total', 'Example Co', 'Example Co', 'key-co', 9]]),
+    'Plain View': (['Section', 'Company', 'Total'], [['Company Total', 'Example Co', 9]]),
+    'Employer View': ([*SUMMARY_HEADER, 'Employer'], [[*row, 'Example Co'] for row in SUMMARY_ROWS]),
+    'Two Sections View': (['Section', 'Name / Recipient', 'Section', 'Total'], [['Top Contributor', 'Zed Quill', 'Top Contributor', 5]]),
+    'No Section Sheet': (['Company', 'Name / Recipient', 'Reference Key', 'Total'], [['Example Co', 'Zed Quill', 'key-zed', 5]])}
+
+
+def summary_workbook(path):
+    """SUMMARY_SHEETS as a workbook, each sheet with a title block above its header row (row 3; data from row 4)."""
+    book = openpyxl.Workbook()
+    del book['Sheet']
+    for name, (header, rows) in SUMMARY_SHEETS.items():
+        sheet = book.create_sheet(name)
+        for row in ([name + ' (synthetic)'], [], header, *rows):
+            sheet.append(row)
+    book.save(path)
+
+
+def blanked(row, *columns):
+    return [None if index in columns else cell for index, cell in enumerate(row)]
+
+
 class Idp:
     """A throw-away Access: one RSA key, its JWKS file in `directory`, and a way to sign tokens."""
 
@@ -565,6 +607,15 @@ class DefaultModeIsUnchanged(unittest.TestCase):
             for name in PERSON_SHEETS:
                 status, _, body = self.plain.request(f'/api/report-data?id=r&index=0&sheet={quote(name)}')
                 self.assertEqual((status, body['row_count']), (200, 2), name)
+
+    @needs_openpyxl
+    def test_local_summary_sheets_keep_their_contributor_names(self):
+        path = Path(self.temp.name) / 'summary-report.xlsx'
+        summary_workbook(path)
+        with patch.object(self.console, 'report_path', Mock(return_value=path), create=True):
+            for name in SUMMARY_SHEETS:
+                status, _, body = self.plain.request(f'/api/report-data?id=r&index=0&sheet={quote(name)}')
+                self.assertEqual((status, body['rows']), (200, SUMMARY_SHEETS[name][1]), name)
 
 
 @needs_crypto
@@ -1110,7 +1161,8 @@ class HostedMode(unittest.TestCase):
         refused = ['Employee Name', 'Email', 'E-mail', 'Payee', 'Given Name', 'Contact', 'Phone', 'Telephone', 'Surname',
                    'First Name', 'Last Name', 'Donor', 'Contributor', 'Mailing Address', 'Street 1', 'City', 'ZIP5',
                    'Employer', 'Occupation', 'Job Title', 'Person Key', 'EmployeeName', 'Company Name', 'Employee Emails',
-                   # on the real '* Summary' and '<Company> View' sheets, the Top Contributor rows' contributor
+                   # on the real '* Summary' and '<Company> View' sheets, the Top Contributor rows' contributor; these
+                   # sheets have no Section column, so they are refused (with one it is redacted: see the summary tests)
                    'Name / Recipient']
         kept = ['Contributor Tier', 'Employee Tier', 'Employee', 'Employee %', 'Employee D', 'Employee R %',
                 'Contributors', 'Distinct Contributors', 'Total Giving', 'Candidate / Officeholder', 'Reference Key']
@@ -1126,6 +1178,111 @@ class HostedMode(unittest.TestCase):
             os.environ['MENTAT_DONOR_ROW_EMAILS'] = EMAIL
             for number, header in enumerate(refused):
                 self.assertEqual(sheet(number)[0], 200, header)
+
+    @needs_openpyxl
+    def test_summary_sheets_are_redacted_unless_the_email_is_listed(self):
+        path = Path(self.temp.name) / 'summary-report.xlsx'
+        summary_workbook(path)
+        sheet = lambda name, header=0, email=EMAIL: self.get(
+            f'/api/report-data?id=r&index=0&sheet={quote(name)}' + (f'&header={header}' if header else ''),
+            token=self.idp.token(email=email))
+        # Name / Recipient and Reference Key (columns 4 and 7) are blank on every row whose Section is not one of the
+        # three recipient and aggregate ones; the rest of each row is as built
+        expected = [row if index in SUMMARY_KEPT else blanked(row, 4, 7) for index, row in enumerate(SUMMARY_ROWS)]
+        with patch.object(self.console, 'report_path', Mock(return_value=path)), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            built = app.worksheet_entry(path, 'Example Co View')
+            for email in (EMAIL, 'stranger@example.test'):
+                status, headers, body = sheet('Example Co View', email=email)
+                self.assertEqual(status, 200, email)
+                self.assertEqual(body['rows'], expected)
+                self.assertEqual((body['row_count'], body['row_numbers']), (8, list(range(4, 12))))
+                text = json.dumps(body)
+                for hidden in SUMMARY_HIDDEN:
+                    self.assertNotIn(hidden, text, hidden)
+                for kept in ('Example PAC', 'key-pac', 'Sample Candidate', 'key-cand', 'Example Co', 'key-co'):
+                    self.assertIn(kept, text, kept)
+                # the column profile follows the rows sent, not the ones redacted; the others are as built
+                columns = {column['name']: column for column in body['columns']}
+                built_columns = {column['name']: column for column in json.loads(built.body)['columns']}
+                for name in ('Name / Recipient', 'Reference Key'):
+                    self.assertEqual((columns[name]['missing'], columns[name]['distinct']), (5, 3), name)
+                    self.assertGreater(built_columns[name]['distinct'], 3, name)
+                for name in set(columns) - {'Name / Recipient', 'Reference Key'}:
+                    self.assertEqual(columns[name], built_columns[name], name)
+                self.assertEqual({key: value for key, value in body.items() if key not in ('rows', 'columns')},
+                                 {key: value for key, value in json.loads(built.body).items() if key not in ('rows', 'columns')})
+                self.assertEqual(headers['ETag'], response_cache.from_value(body).etag, 'the tag follows the sent bytes')
+                self.assertNotEqual(headers['ETag'], built.etag)
+            # the sheet's own header row asked for by number is the same sheet
+            self.assertEqual(sheet('Example Co View', header=3)[2]['rows'], expected)
+            # another '* Summary', and a sheet whose Name / Recipient is twice there (the second is 'Name / Recipient (2)')
+            self.assertEqual(sheet('2024 Summary')[2]['rows'], [blanked(row, 4, 7) if index < 2 else row
+                                                                for index, row in enumerate(SUMMARY_ROWS[:3])])
+            status, _, body = sheet('Twice View')
+            self.assertEqual((status, body['rows']), (200, [['Top Contributor', None, None, None, 5],
+                                                            ['Company Total', 'Example Co', 'Example Co', 'key-co', 9]]))
+            self.assertEqual([column['name'] for column in body['columns']],
+                             ['Section', 'Name / Recipient', 'Name / Recipient (2)', 'Reference Key', 'Total'])
+            # a sheet that names no person is not touched
+            self.assertEqual(sheet('Plain View')[2]['rows'], [['Company Total', 'Example Co', 9]])
+            # read at a row that is not its header, nothing says which cells are a contributor's: refused, not sent as is
+            # (row 4 is a contributor's row, which names a person in its own right; row 6 a recipient's, which does not)
+            for header in (4, 6):
+                self.assertEqual(sheet('Example Co View', header=header)[:3:2],
+                                 (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}), header)
+            # a listed account gets every sheet as built
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ' Someone@Example.test , ' + EMAIL.upper()
+            status, headers, body = sheet('Example Co View')
+            self.assertEqual((status, body, headers['ETag']), (200, json.loads(built.body), built.etag))
+            self.assertEqual(body['rows'], SUMMARY_ROWS)
+            self.assertEqual(sheet('Example Co View', header=6)[0], 200)
+            self.assertEqual(sheet('Example Co View', email='stranger@example.test')[2]['rows'], expected,
+                             'the list names one account, not every account')
+
+    @needs_openpyxl
+    def test_a_summary_sheet_with_another_person_column_is_still_refused(self):
+        path = Path(self.temp.name) / 'summary-report.xlsx'
+        summary_workbook(path)
+        refused = ('Employer View', 'Two Sections View', 'No Section Sheet')
+        with patch.object(self.console, 'report_path', Mock(return_value=path)), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            for name in refused:
+                status, _, body = self.get(f'/api/report-data?id=r&index=0&sheet={quote(name)}')
+                self.assertEqual((status, body), (403, {'error': app.HOSTED_PERSON_LEVEL_REFUSED}), name)
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = EMAIL
+            for name in refused:
+                self.assertEqual(self.get(f'/api/report-data?id=r&index=0&sheet={quote(name)}')[0], 200, name)
+
+    @needs_openpyxl
+    def test_a_worksheet_is_allowed_redacted_or_refused_by_its_header_row(self):
+        import report_insights
+        path = Path(self.temp.name) / 'summary-report.xlsx'
+        summary_workbook(path)
+        outcome = lambda name, header=0: report_insights.person_level_sheet(report_insights.stamp(path), name, header)
+        self.assertEqual({name: outcome(name) for name in SUMMARY_SHEETS},
+                         {'Example Co View': report_insights.REDACT, '2024 Summary': report_insights.REDACT,
+                          'Twice View': report_insights.REDACT, 'Plain View': report_insights.ALLOW,
+                          'Employer View': report_insights.REFUSE, 'Two Sections View': report_insights.REFUSE,
+                          'No Section Sheet': report_insights.REFUSE})
+        # the most restrictive of the sheet's own header row and the one asked for
+        self.assertEqual(outcome('Plain View', 3), report_insights.ALLOW)
+        self.assertEqual(outcome('Example Co View', 6), report_insights.REDACT)    # a row that names no person
+        self.assertEqual(outcome('Example Co View', 4), report_insights.REFUSE)    # a row that does
+        self.assertEqual(outcome('Plain View', 4), report_insights.ALLOW)
+        self.assertEqual(outcome('No Such Sheet'), report_insights.REFUSE, 'fail closed')
+
+    @needs_openpyxl
+    def test_a_body_with_no_single_section_column_cannot_be_redacted(self):
+        body = lambda *names: {'columns': [{'name': name} for name in names], 'rows': [['Top Contributor'] * len(names)]}
+        for names in (('Name / Recipient', 'Total'), ('Section', 'Name / Recipient', 'Section')):
+            self.assertIsNone(app.without_contributor_names(body(*names)), names)
+        given = {'columns': [{'name': 'Section'}, {'name': 'Name / Recipient'}, {'name': 'Reference Key'}],
+                 'rows': [['Top Contributor', 'Zed Quill', 'key-zed'], ['Company Total', 'Example Co', 'key-co']]}
+        before = json.dumps(given)
+        self.assertEqual(app.without_contributor_names(given)['rows'],
+                         [['Top Contributor', None, None], ['Company Total', 'Example Co', 'key-co']])
+        self.assertEqual(json.dumps(given), before, 'the body it is given is not changed')
 
     def test_json_bodies_carry_no_os_error_text_when_hosted(self):
         catalog = {'name': 'ok', 'note': "[Errno 2] No such file or directory: 'x'", 'rows': ['[WinError 3] gone', 'fine']}

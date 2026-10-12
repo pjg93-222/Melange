@@ -112,10 +112,22 @@ PERSON_HEADER = re.compile(r'\b(?:names?|persons?|people|contributors?|donors?|e
 # sheet it holds the contributor's name.
 AGGREGATE_HEADERS = frozenset({'contributor tier', 'employee tier', 'employee', 'employee d', 'employee r',
                                'contributors', 'distinct contributors'})
+# What the hosted console does with a worksheet for a viewer not listed in MENTAT_DONOR_ROW_EMAILS. REDACT: the sheet's
+# only person-level header is 'Name / Recipient' and it has one 'Section' column, which is the shape of every '* Summary'
+# and '<Company> View' sheet (Mentat Complete Files, 2026-10-12). Their Top Contributor rows name an individual in
+# 'Name / Recipient' and carry the name key in 'Reference Key'; server.without_contributor_names blanks both on every row
+# whose Section is not a recipient or aggregate one. Any other person-level header: REFUSE.
+ALLOW, REDACT, REFUSE = 'allow', 'redact', 'refuse'
+REDACTED_HEADERS = frozenset({'name recipient', 'reference key'})   # header_text() of the columns that are blanked
+SECTION_HEADER = 'section'
+
+
+def header_text(value):
+    return ' '.join(re.findall(r'[a-z]+', re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', str(value)).lower()))
 
 
 def person_header(value):
-    text = ' '.join(re.findall(r'[a-z]+', re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', str(value)).lower()))
+    text = header_text(value)
     return text not in AGGREGATE_HEADERS and bool(PERSON_HEADER.search(text))
 
 
@@ -130,15 +142,24 @@ def _header_candidates(file_stamp, sheet_name):
         book.close()
 
 
+def _header_outcome(cells):
+    texts = [header_text(cell) for cell in cells if isinstance(cell, str)]
+    people = {text for text in texts if person_header(text)}
+    if not people:
+        return ALLOW
+    return REDACT if people <= {'name recipient'} and texts.count(SECTION_HEADER) == 1 else REFUSE
+
+
 def person_level_sheet(file_stamp, sheet_name, header=0):
-    """True when the sheet's own header row (header_row's choice) or the one asked for (worksheet_data takes
-    1-100) names a person-level column. Fail closed: a sheet that cannot be read counts as person-level."""
+    """ALLOW, REDACT or REFUSE for a sheet read by a viewer who may not see person-level fields: the most
+    restrictive outcome over the sheet's own header row (header_row's choice) and the one asked for (worksheet_data
+    takes 1-100). Fail closed: a sheet that cannot be read is REFUSE."""
     try:
         chosen, rows = _header_candidates(file_stamp, sheet_name)
-        return any(person_header(cell) for number in {chosen, header} if 1 <= number <= len(rows)
-                   for cell in rows[number - 1] if isinstance(cell, str))
+        return max((_header_outcome(rows[number - 1]) for number in {chosen, header} if 1 <= number <= len(rows)),
+                   key=(ALLOW, REDACT, REFUSE).index, default=ALLOW)
     except Exception:  # noqa: BLE001 - unreadable means refused
-        return True
+        return REFUSE
 
 
 def records(sheet, limit=RECEIPT_LIMIT):

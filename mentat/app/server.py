@@ -655,6 +655,33 @@ def names_person_subject(query):
                for key, values in query.items() if key not in ('id', 'industry') for value in values)
 
 
+# Hosted /api/report-data, same viewers, for a sheet report_insights.person_level_sheet calls REDACT (every '* Summary' and
+# '<Company> View' sheet): Claude's default pending Paul's governance ruling is to show it with the contributors' names and
+# name keys blanked, not to refuse it. A row keeps its Name / Recipient and Reference Key only when its Section is one of
+# these, the recipient and aggregate sections the real workbooks carry (the fourth, 'Top Contributor', names an individual);
+# any other value, a blank one included, is blanked, so a section added later is redacted until it is listed here.
+RECIPIENT_SECTIONS = frozenset({'Top Direct Recipient', 'Top Downstream Beneficiary', 'Company Total'})
+
+
+def without_contributor_names(body):
+    """A worksheet_data body with every Name / Recipient and Reference Key cell blanked on the rows whose Section is
+    not in RECIPIENT_SECTIONS, and those columns' profile recomputed. None (the caller refuses) when the body has no
+    single Section column: the header row asked for was not the sheet's own, so no cell can be told from a contributor's."""
+    import report_insights as insights
+    names = [column.get('name') for column in body.get('columns', [])]
+    texts = [insights.header_text(name) for name in names]
+    if texts.count(insights.SECTION_HEADER) != 1:
+        return None
+    section = texts.index(insights.SECTION_HEADER)
+    blank = [index for index, text in enumerate(texts) if text in insights.REDACTED_HEADERS]
+    rows = [row if str(row[section]).strip() in RECIPIENT_SECTIONS else
+            [None if index in blank else cell for index, cell in enumerate(row)] for row in body.get('rows', [])]
+    profile = insights.profile_columns(names, rows)
+    columns = [{**column, **{key: profile[index][key] for key in ('type', 'missing', 'numeric_values', 'distinct')}}
+               if index in blank else column for index, column in enumerate(body['columns'])]
+    return {**body, 'rows': rows, 'columns': columns}
+
+
 GEO_V2_DIR = Path(__file__).resolve().parent / 'geo' / 'v2'
 GEO_V2_ROUTE = re.compile(r'/geo/v2/((?:albers|wgs84|lookup)(?:/[A-Za-z0-9_@.-]+){1,4}\.(?:json|geojson))')
 BASEMAP_DIR = PROJECT / '.cache' / 'basemap'
@@ -3440,9 +3467,14 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 path = app.report_path(query.get('id', [''])[0], int(query.get('index', ['-1'])[0]))
                 sheet, header = query.get('sheet', [''])[0], int(query.get('header', ['0'])[0])
                 if sheet and self.access_cfg.enforced and not donor_rows_allowed(self.access_user):
-                    import report_insights
-                    if report_insights.person_level_sheet(report_insights.stamp(path), sheet, header):
-                        return self.send({'error': HOSTED_PERSON_LEVEL_REFUSED}, 403)
+                    import report_insights, response_cache
+                    outcome = report_insights.person_level_sheet(report_insights.stamp(path), sheet, header)
+                    if outcome != report_insights.ALLOW:
+                        redacted = outcome == report_insights.REDACT and without_contributor_names(
+                            json.loads(worksheet_entry(path, sheet, header).body))
+                        if not redacted:   # REFUSE, or a REDACT sheet read at a header row that is not its own
+                            return self.send({'error': HOSTED_PERSON_LEVEL_REFUSED}, 403)
+                        return self.send_entry(response_cache.from_value(redacted))
                 return self.send_entry(worksheet_entry(path, sheet, header))
             if parsed.path == '/api/graph-catalog':
                 return self.send(app.graph_catalog(query.get('id',[''])[0]))
