@@ -686,7 +686,8 @@ fec_api_work_contract <- function(unit) {
 
 fec_api_checkpoint_page <- function(connection, state, page) {
   contract <- fec_api_work_contract(state$unit)
-  if (isTRUE(page$decomposed) && !identical(page$coverage_method, "exhaustive_date_windows")) {
+  if (isTRUE(page$decomposed) && !isTRUE(page$coverage_method %in%
+      c("exhaustive_date_windows", "exhaustive_spelling_groups"))) {
     value <- jsonlite::fromJSON(contract, simplifyVector = FALSE)
     value$coverage_verified <- FALSE
     value$coverage_reason <- "Observed spellings do not prove the failed broad query was covered"
@@ -965,6 +966,22 @@ fec_api_decomposition_units <- function(unit, queries = fec_api_decomposition_qu
       unit$decomposition_source %||% "roster",
       "observed_employers"
     )
+    child
+  })
+}
+
+# A multi-value query is an OR over its spellings, so its population is the
+# union of its spelling groups' populations. Halving (down to one spelling)
+# keeps every group a complete query of its own, provable by its own count.
+fec_api_spelling_groups <- function(unit) {
+  values <- trim_text(unit$variants)
+  values <- values[nzchar(values) & !duplicated(toupper(values))]
+  if (length(values) < 2L) return(list())
+  half <- ceiling(length(values) / 2)
+  lapply(list(values[seq_len(half)], values[-seq_len(half)]), function(group) {
+    child <- unit
+    child$id <- paste0(unit$id, "::spelling::", paste(group, collapse = "|"))
+    child$variants <- group
     child
   })
 }
@@ -1320,6 +1337,46 @@ fec_api_collect_work_units <- function(
           retry_count <- retry_count + verified$retry_count
           rate_limit_count <- rate_limit_count + verified$rate_limit_count
           reconcile_count <- reconcile_count + verified$reconcile_count
+          next
+        }
+        # Berkshire Hathaway 2020: the 10-spelling employer query timed out even
+        # inside one-month windows. Split the spellings; each group must verify
+        # against its own exact count (or split again). No group stands in for
+        # the whole: the union is accepted only when every group verified.
+        groups <- fec_api_spelling_groups(state$unit)
+        if (length(groups)) {
+          cat(sprintf("Unservable query: %s -> %d spelling groups\n", state$unit$id, length(groups)))
+          split_result <- fec_api_collect_work_units(groups, api_key = api_key,
+            concurrency = current_concurrency, transport = transport, sleep = sleep,
+            jitter = jitter, before_request = before_request)
+          request_count <- request_count + split_result$request_count
+          retry_count <- retry_count + split_result$retry_count
+          rate_limit_count <- rate_limit_count + split_result$rate_limit_count
+          reconcile_count <- reconcile_count + (split_result$reconcile_count %||% 0L)
+          proven <- vapply(split_result$units, function(child) {
+            isTRUE(child$complete) && !identical(child$coverage_verified, FALSE) &&
+              identical(as.integer(child$expected_count), length(fec_api_state_rows(child)))
+          }, logical(1L))
+          if (!all(proven)) {
+            stop("FEC API spelling group(s) did not verify against their own exact count for ",
+              state$unit$id, ": ", paste(names(split_result$units)[!proven], collapse = ", "),
+              ". Nothing unverified was stored.", call. = FALSE)
+          }
+          union_rows <- fec_api_union_rows(unlist(lapply(split_result$units,
+            fec_api_state_rows), recursive = FALSE))
+          count <- length(union_rows)
+          state$pages <- list(list(rows = union_rows, last_indexes = list(), count = count,
+            is_count_exact = TRUE, rows_collected = count, page_number = 0L, complete = TRUE,
+            decomposed = TRUE, coverage_method = "exhaustive_spelling_groups"))
+          state$last_indexes <- list(); state$seen_keysets <- character()
+          state$expected_count <- count; state$page <- 1L; state$rows_seen <- count
+          state$rows_collected_run <- count
+          state$seen_sub_ids <- vapply(union_rows,
+            function(row) trim_text(row_scalar(row, "sub_id", "")), character(1L))
+          state$complete <- TRUE; state$stored_complete <- FALSE
+          state$coverage_verified <- TRUE
+          if (is.function(page_callback)) page_callback(state, state$pages[[1L]])
+          states[[index]] <- state
           next
         }
         if (isTRUE(state$unit$is_decomposition)) {
