@@ -318,10 +318,26 @@ def catalog(report_directory, sources=None):
     return {'schema_version':VERSION,'datasets':datasets,'fields':_fields(),'amount_unit':'cents'}
 
 
+@lru_cache(maxsize=64)
+def _rule_digest_stamped(stamp):
+    # Code and rule files are identified by content, CRLF read as LF, so a checkout on another machine
+    # (other path, other line endings, other timestamps) names the same index.
+    return hashlib.sha256(Path(stamp[0]).read_bytes().replace(b'\r\n',b'\n')).hexdigest()
+
+
+def _portable(path,roots):
+    # A data input is identified by its path under the report folder or the checkout (posix separators),
+    # never by where those sit on this machine; outside both, by file name.
+    path=Path(path).resolve()
+    for root in roots:
+        if path.is_relative_to(root):return path.relative_to(root).as_posix()
+    return path.name
+
+
 def _token(source):
     if LOADED_RULE_STAMPS != [(str(p),p.stat().st_size,p.stat().st_mtime_ns) for p in RULE_PATHS]:
         raise ValueError('Accounting code changed. Restart the app to load the current accounting rules.')
-    paths=[source['workbook'],source['database'],source['payload'],source['manifest'],*RULE_PATHS]
+    paths=[source['workbook'],source['database'],source['payload'],source['manifest']]
     if source.get('hydration_manifest'):paths.append(source['hydration_manifest'])
     # The selected, hash-verified ledger is an explicitly pinned evidence epoch.
     # Without a ledger, pin the current evidence store including SQLite sidecars.
@@ -334,7 +350,10 @@ def _token(source):
         # An empty WAL is likewise equivalent to absence, not new evidence.
         paths += [p for suffix in ('','-wal')
                   if (p:=PROJECT/('state/cross-reference/evidence.sqlite'+suffix)).exists() and p.stat().st_size]
-    return hashlib.sha256(json.dumps([_stamp(p) for p in paths],sort_keys=True).encode()).hexdigest()
+    roots=(Path(source['workbook']).resolve().parent,PROJECT.resolve())
+    inputs=[[_portable(p,roots),*_stamp(p)[1:3]] for p in paths]   # name under its root, size, mtime_ns
+    rules=[_rule_digest_stamped(_stamp(p)) for p in RULE_PATHS]
+    return hashlib.sha256(json.dumps([inputs,rules],sort_keys=True).encode()).hexdigest()
 
 
 def _source(report_directory, request, sources=None):

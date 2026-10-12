@@ -1,6 +1,7 @@
 """Money conservation, accounting basis, grain and safe query regressions."""
 from contextlib import closing
 import json
+import os
 from pathlib import Path
 import sqlite3
 import sys
@@ -214,6 +215,73 @@ class ContributionQueryTests(unittest.TestCase):
             self.assertEqual(c._token(source),before)
             Path(str(evidence)+'-wal').write_bytes(b'new evidence')
             self.assertNotEqual(c._token(source),before)
+
+
+class PortableTokenTests(unittest.TestCase):
+    """An index token names the same source on any machine: no absolute path, no ctime; code by content (CRLF = LF)."""
+    STAMP=1_700_000_000_000_000_000
+    CODE={'tools/rule_a.py':b'def a():\n    return 1\n','tools/rule_b.py':b'B = 2\n','inputs/rules.json':b'{\n  "r": 1\n}\n'}
+    DATA={'reports/Example Industry Spending Overview.xlsx':b'book','.cache/payload.json':b'payload','.cache/manifest.json':b'{}',
+          '.cache/hydration.json':b'{}','state/cross-reference/r1/ledger.sqlite':b'ledger','state/cross-reference/r1/report.json':b'{}'}
+
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+
+    def machine(self,name,crlf=False):
+        """A checkout and report folder under their own temp root, data mtimes pinned, optionally CRLF code."""
+        base=Path(self.tmp.name)/name;project=base/'app-root'/'mentat'
+        for relative,content in {**self.CODE,**self.DATA}.items():
+            path=(base/relative if relative.startswith('reports/') else project/relative)
+            path.parent.mkdir(parents=True,exist_ok=True)
+            code=relative in self.CODE
+            path.write_bytes(content.replace(b'\n',b'\r\n') if crlf and code else content)
+            if not code:os.utime(path,ns=(self.STAMP,self.STAMP))
+        elsewhere=base/('moved-'+name)/'mentat.db';elsewhere.parent.mkdir();elsewhere.write_bytes(b'database')
+        os.utime(elsewhere,ns=(self.STAMP,self.STAMP))   # outside the report folder and the checkout: file name only
+        source={'workbook':base/'reports/Example Industry Spending Overview.xlsx','database':elsewhere,
+                'payload':project/'.cache/payload.json','manifest':project/'.cache/manifest.json',
+                'hydration_manifest':project/'.cache/hydration.json',
+                'ledger':project/'state/cross-reference/r1/ledger.sqlite'}
+        return project,source,[project/relative for relative in self.CODE]
+
+    def token(self,project,source,rules):
+        stamps=[(str(p),p.stat().st_size,p.stat().st_mtime_ns) for p in rules]
+        with patch.object(c,'PROJECT',project),patch.object(c,'RULE_PATHS',rules),patch.object(c,'LOADED_RULE_STAMPS',stamps):
+            return c._token(source)
+
+    def test_the_same_inputs_under_another_root_and_line_endings_give_one_token(self):
+        first,second=self.machine('laptop'),self.machine('vps-longer-name',crlf=True)
+        self.assertNotEqual(first[0],second[0])
+        self.assertEqual((first[2][0].stat().st_size==second[2][0].stat().st_size),False,'the code really differs on disk')
+        self.assertEqual(self.token(*first),self.token(*second))
+
+    def test_a_data_files_size_or_mtime_or_a_rule_files_content_changes_the_token(self):
+        project,source,rules=self.machine('laptop');before=self.token(project,source,rules)
+        self.assertEqual(before,self.token(project,source,rules))
+        for key in ('payload','ledger','database'):
+            path=Path(source[key]);original=path.read_bytes()
+            path.write_bytes(original+b'x');os.utime(path,ns=(self.STAMP,self.STAMP))     # size only
+            self.assertNotEqual(self.token(project,source,rules),before,key+' size')
+            path.write_bytes(original);os.utime(path,ns=(self.STAMP,self.STAMP))
+            self.assertEqual(self.token(project,source,rules),before)
+            os.utime(path,ns=(self.STAMP+1_000_000_000,self.STAMP+1_000_000_000))        # mtime only
+            self.assertNotEqual(self.token(project,source,rules),before,key+' mtime')
+            os.utime(path,ns=(self.STAMP,self.STAMP))
+        rule=rules[1];rule.write_bytes(b'B = 3\n')                                       # same size, other content
+        self.assertEqual(rule.stat().st_size,len(b'B = 2\n'))
+        self.assertNotEqual(self.token(project,source,rules),before)
+        rule.write_bytes(b'B = 2\n');os.utime(rule,ns=(self.STAMP,self.STAMP))           # a rule file's mtime alone is not in the token
+        self.assertEqual(self.token(project,source,rules),before)
+
+    def test_the_token_holds_no_absolute_path_or_ctime(self):
+        project,source,rules=self.machine('laptop')
+        with patch.object(c.json,'dumps',wraps=json.dumps) as dumped:
+            self.token(project,source,rules)
+        inputs,digests=dumped.call_args.args[0]
+        self.assertEqual([entry[0] for entry in inputs],['Example Industry Spending Overview.xlsx','mentat.db','.cache/payload.json',
+            '.cache/manifest.json','.cache/hydration.json','state/cross-reference/r1/ledger.sqlite','state/cross-reference/r1/report.json'])
+        self.assertTrue(all(len(entry)==3 and entry[2]==self.STAMP for entry in inputs))   # name, size, mtime_ns
+        self.assertEqual(len(digests),len(rules));self.assertTrue(all(len(d)==64 for d in digests))
 
 
 class CompactReceiptTests(unittest.TestCase):

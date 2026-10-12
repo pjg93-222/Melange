@@ -142,8 +142,9 @@ token for changes. This is a local single-user application, not a remote hosted
 service. The one exception is the hosted, read-only console behind Cloudflare
 Access: `BIND_HOST`, `ALLOWED_HOSTS`, `ACCESS_AUD`, `ACCESS_ISSUER` and
 `ACCESS_JWKS_FILE` (see `access_gate.py`) turn it on, it refuses to start
-without `--read-only`, it serves only the analytical read routes, and
-`MENTAT_STATE_WRITE_ROOT` moves the caches it writes (`requirements-hosted.in`
+without `--read-only`, it serves only the analytical read routes (the two
+`/records` routes, which return donor rows, only to an Access email listed in
+`MENTAT_DONOR_ROW_EMAILS`), and `MENTAT_STATE_WRITE_ROOT` moves the caches it writes (`requirements-hosted.in`
 lists its dependencies). With none of those set nothing changes. Closing the
 browser does not stop collection. Keep the app server
 running for its process exit receipt; underlying runner receipts remain available

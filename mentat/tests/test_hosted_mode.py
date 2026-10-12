@@ -13,6 +13,7 @@ public JWKS is written (to a temp dir). The enforced-mode tests skip without `cr
 """
 import base64
 import contextlib
+import hashlib
 import http.client
 import inspect
 import io
@@ -56,6 +57,8 @@ REAL_TOKEN = 'real-console-token-never-shown'
 ANALYTICAL = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography',
               '/api/insights/query', '/api/insights/records', '/api/forecast/project'}
 SERVER_PY = Path(app.__file__).resolve()
+# deploy/access-gate: fec/access_gate.py. The three apps carry byte-identical copies; change one, recopy, update this.
+GATE_SHA256 = 'dc7ef05085044601884ce037f21c1b44d774e7dffba3a0276a3ea5423227e58d'
 
 
 def b64u(raw):
@@ -129,6 +132,18 @@ def free_port():
         return probe.getsockname()[1]
 
 
+class AccessGateCopy(unittest.TestCase):
+    def test_the_copy_is_the_canonical_gate_byte_for_byte(self):
+        self.assertEqual(hashlib.sha256(Path(gate.__file__).read_bytes()).hexdigest(), GATE_SHA256)
+
+
+class ServerPaths(unittest.TestCase):
+    def test_absolute_paths_are_omitted_and_the_rest_is_kept(self):
+        body = {'a': 1, 'b': 'C:\\x\\y', 'c': 'c:/x', 'd': '\\\\host\\share', 'e': '/srv/x', 'f': 'relative/x',
+                'g': ['/srv/y', 'ok', {'h': '/z', 'i': 2}], 'j': {'k': 'D:\\q'}}
+        self.assertEqual(app.without_server_paths(body), {'a': 1, 'f': 'relative/x', 'g': ['ok', {'i': 2}], 'j': {}})
+
+
 class DefaultModeIsUnchanged(unittest.TestCase):
     """No Access environment: every local contract holds, and nothing hosted leaks in."""
 
@@ -137,6 +152,7 @@ class DefaultModeIsUnchanged(unittest.TestCase):
         cls.temp = tempfile.TemporaryDirectory()
         cls.console = SimpleNamespace(
             token='local-token', read_only=False, report_directory=Path(cls.temp.name),
+            configured_root=cls.temp.name, root=Path(cls.temp.name),
             evidence_files=Mock(return_value={'files': []}),
             import_evidence_path=Mock(return_value={'id': 'job', 'state': 'reading'}),
             restart=Mock(return_value={'restarting': True}))
@@ -229,6 +245,22 @@ class DefaultModeIsUnchanged(unittest.TestCase):
             self.assertNotIn(name, headers)
         self.assertEqual(self.plain.stderr, '', 'a local console logs nothing')
 
+    def test_other_verbs_and_the_local_answers_are_what_they_were(self):
+        for method in ('PUT', 'DELETE', 'HEAD', 'OPTIONS'):
+            self.assertEqual(self.plain.request('/api/runs', method=method)[0], 501, method)
+        status, _, body = self.plain.request('/api/health')
+        self.assertEqual(status, 200)
+        self.assertEqual((body['project'], body['report_directory'], body['resolved_data_root']),
+                         (str(app.PROJECT), self.temp.name, str(Path(self.temp.name))))
+        status, _, body = self.plain.request('/api/session?light=1')
+        self.assertEqual(body['report_directory'], self.temp.name)
+
+    def test_local_donor_rows_are_not_gated(self):
+        with patch.object(app.contribution_workbook_guard, 'verify_sources', return_value=[]), \
+                patch.object(app.contribution_query, 'records', return_value={'rows': [{'source_id': 'a'}]}):
+            status, _, body = self.post(self.plain, '/api/contributions/records', {'dataset': 'Example'})
+        self.assertEqual((status, body['rows']), (200, [{'source_id': 'a'}]))
+
     def test_local_read_only_allowlist_is_what_it_was(self):
         self.console.read_only = True
         status, _, body = self.post(self.plain, '/api/evidence-files', {'path': '.'})
@@ -257,6 +289,7 @@ class HostedMode(unittest.TestCase):
         cls.mutators = {name: Mock() for name in cls.MUTATORS}
         cls.console = SimpleNamespace(
             token=REAL_TOKEN, read_only=True, report_directory=Path(cls.temp.name),
+            configured_root=cls.temp.name, root=Path(cls.temp.name),
             summary=Mock(return_value={'runs': []}), report_path=Mock(), evidence_store=Mock(), **cls.mutators)
         config = gate.AccessConfig.from_env(cls.idp.env())
 
@@ -379,6 +412,82 @@ class HostedMode(unittest.TestCase):
             'X-Evidence-Name': 'x.csv', 'Cf-Access-Jwt-Assertion': self.idp.token()})[0], 403)
         self.assertEqual(self.post('/api/evidence-csv?x=1', {'path': 'C:/'})[0], 403)
         self.assert_untouched()
+
+    def test_every_verb_is_gated_not_only_get_and_post(self):
+        token = self.idp.token()
+        for method in ('HEAD', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'TRACE'):
+            with self.subTest(method=method):
+                status, _, _ = self.served.request('/api/runs', method=method, headers={'Host': HOST})
+                self.assertEqual(status, 403, 'refused by the gate, not left to http.server as 501')
+                # past the gate nothing handles it
+                status, _, _ = self.served.request('/api/runs', method=method, headers={
+                    'Host': HOST, 'Cf-Access-Jwt-Assertion': token})
+                self.assertEqual(status, 501)
+        self.assert_untouched()
+        for name in ('do_GET', 'do_POST'):
+            self.assertNotIn('access_check', inspect.getsource(getattr(app.Handler, name)), name)
+        self.assertIs(app.Handler.parse_request, gate.AccessMixin.parse_request)
+
+    def records(self, route, email=EMAIL):
+        return self.served.request(route, method='POST', data={'dataset': 'Example'}, headers={
+            'Host': HOST, 'X-Mentat-Token': 'hosted-read-only', 'Cf-Access-Jwt-Assertion': self.idp.token(email=email)})
+
+    def test_donor_rows_are_refused_unless_the_email_is_listed(self):
+        with patch.object(app.contribution_workbook_guard, 'verify_sources', return_value=[]), \
+                patch.object(app.contribution_query, 'records', return_value={'rows': [{'source_id': 'a'}]}) as contribution, \
+                patch.object(app.contribution_query, 'query', return_value={'rows': []}) as aggregate, \
+                patch('analysis_data.records', return_value={'rows': [{'source_id': 'b'}]}) as insights, \
+                patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            readers = {'/api/contributions/records': contribution, '/api/insights/records': insights}
+            for route, reader in readers.items():          # default: nobody
+                status, _, body = self.records(route)
+                self.assertEqual((status, body), (403, {'error': app.HOSTED_DONOR_ROWS_REFUSED}), route)
+                reader.assert_not_called()
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ' Someone@Example.test , ' + EMAIL.upper()   # case and spaces
+            for route, reader in readers.items():
+                status, _, body = self.records(route)
+                self.assertEqual((status, len(body['rows'])), (200, 1), route)
+                self.assertEqual(reader.call_count, 1)
+                status, _, body = self.records(route, email='stranger@example.test')
+                self.assertEqual((status, body), (403, {'error': app.HOSTED_DONOR_ROWS_REFUSED}), route)
+                self.assertEqual(reader.call_count, 1)
+            self.assertEqual(self.records('/api/contributions/query', email='stranger@example.test')[0], 200,
+                             'only the two records routes carry donor rows')
+            aggregate.assert_called_once()
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ''
+            self.assertEqual(self.records('/api/contributions/records')[0], 403)
+        self.assert_untouched()
+
+    def test_health_and_session_carry_no_server_paths(self):
+        windows = 'C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\x\\mentat.db'
+        summary = {'runs': [], 'collection_directory': self.temp.name, 'report_directory': self.temp.name,
+                   'coverage': [{'industry': 'Banking', 'receipt': windows, 'database': '/srv/mentat/db.sqlite'}],
+                   'read_only': True}
+
+        def strings(value):
+            if isinstance(value, dict):
+                value = list(value.values())
+            for item in value if isinstance(value, list) else [value]:
+                if isinstance(item, (dict, list)):
+                    yield from strings(item)
+                elif isinstance(item, str):
+                    yield item
+
+        with patch.object(self.console, 'summary', Mock(return_value=summary)):
+            for route in ('/api/health', '/api/session?light=1', '/api/session', '/api/runs'):
+                status, _, body = self.get(route)
+                self.assertEqual(status, 200, route)
+                self.assertEqual([s for s in strings(body) if app._SERVER_PATH.match(s)], [], route)
+                for key in ('project', 'data_root', 'resolved_data_root', 'report_directory', 'collection_directory'):
+                    self.assertNotIn(key, body, route)
+        status, _, health = self.get('/api/health')
+        self.assertEqual((health['application'], health['read_only']), ('MENTAT', True))
+        self.assertIn('code_sha256', health)
+        with patch.object(self.console, 'summary', Mock(return_value=summary)):
+            status, _, session = self.get('/api/session')
+        self.assertEqual(session['coverage'], [{'industry': 'Banking'}])
+        self.assertEqual(session['token'], 'hosted-read-only')
 
     def test_the_workbook_download_is_refused(self):
         status, _, body = self.get('/api/report?id=run&index=0')

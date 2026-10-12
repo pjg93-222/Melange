@@ -488,6 +488,28 @@ CONSOLE_CSP = ("default-src 'self'; style-src 'self'; script-src 'self'; img-src
 # form or fetch cannot add the header without a CORS preflight, which this server never answers.
 HOSTED_SESSION_TOKEN = 'hosted-read-only'
 HOSTED_REFUSED = 'This route is not available on the hosted read-only console.'
+# Donor-level rows (the two records routes) are served to an Access identity only if MENTAT_DONOR_ROW_EMAILS
+# (comma-separated, case-insensitive; default empty, so nobody) lists its email. Pending Paul's governance ruling.
+DONOR_ROW_PATHS = ('/api/contributions/records', '/api/insights/records')
+HOSTED_DONOR_ROWS_REFUSED = 'Donor-level rows are not available to this account on the hosted console.'
+_SERVER_PATH = re.compile(r'[A-Za-z]:[\\/]|\\\\|/')
+
+
+def donor_rows_allowed(email):
+    listed = {item.strip().lower() for item in os.environ.get('MENTAT_DONOR_ROW_EMAILS', '').split(',') if item.strip()}
+    return bool(email) and email.strip().lower() in listed
+
+
+def without_server_paths(value):
+    """`value` minus every string that is an absolute server path: a dict entry or list item holding one is omitted."""
+    drop = lambda item: isinstance(item, str) and _SERVER_PATH.match(item)
+    if isinstance(value, dict):
+        return {key: without_server_paths(item) for key, item in value.items() if not drop(item)}
+    if isinstance(value, list):
+        return [without_server_paths(item) for item in value if not drop(item)]
+    return value
+
+
 GEO_V2_DIR = Path(__file__).resolve().parent / 'geo' / 'v2'
 GEO_V2_ROUTE = re.compile(r'/geo/v2/((?:albers|wgs84|lookup)(?:/[A-Za-z0-9_@.-]+){1,4}\.(?:json|geojson))')
 BASEMAP_DIR = PROJECT / '.cache' / 'basemap'
@@ -3046,9 +3068,11 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                               source_proof_token=pinned.get('source_proof_token'))
         return result
 
+    def public(self, body):
+        """Hosted: the answer without absolute server paths."""
+        return without_server_paths(body) if self.access_cfg.enforced else body
+
     def do_GET(self):
-        if self.access_cfg.enforced and not self.access_check():
-            return
         if not self.valid_host():
             return self.send({"error": "Local access only."}, 403)
         parsed = urlparse(self.path)
@@ -3062,14 +3086,14 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 if parsed.path == '/api/report':   # the raw workbook: a download
                     return self.send({'error': HOSTED_REFUSED}, 403)
             if parsed.path == '/api/health':
-                return self.send({'application': 'MENTAT', 'project': str(PROJECT),
+                return self.send(self.public({'application': 'MENTAT', 'project': str(PROJECT),
                                   'data_root': app.configured_root,
                                   'resolved_data_root': str(app.root),
                                   'server_code_sha256': SERVER_CODE_SHA256,
                                   'contribution_studio_revision': CONTRIBUTION_STUDIO_REVISION,
                                   'read_only': bool(getattr(app, 'read_only', False)),
                                   'report_directory':str(app.report_directory),
-                                  **build_status(app, self.server.server_port)})
+                                  **build_status(app, self.server.server_port)}))
             if parsed.path == '/api/prime-status':
                 # Read-only on every console: this process's startup prime (prewarm.prime_status), which
                 # Start-MentatApp.ps1 waits on before it opens the app window.
@@ -3078,10 +3102,10 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             if parsed.path == "/api/session":
                 if query.get('light', ['0'])[0] == '1':
                     build = build_status(app, self.server.server_port)
-                    return self.send({'token':self.session_token(), 'read_only':bool(getattr(app, 'read_only', False)),
+                    return self.send(self.public({'token':self.session_token(), 'read_only':bool(getattr(app, 'read_only', False)),
                                       'evidence_collection_available':True, 'api_version':2,
-                                      'report_directory':str(app.report_directory), 'build': build, **build})
-                return self.send({"token": self.session_token(), **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
+                                      'report_directory':str(app.report_directory), 'build': build, **build}))
+                return self.send(self.public({"token": self.session_token(), **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))}))
             if parsed.path == '/api/contributions/session':
                 registry = snapshot_registry.registry(app.report_directory)
                 entry = industry_scope.from_query(registry, parsed.query)
@@ -3135,7 +3159,7 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                 entry = industry_scope.from_query(registry, parsed.query)
                 return self.send({**registry, 'snapshots': [entry]} if entry else registry)
             if parsed.path == "/api/runs":
-                return self.send(app.summary(query.get('include_archived', ['0'])[0] in ('1','true')))
+                return self.send(self.public(app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))))
             if parsed.path == '/api/evidence-csv':
                 if query.get('job', [''])[0]:
                     return self.send(app.evidence_csv_job(query.get('job', [''])[0]))
@@ -3356,8 +3380,6 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             return self.send({"error": str(error)}, 400)
 
     def do_POST(self):
-        if self.access_cfg.enforced and not self.access_check():
-            return
         analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography',
                             '/api/insights/query', '/api/insights/records', '/api/forecast/project'}
         hosted = self.access_cfg.enforced
@@ -3379,6 +3401,9 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             self.discard_body()
             return self.send({"error": HOSTED_REFUSED if hosted else
                               "This preview is read-only while the original console manages collection."}, 403)
+        if hosted and self.path in DONOR_ROW_PATHS and not donor_rows_allowed(self.access_user):
+            self.discard_body()
+            return self.send({'error': HOSTED_DONOR_ROWS_REFUSED}, 403)
         if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.session_token()):
             self.discard_body()
             return self.send({"error": "Refresh the app before continuing."}, 403)
