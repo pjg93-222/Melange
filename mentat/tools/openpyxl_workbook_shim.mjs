@@ -25,9 +25,21 @@ function bounds(ref) {
   return { c1: column(c1), r1: Number(r1), c2: column(c2), r2: Number(r2) };
 }
 
+const two = (n) => String(n).padStart(2, "0");
+
+// artifact-tool stores a Date at local midnight as that calendar day (a date, not an instant) and any other Date as
+// its UTC fields; this spells both the way its exporter does so the cell holds the same date.
+function dateCell(date) {
+  if (Number.isNaN(date.getTime())) return null;
+  if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0 && date.getMilliseconds() === 0) {
+    return `${String(date.getFullYear()).padStart(4, "0")}-${two(date.getMonth() + 1)}-${two(date.getDate())}T00:00:00.000Z`;
+  }
+  return date.toISOString();
+}
+
 function cell(value) {
   if (value === undefined || value === null) return null;
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  if (value instanceof Date) return dateCell(value);
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   if (typeof value === "string" || typeof value === "boolean") return value;
   return String(value);
