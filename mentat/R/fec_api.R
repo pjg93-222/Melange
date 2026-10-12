@@ -1075,11 +1075,13 @@ fec_api_collect_windows_verified <- function(
   # can never prove the window's population; re-walking it repeats the same
   # outcome every pass. When the split was optional (the parent query served
   # its first page), hand back state = NULL so the caller walks the parent
-  # cursor instead of failing a query that was never unservable.
+  # cursor instead of failing a query that was never unservable. The abandoned
+  # windows' ids go back too, so the caller can drop their checkpoints.
   if (isTRUE(abandon_unproven) && any(vapply(child_states,
       function(child) identical(child$coverage_verified, FALSE), logical(1L)))) {
     return(list(state = NULL, request_count = requests, retry_count = retries,
-      rate_limit_count = rate_limits, reconcile_count = child_reconciles))
+      rate_limit_count = rate_limits, reconcile_count = child_reconciles,
+      abandoned_unit_ids = unname(vapply(windows, function(window) window$id, character(1L)))))
   }
   # One page-1 request per window, shared by the window-count sum and the
   # stale-window search so that one pass never asks the same window twice.
@@ -1215,7 +1217,8 @@ fec_api_collect_work_units <- function(
   initial_states = list(),
   page_callback = NULL,
   before_request = function(count) invisible(NULL),
-  reset_callback = NULL
+  reset_callback = NULL,
+  discard_callback = NULL
 ) {
   if (!length(units)) {
     return(list(
@@ -1491,6 +1494,9 @@ fec_api_collect_work_units <- function(
         }
         cat(sprintf("Shared workers: %s has unservable date windows; walking the parent cursor serially\n",
           state$unit$id))
+        # The abandoned windows were never stored; left checkpointed they read
+        # as incomplete units to the coverage gate (Fintech 2020, Cash App).
+        if (is.function(discard_callback)) discard_callback(verified$abandoned_unit_ids)
         # Later pages report the same count; never re-split this walk.
         state$windows_abandoned <- TRUE
       }
@@ -2620,6 +2626,17 @@ fec_api_collect_checkpointed <- function(
               state$unit$id
             )
           )
+        })
+      },
+      # Date windows abandoned for a serial parent walk were never stored.
+      discard_callback = function(unit_ids) {
+        if (!length(unit_ids)) return(invisible(NULL))
+        marks <- paste(rep("?", length(unit_ids)), collapse = ",")
+        DBI::dbWithTransaction(connection, {
+          DBI::dbExecute(connection, paste0("DELETE FROM api_page_checkpoints WHERE unit_id IN (", marks, ")"),
+            params = as.list(unit_ids))
+          DBI::dbExecute(connection, paste0("DELETE FROM api_work_progress WHERE unit_id IN (", marks, ")"),
+            params = as.list(unit_ids))
         })
       }
     ),

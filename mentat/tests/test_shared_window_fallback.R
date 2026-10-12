@@ -25,11 +25,19 @@ transport <- function(specs, api_key, concurrency) lapply(specs, function(spec) 
     pagination=list(is_count_exact=TRUE, count=n,
       last_indexes=list(last_index=as.character(max(ids)), last_contribution_receipt_date="2020-06-30"))))
 })
+checkpointed <- character(); discarded <- character()
 result <- fec_api_collect_work_units(list(unit), api_key="fake", concurrency=6L, transport=transport,
-  sleep=function(...) NULL, jitter=function(...) 0)
+  sleep=function(...) NULL, jitter=function(...) 0,
+  page_callback=function(state, page) checkpointed <<- union(checkpointed, state$unit$id),
+  discard_callback=function(unit_ids) discarded <<- c(discarded, unit_ids))
 state <- result$units[[1]]
 ids <- unlist(lapply(state$pages, function(page) vapply(page$rows, function(r) r$sub_id, "")))
 stopifnot(state$complete, state$rows_seen == n, setequal(ids, as.character(seq_len(n))),
           !anyDuplicated(ids), parent_requests == 25L)   # split once, then one serial walk
+# Fintech 2020: the abandoned windows stayed checkpointed (fetched, never stored)
+# and the coverage gate counted all 26 as incomplete Cash App units.
+windows <- grep("::window::", checkpointed, value=TRUE, fixed=TRUE)
+stopifnot(length(windows) == 26L, setequal(discarded, windows), !anyDuplicated(discarded),
+          !unit$id %in% discarded)
 Sys.unsetenv(c("MENTAT_REQUEST_POOL_WIDTH", "MENTAT_RECONCILE_PASSES"))
 cat("test_shared_window_fallback: PASS\n")
