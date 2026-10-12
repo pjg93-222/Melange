@@ -1,3 +1,4 @@
 mentat/app/vendor/pptxgen.bundle.js -text
 mentat/tools/pocket/mentat-pocket.html -text
 mentat/tools/pocket/icon-180.png binary
+mentat/app/access_gate.py text eol=lf
