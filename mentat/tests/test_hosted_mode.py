@@ -51,6 +51,7 @@ import contribution_data
 import contribution_source_guard
 import evidence_csv
 import receipt_path as receipt_paths
+import response_cache
 import source_memo
 
 gate = app.access_gate
@@ -165,6 +166,47 @@ def free_port():
         return probe.getsockname()[1]
 
 
+def keys_of(value):
+    """Every dict key at any depth."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield key
+            yield from keys_of(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from keys_of(item)
+
+
+def flow_body():
+    """A /api/flow-shaped body, fake values only. Its first link carries the real evidence record
+    (downstream.filing_record through flow_data._link_out); its second, and a nested copy, carry the person-level
+    keys a record would hold if _link_out's list of keys grew."""
+    from decimal import Decimal
+    import downstream
+    import flow_data
+    record = downstream.filing_record({
+        'sub_id': '1', 'transaction_id': 'T1', 'image_number': '202401019999', 'contribution_receipt_amount': 250,
+        'contribution_receipt_date': '2024-01-02', 'contributor_name': 'TEST PERSON A', 'contributor_city': 'TESTVILLE',
+        'contributor_state': 'ZZ', 'contributor_zip': '00000', 'contributor_employer': 'EXAMPLE CO',
+        'expenditure_description': 'Test purpose'})
+    link = flow_data._link_out({'source': 'donor:A', 'target': 'committee:C00000001', 'value': Decimal('250'),
+                                'kind': 'receipt', 'rows': 1, 'evidence': [record], 'committee': 'C00000001'})
+    wider = {**record, 'contributor': 'TEST PERSON A', 'street_1': '1 Test St', 'street_2': 'Apt 2', 'zip5': '00000',
+             'raw_zip': '00000', 'occupation': 'Engineer', 'reported_memo_text': 'memo', 'reported_filing_form': 'F3'}
+    return {'version': 1,
+            'nodes': [{'id': 'committee:C00000001', 'label': 'Example PAC', 'kind': 'committee',
+                       'committee_id': 'C00000001', 'state': 'ZZ', 'value_in': 250.0, 'value_out': 250.0}],
+            'links': [link, {**link, 'evidence': [wider]}], 'routes': [{'committee': 'C00000001', 'value': 250.0}],
+            'totals': {'in': 250.0}, 'coverage': {'through': '2024-12-31'}, 'deep': {'records': [wider]}}
+
+
+CACHED_BODY = {'sheet': 'Sources', 'rows': [['Company', '/srv/mentat/report.xlsx', 5], ['Other', 'C:\\Users\\x\\r.xlsx', 6]],
+               'file': '/srv/y', 'note': "[Errno 2] No such file or directory: 'x'", 'ok': 'fine/relative', 'n': 3}
+GEOGRAPHY_RESULT = {'points': [], 'layers': {}, 'coverage': {}, 'warnings': ['ZIP locations are unavailable.'],
+                    'errors': {'points': "[Errno 2] No such file or directory: '/srv/geo.json'",
+                               'states': "HTTPSConnectionPool(host='www2.census.gov', port=443)"}}
+
+
 class AccessGateCopy(unittest.TestCase):
     def test_the_copy_is_the_canonical_gate_byte_for_byte(self):
         self.assertEqual(hashlib.sha256(Path(gate.__file__).read_bytes()).hexdigest(), GATE_SHA256)
@@ -175,6 +217,38 @@ class ServerPaths(unittest.TestCase):
         body = {'a': 1, 'b': 'C:\\x\\y', 'c': 'c:/x', 'd': '\\\\host\\share', 'e': '/srv/x', 'f': 'relative/x',
                 'g': ['/srv/y', 'ok', {'h': '/z', 'i': 2}], 'j': {'k': 'D:\\q'}}
         self.assertEqual(app.without_server_paths(body), {'a': 1, 'f': 'relative/x', 'g': ['ok', {'i': 2}], 'j': {}})
+
+    def test_a_worksheet_row_keeps_its_columns_when_a_cell_is_a_path(self):
+        body = {'rows': [['A', '/srv/x', 5], ['B', 'C:\\x', 6]], 'file': '/srv/y', 'ok': 'a/b'}
+        self.assertEqual(app.without_server_paths(body, True), {'rows': [['A', '', 5], ['B', '', 6]], 'ok': 'a/b'})
+
+    def test_os_error_text_is_one_sentence(self):
+        body = {'a': "[Errno 2] No such file or directory: 'x'", 'b': ['[WinError 3] The system cannot find the path', 'ok'],
+                'c': {'d': 'FileNotFoundError: [Errno 2] gone', 'n': 1}, 'e': 'a [text] in brackets'}
+        self.assertEqual(app.without_os_error_text(body), {
+            'a': app.HOSTED_IO_ERROR, 'b': [app.HOSTED_IO_ERROR, 'ok'], 'c': {'d': app.HOSTED_IO_ERROR, 'n': 1},
+            'e': 'a [text] in brackets'})
+
+    def test_only_a_json_cached_body_is_scrubbed_when_hosted(self):
+        class Fake:
+            access_cfg = SimpleNamespace(enforced=True)
+
+            def __init__(self):
+                self.headers, self.wfile = {}, io.BytesIO()
+
+            send_response = send_header = lambda self, *_: None
+            end_headers = lambda self: None
+
+        entry = response_cache.from_value(CACHED_BODY)
+        text, data = Fake(), Fake()
+        app.Handler.send_entry(text, entry, content_type='text/plain')
+        app.Handler.send_entry(data, entry)
+        self.assertEqual(text.wfile.getvalue(), entry.body)
+        self.assertEqual(json.loads(data.wfile.getvalue())['rows'], [['Company', '', 5], ['Other', '', 6]])
+        local = Fake()
+        local.access_cfg = SimpleNamespace(enforced=False)
+        app.Handler.send_entry(local, entry)
+        self.assertEqual(local.wfile.getvalue(), entry.body, 'a local console sends the entry untouched')
 
 
 class DefaultModeIsUnchanged(unittest.TestCase):
@@ -330,6 +404,23 @@ class DefaultModeIsUnchanged(unittest.TestCase):
         catalog = {'path': '/srv/x', 'files': ['C:\\x']}
         with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
             self.assertEqual(self.plain.request('/api/reports?id=a')[2], catalog)
+
+    def test_local_flow_keeps_its_person_level_keys(self):
+        body = flow_body()
+        self.assertTrue(set(keys_of(body)) & app.FLOW_PERSON_KEYS)
+        with patch('flow_data.flow', return_value=body):
+            status, _, answer = self.plain.request('/api/flow?root=industry&cycle=2024')
+        self.assertEqual((status, answer), (200, json.loads(json.dumps(body))))
+
+    def test_local_cached_bodies_and_geography_errors_are_sent_as_they_are(self):
+        entry = response_cache.from_value(CACHED_BODY)
+        with patch.object(app, 'worksheet_entry', return_value=entry), \
+                patch.object(self.console, 'report_path', Mock(return_value=Path('r.xlsx')), create=True):
+            status, headers, answer = self.plain.request('/api/report-data?id=r&index=0')
+        self.assertEqual((status, answer, headers['ETag']), (200, CACHED_BODY, entry.etag))
+        with patch.object(app.contribution_geo, 'geography', return_value=dict(GEOGRAPHY_RESULT)):
+            status, _, answer = self.post(self.plain, '/api/contributions/geography', {'zip5': ['02134']})
+        self.assertEqual((status, answer['errors']), (200, GEOGRAPHY_RESULT['errors']))
 
     @needs_openpyxl
     def test_local_worksheets_have_no_person_level_rule(self):
@@ -582,8 +673,21 @@ class HostedMode(unittest.TestCase):
                          {'app': 'mentat-console', 'user': EMAIL, 'method': 'GET', 'route': '/api/session', 'status': 200})
         self.assertNotIn('secret', self.served.stderr)
         self.assertNotIn('127.0.0.1', self.served.stderr)
-        self.get('/api/runs', token=False)
-        denied = json.loads(self.served.stderr.strip().splitlines()[-1])
+        # The gate answers a refused request and only then writes its line, so the capture that ends with the
+        # response can end first: capture around the whole request and wait (5 s at most) for the line.
+        captured = io.StringIO()
+        connection = http.client.HTTPConnection('127.0.0.1', self.served.port, timeout=10)
+        try:
+            with contextlib.redirect_stderr(captured):
+                connection.request('GET', '/api/runs', headers={'Host': HOST})
+                connection.getresponse().read()
+                deadline = time.monotonic() + 5
+                while not captured.getvalue().endswith('\n') and time.monotonic() < deadline:
+                    time.sleep(0.01)
+        finally:
+            connection.close()
+        self.assertTrue(captured.getvalue().endswith('\n'), 'no audit line for the refused request within 5 s')
+        denied = json.loads(captured.getvalue().strip().splitlines()[-1])
         self.assertEqual((denied['user'], denied['status'], denied['reason']), ('-', 403, 'no token'))
 
     def test_every_get_route_is_allowlisted_or_refused(self):
@@ -713,6 +817,57 @@ class HostedMode(unittest.TestCase):
         with patch.object(self.console, 'report_catalog', Mock(return_value=catalog), create=True):
             status, _, body = self.get('/api/reports?id=a')
         self.assertEqual((status, body), (200, {'name': 'ok', 'files': ['y'], 'nested': [{'n': 1}]}))
+
+    def flow(self, email=EMAIL):
+        return self.served.request('/api/flow?root=industry&cycle=2024', headers={
+            'Host': HOST, 'Cf-Access-Jwt-Assertion': self.idp.token(email=email)})
+
+    def test_flow_has_no_person_level_key_unless_the_email_is_listed(self):
+        body = flow_body()
+        self.assertTrue(set(keys_of(body)) & app.FLOW_PERSON_KEYS, 'the fixture must carry what is to be stripped')
+        # amounts, committee ids and the aggregates (state) stay; the evidence keeps its amount and purpose
+        kept = {'amount': 250.0, 'purpose': 'Test purpose'}
+        kept_wide = {**kept, 'state': 'ZZ'}
+        with patch('flow_data.flow', return_value=body), patch.dict(os.environ):
+            os.environ.pop('MENTAT_DONOR_ROW_EMAILS', None)
+            for email in (EMAIL, 'stranger@example.test'):
+                status, _, answer = self.flow(email)
+                self.assertEqual(status, 200)
+                self.assertEqual(set(keys_of(answer)) & app.FLOW_PERSON_KEYS, set(), email)
+                self.assertEqual([link['evidence'] for link in answer['links']], [[kept], [kept_wide]])
+                self.assertEqual((answer['links'][0]['value'], answer['links'][0]['committee']), (250.0, 'C00000001'))
+                self.assertEqual(answer['nodes'], body['nodes'])
+                self.assertEqual((answer['totals'], answer['coverage'], answer['routes']),
+                                 (body['totals'], body['coverage'], body['routes']))
+                self.assertEqual(answer['deep'], {'records': [kept_wide]})
+            os.environ['MENTAT_DONOR_ROW_EMAILS'] = ' Someone@Example.test , ' + EMAIL.upper()
+            status, _, answer = self.flow()
+            self.assertEqual((status, answer), (200, json.loads(json.dumps(body))), 'a listed account gets the body as built')
+            self.assertEqual(self.flow('stranger@example.test')[2]['links'][0]['evidence'], [kept])
+
+    def test_a_cached_body_is_scrubbed_when_hosted(self):
+        entry = response_cache.from_value(CACHED_BODY)
+        scrubbed = {'sheet': 'Sources', 'rows': [['Company', '', 5], ['Other', '', 6]], 'note': app.HOSTED_IO_ERROR,
+                    'ok': 'fine/relative', 'n': 3}
+        with patch.object(app, 'worksheet_entry', return_value=entry):
+            status, headers, body = self.get('/api/report-data?id=r&index=0')
+            self.assertEqual((status, body), (200, scrubbed))
+            self.assertEqual(headers['ETag'], response_cache.from_value(scrubbed).etag, 'the tag follows the sent bytes')
+            self.assertNotEqual(headers['ETag'], entry.etag)
+        clean = response_cache.from_value({'rows': [['a', 1]], 'ok': 'fine/relative'})
+        with patch.object(app, 'worksheet_entry', return_value=clean):
+            status, headers, body = self.get('/api/report-data?id=r&index=0')
+        self.assertEqual((status, body, headers['ETag']), (200, {'rows': [['a', 1]], 'ok': 'fine/relative'}, clean.etag))
+
+    def test_geography_errors_are_one_sentence_when_hosted(self):
+        result = json.loads(json.dumps(GEOGRAPHY_RESULT))
+        with patch.object(app.contribution_geo, 'geography', return_value=result):
+            status, _, body = self.post('/api/contributions/geography', {'zip5': ['02134']})
+        self.assertEqual(status, 200)
+        self.assertEqual(body['errors'], {'points': app.HOSTED_IO_ERROR, 'states': app.HOSTED_IO_ERROR})
+        self.assertEqual(body['warnings'], GEOGRAPHY_RESULT['warnings'])
+        self.assertNotIn('Errno', json.dumps(body))
+        self.assertEqual(result['errors'], GEOGRAPHY_RESULT['errors'], 'the reader\'s own answer is not changed')
 
 
 class StateWriteRoot(unittest.TestCase):

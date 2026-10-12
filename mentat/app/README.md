@@ -148,8 +148,10 @@ without `--read-only` or without `MENTAT_STATE_WRITE_ROOT` (exit 2), it serves o
 (contributor, street, city, ZIP, employer, occupation, date, source ID, the audit and reported fields; the
 `Employee List` and `Cycle Exceptions` kind of sheet) only to an Access email listed in
 `MENTAT_DONOR_ROW_EMAILS`, and `MENTAT_STATE_WRITE_ROOT` moves the caches it writes and refuses every other write
-under the checkout or the report folder (`requirements-hosted.in` lists its dependencies). With none of those set
-nothing changes.
+under the checkout or the report folder (`requirements-hosted.in` lists its dependencies). `/api/flow` drops the
+same person-level keys from its records (`FLOW_PERSON_KEYS`, counterparty and the filing pointers included) for an
+email not listed there, and a hosted cached body is scrubbed of server paths and OSError text like any other. With
+none of those set nothing changes.
 
 Startup self-check (by hand, no code): the portable index tokens name each data input by its relative path, size and
 `mtime_ns`. Copy the report folder and the contribution sources to the host in a way that keeps sub-second

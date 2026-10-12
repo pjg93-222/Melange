@@ -532,13 +532,48 @@ def names_person_level_field(body):
     return any(isinstance(name, str) and name in PERSON_LEVEL_FIELDS for name in named)
 
 
-def without_server_paths(value):
-    """`value` minus every string that is an absolute server path: a dict entry or list item holding one is omitted."""
+def without_server_paths(value, keep_places=False):
+    """`value` minus every string that is an absolute server path: a dict entry or list item holding one is omitted.
+    keep_places: a list item becomes '' instead, so a worksheet row keeps its columns."""
     drop = lambda item: isinstance(item, str) and _SERVER_PATH.match(item)
     if isinstance(value, dict):
-        return {key: without_server_paths(item) for key, item in value.items() if not drop(item)}
+        return {key: without_server_paths(item, keep_places) for key, item in value.items() if not drop(item)}
     if isinstance(value, list):
+        if keep_places:
+            return ['' if drop(item) else without_server_paths(item, True) for item in value]
         return [without_server_paths(item) for item in value if not drop(item)]
+    return value
+
+
+_OS_ERROR_TEXT = re.compile(r'\[(?:Errno|WinError) -?\d+\]')
+
+
+def without_os_error_text(value):
+    """`value` with every string that carries OSError text ("[Errno 2] ...", "[WinError 3] ...") replaced by HOSTED_IO_ERROR."""
+    if isinstance(value, str):
+        return HOSTED_IO_ERROR if _OS_ERROR_TEXT.search(value) else value
+    if isinstance(value, dict):
+        return {key: without_os_error_text(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [without_os_error_text(item) for item in value]
+    return value
+
+
+# Hosted /api/flow: its records (links[].evidence[], downstream.filing_record through flow_data._link_out) name a
+# counterparty, a date and the filing they were read from. An account not in MENTAT_DONOR_ROW_EMAILS gets none of
+# M1's person-level query fields in that body (PERSON_LEVEL_FIELDS: contributor, street, city, ZIP, employer,
+# occupation, date, every AUDIT and RAW field, source_url among them), nor the record's own names for them:
+# counterparty (the contributor), zip, and the row pointers sub_id and transaction_id (source_id and
+# reported_transaction_id there). 'state' and the committee and candidate ids are aggregates and stay.
+FLOW_PERSON_KEYS = PERSON_LEVEL_FIELDS | {'counterparty', 'zip', 'sub_id', 'transaction_id'}
+
+
+def without_person_keys(value):
+    """`value` minus every key in FLOW_PERSON_KEYS, at any depth."""
+    if isinstance(value, dict):
+        return {key: without_person_keys(item) for key, item in value.items() if key not in FLOW_PERSON_KEYS}
+    if isinstance(value, list):
+        return [without_person_keys(item) for item in value]
     return value
 
 
@@ -2911,6 +2946,11 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
         bytes are exactly send()'s; the headers differ only in Cache-Control (private, no-cache: the
         browser keeps the answer and revalidates every use) and the strong ETag."""
         import response_cache
+        if self.access_cfg.enforced and content_type.startswith('application/json'):
+            # Hosted: a cached JSON body gets send()'s path scrub and the OSError-text scrub too, then is keyed by
+            # its own bytes (the ETag follows the scrubbed body). ponytail: a full parse and encode on every hosted
+            # request; scrub once when the entry is stored if a hosted entry ever gets hot.
+            entry = response_cache.from_value(without_os_error_text(without_server_paths(json.loads(entry.body), True)))
         status, headers, body = response_cache.respond(entry, self.headers.get('If-None-Match'),
                                                        gzip_ok=accepts_gzip(self.headers.get('Accept-Encoding')),
                                                        content_type=content_type)
@@ -3289,11 +3329,14 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
                         raise ValueError('Choose an industry with completed reports.')
                     return [app.report_path(run, index) for index in chosen['indices']]
                 try:
-                    return self.send(flow_data.flow(query, report_directory=app.report_directory,
-                                                    root=PROJECT / '.cache/pac-evidence', workbooks=workbooks,
-                                                    allow_direct_collect=not getattr(app, 'read_only', False)))
+                    body = flow_data.flow(query, report_directory=app.report_directory,
+                                          root=PROJECT / '.cache/pac-evidence', workbooks=workbooks,
+                                          allow_direct_collect=not getattr(app, 'read_only', False))
                 except flow_data.FlowRefused as error:
                     return self.send(error.body(), 409)
+                if self.access_cfg.enforced and not donor_rows_allowed(self.access_user):
+                    body = without_person_keys(body)
+                return self.send(body)
             if parsed.path == '/api/evidence-job':
                 identifier = query.get('id', [''])[0]
                 if not re.fullmatch(r'snapshot-[a-f0-9]{32}', identifier):
@@ -3539,6 +3582,9 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             if self.path == '/api/contributions/geography':
                 entry = self.scope_body(data)
                 result = contribution_geo.geography(data)
+                if hosted and isinstance(result, dict) and result.get('errors'):
+                    # geography() files str(error) of a failed Census read (a URL, a file, an errno): one sentence
+                    result = {**result, 'errors': {key: HOSTED_IO_ERROR for key in result['errors']}}
                 if isinstance(result, dict):
                     result.update(industry_scope.echo(entry))
                 return self.send(result)
