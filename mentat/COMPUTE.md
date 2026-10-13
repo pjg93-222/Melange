@@ -86,6 +86,8 @@ Bytes are the wrong test for workbooks, SQLite and anything with a stamp, so `to
 JSON by leaf, CSV by cell, SQLite per table (schema, rows, a digest per column in primary-key order), workbooks per cell (formula
 and cached value), zips per decompressed member, text with line endings normalised. Classes: `BYTE_EQUAL`, `<KIND>_CANONICAL`,
 `EOL_ONLY`, `PATH_ONLY` (differs only by a declared mount prefix), `DIFFERENT`. The run fails on any `DIFFERENT` file or a file on one side only.
+Two writers state the Windows bytes explicitly, so their files are `BYTE_EQUAL` across platforms and not `EOL_ONLY`: `rf_write_csv` (refit-detect's
+`detect.csv`, the refit's review and panel CSVs) and `tools/pocket/build_page.py` (the pocket page) write CRLF on every platform.
 
 ```powershell
 # 1. noise floor: the Windows job twice on the same frozen inputs; only what differs between the two is masked
