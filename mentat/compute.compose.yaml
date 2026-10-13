@@ -57,7 +57,11 @@ services:
       - *m-mentat
       - {type: bind, source: "${ANCHORS_OUT_HOST:-${MENTAT_HOST}/mentat/state/giving-anchors}", target: /mentat/mentat/state/giving-anchors, bind: {create_host_path: false}}
       - *m-reports
-      - {type: bind, source: "${LOCALAPPDATA_HOST}/Melange", target: /localappdata/Melange, read_only: true, bind: {create_host_path: false}}
+      # The two files the anchors build reads from Melange, read-only, and nothing else under Melange (least privilege, decided 2026-10-12):
+      # forecast/anchors/build_giving_anchors.py:103-105 (sector_spend.csv) and :368 (fullscope_receipts.json, one folder up). The rest of
+      # LOCALAPPDATA/Melange (lda_rebuild keys and backups, dashboard_password.txt, the other data folders) is not visible to this job.
+      - {type: bind, source: "${LOCALAPPDATA_HOST}/Melange/lda_rebuild/derived/sector_spend/sector_spend.csv", target: /localappdata/Melange/lda_rebuild/derived/sector_spend/sector_spend.csv, read_only: true, bind: {create_host_path: false}}
+      - {type: bind, source: "${LOCALAPPDATA_HOST}/Melange/lda_rebuild/derived/fullscope_receipts.json", target: /localappdata/Melange/lda_rebuild/derived/fullscope_receipts.json, read_only: true, bind: {create_host_path: false}}
       - *m-receipts
       - *m-glassbox
 

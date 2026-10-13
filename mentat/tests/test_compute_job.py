@@ -310,6 +310,16 @@ class ComposeTests(unittest.TestCase):
             self.assertEqual(len(roots), 1, name)
             self.assertIs(roots[0]['read_only'], True, name)                        # the code and data tree is never writable as a whole
 
+    def test_nothing_of_melange_is_mounted_beyond_the_two_lda_files_the_anchors_build_reads(self):
+        melange = {}
+        for name, service in self.services.items():
+            for mount in service['volumes']:
+                if 'Melange' in mount['source'] or mount['target'].startswith('/localappdata/Melange'):
+                    melange.setdefault(name, []).append((mount['target'], mount.get('read_only')))
+        self.assertEqual(melange, {'anchors': [
+            ('/localappdata/Melange/lda_rebuild/derived/sector_spend/sector_spend.csv', True),
+            ('/localappdata/Melange/lda_rebuild/derived/fullscope_receipts.json', True)]})
+
     def test_the_container_environment_points_every_location_at_a_mount(self):
         for name, service in self.services.items():
             env = service['environment']
