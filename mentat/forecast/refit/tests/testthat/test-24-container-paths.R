@@ -71,3 +71,13 @@ test_that("RF_GLASSBOX_DIR, RF_RUNTIME, RF_RLIB, REFIT_OUT, RF_REPORT_DIR and RF
   rf24_with_env(c(RF_PUBLISH_DIR = "/publish"), expect_identical(rf_publish_dir(), "/publish"))
   rf24_with_env(c(RF_PUBLISH_DIR = NA), expect_identical(rf_publish_dir(), file.path(dirname(dirname(rf_home())), "app", "data")))
 })
+
+test_that("rf_write_csv writes CRLF explicitly, so detect.csv and the review CSVs are the same bytes on every platform (compute parity, D-177)", {
+  p <- file.path(tempdir(), "rf24_csv", "x.csv")
+  rf_write_csv(data.frame(a = c(1.5, NA), b = c("x", "é \"q\""), stringsAsFactors = FALSE), p)
+  expect_identical(readBin(p, "raw", file.size(p)), charToRaw(enc2utf8("\"a\",\"b\"\r\n1.5,\"x\"\r\nNA,\"é \"\"q\"\"\"\r\n")))
+  rf_write_csv(data.frame(a = "l1\nl2", stringsAsFactors = FALSE), p)                          # a newline inside a field is translated too, as Windows text mode does
+  expect_identical(readBin(p, "raw", file.size(p)), charToRaw("\"a\"\r\n\"l1\r\nl2\"\r\n"))
+  rf_write_csv(data.frame(a = character()), p)
+  expect_identical(readBin(p, "raw", file.size(p)), charToRaw("\"a\"\r\n"))
+})

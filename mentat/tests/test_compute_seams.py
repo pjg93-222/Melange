@@ -181,6 +181,20 @@ class OtherSeamTests(unittest.TestCase):
                 self.assertEqual(fec_key_store.load_keys(), [])                                  # no file, no store: nothing, as before
 
 
+class LineEndingTests(unittest.TestCase):
+    def test_the_pocket_page_is_written_with_crlf_on_every_platform(self):
+        with tempfile.TemporaryDirectory() as base:
+            data, page = Path(base) / 'pocket.json', Path(base) / 'out' / 'mentat-pocket.html'
+            data.write_text('{"a": [1, 2], "note": "two\\nlines"}', encoding='utf-8')
+            done = subprocess.run([sys.executable, str(ROOT / 'tools' / 'pocket' / 'build_page.py'), '--data', str(data), '--out', str(page)],
+                                  capture_output=True, text=True, timeout=120)
+            self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+            raw = page.read_bytes()
+            self.assertGreater(raw.count(b'\r\n'), 100)
+            self.assertEqual(raw.count(b'\n'), raw.count(b'\r\n'), 'a bare LF')
+            self.assertEqual(raw.count(b'\r'), raw.count(b'\r\n'), 'a bare CR')
+
+
 @unittest.skipUnless(os.name == 'nt' and shutil.which('powershell.exe'), 'Windows PowerShell 5.1 launchers')
 class LauncherTests(unittest.TestCase):
     def test_the_powershell_launcher_defaults(self):
