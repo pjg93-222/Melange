@@ -233,6 +233,26 @@ class PlanTests(Temp):
         self.assertEqual(Path(env['MENTAT_COMPUTE_RECEIPT_DIR']), snap.work / '_replay' / 'receipts')
         self.assertTrue(Path(env['MENTAT_COMPUTE_RECEIPT_DIR']).is_relative_to(snap.dir))
 
+    def test_path_arguments_outside_the_work_folder_are_refused_in_both_forms(self):
+        for flag in ('--source-database', '--run-directory', '--output-receipt', '--output'):
+            for args in ([flag, 'C:/real/place'], [flag + '=C:/real/place'], [flag, '/etc/x'], [flag + '=relative/x'], [flag, '{work}/../escape'], [flag + '={work}x/y'], [flag]):
+                with self.assertRaises(rpar.Refused, msg=args):
+                    rpar.create('pac-evidence', 'R1', ['--committees', 'C1', *args], root=self.base / 'refused', restrict=False)
+        self.assertFalse((self.base / 'refused').exists())                                    # refused before anything was made
+        for i, args in enumerate((['--output', '{work}/x'], ['--output={work}/x'], ['--output', '{work}'], ['--source-database={work}\\x.sqlite', '--output', '{work}/e'])):
+            snap = rpar.create('pac-evidence', 'OK%d' % i, ['--committees', 'C1', *args], root=self.base / 'ok', restrict=False)
+            self.assertTrue(snap.dir.is_dir())
+
+    def test_an_input_name_with_a_folder_or_dots_is_refused(self):
+        source = self.base / 'source.sqlite'
+        source.write_bytes(b'x')
+        for name in ('../escape.sqlite', 'sub/x.sqlite', 'sub\\x.sqlite', '..', '.', '', '/abs.sqlite'):
+            with self.assertRaises(rpar.Refused, msg=name):
+                rpar.create('pac-evidence', 'I1', ['--output', '{work}/e'], inputs=[name + '=' + str(source)], root=self.base / 'bad', restrict=False)
+        snap = rpar.create('pac-evidence', 'I2', ['--output', '{work}/e'], inputs=['source.sqlite=' + str(source)], root=self.base / 'bad', restrict=False)
+        self.assertEqual(sorted(snap.meta['inputs']), ['source.sqlite'])
+        self.assertTrue((snap.inputs / 'source.sqlite').is_file())
+
     def test_record_refuses_while_a_fanout_runs_and_stages_no_key(self):
         snap = rpar.create('pac-evidence', 'P1', ['--output', '{work}/e'], root=self.base, restrict=False)
         with patch.object(rpar, 'live_fanouts', return_value=[4242]), patch.object(rpar.secrets, 'stage', side_effect=AssertionError('keys staged')):
@@ -349,6 +369,7 @@ class RoundTrip(Temp):
         snap = rpar.create('pac-evidence', 'RT2', ['--output', '{work}/evidence'], root=self.base / 'root', restrict=False)
         self.assertNotEqual(rpar.record(snap), 0)
         self.assertEqual(snap.meta['state'], 'dirty')
+        self.assertFalse(snap.cassette.exists())                                            # the cassette that held the key is deleted
         with self.assertRaises(rpar.Refused):
             rpar.replay(snap, 'A1')
 

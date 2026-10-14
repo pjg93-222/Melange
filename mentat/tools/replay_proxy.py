@@ -64,13 +64,13 @@ def load_http_replay(path=None):
 
 
 def cassette_digest(directory):
-    """The log's bytes plus every body's name. Bodies are content-addressed, so a name stands for its content (a hand-edited body is not seen)."""
+    """The log's bytes, then every body's name and the sha256 of its content, in name order (a hand-edited body changes the digest)."""
     directory, digest = Path(directory), hashlib.sha256()
     with open(directory / 'cassette.jsonl', 'rb') as stream:
         for chunk in iter(lambda: stream.read(1 << 20), b''):
             digest.update(chunk)
-    for body in sorted(p.name for p in (directory / 'bodies').glob('*')):
-        digest.update(b'\n' + body.encode())
+    for body in sorted((p for p in (directory / 'bodies').glob('*') if p.is_file()), key=lambda p: p.name):
+        digest.update(b'\n' + body.name.encode() + b' ' + sha256_file(body).encode())
     return digest.hexdigest()
 
 
@@ -168,6 +168,8 @@ def serve(mode, args, command):
         refused = getattr(authority, 'refused', set())
     code = module._finish(harness, code, args.allow_unused or mode == 'record', 'replay_proxy')
     code = 5 if leak else code
+    if refused and not code:                                  # a certificate refused for an unminted host is a failed run even when the child swallowed it
+        code = 3
     report = harness.report()
     path = args.report or os.environ.get('REPLAY_REPORT')
     if path:

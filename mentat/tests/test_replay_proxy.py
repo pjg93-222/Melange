@@ -121,6 +121,15 @@ class ReplayTests(Proxy):
         done, report = self.replay(self.cassette((FEC + 'a/', b'{}')), [sys.executable, str(script), 'https://example.invalid/anything'])
         self.assertEqual(done.stdout.split()[0], 'refused', done.stderr)
         self.assertEqual(report['refused_tls_hosts'], ['example.invalid'])
+        self.assertEqual((done.returncode, report['exit_code']), (3, 3))                        # the child swallowed the refusal and exited 0; the run still fails
+
+    def test_the_cassette_digest_sees_a_body_edited_in_place(self):
+        cassette = self.cassette((FEC + 'a/', b'{"results": [1]}'))
+        before = rp.cassette_digest(cassette)
+        self.assertEqual(rp.cassette_digest(cassette), before)
+        body = next((cassette / 'bodies').iterdir())
+        body.write_bytes(b'{"results": [2]}')                                                   # same name, other content
+        self.assertNotEqual(rp.cassette_digest(cassette), before)
 
     def test_loopback_services_bypass_the_proxy(self):
         class Handler(http.server.BaseHTTPRequestHandler):

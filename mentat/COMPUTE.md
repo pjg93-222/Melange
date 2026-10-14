@@ -20,6 +20,9 @@ Not covered, on purpose: the industry report build (PowerShell 5.1 orchestrators
 tasks M2-c and M2-d), the console prewarm, the figure PNG export and the analytics index (console-side), and the manual ingest and
 model-freeze tools. The only PowerShell this lane needs is the Windows wrapper `tools/run_job.ps1`; the image has no PowerShell.
 
+`anchors` inputs: the container requires Melange's `sector_spend.csv` and `fullscope_receipts.json` (`%LOCALAPPDATA%\Melange\lda_rebuild\derived\sector_spend\` and `...\derived\`) to exist, because
+they are bind mounts with `create_host_path: false`. A missing file fails the container; the Windows `build_lda` wrote "unavailable" and carried on.
+
 ## Files
 
 | File | Role |

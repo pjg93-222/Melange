@@ -111,7 +111,24 @@ class Snap:
         return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else None
 
 
+PATH_FLAGS = ('--source-database', '--run-directory', '--output-receipt', '--output')       # the job arguments that name a place the job writes or reads
+
+
+def check_arguments(args, inputs):
+    """Refuse a snapshot whose paths leave the run's work folder: a path argument must sit under {work} (the database comes in with --input), and an input NAME is a bare file name."""
+    for i, a in enumerate(args):
+        flag, eq, val = a.partition('=')
+        v = val if eq else (args[i + 1] if i + 1 < len(args) else '')
+        if flag in PATH_FLAGS and not (v == '{work}' or (v.startswith('{work}') and v[6] in '/\\' and '..' not in re.split(r'[\\/]', v))):
+            raise Refused(flag + ' must be under {work}; pass the database with --input')
+    for pair in inputs:
+        file = pair.partition('=')[0]
+        if file in ('', '.', '..') or Path(file).name != file or '/' in file or '\\' in file:
+            raise Refused('--input name ' + repr(file) + ' must be a bare file name (no folders, no ..)')
+
+
 def create(job, name, args, inputs=(), workers=2, root=None, restrict=True):
+    check_arguments(args, inputs)
     snap = Snap(job, name, root)
     if snap.dir.exists():
         raise Refused(str(snap.dir) + ' exists; a snapshot is frozen once')
@@ -210,6 +227,8 @@ def record(snap, plan=False):
     except module.SecretLeak as error:
         clean, code = False, code or 5
         print('replay_parity: ' + str(error), file=sys.stderr)
+        if snap.cassette.exists():
+            shutil.rmtree(snap.cassette, ignore_errors=False)             # a cassette that holds a key is not kept on disk
     report = snap.load('R0.replay.json') or {}
     meta.update(state='recorded' if clean and code == 0 else ('dirty' if not clean else 'record-failed'), keys_count=info['count'], key_ids=info['key_ids'],
                 cassette_sha256=report.get('cassette_sha256'), http_replay_sha256=report.get('http_replay_sha256'), recorded_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
