@@ -969,5 +969,62 @@ class Route(unittest.TestCase):
         self.assertEqual((status, body['reason'], body['reconciliation']['equal']), (409, 'reconciliation', False))
 
 
+class CommitteeNames(unittest.TestCase):
+    """B4 (lane Z, 2026-10-15): a committee reached only as a recipient is named from the FEC committee master
+    on disk, never by its bare ID and never by a name made up for it. Nothing is fetched."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        cls.master = Path(cls.temp.name) / 'master'
+        (cls.master / 'cm26').mkdir(parents=True)
+        (cls.master / 'cm26' / 'cm.txt').write_text(
+            f'{ONWARD_ID}|ONWARD POLITICAL ACTION COMMITTEE|TREASURER, A|1 MAIN ST||CITY|DC|20001|B|Q||M|C||\n'
+            'C90000099|SOMEONE ELSE PAC|T|1 MAIN ST||CITY|DC|20001|B|Q||M|C||\n', encoding='ascii')
+        cls.saved = flow_data.MASTER_ROOT
+        flow_data.MASTER_ROOT = cls.master
+
+    @classmethod
+    def tearDownClass(cls):
+        flow_data.MASTER_ROOT = cls.saved
+        cls.temp.cleanup()
+
+    def test_names_come_from_the_saved_data_first_then_the_master_and_otherwise_none_is_made_up(self):
+        names = flow_data.Names({'C90000010': 'FILED NAME PAC', 'C90000011': 'C90000011'})
+        self.assertEqual(flow_data.committee_label(names, 'C90000010'), 'Filed Name PAC')
+        self.assertEqual(flow_data.committee_label(names, ONWARD_ID), 'Onward Political Action Committee')     # master
+        self.assertEqual(names.get(ONWARD_ID), 'ONWARD POLITICAL ACTION COMMITTEE')
+        # An ID the ledger fell back to is no name; with none on file anywhere it is "Unnamed committee".
+        for ident in ('C90000011', 'C90000012'):
+            self.assertFalse(names.named(ident))
+            self.assertEqual(flow_data.committee_label(names, ident), 'Unnamed committee')
+            self.assertEqual(flow_data.committee_tag(names, ident), f'Unnamed committee {ident}')
+            self.assertEqual(flow_data.unnamed_fields(names, ident), {'unnamed': True})
+        self.assertEqual(flow_data.unnamed_fields(names, ONWARD_ID), {})
+
+    def test_the_flow_says_where_money_went_by_name_and_by_ID_when_there_is_no_name(self):
+        def stub_text(directory, with_name):
+            folder = Path(directory) / 'flow-fixture'
+            write_fixture(directory)
+            evidence = json.loads((folder / 'evidence.json').read_text(encoding='ascii'))
+            evidence['transfers'] = [{'destination': ONWARD_ID, 'destination_name': 'ONWARD PAC'}] if with_name else []
+            (folder / 'evidence.json').write_text(json.dumps(evidence), encoding='ascii')
+            flow_data._CACHE.clear()
+            body = produce(directory)
+            return by_id(body)[f'stub:onward:committee:{BRIDGE_ID}:{ONWARD_ID}']['label']
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertEqual(stub_text(directory, True), 'passed to Onward PAC', 'the saved data\'s own name wins')
+            self.assertEqual(stub_text(directory, False), 'passed to Onward Political Action Committee', 'the master names it')
+            flow_data.MASTER_ROOT = Path(directory) / 'no-master'
+            try:
+                flow_data._CACHE.clear()
+                text = stub_text(directory, False)
+            finally:
+                flow_data.MASTER_ROOT = self.master
+            self.assertEqual(text, f'passed to Unnamed committee {ONWARD_ID}')
+            self.assertNotIn('ONWARD', text.upper().replace(ONWARD_ID, ''), 'no name was made up')
+        flow_data._CACHE.clear()
+
+
 if __name__ == '__main__':
     unittest.main()
