@@ -140,6 +140,7 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/evidence-flow.js': ('evidence-flow.js', 'text/javascript'),
                  '/graph-flow.js': ('graph-flow.js', 'text/javascript'),
                  '/studio-flow.js': ('studio-flow.js', 'text/javascript'),
+                 '/candidate-spending.js': ('candidate-spending.js', 'text/javascript'),
                  '/flow.css': ('flow.css', 'text/css'),
                  # Lane P (boards #47-#55): maps whose marks cards are its layers. The
                  # model (map-layers.js), the Albers SVG engine and Layer control
@@ -3472,6 +3473,10 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             if parsed.path == '/api/pac-flow-catalog':
                 from pac_flow_access import catalog
                 return self.send(catalog(app, query.get('industry', [''])[0], query.get('q', [''])[0]))
+            if parsed.path == '/api/candidate-spending':
+                # A campaign's own Schedule B spending, from saved snapshots only (candidate_spending.py): no fetch here.
+                import candidate_spending
+                return self.send(*candidate_spending.respond(query))
             if parsed.path == '/api/flow':
                 # Lane F (boards #44-#46): where a committee's (or an industry's) money came
                 # from and where it went, built from the same downstream measurement as

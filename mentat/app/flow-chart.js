@@ -38,6 +38,32 @@
   'use strict';
 
   const layoutApi = () => root.MentatFlowLayout || (typeof require === 'function' ? require('./flow-layout.js') : null);
+
+  // The campaign-spending card and panel (candidate-spending.js) load the first time a candidate is hovered, as
+  // evidence-map.js does: a console that never draws a Flow does not carry them. A node they can speak for is an
+  // individual candidate (not the industry flow's aggregate outcome) in an even cycle.
+  const spendable = (node, cycle) => Boolean(node && node.kind === 'candidate' && !node.outcome && !node.stub
+    && /^[HSP][0-9A-Z]{8}$/.test(String(node.candidate_id || '')) && Number(cycle) % 2 === 0 && Number(cycle) > 1900);
+  let spendLoading = null;
+  function spendModule() {
+    if (root.MentatCandidateSpending) return root.MentatCandidateSpending;
+    if (typeof module !== 'undefined' && typeof require === 'function') {
+      try { return require('./candidate-spending.js'); } catch (error) { return null; }
+    }
+    return null;
+  }
+  function spendReady(doc) {
+    const have = spendModule();
+    if (have) return Promise.resolve(have);
+    if (!spendLoading) spendLoading = new Promise(resolve => {
+      const script = doc.createElement('script');
+      script.src = '/candidate-spending.js';
+      script.onload = () => resolve(spendModule());
+      script.onerror = () => { spendLoading = null; resolve(null); };
+      doc.head.appendChild(script);
+    });
+    return spendLoading;
+  }
   const NEUTRAL = '#a39b92';
   const FALLBACK = ['#327a7a', '#57447b', '#8b6984', '#eca91c', '#de8aab', '#7d4b00', '#3cb0a3', '#83333e', '#99973f',
     '#a09eea', '#d88766', '#509ecd'];
@@ -447,6 +473,7 @@
     const join = (...words) => words.filter(Boolean).join(' · ');
     if (expandable(node)) return join(node.group ? 'Click to show more' : 'Click to expand', pin);
     if (node.kind === 'committee' && !node.root && node.committee_id && hints.zoom) return join('Click to zoom in', pin);
+    if (node.kind === 'candidate' && hints.spend && spendable(node, hints.cycle)) return join('Click for spending detail', pin);
     if (node.kind === 'candidate' && hints.rows) return join('Click to open in Rows', pin);
     return node.stub ? '' : pin;
   }
@@ -891,6 +918,34 @@
     tip.setAttribute('role', 'status');
     const explore = () => Boolean(state.options.explore);
 
+    /* ------------------------------------------------------- a candidate's own spending (card and panel) */
+    // The campaign's spending is the campaign's, never this flow's dollars. The card is a section of the tooltip; a click
+    // opens the panel docked beside the chart (state.options.spendingPanel); Shift-click still pins. Both need the cycle
+    // the flow was drawn for, and the module, which loads on the first hover.
+    let spend = null, lastPlace = null;
+    const cycleOf = () => Number(state.payload && state.payload.cycle);
+    // The other candidates of the same office the chart draws: the only campaigns a comparison may read.
+    const peersOf = node => [...new Set(state.context.result.nodes.filter(item => spendable(item, cycleOf())
+      && item.candidate_id !== node.candidate_id && String(item.candidate_id)[0] === String(node.candidate_id)[0])
+      .map(item => item.candidate_id))];
+    function spending() {
+      if (spend || !explore() || state.options.spending === false) return spend;
+      const api = spendModule();
+      if (!api) return null;
+      spend = api.controller(host, {fetcher: state.options.spendFetcher, panel: state.options.spendingPanel || null, view: state.view,
+        link: url => (root.MentatScope && root.MentatScope.fecLink ? root.MentatScope.fecLink(url) : ''),
+        onRows: state.options.onCandidate, peersOf,
+        after: () => { if (!tip.hidden && lastPlace) place(lastPlace.anchor, lastPlace.point); }});
+      return spend;
+    }
+    function openSpend(node) {
+      if (!explore() || !state.options.spendingPanel || !spendable(node, cycleOf())) return false;
+      const ready = spending();
+      if (ready) { hide(); return ready.open(node, cycleOf()); }
+      spendReady(doc).then(api => { const made = api && spending(); if (made) made.open(node, cycleOf()); });
+      return true;
+    }
+
     function draw() {
       const total = options.width || Math.max(640, Math.floor(host.clientWidth || 1100));
       const height = options.height || Math.max(360, Math.floor(host.clientHeight || 520));
@@ -925,6 +980,11 @@
         state.view.pins = state.view.pins.filter(id => find(id));
       }
       applyPins();
+      // The panel the reader had open comes back after a redraw (a resize), for the candidate if it is still drawn.
+      if (state.view.spend && explore() && state.options.spendingPanel) {
+        const ready = spending();
+        if (ready) ready.restore(id => state.context.result.nodes.find(item => spendable(item, cycleOf()) && item.candidate_id === id));
+      }
       if (state.context.needs.length) wantFull(state.context.needs);
     }
 
@@ -1240,11 +1300,15 @@
       tip.style.top = `${Math.round(spot.top + scrollY)}px`;
     }
 
-    const hintsOf = () => (explore() ? {zoom: Boolean(state.options.onReroot), rows: Boolean(state.options.onCandidate)} : null);
+    const hintsOf = () => (explore() ? {zoom: Boolean(state.options.onReroot), rows: Boolean(state.options.onCandidate),
+      spend: Boolean(state.options.spendingPanel), cycle: cycleOf()} : null);
 
     function show(target, anchor, point) {
       const text = describe(target, state.context, state.payload, hintsOf());
       tip.replaceChildren();
+      tip.classList.remove('has-spend');
+      tip.dataset.for = target.node ? target.node.id : (target.link ? target.link.id : '');
+      lastPlace = {anchor, point};
       const title = doc.createElement('strong');
       title.textContent = text.title;
       tip.appendChild(title);
@@ -1252,6 +1316,13 @@
         const row = doc.createElement('span');
         row.textContent = line;
         tip.appendChild(row);
+      }
+      // A candidate: how their campaign spent its money, a section of the tooltip (read lazily, one read per candidate).
+      const candidate = target.node && explore() && state.options.spending !== false && spendable(target.node, cycleOf()) ? target.node : null;
+      if (candidate) {
+        const ready = spending();
+        if (ready) ready.section(tip, candidate, cycleOf());
+        else spendReady(doc).then(api => { if (api && !tip.hidden && tip.dataset.for === candidate.id) show(target, anchor, point); });
       }
       if (text.url) {
         const link = doc.createElement('a');
@@ -1269,7 +1340,11 @@
       place(anchor, point);
     }
 
-    function hide() { tip.hidden = true; state.shown = null; state.menu = false; }
+    function hide() {
+      tip.hidden = true; state.shown = null; state.menu = false;
+      tip.classList.remove('has-spend');
+      if (spend) spend.cancel();
+    }
 
     function targetOf(element) {
       const group = element.closest('.flow-node');
@@ -1332,6 +1407,7 @@
       if (event && event.shiftKey && explore()) { togglePin(node.id); return; }      // Chart Studio: a plain click
       if (explore() && expandable(node)) { toggleGroup(node.id, true); return; }
       if (zoomable(node)) follow(node.committee_id, node, node);
+      else if (node.kind === 'candidate' && openSpend(node)) { /* the panel is open: Open in Rows is a button in it */ }
       else if (node.kind === 'candidate' && state.options.onCandidate) state.options.onCandidate(node);
       else if (node.bucket === 'other' && state.options.onOther) state.options.onOther(node);
     }
@@ -1464,6 +1540,9 @@
         host.removeEventListener('focusout', focusOut);
         host.replaceChildren();
         if (state.options.pinPanel) { state.options.pinPanel.replaceChildren(); state.options.pinPanel.hidden = true; }
+        // The spending panel is emptied with the chart; what the reader had open (view.spend) is kept for the next draw.
+        if (spend) spend.detach();
+        else if (state.options.spendingPanel) { state.options.spendingPanel.replaceChildren(); state.options.spendingPanel.hidden = true; }
       }
     };
   }
