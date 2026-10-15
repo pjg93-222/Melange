@@ -594,7 +594,7 @@
     return {nodes, links: links.concat([...byKey.values()]), shown: [...shown], residual: rest.length > 0};
   }
 
-  // The whole arrangement. spec: {small: true, minShare, open: {id: count}, full: the top=0 answer}. Returns
+  // The whole arrangement. spec: {small: true, minShare, open: {id: count}, keep: [ids never folded], full: the top=0 answer}. Returns
   // {payload, groups: [{id, stage, shown, residual}], refused: {id: reason}, needs: [ids waiting for spec.full]}.
   // The payload has the answer's shape (every node and link carries whole-cent values summing to its links),
   // so validate() runs on it as on the answer.
@@ -605,7 +605,8 @@
     let state = {nodes: payload.nodes.map(node => Object.assign({}, node)),
       links: payload.links.map(link => Object.assign({}, link, {cents: toCents(link.value)}))
         .filter(link => known.has(link.source) && known.has(link.target) && link.cents > 0)};
-    const groups = [], refused = {}, details = {}, needs = [], keep = new Set();
+    // spec.keep: nodes the reader is looking at (the focused committee, a pinned node) are never folded away.
+    const groups = [], refused = {}, details = {}, needs = [], keep = new Set(spec.keep || []);
     for (const [id, count] of open) {
       if (id.startsWith('small:') || !state.nodes.some(node => node.id === id)) continue;
       if (!spec.full) { needs.push(id); continue; }

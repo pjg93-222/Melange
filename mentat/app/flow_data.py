@@ -129,38 +129,55 @@ UNNAMED = 'Unnamed committee'
 MASTER_ROOT = None                      # tests point this at a directory of cm*/cm.txt; None = the console's inputs
 
 
-@lru_cache(maxsize=2)
-def _master_dict(files):
+@lru_cache(maxsize=4)
+def _master_file(entry):
     import pac_flow_access
-    return dict(pac_flow_access._master_names(files))
+    return dict(pac_flow_access._master_names((entry,)))
 
 
-def committee_names():
-    """{committee ID: name as filed} from the FEC committee master on disk, newest file first; {} when this
-    machine has none."""
+def committee_names(cycle=None):
+    """[(year, {committee ID: name as filed})] from the FEC committee master on disk, in the order a lookup tries
+    them: the file for the flow's cycle first (a committee is renamed from cycle to cycle: C00728980 is
+    "TIPPINGPOINT 2020" in cm22 and "DEMOCRACY SOLVES IT" in cm26), then the newest first; [] when this machine
+    has none. Names only: nothing here is an amount."""
     import evidence_csv
     base = Path(MASTER_ROOT) if MASTER_ROOT else evidence_csv.INPUTS / 'fec_committee_master'
+    mine = f'cm{int(cycle) % 100:02d}' if str(cycle or '').isdigit() else ''
     try:
-        files = tuple((str(path), path.stat().st_mtime_ns, path.stat().st_size)
-                      for path in (folder / 'cm.txt' for folder in sorted(base.glob('cm*'), reverse=True)) if path.is_file())
-        return _master_dict(files)
+        folders = sorted(base.glob('cm*'), reverse=True)
+        folders.sort(key=lambda folder: folder.name != mine)       # stable: the cycle's own file, the rest newest first
+        found = []
+        for folder in folders:
+            path = folder / 'cm.txt'
+            if path.is_file():
+                year = '20' + folder.name[2:] if re.fullmatch(r'cm\d\d', folder.name) else ''
+                found.append((year, _master_file((str(path), path.stat().st_mtime_ns, path.stat().st_size))))
+        return found
     except OSError:
-        return {}
+        return []
 
 
 class Names(dict):
-    """The names a flow's committees are filed under: the saved data's own first, then the FEC master. A
-    value equal to the ID is no name (the ledgers fall back to it)."""
+    """The names a flow's committees are filed under: the saved data's own first, then the FEC master (the file for
+    `cycle` first). A value equal to the ID is no name (the ledgers fall back to it)."""
 
-    def __init__(self, *args):
+    def __init__(self, *args, cycle=None):
         super().__init__(*args)
-        self.master = committee_names()
+        self.master = committee_names(cycle)
+
+    def _master(self, key):
+        return next(((names[key], year) for year, names in self.master if names.get(key)), (None, ''))
 
     def get(self, key, default=None):
         value = dict.get(self, key)
         if value and value != key:
             return value
-        return self.master.get(key) or value or default
+        return self._master(key)[0] or value or default
+
+    def master_year(self, ident):
+        """The year of the FEC committee master file that names a committee here; '' when the saved data does."""
+        value = dict.get(self, ident)
+        return '' if value and value != ident else self._master(ident)[1]
 
     def named(self, ident):
         value = self.get(ident)
@@ -179,6 +196,13 @@ def committee_tag(names, ident):
 
 def unnamed_fields(names, ident):
     return {} if names.named(ident) else {'unnamed': True}
+
+
+def master_fields(names, ident):
+    """A committee node whose name is the FEC committee master's says which year's file it comes from (the tooltip
+    says so instead of "As filed")."""
+    year = names.master_year(ident) if names.named(ident) else ''
+    return {'name_master': year} if year else {}
 
 
 SMALL_WORDS = frozenset({'OF', 'AND', 'THE', 'FOR', 'TO', 'IN', 'ON', 'AT', 'BY', 'AN', 'OR', 'A', 'AS'})
@@ -670,7 +694,7 @@ def committee_flow(committee, cycle, *, identifier='', depth=DEFAULT_DEPTH, root
                 queue.append(edge['destination'])
     drawn = {ident for ident, level in hop.items() if level <= depth - 2}
     network_ids = {key[1] for key in found['keys'] if key[0] == cycle}
-    names = Names(facts['names'])
+    names = Names(facts['names'], cycle=cycle)
     ledgers = {}
     for key, unit in found['units'].items():
         if key[0] == cycle:
@@ -728,7 +752,8 @@ def committee_flow(committee, cycle, *, identifier='', depth=DEFAULT_DEPTH, root
         node = graph.node('committee:' + ident, stage=1 + hop[ident], label=label(ident), kind='committee',
                           committee_id=ident, name_as_filed=names.get(ident, ident),
                           fec_url=committee_url(ident, cycle), root=ident == committee,
-                          saved=(cycle, ident) in found['units'], **unnamed_fields(names, ident))
+                          saved=(cycle, ident) in found['units'], **unnamed_fields(names, ident),
+                          **master_fields(names, ident))
         if (cycle, ident) not in found['units']:
             node['unreached'] = facts['gaps'].get((cycle, ident)) or 'no saved snapshot'
         node.update(carryover_of(found, cycle, ident, label))
@@ -1829,7 +1854,7 @@ def industry_flow(label, cycle, paths, *, depth=DEFAULT_DEPTH, top=DEFAULT_TOP, 
     transfer_edges = [edge for edge in found['edges'] if edge['cycle'] == cycle and not edge.get('terminal_candidate')]
     pairs = {(edge['source'], edge['destination']) for edge in transfer_edges}
     network_ids = {key[1] for key in found['keys'] if key[0] == cycle}
-    names = Names({ident: item['label'] for ident, item in info.items()})
+    names = Names({ident: item['label'] for ident, item in info.items()}, cycle=cycle)
     ledgers = {}
     for key, unit in found['units'].items():
         if key[0] == cycle:
@@ -1919,7 +1944,7 @@ def industry_flow(label, cycle, paths, *, depth=DEFAULT_DEPTH, top=DEFAULT_TOP, 
         node = graph.node('committee:' + ident, stage=1 + hop[ident], label=label_of(ident), kind='committee',
                           committee_id=ident, name_as_filed=names.get(ident, ident), fec_url=committee_url(ident, cycle),
                           saved=(cycle, ident) in found['units'], category=info.get(ident, {}).get('category', ''),
-                          pooled=True, fixed=True, **unnamed_fields(names, ident))
+                          pooled=True, fixed=True, **unnamed_fields(names, ident), **master_fields(names, ident))
         if (cycle, ident) not in found['units']:
             node['unreached'] = 'no saved snapshot'
         node.update(carryover_of(found, cycle, ident, label_of))

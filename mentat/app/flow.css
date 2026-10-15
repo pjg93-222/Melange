@@ -169,7 +169,6 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 /* The level the reader came from: its columns up to the node they clicked, narrow and faded. */
 .flow-ctx-bar { stroke: none; }
 .flow-ctx-focus { stroke: var(--acu-plum); stroke-width: 1.6; }
-.flow-ctx-header { fill: #8d869a; font: 600 9px var(--font-sans); letter-spacing: .1em; }
 /* An unfolded group: a thin bracket with a chevron to fold it back; an unfoldable one has its own chevron. */
 .flow-bracket { fill: none; stroke: #8d869a; stroke-width: 1.2; }
 .flow-collapse { cursor: pointer; outline: none; }
@@ -184,6 +183,9 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 .flow-onward rect { fill: #fff; stroke: var(--acu-purple); stroke-width: 1; }
 .flow-onward text { fill: var(--acu-purple); font: 500 10.5px var(--font-sans); }
 .flow-link--onward { cursor: pointer; }
+/* The answer did not conserve: drawn as received, with this word above it. */
+.flow-contract-notice { margin: 0 0 8px; padding: 8px 12px; border: 1px solid var(--acu-gold); border-radius: 6px;
+  background: #fff6e0; color: #3c3449; font: 500 12.5px/1.4 var(--font-sans); }
 /* A word beside a node (a committee with nothing collected, a group that cannot unfold). */
 .flow-notice { cursor: pointer; }
 .flow-notice rect { fill: #fff6e0; stroke: var(--acu-gold); stroke-width: 1; }
@@ -191,7 +193,11 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 /* Pins: each route stays lit in its own colour; "Show only linked" fades the rest. */
 .flow-chart.has-pins .flow-link.is-pinned { fill-opacity: .6; }
 .flow-chart.has-pins.is-tracing .flow-link.is-pinned { fill-opacity: .6; }
-.flow-chart.is-linked-only .flow-link:not(.is-pinned) { fill-opacity: .04; }
+/* What a pooling committee spends out of its pool (or what filled it) is not the pin's money: hatched, lighter,
+   with a dashed edge in the pin's colour (the fill and stroke are set by flow-chart.js). */
+.flow-chart.has-pins .flow-link.is-pooled, .flow-chart.has-pins.is-tracing .flow-link.is-pooled { fill-opacity: .7; stroke-opacity: .85;
+  stroke-width: 1.1; stroke-dasharray: 5 3; }
+.flow-chart.is-linked-only .flow-link:not(.is-pinned):not(.is-pooled) { fill-opacity: .04; }
 .flow-chart.is-linked-only .flow-node:not(.is-routed) { opacity: .3; }
 .flow-pins[hidden] { display: none; }
 .flow-body:has(> .flow-pins[hidden]) { grid-template-columns: minmax(0, 1fr); }
@@ -204,7 +210,11 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 .flow-pin-swatch { flex: none; width: 10px; height: 10px; border-radius: 50%; }
 .flow-pin-x { margin-left: auto; padding: 0 4px; border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
 .flow-pin-x:hover, .flow-pin-x:focus-visible { color: var(--acu-plum); }
-.flow-pin-path { margin: 8px 0 0; padding: 0; list-style: none; font: 400 12.5px/1.35 var(--font-sans); }
+.flow-pin-block { margin-top: 8px; }
+.flow-pin-block + .flow-pin-block { padding-top: 8px; border-top: 1px dashed var(--line); }
+.flow-pin-block-head { margin: 0; color: #4c4459; font: 600 12px/1.35 var(--font-sans); }
+.flow-pin-block.is-pooled .flow-pin-block-head, .flow-pin-block.is-pooled .flow-pin-node, .flow-pin-block.is-pooled .flow-pin-step { color: #7f7888; }
+.flow-pin-path { margin: 4px 0 0; padding: 0; list-style: none; font: 400 12.5px/1.35 var(--font-sans); }
 .flow-pin-node { display: flex; justify-content: space-between; gap: 8px; color: #2f273f; }
 .flow-pin-node.is-pin { font-weight: 600; }
 .flow-pin-amount { flex: none; color: #6b6376; font-variant-numeric: tabular-nums; }

@@ -135,8 +135,19 @@
     const api = layoutApi();
     // The layout wraps names between words with the page's measured widths (FL3).
     if (!options.measure) options = Object.assign({}, options, {measure: measurer(options)});
-    // A view's own arrangement (small transfers folded, a bucket unfolded) is applied to the answer first.
-    const arranged = options.arrange ? api.arrange(payload, options.arrange) : null;
+    // A view's own arrangement (small transfers folded, a bucket unfolded) is applied to the answer first. The
+    // arrangement drops a dangling or empty link and re-adds every node's totals, so it can hide what is wrong with
+    // the answer: the answer is checked as it arrived, and again as arranged. If either does not conserve, the
+    // answer is drawn as received (nothing folded or unfolded) and the view says so (problems).
+    let arranged = null, problems = [];
+    if (options.arrange) {
+      problems = api.validate(payload);
+      if (!problems.length) {
+        arranged = api.arrange(payload, options.arrange);
+        problems = api.validate(arranged.payload);
+        if (problems.length) arranged = null;
+      }
+    }
     const result = api.layout(arranged ? arranged.payload : payload, options);
     const colours = api.colours(result, options.palette || palette(), options.neutral || NEUTRAL);
     // Chart Studio (#46): a worksheet flow deals its own colours after the palette's
@@ -145,7 +156,7 @@
     const outcomes = api.outcomes(result, colours);
     return {result, colours, outcomes, format: options.format || {short, full},
       payload: arranged ? arranged.payload : payload, groups: arranged ? arranged.groups : [],
-      refused: arranged ? arranged.refused : {}, needs: arranged ? arranged.needs : []};
+      refused: arranged ? arranged.refused : {}, needs: arranged ? arranged.needs : [], problems};
   }
 
   function ribbonFill(link, context, mode, index, prefix) {
@@ -411,7 +422,9 @@
       if (node.member_count > 10) lines.push(`… and ${node.member_count - 10} more`);
     } else if (node.bucket === 'other' || (node.kind === 'bucket' && node.member_count)) lines.push(`${node.member_count} grouped` + ((node.members || []).length ? ': ' + node.members.slice(0, 4)
       .map(member => `${member.label} ${short(member.value)}`).join(', ') + (node.member_count > 4 ? ', …' : '') : ''));  // hosted unlisted bodies drop members
-    if (node.name_as_filed && node.name_as_filed !== node.label) lines.push(`As filed: ${node.name_as_filed}`);
+    // A name from the FEC committee master (a committee the filings only name by ID) says which year's file it is.
+    if (node.name_as_filed && node.name_as_filed !== node.label)
+      lines.push(`${node.name_master ? `Name from FEC committee master, ${node.name_master}` : 'As filed'}: ${node.name_as_filed}`);
     // The lines the drawing leaves off (FL6: one line under a label at most): here, every one.
     for (const line of node.sublines || []) if (line !== node.subline_shown) lines.push(line);
     for (const line of node.details || []) lines.push(line);
@@ -630,6 +643,24 @@
     return () => clearInterval(timer);
   }
 
+  // One read at a time per view. begin() ends the one before it - its timer stops, its answer is dropped - and
+  // returns {live(), end()}: live() is false once a later begin() or cancel() has replaced this read (or the
+  // view was left, Escape, Back), so a slow read that finishes late neither writes the status line nor the chart.
+  // The status setter is guarded by the same test, so a tick already queued cannot write over a newer answer.
+  function loader() {
+    let ticket = 0, stop = null;
+    const cancel = () => { ticket += 1; if (stop) { stop(); stop = null; } };
+    return {
+      cancel,
+      begin(set, words) {
+        cancel();
+        const mine = ticket;
+        const own = stop = waiting(text => { if (mine === ticket) set(text); }, words);
+        return {live: () => mine === ticket, end() { if (mine === ticket) { own(); stop = null; } }};
+      }
+    };
+  }
+
   // The chain behind a pinned node, step by step: its largest way in and its largest way out, each hop
   // with the amount of that one step. Nothing is summed or carried along a chain (pooled money is not
   // traced money), and a chain never crosses the root committee's pool: a candidate's chain ends at the
@@ -679,6 +710,103 @@
 
   // A node's wording, for the pins and the notices.
   const nameOf = node => (node ? nodeTitle(node) : '');
+  const possess = name => (/s$/i.test(name) ? `${name}'` : `${name}'s`);
+
+  // The committees that pool: the root's own pool, and any committee that takes money in from more than one
+  // source in the chart (a second company or committee, an "Other donors" or "cash from before" stub). What leaves
+  // one is its spending out of the pool, not any one source's money.
+  function pools(result) {
+    const sources = new Map();
+    for (const link of result.links) {
+      if (!sources.has(link.target)) sources.set(link.target, new Set());
+      sources.get(link.target).add(link.source);
+    }
+    return new Set(result.nodes.filter(node => node.kind === 'committee' && !node.stub
+      && (node.root || (sources.get(node.id) || []).size > 1)).map(node => node.id));
+  }
+
+  // The route a pinned node lights (the one a hover lights), with each of its ribbons told apart: 'traced', the
+  // pin's own money, from the pin out to and into the first pooling committee in either direction; and 'pooled',
+  // that committee's own spending (or, upstream of a pinned outcome, what filled its pool), drawn but never counted
+  // as the pin's. A node stays open (traced onward) only while every ribbon that reaches it is traced and it does not
+  // pool, so no unbroken chain runs through a pool. Stubs are not steps and are left out.
+  function pinRoute(result, id) {
+    const kinds = new Map();
+    const start = result.nodes.find(node => node.id === id);
+    if (!start) return {kinds, nodes: new Set()};
+    const lit = traced(result, id);
+    const pool = pools(result);
+    const byId = new Map(result.nodes.map(node => [node.id, node]));
+    const own = result.links.filter(link => lit.links.has(link.id) && !byId.get(link.source).stub && !byId.get(link.target).stub);
+    const ids = new Set([id]);
+    for (const link of own) { ids.add(link.source); ids.add(link.target); }
+    for (const way of [{near: 'source', far: 'target', sign: 1}, {near: 'target', far: 'source', sign: -1}]) {
+      const edges = new Map();
+      for (const link of own) {
+        if (!edges.has(link[way.near])) edges.set(link[way.near], []);
+        edges.get(link[way.near]).push(link);
+      }
+      const heard = new Map();                           // node -> how many traced / pooled ribbons reached it
+      const open = node => node === id || (heard.has(node) && heard.get(node).pooled === 0 && heard.get(node).traced > 0 && !pool.has(node));
+      const order = [...ids].sort((a, b) => way.sign * (byId.get(a).stage - byId.get(b).stage));
+      for (const node of order) {
+        if (node !== id && !heard.has(node)) continue;       // not reached from the pin in this direction
+        for (const link of edges.get(node) || []) {
+          if (kinds.has(link.id)) continue;
+          const kind = open(node) ? 'traced' : 'pooled';
+          kinds.set(link.id, kind);
+          const far = heard.get(link[way.far]) || {traced: 0, pooled: 0};
+          far[kind] += 1;
+          heard.set(link[way.far], far);
+        }
+      }
+    }
+    return {kinds, nodes: lit.nodes};
+  }
+
+  // The panel's account of one pin: its chain (chainOf) cut into blocks, in the order money moves. 'traced' is the
+  // pin's own money; 'pooled' is a pool's spending out of (or receipts into) its pool, headed as all donors', with
+  // each step its own amount. A pooling committee shows its own total, never a donor's share of it. Every step and
+  // the node it enters sit in the block of that step, so no downstream amount can land in a donor's block.
+  function pinBlocks(result, id, format) {
+    const money = (format && format.short) || short;
+    const hops = chainOf(result, id);
+    const { kinds } = pinRoute(result, id);
+    const pool = pools(result);
+    const blocks = [];
+    const rowOf = hop => {
+      const pooled = pool.has(hop.node.id);
+      return {kind: 'node', node: hop.node, pin: hop.node.id === id, pool: pooled,
+        amount: pooled ? hop.node.value : (hop.node.amount != null ? hop.node.amount : hop.node.value)};
+    };
+    hops.forEach((hop, at) => {
+      if (!at) { if (hops.length === 1) blocks.push({kind: 'traced', rows: [rowOf(hop)], steps: []}); return; }
+      const kind = kinds.get(hop.via.id) || 'pooled';
+      let block = blocks[blocks.length - 1];
+      if (!block || block.kind !== kind) {
+        block = {kind, rows: [], steps: []};
+        blocks.push(block);
+        if (blocks.length === 1) block.rows.push(rowOf(hops[0]));
+      }
+      block.rows.push({kind: 'step', via: hop.via, amount: hop.via.value}, rowOf(hop));
+      block.steps.push({from: hops[at - 1].node, to: hop.node, via: hop.via});
+    });
+    const middle = blocks.findIndex(block => block.kind === 'traced');
+    blocks.forEach((block, at) => {
+      const first = block.steps[0], last = block.steps[block.steps.length - 1];
+      if (block.kind === 'pooled') {
+        block.head = at < middle ? `What reached ${nameOf(last.to)} (pooled, all donors)`
+          : `${possess(nameOf(first.from))} spending from its pool (all donors)`;
+      } else {
+        const heads = [];
+        if (at > 0 && last) heads.push(`From ${nameOf(first.from)} into ${nameOf(first.to)}: ${money(first.via.value)}`);
+        if (at < blocks.length - 1 && last && !(heads.length && block.steps.length === 1))
+          heads.push(`Into ${nameOf(last.to)} from ${nameOf(last.from)}: ${money(last.via.value)}`);
+        block.head = heads.join(' · ');
+      }
+    });
+    return {hops, blocks};
+  }
 
   // The strip of the level the reader came from: its columns up to the node they clicked, narrow and
   // faded, the clicked node marked. It is drawn from the answer that level showed (its arranged
@@ -707,15 +835,8 @@
       parts.push(`<rect class="flow-ctx-bar${focus ? ' flow-ctx-focus' : ''}" x="${f(node.x0)}" y="${f(node.y0)}" width="${f(node.x1 - node.x0)}"`
         + ` height="${f(Math.max(node.y1 - node.y0, 2))}" fill="${colours.get(node.id)}" fill-opacity="${focus ? 1 : 0.4}"/>`);
     }
-    const fit = fitter(options);
-    drawn.columns.forEach((column, at) => {
-      if (at !== 0 && at !== drawn.columns.length - 1) return;
-      // the first header from its column, the last right-aligned to the strip, so the two never meet
-      const last = at > 0;
-      const room = last ? width - 14 - drawn.columns[0].x - 70 : Math.max(30, drawn.columns[1] ? drawn.columns[1].x - column.x - 6 : width - 14);
-      parts.push(`<text class="flow-ctx-header" x="${f(last ? width - 8 : column.x)}" y="14"${last ? ' text-anchor="end"' : ''}>`
-        + `${escape(fit(String(column.label || '').toUpperCase(), Math.max(30, room), 9))}</text>`);
-    });
+    // No column headers on the strip: they sat beside the main chart's own and ran into them ("FIRS…RECEIVED
+    // FROM"). The breadcrumb above names the level the strip is.
     parts.push('</g>');
     return {width, markup: parts.join('')};
   }
@@ -775,7 +896,9 @@
       const height = options.height || Math.max(360, Math.floor(host.clientHeight || 520));
       const stripWidth = state.options.context ? Math.min(190, Math.max(112, Math.round(total * 0.15))) : 0;
       const settings = Object.assign({}, state.options, {width: total, height, stripWidth,
-        arrange: explore() ? {small: true, open: state.view.open, full: state.full} : null});
+        // the node the view is about (options.focus) and the pinned ones are never folded into a bucket
+        arrange: explore() ? {small: true, open: state.view.open, full: state.full,
+          keep: [state.options.focus].concat(state.view.pins).filter(Boolean)} : null});
       if (!stripWidth) delete settings.context;
       state.context = prepare(state.payload, Object.assign({}, settings, {width: total - stripWidth}));
       // A group the answer cannot unfold honestly stays folded and says why, beside its node.
@@ -787,6 +910,15 @@
         return;
       }
       host.innerHTML = svgString(state.payload, Object.assign({}, settings, {prepared: state.context}));
+      const problems = state.context.problems;
+      if (problems.length) {                // the answer does not conserve: drawn as received, and it says so
+        const note = doc.createElement('p');
+        note.className = 'flow-contract-notice';
+        note.setAttribute('role', 'alert');
+        note.textContent = `This answer has ${problems.length} problem${problems.length === 1 ? '' : 's'} with its numbers`
+          + ` (${problems[0]}${problems.length > 1 ? ', …' : ''}); it is drawn as received, with nothing folded or unfolded.`;
+        host.insertBefore(note, host.firstChild);
+      }
       host.appendChild(tip);
       if (prune) {                          // a zoom keeps the pins whose nodes are still drawn
         prune = false;
@@ -851,35 +983,49 @@
     }
 
     // Each pin's route stays lit in its own colour; with "Show only linked" the rest fades. A pinned
-    // node's route is the one a hover lights, so pooled money is not traced past the root's pool.
+    // node's route is the one a hover lights, so pooled money is not traced past the root's pool. A pinned
+    // route is in its colour only up to and into the first committee that pools money from more than one
+    // source (pinRoute): what that committee spends out of its pool is drawn hatched with a dashed edge, not as
+    // the pin's money.
     function applyPins() {
       const svg = host.querySelector('svg.flow-chart');
       if (!svg || !state.context) return;
       const result = state.context.result;
       const colours = palette();
+      const hatch = `url(#${String(state.options.idPrefix || 'flow').replace(/[^A-Za-z0-9_-]/g, '')}-hatch)`;
       for (const old of svg.querySelectorAll('.flow-pin')) old.remove();
-      for (const path of svg.querySelectorAll('.flow-link.is-pinned')) {
-        path.classList.remove('is-pinned');
+      for (const path of svg.querySelectorAll('.flow-link.is-pinned, .flow-link.is-pooled')) {
+        path.classList.remove('is-pinned', 'is-pooled');
         if (path.dataset.fill) { path.setAttribute('fill', path.dataset.fill); delete path.dataset.fill; }
         path.removeAttribute('data-pin');
+        path.removeAttribute('stroke');
       }
       for (const group of svg.querySelectorAll('.flow-node.is-pinned, .flow-node.is-routed')) group.classList.remove('is-pinned', 'is-routed');
       const live = state.view.pins.filter(id => find(id));
-      const claimed = new Map();
-      // A stub (other donors, cash from before, money passed on) is not a step of a route; it stays as drawn.
-      const stubbed = new Set(result.links.filter(link => (find(link.source) || {}).stub || (find(link.target) || {}).stub).map(link => link.id));
+      const claimed = new Map(), pooled = new Map();
       live.forEach((id, at) => {
-        const lit = traced(result, id);
-        for (const link of lit.links) if (!claimed.has(link) && !stubbed.has(link)) claimed.set(link, at);
-        for (const group of svg.querySelectorAll('.flow-node')) if (lit.nodes.has(group.dataset.node)) group.classList.add('is-routed');
+        const route = pinRoute(result, id);          // no stub is a step of a route; stubs stay as drawn
+        for (const [link, kind] of route.kinds) {
+          const into = kind === 'traced' ? claimed : pooled;
+          if (!into.has(link)) into.set(link, at);
+        }
+        for (const group of svg.querySelectorAll('.flow-node')) if (route.nodes.has(group.dataset.node)) group.classList.add('is-routed');
       });
       for (const path of svg.querySelectorAll('.flow-link')) {
-        const at = claimed.get(path.dataset.link);
-        if (at === undefined) continue;
-        path.classList.add('is-pinned');
-        path.dataset.pin = String(at);
+        const link = path.dataset.link;
+        const mine = claimed.get(link), spending = pooled.get(link);
+        if (mine === undefined && spending === undefined) continue;
         path.dataset.fill = path.getAttribute('fill');
-        path.setAttribute('fill', pinColour(at, colours));
+        if (mine !== undefined) {
+          path.classList.add('is-pinned');
+          path.dataset.pin = String(mine);
+          path.setAttribute('fill', pinColour(mine, colours));
+        } else {
+          path.classList.add('is-pooled');
+          path.dataset.pin = String(spending);
+          path.setAttribute('fill', hatch);
+          path.setAttribute('stroke', pinColour(spending, colours));
+        }
       }
       live.forEach((id, at) => {
         const group = svg.querySelector(`.flow-node[data-node="${CSS.escape(id)}"]`);
@@ -938,7 +1084,7 @@
       head.append(title, toggle);
       panel.appendChild(head);
       live.forEach((id, at) => {
-        const hops = chainOf(result, id);
+        const {hops, blocks} = pinBlocks(result, id, format);
         const node = find(id);
         const card = doc.createElement('section');
         card.className = 'flow-pin-card';
@@ -959,26 +1105,39 @@
         gone.addEventListener('click', () => togglePin(id));
         header.append(swatch, name, gone);
         card.appendChild(header);
-        const list = doc.createElement('ol');
-        list.className = 'flow-pin-path';
-        hops.forEach(hop => {
-          if (hop.via) {
-            const step = doc.createElement('li');
-            step.className = 'flow-pin-step';
-            step.textContent = `↓ ${format.short(hop.via.value)} this step`;
-            list.appendChild(step);
+        for (const block of blocks) {
+          const part = doc.createElement('div');
+          part.className = `flow-pin-block is-${block.kind}`;
+          part.dataset.block = block.kind;
+          if (block.head) {
+            const head = doc.createElement('p');
+            head.className = 'flow-pin-block-head';
+            head.textContent = block.head;
+            part.appendChild(head);
           }
-          const item = doc.createElement('li');
-          item.className = 'flow-pin-node' + (hop.node.id === id ? ' is-pin' : '');
-          const label = doc.createElement('span');
-          label.textContent = nameOf(hop.node);
-          const amount = doc.createElement('span');
-          amount.className = 'flow-pin-amount';
-          amount.textContent = format.short(hop.node.amount != null ? hop.node.amount : hop.node.value);
-          item.append(label, amount);
-          list.appendChild(item);
-        });
-        card.appendChild(list);
+          const list = doc.createElement('ol');
+          list.className = 'flow-pin-path';
+          for (const row of block.rows) {
+            const item = doc.createElement('li');
+            if (row.kind === 'step') {
+              item.className = 'flow-pin-step';
+              item.textContent = `↓ ${format.short(row.amount)} this step`;
+            } else {
+              item.className = 'flow-pin-node' + (row.pin ? ' is-pin' : '');
+              const label = doc.createElement('span');
+              label.textContent = nameOf(row.node);
+              const amount = doc.createElement('span');
+              amount.className = 'flow-pin-amount';
+              // a pooling committee's own total, all donors', never a share of it
+              amount.textContent = (row.pool ? 'pool ' : '') + format.short(row.amount);
+              if (row.pool) amount.title = `${nameOf(row.node)}: the whole pool, all donors`;
+              item.append(label, amount);
+            }
+            list.appendChild(item);
+          }
+          part.appendChild(list);
+          card.appendChild(part);
+        }
         const end = hops[hops.length - 1];
         if (end && end.node.kind === 'candidate' && state.options.onCandidate) {
           const rows = doc.createElement('button');
@@ -1170,7 +1329,7 @@
 
     function activate(node, event) {
       if (!node) return;
-      if (event && event.shiftKey) { togglePin(node.id); return; }
+      if (event && event.shiftKey && explore()) { togglePin(node.id); return; }      // Chart Studio: a plain click
       if (explore() && expandable(node)) { toggleGroup(node.id, true); return; }
       if (zoomable(node)) follow(node.committee_id, node, node);
       else if (node.kind === 'candidate' && state.options.onCandidate) state.options.onCandidate(node);
@@ -1253,8 +1412,10 @@
         if (!tip.hidden || host.querySelector('.flow-notice') || state.menu) { event.preventDefault(); clearNotice(); }
         light(null); hide(); return;
       }
-      if (event.key === 'p' || event.key === 'P') { event.preventDefault(); togglePin(target.node.id); return; }
-      if ((event.key === 'c' || event.key === 'C') && explore() && target.node.group) {
+      // P and C belong to the views that explore, and never to a browser or system shortcut (Ctrl-P prints).
+      const plain = explore() && !event.ctrlKey && !event.metaKey && !event.altKey;
+      if (plain && (event.key === 'p' || event.key === 'P')) { event.preventDefault(); togglePin(target.node.id); return; }
+      if (plain && (event.key === 'c' || event.key === 'C') && target.node.group) {
         event.preventDefault();
         const id = target.node.group;
         toggleGroup(id, false);
@@ -1387,11 +1548,11 @@
   }
 
   const module_short = short, module_full = full;
-  const api = {svgString, mount, describe, short, full, footnote, fitHeading, fitLine, MODES, VIEW_OPACITY,
+  const api = {svgString, mount, prepare, describe, short, full, footnote, fitHeading, fitLine, MODES, VIEW_OPACITY,
     // Lane G1 (board #44): what a hover lights, and where its tooltip goes.
     traced, placeTip,
     // Lane Z (2026-10-15): the zoom path, the strip and minimap, the chain behind a pin, one read per query.
-    trail, crumbs, minimap, chainOf, read, waiting, MAX_PINS};
+    trail, crumbs, minimap, chainOf, pools, pinRoute, pinBlocks, read, waiting, loader, MAX_PINS};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MentatFlowChart = api;
 })(typeof globalThis === 'undefined' ? this : globalThis);

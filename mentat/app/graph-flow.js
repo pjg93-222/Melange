@@ -116,8 +116,12 @@
     $('graph-flow-minimap').addEventListener('click', () => { if (state && state.trail.depth()) jump(0); });
     // Escape goes back one level, unless the chart used it to dismiss a tooltip or a notice.
     doc.addEventListener('keydown', event => {
-      if (event.key !== 'Escape' || event.defaultPrevented || !state || host.hidden || !state.trail.depth()) return;
+      if (event.key !== 'Escape' || !state || host.hidden) return;
       if (/^(INPUT|SELECT|TEXTAREA)$/.test((event.target || {}).tagName || '')) return;
+      // A drill still being read ("Opening FAIRSHAKE…") is what Escape ends first, even where the chart used the
+      // key to dismiss its tooltip: the zoom does not happen and the chart stays as it is.
+      if (state.opening) { event.preventDefault(); state.opening = false; state.loader.cancel(); status(''); return; }
+      if (event.defaultPrevented || !state.trail.depth()) return;
       event.preventDefault();
       back();
     });
@@ -181,13 +185,16 @@
 
   // drill: a committee the reader clicked ({committee, node, anchor}); a failed drill leaves the chart drawn.
   async function load(drill) {
-    const ticket = state.ticket = (state.ticket || 0) + 1;
+    const owner = state;
     const committee = drill ? drill.committee : state.committee;
     const chartApi = root.MentatFlowChart;
-    const stop = chartApi.waiting(text => status(text), drill ? `Opening ${drill.node.label}` : 'Reading the flow');
+    // Beginning a read ends the one before it (its timer and its answer); Back, Escape and leaving the view end it too.
+    const job = owner.loader.begin(text => status(text), drill ? `Opening ${drill.node.label}` : 'Reading the flow');
+    owner.opening = Boolean(drill);
     const {ok, status: code, body} = await chartApi.read(queryOf(committee, state.top));
-    stop();
-    if (!state || ticket !== state.ticket) return;
+    if (state !== owner || !job.live()) return;
+    job.end();
+    owner.opening = false;
     if (drill) {
       status('');
       if (!ok) {
@@ -241,6 +248,9 @@
   function jump(index) { go(state.trail.jump(index)); }
   function go(step) {
     if (!step) return;
+    state.loader.cancel();                   // a read still pending (a drill, a reload) is for a level the reader left
+    state.opening = false;
+    status('');
     state.committee = step.committee;
     state.view = step.view;
     if (step.stale) { state.payload = null; load(); return; }
@@ -294,6 +304,8 @@
     state.chart = chartApi.mount(canvas, payload, {width, height, grow: true, opacity: chartApi.VIEW_OPACITY,
       ribbons: state.ribbons, explore: true, more: state.top || 8, view: state.view, prunePins: prune,
       pinPanel: $('graph-flow-pins'),
+      // a committee asked for from the drawer is the one in view: never folded into "Small transfers"
+      focus: state.focus && !state.committee ? 'committee:' + state.focus : '',
       context: last ? {payload: last.arranged, nodeId: last.nodeId, label: last.label} : null,
       title: $('graph-flow-heading').textContent,
       full: state.fulls[fullUrl] || null, onFull: full => { state.fulls[fullUrl] = full; },
@@ -309,11 +321,12 @@
 
   function open(detail) {
     const host = ensureHost();
+    if (state) state.loader.cancel();
     const industries = options(graphSelect('industry')).filter(item => item.value);
     const cycles = cyclesOf();
     state = {industry: detail.industry, cycle: detail.cycle || cycles[0] || '', run: detail.run || 'published-reports',
       basis: 'reported', top: 8, ribbons: 'outcome', committee: '', focus: detail.focus || '', trail: root.MentatFlowChart.trail(),
-      view: freshView(), fulls: {}, ticket: 0, chart: null, payload: null};
+      view: freshView(), fulls: {}, loader: root.MentatFlowChart.loader(), chart: null, payload: null};
     $('graph-flow-crumb').textContent = state.industry;
     $('graph-flow-industry').replaceChildren(...industries.map(item => new Option(item.label, item.value)));
     $('graph-flow-industry').value = state.industry;
@@ -332,7 +345,7 @@
   }
 
   function close() {
-    if (state && state.chart) state.chart.destroy();
+    if (state) { state.loader.cancel(); if (state.chart) state.chart.destroy(); }
     state = null;
     const host = $('graph-flow');
     if (host) host.hidden = true;

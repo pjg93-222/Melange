@@ -146,8 +146,16 @@
     $('evidence-flow-minimap').addEventListener('click', () => { if (state && state.trail.depth()) jump(0); });
     // Escape goes back one level, unless the chart used it to dismiss a tooltip or a notice.
     doc.addEventListener('keydown', event => {
-      if (event.key !== 'Escape' || event.defaultPrevented || !state || host.hidden || !state.trail.depth()) return;
+      if (event.key !== 'Escape' || !state || host.hidden) return;
       if (/^(INPUT|SELECT|TEXTAREA)$/.test((event.target || {}).tagName || '')) return;
+      // A drill still being read ("Opening FAIRSHAKE…") is what Escape ends first, even where the chart used the
+      // key to dismiss its tooltip: the zoom does not happen and the chart stays as it is.
+      if (state.opening) {
+        event.preventDefault(); state.opening = false; state.loader.cancel(); status('');
+        $('evidence-flow').removeAttribute('aria-busy');
+        return;
+      }
+      if (event.defaultPrevented || !state.trail.depth()) return;
       event.preventDefault();
       back();
     });
@@ -203,10 +211,11 @@
 
   // drill: a committee the reader clicked ({committee, node, anchor}); a failed drill leaves the chart drawn.
   async function load(drill) {
-    const ticket = state.ticket = (state.ticket || 0) + 1;
+    const owner = state;
     const committee = drill ? drill.committee : state.committee;
     const snapshot = drill ? '' : state.snapshot;
     if (!/^C\d{8}$/.test(committee)) {
+      owner.loader.cancel();
       clearChart();
       status('Choose a PAC with a FEC committee ID to examine its flow.');
       return;
@@ -214,11 +223,14 @@
     const chartApi = root.MentatFlowChart;
     const collecting = state.pane.source === 'direct' || state.pane.source === 'csv';
     $('evidence-flow').setAttribute('aria-busy', 'true');
-    const stop = chartApi.waiting(text => status(text), drill ? `Opening ${drill.node.label}`
+    // Beginning a read ends the one before it (its timer and its answer); Back, Escape and leaving the view end it too.
+    const job = owner.loader.begin(text => status(text), drill ? `Opening ${drill.node.label}`
       : collecting ? 'Collecting FEC filings and drawing the flow' : 'Reading the flow');
+    owner.opening = Boolean(drill);
     const {ok, status: code, body} = await chartApi.read(queryOf(committee, snapshot, state.top));
-    stop();
-    if (!state || ticket !== state.ticket) return;
+    if (state !== owner || !job.live()) return;
+    job.end();
+    owner.opening = false;
     $('evidence-flow').removeAttribute('aria-busy');
     if (drill) {
       status('');
@@ -266,6 +278,10 @@
   function jump(index) { go(state.trail.jump(index)); }
   function go(step) {
     if (!step) return;
+    state.loader.cancel();                   // a read still pending (a drill, a reload) is for a level the reader left
+    state.opening = false;
+    status('');
+    $('evidence-flow').removeAttribute('aria-busy');
     state.committee = step.committee;
     state.snapshot = step.snapshot;
     state.view = step.view;
@@ -386,12 +402,13 @@
 
   function open(detail) {
     const host = ensureHost();
+    if (state) state.loader.cancel();
     const pane = detail.pane;
     const basis = ['reported', 'attributed'].includes(detail.basis) ? detail.basis : 'reported';
     state = {pane, onBack: detail.onBack, onView: detail.onView, onChange: detail.onChange, basis, top: 8,
       ribbons: 'gradient',
       committee: pane.committee, snapshot: pane.source === 'snapshot' ? pane.id : '', trail: root.MentatFlowChart.trail(),
-      view: freshView(), fulls: {}, payload: null, chart: null, ticket: 0,
+      view: freshView(), fulls: {}, payload: null, chart: null, loader: root.MentatFlowChart.loader(),
       cycle: String(pane.cycle || (pane.cycles || []).map(String).sort().reverse()[0] || '')};
     $('evidence-flow-industry').textContent = pane.industry || 'PAC evidence';
     $('evidence-flow-title').textContent = pane.name || pane.committee;
@@ -415,7 +432,7 @@
 
   function close() {
     const host = $('evidence-flow');
-    if (state && state.chart) state.chart.destroy();
+    if (state) { state.loader.cancel(); if (state.chart) state.chart.destroy(); }
     state = null;
     if (host) host.hidden = true;
   }

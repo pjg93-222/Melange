@@ -1025,6 +1025,61 @@ class CommitteeNames(unittest.TestCase):
             self.assertNotIn('ONWARD', text.upper().replace(ONWARD_ID, ''), 'no name was made up')
         flow_data._CACHE.clear()
 
+    def test_a_committee_is_named_from_the_master_file_of_the_flows_cycle_then_the_newest(self):
+        """657 committee IDs differ between cm22 and cm26 (C00728980 is "TIPPINGPOINT 2020", then "DEMOCRACY SOLVES
+        IT"): the flow of a cycle names a committee as that cycle's file does, and falls back to the newest file."""
+        with tempfile.TemporaryDirectory() as directory:
+            master = Path(directory)
+            line = '{}|{}|T|1 MAIN ST||CITY|DC|20001|B|Q||M|C||\n'
+            for folder, text in (('cm22', line.format('C00728980', 'TIPPINGPOINT 2020')),
+                                 ('cm24', line.format('C00728980', 'IN BETWEEN')),
+                                 ('cm26', line.format('C00728980', 'DEMOCRACY SOLVES IT')
+                                  + line.format('C90000077', 'ONLY IN THE NEWEST'))):
+                (master / folder).mkdir()
+                (master / folder / 'cm.txt').write_text(text, encoding='ascii')
+            flow_data.MASTER_ROOT = master
+            try:
+                for cycle, name, year in ((2022, 'TIPPINGPOINT 2020', '2022'), ('2022', 'TIPPINGPOINT 2020', '2022'),
+                                          (2024, 'IN BETWEEN', '2024'), (2026, 'DEMOCRACY SOLVES IT', '2026'),
+                                          (2028, 'DEMOCRACY SOLVES IT', '2026'), (None, 'DEMOCRACY SOLVES IT', '2026')):
+                    names = flow_data.Names({}, cycle=cycle)
+                    self.assertEqual((names.get('C00728980'), names.master_year('C00728980')), (name, year), cycle)
+                    self.assertEqual(flow_data.master_fields(names, 'C00728980'), {'name_master': year})
+                # A committee the cycle's file does not name still gets the newest file's name, and says which year.
+                names = flow_data.Names({}, cycle=2022)
+                self.assertEqual((names.get('C90000077'), names.master_year('C90000077')), ('ONLY IN THE NEWEST', '2026'))
+                # The saved filings' own name wins over any file, and then no year is claimed.
+                filed = flow_data.Names({'C00728980': 'FILED NAME'}, cycle=2022)
+                self.assertEqual((filed.get('C00728980'), filed.master_year('C00728980')), ('FILED NAME', ''))
+                self.assertEqual(flow_data.master_fields(filed, 'C00728980'), {})
+                # No name anywhere: nothing is made up and no year is claimed.
+                self.assertEqual(flow_data.master_fields(names, 'C90000555'), {})
+            finally:
+                flow_data.MASTER_ROOT = self.master
+
+    def test_a_flow_asks_for_the_names_of_its_own_cycle_and_marks_a_master_name_on_the_node(self):
+        with tempfile.TemporaryDirectory() as directory:
+            master = Path(directory) / 'master'
+            for folder, name in (('cm24', 'BRIDGE PAC IN 2024'), ('cm26', 'BRIDGE PAC IN 2026')):
+                (master / folder).mkdir(parents=True)
+                (master / folder / 'cm.txt').write_text(f'{BRIDGE_ID}|{name}|T|1 MAIN ST||CITY|DC|20001|B|Q||M|C||\n', encoding='ascii')
+            units = fixture_units()
+            units[1]['totals']['committee_name'] = BRIDGE_ID           # the saved filings give the bridge no name
+            write_fixture(directory, units)
+            asked = []
+            real = flow_data.committee_names
+            flow_data.MASTER_ROOT = master
+            flow_data._CACHE.clear()
+            try:
+                with patch.object(flow_data, 'committee_names', side_effect=lambda cycle=None: (asked.append(cycle), real(cycle))[1]):
+                    node = by_id(produce(directory))['committee:' + BRIDGE_ID]
+            finally:
+                flow_data.MASTER_ROOT = self.master
+                flow_data._CACHE.clear()
+            self.assertIn('2024', [str(cycle) for cycle in asked])
+            self.assertEqual((node['name_as_filed'], node['name_master']), ('BRIDGE PAC IN 2024', '2024'))
+            self.assertNotIn('unnamed', node)
+
 
 if __name__ == '__main__':
     unittest.main()
