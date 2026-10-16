@@ -525,11 +525,14 @@ class Handler(BaseHTTPRequestHandler):
                 return
             result = (self.server.dashboard.assertion_decision(payload) if endpoint == '/api/staffer-assertions' else
                       self.server.dashboard.identity_decision(payload.get('primary_id'), payload.get('alias_ids'), payload.get('decision')))
-            self.send_bytes(json.dumps(result).encode(), 'application/json', 202)
         except (ValueError, TypeError) as exc:
             self.send_bytes(json.dumps({'error': str(exc)}).encode(), 'application/json', 400)
+            return
         except OSError as exc:
             self.send_bytes(json.dumps({'error': 'Could not save identity decision: ' + str(exc)}).encode(), 'application/json', 503)
+            return
+        # Persistence has completed. A lost response cannot undo or retry it.
+        self.send_bytes(json.dumps(result).encode(), 'application/json', 202)
 
     def routing_options(self, query):
         options = {}
@@ -791,21 +794,23 @@ class Handler(BaseHTTPRequestHandler):
         self.send_bytes(path.read_bytes(), mime + "; charset=utf-8")
 
     def send_bytes(self, data, mime, status=200, etag=None, compressed=False):
-        self.send_response(status)
-        self.send_header("Content-Type", mime)
-        self.send_header("Cache-Control", "no-cache" if etag else "no-store")
-        if etag:
-            self.send_header('ETag', etag)
-        if compressed:
-            self.send_header('Content-Encoding', 'gzip')
-            self.send_header('Vary', 'Accept-Encoding')
-        self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
         try:
+            self.send_response(status)
+            self.send_header("Content-Type", mime)
+            self.send_header("Cache-Control", "no-cache" if etag else "no-store")
+            if etag:
+                self.send_header('ETag', etag)
+            if compressed:
+                self.send_header('Content-Encoding', 'gzip')
+                self.send_header('Vary', 'Accept-Encoding')
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
             self.wfile.write(data)
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-            pass  # A superseded search can cancel its HTTP request.
+            # A closed client can interrupt either the headers or response body.
+            # Do not retry the response or mistake this for a persistence error.
+            self.close_connection = True
 
     def log_message(self, fmt, *args):
         pass
