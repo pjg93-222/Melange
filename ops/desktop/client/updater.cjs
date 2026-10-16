@@ -122,7 +122,12 @@ class DesktopUpdater {
     catch(error){
       this.ready=null;
       // The signature tool reached no verdict: keep the staged file and retry it locally, without backoff.
-      if(error.code==='SIGNATURE_CHECK_UNAVAILABLE')throw error;
+      // Report the condition once per staged manifest, as a status and code only.
+      if(error.code==='SIGNATURE_CHECK_UNAVAILABLE'){
+        const manifestHash=envelopeHash(pending.envelope),latest=this.readState();
+        if(latest.signatureUnavailableReported!==manifestHash){this.writeState({...latest,signatureUnavailableReported:manifestHash});await this.report(enrollment,'deferred','SIGNATURE_CHECK_UNAVAILABLE');}
+        throw error;
+      }
       // Drop the candidate and back off from this exact signed manifest. The sequence and version
       // high-water is untouched; only a fresh download of a manifest passing every check can stage.
       this.writeState({...this.readState(),pending:null,verifyFailure:{manifestHash:envelopeHash(pending.envelope),failedAt:Date.now()}});
