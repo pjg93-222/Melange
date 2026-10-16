@@ -1,0 +1,77 @@
+# Copy into the private release repository only after its existing source/export gate passes.
+# This template builds; it does not publish or create a passing release receipt.
+name: Native desktop build
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        type: choice
+        options: [melange, terrier, mentat]
+        required: true
+      source_repository:
+        description: Private source repository for this app
+        required: true
+      source_ref:
+        description: Reviewed immutable source commit
+        required: true
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: windows-2022, platform: win32, arch: x64}
+          - {runner: macos-15, platform: darwin, arch: arm64}
+          - {runner: macos-15-intel, platform: darwin, arch: x64}
+    runs-on: ${{ matrix.runner }}
+    env:
+      DESKTOP_APP_ID: ${{ inputs.app }}
+      CSC_LINK: ${{ secrets.DESKTOP_CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ secrets.DESKTOP_CSC_KEY_PASSWORD }}
+      WINDOWS_PUBLISHER_NAME: ${{ vars.WINDOWS_PUBLISHER_NAME }}
+      APPLE_ID: ${{ secrets.DESKTOP_APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.DESKTOP_APPLE_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.DESKTOP_APPLE_TEAM_ID }}
+    steps:
+      # Pin these actions to reviewed commit SHAs before activating this template,
+      # matching the repository's existing workflow pinning policy.
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source_repository }}
+          ref: ${{ inputs.source_ref }}
+          token: ${{ secrets.DESKTOP_SOURCE_READ_TOKEN }}
+          path: desktop-source
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install native Python dependencies
+        shell: pwsh
+        run: |
+          $manifest = Get-Content ops/desktop/packaging/runtime-manifest.json | ConvertFrom-Json
+          $requirements = $manifest.apps.${{ inputs.app }}.requirements
+          python -m pip install -r "desktop-source/$requirements" pyinstaller==6.22.3
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build Terrier frontend
+        if: inputs.app == 'terrier'
+        working-directory: desktop-source/frontend
+        run: npm ci && npm run build
+      - name: Client dependencies and security tests
+        working-directory: ops/desktop/client
+        run: npm ci && npm test && npm audit --omit=dev --audit-level=high
+      - name: Backend boundary tests
+        run: python -m unittest discover -s ops/desktop/packaging -p "test_*.py" -v
+      - name: Build native backend
+        run: python ops/desktop/packaging/build_runtime.py --app ${{ inputs.app }} --source desktop-source
+      - name: Build application package
+        working-directory: ops/desktop/client
+        run: npm run build -- --${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ inputs.app }}-${{ matrix.platform }}-${{ matrix.arch }}-UNPUBLISHED
+          path: ops/desktop/client/dist/${{ inputs.app }}
+      # Native runtime completeness, real app acceptance, redistribution, OS signing,
+      # secret/data scans and a hash-bound receipt still gate administrator publication.

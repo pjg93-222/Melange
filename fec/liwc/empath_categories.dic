@@ -1,0 +1,1666 @@
+%
+1	achieve
+2	anger
+3	anx
+4	body
+5	death
+6	family
+7	health
+8	leisure
+9	money
+10	negemo
+11	posemo
+12	relig
+13	sad
+14	social
+15	swear
+16	work
+%
+abandonment	13
+abdomen	4
+abortion	7
+academic	1
+accident	10
+acclaim	1
+accomplish	1
+accomplished	1
+accomplishment	1	11
+accountant	16
+accounting	16
+achieve	1
+achieved	1
+achievement	1
+acquaintance	14
+activity	8
+address	14
+administration	16
+administrative	16
+administrator	16
+admiration	11
+adopt	6
+adoption	6
+adoptive	6
+adoration	11
+adrenaline	3
+adventure	8
+adventurous	11
+advertising	16
+advice	14
+advise	14
+advisor	16
+affection	11
+afford	16	9
+afraid	10	3
+afterlife	5
+agency	16
+agenda	16
+aggravation	2
+aggression	2
+aggressiveness	2
+agitation	13	2	3
+agony	13	2	3
+agree	14
+ailment	7
+alarm	3
+alarming	3
+alertness	3
+alive	11
+allergy	7
+allowance	9
+alone	10
+aloud	14
+altar	12
+always	14
+amazing	11
+ambition	1	11
+analyst	16
+anemia	7
+anemic	7
+anesthesia	7
+anger	10	13	2
+angered	10	2
+angry	10	2
+anguish	13	2	3
+animosity	2
+ankle	4
+annoyance	2
+anorexia	7
+answer	14
+antibiotic	7
+anticipated	11
+anticipation	3
+antidepressant	7
+antidote	7
+anxiety	13	3	7
+anxious	3
+apathy	13
+apostle	12
+applaud	1
+applause	1
+applicant	16
+application	16
+appointment	16	7
+appreciate	11
+appreciation	11
+apprehension	13	3
+apprehensive	3
+approval	1
+archbishop	12
+arm	4
+arthritis	7
+ashamed	10
+ask	14
+aspirin	7
+ass	15
+assassinate	5
+assign	16
+assigned	16
+assignment	16
+assist	16
+assistant	16
+assurance	11
+asthma	7
+attack	10	2
+attacks	2
+attain	1
+attendance	16
+aunt	6
+autism	7
+avenge	5
+award	1
+awful	10
+baby	6
+backside	4
+bad	10	15
+badly	10
+bail	9
+bank	9
+banker	16	9
+banking	16	9
+bankruptcy	9
+baptism	12
+barbecue	8
+bargain	9
+bastard	15
+beat	10
+beaten	10
+bedridden	7
+befall	5
+behave	6
+behavioral	7
+belief	12
+believer	12
+beloved	5	6
+benefit	11
+benefits	11
+best	11	14	6
+betray	13	2
+betrayal	13	2
+better	11
+bible	12
+biblical	12
+bidding	9
+bill	9
+biography	14
+biological	6
+biologically	6
+biopsy	7
+birth	6
+bitch	15
+bitterness	13	2
+bittersweet	13
+blame	10
+blasphemy	12
+bless	12
+blessed	12
+blessing	12
+bliss	11
+blood	4
+bloodshed	5
+blueprint	16
+boardroom	16
+body	4
+bond	11
+bonding	8
+bony	4
+bookstore	16
+boredom	13
+boss	16
+boy	14	6
+boyfriend	14
+brag	1
+bravery	1	11
+break	10
+breakdown	3
+breast	4
+brethren	12
+bribe	9
+briefcase	16
+briefing	16
+broken	10
+broker	16
+brother	14	5	6
+brunch	8
+buck	9
+buddy	14
+budget	16	9
+buffet	8
+bulimia	7
+bull	15
+burden	13
+burial	5
+business	16
+businesses	16
+businessman	16
+businesswoman	16
+busy	16
+butt	4
+buy	9
+buyer	9
+buying	9
+call	14
+cancer	5	7
+cancerous	7
+care	10	11	6	7
+career	16
+caretaker	6
+carnival	8
+cash	9
+casket	5
+cater	16
+catering	16
+cathedral	12
+celebrate	1	11
+celebration	1
+celebratory	1
+cemetery	12	5
+cent	9
+certainty	11
+challenge	1
+champ	1
+champion	1
+championship	1
+change	9
+chat	14
+checkbook	9
+checkup	7
+cheek	4
+cheer	1
+cheerful	11
+cheerfulness	11
+cheering	1
+chemotherapy	7
+cheque	9
+cherish	11
+chest	4
+child	6
+childbirth	6
+childhood	14	6
+childlike	11
+children	6
+chin	4
+christian	12
+chronic	7
+church	12
+clarification	14
+classmate	14
+cleaning	16
+clerk	16	9
+client	16
+clientele	16
+clinic	7
+closure	11	5
+clothed	4
+clubbing	8
+clue	14
+coffin	5
+coin	9
+collarbone	4
+colleague	16
+colleagues	14
+coma	7
+comfort	11
+commandment	12
+commerce	16
+communicate	14
+communication	14
+communion	12
+communities	14
+community	14
+company	16
+compassion	11
+compensation	9
+compete	1
+competition	1
+competitive	1
+competitor	1
+complication	7
+computer	16
+conceive	6
+concern	11	13
+concert	8
+concussion	7
+condemn	12
+condemnation	13	2
+condition	7
+condolence	5
+conference	16
+confide	14
+confidence	11
+confirmation	14
+conflicting	13
+confused	10
+confusion	3
+congrats	11
+congratulate	1
+congratulation	1
+congratulations	11
+congregation	12
+connection	14
+conquer	1
+conquest	1
+constituents	14
+construction	16
+consult	14	16
+consultant	16
+consultation	16
+consumer	16
+contempt	13	2	3
+contender	1
+contentment	11
+contest	1
+context	14
+contorted	2
+convent	12
+conversation	14	8
+convey	14
+convince	11
+cope	13
+corporate	16
+corporation	16
+corpse	5
+corrupt	2
+corruption	2
+cost	9
+costly	9
+costs	9
+count	9
+coupon	9
+cousin	14	6
+covenant	12
+coveted	1
+cramp	7
+crap	15
+crazy	10
+credit	9
+crib	6
+cripple	13
+crippling	13	3
+crisis	10	3
+crotch	4
+crucifix	12
+cruelty	13	2
+crusade	12
+crush	14
+crushed	10
+cry	10	13
+crying	10	13
+cult	12
+cultural	12
+cure	7
+curiosity	11	3
+currency	9
+curse	15
+customer	16
+cynicism	13	2
+dad	6
+daddy	6
+damage	10
+damn	15
+damned	15
+danger	10	3
+dangerous	3
+darkness	13
+darling	6
+daughter	6
+dead	10	5
+deal	16
+dealership	16
+dearly	11
+death	10	5
+deathbed	5
+debit	9
+debt	9
+deceased	5
+deceit	13
+decode	14
+decree	12
+deduct	9
+defeat	1
+defiance	2
+defiant	2
+deficiency	7
+dehydrated	7
+dehydration	7
+deity	12
+dejected	13
+delight	11
+delighted	11
+deliver	1
+delivered	1
+dementia	7
+demise	5
+denial	13
+dental	16	7
+department	16
+deposit	9
+depress	13
+depressant	7
+depressed	10	13
+depressing	13
+depression	13	7
+depressive	13
+depth	13
+deserving	1
+designer	16
+desire	11
+desk	16
+desktop	16
+despair	13
+despairing	13
+desperation	13	3
+despondent	13
+dessert	8
+destruction	5
+detail	14
+determination	1	11
+determined	1
+devastate	5
+devastated	5
+devastating	10	5
+devastation	13	3
+developer	16
+development	16
+devoted	12
+devotion	12
+devout	12
+diabetes	7
+diabetic	7
+diagnose	7
+diagnosis	7
+dialogue	14
+diaper	6
+diarrhea	7
+die	10	5
+died	5
+dieing	10
+diet	7
+dime	9
+diminish	13
+director	16
+disability	7
+disappoint	13
+disappointed	10	13
+disappointment	13	2
+disaster	10
+disbelief	2
+discharge	7
+disciple	12
+discomfort	13	3
+discontent	13
+discount	9
+discuss	14
+discussion	14
+disdain	2
+disease	7
+disgrace	10	2
+disgust	2
+disgusting	2
+disinterest	2
+dismal	13
+dismay	13	2
+disorder	7
+displeasure	2	3
+disrespectful	15
+dissipate	13
+distaste	2
+distinction	12
+distraught	13	5
+distress	13
+distrust	13	2	3
+divine	12
+divinity	12
+divorce	6
+divorced	6
+doctor	7
+doctrine	12
+document	16
+doll	6
+dollar	9
+dollars	9
+domination	1
+donate	9
+donation	9
+doom	5
+dosage	7
+drachma	9
+dread	3
+drown	13
+drunk	10
+dying	10	5
+eager	11
+eagerness	11
+earn	1
+earned	1
+earnings	9
+eavesdrop	14
+economic	16
+economy	16
+ecstatic	11
+editor	16
+effort	1
+efforts	1
+either	10
+elated	11
+elation	11
+elbow	4
+eldest	6
+electrician	16
+email	14
+embarrassment	3
+embrace	4
+emotion	11	13	2	3
+emotional	13
+empathy	11	13
+employ	16
+employee	16	9
+employer	16
+employment	16	9
+emptiness	13
+encourage	11
+encouragement	11
+endeavor	11
+endure	13
+engineer	16
+engineering	16
+enjoy	11	8
+enjoyable	11	8
+enjoyment	11
+enlighten	11
+enmity	2
+entertain	11	8
+entertaining	8
+entertainment	16	8
+enthusiasm	11
+enthusiastic	11
+entrepreneur	16
+envy	2
+epic	1
+epidemic	7
+epilepsy	7
+equipment	16
+establishment	16
+estranged	6
+ethical	12
+eulogy	5
+euphoria	11
+euro	9
+evening	8
+everyone	14
+evident	13
+ex	14
+examination	7
+exasperation	2
+excellence	1
+excellent	1	11
+exceptional	1
+exchange	14
+excite	11
+excited	11
+excitement	11
+exciting	11	8
+executive	16
+exhaustion	13
+exhilaration	11
+expectation	11
+expense	16
+expensive	9
+explain	14
+export	16
+expressly	12
+extremist	12
+exuberant	11
+eye	4
+eyes	4
+face	3	4
+fact	14
+fail	10
+failed	10
+failure	10	13
+faith	11	12
+families	14	6
+family	11	14	6	8
+farmers	16
+fateful	5
+father	6
+fault	10
+fax	16
+fear	10	13	2	3
+fearful	3
+feel	3	4
+feeling	11	13	3
+feet	4
+ferocity	2
+fertility	12
+fever	7
+fiancee	6
+fight	10	2
+fighting	10	2
+file	16
+finance	16	6	9
+financial	16	9
+finger	4
+flaring	2
+flirted	14
+flu	7
+folder	16
+folklore	12
+folks	14
+fondness	11
+foot	4
+forearm	4
+forehead	4
+forgiveness	11
+forgiving	11
+forlorn	13
+fortune	9
+foster	6
+fought	1
+frail	4
+frame	4
+franc	9
+freaked	10
+freedom	11
+freelance	16
+freelancer	16
+friend	11	14
+friendliness	11
+friendly	14
+friends	14
+fright	3
+frighten	3
+frightened	10	3
+frightening	3
+frightful	3
+frustrate	2
+frustration	13	2
+fuck	15
+fucking	10
+fun	11	14	6	8
+fund	16	9
+fundamental	12
+funding	16	9
+funds	9
+funeral	12	5
+furious	10	2
+fury	2
+future	11
+gal	14
+gamble	9
+gambling	9
+game	8
+games	8
+gaming	8
+generation	6
+genuine	11
+giddy	11
+girl	14	6
+girlfriend	14
+girls	14
+glad	11
+gleeful	11
+gloat	1
+gloom	13
+glorify	12
+glucose	7
+goal	1
+goals	1
+god	12
+godfather	6
+godmother	6
+good	11
+gospel	12
+govern	12
+grandchild	6
+granddaddy	6
+granddaughter	6
+grandfather	6
+grandkids	6
+grandma	6
+grandmother	5	6
+grandparent	6
+grandparents	6
+grandson	6
+grateful	11
+gratitude	11
+grave	5
+graveyard	5
+great	1	11
+greatness	1
+greed	13
+grief	13	5
+grieve	13	5
+grieving	5
+groin	4
+grown	6
+gruesome	5
+guilt	13	3
+guilty	10
+gynecologist	7
+hand	4
+hands	4
+handwritten	14
+hangout	8
+happiness	11	13
+happy	11
+hard	10
+hardship	13
+harm	10
+harshness	13	2
+hate	10	2
+hated	10
+hateful	2
+hatred	13	2
+haunt	5
+head	4
+health	7
+healthy	7
+hearse	5
+heart	4
+heartache	13
+heartbreak	13
+heartbreaking	13	5
+heartbroken	10	13
+heartburn	7
+heartwarming	11
+heir	6
+hell	10	15
+helplessness	13
+hers	4
+hip	4
+hire	16
+historic	12
+hit	10
+hobby	8
+hoe	15
+holiday	8
+holy	12
+home	6
+honest	11
+honestly	11
+honesty	11
+honor	1	11
+honorable	1
+honorary	1
+honored	1	11
+hope	11
+hopeful	11
+hopefully	11
+hopelessness	13	3
+horrible	10
+horrified	3
+horrifying	3
+horror	3
+hospital	7
+hostile	2
+hostility	2	3
+household	6
+humiliation	13	3
+humor	11
+hunch	4
+hundred	9
+hurt	10
+hurting	10
+hurts	10
+husband	6
+hymn	12
+hysteria	3
+idea	14
+ideology	12
+illegitimate	6
+illness	5	7
+immoral	12
+immune	7
+impatience	13	2	3
+income	16	9
+incurable	7
+indescribable	13	2
+indignant	2
+indignation	2
+industry	16
+inexplicable	13
+infancy	6
+infant	6
+infection	7
+infertile	7
+influenza	7
+info	14
+inform	14
+information	14
+informational	14
+informed	14
+infuriate	2
+infuriated	2
+inheritance	9
+injection	7
+injures	7
+injury	7
+innocence	13
+innocent	6
+insane	10
+insecure	3
+insecurity	13	3
+inseparable	14
+insomnia	13
+institution	7
+insulin	7
+insurance	16
+intensity	2
+intention	11
+interact	14
+interest	8
+intern	16
+internship	16
+interpret	14
+interview	16
+introduce	14
+invest	16	9
+investment	9
+investor	16
+invincibility	1
+irritability	2
+irritation	13	2	3
+isolation	13
+jealously	13
+jealousy	13	2	3
+jewish	12
+jittery	3
+job	16
+jobs	16
+join	14
+joined	14
+joining	14
+joy	11
+joyful	11
+joyous	11
+jubilant	11
+jumpy	3
+karaoke	8
+keep	11
+kid	6
+kidney	7
+kids	6
+kill	10	5
+killed	10	5
+killing	10
+kind	6
+kindness	11
+knee	4
+kneecap	4
+kneel	4
+knees	4
+knowledge	11
+lab	16
+laboratory	16
+lap	4
+laptop	16
+lawyer	16
+lazy	8
+lead	1
+leader	1
+leadership	1
+leading	1
+lean	4
+leave	6
+leg	4
+legacy	6
+legs	4
+leisure	8
+lethargy	13
+letter	14
+leukemia	5	7
+librarian	16
+lie	10
+life	5
+lifeless	5
+lifetime	1
+liking	11
+limb	4
+lip	4
+list	14
+listen	14
+little	6
+liver	7
+loan	9
+loathe	2
+loathing	13	2
+local	16
+locally	16
+loneliness	13	3
+longing	13
+longtime	14
+loose	10
+lose	10
+losing	10
+loss	10	13	5
+lost	10
+lottery	9
+lounge	8
+love	11	14
+loved	11
+lovely	11
+loving	6
+loyalty	11
+mad	10	15
+madness	13	2	3
+mail	14
+mailing	14
+malaria	7
+malice	13	2
+mall	8
+malnutrition	7
+manager	16
+manhood	4
+mankind	12
+manufacture	16
+manufacturing	16
+marketing	16
+marriage	6
+married	6
+marry	6
+mate	14
+maternity	7
+matriarch	6
+mean	10
+meaning	14
+meanness	2
+mecca	12
+mechanic	16
+med	7
+medal	1
+medical	7
+medically	7
+medication	7
+medicine	7
+meeting	14
+melancholy	13
+membership	9
+memo	14
+memorial	5
+menace	2	3
+mental	7
+mention	14
+merchandise	9
+message	14
+messaging	14
+messiah	12
+met	14
+midsection	4
+migraine	7
+milestone	1
+millionaire	9
+mindset	11
+mint	9
+miscarriage	5	7
+miserable	13	5
+misery	13	3	5
+missionary	12
+mistrust	13	2
+mobile	14
+mockery	13	2
+modeling	16
+mom	6
+mommy	6
+monastery	12
+monetary	9
+money	9
+monk	12
+monster	10
+moral	12
+morality	12
+morally	12
+moron	15
+mortgage	9
+mosque	12
+mother	6
+motivate	11
+motivated	11
+motivation	11
+mourn	13	5
+mournful	13
+mourning	13	5
+mouth	4
+movie	8
+mum	6
+murder	5
+murderous	2
+muscle	4
+muscled	4
+music	8
+muslim	12
+naive	6
+nanny	6
+nasty	10	15
+neck	4
+need	16
+negativity	13
+neglect	5
+neighbor	14
+neighbors	14
+nephew	6
+nervous	3
+nervousness	3
+neurologist	7
+newborn	6
+nice	14
+nickel	9
+niece	6
+nominate	1
+nomination	1
+nominee	1
+nostalgia	13
+note	14
+numbness	13
+nurse	7
+nursing	7
+nutrient	7
+nutrition	7
+obligatory	12
+offering	12
+office	16
+offspring	6
+online	16
+opinion	14
+opportunity	1	11
+optimism	11
+optimistic	11
+optimistically	11
+organization	16
+organize	16
+orphan	6
+orphaned	6
+orthodox	12
+outcome	11
+outdo	1
+outdoor	8
+outlook	11
+outrage	10	2
+outrageous	2
+outright	2
+outstanding	1
+overcome	13
+overheard	14
+overjoyed	11
+overseas	16
+oversee	16
+overtime	16
+overwhelm	11	13	2	3
+overwhelming	11	13	3
+owe	9
+owner	16
+pagan	12
+pageant	1
+paid	9
+pain	10	13	2	3
+pained	13	2
+painkiller	7
+palm	4
+palpable	2
+pancreatic	7
+panic	3
+panicked	3
+panicky	3
+paper	16
+paperwork	16
+paragraph	14
+paralyzed	3
+paranoia	3
+paranoid	3
+parent	6
+parents	6
+parish	12
+partied	14	8
+partnership	14	16
+party	8
+partying	8
+passed	1
+pastime	8
+pastor	12
+patient	7
+patients	7
+pay	16	9
+paycheck	16	9
+payday	16	9
+paying	9
+payment	16	9
+payroll	16
+pediatrician	7
+pelvis	4
+penance	12
+pension	9
+people	14
+performance	1
+perish	5
+perseverance	1	11
+persevere	11
+peso	9
+pessimism	13
+pew	12
+pharmaceutical	16
+pharmacist	7
+pharmacy	7
+philosophy	12
+photography	16
+phrase	14
+physician	7
+pilgrim	12
+pilgrimage	12
+pill	7
+pills	7
+pious	12
+pissed	10
+pitiful	13
+pity	13
+planner	16
+planning	16
+play	8
+playfulness	11
+playground	6
+playing	6
+playoff	1
+pledge	12
+pneumonia	7
+poetry	14
+poisoning	7
+policy	16
+pope	12
+popular	14
+portfolio	16
+positive	11
+praise	1
+pray	12	5
+prayer	12
+preach	12
+preacher	12
+precious	6
+pregnancy	7
+pregnant	6
+prenatal	7
+prescribe	7
+prescribed	7
+prescription	7
+presentation	16
+price	9
+prices	9
+pricey	9
+pride	1	11
+priest	12
+princess	6
+principle	16
+prize	1	9
+proclaim	1
+producer	16
+production	16
+productive	16
+profess	12
+profession	16
+profit	16	9
+profitable	16
+profound	11	13
+program	16
+programmer	16
+programming	16
+progress	11
+project	16
+promising	1
+promote	16
+promotion	1	16
+prophet	12
+proud	1	11
+proudly	1
+proverb	12
+psychiatric	7
+psychiatrist	7
+psychological	7
+psychologist	16	7
+psychosis	7
+publicist	16
+punch	10
+pup	6
+purchase	9
+quid	9
+radiant	11
+radical	2
+rage	2
+raise	1
+ranking	1
+ransom	9
+rant	14
+raped	10
+react	10
+read	14
+reason	10	11
+reassurance	11
+rebirth	5
+receipt	9
+reception	16
+receptionist	16
+recite	14
+reckless	10
+record	16
+recovery	7
+recreation	8
+recuperate	7
+regret	13	3
+rehab	7
+rehabilitation	7
+reincarnation	12
+rejection	13
+rejoice	11
+relapse	7
+relate	14
+relationship	14
+relative	6
+relaxation	11
+relay	14
+relief	11
+relievers	7
+religion	12
+religious	12
+remedy	7
+remembrance	13
+remission	7
+remorse	13
+renewal	12
+renown	1
+rent	9
+repay	9
+repayment	9
+repent	12
+repentance	12
+report	14	16
+repressed	13
+reproach	13
+resent	13
+resentment	13	2	3
+resignation	13
+respect	11
+respiratory	7
+respond	14
+responsibility	6
+results	1
+retail	16	9
+retard	15
+reunion	14	6
+reunite	11
+revenge	5
+revenue	9
+revere	12
+reverence	12
+revival	12
+revive	5
+revulsion	2	3
+reward	1	9
+rigged	2
+righteous	12
+righteousness	12
+risk	3
+risky	3
+ritual	12
+roommate	14
+rosary	12
+rude	15
+rupee	9
+ruthlessness	2
+sabbath	12
+sacred	12
+sad	10	13
+saddened	13
+sadly	5
+sadness	13	2
+saint	12
+salary	16	9
+sale	16	9
+salvation	12
+sanctity	12
+satanic	12
+satisfaction	11
+satisfy	11
+saving	9
+scalp	4
+scare	10
+scared	10	3
+scary	10
+schedule	16
+scheduling	16
+schizophrenia	7
+schizophrenic	7
+scholarship	1
+school	16
+schoolwork	16
+score	1
+scoreboard	1
+scoring	1
+scorn	13	2
+scowl	2
+screwed	15
+scripture	12
+secretary	16
+sect	12
+secure	1
+secured	1
+sedate	7
+seeing	10
+seething	2
+seizure	7
+selfishness	13
+sell	16
+seller	9
+seminar	16
+sender	14
+sense	3
+seriousness	2
+sermon	12
+service	16
+severe	7
+shame	13	2	3
+shameful	10	13	2
+share	14
+shilling	9
+shipment	16
+shit	15
+shivering	4
+shocked	10
+shoulder	4
+shrine	12
+shudder	3
+sibling	6
+sick	10	7
+sickness	7
+sightseeing	8
+sin	12
+sincere	11
+sincerity	11
+sinner	12
+sister	14	6
+sitter	6
+skin	4
+slain	5
+sneer	2
+sneering	2
+socialist	12
+socialize	14	8
+socialized	8
+societal	12
+society	12
+solitude	13
+somber	13
+son	5	6
+sorrow	13	3
+sorrowful	13
+spa	8
+spat	2
+speak	14
+speaking	14
+specialist	7
+spend	8
+spending	9
+spiritual	12
+spite	13	2
+splurge	9
+spoil	6
+sports	8
+spouse	6
+spreadsheet	16
+stand	4
+starvation	5
+steeple	12
+stepdaughter	6
+stepfather	6
+stepmother	6
+stepson	6
+stiff	4
+stiffen	4
+stillborn	5	6
+stomach	4
+stop	10
+store	16
+stress	3	7
+stressful	3
+stretch	4
+stricken	13
+strife	13
+strive	1
+stubbornness	2
+stupid	10
+succeed	1
+success	1	11
+successful	1
+suffer	13	7
+sufferer	13	7
+suffering	13	2	5
+suffocation	13	5
+suggest	14
+sullen	13
+superstition	12
+superstitious	12
+supervise	16
+supervisor	16
+supplement	7
+supplier	16
+supply	16
+support	11
+supportive	14
+suppress	2
+supremacy	1
+surely	11
+surfing	8
+surgeon	7
+surgery	7
+surpass	1
+surprise	11
+surprised	10
+surrogate	6
+survivor	5
+suspense	3
+swear	10	15
+sweetness	11
+symbolic	12
+symbolism	12
+symbolize	12
+sympathize	11	13	5
+sympathy	13
+symptom	7
+syndrome	7
+takeout	8
+talent	1
+talk	14
+talked	14
+talking	14
+tax	9
+taxes	9
+teacher	16
+team	14
+tears	13
+technician	16
+teenage	6
+teenaged	6
+teenager	6
+tell	14
+tenderness	11
+terrible	10
+terrific	11
+terrified	10	3
+terrifying	3
+terror	13	3
+testament	12
+testing	7
+text	14
+texts	14
+thank	11
+thankful	11
+thanks	11
+thanksgiving	8
+theater	8
+theology	12
+therapist	16	7
+therapy	7
+thesis	14
+thigh	4
+thinking	10
+threat	10	3
+threatened	10	3
+threatens	3
+thrill	11
+thrilled	11
+thumb	4
+tighten	4
+toddler	6
+together	14
+tombstone	5
+toned	4
+torment	13	5
+tormented	13
+torso	4
+torture	5
+tortured	10	13
+touch	4
+touchdown	1
+tournament	1
+town	14
+toy	6
+trade	16	9
+trading	16
+tradition	12
+tragedy	13	5
+tragic	5
+tragically	5
+transaction	16
+transcript	16
+transfusion	7
+translate	14
+translator	14
+transplant	7
+trauma	7
+traumatic	7
+travel	8
+treasury	9
+treatment	7
+tremble	3
+trembling	3
+tremor	3
+trepidation	3
+trillion	9
+trimester	7
+triumph	1	11
+triumphant	1	11
+trophy	1
+trouble	10
+troubled	13
+trust	11	14
+trusting	11
+trustworthy	11
+tuberculosis	7
+tumor	7
+turbulent	13
+turmoil	13	2
+tutor	16
+tv	8
+twin	6
+twinge	13	2
+tycoon	16
+type	14
+typewriter	16
+ulcer	7
+ultimate	1
+ultimately	1
+ultimatum	5
+ultrasound	7
+unbearable	13
+unbeatable	1
+unborn	6
+unbridled	2	3
+uncertain	3
+uncertainty	13	3
+uncle	6
+unconditionally	11
+uncontrollable	2
+underlying	2
+understand	14
+understanding	11
+unease	13	3
+uneasiness	13	3
+uneasy	3
+unending	13
+unfairness	13	2
+unfinished	16
+unhappiness	13	2	3
+unhappy	13
+unity	12
+universally	12
+unrelenting	2
+unrequited	13
+unsettle	3
+unsettling	3
+unspeakable	2
+unstable	3
+unthinkable	10
+unwell	7
+upbringing	6
+uplifting	11
+upright	4
+upset	10
+urgency	3
+vacation	8
+vaccination	7
+vaccine	7
+valiant	1
+validation	11
+vet	7
+vibrancy	11
+vicar	12
+victim	5
+victorious	1
+victory	1
+vigor	11
+violent	10
+virtue	12
+visit	14	6
+vitamin	7
+void	13
+vomiting	7
+voucher	9
+vulnerability	13	3
+vulnerable	3
+wad	9
+wage	9
+wages	16
+waist	4
+waistline	4
+wallet	9
+wallow	13
+wanted	10
+war	5
+wariness	13
+weak	10
+weakness	13	3
+wealthy	16
+weariness	13	3
+wedlock	6
+weekend	8
+whore	15
+widowed	6
+wife	5	6
+willing	11
+willingness	11
+win	1	11
+winner	1
+winning	1
+wins	11
+wish	11	5
+woman	6
+womb	6
+won	1
+wonderful	11
+word	14
+work	1	16
+workaholic	16
+worker	16
+workers	16
+working	1	16
+workplace	16
+workstation	16
+worldly	12
+worried	10	3
+worrisome	3
+worry	10	3
+worrying	3
+worse	10
+worship	12
+worst	10
+worth	9
+worthwhile	11
+worthy	1
+wrath	2
+wrist	4
+write	14
+writing	14
+wrong	10
+wrote	14
+yearn	11
+yearning	13	2
+yen	9
+young	6
+youngest	6
+youngster	6
+zest	11
