@@ -1,7 +1,9 @@
 # Public GitHub desktop updates
 
-The Electron apps can use public GitHub Releases in
-`pjg93-222/melange-platform`. Binary update checks are independent of application
+The Electron apps can use public GitHub Releases. Each app has its own public
+repository (Paul's correction, 2026-10-15): Melange `pjg93-222/Melange`, Mentat
+`pjg93-222/Mentat`, Terrier `pjg93-222/Geo`. The combined `melange-platform`
+repository is no longer a destination. Binary update checks are independent of application
 feature approval. The app still verifies an Ed25519 manifest against its
 independently installed update roots, exact app/OS/architecture, increasing
 sequence/version, installer hashes, and the native OS signer before activation.
@@ -10,17 +12,25 @@ publisher private key, access credential, or recipient list belongs in an app
 or release asset. Making the repository public is an owner action; none of the
 tools here change repository visibility.
 
+> **Limitation.** Signed release production (`packaging/github_release.py`) currently binds all three apps to ONE repository bundle and cannot yet produce per-app signed releases; a redesign is required before the first signed auto-update release. Current per-app releases are unsigned manual-install previews.
+> Steps 4-5 and the publication commands below describe the single-repository
+> signed-bundle design; they do not work per app today. Do not treat them as a
+> working per-app signed publishing procedure.
+
 ## From committed sources to a prepared installer
 
-1. Commit completed source to local Melange `main`; Mentat source uses the
-   configured `codex/mentat-crypto` worktree ref. Run the source-only sync in
-   `../SOURCE_SYNC.md` to send the filtered committed tree to platform main.
-   The exported `desktop-source-checks.yml` runs source tests on pushes. It
-   neither creates binaries nor deploys servers.
+1. Commit completed source to each app's own repository `main` (Melange to
+   `pjg93-222/Melange`, Mentat to `pjg93-222/Mentat`, Terrier to
+   `pjg93-222/Geo`). The earlier instruction to run the combined source-only sync
+   in `../SOURCE_SYNC.md` to `melange-platform` main is **superseded** by that
+   correction, and `ops/sync_sources.py` now refuses `--apply` and `--push`.
+   No step here creates binaries or deploys servers.
 2. On a Windows x64 builder, follow `packaging/README.md` to freeze each native
    runtime and build the three NSIS installers with the GitHub source selected.
-   The builder defaults to `DESKTOP_UPDATE_PROVIDER=github` and
-   `DESKTOP_GITHUB_REPOSITORY=pjg93-222/melange-platform`. Supply the independently
+   The builder defaults to `DESKTOP_UPDATE_PROVIDER=github` and, when
+   `DESKTOP_GITHUB_REPOSITORY` is unset, to the selected app's repository named in the
+   introduction (`DESKTOP_APP_ID` = `melange`, `mentat` or `terrier`). Set the
+   variable only to override that default. Supply the independently
    reviewed public descriptor through `DESKTOP_ACCESS_TRUST`; its
    `updatePublicKeysByApp[appId]` supplies initial update roots without login or
    server enrollment. `DESKTOP_UPDATE_PROVIDER=publisher` explicitly selects
@@ -46,20 +56,22 @@ python ops/desktop/packaging/github_release.py --state $publisherState --spec $r
 python ops/desktop/packaging/github_release.py --state $publisherState --verify-output $newBundle
 ```
 
-The JSON specification has this structure; replace every placeholder with the
-actual completed build inputs. The all-zero commit below is deliberately invalid.
+`github_release.py` binds one `repository` and all three apps into a single bundle
+(see the limitation above), so this specification cannot yet yield per-app signed
+releases. It shows the current tool's format only; replace every placeholder with
+the actual completed build inputs. The all-zero commit below is deliberately invalid.
 
 ```json
 {
-  "repository": "pjg93-222/melange-platform",
+  "repository": "pjg93-222/Melange",
   "version": "1.0.0",
   "sequence": 1,
   "platform": "win32",
   "arch": "x64",
   "sourceRefs": {
     "melange": {"repository": "pjg93-222/Melange", "ref": "main", "commit": "0000000000000000000000000000000000000000"},
-    "mentat": {"repository": "pjg93-222/Melange", "ref": "codex/mentat-crypto", "commit": "0000000000000000000000000000000000000000"},
-    "terrier": {"repository": "pjg93-222/Geo", "ref": "claude/walk-list", "commit": "0000000000000000000000000000000000000000"}
+    "mentat": {"repository": "pjg93-222/Mentat", "ref": "main", "commit": "0000000000000000000000000000000000000000"},
+    "terrier": {"repository": "pjg93-222/Geo", "ref": "main", "commit": "0000000000000000000000000000000000000000"}
   },
   "packages": {
     "melange": {"package": "C:/build/melange.exe", "receipt": "C:/receipts/melange.json"},

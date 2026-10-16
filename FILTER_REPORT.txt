@@ -1,6 +1,6 @@
-== Melange tree: specs=['melange'] source=<local Melange checkout> commit=d39001d6418481d66cf2c2e73cb55ae27432c3d3 (branch integration/melange-20261016)
+== Melange tree: specs=['melange'] source=<local Melange checkout> commit=c8464449224c6bd578cf7723ee07b75279e92b1f (branch integration/melange-20261016)
 Rules: ops/release_lib/export.py allowlist (identical to the one used for 75aa077fa), path excludes, 5 MB cap, plus the reviewed addendum inclusions below.
-included: 1802   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 36 new source paths, none removed; the 6 skill-doc exception files below are in addition)
+included: 1805   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 39 new source paths, none removed; the 6 skill-doc exception files below are in addition)
 excluded: 269
   [excluded path, path policy] 257: fec/_quarantine_paulcomputer_20260727 17, fec/attic 14, fec/docs 68, fec/pas224.zip 1, fec/research 157
   [extension not allowed, kept excluded] 12
@@ -206,3 +206,21 @@ Source d39001d6418481d66cf2c2e73cb55ae27432c3d3, one commit above ff6f9a4c1. Sam
 Carried forward unchanged: the 6 skill-doc exception files (Addendum 6) and the three non-workflow CI files ops/desktop/packaging/desktop-access-trust.public.json, melange-runtime.constraints.txt and THIRD-PARTY-NOTICES/LibreOffice-SOURCES.md (sha256 re-verified).
 Removed: .github/workflows/desktop-windows.yml (added on main in fdd681922). It is removed temporarily so the release target carries no workflow file that is absent from the default branch; the re-pinned workflow returns in a later commit.
 Verification: all 1802 export blobs equal the d39001d6 blobs (full set); the 6 skill-doc files equal their recorded published blobs; gitleaks on the changed files: no leaks; key grep: clean; compileall fec ops: exit 0. Held-content scan of the source changes and of this metadata for withheld stance example values, member-tier phrases and local user paths: none outside the recorded 'old:' lines of the path edits.
+
+== ADDENDUM 9 2026-10-16: republished from integration c8464449 (per-app update default, sync_sources retirement, QME tests)
+Source c8464449224c6bd578cf7723ee07b75279e92b1f = d39001d6 plus C1 7d9233ef (desktop builder per-app update-repository default, new builder test, GITHUB_RELEASES.md and client README), C2 a7b78c0a (retire the combined melange-platform source sync: ops/sync_sources.py, its tests, ops/SOURCE_SYNC.md) and C3 c8464449 (QME tests-only: 2 new tests, 2 test edits, run_tests.py registration). Same export rules, addendum inclusions and the fec/attic/full_congestion.py exception. Changed paths under the export (12, 3 added + 9 changed; no new path filtered out, none removed):
+  M fec/tests/run_tests.py
+  M fec/tests/surfaces/test_clean_workspace_loading.py
+  M fec/tests/surfaces/test_make_staffer_network_html.py
+  M ops/SOURCE_SYNC.md
+  M ops/desktop/GITHUB_RELEASES.md
+  M ops/desktop/client/README.md
+  M ops/desktop/client/builder.cjs
+  M ops/sync_sources.py
+  M ops/tests/test_sync_sources.py
+  A fec/tests/audit/test_stale_imports_contract.py
+  A fec/tests/surfaces/test_staffer_harness_contract.py
+  A ops/desktop/client/tests/builder-update-source.test.cjs
+Carried forward unchanged: the 6 skill-doc exception files (Addendum 6), the three non-workflow CI files under ops/desktop/packaging, and .github/workflows/desktop-windows.yml (v6, sha256 2e9816f2...). main only; release/melange stays at a9be89198e094374cdbf4178e95cc005065fef46.
+IMPORTANT: the published Melange 1.0.3 desktop binaries (draft release, run 38885810616) were built from a9be89198 and do NOT contain these later changes.
+Verification: all 1805 export blobs equal the c8464449 blobs (full set); skill-doc files, CI files and the workflow re-verified by hash; gitleaks on the changed files: no leaks; key grep: clean; compileall fec ops: exit 0. Held-content scan of the changed source and of this metadata for withheld stance example values, member-tier phrases and local user paths: none outside the recorded 'old:' lines of the path edits.

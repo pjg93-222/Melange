@@ -1024,6 +1024,10 @@ _LANE_PYTEST=(
     'test_audit_completion_20260716',
     'test_member_narratives_v2_repair',
     'test_policy_repairs_20260718',
+    # Staffer fixture isolation and native verdict/exit-status fail-closed contract (QME 2026-10-02).
+    'test_staffer_harness_contract',
+    # Stale-import detector controls (QME 2026-10-02).
+    'test_stale_imports_contract',
     # 2026-10-15 self-healing P2 (D-212): pipeline failure diagnostics, transactional chain, labelled freshness
     # degrade, gold-orphan policy.
     'test_pipeline_failure_diagnostics',
