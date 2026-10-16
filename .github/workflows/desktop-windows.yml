@@ -19,6 +19,9 @@
 # - The release targets REVIEWED_BASE, not github.sha: the REST API refuses GITHUB_TOKEN a release whose target commit adds
 #   files under .github/workflows/ relative to the default branch (claude/melange-math-eval-skill-18e907, which has none).
 #   github.sha differs from REVIEWED_BASE only by CI_FILES; provenance records both.
+# Integration (two commits on main): first the reviewed source commit T, whose tree has NO .github/workflows/; then the
+#   CI commit that restores the workflow files and sets REVIEWED_BASE = RELEASE_TARGET = T's full SHA. Preflight refuses
+#   anything else (non-hex or unequal pins, T missing, or T carrying .github/workflows/) before any build minute is spent.
 # Recovery: re-run failed jobs (`gh run rerun <run id> --failed`). The release job recomputes its own state from the
 #   releases API and never trusts preflight's mode: no release -> create the draft; exactly one DRAFT with the expected
 #   target -> resume (validate every present asset by sha256 against this build's SHA256SUMS, upload only missing ones,
@@ -62,13 +65,15 @@ concurrency:
 env:
   APP: melange
   PRODUCT: Melange
-  VERSION: 1.0.3
-  RELEASE_TAG: desktop-preview-v1.0.3
+  VERSION: 1.0.4
+  RELEASE_TAG: desktop-preview-v1.0.4
   ARTIFACT: melange-desktop-${{ github.sha }}
-  REVIEWED_BASE: a9be89198e094374cdbf4178e95cc005065fef46
-  RELEASE_TARGET: a9be89198e094374cdbf4178e95cc005065fef46
+  # SET AT INTEGRATION: both to the full 40-hex SHA of reviewed source commit T (see the header). Until then preflight fails.
+  REVIEWED_BASE: SET-AT-INTEGRATION-full-sha-of-source-commit-T
+  RELEASE_TARGET: SET-AT-INTEGRATION-full-sha-of-source-commit-T
   CI_FILES: >-
-    .github/workflows/desktop-windows.yml ops/desktop/packaging/desktop-access-trust.public.json
+    .github/workflows/desktop-windows.yml .github/workflows/desktop-installer-acceptance.yml
+    ops/desktop/packaging/desktop-access-trust.public.json
     ops/desktop/packaging/melange-runtime.constraints.txt ops/desktop/packaging/THIRD-PARTY-NOTICES/LibreOffice-SOURCES.md
   TRUST_FILE: ops/desktop/packaging/desktop-access-trust.public.json
   TRUST_SHA256: 081f44db43bac05d25e4cedc93891b7f31595b920f4deda7f6dc04a9f7548a3a
@@ -105,6 +110,16 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          # Source pins: one full SHA, an existing commit, whose tree has no .github/workflows/ (the API refuses a
+          # GITHUB_TOKEN release on a target that adds workflow files relative to the default branch).
+          [[ "$REVIEWED_BASE" =~ ^[0-9a-f]{40}$ && "$RELEASE_TARGET" = "$REVIEWED_BASE" ]] \
+            || { echo "::error::REVIEWED_BASE '$REVIEWED_BASE' and RELEASE_TARGET '$RELEASE_TARGET' must be the same full SHA"; exit 1; }
+          [ "$(gh api "repos/$GH_REPO/commits/$RELEASE_TARGET" --jq .sha)" = "$RELEASE_TARGET" ] \
+            || { echo "::error::RELEASE_TARGET $RELEASE_TARGET is not a commit in $GH_REPO"; exit 1; }
+          if probe=$(gh api "repos/$GH_REPO/contents/.github/workflows?ref=$RELEASE_TARGET" 2>&1); then
+            echo "::error::RELEASE_TARGET $RELEASE_TARGET carries .github/workflows/; it must be the workflow-free source commit"; exit 1
+          fi
+          grep -q 'HTTP 404' <<<"$probe" || { echo "::error::could not establish that RELEASE_TARGET has no .github/workflows/: $probe"; exit 1; }
           # Every release, drafts included, matched on tag_name.
           gh api "repos/$GH_REPO/releases?per_page=100" --paginate | jq -s --arg t "$RELEASE_TAG" '[add[] | select(.tag_name == $t)]' > matches.json
           tag_exists=no; gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1 && tag_exists=yes
@@ -496,9 +511,9 @@ jobs:
         with:
           name: ${{ env.ARTIFACT }}
           path: |
-            ${{ runner.temp }}/out/Melange-1.0.3-win-x64-unsigned-installer.exe
-            ${{ runner.temp }}/out/Melange-1.0.3-win-x64-unsigned-preview.zip
-            ${{ runner.temp }}/out/Melange-1.0.3-provenance.json
+            ${{ runner.temp }}/out/Melange-${{ env.VERSION }}-win-x64-unsigned-installer.exe
+            ${{ runner.temp }}/out/Melange-${{ env.VERSION }}-win-x64-unsigned-preview.zip
+            ${{ runner.temp }}/out/Melange-${{ env.VERSION }}-provenance.json
             ${{ runner.temp }}/out/LibreOffice-SOURCES.md
             ${{ runner.temp }}/out/Python-and-packages.md
             ${{ runner.temp }}/out/SHA256SUMS.txt
