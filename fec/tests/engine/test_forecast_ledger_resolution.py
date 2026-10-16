@@ -93,12 +93,53 @@ def test_missing_sponsorship_date_column_fails_closed(fixture):
         FL._score_unscored_freezes(str(root), "2026-08-15")
 
 
-@pytest.mark.parametrize("threshold", ["2026-08-01", "2026-08-06", "20260815", "2026-02-30"])
-def test_invalid_or_nonprospective_resolution_threshold_is_refused(fixture, threshold):
+@pytest.mark.parametrize("threshold", ["20260815", "2026-02-30"])
+def test_malformed_earliest_execution_date_is_refused(fixture, threshold):
     root, _, _, _, write = fixture
     write([row("POST", "2026-08-10")])
     with pytest.raises(FL.ForecastLedgerError):
         FL._score_unscored_freezes(str(root), threshold)
+
+
+@pytest.mark.parametrize("threshold", ["2026-08-01", "2026-08-06"])
+def test_a_date_on_or_before_the_only_freeze_skips_it_with_a_note(fixture, threshold):
+    root, _, _, path, write = fixture
+    write([row("POST", "2026-08-10")])
+    frozen_bytes = path.read_bytes()
+    scored, notes = FL._score_unscored_freezes(str(root), threshold)
+    assert scored == []
+    assert any("2026Q2" in note and "non-prospective" in note for note in notes)
+    assert not (root / "forecast_ledger" / "ledger.jsonl").exists()
+    assert path.read_bytes() == frozen_bytes
+
+
+def test_a_non_prospective_freeze_is_skipped_while_the_other_freezes_and_dyads_score(fixture):
+    root, _, _, path, write = fixture          # 2026Q2 is frozen 2026-08-06, before the date below
+    write([row("POST", "2026-08-10")])
+    late = json.loads(path.read_text(encoding="utf-8"))
+    late.update(vintage="2026Q3", frozen_utc="2026-08-20T12:00:00+00:00")   # frozen after the date
+    late_path = path.with_name("2026Q3.json")
+    late_path.write_text(json.dumps(late), encoding="utf-8")
+    late_bytes = late_path.read_bytes()
+    for year in (2026, 2027):
+        (root / f"our_network_fullscope_{year}_strict.csv").write_text(
+            f"lob_id,bioguide_id,year,n_bills\norg,POST,{year},1\n", encoding="utf-8")
+    dyad = root / "forecast_ledger" / "freezes" / "dyad_persistence" / "2026Q2.json"
+    dyad.parent.mkdir()
+    dyad.write_text(json.dumps({"schema": FL.FREEZE_SCHEMA, "forecaster": "dyad_persistence", "vintage": "2026Q2",
+                                "frozen_utc": "2026-08-06T12:00:00+00:00", "inputs": {}, "source_year": 2025,
+                                "target_year": 2026,
+                                "predictions": [{"lob_id": "org", "bioguide_id": "POST", "predicted_probability": 0.82}]}),
+                    encoding="utf-8")
+    scored, notes = FL._score_unscored_freezes(str(root), "2026-08-15")
+    assert sorted((r["forecaster"], r["vintage"]) for r in scored) == [
+        ("cosponsor_join", "2026Q2"), ("dyad_persistence", "2026Q2")]
+    assert [n for n in notes if "non-prospective" in n] == [
+        "cosponsor_join 2026Q3: cosponsor freeze skipped: earliest execution date 2026-08-15 "
+        "is not after its freeze date 2026-08-20 (non-prospective)"]
+    ledger = (root / "forecast_ledger" / "ledger.jsonl").read_text(encoding="utf-8")
+    assert '"2026Q3"' not in ledger
+    assert late_path.read_bytes() == late_bytes
 
 
 def test_default_does_not_disable_other_forecasters(fixture):

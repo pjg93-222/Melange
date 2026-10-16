@@ -204,21 +204,6 @@ def _load_dyads(path, expected_year):
     return dyads
 
 
-def _load_memberships(path):
-    memberships = set()
-    for line_number, row in _iter_csv(
-        path,
-        ("bill_key", "bioguide_id"),
-        "interaction bill memberships",
-    ):
-        bill = _required_text(row.get("bill_key"), "bill_key", path, line_number)
-        member = _required_text(
-            row.get("bioguide_id"), "bioguide_id", path, line_number
-        )
-        memberships.add((bill, member))
-    return memberships
-
-
 def _input_receipt(path):
     absolute = os.path.abspath(path)
     return {"path": absolute, "sha256": _sha256(absolute)}
@@ -512,7 +497,12 @@ def _resolve_cosponsor(freeze, freeze_path, data_root, resolution_after=None):
     except (KeyError, TypeError, AttributeError, ValueError) as exc:
         raise ForecastLedgerError(f"invalid cosponsor freeze timestamp: {freeze_path}") from exc
     if resolution_date <= frozen_date:
-        raise ForecastLedgerError("cosponsor resolution date must be later than the freeze date")
+        # Non-prospective for THIS freeze: skip it (never score it) and let the loop continue, so one
+        # later freeze cannot abort scoring of the others or of the dyad forecaster.
+        return None, None, (
+            f"cosponsor freeze skipped: earliest execution date {resolution_after} is not after "
+            f"its freeze date {frozen_date.isoformat()} (non-prospective)"
+        )
     today = datetime.fromisoformat(_utc_now()).astimezone(timezone.utc).date()
     if today < resolution_date:
         return None, None, f"cosponsor scoring deferred until {resolution_after} UTC"
