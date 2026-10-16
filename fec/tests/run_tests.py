@@ -1077,7 +1077,13 @@ _LANE_PYTEST=(
     'test_graph_snapshot_binding','test_email_snapshot_binding','test_surface_gate_regressions',
     'test_observability_snapshot',
     # 2026-10-16 defensive input repairs (G2): non-object cached handoff re-extracts; missing page-data names the page.
-    'test_surface_input_refusals')
+    'test_surface_input_refusals',
+    # 2026-10-16 completed audit repairs (G4; recovery/fec-*-20261015 receipts): artifact gaps, payload currentness,
+    # pre-culling reporting, stale-import AST, tier-boundary status, recursive scanners/walk errors, and the
+    # groups binding/provenance companions of the already-published audit_full.py. Synthetic fixtures.
+    'test_artifact_gap_completion','test_payload_currentness_regression','test_pre_culling_inventory_reporting',
+    'test_stale_imports_ast_regression','test_tier_boundary_status','test_recursive_source_scanners',
+    'test_groups_local_binding_runtime','test_groups_provenance_currentness')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on
