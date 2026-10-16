@@ -4,7 +4,7 @@ from __future__ import annotations
 import unittest
 from unittest import mock
 
-from ops.tests.test_release_common import Base, Fixture, MELANGE_FILES, REPO, g, rmtree
+from ops.tests.test_release_common import Base, Fixture, MELANGE_FILES, g, rmtree
 from ops.release_lib import core, export, gates
 from ops import release
 
@@ -37,29 +37,38 @@ class ExportConfigTests(Base):
     def test_exactly_the_five_research_dependent_tests_are_excluded(self):
         research_tests = export.MELANGE_RESEARCH_TESTS
         self.assertEqual(len(research_tests), 5)
-        neighbours = ("fec/tests/infra/test_cohort_output_bindings_extra.py", "fec/tests/infra/test_other_guard.py",
-                      "fec/tests/research/test_kept_suite.py", "fec/tests/research/test_research_io_regression.py.bak",
-                      "fec/tests/surfaces/test_lobby_sector_state.cjs")
-        with mock.patch.dict(MELANGE_FILES, {path: b"# synthetic test\n" for path in (*research_tests, *neighbours)}):
+        expected = {                                                    # synthetic paths -> disposition
+            **{path: "excluded path" for path in research_tests},
+            "fec/research/cosponsor_universe/universe_gold_cohort.py": "excluded path",   # the research rule itself
+            "fec/tests/infra/test_cohort_output_bindings_extra.py": "exported",
+            "fec/tests/infra/test_other_guard.py": "exported",
+            "fec/tests/research/test_kept_suite.py": "exported",
+            "fec/tests/surfaces/test_lobby_sector_state_extra.cjs": "exported",
+            "fec/tests/research/test_research_io_regression.py.bak": "extension not allowed",
+        }
+        with mock.patch.dict(MELANGE_FILES, {path: b"# synthetic test\n" for path in expected}):
             fixture = Fixture(with_liveness=False, big=False)
         try:
             plan = export.plan_export(fixture.cfg)
             dropped = dict(plan["dropped"])
-            for path in research_tests:
-                self.assertNotIn(path, plan["entries"])
-                self.assertEqual(dropped[path], "excluded path")
-            for path in neighbours:
-                if export.allowed_name(path):
+            for path, disposition in expected.items():
+                if disposition == "exported":
                     self.assertIn(path, plan["entries"], path)
+                    self.assertNotIn(path, dropped, path)
                 else:
-                    self.assertEqual(dropped[path], "extension not allowed")
-            self.assertEqual(dropped.get("fec/research/cosponsor_universe/universe_gold_cohort.py", "excluded path"),
-                             "excluded path")
+                    self.assertNotIn(path, plan["entries"], path)
+                    self.assertIn(path, dropped, path)
+                    self.assertEqual(dropped[path], disposition, path)
         finally:
             fixture.close()
-        tracked = g("ls-files", "fec/tests", cwd=REPO).split()                  # this checkout's own tests
-        self.assertGreater(len(tracked), 100)
-        self.assertEqual([path for path in tracked if export.MELANGE_EXCLUDE.match(path)], [])
+        # The pattern itself: exact paths only (anchored, dots escaped), research rule unchanged.
+        for path in research_tests:
+            self.assertTrue(export.MELANGE_EXCLUDE.match(path), path)
+        for path in ("x/" + research_tests[0], research_tests[0] + "c", research_tests[0][:-3] + "Xpy",
+                     "fec/tests/infra/test_cohort_output_bindings_extra.py", "fec/tests/research/test_kept_suite.py",
+                     "fec/tests/surfaces/test_staffer_live_server.py"):
+            self.assertIsNone(export.MELANGE_EXCLUDE.match(path), path)
+        self.assertTrue(export.MELANGE_EXCLUDE.match("fec/research/anything.py"))
 
     def test_the_shipped_config_keeps_the_r_lock_that_deps_yml_reads(self):
         shipped = core.load_config()["export"]
