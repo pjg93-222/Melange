@@ -59,11 +59,23 @@ class BootPrefixDelivery(unittest.TestCase):
         finally:
             connection.close()
 
-    def test_the_app_prefix_is_this_repository_loaders_own_prefix(self):
-        prefix = live.boot_prefix()
-        loader = live.BOOT_PREFIX_SOURCE.read_bytes()
-        self.assertTrue(prefix and live.BOOT_PREFIX_MARKER in prefix)
-        self.assertEqual(loader.index(b'/* mlk-boot.js:'), len(prefix))
+    def test_a_workspace_with_the_pre_prefix_loader_is_served_exactly_the_app_loader(self):
+        app_loader = live.BOOT_PREFIX_SOURCE.read_bytes()
+        body = app_loader[app_loader.index(b'/* mlk-boot.js:'):]            # the loader as published before the prefix
+        self.assertNotIn(live.BOOT_PREFIX_MARKER, body)
+        (self.approved / 'mlk-boot.js').write_bytes(body)
+        status, served, headers = self.get('/staffer-live/approved/mlk-boot.js')
+        self.assertEqual(status, 200)
+        self.assertEqual(served, app_loader)                               # prefix + workspace body == app file
+        self.assertEqual(headers['Content-Type'], 'application/javascript; charset=utf-8')
+
+    def test_a_nested_workspace_approved_clean_loader_gets_no_prefix(self):
+        nested = self.approved / 'clean' / 'mlk-boot.js'
+        nested.parent.mkdir()
+        nested.write_bytes(OLD_LOADER)
+        status, served, headers = self.get('/staffer-live/approved/clean/mlk-boot.js')
+        self.assertEqual((status, served), (200, OLD_LOADER))
+        self.assertEqual(headers['Content-Type'], 'application/javascript; charset=utf-8')
 
     def test_an_old_workspace_loader_is_served_with_the_prefix_and_never_rewritten(self):
         boot = self.approved / 'mlk-boot.js'
@@ -71,6 +83,7 @@ class BootPrefixDelivery(unittest.TestCase):
         status, body, headers = self.get('/staffer-live/approved/mlk-boot.js')
         self.assertEqual(status, 200)
         self.assertEqual(body, live.boot_prefix() + OLD_LOADER)
+        self.assertEqual(headers['Content-Type'], 'application/javascript; charset=utf-8')
         self.assertEqual(headers['ETag'], '"clean-' + hashlib.sha256(body).hexdigest()[:24] + '"')
         status, zipped, headers = self.get('/staffer-live/approved/mlk-boot.js', gzip_ok=True)
         self.assertEqual((status, headers.get('Content-Encoding')), (200, 'gzip'))
