@@ -243,3 +243,13 @@ Verification: all 1805 export blobs equal the 31588848 blobs (full set); carried
   Override rule for every later republish: this path is carried forward byte-for-byte with the other skill-doc exception files and re-verified against blob 709441298f5a407acf477723bbaa71312f64f82e. Any other blob at this path, including 4eacc0eee7445e4a8ba70909050dac642712253d, is a stop, not an update. SOURCE_PROVENANCE.json skill_docs_exception.publication_override records the same rule; its held list is now empty.
   Skill-doc exception files: 7 (the Addendum 6 six plus this one).
 Verification: gitleaks 8.30.1 on the file: no leaks; held-content scan (local user paths, owner name, commit-like ids, audit ids, tier, stance, run ids): every hit judged, none discloses an internal result (the only commit-like ids are the already-recorded source commit and blob prefix in the file's provenance comment, and numeric seeds that are public in fec/members/b5_n_matrix.py and b5_behavioral_instrument.py). python -m unittest ops.tests.test_release_export: 15 tests OK.
+
+== ADDENDUM 12 2026-10-16: proof-toolkit header comment marked as published (supersedes the pinned blob of Addendum 11)
+.claude/skills/moneyball-proof-and-analysis-toolkit/SKILL.md
+  one exact substitution on line 6 (the HTML header comment), 1 occurrence; every other byte unchanged:
+      old: PUBLICATION CANDIDATE (local only, not published)
+      new: PUBLISHED generic redacted subset (2026-10-16); original research remains private
+  before: sha256 0a4f10529ecb72ea092a56616870596bffa54f9382dcc048cb13a95dfd28224f, blob 709441298f5a407acf477723bbaa71312f64f82e (the reviewed redacted candidate, published at a9c60685; kept as the reviewed predecessor)
+  after:  sha256 586b34896a66da5589a1691d64f0fd65839d9326b9b31aabf6905328359a89f3, blob 1ccbce54208b65d92e7ff4d4375febd6ce179f4a (33710 B, 308 lines, LF)
+  Override rule now pins blob 1ccbce54208b65d92e7ff4d4375febd6ce179f4a: republishes carry it forward byte-for-byte and verify that blob; any other blob at this path, including the original 4eacc0eee7445e4a8ba70909050dac642712253d, is a stop. The 32 withheld markers are unchanged; the original research remains private. SOURCE_PROVENANCE.json skill_docs_exception records the new blob, the reviewed predecessor and this edit.
+Verification: gitleaks 8.30.1 on the file: no leaks; held-content scan of the changed file and this metadata: no new hits beyond those judged in Addendum 11. python -m unittest ops.tests.test_release_export: 15 tests OK.
