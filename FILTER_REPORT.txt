@@ -1,6 +1,6 @@
-== Melange tree: specs=['melange'] source=C:/Users/pgoff/OneDrive/Desktop/Melange Systems commit=99431fc3c94eff079088c01ea979d927009d7967 (branch integration/melange-20261016)
+== Melange tree: specs=['melange'] source=<local Melange checkout> commit=ff6f9a4c1edd9eadb175ddb3793cd1dc655d7edb (branch integration/melange-20261016)
 Rules: ops/release_lib/export.py allowlist (identical to the one used for 75aa077fa), path excludes, 5 MB cap, plus the reviewed addendum inclusions below.
-included: 1800   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 34 new source paths, none removed)
+included: 1801   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 35 new source paths, none removed; the 6 skill-doc exception files below are in addition)
 excluded: 269
   [excluded path, path policy] 257: fec/_quarantine_paulcomputer_20260727 17, fec/attic 14, fec/docs 68, fec/pas224.zip 1, fec/research 157
   [extension not allowed, kept excluded] 12
@@ -24,7 +24,7 @@ Verification: all 1800 published blobs equal the 99431fc3c blobs (git hash-objec
 ------------------------------------------------------------------
 HISTORY: the report for the previous publication (source 75aa077fa, branch release/melange f14fe45) follows unchanged, including its ADDENDA, which still define the KEPT-EXCLUDED reasons.
 ------------------------------------------------------------------
-== Melange tree: specs=['melange'] source=C:/Users/pgoff/OneDrive/Desktop/Melange Systems commit=75aa077fa53581fe2379fb90572cffc0d4fc7db3
+== Melange tree: specs=['melange'] source=<local Melange checkout> commit=75aa077fa53581fe2379fb90572cffc0d4fc7db3
 included: 1738
 excluded: 297
   [excluded path] 258
@@ -113,7 +113,7 @@ Rationale: absolute local paths and local branch names are portability issues, n
 The only unresolved disclosure item is the member stance-tier example values (unpublished model outputs); those values are replaced with '[example values withheld pending disclosure review]' and held by Wire's review (not a Paul ruling).
 HELD (not published): .claude/skills/moneyball-proof-and-analysis-toolkit/SKILL.md -- mostly unpublished prereg outcomes; the hold is attributed to Wire's review. All other .claude/ content is unpublished.
 Verification: gitleaks on the published files: no leaks; key-pattern grep: clean; YAML frontmatter of the three SKILL.md files parses (keys name, description; name equals the directory); the three scripts byte-compile. Residual scan for the local user path, the private branch nicknames and the withheld stance example names across the published .claude files: none.
-Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Desktop\Melange Systems and '<local data dir>' for C:\Users\pgoff\Downloads; (2) private local branch names dropped, sentence kept generic; (3) '(local Project Brain decisions repo; not published)' added once per file after 'Project Brain STATE'; (4) '(local, not in this repo)' added to citations of unpublished files; (5) stance example values replaced as stated above.
+Edits were portability-only: (1) '<repo root>' for the absolute local Melange checkout path and '<local data dir>' for the absolute local Downloads path (the exact old strings are recorded in the 'old:' lines below); (2) private local branch names dropped, sentence kept generic; (3) '(local Project Brain decisions repo; not published)' added once per file after 'Project Brain STATE'; (4) '(local, not in this repo)' added to citations of unpublished files; (5) stance example values replaced as stated above.
 
 .claude/skills/moneyball-debugging-playbook/SKILL.md
   source blob @99431fc3c 5ada2832300f4748606e683f41ffca41d55e9bc6 (39432 B) -> published blob cbd7e5efa3ff7ee1e7e11d82fa2a6d432fc49c7e (39280 B)
@@ -195,3 +195,8 @@ Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Deskt
   source blob @99431fc3c 864f800ab66244ae0f0b4a0816b8908c46d91750 (2502 B) -> published blob 864f800ab66244ae0f0b4a0816b8908c46d91750 (2502 B)  [UNCHANGED, byte-identical to source]
 
 Each replacement above was applied by exact string substitution to the LF source blob; no other bytes differ (source and published blobs re-hashed with git hash-object).
+
+== ADDENDUM 7 2026-10-16: republished from integration ff6f9a4c1 (compute-engine control repair)
+Source ff6f9a4c1edd9eadb175ddb3793cd1dc655d7edb, two commits above 99431fc3c (7d57a1a1f compute-engine control repair; ff6f9a4c1 test registration). Same export rules, addendum inclusions and the fec/attic/full_congestion.py exception. Exactly 5 files differ from the previous publication: changed fec/bounded_subprocess.py, fec/compute_engine.py, fec/tests/run_tests.py, ops/tests/test_compute_engine.py; new fec/tests/infra/test_compute_control_bounds.py. Nothing else; no new path is filtered out; 0 removed. 1801 export files + 6 skill-doc exception files.
+The Addendum 6 skill-doc exception files are carried forward byte-for-byte from the previous publication (their sources did not change).
+Verification: all 1801 export blobs equal the ff6f9a4c1 blobs (full set); the 6 skill-doc files equal their recorded published blobs; gitleaks on the changed files: no leaks; key grep: clean; compileall fec ops: exit 0. Held-content scan of the source changes and of this metadata for the withheld stance example values, member-tier phrases and local user paths: none outside the recorded 'old:' lines of the path edits above.

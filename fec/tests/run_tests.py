@@ -410,6 +410,9 @@ _LANE_MODULES=('test_audio_calibrate','test_audio_identity','test_audio_linear_h
                # process-tree kill, the two measured bounds, and both call sites. Synthetic
                # children only: no producer runs, no lock is taken, no chain event is emitted.
                'test_bounded_subprocess',
+               # Control-command bounds of fec/compute_engine.py (image resolution, container stop/rm) on
+               # the bounded runner, and run_bounded rejecting NaN/infinite timeouts. Mocked: no process starts.
+               'test_compute_control_bounds',
                # The refresh TICK runner (fec/refresh_tick.py + refresh_table + refresh_state),
                # written because fec/weekly_refresh.py is one 49-step run that either finishes
                # or is lost and has not finished since 2026-07-19 on a box that dies about every
