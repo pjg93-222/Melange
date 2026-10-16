@@ -76,3 +76,7 @@ KEPT-EXCLUDED, not path policy (12)
   ops/security/canaries.txt  -- security-gate canary tokens (data-leak tripwires); keep private so the tripwire is not defeated
 
 Counts: INCLUDED-NOW 27; KEPT-EXCLUDED 270 (258 path policy + 12 data/output/private).
+
+== ADDENDUM 2 2026-10-16: narrow exception to the fec/attic path policy
+  f10c45787730   4802 B  fec/attic/full_congestion.py  -- live code: committee_policy() is imported by fec/collect/refresh_fec_money.py, fec/collect/import_mentat_money.py and fec/audit/reconcile_mentat_money.py. Inspected: public FEC committee ids and code only; no secrets or personal data (one hardcoded local workbook path). Blob equals 75aa077fa535. The other 14 files in fec/attic and everything else under the path policy stay excluded.
+Counts now: INCLUDED-NOW 28; KEPT-EXCLUDED 269 (257 path policy + 12 data/output/private).
