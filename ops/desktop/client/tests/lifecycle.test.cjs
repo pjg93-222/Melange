@@ -170,3 +170,102 @@ test('activity signal requires matching app and typed boolean; unavailable is un
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
   try{assert.equal(await activity(origin,'launch-secret','mentat'),true);response={appId:'mentat',busy:false};assert.equal(await activity(origin,'launch-secret','mentat'),false);response={appId:'terrier',busy:false};assert.equal(await activity(origin,'launch-secret','mentat'),null);response={appId:'mentat',busy:'false'};assert.equal(await activity(origin,'launch-secret','mentat'),null);code=404;assert.equal(await activity(origin,'launch-secret','mentat'),null);}finally{await new Promise(resolve=>server.close(resolve));}
 });
+
+test('release failing native verification backs off, cannot wedge a corrected release, and keeps the high-water',async t=>{
+  const f=fixture(t),bad=path.join(f.directory,'updates','2')+path.sep,failing=f.envelope,codes=[];
+  const client=f.client('Fixture Publisher',{verifyNativePackage:async file=>{if(path.resolve(file).startsWith(bad))throw new Error('Native signature refused');}});
+  const report=client.report.bind(client);client.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
+  await client.check();
+  assert.equal(f.downloads,1);assert.equal(f.state.pending,null);assert.equal(client.ready,null);assert.match(f.status.at(-1),/Native signature refused/);assert.deepEqual(codes,['failed:VERIFY_FAILED']);
+  assert.equal(f.state.verifyFailure.manifestHash,crypto.createHash('sha256').update(Buffer.from(failing.payload,'base64')).digest('hex'));
+  // The signed high-water is recorded before download by design; a failed candidate keeps it.
+  assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(await client.activateAfterClose(),false);
+  // Inside the backoff window the same manifest is neither downloaded nor verified again.
+  await client.check();await client.check();assert.equal(f.downloads,1);assert.match(f.status.at(-1),/retry after/);assert.equal(codes.length,1);
+  // Older, equivocating or downgrading manifests stay refused.
+  for(const [offer,reason] of [[f.sign('1.1.0',0),/Rollback/],[f.sign('1.1.1',1),/Rollback|equivocation/],[f.sign('1.0.9',3),/downgrade/]]){
+    f.envelope=offer;await client.check();
+    assert.match(f.status.at(-1),reason);assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(f.downloads,1);assert.equal(client.ready,null);
+  }
+  // After the window the same manifest is retried once (fresh download), fails again and backs off again.
+  f.envelope=failing;f.state={...f.state,verifyFailure:{...f.state.verifyFailure,failedAt:Date.now()-6*60*60*1000-1}};
+  await client.check();assert.equal(f.downloads,2);assert.equal(f.state.pending,null);assert.ok(Date.now()-f.state.verifyFailure.failedAt<60000);
+  await client.check();assert.equal(f.downloads,2);
+  // A corrected release with a higher sequence bypasses the backoff immediately.
+  f.envelope=f.sign('1.1.1',2);await client.check();
+  assert.equal(f.downloads,3);assert.equal(f.state.sequence,3);assert.equal(f.state.pending.version,'1.1.1');assert.equal(f.state.pending.phase,'prepared');
+  assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
+});
+
+test('restart reverification failure is reported and not overwritten by an empty update reply',async t=>{
+  const f=fixture(t);let refuse=false;const bad=path.join(f.directory,'updates','2')+path.sep;
+  const verifyNativePackage=async file=>{if(refuse&&path.resolve(file).startsWith(bad))throw new Error('Native signature refused');};
+  await f.client('Fixture Publisher',{verifyNativePackage}).check();assert.equal(f.state.pending.phase,'prepared');
+  refuse=true;f.envelope=null;const restarted=f.client('Fixture Publisher',{verifyNativePackage}),codes=[];
+  const report=restarted.report.bind(restarted);restarted.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
+  await restarted.check();
+  assert.match(f.status.at(-1),/Staged update 1.1.0 .*Native signature refused/);assert.deepEqual(codes,['failed:VERIFY_FAILED']);
+  assert.equal(f.state.pending,null);assert.equal(restarted.ready,null);assert.equal(await restarted.activateAfterClose(),false);
+});
+
+test('download integrity failure records the high-water but a corrected release still installs',async t=>{
+  const f=fixture(t);let fail=true;
+  const client=f.client('Fixture Publisher',{download:async(p,token,m,target)=>{if(fail){fail=false;throw new Error('Downloaded package integrity failed');}fs.mkdirSync(target,{recursive:true});const destination=path.join(target,m.package.name);fs.writeFileSync(destination,Buffer.from('Non-installable signed test fixture'));return destination;}});
+  await client.check();
+  assert.equal(f.state.sequence,2);assert.equal(f.state.pending,null);assert.match(f.status.at(-1),/integrity failed/);
+  f.envelope=f.sign('1.1.0',0);await client.check();assert.match(f.status.at(-1),/Rollback/);assert.equal(f.state.sequence,2);
+  f.envelope=f.sign('1.1.1',2);await client.check();
+  assert.equal(f.state.sequence,3);assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);
+});
+
+test('failed rollback preparation is marked failed, never activates, and stops blocking updates',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';const second=f.client();second.markApplicationReady();await second.check();
+  f.envelope=f.sign('1.2.0',2);await second.check();await second.activateAfterClose();
+  f.version='1.2.0';const third=f.client();third.markApplicationReady();await third.check();
+  // Rollback staged, then its retained installer fails reverification after a restart.
+  assert.equal(await third.beginRecovery(),'1.1.0');fs.writeFileSync(path.join(f.directory,'updates','2','Terrier.exe'),'corrupt');
+  const restarted=f.client();restarted.markApplicationReady();f.offline=true;await restarted.check();
+  assert.equal(f.state.recovery.phase,'failed');assert.equal(restarted.ready,null);assert.equal(await restarted.activateAfterClose(),false);
+  // A manual retry that fails verification is refused and also marked failed.
+  await assert.rejects(()=>restarted.beginRecovery(),/Cached package/);assert.equal(f.state.recovery.phase,'failed');
+  // Normal updates resume; the newer valid release becomes ready and the failed rollback never activates.
+  f.offline=false;f.envelope=f.sign('1.2.1',3);await restarted.check();
+  assert.equal(f.state.pending.version,'1.2.1');assert.equal(f.state.pending.phase,'prepared');assert.equal(restarted.ready.recovery,false);
+  assert.equal(await restarted.activateAfterClose(),true);assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.recovery.phase,'failed');assert.equal(f.installs,3);
+});
+
+test('broken current-version baseline is not blamed on the staged release and starts no backoff',async t=>{
+  const f=fixture(t);await f.client().check();assert.equal(f.state.pending.phase,'prepared');
+  const baseline=path.join(f.directory,'updates','1','Terrier.exe'),original=fs.readFileSync(baseline);fs.writeFileSync(baseline,'corrupt');
+  const restarted=f.client();await restarted.check();
+  assert.equal(f.state.verifyFailure,undefined);assert.equal(f.state.pending.version,'1.1.0');assert.equal(restarted.ready,null);assert.equal(await restarted.activateAfterClose(),false);
+  fs.writeFileSync(baseline,original);await restarted.check();
+  assert.equal(f.downloads,1);assert.equal(f.state.verifyFailure,undefined);assert.equal(await restarted.activateAfterClose(),true);
+});
+
+test('signature tool failure without a verdict keeps the staged release and retries locally without backoff',async t=>{
+  const f=fixture(t),bad=path.join(f.directory,'updates','2')+path.sep,codes=[];let unavailable=true;
+  const client=f.client('Fixture Publisher',{verifyNativePackage:async file=>{if(unavailable&&path.resolve(file).startsWith(bad))throw Object.assign(new Error('Windows package signature verification failed.'),{code:'SIGNATURE_CHECK_UNAVAILABLE'});}});
+  const report=client.report.bind(client);client.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
+  await client.check();
+  assert.equal(f.state.verifyFailure,undefined);assert.equal(f.state.pending.phase,'staged');assert.equal(f.downloads,1);assert.deepEqual(codes,['deferred:SIGNATURE_CHECK_UNAVAILABLE']);
+  await client.check();assert.equal(f.downloads,1);assert.equal(f.state.verifyFailure,undefined);assert.match(f.status.at(-1),/not prepared/);
+  assert.deepEqual(codes,['deferred:SIGNATURE_CHECK_UNAVAILABLE']); // Reported once per staged manifest.
+  unavailable=false;await client.check();assert.equal(f.downloads,1);assert.equal(await client.activateAfterClose(),true);assert.deepEqual(codes,['deferred:SIGNATURE_CHECK_UNAVAILABLE']);
+});
+
+test('malformed backoff timestamp is ignored without throwing',async t=>{
+  for(const failedAt of [String(Date.now()),[Date.now()]]){
+    const f=fixture(t),client=f.client();
+    f.state={...f.state,verifyFailure:{manifestHash:crypto.createHash('sha256').update(Buffer.from(f.envelope.payload,'base64')).digest('hex'),failedAt}};
+    await client.check();
+    assert.equal(f.downloads,1);assert.equal(f.state.pending.phase,'prepared');assert.doesNotMatch(f.status.join(' '),/Invalid time|retry after/);
+  }
+});
+
+test('install-on-close refuses activation when the current-version baseline fails at close time',async t=>{
+  const f=fixture(t),client=f.client();await client.check();assert.equal(f.state.pending.phase,'prepared');
+  fs.writeFileSync(path.join(f.directory,'updates','1','Terrier.exe'),'corrupt');
+  assert.equal(await client.activateAfterClose(),false);assert.equal(f.installs,0);assert.equal(f.state.pending.phase,'prepared');assert.match(f.status.at(-1),/activation refused/);
+});
