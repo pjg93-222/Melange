@@ -1087,7 +1087,9 @@ _LANE_PYTEST=(
     # 2026-10-16 completed infra repairs (G4b; FEC_ROOT_REPAIR.md:34,41): calibration refusal, workbook plan snapshot.
     'test_calibration_guard_unavailable','test_workbook_author_plan_snapshot',
     # 2026-10-16 bill override CSV overflow guard (G4c; fec-debug-findings.md:66-78).
-    'test_bill_override_csv_overflow')
+    'test_bill_override_csv_overflow',
+    # 2026-10-16 say-do first-pass independent-rounding tolerance (G5; fec_legislation.md:97,144).
+    'test_say_do_validate_output_rounding')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on
