@@ -23,6 +23,10 @@ x-replay: &replay
 services:
   collect-fanout:
     <<: *replay
+    environment:
+      REPLAY_REPORT: /localappdata/Mentat/compute/receipts/replay-report.json
+      # Offline dummy-key replay uses its existing explicit scratch budget.
+      MENTAT_REQUEST_POOL_CONFIG: ""
     volumes:
       - *m-cassette
       - *m-tls
@@ -40,4 +44,6 @@ services:
 # The dummy keys file (replay-dummy-0001, ...; as many as the recording used). Replaces compute.compose.yaml's FEC_KEYS_FILE.
 secrets:
   fec_api_keys:
+    file: ${REPLAY_KEYS_FILE:?REPLAY_KEYS_FILE is the dummy keys file replay_parity.py writes under the snapshot}
+  fec_request_pool:
     file: ${REPLAY_KEYS_FILE:?REPLAY_KEYS_FILE is the dummy keys file replay_parity.py writes under the snapshot}

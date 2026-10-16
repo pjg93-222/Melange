@@ -87,6 +87,8 @@ mentat/state/contribution-source-proofs/
 
 # Reviewed coefficients and historical anchors required by the industry scenario calculator.
 !mentat/app/data/giving-models-v1.json
+# Shared API quota path policy is source configuration.
+!mentat/tools/api_budget_policy.json
 
 # --- Mentat working-tree hygiene (2026-09-18) ---
 # Node dependency trees are never tracked, wherever they appear.
