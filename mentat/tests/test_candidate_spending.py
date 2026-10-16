@@ -9,12 +9,16 @@ donors, and IN-KIND: FOOD, BEVERAGE & EVENT SPACE.
 The source is the crawler's reader (tools/committee_activity_reader.py, not in this checkout); every test feeds the
 adapter results in the reader's exact shape through MENTAT_CANDIDATE_SPENDING_FIXTURE or by calling combine() directly.
 """
+import http.client
+import importlib.util
 import json
 import os
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parents[1]
@@ -89,9 +93,9 @@ class Classifier(unittest.TestCase):
         ('PROFESSIONAL DATA SERVICES', 'COMPLIANCE CONSULTING', 'legal_compliance', {}),     # not consulting
         ('REPUBLICAN PARTY OF FAYETTE COUNTY', 'EVENT SPONSOR', 'contributions_transfers', {}),  # not events
         ('NRCC', 'CONTRIBUTION', 'contributions_transfers', {}),
-        ('BOUCHER, DAWN D', 'REFUND', 'refunds', {'line': '20A', 'entity': 'IND'}),
-        ('LOTT, CHESTER TRENT JR.', 'IN-KIND:FOOD, BEVERAGE, & EVENT SPACE', 'events', {}),
-        ('LOTT, CHESTER TRENT JR.', 'IN-KIND: FOOD, BEVERAGE & EVENT SPACE', 'events', {}),
+        ('DONOR, SAMPLE A', 'REFUND', 'refunds', {'line': '20A', 'entity': 'IND'}),
+        ('SUPPORTER, SAMPLE A', 'IN-KIND:FOOD, BEVERAGE, & EVENT SPACE', 'events', {}),
+        ('SUPPORTER, SAMPLE A', 'IN-KIND: FOOD, BEVERAGE & EVENT SPACE', 'events', {}),
         ('LEXINGTON MINI STORAGE', 'RENT', 'office', {}),
         ('AMERICAN TRUST', 'BANK FEE', 'office', {}),                       # a bank fee is not a processing fee
         ('UPONE INSIGHTS', 'POLLING EXPENSE', 'polling_data', {}),
@@ -107,12 +111,67 @@ class Classifier(unittest.TestCase):
         ('WHATEVER LLC', 'MYSTERY ITEM', 'other', {}),
         ('WHATEVER LLC', 'MYSTERY ITEM', 'travel', {'purpose': 'TRAVEL'}),     # FEC's purpose category is the fallback
         ('WHATEVER LLC', '', 'other', {}),
+        # Review fix S3: each of these used to land in the wrong category
+        ('SAMPLE VENDOR', 'STAFF TRAVEL REIMBURSEMENT', 'travel', {}),                # STAFF is a weak payroll word
+        ('SAMPLE VENDOR', 'STAFF MILEAGE', 'travel', {}),
+        ('SAMPLE VENDOR', 'MEALS - STAFF', 'events', {}),
+        ('SAMPLE VENDOR', 'EVENT STAFFING', 'events', {}),
+        ('SAMPLE VENDOR', 'STAFFING AGENCY', 'payroll', {}),                          # STAFF alone is still payroll
+        ('SAMPLE VENDOR', 'VAN RENTAL', 'travel', {}),                                # not the voter file
+        ('NGP VAN', 'VAN', 'polling_data', {}),                                       # a bare VAN is
+        ('SAMPLE VENDOR', 'DATA PLAN - CELL PHONE', 'office', {}),                    # not data
+        ('SAMPLE VENDOR', 'CABLE/INTERNET', 'office', {}),                            # not cable ads
+        ('SAMPLE VENDOR', 'CABLE TV ADS', 'advertising', {}),
+        ('SAMPLE VENDOR', 'GOOGLE WORKSPACE', 'office', {}),                          # not Google ads
+        ('SAMPLE VENDOR', 'GOOGLE ADS', 'advertising', {}),
+        ('SAMPLE VENDOR', 'WEBSITE DESIGN', 'advertising', {}),                       # documented: design is digital advertising
+        ('SAMPLE VENDOR', 'WEBSITE HOSTING', 'office', {}),                           # hosting and domains are office
+        ('SAMPLE VENDOR', 'PRINTING AND DESIGN', 'printing_mail', {}),                # not design
+        ('SAMPLE VENDOR', 'PRINT ADS', 'advertising', {}),
+        ('SAMPLE VENDOR', 'PAYMENT FOR LEGAL FEES', 'legal_compliance', {}),          # not a processing fee
+        ('SAMPLE VENDOR', 'PAYMENT PROCESSING FEES', 'fundraising_fees', {}),
+        # a vendor whose name has CAMPAIGN / COMMITTEE / VICTORY is a committee only when the filing says so
+        ('CAMPAIGN PROMOTIONS INC', 'EVENT SPONSOR', 'events', {}),
+        ('VICTORY ENTERPRISES', 'EVENT SPONSOR', 'events', {}),
+        ('THE COMMITTEE GROUP', 'EVENT TICKETS', 'events', {}),
+        ('VICTORY FUND', 'EVENT SPONSOR', 'contributions_transfers', {'entity': 'COM'}),
+        ('CAMPAIGN PROMOTIONS INC', 'EVENT SPONSOR', 'contributions_transfers', {'committee': 'C00123456'}),
     ]
 
     def test_paul_rows_and_the_ordering_rules(self):
         for payee, description, expected, extra in self.TABLE:
             with self.subTest(payee=payee, description=description):
                 self.assertEqual(cs.classify(row(payee, description, 100, **extra), BARR), expected)
+
+    NAMES = [
+        # (payee, entity_type, description, candidate as filed, expected)
+        ('BARR, GARLAND ANDY', 'IND', 'CHILD CARE REIMBURSEMENT', BARR, 'personal_reimb'),
+        ('BARR, ANDY', 'IND', 'MILEAGE', BARR, 'personal_reimb'),                       # the nickname the filed name carries
+        ('BARR, GARLAND', 'IND', 'TRAVEL REIMBURSEMENT', BARR, 'personal_reimb'),
+        ('BARR, ANDY JR', 'IND', 'CHILD CARE REIMBURSEMENT', BARR, 'personal_reimb'),   # JR is the only difference
+        ('BARR, ANDY JR', 'ORG', 'CHILD CARE REIMBURSEMENT', BARR, 'other'),            # ... and only for an individual
+        ('BARR, ANDREW JR', 'IND', 'CHILD CARE REIMBURSEMENT', BARR, 'other'),          # a different given name
+        ('BARR, GARLAND ANDY', 'IND', 'CHILD CARE REIMBURSEMENT', 'ANDY BARR', 'personal_reimb'),    # the committee-name hint
+        ('BARR, GARLAND ANDY', 'IND', 'SALARY', BARR, 'payroll'),                       # paid for work, not reimbursed
+        ('SMITH, JOHN', 'IND', 'SALARY', 'SMITH, JOHN ROBERT', 'payroll'),              # a namesake staffer on salary
+        ('SMITH, JOHN', 'IND', 'MILEAGE REIMBURSEMENT', 'SMITH, JOHN ROBERT', 'personal_reimb'),   # documented: cannot be told apart
+        ('SMITH, JOHN WILLIAM', 'IND', 'MILEAGE REIMBURSEMENT', 'SMITH, JOHN ROBERT', 'travel'),   # a different middle name
+        ('FRIENDS OF JOHN Q SMITH', 'IND', 'REIMBURSEMENT', 'SMITH, MARY Q', 'other'),
+        ('FRIENDS OF JOHN Q SMITH', 'IND', 'REIMBURSEMENT', 'SMITH, JOHN Q', 'other'),    # an organisation never is the person
+        ('ANDY BARR GRILL', 'IND', 'TRAVEL REIMBURSEMENT', BARR, 'travel'),
+        ('ANDY BARR GRILL', 'ORG', 'MEALS', BARR, 'events'),
+        ('BARR, ANDY', 'IND', 'CHILD CARE REIMBURSEMENT', 'JONES, ANDY', 'other'),      # same first name, other surname
+    ]
+
+    def test_the_candidate_name_match_is_strict_and_needs_a_reimbursement_purpose(self):
+        for payee, entity, description, candidate, expected in self.NAMES:
+            with self.subTest(payee=payee, entity=entity, description=description, candidate=candidate):
+                self.assertEqual(cs.classify(row(payee, description, 100, entity=entity), candidate), expected)
+
+    def test_suffix_words_and_initials_neither_make_nor_break_a_name(self):
+        self.assertEqual(cs._name_parts('BARR, GARLAND ANDY JR.'), (['BARR'], ['GARLAND', 'ANDY']))
+        self.assertEqual(cs._name_parts('REP. ANDY Q BARR III'), (['BARR'], ['ANDY']))
+        self.assertEqual(cs._name_parts('JOHN Q SMITH'), (['SMITH'], ['JOHN']))
 
     def test_a_campaign_paying_itself_is_a_transfer_not_a_reimbursement(self):
         self.assertEqual(cs.classify(row('ANDY BARR FOR CONGRESS', 'REIMBURSEMENT', 10, committee='C00467571'), BARR), 'contributions_transfers')
@@ -130,7 +189,7 @@ class Classifier(unittest.TestCase):
 class MemoParents(unittest.TestCase):
     def rows(self, child_total):
         parent = row('PAYROLL SOLUTIONS', 'SEE MEMOS', 1000.00, tid='P1')
-        kids = [row('WITT, CONNIE', 'PAYROLL EXPENSE', 600.00, tid='K1', memo='X', back='P1', entity='IND'),
+        kids = [row('STAFFER, SAMPLE E', 'PAYROLL EXPENSE', 600.00, tid='K1', memo='X', back='P1', entity='IND'),
                 row('PAYROLL SOLUTIONS', 'PAYROLL TAXES', child_total - 600.00, tid='K2', memo='X', back='P1')]
         return [parent, *kids, row('DELTA AIRLINES', 'TRAVEL EXPENSE', 50.00)]
 
@@ -169,6 +228,37 @@ class MemoParents(unittest.TestCase):
         self.assertEqual(body['memo_handling']['parents'], 0)
 
 
+    def test_two_parents_sharing_a_transaction_id_do_not_claim_each_others_children(self):
+        def parent(name, amount, **extra):
+            return dict(row(name, 'SEE MEMOS', amount, tid='SHARED', sub=f'P-{name}-{amount}'), **extra)
+
+        def child(name, text, amount, **extra):
+            return dict(row(name, text, amount, tid=f'K-{name}-{amount}', memo='X', back='SHARED', sub=f'K-{name}-{amount}'), **extra)
+        # two committees of one campaign
+        a = committee([parent('AMERICAN EXPRESS', 1000.00), child('DELTA AIRLINES', 'TRAVEL EXPENSE', 1000.00)],
+                      committee_id='C90000101', name='ZED FOR CONGRESS')
+        b = committee([parent('PAYROLL SOLUTIONS', 500.00, committee_id='C90000102'),
+                       child('PAYROLL SOLUTIONS', 'PAYROLL TAXES', 500.00, committee_id='C90000102')],
+                      committee_id='C90000102', name='ZED FOR CONGRESS II')
+        for item in (a, b):
+            for each in item['rows']:
+                each['committee_id'] = item['committee_id']
+        body = cs.breakdown(cs.combine(result(a, b), 2024), 'ZED, ZACHARY')
+        self.assertEqual(body['memo_handling']['resolved'], 2)
+        self.assertEqual(body['memo_handling']['unresolved'], 0)
+        self.assertEqual(amounts(body), {'travel': 1000.0, 'payroll': 500.0})
+        # one committee, two filings
+        rows = [parent('AMERICAN EXPRESS', 1000.00, file_number='1001'), child('DELTA AIRLINES', 'TRAVEL EXPENSE', 1000.00, file_number='1001'),
+                parent('PAYROLL SOLUTIONS', 500.00, file_number='1002'), child('PAYROLL SOLUTIONS', 'PAYROLL TAXES', 500.00, file_number='1002')]
+        body = numbers(rows)
+        self.assertEqual((body['memo_handling']['resolved'], body['memo_handling']['unresolved']), (2, 0))
+        self.assertEqual(amounts(body), {'travel': 1000.0, 'payroll': 500.0})
+        # and the report (year and type) tells filings apart when there is no file number
+        rows = [parent('AMERICAN EXPRESS', 1000.00, report_year=2024, report_type='Q1'), child('DELTA AIRLINES', 'TRAVEL EXPENSE', 1000.00, report_year=2024, report_type='Q1'),
+                parent('PAYROLL SOLUTIONS', 500.00, report_year=2024, report_type='Q2'), child('PAYROLL SOLUTIONS', 'PAYROLL TAXES', 500.00, report_year=2024, report_type='Q2')]
+        self.assertEqual(numbers(rows)['memo_handling']['resolved'], 2)
+
+
 class Netting(unittest.TestCase):
     def test_a_void_nets_inside_the_category_of_the_row_it_undoes(self):
         rows = [row('REPUBLICAN PARTY OF FAYETTE COUNTY', 'EVENT SPONSOR', 1500.00, date='2024-02-01'),
@@ -196,6 +286,16 @@ class Netting(unittest.TestCase):
         self.assertEqual(body['total_itemized'], 950.0)                  # the net of everything itemized
 
 
+    def test_a_category_that_nets_to_exactly_zero_is_dropped_too(self):
+        rows = [row('DELTA AIRLINES', 'TRAVEL EXPENSE', 300.00),
+                row('DELTA AIRLINES', 'TRAVEL EXPENSE REFUNDED', -300.00),
+                row('THE STANTON GROUP, LLC', 'FUNDRAISING CONSULTING', 1000.00)]
+        body = numbers(rows)
+        self.assertEqual(amounts(body), {'consulting': 1000.0})                        # no zero-dollar slice
+        self.assertEqual(body['dropped_negative'], [{'key': 'travel', 'label': 'Travel', 'amount': 0.0, 'payments': 1}])
+        self.assertEqual(body['categories'][0]['share'], 1.0)
+
+
 class Coverage(unittest.TestCase):
     def test_coverage_is_itemized_over_reported_and_never_scaled_up(self):
         rows = [row('THE STANTON GROUP, LLC', 'FUNDRAISING CONSULTING', 600.00), row('DELTA AIRLINES', 'TRAVEL EXPENSE', 200.00)]
@@ -209,7 +309,7 @@ class Coverage(unittest.TestCase):
                 row('ANDY BARR VICTORY COMMITTEE', 'TRANSFER', 300.00, line='18', committee='C00123456'),
                 row('BARR, GARLAND ANDY', 'LOAN REPAYMENT', 100.00, line='19A', entity='IND')]
         body = numbers(rows, disbursements=1500.00, loans=100.00, transfers=300.00)
-        self.assertEqual((body['total_itemized'], body['reported_total'], body['coverage']), (600.0, 1100.0, 0.5455))
+        self.assertEqual((body['total_itemized'], body['reported_total'], body['coverage']), (600.0, 1100.0, 0.5454))      # 0.54545 floored
         self.assertEqual(body['excluded']['transfers_to_authorized'], {'itemized': 300.0, 'reported': 300.0})
         self.assertEqual(body['excluded']['loan_repayments'], {'itemized': 100.0, 'reported': 100.0})
         self.assertEqual(amounts(body), {'consulting': 600.0})
@@ -221,6 +321,75 @@ class Coverage(unittest.TestCase):
         self.assertTrue(body['coverage_unknown'])
         self.assertEqual(body['coverage_status'], 'partial')
         self.assertEqual(body['total_itemized'], 5.0)
+
+    def test_coverage_is_floored_never_rounded_up(self):
+        for itemized, expected in ((899.96, 0.8999), (999.96, 0.9999), (896.0, 0.896), (999.99, 0.9999), (1000.0, 1.0)):
+            with self.subTest(itemized=itemized):
+                body = numbers([row('DELTA AIRLINES', 'TRAVEL EXPENSE', itemized)], disbursements=1000.00)
+                self.assertEqual(body['coverage'], expected)
+
+    def test_coverage_is_never_clamped_to_one(self):
+        body = numbers([row('DELTA AIRLINES', 'TRAVEL EXPENSE', 1000.00)], disbursements=800.00)       # more itemized than reported
+        self.assertEqual((body['total_itemized'], body['reported_total'], body['coverage']), (1000.0, 800.0, 1.25))
+        self.assertFalse(body['coverage_unknown'])
+
+    def test_a_totals_field_that_is_missing_is_unknown_not_zero(self):
+        rows = [row('DELTA AIRLINES', 'TRAVEL EXPENSE', 100.00)]
+        for gone in cs.TOTALS_FIELDS:
+            for how in ('absent', 'null', 'text'):
+                with self.subTest(field=gone, how=how):
+                    item = committee(rows, disbursements=1000.00)
+                    if how == 'absent':
+                        del item['totals'][0][gone]
+                    else:
+                        item['totals'][0][gone] = None if how == 'null' else 'n/a'
+                    made = cs.combine(result(item), 2024)
+                    body = cs.breakdown(made, BARR)
+                    self.assertIsNone(body['reported_total'])
+                    self.assertIsNone(body['coverage'])
+                    self.assertTrue(body['coverage_unknown'])
+                    if gone == 'disbursements' and how != 'text':                         # no totals object at all for the cycle
+                        self.assertIsNone(made['totals'])
+                        self.assertEqual(body['coverage_status'], 'partial')
+                        continue
+                    self.assertIsNone(made['totals'][gone])
+                    self.assertEqual(body['coverage_status'], 'complete')                  # the reader's word stands
+                    self.assertEqual(body['coverage_reasons'], [f'Totals lack {gone}, so what was reported is unknown'])
+        whole = numbers(rows, disbursements=1000.00)                                         # all three present: known
+        self.assertEqual((whole['reported_total'], whole['coverage'], whole['coverage_reasons']), (1000.0, 0.1, []))
+
+    def test_a_presidential_campaign_draws_from_its_rows_and_never_claims_coverage(self):
+        rows = [row('DELTA AIRLINES', 'TRAVEL EXPENSE', 1000.00, line='23'),
+                row('PRESIDENT SECOND COMMITTEE', 'TRANSFER', 400.00, line='24'),                # no committee id: the line says it
+                row('LENDER, SAMPLE A', 'LOAN REPAYMENT', 300.00, line='27A', entity='IND'),
+                row('DONOR, SAMPLE A', 'CONTRIBUTION RETURN', 50.00, line='28A', entity='IND')]            # refunds by the line alone
+        item = committee(rows, disbursements=1750.00, name='PRESIDENT FOR AMERICA')
+        item['totals'][0].update(loan_repayments_made=300.0, transfers_to_affiliated=400.0)      # Form 3P names: never read
+        del item['totals'][0]['loan_repayments']
+        body = cs.breakdown(cs.combine(result(item, candidate='P80000722'), 2024), 'PRESIDENT, SAMPLE')
+        self.assertEqual(amounts(body), {'travel': 1000.0, 'refunds': 50.0})
+        self.assertEqual(body['total_itemized'], 1050.0)
+        self.assertIsNone(body['coverage'])
+        self.assertIsNone(body['reported_total'])
+        self.assertTrue(body['coverage_unknown'])
+        self.assertIn(cs.PRESIDENTIAL_NOTE, body['coverage_reasons'])
+        self.assertEqual(body['excluded'], {'loan_repayments': {'itemized': 300.0, 'reported': None},
+                                            'transfers_to_authorized': {'itemized': 400.0, 'reported': None}})
+        # the same rows for a House candidate: lines 24, 27 and 28 mean nothing there, and coverage is worked out
+        house = cs.breakdown(cs.combine(result(committee(rows, disbursements=1750.00), candidate='H0KY06104'), 2024), BARR)
+        self.assertEqual(house['excluded']['loan_repayments']['itemized'], 0.0)
+        self.assertNotIn('refunds', amounts(house))
+        self.assertNotIn(cs.PRESIDENTIAL_NOTE, house['coverage_reasons'])
+        self.assertEqual(house['coverage'], 1.0)
+
+    def test_the_office_comes_from_the_candidate_id_when_the_reader_gives_no_mapping(self):
+        with tempfile.TemporaryDirectory() as directory:
+            unmapped = result(committee([row('DELTA AIRLINES', 'TRAVEL EXPENSE', 5.0)]), candidate='P80000722')
+            unmapped['mapping'] = None
+            unmapped['query']['candidate_id'] = None
+            (Path(directory) / 'P80000722-2024.json').write_text(json.dumps(unmapped), encoding='utf-8')
+            with patch.dict(os.environ, {cs.FIXTURE_ENV: directory}):
+                self.assertEqual(cs.load_campaign_spending('P80000722', 2024)['office'], 'P')
 
     def test_totals_are_the_object_for_the_cycle_and_the_latest_when_there_are_several(self):
         item = committee([row('DELTA AIRLINES', 'TRAVEL EXPENSE', 10.0)])
@@ -251,7 +420,7 @@ class Source(unittest.TestCase):
         self.assertEqual(body['own_transfers'], {'amount': 450.0, 'rows': 2})
         self.assertEqual(body['committee_name'], 'ZED FOR CONGRESS + ZED FOR CONGRESS II')
         self.assertEqual(body['committee_ids'], ['C90000101', 'C90000102'])
-        self.assertEqual((body['total_itemized'], body['reported_total'], body['coverage']), (1300.0, 1350.0, 0.963))
+        self.assertEqual((body['total_itemized'], body['reported_total'], body['coverage']), (1300.0, 1350.0, 0.9629))
         self.assertEqual(body['coverage_status'], 'complete')
 
     def test_complete_needs_every_committee_complete(self):
@@ -263,6 +432,24 @@ class Source(unittest.TestCase):
         self.assertIn('ZED FOR CONGRESS II: partial (Schedule B pending, totals pending)', both['reasons'])
         only = cs.combine(result(a), 2024)
         self.assertEqual(only['coverage_status'], 'complete')
+
+    def test_complete_needs_totals(self):
+        made = cs.combine(result(committee([row('PEAK', 'FUNDRAISING CONSULTING', 5.00)], disbursements=None)), 2024)    # B and totals "complete", no totals object
+        self.assertEqual(made['coverage_status'], 'partial')
+        self.assertIsNone(made['totals'])
+        self.assertEqual(made['reasons'], ['Totals were not retrieved, so what was reported is unknown'])
+        self.assertEqual(cs.combine(result(committee([row('PEAK', 'FUNDRAISING CONSULTING', 5.00)])), 2024)['coverage_status'], 'complete')
+
+    def test_a_mapped_committee_the_reader_did_not_return_makes_the_campaign_partial(self):
+        a = committee([row('PEAK', 'FUNDRAISING CONSULTING', 1000.00, sub='A1')], committee_id='C90000101', name='ZED FOR CONGRESS')
+        made = result(a)
+        made['mapping']['committee_ids'] = ['C90000101', 'C90000102']
+        both = cs.combine(made, 2024)
+        self.assertEqual(both['coverage_status'], 'partial')
+        self.assertEqual(both['reasons'], ['1 of 2 campaign committees not collected'])
+        self.assertEqual(cs.breakdown(both, 'ZED, ZACHARY')['coverage_reasons'], ['1 of 2 campaign committees not collected'])
+        made['mapping']['committee_ids'] = ['C90000101']
+        self.assertEqual(cs.combine(made, 2024)['coverage_status'], 'complete')
 
     def test_pending_not_seeded_and_unmapped_never_imply_zero(self):
         for status, words in (('pending', 'Spending not collected for 2023–24'), ('not_seeded', 'Spending not collected for 2023–24'),
@@ -341,13 +528,28 @@ class Source(unittest.TestCase):
                 self.assertEqual(shown['source']['rows'] + shown['source']['duplicate_rows_dropped'] + shown['own_transfers']['rows'], len(rows))
                 self.assertEqual(shown['committee_name'], item['result']['committees'][0]['committee_name'])
                 if item['name'] == 'complete':
-                    self.assertFalse(shown['coverage_unknown'])
-                    self.assertEqual(shown['coverage_reasons'], [])
-                    self.assertIsNotNone(shown['reported_total'])
+                    # the crawler's totals object has no loan_repayments: a missing field is unknown, not $0
+                    self.assertTrue(shown['coverage_unknown'])
+                    self.assertIsNone(shown['reported_total'])
+                    self.assertEqual(shown['coverage_reasons'], ['Totals lack loan_repayments, so what was reported is unknown'])
                 else:                                                          # partial: drawn, never read as zero or as complete
                     self.assertTrue(shown['coverage_unknown'])
                     self.assertIsNone(shown['reported_total'])
                     self.assertIn('partial (Schedule B pending, totals unsupported)', shown['coverage_reasons'][0])
+
+
+class Fixtures(unittest.TestCase):
+    def test_no_committed_fixture_names_a_real_individual(self):
+        # Individuals in a committed fixture are the candidate and synthetic placeholders only; vendors and committees may be real.
+        import re
+        allowed = {'BARR, GARLAND ANDY', 'ZED, ZACHARY', 'DOE, JANE', 'ZED STAFFER, ONE'}       # the candidates and obvious placeholders
+        for path in sorted(FIXTURES.glob('*-20*.json')):
+            value = json.loads(path.read_text(encoding='utf-8'))
+            names = {item['recipient_name'] for each in value['committees'] for item in each['rows'] if item.get('entity_type') == 'IND'}
+            self.assertTrue(names, path.name)
+            for name in names:
+                with self.subTest(fixture=path.name, payee=name):
+                    self.assertTrue(name in allowed or re.fullmatch(r'(?:DONOR|STAFFER|SUPPORTER), SAMPLE [A-Z]', name), name)
 
 
 class Detail(unittest.TestCase):
@@ -453,13 +655,89 @@ class Route(unittest.TestCase):
         self.assertEqual(found['shares']['travel'], 1.0)            # the median share of four all-travel campaigns and one 25% one
         self.assertEqual(self.ask(candidate='H0KY06104', cycle='2024', detail='1')[0]['peers']['n'], 0)   # none offered: none read
 
+    def test_a_comparison_where_every_median_is_zero_is_not_drawn(self):
+        self.save('H0KY06104', committee_id=COMMITTEE)
+        kinds = ['TRAVEL EXPENSE', 'FUNDRAISING CONSULTING', 'TV ADS', 'POLLING EXPENSE', 'RENT']          # five peers, five different categories
+        names = [f'H0XX0000{n}' for n in range(5)]
+        for number, (candidate, kind) in enumerate(zip(names, kinds)):
+            self.save(candidate, [row('X', kind, 10.0, sub=f'M{number}')])
+        found = self.ask(candidate='H0KY06104', cycle='2024', detail='1', peers=','.join(names))[0]['peers']
+        self.assertEqual(found['n'], 5)
+        self.assertTrue(found['too_few'])                                          # no category is spent in by most of them
+        self.assertNotIn('shares', found)
+        self.assertIn('no spending category', found['note'])
+
+    def test_a_peers_shares_are_worked_once_per_snapshot_and_the_cache_is_bounded(self):
+        cs._SHARES.clear()
+        self.addCleanup(cs._SHARES.clear)
+        names = [f'H0XX0000{n}' for n in range(4)]
+        for number, candidate in enumerate(names):
+            self.save(candidate, [row('X', 'TRAVEL EXPENSE', 10.0 + number, sub=f'C{number}')])
+        with patch.object(cs, 'breakdown', wraps=cs.breakdown) as spy:
+            cs.peers(2024, 'H', [], names)
+            self.assertEqual(spy.call_count, 4)
+            cs.peers(2024, 'H', [], names)
+            self.assertEqual(spy.call_count, 4, 'the second comparison is served from memory')
+        # without a snapshot sha the rows themselves are the key: unchanged rows hit, changed rows do not
+        for number, candidate in enumerate(names):
+            path = Path(self.directory.name) / f'{candidate}-2024.json'
+            value = json.loads(path.read_text(encoding='utf-8'))
+            value['snapshot'] = None
+            path.write_text(json.dumps(value), encoding='utf-8')
+        cs._SHARES.clear()
+        with patch.object(cs, 'breakdown', wraps=cs.breakdown) as spy:
+            cs.peers(2024, 'H', [], names)
+            cs.peers(2024, 'H', [], names)
+            self.assertEqual(spy.call_count, 4)
+            self.save(names[0], [row('X', 'TRAVEL EXPENSE', 99.0, sub='C0')])
+            path = Path(self.directory.name) / f'{names[0]}-2024.json'
+            value = json.loads(path.read_text(encoding='utf-8'))
+            value['snapshot'] = None
+            path.write_text(json.dumps(value), encoding='utf-8')
+            cs.peers(2024, 'H', [], names)
+            self.assertEqual(spy.call_count, 5, 'a changed input is worked again')
+        with patch.object(cs, 'SHARES_CAP', 2):
+            cs._SHARES.clear()
+            cs.peers(2024, 'H', [], names)
+            self.assertEqual(len(cs._SHARES), 2, 'least recently used go first')
+
+    def test_a_reader_that_raises_is_a_503_source_error_with_its_message_and_a_log_line(self):
+        class Reader:
+            @staticmethod
+            def read_campaign_spending(**kwargs):
+                raise RuntimeError('snapshot store is locked')
+        with patch.dict(os.environ, {cs.FIXTURE_ENV: ''}), patch.dict(sys.modules, {cs.READER: Reader}):
+            with self.assertLogs('mentat.candidate_spending', level='ERROR') as logged:
+                body, status = cs.respond({'candidate': ['H0KY06104'], 'cycle': ['2024']})
+        self.assertEqual((status, body['status']), (503, 'source_error'))
+        self.assertIn('snapshot store is locked', body['error'])
+        self.assertEqual((body['candidate_id'], body['cycle']), ('H0KY06104', 2024))
+        self.assertTrue(any('H0KY06104' in line for line in logged.output))
+        json.dumps(body)
+
+    def test_a_peer_the_reader_cannot_read_is_left_out_not_a_failed_answer(self):
+        names = [f'H0XX0000{n}' for n in range(6)]
+        for number, candidate in enumerate(names):
+            self.save(candidate, [row('X', 'TRAVEL EXPENSE', 10.0, sub=f'E{number}')])
+        real = cs.read_source
+
+        def flaky(**kwargs):
+            if kwargs.get('candidate_id') == names[0]:
+                raise OSError('disk gone')
+            return real(**kwargs)
+        self.save('H0KY06104', committee_id=COMMITTEE)
+        with patch.object(cs, 'read_source', flaky), self.assertLogs('mentat.candidate_spending', level='WARNING'):
+            found = self.ask(candidate='H0KY06104', cycle='2024', detail='1', peers=','.join(names))
+        self.assertEqual(found[1], 200)
+        self.assertEqual(found[0]['peers']['n'], 5)
+
     def test_the_committed_fixtures_answer_through_the_route(self):
         with patch.dict(os.environ, {cs.FIXTURE_ENV: str(FIXTURES)}):
             barr, status = self.ask(candidate='H0KY06104', cycle='2024')
             self.assertEqual((status, barr['coverage_status'], barr['coverage'], barr['reported_total']), (200, 'partial', None, None))
             self.assertTrue(barr['coverage_unknown'])
             synthetic, _ = self.ask(candidate='H8ZZ00001', cycle='2024', name='ZED, ZACHARY', detail='1')
-            self.assertEqual((synthetic['total_itemized'], synthetic['reported_total'], synthetic['coverage']), (71770.0, 153000.0, 0.4691))
+            self.assertEqual((synthetic['total_itemized'], synthetic['reported_total'], synthetic['coverage']), (71770.0, 153000.0, 0.469))
             self.assertEqual(synthetic['own_transfers'], {'amount': 6000.0, 'rows': 2})
             self.assertEqual(synthetic['source']['duplicate_rows_dropped'], 1)
             self.assertEqual(synthetic['dropped_negative'][0]['key'], 'travel')
@@ -467,6 +745,64 @@ class Route(unittest.TestCase):
             self.assertEqual(synthetic['memo_handling']['unresolved'], 1)
             self.assertIn('personal_reimb', amounts(synthetic))
             self.assertEqual(self.ask(candidate='H0KY06104', cycle='2022')[1], 404)
+
+
+class Server(unittest.TestCase):
+    """The route as the console serves it: wired in server.py, refused when hosted, and never a dropped connection."""
+
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location('candidate_spending_server', HERE / 'app' / 'server.py')
+        cls.console = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.console)
+
+    def get(self, path, enforced):
+        sent = []
+        handler = SimpleNamespace(path=path, access_cfg=SimpleNamespace(enforced=enforced), sent=sent, valid_host=lambda: True,
+                                  server=SimpleNamespace(app=SimpleNamespace(read_only=True, report_directory=Path('.'), token='local'), server_port=0),
+                                  session_token=lambda: 'hosted-read-only' if enforced else 'local',
+                                  send=lambda value, status=200, **kwargs: sent.append((value, status)))
+        with patch.object(self.console, 'build_status', return_value={'git_sha': 'x'}):
+            self.console.Handler.do_GET(handler)
+        return sent[0]
+
+    def test_the_hosted_console_refuses_the_route_and_tells_the_page_it_is_hosted(self):
+        self.assertNotIn('/api/candidate-spending', self.console.HOSTED_GET_ROUTES)
+        value, status = self.get('/api/candidate-spending?candidate=H0KY06104&cycle=2024', True)
+        self.assertEqual((status, value), (403, {'error': self.console.HOSTED_REFUSED}))
+        self.assertIs(self.get('/api/session?light=1', True)[0]['hosted'], True)       # the page switches the card and panel off on this
+        self.assertIs(self.get('/api/session?light=1', False)[0]['hosted'], False)
+
+    def test_a_local_console_serves_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            item = committee([row('DELTA AIRLINES', 'TRAVEL EXPENSE', 5.0)])
+            (Path(directory) / 'H0KY06104-2024.json').write_text(json.dumps(result(item)), encoding='utf-8')
+            with patch.dict(os.environ, {cs.FIXTURE_ENV: directory}):
+                value, status = self.get('/api/candidate-spending?candidate=H0KY06104&cycle=2024', False)
+        self.assertEqual((status, value['status'], value['total_itemized']), (200, 'ok', 5.0))
+
+    def test_a_reader_that_raises_still_answers_over_the_wire(self):
+        class Reader:
+            @staticmethod
+            def read_campaign_spending(**kwargs):
+                raise RuntimeError('reader exploded')
+        server = self.console.ThreadingHTTPServer(('127.0.0.1', 0), self.console.Handler)
+        server.app = SimpleNamespace(token='t', read_only=True, report_directory=Path('.'), configured_root='.', root=Path('.'))
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        self.addCleanup(worker.join, 5)
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        with patch.dict(os.environ, {cs.FIXTURE_ENV: ''}), patch.dict(sys.modules, {cs.READER: Reader}):
+            connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=15)
+            with self.assertLogs('mentat.candidate_spending', level='ERROR'):
+                connection.request('GET', '/api/candidate-spending?candidate=H0KY06104&cycle=2024')
+                response = connection.getresponse()
+                body = json.loads(response.read())
+            connection.close()
+        self.assertEqual(response.status, 503)
+        self.assertEqual(body['status'], 'source_error')
+        self.assertIn('reader exploded', body['error'])
 
 
 if __name__ == '__main__':

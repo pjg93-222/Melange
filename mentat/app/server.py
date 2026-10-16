@@ -3334,10 +3334,13 @@ class Handler(access_gate.AccessMixin, BaseHTTPRequestHandler):
             if parsed.path == "/api/session":
                 if query.get('light', ['0'])[0] == '1':
                     build = build_status(app, self.server.server_port)
+                    # hosted: the page switches off what the hosted allowlist refuses (the candidate-spending card and panel)
                     return self.send({'token':self.session_token(), 'read_only':bool(getattr(app, 'read_only', False)),
+                                      'hosted': bool(self.access_cfg.enforced),
                                       'evidence_collection_available':True, 'api_version':2,
                                       'report_directory':str(app.report_directory), 'build': build, **build})
-                return self.send({"token": self.session_token(), **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
+                return self.send({"token": self.session_token(), 'hosted': bool(self.access_cfg.enforced),
+                                  **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
             if parsed.path == '/api/contributions/session':
                 def build(sources):
                     registry = snapshot_registry.registry(app.report_directory, sources)

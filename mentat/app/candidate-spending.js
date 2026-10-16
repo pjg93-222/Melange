@@ -32,8 +32,8 @@
     ['personal_reimb', 'Candidate reimbursements', -1], ['other', 'Other', -2]];
   const LABELS = Object.fromEntries(CATEGORIES.map(item => [item[0], item[1]]));
   const SLOT = Object.fromEntries(CATEGORIES.map(item => [item[0], item[2]]));
-  const NOTE = "Categories assigned from each payment's stated purpose · Refunds and transfers to other committees shown "
-    + "separately · The campaign's own spending, not a trace of this flow's dollars";
+  const NOTE = "Categories assigned from each payment's stated purpose · Refunds and transfers to other committees are "
+    + "their own slices · The campaign's own spending, not a trace of this flow's dollars";
 
   const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, character =>
     ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[character]));
@@ -53,12 +53,15 @@
   const cycleText = cycle => (cycle ? `${Number(cycle) - 1}–${String(cycle).slice(2)}` : '');
   const plural = (count, word) => `${grouped(count)} ${word}${count === 1 ? '' : 's'}`;
 
-  // "N%" for coverage: rounded down at the top end, so 99.77% never reads as 100%.
+  // "N%" for coverage, always rounded DOWN (the server floors it too): 89.6% reads 89%, 99.996% reads 99%, so the "under 90%"
+  // chip can never say 90% and nothing short of all reads as all. The 1e-9 is float dust (0.29 * 100 is 28.999999999999996).
+  // Above 100% (a scope bug, shown as it is) a hundred-and-a-bit keeps its decimals, so it never reads as exactly 100%: 100.04%.
   function coverageText(coverage) {
-    const value = coverage * 100;
-    if (value >= 100) return '100%';
-    return Math.round(value) === 100 ? `${(Math.floor(value * 10) / 10).toFixed(1)}%` : `${Math.round(value)}%`;
+    const value = coverage * 100 + 1e-9;
+    if (value >= 100 && value < 101) return `${(Math.floor(value * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}%`;
+    return `${Math.floor(value)}%`;
   }
+  const exceeds = body => body.coverage != null && body.coverage > 1;
 
   function colourOf(key, palette, neutral) {
     const slot = SLOT[key];
@@ -114,9 +117,13 @@
       const circle = radius => `M${point(0, radius)}A${f(radius)} ${f(radius)} 0 1 1 ${point(Math.PI, radius)}A${f(radius)} ${f(radius)} 0 1 1 ${point(0, radius)}Z`;
       return circle(outer) + circle(inner);
     }
-    const large = a1 - a0 > Math.PI ? 1 : 0;
-    return `M${point(a0, outer)}A${f(outer)} ${f(outer)} 0 ${large} 1 ${point(a1, outer)}L${point(a1, inner)}`
-      + `A${f(inner)} ${f(inner)} 0 ${large} 0 ${point(a0, inner)}Z`;
+    if (a1 - a0 > Math.PI) {                                // past half a turn: two arcs, never one. A single arc whose ends are
+      const mid = (a0 + a1) / 2;                           // (nearly) the same point draws nothing, and a slice of 99.9999% is that.
+      return `M${point(a0, outer)}A${f(outer)} ${f(outer)} 0 0 1 ${point(mid, outer)}A${f(outer)} ${f(outer)} 0 0 1 ${point(a1, outer)}`
+        + `L${point(a1, inner)}A${f(inner)} ${f(inner)} 0 0 0 ${point(mid, inner)}A${f(inner)} ${f(inner)} 0 0 0 ${point(a0, inner)}Z`;
+    }
+    return `M${point(a0, outer)}A${f(outer)} ${f(outer)} 0 0 1 ${point(a1, outer)}L${point(a1, inner)}`
+      + `A${f(inner)} ${f(inner)} 0 0 0 ${point(a0, inner)}Z`;
   }
 
   // The words a screen reader gets for the ring: the three largest categories.
@@ -165,9 +172,40 @@ const uid = prefix => `${prefix}${++serial.n}`;
 
   // The chip: itemized payments cover under 90% of what was reported, the source says the campaign is only partly
   // collected, or the reported total is unknown (no totals: coverage cannot be said at all). Its title says why.
-  const needsChip = body => body.coverage == null || body.coverage < LOW_COVERAGE || body.coverage_status === 'partial';
+  const needsChip = body => body.coverage == null || body.coverage < LOW_COVERAGE || exceeds(body) || body.coverage_status === 'partial';
   const chipWords = body => (body.coverage == null ? 'Coverage unknown — itemized sample only'
-    : `Itemized payments cover ${coverageText(body.coverage)} of reported spending`);
+    : exceeds(body) ? `Itemized exceeds reported (${coverageText(body.coverage)}) — check scope`
+      : `Itemized payments cover ${coverageText(body.coverage)} of reported spending`);
+  // the line under a card / panel that says how much of what was reported the itemized payments are
+  const coversWords = body => (body.coverage == null ? 'Itemized FEC Schedule B · coverage unknown'
+    : exceeds(body) ? `Itemized FEC Schedule B · exceeds reported spending (${coverageText(body.coverage)})`
+      : `Itemized FEC Schedule B · covers ${coverageText(body.coverage)} of reported spending`);
+
+  // What the answer left out or merged, as small lines under the legend: the card gets the short form, the panel the full.
+  // Everything comes from the server's own counts; a line appears only when there is something to say.
+  function footnotes(body, short) {
+    const out = [], skipped = [];
+    const left = body.excluded || {};
+    for (const [key, long, brief] of [['loan_repayments', 'loan repayments', 'loans'],
+      ['transfers_to_authorized', "transfers to the candidate's other committees", 'transfers']]) {
+      const item = left[key] || {};
+      if (!(item.itemized > 0 || item.reported > 0)) continue;
+      const amount = item.itemized > 0 ? item.itemized : item.reported;
+      skipped.push(short ? `${brief} ${money(amount)}`
+        : `${long} ${money(amount)}${item.reported != null && item.itemized > 0 && Math.abs(item.reported - item.itemized) >= 0.5 ? ` (${money(item.reported)} reported)` : ''}`);
+    }
+    if (skipped.length) out.push(short ? `Left out: ${skipped.join(', ')}` : `Left out of the ring and of the reported total: ${skipped.join('; ')}.`);
+    const own = body.own_transfers || {};
+    if (own.rows > 0 || Math.abs(own.amount || 0) >= 0.5) out.push(short ? `${money(own.amount || 0)} between own committees counted once`
+      : `Payments between the candidate's own committees (${money(own.amount || 0)}, ${plural(own.rows || 0, 'payment')}) are left out so each dollar is counted once.`);
+    const negative = body.dropped_negative || [];
+    if (negative.length) out.push(short ? `${negative.map(item => item.label).join(', ')} not drawn (nets to $0 or less)`
+      : negative.map(item => `${item.label} is not drawn: its refunds and voids net to ${money(item.amount)}.`).join(' '));
+    const repeated = (body.source && body.source.duplicate_rows_dropped) || 0;
+    if (repeated > 0) out.push(short ? `${plural(repeated, 'repeated row')} dropped`
+      : `${plural(repeated, 'repeated filing row')} in the source ${repeated === 1 ? 'was' : 'were'} counted once.`);
+    return out;
+  }
   const chip = body => `<p class="flow-spend-chip" role="note"${(body.coverage_reasons || []).length ? ` title="${escape(body.coverage_reasons.join('; '))}"` : ''}>`
     + `<span aria-hidden="true">&#9888;</span> ${escape(chipWords(body))}</p>`;
 
@@ -196,9 +234,11 @@ const uid = prefix => `${prefix}${++serial.n}`;
     const legend = model.segments.map(segment => `<li class="flow-spend-row${segment.key === 'not_itemized' ? ' is-not-itemized' : ''}">${dot(segment)}`
       + `<span class="flow-spend-cat">${escape(segment.label)}</span><span class="flow-spend-pct">${percent(segment.share)}</span>`
       + `<span class="flow-spend-amt">${escape(money(segment.amount))}</span></li>`).join('');
-    const covers = body.coverage == null ? 'Itemized FEC Schedule B · coverage unknown' : `Itemized FEC Schedule B · covers ${coverageText(body.coverage)} of reported spending`;
+    const covers = coversWords(body);
+    const notes = footnotes(body, true);
     return `<div class="flow-spend" data-state="ok">${head('ok')}${needsChip(body) ? chip(body) : ''}`
       + `<div class="flow-spend-body">${donutSvg(body, model, {size: 124, cycle: ctx.cycle})}<ul class="flow-spend-legend" aria-label="Spending by category">${legend}</ul></div>`
+      + (notes.length ? `<p class="flow-spend-fine flow-spend-notes" data-spend-notes>${escape(notes.join(' · '))}</p>` : '')
       + `<p class="flow-spend-foot">${escape(covers)} · the campaign's own spending, not this flow's dollars</p></div>`;
   }
 
@@ -208,7 +248,7 @@ const uid = prefix => `${prefix}${++serial.n}`;
   function compare(body) {
     const peers = body.peers;
     if (!peers || peers.too_few || !(peers.n >= PEERS_MIN) || !peers.shares)
-      return {hidden: true, note: 'Too few collected campaigns to compare', n: peers ? peers.n || 0 : 0};
+      return {hidden: true, note: (peers && peers.note) || 'Too few collected campaigns to compare', n: peers ? peers.n || 0 : 0};
     const mine = Object.fromEntries((body.categories || []).filter(item => item.amount > 0).map(item => [item.key, item.share]));
     return {hidden: false, n: peers.n, label: peers.label, mine, median: peers.shares};
   }
@@ -289,8 +329,9 @@ const uid = prefix => `${prefix}${++serial.n}`;
     const model = ring(body, {top: Infinity, palette: ctx.palette, neutral: ctx.neutral});
     if (!model.segments.length) return `${head}${cardHtml({kind: 'missing', message: 'No itemized spending on file for this campaign'}, ctx)}${foot}`;
     const category = chosen(body, model, view);
-    const covers = `<p class="flow-spend-fine">${body.coverage == null ? 'Itemized FEC Schedule B · coverage unknown'
-      : `Itemized FEC Schedule B · covers ${coverageText(body.coverage)} of reported spending`}</p>`;
+    const covers = `<p class="flow-spend-fine">${escape(coversWords(body))}</p>`;
+    const notes = footnotes(body, false);
+    const noteList = notes.length ? `<ul class="flow-spend-notes" data-spend-notes aria-label="Notes on these figures">${notes.map(line => `<li>${escape(line)}</li>`).join('')}</ul>` : '';
     const legend = model.segments.map(segment => {
       const hatch = segment.key === 'not_itemized';
       const inner = `${dot(segment)}<span class="flow-spend-cat">${escape(segment.label)}</span><span class="flow-spend-pct">${percent(segment.share)}</span>`
@@ -303,7 +344,7 @@ const uid = prefix => `${prefix}${++serial.n}`;
     const open = Boolean(view.payments);
     return head + (needsChip(body) ? chip(body) : '')
       + `<div class="flow-spend-ringbox">${donutSvg(body, model, {size: 220, interactive: true, cycle: ctx.cycle, selected: category})}<p class="flow-spend-read" role="status" aria-live="polite" data-default="${escape(readout)}">${escape(readout)}</p></div>`
-      + `<ul class="flow-spend-legend is-panel" aria-label="Spending by category">${legend}</ul>${covers}`
+      + `<ul class="flow-spend-legend is-panel" aria-label="Spending by category">${legend}</ul>${noteList}${covers}`
       + compareHtml(body, ctx) + payeesHtml(body, category)
       + `<div class="flow-spend-actions"><button type="button" data-spend-payments aria-expanded="${open}">${open ? 'Hide payments' : 'Open payments'}</button>${rowsButton}</div>`
       + (open ? `<div class="flow-spend-payments">${paymentsHtml(body, category, ctx.link)}</div>` : '') + foot;
@@ -362,7 +403,8 @@ const uid = prefix => `${prefix}${++serial.n}`;
   /* ---------------------------------------------------------------- the DOM: tooltip section and panel */
   // host: the chart's host element (for its document). options: {fetcher, panel, link, onRows(node), peersOf(node) (the
   // other candidate ids of the same office the chart draws), view (the chart's persistent view state), after() (the
-  // tooltip changed size: place it again), neutral}
+  // tooltip changed size: place it again), restoreFocus(node) (focus the node that opened the panel; false if it is no
+  // longer drawn), neutral}
   function controller(host, options) {
     const doc = host.ownerDocument;
     const api = options.fetcher ? client(options.fetcher) : shared();
@@ -409,10 +451,20 @@ const uid = prefix => `${prefix}${++serial.n}`;
         .then(state => { if (current === mine) drawPanel(state); });
       return true;
     }
-    function close() {
+    // Closing the panel (its ✕ or Close button, or Escape) gives focus back to the node that opened it, if that node is still
+    // drawn, else to the chart itself: focus never falls to the page. A close the code makes (restore, detach) moves no focus.
+    function close(gesture) {
+      const opener = current && current.node;
       current = null;
       delete view.spend;
       if (options.panel) { options.panel.replaceChildren(); options.panel.hidden = true; }
+      if (gesture && gesture.focus && opener) giveFocusBack(opener);
+    }
+    function giveFocusBack(node) {
+      if (options.restoreFocus && options.restoreFocus(node)) return;
+      if (typeof host.focus !== 'function') return;
+      if (host.hasAttribute && !host.hasAttribute('tabindex') && host.setAttribute) host.setAttribute('tabindex', '-1');
+      host.focus();
     }
     const readout = (text) => { const el = options.panel && options.panel.querySelector('.flow-spend-read'); if (el) el.textContent = text; };
     const pulled = seg => { const [dx, dy] = (seg.dataset.pull || '0 0').split(' '); return `translate(${dx} ${dy})`; };
@@ -426,7 +478,7 @@ const uid = prefix => `${prefix}${++serial.n}`;
       on(panel, 'click', event => {
         const target = event.target.closest ? event.target : null;
         if (!target || !current) return;
-        if (target.closest('[data-spend-close]')) { close(); return; }
+        if (target.closest('[data-spend-close]')) { close({focus: true}); return; }
         if (target.closest('[data-spend-rows]')) { options.onRows && options.onRows(current.node); return; }
         if (target.closest('[data-spend-payments]')) { view.payments = !view.payments; drawPanel(current.state); return; }
         const pick = target.closest('[data-cat]');
@@ -453,10 +505,13 @@ const uid = prefix => `${prefix}${++serial.n}`;
       on(panel, 'pointerout', out);
       on(panel, 'focusin', over);
       on(panel, 'focusout', out);
-      // Escape closes the panel before the view's own Escape (go back a level) can read it.
+      // Escape closes the panel before the view's own Escape (go back a level) can read it. It does nothing while the panel is
+      // not showing, and nothing for an Escape typed in a field (that one belongs to the field).
       on(doc, 'keydown', event => {
         if (event.key !== 'Escape' || !current || panel.hidden) return;
-        event.preventDefault(); close();
+        const from = event.target;
+        if (from && (/^(?:INPUT|TEXTAREA|SELECT)$/.test(String(from.tagName || '').toUpperCase()) || from.isContentEditable)) return;
+        event.preventDefault(); close({focus: true});
       }, true);
     }
     // The chart is being redrawn or left: hands off and the panel emptied, but what the reader had open (view.spend) is kept.

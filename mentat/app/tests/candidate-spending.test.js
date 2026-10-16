@@ -80,16 +80,41 @@ test('low coverage: the ring is drawn over what was reported and what was not it
 test('full coverage and unknown coverage draw no remainder; coverage text never rounds up to a claim of all', () => {
   assert.equal(spend.ring(body(), {}).remainder, null);
   assert.equal(spend.ring(body({coverage: null, coverage_unknown: true, reported_total: null}), {}).remainder, null);
-  assert.equal(spend.coverageText(0.9977), '99.7%');
   assert.equal(spend.coverageText(1), '100%');
-  assert.equal(spend.coverageText(1.02), '100%');
   assert.equal(spend.coverageText(0.614), '61%');
+});
+
+test('coverage text always rounds DOWN: 89.6% reads 89%, 99.996% reads 99%, and the under-90% chip never says 90%', () => {
+  assert.equal(spend.coverageText(0.896), '89%');
+  assert.equal(spend.coverageText(0.99996), '99%');
+  assert.equal(spend.coverageText(0.9977), '99%');
+  assert.equal(spend.coverageText(0.8999), '89%');
+  assert.equal(spend.coverageText(0.29), '29%', 'float dust: 0.29 * 100 is 28.999999999999996');
+  assert.equal(spend.coverageText(0.9), '90%');
+  const chip = spend.cardHtml({kind: 'ok', body: body({coverage: 0.8999, reported_total: 111123})}, CTX);
+  assert.ok(chip.includes('Itemized payments cover 89% of reported spending') && !chip.includes('cover 90%'), 'the chip is for under 90%');
+  assert.ok(chip.includes('covers 89% of reported spending'));
+});
+
+test('coverage above 100% is a scope bug: shown as it is, with a warning chip, never clamped to 100%', () => {
+  assert.equal(spend.coverageText(1.02), '102%');
+  assert.equal(spend.coverageText(1.25), '125%');
+  assert.equal(spend.coverageText(1.004), '100.4%');
+  assert.equal(spend.coverageText(1.0004), '100.04%', 'just over is not shown as exactly 100%');
+  const over = body({coverage: 1.25, reported_total: 80000});
+  const card = spend.cardHtml({kind: 'ok', body: over}, CTX);
+  assert.ok(card.includes('flow-spend-chip') && card.includes('Itemized exceeds reported (125%) — check scope'), 'warning chip');
+  assert.ok(card.includes('exceeds reported spending (125%)') && !card.includes('covers 125%'), 'the footer does not claim a cover');
+  assert.ok(!card.includes('Not itemized'), 'and no remainder is drawn');
+  const panel = spend.panelHtml({kind: 'ok', body: detail({coverage: 1.25, reported_total: 80000})}, PANEL, {});
+  assert.ok(panel.includes('Itemized exceeds reported (125%) — check scope'));
+  assert.ok(!spend.cardHtml({kind: 'ok', body: body()}, CTX).includes('exceeds'), 'exactly 100% is not a warning');
 });
 
 test('arcPath: a sector, a large arc past half, and a whole ring as two half arcs each way', () => {
   const quarter = spend.arcPath(50, 50, 40, 24, 0, Math.PI / 2);
   assert.ok(quarter.startsWith('M50 10A40 40 0 0 1 90 50L74 50A24 24 0 0 0 50 26Z'), quarter);
-  assert.ok(/A40 40 0 1 1/.test(spend.arcPath(50, 50, 40, 24, 0, Math.PI * 1.5)), 'a large arc');
+  assert.equal((spend.arcPath(50, 50, 40, 24, 0, Math.PI * 1.5).match(/A/g) || []).length, 4, 'past half a turn: two arcs each way');
   const whole = spend.arcPath(50, 50, 40, 24, 0, TWO_PI);
   assert.equal((whole.match(/A/g) || []).length, 4);
   assert.equal((whole.match(/Z/g) || []).length, 2);
@@ -216,7 +241,7 @@ test('the panel: the title, a big ring, the largest category chosen, its top pay
   assert.ok(html.includes('aria-label="Close spending panel"'));
   assert.ok(html.includes('<h4 class="flow-spend-h">Top payees in Contributions &amp; transfers</h4>'), 'the largest is the default');
   assert.ok(html.includes('NRCC') && html.includes('$40,000'));
-  assert.ok(html.includes("Categories assigned from each payment&#39;s stated purpose · Refunds and transfers to other committees shown separately · The campaign&#39;s own spending, not a trace of this flow&#39;s dollars"));
+  assert.ok(html.includes("Categories assigned from each payment&#39;s stated purpose · Refunds and transfers to other committees are their own slices · The campaign&#39;s own spending, not a trace of this flow&#39;s dollars"));
   assert.ok(html.includes('data-spend-rows') && html.includes('Open in Rows'));
   assert.ok(html.includes('data-compare="hidden"') && html.includes('Too few collected campaigns to compare'));
   assert.ok(html.includes('data-cat="consulting"') && html.includes('aria-pressed="true"'));
@@ -385,4 +410,221 @@ test('a candidate\'s tooltip tells a click opens the spending detail, Shift-clic
   assert.equal(hint({zoom: true, rows: true, spend: false, cycle: 2024}), 'Click to open in Rows · Shift-click to pin');
   assert.equal(hint({zoom: true, rows: true, spend: true, cycle: 2023}), 'Click to open in Rows · Shift-click to pin', 'an odd cycle has no spending');
   assert.equal(hint(null), '');
+});
+
+/* ------------------------------------------------------------------------------- a slice just under a full turn */
+// Walk an arcPath: every A command must start and end at different points, or the browser draws nothing for it.
+function arcs(d) {
+  const found = [];
+  let at = null;
+  for (const match of d.matchAll(/([MLAZ])([^MLAZ]*)/g)) {
+    const numbers = match[2].trim().split(/[ ,]+/).filter(Boolean).map(Number);
+    if (match[1] === 'M' || match[1] === 'L') at = numbers.slice(-2);
+    else if (match[1] === 'A') {
+      const end = numbers.slice(-2);
+      found.push({flag: numbers[3], from: at, to: end});
+      at = end;
+    }
+  }
+  return found;
+}
+
+test('a slice just under a whole ring is drawn: two arcs each way, none from a point to itself; a whole ring is two circles', () => {
+  for (const share of [0.51, 0.9, 0.9999, 0.999999, 0.99999999]) {
+    const d = spend.arcPath(62, 62, 55, 33, 0, TWO_PI * share);
+    const list = arcs(d);
+    assert.equal(list.length, 4, `share ${share}: two outer and two inner arcs`);
+    for (const arc of list) {
+      assert.equal(arc.flag, 0, 'each half is under half a turn');
+      assert.notDeepEqual(arc.from, arc.to, `share ${share}: an arc that starts where it ends draws nothing`);
+    }
+  }
+  const whole = spend.arcPath(62, 62, 55, 33, 0, TWO_PI);
+  assert.equal((whole.match(/A/g) || []).length, 4);
+  assert.equal((whole.match(/Z/g) || []).length, 2, 'a whole ring is two closed circles');
+  // under half a turn it stays one sector
+  assert.equal(arcs(spend.arcPath(62, 62, 55, 33, 0, TWO_PI * 0.4)).length, 2);
+  // and the donut draws a 99.9999% category as a path with a visible arc
+  const one = body({categories: [{key: 'consulting', label: 'Consulting', amount: 999999, share: 0.999999, payments: 5},
+    {key: 'travel', label: 'Travel', amount: 1, share: 0.000001, payments: 1}]});
+  const svg = spend.donutSvg(one, spend.ring(one, {palette: PALETTE}), {size: 124, cycle: 2024});
+  const big = svg.match(/<path class="flow-spend-seg"[^>]* d="([^"]+)"/);
+  assert.ok(big && arcs(big[1]).length === 4 && arcs(big[1]).every(arc => arc.from.join() !== arc.to.join()), svg.slice(0, 300));
+});
+
+/* ------------------------------------------------------------------------------------------------- footnotes */
+const NOTED = {excluded: {loan_repayments: {itemized: 100, reported: 120}, transfers_to_authorized: {itemized: 300, reported: 300}},
+  own_transfers: {amount: 450, rows: 2}, dropped_negative: [{key: 'travel', label: 'Travel', amount: -50, payments: 1}],
+  source: {duplicate_rows_dropped: 1}};
+
+test('footnotes: what the answer left out or merged is a short line in the card and a full list in the panel, from the server counts', () => {
+  const card = spend.cardHtml({kind: 'ok', body: body(NOTED)}, CTX);
+  const line = card.match(/<p class="flow-spend-fine flow-spend-notes" data-spend-notes>([^<]+)<\/p>/);
+  assert.ok(line, card.slice(-500));
+  assert.equal(line[1], 'Left out: loans $100, transfers $300 · $450 between own committees counted once · Travel not drawn (nets to $0 or less) · 1 repeated row dropped');
+  assert.ok(card.indexOf('flow-spend-notes') > card.indexOf('flow-spend-legend') && card.indexOf('flow-spend-notes') < card.indexOf('flow-spend-foot'), 'under the legend, above the footer');
+  const panel = spend.panelHtml({kind: 'ok', body: detail(NOTED)}, PANEL, {});
+  const list = panel.match(/<ul class="flow-spend-notes" data-spend-notes[^>]*>(.*?)<\/ul>/);
+  assert.ok(list, 'the panel has the list');
+  const items = [...list[1].matchAll(/<li>([^<]+)<\/li>/g)].map(match => match[1].replace(/&#39;/g, "'"));
+  assert.deepEqual(items, [
+    "Left out of the ring and of the reported total: loan repayments $100 ($120 reported); transfers to the candidate's other committees $300.",
+    "Payments between the candidate's own committees ($450, 2 payments) are left out so each dollar is counted once.",
+    'Travel is not drawn: its refunds and voids net to -$50.',
+    '1 repeated filing row in the source was counted once.']);
+  assert.ok(panel.indexOf('flow-spend-notes') > panel.indexOf('flow-spend-legend'), 'under the legend');
+  assert.ok(!style(card) && !style(panel));
+});
+
+test('footnotes: a clean answer has none, and nothing is made up for a zero', () => {
+  assert.ok(!spend.cardHtml({kind: 'ok', body: body()}, CTX).includes('flow-spend-notes'));
+  assert.ok(!spend.panelHtml({kind: 'ok', body: detail()}, PANEL, {}).includes('flow-spend-notes'));
+  const zero = body({excluded: {loan_repayments: {itemized: 0, reported: 0}, transfers_to_authorized: {itemized: 0, reported: null}},
+    own_transfers: {amount: 0, rows: 0}, dropped_negative: [], source: {duplicate_rows_dropped: 0}});
+  assert.ok(!spend.cardHtml({kind: 'ok', body: zero}, CTX).includes('flow-spend-notes'));
+  const two = spend.panelHtml({kind: 'ok', body: detail({source: {duplicate_rows_dropped: 3}})}, PANEL, {});
+  assert.ok(two.includes('3 repeated filing rows in the source were counted once.'));
+});
+
+/* ------------------------------------------------------------------ the comparison note (server words win) */
+test('a comparison the server could not draw says why in its own words', () => {
+  const mode = spend.compare(body({peers: {n: 5, too_few: true, shares: {}, note: 'The collected campaigns share no spending category to compare'}}));
+  assert.equal(mode.hidden, true);
+  assert.equal(mode.note, 'The collected campaigns share no spending category to compare');
+  assert.equal(spend.compare(body({peers: {n: 2, too_few: true}})).note, 'Too few collected campaigns to compare');
+});
+
+/* ------------------------------------------------------------------------- the panel's hands: Escape and focus */
+// A stand-in for the page: the panel, the document's listeners, and where focus went.
+function fakeWorld() {
+  const docListeners = [];
+  const log = {focus: [], tabindex: [], prevented: 0, restored: []};
+  const panel = {hidden: true, innerHTML: '', addEventListener() {}, removeEventListener() {}, replaceChildren() { this.innerHTML = ''; }, querySelector() { return null; }};
+  const doc = {createElement: () => ({classList: {add() {}, remove() {}}, appendChild() {}}), activeElement: null,
+    addEventListener(type, handler, capture) { docListeners.push([type, handler, capture]); }, removeEventListener() {}};
+  const host = {ownerDocument: doc, focus() { log.focus.push('host'); }, hasAttribute: () => false, setAttribute(name, value) { log.tabindex.push([name, value]); }};
+  const press = target => {
+    const event = {key: 'Escape', target, preventDefault() { log.prevented += 1; }};
+    for (const [type, handler] of docListeners) if (type === 'keydown') handler(event);
+  };
+  return {panel, doc, host, log, press, docListeners};
+}
+const NODE = {id: 'candidate:H0KY06104:support', kind: 'candidate', candidate_id: 'H0KY06104', label: 'Garland Barr'};
+const openPanel = (world, extra) => {
+  const control = spend.controller(world.host, Object.assign({fetcher: async () => reply(200, detail()), panel: world.panel,
+    restoreFocus: node => { world.log.restored.push(node.id); return true; }}, extra || {}));
+  assert.equal(control.open(NODE, 2024), true);
+  assert.equal(world.panel.hidden, false);
+  return control;
+};
+
+test('Escape closes the open panel and returns focus to the node that opened it', () => {
+  const world = fakeWorld();
+  const control = openPanel(world);
+  world.press({tagName: 'DIV'});
+  assert.equal(control.isOpen(), false);
+  assert.equal(world.panel.hidden, true);
+  assert.equal(world.log.prevented, 1, 'the view\'s own Escape (go back a level) must not also read it');
+  assert.deepEqual(world.log.restored, [NODE.id], 'focus goes back to the opening node');
+  assert.deepEqual(world.log.focus, [], 'and not to the chart while that node is there');
+});
+
+test('Escape does nothing when the panel is not showing, and nothing for a key typed in a field', () => {
+  const world = fakeWorld();
+  const control = openPanel(world);
+  for (const target of [{tagName: 'INPUT'}, {tagName: 'textarea'}, {tagName: 'SELECT'}, {tagName: 'DIV', isContentEditable: true}]) {
+    world.press(target);
+    assert.equal(control.isOpen(), true, `${target.tagName} keeps the panel`);
+  }
+  assert.equal(world.log.prevented, 0, 'the field\'s own Escape is untouched');
+  assert.deepEqual(world.log.restored, []);
+  world.press({tagName: 'DIV'});
+  assert.equal(control.isOpen(), false);
+  world.press({tagName: 'DIV'});                       // closed now: nothing to do
+  assert.equal(world.log.prevented, 1);
+  assert.equal(world.log.restored.length, 1);
+});
+
+test('closing returns focus to the chart itself when the opening node is no longer drawn', () => {
+  const world = fakeWorld();
+  const control = openPanel(world, {restoreFocus: node => { world.log.restored.push(node.id); return false; }});
+  control.close({focus: true});
+  assert.deepEqual(world.log.restored, [NODE.id]);
+  assert.deepEqual(world.log.focus, ['host'], 'the chart container takes it');
+  assert.deepEqual(world.log.tabindex, [['tabindex', '-1']], 'and is made focusable first');
+});
+
+test('a close made by the code (a redraw, the candidate no longer drawn) moves no focus', () => {
+  const world = fakeWorld();
+  const control = openPanel(world);
+  control.restore(() => null);                          // the candidate is not in the redrawn chart: closed quietly
+  assert.equal(control.isOpen(), false);
+  assert.deepEqual(world.log.restored, []);
+  assert.deepEqual(world.log.focus, []);
+  const again = openPanel(world);
+  again.detach();
+  assert.deepEqual(world.log.restored, []);
+});
+
+test('the panel\'s close button gives focus back too', () => {
+  const handlers = {};
+  const world = fakeWorld();
+  world.panel.addEventListener = (type, handler) => { handlers[type] = handler; };
+  const control = openPanel(world);
+  handlers.click({target: {closest: selector => (selector === '[data-spend-close]' ? {} : null)}});
+  assert.equal(control.isOpen(), false);
+  assert.deepEqual(world.log.restored, [NODE.id]);
+});
+
+/* ----------------------------------------------------------------------------- hosted, and the late module */
+test('hosted console: the spending card and panel are off entirely (a click keeps its Rows behaviour)', () => {
+  assert.equal(chart.spendingOn({explore: true}, false), true);
+  assert.equal(chart.spendingOn({explore: true}, true), false, 'hosted');
+  assert.equal(chart.spendingOn({spending: false}, false), false, 'a view that turns it off');
+  assert.equal(chart.spendingOn(null, false), false);
+  globalThis.MentatConsole = {hosted: true};
+  try {
+    assert.equal(chart.spendingOn({}), false, 'the page told the chart it is hosted');
+    globalThis.MentatConsole = {hosted: false};
+    assert.equal(chart.spendingOn({}), true);
+  } finally { delete globalThis.MentatConsole; }
+  // the hint a candidate's tooltip gives follows: no "spending detail" when it is off
+  const contract = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'audits', 'mentat_failings_20260915', 'contracts', 'flow.json'), 'utf8'));
+  const flow = contract.examples.find(item => item.name.startsWith('FAIRSHAKE 2023-2024')).body;
+  const result = layout.layout(flow, {width: 1100, height: 520});
+  const node = result.nodes.find(item => item.kind === 'candidate' && item.candidate_id);
+  const context = {result, format: {short: chart.short, full: chart.full}};
+  const hint = spendHint => chart.describe({node}, context, flow, {zoom: true, rows: true, spend: spendHint, cycle: 2024}).hint;
+  assert.equal(hint(chart.spendingOn({explore: true}, false)), 'Click for spending detail · Shift-click to pin');
+  assert.equal(hint(chart.spendingOn({explore: true}, true)), 'Click to open in Rows · Shift-click to pin');
+});
+
+test('a spending module that arrives after the chart was destroyed builds nothing', async () => {
+  const doc = {createElement() { throw new Error('the module is already here: nothing to load'); }};
+  const used = [];
+  await chart.spendLater(doc, () => false, api => used.push(api));
+  assert.deepEqual(used, [], 'destroyed before the module loaded: no controller, no listener');
+  await chart.spendLater(doc, () => true, api => used.push(api));
+  assert.equal(used.length, 1);
+  assert.equal(typeof used[0].controller, 'function');
+});
+
+// mount() needs a browser DOM (the browser pass drives it), so the lines that hand the guards above to the chart are read here:
+// each of these is the whole of a fix, and dropping one puts the old behaviour back with every unit test still green.
+test('the chart hands the guards to every spending path: hosted, a late module, and the opener getting focus back', () => {
+  const dir = path.join(__dirname, '..');
+  const source = fs.readFileSync(path.join(dir, 'flow-chart.js'), 'utf8');
+  const app = fs.readFileSync(path.join(dir, 'app.js'), 'utf8');
+  const has = (pattern, why) => assert.ok(pattern.test(source), why);
+  assert.ok(/MentatConsole = Object\.assign\(window\.MentatConsole \|\| \{\}, \{hosted: !!session\.hosted\}\)/.test(app), 'the page tells the chart it is hosted');
+  assert.equal((source.match(/state\.options\.spending(?![A-Za-z])/g) || []).length, 0, 'one switch (spendingEnabled), not a check of its own per path');
+  has(/const spendingEnabled = \(\) => explore\(\) && spendingOn\(state\.options\);/, 'one switch');
+  has(/if \(spend \|\| destroyed \|\| !spendingEnabled\(\)\) return spend;/, 'no controller once destroyed or hosted');
+  has(/function openSpend\(node\) \{\s*if \(!spendingEnabled\(\)/, 'a click on a hosted console keeps its Rows behaviour');
+  has(/const candidate = target\.node && spendingEnabled\(\) && spendable/, 'no card in the tooltip when hosted');
+  has(/spend: Boolean\(state\.options\.spendingPanel\) && spendingEnabled\(\)/, 'no "spending detail" hint when hosted');
+  has(/if \(state\.view\.spend && spendingEnabled\(\) && state\.options\.spendingPanel\)/, 'no panel restored when hosted');
+  has(/destroy\(\) \{\s*destroyed = true;/, 'destroy() marks the chart gone');
+  assert.equal((source.match(/spendLater\(doc, \(\) => !destroyed/g) || []).length, 2, 'both late-module paths ask whether the chart is still there');
+  has(/restoreFocus: node => \{\s*const group = host\.querySelector\(`\.flow-node\[data-node="\$\{CSS\.escape\(node\.id\)\}"\]`\);\s*if \(group\) focusNode\(node\.id\);/, 'the opener gets focus back');
 });
