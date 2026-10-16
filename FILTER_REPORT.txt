@@ -112,7 +112,7 @@ Supersedes the earlier 'held pending Paul' wording (never committed). Source: Me
 Rationale: absolute local paths and local branch names are portability issues, not privacy. The canonical Brain and Research vaults are public under the current contract; 'Project Brain STATE' refers to a separate local decisions repo that is not published, so the reference is kept and annotated.
 The only unresolved disclosure item is the member stance-tier example values (unpublished model outputs); those values are replaced with '[example values withheld pending disclosure review]' and held by Wire's review (not a Paul ruling).
 HELD (not published): .claude/skills/moneyball-proof-and-analysis-toolkit/SKILL.md -- mostly unpublished prereg outcomes; the hold is attributed to Wire's review. All other .claude/ content is unpublished.
-Verification: gitleaks on the published files: no leaks; key-pattern grep: clean; YAML frontmatter of the three SKILL.md files parses (keys name, description; name equals the directory); the three scripts byte-compile. Residual scan for pgoff, magical-booth, nifty-cray, Frank Lucas, Durbin across the published files: none.
+Verification: gitleaks on the published files: no leaks; key-pattern grep: clean; YAML frontmatter of the three SKILL.md files parses (keys name, description; name equals the directory); the three scripts byte-compile. Residual scan for the local user path, the private branch nicknames and the withheld stance example names across the published .claude files: none.
 Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Desktop\Melange Systems and '<local data dir>' for C:\Users\pgoff\Downloads; (2) private local branch names dropped, sentence kept generic; (3) '(local Project Brain decisions repo; not published)' added once per file after 'Project Brain STATE'; (4) '(local, not in this repo)' added to citations of unpublished files; (5) stance example values replaced as stated above.
 
 .claude/skills/moneyball-debugging-playbook/SKILL.md
@@ -133,10 +133,10 @@ Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Deskt
       old: predates the 2026-07-10 magical-booth merge
       new: predates the 2026-07-10 merge of the local audit branch
   - stance example values withheld (name): 1 occurrence(s), source line(s) 210
-      old: the Frank Lucas "defend" glitch
+      old: [withheld; sha256 of the original text: 420120dfedcb231501a746189025cbf3aaf42c2ef6a756e4d5c97dc63b3a64ae]
       new: the [example values withheld pending disclosure review] "defend" glitch
   - stance example values withheld (tiers): 1 occurrence(s), source line(s) 210
-      old: (Lucas moved Ally -> Highly-Persuadable, so his 'defend' should be 'none')
+      old: [withheld; sha256 of the original text: 2f98944af819203692bf8640cf859656c43205d150c55a75716a25629a2e225f]
       new: ([example values withheld pending disclosure review], so the 'defend' should be 'none')
   - Project Brain reference annotated: 1 occurrence(s), source line(s) 328
       old: Project Brain STATE
@@ -156,10 +156,10 @@ Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Deskt
       old: a 2026-07-08 audit on a different branch (`claude/magical-booth-f272da`, report
       new: a 2026-07-08 audit on a different local branch (not published; report
   - stance example values withheld (name, line 83): 1 occurrence(s), source line(s) 83
-      old: the 2026-07-09 Frank Lucas flag
+      old: [withheld; sha256 of the original text: 6e31496de895f9d528e45e35db6b2fdf4238230b21e7a6ba08e654a90641d804]
       new: the 2026-07-09 [example values withheld pending disclosure review] flag
   - stance example values withheld (line 84): 1 occurrence(s), source line(s) 84
-      old: "Durbin is Interchange Opponent"
+      old: [withheld; sha256 of the original text: c87d76f5b867ce97c47d4c1ca39233629fbbcfd6c24788c29e9ac1f15463f755]
       new: "[example values withheld pending disclosure review]"
   - Project Brain reference annotated: 1 occurrence(s), source line(s) 253
       old: Project Brain STATE
@@ -179,7 +179,7 @@ Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Deskt
       old: worktree `claude/nifty-cray-f6d053` (HEAD 88a7048)
       new: a local working branch (HEAD 88a7048)
   - stance example values withheld: 1 occurrence(s), source line(s) 184
-      old: Durbin legitimately changed rungs once
+      old: [withheld; sha256 of the original text: 604b95f537276f2176f033785ad2df4017cd1b9f777635761400a8b16b276256]
       new: [example values withheld pending disclosure review] legitimately changed rungs once
   - Project Brain reference annotated: 1 occurrence(s), source line(s) 309
       old: Project Brain STATE
