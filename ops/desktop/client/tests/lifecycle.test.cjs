@@ -171,24 +171,41 @@ test('activity signal requires matching app and typed boolean; unavailable is un
   try{assert.equal(await activity(origin,'launch-secret','mentat'),true);response={appId:'mentat',busy:false};assert.equal(await activity(origin,'launch-secret','mentat'),false);response={appId:'terrier',busy:false};assert.equal(await activity(origin,'launch-secret','mentat'),null);response={appId:'mentat',busy:'false'};assert.equal(await activity(origin,'launch-secret','mentat'),null);code=404;assert.equal(await activity(origin,'launch-secret','mentat'),null);}finally{await new Promise(resolve=>server.close(resolve));}
 });
 
-test('staged release failing native verification cannot wedge a later corrected release or lower the high-water',async t=>{
-  const f=fixture(t),bad=path.join(f.directory,'updates','2')+path.sep;
+test('release failing native verification backs off, cannot wedge a corrected release, and keeps the high-water',async t=>{
+  const f=fixture(t),bad=path.join(f.directory,'updates','2')+path.sep,failing=f.envelope,codes=[];
   const client=f.client('Fixture Publisher',{verifyNativePackage:async file=>{if(path.resolve(file).startsWith(bad))throw new Error('Native signature refused');}});
+  const report=client.report.bind(client);client.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
   await client.check();
-  assert.equal(f.state.pending.version,'1.1.0');assert.equal(f.state.pending.phase,'staged');assert.equal(client.ready,null);
+  assert.equal(f.downloads,1);assert.equal(f.state.pending,null);assert.equal(client.ready,null);assert.match(f.status.at(-1),/Native signature refused/);assert.deepEqual(codes,['failed:VERIFY_FAILED']);
+  assert.equal(f.state.verifyFailure.manifestHash,crypto.createHash('sha256').update(Buffer.from(failing.payload,'base64')).digest('hex'));
   // The signed high-water is recorded before download by design; a failed candidate keeps it.
   assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(await client.activateAfterClose(),false);
-  // Re-offering the same failed release is retried and refused again, never installed.
-  await client.check();assert.equal(f.downloads,2);assert.match(f.status.at(-1),/Native signature refused/);assert.equal(await client.activateAfterClose(),false);
-  // While wedged-candidate state exists, older, equivocating or downgrading manifests stay refused.
+  // Inside the backoff window the same manifest is neither downloaded nor verified again.
+  await client.check();await client.check();assert.equal(f.downloads,1);assert.match(f.status.at(-1),/retry after/);assert.equal(codes.length,1);
+  // Older, equivocating or downgrading manifests stay refused.
   for(const [offer,reason] of [[f.sign('1.1.0',0),/Rollback/],[f.sign('1.1.1',1),/Rollback|equivocation/],[f.sign('1.0.9',3),/downgrade/]]){
     f.envelope=offer;await client.check();
-    assert.match(f.status.at(-1),reason);assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(f.downloads,2);assert.equal(client.ready,null);
+    assert.match(f.status.at(-1),reason);assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(f.downloads,1);assert.equal(client.ready,null);
   }
-  // A corrected release with a higher sequence is fetched, verified, staged and installable.
+  // After the window the same manifest is retried once (fresh download), fails again and backs off again.
+  f.envelope=failing;f.state={...f.state,verifyFailure:{...f.state.verifyFailure,failedAt:Date.now()-6*60*60*1000-1}};
+  await client.check();assert.equal(f.downloads,2);assert.equal(f.state.pending,null);assert.ok(Date.now()-f.state.verifyFailure.failedAt<60000);
+  await client.check();assert.equal(f.downloads,2);
+  // A corrected release with a higher sequence bypasses the backoff immediately.
   f.envelope=f.sign('1.1.1',2);await client.check();
-  assert.equal(f.state.sequence,3);assert.equal(f.state.pending.version,'1.1.1');assert.equal(f.state.pending.phase,'prepared');
+  assert.equal(f.downloads,3);assert.equal(f.state.sequence,3);assert.equal(f.state.pending.version,'1.1.1');assert.equal(f.state.pending.phase,'prepared');
   assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
+});
+
+test('restart reverification failure is reported and not overwritten by an empty update reply',async t=>{
+  const f=fixture(t);let refuse=false;const bad=path.join(f.directory,'updates','2')+path.sep;
+  const verifyNativePackage=async file=>{if(refuse&&path.resolve(file).startsWith(bad))throw new Error('Native signature refused');};
+  await f.client('Fixture Publisher',{verifyNativePackage}).check();assert.equal(f.state.pending.phase,'prepared');
+  refuse=true;f.envelope=null;const restarted=f.client('Fixture Publisher',{verifyNativePackage}),codes=[];
+  const report=restarted.report.bind(restarted);restarted.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
+  await restarted.check();
+  assert.match(f.status.at(-1),/Staged update 1.1.0 .*Native signature refused/);assert.deepEqual(codes,['failed:VERIFY_FAILED']);
+  assert.equal(f.state.pending,null);assert.equal(restarted.ready,null);assert.equal(await restarted.activateAfterClose(),false);
 });
 
 test('download integrity failure records the high-water but a corrected release still installs',async t=>{
