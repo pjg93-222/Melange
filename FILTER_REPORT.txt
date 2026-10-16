@@ -106,3 +106,92 @@ Counts: INCLUDED-NOW 27; KEPT-EXCLUDED 270 (258 path policy + 12 data/output/pri
 == ADDENDUM 2 2026-10-16: narrow exception to the fec/attic path policy
   f10c45787730   4802 B  fec/attic/full_congestion.py  -- live code: committee_policy() is imported by fec/collect/refresh_fec_money.py, fec/collect/import_mentat_money.py and fec/audit/reconcile_mentat_money.py. Inspected: public FEC committee ids and code only; no secrets or personal data (one hardcoded local workbook path). Blob equals 75aa077fa535. The other 14 files in fec/attic and everything else under the path policy stay excluded.
 Counts now: INCLUDED-NOW 28; KEPT-EXCLUDED 269 (257 path policy + 12 data/output/private).
+
+== ADDENDUM 6 (revised) 2026-10-16: three engineering skill docs published as a narrow exception to the .claude/ exclusion
+Supersedes the earlier 'held pending Paul' wording (never committed). Source: Melange 99431fc3c (docs(skills): land completed group-2 skill corrections). .claude/ is outside the export roots, so this is a recorded narrow exception that publishes exactly the files below at their source paths on main and release/melange. The rest of .claude/ stays unpublished.
+Rationale: absolute local paths and local branch names are portability issues, not privacy. The canonical Brain and Research vaults are public under the current contract; 'Project Brain STATE' refers to a separate local decisions repo that is not published, so the reference is kept and annotated.
+The only unresolved disclosure item is the member stance-tier example values (unpublished model outputs); those values are replaced with '[example values withheld pending disclosure review]' and held by Wire's review (not a Paul ruling).
+HELD (not published): .claude/skills/moneyball-proof-and-analysis-toolkit/SKILL.md -- mostly unpublished prereg outcomes; the hold is attributed to Wire's review. All other .claude/ content is unpublished.
+Verification: gitleaks on the published files: no leaks; key-pattern grep: clean; YAML frontmatter of the three SKILL.md files parses (keys name, description; name equals the directory); the three scripts byte-compile. Residual scan for pgoff, magical-booth, nifty-cray, Frank Lucas, Durbin across the published files: none.
+Edits were portability-only: (1) '<repo root>' for C:\Users\pgoff\OneDrive\Desktop\Melange Systems and '<local data dir>' for C:\Users\pgoff\Downloads; (2) private local branch names dropped, sentence kept generic; (3) '(local Project Brain decisions repo; not published)' added once per file after 'Project Brain STATE'; (4) '(local, not in this repo)' added to citations of unpublished files; (5) stance example values replaced as stated above.
+
+.claude/skills/moneyball-debugging-playbook/SKILL.md
+  source blob @99431fc3c 5ada2832300f4748606e683f41ffca41d55e9bc6 (39432 B) -> published blob cbd7e5efa3ff7ee1e7e11d82fa2a6d432fc49c7e (39280 B)
+  - absolute repo path -> <repo root>: 10 occurrence(s), source line(s) 26,55,81,196,215,216,217,270,271,272
+      old: C:\Users\pgoff\OneDrive\Desktop\Melange Systems
+      new: <repo root>
+  - private local branch name dropped (header): 1 occurrence(s), source line(s) 308
+      old: (branch `claude/nifty-cray-f6d053`)
+      new: (a local working branch)
+  - private local branch name dropped (line 232): 1 occurrence(s), source line(s) 232
+      old: on-branch report, read it with `git show claude/magical-booth-f272da:AUDIT_FINDINGS_2026-07-08_NETWORK_VOTE_CYCLE.md`
+      new: report held on a local branch of the source repo (not published): `git show <local-branch>:AUDIT_FINDINGS_2026-07-08_NETWORK_VOTE_CYCLE.md`
+  - private local branch name dropped (line 326): 1 occurrence(s), source line(s) 326
+      old: lives ONLY on a branch: `git show claude/magical-booth-f272da:AUDIT_FINDINGS_2026-07-08_NETWORK_VOTE_CYCLE.md`
+      new: lives ONLY on a local branch of the source repo (not published): `git show <local-branch>:AUDIT_FINDINGS_2026-07-08_NETWORK_VOTE_CYCLE.md`
+  - private local branch name dropped (line 117): 1 occurrence(s), source line(s) 117
+      old: predates the 2026-07-10 magical-booth merge
+      new: predates the 2026-07-10 merge of the local audit branch
+  - stance example values withheld (name): 1 occurrence(s), source line(s) 210
+      old: the Frank Lucas "defend" glitch
+      new: the [example values withheld pending disclosure review] "defend" glitch
+  - stance example values withheld (tiers): 1 occurrence(s), source line(s) 210
+      old: (Lucas moved Ally -> Highly-Persuadable, so his 'defend' should be 'none')
+      new: ([example values withheld pending disclosure review], so the 'defend' should be 'none')
+  - Project Brain reference annotated: 1 occurrence(s), source line(s) 328
+      old: Project Brain STATE
+      new: Project Brain STATE (local Project Brain decisions repo; not published)
+  - citation annotated (unpublished file): 1 occurrence(s), source line(s) 128
+      old: `.claude/commands/fable-audit.md`
+      new: `.claude/commands/fable-audit.md` (local, not in this repo)
+  - citation annotated (unpublished file): 1 occurrence(s), source line(s) 230
+      old: `DEEP_AUDIT_MATH_LOGIC_2026-07-02.md:10`
+      new: `DEEP_AUDIT_MATH_LOGIC_2026-07-02.md:10` (local, not in this repo)
+.claude/skills/moneyball-diagnostics-and-tooling/SKILL.md
+  source blob @99431fc3c 8462189b9d3572c09d935a9d6891d3b94835e8c3 (43778 B) -> published blob 13a5112cf32ba53510fe8f0f0fdfe3857fec822b (43223 B)
+  - absolute repo path -> <repo root>: 19 occurrence(s), source line(s) 25,26,27,28,29,30,31,32,33,34,36,38,184,223,225,233,242,251,261
+      old: C:\Users\pgoff\OneDrive\Desktop\Melange Systems
+      new: <repo root>
+  - private local branch name dropped: 1 occurrence(s), source line(s) 115
+      old: a 2026-07-08 audit on a different branch (`claude/magical-booth-f272da`, report
+      new: a 2026-07-08 audit on a different local branch (not published; report
+  - stance example values withheld (name, line 83): 1 occurrence(s), source line(s) 83
+      old: the 2026-07-09 Frank Lucas flag
+      new: the 2026-07-09 [example values withheld pending disclosure review] flag
+  - stance example values withheld (line 84): 1 occurrence(s), source line(s) 84
+      old: "Durbin is Interchange Opponent"
+      new: "[example values withheld pending disclosure review]"
+  - Project Brain reference annotated: 1 occurrence(s), source line(s) 253
+      old: Project Brain STATE
+      new: Project Brain STATE (local Project Brain decisions repo; not published)
+  - citation annotated (unpublished file): 1 occurrence(s), source line(s) 43
+      old: `.claude/commands/fable-audit.md:16-19`
+      new: `.claude/commands/fable-audit.md:16-19` (local, not in this repo)
+.claude/skills/moneyball-validation-and-qa/SKILL.md
+  source blob @99431fc3c 654acca36f8a5789c114bb3b2a045f64dfd3434e (34802 B) -> published blob ba74fa8e35aa887ff3d44d6518e828b8692e661f (34762 B)
+  - absolute repo path -> <repo root>: 3 occurrence(s), source line(s) 23,119,258
+      old: C:\Users\pgoff\OneDrive\Desktop\Melange Systems
+      new: <repo root>
+  - absolute Downloads path -> <local data dir>: 2 occurrence(s), source line(s) 129,233
+      old: C:\Users\pgoff\Downloads
+      new: <local data dir>
+  - private local branch name dropped: 1 occurrence(s), source line(s) 255
+      old: worktree `claude/nifty-cray-f6d053` (HEAD 88a7048)
+      new: a local working branch (HEAD 88a7048)
+  - stance example values withheld: 1 occurrence(s), source line(s) 184
+      old: Durbin legitimately changed rungs once
+      new: [example values withheld pending disclosure review] legitimately changed rungs once
+  - Project Brain reference annotated: 1 occurrence(s), source line(s) 309
+      old: Project Brain STATE
+      new: Project Brain STATE (local Project Brain decisions repo; not published)
+.claude/skills/moneyball-diagnostics-and-tooling/scripts/artifact_freshness.py
+  source blob @99431fc3c 9ca09d5912882f9b1036831af6324229ffb684fd (5770 B) -> published blob 118c6f360a8369a7a8272309e77e383a40ff17dc (5729 B)
+  - absolute repo path -> <repo root> (escaped form in usage text): 1 occurrence(s), source line(s) 28
+      old: C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems
+      new: <repo root>
+.claude/skills/moneyball-diagnostics-and-tooling/scripts/env_dials.py
+  source blob @99431fc3c 36f225772c536caf85e1c4842a43255d4c6509bc (4487 B) -> published blob 36f225772c536caf85e1c4842a43255d4c6509bc (4487 B)  [UNCHANGED, byte-identical to source]
+.claude/skills/moneyball-diagnostics-and-tooling/scripts/rank_delta.py
+  source blob @99431fc3c 864f800ab66244ae0f0b4a0816b8908c46d91750 (2502 B) -> published blob 864f800ab66244ae0f0b4a0816b8908c46d91750 (2502 B)  [UNCHANGED, byte-identical to source]
+
+Each replacement above was applied by exact string substitution to the LF source blob; no other bytes differ (source and published blobs re-hashed with git hash-object).
