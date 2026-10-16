@@ -1,4 +1,4 @@
-== Melange tree: specs=['melange'] source=<local Melange checkout> commit=c8464449224c6bd578cf7723ee07b75279e92b1f (branch integration/melange-20261016)
+== Melange tree: specs=['melange'] source=<local Melange checkout> commit=31588848770f2c09daf20e5c085401a2fe11a2fd (branch integration/melange-20261016)
 Rules: ops/release_lib/export.py allowlist (identical to the one used for 75aa077fa), path excludes, 5 MB cap, plus the reviewed addendum inclusions below.
 included: 1805   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 39 new source paths, none removed; the 6 skill-doc exception files below are in addition)
 excluded: 269
@@ -224,3 +224,13 @@ Source c8464449224c6bd578cf7723ee07b75279e92b1f = d39001d6 plus C1 7d9233ef (des
 Carried forward unchanged: the 6 skill-doc exception files (Addendum 6), the three non-workflow CI files under ops/desktop/packaging, and .github/workflows/desktop-windows.yml (v6, sha256 2e9816f2...). main only; release/melange stays at a9be89198e094374cdbf4178e95cc005065fef46.
 IMPORTANT: the published Melange 1.0.3 desktop binaries (draft release, run 38885810616) were built from a9be89198 and do NOT contain these later changes.
 Verification: all 1805 export blobs equal the c8464449 blobs (full set); skill-doc files, CI files and the workflow re-verified by hash; gitleaks on the changed files: no leaks; key grep: clean; compileall fec ops: exit 0. Held-content scan of the changed source and of this metadata for withheld stance example values, member-tier phrases and local user paths: none outside the recorded 'old:' lines of the path edits.
+
+== ADDENDUM 10 2026-10-16: republished from integration 31588848 (per-app signed-release producer)
+Source 31588848770f2c09daf20e5c085401a2fe11a2fd = c8464449 plus the per-app signed-release producer. Same export rules, addendum inclusions and the fec/attic/full_congestion.py exception. Changed export paths (4; none added, none removed, none newly filtered out):
+  M ops/desktop/GITHUB_RELEASES.md
+  M ops/desktop/client/README.md
+  M ops/desktop/packaging/github_release.py
+  M ops/desktop/packaging/test_github_release.py
+Key material: the tests use only fixture keys generated in-test (Ed25519PrivateKey.generate()); gitleaks and a PRIVATE KEY grep over the changed files found no committed key material (the only match is prose in GITHUB_RELEASES.md line 11).
+Carried forward unchanged: all .github/workflows/* (desktop-windows.yml v6, desktop-installer-acceptance.yml v4), the 6 skill-doc exception files and the three non-workflow CI files. main only; release/melange stays at a9be89198e094374cdbf4178e95cc005065fef46. The published Melange 1.0.3 binaries were built from a9be89198 and do not contain these changes.
+Verification: all 1805 export blobs equal the 31588848 blobs (full set); carried-forward files re-verified by hash; gitleaks clean; compileall fec ops exit 0; held-content scan of changed source and metadata clean.

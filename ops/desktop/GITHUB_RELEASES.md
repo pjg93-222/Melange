@@ -12,10 +12,13 @@ publisher private key, access credential, or recipient list belongs in an app
 or release asset. Making the repository public is an owner action; none of the
 tools here change repository visibility.
 
-> **Limitation.** Signed release production (`packaging/github_release.py`) currently binds all three apps to ONE repository bundle and cannot yet produce per-app signed releases; a redesign is required before the first signed auto-update release. Current per-app releases are unsigned manual-install previews.
-> Steps 4-5 and the publication commands below describe the single-repository
-> signed-bundle design; they do not work per app today. Do not treat them as a
-> working per-app signed publishing procedure.
+> **Signing prerequisite.** `packaging/github_release.py` now prepares each app's
+> signed release for that app's own repository (below). Producing a real signed
+> release still needs Paul's Windows Authenticode identity on each installer and
+> the per-app Ed25519 update roots and pinned Windows publisher subject enrolled
+> in the protected publisher state (`server/desktop_admin.py` `init` and
+> `trust-publisher`). Neither is part of this repository, and no tool here creates
+> them. Until both exist, per-app releases remain unsigned manual-install previews.
 
 ## From committed sources to a prepared installer
 
@@ -49,25 +52,32 @@ tools here change repository visibility.
    provisioned per-app Ed25519 update roots and exact Windows publisher subject
    using the existing administrator tools. Preserve this state and the
    `github-prepared.sqlite3` sequence ledger across builds. It is not an asset.
-5. Prepare a **new** output directory, then reverify it before upload:
+5. Prepare a **new** output directory, then reverify each app's release before upload:
 
 ```powershell
 python ops/desktop/packaging/github_release.py --state $publisherState --spec $releaseSpec --output $newBundle
-python ops/desktop/packaging/github_release.py --state $publisherState --verify-output $newBundle
+foreach ($app in 'melange', 'mentat', 'terrier') {
+  python ops/desktop/packaging/github_release.py --state $publisherState --verify-output (Join-Path $newBundle $app)
+  if ($LASTEXITCODE -ne 0) { throw "$app release verification failed" }
+}
 ```
 
-`github_release.py` binds one `repository` and all three apps into a single bundle
-(see the limitation above), so this specification cannot yet yield per-app signed
-releases. It shows the current tool's format only; replace every placeholder with
-the actual completed build inputs. The all-zero commit below is deliberately invalid.
+One specification covers all three apps at one version and sequence; the three
+are signed together or not at all. Each app's release is bound to its own
+repository from the fixed map in `github_release.py` (`melange` to
+`pjg93-222/Melange`, `mentat` to `pjg93-222/Mentat`, `terrier` to `pjg93-222/Geo`).
+An optional `repositories` object may restate entries of that map (case is
+ignored); any other repository, an unknown app key, or the retired single
+`repository` field is refused. Replace every placeholder with the actual
+completed build inputs. The all-zero commit below is deliberately invalid.
 
 ```json
 {
-  "repository": "pjg93-222/Melange",
   "version": "1.0.0",
   "sequence": 1,
   "platform": "win32",
   "arch": "x64",
+  "repositories": {"melange": "pjg93-222/Melange", "mentat": "pjg93-222/Mentat", "terrier": "pjg93-222/Geo"},
   "sourceRefs": {
     "melange": {"repository": "pjg93-222/Melange", "ref": "main", "commit": "0000000000000000000000000000000000000000"},
     "mentat": {"repository": "pjg93-222/Mentat", "ref": "main", "commit": "0000000000000000000000000000000000000000"},
@@ -84,64 +94,73 @@ the actual completed build inputs. The all-zero commit below is deliberately inv
 Preparation checks the actual staged Windows signatures and exact-byte gate
 receipts before signing. It refuses partial three-app releases, source-receipt
 mismatch, old versions/sequences, and reusing a sequence for different bytes.
-Repeating the identical release at a new directory reproduces its envelopes.
-No network request or upload occurs. The output contains exactly eleven files:
+The sequence ledger is checked per app across every repository it has recorded,
+and each new row records that app's own repository. Repeating the identical
+release at a new directory reproduces its envelopes. No network request or upload
+occurs. The output holds one directory per app, each with exactly five files:
 
-- For each of `melange`, `mentat`, `terrier`: `<app>-win32-x64.manifest.json`,
-  `<app>-<version>-win32-x64.exe`, and `<app>-trust.json`.
-- `release.json` and `SHA256SUMS`.
+- `<app>-win32-x64.manifest.json`, `<app>-<version>-win32-x64.exe`, `<app>-trust.json`;
+- that app's `release.json` (with its `appId` and `repository`) and `SHA256SUMS`.
 
 Each signed manifest binds `purpose: melange-desktop-github-release`,
-`distribution: public-installations`, the lowercase GitHub repository, all
-three source references, app/version/sequence/platform/architecture and package
-hashes. The signed logical package path remains
-`/v1/packages/<app>/<sequence>/<installer-name>`; the GitHub adapter maps it to
-the exact asset in `desktop-v<version>`. Trust files contain only signed key
-transitions rooted in keys the installed app already trusts. A failed download
-cannot replace those roots. Recovery looks up the exact installed version tag,
-so keep older accepted release assets available.
+`distribution: public-installations`, that app's lowercase GitHub repository,
+all three source references, app/version/sequence/platform/architecture and
+package hashes. The installed client accepts it only when that repository equals
+its own configured repository (`client/github-source.cjs` `githubPolicy`), so a
+release uploaded to another app's repository cannot install. The signed logical
+package path remains `/v1/packages/<app>/<sequence>/<installer-name>`; the GitHub
+adapter maps it to the exact asset in `desktop-v<version>`. Trust files contain
+only signed key transitions rooted in keys the installed app already trusts. A
+failed download cannot replace those roots. Recovery looks up the exact installed
+version tag, so keep older accepted release assets available.
 
-## Publish the verified bundle
+## Publish the verified releases
 
 These are explicit operator steps after real native acceptance. They require
-an authenticated `gh` with release-write permission on the already public
+an authenticated `gh` with release-write permission on each already public
 destination. The installer never receives that credential. Use one publisher
-and its preserved sequence ledger; review `gh release list --repo $repo` before
-choosing the next version. Never overwrite/delete an accepted tag or asset.
+and its preserved sequence ledger; review `gh release list --repo $repo` for
+every app repository before choosing the next version. Never overwrite/delete
+an accepted tag or asset.
 
-Set `$newBundle`, `$publisherState`, `$notesFile` and `$platformCommit` to the
-reviewed bundle, private state, release notes file, and the exact pushed platform
-source commit whose checks passed. The following commands stop on every native
-command error:
+Set `$newBundle`, `$publisherState` and `$notesFile` to the reviewed output,
+private state and release notes file. Set `$sourceCommits` to a map from app to
+the exact pushed commit, in that app's own repository, whose checks passed (for
+example `@{melange='...'; mentat='...'; terrier='...'}`). The loop handles each
+app in turn and stops on every native command error:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$bundle = (Resolve-Path -LiteralPath $newBundle).Path
-$index = Get-Content -LiteralPath (Join-Path $bundle 'release.json') -Raw | ConvertFrom-Json
-$repo = $index.repository
-$tag = $index.tag
-python ops/desktop/packaging/github_release.py --state $publisherState --verify-output $bundle
-if ($LASTEXITCODE -ne 0) { throw 'Bundle verification failed' }
-$visibility = gh repo view $repo --json visibility --jq '.visibility'
-if ($LASTEXITCODE -ne 0 -or $visibility -ne 'PUBLIC') { throw 'Destination must already be public' }
-$remoteCommit = gh api "repos/$repo/commits/$platformCommit" --jq '.sha'
-if ($LASTEXITCODE -ne 0 -or $remoteCommit -ne $platformCommit) { throw 'Reviewed platform commit is not on the destination' }
-gh release create $tag --repo $repo --target $platformCommit --draft --title "Desktop $($index.version)" --notes-file $notesFile
-if ($LASTEXITCODE -ne 0) { throw 'Draft creation failed; inspect existing tag/release before retrying' }
-$assets = @($index.assets) + @('release.json', 'SHA256SUMS')
-$paths = @($assets | ForEach-Object { Join-Path $bundle $_ })
-gh release upload $tag @paths --repo $repo
-if ($LASTEXITCODE -ne 0) { throw 'Upload incomplete; leave draft for review, never clobber assets' }
-$downloaded = Join-Path ([IO.Path]::GetTempPath()) ('melange-release-' + [guid]::NewGuid().ToString('N'))
-gh release download $tag --repo $repo --dir $downloaded
-if ($LASTEXITCODE -ne 0) { throw 'Uploaded bundle could not be downloaded for verification' }
-python ops/desktop/packaging/github_release.py --state $publisherState --verify-output $downloaded
-if ($LASTEXITCODE -ne 0) { throw 'Uploaded bytes failed verification; keep the release draft' }
-gh release view $tag --repo $repo --json tagName,isDraft,assets,url
-if ($LASTEXITCODE -ne 0) { throw 'Release review failed' }
+foreach ($app in 'melange', 'mentat', 'terrier') {
+  $bundle = (Resolve-Path -LiteralPath (Join-Path $newBundle $app)).Path
+  $index = Get-Content -LiteralPath (Join-Path $bundle 'release.json') -Raw | ConvertFrom-Json
+  if ($index.appId -ne $app) { throw "$bundle is not the $app release" }
+  $repo = $index.repository
+  $tag = $index.tag
+  $commit = $sourceCommits[$app]
+  python ops/desktop/packaging/github_release.py --state $publisherState --verify-output $bundle --repository $repo
+  if ($LASTEXITCODE -ne 0) { throw "$app release verification failed" }
+  $visibility = gh repo view $repo --json visibility --jq '.visibility'
+  if ($LASTEXITCODE -ne 0 -or $visibility -ne 'PUBLIC') { throw "$repo must already be public" }
+  $remoteCommit = gh api "repos/$repo/commits/$commit" --jq '.sha'
+  if ($LASTEXITCODE -ne 0 -or $remoteCommit -ne $commit) { throw "Reviewed $app commit is not on $repo" }
+  gh release create $tag --repo $repo --target $commit --draft --title "Desktop $($index.version)" --notes-file $notesFile
+  if ($LASTEXITCODE -ne 0) { throw "$app draft creation failed; inspect existing tag/release before retrying" }
+  $paths = @(@($index.assets) + @('release.json', 'SHA256SUMS') | ForEach-Object { Join-Path $bundle $_ })
+  gh release upload $tag @paths --repo $repo
+  if ($LASTEXITCODE -ne 0) { throw "$app upload incomplete; leave draft for review, never clobber assets" }
+  $downloaded = Join-Path ([IO.Path]::GetTempPath()) ("melange-release-$app-" + [guid]::NewGuid().ToString('N'))
+  gh release download $tag --repo $repo --dir $downloaded
+  if ($LASTEXITCODE -ne 0) { throw "$app release could not be downloaded for verification" }
+  python ops/desktop/packaging/github_release.py --state $publisherState --verify-output $downloaded --repository $repo
+  if ($LASTEXITCODE -ne 0) { throw "$app uploaded bytes failed verification; keep the release draft" }
+  gh release view $tag --repo $repo --json tagName,isDraft,assets,url
+  if ($LASTEXITCODE -ne 0) { throw "$app release review failed" }
+}
 ```
 
-After reviewing that draft and its exact eleven assets, make it discoverable:
+After reviewing each draft and its exact five assets, make it discoverable in
+that app's repository (set `$repo` and `$tag` from that app's `release.json`):
 
 ```powershell
 gh release edit $tag --repo $repo --draft=false --latest
@@ -152,9 +171,11 @@ The CLI argument behavior is documented by GitHub for
 [create](https://cli.github.com/manual/gh_release_create),
 [upload](https://cli.github.com/manual/gh_release_upload), and
 [edit](https://cli.github.com/manual/gh_release_edit). The local
-`--verify-output` mode rejects extra/private files, renamed or changed assets,
-signature/identity mismatch, stale trust transition files, and altered checksum
-lists. A failed upload stays a draft; do not use `--clobber` to hide a mismatch.
+`--verify-output` mode rejects extra/private files (including another app's
+assets), renamed or changed assets, signature/identity mismatch, a release
+directory checked against a repository other than its app's own
+(`--repository`), stale trust transition files, and altered checksum lists. A
+failed upload stays a draft; do not use `--clobber` to hide a mismatch.
 
 ## First install and remaining prerequisites
 
