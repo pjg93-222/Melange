@@ -249,9 +249,10 @@ test('signature tool failure without a verdict keeps the staged release and retr
   const client=f.client('Fixture Publisher',{verifyNativePackage:async file=>{if(unavailable&&path.resolve(file).startsWith(bad))throw Object.assign(new Error('Windows package signature verification failed.'),{code:'SIGNATURE_CHECK_UNAVAILABLE'});}});
   const report=client.report.bind(client);client.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
   await client.check();
-  assert.equal(f.state.verifyFailure,undefined);assert.equal(f.state.pending.phase,'staged');assert.equal(f.downloads,1);assert.deepEqual(codes,[]);
+  assert.equal(f.state.verifyFailure,undefined);assert.equal(f.state.pending.phase,'staged');assert.equal(f.downloads,1);assert.deepEqual(codes,['deferred:SIGNATURE_CHECK_UNAVAILABLE']);
   await client.check();assert.equal(f.downloads,1);assert.equal(f.state.verifyFailure,undefined);assert.match(f.status.at(-1),/not prepared/);
-  unavailable=false;await client.check();assert.equal(f.downloads,1);assert.equal(await client.activateAfterClose(),true);
+  assert.deepEqual(codes,['deferred:SIGNATURE_CHECK_UNAVAILABLE']); // Reported once per staged manifest.
+  unavailable=false;await client.check();assert.equal(f.downloads,1);assert.equal(await client.activateAfterClose(),true);assert.deepEqual(codes,['deferred:SIGNATURE_CHECK_UNAVAILABLE']);
 });
 
 test('malformed backoff timestamp is ignored without throwing',async t=>{
@@ -261,4 +262,10 @@ test('malformed backoff timestamp is ignored without throwing',async t=>{
     await client.check();
     assert.equal(f.downloads,1);assert.equal(f.state.pending.phase,'prepared');assert.doesNotMatch(f.status.join(' '),/Invalid time|retry after/);
   }
+});
+
+test('install-on-close refuses activation when the current-version baseline fails at close time',async t=>{
+  const f=fixture(t),client=f.client();await client.check();assert.equal(f.state.pending.phase,'prepared');
+  fs.writeFileSync(path.join(f.directory,'updates','1','Terrier.exe'),'corrupt');
+  assert.equal(await client.activateAfterClose(),false);assert.equal(f.installs,0);assert.equal(f.state.pending.phase,'prepared');assert.match(f.status.at(-1),/activation refused/);
 });
