@@ -118,3 +118,15 @@ mentat/test-results/
 !mentat/config/report-directory.json
 !mentat/config/attribution-policy.json
 !mentat/app/tests/chart-engine-r3.golden.json
+
+# Local extraction/staging databases and their SQLite sidecars.
+/mentat/extraction.sqlite
+/mentat/extraction.sqlite-journal
+/mentat/extraction.sqlite-wal
+/mentat/extraction.sqlite-shm
+/mentat/staging.sqlite
+/mentat/staging.sqlite-journal
+/mentat/staging.sqlite-wal
+/mentat/staging.sqlite-shm
+# Preserved local workbook-cache backup; never product source.
+/outputs/workbook-backups-20260926/cache-hardlinks/
