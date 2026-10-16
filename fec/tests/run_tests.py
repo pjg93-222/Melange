@@ -1070,7 +1070,12 @@ _LANE_PYTEST=(
     'test_repin_process_identity',
     'test_snapshot_reconciliation_boundaries',
     # 2026-10-16 weekly refresh: a deferred discovery is a soft failure, never a gate (fec_root.md:20).
-    'test_weekly_discovery_deferral')
+    'test_weekly_discovery_deferral',
+    # 2026-10-16 completed surface repairs (FEC_SURFACES_REPAIR.md): companions of the receipt-binding,
+    # email-snapshot, surface-gate and workbook/observability source repairs. Synthetic fixtures; each
+    # ran green alone on the composed source and wrote nothing into the tree.
+    'test_graph_snapshot_binding','test_email_snapshot_binding','test_surface_gate_regressions',
+    'test_observability_snapshot')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on
@@ -1086,7 +1091,9 @@ _LANE_NODE=(
     'test_staffer_live_query_committee_names.cjs','test_staffer_live_query_ids.cjs',
     'test_staffer_map_scope.cjs','test_staffer_payroll_map.cjs','test_staffer_reconciled_display.cjs',
     'test_staffer_route_jobs_client.cjs','test_staffer_route_models.cjs',
-    'test_staffer_snapshot_recovery.cjs','test_staffer_unreachable_hint.cjs','test_staffer_zoom.cjs')
+    'test_staffer_snapshot_recovery.cjs','test_staffer_unreachable_hint.cjs','test_staffer_zoom.cjs',
+    # 2026-10-16 completed lobby-selection repair (FEC_SURFACES_REPAIR.md): node:test, synthetic, no server.
+    'test_lobby_sector_state.cjs')
 _node=__import__('shutil').which('node')
 
 # Of the 20 originally held, 18 are now registered: eight via the PYTHONPATH lane, four via
