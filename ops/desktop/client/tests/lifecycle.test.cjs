@@ -200,3 +200,20 @@ test('download integrity failure records the high-water but a corrected release 
   f.envelope=f.sign('1.1.1',2);await client.check();
   assert.equal(f.state.sequence,3);assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);
 });
+
+test('failed rollback preparation is marked failed, never activates, and stops blocking updates',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';const second=f.client();second.markApplicationReady();await second.check();
+  f.envelope=f.sign('1.2.0',2);await second.check();await second.activateAfterClose();
+  f.version='1.2.0';const third=f.client();third.markApplicationReady();await third.check();
+  // Rollback staged, then its retained installer fails reverification after a restart.
+  assert.equal(await third.beginRecovery(),'1.1.0');fs.writeFileSync(path.join(f.directory,'updates','2','Terrier.exe'),'corrupt');
+  const restarted=f.client();restarted.markApplicationReady();f.offline=true;await restarted.check();
+  assert.equal(f.state.recovery.phase,'failed');assert.equal(restarted.ready,null);assert.equal(await restarted.activateAfterClose(),false);
+  // A manual retry that fails verification is refused and also marked failed.
+  await assert.rejects(()=>restarted.beginRecovery(),/Cached package/);assert.equal(f.state.recovery.phase,'failed');
+  // Normal updates resume; the newer valid release becomes ready and the failed rollback never activates.
+  f.offline=false;f.envelope=f.sign('1.2.1',3);await restarted.check();
+  assert.equal(f.state.pending.version,'1.2.1');assert.equal(f.state.pending.phase,'prepared');assert.equal(restarted.ready.recovery,false);
+  assert.equal(await restarted.activateAfterClose(),true);assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.recovery.phase,'failed');assert.equal(f.installs,3);
+});
