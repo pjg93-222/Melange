@@ -713,6 +713,7 @@ class WeeklyRefreshStepCallSite(TempTreeCase):
             'FE': self.tmp,
             '_LIVE_CHILD': [None],
             '_tolerated': [],
+            '_soft_failures': [],
             '_producer_path': self.producer_path,
             '_chain_tail_is_audit_full': lambda: True,
             'log': self.logs.append,
@@ -721,7 +722,7 @@ class WeeklyRefreshStepCallSite(TempTreeCase):
                 (kind, status, summary, kwargs)),
             '_hard_abort': self.hard_abort,
         }
-        for name in ('_adopt_live_child', '_kill_live_child', 'step'):
+        for name in ('_adopt_live_child', '_kill_live_child', '_soft_fail', 'step'):
             exec(_weekly_function_source(name), self.ns)
 
     def producer_path(self, name):

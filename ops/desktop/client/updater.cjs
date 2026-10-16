@@ -42,6 +42,9 @@ class DesktopUpdater {
     }catch{} // Keep the last bounded status until the administrator becomes reachable.
   }
   async nativeTrust(){
+    // Isolated acceptance profiles never download native installers, stage them in the
+    // shared native updater cache, or activate them into the installed program directory.
+    if(this.nativeInstallation===false)throw new Error('Native installation is disabled in the isolated test profile.');
     if(!this.packaged)throw new Error('Native installation is required before updates can be installed.');
     if(this.platform==='win32'){
       // electron-updater 6.8.9 silently skips Authenticode verification without publisherName.

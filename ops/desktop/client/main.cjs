@@ -5,17 +5,29 @@ const {appDefinition}=require('./apps.cjs');const {pairing,jsonRequest}=require(
 const {credentialCommand}=require('./credentials.cjs');
 const {enrollFresh,enrollApproved}=require('./enrollment.cjs');
 const {watchNetwork}=require('./lifecycle.cjs');
-const {selectProfile}=require('./profile.cjs');
+const {selectStartupProfile,confineIsolatedPath,confineIsolatedSettings,ISOLATED_TITLE_SUFFIX}=require('./profile.cjs');
 const applicationConfig=app.isPackaged?require('./package.json').desktopAppConfig:{};
 if(!applicationConfig||(app.isPackaged&&!applicationConfig.appId))throw new Error('Packaged application identity is missing.');
 const definition=appDefinition(applicationConfig.appId||(process.env.DESKTOP_APP_ID||'melange'));
 const githubConfig=applicationConfig.desktopUpdateSource?.provider==='github'?require('./github-source.cjs').configuration(applicationConfig.desktopUpdateSource):null;
-app.setName(definition.name);app.setAppUserModelId(definition.applicationId);
-const profile=selectProfile({appId:definition.id,home:app.getPath('home'),appData:app.getPath('appData'),packaged:app.isPackaged,testDirectory:process.env.MELANGE_DESKTOP_TEST_PROFILE});
+app.setName(definition.name);
+// Without the explicit isolated switch this resolves exactly the production profile, AppUserModelId, discovery cache and login registration.
+let profile,isolationRefused=null;
+try{profile=selectStartupProfile({appId:definition.id,argv:process.argv.slice(1),home:app.getPath('home'),appData:app.getPath('appData'),documents:()=>app.getPath('documents'),protectedPaths:()=>[app.getAppPath(),path.dirname(process.execPath)],packaged:app.isPackaged,testDirectory:process.env.MELANGE_DESKTOP_TEST_PROFILE});}
+catch(error){if(error.code!=='ISOLATED_PROFILE_REFUSED')throw error;isolationRefused=error;}
+if(isolationRefused){const message=isolationRefused.message+' Nothing was started; no production profile, login item or update installation was used.';process.stderr.write('[melange-desktop] Isolated test profile refused: '+message+'\n');dialog.showErrorBox(definition.name+' isolated test profile refused',message);app.exit(2);}else{
+app.setAppUserModelId(profile.applicationUserModelId);
 app.setPath('userData',profile.directory);
 if(!app.requestSingleInstanceLock()){app.quit();}else{
+if(profile.isolated){
+ const notice='[melange-desktop] Isolated test profile active: '+profile.directory+' (AppUserModelId '+profile.applicationUserModelId+'). Login startup, OS registration and native update installation are disabled; access, trust, enrollment and signature checks are unchanged.';
+ process.stdout.write(notice+'\n');try{fs.mkdirSync(path.join(profile.directory,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(profile.directory,'logs','isolated-profile.log'),new Date().toISOString()+' '+notice+'\n',{mode:0o600});}catch{}
+ const marked=title=>(title||definition.name).endsWith(ISOLATED_TITLE_SUFFIX)?(title||definition.name):(title||definition.name)+ISOLATED_TITLE_SUFFIX;
+ // Electron applies constructor options after this event fires, so mark again on the next turn.
+ app.on('browser-window-created',(_event,created)=>{const mark=()=>{if(!created.isDestroyed())created.setTitle(marked(created.getTitle()));};mark();setImmediate(mark);created.on('page-title-updated',(event,title)=>{event.preventDefault();created.setTitle(marked(title));});});
+}
 let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,uiStateStore,activityOutbox,activityDraining=false,status='Choose your local data directory to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
-let background=app.isPackaged&&(process.argv.includes('--desktop-updater')||(process.platform==='darwin'&&app.getLoginItemSettings().wasOpenedAtLogin));
+let background=!profile.isolated&&app.isPackaged&&(process.argv.includes('--desktop-updater')||(process.platform==='darwin'&&app.getLoginItemSettings().wasOpenedAtLogin));
 const userData=app.getPath('userData'),setupURL=pathToFileURL(path.join(__dirname,'setup.html')).href;
 const accessURL=pathToFileURL(path.join(__dirname,'access.html')).href;
 const resources=app.isPackaged?process.resourcesPath:__dirname;
@@ -134,10 +146,11 @@ app.whenReady().then(async()=>{
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
   if(!fs.existsSync(file('settings.json'))){const dataDirectory=path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',{dataDirectory,...(definition.id==='terrier'?{district:'co-05'}:{})});}
-  runtime=new Runtime(definition.id,userData,app.isPackaged?process.resourcesPath:__dirname,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,authorize:async()=>(await ensureAccess()).authorize()});
+  if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){dialog.showErrorBox(definition.name+' isolated test profile refused',error.message+' The backend was not started. Correct or remove settings.json in '+userData+'.');app.quit();return;}
+  runtime=new Runtime(definition.id,userData,app.isPackaged?process.resourcesPath:__dirname,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,authorize:async()=>(await ensureAccess()).authorize(),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null});
   if(definition.id==='terrier'){
     const {PendingDistrictSwitch,verifyDistrict}=require('./district-switch.cjs');
-    districtSwitch=new PendingDistrictSwitch({read:()=>read('settings.json'),write:value=>write('settings.json',value),scope:()=>accessGate?.districts()||[],verify:configuration=>verifyDistrict(resources,userData,configuration,[app.getAppPath(),path.dirname(process.execPath)])});
+    districtSwitch=new PendingDistrictSwitch({read:()=>read('settings.json'),write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),scope:()=>accessGate?.districts()||[],verify:configuration=>verifyDistrict(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,[app.getAppPath(),path.dirname(process.execPath)])});
   }
   const partition=session.fromPartition('persist:'+definition.applicationId);runtimePartition=partition;attachLaunchHeader(partition,runtime);
   partition.setPermissionRequestHandler((contents,permission,callback)=>callback(false));
@@ -170,12 +183,12 @@ app.whenReady().then(async()=>{
   window.webContents.on('will-navigate',(event,url)=>{if(!permitted(url))event.preventDefault();});
   window.webContents.on('will-redirect',(event,url)=>{if(!permitted(url))event.preventDefault();});
   window.webContents.setWindowOpenHandler(({url})=>{try{if(['https:','http:'].includes(new URL(url).protocol)&&!url.startsWith('http://127.'))shell.openExternal(url);}catch{}return {action:'deny'};});
-  const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:path.join(app.getPath('appData'),'MelangeDesktop','github-discovery')}):null;
+  const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
-  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:githubConfig?path.join(userData,'github-updates'):userData,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,publisherName:applicationConfig.windowsPublisherName});
+  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:githubConfig?path.join(userData,'github-updates'):userData,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName});
   require('electron-updater').autoUpdater.on('error',error=>{updateStatus('Update not installed: '+error.message);updater.nativeFailure().catch(()=>updateStatus('Update failure recorded locally; administrator status unavailable.')).finally(()=>{if(closing){updater.close();app.quit();}});});
   ipcMain.handle('desktop:info',event=>{setupOnly(event);return {name:definition.name,appId:definition.id,version:app.getVersion(),updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile))};});
-  ipcMain.handle('desktop:directory',async event=>{setupOnly(event);const result=await dialog.showOpenDialog(settingsWindow,{properties:['openDirectory','createDirectory'],title:'Choose '+definition.name+' data directory'});if(!result.canceled){const settings={...read('settings.json'),dataDirectory:result.filePaths[0]};write('settings.json',settings);if(runtime.child)updateStatus('Data folder saved for the next application start. Your current workspace remains open.');return settings;}return read('settings.json');});
+  ipcMain.handle('desktop:directory',async event=>{setupOnly(event);const result=await dialog.showOpenDialog(settingsWindow,{properties:['openDirectory','createDirectory'],title:'Choose '+definition.name+' data directory'});if(!result.canceled){const settings={...read('settings.json'),dataDirectory:result.filePaths[0]};if(profile.isolated)try{confineIsolatedSettings(profile.boundary,settings);}catch(error){updateStatus(error.message+' Settings were not changed.');return read('settings.json');}write('settings.json',settings);if(runtime.child)updateStatus('Data folder saved for the next application start. Your current workspace remains open.');return settings;}return read('settings.json');});
   async function selectDistrict(event,district,fromSetup=false){
     if(fromSetup)setupOnly(event);else runtimeOnly(event);
     if(definition.id!=='terrier'||askingClose||closing)throw new Error('District switching is unavailable.');
@@ -197,7 +210,7 @@ app.whenReady().then(async()=>{
   require('./district-switch.cjs').preserveUnloadVeto(window.webContents,()=>{closeApproved=false;districtSwitch?.cancel();});
   await window.loadURL('about:blank');
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else await showSetup();}
-  if(app.isPackaged)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
+  if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
   checkUpdates();interval=setInterval(checkUpdates,15*60*1000);interval.unref();
   networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:checkUpdates});
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();
@@ -211,4 +224,5 @@ app.whenReady().then(async()=>{
 });
 app.on('window-all-closed',finishClose);
 app.on('before-quit',event=>{if(!closing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
+}
 }

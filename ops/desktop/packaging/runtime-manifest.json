@@ -175,7 +175,9 @@
       "sourceFiles": [
         "mentat/mentat.R",
         "mentat/tools/api_budget_policy.json",
+        "mentat/tools/pocket/manifest.webmanifest",
         "mentat/app/templates/index.html.j2",
+        "mentat/app/template.csv",
         "mentat/inputs/fec_receipt_rules.json",
         "mentat/inputs/fec_transaction_types.json",
         "mentat/config/attribution-policy.json",

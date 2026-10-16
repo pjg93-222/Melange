@@ -1026,7 +1026,44 @@ _LANE_PYTEST=(
     'test_pipeline_failure_diagnostics',
     'test_chain_transaction',
     'test_chain_freshness_degrade',
-    'test_gold_orphan_policy')
+    'test_gold_orphan_policy',
+    # 2026-10-15 admissions spend controls (D-211): classifier quota stop and per-run call budget.
+    'test_sentinel_classifier_quota',
+    'test_sentinel_classifier_budget',
+    # 2026-10-15 self-healing P1 (D-216): tick runner failure classes, tiered degrade, freshness feed.
+    'test_refresh_degrade',
+    # 2026-10-15 self-healing P4 (D-213): stdlib watchdog over the freshness feed, lease, LIVE age and tick task; toast + alert log.
+    'test_refresh_watchdog',
+    # 2026-10-15 press flow and scoring (D-209, D-210, D-219, D-221): carried-pending promotion, FIFO backlog, ratified Stage 5, stack leak fix.
+    'test_press_audit_scored_partitions',
+    'test_press_feed_stage5',
+    'test_press_refresh_scoring_filters',
+    'test_press_stage5',
+    'test_press_haiku_rater',
+    'test_press_stance_stack_refresh',
+    # 2026-10-15 census follow-up: tracked suites no lane named (collector supervisor fixes, press recovery speed, repair_jsonl, prospective outcome contract).
+    'test_collector_supervisor_fixes',
+    'test_press_recovery_speed',
+    'test_repair_jsonl',
+    'test_outcome_contract',
+    # 2026-10-16 adapters: catchnet rerun, quarantine collision and retained-audio safety (audit hooks armed only during guarded calls).
+    'test_catchnet_rerun',
+    'test_quarantine_collision_safety',
+    'test_retained_audio_safety',
+    'test_surface_byte_preservation',
+    # 2026-10-16 RECONCILE42 (lane/m3-reconcile42) boundary suites.
+    'test_congress_reconciliation_boundaries',
+    'test_lease_and_legacy_review_boundaries',
+    'test_pending_native_reconciliation',
+    'test_reconcile42_full_audit_blocks',
+    'test_reconcile42_manifest_boundaries',
+    'test_reconcile42_mechanical_boundaries',
+    'test_reconcile42_security_boundaries',
+    'test_refresh_hash_refusal',
+    'test_repin_process_identity',
+    'test_snapshot_reconciliation_boundaries',
+    # 2026-10-16 weekly refresh: a deferred discovery is a soft failure, never a gate (fec_root.md:20).
+    'test_weekly_discovery_deferral')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on

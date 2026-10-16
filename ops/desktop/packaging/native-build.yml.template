@@ -53,7 +53,10 @@ jobs:
         run: |
           $manifest = Get-Content ops/desktop/packaging/runtime-manifest.json | ConvertFrom-Json
           $requirements = $manifest.apps.${{ inputs.app }}.requirements
-          python -m pip install -r "desktop-source/$requirements" pyinstaller==6.22.3
+          # Terrier's source requirements omit pyarrow, which runtime-manifest.json requires; pin it to
+          # the Terrier score producers (requirements.score.in / .lock: pyarrow==24.0.0) in the same resolve.
+          $extra = @(); if ('${{ inputs.app }}' -eq 'terrier') { $extra = @('pyarrow==24.0.0') }
+          python -m pip install -r "desktop-source/$requirements" pyinstaller==6.22.3 @extra
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build Terrier frontend
         if: inputs.app == 'terrier'

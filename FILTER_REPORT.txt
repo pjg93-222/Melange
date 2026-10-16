@@ -1,3 +1,29 @@
+== Melange tree: specs=['melange'] source=C:/Users/pgoff/OneDrive/Desktop/Melange Systems commit=99431fc3c94eff079088c01ea979d927009d7967 (branch integration/melange-20261016)
+Rules: ops/release_lib/export.py allowlist (identical to the one used for 75aa077fa), path excludes, 5 MB cap, plus the reviewed addendum inclusions below.
+included: 1800   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 34 new source paths, none removed)
+excluded: 269
+  [excluded path, path policy] 257: fec/_quarantine_paulcomputer_20260727 17, fec/attic 14, fec/docs 68, fec/pas224.zip 1, fec/research 157
+  [extension not allowed, kept excluded] 12
+     fec/.Rhistory  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/ccl24.zip  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/cm24.zip  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/cn24.zip  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/communication_style_v1.locked  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/config/primacy_press_v1.ndjson  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/liwc/behavior_calibrated.json.candidate  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/liwc/norms/concreteness_brysbaert.txt  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/stance/folcot_gold_sampling_rule_v1.txt  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/stance/folcot_valence_prompt_v1.txt  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     fec/weball24.zip  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+     ops/security/canaries.txt  (reason in the 'KEPT-EXCLUDED, not path policy' table below)
+
+New-path classification (paths present at 99431fc3c but not at 75aa077fa): 34 new paths, 0 excluded by the filter, 0 removed from the source. All 34 are published. 84 existing published files changed content. The 28 addendum files are unchanged in selection; ops/desktop/packaging/native-build.yml.template changed content and is published at the new blob.
+Verification: all 1800 published blobs equal the 99431fc3c blobs (git hash-object, full set). gitleaks on the changed paths: one generic-api-key hit, fec/tests/surfaces/test_lock_dashboard.py line 19, a synthetic test constant (same reviewed false positive as before). Key-pattern grep: only synthetic test values and env-var lookups. python -X pycache_prefix=<temp> -m compileall -q fec ops: exit 0 (one pre-existing SyntaxWarning in fec/stance/stance_template_xval.py:114).
+.claude/ is outside the export roots (fec/, requirements.txt, ops/), so the skills commit 99431fc3c (4 files under .claude/) is not part of this publication.
+
+------------------------------------------------------------------
+HISTORY: the report for the previous publication (source 75aa077fa, branch release/melange f14fe45) follows unchanged, including its ADDENDA, which still define the KEPT-EXCLUDED reasons.
+------------------------------------------------------------------
 == Melange tree: specs=['melange'] source=C:/Users/pgoff/OneDrive/Desktop/Melange Systems commit=75aa077fa53581fe2379fb90572cffc0d4fc7db3
 included: 1738
 excluded: 297

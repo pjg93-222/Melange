@@ -20,7 +20,7 @@ function activity(origin,token,appId){return new Promise(resolve=>{
   });request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));
 });}
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null}={}){this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;}
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null}={}){this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;}
   async start(configuration){
     if(typeof this.authorize!=='function')throw new Error('Administrator approval and local authentication are required.');
     const authorization=await this.authorize();
@@ -29,8 +29,12 @@ class Runtime {
     this.authorization=authorization;
     const desired=runtimeRoots(this.definition.id,this.userData,configuration);
     if(this.child){if(JSON.stringify(desired)!==JSON.stringify(this.roots))throw new Error('Close the app before changing its district or data directory.');return this.origin;}
+    // Isolated test profiles only: every backend root must stay inside the isolated tree,
+    // checked before any directory is created and again immediately before spawn.
+    const confineRoots=roots=>{if(this.confine)this.confine([configuration.dataDirectory,roots.data,roots.state]);};
+    confineRoots(desired);
     const appId=this.definition.id, command=backendCommand(this.resources,appId),{binary,runtime}=command;
-    const roots=prepareRuntimeRoots(appId,this.userData,configuration,[this.resources,path.dirname(binary),...this.protectedPaths]);this.roots=roots;
+    const roots=prepareRuntimeRoots(appId,this.userData,configuration,[this.resources,path.dirname(binary),...this.protectedPaths]);confineRoots(roots);this.roots=roots;
     const port=await freePort();this.token=crypto.randomBytes(32).toString('base64url');this.origin='http://127.0.0.1:'+port;
     const state=roots.state,logs=path.join(this.userData,'logs');fs.mkdirSync(logs,{recursive:true});
     const environment={...backendEnvironment(),DESKTOP_LAUNCH_TOKEN:this.token};
@@ -40,6 +44,7 @@ class Runtime {
     }
     if(appId==='mentat'&&this.rendererFactory){this.renderer=await this.rendererFactory();environment.MENTAT_DESKTOP_RENDER_URL=this.renderer.url;environment.MENTAT_DESKTOP_RENDER_TOKEN=this.renderer.token;}
     const renderer=this.renderer;
+    if(this.confine){try{confineRoots(roots);this.confine([logs]);}catch(error){this.renderer=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});this.roots=null;this.origin=null;this.token=null;throw error;}}
     const log=fs.openSync(path.join(logs,'backend.log'),'a',0o600);
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
