@@ -1,0 +1,23 @@
+== Melange tree: specs=['melange'] source=C:/Users/pgoff/OneDrive/Desktop/Melange Systems commit=75aa077fa53581fe2379fb90572cffc0d4fc7db3
+included: 1738
+excluded: 297
+  [excluded path] 258
+     fec/_quarantine_paulcomputer_20260727/README.md
+     fec/_quarantine_paulcomputer_20260727/audits/legfix5/congress_advanced_pages_20260725/congress_advanced_memberships-PaulComputer.ndjson
+     fec/_quarantine_paulcomputer_20260727/audits/legfix5/congress_advanced_pages_20260725/congress_advanced_records-PaulComputer.ndjson
+     fec/_quarantine_paulcomputer_20260727/fec/GLASSBOX_PROCESS_MATRIX-PaulComputer.md
+     fec/_quarantine_paulcomputer_20260727/fec/LEGISLATION_CULLING_INTEGRATION_ARCHITECTURE-PaulComputer.md
+     fec/_quarantine_paulcomputer_20260727/fec/OFFICIAL_ROLLCALL_SOURCE_CONTRACT-PaulComputer.md
+     fec/_quarantine_paulcomputer_20260727/fec/build_legislation_staged_integration_gate-PaulComputer.py
+     fec/_quarantine_paulcomputer_20260727/fec/collect_govinfo_bill_xml_versions-PaulComputer.py
+  [extension not allowed] 39
+     fec/.Rhistory
+     fec/ccl24.zip
+     fec/cm24.zip
+     fec/cn24.zip
+     fec/communication_style_v1.locked
+     fec/config/primacy_press_v1.ndjson
+     fec/glassbox_app.vbs
+     fec/liwc/behavior_calibrated.json.candidate
+files > 1 MB included: 1
+     2.92 MB  fec/surfaces/staffer_live/melange-dashboard.js
