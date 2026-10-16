@@ -1,6 +1,6 @@
-== Melange tree: specs=['melange'] source=<local Melange checkout> commit=ff6f9a4c1edd9eadb175ddb3793cd1dc655d7edb (branch integration/melange-20261016)
+== Melange tree: specs=['melange'] source=<local Melange checkout> commit=d39001d6418481d66cf2c2e73cb55ae27432c3d3 (branch integration/melange-20261016)
 Rules: ops/release_lib/export.py allowlist (identical to the one used for 75aa077fa), path excludes, 5 MB cap, plus the reviewed addendum inclusions below.
-included: 1801   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 35 new source paths, none removed; the 6 skill-doc exception files below are in addition)
+included: 1802   (1738 original + 27 extension-filter inclusions + fec/attic/full_congestion.py + 36 new source paths, none removed; the 6 skill-doc exception files below are in addition)
 excluded: 269
   [excluded path, path policy] 257: fec/_quarantine_paulcomputer_20260727 17, fec/attic 14, fec/docs 68, fec/pas224.zip 1, fec/research 157
   [extension not allowed, kept excluded] 12
@@ -200,3 +200,9 @@ Each replacement above was applied by exact string substitution to the LF source
 Source ff6f9a4c1edd9eadb175ddb3793cd1dc655d7edb, two commits above 99431fc3c (7d57a1a1f compute-engine control repair; ff6f9a4c1 test registration). Same export rules, addendum inclusions and the fec/attic/full_congestion.py exception. Exactly 5 files differ from the previous publication: changed fec/bounded_subprocess.py, fec/compute_engine.py, fec/tests/run_tests.py, ops/tests/test_compute_engine.py; new fec/tests/infra/test_compute_control_bounds.py. Nothing else; no new path is filtered out; 0 removed. 1801 export files + 6 skill-doc exception files.
 The Addendum 6 skill-doc exception files are carried forward byte-for-byte from the previous publication (their sources did not change).
 Verification: all 1801 export blobs equal the ff6f9a4c1 blobs (full set); the 6 skill-doc files equal their recorded published blobs; gitleaks on the changed files: no leaks; key grep: clean; compileall fec ops: exit 0. Held-content scan of the source changes and of this metadata for the withheld stance example values, member-tier phrases and local user paths: none outside the recorded 'old:' lines of the path edits above.
+
+== ADDENDUM 8 2026-10-16: republished from integration d39001d6 (LibreOffice recalculation under the office Python)
+Source d39001d6418481d66cf2c2e73cb55ae27432c3d3, one commit above ff6f9a4c1. Same export rules, addendum inclusions and the fec/attic/full_congestion.py exception. Source diff against the previous publication source: changed ops/compute/office_recalc.py and ops/compute/xl_engine.py; new ops/tests/test_office_python_selection.py. Nothing else; no new path is filtered out; 0 removed. 1802 export files.
+Carried forward unchanged: the 6 skill-doc exception files (Addendum 6) and the three non-workflow CI files ops/desktop/packaging/desktop-access-trust.public.json, melange-runtime.constraints.txt and THIRD-PARTY-NOTICES/LibreOffice-SOURCES.md (sha256 re-verified).
+Removed: .github/workflows/desktop-windows.yml (added on main in fdd681922). It is removed temporarily so the release target carries no workflow file that is absent from the default branch; the re-pinned workflow returns in a later commit.
+Verification: all 1802 export blobs equal the d39001d6 blobs (full set); the 6 skill-doc files equal their recorded published blobs; gitleaks on the changed files: no leaks; key grep: clean; compileall fec ops: exit 0. Held-content scan of the source changes and of this metadata for withheld stance example values, member-tier phrases and local user paths: none outside the recorded 'old:' lines of the path edits.
