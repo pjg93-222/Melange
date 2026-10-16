@@ -6,6 +6,7 @@ const crypto=require('node:crypto');
 const semver=require('semver');
 const {verifyWindowsPackage}=require('./native-signature.cjs');
 const {jsonRequest,verifyEnvelope,applyKeyTransitions,downloadVerified,verifyPackageFile}=require('./trust.cjs');
+const VERIFY_RETRY_MS=6*60*60*1000;
 function verifiedFeed(manifest,filename){
   const nonce=crypto.randomBytes(32).toString('hex'),pkg=manifest.package;
   const yaml='version: '+JSON.stringify(manifest.version)+'\nfiles:\n  - url: '+JSON.stringify(pkg.name)+'\n    sha512: '+JSON.stringify(pkg.sha512)+'\n    size: '+pkg.size+'\npath: '+JSON.stringify(pkg.name)+'\nsha512: '+JSON.stringify(pkg.sha512)+'\nreleaseDate: '+JSON.stringify(manifest.issuedAt)+'\n';
@@ -114,6 +115,17 @@ class DesktopUpdater {
     this.writeState(recovery?{...latest,recovery:{...recovery,phase:'prepared',nativeFiles:nativeFiles||[]}}:{...latest,pending:{...pending,phase:'prepared',nativeFiles:nativeFiles||[]}});
     this.ready={...verified,nativeFiles:nativeFiles||[],recovery:Boolean(recovery)};
   }
+  async preparePending(enrollment,pending){
+    await this.nativeTrust(); // An environment refusal is not a failure of this signed release.
+    try{await this.prepare(enrollment,pending);}
+    catch(error){
+      // Drop the candidate and back off from this exact signed manifest. The sequence and version
+      // high-water is untouched; only a fresh download of a manifest passing every check can stage.
+      this.ready=null;const manifestHash=crypto.createHash('sha256').update(Buffer.from(pending.envelope.payload,'base64')).digest('hex');
+      this.writeState({...this.readState(),pending:null,verifyFailure:{manifestHash,failedAt:Date.now()}});
+      await this.report(enrollment,'failed','VERIFY_FAILED');throw error;
+    }
+  }
   async prepareRecovery(enrollment,recovery){
     // A rollback whose retained installer no longer verifies is marked failed, so it can never
     // activate and no longer blocks normal update checks. The user may request it again.
@@ -172,8 +184,8 @@ class DesktopUpdater {
     // A staged candidate that fails reverification must not block discovery of a newer
     // signed release. The sequence/version high-water persisted before download is
     // untouched, so a later offer must still pass every rollback and downgrade check.
-    try{await this.prepare(enrollment,pending);}
-    catch(error){this.ready=null;this.onStatus('Staged update '+pending.version+' failed verification: '+error.message);return;}
+    try{await this.preparePending(enrollment,pending);}
+    catch(error){this.ready=null;const notice='Staged update '+pending.version+' was not prepared: '+error.message;this.onStatus(notice);return notice;}
     this.onStatus('Verified update '+pending.version+' waits for this app to close.');
   }
   async check(){
@@ -181,7 +193,7 @@ class DesktopUpdater {
     let enrollment;
     try {
       enrollment=this.loadEnrollment();if(!enrollment){this.onStatus('Update receiver awaits administrator approval and activation.');return;}
-      await this.recover(enrollment);
+      const notice=await this.recover(enrollment);
       if(this.readState().pending?.version===this.version)return;
       if(this.ready?.recovery||['staged','prepared','activating'].includes(this.readState().recovery?.phase))return;
       const trust=await this.request(enrollment,'/v1/apps/'+this.appId+'/trust',{token:enrollment.deviceToken});
@@ -190,12 +202,14 @@ class DesktopUpdater {
       await this.ensureRecoveryBaseline(enrollment);
       const query=new URLSearchParams({platform:this.platform,arch:this.arch,version:this.version});
       const envelope=await this.request(enrollment,'/v1/apps/'+this.appId+'/updates?'+query,{token:enrollment.deviceToken});
-      if(!envelope){if(!this.ready)this.onStatus('No approved update.');return;}
+      if(!envelope){if(!this.ready&&!notice)this.onStatus('No approved update.');return;}
       const previous=this.readState(),verified=verifyEnvelope(envelope,enrollment,this.identity(),previous),m=verified.manifest;
       if(m.version===this.version){this.onStatus('Already current.');return;}
       if(previous.suspendedVersions?.includes(m.version)){this.onStatus('Recovered release remains suspended. Awaiting a corrected release.');return;}
       if(previous.pending?.phase==='failed'&&previous.pending.version===m.version){this.onStatus('Failed release remains suspended. Awaiting a corrected release.');return;}
       if(this.ready?.manifestHash===verified.manifestHash)return;
+      const failure=previous.verifyFailure,age=Date.now()-(failure?.failedAt||0);
+      if(failure?.manifestHash===verified.manifestHash&&age>=0&&age<VERIFY_RETRY_MS){this.onStatus('Update '+m.version+' failed verification; retry after '+new Date(failure.failedAt+VERIFY_RETRY_MS).toISOString()+'.');return;}
       await this.nativeTrust();
       // Remember accepted sequence before downloading. A failed transfer cannot allow rollback.
       this.ready=null;this.feed?.close();this.feed=null;
@@ -203,7 +217,7 @@ class DesktopUpdater {
       this.onStatus('Downloading verified update '+m.version+'…');
       await this.download(enrollment,enrollment.deviceToken,m,path.dirname(this.packagePath(m)));
       const pending={envelope,version:m.version,fromVersion:this.version,phase:'staged',createdAt:new Date().toISOString()};
-      this.writeState({...this.readState(),pending});await this.prepare(enrollment,pending);
+      this.writeState({...this.readState(),pending});await this.preparePending(enrollment,pending);
       this.onStatus('Update '+m.version+' verified. Installs after you close this app.');
       await this.report(enrollment,'downloaded');
     }catch(error){this.onStatus(this.ready?'Update check deferred. Verified update remains staged; local app remains available.':'Update deferred: '+error.message);
