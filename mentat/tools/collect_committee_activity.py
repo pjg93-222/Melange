@@ -3,13 +3,18 @@
 Every explicit reporting committee remains traversable, including campaign
 committees and negative/zero relationships. A finite physical request allowance
 pauses work; it never defines completeness. Importing this module makes no calls.
+
+Ledger schema 3 (D073) stores each origin once (origin_catalog) and each seeded unit/origin once (origin_seeds); which units an origin reaches is derived on demand by
+origin_closure from the seeds, the archive-bound edges and the recorded later-cycle policy, so collecting an edge never writes per-unit origin rows. A schema-2 ledger is
+refused; `--migrate-to-schema3 SRC DST` writes a NEW schema-3 ledger plus MIGRATION.json (lossless or refused) and never rewrites SRC.
 """
 from contextlib import contextmanager,nullcontext
 from datetime import datetime,timezone
 from decimal import Decimal,InvalidOperation
-import argparse,hashlib,json,os,re,sqlite3,time,uuid
+import argparse,collections,hashlib,json,os,re,shutil,sqlite3,sys,time,uuid
 from pathlib import Path
 from urllib.error import HTTPError,URLError
+import origin_closure
 from spending_endpoint_contracts import (CONTRACTS,activation_plan,bind_enablement,verify_enablement,
  EndpointContractRefused,legacy_cursor_valid,query as contract_query,inspect_page as inspect_contract_page)
 
@@ -19,7 +24,8 @@ SUPPORTED={'B':('schedules/schedule_b/','disbursement_amount'),
  'E_notice':('schedules/schedule_e/','expenditure_amount'),
  'A':('schedules/schedule_a/','contribution_receipt_amount')}
 COMMITTEE=re.compile(r'C[0-9]{8}');CANDIDATE=re.compile(r'[HSP][A-Z0-9]{8}')
-SCHEMA_VERSION=2
+SCHEMA_VERSION=3
+MIGRATION_COMMAND='python collect_committee_activity.py --migrate-to-schema3 <schema-2 ledger> <new schema-3 ledger> --later-cycle-context true|false [--seed-file <captured seed file>] [--snapshot-proof <SNAPSHOT.json>]'
 # Only verified paid-counterparty fields may create collection edges. Schedule
 # E candidate_id is a supported/opposed beneficiary, not a money recipient.
 COUNTERPARTY_C_FIELDS={'B':('recipient_committee_id',),'E_regular':(),'E_notice':(),'A':()}
@@ -43,7 +49,9 @@ def seed_after(receipt):
 
 SCHEMA='''
 CREATE TABLE IF NOT EXISTS units(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,created TEXT NOT NULL,PRIMARY KEY(committee_id,cycle));
-CREATE TABLE IF NOT EXISTS origins(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,origin_id TEXT NOT NULL,metadata_json TEXT NOT NULL,PRIMARY KEY(committee_id,cycle,origin_id));
+CREATE TABLE IF NOT EXISTS origin_catalog(origin_ref INTEGER PRIMARY KEY,origin_id TEXT NOT NULL UNIQUE,base_metadata_json TEXT NOT NULL,first_reached_cycle INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS origin_seeds(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,origin_ref INTEGER NOT NULL,PRIMARY KEY(committee_id,cycle,origin_ref))WITHOUT ROWID;
+CREATE TABLE IF NOT EXISTS ledger_policy(name TEXT PRIMARY KEY,value TEXT NOT NULL)WITHOUT ROWID;
 CREATE TABLE IF NOT EXISTS endpoints(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,kind TEXT NOT NULL,status TEXT NOT NULL,request_cursor_json TEXT NOT NULL DEFAULT '{}',expected_count INTEGER,rows_stored INTEGER NOT NULL DEFAULT 0,pages_stored INTEGER NOT NULL DEFAULT 0,last_error TEXT,coverage_issues_json TEXT NOT NULL DEFAULT '[]',attempt_count INTEGER NOT NULL DEFAULT 0,last_attempt_at REAL,retry_after REAL,PRIMARY KEY(committee_id,cycle,kind));
 CREATE TABLE IF NOT EXISTS pages(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,kind TEXT NOT NULL,page_no INTEGER NOT NULL,request_query_json TEXT NOT NULL,response_pagination_json TEXT NOT NULL,next_cursor_json TEXT NOT NULL,archive_path TEXT NOT NULL,archive_sha256 TEXT NOT NULL,archive_bytes INTEGER NOT NULL,records_count INTEGER NOT NULL,PRIMARY KEY(committee_id,cycle,kind,page_no));
 CREATE TABLE IF NOT EXISTS observations(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,kind TEXT NOT NULL,observation_id TEXT NOT NULL,page_no INTEGER NOT NULL,row_ordinal INTEGER NOT NULL,source_id TEXT,raw_json TEXT NOT NULL,raw_row_sha256 TEXT NOT NULL,amount_text TEXT,amount_field TEXT NOT NULL,amount_status TEXT NOT NULL,PRIMARY KEY(committee_id,cycle,kind,observation_id));
@@ -56,6 +64,17 @@ CREATE TABLE IF NOT EXISTS failures(id INTEGER PRIMARY KEY,committee_id TEXT,cyc
 CREATE INDEX IF NOT EXISTS frontier_pending ON endpoints(status,kind);
 CREATE INDEX IF NOT EXISTS source_occurrences ON observations(committee_id,cycle,kind,source_id);
 '''
+# The schema-2 layout (one materialized origins row per unit and origin) is kept ONLY to verify a migration source; nothing opens or writes it.
+SCHEMA2=''.join(line+'\n' for line in SCHEMA.splitlines() if not line.startswith(('CREATE TABLE IF NOT EXISTS origin_','CREATE TABLE IF NOT EXISTS ledger_policy')))+'CREATE TABLE IF NOT EXISTS origins(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,origin_id TEXT NOT NULL,metadata_json TEXT NOT NULL,PRIMARY KEY(committee_id,cycle,origin_id));\n'
+
+def seed_assignments(rows):
+ """(committee_id, cycle, origin_id, base metadata, first_reached_cycle) for every seed row, exactly as seed() stores them; shared with the migration."""
+ for row in rows:
+  if type(row['cycle'])is not int or row['cycle']not in origin_closure.CYCLES:raise ValueError('Explicit C committee ID and exact integer cycle2022/2024/2026 required.')
+  for origin in row.get('origins') or row.get('industries') or [row.get('origin_id') or 'explicit-seed']:
+   first=row.get('first_reached_cycle',(row.get('origin_metadata')or{}).get('first_reached_cycle',row['cycle']))
+   if type(first)is not int or first not in origin_closure.CYCLES or first>row['cycle']:raise ValueError('Origin first-reached cycle must be an exact permitted integer no later than activity cycle.')
+   yield row['committee_id'],row['cycle'],str(origin),origin_closure.base_of(row.get('origin_metadata')or{'source':'explicit seed','scope':str(origin)}),first
 
 class Frontier:
  def __init__(self,path,*,optional_receipts=False,include_later_cycle_context=False,enabled_endpoint_contracts=()):
@@ -67,13 +86,17 @@ class Frontier:
   self.db=sqlite3.connect(self.path,timeout=1,isolation_level=None);self.db.row_factory=sqlite3.Row
   version=self.db.execute('PRAGMA user_version').fetchone()[0]
   existing={r[0]for r in self.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+  if existing and version==2:self.db.close();raise ValueError('Frontier ledger is schema 2 (materialized per-unit origins). Schema 3 is never mixed with it and an existing ledger is never rewritten in place; write a new ledger with: '+MIGRATION_COMMAND)
   if existing and version!=SCHEMA_VERSION:self.db.close();raise ValueError('Unknown frontier schema/version; no automatic migration or provider admission.')
   if existing:
    model=sqlite3.connect(':memory:');model.executescript(SCHEMA);expected={r[0]for r in model.execute("SELECT name FROM sqlite_master WHERE type='table'")}
    valid=existing==expected and all([tuple(r)for r in self.db.execute('PRAGMA table_info('+name+')')]==[tuple(r)for r in model.execute('PRAGMA table_info('+name+')')]for name in expected);model.close()
    if not valid:self.db.close();raise ValueError('Frontier schema differs from reviewed contract; no automatic migration.')
   self.db.execute('PRAGMA journal_mode=DELETE');self.db.execute('PRAGMA synchronous=FULL')
-  if not existing:self.db.executescript(SCHEMA);self.db.execute('PRAGMA user_version='+str(SCHEMA_VERSION))
+  if not existing:self.db.executescript(SCHEMA);self.db.execute("INSERT INTO ledger_policy VALUES('later_cycle_context',?)",('true'if include_later_cycle_context else'false',));self.db.execute('PRAGMA user_version='+str(SCHEMA_VERSION))
+  try:recorded=origin_closure.read_policy(self.db)
+  except(ValueError,sqlite3.Error)as error:self.db.close();raise ValueError('Frontier ledger lacks its recorded later-cycle context policy: '+str(error))
+  if recorded!=bool(include_later_cycle_context):self.db.close();raise ValueError('Ledger policy later_cycle_context='+str(recorded).lower()+' differs from this invocation; the closure is defined by one recorded policy, never mixed.')
   self.optional_receipts=optional_receipts
   self.include_later_cycle_context=include_later_cycle_context
   try:
@@ -98,37 +121,23 @@ class Frontier:
    state='pending' if kind in self.supported else 'unsupported'
    why=None if state=='pending' else 'Required disclosure family '+kind+' has no reviewed driver coverage contract yet; exhaustive coverage remains false.'
    self.db.execute('INSERT OR IGNORE INTO endpoints(committee_id,cycle,kind,status,last_error) VALUES(?,?,?,?,?)',(committee,cycle,kind,state,why))
- def _origin(self,committee,cycle,origin,metadata):
-  todo=[(committee,cycle)];seen=set()
-  while todo:
-   key=todo.pop()
-   if key in seen:continue
-   seen.add(key);self._unit(*key)
-   first=metadata.get('first_reached_cycle',cycle)
-   local={**metadata,'first_reached_cycle':first,'activity_cycle':key[1],'later_cycle_context':key[1]>first}
-   existing=self.db.execute('SELECT metadata_json FROM origins WHERE committee_id=? AND cycle=? AND origin_id=?',(*key,origin)).fetchone()
-   changed=False
-   if existing:
-    prior=json.loads(existing[0]);previous=prior.get('first_reached_cycle',key[1])
-    if first<previous:
-     local={**prior,'first_reached_cycle':first,'activity_cycle':key[1],'later_cycle_context':key[1]>first}
-     self.db.execute('UPDATE origins SET metadata_json=? WHERE committee_id=? AND cycle=? AND origin_id=?',(encoded(local),*key,origin));changed=True
-   else:
-    self.db.execute('INSERT INTO origins VALUES(?,?,?,?)',(*key,origin,encoded(local)));changed=True
-   if changed:
-    if self.include_later_cycle_context:todo.extend((key[0],yr)for yr in(2022,2024,2026)if yr>key[1])
-    todo.extend((r[0],r[1])for r in self.db.execute('SELECT DISTINCT destination_committee_id,destination_cycle FROM edges WHERE committee_id=? AND cycle=?',key)if r[1]>=key[1])
+ def _forward(self,committee,cycle):
+  # With the ledger's later-cycle policy on, every later cycle of an admitted unit is itself a unit; origins reach it by derivation, never by stored copies.
+  if self.include_later_cycle_context:
+   for later in origin_closure.CYCLES:
+    if later>cycle:self._unit(committee,later)
+ def _catalog(self,origin,base,first):
+  stored=self.db.execute('SELECT origin_ref,base_metadata_json,first_reached_cycle FROM origin_catalog WHERE origin_id=?',(origin,)).fetchone()
+  if stored is None:return self.db.execute('INSERT INTO origin_catalog(origin_id,base_metadata_json,first_reached_cycle) VALUES(?,?,?)',(origin,encoded(base),first)).lastrowid
+  if stored[1]!=encoded(base):raise ValueError('Origin base metadata conflicts with its catalog entry; a catalog base is written once and frozen.')
+  if first<stored[2]:self.db.execute('UPDATE origin_catalog SET first_reached_cycle=? WHERE origin_ref=?',(first,stored[0]))   # monotone: it may only fall
+  return stored[0]
  def seed(self,rows):
   with self.transaction():
-   for row in rows:
-    committee=row['committee_id'];cycle=row['cycle'];self._unit(committee,cycle)
-    origins=row.get('origins') or row.get('industries') or [row.get('origin_id') or 'explicit-seed']
-    for origin in origins:
-     first=row.get('first_reached_cycle',(row.get('origin_metadata')or{}).get('first_reached_cycle',cycle))
-     if type(first)is not int or first not in(2022,2024,2026)or first>cycle:raise ValueError('Origin first-reached cycle must be an exact permitted integer no later than activity cycle.')
-     metadata={**(row.get('origin_metadata')or{'source':'explicit seed','scope':str(origin)}),'first_reached_cycle':first}
-     for activity_cycle in(yr for yr in(2022,2024,2026)if yr>=cycle and(self.include_later_cycle_context or yr==cycle)):
-      self._origin(committee,activity_cycle,str(origin),{**metadata,'activity_cycle':activity_cycle,'later_cycle_context':activity_cycle>metadata['first_reached_cycle']})
+   for committee,cycle,origin,base,first in seed_assignments(rows):
+    self._unit(committee,cycle);self._forward(committee,cycle)
+    self.db.execute('INSERT OR IGNORE INTO origin_seeds VALUES(?,?,?)',(committee,cycle,self._catalog(origin,base,first)))
+ def closure(self):return origin_closure.from_db(self.db,self.include_later_cycle_context)
  def resume(self):
   with self.transaction():self.db.execute("UPDATE endpoints SET status='pending' WHERE status='blocked' AND retry_after<=?",(time.time(),))
  def _query(self,row):
@@ -156,11 +165,7 @@ class Frontier:
     identity_status='conflicting_possible_counterparties_not_two_payments'
     self.db.execute('INSERT INTO counterparty_conflicts VALUES(?,?,?,?,?,?,?,?)',(*unit,kind,occurrence,sid,flat,nested,'identity_unresolved'))
   for destination in sorted(destinations):
-   self._unit(destination,unit[1]);self.db.execute('INSERT INTO edges VALUES(?,?,?,?,?,?,?,?,?,?,?)',(*unit,kind,occurrence,sid,destination,unit[1],amount,rowhash,identity_status,encoded(identity)))
-   for origin in self.db.execute('SELECT origin_id,metadata_json FROM origins WHERE committee_id=? AND cycle=?',unit).fetchall():
-    metadata=json.loads(origin[1]);metadata.setdefault('first_reached_cycle',unit[1])
-    for activity_cycle in(yr for yr in(2022,2024,2026)if yr>=unit[1]and(self.include_later_cycle_context or yr==unit[1])):
-     self._origin(destination,activity_cycle,origin[0],{**metadata,'activity_cycle':activity_cycle,'later_cycle_context':activity_cycle>metadata['first_reached_cycle']})
+   self._unit(destination,unit[1]);self.db.execute('INSERT INTO edges VALUES(?,?,?,?,?,?,?,?,?,?,?)',(*unit,kind,occurrence,sid,destination,unit[1],amount,rowhash,identity_status,encoded(identity)));self._forward(destination,unit[1])
   candidates={k:str(row.get(k) or '')for k in('candidate_id','candidate_id_s','candidate_id_as_filed')if CANDIDATE.fullmatch(str(row.get(k)or''))}
   for field,candidate in candidates.items():
    role='supported_or_opposed_beneficiary_not_paid_counterparty'if kind.startswith('E_')else'associated_candidate_payment_role_unverified'
@@ -299,7 +304,8 @@ class Frontier:
   outgoing=sorted(kind for kind in self.supported if kind!='A')
   pending=self.db.execute("SELECT COUNT(*) FROM endpoints WHERE kind IN("+",".join("?"for _ in outgoing)+")AND status!='complete'",outgoing).fetchone()[0]
   count=lambda table:self.db.execute('SELECT COUNT(*) FROM '+table).fetchone()[0]
-  return {'schema_version':1,'ledger_schema_version':SCHEMA_VERSION,'generated_utc':now(),'ledger':str(self.path),'units':count('units'),'origins':count('origins'),'pages':count('pages'),'observations':count('observations'),'edges':count('edges'),'candidate_resolutions_required':count('candidate_resolutions'),'candidate_beneficiary_or_unverified_references':count('candidate_references'),'counterparty_identity_conflicts':count('counterparty_conflicts'),'leaf_disclosure_boundaries':count('leaf_coverage'),'endpoint_status_counts':endpoint_counts,'new_pages_this_invocation':completed_pages,'stop':stopped,'supported_outgoing_endpoints_complete':pending==0,'exhaustive_disclosed_spending_complete':False,'required_unsupported_endpoints':sorted({r[0]for r in self.db.execute("SELECT kind FROM endpoints WHERE status='unsupported'")}),
+  closure=self.closure()   # derived from seeds+edges+policy; never stored per unit
+  return {'schema_version':1,'ledger_schema_version':SCHEMA_VERSION,'generated_utc':now(),'ledger':str(self.path),'units':count('units'),'origin_seed_assignments':count('origin_seeds'),'origin_catalog_entries':count('origin_catalog'),'origin_unit_assignments':closure.total,**origin_closure.disclosure(),'origin_unit_assignments_note':'Derived by origin_closure from origin_seeds, edges and the recorded later-cycle policy: origins OBSERVED to reach a unit through collected disclosures. A lower bound; an absent origin is not observed, never proven not to reach.','pages':count('pages'),'observations':count('observations'),'edges':count('edges'),'candidate_resolutions_required':count('candidate_resolutions'),'candidate_beneficiary_or_unverified_references':count('candidate_references'),'counterparty_identity_conflicts':count('counterparty_conflicts'),'leaf_disclosure_boundaries':count('leaf_coverage'),'endpoint_status_counts':endpoint_counts,'new_pages_this_invocation':completed_pages,'stop':stopped,'supported_outgoing_endpoints_complete':pending==0,'exhaustive_disclosed_spending_complete':False,'required_unsupported_endpoints':sorted({r[0]for r in self.db.execute("SELECT kind FROM endpoints WHERE status='unsupported'")}),
    'endpoint_contract_enablement':self.contract_enablement,'supported_outgoing_endpoint_kinds':outgoing,
    'later_cycle_context_explicitly_enabled':self.include_later_cycle_context,'later_context_missing_when_disabled':not self.include_later_cycle_context,'unknown_or_subcent_amount_occurrences':self.db.execute("SELECT COUNT(*) FROM observations WHERE amount_status!='valid_decimal'").fetchone()[0],
    'other_spending_families':'/'.join(['B/E']+[kind for kind in('F','H4')if kind in outgoing])+' are overlapping evidence. Other disclosure families, report/unitemized totals, loans/debts and efile timing require independent coverage.','legacy_snapshot_compatible':False,'snapshots_json_or_evidence_json_published':False,'incoming_receipts_not_requested_means_unknown_not_empty':True,'no_exact_origin_dollar_attribution':True,'no_B_E_grand_total':True,'UI_top_depth_or_page_limits_used':False}
@@ -308,7 +314,124 @@ class Frontier:
 class PageFailure(Exception):
  def __init__(self,row,error,query,evidence,attempts):self.row,self.error,self.query,self.evidence,self.attempts=row,error,query,evidence,attempts;super().__init__(str(error))
 
+COPIED_TABLES=('units','endpoints','pages','observations','edges','counterparty_conflicts','candidate_resolutions','candidate_references','leaf_coverage','failures')
+def _immutable(path):
+ db=sqlite3.connect(Path(path).resolve().as_uri()+'?mode=ro&immutable=1',uri=True,timeout=.5);db.execute('PRAGMA query_only=ON');return db
+def migrate_to_schema3(source,destination,*,later_cycle_context,seed_file=None,snapshot_proof=None):
+ """Write a NEW schema-3 ledger (and MIGRATION.json) from a quiescent schema-2 ledger; the source is only read (immutable open), never rewritten.
+ The new ledger is accepted only if the closure derived from its catalog+seeds+edges+policy reproduces EVERY stored origins row and its metadata
+ byte for byte (0 mismatches); otherwise nothing is left behind. Seeds come from the captured seed file when given (exactly what seed() stores),
+ else they are the stored rows no edge predecessor and no earlier-cycle carrier explains."""
+ if type(later_cycle_context)is not bool:raise ValueError('The ledger later-cycle context policy must be stated explicitly (true/false).')
+ source,destination=Path(source).resolve(),Path(destination).resolve();partial=destination.with_name(destination.name+'.partial');proof_path=destination.with_name('MIGRATION.json')
+ for path in(destination,partial,proof_path):
+  if path.exists():raise FileExistsError('Migration writes new files only; already exists: '+str(path))
+ if not destination.parent.is_dir():raise FileNotFoundError('Destination folder must exist: '+str(destination.parent))
+ for suffix in('-journal','-wal','-shm'):
+  if Path(str(source)+suffix).exists()and Path(str(source)+suffix).stat().st_size:raise ValueError('Quiescent source required; '+suffix+' present.')
+ if shutil.disk_usage(destination.parent).free<source.stat().st_size+(64<<20):raise OSError('Not enough free space beside the destination for a new ledger.')
+ source_sha=sha(source);seed_receipt=None;file_rows=None;binding=None
+ if snapshot_proof is not None:   # an accepted snapshot's SNAPSHOT.json binds the bytes and the policy the ledger was collected under
+  recorded=json.loads(Path(snapshot_proof).read_bytes())
+  if recorded.get('snapshot_sha256')!=source_sha or recorded.get('later_cycle_context_explicitly_enabled')is not later_cycle_context:raise ValueError('Snapshot proof does not bind this source ledger and the stated later-cycle policy.')
+  binding={'path':str(Path(snapshot_proof).resolve()),'sha256':sha(snapshot_proof)}
+ if seed_file is not None:file_rows,seed_receipt,_=captured_seeds(seed_file)
+ src=_immutable(source);problems={}
+ try:
+  if src.execute('PRAGMA user_version').fetchone()[0]!=2:raise ValueError('Migration source must be a schema-2 ledger.')
+  if src.execute('PRAGMA quick_check').fetchone()[0]!='ok':raise ValueError('Migration source integrity failed.')
+  model=sqlite3.connect(':memory:');model.executescript(SCHEMA2);names={r[0]for r in model.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+  if {r[0]for r in src.execute("SELECT name FROM sqlite_master WHERE type='table'")}!=names or any([tuple(r)for r in src.execute('PRAGMA table_info('+n+')')]!=[tuple(r)for r in model.execute('PRAGMA table_info('+n+')')]for n in names):raise ValueError('Migration source differs from the reviewed schema-2 layout.')
+  model.close()
+  units=[(r[0],r[1])for r in src.execute('SELECT committee_id,cycle FROM units')];known=set(units)
+  edges=[tuple(r)for r in src.execute('SELECT DISTINCT committee_id,cycle,destination_committee_id,destination_cycle FROM edges')]
+  if({(e[0],e[1])for e in edges}|{(e[2],e[3])for e in edges})-known:raise ValueError('An edge names a unit the ledger does not hold.')
+  if later_cycle_context and any((c,y2)not in known for c,y in units for y2 in origin_closure.CYCLES if y2>y):raise ValueError('Policy true but a unit lacks a later-cycle unit; the policy and the ledger disagree.')
+  catalog=[];ref_of={};file_seeds=set()   # catalog entries [origin_id,base,first]; refs start at 1 like the collector's own INTEGER PRIMARY KEY
+  def entry(origin,base,first):
+   if origin not in ref_of:ref_of[origin]=len(catalog)+1;catalog.append([origin,base,first])
+   item=catalog[ref_of[origin]-1]
+   if encoded(item[1])!=encoded(base):raise ValueError('Origin '+origin+' has more than one base metadata; schema 3 stores one.')
+   item[2]=min(item[2],first);return ref_of[origin]
+  for committee,cycle,origin,base,first in(seed_assignments(file_rows)if file_rows is not None else()):file_seeds.add((committee,cycle,entry(origin,base,first)))
+  stored=collections.defaultdict(int);firsts=collections.defaultdict(set);rows=0
+  for committee,cycle,origin,text in src.execute('SELECT committee_id,cycle,origin_id,metadata_json FROM origins'):
+   rows+=1;metadata=json.loads(text);base=origin_closure.base_of(metadata);first=metadata.get('first_reached_cycle')
+   if origin not in ref_of:
+    if file_rows is not None:problems['origin_rows_not_in_seed_file']=problems.get('origin_rows_not_in_seed_file',0)+1
+    entry(origin,base,first if type(first)is int else 2026)
+   elif encoded(catalog[ref_of[origin]-1][1])!=encoded(base):problems['origin_rows_with_other_base_metadata']=problems.get('origin_rows_with_other_base_metadata',0)+1
+   firsts[ref_of[origin]].add(first);stored[(committee,cycle)]|=1<<ref_of[origin]
+  if file_rows is None:
+   for ref,seen in firsts.items():catalog[ref-1][2]=min([v for v in seen if type(v)is int]or[2026])
+  parents=collections.defaultdict(list)
+  for c,y,d,dy in edges:
+   if dy>=y and(c,y)!=(d,dy):parents[(d,dy)].append((c,y))
+  if later_cycle_context:
+   for c,y in units:
+    for later in origin_closure.CYCLES:
+     if later>y:parents[(c,later)].append((c,y))
+  derived=set()
+  for unit,bits in stored.items():
+   explained=0
+   for parent in parents.get(unit,()):explained|=stored.get(parent,0)
+   derived.update((unit[0],unit[1],ref)for ref in origin_closure.iter_bits(bits&~explained))
+  seeds=file_seeds if file_rows is not None else derived
+  seed_check={'derived_unexplained_seed_rows':len(derived),'seed_file_seed_rows':len(file_seeds)if file_rows is not None else None,'seed_file_equals_derived':(file_seeds==derived)if file_rows is not None else None}
+  dst=sqlite3.connect(partial.as_uri(),uri=True,isolation_level=None)
+  try:
+   dst.execute('PRAGMA journal_mode=OFF');dst.execute('PRAGMA synchronous=OFF');dst.executescript(SCHEMA)
+   dst.execute('ATTACH DATABASE ? AS src',(source.as_uri()+'?mode=ro&immutable=1',));dst.execute('BEGIN')
+   for table in COPIED_TABLES:dst.execute('INSERT INTO main.'+table+' SELECT * FROM src.'+table)
+   dst.executemany('INSERT INTO origin_catalog VALUES(?,?,?,?)',[(number+1,item[0],encoded(item[1]),item[2])for number,item in enumerate(catalog)])
+   dst.executemany('INSERT INTO origin_seeds VALUES(?,?,?)',sorted(seeds));dst.execute("INSERT INTO ledger_policy VALUES('later_cycle_context',?)",('true'if later_cycle_context else'false',));dst.execute('COMMIT')
+   copied={}
+   for table in COPIED_TABLES:
+    left=src.execute('SELECT * FROM '+table+' ORDER BY rowid');right=dst.execute('SELECT * FROM main.'+table+' ORDER BY rowid');count=0;same=True
+    for a,b in zip(left,right):
+     count+=1;same=same and tuple(a)==tuple(b)
+    left.close();right.close()
+    total=src.execute('SELECT COUNT(*) FROM '+table).fetchone()[0];copied[table]={'rows':total,'identical':same and count==total==dst.execute('SELECT COUNT(*) FROM main.'+table).fetchone()[0]}
+   dst.execute('DETACH DATABASE src');dst.execute('PRAGMA user_version='+str(SCHEMA_VERSION))
+   # Verification reads the NEW file back: catalog, seeds, policy and edges are all that a consumer will have.
+   closure=origin_closure.from_db(dst);written=origin_closure.read_catalog(dst);earliest=closure.earliest_cycles();only_stored=only_closure=0
+   for unit in set(units)|set(stored):
+    only_stored+=(stored.get(unit,0)&~closure.bitset(unit)).bit_count();only_closure+=(closure.bitset(unit)&~stored.get(unit,0)).bit_count()
+   equal=unequal=0
+   for committee,cycle,origin,text in src.execute('SELECT committee_id,cycle,origin_id,metadata_json FROM origins'):
+    item=written[ref_of[origin]];expected=origin_closure.metadata_json(item[1],item[2],cycle)
+    if text==expected:equal+=1
+    else:unequal+=1
+   r2=sum(1 for ref,item in written.items()if earliest.get(ref)!=item[2])
+   mismatches=only_stored+only_closure+unequal+sum(problems.values())
+   lossless=mismatches==0 and rows==closure.total and not closure.undeclared and not closure.missing_forward and all(v['identical']for v in copied.values())and dst.execute('PRAGMA quick_check').fetchone()[0]=='ok'
+   dst_counts={'units':len(units),'edges_distinct_unit_pairs':len(edges),'origins_rows_stored_schema2':rows,'origin_catalog_entries':len(written),'origin_seed_rows':len(seeds),'closure_rows_derived':closure.total,'scc_groups_with_cycles':len(closure.cyclic_components())}
+  finally:dst.close()
+  if not lossless:
+   partial.unlink(missing_ok=True)
+   raise ValueError('Migration refused (nothing written): '+encoded({'mismatches':mismatches,'rows_only_in_stored':only_stored,'rows_only_in_closure':only_closure,'metadata_unequal':unequal,'problems':problems,'r2_violations':r2,'counts':dst_counts,'copied':{k:v['identical']for k,v in copied.items()}}))
+  with partial.open('rb+')as stream:os.fsync(stream.fileno())
+  partial_sha=sha(partial);os.rename(partial,destination)
+ finally:src.close()
+ proof={'schema_version':1,'generated_utc':now(),'tool':{'path':str(Path(__file__).resolve()),'sha256':sha(__file__),'origin_closure_sha256':sha(origin_closure.__file__),'command':'--migrate-to-schema3'},
+  'source':{'path':str(source),'sha256':source_sha,'bytes':source.stat().st_size,'user_version':2,'opened':'mode=ro&immutable=1','never_rewritten':True},
+  'destination':{'path':str(destination),'sha256':sha(destination),'sha256_before_rename':partial_sha,'bytes':destination.stat().st_size,'user_version':SCHEMA_VERSION},
+  'later_cycle_context':{'value':later_cycle_context,'basis':'explicit argument; the new ledger records it and refuses a different invocation policy'},
+  'snapshot_proof':binding,'seed_basis':'captured_seed_file'if file_rows is not None else'derived_unexplained_rows','seed_file':seed_receipt,'seed_cross_check':seed_check,'counts':dst_counts,
+  'equality':{'closure_equals_stored_origins':True,'rows_only_in_stored':only_stored,'rows_only_in_closure':only_closure,'metadata_byte_equal_rows':equal,'metadata_mismatches':unequal,'mismatches_total':mismatches,
+   'first_reached_cycle_not_earliest_carrying_cycle':r2,'origin_rows_with_other_base_metadata':problems.get('origin_rows_with_other_base_metadata',0)},
+  'copied_tables_row_for_row_identical':copied,'result':'lossless'}
+ with proof_path.open('x',encoding='utf-8')as stream:json.dump(proof,stream,indent=2);stream.write('\n');stream.flush();os.fsync(stream.fileno())
+ return proof
+def migrate_main(argv):
+ parser=argparse.ArgumentParser(prog='collect_committee_activity.py',description=migrate_to_schema3.__doc__)
+ parser.add_argument('--migrate-to-schema3',nargs=2,required=True,metavar=('SRC','DST'),type=Path);parser.add_argument('--later-cycle-context',required=True,choices=('true','false'),help='the ledger policy; recorded in the new ledger')
+ parser.add_argument('--seed-file',type=Path,help='captured seed file; seeds are then exactly what seed() stores, otherwise they are derived from the stored rows');parser.add_argument('--snapshot-proof',type=Path,help='SNAPSHOT.json of the source; must bind its bytes and the stated policy')
+ args=parser.parse_args(argv);proof=migrate_to_schema3(*args.migrate_to_schema3,later_cycle_context=args.later_cycle_context=='true',seed_file=args.seed_file,snapshot_proof=args.snapshot_proof)
+ print(encoded({'migrated':proof['destination']['path'],'migration_proof':str(Path(proof['destination']['path']).with_name('MIGRATION.json')),'result':proof['result'],'closure_rows':proof['counts']['closure_rows_derived']}))
+
 def main():
+ if '--migrate-to-schema3' in sys.argv[1:]:return migrate_main(sys.argv[1:])
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--state',required=True,type=Path);parser.add_argument('--seeds',required=True,type=Path);parser.add_argument('--max-requests',required=True,type=int);parser.add_argument('--max-failed-attempts',type=int,default=8);parser.add_argument('--optional-receipts',action='store_true');parser.add_argument('--include-later-cycle-context',action='store_true');parser.add_argument('--live',action='store_true')
  parser.add_argument('--enable-endpoint-contract',action='append',default=[],help='Explicit pinned F/H4 contract ID; repeatable, required on every restart after enablement.')
  args=parser.parse_args()
