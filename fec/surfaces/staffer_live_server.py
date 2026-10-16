@@ -595,6 +595,9 @@ class Handler(BaseHTTPRequestHandler):
         elif parts.path == '/api/staffer-assertions':
             self.send_bytes(json.dumps({'assertions': load_coworker_assertions(), 'local_date': local_date(), 'timezone': 'America/New_York'}).encode(), 'application/json')
         elif parts.path == '/api/staffer-network-index':
+            if getattr(self.server.dashboard, 'startup_error', None):
+                self.send_bytes(b'{"error":"The verified people model could not be loaded. Check the selected workspace and restart the app.","code":"model_unavailable"}', 'application/json', 503)
+                return
             compressed = 'gzip' in self.headers.get('Accept-Encoding', '')
             scope = parse_qs(parts.query).get('scope', ['sources'])[0]
             if scope not in ('network', 'sources'):
@@ -611,6 +614,9 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.send_bytes(body, 'application/json; charset=utf-8', etag=etag, compressed=compressed)
         elif parts.path == '/api/staffer-groups-index':
+            if getattr(self.server.dashboard, 'startup_error', None):
+                self.send_bytes(b'{"error":"The verified people model could not be loaded. Check the selected workspace and restart the app.","code":"model_unavailable"}', 'application/json', 503)
+                return
             compressed = 'gzip' in self.headers.get('Accept-Encoding', '')
             service = self.server.dashboard
             if not hasattr(service, 'groups_index'):
