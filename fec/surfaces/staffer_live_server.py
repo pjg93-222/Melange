@@ -38,21 +38,37 @@ APPROVED_CACHE_BYTES = 64 * 1024 * 1024
 _approved_cache = OrderedDict()
 _approved_cache_lock = threading.Lock()
 
+# The desktop persistence prefix of mlk-boot.js ships with the application (runtime-manifest sourceFiles).
+# A selected workspace generated before it existed still gets it: prepended at serve time, never written back.
+BOOT_PREFIX_SOURCE = Path(__file__).parent / 'approved' / 'clean' / 'mlk-boot.js'
+BOOT_PREFIX_MARKER = b'__melangeDesktopStorage'
 
-def approved_payload(path):
-    """(gzip body, ETag, raw size) of one approved asset. The ETag is the content hash it always was."""
+
+def boot_prefix():
+    """The app-owned prefix (bytes before '/* mlk-boot.js:'), or b'' when the app copy is absent or has none."""
+    try:
+        head, separator, _ = BOOT_PREFIX_SOURCE.read_bytes().partition(b'/* mlk-boot.js:')
+    except OSError:
+        return b''
+    return head if separator and BOOT_PREFIX_MARKER in head else b''
+
+
+def approved_payload(path, prefix=b''):
+    """(gzip body, ETag, raw size) of one approved asset. The ETag is the content hash it always was.
+    A non-empty prefix is prepended only when the file does not already carry the desktop prefix."""
     import gzip
     before = path.stat()
-    key = (str(path), before.st_mtime_ns, before.st_size)
+    key = (str(path), before.st_mtime_ns, before.st_size, hashlib.sha256(prefix).hexdigest() if prefix else '')
     with _approved_cache_lock:
         entry = _approved_cache.get(key)
         if entry is not None:
             _approved_cache.move_to_end(key)
             return entry
-    raw = path.read_bytes()
+    original = path.read_bytes()
+    raw = prefix + original if prefix and BOOT_PREFIX_MARKER not in original else original
     entry = (gzip.compress(raw, compresslevel=3), '"clean-' + hashlib.sha256(raw).hexdigest()[:24] + '"', len(raw))
     after = path.stat()
-    if (after.st_mtime_ns, after.st_size) == key[1:] and len(raw) == before.st_size:  # not rewritten while read
+    if (after.st_mtime_ns, after.st_size) == key[1:3] and len(original) == before.st_size:  # not rewritten while read
         with _approved_cache_lock:
             _approved_cache[key] = entry
             total = sum(len(value[0]) for value in _approved_cache.values())
@@ -774,7 +790,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         try:
-            zipped, etag, _size = approved_payload(path)
+            zipped, etag, _size = approved_payload(path, boot_prefix() if path == base / 'mlk-boot.js' else b'')
         except OSError:
             self.send_error(404)
             return
