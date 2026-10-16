@@ -114,6 +114,12 @@ class DesktopUpdater {
     this.writeState(recovery?{...latest,recovery:{...recovery,phase:'prepared',nativeFiles:nativeFiles||[]}}:{...latest,pending:{...pending,phase:'prepared',nativeFiles:nativeFiles||[]}});
     this.ready={...verified,nativeFiles:nativeFiles||[],recovery:Boolean(recovery)};
   }
+  async prepareRecovery(enrollment,recovery){
+    // A rollback whose retained installer no longer verifies is marked failed, so it can never
+    // activate and no longer blocks normal update checks. The user may request it again.
+    try{await this.prepare(enrollment,recovery.target,recovery);}
+    catch(error){this.ready=null;const latest=this.readState();this.writeState({...latest,recovery:{...latest.recovery,phase:'failed'}});await this.report(enrollment,'failed','RECOVERY_FAILED');throw error;}
+  }
   async beginRecovery(){
     if(this.busy||this.osShutdown)throw new Error('Wait for the current update check to finish.');
     this.busy=true;
@@ -123,7 +129,7 @@ class DesktopUpdater {
       const manifestHash=crypto.createHash('sha256').update(Buffer.from(target.envelope.payload,'base64')).digest('hex');
       const recovery={target,manifestHash,fromVersion:this.version,phase:'staged',requestedAt:new Date().toISOString()};
       this.verifyRecovery(enrollment,recovery);this.ready=null;
-      this.writeState({...state,recovery});await this.prepare(enrollment,target,recovery);
+      this.writeState({...state,recovery});await this.prepareRecovery(enrollment,recovery);
       this.onStatus('Previous authorized version '+target.version+' is verified. Close this app to restore its program files; local data stays in place.');
       return target.version;
     }finally{this.busy=false;}
@@ -143,7 +149,8 @@ class DesktopUpdater {
         this.writeState({...state,recovery:{...recovery,phase:'failed'}});
         await this.report(enrollment,'failed','RECOVERY_FAILED');return;
       }
-      await this.prepare(enrollment,recovery.target,recovery);return;
+      try{await this.prepareRecovery(enrollment,recovery);}catch(error){const notice='Previous version '+recovery.target.version+' failed verification and was not restored: '+error.message;this.onStatus(notice);return notice;}
+      return;
     }
     const pending=state.pending;
     if(!pending)return;
