@@ -7,6 +7,7 @@ const semver=require('semver');
 const {verifyWindowsPackage}=require('./native-signature.cjs');
 const {jsonRequest,verifyEnvelope,applyKeyTransitions,downloadVerified,verifyPackageFile}=require('./trust.cjs');
 const VERIFY_RETRY_MS=6*60*60*1000;
+const envelopeHash=envelope=>crypto.createHash('sha256').update(Buffer.from(envelope.payload,'base64')).digest('hex');
 function verifiedFeed(manifest,filename){
   const nonce=crypto.randomBytes(32).toString('hex'),pkg=manifest.package;
   const yaml='version: '+JSON.stringify(manifest.version)+'\nfiles:\n  - url: '+JSON.stringify(pkg.name)+'\n    sha512: '+JSON.stringify(pkg.sha512)+'\n    size: '+pkg.size+'\npath: '+JSON.stringify(pkg.name)+'\nsha512: '+JSON.stringify(pkg.sha512)+'\nreleaseDate: '+JSON.stringify(manifest.issuedAt)+'\n';
@@ -97,7 +98,6 @@ class DesktopUpdater {
   }
   async prepare(enrollment,pending,recovery=null){
     const verified=recovery?this.verifyRecovery(enrollment,recovery):verifyEnvelope(pending.envelope,enrollment,this.identity(),this.readState()),m=verified.manifest;
-    if(!recovery)await this.ensureRecoveryBaseline(enrollment,false);
     await this.verifyNativeFile(this.packagePath(m),m);
     if(this.ready?.manifestHash===verified.manifestHash)return;
     this.feed?.close();this.feed=await this.makeFeed(m,this.packagePath(m));
@@ -116,13 +116,16 @@ class DesktopUpdater {
     this.ready={...verified,nativeFiles:nativeFiles||[],recovery:Boolean(recovery)};
   }
   async preparePending(enrollment,pending){
-    await this.nativeTrust(); // An environment refusal is not a failure of this signed release.
+    // Environment and current-version baseline refusals are not failures of this signed release.
+    await this.nativeTrust();await this.ensureRecoveryBaseline(enrollment,false);
     try{await this.prepare(enrollment,pending);}
     catch(error){
+      this.ready=null;
+      // The signature tool reached no verdict: keep the staged file and retry it locally, without backoff.
+      if(error.code==='SIGNATURE_CHECK_UNAVAILABLE')throw error;
       // Drop the candidate and back off from this exact signed manifest. The sequence and version
       // high-water is untouched; only a fresh download of a manifest passing every check can stage.
-      this.ready=null;const manifestHash=crypto.createHash('sha256').update(Buffer.from(pending.envelope.payload,'base64')).digest('hex');
-      this.writeState({...this.readState(),pending:null,verifyFailure:{manifestHash,failedAt:Date.now()}});
+      this.writeState({...this.readState(),pending:null,verifyFailure:{manifestHash:envelopeHash(pending.envelope),failedAt:Date.now()}});
       await this.report(enrollment,'failed','VERIFY_FAILED');throw error;
     }
   }
@@ -208,8 +211,10 @@ class DesktopUpdater {
       if(previous.suspendedVersions?.includes(m.version)){this.onStatus('Recovered release remains suspended. Awaiting a corrected release.');return;}
       if(previous.pending?.phase==='failed'&&previous.pending.version===m.version){this.onStatus('Failed release remains suspended. Awaiting a corrected release.');return;}
       if(this.ready?.manifestHash===verified.manifestHash)return;
-      const failure=previous.verifyFailure,age=Date.now()-(failure?.failedAt||0);
-      if(failure?.manifestHash===verified.manifestHash&&age>=0&&age<VERIFY_RETRY_MS){this.onStatus('Update '+m.version+' failed verification; retry after '+new Date(failure.failedAt+VERIFY_RETRY_MS).toISOString()+'.');return;}
+      // Still staged after recover(): its local retry is pending, so do not download it again.
+      if(['staged','prepared'].includes(previous.pending?.phase)&&envelopeHash(previous.pending.envelope)===verified.manifestHash)return;
+      const failure=previous.verifyFailure,failedAt=failure?.failedAt,age=Date.now()-failedAt;
+      if(failure?.manifestHash===verified.manifestHash&&typeof failedAt==='number'&&Number.isFinite(failedAt)&&age>=0&&age<VERIFY_RETRY_MS){this.onStatus('Update '+m.version+' failed verification; retry after '+new Date(failure.failedAt+VERIFY_RETRY_MS).toISOString()+'.');return;}
       await this.nativeTrust();
       // Remember accepted sequence before downloading. A failed transfer cannot allow rollback.
       this.ready=null;this.feed?.close();this.feed=null;
