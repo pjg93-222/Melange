@@ -1075,7 +1075,9 @@ _LANE_PYTEST=(
     # email-snapshot, surface-gate and workbook/observability source repairs. Synthetic fixtures; each
     # ran green alone on the composed source and wrote nothing into the tree.
     'test_graph_snapshot_binding','test_email_snapshot_binding','test_surface_gate_regressions',
-    'test_observability_snapshot')
+    'test_observability_snapshot',
+    # 2026-10-16 defensive input repairs (G2): non-object cached handoff re-extracts; missing page-data names the page.
+    'test_surface_input_refusals')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on
