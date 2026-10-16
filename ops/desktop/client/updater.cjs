@@ -162,7 +162,11 @@ class DesktopUpdater {
       this.onStatus('Previous installation did not complete. Local data retained; a corrected release is required.');return;
     }
     if(pending.phase==='failed')return;
-    await this.prepare(enrollment,pending);
+    // A staged candidate that fails reverification must not block discovery of a newer
+    // signed release. The sequence/version high-water persisted before download is
+    // untouched, so a later offer must still pass every rollback and downgrade check.
+    try{await this.prepare(enrollment,pending);}
+    catch(error){this.ready=null;this.onStatus('Staged update '+pending.version+' failed verification: '+error.message);return;}
     this.onStatus('Verified update '+pending.version+' waits for this app to close.');
   }
   async check(){
