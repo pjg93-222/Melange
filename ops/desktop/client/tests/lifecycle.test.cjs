@@ -234,3 +234,31 @@ test('failed rollback preparation is marked failed, never activates, and stops b
   assert.equal(f.state.pending.version,'1.2.1');assert.equal(f.state.pending.phase,'prepared');assert.equal(restarted.ready.recovery,false);
   assert.equal(await restarted.activateAfterClose(),true);assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.recovery.phase,'failed');assert.equal(f.installs,3);
 });
+
+test('broken current-version baseline is not blamed on the staged release and starts no backoff',async t=>{
+  const f=fixture(t);await f.client().check();assert.equal(f.state.pending.phase,'prepared');
+  const baseline=path.join(f.directory,'updates','1','Terrier.exe'),original=fs.readFileSync(baseline);fs.writeFileSync(baseline,'corrupt');
+  const restarted=f.client();await restarted.check();
+  assert.equal(f.state.verifyFailure,undefined);assert.equal(f.state.pending.version,'1.1.0');assert.equal(restarted.ready,null);assert.equal(await restarted.activateAfterClose(),false);
+  fs.writeFileSync(baseline,original);await restarted.check();
+  assert.equal(f.downloads,1);assert.equal(f.state.verifyFailure,undefined);assert.equal(await restarted.activateAfterClose(),true);
+});
+
+test('signature tool failure without a verdict keeps the staged release and retries locally without backoff',async t=>{
+  const f=fixture(t),bad=path.join(f.directory,'updates','2')+path.sep,codes=[];let unavailable=true;
+  const client=f.client('Fixture Publisher',{verifyNativePackage:async file=>{if(unavailable&&path.resolve(file).startsWith(bad))throw Object.assign(new Error('Windows package signature verification failed.'),{code:'SIGNATURE_CHECK_UNAVAILABLE'});}});
+  const report=client.report.bind(client);client.report=(e,s,c)=>{codes.push(s+':'+c);return report(e,s,c);};
+  await client.check();
+  assert.equal(f.state.verifyFailure,undefined);assert.equal(f.state.pending.phase,'staged');assert.equal(f.downloads,1);assert.deepEqual(codes,[]);
+  await client.check();assert.equal(f.downloads,1);assert.equal(f.state.verifyFailure,undefined);assert.match(f.status.at(-1),/not prepared/);
+  unavailable=false;await client.check();assert.equal(f.downloads,1);assert.equal(await client.activateAfterClose(),true);
+});
+
+test('malformed backoff timestamp is ignored without throwing',async t=>{
+  for(const failedAt of [String(Date.now()),[Date.now()]]){
+    const f=fixture(t),client=f.client();
+    f.state={...f.state,verifyFailure:{manifestHash:crypto.createHash('sha256').update(Buffer.from(f.envelope.payload,'base64')).digest('hex'),failedAt}};
+    await client.check();
+    assert.equal(f.downloads,1);assert.equal(f.state.pending.phase,'prepared');assert.doesNotMatch(f.status.join(' '),/Invalid time|retry after/);
+  }
+});
