@@ -212,6 +212,25 @@ jobs:
           assert not missing, f'requirements.txt pins absent from the hash lock: {missing}'
           print(f'{len([p for p in pins if p])} pins covered by {len(lock)} hashed entries')
 
+      # The shipped Python tests for the packaged Melange backend, in the hash-locked venv (pytest is in the lock).
+      # An explicit list, not a glob: only modules known to pass on this source. Runs before any download or packaging.
+      - name: Python backend tests (explicit list)
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          & "$env:VENV\Scripts\python.exe" -E -s -m pytest -p no:cacheprovider -q `
+            ops/desktop/packaging/tests/test_melange_data_paths.py `
+            ops/desktop/packaging/tests/test_melange_data_readiness.py `
+            ops/desktop/packaging/tests/test_melange_save_disconnect.py `
+            ops/desktop/packaging/test_melange_dashboard.py `
+            ops/desktop/packaging/test_desktop_backend.py `
+            fec/tests/surfaces/test_staffer_live_server.py `
+            fec/tests/surfaces/test_staffer_live_server_concurrency.py `
+            fec/tests/surfaces/test_staffer_groups_index.py `
+            fec/tests/surfaces/test_staffer_groups_section.py `
+            fec/tests/surfaces/test_staffer_identity_records.py `
+            fec/tests/surfaces/test_staffer_evidence_boundaries.py 2>&1 | Tee-Object -FilePath "$env:OUT\python-tests.log"
+          if ($LASTEXITCODE -ne 0) { throw "Python backend tests failed (exit $LASTEXITCODE)" }
+
       - name: LibreOffice 26.8.1 native runtime (official MSI, administrative image, no system install)
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
