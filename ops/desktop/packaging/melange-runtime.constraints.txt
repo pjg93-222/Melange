@@ -1,0 +1,97 @@
+# Hash-locked install set for the Melange desktop runtime: CPython 3.12, Windows x64 (cp312 / win_amd64).
+# Generated 2026-10-16 from requirements.txt with pip 25.0.1 (pip-tools is not installed; this is equivalent):
+#   python -m pip install --dry-run --ignore-installed --report report.json --only-binary=:all:
+#     --platform win_amd64 --python-version 3.12 --implementation cp --abi cp312 --target <unused> -r requirements.txt
+# One wheel hash per package (the file pip selected for this target). Every requirements.txt pin appears at the
+# same version; the rest is the transitive closure.
+# Install: pip install --require-hashes --only-binary=:all: --no-deps -r melange-runtime.constraints.txt
+certifi==2026.7.22 \
+    --hash=sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775
+    # certifi-2026.7.22-py3-none-any.whl (dependency)
+cffi==2.1.1 \
+    --hash=sha256:f53e442b08449d42821fa4a4fba000095af9f62742a500f978a9f557ec44339a
+    # cffi-2.1.1-cp312-cp312-win_amd64.whl (dependency)
+charset-normalizer==3.5.2 \
+    --hash=sha256:780fbe7cab297b81dad9fb8dc5eb003c0468ffb0d9e5f65068c53a34661a96bc
+    # charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl (dependency)
+colorama==0.4.6 \
+    --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
+    # colorama-0.4.6-py2.py3-none-any.whl (dependency)
+cryptography==49.0.0 \
+    --hash=sha256:e5dfc1e64de5677cec922ffa8da89c546d0415bf6efdf081842e5d44c84e1f0e
+    # cryptography-49.0.0-cp311-abi3-win_amd64.whl
+et-xmlfile==2.0.0 \
+    --hash=sha256:7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa
+    # et_xmlfile-2.0.0-py3-none-any.whl (dependency)
+idna==3.20 \
+    --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
+    # idna-3.20-py3-none-any.whl (dependency)
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+    # iniconfig-2.3.1-py3-none-any.whl (dependency)
+joblib==1.5.3 \
+    --hash=sha256:5fc3c5039fc5ca8c0276333a188bbd59d6b7ab37fe6632daa76bc7f9ec18e713
+    # joblib-1.5.3-py3-none-any.whl
+narwhals==2.27.1 \
+    --hash=sha256:d057df13f5852b8e157596e82eb5e955fad267425df5e420e0ee9863da483b31
+    # narwhals-2.27.1-py3-none-any.whl (dependency)
+networkx==3.6.1 \
+    --hash=sha256:d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762
+    # networkx-3.6.1-py3-none-any.whl
+numpy==2.4.6 \
+    --hash=sha256:d8e8286dd7cea7895157318d1b91cdacac64c479f3cbc8dce548331728484751
+    # numpy-2.4.6-cp312-cp312-win_amd64.whl
+openpyxl==3.1.5 \
+    --hash=sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2
+    # openpyxl-3.1.5-py2.py3-none-any.whl
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+    # packaging-26.3-py3-none-any.whl (dependency)
+pandas==3.0.3 \
+    --hash=sha256:c7be265b62cef88e253a941e4698604973736dcfe242fdb5198f0f7bc473cdcc
+    # pandas-3.0.3-cp312-cp312-win_amd64.whl
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+    # pluggy-1.7.0-py3-none-any.whl (dependency)
+pycparser==3.11 \
+    --hash=sha256:51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80
+    # pycparser-3.11-py3-none-any.whl (dependency)
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+    # pygments-2.21.0-py3-none-any.whl (dependency)
+pypdf==6.19.0 \
+    --hash=sha256:7e5d6e730e7dae87d560a2cee218b852f6498c8be61966f3cd02ead971e48d14
+    # pypdf-6.19.0-py3-none-any.whl
+pytest==9.1.1 \
+    --hash=sha256:37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c
+    # pytest-9.1.1-py3-none-any.whl
+python-dateutil==2.9.0.post0 \
+    --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+    # python_dateutil-2.9.0.post0-py2.py3-none-any.whl (dependency)
+requests==2.34.2 \
+    --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0
+    # requests-2.34.2-py3-none-any.whl
+scikit-learn==1.9.0 \
+    --hash=sha256:4306775fad04cc4b472a1b15af1ae9cede1540fbfcc17fbce3767cd8dc7ae283
+    # scikit_learn-1.9.0-cp312-cp312-win_amd64.whl
+scipy==1.18.0 \
+    --hash=sha256:71ccc8faa2dd16ac310233203474a8b5cb67f10dedd54a3116d34943f4b19132
+    # scipy-1.18.0-cp312-cp312-win_amd64.whl
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+    # six-1.17.0-py2.py3-none-any.whl (dependency)
+soundfile==0.14.0 \
+    --hash=sha256:299491d3499460fb1b74bb4bd78b57ffc2d243a5fafa7b6ec1b264875c78453e
+    # soundfile-0.14.0-py2.py3-none-win_amd64.whl
+threadpoolctl==3.7.0 \
+    --hash=sha256:cd8b60b5641b45c67bbf73c64c843235fc2d8a480c87389f52f5dbee893b86be
+    # threadpoolctl-3.7.0-py3-none-any.whl (dependency)
+typing-extensions==4.16.0 \
+    --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+    # typing_extensions-4.16.0-py3-none-any.whl (dependency)
+tzdata==2026.5 \
+    --hash=sha256:b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac
+    # tzdata-2026.5-py2.py3-none-any.whl (dependency)
+urllib3==2.8.0 \
+    --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3
+    # urllib3-2.8.0-py3-none-any.whl
