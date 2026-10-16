@@ -1083,7 +1083,9 @@ _LANE_PYTEST=(
     # groups binding/provenance companions of the already-published audit_full.py. Synthetic fixtures.
     'test_artifact_gap_completion','test_payload_currentness_regression','test_pre_culling_inventory_reporting',
     'test_stale_imports_ast_regression','test_tier_boundary_status','test_recursive_source_scanners',
-    'test_groups_local_binding_runtime','test_groups_provenance_currentness')
+    'test_groups_local_binding_runtime','test_groups_provenance_currentness',
+    # 2026-10-16 completed infra repairs (G4b; FEC_ROOT_REPAIR.md:34,41): calibration refusal, workbook plan snapshot.
+    'test_calibration_guard_unavailable','test_workbook_author_plan_snapshot')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on
