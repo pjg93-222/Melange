@@ -236,6 +236,7 @@ jobs:
             ops/desktop/packaging/tests/test_melange_data_paths.py `
             ops/desktop/packaging/tests/test_melange_data_readiness.py `
             ops/desktop/packaging/tests/test_melange_save_disconnect.py `
+            ops/desktop/packaging/tests/test_melange_boot_prefix.py `
             ops/desktop/packaging/test_melange_dashboard.py `
             ops/desktop/packaging/test_desktop_backend.py `
             fec/tests/surfaces/test_staffer_live_server.py `
