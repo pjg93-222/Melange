@@ -170,3 +170,33 @@ test('activity signal requires matching app and typed boolean; unavailable is un
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
   try{assert.equal(await activity(origin,'launch-secret','mentat'),true);response={appId:'mentat',busy:false};assert.equal(await activity(origin,'launch-secret','mentat'),false);response={appId:'terrier',busy:false};assert.equal(await activity(origin,'launch-secret','mentat'),null);response={appId:'mentat',busy:'false'};assert.equal(await activity(origin,'launch-secret','mentat'),null);code=404;assert.equal(await activity(origin,'launch-secret','mentat'),null);}finally{await new Promise(resolve=>server.close(resolve));}
 });
+
+test('staged release failing native verification cannot wedge a later corrected release or lower the high-water',async t=>{
+  const f=fixture(t),bad=path.join(f.directory,'updates','2')+path.sep;
+  const client=f.client('Fixture Publisher',{verifyNativePackage:async file=>{if(path.resolve(file).startsWith(bad))throw new Error('Native signature refused');}});
+  await client.check();
+  assert.equal(f.state.pending.version,'1.1.0');assert.equal(f.state.pending.phase,'staged');assert.equal(client.ready,null);
+  // The signed high-water is recorded before download by design; a failed candidate keeps it.
+  assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(await client.activateAfterClose(),false);
+  // Re-offering the same failed release is retried and refused again, never installed.
+  await client.check();assert.equal(f.downloads,2);assert.match(f.status.at(-1),/Native signature refused/);assert.equal(await client.activateAfterClose(),false);
+  // While wedged-candidate state exists, older, equivocating or downgrading manifests stay refused.
+  for(const [offer,reason] of [[f.sign('1.1.0',0),/Rollback/],[f.sign('1.1.1',1),/Rollback|equivocation/],[f.sign('1.0.9',3),/downgrade/]]){
+    f.envelope=offer;await client.check();
+    assert.match(f.status.at(-1),reason);assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.equal(f.downloads,2);assert.equal(client.ready,null);
+  }
+  // A corrected release with a higher sequence is fetched, verified, staged and installable.
+  f.envelope=f.sign('1.1.1',2);await client.check();
+  assert.equal(f.state.sequence,3);assert.equal(f.state.pending.version,'1.1.1');assert.equal(f.state.pending.phase,'prepared');
+  assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
+});
+
+test('download integrity failure records the high-water but a corrected release still installs',async t=>{
+  const f=fixture(t);let fail=true;
+  const client=f.client('Fixture Publisher',{download:async(p,token,m,target)=>{if(fail){fail=false;throw new Error('Downloaded package integrity failed');}fs.mkdirSync(target,{recursive:true});const destination=path.join(target,m.package.name);fs.writeFileSync(destination,Buffer.from('Non-installable signed test fixture'));return destination;}});
+  await client.check();
+  assert.equal(f.state.sequence,2);assert.equal(f.state.pending,null);assert.match(f.status.at(-1),/integrity failed/);
+  f.envelope=f.sign('1.1.0',0);await client.check();assert.match(f.status.at(-1),/Rollback/);assert.equal(f.state.sequence,2);
+  f.envelope=f.sign('1.1.1',2);await client.check();
+  assert.equal(f.state.sequence,3);assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);
+});
