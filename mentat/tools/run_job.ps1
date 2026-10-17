@@ -24,6 +24,13 @@
 
 .PARAMETER PlanOnly
   Print the plan as JSON (compose command, host variables, verification maps) and do nothing else: no Docker, no keys, no events.
+
+.PARAMETER Batch, Workers, MaxRequests, Seeds, EnableEndpointContract, PriorityCandidates
+  Only for -Job collect-downstream (D075 phase 1, host-native: tools\collect_committee_activity.py runs directly on Windows against the shared ledger under
+  state\committee-activity, no container). -Batch is the batch number (names the run), -Workers 1..32, -MaxRequests the physical request cap, -Seeds the seed file,
+  -EnableEndpointContract the repeatable pinned contract ids, -PriorityCandidates the optional priority list. `--live` is never added here: pass it in -JobArgs.
+  -JobArgs also accepts --max-failed-attempts N, --include-later-cycle-context, --optional-receipts, --ccl CYCLE=PATH and --ccl-vintage CYCLE=TEXT. The job refuses to create
+  a ledger, to run beside another collector process, and treats exit 0 as complete only when the collector's own receipt verifies (DE-053).
 #>
 [CmdletBinding(PositionalBinding = $false)]
 param(
@@ -36,6 +43,12 @@ param(
   [int]$DockerStartSeconds = 240,
   [double]$MaxClockSkewSeconds = 2,
   [switch]$PlanOnly,
+  [int]$Batch = 0,
+  [int]$Workers = 1,
+  [int]$MaxRequests = 0,
+  [string]$Seeds = '',
+  [string[]]$EnableEndpointContract = @(),
+  [string]$PriorityCandidates = '',
   [string[]]$JobArgs = @()
 )
 $ErrorActionPreference = 'Stop'
@@ -115,6 +128,111 @@ if ($null -eq $python) { throw 'No Python interpreter was found for the compute 
 $jobTool = Join-Path $PSScriptRoot 'compute_job.py'
 $secretTool = Join-Path $PSScriptRoot 'compute_secrets.py'
 $hostPoolTool = Join-Path $PSScriptRoot 'api_host_pool.py'
+
+# --- collect-downstream: the downstream spending collector run HOST-NATIVE (D075 phase 1; no container, no Docker, no image lock) ----------------
+# It runs tools\collect_committee_activity.py directly on Windows against the shared ledger under state\committee-activity (override: $env:DOWNSTREAM_STATE_HOST).
+# `--live` is never added here: the caller passes it in -JobArgs, so the authorization stays visible in -PlanOnly and in the log. Everything below the
+# refusals is the same DE-053 rule as the container jobs: exit 0 of the child is one input, the collector's own receipt must verify from this side.
+if ($Job -eq 'collect-downstream') {
+  $collector = Join-Path $PSScriptRoot 'collect_committee_activity.py'
+  $stateHost = if ($env:DOWNSTREAM_STATE_HOST) { $env:DOWNSTREAM_STATE_HOST } else { Join-Path $projectRoot 'state\committee-activity' }
+  $ledgerHost = Join-Path $stateHost 'frontier.sqlite'
+  $allowedFlags = '--live', '--max-failed-attempts', '--include-later-cycle-context', '--optional-receipts', '--ccl', '--ccl-vintage'
+  $refusals = @()
+  if ($Batch -lt 1) { $refusals += '-Batch (the batch number, 1 or more) is required.' }
+  if ($Workers -lt 1 -or $Workers -gt 32) { $refusals += '-Workers must be 1 to 32.' }
+  if ($MaxRequests -lt 1) { $refusals += '-MaxRequests (the physical request cap, 1 or more) is required.' }
+  if (-not $Seeds -or -not (Test-Path -LiteralPath $Seeds -PathType Leaf)) { $refusals += '-Seeds must name an existing seed file.' }
+  if ($PriorityCandidates -and -not (Test-Path -LiteralPath $PriorityCandidates -PathType Leaf)) { $refusals += '-PriorityCandidates must name an existing JSON file.' }
+  foreach ($contract in $EnableEndpointContract) { if ($contract -cnotmatch '^openfec-[A-Za-z0-9._-]+$') { $refusals += "-EnableEndpointContract '$contract' is not a contract id." } }
+  foreach ($argument in $JobArgs) {
+    if ($argument -like '--*' -and $argument -cnotin $allowedFlags) { $refusals += "'$argument' is not accepted in -JobArgs for collect-downstream (the job owns --state/--seeds/--max-requests/--workers/--enable-endpoint-contract/--priority-candidates; recovery, close-out, re-bind, migration and --init-new-ledger are separate deliberate commands)." }
+  }
+  if (-not (Test-Path -LiteralPath $collector -PathType Leaf)) { $refusals += "No collector at $collector." }
+  if (-not (Test-Path -LiteralPath $ledgerHost -PathType Leaf)) { $refusals += "No frontier.sqlite at $stateHost; this job never creates a ledger (a new ledger forks the frontier)." }
+  if ([string]::IsNullOrWhiteSpace($RunId)) { $RunId = 'collect-downstream-b{0:D2}-{1}' -f $Batch, (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ') }
+  if ($RunId -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$') { $refusals += 'The run id may hold only letters, digits, dots, dashes and underscores.' }
+  if ($refusals.Count) { Stop-Refused (($refusals | ForEach-Object { "REFUSED: $_" }) -join "`n") 2 }
+
+  $collectorArguments = @('-B', $collector, '--state', $stateHost, '--seeds', $Seeds, '--max-requests', [string]$MaxRequests, '--workers', [string]$Workers)
+  foreach ($contract in $EnableEndpointContract) { $collectorArguments += '--enable-endpoint-contract'; $collectorArguments += $contract }
+  if ($PriorityCandidates) { $collectorArguments += '--priority-candidates'; $collectorArguments += $PriorityCandidates }
+  $collectorArguments += $JobArgs
+  $timeoutMinutes = 725            # the collector has no wall-clock cap of its own; this is the backstop (12 h plus 5 min)
+  if ($PlanOnly) {
+    [ordered]@{ job = $Job; run_id = $RunId; batch = $Batch; runtime = 'host-native (no container)'; python = $python.Path; collector = $collector
+                state = $stateHost; ledger = $ledgerHost; arguments = $collectorArguments; live_requested = ($JobArgs -contains '--live')
+                workers = $Workers; max_requests = $MaxRequests; fec_keys = 'loaded by the collector from the DPAPI store only when --live is passed; never staged or mounted here'
+                timeout_minutes = $timeoutMinutes } | ConvertTo-Json -Depth 6
+    return
+  }
+
+  $logDirectory = Join-Path $env:LOCALAPPDATA 'Mentat\logs\compute'
+  $lockDirectory = Join-Path $env:LOCALAPPDATA 'Mentat\compute\locks'
+  foreach ($folder in $logDirectory, $lockDirectory) { New-Item -ItemType Directory -Force -Path $folder | Out-Null }
+  $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+  $outLog = Join-Path $logDirectory "$Job-$stamp.out.log"
+  $errLog = Join-Path $logDirectory "$Job-$stamp.err.log"
+  $summaryLog = Join-Path $logDirectory "$Job.log"
+  try { $lockStream = [IO.File]::Open((Join-Path $lockDirectory "$Job.lock"), 'OpenOrCreate', 'ReadWrite', 'None') }
+  catch [IO.IOException] { Stop-Refused "Another run of $Job holds its lock." 75 }
+  $code = 1
+  $problems = @()
+  try {
+    do {
+      # Any collector already alive (including an old suspended batch) is a second writer the run lease cannot see.
+      $running = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'python%'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*collect_committee_activity.py*' })
+      if ($running.Count) { $code = 75; $problems += ('A collector process is already running (pid ' + (($running | ForEach-Object { $_.ProcessId }) -join ', ') + ').'); break }
+      Write-Summary "START $Job run=$RunId batch=$Batch workers=$Workers cap=$MaxRequests live=$($JobArgs -contains '--live')"
+      Send-GlassBox 'run.start' 'running' "Compute job ${Job}: host-native wrapper start" "batch $Batch"
+      $started = [DateTime]::UtcNow
+      $child = Start-Process -FilePath $python.Path -ArgumentList (($collectorArguments | ForEach-Object { Format-Argument ([string]$_) }) -join ' ') -NoNewWindow -PassThru `
+        -RedirectStandardOutput $outLog -RedirectStandardError $errLog
+      $null = $child.Handle        # PS 5.1: ExitCode stays empty unless the handle is opened before exit
+      if ($child.WaitForExit($timeoutMinutes * 60000)) { $childCode = $child.ExitCode }
+      else {
+        $null = Invoke-Native 'taskkill.exe' @('/T', '/F', '/PID', [string]$child.Id)
+        $childCode = 124
+        $problems += "Killed after $timeoutMinutes minutes; the next collector start refuses until --recover-crashed-runs resolves it."
+      }
+      # The exit code is one input. The job is complete only when the collector's own receipt verifies from this side (DE-053).
+      $verified = $false
+      if ($childCode -eq 0) {
+        try {
+          $printed = (Get-Content -LiteralPath $outLog -Encoding UTF8 | Where-Object { $_ -match '^\{.*"receipt"' } | Select-Object -Last 1) | ConvertFrom-Json
+          $receiptFile = Get-Item -LiteralPath ([string]$printed.receipt)
+          $data = Get-Content -LiteralPath $receiptFile.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+          $stopType = if ($null -ne $data.stop) { [string]$data.stop.error_type } else { '' }
+          $checks = [ordered]@{
+            'receipt is newer than the start'      = ($receiptFile.LastWriteTimeUtc -ge $started.AddSeconds(-2))
+            'receipt is inside the state folder'   = ([IO.Path]::GetFullPath($receiptFile.DirectoryName) -eq [IO.Path]::GetFullPath($stateHost).TrimEnd('\'))
+            'receipt names this ledger'            = ([IO.Path]::GetFullPath([string]$data.ledger) -eq [IO.Path]::GetFullPath($ledgerHost))
+            'cap and workers are the requested'    = (([int]$data.physical_request_cap -eq $MaxRequests) -and ([int]$data.workers -eq $Workers))
+            'attempts within the cap'              = ([int]$data.http_attempts -le $MaxRequests)
+            'every attempt is accounted'           = (([int]$data.endpoint_attempts_recorded + [int]$data.candidate_committee_lookup_http_attempts) -eq [int]$data.http_attempts)
+            'stop is not an integrity failure'     = ($stopType -notin 'ArchiveBindingFailed', 'FECArchiveFailed', 'EndpointContractRefused', 'CrashRecovered', 'IntegrityError', 'OperationalError', 'DatabaseError')
+          }
+          foreach ($name in $checks.Keys) { if (-not $checks[$name]) { $problems += "receipt check failed: $name" } }
+          $verified = -not ($checks.Values -contains $false)
+          Write-Summary ("RECEIPT {0} http_attempts={1} stop={2}" -f $receiptFile.FullName, $data.http_attempts, $(if ($stopType) { $stopType } else { 'none' }))
+        }
+        catch { $problems += "The collector's receipt could not be verified: $_" }
+      }
+      if ($childCode -eq 124) { $code = 124 }
+      elseif ($childCode -eq 0 -and $verified) { $code = 0 }
+      else { $code = 1; if ($childCode -ne 0) { $problems += "collector exited $childCode" } }
+    } while ($false)
+  }
+  catch { $code = 1; $problems += "wrapper error: $_" }
+  finally {
+    $detail = ($problems | Where-Object { $_ }) -join '; '
+    if ($detail) { Add-Content -Encoding utf8 -Path $errLog -Value $detail }
+    Write-Summary "END exit=$code out=$outLog err=$errLog $detail"
+    Send-GlassBox 'run.finish' $(if ($code -eq 0) { 'completed' } else { 'failed' }) "Compute job ${Job}: host-native wrapper $(if ($code -eq 0) { 'verified' } else { 'failed' })" $(if ($detail) { $detail } else { "exit $code" })
+    $lockStream.Dispose()
+  }
+  exit $code
+}
 
 $listing = Invoke-Native $python.Path @($jobTool, 'jobs') -StdoutOnly
 if ($listing.Code -ne 0) { Stop-Refused 'compute_job.py jobs failed.' 2 }
