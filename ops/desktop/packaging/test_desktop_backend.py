@@ -14,6 +14,17 @@ spec.loader.exec_module(backend)
 
 
 class BackendBoundaryTests(unittest.TestCase):
+    def test_owner_directory_goes_with_and_only_with_the_existing_terrier_owner(self):
+        from unittest.mock import patch
+        base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
+            for extra in (['--owner-root', 'owner'], ['--legacy-owner', 'admin']):
+                with patch('sys.argv', base + extra), self.assertRaises(SystemExit):
+                    backend.main()
+            with patch('sys.argv', base + ['--legacy-owner', 'admin', '--owner-root', 'owner']):
+                backend.main()
+        self.assertEqual(run.call_count, 1)
+
     def test_invitation_is_only_in_authenticated_health_and_no_referrer(self):
         guarded = backend.GuardedWSGI(lambda environ, start: [b'app'], 'x'*32, 'terrier', launch_path='/?invite=private')
         capture = []

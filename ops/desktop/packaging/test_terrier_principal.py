@@ -113,6 +113,33 @@ class PrincipalTests(boundary_tests.DesktopAccessTests):
         with self.assertRaises(ValueError):prepare_principal(parse_principal({**data,'localUserId':str(user.pk+100)},'co-05'),self.root/'state')
         self.assertFalse(DesktopPrincipalBinding.objects.exists())
 
+    def test_passwordless_owner_sets_one_desktop_password_once_then_signs_in(self):
+        from http.cookies import SimpleCookie
+        from django.contrib.auth.models import User
+        from server.research import desktop_owner
+        from server.research.models import DesktopPrincipalBinding
+        from server.research.desktop_principal import parse_principal,prepare_principal
+        DesktopPrincipalBinding.objects.all().delete(); User.objects.all().delete()
+        user=User.objects.create_user('admin',is_staff=True,is_superuser=True)   # no usable password, like the migrated owner
+        principal=parse_principal({'schemaVersion':1,'serverId':self.principal.server_id,'deviceId':self.principal.device_id,
+            'principalId':self.principal.principal_id,'accountIdentity':self.principal.account_identity,
+            'localAccountIdentity':'admin','localUserId':str(user.pk),'districtId':'co-05',
+            'role':'local_administrator','mode':'existing-owner'},'co-05')
+        self.boundary.principal=principal; before=user.password
+        path=prepare_principal(principal,self.root/'state')
+        self.assertTrue(path.startswith('/#invite='))
+        status,session=self.accept(path.partition('=')[2])
+        self.assertEqual((status,session['authenticated'],session['username']),(200,True,'admin'))
+        user.refresh_from_db(); self.assertEqual(user.password,before)   # the district account is unchanged
+        self.assertTrue(desktop_owner.check(principal,self.password))
+        self.assertIsNone(prepare_principal(principal,self.root/'state'))   # set once: no second setup
+        self.cookies=SimpleCookie()                                          # a later launch of the same app session
+        csrf=self.request('/api/auth/session')[1]['csrf']
+        status,session=self.request('/api/auth/login',method='POST',data={'username':'admin','password':self.password},
+                                    headers={'HTTP_X_CSRFTOKEN':csrf})
+        self.assertEqual((status,session['authenticated']),(200,True))
+        self.assertEqual(self.request('/api/v3/meta')[0]!=401,True)
+
     def test_prelogin_static_interface_and_minimal_health_remain_available(self):
         self.fresh()
         self.assertEqual(self.request('/')[0],200)

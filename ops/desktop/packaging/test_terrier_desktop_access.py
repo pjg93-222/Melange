@@ -17,7 +17,8 @@ class DesktopAccessTests(unittest.TestCase):
         sys.path.insert(0, os.environ['TERRIER_TEST_SOURCE'])
         os.environ.update(DJANGO_SETTINGS_MODULE='server.settings', CU_DEPLOYMENT='desktop', CU_LOCAL_ADMIN='0',
                           CU_DATA_DIR=str(cls.root/'data'), CU_STATE_DIR=str(cls.root/'state'), CU_DISTRICT='co-05',
-                          CU_SECRET_KEY='synthetic-test-only-not-distributed', CU_ALLOWED_HOSTS='127.0.0.1')
+                          CU_SECRET_KEY='synthetic-test-only-not-distributed', CU_ALLOWED_HOSTS='127.0.0.1',
+                          CU_DESKTOP_OWNER_ROOT=str(cls.root/'owner'), CU_DESKTOP_OWNER_SESSION='s'*43)
         import django
         django.setup()
         from django.core.management import call_command
@@ -35,8 +36,10 @@ class DesktopAccessTests(unittest.TestCase):
         cls.temporary.cleanup()
 
     def setUp(self):
+        import shutil
         from django.contrib.auth.models import User
         from server.research.models import LoginAttempt, DesktopPrincipalBinding
+        shutil.rmtree(self.root/'owner', ignore_errors=True)   # the owner's desktop password and sign-in, per test
         DesktopPrincipalBinding.objects.all().delete()
         User.objects.all().delete()
         LoginAttempt.objects.all().delete()
