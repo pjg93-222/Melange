@@ -20,6 +20,18 @@ tools here change repository visibility.
 > `trust-publisher`). Neither is part of this repository, and no tool here creates
 > them. Until both exist, per-app releases remain unsigned manual-install previews.
 
+> **Self-signed route (Paul's choice, 2026-10-16).** The Authenticode identity is a
+> self-signed code-signing certificate whose non-exportable key stays in Paul's
+> `CurrentUser\My`; only machines that import its public certificate into `Root`
+> report its signatures as `Valid`, so only those machines install updates. The
+> hosted build stays unsigned but bakes the public pin
+> `WINDOWS_PUBLISHER_NAME = CN=Melange Desktop Release - Paul Goff - self-signed`
+> (workflow `RELEASE_PUBLISHER`, signed-release input mode, with `STABLE_TAG`
+> reserved). On Paul's PC the installer is then signed (RFC 3161 timestamp),
+> `packaging/authenticode_binding.py` proves the signed file is the hosted bytes
+> plus only an appended signature, and the steps below prepare and publish the
+> stable `desktop-v<version>` release. Nothing in the updater checks changes.
+
 ## From committed sources to a prepared installer
 
 1. Commit completed source to each app's own repository `main` (Melange to
