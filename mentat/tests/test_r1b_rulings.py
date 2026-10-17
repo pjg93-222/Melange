@@ -134,7 +134,7 @@ class Workers(Temp):
         self.assertEqual((start['workers'], receipt['workers'], receipt['peak_in_flight']), (1, 1, 1))
 
 
-# ---------------------------------------------------------------- ruling: the run lease behind a function (msvcrt kept, fcntl is a stub)
+# ---------------------------------------------------------------- ruling: the run lease behind a function (msvcrt kept; D075 implemented the fcntl backend R1b stubbed)
 class Lease(Temp):
     def test_second_holder_is_refused_and_release_frees_the_lease(self):
         with driver.run_lease(self.root):
@@ -145,17 +145,19 @@ class Lease(Temp):
         with driver.run_lease(self.root):
             pass
 
-    def test_backends_are_selected_by_platform_and_fcntl_is_a_stub(self):
+    def test_backends_are_selected_by_platform_and_fcntl_is_a_real_backend(self):
+        # D075 changed this control: R1b asserted that the fcntl backend raised NotImplementedError (a stub). It is now the flock backend of the container runtime; its behaviour
+        # (non-blocking exclusive flock, refusal of a second holder, release, errors not swallowed) is pinned in test_d075_collector.Lease with a fake fcntl module, and with the real
+        # flock where fcntl exists.
         self.assertIs(driver.lease_backend('nt'), driver._MsvcrtLease)
         self.assertIs(driver.lease_backend('posix'), driver._FcntlLease)
         self.assertIs(driver.lease_backend(), driver._MsvcrtLease if sys.platform == 'win32' else driver._FcntlLease)
-        with self.assertRaises(NotImplementedError):
-            driver._FcntlLease.acquire(None)
-        with self.assertRaises(NotImplementedError):
-            driver._FcntlLease.release(None)
-        with self.assertRaises(NotImplementedError):
-            with driver.run_lease(self.root, backend=driver.lease_backend('posix')):
-                pass
+        for backend in (driver._MsvcrtLease, driver._FcntlLease):
+            self.assertTrue(callable(backend.acquire) and callable(backend.release))
+        if sys.platform == 'win32':
+            with self.assertRaises(ImportError):                  # fcntl does not exist on Windows: choosing the posix backend there fails loudly, never silently
+                with driver.run_lease(self.root, backend=driver.lease_backend('posix')):
+                    pass
 
     def test_an_injected_backend_that_cannot_lock_refuses_before_the_body_runs(self):
         class Busy:

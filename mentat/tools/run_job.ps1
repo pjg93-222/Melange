@@ -31,6 +31,16 @@
   -EnableEndpointContract the repeatable pinned contract ids, -PriorityCandidates the optional priority list. `--live` is never added here: pass it in -JobArgs.
   -JobArgs also accepts --max-failed-attempts N, --include-later-cycle-context, --optional-receipts, --ccl CYCLE=PATH and --ccl-vintage CYCLE=TEXT. The job refuses to create
   a ledger, to run beside another collector process, and treats exit 0 as complete only when the collector's own receipt verifies (DE-053).
+
+.PARAMETER Runtime, InitVolume, JobArgsJson
+  D075 phase 2 (opt-in). -Runtime host (the default) is today's behaviour. -Runtime container runs the downstream collector as a compose job: collect-downstream (the
+  collector in a hardened container with NO FEC key; a host broker, api_host_pool.py --scope spending-evidence-v2, holds the keys, the shared quota ledger and the archive),
+  collect-downstream-recover (crash recovery in the volume, no network) and collect-downstream-import (seed an empty volume from a host snapshot). Their arguments all come
+  in -JobArgs / -JobArgsJson (--batch, --collector-run-id, --expect-base-sha256, --seeds /inputs/..., --max-requests, --max-failed-attempts, --workers, --live, ...); -Batch
+  and the other host-native parameters are refused there. The live ledger is in the Docker volume DOWNSTREAM_VOLUME (default mentat-downstream-frontier, created once
+  with -InitVolume, never pruned); every run ends with a hash-checked export under <state>\exports\<run id>, verified from here. Host variables: DOWNSTREAM_STATE_HOST,
+  DOWNSTREAM_INPUTS_HOST (the folder holding the seed file) or DOWNSTREAM_IMPORT_HOST (import), DOWNSTREAM_VOLUME, DOWNSTREAM_MIN_FREE_GB (default 30).
+  -JobArgsJson names a JSON array of the job arguments, for callers that cannot pass a PowerShell array under -File.
 #>
 [CmdletBinding(PositionalBinding = $false)]
 param(
@@ -49,6 +59,9 @@ param(
   [string]$Seeds = '',
   [string[]]$EnableEndpointContract = @(),
   [string]$PriorityCandidates = '',
+  [string]$Runtime = 'host',
+  [switch]$InitVolume,
+  [string]$JobArgsJson = '',
   [string[]]$JobArgs = @()
 )
 $ErrorActionPreference = 'Stop'
@@ -128,12 +141,30 @@ if ($null -eq $python) { throw 'No Python interpreter was found for the compute 
 $jobTool = Join-Path $PSScriptRoot 'compute_job.py'
 $secretTool = Join-Path $PSScriptRoot 'compute_secrets.py'
 $hostPoolTool = Join-Path $PSScriptRoot 'api_host_pool.py'
+$volumeTool = Join-Path $PSScriptRoot 'downstream_volume.py'
+
+# --- D075 phase 2: -Runtime and -JobArgsJson ------------------------------------------------------------------------------------------------------
+if ($JobArgsJson) {
+  if ($JobArgs.Count) { Stop-Refused 'REFUSED: give -JobArgs or -JobArgsJson, not both.' 2 }
+  if (-not (Test-Path -LiteralPath $JobArgsJson -PathType Leaf)) { Stop-Refused "REFUSED: no -JobArgsJson file at $JobArgsJson." 2 }
+  try {
+    $parsedArgs = Get-Content -LiteralPath $JobArgsJson -Raw -Encoding UTF8 | ConvertFrom-Json      # PS 5.1 hands a JSON array back as ONE object: keep it in a variable, then enumerate it
+    if ($null -eq $parsedArgs -or $parsedArgs -isnot [object[]]) { throw 'not an array' }
+    $JobArgs = @($parsedArgs | ForEach-Object { [string]$_ })
+  }
+  catch { Stop-Refused 'REFUSED: -JobArgsJson is not a JSON array of strings.' 2 }
+}
+if ($Runtime -cnotin 'host', 'container') { Stop-Refused "REFUSED: -Runtime must be 'host' (the default) or 'container'." 2 }
+$downstream = ($Runtime -eq 'container' -and $Job -in 'collect-downstream', 'collect-downstream-recover', 'collect-downstream-import')
+if (-not $downstream -and ($InitVolume -or $Job -in 'collect-downstream-recover', 'collect-downstream-import')) {
+  Stop-Refused 'REFUSED: collect-downstream-recover, collect-downstream-import and -InitVolume belong to -Runtime container.' 2
+}
 
 # --- collect-downstream: the downstream spending collector run HOST-NATIVE (D075 phase 1; no container, no Docker, no image lock) ----------------
 # It runs tools\collect_committee_activity.py directly on Windows against the shared ledger under state\committee-activity (override: $env:DOWNSTREAM_STATE_HOST).
 # `--live` is never added here: the caller passes it in -JobArgs, so the authorization stays visible in -PlanOnly and in the log. Everything below the
 # refusals is the same DE-053 rule as the container jobs: exit 0 of the child is one input, the collector's own receipt must verify from this side.
-if ($Job -eq 'collect-downstream') {
+if ($Job -eq 'collect-downstream' -and $Runtime -ne 'container') {
   $collector = Join-Path $PSScriptRoot 'collect_committee_activity.py'
   $stateHost = if ($env:DOWNSTREAM_STATE_HOST) { $env:DOWNSTREAM_STATE_HOST } else { Join-Path $projectRoot 'state\committee-activity' }
   $ledgerHost = Join-Path $stateHost 'frontier.sqlite'
@@ -272,6 +303,38 @@ foreach ($name in @($containerOf.Keys) + 'LOO_HOST', 'CHE_HOST', 'ZIPC_HOST') {
 $maps = @(('/mentat=' + $hosts.MENTAT_HOST), ('/localappdata=' + $hosts.LOCALAPPDATA_HOST), ('/glassbox/events=' + $hosts.GLASSBOX_HOST))
 foreach ($name in $containerOf.Keys) { if ($hosts.Contains($name)) { $maps += ($containerOf[$name] + '=' + $hosts[$name]) } }
 
+# --- D075 phase 2: the downstream collector in the container runtime (opt-in) -----------------------------------------------------------------------
+# The live ledger is in a Docker named volume; the FEC keys are staged for the host broker ONLY (never mounted, never a container variable); the container gets a key-free
+# descriptor. Everything below is refused (exit 2) before Docker is touched, except the checks that need the engine.
+$downstreamInfo = $null; $stateHost = $null; $storedMap = $null; $volume = $null; $sharedLock = $null; $inputsHost = $null; $importHost = $null
+if ($downstream) {
+  if ($Batch -or $MaxRequests -or $Seeds -or $Workers -ne 1 -or $EnableEndpointContract.Count -or $PriorityCandidates) {
+    Stop-Refused 'REFUSED: -Batch, -Workers, -MaxRequests, -Seeds, -EnableEndpointContract and -PriorityCandidates belong to -Runtime host; with -Runtime container give --batch, --workers, --max-requests, --seeds /inputs/..., --enable-endpoint-contract and --priority-candidates in -JobArgs or -JobArgsJson.' 2
+  }
+  $stateHost = if ($env:DOWNSTREAM_STATE_HOST) { $env:DOWNSTREAM_STATE_HOST } else { Join-Path $projectRoot 'state\committee-activity' }
+  $planned = Invoke-Native $python.Path (@($jobTool, 'downstream-plan', '--job', $Job, '--') + $JobArgs) -StdoutOnly
+  try { $downstreamInfo = $planned.Output | ConvertFrom-Json } catch { $downstreamInfo = $null }
+  if ($null -eq $downstreamInfo -or -not $downstreamInfo.ok) { Stop-Refused ('REFUSED: ' + $(if ($downstreamInfo) { $downstreamInfo.error } else { 'compute_job.py downstream-plan gave no answer.' })) 2 }
+  $volume = if ($env:DOWNSTREAM_VOLUME) { $env:DOWNSTREAM_VOLUME } else { 'mentat-downstream-frontier' }
+  if ($volume -notmatch '^[A-Za-z0-9][A-Za-z0-9_.-]{0,60}$') { Stop-Refused 'REFUSED: DOWNSTREAM_VOLUME is not a volume name.' 2 }
+  $inputsHost = $env:DOWNSTREAM_INPUTS_HOST; $importHost = $env:DOWNSTREAM_IMPORT_HOST
+  $stateBack = $stateHost.TrimEnd('\', '/').Replace('/', '\')
+  $hosts['DOWNSTREAM_STATE_HOST'] = ConvertTo-Slash $stateHost
+  $hosts['DOWNSTREAM_EXPORT_HOST'] = ConvertTo-Slash (Join-Path $stateHost 'exports')
+  $hosts['DOWNSTREAM_VOLUME'] = $volume
+  # How the container's paths are RECORDED: the Windows spelling of batches 01 to 03, so the receipt chain, the validator and the reader keep working. List /hoststate first:
+  # a stored path under the state folder is READ through the read-only host view.
+  $storedMap = '/hoststate=' + $stateBack + ';/frontier=' + $stateBack + ';/export=' + $stateBack + '\exports'
+  if ($Job -eq 'collect-downstream-import') { $hosts['DOWNSTREAM_IMPORT_HOST'] = ConvertTo-Slash $(if ($importHost) { $importHost } else { Join-Path $stateHost 'import' }) }
+  else {
+    $hosts['DOWNSTREAM_INPUTS_HOST'] = ConvertTo-Slash $(if ($inputsHost) { $inputsHost } else { Join-Path $stateHost 'inputs' })
+    $storedMap += ';/inputs=' + $hosts['DOWNSTREAM_INPUTS_HOST'].Replace('/', '\')
+  }
+  $hosts['DOWNSTREAM_STORED_MAP'] = $storedMap
+  $maps += ('/export=' + $hosts['DOWNSTREAM_EXPORT_HOST'])
+  $maps += ('/hoststate=' + $hosts['DOWNSTREAM_STATE_HOST'])
+}
+
 $receiptDirectory = Join-Path $env:LOCALAPPDATA 'Mentat\compute\receipts'
 $receipt = Join-Path $receiptDirectory ($RunId + '.json')
 $containerName = 'mentat-compute-' + $RunId.ToLowerInvariant()
@@ -282,6 +345,18 @@ $plan = [ordered]@{
   job = $Job; run_id = $RunId; image = $image; docker = $DockerPath; compose_arguments = $composeArguments
   environment = $hosts; fec_keys = [bool]$spec.keys; network = [bool]$spec.network; timeout_minutes = $timeoutMinutes
   receipt = $receipt; verify_maps = $maps
+}
+if ($downstream) {
+  $plan['runtime'] = 'container'
+  $plan['fec_keys_in_container'] = $false
+  $plan['downstream'] = [ordered]@{
+    job_plan = $downstreamInfo; state_host = $stateHost; volume = $volume; stored_path_map = $storedMap; live_requested = ($JobArgs -contains '--live')
+    broker = $(if ($spec.broker) { [ordered]@{ script = $hostPoolTool; scope = 'spending-evidence-v2'; run_id = [string]$downstreamInfo.collector_run_id; archive_root = $stateHost
+                                                max_attempts = [int]$downstreamInfo.max_requests; families = [string]$downstreamInfo.families
+                                                keys = 'staged for the broker only (owner-only folder, wiped at the end); never mounted into the container' } } else { $null })
+    refuses_before_docker = @('state folder under OneDrive or %TEMP%', 'frontier.sqlite.MOVED.json absent or a frontier.sqlite still at the state folder', 'free space below DOWNSTREAM_MIN_FREE_GB (30) plus 0.35 MB per request', 'inputs/import folder missing')
+    refuses_after_docker_starts = @('volume missing (create with -InitVolume) or without the label com.mentat.keep=true', 'a collector process or a downstream container already running')
+  }
 }
 if ($PlanOnly) { $plan | ConvertTo-Json -Depth 6; return }
 
@@ -306,6 +381,7 @@ catch [IO.IOException] { Stop-Refused "Another run of $Job holds its lock." 75 }
 $staged = $false
 $hostPool = $null
 $hostPoolDirectory = $null
+$dockerCode = $null
 $code = 1
 $problems = @()
 try {
@@ -314,6 +390,18 @@ try {
   Send-GlassBox 'run.start' 'running' "Compute job ${Job}: wrapper start" $image
   $null = Invoke-Native $python.Path @($secretTool, 'sweep') -StdoutOnly       # key files a power-off left behind
 
+  if ($downstream) {
+    $refusals = @()
+    if ($stateHost -like '*\OneDrive\*' -or ($env:TEMP -and $stateHost -like ($env:TEMP + '*'))) { $refusals += 'the state folder must not be under OneDrive or %TEMP% (Storage Sense wipes %TEMP%)' }
+    if (-not (Test-Path -LiteralPath (Join-Path $stateHost 'frontier.sqlite.MOVED.json') -PathType Leaf)) { $refusals += 'frontier.sqlite.MOVED.json is absent: the cutover to the volume has not been recorded' }
+    if (Test-Path -LiteralPath (Join-Path $stateHost 'frontier.sqlite') -PathType Leaf) { $refusals += 'a frontier.sqlite still exists in the state folder; the ledger in the volume would fork it' }
+    if ($Job -eq 'collect-downstream-import') { if (-not (Test-Path -LiteralPath (Join-Path ($hosts['DOWNSTREAM_IMPORT_HOST'].Replace('/', '\')) 'frontier.sqlite') -PathType Leaf)) { $refusals += 'DOWNSTREAM_IMPORT_HOST holds no frontier.sqlite' } }
+    elseif (-not (Test-Path -LiteralPath $hosts['DOWNSTREAM_INPUTS_HOST'] -PathType Container)) { $refusals += 'DOWNSTREAM_INPUTS_HOST is not a folder' }
+    $minFree = if ($env:DOWNSTREAM_MIN_FREE_GB) { [double]$env:DOWNSTREAM_MIN_FREE_GB } else { 30 }
+    $freeBytes = (New-Object IO.DriveInfo (Split-Path -Qualifier $stateHost)).AvailableFreeSpace
+    if ($freeBytes -lt ($minFree * 1GB + [double]$downstreamInfo.max_requests * 0.35MB)) { $refusals += ('free space {0:N1} GB is below the floor ({1:N0} GB plus 0.35 MB per requested attempt)' -f ($freeBytes / 1GB), $minFree) }
+    if ($refusals.Count) { $code = 2; $problems += ($refusals | ForEach-Object { "REFUSED: $_" }); break }
+  }
   if (-not (Start-DockerEngine)) { $code = 3; $problems += "Docker did not start within $DockerStartSeconds seconds."; break }
   $skew = Get-ClockSkew $image
   if ($null -eq $skew) { $code = 3; $problems += 'Could not read the Docker VM clock (is the image pullable by its digest?).'; break }
@@ -325,6 +413,39 @@ try {
     }
   }
 
+  if ($downstream) {
+    $volumeInfo = Invoke-Native $DockerPath @('volume', 'inspect', '--format', '{{json .Labels}}', $volume) -StdoutOnly
+    $volumeLabel = $null
+    if ($volumeInfo.Code -eq 0) { try { $volumeLabel = [string](($volumeInfo.Output | ConvertFrom-Json).'com.mentat.keep') } catch { $volumeLabel = $null } }
+    if ($volumeInfo.Code -ne 0) {
+      if (-not $InitVolume) { $code = 2; $problems += "REFUSED: the Docker volume $volume does not exist; create it once, deliberately, with -InitVolume."; break }
+      $created = Invoke-Native $DockerPath @('volume', 'create', '--label', 'com.mentat.keep=true', $volume) -StdoutOnly
+      if ($created.Code -ne 0) { $code = 2; $problems += "REFUSED: the Docker volume $volume could not be created."; break }
+    }
+    elseif ($volumeLabel -cne 'true') { $code = 2; $problems += "REFUSED: the Docker volume $volume lacks the label com.mentat.keep=true; it was not made for this ledger."; break }
+    if ($InitVolume) {      # an empty named volume belongs to root; the job runs as uid 10001 with every capability dropped
+      $owned = Invoke-Native $DockerPath @('run', '--rm', '--pull=never', '--network', 'none', '--user', '0:0', '--cap-drop', 'ALL', '--cap-add', 'CHOWN', '--security-opt', 'no-new-privileges:true',
+        '--mount', "type=volume,source=$volume,target=/frontier", '--entrypoint', 'chown', $image, '10001:10001', '/frontier') -StdoutOnly
+      if ($owned.Code -ne 0) { $code = 2; $problems += "The Docker volume $volume could not be handed to the job's uid."; break }
+    }
+    $running = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'python%'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*collect_committee_activity.py*' })
+    if ($running.Count) { $code = 75; $problems += ('A collector process is already running (pid ' + (($running | ForEach-Object { $_.ProcessId }) -join ', ') + ').'); break }
+    # By compose project and service label, not by container name: the container is named for the run id (mentat-compute-ds-b04), so a name filter never saw an explicit run id (review F5).
+    # `docker ps --format '{{.Labels}}'` prints each container's labels as ONE comma-joined key=value string (never a JSON map: `{{json .Labels}}` would print that string quoted); only `docker volume inspect` formats a real map (delta review D1).
+    $others = Invoke-Native $DockerPath @('ps', '--filter', 'label=com.docker.compose.project=mentat-compute', '--format', '{{.Labels}}') -StdoutOnly
+    $busy = @($others.Output -split "`n" | ForEach-Object { if ($_ -match '(?:^|,)com\.docker\.compose\.service=(collect-downstream[^,\s]*)') { $Matches[1] } })
+    if ($busy.Count) { $code = 75; $problems += ('A downstream container is already running (' + ($busy -join ', ') + ').'); break }
+    if ($Job -ne 'collect-downstream') {      # the three jobs write one volume: one lock for all of them
+      try { $sharedLock = [IO.File]::Open((Join-Path $lockDirectory 'collect-downstream.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
+      catch [IO.IOException] { $code = 75; $problems += 'Another downstream run holds the shared lock.'; break }
+    }
+    New-Item -ItemType Directory -Force -Path (Join-Path $stateHost 'exports') | Out-Null
+    if ($Job -eq 'collect-downstream-recover' -and (Test-Path -LiteralPath (Join-Path $stateHost ('responses-' + [string]$downstreamInfo.collector_run_id)) -PathType Container)) {
+      # host side, no key, no network: the unpaired or truncated files of a crashed run go aside before the container replays what is left
+      $quarantine = Invoke-Native $python.Path @($hostPoolTool, 'quarantine', '--archive-root', $stateHost, '--run-id', [string]$downstreamInfo.collector_run_id) -StdoutOnly
+      if ($quarantine.Code -ne 0) { $code = 2; $problems += 'The host quarantine of the crashed run failed; nothing was recovered.'; break }
+    }
+  }
   if ($spec.keys) {
     $stage = Invoke-Native $python.Path @($secretTool, 'stage', '--run-id', $RunId) -StdoutOnly
     if ($stage.Code -ne 0) { $code = 2; $problems += 'The FEC keys could not be staged (no enabled key, or the DPAPI store is unreadable).'; break }
@@ -342,6 +463,21 @@ try {
     while (-not (Test-Path -LiteralPath $hostPoolConfig -PathType Leaf) -and -not $hostPool.HasExited -and (Get-Date) -lt $brokerDeadline) { Start-Sleep -Milliseconds 100 }
     if (-not (Test-Path -LiteralPath $hostPoolConfig -PathType Leaf)) { $code = 2; $problems += 'Host request pool did not become ready; collection refused.'; break }
     $hosts['REQUEST_POOL_CONFIG_FILE'] = ConvertTo-Slash $hostPoolConfig
+  }
+  if ($downstream -and $spec.broker) {
+    $evidenceStage = Invoke-Native $python.Path @($secretTool, 'stage', '--run-id', $RunId) -StdoutOnly
+    if ($evidenceStage.Code -ne 0) { $code = 2; $problems += 'The FEC keys could not be staged for the host broker (no enabled key, or the DPAPI store is unreadable).'; break }
+    $staged = $true
+    $hostPoolDirectory = Split-Path -Parent (($evidenceStage.Output | ConvertFrom-Json).path)
+    $evidenceArguments = @($hostPoolTool, '--scope', 'spending-evidence-v2', '--run-directory', $hostPoolDirectory, '--watch-pid', [string]$PID, '--project-root', $projectRoot,
+      '--run-id', [string]$downstreamInfo.collector_run_id, '--archive-root', $stateHost, '--max-attempts', [string]$downstreamInfo.max_requests, '--families', [string]$downstreamInfo.families)
+    $hostPool = Start-Process -FilePath $python.Path -ArgumentList (($evidenceArguments | ForEach-Object { Format-Argument ([string]$_) }) -join ' ') -WindowStyle Hidden -PassThru `
+      -RedirectStandardOutput (Join-Path $hostPoolDirectory 'host-pool.out.log') -RedirectStandardError (Join-Path $hostPoolDirectory 'host-pool.err.log')
+    $evidenceConfig = Join-Path $hostPoolDirectory 'request-pool.json'
+    $evidenceDeadline = (Get-Date).AddSeconds(15)
+    while (-not (Test-Path -LiteralPath $evidenceConfig -PathType Leaf) -and -not $hostPool.HasExited -and (Get-Date) -lt $evidenceDeadline) { Start-Sleep -Milliseconds 100 }
+    if (-not (Test-Path -LiteralPath $evidenceConfig -PathType Leaf)) { $code = 2; $problems += 'The host evidence broker did not become ready; collection refused.'; break }
+    $hosts['REQUEST_POOL_CONFIG_FILE'] = ConvertTo-Slash $evidenceConfig
   }
   foreach ($name in $hosts.Keys) { [Environment]::SetEnvironmentVariable($name, [string]$hosts[$name], 'Process') }
   $composeArguments = @($composeArguments | ForEach-Object { Format-Argument $_ })
@@ -365,6 +501,15 @@ try {
   if ($dockerCode -eq 124) { $code = 124 }
   elseif ($dockerCode -eq 0 -and $verified) { $code = 0 }
   else { $code = 1; if ($dockerCode -ne 0) { $problems += "docker exited $dockerCode" } }
+  if ($downstream -and $Job -eq 'collect-downstream-import' -and $code -eq 0) {
+    # Host side, after the import verified (review F4): the earlier container runs' receipts go into the state folder, so the re-imported ledger does not see their response folders as legacy crashes.
+    $restored = Invoke-Native $python.Path @($volumeTool, 'restore-receipts', '--state', $stateHost, '--expect-sha256', [string]$downstreamInfo.expect_sha256) -StdoutOnly
+    try { $restoreAnswer = $restored.Output | ConvertFrom-Json } catch { $restoreAnswer = $null }
+    if ($restored.Code -ne 0 -or $null -eq $restoreAnswer) {
+      $code = 1; $problems += ('RECEIPT RESTORE FAILED (the ledger itself was imported; repeat only: python downstream_volume.py restore-receipts --state <state> --expect-sha256 <hash>): ' + $(if ($restoreAnswer) { @($restoreAnswer.problems) -join '; ' } else { 'no answer' }))
+    }
+    else { Write-Summary ('RESTORED receipts of {0} earlier run(s); already present {1}; not restored {2}' -f @($restoreAnswer.restored).Count, @($restoreAnswer.already_present).Count, @($restoreAnswer.not_restored).Count) }
+  }
   } while ($false)
 }
 catch { $code = 1; $problems += "wrapper error: $_" }
@@ -373,14 +518,26 @@ finally {
     try { [IO.File]::WriteAllBytes((Join-Path $hostPoolDirectory 'owner.stop'), [byte[]]@()) } catch { $code = 1; $problems += 'Host pool owner stopfile could not be written.' }
     if (-not $hostPool.WaitForExit(150000)) { $code = 1; $problems += 'Owned host pool did not stop cleanly; secret cleanup may be incomplete.'; $hostPool.Kill(); $null = $hostPool.WaitForExit(10000) }
   }
+  if ($downstream -and $spec.broker -and $hostPool -and $null -ne $dockerCode) {
+    # The broker has exited and published BROKER-<run>.json. What it charged, what it journalled and what the collector receipt counts must agree (review F3): a gap is an attempt that
+    # reached the provider with no record, so the run is a failure whatever docker said, and nothing is promoted.
+    $reconciled = Invoke-Native $python.Path @($volumeTool, 'reconcile', '--state', $stateHost, '--run-id', [string]$downstreamInfo.collector_run_id) -StdoutOnly
+    try { $reconciledAnswer = $reconciled.Output | ConvertFrom-Json } catch { $reconciledAnswer = $null }
+    if ($reconciled.Code -ne 0 -or $null -eq $reconciledAnswer -or -not $reconciledAnswer.ok) {
+      $problems += ('BROKER RECONCILIATION FAILED: ' + $(if ($reconciledAnswer) { @($reconciledAnswer.problems) -join '; ' } else { 'no answer' }))
+      if ($code -eq 0) { $code = 1 }
+    }
+  }
   if ($staged) {
     $wiped = Invoke-Native $python.Path @($secretTool, 'wipe', '--run-id', $RunId) -StdoutOnly
     if ($wiped.Code -ne 0) { $code = 1; $problems += 'THE KEY FILE COULD NOT BE WIPED; delete the folder under %LOCALAPPDATA%\Melange\compute\run\ by hand.' }
   }
   $detail = ($problems | Where-Object { $_ }) -join '; '
+  if ($downstream -and $detail -and $code -in 2, 75) { [Console]::Error.WriteLine($detail) }
   if ($detail) { Add-Content -Encoding utf8 -Path $errLog -Value $detail }
   Write-Summary "END exit=$code out=$outLog err=$errLog $detail"
   Send-GlassBox 'run.finish' $(if ($code -eq 0) { 'completed' } else { 'failed' }) "Compute job ${Job}: wrapper $(if ($code -eq 0) { 'verified' } else { 'failed' })" $(if ($detail) { $detail } else { "exit $code" })
+  if ($sharedLock) { $sharedLock.Dispose() }
   $lockStream.Dispose()
 }
 exit $code

@@ -14,6 +14,9 @@ D072 adds campaign spending (totals and candidate_committees contracts, a persis
 Offline subcommands (no provider call, no credentials, run lease held, never create a ledger): --recover-crashed-runs, --rebind-endpoint-contracts (append-only
 superset intent version), --close-out-legacy-run (a pre-D071 run with no START: hot-journal rollback, orphan pairs quarantined, never replayed). A live run on a state
 without frontier.sqlite is refused unless --init-new-ledger is given. A 429 cools only its key and returns its endpoint to pending at once.
+D075 (opt-in container runtime; the default is unchanged): --transport broker runs the same loop on a key-free RemoteEvidenceTransport, a host broker holding the keys, the
+shared quota ledger and the archive; --archive-root says where responses-<run> lives when that is not --state; MENTAT_STORED_PATH_MAP makes every RECORDED path the host's
+Windows spelling while reads go through the container's mounts; --run-id and --stop-after-seconds serve a launcher; the run lease has its fcntl backend.
 """
 from contextlib import contextmanager,nullcontext
 from datetime import datetime,timezone
@@ -23,6 +26,7 @@ from concurrent.futures import FIRST_COMPLETED,ThreadPoolExecutor,wait
 from pathlib import Path
 from urllib.error import HTTPError,URLError
 import origin_closure
+import stored_paths
 from spending_endpoint_contracts import (CONTRACTS,activation_plan,bind_enablement,verify_enablement,
  EndpointContractRefused,legacy_cursor_valid,query as contract_query,inspect_page as inspect_contract_page,
  candidate_committees_query,inspect_candidate_committees_page)
@@ -49,13 +53,29 @@ def encoded(value):return json.dumps(value,sort_keys=True,separators=(',',':'),d
 def digest(value):return hashlib.sha256(encoded(value).encode()).hexdigest()
 def sha(path):
  with Path(path).open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+def stored(path):return stored_paths.to_stored(path)   # the spelling to RECORD (identity unless MENTAT_STORED_PATH_MAP is set)
+def hosted(path):return stored_paths.to_host(path)   # the path to READ a recorded spelling through
+def _stored_enablement(value):
+ pairs=stored_paths.pairs()
+ if not pairs or not value.get('binding'):return value
+ return{**value,'binding':{**value['binding'],'path':stored_paths.to_stored(value['binding']['path'],pairs)}}
+def _verify_archive(evidence,message):
+ """The recorded original body must exist and hash as the evidence says. Read through the container's mounts when the recorded spelling is the host's; a missing or stale
+ read there fails closed as ArchiveBindingFailed (a global stop that leaves the ledger consistent). Host-native behaviour is unchanged."""
+ archive=Path(evidence['path']);readable=Path(hosted(evidence['path']))
+ try:ok=readable.stat().st_size==evidence['bytes']and sha(readable)==evidence['sha256']
+ except OSError:
+  if readable==archive:raise
+  ok=False
+ if not ok:raise ArchiveBindingFailed(message)
+ return archive
 class ArchiveBindingFailed(ValueError):pass
 def captured_seeds(path):
  raw=Path(path).read_bytes();fingerprint=hashlib.sha256(raw).hexdigest();document=json.loads(raw)
  if not isinstance(document,dict)or document.get('schema_version')!=1 or not isinstance(document.get('seed_units'),list):raise ValueError('Reviewed seed schema1 and seed_units array required.')
  return document['seed_units'],{'path':str(path),'sha256':fingerprint,'bytes':len(raw)},raw
 def seed_after(receipt):
- try:after=sha(receipt['path'])
+ try:after=sha(hosted(receipt['path']))
  except OSError:after=None
  return {**receipt,'sha256_after':after,'after_unchanged':after==receipt['sha256']}
 
@@ -250,9 +270,7 @@ class Frontier:
   unit=(row['committee_id'],row['cycle']);kind=row['kind']
   if evidence.get('status')!=200 or evidence.get('original_response_bytes')is not True or evidence.get('query')!=query or evidence.get('endpoint')!=endpoint:
    raise ArchiveBindingFailed('Successful original response evidence does not bind the exact request.')
-  archive=Path(evidence['path'])
-  if archive.stat().st_size!=evidence['bytes']or sha(archive)!=evidence['sha256']:
-   raise ArchiveBindingFailed('Original response archive does not verify; no page admitted.')
+  archive=_verify_archive(evidence,'Original response archive does not verify; no page admitted.')
   if not isinstance(data,dict)or not isinstance(data.get('results'),list):
    raise ValueError('Archived response has no result array; no page shape inferred.')
   pagination=data.get('pagination')or{}
@@ -374,8 +392,9 @@ class Frontier:
   left=maximum-transport.http_attempts-len(inflight)   # conservative: an in-flight job may already have started
   if left>0:return min(free,left)
   return 0 if inflight else 1   # one job reaches the cap refusal: the same single stop record as serial
- def run(self,transport,*,max_failed_attempts=8,workers=1,progress=None,progress_seconds=30,initial_stop=None):
+ def run(self,transport,*,max_failed_attempts=8,workers=1,progress=None,progress_seconds=30,initial_stop=None,stop_after_seconds=None):
   if type(max_failed_attempts)is not int or max_failed_attempts<1:raise ValueError('Positive failed-attempt allowance required.')
+  if stop_after_seconds is not None and not(isinstance(stop_after_seconds,(int,float))and not isinstance(stop_after_seconds,bool)and stop_after_seconds>0):raise ValueError('The stop-after allowance must be a positive number of seconds.')
   if type(workers)is not int or not 1<=workers<=MAX_WORKERS:raise ValueError('Worker count must be an integer from 1 to '+str(MAX_WORKERS)+'.')
   per_call=getattr(transport,'supports_concurrent_fetch',False)is True
   if workers>1 and not per_call:raise ValueError('Concurrent workers need a transport that reports per-call attempts and evidence.')
@@ -384,6 +403,7 @@ class Frontier:
   stopped=initial_stop;completed=failures=attempts=seq=peak=skipped=limited=idle=0;strikes={};benched=set()
   halt=threading.Event();inflight={}
   physical=lambda:getattr(transport,'http_attempts',attempts);rates=_Rates(physical());shown=[time.monotonic()]
+  deadline=None if stop_after_seconds is None else time.monotonic()+stop_after_seconds
   def tick():
    if halt.is_set():getattr(getattr(transport,'pool',None),'stop',lambda:None)()   # M1: waiting acquirers are released and refuse (recorded with 0 attempts, left pending); idempotent
    rates.note(physical())
@@ -395,6 +415,8 @@ class Frontier:
   try:
    while True:
     tick()
+    # D075: past the allowance nothing new is dispatched; what is in flight drains and commits, and the receipt says DeadlineReached (never a kill that would leave a crash to recover).
+    if deadline is not None and stopped is None and time.monotonic()>=deadline:stopped={'error_type':'DeadlineReached','detail':'The --stop-after-seconds allowance ended; dispatch stopped and in-flight work drained.','global_admission_archive_auth_quota_or_failure_allowance':False}
     rows=self._next_rows(self._dispatch_limit(transport,workers,inflight),set(inflight)|benched)if stopped is None and not halt.is_set()else[]
     for row in rows:
      if stopped is not None:break
@@ -447,7 +469,7 @@ class Frontier:
    except Exception:match=False
    if match:found.append(row)
   return found[0]if len(found)==1 else None
- def recover(self,folder,quarantine):
+ def recover(self,folder,quarantine,readonly=False):
   """Reconcile one crashed run's archive folder with the ledger: replay complete unreferenced pairs through the live commit, quarantine the rest.
   Classification and every refusal happen before any file move or ledger write; each step is idempotent so an interrupted recovery is simply rerun."""
   folder=Path(folder);names=sorted(p.name for p in folder.iterdir())if folder.is_dir()else[]
@@ -488,6 +510,7 @@ class Frontier:
    key=(row['committee_id'],row['cycle'],row['kind'])
    if key in targets:raise RecoveryRefused('Two archive pairs map to endpoint '+'/'.join(map(str,key))+'; a human must decide. Nothing was changed.')
    targets[key]=meta
+  if move and readonly:raise RecoveryRefused('The archive root is read-only here, so '+', '.join(name for name,_ in move)+' cannot be moved aside; run api_host_pool.py quarantine on the host for this run first (an uncommitted candidate-committee lookup page needs a human). Nothing was changed.')
   quarantined=_quarantine_files(folder,quarantine,move)
   replayed=0
   for record,raw,meta in sorted(orphans,key=lambda item:item[0]['attempt']):
@@ -550,8 +573,7 @@ class Frontier:
      query=candidate_committees_query(candidate,cycle,cursor=cursor)
      data,evidence=transport.fetch(endpoint,query,exact_decimal=True)
      if evidence.get('status')!=200 or evidence.get('original_response_bytes')is not True or evidence.get('query')!=query or evidence.get('endpoint')!=endpoint:raise ArchiveBindingFailed('Successful original response evidence does not bind the exact request.')
-     archive=Path(evidence['path'])
-     if archive.stat().st_size!=evidence['bytes']or sha(archive)!=evidence['sha256']:raise ArchiveBindingFailed('Original response archive does not verify; no lookup admitted.')
+     archive=_verify_archive(evidence,'Original response archive does not verify; no lookup admitted.')
      progress=inspect_candidate_committees_page(query,data);issues.update(progress['issues']);ignored+=progress['ignored_non_principal_rows']
      ids.extend(item for item in progress['committee_ids']if item not in ids)
      archived.append({'page':query['page'],'path':str(archive),'sha256':evidence['sha256'],'bytes':evidence['bytes'],'captured_utc':evidence.get('captured_utc')})
@@ -590,8 +612,8 @@ class Frontier:
   pending=self.db.execute("SELECT COUNT(*) FROM endpoints WHERE kind IN("+",".join("?"for _ in outgoing)+")AND status!='complete'",outgoing).fetchone()[0]
   count=lambda table:self.db.execute('SELECT COUNT(*) FROM '+table).fetchone()[0]
   closure=self.closure()   # derived from seeds+edges+policy; never stored per unit
-  return {'schema_version':1,'ledger_schema_version':SCHEMA_VERSION,'generated_utc':now(),'ledger':str(self.path),'units':count('units'),'origin_seed_assignments':count('origin_seeds'),'origin_catalog_entries':count('origin_catalog'),'origin_unit_assignments':closure.total,**origin_closure.disclosure(),'origin_unit_assignments_note':'Derived by origin_closure from origin_seeds, edges and the recorded later-cycle policy: origins OBSERVED to reach a unit through collected disclosures. A lower bound; an absent origin is not observed, never proven not to reach.','pages':count('pages'),'observations':count('observations'),'edges':count('edges'),'candidate_resolutions_required':count('candidate_resolutions'),'candidate_beneficiary_or_unverified_references':count('candidate_references'),'counterparty_identity_conflicts':count('counterparty_conflicts'),'leaf_disclosure_boundaries':count('leaf_coverage'),'endpoint_status_counts':endpoint_counts,'new_pages_this_invocation':completed_pages,'stop':stopped,'supported_outgoing_endpoints_complete':pending==0,'exhaustive_disclosed_spending_complete':False,'required_unsupported_endpoints':sorted({r[0]for r in self.db.execute("SELECT kind FROM endpoints WHERE status='unsupported'")}),
-   'endpoint_contract_enablement':self.contract_enablement,'supported_outgoing_endpoint_kinds':outgoing,
+  return {'schema_version':1,'ledger_schema_version':SCHEMA_VERSION,'generated_utc':now(),'ledger':stored(self.path),'units':count('units'),'origin_seed_assignments':count('origin_seeds'),'origin_catalog_entries':count('origin_catalog'),'origin_unit_assignments':closure.total,**origin_closure.disclosure(),'origin_unit_assignments_note':'Derived by origin_closure from origin_seeds, edges and the recorded later-cycle policy: origins OBSERVED to reach a unit through collected disclosures. A lower bound; an absent origin is not observed, never proven not to reach.','pages':count('pages'),'observations':count('observations'),'edges':count('edges'),'candidate_resolutions_required':count('candidate_resolutions'),'candidate_beneficiary_or_unverified_references':count('candidate_references'),'counterparty_identity_conflicts':count('counterparty_conflicts'),'leaf_disclosure_boundaries':count('leaf_coverage'),'endpoint_status_counts':endpoint_counts,'new_pages_this_invocation':completed_pages,'stop':stopped,'supported_outgoing_endpoints_complete':pending==0,'exhaustive_disclosed_spending_complete':False,'required_unsupported_endpoints':sorted({r[0]for r in self.db.execute("SELECT kind FROM endpoints WHERE status='unsupported'")}),
+   'endpoint_contract_enablement':_stored_enablement(self.contract_enablement),'supported_outgoing_endpoint_kinds':outgoing,
    'later_cycle_context_explicitly_enabled':self.include_later_cycle_context,'later_context_missing_when_disabled':not self.include_later_cycle_context,'unknown_or_subcent_amount_occurrences':self.db.execute("SELECT COUNT(*) FROM observations WHERE amount_status!='valid_decimal'AND kind NOT IN('totals')").fetchone()[0],
    'other_spending_families':'/'.join(['B/E']+[kind for kind in('F','H4')if kind in outgoing])+' are overlapping evidence. Other disclosure families, report/unitemized totals, loans/debts and efile timing require independent coverage.','legacy_snapshot_compatible':False,'snapshots_json_or_evidence_json_published':False,'incoming_receipts_not_requested_means_unknown_not_empty':True,'no_exact_origin_dollar_attribution':True,'no_B_E_grand_total':True,'UI_top_depth_or_page_limits_used':False,'campaign_priority':self.priority_summary()}
  def close(self):self.db.close()
@@ -717,7 +739,7 @@ def migrate_main(argv):
 
 MAX_WORKERS=32
 class RecoveryRefused(RuntimeError):pass
-def _key(path):return os.path.normcase(str(Path(path).resolve()))
+def _key(path):return os.path.normcase(str(Path(hosted(path)).resolve()))
 def _walk_strings(value):
  if isinstance(value,str):yield value
  elif isinstance(value,dict):
@@ -768,11 +790,11 @@ class _Outcome:
 def _status(error):
  source_refused=isinstance(error,HTTPError)and error.code in(400,404,405,410,422)
  # Refusals that are not about this endpoint's evidence leave it pending and unmodified.
- return 'pending'if type(error).__name__ in('FECAdmissionRefused','EndpointContractRefused')or _key_scoped(error)else'source_refused'if source_refused else'inconsistent'if isinstance(error,(ValueError,AssertionError))and type(error).__name__ not in('FECArchiveFailed','ArchiveBindingFailed')else'blocked'
+ return 'pending'if type(error).__name__ in('FECAdmissionRefused','EndpointContractRefused','BrokerUnavailable')or _key_scoped(error)else'source_refused'if source_refused else'inconsistent'if isinstance(error,(ValueError,AssertionError))and type(error).__name__ not in('FECArchiveFailed','ArchiveBindingFailed')else'blocked'
 # HTTP 429 is scoped to the one key that received it: the pool cools that key until its window resets and every other key keeps going.
 # Only when no key can be admitted any more does admission refuse (FECAdmissionRefused), which is the global stop.
 # The 429'd endpoint goes straight back to pending (no retry_after, no parking) so another key can serve it; its failure row and archive pair are still written.
-def _is_global(error):return type(error).__name__ in('FECAdmissionRefused','FECArchiveFailed','ArchiveBindingFailed','EndpointContractRefused')or isinstance(error,sqlite3.Error)or isinstance(error,HTTPError)and error.code in(401,403)
+def _is_global(error):return type(error).__name__ in('FECAdmissionRefused','FECArchiveFailed','ArchiveBindingFailed','EndpointContractRefused','BrokerUnavailable')or isinstance(error,sqlite3.Error)or isinstance(error,HTTPError)and error.code in(401,403)
 def _key_scoped(error):return isinstance(error,HTTPError)and error.code==429
 def _pool_stopped(error):return type(error).__name__=='FECAdmissionRefused'and'request pool is stopped'in str(error)
 class _Rates:
@@ -848,11 +870,17 @@ class _MsvcrtLease:
  def release(stream):
   import msvcrt;stream.seek(0);msvcrt.locking(stream.fileno(),msvcrt.LK_UNLCK,1)
 class _FcntlLease:
- # ponytail: stub. Port with fcntl.flock(fd, LOCK_EX|LOCK_NB) (acquire -> False on BlockingIOError) and LOCK_UN before the D075 container phase needs it.
+ # POSIX (the D075 container runtime): an advisory flock on the lease file; the kernel drops it on any exit, including a kill, so a dead holder never blocks the next run.
+ # A second open of the same file in this process conflicts too (flock locks the open file description), as the msvcrt lease does.
  @staticmethod
- def acquire(stream):raise NotImplementedError('The run lease has no fcntl backend yet; only the Windows msvcrt lease exists.')
+ def acquire(stream):
+  import fcntl
+  try:fcntl.flock(stream.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
+  except BlockingIOError:return False
+  return True
  @staticmethod
- def release(stream):raise NotImplementedError('The run lease has no fcntl backend yet; only the Windows msvcrt lease exists.')
+ def release(stream):
+  import fcntl;fcntl.flock(stream.fileno(),fcntl.LOCK_UN)
 def lease_backend(platform=None):return _MsvcrtLease if(os.name if platform is None else platform)=='nt'else _FcntlLease
 @contextmanager
 def run_lease(state,*,backend=None):
@@ -864,23 +892,26 @@ def run_lease(state,*,backend=None):
   if not backend.acquire(stream):raise SystemExit('Another collector invocation or recovery holds the run lease; nothing was written.')
   try:yield
   finally:backend.release(stream)
-def unresolved_runs(state):
- """(crashed, legacy): runs with a START but neither receipt nor ABANDONED marker, and response folders with no START or receipt at all."""
- state=Path(state);resolved=lambda run:(state/('RECEIPT-'+run+'.json')).exists()or(state/('RUN-'+run+'.ABANDONED.json')).exists()
- started=[p.name[len('RUN-'):-len('.START.json')]for p in sorted(state.glob('RUN-*.START.json'))]
- legacy=[p.name[len('responses-'):]for p in sorted(state.glob('responses-*'))if p.is_dir()and p.name[len('responses-'):]not in started and not resolved(p.name[len('responses-'):])]
+def unresolved_runs(state,archive_root=None):
+ """(crashed, legacy): runs with a START but neither receipt nor ABANDONED marker, and response folders with no START or receipt at all.
+ archive_root (D075): where responses-<run> folders live when that is not `state` (the host evidence root, seen read-only from a container); a receipt or marker in either place resolves a run."""
+ state=Path(state);archive=Path(archive_root)if archive_root is not None else state
+ resolved=lambda run:any((root/('RECEIPT-'+run+'.json')).exists()or(root/('RUN-'+run+'.ABANDONED.json')).exists()for root in(state,archive))
+ starts=lambda root:[p.name[len('RUN-'):-len('.START.json')]for p in sorted(root.glob('RUN-*.START.json'))]
+ started=starts(state);known=set(started)|set(starts(archive))
+ legacy=[p.name[len('responses-'):]for p in sorted(archive.glob('responses-*'))if p.is_dir()and p.name[len('responses-'):]not in known and not resolved(p.name[len('responses-'):])]
  return[run for run in started if not resolved(run)],legacy
-def recover_crashed_runs(state):
- state=Path(state);crashed,legacy=unresolved_runs(state)
+def recover_crashed_runs(state,archive_root=None):
+ state=Path(state);archive=Path(archive_root)if archive_root is not None else state;crashed,legacy=unresolved_runs(state,archive_root)
  if legacy:raise RecoveryRefused('Folder(s) responses-'+', responses-'.join(legacy)+' have neither a START record nor a receipt (a legacy crash, or a collector still running); a human must decide. Nothing was changed.')
  if not crashed:return{'recovered':False,'reason':'No unresolved collector run.'}
  if len(crashed)>1:raise RecoveryRefused('More than one unresolved run ('+', '.join(crashed)+'); a human must decide. Nothing was changed.')
  run=crashed[0];start=json.loads((state/('RUN-'+run+'.START.json')).read_bytes())
  if start.get('schema_version')!=1 or start.get('run_id')!=run:raise RecoveryRefused('Run start record is malformed; nothing was changed.')
- folder=state/('responses-'+run);base=start['ledger_at_start']
+ folder=archive/('responses-'+run);base=start['ledger_at_start']
  frontier=Frontier(state/'frontier.sqlite',optional_receipts=start['optional_receipts'],include_later_cycle_context=start['later_cycle_context'],enabled_endpoint_contracts=start['enabled_endpoint_contracts'])
  try:
-  work=frontier.recover(folder,state/'crash-quarantine'/run)
+  work=frontier.recover(folder,state/'crash-quarantine'/run,readonly=archive!=state)
   pages,total=frontier.db.execute('SELECT (SELECT COUNT(*) FROM pages),(SELECT COALESCE(SUM(attempt_count),0) FROM endpoints)').fetchone()
   lookups=(frontier.db.execute('SELECT COALESCE(SUM(http_attempts),0) FROM candidate_committee_lookups').fetchone()[0]if frontier.extensions_ready else 0)-base.get('sum_lookup_http_attempts',0)
   if work['referenced_pairs']==0 and pages==base['pages']and total==base['sum_attempt_count']and lookups==0:
@@ -888,7 +919,7 @@ def recover_crashed_runs(state):
    return{'recovered':True,'run_id':run,'receipt':None,'abandoned':str(marker),'quarantined':len(work['quarantined'])}
   report=frontier.report(pages-base['pages'],{'error_type':'CrashRecovered','detail':'Collector process ended before writing its receipt; this receipt was written by --recover-crashed-runs.','global_admission_archive_auth_quota_or_failure_allowance':True})
   # Every physical attempt counts: endpoint attempts plus candidate-committee lookup pages (the R1 equality is per physical attempt).
-  report.update(http_attempts=total-base['sum_attempt_count']+lookups,endpoint_attempts_recorded=total-base['sum_attempt_count'],candidate_committee_lookup_http_attempts=lookups,physical_request_cap=start['max_requests'],failed_attempt_allowance=start['max_failed_attempts'],raw_archive_directory=str(folder),workers=start['workers'],
+  report.update(http_attempts=total-base['sum_attempt_count']+lookups,endpoint_attempts_recorded=total-base['sum_attempt_count'],candidate_committee_lookup_http_attempts=lookups,physical_request_cap=start['max_requests'],failed_attempt_allowance=start['max_failed_attempts'],raw_archive_directory=stored(folder),workers=start['workers'],
    recovered_after_crash=True,recovery={'quarantined':work['quarantined'],'replayed_pairs':work['replayed_pairs'],'unrecorded_physical_attempts':'unknown; the shared budget ledger may exceed the recorded attempts (requests in flight at the kill are charged but never recorded)'})
   report.update(ledger_sha256=sha(frontier.path),seed_receipt=seed_after(start['seed_receipt']))
   output=state/('RECEIPT-'+run+'.json');write_new(output,report)
@@ -1041,6 +1072,10 @@ def rebind_run(state,*,ids,optional_receipts=False,later=False):
 def main():
  if '--migrate-to-schema3' in sys.argv[1:]:return migrate_main(sys.argv[1:])
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--state',required=True,type=Path);parser.add_argument('--seeds',type=Path);parser.add_argument('--max-requests',type=int);parser.add_argument('--max-failed-attempts',type=int,default=8);parser.add_argument('--optional-receipts',action='store_true');parser.add_argument('--include-later-cycle-context',action='store_true');parser.add_argument('--live',action='store_true')
+ parser.add_argument('--transport',choices=('local','broker'),default='local',help='local: this process holds the keys and archives itself (the default). broker: a key-free client of the host evidence broker named by MENTAT_REQUEST_POOL_CONFIG (D075).')
+ parser.add_argument('--archive-root',type=Path,help='Where responses-<run> lives, as this process sees it (default: --state). Required with --transport broker (the container sees the host evidence root read-only); --recover-crashed-runs reads it too.')
+ parser.add_argument('--run-id',help='32 lowercase hex digits; default a new uuid. A launcher names it so the host broker and this process agree.')
+ parser.add_argument('--stop-after-seconds',type=float,help='Stop dispatching after this many seconds, drain what is in flight and write the receipt (stop DeadlineReached).')
  parser.add_argument('--enable-endpoint-contract',action='append',default=[],help='Explicit pinned contract ID; repeatable, required on every restart after enablement.')
  parser.add_argument('--workers',type=int,default=1,help='Concurrent fetch workers, 1 to '+str(MAX_WORKERS)+'; the keys hourly allowance is the real ceiling.')
  parser.add_argument('--priority-candidates',type=Path,help='JSON list of {candidate_id,cycle}; their principal campaign committees get their B (and totals) pages first. Persisted in the ledger.')
@@ -1055,6 +1090,10 @@ def main():
  parser.add_argument('--launched',type=Path,help='The run\'s LAUNCHED.json (with --close-out-legacy-run).')
  args=parser.parse_args()
  if not 1<=args.workers<=MAX_WORKERS:parser.error('--workers must be an integer from 1 to '+str(MAX_WORKERS))
+ if args.run_id is not None and not re.fullmatch(r'[0-9a-f]{32}',args.run_id):parser.error('--run-id must be 32 lowercase hex digits')
+ if args.stop_after_seconds is not None and not args.stop_after_seconds>0:parser.error('--stop-after-seconds must be positive')
+ if args.transport=='broker' and args.archive_root is None:parser.error('--transport broker needs --archive-root')
+ if args.transport=='broker' and not args.run_id:parser.error('--transport broker needs --run-id (the broker token is bound to it)')
  ccl={};vintage={}
  for text,target in((args.ccl,ccl),(args.ccl_vintage,vintage)):
   for item in text:
@@ -1067,7 +1106,8 @@ def main():
  offline=[name for name,on in(('--recover-crashed-runs',args.recover_crashed_runs),('--rebind-endpoint-contracts',args.rebind_endpoint_contracts),('--close-out-legacy-run',args.close_out_legacy_run is not None))if on]
  if len(offline)>1:parser.error('One offline subcommand at a time: '+', '.join(offline))
  if offline:
-  if args.live or args.seeds is not None or args.max_requests is not None or args.priority_candidates or ccl or vintage or args.init_new_ledger or args.workers!=1:parser.error(offline[0]+' takes no --live, --seeds, --max-requests, --workers, --priority-candidates, --ccl or --init-new-ledger')
+  if args.live or args.seeds is not None or args.max_requests is not None or args.priority_candidates or ccl or vintage or args.init_new_ledger or args.workers!=1 or args.transport!='local' or args.run_id or args.stop_after_seconds is not None:parser.error(offline[0]+' takes no --live, --seeds, --max-requests, --workers, --priority-candidates, --ccl, --init-new-ledger, --transport, --run-id or --stop-after-seconds')
+  if args.archive_root is not None and not args.recover_crashed_runs:parser.error('--archive-root belongs to a live run and --recover-crashed-runs only')
   if args.close_out_legacy_run is None and(args.baseline_snapshot or args.baseline_receipt or args.launched):parser.error('--baseline-snapshot, --baseline-receipt and --launched belong to --close-out-legacy-run')
   if args.rebind_endpoint_contracts and not args.enable_endpoint_contract:parser.error('--rebind-endpoint-contracts needs the full --enable-endpoint-contract set to bind')
   if args.close_out_legacy_run is not None:
@@ -1076,7 +1116,7 @@ def main():
   if not ledger.is_file():raise SystemExit('No frontier.sqlite in '+str(args.state)+'; an offline subcommand never creates a ledger. Nothing was written.')
   with run_lease(args.state):
    try:
-    if args.recover_crashed_runs:print(encoded(recover_crashed_runs(args.state)))
+    if args.recover_crashed_runs:print(encoded(recover_crashed_runs(args.state,args.archive_root)))
     elif args.rebind_endpoint_contracts:print(encoded(rebind_run(args.state,ids=args.enable_endpoint_contract,optional_receipts=args.optional_receipts,later=args.include_later_cycle_context)))
     else:print(encoded(close_out_legacy_run(args.close_out_legacy_run,baseline_snapshot=args.baseline_snapshot,baseline_receipt=args.baseline_receipt,launched=args.launched,state=args.state)))
    except(RecoveryRefused,EndpointContractRefused)as error:raise SystemExit(str(error))from None
@@ -1086,13 +1126,26 @@ def main():
  if not args.live:raise SystemExit('No implicit provider calls. Review the seed/coverage plan and pass --live only after authorization.')
  if not ledger.exists()and not args.init_new_ledger:raise SystemExit('No frontier.sqlite in '+str(args.state)+'; refusing to create a new ledger (a new ledger forks the frontier). Pass --init-new-ledger to start one on purpose. Nothing was written.')
  if ledger.exists()and args.init_new_ledger:raise SystemExit('--init-new-ledger was given but '+str(ledger)+' exists; an existing ledger is never re-initialised. Nothing was written.')
+ remote=None
+ if args.transport=='broker':
+  # Before ANYTHING is written (not even the state folder): the descriptor must be this run's, its families must cover what this run will request, the mounted tree must be
+  # the one the broker imported, and the broker's recorded spelling must be the one this process's map reads back.
+  from api_request_pool import RemoteEvidenceTransport
+  try:remote=RemoteEvidenceTransport.from_environment(run_id=args.run_id,max_requests=args.max_requests,workers=args.workers)
+  except ValueError as error:raise SystemExit(str(error)+' Nothing was written.')from None
+  ids=activation_plan([],args.enable_endpoint_contract)['enabled_contract_ids']
+  needed={'B','E'}|{kind for kind,value in CONTRACTS.items()if value['contract_id']in ids}|({'A'}if args.optional_receipts else set())
+  if not needed<=set(remote.families):raise SystemExit('The broker descriptor does not admit family '+', '.join(sorted(needed-set(remote.families)))+' which this run needs. Nothing was written.')
+  if stored_paths.pairs()and not stored_paths.same(stored(args.archive_root),remote.descriptor['stored_root']):raise SystemExit('The broker records archives as '+remote.descriptor['stored_root']+' but MENTAT_STORED_PATH_MAP spells the archive root '+stored(args.archive_root)+'; recorded paths would not read back. Nothing was written.')
  from fec_accounted_client import AccountedTransport
  args.state.mkdir(parents=True,exist_ok=True)
  with run_lease(args.state):
-  crashed,legacy=unresolved_runs(args.state)
+  crashed,legacy=unresolved_runs(args.state,args.archive_root)
   if crashed or legacy:raise SystemExit('Unresolved collector run(s) '+', '.join(crashed+legacy)+': run --recover-crashed-runs (START present) or --close-out-legacy-run (no START, after a human review). Nothing was written.')
-  run_id=uuid.uuid4().hex;archive=args.state/('responses-'+run_id)
+  run_id=args.run_id or uuid.uuid4().hex;archive=(args.archive_root or args.state)/('responses-'+run_id);start_path=args.state/('RUN-'+run_id+'.START.json')
+  if args.run_id and any(item.exists()for item in(start_path,args.state/('RECEIPT-'+run_id+'.json'),archive)):raise SystemExit('Run id '+run_id+' was used before; a run id is never reused. Nothing was written.')
   rows,seed_receipt,seed_bytes=captured_seeds(args.seeds)
+  seed_receipt={**seed_receipt,'path':stored(seed_receipt['path'])}
   copy=args.state/('seeds-'+seed_receipt['sha256']+'.json')
   if copy.exists():
    if copy.read_bytes()!=seed_bytes:raise ValueError('Captured seed copy conflicts with its fingerprint.')
@@ -1109,18 +1162,20 @@ def main():
    pages,total=frontier.db.execute('SELECT (SELECT COUNT(*) FROM pages),(SELECT COALESCE(SUM(attempt_count),0) FROM endpoints)').fetchone()
    base_lookups=frontier.db.execute('SELECT COALESCE(SUM(http_attempts),0) FROM candidate_committee_lookups').fetchone()[0]if frontier.extensions_ready else 0
    # Written before the transport exists, so a response folder never exists without it; never rewritten.
-   write_new(args.state/('RUN-'+run_id+'.START.json'),{'schema_version':1,'purpose':'collector-run-start','run_id':run_id,'started_utc':now(),'collector_sha256':sha(__file__),'adapter_sha256':sha(sys.modules[AccountedTransport.__module__].__file__),
+   write_new(start_path,{'schema_version':1,'purpose':'collector-run-start','run_id':run_id,'started_utc':now(),'collector_sha256':sha(__file__),'adapter_sha256':sha(sys.modules[AccountedTransport.__module__].__file__),
     'workers':args.workers,'max_requests':args.max_requests,'max_failed_attempts':args.max_failed_attempts,'later_cycle_context':args.include_later_cycle_context,'optional_receipts':args.optional_receipts,'enabled_endpoint_contracts':args.enable_endpoint_contract,
-    'priority_candidates_file':priority_file,'init_new_ledger':args.init_new_ledger,'seed_receipt':{**seed_receipt,'captured_copy':str(copy)},'ledger_at_start':{'pages':pages,'sum_attempt_count':total,'sum_lookup_http_attempts':base_lookups}})
-   with AccountedTransport.live(archive,args.max_requests)as transport:
+    'priority_candidates_file':priority_file,'init_new_ledger':args.init_new_ledger,'seed_receipt':{**seed_receipt,'captured_copy':stored(copy)},'ledger_at_start':{'pages':pages,'sum_attempt_count':total,'sum_lookup_http_attempts':base_lookups},
+    **({'transport':remote.receipt_info()}if remote else{})})
+   with(remote.session(start_path,sha(__file__))if remote else AccountedTransport.live(archive,args.max_requests))as transport:
     lookup=frontier.fill_priority_via_api(transport)if args.priority_candidates else None
-    report=frontier.run(transport,max_failed_attempts=args.max_failed_attempts,workers=args.workers,progress=lambda snapshot:print(encoded(snapshot),file=sys.stderr,flush=True),initial_stop=lookup['stopped']if lookup else None)
+    report=frontier.run(transport,max_failed_attempts=args.max_failed_attempts,workers=args.workers,progress=lambda snapshot:print(encoded(snapshot),file=sys.stderr,flush=True),initial_stop=lookup['stopped']if lookup else None,stop_after_seconds=args.stop_after_seconds)
     recorded=frontier.db.execute('SELECT COALESCE(SUM(attempt_count),0) FROM endpoints').fetchone()[0]-total;lookups=lookup['http_attempts']if lookup else 0
     # Every physical attempt is either a dispatched endpoint attempt (outcomes AND endpoints.attempt_count agree) or a candidate-committee lookup page.
     if report['attempts_recorded']+lookups!=transport.http_attempts or recorded!=report['attempts_recorded']:raise RuntimeError('The ledger did not record every physical attempt (transport '+str(transport.http_attempts)+', outcomes '+str(report['attempts_recorded'])+', lookup pages '+str(lookups)+', endpoint attempt_count delta '+str(recorded)+'); no receipt written. Run --recover-crashed-runs.')
-    report.update(http_attempts=transport.http_attempts,physical_request_cap=transport.maximum,failed_attempt_allowance=args.max_failed_attempts,raw_archive_directory=str(archive),endpoint_attempts_recorded=recorded,candidate_committee_lookup_http_attempts=lookups)
+    report.update(http_attempts=transport.http_attempts,physical_request_cap=transport.maximum,failed_attempt_allowance=args.max_failed_attempts,raw_archive_directory=remote.archive_stored if remote else str(archive),endpoint_attempts_recorded=recorded,candidate_committee_lookup_http_attempts=lookups)
+    if remote:report.update(transport=remote.receipt_info())
     if args.priority_candidates:report.update(priority_candidates_file=priority_file,candidate_committee_api_lookup=lookup)
-   report.update(ledger_sha256=sha(frontier.path),seed_receipt={**seed_after(seed_receipt),'captured_copy':str(copy)})
+   report.update(ledger_sha256=sha(frontier.path),seed_receipt={**seed_after(seed_receipt),'captured_copy':stored(copy)})
    output=args.state/('RECEIPT-'+run_id+'.json');write_new(output,report)
    print(encoded({'receipt':str(output),'http_attempts':report['http_attempts'],'exhaustive_complete':False}))
   finally:frontier.close()

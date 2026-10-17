@@ -232,6 +232,7 @@ class AccountedTransport:
             self.http_attempts += 1
             number = self.http_attempts
             spec['call']['attempts'] = 1
+            spec['call']['key_index'] = spec['key_index']      # D075: the broker reports which ledger key served the attempt (by its hash only)
         try:
             response = (self.opener or self._thread_opener()).open(Request(spec['url'], headers={'X-Api-Key':key,
                 'User-Agent':'Mentat preserved FEC evidence'}), timeout=60)
@@ -258,7 +259,21 @@ class AccountedTransport:
             raise FECArchiveFailed('Original FEC response evidence could not be stored.') from None
         return {'status':status,'headers':headers,'body':body,'evidence':record}
 
+    def fetch_raw(self, endpoint, params, *, call=None):
+        """The original bytes of one admitted attempt, unparsed and with no status check: (status, headers, body, evidence).
+
+        Admission, the physical cap, the archive and the credential-echo refusal are exactly fetch()'s (fetch() is this plus the status check and the parse),
+        so a non-200 answer is a charged, archived attempt returned like any other. Refusals raise as in fetch(). The D075 host broker calls this."""
+        return self._fetch(endpoint, params, call)[1:]
+
     def fetch(self, endpoint, params, *, exact_decimal=False, call=None):
+        url, status, headers, body, evidence = self._fetch(endpoint, params, call)
+        if status != 200:
+            raise HTTPError(url, status, 'FEC evidence response was not successful.', headers, None)
+        options = {'parse_float':Decimal} if exact_decimal else {}
+        return json.loads(body, **options), evidence
+
+    def _fetch(self, endpoint, params, call):
         call = {} if call is None else call
         url = public_request(endpoint, params)
         if contains_secret(params,self.keys) or any(key in url for key in self.keys):
@@ -276,10 +291,7 @@ class AccountedTransport:
                 # Admission was refused (or failed): the slot never became a physical attempt.
                 with self.lock:
                     self.reserved -= 1
-        if response['status'] != 200:
-            raise HTTPError(url, response['status'], 'FEC evidence response was not successful.', response['headers'], None)
-        options = {'parse_float':Decimal} if exact_decimal else {}
-        return json.loads(response['body'], **options), response['evidence']
+        return url, response['status'], response['headers'], response['body'], response['evidence']
 
     def __call__(self, endpoint, params):
         return self.fetch(endpoint, params)[0]
