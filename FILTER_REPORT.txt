@@ -321,3 +321,18 @@ Changed export paths (26; 9 added, 17 changed, none removed, all under ops/deskt
 Held content: no local user paths, owner names, credentials, datasets, account databases or password-off flags in the added or changed files (the README states they are never part of the program ZIP). The two loading-assets files are the branded Terrier loading animation and icon. gitleaks 8.30.1 over the four commits: no leaks.
 Carried forward unchanged and blob-verified: all 28 .claude/skills exception files (the 7 of skill_docs_exception, the proof-toolkit path at blob 1ccbce54208b65d92e7ff4d4375febd6ce179f4a, and the 21 of ops_skills_exception), each equal to its recorded published_blob in T3 and in this branch; every path outside ops/desktop/ is unchanged from T3.
 Verification: node --test client suite 183/183; packaging test_terrier_desktop_access 8, test_terrier_principal 16, test_terrier_owner 6, test_desktop_backend 5, test_terrier_district 4, test_desktop_migrations 5, test_github_release 20 (all against the Geo Terrier 1.0.6 source); python -m unittest ops.tests.test_release_export: 16 tests OK. Tree: 1874 files.
+
+== ADDENDUM 15 2026-10-17: Terrier 1.0.7 desktop tooling on branch tooling/terrier-1.0.6 (not main)
+Base 092149288804bca583f4073370595e88ef5352c8 (ADDENDUM 14, published on tooling/terrier-1.0.6). main and its REVIEWED_BASE binding are unchanged; this branch still carries no .github, so pushing it starts no workflow.
+Commits:
+  8f1ce30d21059c01490575d23e2600e81d974dec fix(desktop): stage Terrier's OCR assets, OCR licences and parcel evidence
+  3112e0d4228158ca7a65613f7a64fb0f92d505c2 build(desktop): client version 1.0.7 for Terrier 1.0.7
+Reason: the Terrier desktop-preview-v1.0.6 package (Geo build run 39079116327, published and kept) lacked seven files that the staging filter drops by extension (.gz, .txt, .json): the OCR language data and asset manifest, the four Apache-2.0 OCR licence/NOTICE files, and the public parcel evidence bundle. runtime-manifest.json now names exactly those seven as Terrier sourceFiles; the extension filter is unchanged. The client version moves to 1.0.7 because 1.0.6 is published.
+Changed export paths (4; none added, none removed, all under ops/desktop/):
+  M ops/desktop/client/package-lock.json
+  M ops/desktop/client/package.json
+  M ops/desktop/packaging/runtime-manifest.json
+  M ops/desktop/packaging/test_staging.py
+Held content: the changes are file paths, a version string and a test; no local user paths, owner names, credentials or data. gitleaks 8.30.1 over the two commits: no leaks.
+Carried forward unchanged: all 28 .claude/skills exception files and every path outside ops/desktop/ (verified unchanged from 092149288).
+Verification: node --test client suite 183/183; packaging test_staging 5 (new: the seven Terrier files are staged); test_github_release 20; ops.tests.test_release_export OK; build_runtime.py --stage-only against the Geo source stages 188 files (181 before). Tree: 1874 files.
