@@ -17,6 +17,10 @@ without frontier.sqlite is refused unless --init-new-ledger is given. A 429 cool
 D075 (opt-in container runtime; the default is unchanged): --transport broker runs the same loop on a key-free RemoteEvidenceTransport, a host broker holding the keys, the
 shared quota ledger and the archive; --archive-root says where responses-<run> lives when that is not --state; MENTAT_STORED_PATH_MAP makes every RECORDED path the host's
 Windows spelling while reads go through the container's mounts; --run-id and --stop-after-seconds serve a launcher; the run lease has its fcntl backend.
+D076 (opt-in; without the flags every byte of behaviour is as before): --bulk-activity-index INDEX.json --expect-bulk-index-sha256 H persists a request-ORDER tier per B / E_regular / E_notice
+endpoint in the additive table endpoint_bulk_tier: 1 = the verified bulk files observed rows for that committee/cycle/kind, 2 = unknown (the index does not cover that kind/cycle),
+3 = the bulk files cover it and observed none. The queue is ordered by D072 campaign priority, then tier, then the existing fair turns; an endpoint with 3 or more attempts beyond its stored pages sorts after tier 3 and stays pending. A tier is only an ordering hint: it is never read by
+completion, accounting, admission or a receipt count, tier 3 is still fetched (last) and is never complete, zero or skipped without its own fetched pages, and an index never creates a unit, edge or payment.
 """
 from contextlib import contextmanager,nullcontext
 from datetime import datetime,timezone
@@ -128,6 +132,71 @@ def load_priority_candidates(path):
   if key in seen:raise ValueError('Duplicate priority entry: '+item['candidate_id']+' '+str(item['cycle']))
   seen.add(key);entries.append(key)
  return entries,{'path':str(path),'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'entries':len(entries)}
+# D076: a bulk activity index (tools/build_bulk_activity_index.py) orders requests. Its table is separate from EXTENSION_NAMES on purpose: extensions_ready, every D072 path and every
+# ledger that never saw an index stay exactly as they were. bulk_rows is NULL unless rows were observed (a stored zero would read as an observed absence); a tier is never an input of completion.
+BULK_TIER_TABLE='CREATE TABLE IF NOT EXISTS endpoint_bulk_tier(committee_id TEXT NOT NULL,cycle INTEGER NOT NULL,kind TEXT NOT NULL,tier INTEGER NOT NULL CHECK(tier IN(1,2,3)),bulk_rows INTEGER,index_sha256 TEXT NOT NULL,source TEXT NOT NULL,recorded TEXT NOT NULL,PRIMARY KEY(committee_id,cycle,kind))'
+BULK_KINDS=('B','E_regular','E_notice')
+BULK_SOURCE='bulk_activity_index'
+BULK_INDEX_KIND='mentat-bulk-activity-index'
+HEX64=re.compile(r'[0-9a-f]{64}')
+class BulkIndex:
+ def __init__(self,rows,coverage,receipt):self.rows,self.coverage,self.receipt=rows,coverage,receipt
+ def tier(self,committee,cycle,kind):
+  """(tier, observed row count or None) for one endpoint. 1: the bulk files observed rows. 3: the index covers this kind/cycle completely and observed none. 2: anything else (unknown)."""
+  seen=self.rows.get((committee,cycle,kind))
+  if seen:return 1,seen
+  return(3,None)if self.coverage.get((kind,cycle))else(2,None)
+def _no_duplicate_keys(pairs):
+ found={}
+ for key,value in pairs:
+  if key in found:raise ValueError('Duplicate key in the bulk activity index: '+key)
+  found[key]=value
+ return found
+BULK_COUNT_LIMIT=2**62   # a row count must fit SQLite's integer with room to spare; a larger one is a defect, not data. Each per-source count is >=1 and they must sum to the row count, so they are below the limit too
+def _short_text(value,limit=64):return value is None or(isinstance(value,str)and len(value)<=limit)
+def load_bulk_activity_index(path,expect_sha256):
+ """Strict reader of the JSON index. The file must hash to the pinned value before a byte is trusted; any defect refuses the whole index (nothing partial is ever used) with a ValueError, never a traceback."""
+ try:return _read_bulk_activity_index(path,expect_sha256)
+ except(TypeError,AttributeError,KeyError,IndexError,OverflowError,RecursionError,UnicodeError)as error:raise ValueError('The index is malformed ('+type(error).__name__+').')from None
+def _read_bulk_activity_index(path,expect_sha256):
+ raw=Path(path).read_bytes();fingerprint=hashlib.sha256(raw).hexdigest()   # the path is this process's own view (like --seeds); only the RECORDED spelling goes through stored()
+ if not isinstance(expect_sha256,str)or not HEX64.fullmatch(expect_sha256):raise ValueError('--expect-bulk-index-sha256 must be 64 lowercase hex digits.')
+ if fingerprint!=expect_sha256:raise ValueError('The index file hashes to '+fingerprint+', not the pinned '+expect_sha256+'.')
+ try:document=json.loads(raw,object_pairs_hook=_no_duplicate_keys)
+ except ValueError as error:raise ValueError('The index is not strict JSON: '+str(error))from None
+ if not isinstance(document,dict)or document.get('schema_version')!=1 or document.get('kind')!=BULK_INDEX_KIND:raise ValueError('Not a schema-1 '+BULK_INDEX_KIND+' document.')
+ provenance=document.get('provenance')
+ if not isinstance(provenance,dict)or not isinstance(provenance.get('sources'),list)or not provenance['sources']:raise ValueError('The index carries no source provenance.')
+ sources={}
+ for item in provenance['sources']:
+  if not(isinstance(item,dict)and isinstance(item.get('id'),str)and item['id']and HEX64.fullmatch(str(item.get('sha256')))and isinstance(item.get('vintage_asof'),str)and item['vintage_asof']and item.get('cycle')in origin_closure.CYCLES)or item['id']in sources:
+   raise ValueError('A source entry of the index lacks an id, sha256, vintage or cycle, or repeats an id.')
+  sources[item['id']]=item
+ coverage={};block=document.get('coverage')
+ for kind in BULK_KINDS:
+  for cycle in origin_closure.CYCLES:
+   entry=block.get(kind,{}).get(str(cycle))if isinstance(block,dict)and isinstance(block.get(kind),dict)else None
+   if not isinstance(entry,dict)or type(entry.get('complete'))is not bool or not isinstance(entry.get('ingested'),list)or any(name not in sources for name in entry['ingested']):
+    raise ValueError('The index coverage for '+kind+' '+str(cycle)+' is missing or malformed.')
+   coverage[kind,cycle]=entry['complete']
+ if not isinstance(document.get('rows'),list):raise ValueError('The index has no rows list.')
+ rows={}
+ for item in document['rows']:
+  if not(isinstance(item,list)and len(item)==5):raise ValueError('An index row is not [committee, cycle, kind, count, per-source counts].')
+  committee,cycle,kind,count,per=item
+  if not(isinstance(committee,str)and COMMITTEE.fullmatch(committee)and type(cycle)is int and cycle in origin_closure.CYCLES and kind in BULK_KINDS and type(count)is int and 1<=count<BULK_COUNT_LIMIT and isinstance(per,dict)and per
+         and all(name in sources and type(value)is int and 1<=value for name,value in per.items())and sum(per.values())==count):
+   raise ValueError('An index row is malformed: '+json.dumps(item)[:200])
+  if(committee,cycle,kind)in rows:raise ValueError('An index row repeats: '+json.dumps(item[:3]))
+  rows[committee,cycle,kind]=count
+ vintage=provenance.get('vintage')if isinstance(provenance.get('vintage'),dict)else{};builder=provenance.get('builder')if isinstance(provenance.get('builder'),dict)else{}
+ if not all(_short_text(value)for value in(provenance.get('built_utc'),builder.get('sha256'),vintage.get('oldest_asof'),vintage.get('newest_asof'))):raise ValueError('The index provenance text (build time, builder hash, vintage) is not short text.')
+ if not all(_short_text(source.get('kind'),32)and len(source['id'])<=64 and len(source['vintage_asof'])<=64 for source in provenance['sources']):raise ValueError('A source entry of the index carries text that is not short text.')
+ receipt={'path':stored(path),'sha256':fingerprint,'bytes':len(raw),'schema_version':1,'built_utc':provenance.get('built_utc'),'builder_sha256':builder.get('sha256'),
+  'vintage':{'oldest_asof':vintage.get('oldest_asof'),'newest_asof':vintage.get('newest_asof')},'rows':len(rows),
+  'sources':[{key:source.get(key)for key in('id','kind','cycle','sha256','vintage_asof')}for source in provenance['sources']],
+  'coverage_complete':{kind:{str(cycle):coverage[kind,cycle]for cycle in origin_closure.CYCLES}for kind in BULK_KINDS}}
+ return BulkIndex(rows,coverage,receipt)
 def ccl_vintage(path):
  receipt=Path(path).with_name('source-receipt.json')
  try:
@@ -160,6 +229,7 @@ class Frontier:
   if existing:
    model=sqlite3.connect(':memory:');model.executescript(SCHEMA);expected={r[0]for r in model.execute("SELECT name FROM sqlite_master WHERE type='table'")}
    for statement in EXTENSION_TABLES:model.execute(statement)
+   model.execute(BULK_TIER_TABLE)   # D076: optional like the extension tables; an existing ledger may hold it only with exactly this layout
    allowed={r[0]for r in model.execute("SELECT name FROM sqlite_master WHERE type='table'")}
    # The reviewed tables must all be present; the additive extension tables may be present (created) or absent (not yet needed).
    valid=expected<=existing<=allowed and all([tuple(r)for r in self.db.execute('PRAGMA table_info('+name+')')]==[tuple(r)for r in model.execute('PRAGMA table_info('+name+')')]for name in existing);model.close()
@@ -170,6 +240,7 @@ class Frontier:
   except(ValueError,sqlite3.Error)as error:self.db.close();raise ValueError('Frontier ledger lacks its recorded later-cycle context policy: '+str(error))
   if recorded!=bool(include_later_cycle_context):self.db.close();raise ValueError('Ledger policy later_cycle_context='+str(recorded).lower()+' differs from this invocation; the closure is defined by one recorded policy, never mixed.')
   self.optional_receipts=optional_receipts
+  self.bulk_index=None  # D076: set by set_bulk_index(); None means no endpoint is tiered by this process
   self.run_id=None      # set by main(); recorded on every candidate-committee lookup attempt row
   self.include_later_cycle_context=include_later_cycle_context
   try:
@@ -201,6 +272,33 @@ class Frontier:
    state='pending' if kind in self.supported else 'unsupported'
    why=None if state=='pending' else 'Required disclosure family '+kind+' has no reviewed driver coverage contract yet; exhaustive coverage remains false.'
    self.db.execute('INSERT OR IGNORE INTO endpoints(committee_id,cycle,kind,status,last_error) VALUES(?,?,?,?,?)',(committee,cycle,kind,state,why))
+  if self.bulk_index is not None:self._tier_endpoints(committee,cycle)
+ def _tier_endpoints(self,committee,cycle):
+  # D076, inside a writer transaction and only while an index is loaded. Records the request-order tier of this unit's B / E_regular / E_notice endpoints; a row is only ever
+  # (re)written when it came from another index. The tier changes no status, count, cursor or receipt figure: only _next_rows reads it.
+  recorded=now()
+  for kind in BULK_KINDS:
+   if kind not in self.supported:continue
+   tier,seen=self.bulk_index.tier(committee,cycle,kind)
+   self.db.execute('INSERT INTO endpoint_bulk_tier VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(committee_id,cycle,kind) DO UPDATE SET tier=excluded.tier,bulk_rows=excluded.bulk_rows,index_sha256=excluded.index_sha256,source=excluded.source,recorded=excluded.recorded WHERE endpoint_bulk_tier.index_sha256!=excluded.index_sha256',
+    (committee,cycle,kind,tier,seen,self.bulk_index.receipt['sha256'],BULK_SOURCE,recorded))
+ def set_bulk_index(self,index):
+  # Serial, before dispatch (like set_priority): tier every existing B / E endpoint; units created later are tiered in _unit(). Creates no unit, endpoint, edge or payment.
+  try:
+   with self.transaction():
+    self.db.execute(BULK_TIER_TABLE);self.bulk_index=index
+    for committee,cycle in self.db.execute("SELECT DISTINCT committee_id,cycle FROM endpoints WHERE kind IN('B','E_regular','E_notice')ORDER BY committee_id,cycle").fetchall():self._tier_endpoints(committee,cycle)
+  except BaseException:self.bulk_index=None;raise
+  return self.bulk_tier_summary()
+ def _tiers_present(self):
+  return self.db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='endpoint_bulk_tier'").fetchone()is not None
+ def bulk_tier_summary(self):
+  if not self._tiers_present():return None
+  by={}
+  for kind,tier,count in self.db.execute('SELECT kind,tier,COUNT(*) FROM endpoint_bulk_tier GROUP BY kind,tier'):by.setdefault(kind,{})[str(tier)]=count
+  total={str(tier):sum(item.get(str(tier),0)for item in by.values())for tier in(1,2,3)}
+  return {'source':BULK_SOURCE,'tiered_endpoints':sum(total.values()),'by_tier':total,'by_kind_tier':{kind:by[kind]for kind in sorted(by)},'index_sha256s':sorted({r[0]for r in self.db.execute('SELECT DISTINCT index_sha256 FROM endpoint_bulk_tier')}),
+   'order':'D072 campaign priority, then tier 1 / 2 / 3 (an endpoint with 3 or more attempts beyond its stored pages sorts after tier 3, still pending), then the existing fair turns','tier_is_an_ordering_hint_only':True}
  def _forward(self,committee,cycle):
   # With the ledger's later-cycle policy on, every later cycle of an admitted unit is itself a unit; origins reach it by derivation, never by stored copies.
   if self.include_later_cycle_context:
@@ -376,12 +474,16 @@ class Frontier:
  def _next_rows(self,limit,exclude):
   if limit<=0:return[]
   # One page per endpoint per round: outgoing endpoints receive fair turns; an endpoint in flight is simply taken.
+  tiered=self._tiers_present()and self.db.execute('SELECT 1 FROM endpoint_bulk_tier LIMIT 1').fetchone()is not None   # D076: persisted tiers order the queue right after campaign priority
   if self.extensions_ready and self.db.execute('SELECT 1 FROM campaign_priority LIMIT 1').fetchone():
    # Priority committees' B (and totals) endpoints are served first, still one page per endpoint per round (fair turns inside the
    # priority group; ties by list order). Everything else keeps the original fair-turn order after them. Priority lives in the ledger.
-   rows=self.db.execute("SELECT e.* FROM endpoints e LEFT JOIN (SELECT m.committee_id AS pc,m.cycle AS py,MIN(p.priority_rank) AS pr FROM campaign_priority p JOIN candidate_committee_map m ON m.candidate_id=p.candidate_id AND m.cycle=p.cycle GROUP BY m.committee_id,m.cycle) q ON q.pc=e.committee_id AND q.py=e.cycle AND e.kind IN('B','totals') WHERE e.status='pending' AND (? OR e.kind!='A') AND(e.kind!='A' OR NOT EXISTS(SELECT 1 FROM endpoints x WHERE x.kind IN('B','E_regular','E_notice')AND x.status!='complete')) ORDER BY CASE e.kind WHEN 'A' THEN 1 ELSE 0 END,CASE WHEN q.pr IS NULL THEN 1 ELSE 0 END,e.attempt_count,e.pages_stored,COALESCE(q.pr,0),e.cycle,e.committee_id,e.kind LIMIT ?",(self.optional_receipts,limit+len(exclude))).fetchall()
+   sql=("SELECT e.* FROM endpoints e LEFT JOIN (SELECT m.committee_id AS pc,m.cycle AS py,MIN(p.priority_rank) AS pr FROM campaign_priority p JOIN candidate_committee_map m ON m.candidate_id=p.candidate_id AND m.cycle=p.cycle GROUP BY m.committee_id,m.cycle) q ON q.pc=e.committee_id AND q.py=e.cycle AND e.kind IN('B','totals') WHERE e.status='pending' AND (? OR e.kind!='A') AND(e.kind!='A' OR NOT EXISTS(SELECT 1 FROM endpoints x WHERE x.kind IN('B','E_regular','E_notice')AND x.status!='complete')) ORDER BY CASE e.kind WHEN 'A' THEN 1 ELSE 0 END,CASE WHEN q.pr IS NULL THEN 1 ELSE 0 END,e.attempt_count,e.pages_stored,COALESCE(q.pr,0),e.cycle,e.committee_id,e.kind LIMIT ?")
+   if tiered:sql=sql.replace(" WHERE e.status='pending'",TIER_JOIN+" WHERE e.status='pending'",1).replace("CASE WHEN q.pr IS NULL THEN 1 ELSE 0 END,","CASE WHEN q.pr IS NULL THEN 1 ELSE 0 END,"+TIER_KEY+",",1)
   else:
-   rows=self.db.execute("SELECT * FROM endpoints WHERE status='pending' AND (? OR kind!='A') AND(kind!='A' OR NOT EXISTS(SELECT 1 FROM endpoints WHERE kind IN('B','E_regular','E_notice')AND status!='complete')) ORDER BY CASE kind WHEN 'A' THEN 1 ELSE 0 END,attempt_count,pages_stored,cycle,committee_id,kind LIMIT ?",(self.optional_receipts,limit+len(exclude))).fetchall()
+   sql=("SELECT * FROM endpoints WHERE status='pending' AND (? OR kind!='A') AND(kind!='A' OR NOT EXISTS(SELECT 1 FROM endpoints WHERE kind IN('B','E_regular','E_notice')AND status!='complete')) ORDER BY CASE kind WHEN 'A' THEN 1 ELSE 0 END,attempt_count,pages_stored,cycle,committee_id,kind LIMIT ?")
+   if tiered:sql="SELECT e.* FROM endpoints e"+TIER_JOIN+" WHERE e.status='pending' AND (? OR e.kind!='A') AND(e.kind!='A' OR NOT EXISTS(SELECT 1 FROM endpoints x WHERE x.kind IN('B','E_regular','E_notice')AND x.status!='complete')) ORDER BY CASE e.kind WHEN 'A' THEN 1 ELSE 0 END,"+TIER_KEY+",e.attempt_count,e.pages_stored,e.cycle,e.committee_id,e.kind LIMIT ?"
+  rows=self.db.execute(sql,(self.optional_receipts,limit+len(exclude))).fetchall()
   return[r for r in rows if(r['committee_id'],r['cycle'],r['kind'])not in exclude][:limit]
  def _dispatch_limit(self,transport,workers,inflight):
   free=workers-len(inflight)
@@ -612,15 +714,22 @@ class Frontier:
   pending=self.db.execute("SELECT COUNT(*) FROM endpoints WHERE kind IN("+",".join("?"for _ in outgoing)+")AND status!='complete'",outgoing).fetchone()[0]
   count=lambda table:self.db.execute('SELECT COUNT(*) FROM '+table).fetchone()[0]
   closure=self.closure()   # derived from seeds+edges+policy; never stored per unit
-  return {'schema_version':1,'ledger_schema_version':SCHEMA_VERSION,'generated_utc':now(),'ledger':stored(self.path),'units':count('units'),'origin_seed_assignments':count('origin_seeds'),'origin_catalog_entries':count('origin_catalog'),'origin_unit_assignments':closure.total,**origin_closure.disclosure(),'origin_unit_assignments_note':'Derived by origin_closure from origin_seeds, edges and the recorded later-cycle policy: origins OBSERVED to reach a unit through collected disclosures. A lower bound; an absent origin is not observed, never proven not to reach.','pages':count('pages'),'observations':count('observations'),'edges':count('edges'),'candidate_resolutions_required':count('candidate_resolutions'),'candidate_beneficiary_or_unverified_references':count('candidate_references'),'counterparty_identity_conflicts':count('counterparty_conflicts'),'leaf_disclosure_boundaries':count('leaf_coverage'),'endpoint_status_counts':endpoint_counts,'new_pages_this_invocation':completed_pages,'stop':stopped,'supported_outgoing_endpoints_complete':pending==0,'exhaustive_disclosed_spending_complete':False,'required_unsupported_endpoints':sorted({r[0]for r in self.db.execute("SELECT kind FROM endpoints WHERE status='unsupported'")}),
+  result={'schema_version':1,'ledger_schema_version':SCHEMA_VERSION,'generated_utc':now(),'ledger':stored(self.path),'units':count('units'),'origin_seed_assignments':count('origin_seeds'),'origin_catalog_entries':count('origin_catalog'),'origin_unit_assignments':closure.total,**origin_closure.disclosure(),'origin_unit_assignments_note':'Derived by origin_closure from origin_seeds, edges and the recorded later-cycle policy: origins OBSERVED to reach a unit through collected disclosures. A lower bound; an absent origin is not observed, never proven not to reach.','pages':count('pages'),'observations':count('observations'),'edges':count('edges'),'candidate_resolutions_required':count('candidate_resolutions'),'candidate_beneficiary_or_unverified_references':count('candidate_references'),'counterparty_identity_conflicts':count('counterparty_conflicts'),'leaf_disclosure_boundaries':count('leaf_coverage'),'endpoint_status_counts':endpoint_counts,'new_pages_this_invocation':completed_pages,'stop':stopped,'supported_outgoing_endpoints_complete':pending==0,'exhaustive_disclosed_spending_complete':False,'required_unsupported_endpoints':sorted({r[0]for r in self.db.execute("SELECT kind FROM endpoints WHERE status='unsupported'")}),
    'endpoint_contract_enablement':_stored_enablement(self.contract_enablement),'supported_outgoing_endpoint_kinds':outgoing,
    'later_cycle_context_explicitly_enabled':self.include_later_cycle_context,'later_context_missing_when_disabled':not self.include_later_cycle_context,'unknown_or_subcent_amount_occurrences':self.db.execute("SELECT COUNT(*) FROM observations WHERE amount_status!='valid_decimal'AND kind NOT IN('totals')").fetchone()[0],
    'other_spending_families':'/'.join(['B/E']+[kind for kind in('F','H4')if kind in outgoing])+' are overlapping evidence. Other disclosure families, report/unitemized totals, loans/debts and efile timing require independent coverage.','legacy_snapshot_compatible':False,'snapshots_json_or_evidence_json_published':False,'incoming_receipts_not_requested_means_unknown_not_empty':True,'no_exact_origin_dollar_attribution':True,'no_B_E_grand_total':True,'UI_top_depth_or_page_limits_used':False,'campaign_priority':self.priority_summary()}
+  tiers=self.bulk_tier_summary()   # D076: present only in a ledger that holds endpoint_bulk_tier
+  if tiers is not None:result['bulk_activity_tiers']=tiers
+  return result
  def close(self):self.db.close()
 
 class PageFailure(Exception):
  def __init__(self,row,error,query,evidence,attempts):self.row,self.error,self.query,self.evidence,self.attempts=row,error,query,evidence,attempts;super().__init__(str(error))
 
+TIER_JOIN=" LEFT JOIN endpoint_bulk_tier t ON t.committee_id=e.committee_id AND t.cycle=e.cycle AND t.kind=e.kind"
+# M1 (owner ruling): an endpoint that keeps failing (3 or more attempts beyond its stored pages) sorts AFTER tier 3, still pending, so a handful of failing tier 1/2 endpoints can never
+# take the whole failure allowance of every run and starve tier 3. The 4 is only a sort position: it is never stored, shown or read anywhere else.
+TIER_KEY="CASE WHEN e.attempt_count-e.pages_stored>=3 THEN 4 ELSE COALESCE(t.tier,2) END"
 COPIED_TABLES=('units','endpoints','pages','observations','edges','counterparty_conflicts','candidate_resolutions','candidate_references','leaf_coverage','failures')
 def _immutable(path):
  db=sqlite3.connect(Path(path).resolve().as_uri()+'?mode=ro&immutable=1',uri=True,timeout=.5);db.execute('PRAGMA query_only=ON');return db
@@ -1088,7 +1197,11 @@ def main():
  parser.add_argument('--baseline-snapshot',type=Path,help='SNAPSHOT.json of the previous accepted batch (with --close-out-legacy-run).')
  parser.add_argument('--baseline-receipt',type=Path,help='The previous batch receipt that snapshot binds (with --close-out-legacy-run).')
  parser.add_argument('--launched',type=Path,help='The run\'s LAUNCHED.json (with --close-out-legacy-run).')
+ parser.add_argument('--bulk-activity-index',type=Path,help='D076: JSON index from build_bulk_activity_index.py. Orders requests (campaign priority, then tier 1 observed / 2 unknown / 3 none observed, then fair turns); never completes, skips, zeroes or creates anything. Persisted per endpoint in the ledger.')
+ parser.add_argument('--expect-bulk-index-sha256',help='The pinned sha256 of --bulk-activity-index (required with it; the file must hash to exactly this before it is read).')
  args=parser.parse_args()
+ if bool(args.bulk_activity_index)!=bool(args.expect_bulk_index_sha256):parser.error('--bulk-activity-index and --expect-bulk-index-sha256 are given together or not at all.')
+ if args.expect_bulk_index_sha256 and not HEX64.fullmatch(args.expect_bulk_index_sha256):parser.error('--expect-bulk-index-sha256 must be 64 lowercase hex digits.')
  if not 1<=args.workers<=MAX_WORKERS:parser.error('--workers must be an integer from 1 to '+str(MAX_WORKERS))
  if args.run_id is not None and not re.fullmatch(r'[0-9a-f]{32}',args.run_id):parser.error('--run-id must be 32 lowercase hex digits')
  if args.stop_after_seconds is not None and not args.stop_after_seconds>0:parser.error('--stop-after-seconds must be positive')
@@ -1107,6 +1220,7 @@ def main():
  if len(offline)>1:parser.error('One offline subcommand at a time: '+', '.join(offline))
  if offline:
   if args.live or args.seeds is not None or args.max_requests is not None or args.priority_candidates or ccl or vintage or args.init_new_ledger or args.workers!=1 or args.transport!='local' or args.run_id or args.stop_after_seconds is not None:parser.error(offline[0]+' takes no --live, --seeds, --max-requests, --workers, --priority-candidates, --ccl, --init-new-ledger, --transport, --run-id or --stop-after-seconds')
+  if args.bulk_activity_index:parser.error(offline[0]+' takes no --bulk-activity-index')
   if args.archive_root is not None and not args.recover_crashed_runs:parser.error('--archive-root belongs to a live run and --recover-crashed-runs only')
   if args.close_out_legacy_run is None and(args.baseline_snapshot or args.baseline_receipt or args.launched):parser.error('--baseline-snapshot, --baseline-receipt and --launched belong to --close-out-legacy-run')
   if args.rebind_endpoint_contracts and not args.enable_endpoint_contract:parser.error('--rebind-endpoint-contracts needs the full --enable-endpoint-contract set to bind')
@@ -1137,6 +1251,10 @@ def main():
   needed={'B','E'}|{kind for kind,value in CONTRACTS.items()if value['contract_id']in ids}|({'A'}if args.optional_receipts else set())
   if not needed<=set(remote.families):raise SystemExit('The broker descriptor does not admit family '+', '.join(sorted(needed-set(remote.families)))+' which this run needs. Nothing was written.')
   if stored_paths.pairs()and not stored_paths.same(stored(args.archive_root),remote.descriptor['stored_root']):raise SystemExit('The broker records archives as '+remote.descriptor['stored_root']+' but MENTAT_STORED_PATH_MAP spells the archive root '+stored(args.archive_root)+'; recorded paths would not read back. Nothing was written.')
+ bulk_index=None
+ if args.bulk_activity_index:
+  try:bulk_index=load_bulk_activity_index(args.bulk_activity_index,args.expect_bulk_index_sha256)
+  except(OSError,ValueError)as error:raise SystemExit('Bulk activity index refused: '+str(error)+' Nothing was written.')from None
  from fec_accounted_client import AccountedTransport
  args.state.mkdir(parents=True,exist_ok=True)
  with run_lease(args.state):
@@ -1159,12 +1277,13 @@ def main():
    if args.priority_candidates:
     entries,priority_file=load_priority_candidates(args.priority_candidates)
     frontier.set_priority(entries,ccl={cycle:{'path':path,'vintage':vintage.get(cycle)or ccl_vintage(path)}for cycle,path in ccl.items()})
+   if bulk_index is not None:frontier.set_bulk_index(bulk_index)
    pages,total=frontier.db.execute('SELECT (SELECT COUNT(*) FROM pages),(SELECT COALESCE(SUM(attempt_count),0) FROM endpoints)').fetchone()
    base_lookups=frontier.db.execute('SELECT COALESCE(SUM(http_attempts),0) FROM candidate_committee_lookups').fetchone()[0]if frontier.extensions_ready else 0
    # Written before the transport exists, so a response folder never exists without it; never rewritten.
    write_new(start_path,{'schema_version':1,'purpose':'collector-run-start','run_id':run_id,'started_utc':now(),'collector_sha256':sha(__file__),'adapter_sha256':sha(sys.modules[AccountedTransport.__module__].__file__),
     'workers':args.workers,'max_requests':args.max_requests,'max_failed_attempts':args.max_failed_attempts,'later_cycle_context':args.include_later_cycle_context,'optional_receipts':args.optional_receipts,'enabled_endpoint_contracts':args.enable_endpoint_contract,
-    'priority_candidates_file':priority_file,'init_new_ledger':args.init_new_ledger,'seed_receipt':{**seed_receipt,'captured_copy':stored(copy)},'ledger_at_start':{'pages':pages,'sum_attempt_count':total,'sum_lookup_http_attempts':base_lookups},
+    'priority_candidates_file':priority_file,**({'bulk_activity_index':bulk_index.receipt}if bulk_index is not None else{}),'init_new_ledger':args.init_new_ledger,'seed_receipt':{**seed_receipt,'captured_copy':stored(copy)},'ledger_at_start':{'pages':pages,'sum_attempt_count':total,'sum_lookup_http_attempts':base_lookups},
     **({'transport':remote.receipt_info()}if remote else{})})
    with(remote.session(start_path,sha(__file__))if remote else AccountedTransport.live(archive,args.max_requests))as transport:
     lookup=frontier.fill_priority_via_api(transport)if args.priority_candidates else None
@@ -1175,6 +1294,7 @@ def main():
     report.update(http_attempts=transport.http_attempts,physical_request_cap=transport.maximum,failed_attempt_allowance=args.max_failed_attempts,raw_archive_directory=remote.archive_stored if remote else str(archive),endpoint_attempts_recorded=recorded,candidate_committee_lookup_http_attempts=lookups)
     if remote:report.update(transport=remote.receipt_info())
     if args.priority_candidates:report.update(priority_candidates_file=priority_file,candidate_committee_api_lookup=lookup)
+    if bulk_index is not None:report.update(bulk_activity_index=bulk_index.receipt)
    report.update(ledger_sha256=sha(frontier.path),seed_receipt={**seed_after(seed_receipt),'captured_copy':stored(copy)})
    output=args.state/('RECEIPT-'+run_id+'.json');write_new(output,report)
    print(encoded({'receipt':str(output),'http_attempts':report['http_attempts'],'exhaustive_complete':False}))

@@ -168,7 +168,7 @@ if ($Job -eq 'collect-downstream' -and $Runtime -ne 'container') {
   $collector = Join-Path $PSScriptRoot 'collect_committee_activity.py'
   $stateHost = if ($env:DOWNSTREAM_STATE_HOST) { $env:DOWNSTREAM_STATE_HOST } else { Join-Path $projectRoot 'state\committee-activity' }
   $ledgerHost = Join-Path $stateHost 'frontier.sqlite'
-  $allowedFlags = '--live', '--max-failed-attempts', '--include-later-cycle-context', '--optional-receipts', '--ccl', '--ccl-vintage'
+  $allowedFlags = '--live', '--max-failed-attempts', '--include-later-cycle-context', '--optional-receipts', '--ccl', '--ccl-vintage', '--bulk-activity-index', '--expect-bulk-index-sha256'
   $refusals = @()
   if ($Batch -lt 1) { $refusals += '-Batch (the batch number, 1 or more) is required.' }
   if ($Workers -lt 1 -or $Workers -gt 32) { $refusals += '-Workers must be 1 to 32.' }

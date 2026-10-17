@@ -200,7 +200,8 @@ def _evidence_check(ctx, extra, started):
 # /import holds a snapshot to seed an empty volume. NO FEC key is mounted: MENTAT_REQUEST_POOL_CONFIG names the host broker, which holds them. `--live` is the caller's
 # argument alone and is never added here, so the authorization stays visible in -PlanOnly and in the receipt.
 FRONTIER, HOSTSTATE, EXPORT, INPUTS, IMPORT = Path('/frontier'), Path('/hoststate'), Path('/export'), Path('/inputs'), Path('/import')
-DOWN_VALUES = ('--batch', '--collector-run-id', '--expect-base-sha256', '--seeds', '--max-requests', '--max-failed-attempts', '--workers', '--stop-after-seconds', '--priority-candidates')
+DOWN_VALUES = ('--batch', '--collector-run-id', '--expect-base-sha256', '--seeds', '--max-requests', '--max-failed-attempts', '--workers', '--stop-after-seconds', '--priority-candidates',
+               '--bulk-activity-index', '--expect-bulk-index-sha256')    # D076
 DOWN_REPEATS = ('--enable-endpoint-contract', '--ccl', '--ccl-vintage')
 DOWN_SWITCHES = ('--live', '--include-later-cycle-context', '--optional-receipts')
 DOWN_REQUIRED = ('--batch', '--collector-run-id', '--expect-base-sha256', '--seeds', '--max-requests', '--max-failed-attempts', '--workers')
@@ -263,7 +264,12 @@ def _down_args(extra):
         raise JobError('--collector-run-id must be 32 lowercase hex digits')
     if not re.fullmatch(r'[0-9a-f]{64}', values['--expect-base-sha256']):
         raise JobError('--expect-base-sha256 must be 64 lowercase hex digits')
-    for flag in ('--seeds', '--priority-candidates'):
+    # D076: a bulk activity index is a data file the host prepared next to the seeds; the pin is mandatory and travels with it (the collector would refuse a lone flag too)
+    if ('--bulk-activity-index' in values) != ('--expect-bulk-index-sha256' in values):
+        raise JobError('--bulk-activity-index and --expect-bulk-index-sha256 are given together or not at all')
+    if '--expect-bulk-index-sha256' in values and not re.fullmatch(r'[0-9a-f]{64}', values['--expect-bulk-index-sha256']):
+        raise JobError('--expect-bulk-index-sha256 must be 64 lowercase hex digits')
+    for flag in ('--seeds', '--priority-candidates', '--bulk-activity-index'):
         if flag in values and not _under(values[flag], INPUTS):
             raise JobError(flag + ' must be a file under ' + _posix(INPUTS) + ' (the folder the host prepared)')
     if any(not re.fullmatch(r'openfec-[A-Za-z0-9._-]+', item) for item in repeats.get('--enable-endpoint-contract', [])):
@@ -296,6 +302,8 @@ def _downstream_argv(ctx, extra):
         argv += ['--enable-endpoint-contract', contract]
     if '--priority-candidates' in values:
         argv += ['--priority-candidates', values['--priority-candidates']]
+    if '--bulk-activity-index' in values:
+        argv += ['--bulk-activity-index', values['--bulk-activity-index'], '--expect-bulk-index-sha256', values['--expect-bulk-index-sha256']]
     for flag in ('--ccl', '--ccl-vintage'):
         for item in repeats.get(flag, []):
             argv += [flag, item]
@@ -367,6 +375,7 @@ def _downstream_check(ctx, extra, started):
               'attempts are within the cap': isinstance(data.get('http_attempts'), int) and data['http_attempts'] <= int(values['--max-requests']),
               'every attempt is accounted': data.get('endpoint_attempts_recorded', -1) + data.get('candidate_committee_lookup_http_attempts', -1) == data.get('http_attempts'),
               'the run read its evidence through the broker': (data.get('transport') or {}).get('kind') == 'broker' and (data.get('transport') or {}).get('keys_held_by_this_process') == 0,
+              'the receipt names the pinned bulk index (or none was requested)': (data.get('bulk_activity_index') or {}).get('sha256') == values.get('--expect-bulk-index-sha256'),
               'the stop is not an integrity failure': stop not in INTEGRITY_STOPS}
     return problems + ['receipt check failed: ' + name for name, ok in checks.items() if not ok]
 
