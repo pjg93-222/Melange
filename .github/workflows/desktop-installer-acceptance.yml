@@ -1,4 +1,4 @@
-# Installer acceptance for the published Melange 1.0.4 unsigned Windows installer.
+# Installer acceptance for the published Melange 1.0.5 unsigned Windows installer.
 # Repository file: .github/workflows/desktop-installer-acceptance.yml (pjg93-222/Melange).
 #
 # Downloads the EXISTING release asset (public URL, no token), verifies its sha256, records the
@@ -36,13 +36,13 @@ jobs:
     env:
       APP_ID: melange
       APP_NAME: Melange
-      APP_VERSION: '1.0.4'
+      APP_VERSION: '1.0.5'
       RELEASE_REPO: pjg93-222/Melange
-      RELEASE_TAG: desktop-preview-v1.0.4
-      ASSET: Melange-1.0.4-win-x64-unsigned-installer.exe
-      ASSET_SHA256: cb24dc4a30abf50505809eb91b9c257321489b0ecc4cc731b08ef5845747cb5f
-      ZIP: Melange-1.0.4-win-x64-unsigned-preview.zip
-      ZIP_SHA256: d549de898fd601395173836c95d956337c31df6656e20242818c4b6a5923b4e6
+      RELEASE_TAG: desktop-preview-v1.0.5
+      ASSET: Melange-1.0.5-win-x64-unsigned-installer.exe
+      ASSET_SHA256: b9b842cc3af9611f325494d34a08e874f5a66e5cdd6435d4e38d4615a2f5bc52
+      ZIP: Melange-1.0.5-win-x64-unsigned-preview.zip
+      ZIP_SHA256: e670820cab0c89e99d81396464588f6c51c83122ea27f1d5daa52df873605d6c
       ZIP_EXPECTED_NOTE: 'none: exact parity (the hosted build zipped win-unpacked before any smoke)'
     defaults:
       run:
