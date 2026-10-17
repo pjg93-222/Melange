@@ -9,7 +9,6 @@ function districtFingerprint(profile,configuration){
  const record=filename=>{try{const stat=fs.lstatSync(filename,{bigint:true});records.push([filename,String(stat.dev),String(stat.ino),String(stat.size),String(stat.mtimeNs),String(stat.ctimeNs),stat.isSymbolicLink()]);}catch(error){if(error.code!=='ENOENT')throw error;records.push([filename,null]);}};
  for(const name of ['scores','contacts','street','walk','roads'])for(const suffix of ['','.sqlite3-wal','.sqlite3-journal'])record(path.join(roots.data,name+(suffix||'.sqlite3')));
  for(const suffix of ['','-wal','-journal'])record(path.join(roots.state,'accounts.sqlite3'+suffix));
- record(path.join(roots.data,'.desktop-password-lock-disabled'));
  const snapshots=path.join(roots.state,'snapshots');let entries=[];try{entries=fs.readdirSync(snapshots).sort();}catch(error){if(error.code!=='ENOENT')throw error;}
  records.push(['snapshots',entries]);for(const key of entries)for(const name of ['manifest.json','rows.json','geometry.json','streets.geojson','district.geojson','area_indices.json','adjacency.json'])record(path.join(snapshots,key,name));
  return JSON.stringify([roots,records]);

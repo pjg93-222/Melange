@@ -31,14 +31,10 @@ test('explicit Terrier sign-out also refuses a stale authenticated cookie and re
  const f=fixture('terrier');f.setAuthenticated(true);await f.lifecycle.suspend('signed_out');assert.equal(f.logout,1);assert.equal(f.lifecycle.requiresFreshPassword,true);
  f.setAuthenticated(true);const ticket=await f.lifecycle.prepareAuthentication();assert.equal(f.logout,2);assert.equal(await f.lifecycle.terrierAuthenticated(),false);assert.ok(ticket);await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);assert.equal(f.runtime.requestsAllowed,false);
 });
-test('temporary approved-owner password bypass resumes after a screen lock without password authentication',async()=>{
+test('removed password-lock switch: a backend reporting password_lock_disabled still forces logout and a fresh password after a screen lock',async()=>{
  const f=fixture('terrier');f.setAuthenticated(true);f.lifecycle.terrierPasswordLockDisabled=async()=>true;
- await f.lifecycle.suspend('locked');assert.equal(f.logout,0);assert.equal(f.lifecycle.requiresFreshPassword,false);
- assert.equal(f.runtime.requestsAllowed,false);await f.lifecycle.resume(f.approved);assert.equal(await f.lifecycle.authenticated(),true);
-});
-test('unavailable password preference preserves the normal Terrier lock',async()=>{
- const f=fixture('terrier');f.setAuthenticated(true);f.lifecycle.terrierPasswordLockDisabled=async()=>{throw new Error('unavailable');};
- await f.lifecycle.suspend('locked');assert.equal(f.logout,1);await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);
+ await f.lifecycle.suspend('locked');assert.equal(f.logout,1);assert.equal(f.lifecycle.requiresFreshPassword,true);assert.equal(await f.lifecycle.authenticated(),false);
+ await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);assert.equal(f.runtime.requestsAllowed,false);
 });
 test('wrong principal or district cannot resume preserved backend; health is not active presence',async()=>{
  const f=fixture('terrier');assert.equal(await f.lifecycle.heartbeat(),'signed_out');await f.lifecycle.suspend('locked');
