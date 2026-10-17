@@ -9,6 +9,8 @@ Standard library only; run with `python -I`.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import struct
 import sys
 
@@ -54,6 +56,7 @@ def verify(unsigned_path: str, signed_path: str) -> dict:
         masked = set(range(checksum, checksum + 4)) | set(range(security, security + 8))
         unsigned.seek(0)
         signed.seek(0)
+        hash_u, hash_s = hashlib.sha256(), hashlib.sha256()
         offset = 0
         while offset < length_u:
             a, b = unsigned.read(CHUNK), signed.read(min(CHUNK, length_u - offset))
@@ -63,10 +66,20 @@ def verify(unsigned_path: str, signed_path: str) -> dict:
                 for index in range(len(a)):
                     if a[index] != b[index] and offset + index not in masked:
                         raise BindingError(f'content differs at byte {offset + index}')
+            hash_u.update(a)
+            hash_s.update(b)
             offset += len(a)
-        if signed.read(table - length_u).strip(b'\0'):
+        padding = signed.read(table - length_u)
+        if padding.strip(b'\0'):
             raise BindingError('non-zero padding before the certificate table')
-    return {'unsignedBytes': length_u, 'signedBytes': length_s, 'certificateTableOffset': table, 'certificateTableBytes': size}
+        hash_s.update(padding)
+        tail = signed.read()
+        if len(tail) != size:
+            raise BindingError('short read of the certificate table')
+        hash_s.update(tail)
+    # The digests of exactly the bytes compared above, so a caller can bind them to the hashes it publishes.
+    return {'unsignedBytes': length_u, 'signedBytes': length_s, 'certificateTableOffset': table, 'certificateTableBytes': size,
+            'unsignedSha256': hash_u.hexdigest(), 'signedSha256': hash_s.hexdigest()}
 
 
 def main(argv=None):
@@ -79,7 +92,7 @@ def main(argv=None):
     except (BindingError, OSError, struct.error) as error:
         print('Binding refused: ' + str(error), file=sys.stderr)
         return 1
-    print(result)
+    print(json.dumps(result, sort_keys=True))
     return 0
 
 

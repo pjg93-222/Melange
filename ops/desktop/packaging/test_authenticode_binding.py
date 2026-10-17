@@ -1,4 +1,6 @@
 """Synthetic PE files: the binding accepts only "unsigned bytes + appended certificate table"."""
+import hashlib
+import json
 import struct
 import sys
 from pathlib import Path
@@ -41,11 +43,16 @@ def files(tmp_path, unsigned, signed):
 
 
 @pytest.mark.parametrize('magic', [0x10B, 0x20B])
-def test_signed_copy_of_the_unsigned_bytes_is_accepted(tmp_path, magic):
+def test_signed_copy_of_the_unsigned_bytes_is_accepted(tmp_path, magic, capsys):
     data = unsigned_pe(magic)
-    result = verify(*files(tmp_path, data, sign(data)))
+    signed = sign(data)
+    result = verify(*files(tmp_path, data, signed))
     assert result['unsignedBytes'] == len(data) and result['certificateTableBytes'] == 40
+    # The reported digests are of exactly the compared bytes, for the caller to bind to its published hashes.
+    assert result['unsignedSha256'] == hashlib.sha256(data).hexdigest()
+    assert result['signedSha256'] == hashlib.sha256(signed).hexdigest()
     assert main(['--unsigned', str(tmp_path / 'unsigned.exe'), '--signed', str(tmp_path / 'signed.exe')]) == 0
+    assert json.loads(capsys.readouterr().out) == result
 
 
 def test_any_change_outside_the_signature_fields_is_refused(tmp_path):
