@@ -41,19 +41,36 @@ def repositories(spec):
     return {app: REPOSITORIES[app].lower() for app in APPS}
 
 
+def valid_version(value):
+    return (isinstance(value, str) and len(value) <= 256 and VERSION.fullmatch(value) is not None
+            and all(int(part) <= 2**53-1 for part in value.split('.')))
+
+
+def valid_sequence(value):
+    return type(value) is int and 1 <= value <= 2**53-1
+
+
+def app_release(spec, app):
+    """(version, sequence) of one app: its own entry in packages, else the specification's defaults."""
+    files = spec['packages'][app]
+    return files.get('version', spec['version']), files.get('sequence', spec['sequence'])
+
+
 def validate_spec(spec):
     if not isinstance(spec, dict):
         raise Refused('release specification must be an object')
-    if (not isinstance(spec.get('version'), str) or len(spec['version']) > 256 or not VERSION.fullmatch(spec['version'])
-            or any(int(part) > 2**53-1 for part in spec['version'].split('.'))):
+    if not valid_version(spec.get('version')):
         raise Refused('a three-part stable application version is required')
-    if type(spec.get('sequence')) is not int or not 1 <= spec['sequence'] <= 2**53-1:
+    if not valid_sequence(spec.get('sequence')):
         raise Refused('positive safe-integer release sequence required')
     if (spec.get('platform'), spec.get('arch')) != ('win32', 'x64'):
         raise Refused('only the verified Windows x64 activation lane can be prepared')
+    # A release may name any non-empty subset of the apps (release owner, 2026-10-16: Melange first). Every signed
+    # manifest still binds the committed source of all three apps, which the installed client requires
+    # (client/github-source.cjs githubPolicy), so sourceRefs always names all three.
     if (not isinstance(spec.get('packages'), dict) or not isinstance(spec.get('sourceRefs'), dict)
-            or set(spec['packages']) != set(APPS) or set(spec['sourceRefs']) != set(APPS)):
-        raise Refused('one release must contain all three apps and their source references')
+            or not spec['packages'] or not set(spec['packages']) <= set(APPS) or set(spec['sourceRefs']) != set(APPS)):
+        raise Refused('a release names one or more of the apps, and the source references of all three')
     for app in sorted(APPS):
         source = spec['sourceRefs'][app]
         if (not isinstance(source, dict) or set(source) != {'repository', 'ref', 'commit'}
@@ -63,14 +80,18 @@ def validate_spec(spec):
                 or any(ord(c) < 32 or ord(c) == 127 for c in source['ref'])
                 or not isinstance(source.get('commit'), str) or not re.fullmatch(r'[0-9a-f]{40}', source['commit']) or source['commit'] == '0'*40):
             raise Refused('invalid committed source reference for ' + app)
+    for app in sorted(spec['packages']):
         files = spec['packages'][app]
-        if (not isinstance(files, dict) or set(files) != {'package', 'receipt'}
-                or any(not isinstance(value, str) or not value or '\0' in value for value in files.values())):
+        if (not isinstance(files, dict) or not {'package', 'receipt'} <= set(files) <= {'package', 'receipt', 'version', 'sequence'}
+                or any(not isinstance(files[key], str) or not files[key] or '\0' in files[key] for key in ('package', 'receipt'))):
             raise Refused('package and exact-byte gate receipt required for ' + app)
+        version, sequence = app_release(spec, app)
+        if not valid_version(version) or not valid_sequence(sequence):
+            raise Refused('invalid version or sequence for ' + app)
 
 
 def prepare(store, spec, output):
-    """Sign all three apps atomically; output/<app>/ is that app's release for its own repository."""
+    """Sign the named apps atomically (one or more); output/<app>/ is that app's release for its own repository."""
     validate_spec(spec)
     repos = repositories(spec)
     output = Path(output).absolute()
@@ -78,16 +99,16 @@ def prepare(store, spec, output):
         raise Refused('output must be a new directory; existing release files are never replaced')
     output.parent.mkdir(parents=True, exist_ok=True)
     config = store.config()  # Existing independently provisioned signing identities only.
-    version, sequence = spec['version'], spec['sequence']
     platform, arch = spec['platform'], spec['arch']
-    tag = 'desktop-v' + version
+    apps = sorted(spec['packages'])
     ledger = store.root / 'github-prepared.sqlite3'
     if ledger.is_symlink():
         raise Refused('release ledger may not be a symlink')
     with tempfile.TemporaryDirectory(prefix='.github-release-', dir=output.parent) as temporary:
         stage = Path(temporary) / 'release'
         manifests = {}
-        for app in sorted(APPS):
+        for app in apps:
+            version, sequence = app_release(spec, app)
             package_input = Path(spec['packages'][app]['package'])
             if package_input.is_symlink() or not package_input.is_file() or package_input.suffix.lower() != '.exe':
                 raise Refused('a regular NSIS installer is required for ' + app)
@@ -122,8 +143,10 @@ def prepare(store, spec, output):
             connection.execute('CREATE TABLE IF NOT EXISTS prepared (repository TEXT, app TEXT, platform TEXT, arch TEXT, sequence INTEGER, version TEXT, envelope TEXT, PRIMARY KEY(repository,app,platform,arch,sequence))')
             connection.execute('BEGIN IMMEDIATE')
             indexes = {}
-            for app in sorted(APPS):
+            for app in apps:
                 manifest = manifests[app]
+                version, sequence = manifest['version'], manifest['sequence']
+                tag = 'desktop-v' + version
                 # Rows are written per (repository, app). The advance check reads every
                 # row for the app, so no repository (including a legacy one) can reuse
                 # or lower its sequence/version.

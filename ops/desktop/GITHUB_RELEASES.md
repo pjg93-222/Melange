@@ -25,7 +25,7 @@ tools here change repository visibility.
 > `CurrentUser\My`; only machines that import its public certificate into `Root`
 > report its signatures as `Valid`, so only those machines install updates. The
 > hosted build stays unsigned but bakes the public pin
-> `WINDOWS_PUBLISHER_NAME = CN=Melange Desktop Release - Paul Goff - self-signed`
+> `WINDOWS_PUBLISHER_NAME = CN=Melange Systems Desktop Release (self-signed)`
 > (workflow `RELEASE_PUBLISHER`, signed-release input mode, with `STABLE_TAG`
 > reserved). On Paul's PC the installer is then signed (RFC 3161 timestamp),
 > `packaging/authenticode_binding.py` proves the signed file is the hosted bytes
@@ -49,9 +49,9 @@ tools here change repository visibility.
    reviewed public descriptor through `DESKTOP_ACCESS_TRUST`; its
    `updatePublicKeysByApp[appId]` supplies initial update roots without login or
    server enrollment. `DESKTOP_UPDATE_PROVIDER=publisher` explicitly selects
-   the existing custom publisher instead. Use one new stable three-part version
-   for all three apps and a strictly
-   increasing positive release sequence. Record the exact source commits used;
+   the existing custom publisher instead. Use a new stable three-part version
+   and a strictly increasing positive release sequence for each released app
+   (its own ledger row). Record the exact source commits used;
    Terrier's original source checkout is separate from Melange/Mentat.
 3. Complete native application acceptance and the existing `tests`, `security`,
    `dependencies`, `redistribution`, and `dataAllowlist` gates. Sign each installer
@@ -68,14 +68,21 @@ tools here change repository visibility.
 
 ```powershell
 python ops/desktop/packaging/github_release.py --state $publisherState --spec $releaseSpec --output $newBundle
-foreach ($app in 'melange', 'mentat', 'terrier') {
+foreach ($app in (Get-ChildItem -LiteralPath $newBundle -Directory).Name) {  # the apps this bundle releases
   python ops/desktop/packaging/github_release.py --state $publisherState --verify-output (Join-Path $newBundle $app)
   if ($LASTEXITCODE -ne 0) { throw "$app release verification failed" }
 }
 ```
 
-One specification covers all three apps at one version and sequence; the three
-are signed together or not at all. Each app's release is bound to its own
+One specification names one or more apps under `packages` (release owner,
+2026-10-16: the first signed release is Melange only). The named apps are signed
+together or not at all. Each takes the top-level `version` and `sequence` unless
+its `packages` entry sets its own, and each passes every per-app gate:
+Authenticode Valid by the exact subject, the receipt bound to its bytes and
+source, and its own ledger advance. `sourceRefs` always names all three apps,
+because every signed manifest binds them and the installed client requires all
+three (`client/github-source.cjs` `githubPolicy`). For an app that is not released,
+give the reviewed commit of its own repository's main. Each app's release is bound to its own
 repository from the fixed map in `github_release.py` (`melange` to
 `pjg93-222/Melange`, `mentat` to `pjg93-222/Mentat`, `terrier` to `pjg93-222/Geo`).
 An optional `repositories` object may restate entries of that map (case is
@@ -143,7 +150,7 @@ app in turn and stops on every native command error:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-foreach ($app in 'melange', 'mentat', 'terrier') {
+foreach ($app in (Get-ChildItem -LiteralPath $newBundle -Directory).Name) {  # the apps this bundle releases
   $bundle = (Resolve-Path -LiteralPath (Join-Path $newBundle $app)).Path
   $index = Get-Content -LiteralPath (Join-Path $bundle 'release.json') -Raw | ConvertFrom-Json
   if ($index.appId -ne $app) { throw "$bundle is not the $app release" }

@@ -52,7 +52,7 @@ test('an unset DESKTOP_GITHUB_REPOSITORY gives each app its own repository, and 
     // Signed-release input (self-signed design, 2026-10-16): the hosted build bakes the public publisher pin but carries
     // no signing material, so electron-builder finds no certificate and leaves every binary unsigned; the release
     // owner signs the installer locally. Without the variable the updater stays fail-closed (pin null).
-    const subject='CN=Melange Desktop Release - Paul Goff - self-signed';
+    const subject='CN=Melange Systems Desktop Release (self-signed)';
     assert.deepEqual(signingConfig(fixture,subject),{pin:subject,force:null,
       win:{target:['nsis'],icon:path.join(path.resolve(__dirname,'..'),'icons','melange.ico'),signtoolOptions:{publisherName:subject},verifyUpdateCodeSignature:true}});
     const unpinned=signingConfig(fixture);

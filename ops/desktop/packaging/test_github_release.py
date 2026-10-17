@@ -48,7 +48,7 @@ class FixtureSigner:
 def write_receipt(spec, app, sources=None):
     package = Path(spec['packages'][app]['package'])
     Path(spec['packages'][app]['receipt']).write_text(json.dumps({
-        'schemaVersion': 1, 'appId': app, 'version': spec['version'], 'platform': 'win32', 'arch': 'x64',
+        'schemaVersion': 1, 'appId': app, 'version': spec['packages'][app].get('version', spec['version']), 'platform': 'win32', 'arch': 'x64',
         'sha256': file_hashes(package)['sha256'], 'source': (sources or spec['sourceRefs'])[app],
         'osSignature': {'status': 'passed'},
         'gates': {name: {'status': 'passed', 'evidence': 'synthetic-test-only'} for name in GATES}}))
@@ -266,23 +266,80 @@ def test_staged_package_mutation_and_missing_native_identity_are_refused(tmp_pat
     assert store.signed == []
 
 
-def test_unreviewed_platform_or_partial_app_release_is_refused(tmp_path, prepared_inputs):
+def test_unreviewed_platform_or_incomplete_release_is_refused(tmp_path, prepared_inputs):
     store, spec, _ = prepared_inputs
+    melange = spec['packages']['melange']
     for changes in ({'platform': 'darwin'}, {'arch': 'arm64'}, {'sequence': True}, {'sequence': 0},
                     {'version': str(2**53)+'.0.0'}, {'version': '1.0.0-beta'},
-                    {'packages': None}, {'version': None}, {'sourceRefs': {}},
-                    {'packages': {app: spec['packages'][app] for app in ('melange', 'mentat')}},
+                    {'packages': None}, {'packages': {}}, {'version': None}, {'sourceRefs': {}},
+                    {'packages': {'melange': melange, 'unknown': melange}},
+                    # A subset release still binds the source of all three apps (the client requires it).
+                    {'packages': {'melange': melange}, 'sourceRefs': {app: spec['sourceRefs'][app] for app in ('melange', 'mentat')}},
+                    {'packages': {'melange': {**melange, 'extra': 'x'}}},
+                    {'packages': {'melange': {**melange, 'version': '1.0'}}},
+                    {'packages': {'melange': {**melange, 'sequence': 0}}},
+                    {'packages': {'melange': {'package': melange['package']}}},
                     {'sourceRefs': {**spec['sourceRefs'], 'melange': {**spec['sourceRefs']['melange'], 'repository': 'a/' + 'b'*101}}}):
         with pytest.raises(Refused):
             release.prepare(store, {**spec, **changes}, tmp_path / 'invalid')
     assert store.signed == []
 
 
+def test_melange_only_release_is_signed_alone_and_binds_all_three_sources(tmp_path, prepared_inputs):
+    store, spec, verified = prepared_inputs
+    subset = {**spec, 'packages': {'melange': {**spec['packages']['melange'], 'version': '1.0.5', 'sequence': 7}}}
+    write_receipt(subset, 'melange')
+    output = tmp_path / 'melange-only'
+    indexes = release.prepare(store, subset, output)
+    assert list(indexes) == ['melange'] and store.signed == ['melange'] and len(verified) == 1
+    assert sorted(path.name for path in output.iterdir()) == ['melange']
+    index = indexes['melange']
+    assert (index['tag'], index['version'], index['sequence']) == ('desktop-v1.0.5', '1.0.5', 7)
+    envelope = json.loads((output / 'melange' / 'melange-win32-x64.manifest.json').read_text())
+    manifest = verify_envelope(envelope, store.config()['apps']['melange']['publicKeys'], app='melange', platform='win32', arch='x64')
+    assert manifest['sourceRefs'] == spec['sourceRefs'] and set(manifest['sourceRefs']) == release.APPS
+    assert manifest['package']['name'] == 'melange-1.0.5-win32-x64.exe' and manifest['package']['path'] == '/v1/packages/melange/7/melange-1.0.5-win32-x64.exe'
+    assert release.verify_bundle(store, output / 'melange', 'pjg93-222/Melange') == index
+    with sqlite3.connect(store.root / 'github-prepared.sqlite3') as ledger:
+        assert list(ledger.execute('SELECT repository, app, sequence, version FROM prepared')) == [('pjg93-222/melange', 'melange', 7, '1.0.5')]
+    # The other apps' ledgers are untouched: a later three-app release at sequence 1 still prepares for them,
+    # while melange must advance beyond its own last release.
+    write_receipt(spec, 'melange')
+    with pytest.raises(Refused, match='must advance'):
+        release.prepare(store, spec, tmp_path / 'three-after-subset')
+    later = {**spec, 'packages': {app: spec['packages'][app] for app in ('mentat', 'terrier')}}
+    assert sorted(release.prepare(store, later, tmp_path / 'others')) == ['mentat', 'terrier']
+
+
+def test_named_app_without_its_verified_inputs_is_refused(tmp_path, prepared_inputs, monkeypatch):
+    store, spec, verified = prepared_inputs
+    two = {**spec, 'packages': {app: spec['packages'][app] for app in ('melange', 'terrier')}}
+    receipt = Path(two['packages']['terrier']['receipt'])
+    receipt.unlink()
+    with pytest.raises(FileNotFoundError):
+        release.prepare(store, two, tmp_path / 'missing-receipt')
+    write_receipt(two, 'terrier')
+    Path(two['packages']['terrier']['package']).write_bytes(b'other bytes than the receipt binds')
+    with pytest.raises(Refused, match='does not bind this package'):
+        release.prepare(store, two, tmp_path / 'unbound-package')
+    write_receipt(two, 'terrier')
+    def unsigned_terrier(argv, **kwargs):
+        status = 'NotSigned' if kwargs['env']['DESKTOP_VERIFY_PACKAGE'].endswith('terrier-1.0.0-win32-x64.exe') else 'Valid'
+        return SimpleNamespace(stdout=json.dumps({'Status': status, 'Subject': 'CN=Synthetic test signer'}))
+    monkeypatch.setattr('desktop_admin.subprocess.run', unsigned_terrier)
+    with pytest.raises(Refused, match='not signed by the pinned Windows publisher'):
+        release.prepare(store, two, tmp_path / 'unsigned-terrier')
+    assert store.signed == []
+    assert not any((tmp_path / name).exists() for name in ('missing-receipt', 'unbound-package', 'unsigned-terrier'))
+    assert not (store.root / 'github-prepared.sqlite3').exists() or not list(sqlite3.connect(store.root / 'github-prepared.sqlite3').execute('SELECT * FROM prepared'))
+
+
 def test_unchanged_client_accepts_each_manifest_only_for_its_own_repository(tmp_path, prepared_inputs):
     """Cross-check against the shipped receiver (client/trust.cjs + github-source.cjs githubPolicy)."""
     node = shutil.which('node')
-    if not node or not (CLIENT / 'node_modules' / 'semver').is_dir():
-        pytest.skip('client receiver needs node and the locked client dependencies (npm ci)')
+    # The locked dependencies may come from this checkout (npm ci) or from NODE_PATH.
+    if not node or RUN([node, '-e', "require.resolve('semver')"], cwd=CLIENT, capture_output=True, timeout=30).returncode != 0:
+        pytest.skip('client receiver needs node and the locked client dependencies (npm ci or NODE_PATH)')
     store, spec, _ = prepared_inputs
     output = tmp_path / 'public-assets'
     release.prepare(store, spec, output)
@@ -317,3 +374,27 @@ def test_unchanged_client_accepts_each_manifest_only_for_its_own_repository(tmp_
             assert outcome != 'accepted', name
     assert 'policy does not match' in outcomes['melange:repository-of-terrier']
     assert 'Invalid update signature' == outcomes['melange:tampered-payload']
+
+
+def test_unchanged_client_accepts_a_melange_only_release(tmp_path, prepared_inputs):
+    """A subset release changes nothing the receiver checks: all three source references are still signed."""
+    node = shutil.which('node')
+    if not node or RUN([node, '-e', "require.resolve('semver')"], cwd=CLIENT, capture_output=True, timeout=30).returncode != 0:
+        pytest.skip('client receiver needs node and the locked client dependencies (npm ci or NODE_PATH)')
+    store, spec, _ = prepared_inputs
+    subset = {**spec, 'packages': {'melange': {**spec['packages']['melange'], 'version': '1.0.5'}}}
+    write_receipt(subset, 'melange')
+    release.prepare(store, subset, tmp_path / 'melange-only')
+    envelope = json.loads((tmp_path / 'melange-only' / 'melange' / 'melange-win32-x64.manifest.json').read_text())
+    keys = store.config()['apps']['melange']['publicKeys']
+    cases = {'own': {'repository': 'pjg93-222/Melange', 'appId': 'melange'}, 'other-repository': {'repository': 'pjg93-222/Geo', 'appId': 'melange'},
+             'other-app': {'repository': 'pjg93-222/Melange', 'appId': 'terrier'}}
+    script = ("const {verifyEnvelope}=require(process.argv[1]);const input=JSON.parse(require('fs').readFileSync(0,'utf8'));const out={};"
+              "for(const [name,c] of Object.entries(input.cases)){try{verifyEnvelope(input.envelope,{source:'github',repository:c.repository,publicKeys:input.keys},"
+              "{appId:c.appId,platform:'win32',arch:'x64',version:'1.0.4'},{});out[name]='accepted';}catch(error){out[name]=error.message;}}"
+              "process.stdout.write(JSON.stringify(out));")
+    result = RUN([node, '-e', script, str(CLIENT / 'trust.cjs')], input=json.dumps({'envelope': envelope, 'keys': keys, 'cases': cases}),
+                 capture_output=True, text=True, timeout=60, check=True, cwd=CLIENT)
+    outcomes = json.loads(result.stdout)
+    assert outcomes['own'] == 'accepted', outcomes
+    assert outcomes['other-repository'] != 'accepted' and outcomes['other-app'] != 'accepted'
