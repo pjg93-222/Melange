@@ -45,6 +45,25 @@ class TemplateStagingTests(unittest.TestCase):
         self.assertIn('mentat/app/template.csv', staged)
         self.assertIn('mentat/tools/pocket/manifest.webmanifest', staged)
 
+    def test_terrier_ocr_assets_licences_and_parcel_evidence_are_staged(self):
+        # .gz, .txt and .json are outside the code extensions, so only sourceFiles keep them. The Terrier
+        # desktop-preview-v1.0.6 package lacked all seven: OCR could not load its language data, the Apache-2.0
+        # OCR licences were absent and parcel location repair had no evidence bundle.
+        spec = json.loads((HERE / 'runtime-manifest.json').read_text(encoding='utf-8'))['apps']['terrier']
+        ocr = 'frontend/dist/ocr/tesseract-6.0.1/'
+        required = {ocr + name for name in ('eng.traineddata.gz', 'asset-manifest.json', 'LICENSE-tessdata.txt',
+                                            'LICENSE-tesseract-core.txt', 'LICENSE-tesseract.js.txt', 'NOTICE.txt')}
+        required.add('server/research/location_evidence/southington-municipal-parcels-2026-10-17.json')
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for relative in spec['sourceDirectories']:
+                (root / relative).mkdir(parents=True, exist_ok=True)
+            for relative in spec['sourceFiles']:
+                (root / relative).parent.mkdir(parents=True, exist_ok=True)
+                (root / relative).write_text('x', encoding='utf-8')
+            staged = {path.as_posix() for path in selected_files(root, spec)}
+        self.assertLessEqual(required, staged)
+
     def test_pocket_template_retains_code_and_removes_embedded_data(self):
         with tempfile.TemporaryDirectory() as folder:
             source, destination = Path(folder) / 'source.html', Path(folder) / 'output.html'
