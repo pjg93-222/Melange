@@ -395,13 +395,16 @@ def combine(result, cycle):
         return {'status': 'source_unavailable', 'message': 'Spending source not installed'}
     committees = [item for item in result.get('committees') or [] if isinstance(item, dict)]
     usable = [item for item in committees if item.get('coverage_status') in ('complete', 'partial')]
-    if not usable:
-        if not committees or all(item.get('coverage_status') == 'mapping_unknown' for item in committees):
-            return {'status': 'mapping_unknown', 'message': f'Campaign committee not identified for {cycle_text(cycle)}'}
-        return {'status': 'not_collected', 'message': f'Spending not collected for {cycle_text(cycle)}'}
     mapping = result.get('mapping') if isinstance(result.get('mapping'), dict) else None
     ids = list(dict.fromkeys((mapping or {}).get('committee_ids') or [item.get('committee_id') for item in committees]))
     ids = [value for value in ids if value]
+    if not usable:
+        if not committees or all(item.get('coverage_status') == 'mapping_unknown' for item in committees):
+            return {'status': 'mapping_unknown', 'message': f'Campaign committee not identified for {cycle_text(cycle)}'}
+        # the ids and per-committee statuses go along so the panel can offer the bulk file's rows (bulk_oppexp.section)
+        return {'status': 'not_collected', 'message': f'Spending not collected for {cycle_text(cycle)}', 'committee_ids': ids,
+                'committees': [{'committee_id': item.get('committee_id'), 'endpoint_status': item.get('endpoint_status') or {}}
+                               for item in committees]}
     seen, rows, duplicates, occurrences = set(), [], 0, 0
     for committee in usable:
         for row in committee.get('rows') or []:
@@ -660,11 +663,19 @@ def respond(query):
         LOG.exception('candidate-spending: the spending source failed for %s %s', candidate, cycle)
         return ({'status': 'source_error', 'error': f'The spending source could not be read: {error or type(error).__name__}',
                  'candidate_id': candidate, 'cycle': cycle}, 503)
+    # The panel (detail) also carries the FEC bulk file's operating expenditures for committees whose API Schedule B is not
+    # complete: a separate, labeled section (bulk_oppexp.py), never added to the API figures; absent once the API is complete.
+    bulk = None
+    if detail and campaign.get('committee_ids'):
+        import bulk_oppexp
+        bulk = bulk_oppexp.section(campaign.get('committees') or [], campaign['committee_ids'], cycle)
     if campaign['status'] != 'ok':
-        return ({'status': campaign['status'], 'error': campaign['message'], 'candidate_id': candidate, 'cycle': cycle},
-                503 if campaign['status'] == 'source_unavailable' else 404)
+        return ({'status': campaign['status'], 'error': campaign['message'], 'candidate_id': candidate, 'cycle': cycle,
+                 **({'bulk': bulk} if bulk else {})}, 503 if campaign['status'] == 'source_unavailable' else 404)
     body = breakdown(campaign, first('name').strip()[:80] or None, detail=detail)
     body.update(candidate_id=candidate, office=candidate[:1])
+    if bulk:
+        body['bulk'] = bulk
     if detail:
         others = [parse_candidate(item) for item in first('peers').split(',') if item.strip()]
         body['peers'] = peers(cycle, candidate[:1], campaign['committee_ids'], [item for item in others if item and item != candidate])

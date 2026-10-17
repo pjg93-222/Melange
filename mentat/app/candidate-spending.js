@@ -314,6 +314,29 @@ const uid = prefix => `${prefix}${++serial.n}`;
       + `<th scope="col" class="flow-spend-num">Amount</th></tr></thead><tbody>${rows || '<tr><td colspan="4" class="flow-spend-none">No payments</td></tr>'}</tbody></table></div>${more}`;
   }
 
+  // The FEC bulk file's operating expenditures (body.bulk, app/bulk_oppexp.py) for committees whose API Schedule B is not
+  // complete: its own labeled section under everything else, never part of the ring, the totals or the comparison. Once the
+  // API is complete the server sends shown: false (api_complete) and only that one line is drawn. Memo rows are hidden.
+  function bulkHtml(bulk) {
+    if (!bulk) return '';
+    if (!bulk.shown) {
+      return bulk.message ? `<p class="flow-spend-fine" data-bulk="${escape(bulk.reason || 'hidden')}">${escape(bulk.message)}</p>` : '';
+    }
+    const rows = (bulk.rows || []).map(item => `<tr><td class="flow-spend-date">${escape(item.date || '')}</td>`
+      + `<td class="flow-spend-payee">${escape(item.payee)}</td><td class="flow-spend-purpose">${escape(item.purpose)}</td>`
+      + `<td class="flow-spend-num">${item.amount == null ? '' : escape(cents(item.amount))}</td></tr>`).join('');
+    const total = bulk.total || 0, shown = (bulk.rows || []).length;
+    const fine = [shown < total ? `Showing the newest ${shown} of ${grouped(total)} payments.` : '',
+      bulk.memo_rows_hidden ? `${plural(bulk.memo_rows_hidden, 'memo row')} hidden.` : '', bulk.scope ? `${bulk.scope}.` : ''].filter(Boolean).join(' ');
+    return `<section class="flow-spend-bulk" data-bulk="shown" aria-label="Operating expenditures from the FEC bulk file">`
+      + `<h4 class="flow-spend-h">Operating expenditures · ${escape(bulk.label || 'FEC bulk file, source date unavailable')}</h4>`
+      + `<p class="flow-spend-chip" role="note"><span aria-hidden="true">&#9432;</span> Bulk coverage · ${escape(bulk.note || 'Not API-collected; not added to the spending figures above')}</p>`
+      + `<div class="flow-spend-scroll" tabindex="0" role="region" aria-label="Bulk file payments"><table class="flow-spend-table flow-spend-pay"><thead><tr>`
+      + `<th scope="col">Date</th><th scope="col">Payee</th><th scope="col">Purpose as filed</th><th scope="col" class="flow-spend-num">Amount</th></tr></thead>`
+      + `<tbody>${rows || '<tr><td colspan="4" class="flow-spend-none">No operating expenditures in the bulk file for these committees</td></tr>'}</tbody></table></div>`
+      + (fine ? `<p class="flow-spend-fine">${escape(fine)}</p>` : '') + '</section>';
+  }
+
   // The whole panel. state as for cardHtml; ctx adds {link(url), rows (an Open in Rows button is offered)}.
   function panelHtml(state, ctx, view) {
     view = view || {};
@@ -322,12 +345,13 @@ const uid = prefix => `${prefix}${++serial.n}`;
       + '<button type="button" class="flow-pin-x" data-spend-close aria-label="Close spending panel">×</button></div>';
     const foot = `<p class="flow-spend-note">${escape(NOTE)}</p>`;
     const rowsButton = ctx.rows ? '<button type="button" class="secondary flow-spend-rows" data-spend-rows>Open in Rows</button>' : '';
+    const bulk = bulkHtml(state.body && state.body.bulk);
     if (state.kind !== 'ok') {
-      return `${head}${cardHtml(state, ctx)}${foot}<div class="flow-spend-actions">${rowsButton}<button type="button" class="secondary" data-spend-close>Close</button></div>`;
+      return `${head}${cardHtml(state, ctx)}${bulk}${foot}<div class="flow-spend-actions">${rowsButton}<button type="button" class="secondary" data-spend-close>Close</button></div>`;
     }
     const body = state.body;
     const model = ring(body, {top: Infinity, palette: ctx.palette, neutral: ctx.neutral});
-    if (!model.segments.length) return `${head}${cardHtml({kind: 'missing', message: 'No itemized spending on file for this campaign'}, ctx)}${foot}`;
+    if (!model.segments.length) return `${head}${cardHtml({kind: 'missing', message: 'No itemized spending on file for this campaign'}, ctx)}${bulk}${foot}`;
     const category = chosen(body, model, view);
     const covers = `<p class="flow-spend-fine">${escape(coversWords(body))}</p>`;
     const notes = footnotes(body, false);
@@ -347,7 +371,7 @@ const uid = prefix => `${prefix}${++serial.n}`;
       + `<ul class="flow-spend-legend is-panel" aria-label="Spending by category">${legend}</ul>${noteList}${covers}`
       + compareHtml(body, ctx) + payeesHtml(body, category)
       + `<div class="flow-spend-actions"><button type="button" data-spend-payments aria-expanded="${open}">${open ? 'Hide payments' : 'Open payments'}</button>${rowsButton}</div>`
-      + (open ? `<div class="flow-spend-payments">${paymentsHtml(body, category, ctx.link)}</div>` : '') + foot;
+      + (open ? `<div class="flow-spend-payments">${paymentsHtml(body, category, ctx.link)}</div>` : '') + bulk + foot;
   }
 
   /* ---------------------------------------------------------------- one read per candidate and cycle */
@@ -532,7 +556,7 @@ const uid = prefix => `${prefix}${++serial.n}`;
       }};
   }
 
-  const api = {ring, arcPath, donutSvg, cardHtml, panelHtml, compare, compareHtml, payeesHtml, paymentsHtml, client, controller,
+  const api = {ring, arcPath, donutSvg, cardHtml, panelHtml, bulkHtml, compare, compareHtml, payeesHtml, paymentsHtml, client, controller,
     eligible, colourOf, coverageText, money, percent, cycleText, summary, CATEGORIES, LABELS, NOTE, TOP, PEERS_MIN, DEBOUNCE_MS};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MentatCandidateSpending = api;
