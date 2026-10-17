@@ -103,12 +103,12 @@ test('main process applies the isolated plan before userData, lock, login item, 
   assert.doesNotMatch(source,/setAsDefaultProtocolClient|setUserTasks|setJumpList/);
   assert.doesNotMatch(source,/getPath\('appData'\),'MelangeDesktop'/);
   // Runtime data confinement: on load (before the runtime exists), on change (before write), before backend launch and district verification.
-  const load=at("if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){"),runtime=at('runtime=new Runtime(');
+  const load=at("if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){"),runtime=at('createRuntime=()=>new Runtime(');
   assert.ok(load<runtime&&source.slice(load,runtime).includes('app.quit();return;}'),'invalid loaded settings stop before any runtime is created');
   const change=at("if(profile.isolated)try{confineIsolatedSettings(profile.boundary,settings);}catch(error){updateStatus(error.message+' Settings were not changed.');return read('settings.json');}write('settings.json',settings);");
   assert.ok(change>source.indexOf("ipcMain.handle('desktop:directory'"));
   at("confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null");
-  at('verifyDistrict(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,');
+  at('verifyDistrictAsync(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,');
   at("write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),");
   // The only other writer creates the default settings with dataDirectory <userData>\data, inside the confined profile.
   at("const dataDirectory=path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',");
