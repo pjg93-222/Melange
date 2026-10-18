@@ -58,6 +58,37 @@ def test_unsigned_or_wrong_publisher_installer_is_refused(bundle, monkeypatch, c
     assert not out.exists() or not any(out.iterdir())
 
 
+def test_installer_swapped_after_verification_is_refused(bundle, monkeypatch, capsys):
+    output, args, out, _ = bundle
+    installer = output / 'mentat' / 'mentat-1.0.0-win32-x64.exe'
+
+    def swap_then_pass(*_args):  # runs after verify_bundle and before the zip is written
+        data = bytearray(installer.read_bytes())
+        data[0] ^= 1
+        installer.write_bytes(data)
+        return 'Valid'
+
+    monkeypatch.setattr(send_zip, 'authenticode', swap_then_pass)
+    assert send_zip.main(args + ['--bundle', str(output)]) == 1
+    assert 'differs from the signed release' in capsys.readouterr().err
+    assert not out.exists() or not any(out.iterdir())
+
+
+def test_checksum_write_failure_leaves_no_zip_behind(bundle, monkeypatch, capsys):
+    output, args, out, _ = bundle
+    original = Path.write_bytes
+
+    def write_bytes(self, data):
+        if self.name.endswith('.sha256'):
+            raise OSError('disk full')
+        return original(self, data)
+
+    monkeypatch.setattr(Path, 'write_bytes', write_bytes)
+    assert send_zip.main(args + ['--bundle', str(output)]) == 1
+    assert 'disk full' in capsys.readouterr().err
+    assert not out.exists() or not any(out.iterdir())  # no zip, no .sha256, no .send-zip-*.tmp
+
+
 def test_unpinned_publisher_is_refused(bundle, monkeypatch, capsys):
     output, args, out, _ = bundle
     store = send_zip.Store(None)

@@ -15,7 +15,7 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import github_release  # also puts ops/desktop/server on sys.path for desktop_admin
 from build_runtime import DENIED_NAMES
-from desktop_admin import APPS, Refused, Store, file_hashes
+from desktop_admin import APPS, Refused, Store, file_hashes, verify_envelope
 
 NAMES = {'melange': 'Melange', 'mentat': 'Mentat', 'terrier': 'Terrier'}
 assert set(NAMES) == APPS
@@ -57,6 +57,18 @@ def authenticode(installer, publisher):
     if signature.get('Subject') != publisher:
         raise Refused('installer is not signed by the pinned Windows publisher')
     return 'Valid'
+
+
+def signed_installer_sha256(store, directory, app, index):
+    """The installer sha256 the release signature vouches for; the bundle file itself can change after verify_bundle."""
+    envelope = json.loads((directory / f'{app}-win32-x64.manifest.json').read_text(encoding='utf-8'))
+    # Re-reading is safe: a substituted manifest must still carry a valid signature for this app, version and sequence.
+    manifest = verify_envelope(envelope, store.config()['apps'][app]['publicKeys'], app=app, platform='win32', arch='x64')
+    package = manifest['package']
+    if (manifest['version'] != index['version'] or manifest['sequence'] != index['sequence']
+            or package['name'] != f"{app}-{index['version']}-win32-x64.exe"):
+        raise Refused('signed manifest differs from the verified release')
+    return package['sha256']
 
 
 def readme(name, version, setup_sha256, publisher):
@@ -118,8 +130,8 @@ def write_zip(path, installer, setup_name, publisher, name, version):
     return setup_sha256
 
 
-def check_zip(path, installer, setup_name, setup_sha256):
-    """Reopen the finished zip: exactly the three expected members, and the installer inside is the bundle's installer."""
+def check_zip(path, setup_name, setup_sha256, signed_sha256):
+    """Reopen the finished zip: exactly the three expected members, and the installer inside is the signed release installer."""
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
         if sorted(names) != sorted((setup_name, 'README.txt', 'SHA256SUMS')) or any(denied(item) for item in names):
@@ -128,8 +140,8 @@ def check_zip(path, installer, setup_name, setup_sha256):
         with archive.open(setup_name) as stored:
             while block := stored.read(CHUNK):
                 readback.update(block)
-    if not setup_sha256 == readback.hexdigest() == file_hashes(installer)['sha256']:
-        raise Refused('zipped installer differs from the verified bundle installer')
+    if not setup_sha256 == readback.hexdigest() == signed_sha256:
+        raise Refused('zipped installer differs from the signed release installer')
     return sorted(names)
 
 
@@ -144,6 +156,7 @@ def build(app, bundle, state, out):
     if index['appId'] != app:
         raise Refused(f"bundle is for {index['appId']}, not {app}")
     version = index['version']
+    signed_sha256 = signed_installer_sha256(store, directory, app, index)
     installer = directory / f'{app}-{version}-win32-x64.exe'
     if installer.is_symlink() or not installer.is_file():
         raise Refused(f'installer is missing or not a regular file: {installer.name}')
@@ -160,13 +173,18 @@ def build(app, bundle, state, out):
     try:
         setup_name = f'{name}-{version}-Setup.exe'
         setup_sha256 = write_zip(temporary, installer, setup_name, publisher if signature == 'Valid' else None, name, version)
-        members = check_zip(temporary, installer, setup_name, setup_sha256)
+        members = check_zip(temporary, setup_name, setup_sha256, signed_sha256)
+        zip_sha256 = file_hashes(temporary)['sha256']
         os.replace(temporary, zip_path)
     except BaseException:
         Path(temporary).unlink(missing_ok=True)
         raise
-    zip_sha256 = file_hashes(zip_path)['sha256']
-    sum_path.write_bytes(f'{zip_sha256}  {zip_path.name}\n'.encode('ascii'))
+    try:
+        sum_path.write_bytes(f'{zip_sha256}  {zip_path.name}\n'.encode('ascii'))
+    except BaseException:  # never leave a zip without its checksum: a rerun would refuse "already exists"
+        zip_path.unlink(missing_ok=True)
+        sum_path.unlink(missing_ok=True)
+        raise
     return {'app': app, 'version': version, 'zip': str(zip_path), 'zipSha256': zip_sha256, 'members': members,
             'setupSha256': setup_sha256, 'authenticode': signature}
 
