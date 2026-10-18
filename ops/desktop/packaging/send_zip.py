@@ -62,12 +62,18 @@ def authenticode(installer, publisher):
 def signed_installer_sha256(store, directory, app, index):
     """The installer sha256 the release signature vouches for; the bundle file itself can change after verify_bundle."""
     envelope = json.loads((directory / f'{app}-win32-x64.manifest.json').read_text(encoding='utf-8'))
-    # Re-reading is safe: a substituted manifest must still carry a valid signature for this app, version and sequence.
+    # Re-reading is safe: our hash comes from a signature-verified manifest whose full release identity matches the verified
+    # release.json, so a substitute would need a second validly signed release with the same app, version, sequence,
+    # repository and sourceRefs. These are the same identity checks verify_bundle makes.
     manifest = verify_envelope(envelope, store.config()['apps'][app]['publicKeys'], app=app, platform='win32', arch='x64')
+    for key in ('version', 'sequence', 'repository', 'sourceRefs', 'purpose'):
+        if manifest.get(key) != index[key]:
+            raise Refused('signed manifest differs from release identity: ' + key)
+    name = f"{app}-{index['version']}-win32-x64.exe"
     package = manifest['package']
-    if (manifest['version'] != index['version'] or manifest['sequence'] != index['sequence']
-            or package['name'] != f"{app}-{index['version']}-win32-x64.exe"):
-        raise Refused('signed manifest differs from the verified release')
+    if (manifest.get('distribution') != 'public-installations' or package['name'] != name
+            or package['path'] != f"/v1/packages/{app}/{index['sequence']}/{name}"):
+        raise Refused('signed manifest differs from release identity: distribution or package')
     return package['sha256']
 
 

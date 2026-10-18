@@ -10,6 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import github_release as release
+from desktop_admin import unb64
 import send_zip
 from test_github_release import prepared_inputs  # noqa: F401  (pytest fixture: signer double, synthetic installers, Authenticode double)
 
@@ -72,6 +73,27 @@ def test_installer_swapped_after_verification_is_refused(bundle, monkeypatch, ca
     assert send_zip.main(args + ['--bundle', str(output)]) == 1
     assert 'differs from the signed release' in capsys.readouterr().err
     assert not out.exists() or not any(out.iterdir())
+
+
+@pytest.mark.parametrize('field, value', [('purpose', 'another-release'), ('repository', 'pjg93-222/other'),
+                                          ('sourceRefs', {}), ('distribution', 'private')])
+def test_validly_signed_manifest_with_another_identity_swapped_in_after_verification_is_refused(bundle, monkeypatch, capsys, field, value):
+    output, args, out, _ = bundle
+    manifest_path = output / 'mentat' / 'mentat-win32-x64.manifest.json'
+    store, real = send_zip.Store(None), release.verify_bundle
+
+    def verify_then_swap(*verify_args):  # signed_installer_sha256 runs after this, authenticode does not, so swap here
+        index = real(*verify_args)
+        manifest = json.loads(unb64(json.loads(manifest_path.read_text(encoding='utf-8'))['payload']))
+        manifest[field] = value
+        manifest_path.write_text(json.dumps(store.sign('mentat', manifest)), encoding='utf-8')  # valid signature, one identity field changed
+        return index
+
+    monkeypatch.setattr(send_zip.github_release, 'verify_bundle', verify_then_swap)
+    assert send_zip.main(args + ['--bundle', str(output)]) == 1
+    err = capsys.readouterr().err
+    assert 'signed manifest differs from release identity' in err and field in err
+    assert not out.exists() or not any(out.iterdir())  # no zip, no .sha256, no .send-zip-*.tmp
 
 
 def test_checksum_write_failure_leaves_no_zip_behind(bundle, monkeypatch, capsys):
