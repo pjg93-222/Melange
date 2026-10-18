@@ -157,7 +157,11 @@ def publish(temporary, final):
         os.link(temporary, final)  # unlike os.replace, os.link is atomic and fails if `final` exists (NTFS and POSIX)
     except FileExistsError as error:
         raise Refused(f'{final} already exists; it is never replaced') from error
-    os.unlink(temporary)
+    try:
+        os.unlink(temporary)
+    except BaseException:  # failing now must not leave `final` behind; os.link only succeeded because `final` did not exist, so it is the link this call just made
+        os.unlink(final)
+        raise
 
 
 def build(app, bundle, state, out):

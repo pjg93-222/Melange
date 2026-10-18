@@ -111,6 +111,24 @@ def test_checksum_write_failure_leaves_no_zip_behind(bundle, monkeypatch, capsys
     assert not out.exists() or not any(out.iterdir())  # no zip, no .sha256, no .send-zip-*.tmp
 
 
+@pytest.mark.parametrize('skip', [0, 1], ids=['zip_publish', 'sha256_publish'])
+def test_temp_cleanup_failure_after_publish_rolls_back_the_link(bundle, monkeypatch, capsys, skip):
+    output, args, out, _ = bundle
+    original, seen = send_zip.os.unlink, []
+
+    def unlink(path, *unlink_args, **unlink_kwargs):  # Path.unlink calls os.unlink too: only the nth .tmp unlink fails, the caller's later cleanup of the same temp succeeds
+        if str(path).endswith('.tmp'):
+            seen.append(path)
+            if len(seen) == skip + 1:
+                raise OSError('locked')
+        return original(path, *unlink_args, **unlink_kwargs)
+
+    monkeypatch.setattr(send_zip.os, 'unlink', unlink)
+    assert send_zip.main(args + ['--bundle', str(output)]) == 1
+    assert 'locked' in capsys.readouterr().err
+    assert not out.exists() or not any(out.iterdir())  # no zip, no .sha256, no .send-zip-*.tmp
+
+
 def test_concurrent_run_cannot_replace_an_existing_zip(bundle, monkeypatch, capsys):
     output, args, out, _ = bundle
     other = out / 'Mentat-1.0.0-windows.zip'
