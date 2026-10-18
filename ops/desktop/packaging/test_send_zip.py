@@ -76,17 +76,34 @@ def test_installer_swapped_after_verification_is_refused(bundle, monkeypatch, ca
 
 def test_checksum_write_failure_leaves_no_zip_behind(bundle, monkeypatch, capsys):
     output, args, out, _ = bundle
-    original = Path.write_bytes
+    original = send_zip.publish
 
-    def write_bytes(self, data):
-        if self.name.endswith('.sha256'):
+    def publish(temporary, final):
+        if str(final).endswith('.sha256'):
             raise OSError('disk full')
-        return original(self, data)
+        return original(temporary, final)
 
-    monkeypatch.setattr(Path, 'write_bytes', write_bytes)
+    monkeypatch.setattr(send_zip, 'publish', publish)
     assert send_zip.main(args + ['--bundle', str(output)]) == 1
     assert 'disk full' in capsys.readouterr().err
     assert not out.exists() or not any(out.iterdir())  # no zip, no .sha256, no .send-zip-*.tmp
+
+
+def test_concurrent_run_cannot_replace_an_existing_zip(bundle, monkeypatch, capsys):
+    output, args, out, _ = bundle
+    other = out / 'Mentat-1.0.0-windows.zip'
+    original = send_zip.write_zip
+
+    def write_zip_then_lose_the_race(*write_args):  # another run publishes between the early check and our publish
+        result = original(*write_args)
+        other.write_bytes(b'other run')
+        return result
+
+    monkeypatch.setattr(send_zip, 'write_zip', write_zip_then_lose_the_race)
+    assert send_zip.main(args + ['--bundle', str(output)]) == 1
+    assert 'already exists' in capsys.readouterr().err
+    assert sorted(path.name for path in out.iterdir()) == [other.name]  # no .sha256, no .send-zip-*.tmp
+    assert other.read_bytes() == b'other run'
 
 
 def test_unpinned_publisher_is_refused(bundle, monkeypatch, capsys):

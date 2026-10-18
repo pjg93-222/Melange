@@ -145,6 +145,15 @@ def check_zip(path, setup_name, setup_sha256, signed_sha256):
     return sorted(names)
 
 
+def publish(temporary, final):
+    """Move a finished temp file to its final name without ever replacing a file that is already there."""
+    try:
+        os.link(temporary, final)  # unlike os.replace, os.link is atomic and fails if `final` exists (NTFS and POSIX)
+    except FileExistsError as error:
+        raise Refused(f'{final} already exists; it is never replaced') from error
+    os.unlink(temporary)
+
+
 def build(app, bundle, state, out):
     name = NAMES[app]
     directory = bundle_dir(bundle, app)
@@ -175,15 +184,20 @@ def build(app, bundle, state, out):
         setup_sha256 = write_zip(temporary, installer, setup_name, publisher if signature == 'Valid' else None, name, version)
         members = check_zip(temporary, setup_name, setup_sha256, signed_sha256)
         zip_sha256 = file_hashes(temporary)['sha256']
-        os.replace(temporary, zip_path)
+        publish(temporary, zip_path)
     except BaseException:
         Path(temporary).unlink(missing_ok=True)
         raise
+    sum_temporary = None
     try:
-        sum_path.write_bytes(f'{zip_sha256}  {zip_path.name}\n'.encode('ascii'))
-    except BaseException:  # never leave a zip without its checksum: a rerun would refuse "already exists"
-        zip_path.unlink(missing_ok=True)
-        sum_path.unlink(missing_ok=True)
+        handle, sum_temporary = tempfile.mkstemp(prefix='.send-zip-', suffix='.tmp', dir=zip_path.parent)
+        os.close(handle)
+        Path(sum_temporary).write_bytes(f'{zip_sha256}  {zip_path.name}\n'.encode('ascii'))
+        publish(sum_temporary, sum_path)
+    except BaseException:  # never leave our zip without its checksum: a rerun would refuse "already exists"
+        if sum_temporary:
+            Path(sum_temporary).unlink(missing_ok=True)
+        zip_path.unlink(missing_ok=True)  # sum_path is never unlinked here: if it already existed, it is not ours
         raise
     return {'app': app, 'version': version, 'zip': str(zip_path), 'zipSha256': zip_sha256, 'members': members,
             'setupSha256': setup_sha256, 'authenticode': signature}
