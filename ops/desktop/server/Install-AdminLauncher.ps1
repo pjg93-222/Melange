@@ -33,8 +33,10 @@ if (-not (Test-Path -LiteralPath $pythonw -PathType Leaf)) { throw 'pythonw.exe 
 & $python -c 'import sys; raise SystemExit(sys.version_info < (3, 12))'
 if ($LASTEXITCODE -ne 0) { throw 'Python 3.12+ is required.' }
 
-# access-dashboard reads access-trust.json, which access-init writes; pythonw would fail silently without it.
-if (-not (Test-Path -LiteralPath (Join-Path $StateDirectory 'access-trust.json') -PathType Leaf)) { throw 'Initialize the admin state first: python desktop_admin.py init, then access-init.' }
+# access-dashboard needs what access-init writes (same set Start-AccessDashboard.ps1 checks); pythonw would fail silently.
+foreach ($name in 'access-trust.json', 'access.sqlite3', 'keys') {
+    if (-not (Test-Path -LiteralPath (Join-Path $StateDirectory $name))) { throw 'Initialize the admin state first: python desktop_admin.py init, then access-init.' }
+}
 $state = (Resolve-Path -LiteralPath $StateDirectory).ProviderPath.TrimEnd('\')
 
 $admin = Join-Path $PSScriptRoot 'desktop_admin.py'
