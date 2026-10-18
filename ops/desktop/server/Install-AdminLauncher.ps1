@@ -9,7 +9,8 @@ param(
     [switch]$Uninstall
 )
 $ErrorActionPreference = 'Stop'
-$links = foreach ($folder in 'Desktop', 'Programs') { Join-Path ([Environment]::GetFolderPath($folder)) 'Melange Admin.lnk' }
+# An unavailable shell folder yields '' and is skipped, so -Uninstall still cleans the other one.
+$links = @(foreach ($folder in 'Desktop', 'Programs') { $dir = [Environment]::GetFolderPath($folder); if ($dir) { Join-Path $dir 'Melange Admin.lnk' } })
 
 if ($Uninstall) {
     foreach ($link in $links) {
@@ -17,6 +18,7 @@ if ($Uninstall) {
     }
     return
 }
+if ($links.Count -ne 2) { throw 'The Desktop or Start-menu folder is unavailable for this user.' }
 
 if (-not $PythonExecutable) {
     $found = Get-Command python.exe -All -CommandType Application -ErrorAction SilentlyContinue |
