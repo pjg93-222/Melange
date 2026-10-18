@@ -41,7 +41,7 @@ optional MELANGE_CHAIN_TXN_DIR staging override), which keeps it clear of the co
 (ops/tests/test_compute_collector_policy.py), since the collectors' import closures now reach it through the freshness loaders.
 
 LABELLED DEGRADE: age_status() / note_freshness() give the four time-bomb sites one vocabulary (FRESH / STALE_LABELLED).
-Stdlib only.
+Stdlib only, plus the default data root from fec/paths.py.
 """
 from __future__ import annotations
 
@@ -56,6 +56,8 @@ import time
 import uuid
 from datetime import datetime, timezone
 
+from paths import DEFAULT_MELANGE_DATA
+
 SCHEMA = 'chain-transaction-v1'
 TXN_RELATIVE = 'data/engine/chain_txn'
 TXN_DIR_ENV = 'MELANGE_CHAIN_TXN_DIR'            # absolute override of the staging base (recover() reads the same variable)
@@ -63,7 +65,7 @@ TXN_DIR_ENV = 'MELANGE_CHAIN_TXN_DIR'            # absolute override of the stag
 # is never synced and never trips the A2 repo size audits). Falls back to the in-tree TXN_RELATIVE only where that root is absent or
 # not writable (e.g. the compute container mounts /melange-data read-only); set MELANGE_CHAIN_TXN_DIR there instead.
 DATA_ROOT_ENV = 'MELANGE_DATA_ROOT'
-DEFAULT_DATA_ROOT = 'C:\\melange-data'
+DEFAULT_DATA_ROOT = DEFAULT_MELANGE_DATA
 MIN_FREE_GB_ENV = 'MELANGE_CHAIN_TXN_MIN_FREE_GB'  # test/ops override of the 30 GB floor; 0 disables the gate
 MIN_FREE_GB = 30.0
 KEEP = 2

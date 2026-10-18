@@ -1,6 +1,6 @@
 # Melange application source (release)
 
-Filtered, history-free application source for Melange, published from local Melange branch `main` at commit `a1640d69c43ca3df56792f82fc904fb46cd4c0f1`. Filter: `ops/release_lib/export.py` rules (roots `fec/`, `requirements.txt`, `ops/`; extension allowlist; 5 MB blob cap; excludes). Paths are kept as in the source (`ops/github` is not remapped to `.github`, so no CI workflows run here).
+Filtered, history-free application source for Melange, published from local Melange branch `main` at commit `fc16b86376920573c0a2b8e67106737967cded9b`. Filter: `ops/release_lib/export.py` rules (roots `fec/`, `requirements.txt`, `ops/`; extension allowlist; 5 MB blob cap; excludes). Paths are kept as in the source (`ops/github` is not remapped to `.github`, so no CI workflows run here).
 
 See `SOURCE_PROVENANCE.json` and `FILTER_REPORT.txt`.
 
