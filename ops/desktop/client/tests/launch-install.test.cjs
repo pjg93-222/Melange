@@ -46,3 +46,13 @@ test('the notice window is created once and destroyed synchronously by closeWind
   li.showWindow();assert.equal(windows.length,2,'a new install phase gets a fresh window');
   windows[1].destroyed=true;li.showWindow();assert.equal(windows.length,3,'an already destroyed window is replaced');
 });
+
+test('the real notice-window factory from main.cjs runs under strict mode (no undeclared variable) and returns its window',()=>{
+  const main=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
+  const m=main.match(/LaunchInstall\)\(\{createWindow:(\(\)=>\{[\s\S]*?return owned;\})\}\);/);assert.ok(m,'factory found in main.cjs');
+  const calls=[],fake=()=>new Proxy(function(){},{get:(_,k)=>k==='then'?undefined:(k==='catch'?()=>{}:fake()),apply:()=>fake()});
+  class BrowserWindow{constructor(o){this.opts=o;this.webContents=fake();}setMenu(v){calls.push(['setMenu',v]);}loadURL(u){calls.push(['loadURL',u]);return Promise.resolve();}}
+  const factory=require('node:vm').runInNewContext("'use strict';("+m[1]+")",{BrowserWindow,definition:{id:'x',name:'X'},path,__dirname,installingURL:'file:///installing.html'});
+  const win=factory();// strict-mode ReferenceError on any undeclared assignment would throw here
+  assert.ok(win instanceof BrowserWindow);assert.equal(win.opts.closable,false);assert.deepEqual(calls,[['setMenu',null],['loadURL','file:///installing.html']],'menu and URL set exactly once');
+});

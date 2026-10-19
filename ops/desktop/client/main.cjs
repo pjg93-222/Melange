@@ -35,9 +35,7 @@ const installingURL=pathToFileURL(path.join(__dirname,'installing.html')).href;
 // While a pending update installs before any window or backend exists, launch requests are only recorded.
 // The notice window is closable:false (the user cannot dismiss it), so every quit path must close it itself first.
 const launchInstall=new(require('./launch-install.cjs').LaunchInstall)({createWindow:()=>{
- const owned=new BrowserWindow({width:420,height:200,title:definition.name+' update',icon:path.join(__dirname,'icons',definition.id+'.ico'),resizable:false,minimizable:false,maximizable:false,closable:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});installingWindow=owned;
- owned.setMenu(null);owned.webContents.setWindowOpenHandler(()=>({action:'deny'}));owned.webContents.on('will-navigate',event=>event.preventDefault());
- owned.loadURL(installingURL).catch(()=>{});
+ const owned=new BrowserWindow({width:420,height:200,title:definition.name+' update',icon:path.join(__dirname,'icons',definition.id+'.ico'),resizable:false,minimizable:false,maximizable:false,closable:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  owned.setMenu(null);owned.webContents.setWindowOpenHandler(()=>({action:'deny'}));owned.webContents.on('will-navigate',event=>event.preventDefault());
  owned.loadURL(installingURL).catch(()=>{});return owned;}});
 const resources=app.isPackaged?process.resourcesPath:__dirname;
