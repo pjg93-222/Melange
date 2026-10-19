@@ -188,9 +188,11 @@ class DesktopUpdater {
       // missing or deleted copy is fetched now (hash-checked on download); prepare() then runs the full hash and
       // native-publisher checks.
       const cached=this.packagePath(m);
-      const intact=async()=>{try{await verifyPackageFile(cached,m);return true;}catch{fs.rmSync(cached,{recursive:true,force:true});return false;}};
+      // Only a size/hash mismatch (PACKAGE_INTEGRITY) condemns a copy; a transient read error (EBUSY/EPERM, antivirus) keeps it.
+      let corrupt=false;
+      const intact=async()=>{try{await verifyPackageFile(cached,m);return true;}catch(error){corrupt=error.code==='PACKAGE_INTEGRITY';if(corrupt)fs.rmSync(cached,{recursive:true,force:true});return false;}};
       let local=fs.existsSync(cached)&&await intact();
-      if(!local){const source=this.adoptBaseline(m);if(source){local=await intact();if(!local)fs.rmSync(source,{force:true});}}
+      if(!local){const source=this.adoptBaseline(m);if(source){local=await intact();if(!local&&corrupt)fs.rmSync(source,{force:true});}}
       if(!local){await this.nativeTrust();await this.download(enrollment,enrollment.deviceToken,m,path.dirname(cached));}
       // A requested rollback beats any other pending update, which must not resurface after it. The running
       // version's own awaiting-startup record is kept.

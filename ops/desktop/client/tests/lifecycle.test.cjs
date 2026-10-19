@@ -418,6 +418,21 @@ test('a rollback copy is deleted only when its own bytes fail the hash check; an
   assert.equal(await mk().beginRecovery(),'1.0.0');assert.equal(f.downloads,downloads+1,'fetched fresh after the corrupt copy was removed');assert.equal(fs.existsSync(baseline),false);
 });
 
+test('a transient read error (EBUSY) on a rollback copy is not an integrity failure: neither the copy nor its baseline source is deleted',async t=>{
+  const f=fixture(t),bytes=fs.readFileSync(path.join(f.directory,'updates','1','Terrier.exe'));
+  f.state={};fs.rmSync(path.join(f.directory,'updates','1'),{recursive:true});
+  const baselineRoot=path.join(f.directory,'baseline'),baseline=path.join(baselineRoot,'1.0.0','Terrier.exe'),retained=path.join(f.directory,'updates','1','Terrier.exe');
+  fs.mkdirSync(path.dirname(baseline),{recursive:true});fs.writeFileSync(baseline,bytes);
+  const mk=extra=>f.client('Fixture Publisher',{baselineRoot,...extra});
+  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();second.markApplicationReady();await second.check();
+  // Antivirus holds the freshly copied installer open: reading it fails with EBUSY, which says nothing about its bytes.
+  const read=fs.createReadStream;fs.createReadStream=(file,...rest)=>{if(String(file).endsWith('Terrier.exe'))throw Object.assign(new Error('EBUSY: resource busy or locked'),{code:'EBUSY'});return read.call(fs,file,...rest);};
+  try{await assert.rejects(()=>mk({download:async()=>{throw new Error('offline');}}).beginRecovery(),/offline/);}finally{fs.createReadStream=read;}
+  assert.ok(fs.existsSync(retained),'the adopted rollback copy is kept');assert.ok(fs.existsSync(baseline),'the baseline source is kept');
+  // The lock is gone: the rollback now works offline from those same copies.
+  const downloads=f.downloads;assert.equal(await mk().beginRecovery(),'1.0.0');assert.equal(f.downloads,downloads);
+});
+
 test('launch strikes count every failure, including activation-time no-verdict and pre-try failures, and reset only after dispatch',async t=>{
   // Failure before the try in preparePending (no pinned publisher): three strikes, then no more offers.
   const f=fixture(t);await f.client().check();
