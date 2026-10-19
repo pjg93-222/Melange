@@ -433,6 +433,22 @@ test('a transient read error (EBUSY) on a rollback copy is not an integrity fail
   const downloads=f.downloads;assert.equal(await mk().beginRecovery(),'1.0.0');assert.equal(f.downloads,downloads);
 });
 
+test('a corrupt copy that cannot be deleted (EBUSY) does not stop recovery: it falls back to the download',async t=>{
+  const f=fixture(t),bytes=fs.readFileSync(path.join(f.directory,'updates','1','Terrier.exe'));
+  f.state={};fs.rmSync(path.join(f.directory,'updates','1'),{recursive:true});
+  const baselineRoot=path.join(f.directory,'baseline'),baseline=path.join(baselineRoot,'1.0.0','Terrier.exe'),retained=path.join(f.directory,'updates','1','Terrier.exe');
+  fs.mkdirSync(path.dirname(baseline),{recursive:true});fs.writeFileSync(baseline,bytes);
+  const mk=extra=>f.client('Fixture Publisher',{baselineRoot,...extra});
+  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();second.markApplicationReady();await second.check();
+  fs.mkdirSync(path.dirname(retained),{recursive:true});fs.writeFileSync(retained,'corrupt');fs.writeFileSync(baseline,'corrupt');
+  // Antivirus holds the corrupt installers open: deleting them fails with EBUSY.
+  const rm=fs.rmSync;let refused=0;
+  fs.rmSync=(file,...rest)=>{if(String(file).endsWith('Terrier.exe')&&refused<2){refused++;throw Object.assign(new Error('EBUSY: resource busy or locked'),{code:'EBUSY'});}return rm.call(fs,file,...rest);};
+  const downloads=f.downloads;
+  try{assert.equal(await mk().beginRecovery(),'1.0.0');}finally{fs.rmSync=rm;}
+  assert.ok(refused>=1,'a delete was attempted and refused');assert.equal(f.downloads,downloads+1,'recovery fell back to the download');
+});
+
 test('launch strikes count every failure, including activation-time no-verdict and pre-try failures, and reset only after dispatch',async t=>{
   // Failure before the try in preparePending (no pinned publisher): three strikes, then no more offers.
   const f=fixture(t);await f.client().check();
