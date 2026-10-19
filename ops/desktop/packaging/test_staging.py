@@ -45,6 +45,26 @@ class TemplateStagingTests(unittest.TestCase):
         self.assertIn('mentat/app/template.csv', staged)
         self.assertIn('mentat/tools/pocket/manifest.webmanifest', staged)
 
+    def test_runtime_state_and_databases_are_never_staged(self):
+        # Mentat's backend writes state/prewarm/access.sqlite (+ -wal/-shm) at run time; none may ship.
+        spec = json.loads((HERE / 'runtime-manifest.json').read_text(encoding='utf-8'))['apps']['mentat']
+        self.assertIn('mentat/state', spec['excludedSourcePrefixes'])
+        planted = ['mentat/state/x.sqlite', 'mentat/state/prewarm/access.sqlite', 'mentat/state/prewarm/access.sqlite-wal',
+                   'mentat/state/prewarm/access.sqlite-shm', 'mentat/state/prewarm/warm.py',
+                   'mentat/app/cache/run.sqlite3', 'mentat/app/cache/run.sqlite3-wal', 'mentat/app/Data.SQLITE',
+                   'mentat/app/cache/run.db', 'mentat/app/cache/run.DB-wal', 'mentat/app/cache/run.db-shm', 'mentat/app/cache/run.db-journal']
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for relative in planted + ['mentat/app/server.py']:
+                (root / relative).parent.mkdir(parents=True, exist_ok=True)
+                (root / relative).write_text('x', encoding='utf-8')
+            # Even a source directory that spans the whole app tree cannot pick them up.
+            for directories in (['mentat/app'], ['mentat']):
+                staged = {path.as_posix() for path in selected_files(root, {**spec, 'sourceDirectories': directories, 'sourceFiles': []})}
+                self.assertEqual(staged, {'mentat/app/server.py'}, directories)
+            with self.assertRaisesRegex(RuntimeError, 'Runtime database'):
+                selected_files(root, {**spec, 'sourceDirectories': ['mentat/app'], 'sourceFiles': ['mentat/state/x.sqlite']})
+
     def test_pocket_template_retains_code_and_removes_embedded_data(self):
         with tempfile.TemporaryDirectory() as folder:
             source, destination = Path(folder) / 'source.html', Path(folder) / 'output.html'

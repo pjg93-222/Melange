@@ -19,5 +19,6 @@ contextBridge.exposeInMainWorld('desktop',Object.freeze({
   rendererReady:()=>ipcRenderer.invoke('desktop:renderer-ready'),
   pair:value=>ipcRenderer.invoke('desktop:pair',value),
   launch:()=>ipcRenderer.invoke('desktop:launch'),
+  trustUpdates:()=>ipcRenderer.invoke('desktop:trust-updates'),
   onStatus:callback=>{const listener=(_event,value)=>callback(String(value));ipcRenderer.on('desktop:status',listener);return()=>ipcRenderer.removeListener('desktop:status',listener);}
 }));

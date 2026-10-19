@@ -167,6 +167,9 @@
     },
     "mentat": {
       "entrypoint": "mentat/app/server.py",
+      "excludedSourcePrefixes": [
+        "mentat/state"
+      ],
       "sourceDirectories": [
         "mentat/app",
         "mentat/tools",
