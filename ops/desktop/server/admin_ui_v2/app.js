@@ -137,8 +137,9 @@
     if(detail&&view==='app'&&current===service&&tab==='logs')enterLogs();}
   function backToList(){stopFollow();current=undefined;detail=undefined;view='apps';byId('app-detail').hidden=true;byId('apps-list').hidden=false;loadApps();}
   async function loadDetail(){
-    try{detail=await call('/apps/detail',{service:current});slow=false;}
-    catch(error){if(error.status===401)return showExpired(true);if(detail&&!(error.body&&error.body.message)){slow=true;renderDetail();keepPolling();return;}say('Could not read this service. Choose Apps and try again.',true);keepPolling();return;}
+    const service=current;   // an answer for a service that is no longer open is dropped, never shown or cached as the open one
+    try{const made=await call('/apps/detail',{service});if(service!==current||view!=='app')return;detail=made;slow=false;}
+    catch(error){if(error.status===401)return showExpired(true);if(service!==current||view!=='app')return;if(detail&&!(error.body&&error.body.message)){slow=true;renderDetail();keepPolling();return;}say('Could not read this service. Choose Apps and try again.',true);keepPolling();return;}
     appsData=appsData||{services:[],activity:[],docker:{ok:true},checkedAt:Date.now()/1000};
     const index=appsData.services.findIndex(s=>s.service===current);if(index>=0)appsData.services[index]=detail.service;
     renderDetail();keepPolling();
@@ -214,7 +215,7 @@
     if(logsBusy||view!=='app'||tab!=='logs')return;
     logsBusy=true;const service=current;
     try{const made=await call('/apps/logs',{service});if(service!==current||view!=='app'||tab!=='logs')return;logLines=made.lines;}
-    catch(error){if(error.status===401)return showExpired(true);if(first&&error.status!==409)say('Could not read the logs for this service.',true);return;}
+    catch(error){if(error.status===401)return showExpired(true);if(service!==current||view!=='app'||tab!=='logs')return;if(first&&error.status!==409)say('Could not read the logs for this service.',true);return;}
     finally{logsBusy=false;}
     drawLogs();
   }

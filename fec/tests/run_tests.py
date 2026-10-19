@@ -1195,10 +1195,33 @@ _suite_specs=tuple(_s for _s in (
 # Missing suites are reported in the same per-suite shape the loop below prints, so the run stays
 # readable and the verdict line keeps its format. Nothing is printed when nothing is missing, so a
 # complete tree's output is byte-identical to before.
-if _missing_suites:
-    print('[registered suites absent from this tree]')
-    for _t in _missing_suites:
-        ok('%s suite clean'%_t,False,'registered test suite not found')
+# 2026-10-19 (CodeRabbit, PR #12): the public export leaves six registered suites out by exact path
+# (MELANGE_RESEARCH_TESTS and MELANGE_LOCAL_ARTIFACT_TESTS in ops/release_lib/export.py). When one of those is
+# absent it is named as skipped and not counted; any other absent suite still fails. The names are read with
+# ast, never imported: fec does not import ops (compute_engine.py runs ops code as a child process instead).
+def _export_excluded(root):
+    import ast as _ast
+    try:
+        with open(os.path.join(root,'ops','release_lib','export.py'),encoding='utf-8') as _f:
+            _tree=_ast.parse(_f.read())
+        _paths=[_p for _n in _tree.body if isinstance(_n,_ast.Assign)
+                and any(getattr(_t,'id',None) in ('MELANGE_RESEARCH_TESTS','MELANGE_LOCAL_ARTIFACT_TESTS') for _t in _n.targets)
+                for _p in _ast.literal_eval(_n.value)]
+    except (OSError,SyntaxError,ValueError):
+        return set()   # no readable export list: nothing is excused
+    return {os.path.basename(_p)[:-3] if _p.endswith('.py') else os.path.basename(_p) for _p in _paths}
+def _report_missing(missing,excluded):
+    skipped=[_t for _t in missing if _t in excluded]
+    if skipped:
+        print('[registered suites the public export leaves out by name (ops/release_lib/export.py): skipped]')
+        for _t in skipped:
+            print('  SKIP %s'%_t)
+    failed=[_t for _t in missing if _t not in excluded]
+    if failed:
+        print('[registered suites absent from this tree]')
+        for _t in failed:
+            ok('%s suite clean'%_t,False,'registered test suite not found')
+_report_missing(_missing_suites,_export_excluded(_mb_root) if _missing_suites else set())
 # No node on PATH is one named failure, never a silent skip of the whole lane.
 if not _node:
     ok('node lane ran',False,'node not on PATH; %d .cjs suites not run'%len(_LANE_NODE))
