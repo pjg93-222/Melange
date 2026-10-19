@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, logsBusy=false, logLines=[], logTop, appsWorking=false, slow=false, polling=false;
+  let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, detailGen=0, logsBusy=false, logLines=[], logTop, appsWorking=false, slow=false, polling=false;
   const legacyViews=['requests','grants','activity'], expanded=new Set(['terrier']), logOptions={count:500,follow:true,filter:''};
   const drafts=new Map(), apps={melange:'Melange',terrier:'Terrier',mentat:'Mentat'}, appOf={'melange-desk':'melange','mentat-console':'mentat',terrier:'terrier'};
   const byId=id=>document.getElementById(id);
@@ -137,9 +137,10 @@
     if(detail&&view==='app'&&current===service&&tab==='logs')enterLogs();}
   function backToList(){stopFollow();current=undefined;detail=undefined;view='apps';byId('app-detail').hidden=true;byId('apps-list').hidden=false;loadApps();}
   async function loadDetail(){
-    const service=current;   // an answer for a service that is no longer open is dropped, never shown or cached as the open one
-    try{const made=await call('/apps/detail',{service});if(service!==current||view!=='app')return;detail=made;slow=false;}
-    catch(error){if(error.status===401)return showExpired(true);if(service!==current||view!=='app')return;if(detail&&!(error.body&&error.body.message)){slow=true;renderDetail();keepPolling();return;}say('Could not read this service. Choose Apps and try again.',true);keepPolling();return;}
+    // Only the newest request's answer is used: one for a service no longer open, or from an earlier visit or an overlapping poll, is dropped
+    const service=current,gen=++detailGen;
+    try{const made=await call('/apps/detail',{service});if(gen!==detailGen||service!==current||view!=='app')return;detail=made;slow=false;}
+    catch(error){if(error.status===401)return showExpired(true);if(gen!==detailGen||service!==current||view!=='app')return;if(detail&&!(error.body&&error.body.message)){slow=true;renderDetail();keepPolling();return;}say('Could not read this service. Choose Apps and try again.',true);keepPolling();return;}
     appsData=appsData||{services:[],activity:[],docker:{ok:true},checkedAt:Date.now()/1000};
     const index=appsData.services.findIndex(s=>s.service===current);if(index>=0)appsData.services[index]=detail.service;
     renderDetail();keepPolling();
