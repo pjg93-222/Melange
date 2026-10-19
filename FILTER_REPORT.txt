@@ -426,3 +426,86 @@ Counts: export-root paths published 1851 = 1822 filter output (including .gitatt
 Carried forward unchanged and blob-verified: the 28 .claude/skills exception files, .github/workflows/desktop-windows.yml, .github/workflows/desktop-installer-acceptance.yml, ops/desktop/packaging/melange-runtime.constraints.txt and DEVELOPMENT.md.
 Verification: all 1851 export-root blobs (mode and id) equal the 97f995c05 source blobs, with .gitattributes equal to source ops/export.gitattributes (cf82e8c3255c); the 31 carried-forward non-export files equal their 90ac9e319 blobs and the 28 skill files their recorded published_blob; the other 25 addendum inclusions are unchanged. gitleaks 8.30.1 over the whole published tree: the four reviewed false positives only (fec/district/cook_pvi.py:38, fec/engine/compet_reciprocity_look.py:44, fec/surfaces/templates/make_member_desk_00.tpl:666, fec/tests/surfaces/test_lock_dashboard.py:19), none in a changed path. Key-pattern grep of the changed paths: only synthetic test values and a secret-pattern list, none on an added line. python -m compileall -q fec ops with the bytecode cache redirected outside the tree: exit 0 (the pre-existing SyntaxWarning in fec/stance/stance_template_xval.py:114). Held-content scan of the 290 added lines and of this metadata (withheld stance example values, member-tier phrases, local user paths): clean; the only drive paths added are test fixtures (C:\fake\...).
 Workflows: a push of this commit to main changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter, so neither workflow starts; neither workflow has a pull_request trigger.
+
+== ADDENDUM 17 2026-10-19: republished from local Melange main db4e54045 (CodeRabbit fixes for pull requests #10 and #11, Docker coverage and chain parity, Melange Admin Apps section, per-run secret files, untracked source, structure-only workspace test, gate-pinned loading video)
+Source db4e540450ae90c2f198cbfe137f0496c91b186b (local Melange branch main), 43 commits (37 non-merge) above 97f995c05 (Addendum 16). Previous publication a56003f8e36ba8becd907c3d3898f4d75adb868e (source 97f995c05, head of pull request #11), merged into main by b2ffbec907b6c0142ad5652096da7e112eb3737d; this commit is a child of that merge, whose tree equals a56003f8e's. Same export rules (_tools/filter_export.py, spec melange; _tools/export_copy.py refreshed to the source's ops/release_lib/export.py at this commit, blob 84b6f5fd9c28; the previous copy, blob 828864d577c1, is kept as export_copy.py.bak-20261019), addendum inclusions, root .gitattributes and the fec/attic/full_congestion.py exception.
+Source commits: claude/docker-coverage merged by 116f87132 (2990f24b1, ba1d2e1ba, b1f1fd4a9, 710e730fb, d4e4eb5bb, 8f2e21cbf, 91ab39f75, a5a2f6f7f, c37f8acc1, ec326b154: Docker coverage inventory, host-step design, single-reference chain parity, Mentat streak driver, per-run secret files, D-249); d2bfa8d89 and 2a8fef217; claude/platform-installer merged by 8defff651 (deb7b9a52 through beed1c876: Melange Admin Apps section, docker allowlist backend, launcher icon, release data-file gate); bda3e0c03 (untracked source committed); 1b82fd452; 1e2789434 merged by 1598a0fab; f61c80269; 042759add merged by 9669d3827 (POSIX secret root); 2737880d9 (CodeRabbit fixes for pull requests #10 and #11); 85264713b (a generated file at the repository root, outside the export roots); 1da0ac237 (structure-only workspace test, local-artifact test exclusion); db4e54045 (gate-pinned loading video).
+Rules change: export.py (1da0ac237) adds MELANGE_LOCAL_ARTIFACT_TESTS, an exact-path exclusion beside the G8 research tests, naming fec/tests/surfaces/test_original_workspace.py. Nothing else in the rules changed.
+Filter run: included 1840, excluded 305 = 264 excluded path + 41 extension not allowed. Against the Addendum 16 run (298) there are 7 new exclusions, all paths new to the source (6 from bda3e0c03, 1 rewritten by 1da0ac237), none of them ever published:
+  fec/tests/infra/test_cohort_output_bindings.py  (blob 8688b3d87fd8, excluded path: G8 research test, export.py MELANGE_RESEARCH_TESTS; first present in the source)
+  fec/tests/infra/test_research_optimized_guards.py  (blob d22c52017d43, excluded path: G8 research test, export.py MELANGE_RESEARCH_TESTS; first present in the source)
+  fec/tests/research/test_institutions_reference_report.py  (blob 470a69aa5c4a, excluded path: G8 research test, export.py MELANGE_RESEARCH_TESTS; first present in the source)
+  fec/tests/research/test_research_assertion_boundaries.py  (blob aa80fffe0fcc, excluded path: G8 research test, export.py MELANGE_RESEARCH_TESTS; first present in the source)
+  fec/tests/research/test_research_io_regression.py  (blob 3fbe6819624a, excluded path: G8 research test, export.py MELANGE_RESEARCH_TESTS; first present in the source)
+  fec/tests/surfaces/test_original_workspace.py  (excluded path: export.py MELANGE_LOCAL_ARTIFACT_TESTS, owner ruling 2026-10-19) -- it reads gitignored local build products (root lobby-*.html and cu-member-desk.html pages, fec/surfaces/staffer_live/approved/), so it cannot run from this tree. 1da0ac237 also rewrote it to check board structure only; the bda3e0c03 version hard-coded one rebuild's member results.
+  fec/collect/launch_collection_monitor.pyw  (blob 9a7a523a3444, 2148 B, extension not allowed) -- new file type .pyw, a Windows launcher for the local press-recovery monitor. KEPT-EXCLUDED on the owner's ruling (2026-10-19); the filter is not widened.
+KEPT-EXCLUDED now 276 = 263 path policy (257 + the 5 G8 research tests + the local-artifact test) + 13 not path policy (the 12 of the first Addendum + launch_collection_monitor.pyw).
+Changed export paths (60: 18 added, 42 changed; none removed, none newly filtered out):
+  A fec/collect/install_collection_monitor.ps1  (bda3e0c03)
+  A fec/collect/press_recovery_monitor.md  (bda3e0c03)
+  A fec/tests/collect/check_press_recovery_monitor.cjs  (bda3e0c03)
+  A fec/tests/collect/test_press_source_extract.py  (bda3e0c03)
+  A fec/tests/speech/test_incremental_speech_manifest_safety.py  (bda3e0c03)
+  A fec/tests/speech/test_source_media_alignment_checkpoint_safety.py  (bda3e0c03)
+  A ops/DOCKER_COVERAGE.md  (2990f24b1 ba1d2e1ba)
+  A ops/compute/HOST_STEPS_DESIGN.md  (b1f1fd4a9)
+  A ops/compute/chain_volatile.json  (8f2e21cbf 2a8fef217)
+  A ops/compute/mentat_streak.py  (91ab39f75 a5a2f6f7f ec326b154 1e2789434)
+  A ops/compute/mentat_volatile.json  (91ab39f75 a5a2f6f7f ec326b154)
+  A ops/desktop/server/apps_admin.py  (e998d7a57 ad0a35f4f 5657050db 33139de09 5238d4312 63b0c27e5 61e04e25c beed1c876)
+  A ops/desktop/server/icons/make_melange_admin_icon.py  (1ebc6001b)
+  A ops/desktop/server/icons/melange-admin.ico  (1ebc6001b)
+  A ops/desktop/server/icons/melange-admin.svg  (1ebc6001b)
+  A ops/desktop/server/test_apps_admin.py  (e998d7a57 ad0a35f4f 5657050db 33139de09 5238d4312 63b0c27e5 61e04e25c beed1c876 f61c80269)
+  A ops/tests/test_mentat_streak.py  (91ab39f75 a5a2f6f7f ec326b154)
+  A ops/tests/test_secret_files.py  (d4e4eb5bb 1e2789434 042759add)
+  M fec/collect/daily_media_refresh.py  (d4e4eb5bb)
+  M fec/collect/recover_press_refresh.py  (2737880d9)
+  M fec/compute_engine.py  (d4e4eb5bb 042759add)
+  M fec/legislation/compute_legislation_policy_scenarios.py  (2737880d9)
+  M fec/legislation/refresh_congress_pipeline.py  (d4e4eb5bb)
+  M fec/members/fetch_interviews.py  (710e730fb)
+  M fec/speech/classify_member_longform_full_turns.py  (2737880d9)
+  M fec/speech/source_media_recovery.py  (2737880d9)
+  M fec/surfaces/approved/clean/network.js  (2737880d9)
+  M fec/surfaces/make_member_desk.py  (2737880d9)
+  M fec/tests/collect/test_press_recovery_speed.py  (2737880d9)
+  M fec/tests/legislation/test_compute_legislation_policy_scenarios.py  (2737880d9)
+  M fec/tests/legislation/test_run_legislation_dashboard_member_desk.py  (2737880d9)
+  M fec/tests/speech/test_classify_member_longform_full_turns.py  (2737880d9)
+  M fec/tests/speech/test_source_media_recovery.py  (2737880d9)
+  M fec/tests/surfaces/test_clean_workspace.cjs  (2737880d9)
+  M ops/RELEASE.md  (deb7b9a52)
+  M ops/compute/README.md  (d4e4eb5bb)
+  M ops/compute/chain_parity.py  (8f2e21cbf c37f8acc1)
+  M ops/compute/http_replay.py  (2737880d9)
+  M ops/desktop/client/district-transition.cjs  (2737880d9)
+  M ops/desktop/client/tests/district-transition.test.cjs  (2737880d9)
+  M ops/desktop/client/tests/release-files.test.cjs  (1b82fd452)
+  M ops/desktop/server/README.md  (d117cb371 8f62fbb0f beed1c876)
+  M ops/desktop/server/access_store.py  (e998d7a57 33139de09)
+  M ops/desktop/server/admin_dashboard.py  (ef6a0ed8e 61e04e25c)
+  M ops/desktop/server/admin_ui_v2/app.js  (fe4e15cbf 5238d4312 63b0c27e5 beed1c876)
+  M ops/desktop/server/admin_ui_v2/index.html  (fe4e15cbf)
+  M ops/desktop/server/admin_ui_v2/style.css  (fe4e15cbf 55984b57b 998e4eb37 beed1c876)
+  M ops/desktop/server/test_admin_dashboard.py  (ef6a0ed8e 5657050db 33139de09 61e04e25c 55984b57b)
+  M ops/github/workflows/desktop-source-checks.yml  (1b82fd452)
+  M ops/github/workflows/release.yml  (deb7b9a52)
+  M ops/local/relay.py  (2737880d9)
+  M ops/release_lib/export.py  (1da0ac237)
+  M ops/security_gate.py  (db4e54045)
+  M ops/tests/test_chain_parity.py  (8f2e21cbf c37f8acc1)
+  M ops/tests/test_compose_local.py  (2737880d9)
+  M ops/tests/test_compose_policy.py  (d2bfa8d89 db4e54045)
+  M ops/tests/test_compute_engine.py  (d4e4eb5bb)
+  M ops/tests/test_http_replay.py  (2737880d9)
+  M ops/tests/test_release_export.py  (1da0ac237)
+  M ops/tests/test_security_gate.py  (db4e54045)
+Loading video (owner ruling 2026-10-19, 'Allow .mp4 in the gate'): db4e54045 pins ops/desktop/client/loading-assets/terrier-loading-hq.mp4 in ops/security_gate.py PINNED_FILES by its path and the sha256 of its approved bytes (64fa7000f928953031e9cb5e49a034b355497eb6a4cd7d99670f77e769711c95; git blob 0789f61aa3ad, 557,821 B), and names it again in ops/release_config.json export.extra_names, reverting that part of d2bfa8d89. .mp4 stays a denied extension: any other .mp4, the same bytes at another path, or this path with other bytes is still denied (ops/tests/test_security_gate.py). ops/release_config.json is therefore back at its published blob 733edc887 and is not a changed path here. The video is published unchanged at blob 0789f61aa3ad as an explicit, gate-approved inclusion; it stays on the INCLUDED-NOW list because _tools/filter_export.py does not read release_config.json.
+Local paths (owner ruling 2026-10-19: publish as is): five changed files add 18 lines that carry the owner's local Windows user paths or the OneDrive location of the local key file: fec/compute_engine.py, fec/tests/collect/check_press_recovery_monitor.cjs, ops/compute/README.md, ops/compute/mentat_streak.py, ops/tests/test_mentat_streak.py. Files published before this commit already carry such paths (125 at b2ffbec90).
+Source changes that are not published: the 7 new exclusions above; and .claude/, DESIGN.md, PRODUCT.md and cu-member-desk-profiles.js at the repository root, which are outside the export roots.
+No-revert check: for each of the 42 changed paths, the blob published at b2ffbec90 equals the 97f995c05 blob and occurs in local main's history of that path (git log --raw), so the source moved past it. No published path disappears.
+Counts: export-root paths published 1869 = 1840 filter output (including .gitattributes) + 28 INCLUDED-NOW + 1 carried CI file (melange-runtime.constraints.txt); published tree 1903 = 1869 + 28 skill-doc exception files + 2 workflows + 4 metadata files; KEPT-EXCLUDED 276.
+Carried forward unchanged and blob-verified: the 28 .claude/skills exception files, .github/workflows/desktop-windows.yml, .github/workflows/desktop-installer-acceptance.yml, ops/desktop/packaging/melange-runtime.constraints.txt and DEVELOPMENT.md.
+Verification: all 1869 export-root blobs (mode and id) equal the db4e54045 source blobs, with .gitattributes equal to source ops/export.gitattributes (cf82e8c3255c); the 31 carried-forward non-export files equal their b2ffbec90 blobs and the 28 skill files their recorded published_blob; the 28 addendum inclusions are at their source blobs, all unchanged. gitleaks 8.30.1 over the whole published tree: the four reviewed false positives only (fec/district/cook_pvi.py:38, fec/engine/compet_reciprocity_look.py:44, fec/surfaces/templates/make_member_desk_00.tpl:666, fec/tests/surfaces/test_lock_dashboard.py:19), none in a changed path. Key-pattern grep of the changed paths: only synthetic test values and redactor fixtures, none a real credential. python -m compileall -q fec ops with the bytecode cache redirected outside the tree: exit 0 (the pre-existing SyntaxWarning in fec/stance/stance_template_xval.py:114). The source's release security gate (python ops/security_gate.py export) over the source-export scope (the 1840 filter-output files plus the pinned video): PASS on gitleaks, data_leak and exact_secrets; over the whole published tree its only finding is fec/staffer_network/schema.sql (denied extension .sql), an INCLUDED-NOW file published unchanged since the 2026-10-16 addendum and outside the source's own export. Held-content scan of the added lines and of this metadata (withheld stance example values, member-tier phrases and results): clean; the local paths are the ones listed above.
+Workflows: a push of this commit to main changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter, so neither workflow starts; neither workflow has a pull_request trigger.
