@@ -47,6 +47,7 @@ VERSION_RETRY = 600   # seconds before a failed /version probe is tried again fo
 REFRESH_BUDGET = 10   # seconds one read of the service list may take in all: the page gives up on a request at 12 s
 CALL_CAP = {'ps': 6, 'inspect': 4, 'config': 10, 'image_inspect': 3}   # ps then inspect run one after the other (10 s); config beside them
 MIN_CALL = 0.5        # a docker call is not started with less time than this left
+INVITE_TIMEOUT = 30  # the invite command; with REFRESH_BUDGET and a 5 s tree kill it ends inside the 50 s the page waits for /apps/invite
 PROJECT_LABEL, SERVICE_LABEL, ONEOFF_LABEL = 'com.docker.compose.project', 'com.docker.compose.service', 'com.docker.compose.oneoff'
 LOCAL_HOSTS = ('', '0.0.0.0', '::', '127.0.0.1', '::1')   # a published port counts when this computer's loopback reaches it
 PINNED_NOTICE = 'The pinned images could not be read from the compose file, so updates cannot be detected.'
@@ -993,7 +994,7 @@ class AppsAdmin:
             self.busy[svc.name] = {'action': 'invite', 'since': int(self.clock())}
         origin, outcome, message, link = f'http://127.0.0.1:{port}', 'failed', 'Terrier did not return an invitation link.', None
         try:
-            result = self.docker.run('invite', 30, terrier=svc.name, email=email, role=role, origin=origin)
+            result = self.docker.run('invite', INVITE_TIMEOUT, terrier=svc.name, email=email, role=role, origin=origin)
             last = [l.strip() for l in result.out.splitlines() if l.strip()][-1:]
             if result.code != 0:
                 message = tail(result)

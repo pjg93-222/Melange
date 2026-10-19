@@ -581,6 +581,13 @@ class AppsAdminTests(unittest.TestCase):
         closing.shutdown()
         self.assertEqual(len(self.entries()), 1)              # the action that finished afterwards adds nothing
 
+    def test_the_page_waits_out_the_slowest_invite(self):
+        # invite() reads the containers (REFRESH_BUDGET), then runs the command (INVITE_TIMEOUT, plus 5 s to kill its tree).
+        # A page that aborts first loses the link while Terrier still creates the invitation; a retry then hits 'Use reset'.
+        script = (Path(apps.__file__).parent / 'admin_ui_v2' / 'app.js').read_text(encoding='utf-8')
+        wait = int(re.search(r"call\('/apps/invite',\{[^}]*\},(\d+)\)", script).group(1)) / 1000
+        self.assertGreater(wait, apps.REFRESH_BUDGET + apps.INVITE_TIMEOUT + 5)
+
     def test_invite_uses_terrier_command_and_returns_the_link_once(self):
         result = self.apps.handle('/apps/invite', {'email': 'maya@example.org', 'role': 'organizer'})
         self.assertEqual(result, {'ok': True, 'link': 'http://127.0.0.1:18766/?invite=TESTTOKEN', 'expiresInHours': 24})

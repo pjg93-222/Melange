@@ -80,6 +80,9 @@ class AdminDashboardTests(unittest.TestCase):
         self.assertIn('history.replaceState', script)
         html = (STATIC/'index.html').read_text(encoding='utf-8')
         self.assertNotIn('<script>', html)
+        # say() writes #apps-message and the detail view hides #apps-list: the message must sit outside the list.
+        self.assertLess(html.index('<div id="apps-view">'), html.index('id="apps-message"'))
+        self.assertLess(html.index('id="apps-message"'), html.index('<div id="apps-list">'))
 
     def test_fixed_shared_theme_and_original_icons_only(self):
         for route, path in [('/desktop-chrome.css',CLIENT/'desktop-chrome.css'),

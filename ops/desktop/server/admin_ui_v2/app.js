@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, logsBusy=false, logLines=[], appsWorking=false, slow=false, polling=false;
+  let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, logsBusy=false, logLines=[], logTop, appsWorking=false, slow=false, polling=false;
   const legacyViews=['requests','grants','activity'], expanded=new Set(['terrier']), logOptions={count:500,follow:true,filter:''};
   const drafts=new Map(), apps={melange:'Melange',terrier:'Terrier',mentat:'Mentat'}, appOf={'melange-desk':'melange','mentat-console':'mentat',terrier:'terrier'};
   const byId=id=>document.getElementById(id);
@@ -8,8 +8,8 @@
   const element=(tag,text,parent,className)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;if(parent)parent.append(e);return e;};
   const titles={requests:'Access requests',grants:'Device sessions',activity:'Successful changes'};
   const descriptions={requests:'Verify the requester before choosing their role and issuing a single-use key.',grants:'Signed in / recently online means an authenticated session checked in within three minutes. It does not indicate a person is typing. Update contact is separate.',activity:'Reported successful changes contain operation metadata and counts. Record contents and passwords are not included.'};
-  async function call(route,value){
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+  async function call(route,value,wait=12000){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),wait);
     try{const response=await fetch(route,{method:'POST',credentials:'omit',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json',...(bearer?{'Authorization':'Bearer '+bearer,'X-Admin-CSRF':csrf}:{})},body:JSON.stringify(value)});if(!response.ok){const error=new Error('refused');error.status=response.status;error.body=await response.json().catch(()=>({}));throw error;}return await response.json();}finally{clearTimeout(timer);}
   }
   function lock(value){busy=value;byId('refresh').disabled=value||!bearer;byId('end-session').disabled=value||!bearer;for(const button of document.querySelectorAll('[data-action]'))button.disabled=value||!bearer;}
@@ -112,10 +112,10 @@
   }
   async function poll(){if(polling)return;polling=true;try{if(view==='app'&&current)await loadDetail();else await loadApps();}finally{polling=false;}}
   async function runAction(service,name){
-    if(appsWorking)return;appsWorking=true;
+    if(appsWorking)return;appsWorking=true;let problem;
     try{await call('/apps/action',{service,action:name});say('');await (view==='app'?loadDetail():loadApps());clearTimeout(appsTimer);appsTimer=setTimeout(()=>poll(),1500);}
-    catch(error){if(error.status===401)return showExpired(true);say(error.status===409?'Another action is already running for this service.':'The action could not start. Check Docker, then try again.',true);}
-    finally{appsWorking=false;if(appsData)renderApps();}
+    catch(error){if(error.status===401)return showExpired(true);problem=error.status===409?'Another action is already running for this service.':'The action could not start. Check Docker, then try again.';}
+    finally{appsWorking=false;if(appsData)renderApps();if(problem)say(problem,true);}   // after renderApps, which rewrites the message line
   }
   function ask({title,text,rows,ok}){
     return new Promise(resolve=>{
@@ -133,7 +133,8 @@
 
   // ---- Service detail ---------------------------------------------------------------------------------------------
   function stopFollow(){clearTimeout(followTimer);followTimer=undefined;followGen++;}
-  async function openDetail(service,name){current=service;tab=name;view='app';detail=undefined;logLines=[];stopFollow();byId('apps-list').hidden=true;byId('app-detail').hidden=false;byId('app-detail').replaceChildren();await loadDetail();}
+  async function openDetail(service,name){current=service;tab=name;view='app';detail=undefined;logLines=[];logTop=undefined;stopFollow();say('');byId('apps-list').hidden=true;byId('app-detail').hidden=false;byId('app-detail').replaceChildren();await loadDetail();
+    if(detail&&view==='app'&&current===service&&tab==='logs')enterLogs();}
   function backToList(){stopFollow();current=undefined;detail=undefined;view='apps';byId('app-detail').hidden=true;byId('apps-list').hidden=false;loadApps();}
   async function loadDetail(){
     try{detail=await call('/apps/detail',{service:current});slow=false;}
@@ -164,7 +165,7 @@
         if(row.openUrl&&row.actions.includes('open')){const a=element('a','Open '+row.name,acts,row.actions.includes('update')?'btn secondary':'btn primary');a.href=row.openUrl;a.target='_blank';a.rel='noopener noreferrer';a.dataset.key='d-open';}
       }else if(tab==='accounts')put('Invite someone',()=>{inviteOpen=true;byId('invite-form')?.removeAttribute('hidden');byId('invite-email')?.focus();},true,'d-invite');
       const tabs=element('div',undefined,box,'tabs');tabs.setAttribute('role','tablist');
-      for(const [id,label] of [['overview','Overview'],['logs','Logs'],...(detail.accounts.supported?[['accounts','Accounts']]:[])]){const t=element('button',label,tabs,'tab');t.type='button';t.setAttribute('role','tab');t.setAttribute('aria-selected',String(tab===id));t.dataset.key='tab-'+id;t.addEventListener('click',()=>{tab=id;stopFollow();renderDetail();});}
+      for(const [id,label] of [['overview','Overview'],['logs','Logs'],...(detail.accounts.supported?[['accounts','Accounts']]:[])]){const t=element('button',label,tabs,'tab');t.type='button';t.setAttribute('role','tab');t.setAttribute('aria-selected',String(tab===id));t.dataset.key='tab-'+id;t.addEventListener('click',()=>{tab=id;stopFollow();logTop=undefined;renderDetail();if(id==='logs')enterLogs();});}
       if(detail.stale||slow)element('p','Showing this service as of '+clock(new Date(detail.checkedAt*1000))+'. Docker is slow to answer; trying again.',box,'stale-line').title=detail.staleReason||'';
       if(row.state==='missing'){element('p','Not set up in Docker',box,'muted');return;}
       if(detail.notice)element('p',detail.notice,box,'notice-line');
@@ -192,21 +193,22 @@
     const filter=element('input',undefined,bar,'filter');filter.type='search';filter.placeholder='Filter lines';filter.setAttribute('aria-label','Filter lines');filter.dataset.key='log-filter';filter.value=logOptions.filter;filter.addEventListener('input',()=>{logOptions.filter=filter.value;drawLogs();});
     const dl=element('button','Download',bar,'btn secondary');dl.type='button';dl.addEventListener('click',download);
     const panel=element('div',undefined,box,'log-panel');panel.id='log-panel';panel.tabIndex=0;panel.setAttribute('role','log');panel.setAttribute('aria-label','Logs');
+    panel.addEventListener('scroll',()=>{logTop=panel.scrollHeight-panel.scrollTop-panel.clientHeight<40?undefined:panel.scrollTop;});   // survives the rebuild a poll does
     const note=element('p',undefined,box,'hint');note.append('Passwords, keys and tokens are replaced with ');element('code','[redacted]',note);note.append(' before they reach this page.');
-    drawLogs();if(logOptions.follow)startFollow();else loadLogs(true);
+    drawLogs();   // a poll redraws this tab: loading and following start once, when the tab is entered (enterLogs)
   }
   const stamp=epoch=>{if(!epoch)return'';const d=new Date(epoch*1000);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());};
   function visibleLines(){const needle=logOptions.filter.trim().toLowerCase();return logLines.slice(-logOptions.count).filter(l=>!needle||(l.level+' '+l.text).toLowerCase().includes(needle));}
   function drawLogs(){
     const panel=byId('log-panel');if(!panel)return;
-    const atEnd=panel.scrollHeight-panel.scrollTop-panel.clientHeight<40,lines=visibleLines();panel.replaceChildren();
+    const lines=visibleLines();panel.replaceChildren();
     if(!lines.length)element('p',logLines.length?'No lines match the filter.':'No log lines yet.',panel,'muted');
     for(const l of lines){
       const line=element('div',undefined,panel,'log-line'+(l.level==='WARN'||l.level==='ERROR'?' '+l.level.toLowerCase():''));
       element('span',stamp(l.ts),line,'ts');element('span',l.level,line,'lvl');
       const msg=element('span',undefined,line,'msg');for(const part of l.text.split(/(\[redacted\])/))if(part==='[redacted]')element('span',part,msg,'redacted');else if(part)msg.append(part);
     }
-    if(logOptions.follow||atEnd)panel.scrollTop=panel.scrollHeight;
+    panel.scrollTop=logOptions.follow||logTop===undefined?panel.scrollHeight:logTop;
   }
   async function loadLogs(first=false){
     if(logsBusy||view!=='app'||tab!=='logs')return;
@@ -217,6 +219,7 @@
     drawLogs();
   }
   function startFollow(){stopFollow();const gen=followGen;(async function tick(){await loadLogs(true);if(gen===followGen)followTimer=setTimeout(tick,5000);})();}
+  function enterLogs(){if(logOptions.follow)startFollow();else loadLogs(true);}
   function download(){
     const text=visibleLines().map(l=>stamp(l.ts)+' '+l.level+' '+l.text).join('\n')+'\n',d=new Date(),a=element('a');
     a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));a.download=current+'-logs-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())+'.txt';
@@ -234,7 +237,7 @@
     const result=element('p',undefined,box,'notice-line');result.hidden=true;
     form.addEventListener('submit',async event=>{
       event.preventDefault();if(appsWorking)return;appsWorking=true;send.disabled=true;result.hidden=true;
-      try{const made=await call('/apps/invite',{email:email.value.trim(),role:role.value});byId('link-value').textContent=made.link;byId('link').showModal();email.value='';inviteOpen=false;form.hidden=true;appsWorking=false;await loadDetail();}
+      try{const made=await call('/apps/invite',{email:email.value.trim(),role:role.value},50000);byId('link-value').textContent=made.link;byId('link').showModal();email.value='';inviteOpen=false;form.hidden=true;appsWorking=false;await loadDetail();}
       catch(error){if(error.status===401)return showExpired(true);result.hidden=false;result.dataset.tone='attention';result.textContent=error.body&&error.body.message?error.body.message:error.status===400?'Enter a valid email address and choose a role.':'The invitation could not be created. Check that Terrier is running, then try again.';}
       finally{appsWorking=false;send.disabled=false;}
     });

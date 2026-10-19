@@ -694,7 +694,16 @@ _LANE_MODULES=('test_audio_calibrate','test_audio_identity','test_audio_linear_h
                'test_opposition_prior_scope','test_contested_bills',
                # Census follow-up 2026-10-11: reads the live workbook's Normalized sheet (all
                # values, no formula cache) and now prints the native verdict shape. ~4 s.
-               'test_legislative_alignment')
+               'test_legislative_alignment',
+               # 2026-10-19: the nine suites bda3e0c03 committed (left untracked in the main checkout) reached git
+               # unregistered, so the census above failed. Each ran green alone. test_press_source_extract skips its
+               # two saved-page cases when the gitignored outputs/press_recovery_20260920 responses are absent;
+               # test_original_workspace reads the live root pages and the staffer_live/approved build (green from LIVE).
+               'test_cohort_output_bindings','test_research_optimized_guards',
+               'test_institutions_reference_report','test_research_assertion_boundaries',
+               'test_research_io_regression','test_incremental_speech_manifest_safety',
+               'test_source_media_alignment_checkpoint_safety','test_press_source_extract',
+               'test_original_workspace')
 
 # Read the suites' five native verdict shapes here instead of editing 39 test files: fewer
 # edits, zero risk of changing a test's meaning, and the change is fully reversible in one file.
