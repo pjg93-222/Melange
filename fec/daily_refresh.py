@@ -14,12 +14,12 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import signal
 import subprocess
 import sys
 import time
 import uuid
 
+import bounded_subprocess
 from lane_file_io import replace_atomic
 from paths import ROOT as ROOT_TEXT
 from process_liveness import process_alive
@@ -132,7 +132,9 @@ def daily_lock(root):
         try:
             if read(path).get('token') == token:
                 path.unlink()
-        except FileNotFoundError:
+        except (OSError, ValueError, AttributeError):
+            # A reader's handle (another daily run, AV, OneDrive) can refuse the unlink on
+            # Windows; a leftover lock is reclaimed as stale by the dead-pid check.
             pass
 
 
@@ -269,12 +271,13 @@ def reconcile(root, state):
 
 
 def terminate_tree(process):
-    if os.name == 'nt':
-        subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'],
-                       capture_output=True, check=False, timeout=30)
-    else:
-        os.killpg(process.pid, signal.SIGKILL)
-    process.wait(timeout=30)
+    # Bounded end to end: this runs inside the BaseException handler in run(), so a wedged
+    # child must not raise out of it and skip finish_attempt/save_state/result.
+    bounded_subprocess.kill_tree(process, own_group=(os.name != 'nt'))
+    try:
+        process.wait(timeout=bounded_subprocess.KILL_WAIT_SECONDS)
+    except subprocess.TimeoutExpired:
+        pass
 
 
 def run(root=ROOT, *, trigger='manual', timeout_seconds=72 * 60 * 60):

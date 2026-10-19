@@ -115,7 +115,8 @@ def find_rscript():
     found = shutil.which("Rscript") or shutil.which("Rscript.exe")
     if found:
         return found
-    roots = (Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "R",)
+    program_files = os.environ.get("ProgramFiles")
+    roots = (Path(program_files) / "R",) if program_files else ()
     candidates = []
     for root in roots:
         candidates.extend(root.glob("R-*/bin/Rscript.exe"))

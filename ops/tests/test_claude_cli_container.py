@@ -1,7 +1,7 @@
 """The claude-CLI callers run in the compute container (D-179): binary path from the environment, no APPDATA, the login
 directory (CLAUDE_CONFIG_DIR) inherited by the child, Windows behaviour unchanged. A fake `claude` stands in for the CLI:
 a real child process on both platforms (a shebang script on POSIX; on Windows a .cmd that does not forward its arguments,
-because cmd.exe re-parses the JSON ones, so the flag set is asserted with a stubbed subprocess.run instead).
+because cmd.exe re-parses the JSON ones, so the flag set is asserted with a stubbed subprocess.run / Popen instead).
 """
 from __future__ import annotations
 
@@ -30,11 +30,12 @@ sys.modules["http_replay"] = HR
 _spec.loader.exec_module(HR)
 
 FAKE = '''
-import json, os, sys
+import json, os, sys, time
 log = {"argv": sys.argv[1:], "stdin": sys.stdin.read(), "cwd": os.getcwd(), "config_dir": os.environ.get("CLAUDE_CONFIG_DIR"),
        "appdata": os.environ.get("APPDATA")}
 with open(os.environ["FAKE_CLAUDE_LOG"], "w", encoding="utf-8") as fh:
     json.dump(log, fh)
+time.sleep(float(os.environ.get("FAKE_CLAUDE_SLEEP", "0")))
 print(json.dumps({"structured_output": {"cls": "negative"}, "uuid": "u-1", "modelUsage": {}, "session_id": "s-1",
                   "usage": {"input_tokens": 3, "output_tokens": 2}, "total_cost_usd": 0.001}))
 '''
@@ -110,16 +111,24 @@ def test_lockdown_flags_and_stdin_prompt_survive_with_the_container_command(monk
         seen.update(command=command, kwargs=kwargs)
         return SimpleNamespace(returncode=1, stdout="stop here", stderr="")
 
+    def popen(command, **kwargs):          # classifier_runtime (D-211): a bounded Popen whose stdin is a temp file holding the prompt
+        seen.update(command=command, kwargs={**kwargs, "input": kwargs["stdin"].read()})
+        return SimpleNamespace(wait=lambda timeout=None: 1)
+
     monkeypatch.setenv("MELANGE_CLASSIFIER_COMMAND", "/usr/local/bin/claude")
     monkeypatch.delenv("APPDATA", raising=False)
-    monkeypatch.setattr(target.subprocess, "run", run)
+    if module == "classifier_runtime":
+        monkeypatch.setattr(target.subprocess, "Popen", popen)
+    else:
+        monkeypatch.setattr(target.subprocess, "run", run)
     with pytest.raises((RuntimeError, ValueError)):
         call()
     command = seen["command"]
     assert command[0] == "/usr/local/bin/claude" and all(flag in command for flag in LOCKDOWN)
     assert command[command.index("--tools") + 1] == "" and command[command.index("--permission-mode") + 1] == "dontAsk"
     assert "Evidence" not in command and "Complete official text." not in " ".join(command)
-    assert "env" not in seen["kwargs"] and seen["kwargs"]["input"]              # inherits the parent env (CLAUDE_CONFIG_DIR rides along)
+    env = seen["kwargs"].get("env", os.environ)                                 # inherits the parent env (CLAUDE_CONFIG_DIR rides along)
+    assert all(env.get(k) == v for k, v in os.environ.items()) and seen["kwargs"]["input"]
 
 
 def test_the_cli_step_replays_from_a_cassette_with_the_binary_gone(fake_claude, tmp_path):
@@ -131,3 +140,16 @@ def test_the_cli_step_replays_from_a_cassette_with_the_binary_gone(fake_claude, 
         with pytest.raises(OSError):
             CR.classify_json("Policy", "Evidence two", {"type": "object"})   # never recorded: the real (absent) binary is not a fallback
     assert len(replay.report()["misses"]) == 1
+
+
+def test_a_classifier_timeout_replays_as_a_timeout_not_as_a_failure(fake_claude, tmp_path, monkeypatch):
+    monkeypatch.setattr(CR, "TIMEOUT_SECONDS", 1)
+    monkeypatch.setenv("FAKE_CLAUDE_SLEEP", "60")                           # overruns the bound: classify_json kills it
+    with HR.Harness("record", tmp_path / "cas"):
+        with pytest.raises(RuntimeError, match="timed out"):
+            CR.classify_json("Policy", "Evidence", {"type": "object"})
+    os.remove(fake_claude.launcher)
+    with HR.Harness("replay", tmp_path / "cas") as replay:
+        with pytest.raises(RuntimeError, match="timed out"):                 # was 'Classifier failed': the kill code came back at once
+            CR.classify_json("Policy", "Evidence", {"type": "object"})
+    assert replay.report()["misses"] == [] == replay.report()["unused"]

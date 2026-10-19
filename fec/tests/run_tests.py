@@ -1028,6 +1028,7 @@ _LANE_PYTEST=(
     'test_staffer_harness_contract',
     # Stale-import detector controls (QME 2026-10-02).
     'test_stale_imports_contract',
+    'test_legacy_direction_archive',
     # 2026-10-15 self-healing P2 (D-212): pipeline failure diagnostics, transactional chain, labelled freshness
     # degrade, gold-orphan policy.
     'test_pipeline_failure_diagnostics',

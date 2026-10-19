@@ -31,6 +31,31 @@ test('explicit Terrier sign-out also refuses a stale authenticated cookie and re
  const f=fixture('terrier');f.setAuthenticated(true);await f.lifecycle.suspend('signed_out');assert.equal(f.logout,1);assert.equal(f.lifecycle.requiresFreshPassword,true);
  f.setAuthenticated(true);const ticket=await f.lifecycle.prepareAuthentication();assert.equal(f.logout,2);assert.equal(await f.lifecycle.terrierAuthenticated(),false);assert.ok(ticket);await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);assert.equal(f.runtime.requestsAllowed,false);
 });
+test('temporary approved-owner password bypass resumes after a screen lock without password authentication',async()=>{
+ const f=fixture('terrier');f.setAuthenticated(true);f.lifecycle.terrierPasswordLockDisabled=async()=>true;
+ await f.lifecycle.suspend('locked');assert.equal(f.logout,0);assert.equal(f.lifecycle.requiresFreshPassword,false);
+ assert.equal(f.runtime.requestsAllowed,false);await f.lifecycle.resume(f.approved);assert.equal(await f.lifecycle.authenticated(),true);
+});
+test('unavailable password preference preserves the normal Terrier lock',async()=>{
+ const f=fixture('terrier');f.setAuthenticated(true);f.lifecycle.terrierPasswordLockDisabled=async()=>{throw new Error('unavailable');};
+ await f.lifecycle.suspend('locked');assert.equal(f.logout,1);await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);
+});
+test('failed district cleanup cannot skip the Terrier lock',async()=>{
+ const f=fixture('terrier'),states=[];f.setAuthenticated(true);
+ f.lifecycle.onSuspend=async()=>{throw new Error('backend stop failed');};f.lifecycle.presence=async state=>{states.push(state);};
+ await f.lifecycle.suspend('locked');assert.equal(f.logout,1);assert.equal(f.lifecycle.requiresFreshPassword,true);assert.equal(f.shown,true);assert.deepEqual(states,['locked']);
+ await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);
+});
+test('slow district cleanup does not delay the Terrier logout or fresh-password requirement',async()=>{
+ const f=fixture('terrier');f.setAuthenticated(true);let release,cancelled=false,done=false;
+ f.lifecycle.onSuspend=()=>{cancelled=true;return new Promise(resolve=>{release=resolve;});};
+ const suspending=f.lifecycle.suspend('locked').then(()=>{done=true;});
+ assert.equal(cancelled,true);assert.equal(f.lifecycle.requiresFreshPassword,true);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(f.logout,1);assert.equal(f.lifecycle.requiresFreshPassword,true);assert.equal(done,false);assert.equal(f.shown,false);
+ await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);
+ release();await suspending;assert.equal(f.shown,true);assert.equal(f.logout,1);
+});
 test('wrong principal or district cannot resume preserved backend; health is not active presence',async()=>{
  const f=fixture('terrier');assert.equal(await f.lifecycle.heartbeat(),'signed_out');await f.lifecycle.suspend('locked');
  const changed=structuredClone(f.approved);changed.principal.localAccountIdentity='other';await assert.rejects(f.lifecycle.resume(changed,{freshPassword:true}),/approved account/);assert.equal(f.runtime.requestsAllowed,false);
