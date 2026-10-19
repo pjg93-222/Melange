@@ -694,7 +694,16 @@ _LANE_MODULES=('test_audio_calibrate','test_audio_identity','test_audio_linear_h
                'test_opposition_prior_scope','test_contested_bills',
                # Census follow-up 2026-10-11: reads the live workbook's Normalized sheet (all
                # values, no formula cache) and now prints the native verdict shape. ~4 s.
-               'test_legislative_alignment')
+               'test_legislative_alignment',
+               # 2026-10-19: the nine suites bda3e0c03 committed (left untracked in the main checkout) reached git
+               # unregistered, so the census above failed. Each ran green alone. test_press_source_extract skips its
+               # two saved-page cases when the gitignored outputs/press_recovery_20260920 responses are absent;
+               # test_original_workspace reads the live root pages and the staffer_live/approved build (green from LIVE).
+               'test_cohort_output_bindings','test_research_optimized_guards',
+               'test_institutions_reference_report','test_research_assertion_boundaries',
+               'test_research_io_regression','test_incremental_speech_manifest_safety',
+               'test_source_media_alignment_checkpoint_safety','test_press_source_extract',
+               'test_original_workspace')
 
 # Read the suites' five native verdict shapes here instead of editing 39 test files: fewer
 # edits, zero risk of changing a test's meaning, and the change is fully reversible in one file.
@@ -1186,10 +1195,33 @@ _suite_specs=tuple(_s for _s in (
 # Missing suites are reported in the same per-suite shape the loop below prints, so the run stays
 # readable and the verdict line keeps its format. Nothing is printed when nothing is missing, so a
 # complete tree's output is byte-identical to before.
-if _missing_suites:
-    print('[registered suites absent from this tree]')
-    for _t in _missing_suites:
-        ok('%s suite clean'%_t,False,'registered test suite not found')
+# 2026-10-19 (CodeRabbit, PR #12): the public export leaves six registered suites out by exact path
+# (MELANGE_RESEARCH_TESTS and MELANGE_LOCAL_ARTIFACT_TESTS in ops/release_lib/export.py). When one of those is
+# absent it is named as skipped and not counted; any other absent suite still fails. The names are read with
+# ast, never imported: fec does not import ops (compute_engine.py runs ops code as a child process instead).
+def _export_excluded(root):
+    import ast as _ast
+    try:
+        with open(os.path.join(root,'ops','release_lib','export.py'),encoding='utf-8') as _f:
+            _tree=_ast.parse(_f.read())
+        _paths=[_p for _n in _tree.body if isinstance(_n,_ast.Assign)
+                and any(getattr(_t,'id',None) in ('MELANGE_RESEARCH_TESTS','MELANGE_LOCAL_ARTIFACT_TESTS') for _t in _n.targets)
+                for _p in _ast.literal_eval(_n.value)]
+    except (OSError,SyntaxError,ValueError):
+        return set()   # no readable export list: nothing is excused
+    return {os.path.basename(_p)[:-3] if _p.endswith('.py') else os.path.basename(_p) for _p in _paths}
+def _report_missing(missing,excluded):
+    skipped=[_t for _t in missing if _t in excluded]
+    if skipped:
+        print('[registered suites the public export leaves out by name (ops/release_lib/export.py): skipped]')
+        for _t in skipped:
+            print('  SKIP %s'%_t)
+    failed=[_t for _t in missing if _t not in excluded]
+    if failed:
+        print('[registered suites absent from this tree]')
+        for _t in failed:
+            ok('%s suite clean'%_t,False,'registered test suite not found')
+_report_missing(_missing_suites,_export_excluded(_mb_root) if _missing_suites else set())
 # No node on PATH is one named failure, never a silent skip of the whole lane.
 if not _node:
     ok('node lane ran',False,'node not on PATH; %d .cjs suites not run'%len(_LANE_NODE))
