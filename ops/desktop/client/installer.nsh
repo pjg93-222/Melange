@@ -16,10 +16,13 @@
 !macroend
 !macro customUnInstall
   ${IfNot} ${isUpdated}
-    ; Remove only this application's login task and its rollback installer copies. Keep user data and
-    ; credentials. The release certificate stays trusted: all three apps share it.
+    ; Remove only this application's login task and its cached installers (rollback baseline and updater cache;
+    ; update state lives in the profile). Keep user data and credentials. The release certificate stays trusted:
+    ; all three apps share it.
     DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_ID}"
     DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run" "${APP_ID}"
     RMDir /r "$LOCALAPPDATA\${APP_ID}\baseline"
+    RMDir /r "$LOCALAPPDATA\${APP_ID}\updater"
+    RMDir "$LOCALAPPDATA\${APP_ID}"
   ${EndIf}
 !macroend
