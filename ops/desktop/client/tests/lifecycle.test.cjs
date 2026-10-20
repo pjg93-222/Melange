@@ -486,9 +486,35 @@ test('moving the updater file root keeps the anti-rollback high-water and instal
   assert.equal(f.state.sequence,before.sequence);assert.equal(f.state.acceptedVersion,before.acceptedVersion);assert.equal(f.downloads,downloads);assert.equal(f.state.pending,null);
 });
 
+// An update installed by a version that cached its installer in the old updater file root leaves a pending record for
+// the running version whose installer is not at the current path.
+for(const [name,ready,legacy] of [['ready, installer only at the legacy path',true,true],['ready, installer nowhere',true,false],['background-only, installer only at the legacy path',false,true],['background-only, installer nowhere',false,false]])
+  test('an activated update whose installer cache moved is confirmed by the running version, then discovery proceeds: '+name,async t=>{
+    const f=fixture(t);const first=f.client();await first.check();await first.activateAfterClose();
+    assert.equal(f.state.pending.phase,'activating');f.version='1.1.0';
+    if(!legacy)fs.rmSync(path.join(f.directory,'updates','2'),{recursive:true});
+    const client=f.client('Fixture Publisher',{userData:path.join(f.directory,'moved-root'),legacyUserData:f.directory});
+    if(ready)client.markApplicationReady();
+    await client.check();
+    assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');assert.equal(f.state.installedVersion,'1.1.0');assert.equal(f.state.previous.version,'1.0.0');
+    assert.match(f.status.at(-1),/^Already current\./,'the check went on to ask for newer releases');
+  });
+
+test('a legacy-path installer is still verified: one failing the native check does not confirm the update',async t=>{
+  const f=fixture(t);const first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';f.nativeValid=false;
+  const client=f.client('Fixture Publisher',{userData:path.join(f.directory,'moved-root'),legacyUserData:f.directory});client.markApplicationReady();await client.check();
+  assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.0');assert.match(f.status.at(-1),/Native signature refused/);
+});
+
+test('an installer at the current path keeps the readiness gate: a background-only run does not confirm it',async t=>{
+  const f=fixture(t);const first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';
+  await f.client().check();assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.0');assert.match(f.status.at(-1),/awaits a successful local startup/);
+});
+
 test('main.cjs moves only the updater file root to %LOCALAPPDATA%, leaving the update state in the profile',()=>{
   const main=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
   assert.match(main,/const updaterRoot=localRoot\?path\.join\(localRoot,'updater'\):githubConfig\?path\.join\(userData,'github-updates'\):userData;/);
   assert.match(main,/baselineRoot:localRoot\?path\.join\(localRoot,'baseline'\):null/);assert.match(main,/userData:updaterRoot,loadEnrollment/);
+  assert.match(main,/legacyUserData:localRoot&&githubConfig\?path\.join\(userData,'github-updates'\):null/,'the pre-move cache stays known to the updater');
   assert.match(main,/readState:\(\)=>read\(githubConfig\?'github-update-state\.json':'update-state\.json'\),writeState:value=>write\(/,'state stays in the profile');
 });

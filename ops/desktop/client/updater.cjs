@@ -231,10 +231,14 @@ class DesktopUpdater {
     if(!pending)return;
     if(pending.version===this.version){
       if(pending.phase==='failed'){this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;}
-      // A version string alone does not prove that its backend can start.
-      if(!this.applicationReady){this.onStatus('Updated app awaits a successful local startup.');return;}
+      // An installer cached before the updater file root moved (legacyUserData) is not at the current path. That release is
+      // already installed, so the running version confirms it: no readiness wait (a background-only run never starts a
+      // backend), and a copy that is gone is not verified. Otherwise a version string alone does not prove that its backend can start.
+      const {path:cached,manifest}=this.packageOf(pending),legacy=this.legacyUserData&&path.join(this.legacyUserData,'updates',String(manifest.sequence),manifest.package.name);
+      const installer=[cached,legacy].find(file=>file&&fs.existsSync(file));
+      if(!this.applicationReady&&installer===cached){this.onStatus('Updated app awaits a successful local startup.');return;}
       const verified=verifyEnvelope(pending.envelope,enrollment,this.identity(),state);
-      await this.verifyNativeFile(this.packagePath(verified.manifest),verified.manifest);
+      if(installer)await this.verifyNativeFile(installer,verified.manifest);
       this.writeState({...state,previous:state.installed||state.previous||null,installed:{...pending,phase:'installed'},pending:null,installedVersion:this.version});
       this.pruneBaselines();
       await this.report(enrollment,'installed');return;
