@@ -92,19 +92,33 @@ class AccessStoreTests(unittest.TestCase):
             self.store.request({**request, 'requestId': str(uuid.uuid4())}, '192.168.2.3')
         with self.assertRaises(Refused):
             self.store.request({**request, 'requestId': str(uuid.uuid4()), 'platform': 'darwin'}, '192.168.2.3')
-        for _ in range(9): self.request()
-        with self.assertRaises(Refused): self.request()
 
-    def test_public_loopback_relay_skips_only_the_per_source_quota(self):
-        for _ in range(10): self.request(source='127.0.0.1')
-        with self.assertRaises(Refused): self.request(source='127.0.0.1')  # LAN mode: loopback is an ordinary source.
-        self.publisher.public_origin = 'https://updates.example.com'
-        for _ in range(10): self.request(source='203.0.113.10')
-        with self.assertRaises(Refused): self.request(source='203.0.113.10')  # Direct public peers keep their own quota.
-        for _ in range(80): self.request(source='127.0.0.1')
-        with self.assertRaises(Refused): self.request(source='127.0.0.1')  # Global hourly/open caps still apply.
+    def test_no_per_source_quota_only_the_global_waiting_and_hourly_bounds(self):
+        for _ in range(100): self.request(source='192.168.2.3')  # Formerly 10/hour per source.
+        with self.assertRaises(Refused) as caught: self.request(source='10.0.0.9')
+        self.assertIn('capacity', str(caught.exception))  # 100 new requests/hour from everyone together.
+        self.now += 3601
+        with self.assertRaises(Refused): self.request()  # 100 still waiting for a decision.
         with self.store.connect() as db:
-            self.assertEqual(db.execute('SELECT COUNT(*) FROM requests').fetchone()[0], 100)
+            waiting = [r[0] for r in db.execute("SELECT request_id FROM requests WHERE state='pending'")]
+        for request_id in waiting:
+            self.store.approve(request_id, 'local_user', [])
+        for _ in range(99): self.request()  # Approved people never count against either bound.
+        with self.store.connect() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM requests').fetchone()[0], 199)
+
+    def test_full_activity_table_prunes_the_oldest_rows_instead_of_refusing(self):
+        _request, response = self.activated()
+        def event(n):
+            return {'eventId': str(uuid.uuid4()), 'type': 'notes_updated', 'occurredAt': self.now, 'districtId': None,
+                    'status': 'succeeded', 'counts': {'items': n}}
+        sent = [event(n) for n in range(5)]
+        with patch('access_store.MAX_ACTIVITY', 3):
+            self.store.events(response['accessToken'], {'events': sent[:2]})
+            self.store.events(response['accessToken'], {'events': sent[2:]})
+        with self.store.connect() as db:
+            kept = [r[0] for r in db.execute('SELECT event_id FROM activity ORDER BY rowid')]
+        self.assertEqual(kept, [e['eventId'] for e in sent[2:]])
 
     def test_signed_revocation_sticky_status_and_token_privilege_separation(self):
         request, response = self.activated()

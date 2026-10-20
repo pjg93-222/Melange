@@ -17,9 +17,12 @@ IDLE = 30            # the relay heartbeats every <=0.5 s; this much silence is 
 RETRY = 10
 LOOPBACK = '127.0.0.1'  # the only local host this tunnel ever dials
 LOCAL_PORT = 38443
-# The publisher serves 16 requests at once. A Connection beyond this many active forwards is left
-# unaccepted, so the relay drops it after its own timeout instead of this process spawning without bound.
+# The publisher serves 32 requests at once and queues the rest. A Connection beyond this many active
+# forwards waits up to SLOT_WAIT for one to finish; the relay keeps an unaccepted connection for 10 s
+# (server.rs), and SLOT_WAIT plus the 3 s dial stays inside that. Waiting in the control loop keeps the
+# thread count bounded; frames behind it queue in the socket (FIFO).
 SLOTS = threading.BoundedSemaphore(32)
+SLOT_WAIT = 6
 
 
 class Frames:
@@ -100,12 +103,13 @@ def session(relay, port, local_port=LOCAL_PORT):
             raise RuntimeError(f'relay refused port {port}: {kind} {value!r}')
         logging.info('connected: %s:%d -> %s:%d', relay[0], port, LOOPBACK, local_port)
         control.settimeout(IDLE)
+        slots = SLOTS  # one semaphore for this session's acquires and releases
         while True:
             kind, value = frames.recv()
             if kind == 'Connection':
                 conn_id = str(uuid.UUID(value))  # canonical form; anything else drops the session
-                if SLOTS.acquire(blocking=False):
-                    threading.Thread(target=forward, args=(relay, conn_id, local_port, SLOTS), daemon=True).start()
+                if slots.acquire(timeout=SLOT_WAIT):
+                    threading.Thread(target=forward, args=(relay, conn_id, local_port, slots), daemon=True).start()
             elif kind == 'Error':
                 raise RuntimeError(f'relay error: {value}')
 

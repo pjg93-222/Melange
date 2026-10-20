@@ -145,7 +145,7 @@ def test_a_client_half_close_still_gets_the_whole_response():
         sock.close()
 
 
-def test_connections_beyond_the_forward_limit_are_left_unaccepted(monkeypatch):
+def test_connections_beyond_the_forward_limit_wait_for_a_slot(monkeypatch):
     monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
     relay, relay_address = listener()
     target, target_address = listener()
@@ -154,11 +154,43 @@ def test_connections_beyond_the_forward_limit_are_left_unaccepted(monkeypatch):
     start_session(relay_address, target_address[1])
     control, _ = relay.accept()
     read_frame(control)
-    control.sendall(connections(*(str(uuid.uuid4()) for _ in range(3))))
+    second_id = str(uuid.uuid4())
+    control.sendall(connections(str(uuid.uuid4()), second_id))
     first, _ = relay.accept()
     read_frame(first)
     relay.settimeout(1)
     with pytest.raises(socket.timeout):
-        relay.accept()  # the second and third connections are not accepted while the only slot is busy
-    for sock in (first, control, relay, target, *held):
+        relay.accept()  # the second waits while the only slot is busy
+    first.close()
+    for _ in range(500):
+        if held:
+            break
+        threading.Event().wait(0.01)
+    held[0].close()  # the first forward ends and frees its slot
+    relay.settimeout(5)
+    second, _ = relay.accept()  # ...so the waiting connection is accepted rather than dropped
+    assert read_frame(second) == {'Accept': second_id}
+    for sock in (second, control, relay, target, *held):
+        sock.close()
+
+
+def test_a_connection_still_waiting_after_the_relay_window_is_skipped(monkeypatch):
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
+    monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 0.2)
+    relay_tunnel.SLOTS.acquire()  # every forward slot stays busy
+    relay, relay_address = listener()
+    start_session(relay_address, 1)
+    control, _ = relay.accept()
+    read_frame(control)
+    control.sendall(connections(str(uuid.uuid4())))
+    relay.settimeout(1)
+    with pytest.raises(socket.timeout):
+        relay.accept()  # never accepted: the relay drops it after its own 10 s, and nothing was spawned
+    relay_tunnel.SLOTS.release()
+    later = str(uuid.uuid4())
+    control.sendall(json.dumps({'Connection': later}).encode() + b'\0')
+    relay.settimeout(5)
+    data, _ = relay.accept()  # the skipped one is gone; the loop moved on to the next
+    assert read_frame(data) == {'Accept': later}
+    for sock in (data, control, relay):
         sock.close()

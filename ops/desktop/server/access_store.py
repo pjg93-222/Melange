@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import contextlib
 import hmac
-import ipaddress
 import json
 import os
 import re
@@ -34,8 +33,9 @@ REQUEST_LIFETIME = 86400
 KEY_LIFETIME = 600
 RETRY_LIFETIME = 600
 PRESENCE_LIFETIME = 180
-MAX_PENDING = 100
-MAX_ACTIVITY = 1000000
+MAX_PENDING = 100        # requests still waiting for a decision; approved recipients are not counted
+MAX_NEW_PER_HOUR = 100   # new requests per hour from all callers together, never per address
+MAX_ACTIVITY = 1000000   # newest activity rows kept; older ones are pruned, never refused
 MAX_USABLE_INVITES = 50
 INVITE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'  # Crockford base32: no I, L, O or U.
 # Additive and idempotent, so deployed databases created before invites gain the table on first use.
@@ -97,13 +97,6 @@ def event_scope(grant, district, allow_none=False):
             raise Refused('district access required')
     elif district is not None:
         raise Refused('unexpected district')
-
-
-def loopback(address):
-    try:
-        return ipaddress.ip_address(address).is_loopback
-    except ValueError:
-        return False
 
 
 def data_identifier(value):
@@ -353,10 +346,8 @@ class AccessStore:
         hashed, now = secret_hash(value['requestSecret']), self.now()
         if 'inviteCode' in value and not self.require_invite and not isinstance(value['inviteCode'], str):
             raise TypeError('inviteCode must be a string')  # Ignored while invites are off, but junk is still a bad request.
-        # Hash the source for quota accounting; no browsing or workstation data is recorded.
+        # Stored for audit only (schema column); no quota is keyed on the network address.
         source_hash = digest((self.config()['serverId'] + ':' + source_address).encode())
-        # A public-mode loopback peer is the relay for every recipient; only global quotas can apply.
-        relayed = self.publisher.public_origin is not None and loopback(source_address)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             existing = db.execute('SELECT * FROM requests WHERE request_id=?', (request_id,)).fetchone()
@@ -375,11 +366,11 @@ class AccessStore:
                     raise Refused('invite code not accepted')
             db.execute("UPDATE requests SET state='expired' WHERE (expires<=? OR (state='approved' AND key_expires<=?)) AND state IN ('pending','approved')", (now, now))
             db.execute('UPDATE requests SET receipt=NULL WHERE receipt_expires<=?', (now,))
-            if (db.execute("SELECT COUNT(*) FROM requests WHERE state IN ('pending','approved')").fetchone()[0] >= MAX_PENDING
-                    or (not relayed and db.execute('SELECT COUNT(*) FROM requests WHERE source_hash=? AND created>?', (source_hash, now-3600)).fetchone()[0] >= 10)
-                    or db.execute('SELECT COUNT(*) FROM requests WHERE created>?', (now-3600,)).fetchone()[0] >= 100
-                    or db.execute('SELECT COUNT(*) FROM requests').fetchone()[0] >= 10000
-                    or db.execute("SELECT 1 FROM requests WHERE app=? AND device_id=? AND state IN ('pending','approved')", (app, device_id)).fetchone()):
+            if db.execute("SELECT 1 FROM requests WHERE app=? AND device_id=? AND state IN ('pending','approved')", (app, device_id)).fetchone():
+                raise Refused('access request conflict: this device already has an open request')
+            # Anti-flood bounds on the waiting queue only; how many people are approved is unlimited.
+            if (db.execute("SELECT COUNT(*) FROM requests WHERE state='pending'").fetchone()[0] >= MAX_PENDING
+                    or db.execute('SELECT COUNT(*) FROM requests WHERE created>?', (now-3600,)).fetchone()[0] >= MAX_NEW_PER_HOUR):
                 raise Refused('access request capacity reached')
             db.execute('INSERT INTO requests(request_id,app,device_id,platform,arch,display_name,secret_hash,source_hash,state,created,expires) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
                        (request_id, app, device_id, platform, arch, display, hashed, source_hash, 'pending', now, now+REQUEST_LIFETIME))
@@ -604,8 +595,9 @@ class AccessStore:
                     raise Refused('event identity conflict')
                 if not previous:
                     new.append((event, hashed))
-            if db.execute('SELECT COUNT(*) FROM activity').fetchone()[0] + len(new) > MAX_ACTIVITY:
-                raise Refused('activity capacity reached; preserve the local outbox')
+            excess = db.execute('SELECT COUNT(*) FROM activity').fetchone()[0] + len(new) - MAX_ACTIVITY
+            if excess > 0:  # Keep the newest rows; a full table never locks recipients out.
+                db.execute('DELETE FROM activity WHERE rowid IN (SELECT rowid FROM activity ORDER BY rowid LIMIT ?)', (excess,))
             for event, hashed in new:
                 refs = {key: event[key] for key in ('datasetId', 'revisionId', 'entityId') if key in event}
                 db.execute('INSERT INTO activity VALUES (?,?,?,?,?,?,?,?,?,?)', (grant['grant_id'], event['eventId'], grant['principal_id'], event['occurredAt'], self.now(), event['type'], canonical(event['counts']).decode(), hashed, event['districtId'], canonical(refs).decode()))

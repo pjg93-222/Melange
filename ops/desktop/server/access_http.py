@@ -6,7 +6,7 @@ import time
 from urllib.parse import urlsplit
 
 from desktop_admin import Refused, canonical, private_address, request_origin
-from access_store import loopback, secret_hash
+from access_store import secret_hash
 
 
 class HeaderDeadlineMixin:
@@ -46,25 +46,25 @@ def unique_object(pairs):
 
 
 class RateLimit:
+    """Per-minute buckets for the loopback-only admin dashboard. The recipient access routes have none:
+    their load is bounded by the listener's worker slots, not by refusing addresses or people."""
     def __init__(self, clock=time.monotonic):
         self.clock, self.lock, self.entries = clock, threading.Lock(), {}
 
-    def check(self, address, per_peer=True):
+    def check(self, address):
         now = self.clock()
         with self.lock:
             self.entries = {key: [stamp for stamp in stamps if now-stamp < 60]
                             for key, stamps in self.entries.items() if any(now-stamp < 60 for stamp in stamps)}
             peer = self.entries.get(address, [])
             total = self.entries.get('*', [])
-            if (per_peer and len(peer) >= 60) or len(total) >= 600 or (address not in self.entries and len(self.entries) >= 201):
+            if len(peer) >= 60 or len(total) >= 600 or (address not in self.entries and len(self.entries) >= 201):
                 raise HTTPRefused(429, 'rate_limited')
             self.entries[address] = peer + [now]
             self.entries['*'] = total + [now]
 
 
 def handler_for(access, fallback):
-    limiter = RateLimit()
-
     class Handler(HeaderDeadlineMixin, fallback):
         def access_response(self, status, value):
             data = canonical(value)
@@ -97,9 +97,6 @@ def handler_for(access, fallback):
                 raise HTTPRefused(400, 'invalid_request')
             if len(self.path) > 160 or any(char in self.path for char in ('%', '\\', '?', '#')) or '..' in self.path:
                 raise HTTPRefused(400, 'invalid_request')
-            # A public-mode loopback peer is the relay for every recipient: total bucket only.
-            peer = self.client_address[0]
-            limiter.check(peer, per_peer=not (self.server.public_origin and loopback(peer)))
             if not access.db.is_file():
                 raise HTTPRefused(503, 'service_unavailable')
 
