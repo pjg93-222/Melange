@@ -249,13 +249,14 @@ def test_without_a_budget_every_selected_key_is_classified(tmp_path, monkeypatch
     assert (generation['classifier_calls'], generation['max_classifier_calls'], generation['aborted_reason']) == (4, None, None)
 
 
-def test_a_call_that_fails_still_spends_the_budget_and_the_error_still_fails_the_run(tmp_path, monkeypatch):
+def test_a_call_that_fails_still_spends_the_budget_and_a_new_key_is_deferred_not_failed(tmp_path, monkeypatch):
     build(tmp_path, monkeypatch)
     calls, _ = fake_cli(monkeypatch, [cli(1, '', 'boom')])
     code, generation, checkpoint, installed = run_main(tmp_path, '--limit', '4', '--max-classifier-calls', '1')
-    assert calls == ['119:hr:14']                           # a billed attempt counts even though it errored
-    assert (code, generation['status'], installed) == (1, 'FAIL', False)   # FAIL because of the error, not the budget
-    assert list(checkpoint['errors']) == calls
+    assert calls == ['119:hr:14']                           # a billed attempt counts even though it failed
+    # R1 (Paul 2026-10-19): a non-quota failure on a key that is not yet admitted is a deferral, so the bounded run passes.
+    assert (code, generation['status'], installed) == (0, 'PASS', True)
+    assert checkpoint['errors'] == {} and generation['source_unavailable_deferred_keys'] == calls
     assert (generation['aborted_reason'], generation['not_attempted']) == ('CLASSIFIER_CALL_BUDGET', 3)
 
 

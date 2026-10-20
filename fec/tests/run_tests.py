@@ -1047,6 +1047,10 @@ _LANE_PYTEST=(
     # 2026-10-15 admissions spend controls (D-211): classifier quota stop and per-run call budget.
     'test_sentinel_classifier_quota',
     'test_sentinel_classifier_budget',
+    # 2026-10-19 pipeline-health Fix 3 (ruling R1): a classifier timeout on an unadmitted measure defers it, never FAILs the step.
+    'test_sentinel_classifier_deferral',
+    # 2026-10-19 pipeline-health Fix 2: a sidecar bound to neither repository is recorded as unhealable drift, not "verified".
+    'test_rollback_unhealable_drift',
     # 2026-10-15 self-healing P1 (D-216): tick runner failure classes, tiered degrade, freshness feed.
     'test_refresh_degrade',
     # 2026-10-15 self-healing P4 (D-213): stdlib watchdog over the freshness feed, lease, LIVE age and tick task; toast + alert log.
@@ -1056,6 +1060,8 @@ _LANE_PYTEST=(
     'test_press_feed_stage5',
     'test_press_refresh_scoring_filters',
     'test_press_stage5',
+    # 2026-10-19 weekly 10-18 HARD FAILURE: an unreadable (OneDrive online-only) Stage 5 weight file is a named refusal.
+    'test_press_stage5_unreadable_model',
     'test_press_haiku_rater',
     'test_press_stance_stack_refresh',
     # 2026-10-15 census follow-up: tracked suites no lane named (collector supervisor fixes, press recovery speed, repair_jsonl, prospective outcome contract).
@@ -1103,7 +1109,10 @@ _LANE_PYTEST=(
     # 2026-10-16 second-pass child timeout seam (G6b; FEC_SURFACES_REPAIR.md:119-134).
     'test_second_pass_child_timeout',
     # 2026-10-16 forecast ledger safe deferral (G9; CODEX_DEBUG_ASSIST.md:27-42). Synthetic tmp_path roots only.
-    'test_forecast_ledger_resolution')
+    'test_forecast_ledger_resolution',
+    # 2026-10-19 pipeline-health Fixes 4-5 (weekly 10-18): MS NOW newest-first walk with caught-up stop, log-intact guard and
+    # budget; Washington Journal failures carry the R error tail. Scripted WordPress API / fake Rscript, tmp_path only.
+    'test_msnow_walk','test_refresh_cspan_wj_errors','test_cspan_chromote_retry')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on
@@ -1209,7 +1218,7 @@ def _export_excluded(root):
                 for _p in _ast.literal_eval(_n.value)]
     except (OSError,SyntaxError,ValueError):
         return set()   # no readable export list: nothing is excused
-    return {os.path.basename(_p)[:-3] if _p.endswith('.py') else os.path.basename(_p) for _p in _paths}
+    return {os.path.basename(_p)[:-3] if _p.endswith('.py') else os.path.basename(_p) for _p in _paths if _p.endswith(('.py','.cjs'))}  # an R fixture is no suite
 def _report_missing(missing,excluded):
     skipped=[_t for _t in missing if _t in excluded]
     if skipped:
