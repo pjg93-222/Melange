@@ -1,6 +1,6 @@
 # Melange application source (release)
 
-Filtered, history-free application source for Melange, published from local Melange branch `fix/pipeline-health-20261019` at commit `15bc300caedf004a8fb097acf826194c3fcc56c8`. Filter: `ops/release_lib/export.py` rules (roots `fec/`, `requirements.txt`, `ops/`; extension allowlist; 5 MB blob cap; excludes). Paths are kept as in the source (`ops/github` is not remapped to `.github`, so the workflow files under `ops/github` never run here. The two workflows published under `.github/workflows` (`desktop-windows.yml`, `desktop-installer-acceptance.yml`) are carried separately and run on a push to `main` that touches their path filters, or on a manual dispatch).
+Filtered, history-free application source for Melange, published from local Melange branch `claude/wave1-delta` (stacked on `fix/pipeline-health-20261019` 15bc300ca) at commit `255614003002f185094bbaabd70d088f484015c0`. Filter: `ops/release_lib/export.py` rules (roots `fec/`, `requirements.txt`, `ops/`; extension allowlist; 5 MB blob cap; excludes). Paths are kept as in the source (`ops/github` is not remapped to `.github`, so the workflow files under `ops/github` never run here. The two workflows published under `.github/workflows` (`desktop-windows.yml`, `desktop-installer-acceptance.yml`) are carried separately and run on a push to `main` that touches their path filters, or on a manual dispatch).
 
 See `SOURCE_PROVENANCE.json` and `FILTER_REPORT.txt`.
 
