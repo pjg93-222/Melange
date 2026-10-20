@@ -187,7 +187,8 @@ def test_quota_exhaustion_still_stops_the_loop_and_fails(world, monkeypatch):
 
 # ---- systemic outage guard (2026-10-19 review of R1) ------------------------------------------------------------
 # A classifier that is broken for good (auth expired, model retired, network down) would otherwise defer every new
-# key and let the run PASS and install. Two or more classifier deferrals with no call that succeeded is that shape.
+# key and let the run PASS and install. Every call deferred, and at least two non-timeout failures or three timeouts, is
+# that shape (rules below).
 
 def test_two_or_more_deferrals_and_no_successful_call_fail_the_run_as_systemic(world, monkeypatch, capsys):
     without_admitted(world)
@@ -213,6 +214,89 @@ def test_systemic_failure_leaves_the_checkpoint_free_of_a_non_key_error(world, m
     run_main(world)
     checkpoint = json.loads((world / 'data/legislation/sentinel_admission_checkpoint.json').read_text(encoding='utf-8'))
     assert checkpoint['errors'] == {}                                             # the marker is not a key to retry
+
+
+# Systemic means a dead classifier, not slow bills (follow-up 1 to R1). Non-timeout failures (auth expired, model gone,
+# overloaded) count from two; timeouts count only when every call timed out and there are three of them.
+
+def test_two_timeouts_on_huge_bills_with_no_other_call_pass(world, monkeypatch):
+    without_admitted(world)
+    calls = fake_cli(monkeypatch, {key: TIMEOUT for key in NEW})
+    code, generation, installed = run_main(world, '--limit', '2')
+
+    assert len(calls) == 2
+    assert (code, generation['status'], installed) == (0, 'PASS', True)
+    assert generation['classifier_systemic_failure'] is False and generation['errors'] == {}
+    assert sorted(generation['classifier_deferred']) == sorted(calls)
+
+
+def test_two_non_timeout_failures_with_no_success_are_systemic(world, monkeypatch):
+    # An expired login: every call exits rc 1. Two are enough, unlike timeouts.
+    without_admitted(world)
+    calls = fake_cli(monkeypatch, {key: cli(1, '', 'auth expired') for key in NEW})
+    code, generation, installed = run_main(world, '--limit', '2')
+
+    assert len(calls) == 2
+    assert (code, generation['status'], installed) == (1, 'FAIL', False)
+    assert generation['classifier_systemic_failure'] is True
+    assert list(generation['errors']) == ['CLASSIFIER_SYSTEMIC_FAILURE']
+
+
+def test_one_non_timeout_failure_beside_a_timeout_is_not_systemic(world, monkeypatch):
+    without_admitted(world)
+    calls = fake_cli(monkeypatch, {NEW[2]: cli(1, '', 'boom'), NEW[1]: TIMEOUT})
+    code, generation, installed = run_main(world, '--limit', '2')
+
+    assert calls == [NEW[2], NEW[1]]
+    assert (code, generation['status'], installed) == (0, 'PASS', True)
+    assert generation['classifier_systemic_failure'] is False
+
+
+# A non-quota is_error envelope (exit 0, e.g. "overloaded") is a classifier failure like a non-quota rc != 0 (follow-up 3).
+
+def overloaded(status=529):
+    return cli(0, json.dumps({'is_error': True, 'api_error_status': status, 'result': 'overloaded'}))
+
+
+def test_is_error_envelope_on_a_new_key_is_deferred(world, monkeypatch):
+    without_admitted(world)
+    calls = fake_cli(monkeypatch, {NEW[1]: overloaded()})
+    code, generation, installed = run_main(world)
+
+    assert NEW[1] in calls
+    assert (code, generation['status'], installed) == (0, 'PASS', True)
+    assert generation['errors'] == {}
+    assert generation['source_unavailable_deferred_keys'] == [NEW[1]]
+    assert generation['classifier_deferred'][NEW[1]].startswith('RuntimeError: tool-free classifier: overloaded')
+
+
+def test_is_error_envelope_on_an_admitted_key_still_fails(world, monkeypatch):
+    fake_cli(monkeypatch, {ADMITTED: overloaded()})
+    code, generation, installed = run_main(world)
+
+    assert (code, generation['status'], installed) == (1, 'FAIL', False)
+    assert generation['errors'][ADMITTED].startswith('RuntimeError: tool-free classifier: overloaded')
+    assert ADMITTED not in generation['classifier_deferred']
+
+
+def test_is_error_envelopes_on_every_call_are_systemic(world, monkeypatch):
+    without_admitted(world)
+    fake_cli(monkeypatch, {key: overloaded() for key in NEW})
+    code, generation, installed = run_main(world, '--limit', '2')
+
+    assert (code, generation['status'], installed) == (1, 'FAIL', False)
+    assert generation['classifier_systemic_failure'] is True and generation['classifier_calls'] == 2
+
+
+def test_a_quota_is_error_envelope_still_stops_the_loop(world, monkeypatch):
+    without_admitted(world)
+    envelope = cli(0, json.dumps({'is_error': True, 'api_error_status': 429, 'result': "You've hit your monthly spend limit"}))
+    calls = fake_cli(monkeypatch, {key: envelope for key in NEW})
+    code, generation, installed = run_main(world)
+
+    assert (code, generation['status'], installed) == (1, 'FAIL', False)
+    assert len(calls) == 1 and generation['aborted_reason'] == 'CLASSIFIER_QUOTA_EXHAUSTED'
+    assert generation['classifier_deferred'] == {}
 
 
 def test_a_single_deferral_with_no_successful_call_still_passes(world, monkeypatch):
@@ -247,7 +331,7 @@ def test_cache_hits_do_not_count_as_a_successful_classifier_call(world, monkeypa
               'categories': [], 'evidence': []}
     monkeypatch.setattr(R, 'reusable_decision',
                         lambda key, *args, **kwargs: (cached, {'cache_hit': True}) if key == NEW[0] else None)
-    fake_cli(monkeypatch, {NEW[1]: TIMEOUT, NEW[2]: TIMEOUT})
+    fake_cli(monkeypatch, {NEW[1]: cli(1, '', 'boom'), NEW[2]: cli(1, '', 'boom')})
     code, generation, installed = run_main(world)
 
     assert (code, generation['status'], installed) == (1, 'FAIL', False)
@@ -293,3 +377,63 @@ def test_deferred_keys_counts_an_unattempted_key_and_a_deferred_key_once_each(wo
     assert generation['not_attempted'] == 1
     assert generation['deferred_keys'] == sorted([NEW[0], NEW[2]])
     assert len(generation['deferred_keys']) == len(set(generation['deferred_keys']))
+
+
+# ---- per-key repeated-deferral hold (follow-up 2 to R1) ----------------------------------------------------------
+# A bill that times out every run is retried, and billed, forever. After HOLD_AFTER_DEFERRALS consecutive runs the key is
+# held like the 'complete evidence exceeds model envelope' holds; any other outcome for it resets the count.
+
+def run_key(root, key):
+    """One run on a single named key (a fresh run directory each time), returning the published generation."""
+    import shutil
+    shutil.rmtree(root / 'audits/sentinel_admissions', ignore_errors=True)
+    return run_main_once(root, key)
+
+
+def run_main_once(root, key):
+    assert R.main(['--root', str(root), '--limit', '8', '--keys', key]) == 0
+    return json.loads((root / SA.RELATIVE).read_text(encoding='utf-8'))
+
+
+def test_a_key_deferred_three_runs_running_is_held_with_the_envelope_hold_shape(world, monkeypatch):
+    without_admitted(world)
+    key = NEW[2]
+    fake_cli(monkeypatch, {key: TIMEOUT})
+    first = run_key(world, key)
+    second = run_key(world, key)
+    assert (first['classifier_deferral_counts'], second['classifier_deferral_counts']) == ({key: 1}, {key: 2})
+    assert key not in second['decisions'] and second['source_unavailable_deferred_keys'] == [key]
+
+    third = run_key(world, key)
+    assert third['classifier_deferral_counts'] == {key: 3}
+    held_decision = third['decisions'][key]
+    assert held_decision['disposition'] == 'hold' and held_decision['confidence'] == 'low'
+    assert held_decision['authority'] == 'automated_classifier_validation_gate'
+    assert held_decision['rationale'].startswith('classifier unavailable 3 runs: TimeoutExpired')
+    assert (held_decision['categories'], held_decision['evidence'], held_decision['canonical_key']) == ([], [], key)
+    assert 'checked_at' in held_decision and key not in third['bills']
+    assert third['source_unavailable_deferred_keys'] == [] and third['errors'] == {}   # a hold, no longer unsealed work
+
+
+def test_a_successful_classification_resets_the_deferral_count(world, monkeypatch):
+    without_admitted(world)
+    key = NEW[2]
+    outcomes = {key: TIMEOUT}
+    fake_cli(monkeypatch, outcomes)
+    run_key(world, key); run_key(world, key)
+    outcomes.pop(key)                                                              # the classifier answers this time
+    answered = run_key(world, key)
+    assert answered['classifier_deferral_counts'] == {} and answered['decisions'][key]['rationale'] == 'fixture hold'
+
+    outcomes[key] = TIMEOUT
+    again = run_key(world, key)
+    assert again['classifier_deferral_counts'] == {key: 1}                         # counting restarts: no premature hold
+    assert again['decisions'][key]['rationale'] == 'fixture hold'
+
+
+def test_deferral_counts_ignore_keys_that_are_not_attempted_this_run(world, monkeypatch):
+    without_admitted(world)
+    fake_cli(monkeypatch, {NEW[2]: TIMEOUT})
+    run_key(world, NEW[2])
+    other = run_key(world, NEW[1])                                           # a run that never selects NEW[2]
+    assert other['classifier_deferral_counts'] == {NEW[2]: 1}

@@ -130,6 +130,7 @@ class ClassifierQuotaExhausted(RuntimeError):
     fail and bill the same way, so main() stops the per-key loop instead of recording one more error per key."""
 
 
+HOLD_AFTER_DEFERRALS = 3  # consecutive classifier deferrals of one key before it is held (Paul 2026-10-19 follow-up to R1)
 _QUOTA_TEXT = re.compile(r'spend limit|usage limit|"api_error_status"\s*:\s*429', re.IGNORECASE)
 
 
@@ -139,10 +140,11 @@ def _quota_limit(text, envelope=None):
 
 
 def _classifier_unavailable(exc):
-    """A claude-cli call that timed out or exited non-zero for a non-quota reason: no verdict, and nothing about the bill.
-    (A quota stop is the ClassifierQuotaExhausted subclass, caught first, and `type is` keeps it out of here.)"""
+    """A claude-cli call that timed out, exited non-zero or returned an is_error envelope (e.g. "overloaded") for a
+    non-quota reason: no verdict, and nothing about the bill. (A quota stop is the ClassifierQuotaExhausted subclass,
+    caught first, and `type is` keeps it out of here.)"""
     return isinstance(exc, subprocess.TimeoutExpired) or (
-        type(exc) is RuntimeError and str(exc).startswith('tool-free classifier failed (rc '))
+        type(exc) is RuntimeError and str(exc).startswith('tool-free classifier'))
 
 
 class BelowHighConfidence(ValueError):
@@ -563,6 +565,7 @@ def main(argv=None):
     decisions=dict(cached_decisions); bills=dict(previous.get('bills',{})); sources=[]; errors={}
     catalog=dict(previous.get('bill_catalog',previous.get('bills',{})))
     no_llm_deferred=[]; source_unavailable_deferred=[]; classifier_deferred={}
+    previous_deferral_counts=previous.get('classifier_deferral_counts') or {}; deferral_counts={}
     aborted_reason=None; not_attempted=0; classifier_calls=0
     for key in selected:
         try:
@@ -660,8 +663,18 @@ def main(argv=None):
                 # Paul 2026-10-19 (R1): a classifier timeout or non-quota failure on a measure not yet admitted is a
                 # deferral, not a FAIL (119:hr:8295 failed the 2026-10-18 run). Same list and same untouched state as the
                 # source-outage deferral above, so the retry order demotes it; an admitted key keeps the error below.
-                source_unavailable_deferred.append(key); classifier_deferred[key]=reason
-                print(key,'deferred:',reason,flush=True)
+                # A key that defers HOLD_AFTER_DEFERRALS runs running (each retry is a billed call) is held instead.
+                classifier_deferred[key]=reason
+                deferral_counts[key]=previous_deferral_counts.get(key,0)+1
+                if deferral_counts[key]>=HOLD_AFTER_DEFERRALS:
+                    decisions[key]={'canonical_key':key,'disposition':'hold','confidence':'low',
+                                    'rationale':f'classifier unavailable {deferral_counts[key]} runs: {reason}',
+                                    'categories':[],'authority':'automated_classifier_validation_gate',
+                                    'checked_at':stamp,'evidence':[]}
+                    print(key,'hold:',decisions[key]['rationale'],flush=True)
+                else:
+                    source_unavailable_deferred.append(key)
+                    print(key,'deferred:',reason,flush=True)
             elif isinstance(exc,ValueError) and key not in previous['bills'] and (isinstance(exc,StatuteIdentityMismatch) or str(exc) in (
                 'amendment requires exact amendment evidence adapter','no complete official operative bill text yet',
                 'complete evidence exceeds model envelope; not silently clipped',
@@ -725,8 +738,12 @@ def main(argv=None):
                 'source':'official BILLSTATUS; automated evidence admission','verified_at':stamp})
     # Systemic outage guard (2026-10-19 review of R1): a classifier broken for good would defer every new key and let the
     # run PASS. Every call this run ended in a classifier deferral is that shape: any other outcome is a decision or a
-    # validation hold (the classifier answered) or an error (the run already fails). One isolated timeout stays a deferral.
-    systemic=len(classifier_deferred)>=2 and classifier_calls==len(classifier_deferred)
+    # validation hold (the classifier answered) or an error (the run already fails). Slow bills are not an outage: two
+    # non-timeout failures (auth expired, model gone, overloaded) are systemic; timeouts only when all of them are and
+    # there are three. Two 480 s timeouts on huge bills stay deferrals.
+    timeouts=sum(r.startswith('TimeoutExpired') for r in classifier_deferred.values())
+    failures=len(classifier_deferred)-timeouts
+    systemic=classifier_calls==len(classifier_deferred) and (failures>=2 or (failures==0 and timeouts>=3))
     if systemic:
         errors['CLASSIFIER_SYSTEMIC_FAILURE']=('%d classifier calls failed and none succeeded this run: %s'
                                                %(len(classifier_deferred),next(iter(classifier_deferred.values()))))
@@ -749,6 +766,10 @@ def main(argv=None):
         'source_unavailable_deferred_keys':sorted(source_unavailable_deferred),
         # Subset of the list above deferred on a classifier timeout / non-quota failure (2026-10-19), with the reason.
         'classifier_deferred':classifier_deferred,'classifier_systemic_failure':systemic,
+        # Consecutive runs a key ended in a classifier deferral. Any other outcome for an attempted key resets it, a key
+        # this run never reached keeps its count; HOLD_AFTER_DEFERRALS turns the deferral into a hold.
+        'classifier_deferral_counts':{**{k:n for k,n in previous_deferral_counts.items()
+                                         if k not in selected[:len(selected)-not_attempted]},**deferral_counts},
         # Set only when the loop stopped early. CLASSIFIER_QUOTA_EXHAUSTED (rate/spend limit) leaves the run FAIL and
         # never installed; CLASSIFIER_CALL_BUDGET (--max-classifier-calls) is a normal bounded run, PASS, installed.
         'aborted_reason':aborted_reason,'not_attempted':not_attempted,

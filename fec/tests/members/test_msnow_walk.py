@@ -11,6 +11,7 @@ Everything here is offline: a scripted paged WordPress API stands in for ms.now,
 runs against a private SQLite file and receipt directory.
 """
 import ast
+import hashlib
 import importlib
 import json
 import os
@@ -18,6 +19,7 @@ import shutil
 import sqlite3
 import sys
 import tempfile
+from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -75,7 +77,7 @@ class Site:
 
     @staticmethod
     def post(i):
-        return {'id': i, 'date': '2020-01-01T00:00:00' if i < 1000 else '2024-01-01T00:00:00',
+        return {'id': i, 'date': (date(2020, 1, 1) + timedelta(days=i)).isoformat() + 'T00:00:00',   # one post a day
                 'link': 'https://www.ms.now/transcripts/post-%d' % i,
                 'content': {'rendered': '<p>JANE DOE: transcript body %d</p>' % i}}
 
@@ -90,6 +92,8 @@ class Site:
         if page in self.fail_pages:
             raise self.fail_pages[page]
         ordered = sorted(self.posts, key=lambda p: p['id'], reverse=descending)
+        if 'before' in query:   # WordPress: only posts dated before this ISO 8601 moment
+            ordered = [p for p in ordered if p['date'] < query['before'][0]]
         chunk = ordered[(page - 1) * PER_PAGE:page * PER_PAGE]
         if not chunk:   # WordPress answers 400 rest_post_invalid_page_number past the last page
             raise HTTPError(url, 400, 'invalid page', {}, None)
@@ -97,6 +101,10 @@ class Site:
 
     def pages_requested(self):
         return [int(parse_qs(urlsplit(u).query)['page'][0]) for u in self.requests]
+
+    def befores_requested(self):
+        """Per request, the `before` bound it carried (None for the plain newest-first walk)."""
+        return [parse_qs(urlsplit(u).query).get('before', [None])[0] for u in self.requests]
 
     def orders_requested(self):
         return {parse_qs(urlsplit(u).query)['order'][0] for u in self.requests}
@@ -197,7 +205,7 @@ def test_no_proof_of_a_gap_free_previous_walk_means_a_full_walk(world, prior):
     assert world.site.pages_requested() == [1]
 
 
-def test_a_failed_page_leaves_a_partial_receipt_and_the_next_run_walks_fully(world):
+def test_a_failed_page_leaves_a_partial_receipt_and_the_next_run_resumes_below_the_cursor(world):
     world.seen(*range(1, 21))
     world.prior_receipt('COMPLETE')
     world.site.fail_pages[2] = HTTPError('u', 503, 'unavailable', {}, None)
@@ -208,7 +216,7 @@ def test_a_failed_page_leaves_a_partial_receipt_and_the_next_run_walks_fully(wor
     world.site.fail_pages.clear()
     world.site.requests.clear()
     assert interviews.run_msnow() is True
-    assert world.site.pages_requested() == [1, 2, 3, 4]    # PARTIAL disabled the early stop
+    assert world.site.pages_requested() == [1, 1, 2, 3]    # catch-up page 1, then the backfill below the cursor
     assert world.logged()['msnow:60'] == 'ok'              # the page that failed is now collected
 
 
@@ -333,3 +341,138 @@ def test_cli_passes_the_budget_flag_to_the_leg_in_both_strict_and_lenient_modes(
     for call in calls:
         assert [k.arg for k in call.keywords] == ['budget']
         assert ast.unparse(call.keywords[0].value) == '_budget'
+
+
+def day(i):
+    """The date the scripted site gives post i."""
+    return Site.post(i)['date'][:10]
+
+
+@pytest.fixture
+def big(world):
+    world.site.publish(*range(121, 401))   # 400 posts = 8 pages of 50
+    return world
+
+
+def test_a_budget_stop_records_where_the_walk_got_to(big, clock):
+    assert interviews.run_msnow(budget=100) is False       # pages 1-3 = posts 400..251
+    assert big.receipt()['resume_before'] == day(251)       # the oldest post reached, as a date
+
+
+def test_the_next_run_catches_up_then_resumes_the_backfill_from_the_cursor(big, clock):
+    interviews.run_msnow(budget=100)
+    big.site.publish(401, 402)
+    big.site.requests.clear()
+    assert interviews.run_msnow(budget=10_000) is True
+    befores = big.site.befores_requested()
+    plain = [i for i, b in enumerate(befores) if b is None]
+    assert plain == [0, 1]                                  # catch-up: page 1 holds 401/402, page 2 is seen
+    assert big.site.pages_requested()[:2] == [1, 2]
+    assert set(befores[2:]) == {day(251) + 'T23:59:59'}     # backfill resumes under the cursor, from page 1
+    assert big.site.pages_requested()[2:] == [1, 2, 3, 4, 5, 6, 7]   # posts 251..1 = 6 pages + the empty probe
+    assert len(big.logged()) == 402 and set(big.logged().values()) == {'ok'}
+    receipt = big.receipt()
+    assert receipt['status'] == 'COMPLETE' and receipt.get('resume_before') is None
+
+
+def test_repeated_budget_stops_converge_to_complete(big, clock):
+    cursors = []
+    for _ in range(12):
+        clock[0] = 0.0
+        if interviews.run_msnow(budget=100):
+            break
+        cursors.append(big.receipt()['resume_before'])
+    else:
+        pytest.fail('never reached COMPLETE: %s' % cursors)
+    assert cursors == sorted(cursors, reverse=True) and len(set(cursors)) == len(cursors)   # every run got further
+    assert big.receipt()['status'] == 'COMPLETE'
+    assert len(big.logged()) == 400
+    big.site.requests.clear()
+    assert interviews.run_msnow(budget=100) is True         # COMPLETE re-enables the one-page path
+    assert big.site.pages_requested() == [1]
+
+
+def test_a_failed_page_holds_the_cursor_back_so_the_gap_is_resumed(big):
+    big.site.fail_pages[3] = HTTPError('u', 503, 'unavailable', {}, None)
+    assert interviews.run_msnow() is False                  # page 3 (posts 300..251) failed, 4-8 walked
+    assert big.receipt()['resume_before'] == day(301)       # NOT day(1): the cursor stops at the last clean page
+    assert not any(big.logged().get('msnow:%d' % i) for i in range(251, 301))
+    big.site.fail_pages.clear()
+    big.site.requests.clear()
+    assert interviews.run_msnow() is True
+    assert all(big.logged().get('msnow:%d' % i) == 'ok' for i in range(251, 301))   # the gap came back
+    assert big.site.befores_requested()[1] == day(301) + 'T23:59:59'
+
+
+@pytest.mark.parametrize('cursor, recorded', [('yesterday', 400), (None, 400), ('2020-03-01', 500)])
+def test_a_cursor_the_receipt_cannot_back_means_a_full_walk(big, cursor, recorded):
+    """No cursor, a malformed one, or a log that lost rows since the receipt: resuming under the cursor
+    would skip posts the log no longer holds, so the walk starts over from the top."""
+    big.seen(*range(1, 401))
+    big.prior_receipt('PARTIAL', resume_before=cursor, known_ok_posts=recorded)
+    assert interviews.run_msnow() is True
+    assert big.site.befores_requested() == [None] * 9      # 8 pages + the empty probe, no bound
+
+
+def digest(*ids):
+    """sha256 over the sorted msnow: keys the log holds, newline-joined (what the receipt records)."""
+    return hashlib.sha256('\n'.join(sorted('msnow:%d' % i for i in ids)).encode()).hexdigest()
+
+
+def test_receipt_records_a_digest_of_the_msnow_keys_the_log_holds(world):
+    con = interviews.db()   # other sources' rows are not part of the msnow key set
+    con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', ('cnn:abc', 'ok', '2026-10-16T00:00:00'))
+    con.commit(); con.close()
+    assert interviews.run_msnow() is True
+    assert world.receipt()['known_ok_post_keys'] == digest(*range(1, 121))
+
+
+def test_same_count_replacement_defeats_the_early_stop(world):
+    """Rows deleted and others added keeps the count at 120, so the count alone trusted the receipt and
+    the deleted posts were never collected again."""
+    world.seen(*range(1, 121))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_keys=digest(*range(1, 121)))
+    world.forget(5, 60)
+    world.seen(5001, 5002)                                 # same count, different key set
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1, 2, 3, 4]
+    assert world.logged()['msnow:5'] == 'ok' and world.logged()['msnow:60'] == 'ok'
+    assert world.receipt()['known_ok_post_keys'] == digest(*range(1, 121), 5001, 5002)
+
+
+def test_an_exact_key_set_match_keeps_the_early_stop(world):
+    world.seen(*range(1, 121))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_keys=digest(*range(1, 121)))
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1]
+
+
+def test_a_log_that_only_grew_keeps_the_early_stop(world):
+    """A run killed after storing posts but before its receipt leaves a log with MORE keys than the
+    receipt describes; that is not a deletion."""
+    world.seen(*range(1, 126))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_keys=digest(*range(1, 121)))
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1]
+
+
+def test_an_unreadable_digest_is_not_trusted(world):
+    world.seen(*range(1, 121))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_keys='not-a-digest')
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1, 2, 3, 4]
+
+
+def test_a_count_only_receipt_from_before_the_digest_stays_trusted(world):
+    world.seen(*range(1, 121))
+    world.prior_receipt('COMPLETE', known_ok_posts=120)
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1]
+    assert world.receipt()['known_ok_post_keys'] == digest(*range(1, 121))   # the next receipt carries it
+
+
+def test_a_partial_receipt_with_a_replaced_key_set_is_not_resumed(big):
+    big.seen(*range(1, 401))
+    big.prior_receipt('PARTIAL', resume_before=day(301), known_ok_posts=400, known_ok_post_keys=digest(*range(2, 402)))
+    assert interviews.run_msnow() is True
+    assert big.site.befores_requested() == [None] * 9
