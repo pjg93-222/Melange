@@ -2413,6 +2413,8 @@ def _read_press_and_bills(member_names, wb):
     _admissions=SA.load(B)
     _admission_replaced=SA.remove_managed_desk_rows(bills,_admissions)
     _admission_rows=SA.append_to_desk(bills,_admissions)
+    media_audit['bill_admissions_loaded']=len(_admissions['bills'])   # the loaded generation: SA.load() drops expired carries (D-260)
+    media_audit['bill_admissions_carry_expired']=sorted(_admissions.get('carry_expired_keys') or [])   # withheld on an expired carry (D-260)
     from legislation import official_membership_movements as OM
     _movement_removed=OM.apply_to_desk(bills,OM.load(B))+_admission_replaced
     media_audit['bill_withdrawn_rows_removed']=_movement_removed
@@ -3099,8 +3101,8 @@ def build_bundle():
         'source_updates': {
             'bills_checked_at':_automatic_source.get('checked_at'),
             'automatic_bill_status':_automatic_source.get('status','NOT_RUN'),
-            'automatically_classified_bills':len(_automatic_source.get('bills',{})),
-            'bill_review_backlog':len(_automatic_source.get('deferred_keys',[])),
+            'automatically_classified_bills':LOAD_AUDIT['bill_admissions_loaded'],
+            'bill_review_backlog':len(set(_automatic_source.get('deferred_keys',[]))|set(LOAD_AUDIT['bill_admissions_carry_expired'])),
             'bill_holds':sum(d.get('disposition')=='hold' for d in _automatic_source.get('decisions',{}).values()),
             'money_checked_at':_money_source.get('checked_at'),
             'money_cycle':_money_source.get('cycle'),

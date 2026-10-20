@@ -794,3 +794,40 @@ No-revert check: the blob published at aced2d2ad equals the source blob at 94fe1
 Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (unchanged).
 Verification: the published blob (mode 100644 and id) equals the 94fe14c7e source blob. Every other path equals its aced2d2ad blob. gitleaks 8.30.1 over aced2d2ad..this commit found nothing.
 Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
+
+== ADDENDUM 32 2026-10-20: end-to-end refresh and admissions fixes (admissions hold parking, daily paid-call budget, congress re-derivation after billstatus, House Code outage handling with the GovInfo statute fallback, 30-day carry-forward guard, field-action and desk consumers), a new pull request into main. Addendum 31 belongs to pull request #20.
+Source 8a641d9ab60eefde1b29e1f28bb5519a928c002d (local Melange branch fix/e2e-20261020, 32 commits above ed64156ff, which is the local main commit pull request #20 was published from). Parent be146b31f9f2cf205bf5bb8b140a7a9fdb031db6, the merge of pull request #19 into main; this commit is on the new branch publish/e2e-pipeline-20261020 with a pull request into main. Same export rules (_tools/export_copy.py blob b33541fcd84d = source ops/release_lib/export.py at 8a641d9ab).
+Selective publication: this commit takes the tree of be146b31f and replaces exactly the export paths changed by ed64156ff..8a641d9ab. For every changed path except fec/tests/run_tests.py the blob on main equals the source parent blob at ed64156ff, so the delta is only the change below.
+Changed export paths (24: 5 added, 19 changed; none removed):
+  M fec/collect/daily_media_refresh.py  (37bdc4a2d88d -> ac1f5f25cbe7)
+  M fec/legislation/refresh_congress_pipeline.py  (759bc6224280 -> 3154c5116dab)
+  M fec/legislation/refresh_sentinel_admissions.py  (83ba6e4ecbe7 -> 209e4334e5a3)
+  M fec/legislation/sentinel_admissions.py  (3a4de18b31fc -> 0c3e6e4c2bf8)
+  M fec/legislation/sync_sentinel_bill_ledger.py  (df8e29704e36 -> f3ba1d11163a)
+  M fec/refresh_table.py  (bf8c66f7da23 -> b11dee8adcc6)
+  M fec/refresh_tick.py  (8d01124d3719 -> f3a10a9eeec1)
+  M fec/stance/build_field_action_evidence.py  (c8425d906c82 -> 1a2f92c935a2)
+  M fec/surfaces/make_member_desk.py  (04da0113bfca -> 0c10a19ac233)
+  M fec/tests/engine/test_chain_freshness_degrade.py  (1b73dd5aee55 -> 6013b4b77676)
+  M fec/tests/infra/test_refresh_degrade.py  (6d9e71086e10 -> 13f4011f6f0b)
+  M fec/tests/legislation/test_refresh_congress_pipeline.py  (e5f217da0d43 -> eb1bfc1a95ae)
+  M fec/tests/legislation/test_sentinel_bill_workbook_sync.py  (068e0caef9d1 -> 118a29d46750)
+  M fec/tests/legislation/test_sentinel_classifier_budget.py  (e83decfad622 -> 56745bbe09fc)
+  M fec/tests/legislation/test_sentinel_classifier_deferral.py  (c5210b7d937a -> 2a83078ba36a)
+  M fec/tests/legislation/test_sentinel_classifier_quota.py  (89e7856f6fbc -> b5bb591d774a)
+  M fec/tests/legislation/test_sentinel_source_unavailable.py  (25aaddfdcd17 -> 973954705098)
+  M fec/tests/run_tests.py  (87348c0f59fa -> a3382d095382)
+  M fec/tests/surfaces/test_desk_membership_fixed_point.py  (f77597def22b -> dca64d119e84)
+  A fec/admission_budget.py  (new, blob d0fe39ae92ab)
+  A fec/tests/legislation/conftest.py  (new, blob 9b01f3a94763)
+  A fec/tests/legislation/test_sentinel_govinfo_statute.py  (new, blob 3c1480d87018)
+  A fec/tests/stance/test_field_action_admissions.py  (new, blob 04803b17e8b9)
+  A fec/tests/legislation/fixtures/govinfo_uscode_12_1786a.htm  (new, blob 0686096f8735)
+Themes: (1) admissions hold parking and the call budget: fec/admission_budget.py (new), refresh_sentinel_admissions.py, refresh_tick.py, refresh_table.py and the budget, quota and deferral tests; MELANGE_SENTINEL_CALL_BUDGET is one setting for the daily runner and the refresh tick, a classifier-unavailable hold is parked for 7 days, and each parked hold is recorded with its unpark time. (2) CONGRESS_REDERIVE: refresh_congress_pipeline.py and daily_media_refresh.py re-run the four repository-bound derivations after billstatus in media mode, with a rollback of the derived outputs when the run fails, and a revert dial. (3) House Code outage handling and the GovInfo statute fallback: sentinel_admissions.py, refresh_sentinel_admissions.py, sync_sentinel_bill_ledger.py, conftest.py, test_sentinel_govinfo_statute.py, test_sentinel_source_unavailable.py, test_sentinel_bill_workbook_sync.py. (4) The 30-day carry-forward guard (D-260) and its consumers: build_field_action_evidence.py, make_member_desk.py, test_field_action_admissions.py, test_desk_membership_fixed_point.py, test_chain_freshness_degrade.py, test_refresh_degrade.py. (5) Kernel registration: fec/tests/run_tests.py registers test_field_action_admissions and test_sentinel_govinfo_statute.
+INCLUDED-NOW (read by tests; inspected, no personal data, no secrets; gitleaks clean): fec/tests/legislation/fixtures/govinfo_uscode_12_1786a.htm, blob 0686096f8735, 1950 B, extension .htm (not allowed by the filter). It is the recorded www.govinfo.gov page for 12 U.S.C. 1786a (United States Code, 2024 edition, a federal statute text from the U.S. Government Publishing Office). test_sentinel_source_unavailable.py reads it at import, so without it the published suite cannot be collected. Published at its source blob as an addendum inclusion; the filter is not widened. It leaves KEPT-EXCLUDED unchanged.
+fec/tests/run_tests.py carry-forward: pull request #20 (open) also changes this file (the RE-2 persuadable-ladder check). Main still holds the ed64156ff parent version without it. To keep this pull request to its own paths, the published blob is main's blob with only this branch's two registration lines applied (a three-way merge of main's blob, the ed64156ff blob and the 8a641d9ab blob; the applied diff equals the source diff ed64156ff..8a641d9ab for this file). It is therefore 87348c0f59fa -> a3382d095382, not the 8a641d9ab source blob 4e4a5f5754e4; once pull request #20 is on main the two blobs are the same.
+Filter run (_tools/filter_export.py, spec melange) on 8a641d9ab: included 1864, excluded 316. On ed64156ff: included 1860, excluded 315. The tip selection adds the 4 new paths above and no path leaves it; the one extra exclusion is the .htm fixture, published here as INCLUDED-NOW.
+Not published (outside the export roots or filter-excluded): .claude/skills/moneyball-config-and-flags/SKILL.md, .gitattributes, MATHEMATICAL_SPECIFICATION.md, cspan/cspan_scrape.R, fec/tests/collect/test_cspan_chromote_retry.R. The source root .gitattributes is never published (the published root .gitattributes comes from ops/export.gitattributes); cspan/ is outside the roots; fec/tests/collect/test_cspan_chromote_retry.R is held back by MELANGE_LOCAL_ARTIFACT_TESTS as before.
+Counts: export-root paths published 1891 -> 1896 (+4 filter-selected, +1 INCLUDED-NOW fixture), published tree 1925 -> 1930, KEPT-EXCLUDED 284 (unchanged).
+Verification: of the 24 changed paths, 23 published blobs (mode and id) equal the 8a641d9ab source blobs; fec/tests/run_tests.py is the carry-forward described above. Every other path equals its be146b31f blob.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
