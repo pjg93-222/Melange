@@ -17,6 +17,9 @@ IDLE = 30            # the relay heartbeats every <=0.5 s; this much silence is 
 RETRY = 10
 LOOPBACK = '127.0.0.1'  # the only local host this tunnel ever dials
 LOCAL_PORT = 38443
+# The publisher serves 16 requests at once. A Connection beyond this many active forwards is left
+# unaccepted, so the relay drops it after its own timeout instead of this process spawning without bound.
+SLOTS = threading.BoundedSemaphore(32)
 
 
 class Frames:
@@ -58,28 +61,34 @@ def pump(src, dst):
     try:
         while data := src.recv(65536):
             dst.sendall(data)
+        dst.shutdown(socket.SHUT_WR)  # pass this side's FIN on; the other direction may still be sending
     except OSError:
-        pass
+        close(src, dst)  # a reset or failed send ends both directions
+
+
+def forward(relay, conn_id, local_port, slots):
+    """Runs holding one slot of `slots`, released on return."""
+    try:
+        try:
+            remote = socket.create_connection(relay, timeout=TIMEOUT)
+        except OSError as exc:
+            return logging.warning('relay data connection failed: %s', exc)
+        try:
+            Frames(remote).send({'Accept': conn_id})
+            local = socket.create_connection((LOOPBACK, local_port), timeout=TIMEOUT)
+        except OSError as exc:
+            close(remote)
+            return logging.warning('forward %s failed: %s', conn_id, exc)
+        # Nothing was read from `remote`, so no bytes past the Accept frame are buffered here.
+        remote.settimeout(None)
+        local.settimeout(None)
+        inbound = threading.Thread(target=pump, args=(remote, local), daemon=True)
+        inbound.start()
+        pump(local, remote)  # ends when the publisher closes, which its own deadlines bound
+        inbound.join(TIMEOUT)  # the response is out; the client gets a moment to finish its side
+        close(remote, local)
     finally:
-        close(src, dst)  # either side's EOF or error ends both directions
-
-
-def forward(relay, conn_id, local_port=LOCAL_PORT):
-    try:
-        remote = socket.create_connection(relay, timeout=TIMEOUT)
-    except OSError as exc:
-        return logging.warning('relay data connection failed: %s', exc)
-    try:
-        Frames(remote).send({'Accept': conn_id})
-        local = socket.create_connection((LOOPBACK, local_port), timeout=TIMEOUT)
-    except OSError as exc:
-        close(remote)
-        return logging.warning('forward %s failed: %s', conn_id, exc)
-    # Nothing was read from `remote`, so no bytes past the Accept frame are buffered here.
-    remote.settimeout(None)
-    local.settimeout(None)
-    threading.Thread(target=pump, args=(remote, local), daemon=True).start()
-    pump(local, remote)
+        slots.release()
 
 
 def session(relay, port, local_port=LOCAL_PORT):
@@ -95,7 +104,8 @@ def session(relay, port, local_port=LOCAL_PORT):
             kind, value = frames.recv()
             if kind == 'Connection':
                 conn_id = str(uuid.UUID(value))  # canonical form; anything else drops the session
-                threading.Thread(target=forward, args=(relay, conn_id, local_port), daemon=True).start()
+                if SLOTS.acquire(blocking=False):
+                    threading.Thread(target=forward, args=(relay, conn_id, local_port, SLOTS), daemon=True).start()
             elif kind == 'Error':
                 raise RuntimeError(f'relay error: {value}')
 

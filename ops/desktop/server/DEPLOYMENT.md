@@ -27,6 +27,19 @@ python desktop_admin.py --state 'C:\ExistingProtectedPublisherState' --public-or
 
 Distribute the first command's descriptor through the administrator's trusted enrollment process. Never distribute a pairing secret or private key in source control. The second command runs the recipient listener in the foreground; use a separately reviewed Windows service/task setup under the same account for unattended operation. Existing LAN startup scripts do not silently opt into internet mode.
 
+### Bundled `bore.pub` relay
+
+The packaged trust descriptor names `https://bore.pub:38443`. That path needs two processes under the publisher's account. Both must run after every login and reboot:
+
+```powershell
+.\Register-LanPublisherStartup.ps1 -Action Install -PublicOrigin https://bore.pub:38443 -PythonExecutable 'C:\Path\To\python.exe'
+python relay_tunnel.py --port 38443 --log 'C:\ExistingProtectedPublisherState\relay.log'
+```
+
+The first command registers the loopback publisher on `127.0.0.1:38443`, the only local port that `relay_tunnel.py` forwards to. The second command is the relay client. It is not part of the publisher startup entry, so supervise it as a separate task under the same account. While it is down, recipients cannot reach the publisher.
+
+`bore.pub` is a shared relay, so another client may hold port 38443 while the tunnel reconnects. Recipients then fail the TLS pin check and send nothing. Access resumes once the tunnel reclaims the port.
+
 Configure the chosen relay and DNS so the public hostname reaches the listener without replacing TLS. Verify from another network: exact TLS public-key pin and certificate validity; approved recipient enrollment; correct Host accepted and any other Host rejected; missing/cross-app credentials rejected; signed recovery seed and update downloaded and installed; wrong pin, redirect and modified installer refused. A TLS connection or `/v1` response alone does not prove an update works.
 
 ## Linux limits

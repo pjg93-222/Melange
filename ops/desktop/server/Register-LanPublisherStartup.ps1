@@ -51,6 +51,7 @@ try {
         if ($ListenIPAddress -or $ExpectedNetworkName -or -not $PythonExecutable) {
             throw 'PublicOrigin startup listens on 127.0.0.1 only: pass -PublicOrigin and -PythonExecutable without -ListenIPAddress or -ExpectedNetworkName.'
         }
+        if ($Port -ne 38443) { throw 'PublicOrigin startup listens on 127.0.0.1:38443, the only local port relay_tunnel.py forwards to.' }
     } elseif (-not $ListenIPAddress -or -not $ExpectedNetworkName -or -not $PythonExecutable) {
         throw 'Install requires the approved LAN address/name and explicit Python executable.'
     }

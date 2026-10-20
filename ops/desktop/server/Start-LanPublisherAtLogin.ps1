@@ -9,6 +9,9 @@ param(
     [ValidateRange(1024, 65535)][int]$Port = 38443
 )
 $ErrorActionPreference = 'Stop'
+if ($PublicOrigin -and $Port -ne 38443) {
+    throw 'PublicOrigin mode listens on 127.0.0.1:38443, the only local port relay_tunnel.py forwards to.'
+}
 if ($PSVersionTable.PSVersion.Major -lt 7) {
     throw 'The publisher supervisor requires PowerShell 7 or later.'
 }
