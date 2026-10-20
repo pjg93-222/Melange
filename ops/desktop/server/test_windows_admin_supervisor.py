@@ -239,5 +239,25 @@ class LoginSupervisorStatusTests(unittest.TestCase):
             record = json.loads(status.read_text())
         self.assertEqual((record['status'], record['publisherPid'], record['notifierPid']), ('running', None, 4321))
 
+    def test_login_supervisor_survives_failed_notifier_launch(self):
+        # Runs only the notifier launcher with an executable that cannot start; never starts the real tray.
+        with tempfile.TemporaryDirectory() as root:
+            status = Path(root) / 'listener-status.json'
+            command = (
+                "$ErrorActionPreference='Stop';"
+                "$ast=[Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SCRIPT,[ref]$null,[ref]$null);"
+                "foreach($f in $ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst]},$true)){"
+                "if($f.Name -in 'Start-AccessNotifierProcess','Write-ListenerStatus'){Invoke-Expression $f.Extent.Text}};"
+                "$statusFile=$env:FIXTURE_STATUS; $publisherProcess=[pscustomobject]@{Id=8765}; $publisherJob=$null;"
+                "$notifierScript='Start-AccessNotifier.ps1'; $PythonExecutable='python.exe'; $stateDirectory=$env:FIXTURE_ROOT;"
+                "$notifierProcess=Start-AccessNotifierProcess (Join-Path $env:FIXTURE_ROOT 'missing.exe');"
+                "Write-ListenerStatus 'running'")
+            env = dict(os.environ, FIXTURE_SCRIPT=str(Path(__file__).with_name('Start-LanPublisherAtLogin.ps1')),
+                       FIXTURE_STATUS=str(status), FIXTURE_ROOT=root)
+            subprocess.run([shutil.which('pwsh'), '-NoProfile', '-NonInteractive', '-Command', command],
+                           env=env, check=True, capture_output=True, timeout=60)
+            record = json.loads(status.read_text())
+        self.assertEqual((record['status'], record['publisherPid'], record['notifierPid']), ('running', 8765, None))
+
 
 if __name__ == '__main__': unittest.main()

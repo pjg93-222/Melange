@@ -29,6 +29,7 @@ $stateDirectory = (Get-Item -LiteralPath $StateDirectory -ErrorAction Stop).Full
 $statusFile = Join-Path $stateDirectory 'listener-status.json'
 $launchScript = Join-Path $PSScriptRoot 'Start-LanPublisher.ps1'
 $serverScript = Join-Path $PSScriptRoot 'desktop_admin.py'
+$notifierScript = Join-Path $PSScriptRoot 'Start-AccessNotifier.ps1'
 if (-not (Test-Path -LiteralPath (Join-Path $stateDirectory 'trust.json'))) {
     throw 'Initialize the protected publisher state before enabling login startup.'
 }
@@ -58,6 +59,30 @@ function Write-ListenerStatus([string]$Status) {
     $temporary = $statusFile + '.' + $PID + '.tmp'
     [IO.File]::WriteAllText($temporary, ($record | ConvertTo-Json))
     [IO.File]::Move($temporary, $statusFile, $true)
+}
+function Start-AccessNotifierProcess([string]$Executable) {
+    # A failed tray must not end this loop: the supervisor's exit closes the job and takes the
+    # publisher down with it. Return $null so the status records notifierPid null and the next pass retries.
+    $process = $null
+    try {
+        $notifierStart = [Diagnostics.ProcessStartInfo]::new()
+        $notifierStart.FileName = $Executable
+        $notifierStart.UseShellExecute = $false
+        $notifierStart.CreateNoWindow = $true
+        foreach ($argument in @('-NoProfile','-NonInteractive','-STA','-WindowStyle','Hidden','-File', $notifierScript, '-PythonExecutable',$PythonExecutable,'-StateDirectory',$stateDirectory)) {
+            $notifierStart.ArgumentList.Add($argument)
+        }
+        $process = [Diagnostics.Process]::Start($notifierStart)
+        [MelangePublisherJob]::Assign($publisherJob, $process)
+        return $process
+    } catch {
+        # A started notifier outside the job would outlive the supervisor; stop it before retrying.
+        if ($process) {
+            try { $process.Kill($true) } catch { }
+            $process.Dispose()
+        }
+        return $null
+    }
 }
 try {
     try { $ownedMutex = $mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $ownedMutex = $true }
@@ -115,15 +140,7 @@ public static class MelangePublisherJob {
             $notifierProcess.Dispose(); $notifierProcess = $null
         }
         if (-not $notifierProcess -and (Test-Path -LiteralPath (Join-Path $stateDirectory 'access.sqlite3'))) {
-            $notifierStart = [Diagnostics.ProcessStartInfo]::new()
-            $notifierStart.FileName = (Get-Process -Id $PID).Path
-            $notifierStart.UseShellExecute = $false
-            $notifierStart.CreateNoWindow = $true
-            foreach ($argument in @('-NoProfile','-NonInteractive','-STA','-WindowStyle','Hidden','-File', (Join-Path $PSScriptRoot 'Start-AccessNotifier.ps1'), '-PythonExecutable',$PythonExecutable,'-StateDirectory',$stateDirectory)) {
-                $notifierStart.ArgumentList.Add($argument)
-            }
-            $notifierProcess = [Diagnostics.Process]::Start($notifierStart)
-            [MelangePublisherJob]::Assign($publisherJob, $notifierProcess)
+            $notifierProcess = Start-AccessNotifierProcess (Get-Process -Id $PID).Path
         }
         $networkReady = $false
         try {
