@@ -75,6 +75,7 @@ except RuntimeError as _lock_error:
     log('WEEKLY REFRESH BLOCKED — %s'%_lock_error)
     sys.exit(75)
 os.environ.update(child_lock_environment(_PIPELINE_LOCK_LEASE))
+_LEASE_HELD=[True]   # False while the chain container holds the writer lease; _hard_abort writes no repository file without it
 def _release_pipeline_lock():
     os.environ.pop(LOCK_TOKEN_ENV,None)
     os.environ.pop(LOCK_OWNER_PID_ENV,None)
@@ -91,12 +92,14 @@ def _lease_handoff_out():
     os.environ.pop(LOCK_TOKEN_ENV,None)
     os.environ.pop(LOCK_OWNER_PID_ENV,None)
     _PIPELINE_LOCK_CONTEXT.__exit__(None,None,None)
+    _LEASE_HELD[0]=False
     log('   chain container: writer lease released to the container; this process takes it back when the container exits')
 def _lease_handoff_in():
     global _PIPELINE_LOCK_CONTEXT,_PIPELINE_LOCK_LEASE
     try:
         _PIPELINE_LOCK_CONTEXT=pipeline_run_lock(owner_kind='weekly_refresh')
         _PIPELINE_LOCK_LEASE=_PIPELINE_LOCK_CONTEXT.__enter__()
+        _LEASE_HELD[0]=True
     except RuntimeError as _lock_error:
         _hard_abort('chain container lease',[],'writer lease not taken back after the container: %s'%_lock_error)
     os.environ.update(child_lock_environment(_PIPELINE_LOCK_LEASE))
@@ -322,7 +325,13 @@ def _hard_abort(name,failures,why):
     # DE-043 (2026-10-18 weekly): an abort between the repository fetch and the chain's rebind of the membership sidecar leaves the
     # sidecar bound to a repository that is gone. The helper restores the before-image only while the sidecar still names it, so after
     # the rebind this is a no-op. Written after the status marker, and fenced, so it can neither hide nor change the abort.
-    if _REPO_BEFORE_IMAGE[0]:
+    # The rollback replaces the repository and its receipt, so it runs only under this process's writer lease: an abort while the
+    # chain container holds it (a timed-out chain skips the take-back) or after the take-back failed (another writer owns it) keeps
+    # the before-image in the run folder and says so.
+    if _REPO_BEFORE_IMAGE[0] and not _LEASE_HELD[0]:
+        log('   repository rollback SKIPPED: this process does not hold the writer lease; the before-image is kept in %s'
+            %os.path.join(_RUN_LOG_DIR,'before'))
+    elif _REPO_BEFORE_IMAGE[0]:
         try:
             from legislation.refresh_congress_pipeline import rollback_unbound_repository
             _rb=rollback_unbound_repository(MB_ROOT,_RUN_LOG_DIR)

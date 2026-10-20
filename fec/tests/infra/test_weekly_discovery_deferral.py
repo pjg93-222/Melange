@@ -142,13 +142,14 @@ RECEIPT = "data/engine/congress_bill_refresh_receipt.json"
 SIDECAR = "data/legislation/official_membership_movements.json"
 
 
-def abort_world(root, *, armed=False):
+def abort_world(root, *, armed=False, lease_held=True):
     """The real _snapshot_repository_before_image() and _hard_abort() over a temp root; everything else records."""
     events = []
     namespace = {
         "os": os, "sys": sys, "datetime": datetime, "MB_ROOT": str(root), "_started_at": datetime.datetime.now(),
         "_RUN_LOG_DIR": str(root / "audits" / "weekly_refresh" / "20261018T000000Z"),
         "_REPO_BEFORE_IMAGE": [armed],
+        "_LEASE_HELD": [lease_held],
         "log": lambda line: events.append(("log", line)),
         "_write_status": lambda **kw: events.append(("status", kw)),
         "_emit": lambda *args, **kwargs: events.append(("emit", args)),
@@ -377,3 +378,46 @@ def test_every_rollback_label_is_named_in_the_log_without_changing_the_abort(tmp
     assert [kind for kind, _ in world.events][:3] == ["log", "emit", "status"]
     assert [kind for kind, _ in world.events][3:] == ["log"] * (len(world.events) - 3), "no extra status or emit"
     assert any(expect in text for kind, text in world.events if kind == "log")
+
+
+def test_an_abort_without_the_writer_lease_keeps_the_before_image_and_does_not_roll_back(tmp_path, monkeypatch):
+    # CodeRabbit, PR #16: a chain that timed out (the take-back is skipped) or a take-back that failed (another writer owns the
+    # lease) reaches _hard_abort without the lease; the rollback would then replace the repository under someone else's lease.
+    world = drifted_world(tmp_path)   # any armed world: the guard comes before the helper
+    world.ns["_LEASE_HELD"][0] = False
+    clean = abort_world(tmp_path, armed=False)
+    calls = spy_on_rollback(monkeypatch)
+    assert abort(world) == abort(clean) == 1
+    assert calls == []
+    assert (tmp_path / "bill_repository_live.json").read_bytes() == FETCHED
+    assert (Path(world.ns["_RUN_LOG_DIR"]) / "before" / "bill_repository_live.json").read_bytes() == BEFORE
+    assert [kw for kind, kw in world.events if kind == "status"] == [kw for kind, kw in clean.events if kind == "status"]
+    assert any("SKIPPED" in text and "writer lease" in text for kind, text in world.events if kind == "log")
+
+
+def test_the_lease_handoff_clears_and_restores_the_held_flag():
+    class Lock:
+        def __init__(self, fail=False):
+            self.fail = fail
+        def __enter__(self):
+            if self.fail:
+                raise RuntimeError("held by another writer")
+            return "lease"
+        def __exit__(self, *exc):
+            return False
+    aborts = []
+    namespace = {"os": os, "LOCK_TOKEN_ENV": "X_TOKEN", "LOCK_OWNER_PID_ENV": "X_PID", "_PIPELINE_LOCK_CONTEXT": Lock(),
+                 "_LEASE_HELD": [True], "log": lambda line: None, "child_lock_environment": lambda lease: {},
+                 "_hard_abort": lambda *args: aborts.append(args)}
+    for name in ("_lease_handoff_out", "_lease_handoff_in"):
+        exec(function_source(name), namespace)
+    namespace["pipeline_run_lock"] = lambda **kw: Lock()
+    namespace["_lease_handoff_out"]()
+    assert namespace["_LEASE_HELD"] == [False]
+    namespace["_lease_handoff_in"]()
+    assert namespace["_LEASE_HELD"] == [True] and aborts == []
+    namespace["_lease_handoff_out"]()
+    namespace["pipeline_run_lock"] = lambda **kw: Lock(fail=True)
+    namespace["_lease_handoff_in"]()
+    assert namespace["_LEASE_HELD"] == [False] and aborts and aborts[0][0] == "chain container lease"
+    assert "_LEASE_HELD=[True]" in SOURCE
