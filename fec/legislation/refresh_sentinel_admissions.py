@@ -138,6 +138,13 @@ def _quota_limit(text, envelope=None):
     return str((envelope or {}).get('api_error_status')) == '429' or bool(_QUOTA_TEXT.search(text or ''))
 
 
+def _classifier_unavailable(exc):
+    """A claude-cli call that timed out or exited non-zero for a non-quota reason: no verdict, and nothing about the bill.
+    (A quota stop is the ClassifierQuotaExhausted subclass, caught first, and `type is` keeps it out of here.)"""
+    return isinstance(exc, subprocess.TimeoutExpired) or (
+        type(exc) is RuntimeError and str(exc).startswith('tool-free classifier failed (rc '))
+
+
 class BelowHighConfidence(ValueError):
     """A classifier decision that would resolve a candidate below high confidence.  Same message as before, so
     the rule and every caller that catches ValueError are unchanged; it carries the confidence for the hold."""
@@ -555,7 +562,7 @@ def main(argv=None):
     run.mkdir(parents=True,exist_ok=False)
     decisions=dict(cached_decisions); bills=dict(previous.get('bills',{})); sources=[]; errors={}
     catalog=dict(previous.get('bill_catalog',previous.get('bills',{})))
-    no_llm_deferred=[]; source_unavailable_deferred=[]
+    no_llm_deferred=[]; source_unavailable_deferred=[]; classifier_deferred={}
     aborted_reason=None; not_attempted=0; classifier_calls=0
     for key in selected:
         try:
@@ -649,6 +656,12 @@ def main(argv=None):
                     except (ValueError, OSError) as refusal:
                         errors[key]=f'{reason}; not carried forward: {type(refusal).__name__}: {refusal}'
                         print(key,errors[key],flush=True)
+            elif key not in previous['bills'] and _classifier_unavailable(exc):
+                # Paul 2026-10-19 (R1): a classifier timeout or non-quota failure on a measure not yet admitted is a
+                # deferral, not a FAIL (119:hr:8295 failed the 2026-10-18 run). Same list and same untouched state as the
+                # source-outage deferral above, so the retry order demotes it; an admitted key keeps the error below.
+                source_unavailable_deferred.append(key); classifier_deferred[key]=reason
+                print(key,'deferred:',reason,flush=True)
             elif isinstance(exc,ValueError) and key not in previous['bills'] and (isinstance(exc,StatuteIdentityMismatch) or str(exc) in (
                 'amendment requires exact amendment evidence adapter','no complete official operative bill text yet',
                 'complete evidence exceeds model envelope; not silently clipped',
@@ -710,13 +723,23 @@ def main(argv=None):
                 'title':bill['title'],'sponsor':bill['sponsor']['name'],'summary':desk_summary(bill['summary']),
                 'action':bill['latest_action']['text'],'ncos':bill['cosponsor_count'],'url':bill['url'],
                 'source':'official BILLSTATUS; automated evidence admission','verified_at':stamp})
+    # Systemic outage guard (2026-10-19 review of R1): a classifier broken for good would defer every new key and let the
+    # run PASS. Every call this run ended in a classifier deferral is that shape: any other outcome is a decision or a
+    # validation hold (the classifier answered) or an error (the run already fails). One isolated timeout stays a deferral.
+    systemic=len(classifier_deferred)>=2 and classifier_calls==len(classifier_deferred)
+    if systemic:
+        errors['CLASSIFIER_SYSTEMIC_FAILURE']=('%d classifier calls failed and none succeeded this run: %s'
+                                               %(len(classifier_deferred),next(iter(classifier_deferred.values()))))
+        print('Classifier systemic failure:',errors['CLASSIFIER_SYSTEMIC_FAILURE'],flush=True)
     status='FAIL' if errors else 'PASS'
     document={'schema':SA.SCHEMA,'status':status,'checked_at':stamp,'policy':POLICY,
         'bills':bills,'decisions':decisions,'memberships':memberships,
         'bill_catalog':catalog,
         'sources':list({r['path']:r for r in sources}.values()),'errors':errors,
-        # Keys a stop left unattempted are still backlog (a budget stop installs this generation).
-        'unresolved_members':unresolved,'deferred_keys':sorted(pool-set(selected[:len(selected)-not_attempted])),
+        # Keys a stop left unattempted are still backlog (a budget stop installs this generation), and so are attempted
+        # keys that stayed unsealed on an outage (source or classifier); the desk's bill_review_backlog counts this list.
+        'unresolved_members':unresolved,
+        'deferred_keys':sorted((pool-set(selected[:len(selected)-not_attempted]))|set(source_unavailable_deferred)),
         'processed':len(selected),'ratified_exclusions_retained':len(excluded),
         # Selected keys that a --no-llm pass could neither reuse nor carry forward.
         # They are unsealed work, not verdicts, and stay eligible for the next pass.
@@ -724,6 +747,8 @@ def main(argv=None):
         'no_llm_deferred_keys':sorted(no_llm_deferred),
         # New measures whose statute service was down: not verdicts, eligible again next pass.
         'source_unavailable_deferred_keys':sorted(source_unavailable_deferred),
+        # Subset of the list above deferred on a classifier timeout / non-quota failure (2026-10-19), with the reason.
+        'classifier_deferred':classifier_deferred,'classifier_systemic_failure':systemic,
         # Set only when the loop stopped early. CLASSIFIER_QUOTA_EXHAUSTED (rate/spend limit) leaves the run FAIL and
         # never installed; CLASSIFIER_CALL_BUDGET (--max-classifier-calls) is a normal bounded run, PASS, installed.
         'aborted_reason':aborted_reason,'not_attempted':not_attempted,
@@ -731,7 +756,7 @@ def main(argv=None):
     write_json(run/'generation.json',document)
     if status=='PASS' and not args.no_install:
         write_json(target,document)
-    print(json.dumps({'status':status,'admitted_bills':len(bills),'memberships':len(memberships),'errors':len(errors),'deferred':len(document['deferred_keys']),'run':str(run)}))
+    print(json.dumps({'status':status,'admitted_bills':len(bills),'memberships':len(memberships),'errors':len(errors),'deferred':len(document['deferred_keys']),'classifier_deferred':len(classifier_deferred),'classifier_systemic_failure':systemic,'run':str(run)}))
     return 0 if status=='PASS' else 1
 
 
