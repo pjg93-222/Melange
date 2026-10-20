@@ -18,8 +18,9 @@ DATA_ROOT = Path(os.environ.get("MONEYBALL_ROOT", ROOT))
 
 
 def state(root: Path) -> dict:
-    """(mtime_ns, sha256) of the speech outputs and of every file under data/stance; None marks an absent output."""
-    files = [root / "speech_stance_final.csv", root / "speech_stance_final.receipt.json"]
+    """(mtime_ns, sha256) of the speech inputs and outputs and of every file under data/stance; None marks an absent file."""
+    files = [root / "speeches_cu.csv", root / "speeches_cu.receipt.json",
+             root / "speech_stance_final.csv", root / "speech_stance_final.receipt.json"]
     files += [p for p in (root / "data" / "stance").rglob("*") if p.is_file()]
     return {p.relative_to(root).as_posix():
             (p.stat().st_mtime_ns, hashlib.sha256(p.read_bytes()).hexdigest()) if p.exists() else None

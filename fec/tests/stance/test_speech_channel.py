@@ -113,7 +113,8 @@ class SpeechCsvEmission(unittest.TestCase):
         stance_dir = DATA_ROOT / "data" / "stance"
 
         def data_root_state():
-            files = [DATA_ROOT / "speech_stance_final.csv", DATA_ROOT / "speech_stance_final.receipt.json",
+            files = [DATA_ROOT / "speeches_cu.csv", DATA_ROOT / "speeches_cu.receipt.json",
+                     DATA_ROOT / "speech_stance_final.csv", DATA_ROOT / "speech_stance_final.receipt.json",
                      DATA_ROOT / "data" / "engine" / "dead_letter" / "gold_labels.jsonl"]
             if stance_dir.is_dir():
                 files += [p for p in stance_dir.iterdir() if p.is_file()]
