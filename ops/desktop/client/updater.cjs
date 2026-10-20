@@ -189,12 +189,14 @@ class DesktopUpdater {
       // native-publisher checks.
       const cached=this.packagePath(m);
       // Only a size/hash mismatch (PACKAGE_INTEGRITY) condemns a copy; a transient read error (EBUSY/EPERM, antivirus) keeps it.
-      // Deleting is best-effort: a locked file (EBUSY/EPERM) must not stop recovery from falling back to the download.
+      // Deleting retries a locked file (EBUSY/EPERM, e.g. an antivirus scan) for ~2.5 s without blocking, then gives up quietly.
       let corrupt=false;
-      const drop=file=>{try{fs.rmSync(file,{recursive:true,force:true});}catch{}};
-      const intact=async()=>{try{await verifyPackageFile(cached,m);return true;}catch(error){corrupt=error.code==='PACKAGE_INTEGRITY';if(corrupt)drop(cached);return false;}};
+      const drop=file=>fs.promises.rm(file,{recursive:true,force:true,maxRetries:4,retryDelay:250}).catch(()=>{});
+      const intact=async()=>{try{await verifyPackageFile(cached,m);return true;}catch(error){corrupt=error.code==='PACKAGE_INTEGRITY';if(corrupt)await drop(cached);return false;}};
       let local=fs.existsSync(cached)&&await intact();
-      if(!local){const source=this.adoptBaseline(m);if(source){local=await intact();if(!local&&corrupt)drop(source);}}
+      if(!local){const source=this.adoptBaseline(m);if(source){local=await intact();if(!local&&corrupt)await drop(source);}}
+      // A corrupt copy that is still locked cannot be replaced at this path, so a download could not land: stop before fetching.
+      if(!local&&corrupt&&fs.existsSync(cached))throw new Error('The saved installer for version '+target.version+' is in use by another program. Close it and try again.');
       if(!local){await this.nativeTrust();await this.download(enrollment,enrollment.deviceToken,m,path.dirname(cached));}
       // A requested rollback beats any other pending update, which must not resurface after it. The running
       // version's own awaiting-startup record is kept.

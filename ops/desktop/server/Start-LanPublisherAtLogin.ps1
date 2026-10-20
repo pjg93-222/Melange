@@ -1,7 +1,9 @@
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = 'Lan')]
 param(
-    [Parameter(Mandatory = $true)][string]$ListenIPAddress,
-    [Parameter(Mandatory = $true)][string]$ExpectedNetworkName,
+    [Parameter(Mandatory = $true, ParameterSetName = 'Lan')][string]$ListenIPAddress,
+    [Parameter(Mandatory = $true, ParameterSetName = 'Lan')][string]$ExpectedNetworkName,
+    # Internet mode behind a local TCP pass-through relay (Tailscale Funnel): listens on 127.0.0.1 only.
+    [Parameter(Mandatory = $true, ParameterSetName = 'Public')][string]$PublicOrigin,
     [Parameter(Mandatory = $true)][string]$PythonExecutable,
     [Parameter(Mandatory = $true)][string]$StateDirectory,
     [ValidateRange(1024, 65535)][int]$Port = 38443
@@ -27,6 +29,17 @@ $serverScript = Join-Path $PSScriptRoot 'desktop_admin.py'
 if (-not (Test-Path -LiteralPath (Join-Path $stateDirectory 'trust.json'))) {
     throw 'Initialize the protected publisher state before enabling login startup.'
 }
+$serverArguments = @($serverScript, '--state', $stateDirectory)
+if ($PublicOrigin) {
+    # desktop_admin.py applies the https_origin rules; the origin must already be canonical and a DNS name.
+    $descriptor = (& $PythonExecutable $serverScript --state $stateDirectory --public-origin $PublicOrigin access-trust --url $PublicOrigin) -join "`n"
+    if ($LASTEXITCODE -ne 0 -or ($descriptor | ConvertFrom-Json).url -cne $PublicOrigin -or ([Uri]$PublicOrigin).HostNameType -ne 'Dns') {
+        throw 'PublicOrigin must be a canonical https DNS origin accepted by desktop_admin.py, with application access initialized.'
+    }
+    $ListenIPAddress = '127.0.0.1'
+    $serverArguments += @('--public-origin', $PublicOrigin)
+}
+$serverArguments += @('serve', '--listen', $ListenIPAddress, '--port', [string]$Port)
 function Write-ListenerStatus([string]$Status) {
     # Fixed status values only: never write enrollment codes, credentials or request data.
     $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null } }
@@ -102,9 +115,12 @@ public static class MelangePublisherJob {
         }
         $networkReady = $false
         try {
-            & $launchScript -ListenIPAddress $ListenIPAddress -ExpectedNetworkName $ExpectedNetworkName `
-                -PythonExecutable $PythonExecutable -StateDirectory $stateDirectory -Port $Port -ConfigureOnly | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw 'Network validation failed.' }
+            # Loopback relay mode has no LAN adapter or inbound firewall rule to validate.
+            if (-not $PublicOrigin) {
+                & $launchScript -ListenIPAddress $ListenIPAddress -ExpectedNetworkName $ExpectedNetworkName `
+                    -PythonExecutable $PythonExecutable -StateDirectory $stateDirectory -Port $Port -ConfigureOnly | Out-Null
+                if ($LASTEXITCODE -ne 0) { throw 'Network validation failed.' }
+            }
             $networkReady = $true
         } catch {
             $networkReady = $false
@@ -126,7 +142,7 @@ public static class MelangePublisherJob {
             $start.FileName = $PythonExecutable
             $start.UseShellExecute = $false
             $start.CreateNoWindow = $true
-            foreach ($argument in @($serverScript, '--state', $stateDirectory, 'serve', '--listen', $ListenIPAddress, '--port', [string]$Port)) {
+            foreach ($argument in $serverArguments) {
                 $start.ArgumentList.Add($argument)
             }
             $publisherProcess = [Diagnostics.Process]::Start($start)

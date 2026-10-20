@@ -36,3 +36,12 @@ test('builder wires the strip step as afterPack and keeps its glob filter inside
   assert.ok(source.includes("'!sources/**/state/**'")&&source.includes("'!sources/**/*.{"),'filter patterns stay under sources/');
   assert.ok(!require('../release-files.cjs').includes('after-pack.cjs'),'build-time only, not shipped in the app');
 });
+
+test('an unreadable directory under sources is logged and skipped; the rest is still stripped and the build continues',async t=>{
+  const context=pack(t,['mentat/sources/locked/a.sqlite','mentat/sources/app/b.db']);
+  const locked=path.join(context.appOutDir,'resources','runtime','mentat','sources','locked'),read=fs.readdirSync;
+  fs.readdirSync=(directory,...rest)=>{if(path.resolve(String(directory))===locked)throw Object.assign(new Error('EACCES: permission denied'),{code:'EACCES'});return read.call(fs,directory,...rest);};
+  let lines;try{lines=await quiet(context);}finally{fs.readdirSync=read;}
+  assert.equal(context.exists('mentat/sources/app/b.db'),false,'the readable branch is still stripped');
+  assert.ok(lines.some(line=>/could not read .*locked: EACCES/.test(line)),'the unreadable directory is logged');
+});

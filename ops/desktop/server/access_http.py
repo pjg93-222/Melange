@@ -6,7 +6,7 @@ import time
 from urllib.parse import urlsplit
 
 from desktop_admin import Refused, canonical, private_address, request_origin
-from access_store import secret_hash
+from access_store import loopback, secret_hash
 
 
 class HeaderDeadlineMixin:
@@ -49,14 +49,14 @@ class RateLimit:
     def __init__(self, clock=time.monotonic):
         self.clock, self.lock, self.entries = clock, threading.Lock(), {}
 
-    def check(self, address):
+    def check(self, address, per_peer=True):
         now = self.clock()
         with self.lock:
             self.entries = {key: [stamp for stamp in stamps if now-stamp < 60]
                             for key, stamps in self.entries.items() if any(now-stamp < 60 for stamp in stamps)}
             peer = self.entries.get(address, [])
             total = self.entries.get('*', [])
-            if len(peer) >= 60 or len(total) >= 600 or (address not in self.entries and len(self.entries) >= 201):
+            if (per_peer and len(peer) >= 60) or len(total) >= 600 or (address not in self.entries and len(self.entries) >= 201):
                 raise HTTPRefused(429, 'rate_limited')
             self.entries[address] = peer + [now]
             self.entries['*'] = total + [now]
@@ -97,7 +97,9 @@ def handler_for(access, fallback):
                 raise HTTPRefused(400, 'invalid_request')
             if len(self.path) > 160 or any(char in self.path for char in ('%', '\\', '?', '#')) or '..' in self.path:
                 raise HTTPRefused(400, 'invalid_request')
-            limiter.check(self.client_address[0])
+            # A public-mode loopback peer is the relay for every recipient: total bucket only.
+            peer = self.client_address[0]
+            limiter.check(peer, per_peer=not (self.server.public_origin and loopback(peer)))
             if not access.db.is_file():
                 raise HTTPRefused(503, 'service_unavailable')
 

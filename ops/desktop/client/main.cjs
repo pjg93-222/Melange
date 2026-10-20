@@ -70,7 +70,7 @@ async function ensureAccess(){
    onSuspend:()=>districtSwitch?.suspend(),
    presence:(state,sessionId)=>accessGate.client.presence({sessionId,state,version:app.getVersion(),districtId:definition.id==='terrier'&&state==='active'?read('settings.json').district:null})});
  return gate;})();
- try{return await accessInitializing;}finally{accessInitializing=null;finish();}
+ try{return await accessInitializing;}catch(error){try{fs.mkdirSync(path.join(userData,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(userData,'logs','access.log'),new Date().toISOString()+' access bootstrap failed (reason='+(error?.reason||'none')+'): '+String(error?.message).slice(0,200)+'\n',{mode:0o600});}catch{}throw error;}finally{accessInitializing=null;finish();}
 }
 async function drainActivity(){
  if(activityDraining||!accessGate||!activityOutbox)return;activityDraining=true;
@@ -96,7 +96,7 @@ async function importAccessTrust(){
  if(selected.canceled)return;
  let finish;
  try{const selectedFile=selected.filePaths[0];if(fs.statSync(selectedFile).size>32768)throw new Error();const value=JSON.parse(fs.readFileSync(selectedFile,'utf8'));
-  finish=accessTransition.commit(ticket);await require('./access-bootstrap.cjs').importTrust({resources,appId:definition.id,profile:userData,packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust,value});accessGate=null;finish();finish=null;await ensureAccess();updateStatus('Administrator trust verified. Open the app to request or use approved access.');
+  finish=accessTransition.commit(ticket);const imported=await require('./access-bootstrap.cjs').importTrust({resources,appId:definition.id,profile:userData,packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust,value});accessGate=null;finish();finish=null;const {client}=await ensureAccess();updateStatus('Administrator trust verified. '+(imported.url!==client.trust.url?'This build uses its built-in server address.':'Open the app to request or use approved access.'));
  }catch{updateStatus('Administrator trust could not be changed while access was active or the selected trust was invalid. Existing identity remains unchanged.');}finally{finish?.();}
 }
 const launch=require('./single-launch.cjs').singleLaunch(async function launchOnce(fromAccess=false){
@@ -206,7 +206,7 @@ app.whenReady().then(async()=>{
    }
   });
   ipcMain.handle('desktop-access:info',async event=>{accessOnly(event);try{return await accessOperation(async()=>await(await ensureAccess()).info());}catch{return {appId:definition.id,appName:definition.name,phase:'error'};}});
-  for(const operation of ['request','poll','activate','setPassword','unlock','lock'])ipcMain.handle('desktop-access:'+operation,async(event,payload)=>{accessOnly(event);if(runtime.child&&!accessLifecycle?.suspended)throw new Error('Lock the workspace before changing access');try{const result=await accessOperation(async()=>await(await ensureAccess()).action(operation,payload));if(operation==='activate')checkUpdates();return result;}catch{throw new Error('Access action could not be completed');}});
+  for(const operation of ['request','poll','activate','setPassword','unlock','lock'])ipcMain.handle('desktop-access:'+operation,async(event,payload)=>{accessOnly(event);if(runtime.child&&!accessLifecycle?.suspended)throw new Error('Lock the workspace before changing access');try{const result=await accessOperation(async()=>await(await ensureAccess()).action(operation,payload));if(operation==='activate')checkUpdates();return result;}catch(error){throw new Error(require('./access-client.cjs').accessFailure(error));}});
   ipcMain.handle('desktop-access:open',async event=>{accessOnly(event);if(!launchInstall.defer())await launch(true);return (await ensureAccess()).info();});
   if(definition.id==='melange'){
     const {UIStateStore,registerStateIPC}=require('./ui-state.cjs');

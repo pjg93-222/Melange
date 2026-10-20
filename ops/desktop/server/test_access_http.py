@@ -121,6 +121,14 @@ class AccessHTTPTests(unittest.TestCase):
         clock[0] = 61
         limiter.check('192.168.1.1')
 
+    def test_relay_rate_limit_uses_only_the_total_bucket(self):
+        limiter = RateLimit(clock=lambda: 0)
+        for _ in range(60): limiter.check('192.168.1.1')
+        with self.assertRaises(HTTPRefused): limiter.check('192.168.1.1')  # Ordinary peers keep 60/min.
+        for _ in range(540): limiter.check('127.0.0.1', per_peer=False)
+        with self.assertRaises(HTTPRefused) as caught: limiter.check('127.0.0.1', per_peer=False)
+        self.assertEqual(caught.exception.status, 429)  # 600/min total still binds the relay.
+
     def test_header_drip_has_total_deadline_and_releases_connection(self):
         self.server.RequestHandlerClass.header_deadline = 0.15
         raw = socket.create_connection(('127.0.0.1', self.server.server_port), timeout=3)

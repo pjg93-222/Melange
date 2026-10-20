@@ -9,7 +9,9 @@ function stripState(runtimeRoot,log=()=>{}){
   const removed=[];
   const remove=full=>{try{fs.rmSync(full,{recursive:true,force:true});removed.push(full);log('[after-pack] removed '+full);}catch(error){log('[after-pack] could not remove '+full+': '+error.message);}};
   const walk=directory=>{
-    for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+    let entries;
+    try{entries=fs.readdirSync(directory,{withFileTypes:true});}catch(error){log('[after-pack] could not read '+directory+': '+error.message);return;}
+    for(const entry of entries){
       const lower=entry.name.toLowerCase(),full=path.join(directory,entry.name);
       if(lower==='state'||DATABASE_SUFFIXES.some(suffix=>lower.endsWith(suffix)))remove(full);
       else if(entry.isDirectory())walk(full);
