@@ -488,7 +488,7 @@ test('moving the updater file root keeps the anti-rollback high-water and instal
 
 // An update installed by a version that cached its installer in the old updater file root leaves a pending record for
 // the running version whose installer is not at the current path.
-for(const [name,ready,legacy] of [['ready, installer only at the legacy path',true,true],['ready, installer nowhere',true,false],['background-only, installer only at the legacy path',false,true],['background-only, installer nowhere',false,false]])
+for(const [name,ready,legacy] of [['ready, installer only at the legacy path',true,true],['ready, installer nowhere',true,false],['background-only, installer only at the legacy path',false,true]])
   test('an activated update whose installer cache moved is confirmed by the running version, then discovery proceeds: '+name,async t=>{
     const f=fixture(t);const first=f.client();await first.check();await first.activateAfterClose();
     assert.equal(f.state.pending.phase,'activating');f.version='1.1.0';
@@ -498,7 +498,19 @@ for(const [name,ready,legacy] of [['ready, installer only at the legacy path',tr
     await client.check();
     assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');assert.equal(f.state.installedVersion,'1.1.0');assert.equal(f.state.previous.version,'1.0.0');
     assert.match(f.status.at(-1),/^Already current\./,'the check went on to ask for newer releases');
+    // The verified legacy copy is kept at the current path, where a later offline rollback looks for it.
+    if(legacy)assert.deepEqual(fs.readFileSync(path.join(f.directory,'moved-root','updates','2','Terrier.exe')),fs.readFileSync(path.join(f.directory,'updates','2','Terrier.exe')));
   });
+
+test('an installer gone from both paths does not prove the old cache was used: a background-only run waits for a successful startup',async t=>{
+  const f=fixture(t);const first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';
+  fs.rmSync(path.join(f.directory,'updates','2'),{recursive:true});
+  const options={userData:path.join(f.directory,'moved-root'),legacyUserData:f.directory};
+  await f.client('Fixture Publisher',options).check();
+  assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.0');assert.match(f.status.at(-1),/awaits a successful local startup/);
+  const ready=f.client('Fixture Publisher',options);ready.markApplicationReady();await ready.check();
+  assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');
+});
 
 test('a legacy-path installer is still verified: one failing the native check does not confirm the update',async t=>{
   const f=fixture(t);const first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';f.nativeValid=false;

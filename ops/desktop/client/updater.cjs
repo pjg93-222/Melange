@@ -231,14 +231,18 @@ class DesktopUpdater {
     if(!pending)return;
     if(pending.version===this.version){
       if(pending.phase==='failed'){this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;}
-      // An installer cached before the updater file root moved (legacyUserData) is not at the current path. That release is
-      // already installed, so the running version confirms it: no readiness wait (a background-only run never starts a
-      // backend), and a copy that is gone is not verified. Otherwise a version string alone does not prove that its backend can start.
+      // An installer found only at the pre-move cache path (legacyUserData) proves that this release was installed from the old
+      // updater file root, so the running version confirms it with no readiness wait (a background-only run never starts a
+      // backend). Otherwise a version string alone does not prove that its backend can start; a copy that is gone everywhere
+      // is not verified, but still waits for a successful local startup.
       const {path:cached,manifest}=this.packageOf(pending),legacy=this.legacyUserData&&path.join(this.legacyUserData,'updates',String(manifest.sequence),manifest.package.name);
       const installer=[cached,legacy].find(file=>file&&fs.existsSync(file));
-      if(!this.applicationReady&&installer===cached){this.onStatus('Updated app awaits a successful local startup.');return;}
+      if(!this.applicationReady&&installer!==legacy){this.onStatus('Updated app awaits a successful local startup.');return;}
       const verified=verifyEnvelope(pending.envelope,enrollment,this.identity(),state);
       if(installer)await this.verifyNativeFile(installer,verified.manifest);
+      // Keep the verified legacy copy at the current path too, so a later offline rollback to this release finds it. Every
+      // later use re-verifies it; a failed copy only means that rollback downloads the installer.
+      if(installer===legacy){const part=cached+'.part';try{fs.mkdirSync(path.dirname(cached),{recursive:true,mode:0o700});fs.copyFileSync(legacy,part);fs.renameSync(part,cached);}catch{try{fs.rmSync(part,{force:true});}catch{}}}
       this.writeState({...state,previous:state.installed||state.previous||null,installed:{...pending,phase:'installed'},pending:null,installedVersion:this.version});
       this.pruneBaselines();
       await this.report(enrollment,'installed');return;
