@@ -50,3 +50,22 @@ def test_feature_failure_is_counted():
     assert failed == 1 and len(records) == 1
     records, failed = _run(None)
     assert failed == 0 and len(records) == 2
+
+
+def test_process_episode_discards_partial_on_feature_failure(monkeypatch):
+    ep = {"guid": "g", "wav": "unused.wav", "turns": [{"rowid": 1, "text": "t"}]}
+    audio = np.zeros(16000 * 30, dtype="float32")
+    monkeypatch.setattr(axe.sf, "read", lambda *a, **k: (audio, 16000))
+    monkeypatch.setattr(axe, "detect_repetition", lambda *a: None)
+    monkeypatch.setattr(axe, "align_turns", lambda *a: [])
+    words = [types.SimpleNamespace(word="a", start=float(i), end=i + 0.5) for i in range(40)]
+    whisper = types.SimpleNamespace(
+        transcribe=lambda *a, **k: ([types.SimpleNamespace(words=words)], None))
+    # One segment succeeded, one failed: the episode must write nothing.
+    monkeypatch.setattr(axe, "feature_records", lambda *a: ([{"seg": 0}], 1))
+    _, _, records, failed = axe.process_episode(ep, whisper, None)
+    assert failed is True and records == []
+    # Control: with no failures the same records come through.
+    monkeypatch.setattr(axe, "feature_records", lambda *a: ([{"seg": 0}], 0))
+    _, _, records, failed = axe.process_episode(ep, whisper, None)
+    assert failed is False and records == [{"seg": 0}]

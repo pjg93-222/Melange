@@ -782,3 +782,15 @@ No-revert check: for each changed path, the blob published at 8cd49457a equals t
 Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (278 plus the six research-dependent tests, now path policy as G8 research tests).
 Verification: the 8 published blobs (mode 100644 and id) equal the e8bf470be source blobs. Every other path equals its 8cd49457a blob. gitleaks 8.30.1 over 8cd49457a..this commit found nothing.
 Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
+
+== ADDENDUM 30 2026-10-20: republished from local Melange main 94fe14c7e, CodeRabbit review 5582182357 on pull request #14 (test for the process_episode all-or-nothing discard)
+Source 94fe14c7eb49e94a09730deddc193b22df4c9035 (local Melange branch main). Previous publication aced2d2ad10d5375b0069caa2dcf87ec90774639 (Addendum 29, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. origin/main is still fc74822df, so no new merge.
+Selective publication: this commit takes the tree of aced2d2ad and replaces exactly the 1 export path changed by source commit 94fe14c7e. 94fe14c7e is the only commit between e8bf470be (Addendum 29) and the source HEAD, so the published blob is both the commit blob and the HEAD blob.
+Change: fec/tests/speech/test_axe_segment_feature_failure.py adds test_process_episode_discards_partial_on_feature_failure, which drives fec/speech/axe_segment.py process_episode with one successful and one failed feature segment and requires that no records are returned. It fails if the all-or-nothing discard is removed.
+Filter run (_tools/filter_export.py, spec melange, on 94fe14c7e). _tools/export_copy.py already equals the source ops/release_lib/export.py at 94fe14c7e (blob b33541fcd84d), so no resync. Included 1850, excluded 313 (unchanged from the Addendum 29 run). The selection is identical; only the path below changes blob, and it is included with the published blob id.
+Changed export paths (1: 0 added, 1 changed; none removed, none newly filtered out of the published tree):
+  M fec/tests/speech/test_axe_segment_feature_failure.py  (97c3a17d4a3f -> 2b7aacc380ca)
+No-revert check: the blob published at aced2d2ad equals the source blob at 94fe14c7e^ (e8bf470be). Mode 100644 on both sides.
+Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (unchanged).
+Verification: the published blob (mode 100644 and id) equals the 94fe14c7e source blob. Every other path equals its aced2d2ad blob. gitleaks 8.30.1 over aced2d2ad..this commit found nothing.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
