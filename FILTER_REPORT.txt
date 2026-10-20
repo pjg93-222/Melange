@@ -794,3 +794,21 @@ No-revert check: the blob published at aced2d2ad equals the source blob at 94fe1
 Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (unchanged).
 Verification: the published blob (mode 100644 and id) equals the 94fe14c7e source blob. Every other path equals its aced2d2ad blob. gitleaks 8.30.1 over aced2d2ad..this commit found nothing.
 Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
+
+== ADDENDUM 31 2026-10-20: small tooling fixes from the 2026-10-19 blocker sweep (cloud-init headroom, CM-3, RE-2, BK-L5), a new pull request into main. Addenda 21-30 belong to pull requests #14 to #17.
+Source ed64156ff37e2536469cd1130174b0d5ee6dcd16 (local Melange branch claude/small-tooling-20261020, forked from local main bd24a0740b183fbd874e53b7398301373f2c5774). Parent be146b31f9f2cf205bf5bb8b140a7a9fdb031db6, the merge of pull request #19 into main; this commit is on the new branch publish/small-tooling-20261020 with a pull request into main. Same export rules (_tools/export_copy.py blob b33541fcd84d = source ops/release_lib/export.py).
+Selective publication: this commit takes the tree of be146b31f and replaces exactly the 8 export paths changed by bd24a0740..ed64156ff. For each path the blob on main equals the source parent blob at bd24a0740, so the delta is only the change below.
+Changed export paths (8: 0 added, 8 changed; none removed, none newly filtered out of the published tree):
+  M fec/engine/build_competitiveness.py  (8d59cc59309f -> cccb11145b44; 939403cc8: CM-3: the PR delegate c = 1 and the DC D+44 state row are labelled ruled 2026-10-11 (Paul-delegated) and DELEGATE_RULINGS is written into the artifact header; no c value changes)
+  M fec/tests/engine/test_competitiveness_c.py  (e0a85decb928 -> 9ffed1d2096d; 939403cc8: CM-3: GU/VI/AS/MP take the territory path with c == 1.0, DC stays on the state table, both flags carry the ruling)
+  M fec/moneyball_core.py  (f3a3fb979208 -> 1b8362f9d8c6; 79bae036d: RE-2: comment only, Highly Persuadable = 0.65 ratified 2026-10-11 (Paul-delegated); no value changes)
+  M fec/tests/run_tests.py  (87348c0f59fa -> ca89010cd341; 79bae036d: RE-2: kernel check that the persuadable ladder TN < LP < P < HP holds in PERS, SGATE and TORD)
+  M fec/lobbying/cosponsor_forecast.py  (0040bee16483 -> cb9901f4e1dd; f2550610c: BK-L5: METHOD_NOTE discloses that members absent from fec/legislators.csv are excluded as candidates (20 pre-snapshot 119th joins as of 2026-09-04))
+  M ops/vps/cloud-init.yaml  (a980a374dc65 -> 5f4eddc6bb3b; cfde79c9e: comments shortened into pointers to ops/VPS.md; payload block and every directive unchanged; 31580 bytes)
+  M ops/VPS.md  (7e2508e1e431 -> 4e32e3ecc7f2; cfde79c9e, 17ad4ebb0: user-data section takes the moved explanations and stops hard-coding the size)
+  M ops/tests/test_compose_policy.py  (eb63e011b8f7 -> cbd84f6bb2e6; 17ad4ebb0: size test keeps 512 bytes of headroom under the 32 KiB cap and reports the overage)
+Filter run (_tools/filter_export.py, spec melange) on ed64156ff and on bd24a0740: included 1860, excluded 315 on both; the selection is identical and only the 8 paths above change blob.
+Not published (outside the export roots, so filtered out): .claude/skills/influence-modeling-reference/SKILL.md, .claude/skills/moneyball-config-and-flags/SKILL.md, .claude/skills/quant-model-evaluation/references/bindings/melange.md, STAFFER_NETWORK_MATH_ADJUDICATION_20260831.md, big5_methods.md, audits/small_tooling_20261020/PAUL_DECISIONS.md.
+Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (unchanged).
+Verification: the 8 published blobs (mode 100644 and id) equal the ed64156ff source blobs; every other path equals its be146b31f blob.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.

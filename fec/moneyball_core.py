@@ -606,6 +606,7 @@ def build_P(adj=None,physics=cpf_diffusion,edge_mult=True):
     return {u:{v:x/(x+6.0) for v,w in nb.items() for x in (w*physics(u,v)*em(v),)} for u,nb in adj.items()}
 # ---- calibrated constant tables (single copies; env dials preserved) ----
 PERS_NONE=float(os.environ.get('PERS_NONE','0.40'))   # USER-RATIFIED 2026-07-02: Ally parity — silence never outranks a declared Ally (Ally=0.40; the old 0.45 broke it; decision F-9 2026-10-11, PERS_NONE=0.45 reverts)
+# HP .65 ratified 2026-10-11 (Paul-delegated RE-2): monotone persuadable ladder
 PERS={'Champion':0.10,'Defender':0.12,'Ally':0.40,'Highly Persuadable':0.65,
       'Persuadable':0.60,'Lean Persuadable':0.55,'True Neutral':0.50,
       'Lean Skeptic':0.40,'Neutral':0.50,'Skeptic':0.25,'Highly Skeptical':0.15,
