@@ -763,3 +763,22 @@ Verification: the 25 published blobs (mode 100644 and id) equal the 110cac4d9 so
 Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter; neither workflow has a pull_request trigger.
 
 Merge note (2026-10-20): branch claude/fec-debug-sweep-20261019 merged with origin/main fc74822df (pull requests #16 and #17 merged, Addenda 23, 25 and 27) so pull request #14 stays mergeable. Only the publish metadata changed on both sides; no fec/ or ops/ path was changed on both sides. Addenda are kept from both sides in numeric order (21 to 28; 23, 25 and 27 come from origin/main). Every published path equals either its origin/main blob (the 12 pull request #16 and #17 paths) or its blob on this branch. Counts after the merge: export-root paths published 1879, published tree 1913, KEPT-EXCLUDED 278.
+
+== ADDENDUM 29 2026-10-20: republished from local Melange main e8bf470be, CodeRabbit round 3 on pull request #14 (evidence output guard, artifact-gap declaration validation, youtube persist race, six research-dependent tests added to the export filter's exclusions)
+Source e8bf470be930a8893f5fa3efa521b5f6e13b9906 (local Melange branch main). Previous publication 8cd49457a3d43b4bea5840ff2d3e9d950cc4efd3 (Addendum 28 and its merge with origin/main fc74822df, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. origin/main is still fc74822df, so no new merge.
+Selective publication: this commit takes the tree of 8cd49457a and replaces exactly the 8 export paths changed by source commit e8bf470be. e8bf470be is the only commit between 110cac4d9 (Addendum 28) and the source HEAD, so each published blob is both the commit blob and the HEAD blob.
+Rules change: ops/release_lib/export.py (published here) adds six paths to MELANGE_RESEARCH_TESTS: fec/tests/research/test_exchange_context_audit_checks.py, fec/tests/research/test_fetch_demographics_guards.py, fec/tests/research/test_fetch_hearing_pilot_provenance.py, fec/tests/research/test_mine_anchors_matcher.py, fec/tests/research/test_refinement_common_write_json.py, fec/tests/research/test_refinement_report_guards.py. These are the six new research-sweep tests that Addendum 28 held back because each imports or reads fec/research/. They were never published and the rule now keeps them out. ops/tests/test_release_export.py now expects 11 MELANGE_RESEARCH_TESTS entries and checks through plan_export that each one is dropped.
+Filter run (_tools/filter_export.py, spec melange, on e8bf470be). _tools/export_copy.py was backed up to export_copy.py.bak-20261020-j and resynced to the source ops/release_lib/export.py at e8bf470be (blob b33541fcd84d; it was 43e433c21aad; the only difference is the six tuple entries). Included 1850, excluded 313 (272 path + 41 extension). Compared with the Addendum 28 run at 110cac4d9 (1856 / 307), exactly the six tests move from included to excluded and exactly the 8 paths below change blob. All 8 are included with the published blob ids.
+Changed export paths (8: 0 added, 8 changed; none removed, none newly filtered out of the published tree):
+  M fec/audit/audit_congress_collector_resume_continuity.py  (2e84763de11e -> e0816f90ea55)
+  M fec/audit/audit_legfix5_artifact_gaps.py  (71f6c5eeb5b9 -> 9c2ba95f47c8)
+  M fec/speech/discover_member_longform_youtube.py  (25acb8283213 -> 012a2c5ffd1a)
+  M fec/tests/collect/test_audit_congress_collector_resume_continuity.py  (d8412208375c -> a728a52c3bce)
+  M fec/tests/legislation/test_audit_legfix5_artifact_gaps.py  (046d6b589608 -> d76862fef6cc)
+  M fec/tests/speech/test_member_longform_youtube_discovery.py  (014b7eb77122 -> ca741ffd1546)
+  M ops/release_lib/export.py  (43e433c21aad -> b33541fcd84d)
+  M ops/tests/test_release_export.py  (12b9a086cc9a -> 4e3d41a4f9f6)
+No-revert check: for each changed path, the blob published at 8cd49457a equals the source blob at e8bf470be^ (110cac4d9). All modes are 100644.
+Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (278 plus the six research-dependent tests, now path policy as G8 research tests).
+Verification: the 8 published blobs (mode 100644 and id) equal the e8bf470be source blobs. Every other path equals its 8cd49457a blob. gitleaks 8.30.1 over 8cd49457a..this commit found nothing.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.

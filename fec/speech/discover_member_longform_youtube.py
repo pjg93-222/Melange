@@ -238,11 +238,11 @@ def main() -> int:
     new_rows: list[dict] = []
     # A failed refresh must not erase a member's prior good search; record the failure beside it.
     failed_refreshes: set[str] = set()
+    # Members whose future has returned; a still-pending member keeps its prior rows.
+    processed: set[str] = set()
 
     def persist() -> None:
-        refreshed = {row["member"] for row in new_rows} | set(selected)
-        # Only remove prior rows for members whose refreshed state is already present.
-        completed = {member for member in refreshed if member in coverage_members} - failed_refreshes
+        completed = processed - failed_refreshes
         rows = [row for row in existing_rows if row.get("member") not in completed]
         rows.extend(row for row in new_rows if row.get("member") in completed)
         rows.sort(key=lambda row: (str(row.get("member") or ""), int(row.get("candidate_rank") or 0)))
@@ -285,6 +285,7 @@ def main() -> int:
                         "qualifying_candidates": len(rows),
                         "next_step": "download_transcribe_identity_gate" if rows else "general_web_search_required",
                     }
+                processed.add(member)
                 if number % 10 == 0 or number == len(selected):
                     persist()
                     print(f"searched {number}/{len(selected)}; candidates={len(new_rows)}", flush=True)

@@ -100,3 +100,47 @@ def test_failed_refresh_without_prior_good_state_records_error(tmp_path, monkeyp
     state = json.loads(cov.read_text(encoding="utf-8"))["members"]["A One"]
     assert state["search_status"] == "ERROR"
     assert "B Two" in out.read_text(encoding="utf-8")
+
+
+def test_checkpoint_keeps_prior_rows_of_members_still_pending(tmp_path, monkeypatch):
+    """The 10th result checkpoints while another refresh is still running; that
+    member's prior rows must survive until its own result arrives."""
+    import json
+    import sys
+    import threading
+    members = [f"M{i:02d}" for i in range(11)]
+    slow = members[-1]
+    roster = tmp_path / "roster.json"
+    roster.write_text(json.dumps({"members": members}), encoding="utf-8")
+    cong = tmp_path / "cong.json"
+    cong.write_text(json.dumps([{"member": m, "chamber": "House"} for m in members]), encoding="utf-8")
+    out, cov = tmp_path / "out.jsonl", tmp_path / "cov.json"
+    out.write_text("".join(json.dumps({"member": m, "candidate_rank": 1}) + "\n" for m in members),
+                   encoding="utf-8")
+    cov.write_text(json.dumps({"members": {m: {"search_status": "SEARCHED"} for m in members}}),
+                   encoding="utf-8")
+    release = threading.Event()
+
+    def search(member, *a, **k):
+        if member == slow:
+            assert release.wait(30)
+        return [], None, ["q"]
+
+    checkpoints = []
+    real_write = module.write_jsonl_atomic
+
+    def capture(path, rows):
+        checkpoints.append([row["member"] for row in rows])
+        real_write(path, rows)
+        release.set()
+
+    monkeypatch.setattr(module, "search_member", search)
+    monkeypatch.setattr(module, "write_jsonl_atomic", capture)
+    argv = ["x", "--roster", str(roster), "--congestion", str(cong), "--out", str(out),
+            "--coverage", str(cov), "--receipt", str(tmp_path / "r.json"), "--workers", "11"]
+    for m in members:
+        argv += ["--member", m]
+    monkeypatch.setattr(sys, "argv", argv)
+    module.main()
+    assert checkpoints[0] == [slow]
+    assert checkpoints[-1] == []

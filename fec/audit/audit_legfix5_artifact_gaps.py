@@ -136,6 +136,13 @@ def collect(receipts: list[pathlib.Path]) -> tuple[list[dict], list]:
     return declared, unreadable
 
 
+def invalid_declaration(d: dict) -> bool:
+    """bytes must be an int (not bool) and sha256 a str when present; anything
+    else cannot be checked and would crash the variant set (lists)."""
+    return ((d["bytes"] is not None and type(d["bytes"]) is not int)
+            or (d["sha256"] is not None and not isinstance(d["sha256"], str)))
+
+
 def index_declarations(declared: list[dict],
                        workspace: pathlib.Path = WORKSPACE) -> dict:
     """Collapse declarations onto the RESOLVED path.
@@ -148,6 +155,8 @@ def index_declarations(declared: list[dict],
     """
     index: dict[pathlib.Path, dict] = {}
     for d in declared:
+        if invalid_declaration(d):
+            continue  # reported separately by main()
         p = resolve(d["path"], d["source"], workspace)
         if p is None:
             continue
@@ -254,6 +263,7 @@ def main() -> int:
         for r, kind in unreadable:
             print("  %s (%s)" % (r, kind))
     print("artifact declarations found: %d" % len(declared))
+    invalid = [d for d in declared if invalid_declaration(d)]
 
     # WORKSPACE is read here rather than relied on as a default argument so a
     # caller (or a test) can retarget the root it falls back to.
@@ -274,6 +284,11 @@ def main() -> int:
     for d in missing:
         print("  %-96s  x%-3d [%s]" % (
             rel(d["resolved"]), d["declarations"], rel(d["sources"][0])))
+
+    print("\n=== INVALID DECLARATION (%d) ===" % len(invalid))
+    for d in invalid:
+        print("  %-84s bytes=%r sha256=%r [%s]" % (
+            d["path"], d["bytes"], d["sha256"], rel(d["source"])))
 
     print("\n=== CONFLICT (%d) ===" % len(report["conflict"]))
     for d in report["conflict"]:
@@ -301,8 +316,8 @@ def main() -> int:
     else:
         print("  sha256 not checked (pass --hash to verify digests)")
 
-    return 1 if (unreadable or missing or report["size"] or report["hash"]
-                  or report["conflict"]) else 0
+    return 1 if (unreadable or invalid or missing or report["size"]
+                  or report["hash"] or report["conflict"]) else 0
 
 
 if __name__ == "__main__":

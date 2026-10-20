@@ -746,10 +746,21 @@ def audit_continuity(
 
 
 def write_report(
-    report: dict[str, Any], output_path: Path, protected: Iterable[Path] = ()
+    report: dict[str, Any],
+    output_path: Path,
+    protected: Iterable[Path] = (),
+    evidence_roots: Iterable[Path] = (),
 ) -> str:
     output_path = output_path.resolve()
     sidecar = output_path.with_suffix(output_path.suffix + ".sha256")
+    # Every query, page and timeout receipt the manifest references resolves
+    # inside its run directory (_safe_relative_file), so refusing the whole
+    # tree protects all of them, including ones a later run will add.
+    for root in evidence_roots:
+        root = Path(root).resolve()
+        for target in (output_path, sidecar):
+            if target.is_relative_to(root):
+                raise ValueError("report output must not be written inside an evidence tree")
     for value in protected:
         source = Path(value).resolve()
         for target in (output_path, sidecar):
@@ -783,10 +794,17 @@ def main() -> int:
             args.partition_audit,
             expected_query_count=args.expected_query_count,
         )
+        review_files = [
+            Path(item["file"])
+            for item in report["candidate_review_partition_binding"]["bindings"]
+            if isinstance(item.get("file"), str) and item["file"]
+        ]
         file_sha = write_report(
             report,
             args.output,
-            [args.baseline_manifest, args.current_manifest, args.partition_audit],
+            [args.baseline_manifest, args.current_manifest, args.partition_audit,
+             *review_files],
+            evidence_roots=[args.current_manifest.resolve().parent],
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"continuity audit failed before report generation: {exc}", file=sys.stderr)

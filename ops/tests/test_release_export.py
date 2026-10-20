@@ -34,9 +34,13 @@ class GitHooksTests(Base):
 
 
 class ExportConfigTests(Base):
-    def test_exactly_the_five_research_dependent_tests_are_excluded(self):
+    def test_exactly_the_eleven_research_dependent_tests_are_excluded(self):
         research_tests = export.MELANGE_RESEARCH_TESTS
-        self.assertEqual(len(research_tests), 5)
+        self.assertEqual(len(research_tests), 11)
+        # PR #14 round 3: six fec/tests/research files that import or read fec/research/.
+        for name in ("exchange_context_audit_checks", "fetch_demographics_guards", "fetch_hearing_pilot_provenance",
+                     "mine_anchors_matcher", "refinement_common_write_json", "refinement_report_guards"):
+            self.assertIn(f"fec/tests/research/test_{name}.py", research_tests, name)
         expected = {                                                    # synthetic paths -> disposition
             **{path: "excluded path" for path in research_tests},
             "fec/research/cosponsor_universe/universe_gold_cohort.py": "excluded path",   # the research rule itself

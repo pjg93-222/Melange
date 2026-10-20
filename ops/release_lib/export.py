@@ -27,6 +27,13 @@ MELANGE_RESEARCH_TESTS = (
     "fec/tests/research/test_research_io_regression.py",
     "fec/tests/research/test_research_assertion_boundaries.py",
     "fec/tests/research/test_institutions_reference_report.py",
+    # 2026-10-20 (PR #14 round 3): new research-sweep tests that import or read fec/research/.
+    "fec/tests/research/test_exchange_context_audit_checks.py",
+    "fec/tests/research/test_fetch_demographics_guards.py",
+    "fec/tests/research/test_fetch_hearing_pilot_provenance.py",
+    "fec/tests/research/test_mine_anchors_matcher.py",
+    "fec/tests/research/test_refinement_common_write_json.py",
+    "fec/tests/research/test_refinement_report_guards.py",
 )
 # 2026-10-19: tests that read gitignored local build products (root lobby-*.html / cu-member-desk.html pages and
 # fec/surfaces/staffer_live/approved/), never in git, so an exported copy could never run either.
