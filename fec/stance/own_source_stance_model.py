@@ -640,14 +640,10 @@ def input_fingerprint():
             # '../.claude/worktrees/<name>/...' and the cache would miss from every checkout but the live one.
             key = name
             if position:
-                # Code-root copy. merged_rows yields the same registry when its bytes equal the data-root copy (every entry
-                # is 'key'-ed), and a missing file contributes nothing, so neither changes the fingerprint.
+                # Code-root copy. A missing copy contributes nothing (merged_rows skips it); an existing copy is always hashed,
+                # because merged_rows keeps anonymous (key-less) rows from both copies, even when the bytes are identical.
                 if not os.path.exists(path):
                     continue
-                if os.path.exists(paths[0]):
-                    with open(path, "rb") as mine, open(paths[0], "rb") as theirs:
-                        if mine.read() == theirs.read():
-                            continue
                 key = "code-root:" + name
             digest.update(key.encode("utf-8"))
             if not os.path.exists(path):
