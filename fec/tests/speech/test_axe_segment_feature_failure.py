@@ -1,8 +1,22 @@
+import importlib
 import importlib.util
 from pathlib import Path
+import sys
+import types
 
 import numpy as np
 import pandas as pd
+
+# opensmile and faster_whisper are optional speech deps absent from requirements.txt;
+# stub them only when they cannot be imported (the test injects its own extractor).
+for _name, _attrs in (("opensmile", {}), ("faster_whisper", {"WhisperModel": object})):
+    try:
+        importlib.import_module(_name)
+    except ImportError:
+        _stub = types.ModuleType(_name)
+        for _attr, _value in _attrs.items():
+            setattr(_stub, _attr, _value)
+        sys.modules[_name] = _stub
 
 _P = Path(__file__).resolve().parents[2] / "speech" / "axe_segment.py"
 _spec = importlib.util.spec_from_file_location("axe_segment_under_test", _P)

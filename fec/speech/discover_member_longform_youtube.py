@@ -236,11 +236,13 @@ def main() -> int:
     generated_at = utc_now()
     lock = threading.Lock()
     new_rows: list[dict] = []
+    # A failed refresh must not erase a member's prior good search; record the failure beside it.
+    failed_refreshes: set[str] = set()
 
     def persist() -> None:
         refreshed = {row["member"] for row in new_rows} | set(selected)
         # Only remove prior rows for members whose refreshed state is already present.
-        completed = {member for member in refreshed if member in coverage_members}
+        completed = {member for member in refreshed if member in coverage_members} - failed_refreshes
         rows = [row for row in existing_rows if row.get("member") not in completed]
         rows.extend(row for row in new_rows if row.get("member") in completed)
         rows.sort(key=lambda row: (str(row.get("member") or ""), int(row.get("candidate_rank") or 0)))
@@ -270,14 +272,19 @@ def main() -> int:
                 row["chamber"] = (congestion.get(member) or {}).get("chamber")
                 row["discovered_at"] = generated_at
             with lock:
-                new_rows.extend(rows)
-                coverage_members[member] = {
-                    "queries": queries,
-                    "search_status": "ERROR" if error else "SEARCHED",
-                    "error": error,
-                    "qualifying_candidates": len(rows),
-                    "next_step": "download_transcribe_identity_gate" if rows else "general_web_search_required",
-                }
+                prior = coverage_members.get(member) or {}
+                if error and prior.get("search_status") == "SEARCHED":
+                    coverage_members[member] = {**prior, "last_refresh_error": error}
+                    failed_refreshes.add(member)
+                else:
+                    new_rows.extend(rows)
+                    coverage_members[member] = {
+                        "queries": queries,
+                        "search_status": "ERROR" if error else "SEARCHED",
+                        "error": error,
+                        "qualifying_candidates": len(rows),
+                        "next_step": "download_transcribe_identity_gate" if rows else "general_web_search_required",
+                    }
                 if number % 10 == 0 or number == len(selected):
                     persist()
                     print(f"searched {number}/{len(selected)}; candidates={len(new_rows)}", flush=True)
@@ -291,7 +298,8 @@ def main() -> int:
     errors = sum(row.get("search_status") == "ERROR" for row in coverage_members.values())
     receipt = {
         "schema": "member-longform-youtube-discovery-receipt-v1",
-        "status": "PASS" if searched == len(roster) and not errors else "PARTIAL_VISIBLE",
+        "status": ("PASS" if searched == len(roster) and not errors and not failed_refreshes
+                   else "PARTIAL_VISIBLE"),
         "generated_at": generated_at,
         "counts": {
             "roster_members": len(roster),
@@ -299,6 +307,7 @@ def main() -> int:
             "members_with_candidates": with_candidates,
             "members_needing_general_web_search": searched - with_candidates,
             "search_errors": errors,
+            "refresh_errors_prior_state_kept": len(failed_refreshes),
             "candidates": len(final_rows),
         },
         "contract": {

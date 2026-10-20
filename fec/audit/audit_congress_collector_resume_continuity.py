@@ -18,6 +18,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+FEC_BOOTSTRAP = Path(__file__).resolve().parents[1]
+if str(FEC_BOOTSTRAP) not in sys.path:
+    sys.path.insert(0, str(FEC_BOOTSTRAP))
+
+try:
+    from lane_file_io import atomic_write_bytes
+except ImportError:  # pragma: no cover - package import path
+    from fec.lane_file_io import atomic_write_bytes
+
 
 SCHEMA = "acu-congress-collector-resume-continuity-audit-v1"
 QUERY_SEMANTIC_FIELDS = (
@@ -736,19 +745,22 @@ def audit_continuity(
     return report
 
 
-def write_report(report: dict[str, Any], output_path: Path) -> str:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-    file_sha = sha256_file(output_path)
-    output_path.with_suffix(output_path.suffix + ".sha256").write_text(
-        f"{file_sha}  {output_path.name}\n",
-        encoding="ascii",
-        newline="\n",
-    )
+def write_report(
+    report: dict[str, Any], output_path: Path, protected: Iterable[Path] = ()
+) -> str:
+    output_path = output_path.resolve()
+    sidecar = output_path.with_suffix(output_path.suffix + ".sha256")
+    for value in protected:
+        source = Path(value).resolve()
+        for target in (output_path, sidecar):
+            if target == source or (
+                target.exists() and source.exists() and target.samefile(source)
+            ):
+                raise ValueError("report output must not overwrite a bound input")
+    body = (json.dumps(report, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    file_sha = hashlib.sha256(body).hexdigest()
+    atomic_write_bytes(output_path, body)
+    atomic_write_bytes(sidecar, f"{file_sha}  {output_path.name}\n".encode("ascii"))
     return file_sha
 
 
@@ -771,7 +783,11 @@ def main() -> int:
             args.partition_audit,
             expected_query_count=args.expected_query_count,
         )
-        file_sha = write_report(report, args.output)
+        file_sha = write_report(
+            report,
+            args.output,
+            [args.baseline_manifest, args.current_manifest, args.partition_audit],
+        )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"continuity audit failed before report generation: {exc}", file=sys.stderr)
         return 2

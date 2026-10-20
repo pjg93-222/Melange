@@ -53,7 +53,7 @@ class DesktopAppTests(unittest.TestCase):
         menu = types.ModuleType('webview.menu')
         menu.Menu = menu.MenuAction = MagicMock()
         menu.MenuSeparator = MagicMock()
-        with tempfile.TemporaryDirectory() as local,                 patch.dict(sys.modules, {'webview': fake, 'webview.menu': menu}),                 patch.dict(os.environ, {'LOCALAPPDATA': local}),                 patch.object(sys, 'argv', ['app', '--smoke-test', str(receipt)]),                 patch.object(moneyball_app, 'load_config', return_value={'port': 8841}),                 patch.object(moneyball_app, 'acquire_instance', return_value=object()),                 patch.object(moneyball_app, 'ensure_service', service),                 patch.object(moneyball_app.ctypes, 'windll', MagicMock()),                 patch.object(moneyball_app.logging, 'basicConfig'):
+        with tempfile.TemporaryDirectory() as local,                 patch.dict(sys.modules, {'webview': fake, 'webview.menu': menu}),                 patch.dict(os.environ, {'LOCALAPPDATA': local}),                 patch.object(sys, 'argv', ['app', '--smoke-test', str(receipt)]),                 patch.object(moneyball_app, 'load_config', return_value={'port': 8841}),                 patch.object(moneyball_app, 'acquire_instance', return_value=object()),                 patch.object(moneyball_app, 'ensure_service', service),                 patch.object(moneyball_app.ctypes, 'windll', MagicMock(), create=True),                 patch.object(moneyball_app.logging, 'basicConfig'):
             moneyball_app.main()
         return window
 

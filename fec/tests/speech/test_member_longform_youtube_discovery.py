@@ -69,3 +69,34 @@ def test_single_member_refresh_refuses_incomplete_prior_pair(tmp_path, monkeypat
     _run_single_member(tmp_path, monkeypatch, with_coverage=False)
     with pytest.raises(SystemExit):
         module.main()
+
+
+def test_failed_single_member_refresh_preserves_prior_candidates(tmp_path, monkeypatch):
+    import json
+    out, cov = _run_single_member(tmp_path, monkeypatch)
+    prior_row = {"member": "B Two", "candidate_rank": 1, "video_id": "keep"}
+    out.write_text(json.dumps(prior_row) + "\n", encoding="utf-8")
+    prior_state = {"search_status": "SEARCHED", "qualifying_candidates": 1, "error": None}
+    cov.write_text(json.dumps({"members": {"B Two": prior_state}}), encoding="utf-8")
+    monkeypatch.setattr(module, "search_member", lambda *a, **k: ([], "DownloadError: transient", ["q"]))
+    argv = [arg if arg != "A One" else "B Two" for arg in __import__("sys").argv]
+    monkeypatch.setattr("sys.argv", argv)
+    module.main()
+    rows = [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert rows == [prior_row]
+    state = json.loads(cov.read_text(encoding="utf-8"))["members"]["B Two"]
+    assert state["search_status"] == "SEARCHED" and state["qualifying_candidates"] == 1
+    assert state["last_refresh_error"] == "DownloadError: transient"
+    receipt = json.loads((tmp_path / "r.json").read_text(encoding="utf-8"))
+    assert receipt["counts"]["refresh_errors_prior_state_kept"] == 1
+    assert receipt["status"] == "PARTIAL_VISIBLE"
+
+
+def test_failed_refresh_without_prior_good_state_records_error(tmp_path, monkeypatch):
+    import json
+    out, cov = _run_single_member(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "search_member", lambda *a, **k: ([], "DownloadError: transient", ["q"]))
+    module.main()
+    state = json.loads(cov.read_text(encoding="utf-8"))["members"]["A One"]
+    assert state["search_status"] == "ERROR"
+    assert "B Two" in out.read_text(encoding="utf-8")

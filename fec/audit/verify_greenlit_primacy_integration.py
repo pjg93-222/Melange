@@ -10,6 +10,11 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import sys
+
+FEC_BOOTSTRAP = Path(__file__).resolve().parents[1]
+if str(FEC_BOOTSTRAP) not in sys.path:
+    sys.path.insert(0, str(FEC_BOOTSTRAP))
 
 from openpyxl import load_workbook
 

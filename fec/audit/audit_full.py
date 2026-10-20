@@ -33,6 +33,9 @@ def ck(name,cond,detail=''):
 def run(script):
     result=subprocess.run([sys.executable,os.path.join(FE,*script.split('/'))],capture_output=True,text=True,encoding='utf-8',errors='replace')   # step names are slash-separated; join natively
     return result.stdout if result.returncode==0 else 'sub-audit execution failed (exit %s)'%result.returncode
+def _engine_out(script,env=None,*args):   # stdout only on exit 0: a crashed engine must never be graded (mirrors run())
+    result=subprocess.run([sys.executable,os.path.join(ENG,script),*args],capture_output=True,text=True,encoding='utf-8',errors='replace',env=env)
+    return result.stdout if result.returncode==0 else 'engine execution failed (exit %s)'%result.returncode
 def _file_sha256(path):
     _h=hashlib.sha256()
     with open(path,'rb') as _handle:
@@ -131,7 +134,7 @@ ck('champion rate disciplined (<2000 of ~9000 cells)', cnt['Champion']<2000, str
 print('\n[5] Co-sponsor route (Pareto + MC reinforcement + determinism)')
 def front(env):
     e=dict(os.environ,TOPIC='Mortgage',**env)
-    out=subprocess.run([sys.executable,os.path.join(ENG, 'cosponsor_route.py')],capture_output=True,text=True,encoding='utf-8',errors='replace',env=e).stdout
+    out=_engine_out('cosponsor_route.py',e)
     d={}
     for ln in out.splitlines():
         m=re.search(r'([0-9,]+) +-> +\+([0-9.]+) +co-sponsors +risk +([0-9.]+)',ln)
@@ -152,8 +155,8 @@ _bad=[p['v'] for p in pr if not _lt_closes(p)]
 ck('every recipe closes the gap (pressure+recruit pull+money units >= theta)', not _bad, ('%d fail e.g. %s (artifact without units? re-run lt_priming)'%(len(_bad),_bad[:3])) if _bad else '')
 ck('no committed Opponents/Champions in primeable set', all(p['tier'] not in ('Champion','Defender','Opponent') for p in pr))
 print('\n[7] Scenario runner (end-to-end)')
-def scen():
-    return subprocess.run([sys.executable,os.path.join(ENG, 'scenario.py'),'--money','Jared Golden:comp:500000'],capture_output=True,text=True,encoding='utf-8',errors='replace').stdout
+def scen(spec='Jared Golden:comp:500000'):
+    return _engine_out('scenario.py',None,'--money',spec)
 o1=scen(); o2=scen()
 net=re.search(r'([+-][0-9.]+) co-sponsors\)',o1)   # the coalition/mobilization NET line
 ck('scenario runs end-to-end (reports a net influence change)', bool(net), o1.strip().splitlines()[-1] if o1 else 'no output')
@@ -163,11 +166,11 @@ ck('competitor shock reduces CU influence (sign sane)', bool(net) and float(net.
 flnet=re.search(r'winnability [0-9.]+ -> [0-9.]+  \(([+-][0-9.]+) expected flips\)',o1)
 ck('competitor shock reduces winnability too (flip channel, consistent footing)', bool(flnet) and float(flnet.group(1))<=0, flnet.group(1) if flnet else '?')
 # scenario CU spend now registers via flip channel (regression on the bug we just fixed)
-cu_o=subprocess.run([sys.executable,os.path.join(ENG, 'scenario.py'),'--money','Tim Scott:cu:300000'],capture_output=True,text=True,encoding='utf-8',errors='replace').stdout
+cu_o=scen('Tim Scott:cu:300000')
 fl=re.search(r'([+-][0-9.]+) expected flips',cu_o)
 ck('CU spend registers gradual flip-value gain (not absorbed)', bool(fl) and float(fl.group(1))>0, fl.group(1) if fl else '?')
 print('\n[8] Joint budget optimizer (fixed-state lazy greedy / modeled replanning)')
-def opt(env): return subprocess.run([sys.executable,os.path.join(ENG, 'optimize.py')],capture_output=True,text=True,encoding='utf-8',errors='replace',env=dict(os.environ,**env)).stdout
+def opt(env): return _engine_out('optimize.py',dict(os.environ,**env))
 # OPT_OUT -> scratch json so the test run doesn't clobber the production optimize_result.json
 # (mirrors FRONTIER_OUT below).  The scratch directory is data\system\audit_scratch, which NO store
 # in fec\audit\build_system_manifest.py's REGISTRY measures.  It used to be data\lobbying, which
@@ -179,13 +182,17 @@ _ASCRATCH=os.path.join(B, 'data', 'system', 'audit_scratch')
 os.makedirs(_ASCRATCH,exist_ok=True)
 # INC=5000 (divides PMAX=10000): optimize.py's cap check requires room for a FULL chunk, so INC>PMAX allocates nothing.
 _OE={'BUDGET':'300000','INC':'5000','OPT_OUT':os.path.join(_ASCRATCH, '_audit_tmp_optimize.json')}
+try: os.remove(os.path.join(_ASCRATCH, '_audit_tmp_optimize.json'))   # never grade a scratch file left by a previous run
+except FileNotFoundError: pass
 oo1=opt(_OE); oo2=opt(_OE)
 gn=re.search(r'\(([+-][0-9.]+) expected flips\)',oo1)
-ck('optimizer runs + reports a winnability frontier', bool(gn), oo1.strip().splitlines()[1] if oo1 else 'no output')
+ck('optimizer runs + reports a winnability frontier', bool(gn), (oo1.strip().splitlines() or ['no output'])[-1])
 ck('optimizer improves winnability (monotone, sign sane)', bool(gn) and float(gn.group(1))>0, gn.group(1) if gn else '?')
 ck('optimizer deterministic (same budget -> identical)', oo1==oo2)
 # H1 regression: winning a member (conversion) must be a GAIN -> the spend->winnability path is monotone non-decreasing
-_opt=json.load(open(os.path.join(_ASCRATCH, '_audit_tmp_optimize.json'))); _pp=[v for _,v in _opt['path']]
+_opt_p=os.path.join(_ASCRATCH, '_audit_tmp_optimize.json')
+ck('optimizer wrote its scratch result this run', os.path.exists(_opt_p), 'missing -- optimize.py crashed before OPT_OUT')
+_opt=json.load(open(_opt_p)) if os.path.exists(_opt_p) else {'path':[[0,0.0]]}; _pp=[v for _,v in _opt['path']]
 _drops=sum(1 for i in range(1,len(_pp)) if _pp[i]<_pp[i-1]-1e-9)
 ck('optimizer path monotone (conversion is a gain, not the old persuadability-loss)', _drops==0, '%d drops; base %.2f final %.2f'%(_drops,_pp[0],_pp[-1]))
 ck('optimizer reports mode, observation status, and guarantee scope honestly',
@@ -263,7 +270,7 @@ def _imputes(path):
 _imp_bad=[f for f in ('per_topic_coalition.py','budget_frontier.py') if not _imputes(os.path.join(ENG,f))]
 ck('coalition + frontier engines impute missing industry money like flip_model (industry_money_missing + median fill)',not _imp_bad,'missing in %s'%_imp_bad)
 # HIGH-1 regression: frontier cascade now uses edge-keyed CRN -> a single-topic run is deterministic across repeats
-def bf(): return subprocess.run([sys.executable,os.path.join(ENG, 'budget_frontier.py')],capture_output=True,text=True,encoding='utf-8',errors='replace',env=dict(os.environ,TOPIC='Interchange',FRONTIER_OUT=os.path.join(_ASCRATCH, '_audit_tmp_frontier.json'))).stdout   # scratch out (see _ASCRATCH above) -> don't clobber the all-topics production json, and don't land inside repo.data_money
+def bf(): return _engine_out('budget_frontier.py',dict(os.environ,TOPIC='Interchange',FRONTIER_OUT=os.path.join(_ASCRATCH, '_audit_tmp_frontier.json')))   # scratch out (see _ASCRATCH above) -> don't clobber the all-topics production json, and don't land inside repo.data_money
 bf1=bf(); bf2=bf()
 ck('budget_frontier deterministic w/ edge-keyed CRN (single topic)', bf1==bf2 and 'Interchange' in bf1)
 
@@ -578,6 +585,8 @@ if os.path.exists(_pm_p):
         else:
             ck('transcript-appendix passages stay a negligible share of pillar-feeding gold hearings',
                False,'hearings_cu/hearing_stance_final row counts differ')
+else:
+    ck('press component meta present (press_component_meta.json)', False, 'missing — build_media_blend did not run in DYNAMIC mode')
 _pra_p=os.path.join(B, 'data', 'stance', 'press_domain_routing_audit.json')
 if os.path.exists(_pra_p):
     _pra=json.load(open(_pra_p)); _prrows=_pra.get('rows') or []
@@ -1925,8 +1934,9 @@ if os.path.exists(os.path.join(B, 'data', 'members', 'behavioral_roles_v2_candid
                  'behavioral_roles_v2_study.py','interview_audio_e_validate.py',
                  'run_legislation_dashboard_member_desk.py',
                  'run_legislation_shadow_recompute.py'}
-    for _scan_dir in (FE,os.path.join(FE,'members'),os.path.join(FE,'legislation')):
-        for _fn in os.listdir(_scan_dir):
+    for _scan_dir,_dns,_fns in os.walk(FE):
+        _dns[:]=[d for d in _dns if d not in ('tests','attic','__pycache__') and not d.startswith('_quarantine_')]
+        for _fn in _fns:
             if not _fn.endswith('.py') or _fn in _r2_allowed: continue
             if 'behavioral_roles_v2_candidate.json' in open(os.path.join(_scan_dir,_fn),encoding='utf-8',errors='ignore').read(): _engine_refs.append(_fn)
     ck('qualified conversation roles v2 propagate exactly to the desk and remain engine-isolated',

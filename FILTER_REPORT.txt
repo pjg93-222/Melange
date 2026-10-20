@@ -683,3 +683,39 @@ Verification: the 41 published blobs (mode 100644 and id) equal the a1f015257 so
 Workflows: this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
 
 Merge note (2026-10-20): branch claude/fec-debug-sweep-20261019 merged with origin/main 82bcc56c2 (pull request #15 merged, Addendum 22) so pull request #14 stays mergeable. Only the publish metadata changed on both sides; no fec/ or ops/ path was changed on both sides. Addenda are kept from both sides in numeric order (21, 22, 24, 26; 23 and 25 belong to pull request #16). Every published path equals either its origin/main blob (the 16 pull request #15 paths) or its blob on this branch. Counts after the merge: export-root paths published 1879, published tree 1913, KEPT-EXCLUDED 278 (276 plus the two cspan test paths from Addendum 22).
+
+== ADDENDUM 28 2026-10-20: republished from local Melange main 110cac4d9, paths of three fec debug sweep commits only (fec/audit fixes, the legfix5 regression test, CodeRabbit round 2 fixes for fec/speech; fec/research stays excluded)
+Source 110cac4d95986e2cea8701c07171c739f0a07cf1 (local Melange branch main). Previous publication d31a3be30e06cd50647c24eb508741d22ae446ee (Addendum 26 and its merge with origin/main, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. Addenda 22, 23, 25 and 27 belong to pull requests #15, #16 and #17.
+Selective publication: local main also carries commits that belong to pull requests #16 and #17. They are not published here. This commit takes the tree of d31a3be30 and replaces exactly the 25 export paths changed by source commits 8ad28cede (fec/audit, 16 paths), 463f20675 (fec/tests/legislation/test_audit_legfix5_coverage_reconciliation.py) and 110cac4d9 (CodeRabbit round 2 on pull request #14: 3 fec/speech paths and 5 tests). Each is unchanged between its sweep commit and 110cac4d9, so each published blob is both the commit blob and the HEAD blob.
+fec/research is not published. Source commits 066a12c20 and 3fe157878 change 37 export-root paths. 31 of them are excluded by the filter: fec/research/ is an excluded path, and fec/tests/infra/test_research_optimized_guards.py and fec/tests/research/test_institutions_reference_report.py are MELANGE_RESEARCH_TESTS (rule G8 of 2026-10-16). The other 6 are new fec/tests/research test files (test_exchange_context_audit_checks.py, test_fetch_demographics_guards.py, test_fetch_hearing_pilot_provenance.py, test_mine_anchors_matcher.py, test_refinement_common_write_json.py, test_refinement_report_guards.py). The filter does not list them, but each imports or reads fec/research/, so exported alone they could never resolve, the same class as G8. They are held back and not published; adding them to MELANGE_RESEARCH_TESTS in the source is the matching filter change. The sweep reports audits/fec_sweep_20261013/fec_research.md and fec_audit.md are outside the export roots and are not published.
+Filter run (_tools/filter_export.py, spec melange, on 110cac4d9; _tools/export_copy.py blob 43e433c21aad, byte-identical to the source's ops/release_lib/export.py at 110cac4d9): included 1856, excluded 307; all 25 published paths are included with the published blob ids; none is excluded by a path rule, the extension allowlist or MELANGE_LOCAL_ARTIFACT_TESTS. The other differences of that run from this tree are other branches' content and were not taken.
+Changed export paths (25: 0 added, 25 changed; none removed, none newly filtered out):
+  M fec/audit/audit_billstatus_snapshot_divergence.py  (8ad28cede; 95a589613dae -> 3fbbe1345c8d)
+  M fec/audit/audit_candidate_membership_review_partition.py  (8ad28cede; d3a657e6bfec -> f9d432073b0c)
+  M fec/audit/audit_congress_collector_resume_continuity.py  (8ad28cede; 30870589ff27 -> 2e84763de11e)
+  M fec/audit/audit_congress_full_text_failure_catchnet.py  (8ad28cede; 5e2b8e6d257d -> 1e611883961b)
+  M fec/audit/audit_frontier.py  (8ad28cede; 198c220a06a0 -> b45cb33e74a2)
+  M fec/audit/audit_full.py  (8ad28cede; 8ee9c7ba2027 -> 5b4a1c36b4a1)
+  M fec/audit/audit_legfix5_artifact_gaps.py  (8ad28cede; 2083c8597702 -> 71f6c5eeb5b9)
+  M fec/audit/audit_legfix5_coverage_reconciliation.py  (8ad28cede; 954c7f29d690 -> ea54d89c94cd)
+  M fec/audit/audit_legislation_query_specificity.py  (8ad28cede; 43d6b6e52bd1 -> f4b8ae478e49)
+  M fec/audit/audit_pre_culling_inventory.py  (8ad28cede; 72a04c90fbb1 -> 6ac717d46c5c)
+  M fec/audit/audit_primacy_math_opus5.py  (8ad28cede; e3ce748b9202 -> 51cb01653669)
+  M fec/audit/audit_rendered_desk.py  (8ad28cede; ec645b4807c9 -> 956fb1206836)
+  M fec/audit/audit_source_to_dashboard.py  (8ad28cede; 1ee8b5aa072c -> a1bae2f79739)
+  M fec/audit/published_source_contracts.py  (8ad28cede; ae62b501e9ec -> 895f43dd36b7)
+  M fec/audit/system_manifest_check.py  (8ad28cede; 5876e4e1f210 -> b6d61f5c6eb8)
+  M fec/audit/verify_greenlit_primacy_integration.py  (8ad28cede; 252bbc11b02c -> a0f1f978fbde)
+  M fec/tests/legislation/test_audit_legfix5_coverage_reconciliation.py  (463f20675; 269840071005 -> a1064f41c894)
+  M fec/speech/build_member_longform_review_app.py  (110cac4d9; 046f8dfdd117 -> 06f29ec66502)
+  M fec/speech/discover_member_longform_youtube.py  (110cac4d9; 78d72c85f79d -> 25acb8283213)
+  M fec/speech/repair_canonical_wj_pcm_contract.py  (110cac4d9; 5870c16cb28a -> 3ecd5fee8846)
+  M fec/tests/speech/test_axe_segment_feature_failure.py  (110cac4d9; 59d0410933dc -> 97c3a17d4a3f)
+  M fec/tests/speech/test_build_member_longform_review_app.py  (110cac4d9; 76c4fc3308ff -> 8a96f17b33b2)
+  M fec/tests/speech/test_member_longform_youtube_discovery.py  (110cac4d9; feaff264226e -> 014b7eb77122)
+  M fec/tests/speech/test_retained_audio_safety.py  (110cac4d9; ba7c623956c4 -> 0f5fa0ccfc1f)
+  M fec/tests/surfaces/test_moneyball_desktop.py  (110cac4d9; 397b4505f020 -> 6aaa3f5c74ab)
+No-revert check: for each changed path, the blob published at d31a3be30 equals the source blob in the parent of its sweep commit; each added path is absent from both.
+Counts: export-root paths published 1879 (1879 + 0 added), published tree 1913 (1913 + 0), KEPT-EXCLUDED 278 (unchanged).
+Verification: the 25 published blobs (mode 100644 and id) equal the 110cac4d9 source blobs; every other path equals its d31a3be30 blob. gitleaks 8.30.1 over d31a3be30..this commit: no findings.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter; neither workflow has a pull_request trigger.
