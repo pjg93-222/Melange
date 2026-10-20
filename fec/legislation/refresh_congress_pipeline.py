@@ -156,13 +156,22 @@ def steps(admission_limit, include_media=False, smoke=False):
     result.extend([
         ("admissions", "legislation/refresh_sentinel_admissions.py", admissions, 14400),
         ("votes", "legislation/refresh_vote_sources.py", [], 1800),
-        ("repository", "legislation/update_bill_repository.py", [], 14400),
-        ("billstatus", "legislation/refresh_billstatus_bulk.py", [], 3600),
     ])
+    # DE-043/W1: media (hours, killable) runs BEFORE the repository fetch. The fetch and the chain's
+    # verify_collector_roster_updates.py, which rebinds official_membership_movements.json to the new
+    # repository sha, are one unit: a kill in media after the fetch left the sidecar unbound and every
+    # chain consumer dying at load (2026-10-16, 2026-10-19). This shrinks the unbound window from media
+    # (hours) to billstatus plus, in media mode, the ~12 chain steps before verify_collector_roster_updates
+    # (calibration_guard .. receptivity_layer, run_pipeline.py CHAIN). A hard kill there still strands the
+    # binding; rollback_unbound_repository only undoes failures the wrapper survives to catch.
     if include_media or smoke:
         local_date = datetime.now().astimezone().date().isoformat()
         result.append(("media", "collect/daily_media_refresh.py",
                        ["--local-date", local_date] + (["--smoke"] if smoke else []), 172800))
+    result.extend([
+        ("repository", "legislation/update_bill_repository.py", [], 14400),
+        ("billstatus", "legislation/refresh_billstatus_bulk.py", [], 3600),
+    ])
     result.append(("pipeline", "run_pipeline.py",
                    [] if (include_media or smoke) else ["--from", "verify_collector_roster_updates.py"], 14400))
     return result
