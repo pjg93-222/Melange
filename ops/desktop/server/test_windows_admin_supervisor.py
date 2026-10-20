@@ -5,6 +5,7 @@ from ctypes import wintypes as W
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -218,6 +219,25 @@ class NativeJobTests(unittest.TestCase):
             finally:
                 child.close(); other.close()
                 if descendant: kernel.CloseHandle(descendant)
+
+
+@unittest.skipUnless(shutil.which('pwsh'), 'PowerShell 7 unavailable')
+class LoginSupervisorStatusTests(unittest.TestCase):
+    def test_login_supervisor_status_names_its_notifier(self):
+        # Runs only Write-ListenerStatus from the login script, never its supervision loop.
+        with tempfile.TemporaryDirectory() as root:
+            status = Path(root) / 'listener-status.json'
+            command = (
+                "$ast=[Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SCRIPT,[ref]$null,[ref]$null);"
+                "$f=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Write-ListenerStatus'},$true);"
+                "Invoke-Expression $f.Extent.Text; $statusFile=$env:FIXTURE_STATUS; $publisherProcess=$null;"
+                "$notifierProcess=[pscustomobject]@{Id=4321}; Write-ListenerStatus 'running'")
+            env = dict(os.environ, FIXTURE_SCRIPT=str(Path(__file__).with_name('Start-LanPublisherAtLogin.ps1')),
+                       FIXTURE_STATUS=str(status))
+            subprocess.run([shutil.which('pwsh'), '-NoProfile', '-NonInteractive', '-Command', command],
+                           env=env, check=True, capture_output=True, timeout=60)
+            record = json.loads(status.read_text())
+        self.assertEqual((record['status'], record['publisherPid'], record['notifierPid']), ('running', None, 4321))
 
 
 if __name__ == '__main__': unittest.main()

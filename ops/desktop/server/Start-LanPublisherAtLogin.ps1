@@ -52,7 +52,9 @@ function Get-InviteRequired {
 }
 function Write-ListenerStatus([string]$Status) {
     # Fixed status values only: never write enrollment codes, credentials or request data.
-    $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null }; inviteRequired = Get-InviteRequired }
+    # Start-AccessNotifier.ps1 writes no status file of its own; this is its only liveness record.
+    $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null }
+        notifierPid = if ($notifierProcess) { $notifierProcess.Id } else { $null }; inviteRequired = Get-InviteRequired }
     $temporary = $statusFile + '.' + $PID + '.tmp'
     [IO.File]::WriteAllText($temporary, ($record | ConvertTo-Json))
     [IO.File]::Move($temporary, $statusFile, $true)
