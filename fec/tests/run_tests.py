@@ -1218,7 +1218,7 @@ def _export_excluded(root):
                 for _p in _ast.literal_eval(_n.value)]
     except (OSError,SyntaxError,ValueError):
         return set()   # no readable export list: nothing is excused
-    return {os.path.basename(_p)[:-3] if _p.endswith('.py') else os.path.basename(_p) for _p in _paths}
+    return {os.path.basename(_p)[:-3] if _p.endswith('.py') else os.path.basename(_p) for _p in _paths if _p.endswith(('.py','.cjs'))}  # an R fixture is no suite
 def _report_missing(missing,excluded):
     skipped=[_t for _t in missing if _t in excluded]
     if skipped:

@@ -476,3 +476,49 @@ def test_a_partial_receipt_with_a_replaced_key_set_is_not_resumed(big):
     big.prior_receipt('PARTIAL', resume_before=day(301), known_ok_posts=400, known_ok_post_keys=digest(*range(2, 402)))
     assert interviews.run_msnow() is True
     assert big.site.befores_requested() == [None] * 9
+
+
+def ids_field(*ids):
+    """The receipt's known_ok_post_ids: the sorted msnow: key suffixes, comma-joined on one line."""
+    return ','.join(k[len('msnow:'):] for k in sorted('msnow:%d' % i for i in ids))
+
+
+def test_receipt_records_the_msnow_ids_the_log_holds(world):
+    assert interviews.run_msnow() is True
+    assert world.receipt()['known_ok_post_ids'] == ids_field(*range(1, 121))
+
+
+def test_a_delete_and_add_that_nets_positive_defeats_the_early_stop(world):
+    """The digest alone had to accept any log with more keys than recorded.  With the ids the superset
+    is checked, so two deleted posts hidden behind four added keys still force the full walk."""
+    world.seen(*range(1, 121))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_keys=digest(*range(1, 121)),
+                        known_ok_post_ids=ids_field(*range(1, 121)))
+    world.forget(5, 60)
+    world.seen(5001, 5002, 5003, 5004)                     # 122 keys > 120 recorded
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1, 2, 3, 4]
+    assert world.logged()['msnow:5'] == 'ok' and world.logged()['msnow:60'] == 'ok'
+
+
+def test_a_log_that_is_a_superset_of_the_recorded_ids_keeps_the_early_stop(world):
+    world.seen(*range(1, 126))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_keys=digest(*range(1, 121)),
+                        known_ok_post_ids=ids_field(*range(1, 121)))
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1]
+
+
+def test_unreadable_ids_are_not_trusted(world):
+    world.seen(*range(1, 121))
+    world.prior_receipt('COMPLETE', known_ok_posts=120, known_ok_post_ids=['1', '2'])
+    assert interviews.run_msnow() is True
+    assert world.site.pages_requested() == [1, 2, 3, 4]
+
+
+def test_a_partial_receipt_whose_ids_are_not_all_in_the_log_is_not_resumed(big):
+    big.seen(*range(2, 401))                               # post 1 is gone from the log
+    big.prior_receipt('PARTIAL', resume_before=day(301), known_ok_posts=400,
+                      known_ok_post_ids=ids_field(*range(1, 401)))
+    assert interviews.run_msnow() is True
+    assert big.site.befores_requested() == [None] * 9

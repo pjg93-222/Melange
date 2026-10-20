@@ -936,13 +936,18 @@ def run_msnow(budget=0):
     # COMPLETE and the log holds every post, and refusing it would cost a full 215-page walk on the
     # first run. A present but unreadable value is not trusted.
     # The count cannot see a same-count replacement (rows deleted, others added), so the receipt also
-    # records known_ok_post_keys, a sha256 of the sorted msnow: keys: at the recorded count the key set must
-    # match exactly. ponytail: a hash cannot prove a superset, so a log with MORE keys than recorded (a run
-    # killed before its receipt) is accepted on the count alone; store the keys if a delete-and-add that
-    # nets positive ever matters. A receipt without the digest keeps the count rule.
+    # records the msnow: ids the log held (known_ok_post_ids, one comma-joined line) and a sha256 of the
+    # sorted keys (known_ok_post_keys). The ids are authoritative: every recorded id must still be in the
+    # log, i.e. the log equals the receipt or grew (a run killed before its receipt). A receipt with only
+    # the digest needs an exact key-set match at the recorded count (a hash cannot prove a superset, so
+    # more keys than recorded pass on the count); one with only the count keeps the count rule.
     recorded = previous.get('known_ok_posts'); recorded_keys = previous.get('known_ok_post_keys')
+    recorded_ids = previous.get('known_ok_post_ids')
     log_intact = recorded is None or (isinstance(recorded, int) and log_holds >= recorded)
-    if log_intact and recorded_keys is not None:
+    if recorded_ids is not None:
+        log_intact = (isinstance(recorded_ids, str)
+                      and set(filter(None, recorded_ids.split(','))) <= {k[len('msnow:'):] for k in log_keys})
+    elif log_intact and recorded_keys is not None:
         log_intact = (isinstance(recorded_keys, str) and re.fullmatch(r'[0-9a-f]{64}', recorded_keys) is not None
                       and (log_holds > recorded or _keys_digest(log_keys) == recorded_keys))
     can_stop_early = previous_status == 'COMPLETE' and log_intact
@@ -1049,6 +1054,7 @@ def run_msnow(budget=0):
         'walk_stop': 'consecutive_failures' if aborted else stop,
         'known_ok_posts': sum(1 for k in done if k.startswith('msnow:')),
         'known_ok_post_keys': _keys_digest(sorted(k for k in done if k.startswith('msnow:'))),
+        'known_ok_post_ids': ','.join(k[len('msnow:'):] for k in sorted(k for k in done if k.startswith('msnow:'))),
         'resume_before': None if failures == 0 and stop != 'budget' else cursor,
         'archive_posts_enumerated': source_posts,
         'archive_pages_checked': max(0, pages_before + page - 1),

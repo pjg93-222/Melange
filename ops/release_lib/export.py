@@ -30,8 +30,12 @@ MELANGE_RESEARCH_TESTS = (
 )
 # 2026-10-19: tests that read gitignored local build products (root lobby-*.html / cu-member-desk.html pages and
 # fec/surfaces/staffer_live/approved/), never in git, so an exported copy could never run either.
+# 2026-10-20: the cspan chromote retry fixture (.R) and its wrapper run against cspan/cspan_scrape.R, which sits outside the
+# export roots, so an exported copy could never pass; the source machine has R and runs them.
 MELANGE_LOCAL_ARTIFACT_TESTS = (
     "fec/tests/surfaces/test_original_workspace.py",
+    "fec/tests/collect/test_cspan_chromote_retry.py",
+    "fec/tests/collect/test_cspan_chromote_retry.R",
 )
 MELANGE_EXCLUDE = re.compile(r"^fec/(_quarantine_[^/]*/|attic/|research/|docs/|pas224\.zip$)"
                              r"|^(?:" + "|".join(re.escape(p) for p in MELANGE_RESEARCH_TESTS + MELANGE_LOCAL_ARTIFACT_TESTS)
