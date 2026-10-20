@@ -18,13 +18,15 @@ RETRY = 10
 LOOPBACK = '127.0.0.1'  # the only local host this tunnel ever dials
 LOCAL_PORT = 38443
 # The publisher serves 32 requests at once and queues the rest. A Connection beyond this many active
-# forwards waits up to SLOT_WAIT for one to finish; the relay keeps an unaccepted connection for 10 s
-# (server.rs). Waiting in the control loop keeps the thread count bounded, but frames behind it queue in
-# the socket (FIFO) and their waits add up: a Connection queued behind others that each waited can reach
-# its own wait (and the 3 s dial) after the relay has already dropped it. Under sustained overload some
-# connections are skipped or fail; each skip is logged.
+# forwards gets its own waiter thread, which waits up to SLOT_WAIT for one to finish. The control loop
+# never waits, so every wait starts when its Connection frame is read; the relay keeps an unaccepted
+# connection for 10 s (server.rs), and SLOT_WAIT plus the 3 s dial stays inside that. At most WAITERS
+# connections wait at once per session, so threads stay bounded (32 forwards plus WAITERS waiters); a
+# Connection beyond that, or one still waiting after SLOT_WAIT, is skipped and logged, and the relay
+# drops it after its 10 s.
 SLOTS = threading.BoundedSemaphore(32)
 SLOT_WAIT = 6
+WAITERS = 32
 
 
 class Frames:
@@ -96,6 +98,17 @@ def forward(relay, conn_id, local_port, slots):
         slots.release()
 
 
+def wait_and_forward(relay, conn_id, local_port, slots, waiters):
+    """Runs holding one permit of `waiters`, released as soon as a slot is won or the wait ends."""
+    try:
+        acquired = slots.acquire(timeout=SLOT_WAIT)
+    finally:
+        waiters.release()
+    if not acquired:
+        return logging.warning('forward %s skipped: no slot freed within %s s', conn_id, SLOT_WAIT)
+    forward(relay, conn_id, local_port, slots)
+
+
 def session(relay, port, local_port=LOCAL_PORT):
     with socket.create_connection(relay, timeout=TIMEOUT) as control:
         frames = Frames(control)
@@ -106,17 +119,18 @@ def session(relay, port, local_port=LOCAL_PORT):
         logging.info('connected: %s:%d -> %s:%d', relay[0], port, LOOPBACK, local_port)
         control.settimeout(IDLE)
         slots = SLOTS  # one semaphore for this session's acquires and releases
+        waiters = threading.BoundedSemaphore(WAITERS)
         while True:
             kind, value = frames.recv()
             if kind == 'Connection':
                 conn_id = str(uuid.UUID(value))  # canonical form; anything else drops the session
-                if not slots.acquire(timeout=SLOT_WAIT):
-                    logging.warning('forward %s skipped: no slot freed within %s s', conn_id, SLOT_WAIT)
+                if not waiters.acquire(blocking=False):
+                    logging.warning('forward %s skipped: %s connections already waiting for a slot', conn_id, WAITERS)
                     continue
                 try:
-                    threading.Thread(target=forward, args=(relay, conn_id, local_port, slots), daemon=True).start()
-                except RuntimeError:  # the thread never ran, so forward() will not release its slot
-                    slots.release()
+                    threading.Thread(target=wait_and_forward, args=(relay, conn_id, local_port, slots, waiters), daemon=True).start()
+                except RuntimeError:  # the thread never ran, so wait_and_forward() will not release its permit
+                    waiters.release()
                     raise
             elif kind == 'Error':
                 raise RuntimeError(f'relay error: {value}')

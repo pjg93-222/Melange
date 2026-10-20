@@ -197,11 +197,84 @@ def test_a_connection_still_waiting_after_the_relay_window_is_skipped(monkeypatc
         sock.close()
 
 
-def test_a_forward_thread_that_cannot_start_returns_its_slot(monkeypatch):
+class WatchedSlots:
+    """A one-slot semaphore, held busy, that counts how many callers are inside acquire() at once."""
+    def __init__(self):
+        self.inner = threading.BoundedSemaphore(1)
+        self.inner.acquire()
+        self.lock, self.waiting, self.peak = threading.Lock(), 0, 0
+
+    def acquire(self, timeout=None):
+        with self.lock:
+            self.waiting += 1
+            self.peak = max(self.peak, self.waiting)
+        try:
+            return self.inner.acquire(timeout=timeout)
+        finally:
+            with self.lock:
+                self.waiting -= 1
+
+    def release(self):
+        self.inner.release()
+
+
+def until(condition, seconds=2):
+    for _ in range(int(seconds * 100)):
+        if condition():
+            return True
+        threading.Event().wait(0.01)
+    return condition()
+
+
+def test_connections_waiting_for_a_slot_wait_side_by_side(monkeypatch):
+    slots = WatchedSlots()
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', slots)
+    monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 5)
+    relay, relay_address = listener()
+    start_session(relay_address, 1)
+    control, _ = relay.accept()
+    read_frame(control)
+    ids = [str(uuid.uuid4()) for _ in range(3)]
+    control.sendall(connections(*ids))
+    # Each wait starts when its frame is read; a control loop that waited itself would show one at a time.
+    assert until(lambda: slots.peak == 3)
+    slots.release()
+    relay.settimeout(5)
+    data, _ = relay.accept()  # the freed slot goes to one of the waiting connections
+    assert read_frame(data)['Accept'] in ids
+    for sock in (data, control, relay):
+        sock.close()
+
+
+def test_connections_beyond_the_waiting_limit_are_skipped_at_once(monkeypatch, caplog):
+    slots = WatchedSlots()
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', slots)
+    monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 5)
+    monkeypatch.setattr(relay_tunnel, 'WAITERS', 2)
+    relay, relay_address = listener()
+    start_session(relay_address, 1)
+    control, _ = relay.accept()
+    read_frame(control)
+    control.sendall(connections(*(str(uuid.uuid4()) for _ in range(3))))
+    # Well inside SLOT_WAIT: the third is refused a waiter at once instead of queueing behind the other two.
+    assert until(lambda: any('already waiting for a slot' in r.getMessage() for r in caplog.records))
+    assert slots.peak == 2
+    for sock in (control, relay):
+        sock.close()
+
+
+def test_a_waiter_thread_that_cannot_start_returns_its_permit(monkeypatch):
     monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
+    monkeypatch.setattr(relay_tunnel, 'WAITERS', 1)
+    made = []
+
+    def semaphore(value):
+        made.append(threading.BoundedSemaphore(value))
+        return made[-1]
+
     def no_threads(*args, **kwargs):
         raise RuntimeError("can't start new thread")
-    monkeypatch.setattr(relay_tunnel, 'threading', type('NoThreads', (), {'Thread': staticmethod(no_threads)}))
+    monkeypatch.setattr(relay_tunnel, 'threading', type('NoThreads', (), {'Thread': staticmethod(no_threads), 'BoundedSemaphore': staticmethod(semaphore)}))
     relay, relay_address = listener()
     def relay_side():
         control, _ = relay.accept()
@@ -212,6 +285,7 @@ def test_a_forward_thread_that_cannot_start_returns_its_slot(monkeypatch):
     threading.Thread(target=relay_side, daemon=True).start()
     with pytest.raises(RuntimeError):
         relay_tunnel.session(relay_address, 45678, 1)
-    assert relay_tunnel.SLOTS.acquire(blocking=False)  # released, not leaked
+    assert made and made[0].acquire(blocking=False)  # the waiter permit was released, not leaked
+    assert relay_tunnel.SLOTS.acquire(blocking=False)  # and no forward slot was taken
     for sock in (relay, *held):
         sock.close()
