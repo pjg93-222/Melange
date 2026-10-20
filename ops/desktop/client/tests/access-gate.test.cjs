@@ -12,7 +12,7 @@ function fixture(appId='melange'){
 }
 test('approval and activation alone never open Melange/Mentat backend',async()=>{
  const {gate,state}=fixture();assert.equal((await gate.info()).phase,'needs_request');await assert.rejects(gate.authorize(),/approval/);
- await gate.action('request',{displayName:'Fixture laptop'});await assert.rejects(gate.action('request',{displayName:'Replacement'}),/preserved/);
+ await gate.action('request',{displayName:'Fixture laptop',inviteCode:'FIXTURE-CODE'});await assert.rejects(gate.action('request',{displayName:'Replacement',inviteCode:'FIXTURE-CODE'}),/preserved/);
  await gate.action('poll');await gate.action('activate',{activationKey:'fixture'});assert.equal((await gate.info()).phase,'needs_password');assert.equal(state.session,null);await assert.rejects(gate.authorize(),/sign-in/);
  await gate.action('setPassword',{password:'fixture-password'});assert.equal(state.session,null);await assert.rejects(gate.authorize(),/sign-in/);
  state.session={authenticated:true};assert.ok((await gate.authorize()).session);await gate.action('lock');await assert.rejects(gate.authorize(),/sign-in/);
@@ -34,19 +34,28 @@ test('offline verified grant works only with existing local session, learned rev
  state.session={authenticated:true};assert.ok(await gate.authorize());state.accepted.revoked=true;assert.deepEqual(gate.districts(),[]);await assert.rejects(gate.authorize(),/approval/);
 });
 test('strict action arguments and phase prevent crafted IPC identity or path input',async()=>{
- const {gate,state}=fixture();for(const payload of [{displayName:'Fixture',appId:'terrier'},{displayName:'Fixture',url:'https://evil.invalid'},'Fixture',null])await assert.rejects(gate.action('request',payload));assert.equal(state.calls.length,0);
+ const {gate,state}=fixture();for(const payload of [{displayName:'Fixture',inviteCode:'FIXTURE-CODE',appId:'terrier'},{displayName:'Fixture',inviteCode:'FIXTURE-CODE',url:'https://evil.invalid'},{inviteCode:'FIXTURE-CODE'},{displayName:'Fixture',inviteCode:''},{displayName:'Fixture',inviteCode:'   '},{displayName:'Fixture',inviteCode:'x'.repeat(65)},{displayName:'Fixture',inviteCode:5},{displayName:'Fixture',inviteCode:null},{displayName:'Fixture',inviteCode:['FIXTURE-CODE']},{displayName:' Fixture',inviteCode:'FIXTURE-CODE'},'Fixture',null])await assert.rejects(gate.action('request',payload));assert.equal(state.calls.length,0);
  await assert.rejects(gate.action('activate',{activationKey:'fixture'}),/not ready/);await assert.rejects(gate.action('open',{url:'file:///private'}),/Unsupported/);
 });
 test('expired renewal recovery is request-relative while older grant evidence stays intact',async()=>{
  const {gate,state,grant}=fixture();state.accepted={grant,revoked:true};state.pending={requestId:'66666666-6666-6666-6666-666666666666'};gate.requestReply={requestId:state.pending.requestId,status:'used',expiresAt:946684800};
- assert.equal((await gate.info()).canRequestAgain,true);await gate.action('request',{displayName:'Fixture retry'});assert.equal(state.calls[0].options.newRequest,true);assert.equal(state.calls[0].options.reapproval,true);assert.equal(state.accepted.grant,grant);
+ assert.equal((await gate.info()).canRequestAgain,true);await gate.action('request',{displayName:'Fixture retry',inviteCode:'FIXTURE-CODE'});assert.equal(state.calls[0].options.newRequest,true);assert.equal(state.calls[0].options.reapproval,true);assert.equal(state.accepted.grant,grant);
 });
 test('a restarted pending request without a cached reply can be polled but never replaced',async()=>{
  const {gate,state}=fixture();state.pending={requestId:'55555555-5555-5555-5555-555555555555'};
  const info=await gate.info();assert.equal(info.phase,'pending');assert.equal(info.requestStatus,undefined);
- await assert.rejects(gate.action('request',{displayName:'Replacement'}),/preserved/);assert.equal(state.calls.length,0);
+ await assert.rejects(gate.action('request',{displayName:'Replacement',inviteCode:'FIXTURE-CODE'}),/preserved/);assert.equal(state.calls.length,0);
  assert.equal((await gate.action('poll')).requestStatus,'approved');
 });
 test('Runtime refuses missing gate before touching resources or writable roots',async()=>{
  const runtime=new Runtime('melange','unavailable-profile','unavailable-resources');await assert.rejects(runtime.start({dataDirectory:'unavailable'}),/approval/);assert.equal(runtime.child,null);assert.equal(runtime.roots,null);
+});
+
+test('request accepts displayName and an optional 1 to 64 character invite code, and hands the trimmed code to the client',async()=>{
+ const {gate,state}=fixture();
+ await gate.action('request',{displayName:'Fixture laptop',inviteCode:'  '+'x'.repeat(64)+'  '});
+ assert.deepEqual(state.calls,[{name:'Fixture laptop',options:{newRequest:false,reapproval:false,inviteCode:'x'.repeat(64)}}]);
+ const other=fixture();await other.gate.action('request',{inviteCode:'ABCD-2345-WXYZ-6789',displayName:'Fixture laptop'});assert.equal(other.state.calls[0].options.inviteCode,'ABCD-2345-WXYZ-6789');
+ const none=fixture();await none.gate.action('request',{displayName:'Fixture laptop'});assert.deepEqual(none.state.calls,[{name:'Fixture laptop',options:{newRequest:false,reapproval:false,inviteCode:''}}]);
+ for(const payload of [{displayName:'Fixture laptop',inviteCode:'x'.repeat(65)},{displayName:'Fixture laptop',inviteCode:' '},{displayName:'Fixture laptop',inviteCode:'ABCD',extra:'x'}]){const third=fixture();await assert.rejects(third.gate.action('request',payload));assert.equal(third.state.calls.length,0);}
 });

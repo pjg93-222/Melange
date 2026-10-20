@@ -10,10 +10,11 @@
     timeout: "The administrator's access server took too long to respond. Try again later.",
     refused: "The administrator's access server did not accept this request. Try again later or contact the administrator.",
     identity: "The access server's identity didn't match. Contact the administrator.",
-    trust: "This app's administrator trust has changed. Reinstall the latest version or contact the administrator."
+    trust: "This app's administrator trust has changed. Reinstall the latest version or contact the administrator.",
+    invite: "That invite code wasn't accepted. It may be mistyped, expired, or already used. Ask the administrator for a new code."
   });
   // Electron wraps a main-process error as "Error invoking remote method ...: Error: access:<reason>"; only the fixed reason is used.
-  const failure = error => REASONS[/\baccess:(unreachable|timeout|refused|identity|trust)\b/.exec(String(error && error.message))?.[1]] || GENERIC_ERROR;
+  const failure = error => REASONS[/\baccess:(unreachable|timeout|refused|identity|trust|invite)\b/.exec(String(error && error.message))?.[1]] || GENERIC_ERROR;
   function validateState(value, expectedApp) {
     if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(key => !FIELDS.has(key)) || !Object.hasOwn(APPS, value.appId) || value.appName !== APPS[value.appId] || !PHASES.has(value.phase) || (expectedApp && value.appId !== expectedApp)) throw new Error('Unsupported access state');
     if (value.accountIdentity !== undefined && (typeof value.accountIdentity !== 'string' || !/^[A-Za-z0-9_@.+-]{1,150}$/.test(value.accountIdentity))) throw new Error('Unsupported account identity');
@@ -30,6 +31,12 @@
     if (typeof value !== 'string' || value.trim() !== value || Array.from(value).length < 1 || Array.from(value).length > 80 || /[\x00-\x1f\x7f]/.test(value)) throw new Error('Enter a label of 1 to 80 characters without leading or trailing spaces.');
     return value;
   }
+  // Optional: '' means no code was given, and the request is sent without one.
+  function inviteCode(value) {
+    const code = typeof value === 'string' ? value.trim() : '';
+    if (code.length > 64) throw new Error(REASONS.invite);
+    return code;
+  }
   function activationKey(value) {
     if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{43,86}$/.test(value)) throw new Error('Enter the complete approval key supplied by your administrator.');
     return value;
@@ -39,11 +46,11 @@
     return value;
   }
   function mount(document, api, windowObject) {
-    const ids = ['app-name', 'description', 'account', 'notice', 'request-form', 'display-name', 'request-submit', 'pending-panel', 'request-status', 'request-expiry', 'poll', 'activation-form', 'activation-key', 'password-form', 'password-label', 'password', 'confirm-panel', 'password-confirm', 'password-submit', 'ready-panel', 'open', 'lock', 'retry', 'status'];
+    const ids = ['app-name', 'description', 'account', 'notice', 'request-form', 'display-name', 'invite-code', 'request-submit', 'pending-panel', 'request-status', 'request-expiry', 'poll', 'activation-form', 'activation-key', 'password-form', 'password-label', 'password', 'confirm-panel', 'password-confirm', 'password-submit', 'ready-panel', 'open', 'lock', 'retry', 'status'];
     const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
     if (ids.some(id => !el[id])) throw new Error('Access UI is incomplete');
     let state = null, appId = null, busy = false, disposed = false, pollTimer = null, unsubscribe;
-    const secretFields = ['activation-key', 'password', 'password-confirm'];
+    const secretFields = ['invite-code', 'activation-key', 'password', 'password-confirm'];
     const clearSecrets = () => { for (const id of secretFields) el[id].value = ''; };
     const status = value => { el.status.textContent = value; };
     function lockControls() { for (const element of document.querySelectorAll('button, input')) element.disabled = busy || !state; if (pollTimer) el.poll.disabled = true; if (!el.retry.hidden) el.retry.disabled = busy; }
@@ -99,15 +106,15 @@
           if (!state) failClosed();
           else {
             status(failure(error));
-            // A failed request may already be stored; show it so Check can re-send it.
-            if (method === 'request') { try { render(await api.info()); } catch { /* keep the current view */ } }
+            // A failed request may already be stored (show it so Check can re-send it); an invite refusal clears it (show the form again).
+            if (method === 'request' || /\baccess:invite\b/.test(String(error && error.message))) { try { render(await api.info()); } catch { /* keep the current view */ } }
           }
         }
       }
       finally { busy = false; if (!disposed) lockControls(); }
     }
     function submit(id, callback) { el[id].addEventListener('submit', event => { event.preventDefault(); if (busy || !state) return; try { callback(); } catch (error) { clearSecrets(); status(error.message); } }); }
-    submit('request-form', () => { if (state.phase !== 'needs_request' && !state.canRequestAgain) return; return act('request', {displayName: displayName(el['display-name'].value)}); });
+    submit('request-form', () => { if (state.phase !== 'needs_request' && !state.canRequestAgain) return; const code = inviteCode(el['invite-code'].value); return act('request', {displayName: displayName(el['display-name'].value), ...(code ? {inviteCode: code} : {})}); });
     submit('activation-form', () => { if (el['activation-form'].hidden) return; return act('activate', {activationKey: activationKey(el['activation-key'].value)}); });
     submit('password-form', () => {
       if (!['needs_password', 'locked'].includes(state.phase)) return;
@@ -115,11 +122,12 @@
       if (state.phase === 'needs_password' && value !== el['password-confirm'].value) throw new Error('The passwords do not match. Enter them again.');
       return act(state.phase === 'needs_password' ? 'setPassword' : 'unlock', {password: value});
     });
-    el.poll.addEventListener('click', () => {
+    function checkApproval() {
       if (busy || !state || state.phase !== 'pending' || pollTimer) return;
       pollTimer = windowObject.setTimeout(() => { pollTimer = null; if (!disposed) lockControls(); }, 15000);
-      void act('poll');
-    });
+      return act('poll');
+    }
+    el.poll.addEventListener('click', () => { void checkApproval(); });
     el.open.addEventListener('click', () => { if (state && ['ready', 'terrier_signin'].includes(state.phase)) void act('open'); });
     el.lock.addEventListener('click', () => { if (state?.phase === 'ready') void act('lock'); });
     el.retry.addEventListener('click', () => { if (!busy) void act('info'); });
@@ -128,10 +136,11 @@
     const required = ['info', 'request', 'poll', 'activate', 'setPassword', 'unlock', 'open', 'lock', 'onStatus'];
     if (!api || required.some(key => typeof api[key] !== 'function')) { failClosed(); return {dispose, ready: Promise.resolve()}; }
     unsubscribe = api.onStatus(value => { if (disposed) return; try { render(value); status(''); } catch { failClosed(); } });
-    const ready = act('info');
+    // A request stored before the app quit has had no reply this session; ask once so a request that never reached the server is re-sent.
+    const ready = act('info').then(() => { if (!disposed && state?.phase === 'pending' && state.requestStatus === undefined) return checkApproval(); });
     return {dispose, ready};
   }
-  const exported = {validateState, displayName, activationKey, password, mount};
+  const exported = {validateState, displayName, inviteCode, activationKey, password, mount};
   if (typeof module === 'object' && module.exports) module.exports = exported;
   else root.addEventListener('DOMContentLoaded', () => mount(root.document, root.desktopAccess, root), {once: true});
 })(typeof window === 'object' ? window : globalThis);

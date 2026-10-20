@@ -186,6 +186,8 @@ def handler_for(access, fallback):
                     self.access_response(429, {'error': 'rate_limited'})
                 elif any(word in message for word in ('conflict', 'already enrolled')):
                     self.access_response(409, {'error': 'state_conflict'})
+                elif 'invite' in message:
+                    self.access_response(403, {'error': 'invite_invalid'})
                 else:
                     self.access_response(403, {'error': 'access_denied'})
             except (KeyError, TypeError, ValueError):

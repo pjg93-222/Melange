@@ -1,13 +1,15 @@
 'use strict';
 (() => {
   let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, detailGen=0, logsBusy=false, logLines=[], logTop, appsWorking=false, slow=false, polling=false;
-  const legacyViews=['requests','grants','activity'], expanded=new Set(['terrier']), logOptions={count:500,follow:true,filter:''};
+  const legacyViews=['requests','grants','activity','invites'], expanded=new Set(['terrier']), logOptions={count:500,follow:true,filter:''};
   const drafts=new Map(), apps={melange:'Melange',terrier:'Terrier',mentat:'Mentat'}, appOf={'melange-desk':'melange','mentat-console':'mentat',terrier:'terrier'};
   const byId=id=>document.getElementById(id);
   const status=(text,attention=false)=>{byId('status').textContent=text;byId('status').dataset.tone=attention?'attention':'neutral';};
   const element=(tag,text,parent,className)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;if(parent)parent.append(e);return e;};
-  const titles={requests:'Access requests',grants:'Device sessions',activity:'Successful changes'};
-  const descriptions={requests:'Verify the requester before choosing their role and issuing a single-use key.',grants:'Signed in / recently online means an authenticated session checked in within three minutes. It does not indicate a person is typing. Update contact is separate.',activity:'Reported successful changes contain operation metadata and counts. Record contents and passwords are not included.'};
+  const titles={requests:'Access requests',grants:'Device sessions',activity:'Successful changes',invites:'Invites'};
+  const descriptions={requests:'Verify the requester before choosing their role and issuing a single-use key.',grants:'Signed in / recently online means an authenticated session checked in within three minutes. It does not indicate a person is typing. Update contact is separate.',activity:'Reported successful changes contain operation metadata and counts. Record contents and passwords are not included.',invites:'A tester needs an invite code to request access. Each code works for a limited number of requests until it expires, and is shown only once when issued. Testers type it into the access request form.'};
+  const reveal={key:{title:'Single-use access key',note:'Give this key only to the requester you verified. It expires in ten minutes and works only for that request and device.',field:'activationKey'},
+    invite:{title:'Invite code',note:'Give this code only to the tester you invited. It is shown once and cannot be shown again; revoke it here if it is lost or shared. The tester types it into the access request form.',field:'code'}};
   async function call(route,value,wait=12000){
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),wait);
     try{const response=await fetch(route,{method:'POST',credentials:'omit',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json',...(bearer?{'Authorization':'Bearer '+bearer,'X-Admin-CSRF':csrf}:{})},body:JSON.stringify(value)});if(!response.ok){const error=new Error('refused');error.status=response.status;error.body=await response.json().catch(()=>({}));throw error;}return await response.json();}finally{clearTimeout(timer);}
@@ -17,8 +19,8 @@
   async function refresh(){const data=await call('/dashboard',{});remember();snapshot=data;render();status('Updated '+new Date(data.serverTime*1000).toLocaleTimeString()+'.');}
   async function action(callback){if(busy)return;lock(true);try{if(await callback()!==false)await refresh();}catch{status('The action response was not confirmed. Refresh to check its state before trying again. Reopen Melange Admin if the session expired.',true);}finally{lock(false);}}
   function button(parent,label,run,secondary=false){const b=element('button',label,parent,secondary?'secondary':'');b.type='button';b.dataset.action='';b.disabled=busy;b.addEventListener('click',()=>action(run));return b;}
-  function heading(parent,app,name,detail,state,kind=''){const h=element('div',undefined,parent,'row-head');if(apps[app]){const logo=element('img',undefined,h);logo.src='/icons/'+app+'.ico';logo.alt=apps[app];}const text=element('div',undefined,h,'row-heading');element('strong',name+' · '+(apps[app]||app),text);element('div',detail,text,'details');element('span',state,h,'badge '+kind);}
-  function showKey(result){byId('key-value').textContent=result.activationKey;byId('key').showModal();}
+  function heading(parent,app,name,detail,state,kind=''){const h=element('div',undefined,parent,'row-head');if(apps[app]){const logo=element('img',undefined,h);logo.src='/icons/'+app+'.ico';logo.alt=apps[app];}const text=element('div',undefined,h,'row-heading');element('strong',name+(app?' · '+(apps[app]||app):''),text);element('div',detail,text,'details');element('span',state,h,'badge '+kind);}
+  function showKey(result,kind='key'){const r=reveal[kind];byId('key-title').textContent=r.title;byId('key-note').textContent=r.note;byId('key-value').textContent=result[r.field];byId('key').showModal();}
   function empty(parent,title,text){const e=element('div',undefined,parent,'empty');element('h2',title,e);element('p',text,e);}
   function selected(rows){const app=byId('app-scope').value;return rows.filter(row=>app==='all'||row.app===app);}
 
@@ -269,6 +271,7 @@
     if(!legacyViews.includes(view))return;
     const focus=document.activeElement?.id, scroll={x:scrollX,y:scrollY};
     for(const id of legacyViews){byId(id).replaceChildren();byId(id).hidden=id!==view;}
+    byId('access-invite-form').hidden=view!=='invites';
     byId('view-title').textContent=titles[view];byId('view-description').textContent=descriptions[view];
     const requests=selected(snapshot.requests),grants=selected(snapshot.grants),events=selected(snapshot.activity);
     const changes=(snapshot.appActions||[]).filter(a=>a.outcome==='succeeded'&&(byId('app-scope').value==='all'||appOf[a.service]===byId('app-scope').value));
@@ -293,17 +296,22 @@
       ...changes.map(a=>({time:a.at,draw:()=>{const card=element('section',undefined,byId('activity'),'card');heading(card,appOf[a.service],actor(a.actor),new Date(a.at*1000).toLocaleString()+' · Apps page',a.action+' · succeeded');}}))].sort((a,b)=>b.time-a.time);
     if(!items.length)empty(byId('activity'),'No reported changes','Successful operations reported by authorized installations will appear here. This list does not imply every application action is currently reported.');
     for(const item of items)item.draw();
+    if(!snapshot.invites.length)empty(byId('invites'),'No invite codes','Issue a code above and give it to a tester. Requests without a valid code are refused before they use any capacity.');
+    for(const invite of snapshot.invites){const card=element('section',undefined,byId('invites'),'card');heading(card,'',invite.label,'Used '+invite.uses+' of '+invite.maxUses+' · expires '+new Date(invite.expires*1000).toLocaleString(),invite.state,invite.state==='active'?'online':'');if(invite.state==='active'){const actions=element('div',undefined,card,'actions');button(actions,'Revoke invite',async()=>{if(confirm('Revoke this invite code? New requests using it will be refused.'))await call('/invite-revoke',{inviteId:invite.inviteId});},true);}}
     if(focus)byId(focus)?.focus({preventScroll:true});scrollTo(scroll.x,scroll.y);
   }
   byId('key-close').addEventListener('click',()=>{byId('key-value').textContent='';byId('key').close();});byId('key').addEventListener('close',()=>{byId('key-value').textContent='';});
-  byId('end-session').addEventListener('click',async()=>{if(busy||!bearer)return;lock(true);try{await call('/session-close',{});bearer=csrf=undefined;byId('key-value').textContent='';byId('key').close();snapshot=undefined;appsData=undefined;drafts.clear();clearTimeout(appsTimer);stopFollow();for(const id of legacyViews)byId(id).replaceChildren();byId('apps-body').replaceChildren();byId('timeline').replaceChildren();byId('app-detail').replaceChildren();say('');byId('apps-sub').textContent='Session ended. You may close this tab. Use Melange Admin to open a fresh session.';status('Session ended. You may close this tab. Use Melange Admin to open a fresh session.');}catch{status('Could not confirm the session ended. Try End session again.');}finally{lock(false);}});
+  byId('end-session').addEventListener('click',async()=>{if(busy||!bearer)return;lock(true);try{await call('/session-close',{});bearer=csrf=undefined;byId('key-value').textContent='';byId('key').close();snapshot=undefined;appsData=undefined;drafts.clear();clearTimeout(appsTimer);stopFollow();byId('access-invite-form').hidden=true;for(const id of legacyViews)byId(id).replaceChildren();byId('apps-body').replaceChildren();byId('timeline').replaceChildren();byId('app-detail').replaceChildren();say('');byId('apps-sub').textContent='Session ended. You may close this tab. Use Melange Admin to open a fresh session.';status('Session ended. You may close this tab. Use Melange Admin to open a fresh session.');}catch{status('Could not confirm the session ended. Try End session again.');}finally{lock(false);}});
   addEventListener('pagehide',()=>{if(bearer)fetch('/session-close',{method:'POST',credentials:'omit',cache:'no-store',keepalive:true,headers:{'Content-Type':'application/json','Authorization':'Bearer '+bearer,'X-Admin-CSRF':csrf},body:'{}'}).catch(()=>{});});
   byId('refresh').addEventListener('click',async()=>{if(busy)return;lock(true);status('Refreshing…');try{await refresh();}catch{status('Could not refresh. Existing results remain visible. Reopen Melange Admin if the session expired.',true);}finally{lock(false);}});
+  byId('access-invite-form').addEventListener('submit',event=>{event.preventDefault();action(async()=>{const label=byId('access-invite-label').value.trim(),uses=Number(byId('access-invite-uses').value),days=Number(byId('access-invite-days').value);if(!label||!Number.isInteger(uses)||uses<1||uses>100||!Number.isInteger(days)||days<1||days>30){status('Enter who the invite is for, 1 to 100 uses, and 1 to 30 days.',true);return false;}showKey(await call('/invite-issue',{label,uses,days}),'invite');byId('access-invite-label').value='';});});
   byId('check-now').addEventListener('click',async()=>{if(byId('check-now').disabled||!bearer)return;byId('check-now').disabled=true;try{say('');if(view==='app'&&current)await loadDetail();else await loadApps();}finally{byId('check-now').disabled=!bearer;}});
   byId('app-scope').addEventListener('change',()=>{remember();render();});for(const nav of document.querySelectorAll('[data-view]'))nav.addEventListener('click',()=>go(nav.dataset.view));
   byId('menu').addEventListener('click',()=>{const open=byId('nav').classList.toggle('open');byId('menu').setAttribute('aria-expanded',String(open));});
   byId('expired-close').addEventListener('click',()=>{close();setTimeout(()=>{byId('expired-close').textContent='You can close this tab';byId('expired-close').disabled=true;},300);});
   setInterval(()=>{if(view==='apps'&&bearer)renderSub();},30000);
+  // The requests, grants and activity views refresh themselves too; not mid-action, behind the key dialog, or while a form field is being used (the render rebuilds the cards).
+  setInterval(()=>{if(['requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);
   const fragment=new URLSearchParams(location.hash.slice(1)),bootstrap=fragment.get('bootstrap');history.replaceState(null,'','/');
   (async()=>{lock(true);try{if(!bootstrap){showExpired();return;}const session=await call('/session',{bootstrap});bearer=session.bearer;csrf=session.csrf;byId('check-now').disabled=false;const [first]=await Promise.allSettled([refresh(),loadApps()]);if(first.status==='rejected')status('Could not load access requests. Use Refresh to try again.',true);}catch{showExpired();}finally{lock(false);}})();
 })();

@@ -97,9 +97,21 @@ class SupervisorTests(unittest.TestCase):
         self.assertFalse(notifier.closed)
         status = json.loads((self.config.state/'listener-status.json').read_text())
         self.assertEqual(status['status'], 'waiting-for-approved-lan')
-        self.assertEqual(set(status), {'schemaVersion', 'status', 'checkedAt', 'supervisorPid', 'publisherPid', 'notifierPid'})
+        self.assertEqual(set(status), {'schemaVersion', 'status', 'checkedAt', 'supervisorPid', 'publisherPid', 'notifierPid', 'inviteRequired'})
         ready[0] = True; service.tick()
         self.assertEqual(len(children), 3)
+
+    def test_status_reports_invite_enforcement_from_the_environment_the_publisher_inherits(self):
+        service = supervisor.Supervisor(self.config, check=lambda _: True, spawn=Child, protect=lambda _: None)
+        self.addCleanup(service.close)
+        for raw, expected in (('', False), ('0', False), ('1', True), (' TRUE ', True), ('on', True), ('enabled', None)):
+            with self.subTest(raw=raw), patch.dict(os.environ, {'MELANGE_ACCESS_REQUIRE_INVITE': raw}):
+                service.tick()
+                self.assertIs(json.loads((self.config.state/'listener-status.json').read_text())['inviteRequired'], expected)
+        with patch.dict(os.environ):
+            os.environ.pop('MELANGE_ACCESS_REQUIRE_INVITE', None)
+            service.tick()
+            self.assertIs(json.loads((self.config.state/'listener-status.json').read_text())['inviteRequired'], False)
 
     def test_exited_children_restart_once_per_tick_and_policy_errors_fail_closed(self):
         children = []
