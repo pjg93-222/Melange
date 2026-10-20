@@ -207,14 +207,16 @@ def test_a_stale_individual_admission_is_labelled_and_the_later_strict_checks_st
         admissions.load(tmp_path)
 
 
-def test_source_outage_carry_forward_limit_is_unchanged(tmp_path):
+def test_source_outage_carry_past_the_limit_is_dropped_not_refused(tmp_path):
+    # D-260: the 30-day bar still holds (the verdict is not served), but it no longer refuses the whole generation.
     key = '119:hr:1'
     carried = {'canonical_key': key, 'disposition': 'include', 'confidence': 'high', 'checked_at': stamp(45),
                'carried_forward': 'source_unavailable', 'carried_at': stamp(1)}
     write(tmp_path, 'data/legislation/sentinel_admissions.json',
           admissions_doc(1, bills={key: {'key': key, 'areas': []}}, decisions={key: carried}))
-    with pytest.raises(ValueError, match='past its verification limit'):
-        admissions.load(tmp_path)
+    document = admissions.load(tmp_path)
+    assert key not in document['bills'] and document['carry_expired_keys'] == [key]
+    assert document['freshness_status'] == 'STALE_LABELLED'
 
 
 # --------------------------------------------------------------------------------------------- official membership movements
