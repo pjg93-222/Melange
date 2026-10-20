@@ -18,9 +18,10 @@ DATA_ROOT = Path(os.environ.get("MONEYBALL_ROOT", ROOT))
 
 
 def state(root: Path) -> dict:
-    """(mtime_ns, sha256) of the speech inputs and outputs and of every file under data/stance; None marks an absent file."""
+    """(mtime_ns, sha256) of the speech inputs and outputs, the dead-letter ledger and every file under data/stance; None marks an absent file."""
     files = [root / "speeches_cu.csv", root / "speeches_cu.receipt.json",
-             root / "speech_stance_final.csv", root / "speech_stance_final.receipt.json"]
+             root / "speech_stance_final.csv", root / "speech_stance_final.receipt.json",
+             root / "data" / "engine" / "dead_letter" / "gold_labels.jsonl"]
     files += [p for p in (root / "data" / "stance").rglob("*") if p.is_file()]
     return {p.relative_to(root).as_posix():
             (p.stat().st_mtime_ns, hashlib.sha256(p.read_bytes()).hexdigest()) if p.exists() else None
@@ -35,9 +36,12 @@ class SpeechChannelNoLiveWrites(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             for name in ("speeches_cu.csv", "speeches_cu.receipt.json",
-                         "speech_stance_final.csv", "speech_stance_final.receipt.json"):
+                         "speech_stance_final.csv", "speech_stance_final.receipt.json",
+                         "data/engine/dead_letter/gold_labels.jsonl"):
                 if (DATA_ROOT / name).exists():
-                    shutil.copy2(DATA_ROOT / name, root / name)
+                    destination = root / name
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(DATA_ROOT / name, destination)
             (root / "data" / "stance").mkdir(parents=True)
             for path in (DATA_ROOT / "data" / "stance").iterdir():   # top-level files only: the model's inputs + joblib/sidecar/report
                 if path.is_file():
