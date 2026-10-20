@@ -1,6 +1,6 @@
 # Melange application source (release)
 
-Filtered, history-free application source for Melange, published from local Melange branch `main` at commit `11db3ad91cacea4cacdbc229b453aff8e2281004`. Filter: `ops/release_lib/export.py` rules (roots `fec/`, `requirements.txt`, `ops/`; extension allowlist; 5 MB blob cap; excludes). Paths are kept as in the source (`ops/github` is not remapped to `.github`, so the workflow files under `ops/github` never run here. The two workflows published under `.github/workflows` (`desktop-windows.yml`, `desktop-installer-acceptance.yml`) are carried separately and run on a push to `main` that touches their path filters, or on a manual dispatch).
+Filtered, history-free application source for Melange, published from local Melange branch `main` at commit `ae83ae15a15f2f1064dcdb697732fc5984c1af4c`. Filter: `ops/release_lib/export.py` rules (roots `fec/`, `requirements.txt`, `ops/`; extension allowlist; 5 MB blob cap; excludes). Paths are kept as in the source (`ops/github` is not remapped to `.github`, so the workflow files under `ops/github` never run here. The two workflows published under `.github/workflows` (`desktop-windows.yml`, `desktop-installer-acceptance.yml`) are carried separately and run on a push to `main` that touches their path filters, or on a manual dispatch).
 
 See `SOURCE_PROVENANCE.json` and `FILTER_REPORT.txt`.
 

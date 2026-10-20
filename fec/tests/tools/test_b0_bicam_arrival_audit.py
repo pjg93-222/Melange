@@ -375,6 +375,43 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         self.assertEqual(presence, {"valid"})
         self.assertEqual({row["canonical_key"] for row in errors}, {"missing", "rejected"})
 
+    def test_15b_truncated_gzip_is_integrity_error_or_ledgered(self) -> None:
+        full = io.BytesIO()
+        with gzip.GzipFile(fileobj=full, mode="wb", mtime=0) as stream:
+            stream.write(b"a,b\n" + b"1,2\n" * 5000)
+        truncated = full.getvalue()[:-12]
+        path = self.directory / "trunc.csv.gz"
+        path.write_bytes(truncated)
+        with self.assertRaises(b0.IntegrityError):
+            b0.inspect_component(path, "csv.gz", {"x": "a"})
+        with self.assertRaises(b0.IntegrityError):
+            b0.load_component_rows(self.directory, {"filename": "trunc.csv.gz", "format": "csv.gz", "columns": {"x": "a"}})
+        run = self.directory / "legfix_trunc"
+        body_dir = run / "accepted_html" / "shared"
+        body_dir.mkdir(parents=True)
+        (run / "receipts").mkdir()
+        (body_dir / "page.html.gz").write_bytes(full.getvalue()[:10])
+        self._write_ndjson(run / "receipts" / "receipts.ndjson", [
+            {"canonical_key": "k", "status": "accepted", "accepted_html": "accepted_html/shared/page.html.gz"},
+        ])
+        presence, errors, _ = b0.load_legfix5_presence(run)
+        self.assertEqual(presence, set())
+        self.assertEqual({row["canonical_key"] for row in errors}, {"k"})
+
+    def test_15c_transport_failure_names_component_and_cause(self) -> None:
+        with mock.patch.object(b0.urllib.request, "build_opener", side_effect=OSError("boom")):
+            with self.assertRaises(b0.IntegrityError) as ctx:
+                b0.atomic_download(
+                    "https://example.test/x.csv.gz", self.directory / "x.csv.gz", "", "csv.gz", {}
+                )
+        self.assertIn("x.csv.gz", str(ctx.exception))
+        self.assertIn("boom", str(ctx.exception))
+        with mock.patch.object(b0.urllib.request, "build_opener", side_effect=b0.UsageError("policy")):
+            with self.assertRaises(b0.IntegrityError):
+                b0.atomic_download(
+                    "https://example.test/x.csv.gz", self.directory / "x.csv.gz", "", "csv.gz", {}
+                )
+
     def _build_integration_inputs(
         self,
         *,

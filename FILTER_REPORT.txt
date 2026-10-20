@@ -577,3 +577,23 @@ Counts: export-root paths published 1869 = 1840 filter output (including .gitatt
 Carried forward unchanged and blob-verified: the 28 .claude/skills exception files, .github/workflows/desktop-windows.yml, .github/workflows/desktop-installer-acceptance.yml, ops/desktop/packaging/melange-runtime.constraints.txt and DEVELOPMENT.md. Root .gitattributes is cf82e8c3255c; ops/export.gitattributes is not published; ops/desktop/packaging/send_zip.py (71f7c0f0bc15) and test_send_zip.py (3221300d7d13) are in the source and the filter output at the recorded blobs.
 Verification: all 1869 export-root blobs (mode and id) equal the 11db3ad91 source blobs, with .gitattributes equal to source ops/export.gitattributes (cf82e8c3255c); every other published path equals its c597d22aa blob. gitleaks 8.30.1 over the new commit: no findings.
 Workflows: a push of this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
+== ADDENDUM 24 2026-10-20: republished from local Melange main ae83ae15a, paths of three fec debug sweep commits only (fec/desktop and fec/tools fixes, matching tests)
+Source ae83ae15a15f2f1064dcdb697732fc5984c1af4c (local Melange branch main). Previous publication 21410cd1a415680d41c2530cce275b1eae1d9a5d (Addendum 21, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. Addenda 22 and 23 belong to pull requests #15 and #16 and are not part of this branch.
+Selective publication: local main also carries commits that belong to pull requests #15 and #16. They are not published here. This commit takes the tree of 21410cd1a and replaces exactly the 9 export paths changed by source commits c966ae247 (fec/desktop), 57165fc85 (fec/tools) and ae83ae15a (matching tests). Each of those paths is unchanged between its sweep commit and ae83ae15a. The sweep reports under audits/ are outside the export roots and are not published.
+Filter run (_tools/filter_export.py, spec melange, on ae83ae15a; _tools/export_copy.py blob 43e433c21aad, byte-identical to the source's ops/release_lib/export.py at ae83ae15a, resynced 2026-10-20 for pull request #15; its only change from 84b6f5fd9c28 adds two cspan test paths to MELANGE_LOCAL_ARTIFACT_TESTS and does not affect these paths): all 9 paths are included; none is excluded by a path rule, the extension allowlist or MELANGE_LOCAL_ARTIFACT_TESTS. The other differences of that run from this tree are other branches' content and were not taken.
+Source commits: c966ae247 (moneyball_app.py: the FAIL receipt creates its parent directory, window.destroy() runs in a finally block, the status-message call is guarded, null DOM evidence gives a FAIL receipt); 57165fc85 (b0_bicam_arrival_audit.py catches EOFError and zlib.error and wraps a UsageError from opener.open in IntegrityError again; e1_stance_imputation_harness.py catches TypeError and ValueError in _finite_float and read_members; m1_trade_association_linkage.py clips TF-IDF scores to [0, 1]; live_patch.py apply_to() refuses a patch that touches files outside the manifest); ae83ae15a (matching tests).
+Changed export paths (9: 0 added, 9 changed; none removed, none newly filtered out):
+  M fec/desktop/moneyball_app.py  (c966ae247; 1dc799939706 -> 432999b0ca1e)
+  M fec/tools/b0_bicam_arrival_audit.py  (57165fc85; 0702a9dce26c -> 7be6bf19caac)
+  M fec/tools/e1_stance_imputation_harness.py  (57165fc85; 0870d2f7d6ce -> ec24249a84af)
+  M fec/tools/m1_trade_association_linkage.py  (57165fc85; f0d8ba057e77 -> a1e6192f092f)
+  M fec/tools/live_patch.py  (57165fc85; a30c5d4c161c -> 4e97cf7340a4)
+  M fec/tests/tools/test_b0_bicam_arrival_audit.py  (ae83ae15a; d5fa0cb2ff59 -> 4ffa328020c0)
+  M fec/tests/tools/test_e1_stance_imputation_harness.py  (ae83ae15a; 5150bbbcfa49 -> 6cd7a0bf7d5b)
+  M fec/tests/tools/test_m1_trade_association_linkage.py  (ae83ae15a; 67b96d40ffc6 -> d53e9f816c69)
+  M fec/tests/infra/test_live_patch.py  (ae83ae15a; d46b7e3f1231 -> 921eb110dec8)
+No-revert check: for each changed path, the blob published at 21410cd1a equals the source blob in the parent of its sweep commit.
+Counts: unchanged. Export-root paths published 1869, published tree 1903, KEPT-EXCLUDED 276.
+Verification: the 9 published blobs (mode and id) equal the ae83ae15a source blobs; every other path equals its 21410cd1a blob. gitleaks 8.30.1 over 21410cd1a..this commit: no findings.
+Workflows: this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
