@@ -156,13 +156,22 @@ def steps(admission_limit, include_media=False, smoke=False):
     result.extend([
         ("admissions", "legislation/refresh_sentinel_admissions.py", admissions, 14400),
         ("votes", "legislation/refresh_vote_sources.py", [], 1800),
-        ("repository", "legislation/update_bill_repository.py", [], 14400),
-        ("billstatus", "legislation/refresh_billstatus_bulk.py", [], 3600),
     ])
+    # DE-043/W1: media (hours, killable) runs BEFORE the repository fetch. The fetch and the chain's
+    # verify_collector_roster_updates.py, which rebinds official_membership_movements.json to the new
+    # repository sha, are one unit: a kill in media after the fetch left the sidecar unbound and every
+    # chain consumer dying at load (2026-10-16, 2026-10-19). This shrinks the unbound window from media
+    # (hours) to billstatus plus, in media mode, the ~12 chain steps before verify_collector_roster_updates
+    # (calibration_guard .. receptivity_layer, run_pipeline.py CHAIN). A hard kill there still strands the
+    # binding; rollback_unbound_repository only undoes failures the wrapper survives to catch.
     if include_media or smoke:
         local_date = datetime.now().astimezone().date().isoformat()
         result.append(("media", "collect/daily_media_refresh.py",
                        ["--local-date", local_date] + (["--smoke"] if smoke else []), 172800))
+    result.extend([
+        ("repository", "legislation/update_bill_repository.py", [], 14400),
+        ("billstatus", "legislation/refresh_billstatus_bulk.py", [], 3600),
+    ])
     result.append(("pipeline", "run_pipeline.py",
                    [] if (include_media or smoke) else ["--from", "verify_collector_roster_updates.py"], 14400))
     return result
@@ -309,6 +318,9 @@ def rollback_unbound_repository(root, run_dir):
     load would only raise: that is recorded as "unhealable_drift" with the
     three hashes, never as "verified". The strict binding in
     official_membership_movements.load is deliberately unchanged.
+
+    A restore that raises part-way is recorded as "restore_failed" (the
+    repository and its receipt may be half-restored), never as "verified".
     """
     root, before = Path(root), Path(run_dir) / "before"
     action = "verified"
@@ -318,6 +330,9 @@ def rollback_unbound_repository(root, run_dir):
         bound = read(sidecar).get("repository_sha256") if sidecar.is_file() else None
         if (snapshot.is_file() and bound == digest(snapshot)
                 and digest(root / ROLLBACK_SOURCES[0]) != bound):
+            # A copy or replace that raises mid-loop (a OneDrive or antivirus lock) can leave a half-restored pair:
+            # never let that read as "verified".
+            action = "restore_failed"
             for relative in ROLLBACK_SOURCES:
                 if (before / relative).is_file():
                     temp = root / (relative + f".{os.getpid()}.rollback.tmp")

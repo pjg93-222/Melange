@@ -252,6 +252,20 @@ def test_one_non_timeout_failure_beside_a_timeout_is_not_systemic(world, monkeyp
     assert generation['classifier_systemic_failure'] is False
 
 
+
+def test_one_overloaded_failure_and_two_timeouts_with_no_success_are_systemic(world, monkeypatch):
+    # Pre-merge review: a mixed outage (one non-timeout failure, the rest timeouts, nothing succeeded) passed with every
+    # new key deferred. Three deferrals and no success is an outage whatever their mix.
+    without_admitted(world)
+    calls = fake_cli(monkeypatch, {NEW[0]: cli(1, '', 'overloaded'), NEW[1]: TIMEOUT, NEW[2]: TIMEOUT})
+    code, generation, installed = run_main(world)
+
+    assert sorted(calls) == sorted(NEW)
+    assert (code, generation['status'], installed) == (1, 'FAIL', False)
+    assert generation['classifier_systemic_failure'] is True
+    assert list(generation['errors']) == ['CLASSIFIER_SYSTEMIC_FAILURE']
+
+
 # A non-quota is_error envelope (exit 0, e.g. "overloaded") is a classifier failure like a non-quota rc != 0 (follow-up 3).
 
 def overloaded(status=529):

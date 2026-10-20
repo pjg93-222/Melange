@@ -739,11 +739,12 @@ def main(argv=None):
     # Systemic outage guard (2026-10-19 review of R1): a classifier broken for good would defer every new key and let the
     # run PASS. Every call this run ended in a classifier deferral is that shape: any other outcome is a decision or a
     # validation hold (the classifier answered) or an error (the run already fails). Slow bills are not an outage: two
-    # non-timeout failures (auth expired, model gone, overloaded) are systemic; timeouts only when all of them are and
-    # there are three. Two 480 s timeouts on huge bills stay deferrals.
+    # non-timeout failures (auth expired, model gone, overloaded) are systemic, and so are three deferrals of any mix (one
+    # "overloaded" plus two timeouts is an outage too: pre-merge review 2026-10-20). Two 480 s timeouts on huge bills, or one
+    # failure beside one timeout, stay deferrals.
     timeouts=sum(r.startswith('TimeoutExpired') for r in classifier_deferred.values())
     failures=len(classifier_deferred)-timeouts
-    systemic=classifier_calls==len(classifier_deferred) and (failures>=2 or (failures==0 and timeouts>=3))
+    systemic=classifier_calls==len(classifier_deferred) and (failures>=2 or len(classifier_deferred)>=3)
     if systemic:
         errors['CLASSIFIER_SYSTEMIC_FAILURE']=('%d classifier calls failed and none succeeded this run: %s'
                                                %(len(classifier_deferred),next(iter(classifier_deferred.values()))))

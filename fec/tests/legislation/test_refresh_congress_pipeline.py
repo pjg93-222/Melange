@@ -399,8 +399,9 @@ def test_daily_admission_defaults_follow_the_2026_10_15_owner_ruling(monkeypatch
 def test_expanded_chain_collects_all_bills_then_media_then_entire_canonical_chain():
     selected = pipeline.steps(19, include_media=True)
     names = [name for name, _, _, _ in selected]
-    assert names == ["calibration", "discovery", "admissions", "votes", "repository", "billstatus", "media", "pipeline"]
-    assert selected[-2][1] == "collect/daily_media_refresh.py"
+    # DE-043/W1: media (hours, killable) precedes the repository fetch, so nothing long sits before the chain's rebind.
+    assert names == ["calibration", "discovery", "admissions", "votes", "media", "repository", "billstatus", "pipeline"]
+    assert selected[names.index("media")][1] == "collect/daily_media_refresh.py"
     assert selected[-1][1:3] == ("run_pipeline.py", [])
     assert selected[2][2] == ["--limit", "19", "--max-classifier-calls", "48"]
     # Starting from the first canonical step includes collection intake and all
@@ -503,7 +504,7 @@ def test_expanded_run_echoes_owned_attempt_and_seals_immutable_media_snapshot(tm
     assert receipt["daily_attempt_id"] == "owned-daily-attempt-123"
     assert receipt["include_media"] is True
     assert receipt["status"] == "PASS"
-    assert seen[-2:] == ["daily_media_refresh.py", "run_pipeline.py"]
+    assert seen[-4:] == ["daily_media_refresh.py", "update_bill_repository.py", "refresh_billstatus_bulk.py", "run_pipeline.py"]
     immutable = Path(receipt["run_dir"]) / "daily_media_refresh_receipt.json"
     bound_hash = receipt["artifacts"][MEDIA_RECEIPT.as_posix()]["sha256"]
     assert immutable.read_bytes() == (tmp_path / MEDIA_RECEIPT).read_bytes()
@@ -634,8 +635,8 @@ def test_cli_include_media_passes_expanded_mode_to_runner(monkeypatch):
 def test_smoke_skips_discovery_spends_no_model_call_and_keeps_the_full_chain():
     selected = pipeline.steps(32, smoke=True)
     names = [name for name, _, _, _ in selected]
-    assert names == ["calibration", "discovery", "admissions", "votes", "repository",
-                     "billstatus", "media", "pipeline"]
+    assert names == ["calibration", "discovery", "admissions", "votes", "media",
+                     "repository", "billstatus", "pipeline"]
     by_name = {name: (script, args) for name, script, args, _ in selected}
     # Discovery is recorded in order but has no script, so it is never launched.
     assert by_name["discovery"][0] is None
@@ -962,7 +963,7 @@ def test_partial_media_receipt_is_a_non_fatal_success_recorded_on_the_run(tmp_pa
     monkeypatch.setattr(pipeline.subprocess, "Popen", launch)
     assert pipeline.run(tmp_path, include_media=True) == 0
     # The canonical chain ran behind the PARTIAL media step: it is not fatal.
-    assert seen[-2:] == ["daily_media_refresh.py", "run_pipeline.py"]
+    assert seen[-4:] == ["daily_media_refresh.py", "update_bill_repository.py", "refresh_billstatus_bulk.py", "run_pipeline.py"]
     receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
     # The congress run itself stays PASS; the media gap is named beside it.
     assert receipt["status"] == "PASS"
@@ -1027,6 +1028,75 @@ def test_w1_failure_before_rebind_restores_repository_and_receipt_byte_exact(tmp
     receipt = pipeline.read(tmp_path / pipeline.STATUS)
     assert receipt["rollback"] == "restored"
     assert receipt["rollback_membership_load"] == "PASS"
+
+
+def test_w1_media_precedes_repository_fetch():
+    # DE-043: the repository fetch and the chain's verify_collector_roster_updates.py (which rebinds the
+    # membership sidecar to the new repository sha) are one unit, so media must not sit between them.
+    for mode in ({"include_media": True}, {"smoke": True}):
+        names = [name for name, _, _, _ in pipeline.steps(19, **mode)]
+        assert names.index("media") < names.index("repository") < names.index("billstatus") < names.index("pipeline")
+        assert names[-1] == "pipeline"
+    # Without media the order is unchanged.
+    assert [name for name, _, _, _ in pipeline.steps(19)] == [
+        "calibration", "discovery", "admissions", "votes", "repository", "billstatus", "pipeline"]
+
+
+def bind_membership(root, bound_sha):
+    from datetime import datetime, timezone
+    write_json(root, pipeline.MEMBERSHIP_SIDECAR, {
+        "schema": "official-membership-movements-v1", "status": "PASS",
+        "checked_at": datetime.now(timezone.utc).isoformat(), "facts": [], "additions": [],
+        "repository_sha256": bound_sha})
+
+
+def test_w1_a_restore_that_raises_part_way_is_restore_failed_not_verified(tmp_path, monkeypatch):
+    # Opus pre-merge review: a OneDrive or antivirus lock on replace left the label "verified" over a half-restored pair.
+    before = b'{"bills": {}, "generation": "before"}\n'
+    (tmp_path / "bill_repository_live.json").write_bytes(b'{"bills": {}, "generation": "fetched"}\n')
+    bind_membership(tmp_path, __import__("hashlib").sha256(before).hexdigest())
+    run_dir = tmp_path / "run"
+    (run_dir / "before").mkdir(parents=True)
+    (run_dir / "before" / "bill_repository_live.json").write_bytes(before)
+
+    def locked(*args, **kwargs):
+        raise PermissionError("locked by another process")
+
+    monkeypatch.setattr(pipeline, "replace_atomic", locked)
+    result = pipeline.rollback_unbound_repository(tmp_path, run_dir)
+    assert result["rollback"] == "restore_failed"
+    assert result["rollback_membership_load"].startswith("PermissionError")
+
+
+def test_w1_media_nonzero_exit_leaves_the_repository_untouched(tmp_path, monkeypatch):
+    # 2026-10-16 hard death and 2026-10-19 sign-out kill (exit 0x40010004) both landed in media after the
+    # repository had been fetched. A media child that exits nonzero must now stop the run before the
+    # repository step launches. Death of the wrapper process itself is out of scope here (no Python runs).
+    (tmp_path / "bill_repository_live.json").write_bytes(b'{"bills": {}, "generation": "before"}\n')
+    write_json(tmp_path, REPOSITORY_RECEIPT, {"schema": "congress-bill-refresh-receipt-v1", "gen": "before"})
+    bind_membership(tmp_path, pipeline.digest(tmp_path / "bill_repository_live.json"))
+    original = {rel: (tmp_path / rel).read_bytes() for rel in pipeline.ROLLBACK_SOURCES}
+    seen = []
+
+    def launch(command, **kwargs):
+        script = Path(command[1]).name
+        seen.append(script)
+        if script == "daily_media_refresh.py":
+            return CompletedProcess(1073807364)
+        if script == "update_bill_repository.py":
+            (tmp_path / "bill_repository_live.json").write_bytes(b'{"bills": {}, "generation": "fetched"}\n')
+        return CompletedProcess()
+
+    monkeypatch.setattr(pipeline.subprocess, "Popen", launch)
+    assert pipeline.run(tmp_path, include_media=True) == 1
+    assert seen[-1] == "daily_media_refresh.py"
+    assert not {"update_bill_repository.py", "refresh_billstatus_bulk.py", "run_pipeline.py"} & set(seen)
+    for rel, data in original.items():
+        assert (tmp_path / rel).read_bytes() == data, rel
+    receipt = pipeline.read(tmp_path / pipeline.STATUS)
+    assert receipt["status"] == "FAILED" and "exit 1073807364" in receipt["error"]
+    # pipeline-health labels: the sidecar is bound to the untouched live repository, so nothing is restored.
+    assert receipt["rollback"] == "verified" and receipt["rollback_membership_load"] == "PASS"
 
 
 # --- Status writes are telemetry: a denied rename must not cost a run ---------
