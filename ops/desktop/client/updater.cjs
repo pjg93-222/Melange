@@ -231,11 +231,20 @@ class DesktopUpdater {
     if(!pending)return;
     if(pending.version===this.version){
       if(pending.phase==='failed'){this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;}
-      // A version string alone does not prove that its backend can start.
-      if(!this.applicationReady){this.onStatus('Updated app awaits a successful local startup.');return;}
+      // An installer found only at the pre-move cache path (legacyUserData) proves that this release was installed from the old
+      // updater file root, so the running version confirms it with no readiness wait (a background-only run never starts a
+      // backend). Otherwise a version string alone does not prove that its backend can start; a copy that is gone everywhere
+      // is not verified, but still waits for a successful local startup.
+      const {path:cached,manifest}=this.packageOf(pending),legacy=this.legacyUserData&&path.join(this.legacyUserData,'updates',String(manifest.sequence),manifest.package.name);
+      const installer=[cached,legacy].find(file=>file&&fs.existsSync(file));
+      if(!this.applicationReady&&installer!==legacy){this.onStatus('Updated app awaits a successful local startup.');return;}
       const verified=verifyEnvelope(pending.envelope,enrollment,this.identity(),state);
-      await this.verifyNativeFile(this.packagePath(verified.manifest),verified.manifest);
+      if(installer)await this.verifyNativeFile(installer,verified.manifest);
       this.writeState({...state,previous:state.installed||state.previous||null,installed:{...pending,phase:'installed'},pending:null,installedVersion:this.version});
+      // Only now, with pending cleared, keep the verified legacy copy at the current path too, so a later offline rollback to
+      // this release finds it; a pending release is therefore never at both paths. Every later use re-verifies the copy, and a
+      // failed copy only means that rollback downloads the installer.
+      if(installer===legacy){const part=cached+'.part';try{fs.mkdirSync(path.dirname(cached),{recursive:true,mode:0o700});fs.copyFileSync(legacy,part);fs.renameSync(part,cached);}catch{try{fs.rmSync(part,{force:true});}catch{}}}
       this.pruneBaselines();
       await this.report(enrollment,'installed');return;
     }
