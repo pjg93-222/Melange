@@ -12,18 +12,53 @@ way test_weekly_discovery_deferral does.
 """
 import ast
 import datetime
+import importlib
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from types import SimpleNamespace
+from unittest import mock
 
 import pytest
 
 FEC = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(FEC))
-from collect import refresh_cspan_wj as wj
+
+
+def import_under_scratch_root(name):
+    """Import `name` with MONEYBALL_ROOT on a scratch root whose roster is empty.
+
+    refresh_cspan_wj imports members.fetch_interviews, which reads data/engine/congestion.json when it is
+    imported, and paths.ROOT is fixed the first time paths is imported, so without the private data tree
+    this suite could not even be collected.  The project modules the import loads are forgotten afterwards,
+    so no other test inherits a module bound to the scratch root (the same helper sits in test_msnow_walk.py)."""
+    root = tempfile.mkdtemp(prefix="moneyball_root_")
+    before = dict(sys.modules)
+    try:
+        os.makedirs(os.path.join(root, "data", "engine"))
+        Path(root, "data", "engine", "congestion.json").write_text("[]", encoding="utf-8")
+        sys.modules.pop("paths", None)   # paths.ROOT is read once, at its first import
+        with mock.patch.dict(os.environ, {"MONEYBALL_ROOT": root}):
+            return importlib.import_module(name)
+    finally:
+        for key in [k for k in sys.modules if k not in before]:
+            module = sys.modules[key]
+            where = getattr(module, "__file__", None) or next(iter(getattr(module, "__path__", [])), "")
+            if str(where).startswith(str(FEC)):   # project modules only; stdlib modules stay shared
+                del sys.modules[key]
+                parent, _, child = key.rpartition(".")
+                if parent in before and getattr(before[parent], child, None) is module:
+                    delattr(before[parent], child)
+        if "paths" in before:
+            sys.modules["paths"] = before["paths"]
+        shutil.rmtree(root, ignore_errors=True)
+
+
+wj = import_under_scratch_root("collect.refresh_cspan_wj")
 
 WEEKLY_SOURCE = (FEC / "weekly_refresh.py").read_text(encoding="utf-8-sig")
 WEEKLY_TREE = ast.parse(WEEKLY_SOURCE)
