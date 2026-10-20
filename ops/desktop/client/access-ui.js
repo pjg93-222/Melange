@@ -5,6 +5,15 @@
   const REQUESTS = new Set(['pending', 'approved', 'used', 'denied', 'expired']);
   const FIELDS = new Set(['appId', 'appName', 'phase', 'accountIdentity', 'requestStatus', 'requestExpiresAt', 'requestCleanupPending', 'canRequestAgain']);
   const GENERIC_ERROR = 'This action could not be completed. Check your connection or try again later.';
+  const REASONS = Object.freeze({
+    unreachable: "Can't reach the administrator's access server. It may be offline; try again later.",
+    timeout: "The administrator's access server took too long to respond. Try again later.",
+    refused: "The administrator's access server did not accept this request. Try again later or contact the administrator.",
+    identity: "The access server's identity didn't match. Contact the administrator.",
+    trust: "This app's administrator trust has changed. Reinstall the latest version or contact the administrator."
+  });
+  // Electron wraps a main-process error as "Error invoking remote method ...: Error: access:<reason>"; only the fixed reason is used.
+  const failure = error => REASONS[/\baccess:(unreachable|timeout|refused|identity|trust)\b/.exec(String(error && error.message))?.[1]] || GENERIC_ERROR;
   function validateState(value, expectedApp) {
     if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(key => !FIELDS.has(key)) || !Object.hasOwn(APPS, value.appId) || value.appName !== APPS[value.appId] || !PHASES.has(value.phase) || (expectedApp && value.appId !== expectedApp)) throw new Error('Unsupported access state');
     if (value.accountIdentity !== undefined && (typeof value.accountIdentity !== 'string' || !/^[A-Za-z0-9_@.+-]{1,150}$/.test(value.accountIdentity))) throw new Error('Unsupported account identity');
@@ -85,7 +94,16 @@
       try {
         const result = value === undefined ? await api[method]() : await api[method](value);
         if (!disposed) { try { render(result); status(method === 'setPassword' ? 'Password saved. Sign in to continue.' : ''); } catch { failClosed(); } }
-      } catch { if (!disposed) { if (!state) failClosed(); else status(GENERIC_ERROR); } }
+      } catch (error) {
+        if (!disposed) {
+          if (!state) failClosed();
+          else {
+            status(failure(error));
+            // A failed request may already be stored; show it so Check can re-send it.
+            if (method === 'request') { try { render(await api.info()); } catch { /* keep the current view */ } }
+          }
+        }
+      }
       finally { busy = false; if (!disposed) lockControls(); }
     }
     function submit(id, callback) { el[id].addEventListener('submit', event => { event.preventDefault(); if (busy || !state) return; try { callback(); } catch (error) { clearSecrets(); status(error.message); } }); }

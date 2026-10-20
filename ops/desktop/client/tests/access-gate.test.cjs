@@ -41,6 +41,12 @@ test('expired renewal recovery is request-relative while older grant evidence st
  const {gate,state,grant}=fixture();state.accepted={grant,revoked:true};state.pending={requestId:'66666666-6666-6666-6666-666666666666'};gate.requestReply={requestId:state.pending.requestId,status:'used',expiresAt:946684800};
  assert.equal((await gate.info()).canRequestAgain,true);await gate.action('request',{displayName:'Fixture retry'});assert.equal(state.calls[0].options.newRequest,true);assert.equal(state.calls[0].options.reapproval,true);assert.equal(state.accepted.grant,grant);
 });
+test('a restarted pending request without a cached reply can be polled but never replaced',async()=>{
+ const {gate,state}=fixture();state.pending={requestId:'55555555-5555-5555-5555-555555555555'};
+ const info=await gate.info();assert.equal(info.phase,'pending');assert.equal(info.requestStatus,undefined);
+ await assert.rejects(gate.action('request',{displayName:'Replacement'}),/preserved/);assert.equal(state.calls.length,0);
+ assert.equal((await gate.action('poll')).requestStatus,'approved');
+});
 test('Runtime refuses missing gate before touching resources or writable roots',async()=>{
  const runtime=new Runtime('melange','unavailable-profile','unavailable-resources');await assert.rejects(runtime.start({dataDirectory:'unavailable'}),/approval/);assert.equal(runtime.child,null);assert.equal(runtime.roots,null);
 });

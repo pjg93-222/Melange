@@ -26,11 +26,18 @@ if(profile.isolated){
  // Electron applies constructor options after this event fires, so mark again on the next turn.
  app.on('browser-window-created',(_event,created)=>{const mark=()=>{if(!created.isDestroyed())created.setTitle(marked(created.getTitle()));};mark();setImmediate(mark);created.on('page-title-updated',(event,title)=>{event.preventDefault();created.setTitle(marked(title));});});
 }
-let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,uiStateStore,activityOutbox,activityDraining=false,status='Choose your local data directory to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
+let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,uiStateStore,activityOutbox,activityDraining=false,status='Choose your local data directory to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false,updatesTrusted=null;
 let background=!profile.isolated&&app.isPackaged&&(process.argv.includes('--desktop-updater')||(process.platform==='darwin'&&app.getLoginItemSettings().wasOpenedAtLogin));
 const userData=app.getPath('userData'),setupURL=pathToFileURL(path.join(__dirname,'setup.html')).href;
 const accessURL=pathToFileURL(path.join(__dirname,'access.html')).href;
 const loadingURL=pathToFileURL(path.join(__dirname,'loading.html')).href;
+const installingURL=pathToFileURL(path.join(__dirname,'installing.html')).href;
+// While a pending update installs before any window or backend exists, launch requests are only recorded.
+// The notice window is closable:false (the user cannot dismiss it), so every quit path must close it itself first.
+const launchInstall=new(require('./launch-install.cjs').LaunchInstall)({createWindow:()=>{
+ const owned=new BrowserWindow({width:420,height:200,title:definition.name+' update',icon:path.join(__dirname,'icons',definition.id+'.ico'),resizable:false,minimizable:false,maximizable:false,closable:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
+ owned.setMenu(null);owned.webContents.setWindowOpenHandler(()=>({action:'deny'}));owned.webContents.on('will-navigate',event=>event.preventDefault());
+ owned.loadURL(installingURL).catch(()=>{});return owned;}});
 const resources=app.isPackaged?process.resourcesPath:__dirname;
 const portable=app.isPackaged&&require('./portable-mode.cjs').portableMode(resources,definition.id);
 const accessTransition=new(require('./access-transition.cjs').AccessTransition)(()=>Boolean(runtime?.child));
@@ -63,7 +70,7 @@ async function ensureAccess(){
    onSuspend:()=>districtSwitch?.suspend(),
    presence:(state,sessionId)=>accessGate.client.presence({sessionId,state,version:app.getVersion(),districtId:definition.id==='terrier'&&state==='active'?read('settings.json').district:null})});
  return gate;})();
- try{return await accessInitializing;}finally{accessInitializing=null;finish();}
+ try{return await accessInitializing;}catch(error){try{fs.mkdirSync(path.join(userData,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(userData,'logs','access.log'),new Date().toISOString()+' access bootstrap failed (reason='+(error?.reason||'none')+'): '+String(error?.message).slice(0,200)+'\n',{mode:0o600});}catch{}throw error;}finally{accessInitializing=null;finish();}
 }
 async function drainActivity(){
  if(activityDraining||!accessGate||!activityOutbox)return;activityDraining=true;
@@ -89,7 +96,7 @@ async function importAccessTrust(){
  if(selected.canceled)return;
  let finish;
  try{const selectedFile=selected.filePaths[0];if(fs.statSync(selectedFile).size>32768)throw new Error();const value=JSON.parse(fs.readFileSync(selectedFile,'utf8'));
-  finish=accessTransition.commit(ticket);await require('./access-bootstrap.cjs').importTrust({resources,appId:definition.id,profile:userData,packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust,value});accessGate=null;finish();finish=null;await ensureAccess();updateStatus('Administrator trust verified. Open the app to request or use approved access.');
+  finish=accessTransition.commit(ticket);const imported=await require('./access-bootstrap.cjs').importTrust({resources,appId:definition.id,profile:userData,packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust,value});accessGate=null;finish();finish=null;const {client}=await ensureAccess();updateStatus('Administrator trust verified. '+(imported.url!==client.trust.url?'This build uses its built-in server address.':'Open the app to request or use approved access.'));
  }catch{updateStatus('Administrator trust could not be changed while access was active or the selected trust was invalid. Existing identity remains unchanged.');}finally{finish?.();}
 }
 const launch=require('./single-launch.cjs').singleLaunch(async function launchOnce(fromAccess=false){
@@ -129,7 +136,10 @@ async function checkUpdates(){
   let enrollmentDeferred=false;
   try{if(githubConfig)await require('./github-source.cjs').enrollGitHub({appId:definition.id,publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp[definition.id],config:githubConfig,load:loadEnrollment,save:saveEnrollment});else await accessOperation(async()=>{const gate=await ensureAccess();await enrollApproved({client:gate.client,version:app.getVersion(),load:loadEnrollment,save:saveEnrollment});});}
   catch{enrollmentDeferred=true;}
-  await updater.check();
+  // Untrusted publisher: no installer could pass the Authenticode check, so do not download one.
+  // Only a definite "not in the store" keeps updates off; a failed probe (null) is unknown, and Authenticode still gates every install.
+  updatesTrusted=process.platform!=='win32'||!app.isPackaged||profile.isolated?true:await require('./publisher-trust.cjs').publisherTrusted();
+  if(updatesTrusted!==false)await updater.check();else updateStatus(UPDATES_UNTRUSTED);
   if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile)))updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');
   if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked'&&runtime.child&&!accessLifecycle.suspended)await accessLifecycle.suspend('locked');if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}
   await drainActivity();
@@ -137,17 +147,31 @@ async function checkUpdates(){
  }catch{updateStatus('Update check deferred. The receiver will retry; local work remains available.');}
  finally{checkingUpdates=false;}
 }
+const UPDATES_UNTRUSTED='Automatic updates are off until this PC trusts the Melange Systems release certificate. Choose Turn on updates (Windows asks Yes or No once; no administrator rights).';
+async function trustUpdates(){
+ if(portable){updateStatus('Portable copy: replace this extracted application folder to update.');return;}
+ try{if(await require('./publisher-trust.cjs').trustPublisher(resources)){updatesTrusted=true;updateStatus('Release certificate trusted. Checking for verified updates.');checkUpdates();}else updateStatus(UPDATES_UNTRUSTED);}
+ catch(error){updateStatus('Update trust unchanged: '+error.message);}
+}
+// First interactive launch only: ask once, here in the app, through Windows' own Yes/No dialog. A refusal is remembered;
+// Settings and the menu still retry. No installer step and no elevation is involved.
+async function offerUpdateTrust(){
+ if(portable||background||process.platform!=='win32'||!app.isPackaged||profile.isolated)return;
+ const outcome=await require('./publisher-trust.cjs').offerTrust(resources,{alreadyDeclined:Boolean(read('publisher-trust.json').declined)});
+ if(outcome==='trusted'){updatesTrusted=true;updateStatus('Release certificate trusted. Checking for verified updates.');}
+ else if(outcome==='declined')write('publisher-trust.json',{declined:true,declinedAt:new Date().toISOString()});
+}
 async function recoverPrevious(){if(portable){updateStatus('Portable copy: replace the extracted application folder to change versions.');return;}try{const target=updater.recoveryCandidate();const result=await dialog.showMessageBox(window,{type:'warning',buttons:['Cancel','Prepare recovery'],defaultId:0,cancelId:0,title:'Restore previous '+definition.name+' version?',message:'Restore previously authorized version '+target.version+'?',detail:'Program files will be restored only after you close the app. Local data is retained. This recovery cannot reverse data changes made by a newer version.'});if(result.response===1)await updater.beginRecovery();}catch(error){updateStatus('Recovery unavailable: '+error.message);}}
 async function confirmClose(){
   try{
     if(districtSwitch?.busy){updateStatus('Finish opening the district before closing.');return;}
     if(await runtime.activity()===true){await dialog.showMessageBox(window,{type:'info',message:'A calculation is still running. Close this app after it finishes.',buttons:['Keep working']});return;}
-    const {response}=await dialog.showMessageBox(window,{type:'question',buttons:['Keep working','Close app'],defaultId:0,cancelId:0,title:'Close '+definition.name+'?',message:'Save changes and finish active calculations before closing.',detail:'Closing stops this app’s local processes. Verified updates install only after the app closes.'});
+    const {response}=await dialog.showMessageBox(window,{type:'question',buttons:['Keep working','Close app'],defaultId:0,cancelId:0,title:'Close '+definition.name+'?',message:'Save changes and finish active calculations before closing.',detail:'Closing stops this app’s local processes. A verified update installs automatically after the app closes.'});
     if(response===1){if(await runtime.activity()===true){updateStatus('Close deferred: a calculation is running.');return;}closeApproved=true;window.close();}
   }finally{askingClose=false;}
 }
 async function finishClose(){if(closing)return;closing=true;clearInterval(interval);clearInterval(presenceInterval);networkWatcher?.close();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
-app.on('second-instance',()=>{background=false;if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
+app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
@@ -182,8 +206,8 @@ app.whenReady().then(async()=>{
    }
   });
   ipcMain.handle('desktop-access:info',async event=>{accessOnly(event);try{return await accessOperation(async()=>await(await ensureAccess()).info());}catch{return {appId:definition.id,appName:definition.name,phase:'error'};}});
-  for(const operation of ['request','poll','activate','setPassword','unlock','lock'])ipcMain.handle('desktop-access:'+operation,async(event,payload)=>{accessOnly(event);if(runtime.child&&!accessLifecycle?.suspended)throw new Error('Lock the workspace before changing access');try{const result=await accessOperation(async()=>await(await ensureAccess()).action(operation,payload));if(operation==='activate')checkUpdates();return result;}catch{throw new Error('Access action could not be completed');}});
-  ipcMain.handle('desktop-access:open',async event=>{accessOnly(event);await launch(true);return (await ensureAccess()).info();});
+  for(const operation of ['request','poll','activate','setPassword','unlock','lock'])ipcMain.handle('desktop-access:'+operation,async(event,payload)=>{accessOnly(event);if(runtime.child&&!accessLifecycle?.suspended)throw new Error('Lock the workspace before changing access');try{const result=await accessOperation(async()=>await(await ensureAccess()).action(operation,payload));if(operation==='activate')checkUpdates();return result;}catch(error){throw new Error(require('./access-client.cjs').accessFailure(error));}});
+  ipcMain.handle('desktop-access:open',async event=>{accessOnly(event);if(!launchInstall.defer())await launch(true);return (await ensureAccess()).info();});
   if(definition.id==='melange'){
     const {UIStateStore,registerStateIPC}=require('./ui-state.cjs');
     uiStateStore=new UIStateStore(userData,{activityContext:()=>runtime.authorization?.accepted||null,onMutation:()=>{drainActivity();}});
@@ -198,11 +222,32 @@ app.whenReady().then(async()=>{
   window.webContents.on('will-navigate',(event,url)=>{if(!permitted(url))event.preventDefault();});
   window.webContents.on('will-redirect',(event,url)=>{if(!permitted(url))event.preventDefault();});
   window.webContents.setWindowOpenHandler(({url})=>{try{if(['https:','http:'].includes(new URL(url).protocol)&&!url.startsWith('http://127.'))shell.openExternal(url);}catch{}return {action:'deny'};});
+  // Large installers live under %LOCALAPPDATA%\<applicationId> (never in the synced Documents profile): cached update
+  // installers in updater\, rollback baselines in baseline\. Only this file root moves. The update state (high-water
+  // marks, installed record, trust data) stays in the profile's update-state file, read and written by readState/writeState
+  // below, so nothing resets; installers cached at the old location are ignored and fetched again once.
+  const localRoot=process.platform==='win32'&&app.isPackaged&&!profile.isolated?path.join(process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),definition.applicationId):null;
+  const updaterRoot=localRoot?path.join(localRoot,'updater'):githubConfig?path.join(userData,'github-updates'):userData;
   const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
-  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:githubConfig?path.join(userData,'github-updates'):userData,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName});
-  require('electron-updater').autoUpdater.on('error',error=>{updateStatus('Update not installed: '+error.message);updater.nativeFailure().catch(()=>updateStatus('Update failure recorded locally; administrator status unavailable.')).finally(()=>{if(closing){updater.close();app.quit();}});});
-  ipcMain.handle('desktop:info',event=>{setupOnly(event);return {name:definition.name,appId:definition.id,version:app.getVersion(),updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile))};});
+  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null});
+  require('electron-updater').autoUpdater.on('error',error=>{updateStatus('Update not installed: '+error.message);updater.nativeFailure().catch(()=>updateStatus('Update failure recorded locally; administrator status unavailable.')).finally(()=>{if(closing){updater.close();launchInstall.closeWindow();app.quit();}});});
+  // Registered before the launch install below, so a shutdown during its preparation still suppresses activation.
+  powerMonitor.on('shutdown',()=>updater.suspendInstallation());
+  window.on('query-session-end',()=>updater.suspendInstallation());
+  window.on('session-end',()=>updater.suspendInstallation());
+  // A verified update still pending from an earlier session installs silently now, before the app window is shown
+  // or a backend started. Launch requests meanwhile (second instance, access IPC) are only recorded; the app relaunches
+  // when the start was interactive or one was recorded, decided after preparation. Failure continues a normal start
+  // and honors a recorded launch request. A non-interactive notice window shows while the update installs.
+  if(!portable&&updater.launchCandidate()){
+   launchInstall.begin();if(!background)launchInstall.showWindow();
+   const installed=await updater.activateAtLaunch(()=>launchInstall.relaunch(!background)).catch(()=>false),requested=launchInstall.end();
+   if(installed){closing=true;launchInstall.closeWindow();await runtime.stop().catch(()=>{});return;}
+   launchInstall.closeWindow();if(requested)background=false;
+  }
+  ipcMain.handle('desktop:info',event=>{setupOnly(event);return {name:definition.name,appId:definition.id,version:app.getVersion(),updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile)),updatesTrusted};});
+  ipcMain.handle('desktop:trust-updates',async event=>{setupOnly(event);await trustUpdates();return updatesTrusted;});
   ipcMain.handle('desktop:directory',async event=>{setupOnly(event);const result=await dialog.showOpenDialog(settingsWindow,{properties:['openDirectory','createDirectory'],title:'Choose '+definition.name+' data directory'});if(!result.canceled){const settings={...read('settings.json'),dataDirectory:result.filePaths[0]};if(profile.isolated)try{confineIsolatedSettings(profile.boundary,settings);}catch(error){updateStatus(error.message+' Settings were not changed.');return read('settings.json');}write('settings.json',settings);if(runtime.child)updateStatus('Data folder saved for the next application start. Your current workspace remains open.');return settings;}return read('settings.json');});
   async function selectDistrict(event,district,fromSetup=false){
     if(fromSetup)setupOnly(event);else runtimeOnly(event);
@@ -216,7 +261,7 @@ app.whenReady().then(async()=>{
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(path.join(userData,'logs'))},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Turn on updates (trust release certificate)',click:trustUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(path.join(userData,'logs'))},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
   window.on('close',event=>{
     if(updater.osShutdown||closeApproved||!runtime.child)return;
     event.preventDefault();if(askingClose)return;askingClose=true;
@@ -227,7 +272,7 @@ app.whenReady().then(async()=>{
   if(!background&&definition.id==='terrier'){await window.loadURL(loadingURL);window.show();}else await window.loadURL('about:blank');
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else await showSetup();}
   if(!portable)if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
-  checkUpdates();interval=setInterval(checkUpdates,15*60*1000);interval.unref();
+  offerUpdateTrust().catch(()=>{}).finally(checkUpdates);interval=setInterval(checkUpdates,15*60*1000);interval.unref();
   networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:checkUpdates});
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();
   powerMonitor.on('lock-screen',()=>{if(accessLifecycle){accessLifecycle.osLocked=true;accessLifecycle.suspend('locked').catch(()=>{});}});
@@ -235,11 +280,8 @@ app.whenReady().then(async()=>{
   powerMonitor.on('suspend',()=>{if(accessLifecycle)accessLifecycle.suspend('locked').catch(()=>{});});
   powerMonitor.on('resume',checkUpdates);
   powerMonitor.on('unlock-screen',checkUpdates);
-  powerMonitor.on('shutdown',()=>updater.suspendInstallation());
-  window.on('query-session-end',()=>updater.suspendInstallation());
-  window.on('session-end',()=>updater.suspendInstallation());
 });
 app.on('window-all-closed',finishClose);
-app.on('before-quit',event=>{if(!closing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
+app.on('before-quit',event=>{launchInstall.closeWindow();if(!closing&&!launchInstall.installing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
 }
 }

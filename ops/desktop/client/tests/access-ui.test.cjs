@@ -43,6 +43,27 @@ test('mismatched passwords never cross IPC, failures never reveal raw errors and
  f.push({...base,phase:'ready',grant:{}});assert.equal(f.elements['ready-panel'].hidden,true);f.elements.open.fire('click');await tick();assert.equal(f.calls.some(c=>c.method==='open'),false);
  ui.dispose();
 });
+test('each failure reason maps to a fixed message; unknown, malformed or raw errors fall back to the generic one',async()=>{
+ const f=fixture({...base,phase:'locked'}),ui=mount(f.document,f.api,f.window);await ui.ready;
+ const attempt=async message=>{f.api.unlock=async()=>{throw new Error(message);};f.elements.password.value='valid fixture password';f.elements['password-form'].fire('submit');await tick();return f.elements.status.textContent;};
+ const wrapped=reason=>"Error invoking remote method 'desktop-access:unlock': Error: access:"+reason;
+ assert.match(await attempt(wrapped('unreachable')),/Can't reach the administrator's access server/);
+ assert.match(await attempt(wrapped('timeout')),/took too long/);
+ assert.match(await attempt(wrapped('refused')),/did not accept/);
+ assert.match(await attempt(wrapped('identity')),/identity didn't match/);
+ assert.match(await attempt(wrapped('trust')),/administrator trust has changed/);
+ for(const message of [wrapped('failed'),wrapped('unreachablex'),'Access action could not be completed','secret-token /private/path'])assert.match(await attempt(message),/could not be completed/);
+ const raw=await attempt(wrapped('identity')+' secret-token /private/path');assert.doesNotMatch(raw,/secret-token|private|Error invoking|desktop-access/);
+ ui.dispose();
+});
+test('a failed request re-reads state so a stored unacknowledged request shows its pending panel and the reason',async()=>{
+ const f=fixture(),ui=mount(f.document,f.api,f.window);await ui.ready;
+ assert.equal(f.elements['request-form'].hidden,false);
+ f.api.request=async()=>{f.setState({...base,phase:'pending'});throw new Error("Error invoking remote method 'desktop-access:request': Error: access:unreachable");};
+ f.elements['display-name'].value='Fixture';f.elements['request-form'].fire('submit');await tick();await tick();
+ assert.equal(f.elements['pending-panel'].hidden,false);assert.equal(f.elements['request-form'].hidden,true);
+ assert.match(f.elements.status.textContent,/Can't reach the administrator's access server/);ui.dispose();
+});
 test('Terrier uses existing sign-in, terminal request UI is explicit, secrets cleared on page exit',async()=>{
  const f=fixture({appId:'terrier',appName:'Terrier',phase:'terrier_signin'}),ui=mount(f.document,f.api,f.window);await ui.ready;
  assert.equal(f.elements['password-form'].hidden,true);assert.equal(f.elements.open.textContent,'Continue to Terrier sign-in');assert.equal(f.elements.lock.hidden,true);

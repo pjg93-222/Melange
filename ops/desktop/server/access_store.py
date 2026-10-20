@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import contextlib
 import hmac
+import ipaddress
 import json
 import os
 import re
@@ -75,6 +76,13 @@ def event_scope(grant, district, allow_none=False):
             raise Refused('district access required')
     elif district is not None:
         raise Refused('unexpected district')
+
+
+def loopback(address):
+    try:
+        return ipaddress.ip_address(address).is_loopback
+    except ValueError:
+        return False
 
 
 def data_identifier(value):
@@ -316,6 +324,8 @@ class AccessStore:
         hashed, now = secret_hash(value['requestSecret']), self.now()
         # Hash the source for quota accounting; no browsing or workstation data is recorded.
         source_hash = digest((self.config()['serverId'] + ':' + source_address).encode())
+        # A public-mode loopback peer is the relay for every recipient; only global quotas can apply.
+        relayed = self.publisher.public_origin is not None and loopback(source_address)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             existing = db.execute('SELECT * FROM requests WHERE request_id=?', (request_id,)).fetchone()
@@ -326,7 +336,7 @@ class AccessStore:
             db.execute("UPDATE requests SET state='expired' WHERE (expires<=? OR (state='approved' AND key_expires<=?)) AND state IN ('pending','approved')", (now, now))
             db.execute('UPDATE requests SET receipt=NULL WHERE receipt_expires<=?', (now,))
             if (db.execute("SELECT COUNT(*) FROM requests WHERE state IN ('pending','approved')").fetchone()[0] >= MAX_PENDING
-                    or db.execute('SELECT COUNT(*) FROM requests WHERE source_hash=? AND created>?', (source_hash, now-3600)).fetchone()[0] >= 10
+                    or (not relayed and db.execute('SELECT COUNT(*) FROM requests WHERE source_hash=? AND created>?', (source_hash, now-3600)).fetchone()[0] >= 10)
                     or db.execute('SELECT COUNT(*) FROM requests WHERE created>?', (now-3600,)).fetchone()[0] >= 100
                     or db.execute('SELECT COUNT(*) FROM requests').fetchone()[0] >= 10000
                     or db.execute("SELECT 1 FROM requests WHERE app=? AND device_id=? AND state IN ('pending','approved')", (app, device_id)).fetchone()):

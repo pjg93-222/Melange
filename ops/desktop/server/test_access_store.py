@@ -27,11 +27,11 @@ class AccessStoreTests(unittest.TestCase):
         self.store = AccessStore(self.publisher, clock=lambda: self.now)
         self.store.initialize()
 
-    def request(self, app='melange', device=None):
+    def request(self, app='melange', device=None, source='192.168.2.3'):
         value = dict(requestId=str(uuid.uuid4()), deviceId=device or str(uuid.uuid4()),
                      appId=app, platform='win32', arch='x64', displayName='Synthetic recipient',
                      requestSecret=secrets.token_urlsafe(32))
-        self.store.request(value, '192.168.2.3')
+        self.store.request(value, source)
         return value
 
     def approval(self, app='melange', device=None):
@@ -94,6 +94,17 @@ class AccessStoreTests(unittest.TestCase):
             self.store.request({**request, 'requestId': str(uuid.uuid4()), 'platform': 'darwin'}, '192.168.2.3')
         for _ in range(9): self.request()
         with self.assertRaises(Refused): self.request()
+
+    def test_public_loopback_relay_skips_only_the_per_source_quota(self):
+        for _ in range(10): self.request(source='127.0.0.1')
+        with self.assertRaises(Refused): self.request(source='127.0.0.1')  # LAN mode: loopback is an ordinary source.
+        self.publisher.public_origin = 'https://updates.example.com'
+        for _ in range(10): self.request(source='203.0.113.10')
+        with self.assertRaises(Refused): self.request(source='203.0.113.10')  # Direct public peers keep their own quota.
+        for _ in range(80): self.request(source='127.0.0.1')
+        with self.assertRaises(Refused): self.request(source='127.0.0.1')  # Global hourly/open caps still apply.
+        with self.store.connect() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM requests').fetchone()[0], 100)
 
     def test_signed_revocation_sticky_status_and_token_privilege_separation(self):
         request, response = self.activated()

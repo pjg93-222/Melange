@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test');const assert=require('node:assert/strict');const crypto=require('node:crypto');
-const {AccessClient,accessRequest,descriptor,verifyGrant,verifyStatus,canonical,trustIdentityHash}=require('../access-client.cjs');
+const {AccessClient,accessRequest,accessFailure,descriptor,verifyGrant,verifyStatus,canonical,trustIdentityHash}=require('../access-client.cjs');
 const now=Date.now();
 function fixture(){
  const pair=crypto.generateKeyPairSync('ed25519'),raw=pair.publicKey.export({format:'der',type:'spki'}).subarray(-32),keyId=crypto.createHash('sha256').update(raw).digest('hex').slice(0,24),key=raw.toString('base64');
@@ -110,6 +110,7 @@ print(json.dumps({'key':key.private_bytes(serialization.Encoding.PEM,serializati
  let mode='drip',hits=0;const sockets=new Set();
  const server=https.createServer(material,(_request,response)=>{hits++;
   if(mode==='redirect'){response.writeHead(302,{Location:'/v1/access/status'});response.end();return;}
+  if(mode==='forbidden'){response.writeHead(403);response.end('request authentication required');return;}
   response.writeHead(200,{'Content-Type':'application/json'});
   if(mode==='drip'){response.write('{');const interval=setInterval(()=>response.write(' '),20);response.on('close',()=>clearInterval(interval));}
   if(mode==='overflow')response.end('x'.repeat(20000));
@@ -120,9 +121,10 @@ print(json.dumps({'key':key.private_bytes(serialization.Encoding.PEM,serializati
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>{for(const socket of sockets)socket.destroy();server.close();});
  const f=fixture();f.trust.url='https://127.0.0.1:'+server.address().port;
  f.trust.tlsSpkiSha256=crypto.createHash('sha256').update(new crypto.X509Certificate(material.cert).publicKey.export({format:'der',type:'spki'})).digest('hex');
- const started=Date.now();await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:150}),/deadline/);assert.ok(Date.now()-started<1500);
- await assert.rejects(accessRequest({...f.trust,tlsSpkiSha256:'0'.repeat(64)},'/v1/access/status',{deadlineMs:500}),/identity mismatch/);
- mode='redirect';const prior=hits;await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),/refused/);assert.equal(hits,prior+1);
+ const started=Date.now();await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:150}),error=>error.reason==='timeout'&&/deadline/.test(error.message));assert.ok(Date.now()-started<1500);
+ await assert.rejects(accessRequest({...f.trust,tlsSpkiSha256:'0'.repeat(64)},'/v1/access/status',{deadlineMs:500}),error=>error.reason==='identity'&&/identity mismatch/.test(error.message));
+ mode='redirect';const prior=hits;await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),error=>error.reason==='refused'&&error.statusCode===302&&/refused/.test(error.message));assert.equal(hits,prior+1);
+ mode='forbidden';await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),error=>error.reason==='refused'&&error.statusCode===403);
  mode='overflow';await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),/too large/);
  mode='abort';await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),/interrupted|unavailable/);
  for(const url of ['https://[::1]','https://localhost','https://127.1','https://127.000.0.1'])assert.throws(()=>descriptor({...f.trust,url}));
@@ -225,4 +227,45 @@ test('unapproved, revoked or missing protected access credentials never request 
  await assert.rejects(f.client.enrollUpdates('1.0.1'),/approval/);
  await f.vault.store.write({...previous,grantEnvelope:null});await assert.rejects(f.client.enrollUpdates('1.0.1'),/approval/);
  assert.equal(f.requests.length,0);
+});
+
+test('connection refused and a silent server carry stable reason codes',async t=>{
+ const net=require('node:net'),f=fixture(),sockets=new Set();
+ const probe=net.createServer();await new Promise(resolve=>probe.listen(0,'127.0.0.1',resolve));const closed=probe.address().port;await new Promise(resolve=>probe.close(resolve));
+ const silent=net.createServer(socket=>{sockets.add(socket);socket.on('error',()=>{});});await new Promise(resolve=>silent.listen(0,'127.0.0.1',resolve));
+ t.after(()=>{for(const socket of sockets)socket.destroy();silent.close();});
+ await assert.rejects(accessRequest({...f.trust,url:'https://127.0.0.1:'+closed},'/v1/access/status',{deadlineMs:2000}),error=>error.reason==='unreachable'&&/unavailable/.test(error.message));
+ await assert.rejects(accessRequest({...f.trust,url:'https://127.0.0.1:'+silent.address().port},'/v1/access/status',{deadlineMs:100}),error=>error.reason==='timeout');
+});
+test('accessFailure forwards only a known reason code, never message text, ids or secrets',()=>{
+ for(const reason of ['unreachable','timeout','refused','identity','trust'])assert.equal(accessFailure(Object.assign(new Error('secret-token request-id /private/path'),{reason})),'access:'+reason);
+ for(const error of [new Error('secret-token'),Object.assign(new Error('x'),{reason:'secret-token'}),Object.assign(new Error('x'),{reason:'toString'}),Object.assign(new Error('x'),{statusCode:403}),null,undefined,'access:identity'])assert.equal(accessFailure(error),'access:failed');
+});
+test('poll re-POSTs the same unacknowledged request on 403 only; a distinct request is still refused while it is pending',async()=>{
+ const f=fixture(),vault=stores();let clock=now,postFails=true,getError=null;const posts=[],gets=[];
+ const request=async(_trust,path,options)=>{
+  if(path==='/v1/access/requests'){posts.push(options.body);if(postFails)throw Object.assign(new Error('Access connection unavailable'),{reason:'unreachable'});return {requestId:options.body.requestId,status:'pending',expiresAt:f.body.issuedAt+86400};}
+  gets.push(path);if(getError)throw getError;return {requestId:path.split('/').at(-1),status:'pending',expiresAt:f.body.issuedAt+86400};
+ };
+ const client=new AccessClient({...vault,trust:f.trust,identity:f.identity,request,now:()=>clock});
+ await assert.rejects(client.requestAccess('Fixture'),/unavailable/);
+ const id=vault.state().pending.requestId,material=structuredClone(vault.values.get('access-request'));assert.equal(posts.length,1);
+ getError=Object.assign(new Error('Access service refused the request'),{statusCode:403});clock+=16000;
+ await assert.rejects(client.poll(),/unavailable/);assert.equal(posts.length,2);
+ postFails=false;clock+=16000;
+ assert.equal((await client.poll()).status,'pending');assert.equal(posts.length,3);
+ for(const body of posts){assert.equal(body.requestId,id);assert.equal(body.requestSecret,material.requests[id].requestSecret);assert.equal(body.displayName,'Fixture');}
+ assert.equal(vault.state().pending.requestId,id);assert.deepEqual(vault.values.get('access-request'),material);
+ for(const error of [Object.assign(new Error('x'),{statusCode:500}),Object.assign(new Error('x'),{statusCode:404}),new Error('Access connection unavailable')]){getError=error;clock+=16000;await assert.rejects(client.poll());}
+ assert.equal(posts.length,3);
+ getError=null;await assert.rejects(client.requestAccess('Fixture',{newRequest:true}),/preserved/);
+ assert.equal(posts.length,3);assert.equal(vault.state().pending.requestId,id);
+});
+test('a failed first POST keeps the stored request so the next request re-sends the same id and secret',async()=>{
+ const f=fixture(),vault=stores();let fail=true;const posts=[];
+ const request=async(_trust,_path,options)=>{posts.push(options.body);if(fail)throw Object.assign(new Error('Access connection unavailable'),{reason:'unreachable'});return {requestId:options.body.requestId,status:'pending',expiresAt:f.body.issuedAt+86400};};
+ const client=new AccessClient({...vault,trust:f.trust,identity:f.identity,request,now:()=>now});
+ await assert.rejects(client.requestAccess('Fixture'),/unavailable/);fail=false;
+ assert.equal((await client.requestAccess('Fixture')).status,'pending');
+ assert.equal(posts.length,2);assert.equal(posts[1].requestId,posts[0].requestId);assert.equal(posts[1].requestSecret,posts[0].requestSecret);
 });

@@ -32,7 +32,7 @@ function descriptor(value){
  return {...structuredClone(value),url:origin};
 }
 function trustIdentityHash(value){const checked=descriptor(value);const stable={schemaVersion:checked.schemaVersion,purpose:checked.purpose,serverId:checked.serverId,tlsSpkiSha256:checked.tlsSpkiSha256,accessPublicKeys:checked.accessPublicKeys};return crypto.createHash('sha256').update(canonical(stable)).digest('hex');}
-function refreshDescriptor(previous,next){if(trustIdentityHash(previous)!==trustIdentityHash(next))throw new Error('Access server verification identity cannot be replaced');return descriptor(next);}
+function refreshDescriptor(previous,next){if(trustIdentityHash(previous)!==trustIdentityHash(next))throw fail('Access server verification identity cannot be replaced','trust');return descriptor(next);}
 function envelope(value,trust){
  exact(value,['schemaVersion','keyId','payload','signature']);
  if(value.schemaVersion!==1||typeof value.keyId!=='string'||!Object.hasOwn(trust.accessPublicKeys,value.keyId))throw new Error('Untrusted access signer');
@@ -72,6 +72,10 @@ function verifyStatus(value,trustValue,identity,accepted,now=Date.now()){
  if(accepted.revoked&&!body.revoked)throw new Error('Learned revocation cannot be cleared by status');
  return {...accepted,highestSequence:body.sequence,revoked:accepted.revoked||body.revoked,statusHash:digest};
 }
+// A fixed reason code is the only failure detail that may leave the main process.
+function fail(message,reason){const error=new Error(message);error.reason=reason;return error;}
+const REASONS=new Set(['unreachable','timeout','refused','identity','trust']);
+function accessFailure(error){return 'access:'+(REASONS.has(error?.reason)?error.reason:'failed');}
 function accessRequest(trustValue,relative,{method='GET',authorization,body,deadlineMs=15000}={}){
  const trust=descriptor(trustValue),origin=new URL(trust.url);
  if(!/^\/v1\/access\/(requests(?:\/[0-9a-f-]{36})?|activate|status|presence|events|update-enrollment)$/.test(relative))return Promise.reject(new Error('Unsupported access operation'));
@@ -81,22 +85,22 @@ function accessRequest(trustValue,relative,{method='GET',authorization,body,dead
  return new Promise((resolve,reject)=>{
   const agent=new https.Agent({keepAlive:false});let request,response,socket,settled=false;
   const finish=(error,value)=>{if(settled)return;settled=true;clearTimeout(deadline);response?.destroy();request?.destroy();socket?.destroy();agent.destroy();error?reject(error):resolve(value);};
-  const deadline=setTimeout(()=>finish(new Error('Access request deadline exceeded')),deadlineMs);
+  const deadline=setTimeout(()=>finish(fail('Access request deadline exceeded','timeout')),deadlineMs);
   agent.createConnection=(_options,callback)=>{
    let completed=false;const done=(error,connection)=>{if(!completed){completed=true;callback(error,connection);}};
    socket=tls.connect({host:origin.hostname,port:Number(origin.port)||443,...(!net.isIP(origin.hostname)?{servername:origin.hostname}:{}),rejectUnauthorized:false});
-   socket.once('error',()=>{done(new Error('Access connection unavailable'));finish(new Error('Access connection unavailable'));});
+   socket.once('error',()=>{done(fail('Access connection unavailable','unreachable'));finish(fail('Access connection unavailable','unreachable'));});
    socket.once('secureConnect',()=>{try{
     const certificate=new crypto.X509Certificate(socket.getPeerCertificate(true).raw);
     const pin=crypto.createHash('sha256').update(certificate.publicKey.export({format:'der',type:'spki'})).digest();
     if(Date.now()<Date.parse(certificate.validFrom)||Date.now()>Date.parse(certificate.validTo)||!crypto.timingSafeEqual(pin,Buffer.from(trust.tlsSpkiSha256,'hex')))throw new Error('Access server identity mismatch');
     done(null,socket);
-   }catch{done(new Error('Access server identity mismatch'));finish(new Error('Access server identity mismatch'));}});
+   }catch{done(fail('Access server identity mismatch','identity'));finish(fail('Access server identity mismatch','identity'));}});
   };
   const headers={Accept:'application/json',...(authorization?{Authorization:authorization}:{}),...(data?{'Content-Type':'application/json','Content-Length':data.length}:{})};
   request=https.request(new URL(relative,origin),{method,headers,agent},incoming=>{
    response=incoming;
-   if(![200,201].includes(response.statusCode)){const error=new Error('Access service refused the request');error.statusCode=response.statusCode;finish(error);return;}
+   if(![200,201].includes(response.statusCode)){const error=fail('Access service refused the request','refused');error.statusCode=response.statusCode;finish(error);return;}
    let size=0,ended=false;const chunks=[];
    response.on('data',part=>{size+=part.length;if(size>16384)finish(new Error('Access response too large'));else chunks.push(part);});
    response.once('aborted',()=>finish(new Error('Access response interrupted')));
@@ -104,7 +108,7 @@ function accessRequest(trustValue,relative,{method='GET',authorization,body,dead
    response.once('close',()=>{if(!ended)finish(new Error('Access response interrupted'));});
    response.once('end',()=>{ended=true;try{finish(null,JSON.parse(Buffer.concat(chunks).toString('utf8')));}catch{finish(new Error('Invalid access response'));}});
   });
-  request.once('error',()=>finish(new Error('Access connection unavailable')));request.end(data);
+  request.once('error',()=>finish(fail('Access connection unavailable','unreachable')));request.end(data);
  });
 }
 class AccessClient{
@@ -134,9 +138,12 @@ class AccessClient{
    await this.store.write({...state,pending});
    try{await this.secrets.write('access-request',{requests:{[pending.requestId]:material}});}catch{/* Redundant protected recovery is harmless and bounded. */}
   }
-  return requestStatus(await this.request(this.trust,'/v1/access/requests',{method:'POST',body:{...this.identity,...pending,requestSecret:material.requestSecret}}),pending.requestId);
+  return this.submit(pending,material);
  });}
- async poll(){return this.operation(async()=>{const state=await this.state(),material=requestMaterials(await this.secrets.read('access-request'))[state.pending?.requestId];if(!state.pending||!material)throw new Error('No pending request');if(this.lastPoll&&this.now()-this.lastPoll<15000)throw new Error('Wait before checking approval again');this.lastPoll=this.now();return requestStatus(await this.request(this.trust,'/v1/access/requests/'+state.pending.requestId,{authorization:'Request '+material.requestSecret}),state.pending.requestId);});}
+ async submit(pending,material){return requestStatus(await this.request(this.trust,'/v1/access/requests',{method:'POST',body:{...this.identity,...pending,requestSecret:material.requestSecret}}),pending.requestId);}
+ async poll(){return this.operation(async()=>{const state=await this.state(),material=requestMaterials(await this.secrets.read('access-request'))[state.pending?.requestId];if(!state.pending||!material)throw new Error('No pending request');if(this.lastPoll&&this.now()-this.lastPoll<15000)throw new Error('Wait before checking approval again');this.lastPoll=this.now();
+  // 403: the server never stored this id (the first POST was lost). Re-send the same id and secret; the server treats that as idempotent.
+  try{return requestStatus(await this.request(this.trust,'/v1/access/requests/'+state.pending.requestId,{authorization:'Request '+material.requestSecret}),state.pending.requestId);}catch(error){if(error.statusCode!==403)throw error;return this.submit(state.pending,material);}});}
  async activate(activationKey){return this.operation(async()=>{
   if(!secret(activationKey))throw new Error('Invalid activation key');
   const state=await this.state(),materials=requestMaterials(await this.secrets.read('access-request')),material=materials[state.pending?.requestId];
@@ -189,4 +196,4 @@ class AccessClient{
   return this.request(this.trust,route,{method:'POST',authorization:'Bearer '+token,body});
  }
 }
-module.exports={AccessClient,accessRequest,descriptor,verifyGrant,verifyStatus,canonical,trustIdentityHash,refreshDescriptor,verifyAccessEnvelope};
+module.exports={AccessClient,accessRequest,accessFailure,descriptor,verifyGrant,verifyStatus,canonical,trustIdentityHash,refreshDescriptor,verifyAccessEnvelope};
