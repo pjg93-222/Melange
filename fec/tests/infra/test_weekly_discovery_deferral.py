@@ -367,6 +367,7 @@ def test_an_unhealable_drift_rollback_is_logged_and_emitted_and_leaves_the_abort
     ({"rollback": "verified", "rollback_membership_load": "PASS"}, "restored nothing"),
     ({"rollback": "verified", "rollback_membership_load": "FileNotFoundError: gone"}, "membership load did NOT pass"),
     ({"rollback": "restored", "rollback_membership_load": "ValueError: bad"}, "membership load did NOT pass"),
+    ({"rollback": "restore_failed", "rollback_membership_load": "PermissionError: locked"}, "RESTORE FAILED part-way"),
     ({"rollback": "some_future_label", "rollback_membership_load": "PASS"}, "unrecognised label 'some_future_label'"),
     ("not a dict", "unrecognised label None"),
 ])

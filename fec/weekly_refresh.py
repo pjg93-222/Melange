@@ -347,6 +347,9 @@ def _hard_abort(name,failures,why):
                 _emit('refresh.step','failed','repository rollback: unhealable drift, nothing restored (abort unchanged)',
                       stage='repository rollback',detail=str(_rb.get('rollback_drift'))[:2000],
                       metadata={'rollback':_label,'rollback_drift':_rb.get('rollback_drift'),'hard':False})
+            elif _label=='restore_failed':
+                log('   repository rollback RESTORE FAILED part-way: the repository and its receipt may be half-restored; the '
+                    'before-image is kept in %s (%s)'%(os.path.join(_RUN_LOG_DIR,'before'),_load))
             elif _label=='restored':
                 log('   repository rollback restored the before-image repository and receipt (membership load: %s)'%(_load,))
             elif _label=='verified':

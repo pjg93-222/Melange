@@ -318,6 +318,9 @@ def rollback_unbound_repository(root, run_dir):
     load would only raise: that is recorded as "unhealable_drift" with the
     three hashes, never as "verified". The strict binding in
     official_membership_movements.load is deliberately unchanged.
+
+    A restore that raises part-way is recorded as "restore_failed" (the
+    repository and its receipt may be half-restored), never as "verified".
     """
     root, before = Path(root), Path(run_dir) / "before"
     action = "verified"
@@ -327,6 +330,9 @@ def rollback_unbound_repository(root, run_dir):
         bound = read(sidecar).get("repository_sha256") if sidecar.is_file() else None
         if (snapshot.is_file() and bound == digest(snapshot)
                 and digest(root / ROLLBACK_SOURCES[0]) != bound):
+            # A copy or replace that raises mid-loop (a OneDrive or antivirus lock) can leave a half-restored pair:
+            # never let that read as "verified".
+            action = "restore_failed"
             for relative in ROLLBACK_SOURCES:
                 if (before / relative).is_file():
                     temp = root / (relative + f".{os.getpid()}.rollback.tmp")

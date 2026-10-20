@@ -1050,6 +1050,24 @@ def bind_membership(root, bound_sha):
         "repository_sha256": bound_sha})
 
 
+def test_w1_a_restore_that_raises_part_way_is_restore_failed_not_verified(tmp_path, monkeypatch):
+    # Opus pre-merge review: a OneDrive or antivirus lock on replace left the label "verified" over a half-restored pair.
+    before = b'{"bills": {}, "generation": "before"}\n'
+    (tmp_path / "bill_repository_live.json").write_bytes(b'{"bills": {}, "generation": "fetched"}\n')
+    bind_membership(tmp_path, __import__("hashlib").sha256(before).hexdigest())
+    run_dir = tmp_path / "run"
+    (run_dir / "before").mkdir(parents=True)
+    (run_dir / "before" / "bill_repository_live.json").write_bytes(before)
+
+    def locked(*args, **kwargs):
+        raise PermissionError("locked by another process")
+
+    monkeypatch.setattr(pipeline, "replace_atomic", locked)
+    result = pipeline.rollback_unbound_repository(tmp_path, run_dir)
+    assert result["rollback"] == "restore_failed"
+    assert result["rollback_membership_load"].startswith("PermissionError")
+
+
 def test_w1_media_nonzero_exit_leaves_the_repository_untouched(tmp_path, monkeypatch):
     # 2026-10-16 hard death and 2026-10-19 sign-out kill (exit 0x40010004) both landed in media after the
     # repository had been fetched. A media child that exits nonzero must now stop the run before the
