@@ -19,6 +19,7 @@ import tempfile
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 from urllib.parse import parse_qsl, urlsplit
 import urllib.request
+import zlib
 
 from fec.bill_rules import bill_type_key
 from fec.paths import ROOT
@@ -280,7 +281,7 @@ def inspect_component(
                         f"component {path.name} lacks mapped headers: {', '.join(sorted(missing))}"
                     )
                 row_count = sum(1 for _ in reader)
-    except (OSError, UnicodeError, csv.Error, gzip.BadGzipFile) as exc:
+    except (OSError, EOFError, zlib.error, UnicodeError, csv.Error, gzip.BadGzipFile) as exc:
         if isinstance(exc, IntegrityError):
             raise
         raise IntegrityError(f"component cannot be read: {path.name}") from exc
@@ -367,7 +368,9 @@ def atomic_download(
                             break
                         stream.write(block)
             except Exception as exc:
-                raise IntegrityError("BICAM transport failed") from exc
+                raise IntegrityError(
+                    f"BICAM transport failed for {target.name}: {type(exc).__name__}: {exc}"
+                ) from exc
             stream.flush()
             os.fsync(stream.fileno())
         receipt = inspect_component(temporary_path, format_name, columns)
@@ -432,7 +435,7 @@ def load_component_rows(
                         for logical, physical in specification["columns"].items()
                     })
                 return rows
-    except (OSError, UnicodeError, csv.Error, gzip.BadGzipFile) as exc:
+    except (OSError, EOFError, zlib.error, UnicodeError, csv.Error, gzip.BadGzipFile) as exc:
         raise IntegrityError(f"cannot load component rows: {path.name}") from exc
 
 
@@ -990,7 +993,7 @@ def load_legfix5_presence(
                 try:
                     with gzip.open(body, "rb") as stream:
                         body_cache[body] = bool(stream.read(1))
-                except (OSError, gzip.BadGzipFile):
+                except (OSError, EOFError, zlib.error, gzip.BadGzipFile):
                     body_cache[body] = False
             if not body_cache[body]:
                 valid = False
@@ -1577,7 +1580,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     except UsageError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
-    except (IntegrityError, OSError, csv.Error, json.JSONDecodeError) as exc:
+    except (IntegrityError, OSError, EOFError, csv.Error, json.JSONDecodeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 4
 

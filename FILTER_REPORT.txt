@@ -565,6 +565,19 @@ No-revert check: the blob published at 47b45d965 for that path equals the a22a3e
 Verification: the published blob equals the 300cbe417 source blob (9f4509f65e29); no other path changed. gitleaks over 47b45d965..this commit: no findings. Key-pattern grep of the changed path: no hits.
 README_RELEASE.md: the CI sentence is narrowed. Files under ops/github never run here; the two carried workflows under .github/workflows run on a push to main that touches their path filters, or on a manual dispatch. Neither has a pull_request trigger, and this commit touches none of their path filters.
 
+== ADDENDUM 21 2026-10-19: republished from local Melange main 11db3ad91 (line endings restored on two fec/network builders)
+Source 11db3ad91cacea4cacdbc229b453aff8e2281004 (local Melange branch main), 1 commit above 300cbe417 (Addendum 20). Previous publication e8aee6677ffa5b4f6972dd6b7fcacc1dfe3afcc6 (source 300cbe417), merged into main as c597d22aadc00596217fbafc6c876baa7c95b0d1 (pull request #12); this commit is a child of that merge, on the new branch claude/fec-debug-sweep-20261019. Same export rules (_tools/filter_export.py, spec melange; _tools/export_copy.py byte-identical to the source's ops/release_lib/export.py at this commit, blob 84b6f5fd9c28, unchanged), addendum inclusions, root .gitattributes, the fec/attic/full_congestion.py exception and the gate-pinned loading video. No filter or rule change.
+Source commit: 11db3ad91. The fec/network sweep commit 30798dcaf rewrote fec/network/build_holistic_base.py and fec/network/build_holistic_normalized.py from LF to CRLF; this commit restores LF. git diff --ignore-cr-at-eol between 300cbe417 and 11db3ad91 is empty, so content is unchanged.
+Filter run: included 1840, excluded 305; the excluded list is identical, path for path, to the Addendum 18 run. No path added or removed.
+Changed export paths (2: 0 added, 2 changed; none removed, none newly filtered out):
+  M fec/network/build_holistic_base.py  (11db3ad91; 52ba5b1683a5 -> 4329d0e10cb9)
+  M fec/network/build_holistic_normalized.py  (11db3ad91; b1ee0ab6d774 -> 2291b018fc08)
+No-revert check: for both changed paths, the blob published at e8aee6677 equals the 300cbe417 source blob.
+Counts: export-root paths published 1869 = 1840 filter output (including .gitattributes) + 28 INCLUDED-NOW + 1 carried CI file (melange-runtime.constraints.txt); published tree 1903 = 1869 + 28 skill-doc exception files + 2 workflows + 4 metadata files; KEPT-EXCLUDED 276 (unchanged).
+Carried forward unchanged and blob-verified: the 28 .claude/skills exception files, .github/workflows/desktop-windows.yml, .github/workflows/desktop-installer-acceptance.yml, ops/desktop/packaging/melange-runtime.constraints.txt and DEVELOPMENT.md. Root .gitattributes is cf82e8c3255c; ops/export.gitattributes is not published; ops/desktop/packaging/send_zip.py (71f7c0f0bc15) and test_send_zip.py (3221300d7d13) are in the source and the filter output at the recorded blobs.
+Verification: all 1869 export-root blobs (mode and id) equal the 11db3ad91 source blobs, with .gitattributes equal to source ops/export.gitattributes (cf82e8c3255c); every other published path equals its c597d22aa blob. gitleaks 8.30.1 over the new commit: no findings.
+Workflows: a push of this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
 == ADDENDUM 22 2026-10-19: republished from local Melange branch fix/pipeline-health-20261019 15bc300ca (weekly and daily refresh failure fixes; round 4 of pull request #15)
 Source 15bc300caedf004a8fb097acf826194c3fcc56c8 (local Melange branch fix/pipeline-health-20261019, not yet on local main), 16 commits above 11db3ad91, the local main commit recorded by Addendum 21 (pull request #14, not yet merged). Previous publication e8aee6677ffa5b4f6972dd6b7fcacc1dfe3afcc6 (source 300cbe417, head of pull request #12), merged into main as c597d22aadc00596217fbafc6c876baa7c95b0d1; the first publication commit f3bae0a2afaac627756395cdbdba3a2d0fc17b4d (built from source a84e7d8a9, 7 commits) is a child of that merge, on the new branch claude/pipeline-health-20261019, the round 2 commit 94de8609a003f141dd0da1734b356fdfddf16b0f (built from source 706a9be5b, 8 commits) is its fast-forward child, the round 3 commit ba4b95f6c5f82a42c7c6084ef753d3dd3110710e (built from source 03dc98f3b, 14 commits) follows it, and the round 4 commit that carries this text is the next fast-forward child. Same export rules (_tools/filter_export.py, spec melange; _tools/export_copy.py byte-identical to the source's ops/release_lib/export.py at this commit, blob 43e433c21aad, resynced 2026-10-20 after the rule change below; it was 84b6f5fd9c28 up to round 3), addendum inclusions, root .gitattributes, the fec/attic/full_congestion.py exception and the gate-pinned loading video. One rule change, from round 4: e0a1d4ed3 adds two exact paths to MELANGE_LOCAL_ARTIFACT_TESTS (see Not published below); nothing is widened and no extension or root changes.
 Source commits (owner-approved pipeline-health fixes; no congress pipeline run had fully passed since 2026-10-12 and the weekly refresh had ended HARD_FAILURE five Sundays running): 7f7f9c25a (fec/stance/press_stage5.py: an unreadable, for example OneDrive online-only, Stage 5 weight file is a named refusal with a remedy instead of a bare OSError); d96634001 (fec/legislation/refresh_congress_pipeline.py: a rollback that meets permanent membership drift records unhealable_drift instead of crashing or reporting verified); 9b5b4c16e (fec/legislation/refresh_sentinel_admissions.py: a classifier timeout or non-quota failure on a not-yet-admitted sentinel key is deferred per the owner's ruling R1 of 2026-10-19, with a systemic-outage guard: two or more deferred keys and no successful call is a FAIL; deferred keys count toward the desk backlog); dd35b906d (fec/members/fetch_interviews.py: the MS NOW archive is walked newest first and stops once caught up, guarded by a COMPLETE receipt and the known_ok_posts set, with a 3000 s budget); f1a7bfd5e (fec/collect/refresh_cspan_wj.py and fec/weekly_refresh.py: a Washington Journal R failure carries the tail of the R output); 942c2cc38 (fec/tests/run_tests.py registers the five new suites); a84e7d8a9 (root .gitignore ignores lock files and per-collector sentinels, and the seven tracked collector_sentinels/*.done files are removed: both outside the export roots, so neither is published). Round 2 adds 706a9be5b (test: make the MS NOW and Washington Journal suites independent of local data; both suites import fetch_interviews under a scratch MONEYBALL_ROOT with an empty roster, so they collect without data/engine/congestion.json). Round 3 adds six source commits (owner-approved: fix/admissions-followups-20261019 and fix/collector-followups-20261019 merged into this branch, linear history, 03dc98f3b on top of 706a9be5b): bee3e4ed9 (fec/members/fetch_interviews.py: a MS NOW walk stopped by the budget or a failed page leaves resume_before, the date it had cleanly reached; the next run catches up newest first and resumes the backfill with before=<date>T23:59:59, so repeated budget stops converge to COMPLETE); 22d0cc4cf (the MS NOW early stop is also guarded by known_ok_post_keys, a sha256 of the sorted msnow: keys, which must match at the recorded count); 1be642ab2 (cspan/cspan_scrape.R js_retry: transient chromote timeouts in the Washington Journal search stage are retried three times and exhaustion fails soft; adds the offline R fixture fec/tests/collect/test_cspan_chromote_retry.R with a Python wrapper, registered in fec/tests/run_tests.py); a66966c72 (fec/legislation/refresh_sentinel_admissions.py: the systemic guard counts dead classifiers, not slow bills: two or more non-timeout failures, or three or more timeouts with no other outcome, and every call deferred); 6a6cc0051 (a non-quota is_error classifier envelope on an unadmitted key is deferred, like a timeout); 03dc98f3b (classifier_deferral_counts: a key that defers three runs running is held, authority automated_classifier_validation_gate). Round 4 adds two more source commits (owner-approved): e0a1d4ed3 (fix(release): keep the cspan chromote R test out of the public export: ops/release_lib/export.py names the R fixture and its wrapper in MELANGE_LOCAL_ARTIFACT_TESTS, ops/tests/test_release_export.py asserts it, and fec/tests/run_tests.py _export_excluded ignores non-suite entries such as the .R fixture) and 15bc300ca (cherry-pick of 9780b5c4a from fix/collector-followups-20261019: fec/members/fetch_interviews.py records the sorted msnow: ids as known_ok_post_ids, and when present every recorded id must still be in the log, so the early stop checks a true superset of what the receipt recorded; digest-only and count-only receipts keep their earlier rules).
@@ -616,6 +629,26 @@ Counts: export-root paths published 1874, published tree 1908, KEPT-EXCLUDED 278
 Verification: the 10 changed blobs equal the 255614003 source blobs; every other published path equals its pull request #15 head blob, including fec/network/build_holistic_base.py and fec/network/build_holistic_normalized.py, which therefore do NOT equal their 255614003 source blobs (they stay at the origin/main blobs 52ba5b1683a5 and b1ee0ab6d774; see the filter-run paragraph above). gitleaks 8.30.1 over pull request #15 head..this commit (git mode) and over the changed files (dir mode): see the publish receipt; no new finding. The two fec/network paths still stay at their origin/main blobs.
 Workflows: a push of this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
 
+== ADDENDUM 24 2026-10-20: republished from local Melange main ae83ae15a, paths of three fec debug sweep commits only (fec/desktop and fec/tools fixes, matching tests)
+Source ae83ae15a15f2f1064dcdb697732fc5984c1af4c (local Melange branch main). Previous publication 21410cd1a415680d41c2530cce275b1eae1d9a5d (Addendum 21, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. Addenda 22 and 23 belong to pull requests #15 and #16 and are not part of this branch.
+Selective publication: local main also carries commits that belong to pull requests #15 and #16. They are not published here. This commit takes the tree of 21410cd1a and replaces exactly the 9 export paths changed by source commits c966ae247 (fec/desktop), 57165fc85 (fec/tools) and ae83ae15a (matching tests). Each of those paths is unchanged between its sweep commit and ae83ae15a. The sweep reports under audits/ are outside the export roots and are not published.
+Filter run (_tools/filter_export.py, spec melange, on ae83ae15a; _tools/export_copy.py blob 43e433c21aad, byte-identical to the source's ops/release_lib/export.py at ae83ae15a, resynced 2026-10-20 for pull request #15; its only change from 84b6f5fd9c28 adds two cspan test paths to MELANGE_LOCAL_ARTIFACT_TESTS and does not affect these paths): all 9 paths are included; none is excluded by a path rule, the extension allowlist or MELANGE_LOCAL_ARTIFACT_TESTS. The other differences of that run from this tree are other branches' content and were not taken.
+Source commits: c966ae247 (moneyball_app.py: the FAIL receipt creates its parent directory, window.destroy() runs in a finally block, the status-message call is guarded, null DOM evidence gives a FAIL receipt); 57165fc85 (b0_bicam_arrival_audit.py catches EOFError and zlib.error and wraps a UsageError from opener.open in IntegrityError again; e1_stance_imputation_harness.py catches TypeError and ValueError in _finite_float and read_members; m1_trade_association_linkage.py clips TF-IDF scores to [0, 1]; live_patch.py apply_to() refuses a patch that touches files outside the manifest); ae83ae15a (matching tests).
+Changed export paths (9: 0 added, 9 changed; none removed, none newly filtered out):
+  M fec/desktop/moneyball_app.py  (c966ae247; 1dc799939706 -> 432999b0ca1e)
+  M fec/tools/b0_bicam_arrival_audit.py  (57165fc85; 0702a9dce26c -> 7be6bf19caac)
+  M fec/tools/e1_stance_imputation_harness.py  (57165fc85; 0870d2f7d6ce -> ec24249a84af)
+  M fec/tools/m1_trade_association_linkage.py  (57165fc85; f0d8ba057e77 -> a1e6192f092f)
+  M fec/tools/live_patch.py  (57165fc85; a30c5d4c161c -> 4e97cf7340a4)
+  M fec/tests/tools/test_b0_bicam_arrival_audit.py  (ae83ae15a; d5fa0cb2ff59 -> 4ffa328020c0)
+  M fec/tests/tools/test_e1_stance_imputation_harness.py  (ae83ae15a; 5150bbbcfa49 -> 6cd7a0bf7d5b)
+  M fec/tests/tools/test_m1_trade_association_linkage.py  (ae83ae15a; 67b96d40ffc6 -> d53e9f816c69)
+  M fec/tests/infra/test_live_patch.py  (ae83ae15a; d46b7e3f1231 -> 921eb110dec8)
+No-revert check: for each changed path, the blob published at 21410cd1a equals the source blob in the parent of its sweep commit.
+Counts: unchanged. Export-root paths published 1869, published tree 1903, KEPT-EXCLUDED 276.
+Verification: the 9 published blobs (mode and id) equal the ae83ae15a source blobs; every other path equals its 21410cd1a blob. gitleaks 8.30.1 over 21410cd1a..this commit: no findings.
+Workflows: this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
 == ADDENDUM 25 2026-10-20: pull request #16 review fixes (writer-lease guard on the weekly rollback; Addendum 23 verification wording). Addendum 24 is pull request #14's.
 Source b9d000e1e2005d66b923f6993faec26bae9c15f5 (local Melange branch claude/wave1-delta-land2, one commit above the local main that carries the Addendum 23 commits) for the two paths below only. Parent 7bc9b668ee380cd8fac93357bc79fb5b405a102e, the Addendum 23 commit at the head of pull request #16; this commit is its fast-forward child on publish/wave1-delta-20261020. Same export rules (_tools/export_copy.py blob 43e433c21aad).
   M fec/weekly_refresh.py  (b9d000e1e: _LEASE_HELD; the hard abort skips the repository rollback, logs it and keeps the before-image when this process does not hold the writer lease)
@@ -625,6 +658,60 @@ Addendum 23 correction (CodeRabbit, pull request #16): its Verification sentence
 Counts: export-root paths published 1874, published tree 1908, KEPT-EXCLUDED 278 (unchanged).
 Verification: the two changed blobs equal the source blobs; every other published path equals its parent blob. gitleaks 8.30.1 over parent..this commit (git mode) and over the changed files (dir mode): no findings; over the full tree, only the four reviewed false positives already in the baseline.
 Workflows: a push of this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
+== ADDENDUM 26 2026-10-20: republished from local Melange main a1f015257, paths of four fec debug sweep commits only (fec/speech fixes and tests, desktop regression tests, live_patch CodeRabbit fix)
+Source a1f015257ad03d3cb945569fad0067348283bae2 (local Melange branch main). Previous publication bbf0a83b2fb5ae1dc6f3a92d8e9c2d2d4f164563 (Addendum 24, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. Addenda 22, 23 and 25 belong to pull requests #15 and #16.
+Selective publication: local main also carries commits that belong to pull requests #15 and #16, and fec/research commit 066a12c20, which is published in a later round. They are not published here. This commit takes the tree of bbf0a83b2 and replaces or adds exactly the 41 export paths changed by source commits e5a3ffb88 (fec/speech), c4713d5bd (fec/tests/speech), e440cf62a (fec/tests/surfaces/test_moneyball_desktop.py) and a1f015257 (fec/tools/live_patch.py and its test). Each of those paths is unchanged between its sweep commit and a1f015257. The sweep report audits/fec_sweep_20261013/fec_speech.md is outside the export roots and is not published.
+Filter run (_tools/filter_export.py, spec melange, on a1f015257; _tools/export_copy.py blob 43e433c21aad, byte-identical to the source's ops/release_lib/export.py at a1f015257): all 41 paths are included with the published blob ids; none is excluded by a path rule, the extension allowlist or MELANGE_LOCAL_ARTIFACT_TESTS. The other differences of that run from this tree are other branches' content and were not taken.
+Source commits: e5a3ffb88 (19 fec/speech fixes from the line-by-line sweep, see the pull request body); c4713d5bd (matching fec/tests/speech updates, 5 new test files); e440cf62a (3 regression tests for the c966ae247 moneyball_app fix, now committed: test_moneyball_desktop.py has 5 tests); a1f015257 (live_patch.py _numstat_paths raises on an unparseable non-empty numstat record and apply_to turns it into a refusal; 2 regression tests; CodeRabbit review on pull request #14).
+Changed export paths (41: 5 added, 36 changed; none removed, none newly filtered out):
+  M fec/speech/axe_segment.py  (e5a3ffb88; 36fd9759d549 -> 4d2c78c83c05)
+  M fec/speech/build_descriptive_speech.py  (e5a3ffb88; c92a717b2f77 -> 9250ee7ba352)
+  M fec/speech/build_member_longform_additional_retry_queue.py  (e5a3ffb88; 495828df42f7 -> 82a065dadf34)
+  M fec/speech/build_member_longform_review_app.py  (e5a3ffb88; 41a330f34536 -> 046f8dfdd117)
+  M fec/speech/discover_gap_youtube_turns.py  (e5a3ffb88; 75ec3696759c -> 797ba39265ef)
+  M fec/speech/discover_member_longform_interviews.py  (e5a3ffb88; 8b22f3081354 -> 2d50ffc44ce8)
+  M fec/speech/discover_member_longform_youtube.py  (e5a3ffb88; 18533101dc81 -> 78d72c85f79d)
+  M fec/speech/import_wj_clips.py  (e5a3ffb88; 085ec1e23a66 -> 3386ed104835)
+  M fec/speech/process_member_longform_automated_batch.py  (e5a3ffb88; dfc86d45e22c -> 1d4afe6f4c50)
+  M fec/speech/quarantine_zero_rms.py  (e5a3ffb88; e1dce07c8faa -> aa6f1e17047c)
+  M fec/speech/repair_canonical_wj_pcm_contract.py  (e5a3ffb88; 8db8bdef44b3 -> 5870c16cb28a)
+  M fec/speech/select_member_longform_profile_sources.py  (e5a3ffb88; c2d8c07b0b7a -> e841f46c4d13)
+  M fec/speech/source_media_recovery.py  (e5a3ffb88; de4b70261d64 -> 93de8979629e)
+  M fec/speech/speaker_anchor_recovery.py  (e5a3ffb88; e0b907436e2b -> 8f22aa4801c7)
+  M fec/speech/transcribe_local_youtube_holdings.py  (e5a3ffb88; 239834db5619 -> 5f31d8113a0a)
+  M fec/speech/transcribe_member_longform_captions.py  (e5a3ffb88; 48d29015c6a3 -> 4016b8f213bd)
+  M fec/speech/verify_member_interview_sources.py  (e5a3ffb88; 9b54632e2ae2 -> e7f451254706)
+  M fec/speech/verify_member_longform_profile_readiness.py  (e5a3ffb88; e01154e54f1c -> 08f4b305f2e4)
+  M fec/speech/voice_first_recovery.py  (e5a3ffb88; dcf601b2c419 -> 9fa005d99a5b)
+  A fec/tests/speech/test_axe_segment_feature_failure.py  (c4713d5bd; absent -> 59d0410933dc)
+  M fec/tests/speech/test_build_member_longform_additional_retry_queue.py  (c4713d5bd; 879c7c0812ea -> 5d78e1f78e04)
+  M fec/tests/speech/test_build_member_longform_review_app.py  (c4713d5bd; f168d7725acb -> 76c4fc3308ff)
+  M fec/tests/speech/test_descriptive_speech.py  (c4713d5bd; 52ec6720a5ba -> 58d8f7b12585)
+  A fec/tests/speech/test_discover_gap_youtube_turns.py  (c4713d5bd; absent -> f12f29ae3ff5)
+  M fec/tests/speech/test_import_wj_clips.py  (c4713d5bd; 4b0e74864b8a -> 5fcd1d2d4d77)
+  M fec/tests/speech/test_incremental_speech_manifest_safety.py  (c4713d5bd; e79733048cee -> ba32be7cc00f)
+  M fec/tests/speech/test_member_longform_youtube_discovery.py  (c4713d5bd; 93865ee25298 -> feaff264226e)
+  A fec/tests/speech/test_process_member_longform_automated_batch.py  (c4713d5bd; absent -> ca7ab29b7ad8)
+  M fec/tests/speech/test_quarantine_collision_safety.py  (c4713d5bd; 9aeac14ef851 -> b92cfd90503a)
+  M fec/tests/speech/test_retained_audio_safety.py  (c4713d5bd; a8e56f64f681 -> ba7c623956c4)
+  M fec/tests/speech/test_select_member_longform_profile_sources.py  (c4713d5bd; 422a580eeada -> d65657391198)
+  M fec/tests/speech/test_source_media_recovery.py  (c4713d5bd; b89c5bbf964b -> b4ed7593c87a)
+  M fec/tests/speech/test_speaker_anchor_recovery.py  (c4713d5bd; fe2ecec8852d -> e25c6689384f)
+  A fec/tests/speech/test_transcribe_local_youtube_holdings.py  (c4713d5bd; absent -> e097c40a508d)
+  M fec/tests/speech/test_transcribe_member_longform_captions.py  (c4713d5bd; c6686896ee16 -> 1e4e0fc8d2cf)
+  A fec/tests/speech/test_verify_member_interview_sources.py  (c4713d5bd; absent -> ec0e383fd0bd)
+  M fec/tests/speech/test_verify_member_longform_profile_readiness.py  (c4713d5bd; 1be494016ff7 -> 994d1cce8f2e)
+  M fec/tests/speech/test_voice_first_recovery.py  (c4713d5bd; 0737070b5e1a -> 36edb2e3f59e)
+  M fec/tests/surfaces/test_moneyball_desktop.py  (e440cf62a; 88091b63d88a -> 397b4505f020)
+  M fec/tests/infra/test_live_patch.py  (a1f015257; 921eb110dec8 -> 7a5b690f2cec)
+  M fec/tools/live_patch.py  (a1f015257; 4e97cf7340a4 -> ac683a32e324)
+No-revert check: for each changed path, the blob published at bbf0a83b2 equals the source blob in the parent of its sweep commit; each added path is absent from both.
+Counts: export-root paths published 1874 (1869 + 5 added), published tree 1908 (1903 + 5), KEPT-EXCLUDED 276 (unchanged).
+Verification: the 41 published blobs (mode 100644 and id) equal the a1f015257 source blobs; every other path equals its bbf0a83b2 blob. gitleaks 8.30.1 over bbf0a83b2..this commit: no findings.
+Workflows: this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
+Merge note (2026-10-20): branch claude/fec-debug-sweep-20261019 merged with origin/main 82bcc56c2 (pull request #15 merged, Addendum 22) so pull request #14 stays mergeable. Only the publish metadata changed on both sides; no fec/ or ops/ path was changed on both sides. Addenda are kept from both sides in numeric order (21, 22, 24, 26; 23 and 25 belong to pull request #16). Every published path equals either its origin/main blob (the 16 pull request #15 paths) or its blob on this branch. Counts after the merge: export-root paths published 1879, published tree 1913, KEPT-EXCLUDED 278 (276 plus the two cspan test paths from Addendum 22).
 
 == ADDENDUM 27 2026-10-20: two pre-merge review fixes (restore_failed label; mixed classifier outage is systemic). Addenda 21, 24 and 26 are pull request #14's.
 Source 4f381c570875e0b38e92b34118dbadc7ca098748 (local Melange main) for the six paths below only; they are 4ed347a49 and 4f381c570 on top of the pull request #16 content. Parent c2786637da52325486f874c6a338588ebfb65992, the merge of pull request #16 into main; this commit is on the new branch publish/wave1-round3-20261020 with a pull request into main. Same export rules (_tools/export_copy.py blob 43e433c21aad = source ops/release_lib/export.py).
@@ -638,3 +725,72 @@ Filter run on the source: included 1856, excluded 307. Against the parent tree, 
 Counts: export-root paths published 1874, published tree 1908, KEPT-EXCLUDED 278 (unchanged).
 Verification: the six changed blobs equal the source blobs; every other published path equals its parent blob. gitleaks 8.30.1 over parent..this commit (git mode) and over the changed files (dir mode): no findings; over the full tree, only the four reviewed false positives already in the baseline.
 Workflows: a push of this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
+== ADDENDUM 28 2026-10-20: republished from local Melange main 110cac4d9, paths of three fec debug sweep commits only (fec/audit fixes, the legfix5 regression test, CodeRabbit round 2 fixes for fec/speech; fec/research stays excluded)
+Source 110cac4d95986e2cea8701c07171c739f0a07cf1 (local Melange branch main). Previous publication d31a3be30e06cd50647c24eb508741d22ae446ee (Addendum 26 and its merge with origin/main, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. Addenda 22, 23, 25 and 27 belong to pull requests #15, #16 and #17.
+Selective publication: local main also carries commits that belong to pull requests #16 and #17. They are not published here. This commit takes the tree of d31a3be30 and replaces exactly the 25 export paths changed by source commits 8ad28cede (fec/audit, 16 paths), 463f20675 (fec/tests/legislation/test_audit_legfix5_coverage_reconciliation.py) and 110cac4d9 (CodeRabbit round 2 on pull request #14: 3 fec/speech paths and 5 tests). Each is unchanged between its sweep commit and 110cac4d9, so each published blob is both the commit blob and the HEAD blob.
+fec/research is not published. Source commits 066a12c20 and 3fe157878 change 37 export-root paths. 31 of them are excluded by the filter: fec/research/ is an excluded path, and fec/tests/infra/test_research_optimized_guards.py and fec/tests/research/test_institutions_reference_report.py are MELANGE_RESEARCH_TESTS (rule G8 of 2026-10-16). The other 6 are new fec/tests/research test files (test_exchange_context_audit_checks.py, test_fetch_demographics_guards.py, test_fetch_hearing_pilot_provenance.py, test_mine_anchors_matcher.py, test_refinement_common_write_json.py, test_refinement_report_guards.py). The filter does not list them, but each imports or reads fec/research/, so exported alone they could never resolve, the same class as G8. They are held back and not published; adding them to MELANGE_RESEARCH_TESTS in the source is the matching filter change. The sweep reports audits/fec_sweep_20261013/fec_research.md and fec_audit.md are outside the export roots and are not published.
+Filter run (_tools/filter_export.py, spec melange, on 110cac4d9; _tools/export_copy.py blob 43e433c21aad, byte-identical to the source's ops/release_lib/export.py at 110cac4d9): included 1856, excluded 307; all 25 published paths are included with the published blob ids; none is excluded by a path rule, the extension allowlist or MELANGE_LOCAL_ARTIFACT_TESTS. The other differences of that run from this tree are other branches' content and were not taken.
+Changed export paths (25: 0 added, 25 changed; none removed, none newly filtered out):
+  M fec/audit/audit_billstatus_snapshot_divergence.py  (8ad28cede; 95a589613dae -> 3fbbe1345c8d)
+  M fec/audit/audit_candidate_membership_review_partition.py  (8ad28cede; d3a657e6bfec -> f9d432073b0c)
+  M fec/audit/audit_congress_collector_resume_continuity.py  (8ad28cede; 30870589ff27 -> 2e84763de11e)
+  M fec/audit/audit_congress_full_text_failure_catchnet.py  (8ad28cede; 5e2b8e6d257d -> 1e611883961b)
+  M fec/audit/audit_frontier.py  (8ad28cede; 198c220a06a0 -> b45cb33e74a2)
+  M fec/audit/audit_full.py  (8ad28cede; 8ee9c7ba2027 -> 5b4a1c36b4a1)
+  M fec/audit/audit_legfix5_artifact_gaps.py  (8ad28cede; 2083c8597702 -> 71f6c5eeb5b9)
+  M fec/audit/audit_legfix5_coverage_reconciliation.py  (8ad28cede; 954c7f29d690 -> ea54d89c94cd)
+  M fec/audit/audit_legislation_query_specificity.py  (8ad28cede; 43d6b6e52bd1 -> f4b8ae478e49)
+  M fec/audit/audit_pre_culling_inventory.py  (8ad28cede; 72a04c90fbb1 -> 6ac717d46c5c)
+  M fec/audit/audit_primacy_math_opus5.py  (8ad28cede; e3ce748b9202 -> 51cb01653669)
+  M fec/audit/audit_rendered_desk.py  (8ad28cede; ec645b4807c9 -> 956fb1206836)
+  M fec/audit/audit_source_to_dashboard.py  (8ad28cede; 1ee8b5aa072c -> a1bae2f79739)
+  M fec/audit/published_source_contracts.py  (8ad28cede; ae62b501e9ec -> 895f43dd36b7)
+  M fec/audit/system_manifest_check.py  (8ad28cede; 5876e4e1f210 -> b6d61f5c6eb8)
+  M fec/audit/verify_greenlit_primacy_integration.py  (8ad28cede; 252bbc11b02c -> a0f1f978fbde)
+  M fec/tests/legislation/test_audit_legfix5_coverage_reconciliation.py  (463f20675; 269840071005 -> a1064f41c894)
+  M fec/speech/build_member_longform_review_app.py  (110cac4d9; 046f8dfdd117 -> 06f29ec66502)
+  M fec/speech/discover_member_longform_youtube.py  (110cac4d9; 78d72c85f79d -> 25acb8283213)
+  M fec/speech/repair_canonical_wj_pcm_contract.py  (110cac4d9; 5870c16cb28a -> 3ecd5fee8846)
+  M fec/tests/speech/test_axe_segment_feature_failure.py  (110cac4d9; 59d0410933dc -> 97c3a17d4a3f)
+  M fec/tests/speech/test_build_member_longform_review_app.py  (110cac4d9; 76c4fc3308ff -> 8a96f17b33b2)
+  M fec/tests/speech/test_member_longform_youtube_discovery.py  (110cac4d9; feaff264226e -> 014b7eb77122)
+  M fec/tests/speech/test_retained_audio_safety.py  (110cac4d9; ba7c623956c4 -> 0f5fa0ccfc1f)
+  M fec/tests/surfaces/test_moneyball_desktop.py  (110cac4d9; 397b4505f020 -> 6aaa3f5c74ab)
+No-revert check: for each changed path, the blob published at d31a3be30 equals the source blob in the parent of its sweep commit; each added path is absent from both.
+Counts: export-root paths published 1879 (1879 + 0 added), published tree 1913 (1913 + 0), KEPT-EXCLUDED 278 (unchanged).
+Verification: the 25 published blobs (mode 100644 and id) equal the 110cac4d9 source blobs; every other path equals its d31a3be30 blob. gitleaks 8.30.1 over d31a3be30..this commit: no findings.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter; neither workflow has a pull_request trigger.
+
+Merge note (2026-10-20): branch claude/fec-debug-sweep-20261019 merged with origin/main fc74822df (pull requests #16 and #17 merged, Addenda 23, 25 and 27) so pull request #14 stays mergeable. Only the publish metadata changed on both sides; no fec/ or ops/ path was changed on both sides. Addenda are kept from both sides in numeric order (21 to 28; 23, 25 and 27 come from origin/main). Every published path equals either its origin/main blob (the 12 pull request #16 and #17 paths) or its blob on this branch. Counts after the merge: export-root paths published 1879, published tree 1913, KEPT-EXCLUDED 278.
+
+== ADDENDUM 29 2026-10-20: republished from local Melange main e8bf470be, CodeRabbit round 3 on pull request #14 (evidence output guard, artifact-gap declaration validation, youtube persist race, six research-dependent tests added to the export filter's exclusions)
+Source e8bf470be930a8893f5fa3efa521b5f6e13b9906 (local Melange branch main). Previous publication 8cd49457a3d43b4bea5840ff2d3e9d950cc4efd3 (Addendum 28 and its merge with origin/main fc74822df, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. origin/main is still fc74822df, so no new merge.
+Selective publication: this commit takes the tree of 8cd49457a and replaces exactly the 8 export paths changed by source commit e8bf470be. e8bf470be is the only commit between 110cac4d9 (Addendum 28) and the source HEAD, so each published blob is both the commit blob and the HEAD blob.
+Rules change: ops/release_lib/export.py (published here) adds six paths to MELANGE_RESEARCH_TESTS: fec/tests/research/test_exchange_context_audit_checks.py, fec/tests/research/test_fetch_demographics_guards.py, fec/tests/research/test_fetch_hearing_pilot_provenance.py, fec/tests/research/test_mine_anchors_matcher.py, fec/tests/research/test_refinement_common_write_json.py, fec/tests/research/test_refinement_report_guards.py. These are the six new research-sweep tests that Addendum 28 held back because each imports or reads fec/research/. They were never published and the rule now keeps them out. ops/tests/test_release_export.py now expects 11 MELANGE_RESEARCH_TESTS entries and checks through plan_export that each one is dropped.
+Filter run (_tools/filter_export.py, spec melange, on e8bf470be). _tools/export_copy.py was backed up to export_copy.py.bak-20261020-j and resynced to the source ops/release_lib/export.py at e8bf470be (blob b33541fcd84d; it was 43e433c21aad; the only difference is the six tuple entries). Included 1850, excluded 313 (272 path + 41 extension). Compared with the Addendum 28 run at 110cac4d9 (1856 / 307), exactly the six tests move from included to excluded and exactly the 8 paths below change blob. All 8 are included with the published blob ids.
+Changed export paths (8: 0 added, 8 changed; none removed, none newly filtered out of the published tree):
+  M fec/audit/audit_congress_collector_resume_continuity.py  (2e84763de11e -> e0816f90ea55)
+  M fec/audit/audit_legfix5_artifact_gaps.py  (71f6c5eeb5b9 -> 9c2ba95f47c8)
+  M fec/speech/discover_member_longform_youtube.py  (25acb8283213 -> 012a2c5ffd1a)
+  M fec/tests/collect/test_audit_congress_collector_resume_continuity.py  (d8412208375c -> a728a52c3bce)
+  M fec/tests/legislation/test_audit_legfix5_artifact_gaps.py  (046d6b589608 -> d76862fef6cc)
+  M fec/tests/speech/test_member_longform_youtube_discovery.py  (014b7eb77122 -> ca741ffd1546)
+  M ops/release_lib/export.py  (43e433c21aad -> b33541fcd84d)
+  M ops/tests/test_release_export.py  (12b9a086cc9a -> 4e3d41a4f9f6)
+No-revert check: for each changed path, the blob published at 8cd49457a equals the source blob at e8bf470be^ (110cac4d9). All modes are 100644.
+Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (278 plus the six research-dependent tests, now path policy as G8 research tests).
+Verification: the 8 published blobs (mode 100644 and id) equal the e8bf470be source blobs. Every other path equals its 8cd49457a blob. gitleaks 8.30.1 over 8cd49457a..this commit found nothing.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
+
+== ADDENDUM 30 2026-10-20: republished from local Melange main 94fe14c7e, CodeRabbit review 5582182357 on pull request #14 (test for the process_episode all-or-nothing discard)
+Source 94fe14c7eb49e94a09730deddc193b22df4c9035 (local Melange branch main). Previous publication aced2d2ad10d5375b0069caa2dcf87ec90774639 (Addendum 29, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. origin/main is still fc74822df, so no new merge.
+Selective publication: this commit takes the tree of aced2d2ad and replaces exactly the 1 export path changed by source commit 94fe14c7e. 94fe14c7e is the only commit between e8bf470be (Addendum 29) and the source HEAD, so the published blob is both the commit blob and the HEAD blob.
+Change: fec/tests/speech/test_axe_segment_feature_failure.py adds test_process_episode_discards_partial_on_feature_failure, which drives fec/speech/axe_segment.py process_episode with one successful and one failed feature segment and requires that no records are returned. It fails if the all-or-nothing discard is removed.
+Filter run (_tools/filter_export.py, spec melange, on 94fe14c7e). _tools/export_copy.py already equals the source ops/release_lib/export.py at 94fe14c7e (blob b33541fcd84d), so no resync. Included 1850, excluded 313 (unchanged from the Addendum 29 run). The selection is identical; only the path below changes blob, and it is included with the published blob id.
+Changed export paths (1: 0 added, 1 changed; none removed, none newly filtered out of the published tree):
+  M fec/tests/speech/test_axe_segment_feature_failure.py  (97c3a17d4a3f -> 2b7aacc380ca)
+No-revert check: the blob published at aced2d2ad equals the source blob at 94fe14c7e^ (e8bf470be). Mode 100644 on both sides.
+Counts: export-root paths published 1879 (unchanged), published tree 1913 (unchanged), KEPT-EXCLUDED 284 (unchanged).
+Verification: the published blob (mode 100644 and id) equals the 94fe14c7e source blob. Every other path equals its aced2d2ad blob. gitleaks 8.30.1 over aced2d2ad..this commit found nothing.
+Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
