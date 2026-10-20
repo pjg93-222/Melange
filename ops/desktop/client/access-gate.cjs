@@ -1,7 +1,8 @@
 'use strict';
 const {checkedRecord}=require('./local-access.cjs');
 const NAMES={melange:'Melange',mentat:'Mentat',terrier:'Terrier'};
-function argument(value,key){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).join('|')!==key||typeof value[key]!=='string')throw new Error('Invalid access action');return value[key];}
+// Optional keys may be absent; when present they must be strings like the required one.
+function argument(value,key,...optional){if(!value||typeof value!=='object'||Array.isArray(value)||!Object.hasOwn(value,key)||Object.keys(value).some(name=>name!==key&&!optional.includes(name))||Object.values(value).some(item=>typeof item!=='string'))throw new Error('Invalid access action');return value[key];}
 class DesktopAccessGate{
  constructor({appId,client,local,passwords,configuration,owner=async()=>null,now=Date.now}){
   if(!NAMES[appId])throw new Error('Unsupported app');Object.assign(this,{appId,client,local,passwords,configuration,owner,now});this.accepted=null;this.requestReply=null;this.cleanupPending=false;this.busy=false;
@@ -29,9 +30,9 @@ class DesktopAccessGate{
   try{
    const state=await this.info();
    if(method==='request'){
-    const displayName=argument(payload,'displayName');if(displayName.trim()!==displayName)throw new Error('Invalid display name');
+    const displayName=argument(payload,'displayName','inviteCode'),inviteCode=(payload.inviteCode??'').trim();if(displayName.trim()!==displayName)throw new Error('Invalid display name');if(payload.inviteCode!==undefined&&(inviteCode.length<1||inviteCode.length>64))throw new Error('Invalid invite code');
     if(state.phase!=='needs_request'&&!state.canRequestAgain)throw new Error('Current request must be preserved');
-    this.requestReply=await this.client.requestAccess(displayName,{newRequest:state.phase==='pending',reapproval:Boolean(this.accepted)});
+    this.requestReply=await this.client.requestAccess(displayName,{newRequest:state.phase==='pending',reapproval:Boolean(this.accepted),inviteCode});
    }else if(method==='poll'){
     if(payload!==undefined||state.phase!=='pending')throw new Error('No pending request');this.requestReply=await this.client.poll();
    }else if(method==='activate'){

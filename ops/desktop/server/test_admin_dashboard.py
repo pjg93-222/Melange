@@ -9,6 +9,7 @@ import threading
 import unittest
 from unittest import mock
 from urllib.parse import urlsplit, parse_qs
+import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from admin_dashboard import AdminSession, create_server, STATIC, CLIENT
@@ -68,6 +69,62 @@ class AdminDashboardTests(unittest.TestCase):
         request2 = store_tests.AccessStoreTests.request(self, 'mentat')
         self.assertEqual(self.call('/deny', {'requestId':request2['requestId']}, headers)[0], 200)
         self.assertEqual(self.store.poll(request2['requestId'], request2['requestSecret'])['status'], 'denied')
+
+    def test_invite_issue_list_and_revoke_routes_share_the_mutation_guard(self):
+        headers = self.session()
+        status, issued = self.call('/invite-issue', {'label': 'Tester', 'uses': 2, 'days': 3}, headers)
+        self.assertEqual(status, 200)
+        self.assertEqual(set(issued), {'inviteId', 'code', 'expiresAt', 'maxUses'})
+        self.assertEqual(issued['maxUses'], 2)
+        self.store.require_invite = True  # The issued code is spent only while enforcement is on.
+        self.store.request(dict(requestId=str(uuid.uuid4()), deviceId=str(uuid.uuid4()), appId='melange', platform='win32', arch='x64',
+                                displayName='Synthetic recipient', requestSecret=secrets.token_urlsafe(32), inviteCode=issued['code']), '203.0.113.5')
+        status, snapshot = self.call('/dashboard', {}, headers)
+        listed = [invite for invite in snapshot['invites'] if invite['inviteId'] == issued['inviteId']]
+        self.assertEqual((status, [(i['label'], i['uses'], i['maxUses'], i['state']) for i in listed]), (200, [('Tester', 1, 2, 'active')]))
+        for secret in (issued['code'], issued['code'].replace('-', ''), 'code_hash'):
+            self.assertNotIn(secret, json.dumps(snapshot))
+        for bad in ({'label': 'x', 'uses': 1}, {'label': 'x', 'uses': 1, 'days': 1, 'extra': 1}, {'label': '', 'uses': 1, 'days': 7},
+                    {'label': 'x', 'uses': True, 'days': 7}, {'label': 'x', 'uses': 0, 'days': 7}, {'label': 'x', 'uses': 1, 'days': 31}):
+            self.assertEqual(self.call('/invite-issue', bad, headers)[0], 403)
+        for bad in ({}, {'inviteId': str(uuid.uuid4())}, {'inviteId': 'x'}, {'inviteId': issued['inviteId'], 'extra': 1}):
+            self.assertEqual(self.call('/invite-revoke', bad, headers)[0], 403)
+        for route, value in (('/invite-issue', {'label': 'Refused', 'uses': 1, 'days': 7}), ('/invite-revoke', {'inviteId': issued['inviteId']})):
+            for override in ({'Origin': 'http://127.0.0.1:1'}, {'Host': 'rebound.invalid'}, {'X-Admin-CSRF': secrets.token_urlsafe(32)},
+                             {'Authorization': 'Bearer ' + secrets.token_urlsafe(32)}):
+                self.assertEqual(self.call(route, value, {**headers, **override})[0], 403)
+            self.assertEqual(self.call(route, value)[0], 403)
+        self.assertEqual(self.call('/invite-revoke', {'inviteId': issued['inviteId']}, headers), (200, {'ok': True}))
+        self.assertEqual(self.call('/invite-revoke', {'inviteId': issued['inviteId']}, headers)[0], 403)
+        self.assertEqual([i['state'] for i in self.store.dashboard()['invites'] if i['inviteId'] == issued['inviteId']], ['revoked'])
+        self.assertEqual([i['label'] for i in self.store.dashboard()['invites']], ['Tester'])
+
+    def test_invites_view_is_wired_and_the_code_is_never_kept(self):
+        html = (STATIC/'index.html').read_text(encoding='utf-8')
+        script = (STATIC/'app.js').read_text(encoding='utf-8')
+        # The Invites view lives in the legacy (access) half of the Melange Admin shell. The Terrier "Invite someone" form
+        # already owns #invite-form, so the access invite form must not reuse that id.
+        for fragment in ('data-view="invites"', 'id="invites"', 'id="access-invite-form"', 'id="access-invite-label"',
+                         'id="access-invite-uses" type="number" min="1" max="100" value="1"',
+                         'id="access-invite-days" type="number" min="1" max="30" value="7"', 'id="key-note"'):
+            self.assertIn(fragment, html)
+        self.assertNotIn('id="invite-form"', html)
+        legacy = html[html.index('<div id="legacy-view"'):]
+        for fragment in ('id="access-invite-form"', 'id="invites"'):
+            self.assertIn(fragment, legacy)
+        for fragment in ('/invite-issue', '/invite-revoke', "'invites'", "legacyViews=['requests','grants','activity','invites']",
+                         "showKey(await call('/invite-issue',{label,uses,days}),'invite')", "field:'code'"):
+            self.assertIn(fragment, script)
+        # The one-time code goes through the shared key dialog, which is emptied on close and when the session ends.
+        self.assertIn("byId('key-close').addEventListener('click',()=>{byId('key-value').textContent='';", script)
+        self.assertIn("byId('key').addEventListener('close',()=>{byId('key-value').textContent='';});", script)
+        self.assertIn("bearer=csrf=undefined;byId('key-value').textContent='';byId('key').close();", script)
+        self.assertIn("byId('access-invite-form').hidden=true;", script)
+
+    def test_access_views_refresh_themselves_without_clobbering_an_action(self):
+        script = (STATIC/'app.js').read_text(encoding='utf-8')
+        self.assertIn("setInterval(()=>{if(['requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&"
+                      "!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);", script)
 
     def test_session_expiry_and_static_ui_use_no_ambient_storage(self):
         clock = [0]; session = AdminSession(clock=lambda:clock[0]); bootstrap = session.bootstrap

@@ -27,6 +27,8 @@ python desktop_admin.py --state 'C:\ExistingProtectedPublisherState' --public-or
 
 Distribute the first command's descriptor through the administrator's trusted enrollment process. Never distribute a pairing secret or private key in source control. The second command runs the recipient listener in the foreground; use a separately reviewed Windows service/task setup under the same account for unattended operation. Existing LAN startup scripts do not silently opt into internet mode.
 
+Invite codes are not enforced by default. After testers update to a client with the invite field, add `--require-invite` after `serve`, or set `MELANGE_ACCESS_REQUIRE_INVITE` in the publisher account's user environment for the startup task. Accepted values (trimmed, case-insensitive): `1`, `true`, `yes`, `on` enforce; unset, empty, `0`, `false`, `no`, `off` do not; anything else makes `serve` refuse to start. `Start-LanPublisherAtLogin.ps1` captures its environment at logon and relaunches Python from that copy, so after setting the User variable restart the login startup task/supervisor (or log off and on); killing only Python is not enough. Then confirm `inviteRequired` is `true` in `listener-status.json` in the state directory. See the README `enforce invites` entry.
+
 ### Bundled `bore.pub` relay
 
 The packaged trust descriptor names `https://bore.pub:38443`. That path needs two processes under the publisher's account. Both must run after every login and reboot:

@@ -20,13 +20,20 @@ class AccessHTTPTests(unittest.TestCase):
     def setUp(self):
         store_tests.AccessStoreTests.setUp(self)
         self.store.clock = time.time
-        self.server = BoundedServer(('127.0.0.1', 0), handler_for(self.publisher), self.publisher.tls_context())
-        self.addCleanup(self.server.server_close)
-        self.worker = threading.Thread(target=self.server.serve_forever, daemon=True)
-        self.worker.start()
-        self.addCleanup(self.worker.join, 3)
-        self.addCleanup(self.server.shutdown)
+        self.serve(require_invite=False)
         self.context = ssl._create_unverified_context()  # Fixture server; pin validation belongs to native-client tests.
+
+    def serve(self, require_invite):
+        self.server = BoundedServer(('127.0.0.1', 0), handler_for(self.publisher, require_invite), self.publisher.tls_context())
+        self.addCleanup(self.server.server_close)
+        worker = threading.Thread(target=self.server.serve_forever, daemon=True)
+        worker.start()
+        self.addCleanup(worker.join, 3)
+        self.addCleanup(self.server.shutdown)
+
+    def count(self, sql):
+        with self.store.connect() as db:
+            return db.execute(sql).fetchone()[0]
 
     def call(self, method, path, value=None, headers=None, raw=None):
         connection = http.client.HTTPSConnection('127.0.0.1', self.server.server_port, context=self.context, timeout=3)
@@ -42,6 +49,52 @@ class AccessHTTPTests(unittest.TestCase):
     def request_value(self):
         return dict(requestId=str(uuid.uuid4()), deviceId=str(uuid.uuid4()), appId='melange',
                     platform='win32', arch='x64', displayName='Synthetic request', requestSecret=secrets.token_urlsafe(32))
+
+    def post_request(self, value):
+        connection = http.client.HTTPSConnection('127.0.0.1', self.server.server_port, context=self.context, timeout=3)
+        try:
+            connection.request('POST', '/v1/access/requests', json.dumps(value), {'Content-Type': 'application/json'})
+            response = connection.getresponse()
+            return response.status, json.loads(response.read()), response.getheader('Retry-After')
+        finally:
+            connection.close()
+
+    def test_invites_off_by_default_requests_without_a_code_work_and_supplied_codes_are_not_consumed(self):
+        self.assertEqual(self.post_request(self.request_value())[0], 201)  # A 1.0.9 client sends no inviteCode.
+        invite = self.store.issue_invite('Unspent')
+        self.assertEqual(self.post_request({**self.request_value(), 'inviteCode': invite['code']})[0], 201)
+        self.assertEqual(self.post_request({**self.request_value(), 'inviteCode': '0000-0000-0000-0000'})[0], 201)
+        for junk in (5, None, ['x'], {'a': 1}):
+            with self.subTest(junk=junk):
+                self.assertEqual(self.post_request({**self.request_value(), 'inviteCode': junk})[:2], (400, {'error': 'invalid_request'}))
+        self.assertEqual(self.count('SELECT COUNT(*) FROM requests'), 3)
+        self.assertEqual(self.count('SELECT uses FROM invites'), 0)
+
+    def test_bad_invite_codes_get_a_distinct_non_retryable_403_and_leave_no_request(self):
+        self.serve(require_invite=True)
+        request = {**self.request_value(), 'inviteCode': self.store.issue_invite('Tester')['code']}
+        missing = {key: value for key, value in request.items() if key != 'inviteCode'}
+        for value in [missing] + [{**request, 'inviteCode': code} for code in ('0000-0000-0000-0000', 'short', 5, None, '', 'U' * 16, ['x'])]:
+            with self.subTest(code=value.get('inviteCode', 'missing')):
+                self.assertEqual(self.post_request(value), (403, {'error': 'invite_invalid'}, None))
+        self.assertEqual(self.count('SELECT COUNT(*) FROM requests'), 0)
+        self.assertEqual(self.post_request(request)[0], 201)
+        status, repeated, _ = self.post_request(missing)  # Re-POST of an existing request (e.g. made before enforcement) skips the check.
+        self.assertEqual((status, repeated['requestId'], repeated['status']), (201, request['requestId'], 'pending'))
+        self.assertEqual(self.count('SELECT COUNT(*) FROM requests'), 1)
+
+    def test_used_up_code_is_invalid_while_capacity_and_conflict_mappings_are_unchanged(self):
+        self.serve(require_invite=True)
+        code = self.store.issue_invite('Single')['code']
+        first = {**self.request_value(), 'inviteCode': code}
+        self.assertEqual(self.post_request(first)[0], 201)
+        status, repeated, _ = self.post_request(first)  # A lost-response retry still reads its status.
+        self.assertEqual((status, repeated['requestId'], repeated['status']), (201, first['requestId'], 'pending'))
+        self.assertEqual(self.post_request({**self.request_value(), 'inviteCode': code}), (403, {'error': 'invite_invalid'}, None))
+        spare = self.store.issue_invite('Spare')
+        self.assertEqual(self.post_request({**self.request_value(), 'deviceId': first['deviceId'], 'inviteCode': spare['code']}), (429, {'error': 'rate_limited'}, '60'))
+        self.assertEqual([i['uses'] for i in self.store.dashboard()['invites'] if i['inviteId'] == spare['inviteId']], [0])  # Capacity refusal spends nothing.
+        self.assertEqual(self.post_request({**first, 'displayName': 'Someone else'}), (409, {'error': 'state_conflict'}, None))
 
     def test_request_activate_status_and_separate_enrollment_over_real_tls(self):
         request = self.request_value()

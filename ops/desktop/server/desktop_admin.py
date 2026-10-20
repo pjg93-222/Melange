@@ -548,7 +548,7 @@ class Store:
         return context
 
 
-def handler_for(store):
+def handler_for(store, require_invite=False):
     class Handler(BaseHTTPRequestHandler):
         server_version = "DesktopUpdates/1"
         publisher_public_origin = store.public_origin
@@ -671,7 +671,7 @@ def handler_for(store):
                 self.response(500, {"error": "INTERNAL_ERROR"})
     from access_store import AccessStore
     from access_http import handler_for as access_handler_for
-    return access_handler_for(AccessStore(store), Handler)
+    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler)
 
 
 class BoundedServer(ThreadingHTTPServer):
@@ -708,6 +708,14 @@ class BoundedServer(ThreadingHTTPServer):
         finally:
             self.shutdown_request(wrapped or request)
             self.slots.release()
+
+
+def invite_env(environ=os.environ):
+    """MELANGE_ACCESS_REQUIRE_INVITE as a bool; unset or empty is off, and an unrecognised value is refused rather than guessed."""
+    raw = environ.get('MELANGE_ACCESS_REQUIRE_INVITE', '').strip().lower()
+    if raw in ('1', 'true', 'yes', 'on'): return True
+    if raw in ('', '0', 'false', 'no', 'off'): return False
+    raise Refused('MELANGE_ACCESS_REQUIRE_INVITE must be 1, true, yes, on, 0, false, no, off or unset; invite enforcement was not guessed')
 
 
 def open_dashboard_window(url):
@@ -755,6 +763,8 @@ def main(argv=None):
     serve = sub.add_parser("serve")
     serve.add_argument("--listen", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=38443)
+    serve.add_argument('--require-invite', action='store_true',
+                       help='refuse new access requests without an admin-issued invite code (also on when MELANGE_ACCESS_REQUIRE_INVITE is 1/true/yes/on)')
     sub.add_parser("devices")
     revoke = sub.add_parser("revoke")
     revoke.add_argument("--app", choices=sorted(APPS), required=True)
@@ -884,8 +894,9 @@ def main(argv=None):
                 allowed_bind = False
             if not allowed_bind or not 1024 <= args.port <= 65535:
                 raise Refused("bind an explicit permitted IP on an unprivileged port; public IPs require --public-origin and wildcard binding is forbidden")
-            server = BoundedServer((args.listen, args.port), handler_for(store), store.tls_context(), public_origin=store.public_origin)
-            print(f"Authenticated update service: {request_origin(server)}", flush=True)
+            require_invite = invite_env() or args.require_invite  # Always parsed, so a junk value refuses even when the flag is given.
+            server = BoundedServer((args.listen, args.port), handler_for(store, require_invite), store.tls_context(), public_origin=store.public_origin)
+            print(f"Authenticated update service: {request_origin(server)}; invite codes {'required' if require_invite else 'not required'}", flush=True)
             try:
                 server.serve_forever()
             finally:

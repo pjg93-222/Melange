@@ -43,9 +43,16 @@ if ($PublicOrigin) {
     $serverArguments += @('--public-origin', $PublicOrigin)
 }
 $serverArguments += @('serve', '--listen', $ListenIPAddress, '--port', [string]$Port)
+function Get-InviteRequired {
+    # Same values as desktop_admin.py invite_env(); the publisher child inherits this environment. $null = unreadable value, so the publisher refuses to start.
+    $raw = ([string]$env:MELANGE_ACCESS_REQUIRE_INVITE).Trim().ToLowerInvariant()
+    if ($raw -in '1', 'true', 'yes', 'on') { return $true }
+    if ($raw -in '', '0', 'false', 'no', 'off') { return $false }
+    return $null
+}
 function Write-ListenerStatus([string]$Status) {
     # Fixed status values only: never write enrollment codes, credentials or request data.
-    $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null } }
+    $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null }; inviteRequired = Get-InviteRequired }
     $temporary = $statusFile + '.' + $PID + '.tmp'
     [IO.File]::WriteAllText($temporary, ($record | ConvertTo-Json))
     [IO.File]::Move($temporary, $statusFile, $true)
