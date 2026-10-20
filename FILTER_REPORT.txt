@@ -597,3 +597,55 @@ No-revert check: for each changed path, the blob published at 21410cd1a equals t
 Counts: unchanged. Export-root paths published 1869, published tree 1903, KEPT-EXCLUDED 276.
 Verification: the 9 published blobs (mode and id) equal the ae83ae15a source blobs; every other path equals its 21410cd1a blob. gitleaks 8.30.1 over 21410cd1a..this commit: no findings.
 Workflows: this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.
+
+== ADDENDUM 26 2026-10-20: republished from local Melange main a1f015257, paths of four fec debug sweep commits only (fec/speech fixes and tests, desktop regression tests, live_patch CodeRabbit fix)
+Source a1f015257ad03d3cb945569fad0067348283bae2 (local Melange branch main). Previous publication bbf0a83b2fb5ae1dc6f3a92d8e9c2d2d4f164563 (Addendum 24, head of pull request #14, branch claude/fec-debug-sweep-20261019); this commit is its child. Addenda 22, 23 and 25 belong to pull requests #15 and #16.
+Selective publication: local main also carries commits that belong to pull requests #15 and #16, and fec/research commit 066a12c20, which is published in a later round. They are not published here. This commit takes the tree of bbf0a83b2 and replaces or adds exactly the 41 export paths changed by source commits e5a3ffb88 (fec/speech), c4713d5bd (fec/tests/speech), e440cf62a (fec/tests/surfaces/test_moneyball_desktop.py) and a1f015257 (fec/tools/live_patch.py and its test). Each of those paths is unchanged between its sweep commit and a1f015257. The sweep report audits/fec_sweep_20261013/fec_speech.md is outside the export roots and is not published.
+Filter run (_tools/filter_export.py, spec melange, on a1f015257; _tools/export_copy.py blob 43e433c21aad, byte-identical to the source's ops/release_lib/export.py at a1f015257): all 41 paths are included with the published blob ids; none is excluded by a path rule, the extension allowlist or MELANGE_LOCAL_ARTIFACT_TESTS. The other differences of that run from this tree are other branches' content and were not taken.
+Source commits: e5a3ffb88 (19 fec/speech fixes from the line-by-line sweep, see the pull request body); c4713d5bd (matching fec/tests/speech updates, 5 new test files); e440cf62a (3 regression tests for the c966ae247 moneyball_app fix, now committed: test_moneyball_desktop.py has 5 tests); a1f015257 (live_patch.py _numstat_paths raises on an unparseable non-empty numstat record and apply_to turns it into a refusal; 2 regression tests; CodeRabbit review on pull request #14).
+Changed export paths (41: 5 added, 36 changed; none removed, none newly filtered out):
+  M fec/speech/axe_segment.py  (e5a3ffb88; 36fd9759d549 -> 4d2c78c83c05)
+  M fec/speech/build_descriptive_speech.py  (e5a3ffb88; c92a717b2f77 -> 9250ee7ba352)
+  M fec/speech/build_member_longform_additional_retry_queue.py  (e5a3ffb88; 495828df42f7 -> 82a065dadf34)
+  M fec/speech/build_member_longform_review_app.py  (e5a3ffb88; 41a330f34536 -> 046f8dfdd117)
+  M fec/speech/discover_gap_youtube_turns.py  (e5a3ffb88; 75ec3696759c -> 797ba39265ef)
+  M fec/speech/discover_member_longform_interviews.py  (e5a3ffb88; 8b22f3081354 -> 2d50ffc44ce8)
+  M fec/speech/discover_member_longform_youtube.py  (e5a3ffb88; 18533101dc81 -> 78d72c85f79d)
+  M fec/speech/import_wj_clips.py  (e5a3ffb88; 085ec1e23a66 -> 3386ed104835)
+  M fec/speech/process_member_longform_automated_batch.py  (e5a3ffb88; dfc86d45e22c -> 1d4afe6f4c50)
+  M fec/speech/quarantine_zero_rms.py  (e5a3ffb88; e1dce07c8faa -> aa6f1e17047c)
+  M fec/speech/repair_canonical_wj_pcm_contract.py  (e5a3ffb88; 8db8bdef44b3 -> 5870c16cb28a)
+  M fec/speech/select_member_longform_profile_sources.py  (e5a3ffb88; c2d8c07b0b7a -> e841f46c4d13)
+  M fec/speech/source_media_recovery.py  (e5a3ffb88; de4b70261d64 -> 93de8979629e)
+  M fec/speech/speaker_anchor_recovery.py  (e5a3ffb88; e0b907436e2b -> 8f22aa4801c7)
+  M fec/speech/transcribe_local_youtube_holdings.py  (e5a3ffb88; 239834db5619 -> 5f31d8113a0a)
+  M fec/speech/transcribe_member_longform_captions.py  (e5a3ffb88; 48d29015c6a3 -> 4016b8f213bd)
+  M fec/speech/verify_member_interview_sources.py  (e5a3ffb88; 9b54632e2ae2 -> e7f451254706)
+  M fec/speech/verify_member_longform_profile_readiness.py  (e5a3ffb88; e01154e54f1c -> 08f4b305f2e4)
+  M fec/speech/voice_first_recovery.py  (e5a3ffb88; dcf601b2c419 -> 9fa005d99a5b)
+  A fec/tests/speech/test_axe_segment_feature_failure.py  (c4713d5bd; absent -> 59d0410933dc)
+  M fec/tests/speech/test_build_member_longform_additional_retry_queue.py  (c4713d5bd; 879c7c0812ea -> 5d78e1f78e04)
+  M fec/tests/speech/test_build_member_longform_review_app.py  (c4713d5bd; f168d7725acb -> 76c4fc3308ff)
+  M fec/tests/speech/test_descriptive_speech.py  (c4713d5bd; 52ec6720a5ba -> 58d8f7b12585)
+  A fec/tests/speech/test_discover_gap_youtube_turns.py  (c4713d5bd; absent -> f12f29ae3ff5)
+  M fec/tests/speech/test_import_wj_clips.py  (c4713d5bd; 4b0e74864b8a -> 5fcd1d2d4d77)
+  M fec/tests/speech/test_incremental_speech_manifest_safety.py  (c4713d5bd; e79733048cee -> ba32be7cc00f)
+  M fec/tests/speech/test_member_longform_youtube_discovery.py  (c4713d5bd; 93865ee25298 -> feaff264226e)
+  A fec/tests/speech/test_process_member_longform_automated_batch.py  (c4713d5bd; absent -> ca7ab29b7ad8)
+  M fec/tests/speech/test_quarantine_collision_safety.py  (c4713d5bd; 9aeac14ef851 -> b92cfd90503a)
+  M fec/tests/speech/test_retained_audio_safety.py  (c4713d5bd; a8e56f64f681 -> ba7c623956c4)
+  M fec/tests/speech/test_select_member_longform_profile_sources.py  (c4713d5bd; 422a580eeada -> d65657391198)
+  M fec/tests/speech/test_source_media_recovery.py  (c4713d5bd; b89c5bbf964b -> b4ed7593c87a)
+  M fec/tests/speech/test_speaker_anchor_recovery.py  (c4713d5bd; fe2ecec8852d -> e25c6689384f)
+  A fec/tests/speech/test_transcribe_local_youtube_holdings.py  (c4713d5bd; absent -> e097c40a508d)
+  M fec/tests/speech/test_transcribe_member_longform_captions.py  (c4713d5bd; c6686896ee16 -> 1e4e0fc8d2cf)
+  A fec/tests/speech/test_verify_member_interview_sources.py  (c4713d5bd; absent -> ec0e383fd0bd)
+  M fec/tests/speech/test_verify_member_longform_profile_readiness.py  (c4713d5bd; 1be494016ff7 -> 994d1cce8f2e)
+  M fec/tests/speech/test_voice_first_recovery.py  (c4713d5bd; 0737070b5e1a -> 36edb2e3f59e)
+  M fec/tests/surfaces/test_moneyball_desktop.py  (e440cf62a; 88091b63d88a -> 397b4505f020)
+  M fec/tests/infra/test_live_patch.py  (a1f015257; 921eb110dec8 -> 7a5b690f2cec)
+  M fec/tools/live_patch.py  (a1f015257; 4e97cf7340a4 -> ac683a32e324)
+No-revert check: for each changed path, the blob published at bbf0a83b2 equals the source blob in the parent of its sweep commit; each added path is absent from both.
+Counts: export-root paths published 1874 (1869 + 5 added), published tree 1908 (1903 + 5), KEPT-EXCLUDED 276 (unchanged).
+Verification: the 41 published blobs (mode 100644 and id) equal the a1f015257 source blobs; every other path equals its bbf0a83b2 blob. gitleaks 8.30.1 over bbf0a83b2..this commit: no findings.
+Workflows: this commit changes neither workflow file nor the three CI files named in desktop-windows.yml's path filter; neither workflow has a pull_request trigger.

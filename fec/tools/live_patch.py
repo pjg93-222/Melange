@@ -699,14 +699,20 @@ def _numstat_paths(listing):
     paths = set()
     i = 0
     while i < len(parts):
-        fields = parts[i].split(b'\t', 2)
+        record = parts[i]
+        fields = record.split(b'\t', 2)
         i += 1
         if len(fields) < 3:
+            if record:                          # fail closed: an unread path would dodge the scope check
+                raise ValueError('unparseable git apply --numstat record: %r' % record)
             continue
         if fields[2]:
             paths.add(fields[2].decode('utf-8', 'replace'))
         else:                                   # rename/copy: old and new path follow as own records
-            paths.update(p.decode('utf-8', 'replace') for p in parts[i:i + 2])
+            pair = parts[i:i + 2]
+            if len(pair) < 2 or not all(pair):
+                raise ValueError('truncated rename/copy record in git apply --numstat output')
+            paths.update(p.decode('utf-8', 'replace') for p in pair)
             i += 2
     return paths
 
@@ -744,7 +750,10 @@ def apply_to(root, patch_path, manifest=None, timeout=120):
     if rc != 0:
         return _refusal('git could not list the files the patch touches: '
                         + err.decode('utf-8', 'replace').strip())
-    touched = _numstat_paths(listing)
+    try:
+        touched = _numstat_paths(listing)
+    except ValueError as exc:
+        return _refusal(str(exc))
     if touched - keyed:
         return _refusal('patch touches files outside the manifest', sorted(touched - keyed))
     labels = sorted(manifest)

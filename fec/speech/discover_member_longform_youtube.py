@@ -217,9 +217,13 @@ def main() -> int:
             raise SystemExit("unknown member(s): " + ", ".join(sorted(missing)))
         selected = [member for member in roster if member in set(args.member)]
 
-    existing_rows = read_jsonl(args.out) if args.resume else []
+    # A single-member refresh merges into prior outputs instead of truncating them.
+    load_prior = args.resume or bool(args.member)
+    if args.member and args.out.exists() != args.coverage.exists():
+        raise SystemExit("--member requires both prior coverage and candidate outputs; incomplete pair preserved")
+    existing_rows = read_jsonl(args.out) if load_prior else []
     coverage_members = {}
-    if args.resume and args.coverage.exists():
+    if load_prior and args.coverage.exists():
         coverage_members = json.loads(args.coverage.read_text(encoding="utf-8-sig")).get("members") or {}
     if args.resume:
         selected = [

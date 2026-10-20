@@ -35,3 +35,37 @@ def test_turn_and_identity_promotion_remain_separate_from_search():
     assert "CANDIDATE_IDENTITY_UNVERIFIED" in text
     assert "promotion_requires_audio_hash_asr_in_band_name_full_turns_and_speaker_gate" in text
     assert "candidate_changes_profile" in text
+
+
+def _run_single_member(tmp_path, monkeypatch, with_coverage=True):
+    import json
+    import sys
+    roster = tmp_path / "roster.json"
+    roster.write_text(json.dumps({"members": ["A One", "B Two"]}), encoding="utf-8")
+    cong = tmp_path / "cong.json"
+    cong.write_text(json.dumps([{"member": "A One", "chamber": "House", "bioguide": "A1"}]), encoding="utf-8")
+    out, cov = tmp_path / "out.jsonl", tmp_path / "cov.json"
+    out.write_text(json.dumps({"member": "B Two", "candidate_rank": 1}) + "\n", encoding="utf-8")
+    if with_coverage:
+        cov.write_text(json.dumps({"members": {"B Two": {"search_status": "SEARCHED"}}}), encoding="utf-8")
+    monkeypatch.setattr(module, "search_member", lambda *a, **k: ([], None, []))
+    argv = ["x", "--roster", str(roster), "--congestion", str(cong), "--out", str(out),
+            "--coverage", str(cov), "--receipt", str(tmp_path / "r.json"), "--member", "A One"]
+    monkeypatch.setattr(sys, "argv", argv)
+    return out, cov
+
+
+def test_single_member_refresh_merges_into_prior_outputs(tmp_path, monkeypatch):
+    import json
+    out, cov = _run_single_member(tmp_path, monkeypatch)
+    module.main()
+    members = json.loads(cov.read_text(encoding="utf-8"))["members"]
+    assert set(members) == {"A One", "B Two"}
+    assert "B Two" in out.read_text(encoding="utf-8")
+
+
+def test_single_member_refresh_refuses_incomplete_prior_pair(tmp_path, monkeypatch):
+    import pytest
+    _run_single_member(tmp_path, monkeypatch, with_coverage=False)
+    with pytest.raises(SystemExit):
+        module.main()

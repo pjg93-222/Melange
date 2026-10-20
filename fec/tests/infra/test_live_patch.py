@@ -982,5 +982,16 @@ class ByteExactApplyTests(TempMixin):
         self.assertFalse(os.path.exists(os.path.join(tree, 'fec', 'tools', 'fresh.py')))
 
 
+class NumstatPathsTests(unittest.TestCase):
+    def test_normal_rename_and_trailing_empty(self):
+        listing = (b'1\t2\tfec/a.py\0'
+                   b'0\t0\t\0old.py\0new.py\0')
+        self.assertEqual(LP._numstat_paths(listing), {'fec/a.py', 'old.py', 'new.py'})
+
+    def test_unparseable_record_fails_closed(self):
+        with self.assertRaises(ValueError):
+            LP._numstat_paths(b'1\t2\tfec/a.py\0garbage-without-tabs\0')
+
+
 if __name__ == '__main__':
     unittest.main()

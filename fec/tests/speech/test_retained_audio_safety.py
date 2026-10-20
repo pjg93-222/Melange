@@ -171,6 +171,20 @@ class RetainedAudio(unittest.TestCase):
                 row=json.loads(manifest.read_text());self.assertEqual(row['dur'],.5);self.assertEqual(row['end'],1.5)
                 self.assertEqual(row['sha256'],hashlib.sha256(wav.read_bytes()).hexdigest());self.assertEqual(json.loads(receipt.read_text())['status'],'PASS')
 
+    def test_rerun_rebinds_already_trimmed_wav_with_stale_hash(self):
+        root=self.root();wav=root/'clip.wav';self.wav(wav,8000)
+        row=self.pcm_row(wav,8000);row['sha256']='0'*64;row['bytes']=1
+        manifest=root/'clips.jsonl';self.manifest(manifest,[row]);original=wav.read_bytes()
+        self.assertEqual(self.repair(manifest,root/'receipt.json'),0)
+        self.assertEqual(wav.read_bytes(),original)
+        out=json.loads(manifest.read_text());self.assertEqual(out['sha256'],hashlib.sha256(original).hexdigest());self.assertEqual(out['bytes'],len(original))
+
+    def test_whitespace_only_manifest_line_is_skipped(self):
+        root=self.root();wav=root/'clip.wav';self.wav(wav,8000)
+        manifest=root/'clips.jsonl';self.manifest(manifest,[self.pcm_row(wav,8000)])
+        manifest.write_bytes(manifest.read_bytes()+b'   '+bytes([10]))
+        self.assertEqual(self.repair(manifest,root/'receipt.json'),0)
+
     def test_exact_count_is_noop_and_existing_safety_limits_remain(self):
         for actual,expected,error in ((8000,8000,None),(7999,8000,'pad'),(24001,8000,'ceiling')):
             with self.subTest(actual=actual,expected=expected):

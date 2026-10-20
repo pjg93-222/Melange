@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import html
 import json
 from pathlib import Path
@@ -84,6 +85,9 @@ def review_rows(queue_path: Path, drafts_path: Path) -> list[dict]:
 def render(rows: list[dict], queue_sha256: str, draft_sha256: str) -> str:
     payload = json.dumps(rows, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     title = "Congressional long-form turn review"
+    # Key on turn identity + binding, not file hashes: queue rebuilds restamp generated_at.
+    content_key = hashlib.sha256(json.dumps(
+        sorted((str(r.get("turn_id")), str(r.get("candidate_turn_binding_sha256"))) for r in rows)).encode()).hexdigest()
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{html.escape(title)}</title>
@@ -132,7 +136,7 @@ textarea{{width:100%;min-height:82px;resize:vertical}} #semantic{{min-height:220
 <script>
 const ROWS={payload};
 const QUEUE_SHA={json.dumps(queue_sha256)},DRAFT_SHA={json.dumps(draft_sha256)};
-const STORE='member-longform-review:'+QUEUE_SHA+':'+DRAFT_SHA;
+const STORE='member-longform-review:'+{json.dumps(content_key)};
 const POSITION_STORE=STORE+':position',REVIEWER_STORE=STORE+':reviewer';
 let saved=JSON.parse(localStorage.getItem(STORE)||'{{}}'),index=Math.max(0,Math.min(ROWS.length-1,Number(localStorage.getItem(POSITION_STORE)||0)));
 const $=id=>document.getElementById(id), fields=['reviewStatus','reviewerName','identity','identityNote','boundary','boundaryNote','semanticStatus','semantic','attest'];

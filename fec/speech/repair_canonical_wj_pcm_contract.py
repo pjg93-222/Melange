@@ -61,7 +61,7 @@ def main() -> int:
     parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
     args = parser.parse_args()
 
-    rows = [json.loads(line) for line in args.manifest.read_text(encoding="utf-8-sig").splitlines() if line]
+    rows = [json.loads(line) for line in args.manifest.read_text(encoding="utf-8-sig").splitlines() if line.strip()]
     manifest_before = sha256(args.manifest)
     repairs = []
     planned = []
@@ -86,6 +86,9 @@ def main() -> int:
             facts = (source.getnchannels(), source.getframerate(), source.getsampwidth())
             actual = source.getnframes()
             if actual == expected:
+                # a prior partial run may have trimmed the WAV without rebinding the manifest
+                if row.get("sha256") and sha256(path) != row["sha256"]:
+                    planned.append((row, path, expected, actual, start))
                 continue
             if facts != (1, 16000, 2):
                 raise RuntimeError(f"WJ WAV contract mismatch: {path}")
@@ -101,7 +104,8 @@ def main() -> int:
                 raise RuntimeError(f"WJ WAV contract changed after preflight: {path}")
             payload = source.readframes(expected)
         before_hash = sha256(path)
-        write_wav_atomic(path, payload, 16000)
+        if actual != expected:
+            write_wav_atomic(path, payload, 16000)
         samples = np.frombuffer(payload, dtype="<i2").astype(np.float64) / 32768.0
         digest = sha256(path)
         row["bytes"] = path.stat().st_size
@@ -135,7 +139,9 @@ def main() -> int:
         "repairs": repairs,
     }
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
-    args.receipt.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary = args.receipt.with_name(args.receipt.name + ".part")
+    temporary.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(temporary, args.receipt)
     print(json.dumps({"repaired_rows": len(repairs), "status": "PASS"}))
     return 0
 

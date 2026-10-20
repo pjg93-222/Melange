@@ -113,3 +113,14 @@ if(!semanticProblems([{kind:'incomplete'}]).length)throw new Error('missing find
 if(!semanticProblems([null]).length)throw new Error('malformed finding accepted');
 """
         subprocess.run([node, "-e", code], text=True, check=True)
+
+
+def test_storage_key_is_stable_across_queue_rebuilds():
+    rows = [{"turn_id": "b", "candidate_turn_binding_sha256": "2" * 64},
+            {"turn_id": "a", "candidate_turn_binding_sha256": "1" * 64}]
+    first = mod.render(rows, "queue-hash-1", "draft-hash-1")
+    rebuilt = mod.render(list(reversed(rows)), "queue-hash-2", "draft-hash-2")
+    key = lambda h: next(l for l in h.splitlines() if l.startswith("const STORE="))
+    assert key(first) == key(rebuilt)
+    changed = [dict(rows[0], candidate_turn_binding_sha256="3" * 64), rows[1]]
+    assert key(mod.render(changed, "queue-hash-1", "draft-hash-1")) != key(first)
