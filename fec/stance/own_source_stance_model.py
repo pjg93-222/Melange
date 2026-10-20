@@ -635,8 +635,21 @@ def input_fingerprint():
         paths = (CO.candidate_paths(name, data_root=ROOT)
                  if name == "data/stance/cu_valence_registry.json"
                  else [os.path.join(ROOT, name)])
-        for path in paths:
-            digest.update(os.path.relpath(path, ROOT).replace('\\', '/').encode("utf-8"))
+        for position, path in enumerate(paths):
+            # Keyed by name, not relpath(path, ROOT): a code-root registry copy outside ROOT (any worktree) would hash
+            # '../.claude/worktrees/<name>/...' and the cache would miss from every checkout but the live one.
+            key = name
+            if position:
+                # Code-root copy. merged_rows yields the same registry when its bytes equal the data-root copy (every entry
+                # is 'key'-ed), and a missing file contributes nothing, so neither changes the fingerprint.
+                if not os.path.exists(path):
+                    continue
+                if os.path.exists(paths[0]):
+                    with open(path, "rb") as mine, open(paths[0], "rb") as theirs:
+                        if mine.read() == theirs.read():
+                            continue
+                key = "code-root:" + name
+            digest.update(key.encode("utf-8"))
             if not os.path.exists(path):
                 digest.update(b"MISSING")
                 continue
