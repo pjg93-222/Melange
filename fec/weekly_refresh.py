@@ -355,7 +355,7 @@ def step(name,args,timeout=3600,hard=False,gate=None,partial=None):
         ok=run.returncode==0
         log('%-28s %s %5.0fs  %s'%(name,'OK' if ok else '!!',time.time()-t,tail[0][:110]))
         if not ok:
-            log('   stderr: '+(stderr or '')[-300:].replace('\n',' | '))
+            log('   stderr: '+(stderr or '')[-2000:].replace('\n',' | '))   # was [-300:]: only the end of a Python traceback, never the child's error message (2026-10-19 WJ)
             if hard and partial is not None and partial(run.returncode,t):
                 return True   # a PARTIAL its owner proves excusable; the hard step after it rules
             if hard:

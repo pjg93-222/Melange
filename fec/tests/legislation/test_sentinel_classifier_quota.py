@@ -173,9 +173,13 @@ def test_an_ordinary_classifier_failure_does_not_stop_the_loop(world, monkeypatc
     calls = fake_cli(monkeypatch, [cli(1, '', 'boom')])
     code, generation, checkpoint, installed = run_main(world)
     assert sorted(calls) == sorted(KEYS)                    # every key still got its call
+    # R1 (Paul 2026-10-19): a non-quota failure on never-admitted keys is a deferral, not a FAIL on its own. Every call here
+    # failed with rc 1, though (an expired login looks exactly like this), so the systemic-outage guard fails the run: two
+    # non-timeout deferrals and no success is a dead classifier (test_sentinel_classifier_deferral has the timeout cases).
     assert (code, generation['status'], installed) == (1, 'FAIL', False)
-    assert sorted(checkpoint['errors']) == sorted(KEYS)
-    assert all(reason.startswith('RuntimeError: tool-free classifier failed (rc 1)') for reason in checkpoint['errors'].values())
+    assert generation['classifier_systemic_failure'] is True and list(generation['errors']) == ['CLASSIFIER_SYSTEMIC_FAILURE']
+    assert checkpoint['errors'] == {} and sorted(generation['source_unavailable_deferred_keys']) == sorted(KEYS)
+    assert all(reason.startswith('RuntimeError: tool-free classifier failed (rc 1)') for reason in generation['classifier_deferred'].values())
     assert (generation['aborted_reason'], generation['not_attempted']) == (None, 0)
 
 

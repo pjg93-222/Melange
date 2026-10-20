@@ -303,6 +303,12 @@ def rollback_unbound_repository(root, run_dir):
     the before-image repository, restore the repository and its fetch receipt
     from this run's before-image, then prove the load. Never raises: the run
     has already failed and this only records what it did.
+
+    A sidecar bound to neither the before-image nor the live repository (a run
+    that died without its handler, 2026-10-16) cannot be healed here, and the
+    load would only raise: that is recorded as "unhealable_drift" with the
+    three hashes, never as "verified". The strict binding in
+    official_membership_movements.load is deliberately unchanged.
     """
     root, before = Path(root), Path(run_dir) / "before"
     action = "verified"
@@ -318,6 +324,16 @@ def rollback_unbound_repository(root, run_dir):
                     shutil.copy2(before / relative, temp)
                     replace_atomic(temp, root / relative)
             action = "restored"
+        live = digest(root / ROLLBACK_SOURCES[0])
+        if bound is not None and bound != live:
+            drift = {"membership_sha256": bound, "live_repository_sha256": live,
+                     "before_snapshot_sha256": digest(snapshot) if snapshot.is_file() else None}
+            note = "membership sidecar %s matches neither the live repository %s nor the before-image %s" % (
+                bound, live, drift["before_snapshot_sha256"])
+            print("ROLLBACK unhealable_drift: " + note, file=sys.stderr, flush=True)
+            live_log(root, "rollback", "UNHEALABLE_DRIFT", None, note)
+            return {"rollback": "unhealable_drift", "rollback_drift": drift,
+                    "rollback_membership_load": "SKIPPED: unhealable_drift; the load refuses a mismatched repository"}
         from legislation import official_membership_movements as membership
         membership.load(root)
         return {"rollback": action, "rollback_membership_load": "PASS"}
