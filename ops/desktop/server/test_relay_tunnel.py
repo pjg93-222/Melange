@@ -174,7 +174,7 @@ def test_connections_beyond_the_forward_limit_wait_for_a_slot(monkeypatch):
         sock.close()
 
 
-def test_a_connection_still_waiting_after_the_relay_window_is_skipped(monkeypatch):
+def test_a_connection_still_waiting_after_the_relay_window_is_skipped(monkeypatch, caplog):
     monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
     monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 0.2)
     relay_tunnel.SLOTS.acquire()  # every forward slot stays busy
@@ -192,5 +192,26 @@ def test_a_connection_still_waiting_after_the_relay_window_is_skipped(monkeypatc
     relay.settimeout(5)
     data, _ = relay.accept()  # the skipped one is gone; the loop moved on to the next
     assert read_frame(data) == {'Accept': later}
+    assert any('skipped: no slot freed' in r.getMessage() for r in caplog.records)
     for sock in (data, control, relay):
+        sock.close()
+
+
+def test_a_forward_thread_that_cannot_start_returns_its_slot(monkeypatch):
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
+    def no_threads(*args, **kwargs):
+        raise RuntimeError("can't start new thread")
+    monkeypatch.setattr(relay_tunnel, 'threading', type('NoThreads', (), {'Thread': staticmethod(no_threads)}))
+    relay, relay_address = listener()
+    def relay_side():
+        control, _ = relay.accept()
+        read_frame(control)
+        control.sendall(connections(str(uuid.uuid4())))
+        held.append(control)
+    held = []
+    threading.Thread(target=relay_side, daemon=True).start()
+    with pytest.raises(RuntimeError):
+        relay_tunnel.session(relay_address, 45678, 1)
+    assert relay_tunnel.SLOTS.acquire(blocking=False)  # released, not leaked
+    for sock in (relay, *held):
         sock.close()

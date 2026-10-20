@@ -19,8 +19,10 @@ LOOPBACK = '127.0.0.1'  # the only local host this tunnel ever dials
 LOCAL_PORT = 38443
 # The publisher serves 32 requests at once and queues the rest. A Connection beyond this many active
 # forwards waits up to SLOT_WAIT for one to finish; the relay keeps an unaccepted connection for 10 s
-# (server.rs), and SLOT_WAIT plus the 3 s dial stays inside that. Waiting in the control loop keeps the
-# thread count bounded; frames behind it queue in the socket (FIFO).
+# (server.rs). Waiting in the control loop keeps the thread count bounded, but frames behind it queue in
+# the socket (FIFO) and their waits add up: a Connection queued behind others that each waited can reach
+# its own wait (and the 3 s dial) after the relay has already dropped it. Under sustained overload some
+# connections are skipped or fail; each skip is logged.
 SLOTS = threading.BoundedSemaphore(32)
 SLOT_WAIT = 6
 
@@ -108,8 +110,14 @@ def session(relay, port, local_port=LOCAL_PORT):
             kind, value = frames.recv()
             if kind == 'Connection':
                 conn_id = str(uuid.UUID(value))  # canonical form; anything else drops the session
-                if slots.acquire(timeout=SLOT_WAIT):
+                if not slots.acquire(timeout=SLOT_WAIT):
+                    logging.warning('forward %s skipped: no slot freed within %s s', conn_id, SLOT_WAIT)
+                    continue
+                try:
                     threading.Thread(target=forward, args=(relay, conn_id, local_port, slots), daemon=True).start()
+                except RuntimeError:  # the thread never ran, so forward() will not release its slot
+                    slots.release()
+                    raise
             elif kind == 'Error':
                 raise RuntimeError(f'relay error: {value}')
 

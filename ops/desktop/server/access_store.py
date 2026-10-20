@@ -35,7 +35,9 @@ RETRY_LIFETIME = 600
 PRESENCE_LIFETIME = 180
 MAX_PENDING = 100        # requests still waiting for a decision; approved recipients are not counted
 MAX_NEW_PER_HOUR = 100   # new requests per hour from all callers together, never per address
-MAX_ACTIVITY = 1000000   # newest activity rows kept; older ones are pruned, never refused
+MAX_ACTIVITY_PER_DEVICE = 10000  # newest activity rows kept per principal (one app on one device); older ones are pruned, never refused
+PRUNE_AFTER = 30 * 86400  # expired requests this long past their expiry are deleted, a few per new request
+PRUNE_BATCH = 20          # each new request adds at most one future expired row, so this keeps up; random-UUID index deletes cost ~2-5 ms a row here
 MAX_USABLE_INVITES = 50
 INVITE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'  # Crockford base32: no I, L, O or U.
 # Additive and idempotent, so deployed databases created before invites gain the table on first use.
@@ -44,6 +46,12 @@ INVITES = '''CREATE TABLE IF NOT EXISTS invites (
                 created INTEGER NOT NULL, expires INTEGER NOT NULL, max_uses INTEGER NOT NULL,
                 uses INTEGER NOT NULL DEFAULT 0, revoked INTEGER NOT NULL DEFAULT 0)'''
 USABLE_INVITES = 'revoked=0 AND expires>? AND uses<max_uses'
+# Same additive style: indexes that keep each anonymous request's housekeeping off full-table scans.
+MIGRATIONS = (INVITES,
+              'CREATE INDEX IF NOT EXISTS requests_state_expires ON requests(state,expires)',
+              'CREATE INDEX IF NOT EXISTS requests_created ON requests(created)',
+              'CREATE INDEX IF NOT EXISTS requests_receipt ON requests(receipt_expires) WHERE receipt IS NOT NULL',
+              'CREATE INDEX IF NOT EXISTS notification_outbox_request ON notification_outbox(request_id)')
 
 
 def fields(value, required, optional=()):
@@ -129,7 +137,8 @@ class AccessStore:
         connection.execute('PRAGMA foreign_keys=ON')
         try:
             if not self.migrated:
-                connection.execute(INVITES)
+                for statement in MIGRATIONS:
+                    connection.execute(statement)
                 self.migrated = True
             with connection:
                 yield connection
@@ -277,7 +286,7 @@ class AccessStore:
               CREATE TABLE access_audit (
                 id INTEGER PRIMARY KEY, at INTEGER NOT NULL, action TEXT NOT NULL,
                 request_id TEXT, grant_id TEXT);
-              ''' + INVITES + ''';
+              ''' + ';\n'.join(MIGRATIONS) + ''';
               COMMIT;
             ''')
 
@@ -364,8 +373,17 @@ class AccessStore:
                         matched = invite['invite_id']
                 if not matched:
                     raise Refused('invite code not accepted')
-            db.execute("UPDATE requests SET state='expired' WHERE (expires<=? OR (state='approved' AND key_expires<=?)) AND state IN ('pending','approved')", (now, now))
-            db.execute('UPDATE requests SET receipt=NULL WHERE receipt_expires<=?', (now,))
+            # Each statement here is index-driven (MIGRATIONS), so this work does not grow with the table.
+            db.execute("UPDATE requests SET state='expired' WHERE state IN ('pending','approved') AND (expires<=? OR (state='approved' AND key_expires<=?))", (now, now))
+            db.execute('UPDATE requests SET receipt=NULL WHERE receipt IS NOT NULL AND receipt_expires<=?', (now,))
+            # Expired requests have no grant (only 'used' ones do). Denied ones are kept: a stale client polling a deleted
+            # id gets 403 and re-sends it as new, which would put a denied requester back in the queue.
+            stale = [r[0] for r in db.execute("SELECT request_id FROM requests r WHERE state='expired' AND expires<=? AND NOT EXISTS (SELECT 1 FROM grants g WHERE g.request_id=r.request_id) AND NOT EXISTS (SELECT 1 FROM notification_outbox o WHERE o.request_id=r.request_id AND o.state IN ('sending','local_claimed')) LIMIT ?",
+                                              (now-PRUNE_AFTER, PRUNE_BATCH))]
+            if stale:
+                marks = ','.join('?' * len(stale))
+                db.execute(f'DELETE FROM notification_outbox WHERE request_id IN ({marks})', stale)
+                db.execute(f'DELETE FROM requests WHERE request_id IN ({marks})', stale)
             if db.execute("SELECT 1 FROM requests WHERE app=? AND device_id=? AND state IN ('pending','approved')", (app, device_id)).fetchone():
                 raise Refused('access request conflict: this device already has an open request')
             # Anti-flood bounds on the waiting queue only; how many people are approved is unlimited.
@@ -595,9 +613,10 @@ class AccessStore:
                     raise Refused('event identity conflict')
                 if not previous:
                     new.append((event, hashed))
-            excess = db.execute('SELECT COUNT(*) FROM activity').fetchone()[0] + len(new) - MAX_ACTIVITY
-            if excess > 0:  # Keep the newest rows; a full table never locks recipients out.
-                db.execute('DELETE FROM activity WHERE rowid IN (SELECT rowid FROM activity ORDER BY rowid LIMIT ?)', (excess,))
+            principal = grant['principal_id']
+            excess = db.execute('SELECT COUNT(*) FROM activity WHERE principal_id=?', (principal,)).fetchone()[0] + len(new) - MAX_ACTIVITY_PER_DEVICE
+            if excess > 0:  # Keep this device's newest rows; a full history never locks it out, and never costs anyone else theirs.
+                db.execute('DELETE FROM activity WHERE rowid IN (SELECT rowid FROM activity WHERE principal_id=? ORDER BY rowid LIMIT ?)', (principal, excess))
             for event, hashed in new:
                 refs = {key: event[key] for key in ('datasetId', 'revisionId', 'entityId') if key in event}
                 db.execute('INSERT INTO activity VALUES (?,?,?,?,?,?,?,?,?,?)', (grant['grant_id'], event['eventId'], grant['principal_id'], event['occurredAt'], self.now(), event['type'], canonical(event['counts']).decode(), hashed, event['districtId'], canonical(refs).decode()))
@@ -605,8 +624,11 @@ class AccessStore:
 
     def dashboard(self):
         with self.connect() as db:
-            requests = [dict(r) for r in db.execute('SELECT request_id,app,device_id,platform,arch,display_name,state,created,expires,key_expires,receipt_expires,role,district_ids FROM requests ORDER BY created DESC LIMIT 100')]
-            grants = [dict(r) for r in db.execute('SELECT g.grant_id,g.app,g.device_id,g.principal_id,g.account_identity,g.role,g.district_ids,g.revoked,p.state,p.version,p.last_seen,p.district_id,r.display_name FROM grants g JOIN requests r ON g.request_id=r.request_id LEFT JOIN presence p ON p.grant_id=g.grant_id ORDER BY g.issued DESC LIMIT 500')]
+            # Everything the administrator can still act on is listed in full; only finished history is capped.
+            columns = 'request_id,app,device_id,platform,arch,display_name,state,created,expires,key_expires,receipt_expires,role,district_ids FROM requests'
+            requests = [dict(r) for r in db.execute(f"SELECT * FROM (SELECT {columns} WHERE state IN ('pending','approved')) UNION ALL SELECT * FROM (SELECT {columns} WHERE state NOT IN ('pending','approved') ORDER BY created DESC LIMIT 100) ORDER BY created DESC")]
+            columns = 'g.grant_id,g.app,g.device_id,g.principal_id,g.account_identity,g.role,g.district_ids,g.revoked,p.state,p.version,p.last_seen,p.district_id,r.display_name,g.issued FROM grants g JOIN requests r ON g.request_id=r.request_id LEFT JOIN presence p ON p.grant_id=g.grant_id'
+            grants = [dict(r) for r in db.execute(f'SELECT * FROM (SELECT {columns} WHERE g.revoked=0) UNION ALL SELECT * FROM (SELECT {columns} WHERE g.revoked!=0 ORDER BY g.issued DESC LIMIT 500) ORDER BY issued DESC')]
             events = [dict(r) for r in db.execute('SELECT a.event_id,a.kind,a.occurred,a.received,a.counts,a.district_id,a.references_json,g.app,g.device_id,g.principal_id,r.display_name FROM activity a JOIN grants g ON g.grant_id=a.grant_id JOIN requests r ON g.request_id=r.request_id ORDER BY received DESC LIMIT 100')]
             invites = [{'inviteId': r['invite_id'], 'label': r['label'], 'created': r['created'], 'expires': r['expires'], 'maxUses': r['max_uses'], 'uses': r['uses'],
                         'state': 'revoked' if r['revoked'] else 'used' if r['uses'] >= r['max_uses'] else 'expired' if r['expires'] <= self.now() else 'active'}
