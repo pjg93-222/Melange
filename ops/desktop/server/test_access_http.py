@@ -83,7 +83,7 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual((status, repeated['requestId'], repeated['status']), (201, request['requestId'], 'pending'))
         self.assertEqual(self.count('SELECT COUNT(*) FROM requests'), 1)
 
-    def test_used_up_code_is_invalid_while_capacity_and_conflict_mappings_are_unchanged(self):
+    def test_used_up_code_is_invalid_and_a_second_open_request_per_device_is_a_conflict(self):
         self.serve(require_invite=True)
         code = self.store.issue_invite('Single')['code']
         first = {**self.request_value(), 'inviteCode': code}
@@ -92,8 +92,8 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual((status, repeated['requestId'], repeated['status']), (201, first['requestId'], 'pending'))
         self.assertEqual(self.post_request({**self.request_value(), 'inviteCode': code}), (403, {'error': 'invite_invalid'}, None))
         spare = self.store.issue_invite('Spare')
-        self.assertEqual(self.post_request({**self.request_value(), 'deviceId': first['deviceId'], 'inviteCode': spare['code']}), (429, {'error': 'rate_limited'}, '60'))
-        self.assertEqual([i['uses'] for i in self.store.dashboard()['invites'] if i['inviteId'] == spare['inviteId']], [0])  # Capacity refusal spends nothing.
+        self.assertEqual(self.post_request({**self.request_value(), 'deviceId': first['deviceId'], 'inviteCode': spare['code']}), (409, {'error': 'state_conflict'}, None))
+        self.assertEqual([i['uses'] for i in self.store.dashboard()['invites'] if i['inviteId'] == spare['inviteId']], [0])  # Conflict refusal spends nothing.
         self.assertEqual(self.post_request({**first, 'displayName': 'Someone else'}), (409, {'error': 'state_conflict'}, None))
 
     def test_request_activate_status_and_separate_enrollment_over_real_tls(self):
@@ -174,13 +174,10 @@ class AccessHTTPTests(unittest.TestCase):
         clock[0] = 61
         limiter.check('192.168.1.1')
 
-    def test_relay_rate_limit_uses_only_the_total_bucket(self):
-        limiter = RateLimit(clock=lambda: 0)
-        for _ in range(60): limiter.check('192.168.1.1')
-        with self.assertRaises(HTTPRefused): limiter.check('192.168.1.1')  # Ordinary peers keep 60/min.
-        for _ in range(540): limiter.check('127.0.0.1', per_peer=False)
-        with self.assertRaises(HTTPRefused) as caught: limiter.check('127.0.0.1', per_peer=False)
-        self.assertEqual(caught.exception.status, 429)  # 600/min total still binds the relay.
+    def test_access_routes_have_no_per_address_rate_limit(self):
+        for _ in range(65):  # Formerly 60/min per peer.
+            self.assertEqual(self.call('GET', '/v1/access/status')[0], 403)
+        self.assertEqual(self.call('POST', '/v1/access/requests', self.request_value())[0], 201)
 
     def test_header_drip_has_total_deadline_and_releases_connection(self):
         self.server.RequestHandlerClass.header_deadline = 0.15
