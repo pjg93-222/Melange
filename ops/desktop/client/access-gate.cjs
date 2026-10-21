@@ -16,7 +16,8 @@ class DesktopAccessGate{
     canRequestAgain:['denied','expired'].includes(reply.status)||(reply.status==='used'&&reply.expiresAt<=Math.floor(this.now()/1000)&&accepted?.grant.requestId!==raw.pending.requestId)}:{})};
   }
   if(!accepted)return {...base,phase:'needs_request'};
-  if(accepted.revoked){this.local?.lock();return {...base,phase:'revoked',canRequestAgain:true};}
+  // A non-legacy Terrier tester's private district store is deleted on revocation (main.cjs dropDistrictData); every other install keeps its local data.
+  if(accepted.revoked){this.local?.lock();return {...base,phase:'revoked',canRequestAgain:true,...(this.appId==='terrier'&&this.configuration().terrierLegacy===undefined?{districtDataRemoved:true}:{})};}
   const grant=accepted.grant,owner=await this.owner(accepted,this.configuration());
   const accountIdentity=owner&&this.appId==='terrier'?owner.dataBindings.find(item=>item.districtId===this.configuration().district)?.localUsername:grant.accountIdentity;
   const identity={...base,accountIdentity:accountIdentity||grant.accountIdentity,...(this.cleanupPending?{requestCleanupPending:true}:{})};
