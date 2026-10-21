@@ -6,7 +6,7 @@ function fixture(appId='melange'){
  const grant={serverId:'11111111-1111-1111-1111-111111111111',deviceId:'22222222-2222-2222-2222-222222222222',principalId,accountIdentity:'recipient_'+principalId.replaceAll('-',''),appId,grantId:'44444444-4444-4444-4444-444444444444',requestId:'55555555-5555-5555-5555-555555555555',role:appId==='terrier'?'local_administrator':'local_user',districtIds:appId==='terrier'?['co-05']:[]};
  const state={accepted:null,pending:null,password:null,session:null,configuration:{district:'co-05'},calls:[]};
  const client={accepted:async()=>state.accepted,state:async()=>({pending:state.pending}),requestAccess:async(name,options)=>{state.calls.push({name,options});state.pending={requestId:grant.requestId};return {requestId:grant.requestId,status:'pending',expiresAt:2000000000};},poll:async()=>({requestId:state.pending.requestId,status:'approved',expiresAt:2000000000}),activate:async()=>{state.accepted={grant,revoked:false};state.pending=null;return {grant,requestCleanupPending:false};},refresh:async()=>{if(state.offline)throw new Error('offline');}};
- const local={current:()=>state.session,create:async()=>{state.calls.push('password-created');},unlock:async()=>{state.session={authenticated:true};},lock:()=>{state.session=null;}};
+ const local={current:()=>state.session,resume:async()=>state.session,forget:async()=>{state.calls.push('forgot');},create:async()=>{state.calls.push('password-created');},unlock:async()=>{state.session={authenticated:true};},lock:()=>{state.session=null;}};
  const gate=new DesktopAccessGate({appId,client,local,passwords:{read:async()=>state.password},configuration:()=>state.configuration});
  return {gate,state,grant};
 }
