@@ -159,8 +159,8 @@ function ownerDistrictController(){
    createProvider:onStatus=>new(require('./github-districts.cjs').GitHubDistricts)({resources,profile:userData,root:packRoot,
     publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.terrier,
     store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}),signal:downloads.signal,onStatus,
-    checkExisting:async(dataRoot,district)=>{const result=await probe(command,'--desktop-github-district-check',{sourceRoot,dataRoot,district});return result.validated===true&&result.district===district;},
-    extract:request=>probe(command,'--desktop-github-district-extract',{...request,sourceRoot},{timeout:10*60*1000})
+    checkExisting:async(dataRoot,district)=>{const result=await probe(command,'--desktop-github-district-check',{sourceRoot,dataRoot,district},{signal:downloads.signal});return result.validated===true&&result.district===district;},
+    extract:request=>probe(command,'--desktop-github-district-extract',{...request,sourceRoot},{timeout:10*60*1000,signal:downloads.signal})
    })
   });
  }
