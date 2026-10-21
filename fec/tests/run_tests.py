@@ -814,7 +814,9 @@ _LANE_SPEECH_PKG=(
 _LANE_PYTEST=(
     # S-2 drain (decision F-3, 2026-10-11): 176 suites that existed but no lane named. Each ran
     # green ALONE from LIVE (pytest, this lane's env, 300 s bound, one at a time) and wrote nothing
-    # of its own into the tree. The suites that stayed red are on the census BACKLOG
+    # of its own into the tree -- except test_speech_channel, whose CSV-emission test DID rewrite the live
+    # stance joblib/sidecar, accuracy report and speech_stance_final.csv + receipt until the 2026-10-20
+    # fix; test_speech_channel_no_live_writes now guards that. The suites that stayed red are on the census BACKLOG
     # (fec/tests/infra/test_kernel_registration_census.py) with a one-line reason each.
     'test_acquire_member_longform_audio', 'test_acu_bill_title_corroboration_query_plan',
     'test_adjudicated_corroboration', 'test_admission_membership_projection',
@@ -841,6 +843,7 @@ _LANE_PYTEST=(
     'test_discover_leadership_prerole_interviews', 'test_discovery_refresh_cycle',
     'test_draft_member_longform_reviews', 'test_e1_stance_imputation_harness', 'test_edge_startup',
     'test_effectiveness_integration', 'test_effectiveness_sources',
+    'test_field_action_admissions',
     'test_f2_stance_rationale_sidecars', 'test_filter_senate_payroll_employment_candidates',
     'test_govinfo_discovery_fallback', 'test_hearing_display_feed',
     'test_held_evidence_reconciliation', 'test_historical_evidence', 'test_industry_valence',
@@ -870,9 +873,11 @@ _LANE_PYTEST=(
     'test_relationship_uncertainty', 'test_responsiveness_layers', 'test_run_pipeline_tolerance',
     'test_screen_member_longform_identity_cues', 'test_select_member_longform_profile_sources',
     'test_sentinel_decision_stability', 'test_sentinel_network_retries', 'test_sentinel_qme_fixes',
+    'test_sentinel_govinfo_statute',
     'test_sentinel_source_unavailable', 'test_sentinel_statute_identity',
     'test_snapshot_member_longform_ready_sources',
-    'test_speech_channel', 'test_staffer_assertions', 'test_staffer_automatic_service',
+    'test_speech_channel', 'test_speech_channel_no_live_writes',
+    'test_staffer_assertions', 'test_staffer_automatic_service',
     'test_staffer_canonical_graph', 'test_staffer_connection_facts', 'test_staffer_contact_group',
     'test_staffer_contacts', 'test_staffer_distinct_routes', 'test_staffer_ecosystem_routes',
     'test_staffer_evidence_boundaries', 'test_staffer_governing_audit',

@@ -145,7 +145,7 @@ def test_a_client_half_close_still_gets_the_whole_response():
         sock.close()
 
 
-def test_connections_beyond_the_forward_limit_are_left_unaccepted(monkeypatch):
+def test_connections_beyond_the_forward_limit_wait_for_a_slot(monkeypatch):
     monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
     relay, relay_address = listener()
     target, target_address = listener()
@@ -154,11 +154,138 @@ def test_connections_beyond_the_forward_limit_are_left_unaccepted(monkeypatch):
     start_session(relay_address, target_address[1])
     control, _ = relay.accept()
     read_frame(control)
-    control.sendall(connections(*(str(uuid.uuid4()) for _ in range(3))))
+    second_id = str(uuid.uuid4())
+    control.sendall(connections(str(uuid.uuid4()), second_id))
     first, _ = relay.accept()
     read_frame(first)
     relay.settimeout(1)
     with pytest.raises(socket.timeout):
-        relay.accept()  # the second and third connections are not accepted while the only slot is busy
-    for sock in (first, control, relay, target, *held):
+        relay.accept()  # the second waits while the only slot is busy
+    first.close()
+    for _ in range(500):
+        if held:
+            break
+        threading.Event().wait(0.01)
+    held[0].close()  # the first forward ends and frees its slot
+    relay.settimeout(5)
+    second, _ = relay.accept()  # ...so the waiting connection is accepted rather than dropped
+    assert read_frame(second) == {'Accept': second_id}
+    for sock in (second, control, relay, target, *held):
+        sock.close()
+
+
+def test_a_connection_still_waiting_after_the_relay_window_is_skipped(monkeypatch, caplog):
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
+    monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 0.2)
+    relay_tunnel.SLOTS.acquire()  # every forward slot stays busy
+    relay, relay_address = listener()
+    start_session(relay_address, 1)
+    control, _ = relay.accept()
+    read_frame(control)
+    control.sendall(connections(str(uuid.uuid4())))
+    relay.settimeout(1)
+    with pytest.raises(socket.timeout):
+        relay.accept()  # never accepted: the relay drops it after its own 10 s, and nothing was spawned
+    relay_tunnel.SLOTS.release()
+    later = str(uuid.uuid4())
+    control.sendall(json.dumps({'Connection': later}).encode() + b'\0')
+    relay.settimeout(5)
+    data, _ = relay.accept()  # the skipped one is gone; the loop moved on to the next
+    assert read_frame(data) == {'Accept': later}
+    assert any('skipped: no slot freed' in r.getMessage() for r in caplog.records)
+    for sock in (data, control, relay):
+        sock.close()
+
+
+class WatchedSlots:
+    """A one-slot semaphore, held busy, that counts how many callers are inside acquire() at once."""
+    def __init__(self):
+        self.inner = threading.BoundedSemaphore(1)
+        self.inner.acquire()
+        self.lock, self.waiting, self.peak = threading.Lock(), 0, 0
+
+    def acquire(self, timeout=None):
+        with self.lock:
+            self.waiting += 1
+            self.peak = max(self.peak, self.waiting)
+        try:
+            return self.inner.acquire(timeout=timeout)
+        finally:
+            with self.lock:
+                self.waiting -= 1
+
+    def release(self):
+        self.inner.release()
+
+
+def until(condition, seconds=2):
+    for _ in range(int(seconds * 100)):
+        if condition():
+            return True
+        threading.Event().wait(0.01)
+    return condition()
+
+
+def test_connections_waiting_for_a_slot_wait_side_by_side(monkeypatch):
+    slots = WatchedSlots()
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', slots)
+    monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 5)
+    relay, relay_address = listener()
+    start_session(relay_address, 1)
+    control, _ = relay.accept()
+    read_frame(control)
+    ids = [str(uuid.uuid4()) for _ in range(3)]
+    control.sendall(connections(*ids))
+    # Each wait starts when its frame is read; a control loop that waited itself would show one at a time.
+    assert until(lambda: slots.peak == 3)
+    slots.release()
+    relay.settimeout(5)
+    data, _ = relay.accept()  # the freed slot goes to one of the waiting connections
+    assert read_frame(data)['Accept'] in ids
+    for sock in (data, control, relay):
+        sock.close()
+
+
+def test_connections_beyond_the_waiting_limit_are_skipped_at_once(monkeypatch, caplog):
+    slots = WatchedSlots()
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', slots)
+    monkeypatch.setattr(relay_tunnel, 'SLOT_WAIT', 5)
+    monkeypatch.setattr(relay_tunnel, 'WAITERS', 2)
+    relay, relay_address = listener()
+    start_session(relay_address, 1)
+    control, _ = relay.accept()
+    read_frame(control)
+    control.sendall(connections(*(str(uuid.uuid4()) for _ in range(3))))
+    # Well inside SLOT_WAIT: the third is refused a waiter at once instead of queueing behind the other two.
+    assert until(lambda: any('already waiting for a slot' in r.getMessage() for r in caplog.records))
+    assert slots.peak == 2
+    for sock in (control, relay):
+        sock.close()
+
+
+def test_a_waiter_thread_that_cannot_start_returns_its_permit(monkeypatch):
+    monkeypatch.setattr(relay_tunnel, 'SLOTS', threading.BoundedSemaphore(1))
+    monkeypatch.setattr(relay_tunnel, 'WAITERS', 1)
+    made = []
+
+    def semaphore(value):
+        made.append(threading.BoundedSemaphore(value))
+        return made[-1]
+
+    def no_threads(*args, **kwargs):
+        raise RuntimeError("can't start new thread")
+    monkeypatch.setattr(relay_tunnel, 'threading', type('NoThreads', (), {'Thread': staticmethod(no_threads), 'BoundedSemaphore': staticmethod(semaphore)}))
+    relay, relay_address = listener()
+    def relay_side():
+        control, _ = relay.accept()
+        read_frame(control)
+        control.sendall(connections(str(uuid.uuid4())))
+        held.append(control)
+    held = []
+    threading.Thread(target=relay_side, daemon=True).start()
+    with pytest.raises(RuntimeError):
+        relay_tunnel.session(relay_address, 45678, 1)
+    assert made and made[0].acquire(blocking=False)  # the waiter permit was released, not leaked
+    assert relay_tunnel.SLOTS.acquire(blocking=False)  # and no forward slot was taken
+    for sock in (relay, *held):
         sock.close()

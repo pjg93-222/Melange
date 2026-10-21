@@ -429,6 +429,16 @@ def test_a_key_deferred_three_runs_running_is_held_with_the_envelope_hold_shape(
     assert third['source_unavailable_deferred_keys'] == [] and third['errors'] == {}   # a hold, no longer unsealed work
 
 
+def test_the_hold_rationale_is_written_with_the_shared_prefix_constant(world, monkeypatch):
+    without_admitted(world)
+    key = NEW[2]
+    monkeypatch.setattr(R, 'CLASSIFIER_UNAVAILABLE_PREFIX', 'prefix-under-test')
+    fake_cli(monkeypatch, {key: TIMEOUT})
+    run_key(world, key); run_key(world, key)
+    third = run_key(world, key)
+    assert third['decisions'][key]['rationale'].startswith('prefix-under-test 3 runs: TimeoutExpired')
+
+
 def test_a_successful_classification_resets_the_deferral_count(world, monkeypatch):
     without_admitted(world)
     key = NEW[2]

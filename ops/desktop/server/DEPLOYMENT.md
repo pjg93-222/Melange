@@ -38,7 +38,7 @@ The packaged trust descriptor names `https://bore.pub:38443`. That path needs tw
 python relay_tunnel.py --port 38443 --log 'C:\ExistingProtectedPublisherState\relay.log'
 ```
 
-The first command registers the loopback publisher on `127.0.0.1:38443`, the only local port that `relay_tunnel.py` forwards to. The second command is the relay client. It is not part of the publisher startup entry, so supervise it as a separate task under the same account. While it is down, recipients cannot reach the publisher.
+The first command registers the loopback publisher on `127.0.0.1:38443`, the only local port that `relay_tunnel.py` forwards to. The second command is the relay client. It is not part of the publisher startup entry, so supervise it as a separate task under the same account. While it is down, recipients cannot reach the publisher. The tunnel runs up to 32 forwards at once; up to 32 further connections each wait up to 6 seconds, counted from when the relay announces them, for one to finish (inside the relay's 10-second accept window) rather than being dropped at once. A connection beyond those is skipped and logged.
 
 `bore.pub` is a shared relay, so another client may hold port 38443 while the tunnel reconnects. Recipients then fail the TLS pin check and send nothing. Access resumes once the tunnel reclaims the port.
 

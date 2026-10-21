@@ -8,8 +8,9 @@ source-text gate assertions, so it runs in a clean runtime.
 Standalone: python fec/tests/stance/test_speech_channel.py
 """
 from __future__ import annotations
-import csv, io, os, re, sys, unittest
+import copy, csv, io, os, re, shutil, sys, tempfile, unittest
 from pathlib import Path
+from unittest import mock
 
 FEC = Path(__file__).resolve().parents[2]
 ROOT = FEC.parent
@@ -104,12 +105,39 @@ class SpeechCsvEmission(unittest.TestCase):
     def test_main_emits_wellformed_csv(self):
         if not (DATA_ROOT / "speeches_cu.csv").exists():
             self.skipTest("speeches_cu.csv absent in this tree")
+        import stance.own_source_stance_model as model
         import stance.speech_stance_stack as sss
-        sss.main()
-        out = DATA_ROOT / "speech_stance_final.csv"
-        self.assertTrue(out.exists(), "speech_stance_final.csv not written")
-        with io.open(out, encoding="utf-8-sig", newline="") as handle:
-            rows = list(csv.DictReader(handle))
+
+        # main() trains/caches a model and writes the sidecar, so every write path is redirected to a scratch dir
+        # (2026-10-20: this test used to rewrite the live joblib, report, speech_stance_final.csv and receipt).
+        stance_dir = DATA_ROOT / "data" / "stance"
+
+        def data_root_state():
+            files = [DATA_ROOT / "speeches_cu.csv", DATA_ROOT / "speeches_cu.receipt.json",
+                     DATA_ROOT / "speech_stance_final.csv", DATA_ROOT / "speech_stance_final.receipt.json",
+                     DATA_ROOT / "data" / "engine" / "dead_letter" / "gold_labels.jsonl"]
+            if stance_dir.is_dir():
+                files += [p for p in stance_dir.iterdir() if p.is_file()]
+            return {str(p): (p.stat().st_mtime_ns, p.stat().st_size) if p.exists() else None for p in files}
+
+        before = data_root_state()
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = os.path.join(tmp, "own_source_stance_model.joblib")
+            for suffix in ("", ".sha256"):          # a matching fingerprint then hits the cache instead of retraining
+                if os.path.exists(model.CACHE + suffix):
+                    shutil.copy2(model.CACHE + suffix, cache + suffix)
+            config = copy.deepcopy(model.CONFIG)
+            config["speech"]["output"] = os.path.join(tmp, "speech_stance_final.csv")   # os.path.join(ROOT, abs) is abs
+            with mock.patch.object(model, "CACHE", cache), \
+                 mock.patch.object(model, "REPORT", os.path.join(tmp, "own_source_stance_accuracy_report.json")), \
+                 mock.patch.object(model, "CONFIG", config), \
+                 mock.patch.object(model, "DEAD_LETTER_RELATIVE", os.path.join(tmp, "gold_labels.jsonl")):
+                sss.main()
+            self.assertEqual(data_root_state(), before, "main() wrote into the data root")
+            out = Path(config["speech"]["output"])
+            self.assertTrue(out.exists(), "speech_stance_final.csv not written")
+            with io.open(out, encoding="utf-8-sig", newline="") as handle:
+                rows = list(csv.DictReader(handle))
         self.assertGreater(len(rows), 0)
         self.assertEqual(list(rows[0].keys()),
                          ["bioguide", "member", "date", "categories", "stance", "tier",

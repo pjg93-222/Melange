@@ -675,12 +675,14 @@ def handler_for(store, require_invite=False):
 
 
 class BoundedServer(ThreadingHTTPServer):
-    """Bounded clients, including TLS handshakes; one stalled peer cannot block acceptance."""
+    """Bounded workers, including TLS handshakes. A connection that arrives while every worker is busy
+    waits up to SLOT_WAIT seconds for one instead of being dropped; later ones wait in the listen backlog."""
     daemon_threads = True
-    request_queue_size = 16
+    request_queue_size = 128
+    SLOT_WAIT = 15
 
     def __init__(self, address, handler, tls_context, *, public_origin=None):
-        self.slots = threading.BoundedSemaphore(16)
+        self.slots = threading.BoundedSemaphore(32)
         self.tls_context = tls_context
         self.public_origin = https_origin(public_origin, allow_public=True) if public_origin is not None else None
         if self.public_origin != getattr(handler, 'publisher_public_origin', None):
@@ -688,7 +690,7 @@ class BoundedServer(ThreadingHTTPServer):
         super().__init__(address, handler)
 
     def process_request(self, request, client_address):
-        if (not self.public_origin and not private_address(client_address[0])) or not self.slots.acquire(blocking=False):
+        if (not self.public_origin and not private_address(client_address[0])) or not self.slots.acquire(timeout=self.SLOT_WAIT):
             self.shutdown_request(request)
             return
         try:
