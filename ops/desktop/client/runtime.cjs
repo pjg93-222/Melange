@@ -7,7 +7,10 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {appDefinition}=require('./apps.cjs');
 const {backendCommand,backendEnvironment}=require('./backend-command.cjs');
-const {runtimeRoots,prepareRuntimeRoots,validatedLaunchPath}=require('./runtime-roots.cjs');
+const {runtimeRoots,prepareRuntimeRoots,validatedLaunchPath,refuseInstalledOverlap}=require('./runtime-roots.cjs');
+// One value per app process, never written anywhere: the Terrier owner's one sign-in for every district is bound to
+// it, so every app launch asks for the owner password again (Geo server/research/desktop_owner.py).
+const OWNER_SESSION_KEY=crypto.randomBytes(32).toString('base64url');
 function freePort(){return new Promise((resolve,reject)=>{const s=net.createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const port=s.address().port;s.close(()=>resolve(port));});});}
 function health(origin,token,appId){return new Promise(resolve=>{const request=http.get(origin+'/__desktop/health',{headers:{'X-Desktop-Token':token},timeout:1000},response=>{let body='';response.on('data',c=>{body+=c;if(body.length>4096)response.destroy();});response.on('error',()=>resolve(null));response.on('close',()=>resolve(null));response.on('end',()=>{try{const value=JSON.parse(body);if(response.statusCode!==200||value.appId!==appId){resolve(null);return;}resolve({launchPath:validatedLaunchPath(appId,value.launchPath)});}catch{resolve(null);}});});request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));});}
 async function probe(origin,token,appId){return Boolean(await health(origin,token,appId));}
@@ -44,13 +47,16 @@ class Runtime {
       if(!authorization.principal||authorization.principal.districtId!==roots.district)throw new Error('Approved Terrier account is required.');
       environment.DESKTOP_ACCESS_PRINCIPAL=JSON.stringify(authorization.principal);
     }
+    // The existing owner's one password and sign-in for all districts live in the profile's desktop-level state.
+    const ownerRoot=roots.legacyOwner?path.join(this.userData,'state','terrier-owner'):null;
+    if(ownerRoot){refuseInstalledOverlap(ownerRoot,[this.resources,path.dirname(binary),...this.protectedPaths]);environment.DESKTOP_OWNER_SESSION_KEY=OWNER_SESSION_KEY;}
     if(appId==='mentat'&&this.rendererFactory){this.renderer=await this.rendererFactory();environment.MENTAT_DESKTOP_RENDER_URL=this.renderer.url;environment.MENTAT_DESKTOP_RENDER_TOKEN=this.renderer.token;}
     check();const renderer=this.renderer;
-    if(this.confine){try{confineRoots(roots);this.confine([logs]);}catch(error){this.renderer=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});this.roots=null;this.origin=null;this.token=null;throw error;}}
+    if(this.confine){try{confineRoots(roots);this.confine(ownerRoot?[logs,ownerRoot]:[logs]);}catch(error){this.renderer=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});this.roots=null;this.origin=null;this.token=null;throw error;}}
     const log=fs.openSync(path.join(logs,'backend.log'),'a',0o600);
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
-    if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner);
+    if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner,'--owner-root',ownerRoot);
     const child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:['ignore',log,log]});fs.closeSync(log);this.child=child;
     let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');if(this.child===child)this.child=null;if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}});
     const deadline=Date.now()+120000;
