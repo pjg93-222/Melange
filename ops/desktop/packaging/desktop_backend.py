@@ -344,6 +344,17 @@ def run(options, token):
                           CU_ALLOWED_HOSTS='127.0.0.1,localhost', CU_DATA_DIR=str(data), CU_STATE_DIR=str(state),
                           CU_SECRET_KEY=key.read_text(encoding='utf-8'), CU_DISTRICT=options.district,
                           CU_COOKIE_PREFIX='desktop_' + options.district.replace('-', '') + '_')
+        # The existing owner's one password and one sign-in for every district (Geo server/research/desktop_owner.py):
+        # a desktop-level directory outside every district and a per-app-session key, which settings removes from the environment.
+        session_key = os.environ.pop('DESKTOP_OWNER_SESSION_KEY', '')
+        if legacy_owner:
+            owner_root = getattr(options, 'owner_root', None)
+            owner_root = owner_root.resolve() if owner_root else None
+            if owner_root is None or len(session_key) < 32 or any(owner_root == root or owner_root.is_relative_to(root) or root.is_relative_to(owner_root)
+                                            for root in (source.parent, data, state)):
+                raise ValueError('A separate desktop owner directory and an app-session key are required')
+            owner_root.mkdir(parents=True, exist_ok=True)
+            os.environ.update(CU_DESKTOP_OWNER_ROOT=str(owner_root), CU_DESKTOP_OWNER_SESSION=session_key)
         import django
         django.setup()
         from django.core.management import call_command
@@ -393,6 +404,7 @@ def main():
     parser.add_argument('--state-root', type=Path, required=True)
     parser.add_argument('--district', choices=['co-05', 'or-05', 'ct-01'], default='co-05')
     parser.add_argument('--legacy-owner', choices=['admin'])
+    parser.add_argument('--owner-root', type=Path)
     options = parser.parse_args()
     token = os.environ.get('DESKTOP_LAUNCH_TOKEN', '')
     if len(token) < 32 or not 1024 <= options.port <= 65535:
@@ -401,6 +413,8 @@ def main():
         parser.error('Installed code and writable data must be separate')
     if options.legacy_owner and options.app != 'terrier':
         parser.error('Legacy owner setup is only available for Terrier')
+    if bool(options.owner_root) != bool(options.legacy_owner):
+        parser.error('The desktop owner directory is used with, and only with, the existing Terrier owner')
     run(options, token)
 
 
