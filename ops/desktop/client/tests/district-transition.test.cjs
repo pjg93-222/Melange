@@ -1,6 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {DistrictTransition}=require('../district-transition.cjs');
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+const {DistrictTransition,districtFingerprint}=require('../district-transition.cjs');
 const {bindingCache}=require('../access-bootstrap.cjs');
 const {attachLaunchHeader}=require('../runtime.cjs');
 const {authorizeAvailable}=require('../access-gate.cjs');
@@ -39,6 +40,14 @@ test('suspend stops warm and starting backends and cancels pending activation',a
 });
 test('changed dataset fingerprint stops stale retained runtime before fresh launch',async()=>{
  const f=fixture();let version=1;f.controller.fingerprint=configuration=>configuration.district+version;f.controller.remember(f.configuration,f.current);await f.controller.switch('or-05');version++;await f.controller.switch('co-05');assert.notEqual(f.current,f.initial);assert.equal(f.initial.stops,1);assert.equal(f.events.findLast(e=>e.phase==='backend-ready').cacheHit,false);
+});
+test('a changed density file invalidates a retained district runtime using the real file fingerprint',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-density-fingerprint-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const data=path.join(root,'data'),profile=path.join(root,'profile'),density=path.join(data,'districts','co-05','density.json');
+ fs.mkdirSync(path.dirname(density),{recursive:true});fs.writeFileSync(density,'synthetic density before');
+ const f=fixture();f.controller.fingerprint=configuration=>districtFingerprint(profile,{...configuration,dataDirectory:data});f.controller.remember(f.configuration,f.current);
+ await f.controller.switch('or-05');fs.writeFileSync(density,'a changed synthetic density dataset');await f.controller.switch('co-05');
+ assert.notEqual(f.current,f.initial);assert.equal(f.initial.stops,1);assert.equal(f.events.findLast(e=>e.phase==='backend-ready').cacheHit,false);
 });
 test('writes made while a district is active do not defeat warm reuse after switching away and back',async()=>{
  const f=fixture(),writes={};f.controller.fingerprint=configuration=>configuration.district+(writes[configuration.district]||0);f.controller.remember(f.configuration,f.current);
