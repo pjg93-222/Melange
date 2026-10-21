@@ -10,7 +10,7 @@ const {REPOSITORY,POINTER_PATH,IDS,ROLES,assetURL}=protocol;
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value));
 function fixture(t){
- const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'github-district-fixture-'));t.after(()=>fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5}));
+ const temporary=fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(),'github-district-fixture-')));t.after(()=>fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5}));
  const profile=path.join(temporary,'profile'),root=path.join(profile,'packs'),legacy=path.join(temporary,'legacy');fs.mkdirSync(root,{recursive:true});fs.mkdirSync(legacy);
  const keys=crypto.generateKeyPairSync('ed25519'),raw=keys.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64'),publicKeys={fixture:raw};
  const sign=value=>({schemaVersion:1,keyId:'fixture',payload:Buffer.from(canonical(value)).toString('base64'),signature:crypto.sign(null,Buffer.from(canonical(value)),keys.privateKey).toString('base64')});
