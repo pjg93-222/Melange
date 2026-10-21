@@ -88,6 +88,17 @@ test('forgetting wins over a device-record read that is still in flight',async()
  w.stores.devices.read=read;assert.equal(await local.resume(g),null);
 });
 
+test('a lock (revocation, activation, suspend) wins over a device-record read that is still in flight',async()=>{
+ const w=world(),g=w.grant;await verifyOnce(w.launch());
+ const local=new LocalAccess({store:w.stores.passwords,devices:w.stores.devices});
+ let release;const gate=new Promise(resolve=>{release=resolve;}),read=w.stores.devices.read;
+ w.stores.devices.read=async id=>{const found=await read(id);await gate;return found;};   // read started before the lock, delivered after it
+ const pending=local.resume(g);local.lock();release();
+ assert.equal(await pending,null);assert.equal(local.current(g),null);
+ assert.equal(w.stores.devices.values.size,1);   // lock keeps the record: only forget deletes it
+ w.stores.devices.read=read;assert.equal((await local.resume(g))?.method,'device-trust');   // a later open still uses it
+});
+
 test('an open that starts while a forget is still deleting the record gets no session, whether the delete then succeeds or fails',async()=>{
  for(const outcome of ['succeeds','fails']){
   const w=world(),g=w.grant;await verifyOnce(w.launch());

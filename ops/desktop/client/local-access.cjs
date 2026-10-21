@@ -135,6 +135,8 @@ class LocalAccess{
     finally{this.forgetting--;}
   }
   current(approved){if(!this.session||JSON.stringify(binding(this.session))!==JSON.stringify(binding(approved)))return null;return this.session;}
-  lock(){this.session=null;}
+  // Ends the session and invalidates any resume still reading the device record, so a lock learned mid-read (revocation,
+  // activation, suspend) cannot be undone by that read. The record itself is kept: only forget() deletes it.
+  lock(){this.epoch++;this.session=null;}
 }
 module.exports={LocalAccess,binding,checkedRecord,OPTIONS};
