@@ -63,11 +63,11 @@
       const messages = {
         needs_request: 'Request administrator approval for this installation. Connect to the internet or the configured local network to reach your trusted administrator server.',
         pending: 'This installation is waiting for administrator approval.',
-        needs_password: 'This installation is approved. Choose your local password, then sign in.',
-        locked: 'Sign in with your local password to open ' + next.appName + '.',
-        ready: 'You are signed in. Your local workspace is ready to open.',
+        needs_password: 'This installation is approved. Choose your local password, then sign in. You only do this once on this computer.',
+        locked: 'Sign in with your local password to open ' + next.appName + '. You will not be asked again on this computer.',
+        ready: next.appId === 'terrier' ? 'This installation is approved for its owner. ' + next.appName + ' does not ask for a password.' : 'You are signed in on this computer and will not be asked again. Your local workspace is ready to open. Lock asks for your password again next time.',
         revoked: 'Administrator access has been revoked. Your local data remains on this computer.',
-        terrier_signin: 'This installation is approved. Continue to Terrier to set up or sign in to its existing local account.',
+        terrier_signin: 'This installation is approved. Continue to Terrier to set up or sign in to your account.',
         error: 'Access could not be checked. Your workspace has not been opened.'
       };
       el.description.textContent = messages[next.phase];
@@ -88,7 +88,7 @@
       el['password-submit'].textContent = next.phase === 'needs_password' ? 'Save password' : 'Sign in';
       el['ready-panel'].hidden = !['ready', 'terrier_signin'].includes(next.phase);
       el.open.textContent = next.phase === 'terrier_signin' ? 'Continue to Terrier sign-in' : 'Open ' + next.appName;
-      el.lock.hidden = next.phase !== 'ready'; el.retry.hidden = next.phase !== 'error'; lockControls();
+      el.lock.hidden = next.phase !== 'ready' || next.appId === 'terrier'; el.retry.hidden = next.phase !== 'error'; lockControls();
     }
     function failClosed() {
       clearSecrets(); state = null;

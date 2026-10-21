@@ -20,8 +20,10 @@ class DesktopAccessGate{
   const grant=accepted.grant,owner=await this.owner(accepted,this.configuration());
   const accountIdentity=owner&&this.appId==='terrier'?owner.dataBindings.find(item=>item.districtId===this.configuration().district)?.localUsername:grant.accountIdentity;
   const identity={...base,accountIdentity:accountIdentity||grant.accountIdentity,...(this.cleanupPending?{requestCleanupPending:true}:{})};
-  if(this.appId==='terrier')return {...identity,phase:'terrier_signin'};
-  if(owner||this.local.current(grant))return {...identity,phase:'ready'};
+  // The approved Terrier owner is never asked for a password; other Terrier accounts use Terrier's own sign-in.
+  if(this.appId==='terrier')return {...identity,phase:owner?'ready':'terrier_signin'};
+  // Melange/Mentat: verified once on this computer, then remembered (see LocalAccess.resume).
+  if(owner||await this.local.resume(grant))return {...identity,phase:'ready'};
   const password=await this.passwords.read(grant);if(password)checkedRecord(password,grant);
   return {...identity,phase:password?'locked':'needs_password'};
  }
@@ -43,7 +45,8 @@ class DesktopAccessGate{
    }else if(method==='unlock'){
     const password=argument(payload,'password');if(state.phase!=='locked')throw new Error('Password sign-in unavailable');await this.local.unlock(this.accepted.grant,password);
    }else if(method==='lock'){
-    if(payload!==undefined)throw new Error('Invalid access action');this.local?.lock();
+    // Lock also forgets this computer, so the password is asked for again at the next open.
+    if(payload!==undefined)throw new Error('Invalid access action');this.local?.lock();if(this.accepted&&!this.accepted.revoked)await this.local?.forget(this.accepted.grant);
    }else throw new Error('Unsupported access action');
    return await this.info();
   }finally{this.busy=false;}
@@ -59,7 +62,7 @@ class DesktopAccessGate{
     principalId:grant.principalId,accountIdentity:grant.accountIdentity,localAccountIdentity:mapping?.localUsername||grant.accountIdentity,
     localUserId:mapping?.localUserId||null,role:grant.role,districtId:configuration.district,mode:owner?'existing-owner':'recipient'}};
   }
-  const session=this.local.current(grant);if(!owner&&!session)throw new Error('Local sign-in required');
+  const session=await this.local.resume(grant);if(!owner&&!session)throw new Error('Local sign-in required');
   return {accepted,owner,session,principal:null};
  }
  districts(){if(!this.accepted||this.accepted.revoked||this.appId!=='terrier')return [];return [...this.accepted.grant.districtIds];}

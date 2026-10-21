@@ -3,7 +3,7 @@ const crypto=require('node:crypto'),path=require('node:path'),fs=require('node:f
 const {desktopProbe}=require('./desktop-probe.cjs');
 const {AccessClient,descriptor,refreshDescriptor,canonical}=require('./access-client.cjs');
 const {accessStateStore,protectedAccess}=require('./access-state.cjs');
-const {accessSecrets,passwordStore}=require('./access-credentials.cjs');
+const {accessSecrets,passwordStore,deviceStore}=require('./access-credentials.cjs');
 const {LocalAccess}=require('./local-access.cjs');const {DesktopAccessGate}=require('./access-gate.cjs');
 const {verifyOwnerRecord}=require('./owner-access.cjs');
 const {backendCommand,backendEnvironment}=require('./backend-command.cjs');
@@ -53,7 +53,7 @@ async function bootstrapAccess({resources,appId,profile,configuration,packaged,b
  const identityStore=store('identity');let saved=await identityStore.read();
  if(!saved){saved={schemaVersion:1,appId,deviceId:crypto.randomUUID(),platform:'win32',arch:'x64'};await identityStore.write(saved);}
  const identity=exactIdentity(saved,appId),secrets=accessSecrets(resources,identity),passwords=passwordStore(resources);
- const client=new AccessClient({trust,identity,store:store('state'),secrets}),local=new LocalAccess({store:passwords});
+ const client=new AccessClient({trust,identity,store:store('state'),secrets}),local=new LocalAccess({store:passwords,devices:deviceStore(resources)});
  const bindings=bindingCache((selected,grant)=>ownerDataBindings(resources,appId,profile,selected,grant),(selected,grant)=>ownerBindingFingerprint(appId,profile,selected,grant));
  // The host identity is immutable for this process. Signed approval and protected
  // owner records are still freshly read and verified for every authorization.
