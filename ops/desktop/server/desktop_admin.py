@@ -160,6 +160,15 @@ def atomic_write(path, data, secret=False):
         temporary.unlink(missing_ok=True)
 
 
+def protect_directory(path):
+    """Owner and SYSTEM only, inherited entries removed (Windows); 0700 elsewhere. Files created inside inherit it."""
+    if os.name == "nt":
+        identity = subprocess.check_output(["whoami"], text=True).strip()
+        subprocess.run(["icacls", str(path), "/inheritance:r", "/grant:r", f"{identity}:(OI)(CI)F", "SYSTEM:(OI)(CI)F"], check=True, capture_output=True)
+    else:
+        os.chmod(path, 0o700)
+
+
 def file_hashes(path):
     sha256, sha512, count = hashlib.sha256(), hashlib.sha512(), 0
     with open(path, "rb") as stream:
@@ -253,11 +262,7 @@ class Store:
         if self.db.exists() or self.config_path.exists():
             raise Refused("publisher already initialized; existing keys will not be replaced")
         self.root.mkdir(parents=True, exist_ok=True)
-        if os.name == "nt":
-            identity = subprocess.check_output(["whoami"], text=True).strip()
-            subprocess.run(["icacls", str(self.root), "/inheritance:r", "/grant:r", f"{identity}:(OI)(CI)F", "SYSTEM:(OI)(CI)F"], check=True, capture_output=True)
-        else:
-            os.chmod(self.root, 0o700)
+        protect_directory(self.root)
         keys = {}
         for app in sorted(APPS):
             key = ed25519.Ed25519PrivateKey.generate()
@@ -548,7 +553,7 @@ class Store:
         return context
 
 
-def handler_for(store, require_invite=False):
+def handler_for(store, require_invite=False, packs=None):
     class Handler(BaseHTTPRequestHandler):
         server_version = "DesktopUpdates/1"
         publisher_public_origin = store.public_origin
@@ -671,7 +676,7 @@ def handler_for(store, require_invite=False):
                 self.response(500, {"error": "INTERNAL_ERROR"})
     from access_store import AccessStore
     from access_http import handler_for as access_handler_for
-    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler)
+    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler, packs)
 
 
 class BoundedServer(ThreadingHTTPServer):
@@ -746,6 +751,7 @@ def main(argv=None):
     parser.add_argument("--state", type=Path, default=default,
                         help="protected publisher state directory (default: %(default)s)")
     parser.add_argument('--public-origin', help='explicit HTTPS recipient origin; permits public clients only in this mode')
+    parser.add_argument('--packs', type=Path, help='district pack store for pack-publish and serve (default: %%LOCALAPPDATA%%\\MelangeDesktopAdmin\\packs)')
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init")
     sub.add_parser('access-init', help='initialize separate protected application-access signing/state')
@@ -785,6 +791,15 @@ def main(argv=None):
         publish.add_argument("--" + field, required=True)
     publish.add_argument("--sequence", type=int, required=True)
     publish.add_argument("--recipient", action="append", required=True)
+    pack_build = sub.add_parser('pack-build', help="copy one district's allowlisted Terrier data and active summary bundle into a new private directory")
+    pack_build.add_argument('--district', choices=['co-05', 'ct-01', 'or-05'], required=True)
+    pack_build.add_argument('--data', type=Path, required=True, help="the district's Terrier data directory (its stores)")
+    pack_build.add_argument('--terrier-state', type=Path, help='Terrier state directory with accounts.sqlite3 and snapshots (default: --data)')
+    pack_build.add_argument('--out', type=Path, required=True, help='new directory outside OneDrive and every git worktree')
+    pack_publish = sub.add_parser('pack-publish', help='gzip a built district pack into the pack store and sign a revision if it changed')
+    pack_publish.add_argument('--district', choices=['co-05', 'ct-01', 'or-05'], required=True)
+    pack_publish.add_argument('--build', type=Path, required=True)
+    pack_publish.add_argument('--keep-build', action='store_true', help='keep the plaintext build directory (deleted after a successful publish by default)')
     trust = sub.add_parser("trust-publisher")
     trust.add_argument("--windows-subject")
     trust.add_argument("--mac-receipt-key")
@@ -873,6 +888,18 @@ def main(argv=None):
         elif args.command == 'authorize-existing-release':
             store.authorize_existing_release(args.app, args.sequence, args.recipient)
             print('Named recipients authorized for the existing active release. No package was changed or installed.')
+        elif args.command == 'pack-build':
+            from district_packs import build
+            print(json.dumps({'district': args.district, 'files': build(args.district, args.data, args.out, args.terrier_state)}))
+        elif args.command == 'pack-publish':
+            from access_store import AccessStore
+            from district_packs import publish
+            try:
+                envelope = publish(AccessStore(store), args.district, args.build, keep_build=args.keep_build, packs=args.packs)
+            finally:
+                if args.build.exists():  # kept (--keep-build) or refused
+                    print(f'WARNING: plaintext voter data remains in {args.build.resolve()}; delete it once it is no longer needed.', file=sys.stderr)
+            print(json.dumps({'district': args.district, 'published': envelope is not None, 'buildKept': args.keep_build}))
         elif args.command == "trust-publisher":
             config = store.config()
             if not args.windows_subject and not args.mac_receipt_key:
@@ -897,7 +924,10 @@ def main(argv=None):
             if not allowed_bind or not 1024 <= args.port <= 65535:
                 raise Refused("bind an explicit permitted IP on an unprivileged port; public IPs require --public-origin and wildcard binding is forbidden")
             require_invite = invite_env() or args.require_invite  # Always parsed, so a junk value refuses even when the flag is given.
-            server = BoundedServer((args.listen, args.port), handler_for(store, require_invite), store.tls_context(), public_origin=store.public_origin)
+            handler = handler_for(store, require_invite, args.packs)
+            if handler.packs_root is None:
+                print('WARNING: the district pack store is inside OneDrive or a git worktree; /v1/data/ answers 503.', file=sys.stderr)
+            server = BoundedServer((args.listen, args.port), handler, store.tls_context(), public_origin=store.public_origin)
             print(f"Authenticated update service: {request_origin(server)}; invite codes {'required' if require_invite else 'not required'}", flush=True)
             try:
                 server.serve_forever()

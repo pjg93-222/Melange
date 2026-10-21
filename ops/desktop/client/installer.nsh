@@ -24,5 +24,11 @@
     RMDir /r "$LOCALAPPDATA\${APP_ID}\baseline"
     RMDir /r "$LOCALAPPDATA\${APP_ID}\updater"
     RMDir "$LOCALAPPDATA\${APP_ID}"
+    ; Terrier's privately downloaded district data and its district state (district-packs.cjs storeRoot()). Only a real uninstall removes it;
+    ; an update runs the old uninstaller, which must keep it (hence the isUpdated guard around this whole block).
+    ${If} "${APP_ID}" == "org.melange.desktop.terrier"
+      RMDir /r "$LOCALAPPDATA\MelangeData\terrier"
+      RMDir "$LOCALAPPDATA\MelangeData"
+    ${EndIf}
   ${EndIf}
 !macroend

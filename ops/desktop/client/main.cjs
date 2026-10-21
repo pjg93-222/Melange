@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,Menu,dialog,ipcMain,safeStorage,shell,session,powerMonitor,net}=require('electron');
+const {app,BrowserWindow,Menu,dialog,ipcMain,safeStorage,shell,session,powerMonitor,powerSaveBlocker,net}=require('electron');
 const fs=require('node:fs');const path=require('node:path');const crypto=require('node:crypto');const {pathToFileURL}=require('node:url');
 const {appDefinition}=require('./apps.cjs');const {pairing,jsonRequest}=require('./trust.cjs');const {Runtime,attachLaunchHeader}=require('./runtime.cjs');const {DesktopUpdater}=require('./updater.cjs');
 const {credentialCommand}=require('./credentials.cjs');
@@ -21,7 +21,7 @@ app.setPath('userData',profile.directory);
 if(!app.requestSingleInstanceLock()){app.quit();}else{
 if(profile.isolated){
  const notice='[melange-desktop] Isolated test profile active: '+profile.directory+' (AppUserModelId '+profile.applicationUserModelId+'). Login startup, OS registration and native update installation are disabled; access, trust, enrollment and signature checks are unchanged.';
- process.stdout.write(notice+'\n');try{fs.mkdirSync(path.join(profile.directory,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(profile.directory,'logs','isolated-profile.log'),new Date().toISOString()+' '+notice+'\n',{mode:0o600});}catch{}
+ process.stdout.on('error',()=>{});try{process.stdout.write(notice+'\n');}catch{}try{fs.mkdirSync(path.join(profile.directory,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(profile.directory,'logs','isolated-profile.log'),new Date().toISOString()+' '+notice+'\n',{mode:0o600});}catch{}
  const marked=title=>(title||definition.name).endsWith(ISOLATED_TITLE_SUFFIX)?(title||definition.name):(title||definition.name)+ISOLATED_TITLE_SUFFIX;
  // Electron applies constructor options after this event fires, so mark again on the next turn.
  app.on('browser-window-created',(_event,created)=>{const mark=()=>{if(!created.isDestroyed())created.setTitle(marked(created.getTitle()));};mark();setImmediate(mark);created.on('page-title-updated',(event,title)=>{event.preventDefault();created.setTitle(marked(title));});});
@@ -29,6 +29,13 @@ if(profile.isolated){
 let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,uiStateStore,activityOutbox,activityDraining=false,status='Open the application to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
 let background=!profile.isolated&&app.isPackaged&&(process.argv.includes('--desktop-updater')||(process.platform==='darwin'&&app.getLoginItemSettings().wasOpenedAtLogin));
 const userData=app.getPath('userData'),setupURL=pathToFileURL(path.join(__dirname,'setup.html')).href;
+// Terrier testers' district data is downloaded privately into <packRoot>\stores (their dataDirectory) and its state kept in <packRoot>\state, outside the synced Documents profile.
+const packs=definition.id==='terrier'?require('./district-packs.cjs'):null,downloads=new AbortController();
+const packRoot=packs?packs.storeRoot({userData,localAppData:process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),packaged:app.isPackaged,isolated:profile.isolated}):null;
+// A non-legacy tester's Chromium session data (its disk cache holds voter data) lives in the store, not the synced profile. Electron only honours sessionData
+// when it is set synchronously before 'ready', so the legacy-owner test reads settings.json here; the persist: partition below then lives under it.
+let startSettings={};try{startSettings={...JSON.parse(fs.readFileSync(path.join(userData,'settings.json'),'utf8'))};}catch{}
+if(packs&&startSettings.terrierLegacy===undefined)app.setPath('sessionData',packs.sessionDirectory(packRoot));
 const accessURL=pathToFileURL(path.join(__dirname,'access.html')).href;
 const loadingURL=pathToFileURL(path.join(__dirname,'loading.html')).href;
 const installingURL=pathToFileURL(path.join(__dirname,'installing.html')).href;
@@ -48,6 +55,8 @@ function read(name,fallback={}){try{return JSON.parse(fs.readFileSync(file(name)
 function write(name,value){fs.mkdirSync(userData,{recursive:true,mode:0o700});const temporary=file(name+'.tmp');const fd=fs.openSync(temporary,'w',0o600);try{fs.writeFileSync(fd,JSON.stringify(value,null,2));fs.fsyncSync(fd);}finally{fs.closeSync(fd);}fs.renameSync(temporary,file(name));}
 function loadEnrollment(){if(!fs.existsSync(file(enrollmentFile)))return null;if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const enrollment=JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile))));if(githubConfig){if(enrollment.source!=='github'||enrollment.repository!==githubConfig.repository||enrollment.appId!==definition.id||enrollment.deviceToken)throw new Error('Protected GitHub update source mismatch');return enrollment;}if(enrollment.deviceToken){saveEnrollment(enrollment);return enrollment;}const result=credentialCommand(resources,definition.id,enrollment.deviceId,'read');if(typeof result.token!=='string'||result.token.length<20)throw new Error('Enrollment credential missing; pair this app again');return {...enrollment,deviceToken:result.token};}
 function saveEnrollment(value){if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const {deviceToken,...metadata}=value;if(deviceToken)credentialCommand(resources,definition.id,value.deviceId,'write',deviceToken);const temporary=file(enrollmentFile+'.tmp');fs.writeFileSync(temporary,safeStorage.encryptString(JSON.stringify(metadata)),{mode:0o600});fs.renameSync(temporary,file(enrollmentFile));}
+// Settings written after startup always pass isolated-profile confinement.
+const saveSettings=value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value);
 function updateStatus(message){status=message;if(settingsWindow&&!settingsWindow.isDestroyed())settingsWindow.webContents.send('desktop:status',message);}
 function setupOnly(event){if(!settingsWindow||settingsWindow.isDestroyed()||event.sender!==settingsWindow.webContents||event.senderFrame!==settingsWindow.webContents.mainFrame||event.senderFrame.url!==setupURL)throw new Error('Untrusted desktop request');}
 function runtimeOnly(event){if(runtime.requestsAllowed===false||accessLifecycle?.suspended||event.sender!==window.webContents||event.senderFrame!==window.webContents.mainFrame||!runtime.origin||new URL(event.senderFrame.url).origin!==runtime.origin)throw new Error('Untrusted application request');}
@@ -106,13 +115,56 @@ const launch=require('./single-launch.cjs').singleLaunch(async function launchOn
 async function launchAuthorized(fromAccess){
  background=false;
  let generation=accessLifecycle?.generation;
- try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked'&&runtime.child&&!accessLifecycle.suspended)await accessLifecycle.suspend('locked');});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
+ try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await settleDistrict(gate);await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked')await onRevoked();});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(accessGate?.accepted?.revoked)await dropDistrictData();if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
  if(closing||generation!==accessLifecycle.generation)return;
  if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
  openingAccess=true;
- try{const approved=await accessGate.authorize();await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=await runtime.start(read('settings.json'));districtSwitch?.remember(read('settings.json'),runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+ try{if(packs&&!runtime.child&&!await prepareDistrictData())return;if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize();await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=await runtime.start(read('settings.json'));bundleNotice();districtSwitch?.remember(read('settings.json'),runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
  catch(error){if(accessLifecycle?.suspended)return;try{if(!portable)await updater.markApplicationFailed();}catch{}updateStatus('Application startup failed. Check local logs.');await showSetup();throw error;}
  finally{openingAccess=false;}
+}
+// Terrier: the chosen district stays while approved; otherwise the first approved one. Runs before authorization, which requires an approved district.
+async function settleDistrict(gate){
+ if(!packs||runtime.child)return;const settings=read('settings.json');await gate.evidence();
+ const district=packs.defaultDistrict(settings,gate.districts());if(district!==settings.district)saveSettings({...settings,district});
+}
+// Loading page text lives here and is re-sent when the page finishes loading; the access window stays hidden meanwhile.
+let loadingText='';
+function loadingStatus(text){
+ loadingText=text;if(!window||window.isDestroyed())return;
+ if(window.webContents.getURL()!==loadingURL){accessWindow?.hide();window.loadURL(loadingURL).then(()=>{if(!closing&&!window.isDestroyed())window.show();}).catch(()=>{});}
+ else{window.webContents.send('desktop:status',text);if(!window.isVisible())window.show();}
+}
+const journalStore=()=>require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'dataset-journal'});
+// A non-legacy Terrier tester's district-data log and backend.log (runtime.cjs logRoot) live in the private store; the owner's legacy install and the other apps keep the profile's logs folder.
+const districtLogs=()=>{try{if(packs&&read('settings.json').terrierLegacy===undefined)return packs.logDirectory(packRoot);}catch{}return path.join(userData,'logs');};
+function districtLog(message){try{const logs=districtLogs();fs.mkdirSync(logs,{recursive:true,mode:0o700});fs.appendFileSync(path.join(logs,'district-data.log'),new Date().toISOString()+' '+String(message).slice(0,300)+'\n',{mode:0o600});}catch{}}
+// The backend serves a district even when its downloaded bundle could not be imported (it leaves a marker and retries at its next start): say so.
+function bundleNotice(){const message=packs?.bundleImportNotice(runtime?.roots);if(message)updateStatus(message);}
+// False when the download stopped (status shown on the loading page) or the app is closing; the backend is not started then.
+async function prepareDistrictData(){
+ const settings=read('settings.json');if(settings.terrierLegacy!==undefined)return true;
+ try{
+  await packs.ensureDistrictData(accessGate,{root:packRoot,settings,journal:journalStore(),check:packs.districtCheck({resources,protectedPaths:[app.getAppPath(),path.dirname(process.execPath)]}),
+   confine:profile.isolated?item=>confineIsolatedPath(profile.boundary,item,'The district data store'):null,onStatus:loadingStatus,signal:downloads.signal,
+   keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);}});
+  return true;
+ }catch(error){
+  if(closing||downloads.signal.aborted)return false;
+  districtLog(error?.cause?.message||error?.message);
+  if(error instanceof packs.DistrictDataStop){loadingStatus(error.message+' Reopen Terrier to try again.');return false;}
+  throw error;
+ }
+}
+// Learned revocation: lock the open workspace, then stop the backends and delete the private store with its journal.
+async function onRevoked(){if(runtime.child&&!accessLifecycle.suspended)await accessLifecycle.suspend('locked');await dropDistrictData();}
+async function dropDistrictData(){
+ if(!packs||read('settings.json').terrierLegacy!==undefined)return;
+ try{if(districtSwitch)await districtSwitch.stopAll();else await runtime.stop();
+  // The session folder under the store is held open by Chromium: empty its cookies and cache first, so nothing readable survives if deleting it is refused.
+  await runtimePartition?.clearStorageData().catch(()=>{});await runtimePartition?.clearCache().catch(()=>{});
+  await packs.removeStore(packRoot,{journal:journalStore()});}
+ catch(error){updateStatus('Private district data could not be removed: '+error.message);}
 }
 async function showTerrierSignIn(){
  if(authenticationWindow&&!authenticationWindow.isDestroyed()){if(accessLifecycle.authenticationCurrent(authenticationTicket)){authenticationWindow.show();return;}const stale=authenticationWindow;authenticationWindow=null;authenticationTicket=null;runtime.authenticationContentsId=null;stale.close();}
@@ -129,7 +181,7 @@ async function resumeTerrierSession(){
  try{const approved=await accessGate.authorize();if(authenticationWindow!==owned||!accessLifecycle.authenticationCurrent(ticket))return;await accessLifecycle.resume(approved,{freshPassword:true,expectedGeneration:ticket.generation});if(closing||!await accessLifecycle.canReveal(ticket.generation,approved))return;openingAccess=true;owned.close();accessWindow?.close();window.show();await accessLifecycle.heartbeat();}catch{}finally{openingAccess=false;}
 }
 async function checkUpdates(){
- if(portable){updateStatus('Portable copy: replace this extracted application folder to update. Your local data remains separate.');if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked'&&runtime.child&&!accessLifecycle.suspended)await accessLifecycle.suspend('locked');}catch{}await drainActivity();return;}
+ if(portable){updateStatus('Portable copy: replace this extracted application folder to update. Your local data remains separate.');if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();}catch{}await drainActivity();return;}
 
  if(checkingUpdates||closing||updater.osShutdown)return;checkingUpdates=true;
  try{
@@ -138,7 +190,7 @@ async function checkUpdates(){
   catch{enrollmentDeferred=true;}
   await updater.check();
   if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile)))updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');
-  if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked'&&runtime.child&&!accessLifecycle.suspended)await accessLifecycle.suspend('locked');if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}
+  if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}
   await drainActivity();
   if(background&&!runtime.child&&!window.isVisible()&&!updater.osShutdown){const activating=await updater.activateAfterClose();if(activating)closing=true;}
  }catch{updateStatus('Update check deferred. The receiver will retry; local work remains available.');}
@@ -153,14 +205,23 @@ async function confirmClose(){
     if(response===1){if(await runtime.activity()===true){updateStatus('Close deferred: a calculation is running.');return;}closeApproved=true;window.close();}
   }finally{askingClose=false;}
 }
-async function finishClose(){if(closing)return;closing=true;clearInterval(interval);clearInterval(presenceInterval);networkWatcher?.close();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
+async function finishClose(){if(closing)return;closing=true;downloads.abort();clearInterval(interval);clearInterval(presenceInterval);networkWatcher?.close();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
 app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
-  if(!fs.existsSync(file('settings.json'))){const dataDirectory=path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',{dataDirectory,...(definition.id==='terrier'?{district:'co-05'}:{})});}
+  // Terrier: new installs use the private store; a tester still on the old default <profile>\data is moved to it (explicit directories are never changed).
+  if(!fs.existsSync(file('settings.json'))){const dataDirectory=packs?path.join(packRoot,'stores'):path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',{dataDirectory,...(definition.id==='terrier'?{district:'co-05'}:{})});}
+  else if(packs){
+   const previous=read('settings.json'),migrated=packs.migrateSettings(previous,{userData,root:packRoot});
+   if(migrated){
+    // The old default data and state trees (voter data, accounts, secrets) must not stay in Documents. They go first: if that fails the settings stay and the next start retries.
+    let cleaned=false;try{const removed=await packs.removeOldDefaultData(previous,{userData});districtLog(removed.length?'removed the old default district data from the profile: '+removed.join(', '):'no old default district data to remove from the profile');cleaned=true;}catch(error){districtLog('could not remove the old default district data ('+String(error?.message).slice(0,160)+'); migration retries on next start');}
+    if(cleaned){fs.mkdirSync(migrated.dataDirectory,{recursive:true,mode:0o700});write('settings.json',migrated);}
+   }
+  }
   if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){dialog.showErrorBox(definition.name+' isolated test profile refused',error.message+' The backend was not started. Correct or remove settings.json in '+userData+'.');app.quit();return;}
-  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null});
+  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
   runtime=createRuntime();
   if(definition.id==='terrier'){
     const {verifyDistrictAsync}=require('./district-switch.cjs');
@@ -168,7 +229,7 @@ app.whenReady().then(async()=>{
      read:()=>read('settings.json'),write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),scope:()=>accessGate?.districts()||[],
      fingerprint:configuration=>require('./district-transition.cjs').districtFingerprint(userData,configuration),
      verify:configuration=>verifyDistrictAsync(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,[app.getAppPath(),path.dirname(process.execPath)]),createRuntime,current:()=>runtime,
-     activate:next=>{runtime=next;runtime.contentsId=window.webContents.id;if(accessLifecycle)accessLifecycle.runtime=next;},
+     activate:next=>{runtime=next;runtime.contentsId=window.webContents.id;if(accessLifecycle)accessLifecycle.runtime=next;bundleNotice();},
      location:()=>window.webContents.getURL(),navigate:url=>window.loadURL(url),
      canReveal:approved=>!closing&&accessLifecycle.canReveal(accessLifecycle.generation,approved),onUnavailable:showAccess,
      log:value=>{try{const logs=path.join(userData,'logs');fs.mkdirSync(logs,{recursive:true});fs.appendFileSync(path.join(logs,'district-switch.jsonl'),JSON.stringify({...value,time:new Date().toISOString()})+'\n');}catch{}}
@@ -202,6 +263,7 @@ app.whenReady().then(async()=>{
   // A late ready-to-show event must never reveal preserved locked content.
   window.on('closed',()=>{authenticationWindow?.close();accessWindow?.close();settingsWindow?.close();});
   const permitted=url=>url===loadingURL||Boolean(runtime.origin&&new URL(url).origin===runtime.origin);
+  window.webContents.on('did-finish-load',()=>{if(loadingText&&window.webContents.getURL()===loadingURL)window.webContents.send('desktop:status',loadingText);});
   window.webContents.on('will-navigate',(event,url)=>{if(!permitted(url))event.preventDefault();});
   window.webContents.on('will-redirect',(event,url)=>{if(!permitted(url))event.preventDefault();});
   window.webContents.setWindowOpenHandler(({url})=>{try{if(['https:','http:'].includes(new URL(url).protocol)&&!url.startsWith('http://127.'))shell.openExternal(url);}catch{}return {action:'deny'};});
@@ -245,7 +307,7 @@ app.whenReady().then(async()=>{
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(path.join(userData,'logs'))},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
   window.on('close',event=>{
     if(updater.osShutdown||closeApproved||!runtime.child)return;
     event.preventDefault();if(askingClose)return;askingClose=true;

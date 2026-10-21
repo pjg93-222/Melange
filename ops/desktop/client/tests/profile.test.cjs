@@ -108,9 +108,12 @@ test('main process applies the isolated plan before userData, lock, login item, 
   at("confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null");
   at('verifyDistrictAsync(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,');
   at("write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),");
-  // The only other writer creates the default settings with dataDirectory <userData>\data, inside the confined profile.
-  at("const dataDirectory=path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',");
-  assert.equal(source.match(/write\('settings.json'/g).length,2,'no other settings writer bypasses confinement');
+  // Two writers run before the load check above (default settings and the old-default migration, both inside the confined profile
+  // or its private store, which the load check then verifies); every later writer is the confining saveSettings or the district transition.
+  const created=at("const dataDirectory=packs?path.join(packRoot,'stores'):path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',"),migrated=at("write('settings.json',migrated)");
+  assert.ok(created<load&&migrated<load,'unconfined writers precede the load-time confinement check');
+  at("const saveSettings=value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value);");
+  assert.equal(source.match(/write\('settings.json'/g).length,4,'no other settings writer bypasses confinement');
 });
 function boundaryFixture(t){
   const {home,options}=sandbox(t),root=path.join(home,'iso'),production=path.join(home,'Documents','MelangeApplicationState','mentat');

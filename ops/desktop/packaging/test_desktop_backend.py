@@ -1,10 +1,16 @@
+import contextlib
+import hashlib
 import importlib.util
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import io
 import json
 from pathlib import Path
+import sys
+import tempfile
 import threading
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 import unittest
+from unittest.mock import patch
 import urllib.request
 from urllib.error import HTTPError
 
@@ -86,6 +92,90 @@ class BackendBoundaryTests(unittest.TestCase):
         self.assertEqual(status, ['403 Forbidden'])
         self.assertEqual(calls, [])
         self.assertEqual(guarded({'HTTP_X_DESKTOP_TOKEN':'x'*32}, lambda *args: None), [b'existing django'])
+
+
+class DistrictBundleImportTests(unittest.TestCase):
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.data, self.state = Path(temp.name) / 'data', Path(temp.name) / 'state'
+        self.data.mkdir()
+        self.state.mkdir()
+        self.imported = []
+        def import_bundle(file, actor='local operator', expected_sha256=None):  # the checksum gate of Terrier bundles.import_bundle
+            if hashlib.sha256(Path(file).read_bytes()).hexdigest() != expected_sha256:
+                raise ValueError('Bundle checksum does not match the expected sha256')
+            self.imported.append(expected_sha256)
+        bundles = ModuleType('server.research.bundles')
+        bundles.import_bundle = import_bundle
+        modules = patch.dict(sys.modules, {'server': ModuleType('server'), 'server.research': ModuleType('server.research'),
+                                           'server.research.bundles': bundles})
+        modules.start()
+        self.addCleanup(modules.stop)
+
+    def pack(self, content, sidecar=None):
+        (self.data / 'bundle.zip').write_bytes(content)
+        (self.data / 'bundle.zip.sha256').write_text((sidecar or hashlib.sha256(content).hexdigest()) + '\n', encoding='utf-8')
+
+    def run_import(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            backend.import_district_bundle(self.data, self.state)
+        return stderr.getvalue()
+
+    def test_marker_makes_import_once_per_sidecar_sha(self):
+        self.assertEqual(self.run_import(), '')  # no pack: nothing to do
+        self.assertFalse((self.state / 'bundle-imported.sha256').exists())
+        self.pack(b'first')
+        first = hashlib.sha256(b'first').hexdigest()
+        self.assertEqual((self.run_import(), self.run_import()), ('', ''))
+        self.assertEqual(self.imported, [first])
+        self.assertEqual((self.state / 'bundle-imported.sha256').read_text(encoding='utf-8'), first + '\n')
+        self.pack(b'second')
+        self.run_import()
+        self.assertEqual(self.imported, [first, hashlib.sha256(b'second').hexdigest()])
+
+    def test_wrong_sha_only_warns_and_is_retried(self):
+        self.pack(b'bundle', sidecar='0' * 64)
+        warning = self.run_import()
+        self.assertIn('DESKTOP_RUNTIME_WARNING', warning)
+        self.assertIn('checksum', warning)
+        self.assertEqual(self.imported, [])
+        self.assertFalse((self.state / 'bundle-imported.sha256').exists())
+        self.pack(b'bundle')
+        self.assertEqual(self.run_import(), '')
+        self.assertEqual(self.imported, [hashlib.sha256(b'bundle').hexdigest()])
+
+    def test_failed_import_leaves_a_marker_that_the_next_successful_start_removes(self):
+        failed = self.state / 'bundle-import-failed'
+        self.assertEqual(self.run_import(), '')  # no pack: no marker either
+        self.assertFalse(failed.exists())
+        self.pack(b'bundle', sidecar='0' * 64)
+        self.run_import()
+        reason = failed.read_text(encoding='utf-8')
+        self.assertTrue(reason.startswith('ValueError: ') and 'checksum' in reason and reason.count('\n') == 1, reason)
+        self.assertFalse((self.state / 'bundle-imported.sha256').exists())
+        self.pack(b'bundle')
+        self.assertEqual(self.run_import(), '')
+        self.assertFalse(failed.exists())
+        self.assertEqual(self.imported, [hashlib.sha256(b'bundle').hexdigest()])
+
+    def test_marker_is_cleared_when_the_bundle_was_already_imported_and_failures_never_raise(self):
+        failed = self.state / 'bundle-import-failed'
+        self.pack(b'bundle')
+        self.run_import()
+        failed.write_text('stale\n', encoding='utf-8')
+        self.assertEqual(self.run_import(), '')  # sidecar already imported: nothing to do, but the stale failure is gone
+        self.assertFalse(failed.exists())
+        self.assertEqual(len(self.imported), 1)
+        (self.data / 'bundle.zip.sha256').unlink()  # unverifiable pack
+        warning = self.run_import()
+        self.assertIn('DESKTOP_RUNTIME_WARNING', warning)
+        self.assertTrue(failed.read_text(encoding='utf-8').startswith('FileNotFoundError: '))
+        # a state folder that cannot take the marker still only warns
+        failed.unlink()
+        failed.mkdir()
+        self.assertIn('DESKTOP_RUNTIME_WARNING', self.run_import())
 
 
 if __name__ == '__main__':

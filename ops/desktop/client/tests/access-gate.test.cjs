@@ -59,3 +59,8 @@ test('request accepts displayName and an optional 1 to 64 character invite code,
  const none=fixture();await none.gate.action('request',{displayName:'Fixture laptop'});assert.deepEqual(none.state.calls,[{name:'Fixture laptop',options:{newRequest:false,reapproval:false,inviteCode:''}}]);
  for(const payload of [{displayName:'Fixture laptop',inviteCode:'x'.repeat(65)},{displayName:'Fixture laptop',inviteCode:' '},{displayName:'Fixture laptop',inviteCode:'ABCD',extra:'x'}]){const third=fixture();await assert.rejects(third.gate.action('request',payload));assert.equal(third.state.calls.length,0);}
 });
+test('a revoked non-legacy Terrier install reports its district store removed; the legacy owner and the other apps keep their data',async()=>{
+ const flags=[];
+ for(const [appId,terrierLegacy] of [['terrier',undefined],['terrier',{district:'co-05'}],['melange',undefined]]){const {gate,state,grant}=fixture(appId);state.configuration={district:'co-05',terrierLegacy};state.accepted={grant,revoked:true};flags.push((await gate.info()).districtDataRemoved);}
+ assert.deepEqual(flags,[true,undefined,undefined]);
+});

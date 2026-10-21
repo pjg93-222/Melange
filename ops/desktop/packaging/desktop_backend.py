@@ -204,6 +204,29 @@ def relocate_mentat_modules(code_root, data_root, workspace=None, app_data=None)
                 setattr(module, name, (app_data or data_root / 'app-data') / Path(*relative.parts[2:]))
 
 
+def import_district_bundle(data, state):
+    """Activate a downloaded district pack's bundle.zip once per sidecar sha256; a refusal warns and keeps the active snapshot.
+
+    The district is served either way. A failed import leaves state/bundle-import-failed (a short reason) for the desktop client to
+    report; the next successful start removes it."""
+    bundle, marker, failed = data / 'bundle.zip', state / 'bundle-imported.sha256', state / 'bundle-import-failed'
+    if not bundle.is_file():
+        return
+    try:
+        expected = (data / 'bundle.zip.sha256').read_text(encoding='utf-8').split()[0].lower()
+        if not (marker.is_file() and marker.read_text(encoding='utf-8').strip() == expected):
+            from server.research.bundles import import_bundle
+            import_bundle(bundle, actor='desktop district pack', expected_sha256=expected)
+            marker.write_text(expected + '\n', encoding='utf-8')
+        failed.unlink(missing_ok=True)
+    except Exception as error:  # never block startup: an unimported bundle is retried at the next launch
+        print('DESKTOP_RUNTIME_WARNING: district bundle not imported (%s): %s' % (type(error).__name__, str(error)[:200]), file=sys.stderr, flush=True)
+        try:
+            failed.write_text('%s: %s\n' % (type(error).__name__, ' '.join(str(error).split())[:200]), encoding='utf-8')
+        except OSError:  # the marker is only a courtesy to the client; an unwritable state folder must not stop the district
+            pass
+
+
 def require_runtime(root, name, relative):
     file = root / 'native' / relative
     if not file.is_file():
@@ -329,6 +352,7 @@ def run(options, token):
         migrate_django(state)
         from server.research.desktop_principal import prepare_principal
         launch_path = prepare_principal(principal, state)
+        import_district_bundle(data, state)
         command = importlib.import_module('server.research.management.commands.serve')
         def desktop_fault_log(port):
             import faulthandler

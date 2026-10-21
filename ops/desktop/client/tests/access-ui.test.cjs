@@ -129,3 +129,10 @@ test('a stored pending request with no reply yet is checked once on load; nothin
  assert.deepEqual(await methods({...base,phase:'pending',requestStatus:'pending',requestExpiresAt:2000000000}),['info']);
  assert.deepEqual(await methods(base),['info']);
 });
+test('the revoked message says district data was removed only when the app reports the store removed',async()=>{
+ for(const [extra,pattern] of [[{},/Your local data remains on this computer/],[{districtDataRemoved:true},/^Access was revoked by the administrator\. District data has been removed from this computer\.$/]]){
+  const f=fixture({...base,appId:'terrier',appName:'Terrier',phase:'revoked',canRequestAgain:true,...extra}),ui=mount(f.document,f.api,f.window);await ui.ready;
+  assert.match(f.elements.description.textContent,pattern);ui.dispose();
+ }
+ assert.throws(()=>validateState({...base,phase:'revoked',canRequestAgain:true,districtDataRemoved:'yes'}));
+});

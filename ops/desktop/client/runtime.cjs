@@ -23,7 +23,7 @@ function activity(origin,token,appId){return new Promise(resolve=>{
   });request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));
 });}
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null}={}){this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;}
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;}
   async start(configuration){
     const generation=this.generation||0,check=()=>{if(generation!==(this.generation||0))throw new Error('Application startup cancelled.');};
     if(typeof this.authorize!=='function')throw new Error('Administrator approval and local authentication are required.');
@@ -41,7 +41,8 @@ class Runtime {
     const appId=this.definition.id, command=backendCommand(this.resources,appId),{binary,runtime}=command;
     const roots=prepareRuntimeRoots(appId,this.userData,configuration,[this.resources,path.dirname(binary),...this.protectedPaths]);confineRoots(roots);this.roots=roots;
     const port=await freePort();check();this.token=crypto.randomBytes(32).toString('base64url');this.origin='http://127.0.0.1:'+port;
-    const state=roots.state,logs=path.join(this.userData,'logs');fs.mkdirSync(logs,{recursive:true});
+    // logRoot (Terrier's private store, main.cjs) keeps backend.log out of the synced profile; the legacy owner and the other apps log in the profile.
+    const state=roots.state,logs=this.logRoot&&!roots.legacyOwner?this.logRoot:path.join(this.userData,'logs');fs.mkdirSync(logs,{recursive:true});
     const environment={...backendEnvironment(),DESKTOP_LAUNCH_TOKEN:this.token};
     if(appId==='terrier'){
       if(!authorization.principal||authorization.principal.districtId!==roots.district)throw new Error('Approved Terrier account is required.');
