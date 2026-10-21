@@ -57,6 +57,9 @@ ok('SGATE monotone down the full ladder',
    all(MC.SGATE[a]>=MC.SGATE[b] for a,b in zip(
        ('Highly Persuadable','Persuadable','Lean Persuadable','True Neutral','Lean Skeptic','Skeptic','Highly Skeptical'),
        ('Persuadable','Lean Persuadable','True Neutral','Lean Skeptic','Skeptic','Highly Skeptical','Opponent'))))
+ok('persuadable ladder TN < LP < P < HP, same order in SGATE and TORD (HP .65 ratified 2026-10-11, Paul-delegated RE-2)',
+   all(t[a]<t[b] for t in (MC.PERS,MC.SGATE,MC.TORD) for a,b in zip(
+       ('True Neutral','Lean Persuadable','Persuadable'),('Lean Persuadable','Persuadable','Highly Persuadable'))))
 ok('auto-repair SMART Acts excluded even when source title is ambiguous',
    BR.excluded_bill('H.R.3664',117,'SMART Act','') and
    BR.excluded_bill('H.R.1707',118,'SMART Act',''))
