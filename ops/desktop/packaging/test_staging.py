@@ -45,6 +45,23 @@ class TemplateStagingTests(unittest.TestCase):
         self.assertIn('mentat/app/template.csv', staged)
         self.assertIn('mentat/tools/pocket/manifest.webmanifest', staged)
 
+    def test_terrier_ocr_assets_licences_and_parcel_evidence_are_staged(self):
+        # These immutable assets were already required by the Terrier release gate.
+        spec = json.loads((HERE / 'runtime-manifest.json').read_text(encoding='utf-8'))['apps']['terrier']
+        ocr = 'frontend/dist/ocr/tesseract-6.0.1/'
+        required = {ocr + name for name in ('eng.traineddata.gz', 'asset-manifest.json', 'LICENSE-tessdata.txt',
+                                           'LICENSE-tesseract-core.txt', 'LICENSE-tesseract.js.txt', 'NOTICE.txt')}
+        required.add('server/research/location_evidence/southington-municipal-parcels-2026-10-17.json')
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for relative in spec['sourceDirectories']:
+                (root / relative).mkdir(parents=True, exist_ok=True)
+            for relative in spec['sourceFiles']:
+                (root / relative).parent.mkdir(parents=True, exist_ok=True)
+                (root / relative).write_text('x', encoding='utf-8')
+            staged = {path.as_posix() for path in selected_files(root, spec)}
+        self.assertLessEqual(required, staged)
+
     def test_runtime_state_and_databases_are_never_staged(self):
         # Mentat's backend writes state/prewarm/access.sqlite (+ -wal/-shm) at run time; none may ship.
         spec = json.loads((HERE / 'runtime-manifest.json').read_text(encoding='utf-8'))['apps']['mentat']
