@@ -8,8 +8,7 @@ const path=require('node:path');
 const {appDefinition}=require('./apps.cjs');
 const {backendCommand,backendEnvironment}=require('./backend-command.cjs');
 const {runtimeRoots,prepareRuntimeRoots,validatedLaunchPath,refuseInstalledOverlap}=require('./runtime-roots.cjs');
-// One value per app process, never written anywhere: the Terrier owner's one sign-in for every district is bound to
-// it, so every app launch asks for the owner password again (Geo server/research/desktop_owner.py).
+// One value per app process, never written anywhere: Terrier's approved owner session is bound to this native launch.
 const OWNER_SESSION_KEY=crypto.randomBytes(32).toString('base64url');
 function freePort(){return new Promise((resolve,reject)=>{const s=net.createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const port=s.address().port;s.close(()=>resolve(port));});});}
 function health(origin,token,appId){return new Promise(resolve=>{const request=http.get(origin+'/__desktop/health',{headers:{'X-Desktop-Token':token},timeout:1000},response=>{let body='';response.on('data',c=>{body+=c;if(body.length>4096)response.destroy();});response.on('error',()=>resolve(null));response.on('close',()=>resolve(null));response.on('end',()=>{try{const value=JSON.parse(body);if(response.statusCode!==200||value.appId!==appId){resolve(null);return;}resolve({launchPath:validatedLaunchPath(appId,value.launchPath)});}catch{resolve(null);}});});request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));});}
@@ -23,8 +22,9 @@ function activity(origin,token,appId){return new Promise(resolve=>{
   });request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));
 });}
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;}
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;}
   async start(configuration){
+    configuration=structuredClone(configuration);
     const generation=this.generation||0,check=()=>{if(generation!==(this.generation||0))throw new Error('Application startup cancelled.');};
     if(typeof this.authorize!=='function')throw new Error('Administrator approval and local authentication are required.');
     const authorization=await this.authorize(configuration);
@@ -33,7 +33,7 @@ class Runtime {
     if(this.child&&this.authorization&&require('./access-lifecycle.cjs').authorizationIdentity(authorization)!==require('./access-lifecycle.cjs').authorizationIdentity(this.authorization))throw new Error('Close the app before changing its approved account.');
     this.authorization=authorization;
     const desired=runtimeRoots(this.definition.id,this.userData,configuration);
-    if(this.child){if(JSON.stringify(desired)!==JSON.stringify(this.roots))throw new Error('Close the app before changing its district or data directory.');return this.origin;}
+    if(this.child){if(JSON.stringify(desired)!==JSON.stringify(this.roots))throw new Error('Close the app before changing its district or data directory.');this.configuration=configuration;return this.origin;}
     // Isolated test profiles only: every backend root must stay inside the isolated tree,
     // checked before any directory is created and again immediately before spawn.
     const confineRoots=roots=>{if(this.confine)this.confine([configuration.dataDirectory,roots.data,roots.state]);};
@@ -58,13 +58,14 @@ class Runtime {
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
     if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner,'--owner-root',ownerRoot);
+    if(roots.githubDistrictData===true) args.push('--github-district-data');
     const child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:['ignore',log,log]});fs.closeSync(log);this.child=child;
-    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');if(this.child===child)this.child=null;if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}});
+    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');if(this.child===child){this.child=null;this.configuration=null;}if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}});
     const deadline=Date.now()+120000;
-    while(Date.now()<deadline){check();if(failed){await this.stop();throw failed;}const ready=await health(this.origin,this.token,appId);check();if(ready){this.launchPath=ready.launchPath;return this.origin;}await new Promise(r=>setTimeout(r,250));}
+    while(Date.now()<deadline){check();if(failed){await this.stop();throw failed;}const ready=await health(this.origin,this.token,appId);check();if(ready){this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
     await this.stop();throw new Error('Application startup timed out. See backend.log.');
   }
-  async stop(){this.generation=(this.generation||0)+1;const child=this.child,renderer=this.renderer;this.child=null;this.renderer=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(!child)return;
+  async stop(){this.generation=(this.generation||0)+1;const child=this.child,renderer=this.renderer;this.child=null;this.renderer=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(!child)return;
     if(process.platform==='win32') await new Promise(resolve=>{const killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});killer.once('error',()=>{child.kill();resolve();});killer.once('exit',resolve);});
     else {try{process.kill(-child.pid,'SIGTERM');}catch{}}
     if(child.exitCode===null)await Promise.race([new Promise(r=>child.once('exit',r)),new Promise(r=>setTimeout(r,5000))]);

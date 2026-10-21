@@ -106,7 +106,8 @@ test('main process applies the isolated plan before userData, lock, login item, 
   const load=at("if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){"),runtime=at('createRuntime=()=>new Runtime(');
   assert.ok(load<runtime&&source.slice(load,runtime).includes('app.quit();return;}'),'invalid loaded settings stop before any runtime is created');
   at("confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null");
-  at('verifyDistrictAsync(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,');
+  const confined=at('const selected=profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,'),prepared=at('effective=await prepareOwnerDistrict(selected);'),verified=at('verifyDistrictAsync(resources,userData,effective,');
+  assert.ok(confined<prepared&&prepared<verified,'district settings are confined before data preparation and effective roots are verified before launch');
   at("write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),");
   // Two writers run before the load check above (default settings and the old-default migration, both inside the confined profile
   // or its private store, which the load check then verifies); every later writer is the confining saveSettings or the district transition.

@@ -238,6 +238,10 @@ def run(options, token):
     source = options.source_root.resolve()
     data = options.data_root.resolve()
     state = options.state_root.resolve()
+    github_data = bool(getattr(options, 'github_district_data', False))
+    if github_data and (options.app != 'terrier' or not getattr(options, 'legacy_owner', None)
+                        or data == state or data.is_relative_to(state) or state.is_relative_to(data)):
+        raise ValueError('GitHub district data requires an existing owner and separate data/state roots')
     principal = None
     if options.app == 'terrier':
         sys.path.insert(0, str(source))
@@ -330,10 +334,10 @@ def run(options, token):
                           TERRIER_WORK_PY=sys.executable, TERRIER_PY312=sys.executable, TERRIER_COMPUTE='windows')
         legacy_owner = getattr(options, 'legacy_owner', None)
         from terrier_district import validate_district
-        validate_district(source, data, options.district, legacy=bool(legacy_owner))
+        validate_district(source, data, options.district, legacy=bool(legacy_owner), state_root=state, github_data=github_data)
         if legacy_owner:
             from terrier_owner import legacy_secret_path
-            key = legacy_secret_path(data, state, legacy_owner)
+            key = legacy_secret_path(data, state, legacy_owner, separate_data=github_data)
         else:
             key = state / 'django-secret'
         if not key.exists():
@@ -380,6 +384,122 @@ def run(options, token):
         call_command('serve', port=options.port)
 
 
+def extract_github_district_archive(request, *, check=None):
+    """Extract only six signed runtime roles into a new, disposable directory."""
+    import re
+    import shutil
+    import stat
+    import zipfile
+    required = {'contacts.sqlite3', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3', 'density.json'}
+    if not isinstance(request, dict) or set(request) != {'archive', 'destination', 'district', 'files', 'sourceRoot'}:
+        raise ValueError('Invalid district archive request')
+    district = request['district']
+    if district not in {'co-05', 'or-05', 'ct-01'} or not isinstance(request['files'], list) or len(request['files']) != 6:
+        raise ValueError('Invalid district runtime roles')
+    for key in ('archive', 'destination', 'sourceRoot'):
+        if not isinstance(request[key], str) or not Path(request[key]).is_absolute():
+            raise ValueError('Absolute local paths are required')
+    archive, output, source = (Path(request[key]) for key in ('archive', 'destination', 'sourceRoot'))
+    if archive.is_symlink() or not archive.is_file() or output.exists() or output.is_symlink():
+        raise ValueError('Archive must exist and destination must be new')
+    source = source.resolve(strict=True)
+    parent = output.parent.resolve(strict=True)
+    output = parent / output.name
+    if output == source or output.is_relative_to(source) or source.is_relative_to(output):
+        raise ValueError('District data must remain outside installed source')
+    specs = {}
+    for item in request['files']:
+        if not isinstance(item, dict) or set(item) != {'role', 'path', 'bytes', 'sha256'}:
+            raise ValueError('Invalid runtime file specification')
+        role = item['role']
+        if role not in required or role in specs or item['path'] != district + '/data/' + role:
+            raise ValueError('Invalid or duplicate runtime path')
+        if type(item['bytes']) is not int or not 0 < item['bytes'] <= 3 * 1024**3 or not isinstance(item['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', item['sha256']):
+            raise ValueError('Invalid runtime file size or checksum')
+        specs[role] = item
+    if set(specs) != required or sum(item['bytes'] for item in specs.values()) > 12 * 1024**3:
+        raise ValueError('Incomplete or oversized district')
+    created = None
+    try:
+        with archive.open('rb') as archive_stream, zipfile.ZipFile(archive_stream) as zipped:
+            entries = zipped.infolist()
+            if not 6 <= len(entries) <= 10000:
+                raise ValueError('Unexpected archive inventory')
+            names, selected = set(), {}
+            for item in entries:
+                name = item.filename
+                parts = name.rstrip('/').split('/')
+                mode = item.external_attr >> 16
+                # ZipInfo normalizes native separators and strips NUL on read;
+                # reject changes to the original name before using its fields.
+                if (item.orig_filename != name or not name or len(name) > 400 or '\\' in name or any(ord(c) < 32 or ord(c) == 127 for c in name) or any(part in ('', '.', '..') or ':' in part for part in parts)
+                        or parts[0] != district or name.casefold().rstrip('/') in names
+                        or item.flag_bits & 1 or stat.S_IFMT(mode) not in (0, stat.S_IFREG, stat.S_IFDIR)
+                        or item.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED)
+                        or item.file_size > 3 * 1024**3):
+                    raise ValueError('Unsafe or ambiguous ZIP entry')
+                names.add(name.casefold().rstrip('/'))
+                role = name.removeprefix(district + '/data/')
+                if role in required and name == specs[role]['path']:
+                    if item.is_dir() or item.file_size != specs[role]['bytes']:
+                        raise ValueError('Runtime ZIP entry size mismatch')
+                    selected[role] = item
+            if set(selected) != required:
+                raise ValueError('District archive lacks a required runtime file')
+            output.mkdir(mode=0o700)
+            created = output.stat()
+            verified = []
+            for role in sorted(required):
+                item, expected = selected[role], specs[role]
+                digest, count = hashlib.sha256(), 0
+                with zipped.open(item) as incoming, (output / role).open('xb') as target:
+                    while block := incoming.read(1024 * 1024):
+                        count += len(block)
+                        if count > expected['bytes']:
+                            raise ValueError('Runtime entry exceeds its signed size')
+                        digest.update(block)
+                        target.write(block)
+                    target.flush()
+                    os.fsync(target.fileno())
+                if count != expected['bytes'] or digest.hexdigest() != expected['sha256']:
+                    raise ValueError('Runtime file checksum mismatch')
+                if role.endswith('.sqlite3'):
+                    with (output / role).open('rb') as database:
+                        header = database.read(100)
+                    if len(header) != 100 or header[:16] != b'SQLite format 3\0' or header[18:20] != b'\x01\x01':
+                        raise ValueError('Runtime SQLite must use rollback mode without sidecars')
+                verified.append({'role': role, 'bytes': count, 'sha256': digest.hexdigest()})
+        if check is None:
+            from terrier_district import validate_github_runtime
+            validate_github_runtime(source, output, district)
+        else:
+            check(source, output, district)
+        return {'ok': True, 'district': district, 'files': verified, 'sourceMetadataAccepted': True}
+    except BaseException:
+        if created is not None:
+            # Only the absolute directory created by this call may be recursively removed.
+            try:
+                current = output.lstat()
+            except FileNotFoundError:
+                current = None
+            if (current is not None and not output.is_symlink() and output.resolve() == output and output.parent == parent
+                    and (current.st_dev, current.st_ino) == (created.st_dev, created.st_ino)):
+                shutil.rmtree(output)
+        raise
+
+
+def github_district_extract_main():
+    try:
+        raw = sys.stdin.buffer.read(32769)
+        if len(raw) > 32768:
+            raise ValueError('Archive request is too large')
+        print(json.dumps(extract_github_district_archive(json.loads(raw))))
+        return 0
+    except Exception:
+        print(json.dumps({'error': 'The GitHub district data could not be extracted safely.'}))
+        return 1
+
+
 def main():
     import multiprocessing
     multiprocessing.freeze_support()
@@ -395,6 +515,11 @@ def main():
     if sys.argv[1:] == ['--desktop-owner-check']:
         from terrier_district import main as district_main
         return district_main(owner=True)
+    if sys.argv[1:] == ['--desktop-github-district-check']:
+        from terrier_district import main as district_main
+        return district_main(github_runtime=True)
+    if sys.argv[1:] == ['--desktop-github-district-extract']:
+        return github_district_extract_main()
     contain_windows_children()
     parser = argparse.ArgumentParser()
     parser.add_argument('--app', choices=['melange', 'mentat', 'terrier'], required=True)
@@ -405,6 +530,7 @@ def main():
     parser.add_argument('--district', choices=['co-05', 'or-05', 'ct-01'], default='co-05')
     parser.add_argument('--legacy-owner', choices=['admin'])
     parser.add_argument('--owner-root', type=Path)
+    parser.add_argument('--github-district-data', action='store_true')
     options = parser.parse_args()
     token = os.environ.get('DESKTOP_LAUNCH_TOKEN', '')
     if len(token) < 32 or not 1024 <= options.port <= 65535:
@@ -415,6 +541,11 @@ def main():
         parser.error('Legacy owner setup is only available for Terrier')
     if bool(options.owner_root) != bool(options.legacy_owner):
         parser.error('The desktop owner directory is used with, and only with, the existing Terrier owner')
+    if options.github_district_data and (options.app != 'terrier' or not options.legacy_owner
+            or options.data_root.resolve() == options.state_root.resolve()
+            or options.data_root.resolve().is_relative_to(options.state_root.resolve())
+            or options.state_root.resolve().is_relative_to(options.data_root.resolve())):
+        parser.error('GitHub district cache requires an explicit existing Terrier owner and separate data/state roots')
     run(options, token)
 
 

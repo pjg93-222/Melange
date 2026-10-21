@@ -26,7 +26,7 @@ if(profile.isolated){
  // Electron applies constructor options after this event fires, so mark again on the next turn.
  app.on('browser-window-created',(_event,created)=>{const mark=()=>{if(!created.isDestroyed())created.setTitle(marked(created.getTitle()));};mark();setImmediate(mark);created.on('page-title-updated',(event,title)=>{event.preventDefault();created.setTitle(marked(title));});});
 }
-let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,uiStateStore,activityOutbox,activityDraining=false,status='Open the application to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
+let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,districtDataController,districtDataInterval,uiStateStore,activityOutbox,activityDraining=false,status='Open the application to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
 let background=!profile.isolated&&app.isPackaged&&(process.argv.includes('--desktop-updater')||(process.platform==='darwin'&&app.getLoginItemSettings().wasOpenedAtLogin));
 const userData=app.getPath('userData'),setupURL=pathToFileURL(path.join(__dirname,'setup.html')).href;
 // Terrier testers' district data is downloaded privately into <packRoot>\stores (their dataDirectory) and its state kept in <packRoot>\state, outside the synced Documents profile.
@@ -119,7 +119,7 @@ async function launchAuthorized(fromAccess){
  if(closing||generation!==accessLifecycle.generation)return;
  if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
  openingAccess=true;
- try{if(packs&&!runtime.child&&!await prepareDistrictData())return;if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize();await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=await runtime.start(read('settings.json'));bundleNotice();districtSwitch?.remember(read('settings.json'),runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+ try{let configuration=runtime.configuration||read('settings.json');if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
  catch(error){if(accessLifecycle?.suspended)return;try{if(!portable)await updater.markApplicationFailed();}catch{}updateStatus('Application startup failed. Check local logs.');await showSetup();throw error;}
  finally{openingAccess=false;}
 }
@@ -141,16 +141,55 @@ const districtLogs=()=>{try{if(packs&&read('settings.json').terrierLegacy===unde
 function districtLog(message){try{const logs=districtLogs();fs.mkdirSync(logs,{recursive:true,mode:0o700});fs.appendFileSync(path.join(logs,'district-data.log'),new Date().toISOString()+' '+String(message).slice(0,300)+'\n',{mode:0o600});}catch{}}
 // The backend serves a district even when its downloaded bundle could not be imported (it leaves a marker and retries at its next start): say so.
 function bundleNotice(){const message=packs?.bundleImportNotice(runtime?.roots);if(message)updateStatus(message);}
+function districtDataStatus(state){
+ if(closing||!window||window.isDestroyed())return;
+ // During startup only fixed provider text reaches the native loading page.
+ if(!runtime?.child&&state.district===read('settings.json').district&&typeof state.message==='string')loadingStatus(state.message);
+ if(runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended&&state.district===read('settings.json').district)window.webContents.send('desktop:district-data-status',state);
+}
+function ownerDistrictController(){
+ if(!packs||!require('./github-district-controller.cjs').ownerGitHubSource(definition.id,githubConfig))return null;
+ if(!districtDataController){
+  const command=require('./backend-command.cjs').backendCommand(resources,'terrier'),sourceRoot=path.join(command.runtime,'sources');
+  const probe=require('./desktop-probe.cjs').desktopProbe;
+  districtDataController=new(require('./github-district-controller.cjs').GitHubDistrictController)({
+   authorize:async configuration=>(await ensureAccess()).authorize(configuration),onStatus:districtDataStatus,
+   canDiscover:configuration=>Boolean(!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended&&!districtSwitch?.busy&&configuration.district===read('settings.json').district),
+   keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);},
+   createProvider:onStatus=>new(require('./github-districts.cjs').GitHubDistricts)({resources,profile:userData,root:packRoot,
+    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.terrier,
+    store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}),signal:downloads.signal,onStatus,
+    checkExisting:async(dataRoot,district)=>{const result=await probe(command,'--desktop-github-district-check',{sourceRoot,dataRoot,district});return result.validated===true&&result.district===district;},
+    extract:request=>probe(command,'--desktop-github-district-extract',{...request,sourceRoot},{timeout:10*60*1000})
+   })
+  });
+ }
+ return districtDataController;
+}
+async function prepareOwnerDistrict(configuration){
+ if(!configuration.terrierLegacy)return configuration;
+ const controller=ownerDistrictController();return controller?await controller.ensure(configuration):configuration;
+}
+async function discoverDistrictData({skipIfBusy=false}={}){
+ if(closing||!runtime?.child||accessLifecycle?.suspended||districtSwitch?.busy)return null;
+ const configuration=runtime.configuration||read('settings.json');
+ if(!configuration.terrierLegacy)return null;
+ const controller=ownerDistrictController();
+ try{await controller?.discover(configuration,{skipIfBusy});}catch{/* The provider emits fixed error/offline state; the open runtime stays intact. */}
+ return controller?.info(configuration,runtime.authorization)||null;
+}
 // False when the download stopped (status shown on the loading page) or the app is closing; the backend is not started then.
 async function prepareDistrictData(){
- const settings=read('settings.json');if(settings.terrierLegacy!==undefined)return true;
+ const settings=read('settings.json');
  try{
+  if(settings.terrierLegacy!==undefined)return await prepareOwnerDistrict(settings);
   await packs.ensureDistrictData(accessGate,{root:packRoot,settings,journal:journalStore(),check:packs.districtCheck({resources,protectedPaths:[app.getAppPath(),path.dirname(process.execPath)]}),
    confine:profile.isolated?item=>confineIsolatedPath(profile.boundary,item,'The district data store'):null,onStatus:loadingStatus,signal:downloads.signal,
    keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);}});
-  return true;
+  return settings;
  }catch(error){
   if(closing||downloads.signal.aborted)return false;
+  if(settings.terrierLegacy!==undefined){districtLog('GitHub district preparation could not complete.');loadingStatus('GitHub district data could not be verified. Existing files were preserved. Reopen Terrier to try again.');return false;}
   districtLog(error?.cause?.message||error?.message);
   if(error instanceof packs.DistrictDataStop){loadingStatus(error.message+' Reopen Terrier to try again.');return false;}
   throw error;
@@ -205,7 +244,7 @@ async function confirmClose(){
     if(response===1){if(await runtime.activity()===true){updateStatus('Close deferred: a calculation is running.');return;}closeApproved=true;window.close();}
   }finally{askingClose=false;}
 }
-async function finishClose(){if(closing)return;closing=true;downloads.abort();clearInterval(interval);clearInterval(presenceInterval);networkWatcher?.close();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
+async function finishClose(){if(closing)return;closing=true;downloads.abort();clearInterval(interval);clearInterval(presenceInterval);clearInterval(districtDataInterval);networkWatcher?.close();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
 app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
@@ -228,7 +267,7 @@ app.whenReady().then(async()=>{
     districtSwitch=new(require('./district-transition.cjs').DistrictTransition)({
      read:()=>read('settings.json'),write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),scope:()=>accessGate?.districts()||[],
      fingerprint:configuration=>require('./district-transition.cjs').districtFingerprint(userData,configuration),
-     verify:configuration=>verifyDistrictAsync(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,[app.getAppPath(),path.dirname(process.execPath)]),createRuntime,current:()=>runtime,
+     verify:async configuration=>{const selected=profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,effective=await prepareOwnerDistrict(selected);await verifyDistrictAsync(resources,userData,effective,[app.getAppPath(),path.dirname(process.execPath)]);return effective;},createRuntime,current:()=>runtime,
      activate:next=>{runtime=next;runtime.contentsId=window.webContents.id;if(accessLifecycle)accessLifecycle.runtime=next;bundleNotice();},
      location:()=>window.webContents.getURL(),navigate:url=>window.loadURL(url),
      canReveal:approved=>!closing&&accessLifecycle.canReveal(accessLifecycle.generation,approved),onUnavailable:showAccess,
@@ -304,6 +343,9 @@ app.whenReady().then(async()=>{
   }
   ipcMain.handle('desktop:switch-district',selectDistrict);
   ipcMain.handle('desktop:renderer-ready',event=>{runtimeOnly(event);districtSwitch?.rendererReady();});
+  require('./github-district-controller.cjs').registerDistrictDataIPC(ipcMain,{runtimeOnly,
+   info:()=>districtDataController?.info(runtime.configuration||read('settings.json'),runtime.authorization)||null,
+   refresh:()=>discoverDistrictData(),canRefresh:()=>!askingClose&&!closing&&!districtSwitch?.busy});
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
@@ -319,6 +361,7 @@ app.whenReady().then(async()=>{
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else{updateStatus('Application startup failed: no local data location is configured. Check local logs.');await showSetup();}}
   if(!portable)if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
   checkUpdates();interval=setInterval(checkUpdates,15*60*1000);interval.unref();
+  districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),5*60*1000);districtDataInterval.unref();
   networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:checkUpdates});
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();
   powerMonitor.on('lock-screen',()=>{if(accessLifecycle){accessLifecycle.osLocked=true;accessLifecycle.suspend('locked').catch(()=>{});}});

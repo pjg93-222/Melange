@@ -20,6 +20,18 @@ spec.loader.exec_module(backend)
 
 
 class BackendBoundaryTests(unittest.TestCase):
+    def test_github_dataset_flag_requires_existing_terrier_owner_and_separate_roots(self):
+        base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
+            for argv in (base + ['--github-district-data'],
+                         [*base[:2], 'mentat', *base[3:], '--github-district-data'],
+                         base + ['--legacy-owner', 'admin', '--owner-root', 'owner', '--github-district-data', '--state-root', 'data']):
+                with patch('sys.argv', argv), self.assertRaises(SystemExit):
+                    backend.main()
+            with patch('sys.argv', base + ['--legacy-owner', 'admin', '--owner-root', 'owner', '--github-district-data']):
+                backend.main()
+        self.assertEqual(run.call_count, 1)
+
     def test_owner_directory_goes_with_and_only_with_the_existing_terrier_owner(self):
         base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
         with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
@@ -186,6 +198,142 @@ class DistrictBundleImportTests(unittest.TestCase):
         failed.unlink()
         failed.mkdir()
         self.assertIn('DESKTOP_RUNTIME_WARNING', self.run_import())
+
+
+class GitHubDistrictArchiveTests(unittest.TestCase):
+    def setUp(self):
+        import sqlite3
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.source = self.root / 'sources'
+        self.source.mkdir()
+        self.archive = self.root / 'district.zip'
+        self.output = self.root / 'cache'
+        database = self.root / 'fixture.sqlite3'
+        with contextlib.closing(sqlite3.connect(database)) as connection:
+            connection.execute('CREATE TABLE metadata(key TEXT, value TEXT)')
+            connection.commit()
+        self.content = {name + '.sqlite3': database.read_bytes() for name in ('contacts', 'roads', 'scores', 'street', 'walk')}
+        self.content['density.json'] = b'{}\n'
+
+    def pack(self, extras=()):
+        import zipfile
+        with zipfile.ZipFile(self.archive, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
+            for name, content in self.content.items():
+                zipped.writestr('co-05/data/' + name, content)
+            for name, content in extras:
+                if isinstance(name, str) and '\\' in name:
+                    # ZipInfo's constructor normalizes OS separators on Windows;
+                    # assign the raw name afterward to exercise the actual guard.
+                    raw_name = name
+                    name = zipfile.ZipInfo('fixture')
+                    name.filename = raw_name
+                zipped.writestr(name, content)
+
+    def request(self):
+        return {'archive': str(self.archive), 'destination': str(self.output), 'sourceRoot': str(self.source), 'district': 'co-05',
+                'files': [{'role': name, 'path': 'co-05/data/' + name, 'bytes': len(content), 'sha256': hashlib.sha256(content).hexdigest()}
+                          for name, content in self.content.items()]}
+
+    def extract(self, request=None, check=lambda *_: None):
+        return backend.extract_github_district_archive(request or self.request(), check=check)
+
+    def test_extracts_only_six_roles_then_validates_source_metadata(self):
+        self.pack([('co-05/sources/example.csv', b'invented fixture')])
+        checked = []
+        result = self.extract(check=lambda *args: checked.append(args))
+        self.assertTrue(result['ok'])
+        self.assertTrue(result['sourceMetadataAccepted'])
+        self.assertEqual({path.name for path in self.output.iterdir()}, set(self.content))
+        self.assertEqual(checked, [(self.source, self.output, 'co-05')])
+        for name, content in self.content.items():
+            self.assertEqual((self.output / name).read_bytes(), content)
+
+    def test_wrong_checksum_removes_only_new_cache(self):
+        self.pack()
+        request = self.request()
+        request['files'][0]['sha256'] = '0' * 64
+        original = (self.root / 'accounts.sqlite3')
+        original.write_bytes(b'private account fixture')
+        with self.assertRaises(ValueError):
+            self.extract(request)
+        self.assertFalse(self.output.exists())
+        self.assertEqual(original.read_bytes(), b'private account fixture')
+
+    def test_unsafe_ignored_zip_paths_and_duplicate_names_are_rejected(self):
+        for name in ('../outside', '/absolute', 'co-05/../outside', 'co-05/data\\outside', 'ct-01/data/extra', 'co-05/data/STREET.SQLITE3'):
+            with self.subTest(name=name):
+                self.pack([(name, b'bad')])
+                with self.assertRaises(ValueError):
+                    self.extract()
+                self.assertFalse(self.output.exists())
+
+    def test_symlink_entries_are_rejected_even_when_not_selected(self):
+        import stat
+        import zipfile
+        entry = zipfile.ZipInfo('co-05/data/shortcut')
+        entry.create_system = 3
+        entry.external_attr = (stat.S_IFLNK | 0o777) << 16
+        self.pack([(entry, b'outside')])
+        with self.assertRaises(ValueError):
+            self.extract()
+        self.assertFalse(self.output.exists())
+
+    def test_existing_account_directory_is_never_overwritten(self):
+        self.pack()
+        self.output.mkdir()
+        account = self.output / 'accounts.sqlite3'
+        account.write_bytes(b'private state')
+        with self.assertRaises(ValueError):
+            self.extract()
+        self.assertEqual(account.read_bytes(), b'private state')
+
+    def test_signed_wal_header_is_not_accepted_without_sidecars(self):
+        self.content['street.sqlite3'] = self.content['street.sqlite3'][:18] + b'\x02\x02' + self.content['street.sqlite3'][20:]
+        self.pack()
+        with self.assertRaises(ValueError):
+            self.extract()
+        self.assertFalse(self.output.exists())
+
+    def test_signed_size_mismatch_and_metadata_rejection_leave_no_cache(self):
+        self.pack()
+        request = self.request()
+        request['files'][0]['bytes'] += 1
+        with self.assertRaises(ValueError):
+            self.extract(request)
+        self.assertFalse(self.output.exists())
+        def reject(*_):
+            raise ValueError('Wrong district source metadata')
+        with self.assertRaises(ValueError):
+            self.extract(check=reject)
+        self.assertFalse(self.output.exists())
+
+    def test_explicit_github_owner_state_retains_existing_secret(self):
+        owner_spec = importlib.util.spec_from_file_location('terrier_owner_fixture', Path(__file__).with_name('terrier_owner.py'))
+        owner = importlib.util.module_from_spec(owner_spec)
+        owner_spec.loader.exec_module(owner)
+        state = self.root / 'owner-state'
+        state.mkdir()
+        (state / 'accounts.sqlite3').write_bytes(b'private existing accounts')
+        (state / '.secret').write_text('existing secret')
+        self.output.mkdir()
+        with self.assertRaises(ValueError):
+            owner.legacy_secret_path(self.output, state, 'admin')
+        self.assertEqual(owner.legacy_secret_path(self.output, state, 'admin', separate_data=True), state / '.secret')
+        self.assertEqual((state / '.secret').read_text(), 'existing secret')
+
+    def test_extraction_probe_does_not_enter_server_startup(self):
+        with patch('sys.argv', ['desktop_backend', '--desktop-github-district-extract']), patch.object(backend, 'github_district_extract_main', return_value=0) as probe, patch.object(backend, 'run') as run:
+            self.assertEqual(backend.main(), 0)
+        probe.assert_called_once()
+        run.assert_not_called()
+
+    def test_metadata_probe_does_not_enter_server_startup(self):
+        with patch('sys.argv', ['desktop_backend', '--desktop-github-district-check']), patch('terrier_district.main', return_value=0) as probe, patch.object(backend, 'run') as run:
+            self.assertEqual(backend.main(), 0)
+        probe.assert_called_once_with(github_runtime=True)
+        run.assert_not_called()
 
 
 if __name__ == '__main__':
