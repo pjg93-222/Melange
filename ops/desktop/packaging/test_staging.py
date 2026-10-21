@@ -52,6 +52,7 @@ class TemplateStagingTests(unittest.TestCase):
         required = {ocr + name for name in ('eng.traineddata.gz', 'asset-manifest.json', 'LICENSE-tessdata.txt',
                                            'LICENSE-tesseract-core.txt', 'LICENSE-tesseract.js.txt', 'NOTICE.txt')}
         required.add('server/research/location_evidence/southington-municipal-parcels-2026-10-17.json')
+        required.add('tools/compute_volatile.json')
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             for relative in spec['sourceDirectories']:

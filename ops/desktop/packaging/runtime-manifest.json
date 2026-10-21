@@ -151,7 +151,8 @@
         "frontend/dist/ocr/tesseract-6.0.1/LICENSE-tesseract-core.txt",
         "frontend/dist/ocr/tesseract-6.0.1/LICENSE-tesseract.js.txt",
         "frontend/dist/ocr/tesseract-6.0.1/NOTICE.txt",
-        "server/research/location_evidence/southington-municipal-parcels-2026-10-17.json"
+        "server/research/location_evidence/southington-municipal-parcels-2026-10-17.json",
+        "tools/compute_volatile.json"
       ],
       "requirements": "requirements.txt",
       "hiddenImports": [
