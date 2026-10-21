@@ -229,8 +229,8 @@ class LoginSupervisorStatusTests(unittest.TestCase):
             status = Path(root) / 'listener-status.json'
             command = (
                 "$ast=[Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SCRIPT,[ref]$null,[ref]$null);"
-                "$f=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Write-ListenerStatus'},$true);"
-                "Invoke-Expression $f.Extent.Text; $statusFile=$env:FIXTURE_STATUS; $publisherProcess=$null;"
+                "foreach($f in $ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst]},$true)){"
+                "if($f.Name -in 'Get-InviteRequired','Write-ListenerStatus'){Invoke-Expression $f.Extent.Text}}; $statusFile=$env:FIXTURE_STATUS; $publisherProcess=$null;"
                 "$notifierProcess=[pscustomobject]@{Id=4321}; Write-ListenerStatus 'running'")
             env = dict(os.environ, FIXTURE_SCRIPT=str(Path(__file__).with_name('Start-LanPublisherAtLogin.ps1')),
                        FIXTURE_STATUS=str(status))
@@ -247,7 +247,7 @@ class LoginSupervisorStatusTests(unittest.TestCase):
                 "$ErrorActionPreference='Stop';"
                 "$ast=[Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SCRIPT,[ref]$null,[ref]$null);"
                 "foreach($f in $ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst]},$true)){"
-                "if($f.Name -in 'Start-AccessNotifierProcess','Write-ListenerStatus'){Invoke-Expression $f.Extent.Text}};"
+                "if($f.Name -in 'Start-AccessNotifierProcess','Get-InviteRequired','Write-ListenerStatus'){Invoke-Expression $f.Extent.Text}};"
                 "$statusFile=$env:FIXTURE_STATUS; $publisherProcess=[pscustomobject]@{Id=8765}; $publisherJob=$null;"
                 "$notifierScript='Start-AccessNotifier.ps1'; $PythonExecutable='python.exe'; $stateDirectory=$env:FIXTURE_ROOT;"
                 "$notifierProcess=Start-AccessNotifierProcess (Join-Path $env:FIXTURE_ROOT 'missing.exe');"
