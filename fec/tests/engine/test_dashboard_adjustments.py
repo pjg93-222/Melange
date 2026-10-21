@@ -283,7 +283,7 @@ class DashboardRenderingContractTests(unittest.TestCase):
         self.assertIsNotNone(holder, "the dashboard line must be element text, not an attribute")
         self.assertEqual(dash.count(holder.group(1)), 1, "a script refers to the note's id")
         self.assertIsNone(re.search(
-            r"""getElementById\(['"](?:left|main|app)['"]\)|(?:querySelector(?:All)?|closest)\(['"][^'"]*#(?:left|main|app)""",
+            r"""getElementById\(['"](?:left|main|app)['"]\)|(?:querySelector(?:All)?|closest)\(['"][^'"]*#(?:left|main|app)\b""",
             dash))
 
 if __name__ == "__main__":

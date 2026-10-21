@@ -18,8 +18,12 @@ restores them). Each turn dropped for that reason (after any page/segment alias 
 bare-surname continuation turns of a refused label) is counted in the exit census and appended to the
 review ledger data/members/interview_surname_refusals.ndjson (ts, show, url, date, label, surname,
 member, bioguide, branch, nwords; no transcript text). RECOVERY: the dropped words are not archived and
-a fetched page is logged 'ok' in iv_fetch_log, so to re-attribute a page delete its url's rows from
-iv_fetch_log and re-run the leg with IV_NAME_MATCH=surname. Host/anchor speech never
+a fetched page is logged 'ok' in iv_fetch_log, so to re-attribute a page FIRST delete its stored rows
+(DELETE FROM speeches WHERE source='INTERVIEW' AND package=<page url>; for the day-keyed legs, cnn,
+pbs and npr, each of that day's segment urls): speeches has no unique key and store() dedups only
+within one call, so a re-run inserts every accepted turn again. THEN delete the page's iv_fetch_log
+row; its key is a leg-specific prefixed id (for example cnn:<date>, mtp:<slug>, axf:<guid>,
+cfr:<slug>), not the url. Then re-run the leg with IV_NAME_MATCH=surname. Host/anchor speech never
 enters the corpus. Storage: speeches table, source='INTERVIEW' (big5_traits and the per-source
 validity harness pick these up automatically); iv_fetch_log makes reruns resumable.
 Usage:

@@ -533,6 +533,7 @@ SENTENCE = 'the senator said this exact sentence which must never reach the ledg
 
 @pytest.fixture
 def roster(monkeypatch, tmp_path):
+    monkeypatch.setattr(interviews, 'IV_NAME_MATCH', 'full')   # the shipped default, whatever the shell exports
     monkeypatch.setattr(interviews, 'FULL', {('elizabeth', 'warren'): 'Elizabeth Warren', ('thom', 'tillis'): 'Thom Tillis'})
     monkeypatch.setattr(interviews, 'SUR', {'warren': ['Elizabeth Warren'], 'tillis': ['Thom Tillis'], 'shaheen': ['Jeanne Shaheen']})
     monkeypatch.setattr(interviews, 'C', {'Elizabeth Warren': {'bioguide': 'W000817'}, 'Thom Tillis': {'bioguide': 'T000476'},
@@ -567,7 +568,6 @@ def test_a_full_name_binds_under_both_name_match_modes(roster, monkeypatch, mode
 
 
 def test_surname_only_labels_are_refused_and_reported_to_the_caller_by_default(roster):
-    assert interviews.IV_NAME_MATCH == 'full'
     refused = []
     assert interviews.resolve_full('SEN. THOMAS TILLIS', refused) is None      # first-name-compatible, not a full-name key
     assert interviews.resolve_full('Senator Shaheen', refused) is None         # honorific + bare surname
