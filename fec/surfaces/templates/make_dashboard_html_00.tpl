@@ -168,6 +168,7 @@ canvas{touch-action:none}
  <div id=left>
    <h3>This issue</h3>
    <div id=istats></div>
+   <div class=hint id=presscatnote>CU-Bank Competitive Dynamics reaches the ranking only through the press and media pillar (press, social, speech, hearing and interview mentions); it has no legislative evidence and no stance column.</div>
    <div id=budgetwrap>
      <h3 style=margin-top:16px id=bhdr>Issue budget</h3>
      <input type=range id=slider aria-label="Issue budget" min=0 max=100 value=100>
@@ -264,7 +265,7 @@ function rowSelect(e,el){
   if(e&&e.target&&e.target.closest&&e.target.closest('a'))return;   // the profile anchor owns its own click
   const s=window.getSelection&&window.getSelection();
   if(s&&String(s).length>0)return;
-  const i=+el.dataset.i; if(i>=0)selectMember(i);
+  const i=+el.dataset.i; if(i>=0){if(i===sel)backToTargets();else selectMember(i);}   // D-157 F-18 (R9): re-clicking the selected member deselects it (user clicks only; selectMember() itself never toggles)
 }
 function mprof(i){
   if(i==null||i<0||DATA.name[i]==null)return '';
@@ -526,7 +527,7 @@ cv.addEventListener('mousemove',e=>{
 });
 cv.addEventListener('mouseleave',()=>{hi=-1;document.getElementById('tip').style.display='none';draw();});
 cv.addEventListener('mousedown',e=>{const r=cv.getBoundingClientRect();drag={x:e.clientX-r.left,y:e.clientY-r.top};panMoved=false;cv.style.cursor='grabbing';});
-cv.addEventListener('click',()=>{if(!panMoved){if(hi>=0)selectMember(hi);else backToTargets();}});
+cv.addEventListener('click',()=>{if(!panMoved){if(hi>=0&&hi!==sel)selectMember(hi);else backToTargets();}});   // D-157 F-18: a click on the selected node deselects it; a touch tap never reaches here (touchend preventDefaults it, so the browser synthesizes no click)
 addEventListener('mouseup',()=>{drag=null;cv.style.cursor='grab';});
 cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;const f=e.deltaY<0?1.12:0.893;const nx=mx-(mx-cam.tx)*f,ny=my-(my-cam.ty)*f;cam.s*=f;cam.tx=nx;cam.ty=ny;draw();},{passive:false});
 // --- touch (mobile): 1-finger pan + tap-to-select, 2-finger pinch-zoom ---
@@ -538,7 +539,7 @@ cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingCli
  if(pinch&&e.touches.length>=2){const a=e.touches[0],b=e.touches[1],nd=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),cx=(a.clientX+b.clientX)/2-r.left,cy=(a.clientY+b.clientY)/2-r.top,f=nd/(pinch.d||nd);
   cam.tx+=cx-pinch.cx;cam.ty+=cy-pinch.cy;cam.tx=cx-(cx-cam.tx)*f;cam.ty=cy-(cy-cam.ty)*f;cam.s*=f;pinch={d:nd,cx:cx,cy:cy};panMoved=true;draw();}
  else if(tdrag&&e.touches.length===1){const t=e.touches[0],mx=t.clientX-r.left,my=t.clientY-r.top;cam.tx+=mx-tdrag.x;cam.ty+=my-tdrag.y;tdrag.x=mx;tdrag.y=my;panMoved=true;draw();}},{passive:false});
-cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved){const mx=tdrag.x,my=tdrag.y;let best=-1,bd=99;for(let i=0;i<N;i++){if(tierHidden(i))continue;const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(12,radOf(i)+8)&&d<bd){bd=d;best=i;}}if(best>=0){selectMember(best);if(window.innerWidth<=640){const rp=document.getElementById('right');if(rp)setTimeout(function(){rp.scrollIntoView({behavior:'smooth',block:'start'});},70);}}else backToTargets();}tdrag=null;pinch=null;}},{passive:true});
+cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved){e.preventDefault();const mx=tdrag.x,my=tdrag.y;let best=-1,bd=99;for(let i=0;i<N;i++){if(tierHidden(i))continue;const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(12,radOf(i)+8)&&d<bd){bd=d;best=i;}}if(best>=0&&best!==sel){selectMember(best);if(window.innerWidth<=640){const rp=document.getElementById('right');if(rp)setTimeout(function(){rp.scrollIntoView({behavior:'smooth',block:'start'});},70);}}else backToTargets();}tdrag=null;pinch=null;}},{passive:false});
 function flyTo(i){cam.s=2.4;cam.tx=W/2-LX[i]*cam.s;cam.ty=H/2-LY[i]*cam.s;draw();}
 // ============ LIVE SCENARIO/PATHFINDER ENGINE (faithful port of flip_model + competitive cascade + lt_priming) ============
 const EG=DATA.engine,K=EG.const,BPF=EG.bpf,PTY=DATA.party;
@@ -1188,6 +1189,8 @@ function updateEngChk(){
 // panels
 function fmt(n){return '$'+Math.round(n).toLocaleString();}
 function frontierKneeText(f){return f.knee_found===true?'best value at $'+(f.knee/1000).toFixed(0)+'k':'best-value point not identified within this range';}
+// D-157 F-15: name the leverage factor the budget curve was computed with (bundle forwards budget_frontier.json's leverage_source); an older bundle without it shows no tag.
+function frontierLevText(f){const s=f.leverage_source;return s==='competitiveness_c'?' · competitiveness-weighted':s==='ballotpedia_lev'?' · leverage-weighted':s==='none'?' · no leverage weighting':'';}
 function refresh(){
  if(HONORS)refreshHonorControls();
  const f=DATA.frontier[issue], useSlider=(mode==='coal'&&!!f);
@@ -1212,7 +1215,7 @@ function refresh(){
    // non-null here by construction: useSlider requires mode==='coal' && DATA.frontier[issue], which is the
    // exact condition computeFund() uses to set SPREAD. "$50k each" mirrors the flat FUND pin at :304 --
    // in coalition mode every entrant is allocated the same 50, so the count implies no tailored amount.
-   document.getElementById('mdetail').innerHTML=`~<b>${SPREAD.toFixed(0)}</b> co-sponsors, up from <b>${f.base.toFixed(0)}</b> · <b>${ORD.length}</b> members funded at $50k each · ${frontierKneeText(f)} · drag to set budget`;
+   document.getElementById('mdetail').innerHTML=`~<b>${SPREAD.toFixed(0)}</b> co-sponsors, up from <b>${f.base.toFixed(0)}</b> · <b>${ORD.length}</b> members funded at $50k each · ${frontierKneeText(f)}${frontierLevText(f)} · drag to set budget`;
  }else if(DATA.engine.refflip[issue]===0){   // Overall = aggregate stance layer; summing every issue's budget is meaningless
    document.getElementById('money').textContent='—';
    const ob=DATA.opt?('$'+(DATA.opt.budget/1e6).toFixed(1)+'M'):'joint';

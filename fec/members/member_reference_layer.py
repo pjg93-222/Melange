@@ -21,14 +21,12 @@ Modes:
   python fec/members/member_reference_layer.py --score [--go]   # Fable valence pass (cost-gated), writes member_references.json
   python fec/members/member_reference_layer.py --rebuild        # FREE: re-extract + re-aggregate from the existing cache only
                                                     # (new/uncached mentions count in n_raw, never spend)
-  python fec/members/member_reference_layer.py --verify         # write member_reference_verify.csv — every edge with its
-                                                    # evidence quotes, for the user's person/valence eyeball pass
 Output: member_references.json {edges:[{a,b,n_raw,n_scored,pos,neg,neu,net,sources{},examples[]}]}
 2026-07-04 resolver upgrade (user: "make sure the person is being mentioned"): nickname classes
 (kernel NICK_SETS: bernie~bernard), chamber-scoped title pools ("senator johnson" resolves in the
 SENATE surname pool), single-alternation bare-name scan; examples now attach to EVERY scored class
 (pos/neg preferred, neutral fills) so the desk can show the phrase on every reference row."""
-import csv, hashlib, io, json, os, re, sqlite3, sys, time, collections, unicodedata
+import hashlib, io, json, os, re, sqlite3, sys, time, collections, unicodedata
 import moneyball_core as MBC   # kernel: name_variants (nickname classes), dump_atomic later
 from moneyball_core import dump_atomic
 from press_stream import REFRESH_MENTIONS_PATH, load_tone_rows
@@ -387,19 +385,8 @@ if '--score' in sys.argv or '--rebuild' in sys.argv:
     sys.exit(0)
 
 if '--verify' in sys.argv:
-    # the user's eyeball sheet: every edge with its evidence quotes (person-check + valence-check)
-    d = json.load(open(os.path.join(B, 'member_references.json'), encoding='utf-8'))
-    outp = os.path.join(B, 'data', 'members', 'member_reference_verify.csv')
-    with io.open(outp, 'w', encoding='utf-8-sig', newline='') as f:
-        w = csv.writer(f)
-        w.writerow(['speaker', 'about', 'net', 'pos', 'neg', 'neu', 'n_raw', 'sources',
-                    'evidence_1', 'evidence_2', 'wrong_person_or_wrong_valence?'])
-        for e in sorted(d['edges'], key=lambda x: -x['n_scored'])[:500]:
-            ex = e.get('examples') or []
-            w.writerow([e['a'], e['b'], e['net'], e['pos'], e['neg'], e['neu'], e['n_raw'],
-                        ' '.join('%s:%d' % kv for kv in sorted((e.get('sources') or {}).items())),
-                        (ex[0]['w'] if ex else ''), (ex[1]['w'] if len(ex) > 1 else ''), ''])
-    print('wrote %s (%d edges, capped 500)' % (outp, min(500, len(d['edges']))))
-    sys.exit(0)
+    # D-157 F-13: the evidence export was retired (no grader; F-12's agreement check replaces it); the old CSV stays on disk
+    print('--verify is retired (D-157 F-13): the evidence export is no longer written')
+    sys.exit(2)
 
-print('usage: member_reference_layer.py [--probe | --score [--go] | --rebuild | --verify]')
+print('usage: member_reference_layer.py [--probe | --score [--go] | --rebuild]')

@@ -12,7 +12,18 @@ Sources (adapters):
            Labels: "SEN. ELIZABETH WARREN:" (title-prefixed full names).
 Attribution: normalized full-name match against the 533 roster (titles stripped); surname-only
 continuation labels resolve ONLY via the segment's own intro aliases; unresolvable speakers are
-DROPPED, never guessed (same discipline as fetch_congressional_record). Host/anchor speech never
+DROPPED, never guessed (same discipline as fetch_congressional_record). Since D-157 F-22 the two
+honorific + roster-unique-surname fallbacks in resolve_full are dropped too (IV_NAME_MATCH=surname
+restores them). Each turn dropped for that reason (after any page/segment alias fallback, and counting
+bare-surname continuation turns of a refused label) is counted in the exit census and appended to the
+review ledger data/members/interview_surname_refusals.ndjson (ts, show, url, date, label, surname,
+member, bioguide, branch, nwords; no transcript text). RECOVERY: the dropped words are not archived and
+a fetched page is logged 'ok' in iv_fetch_log, so to re-attribute a page FIRST delete its stored rows
+(DELETE FROM speeches WHERE source='INTERVIEW' AND package=<page url>; for the day-keyed legs, cnn,
+pbs and npr, each of that day's segment urls): speeches has no unique key and store() dedups only
+within one call, so a re-run inserts every accepted turn again. THEN delete the page's iv_fetch_log
+row; its key is a leg-specific prefixed id (for example cnn:<date>, mtp:<slug>, axf:<guid>,
+cfr:<slug>), not the url. Then re-run the leg with IV_NAME_MATCH=surname. Host/anchor speech never
 enters the corpus. Storage: speeches table, source='INTERVIEW' (big5_traits and the per-source
 validity harness pick these up automatically); iv_fetch_log makes reruns resumable.
 Usage:
@@ -29,7 +40,15 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 # The rules live in a pure module both this collector and the one-off history repair read.
 # IV_TURN_TAGS=1 restores the three legacy patterns byte for byte.
 from members import turn_tags
+from refresh_state import append_line   # stdlib-only; the review ledger below is one LF line per append
 IV_TURN_TAGS = os.environ.get('IV_TURN_TAGS', turn_tags.DEFAULT)
+# NAME MATCH (D-157 F-22, 2026-10-20). resolve_full had two fallbacks that bound a label to a member on the
+# SURNAME alone: honorific + roster-unique surname + a compatible first name, and honorific + BARE surname.
+# 'full' (default) refuses both -- only a full-name match binds a new row -- and ledgers each dropped turn.
+# IV_NAME_MATCH=surname restores the pre-F-22 behavior exactly. Stored rows are never touched.
+IV_NAME_MATCH = os.environ.get('IV_NAME_MATCH', 'full').strip().lower() or 'full'
+if IV_NAME_MATCH not in ('full', 'surname'):
+    raise ValueError("IV_NAME_MATCH must be 'full' or 'surname' (got %r)" % IV_NAME_MATCH)
 # Prefer IPv4 without disabling IPv6.  Several public transcript/feed hosts intermittently reset
 # Windows Schannel connections on their IPv6 route while the same URL succeeds over IPv4.  Sorting
 # resolver results keeps urllib's normal fallback behavior and fixes the transport failure at its
@@ -195,8 +214,49 @@ def _firstname_compatible(a, b):
     a, b = a.lower(), b.lower()
     return a == b or a.startswith(b) or b.startswith(a) or bool(_variants(a) & _variants(b))
 
-def resolve_full(label):
+SURNAME_REFUSED = {}   # (branch, label) -> [candidate member, turns dropped]; the exit census, fed by _record_refusals only
+def _surname_hit(branch, member, refused):
+    """The member a surname-only fallback found: returned under IV_NAME_MATCH=surname. Under 'full' it is refused and
+    reported to the caller through `refused`, which decides (after any alias fallback) whether a turn was really dropped."""
+    if IV_NAME_MATCH == 'surname': return member
+    if refused is not None: refused.append((branch, member))
+    return None
+
+class Turns(list):
+    """(member, text) rows of one page, plus `refused`: the turns dropped because only a surname-only fallback would have
+    bound them, as (label, candidate member, branch, text). store() ledgers them; any plain list works too (no refusals)."""
+    def __init__(self, *rows):
+        super().__init__(*rows); self.refused = []
+    def refuse(self, label, hit, sp):
+        """`hit` = (branch, candidate) from resolve_full; `sp` is the scrubbed turn. Short turns drop anyway, so are not lost."""
+        if hit and len(sp.split()) >= turn_tags.MIN_TURN_WORDS: self.refused.append((label, hit[1], hit[0], sp))
+
+def _record_refusals(refused, date, show, url):
+    """One page's refused turns -> the exit census and the append-only review ledger (both fed here, so they agree).
+    No transcript text is written: the words are not archived, see the module docstring for the recovery path."""
+    seen = set(); lines = []
+    for label, member, branch, sp in refused:
+        if (label, sp) in seen: continue            # a page that embeds its body twice (see store)
+        seen.add((label, sp))
+        SURNAME_REFUSED.setdefault((branch, label), [member, 0])[1] += 1
+        lines.append(json.dumps({'ts': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'show': show, 'url': url,
+                                 'date': date, 'label': label, 'surname': norm(member).split()[-1], 'member': member,
+                                 'bioguide': C.get(member, {}).get('bioguide'), 'branch': branch,
+                                 'nwords': len(sp.split())}, ensure_ascii=False, sort_keys=True))
+    if lines and not append_line(os.path.join(B, 'data', 'members', 'interview_surname_refusals.ndjson'), '\n'.join(lines)):
+        print('WARNING: could not append %d refusal(s) to data/members/interview_surname_refusals.ndjson' % len(lines), flush=True)
+
+def _report_surname_refusals():
+    if SURNAME_REFUSED:
+        print('IV_NAME_MATCH=full census: %d turn(s) dropped across %d surname-only label(s), ledgered in '
+              'data/members/interview_surname_refusals.ndjson (D-157 F-22): %s' % (
+                  sum(n for _, n in SURNAME_REFUSED.values()), len(SURNAME_REFUSED),
+                  '; '.join('%s %r -> %s x%d' % (b, l, m, n) for (b, l), (m, n) in sorted(SURNAME_REFUSED.items())[:20])), flush=True)
+
+def resolve_full(label, refused=None):
     """'SEN. ELIZABETH WARREN' / 'THOM TILLIS' -> roster member or None (never guess).
+    D-157 F-22: the two surname-only fallbacks below bind only under IV_NAME_MATCH=surname; under 'full' a refusal
+    is appended to the optional `refused` list as (branch, candidate member).
     QA2 hardening: the unique-surname fallback fires ONLY when the label's first name is
     COMPATIBLE with the roster member's (nickname/prefix) — a mismatched first name means a
     DIFFERENT person (predecessor, relative) and must never bind."""
@@ -210,14 +270,14 @@ def resolve_full(label):
         cands = SUR.get(p[-1], [])
         if (len(cands) == 1 and re.match(r'^(SEN|REP|SENATOR|REPRESENTATIVE|CONGRESS)', label.strip(), re.I)
                 and _firstname_compatible(p[0], norm(cands[0]).split()[0])):
-            return cands[0]
+            return _surname_hit('firstname_compatible', cands[0], refused)
     elif len(p) == 1:
         # QA 2026-07-10 (CSIS leg): 'Senator Shaheen:' = honorific + BARE surname — no first name
         # exists to check. Resolve ONLY with an explicit honorific AND a roster-unique surname
         # (the same uniqueness standard as above, minus the impossible firstname test).
         cands = SUR.get(p[0], [])
         if len(cands) == 1 and re.match(r'^(SEN|REP|SENATOR|REPRESENTATIVE|CONGRESS)', label.strip(), re.I):
-            return cands[0]
+            return _surname_hit('bare_surname', cands[0], refused)
     return None
 
 LABEL = re.compile(turn_tags.label_pattern(IV_TURN_TAGS), re.M)
@@ -229,26 +289,37 @@ def parse_turns(text):
         end = pos[i + 1][0] if i + 1 < len(pos) else len(text)
         sp = text[me:end].strip()   # from the label's own end: a [hh:mm:ss] stamp holds a colon that cutting at the first ':' would hit
         turns.append((lab.strip(), re.sub(r'\s+', ' ', sp)))
-    alias = {}; _ambig = set()
+    alias = {}; _ambig = set(); ghost = {}
     for lab, _ in turns:
         base = lab.split(',')[0].strip()          # "MARKWAYNE MULLIN, U.S. ...:" -> full-name part
-        m = resolve_full(base)
-        if m and len(norm(base).split()) >= 2:
+        ref = []
+        m = resolve_full(base, ref)
+        if len(norm(base).split()) >= 2:
             sur = norm(base).split()[-1]
-            if sur in alias and alias[sur] != m: _ambig.add(sur)   # QA2: Mike + Ron Johnson in one segment
-            alias[sur] = m
+            if m:
+                if sur in alias and alias[sur] != m: _ambig.add(sur)   # QA2: Mike + Ron Johnson in one segment
+                alias[sur] = m
+            elif ref:                              # F-22: IV_NAME_MATCH=surname would have seeded alias[sur] here; ghost remembers
+                ghost.setdefault(sur, (lab, ref[0][1], ref[0][0]))   # it (a surname has ONE roster candidate) so the label's
+                                                                     # bare-surname continuation turns are still counted
     for sur in _ambig: alias.pop(sur, None)       # ambiguous surnames never bind continuations
-    out = []
+    out = Turns()
     for lab, sp in turns:
         base = lab.split(',')[0].strip()
-        m = resolve_full(base)
+        ref = []
+        m = resolve_full(base, ref)
+        k = norm(base).split()
         if not m:
-            k = norm(base).split()
             m = alias.get(k[-1]) if len(k) == 1 else None
         if m:
             sp = scrub(sp)
             if len(sp.split()) >= 8:              # drop micro-interjections
                 out.append((m, sp))
+        elif ref:                                  # F-22: dropped for want of a full name; counted where it is dropped
+            out.refuse(lab, ref[0], scrub(sp))
+        elif len(k) == 1 and k[-1] in ghost:       # F-22: continuation of a refused label -> attributed to that label
+            g = ghost[k[-1]]
+            out.refuse(g[0], (g[2], g[1]), scrub(sp))
     return out
 
 def store(con, rows, date, show, url):
@@ -265,6 +336,7 @@ def store(con, rows, date, show, url):
         con.execute('INSERT INTO speeches VALUES (?,?,?,?,?,?,?)',
                     (m, date, 'INTERVIEW', show, url, len(sp.split()), sp))
         n += 1
+    _record_refusals(getattr(rows, 'refused', ()), date, show, url)   # D-157 F-22: turns IV_NAME_MATCH=full dropped on this page
     return n
 
 # ---------------- adapters ----------------
@@ -443,15 +515,25 @@ def parse_turns_mixed(text):
     """PBS-style mixed-case labels ('Rep. Tom Kean:'); same drop-never-guess discipline."""
     turns = []
     pos = [(m.start(), m.group(1), m.end()) for m in MIXED_LABEL.finditer(text)]
-    out = []
+    out = Turns()
     for i, (st, lab, me) in enumerate(pos):
         end = pos[i + 1][0] if i + 1 < len(pos) else len(text)
         sp = text[me:end].strip()
-        m = resolve_full(lab)
+        ref = []
+        m = resolve_full(lab, ref)
         if m:
             sp = scrub(sp)
             if len(sp.split()) >= 8:
                 out.append((m, sp))
+        elif ref:
+            out.refuse(lab, ref[0], scrub(sp))
+    return out
+
+def _either(first, parse, text):
+    """`first` if it found turns, else parse(text); the refusals of both are kept (store ledgers them, deduped per page)."""
+    if first: return first
+    second = parse(text); out = Turns(second)
+    out.refused = getattr(first, 'refused', []) + getattr(second, 'refused', [])
     return out
 
 def run_cbs():
@@ -1129,11 +1211,14 @@ def run_axefiles():
             text = re.sub(r'\s+', ' ', _html.unescape(re.sub(r'<[^>]+>', ' ', script))).strip()
             if turns and turns[-1][0] == name: turns[-1][1] += ' ' + text
             else: turns.append([name, text])
-        rows = []
+        rows = Turns()
         for name, text in turns:
-            m = resolve_full(name.upper())
+            ref = []
+            m = resolve_full(name.upper(), ref)
             if m and len(text.split()) >= 8:
                 rows.append((m, scrub(text)))
+            elif ref:
+                rows.refuse(name, ref[0], scrub(text))
         n = store(con, rows, dt, 'axefiles', url)
         con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
                     (key, 'ok' if clips else 'notx', datetime.datetime.now().isoformat()))
@@ -1197,8 +1282,7 @@ def run_csis():
             con.commit(); done.add(key); continue
         body = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', page, flags=re.S)
         body = _html.unescape(re.sub(r'<[^>]+>', '\n', body))
-        rows = parse_turns_mixed(body)
-        if not rows: rows = parse_turns(body)
+        rows = _either(parse_turns_mixed(body), parse_turns, body)
         n = store(con, rows, date, 'csis', u)
         con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
         con.commit(); done.add(key); tot += n
@@ -1264,12 +1348,13 @@ def run_cfr():
         for m in present:
             s = norm(m).split()[-1]
             palias[s] = None if s in palias else m
-        rows = []
+        rows = Turns()
         pos = [(mm.start(), mm.group(1), mm.end()) for mm in LABEL.finditer(body)]
         for i, (st, lab, me) in enumerate(pos):
             end = pos[i + 1][0] if i + 1 < len(pos) else len(body)
             sp = body[me:end].strip()
-            m = resolve_full(lab)
+            ref = []
+            m = resolve_full(lab, ref)
             if not m:
                 k = norm(TITLE.sub('', lab.strip())).split()
                 m = palias.get(k[-1]) if k else None
@@ -1278,6 +1363,8 @@ def run_cfr():
                 sp = scrub(re.sub(r'\s+', ' ', sp))
                 if len(sp.split()) >= 8:
                     rows.append((m, sp))
+            elif ref:                                    # F-22: neither the full name nor the page alias bound it
+                rows.refuse(lab, ref[0], scrub(re.sub(r'\s+', ' ', sp)))
         n = store(con, rows, date, 'cfr', u)
         con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
         con.commit(); done.add(key); tot += n
@@ -1371,7 +1458,7 @@ def run_aei():
             con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
                         (key, 'notx' if date else 'nodate', datetime.datetime.now().isoformat()))
             con.commit(); done.add(key); continue
-        rows = []; pdf_fails = 0
+        rows = Turns(); pdf_fails = 0; refused = []
         for pu in pdfs[:2]:
             try:
                 data = get_bytes(pu); time.sleep(AEI_DELAY)
@@ -1379,9 +1466,11 @@ def run_aei():
                 pdf_fails += 1
                 continue
             txt = _pdf_text(data)
-            r = parse_turns_mixed(txt) or parse_turns(txt)
+            r = _either(parse_turns_mixed(txt), parse_turns, txt)
+            refused += r.refused
             if len(r) > len(rows): rows = r
         if pdf_fails == len(pdfs[:2]): continue   # every transcript PDF failed: no receipt, the event stays retryable
+        rows.refused = refused
         n = store(con, rows, date, 'aei', u)
         con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
         con.commit(); done.add(key); tot += n
@@ -1490,6 +1579,7 @@ def _keep_awake():
         print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
 
 if __name__ == '__main__':
+    import atexit; atexit.register(_report_surname_refusals)
     if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr', 'aei', 'aspen')):
         _keep_awake()
     if 'status' in sys.argv:

@@ -1855,7 +1855,7 @@ function pressHTML(m){
   const pressOutlets={};arts.filter(a=>a.source==='press').forEach(a=>{const host=pressDomain(a);pressOutlets[host]=(pressOutlets[host]||0)+1;});
   const pressRows=Object.entries(pressOutlets).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
   const pressOutletLine=pressRows.length?`<details class=methnote><summary>All ${pressRows.length} press publisher${pressRows.length===1?'':'s'} (${sourceCounts.press.toLocaleString()} items)</summary><div class=methbody>${pressRows.map(([name,count])=>`${esc(name)} ${Number(count).toLocaleString()}`).join(' · ')}</div></details>`:'';
-  const sentimentNote='<div class=cnt>Press sentiment is active at a diminished 10% overall weight and may affect issue and overall labels; legislative action remains the stronger policy signal.</div>';
+  const sentimentNote='<div class=cnt>Press sentiment is active at a diminished 10% overall weight and may affect issue and overall labels; legislative action remains the stronger policy signal.</div><div class=cnt>CU-Bank Competitive Dynamics reaches the ranking only through the press and media pillar (press, social, speech, hearing and interview mentions); it has no legislative evidence and no stance column.</div>';
   if(!arts.length)return audit+fpline+outletLine+pressOutletLine+sentimentNote+'<div class=empty>No tracked credit-union press or social items — and no interview, hearing, or Bluesky footprint — on record for this member.</div>';
   const areas=[...new Set(arts.flatMap(a=>a.cats||[]))].sort();
   const present=[...new Set(arts.map(a=>a.label).filter(Boolean))];
