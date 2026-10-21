@@ -520,6 +520,9 @@ def main():
         return district_main(github_runtime=True)
     if sys.argv[1:] == ['--desktop-github-district-extract']:
         return github_district_extract_main()
+    if sys.argv[1:] == ['--desktop-github-module-check']:
+        from module_data_snapshot import main as module_snapshot_main
+        return module_snapshot_main()
     contain_windows_children()
     parser = argparse.ArgumentParser()
     parser.add_argument('--app', choices=['melange', 'mentat', 'terrier'], required=True)

@@ -335,6 +335,12 @@ class GitHubDistrictArchiveTests(unittest.TestCase):
         probe.assert_called_once_with(github_runtime=True)
         run.assert_not_called()
 
+    def test_module_probe_does_not_enter_server_startup(self):
+        with patch('sys.argv', ['desktop_backend', '--desktop-github-module-check']), patch('module_data_snapshot.main', return_value=0) as probe, patch.object(backend, 'run') as run:
+            self.assertEqual(backend.main(), 0)
+        probe.assert_called_once_with()
+        run.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()
