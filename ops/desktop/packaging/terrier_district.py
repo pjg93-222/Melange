@@ -36,10 +36,13 @@ def validate_github_runtime(source, data, district):
                 raise ValueError('A GitHub district database must use rollback mode.')
             key = 'contacts_source_sha256' if role == 'scores.sqlite3' else 'source_sha256'
             if role != 'roads.sqlite3':
+                # Walk's existing store uses meta/raw strings; the other stores
+                # use metadata/JSON. Preserve each installed reader's format.
+                table = 'meta' if role == 'walk.sqlite3' else 'metadata'
                 with closing(sqlite3.connect(file.as_uri() + '?mode=ro&immutable=1', uri=True)) as connection:
                     connection.execute('PRAGMA query_only=ON')
-                    rows = connection.execute('SELECT value FROM metadata WHERE key=?', (key,)).fetchall()
-                if len(rows) != 1 or json.loads(rows[0][0]) != definition['sha256']:
+                    rows = connection.execute('SELECT value FROM ' + table + ' WHERE key=?', (key,)).fetchall()
+                if len(rows) != 1 or (rows[0][0] if role == 'walk.sqlite3' else json.loads(rows[0][0])) != definition['sha256']:
                     raise ValueError('A GitHub runtime store belongs to another source.')
     districts.check_data_dir(definition, data)
     for role in RUNTIME_ROLES:

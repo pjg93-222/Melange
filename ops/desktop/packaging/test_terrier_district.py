@@ -65,9 +65,10 @@ class DistrictValidationTests(unittest.TestCase):
         source_sha = self.definitions.get('co-05')['sha256']
         for role in ('contacts.sqlite3', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3'):
             with closing(sqlite3.connect(cache / role)) as connection:
-                connection.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT)')
+                table = 'meta' if role == 'walk.sqlite3' else 'metadata'
+                connection.execute('CREATE TABLE ' + table + ' (key TEXT PRIMARY KEY, value TEXT)')
                 key = 'contacts_source_sha256' if role == 'scores.sqlite3' else 'source_sha256'
-                connection.execute('INSERT INTO metadata VALUES (?,?)', (key, json.dumps(source_sha)))
+                connection.execute('INSERT INTO ' + table + ' VALUES (?,?)', (key, source_sha if role == 'walk.sqlite3' else json.dumps(source_sha)))
                 connection.commit()
         (cache / 'density.json').write_text('{}')
         return cache
@@ -94,7 +95,8 @@ class DistrictValidationTests(unittest.TestCase):
             with self.subTest(role=role):
                 original = (cache / role).read_bytes()
                 with closing(sqlite3.connect(cache / role)) as connection:
-                    connection.execute('UPDATE metadata SET value=? WHERE key=?', (json.dumps('wrong source'), key))
+                    table = 'meta' if role == 'walk.sqlite3' else 'metadata'
+                    connection.execute('UPDATE ' + table + ' SET value=? WHERE key=?', ('wrong source' if role == 'walk.sqlite3' else json.dumps('wrong source'), key))
                     connection.commit()
                 with self.assertRaises(ValueError):
                     validate_github_runtime(self.source, cache, 'co-05')
