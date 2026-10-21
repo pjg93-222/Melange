@@ -15,18 +15,20 @@ function exactIdentity(value,appId){
 }
 async function ownerDataBindings(resources,appId,profile,configuration,grant){
  if(appId!=='terrier')return [{districtId:null,dataRoot:runtimeRoots(appId,profile,configuration).data,localUserId:null,localUsername:null}];
+ const {ownerGitHubData,...ownerConfiguration}=configuration;
  const command=backendCommand(resources,appId);
  return Promise.all(grant.districtIds.map(async district=>{
-  const selected=districtConfiguration(configuration,district,grant.districtIds),roots=runtimeRoots(appId,profile,selected);
+  const selected=districtConfiguration(ownerConfiguration,district,grant.districtIds),roots=runtimeRoots(appId,profile,selected);
   if(!roots.legacyOwner)throw new Error('Explicit existing Terrier account mapping required');
-  const value=await desktopProbe(command,'--desktop-owner-check',{sourceRoot:path.join(command.runtime,'sources'),dataRoot:roots.data,district,legacy:true},{limit:16384});
+  const value=await desktopProbe(command,'--desktop-owner-check',{sourceRoot:path.join(command.runtime,'sources'),dataRoot:roots.state,district,legacy:true},{limit:16384});
   if(value.district!==district||value.validated!==true||value.localUsername!=='admin'||typeof value.localUserId!=='string'||!(/^[1-9][0-9]{0,18}$/).test(value.localUserId))throw new Error('Existing account mapping could not be verified');
-  return {districtId:district,dataRoot:roots.data,localUserId:value.localUserId,localUsername:value.localUsername};
+  return {districtId:district,dataRoot:roots.state,localUserId:value.localUserId,localUsername:value.localUsername};
  }));
 }
 function ownerBindingFingerprint(appId,profile,configuration,grant){
  if(appId!=='terrier')return JSON.stringify(configuration);
- return JSON.stringify(grant.districtIds.map(district=>{const selected=districtConfiguration(configuration,district,grant.districtIds),roots=runtimeRoots(appId,profile,selected);return [roots,...['accounts.sqlite3','accounts.sqlite3-wal','accounts.sqlite3-journal','.secret','street.sqlite3','scores.sqlite3','walk.sqlite3'].map(name=>{try{const stat=fs.lstatSync(path.join(roots.data,name),{bigint:true});return [name,String(stat.dev),String(stat.ino),String(stat.size),String(stat.mtimeNs),String(stat.ctimeNs),stat.isSymbolicLink()];}catch(error){if(error.code==='ENOENT')return [name,null];throw error;}})];}));
+ const {ownerGitHubData,...ownerConfiguration}=configuration;
+ return JSON.stringify(grant.districtIds.map(district=>{const selected=districtConfiguration(ownerConfiguration,district,grant.districtIds),roots=runtimeRoots(appId,profile,selected);return [roots,...['accounts.sqlite3','accounts.sqlite3-wal','accounts.sqlite3-journal','.secret','street.sqlite3','scores.sqlite3','walk.sqlite3'].map(name=>{try{const stat=fs.lstatSync(path.join(roots.state,name),{bigint:true});return [name,String(stat.dev),String(stat.ino),String(stat.size),String(stat.mtimeNs),String(stat.ctimeNs),stat.isSymbolicLink()];}catch(error){if(error.code==='ENOENT')return [name,null];throw error;}})];}));
 }
 function bindingCache(validate,fingerprint,{now=Date.now,ttl=2000}={}){
  let cached;
