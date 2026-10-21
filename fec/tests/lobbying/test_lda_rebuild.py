@@ -10095,26 +10095,33 @@ def test_org_mentions_surface_renders_landing_company_and_absent_states():
     assert landing.index("id=company-public-mentions") < landing.index("<h3>Forecast coverage</h3>")
 
 
+_CHAMPIONS_V2_NAMES = {
+    "A000001": "Fixture Ally",
+    "V000001": "Fixture Veto",
+    "M000001": "Fixture Mixed",
+    "B000001": "Fixture Banker",
+    "C000001": "Fixture Crown Mixed",
+    "K000001": "Fixture Crown Omitted",
+    "N000001": "Fixture Bank Negative Control",
+}
+# The tiers the fixture's (stale) member_desk_bundle.json carries; the tests'
+# crown set (D-157 F-20) is injected from the same map unless a test supplies a
+# real active rank_honors generation.
+_CHAMPIONS_V2_TIERS = {
+    "A000001": 0,
+    "V000001": 3,
+    "M000001": 2,
+    "B000001": 0,
+    "C000001": 1,
+    "K000001": 1,
+    "N000001": 2,
+}
+
+
 def _champions_v2_producer_fixture(directory):
     root = os.path.join(directory, "champions-v2-fixture")
-    names = {
-        "A000001": "Fixture Ally",
-        "V000001": "Fixture Veto",
-        "M000001": "Fixture Mixed",
-        "B000001": "Fixture Banker",
-        "C000001": "Fixture Crown Mixed",
-        "K000001": "Fixture Crown Omitted",
-        "N000001": "Fixture Bank Negative Control",
-    }
-    tiers = {
-        "A000001": 0,
-        "V000001": 3,
-        "M000001": 2,
-        "B000001": 0,
-        "C000001": 1,
-        "K000001": 1,
-        "N000001": 2,
-    }
+    names = _CHAMPIONS_V2_NAMES
+    tiers = _CHAMPIONS_V2_TIERS
     signed_path = os.path.join(root, "stance_priors", "signed_attention.csv")
     _write_industry_csv(
         signed_path,
@@ -10288,6 +10295,7 @@ def _champions_v2_producer_fixture(directory):
         "titles_path": titles_path,
         "bill_directions_path": directions_path,
         "resolver": HMN.MemberNameResolver(congestion_names=names),
+        "crown_tiers": {name: tiers[bioguide] for bioguide, name in names.items()},
     }
 
 
@@ -10405,6 +10413,138 @@ def test_champions_v2_identical_noncrown_profile_still_routes_to_threats():
         row["components"][field] == crown_receipt[field]
         for field in ("opposition_att", "opp_sponsored", "opp_cosponsored")
     )
+
+
+def _champions_v2_honors_root(directory, order):
+    """A loader-valid ACTIVE rank_honors generation (real files + active.json) seating `order`; returns its root."""
+    import hashlib
+    from stance.build_rank_honors import build_honors, serialized
+    from stance.honors_views import POINTER_SCHEMA
+
+    bios = {name: bio for bio, name in _CHAMPIONS_V2_NAMES.items()}
+    roster = {
+        name: {"member_id": bios.get(name) or "F%06d" % index, "chamber": "House"}
+        for index, name in enumerate(order)
+    }
+    actions = []
+    for index, name in enumerate(order):
+        bio, measure = roster[name]["member_id"], "119:hr:%d" % (index + 1)
+        base = "legislative|%s|%s" % (bio, measure)
+        actions.append({
+            "member_id": bio, "category_id": "Field", "measure_id": measure,
+            "evidence_id": base + "|Field", "overall_event_id": base,
+            "weight": str(len(order) - index), "decay": "1", "alignment": 1,
+            "position_on_measure": 1, "tensor_position_scoped": True,
+            "kind": "legislative", "congress": 119, "role": "sponsor",
+        })
+    doc = build_honors(
+        roster, ["Field"], actions, {}, list(order), "2026-09-12",
+        board_metadata={"mode": "factor", "generation": "fixture",
+                        "top13": list(order[:13]), "order": list(order)},
+    )
+    generation = "a" * 24
+    doc["generation_id"] = generation
+    doc["inputs_sha256"] = {"fixture-input.json": hashlib.sha256(b"{}").hexdigest()}
+    evidence = {"schema": "field-action-evidence-v1", "generation_id": generation,
+                "actions": actions, "tensor": {}}
+    root = os.path.join(directory, "honors-root")
+    base = os.path.join(root, "data", "stance", "rank_honors")
+    os.makedirs(os.path.join(base, generation))
+    with open(os.path.join(root, "fixture-input.json"), "wb") as handle:
+        handle.write(b"{}")
+    hashes = {}
+    for name, value in (("rank_honors.json", doc), ("field_action_evidence.json", evidence),
+                        ("transition_report.json", {"generation_id": generation})):
+        raw = serialized(value)
+        with open(os.path.join(base, generation, name), "wb") as handle:
+            handle.write(raw)
+        hashes[name] = hashlib.sha256(raw).hexdigest()
+    with open(os.path.join(base, "active.json"), "wb") as handle:
+        handle.write(serialized({"schema": POINTER_SCHEMA, "generation_id": generation, "files_sha256": hashes}))
+    return root
+
+
+# The honors board seats Fixture Veto in the top 13 and Fixture Crown Mixed /
+# Fixture Crown Omitted outside it - the reverse of the fixture bundle's tiers.
+_CHAMPIONS_V2_HONORS_ORDER = (
+    ["Fixture Veto"] + ["Filler %02d" % index for index in range(12)]
+    + ["Filler 12", "Filler 13", "Fixture Ally", "Fixture Mixed", "Fixture Banker",
+       "Fixture Crown Mixed", "Fixture Crown Omitted", "Fixture Bank Negative Control"]
+)
+
+
+def test_champions_v2_crown_set_is_the_active_rank_honors_generation_not_the_stale_bundle():
+    from unittest import mock
+
+    env = {"HONORS_MODE": "active", "PRIMACY_BOARD": "factor"}
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        stale_tiers = kwargs.pop("crown_tiers")
+        with open(kwargs["member_bundle_path"], encoding="utf-8") as handle:
+            bundle_tier = {row["name"]: row["tier"] for row in json.load(handle)["members"]}
+        root = _champions_v2_honors_root(directory, _CHAMPIONS_V2_HONORS_ORDER)
+        with mock.patch.dict(os.environ, env), mock.patch.object(CV2, "MB_ROOT", root):
+            fresh = CV2.build_payload(**kwargs)
+        control = CV2.build_payload(**kwargs, crown_tiers=stale_tiers)
+
+    # The bundle on disk still carries last cycle's crowns; the payload must not.
+    assert bundle_tier["Fixture Crown Mixed"] == 1 and bundle_tier["Fixture Veto"] == 3
+    # The receipt names the generation the crowns came from (N3); injected crowns have none.
+    assert fresh["receipt"]["honors_generation"] == "a" * 24 and control["receipt"]["honors_generation"] is None
+
+    def rows(payload, board):
+        return {row["bioguide"] for row in payload["sectors"]["credit_union"][board]}
+
+    def excluded(payload):
+        return {
+            row["bioguide"]
+            for row in payload["receipt"]["sectors"]["credit_union"]["crown_threat_exclusions"]
+        }
+
+    assert excluded(control) == {"C000001"} and "V000001" in rows(control, "threats")
+    assert excluded(fresh) == {"V000001"}
+    assert "V000001" not in rows(fresh, "threats") and "V000001" in rows(fresh, "mixed")
+    assert "C000001" in rows(fresh, "threats") and "C000001" not in rows(fresh, "mixed")
+    cu_threats = {row["bioguide"]: row for row in fresh["sectors"]["credit_union"]["threats"]}
+    assert cu_threats["C000001"]["tier"] == 2       # displayed tier follows the same generation
+    bank = fresh["sectors"]["bank"]
+    assert "K000001" in {row["bioguide"] for row in bank["threats"]}
+    assert fresh["receipt"]["sectors"]["bank"]["crown_threat_exclusions"] == []
+
+
+def test_champions_v2_fails_closed_without_a_usable_active_rank_honors_generation():
+    from unittest import mock
+
+    env = {"HONORS_MODE": "active", "PRIMACY_BOARD": "factor"}
+
+    def refused(root, extra_env=None):
+        with mock.patch.dict(os.environ, {**env, **(extra_env or {})}), \
+                mock.patch.object(CV2, "MB_ROOT", root):
+            try:
+                CV2.build_payload(**kwargs)
+            except CV2.ChampionsV2Error as exc:
+                return str(exc)
+        raise AssertionError("champions_v2 built boards without a usable rank_honors generation")
+
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        kwargs.pop("crown_tiers")                       # the bundle's tiers must not stand in
+        empty = os.path.join(directory, "no-honors")
+        os.makedirs(empty)
+        assert "crown set unavailable" in refused(empty)               # no active.json
+        root = _champions_v2_honors_root(directory, _CHAMPIONS_V2_HONORS_ORDER)
+        assert "HONORS_MODE=legacy" in refused(root, {"HONORS_MODE": "legacy"})
+        pointer_path = os.path.join(root, "data", "stance", "rank_honors", "active.json")
+        with open(pointer_path, encoding="utf-8") as handle:
+            pointer = json.load(handle)
+        with open(pointer_path, "w", encoding="utf-8") as handle:
+            json.dump({**pointer, "schema": "rank-honors-active-v0"}, handle)
+        assert "crown set unavailable" in refused(root)                # schema mismatch
+        with open(pointer_path, "w", encoding="utf-8") as handle:
+            json.dump(pointer, handle)
+        with open(os.path.join(root, "fixture-input.json"), "wb") as handle:
+            handle.write(b'{"changed":true}')
+        assert "crown set unavailable" in refused(root)                # generation stale vs its inputs
 
 
 def test_efficiency_layers_panel_without_att_telecom_loads_with_zero_telecom_attention():
@@ -10955,6 +11095,8 @@ TESTS = (
     test_champions_v2_receipts_cross_sector_rule_and_sector_lists,
     test_champions_v2_non_cu_components_are_empty_and_receipted_as_two,
     test_champions_v2_page_headline_panels_and_unsigned_demotion_are_explicit,
+    test_champions_v2_crown_set_is_the_active_rank_honors_generation_not_the_stale_bundle,
+    test_champions_v2_fails_closed_without_a_usable_active_rank_honors_generation,
     test_efficiency_layers_contest_arithmetic_is_exact,
     test_efficiency_layers_threat_member_is_adversary_and_never_ranked,
     test_efficiency_layers_headroom_rewards_active_under_lobbied_member,

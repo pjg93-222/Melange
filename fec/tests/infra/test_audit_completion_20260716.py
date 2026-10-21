@@ -608,7 +608,10 @@ class CrossEngineContracts(unittest.TestCase):
 
     def test_dashboard_and_compact_layout_use_kernel_network_authority(self):
         bundle = source("build_dashboard_bundle.py")
-        layout = source("sna_layout.py")
+        # D-157 F-17: sna_layout.py (sole producer of the reader-less sna_compact.json) is retired to fec/attic
+        layout = (FEC / "attic" / "sna_layout.py").read_text(encoding="utf-8-sig")
+        self.assertFalse((FEC / "engine" / "sna_layout.py").exists())
+        self.assertNotIn("sna_layout", (FEC / "run_pipeline.py").read_text(encoding="utf-8-sig"))
         self.assertIn("select_network_file", bundle)
         self.assertIn("load_network", layout)
         self.assertIn("dump_atomic", layout)

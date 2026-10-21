@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 import sys
 import unittest
@@ -261,6 +262,29 @@ class DashboardRenderingContractTests(unittest.TestCase):
         self.assertIn("Senate population normalization", desk)
         self.assertIn("Britannica seat table", desk)
 
+    def test_competitive_dynamics_is_disclosed_as_press_only(self) -> None:
+        # D-157 F-14 (N3): the category counts through the press/media pillar only (that column is a media
+        # blend: press, social, speech, hearing, interview; build_media_blend.py); both surfaces say so.
+        line = (
+            "CU-Bank Competitive Dynamics reaches the ranking only through the press and media pillar "
+            "(press, social, speech, hearing and interview mentions); it has no legislative evidence "
+            "and no stance column."
+        )
+        templates = FEC / "surfaces" / "templates"
+        desk = (templates / "make_member_desk_00.tpl").read_text(encoding="utf-8")
+        self.assertEqual(desk.count(line), 1)
+        # The dashboard's first attempt put the line in the #tierseg title, which honors mode
+        # rewrites at load, so it never showed. It must be the text of a static element that
+        # nothing in the page assigns to: the element's id is mentioned nowhere else, and no
+        # script reaches the containers (#left, #main, #app) it sits in.
+        dash = (templates / "make_dashboard_html_00.tpl").read_text(encoding="utf-8")
+        self.assertEqual(dash.count(line), 1)
+        holder = re.search(r"<div class=hint id=(\w+)>" + re.escape(line) + r"</div>", dash)
+        self.assertIsNotNone(holder, "the dashboard line must be element text, not an attribute")
+        self.assertEqual(dash.count(holder.group(1)), 1, "a script refers to the note's id")
+        self.assertIsNone(re.search(
+            r"""getElementById\(['"](?:left|main|app)['"]\)|(?:querySelector(?:All)?|closest)\(['"][^'"]*#(?:left|main|app)""",
+            dash))
 
 if __name__ == "__main__":
     unittest.main()

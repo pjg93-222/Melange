@@ -21,9 +21,9 @@ from paths import ROOT as MB_ROOT
 from engine import primacy_factors
 from moneyball_core import write_text_atomic
 import tier_util
+from lobbying.active_crowns import active_board
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
 
 SCHEMA = "industry-tiers-v1"
 INDUSTRIES = ("credit_union", "bank", "crypto", "fintech", "telecom")
@@ -928,7 +928,7 @@ def _build_industry(
 
 def _canonical_cu_board(records, member_names, factor_artifact, tags, *,
                         board_mode=None, effectiveness_path=None, shadow_root=None):
-    """Read the same factor and tier authorities as the desk and engines."""
+    """Factor from the factor artifact; tier and rank from the active rank_honors generation (D-157 F-20)."""
     selected_mode = board_mode or tier_util.PRIMACY_BOARD
     if selected_mode == 'realized_results_v1':
         from engine.effectiveness_integration import load_shadow_comparison
@@ -950,7 +950,7 @@ def _canonical_cu_board(records, member_names, factor_artifact, tags, *,
             'evidence_gate':comparison['results_evidence_gate'],
             'source_sha256':comparison['source_sha256'], 'as_of':comparison.get('as_of'),
             'floor_qualified_count':sum(row['floor_qualified'] for row in rows)}}
-    tier, rank = tier_util.legislative_press_tiers(member_names, root=MB_ROOT, mode=selected_mode)
+    tier, rank, generation = active_board(MB_ROOT, selected_mode)
     factors = factor_artifact['members']
     if set(factors) != set(member_names) or set(tier) != set(member_names):
         raise IndustryTiersError('Canonical CU board roster differs from its factor authority')
@@ -971,7 +971,7 @@ def _canonical_cu_board(records, member_names, factor_artifact, tags, *,
         'overrides':'canonical tier_util policy',
         'oppose_handling':'Canonical signed CU act weights and active adjudicated credits; identical to the member desk.',
         'baseline':factor_artifact['_constants']['roster_baseline'],
-        'authority':FACTOR_PATH,
+        'authority':FACTOR_PATH, 'honors_generation':generation,
     }}
 
 

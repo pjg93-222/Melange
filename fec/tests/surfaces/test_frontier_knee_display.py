@@ -74,8 +74,10 @@ def test_legacy_frontier_does_not_infer_a_knee_from_its_endpoint():
 def _render_caption(frontier):
     source = TEMPLATE.read_text(encoding='utf-8')
     formatter = re.search(r'^function frontierKneeText\(f\)\{[^\n]+\}$', source, re.M)
+    levtext = re.search(r'^function frontierLevText\(f\)\{[^\n]+\}$', source, re.M)
     refresh = re.search(r'^function refresh\(\)\{\n.*?^\}', source, re.M | re.S)
     assert formatter, 'dashboard knee caption formatter missing'
+    assert levtext, 'dashboard leverage caption formatter missing'
     assert refresh, 'dashboard refresh function missing'
     script = r"""
 const f = JSON.parse(process.argv[1]);
@@ -92,7 +94,7 @@ let budget=0,ORD=[],SPREAD=18,flipHi=null;
 function computeFund() {}
 function updateEngChk() {}
 function draw() {}
-""" + formatter.group(0) + '\n' + refresh.group(0) + r"""
+""" + formatter.group(0) + '\n' + levtext.group(0) + '\n' + refresh.group(0) + r"""
 refresh();
 process.stdout.write(JSON.stringify(document.getElementById('mdetail').innerHTML));
 """
@@ -124,3 +126,39 @@ def test_dashboard_legacy_bundle_without_status_does_not_claim_best_value():
     caption = _render_caption(frontier)
     assert 'best-value point not identified within this range' in caption
     assert 'best value at' not in caption
+
+
+_LEV_STATE = {'mode': 'coalition', 'leverage': True, 'compet_mult': True,
+              'leverage_source': 'competitiveness_c'}
+
+
+def test_builder_forwards_leverage_state_and_old_artifacts_stay_unchanged():
+    # D-157 F-15: the run state in budget_frontier.json reaches every frontier entry;
+    # an artifact without those keys gets none (not None) so old bundles render unchanged.
+    row = _frontier(True)
+    tree = ast.parse(BUNDLE.read_text(encoding='utf-8'), filename=str(BUNDLE))
+    fn = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'frontier_for']
+    ns = {'BF': {**_LEV_STATE, 'topics': {'Synthetic issue': row}}, 'idx': {'Seed A': 2, 'Seed B': 5, 'Seed C': 8}}
+    exec(compile(ast.Module(body=fn, type_ignores=[]), str(BUNDLE), 'exec'), ns)
+    got = ns['frontier_for']('Synthetic issue')
+    assert {k: got[k] for k in _LEV_STATE} == _LEV_STATE
+    assert 'leverage_source' not in _build_frontier(row)('Synthetic issue')
+
+
+@pytest.mark.skipif(NODE is None, reason='Node is required to execute the dashboard template fixture')
+@pytest.mark.parametrize('state,tag', [
+    ({'leverage_source': 'competitiveness_c'}, 'competitiveness-weighted'),
+    ({'leverage_source': 'ballotpedia_lev'}, 'leverage-weighted'),
+    ({'leverage_source': 'none', 'leverage': False}, 'no leverage weighting'),
+])
+def test_dashboard_caption_names_leverage_source(state, tag):
+    caption = _render_caption({**_build_frontier(_frontier(True))('Synthetic issue'), **state})
+    assert ' · %s · drag to set budget' % tag in caption
+    assert 'undefined' not in caption
+
+
+@pytest.mark.skipif(NODE is None, reason='Node is required to execute the dashboard template fixture')
+def test_dashboard_caption_without_leverage_state_has_no_tag():
+    caption = _render_caption(_build_frontier(_frontier(True))('Synthetic issue'))
+    assert 'weighted' not in caption and 'weighting' not in caption and 'undefined' not in caption
+    assert caption.endswith('best value at $100k · drag to set budget')
