@@ -2,7 +2,7 @@
   ; Offline rollback baseline: an interactive (non-update) install keeps a copy of its own installer in the
   ; per-user baseline folder the app reads (main.cjs baselineRoot). The first rollback then needs no download;
   ; the app re-verifies the hash and the publisher before using it. Nothing elevated; any failure is ignored.
-  ; Update trust is not set here: the app asks once at its first interactive launch (publisher-trust.cjs).
+  ; Update trust is not set here: updates no longer depend on the release certificate being in the Trusted Root store.
   ; Per-machine (all users) installs skip it: the app reads the signed-in user's %LOCALAPPDATA%, which may not be the
   ; (elevated) installing account's, so their first rollback falls back to a network download.
   ${IfNot} ${isUpdated}
