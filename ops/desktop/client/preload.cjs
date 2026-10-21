@@ -12,13 +12,10 @@ if(savedState&&savedState.enabled){
 }
 contextBridge.exposeInMainWorld('desktop',Object.freeze({
   info:()=>ipcRenderer.invoke('desktop:info'),
-  chooseDirectory:()=>ipcRenderer.invoke('desktop:directory'),
-  district:value=>ipcRenderer.invoke('desktop:district',value),
   districts:()=>ipcRenderer.invoke('desktop:districts'),
   switchDistrict:value=>ipcRenderer.invoke('desktop:switch-district',value),
   rendererReady:()=>ipcRenderer.invoke('desktop:renderer-ready'),
   pair:value=>ipcRenderer.invoke('desktop:pair',value),
   launch:()=>ipcRenderer.invoke('desktop:launch'),
-  trustUpdates:()=>ipcRenderer.invoke('desktop:trust-updates'),
   onStatus:callback=>{const listener=(_event,value)=>callback(String(value));ipcRenderer.on('desktop:status',listener);return()=>ipcRenderer.removeListener('desktop:status',listener);}
 }));

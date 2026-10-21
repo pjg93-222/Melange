@@ -204,6 +204,29 @@ def relocate_mentat_modules(code_root, data_root, workspace=None, app_data=None)
                 setattr(module, name, (app_data or data_root / 'app-data') / Path(*relative.parts[2:]))
 
 
+def import_district_bundle(data, state):
+    """Activate a downloaded district pack's bundle.zip once per sidecar sha256; a refusal warns and keeps the active snapshot.
+
+    The district is served either way. A failed import leaves state/bundle-import-failed (a short reason) for the desktop client to
+    report; the next successful start removes it."""
+    bundle, marker, failed = data / 'bundle.zip', state / 'bundle-imported.sha256', state / 'bundle-import-failed'
+    if not bundle.is_file():
+        return
+    try:
+        expected = (data / 'bundle.zip.sha256').read_text(encoding='utf-8').split()[0].lower()
+        if not (marker.is_file() and marker.read_text(encoding='utf-8').strip() == expected):
+            from server.research.bundles import import_bundle
+            import_bundle(bundle, actor='desktop district pack', expected_sha256=expected)
+            marker.write_text(expected + '\n', encoding='utf-8')
+        failed.unlink(missing_ok=True)
+    except Exception as error:  # never block startup: an unimported bundle is retried at the next launch
+        print('DESKTOP_RUNTIME_WARNING: district bundle not imported (%s): %s' % (type(error).__name__, str(error)[:200]), file=sys.stderr, flush=True)
+        try:
+            failed.write_text('%s: %s\n' % (type(error).__name__, ' '.join(str(error).split())[:200]), encoding='utf-8')
+        except OSError:  # the marker is only a courtesy to the client; an unwritable state folder must not stop the district
+            pass
+
+
 def require_runtime(root, name, relative):
     file = root / 'native' / relative
     if not file.is_file():
@@ -321,6 +344,17 @@ def run(options, token):
                           CU_ALLOWED_HOSTS='127.0.0.1,localhost', CU_DATA_DIR=str(data), CU_STATE_DIR=str(state),
                           CU_SECRET_KEY=key.read_text(encoding='utf-8'), CU_DISTRICT=options.district,
                           CU_COOKIE_PREFIX='desktop_' + options.district.replace('-', '') + '_')
+        # The existing owner's one password and one sign-in for every district (Geo server/research/desktop_owner.py):
+        # a desktop-level directory outside every district and a per-app-session key, which settings removes from the environment.
+        session_key = os.environ.pop('DESKTOP_OWNER_SESSION_KEY', '')
+        if legacy_owner:
+            owner_root = getattr(options, 'owner_root', None)
+            owner_root = owner_root.resolve() if owner_root else None
+            if owner_root is None or len(session_key) < 32 or any(owner_root == root or owner_root.is_relative_to(root) or root.is_relative_to(owner_root)
+                                            for root in (source.parent, data, state)):
+                raise ValueError('A separate desktop owner directory and an app-session key are required')
+            owner_root.mkdir(parents=True, exist_ok=True)
+            os.environ.update(CU_DESKTOP_OWNER_ROOT=str(owner_root), CU_DESKTOP_OWNER_SESSION=session_key)
         import django
         django.setup()
         from django.core.management import call_command
@@ -329,6 +363,7 @@ def run(options, token):
         migrate_django(state)
         from server.research.desktop_principal import prepare_principal
         launch_path = prepare_principal(principal, state)
+        import_district_bundle(data, state)
         command = importlib.import_module('server.research.management.commands.serve')
         def desktop_fault_log(port):
             import faulthandler
@@ -369,6 +404,7 @@ def main():
     parser.add_argument('--state-root', type=Path, required=True)
     parser.add_argument('--district', choices=['co-05', 'or-05', 'ct-01'], default='co-05')
     parser.add_argument('--legacy-owner', choices=['admin'])
+    parser.add_argument('--owner-root', type=Path)
     options = parser.parse_args()
     token = os.environ.get('DESKTOP_LAUNCH_TOKEN', '')
     if len(token) < 32 or not 1024 <= options.port <= 65535:
@@ -377,6 +413,8 @@ def main():
         parser.error('Installed code and writable data must be separate')
     if options.legacy_owner and options.app != 'terrier':
         parser.error('Legacy owner setup is only available for Terrier')
+    if bool(options.owner_root) != bool(options.legacy_owner):
+        parser.error('The desktop owner directory is used with, and only with, the existing Terrier owner')
     run(options, token)
 
 
