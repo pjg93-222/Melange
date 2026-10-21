@@ -129,7 +129,7 @@ class PrincipalTests(boundary_tests.DesktopAccessTests):
         self.assertEqual(Invitation.objects.count(),invitations)
         status,session=self.request('/api/auth/session')
         self.assertEqual((status,session['authenticated'],session['username'],session['password_lock_disabled']),(200,True,'admin',True))
-        self.assertNotEqual(self.request('/api/v3/meta')[0],401)
+        self.assertEqual(self.request('/api/accounts')[0],200)   # an administrator-only route, no data needed
         self.assertEqual(self.request('/api/v3/meta',headers={'HTTP_X_DESKTOP_TOKEN':'u'*40})[0],403)   # the launch token still gates
         self.assertEqual(self.request('/api/v3/meta',headers={'REMOTE_ADDR':'192.168.1.20'})[0],403)    # and the loopback boundary
         self.assertIsNone(prepare_principal(principal,self.root/'state'))
