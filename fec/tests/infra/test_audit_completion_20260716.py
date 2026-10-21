@@ -606,16 +606,15 @@ class CrossEngineContracts(unittest.TestCase):
         self.assertIn("MBC.salience_issue_params", shock)
         self.assertIn("salience_issue_params", bundle)
 
-    def test_dashboard_and_compact_layout_use_kernel_network_authority(self):
+    def test_dashboard_uses_kernel_network_authority(self):
         bundle = source("build_dashboard_bundle.py")
-        # D-157 F-17: sna_layout.py (sole producer of the reader-less sna_compact.json) is retired to fec/attic
-        layout = (FEC / "attic" / "sna_layout.py").read_text(encoding="utf-8-sig")
+        self.assertIn("select_network_file", bundle)
+
+    def test_retired_sna_layout_is_gone_from_engine_and_the_chain(self):
+        # D-157 F-17: sna_layout.py (sole producer of the reader-less sna_compact.json) was retired to fec/attic.
+        # It is no longer a layout authority, so only its absence from the engine and the chain is asserted.
         self.assertFalse((FEC / "engine" / "sna_layout.py").exists())
         self.assertNotIn("sna_layout", (FEC / "run_pipeline.py").read_text(encoding="utf-8-sig"))
-        self.assertIn("select_network_file", bundle)
-        self.assertIn("load_network", layout)
-        self.assertIn("dump_atomic", layout)
-        self.assertIn("sorted(", layout)
 
 
 if __name__ == "__main__":
