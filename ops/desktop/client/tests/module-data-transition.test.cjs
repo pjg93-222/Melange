@@ -7,7 +7,7 @@ function fixture(){
  let selected={dataDirectory:'synthetic-original-root'},generation=1,runtime={child:null,origin:null,configuration:null,requestsAllowed:true};
  const transition=new ModuleDataTransition({getSelected:()=>selected,getGeneration:()=>generation,getRuntime:()=>runtime});
  const candidate=()=>Object.freeze({effectiveConfiguration:Object.freeze({...selected,ownerGitHubModuleData:{fixture:true}})});
- const health=(lease,value)=>{lease.bindCandidate(value);runtime.child={fixtureChild:true};runtime.origin='http://127.0.0.1:12345';runtime.configuration=structuredClone(value.effectiveConfiguration);lease.markHealthy(value);};
+ const health=(lease,value)=>{lease.bindCandidate(value);runtime.child={fixtureChild:true};runtime.origin='http://127.0.0.1:12345';runtime.configuration=structuredClone(lease.originalSelected);lease.markHealthy(value);};
  return {transition,candidate,health,get selected(){return selected;},set selected(value){selected=value;},get generation(){return generation;},set generation(value){generation=value;},get runtime(){return runtime;},set runtime(value){runtime=value;}};
 }
 
@@ -40,7 +40,7 @@ test('health binding requires the exact candidate and matching healthy backend c
   assert.throws(()=>lease.markHealthy(prepared),{code:'transition'});
   f.runtime.child={};f.runtime.origin='http://127.0.0.1:12345';f.runtime.configuration={different:true};
   assert.throws(()=>lease.markHealthy(prepared),{code:'transition'});
-  f.runtime.configuration=structuredClone(prepared.effectiveConfiguration);f.runtime.requestsAllowed=false;
+  f.runtime.configuration=structuredClone(lease.originalSelected);f.runtime.requestsAllowed=false;
   assert.throws(()=>lease.markHealthy(prepared),{code:'transition'});f.runtime.requestsAllowed=true;
   assert.throws(()=>lease.markHealthy(structuredClone(prepared)),{code:'transition'});lease.markHealthy(prepared);
   assert.equal(lease.canCommit(prepared),true);assert.equal(lease.canCommit(structuredClone(prepared)),false);
@@ -133,7 +133,7 @@ test('the actual controller/provider protected write drains under the native sta
  const running=transition.run(async lease=>{
   leaseInMain=lease;try{
    const prepared=await controller.prepare({signal:lease.signal});lease.bindCandidate(prepared);
-   runtime.child={syntheticHealthCheckedChild:true};runtime.origin='http://127.0.0.1:12345';runtime.configuration=structuredClone(prepared.effectiveConfiguration);lease.markHealthy(prepared);
+   runtime.child={syntheticHealthCheckedChild:true};runtime.origin='http://127.0.0.1:12345';runtime.configuration=structuredClone(lease.originalSelected);lease.markHealthy(prepared);
    await lease.commit(prepared,()=>controller.commitActive(prepared,{signal:lease.signal}));
   }finally{leaseInMain=null;}
  }).catch(error=>error);
@@ -142,4 +142,26 @@ test('the actual controller/provider protected write drains under the native sta
  write.resolve();const error=await running;await invalidating;
  assert.equal(error.code,'cancelled');assert.equal(drained,true);assert.ok(env.journal.active);assert.ok(runtime.child);
  assert.deepEqual(env.selected,{dataDirectory:env.original});
+});
+
+
+test('native health requires original marker-free configuration while tracking candidate mutation separately',async()=>{
+ const f=fixture();await f.transition.run(async lease=>{
+  const candidate=f.candidate();lease.bindCandidate(candidate);f.runtime.child={};f.runtime.origin='http://127.0.0.1:12345';
+  f.runtime.configuration=structuredClone(candidate.effectiveConfiguration);
+  assert.throws(()=>lease.markHealthy(candidate),{code:'transition'},'A settings marker cannot substitute for original roots');
+  f.runtime.configuration=structuredClone(lease.originalSelected);lease.markHealthy(candidate);assert.equal(lease.canCommit(candidate),true);
+  candidate.effectiveConfiguration.ownerGitHubModuleData.fixture=false;
+  assert.equal(lease.canCommit(candidate),false,'Exact effective/source identity is independently bound');
+  await assert.rejects(lease.commit(candidate,()=>assert.fail('Mutated source must not commit')),{code:'transition'});
+ });
+});
+
+
+test('candidate effective identity is captured before awaited native preparation, not first health',async()=>{
+ const f=fixture();await f.transition.run(async lease=>{
+  const candidate=f.candidate();lease.bindCandidate(candidate);candidate.effectiveConfiguration.ownerGitHubModuleData.fixture=false;
+  f.runtime.child={};f.runtime.origin='http://127.0.0.1:12345';f.runtime.configuration=structuredClone(lease.originalSelected);
+  assert.throws(()=>lease.markHealthy(candidate),{code:'transition'});assert.equal(lease.canCommit(candidate),false);
+ });
 });

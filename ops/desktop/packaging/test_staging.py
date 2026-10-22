@@ -10,6 +10,21 @@ from build_runtime import HERE, BOOTSTRAP_FILES, POCKET_TEMPLATE, selected_files
 
 
 class TemplateStagingTests(unittest.TestCase):
+    def test_public_input_bootstrap_declares_contract_but_cannot_activate_without_installed_program(self):
+        with tempfile.TemporaryDirectory() as folder:
+            staged=Path(folder)/'bootstrap';stage_bootstrap(staged)
+            script=('import sys,json\nfrom pathlib import Path\nsys.path.insert(0,sys.argv[1])\n'
+                    'import module_data_handoff,module_public_input_installers,module_data_launch\n'
+                    'from module_application_contracts import application_contract,verify_program,ModuleInputError\n'
+                    'contract=application_contract("mentat","mentat.public-data.v1")\n'
+                    'try:\n verify_program(contract,source_root=Path.cwd(),bootstrap_root=Path(sys.argv[1]))\n'
+                    'except ModuleInputError:\n print(json.dumps({"declared":contract is not None,"refused":True}))\n'
+                    'else:\n raise AssertionError("Missing installed program was accepted")\n')
+            result=subprocess.run([sys.executable,'-I','-S','-B','-c',script,str(staged)],cwd=folder,
+                                  capture_output=True,text=True,timeout=15,check=True)
+            self.assertEqual(json.loads(result.stdout),{'declared':True,'refused':True})
+            self.assertFalse(any(staged.rglob('__pycache__')))
+
     def test_packaged_district_helper_imports_without_source_or_host_site_packages(self):
         with tempfile.TemporaryDirectory() as folder:
             staged = Path(folder) / 'bootstrap'

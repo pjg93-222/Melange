@@ -23,7 +23,16 @@ PAYROLL = {'config': ('payroll/config.json',65536), 'evidence': ('payroll/eviden
 FORECAST = {'selection':('models/selection.json',4096), 'giving-pointer':('models/giving-models-current.json',4096), 'pac-pointer':('models/pac-giving-current.json',4096),
  'giving-model':('models/giving-model.json',16*MiB), 'pac-model':('models/pac-model.json',16*MiB), 'anchors':('anchors/snapshot.json',16*MiB), 'anchor-receipt':('anchors/receipt.json',MiB),
  **{'workbook-'+name:('reports/'+name+'.xlsx',512*MiB) for name in ('commercial-banks','credit-unions','property-casualty','telecom','community-banks')}}
-KINDS = {'melange.staffer-graph-core.v1':('melange',GRAPH), 'melange.payroll-identity-core.v1':('melange',PAYROLL), 'mentat.aggregate-forecast-core.v1':('mentat',FORECAST)}
+PUBLIC_PAYROLL = {'observations': ('public-data/observations.ndjson', 8*GiB),
+                  'receipt': ('public-data/receipt.json', MiB)}
+PUBLIC_FEC = {f'mentat.fec.{table}.{cycle}': (f'fec/{cycle}/{table}.psv', 160*MiB)
+              for cycle in ('2022', '2024', '2026') for table in ('cm', 'cn', 'ccl', 'pas2')}
+PUBLIC_FEC['mentat.fec.provenance'] = ('fec/provenance.json', 65536)
+KINDS = {'melange.staffer-graph-core.v1':('melange',GRAPH), 'melange.payroll-identity-core.v1':('melange',PAYROLL),
+         'mentat.aggregate-forecast-core.v1':('mentat',FORECAST),
+         'melange.official-payroll-observations.v1':('melange',PUBLIC_PAYROLL),
+         'mentat.public-fec-tables.v1':('mentat',PUBLIC_FEC)}
+KIND_TOTAL_LIMITS = {'mentat.public-fec-tables.v1': 512*MiB}
 
 def require(value, message='Module data snapshot was rejected'):
     if not value: raise ValueError(message)
@@ -92,6 +101,8 @@ class Snapshot:
                 exact(part,('asset','bytes','sha256'));require(isinstance(part['asset'],str) and type(part['bytes']) is int and 0<part['bytes']<=GiB and isinstance(part['sha256'],str) and len(part['sha256'])==64 and all(c in '0123456789abcdef' for c in part['sha256']))
             require(sum(part['bytes'] for part in segments)==item['bytes'])
             self.objects[role]=item
+        require(sum(item['bytes'] for item in self.objects.values()) <= KIND_TOTAL_LIMITS.get(
+            self.kind, sum(limit for _path, limit in self.roles.values())))
         self.files={}
         for role,(relative,_limit) in self.roles.items():
             path=self.root.joinpath(*relative.split('/'))
@@ -178,11 +189,15 @@ class LimitedGzip:
 
 def validate_snapshot(request):
     snapshot=Snapshot(request)
-    if snapshot.app=='melange':
+    if snapshot.kind in ('melange.official-payroll-observations.v1', 'mentat.public-fec-tables.v1'):
+        from module_public_input_installers import validate_public_snapshot
+        validate_public_snapshot(snapshot)
+    elif snapshot.app=='melange':
         from melange_module_data import validate
+        validate(snapshot)
     else:
         from mentat_module_data import validate
-    validate(snapshot)
+        validate(snapshot)
     # Rehash after reader/schema validation: caller may only commit an unchanged snapshot.
     for role,path in snapshot.files.items():require(digest(path)==snapshot.objects[role]['sha256'])
     return {'schemaVersion':1,'validated':True,'appId':snapshot.app,'kind':snapshot.kind,'coverage':{'completeKind':True,'fullApplication':False}}

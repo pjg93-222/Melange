@@ -7,14 +7,35 @@ function deferred(){let resolve;const promise=new Promise(done=>{resolve=done;})
 function actual(startText,endText,context){const start=source.indexOf(startText),end=source.indexOf(endText,start);assert.ok(start>=0&&end>start);vm.runInNewContext(source.slice(start,end),context,{filename:mainFile});return context;}
 
 for(const appId of ['terrier','melange','mentat']){
- test(`actual ${appId} factory registers only supported native apps and keeps production activation unavailable`,async t=>{
+ test(`actual ${appId} factory requires the exact installed program before activation`,async t=>{
   const context={definition:{id:appId},require:name=>{assert.equal(name,'./module-data-startup.cjs');return require('../module-data-startup.cjs');},
-   read:()=>assert.fail('No settings read at construction'),runtime:{child:null},accessLifecycle:null};
+   read:()=>({dataDirectory:'original'}),refuseModuleDataSettings:require('../runtime.cjs').refuseModuleDataSettings,
+   resources:path.join(__dirname,'absent-runtime'),runtime:{child:null},accessLifecycle:null};
   actual('function createModuleDataStartup()','\napp.on(\'second-instance\'',context);const startup=context.createModuleDataStartup();
   if(appId==='terrier'){assert.equal(startup,null);return;}t.after(()=>startup.shutdown());assert.equal(startup.supported,false);assert.equal(startup.boundary,null);assert.equal(startup.contract,null);
   assert.equal((await startup.info()).phase,'unsupported');assert.equal(startup.canRefresh(),false);
  });
 }
+
+for(const marker of [null,false,undefined,{schemaVersion:1}]){
+ test(`actual native factory refuses an own marker ${String(marker)} before installed program lookup`,async t=>{
+  let lookups=0,reads=0;const original={dataDirectory:'original',ownerGitHubModuleData:marker};
+  const context={definition:{id:'melange'},read:()=>{reads++;return original;},refuseModuleDataSettings:require('../runtime.cjs').refuseModuleDataSettings,
+   require:name=>{assert.equal(name,'./module-data-startup.cjs');return {...require('../module-data-startup.cjs'),compiledApplicationContract:()=>{lookups++;assert.fail('No program or provider lookup');}};},
+   runtime:{child:null},accessLifecycle:null};
+  actual('function createModuleDataStartup()','\napp.on(\'second-instance\'',context);const startup=context.createModuleDataStartup();t.after(()=>startup.shutdown());
+  assert.equal(startup.supported,false);assert.equal(startup.contract,null);assert.equal(lookups,0);assert.equal(reads,1);
+  await assert.rejects(startup.start(original,null),/GitHub module data startup is unavailable/);
+ });
+}
+
+test('actual native factory never reads a marker accessor before unsupported launch handling',async t=>{
+ let values=0;const selected={};Object.defineProperty(selected,'ownerGitHubModuleData',{get(){values++;assert.fail('No marker value read');}});
+ const context={definition:{id:'mentat'},read:()=>selected,refuseModuleDataSettings:require('../runtime.cjs').refuseModuleDataSettings,
+  require:name=>{assert.equal(name,'./module-data-startup.cjs');return {...require('../module-data-startup.cjs'),compiledApplicationContract:()=>assert.fail('No installed program lookup')};},runtime:{child:null}};
+ actual('function createModuleDataStartup()','\napp.on(\'second-instance\'',context);const startup=context.createModuleDataStartup();t.after(()=>startup.shutdown());
+ assert.equal(startup.supported,false);assert.equal(values,0);
+});
 
 test('actual approved close drains held signed staging before stopping runtime or activating an update',async t=>{
  const f=startupFixture(t),entered=deferred(),release=deferred(),events=[],segment=f.data.transport.segment;
@@ -78,4 +99,16 @@ test('actual main IPC wiring guards sender/frame/origin and stages only native-s
  assert.equal(status.phase,'update-ready');assert.equal(status.appId,'mentat');assert.equal(status.snapshotRoot,undefined);assert.deepEqual(f.selected,original);assert.equal(f.data.journal.active,null);
  assert.deepEqual([...handlers.keys()],['desktop:module-data','desktop:module-data-refresh']);
  context.accessLifecycle.suspended=true;await assert.rejects(info(trusted),/Untrusted application request/);
+});
+
+
+test('actual native Public data navigation uses only compiled paths after fresh access reveal checks',async()=>{
+ for(const [appId,target]of [['melange','/public-data/'],['mentat','/#public-data'],['terrier',null]]){
+  let launches=0,allow=true;const loaded=[],runtime={child:{},authorization:{fixture:true},origin:'http://127.0.0.1:43212'},context={definition:{id:appId},closing:false,runtime,
+   accessLifecycle:{generation:3,canReveal:async(generation,approval)=>{assert.equal(generation,3);assert.equal(approval,runtime.authorization);return allow;}},launch:async()=>{launches++;},window:{loadURL:async url=>loaded.push(url)}};
+  actual('async function openPublicData()','\napp.on(\'second-instance\'',context);await context.openPublicData();
+  assert.equal(launches,target?1:0);assert.deepEqual(loaded,target?[runtime.origin+target]:[]);
+  if(!target)continue;allow=false;await context.openPublicData();assert.equal(loaded.length,1);
+  allow=true;context.accessLifecycle.canReveal=async()=>{context.accessLifecycle.generation++;return true;};await context.openPublicData();assert.equal(loaded.length,1,'Changed access generation prevents navigation');
+ }
 });

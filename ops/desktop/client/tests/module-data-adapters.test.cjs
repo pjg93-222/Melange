@@ -28,3 +28,18 @@ test('cancellation before or during a probe never reports verification success',
  let calls=0;const first=new AbortController();first.abort();const f=fixture('melange',async()=>{calls++;});await assert.rejects(f.adapter.validateSnapshot({...f,signal:first.signal}));assert.equal(calls,0);
  const later=new AbortController(),g=fixture('melange',async request=>{later.abort();return{schemaVersion:1,validated:true,appId:request.appId,kind:request.kind,coverage:{completeKind:true,fullApplication:false}};});await assert.rejects(g.adapter.validateSnapshot({...g,signal:later.signal}));
 });
+
+
+for(const appId of ['melange','mentat'])test(`${appId} passive public registry has exact fixed roles without any mixed core defaults`,async()=>{
+ const {PUBLIC_KINDS,PUBLIC_ROLES,createPublicModuleDataRegistry}=require('../module-data-adapters.cjs');
+ const calls=[],registry=createPublicModuleDataRegistry({appId,sourceRoot:path.resolve('trusted-source'),probe:async request=>{calls.push(request);return {schemaVersion:1,validated:true,appId:request.appId,kind:request.kind,coverage:{completeKind:true,fullApplication:false}};}});
+ assert.deepEqual(Object.keys(registry),PUBLIC_KINDS[appId]);assert.ok(CORE_KINDS[appId].every(kind=>!Object.hasOwn(registry,kind)));
+ checkedRegistry(appId,registry,PUBLIC_KINDS[appId]);const kind=PUBLIC_KINDS[appId][0],adapter=registry[kind],root=path.resolve('public-fixture-cache');
+ const dataset={kind,adapterVersion:1,objects:Object.keys(PUBLIC_ROLES[kind]).map(role=>({role,bytes:1,sha256:'a'.repeat(64)})),counts:{files:Object.keys(PUBLIC_ROLES[kind]).length}};
+ const files=Object.fromEntries(Object.entries(adapter.roles).map(([role,spec])=>[role,path.join(root,...spec.path.split('/'))]));
+ assert.equal(await adapter.validateSnapshot({dataset,root,files}),true);assert.equal(calls.length,1);
+ if(appId==='melange'){assert.deepEqual(Object.keys(adapter.roles),['observations','receipt']);assert.equal(adapter.roles.observations.maxBytes,8*1024**3);}
+ else{assert.equal(Object.keys(adapter.roles).length,13);assert.equal(adapter.maxTotalBytes,512*1024**2);
+  assert.equal(adapter.roles['mentat.fec.cm.2022'].path,'fec/2022/cm.psv');dataset.objects.forEach(object=>{object.bytes=object.role==='mentat.fec.provenance'?1:160*1024**2;});
+  assert.equal(adapter.validateMetadata(dataset),false,'Combined public payload cannot exceed512MiB even under per-file limits');}
+});

@@ -249,21 +249,36 @@ async function confirmClose(){
 async function finishClose(){if(closing)return;closing=true;downloads.abort();clearInterval(interval);clearInterval(presenceInterval);clearInterval(districtDataInterval);networkWatcher?.close();await moduleDataStartup?.shutdown();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
 function createModuleDataStartup(){
  if(!['melange','mentat'].includes(definition.id))return null;
- const {ModuleDataStartup}=require('./module-data-startup.cjs');
+ const {ModuleDataStartup,compiledApplicationContract}=require('./module-data-startup.cjs');
+ // Reject untrusted source markers before installed-program or provider I/O.
+ // The existing fresh launch preflight reports this through startup failure UI.
+ let contract=null;
+ try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources});}catch{}
+ const boundary=contract?require('./module-data-runtime-boundary.cjs').createRuntimeModuleBoundary({appId:definition.id,profile:userData,contract,
+  publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],getRuntime:()=>runtime,getSelected:()=>read('settings.json'),
+  onPreparing:()=>updateStatus('Preparing reviewed public data. Larger sources can take several minutes.'),
+  authorize:async configuration=>(await ensureAccess()).authorize(configuration),protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)]}):null;
  return new ModuleDataStartup({appId:definition.id,getSelected:()=>read('settings.json'),getRuntime:()=>runtime,getGeneration:()=>accessLifecycle?.generation||0,
   authorize:async configuration=>(await ensureAccess()).authorize(configuration),
   canStage:()=>Boolean(!askingClose&&!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended),
   onStatus:state=>{if(!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended&&window&&!window.isDestroyed())window.webContents.send('desktop:module-data-status',state);},
   keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);},
-  // No Runtime module installer is shipped yet. The compiled application
-  // registry is also empty; neither settings nor component coverage can enable it.
-  boundary:null,
+  // Only an exact installed program table grants the native boundary. A staged
+  // component probe alone cannot establish installed reader health.
+  contract,boundary,
   createProvider:contract=>new(require('./github-modules.cjs').GitHubModules)({appId:definition.id,profile:userData,
    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,
    protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)],
    store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}),
    authorize:async configuration=>(await ensureAccess()).authorize(configuration),
    effectiveConfiguration:({originalSelected,source})=>({...originalSelected,ownerGitHubModuleData:source})})});
+}
+async function openPublicData(){
+ const target=definition.id==='melange'?'/public-data/':definition.id==='mentat'?'/#public-data':null;if(!target||closing)return;
+ await launch();const current=runtime,generation=accessLifecycle?.generation,approval=current?.authorization,origin=current?.origin;
+ if(closing||!current?.child||current.requestsAllowed===false||!origin||!accessLifecycle||!await accessLifecycle.canReveal(generation,approval))return;
+ if(runtime!==current||current.origin!==origin||accessLifecycle.generation!==generation||closing)return;
+ await window.loadURL(origin+target);
 }
 app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
@@ -372,7 +387,7 @@ app.whenReady().then(async()=>{
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})}]:[]),{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
   window.on('close',event=>{
     if(updater.osShutdown||closeApproved||!runtime.child)return;
     event.preventDefault();if(askingClose)return;askingClose=true;

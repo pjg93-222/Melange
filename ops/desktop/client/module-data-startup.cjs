@@ -1,26 +1,47 @@
 'use strict';
-// Native orchestration only. Production has neither a complete application
-// contract nor a supported Runtime installer yet. Downloaded metadata and saved
-// settings cannot fill either gate; component probes remain fullApplication:false.
+// Native orchestration only. Compiled application contracts require the exact
+// installed program closure; component probes remain fullApplication:false.
 const crypto=require('node:crypto');
+const path=require('node:path');
 const {canonical}=require('./access-client.cjs');
 const {authorized,checkedRegistry}=require('./github-module-protocol.cjs');
 const {GitHubModuleController,sanitizeModuleStatus}=require('./github-module-controller.cjs');
 const {ModuleDataTransition}=require('./module-data-transition.cjs');
 const {refuseModuleDataSettings}=require('./runtime.cjs');
-const APPLICATION_CONTRACTS=Object.freeze({});
-function compiledApplicationContract(appId){return Object.hasOwn(APPLICATION_CONTRACTS,appId)?APPLICATION_CONTRACTS[appId]:null;}
+const {programTable,programFingerprint,verifyProgram}=require('./module-data-runtime-boundary.cjs');
+const {APPLICATION_SPECS}=require('./module-application-inventory.cjs');
+const {createPublicModuleDataRegistry,PUBLIC_KINDS}=require('./module-data-adapters.cjs');
+const {backendCommand}=require('./backend-command.cjs');
+const {desktopProbe}=require('./desktop-probe.cjs');
+function compiledApplicationContract(appId,context){
+ if(!['melange','mentat'].includes(appId)||!context?.runtime||typeof context.resources!=='string'||!path.isAbsolute(context.resources))return null;
+ try{
+  const spec=APPLICATION_SPECS[appId];
+  if(!spec||spec.contractId!==appId+'.public-data.v1'||spec.requiredKinds.join('|')!==PUBLIC_KINDS[appId].join('|')||
+     spec.startupTimeoutMs!==(appId==='melange'?600000:300000))return null;
+  const command=backendCommand(context.resources,appId),sourceRoot=path.join(command.runtime,'sources'),bootstrapRoot=path.join(command.runtime,'bootstrap');
+  const current=()=>{const roots=verifyProgram(context.runtime,spec);if(roots.source!==sourceRoot||roots.bootstrap!==bootstrapRoot)throw failure();};
+  current();
+  const registry=createPublicModuleDataRegistry({appId,sourceRoot,probe:async(request,{signal}={})=>{
+   if(signal?.aborted)throw failure();current();
+   const result=await desktopProbe(command,'--desktop-github-module-check',request,{signal,timeout:spec.startupTimeoutMs});
+   if(signal?.aborted)throw failure();current();return result;
+  }});
+  return checkedContract(appId,{...spec,registry});
+ }catch{return null;}
+}
 function failure(){const error=new Error('Module data activation is unavailable.');error.code=error.reason='transition';return error;}
 function fingerprint(value){try{return crypto.createHash('sha256').update(canonical(value)).digest('hex');}catch{throw failure();}}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
 function names(value){return Array.isArray(value)&&value.length>0&&value.every(name=>typeof name==='string'&&/^[a-z0-9][a-z0-9._-]{0,127}$/.test(name))&&new Set(value).size===value.length;}
 function checkedContract(appId,contract){
  if(contract===null)return null;
- if(!contract||Object.keys(contract).sort().join('|')!=='appId|contractId|privateBoundaries|programFingerprint|publicReaders|registry|requiredKinds|schemaVersion'||
+ if(!contract||Object.keys(contract).sort().join('|')!=='appId|contractId|privateBoundaries|programFiles|programFingerprint|publicReaders|registry|requiredKinds|schemaVersion|startupTimeoutMs'||
     contract.schemaVersion!==1||contract.appId!==appId||typeof contract.contractId!=='string'||!/^[a-z0-9][a-z0-9._-]{0,127}$/.test(contract.contractId)||
     typeof contract.programFingerprint!=='string'||!/^[a-f0-9]{64}$/.test(contract.programFingerprint)||
-    !names(contract.requiredKinds)||!names(contract.publicReaders)||!names(contract.privateBoundaries))throw failure();
- try{checkedRegistry(appId,contract.registry,contract.requiredKinds);}catch{throw failure();}
+    !names(contract.requiredKinds)||!names(contract.publicReaders)||!names(contract.privateBoundaries)||
+    !Number.isSafeInteger(contract.startupTimeoutMs)||contract.startupTimeoutMs<1000||contract.startupTimeoutMs>600000)throw failure();
+ try{programTable(contract.programFiles);if(programFingerprint(contract.programFiles)!==contract.programFingerprint)throw failure();checkedRegistry(appId,contract.registry,contract.requiredKinds);}catch{throw failure();}
  return freeze(contract);
 }
 function moduleHealthBinding(candidate,contract){
@@ -41,7 +62,7 @@ class ModuleDataStartup{
   this.supported=Boolean(this.contract&&boundary&&boundary.programFingerprint===this.contract.programFingerprint&&
    typeof boundary.supportsContract==='function'&&boundary.supportsContract(this.contract)===true&&
    typeof boundary.start==='function'&&typeof boundary.verifyHealth==='function');
-  this.boundary=this.supported?Object.freeze({programFingerprint:boundary.programFingerprint,start:boundary.start.bind(boundary),verifyHealth:boundary.verifyHealth.bind(boundary)}):null;
+  this.boundary=this.supported?Object.freeze({programFingerprint:boundary.programFingerprint,supportsContract:boundary.supportsContract.bind(boundary),start:boundary.start.bind(boundary),verifyHealth:boundary.verifyHealth.bind(boundary)}):null;
   this.transition=new ModuleDataTransition({getSelected,getGeneration,getRuntime});
   this.controller=new GitHubModuleController({...controllerOptions,appId,getSelected,authorize,keepAwake,onStatus,
    createProvider:()=>this.supported?createProvider(this.contract):null,
@@ -51,12 +72,13 @@ class ModuleDataStartup{
  canRefresh(){try{return !this.closed&&this.supported&&!this.transition.busy&&!this.controller?.invalidating&&this.stageEligible()===true;}catch{return false;}}
  unsupported(){return sanitizeModuleStatus(this.appId,{phase:'unsupported',cached:false});}
  info(){return this.supported?this.controller.info():Promise.resolve(this.unsupported());}
- stage(options){return this.supported?this.controller.stage(options):Promise.resolve(this.unsupported());}
+ stage(options){if(this.supported&&this.boundary.supportsContract(this.contract)!==true)return Promise.reject(failure());return this.supported?this.controller.stage(options):Promise.resolve(this.unsupported());}
  async start(configuration,approval){
   refuseModuleDataSettings(configuration);
   const runtime=this.getRuntime();
   if(this.closed||this.transition.busy)throw failure();
   if(runtime.child||!this.supported||!authorized(this.appId,configuration,approval))return runtime.start(configuration);
+  if(this.boundary.supportsContract(this.contract)!==true)throw failure();
   return this.transition.run(async lease=>{
    let ownedChild=null;this.liveLease=lease;
    try{
@@ -65,7 +87,7 @@ class ModuleDataStartup{
     if(!candidate)throw failure();lease.bindCandidate(candidate);
     const expected=moduleHealthBinding(candidate,this.contract);
     const binding=await this.boundary.start({runtime,configuration,candidate,lease,contract:this.contract,
-     claimChild:child=>{lease.assertCurrent();if(ownedChild||!child||runtime.child!==child)throw failure();ownedChild=child;}});
+     claimChild:child=>{if(ownedChild||!child||runtime.child!==child)throw failure();ownedChild=child;lease.assertCurrent();}});
     lease.assertCurrent();
     if(!binding||binding.child!==ownedChild||!ownedChild||runtime.child!==ownedChild||binding.origin!==runtime.origin||
        Object.entries(expected).some(([key,value])=>binding[key]!==value))throw failure();

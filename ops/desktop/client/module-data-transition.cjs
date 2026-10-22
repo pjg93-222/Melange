@@ -32,7 +32,7 @@ class ModuleDataTransition{
   this.assert(record);const runtime=record.runtime,health=record.health;
   if(candidate!==record.candidate||!candidate||!health||record.committed||
      runtime.child!==health.child||!runtime.child||runtime.origin!==health.origin||runtime.requestsAllowed===false||
-     fingerprint(runtime.configuration)!==health.configuration||fingerprint(candidate.effectiveConfiguration)!==health.configuration)throw failure();
+     fingerprint(runtime.configuration)!==health.configuration||fingerprint(candidate.effectiveConfiguration)!==health.candidateConfiguration)throw failure();
   return true;
  }
  lease(record){
@@ -41,13 +41,13 @@ class ModuleDataTransition{
    bindCandidate:candidate=>{
     this.assert(record);
     if(record.candidate||!candidate||typeof candidate!=='object'||!candidate.effectiveConfiguration||typeof candidate.effectiveConfiguration!=='object')throw failure();
-    record.candidate=candidate;return candidate;
+    record.candidate=candidate;record.candidateConfiguration=fingerprint(candidate.effectiveConfiguration);return candidate;
    },
    markHealthy:candidate=>{
     this.assert(record);const runtime=record.runtime;
     if(candidate!==record.candidate||!candidate||!runtime.child||typeof runtime.origin!=='string'||!runtime.origin||runtime.requestsAllowed===false||
-       fingerprint(runtime.configuration)!==fingerprint(candidate.effectiveConfiguration))throw failure();
-    record.health={child:runtime.child,origin:runtime.origin,configuration:fingerprint(runtime.configuration)};return true;
+       fingerprint(runtime.configuration)!==record.fingerprint||fingerprint(candidate.effectiveConfiguration)!==record.candidateConfiguration)throw failure();
+    record.health={child:runtime.child,origin:runtime.origin,configuration:fingerprint(runtime.configuration),candidateConfiguration:record.candidateConfiguration};return true;
    },
    canCommit:candidate=>{try{return this.assertCommit(record,candidate);}catch{return false;}},
    assertCommit:candidate=>this.assertCommit(record,candidate),

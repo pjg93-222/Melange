@@ -40,7 +40,7 @@ class LaunchTests(unittest.TestCase):
                        'releaseTag':'module-data-2026-10-21-fixture','datasets':[]}
         self.contents={}
         for index,(kind,(app,roles)) in enumerate(KINDS.items()):
-            if app!=app_id:continue
+            if app!=app_id or kind in ('melange.official-payroll-observations.v1','mentat.public-fec-tables.v1'):continue
             objects=[]
             for role,(_relative,_limit) in roles.items():
                 raw=(role_bytes or {}).get((kind,role),('synthetic '+role).encode())
@@ -53,7 +53,9 @@ class LaunchTests(unittest.TestCase):
                       'catalogSequence':1,'releaseTag':self.manifest['releaseTag'],'releaseCommit':'a'*40,'manifest':{}}
         self.snapshot=None;self.rebind()
         self.options={'app_id':app_id,'profile':str(self.profile),'source_root':str(self.code),
-            'original_data_root':str(self.data),'state_root':str(self.state),'source':self.source,'native_verified':True}
+            'original_data_root':str(self.data),'state_root':str(self.state),'source':self.source,'native_verified':True,
+            'required_kinds':tuple(d['kind'] for d in self.manifest['datasets']),
+            'reader_registry':{d['kind']:self.configure_snapshot for d in self.manifest['datasets']}}
 
     def rebind(self, raw_manifest=None, raw_payload=None):
         raw_manifest=canonical(self.manifest) if raw_manifest is None else raw_manifest
@@ -81,9 +83,14 @@ class LaunchTests(unittest.TestCase):
         return {'appId':request['appId'],'kind':request['kind'],
                 'coverage':{'completeKind':True,'fullApplication':False},'fixture_reader':lambda:'synthetic'}
 
+    def configure_snapshot(self,snapshot,**_options):
+        self.assertIs(type(snapshot),Snapshot)
+        return self.configured({'appId':snapshot.app,'kind':snapshot.kind,'sourceRoot':str(snapshot.source),
+            'snapshotRoot':str(snapshot.root),'files':{key:str(path) for key,path in snapshot.files.items()},
+            'objects':list(snapshot.objects.values())})
+
     def launch(self, **changes):
-        with patch('melange_module_data.configure_readers',side_effect=self.configured),patch('mentat_module_data.configure_readers',side_effect=self.configured):
-            return prepare_module_readers(**{**self.options,**changes})
+        return prepare_module_readers(**{**self.options,**changes})
 
     def role(self):
         dataset=self.manifest['datasets'][0];relative=next(iter(KINDS[dataset['kind']][1].values()))[0]
@@ -99,7 +106,7 @@ class LaunchTests(unittest.TestCase):
             result=self.launch()
             self.assertEqual(result['signatureVerification'],'native-js')
             self.assertEqual(result['coverage'],{'completeKind':True,'fullApplication':False})
-            self.assertEqual(set(result['readers']),{kind for kind,(owner,_roles) in KINDS.items() if owner==app})
+            self.assertEqual(set(result['readers']),set(self.options['required_kinds']))
             self.assertEqual(result['source'],source);self.assertEqual(self.inventory(),before)
             self.assertEqual(self.account.read_bytes(),b'original account state');self.assertEqual(self.output.read_bytes(),b'original output')
 
@@ -154,6 +161,23 @@ class LaunchTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.launch(required_kinds=['mentat.unknown.v1'])
         self.make('melange');self.manifest['datasets'].pop();self.rebind()
         with self.assertRaises(ValueError):self.launch()
+
+    def test_no_implicit_core_registry_or_downloaded_registry_authority(self):
+        for changes in ({'required_kinds':None},{'reader_registry':None},{'reader_registry':{}},
+                        {'reader_registry':{self.options['required_kinds'][0]:True}}):
+            with (self.subTest(changes=changes),patch.object(Path,'lstat',side_effect=AssertionError('must not probe')),
+                    self.assertRaises(ValueError)):
+                self.launch(**changes)
+
+    def test_absent_original_descendants_are_not_created_by_reader_preparation(self):
+        future=self.base/'new-original'/'data'
+        result=self.launch(original_data_root=str(future))
+        self.assertFalse(future.parent.exists())
+        self.assertEqual(result['source'],self.source)
+
+    def test_cancellation_is_checked_before_cache_or_domain_reads(self):
+        with patch.object(Path,'lstat',side_effect=AssertionError('must not probe')),self.assertRaises(ValueError):
+            self.launch(is_cancelled=lambda:True)
 
     def test_extra_snapshot_files_and_empty_directories_are_refused(self):
         extra=self.snapshot/'unlisted';extra.mkdir()
@@ -229,7 +253,13 @@ class LaunchTests(unittest.TestCase):
             folder=self.base/builder.__name__;folder.mkdir();fixture=builder(folder)
             for role,file in fixture.request['files'].items():contents[(fixture.kind,role)]=Path(file).read_bytes()
         self.make('melange',contents)
-        result=prepare_module_readers(**{**self.options,'source_root':str(source)})
+        from melange_module_data import configure_readers
+        def legacy_component(snapshot,**_options):
+            return configure_readers({'appId':snapshot.app,'kind':snapshot.kind,'sourceRoot':str(snapshot.source),
+                'snapshotRoot':str(snapshot.root),'files':{key:str(path) for key,path in snapshot.files.items()},
+                'objects':list(snapshot.objects.values())})
+        result=prepare_module_readers(**{**self.options,'source_root':str(source),
+            'reader_registry':{kind:legacy_component for kind in self.options['required_kinds']}})
         graph=result['readers']['melange.staffer-graph-core.v1'];payroll=result['readers']['melange.payroll-identity-core.v1']
         self.assertIs(graph['graph_factory'](self.data),graph['graph'])
         self.assertEqual(payroll['payroll_loader'](self.data)['counts'],{'episodes':0})

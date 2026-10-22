@@ -53,7 +53,7 @@ def valid_token(value, token):
     return isinstance(value, str) and hmac.compare_digest(value, token)
 
 
-def guarded_handler(handler, token, app_id):
+def guarded_handler(handler, token, app_id, *, module_installation=None):
     """Authenticate before the existing handler routes any HTTP verb or returns app data."""
     class DesktopHandler(handler):
         def parse_request(self):
@@ -65,6 +65,13 @@ def guarded_handler(handler, token, app_id):
                 return False
             if self.path in {HEALTH_PATH, ACTIVITY_PATH} and self.command == 'GET':
                 payload = {'appId': app_id, 'pid': os.getpid()}
+                if self.path == HEALTH_PATH and module_installation is not None:
+                    from module_data_handoff import server_installed_health, ModuleInputError
+                    try:
+                        payload['moduleData'] = server_installed_health(module_installation, self.server)
+                    except ModuleInputError:
+                        self.send_error(503, 'Native module input is unavailable')
+                        return False
                 if self.path == ACTIVITY_PATH:
                     app = getattr(self.server, 'app', None)
                     payload = {'appId': app_id, 'busy': bool(app.busy()) if app_id == 'mentat' and app is not None and callable(getattr(app, 'busy', None)) else None}
@@ -244,7 +251,19 @@ def require_runtime(root, name, relative):
     return file
 
 
-def run(options, token):
+def run(options, token, *, module_inputs=None):
+    public_data = None
+    on_server_ready = None
+    if module_inputs is not None:
+        from module_data_handoff import PreparedHandoff, recheck_original_roots, require
+        from module_public_input_installers import public_reader
+        require(type(module_inputs) is PreparedHandoff and options.app == module_inputs.contract.app_id
+                and options.app in ('melange', 'mentat'))
+        for key, value in (('sourceRoot', options.source_root), ('originalDataRoot', options.data_root),
+                           ('stateRoot', options.state_root), ('profileRoot', options.profile_root)):
+            require(os.path.normcase(os.path.abspath(value)) == os.path.normcase(os.path.abspath(module_inputs.roots[key])))
+        recheck_original_roots(module_inputs)
+        public_data = public_reader(module_inputs)
     source = options.source_root.resolve()
     data = options.data_root.resolve()
     state = options.state_root.resolve()
@@ -263,6 +282,8 @@ def run(options, token):
         if (principal.mode == 'existing-owner') != bool(getattr(options, 'legacy_owner', None)):
             raise ValueError('Explicit owner mapping does not match the approved principal')
     for directory in (data, state):
+        if module_inputs is not None:
+            recheck_original_roots(module_inputs)
         directory.mkdir(parents=True, exist_ok=True)
     # A caller must not make a desktop install act as a network-hosted server.
     if os.environ.get('ACCESS_ENFORCE') == '1' or os.environ.get('CU_DEPLOYMENT') == 'hosted':
@@ -289,9 +310,18 @@ def run(options, token):
         configure_melange_workspace(data)
         module = importlib.import_module('fec.surfaces.staffer_live_server')
         dashboard_file = configure_melange_dashboard(module, data, state)
-        module.Handler = guarded_handler(module.Handler, token, options.app)
+        installation = None
+        if module_inputs is not None:
+            from module_data_handoff import server_installation, complete_server_installation
+            from module_public_input_installers import capture_originals
+            installation = server_installation(module_inputs, lambda server: capture_originals(module_inputs, server))
+            on_server_ready = lambda server: complete_server_installation(installation, server)
+        module.Handler = guarded_handler(module.Handler, token, options.app, module_installation=installation)
         sys.argv = ['staffer_live_server', '--source-root', str(data), '--port', str(options.port), '--dashboard-file', dashboard_file]
-        module.main()
+        if module_inputs is None:
+            module.main()
+        else:
+            module.main(public_data=public_data, on_server_ready=on_server_ready)
     elif options.app == 'mentat':
         code = source / 'mentat'
         from mentat_layout import prepare_workspace, load_connections, bind_analytics_paths
@@ -324,7 +354,15 @@ def run(options, token):
         module = importlib.import_module('server')
         relocate_mentat_modules(code, data, workspace, connections['app_data'])
         bind_analytics_paths(importlib.import_module('contribution_data'), code, workspace, data)
-        module.Handler = guarded_handler(module.Handler, token, options.app)
+        installation = None
+        if module_inputs is not None:
+            from module_data_handoff import server_installation, complete_server_installation
+            from module_public_input_installers import capture_originals, private_program_guard
+            guard = private_program_guard(source)
+            installation = server_installation(module_inputs, lambda server: capture_originals(module_inputs, server,
+                console_root=connections['console'], reports_root=connections['reports'], program_guard=guard))
+            on_server_ready = lambda server: complete_server_installation(installation, server)
+        module.Handler = guarded_handler(module.Handler, token, options.app, module_installation=installation)
         rscript = source.parent / 'native' / 'R' / 'bin' / ('Rscript.exe' if os.name == 'nt' else 'Rscript')
         sys.argv = ['mentat', '--port', str(options.port), '--data-root', str(connections['console'])]
         if rscript.is_file():
@@ -337,7 +375,10 @@ def run(options, token):
             sys.argv += ['--rscript', str(rscript)]
         else:
             print('DESKTOP_RUNTIME_WARNING: Rscript is not bundled; collection actions requiring R cannot run.', file=sys.stderr, flush=True)
-        module.main()
+        if module_inputs is None:
+            module.main()
+        else:
+            module.main(public_data=public_data, on_server_ready=on_server_ready)
     else:
         sys.path.insert(0, str(source))
         os.environ.update(CU_LOCAL_ADMIN='0', TERRIER_LOCAL_DIR=str(data), TERRIER_WORK_DIR=str(state / 'work'),
@@ -513,6 +554,10 @@ def github_district_extract_main():
 
 
 def main():
+    if '--desktop-module-input' in sys.argv[1:]:
+        # -E ignores the environment bytecode setting. Suppress writes before
+        # importing the parent-frame/parser/contract or any domain module.
+        sys.dont_write_bytecode = True
     import multiprocessing
     multiprocessing.freeze_support()
     if sys.argv[1:] == ['--desktop-credential']:
@@ -548,6 +593,8 @@ def main():
     parser.add_argument('--legacy-owner', choices=['admin'])
     parser.add_argument('--owner-root', type=Path)
     parser.add_argument('--github-district-data', action='store_true')
+    parser.add_argument('--desktop-module-input', action='store_true')
+    parser.add_argument('--profile-root', type=Path)
     options = parser.parse_args()
     token = os.environ.get('DESKTOP_LAUNCH_TOKEN', '')
     if len(token) < 32 or not 1024 <= options.port <= 65535:
@@ -563,7 +610,26 @@ def main():
             or options.data_root.resolve().is_relative_to(options.state_root.resolve())
             or options.state_root.resolve().is_relative_to(options.data_root.resolve())):
         parser.error('GitHub district cache requires an explicit existing Terrier owner and separate data/state roots')
-    run(options, token)
+    if bool(options.profile_root) != bool(options.desktop_module_input) or (options.desktop_module_input and
+            (options.app not in ('melange', 'mentat') or options.github_district_data or options.legacy_owner)):
+        parser.error('Native module input requires an explicit profile and a supported original application')
+    prepared = None
+    try:
+        if options.desktop_module_input:
+            from module_data_handoff import prepare_handoff
+            prepared = prepare_handoff(sys.stdin.buffer, app_id=options.app, profile_root=options.profile_root,
+                source_root=options.source_root, original_data_root=options.data_root, state_root=options.state_root,
+                bootstrap_root=Path(__file__).resolve().parent)
+        run(options, token, module_inputs=prepared)
+    except Exception as error:
+        if options.desktop_module_input:
+            print('Native module input is unavailable.', file=sys.stderr, flush=True)
+            return 1
+        raise
+    finally:
+        if prepared is not None:
+            from module_data_handoff import close_handoff
+            close_handoff(prepared)
 
 
 if __name__ == '__main__':

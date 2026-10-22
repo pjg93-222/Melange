@@ -51,7 +51,7 @@ class BoundaryTests(unittest.TestCase):
     def test_node_and_python_compiled_roles_agree(self):
         from module_data_snapshot import KINDS
         client=Path(__file__).resolve().parents[1]/'client/module-data-adapters.cjs'
-        output=subprocess.run(['node','-e','process.stdout.write(JSON.stringify(require(process.argv[1]).ROLE_MAPS))',str(client)],capture_output=True,check=True,timeout=20)
+        output=subprocess.run(['node','-e','const m=require(process.argv[1]);process.stdout.write(JSON.stringify({...m.ROLE_MAPS,...m.PUBLIC_ROLES}))',str(client)],capture_output=True,check=True,timeout=20)
         actual=json.loads(output.stdout)
         expected={kind:{role:{'path':value[0],'maxBytes':value[1]} for role,value in roles.items()} for kind,(_app,roles) in KINDS.items()}
         self.assertEqual(actual,expected)

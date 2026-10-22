@@ -19,7 +19,8 @@ import stat
 import sys
 import uuid
 
-from module_data_snapshot import KINDS, Snapshot, exact, parse, regular, require, safe_root
+from collections.abc import Mapping
+from module_data_snapshot import KINDS, KIND_TOTAL_LIMITS, Snapshot, exact, parse, regular, require, safe_root
 
 MiB, GiB = 1024 ** 2, 1024 ** 3
 MAX_TOTAL, MAX_SEGMENTS, MAX_MANIFEST = 32 * GiB, 256, 2 * MiB
@@ -198,39 +199,54 @@ def manifest_metadata(app_id, value, pointer, required_kinds):
                 require(asset(name) and name.lower() not in assets and integer(part['bytes'],GiB) and part['bytes']>0 and digest(part['sha256']))
                 assets.add(name.lower());raw+=part['bytes'];segments+=1
             require(raw==item['bytes']);dataset_bytes+=item['bytes']
-        require(dataset_bytes<=sum(limit for _path,limit in roles.values()));total+=dataset_bytes
-    require(set(required_kinds)<=kinds and total<=MAX_TOTAL and segments<=MAX_SEGMENTS)
+        require(dataset_bytes<=KIND_TOTAL_LIMITS.get(dataset['kind'],sum(limit for _path,limit in roles.values())));total+=dataset_bytes
+    require(set(required_kinds)==kinds and total<=MAX_TOTAL and segments<=MAX_SEGMENTS)
     return value['datasets']
 
 
 def prepare_module_readers(*, app_id, profile, source_root, original_data_root, state_root, source,
-                           native_verified=False, verify_signature=None, required_kinds=None, protected_roots=()):
+                           native_verified=False, verify_signature=None, required_kinds=None,
+                           reader_registry=None, protected_roots=(), is_cancelled=lambda:False):
     """Return scoped readers; caller installs them before server imports.
 
     Neither downloaded JSON nor a standalone CLI can establish native_verified.
     Original data/state/connection and global runtime_paths remain unchanged.
     """
     require(native_verified is True and app_id in APPS,'Native verified module launch context is required')
-    require(verify_signature is None or callable(verify_signature))
+    require((verify_signature is None or callable(verify_signature)) and callable(is_cancelled) and not is_cancelled())
+    # Only a compiled caller supplies this exact registry. No implicit private
+    # cores or downloaded selector can choose application readers.
+    require(isinstance(required_kinds,(list,tuple)) and 0<len(required_kinds)<=32
+            and all(type(kind) is str and kind in KINDS and KINDS[kind][0]==app_id for kind in required_kinds)
+            and len(set(required_kinds))==len(required_kinds)
+            and isinstance(reader_registry,Mapping) and set(reader_registry)==set(required_kinds)
+            and all(callable(value) for value in reader_registry.values()))
+    required=tuple(required_kinds)
     original_source=copy.deepcopy(source);exact(original_source,SOURCE_FIELDS)
     repository,_purpose=APPS[app_id]
     require(type(source['schemaVersion']) is int and source['schemaVersion']==1 and source['appId']==app_id
             and source['repository']==repository and integer(source['catalogSequence']) and source['catalogSequence']>0
             and digest(source['pointerDigest']) and digest(source['manifestSha256']))
-    profile_root=safe_root(profile);code=safe_root(source_root);data=safe_root(original_data_root);state=safe_root(state_root)
+    profile_root=safe_root(profile);code=safe_root(source_root)
+    from module_data_handoff import planned_original_root
+    data=Path(planned_original_root(original_data_root,original_data_root).canonical)
+    state=Path(planned_original_root(state_root,state_root).canonical)
     require(isinstance(source['cacheRoot'],str) and Path(source['cacheRoot']).is_absolute())
     choices=[(profile_root,profile_root/'packs/github-module-data')]
-    if os.environ.get('LOCALAPPDATA'):choices.append((Path(os.environ['LOCALAPPDATA']).absolute(),Path(os.environ['LOCALAPPDATA']).absolute()/'MelangeData'/app_id/'github-module-data'))
+    if os.environ.get('LOCALAPPDATA'):
+        # Only this trusted provider ancestor may be canonicalized before the
+        # fixed suffix. ReadView still rejects every descendant junction/link.
+        local=Path(os.environ['LOCALAPPDATA'])
+        require(local.is_absolute())
+        local=local.resolve(strict=True);safe_root(str(local))
+        choices.append((local,local/'MelangeData'/app_id/'github-module-data'))
     chosen=next(((base,root) for base,root in choices if os.path.normcase(os.path.abspath(source['cacheRoot']))==os.path.normcase(str(root))),None)
     require(chosen is not None,'Unapproved native module cache root')
     base,cache=chosen;safe_root(str(base))
     require(isinstance(protected_roots,(list,tuple)) and all(isinstance(root,str) for root in protected_roots))
     for protected in (code,data,state,profile_root/'state',*(Path(root) for root in protected_roots)):
         require(protected.is_absolute() and not overlap(cache,protected),'Module cache overlaps original or protected state')
-    compiled=[kind for kind,(app,_roles) in KINDS.items() if app==app_id]
-    required=compiled if required_kinds is None else required_kinds
-    require(isinstance(required,(list,tuple)) and 0<len(required)<=32 and all(isinstance(kind,str) for kind in required) and len(set(required))==len(required) and all(kind in compiled for kind in required))
-    require(sum(sum(limit for _path,limit in KINDS[kind][1].values()) for kind in compiled)<=MAX_TOTAL)
+    require(sum(KIND_TOTAL_LIMITS.get(kind,sum(limit for _path,limit in KINDS[kind][1].values())) for kind in required)<=MAX_TOTAL)
     view=ReadView(base,cache);view.directory(cache)
     envelope=parse(view.read(cache/'pointers'/(source['pointerDigest']+'.json'),32768,retain=True))
     pointer=pointer_metadata(app_id,envelope,source,verify_signature)
@@ -240,6 +256,7 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
     snapshot_root=cache/'snapshots'/source['manifestSha256'];view.directory(snapshot_root)
     requests=[];entries=[];expected_files=set();expected_directories=set()
     for dataset in datasets:
+        require(not is_cancelled())
         root=snapshot_root/dataset['datasetId'];view.directory(root);roles=KINDS[dataset['kind']][1];files={}
         for item in dataset['objects']:
             relative=dataset['datasetId']+'/'+roles[item['role']][0];file=snapshot_root/relative
@@ -247,30 +264,29 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
             parent=Path(relative).parent
             while parent!=Path('.'):expected_directories.add(parent.as_posix());parent=parent.parent
         request={'appId':app_id,'kind':dataset['kind'],'sourceRoot':str(code),'snapshotRoot':str(root),'files':files,'objects':copy.deepcopy(dataset['objects'])}
-        Snapshot(request);requests.append(request)
+        requests.append(Snapshot(request))
         entries.append({'kind':dataset['kind'],'datasetId':dataset['datasetId'],'revisionId':dataset['revisionId'],'root':str(root),'files':files,'objects':copy.deepcopy(dataset['objects'])})
     view.closure(snapshot_root,expected_files,expected_directories)
-    previous_bytecode=sys.dont_write_bytecode
-    sys.dont_write_bytecode=True
-    try:
-        if app_id=='melange':
-            from melange_module_data import configure_readers
-        else:
-            from mentat_module_data import configure_readers
-    finally:
-        sys.dont_write_bytecode=previous_bytecode
     readers={}
-    for request in requests:
-        bound=configure_readers(copy.deepcopy(request))
-        require(isinstance(bound,dict) and bound.get('appId')==app_id and bound.get('kind')==request['kind']
-                and bound.get('coverage')=={'completeKind':True,'fullApplication':False})
-        readers[request['kind']]=bound
-    # Reader imports/probes are awaited work at the native boundary. Reject any
-    # role replacement even if the domain reader returned a successful object.
-    for entry in entries:
-        for item in entry['objects']:view.read(Path(entry['files'][item['role']]),item['bytes'],expected_bytes=item['bytes'],expected_sha=item['sha256'])
-    view.closure(snapshot_root,expected_files,expected_directories);view.unchanged()
-    require(source==original_source,'Native module source changed during reader configuration')
+    try:
+        for snapshot in requests:
+            require(not is_cancelled())
+            bound=reader_registry[snapshot.kind](snapshot,source=copy.deepcopy(source),is_cancelled=is_cancelled)
+            require(isinstance(bound,dict) and bound.get('appId')==app_id and bound.get('kind')==snapshot.kind
+                    and bound.get('coverage')=={'completeKind':True,'fullApplication':False})
+            readers[snapshot.kind]=bound
+        require(not is_cancelled())
+        # Reader imports/probes are awaited work at the native boundary. Reject
+        # any role replacement even after a successful domain reader result.
+        for entry in entries:
+            for item in entry['objects']:view.read(Path(entry['files'][item['role']]),item['bytes'],expected_bytes=item['bytes'],expected_sha=item['sha256'])
+        view.closure(snapshot_root,expected_files,expected_directories);view.unchanged()
+        require(source==original_source,'Native module source changed during reader configuration')
+    except BaseException:
+        for bound in readers.values():
+            reader=bound.get('reader')
+            if callable(getattr(reader,'close',None)):reader.close()
+        raise
     return {'schemaVersion':1,'appId':app_id,'source':copy.deepcopy(source),'snapshotRoot':str(snapshot_root),
             'datasets':entries,'readers':readers,'coverage':{'completeKind':True,'fullApplication':False},
             'signatureVerification':'python-callback' if verify_signature is not None else 'native-js'}
