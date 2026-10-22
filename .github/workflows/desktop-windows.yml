@@ -606,7 +606,7 @@ jobs:
               --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .workflow_run.id // empty')
           fi
           gh run download "$build_run" -n "$ARTIFACT" -D release \
-            || { echo "::error::build artifact $ARTIFACT is unavailable (1-day retention expired?). Rebuilding is a deliberate decision: record it in the build queue, delete the stale draft by hand, then dispatch."; exit 1; }
+            || { echo "::error::build artifact $ARTIFACT is unavailable (7-day retention expired?). Rebuilding is a deliberate decision: record it in the build queue, delete the stale draft by hand, then dispatch."; exit 1; }
           cd release
           sha256sum -c SHA256SUMS.txt
           prov="$PRODUCT-$VERSION-provenance.json"
