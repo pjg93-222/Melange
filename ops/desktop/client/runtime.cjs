@@ -24,6 +24,9 @@ function activity(origin,token,appId){return new Promise(resolve=>{
 class Runtime {
   constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;}
   async start(configuration){
+    // Module snapshots have no compiled whole-application reader installer yet.
+    // Settings cannot turn their source descriptor into a native launch capability.
+    if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
     configuration=structuredClone(configuration);
     const generation=this.generation||0,check=()=>{if(generation!==(this.generation||0))throw new Error('Application startup cancelled.');};
     if(typeof this.authorize!=='function')throw new Error('Administrator approval and local authentication are required.');

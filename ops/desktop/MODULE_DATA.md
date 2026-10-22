@@ -5,6 +5,12 @@ and Mentat. They are foundations: `main.cjs` does not enable this provider, and
 these source tests do not establish a published dataset, installed feature, or
 complete application preload.
 
+The ordinary runtime launcher rejects any own `ownerGitHubModuleData` setting
+before authorization, storage preparation, or process creation, regardless of
+the marker's value. A source descriptor is not a native launch capability. Normal
+marker-free Melange and Mentat configurations retain their original data and
+state roots. No native module-data launch capability is enabled by this guard.
+
 Binary updates, Terrier district data, and recipient dataset access retain their
 existing protocols and protected state. This provider uses the existing per-app
 verification keys with the distinct `melange-public-module-data` and
