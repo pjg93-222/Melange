@@ -45,9 +45,17 @@ test('private staging refuses reuse, external files and custom plugin shadowing'
 test('signature command uses CurrentUser script and refuses an invalid verification result',async t=>{
  const f=fixture(t);let called;
  await assert.rejects(signFile(f.main,f.root,{owned:true,execute:async(command,args,settings)=>{called={command,args,settings};return {stdout:JSON.stringify({path:f.main,status:'Valid',sha256:f.digest(f.main),thumbprint:'vendor',timestamped:true})};}}),/verification failed/);
- assert.match(called.command,/WindowsPowerShell.*powershell.exe$/);assert.ok(called.args.includes('-RequirePublisher'));assert.equal(called.settings.windowsHide,true);assert.equal(called.args.includes('/p'),false);
+ assert.equal(called.command,String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`);assert.equal(path.win32.isAbsolute(called.command),true);assert.equal(/[\x00-\x1f]/.test(called.command),false);assert.equal(/[\x00-\x1f]/.test(called.settings.env.PSModulePath),false);
+ if(process.platform==='win32')assert.equal(fs.statSync(called.command).isFile(),true);
+ assert.ok(called.args.includes('-RequirePublisher'));assert.equal(called.settings.windowsHide,true);assert.equal(called.args.includes('/p'),false);
 });
 test('a junction parent cannot redirect signing outside the private staging directory',async t=>{
  const f=fixture(t),link=path.join(f.root,'junction');fs.symlinkSync(path.join(f.vendor,'nsis'),link,'junction');
  let called=false;await assert.rejects(signFile(path.join(link,'elevate.exe'),f.root,{execute:async()=>{called=true;}}),/private regular/);assert.equal(called,false);fs.unlinkSync(link);
+});
+test('actual Windows subprocess verifies a copied vendor binary without signing or changing it',{skip:process.platform!=='win32'},async t=>{
+ const f=fixture(t),file=path.join(f.root,'vendor-powershell.exe');
+ fs.copyFileSync(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,file);
+ const before=f.digest(file),result=await signFile(file,f.root,{verify:true});
+ assert.equal(result.status,'Valid');assert.equal(result.signed,false);assert.equal(result.preserved,true);assert.equal(result.sha256,before);assert.equal(f.digest(file),before);
 });
