@@ -11,8 +11,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "data_release_fetch.py",
-        "bytes": 28483,
-        "sha256": "a6f557f60bc1faa9133ebb7e24039eabf280a8f64d41007a6bc8992f0fe3e435"
+        "bytes": 29092,
+        "sha256": "6b55d468ecd71a04fb19838ac9cab9007488e96f2af92ef0881aa121030e29b7"
       },
       {
         "root": "bootstrap",
@@ -453,7 +453,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "ae8304a666555f14010af671f532c6830d8652c6d7bfd83e1463cf7f655ece4d",
+    "programFingerprint": "54bf56b001bba874d920b82543d1ba8656d57f8348444af05895df0a2b43db4b",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -476,8 +476,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "data_release_fetch.py",
-        "bytes": 28483,
-        "sha256": "a6f557f60bc1faa9133ebb7e24039eabf280a8f64d41007a6bc8992f0fe3e435"
+        "bytes": 29092,
+        "sha256": "6b55d468ecd71a04fb19838ac9cab9007488e96f2af92ef0881aa121030e29b7"
       },
       {
         "root": "bootstrap",
@@ -1986,7 +1986,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "5bdce70ba94e01b7b07ed3f27bdda8ad1ff74c91fcd7304d769522424324d811",
+    "programFingerprint": "1556041017fde328f1b7a14158c9528e3cff1e26d096e30439eaa052db7d67e5",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],

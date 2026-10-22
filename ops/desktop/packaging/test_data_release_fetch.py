@@ -640,6 +640,62 @@ def test_completed_temporary_in_place_change_survives_failure_cleanup(roots, mon
     assert fetch._path_stamp(changed[0][0]) == changed[0][1]
 
 
+@pytest.mark.parametrize('operation', ['extraction', 'recovery_record'])
+def test_equal_completed_stamp_never_authorizes_changed_temporary_cleanup(roots, monkeypatch, operation):
+    data, state = roots
+    payload = b'public fixture'
+    archives, files = component_archive(state, {'fresh.bin': payload})
+    stamp = fetch._handle_stamp
+    # Model a filesystem/native ChangeTime collision deterministically. Every
+    # other identity/size/mtime field is real, and content checks stay intact.
+    monkeypatch.setattr(fetch, '_handle_stamp', lambda stream: stamp(stream)[:-1] + (0,))
+    error, changed = OSError('injected failure with colliding completed stamp'), []
+    def refuse(source, target, **options):
+        before = source.stat()
+        before_stamp = fetch._path_stamp(source)
+        raw = source.read_bytes()
+        source.write_bytes(b'x' * len(raw))
+        os.utime(source, ns=(before.st_atime_ns, before.st_mtime_ns))
+        after_stamp = fetch._path_stamp(source)
+        assert after_stamp == before_stamp and source.read_bytes() != raw
+        changed.append((source, after_stamp, b'x' * len(raw)))
+        raise error
+    monkeypatch.setattr(fetch, '_replace', refuse)
+    target = data / 'fresh.bin' if operation == 'extraction' else state / 'fixture-record.json'
+    with pytest.raises(OSError) as raised:
+        if operation == 'extraction':
+            fetch._extract(archives, data, state, files, 'melange')
+        else:
+            fetch._atomic_write(target, '{"fixture":true}')
+    assert raised.value is error and not target.exists()
+    temporary, completed_stamp, raw = changed[0]
+    assert temporary.read_bytes() == raw
+    assert fetch._path_stamp(temporary) == completed_stamp
+
+
+@pytest.mark.parametrize('operation', ['extraction', 'recovery_record'])
+def test_unverified_temporary_is_preserved_after_write_failure(roots, monkeypatch, operation):
+    data, state = roots
+    payload = b'public fixture'
+    archives, files = component_archive(state, {'fresh.bin': payload})
+    error = OSError('injected failure before completed verification')
+    def refuse(_descriptor):
+        raise error
+    monkeypatch.setattr(fetch.os, 'fsync', refuse)
+    target = data / 'fresh.bin' if operation == 'extraction' else state / 'fixture-record.json'
+    with pytest.raises(OSError) as raised:
+        if operation == 'extraction':
+            fetch._extract(archives, data, state, files, 'melange')
+        else:
+            fetch._atomic_write(target, '{"fixture":true}')
+    assert raised.value is error and not target.exists()
+    temporary = list(target.parent.glob('.melange-data-*'))
+    assert len(temporary) == 1
+    expected = payload if operation == 'extraction' else b'{"fixture":true}'
+    assert temporary[0].read_bytes() == expected
+    assert temporary[0].stat().st_nlink == 1
+
+
 @pytest.mark.parametrize('change_bytes', [False, True])
 def test_changed_linked_stage_is_preserved_after_completed_verification(roots, monkeypatch, change_bytes):
     data, state = roots
@@ -705,7 +761,12 @@ def test_later_member_checksum_failure_never_publishes_the_first_member(roots):
     archives, files = component_archive(state, {'a.bin':b'first', 'z.bin':b'second'})
     files['z.bin']['sha256'] = '0' * 64
     with pytest.raises(fetch.DataReleaseError): fetch._extract(archives, data, state, files, 'mentat')
-    assert list(data.iterdir()) == []
+    assert not (data / 'a.bin').exists() and not (data / 'z.bin').exists()
+    # The earlier fully verified stage is safe to remove. The later stage has
+    # no completed checksum/stamp authority, so leave its exact bytes intact.
+    temporary = list(data.glob('.melange-data-*'))
+    assert len(temporary) == 1 and temporary[0].read_bytes() == b'second'
+    assert temporary[0].stat().st_nlink == 1
 
 
 def test_existing_welcome_is_preserved_even_when_download_claims_to_replace_it(roots):

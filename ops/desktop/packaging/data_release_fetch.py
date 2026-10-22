@@ -210,6 +210,23 @@ def _remove_owned(path, identity, *, links=1, stamp=None):
     return False
 
 
+def _remove_completed(path, entry, identity, stamp):
+    """Delete only an unchanged, previously completed owned temporary.
+
+    A timestamp can collide after an in-place rewrite. Rehash the expected
+    completed bytes as well as checking the original identity/full stamp; an
+    unverified or changed file never becomes a fresh cleanup baseline.
+    """
+    if stamp is None:
+        return False
+    try:
+        if _checked_file(path, entry, identity) == stamp:
+            return _remove_owned(path, identity, stamp=stamp)
+    except (OSError, DataReleaseError):
+        pass
+    return False
+
+
 def _component_member(relative):
     parts = relative.split('/')
     if (relative.startswith(STATE_PREFIX) or any(part.casefold() in
@@ -335,10 +352,10 @@ def _extract(archives, data, state, files, app):
                 pass
         raise
     finally:
-        for temporary, _target, _entry, identity, stamp in stages:
+        for temporary, _target, entry, identity, stamp in stages:
             try:
                 _parents(data, temporary.parent)
-                _remove_owned(temporary, identity, stamp=stamp)
+                _remove_completed(temporary, entry, identity, stamp)
             except (OSError, DataReleaseError):
                 pass
 
@@ -550,7 +567,7 @@ def _atomic_write(path, text):
         stamp = _checked_file(temporary, entry, identity)
         _replace(temporary, path, identity=identity, entry=entry)
     finally:
-        _remove_owned(temporary, identity, stamp=stamp)
+        _remove_completed(temporary, entry, identity, stamp)
 
 
 def _redact(text, data, state):
