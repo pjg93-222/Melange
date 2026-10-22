@@ -32,7 +32,8 @@ if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
 }
 $stateDirectory = [IO.Path]::GetFullPath($StateDirectory)
 $recordPath = Join-Path $stateDirectory 'startup-registration.json'
-$supervisor = (Get-Item -LiteralPath $SupervisorScript).FullName
+# Remove compares the path with the saved record only, so it still works after that checkout is gone.
+$supervisor = if ($Action -eq 'Remove') { [IO.Path]::GetFullPath($SupervisorScript) } else { (Get-Item -LiteralPath $SupervisorScript).FullName }
 if ([IO.Path]::GetFileName($supervisor) -cne 'Start-LanPublisherAtLogin.ps1') { throw 'SupervisorScript must be a Start-LanPublisherAtLogin.ps1.' }
 $entryName = 'MelangeDesktopPublisher'
 $runPath = 'Software\Microsoft\Windows\CurrentVersion\Run'
@@ -151,13 +152,16 @@ try {
     if ($PublicOrigin) { $record.publicOrigin = $PublicOrigin }
     $temporary = $recordPath + '.tmp'
     [IO.File]::WriteAllText($temporary, ($record | ConvertTo-Json))
-    [IO.File]::Move($temporary, $recordPath, $true)
     if ($useTask) {
+        # The record is replaced only once the task exists, so a failed registration leaves the previous record
+        # (and the Run entry it owns) consistent for -Action Remove.
         $userId = [Security.Principal.WindowsIdentity]::GetCurrent().Name
         Register-ScheduledTask -TaskPath '\' -TaskName $entryName -InputObject (New-PublisherTask $PowerShellExecutable $taskArguments $userId) -Force | Out-Null
+        [IO.File]::Move($temporary, $recordPath, $true)
         $runEntry = Remove-OwnedRunEntry $key $owned
         Write-Output ("Registered scheduled task $entryName for the current user (starts at logon, restarts within a minute; Run entry $runEntry). It was not started: Start-ScheduledTask $entryName.")
     } else {
+        [IO.File]::Move($temporary, $recordPath, $true)
         $key.SetValue($entryName, $command, [Microsoft.Win32.RegistryValueKind]::String)
         Write-Output $(if ($PublicOrigin) { 'Registered publisher startup for the current user only. The listener binds 127.0.0.1 for the local relay; no LAN or firewall rule is used.' }
             else { 'Registered publisher startup for the current user only. Approved LAN and firewall checks run before every listener start.' })

@@ -34,7 +34,7 @@ Invite codes are not enforced by default. After testers update to a client with 
 The packaged trust descriptor names `https://bore.pub:38443`. That path needs two processes under the publisher's account. Both must run after every login and reboot:
 
 ```powershell
-.\Register-LanPublisherStartup.ps1 -Action Install -PublicOrigin https://bore.pub:38443 -PythonExecutable 'C:\Path\To\python.exe'
+.\Register-LanPublisherStartup.ps1 -Action Install -PublicOrigin https://bore.pub:38443 -StateDirectory 'C:\ExistingProtectedPublisherState' -PythonExecutable 'C:\Path\To\python.exe'
 python relay_tunnel.py --port 38443 --log 'C:\ExistingProtectedPublisherState\relay.log'
 ```
 

@@ -141,12 +141,12 @@ function Start-LoggedChild([string]$Name, [string]$Executable, [string[]]$Argume
     foreach ($argument in $Arguments) { $start.ArgumentList.Add($argument) }
     $process = [Diagnostics.Process]::Start($start)
     foreach ($done in @($pumps | Where-Object { -not $_.IsAlive })) { [void]$pumps.Remove($done) }
-    $pumps.Add([MelangeLog]::Pump($process.StandardOutput, (Join-Path $stateDirectory ($Name + '.log'))))
-    $pumps.Add([MelangeLog]::Pump($process.StandardError, (Join-Path $stateDirectory ($Name + '.err'))))
     try {
+        $pumps.Add([MelangeLog]::Pump($process.StandardOutput, (Join-Path $stateDirectory ($Name + '.log'))))
+        $pumps.Add([MelangeLog]::Pump($process.StandardError, (Join-Path $stateDirectory ($Name + '.err'))))
         [MelangePublisherJob]::Assign($publisherJob, $process)
     } catch {
-        # A child outside the job would outlive the supervisor.
+        # A child outside the job, or one whose output nobody drains, would outlive the supervisor or block.
         try { $process.Kill($true) } catch { }
         $process.Dispose()
         throw
