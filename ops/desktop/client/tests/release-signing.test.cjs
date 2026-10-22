@@ -73,3 +73,78 @@ test('signing pool stops admission on failure and drains all in-flight operation
  await assert.rejects(signPool(Array.from({length:20},(_,i)=>String(i)+'.dll'),async file=>{started.push(file);active++;try{if(file==='0.dll')throw failure;await new Promise(resolve=>setTimeout(resolve,20));finished.push(file);}finally{active--;}}),error=>error===failure);
  assert.equal(active,0);assert.equal(started.length,4);assert.equal(finished.length,3);
 });
+
+async function preparedRelease(t,decorate=sign=>sign){
+ const f=fixture(t),elevate=f.put('private/dist/terrier/win-unpacked/resources/elevate.exe');
+ const sign=decorate(f.sign,f),config=options(app,{env:f.env,platform:'win32',sign,toolset:f.toolset});
+ await config.beforePack(f.context);await config.win.signtoolOptions.sign({path:f.main});await config.afterSign(f.context);
+ const uninstaller=f.put('private/dist/terrier/Terrier-1.0.15-win-x64.__uninstaller.exe'),installer=f.put('private/dist/terrier/Terrier-1.0.15-win-x64.exe');
+ for(const file of [uninstaller,installer])await config.win.signtoolOptions.sign({path:file});
+ fs.unlinkSync(uninstaller);
+ return {...f,elevate,config,installer,uninstaller};
+}
+test('current owned helper rejects a changed vendor signer despite approved historical evidence',async t=>{
+ const attempts=[],f=await preparedRelease(t,(sign,_f)=>async(file,root,request)=>{attempts.push({file,...request});return sign(file,root,request);});
+ const original=f.digest(f.elevate);fs.writeFileSync(f.elevate,'valid-vendor');
+ assert.notEqual(f.digest(f.elevate),original);
+ await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/Wrong publisher/);
+ const current=attempts.filter(row=>row.file===f.elevate&&row.verify).at(-1);
+ assert.equal(current.owned,true);assert.equal(fs.readFileSync(f.elevate,'utf8'),'valid-vendor');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+});
+test('current helper requires a timestamp even when its reported signer is approved',async t=>{
+ let final=false;
+ const f=await preparedRelease(t,(sign,base)=>async(file,root,request)=>{const result=await sign(file,root,request);return final&&file===path.join(base.context.appOutDir,'resources','elevate.exe')&&request.verify?{...result,timestamped:false}:result;});
+ final=true;
+ await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/Current application, elevation helper or installer signature/);
+ assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+});
+test('another same-named vendor helper cannot replace the exact current application helper',async t=>{
+ const f=await preparedRelease(t),decoy=f.put('private/dist/terrier/win-unpacked/resources/vendor/elevate.exe','valid-vendor');
+ fs.unlinkSync(f.elevate);
+ await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/Current application, elevation helper or installer signature/);
+ assert.equal(f.calls.filter(row=>row.file===decoy).at(-1).owned,false);assert.equal(fs.readFileSync(decoy,'utf8'),'valid-vendor');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+});
+test('helper bytes changed after its current verification cannot yield a receipt',async t=>{
+ let final=false;
+ const f=await preparedRelease(t,(sign,base)=>async(file,root,request)=>{const result=await sign(file,root,request);if(final&&request.verify&&file.endsWith('Terrier-1.0.15-win-x64.exe'))fs.writeFileSync(path.join(base.context.appOutDir,'resources','elevate.exe'),'valid-release:changed-after-verification');return result;});
+ final=true;
+ await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/changed after verification/);
+ assert.equal(fs.readFileSync(f.elevate,'utf8'),'valid-release:changed-after-verification');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+});
+test('fresh exact current rows are distinct from staged uninstaller history and preserve vendors',async t=>{
+ const f=await preparedRelease(t),vendor=f.digest(f.third);
+ await f.config.artifactBuildCompleted({file:f.installer});
+ const proof=JSON.parse(fs.readFileSync(f.installer+'.signatures.json'));
+ for(const file of [f.main,f.elevate,f.installer]){
+  const rows=proof.currentFiles.filter(row=>row.path===file);assert.equal(rows.length,1);assert.equal(rows[0].sha256,f.digest(file));assert.equal(rows[0].thumbprint,THUMBPRINT);assert.equal(rows[0].timestamped,true);
+ }
+ assert.equal(proof.currentFiles.some(row=>row.path===f.uninstaller),false);assert.ok(proof.files.some(row=>row.path===f.uninstaller));assert.equal(proof.uninstallerEvidence,'staged-history-only');
+ assert.equal(f.digest(f.third),vendor);assert.equal(proof.currentFiles.find(row=>row.path===f.third).thumbprint,'vendor');
+});
+test('fixed builtin signing imports and command-origin guards fail closed without signing',async()=>{
+ const source=fs.readFileSync(path.join(__dirname,'..','sign-staged-binary.ps1'),'utf8');
+ for(const module of ['Utility','Security'])assert.ok(source.includes("Import-Module -Name ($PSHOME + '\\Modules\\Microsoft.PowerShell."+module+"\\Microsoft.PowerShell."+module+".psd1') -ErrorAction Stop"));
+ assert.ok(source.includes("$PSVersionTable.PSEdition -ne 'Desktop'"));assert.ok(source.includes('$PSVersionTable.PSVersion.Minor -ne 1'));
+ assert.ok(source.includes('Microsoft.PowerShell.Utility\\Get-FileHash -LiteralPath'));assert.ok(source.includes('Microsoft.PowerShell.Security\\Get-AuthenticodeSignature -LiteralPath'));
+ assert.equal(/\$env:PSModulePath\s*=/i.test(source),false);
+ const guard=source.match(/^function Assert-ReleaseBuiltinCommand[^\n]*\{\n[\s\S]*?^\}/m);assert.ok(guard);
+ const script=`$ErrorActionPreference='Stop'
+function Get-Command([string]$Name,[string]$ErrorAction) {
+ if($script:scenario -eq 'missing'){throw 'Unresolved builtin'}
+ $module='Microsoft.PowerShell.Utility';$file=[IO.Path]::Combine($PSHOME,'Modules',$module,'Microsoft.PowerShell.Utility.psm1');$type='Function'
+ if($script:scenario -eq 'wrong-module'){$module='Unreviewed.Module'}
+ if($script:scenario -eq 'wrong-path'){$file='C:\\Unreviewed\\Utility.psm1'}
+ if($script:scenario -eq 'wrong-type'){$type='Alias'}
+ [pscustomobject]@{ModuleName=$module;CommandType=$type;Module=[pscustomobject]@{Path=$file}}
+}
+${guard[0]}
+$script:scenario='good';Assert-ReleaseBuiltinCommand 'Get-FileHash' 'Microsoft.PowerShell.Utility' 'Microsoft.PowerShell.Utility.psm1' 'Function'
+foreach($scenario in @('missing','wrong-module','wrong-path','wrong-type')){
+ $script:scenario=$scenario;$refused=$false
+ try{Assert-ReleaseBuiltinCommand 'Get-FileHash' 'Microsoft.PowerShell.Utility' 'Microsoft.PowerShell.Utility.psm1' 'Function'}catch{$refused=$true}
+ if(-not $refused){throw ('Invalid command origin accepted: '+$scenario)}
+}
+'four-invalid-origins-refused'`;
+ const {stdout}=await require('node:util').promisify(require('node:child_process').execFile)(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],{windowsHide:true,timeout:15000,maxBuffer:1024*1024});
+ assert.equal(stdout.trim(),'four-invalid-origins-refused');
+});
