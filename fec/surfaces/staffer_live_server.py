@@ -574,6 +574,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send_bytes(b'{"error":"Local access only."}', 'application/json', 403)
             return
         parts = urlsplit(self.path)
+        if parts.path in {'/public-data/', '/public-data/public-data.js', '/public-data/public-data.css',
+                          '/api/public-data/catalogue', '/api/public-data/provenance',
+                          '/api/public-data/observations'}:
+            from fec.surfaces.melange_public_data import handle_public_data_request
+            handle_public_data_request(self, parts.path, parts.query, getattr(self.server, 'public_data', None))
+            return
         if parts.path == '/api/staffer-person-activities':
             query = parse_qs(parts.query)
             service = self.server.dashboard
@@ -832,7 +838,13 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def main():
+def main(*, public_data=None, on_server_ready=None):
+    if on_server_ready is not None and not callable(on_server_ready):
+        raise ValueError('The public data startup hook must be program-supplied')
+    if public_data is not None:
+        from fec.surfaces.melange_public_data import PublicDataCatalogue
+        if type(public_data) is not PublicDataCatalogue:
+            raise ValueError('Verified public data must be prepared before launch')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--port", type=int, default=8841)
@@ -853,11 +865,20 @@ def main():
     graph = StaticGraph(args.source_root)
     dashboard = LiveService(args.source_root, graph)
     server = WorkspaceServer(("127.0.0.1", args.port), Handler)
-    server.dashboard = dashboard
-    server.dashboard_file = args.dashboard_file
-    dashboard.start()
-    print(f"Live staffer dashboard http://127.0.0.1:{args.port}/staffer-live/ — IN PROGRESS", flush=True)
-    server.serve_forever()
+    try:
+        server.dashboard = dashboard
+        server.dashboard_file = args.dashboard_file
+        server.public_data = public_data
+        # Attach the actual public consumer and original private service before
+        # the one-use native installation callback. LiveService.start() has no
+        # inverse operation, so a refused callback must run before it starts.
+        if on_server_ready is not None:
+            on_server_ready(server)
+        dashboard.start()
+        print(f"Live staffer dashboard http://127.0.0.1:{args.port}/staffer-live/ — IN PROGRESS", flush=True)
+        server.serve_forever()
+    finally:
+        server.server_close()
 
 
 if __name__ == "__main__":
