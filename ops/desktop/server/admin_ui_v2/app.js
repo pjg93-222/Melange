@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, detailGen=0, logsBusy=false, logLines=[], logTop, appsWorking=false, slow=false, polling=false;
+  let bearer, csrf, snapshot, busy=false, view='apps', appsData, detail, tab='overview', current, appsTimer, followTimer, followGen=0, detailGen=0, logsBusy=false, logLines=[], logTop, appsWorking=false, slow=false, polling=false, dockerStarted=0, unansweredTimer;
   const legacyViews=['requests','grants','activity','invites'], expanded=new Set(['terrier']), logOptions={count:500,follow:true,filter:''};
   const drafts=new Map(), apps={melange:'Melange',terrier:'Terrier',mentat:'Mentat'}, appOf={'melange-desk':'melange','mentat-console':'mentat',terrier:'terrier'};
   const byId=id=>document.getElementById(id);
@@ -10,10 +10,17 @@
   const descriptions={requests:'Verify the requester before choosing their role and issuing a single-use key.',grants:'Signed in / recently online means an authenticated session checked in within three minutes. It does not indicate a person is typing. Update contact is separate.',activity:'Reported successful changes contain operation metadata and counts. Record contents and passwords are not included.',invites:'When the listener enforces invites (inviteRequired is true in listener-status.json), a tester needs an invite code to request access. Each code works for a limited number of requests until it expires, and is shown only once when issued. Testers type it into the access request form.'};
   const reveal={key:{title:'Single-use access key',note:'Give this key only to the requester you verified. It expires in ten minutes and works only for that request and device.',field:'activationKey'},
     invite:{title:'Invite code',note:'Give this code only to the tester you invited. It is shown once and cannot be shown again; revoke it here if it is lost or shared. The tester types it into the access request form.',field:'code'}};
+  // error.unanswered: fetch rejected with no HTTP status and not by our own timeout. A busy dashboard (all four request slots taken) gives no answer, and so
+  // does one that ended; either way the session is kept, so closing the window still ends it on the server. Only a 401 ends it here.
   async function call(route,value,wait=12000){
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),wait);
-    try{const response=await fetch(route,{method:'POST',credentials:'omit',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json',...(bearer?{'Authorization':'Bearer '+bearer,'X-Admin-CSRF':csrf}:{})},body:JSON.stringify(value)});if(!response.ok){const error=new Error('refused');error.status=response.status;error.body=await response.json().catch(()=>({}));throw error;}return await response.json();}finally{clearTimeout(timer);}
+    try{const response=await fetch(route,{method:'POST',credentials:'omit',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json',...(bearer?{'Authorization':'Bearer '+bearer,'X-Admin-CSRF':csrf}:{})},body:JSON.stringify(value)}).catch(error=>{if(error.name!=='AbortError'){error.unanswered=true;notAnswering();}throw error;});answering();if(!response.ok){const error=new Error('refused');error.status=response.status;error.body=await response.json().catch(()=>({}));throw error;}return await response.json();}finally{clearTimeout(timer);}
   }
+  // Say so and look again every 10 s, in the view that is open, until the dashboard answers (any answer clears the line).
+  function notAnswering(){const line=byId('unanswered');line.textContent='Melange Admin is not answering. Trying again\u2026 If this keeps up, open Melange Admin again from its icon.';line.hidden=false;clearTimeout(unansweredTimer);unansweredTimer=setTimeout(()=>{if(bearer)poll();},10000);}
+  function answering(){byId('unanswered').hidden=true;clearTimeout(unansweredTimer);}
+  // True when the failure is dealt with: a 401 ends the session; no answer is already on the page (the line above), so nothing else may blame Docker for it.
+  const lost=error=>{if(error.status===401)showExpired(true);return error.status===401||Boolean(error.unanswered);};
   function lock(value){busy=value;byId('refresh').disabled=value||!bearer;byId('end-session').disabled=value||!bearer;for(const button of document.querySelectorAll('[data-action]'))button.disabled=value||!bearer;}
   function remember(){for(const card of byId('requests').querySelectorAll('[data-request]')){const role=card.querySelector('select');if(role)drafts.set(card.dataset.request,{role:role.value,districts:[...card.querySelectorAll('input:checked')].map(c=>c.value)});}}
   async function refresh(){const data=await call('/dashboard',{});remember();snapshot=data;render();status('Updated '+new Date(data.serverTime*1000).toLocaleTimeString()+'.');}
@@ -64,7 +71,7 @@
     let line=byId('apps-stale');
     if(!line){line=element('p',undefined,undefined,'stale-line');line.id='apps-stale';line.setAttribute('role','status');byId('apps-table').before(line);}
     const late=lateApps();line.hidden=!late;
-    line.textContent=late?'Showing the list from '+clock(new Date(appsData.checkedAt*1000))+'. Docker is slow to answer; trying again.':'';
+    line.textContent=late?'Showing the list from '+clock(new Date(appsData.checkedAt*1000))+'. '+(dockerWaiting()?'Starting Docker Desktop. This can take a minute or two.':appsData.docker.message||'Docker is slow to answer; trying again.'):'';
     line.title=late&&appsData.staleReason||'';
   }
   function renderSub(){if(!appsData)return;const n=appsData.services.length;byId('apps-sub').textContent=(appsData.docker.ok?(numbers[n]||n)+(n===1?' service':' services')+' on this computer. ':'')+'Last checked '+ago(appsData.checkedAt)+'.';}
@@ -80,7 +87,9 @@
     if(!appsData)return;
     keepFocus(()=>{
       renderSub();drawStale();byId('recent').hidden=byId('timeline').hidden=false;
-      const ok=appsData.docker.ok;byId('apps-table').hidden=!ok;say(ok?appsData.notice:appsData.docker.message,!ok);
+      const ok=appsData.docker.ok,waiting=dockerWaiting(),starter=byId('start-docker');byId('apps-table').hidden=!ok;
+      say(ok?appsData.notice:waiting?'Starting Docker Desktop. This can take a minute or two.':appsData.docker.message,!ok&&!waiting);
+      starter.hidden=!appsData.docker.canStart;starter.disabled=appsWorking||waiting;
       const body=byId('apps-body');body.replaceChildren();
       for(const row of ok?appsData.services:[]){
         const tr=element('tr',undefined,body,'app-row'),name=element('td',undefined,tr,'c-name');if(row.terrier&&expanded.has(row.service)&&row.state!=='missing')tr.classList.add('open');
@@ -101,11 +110,13 @@
   }
   const anyBusy=()=>Boolean(appsData&&appsData.services.some(s=>s.busy)||view==='app'&&detail&&detail.service&&detail.service.busy);
   const isLate=()=>Boolean(slow||(view==='app'?detail&&detail.stale:appsData&&appsData.stale));
-  function keepPolling(delay=2500){clearTimeout(appsTimer);if(!bearer)return;if(isLate())appsTimer=setTimeout(poll,10000);else if(anyBusy())appsTimer=setTimeout(poll,delay);}
+  // True for three minutes after Start Docker Desktop was chosen, until Docker answers and the services have settled (those that were running come back by themselves).
+  const dockerWaiting=()=>Boolean(dockerStarted&&Date.now()-dockerStarted<18e4&&!(appsData&&appsData.docker.ok&&!appsData.stale&&appsData.services.every(s=>s.state==='running'||s.state==='update_ready')));
+  function keepPolling(delay=2500){clearTimeout(appsTimer);if(!bearer)return;if(isLate())appsTimer=setTimeout(poll,10000);else if(anyBusy())appsTimer=setTimeout(poll,delay);else if(dockerWaiting())appsTimer=setTimeout(poll,4000);}
   async function loadApps(){
     try{appsData=await call('/apps',{});slow=false;}
     catch(error){
-      if(error.status===401){showExpired(true);return false;}
+      if(lost(error))return false;
       if(appsData&&appsData.docker.ok&&!(error.body&&error.body.message)){slow=true;drawStale();keepPolling();return false;}   // keep the list that is showing
       say(error.body&&error.body.message?error.body.message:'Could not read the services. Choose Check now to try again.',true);keepPolling();return false;
     }
@@ -116,7 +127,7 @@
   async function runAction(service,name){
     if(appsWorking)return;appsWorking=true;let problem;
     try{await call('/apps/action',{service,action:name});say('');await (view==='app'?loadDetail():loadApps());clearTimeout(appsTimer);appsTimer=setTimeout(()=>poll(),1500);}
-    catch(error){if(error.status===401)return showExpired(true);problem=error.status===409?'Another action is already running for this service.':'The action could not start. Check Docker, then try again.';}
+    catch(error){if(lost(error))return;const body=error.body||{};problem=body.error==='busy'?'Another action is already running for this service.':body.message||'The action could not start. Check Docker, then try again.';}
     finally{appsWorking=false;if(appsData)renderApps();if(problem)say(problem,true);}   // after renderApps, which rewrites the message line
   }
   function ask({title,text,rows,ok}){
@@ -142,7 +153,7 @@
     // Only the newest request's answer is used: one for a service no longer open, or from an earlier visit or an overlapping poll, is dropped
     const service=current,gen=++detailGen;
     try{const made=await call('/apps/detail',{service});if(gen!==detailGen||service!==current||view!=='app')return;detail=made;slow=false;}
-    catch(error){if(error.status===401)return showExpired(true);if(gen!==detailGen||service!==current||view!=='app')return;if(detail&&!(error.body&&error.body.message)){slow=true;renderDetail();keepPolling();return;}say('Could not read this service. Choose Apps and try again.',true);keepPolling();return;}
+    catch(error){if(lost(error))return;if(gen!==detailGen||service!==current||view!=='app')return;if(detail&&!(error.body&&error.body.message)){slow=true;renderDetail();keepPolling();return;}say('Could not read this service. Choose Apps and try again.',true);keepPolling();return;}
     appsData=appsData||{services:[],activity:[],docker:{ok:true},checkedAt:Date.now()/1000};
     const index=appsData.services.findIndex(s=>s.service===current);if(index>=0)appsData.services[index]=detail.service;
     renderDetail();keepPolling();
@@ -218,7 +229,7 @@
     if(logsBusy||view!=='app'||tab!=='logs')return;
     logsBusy=true;const service=current;
     try{const made=await call('/apps/logs',{service});if(service!==current||view!=='app'||tab!=='logs')return;logLines=made.lines;}
-    catch(error){if(error.status===401)return showExpired(true);if(service!==current||view!=='app'||tab!=='logs')return;if(first&&error.status!==409)say('Could not read the logs for this service.',true);return;}
+    catch(error){if(lost(error))return;if(service!==current||view!=='app'||tab!=='logs')return;if(first&&error.status!==409)say('Could not read the logs for this service.',true);return;}
     finally{logsBusy=false;}
     drawLogs();
   }
@@ -242,7 +253,7 @@
     form.addEventListener('submit',async event=>{
       event.preventDefault();if(appsWorking)return;appsWorking=true;send.disabled=true;result.hidden=true;
       try{const made=await call('/apps/invite',{email:email.value.trim(),role:role.value},50000);byId('link-value').textContent=made.link;byId('link').showModal();email.value='';inviteOpen=false;form.hidden=true;appsWorking=false;await loadDetail();}
-      catch(error){if(error.status===401)return showExpired(true);result.hidden=false;result.dataset.tone='attention';result.textContent=error.body&&error.body.message?error.body.message:error.status===400?'Enter a valid email address and choose a role.':'The invitation could not be created. Check that Terrier is running, then try again.';}
+      catch(error){if(lost(error))return;result.hidden=false;result.dataset.tone='attention';result.textContent=error.body&&error.body.message?error.body.message:error.status===400?'Enter a valid email address and choose a role.':'The invitation could not be created. Check that Terrier is running, then try again.';}
       finally{appsWorking=false;send.disabled=false;}
     });
     element('p','Listing accounts is not available yet. Invitations are created here and delivered by you.',box,'muted');
@@ -252,7 +263,7 @@
 
   // ---- Shell ------------------------------------------------------------------------------------------------------
   function showExpired(ended=false){
-    bearer=csrf=undefined;snapshot=undefined;appsData=undefined;slow=false;clearTimeout(appsTimer);stopFollow();byId('key-value').textContent='';byId('link-value').textContent='';
+    bearer=csrf=undefined;snapshot=undefined;appsData=undefined;slow=false;clearTimeout(appsTimer);answering();stopFollow();byId('key-value').textContent='';byId('link-value').textContent='';
     for(const d of document.querySelectorAll('dialog'))if(d.open)d.close();
     if(ended){byId('expired-title').textContent='This session has ended';byId('expired-text').textContent='Open Melange Admin again from your desktop or Start menu to continue.';}
     byId('shell').hidden=true;byId('expired').hidden=false;document.title='Melange Admin';
@@ -306,6 +317,12 @@
   byId('refresh').addEventListener('click',async()=>{if(busy)return;lock(true);status('Refreshing…');try{await refresh();}catch{status('Could not refresh. Existing results remain visible. Reopen Melange Admin if the session expired.',true);}finally{lock(false);}});
   byId('access-invite-form').addEventListener('submit',event=>{event.preventDefault();action(async()=>{const label=byId('access-invite-label').value.trim(),uses=Number(byId('access-invite-uses').value),days=Number(byId('access-invite-days').value);if(!label||!Number.isInteger(uses)||uses<1||uses>100||!Number.isInteger(days)||days<1||days>30){status('Enter who the invite is for, 1 to 100 uses, and 1 to 30 days.',true);return false;}showKey(await call('/invite-issue',{label,uses,days}),'invite');byId('access-invite-label').value='';});});
   byId('check-now').addEventListener('click',async()=>{if(byId('check-now').disabled||!bearer)return;byId('check-now').disabled=true;try{say('');if(view==='app'&&current)await loadDetail();else await loadApps();}finally{byId('check-now').disabled=!bearer;}});
+  byId('start-docker').addEventListener('click',async()=>{
+    if(appsWorking||!bearer)return;appsWorking=true;let problem;
+    try{await call('/apps/docker-start',{});dockerStarted=Date.now();clearTimeout(appsTimer);appsTimer=setTimeout(poll,4000);}
+    catch(error){if(lost(error))return;problem=error.body&&error.body.message?error.body.message:'Docker Desktop could not be started. Open it from the Start menu, then choose Check now.';}
+    finally{appsWorking=false;if(appsData)renderApps();if(problem)say(problem,true);}   // after renderApps, which rewrites the message line
+  });
   byId('app-scope').addEventListener('change',()=>{remember();render();});for(const nav of document.querySelectorAll('[data-view]'))nav.addEventListener('click',()=>go(nav.dataset.view));
   byId('menu').addEventListener('click',()=>{const open=byId('nav').classList.toggle('open');byId('menu').setAttribute('aria-expanded',String(open));});
   byId('expired-close').addEventListener('click',()=>{close();setTimeout(()=>{byId('expired-close').textContent='You can close this tab';byId('expired-close').disabled=true;},300);});
