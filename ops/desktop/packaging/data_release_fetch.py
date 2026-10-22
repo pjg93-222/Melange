@@ -122,7 +122,43 @@ def _regular(path, *, links=1):
 
 def _stamp(info):
     return (info.st_dev, info.st_ino, info.st_mode, info.st_nlink,
-            info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+            info.st_size, info.st_mtime_ns, info.st_ctime_ns if os.name != 'nt' else None)
+
+
+def _handle_stamp(stream):
+    result = _stamp(os.fstat(stream.fileno()))
+    if os.name != 'nt':
+        return result
+    # Windows st_ctime is creation time; use native ChangeTime to detect an
+    # in-place rewrite even when the previous mtime/bytes are restored.
+    import ctypes
+    from ctypes import wintypes
+    import msvcrt
+    class BasicInformation(ctypes.Structure):
+        _fields_ = [('CreationTime', ctypes.c_longlong), ('LastAccessTime', ctypes.c_longlong),
+                    ('LastWriteTime', ctypes.c_longlong), ('ChangeTime', ctypes.c_longlong),
+                    ('FileAttributes', wintypes.DWORD)]
+    query = ctypes.WinDLL('kernel32', use_last_error=True).GetFileInformationByHandleEx
+    query.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+    query.restype = wintypes.BOOL
+    info = BasicInformation()
+    if (not query(msvcrt.get_osfhandle(stream.fileno()), 0, ctypes.byref(info), ctypes.sizeof(info))
+            or info.FileAttributes & 0x400):
+        raise DataReleaseError('Windows component change identity is unavailable')
+    return result + (info.ChangeTime,)
+
+
+def _path_stamp(path, *, links=1):
+    before = _regular(path, links=links)
+    flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
+    with os.fdopen(os.open(path, flags), 'rb') as stream:
+        if _stamp(before) != _stamp(os.fstat(stream.fileno())):
+            raise DataReleaseError('Component path identity changed')
+        result = _handle_stamp(stream)
+        if (_stamp(_regular(path, links=links)) != _stamp(os.fstat(stream.fileno()))
+                or _handle_stamp(stream) != result):
+            raise DataReleaseError('Component path stamp changed')
+        return result
 
 
 def _parents(root, folder, *, create=False):
@@ -144,10 +180,11 @@ def _checked_file(path, entry, identity=None, *, links=1):
         raise DataReleaseError('Owned component temporary changed')
     if before.st_size != entry['bytes']:
         raise DataReleaseError('Component bytes differ from the manifest')
+    stamp = _path_stamp(path, links=links)
     flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
     with os.fdopen(os.open(path, flags), 'rb') as stream:
-        opened = os.fstat(stream.fileno())
-        if _stamp(opened)[:-1] != _stamp(before)[:-1]:
+        opened = _handle_stamp(stream)
+        if opened != stamp:
             raise DataReleaseError('Component file identity changed')
         digest, received = hashlib.sha256(), 0
         while chunk := stream.read(CHUNK):
@@ -155,20 +192,22 @@ def _checked_file(path, entry, identity=None, *, links=1):
             if received > entry['bytes']:
                 raise DataReleaseError('Component file grew during verification')
             digest.update(chunk)
-        if (_stamp(os.fstat(stream.fileno())) != _stamp(opened)
-                or _stamp(_regular(path, links=links)) != _stamp(before)
+        if (_handle_stamp(stream) != opened
+                or _path_stamp(path, links=links) != stamp
                 or received != entry['bytes'] or digest.hexdigest() != entry['sha256']):
             raise DataReleaseError('Component file checksum or identity changed')
-    return _stamp(before)
+    return stamp
 
 
-def _remove_owned(path, identity):
+def _remove_owned(path, identity, *, links=1, stamp=None):
     try:
-        info = _regular(path)
-        if (info.st_dev, info.st_ino) == identity:
+        info = _regular(path, links=links)
+        if (info.st_dev, info.st_ino) == identity and (stamp is None or _path_stamp(path, links=links) == stamp):
             Path(path).unlink()
+            return True
     except (OSError, DataReleaseError):
         pass  # Never delete a foreign replacement, link or reparse point.
+    return False
 
 
 def _component_member(relative):
@@ -261,7 +300,8 @@ def _extract(archives, data, state, files, app):
             temporary = Path(name)
             opened = os.fstat(descriptor)
             identity = (opened.st_dev, opened.st_ino)
-            stages.append((temporary, target, entry, identity))
+            stage = [temporary, target, entry, identity, None]
+            stages.append(stage)
             digest, received = hashlib.sha256(), 0
             with os.fdopen(descriptor, 'wb') as out, zipfile.ZipFile(archive) as bundle, bundle.open(info) as source:
                 while chunk := source.read(CHUNK):
@@ -274,28 +314,31 @@ def _extract(archives, data, state, files, app):
                 os.fsync(out.fileno())
             if received != entry['bytes'] or digest.hexdigest() != entry['sha256']:
                 raise DataReleaseError('Component does not match the manifest')
-            _checked_file(temporary, entry, identity)
-        for temporary, target, entry, identity in stages:
+            stage[4] = _checked_file(temporary, entry, identity)
+        for temporary, target, entry, identity, stamp in stages:
             _parents(data, target.parent)
-            _checked_file(temporary, entry, identity)
+            if _checked_file(temporary, entry, identity) != stamp:
+                raise DataReleaseError('Completed component temporary changed')
             _replace(temporary, target, identity=identity, entry=entry)
-            created.append((target, entry, identity))
-            _checked_file(target, entry, identity)
+            published = [target, entry, identity, None]
+            created.append(published)
+            published[3] = _checked_file(target, entry, identity)
         return len(stages), []
     except BaseException:
-        for target, entry, identity in created:
+        for target, entry, identity, stamp in created:
             try:
                 _parents(data, target.parent)
-                _checked_file(target, entry, identity)
-                _remove_owned(target, identity)
+                current = _checked_file(target, entry, identity)
+                if stamp is None or current == stamp:
+                    _remove_owned(target, identity, stamp=current)
             except (OSError, DataReleaseError):
                 pass
         raise
     finally:
-        for temporary, _target, _entry, identity in stages:
+        for temporary, _target, _entry, identity, stamp in stages:
             try:
                 _parents(data, temporary.parent)
-                _remove_owned(temporary, identity)
+                _remove_owned(temporary, identity, stamp=stamp)
             except (OSError, DataReleaseError):
                 pass
 
@@ -458,12 +501,32 @@ def _replace(source, target, *, identity, entry):
     """Publish a newly owned file only if the destination is still absent."""
     _checked_file(source, entry, identity)
     os.link(source, target, follow_symlinks=False)  # atomic no-overwrite, same directory/volume
-    for path in (source, target):
-        info = _regular(path, links=2)
-        if (info.st_dev, info.st_ino) != identity:
-            raise DataReleaseError('Component publication identity changed')
-    _checked_file(target, entry, identity, links=2)
-    Path(source).unlink()
+    linked_stamp = None
+    try:
+        for path in (source, target):
+            info = _regular(path, links=2)
+            if (info.st_dev, info.st_ino) != identity:
+                raise DataReleaseError('Component publication identity changed')
+        linked_stamp = _checked_file(target, entry, identity, links=2)
+        if _path_stamp(source, links=2) != linked_stamp:
+            raise DataReleaseError('Component publication changed')
+        Path(source).unlink()
+    except BaseException:
+        try:
+            # Revalidate both names before undoing only this call's new link.
+            # A verified stamp must not be replaced by a changed baseline.
+            current = _checked_file(target, entry, identity, links=2)
+            if ((linked_stamp is None or current == linked_stamp)
+                    and _path_stamp(source, links=2) == current
+                    and _remove_owned(target, identity, links=2, stamp=current)):
+                remaining = _checked_file(source, entry, identity)
+                # Our unlink changes only link count/change time. All other
+                # content identity fields must still equal the linked stamp.
+                if remaining[:3] + remaining[4:6] == current[:3] + current[4:6]:
+                    _remove_owned(source, identity, stamp=remaining)
+        except (OSError, DataReleaseError):
+            pass
+        raise
 
 
 def _atomic_write(path, text):
@@ -478,15 +541,16 @@ def _atomic_write(path, text):
     temporary = Path(name)
     info = os.fstat(descriptor)
     identity = (info.st_dev, info.st_ino)
+    stamp = None
     try:
         with os.fdopen(descriptor, 'wb') as stream:
             stream.write(raw)
             stream.flush()
             os.fsync(stream.fileno())
-        _checked_file(temporary, entry, identity)
+        stamp = _checked_file(temporary, entry, identity)
         _replace(temporary, path, identity=identity, entry=entry)
     finally:
-        _remove_owned(temporary, identity)
+        _remove_owned(temporary, identity, stamp=stamp)
 
 
 def _redact(text, data, state):

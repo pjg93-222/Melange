@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import io
 import json
 import os
+from pathlib import Path
 import threading
 import zipfile
 
@@ -538,12 +539,126 @@ def test_foreign_replacement_of_owned_temporary_is_never_removed_or_installed(ro
     real = fetch._replace
     foreign = []
     def replaced(source, target, **options):
-        source.unlink(); source.write_bytes(b'foreign temporary replacement'); foreign.append(source)
+        before = source.stat()
+        other = source.with_name(source.name + '.foreign')
+        other.write_bytes(b'foreign temporary replacement')
+        os.replace(other, source)  # Distinct inode allocated before the original is released.
+        assert (source.stat().st_dev, source.stat().st_ino) != (before.st_dev, before.st_ino)
+        foreign.append(source)
         return real(source, target, **options)
     monkeypatch.setattr(fetch, '_replace', replaced)
     with pytest.raises(fetch.DataReleaseError): fetch._extract(archives, data, state, files, 'melange')
     assert foreign[0].read_bytes() == b'foreign temporary replacement'
     assert not (data / 'fresh.bin').exists()
+
+
+@pytest.mark.parametrize('failure_at', ['verification', 'source_unlink'])
+def test_post_link_failure_rolls_back_owned_names_and_allows_retry(roots, monkeypatch, failure_at):
+    data, state = roots
+    archives, files = component_archive(state, {'fresh.bin': b'public fixture'})
+    error, failed = OSError('injected post-link failure'), []
+    checked, unlink = fetch._checked_file, Path.unlink
+    def verify(path, entry, identity=None, **options):
+        if failure_at == 'verification' and Path(path).name == 'fresh.bin' and options.get('links') == 2 and not failed:
+            failed.append(True)
+            raise error
+        return checked(path, entry, identity, **options)
+    def remove(path, *args, **options):
+        if failure_at == 'source_unlink' and path.name.startswith('.melange-data-') and path.stat().st_nlink == 2 and not failed:
+            failed.append(True)
+            raise error
+        return unlink(path, *args, **options)
+    with monkeypatch.context() as patch:
+        patch.setattr(fetch, '_checked_file', verify)
+        patch.setattr(Path, 'unlink', remove)
+        with pytest.raises(OSError) as raised:
+            fetch._extract(archives, data, state, files, 'melange')
+        assert raised.value is error and failed
+    assert not (data / 'fresh.bin').exists() and not list(data.glob('.melange-data-*'))
+    assert fetch._extract(archives, data, state, files, 'melange') == (1, [])
+    assert (data / 'fresh.bin').read_bytes() == b'public fixture'
+
+
+def test_recovery_record_post_link_failure_preserves_exception_and_can_retry(roots, monkeypatch):
+    data, state = roots
+    record = state / 'fixture-record.json'
+    error, failed, unlink = PermissionError('injected sharing violation'), [], Path.unlink
+    def remove(path, *args, **options):
+        if path.name.startswith('.melange-data-') and path.stat().st_nlink == 2 and not failed:
+            failed.append(True)
+            raise error
+        return unlink(path, *args, **options)
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, 'unlink', remove)
+        with pytest.raises(PermissionError) as raised:
+            fetch._atomic_write(record, '{"fixture":true}')
+        assert raised.value is error and failed
+    assert not record.exists() and not list(state.glob('.melange-data-*'))
+    fetch._atomic_write(record, '{"fixture":true}')
+    assert record.read_bytes() == b'{"fixture":true}'
+
+
+def test_completed_temporary_in_place_change_survives_failure_cleanup(roots, monkeypatch):
+    data, state = roots
+    archives, files = component_archive(state, {'fresh.bin': b'public fixture'})
+    changed, error = [], OSError('injected refusal after foreign change')
+    def refuse(source, target, **options):
+        before = source.stat()
+        source.write_bytes(b'x' * before.st_size)
+        os.utime(source, ns=(before.st_atime_ns, before.st_mtime_ns))
+        changed.append((source, fetch._path_stamp(source)))
+        raise error
+    monkeypatch.setattr(fetch, '_replace', refuse)
+    with pytest.raises(OSError) as raised:
+        fetch._extract(archives, data, state, files, 'melange')
+    assert raised.value is error and not (data / 'fresh.bin').exists()
+    assert changed[0][0].read_bytes() == b'x' * len(b'public fixture')
+    assert fetch._path_stamp(changed[0][0]) == changed[0][1]
+
+
+@pytest.mark.parametrize('change_bytes', [False, True])
+def test_changed_linked_stage_is_preserved_after_completed_verification(roots, monkeypatch, change_bytes):
+    data, state = roots
+    archives, files = component_archive(state, {'fresh.bin': b'public fixture'})
+    error, changed, unlink = OSError('injected unlink refusal after mutation'), [], Path.unlink
+    def remove(path, *args, **options):
+        if path.name.startswith('.melange-data-') and path.stat().st_nlink == 2 and not changed:
+            before = path.stat()
+            raw = b'x' * before.st_size if change_bytes else path.read_bytes()
+            path.write_bytes(raw)
+            os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+            changed.append((path, raw, fetch._path_stamp(path, links=2)))
+            raise error
+        return unlink(path, *args, **options)
+    monkeypatch.setattr(Path, 'unlink', remove)
+    with pytest.raises(OSError) as raised:
+        fetch._extract(archives, data, state, files, 'melange')
+    assert raised.value is error
+    stage, raw, stamp = changed[0]
+    assert stage.read_bytes() == (data / 'fresh.bin').read_bytes() == raw
+    assert fetch._path_stamp(stage, links=2) == stamp and stage.stat().st_nlink == 2
+
+
+def test_changed_published_member_is_preserved_during_later_failure_rollback(roots, monkeypatch):
+    data, state = roots
+    archives, files = component_archive(state, {'a.bin': b'first fixture', 'z.bin': b'later fixture'})
+    real, changed, error = fetch._replace, [], OSError('injected later publication failure')
+    def fail_later(source, target, **options):
+        if target.name == 'z.bin':
+            first = data / 'a.bin'
+            before = first.stat()
+            first.write_bytes(first.read_bytes())
+            os.utime(first, ns=(before.st_atime_ns, before.st_mtime_ns))
+            changed.append(fetch._path_stamp(first))
+            raise error
+        return real(source, target, **options)
+    monkeypatch.setattr(fetch, '_replace', fail_later)
+    with pytest.raises(OSError) as raised:
+        fetch._extract(archives, data, state, files, 'melange')
+    assert raised.value is error and not (data / 'z.bin').exists()
+    assert (data / 'a.bin').read_bytes() == b'first fixture'
+    assert fetch._path_stamp(data / 'a.bin') == changed[0]
+    assert not list(data.glob('.melange-data-*'))
 
 
 def test_hardlinked_or_reparse_temporary_is_never_cleaned_as_owned(roots, monkeypatch):
