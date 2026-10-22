@@ -31,7 +31,7 @@ BOOTSTRAP_FILES = (
     'melange_bootstrap.py', 'melange_data_paths.py', 'mentat_layout.py', 'desktop_migrations.py',
     'terrier_owner.py', 'terrier_district.py', 'desktop_figure_renderer.py',
     'module_data_snapshot.py', 'melange_module_data.py', 'mentat_module_data.py',
-    'module_data_launch.py',
+    'module_data_launch.py', 'data_release_fetch.py',
 )
 
 
@@ -75,6 +75,22 @@ def selected_files(root, spec):
                 if 'pocket' in file.name.lower() and file.suffix.lower() in {'.html', '.js'} and file.relative_to(root).as_posix() != POCKET_TEMPLATE:
                     raise RuntimeError(f'Pocket source needs the existing release export scrub before packaging: {file}')
                 result.add(file.relative_to(root))
+    # Data-extension files the code itself serves (e.g. Mentat's geo layers); same deny rules, no extension test.
+    for pattern in spec.get('sourceGlobs', []):
+        matched = [file for file in root.glob(pattern) if file.is_file() and not file.is_symlink()]
+        if not matched:
+            raise RuntimeError(f'Required source glob matched nothing: {root / pattern}')
+        for file in matched:
+            relative = file.relative_to(root)
+            posix = relative.as_posix()
+            # Path.glob descends into junctions on Windows; excluded prefixes and the dot/test_/.bak rules apply here too.
+            linked = any((root.joinpath(*relative.parts[:i]).is_symlink() or root.joinpath(*relative.parts[:i]).is_junction())
+                         for i in range(1, len(relative.parts)))
+            excluded = any(posix == prefix or posix.startswith(prefix + '/') for prefix in spec.get('excludedSourcePrefixes', []))
+            if linked or excluded or file.name.startswith(('test_', '.')) or '.bak' in file.name:
+                continue
+            if not any(p in DENIED_PARTS for p in relative.parts) and file.name.lower() not in {n.lower() for n in DENIED_NAMES} and not file.name.lower().endswith(DENIED_SUFFIXES):
+                result.add(relative)
     for relative in spec.get('sourceFiles', []):
         file = root / relative
         if not file.is_file() or file.is_symlink():

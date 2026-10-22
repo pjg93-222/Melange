@@ -184,6 +184,10 @@
         "mentat/forecast",
         "mentat/R"
       ],
+      "sourceGlobs": [
+        "mentat/app/geo/**/*.json",
+        "mentat/app/geo/**/*.geojson"
+      ],
       "sourceFiles": [
         "mentat/mentat.R",
         "mentat/tools/api_budget_policy.json",
