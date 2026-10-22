@@ -38,7 +38,21 @@ The packaged trust descriptor names `https://bore.pub:38443`. That path needs tw
 python relay_tunnel.py --port 38443 --log 'C:\ExistingProtectedPublisherState\relay.log'
 ```
 
-The first command registers the loopback publisher on `127.0.0.1:38443`, the only local port that `relay_tunnel.py` forwards to. The second command is the relay client. It is not part of the publisher startup entry, so supervise it as a separate task under the same account. While it is down, recipients cannot reach the publisher. The tunnel runs up to 32 forwards at once; up to 32 further connections each wait up to 6 seconds, counted from when the relay announces them, for one to finish (inside the relay's 10-second accept window) rather than being dropped at once. A connection beyond those is skipped and logged.
+The first command registers the loopback publisher on `127.0.0.1:38443`, the only local port that `relay_tunnel.py` forwards to, as the scheduled task `MelangeDesktopPublisher` (starts at logon and is started again within a minute after it ends; see the README "Login startup, restart and logs" section). It does not start it: run `Start-ScheduledTask MelangeDesktopPublisher` once. Restart it with `Stop-ScheduledTask MelangeDesktopPublisher` then `Start-ScheduledTask MelangeDesktopPublisher`; its logs are `supervisor.log`, `publisher.log`/`.err` and `notifier.log`/`.err` in the state directory. The second command is the relay client. It is not part of the publisher startup entry, so supervise it as a separate task under the same account. While it is down, recipients cannot reach the publisher. The tunnel runs up to 32 forwards at once; up to 32 further connections each wait up to 6 seconds, counted from when the relay announces them, for one to finish (inside the relay's 10-second accept window) rather than being dropped at once. A connection beyond those is skipped and logged.
+
+Fallback when the task cannot be registered or does not start the supervisor: run the recorded `command` from `startup-registration.json` through a one-shot task (no trigger) with the same settings. Other launch routes failed on 2026-10-20: `Start-Process` and WMI did not leave a working supervisor, and the task default priority 7 hung it. Placeholders as above:
+
+```powershell
+$pwsh = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\pwsh.exe'
+$arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -File "C:\Path\To\Start-LanPublisherAtLogin.ps1" -PublicOrigin "https://bore.pub:38443" -PythonExecutable "C:\Path\To\python.exe" -StateDirectory "C:\ExistingProtectedPublisherState" -Port "38443"'
+$user = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+$settings = New-ScheduledTaskSettingsSet -Priority 4 -ExecutionTimeLimit ([TimeSpan]::Zero) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+$principal = New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited
+Register-ScheduledTask -TaskName MelangePublisherOneShot -Action (New-ScheduledTaskAction -Execute $pwsh -Argument $arguments) -Settings $settings -Principal $principal
+Start-ScheduledTask -TaskName MelangePublisherOneShot
+```
+
+A one-shot run is not restarted when it ends. Remove it (`Unregister-ScheduledTask MelangePublisherOneShot`) once `MelangeDesktopPublisher` works again.
 
 `bore.pub` is a shared relay, so another client may hold port 38443 while the tunnel reconnects. Recipients then fail the TLS pin check and send nothing. Access resumes once the tunnel reclaims the port.
 
