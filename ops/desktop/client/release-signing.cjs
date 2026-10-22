@@ -11,6 +11,18 @@ function regular(file,directory=false){const stat=fs.lstatSync(file);if(stat.isS
 function ancestors(file,directory=false){regular(file,directory);for(let parent=path.dirname(file);;parent=path.dirname(parent)){regular(parent,true);if(parent===path.dirname(parent))break;}}
 function tree(root){regular(root,true);const files=[];for(const item of fs.readdirSync(root,{withFileTypes:true})){const file=path.join(root,item.name);if(item.isDirectory())files.push(...tree(file));else{regular(file);files.push(file);}}return files;}
 function hash(file){return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');}
+async function signPool(files,task){
+ const identities=files.map(file=>path.resolve(file).toLowerCase());
+ if(new Set(identities).size!==files.length)throw new Error('Signing pool requires distinct private files');
+ let next=0,failed=false,failure;
+ await Promise.all(Array.from({length:Math.min(4,files.length)},async()=>{
+  while(!failed){const index=next++;if(index>=files.length)return;
+   try{await task(files[index]);}catch(error){if(!failed)failure=error;failed=true;}
+  }
+ }));
+ // Drain every in-flight operation before returning failure or releasing a phase.
+ if(failed)throw failure;
+}
 async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  file=path.resolve(file);root=path.resolve(root);if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');ancestors(root,true);ancestors(file);
  const args=['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
@@ -36,7 +48,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  };
  return {
   forceCodeSigning:true,
-  win:{signExts:['.dll','.pyd','.node','.ocx'],signtoolOptions:{publisherName:SUBJECT,signingHashAlgorithms:['sha256'],sign:async configuration=>{if(!ready)throw new Error('Private signing tools were not prepared');await record(configuration.path);}}},
+  win:{signtoolOptions:{publisherName:SUBJECT,signingHashAlgorithms:['sha256'],sign:async configuration=>{if(!ready)throw new Error('Private signing tools were not prepared');await record(configuration.path);}}},
   beforePack:async context=>{
    if(context.electronPlatformName!=='win32'||ready||!within(root,path.resolve(context.appOutDir)))throw new Error('Release signing supports one fresh private Windows package per build');
    if(env.ELECTRON_BUILDER_NSIS_DIR||env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR)throw new Error('Release signing refuses inherited NSIS tool overrides');
@@ -47,7 +59,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    const copies=[{source,destination:path.join(root,'nsis')},{source:path.dirname(plugins),destination:path.join(root,'nsis-resources')}];
    const originals=[];
    for(const copy of copies){if(fs.existsSync(copy.destination))throw new Error('Private NSIS staging already exists');for(const file of tree(copy.source))originals.push({file,sha256:hash(file)});fs.cpSync(copy.source,copy.destination,{recursive:true,errorOnExist:true,force:false});}
-   for(const copy of copies)for(const file of tree(copy.destination).filter(file=>PE.test(file)))await record(file,false,false);
+   await signPool(copies.flatMap(copy=>tree(copy.destination).filter(file=>PE.test(file))),file=>record(file,false,false));
    for(const original of originals)if(hash(original.file)!==original.sha256)throw new Error('Shared NSIS tool cache changed');
    const userPlugins=path.join(context.packager.info.buildResourcesDir,'x86-unicode');
    if(fs.existsSync(userPlugins))throw new Error('Unreviewed custom NSIS plugins override the signed private toolset');
@@ -59,13 +71,13 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    // Fuses and resource editing have already completed. Sign remaining DLL/PYD
    // dependencies; valid third-party signatures are checked and left unchanged.
    appDirectory=path.resolve(context.appOutDir);
-   for(const file of tree(appDirectory).filter(file=>PE.test(file)))await record(file,false,owned(file));
+   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>record(file,false,owned(file)));
    await record(path.join(context.appOutDir,app.name+'.exe'),true,true);verifyToolCopies();
   },
   artifactBuildCompleted:async event=>{
    if(!event.file?.toLowerCase().endsWith('.exe'))return;
    if(!appDirectory)throw new Error('Application signing has not completed');
-   for(const file of tree(appDirectory).filter(file=>PE.test(file)))await record(file,true,owned(file));
+   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>record(file,true,owned(file)));
    await record(event.file,true,true);verifyToolCopies();
    if(!records.some(row=>path.basename(row.path)===app.name+'.exe'&&row.thumbprint===THUMBPRINT)||!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.thumbprint===THUMBPRINT)||!records.some(row=>path.basename(row.path)==='elevate.exe'&&row.thumbprint===THUMBPRINT))throw new Error('Application, elevation helper or uninstaller signature evidence is missing');
    const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records};
@@ -73,4 +85,4 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   }
  };
 }
-module.exports={THUMBPRINT,SUBJECT,within,tree,signFile,options};
+module.exports={THUMBPRINT,SUBJECT,within,tree,signFile,signPool,options};
