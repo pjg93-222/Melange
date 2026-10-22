@@ -16,6 +16,7 @@ import shutil
 import sys
 import threading
 import time
+import urllib.error
 import urllib.request
 import zipfile
 
@@ -254,15 +255,22 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
     insecure = api_base is not None and api_base.rstrip('/') != DEFAULT_API
     report = progress or (lambda **_: None)
     report(phase='checking')
-    releases = json.loads(_read_json('%s/repos/%s/releases?per_page=20' % ((api_base or DEFAULT_API).rstrip('/'), repo), 4 << 20, insecure))
-    listed = releases if isinstance(releases, list) else []
+    base = '%s/repos/%s/releases' % ((api_base or DEFAULT_API).rstrip('/'), repo)
     extracting = state / 'data-download' / EXTRACTING  # lets launch() resume once Mentat's reports/ is partly written
     resumed = json.loads(extracting.read_text(encoding='utf-8')).get('tag') if extracting.is_file() else None
     if resumed is None:
-        release = select_release(listed, app)
-    else:  # an interrupted extraction finishes with its own release; files of two releases are never mixed
-        release = next((r for r in listed if isinstance(r, dict) and not r.get('draft') and r.get('tag_name') == resumed), None)
-        if release is None:
+        releases = json.loads(_read_json(base + '?per_page=20', 4 << 20, insecure))
+        release = select_release(releases if isinstance(releases, list) else [], app)
+    else:  # an interrupted extraction finishes with its own release (looked up by tag); two releases are never mixed
+        if not SAFE_NAME.match(str(resumed)):
+            raise DataReleaseError('Unsupported data release tag')
+        try:
+            release = json.loads(_read_json('%s/tags/%s' % (base, resumed), 4 << 20, insecure))
+        except urllib.error.HTTPError as error:
+            if error.code != 404:
+                raise
+            release = None
+        if not isinstance(release, dict) or release.get('draft') or release.get('tag_name') != resumed:
             raise DataReleaseError('The interrupted data release %s is no longer published' % resumed)
     if release is None:
         report(phase='none')

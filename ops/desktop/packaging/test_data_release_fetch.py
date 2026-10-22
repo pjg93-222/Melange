@@ -35,7 +35,7 @@ def build_release(members, app='melange', tag=NEWER, corrupt_sha=False):
 class Server:
     def __init__(self, assets, app='melange', truncate_first=False, tag=NEWER, ignore_range=False):
         self.assets, self.requests, self.truncate_first, self.tag = assets, [], truncate_first, tag
-        self.ignore_range = ignore_range
+        self.ignore_range, self.by_tag = ignore_range, False
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -46,6 +46,10 @@ class Server:
                 owner.requests.append((self.path, self.headers.get('Range')))
                 if self.path == '/repos/x/y/releases?per_page=20':
                     return self.reply(200, json.dumps(owner.releases(app)).encode())
+                if self.path.startswith('/repos/x/y/releases/tags/'):
+                    owner.by_tag = True
+                    found = [r for r in owner.releases(app) if r['tag_name'] == self.path.rsplit('/', 1)[-1]]
+                    return self.reply(200, json.dumps(found[0]).encode()) if found else self.reply(404, b'missing')
                 name = self.path.rsplit('/', 1)[-1]
                 if not self.path.startswith('/dl/%s/' % owner.tag) or name not in owner.assets:
                     return self.reply(404, b'missing')
@@ -457,6 +461,7 @@ def test_interrupted_extraction_resumes_its_own_release_not_a_newer_one(roots, m
         assert not (data / 'reports' / 'b.txt').exists() and not (data / fetch.MARKER).exists()
         server.releases = lambda app: [newest, *listed]
         result = fetch.ensure_app_data('mentat', data, state, 'x/y', api_base=server.base)
+        assert server.by_tag  # found by tag, so 20 newer releases cannot push it off the first page
     finally:
         server.close()
     assert result['status'] == 'installed' and result['tag'] == tag

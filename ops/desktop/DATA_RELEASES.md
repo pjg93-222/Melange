@@ -27,8 +27,9 @@ release in the app's own repo. The reader is `packaging/data_release_fetch.py`, 
   part file is removed when a write fails. The main file (Melange `Moneyball.html`, Mentat `reports/`) is written last and the marker
   after everything, so an interrupted run is retried at the next launch and already-correct files are skipped.
   `<state>/data-download/extracting.json` exists from the start of extraction until the marker is written, so Mentat
-  resumes even though its `reports/` folder is no longer empty. A resumed run uses the tag recorded there, never a newer
-  release; if that release is no longer published, the fetch stops with an error instead of mixing two releases.
+  resumes even though its `reports/` folder is no longer empty. A resumed run uses the tag recorded there (looked up with
+  `releases/tags/<tag>`, so it is found however many releases are newer), never a newer release; if that release is no
+  longer published, the fetch stops with an error instead of mixing two releases.
 - **Marker:** `<data>/.melange-data-release.json` `{"tag","manifestSha256","extractedAt"}`. Once it exists, later launches do nothing.
 - **Newer releases:** not applied to an install that has the marker; the mechanism is first-run only. Deleting the marker makes the
   next launch fetch the newest release, but every existing file is still kept, including files from the older release whose content
