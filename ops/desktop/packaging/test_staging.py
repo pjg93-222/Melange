@@ -38,12 +38,50 @@ class TemplateStagingTests(unittest.TestCase):
             root = Path(folder)
             for relative in spec['sourceDirectories']:
                 (root / relative).mkdir(parents=True, exist_ok=True)
-            for relative in spec['sourceFiles']:
+            for relative in spec['sourceFiles'] + ['mentat/app/geo/index.json', 'mentat/app/geo/sld/mn/sldu.geojson']:
                 (root / relative).parent.mkdir(parents=True, exist_ok=True)
                 (root / relative).write_text('x', encoding='utf-8')
             staged = {path.as_posix() for path in selected_files(root, spec)}
         self.assertIn('mentat/app/template.csv', staged)
         self.assertIn('mentat/tools/pocket/manifest.webmanifest', staged)
+
+    def test_mentat_geo_json_is_staged_and_other_app_json_is_not(self):
+        # server.py serves geo/**/*.json and *.geojson from the code dir; app/data JSON comes from the data release.
+        spec = json.loads((HERE / 'runtime-manifest.json').read_text(encoding='utf-8'))['apps']['mentat']
+        geo = ['mentat/app/geo/index.json', 'mentat/app/geo/v2/albers/cd119.json', 'mentat/app/geo/sld/mn/sldu.geojson']
+        other = ['mentat/app/data/giving-models-v2.json', 'mentat/app/settings.json', 'mentat/app/geo/notes.txt', 'mentat/app/geo/keys.json']
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for relative in geo + other + ['mentat/app/server.py']:
+                (root / relative).parent.mkdir(parents=True, exist_ok=True)
+                (root / relative).write_text('x', encoding='utf-8')
+            staged = {path.as_posix() for path in selected_files(root, {**spec, 'sourceDirectories': ['mentat/app'], 'sourceFiles': []})}
+            self.assertEqual(staged, set(geo) | {'mentat/app/server.py'})
+            for relative in geo:
+                (root / relative).unlink()
+            with self.assertRaisesRegex(RuntimeError, 'matched nothing'):
+                selected_files(root, {**spec, 'sourceDirectories': ['mentat/app'], 'sourceFiles': []})
+
+    def test_source_globs_keep_the_directory_rules_and_do_not_follow_links(self):
+        spec = json.loads((HERE / 'runtime-manifest.json').read_text(encoding='utf-8'))['apps']['mentat']
+        skipped = ['mentat/app/geo/Keys.json', 'mentat/app/geo/.local.json', 'mentat/app/geo/test_fixture.json',
+                   'mentat/app/geo/old.bak.json', 'mentat/app/geo/excluded/a.json']
+        with tempfile.TemporaryDirectory() as folder:
+            root, outside = Path(folder) / 'repo', Path(folder) / 'outside'
+            for relative in skipped + ['mentat/app/geo/index.json', 'mentat/app/geo/sld/a.geojson', 'mentat/app/server.py']:
+                (root / relative).parent.mkdir(parents=True, exist_ok=True)
+                (root / relative).write_text('x', encoding='utf-8')
+            outside.mkdir()
+            (outside / 'private.json').write_text('x', encoding='utf-8')
+            link = root / 'mentat/app/geo/linked'
+            if sys.platform == 'win32':
+                subprocess.run(['cmd', '/c', 'mklink', '/J', str(link), str(outside)], check=True, capture_output=True)
+            else:
+                link.symlink_to(outside, target_is_directory=True)
+            narrowed = {**spec, 'sourceDirectories': ['mentat/app'], 'sourceFiles': [],
+                        'excludedSourcePrefixes': spec['excludedSourcePrefixes'] + ['mentat/app/geo/excluded']}
+            staged = {path.as_posix() for path in selected_files(root, narrowed)}
+        self.assertEqual(staged, {'mentat/app/geo/index.json', 'mentat/app/geo/sld/a.geojson', 'mentat/app/server.py'})
 
     def test_terrier_ocr_assets_licences_and_parcel_evidence_are_staged(self):
         # These immutable assets were already required by the Terrier release gate.
@@ -78,10 +116,10 @@ class TemplateStagingTests(unittest.TestCase):
                 (root / relative).write_text('x', encoding='utf-8')
             # Even a source directory that spans the whole app tree cannot pick them up.
             for directories in (['mentat/app'], ['mentat']):
-                staged = {path.as_posix() for path in selected_files(root, {**spec, 'sourceDirectories': directories, 'sourceFiles': []})}
+                staged = {path.as_posix() for path in selected_files(root, {**spec, 'sourceDirectories': directories, 'sourceFiles': [], 'sourceGlobs': []})}
                 self.assertEqual(staged, {'mentat/app/server.py'}, directories)
             with self.assertRaisesRegex(RuntimeError, 'Runtime database'):
-                selected_files(root, {**spec, 'sourceDirectories': ['mentat/app'], 'sourceFiles': ['mentat/state/x.sqlite']})
+                selected_files(root, {**spec, 'sourceDirectories': ['mentat/app'], 'sourceFiles': ['mentat/state/x.sqlite'], 'sourceGlobs': []})
 
     def test_pocket_template_retains_code_and_removes_embedded_data(self):
         with tempfile.TemporaryDirectory() as folder:

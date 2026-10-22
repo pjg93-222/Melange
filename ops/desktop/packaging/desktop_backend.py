@@ -227,6 +227,16 @@ def import_district_bundle(data, state):
             pass
 
 
+def start_data_release(app, data, state, **options):
+    """First-run data from the app's GitHub data release, in the background; the server starts immediately either way."""
+    try:
+        from data_release_fetch import launch
+        return launch(app, data, state, **options)
+    except Exception as error:  # never block startup on the optional first-run download
+        print('DESKTOP_RUNTIME_WARNING: data release fetch not started (%s): %s' % (type(error).__name__, str(error)[:200]), file=sys.stderr, flush=True)
+        return None
+
+
 def require_runtime(root, name, relative):
     file = root / 'native' / relative
     if not file.is_file():
@@ -266,6 +276,7 @@ def run(options, token):
     if options.app == 'melange':
         from melange_bootstrap import initialize_workspace
         initialize_workspace(data)
+        start_data_release('melange', data, state)
         sys.path.insert(0, str(source))
         os.environ.update(MONEYBALL_ROOT=str(data), MELANGE_LOCAL_ROOT=str(state / 'Melange'),
                           MELANGE_DATA_ROOT=str(data / 'melange-data'), GLASSBOX_EVENTS_DIR=str(state / 'glassbox'))
@@ -291,6 +302,7 @@ def run(options, token):
         workspace = prepare_workspace(code, data, state)
         sys.path[:0] = [str(code / 'app'), str(code / 'tools'), str(source)]
         connections['reports'].mkdir(exist_ok=True)
+        start_data_release('mentat', data, state, reports_root=connections['reports'])
         os.environ.update(MENTAT_REPORT_DIRECTORY=str(connections['reports']), MENTAT_MELANGE_ROOT=str(data / 'melange'),
                           MENTAT_DATA_ROOT=str(data), MENTAT_BULK_DIR=str(data / 'bulk'),
                           MENTAT_WORKSPACE_ROOT=str(workspace), MENTAT_CODE_ROOT=str(code),
