@@ -10,11 +10,13 @@ const {physicalPath}=require('./runtime-roots.cjs');
 const {fail,requireValue,authorized,hash,integer,TAG,COMMIT}=protocol;
 const RECORD=['catalogSequence','pointerDigest','manifestSha256','releaseTag','releaseCommit','identityDigest'];
 const OFFLINE=new Set(['unreachable','timeout','rate_limited']);
+const stagingOwners=new WeakMap();
 function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module data operation cancelled');}
 function inside(root,target,equal=false){const rel=path.relative(root,target);return (equal||rel!=='')&&rel!=='..'&&!rel.startsWith('..'+path.sep)&&!path.isAbsolute(rel);}
 function overlaps(a,b){a=physicalPath(a);b=physicalPath(b);return inside(a,b,true)||inside(b,a,true);}
 function digest(bytes){return crypto.createHash('sha256').update(bytes).digest('hex');}
 function sameFile(a,b){return a.dev===b.dev&&a.ino===b.ino&&a.mode===b.mode&&a.nlink===b.nlink&&a.size===b.size&&a.mtimeNs===b.mtimeNs&&a.ctimeNs===b.ctimeNs;}
+function sameIdentity(a,b){return a.dev===b.dev&&a.ino===b.ino&&a.mode===b.mode;}
 function safeRecord(record){
  if(record===null)return;
  exact(record,RECORD);
@@ -43,6 +45,7 @@ class GitHubModules{
   this.cacheRoot=path.resolve(chosen.root);this.cacheBase=fs.realpathSync.native(chosen.base);this.protectedRoots=[path.join(this.profile,'state'),...protectedRoots];
   for(const root of this.protectedRoots)requireValue(!overlaps(this.cacheRoot,root),'Module cache overlaps protected state');
   this.tail=Promise.resolve();
+  stagingOwners.set(this,new Map());
  }
  operation(selected,options,action){
   const original=structuredClone(selected),copied={...(options||{})};
@@ -103,12 +106,69 @@ class GitHubModules{
    requireValue(current.isFile()&&!current.isSymbolicLink()&&current.nlink===1n&&sameFile(current,identity),'Module partial identity changed');
   }catch(error){if(error.reason)throw error;throw fail('integrity','Module partial identity is unavailable');}
  }
+ cacheAncestors(file){
+  requireValue(inside(this.cacheRoot,file),'Owned module file leaves cache');
+  let parent=path.dirname(file);
+  while(inside(this.cacheBase,parent,true)){const st=fs.lstatSync(parent);requireValue(st.isDirectory()&&!st.isSymbolicLink(),'Owned module directory changed');if(parent===this.cacheBase)break;parent=path.dirname(parent);}
+  requireValue(parent===this.cacheBase&&inside(this.cacheRoot,fs.realpathSync.native(file)),'Owned module file leaves its native boundary');
+ }
+ ownedFile(file,receipt,{links=1n,linkTransition=false}={}){
+  // This read-only, bounded verification is synchronous through the final action.
+  // A receipt always retains the originally opened inode and writer digest.
+  requireValue(receipt&&integer(receipt.bytes,protocol.MAX_TOTAL)&&hash(receipt.sha256)&&receipt.stamp,'Invalid owned module receipt');
+  this.cacheAncestors(file);const before=fs.lstatSync(file,{bigint:true}),original=receipt.stamp;
+  requireValue(before.isFile()&&!before.isSymbolicLink()&&before.nlink===links&&sameIdentity(before,original)&&before.size===BigInt(receipt.bytes),'Owned module file identity changed');
+  requireValue(linkTransition?before.mtimeNs===original.mtimeNs:sameFile(before,original),'Owned module file stamp changed');
+  let descriptor;const h=crypto.createHash('sha256');let bytes=0;
+  try{
+   descriptor=fs.openSync(file,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW||0));requireValue(sameFile(fs.fstatSync(descriptor,{bigint:true}),before),'Owned module handle changed');
+   const buffer=Buffer.alloc(Math.min(1024*1024,Math.max(1,receipt.bytes)));
+   for(;;){const n=fs.readSync(descriptor,buffer,0,buffer.length,null);if(n===0)break;bytes+=n;requireValue(bytes<=receipt.bytes,'Owned module file exceeds its bound');h.update(buffer.subarray(0,n));}
+   requireValue(bytes===receipt.bytes&&h.digest('hex')===receipt.sha256,'Owned module file integrity failed');
+   requireValue(sameFile(before,fs.fstatSync(descriptor,{bigint:true}))&&sameFile(before,fs.lstatSync(file,{bigint:true})),'Owned module file changed during verification');this.cacheAncestors(file);
+   return before;
+  }finally{if(descriptor!==undefined)fs.closeSync(descriptor);}
+ }
+ removeOwnedFile(file,receipt){
+  if(!receipt)return false;
+  try{this.ownedFile(file,receipt);fs.unlinkSync(file);return true;}catch{return false;}
+ }
+ rememberStagedFile(file,receipt){
+  for(const [root,owner] of stagingOwners.get(this))if(inside(root,file)){const relative=path.relative(root,file);requireValue(!owner.files.has(relative),'Staged module file already recorded');owner.files.set(relative,receipt);return;}
+ }
+ stageDirectory(root,target,owner){
+  requireValue(inside(root,target,true),'Staged module directory leaves its root');let current=root;
+  requireValue(sameIdentity(fs.lstatSync(root,{bigint:true}),owner.root),'Staging root identity changed');
+  for(const part of path.relative(root,target).split(path.sep).filter(Boolean)){
+   current=path.join(current,part);const relative=path.relative(root,current),known=owner.directories.get(relative);
+   if(!known){fs.mkdirSync(current);const created=fs.lstatSync(current,{bigint:true});requireValue(created.isDirectory()&&!created.isSymbolicLink(),'Unsafe staged module directory');owner.directories.set(relative,created);}
+   const st=fs.lstatSync(current,{bigint:true});requireValue(st.isDirectory()&&!st.isSymbolicLink()&&sameIdentity(st,owner.directories.get(relative)),'Staging directory identity changed');
+  }
+ }
+ ownedStaging(root,owner){
+  this.cacheAncestors(root);const st=fs.lstatSync(root,{bigint:true});requireValue(st.isDirectory()&&!st.isSymbolicLink()&&sameIdentity(st,owner.root),'Staging root identity changed');
+  const files=new Set(owner.files.keys()),directories=new Set(owner.directories.keys());
+  const walk=directory=>{for(const name of fs.readdirSync(directory)){
+   const file=path.join(directory,name),relative=path.relative(root,file),item=fs.lstatSync(file,{bigint:true});requireValue(!item.isSymbolicLink(),'Staging reparse point refused');
+   if(item.isDirectory()){requireValue(directories.delete(relative)&&sameIdentity(item,owner.directories.get(relative)),'Unowned staging directory refused');walk(file);}
+   else{requireValue(item.isFile()&&files.delete(relative),'Unowned staging file refused');this.ownedFile(file,owner.files.get(relative));}
+  }};
+  walk(root);requireValue(files.size===0&&directories.size===0,'Owned staging member is missing');
+ }
  async immutable(relative,bytes){
+  const expected=Buffer.from(bytes),entry={bytes:expected.length,sha256:digest(expected)};
   const file=await this.file(relative);
-  if(fs.existsSync(file)){requireValue((await this.read(file,bytes.length)).equals(bytes),'Module metadata cache collision');return file;}
-  const temporary=await this.file(relative+'.'+crypto.randomUUID()+'.tmp');let handle;
-  try{handle=await fsp.open(temporary,'wx');await this.openedCacheHandle(handle,temporary,0);await handle.writeFile(bytes);await handle.sync();await handle.close();handle=null;requireValue(!fs.existsSync(file),'Concurrent module metadata replacement refused');await fsp.rename(temporary,file);}finally{await handle?.close();await fsp.unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
-  return file;
+  if(fs.existsSync(file)){const stamp=fs.lstatSync(file,{bigint:true});this.ownedFile(file,{...entry,stamp});return file;}
+  const temporary=await this.file(relative+'.'+crypto.randomUUID()+'.tmp');let handle,receipt;
+  try{
+   handle=await fsp.open(temporary,'wx');const initial=await this.openedCacheHandle(handle,temporary,0);await handle.writeFile(expected);await handle.sync();
+   const stamp=await this.openedCacheHandle(handle,temporary,entry.bytes);requireValue(sameIdentity(initial,stamp),'Owned module writer identity changed');receipt={...entry,stamp};
+   await handle.close();handle=null;this.ownedFile(temporary,receipt);
+   // link is exclusive even if another process creates the destination now.
+   fs.linkSync(temporary,file);
+   const linked=this.ownedFile(temporary,receipt,{links:2n,linkTransition:true});receipt={...entry,stamp:linked};this.ownedFile(file,receipt,{links:2n});
+   this.ownedFile(temporary,receipt,{links:2n});fs.unlinkSync(temporary);this.ownedFile(file,receipt,{linkTransition:true});return file;
+  }finally{await handle?.close().catch(()=>{});this.removeOwnedFile(temporary,receipt);}
  }
  async state(){
   const value=await this.store.read();
@@ -137,7 +197,7 @@ class GitHubModules{
  }
  async validateSnapshot(root,manifest,{signal}={}){
   await this.ensureDirectory(path.dirname(root));const st=await fsp.lstat(root);requireValue(st.isDirectory()&&!st.isSymbolicLink()&&inside(this.cacheRoot,await fsp.realpath(root)),'Unsafe module snapshot');
-  const expected=new Set(),expectedDirectories=new Set(),datasets=[];
+  const expected=new Set(),expectedDirectories=new Set(),datasets=[],verified=[];
   for(const dataset of manifest.value.datasets){
    const adapter=this.registry[dataset.kind],dataRoot=path.join(root,dataset.datasetId),files={};
    const dataStat=await fsp.lstat(dataRoot);requireValue(dataStat.isDirectory()&&!dataStat.isSymbolicLink(),'Unsafe module dataset directory');
@@ -146,14 +206,14 @@ class GitHubModules{
     let parent=path.dirname(file);
     while(parent!==root){const parentStat=await fsp.lstat(parent);requireValue(parentStat.isDirectory()&&!parentStat.isSymbolicLink(),'Unsafe module snapshot directory');parent=path.dirname(parent);}
     requireValue(inside(root,await fsp.realpath(file)),'Module role leaves snapshot');
-    const actual=await fileDigest(file,{signal});requireValue(actual.bytes===object.bytes&&actual.sha256===object.sha256,'Module role cache integrity failed');expected.add(relative);files[object.role]=file;
+    const stamp=await fsp.lstat(file,{bigint:true}),actual=await fileDigest(file,{signal,identity:stamp});requireValue(actual.bytes===object.bytes&&actual.sha256===object.sha256,'Module role cache integrity failed');verified.push({file,receipt:{stamp,bytes:object.bytes,sha256:object.sha256}});expected.add(relative);files[object.role]=file;
     let ancestor=path.posix.dirname(relative);while(ancestor!=='.'){expectedDirectories.add(ancestor);ancestor=path.posix.dirname(ancestor);}
    }
    requireValue(await adapter.validateSnapshot({dataset:structuredClone(dataset),root:dataRoot,files:{...files},signal})===true,'Compiled module reader validation failed');
    datasets.push({kind:dataset.kind,datasetId:dataset.datasetId,revisionId:dataset.revisionId,root:dataRoot,files,objects:structuredClone(dataset.objects)});
   }
   const walk=async(directory,prefix='')=>{for(const entry of await fsp.readdir(directory,{withFileTypes:true})){const relative=prefix+entry.name,p=path.join(directory,entry.name);requireValue(!entry.isSymbolicLink(),'Snapshot reparse point refused');if(entry.isDirectory()){requireValue(expectedDirectories.delete(relative),'Unexpected module snapshot directory');await walk(p,relative+'/');}else requireValue(entry.isFile()&&expected.delete(relative),'Unexpected module snapshot file');}};
-  await walk(root);requireValue(expected.size===0&&expectedDirectories.size===0,'Module snapshot role is missing');return datasets;
+  await walk(root);requireValue(expected.size===0&&expectedDirectories.size===0,'Module snapshot role is missing');canceled(signal);for(const {file,receipt} of verified)this.ownedFile(file,receipt);return datasets;
  }
  async candidate(record,selected,identity,{signal,onStatus,phase='ready'}={}){
   requireValue(record.identityDigest===identity,'Module snapshot belongs to another owner configuration');
@@ -198,42 +258,57 @@ class GitHubModules{
   let ancestor=path.dirname(source);const selectedRoot=path.resolve(selected.dataDirectory);
   while(inside(selectedRoot,ancestor,true)){const st=await fsp.lstat(ancestor);requireValue(st.isDirectory()&&!st.isSymbolicLink(),'Legacy module reparse point refused');if(ancestor===selectedRoot)break;ancestor=path.dirname(ancestor);}
   let before;try{before=await fsp.lstat(source,{bigint:true});}catch(error){if(error.code==='ENOENT')return false;throw error;}
-  requireValue(before.isFile()&&!before.isSymbolicLink(),'Unsafe legacy module candidate');if(before.size!==BigInt(object.bytes))return false;
-  const h=crypto.createHash('sha256');let handle,bytes=0;
-  try{handle=await fsp.open(destination,'wx');await this.openedCacheHandle(handle,destination,0);for await(const chunk of fs.createReadStream(source)){canceled(signal);bytes+=chunk.length;if(bytes>object.bytes)break;h.update(chunk);await handle.writeFile(chunk);}await handle.sync();}finally{await handle?.close();}
+  requireValue(before.isFile()&&!before.isSymbolicLink()&&before.nlink===1n,'Unsafe legacy module candidate');if(before.size!==BigInt(object.bytes))return false;
+  const h=crypto.createHash('sha256');let handle,bytes=0,receipt;
+  try{handle=await fsp.open(destination,'wx');const initial=await this.openedCacheHandle(handle,destination,0);for await(const chunk of fs.createReadStream(source)){canceled(signal);bytes+=chunk.length;if(bytes>object.bytes)break;h.update(chunk);await handle.writeFile(chunk);}await handle.sync();
+   const stamp=await this.openedCacheHandle(handle,destination,bytes);requireValue(sameIdentity(initial,stamp),'Legacy module writer identity changed');receipt={stamp,bytes,sha256:h.digest('hex')};
+  }finally{await handle?.close();}
   const after=await fsp.lstat(source,{bigint:true}),stable=after.isFile()&&!after.isSymbolicLink()&&sameFile(before,after);
-  if(!stable||bytes!==object.bytes||h.digest('hex')!==object.sha256){await fsp.unlink(destination);return false;}return true;
+  if(!stable||bytes!==object.bytes||receipt.sha256!==object.sha256){this.removeOwnedFile(destination,receipt);return false;}
+  this.ownedFile(destination,receipt);this.rememberStagedFile(destination,receipt);return true;
  }
  async removeStaging(directory){
-  const root=path.join(this.cacheRoot,'staging');requireValue(path.dirname(directory)===root&&/^[a-f0-9-]{36}$/.test(path.basename(directory))&&inside(physicalPath(root),physicalPath(directory)),'Unsafe staging cleanup refused');
-  const inspect=async p=>{const st=await fsp.lstat(p);requireValue(!st.isSymbolicLink(),'Staging reparse point refused');if(st.isDirectory())for(const name of await fsp.readdir(p))await inspect(path.join(p,name));};
-  if(fs.existsSync(directory)){await inspect(directory);await fsp.rm(directory,{recursive:true});}
+  const root=path.join(this.cacheRoot,'staging'),owners=stagingOwners.get(this),owner=owners.get(directory);
+  requireValue(path.dirname(directory)===root&&/^[a-f0-9-]{36}$/.test(path.basename(directory)),'Unsafe staging cleanup refused');
+  if(!owner)return false;
+  try{
+   if(!fs.existsSync(directory)){owners.delete(directory);return true;}
+   this.ownedStaging(directory,owner);
+   // Never recursively remove a tree: every member must have an original receipt.
+   for(const [relative,receipt] of owner.files){const file=path.join(directory,relative);requireValue(sameIdentity(fs.lstatSync(directory,{bigint:true}),owner.root),'Staging root identity changed');this.ownedFile(file,receipt);fs.unlinkSync(file);}
+   for(const relative of [...owner.directories.keys()].sort((a,b)=>b.split(path.sep).length-a.split(path.sep).length)){
+    const file=path.join(directory,relative),st=fs.lstatSync(file,{bigint:true});requireValue(st.isDirectory()&&!st.isSymbolicLink()&&sameIdentity(st,owner.directories.get(relative)),'Staging directory identity changed');fs.rmdirSync(file);
+   }
+   const st=fs.lstatSync(directory,{bigint:true});requireValue(st.isDirectory()&&!st.isSymbolicLink()&&sameIdentity(st,owner.root),'Staging root identity changed');fs.rmdirSync(directory);owners.delete(directory);return true;
+  }catch{return false;}
  }
  async materialize(manifest,checked,selected,{signal,onStatus}={}){
   const final=path.join(this.cacheRoot,'snapshots',manifest.sha256);
   if(fs.existsSync(final)){await this.validateSnapshot(final,manifest,{signal});return;}
-  await this.disk(manifest.totalBytes*2);const staging=path.join(this.cacheRoot,'staging',crypto.randomUUID());await this.ensureDirectory(staging);let completed=0;
+  await this.disk(manifest.totalBytes*2);const staging=path.join(this.cacheRoot,'staging',crypto.randomUUID());await this.ensureDirectory(path.dirname(staging));fs.mkdirSync(staging);
+  const root=fs.lstatSync(staging,{bigint:true});requireValue(root.isDirectory()&&!root.isSymbolicLink(),'Unsafe new staging root');
+  const owner={root,directories:new Map(),files:new Map()};stagingOwners.get(this).set(staging,owner);let completed=0;
   try{
    for(const dataset of manifest.value.datasets){
     const adapter=this.registry[dataset.kind],legacy=typeof adapter.probeLegacy==='function'?await adapter.probeLegacy({originalSelected:structuredClone(selected),dataset:structuredClone(dataset),signal}):null;
     for(const object of dataset.objects){
-     canceled(signal);const destination=path.join(staging,dataset.datasetId,...adapter.roles[object.role].path.split('/'));await this.ensureDirectory(path.dirname(destination));
+     canceled(signal);const destination=path.join(staging,dataset.datasetId,...adapter.roles[object.role].path.split('/'));this.stageDirectory(staging,path.dirname(destination),owner);
      if(await this.seed(legacy?.[object.role],destination,object,selected,{signal})){completed+=object.bytes;continue;}
-     let handle;const h=crypto.createHash('sha256');let bytes=0;
+     let handle,receipt;const h=crypto.createHash('sha256');let bytes=0;
      try{
       handle=await fsp.open(destination,'wx');
-      await this.openedCacheHandle(handle,destination,0);
+      const initial=await this.openedCacheHandle(handle,destination,0);
       for(const segment of object.segments){
        const file=await this.segment(checked.value.releaseTag,segment,{signal,onProgress:n=>this.status('downloading',checked.value,{onStatus,totalBytes:manifest.totalBytes,receivedBytes:Math.min(manifest.totalBytes,completed+bytes+n)})});
        for await(const chunk of fs.createReadStream(file)){canceled(signal);bytes+=chunk.length;requireValue(bytes<=object.bytes,'Logical module role exceeds its bound');h.update(chunk);await handle.writeFile(chunk);}
       }
-      await handle.sync();
+      await handle.sync();const stamp=await this.openedCacheHandle(handle,destination,bytes);requireValue(sameIdentity(initial,stamp),'Staged module writer identity changed');receipt={stamp,bytes,sha256:h.digest('hex')};
      }finally{await handle?.close();}
-     requireValue(bytes===object.bytes&&h.digest('hex')===object.sha256,'Logical module role integrity failed');completed+=bytes;
+     requireValue(bytes===object.bytes&&receipt.sha256===object.sha256,'Logical module role integrity failed');this.ownedFile(destination,receipt);this.rememberStagedFile(destination,receipt);completed+=bytes;
     }
    }
    this.status('verifying',checked.value,{onStatus,totalBytes:manifest.totalBytes,receivedBytes:completed});await this.validateSnapshot(staging,manifest,{signal});
-   requireValue(!fs.existsSync(final),'Concurrent module snapshot replacement refused');await fsp.rename(staging,final);
+   canceled(signal);this.ownedStaging(staging,owner);requireValue(!fs.existsSync(final),'Concurrent module snapshot replacement refused');fs.renameSync(staging,final);this.ownedStaging(final,owner);
   }finally{await this.removeStaging(staging);}
  }
  prepare(selected,options={}){return this.operation(selected,options,(original,opts,identity)=>this.check(original,opts,identity,false));}

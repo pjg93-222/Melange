@@ -62,10 +62,26 @@ def _owned(path, identity, *, links=1):
     return info
 
 
-def _checked_stage(path, identity, expected_bytes, expected_hash):
+def _stage_stamp(path, identity, links):
+    if links == 1:
+        return provenance._path_stamp(path)
+    # Only this publication's two owned names may temporarily share an inode.
+    # The general provenance path policy remains single-link-only.
+    require(links == 2)
+    before = _owned(path, identity, links=links)
+    flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
+    with os.fdopen(os.open(path, flags), 'rb') as stream:
+        require(provenance._stamp(before) == provenance._stamp(os.fstat(stream.fileno())))
+        value = provenance._handle_stamp(stream)
+        require(provenance._stamp(_owned(path, identity, links=links)) ==
+                provenance._stamp(os.fstat(stream.fileno())))
+        return value
+
+
+def _checked_stage(path, identity, expected_bytes, expected_hash, *, links=1):
     """Bind the closed output's actual bytes, not a learned post-close stamp."""
-    _owned(path, identity)
-    before = provenance._path_stamp(path)
+    _owned(path, identity, links=links)
+    before = _stage_stamp(path, identity, links)
     flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
     with os.fdopen(os.open(path, flags), 'rb') as stream:
         require(provenance._handle_stamp(stream) == before)
@@ -80,8 +96,8 @@ def _checked_stage(path, identity, expected_bytes, expected_hash):
         require(count == expected_bytes and h.hexdigest() == expected_hash,
                 'Staged projection bytes differ from the generated receipt')
         require(provenance._handle_stamp(stream) == before)
-        _owned(path, identity)
-        require(provenance._path_stamp(path) == before)
+        _owned(path, identity, links=links)
+        require(_stage_stamp(path, identity, links) == before)
     return before
 
 
@@ -132,9 +148,9 @@ def project_observations(verified, destination):
                             require(key not in seen, 'Duplicate source-native observation was rejected')
                             seen.add(key)
                             encoded = canonical(row) + b'\n'
-                            output_bytes += len(encoded)
-                            require(output_bytes <= MAX_OUTPUT_BYTES)
+                            require(output_bytes + len(encoded) <= MAX_OUTPUT_BYTES)
                             output.write(encoded)
+                            output_bytes += len(encoded)
                             output_hash.update(encoded)
                     source.finish()
                 except (EOFError, gzip.BadGzipFile, zlib.error) as error:
@@ -170,12 +186,17 @@ def project_observations(verified, destination):
         provenance._directory(parent)
         require(provenance._stamp(parent.lstat())[:2] == parent_stamp)
         _owned(stage, identity)
-        require(provenance._path_stamp(stage) == stage_stamp)
+        require(_checked_stage(stage, identity, output_bytes, output_hash.hexdigest()) == stage_stamp,
+                'Completed projection changed before publication')
         os.link(stage, destination)
         _owned(stage, identity, links=2)
         _owned(destination, identity, links=2)
+        linked_stamp = _checked_stage(stage, identity, output_bytes, output_hash.hexdigest(), links=2)
+        require(_checked_stage(destination, identity, output_bytes, output_hash.hexdigest(), links=2) == linked_stamp,
+                'Linked projection changed before publication completed')
         stage.unlink()
         stage = None
+        _checked_stage(destination, identity, output_bytes, output_hash.hexdigest())
         return receipt
     finally:
         if stage is not None:
@@ -183,8 +204,9 @@ def project_observations(verified, destination):
                 provenance._directory(parent)
                 require(provenance._stamp(parent.lstat())[:2] == parent_stamp)
                 _owned(stage, identity)
+                checked_stamp = _checked_stage(stage, identity, output_bytes, output_hash.hexdigest())
                 if stage_stamp is not None:
-                    require(provenance._path_stamp(stage) == stage_stamp,
+                    require(checked_stamp == stage_stamp,
                             'Changed staged output is preserved during cleanup')
                 stage.unlink()
             except (ValueError, OSError):

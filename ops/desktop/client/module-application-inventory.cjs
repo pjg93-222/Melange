@@ -65,8 +65,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "melange_public_payroll_projection.py",
-        "bytes": 9319,
-        "sha256": "011d7eaae4cac2a916f204bf9adf39aa7de7a2b081376bd0498fba16c279aec8"
+        "bytes": 10725,
+        "sha256": "3e0867801eb6ad607db6feb9928d78d3a41f7f1cc6e99b213e7b5d84f7c0795f"
       },
       {
         "root": "bootstrap",
@@ -453,7 +453,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "54bf56b001bba874d920b82543d1ba8656d57f8348444af05895df0a2b43db4b",
+    "programFingerprint": "bd5f696f481bfc7e4e34e1cf8cda3c80393b4cb0c33caaff789de91f240aa51d",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -530,8 +530,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "melange_public_payroll_projection.py",
-        "bytes": 9319,
-        "sha256": "011d7eaae4cac2a916f204bf9adf39aa7de7a2b081376bd0498fba16c279aec8"
+        "bytes": 10725,
+        "sha256": "3e0867801eb6ad607db6feb9928d78d3a41f7f1cc6e99b213e7b5d84f7c0795f"
       },
       {
         "root": "bootstrap",
@@ -1986,7 +1986,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "1556041017fde328f1b7a14158c9528e3cff1e26d096e30439eaa052db7d67e5",
+    "programFingerprint": "add8a83a68bf6b4d1d8267eadcc614e0f00f00c0115766146761b402fe10b454",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],
