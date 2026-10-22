@@ -399,3 +399,34 @@ def test_server_that_ignores_range_restarts_the_part(roots):
     finally:
         server.close()
     assert (data / 'fec/surfaces/bulk.bin').read_bytes() == MEMBERS['fec/surfaces/bulk.bin']
+
+
+def test_interrupted_mentat_extraction_resumes_at_the_next_launch(roots, monkeypatch):
+    data, state = roots
+    tag = 'data-mentat-2026-10-20'
+    members = {'app-data/m.bin': b'model', 'reports/a.txt': b'report a', 'reports/b.txt': b'report b'}
+    real_replace = fetch._replace
+
+    def fail_on_b(source, target):
+        if target.name == 'b.txt':
+            raise OSError('app closed')
+        return real_replace(source, target)
+    server = Server(build_release(members, app='mentat', tag=tag), app='mentat', tag=tag)
+    try:
+        monkeypatch.setattr(fetch, '_replace', fail_on_b)
+        with pytest.raises(OSError):
+            fetch.ensure_app_data('mentat', data, state, 'x/y', api_base=server.base)
+        assert (data / 'reports' / 'a.txt').exists() and not (data / fetch.MARKER).exists()
+        assert (state / 'data-download' / fetch.EXTRACTING).is_file()
+        monkeypatch.setattr(fetch, '_replace', real_replace)
+        environment = {'DESKTOP_DATA_RELEASE_REPO': 'x/y', 'DESKTOP_DATA_RELEASE_API': server.base}
+        thread = fetch.launch('mentat', data, state, environ=environment)
+        assert thread is not None  # reports/ is not empty, but the extraction had started: resume
+        thread.join(30)
+    finally:
+        server.close()
+    assert (data / 'reports' / 'b.txt').read_bytes() == b'report b'
+    assert json.loads((data / fetch.MARKER).read_text(encoding='utf-8'))['tag'] == tag
+    assert not (state / 'data-download' / fetch.EXTRACTING).exists()
+    (data / fetch.MARKER).unlink()
+    assert fetch.launch('mentat', data, state, environ={}) is None  # finished: a non-empty reports/ is the user's again

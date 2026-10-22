@@ -156,10 +156,14 @@ def build(app: str, data_root: Path | None, out: Path, tag: str, allow: list[str
             used = 0
         info = zipfile.ZipInfo(rel, date_time=(1980, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
-        with p.open("rb") as fh:
-            zf.writestr(info, fh.read())
-        used += size
-        files.append({"path": rel, "bytes": size, "sha256": sha256_file(p), "asset": zpath.name})
+        digest, written = hashlib.sha256(), 0  # one read: a file that changes during the build cannot disagree with its zip member
+        with p.open("rb") as fh, zf.open(info, "w", force_zip64=True) as dst:
+            while chunk := fh.read(1 << 20):
+                digest.update(chunk)
+                dst.write(chunk)
+                written += len(chunk)
+        used += written
+        files.append({"path": rel, "bytes": written, "sha256": digest.hexdigest(), "asset": zpath.name})
     close()
 
     manifest = {

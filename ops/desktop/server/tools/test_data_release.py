@@ -6,6 +6,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import data_release  # noqa: E402
@@ -65,6 +66,23 @@ class BuildTest(unittest.TestCase):
                 seen.extend(zf.namelist())
         self.assertEqual(sorted(seen), sorted(f["path"] for f in m["files"]))
         self.assertEqual(len(seen), len(set(seen)))
+
+    def test_file_that_grows_during_the_build_matches_its_zip_member(self):
+        growing, real_open = self.root / "data/engine/e.csv", Path.open
+
+        def open_after_a_write(path, mode="r", *args, **kwargs):
+            if path == growing and mode == "rb":  # a writer appends after the size was read and before the copy
+                with real_open(path, "ab") as fh:
+                    fh.write(b"3,4\n")
+            return real_open(path, mode, *args, **kwargs)
+        with mock.patch.object(Path, "open", open_after_a_write):
+            m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21", [], data_release.DENY,
+                                   data_release.DEFAULT_PART_BYTES)
+        entry = next(f for f in m["files"] if f["path"] == "data/engine/e.csv")
+        with zipfile.ZipFile(self.out / entry["asset"]) as zf:
+            body = zf.read("data/engine/e.csv")
+        self.assertEqual(entry["bytes"], len(body))
+        self.assertEqual(entry["sha256"], hashlib.sha256(body).hexdigest())
 
     def test_allow_overrides_soft_denies_only(self):
         hard = ["keys/x.json", "a/credentials/c.json", "a/blob.dpapi", "a/accounts.sqlite3", "a/.env.local", "a/keys.json",

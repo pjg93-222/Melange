@@ -23,6 +23,7 @@ SCHEMA = 'melange-desktop-data/v1'
 REPOSITORIES = {'melange': 'pjg93-222/Melange', 'mentat': 'pjg93-222/Mentat'}
 DEFAULT_API = 'https://api.github.com'
 MARKER = '.melange-data-release.json'
+EXTRACTING = 'extracting.json'  # in <state>/data-download while an extraction has started and not finished
 BOOTSTRAP_TAG = 'melange-desktop-empty-workspace-v1'  # melange_bootstrap.WELCOME carries it; so does the progress page
 STATE_PREFIX = '__state__/'
 CHUNK, ATTEMPTS, RETRY_DELAY = 1 << 16, 4, 2.0
@@ -291,9 +292,12 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
         done += int(asset['bytes'])
         archives.append((part, asset['name']))
     report(phase='extracting', bytesDone=total, bytesTotal=total)
+    extracting = state / 'data-download' / EXTRACTING  # lets launch() resume once Mentat's reports/ is partly written
+    extracting.write_text(json.dumps({'tag': tag}), encoding='utf-8')
     written, kept = _extract(archives, data, state, files, app)
     marker.write_text(json.dumps({'tag': tag, 'manifestSha256': hashlib.sha256(raw).hexdigest(),
                                   'extractedAt': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2), encoding='utf-8')
+    extracting.unlink(missing_ok=True)
     shutil.rmtree(cache, ignore_errors=True)
     report(phase='done', bytesDone=total, bytesTotal=total)
     return {'status': 'installed', 'tag': tag, 'written': written, 'kept': kept}
@@ -393,7 +397,8 @@ def launch(app, data_root, state_root, *, reports_root=None, environ=os.environ)
             return None
     else:
         reports = Path(reports_root) if reports_root else data / 'reports'
-        if reports.resolve() != (data / 'reports').resolve() or (reports.is_dir() and any(reports.iterdir())):
+        resuming = (Path(state_root) / 'data-download' / EXTRACTING).is_file()
+        if reports.resolve() != (data / 'reports').resolve() or (not resuming and reports.is_dir() and any(reports.iterdir())):
             return None
     return start_background(app, data, state_root, environ.get('DESKTOP_DATA_RELEASE_REPO') or REPOSITORIES[app],
                             api_base=environ.get('DESKTOP_DATA_RELEASE_API') or None)

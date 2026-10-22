@@ -2,6 +2,7 @@
 import contextlib
 import io
 import json
+import os
 import socket
 import sys
 import tempfile
@@ -28,7 +29,7 @@ class LiveRefusal(unittest.TestCase):
                                 ('https://bore.pub:38443', ['--origin', local, '--dashboard', 'x']),
                                 (local, ['--origin', local, '--dashboard', 'http://127.0.0.1:38443/#bootstrap=x']),
                                 (local, ['--origin', local, '--dashboard', 'http://127.0.0.1:51234/#bootstrap=x']),
-                                (local, ['--origin', local, '--dashboard', str(auth_roundtrip.LIVE_STATE).upper()])):
+                                (local, ['--origin', local, '--dashboard', str(auth_roundtrip.LIVE_STATE).upper() if os.name == 'nt' else str(auth_roundtrip.LIVE_STATE)])):
             with self.subTest(argv=argv):
                 self.assertEqual(self.main(trust_url, *argv), 2)
 

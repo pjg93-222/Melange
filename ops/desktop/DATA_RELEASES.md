@@ -26,6 +26,8 @@ release in the app's own repo. The reader is `packaging/data_release_fetch.py`, 
 - **Interrupted extraction:** each file is written to `<name>.data-release-part` and renamed into place after its checksum; the
   part file is removed when a write fails. The main file (Melange `Moneyball.html`, Mentat `reports/`) is written last and the marker
   after everything, so an interrupted run is retried at the next launch and already-correct files are skipped.
+  `<state>/data-download/extracting.json` exists from the start of extraction until the marker is written, so Mentat
+  resumes even though its `reports/` folder is no longer empty.
 - **Marker:** `<data>/.melange-data-release.json` `{"tag","manifestSha256","extractedAt"}`. Once it exists, later launches do nothing.
 - **Newer releases:** not applied to an install that has the marker; the mechanism is first-run only. Deleting the marker makes the
   next launch fetch the newest release, but every existing file is still kept, including files from the older release whose content
@@ -33,7 +35,7 @@ release in the app's own repo. The reader is `packaging/data_release_fetch.py`, 
   marker; that is not implemented.
 - **Skip rules:** no fetch for Terrier, when `DESKTOP_DATA_RELEASE=off`, when the marker exists, when Melange's
   `Moneyball.html` exists and is not the bootstrap page, or when Mentat's reports folder is redirected away from
-  `<data>/reports` or is not empty. No matching release ends with status `none`.
+  `<data>/reports` or is not empty (unless `extracting.json` shows an interrupted extraction). No matching release ends with status `none`.
 - **Env knobs** (set on the client, which passes `DESKTOP_*` through): `DESKTOP_DATA_RELEASE=off` disables the fetch;
   `DESKTOP_DATA_RELEASE_REPO=owner/name` overrides the repo; `DESKTOP_DATA_RELEASE_API=<base>` overrides the API base
   (plain `http://` is accepted only with this set, for tests).
