@@ -1,7 +1,7 @@
 'use strict';
 const {app,BrowserWindow,Menu,dialog,ipcMain,safeStorage,shell,session,powerMonitor,powerSaveBlocker,net}=require('electron');
 const fs=require('node:fs');const path=require('node:path');const crypto=require('node:crypto');const {pathToFileURL}=require('node:url');
-const {appDefinition}=require('./apps.cjs');const {pairing,jsonRequest}=require('./trust.cjs');const {Runtime,attachLaunchHeader}=require('./runtime.cjs');const {DesktopUpdater}=require('./updater.cjs');
+const {appDefinition}=require('./apps.cjs');const {pairing,jsonRequest}=require('./trust.cjs');const {Runtime,attachLaunchHeader,refuseModuleDataSettings}=require('./runtime.cjs');const {DesktopUpdater}=require('./updater.cjs');
 const {credentialCommand}=require('./credentials.cjs');
 const {enrollFresh,enrollApproved}=require('./enrollment.cjs');
 const {watchNetwork}=require('./lifecycle.cjs');
@@ -115,12 +115,14 @@ const launch=require('./single-launch.cjs').singleLaunch(async function launchOn
 async function launchAuthorized(fromAccess){
  background=false;
  let generation=accessLifecycle?.generation;
+ const failStartup=async error=>{if(accessLifecycle?.suspended)return;try{if(!portable)await updater.markApplicationFailed();}catch{}updateStatus('Application startup failed. Check local logs.');await showSetup();throw error;};
+ try{refuseModuleDataSettings(runtime.configuration||read('settings.json'));}catch(error){await failStartup(error);return;}
  try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await settleDistrict(gate);await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked')await onRevoked();});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(accessGate?.accepted?.revoked)await dropDistrictData();if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
  if(closing||generation!==accessLifecycle.generation)return;
  if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
  openingAccess=true;
- try{let configuration=runtime.configuration||read('settings.json');if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
- catch(error){if(accessLifecycle?.suspended)return;try{if(!portable)await updater.markApplicationFailed();}catch{}updateStatus('Application startup failed. Check local logs.');await showSetup();throw error;}
+ try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+ catch(error){await failStartup(error);}
  finally{openingAccess=false;}
 }
 // Terrier: the chosen district stays while approved; otherwise the first approved one. Runs before authorization, which requires an approved district.
