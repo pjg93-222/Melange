@@ -1,9 +1,9 @@
-"""First-run app data from the app's own GitHub data release (reader side of melange-desktop-data/v1).
+"""Automatic data bootstrap is disabled until an exact compiled public plan exists.
 
-Newest non-draft release tagged data-<app>-*; zip assets are resumed into <state>/data-download/<tag>/, verified against
-manifest.json (bytes + sha256 per asset and per file), then extracted into the data root; members under __state__/ go to
-the state root with that prefix stripped (Melange reads <state>/Melange as MELANGE_LOCAL_ROOT). Existing files in either
-root are never replaced, except the bootstrap welcome/progress Moneyball.html. A marker file makes later launches a no-op."""
+The private component seam retains transport/recovery tests only. It is not an
+application installer, a complete reader contract or a live-update mechanism.
+Downloaded HTML/code/state/accounts cannot be authorized through this module.
+"""
 from __future__ import annotations
 from datetime import datetime, timezone
 import hashlib
@@ -13,9 +13,12 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import sys
+import tempfile
 import threading
 import time
+from types import MappingProxyType
 import urllib.error
 import urllib.request
 import zipfile
@@ -30,11 +33,21 @@ STATE_PREFIX = '__state__/'
 CHUNK, ATTEMPTS, RETRY_DELAY = 1 << 16, 4, 2.0
 SPACE_MARGIN = 512 << 20
 SAFE_NAME = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$')
-WINDOWS_DEVICE = re.compile(r'^(con|prn|aux|nul|conin\$|conout\$|com[0-9¹²³]|lpt[0-9¹²³])(\..*)?$', re.I)
+WINDOWS_DEVICE = re.compile(r'^(con|prn|aux|nul|conin\$|conout\$|com[0-9Â¹Â²Â³]|lpt[0-9Â¹Â²Â³])(\..*)?$', re.I)
+# No reviewed public-only application plan/installer is compiled in this build.
+# Neither downloaded metadata, settings nor inherited environment can fill it.
+_COMPILED_PUBLIC_PLANS = MappingProxyType({})
 
 
 class DataReleaseError(RuntimeError):
     pass
+
+
+def ensure_app_data(app, data_root, state_root, repo, *, api_base=None, progress=None):
+    """Production entry: fail closed before paths, markers, locks or network."""
+    if _COMPILED_PUBLIC_PLANS.get(app) is None:
+        return {'status': 'unsupported'}
+    raise DataReleaseError('The compiled public input installer is unavailable')
 
 
 def _check_url(url, insecure):
@@ -99,9 +112,119 @@ def _sha256(path):
     return digest.hexdigest()
 
 
+def _regular(path, *, links=1):
+    info = Path(path).lstat()
+    if (not stat.S_ISREG(info.st_mode) or info.st_nlink != links
+            or Path(path).is_symlink() or getattr(info, 'st_file_attributes', 0) & 0x400):
+        raise DataReleaseError('An independent regular component file is required')
+    return info
+
+
+def _stamp(info):
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_nlink,
+            info.st_size, info.st_mtime_ns, info.st_ctime_ns if os.name != 'nt' else None)
+
+
+def _handle_stamp(stream):
+    result = _stamp(os.fstat(stream.fileno()))
+    if os.name != 'nt':
+        return result
+    # Windows st_ctime is creation time; use native ChangeTime to detect an
+    # in-place rewrite even when the previous mtime/bytes are restored.
+    import ctypes
+    from ctypes import wintypes
+    import msvcrt
+    class BasicInformation(ctypes.Structure):
+        _fields_ = [('CreationTime', ctypes.c_longlong), ('LastAccessTime', ctypes.c_longlong),
+                    ('LastWriteTime', ctypes.c_longlong), ('ChangeTime', ctypes.c_longlong),
+                    ('FileAttributes', wintypes.DWORD)]
+    query = ctypes.WinDLL('kernel32', use_last_error=True).GetFileInformationByHandleEx
+    query.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+    query.restype = wintypes.BOOL
+    info = BasicInformation()
+    if (not query(msvcrt.get_osfhandle(stream.fileno()), 0, ctypes.byref(info), ctypes.sizeof(info))
+            or info.FileAttributes & 0x400):
+        raise DataReleaseError('Windows component change identity is unavailable')
+    return result + (info.ChangeTime,)
+
+
+def _path_stamp(path, *, links=1):
+    before = _regular(path, links=links)
+    flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
+    with os.fdopen(os.open(path, flags), 'rb') as stream:
+        if _stamp(before) != _stamp(os.fstat(stream.fileno())):
+            raise DataReleaseError('Component path identity changed')
+        result = _handle_stamp(stream)
+        if (_stamp(_regular(path, links=links)) != _stamp(os.fstat(stream.fileno()))
+                or _handle_stamp(stream) != result):
+            raise DataReleaseError('Component path stamp changed')
+        return result
+
+
+def _parents(root, folder, *, create=False):
+    current = root
+    for part in ('', *folder.relative_to(root).parts):
+        if part:
+            current = current / part
+        if create:
+            current.mkdir(exist_ok=True)
+        info = current.lstat()
+        if (not stat.S_ISDIR(info.st_mode) or current.is_symlink()
+                or getattr(info, 'st_file_attributes', 0) & 0x400):
+            raise DataReleaseError('Component folders cannot contain reparse points')
+
+
+def _checked_file(path, entry, identity=None, *, links=1):
+    before = _regular(path, links=links)
+    if identity is not None and (before.st_dev, before.st_ino) != identity:
+        raise DataReleaseError('Owned component temporary changed')
+    if before.st_size != entry['bytes']:
+        raise DataReleaseError('Component bytes differ from the manifest')
+    stamp = _path_stamp(path, links=links)
+    flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
+    with os.fdopen(os.open(path, flags), 'rb') as stream:
+        opened = _handle_stamp(stream)
+        if opened != stamp:
+            raise DataReleaseError('Component file identity changed')
+        digest, received = hashlib.sha256(), 0
+        while chunk := stream.read(CHUNK):
+            received += len(chunk)
+            if received > entry['bytes']:
+                raise DataReleaseError('Component file grew during verification')
+            digest.update(chunk)
+        if (_handle_stamp(stream) != opened
+                or _path_stamp(path, links=links) != stamp
+                or received != entry['bytes'] or digest.hexdigest() != entry['sha256']):
+            raise DataReleaseError('Component file checksum or identity changed')
+    return stamp
+
+
+def _remove_owned(path, identity, *, links=1, stamp=None):
+    try:
+        info = _regular(path, links=links)
+        if (info.st_dev, info.st_ino) == identity and (stamp is None or _path_stamp(path, links=links) == stamp):
+            Path(path).unlink()
+            return True
+    except (OSError, DataReleaseError):
+        pass  # Never delete a foreign replacement, link or reparse point.
+    return False
+
+
+def _component_member(relative):
+    parts = relative.split('/')
+    if (relative.startswith(STATE_PREFIX) or any(part.casefold() in
+            {'accounts', 'accounts.sqlite3', 'accounts.sqlite', 'keys', 'keys.json', 'credentials'} for part in parts)
+            or any(part.startswith('.melange-data-') or part.endswith('.data-release-part') for part in parts)
+            or Path(relative).suffix.casefold() in {'.html', '.htm', '.js', '.mjs', '.cjs', '.py', '.pyc',
+                '.exe', '.dll', '.ps1', '.bat', '.cmd', '.sh', '.pfx', '.pem'}):
+        raise DataReleaseError('Code, account or state members are not public component inputs')
+
+
 def _download(url, part, size, sha256, report, insecure):
     error = None
     for attempt in range(ATTEMPTS + 1):
+        if os.path.lexists(part):
+            _regular(part)
         have = part.stat().st_size if part.exists() else 0
         if have > size:
             part.unlink()
@@ -131,54 +254,93 @@ def _download(url, part, size, sha256, report, insecure):
 
 
 def _extract(archives, data, state, files, app):
-    """Validate every member of every archive before writing any file; main-app files are written last."""
-    data, state = data.resolve(), state.resolve()
-    plan, seen = [], set()
+    """Private component transport only; never replace original inputs or UI.
+
+    All members are staged and hashed before any new target is published. This
+    does not install application readers or grant whole-application readiness.
+    """
+    data = Path(data).absolute()
+    _parents(data, data)
+    plan, seen, stages, created = [], set(), [], []
     for archive, asset in archives:
         with zipfile.ZipFile(archive) as bundle:
             for info in bundle.infolist():
                 if info.is_dir():
                     continue
                 relative = member_path(info.filename)
+                _component_member(relative)
                 entry = files.get(relative)
                 if entry is None or entry.get('asset', asset) != asset or info.file_size != entry['bytes']:
                     raise DataReleaseError('Archive member %s does not match the manifest' % relative)
                 if relative in seen:
                     raise DataReleaseError('Archive member %s appears more than once' % relative)
                 seen.add(relative)
-                root, inner = (state, relative[len(STATE_PREFIX):]) if relative.startswith(STATE_PREFIX) else (data, relative)
-                if root is state and inner.split('/', 1)[0].casefold() == 'data-download':
-                    raise DataReleaseError('Refusing archive member in the download cache: %s' % relative)
-                target = (root / inner).resolve()
-                if not target.is_relative_to(root):
-                    raise DataReleaseError('Refusing archive member outside its folder: %s' % relative)
+                target = data.joinpath(*relative.split('/'))
+                if type(entry.get('bytes')) is not int or entry['bytes'] < 0 or not re.fullmatch('[a-f0-9]{64}', str(entry.get('sha256'))):
+                    raise DataReleaseError('Invalid component size or checksum')
                 plan.append((archive, info, target, entry, relative))
     if len(seen) != len(files):
         raise DataReleaseError('Data release archives lack %d file(s) listed in the manifest' % (len(files) - len(seen)))
-    main = (lambda r: r == 'Moneyball.html') if app == 'melange' else (lambda r: r.startswith('reports/'))
-    plan.sort(key=lambda item: main(item[4]))
-    written, kept = 0, []
-    for archive, info, target, entry, relative in plan:
-        if target.exists() and not (relative == 'Moneyball.html' and is_bootstrap_page(target)):
-            if not (target.is_file() and _sha256(target) == entry['sha256']):
-                kept.append(relative)  # never replace a file the user already has
-            continue
-        target.parent.mkdir(parents=True, exist_ok=True)
-        temporary = target.with_name(target.name + '.data-release-part')
-        digest = hashlib.sha256()
-        try:  # a failed write (disk full, file in use) leaves no partial file in the user's folders
-            with zipfile.ZipFile(archive) as bundle, bundle.open(info) as source, temporary.open('wb') as out:
+    plan.sort(key=lambda item: item[4])
+    # Refuse a mismatched required original before staging any missing member.
+    for _archive, _info, target, entry, _relative in plan:
+        parent = target.parent
+        while not parent.exists() and parent != data:
+            parent = parent.parent
+        _parents(data, parent)
+        if os.path.lexists(target):
+            _checked_file(target, entry)
+    try:
+        for archive, info, target, entry, relative in plan:
+            if os.path.lexists(target):
+                _checked_file(target, entry)
+                continue
+            _parents(data, target.parent, create=True)
+            descriptor, name = tempfile.mkstemp(prefix='.melange-data-', suffix='.part', dir=target.parent)
+            temporary = Path(name)
+            opened = os.fstat(descriptor)
+            identity = (opened.st_dev, opened.st_ino)
+            stage = [temporary, target, entry, identity, None]
+            stages.append(stage)
+            digest, received = hashlib.sha256(), 0
+            with os.fdopen(descriptor, 'wb') as out, zipfile.ZipFile(archive) as bundle, bundle.open(info) as source:
                 while chunk := source.read(CHUNK):
+                    received += len(chunk)
+                    if received > entry['bytes']:
+                        raise DataReleaseError('Component exceeds its declared bytes')
                     digest.update(chunk)
                     out.write(chunk)
-            if temporary.stat().st_size != entry['bytes'] or digest.hexdigest() != entry['sha256']:
-                raise DataReleaseError('Extracted %s does not match the manifest' % relative)
-            _replace(temporary, target)
-        except BaseException:
-            temporary.unlink(missing_ok=True)
-            raise
-        written += 1
-    return written, kept
+                out.flush()
+                os.fsync(out.fileno())
+            if received != entry['bytes'] or digest.hexdigest() != entry['sha256']:
+                raise DataReleaseError('Component does not match the manifest')
+            stage[4] = _checked_file(temporary, entry, identity)
+        for temporary, target, entry, identity, stamp in stages:
+            _parents(data, target.parent)
+            if _checked_file(temporary, entry, identity) != stamp:
+                raise DataReleaseError('Completed component temporary changed')
+            _replace(temporary, target, identity=identity, entry=entry)
+            published = [target, entry, identity, None]
+            created.append(published)
+            published[3] = _checked_file(target, entry, identity)
+        return len(stages), []
+    except BaseException:
+        for target, entry, identity, stamp in created:
+            try:
+                _parents(data, target.parent)
+                current = _checked_file(target, entry, identity)
+                if stamp is None or current == stamp:
+                    _remove_owned(target, identity, stamp=current)
+            except (OSError, DataReleaseError):
+                pass
+        raise
+    finally:
+        for temporary, _target, _entry, identity, stamp in stages:
+            try:
+                _parents(data, temporary.parent)
+                _remove_owned(temporary, identity, stamp=stamp)
+            except (OSError, DataReleaseError):
+                pass
 
 
 def _lock(path):
@@ -233,19 +395,19 @@ def _require_space(data, state, download, files):
                                    % ((need + SPACE_MARGIN) / 1e9, free / 1e9))
 
 
-def ensure_app_data(app, data_root, state_root, repo, *, api_base=None, progress=None):
-    """Download, verify and extract the newest data release once. Returns a summary dict; raises DataReleaseError.
+def _ensure_component_data(app, data_root, state_root, repo, *, api_base=None, progress=None):
+    """Private transport fixture seam, not production authority. Download, verify and extract the newest data release once. Returns a summary dict; raises DataReleaseError.
     A second launch (or process) while one download runs gets {'status': 'busy'} and touches nothing."""
     data, state = Path(data_root), Path(state_root)
     marker = data / MARKER
     if marker.exists():
-        return {'status': 'present', 'tag': json.loads(marker.read_text(encoding='utf-8')).get('tag')}
+        return {'status': 'component-present', 'tag': json.loads(marker.read_text(encoding='utf-8')).get('tag')}
     lock = _lock(state / 'data-download' / '.lock')
     if lock is None:
         return {'status': 'busy'}
     try:
         if marker.exists():  # the launch that held the lock finished meanwhile
-            return {'status': 'present', 'tag': json.loads(marker.read_text(encoding='utf-8')).get('tag')}
+            return {'status': 'component-present', 'tag': json.loads(marker.read_text(encoding='utf-8')).get('tag')}
         return _ensure_locked(app, data, state, repo, api_base, progress, marker)
     finally:
         _unlock(lock)
@@ -315,12 +477,12 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
     report(phase='extracting', bytesDone=total, bytesTotal=total)
     _atomic_write(extracting, json.dumps({'tag': tag, 'manifestSha256': digest}))
     written, kept = _extract(archives, data, state, files, app)
-    marker.write_text(json.dumps({'tag': tag, 'manifestSha256': digest,
-                                  'extractedAt': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2), encoding='utf-8')
+    _atomic_write(marker, json.dumps({'tag': tag, 'manifestSha256': digest,
+                                    'extractedAt': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2))
     extracting.unlink(missing_ok=True)
     shutil.rmtree(cache, ignore_errors=True)
     report(phase='done', bytesDone=total, bytesTotal=total)
-    return {'status': 'installed', 'tag': tag, 'written': written, 'kept': kept}
+    return {'status': 'component-extracted', 'tag': tag, 'written': written, 'kept': kept}
 
 
 def progress_page(status):
@@ -335,20 +497,60 @@ def progress_page(status):
             'download finishes. If it is still here afterwards, close and reopen Melange.</p></main></body></html>\n') % (BOOTSTRAP_TAG, line)
 
 
-def _replace(source, target):
-    for attempt in range(10):  # Windows refuses a replace while the server has the file open; that is brief
+def _replace(source, target, *, identity, entry):
+    """Publish a newly owned file only if the destination is still absent."""
+    _checked_file(source, entry, identity)
+    os.link(source, target, follow_symlinks=False)  # atomic no-overwrite, same directory/volume
+    linked_stamp = None
+    try:
+        for path in (source, target):
+            info = _regular(path, links=2)
+            if (info.st_dev, info.st_ino) != identity:
+                raise DataReleaseError('Component publication identity changed')
+        linked_stamp = _checked_file(target, entry, identity, links=2)
+        if _path_stamp(source, links=2) != linked_stamp:
+            raise DataReleaseError('Component publication changed')
+        Path(source).unlink()
+    except BaseException:
         try:
-            return os.replace(source, target)
-        except PermissionError:
-            if attempt == 9:
-                raise
-            time.sleep(0.2)
+            # Revalidate both names before undoing only this call's new link.
+            # A verified stamp must not be replaced by a changed baseline.
+            current = _checked_file(target, entry, identity, links=2)
+            if ((linked_stamp is None or current == linked_stamp)
+                    and _path_stamp(source, links=2) == current
+                    and _remove_owned(target, identity, links=2, stamp=current)):
+                remaining = _checked_file(source, entry, identity)
+                # Our unlink changes only link count/change time. All other
+                # content identity fields must still equal the linked stamp.
+                if remaining[:3] + remaining[4:6] == current[:3] + current[4:6]:
+                    _remove_owned(source, identity, stamp=remaining)
+        except (OSError, DataReleaseError):
+            pass
+        raise
 
 
 def _atomic_write(path, text):
-    temporary = path.with_name(path.name + '.tmp')
-    temporary.write_text(text, encoding='utf-8')
-    _replace(temporary, path)
+    # Component recovery records may be repeated unchanged. They never replace
+    # a late/foreign record, a link, or an original user path.
+    raw = text.encode('utf-8')
+    entry = {'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+    if os.path.lexists(path):
+        _checked_file(path, entry)
+        return
+    descriptor, name = tempfile.mkstemp(prefix='.melange-data-', suffix='.part', dir=path.parent)
+    temporary = Path(name)
+    info = os.fstat(descriptor)
+    identity = (info.st_dev, info.st_ino)
+    stamp = None
+    try:
+        with os.fdopen(descriptor, 'wb') as stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        stamp = _checked_file(temporary, entry, identity)
+        _replace(temporary, path, identity=identity, entry=entry)
+    finally:
+        _remove_owned(temporary, identity, stamp=stamp)
 
 
 def _redact(text, data, state):
@@ -365,60 +567,14 @@ def _redact(text, data, state):
 
 
 def start_background(app, data_root, state_root, repo, *, api_base=None, progress=None):
-    """Run ensure_app_data in a daemon thread; status goes to <state>/data-download/status.json."""
-    data, state = Path(data_root), Path(state_root)
-    status_file = state / 'data-download' / 'status.json'
-    status_file.parent.mkdir(parents=True, exist_ok=True)
-    status, last = {'app': app, 'phase': 'starting', 'asset': None, 'bytesDone': 0, 'bytesTotal': 0, 'error': None}, [0.0]
-
-    def update(**changes):
-        phase_changed = changes.get('phase', status['phase']) != status['phase']
-        status.update(changes)
-        if progress:
-            progress(**status)
-        if not phase_changed and time.monotonic() - last[0] < 3 and status['phase'] not in ('done', 'error'):
-            return
-        last[0] = time.monotonic()
-        page = data / 'Moneyball.html'
-        try:  # status and the progress page are courtesy output; they never fail the download
-            _atomic_write(status_file, json.dumps(status))
-            if app == 'melange' and status['phase'] in ('downloading', 'extracting', 'error') and is_bootstrap_page(page):
-                _atomic_write(page, progress_page(status))
-        except OSError as error:
-            print('DESKTOP_RUNTIME_WARNING: data release status not written: %s' % error, file=sys.stderr, flush=True)
-        if app == 'mentat':
-            print('DESKTOP_DATA_RELEASE: %s %s/%s bytes %s' % (status['phase'], status['bytesDone'], status['bytesTotal'],
-                                                               status['error'] or ''), file=sys.stderr, flush=True)
-
-    def work():
-        try:
-            result = ensure_app_data(app, data, state, repo, api_base=api_base, progress=update)
-            if app == 'mentat' and result['status'] == 'installed':
-                (data / 'reports').mkdir(parents=True, exist_ok=True)
-                (data / 'reports' / 'README-first-run.txt').write_text(
-                    'Mentat downloaded its starting data (%s). If reports do not appear, restart the app (close and reopen Mentat).\n' % result['tag'], encoding='utf-8')
-            status['result'] = result
-        except Exception as error:  # a failed first-run download never stops the app; the next launch retries
-            update(phase='error', error=_redact('%s: %s' % (type(error).__name__, error), data, state)[:300])
-
-    thread = threading.Thread(target=work, name='data-release-fetch', daemon=True)
-    thread.start()
-    return thread
+    """No production thread or filesystem preparation without a compiled plan."""
+    if _COMPILED_PUBLIC_PLANS.get(app) is None:
+        return None
+    raise DataReleaseError('The compiled public input installer is unavailable')
 
 
 def launch(app, data_root, state_root, *, reports_root=None, environ=os.environ):
-    """Backend hook: start the first-run fetch unless disabled, already done, or the folder already holds the app's data."""
-    data = Path(data_root)
-    if app not in REPOSITORIES or environ.get('DESKTOP_DATA_RELEASE', '').lower() == 'off' or (data / MARKER).exists():
+    """Ordinary backend hook: no inherited flag/repository/API enables a plan."""
+    if _COMPILED_PUBLIC_PLANS.get(app) is None:
         return None
-    if app == 'melange':
-        page = data / 'Moneyball.html'
-        if page.exists() and not is_bootstrap_page(page):
-            return None
-    else:
-        reports = Path(reports_root) if reports_root else data / 'reports'
-        resuming = (Path(state_root) / 'data-download' / EXTRACTING).is_file()
-        if reports.resolve() != (data / 'reports').resolve() or (not resuming and reports.is_dir() and any(reports.iterdir())):
-            return None
-    return start_background(app, data, state_root, environ.get('DESKTOP_DATA_RELEASE_REPO') or REPOSITORIES[app],
-                            api_base=environ.get('DESKTOP_DATA_RELEASE_API') or None)
+    raise DataReleaseError('The compiled public input installer is unavailable')

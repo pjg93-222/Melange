@@ -1,107 +1,80 @@
-# Desktop data releases (Melange and Mentat)
+# Desktop public data release status
 
-The installers ship code only. On first launch the backend fetches the app's data from a GitHub
-release in the app's own repo. The reader is `packaging/data_release_fetch.py`, started from
-`desktop_backend.start_data_release`. The builder is `server/tools/data_release.py`.
+**Ordinary automatic bootstrap is disabled.** Melange and Mentat do not fetch or
+install a data release through desktop_backend.start_data_release until an
+exact reviewed public-only plan and its application reader installer are
+compiled into the program. The production registry is currently empty.
 
-## How a release is consumed
+Production launch, start_background, and direct ensure_app_data refuse before
+reading markers, preparing paths, taking locks, making requests or starting
+threads. DESKTOP_DATA_RELEASE_REPO/API, settings and downloaded approved/complete
+fields cannot enable this path. An added metadata entry alone cannot enable it
+either; the production installer remains unavailable.
 
-- **Repo and tag:** `pjg93-222/Melange` or `pjg93-222/Mentat`. The reader uses the newest **non-draft** release whose tag starts with `data-<app>-` (e.g. `data-mentat-2026-10-21`). Drafts are invisible to it.
-- **Manifest (`manifest.json` asset, schema `melange-desktop-data/v1`):**
-  `{"schema","app","tag","created","assets":[{"name","bytes","sha256"}],"files":[{"path","bytes","sha256","asset"}],"excluded":[...]}`.
-  The reader checks that `schema`, `app` and `tag` match the release, and that each asset's size and SHA-256 match before
-  anything is extracted. The zips must hold exactly the files in `files` (no extra, missing or repeated member, no path listed
-  twice even by case), and each extracted file must match its `bytes` and SHA-256 before it is moved into place.
-- **Download:** HTTPS only, redirects included. Zip parts download, with resume (a server that ignores `Range` restarts the
-  part), to `<state>/data-download/<tag>/`. That cache is deleted after a successful extraction; a leftover cache of an
-  older tag is deleted before a newer tag downloads. One unauthenticated GitHub API call (`releases?per_page=20`) per launch
-  until the marker exists; asset downloads do not count against the 60/hour API limit. A data release older than the 20 newest
-  releases of the repo is not seen.
-- **One at a time:** an OS lock on `<state>/data-download/.lock` (released when the process exits). A second launch while a
-  download runs returns `busy` and writes nothing.
-- **Disk space:** before downloading, the reader requires free space for the remaining zips plus every file still to extract
-  plus 512 MB (Melange 2026-10-21: about 3.7 GB of zips and 8.7 GB extracted, so about 12.4 GB at peak, counted per volume).
-- **Routing:** members are extracted into the data root. Members under `__state__/` go to the state root with the prefix stripped (Melange reads `<state>/Melange` as `MELANGE_LOCAL_ROOT`). The reader refuses absolute paths, drive letters, `..` segments, members that resolve outside their root (including through a junction already in the folder), `__state__/data-download/`, Windows device names (`CON`, `NUL.txt`), names ending in a dot or space, and wildcard or control characters.
-- **No overwrites:** existing files are never replaced, except Melange's bootstrap welcome/progress `Moneyball.html`. That page is recognised by the `melange-desktop-empty-workspace-v1` comment in a regular file under 64 KB, so a real dashboard is never mistaken for it. Files that already exist with different content are reported as `kept`.
-- **Interrupted extraction:** each file is written to `<name>.data-release-part` and renamed into place after its checksum; the
-  part file is removed when a write fails. The main file (Melange `Moneyball.html`, Mentat `reports/`) is written last and the marker
-  after everything, so an interrupted run is retried at the next launch and already-correct files are skipped.
-  `<state>/data-download/extracting.json` exists from the start of extraction until the marker is written, so Mentat
-  resumes even though its `reports/` folder is no longer empty. A resumed run uses the tag recorded there (looked up with
-  `releases/tags/<tag>`, so it is found however many releases are newer), never a newer release; if that release is no
-  longer published, the fetch stops with an error instead of mixing two releases. The record also holds the manifest's sha256;
-  if the manifest under that tag has changed, the fetch stops with status `error`, reason `manifest_changed`, before writing anything.
-- **Marker:** `<data>/.melange-data-release.json` `{"tag","manifestSha256","extractedAt"}`. Once it exists, later launches do nothing.
-- **Newer releases:** not applied to an install that has the marker; the mechanism is first-run only. Deleting the marker makes the
-  next launch fetch the newest release, but every existing file is still kept, including files from the older release whose content
-  changed (they appear in `kept`). Replacing files that still match the older manifest would need the old manifest stored with the
-  marker; that is not implemented.
-- **Skip rules:** no fetch for Terrier, when `DESKTOP_DATA_RELEASE=off`, when the marker exists, when Melange's
-  `Moneyball.html` exists and is not the bootstrap page, or when Mentat's reports folder is redirected away from
-  `<data>/reports` or is not empty (unless `extracting.json` shows an interrupted extraction). No matching release ends with status `none`.
-- **Env knobs** (set on the client, which passes `DESKTOP_*` through): `DESKTOP_DATA_RELEASE=off` disables the fetch;
-  `DESKTOP_DATA_RELEASE_REPO=owner/name` overrides the repo; `DESKTOP_DATA_RELEASE_API=<base>` overrides the API base
-  (plain `http://` is accepted only with this set, for tests).
-- **Progress:** `<state>/data-download/status.json`. The server starts immediately; data appears when extraction finishes.
-  Error text there and on Melange's progress page shows `<data>`, `<state>` and `~` in place of absolute folders.
-- **Mentat models:** `app-data/` lands at `<data>/app-data`, the default `MENTAT_APP_DATA_ROOT` (a redirected `appDataRoot` does not
-  stop the fetch, and the release's models then sit unused in `<data>/app-data`). Geo layers are not data: they ship in the installer (`runtime-manifest.json` `sourceGlobs`).
+This change does not alter original application roots, accounts, private
+evidence, writable state or ordinary local application mode. It does not claim a
+preload, live update, release or installation is complete. Terrier retains its
+separate district-data mechanism.
 
-## Building one (local only, never uploads)
+## Required public input boundary
 
-Run from the repo root with Python 3.12. `--map rel=ABS` (repeatable) mounts a folder or file at `rel` inside a virtual
-data root, so nothing is copied; deny/allow patterns use the virtual path. Symlinks and junctions inside a source are listed in
-`EXCLUDED.txt` and not followed. `--out` must be outside every source. The two builds from 2026-10-21:
+Future enablement requires a fixed application/repository and authenticated
+reviewed generation, exact passive roles and provenance, resource bounds,
+complete intended public reader coverage, and explicit original private and
+writable contexts. Downloaded HTML, JavaScript, programs, account files and
+arbitrary __state__/ members are not public data roles.
 
-```powershell
-# Mentat; $M = the Mentat checkout's mentat folder, $OUT = a new output folder outside it
-python -I ops\desktop\server\tools\data_release.py build --app mentat --tag data-mentat-2026-10-21 `
-  --out $OUT `
-  --map inputs=$M\inputs --map app-data=$M\app\data `
-  --map forecast=$M\forecast
-```
+Application templates and scripts belong in the reviewed program distribution.
+Public data must use scoped read-only inputs. Existing private calibration,
+models, pointers, anchors and their hash-bound workbook/index context must stay
+coherent at original locations. An independently updated public report source
+must not silently replace a member of that private context. User outputs,
+collections, account state and mutable caches remain original.
 
-```bash
-# Melange, clean build (-> ...\data-release-melange-2026-10-21-clean); S = live checkout, L = local staffer_network
-python -I -X utf8 ops/desktop/server/tools/data_release.py build --app melange --tag data-melange-2026-10-21 --out "$OUT" \
- --map "Moneyball.html=$S\\Moneyball.html" --map "audits/staffer_live_runtime=$S\\audits\\staffer_live_runtime" \
- --map "data/engine=$S\\data\\engine" --map "fec/surfaces=$S\\fec\\surfaces" \
- --map "__state__/Melange/staffer_network/live_catalog=$L\\live_catalog" \
- --map "__state__/Melange/staffer_network/normalized=$L\\normalized" \
- --map "__state__/Melange/staffer_network/raw/littlesis=$L\\raw\\littlesis" \
- --deny 'audits/staffer_live_runtime/backups/**' --deny '**/*.bak' --deny '**/*.log' --deny '**/*.err' --deny '**/*.tmp' \
- --deny '**/*.pre-heal-*' --deny '**/STABILIZATION_*' --deny '**/restart_watch_*' --deny '**/stabilization_chain_plan.txt' \
- --deny '**/*.ps1' --deny '**/identity_reference_cache/**' \
- --allow 'audits/staffer_live_runtime/identity_reference_v1.sqlite-wal' \
- --allow 'audits/staffer_live_runtime/identity_reference_v1.sqlite-shm'
-```
+The signed immutable module loader is a separate source foundation. Its compiled
+complete-application registry and actual native Runtime/reader installer must
+remain unavailable until those contracts are reviewed. Keeping that registry
+empty does not itself guard a different automatic downloader; the ordinary
+legacy bootstrap is explicitly disabled here too.
 
-Output: `<app>-data-<date>-partN.zip` (each under 1.9 GiB, `--part-bytes`), `manifest.json`, `SHA256SUMS`, `EXCLUDED.txt`, `README.md`.
-`--allow <glob>` overrides `--deny` and the soft defaults, never the hard denylist below; keep it to exact paths (above: the identity index's WAL/SHM).
+## Private component tests
 
-## Publishing
+The private _ensure_component_data seam exists for generated transport/recovery
+fixtures. It is not called by the ordinary hook and has no CLI, environment or
+settings enablement. Its component-extracted/component-present results describe
+fixture byte transport, not application readiness or a verified complete source.
 
-1. Read `EXCLUDED.txt` and spot-check the manifest for anything below that slipped through.
-2. Run the `gh release create` line the build prints: `gh release create <tag> -R pjg93-222/<App> --prerelease --draft
-   --title "<app> data <date>" --notes-file <out>\README.md <out>\*.zip <out>\manifest.json <out>\SHA256SUMS`.
-3. Un-draft it (`gh release edit <tag> -R <repo> --draft=false`). Until then no app sees it. To retract a release, re-draft or delete it. Installs that already extracted it keep their files.
+Retained component behavior covers bounded metadata reads, HTTPS by default,
+range resume, ZIP member/path and checksum checks, a local OS lock, free-space
+checks and recovery pinned to the original tag/manifest. Tests inject a local
+fixture endpoint directly into this private seam. Production does not accept
+endpoint overrides.
 
-## Excluded by policy
+Component extraction rejects HTML/code, account and state members. Every member
+is staged and hashed before any new target is published. Staging uses unique,
+exclusively created regular temporary files with content and identity checks.
+Publication creates a new name atomically and never replaces a target. A late
+original file or mismatched required existing file refuses success; original
+welcome pages are preserved. Cleanup removes only the same independent owned
+temporary/new file and preserves foreign replacements, hardlinks and reparse
+paths. Recovery records are newly created or reused only when identical; they
+do not overwrite a different existing record.
 
-Hard denylist (`HARD_DENY`; `--allow` cannot override it, and it is also matched against each file's real absolute path, so a
-`--map` cannot rename or mount these in): account databases (`accounts.sqlite3`), DPAPI blobs, `keys/`, `keys.json`, `.env*`,
-`credentials/`, `.pfx`/`.pem` files, the marker and `__state__/data-download/`.
-Soft defaults (`DENY`; an exact-path `--allow` after review can re-include one): anything named `*secret*`, `*token*`, `session*` or
-`cookies*` (congressional `session_*` data can match), licensed third-party content (raw Politico Pro crawls, `*politico*raw*`; never
-allow these), caches, `__pycache__`, `.git`, `node_modules`, and SQLite journals.
-Beyond the defaults, the Melange build also excluded backups, logs, scratch files and operator scripts. Donor records, reports and
-user state stay out of Mentat releases, as `dataPolicy` in `runtime-manifest.json` requires. Only publish public-record data.
+These transport tests do not establish signed publication authority, monotonic
+history, typed consumer semantics, whole-application health or an atomic live
+input switch. No public data approval or publication follows from a fixture
+pass. The component marker is not an application-readiness receipt.
 
-## How this differs from Terrier's GitHub district data
+## Earlier first-run behavior
 
-Terrier does not use this mechanism (`launch` ignores it). Its district data lives in `pjg93-222/Geo` and is addressed by a
-**signed pointer/catalogue** that the owner prepares with the protected release key (`packaging/prepare_github_district_catalogue.py`).
-The **Electron client** (`client/github-districts.cjs`) downloads and verifies the data into a **separate cache** and passes it
-to the backend with `--github-district-data`. `terrier_district.validate_github_runtime` then validates the cache read-only, and
-updates apply when the district is reopened. Melange/Mentat use an unsigned release manifest instead. The integrity
-check there is size plus SHA-256 over HTTPS from the app's own repo. The **backend** extracts once, in place, into the data root.
+The earlier implementation selected the newest non-draft data-<app>-* release
+from the first 20 results, checked an unsigned manifest and copied files into
+original data/state trees in a background thread. Its marker prevented later
+refresh; deleting it still kept changed older files. It did not provide the
+requested live GitHub update behavior or a complete immutable input generation.
+That automatic behavior is disabled rather than treated as a reviewed installer.
+
+Historical unrestricted workspace/state mappings and publication recipes are
+removed. Actual generation/publication requires a separately reviewed exact
+public-only manifest and source/provenance closure; private evidence, vendor
+captures, accounts, writable user state and program/UI code remain excluded.
