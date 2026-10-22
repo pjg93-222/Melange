@@ -7,6 +7,7 @@ const {strictJson,exact}=require('./dataset-protocol.cjs');
 const protocol=require('./github-module-protocol.cjs');
 const {GitHubModuleTransport}=require('./github-module-transport.cjs');
 const {physicalPath}=require('./runtime-roots.cjs');
+const {checkedNativeCacheRoot}=require('./module-data-binding.cjs');
 const {fail,requireValue,authorized,hash,integer,TAG,COMMIT}=protocol;
 const RECORD=['catalogSequence','pointerDigest','manifestSha256','releaseTag','releaseCommit','identityDigest'];
 const OFFLINE=new Set(['unreachable','timeout','rate_limited']);
@@ -72,6 +73,10 @@ class GitHubModules{
   requireValue(!overlaps(this.cacheRoot,selected.dataDirectory),'Module cache must remain separate from the owner workspace');
   for(const root of this.protectedRoots)requireValue(!overlaps(this.cacheRoot,root),'Module cache overlaps protected state');
   await this.ensureDirectory(this.cacheRoot);
+  const resolved=checkedNativeCacheRoot(this.cacheBase,this.cacheRoot);
+  requireValue(!overlaps(resolved,selected.dataDirectory),'Module cache must remain separate from the owner workspace');
+  for(const root of this.protectedRoots)requireValue(!overlaps(resolved,root),'Module cache overlaps protected state');
+  this.cacheRoot=resolved;
   for(const part of ['pointers','manifests','segments','snapshots','staging'])await this.ensureDirectory(path.join(this.cacheRoot,part));
  }
  async file(relative,{parent=true}={}){

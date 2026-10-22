@@ -12,7 +12,7 @@ from unittest.mock import patch
 import uuid
 
 from module_data_snapshot import KINDS, Snapshot
-from module_data_launch import APPS, canonical, prepare_module_readers
+from module_data_launch import APPS, canonical, prepare_module_readers, _native_cache_root
 
 
 def sha(raw):
@@ -245,6 +245,49 @@ class LaunchTests(unittest.TestCase):
             result=self.launch(source={**self.source,'cacheRoot':str(new)})
             self.assertEqual(result['source']['cacheRoot'],str(new))
             with self.assertRaises(ValueError):self.launch(source={**self.source,'cacheRoot':str(new.parent.parent/'melange'/'github-module-data')})
+
+    def test_fixed_transparently_redirected_cache_uses_physical_read_view_and_preserves_source(self):
+        local=self.base/'local';local.mkdir()
+        lexical=local/'MelangeData'
+        physical=local/'Packages/fixture/LocalCache/Local/MelangeData'
+        new=physical/'mentat/github-module-data';new.parent.mkdir(parents=True);shutil.move(self.cache,new)
+        original_resolve,original_lstat=Path.resolve,Path.lstat
+        def mapped(path):
+            return physical/path.relative_to(lexical) if path==lexical or path.is_relative_to(lexical) else path
+        def resolve(path,*args,**kwargs):return original_resolve(mapped(path),*args,**kwargs)
+        def lstat(path,*args,**kwargs):return original_lstat(mapped(path),*args,**kwargs)
+        source={**self.source,'cacheRoot':str(new)};before=self.inventory()
+        with patch.dict(os.environ,{'LOCALAPPDATA':str(local)}),patch.object(Path,'resolve',resolve),patch.object(Path,'lstat',lstat):
+            result=self.launch(source=source)
+            self.assertEqual(result['source'],source)
+            self.assertEqual(result['snapshotRoot'],str(new/'snapshots'/self.source['manifestSha256']))
+            with self.assertRaisesRegex(ValueError,'Unapproved'):
+                self.launch(source={**source,'cacheRoot':str(lexical/'mentat/github-module-data')})
+            with self.assertRaisesRegex(ValueError,'Unapproved'):
+                self.launch(source={**source,'cacheRoot':str(local/'Packages/arbitrary')})
+        self.assertEqual(self.inventory(),before)
+        self.assertEqual(self.account.read_bytes(),b'original account state')
+
+    def test_native_cache_root_rejects_replacement_during_resolution(self):
+        root=self.profile/'packs/github-module-data';backup=root.with_name('original-cache')
+        original=Path.resolve;changed=False
+        def raced(path,*args,**kwargs):
+            nonlocal changed
+            if path==root and not changed:
+                changed=True;root.rename(backup);root.mkdir()
+            return original(path,*args,**kwargs)
+        with patch.object(Path,'resolve',raced),self.assertRaisesRegex(ValueError,'identity|changed'):
+            _native_cache_root(self.profile,root)
+        self.assertTrue(changed);self.assertTrue(backup.is_dir());self.assertEqual(list(root.iterdir()),[])
+
+    def test_native_cache_root_refuses_transparent_resolution_outside_approved_base(self):
+        local=self.base/'local';local.mkdir();requested=local/'MelangeData/mentat/github-module-data';requested.mkdir(parents=True)
+        outside=self.base/'outside';outside.mkdir();original=Path.resolve
+        def redirected(path,*args,**kwargs):
+            return outside if path==requested else original(path,*args,**kwargs)
+        with patch.object(Path,'resolve',redirected),self.assertRaisesRegex(ValueError,'boundary|unsafe'):
+            _native_cache_root(local,requested)
+        self.assertTrue(outside.is_dir());self.assertTrue(requested.is_dir())
 
     def test_actual_graph_and_payroll_configurers_use_synthetic_sources_only(self):
         from module_data_test_helpers import graph_fixture,payroll_fixture

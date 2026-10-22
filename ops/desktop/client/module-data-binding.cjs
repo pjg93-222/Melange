@@ -13,6 +13,28 @@ function inside(root,target,equal=false){const rel=path.relative(root,target);re
 function overlaps(a,b){a=physicalPath(a);b=physicalPath(b);return inside(a,b,true)||inside(b,a,true);}
 function same(a,b){return a.dev===b.dev&&a.ino===b.ino&&a.mode===b.mode&&a.nlink===b.nlink&&a.size===b.size&&a.mtimeNs===b.mtimeNs&&a.ctimeNs===b.ctimeNs;}
 function sameDirectory(a,b,strict){return strict?same(a,b):a.dev===b.dev&&a.ino===b.ino&&a.mode===b.mode;}
+function checkedNativeCacheRoot(base,requested){
+ // A fixed native path can be transparently redirected by Windows package
+ // storage. Check the named chain before resolving it; a junction must never
+ // become an approved cache merely because its target is beneath the base.
+ requireValue(typeof base==='string'&&typeof requested==='string'&&path.isAbsolute(base)&&path.isAbsolute(requested)&&
+  path.resolve(base)===base&&path.resolve(requested)===requested&&fs.realpathSync.native(base)===base&&inside(base,requested),'Invalid native module cache boundary');
+ const walk=target=>{
+  requireValue(inside(base,target,true),'Native module cache leaves its boundary');const identities=[];let current=base;
+  for(const part of ['',...path.relative(base,target).split(path.sep).filter(Boolean)]){
+   if(part)current=path.join(current,part);const stat=fs.lstatSync(current,{bigint:true});
+   requireValue(stat.isDirectory()&&!stat.isSymbolicLink()&&inside(base,fs.realpathSync.native(current),true),'Native module cache directory is unsafe');
+   identities.push({file:current,stat});
+  }
+  return identities;
+ };
+ const named=walk(requested),resolved=fs.realpathSync.native(requested);
+ requireValue(inside(base,resolved)&&fs.realpathSync.native(resolved)===resolved,'Native module cache resolution is unsafe');
+ const physical=walk(resolved);requireValue(sameDirectory(named.at(-1).stat,physical.at(-1).stat,false),'Native module cache identity changed');
+ for(const {file,stat} of [...named,...physical]){const current=fs.lstatSync(file,{bigint:true});requireValue(current.isDirectory()&&!current.isSymbolicLink()&&sameDirectory(stat,current,false),'Native module cache directory changed');}
+ requireValue(fs.realpathSync.native(base)===base&&fs.realpathSync.native(requested)===resolved&&fs.realpathSync.native(resolved)===resolved,'Native module cache resolution changed');
+ return resolved;
+}
 class ReadView{
  constructor(base,root,signal){this.base=base;this.root=root;this.signal=signal;this.directories=new Map();this.files=new Map();}
  async directory(target){
@@ -79,13 +101,16 @@ async function validateModuleBinding({appId,profile,configuration,publicKeys,reg
   const original=structuredClone(configuration),source=original.ownerGitHubModuleData;exact(source,SOURCE_FIELDS);
   requireValue(source.schemaVersion===1&&source.appId===appId&&source.repository===app.repository&&protocol.integer(source.catalogSequence)&&source.catalogSequence>0&&protocol.hash(source.pointerDigest)&&protocol.hash(source.manifestSha256)&&typeof source.cacheRoot==='string'&&path.isAbsolute(source.cacheRoot),'Invalid native module source binding');
   const profileStat=await fsp.lstat(profile);requireValue(profileStat.isDirectory()&&!profileStat.isSymbolicLink(),'Native module profile is unsafe');
-  // Canonicalize native ancestors only; cache descendants still undergo the
-  // read view's explicit reparse checks rather than being resolved away.
+  // Only independently checked fixed choices can grant a physical cache root.
   const nativeProfile=fs.realpathSync.native(profile),localBase=process.env.LOCALAPPDATA?fs.realpathSync.native(path.resolve(process.env.LOCALAPPDATA)):null;
   const choices=[{base:nativeProfile,root:path.join(nativeProfile,'packs','github-module-data')},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,'github-module-data')}]:[])];
-  const selected=choices.find(choice=>path.resolve(source.cacheRoot)===path.resolve(choice.root));
-  requireValue(selected&&source.cacheRoot===path.resolve(selected.root),'Unapproved native module cache root');
-  const cacheRoot=path.resolve(selected.root),base=path.resolve(selected.base);
+  let selected;
+  for(const choice of choices){
+   let root;try{root=checkedNativeCacheRoot(choice.base,choice.root);}catch(error){if(error.code==='ENOENT')continue;throw error;}
+   if(source.cacheRoot===root){selected={base:choice.base,root};break;}
+  }
+  requireValue(selected,'Unapproved native module cache root');
+  const cacheRoot=selected.root,base=selected.base;
   for(const protectedRoot of [original.dataDirectory,path.join(nativeProfile,'state'),...protectedRoots])requireValue(!overlaps(cacheRoot,protectedRoot),'Module binding cache overlaps original or protected state');
   const view=new ReadView(base,cacheRoot,signal);await view.directory(cacheRoot);
   const envelope=protocol.parseJson(await view.read(path.join(cacheRoot,'pointers',source.pointerDigest+'.json'),32768,{retain:true}));
@@ -109,4 +134,4 @@ async function validateModuleBinding({appId,profile,configuration,publicKeys,reg
   return {source:structuredClone(expected),snapshotRoot,datasets};
  }catch(error){if(error?.reason)throw error;throw fail('integrity','Module binding verification failed');}
 }
-module.exports={validateModuleBinding};
+module.exports={validateModuleBinding,checkedNativeCacheRoot};

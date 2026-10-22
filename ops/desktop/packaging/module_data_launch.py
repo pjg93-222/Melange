@@ -76,6 +76,36 @@ def opened_identity(info):
     return (info.st_dev,info.st_ino,info.st_mode,info.st_nlink,info.st_size,info.st_mtime_ns)
 
 
+def _native_cache_root(base, requested):
+    # Walk the fixed requested spelling before resolving Windows native storage
+    # redirection. Never resolve away a descendant junction/reparse point.
+    require(base.is_absolute() and requested.is_absolute() and safe_root(str(base)) == base
+            and requested != base and contains(base, requested), 'Invalid native module cache boundary')
+    def walk(target):
+        require(contains(base, target))
+        current = base
+        identities = []
+        for part in (None, *target.relative_to(base).parts):
+            if part is not None:
+                current = current / part
+            info = regular(current, True)
+            require(contains(base, current.resolve(strict=True)), 'Native module cache leaves its boundary')
+            identities.append((current, info))
+        return identities
+    identity = lambda info: (info.st_dev, info.st_ino, info.st_mode)
+    named = walk(requested)
+    resolved = requested.resolve(strict=True)
+    require(resolved != base and contains(base, resolved) and resolved.resolve(strict=True) == resolved,
+            'Native module cache resolution is unsafe')
+    physical = walk(resolved)
+    require(identity(named[-1][1]) == identity(physical[-1][1]), 'Native module cache identity changed')
+    for file, before in (*named, *physical):
+        require(identity(regular(file, True)) == identity(before), 'Native module cache directory changed')
+    require(base.resolve(strict=True) == base and requested.resolve(strict=True) == resolved
+            and resolved.resolve(strict=True) == resolved, 'Native module cache resolution changed')
+    return resolved
+
+
 class ReadView:
     def __init__(self, base, root):
         self.base,self.root=base,root
@@ -234,13 +264,19 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
     require(isinstance(source['cacheRoot'],str) and Path(source['cacheRoot']).is_absolute())
     choices=[(profile_root,profile_root/'packs/github-module-data')]
     if os.environ.get('LOCALAPPDATA'):
-        # Only this trusted provider ancestor may be canonicalized before the
-        # fixed suffix. ReadView still rejects every descendant junction/link.
         local=Path(os.environ['LOCALAPPDATA'])
         require(local.is_absolute())
         local=local.resolve(strict=True);safe_root(str(local))
         choices.append((local,local/'MelangeData'/app_id/'github-module-data'))
-    chosen=next(((base,root) for base,root in choices if os.path.normcase(os.path.abspath(source['cacheRoot']))==os.path.normcase(str(root))),None)
+    chosen = None
+    for base, requested in choices:
+        try:
+            root = _native_cache_root(base, requested)
+        except FileNotFoundError:
+            continue
+        if os.path.normcase(os.path.abspath(source['cacheRoot'])) == os.path.normcase(str(root)):
+            chosen = base, root
+            break
     require(chosen is not None,'Unapproved native module cache root')
     base,cache=chosen;safe_root(str(base))
     require(isinstance(protected_roots,(list,tuple)) and all(isinstance(root,str) for root in protected_roots))

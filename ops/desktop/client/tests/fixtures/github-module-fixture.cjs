@@ -32,4 +32,14 @@ function environment(appId='mentat'){
  const options={appId,profile,cacheRoot:path.join(profile,'packs','github-module-data'),publicKeys:remote.publicKeys,registry:remote.registry,authorize,transport,store,minimumFreeBytes:0,effectiveConfiguration:({originalSelected,source})=>({...originalSelected,ownerGitHubModuleData:source})};
  return {temporary,profile,original,selected,grant,transport,store,options,offsets,requests,get journal(){return journal;},get remote(){return remote;},set remote(value){remote=value;},set revoked(value){revoked=value;},set owner(value){owner=value;},set network(value){network=value;},cleanup(){const resolved=path.resolve(temporary);if(path.dirname(resolved)!==path.resolve(os.tmpdir())||!path.basename(resolved).startsWith('github-module-fixture-'))throw new Error('Unsafe fixture cleanup');fs.rmSync(resolved,{recursive:true,force:true});}};
 }
-module.exports={signed,environment,sha};
+function redirectedLocalCache(t,base,{physicalRoot=path.join(base,'Packages','fixture','LocalCache','Local','MelangeData')}={}){
+ // Model transparent Windows package redirection, without a junction that the
+ // production no-reparse policy must reject. All files remain generated.
+ const lexicalRoot=path.join(base,'MelangeData');fs.mkdirSync(path.dirname(physicalRoot),{recursive:true});
+ const map=file=>typeof file==='string'&&(file===lexicalRoot||file.startsWith(lexicalRoot+path.sep))?physicalRoot+file.slice(lexicalRoot.length):file;
+ for(const name of ['existsSync','statSync','lstatSync']){const original=fs[name];t.mock.method(fs,name,function(file,...args){return original.call(this,map(file),...args);});}
+ const native=fs.realpathSync.native;t.mock.method(fs.realpathSync,'native',function(file,...args){return native.call(this,map(file),...args);});
+ for(const name of ['mkdir','lstat','realpath']){const original=fs.promises[name];t.mock.method(fs.promises,name,function(file,...args){return original.call(this,map(file),...args);});}
+ return {lexicalRoot,physicalRoot,map};
+}
+module.exports={signed,environment,sha,redirectedLocalCache};
