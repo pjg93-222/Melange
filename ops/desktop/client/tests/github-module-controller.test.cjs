@@ -8,6 +8,24 @@ const {GitHubModuleController,registerModuleDataIPC,sanitizeModuleStatus,STATUS_
 
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function deferred(){let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};}
+
+test('shutdown aborts synchronously, rejects queued work and resolves only after the provider drains',async()=>{
+ const hold=deferred(),f=fixture();let signal;
+ f.provider.prepare=async(value,options)=>{signal=options.signal;await hold.promise;return candidate('melange',value);};
+ const active=f.controller.prepare().catch(error=>error);await tick();const queued=f.controller.stage().catch(error=>error);
+ let drained=false;const shutdown=f.controller.shutdown();shutdown.then(()=>{drained=true;});assert.equal(f.controller.shutdown(),shutdown);
+ assert.equal(signal.aborted,true);await tick();assert.equal(drained,false);
+ await assert.rejects(f.controller.info(),{code:'cancelled'});hold.resolve();assert.equal((await active).code,'cancelled');assert.equal((await queued).code,'cancelled');
+ assert.deepEqual(await shutdown,{drained:true});assert.equal(drained,true);assert.equal(f.calls.includes('timer-clear'),true);
+});
+
+test('access invalidation drains the old epoch, refuses its prepared candidate and permits fresh work',async()=>{
+ const f=fixture(),old=await f.controller.prepare(),hold=deferred();let signal;
+ f.provider.stage=async(value,options)=>{signal=options.signal;await hold.promise;return candidate('melange',value,'update-ready');};
+ const staging=f.controller.stage().catch(error=>error);await tick();const draining=f.controller.invalidate();assert.equal(signal.aborted,true);
+ await assert.rejects(f.controller.prepare(),{code:'cancelled'});hold.resolve();assert.equal((await staging).code,'cancelled');await draining;
+ f.healthy=true;await assert.rejects(f.controller.commitActive(old),{code:'context'});assert.ok(await f.controller.prepare());await f.controller.shutdown();
+});
 function approval(appId='melange'){
  const grant={appId,grantId:'fixture-grant',accountIdentity:'fixture-owner'};
  return {accepted:{revoked:false,grant},owner:{mode:'existing-owner',appId,grantId:grant.grantId,accountIdentity:grant.accountIdentity,

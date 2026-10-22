@@ -1,12 +1,13 @@
 'use strict';
 // Reviewed UI/access release inputs. New modules require explicit inclusion and
-// dependency-closure verification. The dataset modules ship only for Terrier's private district download (district-packs.cjs).
+// dependency-closure verification. Public module activation remains gated by a
+// compiled complete application contract and a supported native Runtime boundary.
 module.exports=Object.freeze([
   'main.cjs','apps.cjs','backend-command.cjs','credentials.cjs','district-switch.cjs','district-transition.cjs','desktop-probe.cjs','dataset-client.cjs','dataset-protocol.cjs','dataset-transport.cjs','district-packs.cjs','loading.html','loading.js','installing.html','launch-install.cjs','loading-assets/terrier-loading-hq.mp4','loading-assets/terrier-icon-hq.png',
   'enrollment.cjs','lifecycle.cjs','native-signature.cjs','preload.cjs','profile.cjs','portable-mode.cjs',
   'render-service.cjs','runtime-roots.cjs','runtime.cjs','single-launch.cjs','trust.cjs',
   'ui-state.cjs','updater.cjs','github-source.cjs','github-discovery.cjs','github-districts.cjs','github-district-protocol.cjs','github-district-controller.cjs',
-  'github-module-protocol.cjs','github-module-transport.cjs','github-modules.cjs','github-module-controller.cjs','module-data-adapters.cjs','module-data-transition.cjs','module-data-binding.cjs',
+  'github-module-protocol.cjs','github-module-transport.cjs','github-modules.cjs','github-module-controller.cjs','module-data-adapters.cjs','module-data-transition.cjs','module-data-binding.cjs','module-data-startup.cjs',
   'access-bootstrap.cjs','access-client.cjs','access-credentials.cjs','access-gate.cjs',
   'access-lifecycle.cjs','access-preload.cjs','access-state.cjs','access-transition.cjs','activity-outbox.cjs',
   'local-access.cjs','owner-access.cjs','publisher-trust.cjs',

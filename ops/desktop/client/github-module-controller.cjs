@@ -62,7 +62,7 @@ class GitHubModuleController{
   for(const callback of [getSelected,createProvider,authorize,canStage,canCommit,keepAwake,onStatus,setIntervalFn,clearIntervalFn])if(typeof callback!=='function')throw new Error('Native module data callbacks are required.');
   if(!Number.isSafeInteger(intervalMs)||intervalMs<1000||intervalMs>24*60*60*1000)throw new Error('Invalid module data check interval.');
   Object.assign(this,{getSelected,createProvider,authorize,canStage,canCommit,keepAwake,onStatus,clearIntervalFn});
-  this.provider=null;this.tail=Promise.resolve();this.busy=false;this.closed=false;
+  this.provider=null;this.tail=Promise.resolve();this.busy=false;this.closed=false;this.epoch=0;this.invalidating=false;this.draining=null;
   this.cancelled=new AbortController();this.prepared=new WeakMap();this.lastStatus=null;this.statusContext=null;
   this.timer=setIntervalFn(()=>{this.stage({skipIfBusy:true}).catch(()=>{});},intervalMs);
   this.timer?.unref?.();
@@ -73,10 +73,10 @@ class GitHubModuleController{
   if(!selected||typeof selected!=='object'||Array.isArray(selected)||
      ['ownerGitHubData','ownerGitHubModuleData','githubModuleData','effectiveConfiguration','snapshotRoot'].some(key=>Object.hasOwn(selected,key)))throw failure('authorization');
   let fingerprint;try{fingerprint=canonical(selected);}catch{throw failure('authorization');}
-  return {selected:freeze(selected),fingerprint};
+  return {selected:freeze(selected),fingerprint,epoch:this.epoch};
  }
- current(context){try{return !this.closed&&this.selected().fingerprint===context.fingerprint;}catch{return false;}}
- guard(context,signal){if(this.closed||signal?.aborted)throw failure('cancelled');if(!this.current(context))throw failure('context');}
+ current(context){try{return !this.closed&&!this.invalidating&&context.epoch===this.epoch&&this.selected().fingerprint===context.fingerprint;}catch{return false;}}
+ guard(context,signal){if(this.closed||this.invalidating||context.epoch!==this.epoch||signal?.aborted)throw failure('cancelled');if(!this.current(context))throw failure('context');}
  async approval(context,signal){
   this.guard(context,signal);
   let approval;try{approval=await this.authorize(context.selected);}catch{this.guard(context,signal);throw failure('authorization');}
@@ -84,7 +84,7 @@ class GitHubModuleController{
   if(!authorized(this.appId,context.selected,approval))throw failure('authorization');
   return approval;
  }
- stageAllowed(){try{return this.canStage()===true;}catch{return false;}}
+ stageAllowed(){try{return !this.closed&&!this.invalidating&&this.canStage()===true;}catch{return false;}}
  commitAllowed(candidate){try{return this.canCommit(candidate)===true;}catch{return false;}}
  status(value,context){
   if(!this.current(context))return;
@@ -106,7 +106,7 @@ class GitHubModuleController{
   try{return freeze(structuredClone(candidate));}catch{throw failure('integrity');}
  }
  enqueue(kind,options={},candidate){
-  if(this.closed)return Promise.reject(failure('cancelled'));
+  if(this.closed||this.invalidating)return Promise.reject(failure('cancelled'));
   if(kind==='stage'&&options.skipIfBusy&&this.busy)return Promise.resolve(null);
   let context;try{context=this.selected();}catch(error){return Promise.reject(safeFailure(error));}
   const result=this.tail.then(()=>this.run(kind,context,options,candidate));
@@ -176,7 +176,14 @@ class GitHubModuleController{
  stage(options){return this.enqueue('stage',options);}
  commitActive(candidate,options){return this.enqueue('commit',options,candidate);}
  info(){return this.enqueue('info');}
- shutdown(){if(this.closed)return;this.closed=true;this.cancelled.abort();this.clearIntervalFn(this.timer);this.prepared=new WeakMap();this.lastStatus=null;this.statusContext=null;}
+ drain(){return this.tail.then(()=>Object.freeze({drained:true}));}
+ invalidate(){
+  if(this.draining)return this.draining;
+  this.invalidating=true;this.epoch++;this.cancelled.abort();this.prepared=new WeakMap();this.lastStatus=null;this.statusContext=null;
+  this.draining=this.drain().then(value=>{if(!this.closed){this.cancelled=new AbortController();this.invalidating=false;this.draining=null;}return value;});
+  return this.draining;
+ }
+ shutdown(){if(this.closed)return this.draining;this.closed=true;this.clearIntervalFn(this.timer);return this.invalidate();}
 }
 
 function registerModuleDataIPC(ipc,{appId,runtimeOnly,info,refresh,canRefresh}){

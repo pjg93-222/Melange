@@ -8,11 +8,11 @@ const mainFile=path.join(__dirname,'..','main.cjs'),source=fs.readFileSync(mainF
 const start=source.indexOf('async function launchAuthorized('),end=source.indexOf('\n// Terrier: the chosen district stays',start);
 assert.ok(start>=0&&end>start,'The actual launch function must be present');
 const launchSource=source.slice(start,end)+'\nmodule.exports=launchAuthorized;';
-function fixture(appId,{settings,role='owner',portable=false,suspended=false,accessError=false,startupError=false,readError=false,afterSettle=null}={}){
+function fixture(appId,{settings,role='owner',portable=false,suspended=false,accessError=false,startupError=false,readError=false,afterSettle=null,nativeFixture=null,approval=null}={}){
  let selected=settings||{dataDirectory:'synthetic-original-workspace',district:'co-05'},url='about:blank';
  const events=[],authorized=[],started=[],resumed=[],revealed=[];
- const approved={accepted:{grant:{appId,role}},owner:role==='owner'?{mode:'existing-owner'}:null,session:role==='recipient'?{mode:'local-session'}:null};
- const context={module:{exports:{}},URL,background:true,openingAccess:false,closing:false,portable,packs:appId==='terrier'?{}:null,definition:{id:appId},refuseModuleDataSettings,
+ const approved=approval||{accepted:{grant:{appId,role}},owner:role==='owner'?{mode:'existing-owner'}:null,session:role==='recipient'?{mode:'local-session'}:null};
+ const context={module:{exports:{}},URL,background:true,openingAccess:false,closing:false,moduleDataStartup:null,portable,packs:appId==='terrier'?{}:null,definition:{id:appId},refuseModuleDataSettings,
   read:name=>{assert.equal(name,'settings.json');events.push('read');if(readError)throw new Error('Synthetic settings read failure');return selected;},
   updateStatus:message=>{events.push('status');assert.equal(message,'Application startup failed. Check local logs.');},
   showSetup:async()=>{events.push('setup');},showAccess:async()=>{events.push('accessUI');},showTerrierSignIn:async()=>{events.push('signIn');},
@@ -38,6 +38,7 @@ function fixture(appId,{settings,role='owner',portable=false,suspended=false,acc
   events.push('runtime.start');started.push(configuration);refuseModuleDataSettings(configuration);
   if(startupError)throw new Error('Synthetic backend startup failure');context.runtime.child={};return 'http://127.0.0.1:43212';
  }};
+ if(nativeFixture){context.runtime=nativeFixture.runtime;context.moduleDataStartup=nativeFixture.startup;}
  vm.runInNewContext(launchSource,context,{filename:mainFile});
  return {launch:context.module.exports,context,events,authorized,started,resumed,revealed,approved,get selected(){return selected;}};
 }
@@ -111,4 +112,34 @@ test('an already suspended lifecycle keeps the existing startup-failure suppress
 
 test('settings read failures use startup UI before any launch-dependent access preparation',async()=>{
  const f=fixture('mentat',{readError:true});await assert.rejects(f.launch(false),/Synthetic settings read failure/);assertPreflightFailure(f);
+});
+
+const {startupFixture}=require('./fixtures/module-startup-fixture.cjs');
+for(const appId of ['melange','mentat']){
+ test(`actual ${appId} main launch uses the native coordinator and reveals only after fixture health and journal commit`,async t=>{
+  const native=startupFixture(t,{appId}),approval=await native.data.options.authorize(),f=fixture(appId,{settings:native.selected,nativeFixture:native,approval});
+  f.context.window.show=()=>{assert.ok(native.data.journal.active,'Do not reveal before active commit');f.events.push('show');};
+  await f.launch(false);assert.deepEqual(native.events,['provider','module-start','module-health']);
+  assert.equal(f.events.includes('ready'),true);assert.equal(f.events.includes('setup'),false);assert.equal(f.context.openingAccess,false);
+ });
+ test(`actual ${appId} main launch with the production gate disabled keeps the original ordinary configuration`,async t=>{
+  const native=startupFixture(t,{appId,production:true}),f=fixture(appId,{settings:native.selected,nativeFixture:native});await f.launch(false);
+  assert.deepEqual(native.events,['ordinary-start']);assert.equal(native.runtime.configuration,native.selected);assert.deepEqual(native.data.requests,[]);assert.equal(native.data.journal,null);
+ });
+}
+
+test('actual main still refuses an untrusted marker before entering the wired module coordinator',async t=>{
+ const native=startupFixture(t),f=fixture('mentat',{settings:{...native.selected,ownerGitHubModuleData:false},nativeFixture:native});
+ await assert.rejects(f.launch(false),/GitHub module data startup is unavailable/);assertPreflightFailure(f);assert.deepEqual(native.events,[]);assert.deepEqual(native.data.requests,[]);
+});
+
+test('actual main passes the fresh post-access selection to the production-disabled coordinator',async t=>{
+ const native=startupFixture(t,{production:true}),f=fixture('mentat',{settings:native.selected,nativeFixture:native,afterSettle:old=>({...old,selectionRevision:2})});
+ await f.launch(false);assert.equal(native.runtime.configuration.selectionRevision,2);assert.equal(native.runtime.configuration,f.selected);assert.equal(f.events.filter(value=>value==='read').length,2);
+});
+
+test('module-bound health refusal in actual main uses the existing startup failure UI and never marks ready',async t=>{
+ const native=startupFixture(t,{changeBoundary:boundary=>{boundary.verifyHealth=async()=>false;}}),approval=await native.data.options.authorize();
+ const f=fixture('mentat',{settings:native.selected,nativeFixture:native,approval});await assert.rejects(f.launch(false),/Module startup is unavailable/);
+ assert.deepEqual(f.events.slice(-3),['failed','status','setup']);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('accessUI'),false);assert.equal(native.data.journal.active,null);
 });
