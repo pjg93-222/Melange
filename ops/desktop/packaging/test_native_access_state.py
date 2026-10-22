@@ -55,5 +55,27 @@ class ProtectedStateTests(unittest.TestCase):
             with self.assertRaises(state.StateError):
                 state.read(root, 'github-district-state')
 
+    def test_module_high_water_is_separate_from_district_recipient_and_binary_state(self):
+        with tempfile.TemporaryDirectory(prefix='github-module-state-fixture-') as directory:
+            root = Path(directory)
+            values = {
+                'github-module-state': {'catalogSequence': 2},
+                'github-district-state': {'catalogSequence': 3},
+                'dataset-journal': {'fixtureRecipient': True},
+                'state': {'appUpdateSequence': 700},
+            }
+            for kind, value in values.items():
+                state.write(root, kind, value)
+            for kind, value in values.items():
+                self.assertEqual(state.read(root, kind), value)
+            module_file = root / 'access-github-module-state.dpapi'
+            original = module_file.read_bytes()
+            for kind in ('github-district-state', 'dataset-journal', 'state'):
+                module_file.write_bytes((root / ('access-' + kind + '.dpapi')).read_bytes())
+                with self.assertRaises(state.StateError):
+                    state.read(root, 'github-module-state')
+            module_file.write_bytes(original)
+            self.assertEqual(state.read(root, 'github-module-state'), values['github-module-state'])
+
 
 if __name__=='__main__':unittest.main()
