@@ -16,9 +16,9 @@ from test_melange_public_provenance import fixture, encoded, digest, change_rece
 class ProjectionTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.root = Path(self.temporary.name) / 'inputs'
+        self.root = Path(self.temporary.name).resolve() / 'inputs'
         self.root.mkdir()
-        self.output = Path(self.temporary.name) / 'output'
+        self.output = Path(self.temporary.name).resolve() / 'output'
         self.output.mkdir()
         self.plan, self.rows = fixture(self.root)
         self.destination = self.output / 'projected.ndjson'
@@ -57,8 +57,9 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(len(records), 3)
         self.assertEqual(len({row['recordId'] for row in records}), 3)
         self.assertEqual([row['sourceRole'] for row in records], list(public.ROLE_FAMILIES))
-        self.assertEqual(set(records[0]), {'schemaVersion', 'recordId', 'sourceRole', 'source', 'printed', 'review'})
-        self.assertEqual(records[0]['printed']['payee'], 'Fabricated Employee')
+        self.assertEqual(set(records[0]), {'schemaVersion', 'recordId', 'sourceRole', 'source', 'sourceExtracted',
+                                         'literalTokens', 'originalBeforeRepair', 'extractionStatus', 'recordProvenance', 'review'})
+        self.assertEqual(records[0]['sourceExtracted']['payee'], 'Fabricated Employee')
         self.assertTrue(all(row['review']['status'] == 'SOURCE_OBSERVATION_ONLY' for row in records))
         self.assertEqual(receipt['output']['sha256'], digest(self.destination.read_bytes()))
         self.assertEqual(receipt['output']['records'], 3)
@@ -148,15 +149,15 @@ class ProjectionTests(unittest.TestCase):
             self.assert_failure_preserves_inputs()
 
     def test_text_html_stays_inert_json_and_dates_are_never_inferred(self):
-        role = 'house-observations'
+        role = 'senate-personal-candidates'
         row = {**self.rows[role], 'payee_raw': '<img src=x onerror=evil()>',
-               'service_start_raw': 'printed uncertain date', 'service_end_raw': None}
+               'payee_name_raw': '<img src=x onerror=evil()>'}
+        del row['payee_raw']
         self.rewrite_input(role, encoded(row) + b'\n')
         self.run_projection()
-        value = json.loads(self.destination.read_bytes().splitlines()[0])
-        self.assertEqual(value['printed']['payee'], row['payee_raw'])
-        self.assertEqual(value['printed']['serviceStart'], 'printed uncertain date')
-        self.assertIsNone(value['printed']['serviceEnd'])
+        value = json.loads(self.destination.read_bytes().splitlines()[1])
+        self.assertEqual(value['sourceExtracted']['payee'], row['payee_name_raw'])
+        self.assertIsNone(value['literalTokens'])
         self.assertNotIn('canonical_person_id', value)
 
     def test_output_budget_and_expanded_line_budget_fail_atomically(self):
@@ -168,15 +169,20 @@ class ProjectionTests(unittest.TestCase):
     def test_validation_and_source_change_before_publish_leave_no_output(self):
         original = public.ValidatedInputs.ensure_current
         calls = [0]
+        reached_stage = [False]
         def changed(value):
             calls[0] += 1
-            if calls[0] == 2:
+            if calls[0] == 3:
+                stage = next(self.output.glob('.melange-public-*.tmp'))
+                self.assertGreater(stage.stat().st_size, 0)
+                reached_stage[0] = True
                 path = self.root / self.plan.documents[0].relative
                 path.write_bytes(path.read_bytes() + b'changed')
             return original(value)
         with patch.object(public.ValidatedInputs, 'ensure_current', changed):
             with self.assertRaises(ValueError):
                 self.run_projection()
+        self.assertTrue(reached_stage[0])
         self.assertFalse(self.destination.exists())
         self.assertFalse(any(p.name.startswith('.melange-public-') for p in self.output.iterdir()))
 
@@ -230,6 +236,8 @@ class ProjectionTests(unittest.TestCase):
     def test_in_place_stage_modification_is_not_published(self):
         original = projection._program_fingerprint
         calls = [0]
+        changed_path = [None]
+        changed_stamp = [None]
         def changed():
             calls[0] += 1
             if calls[0] == 2:
@@ -237,11 +245,16 @@ class ProjectionTests(unittest.TestCase):
                 before = stage.stat()
                 stage.write_bytes(b'x' * before.st_size)
                 os.utime(stage, ns=(before.st_atime_ns, before.st_mtime_ns))
+                changed_path[0] = stage
+                changed_stamp[0] = public._path_stamp(stage)
             return original()
         with patch.object(projection, '_program_fingerprint', changed):
             with self.assertRaises((ValueError, OSError)):
                 self.run_projection()
         self.assertFalse(self.destination.exists())
+        self.assertTrue(changed_path[0].exists())
+        self.assertEqual(changed_path[0].read_bytes(), b'x' * changed_path[0].stat().st_size)
+        self.assertEqual(public._path_stamp(changed_path[0]), changed_stamp[0])
 
     def test_edit_before_first_stage_stamp_cannot_become_a_trusted_baseline(self):
         original = public._path_stamp

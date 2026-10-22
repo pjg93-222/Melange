@@ -21,6 +21,14 @@ from urllib.parse import unquote, urlsplit
 MiB = 1024 ** 2
 ROLE_FAMILIES = MappingProxyType({'house-observations': 'house',
     'senate-personal-candidates': 'senate', 'senate-committee-candidates': 'senate'})
+AUXILIARY_FAMILIES = MappingProxyType({'house-pdf-candidates': 'house',
+    'senate-personal-unfiltered': 'senate'})
+SOURCE_RECEIPTS = MappingProxyType({
+    'house-ledger-v1': ('house', 'house-observations'),
+    'house-pdf-v1': ('house', 'house-pdf-candidates'),
+    'senate-scope-v1': ('senate', 'senate-personal-candidates'),
+    'senate-full-v1': ('senate', 'senate-personal-unfiltered'),
+    'senate-committee-v1': ('senate', 'senate-committee-candidates')})
 PRODUCTION_PUBLIC_INPUT_PLANS = MappingProxyType({})
 MAX_STRING, MAX_JSON_BYTES, MAX_DEPTH = 4096, MiB, 32
 MAX_DOCUMENTS, MAX_RECEIPTS, MAX_RECORDS = 2048, 64, 2_000_000
@@ -116,7 +124,12 @@ def _official_url(value, family):
                 and parsed.netloc == parsed.hostname and parsed.username is None
                 and parsed.password is None and parsed.port is None
                 and not parsed.query and not parsed.fragment)
-        require(any(parsed.hostname == root or parsed.hostname.endswith('.' + root) for root in roots))
+        govinfo = family == 'senate' and parsed.hostname == 'www.govinfo.gov'
+        if govinfo:
+            require(re.fullmatch(r'/content/pkg/(GPO-CDOC-[1-9][0-9]{0,2}sdoc[1-9][0-9]{0,3})/pdf/\1\.pdf',
+                                 parsed.path) is not None)
+        else:
+            require(any(parsed.hostname == root or parsed.hostname.endswith('.' + root) for root in roots))
         decoded = unquote(parsed.path, errors='strict')
         require(parsed.path.startswith('/') and '\\' not in decoded
                 and not any(ord(c) < 32 for c in decoded)
@@ -133,6 +146,8 @@ class DocumentSpec:
     bytes: int
     sha256: str
     url: str
+    format: str = 'pdf'
+    page_count: int | None = None
 
 
 @dataclass(frozen=True)
@@ -142,9 +157,20 @@ class ReceiptSpec:
     relative: str
     bytes: int
     sha256: str
-    producer_sha256: str
+    producer_sha256: str | None
     dependencies: tuple
     outputs: tuple
+    source_format: str = 'normalized-v1'
+
+
+@dataclass(frozen=True)
+class EvidenceSpec:
+    evidence_id: str
+    family: str
+    relative: str
+    bytes: int
+    sha256: str
+    kind: str
 
 
 @dataclass(frozen=True)
@@ -162,6 +188,8 @@ class ReviewedPlan:
     documents: tuple
     receipts: tuple
     inputs: tuple
+    auxiliaries: tuple = ()
+    evidence: tuple = ()
 
 
 def _plan(plan):
@@ -169,9 +197,12 @@ def _plan(plan):
     require(type(plan.documents) is tuple and 0 < len(plan.documents) <= MAX_DOCUMENTS
             and type(plan.receipts) is tuple and 0 < len(plan.receipts) <= MAX_RECEIPTS
             and type(plan.inputs) is tuple and len(plan.inputs) == len(ROLE_FAMILIES))
-    documents, receipts, inputs, paths = {}, {}, {}, set()
+    require(type(plan.auxiliaries) is tuple and len(plan.auxiliaries) in (0, len(AUXILIARY_FAMILIES))
+            and type(plan.evidence) is tuple and len(plan.evidence) <= MAX_DOCUMENTS)
+    documents, receipts, inputs, evidence, paths = {}, {}, {}, {}, set()
     total = 0
-    for specs, expected in ((plan.documents, DocumentSpec), (plan.receipts, ReceiptSpec), (plan.inputs, InputSpec)):
+    for specs, expected in ((plan.documents, DocumentSpec), (plan.receipts, ReceiptSpec),
+                            (plan.inputs + plan.auxiliaries, InputSpec), (plan.evidence, EvidenceSpec)):
         for spec in specs:
             require(type(spec) is expected)
             _relative(spec.relative)
@@ -185,31 +216,52 @@ def _plan(plan):
     for spec in plan.documents:
         _identifier(spec.document_id)
         require(spec.document_id not in documents and spec.family in ('house', 'senate'))
+        require(spec.format in ('pdf', 'csv') and (spec.format != 'csv' or spec.family == 'house'))
+        require(spec.page_count is None or (type(spec.page_count) is int and 0 < spec.page_count <= 100_000))
+        require(spec.format == 'pdf' or spec.page_count is None)
         _official_url(spec.url, spec.family)
         require(all(old.url != spec.url for old in documents.values()))
         documents[spec.document_id] = spec
+    for spec in plan.evidence:
+        _identifier(spec.evidence_id)
+        require(spec.evidence_id not in evidence and spec.family in ('house', 'senate'))
+        require(spec.kind in ('source-inventory', 'source-extraction-receipts', 'source-text-cache',
+                              'current-mapping-source', 'excluded-origin-dependency'))
+        evidence[spec.evidence_id] = spec
+    families = {**ROLE_FAMILIES, **AUXILIARY_FAMILIES}
     for spec in plan.receipts:
         _identifier(spec.receipt_id)
-        _hash(spec.producer_sha256)
+        require(type(spec.outputs) is tuple and len(spec.outputs) <= 1)
+        if spec.source_format == 'normalized-v1':
+            _hash(spec.producer_sha256)
+        else:
+            require(spec.source_format in SOURCE_RECEIPTS and spec.producer_sha256 is None
+                    and SOURCE_RECEIPTS[spec.source_format] == (spec.family, spec.outputs[0] if spec.outputs else None))
         require(spec.receipt_id not in receipts and spec.family in ('house', 'senate'))
         require(type(spec.dependencies) is tuple and 0 < len(spec.dependencies) <= MAX_DOCUMENTS + MAX_RECEIPTS
                 and len(set(spec.dependencies)) == len(spec.dependencies))
-        require(type(spec.outputs) is tuple and len(spec.outputs) <= 1)
         for key in spec.dependencies:
             _identifier(key)
         for role in spec.outputs:
-            require(role in ROLE_FAMILIES and ROLE_FAMILIES[role] == spec.family)
+            require(role in families and families[role] == spec.family)
         receipts[spec.receipt_id] = spec
-    require(not (set(documents) & set(receipts)) and not ((set(documents) | set(receipts)) & set(ROLE_FAMILIES)))
-    for spec in plan.inputs:
-        require(spec.role in ROLE_FAMILIES and spec.role not in inputs)
+    source_formats = [s.source_format for s in plan.receipts if s.source_format != 'normalized-v1']
+    if source_formats:
+        require(len(plan.auxiliaries) == len(AUXILIARY_FAMILIES)
+                and len(source_formats) == len(SOURCE_RECEIPTS) and set(source_formats) == set(SOURCE_RECEIPTS)
+                and len(source_formats) == len(plan.receipts), 'Incomplete original-receipt adapter closure')
+    all_ids = [*documents, *receipts, *evidence, *families]
+    require(len(all_ids) == len(set(all_ids)))
+    for spec in plan.inputs + plan.auxiliaries:
+        allowed = ROLE_FAMILIES if spec in plan.inputs else AUXILIARY_FAMILIES
+        require(spec.role in allowed and spec.role not in inputs)
         require(type(spec.records) is int and 0 < spec.records <= MAX_RECORDS)
         require(spec.receipt_id in receipts)
         receipt = receipts[spec.receipt_id]
-        require(receipt.family == ROLE_FAMILIES[spec.role] and receipt.outputs == (spec.role,))
+        require(receipt.family == families[spec.role] and receipt.outputs == (spec.role,))
         inputs[spec.role] = spec
-    require(set(inputs) == set(ROLE_FAMILIES))
-    by_role, used_receipts, used_documents = {}, set(), set()
+    require(set(inputs) == set(ROLE_FAMILIES) | (set(AUXILIARY_FAMILIES) if plan.auxiliaries else set()))
+    by_role, used_receipts, used_documents, used_evidence = {}, set(), set(), set()
     for role, source in inputs.items():
         visiting, reachable, complete = set(), set(), set()
         def visit(key):
@@ -217,10 +269,14 @@ def _plan(plan):
             if key in complete:
                 return
             if key in documents:
-                require(documents[key].family == ROLE_FAMILIES[role])
+                require(documents[key].family == families[role])
                 reachable.add(key)
                 return
-            require(key in receipts and receipts[key].family == ROLE_FAMILIES[role])
+            if key in evidence:
+                require(evidence[key].family == families[role])
+                used_evidence.add(key)
+                return
+            require(key in receipts and receipts[key].family == families[role])
             visiting.add(key)
             used_receipts.add(key)
             for child in receipts[key].dependencies:
@@ -231,11 +287,11 @@ def _plan(plan):
         require(bool(reachable))
         by_role[role] = frozenset(reachable)
         used_documents.update(reachable)
-    require(used_receipts == set(receipts) and used_documents == set(documents))
+    require(used_receipts == set(receipts) and used_documents == set(documents) and used_evidence == set(evidence))
     for receipt in receipts.values():
         for role in receipt.outputs:
             require(inputs[role].receipt_id == receipt.receipt_id)
-    return documents, receipts, inputs, by_role
+    return documents, receipts, inputs, by_role, evidence
 
 
 def _regular(path, *, directory=False):
@@ -302,22 +358,31 @@ def _path(root, relative):
 
 
 class ValidatedInputs:
-    def __init__(self, capability, root, plan, documents, receipts, inputs, by_role, streams, stamps):
+    def __init__(self, capability, root, plan, documents, receipts, inputs, by_role, streams, stamps, evidence):
         require(capability is _CAPABILITY)
         self.root, self.plan = root, plan
         self.documents, self.receipts, self.inputs = map(MappingProxyType, (documents, receipts, inputs))
+        self.evidence = MappingProxyType(evidence)
         self._by_role, self._streams, self._stamps = by_role, streams, stamps
         self.closed = False
+        self._document_periods = {}
         self.coverage = {'closedGovernmentInputs': True, 'fullApplication': False}
         manifest = {
             'schemaVersion': 1,
-            'documents': [{'id': s.document_id, 'family': s.family, 'url': s.url, 'bytes': s.bytes, 'sha256': s.sha256}
+            'documents': [{'id': s.document_id, 'family': s.family, 'url': s.url, 'bytes': s.bytes, 'sha256': s.sha256,
+                           'format': s.format, 'pageCount': s.page_count}
                           for s in sorted(documents.values(), key=lambda s: s.document_id)],
             'receipts': [{'id': s.receipt_id, 'family': s.family, 'bytes': s.bytes, 'sha256': s.sha256,
-                          'producerSha256': s.producer_sha256, 'dependencies': sorted(s.dependencies), 'outputs': list(s.outputs)}
+                          'producerSha256': s.producer_sha256, 'sourceFormat': s.source_format,
+                          'historicalProducerProof': 'GENERATION_CODE_UNAVAILABLE' if s.producer_sha256 is None
+                              else 'RECEIPT_REPORTED_CODE_DIGEST',
+                          'receiptEvidence': 'SOURCE_REPORTED_NOT_REPLAYED',
+                          'dependencies': sorted(s.dependencies), 'outputs': list(s.outputs)}
                          for s in sorted(receipts.values(), key=lambda s: s.receipt_id)],
+            'evidence': [{'id': s.evidence_id, 'family': s.family, 'kind': s.kind, 'bytes': s.bytes,
+                          'sha256': s.sha256} for s in sorted(evidence.values(), key=lambda s: s.evidence_id)],
             'inputs': [{'role': role, 'bytes': inputs[role].bytes, 'sha256': inputs[role].sha256,
-                        'records': inputs[role].records, 'receiptId': inputs[role].receipt_id} for role in ROLE_FAMILIES]}
+                        'records': inputs[role].records, 'receiptId': inputs[role].receipt_id} for role in inputs]}
         self._manifest_bytes = canonical(manifest)
         require(len(self._manifest_bytes) <= MAX_JSON_BYTES)
         self.manifest_digest = hashlib.sha256(self._manifest_bytes).hexdigest()
@@ -340,6 +405,18 @@ class ValidatedInputs:
         stream.seek(0)
         return stream
 
+    def evidence_stream(self, evidence_id):
+        require(not self.closed and evidence_id in self.evidence)
+        stream = self._streams[self.evidence[evidence_id].relative]
+        stream.seek(0)
+        return stream
+
+    def document_stream(self, document_id):
+        require(not self.closed and document_id in self.documents)
+        stream = self._streams[self.documents[document_id].relative]
+        stream.seek(0)
+        return stream
+
     def document_for(self, role, url, sha256):
         require(not self.closed and role in self.inputs)
         require(type(url) is str and type(sha256) is str)
@@ -349,7 +426,10 @@ class ValidatedInputs:
         return found[0]
 
 
-def _receipt(raw, spec, documents, receipts, inputs):
+def _receipt(raw, spec, documents, receipts, inputs, evidence):
+    if spec.source_format != 'normalized-v1':
+        import melange_public_payroll_normalize as normalize
+        return normalize.validate_origin_receipt(raw, spec, documents, receipts, inputs, evidence)
     value = strict_json(raw)
     _exact(value, ('schemaVersion', 'receiptId', 'family', 'producerSha256', 'dependencies', 'outputs', 'canonicalPromotions'))
     require(type(value['schemaVersion']) is int and value['schemaVersion'] == 1
@@ -364,7 +444,7 @@ def _receipt(raw, spec, documents, receipts, inputs):
         key = binding['id']
         require(type(key) is str and key in spec.dependencies and key not in seen)
         seen.add(key)
-        expected = documents.get(key) or receipts.get(key)
+        expected = documents.get(key) or receipts.get(key) or evidence.get(key)
         require(expected is not None and type(binding['bytes']) is int
                 and binding['bytes'] == expected.bytes and binding['sha256'] == expected.sha256)
     require(type(value['outputs']) is list and len(value['outputs']) == len(spec.outputs))
@@ -380,11 +460,11 @@ def _receipt(raw, spec, documents, receipts, inputs):
 
 @contextmanager
 def validated_inputs(root, plan):
-    documents, receipts, inputs, by_role = _plan(plan)
+    documents, receipts, inputs, by_role, evidence = _plan(plan)
     root = _directory(Path(root).absolute())
     streams, stamps, result, identities = {}, {}, None, set()
     with ExitStack() as stack:
-        for spec in (*plan.documents, *plan.receipts, *plan.inputs):
+        for spec in (*plan.documents, *plan.receipts, *plan.inputs, *plan.auxiliaries, *plan.evidence):
             path = _path(root, spec.relative)
             before = _regular(path)
             require(before.st_size == spec.bytes)
@@ -406,8 +486,11 @@ def validated_inputs(root, plan):
             stream.seek(0)
             streams[spec.relative], stamps[spec.relative] = stream, stamp
         for spec in plan.receipts:
-            _receipt(streams[spec.relative].read(MAX_JSON_BYTES + 1), spec, documents, receipts, inputs)
-        result = ValidatedInputs(_CAPABILITY, root, plan, documents, receipts, inputs, by_role, streams, stamps)
+            _receipt(streams[spec.relative].read(MAX_JSON_BYTES + 1), spec, documents, receipts, inputs, evidence)
+        result = ValidatedInputs(_CAPABILITY, root, plan, documents, receipts, inputs, by_role, streams, stamps, evidence)
+        if any(s.source_format != 'normalized-v1' for s in plan.receipts):
+            import melange_public_payroll_normalize as normalize
+            normalize.validate_documentary_bindings(result)
         result.ensure_current()
         try:
             yield result

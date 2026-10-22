@@ -1,7 +1,9 @@
 """Fabricated government documents only; never opens the original data tree."""
 from dataclasses import replace
 import gzip
+import csv
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -24,22 +26,37 @@ def fixture(root):
     for role, family in public.ROLE_FAMILIES.items():
         document_id = role + '-document'
         raw = ('FABRICATED ' + document_id).encode()
-        document_path = document_id + '.pdf'
+        if family == 'house':
+            from melange_public_payroll_normalize import CSV_12
+            rendered = io.StringIO(newline='')
+            writer = csv.writer(rendered)
+            writer.writerow(CSV_12)
+            writer.writerow(['Fabricated Office', '', 'PERSONNEL COMPENSATION', 'DETAIL', '', '', '',
+                             'Fabricated Employee', '', '', 'Fabricated Position', '123.45'])
+            raw = rendered.getvalue().encode()
+        document_path = document_id + ('.csv' if family == 'house' else '.pdf')
         (root / document_path).write_bytes(raw)
         url = 'https://www.' + ('house.gov' if family == 'house' else 'senate.gov') + '/synthetic/' + document_path
-        documents.append(public.DocumentSpec(document_id, family, document_path, len(raw), digest(raw), url))
+        documents.append(public.DocumentSpec(document_id, family, document_path, len(raw), digest(raw), url,
+                                            format='csv' if family == 'house' else 'pdf'))
         if family == 'house':
-            row = {'source_url': url, 'source_sha256': digest(raw), 'source_row_index': 0,
+            row = {'source_url': url, 'source_sha256': digest(raw), 'source_row_index': 1,
+                   'source_form': 'detail_csv',
                    'payee_raw': 'Fabricated Employee', 'office_raw': 'Fabricated Office',
                    'title_raw': 'Fabricated Position', 'amount_raw': '123.45',
                    'report_period_start': '2024-01-01', 'report_period_end': '2024-03-31',
                    'service_start_raw': None, 'service_end_raw': None}
         else:
             row = {'source_pdf_url': url, 'source_pdf_sha256': digest(raw), 'page_number': 1,
-                   'row_ordinal_on_page': 0, 'payee_name_raw': 'Fabricated Employee',
+                   'row_ordinal_on_page': 1, 'payee_name_raw': 'Fabricated Employee',
+                   'identity_status': 'UNVERIFIED_CANDIDATE', 'employment_claim_status': 'UNVERIFIED_CANDIDATE',
+                   'parse_status': 'HEURISTIC_SPLIT' if role == 'senate-personal-candidates' else 'COLUMN_COORDINATE_SPLIT',
                    'office_raw': 'Fabricated Office', 'title_raw': 'Fabricated Position',
                    'amount_paid_raw': '123.45', 'report_period_start': '2024-01-01',
                    'report_period_end': '2024-03-31'}
+            if role == 'senate-committee-candidates':
+                row.update(parser_version='senate-committee-payroll-parser-v2',
+                           office_attribution_basis='PAGE_HEADER')
         rows[role] = row
         payload = gzip.compress(encoded(row) + b'\n', mtime=0)
         input_path = role + '.ndjson.gz'
@@ -74,7 +91,7 @@ def change_receipt(root, plan, index, mutate):
 class ProvenanceTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.root = Path(self.temporary.name)
+        self.root = Path(self.temporary.name).resolve()
         self.plan, self.rows = fixture(self.root)
 
     def tearDown(self):

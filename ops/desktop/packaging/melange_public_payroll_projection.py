@@ -13,6 +13,7 @@ import tempfile
 import zlib
 
 import melange_public_provenance as provenance
+import melange_public_payroll_normalize as normalize
 from melange_public_provenance import ROLE_FAMILIES, require, strict_json, canonical
 
 
@@ -21,60 +22,6 @@ MAX_ROLE_EXPANDED_BYTES = 4 * 1024 ** 3
 MAX_TOTAL_EXPANDED_BYTES = 8 * 1024 ** 3
 MAX_TOTAL_RECORDS = 3_000_000
 MAX_OUTPUT_BYTES = 8 * 1024 ** 3
-_HOUSE = frozenset('allowance_year allowance_year_kind amount amount_raw amount_sign budget_object_code canonical_eligible canonical_employment_promoted canonical_identity_decision canonical_identity_promoted canonical_office_id canonical_office_promoted canonical_person_id compensation_class container_kind data_source document family_link_candidate fiscal_or_legislative_year_column identity_status interval_vs_quarter member_bioguide member_resolution_evidence member_resolution_method observation_id office_family_normalized office_family_raw office_group_key_legacy office_key office_raw organization_code payee_parse payee_raw person_key person_key_family program quarter report_period_end report_period_start review_flags review_status row_admission rule_version schema_id service_days service_end service_end_raw service_start service_start_raw shared_employee_flag source_file source_form source_locator source_row_index source_sha256 source_url title_base title_raw title_truncated_30 transaction_date vendor_id'.split())
-_SENATE = frozenset('amount_paid_raw candidate_id canonical_employment_decision canonical_identity_decision completeness_status date_intervals date_promotion_eligible employment_claim_status evidence_quote identity_status office_raw page_number parse_status payee_name_raw promotion_gate qualifiers report_package_id report_period_end report_period_start row_ordinal_on_page schema_id source_pdf_sha256 source_pdf_url source_tier title_candidate title_raw'.split())
-_COMMITTEE = _SENATE | frozenset('evidence_columns extraction_engine office_attribution_basis page_label_raw parser_version review_status senate_appropriation_raw senate_funding_resolution_raw senate_report_volume'.split())
-
-
-def _text(value, *, maximum=4096, nullable=False):
-    if value is None and nullable:
-        return None
-    require(type(value) is str and len(value) <= maximum and '\x00' not in value)
-    value.encode('utf-8', errors='strict')
-    return value
-
-
-def _integer(value, minimum=0):
-    require(type(value) is int and minimum <= value < 2 ** 31)
-    return value
-
-
-def _observation(verified, role, row):
-    require(type(row) is dict)
-    house = role == 'house-observations'
-    allowed = _HOUSE if house else _COMMITTEE if role == 'senate-committee-candidates' else _SENATE
-    require(set(row) <= allowed, 'Unknown or private observation field was rejected')
-    required = {'office_raw', 'title_raw', 'report_period_start', 'report_period_end'}
-    required |= {'source_url', 'source_sha256', 'source_row_index', 'payee_raw', 'amount_raw'} if house else {
-        'source_pdf_url', 'source_pdf_sha256', 'page_number', 'row_ordinal_on_page', 'payee_name_raw', 'amount_paid_raw'}
-    require(required <= set(row), 'Required printed observation field is missing')
-    for key in ('canonical_eligible', 'canonical_identity_promoted', 'canonical_employment_promoted', 'canonical_office_promoted'):
-        require(key not in row or row[key] is None or row[key] is False,
-                'Promoted source record is outside this observation-only projection')
-    for key in ('canonical_person_id', 'canonical_office_id'):
-        require(row.get(key) is None, 'Canonical identity is outside this observation-only projection')
-    url, sha = (row['source_url'], row['source_sha256']) if house else (row['source_pdf_url'], row['source_pdf_sha256'])
-    document = verified.document_for(role, url, sha)
-    locator = {'row': _integer(row['source_row_index'])} if house else {
-        'page': _integer(row['page_number'], 1), 'row': _integer(row['row_ordinal_on_page'])}
-    identity = hashlib.sha256(canonical([role, document.sha256, locator])).digest()
-    printed = {
-        'office': _text(row['office_raw']),
-        'payee': _text(row['payee_raw'] if house else row['payee_name_raw']),
-        'title': _text(row['title_raw'], nullable=True),
-        'amount': _text(row['amount_raw'] if house else row['amount_paid_raw'], maximum=256, nullable=True),
-        'periodStart': _text(row['report_period_start'], maximum=256, nullable=True),
-        'periodEnd': _text(row['report_period_end'], maximum=256, nullable=True),
-        # Only printed source dates are copied. Parsed/promoted intervals and
-        # cross-source identity fields never become public projection columns.
-        'serviceStart': _text(row.get('service_start_raw'), maximum=256, nullable=True) if house else None,
-        'serviceEnd': _text(row.get('service_end_raw'), maximum=256, nullable=True) if house else None,
-    }
-    return identity, {'schemaVersion': 1, 'recordId': 'government-observation:' + identity.hex(),
-        'sourceRole': role, 'source': {'documentId': document.document_id, 'sha256': document.sha256,
-            'url': document.url, 'locator': locator}, 'printed': printed,
-        'review': {'status': 'SOURCE_OBSERVATION_ONLY', 'identityPromoted': False,
-                   'employmentPromoted': False, 'officePromoted': False, 'datePromoted': False}}
 
 
 class _HashedRead(io.RawIOBase):
@@ -99,9 +46,13 @@ class _HashedRead(io.RawIOBase):
                 'Projection compressed input changed')
 
 
+def _program_manifest():
+    files = (Path(__file__), Path(provenance.__file__), Path(normalize.__file__))
+    return {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+
+
 def _program_fingerprint():
-    files = (Path(__file__), Path(provenance.__file__))
-    return hashlib.sha256(canonical({p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files})).hexdigest()
+    return hashlib.sha256(canonical(_program_manifest())).hexdigest()
 
 
 def _owned(path, identity, *, links=1):
@@ -148,7 +99,10 @@ def project_observations(verified, destination):
                 (*verified.plan.documents, *verified.plan.receipts, *verified.plan.inputs)))
     stage, identity, stage_stamp = None, None, None
     program = _program_fingerprint()
+    program_files = _program_manifest()
+    require(hashlib.sha256(canonical(program_files)).hexdigest() == program)
     output_hash, output_bytes, expanded, records, seen, counts = hashlib.sha256(), 0, 0, 0, set(), {}
+    normalizer = normalize.Normalizer(verified)
     try:
         descriptor, name = tempfile.mkstemp(prefix='.melange-public-', suffix='.tmp', dir=parent)
         stage = Path(name)
@@ -174,7 +128,7 @@ def project_observations(verified, destination):
                                     and expanded <= MAX_TOTAL_EXPANDED_BYTES
                                     and count <= spec.records and records <= MAX_TOTAL_RECORDS,
                                     'Projection record or expansion limit was exceeded')
-                            key, row = _observation(verified, role, strict_json(line))
+                            key, row = normalizer.observation(role, strict_json(line))
                             require(key not in seen, 'Duplicate source-native observation was rejected')
                             seen.add(key)
                             encoded = canonical(row) + b'\n'
@@ -187,6 +141,7 @@ def project_observations(verified, destination):
                     raise ValueError('Government observation compression was rejected') from error
                 require(count == spec.records, 'Government observation record conservation failed')
                 counts[role] = count
+            normalization_counts = normalizer.finish()
             output.flush()
             os.fsync(output.fileno())
             require(os.fstat(output.fileno()).st_size == output_bytes)
@@ -198,7 +153,12 @@ def project_observations(verified, destination):
         stage_stamp = _checked_stage(stage, identity, output_bytes, output_hash.hexdigest())
         receipt = {'schemaVersion': 1, 'kind': 'melange.official-payroll-observations.v1',
             'programFingerprint': program, 'inputManifestDigest': verified.manifest_digest,
+            'currentMapperFiles': program_files,
             'sourceManifest': verified.manifest, 'recordCounts': counts,
+            'normalizationCounts': normalization_counts,
+            'provenanceStatus': {'currentMapper': 'EXACT_CODE_CLOSURE',
+                'historicalProducer': 'SEE_SOURCE_RECEIPTS_NOT_INFERRED_FROM_CURRENT_CODE',
+                'sourceExtraction': 'RECEIPT_REPORTED_NOT_INDEPENDENTLY_REPLAYED'},
             'output': {'format': 'strict-utf8-ndjson', 'bytes': output_bytes,
                        'sha256': output_hash.hexdigest(), 'records': records},
             'canonicalPromotions': {'identity': 0, 'employment': 0, 'office': 0, 'date': 0},
@@ -223,6 +183,9 @@ def project_observations(verified, destination):
                 provenance._directory(parent)
                 require(provenance._stamp(parent.lstat())[:2] == parent_stamp)
                 _owned(stage, identity)
+                if stage_stamp is not None:
+                    require(provenance._path_stamp(stage) == stage_stamp,
+                            'Changed staged output is preserved during cleanup')
                 stage.unlink()
             except (ValueError, OSError):
                 # A foreign, replaced, linked or reparse path is never removed.
