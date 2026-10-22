@@ -897,3 +897,18 @@ Counts (recomputed on this commit's tree, using the formula of Addendum 31):
   - The set is identical to the one derived from ed64156ff in Addendum 31. The fixture Addendum 33 counted as the 285th is now published by pull request #22.
 Verification: the published blob (mode 100644 and id) equals the 39715eae0 source blob. The 7 other small-tooling paths equal the blobs recorded in Addenda 31 and 33 (run_tests.py as merged above). Every other path equals its origin/main 0762ffec8 blob.
 Workflows: this commit changes neither workflow file nor the three CI files named in the desktop-windows.yml path filter.
+== ADDENDUM 37 2026-10-22: agent roster, remaining-items ledger, state record and decision packet (2026-10-21), and the three agent definition files, a new pull request into main. Addendum 35 belongs to pull request #25.
+Decision: Paul, 2026-10-21, to export audits/agent_roster_20261021 and the agent files to public main through this route as a pull request. This is a narrow recorded exception like the skill-doc exceptions (SOURCE_PROVENANCE.json skill_docs_exception, ops_skills_exception): audits/ is not an export root and .claude/ is excluded except for recorded exceptions. The filter was not widened.
+Source: local Melange main commits 6390bc611 (adds the 7 files), 168c4fefa and 6795272aa (each one line of STATE_2026-10-21.md). Published from 6795272aa.
+Filter run (_tools/filter_export.py, spec melange) on 6795272aa: included 1921, excluded 316; none of the 7 paths is selected (they are outside the export roots). Local main carries other lanes' work, so the filter output is not published; only the 7 paths below are added to origin/main.
+Added (7, mode 100644, LF, no BOM):
+  A .claude/agents/coder.md  (caca73f28377; source blob caca73f28377; byte-identical)
+  A .claude/agents/manager.md  (7b99faf8861d; source blob 7b99faf8861d; byte-identical)
+  A .claude/agents/overseer.md  (7cf639aad3af; source blob 7cf639aad3af; byte-identical)
+  A audits/agent_roster_20261021/AGENT_ROSTER.md  (d327b55d64d7; source blob 1ae6261ea529; 1 path placeholder(s))
+  A audits/agent_roster_20261021/PAUL_DECISION_PACKET.md  (6be63d54fafa; source blob 0b403690117e; 1 path placeholder(s))
+  A audits/agent_roster_20261021/REMAINING_ITEMS.md  (01195f7fafd7; source blob 9a17f246c5ba; 2 path placeholder(s))
+  A audits/agent_roster_20261021/STATE_2026-10-21.md  (d92a92037923; source blob 9fa0b837eb82; 5 path placeholder(s))
+Publication edits (audits documents only): local absolute paths replaced by placeholders: the local plan file path -> <local plan file, not published> (5), the repo path -> <repo root> (1), the Mentat worktree path -> <Mentat worktree> (2), a local data path -> <local data dir>/... (1). Replacement text, sha256 of each replaced path and source lines: SOURCE_PROVENANCE.json agent_roster_docs_exception. No row was removed. References to filter-excluded areas (fec/research, fec/docs, unpublished audits/ files) are path mentions only and ship as written; the filter rules are path rules.
+Counts: export-root paths unchanged (1899); published tree 1951 -> 1958. KEPT-EXCLUDED unchanged.
+Verification: the 3 agent files' published blobs equal their 6795272aa source blobs; each audits document equals its source blob with exactly the recorded edits; every other path equals its origin/main blob.
