@@ -5,8 +5,9 @@
 # The task starts at logon and repeats every minute with MultipleInstances IgnoreNew, so a supervisor that ended
 # for any reason (exception, kill, crash) is started again within a minute while the user is logged on.
 # Task Scheduler's restart-on-failure (RestartCount 99, one minute) is also set but does not act on a non-zero exit
-# code of the action; the repetition is what restarts it. The supervisor exits 1 on any abnormal end (the task's
-# Last Run Result) and 0 only when another supervisor already runs. Restart: Stop-ScheduledTask, then Start-ScheduledTask.
+# code of the action; the repetition is what restarts it. The supervisor exits 1 on any abnormal end and 0 only when
+# another supervisor already runs (supervisor.log records it; while one runs, each skipped repetition sets the task's
+# Last Run Result to 0x800710E0). Restart: Stop-ScheduledTask, then Start-ScheduledTask.
 # Stop for good: Disable-ScheduledTask, then Stop-ScheduledTask (a stop alone is undone by the next repetition).
 [CmdletBinding()]
 param(

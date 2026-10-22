@@ -266,6 +266,7 @@ class LoginSupervisorStatusTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         return json.loads(result.stdout)
 
+    @unittest.skipUnless(os.name == 'nt', 'Windows identity, mutex and job APIs')
     def test_login_supervisor_logs_start_terminating_error_and_exit(self):
         # Uninitialized state stops the script before its mutex, job or children: nothing real starts.
         with tempfile.TemporaryDirectory() as root:
@@ -281,6 +282,7 @@ class LoginSupervisorStatusTests(unittest.TestCase):
         self.assertIn('exiting with code 1', lines[-2])
         self.assertIn('process exiting with code 1', lines[-1])
 
+    @unittest.skipUnless(os.name == 'nt', 'Windows job objects')
     def test_login_supervisor_logs_child_output_masked_and_exit_code(self):
         # Runs the logging, child-start and exit-check functions with a Python child that crashes; never the loop.
         secret = 'Zq3' + 'x' * 40
@@ -295,10 +297,10 @@ class LoginSupervisorStatusTests(unittest.TestCase):
             "foreach($f in $ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst]},$true)){"
             "if($f.Name -in 'Write-SupervisorLog','Start-LoggedChild','Test-ChildExited'){Invoke-Expression $f.Extent.Text}};"
             "$stateDirectory=$env:FIXTURE_ROOT; $supervisorLog=Join-Path $stateDirectory 'supervisor.log'; $publisherJob=[MelangePublisherJob]::Create();"
+            "$pumps=[Collections.Generic.List[Threading.Thread]]::new();"
             "$p=Start-LoggedChild 'publisher' $env:FIXTURE_PYTHON @('-c',$env:FIXTURE_CHILD); $id=$p.Id; $deadline=(Get-Date).AddSeconds(30);"
             "while(-not (Test-ChildExited 'publisher' $p)){ if((Get-Date) -gt $deadline){throw 'child did not exit'}; Start-Sleep -Milliseconds 100 };"
-            "while(-not ((Test-Path (Join-Path $stateDirectory 'publisher.log')) -and (Test-Path (Join-Path $stateDirectory 'publisher.err'))) -and (Get-Date) -lt $deadline){ Start-Sleep -Milliseconds 100 };"
-            "Start-Sleep -Milliseconds 300; $publisherJob.Dispose(); @{pid=$id} | ConvertTo-Json")
+            "$joined=@($pumps | ForEach-Object { $_.Join(10000) }); $publisherJob.Dispose(); @{pid=$id; joined=$joined} | ConvertTo-Json")
         with tempfile.TemporaryDirectory() as root:
             out = self.run_pwsh(command, FIXTURE_SCRIPT=str(SUPERVISOR_SCRIPT), FIXTURE_ROOT=root, FIXTURE_PYTHON=sys.executable,
                                 FIXTURE_CHILD=child, FIXTURE_SECRET=secret)
@@ -306,6 +308,7 @@ class LoginSupervisorStatusTests(unittest.TestCase):
             stdout_log = (Path(root) / 'publisher.log').read_text()
             stderr_log = (Path(root) / 'publisher.err').read_text()
         self.assertIn(f"started publisher pid {out['pid']}: {sys.executable} -c", supervisor_log)
+        self.assertEqual(out['joined'], [True, True])
         self.assertIn(f"publisher pid {out['pid']} exited with code 7", supervisor_log)
         self.assertIn('Authenticated update service: https://updates.example.com; invite codes not required', stdout_log)
         self.assertNotIn(secret, stderr_log)
@@ -313,6 +316,7 @@ class LoginSupervisorStatusTests(unittest.TestCase):
         self.assertIn('Refused: bearer [masked] token=[masked] [masked]', stderr_log)
 
 
+    @unittest.skipUnless(os.name == 'nt', 'Windows file-sharing semantics')
     def test_login_supervisor_survives_a_reader_holding_the_status_file(self):
         # A reader without delete sharing makes the atomic replace fail; before, that error ended the supervisor.
         command = (

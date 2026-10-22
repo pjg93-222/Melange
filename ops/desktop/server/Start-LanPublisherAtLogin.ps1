@@ -5,7 +5,8 @@
 # is undone by the next repetition); to restart, Stop-ScheduledTask then Start-ScheduledTask.
 # Task Scheduler's restart-on-failure setting does not restart a task whose action merely exits non-zero, so the
 # MelangeDesktopPublisher task (Register-LanPublisherStartup.ps1) also repeats every minute with IgnoreNew: a new
-# instance starts only when this one is gone, however it ended. The exit code is the task's Last Run Result.
+# instance starts only when this one is gone, however it ended. Read exit codes in supervisor.log: while this runs,
+# each skipped repetition sets the task's Last Run Result to 0x800710E0.
 # Logs in the state directory: supervisor.log (this script), publisher.log/.err and notifier.log/.err (child
 # stdout/stderr). Every line is timestamped and masked for credentials; each file rotates to <name>.1 above 10 MB.
 [CmdletBinding(DefaultParameterSetName = 'Lan')]
@@ -48,11 +49,12 @@ public static class MelangeLog {
         AppDomain.CurrentDomain.ProcessExit += (sender, e) => Append(path, "[" + pid + "] process exiting with code " + Environment.ExitCode);
     }
     // Drains a child's redirected stream on a background thread until the child (and any inheritor) closes it;
-    // an undrained pipe would block the child.
-    public static void Pump(StreamReader reader, string path) {
+    // an undrained pipe would block the child. The caller joins the thread before exiting so final lines are kept.
+    public static Thread Pump(StreamReader reader, string path) {
         var thread = new Thread(() => { try { string line; while ((line = reader.ReadLine()) != null) Append(path, line); } catch { } });
         thread.IsBackground = true;
         thread.Start();
+        return thread;
     }
 }
 '@
@@ -84,6 +86,7 @@ $mutex = [Threading.Mutex]::new($false, ('Local\MelangeDesktopPublisher-' + $ide
 $publisherProcess = $null
 $notifierProcess = $null
 $publisherJob = $null
+$pumps = [Collections.Generic.List[Threading.Thread]]::new()
 $exitCode = 1
 $stateDirectory = (Get-Item -LiteralPath $StateDirectory -ErrorAction Stop).FullName
 $statusFile = Join-Path $stateDirectory 'listener-status.json'
@@ -137,8 +140,9 @@ function Start-LoggedChild([string]$Name, [string]$Executable, [string[]]$Argume
     $start.RedirectStandardError = $true
     foreach ($argument in $Arguments) { $start.ArgumentList.Add($argument) }
     $process = [Diagnostics.Process]::Start($start)
-    [MelangeLog]::Pump($process.StandardOutput, (Join-Path $stateDirectory ($Name + '.log')))
-    [MelangeLog]::Pump($process.StandardError, (Join-Path $stateDirectory ($Name + '.err')))
+    foreach ($done in @($pumps | Where-Object { -not $_.IsAlive })) { [void]$pumps.Remove($done) }
+    $pumps.Add([MelangeLog]::Pump($process.StandardOutput, (Join-Path $stateDirectory ($Name + '.log'))))
+    $pumps.Add([MelangeLog]::Pump($process.StandardError, (Join-Path $stateDirectory ($Name + '.err'))))
     try {
         [MelangePublisherJob]::Assign($publisherJob, $process)
     } catch {
@@ -271,6 +275,14 @@ public static class MelangePublisherJob {
     } catch { }
     if ($publisherProcess) { $publisherProcess.Dispose() }
     if ($notifierProcess) { $notifierProcess.Dispose() }
+    # The job is closed, so every child has ended and its pipes reach end of file: let the drains write the last
+    # lines, but never hold the exit for more than three seconds.
+    $drainUntil = [DateTime]::UtcNow.AddSeconds(3)
+    foreach ($pump in $pumps) {
+        $left = [int]($drainUntil - [DateTime]::UtcNow).TotalMilliseconds
+        if ($left -le 0) { break }
+        [void]$pump.Join($left)
+    }
     if ($ownedMutex) { $mutex.ReleaseMutex() }
     $mutex.Dispose()
     Write-SupervisorLog ('exiting with code ' + $exitCode)
