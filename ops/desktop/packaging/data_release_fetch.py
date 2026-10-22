@@ -24,7 +24,7 @@ SCHEMA = 'melange-desktop-data/v1'
 REPOSITORIES = {'melange': 'pjg93-222/Melange', 'mentat': 'pjg93-222/Mentat'}
 DEFAULT_API = 'https://api.github.com'
 MARKER = '.melange-data-release.json'
-EXTRACTING = 'extracting.json'  # in <state>/data-download while an extraction has started and not finished
+EXTRACTING = 'extracting.json'  # in <state>/data-download while an extraction has started and not finished: {tag, manifestSha256}
 BOOTSTRAP_TAG = 'melange-desktop-empty-workspace-v1'  # melange_bootstrap.WELCOME carries it; so does the progress page
 STATE_PREFIX = '__state__/'
 CHUNK, ATTEMPTS, RETRY_DELAY = 1 << 16, 4, 2.0
@@ -257,7 +257,8 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
     report(phase='checking')
     base = '%s/repos/%s/releases' % ((api_base or DEFAULT_API).rstrip('/'), repo)
     extracting = state / 'data-download' / EXTRACTING  # lets launch() resume once Mentat's reports/ is partly written
-    resumed = json.loads(extracting.read_text(encoding='utf-8')).get('tag') if extracting.is_file() else None
+    record = json.loads(extracting.read_text(encoding='utf-8')) if extracting.is_file() else {}
+    resumed = record.get('tag')
     if resumed is None:
         releases = json.loads(_read_json(base + '?per_page=20', 4 << 20, insecure))
         release = select_release(releases if isinstance(releases, list) else [], app)
@@ -282,6 +283,10 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
     if not urls.get('manifest.json'):
         raise DataReleaseError('Data release %s has no manifest.json' % tag)
     raw = _read_json(urls['manifest.json'], 16 << 20, insecure)
+    digest = hashlib.sha256(raw).hexdigest()
+    if resumed is not None and record.get('manifestSha256') != digest:  # same tag, new manifest: never mix two generations
+        report(phase='error', error='manifest_changed: data release %s was replaced after its extraction started' % tag)
+        return {'status': 'error', 'reason': 'manifest_changed', 'tag': tag}
     manifest = json.loads(raw)
     if not isinstance(manifest, dict) or manifest.get('schema') != SCHEMA or manifest.get('app') != app or manifest.get('tag') != tag:
         raise DataReleaseError('Data release manifest does not describe %s %s' % (app, tag))
@@ -308,9 +313,9 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
         done += int(asset['bytes'])
         archives.append((part, asset['name']))
     report(phase='extracting', bytesDone=total, bytesTotal=total)
-    _atomic_write(extracting, json.dumps({'tag': tag}))
+    _atomic_write(extracting, json.dumps({'tag': tag, 'manifestSha256': digest}))
     written, kept = _extract(archives, data, state, files, app)
-    marker.write_text(json.dumps({'tag': tag, 'manifestSha256': hashlib.sha256(raw).hexdigest(),
+    marker.write_text(json.dumps({'tag': tag, 'manifestSha256': digest,
                                   'extractedAt': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2), encoding='utf-8')
     extracting.unlink(missing_ok=True)
     shutil.rmtree(cache, ignore_errors=True)

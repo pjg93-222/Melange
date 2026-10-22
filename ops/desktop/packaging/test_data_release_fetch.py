@@ -469,3 +469,49 @@ def test_interrupted_extraction_resumes_its_own_release_not_a_newer_one(roots, m
     assert (data / 'reports' / 'b.txt').read_bytes() == b'report b'
     assert json.loads((data / fetch.MARKER).read_text(encoding='utf-8'))['tag'] == tag
     assert not (state / 'data-download' / fetch.EXTRACTING).exists()
+
+
+def two_asset_release(first, second):
+    """data-1.zip holds fec/a.bin, data-2.zip holds fec/b.bin; one manifest lists both."""
+    assets, files = {}, []
+    for name, (path, data) in (('data-1.zip', ('fec/a.bin', first)), ('data-2.zip', ('fec/b.bin', second))):
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_STORED) as bundle:
+            bundle.writestr(path, data)
+        assets[name] = buffer.getvalue()
+        files.append({'path': path, 'bytes': len(data), 'sha256': sha(data), 'asset': name})
+    manifest = {'schema': fetch.SCHEMA, 'app': 'melange', 'tag': NEWER, 'created': '2026-10-20T00:00:00Z', 'files': files, 'excluded': [],
+                'assets': [{'name': n, 'bytes': len(b), 'sha256': sha(b)} for n, b in assets.items()]}
+    return {'manifest.json': json.dumps(manifest).encode(), **assets}
+
+
+def test_resume_refuses_a_manifest_replaced_under_the_same_tag(roots, monkeypatch):
+    data, state = roots
+    real_replace = fetch._replace
+
+    def fail_on_b(source, target):
+        if target.name == 'b.bin':
+            raise OSError('app closed')
+        return real_replace(source, target)
+    server = Server(two_asset_release(b'generation A one', b'generation A two'))
+    try:
+        monkeypatch.setattr(fetch, '_replace', fail_on_b)
+        with pytest.raises(OSError):
+            fetch.ensure_app_data('melange', data, state, 'x/y', api_base=server.base)
+        monkeypatch.setattr(fetch, '_replace', real_replace)
+        assert (data / 'fec' / 'a.bin').read_bytes() == b'generation A one' and not (data / 'fec' / 'b.bin').exists()
+        record = json.loads((state / 'data-download' / fetch.EXTRACTING).read_text(encoding='utf-8'))
+        assert record == {'tag': NEWER, 'manifestSha256': sha(server.assets['manifest.json'])}
+        before = {p: p.read_bytes() for p in (data.parent).rglob('*') if p.is_file()}
+        server.assets.clear()
+        server.assets.update(two_asset_release(b'generation B one', b'generation B two'))  # republished under the same tag
+        server.requests.clear()
+        seen = []
+        result = fetch.ensure_app_data('melange', data, state, 'x/y', api_base=server.base, progress=lambda **s: seen.append(s))
+    finally:
+        server.close()
+    assert result == {'status': 'error', 'reason': 'manifest_changed', 'tag': NEWER}
+    assert seen[-1]['phase'] == 'error' and 'manifest_changed' in seen[-1]['error']
+    assert not [r for r in server.requests if r[0].endswith('.zip')]
+    assert {p: p.read_bytes() for p in (data.parent).rglob('*') if p.is_file()} == before  # nothing further written
+    assert not (data / fetch.MARKER).exists()
