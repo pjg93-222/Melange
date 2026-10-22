@@ -121,7 +121,13 @@ async function launchAuthorized(fromAccess){
  if(closing||generation!==accessLifecycle.generation)return;
  if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
  openingAccess=true;
- try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+ try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});
+   if(closing||generation!==accessLifecycle.generation)return;
+   if(moduleDataStartup?.supported&&!runtime.child){
+    await loadingStatus('Preparing reviewed public data. Larger sources can take several minutes.');
+    if(closing||generation!==accessLifecycle.generation)return;
+   }
+   const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
  catch(error){await failStartup(error);}
  finally{openingAccess=false;}
 }
@@ -134,7 +140,7 @@ async function settleDistrict(gate){
 let loadingText='';
 function loadingStatus(text){
  loadingText=text;if(!window||window.isDestroyed())return;
- if(window.webContents.getURL()!==loadingURL){accessWindow?.hide();window.loadURL(loadingURL).then(()=>{if(!closing&&!window.isDestroyed())window.show();}).catch(()=>{});}
+ if(window.webContents.getURL()!==loadingURL){accessWindow?.hide();return window.loadURL(loadingURL).then(()=>{if(!closing&&!window.isDestroyed())window.show();}).catch(()=>{});}
  else{window.webContents.send('desktop:status',text);if(!window.isVisible())window.show();}
 }
 const journalStore=()=>require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'dataset-journal'});
