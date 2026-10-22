@@ -14,7 +14,7 @@ function hash(file){return crypto.createHash('sha256').update(fs.readFileSync(fi
 async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  file=path.resolve(file);root=path.resolve(root);if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');ancestors(root,true);ancestors(file);
  const args=['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
- const {stdout}=await execute('C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024,env:{...process.env,PSModulePath:'C:\Windows\System32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules'}});
+ const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024,env:{...process.env,PSModulePath:String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules`}});
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
  if(result.path.toLowerCase()!==file.toLowerCase()||result.status!=='Valid'||result.sha256!==hash(file)||(owned&&(result.thumbprint!==THUMBPRINT||result.timestamped!==true)))throw new Error('Staged signature verification failed');
  return result;
