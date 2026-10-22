@@ -88,6 +88,14 @@ application-template and typed-data split. Report lineage and analytical-index
 relocation need their own contracts. The production factory must remain disabled
 until the intended required-kind set and reader bindings are complete.
 
+The producer-only `module_data_islands` helper accepts reviewed template bytes,
+closed slots, and explicit typed schemas. All bytes outside those slots must
+match the compiled template. Its explanation adapter accepts one exact passive
+markup grammar, converts it to a plain text document, and regenerates escaped
+markup through compiled code. It performs no file or network I/O and has no
+enabled production page contracts. This is not a general HTML exporter or proof
+that the current dashboards' complete inputs have been mapped.
+
 Before enabling a release, review its exact data-role manifest and provenance,
 finish native runtime/UI integration, test the actual built artifact, and verify
 the signed installed app, owner startup, GitHub/cache state, and account
