@@ -430,3 +430,36 @@ def test_interrupted_mentat_extraction_resumes_at_the_next_launch(roots, monkeyp
     assert not (state / 'data-download' / fetch.EXTRACTING).exists()
     (data / fetch.MARKER).unlink()
     assert fetch.launch('mentat', data, state, environ={}) is None  # finished: a non-empty reports/ is the user's again
+
+
+def test_interrupted_extraction_resumes_its_own_release_not_a_newer_one(roots, monkeypatch):
+    data, state = roots
+    tag, newer = 'data-mentat-2026-10-19', 'data-mentat-2026-10-25'
+    members = {'reports/a.txt': b'report a', 'reports/b.txt': b'report b'}
+    real_replace = fetch._replace
+
+    def fail_on_b(source, target):
+        if target.name == 'b.txt':
+            raise OSError('app closed')
+        return real_replace(source, target)
+    server = Server(build_release(members, app='mentat', tag=tag), app='mentat', tag=tag)
+    listed = server.releases('mentat')
+    newest = {'tag_name': newer, 'draft': False, 'published_at': '2026-10-25T00:00:00Z', 'assets': [
+        {'name': name, 'browser_download_url': '%s/dl/%s/%s' % (server.base, newer, name)} for name in server.assets]}
+    try:
+        monkeypatch.setattr(fetch, '_replace', fail_on_b)
+        with pytest.raises(OSError):
+            fetch.ensure_app_data('mentat', data, state, 'x/y', api_base=server.base)
+        monkeypatch.setattr(fetch, '_replace', real_replace)
+        server.releases = lambda app: [newest]  # the interrupted release was withdrawn: stop, do not mix releases
+        with pytest.raises(fetch.DataReleaseError, match='no longer published'):
+            fetch.ensure_app_data('mentat', data, state, 'x/y', api_base=server.base)
+        assert not (data / 'reports' / 'b.txt').exists() and not (data / fetch.MARKER).exists()
+        server.releases = lambda app: [newest, *listed]
+        result = fetch.ensure_app_data('mentat', data, state, 'x/y', api_base=server.base)
+    finally:
+        server.close()
+    assert result['status'] == 'installed' and result['tag'] == tag
+    assert (data / 'reports' / 'b.txt').read_bytes() == b'report b'
+    assert json.loads((data / fetch.MARKER).read_text(encoding='utf-8'))['tag'] == tag
+    assert not (state / 'data-download' / fetch.EXTRACTING).exists()

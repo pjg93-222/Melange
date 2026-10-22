@@ -255,7 +255,15 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
     report = progress or (lambda **_: None)
     report(phase='checking')
     releases = json.loads(_read_json('%s/repos/%s/releases?per_page=20' % ((api_base or DEFAULT_API).rstrip('/'), repo), 4 << 20, insecure))
-    release = select_release(releases if isinstance(releases, list) else [], app)
+    listed = releases if isinstance(releases, list) else []
+    extracting = state / 'data-download' / EXTRACTING  # lets launch() resume once Mentat's reports/ is partly written
+    resumed = json.loads(extracting.read_text(encoding='utf-8')).get('tag') if extracting.is_file() else None
+    if resumed is None:
+        release = select_release(listed, app)
+    else:  # an interrupted extraction finishes with its own release; files of two releases are never mixed
+        release = next((r for r in listed if isinstance(r, dict) and not r.get('draft') and r.get('tag_name') == resumed), None)
+        if release is None:
+            raise DataReleaseError('The interrupted data release %s is no longer published' % resumed)
     if release is None:
         report(phase='none')
         return {'status': 'none'}
@@ -292,8 +300,7 @@ def _ensure_locked(app, data, state, repo, api_base, progress, marker):
         done += int(asset['bytes'])
         archives.append((part, asset['name']))
     report(phase='extracting', bytesDone=total, bytesTotal=total)
-    extracting = state / 'data-download' / EXTRACTING  # lets launch() resume once Mentat's reports/ is partly written
-    extracting.write_text(json.dumps({'tag': tag}), encoding='utf-8')
+    _atomic_write(extracting, json.dumps({'tag': tag}))
     written, kept = _extract(archives, data, state, files, app)
     marker.write_text(json.dumps({'tag': tag, 'manifestSha256': hashlib.sha256(raw).hexdigest(),
                                   'extractedAt': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2), encoding='utf-8')
