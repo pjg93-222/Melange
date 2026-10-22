@@ -62,6 +62,13 @@ configuration adds only the strictly checked native source descriptor. Read-only
 input aliases must be separate from account, console, report-output, identity,
 waiver, and other writable user-state roots.
 
+The Python `module_data_launch` bridge rechecks that native descriptor and its
+cache, then constructs scoped actual readers. Its `native_verified` argument is
+an internal caller assertion after native signature and owner checks, never a
+downloaded field or proof of authorization by itself. The bridge reports whether
+signature authority came from native JavaScript or an additional trusted Python
+callback. It does not independently establish owner access or journal high-water.
+
 ## Implemented component contracts
 
 | Kind | Immutable inputs |

@@ -31,6 +31,7 @@ BOOTSTRAP_FILES = (
     'melange_bootstrap.py', 'melange_data_paths.py', 'mentat_layout.py', 'desktop_migrations.py',
     'terrier_owner.py', 'terrier_district.py', 'desktop_figure_renderer.py',
     'module_data_snapshot.py', 'melange_module_data.py', 'mentat_module_data.py',
+    'module_data_launch.py',
 )
 
 

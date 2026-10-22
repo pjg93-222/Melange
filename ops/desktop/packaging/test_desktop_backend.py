@@ -336,8 +336,13 @@ class GitHubDistrictArchiveTests(unittest.TestCase):
         run.assert_not_called()
 
     def test_module_probe_does_not_enter_server_startup(self):
-        with patch('sys.argv', ['desktop_backend', '--desktop-github-module-check']), patch('module_data_snapshot.main', return_value=0) as probe, patch.object(backend, 'run') as run:
+        observed = []
+        def checked_probe():
+            observed.append(sys.dont_write_bytecode)
+            return 0
+        with patch('sys.dont_write_bytecode', False), patch('sys.argv', ['desktop_backend', '--desktop-github-module-check']), patch('module_data_snapshot.main', side_effect=checked_probe) as probe, patch.object(backend, 'run') as run:
             self.assertEqual(backend.main(), 0)
+        self.assertEqual(observed, [True])
         probe.assert_called_once_with()
         run.assert_not_called()
 
