@@ -138,7 +138,14 @@ class GitHubModuleController{
    if(!this.provider){this.status({phase:'unsupported',cached:false},context);return null;}
    for(const method of ['prepare','stage','commitActive'])if(typeof this.provider[method]!=='function')throw failure('integrity');
    release=this.keepAwake();this.guard(context,signal);
-   const progress=value=>{if(!this.current(context)||signal.aborted)return;this.status(value,context);};
+   let lastProgressPhase,lastProgressAt;
+   const progress=value=>{
+    if(signal.aborted)return;
+    const phase=value?.phase,now=Date.now();
+    if(lastProgressAt!==undefined&&phase===lastProgressPhase&&now>=lastProgressAt&&now-lastProgressAt<250)return;
+    if(!this.current(context))return;
+    lastProgressPhase=phase;lastProgressAt=now;this.status(value,context);
+   };
    if(kind==='commit'){
     // The native caller holds its normal transition lease and has health-checked
     // this exact prepared backend. Provider commit rechecks owner/hash integrity.

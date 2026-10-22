@@ -81,6 +81,51 @@ test('background staging returns only public status and cannot activate a snapsh
  assert.equal(f.calls.some(item=>Array.isArray(item)&&item[0]==='commit'),false);f.controller.shutdown();
 });
 
+test('chunk progress limits synchronous settings reads and status sends while phase changes and completion remain immediate',async t=>{
+ let now=1000,reads=0,f;t.mock.method(Date,'now',()=>now);
+ f=fixture({controller:{getSelected:()=>{reads++;return f.selected;}}});
+ t.after(()=>f.controller.shutdown());
+ f.provider.stage=async(selected,{onStatus})=>{
+  const emit=(phase,receivedBytes)=>onStatus({phase,cached:true,totalBytes:1000,receivedBytes});
+  emit('downloading',1);const initialReads=reads,initialStates=f.states.length;
+  for(let value=2;value<=100;value++){now=1000+value;emit('downloading',value);}
+  now=1249;emit('downloading',249);
+  assert.equal(reads,initialReads);assert.equal(f.states.length,initialStates);
+  now=1250;emit('downloading',250);
+  assert.equal(reads,initialReads+2);assert.equal(f.states.length,initialStates+1);
+  now=1251;emit('verifying',1000);
+  assert.equal(reads,initialReads+4);assert.equal(f.states.length,initialStates+2);
+  now=1252;emit('ready',1000);
+  assert.equal(reads,initialReads+6);assert.equal(f.states.length,initialStates+3);
+  now=1253;emit('ready',1000);
+  assert.equal(reads,initialReads+6);assert.equal(f.states.length,initialStates+3);
+  return candidate('melange',selected,'update-ready');
+ };
+ const completed=await f.controller.stage();
+ assert.equal(completed.phase,'update-ready');assert.equal(completed.canRefresh,true);
+ assert.equal(f.states.at(-1).phase,'update-ready');assert.equal(f.states.at(-1).canRefresh,true);
+});
+
+test('progress throttling retains cancellation and current-workspace guards before every emission',async t=>{
+ let now=1000;t.mock.method(Date,'now',()=>now);
+ for(const change of ['cancelled','context']){
+  const hold=deferred(),cancel=new AbortController();let reads=0,f,progress;
+  f=fixture({controller:{getSelected:()=>{reads++;return f.selected;}}});
+  t.after(()=>f.controller.shutdown());
+  f.provider.prepare=async(selected,{onStatus})=>{progress=onStatus;onStatus({phase:'downloading',cached:true});await hold.promise;return candidate('melange',selected);};
+  const preparing=f.controller.prepare({signal:cancel.signal}).catch(error=>error);await tick();
+  if(change==='cancelled')cancel.abort();else f.selected={dataDirectory:path.join(os.tmpdir(),'changed-during-progress')};
+  const states=f.states.length,before=reads;
+  now+=1;progress({phase:'downloading',cached:true});
+  assert.equal(reads,before);assert.equal(f.states.length,states);
+  progress({phase:'verifying',cached:true});
+  assert.equal(reads,before+(change==='context'?1:0));assert.equal(f.states.length,states);
+  now+=300;progress({phase:'downloading',cached:true});
+  assert.equal(reads,before+(change==='context'?2:0));assert.equal(f.states.length,states);
+  hold.resolve();assert.equal((await preparing).code,change);await f.controller.shutdown();
+ }
+});
+
 test('missing compiled adapters report unsupported without claiming that data was prepared',async()=>{
  const f=fixture({controller:{createProvider:()=>null}});
  assert.equal(await f.controller.prepare(),null);
