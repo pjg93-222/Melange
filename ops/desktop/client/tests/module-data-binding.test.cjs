@@ -1,6 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
+const {spawnSync}=require('node:child_process');
 const {canonical}=require('../access-client.cjs');
 const {GitHubModules}=require('../github-modules.cjs');
 const {validateModuleBinding}=require('../module-data-binding.cjs');
@@ -17,6 +18,35 @@ function inventory(root){
  const result=[];
  function walk(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name),st=fs.lstatSync(file,{bigint:true});result.push([path.relative(root,file),String(st.ino),String(st.size),String(st.mtimeNs),String(st.ctimeNs),entry.isFile()?sha(fs.readFileSync(file)):null]);if(entry.isDirectory())walk(file);}}
  walk(root);return result;
+}
+function windowsShortPath(directory){
+ const script=[
+  "Add-Type -TypeDefinition 'using System; using System.Text; using System.Runtime.InteropServices; public static class ModuleBindingShortPath { [DllImport(\"kernel32.dll\", CharSet=CharSet.Unicode, SetLastError=true)] public static extern uint GetShortPathName(string path, StringBuilder buffer, uint capacity); }'",
+  '$pathBuffer = New-Object System.Text.StringBuilder 32768',
+  '$pathLength = [ModuleBindingShortPath]::GetShortPathName($env:MODULE_BINDING_FIXTURE_DIRECTORY, $pathBuffer, 32768)',
+  "if ($pathLength -eq 0 -or $pathLength -ge 32768) { throw 'Fixture short path could not be resolved' }",
+  '[Console]::Out.Write($pathBuffer.ToString())'
+ ].join('\n');
+ const result=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command','-'],{input:script,encoding:'utf8',windowsHide:true,timeout:30000,env:{...process.env,MODULE_BINDING_FIXTURE_DIRECTORY:directory}});
+ assert.ifError(result.error);assert.equal(result.status,0,result.stderr);
+ const short=result.stdout.trim();assert.ok(short);return short;
+}
+async function localAliasFixture(t,{shortPath=false}={}){
+ const f=environment('mentat');t.after(()=>f.cleanup());
+ const local=path.join(f.temporary,'Native Local Application Data Binding');fs.mkdirSync(local);
+ let configuredLocal;
+ if(shortPath){
+  configuredLocal=windowsShortPath(local);
+  if(path.resolve(configuredLocal).toLowerCase()===path.resolve(local).toLowerCase()){t.skip('The isolated filesystem does not provide a distinct Windows short path');return null;}
+ }else{
+  configuredLocal=path.join(f.temporary,'local-app-data-alias');fs.symlinkSync(local,configuredLocal,process.platform==='win32'?'junction':'dir');
+ }
+ const previous=process.env.LOCALAPPDATA;t.after(()=>{if(previous===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=previous;});
+ process.env.LOCALAPPDATA=configuredLocal;
+ const localBase=fs.realpathSync.native(local),cacheRoot=path.join(localBase,'MelangeData','mentat','github-module-data');
+ const candidate=await new GitHubModules({...f.options,cacheRoot:path.join(configuredLocal,'MelangeData','mentat','github-module-data')}).prepare(f.selected);
+ const options={appId:'mentat',profile:f.profile,configuration:candidate.effectiveConfiguration,publicKeys:f.options.publicKeys,registry:f.options.registry};
+ return {...f,local:localBase,configuredLocal,cacheRoot,candidate,options};
 }
 test('both app bindings independently derive signed roles while preserving configuration, account and journal bytes',async t=>{
  for(const appId of ['melange','mentat']){
@@ -106,4 +136,36 @@ test('the second allowed cache is app-scoped LOCALAPPDATA, with no arbitrary sib
 test('unrelated native profile activity does not replace the checked cache identity',async t=>{
  const f=await fixture(t);f.options.registry['mentat.fixture.v1'].validateSnapshot=async()=>{fs.writeFileSync(path.join(f.profile,'unrelated-native.fixture'),'separate local state');return true;};
  assert.equal((await validateModuleBinding(f.options)).snapshotRoot,f.candidate.snapshotRoot);
+});
+
+test('a real LOCALAPPDATA alias derives the exact canonical descriptor without approving source aliases, outside roots or original state',async t=>{
+ const f=await localAliasFixture(t),account=path.join(f.original,'account.fixture');fs.writeFileSync(account,'original account bytes');
+ const before=inventory(f.temporary),configuration=structuredClone(f.options.configuration),requests=f.requests.length;
+ const actual=await validateModuleBinding(f.options);
+ assert.equal(actual.source.cacheRoot,f.cacheRoot);assert.deepEqual(actual.source,configuration.ownerGitHubModuleData);assert.equal(actual.snapshotRoot,f.candidate.snapshotRoot);
+ const aliasRoot=path.join(f.configuredLocal,'MelangeData','mentat','github-module-data');assert.notEqual(aliasRoot,f.cacheRoot);
+ for(const cacheRoot of [aliasRoot,path.join(f.local,'MelangeData','mentat','outside-cache'),path.join(f.local,'MelangeData','melange','github-module-data')]){
+  const changed=structuredClone(configuration);changed.ownerGitHubModuleData.cacheRoot=cacheRoot;
+  await assert.rejects(validateModuleBinding({...f.options,configuration:changed}),/Unapproved/);
+ }
+ await assert.rejects(validateModuleBinding({...f.options,configuration:{...configuration,dataDirectory:f.local}}),/overlaps/);
+ await assert.rejects(validateModuleBinding({...f.options,protectedRoots:[f.configuredLocal]}),/overlaps/);
+ assert.deepEqual(f.options.configuration,configuration);assert.equal(f.requests.length,requests);assert.deepEqual(inventory(f.temporary),before);assert.equal(fs.readFileSync(account,'utf8'),'original account bytes');
+});
+
+test('canonical LOCALAPPDATA handling does not resolve away a cache-descendant directory junction',async t=>{
+ const f=await localAliasFixture(t),managed=path.join(f.local,'MelangeData'),outside=path.join(f.temporary,'outside-cache-branch');
+ fs.renameSync(managed,outside);fs.symlinkSync(outside,managed,process.platform==='win32'?'junction':'dir');
+ const before=inventory(f.temporary),requests=f.requests.length;
+ await assert.rejects(validateModuleBinding(f.options),/unsafe|boundary|overlaps/);
+ assert.deepEqual(inventory(f.temporary),before);assert.equal(f.requests.length,requests);
+});
+
+test('a real Windows short LOCALAPPDATA path binds to the provider canonical cache identity',async t=>{
+ if(process.platform!=='win32'){t.skip('Windows native short paths are platform-specific');return;}
+ const f=await localAliasFixture(t,{shortPath:true});if(!f)return;
+ assert.equal(fs.realpathSync.native(f.configuredLocal),f.local);
+ const before=inventory(f.temporary),actual=await validateModuleBinding(f.options);
+ assert.equal(actual.source.cacheRoot,f.cacheRoot);assert.deepEqual(actual.source,f.candidate.effectiveConfiguration.ownerGitHubModuleData);
+ assert.deepEqual(inventory(f.temporary),before);
 });

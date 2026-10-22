@@ -5,6 +5,8 @@ import json
 import math
 from pathlib import Path
 import unittest
+from unittest.mock import patch
+import module_data_islands as islands
 from module_data_islands import (Array,Boolean,CompiledPage,Integer,Keyed,Literal,Null,Number,Object,OneOf,
     PassiveExplanation,Slot,Text,PRODUCTION_PAGE_CONTRACTS,encode_slot,parse_passive_explanation,render_passive_explanation)
 
@@ -83,6 +85,44 @@ class CompiledSlotsTests(unittest.TestCase):
         self.assertEqual(contract.extract(b'<x>'+encode_slot({'rows':{'fixture':{'value':1}}}).encode()+b'</x>')['slots']['network']['rows']['fixture']['value'],1)
         for rows in ({'bad/name':{'value':1}},{'fixture':{'untyped':1}}):
             with self.assertRaises(ValueError):contract.extract(b'<x>'+encode_slot({'rows':rows}).encode()+b'</x>')
+    def test_invalid_key_patterns_are_refused_when_constructed_before_any_values(self):
+        for pattern in ('[a-z]{99,1}','[z-a]{1,2}','[\\]{1,2}','[a-z]+',None):
+            with self.subTest(pattern=pattern),self.assertRaises(ValueError):
+                Keyed(pattern,Integer(0,3),2)
+    def test_keyed_contract_reuses_its_validated_pattern_including_empty_dictionary(self):
+        schema=Object({'rows':Keyed('[a-z0-9_-]{1,32}',Integer(0,3),2)})
+        contract=CompiledPage('synthetic.html',b'<x>__DATA__</x>',(Slot('network','__DATA__',schema,128),))
+        # Pattern compilation/shape checks belong to contract construction,
+        # including contracts later applied only to an empty dictionary.
+        with patch.object(islands.re,'fullmatch',side_effect=AssertionError('late pattern validation')):
+            for rows in ({},{'fixture':1}):
+                result=contract.extract(b'<x>'+encode_slot({'rows':rows}).encode()+b'</x>')
+                self.assertEqual(result['slots']['network']['rows'],rows)
+    def test_slot_json_decoder_receives_only_the_byte_bounded_window(self):
+        limit=16
+        contract=CompiledPage('synthetic.html',b'<x>__DATA__</x>',(Slot('network','__DATA__',Object({'label':Text(20000)}),limit),),max_bytes=60000)
+        original=islands._DECODER
+        observed=[]
+        class BoundedDecoder:
+            def raw_decode(self,window,idx=0):
+                observed.append(len(window.encode('utf-8')))
+                self_test.assertLessEqual(observed[-1],limit)
+                return original.raw_decode(window,idx)
+        self_test=self
+        with patch.object(islands,'_DECODER',BoundedDecoder()):
+            for label in ('a'*10000,'\U0001f4a1'*10000):
+                with self.assertRaises(ValueError):
+                    contract.extract(b'<x>'+encode_slot({'label':label}).encode()+b'</x>')
+        self.assertEqual(len(observed),2)
+    def test_exact_utf8_slot_budget_preserves_a_truncated_following_literal(self):
+        raw=encode_slot({'label':'\u00e9'}).encode('utf-8')
+        template=b'<x>__DATA__'+'\U0001f4a1</x>'.encode('utf-8')
+        document=template.replace(b'__DATA__',raw)
+        for limit in (len(raw),len(raw)+1):
+            contract=CompiledPage('synthetic.html',template,(Slot('network','__DATA__',Object({'label':Text(10)}),limit),))
+            self.assertEqual(contract.extract(document)['slots']['network'],{'label':'\u00e9'})
+        contract=CompiledPage('synthetic.html',template,(Slot('network','__DATA__',Object({'label':Text(10)}),len(raw)-1),))
+        with self.assertRaises(ValueError):contract.extract(document)
 
 class PassiveMarkupTests(unittest.TestCase):
     def setUp(self):self.fragment=trusted_explanation()

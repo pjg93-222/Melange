@@ -14,17 +14,19 @@ function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module data
 function inside(root,target,equal=false){const rel=path.relative(root,target);return (equal||rel!=='')&&rel!=='..'&&!rel.startsWith('..'+path.sep)&&!path.isAbsolute(rel);}
 function overlaps(a,b){a=physicalPath(a);b=physicalPath(b);return inside(a,b,true)||inside(b,a,true);}
 function digest(bytes){return crypto.createHash('sha256').update(bytes).digest('hex');}
+function sameFile(a,b){return a.dev===b.dev&&a.ino===b.ino&&a.mode===b.mode&&a.nlink===b.nlink&&a.size===b.size&&a.mtimeNs===b.mtimeNs&&a.ctimeNs===b.ctimeNs;}
 function safeRecord(record){
  if(record===null)return;
  exact(record,RECORD);
  requireValue(integer(record.catalogSequence)&&record.catalogSequence>0&&['pointerDigest','manifestSha256','identityDigest'].every(key=>hash(record[key]))&&typeof record.releaseTag==='string'&&TAG.test(record.releaseTag)&&typeof record.releaseCommit==='string'&&COMMIT.test(record.releaseCommit),'Invalid protected module data record');
 }
-async function fileDigest(file,{signal}={}){
- const before=await fsp.lstat(file);requireValue(before.isFile()&&!before.isSymbolicLink()&&before.nlink===1&&before.size<=protocol.MAX_TOTAL,'Unsafe module cache file');
+async function fileDigest(file,{signal,identity}={}){
+ const before=await fsp.lstat(file,{bigint:true});requireValue(before.isFile()&&!before.isSymbolicLink()&&before.nlink===1n&&before.size<=BigInt(protocol.MAX_TOTAL),'Unsafe module cache file');
+ if(identity)requireValue(sameFile(before,identity),'Module file changed during verification');
  const h=crypto.createHash('sha256');let bytes=0;
- for await(const chunk of fs.createReadStream(file)){canceled(signal);bytes+=chunk.length;requireValue(bytes<=before.size,'Module file grew during verification');h.update(chunk);}
- const after=await fsp.lstat(file);
- requireValue(after.isFile()&&!after.isSymbolicLink()&&after.nlink===1&&before.size===after.size&&before.mtimeMs===after.mtimeMs&&before.ctimeMs===after.ctimeMs&&before.ino===after.ino&&bytes===before.size,'Module file changed during verification');
+ for await(const chunk of fs.createReadStream(file)){canceled(signal);bytes+=chunk.length;requireValue(BigInt(bytes)<=before.size,'Module file grew during verification');h.update(chunk);}
+ const after=await fsp.lstat(file,{bigint:true});
+ requireValue(after.isFile()&&!after.isSymbolicLink()&&after.nlink===1n&&sameFile(before,after)&&BigInt(bytes)===before.size,'Module file changed during verification');
  return {bytes,sha256:h.digest('hex')};
 }
 class GitHubModules{
@@ -34,7 +36,8 @@ class GitHubModules{
   if(typeof profile!=='string'||!path.isAbsolute(profile)||!fs.statSync(profile).isDirectory()||fs.lstatSync(profile).isSymbolicLink())throw fail('integrity','An existing native profile is required');
   if(!Array.isArray(protectedRoots)||protectedRoots.some(root=>typeof root!=='string'||!path.isAbsolute(root))||!integer(minimumFreeBytes))throw fail('integrity','Invalid native module data boundaries');
   this.profile=fs.realpathSync.native(profile);this.publicKeys=structuredClone(publicKeys);this.store=store;this.registry=registry;this.requiredKinds=[...requiredKinds];this.effectiveConfiguration=effectiveConfiguration;this.authorize=authorize;this.transport=transport||new GitHubModuleTransport(appId);this.now=now;this.minimumFreeBytes=minimumFreeBytes;
-  const choices=[{base:this.profile,root:path.join(this.profile,'packs','github-module-data')},...(process.env.LOCALAPPDATA?[{base:path.resolve(process.env.LOCALAPPDATA),root:path.join(process.env.LOCALAPPDATA,'MelangeData',appId,'github-module-data')}]:[])];
+  const localBase=process.env.LOCALAPPDATA?fs.realpathSync.native(path.resolve(process.env.LOCALAPPDATA)):null;
+  const choices=[{base:this.profile,root:path.join(this.profile,'packs','github-module-data')},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,'github-module-data')}]:[])];
   const chosen=cacheRoot?choices.find(choice=>physicalPath(choice.root)===physicalPath(cacheRoot)):choices.at(-1);
   if(!chosen)throw fail('integrity','Unapproved native module cache root');
   this.cacheRoot=path.resolve(chosen.root);this.cacheBase=fs.realpathSync.native(chosen.base);this.protectedRoots=[path.join(this.profile,'state'),...protectedRoots];
@@ -85,7 +88,20 @@ class GitHubModules{
    requireValue(inside(physicalPath(this.cacheRoot),physicalPath(await fsp.realpath(file))),'Opened module file leaves cache');
    let parent=path.dirname(file);
    while(inside(this.cacheRoot,parent,true)){const st=await fsp.lstat(parent);requireValue(st.isDirectory()&&!st.isSymbolicLink(),'Opened module directory is unsafe');if(parent===this.cacheRoot)break;parent=path.dirname(parent);}
+   return opened;
   }catch(error){if(error.reason)throw error;throw fail('integrity','Opened module cache identity is unavailable');}
+ }
+ partialIdentity(file,identity){
+  // No asynchronous gap between the final path/identity checks and unlink/rename.
+  // Callers close the verified handle first for Windows file-sharing semantics.
+  try{
+   requireValue(path.dirname(file)===path.join(this.cacheRoot,'segments')&&/^[a-f0-9]{64}\.part$/.test(path.basename(file)),'Unsafe module partial path');
+   let parent=path.dirname(file);
+   while(inside(this.cacheBase,parent,true)){const st=fs.lstatSync(parent);requireValue(st.isDirectory()&&!st.isSymbolicLink(),'Module partial directory changed');if(parent===this.cacheBase)break;parent=path.dirname(parent);}
+   requireValue(parent===this.cacheBase&&inside(this.cacheRoot,fs.realpathSync.native(file)),'Module partial leaves its cache');
+   const current=fs.lstatSync(file,{bigint:true});
+   requireValue(current.isFile()&&!current.isSymbolicLink()&&current.nlink===1n&&sameFile(current,identity),'Module partial identity changed');
+  }catch(error){if(error.reason)throw error;throw fail('integrity','Module partial identity is unavailable');}
  }
  async immutable(relative,bytes){
   const file=await this.file(relative);
@@ -154,16 +170,26 @@ class GitHubModules{
  async segment(tag,item,{signal,onProgress}={}){
   const complete=await this.file('segments/'+item.sha256+'.bin'),part=await this.file('segments/'+item.sha256+'.part');
   if(fs.existsSync(complete)){const found=await fileDigest(complete,{signal});requireValue(found.bytes===item.bytes&&found.sha256===item.sha256,'Module segment cache integrity failed');onProgress?.(item.bytes);return complete;}
-  let offset=fs.existsSync(part)?(await fsp.lstat(part)).size:0;requireValue(offset<=item.bytes,'Module partial segment exceeds its bound');
-  let handle;
+  const initial=fs.existsSync(part)?await fsp.lstat(part,{bigint:true}):null;
+  let handle,identity,offset;
+  const discard=async message=>{
+   const current=await this.openedCacheHandle(handle,part,identity.size);requireValue(sameFile(current,identity),'Module partial identity changed');
+   this.partialIdentity(part,identity);await handle.close();handle=null;
+   this.partialIdentity(part,identity);fs.unlinkSync(part);throw fail('integrity',message);
+  };
   try{
-   handle=await fsp.open(part,fs.existsSync(part)?'r+':'wx');
-   await this.openedCacheHandle(handle,part,offset);
+   handle=await fsp.open(part,initial?'r+':'wx');
+   identity=await this.openedCacheHandle(handle,part,initial?initial.size:0n);
+   if(initial)requireValue(sameFile(initial,identity),'Module partial identity changed');
+   if(identity.size>BigInt(item.bytes))await discard('Module partial segment exceeds its bound');
+   offset=Number(identity.size);
    if(offset<item.bytes)await this.transport.segment(tag,item,{offset,signal,onChunk:async chunk=>{canceled(signal);requireValue(offset+chunk.length<=item.bytes,'Module segment exceeds its bound');let written=0;while(written<chunk.length){const result=await handle.write(chunk,written,chunk.length-written,offset+written);if(result.bytesWritten<=0)throw fail('storage','Module cache write failed');written+=result.bytesWritten;}offset+=written;onProgress?.(offset);}});
-   await handle.sync();await handle.close();handle=null;
+   await handle.sync();identity=await this.openedCacheHandle(handle,part,offset);
+   const found=await fileDigest(part,{signal,identity});
+   if(found.bytes!==item.bytes||found.sha256!==item.sha256)await discard('Module segment integrity failed');
+   await handle.close();handle=null;this.partialIdentity(part,identity);
+   requireValue(!fs.existsSync(complete),'Concurrent module segment replacement refused');fs.renameSync(part,complete);return complete;
   }finally{await handle?.sync().catch(()=>{});await handle?.close();}
-  const found=await fileDigest(part,{signal});requireValue(found.bytes===item.bytes&&found.sha256===item.sha256,'Module segment integrity failed');
-  requireValue(!fs.existsSync(complete),'Concurrent module segment replacement refused');await fsp.rename(part,complete);return complete;
  }
  async seed(source,destination,object,selected,{signal}={}){
   if(typeof source!=='string'||!path.isAbsolute(source))return false;
@@ -171,11 +197,11 @@ class GitHubModules{
   for(const root of this.protectedRoots)requireValue(!inside(physicalPath(root),physicalPath(source),true),'Legacy module candidate overlaps protected state');
   let ancestor=path.dirname(source);const selectedRoot=path.resolve(selected.dataDirectory);
   while(inside(selectedRoot,ancestor,true)){const st=await fsp.lstat(ancestor);requireValue(st.isDirectory()&&!st.isSymbolicLink(),'Legacy module reparse point refused');if(ancestor===selectedRoot)break;ancestor=path.dirname(ancestor);}
-  let before;try{before=await fsp.lstat(source);}catch(error){if(error.code==='ENOENT')return false;throw error;}
-  requireValue(before.isFile()&&!before.isSymbolicLink(),'Unsafe legacy module candidate');if(before.size!==object.bytes)return false;
+  let before;try{before=await fsp.lstat(source,{bigint:true});}catch(error){if(error.code==='ENOENT')return false;throw error;}
+  requireValue(before.isFile()&&!before.isSymbolicLink(),'Unsafe legacy module candidate');if(before.size!==BigInt(object.bytes))return false;
   const h=crypto.createHash('sha256');let handle,bytes=0;
   try{handle=await fsp.open(destination,'wx');await this.openedCacheHandle(handle,destination,0);for await(const chunk of fs.createReadStream(source)){canceled(signal);bytes+=chunk.length;if(bytes>object.bytes)break;h.update(chunk);await handle.writeFile(chunk);}await handle.sync();}finally{await handle?.close();}
-  const after=await fsp.lstat(source),stable=before.size===after.size&&before.mtimeMs===after.mtimeMs&&before.ctimeMs===after.ctimeMs&&before.ino===after.ino&&!after.isSymbolicLink();
+  const after=await fsp.lstat(source,{bigint:true}),stable=after.isFile()&&!after.isSymbolicLink()&&sameFile(before,after);
   if(!stable||bytes!==object.bytes||h.digest('hex')!==object.sha256){await fsp.unlink(destination);return false;}return true;
  }
  async removeStaging(directory){

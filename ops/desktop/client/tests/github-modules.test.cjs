@@ -1,12 +1,74 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
-const {GitHubModules}=require('../github-modules.cjs');
+const {GitHubModules,fileDigest}=require('../github-modules.cjs');
 const {fail}=require('../github-module-protocol.cjs');
 const {environment,signed,sha}=require('./fixtures/github-module-fixture.cjs');
 function fixture(t){const f=environment();t.after(()=>f.cleanup());return f;}
 function roleFile(candidate,f){return path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');}
 function next(f,sequence=2,bytes=Buffer.from('{"aggregate":42,"revision":2}')){f.remote=signed('mentat',{keys:f.remote.keys,sequence,bytes});}
+
+function changedStamp(t,file,field){
+ const original=fs.promises.lstat;let calls=0;
+ t.mock.method(fs.promises,'lstat',async function(target,options){
+  const stat=await original.call(this,target,options);if(target!==file)return stat;
+  const changed=calls++>0,big=options?.bigint===true;
+  return new Proxy(stat,{get(object,key){if(key!==field)return Reflect.get(object,key,object);if(field==='ino')return big?9007199254740992n+BigInt(changed):Number(9007199254740992n+BigInt(changed));if(field==='dev')return big?BigInt(changed)+1n:Number(changed)+1;return big?1234567890000000000n+BigInt(changed):undefined;}});
+ });
+ return ()=>calls;
+}
+
+for(const field of ['ino','dev','mtimeNs','ctimeNs']){
+ test(`file digests reject exact ${field} changes without Number precision loss`,async t=>{
+  const f=fixture(t),file=path.join(f.original,'digest.fixture');fs.writeFileSync(file,'synthetic bytes');
+  const calls=changedStamp(t,file,field);await assert.rejects(fileDigest(file),/changed during verification/);assert.equal(calls(),2);
+ });
+ test(`legacy seeding rejects exact ${field} changes without Number precision loss`,async t=>{
+  const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);
+  const source=path.join(f.original,'seed.fixture'),destination=await p.file('staging/seed.fixture');fs.writeFileSync(source,f.remote.bytes);
+  const calls=changedStamp(t,source,field);assert.equal(await p.seed(source,destination,f.remote.manifest.datasets[0].objects[0],f.selected),false);
+  assert.equal(calls(),2);assert.equal(fs.existsSync(destination),false);assert.deepEqual(fs.readFileSync(source),f.remote.bytes);
+ });
+}
+
+for(const invalid of ['wrong-hash','oversized','prefix'])test(`${invalid} owned partial segments fail once and permit a later clean retry`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);
+ const item=f.remote.manifest.datasets[0].objects[0].segments[0],part=path.join(p.cacheRoot,'segments',item.sha256+'.part');
+ fs.writeFileSync(part,Buffer.alloc(item.bytes+(invalid==='oversized'?1:invalid==='prefix'?-1:0),120));
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');
+ assert.equal(fs.existsSync(part),false);assert.equal(f.journal.active,null);assert.equal(f.requests.filter(x=>x===item.asset).length,invalid==='prefix'?1:0);
+ const offsetCount=f.offsets.length,candidate=await p.prepare(f.selected);assert.equal(f.offsets[offsetCount],0);assert.deepEqual(fs.readFileSync(roleFile(candidate,f)),f.remote.bytes);assert.equal(f.journal.active,null);
+});
+
+for(const replacement of ['regular','hardlink','junction'])test(`partial cleanup preserves a ${replacement} replacement made while the verified handle closes`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);
+ const item=f.remote.manifest.datasets[0].objects[0].segments[0],part=path.join(p.cacheRoot,'segments',item.sha256+'.part'),foreign=path.join(f.original,'foreign.fixture');
+ fs.writeFileSync(part,Buffer.alloc(item.bytes,120));if(replacement==='junction'){fs.mkdirSync(foreign);fs.writeFileSync(path.join(foreign,'sentinel.fixture'),'foreign synthetic bytes');}else fs.writeFileSync(foreign,'foreign synthetic bytes');
+ const open=fs.promises.open;let swapped=false;
+ t.mock.method(fs.promises,'open',async function(file,...args){
+  const handle=await open.call(this,file,...args);if(file!==part)return handle;
+  const close=handle.close.bind(handle);handle.close=async()=>{await close();if(!swapped){swapped=true;fs.unlinkSync(part);if(replacement==='hardlink')fs.linkSync(foreign,part);else if(replacement==='junction')fs.symlinkSync(foreign,part,process.platform==='win32'?'junction':'dir');else fs.renameSync(foreign,part);}};return handle;
+ });
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert.equal(swapped,true);
+ if(replacement==='junction'){assert.equal(fs.lstatSync(part).isSymbolicLink(),true);assert.equal(fs.readFileSync(path.join(foreign,'sentinel.fixture'),'utf8'),'foreign synthetic bytes');}else assert.equal(fs.readFileSync(part,'utf8'),'foreign synthetic bytes');
+ if(replacement==='hardlink')assert.equal(fs.readFileSync(foreign,'utf8'),'foreign synthetic bytes');assert.equal(f.journal.active,null);
+});
+
+test('an aliased approved LOCALAPPDATA ancestor yields the canonical fixed provider cache',async t=>{
+ const f=fixture(t),local=path.join(f.temporary,'local-real'),alias=path.join(f.temporary,'local-alias');fs.mkdirSync(local);fs.symlinkSync(local,alias,process.platform==='win32'?'junction':'dir');
+ const prior=process.env.LOCALAPPDATA;process.env.LOCALAPPDATA=alias;t.after(()=>{if(prior===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=prior;});
+ const p=new GitHubModules({...f.options,cacheRoot:path.join(alias,'MelangeData','mentat','github-module-data')}),canonical=path.join(fs.realpathSync.native(local),'MelangeData','mentat','github-module-data');
+ const candidate=await p.prepare(f.selected);assert.equal(p.cacheRoot,canonical);assert.equal(candidate.effectiveConfiguration.ownerGitHubModuleData.cacheRoot,canonical);
+ assert.throws(()=>new GitHubModules({...f.options,cacheRoot:path.join(f.temporary,'outside')}),/Unapproved/);
+ assert.throws(()=>new GitHubModules({...f.options,cacheRoot:canonical,protectedRoots:[local]}),/overlaps/);
+});
+
+test('canonicalizing LOCALAPPDATA never blesses a reparse point below its fixed cache suffix',async t=>{
+ const f=fixture(t),local=path.join(f.temporary,'local-real'),outside=path.join(f.temporary,'outside');fs.mkdirSync(local);fs.mkdirSync(outside);fs.writeFileSync(path.join(outside,'sentinel.fixture'),'unchanged');fs.symlinkSync(outside,path.join(local,'MelangeData'),process.platform==='win32'?'junction':'dir');
+ const prior=process.env.LOCALAPPDATA;process.env.LOCALAPPDATA=local;t.after(()=>{if(prior===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=prior;});
+ const p=new GitHubModules({...f.options,cacheRoot:path.join(local,'MelangeData','mentat','github-module-data')});await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');
+ assert.deepEqual(fs.readdirSync(outside),['sentinel.fixture']);assert.equal(fs.readFileSync(path.join(outside,'sentinel.fixture'),'utf8'),'unchanged');assert.equal(f.journal,null);
+});
 test('prepare verifies complete segmented roles but activation is a separate native commit',async t=>{
  const f=fixture(t),provider=new GitHubModules(f.options),settings=structuredClone(f.selected);
  fs.mkdirSync(path.join(f.profile,'state'));const account=path.join(f.profile,'state','accounts.fixture');fs.writeFileSync(account,'unchanged-account-state');const before=sha(fs.readFileSync(account));
@@ -116,7 +178,7 @@ test('a partial swapped to an account hardlink after path validation is refused 
 test('writes retain the validated handle if the partial path is replaced after open',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options),account=path.join(f.original,'account.fixture');fs.writeFileSync(account,'own');const send=f.transport.segment;let swapped=false;
  f.transport.segment=async(tag,item,options)=>{if(!swapped){const part=path.join(f.options.cacheRoot,'segments',item.sha256+'.part');fs.unlinkSync(part);fs.linkSync(account,part);swapped=true;}return send(tag,item,options);};
- await assert.rejects(p.prepare(f.selected),/Unsafe module cache file/);assert.equal(swapped,true);assert.equal(fs.readFileSync(account,'utf8'),'own');assert.equal(f.journal.active,null);
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert.equal(swapped,true);assert.equal(fs.readFileSync(account,'utf8'),'own');assert.equal(fs.statSync(account).nlink,2);assert.equal(f.journal.active,null);
 });
 test('trusted binder receives authenticated source and exact objects while original roots remain intact',async t=>{
  const f=fixture(t);f.selected.connection={appDataRoot:path.join(f.original,'app','data'),console:'original-console'};const original=structuredClone(f.selected);let context;

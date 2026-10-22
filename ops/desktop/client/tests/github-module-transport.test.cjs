@@ -24,6 +24,14 @@ test('asset redirects are bounded, HTTPS-only and never receive auth on any hop'
  for(const location of ['http://release-assets.githubusercontent.com/file','https://evil.invalid/file','https://user:secret@release-assets.githubusercontent.com/file','https://release-assets.githubusercontent.com:444/file','https://github.com/other/repository/releases/download/'+tag+'/file']){const g=fixture(({respond})=>respond(302,'',{location}));await assert.rejects(g.transport.manifest({releaseTag:tag,manifest:{asset:'manifest.json',bytes:4}}),error=>error.reason==='integrity');assert.equal(g.calls.length,1);}
  const loop=fixture(({respond})=>respond(302,'',{location:'https://release-assets.githubusercontent.com/loop'}));await assert.rejects(loop.transport.manifest({releaseTag:tag,manifest:{asset:'manifest.json',bytes:4}}),/redirect/);assert.equal(loop.calls.length,4);
 });
+
+test('malformed asset redirect locations have an integrity reason and never make a second request',async()=>{
+ for(const location of ['https://','https://[broken']){
+  const f=fixture(({respond})=>respond(302,'',{location}));
+  await assert.rejects(f.transport.manifest({releaseTag:tag,manifest:{asset:'manifest.json',bytes:4}}),error=>error.reason==='integrity');
+  assert.equal(f.calls.length,1);
+ }
+});
 test('API redirects and malformed/duplicate JSON fail verification without another host request',async()=>{
  const redirect=fixture(({respond})=>respond(302,'',{location:'https://evil.invalid'}));await assert.rejects(redirect.transport.resolveMain(),error=>error.reason==='integrity');assert.equal(redirect.calls.length,1);
  const duplicate=fixture(({respond})=>respond(200,'{"sha":"'+commit+'","sha":"'+commit+'"}'));await assert.rejects(duplicate.transport.resolveMain(),error=>error.reason==='integrity');

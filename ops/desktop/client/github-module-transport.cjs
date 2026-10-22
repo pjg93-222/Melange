@@ -24,7 +24,7 @@ class GitHubModuleTransport{
    const result=await this.once(target,{limit,expectedBytes,offset,totalBytes,signal,onChunk,asset,deadlineMs:remaining});
    if(!result.redirect)return result.bytes;
    requireValue(asset&&redirects++<3,'GitHub module redirect refused');
-   target=new URL(result.redirect,target);
+   try{target=new URL(result.redirect,target);}catch{throw fail('integrity','GitHub module redirect refused');}
   }
  }
  once(url,{limit,expectedBytes,offset,totalBytes,signal,onChunk,asset,deadlineMs}){

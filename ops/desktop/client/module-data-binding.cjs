@@ -79,8 +79,10 @@ async function validateModuleBinding({appId,profile,configuration,publicKeys,reg
   const original=structuredClone(configuration),source=original.ownerGitHubModuleData;exact(source,SOURCE_FIELDS);
   requireValue(source.schemaVersion===1&&source.appId===appId&&source.repository===app.repository&&protocol.integer(source.catalogSequence)&&source.catalogSequence>0&&protocol.hash(source.pointerDigest)&&protocol.hash(source.manifestSha256)&&typeof source.cacheRoot==='string'&&path.isAbsolute(source.cacheRoot),'Invalid native module source binding');
   const profileStat=await fsp.lstat(profile);requireValue(profileStat.isDirectory()&&!profileStat.isSymbolicLink(),'Native module profile is unsafe');
-  const nativeProfile=await fsp.realpath(profile);
-  const choices=[{base:nativeProfile,root:path.join(nativeProfile,'packs','github-module-data')},...(process.env.LOCALAPPDATA?[{base:path.resolve(process.env.LOCALAPPDATA),root:path.resolve(process.env.LOCALAPPDATA,'MelangeData',appId,'github-module-data')}]:[])];
+  // Canonicalize native ancestors only; cache descendants still undergo the
+  // read view's explicit reparse checks rather than being resolved away.
+  const nativeProfile=fs.realpathSync.native(profile),localBase=process.env.LOCALAPPDATA?fs.realpathSync.native(path.resolve(process.env.LOCALAPPDATA)):null;
+  const choices=[{base:nativeProfile,root:path.join(nativeProfile,'packs','github-module-data')},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,'github-module-data')}]:[])];
   const selected=choices.find(choice=>path.resolve(source.cacheRoot)===path.resolve(choice.root));
   requireValue(selected&&source.cacheRoot===path.resolve(selected.root),'Unapproved native module cache root');
   const cacheRoot=path.resolve(selected.root),base=path.resolve(selected.base);

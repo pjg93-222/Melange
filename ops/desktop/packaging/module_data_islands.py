@@ -5,7 +5,8 @@ file/network I/O, script execution, inferred schema, downloaded template hash,
 or installed production page contract here. Closed JSON slots do not establish
 the outside-input/nested-schema closure of the complete Melange application.
 """
-from dataclasses import dataclass
+import codecs
+from dataclasses import dataclass, field
 import hashlib
 import html
 import json
@@ -61,6 +62,15 @@ class Keyed:
     key_pattern:str
     item:object
     max_items:int
+    _compiled_pattern:object=field(init=False,repr=False,compare=False)
+    def __post_init__(self):
+        # The finite key grammar is native compiled source, not data-provided
+        # regular expressions. Restrict it to character classes plus one bound.
+        shape=re.fullmatch(r'\[[A-Za-z0-9_\\\-:]+\]\{([1-9][0-9]?),([1-9][0-9]{0,2})\}',self.key_pattern) if isinstance(self.key_pattern,str) else None
+        require(shape is not None and int(shape.group(1))<=int(shape.group(2)))
+        try:compiled=re.compile(self.key_pattern)
+        except re.error as error:raise ValueError('Compiled page data was rejected') from error
+        object.__setattr__(self,'_compiled_pattern',compiled)
 @dataclass(frozen=True)
 class OneOf:
     choices:tuple
@@ -90,9 +100,6 @@ def checked_schema(schema,depth=0):
             require(isinstance(key,str) and 0<len(key)<=128 and key not in _FORBIDDEN_KEYS)
             checked_schema(child,depth+1)
     elif type(schema) is Keyed:
-        # The finite key grammar is native compiled source, not data-provided
-        # regular expressions. Restrict it to character classes plus one bound.
-        require(isinstance(schema.key_pattern,str) and re.fullmatch(r'\[[A-Za-z0-9_\\\-:]+\]\{[1-9][0-9]?,[1-9][0-9]{0,2}\}',schema.key_pattern) is not None)
         require(type(schema.max_items) is int and 0<=schema.max_items<=2_000_000)
         checked_schema(schema.item,depth+1)
     elif type(schema) is OneOf:
@@ -118,7 +125,7 @@ def schema_value(schema,value):
         return {key:schema_value(schema.fields[key],item) for key,item in value.items()}
     if kind is Keyed:
         require(type(value) is dict and len(value)<=schema.max_items)
-        require(all(key not in _FORBIDDEN_KEYS and re.fullmatch(schema.key_pattern,key) is not None for key in value))
+        require(all(key not in _FORBIDDEN_KEYS and schema._compiled_pattern.fullmatch(key) is not None for key in value))
         return {key:schema_value(schema.item,item) for key,item in value.items()}
     if kind is OneOf:
         for choice in schema.choices:
@@ -227,16 +234,21 @@ class CompiledPage:
     def extract(self,document):
         require(type(document) is bytes and len(document)<=self.max_bytes)
         text=document.decode('utf-8',errors='strict');require(not text.startswith('\ufeff') and '\x00' not in text)
+        del text
         values={};cursor=0
         for index,slot in enumerate(self.slots):
-            literal=self.literals[index];require(text.startswith(literal,cursor));cursor+=len(literal)
+            literal=self.literals[index].encode('utf-8');require(document.startswith(literal,cursor));cursor+=len(literal)
             start=cursor
-            try:value,cursor=_DECODER.raw_decode(text,cursor)
+            # Bound bytes before JSON creates any values. Full-document strict
+            # UTF8 was checked above; only an incomplete final code point at
+            # this byte window's edge may remain undecoded.
+            window,_consumed=codecs.utf_8_decode(document[start:start+slot.max_bytes],'strict',False)
+            try:value,end=_DECODER.raw_decode(window)
             except (RecursionError,OverflowError) as error:raise ValueError('Compiled page data was rejected') from error
-            require(len(text[start:cursor].encode('utf-8'))<=slot.max_bytes)
+            raw=window[:end];cursor=start+len(raw.encode('utf-8'))
             _tree_budget(value)
-            require(any(encode_slot(value,ensure_ascii=a,sort_keys=s)==text[start:cursor] for a,s in ((False,False),(False,True),(True,False),(True,True))))
+            require(any(encode_slot(value,ensure_ascii=a,sort_keys=s)==raw for a,s in ((False,False),(False,True),(True,False),(True,True))))
             values[slot.name]=schema_value(slot.schema,value)
-        require(text[cursor:]==self.literals[-1])
+        require(document[cursor:]==self.literals[-1].encode('utf-8'))
         return {'schemaVersion':1,'kind':'compiled-page-islands','page':self.page,'templateSha256':self.template_sha256,
             'slots':values,'coverage':{'closedSlots':True,'fullPage':False,'fullApplication':False}}
