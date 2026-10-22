@@ -40,7 +40,8 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  env.ELECTRON_BUILDER_DISABLE_BUILD_CACHE='true';
  const root=path.resolve(env.DESKTOP_SIGNING_ROOT),records=[];let ready=false,appDirectory;
  ancestors(root,true);
- const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file));
+ const identity=file=>path.resolve(file).toLowerCase();
+ const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file))||(appDirectory&&identity(file)===identity(path.join(appDirectory,'resources','elevate.exe')));
  const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned});records.push(result);return result;};
  const verifyToolCopies=()=>{
   for(const directory of ['nsis','nsis-resources'])for(const file of tree(path.join(root,directory)).filter(file=>PE.test(file)))
@@ -77,10 +78,17 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   artifactBuildCompleted:async event=>{
    if(!event.file?.toLowerCase().endsWith('.exe'))return;
    if(!appDirectory)throw new Error('Application signing has not completed');
-   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>record(file,true,owned(file)));
-   await record(event.file,true,true);verifyToolCopies();
-   if(!records.some(row=>path.basename(row.path)===app.name+'.exe'&&row.thumbprint===THUMBPRINT)||!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.thumbprint===THUMBPRINT)||!records.some(row=>path.basename(row.path)==='elevate.exe'&&row.thumbprint===THUMBPRINT))throw new Error('Application, elevation helper or uninstaller signature evidence is missing');
-   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records};
+   const current=new Map();
+   const verifyCurrent=async(file,forceOwned=owned(file))=>{const result=await record(file,true,forceOwned);current.set(identity(file),result);};
+   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>verifyCurrent(file));
+   await verifyCurrent(event.file,true);verifyToolCopies();
+   for(const file of [path.join(appDirectory,app.name+'.exe'),path.join(appDirectory,'resources','elevate.exe'),path.resolve(event.file)]){
+    const result=current.get(identity(file));
+    if(!result||identity(result.path)!==identity(file)||result.status!=='Valid'||result.thumbprint!==THUMBPRINT||result.timestamped!==true)throw new Error('Current application, elevation helper or installer signature evidence is missing');
+    ancestors(file);if(result.sha256!==hash(file))throw new Error('Current application, elevation helper or installer changed after verification');
+   }
+   if(!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.status==='Valid'&&row.thumbprint===THUMBPRINT&&row.timestamped===true))throw new Error('Staged uninstaller signature evidence is missing');
+   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records,currentFiles:[...current.values()],uninstallerEvidence:'staged-history-only'};
    fs.writeFileSync(event.file+'.signatures.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   }
  };
