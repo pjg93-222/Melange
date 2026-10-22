@@ -157,7 +157,13 @@ try {
         # (and the Run entry it owns) consistent for -Action Remove.
         $userId = [Security.Principal.WindowsIdentity]::GetCurrent().Name
         Register-ScheduledTask -TaskPath '\' -TaskName $entryName -InputObject (New-PublisherTask $PowerShellExecutable $taskArguments $userId) -Force | Out-Null
-        [IO.File]::Move($temporary, $recordPath, $true)
+        try {
+            [IO.File]::Move($temporary, $recordPath, $true)
+        } catch {
+            # A task this run created must not start later without its record; an existing task (same command) stays.
+            if (-not $task) { Unregister-ScheduledTask -TaskPath '\' -TaskName $entryName -Confirm:$false }
+            throw
+        }
         $runEntry = Remove-OwnedRunEntry $key $owned
         Write-Output ("Registered scheduled task $entryName for the current user (starts at logon, restarts within a minute; Run entry $runEntry). It was not started: Start-ScheduledTask $entryName.")
     } else {
