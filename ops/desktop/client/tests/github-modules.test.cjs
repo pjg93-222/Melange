@@ -119,9 +119,10 @@ test('materialize refuses post-validator byte changes despite an identical obser
 });
 
 test('materialize rechecks the published tree before reporting success and preserves a changed result',async t=>{
- const f=fixture(t),rename=fs.renameSync;let reached=false,published;
- t.mock.method(fs,'renameSync',function(from,to){const result=rename.call(this,from,to);if(path.dirname(from)===path.join(f.options.cacheRoot,'staging')){reached=true;published=path.join(to,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');fs.writeFileSync(published,Buffer.alloc(f.remote.bytes.length,120));}return result;});
- await assert.rejects(new GitHubModules(f.options).prepare(f.selected),error=>error.reason==='integrity');assert.equal(reached,true);assert.deepEqual(fs.readFileSync(published),Buffer.alloc(f.remote.bytes.length,120));assert.equal(f.journal.staged,null);
+ const f=fixture(t),p=new GitHubModules(f.options),rename=fs.renameSync;let reached=false,published,rejection;
+ t.mock.method(fs,'renameSync',function(from,to){const result=rename.call(this,from,to);if(path.dirname(from)===path.join(p.cacheRoot,'staging')){reached=true;published=path.join(to,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');fs.writeFileSync(published,Buffer.alloc(f.remote.bytes.length,120));}return result;});
+ try{await p.prepare(f.selected);}catch(error){rejection=error;}
+ assert.equal(reached,true);assert.equal(rejection?.reason,'integrity');assert.deepEqual(fs.readFileSync(published),Buffer.alloc(f.remote.bytes.length,120));assert.equal(f.journal.staged,null);
 });
 
 test('a wholly owned completed staging tree is cleaned after a validator refusal',async t=>{
