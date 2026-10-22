@@ -8,6 +8,127 @@ function fixture(t){const f=environment();t.after(()=>f.cleanup());return f;}
 function roleFile(candidate,f){return path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');}
 function next(f,sequence=2,bytes=Buffer.from('{"aggregate":42,"revision":2}')){f.remote=signed('mentat',{keys:f.remote.keys,sequence,bytes});}
 
+function onMetadataClose(t,action){
+ const open=fs.promises.open;let reached=false;
+ t.mock.method(fs.promises,'open',async function(file,...args){const handle=await open.call(this,file,...args);if(!file.endsWith('.tmp'))return handle;
+  const close=handle.close.bind(handle);handle.close=async()=>{await close();if(!reached){reached=true;action(file);}};return handle;
+ });
+ return ()=>reached;
+}
+
+function equalObservedTimes(t,{onClose,onLstat}={}){
+ // Model a timestamp collision without weakening identity/size/link observations.
+ const stamp=stat=>typeof stat.ino==='bigint'&&stat.isFile()?new Proxy(stat,{get(object,key){if(key==='mtimeNs'||key==='ctimeNs')return 1234567890000000000n;return Reflect.get(object,key,object);}}):stat;
+ for(const key of ['lstatSync','fstatSync']){const original=fs[key];t.mock.method(fs,key,function(...args){return stamp(original.apply(this,args));});}
+ const lstat=fs.promises.lstat;t.mock.method(fs.promises,'lstat',async function(...args){onLstat?.(args[0]);return stamp(await lstat.apply(this,args));});
+ const open=fs.promises.open;let reached=false;t.mock.method(fs.promises,'open',async function(...args){const handle=await open.apply(this,args),stat=handle.stat.bind(handle);handle.stat=async(...options)=>stamp(await stat(...options));
+  if(onClose&&args[0].endsWith('.tmp')){const close=handle.close.bind(handle);handle.close=async()=>{await close();if(!reached){reached=true;onClose(args[0]);}};}return handle;
+ });return ()=>reached;
+}
+
+test('immutable metadata pins caller bytes before its first asynchronous operation',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const raw=Buffer.from('original'),expected=Buffer.from(raw),file=p.file.bind(p);let changed=false;
+ p.file=async(...args)=>{if(!changed){changed=true;raw.fill(120);}return file(...args);};
+ const published=await p.immutable('pointers/'+('1'.repeat(64))+'.json',raw);assert.equal(changed,true);assert.deepEqual(fs.readFileSync(published),expected);assert.equal(fs.statSync(published).nlink,1);
+});
+
+test('immutable metadata rejects and preserves completed bytes changed when its writer closes',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const raw=Buffer.from('original');let staged;
+ const reached=onMetadataClose(t,file=>{staged=file;fs.writeFileSync(file,Buffer.alloc(raw.length,120));});
+ await assert.rejects(p.immutable('pointers/'+('2'.repeat(64))+'.json',raw),error=>error.reason==='integrity');assert.equal(reached(),true);assert.deepEqual(fs.readFileSync(staged),Buffer.alloc(raw.length,120));assert.equal(fs.existsSync(path.join(p.cacheRoot,'pointers','2'.repeat(64)+'.json')),false);
+});
+
+test('immutable final verification rejects different bytes even when all observed timestamps collide',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const raw=Buffer.from('original');let staged;
+ const reached=equalObservedTimes(t,{onClose:file=>{staged=file;fs.writeFileSync(file,Buffer.alloc(raw.length,120));}});
+ await assert.rejects(p.immutable('pointers/'+('6'.repeat(64))+'.json',raw),/Owned module file integrity/);assert.equal(reached(),true);assert.deepEqual(fs.readFileSync(staged),Buffer.alloc(raw.length,120));
+});
+
+for(const replacement of ['regular','hardlink','junction'])test(`immutable cleanup preserves a ${replacement} replacement instead of rebasing ownership`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const raw=Buffer.from('original'),foreign=path.join(f.original,'foreign');let staged,backup;
+ if(replacement==='junction'){fs.mkdirSync(foreign);fs.writeFileSync(path.join(foreign,'sentinel'),'foreign');}else fs.writeFileSync(foreign,'foreign');
+ const reached=onMetadataClose(t,file=>{staged=file;backup=file+'.owned';fs.renameSync(file,backup);if(replacement==='regular')fs.writeFileSync(file,'foreign');else if(replacement==='hardlink')fs.linkSync(foreign,file);else fs.symlinkSync(foreign,file,process.platform==='win32'?'junction':'dir');});
+ await assert.rejects(p.immutable('pointers/'+('3'.repeat(64))+'.json',raw));assert.equal(reached(),true);assert.deepEqual(fs.readFileSync(backup),raw);
+ if(replacement==='junction'){assert.equal(fs.lstatSync(staged).isSymbolicLink(),true);assert.equal(fs.readFileSync(path.join(foreign,'sentinel'),'utf8'),'foreign');}else assert.equal(fs.readFileSync(staged,'utf8'),'foreign');
+ if(replacement==='hardlink')assert.equal(fs.statSync(foreign).nlink,2);
+});
+
+test('immutable exclusive publication never replaces a concurrently created destination',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const link=fs.linkSync;let staged,published,reached=false;
+ t.mock.method(fs,'linkSync',function(from,to){if(from.endsWith('.tmp')){staged=from;published=to;reached=true;fs.writeFileSync(to,'foreign');}return link.call(this,from,to);});
+ await assert.rejects(p.immutable('pointers/'+('4'.repeat(64))+'.json',Buffer.from('original')),error=>error.code==='EEXIST');assert.equal(reached,true);assert.equal(fs.readFileSync(published,'utf8'),'foreign');assert.equal(fs.existsSync(staged),false);
+});
+
+test('immutable publication verifies linked bytes and preserves a changed linked pair on refusal',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const link=fs.linkSync,raw=Buffer.from('original');let staged,published;
+ t.mock.method(fs,'linkSync',function(from,to){const result=link.call(this,from,to);if(from.endsWith('.tmp')){staged=from;published=to;fs.writeFileSync(to,Buffer.alloc(raw.length,120));}return result;});
+ await assert.rejects(p.immutable('pointers/'+('5'.repeat(64))+'.json',raw),error=>error.reason==='integrity');assert.deepEqual(fs.readFileSync(published),Buffer.alloc(raw.length,120));assert.equal(fs.statSync(staged).nlink,2);
+});
+
+test('failed seed cleanup retains its original writer receipt across asynchronous source verification',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const source=path.join(f.original,'source'),destination=await p.file('staging/seed.fixture'),raw=Buffer.from('original');fs.writeFileSync(source,raw);
+ const lstat=fs.promises.lstat;let count=0,backup;
+ t.mock.method(fs.promises,'lstat',async function(file,...args){if(file===source&&++count===2){backup=destination+'.owned';fs.renameSync(destination,backup);fs.writeFileSync(destination,'foreign');}return lstat.call(this,file,...args);});
+ assert.equal(await p.seed(source,destination,{bytes:raw.length,sha256:'0'.repeat(64)},f.selected),false);assert.equal(count,2);assert.equal(fs.readFileSync(destination,'utf8'),'foreign');assert.deepEqual(fs.readFileSync(backup),raw);assert.deepEqual(fs.readFileSync(source),raw);
+});
+
+test('successful seed refuses destination mutation during asynchronous source verification',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const source=path.join(f.original,'source'),destination=await p.file('staging/seed.fixture'),raw=Buffer.from('original');fs.writeFileSync(source,raw);
+ const lstat=fs.promises.lstat;let count=0;
+ t.mock.method(fs.promises,'lstat',async function(file,...args){if(file===source&&++count===2)fs.writeFileSync(destination,Buffer.alloc(raw.length,120));return lstat.call(this,file,...args);});
+ await assert.rejects(p.seed(source,destination,{bytes:raw.length,sha256:sha(raw)},f.selected),error=>error.reason==='integrity');assert.equal(count,2);assert.deepEqual(fs.readFileSync(destination),Buffer.alloc(raw.length,120));assert.deepEqual(fs.readFileSync(source),raw);
+});
+
+test('seed cleanup preserves different completed bytes with an identical observed full stamp',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const source=path.join(f.original,'source'),destination=await p.file('staging/seed.fixture'),raw=Buffer.from('original');fs.writeFileSync(source,raw);let count=0;
+ equalObservedTimes(t,{onLstat:file=>{if(file===source&&++count===2)fs.writeFileSync(destination,Buffer.alloc(raw.length,120));}});
+ assert.equal(await p.seed(source,destination,{bytes:raw.length,sha256:'0'.repeat(64)},f.selected),false);assert.equal(count,2);assert.deepEqual(fs.readFileSync(destination),Buffer.alloc(raw.length,120));assert.deepEqual(fs.readFileSync(source),raw);
+});
+
+test('staging cleanup cannot remove an unknown directory, even with a valid UUID path',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.ensureCache(f.selected);const directory=path.join(p.cacheRoot,'staging',require('node:crypto').randomUUID());fs.mkdirSync(directory);fs.writeFileSync(path.join(directory,'foreign'),'foreign');
+ assert.equal(await p.removeStaging(directory),false);assert.equal(fs.readFileSync(path.join(directory,'foreign'),'utf8'),'foreign');
+});
+
+for(const mutation of ['bytes','extra','root','hardlink','junction'])test(`materialize preserves a ${mutation} mutation after the compiled validator and does not publish it`,async t=>{
+ const f=fixture(t),adapter=f.options.registry['mentat.fixture.v1'];let file,staging,backup,reached=false;const foreign=path.join(f.original,'foreign');
+ fs.mkdirSync(foreign);fs.writeFileSync(path.join(foreign,'sentinel'),'foreign');
+ adapter.validateSnapshot=async({files,root})=>{reached=true;file=files.aggregate;staging=path.dirname(root);
+  if(mutation==='bytes')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));
+  if(mutation==='extra')fs.writeFileSync(path.join(staging,'foreign'),'foreign');
+  if(mutation==='root'){backup=staging+'.owned';fs.renameSync(staging,backup);fs.mkdirSync(staging);fs.writeFileSync(path.join(staging,'foreign'),'foreign');}
+  if(mutation==='hardlink'){backup=file+'.owned';fs.renameSync(file,backup);fs.writeFileSync(path.join(foreign,'linked'),'foreign');fs.linkSync(path.join(foreign,'linked'),file);}
+  if(mutation==='junction'){const models=path.dirname(file);backup=models+'.owned';fs.renameSync(models,backup);fs.symlinkSync(foreign,models,process.platform==='win32'?'junction':'dir');}
+  return true;
+ };
+ const p=new GitHubModules(f.options);await assert.rejects(p.prepare(f.selected));assert.equal(reached,true);assert.equal(fs.existsSync(path.join(p.cacheRoot,'snapshots',sha(f.remote.manifestBytes))),false);assert.equal(f.journal.active,null);assert.equal(f.journal.staged,null);
+ assert.equal(fs.existsSync(staging),true);assert.equal(fs.readFileSync(path.join(foreign,'sentinel'),'utf8'),'foreign');
+ if(mutation==='bytes')assert.deepEqual(fs.readFileSync(file),Buffer.alloc(f.remote.bytes.length,120));if(mutation==='extra'||mutation==='root')assert.equal(fs.readFileSync(path.join(staging,'foreign'),'utf8'),'foreign');
+ if(mutation==='hardlink'){assert.equal(fs.readFileSync(file,'utf8'),'foreign');assert.equal(fs.statSync(file).nlink,2);}if(mutation==='junction')assert.equal(fs.lstatSync(path.dirname(file)).isSymbolicLink(),true);
+});
+
+test('a cancelled partial role is preserved rather than recursively cleaned as a completed member',async t=>{
+ const f=fixture(t),controller=new AbortController(),send=f.transport.segment;let reached=false;
+ f.transport.segment=async(...args)=>{if(!reached){reached=true;controller.abort();}return send(...args);};
+ const p=new GitHubModules(f.options);await assert.rejects(p.prepare(f.selected,{signal:controller.signal}),error=>error.reason==='cancelled');assert.equal(reached,true);const stages=fs.readdirSync(path.join(p.cacheRoot,'staging'));assert.equal(stages.length,1);assert.equal(fs.existsSync(path.join(p.cacheRoot,'staging',stages[0],f.remote.manifest.datasets[0].datasetId,'models','aggregate.json')),true);assert.equal(f.journal.staged,null);
+});
+
+test('materialize refuses post-validator byte changes despite an identical observed full stamp',async t=>{
+ const f=fixture(t);equalObservedTimes(t);let file,reached=false;f.options.registry['mentat.fixture.v1'].validateSnapshot=async({files})=>{reached=true;file=files.aggregate;fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));return true;};const p=new GitHubModules(f.options);
+ await assert.rejects(p.prepare(f.selected),/Owned module file integrity/);assert.equal(reached,true);assert.deepEqual(fs.readFileSync(file),Buffer.alloc(f.remote.bytes.length,120));assert.equal(f.journal.staged,null);
+});
+
+test('materialize rechecks the published tree before reporting success and preserves a changed result',async t=>{
+ const f=fixture(t),rename=fs.renameSync;let reached=false,published;
+ t.mock.method(fs,'renameSync',function(from,to){const result=rename.call(this,from,to);if(path.dirname(from)===path.join(f.options.cacheRoot,'staging')){reached=true;published=path.join(to,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');fs.writeFileSync(published,Buffer.alloc(f.remote.bytes.length,120));}return result;});
+ await assert.rejects(new GitHubModules(f.options).prepare(f.selected),error=>error.reason==='integrity');assert.equal(reached,true);assert.deepEqual(fs.readFileSync(published),Buffer.alloc(f.remote.bytes.length,120));assert.equal(f.journal.staged,null);
+});
+
+test('a wholly owned completed staging tree is cleaned after a validator refusal',async t=>{
+ const f=fixture(t);let reached=false;f.options.registry['mentat.fixture.v1'].validateSnapshot=async()=>{reached=true;return false;};const p=new GitHubModules(f.options);
+ await assert.rejects(p.prepare(f.selected),/Compiled module reader/);assert.equal(reached,true);assert.deepEqual(fs.readdirSync(path.join(p.cacheRoot,'staging')),[]);assert.equal(f.journal.staged,null);
+});
+
 function changedStamp(t,file,field){
  const original=fs.promises.lstat;let calls=0;
  t.mock.method(fs.promises,'lstat',async function(target,options){

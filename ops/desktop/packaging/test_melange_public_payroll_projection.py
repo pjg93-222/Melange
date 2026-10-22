@@ -1,5 +1,6 @@
 """Deterministic projection of fabricated observations, with hostile boundaries."""
 from dataclasses import replace
+from contextlib import contextmanager
 import gzip
 import json
 import os
@@ -42,6 +43,9 @@ class ProjectionTests(unittest.TestCase):
         with public.validated_inputs(self.root, self.plan) as value:
             return projection.project_observations(value, self.destination)
 
+    def input_snapshot(self):
+        return {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.root.iterdir()}
+
     def assert_failure_preserves_inputs(self):
         before = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.root.iterdir()}
         with self.assertRaises((ValueError, OSError)):
@@ -49,6 +53,27 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(before, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.root.iterdir()})
         self.assertFalse(self.destination.exists())
         self.assertEqual(list(self.output.iterdir()), [])
+
+    @contextmanager
+    def colliding_stage_change_time(self):
+        """Retain real identity/size/mtime/link checks, force only CT collision."""
+        path_stamp, handle_stamp = public._path_stamp, public._handle_stamp
+        captured = {}
+        def collide(stamp):
+            if captured.get('identity') != stamp[:2]:
+                return stamp
+            index = len(stamp) - 1 if os.name == 'nt' else 4
+            return stamp[:index] + (captured['changeTime'],) + stamp[index + 1:]
+        def path_value(path):
+            value = path_stamp(path)
+            if Path(path).name.startswith('.melange-public-') and not captured:
+                index = len(value) - 1 if os.name == 'nt' else 4
+                captured.update(identity=value[:2], changeTime=value[index])
+            return collide(value)
+        def handle_value(stream):
+            return collide(handle_stamp(stream))
+        with patch.object(public, '_path_stamp', path_value), patch.object(public, '_handle_stamp', handle_value):
+            yield captured
 
     def test_three_roles_emit_only_source_native_whitelist_and_receipt(self):
         before = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.root.iterdir()}
@@ -257,6 +282,7 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(public._path_stamp(changed_path[0]), changed_stamp[0])
 
     def test_edit_before_first_stage_stamp_cannot_become_a_trusted_baseline(self):
+        inputs_before = self.input_snapshot()
         original = public._path_stamp
         changed = [False]
         def first_stamp(path):
@@ -267,8 +293,97 @@ class ProjectionTests(unittest.TestCase):
                 os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
             return original(path)
         with patch.object(public, '_path_stamp', first_stamp):
-            self.assert_failure_preserves_inputs()
+            with self.assertRaises((ValueError, OSError)):
+                self.run_projection()
         self.assertTrue(changed[0], 'The regression must reach the pre-stamp publication window')
+        self.assertFalse(self.destination.exists())
+        stages = list(self.output.glob('.melange-public-*.tmp'))
+        self.assertEqual(len(stages), 1)
+        self.assertEqual(stages[0].read_bytes(), b'x' * stages[0].stat().st_size)
+        self.assertEqual(self.input_snapshot(), inputs_before)
+
+    def test_equal_change_time_different_stage_bytes_cannot_publish(self):
+        inputs_before = self.input_snapshot()
+        fingerprint = projection._program_fingerprint
+        calls, changed = [0], [None]
+        def mutate():
+            calls[0] += 1
+            if calls[0] == 2:
+                stage = next(self.output.glob('.melange-public-*.tmp'))
+                before = stage.stat()
+                old_stamp = public._path_stamp(stage)
+                stage.write_bytes(b'x' * before.st_size)
+                os.utime(stage, ns=(before.st_atime_ns, before.st_mtime_ns))
+                self.assertEqual(public._path_stamp(stage), old_stamp)
+                changed[0] = stage
+            return fingerprint()
+        with self.colliding_stage_change_time(), patch.object(projection, '_program_fingerprint', mutate):
+            with self.assertRaises((ValueError, OSError)):
+                self.run_projection()
+        self.assertFalse(self.destination.exists())
+        self.assertEqual(changed[0].read_bytes(), b'x' * changed[0].stat().st_size)
+        self.assertEqual(self.input_snapshot(), inputs_before)
+
+    def test_equal_change_time_different_stage_bytes_survive_failure_cleanup(self):
+        inputs_before = self.input_snapshot()
+        fingerprint = projection._program_fingerprint
+        calls, changed = [0], [None]
+        def mutate_then_fail():
+            calls[0] += 1
+            if calls[0] == 2:
+                stage = next(self.output.glob('.melange-public-*.tmp'))
+                before = stage.stat()
+                old_stamp = public._path_stamp(stage)
+                stage.write_bytes(b'x' * before.st_size)
+                os.utime(stage, ns=(before.st_atime_ns, before.st_mtime_ns))
+                self.assertEqual(public._path_stamp(stage), old_stamp)
+                changed[0] = stage
+                raise RuntimeError('controlled failure after completed stage')
+            return fingerprint()
+        with self.colliding_stage_change_time(), patch.object(projection, '_program_fingerprint', mutate_then_fail):
+            with self.assertRaisesRegex(RuntimeError, 'controlled failure after completed stage'):
+                self.run_projection()
+        self.assertFalse(self.destination.exists())
+        self.assertEqual(changed[0].read_bytes(), b'x' * changed[0].stat().st_size)
+        self.assertEqual(self.input_snapshot(), inputs_before)
+
+    def test_link_hook_change_refuses_receipt_and_preserves_changed_links(self):
+        inputs_before = self.input_snapshot()
+        link, changed = os.link, [None]
+        def mutate_and_link(source, destination, *args, **kwargs):
+            stage = Path(source)
+            before = stage.stat()
+            stage.write_bytes(b'x' * before.st_size)
+            os.utime(stage, ns=(before.st_atime_ns, before.st_mtime_ns))
+            changed[0] = stage
+            return link(source, destination, *args, **kwargs)
+        with self.colliding_stage_change_time(), patch.object(projection.os, 'link', mutate_and_link):
+            with self.assertRaises((ValueError, OSError)):
+                self.run_projection()
+        self.assertTrue(self.destination.exists())
+        self.assertEqual(changed[0].stat().st_nlink, 2)
+        self.assertEqual(changed[0].read_bytes(), b'x' * changed[0].stat().st_size)
+        self.assertEqual(self.destination.read_bytes(), changed[0].read_bytes())
+        self.assertEqual(self.input_snapshot(), inputs_before)
+
+    def test_unlink_hook_change_refuses_receipt_and_preserves_destination(self):
+        inputs_before = self.input_snapshot()
+        unlink, changed = Path.unlink, [False]
+        def mutate_and_unlink(path, *args, **kwargs):
+            if path.name.startswith('.melange-public-') and self.destination.exists():
+                before = path.stat()
+                path.write_bytes(b'x' * before.st_size)
+                os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+                changed[0] = True
+            return unlink(path, *args, **kwargs)
+        with self.colliding_stage_change_time(), patch.object(Path, 'unlink', mutate_and_unlink):
+            with self.assertRaises((ValueError, OSError)):
+                self.run_projection()
+        self.assertTrue(changed[0])
+        self.assertEqual(list(self.output.glob('.melange-public-*.tmp')), [])
+        self.assertEqual(self.destination.stat().st_nlink, 1)
+        self.assertEqual(self.destination.read_bytes(), b'x' * self.destination.stat().st_size)
+        self.assertEqual(self.input_snapshot(), inputs_before)
 
     def test_invalid_gzip_fails_without_a_published_output(self):
         spec = self.plan.inputs[0]
