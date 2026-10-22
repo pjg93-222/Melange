@@ -3,10 +3,20 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const {GitHubModules,fileDigest}=require('../github-modules.cjs');
 const {fail}=require('../github-module-protocol.cjs');
-const {environment,signed,sha}=require('./fixtures/github-module-fixture.cjs');
+const {environment,signed,sha,redirectedLocalCache}=require('./fixtures/github-module-fixture.cjs');
 function fixture(t){const f=environment();t.after(()=>f.cleanup());return f;}
 function roleFile(candidate,f){return path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');}
 function next(f,sequence=2,bytes=Buffer.from('{"aggregate":42,"revision":2}')){f.remote=signed('mentat',{keys:f.remote.keys,sequence,bytes});}
+
+test('a fixed transparently redirected native cache adopts one physical root before metadata, segments and snapshot checks',async t=>{
+ const f=fixture(t),local=path.join(fs.realpathSync.native(f.temporary),'local');fs.mkdirSync(local);const redirect=redirectedLocalCache(t,local);
+ const previous=process.env.LOCALAPPDATA;t.after(()=>{if(previous===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=previous;});process.env.LOCALAPPDATA=local;
+ const p=new GitHubModules({...f.options,cacheRoot:path.join(local,'MelangeData','mentat','github-module-data')}),selected=structuredClone(f.selected),candidate=await p.prepare(f.selected);
+ const physical=path.join(redirect.physicalRoot,'mentat','github-module-data');assert.equal(p.cacheRoot,physical);assert.equal(candidate.effectiveConfiguration.ownerGitHubModuleData.cacheRoot,physical);
+ assert.equal(candidate.snapshotRoot,path.join(physical,'snapshots',candidate.manifestSha256));assert.deepEqual(fs.readFileSync(roleFile(candidate,f)),f.remote.bytes);
+ assert.equal(fs.readdirSync(path.join(physical,'pointers')).length,1);assert.ok(fs.readdirSync(path.join(physical,'pointers'))[0].endsWith('.json'));assert.deepEqual(f.selected,selected);
+ await p.commitActive(candidate,f.selected);assert.equal(f.journal.active.manifestSha256,candidate.manifestSha256);
+});
 
 function onMetadataClose(t,action){
  const open=fs.promises.open;let reached=false;

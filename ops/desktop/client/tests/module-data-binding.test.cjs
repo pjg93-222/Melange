@@ -4,8 +4,8 @@ const fs=require('node:fs'),path=require('node:path');
 const {spawnSync}=require('node:child_process');
 const {canonical}=require('../access-client.cjs');
 const {GitHubModules}=require('../github-modules.cjs');
-const {validateModuleBinding}=require('../module-data-binding.cjs');
-const {environment,signed,sha}=require('./fixtures/github-module-fixture.cjs');
+const {validateModuleBinding,checkedNativeCacheRoot}=require('../module-data-binding.cjs');
+const {environment,signed,sha,redirectedLocalCache}=require('./fixtures/github-module-fixture.cjs');
 async function fixture(t,appId='mentat'){
  const f=environment(appId);t.after(()=>f.cleanup());
  f.selected.connection={schemaVersion:1,console:'original-console',reports:'original-report-output'};
@@ -14,6 +14,27 @@ async function fixture(t,appId='mentat'){
  return {...f,candidate,options,role:path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json'),cache:f.options.cacheRoot};
 }
 function metadataFiles(f){return {pointer:path.join(f.cache,'pointers',f.candidate.pointerDigest+'.json'),manifest:path.join(f.cache,'manifests',f.candidate.manifestSha256+'.json')};}
+test('binding derives only the checked fixed redirected root, preserves exact source identity and performs no writes',async t=>{
+ const f=environment('mentat');t.after(()=>f.cleanup());const local=path.join(fs.realpathSync.native(f.temporary),'local');fs.mkdirSync(local);const redirect=redirectedLocalCache(t,local);
+ const previous=process.env.LOCALAPPDATA;t.after(()=>{if(previous===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=previous;});process.env.LOCALAPPDATA=local;
+ const candidate=await new GitHubModules({...f.options,cacheRoot:path.join(local,'MelangeData','mentat','github-module-data')}).prepare(f.selected),configuration=structuredClone(candidate.effectiveConfiguration);
+ const options={appId:'mentat',profile:f.profile,configuration,publicKeys:f.options.publicKeys,registry:f.options.registry},before=inventory(f.temporary),journal=await f.store.read(),requests=f.requests.length;
+ const result=await validateModuleBinding(options),physical=path.join(redirect.physicalRoot,'mentat','github-module-data');assert.equal(result.source.cacheRoot,physical);assert.equal(result.snapshotRoot,candidate.snapshotRoot);
+ for(const cacheRoot of [path.join(local,'MelangeData','mentat','github-module-data'),path.join(local,'Packages','arbitrary-cache')])await assert.rejects(validateModuleBinding({...options,configuration:{...configuration,ownerGitHubModuleData:{...configuration.ownerGitHubModuleData,cacheRoot}}}),/Unapproved/);
+ assert.deepEqual(configuration,candidate.effectiveConfiguration);assert.deepEqual(await f.store.read(),journal);assert.equal(f.requests.length,requests);assert.deepEqual(inventory(f.temporary),before);
+});
+
+test('native cache root checking rejects a replacement during resolution and preserves both directories',t=>{
+ const f=environment();t.after(()=>f.cleanup());const base=fs.realpathSync.native(f.profile),root=path.join(base,'packs','github-module-data'),backup=root+'.original';fs.mkdirSync(root,{recursive:true});fs.writeFileSync(path.join(root,'sentinel'),'original');
+ const native=fs.realpathSync.native;let changed=false;t.mock.method(fs.realpathSync,'native',function(file,...args){if(file===root&&!changed){changed=true;fs.renameSync(root,backup);fs.mkdirSync(root);}return native.call(this,file,...args);});
+ assert.throws(()=>checkedNativeCacheRoot(base,root),/identity|changed/);assert.equal(changed,true);assert.equal(fs.readFileSync(path.join(backup,'sentinel'),'utf8'),'original');assert.equal(fs.statSync(root).isDirectory(),true);
+});
+
+test('native cache roots reject a transparent resolution outside the approved base',t=>{
+ const f=environment();t.after(()=>f.cleanup());const base=path.join(fs.realpathSync.native(f.temporary),'local');fs.mkdirSync(base);const outside=path.join(fs.realpathSync.native(f.temporary),'outside','MelangeData');
+ const redirect=redirectedLocalCache(t,base,{physicalRoot:outside}),root=path.join(base,'MelangeData','mentat','github-module-data');fs.mkdirSync(path.join(redirect.physicalRoot,'mentat','github-module-data'),{recursive:true});
+ assert.throws(()=>checkedNativeCacheRoot(base,root),/unsafe|boundary/);assert.equal(fs.statSync(outside).isDirectory(),true);
+});
 function inventory(root){
  const result=[];
  function walk(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name),st=fs.lstatSync(file,{bigint:true});result.push([path.relative(root,file),String(st.ino),String(st.size),String(st.mtimeNs),String(st.ctimeNs),entry.isFile()?sha(fs.readFileSync(file)):null]);if(entry.isDirectory())walk(file);}}
