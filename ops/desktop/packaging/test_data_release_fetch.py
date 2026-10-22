@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import threading
+import time
 import zipfile
 
 import pytest
@@ -21,6 +22,29 @@ NEWER = 'data-melange-2026-10-20'
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def _rewrite_same_bytes_with_changed_stamp(path, raw, *, links=1):
+    """Require an observable native-change-only fixture before testing cleanup."""
+    before = fetch._path_stamp(path, links=links)
+    original = path.stat()
+    assert path.read_bytes() == raw
+    deadline = time.monotonic() + 1.0
+    while True:
+        assert time.monotonic() < deadline, 'Fixture could not advance the native change stamp within one second'
+        path.write_bytes(raw)
+        os.utime(path, ns=(original.st_atime_ns, original.st_mtime_ns))
+        after = fetch._path_stamp(path, links=links)
+        # Keep identity, link count, mode, size and mtime unchanged. Windows
+        # supplies required native ChangeTime in the final tuple component;
+        # POSIX supplies ctime there. Do not replace this with an mtime change.
+        assert after[:-1] == before[:-1]
+        assert path.read_bytes() == raw
+        if after[-1] != before[-1]:
+            return after
+        remaining = deadline - time.monotonic()
+        assert remaining > 0, 'Fixture could not advance the native change stamp within one second'
+        time.sleep(min(0.005, remaining))
 
 
 def build_release(members, app='melange', tag=NEWER, corrupt_sha=False):
@@ -625,9 +649,13 @@ def test_changed_linked_stage_is_preserved_after_completed_verification(roots, m
         if path.name.startswith('.melange-data-') and path.stat().st_nlink == 2 and not changed:
             before = path.stat()
             raw = b'x' * before.st_size if change_bytes else path.read_bytes()
-            path.write_bytes(raw)
-            os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
-            changed.append((path, raw, fetch._path_stamp(path, links=2)))
+            if change_bytes:
+                path.write_bytes(raw)
+                os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+                stamp = fetch._path_stamp(path, links=2)
+            else:
+                stamp = _rewrite_same_bytes_with_changed_stamp(path, raw, links=2)
+            changed.append((path, raw, stamp))
             raise error
         return unlink(path, *args, **options)
     monkeypatch.setattr(Path, 'unlink', remove)
@@ -646,10 +674,7 @@ def test_changed_published_member_is_preserved_during_later_failure_rollback(roo
     def fail_later(source, target, **options):
         if target.name == 'z.bin':
             first = data / 'a.bin'
-            before = first.stat()
-            first.write_bytes(first.read_bytes())
-            os.utime(first, ns=(before.st_atime_ns, before.st_mtime_ns))
-            changed.append(fetch._path_stamp(first))
+            changed.append(_rewrite_same_bytes_with_changed_stamp(first, first.read_bytes()))
             raise error
         return real(source, target, **options)
     monkeypatch.setattr(fetch, '_replace', fail_later)

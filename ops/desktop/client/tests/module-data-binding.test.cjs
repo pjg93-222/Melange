@@ -128,7 +128,7 @@ test('the second allowed cache is app-scoped LOCALAPPDATA, with no arbitrary sib
  try{
   const cacheRoot=path.join(local,'MelangeData','mentat','github-module-data'),candidate=await new GitHubModules({...f.options,cacheRoot}).prepare(f.selected);
   const options={appId:'mentat',profile:f.profile,configuration:candidate.effectiveConfiguration,publicKeys:f.options.publicKeys,registry:f.options.registry};
-  assert.equal((await validateModuleBinding(options)).source.cacheRoot,cacheRoot);
+  assert.equal((await validateModuleBinding(options)).source.cacheRoot,path.join(fs.realpathSync.native(local),'MelangeData','mentat','github-module-data'));
   const configuration=structuredClone(candidate.effectiveConfiguration);configuration.ownerGitHubModuleData.cacheRoot=path.join(local,'MelangeData','melange','github-module-data');
   await assert.rejects(validateModuleBinding({...options,configuration}),/Unapproved/);
  }finally{if(previous===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=previous;}
