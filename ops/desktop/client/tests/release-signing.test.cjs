@@ -70,10 +70,61 @@ test('a junction parent cannot redirect signing outside the private staging dire
  const f=fixture(t),link=path.join(f.root,'junction');fs.symlinkSync(path.join(f.vendor,'nsis'),link,'junction');
  let called=false;await assert.rejects(signFile(path.join(link,'elevate.exe'),f.root,{execute:async()=>{called=true;}}),/private regular/);assert.equal(called,false);fs.unlinkSync(link);
 });
+function vendorPathDiagnostic(file,root,reported,baseline){
+ const value=reported.path,isString=typeof value==='string',equal=(a,b)=>a.toLowerCase()===b.toLowerCase();
+ const short=value=>/(?:^|[\\/])[^\\/]*~[0-9]+(?:[.][^\\/]*)?(?:[\\/]|$)/i.test(value);
+ const facts={kind:'copied-vendor-path-diagnostic',requestedAbsolute:path.win32.isAbsolute(file),returnedPathString:isString,
+  returnedAbsolute:isString&&path.win32.isAbsolute(value),lexicalPathEqual:isString&&equal(file,value),
+  slashNormalizedEqual:isString&&equal(file.replace(/\//g,'\\'),value.replace(/\//g,'\\')),
+  requestedShortComponent:short(file),returnedShortComponent:isString&&short(value),
+  returnedProviderPrefix:isString&&/^(?:Microsoft[.]PowerShell[.]Core\\)?FileSystem::/i.test(value),
+  requestedExtendedPrefix:/^\\\\[?.]\\/.test(file),returnedExtendedPrefix:isString&&/^\\\\[?.]\\/.test(value),
+  basenameEqual:isString&&equal(path.win32.basename(file),path.win32.basename(value)),returnedEqualsRoot:isString&&equal(root,value),
+  statusValid:reported.status==='Valid',reportedHashMatchesBefore:reported.sha256===baseline.sha256,returnedLocalFixtureDrive:false,refusedPathScope:false,
+  expectedWithinNativeRoot:null,returnedWithinNativeRoot:null,sameNativeRealpath:null,sameDevIno:null,sameSize:null,
+  regularSingleLink:null,expectedIdentityPreserved:null,diagnosticSizeBound:null,
+  expectedHashPreserved:null,sameCurrentSHA256:null,returnedHashMatchesReported:null,diagnosticError:null};
+ const drive=value=>{
+  if(typeof value!=='string'||/[\x00-\x1f]/.test(value))return null;
+  if(value.startsWith('\\\\?\\')){const plain=value.slice(4);return /^[a-z]:\\/i.test(plain)?plain[0].toUpperCase():null;}
+  return /^[a-z]:[\\/]/i.test(value)?value[0].toUpperCase():null;
+ };
+ const requestedDrive=drive(file),returnedDrive=drive(value);
+ facts.returnedLocalFixtureDrive=requestedDrive!==null&&returnedDrive===requestedDrive;
+ if(!facts.returnedLocalFixtureDrive){facts.refusedPathScope=true;return facts;}
+ try{
+  if(!facts.returnedAbsolute)return facts;
+  const nativeRoot=fs.realpathSync.native(root),nativeExpected=fs.realpathSync.native(file),nativeReturned=fs.realpathSync.native(value);
+  const contained=p=>{const r=path.win32.relative(nativeRoot,p);return r!==''&&r!=='..'&&!r.startsWith('..'+path.win32.sep)&&!path.win32.isAbsolute(r);};
+  facts.expectedWithinNativeRoot=contained(nativeExpected);facts.returnedWithinNativeRoot=contained(nativeReturned);
+  if(!facts.expectedWithinNativeRoot||!facts.returnedWithinNativeRoot)return facts;
+  const expected=fs.lstatSync(nativeExpected,{bigint:true}),returned=fs.lstatSync(nativeReturned,{bigint:true});
+  facts.sameNativeRealpath=equal(nativeExpected,nativeReturned);facts.sameDevIno=expected.dev===returned.dev&&expected.ino===returned.ino;
+  facts.sameSize=expected.size===returned.size;
+  facts.regularSingleLink=expected.isFile()&&!expected.isSymbolicLink()&&expected.nlink===1n&&returned.isFile()&&!returned.isSymbolicLink()&&returned.nlink===1n;
+  facts.expectedIdentityPreserved=expected.dev===baseline.stat.dev&&expected.ino===baseline.stat.ino&&expected.size===baseline.stat.size;
+  facts.diagnosticSizeBound=baseline.stat.size>0n&&baseline.stat.size<=16n*1024n*1024n;
+  if(facts.regularSingleLink&&facts.sameSize&&facts.expectedIdentityPreserved&&facts.diagnosticSizeBound){
+   const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+   const current=hash(nativeExpected),returnedHash=hash(nativeReturned);
+   facts.expectedHashPreserved=current===baseline.sha256;facts.sameCurrentSHA256=current===returnedHash;facts.returnedHashMatchesReported=returnedHash===reported.sha256;
+  }
+ }catch(error){facts.diagnosticError=typeof error.code==='string'&&/^[A-Z_]{1,32}$/.test(error.code)?error.code:'diagnostic-read-error';}
+ return facts;
+}
+
 test('actual Windows subprocess verifies a copied vendor binary without signing or changing it',{skip:process.platform!=='win32'},async t=>{
  const f=fixture(t),file=path.join(f.root,'vendor-powershell.exe');
  fs.copyFileSync(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,file);
- const before=f.digest(file),result=await signFile(file,f.root,{verify:true});
+ const before=f.digest(file),baseline={stat:fs.lstatSync(file,{bigint:true}),sha256:before};
+ const execute=async(command,args,settings)=>{
+  const response=await require('node:util').promisify(require('node:child_process').execFile)(command,args,settings);
+  let facts;
+  try{facts=vendorPathDiagnostic(file,f.root,JSON.parse(response.stdout.replace(/^\uFEFF/,'')),baseline);}
+  catch(error){facts={kind:'copied-vendor-path-diagnostic',diagnosticError:'response-json-unavailable'};}
+  t.diagnostic(JSON.stringify(facts));return response;
+ };
+ const result=await signFile(file,f.root,{verify:true,execute});
  assert.equal(result.status,'Valid');assert.equal(result.signed,false);assert.equal(result.preserved,true);assert.equal(result.sha256,before);assert.equal(f.digest(file),before);
 });
 
