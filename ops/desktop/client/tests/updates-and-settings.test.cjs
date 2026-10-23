@@ -7,7 +7,10 @@ test('updates are checked unconditionally and the Authenticode chain checks are 
  const main=read('main.cjs');
  assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*await updater\.check\(\);/);
  assert.doesNotMatch(main,/publisher-trust|publisherTrusted|trustPublisher|trustUpdates|trust-updates|offerUpdateTrust|UPDATES_UNTRUSTED|updatesTrusted|Turn on updates/);
- assert.match(main,/autoUpdater:require\('electron-updater'\)\.autoUpdater,verifyNativePackage:async\(\)=>\{\},packaged:/);
+ // The installer publisher check is not disabled: updater.cjs uses its default, native-signature.cjs, which pins the
+ // signer thumbprint to the signed manifest's publisherThumbprints (tests/publisher-thumbprint.test.cjs).
+ assert.match(main,/autoUpdater:require\('electron-updater'\)\.autoUpdater,packaged:/);
+ assert.doesNotMatch(main,/verifyNativePackage:/);
  assert.match(main,/^\s*require\('electron-updater'\)\.autoUpdater\.verifyUpdateCodeSignature=async\(\)=>null;/m);
  // updater.cjs nativeTrust refuses every update when electron-updater has no publisherName, which verifyUpdateCodeSignature:true provides.
  assert.match(read('builder.cjs'),/verifyUpdateCodeSignature:true/);
