@@ -8,7 +8,7 @@ const {strictJson,exact}=require('./dataset-protocol.cjs');
 const {response}=require('./github-source.cjs');
 const protocol=require('./github-district-protocol.cjs');
 const {REPOSITORY,POINTER_PATH,ROLES,IDS,COMMIT,MAX_MANIFEST,assetURL,requireValue}=protocol;
-const API='https://api.github.com/repos/'+REPOSITORY;
+const API='https://api.github.com/repos/'+REPOSITORY,TAG_HOPS=4;
 class ConnectionError extends Error{constructor(cause){super('GitHub district connection unavailable');this.cause=cause;}}
 const connectionFailure=error=>error?.githubRateLimit===true||['ENETUNREACH','EHOSTUNREACH','ENOTFOUND','EAI_AGAIN','ECONNRESET','ECONNREFUSED','ETIMEDOUT'].includes(error?.code)||/^GitHub (?:request (?:deadline exceeded|timed out)|release unavailable \((?:502|503|504)\))$/.test(error?.message||'');
 const TEXT=Object.freeze({checking:'Checking GitHub district data.',downloading:'Downloading verified district data from GitHub.',verifying:'Verifying district data.',ready:'Using verified GitHub district data cached on this computer.',offline:'GitHub could not be reached. Using previously verified district data.',update:'New GitHub district data is ready. Reopen this district to use it.',error:'GitHub district data could not be verified. Existing files were preserved.'});
@@ -100,7 +100,14 @@ class GitHubDistricts{
   const previous=state.latest?this.catalogue(state).pointer:null,checked=protocol.pointer(strictJson(pointerBytes),this.publicKeys,previous?{catalogSequence:previous.value.catalogSequence,pointerDigest:previous.digest}:{});
   if(state.latest===checked.digest)return this.catalogue(state);
   const tag=strictJson(await read(API+'/git/ref/tags/'+checked.value.releaseTag));
-  requireValue(tag.ref==='refs/tags/'+checked.value.releaseTag&&tag.object?.type==='commit'&&tag.object.sha===checked.value.releaseCommit,'GitHub district release commit changed');
+  requireValue(tag.ref==='refs/tags/'+checked.value.releaseTag,'GitHub district release commit changed');
+  // Signed releases use annotated tags; peel a bounded chain of tag objects to the commit.
+  let target=tag.object;
+  for(let hops=0;target?.type==='tag';hops++){
+   requireValue(hops<TAG_HOPS&&typeof target.sha==='string'&&COMMIT.test(target.sha),'GitHub district release commit changed');
+   const annotated=strictJson(await read(API+'/git/tags/'+target.sha));requireValue(annotated.sha===target.sha,'GitHub district release commit changed');target=annotated.object;
+  }
+  requireValue(target?.type==='commit'&&target.sha===checked.value.releaseCommit,'GitHub district release commit changed');
   const bytes=await read(assetURL(checked.value.releaseTag,checked.value.manifest.asset),{maxBytes:checked.value.manifest.bytes,asset:true}),manifest=protocol.manifest(bytes,checked);
   state.catalogues[checked.digest]={envelope:checked.envelope,manifestBase64:bytes.toString('base64'),commit};state.latest=checked.digest;await this.commit(state);return {pointer:checked,manifest};
  }
