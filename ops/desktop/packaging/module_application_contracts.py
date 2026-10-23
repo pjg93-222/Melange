@@ -92,6 +92,7 @@ _SHARED = frozenset(('desktop_backend.py', 'module_application_contracts.py', 'm
                      'module_data_launch.py', 'module_data_snapshot.py', 'module_public_input_installers.py'))
 _APPLICATION = MappingProxyType({
     'melange': frozenset(('fec/surfaces/melange_public_data.py', 'fec/surfaces/staffer_live_server.py',
+        'fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py',
         'fec/surfaces/staffer_live_service.py', 'fec/surfaces/staffer_graph_snapshot.py',
         'fec/surfaces/public_data/index.html', 'fec/surfaces/public_data/public-data.js',
         'fec/surfaces/public_data/public-data.css')),
@@ -108,16 +109,19 @@ def application_contract(app_id, contract_id):
     installed source/bootstrap closure must still pass verify_program in the
     framed native handoff before consumer preparation or original-root writes.
     """
-    if app_id not in _APPLICATION or contract_id != app_id + '.public-data.v1':
+    paged = app_id == 'melange' and contract_id == 'melange.public-data.pages.v1'
+    if app_id not in _APPLICATION or (contract_id != app_id + '.public-data.v1' and not paged):
         return None
     from module_application_inventory import APPLICATION_SPECS
-    from module_public_input_installers import PUBLIC_KINDS, PUBLIC_IDS, PRIVATE_IDS
+    from module_public_input_installers import PUBLIC_KINDS, PUBLIC_IDS, PRIVATE_IDS, PAGED_KIND
     from module_public_input_installers import prepare_public_readers, install_public_readers
     spec = APPLICATION_SPECS[app_id]
+    if paged:
+        spec = MappingProxyType({**spec, 'contractId': contract_id, 'requiredKinds': (PAGED_KIND,)})
     require(type(spec) is MappingProxyType and set(spec) == _FIELDS
             and type(spec['schemaVersion']) is int and spec['schemaVersion'] == 1
             and spec['appId'] == app_id and spec['contractId'] == contract_id
-            and spec['requiredKinds'] == (PUBLIC_KINDS[app_id],)
+            and spec['requiredKinds'] == ((PAGED_KIND,) if paged else (PUBLIC_KINDS[app_id],))
             and spec['publicReaders'] == PUBLIC_IDS[app_id] and spec['privateBoundaries'] == PRIVATE_IDS[app_id]
             and type(spec['startupTimeoutMs']) is int
             and spec['startupTimeoutMs'] == (600000 if app_id == 'melange' else 300000)

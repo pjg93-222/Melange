@@ -26,6 +26,13 @@ function fixture(t,appId='melange',changeSpec=()=>{}){
 }
 function snapshot(f){const kind=PUBLIC_KINDS[f.appId][0],root=path.join(f.base,'snapshot'),roles=PUBLIC_ROLES[kind];
  return {dataset:{kind,adapterVersion:1,objects:Object.keys(roles).map(role=>({role,bytes:1,sha256:'a'.repeat(64)})),counts:{files:Object.keys(roles).length}},root,files:Object.fromEntries(Object.entries(roles).map(([role,spec])=>[role,path.join(root,...spec.path.split('/'))]))};}
+test('paged Melange selection is explicit and legacy default remains compatible',t=>{
+ const f=fixture(t),paged=f.lookup('melange',{runtime:f.runtime,resources:f.resources,publicDataMode:'paged-v1'});
+ assert.equal(f.contract.contractId,'melange.public-data.v1');assert.equal(paged.contractId,'melange.public-data.pages.v1');
+ assert.equal(paged.requiredKinds.join('|'),'melange.official-payroll-pages.v1');
+ assert.deepEqual(Object.keys(paged.registry[paged.requiredKinds[0]].roles),['index','receipt']);
+ assert.equal(paged.programFingerprint,f.contract.programFingerprint);
+});
 for(const appId of ['melange','mentat']){
  test(`${appId} compiled inventory has fixed public coverage, budget and closed source table`,()=>{
   const spec=APPLICATION_SPECS[appId];assert.equal(spec.contractId,appId+'.public-data.v1');assert.equal(spec.appId,appId);

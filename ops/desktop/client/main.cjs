@@ -259,7 +259,7 @@ function createModuleDataStartup(){
  // Reject untrusted source markers before installed-program or provider I/O.
  // The existing fresh launch preflight reports this through startup failure UI.
  let contract=null;
- try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources});}catch{}
+ try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id]});}catch{}
  const boundary=contract?require('./module-data-runtime-boundary.cjs').createRuntimeModuleBoundary({appId:definition.id,profile:userData,contract,
   publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],getRuntime:()=>runtime,getSelected:()=>read('settings.json'),
   onPreparing:()=>updateStatus('Preparing reviewed public data. Larger sources can take several minutes.'),
@@ -273,6 +273,7 @@ function createModuleDataStartup(){
   // component probe alone cannot establish installed reader health.
   contract,boundary,
   createProvider:contract=>new(require('./github-modules.cjs').GitHubModules)({appId:definition.id,profile:userData,
+   transport:new(require('./github-module-transport.cjs').GitHubModuleTransport)(definition.id,{paged:contract.contractId==='melange.public-data.pages.v1'}),
    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,
    protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)],
    store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}),

@@ -8,13 +8,13 @@ const NETWORK=new Set(['ENOTFOUND','EAI_AGAIN','ECONNRESET','ECONNREFUSED','ETIM
 function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module data transfer cancelled');}
 function networkError(error){return error?.reason?error:fail(NETWORK.has(error?.code)?'unreachable':'integrity',NETWORK.has(error?.code)?'GitHub module data is unavailable':'GitHub module connection verification failed');}
 class GitHubModuleTransport{
- constructor(appId,{request=https.request}={}){this.appId=appId;this.app=configuration(appId);this.request=request;}
+ constructor(appId,{request=https.request,paged=false}={}){requireValue(typeof paged==='boolean'&&(!paged||appId==='melange'),'Unsupported module data channel');this.appId=appId;this.app=configuration(appId);this.request=request;this.pointerPath=paged?'docs/desktop-data/on-demand-current.json':POINTER_PATH;}
  async fetch(url,{limit,expectedBytes,offset=0,totalBytes,signal,onChunk,asset=false,deadlineMs=15000}={}){
   requireValue(Number.isSafeInteger(limit)&&limit>=0&&limit<=MAX_SEGMENT&&Number.isSafeInteger(deadlineMs)&&deadlineMs>=50&&deadlineMs<=120000,'Invalid module transport bounds');
   canceled(signal);const deadline=Date.now()+deadlineMs;let target=new URL(url),redirects=0;
   const repo=this.app.repository,tag=TAG.source.slice(1,-1),commit=COMMIT.source.slice(1,-1);
   const api=new RegExp('^/repos/'+repo+'/(?:git/ref/heads/main|releases/tags/'+tag+'|git/ref/tags/'+tag+'|git/tags/'+commit+')$');
-  requireValue(!target.search&&(asset?target.hostname==='github.com'&&target.pathname.startsWith('/'+repo+'/releases/download/'):target.hostname==='api.github.com'?api.test(target.pathname):target.hostname==='raw.githubusercontent.com'&&new RegExp('^/'+repo+'/'+commit+'/'+POINTER_PATH.replaceAll('.','\\.')+'$').test(target.pathname)),'Invalid fixed module transport route');
+  requireValue(!target.search&&(asset?target.hostname==='github.com'&&target.pathname.startsWith('/'+repo+'/releases/download/'):target.hostname==='api.github.com'?api.test(target.pathname):target.hostname==='raw.githubusercontent.com'&&new RegExp('^/'+repo+'/'+commit+'/'+this.pointerPath.replaceAll('.','\\.')+'$').test(target.pathname)),'Invalid fixed module transport route');
   for(;;){
    requireValue(target.protocol==='https:'&&!target.username&&!target.password&&!target.hash&&(!target.port||target.port==='443'),'Invalid module transport destination');
    const allowed=asset?ASSET_HOSTS.has(target.hostname):['api.github.com','raw.githubusercontent.com'].includes(target.hostname);
@@ -77,7 +77,7 @@ class GitHubModuleTransport{
  }
  async pointer(commit,{signal}={}){
   requireValue(typeof commit==='string'&&COMMIT.test(commit)&&commit!=='0'.repeat(40),'Invalid GitHub module source commit');
-  return this.fetch('https://raw.githubusercontent.com/'+this.app.repository+'/'+commit+'/'+POINTER_PATH,{limit:32768,signal});
+  return this.fetch('https://raw.githubusercontent.com/'+this.app.repository+'/'+commit+'/'+this.pointerPath,{limit:32768,signal});
  }
  async verifyRelease(value,{signal}={}){
   requireValue(value&&TAG.test(value.releaseTag)&&COMMIT.test(value.releaseCommit),'Invalid module release binding');

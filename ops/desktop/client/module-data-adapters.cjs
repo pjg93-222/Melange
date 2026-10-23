@@ -20,6 +20,8 @@ const FORECAST=Object.freeze({selection:role('models/selection.json',4096),'givi
  'workbook-commercial-banks':role('reports/commercial-banks.xlsx',512*MiB),'workbook-credit-unions':role('reports/credit-unions.xlsx',512*MiB),
  'workbook-property-casualty':role('reports/property-casualty.xlsx',512*MiB),'workbook-telecom':role('reports/telecom.xlsx',512*MiB),'workbook-community-banks':role('reports/community-banks.xlsx',512*MiB)});
 const PUBLIC_KINDS=Object.freeze({melange:Object.freeze(['melange.official-payroll-observations.v1']),mentat:Object.freeze(['mentat.public-fec-tables.v1'])});
+const PAGED_KINDS=Object.freeze({melange:Object.freeze(['melange.official-payroll-pages.v1'])});
+const PAGED_ROLES=Object.freeze({'melange.official-payroll-pages.v1':Object.freeze({index:role('public-data/index.json',2*MiB),receipt:role('public-data/receipt.json',MiB)})});
 const FEC=Object.freeze(Object.fromEntries([...['2022','2024','2026'].flatMap(cycle=>['cm','cn','ccl','pas2'].map(table=>['mentat.fec.'+table+'.'+cycle,role('fec/'+cycle+'/'+table+'.psv',160*MiB)])),['mentat.fec.provenance',role('fec/provenance.json',65536)]]));
 const PUBLIC_ROLES=Object.freeze({'melange.official-payroll-observations.v1':Object.freeze({observations:role('public-data/observations.ndjson',8*GiB),receipt:role('public-data/receipt.json',MiB)}),'mentat.public-fec-tables.v1':FEC});
 const ROLE_MAPS=Object.freeze({'melange.staffer-graph-core.v1':GRAPH,'melange.payroll-identity-core.v1':PAYROLL,'mentat.aggregate-forecast-core.v1':FORECAST});
@@ -50,4 +52,5 @@ function registryFor({appId,sourceRoot,probe},kinds,maps){
 }
 function createModuleDataRegistry(options){return registryFor(options,CORE_KINDS,ROLE_MAPS);}
 function createPublicModuleDataRegistry(options){return registryFor(options,PUBLIC_KINDS,PUBLIC_ROLES);}
-module.exports={CORE_KINDS,ROLE_MAPS,PUBLIC_KINDS,PUBLIC_ROLES,createModuleDataRegistry,createPublicModuleDataRegistry};
+function createPagedModuleDataRegistry(options){return registryFor(options,PAGED_KINDS,PAGED_ROLES);}
+module.exports={CORE_KINDS,ROLE_MAPS,PUBLIC_KINDS,PUBLIC_ROLES,PAGED_KINDS,PAGED_ROLES,createModuleDataRegistry,createPublicModuleDataRegistry,createPagedModuleDataRegistry};

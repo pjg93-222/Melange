@@ -89,8 +89,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 9804,
-        "sha256": "c99c504aeb740e7ae9d30df5657a98c94a4b8e1bc212492c767eb2315a8c9a9a"
+        "bytes": 10138,
+        "sha256": "691f6bed3d307fcc38e7567c8baec366831dd7f34c7efbef0526c4c23ae8dde4"
       },
       {
         "root": "bootstrap",
@@ -107,14 +107,14 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_data_snapshot.py",
-        "bytes": 12275,
-        "sha256": "2f9ca31e4dd6d86f6913db05ae1df2595ed146ae3ec042764455786e2b5ac370"
+        "bytes": 12529,
+        "sha256": "4f86f84e0d660ca7cdfaa9a941280d30c504cea1dc5624d509f6d1bee4cecf80"
       },
       {
         "root": "bootstrap",
         "path": "module_public_input_installers.py",
-        "bytes": 17075,
-        "sha256": "ee90f39850e82a47ef5696dfc38c0cc8ddfa44ddd1886c3a2dd6c0edb386c822"
+        "bytes": 18005,
+        "sha256": "2876177482fc928ea19b12c60e5de42aff2da504779d4e89f93a4e07e939bc17"
       },
       {
         "root": "bootstrap",
@@ -238,6 +238,12 @@ const APPLICATION_SPECS=freeze({
       },
       {
         "root": "source",
+        "path": "fec/surfaces/demand_data.py",
+        "bytes": 11320,
+        "sha256": "cce86f0b41e8f87cd3d3b9f2da956cb43e25c499125c8932c4ab66ea024b7904"
+      },
+      {
+        "root": "source",
         "path": "fec/surfaces/melange_dashboard.py",
         "bytes": 5050,
         "sha256": "23f93d488261ccdd905d3914afb3a6da2198e273709be6353012b16e17abfcbf"
@@ -245,8 +251,14 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "fec/surfaces/melange_public_data.py",
-        "bytes": 22698,
-        "sha256": "56850120afdec11bdcef0e90d923729598431da927257b0c2397f9e51ddb95d6"
+        "bytes": 22789,
+        "sha256": "6f172768612773d8d46a29ba8a962dbec5fd91b4680fbeb10c6d4f9266bfda4b"
+      },
+      {
+        "root": "source",
+        "path": "fec/surfaces/melange_public_pages.py",
+        "bytes": 9091,
+        "sha256": "3c7b90171fbcfd35eb6ebeeea0e5aa7037c92c864f09026f029cccf9390a6a07"
       },
       {
         "root": "source",
@@ -453,7 +465,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "f9af7b16588edb2dd5e05977b731815d6606dd3b6108c680e7223b3650dec921",
+    "programFingerprint": "a8072374000cd7561b0dcc95e927aff7510cc2f4e75606648fa90debb2e068ff",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
