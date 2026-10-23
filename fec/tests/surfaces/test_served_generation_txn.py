@@ -7,8 +7,10 @@ directory.  These cases prove, on synthetic temp roots with a tiny writer only (
      from being pruned meanwhile;
   3. success serves G2 (manifest verifies), keeps G1 and prunes G0;
   4. a terminal audit_full.py failure (ROLLBACK_EXEMPT, committed as run_pipeline does) keeps G2;
-  5. the resolver falls back to the legacy approved/ directory whenever the pointer cannot be trusted, and the live server,
-     the alias receipt and the desktop backend follow it.
+  5. the resolver falls back to the legacy approved/ directory whenever the pointer cannot be trusted (malformed, unsealed,
+     a manifest that no longer hashes to the pointer, one changed byte in a listed file), and the live server, the alias
+     receipt and the desktop backend follow it;
+  6. retention prunes nothing when the open chain journals cannot be read.
 """
 import http.client
 import json
@@ -28,7 +30,8 @@ for _path in (str(FEC), str(REPO)):
 import chain_transaction as CT  # noqa: E402
 from surfaces import staffer_live_generation as G  # noqa: E402
 
-FILES = 8   # files per synthetic generation: well under the 50-file / 2 MiB fixture budget
+FILES = 8   # files per synthetic generation (about 1.3 KB of bytes each generation); every test's tmp tree stays under
+            # 50 files and 2 MiB (measured with --basetemp: 16 tests, 299 files / 103,797 bytes in total; largest 34 files / 12,370 B)
 
 
 def quiet(*_args, **_kwargs):
@@ -207,6 +210,49 @@ def test_resolver_falls_back_to_legacy_unless_the_pointer_names_a_sealed_generat
     other = root / 'installed-assets'                                        # not the <root>/fec/surfaces/staffer_live layout
     assert G.served_dir(other) == other / 'approved'
 
+
+
+def test_one_changed_byte_in_a_listed_file_falls_back_to_legacy(root):
+    G.publish_generation(root, writer('G1'), 'G1', log=quiet)
+    target = G.generation_dir(root, 'G1') / 'data' / 'member-1.json'
+    raw = bytearray(target.read_bytes())
+    raw[0] ^= 0x01                                                           # same size, one byte different
+    target.write_bytes(bytes(raw))
+    pointer = G.read_pointer(root)
+    assert pointer and G._manifest_matches(root, 'G1', pointer['sha256_manifest'])   # pointer and manifest still schema-valid
+    assert G.verify_generation(root, 'G1') == ['data/member-1.json: bytes differ from the manifest']
+    assert G.active_generation(root) is None and G.active_dir(root) == G.legacy_dir(root)
+
+
+def test_a_manifest_that_no_longer_hashes_to_the_pointer_falls_back_to_legacy(root):
+    G.publish_generation(root, writer('G1'), 'G1', log=quiet)
+    manifest = G.generation_dir(root, 'G1') / G.MANIFEST_NAME
+    doc = json.loads(manifest.read_bytes().decode('utf-8'))
+    doc['written_at'] = '2026-01-01T00:00:00Z'                               # valid JSON, valid schema, same file list
+    manifest.write_bytes(G._json_bytes(doc))
+    assert G.read_pointer(root)['generation'] == 'G1'                        # the pointer itself is still well formed
+    assert G.verify_generation(root, 'G1') == []                             # every listed file still matches
+    assert G.active_generation(root) is None and G.active_dir(root) == G.legacy_dir(root)
+
+
+def test_retention_prunes_nothing_unless_the_chain_journals_can_be_read(root, monkeypatch):
+    G.publish_generation(root, writer('G0'), 'G0', log=quiet)
+    with monkeypatch.context() as patch:
+        patch.setitem(sys.modules, 'chain_transaction', None)                # the import fails
+        assert G.journal_generations(root) is None
+        G.publish_generation(root, writer('G1'), 'G1', log=quiet)
+        published = G.publish_generation(root, writer('G2'), 'G2', log=quiet)
+    assert published['pruned'] == []
+    assert sorted(p.name for p in G.generations_dir(root).iterdir()) == ['G0', 'G1', 'G2']
+    unreadable = Path(CT.txn_base(str(root)), '20261023T000000000000Z-corrupt')
+    unreadable.mkdir(parents=True)
+    (unreadable / 'journal.json').write_text('{not a journal', encoding='utf-8', newline='\n')
+    assert G.journal_generations(root) is None                               # a journal that exists but cannot be read
+    assert G.publish_generation(root, writer('G3'), 'G3', log=quiet)['pruned'] == []
+    (unreadable / 'journal.json').unlink()                                  # a snapshot that never finished names nothing
+    assert G.journal_generations(root) == set()
+    assert G.publish_generation(root, writer('G4'), 'G4', log=quiet)['pruned'] == ['G0', 'G1', 'G2']
+    assert sorted(p.name for p in G.generations_dir(root).iterdir()) == ['G3', 'G4']
 
 def test_live_server_follows_the_pointer_and_a_rollback(root, monkeypatch):
     from fec.surfaces import staffer_live_server as live
