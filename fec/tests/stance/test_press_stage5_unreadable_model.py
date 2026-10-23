@@ -82,3 +82,40 @@ def test_the_model_hash_of_a_readable_tiny_dir_is_unchanged(tmp_path):
         data = (model / name).read_bytes()
         expected.update(("%s\0%d\0%s\n" % (name, len(data), hashlib.sha256(data).hexdigest())).encode("utf-8"))
     assert S.model_dir_sha256(model) == expected.hexdigest()
+
+
+@pytest.mark.parametrize("winerror", [362, 389, 426])  # cloud provider not running / unsuccessful / request timeout
+def test_a_onedrive_recall_failure_surfaces_as_errno_22_and_is_a_named_refusal(tmp_path, monkeypatch, winerror):
+    """The weekly 2026-10-18 failure, reproduced with the live model directory's file names.
+
+    Python maps Windows cloud-file errors it has no errno for to EINVAL, which is why the 737 MB
+    model.safetensors placeholder (dehydrated by Storage Sense after 30 days unopened) read as
+    "[Errno 22] Invalid argument" mid-file at press_stage5.py:132.
+    """
+    model = make_model(tmp_path)
+    (model / "tokenizer_config.json").write_text("{}", encoding="utf-8")
+    error = OSError(None, "The cloud operation was unsuccessful", None, winerror)
+    assert error.errno == errno.EINVAL
+    real_open = builtins.open
+
+    class Recall:
+        def __init__(self, handle):
+            self.handle = handle
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            self.handle.close()
+
+        def read(self, size):
+            raise error
+
+    def recalling_open(file, *args, **kwargs):
+        handle = real_open(file, *args, **kwargs)
+        return Recall(handle) if Path(file).name == "model.safetensors" else handle
+
+    monkeypatch.setattr(S, "open", recalling_open, raising=False)
+    with pytest.raises(S.Stage5Refused, match="OneDrive online-only") as caught:
+        S.model_dir_sha256(model)
+    assert caught.value.__cause__ is error
