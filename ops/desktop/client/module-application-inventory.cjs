@@ -89,8 +89,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 10138,
-        "sha256": "691f6bed3d307fcc38e7567c8baec366831dd7f34c7efbef0526c4c23ae8dde4"
+        "bytes": 16375,
+        "sha256": "07079e6607eb7122689bdde9179d683631bd981d51147380e9a490864ceb4c5b"
       },
       {
         "root": "bootstrap",
@@ -239,8 +239,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "fec/surfaces/demand_data.py",
-        "bytes": 11320,
-        "sha256": "cce86f0b41e8f87cd3d3b9f2da956cb43e25c499125c8932c4ab66ea024b7904"
+        "bytes": 13692,
+        "sha256": "433d2dc3802e02efc925ac433009dff951d93fb6047ce81961ba5a4cf01ec885"
       },
       {
         "root": "source",
@@ -465,7 +465,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "a8072374000cd7561b0dcc95e927aff7510cc2f4e75606648fa90debb2e068ff",
+    "programFingerprint": "f532a11cebf1ecbae26a3407ac161f6d139981582462016bbe71f0843552700e",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],

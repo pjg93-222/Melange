@@ -264,3 +264,47 @@ class ChunkCache:
     def acquire(self, chunk):
         with self.acquire_many([chunk]) as paths:
             yield paths[0]
+
+
+MAX_INDEX_BYTES = 2 * 1024 ** 2
+MODULE = re.compile(r'melange\.[a-z0-9][a-z0-9.-]{0,100}\.v[0-9]+')
+PARTITION = re.compile(r'|[0-9]{1,6}')
+
+
+def load_generation_index(raw, expected_sha256):
+    """Parse a published generation index whose hash came from a trusted pointer."""
+    import json
+    if (type(raw) is not bytes or len(raw) > MAX_INDEX_BYTES
+            or hashlib.sha256(raw).hexdigest() != expected_sha256):
+        raise CacheError('Generation index failed size or SHA-256 verification')
+    index = json.loads(raw)
+    if (not isinstance(index, dict) or index.get('schemaVersion') != 1 or index.get('appId') != 'melange'
+            or index.get('contractId') != 'melange.public-data.pages.v1'
+            or not isinstance(index.get('modules'), dict)):
+        raise CacheError('Unsupported generation index')
+    for module_id, module in index['modules'].items():
+        if not MODULE.fullmatch(module_id) or not isinstance(module, dict) or not isinstance(module.get('partitions'), dict):
+            raise CacheError('Invalid generation module')
+        for partition, entry in module['partitions'].items():
+            if (not PARTITION.fullmatch(partition) or not isinstance(entry, dict)
+                    or not SHA.fullmatch(str(entry.get('sha256', ''))) or type(entry.get('bytes')) is not int
+                    or not isinstance(entry.get('pages'), list) or not entry['pages']):
+                raise CacheError('Invalid generation partition')
+            for page in entry['pages']:
+                descriptor(page)
+            if sum(page['bytes'] for page in entry['pages']) != entry['bytes']:
+                raise CacheError('Generation pages do not add up to their source')
+    return index
+
+
+def read_module(index, module_id, partition, cache):
+    """Exact source bytes for one module partition, or a CacheError; never partial."""
+    try:
+        entry = index['modules'][module_id]['partitions'][partition]
+    except (KeyError, TypeError):
+        raise CacheError('This module is not part of the published generation') from None
+    with cache.acquire_many(entry['pages']) as paths:
+        data = b''.join(Path(path).read_bytes() for path in paths)
+    if len(data) != entry['bytes'] or hashlib.sha256(data).hexdigest() != entry['sha256']:
+        raise CacheError('Module bytes failed whole-source verification')
+    return data

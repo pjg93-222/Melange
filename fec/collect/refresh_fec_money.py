@@ -276,8 +276,16 @@ def main(argv=None):
         dump_atomic(receipt,str(run/'receipt.json'))
         if not a.no_install: dump_atomic(receipt,str(root/'data/money/fec_refresh_current.json'))
         print(json.dumps({k:v for k,v in receipt.items() if k not in ('sources','dependencies')}))
-        return 0
     except Exception as exc: return fail(exc)
+    # Collection is complete and installed. Publication is optional and separate:
+    # its failure never rewrites the refresh receipt, it only changes the exit code.
+    if not a.no_install:
+        try:
+            import generation_publish_hook
+            generation_publish_hook.after_collection('fec-money',root)
+        except Exception as exc:
+            print('FEC refresh installed; page publication failed:',type(exc).__name__,exc,file=sys.stderr);return 3
+    return 0
 
 
 if __name__=='__main__': raise SystemExit(main())

@@ -2297,7 +2297,19 @@ def main(argv: list[str] | None = None) -> int:
             sort_keys=True,
         )
     )
-    return 0 if manifest["acceptance_passed"] else 2
+    if not manifest["acceptance_passed"]:
+        return 2
+    # Optional page publication after an accepted collection; inert when unset.
+    try:
+        try:
+            import generation_publish_hook
+        except ImportError:  # pragma: no cover - package import path
+            from fec import generation_publish_hook
+        generation_publish_hook.after_collection("official-rollcall", args.workspace_root)
+    except Exception as exc:
+        print(f"collect_official_rollcall_events: collected; page publication failed: {exc}", file=sys.stderr)
+        return 3
+    return 0
 
 
 if __name__ == "__main__":

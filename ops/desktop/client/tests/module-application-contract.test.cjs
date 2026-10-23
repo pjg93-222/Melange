@@ -33,6 +33,11 @@ test('paged Melange selection is explicit and legacy default remains compatible'
  assert.deepEqual(Object.keys(paged.registry[paged.requiredKinds[0]].roles),['index','receipt']);
  assert.equal(paged.programFingerprint,f.contract.programFingerprint);
 });
+test('paged mode is ignored for other apps and unknown modes keep the legacy contract',t=>{
+ const f=fixture(t),odd=f.lookup('melange',{runtime:f.runtime,resources:f.resources,publicDataMode:'paged-v2'}),none=f.lookup('melange',{runtime:f.runtime,resources:f.resources});
+ assert.equal(odd.contractId,'melange.public-data.v1');assert.equal(none.contractId,'melange.public-data.v1');
+ assert.equal(odd.requiredKinds.join('|'),'melange.official-payroll-observations.v1');
+});
 for(const appId of ['melange','mentat']){
  test(`${appId} compiled inventory has fixed public coverage, budget and closed source table`,()=>{
   const spec=APPLICATION_SPECS[appId];assert.equal(spec.contractId,appId+'.public-data.v1');assert.equal(spec.appId,appId);

@@ -2,6 +2,7 @@ import hashlib
 import multiprocessing
 from pathlib import Path
 import tempfile
+import threading
 import time
 import sys
 import unittest
@@ -91,6 +92,71 @@ class CacheTests(unittest.TestCase):
                 with ChunkCache(root, 4, lambda c, out: out.write(b'aaaa')).acquire(spec(b'aaaa')):
                     pass
             self.assertEqual(foreign.read_text(), 'keep')
+
+    def test_cache_never_exceeds_cap_under_concurrent_download_and_read(self):
+        cap, block = 64, 4
+        values = [bytes([65 + n]) * (8 + 4 * (n % 3)) for n in range(12)]
+        with tempfile.TemporaryDirectory() as root:
+            observed, stop = [0], threading.Event()
+            def used():
+                total = 0
+                for path in Path(root).iterdir():
+                    if path.name != 'cache.lock':
+                        try:
+                            total += path.stat().st_size
+                        except OSError:
+                            pass
+                observed[0] = max(observed[0], total)
+            def fetch(chunk, output):
+                raw = next(v for v in values if spec(v)['sha256'] == chunk['sha256'])
+                for start in range(0, len(raw), block):
+                    output.write(raw[start:start + block]); output.stream.flush(); used()
+            def sampler():
+                while not stop.is_set():
+                    used()
+            def worker(offset):
+                cache = ChunkCache(root, cap, fetch, lock_timeout=30)
+                for n in range(24):
+                    value = values[(offset + n * 5) % len(values)]
+                    with cache.acquire(spec(value)) as path:
+                        used(); self.assertEqual(path.read_bytes(), value)
+            watcher = threading.Thread(target=sampler); watcher.start()
+            threads = [threading.Thread(target=worker, args=(n,)) for n in range(4)]
+            errors = []
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join(120)
+            stop.set(); watcher.join(10)
+            used()
+            self.assertFalse(any(thread.is_alive() for thread in threads))
+            self.assertGreater(observed[0], 0)
+            self.assertLessEqual(observed[0], cap)
+            print('max observed cache bytes', observed[0], 'cap', cap)
+
+    def test_lease_blocks_eviction_of_in_use_page_by_another_reader(self):
+        with tempfile.TemporaryDirectory() as root:
+            held, result = threading.Event(), []
+            release = threading.Event()
+            def holder():
+                with ChunkCache(root, 8, lambda c, out: out.write(b'aaaaaaaa')).acquire(spec(b'aaaaaaaa')) as path:
+                    held.set(); release.wait(10); result.append(path.read_bytes())
+            thread = threading.Thread(target=holder); thread.start()
+            self.assertTrue(held.wait(10))
+            with self.assertRaisesRegex(CacheError, 'busy'):
+                with ChunkCache(root, 8, lambda c, out: out.write(b'bbbbbbbb'), lock_timeout=.2).acquire(spec(b'bbbbbbbb')):
+                    pass
+            release.set(); thread.join(10)
+            self.assertEqual(result, [b'aaaaaaaa'])
+
+    def test_corrupt_download_is_refused_and_reported_missing(self):
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaisesRegex(CacheError, 'verification'):
+                with ChunkCache(root, 8, lambda c, out: out.write(b'zzzz')).acquire(spec(b'aaaa')):
+                    pass
+            with self.assertRaisesRegex(CacheError, 'not cached'):
+                with ChunkCache(root, 8).acquire(spec(b'aaaa')):
+                    pass
 
 
 if __name__ == '__main__':
