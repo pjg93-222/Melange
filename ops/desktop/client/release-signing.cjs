@@ -24,12 +24,31 @@ async function signPool(files,task){
  if(failed)throw failure;
 }
 async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
- file=path.resolve(file);root=path.resolve(root);if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');ancestors(root,true);ancestors(file);
- const args=['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
- const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024,env:{...process.env,PSModulePath:String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules`}});
+ const requestedFile=path.resolve(file),requestedRoot=path.resolve(root);
+ if(!within(requestedRoot,requestedFile)||!PE.test(requestedFile))throw new Error('Refusing binary outside private build root');
+ const snapshot=(target,directory)=>{
+  ancestors(target,directory);const stat=fs.lstatSync(target,{bigint:true});
+  if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1n)||stat.ino===0n)throw new Error('Build path must retain a private physical identity');
+  return stat;
+ };
+ const rootIdentity=snapshot(requestedRoot,true),fileIdentity=snapshot(requestedFile,false);
+ root=fs.realpathSync.native(requestedRoot);file=fs.realpathSync.native(requestedFile);
+ if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');
+ const checkIdentity=()=>{
+  for(const [target,before,directory] of [[requestedRoot,rootIdentity,true],[requestedFile,fileIdentity,false],[root,rootIdentity,true],[file,fileIdentity,false]]){
+   const after=snapshot(target,directory);
+   if(after.dev!==before.dev||after.ino!==before.ino||(after.mode&0o170000n)!==(before.mode&0o170000n))throw new Error('Private build path identity changed');
+  }
+ };
+ checkIdentity();
+ const args=['-NoProfile','-NonInteractive','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
+ const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
+ checkIdentity();
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
- if(result.path.toLowerCase()!==file.toLowerCase()||result.status!=='Valid'||result.sha256!==hash(file)||(owned&&(result.thumbprint!==THUMBPRINT||result.timestamped!==true)))throw new Error('Staged signature verification failed');
- return result;
+ const failure=result.path.toLowerCase()!==file.toLowerCase()?'path':result.status!=='Valid'?'status':result.sha256!==hash(file)?'sha256':owned&&result.thumbprint!==THUMBPRINT?'thumbprint':owned&&result.timestamped!==true?'timestamped':null;
+ if(failure)throw new Error('Staged signature verification failed ('+failure+')');
+ checkIdentity();
+ return {...result,path:requestedFile,verifiedPath:result.path};
 }
 function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset}={}){
  const configured=env.DESKTOP_SIGNING_CERT_SHA1;
@@ -40,7 +59,8 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  env.ELECTRON_BUILDER_DISABLE_BUILD_CACHE='true';
  const root=path.resolve(env.DESKTOP_SIGNING_ROOT),records=[];let ready=false,appDirectory;
  ancestors(root,true);
- const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file));
+ const identity=file=>path.resolve(file).toLowerCase();
+ const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file))||(appDirectory&&identity(file)===identity(path.join(appDirectory,'resources','elevate.exe')));
  const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned});records.push(result);return result;};
  const verifyToolCopies=()=>{
   for(const directory of ['nsis','nsis-resources'])for(const file of tree(path.join(root,directory)).filter(file=>PE.test(file)))
@@ -77,10 +97,17 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   artifactBuildCompleted:async event=>{
    if(!event.file?.toLowerCase().endsWith('.exe'))return;
    if(!appDirectory)throw new Error('Application signing has not completed');
-   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>record(file,true,owned(file)));
-   await record(event.file,true,true);verifyToolCopies();
-   if(!records.some(row=>path.basename(row.path)===app.name+'.exe'&&row.thumbprint===THUMBPRINT)||!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.thumbprint===THUMBPRINT)||!records.some(row=>path.basename(row.path)==='elevate.exe'&&row.thumbprint===THUMBPRINT))throw new Error('Application, elevation helper or uninstaller signature evidence is missing');
-   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records};
+   const current=new Map();
+   const verifyCurrent=async(file,forceOwned=owned(file))=>{const result=await record(file,true,forceOwned);current.set(identity(file),result);};
+   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>verifyCurrent(file));
+   await verifyCurrent(event.file,true);verifyToolCopies();
+   for(const file of [path.join(appDirectory,app.name+'.exe'),path.join(appDirectory,'resources','elevate.exe'),path.resolve(event.file)]){
+    const result=current.get(identity(file));
+    if(!result||identity(result.path)!==identity(file)||result.status!=='Valid'||result.thumbprint!==THUMBPRINT||result.timestamped!==true)throw new Error('Current application, elevation helper or installer signature evidence is missing');
+    ancestors(file);if(result.sha256!==hash(file))throw new Error('Current application, elevation helper or installer changed after verification');
+   }
+   if(!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.status==='Valid'&&row.thumbprint===THUMBPRINT&&row.timestamped===true))throw new Error('Staged uninstaller signature evidence is missing');
+   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records,currentFiles:[...current.values()],uninstallerEvidence:'staged-history-only'};
    fs.writeFileSync(event.file+'.signatures.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   }
  };
