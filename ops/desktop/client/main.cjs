@@ -273,7 +273,8 @@ function createModuleDataStartup(){
   // component probe alone cannot establish installed reader health.
   contract,boundary,
   createProvider:contract=>new(require('./github-modules.cjs').GitHubModules)({appId:definition.id,profile:userData,
-   transport:new(require('./github-module-transport.cjs').GitHubModuleTransport)(definition.id,{paged:contract.contractId==='melange.public-data.pages.v1'}),
+   // Legacy keeps the provider's own default transport; only the paged contract selects the separate pointer.
+   transport:contract.contractId==='melange.public-data.pages.v1'?new(require('./github-module-transport.cjs').GitHubModuleTransport)(definition.id,{paged:true}):undefined,
    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,
    protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)],
    store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}),
