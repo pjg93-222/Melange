@@ -52,6 +52,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 from legislation import official_billstatus_rollcall_source as BILLSTATUS
+import scrape_client
 
 try:
     from legislation_measure_key import CANONICAL_KEY_RE
@@ -827,6 +828,10 @@ class HttpFetcher:
         parts = urllib.parse.urlsplit(source_url)
         query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
         if parts.hostname and parts.hostname.casefold() == "api.congress.gov":
+            if scrape_client.available():
+                content, status, headers = scrape_client.fetch_raw_url(source_url)
+                if status != 200: raise scrape_client.ScrapeBrokerError(status)
+                return {"source_url":source_url,"final_url":source_url,"status":status,"content_type":headers.get('content-type','application/json').split(';')[0],"content":content}
             if not self.api_key:
                 raise CollectorError(
                     "Congress.gov API action source requires CONGRESS_API_KEY; "
@@ -1027,7 +1032,7 @@ def action_source_for_measure(
         selected = "congress_api"
     elif key.measure_type in BILLSTATUS.BILLSTATUS_SUPPORTED_TYPES:
         selected = "billstatus"
-    elif congress_api_key:
+    elif congress_api_key or scrape_client.available():
         selected = "congress_api"
     else:
         raise CollectorError(
@@ -1046,7 +1051,7 @@ def action_source_for_measure(
     if (
         selected == "congress_api"
         and fixture_manifest is None
-        and not congress_api_key
+        and not congress_api_key and not scrape_client.available()
     ):
         raise CollectorError(
             "Congress.gov API action source requires CONGRESS_API_KEY"

@@ -566,7 +566,7 @@ class Store:
         return context
 
 
-def handler_for(store, require_invite=False, packs=None):
+def handler_for(store, require_invite=False, packs=None, scrape_broker=None):
     class Handler(BaseHTTPRequestHandler):
         server_version = "DesktopUpdates/1"
         publisher_public_origin = store.public_origin
@@ -689,7 +689,10 @@ def handler_for(store, require_invite=False, packs=None):
                 self.response(500, {"error": "INTERNAL_ERROR"})
     from access_store import AccessStore
     from access_http import handler_for as access_handler_for
-    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler, packs)
+    if scrape_broker is None:
+        from scrape_broker import from_environment
+        scrape_broker = from_environment(store.root)
+    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler, packs, scrape_broker)
 
 
 class BoundedServer(ThreadingHTTPServer):

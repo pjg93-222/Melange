@@ -14,6 +14,9 @@ const accessTrust=process.env.DESKTOP_ACCESS_TRUST?require('./access-client.cjs'
 const updateProvider=process.env.DESKTOP_UPDATE_PROVIDER||'github';
 if(!['github','publisher'].includes(updateProvider))throw new Error('Unsupported desktop update provider');
 const desktopUpdateSource=updateProvider==='github'?require('./github-source.cjs').configuration({provider:'github',repository:process.env.DESKTOP_GITHUB_REPOSITORY||DEFAULT_GITHUB_REPOSITORY[selected.id]}):{provider:'publisher'};
+// Shared collection through the publisher's scrape broker (ops/desktop/server/SCRAPE-BROKER.md); off unless set to 1.
+if(!['','0','1'].includes(process.env.DESKTOP_SHARED_SCRAPE||''))throw new Error('DESKTOP_SHARED_SCRAPE must be 0 or 1');
+const desktopScrapeBroker=process.env.DESKTOP_SHARED_SCRAPE==='1'&&['melange','mentat'].includes(selected.id);
 if(!fs.existsSync(icon))throw new Error('Original application icon is missing.');
 require('./backend-command.cjs').backendCommand(__dirname,selected.id,process.platform,runtimeRoot);
 const releaseSigning=require('./release-signing.cjs').options(selected);
@@ -28,7 +31,7 @@ module.exports={
   extraResources:[{from:runtime,to:'runtime/'+selected.id,filter:['**/*','!sources/**/state/**','!sources/**/*.{sqlite,sqlite3,db,sqlite-wal,sqlite-shm,sqlite-journal,sqlite3-wal,sqlite3-shm,sqlite3-journal,db-wal,db-shm,db-journal}']},
    // Public release certificate only (no longer used by the app; kept for publisher-trust.cjs and turn-on-updates.cmd).
    {from:path.join(__dirname,'melange-systems-desktop-release.cer'),to:'melange-systems-desktop-release.cer'}],
-  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource}},
+  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker}},
   win:{target:['nsis'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
   nsis:{oneClick:false,perMachine:false,allowToChangeInstallationDirectory:true,deleteAppDataOnUninstall:false,runAfterFinish:false,include:path.join(__dirname,'installer.nsh'),installerIcon:icon,uninstallerIcon:icon},
   mac:{target:['dmg','zip'],category:'public.app-category.productivity',hardenedRuntime:true,notarize:process.env.APPLE_ID?true:false},

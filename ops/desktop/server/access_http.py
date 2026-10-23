@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 from desktop_admin import Refused, canonical, private_address, request_origin
 from access_store import secret_hash
+from scrape_broker import BrokerError
 import district_packs
 
 # Exactly the read routes of client dataset-transport.cjs route(); every other /v1/data/ path is 404.
@@ -76,7 +77,7 @@ class RateLimit:
             self.entries['*'] = total + [now]
 
 
-def handler_for(access, fallback, packs=None):
+def handler_for(access, fallback, packs=None, scrape_broker=None):
     try:  # checked once at startup and cached: a pack store in OneDrive or a git worktree is never served
         packs_root = district_packs.refuse_synced(packs or district_packs.default_packs())
     except Refused:
@@ -85,7 +86,7 @@ def handler_for(access, fallback, packs=None):
     class Handler(HeaderDeadlineMixin, fallback):
         data_slots = threading.BoundedSemaphore(DATA_SLOTS)
 
-        def access_response(self, status, value):
+        def access_response(self, status, value, retry_after=None):
             data = canonical(value)
             self.close_connection = True
             try:
@@ -97,7 +98,7 @@ def handler_for(access, fallback, packs=None):
                 self.send_header('X-Content-Type-Options', 'nosniff')
                 self.send_header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'")
                 if status in (429, 503):
-                    self.send_header('Retry-After', '60' if status == 429 else '5')
+                    self.send_header('Retry-After', str(retry_after) if retry_after is not None else ('60' if status == 429 else '5'))
                 self.end_headers()
                 self.wfile.write(data)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
@@ -224,6 +225,14 @@ def handler_for(access, fallback, packs=None):
                     return self.access_response(200, value)
                 if self.command != 'POST':
                     raise HTTPRefused(405, 'method_not_allowed')
+                if self.path == '/v1/scrape/query':
+                    bearer = self.access_secret('Bearer')
+                    grant = access.authenticate(bearer)  # Authenticate before parsing or reserving quota.
+                    if scrape_broker is None:
+                        raise HTTPRefused(503, 'scrape_service_disabled')
+                    result = scrape_broker.execute(grant, self.access_body())
+                    access.authenticate(bearer)  # A revocation during an upstream read still denies delivery.
+                    return self.access_response(200, result)
                 if self.path == '/v1/access/requests':
                     if self.headers.get_all('Authorization'):
                         raise HTTPRefused(403, 'access_denied')
@@ -245,6 +254,8 @@ def handler_for(access, fallback, packs=None):
                 self.access_response(200, response)
             except HTTPRefused as error:
                 self.access_response(error.status, {'error': error.code})
+            except BrokerError as error:
+                self.access_response(error.status, {'error': error.code}, error.retry_after)
             except Refused as error:
                 message = str(error)
                 if 'capacity' in message:
@@ -263,10 +274,10 @@ def handler_for(access, fallback, packs=None):
                 self.access_response(503, {'error': 'service_unavailable'})
 
         def do_GET(self):
-            return self.access_dispatch() if self.path.startswith(('/v1/access', '/v1/data/')) else super().do_GET()
+            return self.access_dispatch() if self.path.startswith(('/v1/access', '/v1/data/', '/v1/scrape/')) else super().do_GET()
 
         def do_POST(self):
-            return self.access_dispatch() if self.path.startswith(('/v1/access', '/v1/data/')) else super().do_POST()
+            return self.access_dispatch() if self.path.startswith(('/v1/access', '/v1/data/', '/v1/scrape/')) else super().do_POST()
 
         def do_OPTIONS(self):
             self.access_response(405, {'error': 'method_not_allowed'})

@@ -41,6 +41,24 @@ test('Terrier signed sorted districts are explicit; wrong status scope refused',
  assert.throws(()=>verifyStatus(f.sign(f.status({districtIds:['ct-01']})),f.trust,f.identity,accepted,now),/another approved/);
 });
 function stores(){let state;const values=new Map();return {store:{read:async()=>structuredClone(state),write:async value=>{state=structuredClone(value);}},secrets:{read:async scope=>structuredClone(values.get(scope)),write:async(scope,value)=>{values.set(scope,structuredClone(value));},delete:async scope=>values.delete(scope)},state:()=>state,values};}
+test('shared scrape uses approved protected bearer and discards a response after grant revocation',async()=>{
+ const f=fixture(),vault=stores(),token=crypto.randomBytes(48).toString('base64url'),content=Buffer.from('{"amount":1.230000000001}');
+ const value={schemaVersion:1,provider:'fec',path:'schedules/schedule_a',query:{}};
+ const reply={schemaVersion:1,provider:'fec',raw:{status:200,headers:{},bodyBase64:content.toString('base64'),bytes:content.length,sha256:crypto.createHash('sha256').update(content).digest('hex'),originalResponseBytes:true}};
+ let revoke=false,calls=0;
+ const request=async(_trust,path,options)=>{
+  if(path==='/v1/access/requests'){f.body.requestId=options.body.requestId;return {requestId:f.body.requestId,status:'pending',expiresAt:f.body.issuedAt+86400};}
+  if(path==='/v1/access/activate')return {grant:f.sign(f.body),accessToken:token};
+  assert.equal(path,'/v1/scrape/query');calls++;assert.equal(options.authorization,'Bearer '+token);assert.equal(options.deadlineMs,90000);assert.deepEqual(options.body,value);
+  if(revoke){const state=await vault.store.read();state.statusEnvelope=f.sign(f.status({sequence:2,revoked:true}));state.highestSequence=2;state.revoked=true;await vault.store.write(state);}
+  return reply;
+ };
+ const client=new AccessClient({...vault,trust:f.trust,identity:f.identity,request,now:()=>now});
+ await assert.rejects(client.scrape(value));assert.equal(calls,0);
+ await client.requestAccess('Fixture',INVITE);await client.activate(crypto.randomBytes(32).toString('base64url'));
+ assert.deepEqual(await client.scrape(value),reply);assert.equal(JSON.stringify(reply).includes(token),false);
+ revoke=true;await assert.rejects(client.scrape(value),/approval changed/);
+});
 test('response-loss retry retains request secret/key, activation scoped, offline valid, revocation survives restart',async()=>{
  const f=fixture(),vault=stores(),accessToken=crypto.randomBytes(48).toString('base64url');let activationCalls=0,offline=false,revoked=false;
  const request=async(_trust,path,options)=>{
@@ -114,6 +132,7 @@ test('native pinned transport has absolute drip deadline, rejects redirects/over
  const server=https.createServer(material,(_request,response)=>{hits++;
   if(mode==='redirect'){response.writeHead(302,{Location:'/v1/access/status'});response.end();return;}
   if(mode==='forbidden'){response.writeHead(403);response.end('request authentication required');return;}
+  if(mode==='quota'){response.writeHead(429,{'Retry-After':'17'});response.end('{}');return;}
   response.writeHead(200,{'Content-Type':'application/json'});
   if(mode==='drip'){response.write('{');const interval=setInterval(()=>response.write(' '),20);response.on('close',()=>clearInterval(interval));}
   if(mode==='overflow')response.end('x'.repeat(20000));
@@ -130,6 +149,9 @@ test('native pinned transport has absolute drip deadline, rejects redirects/over
  mode='forbidden';await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),error=>error.reason==='refused'&&error.statusCode===403);
  mode='overflow';await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),/too large/);
  mode='abort';await assert.rejects(accessRequest(f.trust,'/v1/access/status',{deadlineMs:500}),/interrupted|unavailable/);
+ const scrapeOptions={method:'POST',authorization:'Bearer '+'a'.repeat(64),body:{schemaVersion:1,provider:'fec',path:'candidates',query:{}},deadlineMs:1000};
+ mode='quota';await assert.rejects(accessRequest(f.trust,'/v1/scrape/query',scrapeOptions),error=>error.statusCode===429&&error.retryAfter===17);
+ mode='drip';const controller=new AbortController(),cancelled=accessRequest(f.trust,'/v1/scrape/query',{...scrapeOptions,signal:controller.signal});setTimeout(()=>controller.abort(),30);await assert.rejects(cancelled,/cancelled/);
  for(const url of ['https://[::1]','https://localhost','https://127.1','https://127.000.0.1'])assert.throws(()=>descriptor({...f.trust,url}));
  // DNS is replaced only inside this fixture; both real HTTPS clients still
  // handshake, send SNI and enforce their configured TLS key and origin.

@@ -301,7 +301,11 @@ app.whenReady().then(async()=>{
    }
   }
   if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){dialog.showErrorBox(definition.name+' isolated test profile refused',error.message+' The backend was not started. Correct or remove settings.json in '+userData+'.');app.quit();return;}
-  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
+  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,
+   // Packaged only with DESKTOP_SHARED_SCRAPE=1 (builder.cjs). The backend gets a loopback capability; the protected access
+   // bearer stays in this process and provider API keys stay on the publisher (ops/desktop/server/SCRAPE-BROKER.md).
+   scrapeFactory:applicationConfig.desktopScrapeBroker===true&&['melange','mentat'].includes(definition.id)?async configuration=>require('./scrape-service.cjs').startScrapeService({authorize:async()=>{if(closing||accessLifecycle?.suspended)throw new Error('Collection is suspended');return (await ensureAccess()).authorize(configuration);},query:async(value,options)=>(await ensureAccess()).client.scrape(value,options)}):null,
+   authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
   runtime=createRuntime();
   moduleDataStartup=createModuleDataStartup();
   if(definition.id==='terrier'){
