@@ -28,14 +28,14 @@ function fixture(t){
   const body={schemaVersion:1,purpose:'terrier-public-district-data',appId:'terrier',repository:REPOSITORY,catalogSequence:sequence,releaseTag:tag,releaseCommit:String(sequence).repeat(40),manifest:{asset:'manifest.json',bytes:manifest.length,sha256:sha(manifest)}};
   const result={body,envelope:sign(body),manifest,data,archives};worlds.set(tag,result);return result;
  }
- world=build();const requests=[],downloads=[],checks=[],statuses=[];let saved=null,networkDown=false,corruptDownload=false,extractFails=false,extractCount=0;
+ world=build();const requests=[],downloads=[],checks=[],statuses=[];let saved=null,networkDown=false,corruptDownload=false,extractFails=false,extractCount=0,tagRef=null;const tagObjects=new Map();
  const store={read:async()=>structuredClone(saved),write:async value=>{saved=structuredClone(value);}};
- const transport={read:async(url,options)=>{requests.push({url,options});if(networkDown)throw Object.assign(new Error('fixture network unavailable bearer=SENTINEL'),{code:'ENETUNREACH'});if(url.endsWith('/commits/main'))return json({sha:'a'.repeat(40)});if(url.includes('/contents/')){const bytes=json(world.envelope);return json({type:'file',encoding:'base64',path:POINTER_PATH,size:bytes.length,content:bytes.toString('base64')});}if(url.includes('/git/ref/tags/'))return json({ref:'refs/tags/'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});const target=[...worlds.values()].find(item=>url===assetURL(item.body.releaseTag,'manifest.json'));assert.ok(target,url);return target.manifest;},download:async(url,target,options)=>{downloads.push({url,options});const item=[...worlds.values()].find(item=>url.includes('/'+item.body.releaseTag+'/')),id=IDS.find(id=>url.includes('-'+id+'-'));assert.ok(item&&id);const bytes=corruptDownload?Buffer.alloc(item.archives.get(id).length):item.archives.get(id);await fsp.writeFile(target,bytes,{flag:'wx'});options.onProgress(bytes.length);}};
+ const transport={read:async(url,options)=>{requests.push({url,options});if(networkDown)throw Object.assign(new Error('fixture network unavailable bearer=SENTINEL'),{code:'ENETUNREACH'});if(url.endsWith('/commits/main'))return json({sha:'a'.repeat(40)});if(url.includes('/contents/')){const bytes=json(world.envelope);return json({type:'file',encoding:'base64',path:POINTER_PATH,size:bytes.length,content:bytes.toString('base64')});}if(url.includes('/git/ref/tags/'))return json(tagRef?tagRef(world):{ref:'refs/tags/'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});if(url.includes('/git/tags/')){const entry=tagObjects.get(url.slice(url.indexOf('/git/tags/')+'/git/tags/'.length));assert.ok(entry,url);return json(typeof entry==='function'?entry(world):entry);}const target=[...worlds.values()].find(item=>url===assetURL(item.body.releaseTag,'manifest.json'));assert.ok(target,url);return target.manifest;},download:async(url,target,options)=>{downloads.push({url,options});const item=[...worlds.values()].find(item=>url.includes('/'+item.body.releaseTag+'/')),id=IDS.find(id=>url.includes('-'+id+'-'));assert.ok(item&&id);const bytes=corruptDownload?Buffer.alloc(item.archives.get(id).length):item.archives.get(id);await fsp.writeFile(target,bytes,{flag:'wx'});options.onProgress(bytes.length);}};
  const checkExisting=async(directory,district)=>{checks.push({directory,district});return true;};
  const extract=async({archive,destination,district,files})=>{extractCount++;assert.ok(archive.endsWith('.zip'));await fsp.mkdir(destination);if(extractFails){await fsp.writeFile(path.join(destination,'partial'),'fixture');throw new Error('fixture extraction failure');}const item=[...worlds.values()].find(item=>files[0].sha256===sha(item.data.get(district+'/'+files[0].role)));assert.ok(item);for(const file of files)await fsp.writeFile(path.join(destination,file.role),item.data.get(district+'/'+file.role),{flag:'wx'});return {ok:true,district,files:files.map(({role,bytes,sha256})=>({role,bytes,sha256})),sourceMetadataAccepted:true};};
  const create=(overrides={})=>new GitHubDistricts({profile,root,publicKeys,store,transport,checkExisting,extract,onStatus:status=>statuses.push(status),statfs:async()=>({bavail:100000000000,bsize:1}),...overrides});
  function writeLegacy(item=world){for(const id of IDS){const directory=id==='co-05'?legacy:path.join(legacy,id);fs.mkdirSync(directory,{recursive:true});for(const role of ROLES)fs.writeFileSync(path.join(directory,role),item.data.get(id+'/'+role));fs.writeFileSync(path.join(directory,'accounts.sqlite3'),'fixture account remains local');fs.writeFileSync(path.join(directory,'.secret'),'fixture secret remains local');}}
- return {temporary,profile,root,legacy,config,authorization,publicKeys,sign,build,create,writeLegacy,requests,downloads,checks,statuses,transport,get world(){return world;},set world(value){world=value;},get state(){return saved;},set state(value){saved=value;},set networkDown(value){networkDown=value;},set corruptDownload(value){corruptDownload=value;},set extractFails(value){extractFails=value;},get extractCount(){return extractCount;}};
+ return {temporary,profile,root,legacy,config,authorization,publicKeys,sign,build,create,writeLegacy,requests,downloads,checks,statuses,transport,get world(){return world;},set world(value){world=value;},get state(){return saved;},set state(value){saved=value;},set networkDown(value){networkDown=value;},set corruptDownload(value){corruptDownload=value;},set extractFails(value){extractFails=value;},set tagRef(value){tagRef=value;},tagObjects,get extractCount(){return extractCount;}};
 }
 test('pointer signature domain, exact fields, pinned identity and independent sequence reject tamper and rollback',t=>{
  const f=fixture(t),first=protocol.pointer(f.world.envelope,f.publicKeys);assert.equal(first.value.catalogSequence,1);
@@ -145,4 +145,39 @@ test('real public transport sends public GET headers only, bounds bytes and refu
   oversize=true;await assert.rejects(()=>publicTransport.read('https://api.github.com/repos/'+REPOSITORY+'/commits/main',{maxBytes:4}),/limit/);
   oversize=false;redirect=true;await assert.rejects(()=>publicTransport.read(assetURL('district-testsets-2026-10-21','manifest.json'),{maxBytes:10,asset:true}),/URL refused/);
  }finally{https.request=original;}
+});
+// Release tags may be lightweight (ref -> commit) or annotated (ref -> tag object(s) -> commit); peeling is bounded.
+const tagShas=count=>Array.from({length:count},(_,index)=>'bcdef'[index].repeat(40));
+function annotate(f,count,{peel=()=>f.world.body.releaseCommit,mismatch=-1}={}){
+ const shas=tagShas(count),tag=()=>f.world.body.releaseTag;f.tagRef=world=>({ref:'refs/tags/'+world.body.releaseTag,object:{type:'tag',sha:shas[0]}});
+ shas.forEach((id,index)=>f.tagObjects.set(id,()=>({sha:index===mismatch?'0'.repeat(40):id,tag:tag(),object:index<count-1?{type:'tag',sha:shas[index+1]}:{type:'commit',sha:peel()}})));
+ return shas;
+}
+const tagRequests=f=>f.requests.map(request=>request.url).filter(url=>url.includes('/git/tags/')),tagBase=f=>{const url=f.requests.find(request=>request.url.includes('/git/ref/tags/')).url;return url.slice(0,url.indexOf('/git/ref/tags/'));};
+test('a lightweight release tag is accepted without fetching any tag object',async t=>{
+ const f=fixture(t);f.writeLegacy();await f.create().ensure(f.config,f.authorization);
+ assert.ok(f.requests.some(request=>request.url.includes('/git/ref/tags/')));assert.deepEqual(tagRequests(f),[]);assert.equal(f.state.latest!==null,true);assert.equal(f.state.active['co-05'].catalogSequence,1);
+});
+test('annotated release tags peel through bounded tag objects to the signed release commit',async t=>{
+ for(const count of [1,2,4]){
+  const f=fixture(t);f.writeLegacy();const shas=annotate(f,count);await f.create().ensure(f.config,f.authorization);
+  assert.deepEqual(tagRequests(f),shas.map(id=>tagBase(f)+'/git/tags/'+id));assert.equal(f.state.active['co-05'].catalogSequence,1);assert.equal(f.downloads.length,0);
+ }
+});
+test('an annotated tag peeling to another commit is rejected and leaves accepted state and downloads untouched',async t=>{
+ const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);f.world=f.build(2);
+ for(const other of ['9'.repeat(40),f.world.body.releaseCommit.replace(/^./,'8')]){
+  annotate(f,2,{peel:()=>other});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);assert.equal(f.extractCount,0);
+ }
+ annotate(f,1);f.tagObjects.set(tagShas(1)[0],{sha:tagShas(1)[0],object:{type:'blob',sha:f.world.body.releaseCommit}});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
+});
+test('a tag chain deeper than the hop cap is rejected after exactly four tag-object fetches',async t=>{
+ const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);f.world=f.build(2);const before=f.requests.length;
+ annotate(f,5);await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);
+ assert.equal(tagRequests(f).length,4);assert.ok(f.requests.length>before);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
+});
+test('a tag object whose sha differs from the requested sha, or a mismatched ref name, is rejected',async t=>{
+ const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);f.world=f.build(2);
+ annotate(f,2,{mismatch:1});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
+ f.tagRef=world=>({ref:'refs/tags/other-'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
 });

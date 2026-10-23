@@ -200,13 +200,13 @@ test('fresh exact current rows are distinct from staged uninstaller history and 
  assert.equal(proof.currentFiles.some(row=>row.path===f.uninstaller),false);assert.ok(proof.files.some(row=>row.path===f.uninstaller));assert.equal(proof.uninstallerEvidence,'staged-history-only');
  assert.equal(f.digest(f.third),vendor);assert.equal(proof.currentFiles.find(row=>row.path===f.third).thumbprint,'vendor');
 });
-test('fixed builtin signing imports and command-origin guards fail closed without signing',async()=>{
+test('fixed builtin signing imports and command-origin guards fail closed without signing',{skip:process.platform!=='win32'},async()=>{
  const source=fs.readFileSync(path.join(__dirname,'..','sign-staged-binary.ps1'),'utf8');
  for(const module of ['Utility','Security'])assert.ok(source.includes("Import-Module -Name ($PSHOME + '\\Modules\\Microsoft.PowerShell."+module+"\\Microsoft.PowerShell."+module+".psd1') -ErrorAction Stop"));
  assert.ok(source.includes("$PSVersionTable.PSEdition -ne 'Desktop'"));assert.ok(source.includes('$PSVersionTable.PSVersion.Minor -ne 1'));
  assert.ok(source.includes('Microsoft.PowerShell.Utility\\Get-FileHash -LiteralPath'));assert.ok(source.includes('Microsoft.PowerShell.Security\\Get-AuthenticodeSignature -LiteralPath'));
  assert.equal(/\$env:PSModulePath\s*=/i.test(source),false);
- const guard=source.match(/^function Assert-ReleaseBuiltinCommand[^\n]*\{\n[\s\S]*?^\}/m);assert.ok(guard);
+ const guard=source.match(/^function Assert-ReleaseBuiltinCommand[^\n]*\{\r?\n[\s\S]*?^\}/m);assert.ok(guard);
  const script=`$ErrorActionPreference='Stop'
 function Get-Command([string]$Name,[string]$ErrorAction) {
  if($script:scenario -eq 'missing'){throw 'Unresolved builtin'}
