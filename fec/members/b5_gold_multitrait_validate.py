@@ -19,6 +19,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from members.b5_external_gold_validate import map_gold, name_key, one_sided_permutation_p
+from members.ratified_trait_status import published_status
 from moneyball_core import dump_atomic
 from paths import ROOT
 
@@ -284,7 +285,8 @@ def build():
                 "mean_panel_r": result["mean_panel_r"],
             }
         output_traits[trait] = {
-            "status": status,
+            "status": published_status(trait, status),
+            "computed_status": status,
             "scope": "public expert-perceived Big Five estimate; not self-report, diagnosis, or private-state measurement",
             "candidate_channels": list(channels), "selected_variant": selected_name,
             "selected_weights": selected["selected_weights"], "coverage_n": len(members),
