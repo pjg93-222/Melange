@@ -30,3 +30,12 @@ test('raw response digest, byte length, headers and exact number bytes are verif
  for(const change of [{bytes:body.length+1},{sha256:'0'.repeat(64)},{originalResponseBytes:false},{headers:{authorization:'secret'}},{bodyBase64:result.raw.bodyBase64+' '}])assert.throws(()=>checkedResponse({...result,raw:{...result.raw,...change}}));
  for(const change of [{provider:'untrusted'},{path:'../private'},{path:'https://evil.invalid/'},{query:{url:'https://evil.invalid/'}}])assert.throws(()=>checkedQuery({...value,...change}));
 });
+test('no packaged client file names a provider key, its environment variable or the owner key file',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ for(const name of require('../release-files.cjs')){
+  if(/\.(ico|png)$/.test(name))continue;
+  const text=fs.readFileSync(path.join(__dirname,'..',name),'utf8');
+  // scrape-service.cjs names x-api-key only to refuse it as a query parameter; the key names and the key file appear nowhere.
+  assert.doesNotMatch(text,/FEC_API_KEY|CONGRESS_API_KEY|keys\.json|data_gov/i,name);
+ }
+});

@@ -125,6 +125,32 @@ class BrokerTests(unittest.TestCase):
             with self.assertRaises(BrokerError): self.broker().execute(grant, QUERY)
         with self.assertRaises(ValueError): from_environment(self.root, {'MELANGE_SCRAPE_BROKER_ENABLED': '1'})
 
+    def test_global_budget_survives_restart(self):
+        limits = Limits(per_principal_hour=10, global_hour=1)
+        self.broker(limits=limits).execute(self.grant, QUERY)
+        other = {**self.grant, 'principal_id': str(uuid.uuid4())}
+        with self.assertRaises(BrokerError) as caught:
+            self.broker(limits=limits).execute(other, QUERY)  # a new instance reads the same sqlite budget
+        self.assertEqual((caught.exception.status, caught.exception.code), (429, 'scrape_quota_exceeded'))
+        self.assertEqual(len(self.calls), 1)
+
+    def test_per_principal_concurrency_is_enforced_below_the_global_limit(self):
+        started, finish = threading.Event(), threading.Event()
+        def fetch(*_):
+            started.set(); self.assertTrue(finish.wait(4)); return source({'ok': True})
+        limits = Limits(per_principal_concurrent=1, global_concurrent=4)
+        with concurrent.futures.ThreadPoolExecutor(1) as pool:
+            pending = pool.submit(self.broker(limits=limits, fetch=fetch).execute, self.grant, QUERY)
+            self.assertTrue(started.wait(3))
+            try:
+                with self.assertRaises(BrokerError) as caught: self.broker(limits=limits).execute(self.grant, QUERY)
+                self.assertEqual((caught.exception.status, caught.exception.code, caught.exception.retry_after),
+                                 (429, 'scrape_concurrency_exceeded', 5))
+                other = {**self.grant, 'principal_id': str(uuid.uuid4())}
+                self.assertEqual(decoded(self.broker(limits=limits).execute(other, QUERY))['results'], [1])
+            finally: finish.set()
+            self.assertEqual(decoded(pending.result()), {'ok': True})
+
 
 class BrokerHTTPTests(unittest.TestCase):
     request, approval, activated, payload = (AccessStoreTests.request, AccessStoreTests.approval,
@@ -173,6 +199,35 @@ class BrokerHTTPTests(unittest.TestCase):
         _, activation = self.activated('mentat')
         self.assertEqual(self.call(activation['accessToken'])[:2], (503, {'error': 'scrape_service_disabled'}))
         self.assertEqual(self.calls, [])
+
+    def test_503_answers_carry_retry_after(self):
+        _, activation = self.activated('melange'); token = activation['accessToken']
+        def down(*_): raise BrokerError(503, 'upstream_unavailable', 5)
+        self.broker.fetch = down
+        self.assertEqual(self.call(token), (503, {'error': 'upstream_unavailable'}, '5'))
+        no_congress = {'schemaVersion': 1, 'provider': 'congress', 'path': 'bill', 'query': {}}
+        self.assertEqual(self.call(token, query=no_congress), (503, {'error': 'scrape_provider_unavailable'}, '60'))
+        with patch.dict('os.environ', {'MELANGE_SCRAPE_BROKER_ENABLED': '0'}):
+            self.server.RequestHandlerClass = handler_for(self.publisher)
+        self.assertEqual(self.call(token), (503, {'error': 'scrape_service_disabled'}, '5'))
+
+    def test_original_bytes_cross_the_https_route_unchanged(self):
+        body = b'{ "results": [{"amount": 123456789012345.123456, "tiny":1e-99}] }\n'
+        self.broker.fetch = lambda *_: UpstreamResponse(body, 200, {'content-type': 'application/json'})
+        _, activation = self.activated('mentat')
+        status, data, _ = self.call(activation['accessToken'])
+        self.assertEqual(status, 200)
+        self.assertEqual(base64.b64decode(data['raw']['bodyBase64']), body)
+        self.assertEqual((data['raw']['sha256'], data['raw']['bytes']), (hashlib.sha256(body).hexdigest(), len(body)))
+
+    def test_revocation_during_an_upstream_read_denies_delivery(self):
+        _, activation = self.activated('melange'); token = activation['accessToken']
+        def revoke_then_answer(*_):
+            self.store.revoke(self.payload(activation['grant'])['grantId'])
+            return source({'results': ['must not be delivered']})
+        self.broker.fetch = revoke_then_answer
+        status, data, _ = self.call(token)
+        self.assertEqual(status, 403); self.assertNotIn('must not be delivered', json.dumps(data))
 
 
 class UpstreamTransportTests(unittest.TestCase):

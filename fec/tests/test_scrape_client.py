@@ -84,5 +84,31 @@ class ScrapeClientTests(unittest.TestCase):
             self.assertEqual(len(originals),1);self.assertEqual(originals[0].read_bytes(),body)
             self.assertFalse((root/'data/money/fec_refresh_current.json').exists())
 
+    def test_broker_5xx_raises_and_collectors_never_take_the_direct_key_path(self):
+        self.status=503
+        with self.assertRaises(scrape_client.ScrapeBrokerError) as caught:scrape_client.fetch_raw_url('https://api.open.fec.gov/v1/candidates/')
+        self.assertEqual(caught.exception.status,503)
+        from legislation.collect_official_rollcall_events import HttpFetcher
+        source='https://api.congress.gov/v3/bill/119/hr/1/actions?format=json'
+        with patch('urllib.request.urlopen',side_effect=AssertionError('direct request')) as direct:
+            with self.assertRaises(scrape_client.ScrapeBrokerError):HttpFetcher('TEST-KEY-0000').fetch(source)
+            # an upstream error status passed through the broker is raised too, never retried directly
+            with patch('scrape_client.fetch_raw_url',return_value=(b'{}',500,{})):
+                with self.assertRaises(scrape_client.ScrapeBrokerError):HttpFetcher('TEST-KEY-0000').fetch(source)
+        direct.assert_not_called()
+        from collect import refresh_fec_money as collector
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            for name in ('fec/attic/full_congestion.py','fec/legislators.csv','data/engine/congestion.json'):
+                file=root/name;file.parent.mkdir(parents=True,exist_ok=True);file.write_text('[]')
+            with patch.object(collector,'committee_policy',return_value={'C00000001':'cu'}),patch.object(collector,'candidate_map',return_value={}),\
+                 patch('scrape_client.fetch_raw_url',side_effect=scrape_client.ScrapeBrokerError(503)) as fetch,\
+                 patch('urllib.request.urlopen',side_effect=AssertionError('direct request')) as direct,\
+                 patch.dict(os.environ,{'FEC_API_KEY':'TEST-KEY-0000'}):
+                status=collector.main(['--root',str(root),'--no-install','--key-file',str(root/'never-read-key.json')])
+            self.assertNotEqual(status,0)
+            self.assertGreaterEqual(fetch.call_count,1);direct.assert_not_called()
+            self.assertFalse((root/'data/money/fec_refresh_current.json').exists())
+
 
 if __name__=='__main__':unittest.main()
