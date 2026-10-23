@@ -10,6 +10,7 @@
       ],
       "excludedSourcePrefixes": [
         "fec/surfaces/staffer_live/approved",
+        "fec/surfaces/staffer_live/generations",
         "fec/surfaces/approved",
         "fec/attic",
         "fec/research",

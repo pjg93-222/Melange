@@ -17,10 +17,14 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from lane_file_io import replace_atomic  # noqa: E402
 from paths import to_host  # noqa: E402  (a hard-coded Windows root maps onto the container mount; identity on Windows)
+from surfaces import staffer_live_generation as generations  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = Path(__file__).parent / 'approved/clean'
-OUT = Path(__file__).parent / 'staffer_live/approved'
+# The generation being written: build() points this at a fresh directory under staffer_live/generations/ that no reader is served
+# from, and main() publishes it by flipping data/system/staffer_live_active.json (fec/surfaces/staffer_live_generation.py). The
+# legacy staffer_live/approved directory is never written again; readers fall back to it only while no generation is served.
+OUT = None
 
 
 def write_json(name, value):
@@ -588,9 +592,11 @@ def compute_people_days(paths):
     return days, counts
 
 
-def people_days():
-    """data/people-days/index.json + shard-NN.json; reuses the last output when every input hash is unchanged."""
+def people_days(prior_dir=None):
+    """data/people-days/index.json + shard-NN.json; reuses the served generation's output (prior_dir, copied byte-exactly into
+    this one) when every input hash is unchanged."""
     target = OUT / 'data' / PEOPLE_DAYS_DIR
+    previous = Path(prior_dir) / 'data' / PEOPLE_DAYS_DIR if prior_dir else target
     meta = {'schema': 'melange-people-days-v1', 'producer': 'build_clean_workspace.py ' + PEOPLE_DAYS_VERSION,
             'label': 'Days on the record', 'available': False}
     try:
@@ -599,12 +605,16 @@ def people_days():
             raise FileNotFoundError('no staffer data files (audits/staffer_live_runtime) under this tree or ' + str(LIVE_ROOT))
         paths, sources = people_days_inputs(root)
         try:
-            prior = json.loads((target / 'index.json').read_text(encoding='utf-8'))
+            prior = json.loads((previous / 'index.json').read_text(encoding='utf-8'))
         except (OSError, ValueError):
             prior = {}
         if (prior.get('available') and prior.get('producer') == meta['producer'] and prior.get('sources') == sources
                 and prior.get('shards') == PEOPLE_DAYS_SHARDS
-                and all((target / f'shard-{n:02d}.json').is_file() for n in range(PEOPLE_DAYS_SHARDS))):
+                and all((previous / f'shard-{n:02d}.json').is_file() for n in range(PEOPLE_DAYS_SHARDS))):
+            if previous != target:
+                target.mkdir(parents=True, exist_ok=True)
+                for name in ['index.json'] + [f'shard-{n:02d}.json' for n in range(PEOPLE_DAYS_SHARDS)]:
+                    shutil.copyfile(previous / name, target / name)
             print(f"People days: inputs unchanged, kept {prior['counts']['entries']:,} entries.")
             return
         days, counts = compute_people_days(paths)
@@ -668,9 +678,26 @@ def alias_receipt_rebinder():
 
 
 def main():
-    OUT.mkdir(parents=True, exist_ok=True)
+    """Build a complete new generation, serve it (pointer flip), then write the root alias shell that loads it."""
     if not (SRC / BOOT).is_file():  # every frame document names it first; without it no view could load
         raise FileNotFoundError(f'{SRC / BOOT} is missing')
+    prior = generations.active_dir(ROOT)
+    built = {}
+    published = generations.publish_generation(ROOT, lambda out: built.update(profiles=build(out, prior)))
+    html = (SRC/'index.html').read_text(encoding='utf-8')
+    target = ROOT/'Moneyball_Redesign.html'
+    backup = ROOT/'outputs/rebuild-review-2026-09-21/rejected-Moneyball_Redesign.html'
+    keep_rejected_alias(target, backup)
+    target.write_text(html, encoding='utf-8', newline='\r\n')
+    print(f"Built clean shell: {target.stat().st_size:,} bytes; {built['profiles']} profiles loaded individually; "
+          f"serving generation {published['generation']} ({published['files']} files).")
+
+
+def build(out, prior_dir=None):
+    """Write one complete workspace generation into `out`, a new directory no reader is served from. prior_dir is the directory
+    served before this build (people days reuse its output when their inputs are unchanged). Returns the profile count."""
+    global OUT
+    OUT = Path(out)
     d = json.loads((ROOT / 'member_desk_bundle.json').read_text(encoding='utf-8'))
     desk_source = (ROOT/'cu-member-desk.html').read_text(encoding='utf-8')
     try:  # the desk's own `const D=` is what its #integritybar was built from
@@ -748,16 +775,11 @@ def main():
     people = with_boot(people, 'people', head='<head><base href="/staffer-live/">')
     (OUT/'people.html').write_text(people, encoding='utf-8', newline='\r\n')
     write_json('colors.json', colour_maps(documents))
-    people_days()
+    people_days(prior_dir)
     for p in SRC.iterdir():
         if p.is_file(): shutil.copyfile(p, OUT/p.name)
     ensure_stubs()
-    html = (SRC/'index.html').read_text(encoding='utf-8')
-    target = ROOT/'Moneyball_Redesign.html'
-    backup = ROOT/'outputs/rebuild-review-2026-09-21/rejected-Moneyball_Redesign.html'
-    keep_rejected_alias(target, backup)
-    target.write_text(html, encoding='utf-8', newline='\r\n')
-    print(f'Built clean shell: {target.stat().st_size:,} bytes; {len(catalog)} profiles loaded individually.')
+    return len(catalog)
 
 
 if __name__ == '__main__':
