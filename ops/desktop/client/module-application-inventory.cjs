@@ -23,8 +23,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 38402,
-        "sha256": "e6c291834fc44966dfb1d78900566a7df41e6662dcd1810bd091dedea1e7e2bc"
+        "bytes": 38974,
+        "sha256": "0bd4245f1e785d51af0169d8ebace07908bd695823543b1ac3948dfd60765659"
       },
       {
         "root": "bootstrap",
@@ -370,9 +370,15 @@ const APPLICATION_SPECS=freeze({
       },
       {
         "root": "source",
+        "path": "fec/surfaces/staffer_live_generation.py",
+        "bytes": 19537,
+        "sha256": "7764d29a3e3330099b3c89f33fbe99c10697516de496b00ac21b1382bafe81cf"
+      },
+      {
+        "root": "source",
         "path": "fec/surfaces/staffer_live_server.py",
-        "bytes": 55437,
-        "sha256": "f5990382b02a7adc02ef9f39a834acc09d054f9621cf292c8d5904b0afe36201"
+        "bytes": 55891,
+        "sha256": "9d6b348912be25330798c621dfc2e769c5cf52680b5fc1e1dba20d127dbd434c"
       },
       {
         "root": "source",
@@ -465,7 +471,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "f532a11cebf1ecbae26a3407ac161f6d139981582462016bbe71f0843552700e",
+    "programFingerprint": "9a253ba90df6b0453c171b0b8db6671c912513f5faff3f17082763e3f19cf82e",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],

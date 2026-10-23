@@ -11,7 +11,8 @@ import runpy
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-ADDITIONS = {'melange': ('fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py')}
+ADDITIONS = {'melange': ('fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py',
+                         'fec/surfaces/staffer_live_generation.py')}
 
 
 def encoded(value):
