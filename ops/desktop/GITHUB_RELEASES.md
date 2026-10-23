@@ -187,6 +187,115 @@ exact `desktop-v<version>` release, which therefore must stay hosted for that
 fallback. Network is needed only to fetch new updates. A per-machine (all users) install skips the first-install copy, because the app reads the signed-in user's `%LOCALAPPDATA%`; the first rollback there falls back to the network. The baseline copy is copied (not moved) and removed only after the rollback completes and the target version is confirmed running. A cached installer is deleted only when its own size or hash check fails, never for an untrusted signature or a tool error. If the installer later cannot be spawned, electron-updater exits the app once and the update is recorded as failed at the next start; the exceptions are EACCES/UNKNOWN (retried through its elevation helper, which can show a UAC prompt, rare for this per-user install) and ENOENT (opened interactively without `/S`), neither of which reports an error. Disk cost is about one
 extra installer per app (Melange roughly 575 MB).
 
+## Release from main
+
+`packaging/release_from_main.py` runs the steps above, and the publishing steps
+below, as one local command. It stops at the first failed step and names that step.
+
+- **Sources.** Each checkout's `origin` must be its app's GitHub repository: the
+  configured URL (`git config --get remote.origin.url`, before any `insteadOf`
+  rewriting) must be `https://github.com/pjg93-222/<Name>[.git]` or
+  `git@github.com:pjg93-222/<Name>[.git]`. The command fetches, then refuses modified tracked files and any `HEAD` that is not
+  `origin/main`. Untracked files are ignored, because every source is exported
+  from the commit with `git archive`. The checkouts default to dedicated clean
+  clones in `~/Documents/MelangeReleaseSources/{Melange,Mentat,Geo}`; a missing
+  default clone is cloned from `https://github.com/pjg93-222/<Name>.git` first.
+  (Everyday checkouts are other lineages whose `HEAD` is not `origin/main`.)
+  Override them with `--melange`/`--mentat`/`--geo` or
+  `DESKTOP_MELANGE_SOURCE`/`DESKTOP_MENTAT_SOURCE`/`DESKTOP_GEO_SOURCE`; a given
+  path that does not exist is refused, never cloned.
+- **Clients.** Each app is built with its own repository's desktop client:
+  Melange with Melange's `ops/desktop/{client,packaging}`, Mentat with Mentat's,
+  and Terrier with Melange's, Geo being its application source.
+- **Version.** The version is `ops/desktop/client/package.json`, which must be
+  the same on Melange main and Mentat main. `--version` must equal it.
+  `desktop-v<version>` must not exist in any of the three repositories. The
+  sequence is the ledger's last + 1, unless you pass `--sequence`.
+- **Build venvs.** Without `--build-python` (or `DESKTOP_BUILD_PYTHON`) the
+  command creates one venv per app in `release-<v>/venv/<app>` with its own
+  interpreter (CPython 3.12) and installs it as CI does (`--require-hashes
+  --only-binary=:all: --no-deps`, then `pip check`) from a hash-locked file:
+  `ops/desktop/packaging/<app>-runtime.constraints.txt` in the app's client
+  (tool) repository: `melange-` (Melange), `mentat-` (Mentat repo),
+  `terrier-` (Melange, Terrier's tool repo). Geo's `requirements.build.lock` is
+  a Linux lock and is never used. Each file's header says how it was generated
+  (Windows x64 / cp312 wheel hashes). An app with no such file is refused at step `venv`; pass `--build-python` for it (then that
+  one venv serves every app). Each venv's `pip freeze --all` SHA-256 is in its
+  app's tests gate.
+- **Gates.** Per app: `security_gate.py export` (gitleaks; the one reviewed Mentat
+  finding goes through `desktop_source_review.py`; both from the app's client
+  repository when it has them, else Melange's), `build_runtime.py --stage-only`,
+  the runtime build (native runtimes complete, licence metadata for every
+  dependency), `npm run build` and the packaged backend smoke. Per client
+  repository: `npm ci`/`npm test`/`npm audit` and pytest `ops/desktop`. Every
+  gate's evidence names its command, exit code, log and log SHA-256. The runtime
+  build, pytest and the smoke run in the build venvs.
+- **Signing.** Signing happens inside `npm run build`, by the merged hook
+  `ops/desktop/client/release-signing.cjs` of each app's client repository
+  (`packaging/INNER-SIGNING.md`), with the certificate held in this PC's TPM-backed
+  `Cert:\CurrentUser\My` store (thumbprint `0EBC9AD0...3D30`). The command passes
+  `DESKTOP_SIGNING_CERT_SHA1`, `WINDOWS_PUBLISHER_NAME`, and a fresh per-app
+  `DESKTOP_SIGNING_ROOT` (`release-<v>/signing/<app>`) with `DESKTOP_DIST_ROOT`
+  inside it. It strips `CSC_*`/`WIN_CSC_*`; the rest of your environment is
+  inherited. Step `version` refuses a client repository whose main lacks the
+  hook. `trust.json` `windowsPublisher` must be the hook's subject,
+  `CN=Melange Systems Desktop Release (self-signed)`. Step `sign` then only
+  verifies: each installer must be Valid, with that thumbprint, subject and a
+  timestamp. Its `<installer>.signatures.json` hook receipt must record those
+  installer bytes, and its SHA-256 goes into `osSignature`. A NotSigned installer
+  means the hook was not active and is refused. The manifest keys stay in the
+  state directory (`--state`, default `~/Documents/MelangeDesktopAdmin`). The
+  command refuses to run in CI, and `--publish` never runs there.
+- **Execution policy.** The hook runs `sign-staged-binary.ps1` with
+  `powershell.exe -File` and no execution-policy argument. Step `local` reads the
+  effective policy (`Get-ExecutionPolicy`, with your environment) and refuses
+  anything other than RemoteSigned, Unrestricted or Bypass, before any other
+  command runs. If every scope is Undefined (Restricted), the choice is yours,
+  for example running the command from a PowerShell session after
+  `Set-ExecutionPolicy -Scope Process RemoteSigned`. That lasts only for that
+  session and reaches the build via `PSExecutionPolicyPreference`. The command
+  never sets or overrides the policy. The check also runs for a `--publish`
+  after a dry run, which builds nothing.
+- **Outputs** (under `--output-root`, default `~/Documents/Desktop-Installers-<date>`):
+  `receipts-<v>/`, `release-spec-<v>.json` and `release-<v>/` (sources, venvs,
+  logs, signed installers and their hook receipts in `signing/<app>/dist/<app>/`). A dry run (no `--publish`) ends with a
+  `check` step: the release spec and each receipt pass the same spec and gate
+  verification (`desktop_admin` `verify_release_gates`, including the signature)
+  and the same version and sequence advance rule against the ledger (read only)
+  that `github_release.py` will apply, but nothing is prepared, so there are no
+  GitHub writes and no ledger sequence is reserved.
+  `--publish` after a dry run reuses its signed installers and receipts: it
+  rechecks that every `origin/main` still equals the spec's `sourceRefs`, that
+  no tag exists and that each installer's SHA-256 equals its receipt, then
+  runs `github_release.py --spec` (which reserves the sequence) into
+  `release-<v>/bundle/`, checks each `release.json` against the spec, and
+  publishes. Without a prior dry run, `--publish` builds everything first.
+  `--output-root` defaults to a dated folder, so pass the dry run's
+  `--output-root` when `--publish` runs on a later day. Otherwise it finds no
+  dry run and rebuilds. The publish first checks, for all
+  three apps, that the repository is public, that the commit exists on GitHub
+  (a pushed `origin/main`) and that there is no `desktop-v<v>` tag, release or
+  draft; a `gh release view` failure other than "release not found" (auth,
+  network) stops it instead of counting as absent. It then creates, uploads, re-downloads and
+  verifies all three drafts, and only then makes any of them public. If it stops
+  partway, delete the leftover drafts it made with
+  `gh release delete desktop-v<v> --repo <repo>` (only those), remove
+  `release-<v>/bundle/` and rerun `--publish`; `github_release.py` reuses the
+  signed manifests stored for that sequence when the bytes are identical.
+- **Git config.** Every git command follows your `url.*.insteadOf` settings
+  (only the origin check reads the unrewritten URL).
+- **Tags.** The command creates no git tags; `gh release create --target` makes
+  the release tag. Keep any district tag created alongside a release lightweight
+  (`git -c tag.gpgsign=false tag <name> <sha>`) until a release containing
+  `0084dd739` ships, because the 1.0.15 client rejects annotated district tags.
+
+```powershell
+$version = '1.0.17'
+$out = "$HOME\Documents\Desktop-Installers-$version"
+py -3.12 ops/desktop/packaging/release_from_main.py --native-root $nativeRoot --output-root $out            # dry run
+py -3.12 ops/desktop/packaging/release_from_main.py --native-root $nativeRoot --output-root $out --publish  # publish it
+```
+
 ## Publish the verified releases
 
 These are explicit operator steps after real native acceptance. They require
