@@ -28,7 +28,8 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  const args=['-NoProfile','-NonInteractive','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
  const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
- if(result.path.toLowerCase()!==file.toLowerCase()||result.status!=='Valid'||result.sha256!==hash(file)||(owned&&(result.thumbprint!==THUMBPRINT||result.timestamped!==true)))throw new Error('Staged signature verification failed');
+ const failure=result.path.toLowerCase()!==file.toLowerCase()?'path':result.status!=='Valid'?'status':result.sha256!==hash(file)?'sha256':owned&&result.thumbprint!==THUMBPRINT?'thumbprint':owned&&result.timestamped!==true?'timestamped':null;
+ if(failure)throw new Error('Staged signature verification failed ('+failure+')');
  return result;
 }
 function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset}={}){
