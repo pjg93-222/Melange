@@ -5,7 +5,8 @@ const {execFile}=require('node:child_process'),{promisify}=require('node:util');
 const run=promisify(execFile);
 const THUMBPRINT='0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30';
 const SUBJECT='CN=Melange Systems Desktop Release (self-signed)';
-const PE=/\.(exe|dll|pyd|node|ocx)$/i;
+function isPE(file){const fd=fs.openSync(file,'r');try{const b=Buffer.alloc(2);return fs.readSync(fd,b,0,2,0)===2&&b[0]===0x4d&&b[1]===0x5a;}finally{fs.closeSync(fd);}}
+function stub(file){return path.basename(path.dirname(file)).toLowerCase()==='stubs';}
 function within(root,file){const relative=path.relative(root,file);return relative!==''&&!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative);}
 function regular(file,directory=false){const stat=fs.lstatSync(file);if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1))throw new Error('Build path must be a private regular '+(directory?'directory':'file'));return stat;}
 function ancestors(file,directory=false){regular(file,directory);for(let parent=path.dirname(file);;parent=path.dirname(parent)){regular(parent,true);if(parent===path.dirname(parent))break;}}
@@ -25,7 +26,7 @@ async function signPool(files,task){
 }
 async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  const requestedFile=path.resolve(file),requestedRoot=path.resolve(root);
- if(!within(requestedRoot,requestedFile)||!PE.test(requestedFile))throw new Error('Refusing binary outside private build root');
+ if(!within(requestedRoot,requestedFile))throw new Error('Refusing binary outside private build root');
  const snapshot=(target,directory)=>{
   ancestors(target,directory);const stat=fs.lstatSync(target,{bigint:true});
   if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1n)||stat.ino===0n)throw new Error('Build path must retain a private physical identity');
@@ -33,7 +34,7 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  };
  const rootIdentity=snapshot(requestedRoot,true),fileIdentity=snapshot(requestedFile,false);
  root=fs.realpathSync.native(requestedRoot);file=fs.realpathSync.native(requestedFile);
- if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');
+ if(!within(root,file)||!isPE(file))throw new Error('Refusing binary outside private build root');
  const checkIdentity=()=>{
   for(const [target,before,directory] of [[requestedRoot,rootIdentity,true],[requestedFile,fileIdentity,false],[root,rootIdentity,true],[file,fileIdentity,false]]){
    const after=snapshot(target,directory);
@@ -63,7 +64,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file))||(appDirectory&&identity(file)===identity(path.join(appDirectory,'resources','elevate.exe')));
  const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned});records.push(result);return result;};
  const verifyToolCopies=()=>{
-  for(const directory of ['nsis','nsis-resources'])for(const file of tree(path.join(root,directory)).filter(file=>PE.test(file)))
+  for(const directory of ['nsis','nsis-resources'])for(const file of tree(path.join(root,directory)).filter(file=>!stub(file)&&isPE(file)))
    if(!records.some(row=>row.path.toLowerCase()===file.toLowerCase()&&row.sha256===hash(file)&&row.status==='Valid'))throw new Error('Private NSIS binary changed after signing');
  };
  return {
@@ -79,7 +80,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    const copies=[{source,destination:path.join(root,'nsis')},{source:path.dirname(plugins),destination:path.join(root,'nsis-resources')}];
    const originals=[];
    for(const copy of copies){if(fs.existsSync(copy.destination))throw new Error('Private NSIS staging already exists');for(const file of tree(copy.source))originals.push({file,sha256:hash(file)});fs.cpSync(copy.source,copy.destination,{recursive:true,errorOnExist:true,force:false});}
-   await signPool(copies.flatMap(copy=>tree(copy.destination).filter(file=>PE.test(file))),file=>record(file,false,false));
+   await signPool(copies.flatMap(copy=>tree(copy.destination).filter(file=>!stub(file)&&isPE(file))),file=>record(file,false,false));
    for(const original of originals)if(hash(original.file)!==original.sha256)throw new Error('Shared NSIS tool cache changed');
    const userPlugins=path.join(context.packager.info.buildResourcesDir,'x86-unicode');
    if(fs.existsSync(userPlugins))throw new Error('Unreviewed custom NSIS plugins override the signed private toolset');
@@ -91,7 +92,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    // Fuses and resource editing have already completed. Sign remaining DLL/PYD
    // dependencies; valid third-party signatures are checked and left unchanged.
    appDirectory=path.resolve(context.appOutDir);
-   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>record(file,false,owned(file)));
+   await signPool(tree(appDirectory).filter(file=>isPE(file)),file=>record(file,false,owned(file)));
    await record(path.join(context.appOutDir,app.name+'.exe'),true,true);verifyToolCopies();
   },
   artifactBuildCompleted:async event=>{
@@ -99,7 +100,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    if(!appDirectory)throw new Error('Application signing has not completed');
    const current=new Map();
    const verifyCurrent=async(file,forceOwned=owned(file))=>{const result=await record(file,true,forceOwned);current.set(identity(file),result);};
-   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>verifyCurrent(file));
+   await signPool(tree(appDirectory).filter(file=>isPE(file)),file=>verifyCurrent(file));
    await verifyCurrent(event.file,true);verifyToolCopies();
    for(const file of [path.join(appDirectory,app.name+'.exe'),path.join(appDirectory,'resources','elevate.exe'),path.resolve(event.file)]){
     const result=current.get(identity(file));
@@ -112,4 +113,4 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   }
  };
 }
-module.exports={THUMBPRINT,SUBJECT,within,tree,signFile,signPool,options};
+module.exports={THUMBPRINT,SUBJECT,within,tree,isPE,signFile,signPool,options};
