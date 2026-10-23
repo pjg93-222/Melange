@@ -201,8 +201,7 @@ def main(argv=None):
                     try:
                         raw,status,headers=scrape_client.fetch_raw_url(url)
                         if status!=200:
-                            retry=headers.get('retry-after','')
-                            raise scrape_client.ScrapeBrokerError(status,int(retry) if retry.isascii() and retry.isdecimal() else None)
+                            raise scrape_client.ScrapeBrokerError(status,scrape_client.parse_retry_after(headers.get('retry-after','')))
                         break
                     except scrape_client.ScrapeBrokerError as exc:
                         if attempt==5 or exc.status not in (429,503) or not exc.retry_after or exc.retry_after>300: raise

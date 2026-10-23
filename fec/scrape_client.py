@@ -4,8 +4,11 @@ The packaged main process supplies this ephemeral loopback capability only to
 its backend. A configured broker failure never falls back to direct API keys.
 """
 import base64
+import datetime
+import email.utils
 import hashlib
 import json
+import math
 import os
 import re
 import urllib.error
@@ -22,6 +25,19 @@ class ScrapeBrokerError(urllib.error.URLError):
         message = 'Shared collection is unavailable'
         if retry_after: message += '; retry after ' + str(retry_after) + ' seconds'
         super().__init__(message)
+
+
+def _now(): return datetime.datetime.now(datetime.timezone.utc)
+
+
+def parse_retry_after(value):
+    """RFC 7231 Retry-After: decimal seconds or an HTTP-date, as whole seconds >= 0; None if absent or unparsable."""
+    value = (value or '').strip()
+    if value.isascii() and re.fullmatch(r'\d+(\.\d+)?', value): return math.ceil(float(value))
+    try: when = email.utils.parsedate_to_datetime(value)
+    except (TypeError, ValueError, IndexError): return None
+    if when.tzinfo is None: when = when.replace(tzinfo=datetime.timezone.utc)
+    return max(0, math.ceil((when - _now()).total_seconds()))
 
 
 def configuration(environ=None):
@@ -96,8 +112,8 @@ def fetch_raw_url(source_url):
                        for key,val in source['headers'].items())): raise ValueError()
         return content, source['status'], source['headers']
     except urllib.error.HTTPError as error:
-        retry = error.headers.get('Retry-After', '')
-        retry = max(1, min(int(retry), 86400)) if retry.isascii() and retry.isdecimal() else None
+        retry = parse_retry_after(error.headers.get('Retry-After', ''))
+        retry = max(1, min(retry, 86400)) if retry is not None else None
         status = error.code; error.close()
         raise ScrapeBrokerError(status, retry) from None
     except (OSError, ValueError, TypeError):
@@ -107,7 +123,6 @@ def fetch_raw_url(source_url):
 def fetch_json_url(source_url):
     content, status, headers = fetch_raw_url(source_url)
     if status != 200:
-        retry = headers.get('retry-after', '')
-        raise ScrapeBrokerError(status, int(retry) if retry.isdecimal() else None)
+        raise ScrapeBrokerError(status, parse_retry_after(headers.get('retry-after', '')))
     try: return json.loads(content)
     except (ValueError, UnicodeError): raise ScrapeBrokerError(502) from None

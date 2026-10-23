@@ -1,5 +1,6 @@
 import base64
 import contextlib
+import datetime
 import hashlib
 import http.server
 import json
@@ -117,6 +118,8 @@ class ScrapeClientTests(unittest.TestCase):
         for side_effect,sleeps,calls in (
                 ([scrape_client.ScrapeBrokerError(429,7),(body,200,{})],[7],2),          # broker quota, then success
                 ([(b'{}',503,{'retry-after':'5'}),(body,200,{})],[5],2),                # upstream 503 passed through
+                ([(b'{}',503,{'retry-after':'Fri, 23 Oct 2026 12:00:05 GMT'}),(body,200,{})],[5],2),  # upstream 503 with a future HTTP-date
+                ([(b'{}',503,{'retry-after':'soon, maybe'})],[],1),                      # unparsable: no wait
                 ([scrape_client.ScrapeBrokerError(429,301)],[],1),                       # above the cap: no wait
                 ([scrape_client.ScrapeBrokerError(429)],[],1),                           # no Retry-After: no wait
                 ([scrape_client.ScrapeBrokerError(429,1)]*6,[1]*5,6)):                   # six attempts at most
@@ -125,7 +128,7 @@ class ScrapeClientTests(unittest.TestCase):
                 for name in ('fec/attic/full_congestion.py','fec/legislators.csv','data/engine/congestion.json'):
                     file=root/name;file.parent.mkdir(parents=True,exist_ok=True);file.write_text('[]')
                 with patch.object(collector,'committee_policy',return_value={'C00000001':'cu'}),patch.object(collector,'candidate_map',return_value={}),\
-                     patch('scrape_client.fetch_raw_url',side_effect=side_effect) as fetch,patch.object(collector.time,'sleep') as sleep,\
+                     patch('scrape_client.fetch_raw_url',side_effect=side_effect) as fetch,patch.object(collector.time,'sleep') as sleep,patch.object(scrape_client,'_now',return_value=datetime.datetime(2026,10,23,12,0,0,tzinfo=datetime.timezone.utc)),\
                      patch('urllib.request.urlopen',side_effect=AssertionError('direct request')) as direct,contextlib.redirect_stdout(io.StringIO()):
                     collector.main(['--root',str(root),'--no-install','--key-file',str(root/'never-read-key.json')])
                 self.assertEqual(fetch.call_count,calls);self.assertEqual([c.args[0] for c in sleep.call_args_list],sleeps);direct.assert_not_called()
