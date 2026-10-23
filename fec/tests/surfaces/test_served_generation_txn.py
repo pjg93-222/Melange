@@ -319,3 +319,12 @@ def test_builder_main_publishes_a_generation_and_never_writes_legacy(root, monke
     assert G.active_dir(root) == out and G.verify_generation(root, pointer['generation']) == []
     assert {p: p.read_bytes() for p in G.legacy_dir(root).rglob('*') if p.is_file()} == legacy
     assert (root / 'Moneyball_Redesign.html').read_bytes() == (B.SRC / 'index.html').read_bytes().replace(b'\n', b'\r\n')
+
+
+def test_a_generation_published_under_a_chain_run_carries_the_run_id(root, monkeypatch):
+    monkeypatch.setenv(G.RUN_ID_ENV, 'moneyball-pipeline-20261023T120000')    # what fec/run_pipeline.py exports per run
+    published = G.publish_generation(root, writer('chain'), log=quiet)
+    assert published['generation'].endswith('Z-moneyball-pipeline-20261023T120000')
+    assert G.active_generation(root) == published['generation']
+    rp = (FEC / 'run_pipeline.py').read_text(encoding='utf-8')
+    assert "os.environ['MELANGE_CHAIN_RUN_ID']=str(_GB_RUN)" in rp and G.RUN_ID_ENV == 'MELANGE_CHAIN_RUN_ID'
