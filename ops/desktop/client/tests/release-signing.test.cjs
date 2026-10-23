@@ -46,9 +46,25 @@ test('private staging refuses reuse, external files and custom plugin shadowing'
 test('signature command uses CurrentUser script and refuses an invalid verification result',async t=>{
  const f=fixture(t);let called;
  await assert.rejects(signFile(f.main,f.root,{owned:true,execute:async(command,args,settings)=>{called={command,args,settings};return {stdout:JSON.stringify({path:f.main,status:'Valid',sha256:f.digest(f.main),thumbprint:'vendor',timestamped:true})};}}),/verification failed/);
- assert.equal(called.command,String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`);assert.equal(path.win32.isAbsolute(called.command),true);assert.equal(/[\x00-\x1f]/.test(called.command),false);assert.equal(/[\x00-\x1f]/.test(called.settings.env.PSModulePath),false);
+ assert.equal(called.command,String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`);assert.equal(path.win32.isAbsolute(called.command),true);assert.equal(/[\x00-\x1f]/.test(called.command),false);assert.equal(Object.hasOwn(called.settings,'env'),false);
  if(process.platform==='win32')assert.equal(fs.statSync(called.command).isFile(),true);
  assert.ok(called.args.includes('-RequirePublisher'));assert.equal(called.settings.windowsHide,true);assert.equal(called.args.includes('/p'),false);
+});
+test('signature invocation preserves default policy and environment without overrides',async t=>{
+ const f=fixture(t),calls=[];
+ for(const request of [{verify:true,owned:false},{verify:false,owned:true}]){
+  await signFile(f.main,f.root,{...request,execute:async(command,args,settings)=>{
+   calls.push({command,args,settings});
+   return {stdout:JSON.stringify({path:f.main,status:'Valid',sha256:f.digest(f.main),thumbprint:THUMBPRINT,timestamped:true})};
+  }});
+  const called=calls.at(-1);
+  assert.equal(called.command,String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`);
+  assert.deepEqual(called.args,['-NoProfile','-NonInteractive','-File',path.join(__dirname,'..','sign-staged-binary.ps1'),'-File',f.main,'-Root',f.root,'-Mode',request.verify?'Verify':'Sign',...(request.owned?['-RequirePublisher']:[])]);
+  assert.deepEqual(called.settings,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
+  assert.equal(Object.hasOwn(called.settings,'env'),false);
+  assert.equal(called.args.some(value=>/^(?:-ExecutionPolicy|-EP|Bypass)$/i.test(value)),false);
+ }
+ assert.equal(calls.length,2);
 });
 test('a junction parent cannot redirect signing outside the private staging directory',async t=>{
  const f=fixture(t),link=path.join(f.root,'junction');fs.symlinkSync(path.join(f.vendor,'nsis'),link,'junction');
