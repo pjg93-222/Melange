@@ -24,13 +24,31 @@ async function signPool(files,task){
  if(failed)throw failure;
 }
 async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
- file=path.resolve(file);root=path.resolve(root);if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');ancestors(root,true);ancestors(file);
+ const requestedFile=path.resolve(file),requestedRoot=path.resolve(root);
+ if(!within(requestedRoot,requestedFile)||!PE.test(requestedFile))throw new Error('Refusing binary outside private build root');
+ const snapshot=(target,directory)=>{
+  ancestors(target,directory);const stat=fs.lstatSync(target,{bigint:true});
+  if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1n)||stat.ino===0n)throw new Error('Build path must retain a private physical identity');
+  return stat;
+ };
+ const rootIdentity=snapshot(requestedRoot,true),fileIdentity=snapshot(requestedFile,false);
+ root=fs.realpathSync.native(requestedRoot);file=fs.realpathSync.native(requestedFile);
+ if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');
+ const checkIdentity=()=>{
+  for(const [target,before,directory] of [[requestedRoot,rootIdentity,true],[requestedFile,fileIdentity,false],[root,rootIdentity,true],[file,fileIdentity,false]]){
+   const after=snapshot(target,directory);
+   if(after.dev!==before.dev||after.ino!==before.ino||(after.mode&0o170000n)!==(before.mode&0o170000n))throw new Error('Private build path identity changed');
+  }
+ };
+ checkIdentity();
  const args=['-NoProfile','-NonInteractive','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
  const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
+ checkIdentity();
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
  const failure=result.path.toLowerCase()!==file.toLowerCase()?'path':result.status!=='Valid'?'status':result.sha256!==hash(file)?'sha256':owned&&result.thumbprint!==THUMBPRINT?'thumbprint':owned&&result.timestamped!==true?'timestamped':null;
  if(failure)throw new Error('Staged signature verification failed ('+failure+')');
- return result;
+ checkIdentity();
+ return {...result,path:requestedFile,verifiedPath:result.path};
 }
 function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset}={}){
  const configured=env.DESKTOP_SIGNING_CERT_SHA1;
