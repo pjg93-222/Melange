@@ -23,6 +23,7 @@ FILES = (
     "fec/surfaces/staffer_live_server.py",
     "fec/surfaces/staffer_live_service.py",
     "fec/surfaces/melange_dashboard.py",
+    "fec/surfaces/staffer_live_generation.py",
     "fec/surfaces/staffer_routing.py",
     "fec/surfaces/staffer_work_sources.py",
     "fec/surfaces/staffer_closeness_routes.py",
