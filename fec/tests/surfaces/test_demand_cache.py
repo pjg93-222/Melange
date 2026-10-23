@@ -94,6 +94,12 @@ class CacheTests(unittest.TestCase):
             self.assertEqual(foreign.read_text(), 'keep')
 
     def test_cache_never_exceeds_cap_under_concurrent_download_and_read(self):
+        """Cache bytes stay at or under the cap at every sampled moment.
+
+        ChunkCache holds one cross-process lock for each whole acquire (download,
+        verification and the caller's read), so the four workers interleave their
+        page holds rather than overlap them; the sampler thread runs unlocked.
+        """
         cap, block = 64, 4
         values = [bytes([65 + n]) * (8 + 4 * (n % 3)) for n in range(12)]
         with tempfile.TemporaryDirectory() as root:
@@ -115,14 +121,19 @@ class CacheTests(unittest.TestCase):
                 while not stop.is_set():
                     used()
             def worker(offset):
-                cache = ChunkCache(root, cap, fetch, lock_timeout=30)
-                for n in range(24):
-                    value = values[(offset + n * 5) % len(values)]
-                    with cache.acquire(spec(value)) as path:
-                        used(); self.assertEqual(path.read_bytes(), value)
+                try:
+                    cache = ChunkCache(root, cap, fetch, lock_timeout=30)
+                    for n in range(24):
+                        value = values[(offset + n * 5) % len(values)]
+                        with cache.acquire(spec(value)) as path:
+                            used()
+                            if path.read_bytes() != value:
+                                raise AssertionError('wrong bytes for a leased page')
+                except Exception as exc:  # a worker thread's failure must fail the test
+                    errors.append(exc)
             watcher = threading.Thread(target=sampler); watcher.start()
-            threads = [threading.Thread(target=worker, args=(n,)) for n in range(4)]
             errors = []
+            threads = [threading.Thread(target=worker, args=(n,)) for n in range(4)]
             for thread in threads:
                 thread.start()
             for thread in threads:
@@ -130,6 +141,7 @@ class CacheTests(unittest.TestCase):
             stop.set(); watcher.join(10)
             used()
             self.assertFalse(any(thread.is_alive() for thread in threads))
+            self.assertEqual(errors, [])
             self.assertGreater(observed[0], 0)
             self.assertLessEqual(observed[0], cap)
             print('max observed cache bytes', observed[0], 'cap', cap)
