@@ -212,7 +212,7 @@ def test_resolver_falls_back_to_legacy_unless_the_pointer_names_a_sealed_generat
 
 
 
-def test_one_changed_byte_in_a_listed_file_falls_back_to_legacy(root):
+def test_one_changed_byte_in_a_listed_file_falls_back_to_legacy(root, capsys):
     G.publish_generation(root, writer('G1'), 'G1', log=quiet)
     target = G.generation_dir(root, 'G1') / 'data' / 'member-1.json'
     raw = bytearray(target.read_bytes())
@@ -222,6 +222,7 @@ def test_one_changed_byte_in_a_listed_file_falls_back_to_legacy(root):
     assert pointer and G._manifest_matches(root, 'G1', pointer['sha256_manifest'])   # pointer and manifest still schema-valid
     assert G.verify_generation(root, 'G1') == ['data/member-1.json: bytes differ from the manifest']
     assert G.active_generation(root) is None and G.active_dir(root) == G.legacy_dir(root)
+    assert capsys.readouterr().err.count('refused generation G1 (data/member-1.json: bytes differ from the manifest)') == 1
 
 
 def test_a_manifest_that_no_longer_hashes_to_the_pointer_falls_back_to_legacy(root):

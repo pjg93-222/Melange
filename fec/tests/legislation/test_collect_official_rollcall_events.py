@@ -431,6 +431,26 @@ class OfficialRollcallFixtureTests(unittest.TestCase):
                 ],
             )
 
+    def test_broker_refusal_is_a_per_measure_blocker_and_main_exits_2(self):
+        import scrape_client
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as raw:
+            base = Path(raw)
+            accepted = base / "accepted.ndjson"
+            write_ndjson(accepted, [accepted_row("119:hamdt:1", "Payments", direction=1)])
+            out = base / "audit-broker"
+            with mock.patch.object(scrape_client, "available", return_value=True), \
+                 mock.patch.object(scrape_client, "fetch_raw_url", side_effect=scrape_client.ScrapeBrokerError(429, 30)), \
+                 mock.patch("urllib.request.urlopen", side_effect=AssertionError("direct request")):
+                manifest = RC.collect(accepted_path=accepted, out_path=out, workspace_root=base)
+            self.assertFalse(manifest["acceptance_passed"])
+            match = read_ndjson(out / "rollcall_measure_match_audit.ndjson")[0]
+            self.assertEqual("ambiguous", match["disposition"])
+            self.assertIn("Shared collection is unavailable", match["error"])
+            self.assertIn("119:hamdt:1:official_actions_fetch_failed", manifest["blocking_issues"])
+        with mock.patch.object(RC, "collect", side_effect=scrape_client.ScrapeBrokerError()):
+            self.assertEqual(2, RC.main(["--accepted", "a.ndjson", "--out", "audit-x"]))
+
     def test_type_aware_identity_collision_is_unmatched_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as raw:
             base = Path(raw)

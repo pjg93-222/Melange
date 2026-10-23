@@ -62,7 +62,7 @@ New-Item -ItemType Directory -Path $root | Out-Null
 
 # 2. Runtime (difference 1)
 # Copy the verified 1.0.15 runtime to $root\runtime, then:
-python ops\desktop\packaging\build_runtime.py --app melange --source $source --sync-sources-only --runtime-root "$root\runtime"
+& python (Join-Path $source 'ops\desktop\packaging\build_runtime.py') --app melange --source $source --sync-sources-only --runtime-root "$root\runtime"
 
 # 3. Client dependencies: npm ci in $source\ops\desktop\client (node_modules is ignored by ops/desktop/client/.gitignore).
 

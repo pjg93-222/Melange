@@ -196,8 +196,17 @@ def main(argv=None):
             if cache_used:
                 raw=cached.read_bytes();cache_hits+=1
             elif shared_broker:
-                raw,status,_headers=scrape_client.fetch_raw_url(url)
-                if status!=200: raise scrape_client.ScrapeBrokerError(status)
+                # Honor a broker or upstream 429/503 Retry-After up to 300 s, six attempts; never a client key.
+                for attempt in range(6):
+                    try:
+                        raw,status,headers=scrape_client.fetch_raw_url(url)
+                        if status!=200:
+                            retry=headers.get('retry-after','')
+                            raise scrape_client.ScrapeBrokerError(status,int(retry) if retry.isascii() and retry.isdecimal() else None)
+                        break
+                    except scrape_client.ScrapeBrokerError as exc:
+                        if attempt==5 or exc.status not in (429,503) or not exc.retry_after or exc.retry_after>300: raise
+                        print('Shared broker wait:',exc.retry_after,'seconds',flush=True);time.sleep(exc.retry_after)
             else:
                 request=urllib.request.Request(url,headers={'X-Api-Key':key,'User-Agent':'Melange source refresh/1.0'})
                 for attempt in range(6):

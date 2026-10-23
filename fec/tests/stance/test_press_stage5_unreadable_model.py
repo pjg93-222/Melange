@@ -94,8 +94,11 @@ def test_a_onedrive_recall_failure_surfaces_as_errno_22_and_is_a_named_refusal(t
     """
     model = make_model(tmp_path)
     (model / "tokenizer_config.json").write_text("{}", encoding="utf-8")
-    error = OSError(None, "The cloud operation was unsuccessful", None, winerror)
-    assert error.errno == errno.EINVAL
+    if sys.platform == "win32":  # only Windows maps winerror to errno
+        error = OSError(None, "The cloud operation was unsuccessful", None, winerror)
+        assert error.errno == errno.EINVAL
+    else:
+        error = OSError(errno.EINVAL, "The cloud operation was unsuccessful")
     real_open = builtins.open
 
     class Recall:

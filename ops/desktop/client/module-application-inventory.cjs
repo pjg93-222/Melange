@@ -371,8 +371,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "fec/surfaces/staffer_live_generation.py",
-        "bytes": 19537,
-        "sha256": "7764d29a3e3330099b3c89f33fbe99c10697516de496b00ac21b1382bafe81cf"
+        "bytes": 19960,
+        "sha256": "acad5aeb739407d1f25972da4416cacc3bd995a692735bba9c860fd085c262d3"
       },
       {
         "root": "source",
@@ -471,7 +471,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "9a253ba90df6b0453c171b0b8db6671c912513f5faff3f17082763e3f19cf82e",
+    "programFingerprint": "2a28042020b9f4fa149ddb06a2c378b1ccd0f9da68e630fb0634e27de4639e3e",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],

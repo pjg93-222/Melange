@@ -138,8 +138,9 @@ class PublicationTests(unittest.TestCase):
         seal = json.loads((staging / 'seal.json').read_bytes())
         self.assertEqual(publication['verifiedAssets'], len(seal['assets']) + 1)  # plus seal.json
         self.assertEqual({a['asset'] for a in seal['assets']} | {'seal.json'}, {p.name for p in remote.iterdir()})
-        newest = max(staging.iterdir(), key=lambda p: p.stat().st_mtime_ns)
-        self.assertEqual(newest.name, 'publication.json')
+        # Ordering is pinned by test_corrupt_readback_never_marks_published; mtimes can tie on coarse filesystems.
+        self.assertEqual({p.name for p in staging.iterdir()} - {a['asset'] for a in seal['assets']} - {'seal.json'},
+                         {'publication.json'})
         index = json.loads((staging / 'index.json').read_bytes())
         self.assertLessEqual(len((staging / 'index.json').read_bytes()), contracts.MAX_MODULE_INDEX_BYTES)
         self.assertEqual(index['contractId'], 'melange.public-data.pages.v1')

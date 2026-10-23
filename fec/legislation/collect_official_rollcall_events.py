@@ -2010,7 +2010,8 @@ def collect(
                         else None
                     ),
                 }
-            except CollectorError as exc:
+            # Broker refusals (429/503/404, partial configuration) stay per-measure blockers.
+            except (CollectorError, scrape_client.ScrapeBrokerError) as exc:
                 action_results[key] = {
                     "action_count": 0,
                     "error": str(exc),
@@ -2280,7 +2281,7 @@ def main(argv: list[str] | None = None) -> int:
             congress_api_key=os.environ.get("CONGRESS_API_KEY"),
             action_source=args.action_source,
         )
-    except CollectorError as exc:
+    except (CollectorError, scrape_client.ScrapeBrokerError) as exc:
         print(f"collect_official_rollcall_events: FAIL CLOSED: {exc}", file=sys.stderr)
         return 2
     print(

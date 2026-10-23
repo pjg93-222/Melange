@@ -32,6 +32,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -154,10 +155,18 @@ def _resolve(root):
     doc = _parse_pointer(raw)
     manifest = (generation_dir(root, doc['generation']) if doc else generations_dir(root)) / MANIFEST_NAME
     stat_before = _stat_key(manifest)
-    generation = None
-    if (doc and _manifest_matches(root, doc['generation'], doc['sha256_manifest'])
-            and not verify_generation(root, doc['generation'])):
+    generation = problem = None
+    if not doc:
+        problem = 'pointer unreadable'
+    elif not _manifest_matches(root, doc['generation'], doc['sha256_manifest']):
+        problem = 'manifest does not hash to the pointer'
+    else:
+        problem = next(iter(verify_generation(root, doc['generation'])), None)
+    if problem is None:
         generation = doc['generation']
+    else:  # logged once per cache entry, not per request
+        print('staffer_live_generation: refused generation %s (%s); serving legacy approved/'
+              % (doc['generation'] if doc else '?', problem), file=sys.stderr, flush=True)
     _resolved[key] = (raw, stat_before, manifest, generation, time.monotonic())
     return generation
 
