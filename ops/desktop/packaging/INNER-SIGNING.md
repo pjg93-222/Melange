@@ -37,8 +37,8 @@ copied unsigned; the installer and uninstaller built from them are signed afterw
 The builder's sign hook runs after Electron fuse/resource editing and before
 NSIS archives the app. It also signs the elevation helper, generated uninstaller
 and final installer. Executable build caching is disabled because a cache hit
-can bypass signing. `afterSign` checks/signs remaining PE binaries (recognised by their `MZ`
-header, not their extension) in the packed application. Valid vendor signatures are preserved byte-for-byte;
+can bypass signing. `afterSign` checks/signs remaining PE binaries (recognised by the DOS `MZ` header plus the `PE\0\0`
+signature at `e_lfanew`, not their extension) in the packed application. Valid vendor signatures are preserved byte-for-byte;
 an invalid existing signature fails rather than being overwritten.
 
 The release requires Windows Authenticode status `Valid`, the approved exact

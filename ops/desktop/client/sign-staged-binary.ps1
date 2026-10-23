@@ -31,10 +31,15 @@ for ($parent = $item.Directory; $null -ne $parent; $parent = $parent.Parent) {
 }
 $links = @(& fsutil.exe hardlink list $filePath)
 if ($LASTEXITCODE -ne 0 -or $links.Count -ne 1) { throw 'Signing target must have exactly one hard link' }
-$magic = New-Object byte[] 2
+$dos = New-Object byte[] 64
+$sig = New-Object byte[] 4
 $stream = [IO.File]::OpenRead($filePath)
-try { $count = $stream.Read($magic, 0, 2) } finally { $stream.Dispose() }
-if ($count -ne 2 -or $magic[0] -ne 0x4D -or $magic[1] -ne 0x5A) { throw 'Signing target is not an executable binary' }
+try {
+  $pe = $stream.Read($dos, 0, 64) -eq 64 -and $dos[0] -eq 0x4D -and $dos[1] -eq 0x5A
+  if ($pe) { $offset = [BitConverter]::ToUInt32($dos, 0x3C); $pe = $offset -le ($stream.Length - 4) }
+  if ($pe) { $null = $stream.Seek($offset, [IO.SeekOrigin]::Begin); $pe = $stream.Read($sig, 0, 4) -eq 4 -and $sig[0] -eq 0x50 -and $sig[1] -eq 0x45 -and $sig[2] -eq 0 -and $sig[3] -eq 0 }
+} finally { $stream.Dispose() }
+if (-not $pe) { throw 'Signing target is not an executable binary' }
 $before = (Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash.ToLowerInvariant()
 $signature = Microsoft.PowerShell.Security\Get-AuthenticodeSignature -LiteralPath $filePath
 $signed = $false

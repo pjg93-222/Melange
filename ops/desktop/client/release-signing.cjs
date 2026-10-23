@@ -5,7 +5,7 @@ const {execFile}=require('node:child_process'),{promisify}=require('node:util');
 const run=promisify(execFile);
 const THUMBPRINT='0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30';
 const SUBJECT='CN=Melange Systems Desktop Release (self-signed)';
-function isPE(file){const fd=fs.openSync(file,'r');try{const b=Buffer.alloc(2);return fs.readSync(fd,b,0,2,0)===2&&b[0]===0x4d&&b[1]===0x5a;}finally{fs.closeSync(fd);}}
+function isPE(file){const fd=fs.openSync(file,'r');try{const dos=Buffer.alloc(64);if(fs.readSync(fd,dos,0,64,0)!==64||dos[0]!==0x4d||dos[1]!==0x5a)return false;const sig=Buffer.alloc(4);return fs.readSync(fd,sig,0,4,dos.readUInt32LE(0x3c))===4&&sig.equals(Buffer.from('PE\0\0','latin1'));}finally{fs.closeSync(fd);}}
 function stub(file){return path.basename(path.dirname(file)).toLowerCase()==='stubs';}
 function within(root,file){const relative=path.relative(root,file);return relative!==''&&!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative);}
 function regular(file,directory=false){const stat=fs.lstatSync(file);if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1))throw new Error('Build path must be a private regular '+(directory?'directory':'file'));return stat;}
