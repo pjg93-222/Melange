@@ -222,10 +222,26 @@ below, as one local command. It stops at the first failed step and names that st
   (Windows x64 / cp312 wheel hashes). An app with no such file is refused at step `venv`; pass `--build-python` for it (then that
   one venv serves every app). Each venv's `pip freeze --all` SHA-256 is in its
   app's tests gate.
-- **Gates.** Per app: `security_gate.py export` (gitleaks; the one reviewed Mentat
-  finding goes through `desktop_source_review.py`; both from the app's client
-  repository when it has them, else Melange's), `build_runtime.py --stage-only`,
-  the runtime build (native runtimes complete, licence metadata for every
+- **Gates.** Per app: an app whose export has `frontend/package.json` and whose
+  `runtime-manifest.json` sources need `frontend/dist` (Terrier) first gets
+  `npm ci --no-fund` and `npm run build` in `<export>/frontend` (step
+  `dataAllowlist`) and `npm audit --omit=dev --audit-level=high` there (its
+  `dependencies` evidence). Then `build_runtime.py --stage-only`, then `security_gate.py export`
+  on the sources it staged (`release-<v>/stage/<app>/<id>/sources`, the files the
+  app installs; tests, fixtures and other unshipped files drop out; owner ruling
+  2026-10-24 "Scan shipped files only"). The gate is the private checkout's
+  `ops/security_gate.py` with its `ops/security/` (canaries, exceptions):
+  `--security-root` (env `DESKTOP_SECURITY_ROOT`, default
+  `~/OneDrive/Desktop/Melange Systems`), refused at step `local` without
+  `ops/security_gate.py` or `ops/security/canaries.txt`. It runs in place with
+  `python -B` and is never written. When the app's client repository has
+  `ops/desktop/packaging/<app>-security-exceptions.toml` (Terrier only), those
+  entries are appended to a copy of the private `exceptions.toml` in
+  `release-<v>/security-gate/` and passed with `--exceptions`; the security
+  evidence records the SHA-256 of the original, the appended file and the merged
+  copy. Each entry needs a `D-###` that is in the brain's `DECISIONS.md` and
+  expires within 30 days (Terrier's three: D-292, until 2026-11-23). The one reviewed Mentat finding still goes through
+  `desktop_source_review.py`. Then the runtime build (native runtimes complete, licence metadata for every
   dependency), `npm run build` and the packaged backend smoke. Per client
   repository: `npm ci`/`npm test`/`npm audit` and pytest `ops/desktop`. Every
   gate's evidence names its command, exit code, log and log SHA-256. The runtime
@@ -294,6 +310,32 @@ $version = '1.0.17'
 $out = "$HOME\Documents\Desktop-Installers-$version"
 py -3.12 ops/desktop/packaging/release_from_main.py --native-root $nativeRoot --output-root $out            # dry run
 py -3.12 ops/desktop/packaging/release_from_main.py --native-root $nativeRoot --output-root $out --publish  # publish it
+```
+
+**Single app, injected runtime.** `--apps` (comma list, default all three)
+limits the export, build, gates, signing, receipts, release spec packages and
+publish to those apps. The sources step still checks all three checkouts,
+because every release spec binds all three `main` commits. Only the selected
+apps' client repositories must agree on the version (Terrier alone needs only
+Melange's), and only the selected apps' repositories must lack the tag.
+`--inject-runtime APP=DIR` copies a previously built runtime for APP (the folder
+holding `python\`, `sources\`, `bootstrap\`, `runtime-status.json` and
+`dependency-inventory.json`) to `release-<v>/runtime/<app>` and replaces only its
+sources with `build_runtime.py --sync-sources-only`: no venv, no full build. The
+build step reads DIR's `source-provenance.json` (its `repository` must be the
+app's) and, in the app's checkout, takes the requirements file
+`runtime-manifest.json` names (Terrier: `requirements.txt`), plus
+`requirements.lock.txt` when the export has one, at its `commit` (fetched if
+absent; else `reviewedBase`). Every file must be byte-identical to main's;
+otherwise, or with no provenance or no resolvable commit, the dependencies may
+have changed and it refuses: a full build is required. Every gate, the signing
+and the check still run; the tests evidence names DIR, the SHA-256 of its two
+JSON files, the provenance commit used and the requirements hashes. `--publish`
+after such a dry run needs the same `--apps`.
+
+```powershell
+python ops\desktop\packaging\release_from_main.py --apps terrier --inject-runtime terrier=<path to previous Terrier runtime> --output-root <dir>
+python ops\desktop\packaging\release_from_main.py --apps terrier --inject-runtime terrier=<path to previous Terrier runtime> --output-root <dir> --publish
 ```
 
 ## Publish the verified releases

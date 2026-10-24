@@ -1,0 +1,38 @@
+# Terrier's security-gate exceptions, in ops/security/exceptions.toml's format. release_from_main.py appends this file to a
+# copy of --security-root's ops/security/exceptions.toml for the terrier gate only (<app>-security-exceptions.toml).
+# Owner ruling 2026-10-24 "Scan shipped files only": the gate scans the staged sources Terrier installs
+# (build_runtime.py --stage-only, <build-root>/terrier/<id>/sources); paths below are inside that tree. Each entry excuses
+# one shipped file's denied extension only: a size, PII or canary finding on the same file still fails. Decision D-292.
+
+[[exception]]
+id = "TERRIER-001"
+stage = "export"
+check = "data_leak"
+match = "data/field_dictionary.csv: denied extension .csv"
+reason = "Shipped Terrier product asset, not data; owner ruling 2026-10-24 \"Scan shipped files only\"."
+approver = "Paul"
+expires = "2026-11-23"
+decision = "D-292"
+severity = "HIGH"
+
+[[exception]]
+id = "TERRIER-002"
+stage = "export"
+check = "data_leak"
+match = "frontend/dist/brand/terrier-loading-hq.mp4: denied extension .mp4"
+reason = "Shipped Terrier product asset, not data; owner ruling 2026-10-24 \"Scan shipped files only\"."
+approver = "Paul"
+expires = "2026-11-23"
+decision = "D-292"
+severity = "HIGH"
+
+[[exception]]
+id = "TERRIER-003"
+stage = "export"
+check = "data_leak"
+match = "frontend/dist/ocr/tesseract-6.0.1/eng.traineddata.gz: denied extension .gz"
+reason = "Shipped Tesseract English OCR model required by Terrier; owner ruling 2026-10-24."
+approver = "Paul"
+expires = "2026-11-23"
+decision = "D-292"
+severity = "HIGH"
