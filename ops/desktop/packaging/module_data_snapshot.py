@@ -25,12 +25,15 @@ FORECAST = {'selection':('models/selection.json',4096), 'giving-pointer':('model
  **{'workbook-'+name:('reports/'+name+'.xlsx',512*MiB) for name in ('commercial-banks','credit-unions','property-casualty','telecom','community-banks')}}
 PUBLIC_PAYROLL = {'observations': ('public-data/observations.ndjson', 8*GiB),
                   'receipt': ('public-data/receipt.json', MiB)}
+PUBLIC_PAYROLL_PAGES = {'index': ('public-data/index.json', 2*MiB),
+                        'receipt': ('public-data/receipt.json', MiB)}
 PUBLIC_FEC = {f'mentat.fec.{table}.{cycle}': (f'fec/{cycle}/{table}.psv', 160*MiB)
               for cycle in ('2022', '2024', '2026') for table in ('cm', 'cn', 'ccl', 'pas2')}
 PUBLIC_FEC['mentat.fec.provenance'] = ('fec/provenance.json', 65536)
 KINDS = {'melange.staffer-graph-core.v1':('melange',GRAPH), 'melange.payroll-identity-core.v1':('melange',PAYROLL),
          'mentat.aggregate-forecast-core.v1':('mentat',FORECAST),
          'melange.official-payroll-observations.v1':('melange',PUBLIC_PAYROLL),
+         'melange.official-payroll-pages.v1':('melange',PUBLIC_PAYROLL_PAGES),
          'mentat.public-fec-tables.v1':('mentat',PUBLIC_FEC)}
 KIND_TOTAL_LIMITS = {'mentat.public-fec-tables.v1': 512*MiB}
 
@@ -189,7 +192,7 @@ class LimitedGzip:
 
 def validate_snapshot(request):
     snapshot=Snapshot(request)
-    if snapshot.kind in ('melange.official-payroll-observations.v1', 'mentat.public-fec-tables.v1'):
+    if snapshot.kind in ('melange.official-payroll-observations.v1', 'melange.official-payroll-pages.v1', 'mentat.public-fec-tables.v1'):
         from module_public_input_installers import validate_public_snapshot
         validate_public_snapshot(snapshot)
     elif snapshot.app=='melange':

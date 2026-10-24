@@ -121,7 +121,13 @@ async function launchAuthorized(fromAccess){
  if(closing||generation!==accessLifecycle.generation)return;
  if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
  openingAccess=true;
- try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+ try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});
+   if(closing||generation!==accessLifecycle.generation)return;
+   if(moduleDataStartup?.supported&&!runtime.child){
+    await loadingStatus('Preparing reviewed public data. Larger sources can take several minutes.');
+    if(closing||generation!==accessLifecycle.generation)return;
+   }
+   const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
  catch(error){await failStartup(error);}
  finally{openingAccess=false;}
 }
@@ -134,7 +140,7 @@ async function settleDistrict(gate){
 let loadingText='';
 function loadingStatus(text){
  loadingText=text;if(!window||window.isDestroyed())return;
- if(window.webContents.getURL()!==loadingURL){accessWindow?.hide();window.loadURL(loadingURL).then(()=>{if(!closing&&!window.isDestroyed())window.show();}).catch(()=>{});}
+ if(window.webContents.getURL()!==loadingURL){accessWindow?.hide();return window.loadURL(loadingURL).then(()=>{if(!closing&&!window.isDestroyed())window.show();}).catch(()=>{});}
  else{window.webContents.send('desktop:status',text);if(!window.isVisible())window.show();}
 }
 const journalStore=()=>require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'dataset-journal'});
@@ -253,7 +259,7 @@ function createModuleDataStartup(){
  // Reject untrusted source markers before installed-program or provider I/O.
  // The existing fresh launch preflight reports this through startup failure UI.
  let contract=null;
- try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources});}catch{}
+ try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id]});}catch{}
  const boundary=contract?require('./module-data-runtime-boundary.cjs').createRuntimeModuleBoundary({appId:definition.id,profile:userData,contract,
   publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],getRuntime:()=>runtime,getSelected:()=>read('settings.json'),
   onPreparing:()=>updateStatus('Preparing reviewed public data. Larger sources can take several minutes.'),
@@ -267,6 +273,8 @@ function createModuleDataStartup(){
   // component probe alone cannot establish installed reader health.
   contract,boundary,
   createProvider:contract=>new(require('./github-modules.cjs').GitHubModules)({appId:definition.id,profile:userData,
+   // Legacy keeps the provider's own default transport; only the paged contract selects the separate pointer.
+   transport:contract.contractId==='melange.public-data.pages.v1'?new(require('./github-module-transport.cjs').GitHubModuleTransport)(definition.id,{paged:true}):undefined,
    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,
    protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)],
    store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}),
@@ -295,7 +303,11 @@ app.whenReady().then(async()=>{
    }
   }
   if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){dialog.showErrorBox(definition.name+' isolated test profile refused',error.message+' The backend was not started. Correct or remove settings.json in '+userData+'.');app.quit();return;}
-  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
+  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,
+   // Packaged only with DESKTOP_SHARED_SCRAPE=1 (builder.cjs). The backend gets a loopback capability; the protected access
+   // bearer stays in this process and provider API keys stay on the publisher (ops/desktop/server/SCRAPE-BROKER.md).
+   scrapeFactory:applicationConfig.desktopScrapeBroker===true&&['melange','mentat'].includes(definition.id)?async configuration=>require('./scrape-service.cjs').startScrapeService({authorize:async()=>{if(closing||accessLifecycle?.suspended)throw new Error('Collection is suspended');return (await ensureAccess()).authorize(configuration);},query:async(value,options)=>(await ensureAccess()).client.scrape(value,options)}):null,
+   authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
   runtime=createRuntime();
   moduleDataStartup=createModuleDataStartup();
   if(definition.id==='terrier'){
@@ -351,9 +363,13 @@ app.whenReady().then(async()=>{
   const updaterRoot=localRoot?path.join(localRoot,'updater'):githubConfig?path.join(userData,'github-updates'):userData;
   const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
-  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,verifyNativePackage:async()=>{},packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
+  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
   // Updates do not depend on the release certificate being in the user's Trusted Root store: the Ed25519-signed manifest and sha256/sha512 checks (trust.cjs, github-source.cjs) still gate every install.
   // builder.cjs keeps verifyUpdateCodeSignature:true so publisherName stays configured for updater.cjs nativeTrust; only the Authenticode chain checks are skipped.
+  // electron-updater's own check would require the release root in the user's Trusted Root store (Status Valid) and match a
+  // subject string. The publisher decision is instead updater.cjs verifyNativeFile -> native-signature.cjs (the default
+  // verifyNativePackage): the installer signer's thumbprint must be in the signed manifest's publisherThumbprints, checked
+  // before staging and again on every file just before activation.
   require('electron-updater').autoUpdater.verifyUpdateCodeSignature=async()=>null;
   require('electron-updater').autoUpdater.on('error',error=>{updateStatus('Update not installed: '+error.message);updater.nativeFailure().catch(()=>updateStatus('Update failure recorded locally; administrator status unavailable.')).finally(()=>{if(closing){updater.close();launchInstall.closeWindow();app.quit();}});});
   // Registered before the launch install below, so a shutdown during its preparation still suppresses activation.

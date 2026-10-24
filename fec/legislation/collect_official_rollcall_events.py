@@ -52,6 +52,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 from legislation import official_billstatus_rollcall_source as BILLSTATUS
+import scrape_client
 
 try:
     from legislation_measure_key import CANONICAL_KEY_RE
@@ -827,6 +828,10 @@ class HttpFetcher:
         parts = urllib.parse.urlsplit(source_url)
         query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
         if parts.hostname and parts.hostname.casefold() == "api.congress.gov":
+            if scrape_client.available():
+                content, status, headers = scrape_client.fetch_raw_url(source_url)
+                if status != 200: raise scrape_client.ScrapeBrokerError(status)
+                return {"source_url":source_url,"final_url":source_url,"status":status,"content_type":headers.get('content-type','application/json').split(';')[0],"content":content}
             if not self.api_key:
                 raise CollectorError(
                     "Congress.gov API action source requires CONGRESS_API_KEY; "
@@ -1027,7 +1032,7 @@ def action_source_for_measure(
         selected = "congress_api"
     elif key.measure_type in BILLSTATUS.BILLSTATUS_SUPPORTED_TYPES:
         selected = "billstatus"
-    elif congress_api_key:
+    elif congress_api_key or scrape_client.available():
         selected = "congress_api"
     else:
         raise CollectorError(
@@ -1046,7 +1051,7 @@ def action_source_for_measure(
     if (
         selected == "congress_api"
         and fixture_manifest is None
-        and not congress_api_key
+        and not congress_api_key and not scrape_client.available()
     ):
         raise CollectorError(
             "Congress.gov API action source requires CONGRESS_API_KEY"
@@ -2005,7 +2010,8 @@ def collect(
                         else None
                     ),
                 }
-            except CollectorError as exc:
+            # Broker refusals (429/503/404, partial configuration) stay per-measure blockers.
+            except (CollectorError, scrape_client.ScrapeBrokerError) as exc:
                 action_results[key] = {
                     "action_count": 0,
                     "error": str(exc),
@@ -2275,7 +2281,7 @@ def main(argv: list[str] | None = None) -> int:
             congress_api_key=os.environ.get("CONGRESS_API_KEY"),
             action_source=args.action_source,
         )
-    except CollectorError as exc:
+    except (CollectorError, scrape_client.ScrapeBrokerError) as exc:
         print(f"collect_official_rollcall_events: FAIL CLOSED: {exc}", file=sys.stderr)
         return 2
     print(
@@ -2292,7 +2298,19 @@ def main(argv: list[str] | None = None) -> int:
             sort_keys=True,
         )
     )
-    return 0 if manifest["acceptance_passed"] else 2
+    if not manifest["acceptance_passed"]:
+        return 2
+    # Optional page publication after an accepted collection; inert when unset.
+    try:
+        try:
+            import generation_publish_hook
+        except ImportError:  # pragma: no cover - package import path
+            from fec import generation_publish_hook
+        generation_publish_hook.after_collection("official-rollcall", args.workspace_root)
+    except Exception as exc:
+        print(f"collect_official_rollcall_events: collected; page publication failed: {exc}", file=sys.stderr)
+        return 3
+    return 0
 
 
 if __name__ == "__main__":

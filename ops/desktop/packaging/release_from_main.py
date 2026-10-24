@@ -28,7 +28,7 @@ import tempfile
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from github_release import REPOSITORIES, Refused, app_release, repositories, valid_sequence, valid_version, validate_spec
-from desktop_admin import Store  # importable once github_release has put ops/desktop/server on sys.path
+from desktop_admin import PUBLISHER_THUMBPRINTS, Store  # importable once github_release has put ops/desktop/server on sys.path
 
 APPS = ('melange', 'mentat', 'terrier')
 PRODUCTS = {'melange': 'Melange', 'mentat': 'Mentat', 'terrier': 'Terrier'}
@@ -632,7 +632,7 @@ class Release:
                 installer = Path(spec['packages'][app]['package'])
                 receipt = json.loads(Path(spec['packages'][app]['receipt']).read_text(encoding='utf-8'))
                 target = {'appId': app, 'version': self.version, 'platform': 'win32', 'arch': 'x64',
-                          'package': {'sha256': sha256(installer)}}
+                          'publisherThumbprints': list(PUBLISHER_THUMBPRINTS), 'package': {'sha256': sha256(installer)}}
                 with without_ps_module_path():
                     store.verify_release_gates(receipt, target, installer)
                 # github_release.prepare's advance rule, on its newest row for the app (a fresh build never matches that

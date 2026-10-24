@@ -366,7 +366,8 @@ def handle_public_data_request(handler, path, query, reader):
     except (ValueError, TypeError):
         handler.send_bytes(b'{"error":"Invalid public source page."}', 'application/json', 400)
         return True
-    if type(reader) is not PublicDataCatalogue:
+    from .melange_public_pages import PagedPublicDataCatalogue
+    if type(reader) not in (PublicDataCatalogue, PagedPublicDataCatalogue):
         handler.send_bytes(b'{"error":"Verified public data is not loaded."}', 'application/json', 503)
         return True
     try:

@@ -10,19 +10,20 @@ const {ModuleDataTransition}=require('./module-data-transition.cjs');
 const {refuseModuleDataSettings}=require('./runtime.cjs');
 const {programTable,programFingerprint,verifyProgram}=require('./module-data-runtime-boundary.cjs');
 const {APPLICATION_SPECS}=require('./module-application-inventory.cjs');
-const {createPublicModuleDataRegistry,PUBLIC_KINDS}=require('./module-data-adapters.cjs');
+const {createPublicModuleDataRegistry,createPagedModuleDataRegistry,PUBLIC_KINDS,PAGED_KINDS}=require('./module-data-adapters.cjs');
 const {backendCommand}=require('./backend-command.cjs');
 const {desktopProbe}=require('./desktop-probe.cjs');
 function compiledApplicationContract(appId,context){
  if(!['melange','mentat'].includes(appId)||!context?.runtime||typeof context.resources!=='string'||!path.isAbsolute(context.resources))return null;
  try{
-  const spec=APPLICATION_SPECS[appId];
-  if(!spec||spec.contractId!==appId+'.public-data.v1'||spec.requiredKinds.join('|')!==PUBLIC_KINDS[appId].join('|')||
+  const paged=appId==='melange'&&context.publicDataMode==='paged-v1';
+  const base=APPLICATION_SPECS[appId],spec=paged?{...base,contractId:'melange.public-data.pages.v1',requiredKinds:PAGED_KINDS.melange}:base;
+  if(!spec||spec.contractId!==(paged?'melange.public-data.pages.v1':appId+'.public-data.v1')||spec.requiredKinds.join('|')!==(paged?PAGED_KINDS[appId]:PUBLIC_KINDS[appId]).join('|')||
      spec.startupTimeoutMs!==(appId==='melange'?600000:300000))return null;
   const command=backendCommand(context.resources,appId),sourceRoot=path.join(command.runtime,'sources'),bootstrapRoot=path.join(command.runtime,'bootstrap');
   const current=()=>{const roots=verifyProgram(context.runtime,spec);if(roots.source!==sourceRoot||roots.bootstrap!==bootstrapRoot)throw failure();};
   current();
-  const registry=createPublicModuleDataRegistry({appId,sourceRoot,probe:async(request,{signal}={})=>{
+  const registry=(paged?createPagedModuleDataRegistry:createPublicModuleDataRegistry)({appId,sourceRoot,probe:async(request,{signal}={})=>{
    if(signal?.aborted)throw failure();current();
    const result=await desktopProbe(command,'--desktop-github-module-check',request,{signal,timeout:spec.startupTimeoutMs});
    if(signal?.aborted)throw failure();current();return result;

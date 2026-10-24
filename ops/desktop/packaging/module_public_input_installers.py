@@ -21,6 +21,11 @@ PUBLIC_KINDS = MappingProxyType({
     'melange': 'melange.official-payroll-observations.v1',
     'mentat': 'mentat.public-fec-tables.v1',
 })
+PAGED_KIND = 'melange.official-payroll-pages.v1'
+
+
+def supported_public_kind(app, kind):
+    return kind == PUBLIC_KINDS.get(app) or (app == 'melange' and kind == PAGED_KIND)
 PUBLIC_IDS = MappingProxyType({
     'melange': ('melange.public-data.catalogue', 'melange.public-data.provenance', 'melange.public-data.observations'),
     'mentat': ('mentat.public-data.catalogue', 'mentat.public-data.rows', 'mentat.public-data.download', 'mentat.public-data.provenance'),
@@ -80,14 +85,19 @@ class PublicComponent:
 
 
 def prepare_public_component(snapshot, *, source, is_cancelled=lambda:False):
-    require(type(snapshot) is Snapshot and snapshot.kind == PUBLIC_KINDS.get(snapshot.app)
+    require(type(snapshot) is Snapshot and supported_public_kind(snapshot.app, snapshot.kind)
             and type(source) is dict and source.get('appId') == snapshot.app
             and callable(is_cancelled) and not is_cancelled())
     module = _program_module(snapshot.source, snapshot.app)
     digest, fingerprint = source['manifestSha256'], hashlib.sha256(canonical(source)).hexdigest()
     if snapshot.app == 'melange':
-        reader = module.prepare_public_data(snapshot, cancelled=is_cancelled)
-        require(type(reader) is module.PublicDataCatalogue)
+        if snapshot.kind == PAGED_KIND:
+            from fec.surfaces.melange_public_pages import prepare_public_pages, PagedPublicDataCatalogue
+            reader = prepare_public_pages(snapshot, source, cancelled=is_cancelled)
+            require(type(reader) is PagedPublicDataCatalogue)
+        else:
+            reader = module.prepare_public_data(snapshot, cancelled=is_cancelled)
+            require(type(reader) is module.PublicDataCatalogue)
     else:
         reader = module.prepare(snapshot.root, source_digest=digest, source_fingerprint=fingerprint)
         require(type(reader) is module.Catalogue)
@@ -156,7 +166,7 @@ def validate_public_snapshot(snapshot, *, is_cancelled=lambda:False):
     constructing a Catalogue or parsing observation/table rows. The actual
     handoff still invokes the full factory before original-root writes.
     """
-    require(type(snapshot) is Snapshot and snapshot.kind == PUBLIC_KINDS.get(snapshot.app)
+    require(type(snapshot) is Snapshot and supported_public_kind(snapshot.app, snapshot.kind)
             and callable(is_cancelled) and not is_cancelled())
     from module_data_launch import ReadView
     roles = KINDS[snapshot.kind][1]
@@ -177,7 +187,11 @@ def validate_public_snapshot(snapshot, *, is_cancelled=lambda:False):
             raw = value
     require(not is_cancelled())
     module = _program_module(snapshot.source, snapshot.app)
-    _public_receipt(module, snapshot, raw)
+    if snapshot.kind == PAGED_KIND:
+        from fec.surfaces.melange_public_pages import validate_index
+        validate_index(snapshot)
+    else:
+        _public_receipt(module, snapshot, raw)
     view.unchanged()
     require(not is_cancelled())
 
@@ -189,16 +203,18 @@ _REGISTRIES = MappingProxyType({app: MappingProxyType({kind: prepare_public_comp
 def prepare_public_readers(**options):
     """Compiled contract entry: one fixed public kind, never all legacy cores."""
     app_id = options.get('app_id')
-    require(app_id in PUBLIC_KINDS and tuple(options.get('required_kinds', ())) == (PUBLIC_KINDS[app_id],))
+    kinds = tuple(options.get('required_kinds', ()))
+    require(app_id in PUBLIC_KINDS and len(kinds) == 1 and supported_public_kind(app_id, kinds[0]))
     from module_data_launch import prepare_module_readers
-    return prepare_module_readers(**options, reader_registry=_REGISTRIES[app_id])
+    return prepare_module_readers(**options, reader_registry={kinds[0]: prepare_public_component})
 
 
 def public_reader(prepared):
     require(type(prepared) is PreparedHandoff)
     app = prepared.contract.app_id
-    kind = PUBLIC_KINDS.get(app)
-    require(prepared.contract.required_kinds == (kind,) and set(prepared.readers) == {kind})
+    require(len(prepared.contract.required_kinds) == 1)
+    kind = prepared.contract.required_kinds[0]
+    require(supported_public_kind(app, kind) and set(prepared.readers) == {kind})
     bound = prepared.readers[kind]
     component = bound.get('component') if type(bound) is dict else None
     require(type(component) is PublicComponent and type(component.snapshot) is Snapshot
@@ -207,8 +223,11 @@ def public_reader(prepared):
             and component.source_digest == prepared.binding['sourceDigest']
             and component.source_fingerprint == prepared.binding['sourceFingerprint'])
     module = _program_module(prepared.roots['sourceRoot'], app)
-    require(module is component.module and type(component.reader) is (
-        module.PublicDataCatalogue if app == 'melange' else module.Catalogue))
+    expected = module.PublicDataCatalogue if app == 'melange' else module.Catalogue
+    if kind == PAGED_KIND:
+        from fec.surfaces.melange_public_pages import PagedPublicDataCatalogue
+        expected = PagedPublicDataCatalogue
+    require(module is component.module and type(component.reader) is expected)
     return component.reader
 
 

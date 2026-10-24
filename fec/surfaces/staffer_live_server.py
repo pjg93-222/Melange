@@ -18,6 +18,7 @@ from urllib.parse import parse_qs, urlsplit
 try:
     from .staffer_assertions import load_coworker_assertions, record_coworker_decision, local_date
     from .melange_dashboard import resolve as dashboard_request, prepared as prepared_dashboard
+    from .staffer_live_generation import served_dir as served_workspace_dir
 except ImportError:  # direct script execution: no package context
     import os as _bootstrap_os, sys as _bootstrap_sys
     _bootstrap_root = _bootstrap_os.path.dirname(_bootstrap_os.path.dirname(
@@ -26,6 +27,7 @@ except ImportError:  # direct script execution: no package context
         _bootstrap_sys.path.insert(0, _bootstrap_root)
     from fec.surfaces.staffer_assertions import load_coworker_assertions, record_coworker_decision, local_date
     from fec.surfaces.melange_dashboard import resolve as dashboard_request, prepared as prepared_dashboard
+    from fec.surfaces.staffer_live_generation import served_dir as served_workspace_dir
 
 DEFAULT_ROOT = Path(r"C:\Users\pgoff\OneDrive\Desktop\Melange Systems")
 ASSETS = Path(__file__).parent / "staffer_live"
@@ -788,9 +790,11 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def send_approved_asset(self, name):
-        """Serve only generated presentation assets within the approved directory."""
+        """Serve only generated presentation assets within the served workspace directory: the complete generation that
+        data/system/staffer_live_active.json names, else the frozen legacy staffer_live/approved (staffer_live_generation.py).
+        The URL stays /staffer-live/approved/; only the directory behind it moves, and only by an atomic pointer flip."""
         import gzip
-        base = (ASSETS / 'approved').resolve()
+        base = served_workspace_dir(ASSETS).resolve()
         path = (base / name).resolve()
         if not path.is_relative_to(base) or not path.is_file() or path.suffix not in {'.json', '.html', '.js', '.css'}:
             self.send_error(404)

@@ -339,6 +339,33 @@ class LoginSupervisorStatusTests(unittest.TestCase):
         self.assertEqual(out['temporaryLeft'], 0)
         self.assertIn('status write failed:', log)
 
+    @unittest.skipUnless(os.name == 'nt', 'PowerShell 7 Add-Type')
+    def test_supervisor_log_rotates_above_ten_megabytes_and_never_throws(self):
+        # MelangeLog.Append keeps one previous file (<name>.1, replaced on the next rotation) and swallows I/O errors.
+        command = (
+            "$ErrorActionPreference='Stop';"
+            "$ast=[Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SCRIPT,[ref]$null,[ref]$null);"
+            "Invoke-Expression $ast.Find({param($n) $n -is [Management.Automation.Language.AssignmentStatementAst] -and $n.Left.Extent.Text -eq '$logSource'},$true).Extent.Text;"
+            "Add-Type -TypeDefinition $logSource;"
+            "$log=Join-Path $env:FIXTURE_ROOT 'supervisor.log';"
+            "[MelangeLog]::Append($log,'first line'); $belowLimit=-not (Test-Path -LiteralPath ($log+'.1'));"
+            "[IO.File]::WriteAllBytes($log,[byte[]]::new(10MB)); [MelangeLog]::Append($log,'at the limit');"
+            "$atLimit=-not (Test-Path -LiteralPath ($log+'.1'));"
+            "[MelangeLog]::Append($log,'after rotation');"
+            "$rotated=(Get-Item -LiteralPath ($log+'.1')).Length; $current=[IO.File]::ReadAllText($log);"
+            "[IO.File]::WriteAllBytes($log,[byte[]]::new(10MB+1)); [MelangeLog]::Append($log,'second rotation');"
+            "$second=(Get-Item -LiteralPath ($log+'.1')).Length;"
+            "[MelangeLog]::Append((Join-Path $env:FIXTURE_ROOT 'missing\\dir\\x.log'),'unwritable');"
+            "@{belowLimit=$belowLimit; atLimit=$atLimit; rotated=$rotated; current=$current; second=$second} | ConvertTo-Json")
+        with tempfile.TemporaryDirectory() as root:
+            out = self.run_pwsh(command, FIXTURE_SCRIPT=str(SUPERVISOR_SCRIPT), FIXTURE_ROOT=root)
+        self.assertTrue(out['belowLimit'])
+        self.assertTrue(out['atLimit'])  # rotation happens only when the file is larger than 10 MiB
+        self.assertGreater(out['rotated'], 10 * 1024 * 1024)
+        self.assertEqual(len(out['current'].splitlines()), 1)
+        self.assertTrue(out['current'].rstrip().endswith(' after rotation'))
+        self.assertEqual(out['second'], 10 * 1024 * 1024 + 1)  # the older .1 was replaced, not kept
+
 @unittest.skipUnless(os.name == 'nt' and shutil.which('pwsh'), 'Windows Task Scheduler and PowerShell 7')
 class StartupRegistrationTests(unittest.TestCase):
     # Builds the task in memory only (New-ScheduledTask registers nothing) and drives the Run-entry removal with a fake key.

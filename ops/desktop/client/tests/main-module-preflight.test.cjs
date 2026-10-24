@@ -15,6 +15,7 @@ function fixture(appId,{settings,role='owner',portable=false,suspended=false,acc
  const context={module:{exports:{}},URL,background:true,openingAccess:false,closing:false,moduleDataStartup:null,portable,packs:appId==='terrier'?{}:null,definition:{id:appId},refuseModuleDataSettings,
   read:name=>{assert.equal(name,'settings.json');events.push('read');if(readError)throw new Error('Synthetic settings read failure');return selected;},
   updateStatus:message=>{events.push('status');assert.equal(message,'Application startup failed. Check local logs.');},
+  loadingStatus:async()=>{events.push('loading');},
   showSetup:async()=>{events.push('setup');},showAccess:async()=>{events.push('accessUI');},showTerrierSignIn:async()=>{events.push('signIn');},
   onRevoked:async()=>{events.push('revoked');},dropDistrictData:async()=>{events.push('dropDistrictData');},bundleNotice:()=>events.push('bundleNotice'),
   accessWindow:{close:()=>events.push('closeAccess')},districtSwitch:{remember:()=>events.push('remember')},
@@ -143,3 +144,34 @@ test('module-bound health refusal in actual main uses the existing startup failu
  const f=fixture('mentat',{settings:native.selected,nativeFixture:native,approval});await assert.rejects(f.launch(false),/Module startup is unavailable/);
  assert.deepEqual(f.events.slice(-3),['failed','status','setup']);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('accessUI'),false);assert.equal(native.data.journal.active,null);
 });
+
+for(const appId of ['melange','mentat']){
+ test(`${appId} shows the actual neutral loading page before deferred data preparation resolves`,async()=>{
+  const f=fixture(appId),c=f.context;let finish,visible=false,prepared=false,url='about:blank';
+  const preparation=new Promise(resolve=>{finish=resolve;});
+  c.loadingURL='file:///reviewed-app/loading.html';c.accessWindow.hide=()=>f.events.push('hideAccess');
+  c.window={isDestroyed:()=>false,isVisible:()=>visible,
+   show:()=>{visible=true;f.events.push(url===c.loadingURL?'showLoading':'showApplication');},
+   loadURL:async value=>{url=value;f.events.push(value===c.loadingURL?'loadLoading':'loadApplication');},
+   webContents:{getURL:()=>url,send:()=>{}}};
+  const begin=source.indexOf("let loadingText='';"),end=source.indexOf('\nconst journalStore=',begin);
+  assert.ok(begin>=0&&end>begin);vm.runInNewContext(source.slice(begin,end),c,{filename:mainFile});
+  c.moduleDataStartup={supported:true,start:async()=>{assert.equal(visible,true);assert.equal(url,c.loadingURL);assert.equal(f.resumed.length,1);prepared=true;await preparation;c.runtime.child={};return 'http://127.0.0.1:43212';}};
+  const pending=f.launch(false);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(prepared,true);assert.equal(visible,true);assert.equal(url,c.loadingURL);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('showApplication'),false);
+  finish();await pending;assert.equal(f.events.includes('showApplication'),true);assert.equal(f.events.includes('ready'),true);
+ });
+ test(`${appId} cannot prepare data after closure or authorization changes while the loading page opens`,async()=>{
+  for(const revoke of [context=>{context.closing=true;},context=>{context.accessLifecycle.generation++;}]){
+   const f=fixture(appId);f.context.moduleDataStartup={supported:true,start:async()=>{throw new Error('Preparation must not start');}};
+   f.context.loadingStatus=async()=>{revoke(f.context);};await f.launch(false);
+   assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('show'),false);assert.equal(f.context.openingAccess,false);
+  }
+ });
+ test(`${appId} preserves existing runtime contents and never shows preparation before approval`,async()=>{
+  const f=fixture(appId);f.context.runtime.child={};f.context.moduleDataStartup={supported:true,start:async()=> 'http://127.0.0.1:43212'};
+  await f.launch(false);assert.equal(f.events.includes('loading'),false);
+  const denied=fixture(appId,{accessError:true});denied.context.moduleDataStartup={supported:true,start:async()=>{throw new Error('Approval required');}};
+  await denied.launch(false);assert.equal(denied.events.includes('loading'),false);assert.equal(denied.events.includes('show'),false);assert.equal(denied.events.includes('accessUI'),true);
+ });
+}

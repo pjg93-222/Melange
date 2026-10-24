@@ -326,3 +326,20 @@ test('a compiled binder cannot alter original paths/connections or inject anothe
   await assert.rejects(new GitHubModules({...f.options,effectiveConfiguration:mutate}).prepare(f.selected),/preserve original configuration/);assert.equal(f.journal.active,null);
  }
 });
+
+test('paged mode with on-demand-current.json absent fails closed and never reads the legacy pointer',async t=>{
+ const {EventEmitter}=require('node:events'),{Readable}=require('node:stream'),{GitHubModuleTransport}=require('../github-module-transport.cjs');
+ const f=environment('melange');t.after(()=>f.cleanup());
+ const legacy=new GitHubModules(f.options);await legacy.commitActive(await legacy.prepare(f.selected),f.selected);
+ const before=structuredClone(f.journal),urls=[];
+ // GitHub answers main normally; the paged pointer file does not exist (404).
+ const request=(url,_options,callback)=>{const req=new EventEmitter();req.destroy=()=>{};urls.push(String(url));req.end=()=>queueMicrotask(()=>{
+  const main=new URL(url).hostname==='api.github.com',bytes=Buffer.from(main?JSON.stringify({ref:'refs/heads/main',object:{type:'commit',sha:'b'.repeat(40)}}):'404: Not Found');
+  const incoming=Readable.from([bytes]);incoming.statusCode=main?200:404;incoming.headers={'content-length':String(bytes.length)};callback(incoming);});return req;};
+ const paged=new GitHubModules({...f.options,transport:new GitHubModuleTransport('melange',{request,paged:true})});
+ // Refused as an integrity failure, so the offline fallback to the active (legacy) snapshot is not taken.
+ await assert.rejects(paged.prepare(f.selected),error=>error.reason==='integrity');
+ assert.ok(urls.some(url=>url.endsWith('/docs/desktop-data/on-demand-current.json')));
+ assert.ok(!urls.some(url=>url.endsWith('/docs/desktop-data/current.json')));
+ assert.deepEqual(f.journal,before);
+});

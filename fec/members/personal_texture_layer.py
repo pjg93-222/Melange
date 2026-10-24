@@ -152,14 +152,21 @@ def iter_docs():
                    'locator': r.get('url') or '', 'url': r.get('url') or '', 'text': r.get('title') or ''}
 
 def extract():
-    seen = set(); out = []
+    seen = set(); out = []; outside = collections.Counter()
     for d in iter_docs():
         if not d['member'] or not d['text']: continue
+        if d['member'] not in ROSTER_NAMES:
+            # The member desk is keyed on the current roster, so a departed member (or an unresolved spelling) would be an
+            # artifact row no profile can carry; count and name them instead of publishing them.
+            outside[d['member']] += 1; continue
         for w, cats in windows(d['text']):
             k = hashlib.sha256((d['member'] + '|' + w.lower()).encode('utf-8', 'replace')).hexdigest()
             if k in seen: continue
             seen.add(k); out.append({**{x: d[x] for x in ('member','date','source','locator','url')},
                                      'evidence': w, 'hints': cats, 'key': k})
+    if outside:
+        print('PERSONAL TEXTURE: skipped %d documents from %d names outside the current roster (%s)' %
+              (sum(outside.values()), len(outside), ', '.join(n for n, _ in outside.most_common(5))))
     return out
 
 def select_for_semantic_gate(rows):

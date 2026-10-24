@@ -50,7 +50,7 @@ test('signature command uses CurrentUser script and refuses an invalid verificat
  if(process.platform==='win32')assert.equal(fs.statSync(called.command).isFile(),true);
  assert.ok(called.args.includes('-RequirePublisher'));assert.equal(called.settings.windowsHide,true);assert.equal(called.args.includes('/p'),false);
 });
-test('signature invocation preserves default policy and environment without overrides',async t=>{
+test('signature invocation uses only a process-scoped policy bypass and no environment overrides',async t=>{
  const f=fixture(t),calls=[];
  for(const request of [{verify:true,owned:false},{verify:false,owned:true}]){
   const nativeFile=fs.realpathSync.native(f.main),nativeRoot=fs.realpathSync.native(f.root);
@@ -61,17 +61,17 @@ test('signature invocation preserves default policy and environment without over
   assert.equal(result.path,path.resolve(f.main));assert.equal(result.verifiedPath,nativeFile);
   const called=calls.at(-1);
   assert.equal(called.command,String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`);
-  assert.deepEqual(called.args,['-NoProfile','-NonInteractive','-File',path.join(__dirname,'..','sign-staged-binary.ps1'),'-File',nativeFile,'-Root',nativeRoot,'-Mode',request.verify?'Verify':'Sign',...(request.owned?['-RequirePublisher']:[])]);
+  assert.deepEqual(called.args,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'..','sign-staged-binary.ps1'),'-File',nativeFile,'-Root',nativeRoot,'-Mode',request.verify?'Verify':'Sign',...(request.owned?['-RequirePublisher']:[])]);
   assert.deepEqual(called.settings,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
   assert.equal(Object.hasOwn(called.settings,'env'),false);
-  assert.equal(called.args.some(value=>/^(?:-ExecutionPolicy|-EP|Bypass)$/i.test(value)),false);
+  assert.equal(called.args.filter(value=>/^(?:-ExecutionPolicy|-EP|Bypass)$/i.test(value)).join(' '),'-ExecutionPolicy Bypass');
  }
  assert.equal(calls.length,2);
 });
 test('signature evidence refuses a same-byte replacement after fake execution',async t=>{
  const f=fixture(t);let reached=false;
  await assert.rejects(signFile(f.main,f.root,{verify:true,execute:async(command,args)=>{
-  const file=args[args.indexOf('-File',3)+1],before=fs.lstatSync(file,{bigint:true});
+  const file=args[args.indexOf('-File',args.indexOf('-File')+1)+1],before=fs.lstatSync(file,{bigint:true});
   fs.renameSync(file,file+'.original-fixture');fs.copyFileSync(file+'.original-fixture',file);
   assert.notEqual(fs.lstatSync(file,{bigint:true}).ino,before.ino);reached=true;
   return {stdout:JSON.stringify({path:file,status:'Valid',sha256:f.digest(file),thumbprint:THUMBPRINT,timestamped:true})};

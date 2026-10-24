@@ -147,6 +147,17 @@ def configure_melange_assertions(identity, data_root):
     return assertions
 
 
+def served_workspace_dir(assets):
+    """The workspace directory the live server will serve for these assets: the complete generation named by
+    <data>/data/system/staffer_live_active.json, else the legacy staffer_live/approved (fec/surfaces/staffer_live_generation.py,
+    the resolver the server itself uses). Without that module (an older runtime) the legacy directory is the only layout."""
+    try:
+        from fec.surfaces.staffer_live_generation import served_dir
+    except ImportError:
+        return assets / 'approved'
+    return served_dir(assets)
+
+
 def configure_melange_dashboard(module, data_root, state_root):
     """Select an existing local interface without copying workspace assets into binaries."""
     root = Path(data_root).resolve()
@@ -170,7 +181,7 @@ def configure_melange_dashboard(module, data_root, state_root):
         raise ValueError('Selected Melange dashboard must exist inside the data directory')
     if filename == 'Moneyball_Redesign.html':
         assets = (root / 'fec' / 'surfaces' / 'staffer_live').resolve()
-        approved = (assets / 'approved').resolve()
+        approved = served_workspace_dir(assets).resolve()
         if not assets.is_relative_to(root) or not approved.is_relative_to(assets) or not approved.is_dir():
             raise ValueError('Selected Melange interface assets must remain inside the data directory')
         for name in ('mlk-boot.js', 'app.css', 'ui-kit.css', 'forecasts.css', 'ui-kit.js', 'app.js', 'research.js', 'workspace.js'):
