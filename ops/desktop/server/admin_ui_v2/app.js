@@ -27,6 +27,7 @@
     }catch(error){
       if(token!==bearer)return;
       if(error.unanswered){notice.textContent=noAnswer;desktopTimer=setTimeout(loadDesktopApps,10000);}   // its own retry: any later answer clears the shared one
+      else if(error.name==='AbortError'){notice.textContent='Could not read installed apps. It will try again by itself; choose Refresh apps to try sooner.';desktopTimer=setTimeout(loadDesktopApps,10000);}   // our own timeout: slow, not silent, so the same retry
       else if(!lost(error))notice.textContent='Could not read installed apps. Choose Refresh apps to try again.';
     }
     finally{desktopLoading=false;}
@@ -148,7 +149,10 @@
       if(lost(error)){if(error.unanswered){clearTimeout(appsTimer);appsTimer=setTimeout(poll,10000);}return false;}   // its own retry: any later answer clears the shared one
       if(appsData&&appsData.docker.ok&&!(error.body&&error.body.message)){slow=true;drawStale();keepPolling();return false;}   // keep the list that is showing
       if(!appsData)byId('apps-sub').textContent='Local services have not been checked yet.';
-      say(error.body&&error.body.message?error.body.message:'Could not read the services. Choose Check now to try again.',true);keepPolling();return false;
+      const timedOut=error.name==='AbortError';   // our own timeout: slow, not silent, so it looks again by itself
+      say(error.body&&error.body.message?error.body.message:'Could not read the services. '+(timedOut?'It will try again by itself; choose Check now to try sooner.':'Choose Check now to try again.'),true);keepPolling();
+      if(timedOut){clearTimeout(appsTimer);appsTimer=setTimeout(poll,10000);}
+      return false;
     }
     renderApps();keepPolling();
     return true;

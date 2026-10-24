@@ -550,6 +550,8 @@ class AdminPageTests(unittest.TestCase):
         return json.loads(done.stdout)
 
     NOT_ANSWERING = 'Melange Admin is not answering. Trying again\u2026 If this keeps up, open Melange Admin again from its icon.'
+    SERVICES_TIMED_OUT = 'Could not read the services. It will try again by itself; choose Check now to try sooner.'
+    DESKTOP_TIMED_OUT = 'Could not read installed apps. It will try again by itself; choose Refresh apps to try sooner.'
 
     def test_desktop_apps_load_while_docker_status_is_pending(self):
         page = self.page('desktop-melange', hold='/apps')
@@ -578,7 +580,7 @@ class AdminPageTests(unittest.TestCase):
                     self.assertIn('Last checked', startup['subtitle'])               # Docker finished without the access store
 
     def test_first_services_failure_replaces_the_opening_session_message(self):
-        for response, message in (({'reject': 'AbortError'}, 'Could not read the services. Choose Check now to try again.'),
+        for response, message in (({'reject': 'AbortError'}, self.SERVICES_TIMED_OUT),
                                   ({'status': 503, 'body': {'error': 'docker_unavailable', 'message': 'Docker took too long to answer.'}},
                                    'Docker took too long to answer.')):
             with self.subTest(response=response):
@@ -639,6 +641,24 @@ class AdminPageTests(unittest.TestCase):
         self.assertEqual((page['desktopRows'], page['desktopStatus'], page['calls']), (1, 'Installed desktop applications on this computer.', ['/desktop-apps']))
         page = self.page(None, startup_routes={'/desktop-apps': {'status': 500, 'body': {}}}, fire=True)    # an answer that is an error keeps the Refresh apps prompt and does not retry
         self.assertEqual((page['desktopRows'], page['desktopStatus'], page['calls']), (0, 'Could not read installed apps. Choose Refresh apps to try again.', []))
+
+    def test_desktop_apps_that_time_out_say_so_and_load_again_on_their_own(self):
+        # our own 12 s abort is a slow dashboard, not a silent one: no banner and no session change, but the same 10 s retry
+        page = self.page(None, startup_routes={'/desktop-apps': {'reject': 'AbortError', 'times': 1}}, fire=True)
+        startup = page['startup']
+        self.assertEqual((startup['desktopRows'], startup['desktopStatus'], startup['banner']['shown']), (0, self.DESKTOP_TIMED_OUT, False))
+        self.assertEqual((page['desktopRows'], page['desktopStatus'], page['calls'], page['rechecks']), (1, 'Installed desktop applications on this computer.', ['/desktop-apps'], 0))
+        self.assertEqual((page['expired'], page['shell']), (False, True))
+
+    def test_services_that_time_out_say_so_and_load_again_on_their_own(self):
+        page = self.page(None, startup_routes={'/apps': {'reject': 'AbortError', 'times': 1}}, fire=True)
+        startup = page['startup']
+        self.assertEqual((startup['serviceRows'], startup['subtitle'], startup['message'], startup['banner']['shown']),
+                         (0, 'Local services have not been checked yet.', self.SERVICES_TIMED_OUT, False))
+        self.assertEqual((page['serviceRows'], page['message'], page['calls'], page['rechecks']), (1, '', ['/apps'], 0))
+        self.assertEqual((page['expired'], page['shell']), (False, True))
+        page = self.page(None, startup_routes={'/apps': {'status': 500, 'body': {}}}, fire=True)    # an answer that is an error keeps the Check now prompt and does not retry
+        self.assertEqual((page['serviceRows'], page['message'], page['calls']), (0, 'Could not read the services. Choose Check now to try again.', []))
 
     def test_services_that_got_no_answer_are_asked_for_again_when_another_request_answers_first(self):
         # startup loads both together: /apps gets no answer, then /desktop-apps answers, and that answer clears the shared retry
