@@ -2,13 +2,21 @@ name: signing-hook-unit
 run-name: Signing hook unit tests ${{ github.sha }}
 
 on:
-  push:
-    branches: [fix/current-helper-signing-20261022]
+  pull_request:
     paths:
       - .github/workflows/signing-hook-unit.yml
       - ops/desktop/client/release-signing.cjs
       - ops/desktop/client/sign-staged-binary.ps1
       - ops/desktop/client/tests/release-signing.test.cjs
+      - ops/desktop/client/builder.cjs
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/signing-hook-unit.yml
+      - ops/desktop/client/release-signing.cjs
+      - ops/desktop/client/sign-staged-binary.ps1
+      - ops/desktop/client/tests/release-signing.test.cjs
+      - ops/desktop/client/builder.cjs
 
 permissions:
   contents: read
@@ -19,7 +27,6 @@ concurrency:
 
 jobs:
   focused-unit:
-    if: github.event_name == 'push' && github.repository == 'pjg93-222/Melange' && github.ref == 'refs/heads/fix/current-helper-signing-20261022'
     runs-on: windows-2022
     timeout-minutes: 10
     steps:
