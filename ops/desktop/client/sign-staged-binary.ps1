@@ -24,13 +24,22 @@ $filePath = [IO.Path]::GetFullPath($File)
 $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd('\')
 if (-not $filePath.StartsWith($rootPath + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Signing target is outside the private build root' }
 $item = Get-Item -LiteralPath $filePath
-if ($item.PSIsContainer -or $item.Extension.ToLowerInvariant() -notin @('.exe','.dll','.pyd','.node','.ocx')) { throw 'Signing target is not an executable binary' }
+if ($item.PSIsContainer) { throw 'Signing target is not an executable binary' }
 if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Signing target is a reparse point' }
 for ($parent = $item.Directory; $null -ne $parent; $parent = $parent.Parent) {
   if ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Signing target traverses a reparse point' }
 }
 $links = @(& fsutil.exe hardlink list $filePath)
 if ($LASTEXITCODE -ne 0 -or $links.Count -ne 1) { throw 'Signing target must have exactly one hard link' }
+$dos = New-Object byte[] 64
+$sig = New-Object byte[] 4
+$stream = [IO.File]::OpenRead($filePath)
+try {
+  $pe = $stream.Read($dos, 0, 64) -eq 64 -and $dos[0] -eq 0x4D -and $dos[1] -eq 0x5A
+  if ($pe) { $offset = [BitConverter]::ToUInt32($dos, 0x3C); $pe = $offset -le ($stream.Length - 4) }
+  if ($pe) { $null = $stream.Seek($offset, [IO.SeekOrigin]::Begin); $pe = $stream.Read($sig, 0, 4) -eq 4 -and $sig[0] -eq 0x50 -and $sig[1] -eq 0x45 -and $sig[2] -eq 0 -and $sig[3] -eq 0 }
+} finally { $stream.Dispose() }
+if (-not $pe) { throw 'Signing target is not an executable binary' }
 $before = (Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash.ToLowerInvariant()
 $signature = Microsoft.PowerShell.Security\Get-AuthenticodeSignature -LiteralPath $filePath
 $signed = $false
