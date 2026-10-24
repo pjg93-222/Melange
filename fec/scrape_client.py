@@ -33,9 +33,11 @@ def _now(): return datetime.datetime.now(datetime.timezone.utc)
 def parse_retry_after(value):
     """RFC 7231 Retry-After: decimal seconds or an HTTP-date, as whole seconds >= 0; None if absent or unparsable."""
     value = (value or '').strip()
-    if value.isascii() and re.fullmatch(r'\d+(\.\d+)?', value): return math.ceil(float(value))
+    if value.isascii() and re.fullmatch(r'\d+(\.\d+)?', value):
+        seconds = float(value)
+        return math.ceil(seconds) if math.isfinite(seconds) else None  # 310 nines is inf: unusable, not an OverflowError
     try: when = email.utils.parsedate_to_datetime(value)
-    except (TypeError, ValueError, IndexError): return None
+    except (TypeError, ValueError, IndexError, OverflowError): return None
     if when.tzinfo is None: when = when.replace(tzinfo=datetime.timezone.utc)
     return max(0, math.ceil((when - _now()).total_seconds()))
 

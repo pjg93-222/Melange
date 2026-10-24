@@ -120,6 +120,7 @@ class ScrapeClientTests(unittest.TestCase):
                 ([(b'{}',503,{'retry-after':'5'}),(body,200,{})],[5],2),                # upstream 503 passed through
                 ([(b'{}',503,{'retry-after':'Fri, 23 Oct 2026 12:00:05 GMT'}),(body,200,{})],[5],2),  # upstream 503 with a future HTTP-date
                 ([(b'{}',503,{'retry-after':'soon, maybe'})],[],1),                      # unparsable: no wait
+                ([(b'{}',503,{'retry-after':'9'*310})],[],1),                           # decimal too large for a float: unusable, no wait
                 ([scrape_client.ScrapeBrokerError(429,301)],[],1),                       # above the cap: no wait
                 ([scrape_client.ScrapeBrokerError(429)],[],1),                           # no Retry-After: no wait
                 ([scrape_client.ScrapeBrokerError(429,1)]*6,[1]*5,6)):                   # six attempts at most
