@@ -10,6 +10,7 @@ run in CI. Without --publish it makes no GitHub writes and reserves no release s
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import hashlib
 import json
@@ -92,6 +93,17 @@ def origin_matches(url, repository):
 
 def gate(evidence):
     return {'status': 'passed', 'evidence': evidence}
+
+
+@contextlib.contextmanager
+def without_ps_module_path():
+    """desktop_admin runs Windows PowerShell with os.environ; PSModulePath from pwsh 7 breaks its autoload (see Release.environ)."""
+    saved = os.environ.pop('PSModulePath', None)
+    try:
+        yield
+    finally:
+        if saved is not None:
+            os.environ['PSModulePath'] = saved
 
 
 
@@ -621,7 +633,8 @@ class Release:
                 receipt = json.loads(Path(spec['packages'][app]['receipt']).read_text(encoding='utf-8'))
                 target = {'appId': app, 'version': self.version, 'platform': 'win32', 'arch': 'x64',
                           'package': {'sha256': sha256(installer)}}
-                store.verify_release_gates(receipt, target, installer)
+                with without_ps_module_path():
+                    store.verify_release_gates(receipt, target, installer)
                 # github_release.prepare's advance rule, on its newest row for the app (a fresh build never matches that
                 # row's bytes, so an equal sequence is a refusal here too).
                 version, sequence = app_release(spec, app)
@@ -670,6 +683,10 @@ class Release:
             remote = self.call('publish', ['gh', 'api', f'repos/{repo}/commits/{sha}', '--jq', '.sha'], log=f'gh-commit-{app}')
             if remote.stdout.strip() != sha:
                 raise StepFailed('publish', f'{sha} is not on {repo}')
+            expected = self.spec['sourceRefs'][app]['commit']
+            tip = self.call('publish', ['gh', 'api', f'repos/{repo}/commits/main', '--jq', '.sha'], log=f'gh-main-{app}').stdout.strip()
+            if tip != expected:
+                raise StepFailed('publish', f'{repo} main moved to {tip or "unknown"} since the release spec was made from {expected}')
             if self.git('publish', app, 'ls-remote', '--tags', 'origin', 'refs/tags/' + self.tag).stdout.strip():
                 raise StepFailed('publish', f'{repo} already has {self.tag}')
             view = self.call('publish', ['gh', 'release', 'view', self.tag, '--repo', repo], log=f'gh-view-{app}', check=False)

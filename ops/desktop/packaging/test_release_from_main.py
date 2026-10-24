@@ -1,6 +1,7 @@
 """release_from_main.py against real temporary git repositories; every other tool is a fake behind the injected runner."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import sqlite3
@@ -62,6 +63,7 @@ class Fake:
         self.view_error = None  # stderr of a failing `gh release view` that is not "release not found"
         self.gates = []  # (security_gate.py command, text of its --exceptions file or None)
         self.npm_fail = lambda cmd, cwd: False  # npm commands to fail
+        self.tips = {}  # repository -> main sha `gh api repos/R/commits/main` answers; `release` fills in origin's own
 
     def __call__(self, cmd, cwd=None, env=None):
         self.calls.append(list(cmd))
@@ -124,6 +126,8 @@ class Fake:
             return rfm.Ran(0, '{}', '') if repo in self.existing else rfm.Ran(1, '', 'release not found')
         if cmd[1:3] == ['repo', 'view']:
             return rfm.Ran(0, 'PUBLIC\n', '')
+        if cmd[1] == 'api' and cmd[2].endswith('/commits/main'):
+            return rfm.Ran(0, self.tips[cmd[2][len('repos/'):-len('/commits/main')]] + '\n', '')
         if cmd[1] == 'api':
             return rfm.Ran(0, cmd[2].rsplit('/', 1)[1] + '\n', '')
         if cmd[1:3] == ['release', 'upload']:
@@ -260,6 +264,8 @@ def world(template, tmp_path, monkeypatch):
 
 def release(world, *extra, fake=None, environ=None, build_python=True, sources=True):
     fake = fake or Fake()
+    for app in NAMES:
+        fake.tips.setdefault(rfm.REPOSITORIES[app], origin_main(world, app))
     argv = ['--state', str(world['state']), '--output-root', str(world['out']), '--security-root', str(world['security']), *extra]
     if sources:
         argv += ['--melange', str(world['paths']['melange']), '--mentat', str(world['paths']['mentat']),
@@ -509,12 +515,13 @@ def test_publish_after_dry_run_prepares_and_publishes_its_installers(world, caps
         verified = [i for i, call in enumerate(fake.calls) if '--verify-output' in call and 'verify-download' in ' '.join(call) and repo in call]
         assert verified and verified[0] < edit
         calls = [call for call in fake.calls if tool(call) == 'gh' and repo in ' '.join(call)]
-        assert [call[1:3] for call in calls] == [['repo', 'view'], ['api', f'repos/{repo}/commits/{sha}'], ['release', 'view'],
+        assert [call[1:3] for call in calls] == [['repo', 'view'], ['api', f'repos/{repo}/commits/{sha}'],
+                                                 ['api', f'repos/{repo}/commits/main'], ['release', 'view'],
                                                  ['release', 'create'], ['release', 'upload'], ['release', 'download'], ['release', 'edit']]
-        create = calls[3]
+        create = calls[4]
         assert create[3] == 'desktop-v' + VERSION and create[create.index('--target') + 1] == sha and '--draft' in create
-        assert len(calls[4]) == 4 + 6 + 2 and '--clobber' not in calls[4]
-        assert calls[6][-2:] == ['--draft=false', '--latest']
+        assert len(calls[5]) == 4 + 6 + 2 and '--clobber' not in calls[5]
+        assert calls[7][-2:] == ['--draft=false', '--latest']
 
 
 def test_publish_without_a_dry_run_builds_then_prepares(world, capsys):
@@ -545,6 +552,19 @@ def test_publish_refuses_an_existing_release_before_creating_any_draft(world, ca
     fake.existing = {rfm.REPOSITORIES['terrier']}
     code, fake = release(world, '--publish', fake=fake)
     assert code == 1 and "step 'publish'" in capsys.readouterr().err
+    gh = [call[1:3] for call in fake.calls if tool(call) == 'gh']
+    assert ['release', 'create'] not in gh and ['release', 'edit'] not in gh
+
+
+def test_publish_refuses_when_main_moved_after_the_spec_before_any_draft(world, capsys):
+    assert release(world)[0] == 0, capsys.readouterr().err
+    capsys.readouterr()
+    fake = Fake()
+    fake.tips[rfm.REPOSITORIES['terrier']] = 'f' * 40
+    code, fake = release(world, '--publish', fake=fake)
+    error = capsys.readouterr().err
+    assert code == 1 and "step 'publish'" in error and rfm.REPOSITORIES['terrier'] in error
+    assert 'f' * 40 in error and origin_main(world, 'terrier') in error
     gh = [call[1:3] for call in fake.calls if tool(call) == 'gh']
     assert ['release', 'create'] not in gh and ['release', 'edit'] not in gh
 
@@ -960,3 +980,24 @@ def test_pwsh_module_path_never_reaches_a_child(world, capsys):
     assert code == 0, capsys.readouterr().err
     assert seen and all(env is not None and 'PSExecutionPolicyPreference' in env for env in seen)
     assert not any(key.upper() == 'PSMODULEPATH' for env in seen for key in env)
+
+
+def test_desktop_admin_gate_check_never_sees_pwsh_module_path(world, capsys, monkeypatch):
+    seen = []
+
+    class Spy(Shell):
+        def run(self, cmd, env=None, **kwargs):
+            seen.append(dict(env))
+            return super().run(cmd, env=env, **kwargs)
+
+    spy = Spy()
+    monkeypatch.setattr(desktop_admin, 'subprocess', spy)
+    monkeypatch.setenv('PSModulePath', r'C:\Program Files\PowerShell\Modules')
+    code, _ = release(world)
+    assert code == 0, capsys.readouterr().err
+    assert seen and not any(key.upper() == 'PSMODULEPATH' for env in seen for key in env)
+    assert os.environ['PSModulePath'] == r'C:\Program Files\PowerShell\Modules'
+    monkeypatch.delenv('PSModulePath')
+    with rfm.without_ps_module_path():
+        pass
+    assert 'PSModulePath' not in os.environ
