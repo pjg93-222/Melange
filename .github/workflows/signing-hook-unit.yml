@@ -8,6 +8,7 @@ on:
       - ops/desktop/client/release-signing.cjs
       - ops/desktop/client/sign-staged-binary.ps1
       - ops/desktop/client/tests/release-signing.test.cjs
+      - ops/desktop/client/builder.cjs
   push:
     branches: [main, release/1.0.17]
     paths:
@@ -15,6 +16,7 @@ on:
       - ops/desktop/client/release-signing.cjs
       - ops/desktop/client/sign-staged-binary.ps1
       - ops/desktop/client/tests/release-signing.test.cjs
+      - ops/desktop/client/builder.cjs
 
 permissions:
   contents: read

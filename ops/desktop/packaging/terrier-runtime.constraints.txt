@@ -1,0 +1,77 @@
+# Hash-locked install set for the Terrier desktop runtime: CPython 3.12, Windows x64 (cp312 / win_amd64).
+# Generated 2026-10-23 from pjg93-222/Geo requirements.lock.txt at ec79b73 (ec79b73ad13e64f9cde138fdf6ff37bf62c57b05) with pip 25.0.1
+# (pip-tools is not installed; this is equivalent), using the lock's exact == pins as the input so versions match Geo's Linux lock:
+#   python -m pip install --dry-run --ignore-installed --report report.json --only-binary=:all:
+#     --platform win_amd64 --python-version 3.12 --implementation cp --abi cp312 --target <unused> -r requirements.lock.txt
+# One wheel hash per package (the file pip selected for this target). Every requirements.lock.txt pin appears at the
+# same version; no package outside the lock was added. Terrier ships no test/runtime extras beyond Geo's lock.
+# Install: pip install --require-hashes --only-binary=:all: --no-deps -r terrier-runtime.constraints.txt
+argon2-cffi==25.1.0 \
+    --hash=sha256:fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741
+    # argon2_cffi-25.1.0-py3-none-any.whl
+argon2-cffi-bindings==26.1.0 \
+    --hash=sha256:2c36ff87b5dfaa477d0bd51e9d7f6abdae7c8955d2983c97419085d842154b3e
+    # argon2_cffi_bindings-26.1.0-cp310-abi3-win_amd64.whl (dependency)
+asgiref==3.12.1 \
+    --hash=sha256:fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094
+    # asgiref-3.12.1-py3-none-any.whl (dependency)
+certifi==2026.7.22 \
+    --hash=sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775
+    # certifi-2026.7.22-py3-none-any.whl (dependency)
+cffi==2.1.1 \
+    --hash=sha256:f53e442b08449d42821fa4a4fba000095af9f62742a500f978a9f557ec44339a
+    # cffi-2.1.1-cp312-cp312-win_amd64.whl (dependency)
+charset-normalizer==3.5.1 \
+    --hash=sha256:3617ac3cfd8b9888f145ad89dd6e692285834b0201c6074a5eeaad3fd4d668c2
+    # charset_normalizer-3.5.1-cp312-cp312-win_amd64.whl (dependency)
+django==5.2.17 \
+    --hash=sha256:f04fb3b36ee119e1af4fa1d397d5fd6cf12700f49321e84d4f4c642c5b1973db
+    # django-5.2.17-py3-none-any.whl
+geopandas==1.1.4 \
+    --hash=sha256:1a0c459cbdb1537cd154dafe6174be20d1760844b7f1c967dc8520b180f2e773
+    # geopandas-1.1.4-py3-none-any.whl
+idna==3.20 \
+    --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
+    # idna-3.20-py3-none-any.whl (dependency)
+numpy==2.5.3 \
+    --hash=sha256:0a59a421a32580a009e8a1751345bf829631b990dc1794b80514ab722b435def
+    # numpy-2.5.3-cp312-cp312-win_amd64.whl (dependency)
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+    # packaging-26.3-py3-none-any.whl (dependency)
+pandas==3.0.6 \
+    --hash=sha256:3ef908d28590b3f42d7070e7ad8f9b34b442b260b7f3c1afb57e0040c58cdb1b
+    # pandas-3.0.6-cp312-cp312-win_amd64.whl
+pycparser==3.0 \
+    --hash=sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992
+    # pycparser-3.0-py3-none-any.whl (dependency)
+pyogrio==0.13.0 \
+    --hash=sha256:1b91f6d6e6757a6ea84b9459d24f479dcb52bbf4ebcdb16baf39e49d2836a1cf
+    # pyogrio-0.13.0-cp311-abi3-win_amd64.whl
+pyproj==3.8.0 \
+    --hash=sha256:0556ce011e1530aea2084a12e39dc9c6ccd25a16c1db5457f39bf83161e7c301
+    # pyproj-3.8.0-cp312-cp312-win_amd64.whl
+python-dateutil==2.9.0.post0 \
+    --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+    # python_dateutil-2.9.0.post0-py2.py3-none-any.whl (dependency)
+requests==2.34.2 \
+    --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0
+    # requests-2.34.2-py3-none-any.whl
+shapely==2.1.2 \
+    --hash=sha256:743044b4cfb34f9a67205cee9279feaf60ba7d02e69febc2afc609047cb49179
+    # shapely-2.1.2-cp312-cp312-win_amd64.whl
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+    # six-1.17.0-py2.py3-none-any.whl (dependency)
+sqlparse==0.6.0 \
+    --hash=sha256:b861c0288ce2fa56209a9a6412d2e066ac664b3873b89c26c9d8415e8e32996f
+    # sqlparse-0.6.0-py3-none-any.whl (dependency)
+tzdata==2026.4 \
+    --hash=sha256:c2169a8b0a7a5e9674da5a135ccdfb2b3e671b333ed9fed17b41f73c34476e81
+    # tzdata-2026.4-py2.py3-none-any.whl (dependency)
+urllib3==2.8.0 \
+    --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3
+    # urllib3-2.8.0-py3-none-any.whl (dependency)
+waitress==3.0.2 \
+    --hash=sha256:c56d67fd6e87c2ee598b76abdd4e96cfad1f24cacdea5078d382b1f9d7b5ed2e
+    # waitress-3.0.2-py3-none-any.whl
