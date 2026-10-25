@@ -1,4 +1,5 @@
 """release_from_main.py against real temporary git repositories; every other tool is a fake behind the injected runner."""
+import ast
 import hashlib
 import json
 import os
@@ -256,6 +257,8 @@ def world(template, tmp_path, monkeypatch):
         monkeypatch.delenv(name, raising=False)
     shell = Shell()
     monkeypatch.setattr(desktop_admin, 'subprocess', shell)
+    monkeypatch.setattr(rfm, 'APP_TEST_INPUT_MODULES', {'terrier': ('ops/desktop/packaging/test_terrier_fixture.py',),
+                                                        'mentat': ('ops/desktop/packaging/test_mentat_fixture.py',)})
     shutil.copytree(template, tmp_path, dirs_exist_ok=True)
     paths = {app: tmp_path / 'checkouts' / app for app in NAMES}
     for app, name in NAMES.items():
@@ -917,6 +920,45 @@ def test_melange_app_modules_are_exactly_those_importing_its_real_fec():
     found = {path.relative_to(root).as_posix() for path in (root / 'ops' / 'desktop').rglob('test_*.py')
              if 'node_modules' not in path.parts and imports.search(text := path.read_text(encoding='utf-8')) and "'fec/__init__.py'" not in text}
     assert found == set(rfm.APP_TEST_MODULES['melange'])
+
+
+def test_env_bound_modules_are_exactly_those_reading_the_variables():
+    """APP_TEST_INPUT_MODULES lists every test here that reads a source variable from os.environ/getenv, parsed so that a
+    module naming it only in a string (the release command's own fixtures) is not bound to an app."""
+    root = Path(__file__).resolve().parents[3]
+    names = {name: app for app, (name, _) in rfm.APP_TEST_INPUTS.items()}
+
+    def reads(tree):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute) and node.value.attr == 'environ':
+                key = node.slice
+            elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ('getenv', 'get') and node.args:
+                key = node.args[0]
+            else:
+                continue
+            if isinstance(key, ast.Constant) and key.value in names:
+                yield names[key.value], key.value
+
+    found = {app: set() for app in rfm.APP_TEST_INPUTS}
+    for path in (root / 'ops' / 'desktop').rglob('test_*.py'):
+        if 'node_modules' not in path.parts:
+            for app, _ in reads(ast.parse(path.read_text(encoding='utf-8'))):
+                found[app].add(path.relative_to(root).as_posix())
+    assert 'ops/desktop/packaging/test_release_from_main.py' not in set().union(*found.values())
+    assert found == {app: set(modules) for app, modules in rfm.APP_TEST_INPUT_MODULES.items()}
+
+
+def test_the_release_commands_own_tests_run_in_the_shared_run_of_their_repository(world, capsys):
+    module = 'ops/desktop/packaging/test_release_from_main.py'
+    for repo in ('melange', 'mentat'):
+        push(world, repo, module, TERRIER_TEST + MENTAT_TEST)  # names both variables, only as data
+    code, fake = release(world)
+    assert code == 0, capsys.readouterr().err
+    src = world['out'] / f'release-{VERSION}' / 'src'
+    for repo in ('melange', 'mentat'):
+        runs = [call for call, cwd in zip(fake.calls, fake.cwds) if 'pytest' in call and cwd == str(src / repo)]
+        assert f'--ignore={module}' not in runs[0] and 'ops/desktop' in runs[0]  # the shared run, which collects it
+        assert module not in [call[-1] for call in runs]  # and no run of its own, in terrier-tests or elsewhere
 
 
 def test_a_failing_terrier_module_stops_the_tests_gate(world, capsys):

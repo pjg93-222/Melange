@@ -3,8 +3,10 @@ import json
 import os
 import re
 import socket
+import sys
 import threading
 import time
+import traceback
 from urllib.parse import urlsplit
 
 from desktop_admin import Refused, canonical, private_address, request_origin
@@ -270,8 +272,14 @@ def handler_for(access, fallback, packs=None, scrape_broker=None):
                 self.access_response(400, {'error': 'invalid_request'})
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, TimeoutError):
                 self.close_connection = True
-            except Exception:
-                self.access_response(503, {'error': 'service_unavailable'})
+            except Exception as error:
+                # Never silent: the cause goes to stderr (publisher.err, masked by the supervisor), never to the caller.
+                # No URL or header is logged; request parsing errors were answered 400 above, so none reaches here.
+                try:
+                    print(f'access {self.command} answered 503: ' + ''.join(traceback.format_exception(error)).rstrip(),
+                          file=sys.stderr, flush=True)
+                finally:  # a broken log never costs the caller its answer
+                    self.access_response(503, {'error': 'service_unavailable'})
 
         def do_GET(self):
             return self.access_dispatch() if self.path.startswith(('/v1/access', '/v1/data/', '/v1/scrape/')) else super().do_GET()

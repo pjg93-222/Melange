@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import secrets
 import socket
+import sqlite3
 import ssl
 import sys
 import threading
@@ -18,6 +19,7 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from desktop_admin import BoundedServer, handler_for
 from access_http import HTTPRefused, RateLimit
+from access_store import AccessStore
 import district_packs
 import test_access_store as store_tests
 from test_district_packs import stamp
@@ -124,6 +126,40 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual(self.call('GET', '/v1/access/status', headers={'Authorization': 'Bearer '+enrolled['deviceToken']})[0], 403)
         self.assertEqual(self.call('POST', '/v1/status', {'version': '1.0.0', 'status': 'current'}, bearer)[0], 403)
         self.assertEqual(self.call('POST', '/v1/access/approve', {}, bearer)[0], 404)
+
+    def bearer(self):
+        request = self.request_value()
+        self.assertEqual(self.call('POST', '/v1/access/requests', request)[0], 201)
+        key = self.store.approve(request['requestId'], 'local_user', [])['activationKey']
+        activate = {**{k: request[k] for k in ('requestId', 'deviceId', 'appId', 'platform', 'arch')}, 'activationKey': key}
+        status, granted = self.call('POST', '/v1/access/activate', activate, {'Authorization': 'Request ' + request['requestSecret']})
+        self.assertEqual(status, 200)
+        return {'Authorization': 'Bearer ' + granted['accessToken']}
+
+    def test_presence_queues_behind_a_held_write_instead_of_answering_503(self):
+        """Forced lock: a writer holds the database while presence arrives, with SQLite's own busy wait cut to 50 ms.
+        Formerly presence polled past that wait, failed with 'database is locked' and answered 503 (Terrier dry run 11)."""
+        bearer, held, connect = self.bearer(), threading.Event(), sqlite3.connect
+        presence = {'sessionId': str(uuid.uuid4()), 'state': 'active', 'version': '1.0.0', 'districtId': None}
+        def hold():
+            with self.store.connect() as db:
+                db.execute('BEGIN IMMEDIATE'); held.set(); time.sleep(1)
+        with patch('access_store.sqlite3.connect', lambda path, **_: connect(path, timeout=0.05)):
+            writer = threading.Thread(target=hold); writer.start()
+            self.assertTrue(held.wait(5))
+            status = self.call('POST', '/v1/access/presence', presence, bearer)[0]
+            writer.join(5)
+        self.assertEqual(status, 200)
+
+    def test_an_unexpected_failure_still_answers_503_and_logs_its_cause_without_credentials(self):
+        bearer = self.bearer()
+        presence = {'sessionId': str(uuid.uuid4()), 'state': 'active', 'version': '1.0.0', 'districtId': None}
+        with patch.object(AccessStore, 'presence', side_effect=sqlite3.OperationalError('disk I/O error')), \
+                patch('sys.stderr', new_callable=io.StringIO) as log:
+            self.assertEqual(self.call('POST', '/v1/access/presence', presence, bearer), (503, {'error': 'service_unavailable'}))
+        self.assertIn('access POST answered 503', log.getvalue())
+        self.assertIn('sqlite3.OperationalError: disk I/O error', log.getvalue())
+        self.assertNotIn(bearer['Authorization'].split()[1], log.getvalue())
 
     def test_browser_host_json_and_target_rejections(self):
         request = self.request_value()
