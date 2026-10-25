@@ -148,15 +148,19 @@ def handler_for(access, fallback, packs=None, scrape_broker=None):
             if not 0 < length <= bound:
                 raise HTTPRefused(413, 'request_too_large')
             deadline, chunks, remaining = time.monotonic()+10, [], length
-            while remaining:
-                left = deadline-time.monotonic()
-                if left <= 0:
-                    raise TimeoutError()
-                self.connection.settimeout(left)
-                chunk = self.rfile.read1(min(remaining, 8192))
-                if not chunk:
-                    raise HTTPRefused(400, 'invalid_request')
-                chunks.append(chunk); remaining -= len(chunk)
+            previous = self.connection.gettimeout()
+            try:
+                while remaining:
+                    left = deadline-time.monotonic()
+                    if left <= 0:
+                        raise TimeoutError()
+                    self.connection.settimeout(left)
+                    chunk = self.rfile.read1(min(remaining, 8192))
+                    if not chunk:
+                        raise HTTPRefused(400, 'invalid_request')
+                    chunks.append(chunk); remaining -= len(chunk)
+            finally:
+                self.connection.settimeout(previous)  # the answer is written after this read; never with its last sliver of deadline
             try:
                 value = json.loads(b''.join(chunks).decode('utf-8'), object_pairs_hook=unique_object,
                                    parse_constant=lambda _value: (_ for _ in ()).throw(ValueError()))

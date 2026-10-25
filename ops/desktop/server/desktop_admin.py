@@ -148,6 +148,19 @@ def protect(data: bytes, decrypt=False):
         ctypes.windll.kernel32.LocalFree(ctypes.cast(output.data, ctypes.c_void_p))
 
 
+def replace_file(source, destination):
+    for wait in (0.05, 0.1, 0.2, 0.4, 0.8, None):
+        try:
+            os.replace(source, destination)
+            break
+        except PermissionError:
+            # Windows refuses the replace while antivirus or the indexer briefly holds the destination open (WinError 5):
+            # wait up to about 1.5 s in all, then raise. Elsewhere it is a real permission error, raised at once.
+            if os.name != "nt" or wait is None:
+                raise
+            time.sleep(wait)
+
+
 def atomic_write(path, data, secret=False):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -159,16 +172,7 @@ def atomic_write(path, data, secret=False):
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        for wait in (0.05, 0.1, 0.2, 0.4, 0.8, None):
-            try:
-                os.replace(temporary, path)
-                break
-            except PermissionError:
-                # Windows refuses the replace while antivirus or the indexer briefly holds the destination open (WinError 5):
-                # wait up to about 1.5 s in all, then raise. Elsewhere it is a real permission error, raised at once.
-                if os.name != "nt" or wait is None:
-                    raise
-                time.sleep(wait)
+        replace_file(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -556,7 +560,7 @@ class Store:
                     if not connection.execute("SELECT 1 FROM devices WHERE app=? AND device_id=? AND revoked=0 AND platform=? AND arch=?",
                                               (app, recipient, platform, arch)).fetchone():
                         raise Refused("recipient is unknown, revoked, or targets another platform")
-                os.replace(temporary, destination)
+                replace_file(temporary, destination)
                 connection.execute("INSERT INTO releases VALUES (?,?,?,?,?,?,?,?,0)",
                                    (app, platform, arch, sequence, version, canonical(envelope).decode(), str(destination.relative_to(self.root)), json.dumps(recipients)))
                 self.audit(connection, "release-published", app, detail=f"{version}/{sequence}/{platform}/{arch}")

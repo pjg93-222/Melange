@@ -19,7 +19,7 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from desktop_admin import (APPS, VERSION, Refused, atomic_write, b64,
-                           canonical, digest, protect)
+                           canonical, digest, protect, replace_file)
 
 ROLES = {'melange': 'local_user', 'mentat': 'local_user', 'terrier': 'local_administrator'}
 DISTRICTS = {'co-05', 'or-05', 'ct-01'}
@@ -233,7 +233,7 @@ class AccessStore:
             self._verify_initialized_database(temporary)
             with temporary.open('r+b') as stream:
                 os.fsync(stream.fileno())
-            os.replace(temporary, self.db)
+            replace_file(temporary, self.db)
         self._verify_initialized_database(self.db)
         checkpoint('database')
         receipt['completed'] = True
