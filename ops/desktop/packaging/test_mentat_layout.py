@@ -36,9 +36,14 @@ class MentatLayoutTests(unittest.TestCase):
             module = types.ModuleType('fixture_engine')
             module.__file__ = str(code/'app/contribution_data.py')
             # _token validates the report publication through its sibling module; load the engine's own copy.
+            # Keep any report_publication another test module already cached from shadowing the engine's sibling.
+            cached = sys.modules.pop('report_publication', None)
             sys.path.insert(0,str(engine.parent))
             try: report_publication = importlib.import_module('report_publication')
-            finally: sys.path.remove(str(engine.parent))
+            finally:
+                sys.path.remove(str(engine.parent))
+                sys.modules.pop('report_publication', None)
+                if cached is not None: sys.modules['report_publication'] = cached
             module.__dict__.update(Path=Path,hashlib=hashlib,json=json,PROJECT=data,report_publication=report_publication)
             module._stamp = lambda path: (str(path),Path(path).stat().st_size,Path(path).stat().st_mtime_ns)
             module._rule_digest_stamped = lambda stamp: hashlib.sha256(Path(stamp[0]).read_bytes().replace(b'\r\n',b'\n')).hexdigest()
