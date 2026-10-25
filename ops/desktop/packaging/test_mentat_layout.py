@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import tempfile
 import ast
+import importlib
+import sys
 import hashlib
 import types
 import unittest
@@ -33,7 +35,11 @@ class MentatLayoutTests(unittest.TestCase):
                 source[key] = file
             module = types.ModuleType('fixture_engine')
             module.__file__ = str(code/'app/contribution_data.py')
-            module.__dict__.update(Path=Path,hashlib=hashlib,json=json,PROJECT=data)
+            # _token validates the report publication through its sibling module; load the engine's own copy.
+            sys.path.insert(0,str(engine.parent))
+            try: report_publication = importlib.import_module('report_publication')
+            finally: sys.path.remove(str(engine.parent))
+            module.__dict__.update(Path=Path,hashlib=hashlib,json=json,PROJECT=data,report_publication=report_publication)
             module._stamp = lambda path: (str(path),Path(path).stat().st_size,Path(path).stat().st_mtime_ns)
             module._rule_digest_stamped = lambda stamp: hashlib.sha256(Path(stamp[0]).read_bytes().replace(b'\r\n',b'\n')).hexdigest()
             module.RULE_PATHS = [code/'tools/rules.py',code/'inputs/fec_receipt_rules.json',Path(module.__file__)]
