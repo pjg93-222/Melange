@@ -133,6 +133,7 @@ def create_server(access, port=0, apps=None, desktop=None):
             pass
 
         def reply(self, status, body, mime='application/json'):
+            self.discard()
             raw = body if isinstance(body, bytes) else canonical(body)
             self.close_connection = True
             try:
@@ -162,13 +163,10 @@ def create_server(access, port=0, apps=None, desktop=None):
                 raise Refused('exact origin required')
             limiter.check(self.client_address[0])
 
-        def body(self):
-            if self.headers.get('Content-Type') != 'application/json':
-                raise Refused('JSON required')
-            size = self.headers.get('Content-Length', '')
-            if not size.isascii() or not size.isdecimal() or not 0 < int(size) <= 4096:
-                raise Refused('bounded body required')
-            deadline, remaining, chunks = time.monotonic()+5, int(size), []
+        consumed = False   # the request body has been read (or reading it has started)
+
+        def read(self, size):
+            deadline, remaining, chunks = time.monotonic()+5, size, []
             while remaining:
                 left = deadline-time.monotonic()
                 if left <= 0: raise TimeoutError()
@@ -176,7 +174,30 @@ def create_server(access, port=0, apps=None, desktop=None):
                 chunk = self.rfile.read1(remaining)
                 if not chunk: raise Refused('incomplete body')
                 chunks.append(chunk); remaining -= len(chunk)
-            value = json.loads(b''.join(chunks).decode('utf-8'), object_pairs_hook=unique_object,
+            return b''.join(chunks)
+
+        def discard(self):
+            """Read and drop a body no route read, within the same bound, before any answer. A refusal decided on the headers
+            alone would otherwise close with the body unread (http.client sends it in a second write), and Windows then resets
+            the connection, which can destroy the answer before the client reads it (WinError 10053). Nothing is decided here."""
+            size = self.headers.get_all('Content-Length', [])
+            size = size[0] if len(size) == 1 else ''
+            if (self.consumed or self.headers.get_all('Transfer-Encoding') or not size.isascii() or not size.isdecimal()
+                    or len(size) > 4 or not 0 < int(size) <= 4096):
+                return   # nothing to read, or nothing it is safe to read: the connection closes as before
+            self.consumed = True
+            try: self.read(int(size))
+            except (Refused, OSError): pass   # a short or stalled body: answer anyway
+            finally: self.connection.settimeout(5)
+
+        def body(self):
+            if self.headers.get('Content-Type') != 'application/json':
+                raise Refused('JSON required')
+            size = self.headers.get('Content-Length', '')
+            if not size.isascii() or not size.isdecimal() or not 0 < int(size) <= 4096:
+                raise Refused('bounded body required')
+            self.consumed = True
+            value = json.loads(self.read(int(size)).decode('utf-8'), object_pairs_hook=unique_object,
                                parse_constant=lambda _value: (_ for _ in ()).throw(ValueError()))
             if not isinstance(value, dict): raise ValueError('JSON object required')
             return value
