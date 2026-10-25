@@ -248,7 +248,10 @@ below, as one local command. It stops at the first failed step and names that st
   load `node_modules`; pytest never recurses into it), then pytest inside a git
   work tree as in a checkout (`test_district_packs` checks that its own file is
   refused there; `git init` makes the export one for the run, and its `.git` is
-  removed afterwards). A module that reads another app's source tests that
+  removed afterwards). A module listed in `APP_TEST_INPUT_MODULES` (those that
+  read `TERRIER_TEST_SOURCE` or `MENTAT_TEST_ENGINE` from `os.environ`, checked
+  against a parse of the tests; a module that only names them, such as
+  `test_release_from_main`, is not one) tests that
   app's integration and runs when that app is released: `TERRIER_TEST_SOURCE`
   is then Geo's export (its `frontend/dist` built) and `MENTAT_TEST_ENGINE`
   Mentat's `mentat/app/contribution_data.py`. In a release without that app the

@@ -41,6 +41,10 @@ GATES = ('tests', 'security', 'dependencies', 'redistribution', 'dataAllowlist')
 PYTEST = ('colorama', 'iniconfig', 'pluggy', 'pygments', 'pytest')  # pytest 9's closure beyond packaging, on Windows
 # The variable a test module reads for another app's source, and that source in the app's export.
 APP_TEST_INPUTS = {'terrier': ('TERRIER_TEST_SOURCE', '.'), 'mentat': ('MENTAT_TEST_ENGINE', 'mentat/app/contribution_data.py')}
+# The modules that read that variable from os.environ (test_release_from_main checks the lists against a parse of the tests),
+# per app. A module that merely names it, as the release command's own tests do in fixtures, is not bound to the app.
+APP_TEST_INPUT_MODULES = {'terrier': tuple(f'ops/desktop/packaging/test_terrier_{name}.py' for name in ('desktop_access', 'district', 'owner', 'principal')),
+                          'mentat': ('ops/desktop/packaging/test_mentat_layout.py',)}
 # The source root the module-data tests read from another app's real files (Melange's `fec/`, Mentat's `mentat/forecast`); they
 # skip when it is unset, so these are supplied, to every pytest run, for each app in the release (not scanned like the above).
 MODULE_DATA_SOURCES = {'melange': 'MODULE_DATA_MELANGE_SOURCE', 'mentat': 'MODULE_DATA_MENTAT_SOURCE'}
@@ -459,7 +463,7 @@ class Release:
         """Every test module under the client repository's ops/desktop, each given what it needs. npm ci first: the client tests
         and test_district_packs require node_modules (pytest never recurses into node_modules). The run is inside a git work
         tree, as in a checkout (test_district_packs asserts its own file is refused there; `git archive` writes no .git, so one
-        is made for the run and removed after). A module that reads another app's source (APP_TEST_INPUTS) tests that app's
+        is made for the run and removed after). A module listed as reading another app's source (APP_TEST_INPUT_MODULES) tests that app's
         integration: it runs, with that app's export, when that app is released, and is otherwise listed as not run. Modules
         reading TERRIER_TEST_SOURCE set up Django once per process, so each runs alone, in a venv of Terrier's lock plus pytest
         (the shipped runtime drops django/test); the rest run together in a venv of the repository's own runtime lock (and
@@ -468,11 +472,7 @@ class Release:
         pytest's pythonpath, and is otherwise listed as not run. Every pytest run is given each released app's export as
         MODULE_DATA_<APP>_SOURCE (MODULE_DATA_SOURCES), which the module-data tests otherwise skip for, or fail without."""
         root = self.export[tool]
-        desktop = root / 'ops' / 'desktop'
-        modules = [path for path in desktop.rglob('*.py')
-                   if re.fullmatch(r'test_.*|.*_test', path.stem) and 'node_modules' not in path.relative_to(desktop).parts]
-        bound = {app: sorted(path.relative_to(root).as_posix() for path in modules
-                             if name in path.read_text(encoding='utf-8', errors='replace')) for app, (name, _) in APP_TEST_INPUTS.items()}
+        bound = {app: sorted(name for name in APP_TEST_INPUT_MODULES[app] if (root / name).is_file()) for app in APP_TEST_INPUTS}
         django = bound['terrier'] if 'terrier' in self.apps else []
         owned = {app: sorted(name for name in names if (root / name).is_file()) for app, names in APP_TEST_MODULES.items() if TOOLS[app] != tool}
         foreign = {app: names for app, names in owned.items() if app in self.apps and names}
