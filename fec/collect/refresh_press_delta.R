@@ -85,6 +85,8 @@ deadlines_path <- file.path(dirname(normalizePath(wrapper_file, mustWork = TRUE)
                            "press_request_deadlines.R")
 backlog_path <- file.path(dirname(normalizePath(wrapper_file, mustWork = TRUE)),
                          "press_backlog.R")
+host_routes_path <- file.path(dirname(normalizePath(wrapper_file, mustWork = TRUE)),
+                              "press_host_routes.R")
 collector_source_paths <- list(refresh_press_delta.R = wrapper_file,
                                press_member_overrides.R = overrides_path,
                                press_official_coverage.R = coverage_path,
@@ -93,6 +95,7 @@ collector_source_paths <- list(refresh_press_delta.R = wrapper_file,
                                press_official_dated_listings.R = dated_listings_path,
                                press_request_deadlines.R = deadlines_path,
                                press_backlog.R = backlog_path,
+                               press_host_routes.R = host_routes_path,
                                cu_press_release_scraper.R = scraper_path)
 collector_sources_sha256 <- lapply(collector_source_paths, sha256_file)
 source(scraper_path, local = globalenv(), chdir = FALSE)
@@ -113,6 +116,9 @@ install_press_official_dated_listings()
 source(deadlines_path, local = globalenv(), chdir = FALSE)
 install_press_request_deadlines()
 source(backlog_path, local = globalenv(), chdir = FALSE)
+# Installed BEFORE the backlog wrapper so the backlog sees the routed rows in the body walk's result.
+source(host_routes_path, local = globalenv(), chdir = FALSE)
+install_press_host_routes()
 install_press_backlog(dirname(dirname(dirname(normalizePath(wrapper_file, mustWork = TRUE)))))
 if (!identical(collector_sources_sha256, lapply(collector_source_paths, sha256_file)))
   stop("press collector source changed during initialization")
@@ -391,6 +397,14 @@ terminal_nonarticle_reason <- function(value) {
       grepl("/(news/press-releases|newsroom/newsletters|news/in-the-news)/[^/]+/[^/]+/?$",
             path, perl = TRUE))
     return("nested_press_release_media_asset")
+  # Page-builder script hooks scraped out of inline JS as if they were links: Elementor/JetEngine widget names
+  # (text-editor.default, frontend/element_ready/ha-slider.default) and jQuery event names (blur.validate-equalTo).
+  # The dot-suffix alternatives are the hook namespaces only, so IQ-CMS pages such as documentsingle.aspx stay retryable.
+  if (grepl(paste0("[.](default|validate[a-z-]*|ui-form-reset|element-ready)$|/(element_ready|elementor|jet-popup|",
+                   "jet-search|jet-ajax-search|get-style-property|matches-selector)(/|$)"), path, perl = TRUE))
+    return("page_builder_widget_hook")
+  # A document href with another URL concatenated after the extension (babin.house.gov/uploadedfiles/x.pdfhttp://...).
+  if (grepl("[.](pdf|docx?|xlsx?|pptx?)https?:", value, perl = TRUE)) return("document_or_media_asset")
   if (grepl("/(services?|constituent-services?|contact|about)/", path, perl = TRUE))
     return("nonarticle_service_page")
   if (grepl("/(feed|tag|category|author|page)/?[^/]*$", path, perl = TRUE))
@@ -469,7 +483,8 @@ run_receipt_metrics <- list(
   historical_inventory_source = NULL,
   terminal_nonarticle_urls = 0L,
   retryable_body_candidates = 0L,
-  recovered_bodies = 0L
+  recovered_bodies = 0L,
+  host_routes = setNames(list(), character(0))   # per-host eligible/attempted/routed/errors/tripped, from press_host_routes.R
 )
 
 write_official_coverage_artifact <- function() {
@@ -613,7 +628,8 @@ write_retry_receipt <- function(materialized) {
     retry_source_run = run_receipt_metrics$retry_source_run,
     terminal_nonarticle_urls = run_receipt_metrics$terminal_nonarticle_urls,
     retryable_body_candidates = run_receipt_metrics$retryable_body_candidates,
-    recovered_bodies = run_receipt_metrics$recovered_bodies
+    recovered_bodies = run_receipt_metrics$recovered_bodies,
+    host_routes = run_receipt_metrics$host_routes
   )
   temp <- paste0(retry_receipt_path, ".part")
   jsonlite::write_json(payload, temp, auto_unbox = TRUE, pretty = TRUE, na = "null")
@@ -637,6 +653,23 @@ load_valid_retry_receipt <- function() {
   receipt
 }
 
+# Rows that reached the body partitions although their url is a terminal non-article (a page-builder script string, a glued
+# document href) are not press releases. They are moved to the terminal artifacts so the receipt, the audit and scoring all see
+# them as non-articles: they never count as failed bodies and the D-219 title fallback never scores them. The discovery step
+# already splits the delta before any fetch; this is the guard for every other way a row can arrive. Returns the new total.
+merge_late_terminal <- function(late) {
+  rds <- file.path(run_root, "press_delta_terminal_nonarticles.rds")
+  existing <- if (file.exists(rds)) readRDS(rds) else late[0, , drop = FALSE]
+  combined <- dplyr::bind_rows(existing, late)
+  member <- if ("bioguide" %in% names(combined)) toupper(trimws(ifelse(is.na(combined$bioguide), "", combined$bioguide))) else ""
+  combined <- combined[!duplicated(paste(canonical_url(combined$url), member, sep = "#")), , drop = FALSE]
+  write_rds_atomic(combined, rds)
+  write_csv_atomic(combined, file.path(run_root, "press_delta_terminal_nonarticles.csv"))
+  message("Moved ", nrow(combined) - nrow(existing), " late terminal non-article row(s) out of the body partitions; ",
+          nrow(combined), " in total.")
+  nrow(combined)
+}
+
 materialize_press_outputs <- function(full, failure_status, rewrite_fulltext = TRUE) {
   if (!nrow(full)) {
     for (name in c("url", "bioguide", "body", "source", "url_key"))
@@ -652,6 +685,10 @@ materialize_press_outputs <- function(full, failure_status, rewrite_fulltext = T
     # Collapse only duplicate document/member pairs, never distinct members.
     full <- full[nzchar(full$url_key) & !duplicated(full$turn_key), , drop = FALSE]
   }
+  # --score-only re-reads a sealed fulltext and leaves it as written, so its partitions are left alone too.
+  late <- if (rewrite_fulltext) split_terminal_nonarticles(full) else
+    list(articles = full, nonarticles = full[0, , drop = FALSE])
+  full <- late$articles
   body <- ifelse(is.na(full$body), "", trimws(full$body))
   word_count <- ifelse(
     nzchar(body),
@@ -739,6 +776,7 @@ materialize_press_outputs <- function(full, failure_status, rewrite_fulltext = T
   outputs$scorable <- dplyr::bind_rows(
     tag_body_fallback(dated, ""), tag_body_fallback(unresolved, ""),
     tag_body_fallback(fallback, "title"))
+  outputs$terminal_late <- late$nonarticles
   outputs
 }
 
@@ -862,9 +900,12 @@ if (!is.na(retry_from)) {
   # status suffix so the intake gate can prove that no failure was silently
   # skipped.
   materialized <- materialize_press_outputs(full, "after_network_retry")
+  if (nrow(materialized$terminal_late))
+    run_receipt_metrics$terminal_nonarticle_urls <- merge_late_terminal(materialized$terminal_late)
   scored <- score_scorable_press_rows(materialized$scorable)
   write_rds_atomic(scored, file.path(run_root, "press_delta_scored.rds"))
   write_csv_atomic(scored, file.path(run_root, "press_delta_scored.csv"))
+  run_receipt_metrics$host_routes <- press_route_summary(CHECKPOINT_DIR)
   completion <- write_retry_receipt(materialized)
   message("Targeted retry complete: recovered=", nrow(recovered_good),
           " failed_bodies=", nrow(materialized$failed_bodies),
@@ -992,11 +1033,14 @@ exit_code <- tryCatch({
         full,
         if (cache_only) "from_existing_receipt" else "after_network_retry"
       )
+      if (nrow(materialized$terminal_late))
+        run_receipt_metrics$terminal_nonarticle_urls <- merge_late_terminal(materialized$terminal_late)
       dated <- materialized$dated
 
       scored <- score_scorable_press_rows(materialized$scorable)
       write_rds_atomic(scored, file.path(run_root, "press_delta_scored.rds"))
       write_csv_atomic(scored, file.path(run_root, "press_delta_scored.csv"))
+      run_receipt_metrics$host_routes <- press_route_summary(CHECKPOINT_DIR)
       completion <- write_retry_receipt(materialized)
       message(
         "Scratch full-text complete: receipts=", nrow(materialized$fulltext),
