@@ -130,6 +130,8 @@ class Release:
         self.paths = {'melange': args.melange, 'mentat': args.mentat, 'terrier': args.geo}
         self.apps, self.inject = args.apps, args.inject_runtime  # the apps released; app -> reused runtime folder
         self.tools = sorted({TOOLS[app] for app in self.apps})  # their client repositories
+        self.shipped = [app for app in APPS if app in self.apps or app in self.tools]  # the repositories whose code this release ships
+        self.moved = {}  # unshipped repository -> its main when --publish found it moved since the spec
         self.state, self.root, self.security_root = args.state, args.output_root, args.security_root
         self.python = sys.executable  # release tools, and the interpreter that creates the build venvs
         self.build_python = args.build_python  # one given build venv for every app; otherwise one venv per app is made
@@ -279,14 +281,18 @@ class Release:
         self.release = self.root / f'release-{version}'
         self.spec_path = self.root / f'release-spec-{version}.json'
         self.receipts = self.root / f'receipts-{version}'
-        # --publish after a completed dry run publishes its signed installers, as long as every origin/main is unchanged.
+        # --publish after a completed dry run publishes its signed installers, as long as every shipped repository's
+        # origin/main is unchanged; another repository's main moving is only noted (a Terrier release ships no Mentat code).
         self.resume = bool(self.args.publish and self.spec_path.is_file())
         if self.resume:
             self.spec = json.loads(self.spec_path.read_text(encoding='utf-8'))
             for app in APPS:
-                if self.spec.get('sourceRefs', {}).get(app) != self.source(app):
+                if self.spec.get('sourceRefs', {}).get(app) == self.source(app):
+                    continue
+                if app in self.shipped:
                     raise StepFailed('version', f'{self.spec_path} was prepared from other commits than origin/main of '
                                                 f'{REPOSITORIES[app]}; bump the version on main and run again')
+                self.moved[app] = self.shas[app]
             if set(self.spec.get('packages') or ()) != set(self.apps):
                 raise StepFailed('version', f'{self.spec_path} releases {",".join(sorted(self.spec.get("packages") or ()))}, not '
                                             f'--apps {",".join(self.apps)}; rerun --publish with the dry run\'s --apps')
@@ -767,6 +773,14 @@ class Release:
                          + ''.join(f'- {PRODUCTS[app]}: {REPOSITORIES[app]}@{self.shas[app]}\n' for app in self.apps), encoding='utf-8')
         downloads = self.release / 'verify-download'
         downloads.mkdir(exist_ok=True)
+        for app in self.shipped:  # a shipped client repository that is no app here still must not have moved
+            if app not in self.apps:
+                expected = self.spec['sourceRefs'][app]['commit']
+                tip = self.call('publish', ['gh', 'api', f'repos/{REPOSITORIES[app]}/commits/main', '--jq', '.sha'],
+                                log=f'gh-main-{app}').stdout.strip()
+                if tip != expected:
+                    raise StepFailed('publish', f'{REPOSITORIES[app]} main moved to {tip or "unknown"} since the release spec was made '
+                                                f'from {expected}')
         # All-or-nothing as far as GitHub allows: checks, then verified drafts for every app, and only then the public edits.
         for app in self.apps:  # read-only checks first, so a refusal leaves no draft behind
             repo, sha = REPOSITORIES[app], self.shas[app]
@@ -810,8 +824,9 @@ class Release:
             artifacts.append({'app': app, 'name': self.installers[app].name, 'sha256': receipt['sha256']})
             gates[app] = {name: receipt[name]['status'] if name in ('osSignature', 'nativeAcceptance') else receipt['gates'][name]['status']
                           for name in (*GATES, 'nativeAcceptance', 'osSignature')}
+        notes = [f'{app} main moved to {sha} since the spec (not shipped in this release)' for app, sha in self.moved.items()]
         return {'version': self.version, 'sequence': self.sequence, 'sources': {app: self.source(app) for app in APPS},
-                'artifacts': artifacts, 'gates': gates, 'published': published}
+                'artifacts': artifacts, 'gates': gates, 'published': published, **({'notes': notes} if notes else {})}
 
     # ---------------------------------------------------------------- driver
     def step(self, name, action):

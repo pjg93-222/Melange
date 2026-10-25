@@ -1018,8 +1018,46 @@ def test_publish_after_a_terrier_dry_run_publishes_only_to_geo(world, capsys):
     out, error = capsys.readouterr()
     assert code == 0, error
     gh = [call for call in fake.calls if tool(call) == 'gh']
-    assert gh and all('pjg93-222/Geo' in ' '.join(call) for call in gh)
+    assert gh and all('pjg93-222/Geo' in ' '.join(call) or call[1:3] == ['api', 'repos/pjg93-222/Melange/commits/main'] for call in gh)
     assert 'Published desktop-v1.2.3 to pjg93-222/Geo.' in out
+    assert 'notes' not in json.loads(out[:out.rindex('}') + 1])
+
+
+def test_terrier_resume_allows_mentat_main_moving_and_notes_it(world, capsys):
+    assert release(world, '--apps', 'terrier', '--inject-runtime', f'terrier={runtime(world)}')[0] == 0, capsys.readouterr().err
+    push(world, 'mentat', 'later.txt', 'new work')
+    capsys.readouterr()
+    code, fake = release(world, '--publish', '--apps', 'terrier')
+    out, error = capsys.readouterr()
+    assert code == 0, error
+    note = f'mentat main moved to {origin_main(world, "mentat")} since the spec (not shipped in this release)'
+    assert json.loads(out[:out.rindex('}') + 1])['notes'] == [note]
+    spec = json.loads((world['out'] / f'release-spec-{VERSION}.json').read_text(encoding='utf-8'))
+    assert spec['sourceRefs']['mentat']['commit'] != origin_main(world, 'mentat')  # the spec still names the dry run's commit
+    assert not any('Mentat' in ' '.join(call) for call in fake.calls if tool(call) == 'gh')
+
+
+@pytest.mark.parametrize('moved', ['melange', 'terrier'])
+def test_terrier_resume_refuses_a_shipped_repository_moving(world, capsys, moved):
+    assert release(world, '--apps', 'terrier', '--inject-runtime', f'terrier={runtime(world)}')[0] == 0, capsys.readouterr().err
+    push(world, moved, 'later.txt', 'new work')
+    capsys.readouterr()
+    code, fake = release(world, '--publish', '--apps', 'terrier')
+    error = capsys.readouterr().err
+    assert code == 1 and "step 'version'" in error and rfm.REPOSITORIES[moved] in error
+    assert not any(tool(call) == 'gh' or '--spec' in call for call in fake.calls)
+
+
+def test_terrier_publish_refuses_the_client_repository_tip_moving(world, capsys):
+    assert release(world, '--apps', 'terrier', '--inject-runtime', f'terrier={runtime(world)}')[0] == 0, capsys.readouterr().err
+    capsys.readouterr()
+    fake = Fake()
+    fake.tips[rfm.REPOSITORIES['melange']] = 'f' * 40
+    code, fake = release(world, '--publish', '--apps', 'terrier', fake=fake)
+    error = capsys.readouterr().err
+    assert code == 1 and "step 'publish'" in error and rfm.REPOSITORIES['melange'] in error and 'f' * 40 in error
+    gh = [call[1:3] for call in fake.calls if tool(call) == 'gh']
+    assert ['release', 'create'] not in gh and ['release', 'edit'] not in gh
 
 
 def snapshot(root):

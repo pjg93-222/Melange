@@ -159,7 +159,16 @@ def atomic_write(path, data, secret=False):
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        for wait in (0.05, 0.1, 0.2, 0.4, 0.8, None):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError:
+                # Windows refuses the replace while antivirus or the indexer briefly holds the destination open (WinError 5):
+                # wait up to about 1.5 s in all, then raise. Elsewhere it is a real permission error, raised at once.
+                if os.name != "nt" or wait is None:
+                    raise
+                time.sleep(wait)
     finally:
         temporary.unlink(missing_ok=True)
 

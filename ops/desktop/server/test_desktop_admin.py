@@ -2,6 +2,7 @@ import base64
 import concurrent.futures
 import http.client
 import json
+import os
 from pathlib import Path
 import ssl
 import threading
@@ -211,6 +212,40 @@ def test_rotation_chain_signed_by_previously_trusted_key(store):
     assert payload["fromKeyId"] == before["active"]
     assert payload["toKeyId"] == key_id == digest(unb64(payload["publicKey"]))[:24]
     assert payload["appId"] == "melange"
+
+
+@pytest.mark.skipif(os.name != "nt", reason="the retry is for Windows sharing violations only")
+def test_atomic_write_rides_out_a_brief_destination_lock(tmp_path, monkeypatch):
+    import desktop_admin
+    real, calls, waits = os.replace, [], []
+    def locked_once(source, destination):
+        calls.append(destination)
+        if len(calls) == 1:
+            raise PermissionError(13, "Access is denied")
+        real(source, destination)
+    monkeypatch.setattr(desktop_admin.os, "replace", locked_once)
+    monkeypatch.setattr(desktop_admin.time, "sleep", waits.append)
+    target = tmp_path / "trust.json"
+    target.write_bytes(b"old")
+    desktop_admin.atomic_write(target, b"new")
+    assert (target.read_bytes(), len(calls), waits) == (b"new", 2, [0.05])
+    assert [p.name for p in tmp_path.iterdir()] == ["trust.json"]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="the retry is for Windows sharing violations only")
+def test_atomic_write_raises_when_the_destination_stays_locked(tmp_path, monkeypatch):
+    import desktop_admin
+    def locked(source, destination):
+        raise PermissionError(13, "Access is denied")
+    waits = []
+    monkeypatch.setattr(desktop_admin.os, "replace", locked)
+    monkeypatch.setattr(desktop_admin.time, "sleep", waits.append)
+    target = tmp_path / "trust.json"
+    target.write_bytes(b"old")
+    with pytest.raises(PermissionError):
+        desktop_admin.atomic_write(target, b"new")
+    assert 1 <= sum(waits) <= 2 and len(waits) == 5
+    assert target.read_bytes() == b"old" and [p.name for p in tmp_path.iterdir()] == ["trust.json"]
 
 
 def test_withdraw_and_status_minimization(store, monkeypatch, tmp_path):

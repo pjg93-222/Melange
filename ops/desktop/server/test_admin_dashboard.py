@@ -64,6 +64,20 @@ class AdminDashboardTests(unittest.TestCase):
         self.assertEqual(self.call('/dashboard', {})[0], 403)
         self.assertEqual(self.server.server_address[0], '127.0.0.1')
 
+    def test_a_refusal_decided_before_the_body_arrives_still_reaches_the_client(self):
+        # http.client writes the headers and the body separately. A refusal sent and closed with the body still unread made
+        # Windows reset the connection, destroying the answer (WinError 10053). The body here arrives after the decision.
+        headers, port = self.session(), self.server.server_port
+        for route, override, status in (('/dashboard', {'Origin': 'http://127.0.0.1:1'}, b'403'), ('/apps', {'Authorization': ''}, b'401'),
+                                        ('/dashboard', {'X-Admin-CSRF': secrets.token_urlsafe(32)}, b'403'), ('/nowhere', {}, b'404')):
+            fields = {'Host': f'127.0.0.1:{port}', 'Origin': self.origin, 'Content-Type': 'application/json', 'Content-Length': '2', **headers, **override}
+            with socket.create_connection(('127.0.0.1', port), timeout=3) as peer:
+                peer.sendall(f'POST {route} HTTP/1.1\r\n'.encode() + b''.join(f'{k}: {v}\r\n'.encode() for k, v in fields.items()) + b'\r\n')
+                time.sleep(0.3)
+                peer.sendall(b'{}')
+                answer = peer.makefile('rb').read()
+            self.assertEqual(answer.split(b' ', 2)[1], status, (route, override))
+
     def test_desktop_launch_requires_protected_session_and_ignores_no_guards(self):
         exe = self.desktop_root / 'Melange' / 'Melange.exe'
         exe.parent.mkdir(parents=True)

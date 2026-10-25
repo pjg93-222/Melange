@@ -305,8 +305,10 @@ below, as one local command. It stops at the first failed step and names that st
   that `github_release.py` will apply, but nothing is prepared, so there are no
   GitHub writes and no ledger sequence is reserved.
   `--publish` after a dry run reuses its signed installers and receipts: it
-  rechecks that every `origin/main` still equals the spec's `sourceRefs`, that
-  no tag exists and that each installer's SHA-256 equals its receipt, then
+  rechecks that every shipped repository's `origin/main` (the selected apps'
+  own and their client repositories; for `--apps terrier`, Geo and Melange)
+  still equals the spec's `sourceRefs` (another repository's main moving is only
+  noted in the summary's `notes`), that no tag exists and that each installer's SHA-256 equals its receipt, then
   runs `github_release.py --spec` (which reserves the sequence) into
   `release-<v>/bundle/`, checks each `release.json` against the spec, and
   publishes. Without a prior dry run, `--publish` builds everything first.
