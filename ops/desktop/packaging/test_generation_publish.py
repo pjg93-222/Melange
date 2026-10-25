@@ -26,6 +26,26 @@ ROSTER = (b'{"schema":"roster-v3","members":[{"bioguide":"A000001","share":0.100
 BILLS = b''.join(b'{"congress": 118, "sponsor": "S%06d", "weight": 1.230000000001}\n' % n for n in range(40))
 
 
+# What collect_official_rollcall_events --install leaves under the data root (manifest uses CRLF, as written).
+ROLLCALL = {
+    'manifest.json': b'{\r\n  "acceptance_passed": true,\r\n  "outputs": {},\r\n  "schema": "official-rollcall-staging-v1"\r\n}\r\n',
+    'official_rollcall_aggregate.json': b'{"schema":"a","members":{"A000001":{"Payments":{"lean":0.3333333333333333}}},"cells":[]}',
+    'official_rollcall_member_votes.ndjson': b'{"schema":"v","event_id":"119:house:1:5","bioguide_id":"A000001"}\n',
+    'official_rollcall_event_ledger.ndjson': b'{"schema":"e","event_id":"119:house:1:5"}\n',
+    'rollcall_measure_match_audit.ndjson': b'{"schema":"m","canonical_key":"119:hr:1"}\n',
+    'rollcall_direction_audit.ndjson': b'{"schema":"d","canonical_key":"119:hr:1"}\n',
+    'source_snapshots.ndjson': b'{"schema":"s","content_sha256":"00"}\n',
+}
+
+
+def install_rollcall(data):
+    target = data / 'data' / 'legislation' / 'official_rollcall'
+    target.mkdir(parents=True, exist_ok=True)
+    for name, raw in ROLLCALL.items():
+        (target / name).write_bytes(raw)
+    return target
+
+
 def fixture_root(base):
     data = base / 'data-root'
     (data / 'data' / 'engine').mkdir(parents=True)
@@ -95,12 +115,27 @@ class ContractTests(unittest.TestCase):
     @unittest.skipUnless(os.environ.get('MELANGE_CANONICAL_DATA_ROOT'), 'canonical data root not provided')
     def test_canonical_data_conforms_without_copying_it(self):
         root = Path(os.environ['MELANGE_CANONICAL_DATA_ROOT'])
+        collected = {m for ids in contracts.COLLECTOR_MODULES.values() for m in ids}
         for module_id, module in PAGED_MODULES.items():
             for partition in module.partitions:
+                if module_id in collected and not (root / module.path(partition)).exists():
+                    continue  # installed only once its collector has run with install
                 with self.subTest(module_id=module_id, partition=partition):
                     raw = (root / module.path(partition)).read_bytes()
                     self.assertGreater(check_module_bytes(module, partition, raw), 0)
                     self.assertEqual(b''.join(split_pages(module, raw)), raw)
+
+    def test_collector_modules_are_registered_at_the_collectors_install_paths(self):
+        from legislation import collect_official_rollcall_events as RC
+        self.assertEqual(set(contracts.COLLECTOR_MODULES), {'official-rollcall', 'fec-money'})
+        rollcall = {paged_module(m).path() for m in contracts.COLLECTOR_MODULES['official-rollcall']}
+        self.assertEqual(rollcall, {(RC.INSTALL_DIR / name).as_posix() for name in (*RC.OUTPUT_NAMES, 'manifest.json')})
+        self.assertEqual(paged_module('melange.fec-money-refresh.v1').path(), 'data/money/fec_refresh_current.json')
+        for module_id in contracts.COLLECTOR_MODULES['official-rollcall']:
+            module = paged_module(module_id)
+            raw = ROLLCALL[module.path().rsplit('/', 1)[1]]
+            self.assertEqual(check_module_bytes(module, '', raw), 1)
+            self.assertEqual(split_pages(module, raw), [raw])
 
     def test_pages_are_original_bytes_split_on_record_ends(self):
         bills = paged_module('melange.holistic-billcache.v1')
@@ -170,18 +205,35 @@ class PublicationTests(unittest.TestCase):
         with self.assertRaises(gp.PublicationError):
             self.publish(gp.LocalDirectoryTransport(remote), staging='s3')
 
+    def hook_config(self, modules=()):
+        config = self.base / 'publish.json'
+        config.write_text(json.dumps({'transport': {'kind': 'local', 'root': str(self.base / 'remote')},
+            'stagingRoot': str(self.base / 'stagings'), 'modules': list(modules),
+            'partitions': {'melange.holistic-billcache.v1': ['118']}, 'pageBytes': 512}), encoding='utf-8')
+        return patch.dict(os.environ, {generation_publish_hook.ENVIRONMENT: str(config)})
+
+    def test_hook_refuses_a_collection_whose_own_output_is_missing(self):
+        installed = install_rollcall(self.data)
+        (installed / 'official_rollcall_aggregate.json').unlink()
+        with self.hook_config(self.modules), self.assertRaisesRegex(gp.PublicationError, 'not installed'):
+            generation_publish_hook.after_collection('official-rollcall', self.data, generation=12)
+        with self.hook_config(self.modules), self.assertRaisesRegex(gp.PublicationError, 'not installed'):
+            generation_publish_hook.after_collection('fec-money', self.data, generation=13)
+        with self.hook_config(self.modules), self.assertRaisesRegex(gp.PublicationError, 'No paged module'):
+            generation_publish_hook.after_collection('fixture-scrape', self.data, generation=14)
+        self.assertFalse((self.base / 'stagings').exists())
+        self.assertFalse((self.base / 'remote').exists())
+
     def test_fixture_collection_publishes_and_second_profile_reads_exact_bytes(self):
         remote = self.base / 'remote'
-        config = self.base / 'publish.json'
-        config.write_text(json.dumps({'transport': {'kind': 'local', 'root': str(remote)},
-            'stagingRoot': str(self.base / 'stagings'), 'modules': list(self.modules),
-            'partitions': {'melange.holistic-billcache.v1': ['118']}, 'pageBytes': 512}), encoding='utf-8')
-        with patch.dict(os.environ, {generation_publish_hook.ENVIRONMENT: str(config)}):
-            publication = generation_publish_hook.after_collection('fixture-scrape', self.data, generation=11)
+        installed = install_rollcall(self.data)
+        with self.hook_config(self.modules):
+            publication = generation_publish_hook.after_collection('official-rollcall', self.data, generation=11)
         self.assertEqual(publication['status'], 'published')
         staging = Path(publication['staging'])
         index_raw = (staging / 'index.json').read_bytes()
         index = load_generation_index(index_raw, publication['indexSha256'])
+        self.assertEqual(set(index['modules']), {*contracts.COLLECTOR_MODULES['official-rollcall'], *self.modules})
         fetched = []
         def fetch(chunk, output):
             fetched.append(chunk['asset']); output.write((remote / chunk['asset']).read_bytes())
@@ -190,6 +242,12 @@ class PublicationTests(unittest.TestCase):
         roster = read_module(index, 'melange.roster.v1', '', profile_cache)
         bills = read_module(index, 'melange.holistic-billcache.v1', '118', profile_cache)
         self.assertEqual((roster, bills), (ROSTER, BILLS))
+        for module_id in contracts.COLLECTOR_MODULES['official-rollcall']:  # the collector's own output
+            name = paged_module(module_id).path().rsplit('/', 1)[1]
+            self.assertEqual(read_module(index, module_id, '', profile_cache), (installed / name).read_bytes())
+        aggregate = json.loads(read_module(index, 'melange.official-rollcall-aggregate.v1', '', profile_cache),
+                               parse_float=Decimal)
+        self.assertEqual(str(aggregate['members']['A000001']['Payments']['lean']), '0.3333333333333333')
         value = json.loads(roster, parse_float=Decimal)
         self.assertEqual(str(value['members'][0]['share']), '0.1000000000000000055511')
         self.assertEqual(str(value['members'][0]['amount']), '123456789012345678901.50')

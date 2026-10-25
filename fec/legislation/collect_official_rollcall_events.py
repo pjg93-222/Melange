@@ -1942,6 +1942,44 @@ def write_ndjson(path: Path, rows: Iterable[dict[str, Any]]) -> None:
             handle.write(json.dumps(row, sort_keys=True, ensure_ascii=False) + "\n")
 
 
+OUTPUT_NAMES = (
+    "official_rollcall_event_ledger.ndjson",
+    "rollcall_measure_match_audit.ndjson",
+    "official_rollcall_member_votes.ndjson",
+    "rollcall_direction_audit.ndjson",
+    "source_snapshots.ndjson",
+    "official_rollcall_aggregate.json",
+)
+# Installed copy of the latest accepted generation: the paged modules registered for
+# "official-rollcall" in ops/desktop/packaging/module_application_contracts.py.
+INSTALL_DIR = Path("data") / "legislation" / "official_rollcall"
+
+
+def install_outputs(out_path: Path, workspace_root: Path) -> Path:
+    """Copy an accepted generation's outputs, then its manifest, to INSTALL_DIR.
+
+    Each file is checked against its manifest receipt before it replaces the
+    installed copy, and the manifest goes last, so a reader that checks the
+    receipts never accepts a mixed install.  Still never vote_category_lean.json.
+    """
+    out_path = out_path.resolve()
+    manifest = json.loads((out_path / "manifest.json").read_text(encoding="utf-8"))
+    if not manifest.get("acceptance_passed") or set(manifest.get("outputs") or ()) != set(OUTPUT_NAMES):
+        raise CollectorError("only an accepted generation with every output can be installed")
+    target = workspace_root.resolve() / INSTALL_DIR
+    target.mkdir(parents=True, exist_ok=True)
+    for name in (*OUTPUT_NAMES, "manifest.json"):
+        source = out_path / name
+        receipt = manifest["outputs"].get(name) or {"sha256": sha256_file(source)}
+        part = target / (name + ".part")
+        shutil.copyfile(source, part)
+        if sha256_file(part) != receipt["sha256"]:
+            part.unlink()
+            raise CollectorError(f"installed copy differs from its receipt: {name}")
+        os.replace(part, target / name)
+    return target
+
+
 def assert_staging_output_path(path: Path, workspace_root: Path) -> Path:
     resolved = path.expanduser().resolve()
     root = workspace_root.resolve()
@@ -2103,14 +2141,7 @@ def collect(
             input_paths.append(member_map_path)
         if fixture_manifest:
             input_paths.append(fixture_manifest)
-        output_names = (
-            "official_rollcall_event_ledger.ndjson",
-            "rollcall_measure_match_audit.ndjson",
-            "official_rollcall_member_votes.ndjson",
-            "rollcall_direction_audit.ndjson",
-            "source_snapshots.ndjson",
-            "official_rollcall_aggregate.json",
-        )
+        output_names = OUTPUT_NAMES
         manifest = {
             "schema": SCHEMA_VERSION,
             "generated_at": utc_now(),
@@ -2260,6 +2291,14 @@ def parser() -> argparse.ArgumentParser:
         ),
     )
     result.add_argument(
+        "--install",
+        action="store_true",
+        help=(
+            "after acceptance, copy the manifest and outputs to "
+            "data/legislation/official_rollcall/ (required for page publication)"
+        ),
+    )
+    result.add_argument(
         "--workspace-root",
         type=Path,
         default=Path(__file__).resolve().parent.parent.parent,
@@ -2300,13 +2339,24 @@ def main(argv: list[str] | None = None) -> int:
     )
     if not manifest["acceptance_passed"]:
         return 2
+    if args.install:
+        try:
+            installed = install_outputs(args.out, args.workspace_root)
+        except (OSError, ValueError, CollectorError) as exc:
+            print(f"collect_official_rollcall_events: FAIL CLOSED: install: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps({"installed": str(installed)}))
     # Optional page publication after an accepted collection; inert when unset.
     try:
         try:
             import generation_publish_hook
         except ImportError:  # pragma: no cover - package import path
             from fec import generation_publish_hook
-        generation_publish_hook.after_collection("official-rollcall", args.workspace_root)
+        if args.install:
+            generation_publish_hook.after_collection("official-rollcall", args.workspace_root)
+        elif os.environ.get(generation_publish_hook.ENVIRONMENT):
+            # Without --install the data root holds no output of this run, only older copies.
+            raise CollectorError("--install is required: this run's outputs are not installed")
     except Exception as exc:
         print(f"collect_official_rollcall_events: collected; page publication failed: {exc}", file=sys.stderr)
         return 3

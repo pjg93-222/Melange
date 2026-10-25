@@ -274,7 +274,42 @@ PAGED_MODULES = MappingProxyType(dict((
             partition_key='congress', partitions=('117', '118', '119'), max_source_bytes=64 * MiB),
     _module('melange.holistic-billcache.v1', 'data/holistic/billcache_{partition}.ndjson', ('congress',),
             partition_key='congress', partitions=('117', '118', '119'), max_source_bytes=64 * MiB),
+    # Collector outputs, installed by the collector itself (see COLLECTOR_MODULES).
+    _module('melange.official-rollcall-manifest.v1', 'data/legislation/official_rollcall/manifest.json',
+            ('schema', 'acceptance_passed', 'outputs'), max_source_bytes=4 * MiB),
+    _module('melange.official-rollcall-aggregate.v1',
+            'data/legislation/official_rollcall/official_rollcall_aggregate.json',
+            ('schema', 'members', 'cells'), max_source_bytes=16 * MiB),
+    # ponytail: one unpartitioned file (~0.5 MB per roll call); rows carry no integer partition key.
+    _module('melange.official-rollcall-member-votes.v1',
+            'data/legislation/official_rollcall/official_rollcall_member_votes.ndjson',
+            ('schema', 'event_id', 'bioguide_id'), max_source_bytes=256 * MiB),
+    _module('melange.official-rollcall-event-ledger.v1',
+            'data/legislation/official_rollcall/official_rollcall_event_ledger.ndjson',
+            ('schema', 'event_id'), max_source_bytes=64 * MiB),
+    _module('melange.official-rollcall-measure-match-audit.v1',
+            'data/legislation/official_rollcall/rollcall_measure_match_audit.ndjson',
+            ('schema', 'canonical_key'), max_source_bytes=16 * MiB),
+    _module('melange.official-rollcall-direction-audit.v1',
+            'data/legislation/official_rollcall/rollcall_direction_audit.ndjson',
+            ('schema', 'canonical_key'), max_source_bytes=16 * MiB),
+    _module('melange.official-rollcall-source-snapshots.v1',
+            'data/legislation/official_rollcall/source_snapshots.ndjson',
+            ('schema', 'content_sha256'), max_source_bytes=16 * MiB),
+    _module('melange.fec-money-refresh.v1', 'data/money/fec_refresh_current.json',
+            ('schema', 'status', 'checked_at', 'cycle', 'output', 'sources'), max_source_bytes=4 * MiB),
 )))
+
+# The modules each collector installs and must publish after a completed run.
+# fec/generation_publish_hook.after_collection refuses a source not named here.
+COLLECTOR_MODULES = MappingProxyType({
+    'official-rollcall': ('melange.official-rollcall-manifest.v1', 'melange.official-rollcall-aggregate.v1',
+                          'melange.official-rollcall-member-votes.v1', 'melange.official-rollcall-event-ledger.v1',
+                          'melange.official-rollcall-measure-match-audit.v1',
+                          'melange.official-rollcall-direction-audit.v1',
+                          'melange.official-rollcall-source-snapshots.v1'),
+    'fec-money': ('melange.fec-money-refresh.v1',),
+})
 
 
 def paged_module(module_id):

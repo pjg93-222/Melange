@@ -89,8 +89,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 16375,
-        "sha256": "07079e6607eb7122689bdde9179d683631bd981d51147380e9a490864ceb4c5b"
+        "bytes": 18920,
+        "sha256": "33d0cba81fb39a274c8d489b16423e9a0a5b3c5cc5d22e386fabb5319eb87dd6"
       },
       {
         "root": "bootstrap",
@@ -471,7 +471,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "2a28042020b9f4fa149ddb06a2c378b1ccd0f9da68e630fb0634e27de4639e3e",
+    "programFingerprint": "d7001fb3664214c1d92a07184642f89dd3cdeaf1df1d8529121b382444b46d2e",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
