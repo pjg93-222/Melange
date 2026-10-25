@@ -12,6 +12,7 @@ import os
 import re
 import secrets
 import sqlite3
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -113,6 +114,14 @@ def data_identifier(value):
     return identifier(value)
 
 
+# One lock per database file for this process's connections (listener workers and the local dashboard share one file).
+# SQLite's busy handler sleeps and polls, up to 100 ms between tries and in no order, so under a steady stream of
+# writers one caller could poll past its whole 10 s timeout and fail with 'database is locked' (a 503). Threads
+# queue here instead; the busy timeout still bounds waits on other processes, and LOCK_WAIT bounds this queue.
+# ponytail: reads queue too; per-file read/write locks if listener throughput ever needs concurrent reads.
+CONNECTION_LOCKS, LOCK_WAIT = {}, 30
+
+
 class AccessStore:
     def __init__(self, publisher, clock=time.time, require_invite=False):
         self.publisher = publisher
@@ -132,18 +141,24 @@ class AccessStore:
     def connect(self):
         if not self.db.is_file():
             raise Refused('application access service is not initialized')
-        connection = sqlite3.connect(self.db, timeout=10)
-        connection.row_factory = sqlite3.Row
-        connection.execute('PRAGMA foreign_keys=ON')
+        lock = CONNECTION_LOCKS.setdefault(os.path.normcase(os.path.abspath(self.db)), threading.RLock())
+        if not lock.acquire(timeout=LOCK_WAIT):
+            raise sqlite3.OperationalError('access database busy in this process')
         try:
-            if not self.migrated:
-                for statement in MIGRATIONS:
-                    connection.execute(statement)
-                self.migrated = True
-            with connection:
-                yield connection
+            connection = sqlite3.connect(self.db, timeout=10)
+            connection.row_factory = sqlite3.Row
+            connection.execute('PRAGMA foreign_keys=ON')
+            try:
+                if not self.migrated:
+                    for statement in MIGRATIONS:
+                        connection.execute(statement)
+                    self.migrated = True
+                with connection:
+                    yield connection
+            finally:
+                connection.close()
         finally:
-            connection.close()
+            lock.release()
 
     def initialize(self, checkpoint=lambda _stage: None):
         self.publisher.config()
