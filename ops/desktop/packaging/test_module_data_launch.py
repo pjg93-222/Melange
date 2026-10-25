@@ -40,7 +40,7 @@ class LaunchTests(unittest.TestCase):
                        'releaseTag':'module-data-2026-10-21-fixture','datasets':[]}
         self.contents={}
         for index,(kind,(app,roles)) in enumerate(KINDS.items()):
-            if app!=app_id or kind in ('melange.official-payroll-observations.v1','mentat.public-fec-tables.v1'):continue
+            if app!=app_id or kind in ('melange.official-payroll-observations.v1','melange.official-payroll-pages.v1','mentat.public-fec-tables.v1'):continue
             objects=[]
             for role,(_relative,_limit) in roles.items():
                 raw=(role_bytes or {}).get((kind,role),('synthetic '+role).encode())

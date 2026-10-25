@@ -18,6 +18,7 @@ import github_release as release
 from desktop_admin import GATES, Store, Refused, b64, canonical, digest, file_hashes, verify_envelope
 
 CLIENT = Path(__file__).resolve().parents[1] / 'client'
+PIN = '0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30'
 RUN = subprocess.run  # captured before the fixture replaces subprocess.run with the Authenticode double
 
 
@@ -63,7 +64,7 @@ def prepared_inputs(tmp_path, monkeypatch):
     def native_signature(argv, **kwargs):
         assert argv[0] == 'powershell.exe'
         verified.append(kwargs['env']['DESKTOP_VERIFY_PACKAGE'])
-        return SimpleNamespace(stdout=json.dumps({'Status': 'Valid', 'Subject': 'CN=Synthetic test signer'}))
+        return SimpleNamespace(stdout=json.dumps({'Status': 'Valid', 'Subject': 'CN=Synthetic test signer', 'Thumbprint': PIN}))
     monkeypatch.setattr('desktop_admin.subprocess.run', native_signature)
     sources = {app: {'repository': release.REPOSITORIES[app], 'ref': 'main', 'commit': str(index)*40}
                for index, app in enumerate(sorted(release.APPS), 1)}
@@ -96,6 +97,7 @@ def test_each_app_is_signed_for_its_own_repository_with_only_public_material(tmp
         assert manifest['distribution'] == 'public-installations'
         assert manifest['repository'] == release.REPOSITORIES[app].lower()
         assert manifest['sourceRefs'] == spec['sourceRefs']
+        assert manifest['publisherThumbprints'] == [PIN]  # inside the Ed25519-signed payload
         package = directory / manifest['package']['name']
         assert package.read_bytes() == Path(spec['packages'][app]['package']).read_bytes()
         assert json.loads((directory / (app + '-trust.json')).read_text()) == {'transitions': []}
@@ -331,13 +333,23 @@ def test_named_app_without_its_verified_inputs_is_refused(tmp_path, prepared_inp
     write_receipt(two, 'terrier')
     def unsigned_terrier(argv, **kwargs):
         status = 'NotSigned' if kwargs['env']['DESKTOP_VERIFY_PACKAGE'].endswith('terrier-1.0.0-win32-x64.exe') else 'Valid'
-        return SimpleNamespace(stdout=json.dumps({'Status': status, 'Subject': 'CN=Synthetic test signer'}))
+        return SimpleNamespace(stdout=json.dumps({'Status': status, 'Subject': 'CN=Synthetic test signer', 'Thumbprint': PIN}))
     monkeypatch.setattr('desktop_admin.subprocess.run', unsigned_terrier)
     with pytest.raises(Refused, match='not signed by the pinned Windows publisher'):
         release.prepare(store, two, tmp_path / 'unsigned-terrier')
     assert store.signed == []
     assert not any((tmp_path / name).exists() for name in ('missing-receipt', 'unbound-package', 'unsigned-terrier'))
     assert not (store.root / 'github-prepared.sqlite3').exists() or not list(sqlite3.connect(store.root / 'github-prepared.sqlite3').execute('SELECT * FROM prepared'))
+
+
+def test_an_installer_signed_outside_the_thumbprint_allow_list_is_never_published(tmp_path, prepared_inputs, monkeypatch):
+    store, spec, _ = prepared_inputs
+    def other_signer(argv, **kwargs):
+        return SimpleNamespace(stdout=json.dumps({'Status': 'Valid', 'Subject': 'CN=Synthetic test signer', 'Thumbprint': '1' * 40}))
+    monkeypatch.setattr('desktop_admin.subprocess.run', other_signer)
+    with pytest.raises(Refused, match="publisher allow-list"):
+        release.prepare(store, spec, tmp_path / 'other-signer')
+    assert store.signed == [] and not (tmp_path / 'other-signer').exists()
 
 
 def test_unchanged_client_accepts_each_manifest_only_for_its_own_repository(tmp_path, prepared_inputs):

@@ -9,6 +9,14 @@ function fixture(handler){
  return {calls,transport:new GitHubModuleTransport('mentat',{request})};
 }
 const tag='module-data-2026-10-21-fixture',commit='a'.repeat(40);
+test('paged Melange channel has a separate fixed pointer and cannot alter legacy routing',async()=>{
+ const legacy=new GitHubModuleTransport('melange'),paged=new GitHubModuleTransport('melange',{paged:true});
+ const calls=[];paged.fetch=async url=>{calls.push(url);return Buffer.from('{}');};
+ await paged.pointer(commit);assert.equal(calls[0],'https://raw.githubusercontent.com/pjg93-222/melange/'+commit+'/docs/desktop-data/on-demand-current.json');
+ assert.equal(legacy.pointerPath,'docs/desktop-data/current.json');
+ assert.throws(()=>new GitHubModuleTransport('mentat',{paged:true}),/channel/);
+ await assert.rejects(legacy.fetch(calls[0],{limit:100}),error=>error.reason==='integrity');
+});
 test('fixed public API/raw routes use normal TLS and no credentials or cookies',async()=>{
  const f=fixture(({url,respond})=>respond(200,url.hostname==='api.github.com'?JSON.stringify({ref:'refs/heads/main',object:{type:'commit',sha:commit}}):'{}'));
  assert.equal(await f.transport.resolveMain(),commit);assert.equal((await f.transport.pointer(commit)).toString(),'{}');

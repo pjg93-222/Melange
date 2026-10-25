@@ -12,8 +12,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 SURFACES = ROOT / 'fec/surfaces'
 CLEAN = SURFACES / 'approved/clean'
-OUT = SURFACES / 'staffer_live/approved'
 sys.path.insert(0, str(ROOT / 'fec'))
+from surfaces.staffer_live_generation import active_dir  # noqa: E402
+OUT = active_dir(ROOT)   # the served generation (data/system/staffer_live_active.json), else the legacy staffer_live/approved
 
 
 def builder():

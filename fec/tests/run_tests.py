@@ -1050,6 +1050,8 @@ _LANE_PYTEST=(
     # degrade, gold-orphan policy.
     'test_pipeline_failure_diagnostics',
     'test_chain_transaction',
+    # 2026-10-23 reliability task 1: the served staffer-live workspace is a pointer-flipped generation inside the chain transaction.
+    'test_served_generation_txn',
     'test_chain_freshness_degrade',
     'test_gold_orphan_policy',
     # 2026-10-15 admissions spend controls (D-211): classifier quota stop and per-run call budget.

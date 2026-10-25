@@ -27,7 +27,7 @@ function refuseModuleDataSettings(configuration){
   if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
 }
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
     initializeModuleRuntime(this,()=>{const command=backendCommand(this.resources,this.definition.id);return {source:path.join(command.runtime,'sources'),bootstrap:path.join(command.runtime,'bootstrap')};});}
   async start(configuration,capability){
     refuseModuleDataSettings(configuration);
@@ -65,8 +65,12 @@ class Runtime {
     const ownerRoot=roots.legacyOwner?path.join(this.userData,'state','terrier-owner'):null;
     if(ownerRoot){refuseInstalledOverlap(ownerRoot,[this.resources,path.dirname(binary),...this.protectedPaths]);environment.DESKTOP_OWNER_SESSION_KEY=OWNER_SESSION_KEY;}
     if(appId==='mentat'&&this.rendererFactory){this.renderer=await this.rendererFactory();environment.MENTAT_DESKTOP_RENDER_URL=this.renderer.url;environment.MENTAT_DESKTOP_RENDER_TOKEN=this.renderer.token;}
-    check();const renderer=this.renderer;
-    if(this.confine){try{confineRoots(roots);this.confine(ownerRoot?[logs,ownerRoot]:[logs]);}catch(error){this.renderer=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});this.roots=null;this.origin=null;this.token=null;throw error;}}
+    // Shared collection (SCRAPE-BROKER.md): a per-launch loopback capability for this backend only. It carries neither the
+    // access bearer nor any provider key, and it closes with the backend.
+    try{if(['melange','mentat'].includes(appId)&&this.scrapeFactory){this.scrape=await this.scrapeFactory(configuration);environment.MELANGE_SCRAPE_BROKER_URL=this.scrape.url;environment.MELANGE_SCRAPE_BROKER_TOKEN=this.scrape.token;}}catch(error){if(this.renderer)await Promise.resolve().then(()=>this.renderer.close()).catch(()=>{});this.renderer=null;throw error;}
+    const renderer=this.renderer,scrape=this.scrape;
+    try{check();}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;if(this.scrape===scrape)this.scrape=null;throw error;}
+    if(this.confine){try{confineRoots(roots);this.confine(ownerRoot?[logs,ownerRoot]:[logs]);}catch(error){this.renderer=null;this.scrape=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.roots=null;this.origin=null;this.token=null;throw error;}}
     const log=fs.openSync(path.join(logs,'backend.log'),'a',0o600);
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
@@ -74,9 +78,9 @@ class Runtime {
     if(roots.githubDistrictData===true) args.push('--github-district-data');
     if(moduleInput)args.push('--desktop-module-input','--profile-root',this.userData);
     let child;
-    try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput?'pipe':'ignore',log,log]});}finally{fs.closeSync(log);}
+    try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput?'pipe':'ignore',log,log]});}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.renderer=null;this.scrape=null;throw error;}finally{fs.closeSync(log);}
     this.child=child;
-    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}});
+    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}if(scrape&&this.scrape===scrape){this.scrape=null;Promise.resolve(scrape.close()).catch(()=>{});}});
     try{
       if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
       const deadline=Date.now()+(moduleInput?moduleInput.startupTimeoutMs:120000);
@@ -91,7 +95,7 @@ class Runtime {
   }
   originalConfiguration(){return this.configuration===null?null:structuredClone(this.configuration);}
   async verifyModuleHealth(binding){const active=activeModule(this),child=this.child,generation=this.generation||0,origin=this.origin,token=this.token;if(!active||active.child!==child)return false;const value=await health(origin,token,this.definition.id);return this.child===child&&(this.generation||0)===generation&&this.origin===origin&&this.token===token&&activeModule(this)===active&&matchesModuleHealth(this,value,binding);}
-  async stop(){this.generation=(this.generation||0)+1;const child=this.child,renderer=this.renderer;clearActiveModule(this);this.child=null;this.renderer=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(!child)return;
+  async stop(){this.generation=(this.generation||0)+1;const child=this.child,renderer=this.renderer,scrape=this.scrape;clearActiveModule(this);this.child=null;this.renderer=null;this.scrape=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});if(!child)return;
     if(process.platform==='win32') await new Promise(resolve=>{const killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});killer.once('error',()=>{child.kill();resolve();});killer.once('exit',resolve);});
     else {try{process.kill(-child.pid,'SIGTERM');}catch{}}
     if(child.exitCode===null)await Promise.race([new Promise(r=>child.once('exit',r)),new Promise(r=>setTimeout(r,5000))]);

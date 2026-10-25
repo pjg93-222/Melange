@@ -13,6 +13,7 @@ from decimal import Decimal
 from collections import defaultdict
 from paths import ROOT
 from moneyball_core import dump_atomic
+import scrape_client
 
 # FEC_VOID_NET (Paul confirmed 2026-10-11, D-163): a negative 24K/24Z (a void or
 # refund on the PAYER's report) nets only against its own original check, so a
@@ -162,8 +163,9 @@ def main(argv=None):
     p.add_argument('--key-file',type=Path,default=Path.home()/'OneDrive/Desktop/API Keys/keys.json')
     a=p.parse_args(argv);root=a.root.resolve();now=datetime.now(timezone.utc)
     cycle=now.year+(now.year%2)
-    key=os.environ.get('FEC_API_KEY')
-    if not key: key=json.loads(a.key_file.read_text(encoding='utf-8'))['data_gov']['keys'][0]
+    shared_broker=scrape_client.available()
+    key=None if shared_broker else os.environ.get('FEC_API_KEY')
+    if not shared_broker and not key: key=json.loads(a.key_file.read_text(encoding='utf-8'))['data_gov']['keys'][0]
     run=root/'data/money/fec_generations'/now.strftime('%Y%m%dT%H%M%S%fZ');run.mkdir(parents=True)
     sources=[];requests=0;cache_hits=0
     def fail(exc):
@@ -193,6 +195,17 @@ def main(argv=None):
             except (ValueError,TypeError,AttributeError,OSError): cache_used=False  # corrupt/odd cache receipt = miss
             if cache_used:
                 raw=cached.read_bytes();cache_hits+=1
+            elif shared_broker:
+                # Honor a broker or upstream 429/503 Retry-After up to 300 s, six attempts; never a client key.
+                for attempt in range(6):
+                    try:
+                        raw,status,headers=scrape_client.fetch_raw_url(url)
+                        if status!=200:
+                            raise scrape_client.ScrapeBrokerError(status,scrape_client.parse_retry_after(headers.get('retry-after','')))
+                        break
+                    except scrape_client.ScrapeBrokerError as exc:
+                        if attempt==5 or exc.status not in (429,503) or not exc.retry_after or exc.retry_after>300: raise
+                        print('Shared broker wait:',exc.retry_after,'seconds',flush=True);time.sleep(exc.retry_after)
             else:
                 request=urllib.request.Request(url,headers={'X-Api-Key':key,'User-Agent':'Melange source refresh/1.0'})
                 for attempt in range(6):
@@ -271,8 +284,16 @@ def main(argv=None):
         dump_atomic(receipt,str(run/'receipt.json'))
         if not a.no_install: dump_atomic(receipt,str(root/'data/money/fec_refresh_current.json'))
         print(json.dumps({k:v for k,v in receipt.items() if k not in ('sources','dependencies')}))
-        return 0
     except Exception as exc: return fail(exc)
+    # Collection is complete and installed. Publication is optional and separate:
+    # its failure never rewrites the refresh receipt, it only changes the exit code.
+    if not a.no_install:
+        try:
+            import generation_publish_hook
+            generation_publish_hook.after_collection('fec-money',root)
+        except Exception as exc:
+            print('FEC refresh installed; page publication failed:',type(exc).__name__,exc,file=sys.stderr);return 3
+    return 0
 
 
 if __name__=='__main__': raise SystemExit(main())

@@ -12,6 +12,15 @@ from module_public_input_installers import PUBLIC_KINDS, PUBLIC_IDS, PRIVATE_IDS
 
 
 class CompiledInventoryTests(unittest.TestCase):
+    def test_paged_melange_contract_is_explicit_and_preserves_legacy_selection(self):
+        legacy=application_contract('melange','melange.public-data.v1')
+        paged=application_contract('melange','melange.public-data.pages.v1')
+        self.assertEqual(legacy.required_kinds,('melange.official-payroll-observations.v1',))
+        self.assertEqual(paged.required_kinds,('melange.official-payroll-pages.v1',))
+        self.assertEqual(paged.program_fingerprint,legacy.program_fingerprint)
+        self.assertEqual(paged.private_boundaries,legacy.private_boundaries)
+        self.assertIsNone(application_contract('mentat','melange.public-data.pages.v1'))
+
     def test_fixed_declarations_have_exact_contracts_factories_coverage_and_fingerprints(self):
         for app in ('melange','mentat'):
             contract=application_contract(app,app+'.public-data.v1')

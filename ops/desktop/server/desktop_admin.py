@@ -41,6 +41,10 @@ TARGETS = {("win32", "x64"), ("darwin", "arm64"), ("darwin", "x64")}
 VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,180}$")
 GATES = {"tests", "security", "dependencies", "redistribution", "dataAllowlist"}
+# Windows installer publisher allow-list, carried inside every Ed25519-signed manifest as publisherThumbprints and
+# checked by the desktop client against the installer signer (ops/desktop/client/native-signature.cjs). Rotation:
+# add the new certificate thumbprint here, ship releases signed by either, then remove the old one.
+PUBLISHER_THUMBPRINTS = ("0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30",)
 PRIVATE_NETWORKS = tuple(ipaddress.ip_network(s) for s in
                          ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "::1/128"))
 
@@ -227,6 +231,11 @@ def validate_manifest(manifest):
         raise Refused("invalid package hash")
     if len(unb64(package.get("sha512", ""))) != 64:
         raise Refused("invalid package checksum")
+    thumbprints = manifest.get("publisherThumbprints")
+    # Optional so legacy signed manifests stay readable; clients refuse to install a package without it.
+    if thumbprints is not None and (type(thumbprints) is not list or not 1 <= len(thumbprints) <= 8 or
+                                    not all(type(value) is str and re.fullmatch(r"[0-9A-F]{40}", value) for value in thumbprints)):
+        raise Refused("invalid publisher thumbprints")
 
 
 class Store:
@@ -476,12 +485,15 @@ class Store:
                 raise Refused("pinned Windows publisher identity is not configured")
             # Pass paths through environment, never interpolate them into shell source.
             env = dict(os.environ, DESKTOP_VERIFY_PACKAGE=str(package))
-            command = "$s=Get-AuthenticodeSignature -LiteralPath $env:DESKTOP_VERIFY_PACKAGE; @{Status=[string]$s.Status;Subject=$s.SignerCertificate.Subject}|ConvertTo-Json -Compress"
+            command = "$s=Get-AuthenticodeSignature -LiteralPath $env:DESKTOP_VERIFY_PACKAGE; @{Status=[string]$s.Status;Subject=$s.SignerCertificate.Subject;Thumbprint=$s.SignerCertificate.Thumbprint}|ConvertTo-Json -Compress"
             result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command], env=env,
                                     capture_output=True, text=True, timeout=60, check=True)
             signature = json.loads(result.stdout)
             if signature.get("Status") != "Valid" or signature.get("Subject") != config["windowsPublisher"]:
                 raise Refused("package is not signed by the pinned Windows publisher")
+            # Every client refuses an installer whose signer is not in the signed allow-list; refuse to publish one.
+            if str(signature.get("Thumbprint") or "").upper() not in (manifest.get("publisherThumbprints") or ()):
+                raise Refused("package signer thumbprint is not in the manifest's publisher allow-list")
         else:
             public = config.get("macReceiptPublicKey")
             attestation = receipt.get("macAttestation")
@@ -504,6 +516,7 @@ class Store:
             raise Refused("update payload must be a Windows installer or Mac application ZIP")
         manifest = {"schemaVersion": 1, "appId": app, "version": version, "sequence": sequence, "platform": platform, "arch": arch,
                     "issuedAt": dt.datetime.now(dt.timezone.utc).isoformat(), "minimumUpdaterVersion": "1.0.0", "dataSchemaVersion": 1,
+                    **({"publisherThumbprints": list(PUBLISHER_THUMBPRINTS)} if platform == "win32" else {}),
                     "package": {"name": source.name, **file_hashes(source), "path": f"/v1/packages/{app}/{sequence}/{source.name}"}}
         validate_manifest(manifest)
         recipients = sorted(set(recipients))
@@ -553,7 +566,7 @@ class Store:
         return context
 
 
-def handler_for(store, require_invite=False, packs=None):
+def handler_for(store, require_invite=False, packs=None, scrape_broker=None):
     class Handler(BaseHTTPRequestHandler):
         server_version = "DesktopUpdates/1"
         publisher_public_origin = store.public_origin
@@ -676,7 +689,10 @@ def handler_for(store, require_invite=False, packs=None):
                 self.response(500, {"error": "INTERNAL_ERROR"})
     from access_store import AccessStore
     from access_http import handler_for as access_handler_for
-    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler, packs)
+    if scrape_broker is None:
+        from scrape_broker import from_environment
+        scrape_broker = from_environment(store.root)
+    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler, packs, scrape_broker)
 
 
 class BoundedServer(ThreadingHTTPServer):

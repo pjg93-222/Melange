@@ -195,7 +195,8 @@ class Shell:
         path = Path(env['DESKTOP_VERIFY_PACKAGE'])
         self.checked.append(path)
         signed = path.read_bytes().endswith(b'\0signature')
-        return SimpleNamespace(stdout=json.dumps({'Status': 'Valid' if signed else 'NotSigned', 'Subject': PUBLISHER if signed else None}))
+        return SimpleNamespace(stdout=json.dumps({'Status': 'Valid' if signed else 'NotSigned', 'Subject': PUBLISHER if signed else None,
+                                                'Thumbprint': rfm.THUMBPRINT if signed else None}))
 
 
 @pytest.fixture(scope='module')

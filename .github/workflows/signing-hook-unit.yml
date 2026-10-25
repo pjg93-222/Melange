@@ -10,7 +10,7 @@ on:
       - ops/desktop/client/tests/release-signing.test.cjs
       - ops/desktop/client/builder.cjs
   push:
-    branches: [main]
+    branches: [main, release/1.0.17]
     paths:
       - .github/workflows/signing-hook-unit.yml
       - ops/desktop/client/release-signing.cjs
@@ -27,6 +27,7 @@ concurrency:
 
 jobs:
   focused-unit:
+    if: github.repository == 'pjg93-222/Melange'
     runs-on: windows-2022
     timeout-minutes: 10
     steps:
