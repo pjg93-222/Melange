@@ -854,15 +854,10 @@ def main(argv=None):
                     return True
                 instance.start(reopen_dashboard)
                 print('Local application approval dashboard opened. No approval keys are logged.', flush=True)
-                # Expired sessions must not leave a permanent listener.
-                lifetime = threading.Timer(8*3600+60, server.shutdown)
-                lifetime.daemon = True
-                lifetime.start()
                 try:
                     if not args.background: open_dashboard_window(url)
-                    server.serve_forever()
+                    server.serve_forever()   # ends itself admin_dashboard.LIFETIME after the newest open: expired sessions must not leave a permanent listener
                 finally:
-                    lifetime.cancel()
                     server.server_close()
             finally:
                 instance.close()
