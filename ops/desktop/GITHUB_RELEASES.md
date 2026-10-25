@@ -243,9 +243,33 @@ below, as one local command. It stops at the first failed step and names that st
   expires within 30 days (Terrier's three: D-292, until 2026-11-23). The one reviewed Mentat finding still goes through
   `desktop_source_review.py`. Then the runtime build (native runtimes complete, licence metadata for every
   dependency), `npm run build` and the packaged backend smoke. Per client
-  repository: `npm ci`/`npm test`/`npm audit` and pytest `ops/desktop`. Every
-  gate's evidence names its command, exit code, log and log SHA-256. The runtime
-  build, pytest and the smoke run in the build venvs.
+  repository, the tests gate runs every test module under `ops/desktop`, each
+  with what it needs: `npm ci` first (the client tests and `test_district_packs`
+  load `node_modules`; pytest never recurses into it), then pytest inside a git
+  work tree as in a checkout (`test_district_packs` checks that its own file is
+  refused there; `git init` makes the export one for the run, and its `.git` is
+  removed afterwards). A module that reads another app's source tests that
+  app's integration and runs when that app is released: `TERRIER_TEST_SOURCE`
+  is then Geo's export (its `frontend/dist` built) and `MENTAT_TEST_ENGINE`
+  Mentat's `mentat/app/contribution_data.py`. In a release without that app the
+  tests evidence lists those modules as not run, and the shared run `--ignore`s
+  them; every other module runs in every release. The modules that import
+  Melange's own `fec` from their repository root (`APP_TEST_MODULES`, checked
+  against a scan by `test_release_from_main`) run in Melange's shared run; in
+  another repository they run, with Melange released, in Melange's test venv
+  with Melange's export on pytest's `pythonpath`, and are otherwise listed as
+  not run and `--ignore`d. pytest runs in test venvs
+  only, never a build venv or a runtime: `release-<v>/venv/<repo>-tests` from the repository's
+  `<repo>-runtime.constraints.txt` (plus `mentat-test.constraints.txt` in Mentat),
+  installed like the build venvs. The modules that read `TERRIER_TEST_SOURCE`
+  set up Django once per process, so each runs alone in `venv/terrier-tests`:
+  Melange's `terrier-runtime.constraints.txt` plus pytest's hashed entries from
+  `melange-runtime.constraints.txt` (`venv/pytest.constraints.txt`). The shipped
+  Terrier runtime cannot run them (the runtime build drops every `test`
+  directory, `django/test` included). The shared run `--ignore`s exactly those
+  modules. Then `npm test` and `npm audit`. Every gate's evidence names its
+  command, exit code, log and log SHA-256. The runtime build and the smoke run
+  in the build venvs.
 - **Signing.** Signing happens inside `npm run build`, by the merged hook
   `ops/desktop/client/release-signing.cjs` of each app's client repository
   (`packaging/INNER-SIGNING.md`), with the certificate held in this PC's TPM-backed

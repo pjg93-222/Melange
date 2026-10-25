@@ -3,6 +3,8 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
+import shlex
 import shutil
 import sqlite3
 import subprocess
@@ -26,6 +28,12 @@ LOCK = 'pkg==1.0 --hash=sha256:' + '0' * 64 + '\n'
 HOOK = "'use strict';\n"
 ORIGINAL_EXCEPTIONS = '# the private exceptions\n[[exception]]\nid = "EX-001"\n'
 TERRIER_EXCEPTIONS = '[[exception]]\nid = "TERRIER-001"\n'
+# pytest's closure beyond packaging, hash-locked in Melange's runtime file (the tests gate copies it for Terrier's test venv).
+PYTEST_LOCK = ''.join(f'{name}==1.0 \\\n    --hash=sha256:{digit * 64}\n    # {name}-1.0-py3-none-any.whl\n'
+                      for name, digit in zip(rfm.PYTEST, '12345'))
+# A module that needs Geo's source (and Django) runs alone in Terrier's test venv; every other module runs together.
+TERRIER_TEST = "import os\nSOURCE = os.environ['TERRIER_TEST_SOURCE']\n"
+MENTAT_TEST = "import os\nENGINE = os.environ['MENTAT_TEST_ENGINE']\n"  # needs Mentat's engine: runs in releases with Mentat
 LOCKS = {'melange': 'src/melange/ops/desktop/packaging/melange-runtime.constraints.txt',
          'mentat': 'src/mentat/ops/desktop/packaging/mentat-runtime.constraints.txt', 'terrier': 'src/melange/ops/desktop/packaging/terrier-runtime.constraints.txt'}
 
@@ -51,7 +59,8 @@ class Fake:
     are scripted."""
 
     def __init__(self):
-        self.calls, self.cwds = [], []
+        self.calls, self.cwds, self.envs = [], [], []
+        self.worktree = {}  # index of each pytest call -> whether its cwd was a git work tree then
         self.signed = set()
         self.builds = []  # environment of each `npm run build`
         self.policy = 'RemoteSigned'  # effective execution policy Get-ExecutionPolicy reports
@@ -63,12 +72,16 @@ class Fake:
         self.view_error = None  # stderr of a failing `gh release view` that is not "release not found"
         self.gates = []  # (security_gate.py command, text of its --exceptions file or None)
         self.npm_fail = lambda cmd, cwd: False  # npm commands to fail
+        self.pytest_fail = lambda cmd: False  # pytest runs to fail
         self.tips = {}  # repository -> main sha `gh api repos/R/commits/main` answers; `release` fills in origin's own
 
     def __call__(self, cmd, cwd=None, env=None):
         self.calls.append(list(cmd))
         self.cwds.append(cwd)
+        self.envs.append(env)
         name = tool(cmd)
+        if 'pytest' in cmd:
+            self.worktree[len(self.calls) - 1] = (Path(cwd) / '.git').is_dir()
         if name in ('git', 'git.exe'):
             return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
         if 'Get-ExecutionPolicy' in cmd:
@@ -139,7 +152,7 @@ class Fake:
 
     def python(self, cmd):
         arg = lambda name: cmd[cmd.index(name) + 1]
-        script = next((Path(part).name for part in cmd if part.endswith('.py')), None)
+        script = None if '-m' in cmd else next((Path(part).name for part in cmd if part.endswith('.py')), None)
         if script is None and '-m' in cmd:
             module = arg('-m')
             if module == 'venv':
@@ -147,6 +160,8 @@ class Fake:
                 (Path(cmd[-1]) / 'pyvenv.cfg').write_text('include-system-site-packages = false\n', encoding='utf-8')
             if module == 'pip' and 'freeze' in cmd:
                 return rfm.Ran(0, 'pkg==1.0\n', '')
+            if module == 'pytest' and self.pytest_fail(cmd):
+                return rfm.Ran(1, '1 failed', '')
             assert module in ('venv', 'pip', 'pytest'), cmd
         elif script == 'build_runtime.py':
             app = arg('--app')
@@ -204,13 +219,17 @@ def template(tmp_path_factory):
     """Bare origins at pjg93-222/<Name>.git with main, and checkouts cloned from them. Built once: git is slow on Windows."""
     root = tmp_path_factory.mktemp('template')
     package = json.dumps({'name': 'client', 'version': VERSION})
-    files = {'melange': {'ops/desktop/client/package.json': package, 'ops/desktop/packaging/melange-runtime.constraints.txt': LOCK,
+    files = {'melange': {'ops/desktop/client/package.json': package, 'ops/desktop/packaging/melange-runtime.constraints.txt': LOCK + PYTEST_LOCK,
+                         'ops/desktop/packaging/test_terrier_fixture.py': TERRIER_TEST,
+                         'ops/desktop/packaging/test_mentat_fixture.py': MENTAT_TEST,
                          'ops/desktop/packaging/terrier-runtime.constraints.txt': LOCK, rfm.SIGNING_HOOK: HOOK,
                          'ops/desktop/packaging/terrier-security-exceptions.toml': TERRIER_EXCEPTIONS,
                          'ops/desktop/packaging/runtime-manifest.json': json.dumps({'apps': {'terrier': {
                              'requirements': 'requirements.txt', 'sourceDirectories': ['server', 'frontend/dist']}}})},
              'mentat': {'README.md': 'Mentat', 'ops/desktop/client/package.json': package,
-                        'ops/desktop/packaging/mentat-runtime.constraints.txt': LOCK, rfm.SIGNING_HOOK: HOOK},
+                        'ops/desktop/packaging/mentat-runtime.constraints.txt': LOCK, rfm.SIGNING_HOOK: HOOK,
+                        'ops/desktop/packaging/mentat-test.constraints.txt': PYTEST_LOCK, 'mentat/app/contribution_data.py': '',
+                        'ops/desktop/packaging/test_terrier_fixture.py': TERRIER_TEST},
              'terrier': {'README.md': 'Geo', 'requirements.build.lock': LOCK, 'requirements.txt': 'Django>=5.2,<5.3\n',
                          'frontend/package.json': '{"name": "terrier"}'}}  # Geo's Linux lock: present, hash-locked, and must never be used
     for app, name in NAMES.items():
@@ -427,7 +446,7 @@ def test_each_app_is_built_with_its_own_repositorys_client(world, capsys):
     npm = [(call[1:3], cwd) for call, cwd in zip(fake.calls, fake.cwds) if tool(call) == 'npm']
     for repo in ('melange', 'mentat'):  # tested and audited once per client repository
         assert [verbs for verbs, cwd in npm if cwd == client(repo) and verbs != ['run', 'build']] == [['ci', '--no-fund'], ['test'], ['audit', '--omit=dev']]
-        assert [cwd for call, cwd in zip(fake.calls, fake.cwds) if 'pytest' in call].count(str(src / repo)) == 1
+        assert [cwd for call, cwd in zip(fake.calls, fake.cwds) if 'pytest' in call].count(str(src / repo)) == 2
     builds = [cwd for call, cwd in zip(fake.calls, fake.cwds) if call[1:3] == ['run', 'build'] and cwd != str(src / 'terrier' / 'frontend')]
     assert builds == [client('melange'), client('mentat'), client('melange')]  # melange, mentat, terrier
     for app, repo in rfm.TOOLS.items():
@@ -802,6 +821,121 @@ def test_terrier_alone_needs_only_melange_and_geo(world, capsys):
     assert [env['DESKTOP_APP_ID'] for env in fake.builds] == ['terrier']
 
 
+def test_tests_gate_supplies_each_tests_prerequisites(world, capsys):
+    code, fake = release(world)
+    assert code == 0, capsys.readouterr().err
+    release_dir = world['out'] / f'release-{VERSION}'
+    src, venv = release_dir / 'src', lambda name: str(release_dir / 'venv' / name / 'Scripts' / 'python.exe')
+    module = 'ops/desktop/packaging/test_terrier_fixture.py'
+    pytest = ['-E', '-s', '-B', '-m', 'pytest', '-p', 'no:cacheprovider', '-q']
+    for repo in ('melange', 'mentat'):
+        runs = [(i, call) for i, (call, cwd) in enumerate(zip(fake.calls, fake.cwds)) if 'pytest' in call and cwd == str(src / repo)]
+        # The shared run ignores exactly the module the Terrier venv then runs alone: nothing is left out.
+        assert [call for _, call in runs] == [[venv(f'{repo}-tests'), *pytest, 'ops/desktop', f'--ignore={module}'],
+                                              [venv('terrier-tests'), *pytest, module]]
+        ci = next(i for i, (call, cwd) in enumerate(zip(fake.calls, fake.cwds))
+                  if call[1:3] == ['ci', '--no-fund'] and cwd == str(src / repo / 'ops' / 'desktop' / 'client'))
+        assert ci < runs[0][0]  # node_modules before pytest (test_district_packs runs the client's verifier)
+        for i, _ in runs:
+            assert fake.worktree[i]  # inside a git work tree, as a checkout is
+            # Every run, in either tool repository, is told where each released app's real source is (module-data tests).
+            assert {key: fake.envs[i][key] for key in ('MODULE_DATA_MELANGE_SOURCE', 'MODULE_DATA_MENTAT_SOURCE')} == {
+                'MODULE_DATA_MELANGE_SOURCE': str(src / 'melange'), 'MODULE_DATA_MENTAT_SOURCE': str(src / 'mentat')}
+            assert {key: fake.envs[i][key] for key in ('TERRIER_TEST_SOURCE', 'MENTAT_TEST_ENGINE', 'DESKTOP_TEST_PYTHON')} == {
+                'TERRIER_TEST_SOURCE': str(src / 'terrier'), 'DESKTOP_TEST_PYTHON': venv(f'{repo}-tests'),
+                'MENTAT_TEST_ENGINE': str(src / 'mentat' / 'mentat' / 'app' / 'contribution_data.py')}
+        assert not (src / repo / '.git').exists()  # removed after the tests: the build packs the pristine export
+    install = lambda name: next(call for call in fake.calls if call[0] == venv(name) and call[2:4] == ['pip', 'install'])
+    locks = lambda name: [part for before, part in zip(install(name), install(name)[1:]) if before == '-r']
+    packaging = lambda repo: src / repo / 'ops' / 'desktop' / 'packaging'
+    pinned = release_dir / 'venv' / 'pytest.constraints.txt'
+    assert locks('melange-tests') == [str(packaging('melange') / 'melange-runtime.constraints.txt')]
+    assert locks('mentat-tests') == [str(packaging('mentat') / name) for name in ('mentat-runtime.constraints.txt', 'mentat-test.constraints.txt')]
+    assert locks('terrier-tests') == [str(packaging('melange') / 'terrier-runtime.constraints.txt'), str(pinned)]
+    assert all('--require-hashes' in install(name) for name in ('melange-tests', 'mentat-tests', 'terrier-tests'))
+    assert [Path(call[-1]).name for call in fake.calls if call[1:4] == ['-I', '-m', 'venv']].count('terrier-tests') == 1
+    assert pinned.read_text(encoding='utf-8').split('\n', 1)[1] == PYTEST_LOCK  # the hashed entries, nothing else
+    evidence = json.loads((world['out'] / f'receipts-{VERSION}' / 'terrier.json').read_text(encoding='utf-8'))['gates']['tests']['evidence']
+    assert 'pytest-test_terrier_fixture-melange.log' in evidence and f'test venv {release_dir / "venv" / "terrier-tests"}' in evidence
+
+
+@pytest.mark.parametrize('apps, unreleased', [('terrier', 'ops/desktop/packaging/test_mentat_fixture.py'),
+                                              ('mentat', 'ops/desktop/packaging/test_terrier_fixture.py')])
+def test_modules_needing_an_unreleased_apps_source_are_listed_not_run(world, capsys, apps, unreleased):
+    code, fake = release(world, '--apps', apps)
+    assert code == 0, capsys.readouterr().err
+    release_dir = world['out'] / f'release-{VERSION}'
+    tool = rfm.TOOLS[apps]
+    runs = [(call, env) for call, env in zip(fake.calls, fake.envs) if 'pytest' in call]
+    shared = [call for call, _ in runs if 'ops/desktop' in call]
+    assert len(shared) == 1 and f'--ignore={unreleased}' in shared[0] and unreleased not in [call[-1] for call, _ in runs]
+    other = 'MENTAT_TEST_ENGINE' if apps == 'terrier' else 'TERRIER_TEST_SOURCE'
+    assert all(other not in env for _, env in runs)  # no source of an app that is not released
+    assert all('MODULE_DATA_MELANGE_SOURCE' not in env for _, env in runs)  # neither is Melange's in this release
+    assert all(('MODULE_DATA_MENTAT_SOURCE' in env) == (apps == 'mentat') for _, env in runs)
+    if apps == 'terrier':  # the released app's own modules still run, alone, with its export
+        assert runs[1][0][-1] == 'ops/desktop/packaging/test_terrier_fixture.py'
+        assert runs[1][1]['TERRIER_TEST_SOURCE'] == str(release_dir / 'src' / 'terrier')
+    else:
+        assert len(runs) == 1 and not (release_dir / 'venv' / 'terrier-tests').exists()
+    evidence = json.loads((world['out'] / f'receipts-{VERSION}' / f'{apps}.json').read_text(encoding='utf-8'))['gates']['tests']['evidence']
+    assert evidence.startswith(f'not run, as their app is not in this release: {unreleased}; '), evidence
+    assert f'pytest-ops-desktop-{tool}.log' in evidence
+
+
+@pytest.mark.parametrize('apps', [None, 'mentat'])
+def test_modules_needing_melanges_app_run_with_its_export_or_are_listed_not_run(world, capsys, apps):
+    module = rfm.APP_TEST_MODULES['melange'][1]
+    for repo in ('melange', 'mentat'):  # the repositories share ops/desktop/packaging; only Melange's holds fec
+        push(world, repo, module, 'from fec.surfaces import staffer_live_server\n')
+    code, fake = release(world, *(('--apps', apps) if apps else ()))
+    assert code == 0, capsys.readouterr().err
+    release_dir = world['out'] / f'release-{VERSION}'
+    src, venv = release_dir / 'src', lambda name: str(release_dir / 'venv' / name / 'Scripts' / 'python.exe')
+    runs = lambda repo: [call for call, cwd in zip(fake.calls, fake.cwds) if 'pytest' in call and cwd == str(src / repo)]
+    pytest = ['-E', '-s', '-B', '-m', 'pytest', '-p', 'no:cacheprovider', '-q']
+    assert 'ops/desktop' in runs('mentat')[0] and f'--ignore={module}' in runs('mentat')[0]
+    evidence = json.loads((world['out'] / f'receipts-{VERSION}' / 'mentat.json').read_text(encoding='utf-8'))['gates']['tests']['evidence']
+    sources = [env for call, env in zip(fake.calls, fake.envs) if 'pytest' in call]
+    assert all(('MODULE_DATA_MELANGE_SOURCE' in env) == (not apps) for env in sources)  # Melange's source only when it is released
+    assert ('MODULE_DATA_MELANGE_SOURCE=' + str(src / 'melange') in evidence) == (not apps)  # and the receipt lists what was supplied
+    assert 'MODULE_DATA_MENTAT_SOURCE=' + str(src / 'mentat') in evidence
+    if apps:
+        assert module not in [call[-1] for call in runs('mentat')]
+        assert evidence.split('; ')[0] == 'not run, as their app is not in this release: ' + ', '.join(
+            sorted(['ops/desktop/packaging/test_terrier_fixture.py', module])), evidence
+    else:
+        assert [venv('melange-tests'), *pytest, '-o', 'pythonpath=' + shlex.quote((src / 'melange').as_posix()), module] in runs('mentat')
+        assert 'pytest-melange-app-mentat.log' in evidence and module not in evidence.split('; ')[0]
+        assert f'--ignore={module}' not in runs('melange')[0] and len(runs('melange')) == 2  # its own repository: the shared run
+
+
+def test_melange_app_modules_are_exactly_those_importing_its_real_fec():
+    """Every ops/desktop test module here that imports fec is listed, unless it writes its own fec package fixture."""
+    root = Path(__file__).resolve().parents[3]
+    imports = re.compile(r'^\s*(?:from|import)\s+fec\b', re.M)
+    found = {path.relative_to(root).as_posix() for path in (root / 'ops' / 'desktop').rglob('test_*.py')
+             if 'node_modules' not in path.parts and imports.search(text := path.read_text(encoding='utf-8')) and "'fec/__init__.py'" not in text}
+    assert found == set(rfm.APP_TEST_MODULES['melange'])
+
+
+def test_a_failing_terrier_module_stops_the_tests_gate(world, capsys):
+    fake = Fake()
+    fake.pytest_fail = lambda cmd: cmd[-1] == 'ops/desktop/packaging/test_terrier_fixture.py'
+    code, fake = release(world, '--apps', 'terrier', fake=fake)
+    error = capsys.readouterr().err
+    assert code == 1 and "step 'tests'" in error and 'pytest-test_terrier_fixture-melange.log' in error, error
+    assert not (world['out'] / f'release-{VERSION}' / 'src' / 'melange' / '.git').exists()
+    assert not any(call[1:3] == ['run', 'build'] and 'client' in str(cwd) for call, cwd in zip(fake.calls, fake.cwds))
+
+
+def test_a_melange_lock_without_pytest_is_refused_at_tests(world, capsys):
+    push(world, 'melange', 'ops/desktop/packaging/melange-runtime.constraints.txt', LOCK)
+    code, _ = release(world, '--apps', 'terrier')
+    error = capsys.readouterr().err
+    assert code == 1 and "step 'tests'" in error and 'has no hash-locked colorama, iniconfig, pluggy, pygments, pytest' in error, error
+
+
 def runtime(world, python=True, provenance=True, commit=None, reviewed=None):
     """A previously built Terrier runtime, built from Geo main (or the given commits)."""
     folder = world['tmp'] / 'previous' / 'terrier'
@@ -826,11 +960,13 @@ def test_injected_runtime_replaces_only_the_sources(world, capsys):
     release_dir = world['out'] / f'release-{VERSION}'
     python = release_dir / 'runtime' / 'terrier' / 'python' / 'python.exe'
     assert python.read_bytes() == b'MZ python'
-    assert not any('venv' in call or 'pip' in call for call in fake.calls)  # no venv, no install
+    venvs = [Path(call[-1]).name for call in fake.calls if call[1:4] == ['-I', '-m', 'venv']]
+    assert venvs == ['melange-tests', 'terrier-tests']  # no build venv and no install into the runtime: test venvs only
     runtime_calls = [call for call in fake.calls if any(part.endswith('build_runtime.py') for part in call)]
     assert [('--stage-only' in call, '--sync-sources-only' in call) for call in runtime_calls] == [(True, False), (False, True)]
     assert all(call[0] == str(python) for call in runtime_calls)
-    assert [call for call in fake.calls if 'pytest' in call][0][0] == sys.executable  # Terrier's lock has no pytest
+    assert [call[0] for call in fake.calls if 'pytest' in call] == [  # never the runtime's python, which has no pytest
+        str(release_dir / 'venv' / name / 'Scripts' / 'python.exe') for name in ('melange-tests', 'terrier-tests')]
     receipt = json.loads((world['out'] / f'receipts-{VERSION}' / 'terrier.json').read_text(encoding='utf-8'))
     digest = lambda name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
     tests = receipt['gates']['tests']['evidence']

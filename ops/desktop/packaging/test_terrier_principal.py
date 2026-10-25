@@ -57,6 +57,13 @@ class PrincipalTests(boundary_tests.DesktopAccessTests):
         from server.research.desktop_principal import prepare_principal
         self.assertIsNone(prepare_principal(self.principal,self.root/'state'))
 
+    def test_native_smoke_principal_is_a_fresh_recipient_the_boundary_invites(self):
+        from smoke_backend import TERRIER_DISTRICT, terrier_principal
+        from server.research.desktop_principal import parse_principal
+        self.principal = parse_principal(terrier_principal(TERRIER_DISTRICT), TERRIER_DISTRICT)
+        self.assertEqual((self.principal.mode, self.principal.local_user_id), ('recipient', None))
+        self.assertTrue(self.fresh().startswith('/#invite='))
+
     def test_unrelated_invitation_account_and_existing_session_are_refused(self):
         from django.contrib.auth.models import User
         from server.research.views import create_invitation

@@ -19,6 +19,13 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def melange_source():
+    """The root holding Melange's real fec/: MODULE_DATA_MELANGE_SOURCE when set, else this repository when it is Melange's."""
+    chosen=os.environ.get('MODULE_DATA_MELANGE_SOURCE')
+    root=Path(chosen) if chosen else Path(__file__).resolve().parents[3]
+    return root if (root/'fec/surfaces/staffer_graph_snapshot.py').is_file() else None
+
+
 class LaunchTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
@@ -291,7 +298,9 @@ class LaunchTests(unittest.TestCase):
 
     def test_actual_graph_and_payroll_configurers_use_synthetic_sources_only(self):
         from module_data_test_helpers import graph_fixture,payroll_fixture
-        self.make('melange');source=Path(__file__).resolve().parents[3];contents={}
+        source=melange_source()
+        if source is None:self.skipTest('Set MODULE_DATA_MELANGE_SOURCE to a Melange source root holding fec/surfaces')
+        self.make('melange');contents={}
         for builder in (graph_fixture,payroll_fixture):
             folder=self.base/builder.__name__;folder.mkdir();fixture=builder(folder)
             for role,file in fixture.request['files'].items():contents[(fixture.kind,role)]=Path(file).read_bytes()
