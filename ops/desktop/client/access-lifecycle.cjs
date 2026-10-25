@@ -46,10 +46,33 @@ class AccessLifecycle{
   await this.showBoundary();
  }
  async resume(approved,{freshPassword=false,expectedGeneration=this.generation}={}){
+  if(this.osLocked)throw new Error('Unlock Windows before opening the workspace');
   if(expectedGeneration!==this.generation)throw new Error('Access changed while sign-in was pending');
   if(this.requiresFreshPassword&&!freshPassword)throw new Error('Fresh Terrier password authentication required');
   if(this.runtime.child&&this.runtime.authorization&&authorizationIdentity(approved)!==authorizationIdentity(this.runtime.authorization))throw new Error('Close the workspace before changing its approved account');
   this.runtime.requestsAllowed=true;this.suspended=false;this.requiresFreshPassword=false;
+ }
+ async refreshPasswordlessOwner({expectedGeneration=this.generation}={}){
+  if(this.runtime.definition.id!=='terrier'||!this.suspended)return false;
+  const authorization=this.runtime.authorization;
+  const owner=value=>value?.owner?.mode==='existing-owner'&&value?.principal?.mode==='existing-owner';
+  if(!owner(authorization))return false; // Recipients still need the existing password flow.
+  try{
+   const identity=authorizationIdentity(authorization),child=this.runtime.child,origin=this.runtime.origin,token=this.runtime.token;
+   const current=()=>this.runtime.definition.id==='terrier'&&!this.osLocked&&this.suspended&&this.runtime.requestsAllowed===false
+    &&expectedGeneration===this.generation&&Boolean(child)&&this.runtime.child===child
+    &&Boolean(origin)&&this.runtime.origin===origin&&Boolean(token)&&this.runtime.token===token
+    &&this.runtime.authorization===authorization&&owner(this.runtime.authorization)&&authorizationIdentity(this.runtime.authorization)===identity;
+   const approved=value=>current()&&owner(value)&&authorizationIdentity(value)===identity;
+   if(!current())throw new Error();
+   if(!approved(await this.gate.authorize()))throw new Error();
+   // A lock-time timeout is not a permanent password requirement for a verified owner.
+   // This existing callback proves the bound account, administrator session and owner preference.
+   if(await this.terrierPasswordLockDisabled()!==true||!current())throw new Error();
+   if(!approved(await this.gate.authorize()))throw new Error();
+   this.requiresFreshPassword=false;
+   return true; // The caller must still use normal resume, runtime and reveal checks.
+  }catch{throw new Error('Terrier owner sign-in could not be verified. Try opening the app again.');}
  }
  authenticationTicket(){return Object.freeze({generation:this.generation});}
  authenticationCurrent(ticket){return Boolean(ticket)&&ticket.generation===this.generation;}
@@ -61,7 +84,7 @@ class AccessLifecycle{
   return this.authenticationCurrent(ticket)?ticket:null;
  }
  async canReveal(generation,approved){
-  const current=()=>generation===this.generation&&!this.suspended&&this.runtime.requestsAllowed!==false&&Boolean(this.runtime.child);
+  const current=()=>!this.osLocked&&generation===this.generation&&!this.suspended&&this.runtime.requestsAllowed!==false&&Boolean(this.runtime.child);
   if(!current())return false;
   try{const latest=await this.gate.authorize();if(!current())return false;if(authorizationIdentity(latest)===authorizationIdentity(approved)&&authorizationIdentity(latest)===authorizationIdentity(this.runtime.authorization))return true;}catch{}
   if(current())await this.suspend('locked');return false;
