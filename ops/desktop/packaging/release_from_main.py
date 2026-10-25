@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shlex
 import shutil
 import sqlite3
 import subprocess
@@ -37,6 +38,17 @@ PRODUCTS = {'melange': 'Melange', 'mentat': 'Mentat', 'terrier': 'Terrier'}
 TOOLS = {'melange': 'melange', 'mentat': 'mentat', 'terrier': 'melange'}
 PACKAGING = Path('ops') / 'desktop' / 'packaging'
 GATES = ('tests', 'security', 'dependencies', 'redistribution', 'dataAllowlist')
+PYTEST = ('colorama', 'iniconfig', 'pluggy', 'pygments', 'pytest')  # pytest 9's closure beyond packaging, on Windows
+# The variable a test module reads for another app's source, and that source in the app's export.
+APP_TEST_INPUTS = {'terrier': ('TERRIER_TEST_SOURCE', '.'), 'mentat': ('MENTAT_TEST_ENGINE', 'mentat/app/contribution_data.py')}
+# The source root the module-data tests read from another app's real files (Melange's `fec/`, Mentat's `mentat/forecast`); they
+# skip when it is unset, so these are supplied, to every pytest run, for each app in the release (not scanned like the above).
+MODULE_DATA_SOURCES = {'melange': 'MODULE_DATA_MELANGE_SOURCE', 'mentat': 'MODULE_DATA_MENTAT_SOURCE'}
+# The test modules that import an app's own package from their repository root, which only that app's repository holds
+# (the repositories share ops/desktop/packaging). Melange's: `fec`. test_release_from_main checks the list against a scan.
+APP_TEST_MODULES = {'melange': tuple(f'ops/desktop/packaging/{name}.py' for name in (
+    'test_melange_assertions', 'test_melange_public_input_probe', 'test_melange_public_pages', 'tests/test_melange_boot_prefix',
+    'tests/test_melange_data_paths', 'tests/test_melange_data_readiness', 'tests/test_melange_save_disconnect'))}
 # What ops/desktop/client/release-signing.cjs accepts: it signs only with this certificate and this exact subject.
 THUMBPRINT = '0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30'
 SUBJECT = 'CN=Melange Systems Desktop Release (self-signed)'
@@ -377,6 +389,7 @@ class Release:
         self.native = {}
         self.installers = {}
         self.frontend_audit = {}
+        self.test_venvs = {}
         # Data and security gates first, from the pristine exports (before npm ci or pytest write into them): the security
         # gate scans the staged sources each app ships (owner ruling 2026-10-24 "Scan shipped files only").
         for app in self.apps:
@@ -405,14 +418,7 @@ class Release:
         tested, audited = {}, {}
         for tool in self.tools:  # once per client repository
             client = self.export[tool] / 'ops' / 'desktop' / 'client'
-            # The repository's own app interpreter; for Terrier alone (its lock has no pytest) --build-python or this one.
-            python = self.pythons.get(tool) or self.build_python or self.python
-            tests_env = {**self.environ, 'DESKTOP_TEST_PYTHON': str(python)}
-            # pytest before npm ci, so it never collects anything under node_modules.
-            tested[tool] = [self.call('tests', [python, '-E', '-s', '-B', '-m', 'pytest', '-p', 'no:cacheprovider', '-q',
-                                                'ops/desktop'], cwd=self.export[tool], log=f'pytest-ops-desktop-{tool}').evidence,
-                            self.call('tests', ['npm', 'ci', '--no-fund'], cwd=client, log=f'npm-ci-{tool}').evidence,
-                            self.call('tests', ['npm', 'test'], cwd=client, env=tests_env, log=f'npm-test-{tool}').evidence]
+            tested[tool] = self.tests(tool, client)
             audited[tool] = self.call('dependencies', ['npm', 'audit', '--omit=dev', '--audit-level=high'], cwd=client,
                                       log=f'npm-audit-{tool}').evidence
         for app in self.apps:
@@ -442,6 +448,94 @@ class Release:
             smoke = self.python_tool('nativeAcceptance', app, 'smoke_backend.py', '--app', app, '--runtime', packaged,
                                      '--output', self.logs / f'smoke-{app}.json', log=f'smoke-{app}', python=self.pythons[app])
             self.native[app] += '; packaged backend smoke on empty data: ' + smoke.evidence
+
+    def tests(self, tool, client):
+        """Every test module under the client repository's ops/desktop, each given what it needs. npm ci first: the client tests
+        and test_district_packs require node_modules (pytest never recurses into node_modules). The run is inside a git work
+        tree, as in a checkout (test_district_packs asserts its own file is refused there; `git archive` writes no .git, so one
+        is made for the run and removed after). A module that reads another app's source (APP_TEST_INPUTS) tests that app's
+        integration: it runs, with that app's export, when that app is released, and is otherwise listed as not run. Modules
+        reading TERRIER_TEST_SOURCE set up Django once per process, so each runs alone, in a venv of Terrier's lock plus pytest
+        (the shipped runtime drops django/test); the rest run together in a venv of the repository's own runtime lock (and
+        test lock, Mentat), which --ignore's exactly the modules run alone or listed. In another repository, a module needing an
+        app's own package (APP_TEST_MODULES) runs, when that app is released, in that app's test venv with its export on
+        pytest's pythonpath, and is otherwise listed as not run. Every pytest run is given each released app's export as
+        MODULE_DATA_<APP>_SOURCE (MODULE_DATA_SOURCES), which the module-data tests otherwise skip for, or fail without."""
+        root = self.export[tool]
+        desktop = root / 'ops' / 'desktop'
+        modules = [path for path in desktop.rglob('*.py')
+                   if re.fullmatch(r'test_.*|.*_test', path.stem) and 'node_modules' not in path.relative_to(desktop).parts]
+        bound = {app: sorted(path.relative_to(root).as_posix() for path in modules
+                             if name in path.read_text(encoding='utf-8', errors='replace')) for app, (name, _) in APP_TEST_INPUTS.items()}
+        django = bound['terrier'] if 'terrier' in self.apps else []
+        owned = {app: sorted(name for name in names if (root / name).is_file()) for app, names in APP_TEST_MODULES.items() if TOOLS[app] != tool}
+        foreign = {app: names for app, names in owned.items() if app in self.apps and names}
+        unreleased = sorted({name for found in (bound, owned) for app, names in found.items() if app not in self.apps for name in names})
+        evidence = [f'not run, as their app is not in this release: {", ".join(unreleased)}'] if unreleased else []
+        evidence.append(self.call('tests', ['npm', 'ci', '--no-fund'], cwd=client, log=f'npm-ci-{tool}').evidence)
+        python = self.test_venv(tool, self.test_locks(tool), evidence)
+        env = {**self.environ, 'DESKTOP_TEST_PYTHON': str(python),
+               **{name: str(self.export[app] / relative) for app, (name, relative) in APP_TEST_INPUTS.items() if app in self.apps},
+               **{name: str(self.export[app]) for app, name in MODULE_DATA_SOURCES.items() if app in self.apps}}
+        evidence.append('module-data sources: ' + (', '.join(f'{MODULE_DATA_SOURCES[app]}={self.export[app]}' for app in MODULE_DATA_SOURCES if app in self.apps) or 'none'))
+        pytest = ['-E', '-s', '-B', '-m', 'pytest', '-p', 'no:cacheprovider', '-q']
+        if (root / '.git').exists():
+            raise StepFailed('tests', f'{root} has a .git, which no export has')
+        self.call('tests', ['git', 'init', '-q', root])
+        try:
+            ignored = django + unreleased + [name for names in foreign.values() for name in names]
+            evidence.append(self.call('tests', [python, *pytest, 'ops/desktop', *[f'--ignore={name}' for name in ignored]],
+                                      cwd=root, env=env, log=f'pytest-ops-desktop-{tool}').evidence)
+            for app, names in foreign.items():  # pytest's ini pythonpath, as -E drops PYTHONPATH; its value is shlex-split
+                venv = self.test_venv(TOOLS[app], self.test_locks(TOOLS[app]), evidence)
+                evidence.append(self.call('tests', [venv, *pytest, '-o', 'pythonpath=' + shlex.quote(self.export[app].as_posix()), *names],
+                                          cwd=root, env=env, log=f'pytest-{app}-app-{tool}').evidence)
+            if django:
+                terrier = self.test_venv('terrier', [self.lock_file('terrier'), self.pytest_lock()], evidence)
+                evidence += [self.call('tests', [terrier, *pytest, name], cwd=root, env=env, log=f'pytest-{Path(name).stem}-{tool}').evidence
+                             for name in django]
+            evidence.append(self.call('tests', ['npm', 'test'], cwd=client, env=env, log=f'npm-test-{tool}').evidence)
+        finally:
+            shutil.rmtree(root / '.git', ignore_errors=True)
+        return evidence
+
+    def test_locks(self, tool):
+        """The repository's runtime lock, and its test lock if it has one (Mentat)."""
+        packaging = self.export[tool] / PACKAGING
+        return [lock for lock in (packaging / f'{tool}-runtime.constraints.txt', packaging / f'{tool}-test.constraints.txt') if lock.is_file()]
+
+    def test_venv(self, name, locks, evidence):
+        """A venv for the tests gate only (never bundled), installed like the build venvs from hash-locked files; made once."""
+        folder = self.release / 'venv' / f'{name}-tests'
+        python = folder / 'Scripts' / 'python.exe'
+        if name not in self.test_venvs:
+            self.call('tests', [self.python, '-I', '-m', 'venv', folder], log=f'venv-{name}-tests')
+            installed = self.call('tests', [python, '-m', 'pip', 'install', '--disable-pip-version-check', '--no-input', '--require-hashes',
+                                            '--only-binary=:all:', '--no-deps', *[part for lock in locks for part in ('-r', lock)]],
+                                  log=f'pip-install-{name}-tests')
+            checked = self.call('tests', [python, '-m', 'pip', 'check'], log=f'pip-check-{name}-tests')
+            self.test_venvs[name] = (f'test venv {folder} from ' + ', '.join(f'{lock} sha256 {sha256(lock)}' for lock in locks)
+                                     + f': {installed.evidence}; {checked.evidence}')
+        evidence.append(self.test_venvs[name])
+        return python
+
+    def pytest_lock(self):
+        """pytest and what it needs beyond packaging (in every runtime lock), with their hashes, from Melange's runtime lock."""
+        source = self.export['melange'] / PACKAGING / 'melange-runtime.constraints.txt'
+        lines, found, keep = [], set(), False
+        for line in source.read_text(encoding='utf-8').splitlines():
+            match = re.match(r'([A-Za-z0-9_.-]+)==', line)
+            if match or not line.startswith((' ', '\t')):
+                keep = bool(match) and match.group(1).lower() in PYTEST
+                found |= {match.group(1).lower()} if keep else set()
+            if keep:
+                lines.append(line)
+        if found != set(PYTEST):
+            raise StepFailed('tests', f'{source} has no hash-locked {", ".join(sorted(set(PYTEST) - found))}')
+        path = self.release / 'venv' / 'pytest.constraints.txt'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f'# {", ".join(PYTEST)} as in {source} (sha256 {sha256(source)})\n' + '\n'.join(lines) + '\n', encoding='utf-8')
+        return path
 
     def requirements(self, app, runtime):
         """The reused runtime's requirements files, at the commit its source-provenance.json names, must be the export's bytes."""
