@@ -293,7 +293,7 @@ press_site_failure_record <- function(envir, bioguide, source, condition) {
 # ponytail: calibration knob; the wait is shared by all deferred sites and by both collectors' passes.
 press_site_retry_delay <- function() {
   value <- suppressWarnings(as.numeric(Sys.getenv("PRESS_SITE_RETRY_DELAY_S", "60")))
-  if (length(value) != 1L || is.na(value) || value < 0) 60 else value
+  if (length(value) != 1L || !is.finite(value) || value < 0) 60 else value   # "Inf" would sleep forever
 }
 
 # attempt(i) returns the member's result (never NULL) or raises press_site_unavailable;

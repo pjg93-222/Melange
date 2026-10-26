@@ -374,3 +374,30 @@ def test_open_count_treats_a_non_object_row_as_unreadable(tmp_path):
     assert q.open_count(queue) == -1      # a status-less row is damage too, never counted as a clean zero
     queue.write_text(open_row + "\n", encoding="utf-8")
     assert q.open_count(queue) == 1
+
+
+def write_run_attempted(tmp_path, name, failures, attempted):
+    run = tmp_path / "outputs" / name
+    run.mkdir(parents=True)
+    (run / "press_site_failures.json").write_text(json.dumps(
+        {"schema": "press-site-failures-v1", "failures": failures, "attempted": attempted}), encoding="utf-8")
+    return run
+
+
+def test_an_open_row_recovers_only_when_its_member_was_attempted(tmp_path):
+    # CodeRabbit PR #84: a member the walk did not try (left the roster) must not read as recovered.
+    queue = tmp_path / "queue.ndjson"
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261025", [ROW], [ROW["member_id"]]), queue, now=NOW)
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261026", [], ["X000001"]), queue, now=NOW)
+    assert rows(queue)[0]["status"] == "open" and q.open_count(queue) == 1     # not walked: unverified, still open
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261027", [], [ROW["member_id"]]), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("recovered", 0)
+    # an older artifact without "attempted" keeps the previous behaviour
+    q.record_run(write_run(tmp_path, "press_refresh_20261028", [ROW]), queue, now=NOW)
+    q.record_run(write_run(tmp_path, "press_refresh_20261029", []), queue, now=NOW)
+    assert rows(queue)[0]["status"] == "recovered"
+
+
+def test_the_collector_writes_the_attempted_roster_beside_the_failures():
+    source = (FEC / "collect" / "refresh_press_delta.R").read_text(encoding="utf-8")
+    assert "attempted = as.list(unique(as.character(members$bioguide)))" in source

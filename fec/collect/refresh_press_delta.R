@@ -952,7 +952,9 @@ exit_code <- tryCatch({
   # beside (not inside) the hash-bound receipt; collect/press_failure_queue.py ingests it.
   site_failures <- press_site_failures_snapshot()
   site_failures_temp <- file.path(run_root, "press_site_failures.json.part")
-  jsonlite::write_json(list(schema = "press-site-failures-v1", failures = site_failures),
+  # attempted: the roster this walk actually tried, so the queue only marks a row recovered for a member it walked.
+  jsonlite::write_json(list(schema = "press-site-failures-v1", failures = site_failures,
+                            attempted = as.list(unique(as.character(members$bioguide)))),
                        site_failures_temp, auto_unbox = TRUE, pretty = TRUE, null = "null")
   promote_with_backup(site_failures_temp, file.path(run_root, "press_site_failures.json"))
   if (press_site_all_failed(site_failures, members$bioguide)) {

@@ -267,6 +267,8 @@ Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
 stopifnot(press_site_retry_delay() == 0)
 Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "garbage")
 stopifnot(press_site_retry_delay() == 60)
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "Inf")
+stopifnot(press_site_retry_delay() == 60)   # an infinite wait would hang the walk
 Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
 
 # An integrity violation (not an availability failure) stays fatal and is never recorded as a skip.
