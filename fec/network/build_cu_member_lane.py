@@ -28,7 +28,7 @@ _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
 import argparse, collections, datetime, hashlib, html, io, json, math, os, re, sys, zipfile
 import xml.etree.ElementTree as ET
 
-import build_cu_placeholder_backfill as BF
+import build_cu_placeholder_backfill as BF  # stale-ok: script-mode import after explicit own-dir sys.path insert
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 NEWEST_CONGRESS = 119

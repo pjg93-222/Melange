@@ -16,9 +16,9 @@ import os as _o, sys as _s
 _s.path.insert(0, _o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))))
 _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
 import collections, json, os, sys
-import build_cu_placeholder_backfill as BF
-import build_cu_member_lane as L
-import cr_parity_gate as PG
+import build_cu_placeholder_backfill as BF  # stale-ok: script-mode import after explicit own-dir sys.path insert
+import build_cu_member_lane as L  # stale-ok: script-mode import after explicit own-dir sys.path insert
+import cr_parity_gate as PG  # stale-ok: script-mode import after explicit own-dir sys.path insert
 
 CAUSES = ['S0b identity/roster', 'S1 new cosponsorships', 'S2 passed-status (x3)', 'S2b section de-dup', 'S3 bills R never used']
 

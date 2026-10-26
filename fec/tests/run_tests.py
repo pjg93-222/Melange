@@ -1122,7 +1122,9 @@ _LANE_PYTEST=(
     'test_forecast_ledger_resolution',
     # 2026-10-19 pipeline-health Fixes 4-5 (weekly 10-18): MS NOW newest-first walk with caught-up stop, log-intact guard and
     # budget; Washington Journal failures carry the R error tail. Scripted WordPress API / fake Rscript, tmp_path only.
-    'test_msnow_walk','test_refresh_cspan_wj_errors','test_cspan_chromote_retry')
+    'test_msnow_walk','test_refresh_cspan_wj_errors','test_cspan_chromote_retry',
+    # 2026-10-26 the CR member lane suite merged unregistered (kernel_registration_census red); synthetic tmp_path roots.
+    'test_cu_member_lane')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on

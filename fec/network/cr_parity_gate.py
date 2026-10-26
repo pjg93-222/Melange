@@ -12,8 +12,8 @@ import os as _o, sys as _s
 _s.path.insert(0, _o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))))
 _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
 import collections, json, os, re, sys
-import build_cu_placeholder_backfill as BF
-import build_cu_member_lane as L
+import build_cu_placeholder_backfill as BF  # stale-ok: script-mode import after explicit own-dir sys.path insert
+import build_cu_member_lane as L  # stale-ok: script-mode import after explicit own-dir sys.path insert
 
 TY = {'house-bill': 'H.R.', 'senate-bill': 'S.', 'house-resolution': 'H.Res.', 'senate-resolution': 'S.Res.',
       'house-joint-resolution': 'H.J.Res.', 'senate-joint-resolution': 'S.J.Res.',
