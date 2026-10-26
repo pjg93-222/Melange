@@ -69,8 +69,7 @@ for m in C:
     if sp[m] or co[m]: P[m]['n_sponsored'] = sp[m]; P[m]['n_cosponsored'] = co[m]
 
 # cosponsor network degree (non-AUG file = pure cosponsorship)
-np_ = max([q for q in glob.glob(B + r'\congress_cosponsor_network_*.xlsx') if 'AUG' not in os.path.basename(q)],
-          key=os.path.getmtime)
+np_ = source_select.select_network(glob.glob(B + r'\congress_cosponsor_network_*.xlsx'), 'exclude', root=B)
 b2n = {info.get('bioguide'): m for m, info in C.items() if info.get('bioguide')}
 ne = openpyxl.load_workbook(np_, read_only=True, data_only=True)['Edges']
 deg = collections.Counter()

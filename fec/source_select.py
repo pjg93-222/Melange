@@ -6,9 +6,11 @@ congress_bills_archive_* families (lane SEL).  NEVER uses mtime: file mtimes tie
 Order of authority:
   (a) data/engine/source_pins.json  {pin_key: exact filename}  -- wins when present (fail-closed if the
       pinned file is not among the candidates).  A promotion is an explicit pin edit.
-  (b) the timestamp embedded in the filename: YYYYMMDD_HHMMSS (base network, archive) or YYYYMMDD
-      (AUG<YYYYMMDD>); a missing time sorts as 000000.  Ties break on the full filename, ascending, so
-      the greater name wins.  Names with no timestamp sort lowest.
+  (b) the timestamp embedded in the filename: YYYYMMDD_HHMMSS (base network, archive, and new
+      AUG<YYYYMMDD_HHMMSS>) or the old AUG<YYYYMMDD> form; a missing time sorts as 000000.  Order is
+      (date, AUG-over-base, time, full filename), so on the SAME date an AUG beats a base whatever the
+      times ('any' mode; the AUG is derived from the base).  Ties break on the full filename, ascending.
+      Names with no timestamp sort lowest.
 
 aug mode keeps each caller's old intent:
   'prefer'  AUG-named files if any exist, else the base files   (moneyball_core.select_network_file)
@@ -26,7 +28,10 @@ _TS = re.compile(r'(?<!\d)(\d{8})(?:_(\d{6}))?(?!\d)')
 def _ts_key(path):
     name = os.path.basename(str(path))
     m = _TS.search(name)
-    return (m.group(1), m.group(2) or '000000', name) if m else ('', '', name)
+    if not m:
+        return ('', 0, '', name)
+    # same calendar date: an AUG is derived from a base, so it outranks the base whatever the time
+    return (m.group(1), int(_is_aug(path)), m.group(2) or '000000', name)
 
 
 def _is_aug(path):

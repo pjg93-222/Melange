@@ -81,13 +81,38 @@ class SourceSelect(unittest.TestCase):
                    'audit/audit_full.py', 'tools/identity_collision_census.py',
                    'legislation/vote_by_category.py', 'members/coop_v2_candidate.py',
                    'members/behavior_panel.py', 'members/behavioral_dispositions.py',
-                   'legislation/build_archive_legislative.py', 'legislation/bill_coverage_audit.py']
+                   'legislation/build_archive_legislative.py', 'legislation/bill_coverage_audit.py',
+                   'legislation/build_vote_category.py', 'legislation/bill_audit_console.py']
         for r in readers:
             src = (FEC / r).read_text(encoding='utf-8')
             self.assertIn('source_select', src, r)
             for line in src.splitlines():
                 if ('congress_cosponsor_network_*' in line or 'congress_bills_archive_*' in line) and 'getmtime' in line:
                     self.fail('%s still selects by mtime: %s' % (r, line.strip()))
+                if 'select_' in line and 'source_select' in line and ('congress_cosponsor_network_*' in line or 'congress_bills_archive_*' in line):
+                    self.assertIn('root=', line, '%s helper call is not pin-aware: %s' % (r, line.strip()))
+
+    def test_same_date_aug_beats_base_in_any(self):
+        base_same = NET + '20261022_235959.xlsx'            # base stamped later the same day than the AUG
+        fs = mk(self.d, [AUG_NEW, base_same, BASE_NEW])
+        self.assertEqual(os.path.basename(S.select_network(fs, 'any')), AUG_NEW)
+        fs = mk(self.d, [NET + 'AUG20261022_093000.xlsx', base_same])
+        self.assertEqual(os.path.basename(S.select_network(fs, 'any')), NET + 'AUG20261022_093000.xlsx')
+        nxt = mk(self.d, [NET + '20261023_000001.xlsx'])     # a later-DATE base still wins
+        self.assertEqual(os.path.basename(S.select_network(fs + nxt, 'any')), os.path.basename(nxt[0]))
+        self.assertEqual(os.path.basename(S.select_network(fs, 'exclude')), os.path.basename(base_same))
+
+    def test_new_aug_timestamp_orders_against_old_aug_date(self):
+        old, early, late = NET + 'AUG20261022.xlsx', NET + 'AUG20261022_090000.xlsx', NET + 'AUG20261022_170000.xlsx'
+        nextday_old = NET + 'AUG20261023.xlsx'
+        for fs, want in (([old, early], early), ([early, late, old], late), ([late, nextday_old], nextday_old)):
+            self.assertEqual(os.path.basename(S.select_network(mk(self.d, fs), 'prefer')), want)
+
+    def test_pin_beats_same_date_ordering(self):
+        fs = mk(self.d, [AUG_NEW, NET + '20261022_235959.xlsx'])
+        pins = Path(self.d) / 'data' / 'engine'; pins.mkdir(parents=True)
+        (pins / 'source_pins.json').write_text(json.dumps({'congress_cosponsor_network': NET + '20261022_235959.xlsx'}))
+        self.assertEqual(os.path.basename(S.select_network(fs, 'any', root=self.d)), NET + '20261022_235959.xlsx')
 
 
 if __name__ == '__main__':

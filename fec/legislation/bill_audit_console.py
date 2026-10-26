@@ -47,10 +47,10 @@ MANUAL_FIELDS = ['Member','Role','Bill','Title','Sponsor','Congress','Category',
 
 
 def latest_archive():
-    files = sorted(glob.glob(ARCHIVE_GLOB))
+    files = glob.glob(ARCHIVE_GLOB)
     if not files:
         raise FileNotFoundError(ARCHIVE_GLOB)
-    return files[-1]
+    return __import__('source_select').select_archive(files, root=ROOT)
 
 
 def _text(value):
