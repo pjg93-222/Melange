@@ -199,7 +199,7 @@ def test_front_truncated_failures_line_fails_closed():
 
 
 def test_known_gated_failures_contains_only_ratified_checks_and_completed_backup_scope():
-    assert len(gate.KNOWN_GATED_FAILURES) == 9   # D-330: +collection_intake REJECTED, +longform age (ruling 8)
+    assert len(gate.KNOWN_GATED_FAILURES) == 7   # D-330's two names are CONDITIONALLY_GATED_FAILURES (sub-condition only)
     assert {n for n in gate.KNOWN_GATED_FAILURES if n.startswith('A1 ')} == {
         'A1 repo.rescue_dir still exists','A1 repo.rescue_manifest_a still exists',
         'A1 repo.rescue_manifest_b still exists','A1 repo.rescue_manifest_c still exists'}
