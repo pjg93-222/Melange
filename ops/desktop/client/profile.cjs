@@ -31,13 +31,15 @@ function isolatedProfileArgument(argv=[]){
   if(matches.length!==1||!matches[0].startsWith(ISOLATED_SWITCH+'='))throw refused('Use exactly one '+ISOLATED_SWITCH+'=<absolute directory> argument.');
   return matches[0].slice(ISOLATED_SWITCH.length+1);
 }
-function isolatedRoot(value,{home,appData,documents,protectedPaths=[],platform=process.platform}){
+function isolatedRoot(value,{home,appData,documents,downloads,protectedPaths=[],platform=process.platform}){
   if(typeof value!=='string'||!value||value.length>1024||value.includes('\0'))throw refused('The isolated test profile directory is missing or invalid.');
   if(platform==='win32'?!/^[A-Za-z]:[\\/]/.test(value):!path.isAbsolute(value))throw refused('The isolated test profile must be an absolute local directory'+(platform==='win32'?' starting with a drive letter':'')+'.');
   const root=path.resolve(value);
   if(path.dirname(root)===root)throw refused('The isolated test profile cannot be a drive or filesystem root.');
   const forbidden=Object.freeze([path.join(home,'Documents','MelangeApplicationState'),path.join(home,'Documents','MelangeApplications'),path.join(appData,'MelangeApps'),path.join(home,'AppData','Roaming','MelangeApps'),
-    ...(documents?[path.join(documents,'MelangeApplicationState'),path.join(documents,'MelangeApplications')]:[]),...protectedPaths]);
+    ...(documents?[path.join(documents,'MelangeApplicationState'),path.join(documents,'MelangeApplications')]:[]),
+    // Downloads layout (DL-spec 2.9): <Downloads>/MelangeApplications holds installed program folders and the updater cache.
+    ...(downloads?[path.join(downloads,'MelangeApplications')]:[]),...protectedPaths]);
   const separate=()=>{const actual=physicalPath(root);for(const item of forbidden)if(overlaps(actual,physicalPath(item)))throw refused('The isolated test profile must be separate from production application state, legacy profiles and installed application files ('+item+').');};
   separate();
   if(fs.existsSync(root)&&!fs.statSync(root).isDirectory())throw refused('The isolated test profile path exists and is not a directory.');
@@ -64,12 +66,12 @@ function confineIsolatedSettings(boundary,settings){
   if(settings.terrierDistricts!==undefined)confineIsolatedPath(boundary,settings.terrierDistricts?.legacyRoot,'The Terrier district data root');
   return settings;
 }
-function selectStartupProfile({appId,argv=[],home,appData,documents,protectedPaths,packaged,testDirectory,platform}){
+function selectStartupProfile({appId,argv=[],home,appData,documents,downloads,protectedPaths,packaged,testDirectory,platform}){
   const definition=appDefinition(appId),requested=isolatedProfileArgument(argv);
   if(requested===null)return {...selectProfile({appId,home,appData,packaged,testDirectory}),isolated:false,applicationUserModelId:definition.applicationId,
     discoveryCache:path.join(appData,'MelangeDesktop','github-discovery'),registerLoginItem:Boolean(packaged),nativeInstallation:true};
   try{
-    const boundary=isolatedRoot(requested,{home,appData,documents:typeof documents==='function'?documents():documents,protectedPaths:(typeof protectedPaths==='function'?protectedPaths():protectedPaths)||[],platform});
+    const boundary=isolatedRoot(requested,{home,appData,documents:typeof documents==='function'?documents():documents,downloads:typeof downloads==='function'?downloads():downloads,protectedPaths:(typeof protectedPaths==='function'?protectedPaths():protectedPaths)||[],platform});
     const {root}=boundary,directory=path.join(root,definition.id),discoveryCache=path.join(root,'github-discovery');
     const created=[[directory,'The isolated application profile'],[discoveryCache,'The isolated discovery cache']];
     // Writable children of the profile that the main process or backend uses directly.

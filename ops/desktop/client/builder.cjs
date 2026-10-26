@@ -23,10 +23,11 @@ const desktopPublicData=publicDataMode==='paged-v1'?{melange:'paged-v1'}:{};
 if(!fs.existsSync(icon))throw new Error('Original application icon is missing.');
 require('./backend-command.cjs').backendCommand(__dirname,selected.id,process.platform,runtimeRoot);
 const releaseSigning=require('./release-signing.cjs').options(selected);
+const outputDir=process.env.DESKTOP_DIST_ROOT?path.join(path.resolve(process.env.DESKTOP_DIST_ROOT),selected.id):'dist/'+selected.id;
 module.exports={
   ...releaseSigning,
   appId:selected.applicationId,productName:selected.name,artifactName:selected.name+'-${version}-${os}-${arch}.${ext}',
-  directories:{output:process.env.DESKTOP_DIST_ROOT?path.join(path.resolve(process.env.DESKTOP_DIST_ROOT),selected.id):'dist/'+selected.id},asar:true,
+  directories:{output:outputDir},asar:true,
   files:[...require('./release-files.cjs')],
   // The filter below is case-sensitive; after-pack.cjs walks the packed runtime/*/sources case-insensitively and removes (and logs) any state directory or database file.
   afterPack:path.join(__dirname,'after-pack.cjs'),
@@ -36,7 +37,9 @@ module.exports={
    {from:path.join(__dirname,'melange-systems-desktop-release.cer'),to:'melange-systems-desktop-release.cer'}],
   extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
   win:{target:['nsis'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
-  nsis:{oneClick:false,perMachine:false,allowToChangeInstallationDirectory:true,deleteAppDataOnUninstall:false,runAfterFinish:false,include:path.join(__dirname,'installer.nsh'),installerIcon:icon,uninstallerIcon:icon},
+  nsis:{oneClick:false,perMachine:false,allowToChangeInstallationDirectory:false,deleteAppDataOnUninstall:false,runAfterFinish:false,
+    // Downloads layout (DL-spec 1.3): after-pack.cjs writes this include (the DL_* defines, then !include installer.nsh) into the output directory; builder.cjs writes nothing.
+    include:path.join(path.resolve(__dirname,outputDir),'installer.generated.nsh'),installerIcon:icon,uninstallerIcon:icon},
   mac:{target:['dmg','zip'],category:'public.app-category.productivity',hardenedRuntime:true,notarize:process.env.APPLE_ID?true:false},
   publish:{provider:'generic',url:'https://127.0.0.1/desktop-feed-disabled-until-paired/'},
   electronFuses:{runAsNode:false,enableCookieEncryption:true,enableNodeOptionsEnvironmentVariable:false,enableNodeCliInspectArguments:false,enableEmbeddedAsarIntegrityValidation:true,onlyLoadAppFromAsar:true}
