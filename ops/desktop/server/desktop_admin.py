@@ -794,6 +794,7 @@ def main(argv=None):
     notification_ack = sub.add_parser('notification-ack', help='local startup notifier: record Windows handoff')
     notification_ack.add_argument('--delivery', required=True)
     notification_ack.add_argument('--outcome', choices=['handed_to_windows','deferred','unknown'], required=True)
+    sub.add_parser('relay-check', help='local startup notifier: one TLS check of the public relay; alert/recovery state in --state')
     pair = sub.add_parser("pair")
     pair.add_argument("--app", choices=sorted(APPS), required=True)
     pair.add_argument("--url", required=True)
@@ -896,6 +897,9 @@ def main(argv=None):
             notifications = LocalNotifications(AccessStore(store))
             result = notifications.claim() if args.command == 'notification-claim' else notifications.acknowledge(args.delivery, args.outcome)
             print(json.dumps(result))
+        elif args.command == 'relay-check':
+            from relay_monitor import check
+            print(json.dumps(check(store.root)))
         elif args.command == "pair":
             print(store.pairing(args.app, args.url))
         elif args.command == "devices":

@@ -3,6 +3,8 @@ param(
     [Parameter(Mandatory=$true)][string]$PythonExecutable,
     [Parameter(Mandatory=$true)][string]$StateDirectory,
     [ValidateRange(0,60)][int]$ExitAfterSeconds = 0,
+    # Public relay check (relay_monitor.py via desktop_admin.py relay-check); 0 turns it off.
+    [ValidateRange(0,3600)][int]$RelayCheckSeconds = 100,
     [switch]$ValidateOnly
 )
 $ErrorActionPreference = 'Stop'
@@ -40,6 +42,9 @@ $tray = [Windows.Forms.NotifyIcon]::new()
 $timer = [Windows.Forms.Timer]::new()
 $menu = [Windows.Forms.ContextMenuStrip]::new()
 $script:handoffs = 0
+$script:relayPending = $null
+$script:relaySince = $null
+$script:nextRelayCheck = $started.AddSeconds(15)
 function Start-FixedHelper([string[]]$Arguments, [bool]$Capture = $true) {
     Assert-ProtectedState
     $info = [Diagnostics.ProcessStartInfo]::new()
@@ -57,6 +62,42 @@ function Open-LocalDashboard {
     # Every click runs the helper; it reopens an already-running dashboard itself.
     $dashboard = Start-FixedHelper @('access-dashboard') $false
     $dashboard.Dispose()
+}
+function Get-RelayNotice([string]$Output) {
+    # Fixed text only: the helper's JSON supplies an event, a kind made of fixed words and a whole number of seconds.
+    if ($Output.Length -gt 512) { return $null }
+    $value = $Output | ConvertFrom-Json
+    if (($value.PSObject.Properties.Name | Sort-Object) -join ',' -cne 'durationS,event,kind') { return $null }
+    if ($value.event -cnotin @('alert','recovered')) { return $null }
+    if ($value.kind -isnot [string] -or $value.kind -cnotmatch '^(timeout|refused|wrong_cert|error)(\|(timeout|refused|wrong_cert|error)){0,3}$') { return $null }
+    if ($value.durationS -isnot [long] -and $value.durationS -isnot [int] -or $value.durationS -lt 0 -or $value.durationS -gt 31536000) { return $null }
+    $minutes = [string][Math]::Max(1, [Math]::Round($value.durationS / 60))
+    if ($value.event -ceq 'alert') {
+        return @('Public access relay down', ('The public relay has failed 3 checks in a row (' + $value.kind + ') for about ' + $minutes + ' min. Remote testers cannot send access requests until it recovers.'), [Windows.Forms.ToolTipIcon]::Warning)
+    }
+    return @('Public access relay restored', ('The public relay is reachable again. The outage lasted about ' + $minutes + ' min (' + [string]$value.durationS + ' s).'), [Windows.Forms.ToolTipIcon]::Info)
+}
+function Step-RelayCheck {
+    # Runs beside the claim/ack helper and never blocks it; a hung check is killed after 30 s.
+    if ($script:relayPending) {
+        if (-not $script:relayPending.HasExited) {
+            if (([DateTime]::UtcNow-$script:relaySince).TotalSeconds -ge 30) {
+                $script:relayPending.Kill($true); $script:relayPending.WaitForExit(); $script:relayPending.Dispose(); $script:relayPending=$null
+            }
+            return
+        }
+        $process=$script:relayPending; $script:relayPending=$null
+        try {
+            $output=$process.StandardOutput.ReadToEnd(); $null=$process.StandardError.ReadToEnd()
+            if ($process.ExitCode -ne 0) { return }
+            $notice=Get-RelayNotice $output
+            if ($notice) { $tray.ShowBalloonTip(15000,$notice[0],$notice[1],$notice[2]) }
+        } finally { $process.Dispose() }
+    } elseif ($RelayCheckSeconds -and [DateTime]::UtcNow -ge $script:nextRelayCheck) {
+        $script:nextRelayCheck=[DateTime]::UtcNow.AddSeconds($RelayCheckSeconds)
+        $script:relayPending=Start-FixedHelper @('relay-check')
+        $script:relaySince=[DateTime]::UtcNow
+    }
 }
 function Start-Acknowledge([string]$Delivery, [string]$Outcome) {
     $script:pending = Start-FixedHelper @('notification-ack','--delivery',$Delivery,'--outcome',$Outcome)
@@ -78,6 +119,7 @@ try {
     $timer.Add_Tick({
         try {
             if ($ExitAfterSeconds -and ([DateTime]::UtcNow-$started).TotalSeconds -ge $ExitAfterSeconds) { [Windows.Forms.Application]::ExitThread(); return }
+            try { Step-RelayCheck } catch { $script:nextRelayCheck=[DateTime]::UtcNow.AddSeconds(30) }
             if ($script:pending) {
                 if (-not $script:pending.HasExited) {
                     if (([DateTime]::UtcNow-$script:pendingSince).TotalSeconds -ge 10) {
@@ -114,5 +156,6 @@ try {
 } finally {
     $timer.Stop(); $timer.Dispose(); $tray.Visible=$false; $tray.Dispose(); $menu.Dispose()
     if ($script:pending) { if (-not $script:pending.HasExited) { $script:pending.Kill($true); $script:pending.WaitForExit() }; $script:pending.Dispose() }
+    if ($script:relayPending) { if (-not $script:relayPending.HasExited) { $script:relayPending.Kill($true); $script:relayPending.WaitForExit() }; $script:relayPending.Dispose() }
     if ($owned) { $mutex.ReleaseMutex() }; $mutex.Dispose()
 }
