@@ -508,17 +508,15 @@ function Start-Collector {
     $argList.Add('--args')
     $argList.Add('--records');   $argList.Add((Format-Arg $RecordsRelative))
     $argList.Add('--out');       $argList.Add((Format-Arg $OutRelative))
-    if (-not [string]::IsNullOrWhiteSpace($PriorReceiptsRelative)) {
-        $argList.Add('--prior_receipts'); $argList.Add((Format-Arg $PriorReceiptsRelative))
-    }
+    # Only pass flags harvest_congress_text_httr.R parse_args accepts (guarded by
+    # fec/tests/collect/test_fulltext_pipeline_collector_flags.py).  The collector
+    # has no --prior_receipts/--attempts/--min_delay/--max_delay/--glassbox_events:
+    # it verifies its own receipts on --resume, never retries by design, and leaves
+    # shared Glass Box publishing to the supervisor.
     $argList.Add('--limit');     $argList.Add([string]$Limit)
     $argList.Add('--workers');   $argList.Add([string]$Workers)
-    $argList.Add('--attempts');  $argList.Add([string]$Attempts)
-    $argList.Add('--min_delay'); $argList.Add(([string]$MinDelay))
-    $argList.Add('--max_delay'); $argList.Add(([string]$MaxDelay))
     $argList.Add('--host');      $argList.Add('127.0.0.1')
     $argList.Add('--port');      $argList.Add([string]$Port)
-    $argList.Add('--glassbox_events'); $argList.Add((Format-Arg ($EventsDirectory -replace '\\', '/')))
     $argList.Add('--resume')
     try {
         Start-Process -FilePath $RRuntime -ArgumentList $argList.ToArray() -WorkingDirectory $Workspace `
