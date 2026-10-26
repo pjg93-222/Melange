@@ -48,7 +48,9 @@ HEARTBEAT_SECONDS = 60
 # retried once and then deferred rather than treated as a hard failure. Only
 # discovery is retried; every other step keeps stop-on-first-failure.
 DISCOVERY_RETRY_DELAY_SECONDS = 300
-RETRYABLE_STEPS = ("discovery",)
+# D-263: the sign-on letter collector and promoter are non-fatal the same way (a designed PARTIAL stop already exits 0).
+RETRYABLE_STEPS = ("discovery", "letters", "letters_promote")
+DEFERRED_WORK = {"discovery": "new-bill discovery", "letters": "sign-on letter collection", "letters_promote": "sign-on letter promotion"}
 # 2026-10-15 owner ruling (cap: interactive + $150/month): 48 calls/day x ~$0.075 (caching off) x 30 days = ~$108/month.
 # MELANGE_SENTINEL_CALL_BUDGET raises the paid-call budget for a flood run (unset = the ruled 48, D-211). The numbers live in
 # admission_budget, which the refresh tick renders at launch too, so the daily runner and the tick share this one setting.
@@ -94,6 +96,33 @@ def now():
 
 def read(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+DEFERRED_STREAK_ALERT = 3     # a step DEFERRED on more than this many runs in a row is flagged in the summary (a deferral is not a fix)
+LETTERS_DIR = Path("data/legislation/letters")
+
+
+def letters_run_problems(root, step, step_start):
+    """['letters:collector PARTIAL (...)'] for a PARTIAL letters step. A receipt that is missing, unreadable or older than this step is
+    itself a problem: yesterday's PASS must never stand in for today's run. Holds are normal and are not problems."""
+    name, label = ("collector_receipt.json", "collector") if step == "letters" else ("promoter_status.json", "promoter")
+    try:
+        document = read(Path(root) / LETTERS_DIR / name)
+        stamp = document.get("started_at") or document.get("run_at")
+        when = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+    except (OSError, ValueError, TypeError, AttributeError):
+        return ["letters:%s receipt missing or unreadable" % label]
+    if when < int(step_start) - 1:
+        return ["letters:%s receipt is stale (%s)" % (label, stamp)]
+    if document.get("status") == "PASS":
+        return []
+    bits = [("%s: %s" % (key, ",".join(sorted(document[key])))) for key in ("hosts_refused", "hosts_failed") if document.get(key)]
+    bits += ["errors %s" % document["errors"]] if document.get("errors") else []
+    bits += ["cap_hit"] if document.get("cap_hit") else []
+    bits += ["unparsed %s" % document["unparsed"]] if document.get("unparsed") else []
+    bits += list(document.get("gaps") or [])
+    bits += [str(document["error"])] if document.get("error") else []
+    return ["letters:%s %s (%s)" % (label, document.get("status"), "; ".join(bits) or "no reason recorded")]
 
 
 def digest(path):
@@ -193,6 +222,15 @@ def steps(admission_limit=None, include_media=False, smoke=False):
     if include_media or smoke:
         result.append(("media", "collect/daily_media_refresh.py",
                        ["--local-date", today.isoformat()] + (["--smoke"] if smoke else []), 172800))
+    # D-263: member sign-on letters. They must land in manual_bill_evidence.csv BEFORE the chain (build_archive_legislative and
+    # make_member_desk read it inside run_pipeline.py). The collector reads the newest sealed press run (media ran above) and the
+    # committee sites; the promoter appends only Gate E + Gate C letters. Smoke: no network, promoter dry-run.
+    from legislation import promote_staged_letters as letters_promoter     # LETTERS_PROMOTE is read when the steps are built; a bad value RAISES
+    promote_args = ["--dry-run"] if smoke or not letters_promoter.promote_dial(os.environ) else []
+    result.extend([
+        ("letters", None if smoke else "collect/collect_signon_letters.py", ["--committee", "--from-press"], 3600),
+        ("letters_promote", "legislation/promote_staged_letters.py", promote_args, 600),
+    ])
     result.extend([
         ("repository", "legislation/update_bill_repository.py", [], 14400),
         ("billstatus", "legislation/refresh_billstatus_bulk.py", [], 3600),
@@ -425,10 +463,14 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
         started = time.time()
         run_dir = root / "audits/congress_pipeline" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         run_dir.mkdir(parents=True, exist_ok=False)
+        try:
+            previous_streaks = dict(read(root / RECEIPT).get("deferred_streaks") or {})   # consecutive DEFERRED runs per step, carried run to run
+        except (OSError, ValueError, AttributeError):
+            previous_streaks = {}
         state = {"schema": "congress-pipeline-status-v1", "status": "RUNNING",
                  "owner_pid": os.getpid(), "started_at": now(), "run_dir": str(run_dir), "steps": [],
                  "include_media": include_media, "mode": "smoke" if smoke else "full",
-                 "deferred_steps": [],
+                 "deferred_steps": [], "deferred_streaks": dict(previous_streaks), "letters_partial": [],
                  "daily_attempt_id": os.environ.get("MELANGE_DAILY_ATTEMPT_ID")}
         stream_id = new_run_id("congress-pipeline")
         trim_live_log(root)
@@ -573,9 +615,9 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                         # discovery: repository and BILLSTATUS still refresh
                         # every already-known bill, and the next run retries.
                         row["status"] = "DEFERRED"
-                        row["note"] = ("%s collector failed twice (rc=%s, rc=%s); new-bill "
-                                       "discovery deferred to the next run; see %s"
-                                       % (name, first_code, code, log_path))
+                        row["note"] = ("%s collector failed twice (rc=%s, rc=%s); %s "
+                                       "deferred to the next run; see %s"
+                                       % (name, first_code, code, DEFERRED_WORK[name], log_path))
                 state["steps"].append(row)
                 output = log_path.read_text(encoding="utf-8", errors="replace")
                 if code and row.get("status") != "DEFERRED":
@@ -587,6 +629,7 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                     acknowledged = names
                 if row.get("status") == "DEFERRED":
                     state["deferred_steps"] = state["deferred_steps"] + [name]
+                    state["deferred_streaks"][name] = previous_streaks.get(name, 0) + 1
                     write_status(root, state)
                     print(f"{now()} {name}: DEFERRED ({row['duration_seconds']}s)", flush=True)
                     _emit("refresh.step", "deferred", f"Congress pipeline: {row['note']}",
@@ -617,6 +660,16 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                         if parked_steps:
                             parts.append("parked: " + ", ".join(parked_steps))
                         note = "; ".join(parts)
+                if name in RETRYABLE_STEPS:
+                    state["deferred_streaks"][name] = 0           # it completed this run: the streak is broken
+                if name in ("letters", "letters_promote"):
+                    # Same idea as media's partial_sources: a PARTIAL (or unreadable, or stale) letters receipt is named in the step row,
+                    # the receipt and the summary, so a day that collected nothing can never read as a clean PASS.
+                    problems = letters_run_problems(root, name, step_start)
+                    state["letters_partial"] = state["letters_partial"] + problems
+                    if problems:
+                        row["letters_partial"] = problems
+                        note = "; ".join([note] * bool(note) + problems)
                 print(f"{now()} {name}: completed ({row['duration_seconds']}s)", flush=True)
                 _emit("refresh.step", "completed",
                       f"Congress pipeline: {name}" + (f" ({note})" if note else ""),
@@ -637,6 +690,7 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
             movers = [{"member": name, "before": old.get(name), "after": rank}
                       for name, rank in current.items() if old.get(name) != rank]
             write(run_dir / "rank_changes.json", movers)
+            state["deferred_streak_alerts"] = {n: c for n, c in state["deferred_streaks"].items() if c > DEFERRED_STREAK_ALERT}
             state.update(status="PASS", completed_at=now(), active_step=None, artifacts=artifacts,
                          acknowledged_audit_findings=acknowledged, rank_changes=len(movers))
             write(run_dir / "receipt.json", state)
@@ -650,13 +704,19 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                 summary += " - PASS with deferred: " + ", ".join(state["deferred_steps"])
             if state.get("media_status") == "PARTIAL":
                 summary += " - media PARTIAL: " + ", ".join(state["partial_sources"])
+            if state["letters_partial"]:
+                summary += " - letters PARTIAL: " + "; ".join(state["letters_partial"])
+            for step_name, streak in state["deferred_streak_alerts"].items():
+                summary += " - %s DEFERRED %d runs in a row" % (step_name, streak)
             _emit("refresh.run", "completed", summary,
                   run_id=stream_id, source="congress-pipeline", current=total, total=total)
             live_log(root, "run", "PASS", time.time() - started,
                      "mode=%s rank_changes=%d deferred=%s"
                      % (state["mode"], len(movers), ",".join(state["deferred_steps"]) or "none")
                      + (" media=PARTIAL:" + ",".join(state["partial_sources"])
-                        if state.get("media_status") == "PARTIAL" else ""))
+                        if state.get("media_status") == "PARTIAL" else "")
+                     + (" letters=PARTIAL:" + ";".join(state["letters_partial"]) if state["letters_partial"] else "")
+                     + "".join(" %s=DEFERRED_%d_RUNS" % item for item in state["deferred_streak_alerts"].items()))
             print(json.dumps({"status": "PASS", "mode": state["mode"],
                               "deferred_steps": state["deferred_steps"],
                               "receipt": str(run_dir / "receipt.json") if smoke else str(root / RECEIPT),

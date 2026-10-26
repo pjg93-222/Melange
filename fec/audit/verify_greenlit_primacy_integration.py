@@ -76,7 +76,10 @@ def main():
     culling_status = load_json('data/legislation/legislation_culling_status.json')
     rank_delta = load_json('legislation_rank_delta.json')
     dashboard = load_json('dashboard_data.json')
-    tags = PF.load_tags(ROOT / 'bill_beneficiary_tags.ndjson')
+    # D-263: through effective_tags WITH the root, like every other tag-loading site, so the auto-promoted letters' sidecar tags are
+    # part of the act universe this verifier closes over (its other, older pins on the tracked file are a separate follow-up).
+    from legislation import sentinel_admissions as SA
+    tags = SA.effective_tags(PF.load_tags(ROOT / 'bill_beneficiary_tags.ndjson'), SA.load(ROOT), ROOT)
     adjudicated_credits = PF.load_adjudicated_credits(
         ROOT / PF.ADJUDICATION_LEDGER
     )
@@ -206,6 +209,11 @@ def main():
                 else 'bill',
                 bill.get('role'),
             )] += 1
+    # D-263: auto-promoted sign-on letters are accounted for EXACTLY by the CSV's own auto-letter rows (member x letter pairs by role,
+    # counted from manual_bill_evidence.csv by legislation/letter_tags.py, the same number the promotion receipt reports); the pin is
+    # base + that count, never "at least", and never a receipt that could disagree with the file.
+    from legislation import letter_tags as LT
+    promoted = LT.auto_letter_accounting_from_csv(str(ROOT / 'manual_bill_evidence.csv'))
     check(
         checks, 'bill and letter participation roles preserve 4:2:1 mass',
         PF.ROLE_W == {
@@ -216,8 +224,8 @@ def main():
         and role_counts[('bill', 'sponsor')] == 576
         and role_counts[('bill', 'original')] == 1953
         and role_counts[('bill', 'cosponsor')] == 2943
-        and role_counts[('letter', 'sponsor')] == 11
-        and role_counts[('letter', 'original')] == 276
+        and role_counts[('letter', 'sponsor')] == 11 + promoted.get('sponsor', 0)
+        and role_counts[('letter', 'original')] == 276 + promoted.get('original', 0)
         and role_counts[('letter', 'cosponsor')] == 0,
         str(dict(role_counts)),
     )

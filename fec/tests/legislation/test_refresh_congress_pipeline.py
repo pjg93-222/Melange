@@ -10,6 +10,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from types import SimpleNamespace
@@ -484,7 +485,8 @@ def test_expanded_chain_collects_all_bills_then_media_then_entire_canonical_chai
     names = [name for name, _, _, _ in selected]
     # DE-043/W1: media (hours, killable) precedes the repository fetch, so nothing long sits before the chain's rebind.
     # 2026-10-20: the repository-bound behavioural derivations re-run after billstatus (the media step's own copy read the old repository).
-    assert names == ["calibration", "discovery", "admissions", "votes", "media", "repository", "billstatus", *REDERIVED, "pipeline"]
+    assert names == ["calibration", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
+                     "repository", "billstatus", *REDERIVED, "pipeline"]
     assert selected[names.index("media")][1] == "collect/daily_media_refresh.py"
     assert selected[-1][1:3] == ("run_pipeline.py", [])
     assert selected[2][2] == ["--limit", "19", "--max-classifier-calls", "48"]
@@ -589,7 +591,8 @@ def test_expanded_run_echoes_owned_attempt_and_seals_immutable_media_snapshot(tm
     assert receipt["include_media"] is True
     assert receipt["status"] == "PASS"
     # 2026-10-20: the repository-bound behavioural derivations re-run between billstatus and the chain.
-    assert seen[-8:] == ["daily_media_refresh.py", "update_bill_repository.py", "refresh_billstatus_bulk.py",
+    assert seen[-10:] == ["daily_media_refresh.py", "collect_signon_letters.py", "promote_staged_letters.py",
+                          "update_bill_repository.py", "refresh_billstatus_bulk.py",
                          "behavior_panel.py", "behavioral_dispositions.py", "big5_lexcal_v2.py", "big5_hybrid.py", "run_pipeline.py"]
     immutable = Path(receipt["run_dir"]) / "daily_media_refresh_receipt.json"
     bound_hash = receipt["artifacts"][MEDIA_RECEIPT.as_posix()]["sha256"]
@@ -721,11 +724,13 @@ def test_cli_include_media_passes_expanded_mode_to_runner(monkeypatch):
 def test_smoke_skips_discovery_spends_no_model_call_and_keeps_the_full_chain():
     selected = pipeline.steps(32, smoke=True)
     names = [name for name, _, _, _ in selected]
-    assert names == ["calibration", "discovery", "admissions", "votes", "media",
+    assert names == ["calibration", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
                      "repository", "billstatus", *REDERIVED, "pipeline"]
     by_name = {name: (script, args) for name, script, args, _ in selected}
     # Discovery is recorded in order but has no script, so it is never launched.
     assert by_name["discovery"][0] is None
+    # D-263: smoke makes no letter request and only dry-runs the promoter.
+    assert by_name["letters"][0] is None and by_name["letters_promote"] == ("legislation/promote_staged_letters.py", ["--dry-run"])
     assert by_name["admissions"] == ("legislation/refresh_sentinel_admissions.py",
                                      ["--limit", "1", "--no-llm", "--no-install"])
     # The steps that were measured as cheap keep their full production scope.
@@ -1026,6 +1031,18 @@ def test_step_events_carry_position_and_media_partials_reach_the_status_row(tmp_
     assert "PARTIAL: press" in completed_media[2]
 
 
+def letters_ok(tmp_path, script):
+    """What the real letters children leave behind after a clean run (the runner now reads it; see letters_run_problems)."""
+    from datetime import datetime, timezone
+    stamp = datetime.fromtimestamp(pipeline.time.time(), timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    d = tmp_path / "data" / "legislation" / "letters"
+    d.mkdir(parents=True, exist_ok=True)
+    if script == "collect_signon_letters.py":
+        (d / "collector_receipt.json").write_text(json.dumps({"started_at": stamp, "status": "PASS"}), encoding="utf-8")
+    if script == "promote_staged_letters.py":
+        (d / "promoter_status.json").write_text(json.dumps({"run_at": stamp, "status": "PASS", "dry_run": False}), encoding="utf-8")
+
+
 def test_partial_media_receipt_is_a_non_fatal_success_recorded_on_the_run(tmp_path, monkeypatch):
     write_json(tmp_path, "ranks_python.json", {"rank": {"Member A": 1}})
     freeze_clocks(monkeypatch)
@@ -1036,6 +1053,7 @@ def test_partial_media_receipt_is_a_non_fatal_success_recorded_on_the_run(tmp_pa
     def launch(command, **kwargs):
         script = Path(command[1]).name
         seen.append(script)
+        letters_ok(tmp_path, script)
         if script == "daily_media_refresh.py":
             write_json(tmp_path, MEDIA_RECEIPT, {
                 "schema": "daily-media-refresh-receipt-v1", "status": "PARTIAL",
@@ -1050,7 +1068,8 @@ def test_partial_media_receipt_is_a_non_fatal_success_recorded_on_the_run(tmp_pa
     assert pipeline.run(tmp_path, include_media=True) == 0
     # The canonical chain ran behind the PARTIAL media step: it is not fatal.
     # 2026-10-20: the repository-bound behavioural derivations re-run between billstatus and the chain.
-    assert seen[-8:] == ["daily_media_refresh.py", "update_bill_repository.py", "refresh_billstatus_bulk.py",
+    assert seen[-10:] == ["daily_media_refresh.py", "collect_signon_letters.py", "promote_staged_letters.py",
+                          "update_bill_repository.py", "refresh_billstatus_bulk.py",
                          "behavior_panel.py", "behavioral_dispositions.py", "big5_lexcal_v2.py", "big5_hybrid.py", "run_pipeline.py"]
     receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
     # The congress run itself stays PASS; the media gap is named beside it.
@@ -1074,6 +1093,7 @@ def test_a_clean_media_receipt_adds_no_partial_noise(tmp_path, monkeypatch):
 
     def launch(command, **kwargs):
         script = Path(command[1]).name
+        letters_ok(tmp_path, script)
         if script == "daily_media_refresh.py":
             media_receipt(tmp_path)
         elif script == "run_pipeline.py":
@@ -1128,7 +1148,7 @@ def test_w1_media_precedes_repository_fetch():
         assert names[names.index("billstatus") + 1:-1] == REDERIVED   # nothing else between billstatus and the chain
     # Without media the order is unchanged.
     assert [name for name, _, _, _ in pipeline.steps(19)] == [
-        "calibration", "discovery", "admissions", "votes", "repository", "billstatus", "pipeline"]
+        "calibration", "discovery", "admissions", "votes", "letters", "letters_promote", "repository", "billstatus", "pipeline"]
 
 
 REDERIVE_ENV = "CONGRESS_REDERIVE"
@@ -1147,10 +1167,11 @@ def test_congress_rederive_zero_is_the_revert_switch_and_skips_exactly_the_four_
     monkeypatch.setenv(REDERIVE_ENV, "0")
     for mode in ({"include_media": True}, {"smoke": True}):
         names = [name for name, _, _, _ in pipeline.steps(19, **mode)]
-        assert names == ["calibration", "discovery", "admissions", "votes", "media", "repository", "billstatus", "pipeline"]
+        assert names == ["calibration", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
+                         "repository", "billstatus", "pipeline"]
     # Without media there was never a re-derivation, so the dial changes nothing (and a bad value there is not its business).
     assert [n for n, _, _, _ in pipeline.steps(19)] == [
-        "calibration", "discovery", "admissions", "votes", "repository", "billstatus", "pipeline"]
+        "calibration", "discovery", "admissions", "votes", "letters", "letters_promote", "repository", "billstatus", "pipeline"]
     monkeypatch.setenv(REDERIVE_ENV, "off")
     assert [n for n, _, _, _ in pipeline.steps(19)][-1] == "pipeline"
 
@@ -1505,3 +1526,172 @@ def test_a_denied_receipt_write_is_still_fatal(tmp_path, monkeypatch):
     receipt = pipeline.read(run_dir / "receipt.json")
     assert receipt["status"] == "FAILED" and "PermissionError" in receipt["error"]
     assert not (tmp_path / pipeline.RECEIPT).exists()
+
+
+# --- D-263: member sign-on letters (collector + promoter) -----------------------------------------
+
+
+def test_letters_run_after_media_and_before_the_repository_and_the_chain():
+    selected = pipeline.steps(13)
+    names = [name for name, _, _, _ in selected]
+    assert names.index("votes") < names.index("letters") < names.index("letters_promote") < names.index("repository") < names.index("pipeline")
+    assert [name for name, _, _, _ in pipeline.steps(13, include_media=True)].index("media") < \
+        [name for name, _, _, _ in pipeline.steps(13, include_media=True)].index("letters")
+    by_name = {name: (script, args) for name, script, args, _ in selected}
+    assert by_name["letters"] == ("collect/collect_signon_letters.py", ["--committee", "--from-press"])
+    assert by_name["letters_promote"] == ("legislation/promote_staged_letters.py", [])
+    assert {"letters", "letters_promote"} <= set(pipeline.RETRYABLE_STEPS)
+
+
+@pytest.mark.parametrize("failing, work", [("collect_signon_letters.py", "sign-on letter collection"),
+                                           ("promote_staged_letters.py", "sign-on letter promotion")])
+def test_a_letters_step_failing_twice_defers_without_failing_the_day(tmp_path, monkeypatch, failing, work):
+    write_json(tmp_path, "ranks_python.json", {"rank": {"Member A": 1}})
+    monkeypatch.setattr(pipeline, "DISCOVERY_RETRY_DELAY_SECONDS", 0)
+    monkeypatch.setattr(pipeline.time, "sleep", lambda seconds: None)
+    seen = []
+
+    def launch(command, **kwargs):
+        script = Path(command[1]).name
+        seen.append(script)
+        if script == "run_pipeline.py":
+            install_generation(tmp_path)
+        return CompletedProcess(1 if script == failing else 0)
+
+    monkeypatch.setattr(pipeline.subprocess, "Popen", launch)
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    name = "letters" if failing.startswith("collect") else "letters_promote"
+    assert receipt["status"] == "PASS" and receipt["deferred_steps"] == [name]
+    row = next(r for r in receipt["steps"] if r["step"] == name)
+    assert row["status"] == "DEFERRED" and row["note"].startswith("%s collector failed twice (rc=1, rc=1); %s deferred to the next run" % (name, work))
+    assert seen.count(failing) == 2 and "run_pipeline.py" in seen
+
+
+# --- D-263 review ruling 10: LETTERS_PROMOTE, the revert dial -------------------------------------------------------------------
+
+def test_letters_promote_zero_turns_the_promoter_step_into_a_dry_run(monkeypatch):
+    by_name = lambda: {name: args for name, _, args, _ in pipeline.steps(19)}
+    monkeypatch.delenv("LETTERS_PROMOTE", raising=False)
+    assert by_name()["letters_promote"] == []
+    monkeypatch.setenv("LETTERS_PROMOTE", "1")
+    assert by_name()["letters_promote"] == []
+    monkeypatch.setenv("LETTERS_PROMOTE", "0")
+    assert by_name()["letters_promote"] == ["--dry-run"] and by_name()["letters"] == ["--committee", "--from-press"]
+
+
+@pytest.mark.parametrize("bad", ["off", "2", "true", "no"])
+def test_letters_promote_rejects_any_other_value_and_the_run_fails_with_a_receipt(tmp_path, monkeypatch, bad):
+    monkeypatch.setenv("LETTERS_PROMOTE", bad)
+    with pytest.raises(ValueError, match="LETTERS_PROMOTE"):
+        pipeline.steps(19)
+    write_json(tmp_path, "ranks_python.json", {"rank": {"Member A": 1}})
+    monkeypatch.setattr(pipeline.subprocess, "Popen", lambda *a, **k: pytest.fail("no step may start on a bad dial"))
+    assert pipeline.run(tmp_path) == 1
+    status = pipeline.read(tmp_path / pipeline.STATUS)
+    assert status["status"] == "FAILED" and "LETTERS_PROMOTE" in status["error"]
+
+
+# --- D-263 review rulings 8 and 9: a PARTIAL letters run never reads as a clean PASS; a step stuck in DEFERRED is flagged -------------
+
+def stamp_now():
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def letters_world(tmp_path, monkeypatch, collector="missing", promoter="missing", failing=None, previous_receipt=None):
+    """Run the wrapper with fake children; the letters children write the receipt/status the real ones would (a dict, or 'missing')."""
+    write_json(tmp_path, "ranks_python.json", {"rank": {"Member A": 1}})
+    if previous_receipt is not None:
+        write_json(tmp_path, str(pipeline.RECEIPT), previous_receipt)
+    monkeypatch.setattr(pipeline, "DISCOVERY_RETRY_DELAY_SECONDS", 0)
+    monkeypatch.setattr(pipeline.time, "sleep", lambda seconds: None)
+    d = tmp_path / "data" / "legislation" / "letters"
+
+    def launch(command, **kwargs):
+        script = Path(command[1]).name
+        if script == "run_pipeline.py":
+            install_generation(tmp_path)
+        d.mkdir(parents=True, exist_ok=True)
+        if script == "collect_signon_letters.py" and collector != "missing":
+            (d / "collector_receipt.json").write_text(json.dumps(dict({"started_at": stamp_now()}, **collector)), encoding="utf-8")
+        if script == "promote_staged_letters.py" and promoter != "missing":
+            (d / "promoter_status.json").write_text(json.dumps(dict({"run_at": stamp_now()}, **promoter)), encoding="utf-8")
+        return CompletedProcess(1 if script == failing else 0)
+
+    monkeypatch.setattr(pipeline.subprocess, "Popen", launch)
+    events = []
+    monkeypatch.setattr(pipeline, "_emit", lambda *args, **kwargs: events.append((args, kwargs)))
+    return events
+
+
+def summary_of(events):
+    return next(args for args, kwargs in events if args[:2] == ("refresh.run", "completed"))[2]
+
+
+def test_a_partial_collector_run_is_named_in_the_receipt_the_step_row_and_the_summary(tmp_path, monkeypatch):
+    events = letters_world(tmp_path, monkeypatch, collector={"status": "PARTIAL", "hosts_refused": {"x.house.gov": "robots.txt"}, "errors": 2,
+                                                              "cap_hit": True, "gaps": ["listing_unparsed:fs_minority"]},
+                           promoter={"status": "PASS", "dry_run": False})
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    assert receipt["status"] == "PASS" and len(receipt["letters_partial"]) == 1
+    text = receipt["letters_partial"][0]
+    assert text.startswith("letters:collector PARTIAL") and "x.house.gov" in text and "errors 2" in text and "cap_hit" in text and "listing_unparsed:fs_minority" in text
+    row = next(r for r in receipt["steps"] if r["step"] == "letters")
+    assert row["letters_partial"] == receipt["letters_partial"]
+    assert "letters PARTIAL" in summary_of(events) and "x.house.gov" in summary_of(events)
+
+
+def test_a_partial_promoter_status_is_surfaced_too(tmp_path, monkeypatch):
+    events = letters_world(tmp_path, monkeypatch, collector={"status": "PASS"},
+                           promoter={"status": "PARTIAL", "error": "csv_changed_during_promotion", "dry_run": False})
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    assert receipt["letters_partial"] == ["letters:promoter PARTIAL (csv_changed_during_promotion)"]
+    assert "letters PARTIAL" in summary_of(events)
+
+
+def test_clean_letters_steps_add_nothing_to_the_summary(tmp_path, monkeypatch):
+    events = letters_world(tmp_path, monkeypatch, collector={"status": "PASS"}, promoter={"status": "PASS", "dry_run": False})
+    assert pipeline.run(tmp_path) == 0
+    assert pipeline.read(tmp_path / pipeline.RECEIPT)["letters_partial"] == [] and "letters" not in summary_of(events)
+
+
+def test_a_missing_or_stale_letters_receipt_is_itself_a_problem_never_a_silent_pass(tmp_path, monkeypatch):
+    events = letters_world(tmp_path, monkeypatch)                                    # the children wrote nothing
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    assert [p.split(" ")[0] for p in receipt["letters_partial"]] == ["letters:collector", "letters:promoter"]
+    assert all("missing" in p for p in receipt["letters_partial"]) and "letters PARTIAL" in summary_of(events)
+
+
+def test_a_receipt_older_than_this_step_does_not_count_as_this_runs_pass(tmp_path, monkeypatch):
+    d = tmp_path / "data" / "legislation" / "letters"
+    d.mkdir(parents=True)
+    (d / "collector_receipt.json").write_text(json.dumps({"started_at": "2026-01-01T00:00:00Z", "status": "PASS"}), encoding="utf-8")
+    letters_world(tmp_path, monkeypatch, promoter={"status": "PASS", "dry_run": False})
+    assert pipeline.run(tmp_path) == 0
+    (stale,) = pipeline.read(tmp_path / pipeline.RECEIPT)["letters_partial"]
+    assert stale.startswith("letters:collector receipt is stale")
+
+
+def test_the_deferred_streak_counts_consecutive_runs_and_is_flagged_after_three(tmp_path, monkeypatch):
+    ok = {"collector": {"status": "PASS"}, "promoter": {"status": "PASS", "dry_run": False}}
+    events = letters_world(tmp_path, monkeypatch, failing="collect_signon_letters.py", previous_receipt={"deferred_streaks": {"letters": 2}}, **ok)
+    assert pipeline.run(tmp_path) == 0
+    assert pipeline.read(tmp_path / pipeline.RECEIPT)["deferred_streaks"]["letters"] == 3 and "in a row" not in summary_of(events)
+    shutil.rmtree(tmp_path / "audits" / "congress_pipeline")    # the run directory is stamped to the second and created exist_ok=False
+    events = letters_world(tmp_path, monkeypatch, failing="collect_signon_letters.py", previous_receipt={"deferred_streaks": {"letters": 3}}, **ok)
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    assert receipt["deferred_streaks"]["letters"] == 4 and "letters DEFERRED 4 runs in a row" in summary_of(events)
+    assert receipt["deferred_streak_alerts"] == {"letters": 4}
+
+
+def test_a_step_that_completes_resets_its_streak(tmp_path, monkeypatch):
+    letters_world(tmp_path, monkeypatch, previous_receipt={"deferred_streaks": {"letters": 5, "discovery": 2}},
+                  collector={"status": "PASS"}, promoter={"status": "PASS", "dry_run": False})
+    assert pipeline.run(tmp_path) == 0
+    streaks = pipeline.read(tmp_path / pipeline.RECEIPT)["deferred_streaks"]
+    assert streaks["letters"] == 0 and streaks["discovery"] == 0

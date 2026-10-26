@@ -2109,7 +2109,7 @@ if _g:
     _tag_count=len(_tag_rows)
     from legislation import sentinel_admissions as _SA
     _admissions=_SA.load(B)
-    _effective_tags=_SA.effective_tags({'%s|%s'%(r['bill'],r['congress']):r for r in _tag_rows},_admissions)
+    _effective_tags=_SA.effective_tags({'%s|%s'%(r['bill'],r['congress']):r for r in _tag_rows},_admissions,B)
     _tag_keys={'%s|%s'%(str(row.get('bill') or '').strip(),
                         str(row.get('congress') or '').strip())
                for row in _effective_tags.values()}
