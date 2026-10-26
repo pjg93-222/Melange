@@ -48,7 +48,7 @@ def sentinel_scoring_mask(frame):
     verified=text_column('Review Status').eq('verified')
     membership=text_column('Record Type').eq('membership')
     return eligible & verified & membership
-A=pd.read_excel(sorted(glob.glob(_o.path.join(MB_ROOT, 'congress_bills_archive_*.xlsx')))[-1],sheet_name='All Bills')
+A=pd.read_excel(__import__('source_select').select_archive(glob.glob(_o.path.join(MB_ROOT, 'congress_bills_archive_*.xlsx')),root=MB_ROOT),sheet_name='All Bills')
 _archive_rows=len(A)   # only the archive rows carry the bill-level Sponsor column;
                        # sentinel and manual evidence arrive with that cell blank.
 # The verified sentinel is persisted to the canonical workbook before this
@@ -326,7 +326,7 @@ print('shared false-positive exclusions: %d rows; override rows: %d (excluded %d
       sum(duplicate_rows.values())))
 dump_atomic({m:dict(leg[m]) for m in leg},_o.path.join(MB_ROOT, 'archive_leg.json'))
 dump_atomic({'schema':'legislation-routing-audit-v1',
-             'source':_o.path.basename(sorted(glob.glob(_o.path.join(MB_ROOT, 'congress_bills_archive_*.xlsx')))[-1])+
+             'source':_o.path.basename(__import__('source_select').select_archive(glob.glob(_o.path.join(MB_ROOT, 'congress_bills_archive_*.xlsx')),root=MB_ROOT))+
                       ' + Sentinel Bill Ledger',
              'source_rows':len(A),'selected_events':len(events),
              'sentinel_ledger_rows':_sentinel_n,

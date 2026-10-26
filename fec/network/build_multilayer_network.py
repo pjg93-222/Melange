@@ -92,7 +92,7 @@ elif CFG=='holistic_norm':
 else:
     srcs=glob.glob(os.path.join(B, 'holistic_network_BASE_*.xlsx'))
     if not srcs: raise SystemExit('NET_CONFIG=holistic: no holistic_network_BASE_*.xlsx at root (fail-closed; the augmenter never bases on the CU family in holistic mode)')
-src=max(srcs,key=os.path.getmtime)
+import source_select; src=source_select.select_network(srcs,'exclude',root=B) if CFG=='cu' else max(srcs,key=os.path.getmtime)  # holistic families stay mtime (out of SEL scope)
 ws=openpyxl.load_workbook(src,data_only=True)['Edges']
 edges={}; deg=collections.Counter()
 _drop=cu_dropped_sponsors(src); dropped_misattributed=0   # CU_IDENTITY_FIX (decision G 2026-10-11)

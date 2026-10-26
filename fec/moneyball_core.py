@@ -419,7 +419,7 @@ def select_network_file(files):
     files=[str(f) for f in files]
     if not files: raise FileNotFoundError('no congress_cosponsor_network_*.xlsx files found')
     augmented=[f for f in files if 'AUG' in os.path.basename(f).upper()]
-    return max(augmented or files,key=os.path.getmtime)
+    import source_select; return source_select.select_network(files,'prefer',root=ROOT)
 # ---- NETWORK REGISTRY (sector promotion 2026-08-18) ------------------------------------------
 # Paul promoted bank_reg and crypto from audit-only diagnostics to full networks. That took the
 # config count from 3 to 5, and the blast-radius census warned that doing it by copy-paste means
@@ -549,7 +549,7 @@ def select_network_file_directed(files):
     The base scrape is the authority (45.7% source<target, 45 genuinely reciprocal dyads)."""
     files=[str(f) for f in files if 'AUG' not in os.path.basename(str(f)).upper()]
     if not files: raise FileNotFoundError('no non-augmented congress_cosponsor_network_*.xlsx found')
-    return max(files,key=os.path.getmtime)
+    import source_select; return source_select.select_network(files,'exclude',root=ROOT)
 def load_network_directed():
     """DIRECTED sponsor -> cosponsor edges, name-keyed:  {sponsor: {cosponsor: weight}}.
 

@@ -27,7 +27,7 @@ with open(PRODUCER, encoding='utf-8') as _handle:
     SOURCE = _handle.read()
 
 ROW_LOOP = 'for _idx,r in A.iterrows():'
-ARCHIVE_READ = "A=pd.read_excel(sorted(glob.glob(_o.path.join(MB_ROOT, 'congress_bills_archive_*.xlsx')))[-1]"
+ARCHIVE_READ = "A=pd.read_excel(__import__('source_select').select_archive(glob.glob(_o.path.join(MB_ROOT, 'congress_bills_archive_*.xlsx')),root=MB_ROOT)"
 CALL = '_sponsor_column_rows=SC.sponsor_rows_from_column('
 
 

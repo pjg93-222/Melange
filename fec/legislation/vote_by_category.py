@@ -2,7 +2,7 @@ import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.dirname(_o.pa
 from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 import pandas as pd, csv, sys, re, glob, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-ARCH=sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1]
+import source_select; ARCH=source_select.select_archive(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'),root=MB_ROOT)
 a=pd.read_excel(ARCH,sheet_name='All Bills')
 def billkey(name,cong):
     if not isinstance(name,str) or pd.isna(cong): return None

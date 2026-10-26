@@ -194,7 +194,7 @@ def main():
     if not cu_files:
         print('\n[3-4] SKIPPED (not passed): no CU base workbook at %s.' % B)
         return
-    cu = os.environ.get('CU_BASE') or max(cu_files, key=os.path.getmtime)
+    cu = os.environ.get('CU_BASE') or __import__('source_select').select_network(cu_files, 'exclude', root=B)
     hol_out = directed_edges(hol)
     cu_out = directed_edges(cu)
     print('\n    ground truth: %s | CU base: %s' % (os.path.basename(hol), os.path.basename(cu)))
