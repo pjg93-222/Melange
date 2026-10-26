@@ -209,6 +209,23 @@ class AccessHTTPTests(unittest.TestCase):
         with self.store.connect() as db:
             self.assertEqual(db.execute('SELECT COUNT(*) FROM requests').fetchone()[0], 1)
 
+    def test_body_read_restores_the_socket_timeout_before_the_answer(self):
+        cls = handler_for(self.publisher, False, self.packs)
+        handler, timeouts, body = cls.__new__(cls), [], b'{"a":1}'
+        class Connection:
+            def gettimeout(self): return 30
+            def settimeout(self, value): timeouts.append(value)
+        headers = {'Content-Type': 'application/json', 'Content-Length': str(len(body))}
+        handler.headers = type('Headers', (), {'get': lambda _self, key, default=None: headers.get(key, default)})()
+        handler.path, handler.connection, handler.rfile = '/v1/access/requests', Connection(), io.BytesIO(body)
+        self.assertEqual(handler.access_body(), {'a': 1})
+        self.assertEqual(timeouts[-1], 30)
+        timeouts.clear()
+        handler.rfile = io.BytesIO(b'{"a"')  # short body: refused, and the timeout is still restored
+        with self.assertRaises(HTTPRefused):
+            handler.access_body()
+        self.assertEqual(timeouts[-1], 30)
+
     def test_rate_limit_is_bounded_and_recovers_after_window(self):
         clock = [0]
         limiter = RateLimit(clock=lambda: clock[0])

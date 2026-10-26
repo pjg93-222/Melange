@@ -24,7 +24,7 @@ import time
 import uuid
 import zipfile
 
-from desktop_admin import Refused, atomic_write, canonical, protect_directory
+from desktop_admin import Refused, atomic_write, canonical, protect_directory, replace_file
 from access_store import event_scope
 
 REQUIRED = ('contacts.sqlite3', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3', 'density.json')
@@ -167,7 +167,7 @@ def store_object(source, objects):
             sha256 = hashlib.file_digest(stream, 'sha256').hexdigest()
         size = temporary.stat().st_size
         if not (objects / sha256).exists():  # content-addressed; an existing object may be streaming right now
-            os.replace(temporary, objects / sha256)
+            replace_file(temporary, objects / sha256)
         return {'sha256': sha256, 'size': size, 'rawSize': raw_size}
     finally:
         temporary.unlink(missing_ok=True)

@@ -406,3 +406,28 @@ def test_serve_refuses_a_junk_enforcement_value_before_listening(store, monkeypa
 def test_junk_enforcement_value_does_not_affect_other_commands(store, monkeypatch):
     monkeypatch.setenv('MELANGE_ACCESS_REQUIRE_INVITE', 'enabled')
     assert main(['--state', str(store.root), 'devices']) == 0
+
+
+@pytest.mark.skipif(os.name != "nt", reason="the retry is for Windows sharing violations only")
+def test_replace_sites_ride_out_a_brief_destination_lock(tmp_path, monkeypatch):
+    import desktop_admin, district_packs, access_store
+    real, calls = os.replace, []
+    def locked_once(source, destination):
+        calls.append(destination)
+        if len(calls) == 1:
+            raise PermissionError(13, "Access is denied")
+        real(source, destination)
+    monkeypatch.setattr(desktop_admin.os, "replace", locked_once)
+    monkeypatch.setattr(desktop_admin.time, "sleep", lambda _wait: None)
+    source = tmp_path / "pack.json"
+    source.write_bytes(b"{}")
+    objects = tmp_path / "objects"
+    objects.mkdir()
+    stored = district_packs.store_object(source, objects)  # district_packs site
+    assert (objects / stored["sha256"]).is_file() and len(calls) == 2
+    calls.clear()
+    staging, target = tmp_path / "access.initializing", tmp_path / "access.sqlite3"
+    staging.write_bytes(b"db")
+    desktop_admin.replace_file(staging, target)  # shared helper used by access_store and Store.publish
+    assert target.read_bytes() == b"db" and len(calls) == 2
+    assert access_store.replace_file is desktop_admin.replace_file and district_packs.replace_file is desktop_admin.replace_file
