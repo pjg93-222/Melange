@@ -393,6 +393,18 @@ def test_parity_refuses_a_non_finite_weight_on_either_side(tmp_path, monkeypatch
         assert PG.write_billset('x.csv', str(out)) != 0 and not out.exists()
 
 
+def test_edge_growth_uses_the_checkpoint_bill_set_not_the_persisted_file():
+    # CodeRabbit PR #83: the default (R-faithful) network call must use the checkpoint-derived counts.
+    import ast
+    from network import cr_edge_growth as EG
+    tree = ast.parse(open(EG.__file__, encoding='utf-8').read())
+    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, 'attr', '') == 'network_edges'
+             and n.args and isinstance(n.args[0], ast.Constant) and n.args[0].value == 'r']
+    assert len(calls) == 1
+    kw = {k.arg: ast.unparse(k.value) for k in calls[0].keywords}
+    assert kw.get('billset') == '{k: len(v) for k, v in rkeys.items()}'
+
+
 def test_edge_growth_last_action_is_recomputed_for_bills_outside_the_seed():
     from network import cr_edge_growth as EG
     passed = [('2025-02-01', '8000', 'Floor', 'Passed/agreed to in House')]

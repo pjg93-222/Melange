@@ -87,7 +87,10 @@ def main(csv_path, run_dir, raw_root=None, legacy=False):
     if legacy:
         edges, _, labels = L.network_edges('archive', 'dedupe', rows, bills, roster, seed)
     else:
-        edges, _, labels = L.network_edges('r', 'per-section', rows, bills, roster, seed)
+        # the bill set comes from the checkpoint being analysed (same derivation as write_billset), not from the
+        # persisted billset file, so a different checkpoint or a stale file cannot skew S3 (CodeRabbit PR #83)
+        edges, _, labels = L.network_edges('r', 'per-section', rows, bills, roster, seed,
+                                           billset={k: len(v) for k, v in rkeys.items()})
         W[4] = W[3]
     for key, w in W[4].items():
         W[5][key] += w
