@@ -1,6 +1,7 @@
 'use strict';
 const path=require('node:path'),fs=require('node:fs');
 const {execFile}=require('node:child_process');
+const {THUMBPRINT:PINNED}=require('./publisher-trust.cjs');
 
 // Fixed source; the file path is JSON data on stdin, never executable shell text.
 const SCRIPT="$ProgressPreference='SilentlyContinue'; $ErrorActionPreference='Stop'; $inputData=[Console]::In.ReadToEnd() | ConvertFrom-Json; $signature=Get-AuthenticodeSignature -LiteralPath $inputData.path; [ordered]@{status=[int]$signature.Status; path=$signature.Path; thumbprint=$signature.SignerCertificate.Thumbprint} | ConvertTo-Json -Compress";
@@ -21,7 +22,9 @@ function signatureTimeoutMs(bytes){
 function pinnedThumbprints(thumbprints){
   if(!Array.isArray(thumbprints)||!thumbprints.length||!thumbprints.every(value=>typeof value==='string'&&THUMBPRINT.test(value)))
     throw new Error('The signed release manifest names no publisher thumbprint; this installer is refused.');
-  return thumbprints;
+  // D-328/T18: the client pin is the publisher; the signed manifest may only confirm it, never widen it.
+  if(!thumbprints.includes(PINNED))throw new Error('The signed release manifest does not name the pinned publisher thumbprint; this installer is refused.');
+  return [PINNED];
 }
 function verifySignatureResult(result,filename,thumbprints){
   const allowed=pinnedThumbprints(thumbprints);

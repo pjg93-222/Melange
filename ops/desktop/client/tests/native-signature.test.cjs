@@ -16,6 +16,16 @@ test('native signature requires a pinned signer thumbprint and the exact install
     assert.throws(()=>verifySignatureResult(result,filename,pins),/could not be verified/);
   for(const pins of [undefined,null,[],'0EBC',[PIN.toLowerCase()]])assert.throws(()=>verifySignatureResult(valid,filename,pins),/names no publisher thumbprint/);
 });
+test('T18 (D-328): the signer must equal the client-pinned thumbprint AND be on the manifest allow-list',()=>{
+  const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename});
+  verifySignatureResult(signed(PIN),filename,[PIN]);
+  verifySignatureResult(signed(PIN.toLowerCase()),filename,[PIN]);
+  // A manifest that names another publisher (even alone, even as the signer) cannot widen the client pin.
+  for(const [signer,pins] of [[OTHER,[OTHER]],[OTHER,[PIN,OTHER]],[PIN,[OTHER]]])
+    assert.throws(()=>verifySignatureResult(signed(signer),filename,pins),/could not be verified|does not name the pinned publisher thumbprint/);
+  for(const status of [2,3])assert.throws(()=>verifySignatureResult({...signed(PIN),status},filename,[PIN]),/could not be verified/);
+  assert.throws(()=>verifySignatureResult({...signed(PIN),path:'C:\Other\Package.exe'},filename,[PIN]),/could not be verified/);
+});
 test('signature tool failures without a verdict are tagged; a parsed refusal is not',async()=>{
   const childProcess=require('node:child_process'),realExecFile=childProcess.execFile,platform=Object.getOwnPropertyDescriptor(process,'platform');
   const filename=tempPackage(1),pins=[PIN],modulePath=require.resolve('../native-signature.cjs');
