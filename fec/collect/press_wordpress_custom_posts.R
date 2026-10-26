@@ -87,12 +87,18 @@ press_wp_header_integer <- function(response, name) {
 }
 
 press_wp_json <- function(response, endpoint) {
-  if (is.null(response$status) || response$status != 200L ||
-      length(response$text) != 1L || is.na(response$text) || !nzchar(response$text))
+  if (is.null(response$status) || response$status != 200L)
     stop("invalid official WordPress response: ", endpoint)
+  # An HTTP-200 body that is empty or not JSON is the site being unavailable, not an integrity violation
+  # (CodeRabbit PR #77): classed, so the member is recorded and skipped instead of aborting the walk.
+  if (length(response$text) != 1L || is.na(response$text) || !nzchar(response$text))
+    press_site_unavailable(paste0("official WordPress endpoint returned an empty body: ", endpoint),
+                           endpoint, status = "200", error_class = "non_json")
   tryCatch(
     jsonlite::fromJSON(response$text, simplifyVector = FALSE),
-    error = function(error) stop("invalid official WordPress JSON: ", endpoint)
+    error = function(error)
+      press_site_unavailable(paste0("official WordPress endpoint returned malformed JSON: ", endpoint),
+                             endpoint, status = "200", error_class = "non_json")
   )
 }
 

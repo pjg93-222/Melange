@@ -249,4 +249,17 @@ stopifnot(press_site_error_class(403L, "") == "http_403",
           press_site_error_class(NA, "SSL certificate problem") == "ssl",
           press_site_error_class(NA, "Could not resolve host") == "network_error")
 
+# An HTTP-200 body that is empty or malformed JSON is site unavailability (classed non_json, so the member is
+# recorded and skipped), while a non-200 response reaching the parser stays an ordinary fatal error.
+parser <- fixture(list())$env
+body_class <- function(text) tryCatch(
+  { parser$press_wp_json(list(status = 200L, text = text), "https://example.senate.gov/wp-json/wp/v2/types"); "parsed" },
+  press_site_unavailable = function(condition) condition$error_class,
+  error = function(error) "fatal")
+stopifnot(body_class("") == "non_json", body_class("{not json") == "non_json",
+          body_class(NA_character_) == "non_json", body_class("{\"ok\": true}") == "parsed",
+          identical(tryCatch(parser$press_wp_json(list(status = 500L, text = "{}"), "e"),
+                             press_site_unavailable = function(condition) "classed",
+                             error = function(error) "fatal"), "fatal"))
+
 cat("PASS: official custom-post pagination, exact dates, canonical identity, body seeding, provenance rejection and retained caches\n")

@@ -91,7 +91,10 @@ def upsert(failures, run_id, now=None, queue_path=None):
 
 def open_count(queue_path=None):
     try:
-        return sum(1 for row in _read(queue_path or QUEUE_PATH) if row.get("status") == "open")
+        rows = _read(queue_path or QUEUE_PATH)
+        if not all(isinstance(row, dict) for row in rows):
+            return -1                         # a non-object row is damage: unreadable, never a clean zero
+        return sum(1 for row in rows if row.get("status") == "open")
     except (OSError, ValueError):
         return -1                             # unreadable: say so, never report a clean zero
 

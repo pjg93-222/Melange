@@ -196,9 +196,15 @@ def test_weekly_reports_pass_only_for_a_clean_run_folder_and_unknown_without_one
     ns, logs, status, emits = weekly_namespace(tmp_path, datetime.datetime.now())
     ns["_press_failure_status"]()
     assert status["press_status"] == "UNKNOWN" and status["press_failures_open"] == 0   # no run folder: not PASS
-    write_run(tmp_path, TODAY_RUN, [])
+    run = write_run(tmp_path, TODAY_RUN, [])
+    ns["_press_failure_status"]()
+    assert status["press_status"] == "UNKNOWN"        # no walk receipt: the run is incomplete, never PASS
+    (run / "press_network_retry_receipt.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
     ns["_press_failure_status"]()
     assert status["press_status"] == "PASS"
+    (run / "press_site_failures.json").unlink()
+    ns["_press_failure_status"]()
+    assert status["press_status"] == "UNKNOWN"        # no failures artifact either
 
 
 def old_mtime(*paths):
@@ -244,7 +250,8 @@ def test_weekly_ignores_run_folders_older_than_this_weekly(tmp_path, monkeypatch
     monkeypatch.setattr(q, "QUEUE_PATH", str(tmp_path / "queue.ndjson"))
     stale = "press_refresh_" + (datetime.date.today() - datetime.timedelta(days=9)).strftime("%Y%m%d")
     write_run(tmp_path, stale, [ROW])
-    write_run(tmp_path, TODAY_RUN, [])
+    today = write_run(tmp_path, TODAY_RUN, [])
+    (today / "press_network_retry_receipt.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
     ns, logs, status, emits = weekly_namespace(tmp_path, datetime.datetime.now())
     ns["_press_failure_status"]()
     assert status["press_status"] == "PASS"
@@ -320,3 +327,26 @@ def test_weekly_still_writes_press_status_when_a_receipt_is_unreadable(tmp_path,
     status.clear()
     ns["_press_failure_status"]()
     assert status["press_status"] == "PASS"
+
+
+def test_weekly_is_not_pass_when_the_failure_queue_is_unreadable(tmp_path, monkeypatch):
+    # CodeRabbit PR #77: open_count() returns -1 for a damaged queue, which must not sit beside a PASS.
+    queue = tmp_path / "queue.ndjson"
+    monkeypatch.setattr(q, "QUEUE_PATH", str(queue))
+    run = write_run(tmp_path, TODAY_RUN, [])
+    (run / "press_network_retry_receipt.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
+    ns, logs, status, emits = weekly_namespace(tmp_path, datetime.datetime.now())
+    for damaged in ("not json", "5", "null", "[]"):
+        queue.write_text(damaged + "\n", encoding="utf-8")
+        status.clear()
+        ns["_press_failure_status"]()
+        assert status["press_status"] == "UNKNOWN" and status["press_failures_open"] == -1, damaged
+
+
+def test_open_count_treats_a_non_object_row_as_unreadable(tmp_path):
+    queue = tmp_path / "queue.ndjson"
+    open_row = json.dumps({"status": "open"})
+    queue.write_text(open_row + "\n5\n", encoding="utf-8")
+    assert q.open_count(queue) == -1
+    queue.write_text(open_row + "\n", encoding="utf-8")
+    assert q.open_count(queue) == 1
