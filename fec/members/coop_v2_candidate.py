@@ -53,7 +53,7 @@ def joincorr(d1, d2):
     return rr([(d1[m], d2[m]) for m in d1 if m in d2 and d1[m] is not None and d2[m] is not None])
 
 # ---- parse the bills archive: cosponsor rows (with sponsor party) + bill->sponsor/cosponsor maps ----
-bp = max(glob.glob(os.path.join(B, 'congress_bills_archive_*.xlsx')), key=os.path.getmtime)
+import source_select; bp = source_select.select_archive(glob.glob(os.path.join(B, 'congress_bills_archive_*.xlsx')), root=B)
 ws = openpyxl.load_workbook(bp, read_only=True)['All Bills']
 rows = ws.iter_rows(min_row=1, values_only=True)
 hdr = [str(h or '') for h in next(rows)]

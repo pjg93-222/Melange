@@ -2109,7 +2109,7 @@ if _g:
     _tag_count=len(_tag_rows)
     from legislation import sentinel_admissions as _SA
     _admissions=_SA.load(B)
-    _effective_tags=_SA.effective_tags({'%s|%s'%(r['bill'],r['congress']):r for r in _tag_rows},_admissions)
+    _effective_tags=_SA.effective_tags({'%s|%s'%(r['bill'],r['congress']):r for r in _tag_rows},_admissions,B)
     _tag_keys={'%s|%s'%(str(row.get('bill') or '').strip(),
                         str(row.get('congress') or '').strip())
                for row in _effective_tags.values()}
@@ -2347,7 +2347,7 @@ if _g:
     ck('champions threat boards fresh vs live crown set',
        not _stale_crown_threats and not _champions_boards_missing,
        'boards.json missing -- run champions_v2' if _champions_boards_missing
-       else '%s; champions_v2 runs before make_member_desk -- rerun chain'%
+       else '%s; the threat rows include a member the desk crowns: the rank_honors generation champions_v2 read differs from the one the desk published (different HONORS_MODE/PRIMACY_BOARD env, or boards.json older than the desk) -- re-run the chain from build_rank_honors.py'%
        ', '.join('%s: %s (%s)'%(
            sector,_live_crowns.get(row.get('bioguide')),row.get('bioguide'))
            for sector,row in _stale_crown_threats))
@@ -2604,8 +2604,7 @@ try:
                 # (The earlier form asserted the picked name startswith the glob's own prefix, which
                 # is tautologically true for anything the glob returned and could never fail -- a
                 # negative control caught it.)
-                _picked = os.path.basename(max(_g.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),
-                                               key=os.path.getmtime))
+                _picked = os.path.basename(__import__('source_select').select_network(_g.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),'any',root=B))
                 _published = (_D.get('cu') or {}).get('graph')
                 ck('the CU file unfiltered max-by-mtime consumers would pick IS the published graph',
                    bool(_published) and _picked == _published,

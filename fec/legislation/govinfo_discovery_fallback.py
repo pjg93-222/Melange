@@ -17,12 +17,14 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import errno
 import hashlib
 import json
 import os
 import re
 import ssl
 import tempfile
+import time
 import unicodedata
 import urllib.error
 import urllib.request
@@ -136,9 +138,20 @@ def _require(condition: bool, message: str) -> None:
         raise FallbackError(message)
 
 
+def _read_text_retry(path: Path, attempts: int = 4) -> str:
+    # OneDrive placeholders (reparse points) transiently raise EINVAL (Errno 22) while hydrating.
+    for attempt in range(attempts):
+        try:
+            return path.read_text(encoding="utf-8-sig")
+        except OSError as error:
+            if error.errno != errno.EINVAL or attempt == attempts - 1:
+                raise
+            time.sleep(0.5 * (attempt + 1))
+
+
 def _read_json(path: Path) -> Any:
     try:
-        return json.loads(path.read_text(encoding="utf-8-sig"))
+        return json.loads(_read_text_retry(path))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise FallbackError(f"invalid JSON artifact: {path}: {error}") from error
 

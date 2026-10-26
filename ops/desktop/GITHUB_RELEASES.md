@@ -12,8 +12,9 @@ publisher private key, access credential, or recipient list belongs in an app
 or release asset. Making the repository public is an owner action; none of the
 tools here change repository visibility.
 
-> **Signing: self-signed certificate plus one-click trust (Paul's choice,
-> 2026-10-16; trust step added for 1.0.6).** Each installer is Authenticode-signed
+> **Signing: self-signed certificate; no trust step in current builds (Paul's choice,
+> 2026-10-16; the one-click trust step was added for 1.0.6 and later removed).**
+> Each installer is Authenticode-signed
 > on Paul's PC with the self-signed certificate
 > `CN=Melange Systems Desktop Release (self-signed)` (SHA-1 thumbprint
 > `0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30`; end-entity, CA:false, Code Signing
@@ -29,34 +30,14 @@ tools here change repository visibility.
 > pinned publisher subject live in the protected publisher state
 > (`server/desktop_admin.py` `init` and `trust-publisher`), outside this repository.
 >
-> A PC installs updates only when Windows reports that signer as `Valid`, that
-> is, when the public certificate is in the user's trusted roots. Trust is one
-> click, through Windows' own Yes/No security dialog, with no command line and
-> no administrator rights; it adds only that public certificate (shipped as
-> `client/melange-systems-desktop-release.cer`) to `CurrentUser\Root`:
->
-> - the installer no longer touches the certificate store (no `certutil`, nothing
->   elevated), so there is no "all users" or different-administrator account
->   mismatch: trust is always granted to the account that runs the app;
-> - the app asks once, at its first interactive launch, when Windows definitely
->   reports the certificate as not trusted and the user has not declined before
->   (a refusal is remembered). The prompt is Windows' own Yes/No dialog;
-> - until trusted, the app shows "Automatic updates are off until this PC trusts
->   the Melange Systems release certificate" in Settings, with a **Turn on
->   updates** button (also in the app menu) that asks again
->   (`client/publisher-trust.cjs`: it reads the bundled certificate once, refuses
->   any bytes whose SHA-1 is not the pinned thumbprint, and imports those same
->   in-memory bytes) and skips update downloads until trusted. Only a definite
->   "not in the store" answer counts as untrusted; if the check itself fails the
->   update check runs anyway, because Authenticode still gates every install;
-> - the certificate intentionally stays trusted after an app is uninstalled,
->   because all three apps (Melange, Mentat, Terrier) share it;
-> - PCs that already run 1.0.5 (which cannot verify updates until trusted) can
->   double-click `turn-on-updates.cmd`, published with every release: it carries
->   the certificate, refuses to import anything but the pinned thumbprint (it
->   adds the checked in-memory certificate, no temporary file), and reports the
->   result in a Windows message box. Windows SmartScreen may first ask to
->   confirm the downloaded file.
+> The app no longer asks for trust. Updates are always on and do not depend on the
+> release certificate being in the Windows trusted roots: the Ed25519 manifest, the
+> package hashes and the native Windows signer gate every install (see
+> `client/README.md`, "Update lifecycle"). Historical only: builds from 1.0.6 offered
+> one-click trust through Windows' own Yes/No dialog (`client/publisher-trust.cjs`).
+> PCs still on 1.0.5 can double-click `turn-on-updates.cmd`; the release bundle still
+> includes it (`packaging/github_release.py`, `app_assets`, `launcher=True`). It adds
+> only the pinned public certificate to `CurrentUser\Root`.
 >
 > Verified updates then apply without asking: when the app closes (silent NSIS
 > install), or, if one is still pending (for example after a shutdown), at the
@@ -152,7 +133,7 @@ occurs. The output holds one directory per app, each with exactly six files:
 
 - `<app>-win32-x64.manifest.json`, `<app>-<version>-win32-x64.exe`, `<app>-trust.json`;
 - `turn-on-updates.cmd`, byte-identical to `client/turn-on-updates.cmd` (the
-  one-click trust file above; `--verify-output` refuses any other bytes);
+  historical one-click trust launcher; `--verify-output` refuses any other bytes);
 - that app's `release.json` (with its `appId` and `repository`) and `SHA256SUMS`.
 
 A directory prepared before the trust file existed (`desktop-v1.0.5`) still
@@ -368,6 +349,11 @@ python ops\desktop\packaging\release_from_main.py --apps terrier --inject-runtim
 ```
 
 ## Publish the verified releases
+
+The actual publish path is `packaging/release_from_main.py --apps <app> --publish`
+(section "Release from main" above). It performs the same staging, verification, draft,
+upload, download-and-verify and publish steps as one command. The manual steps below are
+the same sequence for an operator who already holds a verified bundle.
 
 These are explicit operator steps after real native acceptance. They require
 an authenticated `gh` with release-write permission on each already public

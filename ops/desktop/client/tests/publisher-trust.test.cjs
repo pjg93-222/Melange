@@ -14,7 +14,11 @@ test('bundled release certificate is the pinned, public, code-signing-only, non-
 
 test('installer no longer imports the certificate; it only keeps an offline rollback copy of itself. Builder and standalone launcher use the pinned certificate in memory',()=>{
   const nsis=fs.readFileSync(path.join(root,'installer.nsh'),'utf8');
-  assert.ok(!/certutil|addstore|Root/i.test(nsis.replace(/;[^\n]*/g,'')),'no certificate import in the installer, no elevation');
+  // The Downloads-layout identifiers dlRoot / DL_ROOT_NAME / dlExedirUnderRoot / dlInstdirUnderRoot are not certificate stores; everything else stays under the broad guard.
+  const scanned=nsis.replace(/;[^\n]*/g,'').replace(/\b(dlRoot|DL_ROOT_NAME|DL_TEST_ROOT|dlInstdirUnderRoot|dlExedirUnderRoot)\b/g,'');
+  const IMPORT=/certutil|addstore|Root|TrustedPublisher|Import-Certificate|CertAdd/i;
+  assert.ok(!IMPORT.test(scanned),'no certificate import in the installer, no elevation');
+  for(const probe of ['Cert:\\CurrentUser\\AuthRoot','CertOpenSystemStore(0,"AuthRoot")','certutil -addstore','Import-Certificate','TrustedPublisher'])assert.ok(IMPORT.test(probe),'the guard still catches '+probe);
   const install=nsis.slice(nsis.indexOf('!macro customInstall'),nsis.indexOf('!macroend'));
   assert.match(install,/\$\{IfNot\} \$\{isUpdated\}\s+\$\{AndIfNot\} \$\{Silent\}\s+\$\{AndIf\} \$installMode == "CurrentUser"/,'per-user installs only');
   assert.ok(install.includes('CopyFiles /SILENT "$EXEPATH" "$LOCALAPPDATA\\${APP_ID}\\baseline\\${VERSION}\\$EXEFILE"'));

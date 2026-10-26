@@ -183,7 +183,8 @@ def main():
     for name in spec['nativeRuntimes']:
         native = options.native_root / name if options.native_root else None
         if native and native.is_dir():
-            shutil.copytree(native, output / 'native' / name, dirs_exist_ok=True, symlinks=True)
+            from bundle_python import dormant_launchers  # LAUNCH F3: e.g. LibreOffice's python-core pip/setuptools stubs
+            shutil.copytree(native, output / 'native' / name, dirs_exist_ok=True, symlinks=True, ignore=dormant_launchers)
         else:
             missing.append(name)
     (output / 'runtime-status.json').write_text(json.dumps({'appId': options.app, 'platform': sys.platform, 'missingNativeRuntimes': missing,

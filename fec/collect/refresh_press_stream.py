@@ -52,6 +52,7 @@ def collector_source_hashes():
              directory / "press_official_dated_listings.R",
              directory / "press_request_deadlines.R",
              directory / "press_backlog.R",
+             directory / "press_host_routes.R",
              Path(os.environ.get("MONEYBALL_DRAFT") or Path(ROOT).parent / "Draft Systems") / "cu_press_release_scraper.R")
     return {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
 
@@ -261,6 +262,7 @@ def main(argv=None):
             print("historical body recovery already completed; this is not fresh inventory coverage")
             return 0
     elif current_source_run(run_root, sources):
+        record_site_failures(run_root)    # idempotent: retries a queue update that failed after the seal
         print("press refresh already has a valid same-day receipt: %s" % run_root)
         return 0
     script = Path(__file__).with_name("refresh_press_delta.R")

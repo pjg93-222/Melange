@@ -522,7 +522,7 @@ def main(root='.'):
         bundle = json.load(handle)
     tags = load_tags(path('bill_beneficiary_tags.ndjson'))
     from legislation import sentinel_admissions as SA
-    tags = SA.effective_tags(tags, SA.load(root))
+    tags = SA.effective_tags(tags, SA.load(root), root)
     adjudicated_credits = load_adjudicated_credits(
         path(ADJUDICATION_LEDGER)
     )

@@ -48,7 +48,7 @@ if os.path.exists(tp):
 for m, n in tw.items(): P[m]['n_tweets'] = n
 
 # sponsorship / cosponsorship from the bills archive
-bp = max(glob.glob(B + r'\congress_bills_archive_*.xlsx'), key=os.path.getmtime)
+import source_select; bp = source_select.select_archive(glob.glob(B + r'\congress_bills_archive_*.xlsx'), root=B)
 ws = openpyxl.load_workbook(bp, read_only=True)['All Bills']
 rows = ws.iter_rows(min_row=1, values_only=True)
 hdr = [str(h or '') for h in next(rows)]
@@ -69,8 +69,7 @@ for m in C:
     if sp[m] or co[m]: P[m]['n_sponsored'] = sp[m]; P[m]['n_cosponsored'] = co[m]
 
 # cosponsor network degree (non-AUG file = pure cosponsorship)
-np_ = max([q for q in glob.glob(B + r'\congress_cosponsor_network_*.xlsx') if 'AUG' not in os.path.basename(q)],
-          key=os.path.getmtime)
+np_ = source_select.select_network(glob.glob(B + r'\congress_cosponsor_network_*.xlsx'), 'exclude', root=B)
 b2n = {info.get('bioguide'): m for m, info in C.items() if info.get('bioguide')}
 ne = openpyxl.load_workbook(np_, read_only=True, data_only=True)['Edges']
 deg = collections.Counter()

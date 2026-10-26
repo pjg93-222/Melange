@@ -5,6 +5,7 @@ const {appDefinition}=require('./apps.cjs');const {pairing,jsonRequest}=require(
 const {credentialCommand}=require('./credentials.cjs');
 const {enrollFresh,enrollApproved}=require('./enrollment.cjs');
 const {watchNetwork}=require('./lifecycle.cjs');
+const dlLayout=require('./install-layout.cjs');
 const {selectStartupProfile,confineIsolatedPath,confineIsolatedSettings,ISOLATED_TITLE_SUFFIX}=require('./profile.cjs');
 const applicationConfig=app.isPackaged?require('./package.json').desktopAppConfig:{};
 if(!applicationConfig||(app.isPackaged&&!applicationConfig.appId))throw new Error('Packaged application identity is missing.');
@@ -13,7 +14,7 @@ const githubConfig=applicationConfig.desktopUpdateSource?.provider==='github'?re
 app.setName(definition.name);
 // Without the explicit isolated switch this resolves exactly the production profile, AppUserModelId, discovery cache and login registration.
 let profile,isolationRefused=null;
-try{profile=selectStartupProfile({appId:definition.id,argv:process.argv.slice(1),home:app.getPath('home'),appData:app.getPath('appData'),documents:()=>app.getPath('documents'),protectedPaths:()=>[app.getAppPath(),path.dirname(process.execPath)],packaged:app.isPackaged,testDirectory:process.env.MELANGE_DESKTOP_TEST_PROFILE});}
+try{profile=selectStartupProfile({appId:definition.id,argv:process.argv.slice(1),home:app.getPath('home'),appData:app.getPath('appData'),documents:()=>app.getPath('documents'),downloads:()=>app.getPath('downloads'),protectedPaths:()=>[app.getAppPath(),path.dirname(process.execPath)],packaged:app.isPackaged,testDirectory:process.env.MELANGE_DESKTOP_TEST_PROFILE});}
 catch(error){if(error.code!=='ISOLATED_PROFILE_REFUSED')throw error;isolationRefused=error;}
 if(isolationRefused){const message=isolationRefused.message+' Nothing was started; no production profile, login item or update installation was used.';process.stderr.write('[melange-desktop] Isolated test profile refused: '+message+'\n');dialog.showErrorBox(definition.name+' isolated test profile refused',message);app.exit(2);}else{
 app.setAppUserModelId(profile.applicationUserModelId);
@@ -119,7 +120,12 @@ async function launchAuthorized(fromAccess){
  try{refuseModuleDataSettings(runtime.configuration||read('settings.json'));}catch(error){await failStartup(error);return;}
  try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await settleDistrict(gate);await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked')await onRevoked();});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(accessGate?.accepted?.revoked)await dropDistrictData();if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
  if(closing||generation!==accessLifecycle.generation)return;
- if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
+ if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'){
+  const passwordlessOwner=await accessLifecycle.refreshPasswordlessOwner({expectedGeneration:generation});
+  const signedIn=passwordlessOwner||(!accessLifecycle.requiresFreshPassword&&await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition));
+  if(closing||generation!==accessLifecycle.generation||accessLifecycle.osLocked)return;
+  if(!signedIn){await showTerrierSignIn();return;}
+ }
  openingAccess=true;
  try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});
    if(closing||generation!==accessLifecycle.generation)return;
@@ -363,7 +369,13 @@ app.whenReady().then(async()=>{
   const updaterRoot=localRoot?path.join(localRoot,'updater'):githubConfig?path.join(userData,'github-updates'):userData;
   const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
-  updater=new DesktopUpdater({...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
+  // Downloads layout (DL-spec 2.4): only an app that runs from <Downloads>/MelangeApplications; Documents/Programs installs behave exactly as before.
+  const downloadsFolder=process.platform==='win32'&&app.isPackaged&&!profile.isolated?app.getPath('downloads'):null;
+  const layoutMode=Boolean(downloadsFolder&&dlLayout.downloadsMode({execPath:process.execPath,downloads:downloadsFolder}));
+  const installLayout=layoutMode?{cacheDirectory:dlLayout.updaterCacheDirectory(downloadsFolder,definition.id),
+    sweep:state=>dlLayout.sweepLayout({downloads:downloadsFolder,documents:app.getPath('documents'),home:app.getPath('home'),localAppData:process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),product:definition.name,app:definition.id,applicationId:definition.applicationId,current:app.getVersion(),execPath:process.execPath,userData,state,log:updateStatus})}:null;
+  if(layoutMode)dlLayout.layoutWarnings({downloads:downloadsFolder,home:app.getPath('home'),env:process.env,execFile:require('node:util').promisify(require('node:child_process').execFile)}).then(warnings=>{if(warnings.length)updateStatus(warnings.join(' '));}).catch(()=>{});
+  updater=new DesktopUpdater({installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
   // Updates do not depend on the release certificate being in the user's Trusted Root store: the Ed25519-signed manifest and sha256/sha512 checks (trust.cjs, github-source.cjs) still gate every install.
   // builder.cjs keeps verifyUpdateCodeSignature:true so publisherName stays configured for updater.cjs nativeTrust; only the Authenticode chain checks are skipped.
   // electron-updater's own check would require the release root in the user's Trusted Root store (Status Valid) and match a

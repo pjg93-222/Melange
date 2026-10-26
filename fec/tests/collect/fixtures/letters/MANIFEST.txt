@@ -1,0 +1,32 @@
+Recorded public .gov documents for test_collect_signon_letters.py (retrieved 2026-10-20, robots.txt checked, 2 s spacing,
+UA MelangeSystemsResearchCollector/1.0). Tests never touch the network.
+
+PDFs were slimmed with pypdf (remove_images + compress): the TEXT LAYER IS UNCHANGED (asserted equal before saving),
+only embedded signature/letterhead images were dropped to keep the public repo small. The original bytes' sha256 is
+what the collector would record for the live document.
+
+dingell_canada_letter.pdf   https://debbiedingell.house.gov/UploadedFiles/8.31.26_US_Canada_Trump_Letter.pdf
+                            original sha256 caa4e379d5f68fb3f76d46b2a505329e5ee6ec19e941272cb484aba8008d8737 (10 pp, 88 signers)
+murray_pediatric_letter.pdf https://www.murray.senate.gov/wp-content/uploads/2026/08/Pediatric-Trials-Network-POPS-Cancellation-Letter-Signed.pdf
+                            original sha256 96a2f83835d081048b3117b2713af637d11df7381bd0c8acff5ab6a0bd80f9e9 (3 pp, 5 signers)
+fs_dems_cdfi_letter.pdf     https://democrats-financialservices.house.gov/UploadedFiles/04.21.2025_Ltr.SecCDFI_EO.pdf
+                            original sha256 f3adfa536dfe284b28e8d6912550d2e1c482966b003ba35e5ddc9adf0d84a041 (10 pp, 90 signers, CDFI Fund, 119th)
+kaptur_release.html         https://kaptur.house.gov/media-center/press-releases/kaptur-dingell-lead-colleagues-letter-urging-president-recognize (verbatim)
+murray_release.html         https://www.murray.senate.gov/in-new-letter-murray-colleagues-demand-nih-director-restore-lifesaving-pediatric-research/
+                            EXCERPT of the article (title, published_time meta, three paragraphs, the letter link); original was 1.1 MB, sha256 43e0a303a03bfeaf18bc305b1fb3ff2e91404a3f6f67d76600f0961fcd113a9a
+fs_dems_listing.html        https://democrats-financialservices.house.gov/news/documentquery.aspx?DocumentTypeID=2636 (verbatim, page 1)
+fs_dems_hud_release.html    https://democrats-financialservices.house.gov/news/documentsingle.aspx?DocumentID=415382 (verbatim)
+roster_slice.json           147 members of data/engine/congestion.json: everyone the three PDFs resolve to, plus decoys
+                            (Andy Barr, French Hill, Jason Smith, Julie Johnson, ...) that share surnames with off-roster people.
+
+Author metadata cleared 2026-10-25 (public export): the PDF /Author Info field and the catalog XMP metadata stream
+(dc:creator) named the drafting staff, so both were removed with pypdf (clone, drop /Author and /Metadata, drop
+unreferenced objects). Page text extraction is identical before and after, page for page. The "original sha256"
+values above (live documents) are unchanged; the fixture files' own sha256s are:
+
+dingell_canada_letter.pdf   slimmed a90b90cf9f8da0537ab21bec209c9fc587b5f773f6ab3b8d42c2bdf2861d3b7f
+                            cleared 11c1f833720eea1aa7a7679b84bf354ae52063ce1e190ca89c22d936e4048a39
+murray_pediatric_letter.pdf slimmed 2914bc9feb23ebf4d420999a541d2edf47b4a72cf9f65cf0ecace2de7479943d
+                            cleared 30d2b23c16248d7f66053fed2497222a2375e603d1d60e2e7e2f11164b479e9a
+fs_dems_cdfi_letter.pdf     slimmed c1d3fdf5b73a912316aaeda87e5d74647076b70fed1dad656ec9acefe0dd3720
+                            cleared a4bcba82a637eacae47f5796102b88cfc1420014babb76bdea0a4cd5054d0f8c

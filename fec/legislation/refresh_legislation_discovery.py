@@ -227,13 +227,25 @@ def active_cooldown_failure(out_dir: Path, *, now: float | None = None) -> Path 
     return None
 
 
+def collector_command(node, out, delay_ms, categories, headless):
+    """Headed by default (Congress.gov's Cloudflare check never clears headless);
+    headless only by explicit opt-in. Chrome headed needs an interactive logon."""
+    command = [node, str(COLLECTOR), "--registry", str(REGISTRY), "--out", str(out),
+               "--delay-ms", str(delay_ms), "--headless" if headless else "--headed", "--resume"]
+    if categories:
+        command.extend(["--categories", categories])
+    return command
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--categories")
-    parser.add_argument("--delay-ms", type=int, default=1500)
+    parser.add_argument("--delay-ms", type=int, default=0)
     parser.add_argument("--fallback-workers", type=int, default=8)
     parser.add_argument("--fallback-timeout-seconds", type=float, default=60.0)
+    parser.add_argument("--headless", action="store_true",
+                        default=os.environ.get("MELANGE_CONGRESS_HEADLESS") == "1")
     args = parser.parse_args()
     cycle = prepare_discovery_cycle(args.out, REGISTRY, args.categories)
     failure = active_cooldown_failure(args.out)
@@ -242,10 +254,7 @@ def main() -> int:
         print("Congress.gov verification cooldown remains active; honoring it without a browser retry.")
     else:
         node, environment = node_runtime()
-        command = [node, str(COLLECTOR), "--registry", str(REGISTRY), "--out", str(args.out),
-                   "--delay-ms", str(args.delay_ms), "--headless", "--resume"]
-        if args.categories:
-            command.extend(["--categories", args.categories])
+        command = collector_command(node, args.out, args.delay_ms, args.categories, args.headless)
         browser_started_at = time.time()
         completed = subprocess.run(command, cwd=ROOT, env=environment, check=False)
         if completed.returncode:

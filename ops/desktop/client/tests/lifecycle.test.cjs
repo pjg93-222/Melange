@@ -530,3 +530,51 @@ test('main.cjs moves only the updater file root to %LOCALAPPDATA%, leaving the u
   assert.match(main,/legacyUserData:localRoot&&githubConfig\?path\.join\(userData,'github-updates'\):null/,'the pre-move cache stays known to the updater');
   assert.match(main,/readState:\(\)=>read\(githubConfig\?'github-update-state\.json':'update-state\.json'\),writeState:value=>write\(/,'state stays in the profile');
 });
+
+// ---- Downloads install layout (DL-spec 2.3 / 3.2) ----
+const layoutModule=require('../install-layout.cjs');
+function layoutOptions(root,over={}){const cache=path.join(root,'updates','terrier');return {installLayout:{cacheDirectory:cache,sweep:async()=>{},...over}};}
+
+test('electron-updater is pinned to the audited 6.8.9 and still reuses a preset download helper',async()=>{
+  assert.equal(require('electron-updater/package.json').version,'6.8.9','the downloadedUpdateHelper preset relies on 6.8.9 internals; re-audit AppUpdater.getOrCreateDownloadHelper before bumping');
+  assert.equal(require('../package.json').dependencies['electron-updater'],'6.8.9');
+  const {DownloadedUpdateHelper}=require('electron-updater/out/DownloadedUpdateHelper'),{AppUpdater}=require('electron-updater');
+  const helper=new DownloadedUpdateHelper(path.join(os.tmpdir(),'dl-helper-probe'));
+  assert.equal(await AppUpdater.prototype.getOrCreateDownloadHelper.call({downloadedUpdateHelper:helper}),helper);
+  assert.equal(helper.cacheDirForPendingUpdate,path.join(os.tmpdir(),'dl-helper-probe','pending'));
+});
+
+test('with an install layout the update cache moves under Downloads; without one the auto-updater is untouched',t=>{
+  const f=fixture(t),root=path.join(f.directory,'Downloads','MelangeApplications');
+  const legacy=f.client();assert.equal('downloadedUpdateHelper' in legacy.autoUpdater,false);assert.equal('installDirectory' in legacy.autoUpdater,false);
+  const moved=f.client('Fixture Publisher',layoutOptions(root));
+  assert.equal(moved.autoUpdater.downloadedUpdateHelper.cacheDirForPendingUpdate,path.join(root,'updates','terrier','pending'));
+});
+
+test('B2: activation never passes /D (a spaced path would be quoted and ignored by NSIS); the installer chooses its own folder',async t=>{
+  const f=fixture(t),root=path.join(f.directory,'Down loads','MelangeApplications');
+  const spaced=f.client('Fixture Publisher',layoutOptions(root));await spaced.check();
+  assert.equal(await spaced.activateAfterClose(),true);assert.equal('installDirectory' in spaced.autoUpdater,false);
+  const h=fixture(t),plain=h.client();await plain.check();await plain.activateAfterClose();assert.equal('installDirectory' in plain.autoUpdater,false,'no layout: never touched');
+});
+
+test('a rollback below the Downloads floor is refused with a layout and allowed without one',t=>{
+  const f=fixture(t),root=path.join(f.directory,'Downloads','MelangeApplications');
+  const target=version=>{const envelope=f.sign(version,0);return {phase:'prepared',target:{envelope,version},manifestHash:crypto.createHash('sha256').update(Buffer.from(envelope.payload,'base64')).digest('hex')}};
+  const withLayout=f.client('Fixture Publisher',layoutOptions(root)),without=f.client();
+  assert.throws(()=>withLayout.verifyRecovery(f.enrollment,target('1.0.18')),/Rollback below 1\.0\.19 would leave the Downloads layout/);
+  assert.equal(without.verifyRecovery(f.enrollment,target('1.0.18')).manifest.version,'1.0.18');
+  assert.equal(withLayout.verifyRecovery(f.enrollment,target('1.0.19')).manifest.version,'1.0.19');
+});
+
+test('readiness sweeps the layout exactly once and a failing sweep never throws',async t=>{
+  const f=fixture(t),root=path.join(f.directory,'Downloads','MelangeApplications');
+  let calls=0,seen;
+  const ok=f.client('Fixture Publisher',layoutOptions(root,{sweep:async s=>{calls++;seen=s;}}));
+  ok.markApplicationReady();ok.markApplicationReady();assert.equal(calls,1);assert.equal(ok.applicationReady,true);assert.equal(seen.installed.version,'1.0.0');
+  const rejecting=f.client('Fixture Publisher',layoutOptions(root,{sweep:()=>Promise.reject(new Error('boom'))}));
+  assert.doesNotThrow(()=>rejecting.markApplicationReady());await new Promise(resolve=>setImmediate(resolve));
+  const throwing=f.client('Fixture Publisher',layoutOptions(root,{sweep(){throw new Error('sync boom');}}));
+  assert.doesNotThrow(()=>throwing.markApplicationReady());
+  const legacy=f.client();legacy.markApplicationReady();assert.equal(legacy.applicationReady,true);
+});

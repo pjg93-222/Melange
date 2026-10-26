@@ -12,5 +12,5 @@ module.exports=Object.freeze([
   'access-lifecycle.cjs','access-preload.cjs','access-state.cjs','access-transition.cjs','activity-outbox.cjs',
   'local-access.cjs','owner-access.cjs','publisher-trust.cjs',
   'access.html','access.css','access-ui.js','setup.html','setup.css','setup.js','desktop-chrome.css',
-  'icons/melange.ico','icons/terrier.ico','icons/mentat.ico','package.json'
+  'install-layout.cjs','icons/melange.ico','icons/terrier.ico','icons/mentat.ico','package.json'
 ]);

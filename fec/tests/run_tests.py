@@ -1140,7 +1140,9 @@ _LANE_NODE=(
     'test_staffer_route_jobs_client.cjs','test_staffer_route_models.cjs',
     'test_staffer_snapshot_recovery.cjs','test_staffer_unreachable_hint.cjs','test_staffer_zoom.cjs',
     # 2026-10-16 completed lobby-selection repair (FEC_SURFACES_REPAIR.md): node:test, synthetic, no server.
-    'test_lobby_sector_state.cjs')
+    'test_lobby_sector_state.cjs',
+    # 2026-10-20 D-157 F-18 (R9): re-clicking the selected member deselects it (dashboard row, canvas click and touch tap); real handlers in a vm.
+    'test_dashboard_reclick_deselect.cjs')
 _node=__import__('shutil').which('node')
 
 # Of the 20 originally held, 18 are now registered: eight via the PYTHONPATH lane, four via

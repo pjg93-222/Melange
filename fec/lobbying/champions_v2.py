@@ -6,7 +6,9 @@ residual attention as the champions-family headline without becoming an
 engine, rank, or receptivity input.
 Tier-1 crowns are never eligible for any sector's threat board, and a member
 on any retained threat board holds no champions seat (the champion seat
-yields, Paul 2026-08-09).
+yields, Paul 2026-08-09).  The crown set is the ACTIVE rank_honors generation's
+(D-157 F-20), never the previous cycle's member_desk_bundle.json tiers; the
+build fails closed when that generation is absent.
 """
 
 import os as _o, sys as _s; _s.path.insert(0, _o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))))  # noqa: E501,E702
@@ -22,6 +24,7 @@ import sys
 from datetime import datetime, timezone
 
 from paths import ROOT as MB_ROOT, LOCAL_MELANGE
+from lobbying.active_crowns import active_board
 import members.historical_member_names as identity
 import members.member_identity as desk_identity
 
@@ -336,7 +339,7 @@ def _load_member_bundle(path):
         if not isinstance(row, dict):
             raise ChampionsV2Error(f"member desk bundle row {index} is not an object")
         missing = {
-            field for field in ("name", "chamber", "tier", "invested")
+            field for field in ("name", "chamber", "invested")
             if field not in row
         }
         if missing:
@@ -353,7 +356,6 @@ def _load_member_bundle(path):
             raise ChampionsV2Error(f"member desk bundle repeats member name {name!r}")
         by_name[name] = {
             "chamber": chamber,
-            "tier": row.get("tier"),
             "invested": _number(
                 row.get("invested"), f"member desk bundle invested for {name}", minimum=0
             ),
@@ -367,6 +369,15 @@ def _load_member_bundle(path):
         desk_identity.Resolver(by_name, name_to_bioguide=name_to_bioguide),
         len(members),
     )
+
+
+def _load_crown_tiers():
+    """(priority tier by desk name, generation id) from the ACTIVE rank_honors generation; fails closed."""
+    try:
+        tier, _rank, generation = active_board(MB_ROOT)
+        return tier, generation
+    except ValueError as exc:
+        raise ChampionsV2Error(f"crown set unavailable: {exc}") from exc
 
 
 def _load_titles(path):
@@ -555,7 +566,11 @@ def build_payload(
     titles_path=None,
     bill_directions_path=None,
     resolver=None,
+    crown_tiers=None,
 ):
+    honors_generation = None    # None: the caller passed crown_tiers itself
+    if crown_tiers is None:
+        crown_tiers, honors_generation = _load_crown_tiers()
     defaults = _default_paths()
     signed_attention_path = signed_attention_path or defaults["signed_attention_path"]
     interactions_path = interactions_path or defaults["interactions_path"]
@@ -672,9 +687,12 @@ def build_payload(
                 all_desk_unavailable.add(bioguide)
                 continue
             desk = desk_by_name[name]
-            desk_tier = _integer(
-                desk["tier"], f"desk tier for {sector} / {bioguide}"
-            )
+            if name not in crown_tiers:
+                raise ChampionsV2Error(
+                    f"desk member {name!r} ({sector} / {bioguide}) is absent "
+                    "from the active rank_honors generation"
+                )
+            desk_tier = crown_tiers[name]
             if desk_tier == 1:
                 crown_bioguides.add(bioguide)
             supportive_att = int(support[sector][bioguide])
@@ -714,7 +732,7 @@ def build_payload(
                     "bioguide": bioguide,
                     "name": name,
                     "chamber": desk["chamber"],
-                    "tier": desk["tier"] if sector == "credit_union" else None,
+                    "tier": desk_tier if sector == "credit_union" else None,
                     "components": components,
                     "composite": 0.0,
                     "threat": 0.0,
@@ -870,6 +888,7 @@ def build_payload(
             "sector_order": list(SECTORS),
             "sectors": sector_receipts,
             "ladder": "canonical > kim > prior",
+            "honors_generation": honors_generation,
             "rules": {
                 "veto": VETO_RULE,
                 "mixed": MIXED_RULE,

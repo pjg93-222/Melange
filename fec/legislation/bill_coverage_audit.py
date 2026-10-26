@@ -77,10 +77,11 @@ def ascii_only(text):
 def load_archive(root):
     """Return {source_row: {col: value}} for the newest bills archive."""
     import openpyxl
-    hits = sorted(glob.glob(os.path.join(root, 'congress_bills_archive_*.xlsx')))
+    hits = glob.glob(os.path.join(root, 'congress_bills_archive_*.xlsx'))
     if not hits:
         return None, {}
-    path = hits[-1]
+    import source_select
+    path = source_select.select_archive(hits, root=root)
     try:
         book = openpyxl.load_workbook(path, read_only=True, data_only=True)
     except Exception as exc:

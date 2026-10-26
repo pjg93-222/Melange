@@ -8,7 +8,8 @@ stopifnot(length(args) == 1L)
 suppressMessages(library(dplyr))
 producer <- new.env(parent = globalenv())
 expressions <- as.list(parse(file = args[[1]]))
-for (name in c("materialize_press_outputs", "score_scorable_press_rows")) {
+for (name in c("terminal_nonarticle_reason", "split_terminal_nonarticles", "materialize_press_outputs",
+               "score_scorable_press_rows")) {
   definition <- Filter(function(expr) is.call(expr) && identical(expr[[1]], as.name("<-")) &&
                          identical(expr[[2]], as.name(name)), expressions)
   stopifnot(length(definition) == 1L)

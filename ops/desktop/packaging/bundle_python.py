@@ -11,6 +11,28 @@ import shutil
 import subprocess
 import sys
 
+# LAUNCH F3: pip, setuptools and venv launcher stubs. They run only when pip installs a console script or venv builds
+# an environment; the desktop does neither, so they would ship as dormant executables. Matched by their folder, never
+# by name alone, so no other package's executable is dropped. venvlauncher names are unambiguous in any folder.
+_DORMANT = (
+    (('pip', '_vendor', 'distlib'), {'t32.exe', 't64.exe', 't64-arm.exe', 'w32.exe', 'w64.exe', 'w64-arm.exe'}),
+    (('setuptools',), {'cli.exe', 'cli-32.exe', 'cli-64.exe', 'cli-arm64.exe', 'gui.exe', 'gui-32.exe', 'gui-64.exe', 'gui-arm64.exe'}),
+    (('venv', 'scripts', 'nt'), {'python.exe', 'pythonw.exe'}),
+    ((), {'venvlauncher.exe', 'venvwlauncher.exe'}),
+)
+
+
+def dormant_launchers(directory, names):
+    """shutil.copytree ignore callable: the dormant launcher executables in this directory."""
+    parts = tuple(part.lower() for part in Path(directory).parts)
+    return {name for name in names for folder, files in _DORMANT
+            if parts[len(parts) - len(folder):] == folder and name.lower() in files}
+
+
+def _ignore(*patterns):
+    base = shutil.ignore_patterns(*patterns)
+    return lambda directory, names: set(base(directory, names)) | dormant_launchers(directory, names)
+
 
 def bundle_python(destination):
     if os.name != 'nt' or sys.version_info[:2] != (3, 12):
@@ -26,11 +48,11 @@ def bundle_python(destination):
         if not source.is_file():
             raise RuntimeError('Required CPython distribution file missing: ' + name)
         shutil.copy2(source, destination / name)
-    ignore = shutil.ignore_patterns('__pycache__', '*.pyc', 'test', 'tests', 'idlelib', 'ensurepip', 'site-packages')
+    ignore = _ignore('__pycache__', '*.pyc', 'test', 'tests', 'idlelib', 'ensurepip', 'site-packages')
     shutil.copytree(base / 'Lib', destination / 'Lib', ignore=ignore)
     shutil.copytree(base / 'DLLs', destination / 'DLLs', ignore=shutil.ignore_patterns('_test*', '*.pdb'))
     shutil.copytree(environment / 'Lib' / 'site-packages', destination / 'Lib' / 'site-packages',
-                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc', 'tests', 'test'))
+                    ignore=_ignore('__pycache__', '*.pyc', 'tests', 'test'))
     # Launchers use -E -s, and child jobs inherit PYTHONNOUSERSITE=1. This flag is
     # defense in depth; sitecustomize alone does not remove an already-added path.
     # Do not use an embeddable ._pth file: the existing tools require ordinary

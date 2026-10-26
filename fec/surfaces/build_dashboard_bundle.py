@@ -125,7 +125,7 @@ TC={'Champion':'C','Defender':'F','Ally':'A','Highly Persuadable':'H','Persuadab
 # cpf_diffusion/tgt/coalition boosts via bipartisan.json. BP therefore uses the newest NON-AUG file.
 # BP_SRC=aug restores the augmented definition if the user ever ratifies it.
 if os.environ.get('BP_SRC','cosponsor')=='cosponsor':
-    _n0=max([q for q in glob.glob(os.path.join(MB_ROOT, 'congress_cosponsor_network_*.xlsx')) if 'AUG' not in os.path.basename(q)],key=os.path.getmtime)
+    import source_select; _n0=source_select.select_network(glob.glob(os.path.join(MB_ROOT, 'congress_cosponsor_network_*.xlsx')),'exclude',root=MB_ROOT)
     _e0=openpyxl.load_workbook(_n0,data_only=True)['Edges']
     G0=nx.Graph(); G0.add_nodes_from(members); _drop0=cu_dropped_sponsors(_n0)   # CU_IDENTITY_FIX (decision G)
     for a,b,w in cu_edge_rows(_n0,_e0):   # + CU_PLACEHOLDER_BACKFILL (2026-10-11)
@@ -592,7 +592,9 @@ def frontier_for(lb):
     t=BF['topics'].get(lb)
     if not t: return None
     pts=[[p['b'],p['spread'],(idx.get(p['seed']) if p.get('seed') else -1),(p.get('type','') or '')[:1]] for p in t['path']]
-    return {'base':t['base'],'knee':t.get('knee',0),'knee_found':bool(t.get('knee_found')),'core':t.get('core_seeds',0),'path':pts}
+    # D-157 F-15: forward budget_frontier.json's run state (mode, leverage on/off, leverage_source, compet_mult) so the dashboard can name the weighting; absent keys (older artifacts) stay absent.
+    return {'base':t['base'],'knee':t.get('knee',0),'knee_found':bool(t.get('knee_found')),'core':t.get('core_seeds',0),'path':pts,
+            **{k:BF[k] for k in ('mode','leverage','leverage_source','compet_mult') if k in BF}}
 frontier=[frontier_for(lb) for lb in source_issues]
 # --- joint optimizer (cross-topic CU allocation; explicit fixed-state/replanning guarantee scope) ---
 if not os.path.exists(os.path.join(B, 'optimize_result.json')): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05

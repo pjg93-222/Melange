@@ -69,7 +69,7 @@ try:
     import openpyxl
     C={m['member']:m for m in json.load(open(os.path.join(B, 'data', 'engine', 'congestion.json')))}
     bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-    net=max(glob.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),key=os.path.getmtime)
+    import source_select; net=source_select.select_network(glob.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),'any',root=B)
     ne=openpyxl.load_workbook(net,data_only=True)['Edges']; cadj=collections.defaultdict(set); deg=collections.Counter()
     for r2 in range(2,ne.max_row+1):
         a,b=bio2name.get(ne.cell(r2,1).value),bio2name.get(ne.cell(r2,2).value)

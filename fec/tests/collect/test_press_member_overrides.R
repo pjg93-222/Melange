@@ -79,8 +79,8 @@ producer <- new.env(parent = globalenv())
 producer$run_root <- tempfile("press-receipt-test-")
 dir.create(producer$run_root)
 wrapper_expressions <- parse(file = args[[3]])
-for (name in c("sha256_file", "write_retry_receipt", "materialize_press_outputs",
-               "bind_historical_retry_source")) {
+for (name in c("sha256_file", "write_retry_receipt", "materialize_press_outputs", "terminal_nonarticle_reason",
+               "split_terminal_nonarticles", "bind_historical_retry_source")) {
   definition <- Filter(function(expr) is.call(expr) && identical(expr[[1]], as.name("<-")) &&
                          identical(expr[[2]], as.name(name)), as.list(wrapper_expressions))
   stopifnot(length(definition) == 1L)
@@ -89,7 +89,7 @@ for (name in c("sha256_file", "write_retry_receipt", "materialize_press_outputs"
 source_names <- c("refresh_press_delta.R", "press_member_overrides.R", "press_official_coverage.R",
                   "press_release_date_precedence.R", "press_request_deadlines.R",
                   "press_wordpress_custom_posts.R", "press_official_dated_listings.R",
-                  "press_backlog.R", "cu_press_release_scraper.R")
+                  "press_backlog.R", "press_host_routes.R", "cu_press_release_scraper.R")
 producer$collector_source_paths <- as.list(setNames(file.path(producer$run_root, source_names), source_names))
 for (path in producer$collector_source_paths) writeLines("original source", path)
 producer$collector_sources_sha256 <- lapply(producer$collector_source_paths, producer$sha256_file)
@@ -112,7 +112,8 @@ producer$write_csv_atomic <- function(frame, path) write.csv(frame, path, row.na
 producer$write_rds_atomic <- function(frame, path) saveRDS(frame, path)
 producer$DATE_FLOOR <- as.Date("2026-06-25")
 producer$run_receipt_metrics <- list(retry_source_run = NULL, terminal_nonarticle_urls = 0L,
-                                    retryable_body_candidates = 0L, recovered_bodies = 0L)
+                                    retryable_body_candidates = 0L, recovered_bodies = 0L,
+                                    host_routes = setNames(list(), character(0)))
 producer$promote_with_backup <- function(from, to) stopifnot(file.rename(from, to))
 producer$write_official_coverage_artifact <- function() {
   value <- list(schema = "official-current-inventory-snapshot-v1", floor = "2026-06-25",
@@ -124,6 +125,16 @@ producer$write_official_coverage_artifact <- function() {
 materialized <- list(failed_bodies = data.frame(collection_status = character(0)),
                      fulltext = data.frame(), articles = data.frame(),
                      host_articles = data.frame(url = character(0)), article_mentions = data.frame())
+producer$write_retry_receipt(materialized)
+receipt <- jsonlite::fromJSON(producer$retry_receipt_path, simplifyVector = FALSE)
+stopifnot(identical(receipt$host_routes, setNames(list(), character(0))))   # nothing routed: an empty object, not absent
+producer$run_receipt_metrics$host_routes <- list(husted.senate.gov = list(eligible = 89L, attempted = 61L, routed = 58L,
+                                                                          errors = 3L, tripped = 1L))
+producer$write_retry_receipt(materialized)
+receipt <- jsonlite::fromJSON(producer$retry_receipt_path, simplifyVector = FALSE)
+stopifnot(identical(receipt$host_routes$husted.senate.gov$routed, 58L), identical(receipt$host_routes$husted.senate.gov$tripped, 1L),
+          identical(receipt$host_routes$husted.senate.gov$eligible, 89L))
+producer$run_receipt_metrics$host_routes <- setNames(list(), character(0))
 producer$write_retry_receipt(materialized)
 receipt <- jsonlite::fromJSON(producer$retry_receipt_path, simplifyVector = FALSE)
 stopifnot(identical(receipt$collector_sources_sha256, producer$collector_sources_sha256),

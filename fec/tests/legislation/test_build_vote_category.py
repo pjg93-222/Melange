@@ -48,9 +48,7 @@ def test_complete_rebuild_conserves_types_exclusions_and_nonvotes(tmp_path):
     (root / 'legislation_exclusion_ledger.ndjson').write_text('', encoding='utf-8')
     (root / 'legislation_hold_ledger.ndjson').write_text(''.join(json.dumps({
         'canonical_key': f'{c}:s:9', 'decision_scope': 'candidate'}) + '\n' for c in (117,118,119)), encoding='utf-8')
-    # Rollcall dates must sit inside the builder's 30-day freshness window of the archive's mtime
-    # (the archive is written below, now), so they follow the clock, not a fixed date that ages out.
-    fresh = datetime.now(timezone.utc).date().isoformat()
+    fresh = '2026-09-16'
     exclusions = tmp_path / 'excluded.csv'
     exclusions.write_text('congress,bill\n', encoding='utf-8')
     names = tmp_path / 'names.json'
@@ -87,3 +85,42 @@ def test_complete_rebuild_conserves_types_exclusions_and_nonvotes(tmp_path):
         handle.write('119,House,1,1,6\n')
     with pytest.raises(ValueError,match='Source snapshot bytes changed'):
         build(root,source,archive,exclusions,names,output)
+
+
+def _stale_fixture(tmp_path, vote_date):
+    import zipfile
+    root, source = tmp_path / 'root', tmp_path / 'source'
+    (root / 'fec/legislation').mkdir(parents=True); (root / 'data/legislation').mkdir(parents=True); source.mkdir()
+    (root / 'fec/legislation/vote_by_category.py').write_bytes((Path(__file__).resolve().parents[2] / 'legislation/vote_by_category.py').read_bytes())
+    (root / 'data/legislation/cfpb_bill_directions.csv').write_text('Bill,Direction,Category\n', encoding='utf-8')
+    for n in ('legislation_exclusion_ledger.ndjson', 'legislation_hold_ledger.ndjson'): (root / n).write_text('', encoding='utf-8')
+    (tmp_path / 'excluded.csv').write_text('congress,bill\n', encoding='utf-8')
+    (tmp_path / 'names.json').write_text('{"A000001":"Member A"}', encoding='utf-8')
+    archive = root / 'congress_bills_archive_test.xlsx'
+    pd.DataFrame([{'Congress': 119, 'Name': 'H.R.7', 'Section': 'Payments'}]).to_excel(archive, sheet_name='All Bills', index=False)
+    for c in (117, 118, 119):
+        (source / f'HS{c}_members.csv').write_text('congress,chamber,icpsr,bioguide_id,bioname\n', encoding='utf-8')
+        (source / f'HS{c}_votes.csv').write_text('congress,chamber,rollnumber,icpsr,cast_code\n', encoding='utf-8')
+        (source / f'HS{c}_rollcalls.csv').write_text('congress,chamber,rollnumber,bill_number,vote_question,date,session,clerk_rollnumber\n'
+            f'{c},House,1,HR7,On Passage,2026-09-16,2,1\n{c},Senate,2,S9,On Passage,2026-09-30,2,2\n', encoding='utf-8')
+    (source / 'receipt.json').write_text(json.dumps({'status': 'PASS', 'files': [
+        {'path': str(p), 'sha256': sha(p)} for p in source.glob('*.csv')]}), encoding='utf-8')
+    raw = tmp_path / 'raw'; (raw / 'billstatus119').mkdir(parents=True)
+    with zipfile.ZipFile(raw / 'billstatus119/BILLSTATUS-119-hr.zip', 'w') as z:
+        z.writestr('BILLSTATUS-119hr7.xml', '<billStatus><bill><actions><recordedVotes><recordedVote><rollNumber>1</rollNumber>'
+            f'<chamber>House</chamber><congress>119</congress><date>{vote_date}</date><sessionNumber>2</sessionNumber>'
+            '</recordedVote></recordedVotes></actions></bill></billStatus>')
+    return root, source, archive, raw
+
+
+def test_builder_rejects_stale_snapshot_by_recorded_votes_not_mtime(tmp_path):
+    import os
+    root, source, archive, raw = _stale_fixture(tmp_path, '2026-10-20T15:00:00Z')
+    args = (root, source, archive, tmp_path / 'excluded.csv', tmp_path / 'names.json', tmp_path / 'out')
+    os.utime(archive, (1_000_000_000, 1_000_000_000))      # ancient mtime must not matter either way
+    with pytest.raises(ValueError, match=r'stale relative to archive: 1 recorded.*119:hr:7 House roll 1 2026-10-20'):
+        build(*args, raw_root=str(raw))
+    root, source, archive, raw = _stale_fixture(tmp_path / 'ok', '2026-09-16T15:00:00Z')
+    os.utime(archive, (4_000_000_000, 4_000_000_000))
+    with pytest.raises(ValueError, match='No accepted vote evidence'):   # gate passed; fixture has no votes to publish
+        build(root, source, archive, tmp_path / 'ok/excluded.csv', tmp_path / 'ok/names.json', tmp_path / 'ok/out', raw_root=str(raw))

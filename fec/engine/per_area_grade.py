@@ -113,10 +113,15 @@ INPUT_FILES = (
     REFERENCE_DIR.replace(os.sep, '/') + '/legislators-current.yaml',
     REFERENCE_DIR.replace(os.sep, '/') + '/legislators-historical.yaml',
 )
+# D-263: the auto-promoted sign-on letters' tag sidecar reaches the beneficiary weights through sentinel_admissions.effective_tags,
+# so a promotion changes this board's inputs. It does not exist until the first promotion: an absent sidecar hashes as the empty file.
+from legislation import letter_tags as _letter_tags
+LETTER_TAGS_INPUT = _letter_tags.SIDECAR.replace(os.sep, '/')
+EMPTY_SHA256 = hashlib.sha256(b'').hexdigest()
 if DIAGNOSTIC:
     INPUT_FILES += ('bill_beneficiary_tags.ndjson',
                     'data/legislation/sentinel_admissions.json',
-                    primacy_press.LEDGER, primacy_press.RECEIPT)
+                    primacy_press.LEDGER, primacy_press.RECEIPT, LETTER_TAGS_INPUT)
 
 
 # ---------------------------------------------------------------------------
@@ -171,6 +176,14 @@ def canonical_role(role):
     if 'sponsor' in value:
         return 'sponsor'
     return value or 'other'
+
+
+def input_sha256(root, relative):
+    """sha256 of one INPUT_FILES entry under root; only the letter tag sidecar may be absent (it hashes as the empty file)."""
+    path = os.path.join(root, *relative.split('/'))
+    if relative == LETTER_TAGS_INPUT and not os.path.exists(path):
+        return EMPTY_SHA256
+    return sha256_of(path)
 
 
 def sha256_of(path):
@@ -450,7 +463,7 @@ def load_method_inputs(roster, root):
         return proportion, items, None, None
     from engine.primacy_factors import load_tags
     from legislation import sentinel_admissions as SA
-    tags = SA.effective_tags(load_tags(path('bill_beneficiary_tags.ndjson')), SA.load(root))
+    tags = SA.effective_tags(load_tags(path('bill_beneficiary_tags.ndjson')), SA.load(root), root)
     weights = {(tag['bill'], str(tag['congress'])): BENEFICIARY_W[tag['class']]
                for tag in tags.values() if tag['class'] in BENEFICIARY_W}
     proportion, items, _, receipt = primacy_press.load(roster, root)
@@ -626,7 +639,7 @@ def main(argv=None):
 
     result = build(roster, acts, cu_cells, spine, votes, press_proportion,
                    press_items, rankable, as_of, beneficiary_weights=beneficiary_weights)
-    inputs = {relative: sha256_of(path(*relative.split('/')))
+    inputs = {relative: input_sha256(root, relative)
               for relative in INPUT_FILES}
     doc = document(roster, rankable, result, press_proportion, press_items,
                    inputs, act_stats, cu_cells, as_of)
