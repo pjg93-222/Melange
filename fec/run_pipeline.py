@@ -217,7 +217,7 @@ CHAIN=[
     # residual lens from the round-3 look, rendered by the industry page.
     # Screen, not a score - no engine or rank reads it.
     ('contest_screen.py',[]),
-    # 2026-08-06 Paul: direction-aware boards replace the residual-attention headline.
+    # 2026-08-06 Paul: direction-aware boards replace the residual-attention headline. Crown set = active rank_honors (D-157 F-20); fails closed.
     ('champions_v2.py',[]),
     # Contest-adjusted investment and lobbying efficiency; decision layer only, moves no rank.
     # 2026-08-09 Paul: moved AFTER champions_v2 so the ADVERSARY exclusion consumes the
@@ -226,9 +226,9 @@ CHAIN=[
     # move (d07eaea): the dashboard no longer reads efficiency output — its consumer is
     # make_member_desk, which renders later.
     ('efficiency_layers.py',[]),
-    # 2026-08-10: consumes the previous-cycle member_desk_bundle exactly like champions_v2
-    # (the documented bundle producer/consumer cycle), and hard-fails unless its credit-union
-    # instance reproduces the desk bundle's tiers exactly. make_lobby_network_html.py hard-requires
+    # 2026-08-10: reads the previous-cycle member_desk_bundle for its roster and acts (like champions_v2) but takes the
+    # credit-union tier and rank from the active rank_honors generation (D-157 F-20), failing closed without one.
+    # make_lobby_network_html.py hard-requires
     # data/lobbying/industry_tiers.json, so this must precede that step.
     ('industry_tiers.py',[]),
     ('org_mentions.py',[]),

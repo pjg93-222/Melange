@@ -522,3 +522,145 @@ def test_a_partial_receipt_whose_ids_are_not_all_in_the_log_is_not_resumed(big):
                       known_ok_post_ids=ids_field(*range(1, 401)))
     assert interviews.run_msnow() is True
     assert big.site.befores_requested() == [None] * 9
+
+
+# D-157 F-22: resolve_full's surname-only fallbacks bind only under IV_NAME_MATCH=surname. Same module and scratch
+# root as above; the roster maps are patched in as the collector builds them (FULL by first+last, SUR by last).
+# A turn dropped for that reason is counted and ledgered by store() (data/members/interview_surname_refusals.ndjson).
+LEDGER = Path('data') / 'members' / 'interview_surname_refusals.ndjson'
+SENTENCE = 'the senator said this exact sentence which must never reach the ledger file'   # 13 words
+
+
+@pytest.fixture
+def roster(monkeypatch, tmp_path):
+    monkeypatch.setattr(interviews, 'IV_NAME_MATCH', 'full')   # the shipped default, whatever the shell exports
+    monkeypatch.setattr(interviews, 'FULL', {('elizabeth', 'warren'): 'Elizabeth Warren', ('thom', 'tillis'): 'Thom Tillis'})
+    monkeypatch.setattr(interviews, 'SUR', {'warren': ['Elizabeth Warren'], 'tillis': ['Thom Tillis'], 'shaheen': ['Jeanne Shaheen']})
+    monkeypatch.setattr(interviews, 'C', {'Elizabeth Warren': {'bioguide': 'W000817'}, 'Thom Tillis': {'bioguide': 'T000476'},
+                                          'Jeanne Shaheen': {'bioguide': 'S001181'}})
+    monkeypatch.setattr(interviews, 'SURNAME_REFUSED', {})
+    monkeypatch.setattr(interviews, 'B', str(tmp_path))
+    monkeypatch.setattr(interviews, 'DB', str(tmp_path / 'media.db'))
+    monkeypatch.setattr(interviews, 'PAUSE', 0)
+
+
+def store_page(text, parse=None, show='cnn-test', url='https://transcripts.test/page-1'):
+    con = interviews.db()
+    try:
+        n = interviews.store(con, (parse or interviews.parse_turns)(text), '2026-10-01', show, url)
+        con.commit()
+        return n
+    finally:
+        con.close()
+
+
+def ledger(tmp_path):
+    path = tmp_path / LEDGER
+    return [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines()] if path.exists() else []
+
+
+@pytest.mark.parametrize('mode', ['full', 'surname'])
+def test_a_full_name_binds_under_both_name_match_modes(roster, monkeypatch, mode):
+    monkeypatch.setattr(interviews, 'IV_NAME_MATCH', mode)
+    refused = []
+    assert interviews.resolve_full('SEN. ELIZABETH WARREN (D-MA)', refused) == 'Elizabeth Warren'
+    assert refused == [] and interviews.SURNAME_REFUSED == {}
+
+
+def test_surname_only_labels_are_refused_and_reported_to_the_caller_by_default(roster):
+    refused = []
+    assert interviews.resolve_full('SEN. THOMAS TILLIS', refused) is None      # first-name-compatible, not a full-name key
+    assert interviews.resolve_full('Senator Shaheen', refused) is None         # honorific + bare surname
+    assert refused == [('firstname_compatible', 'Thom Tillis'), ('bare_surname', 'Jeanne Shaheen')]
+    assert interviews.SURNAME_REFUSED == {}      # a refusal is only a drop once the caller has tried its alias fallback
+
+
+def test_name_match_surname_restores_the_old_binding(roster, monkeypatch, tmp_path):
+    monkeypatch.setattr(interviews, 'IV_NAME_MATCH', 'surname')
+    refused = []
+    assert interviews.resolve_full('SEN. THOMAS TILLIS', refused) == 'Thom Tillis'
+    assert interviews.resolve_full('Senator Shaheen', refused) == 'Jeanne Shaheen'
+    assert refused == [] and interviews.SURNAME_REFUSED == {}
+    assert store_page('SEN. THOMAS TILLIS: %s\n' % SENTENCE) == 1
+    assert ledger(tmp_path) == []
+
+
+@pytest.mark.parametrize('text, parse, label, member, bioguide, branch', [
+    ('SEN. THOMAS TILLIS: %s\nHOST: thanks.\n' % SENTENCE, interviews.parse_turns,
+     'SEN. THOMAS TILLIS', 'Thom Tillis', 'T000476', 'firstname_compatible'),
+    ('Senator Shaheen: %s\n' % SENTENCE, interviews.parse_turns_mixed,
+     'Senator Shaheen', 'Jeanne Shaheen', 'S001181', 'bare_surname'),
+])
+def test_a_refused_label_that_does_not_bind_is_ledgered_without_its_text(roster, tmp_path, text, parse, label, member,
+                                                                         bioguide, branch):
+    assert store_page(text, parse) == 0
+    [row] = ledger(tmp_path)
+    ts = row.pop('ts')
+    assert ts.startswith('20') and ts.endswith('+00:00')
+    assert row == {'show': 'cnn-test', 'url': 'https://transcripts.test/page-1', 'date': '2026-10-01', 'label': label,
+                   'surname': member.split()[-1].lower(), 'member': member, 'bioguide': bioguide, 'branch': branch,
+                   'nwords': len(SENTENCE.split())}
+    assert 'sentence' not in (tmp_path / LEDGER).read_text(encoding='utf-8')   # no transcript text, only the count
+    assert interviews.SURNAME_REFUSED == {(branch, label): [member, 1]}
+
+
+def test_a_short_refused_turn_is_not_a_loss_and_is_not_ledgered(roster, tmp_path):
+    assert store_page('SEN. THOMAS TILLIS: thank you very much.\n') == 0
+    assert ledger(tmp_path) == [] and interviews.SURNAME_REFUSED == {}
+
+
+def test_the_ledger_is_appended_to_and_a_double_embedded_page_counts_once(roster, tmp_path):
+    store_page('SEN. THOMAS TILLIS: %s\nSEN. THOMAS TILLIS: %s\n' % (SENTENCE, SENTENCE), url='https://transcripts.test/a')
+    store_page('SEN. THOMAS TILLIS: %s was said again here\n' % SENTENCE, url='https://transcripts.test/b')
+    assert [r['url'] for r in ledger(tmp_path)] == ['https://transcripts.test/a', 'https://transcripts.test/b']
+    assert interviews.SURNAME_REFUSED == {('firstname_compatible', 'SEN. THOMAS TILLIS'): ['Thom Tillis', 2]}
+
+
+def cfr_site(monkeypatch, labels):
+    """run_cfr over one scripted event page whose body names Jeanne Shaheen in full (so her page alias exists)."""
+    sitemap = '<loc>https://www.cfr.org/event/senator-shaheen-on-the-world</loc>'
+    page = ('<script>x</script>"datePublished": "2026-09-01"<p>Jeanne Shaheen, senator from New Hampshire, joins us.</p>'
+            + ''.join('<p>%s: %s</p>' % (label, SENTENCE) for label in labels))
+    monkeypatch.setattr(interviews, 'get', lambda url, tries=3: sitemap if url.endswith('sitemap.xml') else page)
+
+
+def test_a_label_the_page_alias_binds_is_not_ledgered_but_one_it_does_not_bind_is(roster, monkeypatch, tmp_path):
+    cfr_site(monkeypatch, ['SEN. SHAHEEN', 'SEN. TILLIS'])        # Shaheen is named on the page, Tillis is not
+    interviews.run_cfr()
+    con = interviews.db()
+    assert [r[0] for r in con.execute("SELECT member FROM speeches WHERE source='INTERVIEW'")] == ['Jeanne Shaheen']
+    con.close()
+    [row] = ledger(tmp_path)
+    assert (row['label'], row['member'], row['branch'], row['show']) == ('SEN. TILLIS', 'Thom Tillis', 'bare_surname', 'cfr')
+    assert interviews.SURNAME_REFUSED == {('bare_surname', 'SEN. TILLIS'): ['Thom Tillis', 1]}
+
+
+def test_continuation_turns_after_a_refused_label_are_counted_and_the_census_agrees(roster, monkeypatch, tmp_path, capsys):
+    text = ('SEN. THOMAS TILLIS: %s\n'
+            'HOST: and what do you make of that, given the vote before the break today?\n'
+            'TILLIS: %s and then some more\n'
+            'TILLIS: too short.\n'                  # a micro-interjection drops under either mode, so is not a loss
+            'SEN. ELIZABETH WARREN: %s\n' % (SENTENCE, SENTENCE, SENTENCE))
+    assert store_page(text) == 1                    # Warren binds; both Tillis turns (label + continuation) are dropped
+    rows = ledger(tmp_path)
+    assert [(r['label'], r['member'], r['nwords']) for r in rows] == [('SEN. THOMAS TILLIS', 'Thom Tillis', 13),
+                                                                      ('SEN. THOMAS TILLIS', 'Thom Tillis', 17)]
+    assert interviews.SURNAME_REFUSED == {('firstname_compatible', 'SEN. THOMAS TILLIS'): ['Thom Tillis', 2]}
+    interviews._report_surname_refusals()
+    assert '2 turn(s) dropped across 1 surname-only label(s)' in capsys.readouterr().out
+    # what IV_NAME_MATCH=surname would have added is exactly what the ledger counts
+    monkeypatch.setattr(interviews, 'IV_NAME_MATCH', 'surname')
+    gained = [m for m, _ in interviews.parse_turns(text) if m == 'Thom Tillis']
+    assert len(gained) == len(rows) == 2
+
+
+@pytest.mark.parametrize('raw, expected', [('Full', 'full'), (' SURNAME ', 'surname'), ('', 'full')])
+def test_the_name_match_dial_is_case_insensitive(raw, expected):
+    with mock.patch.dict(os.environ, {'IV_NAME_MATCH': raw}):
+        assert import_under_scratch_root('members.fetch_interviews').IV_NAME_MATCH == expected
+
+
+def test_an_unknown_name_match_value_raises():
+    with mock.patch.dict(os.environ, {'IV_NAME_MATCH': 'bioguide'}):
+        with pytest.raises(ValueError, match='IV_NAME_MATCH'):
+            import_under_scratch_root('members.fetch_interviews')

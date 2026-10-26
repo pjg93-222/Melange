@@ -2347,7 +2347,7 @@ if _g:
     ck('champions threat boards fresh vs live crown set',
        not _stale_crown_threats and not _champions_boards_missing,
        'boards.json missing -- run champions_v2' if _champions_boards_missing
-       else '%s; champions_v2 runs before make_member_desk -- rerun chain'%
+       else '%s; the threat rows include a member the desk crowns: the rank_honors generation champions_v2 read differs from the one the desk published (different HONORS_MODE/PRIMACY_BOARD env, or boards.json older than the desk) -- re-run the chain from build_rank_honors.py'%
        ', '.join('%s: %s (%s)'%(
            sector,_live_crowns.get(row.get('bioguide')),row.get('bioguide'))
            for sector,row in _stale_crown_threats))

@@ -67,3 +67,9 @@ runpy.run_path(sys.argv[0],run_name='__main__')
         assert receipt['classified']==1 and receipt['deferred_contexts']==deferred
         edges=json.loads((tmp_path/'member_references.json').read_text())['edges']
         assert edges[0]['n_scored']==3-deferred
+
+
+def test_verify_export_is_retired_d157_f13():
+    src=(Path(__file__).resolve().parents[2]/'members/member_reference_layer.py').read_text(encoding='utf-8')
+    assert 'member_reference_verify' not in src and 'csv.writer' not in src
+    assert "--verify is retired (D-157 F-13)" in src and '--rebuild]' in src

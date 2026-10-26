@@ -592,7 +592,9 @@ def frontier_for(lb):
     t=BF['topics'].get(lb)
     if not t: return None
     pts=[[p['b'],p['spread'],(idx.get(p['seed']) if p.get('seed') else -1),(p.get('type','') or '')[:1]] for p in t['path']]
-    return {'base':t['base'],'knee':t.get('knee',0),'knee_found':bool(t.get('knee_found')),'core':t.get('core_seeds',0),'path':pts}
+    # D-157 F-15: forward budget_frontier.json's run state (mode, leverage on/off, leverage_source, compet_mult) so the dashboard can name the weighting; absent keys (older artifacts) stay absent.
+    return {'base':t['base'],'knee':t.get('knee',0),'knee_found':bool(t.get('knee_found')),'core':t.get('core_seeds',0),'path':pts,
+            **{k:BF[k] for k in ('mode','leverage','leverage_source','compet_mult') if k in BF}}
 frontier=[frontier_for(lb) for lb in source_issues]
 # --- joint optimizer (cross-topic CU allocation; explicit fixed-state/replanning guarantee scope) ---
 if not os.path.exists(os.path.join(B, 'optimize_result.json')): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05
