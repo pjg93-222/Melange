@@ -8,7 +8,9 @@ const LAYOUT=Object.freeze({
   appFolder:'{product}-{version}',           // <root>\Melange-1.0.19 (folder name carries 1.x)
   updatesName:'updates',                      // <root>\updates
   updaterCacheFolder:'{app}',                // <root>\updates\melange\pending\melange-1.0.20-win32-x64.exe
-  setupFolder:'{app}-{version}-setup',       // <root>\updates\melange-1.0.19-setup\nsXXXX.tmp (NSIS $TEMP)
+  setupFolder:'{app}-setup',                 // <root>\updates\melange-setup\nsXXXX.tmp (NSIS $TEMP). No version: 7 more characters of
+                                              // user name fit under DL_MAX_SETUP (LAUNCH F2); only one setup folder is ever live
+  legacySetupFolder:'{app}-{version}-setup', // the 1.0.19 name; the sweep removes these leftovers
   keepVersions:2,                             // D-7: current + one previous
   rollbackFloor:'1.0.19',                     // D-5: first Downloads release
   downloadsKnownFolder:'{374DE290-123F-4565-9164-39C4925E467B}',
@@ -137,7 +139,7 @@ async function sweepLayout({fs=require('node:fs'),downloads,documents,home,local
   // stale setup folders: the NSIS run is over and they are empty
   try{
     const updates=updatesDirectory(downloads),keepSetup=new Set([current,state.pending?.version].filter(Boolean).map(version=>fill(LAYOUT.setupFolder,{app,version})));
-    const pattern=new RegExp('^'+escape(fill(LAYOUT.setupFolder,{app,version:'@@'})).replace('@@',VERSION)+'$');
+    const pattern=new RegExp('^(?:'+[LAYOUT.setupFolder,LAYOUT.legacySetupFolder].map(template=>escape(fill(template,{app,version:'@@'})).replace('@@',VERSION)).join('|')+')$');
     for(const name of await fs.promises.readdir(updates)){
       if(!pattern.test(name)||keepSetup.has(name))continue;
       const target=win.join(updates,name);

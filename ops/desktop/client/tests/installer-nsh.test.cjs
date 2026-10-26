@@ -85,7 +85,7 @@ function harness(t){
   if(process.platform!=='win32'||!makensis){t.skip('makensis is not installed');return null;}
   const work=fs.mkdtempSync(path.join(os.tmpdir(),'dl-nsis-'));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
   const header=(fake,max,extra={})=>['Unicode true','!define VERSION "1.0.19"','!define DL_VERSION "'+(extra.dlVersion||'1.0.19')+'"','!define DL_TEST_ROOT "'+fake+'"','!define DL_ROOT_NAME "MelangeApplications"','!define DL_UPDATES_NAME "updates"',
-    '!define DL_APP_FOLDER "Melange-1.0.19"','!define DL_SETUP_FOLDER "melange-1.0.19-setup"','!define DL_CACHE_FOLDER "melange"','!define DL_KNOWN_FOLDER "'+layout.LAYOUT.downloadsKnownFolder+'"',
+    '!define DL_APP_FOLDER "Melange-1.0.19"','!define DL_SETUP_FOLDER "melange-setup"','!define DL_CACHE_FOLDER "melange"','!define DL_KNOWN_FOLDER "'+layout.LAYOUT.downloadsKnownFolder+'"',
     '!define DL_MAX_DIR '+(max.dir??layout.maxDirectory()),'!define DL_MAX_SETUP '+(max.setup??layout.maxSetup()),'!define APP_ID "org.melange.test.dlharness"','!include LogicLib.nsh',
     // stand-in for electron-builder's StdUtils-based ${isUpdated}: same --updated switch, script-only
     '!include FileFunc.nsh','!macro _isUpdated _a _b _t _f','  ${GetParameters} $8','  ClearErrors','  ${GetOptions} $8 "--updated" $7','  IfErrors `${_f}` `${_t}`','!macroend','!define isUpdated `"" isUpdated ""`',
@@ -118,7 +118,7 @@ test('compiled installer logic: TEMP move, folder choice (including a Downloads 
       return fs.existsSync(log)?{...read(log),realTemp:env.TEMP}:null;
     };
   };
-  const setup=path.join(rootDir,'updates','melange-1.0.19-setup').toLowerCase(),want=path.join(rootDir,'Melange-1.0.19');
+  const setup=path.join(rootDir,'updates','melange-setup').toLowerCase(),want=path.join(rootDir,'Melange-1.0.19');
   const run=build('normal',{setup:250,dir:250}); // the temp dir here is longer than a real user's budget; the comparisons are what is under test
   const first=run(['/S']);
   assert.ok(first.PLUGINSDIR.toLowerCase().startsWith(setup+'\\'),'manual install: plugins load under the Downloads setup folder (path has a space): '+first.PLUGINSDIR);
@@ -143,7 +143,7 @@ test('compiled installer logic: TEMP move, folder choice (including a Downloads 
   // too-long setup folder leaves TEMP alone
   const noMove=build('toolong',{setup:10,dir:250})(['/S']);
   assert.equal(noMove.PLUGINSDIR,'');assert.equal(noMove.TEMP.toLowerCase(),noMove.realTemp.toLowerCase());
-  assert.equal(fs.existsSync(path.join(rootDir,'updates','melange-1.0.19-setup')),true,'NSIS removes its ns*.tmp, leaving the empty setup folder for the sweep');
+  assert.equal(fs.existsSync(path.join(rootDir,'updates','melange-setup')),true,'NSIS removes its ns*.tmp, leaving the empty setup folder for the sweep');
 });
 
 test('a stale generated include (different version) fails the compile',t=>{

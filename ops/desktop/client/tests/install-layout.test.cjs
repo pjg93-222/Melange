@@ -13,7 +13,7 @@ test('naming helpers build the Downloads layout from the config point',()=>{
   assert.equal(layout.root(D),D+'\\MelangeApplications');
   assert.equal(layout.appDirectory(D,'Melange','1.0.19'),D+'\\MelangeApplications\\Melange-1.0.19');
   assert.equal(layout.updaterCacheDirectory(D,'melange'),D+'\\MelangeApplications\\updates\\melange');
-  assert.equal(layout.setupTempDirectory(D,'melange','1.0.19'),D+'\\MelangeApplications\\updates\\melange-1.0.19-setup');
+  assert.equal(layout.setupTempDirectory(D,'melange','1.0.19'),D+'\\MelangeApplications\\updates\\melange-setup');
   assert.equal(layout.updatesDirectory(D),D+'\\MelangeApplications\\updates');
   assert.equal(LAYOUT.keepVersions,2);assert.equal(LAYOUT.rollbackFloor,'1.0.19');
   assert.throws(()=>{LAYOUT.keepVersions=3;});
@@ -46,13 +46,22 @@ test('fitsPath and deepestRelative implement the MAX_PATH budget',t=>{
   assert.equal(layout.deepestRelative(path.join(base,'missing')),0);
 });
 
+test('F2: the versionless setup folder keeps NSIS plugins under Downloads for user names up to 27 characters',()=>{
+  // installer.nsh moves TEMP only when the setup path is <= DL_MAX_SETUP (88); the 1.0.19 name allowed 20 characters.
+  const setup=user=>layout.setupTempDirectory('C:\\Users\\'+user+'\\Downloads','melange','1.0.19');
+  for(const app of ['melange','terrier'])assert.equal(layout.setupTempDirectory(D,app,'9.99.999'),layout.setupTempDirectory(D,app,'1.0.19'),'no version in the name');
+  assert.equal(layout.maxSetup(),88);
+  assert.equal(setup('u'.repeat(27)).length<=layout.maxSetup(),true);assert.equal(setup('u'.repeat(28)).length<=layout.maxSetup(),false);
+  assert.equal(('C:\\Users\\'+'u'.repeat(21)+'\\Downloads\\MelangeApplications\\updates\\'+layout.fill(LAYOUT.legacySetupFolder,{app:'melange',version:'1.0.19'})).length<=layout.maxSetup(),false,'the old name did not fit at 21');
+});
+
 test('nsisInclude carries every config value and includes the absolute installer.nsh',()=>{
   const text=layout.nsisInclude({product:'Melange',app:'melange',version:'1.0.19',installerNsh:'C:\\w\\ops\\desktop\\client\\installer.nsh'});
-  for(const line of ['!define DL_ROOT_NAME "MelangeApplications"','!define DL_UPDATES_NAME "updates"','!define DL_APP_FOLDER "Melange-1.0.19"','!define DL_SETUP_FOLDER "melange-1.0.19-setup"',
+  for(const line of ['!define DL_ROOT_NAME "MelangeApplications"','!define DL_UPDATES_NAME "updates"','!define DL_APP_FOLDER "Melange-1.0.19"','!define DL_SETUP_FOLDER "melange-setup"',
     '!define DL_CACHE_FOLDER "melange"','!define DL_KNOWN_FOLDER "{374DE290-123F-4565-9164-39C4925E467B}"','!define DL_MAX_DIR 108','!define DL_MAX_SETUP 88',
     '!include "C:\\w\\ops\\desktop\\client\\installer.nsh"'])assert.ok(text.includes(line),line);
   assert.ok(text.indexOf('!define DL_MAX_SETUP')<text.indexOf('!include'),'defines come before the include');
-  assert.match(layout.nsisInclude({product:'Terrier',app:'terrier',version:'1.0.20',installerNsh:'x'}),/DL_APP_FOLDER "Terrier-1\.0\.20"[\s\S]*DL_SETUP_FOLDER "terrier-1\.0\.20-setup"[\s\S]*DL_CACHE_FOLDER "terrier"/);
+  assert.match(layout.nsisInclude({product:'Terrier',app:'terrier',version:'1.0.20',installerNsh:'x'}),/DL_APP_FOLDER "Terrier-1\.0\.20"[\s\S]*DL_SETUP_FOLDER "terrier-setup"[\s\S]*DL_CACHE_FOLDER "terrier"/);
 });
 
 const FOLDERS=['Melange-1.0.17','Melange-1.0.18','Melange-1.0.19','Melange-1.0.20','Mentat-1.0.19','Terrier-1.0.19','Melange.bak-x','Melange-1.0.19-old','Melange-1.0.19.bak','melange-1.0.16'];
@@ -164,13 +173,15 @@ test('the keep-2 sweep deletes old version folders and stale setup folders, prot
   const s=state(t);
   for(const v of ['1.0.17','1.0.18','1.0.19','1.0.20'])program(path.join(s.root,'Melange-'+v),'Melange');
   program(path.join(s.root,'Mentat-1.0.17'),'Mentat');program(path.join(s.root,'Melange.bak-x'),'Melange');
-  for(const name of ['melange-1.0.17-setup','melange-1.0.20-setup','melange-1.0.21-setup','melange-1.0.19-old'])fs.mkdirSync(path.join(s.root,'updates',name),{recursive:true});
+  for(const name of ['melange-1.0.17-setup','melange-1.0.20-setup','melange-1.0.21-setup','melange-setup','melange-1.0.19-old','mentat-1.0.17-setup'])fs.mkdirSync(path.join(s.root,'updates',name),{recursive:true});
   make(path.join(s.root,'updates','melange','pending','melange-1.0.21-win32-x64.exe'));
   const result=await layout.sweepLayout({...s.args,state:{pending:{version:'1.0.21'},previous:{version:'1.0.18'},recovery:{phase:'prepared',target:{version:'1.0.17'}}}});
   const left=fs.readdirSync(s.root).sort();
   assert.deepEqual(left,['Melange-1.0.17','Melange-1.0.18','Melange-1.0.20','Melange.bak-x','Mentat-1.0.17','updates'].sort(),'1.0.19 is the only unprotected extra');
-  assert.deepEqual(fs.readdirSync(path.join(s.root,'updates')).sort(),['melange','melange-1.0.19-old','melange-1.0.20-setup','melange-1.0.21-setup'],'only stale setup folders go; the cache stays');
-  assert.deepEqual(result.pruned,[path.join(s.root,'Melange-1.0.19')]);assert.deepEqual(result.setupRemoved,[path.join(s.root,'updates','melange-1.0.17-setup')]);
+  // F2: the live folder is the versionless one; every 1.0.19-style versioned folder is a leftover (another app's is never touched)
+  assert.deepEqual(fs.readdirSync(path.join(s.root,'updates')).sort(),['melange','melange-1.0.19-old','melange-setup','mentat-1.0.17-setup'],'only stale setup folders go; the cache stays');
+  assert.deepEqual(result.pruned,[path.join(s.root,'Melange-1.0.19')]);
+  assert.deepEqual(result.setupRemoved.sort(),['melange-1.0.17-setup','melange-1.0.20-setup','melange-1.0.21-setup'].map(name=>path.join(s.root,'updates',name)));
   // finished recovery no longer protects
   await layout.sweepLayout({...s.args,state:{previous:{version:'1.0.18'},recovery:{phase:'completed',target:{version:'1.0.17'}}}});
   assert.equal(fs.existsSync(path.join(s.root,'Melange-1.0.17')),false);assert.equal(fs.existsSync(path.join(s.root,'Melange-1.0.18')),true);
