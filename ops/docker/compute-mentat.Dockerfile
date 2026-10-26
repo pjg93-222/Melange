@@ -16,7 +16,7 @@
 # Refresh = change one of those pins and say why in the commit. A stale DEBIAN_SNAPSHOT is how a fixable HIGH vulnerability
 # (Chromium above all) reaches the images gate: bump it with CHROMIUM_VERSION, the version that snapshot holds.
 ARG DEBIAN_BASE=debian:trixie-20261005-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f
-ARG NODE_IMAGE=node:22-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
+ARG NODE_IMAGE=node:22-trixie-slim@sha256:8eb619e402eaede1748a3c8173bffab391592812e85136452f781741c7242ddf
 
 FROM ${NODE_IMAGE} AS node
 

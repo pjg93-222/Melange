@@ -28,7 +28,7 @@
 #   R and audio: not here. The R collectors (press walk, Washington Journal) run in the Mentat/R image with http_replay.py's proxy mode;
 #             yt-dlp, ffmpeg and ASR are manual tools and stay out (design 2.4, YAGNI).
 ARG DEBIAN_BASE=debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f
-ARG NODE_BASE=node:22-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
+ARG NODE_BASE=node:22-trixie-slim@sha256:8eb619e402eaede1748a3c8173bffab391592812e85136452f781741c7242ddf
 ARG CPYTHON_VERSION=3.12.10
 ARG PBS_RELEASE=20250409
 ARG PBS_SHA256=8c59b9ac6bff2dc3934181d7bc82594f9f59a613afed8d72c9e89d7194e790ee
