@@ -12,6 +12,7 @@ from access_http import unique_object, RateLimit, HTTPRefused, HeaderDeadlineMix
 from access_store import fields, secret_hash
 from apps_admin import AppsAdmin, AppsError, UnavailableApps
 from desktop_apps_admin import DesktopApps, ROUTES as DESKTOP_ROUTES
+from relay_monitor import status as relay_status
 
 STATIC = Path(__file__).with_name('admin_ui_v2')
 CLIENT = Path(__file__).resolve().parent.parent / 'client'
@@ -234,7 +235,7 @@ def create_server(access, port=0, apps=None, desktop=None):
                     result = {'ok':True}
                 elif self.path == '/dashboard':
                     fields(value, set())
-                    result = access.dashboard()
+                    result = {**access.dashboard(), 'relay': relay_status(access.root)}
                 elif self.path == '/approve':
                     fields(value, {'requestId', 'role', 'districtIds'})
                     result = access.approve(value['requestId'], value['role'], value['districtIds'])

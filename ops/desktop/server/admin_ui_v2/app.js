@@ -313,6 +313,8 @@
     if(!snapshot)return;
     byId('pending-count').textContent=String(snapshot.notifications.pendingRequests);
     byId('notifications').textContent=snapshot.notifications.pendingRequests+' access request(s) need review. Pending requests stay here until you review them.';
+    const relay=snapshot.relay,down=relay?.state==='down';byId('relay-down').hidden=!down;   // only an alerted outage (3 failed checks); recovery hides it on the next refresh
+    if(down)byId('relay-down').textContent='Public relay down since '+new Date(relay.since*1000).toLocaleString()+' ('+relay.kind+'). Remote testers cannot send access requests until it recovers; it usually recovers by itself.';
     if(!legacyViews.includes(view))return;
     const focus=document.activeElement?.id, scroll={x:scrollX,y:scrollY};
     for(const id of legacyViews){byId(id).replaceChildren();byId(id).hidden=id!==view;}
@@ -363,7 +365,7 @@
   byId('expired-close').addEventListener('click',()=>{close();setTimeout(()=>{byId('expired-close').textContent='You can close this tab';byId('expired-close').disabled=true;},300);});
   setInterval(()=>{if(view==='apps'&&bearer)renderSub();},30000);
   // The requests, grants and activity views refresh themselves too; not mid-action, behind the key dialog, or while a form field is being used (the render rebuilds the cards).
-  setInterval(()=>{if(['requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);
+  setInterval(()=>{if(['apps','requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);
   const fragment=new URLSearchParams(location.hash.slice(1)),bootstrap=fragment.get('bootstrap');history.replaceState(null,'','/');
   (async()=>{
     lock(true);
