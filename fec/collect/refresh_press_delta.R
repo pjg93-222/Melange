@@ -589,6 +589,12 @@ write_retry_receipt <- function(materialized) {
     due = 0L, selected = 0L, attempted = 0L, recovered = 0L,
     historical_retained = nrow(historical), historical_selected = 0L)
   status <- if (nrow(failures)) failures$collection_status else character(0)
+  # PS: a run that skipped any member site is PARTIAL, never PASS.  The skipped sites are named here and
+  # the file is hash-bound, so the intake (build_press_engine_feed.validate_body_completion) can refuse a
+  # PASS over a non-empty file and accept this PARTIAL without a body backlog.  Absent file: no skips.
+  site_failures_path <- file.path(run_root, "press_site_failures.json")
+  site_rows <- if (file.exists(site_failures_path))
+    jsonlite::fromJSON(site_failures_path, simplifyVector = FALSE)$failures else list()
   payload <- list(
     schema_version = 2L,
     mode = if (is.null(run_receipt_metrics$retry_source_run))
@@ -596,7 +602,11 @@ write_retry_receipt <- function(materialized) {
     inventory_freshness = if (is.null(run_receipt_metrics$retry_source_run))
       "fresh" else "historical",
     historical_inventory_source = run_receipt_metrics$historical_inventory_source,
-    status = if (nrow(pending)) "PARTIAL" else "PASS",
+    status = if (nrow(pending) || length(site_rows)) "PARTIAL" else "PASS",
+    site_failures = length(site_rows),
+    site_failures_sha256 = if (file.exists(site_failures_path)) sha256_file(site_failures_path) else NA_character_,
+    skipped_sites = lapply(site_rows, function(row) list(
+      member_id = row$member_id, url = row$url, error_class = row$error_class)),
     pending_body_urls = nrow(pending),
     pending_body_urls_sha256 = sha256_file(pending_path),
     cached_date_rejoins = nrow(cached_dates),
@@ -645,7 +655,8 @@ load_valid_retry_receipt <- function() {
   full_rds <- file.path(run_root, "press_delta_fulltext.rds")
   full_csv <- file.path(run_root, "press_delta_fulltext.csv")
   if (!identical(receipt$mode, "live_network_retry") ||
-      identical(receipt$status, "PARTIAL") || isTRUE(receipt$pending_body_urls > 0) ||
+      (identical(receipt$status, "PARTIAL") && !isTRUE(receipt$site_failures > 0)) ||
+      isTRUE(receipt$pending_body_urls > 0) ||
       !identical(receipt$fulltext_rds_sha256, sha256_file(full_rds)) ||
       !identical(receipt$fulltext_csv_sha256, sha256_file(full_csv))) {
     stop("live-network retry receipt does not match the fulltext artifacts")
@@ -805,6 +816,11 @@ if (!is.na(retry_from)) {
   }
   run_receipt_metrics$historical_inventory_source <- bind_historical_retry_source(source_root)
   import_official_coverage_from_run(source_root)
+  # PS: the inventory is the parent's, so its skipped member sites are this run's; write_retry_receipt
+  # then seals PARTIAL (never PASS) over them.
+  parent_site_failures <- file.path(source_root, "press_site_failures.json")
+  if (file.exists(parent_site_failures))
+    file.copy(parent_site_failures, file.path(run_root, "press_site_failures.json"), overwrite = TRUE)
   source_full_path <- file.path(source_root, "press_delta_fulltext.rds")
   if (!file.exists(source_full_path)) stop("retry source lacks press_delta_fulltext.rds: ", source_root)
   source_full <- readRDS(source_full_path)
