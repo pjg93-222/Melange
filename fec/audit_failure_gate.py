@@ -57,6 +57,9 @@ KNOWN_GATED_FAILURES = (
     # D-330 (Paul, 2026-10-26): attempt 9's collection_intake_receipt is REJECTED (media gate unmet);
     # tolerated until the media gate passes, then UN-GATE. Its own name, not a broad pattern.
     'accepted audio manifest is fully partitioned into a candidate-only review intake',
+    # D-330 ruling 8 (Paul, 2026-10-26): the longform last-good artifact is re-bound after attempt 10; its age
+    # (47 d > 21 d at attempt 9) is tolerated until then. UN-GATE once the longform lane re-binds it.
+    'chain_tolerated_failures',
 )
 # DELIBERATELY NOT LISTED (these must keep aborting the refresh AND failing GATE-2):
 #   'own-source channel inputs within 28 days of the corpus (channels are default-ON)'

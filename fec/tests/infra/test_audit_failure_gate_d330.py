@@ -38,3 +38,12 @@ def test_personal_texture_precision_still_fails_the_gate():
 def test_a2b_repo_staleness_is_refreshed_not_tolerated():
     for n in A2B_REPO:
         assert _run([n]) is False, n
+
+
+LONGFORM_AGE = 'chain_tolerated_failures'
+
+
+def test_longform_age_is_tolerated_until_the_rebind():
+    # D-330 ruling 8: re-bind longform after attempt 10; tolerate the 47-day last-good age until then.
+    assert LONGFORM_AGE in gate.KNOWN_GATED_FAILURES
+    assert _run([LONGFORM_AGE, INTAKE]) is True
