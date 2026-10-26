@@ -472,12 +472,13 @@ def _coverage(root, retry):
             member = (row.get("bioguide") or "").strip().upper()
             if member:
                 members[member] = members.get(member, 0) + 1
-    skipped = retry.get("site_failures")
+    # D-294: completion and the named sites both come from the validated sealed file, never the receipt's own copy
+    skipped = site_failure_proof(root, retry).get("site_failures_skipped", [])
     coverage = {"complete": pending == 0 and not skipped, "pending_body_urls_carried": carried,
                 "pending_body_urls_sha256": retry.get("pending_body_urls_sha256"),
                 "pending_members": dict(sorted(members.items()))}
-    if skipped:   # D-294: skipped member sites make the run PARTIAL; named only when present
-        coverage["site_failures_skipped"] = retry.get("skipped_sites") or skipped
+    if skipped:   # skipped member sites make the run PARTIAL; named only when present
+        coverage["site_failures_skipped"] = skipped
     return coverage
 
 

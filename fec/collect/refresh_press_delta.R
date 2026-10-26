@@ -818,9 +818,18 @@ if (!is.na(retry_from)) {
   import_official_coverage_from_run(source_root)
   # PS: the inventory is the parent's, so its skipped member sites are this run's; write_retry_receipt
   # then seals PARTIAL (never PASS) over them.
+  # A failed copy, or a stale file left in run_root when the parent has none, would let the receipt seal PASS
+  # over the parent's skips (CodeRabbit PR #94): both stop the recovery.
   parent_site_failures <- file.path(source_root, "press_site_failures.json")
-  if (file.exists(parent_site_failures))
-    file.copy(parent_site_failures, file.path(run_root, "press_site_failures.json"), overwrite = TRUE)
+  target_site_failures <- file.path(run_root, "press_site_failures.json")
+  if (file.exists(parent_site_failures)) {
+    if (!isTRUE(file.copy(parent_site_failures, target_site_failures, overwrite = TRUE)))
+      stop("failed to copy the parent's press_site_failures.json: ", source_root)
+  } else if (file.exists(target_site_failures)) {
+    unlink(target_site_failures)
+    if (file.exists(target_site_failures))
+      stop("failed to remove a stale press_site_failures.json: ", run_root)
+  }
   source_full_path <- file.path(source_root, "press_delta_fulltext.rds")
   if (!file.exists(source_full_path)) stop("retry source lacks press_delta_fulltext.rds: ", source_root)
   source_full <- readRDS(source_full_path)

@@ -145,7 +145,10 @@ def test_the_r_receipt_is_partial_for_skipped_sites_and_binds_the_file():
 
 def test_retry_from_copies_the_parents_skipped_sites_before_the_receipt_is_written():
     source = (FEC / "collect" / "refresh_press_delta.R").read_text(encoding="utf-8")
-    copy = source.index('file.copy(parent_site_failures, file.path(run_root, "press_site_failures.json")')
+    copy = source.index("file.copy(parent_site_failures, target_site_failures, overwrite = TRUE)")
+    # a failed copy stops the recovery, and a stale file is removed when the parent has none (CodeRabbit PR #94)
+    assert "if (!isTRUE(file.copy(parent_site_failures, target_site_failures, overwrite = TRUE)))" in source
+    assert "unlink(target_site_failures)" in source and 'stop("failed to remove a stale press_site_failures.json' in source
     assert source.index("import_official_coverage_from_run(source_root)") < copy
     assert copy < source.rindex("completion <- write_retry_receipt")
     assert copy < source.index("run_receipt_metrics$retry_source_run <- basename(source_root)")
@@ -162,3 +165,17 @@ def test_a_historical_recovery_receipt_over_inherited_skips_is_partial_and_never
     with pytest.raises(ReceiptRejected) as refused:
         validate_body_completion(tmp_path, passing, require_complete=True)
     assert refused.value.reason == "PASS_OVER_SKIPPED_SITES"
+
+
+def test_feed_coverage_names_the_sites_from_the_validated_file_not_the_receipt_copy(tmp_path):
+    # CodeRabbit PR #94: _coverage used the receipt's own skipped_sites; it now uses site_failure_proof.
+    from collect import build_press_engine_feed as feed
+    receipt = {"mode": "live_network_retry"}
+    seal_sites(tmp_path, receipt)
+    receipt["skipped_sites"] = [{"member_id": "X000001", "url": "https://elsewhere.example.com", "error_class": "timeout"}]
+    coverage = feed._coverage(tmp_path, receipt)
+    assert coverage["complete"] is False and coverage["site_failures_skipped"] == [NAMED]
+    clean = {"mode": "live_network_retry"}
+    seal_sites(tmp_path, clean, failures=(), status="PASS")
+    assert feed._coverage(tmp_path, clean) == {"complete": True, "pending_body_urls_carried": 0,
+                                               "pending_body_urls_sha256": None, "pending_members": {}}
