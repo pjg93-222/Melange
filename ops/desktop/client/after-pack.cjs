@@ -29,21 +29,17 @@ function stripState(runtimeRoot,log=()=>{}){
 // Dashboards are banned anywhere in the runtime; datasets only in Melange's own sources (Terrier and Mentat name reviewed schema/geo files in the manifest).
 const DASHBOARD_PATTERN=/^moneyball.*\.html$/i,DATASET_PATTERN=/\.(xlsx|xlsm|xls|csv|parquet|feather|ndjson|joblib|pkl|pickle|npz)$/i;
 function findShippedData(runtimeRoot){
-  const found=[];
-  const walk=(directory,datasets)=>{
+  // One walk over the whole runtime, so files at any depth (including directly under runtime/<app>) are checked.
+  const found=[],melangeSources=path.join(runtimeRoot,'melange','sources',path.sep).toLowerCase();
+  const walk=directory=>{
     let entries;try{entries=fs.readdirSync(directory,{withFileTypes:true});}catch(error){return;}
     for(const entry of entries){
       const full=path.join(directory,entry.name);
-      if(entry.isDirectory())walk(full,datasets);
-      else if(DASHBOARD_PATTERN.test(entry.name)||(datasets&&DATASET_PATTERN.test(entry.name)))found.push(full);
+      if(entry.isDirectory())walk(full);
+      else if(DASHBOARD_PATTERN.test(entry.name)||(full.toLowerCase().startsWith(melangeSources)&&DATASET_PATTERN.test(entry.name)))found.push(full);
     }
   };
-  if(fs.existsSync(runtimeRoot))for(const application of fs.readdirSync(runtimeRoot,{withFileTypes:true}))if(application.isDirectory()){
-    const root=path.join(runtimeRoot,application.name);
-    if(application.name==='melange'){
-      for(const child of fs.readdirSync(root,{withFileTypes:true}))if(child.isDirectory())walk(path.join(root,child.name),child.name.toLowerCase()==='sources');
-    }else walk(root,false);
-  }
+  if(fs.existsSync(runtimeRoot))walk(runtimeRoot);
   return found;
 }
 async function afterPack(context){

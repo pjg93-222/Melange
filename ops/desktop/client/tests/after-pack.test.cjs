@@ -83,9 +83,8 @@ test('afterPack without packager metadata (unit use) leaves no include behind',a
 // ---- N20: the public installer ships a no-data dashboard shell only ----
 test('N20: afterPack fails on a real Moneyball.html or a Melange dataset, and passes on the shell-only runtime',async t=>{
   const shell=['melange/sources/fec/surfaces/staffer_live_server.py','melange/bootstrap/melange_bootstrap.py','terrier/sources/data/field_dictionary.csv'];
-  
   const ok=pack(t,shell);await quiet({appOutDir:ok.appOutDir});
-  for(const bad of ['melange/sources/Moneyball.html','melange/sources/fec/MONEYBALL_Redesign.html','mentat/sources/app/moneyball.html','melange/sources/fec/data/members.xlsx','melange/sources/fec/data/votes.ndjson']){
+  for(const bad of ['melange/Moneyball.html','terrier/moneyball.html','melange/sources/Moneyball.html','melange/sources/fec/MONEYBALL_Redesign.html','mentat/sources/app/moneyball.html','melange/sources/fec/data/members.xlsx','melange/sources/fec/data/votes.ndjson']){
     const context=pack(t,[...shell,bad]);
     await assert.rejects(()=>quiet({appOutDir:context.appOutDir}),/no-data dashboard shell \(N20\)/,bad);
   }
