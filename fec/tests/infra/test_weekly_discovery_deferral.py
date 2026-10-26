@@ -422,3 +422,53 @@ def test_the_lease_handoff_clears_and_restores_the_held_flag():
     namespace["_lease_handoff_in"]()
     assert namespace["_LEASE_HELD"] == [False] and aborts and aborts[0][0] == "chain container lease"
     assert "_LEASE_HELD=[True]" in SOURCE
+
+
+CR_LANE = "CR member lane (side copy)"
+
+
+def cr_if():
+    return statement(lambda n: isinstance(n, ast.If) and CR_LANE in ast.get_source_segment(SOURCE, n))
+
+
+def run_cr_lane(world):
+    world.ns.update({"MB_ROOT": "R", "log": world.logs.append})
+    for node in TREE.body:
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") in ("_cr_out", "_cr_run_id"):
+            run_statement(node, world.ns)
+    run_statement(cr_if(), world.ns)
+
+
+def test_cr_lane_step_wired_after_aug_soft_and_side_copy_only():
+    def at(text):
+        return next(i for i, n in enumerate(TREE.body) if text in ast.get_source_segment(SOURCE, n))
+    assert at("step('multilayer network'") < TREE.body.index(cr_if()) < at("step('co-appearance layer'")   # statement order, not comment text
+    call = cr_if().test
+    assert call.func.id == "step"
+    assert next(k.value.value for k in call.keywords if k.arg == "hard") is False
+    argv = [ast.unparse(a) for a in call.args[1].elts]
+    assert argv[:2] == ["'network/build_cu_member_lane.py'", "'build'"]
+    assert argv[argv.index("'--out'") + 1] == "_cr_out"      # explicit out, under data/cr_lane (checked below), never a root
+    assert not any(w in ast.get_source_segment(SOURCE, cr_if()).lower() for w in ("promote(", "pin"))
+
+
+def test_cr_lane_out_is_under_data_cr_lane_never_a_root():
+    world = weekly_world(returncode=0)
+    run_cr_lane(world)
+    assert world.ns["_cr_out"] == os.path.join("R", "data", "cr_lane")
+
+
+def test_cr_lane_success_records_run_dir_in_status():
+    world = weekly_world(returncode=0)
+    run_cr_lane(world)
+    runs = [s["cr_lane_last_run"] for s in world.statuses if "cr_lane_last_run" in s]
+    assert runs == [os.path.join("R", "data", "cr_lane", world.ns["_cr_run_id"])]
+    assert world.ns["_soft_failures"] == []
+
+
+def test_cr_lane_failure_warns_and_weekly_continues():
+    world = weekly_world(returncode=3)
+    run_cr_lane(world)
+    assert world.ns["_soft_failures"] == [CR_LANE] and world.aborts == []
+    assert not any("cr_lane_last_run" in s for s in world.statuses)
+    assert any(line.startswith("WARNING: CR member lane") for line in world.logs)

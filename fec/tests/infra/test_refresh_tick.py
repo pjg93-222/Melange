@@ -53,6 +53,7 @@ for _engine_key in ('MELANGE_ENGINE_COLLECT', 'MELANGE_ENGINE_CHAIN', 'MELANGE_E
 
 TICK_PATH = os.path.join(FEC, 'refresh_tick.py')
 WEEKLY_REFRESH_PATH = os.path.join(FEC, 'weekly_refresh.py')
+WEEKLY_ONLY_STEPS = frozenset({'CR member lane (side copy)'})   # weekly_refresh.py steps the tick table deliberately does not carry
 # Anything the suite writes under the repository itself would be a bug; this is what it must not
 # grow.  Captured at import, checked by the last test.
 _REAL_ENGINE = os.path.join(REPO_ROOT, 'data', 'engine')
@@ -978,6 +979,8 @@ class RefreshTickTest(unittest.TestCase):
         for node in ast.walk(tree):
             if not (isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'step'):
                 continue
+            if node.args[0].value in WEEKLY_ONLY_STEPS:
+                continue   # declared weekly-only: argv built at run time (not literal), asserted below
             keywords = {kw.arg: kw.value for kw in node.keywords}
             rows.append((node.lineno, node.args[0].value,
                          tuple(literal(el) for el in node.args[1].elts),
@@ -991,7 +994,13 @@ class RefreshTickTest(unittest.TestCase):
         today = datetime.date.today()
         actual = [(step.name, tuple(R.render_argv(step.argv, today)), step.timeout_s, step.hard)
                   for step in T.pinned_steps()]
-        self.assertEqual(49, len(expected), 'weekly_refresh.py no longer declares 49 steps')
+        self.assertEqual(49, len(expected), 'weekly_refresh.py no longer declares 49 table-pinned steps')
+        # D-297/D-298: the CR member lane side copy is weekly-only BY DESIGN (soft, never promotes, its --out/--run-id are
+        # computed per run).  The exemption must name a step weekly_refresh.py still declares and the table must not carry.
+        declared = {node.args[0].value for node in ast.walk(ast.parse(open(WEEKLY_REFRESH_PATH, encoding='utf-8').read()))
+                    if isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'step'}
+        self.assertEqual(WEEKLY_ONLY_STEPS, declared & WEEKLY_ONLY_STEPS)
+        self.assertEqual(set(), {step.name for step in T.TABLE} & WEEKLY_ONLY_STEPS)
         self.assertEqual(len(expected), len(actual))
         for index, (want, got) in enumerate(zip(expected, actual)):
             self.assertEqual(want, got, 'row %d drifted from weekly_refresh.py' % (index + 1))

@@ -707,6 +707,15 @@ step('social interaction layer',['social_interaction_layer.py'],timeout=900)
 step('press engagement layer',['press_engagement_layer.py'],timeout=600)
 step('press HCoI layer',['press_hcoi.py'],timeout=600)
 step('multilayer network',['build_multilayer_network.py'],timeout=900)
+# CR member lane (D-297/D-298): side copy ONLY -- builds the R-faithful network + archive variant B into data/cr_lane/<UTC run_id>/.
+# Soft: missing inputs (BILLSTATUS bulk, roster, 0624/0825 archives) make the builder refuse non-zero and the weekly continues.
+# Never promotes and never moves a pin; promotion stays manual (D-298). The run dir is recorded as cr_lane_last_run.
+_cr_out=os.path.join(MB_ROOT,'data','cr_lane')
+_cr_run_id=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')
+if step('CR member lane (side copy)',['network/build_cu_member_lane.py','build','--out',_cr_out,'--run-id',_cr_run_id],timeout=900,hard=False):
+    _write_status(cr_lane_last_run=os.path.join(_cr_out,_cr_run_id))
+else:
+    log('WARNING: CR member lane side copy not built (inputs missing -- incl. fec/network/cr_r_network_billset.json -- or builder refused); weekly continues, nothing promoted')
 step('co-appearance layer',['co_appearance_layer.py'],timeout=600)                 # joint interview-episode pairings (user 2026-07-05)
 # New document windows are classified before the network-free pipeline rebuild.
 # Successful classifications checkpoint individually; provider failure blocks publication.
