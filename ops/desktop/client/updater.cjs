@@ -71,7 +71,7 @@ class DesktopUpdater {
     if(this.platform!=='win32')throw new Error('This release supports verified Windows activation only.');
     // The publisher decision is the installer signer's thumbprint against the signed manifest's allow-list; a manifest
     // without one (published before thumbprint pinning) is refused by verifyWindowsPackage, failing closed.
-    await this.verifyNativePackage(filename,manifest.publisherThumbprints);
+    await this.verifyNativePackage(filename,manifest.publisherThumbprints,{warn:message=>this.onStatus(message)});
     await verifyPackageFile(filename,manifest);
   }
   async ensureRecoveryBaseline(enrollment,fetch=true){

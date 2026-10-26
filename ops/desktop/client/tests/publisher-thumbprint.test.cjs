@@ -117,3 +117,12 @@ test('publisherThumbprints must be a non-empty list of 40 uppercase hex digits w
   for(const bad of [[],[PIN.toLowerCase()],[PIN+'0'],'0EBC',[1],Array(9).fill(PIN)])
     assert.throws(()=>verifyEnvelope(f.sign('1.1.0',2,{publisherThumbprints:bad}),f.enrollment,identity),/Invalid publisher thumbprints/);
 });
+
+test('T18 warn-only (Paul 2026-10-26): a manifest that does not name the pinned publisher still installs for 1.0.19 and the update status carries the warning',async t=>{
+  const f=fixture(t,{thumbprints:[OTHER]});signer={status:4,thumbprint:OTHER};
+  const realWarn=console.warn;console.warn=()=>{};
+  try{const client=f.client();await client.check();
+    assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
+  }finally{console.warn=realWarn;}
+  assert.ok(f.status.some(message=>/Update publisher warning: .*does not name the pinned publisher certificate/.test(message)),f.status.join(' | '));
+});

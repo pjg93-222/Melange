@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {verifySignatureResult}=require('../native-signature.cjs');
+const {verifySignatureResult,PUBLISHER_PIN_ENFORCE}=require('../native-signature.cjs');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const tempPackage=bytes=>{const filename=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'native-signature-')),'Package.exe');fs.writeFileSync(filename,Buffer.alloc(bytes));return filename;};
 const PIN='0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30',OTHER='1111111111111111111111111111111111111111';
@@ -16,15 +16,45 @@ test('native signature requires a pinned signer thumbprint and the exact install
     assert.throws(()=>verifySignatureResult(result,filename,pins),/could not be verified/);
   for(const pins of [undefined,null,[],'0EBC',[PIN.toLowerCase()]])assert.throws(()=>verifySignatureResult(valid,filename,pins),/names no publisher thumbprint/);
 });
-test('T18 (D-328): the signer must equal the client-pinned thumbprint AND be on the manifest allow-list',()=>{
-  const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename});
-  verifySignatureResult(signed(PIN),filename,[PIN]);
-  verifySignatureResult(signed(PIN.toLowerCase()),filename,[PIN]);
+test('T18 (D-328): with enforcement on, the signer must equal the client-pinned thumbprint AND be on the manifest allow-list',()=>{
+  const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename}),on={enforce:true};
+  verifySignatureResult(signed(PIN),filename,[PIN],on);
+  verifySignatureResult(signed(PIN.toLowerCase()),filename,[PIN],on);
   // A manifest that names another publisher (even alone, even as the signer) cannot widen the client pin.
   for(const [signer,pins] of [[OTHER,[OTHER]],[OTHER,[PIN,OTHER]],[PIN,[OTHER]]])
-    assert.throws(()=>verifySignatureResult(signed(signer),filename,pins),/could not be verified|does not name the pinned publisher thumbprint/);
-  for(const status of [2,3])assert.throws(()=>verifySignatureResult({...signed(PIN),status},filename,[PIN]),/could not be verified/);
-  assert.throws(()=>verifySignatureResult({...signed(PIN),path:'C:\Other\Package.exe'},filename,[PIN]),/could not be verified/);
+    assert.throws(()=>verifySignatureResult(signed(signer),filename,pins,on),/could not be verified|does not name the pinned publisher thumbprint/);
+  for(const status of [2,3])assert.throws(()=>verifySignatureResult({...signed(PIN),status},filename,[PIN],on),/could not be verified/);
+  assert.throws(()=>verifySignatureResult({...signed(PIN),path:'C:\Other\Package.exe'},filename,[PIN],on),/could not be verified/);
+});
+test('T18 (Paul 2026-10-26): the shipped default is warn-only for 1.0.19 (flip PUBLISHER_PIN_ENFORCE in the next release)',()=>{
+  assert.equal(PUBLISHER_PIN_ENFORCE,false);
+});
+test('T18 warn-only: a pin mismatch warns and proceeds while enforcement is off; the allow-list and release-signing checks still refuse',()=>{
+  const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename}),off={enforce:false};
+  const run=(result,pins)=>{const warnings=[];verifySignatureResult(result,filename,pins,{...off,warn:message=>warnings.push(message)});return warnings;};
+  // The pin matches: no warning.
+  assert.deepEqual(run(signed(PIN),[PIN]),[]);
+  assert.deepEqual(run(signed(PIN),[OTHER,PIN]),[]);
+  // Manifest does not name the pin (signer is on the manifest list): proceeds with a warning.
+  assert.match(run(signed(OTHER),[OTHER])[0],/does not name the pinned publisher certificate.*next release will refuse/);
+  // Manifest names the pin but the installer is signed by another listed publisher: proceeds with a warning.
+  assert.match(run(signed(OTHER),[PIN,OTHER])[0],/signed by 1111.*not the pinned publisher certificate/);
+  // Not warn-only for the existing checks: a signer outside the manifest list, a refused status, a path mismatch, or no list still throws.
+  assert.throws(()=>run(signed(OTHER),[PIN]),/could not be verified/);
+  for(const status of [2,3])assert.throws(()=>run({...signed(PIN),status},[PIN]),/could not be verified/);
+  assert.throws(()=>run({...signed(PIN),path:'C:\Other\Package.exe'},[PIN]),/could not be verified/);
+  assert.throws(()=>run(signed(PIN),[]),/names no publisher thumbprint/);
+  // The module default (off) behaves the same without options, and console.warn is the log.
+  const logged=[],realWarn=console.warn;console.warn=message=>logged.push(message);
+  try{verifySignatureResult(signed(OTHER),filename,[OTHER]);}finally{console.warn=realWarn;}
+  assert.equal(logged.length,1);
+});
+test('T18 flip: the same mismatches that warn while off block once enforcement is on',()=>{
+  const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename});
+  for(const [signer,pins] of [[OTHER,[OTHER]],[OTHER,[PIN,OTHER]]]){
+    verifySignatureResult(signed(signer),filename,pins,{enforce:false});
+    assert.throws(()=>verifySignatureResult(signed(signer),filename,pins,{enforce:true}),/could not be verified|does not name the pinned publisher thumbprint/);
+  }
 });
 test('signature tool failures without a verdict are tagged; a parsed refusal is not',async()=>{
   const childProcess=require('node:child_process'),realExecFile=childProcess.execFile,platform=Object.getOwnPropertyDescriptor(process,'platform');

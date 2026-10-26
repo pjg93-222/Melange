@@ -19,23 +19,39 @@ function signatureTimeoutMs(bytes){
   const blocks=Math.ceil(Math.max(0,Number(bytes)||0)/(100*MIB));
   return Math.min(600000,Math.max(60000,60000+30000*blocks));
 }
-function pinnedThumbprints(thumbprints){
+// D-328/T18: the client pin is the publisher; the signed manifest may only confirm it, never widen it. Paul ruling
+// 2026-10-26: that NEW pin check is warn-only for 1.0.19 (a mismatch is logged and surfaced through the update status
+// and the update proceeds on the manifest allow-list alone); the allow-list itself is always enforced.
+// flip to true in the release after 1.0.19 (Paul ruling 2026-10-26, T18)
+const PUBLISHER_PIN_ENFORCE=false;
+function allowList(thumbprints){
   if(!Array.isArray(thumbprints)||!thumbprints.length||!thumbprints.every(value=>typeof value==='string'&&THUMBPRINT.test(value)))
     throw new Error('The signed release manifest names no publisher thumbprint; this installer is refused.');
-  // D-328/T18: the client pin is the publisher; the signed manifest may only confirm it, never widen it.
-  if(!thumbprints.includes(PINNED))throw new Error('The signed release manifest does not name the pinned publisher thumbprint; this installer is refused.');
+  return thumbprints;
+}
+function pinnedThumbprints(thumbprints,enforce=PUBLISHER_PIN_ENFORCE){
+  const listed=allowList(thumbprints);
+  if(!enforce)return listed;
+  if(!listed.includes(PINNED))throw new Error('The signed release manifest does not name the pinned publisher thumbprint; this installer is refused.');
   return [PINNED];
 }
-function verifySignatureResult(result,filename,thumbprints){
-  const allowed=pinnedThumbprints(thumbprints);
+function pinWarning(listed,thumbprint){
+  if(!listed.includes(PINNED))return 'Update publisher warning: the signed release manifest does not name the pinned publisher certificate ('+PINNED+'). This release still installs; the next release will refuse it.';
+  if(thumbprint!==PINNED)return 'Update publisher warning: the installer is signed by '+thumbprint+', not the pinned publisher certificate ('+PINNED+'). This release still installs; the next release will refuse it.';
+  return null;
+}
+function verifySignatureResult(result,filename,thumbprints,{enforce=PUBLISHER_PIN_ENFORCE,warn}={}){
+  const allowed=pinnedThumbprints(thumbprints,enforce);
   const thumbprint=typeof result?.thumbprint==='string'?result.thumbprint.toUpperCase():'';
   if(!Number.isInteger(result?.status)||REFUSED_STATUS.has(result.status)||!THUMBPRINT.test(thumbprint)||!allowed.includes(thumbprint)||
       typeof result.path!=='string'||path.win32.resolve(result.path).toLowerCase()!==path.win32.resolve(filename).toLowerCase())
     throw new Error('Windows package signature or pinned publisher thumbprint could not be verified.');
+  const message=enforce?null:pinWarning(thumbprints,thumbprint);
+  if(message){console.warn(message);if(typeof warn==='function')warn(message);}
 }
-async function verifyWindowsPackage(filename,thumbprints){
+async function verifyWindowsPackage(filename,thumbprints,{enforce=PUBLISHER_PIN_ENFORCE,warn}={}){
   if(process.platform!=='win32')throw new Error('Windows package signature verification requires Windows.');
-  pinnedThumbprints(thumbprints);
+  pinnedThumbprints(thumbprints,enforce);
   const executable=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
   const encoded=Buffer.from(SCRIPT,'utf16le').toString('base64');
   const timeout=signatureTimeoutMs(fs.statSync(filename).size),started=Date.now();
@@ -51,6 +67,6 @@ async function verifyWindowsPackage(filename,thumbprints){
     });
     child.stdin.on('error',()=>{});child.stdin.end(JSON.stringify({path:path.resolve(filename)}));
   });
-  verifySignatureResult(result,filename,thumbprints);
+  verifySignatureResult(result,filename,thumbprints,{enforce,warn});
 }
-module.exports={verifyWindowsPackage,verifySignatureResult,signatureTimeoutMs};
+module.exports={verifyWindowsPackage,verifySignatureResult,signatureTimeoutMs,PUBLISHER_PIN_ENFORCE};
