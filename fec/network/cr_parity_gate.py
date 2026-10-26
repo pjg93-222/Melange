@@ -66,9 +66,21 @@ def reconstruct(csv_path):
     return {'per': per, 'stale': stale, 'E': E, 'nometa': nometa, 'ties_by': ties_by, 'ties': ties}
 
 
+def parity(g):
+    """-> (bad, extra): R edges not reproduced exactly / edges R does not have."""
+    E, ties = g['E'], g['ties']
+    bad = [k for k in E if k not in ties or abs(E[k][0] - ties[k][0]) > 1e-9 or E[k][1:] != tuple(ties[k][1:])]
+    return bad, [k for k in ties if k not in E]
+
+
 def write_billset(csv_path, path):
-    """Freeze R's network bill set: non-stale checkpoint bills with their DetailLink count (= sections counted)."""
+    """Freeze R's network bill set: non-stale checkpoint bills with their DetailLink count (= sections counted).
+    Writes ONLY when every R edge is reproduced exactly (the build consumes this file by default); else refuses, returns 1."""
     g = reconstruct(csv_path)
+    bad, extra = parity(g)
+    if bad or extra:
+        print('REFUSED: parity gate failed (%d R edges mismatched/missing, %d extra); billset NOT written' % (len(bad), len(extra)), file=sys.stderr)
+        return 1
     n = collections.Counter()
     for l, (r, sponsor, c) in g['per'].items():
         if l not in g['stale']:
@@ -82,12 +94,12 @@ def write_billset(csv_path, path):
     with open(path, 'w', encoding='utf-8', newline='\n') as fh:
         json.dump(doc, fh, indent=0)
     print('billset: %d bills, %d R links -> %s' % (len(n), sum(n.values()), path))
+    return 0
 
 
 def main(csv_path):
     g = reconstruct(csv_path); E, ties, per, stale, nometa = g['E'], g['ties'], g['per'], g['stale'], g['nometa']
-    bad = [k for k in E if k not in ties or abs(E[k][0] - ties[k][0]) > 1e-9 or E[k][1:] != tuple(ties[k][1:])]
-    extra = [k for k in ties if k not in E]
+    bad, extra = parity(g)
     print('R edges %d | reproduced exactly %d | mismatched/missing %d | extra %d' % (len(E), len(E) - len(bad), len(bad), len(extra)))
     print('checkpoint bills %d | stale (R did not use) %d | sponsor row absent from stored archive %d %s' % (len(per), len(stale), len(nometa), nometa))
     return 0 if not bad and not extra else 1

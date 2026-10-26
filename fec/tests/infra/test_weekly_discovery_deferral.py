@@ -440,8 +440,9 @@ def run_cr_lane(world):
 
 
 def test_cr_lane_step_wired_after_aug_soft_and_side_copy_only():
-    pos = [SOURCE.index(s) for s in ("step('multilayer network'", CR_LANE, "step('co-appearance layer'")]
-    assert pos == sorted(pos)
+    def at(text):
+        return next(i for i, n in enumerate(TREE.body) if text in ast.get_source_segment(SOURCE, n))
+    assert at("step('multilayer network'") < TREE.body.index(cr_if()) < at("step('co-appearance layer'")   # statement order, not comment text
     call = cr_if().test
     assert call.func.id == "step"
     assert next(k.value.value for k in call.keywords if k.arg == "hard") is False

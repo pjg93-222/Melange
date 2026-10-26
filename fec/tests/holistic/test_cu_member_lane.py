@@ -318,3 +318,71 @@ def test_golden_baked_ties_match_live_sidecar_within_tolerance():
     side = {(e['from'], e['to']): e['weight'] for e in json.load(open(sidecar, encoding='utf-8'))['edges']}
     assert len(set(got) & set(side)) >= 0.99 * len(side)                      # measured 1,267 of 1,272 pairs
     assert abs(sum(got.values()) - sum(side.values())) <= 0.06 * sum(side.values())   # measured within 5%: BILLSTATUS drift since the frozen sidecar
+
+
+# ----------------------------------------------------------------------------- FIX83 (CodeRabbit, PR #83)
+def test_out_allowed_only_under_live_data_cr_lane_or_outside_root(tmp_path):
+    ok = os.path.join(ROOT, 'data', 'cr_lane')
+    L.assert_out_ok(ok, ROOT); L.assert_out_ok(os.path.join(ok, 'run1'), ROOT); L.assert_out_ok(str(tmp_path / 'sandbox'), ROOT)
+    for bad in (os.path.join(ROOT, 'data'), os.path.join(ROOT, 'sub'), os.path.join(ROOT, 'data', 'cr_lane_x'),
+                os.path.join(ROOT, 'data', 'cr_lane', '..'), os.path.join(ROOT, 'data', 'cr_lane', '..', 'engine'),
+                os.path.join(ROOT, 'data', 'cr_lane', '..', '..', 'fec')):
+        with pytest.raises(L.Refusal):
+            L.assert_out_ok(bad, ROOT)
+
+
+def test_out_refuses_junction_into_live_root(tmp_path):
+    link = tmp_path / 'jx'
+    try:
+        if os.name == 'nt':
+            subprocess.run(['cmd', '/c', 'mklink', '/J', str(link), os.path.join(ROOT, 'data')], check=True, capture_output=True)
+        else:
+            os.symlink(os.path.join(ROOT, 'data'), link)
+    except Exception:
+        pytest.skip('cannot create link')
+    with pytest.raises(L.Refusal):
+        L.assert_out_ok(str(link / 'x'), ROOT)
+
+
+@pytest.mark.parametrize('rid', ['..', '.', 'a/b', r'a\b', r'..\..', 'C:x'])
+def test_bad_run_id_refused_nothing_written(tmp_path, rid):
+    out = tmp_path / 'o'
+    assert L.main(['build', '--out', str(out), '--run-id', rid]) == 3
+    assert not out.exists()
+
+
+def test_build_prechecks_reference_workbooks_even_with_seed_override(tmp_path, monkeypatch, capsys):
+    raw = make_raw(tmp_path / 'raw', {})
+    seed = tmp_path / 'seed.xlsx'; seed.write_bytes(b'x')
+    monkeypatch.setattr(L, 'REF_NETWORK', 'no_such_ref_network.xlsx')
+    rc = L.main(['build', '--out', str(tmp_path / 'o'), '--run-id', 'r1', '--raw-root', raw, '--seed-archive', str(seed),
+                 '--network-set', 'archive'])
+    assert rc == 3 and 'no_such_ref_network.xlsx' in capsys.readouterr().err and not (tmp_path / 'o' / 'r1').exists()
+
+
+def _pg_world(monkeypatch, ties_ok):
+    from network import cr_parity_gate as PG
+    E = {('a', 'b'): (1.0, 1, 1, 0)}
+    g = {'per': {}, 'stale': [], 'E': E, 'nometa': [], 'ties_by': {}, 'ties': {('a', 'b'): [1.0, 1, 1, 0]} if ties_ok else {}}
+    monkeypatch.setattr(PG, 'reconstruct', lambda p: g)
+    return PG
+
+
+def test_write_billset_refused_without_parity(tmp_path, monkeypatch):
+    PG = _pg_world(monkeypatch, ties_ok=False)
+    out = tmp_path / 'bs.json'
+    assert PG.write_billset('x.csv', str(out)) != 0 and not out.exists()
+
+
+def test_write_billset_written_when_parity_passes(tmp_path, monkeypatch):
+    PG = _pg_world(monkeypatch, ties_ok=True)
+    out = tmp_path / 'bs.json'
+    assert PG.write_billset('x.csv', str(out)) == 0 and out.exists()
+
+
+def test_edge_growth_last_action_is_recomputed_for_bills_outside_the_seed():
+    from network import cr_edge_growth as EG
+    passed = [('2025-02-01', '8000', 'Floor', 'Passed/agreed to in House')]
+    bills = {(119, 'hr', 1): {'actions': passed}, (119, 'hr', 2): {'actions': []}}
+    la = EG.last_actions(bills)
+    assert la[(119, 'hr', 1)] == L.tracker_status(passed, 'hr') and la[(119, 'hr', 2)] == 'Introduced'

@@ -29,6 +29,12 @@ def bill_w(k, sponsor, cos, la):
     return {(f, to, k[0]): v[0] for (f, to), v in t.items()}
 
 
+def last_actions(bills):
+    """Final status per bill exactly as the lane network computes it (BILLSTATUS tracker_status) -- for EVERY loaded bill,
+    not only seed-archive rows, so R bills absent from the seed archives still get their new status."""
+    return {k: L.tracker_status(b['actions'], k[1]) for k, b in bills.items()}
+
+
 def add(acc, d):
     for key, w in d.items():
         acc[key] += w
@@ -54,7 +60,7 @@ def main(csv_path, run_dir, raw_root=None, legacy=False):
         rkeys.setdefault(k, []).append((r, sponsor, c)); need.add(k)
     bills, refused = L.read_bills(raw_root, list(need))
     rows = L.archive_rows(seed, bills, roster, order)
-    new_la = {k3(r['Name'], r['Congress']): r['LastAction'] for r in rows}
+    new_la = last_actions(bills)
     W = [collections.defaultdict(float) for _ in range(6)]
     notes = collections.Counter()
     for k, lst in rkeys.items():

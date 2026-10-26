@@ -585,11 +585,21 @@ def _exclusion_flips(arow, rarow, ix):
 
 
 # ----------------------------------------------------------------------------- CLI
+def _inside(o, base):
+    try:
+        return os.path.commonpath([o, base]) == base
+    except ValueError:   # different drives
+        return False
+
+
 def assert_out_ok(out, live_root):
-    o = os.path.realpath(out)
-    for forbidden in {os.path.realpath(live_root), os.path.realpath(REPO)}:
-        if o == forbidden:
-            raise Refusal('refusing to write to a repo/live root: %s' % o)
+    """Inside the live root (or the repo) the ONLY allowed output is <root>/data/cr_lane[/...]; anywhere outside both is a sandbox.
+    realpath resolves '..', symlinks and junctions first, so traversal/links into a root cannot slip through."""
+    o = os.path.normcase(os.path.realpath(out))
+    for root in (live_root, REPO):
+        r = os.path.normcase(os.path.realpath(root))
+        if _inside(o, r) and not _inside(o, os.path.join(r, 'data', 'cr_lane')):
+            raise Refusal('refusing to write inside a repo/live root (only <root>/data/cr_lane is allowed): %s' % o)
 
 
 def load_roster(root):
@@ -601,11 +611,14 @@ def build(a):
     from paths import ROOT
     out_base = a.out or os.path.join(REPO, 'data', 'cr_lane')
     run_id = a.run_id or datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    if not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.-]*', run_id) or run_id.endswith('.'):
+        raise Refusal('bad --run-id (one plain path component): %r' % run_id)
     out = os.path.join(out_base, run_id)
     assert_out_ok(out_base, ROOT); assert_out_ok(out, ROOT)
     raw_root = a.raw_root or os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Melange', 'lda_rebuild', 'raw')
     seeds = a.seed_archive or [os.path.join(ROOT, p) for p in SEED_ARCHIVES]
-    need = [raw_root, os.path.join(ROOT, 'data', 'engine', 'roster.json')] + seeds + ([a.billset] if a.network_set == 'r' else [])
+    refs = [os.path.join(ROOT, REF_ARCHIVE), os.path.join(ROOT, SEED_ARCHIVES[1]), os.path.join(ROOT, REF_NETWORK)]   # always read below, even with --seed-archive
+    need = [raw_root, os.path.join(ROOT, 'data', 'engine', 'roster.json')] + seeds + refs + ([a.billset] if a.network_set == 'r' else [])
     gone = [p for p in need if not os.path.exists(p)]
     if gone:
         raise Refusal('WARNING: inputs missing, nothing built: %s' % gone)
