@@ -318,3 +318,42 @@ def test_wrapper_only_accepts_fresh_fail_closed_verification_receipt(tmp_path: P
         )
         is None
     )
+
+
+def test_read_json_retries_transient_einval(tmp_path, monkeypatch):
+    # OneDrive placeholder hydration raises [Errno 22] transiently (M11, 2026-10-24).
+    target = tmp_path / "manifest.json"
+    write_json(target, {"status": "complete"})
+    real = Path.read_text
+    calls = {"n": 0}
+
+    def flaky(self, *args, **kwargs):
+        if self == target and calls["n"] < 2:
+            calls["n"] += 1
+            raise OSError(22, "Invalid argument")
+        return real(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", flaky)
+    monkeypatch.setattr(FALLBACK.time, "sleep", lambda _s: None)
+    assert FALLBACK._read_json(target) == {"status": "complete"}
+    assert calls["n"] == 2
+
+
+def test_read_json_persistent_einval_still_fails_clearly(tmp_path, monkeypatch):
+    target = tmp_path / "manifest.json"
+    write_json(target, {})
+
+    def broken(self, *args, **kwargs):
+        raise OSError(22, "Invalid argument")
+
+    monkeypatch.setattr(Path, "read_text", broken)
+    monkeypatch.setattr(FALLBACK.time, "sleep", lambda _s: None)
+    with pytest.raises(FALLBACK.FallbackError, match="invalid JSON artifact"):
+        FALLBACK._read_json(target)
+
+
+def test_collector_command_headed_by_default_headless_opt_in():
+    headed = REFRESH.collector_command("node", "out", 1500, None, False)
+    assert "--headless" not in headed and "--headed" in headed
+    assert "--headless" in REFRESH.collector_command("node", "out", 1500, "a,b", True)
+    assert REFRESH.collector_command("node", "out", 1, "a,b", False)[-2:] == ["--categories", "a,b"]
