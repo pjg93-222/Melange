@@ -18,8 +18,11 @@ passed-chamber status; sponsor identity by bioguide). Opt-in: --network-set arch
 --count dedupe (one count per bill, "method B"). New bills join R's set only after discovery (a later step, Paul's GO):
 append [congress, type, number, n_sections] to the billset file (n_sections = sections the bill is in), or use
 --network-set archive. Archive default = variant B (0624 rows for the 117th/118th + BILLSTATUS 119th rows).
+GLOSSARY BACKFILL (CR-BF, default yes): the 111 bills whose R ties the glossary-link bug lost are added to the R set (once each,
+unless already in it), so the base is complete; moneyball_core's 0625-keyed sidecar then keeps applying only to 0625.
 
   python fec/network/build_cu_member_lane.py build [--network-set r|archive] [--count per-section|dedupe]
+  python fec/network/build_cu_member_lane.py build --glossary-backfill no   # cr2 behaviour (default yes = cr3)
   python fec/network/build_cu_member_lane.py diff --candidate-dir DIR
 """
 import os as _o, sys as _s
@@ -334,6 +337,18 @@ def load_billset(path=BILLSET):
     return {(c, t, n): m for c, t, n, m in d['bills']}
 
 
+def glossary_lost_set(ref_archive):
+    """The 111 bills whose R sponsor ties were lost to the glossary-link bug (BF.lost_sponsored_bills over the 0624 archive)
+    -> {(congress, type, number): 1}, each counted once (as the CU_PLACEHOLDER_BACKFILL sidecar does)."""
+    rows = _read_rows(ref_archive, lambda r: True)
+    return {BF.bill_key(r['Name'], r['Congress']): 1 for r in BF.lost_sponsored_bills(rows)}
+
+
+def with_glossary_backfill(billset, lost):
+    """R's bill set plus the lost glossary-bug bills; a bill already in R's set keeps R's count (never double-counted)."""
+    return {**lost, **billset}
+
+
 def _labels(bills, roster_by_bio):
     labels = dict(roster_by_bio)
     for b in bills.values():
@@ -597,6 +612,10 @@ def build(a):
     roster, rdoc = load_roster(ROOT)
     seed, order = section_seed(seeds)
     billset = load_billset(a.billset) if a.network_set == 'r' else {}
+    n_lost = 0
+    if a.network_set == 'r' and a.glossary_backfill == 'yes':   # CR-BF: bake the 111 glossary-bug bills into the base (0625's sidecar is keyed to that filename only)
+        lost = glossary_lost_set(os.path.join(ROOT, REF_ARCHIVE)); n_lost = len(set(lost) - set(billset))
+        billset = with_glossary_backfill(billset, lost)
     bills, refused = read_bills(raw_root, list(set(seed) | set(billset)))
     if len(refused) > a.allow_refusals:
         raise Refusal('%d missing BILLSTATUS keys (> --allow-refusals %d): %s' % (len(refused), a.allow_refusals, refused[:5]))
@@ -625,7 +644,7 @@ def build(a):
     zips = sorted(os.path.join(dp, f) for dp, _, fs in os.walk(raw_root) for f in fs
                   if f.endswith('.zip') and re.search(r'billstatus11[789]', dp))
     man = {'schema': 'cr-manifest-v1', 'run_id': run_id, 'built_at': datetime.datetime.now().isoformat(),
-           'dials': {'network_set': a.network_set, 'count': a.count, 'default_archive': 'B', 'withdrawn': a.withdrawn, 'edge_withdrawn': a.edge_withdrawn, 'originals_also_cosponsor': a.originals_also_cosponsor, 'newest_congress': NEWEST_CONGRESS,
+           'dials': {'network_set': a.network_set, 'count': a.count, 'glossary_backfill': a.glossary_backfill, 'glossary_bills_added': n_lost, 'default_archive': 'B', 'withdrawn': a.withdrawn, 'edge_withdrawn': a.edge_withdrawn, 'originals_also_cosponsor': a.originals_also_cosponsor, 'newest_congress': NEWEST_CONGRESS,
                      'allow_refusals': a.allow_refusals},
            'inputs_sha256': {'roster.json': sha256(os.path.join(ROOT, 'data', 'engine', 'roster.json')),
                              **{os.path.basename(p): sha256(p) for p in seeds},
@@ -668,6 +687,7 @@ def main(argv=None):
     b.add_argument('--network-set', choices=('r', 'archive'), default='r')
     b.add_argument('--count', choices=('per-section', 'dedupe'), default='per-section')
     b.add_argument('--billset', default=BILLSET)
+    b.add_argument('--glossary-backfill', choices=('yes', 'no'), default='yes')
     b.add_argument('--originals-also-cosponsor', choices=('yes', 'no'), default='yes')
     d = sp.add_parser('diff')
     d.add_argument('--candidate-dir', required=True); d.add_argument('--ref-network'); d.add_argument('--ref-archive')

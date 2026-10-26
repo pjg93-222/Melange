@@ -261,3 +261,60 @@ def test_billset_file_is_r_network_set():
     assert len(bs_) == 229 and sum(bs_.values()) == 293          # 311 checkpoint bills - 18 stale (+3 Tim Scott supplied)
     assert all(t in L.PREFIX and c in L.CONGRESSES for c, t, n in bs_)
     assert (119, 's', 2486) in bs_ and (118, 's', 3992) in bs_ and (117, 's', 3382) in bs_
+
+
+# ---- CR-BF: glossary-bug backfill baked into the R-faithful base
+def test_glossary_backfill_adds_lost_bills_once_and_never_double_counts(tmp_path):
+    docs = {(119, 'hr', 1): bs(1, cos=COS3), (119, 'hr', 2): bs(2, cos=COS3)}
+    bills, _, _ = build_fixture(tmp_path, docs)
+    r_set = {(119, 'hr', 1): 2}
+    lost = {(119, 'hr', 1): 1, (119, 'hr', 2): 1}               # hr1 is in BOTH sets; hr2 only lost
+    merged = L.with_glossary_backfill(r_set, lost)
+    assert merged == {(119, 'hr', 1): 2, (119, 'hr', 2): 1}     # R's per-section count wins, no double count
+    base, _, _ = L.r_network_edges(r_set, bills, ROSTER)
+    full, _, _ = L.r_network_edges(merged, bills, ROSTER)
+    w = lambda es: {(e['From'], e['To']): e['Weight'] for e in es}
+    one = {k: v / 2 for k, v in w(base).items()}                # weight of one count of hr1
+    assert all(math.isclose(w(full)[k], w(base)[k] + one[k]) for k in one)   # hr2 adds exactly one hr1-sized count
+
+
+def _glossary_golden():
+    ref = os.path.join(ROOT, L.REF_ARCHIVE)
+    sidecar = os.path.join(ROOT, 'data', 'network', 'cu_placeholder_backfill_20260625.json')
+    if not (os.path.exists(ref) and os.path.exists(sidecar)):
+        pytest.skip('live 0624 archive / backfill sidecar absent')
+    return ref, sidecar
+
+
+def test_golden_lost_set_is_the_111_bills_of_the_live_sidecar():
+    import json
+    ref, sidecar = _glossary_golden()
+    lost = L.glossary_lost_set(ref)
+    doc = json.load(open(sidecar, encoding='utf-8'))
+    assert len(lost) == 111 and lost == {L.BF.bill_key(n, c): 1 for n, c, _ in doc['lost_bills']}
+    assert len(set(lost) - set(L.load_billset())) == 109        # 2 are already in R's set: kept once
+
+
+def test_baked_base_not_keyed_in_core_so_sidecar_never_stacks():
+    import moneyball_core as MC
+    cr = 'congress_cosponsor_network_20261026_cr3.xlsx'
+    assert MC.cu_backfill_ties(cr) == {} and MC.cu_dropped_sponsors(cr) == frozenset()
+    assert list(MC.CU_PLACEHOLDER_BACKFILL_FILES) == ['congress_cosponsor_network_20260625_205554.xlsx']   # 0625 only, untouched
+
+
+def test_golden_baked_ties_match_live_sidecar_within_tolerance():
+    """The 111 bills rebuilt from CURRENT BILLSTATUS vs the frozen live sidecar (Oct-17 cache + 0624 LastAction)."""
+    import json
+    ref, sidecar = _glossary_golden()
+    raw = os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Melange', 'lda_rebuild', 'raw')
+    if not os.path.isdir(raw):
+        pytest.skip('BILLSTATUS raw root absent')
+    lost = L.glossary_lost_set(ref)
+    roster, _ = L.load_roster(ROOT)
+    bills, refused = L.read_bills(raw, list(lost))
+    assert not refused
+    edges, skipped, _ = L.r_network_edges(lost, bills, roster)
+    got = {(e['From'], e['To']): e['Weight'] for e in edges}
+    side = {(e['from'], e['to']): e['weight'] for e in json.load(open(sidecar, encoding='utf-8'))['edges']}
+    assert len(set(got) & set(side)) >= 0.99 * len(side)                      # measured 1,267 of 1,272 pairs
+    assert abs(sum(got.values()) - sum(side.values())) <= 0.06 * sum(side.values())   # measured within 5%: BILLSTATUS drift since the frozen sidecar
