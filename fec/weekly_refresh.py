@@ -502,7 +502,8 @@ def _press_failure_status():
         receipt,receipt_path=_load(pfq.RECEIPT_ARTIFACT)
         opened=pfq.open_count()
         walk=_load('press_network_retry_receipt.json',lambda d: d.get('status') in ('PASS','PARTIAL'))[0] or {}
-        failures=_load(pfq.FAILURES_ARTIFACT,lambda d: isinstance(d.get('failures'),list))[0]   # the collector's own artifact
+        failures=_load(pfq.FAILURES_ARTIFACT,   # the collector's own artifact, held to the schema queue ingestion requires
+                       lambda d: d.get('schema')==pfq.FAILURES_SCHEMA and isinstance(d.get('failures'),list))[0]
         skipped=len(failures['failures']) if failures else -1 if pfq.FAILURES_ARTIFACT in bad else 0   # unreadable: never PASS
         # PASS only with a run folder, a clean failures artifact, a non-PARTIAL walk and every receipt readable; a missing
         # queue receipt (record_site_failures() failed) can no longer hide a non-empty press_site_failures.json, and an

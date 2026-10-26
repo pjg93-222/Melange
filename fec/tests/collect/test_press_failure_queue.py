@@ -310,7 +310,7 @@ def test_weekly_still_writes_press_status_when_a_receipt_is_unreadable(tmp_path,
         assert status["press_status"] == "UNKNOWN", wrong
     # a failures artifact without a "failures" list is never PASS
     (run / "press_network_retry_receipt.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
-    for wrong in ("{}", '{"failures": null}', '{"failures": "x"}'):
+    for wrong in ("{}", '{"failures": null}', '{"failures": "x"}', '{"schema": "unexpected", "failures": []}'):
         (run / q.FAILURES_ARTIFACT).write_text(wrong, encoding="utf-8")
         status.clear()
         ns["_press_failure_status"]()
