@@ -232,3 +232,62 @@ press_official_coverage_alias_map <- function(candidate_urls, official_urls) {
   }
   mapped
 }
+
+# ---- per-site availability failures (D-294) --------------------------------------------------
+# One member site being unreachable (403 bot block, 404, 5xx, timeout, SSL, non-JSON) must not
+# fail the whole walk.  The adapters raise this classed error ONLY for availability; integrity
+# violations (pagination, host crossing, dates, hashes) stay plain stop() and stay fatal.  The
+# collect loops record the failure here, skip that member for this run (it gets no coverage
+# proof, so its rows keep the existing uncertain/pending handling) and continue.  The wrapper
+# writes the registry to press_site_failures.json beside the receipt; the receipt itself is
+# unchanged, and collect/press_failure_queue.py turns that file into the Claude hand-off queue.
+press_site_error_class <- function(status, error_text = "") {
+  status <- suppressWarnings(as.integer(status))
+  if (length(status) == 1L && !is.na(status)) {
+    if (status >= 500L) return("http_5xx")
+    if (status %in% c(403L, 404L)) return(paste0("http_", status))
+    return("http_other")
+  }
+  if (grepl("time(d)? ?out", error_text, ignore.case = TRUE)) return("timeout")
+  if (grepl("SSL|certificate", error_text, ignore.case = TRUE)) return("ssl")
+  "network_error"
+}
+
+press_site_unavailable <- function(message, url, status = NA_character_,
+                                   error_class = press_site_error_class(status)) {
+  stop(structure(class = c("press_site_unavailable", "error", "condition"),
+                 list(message = message, call = NULL, url = url,
+                      status = as.character(status), error_class = error_class)))
+}
+
+press_site_failures_reset <- function(envir = .GlobalEnv) {
+  assign("PRESS_SITE_FAILURES", list(), envir = envir)
+  invisible(NULL)
+}
+
+press_site_failures_snapshot <- function(envir = .GlobalEnv) {
+  if (!exists("PRESS_SITE_FAILURES", envir = envir, inherits = FALSE)) return(list())
+  unname(get("PRESS_SITE_FAILURES", envir = envir, inherits = FALSE))
+}
+
+press_site_failure_record <- function(envir, bioguide, source, condition) {
+  registry <- if (exists("PRESS_SITE_FAILURES", envir = envir, inherits = FALSE))
+    get("PRESS_SITE_FAILURES", envir = envir, inherits = FALSE) else list()
+  key <- paste(bioguide, condition$url, condition$error_class, sep = "|")
+  registry[[key]] <- list(
+    member_id = as.character(bioguide), source = source, url = as.character(condition$url),
+    error_class = condition$error_class,
+    http_status = if (is.na(condition$status) || !nzchar(condition$status)) NULL else condition$status,
+    last_error = substr(conditionMessage(condition), 1L, 300L))
+  assign("PRESS_SITE_FAILURES", registry, envir = envir)
+  message("PRESS SITE SKIPPED (", condition$error_class, ") ", bioguide, ": ",
+          conditionMessage(condition))
+  invisible(NULL)
+}
+
+# TRUE when no member outside the failed set contributed an index row: every member failed.
+press_site_all_failed <- function(failures, index) {
+  if (!length(failures)) return(FALSE)
+  failed <- vapply(failures, function(item) item$member_id, character(1L))
+  !length(setdiff(unique(as.character(index$bioguide)), failed))
+}

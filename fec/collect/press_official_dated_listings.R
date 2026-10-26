@@ -113,11 +113,12 @@ press_official_rfc_date <- function(value) {
 
 press_official_default_request <- function(url) {
   response <- NULL
+  failure <- ""
   for (attempt in seq_len(3L)) {
     response <- tryCatch(
       httr::GET(url, httr::user_agent(CHROME_UA), httr::timeout(HTTP_TIMEOUT),
                 httr::add_headers(Accept = "text/html,application/xhtml+xml,application/xml,text/xml")),
-      error = function(error) NULL
+      error = function(error) { failure <<- conditionMessage(error); NULL }
     )
     if (!is.null(response) && httr::status_code(response) == 200L) {
       return(list(
@@ -128,8 +129,11 @@ press_official_default_request <- function(url) {
     }
     if (attempt < 3L) Sys.sleep(1.5 * attempt)
   }
-  status <- if (is.null(response)) "network error" else httr::status_code(response)
-  stop("official dated press endpoint unavailable (", status, "): ", url)
+  status <- if (is.null(response)) NA_integer_ else httr::status_code(response)
+  press_site_unavailable(
+    paste0("official dated press endpoint unavailable (",
+           if (is.na(status)) "network error" else status, "): ", url),
+    url, status = status, error_class = press_site_error_class(status, failure))
 }
 
 press_official_response_text <- function(response, endpoint, origin) {
@@ -628,9 +632,18 @@ press_official_collect <- function(members, floor, request = press_official_defa
       stop("official dated press member identity is ambiguous: ", config$bioguide[[1L]])
     if (!press_official_same_host(member$url[[1L]], config$origin[[1L]]))
       stop("official dated press origin no longer matches roster: ", config$bioguide[[1L]])
-    result <- press_official_collect_member(config, floor, request, today)
-    if (config$bioguide[[1L]] == "L000560")
-      result <- press_official_add_larsen_rss(result, request)
+    result <- tryCatch({
+      result <- press_official_collect_member(config, floor, request, today)
+      if (config$bioguide[[1L]] == "L000560")
+        result <- press_official_add_larsen_rss(result, request)
+      result
+    }, press_site_unavailable = function(condition) {
+      # No registry to record into (a direct caller): keep the historical fatal behavior.
+      if (is.null(envir)) stop(condition)
+      press_site_failure_record(envir, config$bioguide[[1L]], "official_dated_listing", condition)
+      NULL
+    })
+    if (is.null(result)) next
     if (!is.null(envir))
       press_official_coverage_register(press_official_shared_coverage_proof(result), envir)
     for (name in intersect(c("member", "chamber", "state", "party"), names(member)))

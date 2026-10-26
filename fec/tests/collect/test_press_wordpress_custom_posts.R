@@ -17,7 +17,8 @@ make_record <- function(id, slug, day = Sys.Date(), host = "www.ossoff.senate.go
               3L), collapse = " "), "</p>"))
 )
 
-fixture <- function(records, declared_total = length(records), second_total = declared_total) {
+fixture <- function(records, declared_total = length(records), second_total = declared_total,
+                    unavailable = NULL, by_host = NULL) {
   env <- new.env(parent = globalenv())
   source(args[[2]], local = env)
   env$DATE_FLOOR <- Sys.Date() - 10L
@@ -45,6 +46,12 @@ fixture <- function(records, declared_total = length(records), second_total = de
   calls <- character(0)
   request <- function(url) {
     calls <<- c(calls, url)
+    if (!is.null(unavailable) && grepl(unavailable, url))
+      press_site_unavailable(paste0("official WordPress endpoint unavailable (403): ", url),
+                                 url, status = "403", error_class = "http_403")
+    if (!is.null(by_host)) records <- by_host[[sub("^https?://([^/]+).*$", "\\1", url)]]
+    declared_total <- if (is.null(by_host)) declared_total else length(records)
+    second_total <- declared_total
     if (grepl("/types$", url)) {
       payload <- list(post = list(rest_base = "posts"),
                       release = list(rest_base = "press_releases"))
@@ -196,5 +203,43 @@ for (bad in list(
   stopifnot(inherits(try(broken$env$stage_index(members, discovery), silent = TRUE), "try-error"),
             !file.exists(broken_checkpoint))
 }
+
+# D-294: one member site's availability failure (403, timeout, SSL, non-JSON) is recorded and the
+# member skipped; the other members are still collected and the run goes on.
+two_members <- data.frame(
+  bioguide = c("O000174", "M001198"), member = c("Jon Ossoff", "Roger Marshall"),
+  chamber = c("Senate", "Senate"), state = c("GA", "KS"), party = c("Democrat", "Republican"),
+  url = c("https://www.ossoff.senate.gov", "https://www.marshall.senate.gov"),
+  stringsAsFactors = FALSE)
+marshall_records <- list(make_record(7L, "marshall-current", today, "www.marshall.senate.gov"))
+skip <- fixture(list(make_record(1L, "unused")), unavailable = "ossoff",
+                by_host = list(`www.marshall.senate.gov` = marshall_records))
+skipped_index <- skip$env$stage_index(two_members, data.frame(bioguide = two_members$bioguide))
+failures <- press_site_failures_snapshot(skip$env)
+stopifnot(length(failures) == 1L, failures[[1]]$member_id == "O000174",
+          failures[[1]]$http_status == "403", failures[[1]]$error_class == "http_403",
+          grepl("/wp-json/wp/v2/types$", failures[[1]]$url),
+          sum(skipped_index$press_wp_api %in% TRUE, na.rm = TRUE) == 1L,
+          press_site_failures_snapshot(skip$env)[[1]]$source == "official_wordpress_custom_post",
+          press_official_coverage_snapshot(skip$env)$member_count == 1L)
+stopifnot(!press_site_all_failed(failures, skipped_index))
+# Every member that contributed an index row failed: the run is genuinely down.
+only <- skipped_index[skipped_index$bioguide == "O000174", , drop = FALSE]
+stopifnot(press_site_all_failed(failures, only),
+          !press_site_all_failed(list(), only))
+
+# An integrity violation (not an availability failure) stays fatal and is never recorded as a skip.
+foreign <- fixture(list(make_record(1L, "foreign", today, "example.com")))
+stopifnot(inherits(try(foreign$env$stage_index(members, discovery), silent = TRUE), "try-error"),
+          length(press_site_failures_snapshot(foreign$env)) == 0L)
+
+# Availability classes.
+env_classes <- skip$env
+stopifnot(press_site_error_class(403L, "") == "http_403",
+          press_site_error_class(404L, "") == "http_404",
+          press_site_error_class(503L, "") == "http_5xx",
+          press_site_error_class(NA, "Timeout was reached") == "timeout",
+          press_site_error_class(NA, "SSL certificate problem") == "ssl",
+          press_site_error_class(NA, "Could not resolve host") == "network_error")
 
 cat("PASS: official custom-post pagination, exact dates, canonical identity, body seeding, provenance rejection and retained caches\n")

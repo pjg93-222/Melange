@@ -42,15 +42,17 @@ press_wp_same_host <- function(left, right) {
 press_wp_default_request <- function(url) {
   attempts <- 3L
   for (number in seq_len(attempts)) {
+    failure <- ""
     response <- tryCatch(
       httr::GET(url, httr::user_agent(CHROME_UA), httr::timeout(HTTP_TIMEOUT),
                 httr::add_headers(Accept = "application/json")),
-      error = function(error) NULL
+      error = function(error) { failure <<- conditionMessage(error); NULL }
     )
     if (!is.null(response) && httr::status_code(response) == 200L) {
       type <- as.character(httr::headers(response)[["content-type"]])
       if (!length(type) || !grepl("application/json", type, ignore.case = TRUE))
-        stop("official WordPress endpoint returned non-JSON content: ", url)
+        press_site_unavailable(paste0("official WordPress endpoint returned non-JSON content: ", url),
+                               url, error_class = "non_json")
       return(list(
         status = 200L,
         headers = httr::headers(response),
@@ -60,8 +62,11 @@ press_wp_default_request <- function(url) {
     }
     if (number < attempts) Sys.sleep(1.5 * number)
   }
-  status <- if (is.null(response)) "network error" else as.character(httr::status_code(response))
-  stop("official WordPress endpoint unavailable (", status, "): ", url)
+  status <- if (is.null(response)) NA_integer_ else httr::status_code(response)
+  press_site_unavailable(
+    paste0("official WordPress endpoint unavailable (",
+           if (is.na(status)) "network error" else status, "): ", url),
+    url, status = status, error_class = press_site_error_class(status, failure))
 }
 
 press_wp_header_integer <- function(response, name) {
@@ -284,7 +289,13 @@ press_wp_collect <- function(members, floor, request, envir = .GlobalEnv) {
     if (nrow(member) != 1L) stop("official WordPress member identity is ambiguous: ", config$bioguide)
     if (!"url" %in% names(member) || !press_wp_same_host(member$url[[1]], config$origin))
       stop("official WordPress origin no longer matches the verified roster: ", config$bioguide)
-    rows <- press_wp_fetch_member(config$bioguide, config$origin, config$rest_base, floor, request)
+    rows <- tryCatch(
+      press_wp_fetch_member(config$bioguide, config$origin, config$rest_base, floor, request),
+      press_site_unavailable = function(condition) {
+        press_site_failure_record(envir, config$bioguide, "official_wordpress_custom_post", condition)
+        NULL
+      })
+    if (is.null(rows)) next
     press_official_coverage_register(attr(rows, "official_coverage_proof"), envir)
     for (name in intersect(c("member", "chamber", "state", "party"), names(member)))
       rows[[name]] <- rep(member[[name]][[1]], nrow(rows))

@@ -468,6 +468,35 @@ def _press_partial_excused(returncode,started):
     _emit('refresh.step','partial','press delta refresh: %s pending body URL(s) carried to the next run'%receipt.get('pending_body_urls'),
           stage='press delta refresh',metadata={'run_root':root,'pending_body_urls':receipt.get('pending_body_urls')})
     return True
+# ---- press site failures (D-294) ---------------------------------------------------------------
+# One member site being unavailable (403 / 404 / 5xx / timeout / SSL / non-JSON) no longer fails the press walk:
+# refresh_press_delta.R records and skips it, refresh_press_stream.py queues it in data/press/press_failure_queue.ndjson
+# for a Claude session (collect/PRESS_FAILURE_TRIAGE.md) and the step exits as before. This reports it: press_status is
+# PARTIAL (never PASS) when this run skipped a site or its walk receipt is PARTIAL (pending bodies), plus the open count
+# and queue path. last_outcome and the step list are untouched. Never raises.
+def _press_failure_status():
+    try:
+        from collect import press_failure_queue as pfq
+        import glob,shutil
+        floor=_started_at.timestamp()-1
+        found=[p for p in glob.glob(os.path.join(MB_ROOT,'outputs','press_refresh_*',pfq.RECEIPT_ARTIFACT)) if os.path.getmtime(p)>=floor]
+        receipt=json.load(open(max(found,key=os.path.getmtime),encoding='utf-8')) if found else None
+        opened=pfq.open_count()
+        walks=[p for p in glob.glob(os.path.join(MB_ROOT,'outputs','press_refresh_*','press_network_retry_receipt.json')) if os.path.getmtime(p)>=floor]
+        walk=json.load(open(max(walks,key=os.path.getmtime),encoding='utf-8')) if walks else {}
+        partial=bool(receipt and receipt.get('failures_this_run')) or walk.get('status')=='PARTIAL'
+        _write_status(press_status='PARTIAL' if partial else 'PASS',press_failures_open=opened,press_failure_queue=pfq.QUEUE_PATH)
+        if found:
+            try: shutil.copy2(max(found,key=os.path.getmtime),os.path.join(_RUN_LOG_DIR,pfq.RECEIPT_ARTIFACT))
+            except Exception: pass
+        if receipt and receipt.get('failures_this_run'):
+            why='press delta refresh: %d member site(s) unavailable this run, skipped and queued for Claude (%s open in %s)'%(
+                receipt['failures_this_run'],opened,pfq.QUEUE_PATH)
+            log('   press PARTIAL: '+why)
+            _emit('refresh.step','partial',why,stage='press delta refresh',
+                  metadata={'press_failures_open':opened,'queue':pfq.QUEUE_PATH,'run_id':receipt.get('run_id')})
+    except Exception as e:
+        log('   press failure status skipped (non-fatal): %s: %s'%(type(e).__name__,str(e)[:200]))
 try:   # user directive 2026-07-06: hold a system wake lock for the refresh's lifetime (the 01:10
     import ctypes   # machine sleep stalled collectors 5h; a mid-refresh sleep would do the same)
     ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)
@@ -604,6 +633,7 @@ if not step('Wikipedia biographies (full roster)',[
 # deadline (rather than making the network leg unbounded), with enough headroom for one
 # complete healthy pass instead of repeatedly replaying partially completed groups.
 step('press delta refresh',['refresh_press_stream.py'],timeout=129600,hard=True,partial=_press_partial_excused)
+_press_failure_status()
 step('press intake audit',['audit_collection.py','--scope','press','--output','data/engine/press_collection_intake_receipt.json'],timeout=1800,hard=True)
 step('press engine feed',['build_press_engine_feed.py','--intake-receipt','data/engine/press_collection_intake_receipt.json'],timeout=1800,hard=True)
 step('fold promoted press runs',['fold_promoted_press_runs.py'],timeout=1800,hard=True)
