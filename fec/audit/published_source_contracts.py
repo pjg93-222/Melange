@@ -6,7 +6,6 @@ import hashlib
 import json
 import csv
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 
 
 def personal_source_errors(source: dict, published: dict) -> list[str]:
@@ -53,7 +52,7 @@ def personal_source_errors(source: dict, published: dict) -> list[str]:
     return errors
 
 
-def vote_source_errors(root: Path) -> list[str]:
+def vote_source_errors(root: Path, raw_root=None) -> list[str]:
     root = Path(root)
     path = root / 'data/legislation/vote_refresh_receipt.json'
     try:
@@ -91,7 +90,6 @@ def vote_source_errors(root: Path) -> list[str]:
         for name, source in outputs.items():
             if not source.is_file() or file_sha256(source) != hashes.get(name):
                 errors.append(f'vote output bytes differ: {name}')
-        floor = datetime.fromtimestamp(archive.stat().st_mtime, timezone.utc).date() - timedelta(days=30)
         latest = receipt.get('latest_source_vote_dates') or {}
         observed = {}
         with (source_dir / 'HS119_rollcalls.csv').open(encoding='utf-8-sig', newline='') as handle:
@@ -100,8 +98,19 @@ def vote_source_errors(root: Path) -> list[str]:
                     observed[row['chamber']] = max(observed.get(row['chamber'], ''), row['date'])
         if latest != observed:
             errors.append('declared vote coverage dates differ from source rollcalls')
-        if set(observed) != {'House', 'Senate'} or any(datetime.fromisoformat(date).date() < floor for date in observed.values()):
-            errors.append('vote evidence is stale relative to bill archive')
+        if set(observed) != {'House', 'Senate'}:
+            errors.append('vote evidence is missing a chamber')
+        else:
+            import pandas as pd
+            from legislation import vote_coverage
+            from legislation.build_vote_category import measure
+            try:
+                frame = pd.read_excel(archive, sheet_name='All Bills')
+                stale, _, _unverifiable = vote_coverage.evaluate(source_dir, vote_coverage.archive_bill_keys(frame, measure), raw_root)
+            except Exception as exc:  # unreadable archive; the bytes check above reports tampering
+                stale = f'vote coverage check could not read the bill archive: {exc}'
+            if stale:
+                errors.append(stale)
         return errors
     except (ValueError, KeyError, TypeError, OSError) as exc:
         return [f'vote refresh provenance missing or invalid: {exc}']

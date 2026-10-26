@@ -14,7 +14,7 @@ import glob
 import ast
 from collections import Counter, defaultdict
 import csv
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
@@ -24,6 +24,7 @@ import pandas as pd
 from paths import ROOT, stored_name, to_host
 from moneyball_core import dump_atomic
 from legislation.collect_official_rollcall_events import canonical_category
+from legislation import vote_coverage
 
 
 def sha(path):
@@ -64,7 +65,7 @@ def retained_rules(path):
     return rules
 
 
-def build(root, source, archive, historical_exclusions, names_path, output):
+def build(root, source, archive, historical_exclusions, names_path, output, raw_root=None):
     root, source, archive, output = map(Path, (root, source, archive, output))
     source_receipt = load(source / 'receipt.json')
     from legislation import sentinel_admissions as SA
@@ -165,9 +166,13 @@ def build(root, source, archive, historical_exclusions, names_path, output):
             if event in rollcalls:
                 raise ValueError(f'Duplicate rollcall event: {event}')
             rollcalls[event] = (key, row)
-    freshness_floor = datetime.fromtimestamp(archive.stat().st_mtime, timezone.utc).date() - timedelta(days=30)
-    if set(latest) != {'House', 'Senate'} or any(datetime.fromisoformat(date).date() < freshness_floor for date in latest.values()):
-        raise ValueError(f'Vote source is stale relative to archive: {latest}; floor={freshness_floor}')
+    if set(latest) != {'House', 'Senate'}:
+        raise ValueError(f'Vote source is missing a chamber: {latest}')
+    stale, _, unverifiable = vote_coverage.evaluate(source, vote_coverage.archive_bill_keys(archived, measure), raw_root)
+    if stale:
+        raise ValueError(stale)
+    if unverifiable:
+        print(f'WARNING: {len(unverifiable)} archive bill(s) have no local BILLSTATUS; vote coverage unverifiable for them', file=sys.stderr)
     aggregate, vote_rows, seen = defaultdict(lambda: [0, 0]), [], set()
     member_names = {}
     for congress in (117, 118, 119):
@@ -232,7 +237,7 @@ def build(root, source, archive, historical_exclusions, names_path, output):
         'generated_at': datetime.now(timezone.utc).isoformat(),
         'source': 'Voteview Congressional Roll-Call Votes Database',
         'source_documentation': 'https://voteview.com/articles/data_help_votes',
-        'latest_source_vote_dates': latest, 'freshness_floor': str(freshness_floor),
+        'latest_source_vote_dates': latest,
         'archive': str(archive.resolve()), 'inputs_sha256': before,
         'counts': {'accepted_rollcalls': len(rollcalls), 'member_votes': len(vote_rows),
                    'members_with_categorized_votes': len(votes), 'category_cells': len(aggregate),
