@@ -914,8 +914,8 @@ exit_code <- tryCatch({
   jsonlite::write_json(list(schema = "press-site-failures-v1", failures = site_failures),
                        site_failures_temp, auto_unbox = TRUE, pretty = TRUE, null = "null")
   promote_with_backup(site_failures_temp, file.path(run_root, "press_site_failures.json"))
-  if (press_site_all_failed(site_failures, refreshed_index)) {
-    stop("every member failed: ", length(site_failures), " site failure(s), no member produced an index row")
+  if (press_site_all_failed(site_failures, members$bioguide)) {
+    stop("every member failed: ", length(site_failures), " site failure(s), no attempted member succeeded")
   }
 
   old_index <- utils::read.csv(

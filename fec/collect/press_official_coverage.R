@@ -285,9 +285,12 @@ press_site_failure_record <- function(envir, bioguide, source, condition) {
   invisible(NULL)
 }
 
-# TRUE when no member outside the failed set contributed an index row: every member failed.
-press_site_all_failed <- function(failures, index) {
-  if (!length(failures)) return(FALSE)
+# TRUE when every ATTEMPTED member raised an availability failure.  Success is "attempted and not
+# failed", never "contributed an index row": a member whose walk worked but found nothing new is
+# a success (CodeRabbit PR #77), so an empty index must not read as everyone failing.
+press_site_all_failed <- function(failures, attempted) {
+  attempted <- unique(as.character(attempted))
+  if (!length(failures) || !length(attempted)) return(FALSE)
   failed <- vapply(failures, function(item) item$member_id, character(1L))
-  !length(setdiff(unique(as.character(index$bioguide)), failed))
+  !length(setdiff(attempted, failed))
 }

@@ -261,6 +261,7 @@ def main(argv=None):
             print("historical body recovery already completed; this is not fresh inventory coverage")
             return 0
     elif current_source_run(run_root, sources):
+        record_site_failures(run_root)    # idempotent: retries a queue update that failed after the seal
         print("press refresh already has a valid same-day receipt: %s" % run_root)
         return 0
     script = Path(__file__).with_name("refresh_press_delta.R")

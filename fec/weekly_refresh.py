@@ -478,17 +478,28 @@ def _press_failure_status():
     try:
         from collect import press_failure_queue as pfq
         import glob,shutil
-        floor=_started_at.timestamp()-1
-        found=[p for p in glob.glob(os.path.join(MB_ROOT,'outputs','press_refresh_*',pfq.RECEIPT_ARTIFACT)) if os.path.getmtime(p)>=floor]
-        receipt=json.load(open(max(found,key=os.path.getmtime),encoding='utf-8')) if found else None
+        # FIX77: read the run folder THIS step used. A same-day sealed run is reused untouched (its files keep
+        # an old mtime), so a start-time mtime floor dropped its receipts and could report PASS for a partial run.
+        lo=_started_at.strftime('%Y%m%d'); hi=datetime.date.today().strftime('%Y%m%d')   # run folders are press_refresh_YYYYMMDD
+        days=sorted(d for d in (os.listdir(os.path.join(MB_ROOT,'outputs')) if os.path.isdir(os.path.join(MB_ROOT,'outputs')) else [])
+                    if d.startswith('press_refresh_') and len(d)==22 and d[14:].isdigit() and lo<=d[14:]<=hi)
+        root=os.path.join(MB_ROOT,'outputs',days[-1]) if days else None
+        def _load(name):
+            p=os.path.join(root,name) if root else ''
+            return (json.load(open(p,encoding='utf-8')),p) if os.path.isfile(p) else (None,p)
+        receipt,receipt_path=_load(pfq.RECEIPT_ARTIFACT)
         opened=pfq.open_count()
-        walks=[p for p in glob.glob(os.path.join(MB_ROOT,'outputs','press_refresh_*','press_network_retry_receipt.json')) if os.path.getmtime(p)>=floor]
-        walk=json.load(open(max(walks,key=os.path.getmtime),encoding='utf-8')) if walks else {}
-        partial=bool(receipt and receipt.get('failures_this_run')) or walk.get('status')=='PARTIAL'
-        _write_status(press_status='PARTIAL' if partial else 'PASS',press_failures_open=opened,press_failure_queue=pfq.QUEUE_PATH)
-        if found:
-            try: shutil.copy2(max(found,key=os.path.getmtime),os.path.join(_RUN_LOG_DIR,pfq.RECEIPT_ARTIFACT))
+        walk=_load('press_network_retry_receipt.json')[0] or {}
+        try: skipped=len((_load(pfq.FAILURES_ARTIFACT)[0] or {}).get('failures') or [])   # the collector's own artifact
+        except Exception: skipped=-1   # unreadable: unknown, never PASS
+        # PASS only with a run folder, a clean failures artifact and a non-PARTIAL walk; a missing queue receipt
+        # (record_site_failures() failed) can no longer hide a non-empty press_site_failures.json.
+        partial=bool(receipt and receipt.get('failures_this_run')) or walk.get('status')=='PARTIAL' or skipped!=0
+        _write_status(press_status='PARTIAL' if partial else 'PASS' if root else 'UNKNOWN',press_failures_open=opened,press_failure_queue=pfq.QUEUE_PATH)
+        if receipt:
+            try: shutil.copy2(receipt_path,os.path.join(_RUN_LOG_DIR,pfq.RECEIPT_ARTIFACT))
             except Exception: pass
+        if skipped and not receipt: log('   press PARTIAL: %s skipped site(s) in the run folder but no queue receipt (queue update failed or pending)'%skipped)
         if receipt and receipt.get('failures_this_run'):
             why='press delta refresh: %d member site(s) unavailable this run, skipped and queued for Claude (%s open in %s)'%(
                 receipt['failures_this_run'],opened,pfq.QUEUE_PATH)

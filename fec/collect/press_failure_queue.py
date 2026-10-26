@@ -77,13 +77,13 @@ def upsert(failures, run_id, now=None, queue_path=None):
                    "consecutive_runs": 0, "run_id": None}
             index[key] = row
             rows.append(row)
-        if row["run_id"] != run_id:           # the same run recorded twice counts once
+        if row["run_id"] != run_id or row.get("status") != "open":   # the same run recorded twice counts once
             row["consecutive_runs"] = row["consecutive_runs"] + 1 if row.get("status") == "open" else 1
         row.update(status="open", last_seen=stamp, run_id=run_id,
                    source=failure.get("source"), http_status=failure.get("http_status"),
                    last_error=str(failure.get("last_error") or "")[:300])
-    for row in rows:                          # a sealed run that did not fail this key: it recovered
-        if _key(row) not in seen and row.get("status") == "open" and row.get("run_id") != run_id:
+    for row in rows:                          # the current artifact lacks this key: it recovered, including a
+        if _key(row) not in seen and row.get("status") == "open":   # same-day reseal of this very run
             row.update(status="recovered", consecutive_runs=0)
     _write(path, rows)
     return rows

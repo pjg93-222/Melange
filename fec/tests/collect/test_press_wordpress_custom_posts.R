@@ -222,11 +222,18 @@ stopifnot(length(failures) == 1L, failures[[1]]$member_id == "O000174",
           sum(skipped_index$press_wp_api %in% TRUE, na.rm = TRUE) == 1L,
           press_site_failures_snapshot(skip$env)[[1]]$source == "official_wordpress_custom_post",
           press_official_coverage_snapshot(skip$env)$member_count == 1L)
-stopifnot(!press_site_all_failed(failures, skipped_index))
-# Every member that contributed an index row failed: the run is genuinely down.
-only <- skipped_index[skipped_index$bioguide == "O000174", , drop = FALSE]
-stopifnot(press_site_all_failed(failures, only),
-          !press_site_all_failed(list(), only))
+stopifnot(!press_site_all_failed(failures, two_members$bioguide))
+# FIX77: "every member failed" compares the ATTEMPTED set with the failed set, never index rows.
+# A member whose walk succeeded with zero rows (quiet) is a success, so one failing site plus a
+# quiet member must not stop the walk.
+quiet_index <- skipped_index[0, , drop = FALSE]
+stopifnot(nrow(quiet_index) == 0L, !press_site_all_failed(failures, two_members$bioguide))
+both_down <- c(failures, list(list(member_id = "M001198")))
+stopifnot(press_site_all_failed(both_down, two_members$bioguide),
+          press_site_all_failed(failures, "O000174"),
+          !press_site_all_failed(both_down, c(two_members$bioguide, "X000001")),
+          !press_site_all_failed(list(), two_members$bioguide),
+          !press_site_all_failed(failures, character(0)))
 
 # An integrity violation (not an availability failure) stays fatal and is never recorded as a skip.
 foreign <- fixture(list(make_record(1L, "foreign", today, "example.com")))
