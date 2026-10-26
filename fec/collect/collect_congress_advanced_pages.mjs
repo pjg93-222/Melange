@@ -491,7 +491,6 @@ async function waitForAttachClearance(page, expectedSelector, alternateClassifie
   const isMain = page === runtime.mainPage;
   try {
     await waitForClearance(page, {
-      selector: expectedSelector,
       ...runtime.clearanceOptions,
       ...(isMain ? {} : { humanMs: 0, autoMs: Math.min(15_000, runtime.clearanceOptions.autoMs ?? 15_000) }),
     });
@@ -1729,7 +1728,6 @@ async function main() {
             timeout: 90_000,
           });
           await waitForClearance(runtime.mainPage, {
-            selector: "#main",
             ...runtime.clearanceOptions,
           });
           await noteClearance();
@@ -1783,7 +1781,6 @@ async function main() {
           timeout: 90_000,
         });
         await waitForClearance(runtime.mainPage, {
-          selector: "#main",
           ...runtime.clearanceOptions,
         });
         await noteClearance();

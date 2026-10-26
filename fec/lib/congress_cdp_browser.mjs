@@ -22,7 +22,8 @@ export const DEFAULT_REFRESH_MARGIN_MS = 10 * 60_000;
 export const DEFAULT_KEEP_WARM_MS = 20 * 60_000;
 
 const CHALLENGE_DOM =
-  "#challenge-running,#cf-challenge-running,.cf-browser-verification,#challenge-form";
+  "#challenge-running,#cf-challenge-running,.cf-browser-verification,#challenge-form," +
+  "iframe[src*='challenges.cloudflare.com'],.cf-turnstile";
 
 // ---- chrome attach -------------------------------------------------------------------
 
@@ -84,15 +85,17 @@ export function isClearedSignal(s) {
   const challengeTitle = /just a moment|attention required|security check|verify you are human/i;
   if (challengeTitle.test(s.title || "")) return false;
   if (s.hasChallengeDom) return false;
-  return Boolean(s.hasSelector) || /\/(bill|amendment)\//.test(s.pathname || "");
+  // Positive signal = a real congress.gov page with no challenge. Not tied to a results
+  // selector: the first navigation lands on the advanced-search FORM, which has none, and
+  // result-page validation belongs to the parser / fetch path.
+  return /(^|\.)congress\.gov$/i.test(s.hostname || "");
 }
 
-export function clearedProbeExpression(selector) {
+export function clearedProbeExpression() {
   return (
     "(() => { const s = { title: document.title, " +
     `hasChallengeDom: !!document.querySelector(${JSON.stringify(CHALLENGE_DOM)}), ` +
-    `hasSelector: !!document.querySelector(${JSON.stringify(selector)}), ` +
-    "pathname: location.pathname }; " +
+    "hostname: location.hostname }; " +
     `return (${isClearedSignal.toString()})(s); })()`
   );
 }
@@ -143,14 +146,13 @@ async function snapshot(page) {
 export async function waitForClearance(
   page,
   {
-    selector = "#main",
     autoMs = DEFAULT_CLEARANCE_AUTO_MS,
     humanMs = DEFAULT_CLEARANCE_HUMAN_MS,
     reloadAtMs = Math.floor(autoMs / 2),
     log = console.log,
   } = {},
 ) {
-  const probe = clearedProbeExpression(selector);
+  const probe = clearedProbeExpression();
   const waitFor = (timeout) =>
     page.waitForFunction(probe, undefined, { timeout }).then(
       () => true,

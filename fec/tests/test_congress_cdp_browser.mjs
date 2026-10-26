@@ -9,6 +9,7 @@ import {
   clearedProbeExpression,
   ensureChrome,
   isClearedSignal,
+  waitForClearance,
 } from "../lib/congress_cdp_browser.mjs";
 
 const okResponse = { ok: true };
@@ -82,31 +83,74 @@ test("ensureChrome times out with an actionable error", async () => {
   );
 });
 
-test("cleared signal: results page passes, challenge title or DOM does not", () => {
-  const base = { title: "Search Results | Congress.gov", hasChallengeDom: false, hasSelector: true, pathname: "/x" };
+test("cleared signal: any non-challenge congress.gov page passes (incl. the search form)", () => {
+  const base = { title: "Search Results | Congress.gov", hasChallengeDom: false, hostname: "www.congress.gov" };
   assert.equal(isClearedSignal(base), true);
+  // the advanced-search FORM has no results list and must still count as cleared
+  assert.equal(
+    isClearedSignal({ ...base, title: "Advanced Search - Legislation | Congress.gov | Library of Congress" }),
+    true,
+  );
   for (const title of ["Just a moment...", "Attention Required! | Cloudflare", "Security Check", "Verify you are human"]) {
     assert.equal(isClearedSignal({ ...base, title }), false, title);
   }
   assert.equal(isClearedSignal({ ...base, hasChallengeDom: true }), false);
-  assert.equal(isClearedSignal({ ...base, hasSelector: false }), false);
-  // single-result redirect lands on a bill page
-  assert.equal(
-    isClearedSignal({ ...base, hasSelector: false, pathname: "/bill/118th-congress/house-bill/1" }),
-    true,
-  );
+  assert.equal(isClearedSignal({ ...base, hostname: "example.com" }), false);
+  assert.equal(isClearedSignal({ ...base, hostname: "evilcongress.gov" }), false);
 });
 
 test("page probe expression embeds the same classifier and evaluates against a fake document", () => {
-  const expression = clearedProbeExpression("ol.basic-search-results-lists");
+  const expression = clearedProbeExpression();
   const run = (doc, loc) => new Function("document", "location", `return ${expression}`)(doc, loc);
-  const results = {
-    title: "Search",
-    querySelector: (sel) => (sel === "ol.basic-search-results-lists" ? {} : null),
+  const loc = { hostname: "www.congress.gov" };
+  const form = {
+    title: "Advanced Search - Legislation | Congress.gov | Library of Congress",
+    querySelector: () => null,
   };
-  assert.equal(run(results, { pathname: "/x" }), true);
-  const challenge = { title: "Just a moment...", querySelector: () => null };
-  assert.equal(run(challenge, { pathname: "/x" }), false);
+  assert.equal(run(form, loc), true);
+  const challenge = {
+    title: "Just a moment...",
+    querySelector: (sel) => (sel.includes("#challenge-running") ? {} : null),
+  };
+  assert.equal(run(challenge, loc), false);
+});
+
+function fakeChallengePage({ title, bodyText }) {
+  const state = { reloads: 0, waits: [] };
+  return {
+    state,
+    waitForFunction: async (_probe, _arg, { timeout }) => {
+      state.waits.push(timeout);
+      const err = new Error("timeout");
+      err.name = "TimeoutError";
+      throw err;
+    },
+    reload: async () => {
+      state.reloads += 1;
+    },
+    title: async () => title,
+    url: () => "https://www.congress.gov/index.php/advanced-search/legislation",
+    locator: () => ({ innerText: async () => bodyText }),
+  };
+}
+
+test("waitForClearance: interactive challenge reloads once then waits for a human", async () => {
+  const page = fakeChallengePage({ title: "Just a moment...", bodyText: "Please complete the CAPTCHA" });
+  const logs = [];
+  await assert.rejects(
+    waitForClearance(page, { autoMs: 40, humanMs: 5000, log: (m) => logs.push(m) }),
+    (error) => error.name === "CongressAutomaticVerificationTimeoutError",
+  );
+  assert.equal(page.state.reloads, 1);
+  assert.deepEqual(page.state.waits, [20, 20, 5000]);
+  assert.equal(logs.length, 1);
+});
+
+test("waitForClearance: automatic challenge reloads once and does not wait for a human", async () => {
+  const page = fakeChallengePage({ title: "Just a moment...", bodyText: "Performing security verification" });
+  await assert.rejects(waitForClearance(page, { autoMs: 40, humanMs: 5000, log: () => {} }));
+  assert.equal(page.state.reloads, 1);
+  assert.deepEqual(page.state.waits, [20, 20]);
 });
 
 test("classifyChallenge distinguishes automatic, interactive, and none", () => {
