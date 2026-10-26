@@ -2604,8 +2604,7 @@ try:
                 # (The earlier form asserted the picked name startswith the glob's own prefix, which
                 # is tautologically true for anything the glob returned and could never fail -- a
                 # negative control caught it.)
-                _picked = os.path.basename(max(_g.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),
-                                               key=os.path.getmtime))
+                _picked = os.path.basename(__import__('source_select').select_network(_g.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),'any',root=B))
                 _published = (_D.get('cu') or {}).get('graph')
                 ck('the CU file unfiltered max-by-mtime consumers would pick IS the published graph',
                    bool(_published) and _picked == _published,

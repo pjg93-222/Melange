@@ -48,7 +48,7 @@ if os.path.exists(tp):
 for m, n in tw.items(): P[m]['n_tweets'] = n
 
 # sponsorship / cosponsorship from the bills archive
-bp = max(glob.glob(B + r'\congress_bills_archive_*.xlsx'), key=os.path.getmtime)
+import source_select; bp = source_select.select_archive(glob.glob(B + r'\congress_bills_archive_*.xlsx'), root=B)
 ws = openpyxl.load_workbook(bp, read_only=True)['All Bills']
 rows = ws.iter_rows(min_row=1, values_only=True)
 hdr = [str(h or '') for h in next(rows)]

@@ -115,7 +115,7 @@ vis = mean_z([zscore({m: d.get('n_interviews') for m, d in PANEL.items() if (d.g
               zscore({m: d.get('n_interview_programs') for m, d in PANEL.items() if (d.get('n_interviews') or 0) >= 3}, log=True)], need=1)
 
 # breadth: distinct issue sections with any legislative role (bills archive)
-bp = max(glob.glob(B + r'\congress_bills_archive_*.xlsx'), key=os.path.getmtime)
+import source_select; bp = source_select.select_archive(glob.glob(B + r'\congress_bills_archive_*.xlsx'), root=B)
 ws = openpyxl.load_workbook(bp, read_only=True)['All Bills']
 rows = ws.iter_rows(min_row=1, values_only=True)
 hdr = [str(h or '') for h in next(rows)]

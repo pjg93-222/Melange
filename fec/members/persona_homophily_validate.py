@@ -25,7 +25,7 @@ ma, sa = sum(ag)/len(ag), (sum((x-sum(ag)/len(ag))**2 for x in ag)/len(ag))**.5 
 mc, sc = sum(co)/len(co), (sum((x-sum(co)/len(co))**2 for x in co)/len(co))**.5 or 1
 Z = {m: ((d['agency']-ma)/sa, (d['communion']-mc)/sc) for m, d in AC.items()}
 party = MC.party()
-net = max([p for p in glob.glob(B+r"\congress_cosponsor_network_*.xlsx") if 'AUG' not in os.path.basename(p)], key=os.path.getmtime)
+import source_select; net = source_select.select_network(glob.glob(B+r"\congress_cosponsor_network_*.xlsx"), 'exclude', root=B)
 ne = openpyxl.load_workbook(net, data_only=True)['Edges']; b2n = MC.bio2name()
 W = {}
 for r in range(2, ne.max_row+1):
