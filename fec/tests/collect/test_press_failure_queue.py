@@ -302,8 +302,15 @@ def test_weekly_still_writes_press_status_when_a_receipt_is_unreadable(tmp_path,
     status.clear()
     ns["_press_failure_status"]()
     assert status["press_status"] == "UNKNOWN" and "press_failures_open" in status
-    # a receipt that parses but is not an object is treated the same way
-    (run / "press_network_retry_receipt.json").write_text("[]", encoding="utf-8")
+    # a receipt that parses but is not an object, or lacks the field the status reads, is treated the same way
+    for wrong in ("[]", "{}"):
+        (run / "press_network_retry_receipt.json").write_text(wrong, encoding="utf-8")
+        status.clear()
+        ns["_press_failure_status"]()
+        assert status["press_status"] == "UNKNOWN", wrong
+    # a failures artifact without its "failures" list is never PASS
+    (run / "press_network_retry_receipt.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
+    (run / q.FAILURES_ARTIFACT).write_text("{}", encoding="utf-8")
     status.clear()
     ns["_press_failure_status"]()
-    assert status["press_status"] == "UNKNOWN"
+    assert status["press_status"] != "PASS"

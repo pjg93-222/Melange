@@ -485,18 +485,22 @@ def _press_failure_status():
                     if d.startswith('press_refresh_') and len(d)==22 and d[14:].isdigit() and lo<=d[14:]<=hi)
         root=os.path.join(MB_ROOT,'outputs',days[-1]) if days else None
         bad=[]   # FIX77b (CodeRabbit PR #77): an unreadable receipt is recorded here, never raised past _write_status()
-        def _load(name):
+        def _load(name,need=None):   # need: the field the status logic reads; a receipt without it is not readable
             p=os.path.join(root,name) if root else ''
             if not os.path.isfile(p): return (None,p)
             try:
-                with open(p,encoding='utf-8') as f: doc=json.load(f)
-            except (OSError,ValueError): bad.append(name); return (None,p)
-            if isinstance(doc,dict): return (doc,p)
-            bad.append(name); return (None,p)
+                with open(p,encoding='utf-8') as f:
+                    doc=json.load(f)
+            except (OSError,ValueError):
+                bad.append(name)
+                return (None,p)
+            if isinstance(doc,dict) and (need is None or need in doc): return (doc,p)
+            bad.append(name)
+            return (None,p)
         receipt,receipt_path=_load(pfq.RECEIPT_ARTIFACT)
         opened=pfq.open_count()
-        walk=_load('press_network_retry_receipt.json')[0] or {}
-        failures=_load(pfq.FAILURES_ARTIFACT)[0]   # the collector's own artifact
+        walk=_load('press_network_retry_receipt.json','status')[0] or {}
+        failures=_load(pfq.FAILURES_ARTIFACT,'failures')[0]   # the collector's own artifact
         try: skipped=-1 if pfq.FAILURES_ARTIFACT in bad else len((failures or {}).get('failures') or [])
         except TypeError: skipped=-1   # unreadable or malformed: unknown, never PASS
         # PASS only with a run folder, a clean failures artifact, a non-PARTIAL walk and every receipt readable; a missing
