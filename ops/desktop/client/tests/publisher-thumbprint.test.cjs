@@ -122,6 +122,7 @@ test('T18 warn-only (Paul 2026-10-26): a manifest that does not name the pinned 
   const f=fixture(t,{thumbprints:[OTHER]});signer={status:4,thumbprint:OTHER};
   const realWarn=console.warn;console.warn=()=>{};
   try{const client=f.client();await client.check();
+    assert.match(f.status.at(-1),/verified. Installs after you close this app. Update publisher warning: /,'the final status keeps the warning');
     assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
   }finally{console.warn=realWarn;}
   assert.ok(f.status.some(message=>/Update publisher warning: .*does not name the pinned publisher certificate/.test(message)),f.status.join(' | '));

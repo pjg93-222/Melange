@@ -71,7 +71,8 @@ class DesktopUpdater {
     if(this.platform!=='win32')throw new Error('This release supports verified Windows activation only.');
     // The publisher decision is the installer signer's thumbprint against the signed manifest's allow-list; a manifest
     // without one (published before thumbprint pinning) is refused by verifyWindowsPackage, failing closed.
-    await this.verifyNativePackage(filename,manifest.publisherThumbprints,{warn:message=>this.onStatus(message)});
+    this.publisherWarning=null;
+    await this.verifyNativePackage(filename,manifest.publisherThumbprints,{warn:message=>{this.publisherWarning=message;this.onStatus(message);}});
     await verifyPackageFile(filename,manifest);
   }
   async ensureRecoveryBaseline(enrollment,fetch=true){
@@ -266,7 +267,7 @@ class DesktopUpdater {
     // untouched, so a later offer must still pass every rollback and downgrade check.
     try{await this.preparePending(enrollment,pending);}
     catch(error){this.ready=null;const notice='Staged update '+pending.version+' was not prepared: '+error.message;this.onStatus(notice);return notice;}
-    this.onStatus('Verified update '+pending.version+' waits for this app to close.');
+    this.onStatus('Verified update '+pending.version+' waits for this app to close.'+(this.publisherWarning?' '+this.publisherWarning:''));
   }
   async check(){
     if(this.busy||this.osShutdown)return;this.busy=true;
@@ -300,7 +301,7 @@ class DesktopUpdater {
       await this.download(enrollment,enrollment.deviceToken,m,path.dirname(this.packagePath(m)));
       const pending={envelope,version:m.version,fromVersion:this.version,phase:'staged',createdAt:new Date().toISOString()};
       this.writeState({...this.readState(),pending});await this.preparePending(enrollment,pending);
-      this.onStatus('Update '+m.version+' verified. Installs after you close this app.');
+      this.onStatus('Update '+m.version+' verified. Installs after you close this app.'+(this.publisherWarning?' '+this.publisherWarning:''));
       await this.report(enrollment,'downloaded');
     }catch(error){this.onStatus(this.ready?'Update check deferred. Verified update remains staged; local app remains available.':'Update deferred: '+error.message);
     }finally{this.busy=false;}
