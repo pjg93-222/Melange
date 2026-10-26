@@ -281,3 +281,29 @@ def test_the_collector_wrapper_writes_the_failure_file_then_fails_only_when_ever
         'stop("every member failed', "read.csv(")]
     assert order == sorted(order)
     assert "PRESS REFRESH FAILED" in main and main.rstrip().endswith("quit(save = \"no\", status = exit_code)")
+
+
+def test_weekly_still_writes_press_status_when_a_receipt_is_unreadable(tmp_path, monkeypatch):
+    # FIX77b (CodeRabbit PR #77): a corrupt queue or walk receipt must not skip _write_status().
+    queue = tmp_path / "queue.ndjson"
+    monkeypatch.setattr(q, "QUEUE_PATH", str(queue))
+    run = write_run(tmp_path, TODAY_RUN, [ROW])
+    q.record_run(run, queue, now=NOW)
+    (run / q.RECEIPT_ARTIFACT).write_text("{bad", encoding="utf-8")
+    ns, logs, status, emits = weekly_namespace(tmp_path, datetime.datetime.now())
+    ns["_press_failure_status"]()
+    assert status["press_status"] == "PARTIAL"            # the collector artifact still records the skip
+    assert status["press_failures_open"] == 1 and status["press_failure_queue"] == str(queue)
+    assert any("unreadable" in line for line in logs)
+    # clean failures artifact but a corrupt walk receipt: status cannot be established, never PASS
+    (run / q.FAILURES_ARTIFACT).write_text(json.dumps({"schema": q.FAILURES_SCHEMA, "failures": []}), encoding="utf-8")
+    (run / q.RECEIPT_ARTIFACT).unlink()
+    (run / "press_network_retry_receipt.json").write_text("not json", encoding="utf-8")
+    status.clear()
+    ns["_press_failure_status"]()
+    assert status["press_status"] == "UNKNOWN" and "press_failures_open" in status
+    # a receipt that parses but is not an object is treated the same way
+    (run / "press_network_retry_receipt.json").write_text("[]", encoding="utf-8")
+    status.clear()
+    ns["_press_failure_status"]()
+    assert status["press_status"] == "UNKNOWN"

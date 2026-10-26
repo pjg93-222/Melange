@@ -484,18 +484,27 @@ def _press_failure_status():
         days=sorted(d for d in (os.listdir(os.path.join(MB_ROOT,'outputs')) if os.path.isdir(os.path.join(MB_ROOT,'outputs')) else [])
                     if d.startswith('press_refresh_') and len(d)==22 and d[14:].isdigit() and lo<=d[14:]<=hi)
         root=os.path.join(MB_ROOT,'outputs',days[-1]) if days else None
+        bad=[]   # FIX77b (CodeRabbit PR #77): an unreadable receipt is recorded here, never raised past _write_status()
         def _load(name):
             p=os.path.join(root,name) if root else ''
-            return (json.load(open(p,encoding='utf-8')),p) if os.path.isfile(p) else (None,p)
+            if not os.path.isfile(p): return (None,p)
+            try:
+                with open(p,encoding='utf-8') as f: doc=json.load(f)
+            except (OSError,ValueError): bad.append(name); return (None,p)
+            if isinstance(doc,dict): return (doc,p)
+            bad.append(name); return (None,p)
         receipt,receipt_path=_load(pfq.RECEIPT_ARTIFACT)
         opened=pfq.open_count()
         walk=_load('press_network_retry_receipt.json')[0] or {}
-        try: skipped=len((_load(pfq.FAILURES_ARTIFACT)[0] or {}).get('failures') or [])   # the collector's own artifact
-        except Exception: skipped=-1   # unreadable: unknown, never PASS
-        # PASS only with a run folder, a clean failures artifact and a non-PARTIAL walk; a missing queue receipt
-        # (record_site_failures() failed) can no longer hide a non-empty press_site_failures.json.
+        failures=_load(pfq.FAILURES_ARTIFACT)[0]   # the collector's own artifact
+        try: skipped=-1 if pfq.FAILURES_ARTIFACT in bad else len((failures or {}).get('failures') or [])
+        except TypeError: skipped=-1   # unreadable or malformed: unknown, never PASS
+        # PASS only with a run folder, a clean failures artifact, a non-PARTIAL walk and every receipt readable; a missing
+        # queue receipt (record_site_failures() failed) can no longer hide a non-empty press_site_failures.json, and an
+        # unreadable receipt leaves PARTIAL when the failures artifact records skips, otherwise UNKNOWN.
         partial=bool(receipt and receipt.get('failures_this_run')) or walk.get('status')=='PARTIAL' or skipped!=0
-        _write_status(press_status='PARTIAL' if partial else 'PASS' if root else 'UNKNOWN',press_failures_open=opened,press_failure_queue=pfq.QUEUE_PATH)
+        _write_status(press_status='PARTIAL' if partial else 'UNKNOWN' if (bad or not root) else 'PASS',press_failures_open=opened,press_failure_queue=pfq.QUEUE_PATH)
+        if bad: log('   press status: unreadable receipt(s) %s in %s'%(', '.join(bad),root))
         if receipt:
             try: shutil.copy2(receipt_path,os.path.join(_RUN_LOG_DIR,pfq.RECEIPT_ARTIFACT))
             except Exception: pass
