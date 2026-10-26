@@ -64,6 +64,13 @@ test('a signer thumbprint in the manifest allow-list installs, even when Windows
   assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
 });
 
+test('LAUNCH F5 (ported from Mentat #36): enforced by default from 1.0.20, a wrong thumbprint on an untrusted chain is refused even when the manifest lists it',async t=>{
+  for(const status of [1,4]){
+    const f=fixture(t,{thumbprints:[PIN,OTHER]});signer={status,thumbprint:OTHER};
+    await refusedAndStillRunning(f,f.client(),/pinned publisher thumbprint could not be verified/);
+  }
+});
+
 test('an unsigned installer is refused',async t=>{
   const f=fixture(t);signer={status:2,thumbprint:null};
   await refusedAndStillRunning(f,f.client(),/Update deferred: Windows package signature or pinned publisher thumbprint could not be verified/);
@@ -118,12 +125,8 @@ test('publisherThumbprints must be a non-empty list of 40 uppercase hex digits w
     assert.throws(()=>verifyEnvelope(f.sign('1.1.0',2,{publisherThumbprints:bad}),f.enrollment,identity),/Invalid publisher thumbprints/);
 });
 
-test('T18 warn-only (Paul 2026-10-26): a manifest that does not name the pinned publisher still installs for 1.0.19 and the update status carries the warning',async t=>{
+test('T18 enforced (1.0.20, was warn-only in 1.0.19): a manifest that does not name the pinned publisher is refused end to end and the current version keeps running',async t=>{
   const f=fixture(t,{thumbprints:[OTHER]});signer={status:4,thumbprint:OTHER};
-  const realWarn=console.warn;console.warn=()=>{};
-  try{const client=f.client();await client.check();
-    assert.match(f.status.at(-1),/verified. Installs after you close this app. Update publisher warning: /,'the final status keeps the warning');
-    assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
-  }finally{console.warn=realWarn;}
-  assert.ok(f.status.some(message=>/Update publisher warning: .*does not name the pinned publisher certificate/.test(message)),f.status.join(' | '));
+  await refusedAndStillRunning(f,f.client(),/does not name the pinned publisher thumbprint; this installer is refused/);
+  assert.ok(!f.status.some(message=>/Update publisher warning/.test(message)),'no warn-and-proceed once enforced');
 });
