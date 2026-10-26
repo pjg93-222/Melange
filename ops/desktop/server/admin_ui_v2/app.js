@@ -365,7 +365,7 @@
   byId('expired-close').addEventListener('click',()=>{close();setTimeout(()=>{byId('expired-close').textContent='You can close this tab';byId('expired-close').disabled=true;},300);});
   setInterval(()=>{if(view==='apps'&&bearer)renderSub();},30000);
   // The requests, grants and activity views refresh themselves too; not mid-action, behind the key dialog, or while a form field is being used (the render rebuilds the cards).
-  setInterval(()=>{if(['requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);
+  setInterval(()=>{if(['apps','requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);
   const fragment=new URLSearchParams(location.hash.slice(1)),bootstrap=fragment.get('bootstrap');history.replaceState(null,'','/');
   (async()=>{
     lock(true);

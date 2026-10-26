@@ -164,7 +164,7 @@ class AdminDashboardTests(unittest.TestCase):
 
     def test_access_views_refresh_themselves_without_clobbering_an_action(self):
         script = (STATIC/'app.js').read_text(encoding='utf-8')
-        self.assertIn("setInterval(()=>{if(['requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&"
+        self.assertIn("setInterval(()=>{if(['apps','requests','grants','activity'].includes(view)&&bearer&&!busy&&!byId('key').open&&"
                       "!document.activeElement?.closest('#legacy-view select, #legacy-view input'))refresh().catch(()=>{});},30000);", script)
 
     def test_session_expiry_and_static_ui_use_no_ambient_storage(self):

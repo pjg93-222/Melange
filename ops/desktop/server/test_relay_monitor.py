@@ -133,6 +133,14 @@ class RelayMonitorTests(unittest.TestCase):
         self.assertEqual(check(self.root, 1_800_000_000, Sequence(['refused']))['event'], 'none')
         self.assertEqual(json.loads((self.root / 'relay-monitor.json').read_text())['failures'], 1)
 
+    def test_changed_target_starts_a_fresh_count(self):
+        self.run_sequence(['refused'] * 3)  # alerted outage on bore.pub:38443
+        (self.root / 'startup-registration.json').write_text(json.dumps({'publicOrigin': 'https://relay.example:443'}))
+        result = check(self.root, 1_800_000_300, Sequence([None]))
+        self.assertEqual(result['event'], 'none')  # no false recovery for the old relay
+        self.assertIsNone(self.outages())
+        self.assertEqual(check(self.root, 1_800_000_400, Sequence(['refused']))['event'], 'none')
+
     def test_lan_mode_is_disabled_and_writes_nothing(self):
         (self.root / 'startup-registration.json').unlink()
         self.assertEqual(check(self.root, 1, Sequence([])), {'event': 'disabled', 'kind': None, 'durationS': None})

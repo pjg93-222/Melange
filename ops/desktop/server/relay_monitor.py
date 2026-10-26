@@ -90,9 +90,10 @@ def check(root, now=None, prober=None):
     now = int(time.time() if now is None else now)
     failure = (prober or probe)(*where)  # looked up per call so tests can patch relay_monitor.probe
     before = _read(root / STATE)
-    if not _valid(before):
-        before = {}  # unreadable or foreign shape: start a fresh count rather than fail every check
+    if not _valid(before) or before.get('target') != list(where):
+        before = {}  # unreadable, foreign shape or another relay/certificate: start a fresh count
     state, event = step(before, failure, now)
+    state['target'] = list(where)
     relay = f'{where[0]}:{where[1]}'
     duration = None
     if event == 'alert':
