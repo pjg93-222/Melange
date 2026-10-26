@@ -261,5 +261,21 @@ stopifnot(body_class("") == "non_json", body_class("{not json") == "non_json",
           identical(tryCatch(parser$press_wp_json(list(status = 500L, text = "{}"), "e"),
                              press_site_unavailable = function(condition) "classed",
                              error = function(error) "fatal"), "fatal"))
+# Integrity before availability: a 200 with a malformed body that was redirected off the official host stays fatal.
+stopifnot(identical(tryCatch(
+  parser$press_wp_json(list(status = 200L, text = "{not json", url = "https://elsewhere.example.com/x"),
+                       "https://example.senate.gov/wp-json/wp/v2/types"),
+  press_site_unavailable = function(condition) "classed", error = function(error) "fatal"), "fatal"))
+# A malformed first-page body with no pagination headers is classed non_json, not a missing-header integrity stop.
+bad_page <- function(url) {
+  if (grepl("/types$", url))
+    return(list(status = 200L, headers = list(), url = url,
+                text = jsonlite::toJSON(list(post = list(rest_base = "posts")), auto_unbox = TRUE)))
+  list(status = 200L, headers = list(), text = "{not json", url = url)
+}
+stopifnot(identical(tryCatch(
+  parser$press_wp_fetch_member("O000174", "https://www.ossoff.senate.gov", "posts", Sys.Date() - 10L, bad_page),
+  press_site_unavailable = function(condition) condition$error_class,
+  error = function(error) conditionMessage(error)), "non_json"))
 
 cat("PASS: official custom-post pagination, exact dates, canonical identity, body seeding, provenance rejection and retained caches\n")

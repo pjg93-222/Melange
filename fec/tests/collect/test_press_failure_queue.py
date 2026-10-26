@@ -348,5 +348,7 @@ def test_open_count_treats_a_non_object_row_as_unreadable(tmp_path):
     open_row = json.dumps({"status": "open"})
     queue.write_text(open_row + "\n5\n", encoding="utf-8")
     assert q.open_count(queue) == -1
+    queue.write_text(open_row + "\n" + json.dumps({"member_id": "X"}) + "\n", encoding="utf-8")
+    assert q.open_count(queue) == -1      # a status-less row is damage too, never counted as a clean zero
     queue.write_text(open_row + "\n", encoding="utf-8")
     assert q.open_count(queue) == 1
