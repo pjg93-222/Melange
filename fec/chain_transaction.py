@@ -88,7 +88,9 @@ ROOT_FILE_EXTENSIONS = ('.json', '.html', '.js', '.xlsx', '.csv', '.ndjson', '.j
 ROOT_FILE_SKIP = ('*.PRE-*', '*.pre_*', '*.BACKUP-*', '~$*')   # dated workbook backups the chain never rewrites; Excel lock files
 COPY_TREES = ('data/engine', 'data/members', 'data/lobbying', 'data/network', 'data/district', 'data/reference', 'data/holistic',
               'data/money', 'data/legislation', 'data/stance', 'data/speech', 'data/press', 'data/staffer_network',
-              'data/system', 'outputs/email_package')
+              'data/system', 'outputs/email_package',
+              # DE-078 / D-330: CHAIN[77] (build_clean_workspace) rewrites this tree; outside the before-image a rollback left a partial 535 build
+              'fec/surfaces/staffer_live/approved')
 EXTRA_FILES = ('backups/Moneyball_Redesign.previous-generation.html',)   # sync_live_dashboard_alias keeps the previous generation here
 TRACK_ONLY = ('data/stance/rank_honors', 'data/legislation/vote_sources', 'data/legislation/congress_advanced_current',
               'data/legislation/sentinel_evidence', 'data/money/fec_generations', 'data/money/fec_page_cache',
