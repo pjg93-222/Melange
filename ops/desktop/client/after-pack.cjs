@@ -32,8 +32,8 @@ function findShippedData(runtimeRoot){
   // One walk over the whole runtime, so files at any depth (including directly under runtime/<app>) are checked.
   const found=[],melangeSources=path.join(runtimeRoot,'melange','sources',path.sep).toLowerCase();
   const walk=directory=>{
-    let entries;try{entries=fs.readdirSync(directory,{withFileTypes:true});}catch(error){return;}
-    for(const entry of entries){
+    // Fail closed: an unreadable directory could hide a dashboard or dataset (stripState stays best-effort).
+    for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
       const full=path.join(directory,entry.name);
       if(entry.isDirectory())walk(full);
       else if(DASHBOARD_PATTERN.test(entry.name)||(full.toLowerCase().startsWith(melangeSources)&&DATASET_PATTERN.test(entry.name)))found.push(full);

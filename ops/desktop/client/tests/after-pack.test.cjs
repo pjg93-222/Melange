@@ -37,13 +37,16 @@ test('builder wires the strip step as afterPack and keeps its glob filter inside
   assert.ok(!require('../release-files.cjs').includes('after-pack.cjs'),'build-time only, not shipped in the app');
 });
 
-test('an unreadable directory under sources is logged and skipped; the rest is still stripped and the build continues',async t=>{
+test('an unreadable directory under sources is logged and skipped by stripState, then fails the N20 guard (fail closed)',async t=>{
   const context=pack(t,['mentat/sources/locked/a.sqlite','mentat/sources/app/b.db']);
   const locked=path.join(context.appOutDir,'resources','runtime','mentat','sources','locked'),read=fs.readdirSync;
   fs.readdirSync=(directory,...rest)=>{if(path.resolve(String(directory))===locked)throw Object.assign(new Error('EACCES: permission denied'),{code:'EACCES'});return read.call(fs,directory,...rest);};
-  let lines;try{lines=await quiet(context);}finally{fs.readdirSync=read;}
+  const lines=[];let failure;
+  try{afterPack.stripState(path.join(context.appOutDir,'resources','runtime'),line=>lines.push(line));
+    await quiet(context).catch(error=>{failure=error;});}finally{fs.readdirSync=read;}
   assert.equal(context.exists('mentat/sources/app/b.db'),false,'the readable branch is still stripped');
   assert.ok(lines.some(line=>/could not read .*locked: EACCES/.test(line)),'the unreadable directory is logged');
+  assert.match(failure?.message??'',/EACCES/,'the N20 guard does not pass a directory it cannot read');
 });
 
 // ---- Downloads layout (DL-spec 1.3, 2.8): generated NSIS include and the build-time long-path gate ----
