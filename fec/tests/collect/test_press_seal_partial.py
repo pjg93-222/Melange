@@ -193,3 +193,7 @@ def test_score_only_admits_a_sites_only_partial_only_with_its_proof_intact():
     gate = source[source.index("load_valid_retry_receipt <- function()"):]
     gate = gate[:gate.index("\n}\n")]
     assert "validate_site_failures_proof(run_root, receipt)" in gate
+    # a sites-only PARTIAL also needs an explicit zero, hash-bound, empty pending set (CodeRabbit PR #94)
+    assert "is.null(receipt$pending_body_urls)" in gate and "as.integer(receipt$pending_body_urls), 0L" in gate
+    assert "receipt$pending_body_urls_sha256, sha256_file(pending_path)" in gate
+    assert "sum(nzchar(readLines(pending_path, warn = FALSE))) > 1L" in gate

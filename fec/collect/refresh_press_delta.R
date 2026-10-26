@@ -679,6 +679,13 @@ load_valid_retry_receipt <- function() {
     stop("live-network retry receipt does not match the fulltext artifacts")
   }
   validate_site_failures_proof(run_root, receipt)   # a sites-only PARTIAL is admitted only with its proof intact
+  if (identical(receipt$status, "PARTIAL")) {         # ... and with an explicit, hash-bound, empty pending set
+    pending_path <- file.path(run_root, "press_delta_pending.csv")
+    if (is.null(receipt$pending_body_urls) || !identical(as.integer(receipt$pending_body_urls), 0L) ||
+        !file.exists(pending_path) || !identical(receipt$pending_body_urls_sha256, sha256_file(pending_path)) ||
+        sum(nzchar(readLines(pending_path, warn = FALSE))) > 1L)   # any line beyond the header is a pending row
+      stop("a sites-only PARTIAL needs an explicit zero, hash-bound, empty press_delta_pending.csv for score-only")
+  }
   validate_official_coverage_artifacts(receipt)
   receipt
 }
