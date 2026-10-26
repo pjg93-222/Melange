@@ -26,8 +26,20 @@ test('T18 (D-328): with enforcement on, the signer must equal the client-pinned 
   for(const status of [2,3])assert.throws(()=>verifySignatureResult({...signed(PIN),status},filename,[PIN],on),/could not be verified/);
   assert.throws(()=>verifySignatureResult({...signed(PIN),path:'C:\Other\Package.exe'},filename,[PIN],on),/could not be verified/);
 });
-test('T18 (Paul 2026-10-26): the shipped default is warn-only for 1.0.19 (flip PUBLISHER_PIN_ENFORCE in the next release)',()=>{
-  assert.equal(PUBLISHER_PIN_ENFORCE,false);
+test('LAUNCH F5 (ported from Mentat #36): enforced, an untrusted chain is accepted on the pinned thumbprint alone; a wrong thumbprint is refused; the signature must stay intact',()=>{
+  // Staff PCs without our root in Trusted Root report UnknownError (1) or NotTrusted (4) for a correctly signed installer.
+  const filename='C:\\Test\\Package.exe',on={enforce:true},result=(status,thumbprint)=>({status,thumbprint,path:filename});
+  for(const status of [1,4]){
+    verifySignatureResult(result(status,PIN),filename,[PIN],on);
+    verifySignatureResult(result(status,PIN.toLowerCase()),filename,[PIN,OTHER],on);
+    for(const pins of [[PIN],[PIN,OTHER]])
+      assert.throws(()=>verifySignatureResult(result(status,OTHER),filename,pins,on),/could not be verified/,'wrong thumbprint, status '+status);
+  }
+  // NotSigned / HashMismatch: no intact signature, refused even with the pinned thumbprint.
+  for(const status of [2,3])assert.throws(()=>verifySignatureResult(result(status,PIN),filename,[PIN],on),/could not be verified/);
+});
+test('T18 (D-411): the shipped default enforces the publisher pin (fail-closed since 1.0.20)',()=>{
+  assert.equal(PUBLISHER_PIN_ENFORCE,true);
 });
 test('T18 warn-only: a pin mismatch warns and proceeds while enforcement is off; the allow-list and release-signing checks still refuse',()=>{
   const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename}),off={enforce:false};
@@ -44,10 +56,11 @@ test('T18 warn-only: a pin mismatch warns and proceeds while enforcement is off;
   for(const status of [2,3])assert.throws(()=>run({...signed(PIN),status},[PIN]),/could not be verified/);
   assert.throws(()=>run({...signed(PIN),path:'C:\Other\Package.exe'},[PIN]),/could not be verified/);
   assert.throws(()=>run(signed(PIN),[]),/names no publisher thumbprint/);
-  // The module default (off) behaves the same without options, and console.warn is the log.
+  // Off without a warn callback, console.warn is the log; the module default (on from 1.0.20) refuses the same mismatch.
   const logged=[],realWarn=console.warn;console.warn=message=>logged.push(message);
-  try{verifySignatureResult(signed(OTHER),filename,[OTHER]);}finally{console.warn=realWarn;}
+  try{verifySignatureResult(signed(OTHER),filename,[OTHER],off);}finally{console.warn=realWarn;}
   assert.equal(logged.length,1);
+  assert.throws(()=>verifySignatureResult(signed(OTHER),filename,[OTHER]),/does not name the pinned publisher thumbprint/);
 });
 test('T18 flip: the same mismatches that warn while off block once enforcement is on',()=>{
   const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename});
