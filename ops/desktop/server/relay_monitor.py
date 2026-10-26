@@ -119,8 +119,10 @@ def check(root, now=None, prober=None):
 def _valid(state):
     if not isinstance(state.get('failures', 0), int):
         return False
-    return not state.get('failures') or (isinstance(state.get('since'), int) and isinstance(state.get('kinds'), list)
-                                         and all(kind in KINDS for kind in state['kinds']))
+    if not state.get('failures') and not state.get('alerted'):
+        return True
+    return (isinstance(state.get('failures'), int) and state['failures'] > 0 and isinstance(state.get('since'), int)
+            and isinstance(state.get('kinds'), list) and all(kind in KINDS for kind in state['kinds']))
 
 
 def _log(root, now, message):
@@ -133,7 +135,7 @@ def status(root, now=None):
     state = _read(Path(root) / STATE)
     now = time.time() if now is None else now
     checked = state.get('checkedAt')
-    if not isinstance(checked, int) or now - checked > STALE:
+    if not _valid(state) or not isinstance(checked, int) or now - checked > STALE:
         return {'state': 'unknown', 'since': None, 'kind': None, 'checkedAt': checked if isinstance(checked, int) else None}
     if state.get('alerted'):
         return {'state': 'down', 'since': state['since'], 'kind': '|'.join(state['kinds']), 'checkedAt': checked}

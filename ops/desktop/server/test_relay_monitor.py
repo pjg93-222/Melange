@@ -141,6 +141,12 @@ class RelayMonitorTests(unittest.TestCase):
         self.assertIsNone(self.outages())
         self.assertEqual(check(self.root, 1_800_000_400, Sequence(['refused']))['event'], 'none')
 
+    def test_alerted_state_without_outage_fields_is_rejected(self):
+        target = list(relay_monitor.target(self.root))
+        (self.root / 'relay-monitor.json').write_text(json.dumps({'failures': 0, 'alerted': True, 'checkedAt': 1_800_000_000, 'target': target}))
+        self.assertEqual(status(self.root, 1_800_000_010)['state'], 'unknown')
+        self.assertEqual(check(self.root, 1_800_000_100, Sequence([None]))['event'], 'none')  # no KeyError, no false recovery
+
     def test_lan_mode_is_disabled_and_writes_nothing(self):
         (self.root / 'startup-registration.json').unlink()
         self.assertEqual(check(self.root, 1, Sequence([])), {'event': 'disabled', 'kind': None, 'durationS': None})

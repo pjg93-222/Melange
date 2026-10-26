@@ -156,6 +156,6 @@ try {
 } finally {
     $timer.Stop(); $timer.Dispose(); $tray.Visible=$false; $tray.Dispose(); $menu.Dispose()
     if ($script:pending) { if (-not $script:pending.HasExited) { $script:pending.Kill($true); $script:pending.WaitForExit() }; $script:pending.Dispose() }
-    if ($script:relayPending) { if (-not $script:relayPending.HasExited) { $script:relayPending.Kill($true); $script:relayPending.WaitForExit() }; $script:relayPending.Dispose() }
+    try { if ($script:relayPending) { if (-not $script:relayPending.HasExited) { $script:relayPending.Kill($true); $script:relayPending.WaitForExit() }; $script:relayPending.Dispose() } } catch { }   # never skip the mutex release below
     if ($owned) { $mutex.ReleaseMutex() }; $mutex.Dispose()
 }
