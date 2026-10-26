@@ -380,6 +380,19 @@ def test_write_billset_written_when_parity_passes(tmp_path, monkeypatch):
     assert PG.write_billset('x.csv', str(out)) == 0 and out.exists()
 
 
+def test_parity_refuses_a_non_finite_weight_on_either_side(tmp_path, monkeypatch):
+    # CodeRabbit PR #83: a blank reference Weight cell reads as NaN, and abs(NaN - x) > tol is False.
+    from network import cr_parity_gate as PG
+    for ref_w, tie_w in ((float('nan'), 1.0), (1.0, float('nan')), (float('inf'), 1.0)):
+        g = {'per': {}, 'stale': [], 'E': {('a', 'b'): (ref_w, 1, 1, 0)}, 'nometa': [], 'ties_by': {},
+             'ties': {('a', 'b'): [tie_w, 1, 1, 0]}}
+        monkeypatch.setattr(PG, 'reconstruct', lambda p, g=g: g)
+        bad, extra = PG.parity(g)
+        assert bad == [('a', 'b')] and extra == [], (ref_w, tie_w)
+        out = tmp_path / 'bs.json'
+        assert PG.write_billset('x.csv', str(out)) != 0 and not out.exists()
+
+
 def test_edge_growth_last_action_is_recomputed_for_bills_outside_the_seed():
     from network import cr_edge_growth as EG
     passed = [('2025-02-01', '8000', 'Floor', 'Passed/agreed to in House')]

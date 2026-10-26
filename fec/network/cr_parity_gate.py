@@ -11,7 +11,7 @@ and supplied as 'Introduced'. Sponsor node = roster bioguide by NAME, as R did (
 import os as _o, sys as _s
 _s.path.insert(0, _o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))))
 _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
-import collections, json, os, re, sys
+import collections, json, math, os, re, sys
 import build_cu_placeholder_backfill as BF  # stale-ok: script-mode import after explicit own-dir sys.path insert
 import build_cu_member_lane as L  # stale-ok: script-mode import after explicit own-dir sys.path insert
 
@@ -69,7 +69,9 @@ def reconstruct(csv_path):
 def parity(g):
     """-> (bad, extra): R edges not reproduced exactly / edges R does not have."""
     E, ties = g['E'], g['ties']
-    bad = [k for k in E if k not in ties or abs(E[k][0] - ties[k][0]) > 1e-9 or E[k][1:] != tuple(ties[k][1:])]
+    # a non-finite weight on either side (a blank reference Weight cell reads as NaN) is a mismatch, never a pass
+    bad = [k for k in E if k not in ties or not (math.isfinite(E[k][0]) and math.isfinite(ties[k][0]))
+           or abs(E[k][0] - ties[k][0]) > 1e-9 or E[k][1:] != tuple(ties[k][1:])]
     return bad, [k for k in ties if k not in E]
 
 
