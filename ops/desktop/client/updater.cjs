@@ -36,6 +36,9 @@ class DesktopUpdater {
     this.autoUpdater.autoDownload=false;this.autoUpdater.autoInstallOnAppQuit=false;
     this.autoUpdater.allowDowngrade=false;this.autoUpdater.disableDifferentialDownload=true;
     this.autoUpdater.disableWebInstaller=true;
+    // Downloads layout (DL-spec 2.3): the installer that actually runs is cached under <Downloads>/MelangeApplications/updates.
+    // electron-updater 6.8.9 reuses a preset helper (AppUpdater.getOrCreateDownloadHelper); tests/lifecycle.test.cjs pins that contract.
+    if(this.installLayout){const {DownloadedUpdateHelper}=require('electron-updater/out/DownloadedUpdateHelper');this.autoUpdater.downloadedUpdateHelper=new DownloadedUpdateHelper(this.installLayout.cacheDirectory);}
   }
   identity(){return {appId:this.appId,version:this.version,platform:this.platform,arch:this.arch};}
   packagePath(manifest){return path.join(this.userData,'updates',String(manifest.sequence),manifest.package.name);}
@@ -93,6 +96,8 @@ class DesktopUpdater {
     return candidate;
   }
   verifyRecovery(enrollment,recovery){
+    const floor=require('./install-layout.cjs').LAYOUT.rollbackFloor;
+    if(this.installLayout&&semver.lt(recovery.target.version,floor))throw new Error('Rollback below '+floor+' would leave the Downloads layout');
     // The only downgrade exception is this exact, locally selected, previously installed envelope.
     const expected=crypto.createHash('sha256').update(Buffer.from(recovery.target.envelope.payload,'base64')).digest('hex');
     if(expected!==recovery.manifestHash)throw new Error('Recovery authorization changed');
@@ -300,7 +305,11 @@ class DesktopUpdater {
     }catch(error){this.onStatus(this.ready?'Update check deferred. Verified update remains staged; local app remains available.':'Update deferred: '+error.message);
     }finally{this.busy=false;}
   }
-  markApplicationReady(){this.applicationReady=true;}
+  markApplicationReady(){
+    this.applicationReady=true;
+    // Keep-2 pruning and legacy program-folder cleanup (DL-spec 2.5, 2.6): once per run, after a successful launch, never fatal.
+    if(this.installLayout&&!this.layoutSwept){this.layoutSwept=true;try{Promise.resolve(this.installLayout.sweep(this.readState())).catch(()=>{});}catch{}}
+  }
   async markApplicationFailed(){
     this.applicationReady=false;this.ready=null;
     const state=this.readState();
@@ -372,6 +381,8 @@ class DesktopUpdater {
       // marks the transaction failed with INSTALL_FAILED.
       const run=Boolean(typeof relaunch==='function'?relaunch():relaunch);
       this.autoUpdater.autoRunAppAfterInstall=run;
+      // Downloads layout: no /D. Node quotes a /D value that holds a space and NSIS 3.04 then ignores it; the installer runs from
+      // <Downloads>/MelangeApplications/updates/<app>/pending and chooses <App>-<its version> itself (installer.nsh dlDecideInstdir).
       this.autoUpdater.quitAndInstall(true,run);
       if(this.autoUpdater.quitAndInstallCalled===false)throw new Error('The installer could not be started.');
       return true;

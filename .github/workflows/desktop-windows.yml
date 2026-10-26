@@ -74,12 +74,12 @@ concurrency:
 env:
   APP: melange
   PRODUCT: Melange
-  VERSION: 1.0.15
-  RELEASE_TAG: desktop-preview-v1.0.15
+  VERSION: 1.0.19
+  RELEASE_TAG: desktop-preview-v1.0.19
   # Signed-release input mode (header). Both empty = plain preview. Melange is the first signed release (release owner,
   # 2026-10-16); Geo and Mentat adopt this subject when they are re-pinned for their own signed releases.
   RELEASE_PUBLISHER: 'CN=Melange Systems Desktop Release (self-signed)'
-  STABLE_TAG: desktop-v1.0.15
+  STABLE_TAG: desktop-v1.0.19
   ARTIFACT: melange-desktop-${{ github.sha }}
   # SET AT INTEGRATION: both to the full 40-hex SHA of reviewed source commit T (see the header). Until then preflight fails.
   REVIEWED_BASE: 0194af87d3d37e3dae5feb14f1ef70b4b15afae6

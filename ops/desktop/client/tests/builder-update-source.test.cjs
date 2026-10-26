@@ -64,3 +64,29 @@ test('an unset DESKTOP_GITHUB_REPOSITORY gives each app its own repository, and 
     fs.rmSync(fixture,{recursive:true,force:true});
   }
 });
+
+test('the NSIS target is Downloads-only and reads the include that after-pack generates in the output directory',()=>{
+  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'melange-update-source-'));
+  try{
+    fs.mkdirSync(path.join(fixture,'melange','python'),{recursive:true});fs.mkdirSync(path.join(fixture,'melange','bootstrap'),{recursive:true});
+    fs.writeFileSync(path.join(fixture,'melange','python',process.platform==='win32'?'python.exe':'bin-python-placeholder'),'');
+    if(process.platform!=='win32'){fs.mkdirSync(path.join(fixture,'melange','python','bin'),{recursive:true});fs.writeFileSync(path.join(fixture,'melange','python','bin','python3'),'');}
+    fs.writeFileSync(path.join(fixture,'melange','bootstrap','desktop_backend.py'),'');
+    const config=distRoot=>{
+      const env={...process.env,DESKTOP_APP_ID:'melange',DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:''};delete env.DESKTOP_DIST_ROOT;if(distRoot)env.DESKTOP_DIST_ROOT=distRoot;
+      const child=spawnSync(process.execPath,['-e',"const c=require('./builder.cjs');process.stdout.write(JSON.stringify({nsis:c.nsis,output:c.directories.output}))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
+      assert.equal(child.status,0,child.stderr);return JSON.parse(child.stdout);
+    };
+    const before=fs.readdirSync(fixture).length;
+    const plain=config();
+    assert.equal(plain.nsis.allowToChangeInstallationDirectory,false);assert.equal(plain.nsis.oneClick,false);assert.equal(plain.nsis.perMachine,false);
+    assert.equal(plain.nsis.include,path.join(path.resolve(__dirname,'..'),'dist','melange','installer.generated.nsh'),'default output is dist/melange under the client directory');
+    const dist=path.join(fixture,'out');
+    const rooted=config(dist);
+    assert.equal(rooted.output,path.join(dist,'melange'));assert.equal(rooted.nsis.include,path.join(dist,'melange','installer.generated.nsh'));
+    assert.equal(fs.readdirSync(fixture).length,before,'builder.cjs writes no files; after-pack is the only writer');
+  }finally{
+    assert.equal(path.dirname(fixture),path.resolve(os.tmpdir()));assert.ok(path.basename(fixture).startsWith('melange-update-source-'));
+    fs.rmSync(fixture,{recursive:true,force:true});
+  }
+});
