@@ -117,7 +117,7 @@ def check(root, now=None, prober=None):
 
 
 def _valid(state):
-    if not isinstance(state.get('failures', 0), int):
+    if not isinstance(state.get('failures', 0), int) or not isinstance(state.get('alerted', False), bool):
         return False
     if not state.get('failures') and not state.get('alerted'):
         return True
