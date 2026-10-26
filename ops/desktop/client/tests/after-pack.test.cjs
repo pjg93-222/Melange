@@ -37,13 +37,16 @@ test('builder wires the strip step as afterPack and keeps its glob filter inside
   assert.ok(!require('../release-files.cjs').includes('after-pack.cjs'),'build-time only, not shipped in the app');
 });
 
-test('an unreadable directory under sources is logged and skipped; the rest is still stripped and the build continues',async t=>{
+test('an unreadable directory under sources is logged and skipped by stripState, then fails the N20 guard (fail closed)',async t=>{
   const context=pack(t,['mentat/sources/locked/a.sqlite','mentat/sources/app/b.db']);
   const locked=path.join(context.appOutDir,'resources','runtime','mentat','sources','locked'),read=fs.readdirSync;
   fs.readdirSync=(directory,...rest)=>{if(path.resolve(String(directory))===locked)throw Object.assign(new Error('EACCES: permission denied'),{code:'EACCES'});return read.call(fs,directory,...rest);};
-  let lines;try{lines=await quiet(context);}finally{fs.readdirSync=read;}
+  const lines=[];let failure;
+  try{afterPack.stripState(path.join(context.appOutDir,'resources','runtime'),line=>lines.push(line));
+    await quiet(context).catch(error=>{failure=error;});}finally{fs.readdirSync=read;}
   assert.equal(context.exists('mentat/sources/app/b.db'),false,'the readable branch is still stripped');
   assert.ok(lines.some(line=>/could not read .*locked: EACCES/.test(line)),'the unreadable directory is logged');
+  assert.match(failure?.message??'',/EACCES/,'the N20 guard does not pass a directory it cannot read');
 });
 
 // ---- Downloads layout (DL-spec 1.3, 2.8): generated NSIS include and the build-time long-path gate ----
@@ -78,4 +81,15 @@ test('afterPack fails the build when the deepest packaged path exceeds the budge
 
 test('afterPack without packager metadata (unit use) leaves no include behind',async t=>{
   const context=build(t);await quiet({appOutDir:context.appOutDir});assert.equal(fs.existsSync(path.join(context.output,'installer.generated.nsh')),false);
+});
+
+// ---- N20: the public installer ships a no-data dashboard shell only ----
+test('N20: afterPack fails on a real Moneyball.html or a Melange dataset, and passes on the shell-only runtime',async t=>{
+  const shell=['melange/sources/fec/surfaces/staffer_live_server.py','melange/bootstrap/melange_bootstrap.py','terrier/sources/data/field_dictionary.csv'];
+  const ok=pack(t,shell);await quiet({appOutDir:ok.appOutDir});
+  for(const bad of ['melange/Moneyball.html','terrier/moneyball.html','melange/sources/Moneyball.html','melange/sources/fec/MONEYBALL_Redesign.html','mentat/sources/app/moneyball.html','melange/sources/fec/data/members.xlsx','melange/sources/fec/data/votes.ndjson']){
+    const context=pack(t,[...shell,bad]);
+    await assert.rejects(()=>quiet({appOutDir:context.appOutDir}),/no-data dashboard shell \(N20\)/,bad);
+  }
+  assert.ok(afterPack.findShippedData(path.join(ok.appOutDir,'resources','runtime')).length===0);
 });
