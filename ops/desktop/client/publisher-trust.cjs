@@ -1,6 +1,7 @@
 'use strict';
 // One-click trust of the pinned self-signed release certificate (public part only, shipped beside the app).
-// Verified updates install only where Windows reports that signer as Valid; trust changes nothing else here.
+// Verified updates install only when the installer signer thumbprint is on the signed manifest allow-list (Windows need
+// not report it Valid; NotSigned and HashMismatch are refused). Trust changes nothing else here.
 // The certificate is end-entity (CA:false) with only the Code Signing EKU, so it cannot vouch for websites.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{execFile}=require('node:child_process');
 const THUMBPRINT='0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30',CERTIFICATE='melange-systems-desktop-release.cer';
