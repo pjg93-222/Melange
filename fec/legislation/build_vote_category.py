@@ -10,6 +10,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import argparse
+import glob
 import ast
 from collections import Counter, defaultdict
 import csv
@@ -260,7 +261,7 @@ def main():
     names = args.names or to_host(config.get('names') or '')
     if not all((source, exclusions, names)):
         parser.error('source-dir, historical-exclusions and names are required until a source snapshot is configured')
-    archive = args.archive or sorted(root.glob('congress_bills_archive_*.xlsx'))[-1]
+    archive = args.archive or Path(__import__('source_select').select_archive(glob.glob(str(root / 'congress_bills_archive_*.xlsx')), root=str(root)))
     receipt = build(root, source, archive, exclusions, names, root if args.publish else args.output_dir)
     print(json.dumps({'status': receipt['status'], 'counts': receipt['counts'],
                       'latest_source_vote_dates': receipt['latest_source_vote_dates'], 'rejections': receipt['rejections']}, indent=2))
