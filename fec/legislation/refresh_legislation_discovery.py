@@ -241,7 +241,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--categories")
-    parser.add_argument("--delay-ms", type=int, default=1500)
+    parser.add_argument("--delay-ms", type=int, default=0)
     parser.add_argument("--fallback-workers", type=int, default=8)
     parser.add_argument("--fallback-timeout-seconds", type=float, default=60.0)
     parser.add_argument("--headless", action="store_true",

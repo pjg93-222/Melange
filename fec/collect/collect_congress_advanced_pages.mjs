@@ -36,6 +36,30 @@ import {
   writeJsonAtomicWithRetry,
   writeTextAtomicWithRetry,
 } from "../lib/atomic_checkpoint.mjs";
+import {
+  DEFAULT_CDP_PORT,
+  DEFAULT_CLEARANCE_AUTO_MS,
+  DEFAULT_CLEARANCE_HUMAN_MS,
+  DEFAULT_KEEP_WARM_MS,
+  DEFAULT_REFRESH_MARGIN_MS,
+  classifyFetchPushback,
+  clearanceNeedsRefresh,
+  ensureChrome,
+  recordClearance,
+  waitForClearance,
+} from "../lib/congress_cdp_browser.mjs";
+import {
+  DEFAULT_MAX_RPS,
+  DEFAULT_PAUSE_MS,
+  DEFAULT_RECOVER_AFTER,
+  DEFAULT_WORKERS,
+  createGovernor,
+} from "../lib/congress_governor.mjs";
+import {
+  PushbackError,
+  governedAttempt,
+  runPool,
+} from "../lib/congress_page_queue.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -98,10 +122,34 @@ function parseArgs(argv) {
     ),
     profile: defaultCongressProfileDir(),
     chrome: DEFAULT_CHROME,
-    headless: true,
-    delayMs: 1500,
+    // Attach to a real headed Chrome by default; --headless is the opt-in legacy path.
+    headless: false,
+    // Optional minimum per-request interval fed into the governor (no per-page sleep).
+    delayMs: 0,
     categories: null,
     resume: false,
+    cdpPort: DEFAULT_CDP_PORT,
+    workers: DEFAULT_WORKERS,
+    maxRps: DEFAULT_MAX_RPS,
+    maxPages: null,
+    pauseMs: DEFAULT_PAUSE_MS,
+    recoverAfter: DEFAULT_RECOVER_AFTER,
+    clearanceAutoMs: DEFAULT_CLEARANCE_AUTO_MS,
+    clearanceHumanMs: DEFAULT_CLEARANCE_HUMAN_MS,
+    refreshMarginMs: DEFAULT_REFRESH_MARGIN_MS,
+    keepWarmMs: DEFAULT_KEEP_WARM_MS,
+  };
+  const numeric = {
+    "--cdp-port": "cdpPort",
+    "--workers": "workers",
+    "--max-rps": "maxRps",
+    "--max-pages": "maxPages",
+    "--pause-ms": "pauseMs",
+    "--recover-after": "recoverAfter",
+    "--clearance-auto-ms": "clearanceAutoMs",
+    "--clearance-human-ms": "clearanceHumanMs",
+    "--refresh-margin-ms": "refreshMarginMs",
+    "--keep-warm-ms": "keepWarmMs",
   };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
@@ -110,7 +158,9 @@ function parseArgs(argv) {
     else if (value === "--profile") args.profile = argv[++index];
     else if (value === "--chrome") args.chrome = argv[++index];
     else if (value === "--delay-ms") args.delayMs = Number(argv[++index]);
-    else if (value === "--categories") {
+    else if (Object.hasOwn(numeric, value)) {
+      args[numeric[value]] = Number(argv[++index]);
+    } else if (value === "--categories") {
       args.categories = new Set(
         argv[++index]
           .split(",")
@@ -127,9 +177,19 @@ function parseArgs(argv) {
   --profile PATH      Isolated Chrome profile directory
   --chrome PATH       Chrome executable
   --categories IDS    Comma-separated category/probe IDs
-  --delay-ms N        Delay between Congress.gov page loads (default 1500)
-  --headless          Run headless (default)
-  --headed            Run headed only when explicitly requested
+  --delay-ms N        Minimum interval between requests, via the governor (default 0)
+  --headed            Attach to a real headed Chrome over CDP (default)
+  --headless          Legacy opt-in: launch headless, one tab, cross-run cooldown
+  --cdp-port N        Chrome remote-debugging port (default ${DEFAULT_CDP_PORT})
+  --workers N         Worker tabs in the same browser (default ${DEFAULT_WORKERS})
+  --max-rps N         Aggregate requests/second ceiling (default ${DEFAULT_MAX_RPS})
+  --max-pages N       Stop after N live Congress.gov page loads (smoke tests)
+  --pause-ms N        Global pause after pushback (default ${DEFAULT_PAUSE_MS})
+  --recover-after N   Clean responses before adding a worker back (default ${DEFAULT_RECOVER_AFTER})
+  --clearance-auto-ms N   Automatic clearance window (default ${DEFAULT_CLEARANCE_AUTO_MS})
+  --clearance-human-ms N  Wait for a human check (default ${DEFAULT_CLEARANCE_HUMAN_MS})
+  --refresh-margin-ms N   Re-warm when cf_clearance expires within N (default ${DEFAULT_REFRESH_MARGIN_MS})
+  --keep-warm-ms N    Re-warm at least this often (default ${DEFAULT_KEEP_WARM_MS})
   --resume            Reuse page files that pass provenance checks`);
       process.exit(0);
     } else {
@@ -139,6 +199,15 @@ function parseArgs(argv) {
   if (!Number.isFinite(args.delayMs) || args.delayMs < 0) {
     throw new Error("--delay-ms must be a non-negative number");
   }
+  for (const [flag, key] of Object.entries(numeric)) {
+    const ok =
+      Number.isFinite(args[key]) &&
+      args[key] >= (key === "workers" || key === "maxRps" ? 1 : 0);
+    if (!ok && !(key === "maxPages" && args[key] === null)) {
+      throw new Error(`${flag} must be a valid number`);
+    }
+  }
+  if (args.headless) args.workers = 1; // ponytail: legacy headless path stays single-tab
   return args;
 }
 
@@ -247,7 +316,18 @@ async function waitForSettledResultSummary({
         poll_count: pollCount,
       };
     }
-    await sleep(RESULT_SUMMARY_POLL_MS);
+    if (runtime.attach) {
+      // Event-based: wake when the "summary is in progress" surface disappears.
+      await page
+        .waitForFunction(
+          () => !/a summary is in progress/i.test(document.body?.innerText ?? ""),
+          undefined,
+          { timeout: Math.max(1, Math.min(5_000, deadline - Date.now())) },
+        )
+        .catch(() => {});
+    } else {
+      await sleep(RESULT_SUMMARY_POLL_MS);
+    }
   }
   throw new Error(
     "Congress.gov result summary remained in the non-result " +
@@ -402,11 +482,49 @@ async function honorAutomaticVerificationCooldown(stateFile) {
   return state;
 }
 
+// Attach-mode state shared by every tab: the positive cleared-signal wait replaces the
+// passive 120 s poll. Worker tabs never prompt a human; they raise a PushbackError so the
+// governor pauses and the MAIN tab re-clears once for everyone.
+const runtime = { attach: false, mainPage: null, clearanceOptions: {} };
+
+async function waitForAttachClearance(page, expectedSelector, alternateClassifier) {
+  const isMain = page === runtime.mainPage;
+  try {
+    await waitForClearance(page, {
+      ...runtime.clearanceOptions,
+      ...(isMain ? {} : { humanMs: 0, autoMs: Math.min(15_000, runtime.clearanceOptions.autoMs ?? 15_000) }),
+    });
+  } catch (error) {
+    if (!isMain && automaticVerificationError(error)) {
+      throw new PushbackError("challenge");
+    }
+    throw error;
+  }
+  if (alternateClassifier) {
+    const title = await page.title().catch(() => "");
+    const body = await page
+      .locator("body")
+      .innerText()
+      .then((value) => value.slice(0, 1200))
+      .catch(() => "");
+    const alternate = alternateClassifier({
+      loadedUrl: page.url(),
+      title,
+      bodyText: body,
+    });
+    if (alternate) return alternate;
+  }
+  return { kind: "expected_selector", selector: expectedSelector };
+}
+
 async function waitForAutomaticVerification(
   page,
   expectedSelector,
   alternateClassifier = null,
 ) {
+  if (runtime.attach) {
+    return waitForAttachClearance(page, expectedSelector, alternateClassifier);
+  }
   const deadline = Date.now() + AUTOMATIC_VERIFICATION_WAIT_MS;
   let automaticVerification = null;
   while (Date.now() < deadline) {
@@ -471,10 +589,13 @@ async function gotoWithRetry(
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      await page.goto(url, {
+      const response = await page.goto(url, {
         waitUntil: "domcontentloaded",
         timeout: 90_000,
       });
+      if (runtime.attach && [429, 503].includes(response?.status())) {
+        throw new PushbackError("rate_limit", { status: response.status() });
+      }
       return await waitForAutomaticVerification(
         page,
         expectedSelector,
@@ -482,9 +603,10 @@ async function gotoWithRetry(
       );
     } catch (error) {
       lastError = error;
+      if (error instanceof PushbackError) throw error;
       if (/interactive human-verification/i.test(error.message)) throw error;
       if (automaticVerificationError(error)) throw error;
-      if (attempt < attempts) await sleep(4000 * attempt);
+      if (attempt < attempts && !runtime.attach) await sleep(4000 * attempt);
     }
   }
   throw new Error(`Congress.gov navigation failed after ${attempts} attempts`, {
@@ -663,11 +785,25 @@ async function extractSingleResultRedirect(page, navigation) {
   };
 }
 
-async function extractPage(page) {
-  return page.evaluate(() => {
+// html === null parses the live DOM; otherwise the fetched HTML is rendered into an
+// off-screen container of the same tab, so innerText sees the page's own stylesheets and
+// the extraction below is the single code path for both transports.
+async function extractPage(page, html = null, loadedUrl = null) {
+  return page.evaluate(({ html, loadedUrl }) => {
+    let root = document;
+    let container = null;
+    if (html !== null) {
+      container = document.createElement("div");
+      container.style.cssText =
+        "position:absolute;left:-99999px;top:0;width:1400px";
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      root = container;
+    }
+    try {
     const clean = (value) =>
       String(value ?? "").replace(/\s+/g, " ").trim();
-    const mainText = document.querySelector("#main")?.innerText ?? "";
+    const mainText = root.querySelector("#main")?.innerText ?? "";
     const match = clean(mainText).match(
       /Search Results\s+([\d,]+)-([\d,]+) of ([\d,]+)/i,
     );
@@ -677,7 +813,7 @@ async function extractPage(page) {
       );
     }
     const cards = [
-      ...document.querySelectorAll(
+      ...root.querySelectorAll(
         "ol.basic-search-results-lists > li.expanded",
       ),
     ];
@@ -742,15 +878,18 @@ async function extractPage(page) {
         total: Number(match[3].replaceAll(",", "")),
         header: match[0],
       },
-      loaded_url: location.href,
+      loaded_url: loadedUrl ?? location.href,
       page_size:
-        document.querySelector(".pageSizeSelect")?.value ?? null,
-      page_sort: document.querySelector("#pageSort")?.value ?? null,
+        root.querySelector(".pageSizeSelect")?.value ?? null,
+      page_sort: root.querySelector("#pageSort")?.value ?? null,
       current_page:
-        document.querySelector("#currentPageNumber")?.value ?? null,
+        root.querySelector("#currentPageNumber")?.value ?? null,
       records,
     };
-  });
+    } finally {
+      container?.remove();
+    }
+  }, { html, loadedUrl });
 }
 
 function normalizeDate(value) {
@@ -820,15 +959,62 @@ function normalizePageRecords(rawRecords, entry, pageNumber, contract) {
   });
 }
 
+class EntryIncompleteError extends Error {}
+class MaxPagesReachedError extends Error {}
+
+// fetch one result page: in-browser fetch (shares the browser's cookies AND TLS
+// fingerprint) in attach mode, plain navigation on the legacy headless path.
+async function fetchResultPage(page, url) {
+  if (!runtime.attach) {
+    await gotoWithRetry(page, url, "ol.basic-search-results-lists");
+    return extractPage(page);
+  }
+  const response = await page.evaluate(async (target) => {
+    const reply = await fetch(target, { credentials: "include" });
+    return { status: reply.status, text: await reply.text() };
+  }, url);
+  const pushback = classifyFetchPushback(response);
+  if (pushback) throw new PushbackError(pushback.kind, { status: pushback.status });
+  if (response.status !== 200) {
+    throw new Error(`Congress.gov returned HTTP ${response.status} for ${url}`);
+  }
+  return extractPage(page, response.text, url);
+}
+
 async function collectEntry({
   page,
   entry,
   contract,
   outDir,
   registryHash,
-  delayMs,
   resume,
+  guarded,
+  gaps,
 }) {
+  // One governed request: rate slot, pushback handling, 3-try cap. A capped page becomes a
+  // gap row and ends this entry (its finished pages stay checkpointed for --resume).
+  const governedRequest = async (label, pageNumber, request) => {
+    const outcome = await governedAttempt({
+      governor: guarded.governor,
+      request: guarded.wrap(request),
+      onChallenge: guarded.onChallenge,
+    });
+    if (outcome.ok) return outcome.value;
+    gaps.push({
+      gap_kind: "page_fetch_retry_cap_exhausted",
+      query_id: entry.id,
+      page_number: pageNumber,
+      request: label,
+      attempts: outcome.attempts,
+      pushback_kind: outcome.error?.kind ?? null,
+      http_status: outcome.error?.status ?? null,
+      disposition: "retry_on_next_resume",
+      explanation:
+        "Congress.gov pushed back on every attempt; the page was not accepted " +
+        "and the query was not marked complete.",
+    });
+    throw new EntryIncompleteError(`${entry.id} ${label}`);
+  };
   const query = buildQuery(entry);
   const queryHash = stableHash({
     query,
@@ -839,7 +1025,9 @@ async function collectEntry({
   const queryDir = path.join(outDir, "raw", "pages", entry.id);
   await fs.mkdir(queryDir, { recursive: true });
 
-  const search = await configureAndSearch(page, entry, contract);
+  const search = await governedRequest("search", 0, () =>
+    configureAndSearch(page, entry, contract),
+  );
   const expectedPageCount = Math.ceil(search.total / PAGE_SIZE);
   console.log(
     `QUERY ${entry.id}: ${search.total} result(s), ${expectedPageCount} page(s)`,
@@ -893,7 +1081,6 @@ async function collectEntry({
     }
 
     if (!pageArtifact) {
-      if (delayMs) await sleep(delayMs);
       let requestedPageUrl;
       let extracted;
       if (search.result_transport === "single_result_redirect") {
@@ -927,12 +1114,9 @@ async function collectEntry({
         pageUrl.searchParams.set("pageSort", PAGE_SORT);
         pageUrl.searchParams.set("page", String(pageNumber));
         requestedPageUrl = pageUrl.href;
-        await gotoWithRetry(
-          page,
-          requestedPageUrl,
-          "ol.basic-search-results-lists",
+        extracted = await governedRequest(`page_${pageNumber}`, pageNumber, () =>
+          fetchResultPage(page, requestedPageUrl),
         );
-        extracted = await extractPage(page);
       }
       const expectedStart = (pageNumber - 1) * PAGE_SIZE + 1;
       const expectedEnd = Math.min(pageNumber * PAGE_SIZE, search.total);
@@ -1455,9 +1639,11 @@ async function main() {
     queries: [],
   };
   await writeJson(partialFile, manifest);
-  const honoredCooldown = await honorAutomaticVerificationCooldown(
-    automaticVerificationStateFile,
-  );
+  // Cross-run cooldown applies to the legacy headless path only; attach mode handles
+  // pushback in-run and sends a failed clearance straight to the GovInfo fallback.
+  const honoredCooldown = args.headless
+    ? await honorAutomaticVerificationCooldown(automaticVerificationStateFile)
+    : null;
   if (honoredCooldown) {
     manifest.automatic_verification_policy.honored_prior_state = {
       observed_at: honoredCooldown.observed_at,
@@ -1467,48 +1653,215 @@ async function main() {
     await writeJson(partialFile, manifest);
   }
 
-  const context = await chromium.launchPersistentContext(args.profile, {
-    executablePath: args.chrome,
-    headless: args.headless,
-    acceptDownloads: false,
-    ignoreDefaultArgs: ["--enable-automation"],
-    args: ["--disable-blink-features=AutomationControlled"],
-    viewport: { width: 1400, height: 900 },
-  });
+  // Resume pass first: completed queries never need a browser.
+  const contract = registry.collection_contract;
+  const completed = new Map();
+  if (args.resume) {
+    for (const entry of entries) {
+      const done = await loadCompletedEntry({ entry, contract, outDir, registryHash });
+      if (done) completed.set(entry.id, done);
+    }
+  }
+  const pending = entries.filter((entry) => !completed.has(entry.id));
 
+  const attach = !args.headless;
+  runtime.attach = attach;
+  runtime.clearanceOptions = {
+    autoMs: args.clearanceAutoMs,
+    humanMs: args.clearanceHumanMs,
+  };
+  let browser = null;
+  let context = null;
+  const workerPages = [];
   try {
-    const page = context.pages()[0] || (await context.newPage());
+    if (pending.length && attach) {
+      const chrome = await ensureChrome({
+        port: args.cdpPort,
+        profile: args.profile,
+        chromePath: args.chrome,
+      });
+      console.log(
+        `Chrome ${chrome.spawned ? "launched" : "reused"} on ${chrome.endpoint}`,
+      );
+      browser = await chromium.connectOverCDP(chrome.endpoint);
+      context = browser.contexts()[0] ?? (await browser.newContext());
+    } else if (pending.length) {
+      context = await chromium.launchPersistentContext(args.profile, {
+        executablePath: args.chrome,
+        headless: true,
+        acceptDownloads: false,
+        viewport: { width: 1400, height: 900 },
+      });
+    }
+
+    // Clearance bookkeeping (metadata only; Chrome's profile persists the cookie itself).
+    const session = {
+      meta: null,
+      lastRefreshAtMs: null,
+      refreshes: 0,
+      clearing: null,
+    };
+    const noteClearance = async () => {
+      const userAgent = await runtime.mainPage.evaluate(() => navigator.userAgent);
+      session.meta = await recordClearance({
+        context,
+        userAgent,
+        profile: args.profile,
+      });
+      session.lastRefreshAtMs = Date.now();
+      manifest.clearance_session = {
+        metadata_file: "%LOCALAPPDATA%/Melange/congress_cf_session.json",
+        harvested_at: session.meta.harvested_at,
+        cf_clearance_present: session.meta.cf_clearance_present,
+        cf_clearance_expires: session.meta.cf_clearance_expires,
+        measured_lifetime_ms: session.meta.measured_lifetime_ms,
+        refreshes: session.refreshes,
+        cookie_value_recorded: false,
+      };
+    };
+    // One shared re-clearance in the MAIN tab; concurrent callers await the same promise.
+    const recoverClearance = () => {
+      session.clearing ??= (async () => {
+        try {
+          await runtime.mainPage.goto(ADVANCED_SEARCH, {
+            waitUntil: "domcontentloaded",
+            timeout: 90_000,
+          });
+          await waitForClearance(runtime.mainPage, {
+            ...runtime.clearanceOptions,
+          });
+          await noteClearance();
+        } finally {
+          session.clearing = null;
+        }
+      })();
+      return session.clearing;
+    };
+    const governor = createGovernor({
+      maxWorkers: args.workers,
+      maxRps: args.maxRps,
+      pauseMs: args.pauseMs,
+      recoverAfter: args.recoverAfter,
+      // ponytail: legacy headless keeps its old 1.5 s pacing unless --delay-ms says otherwise
+      minIntervalMs: args.headless ? args.delayMs || 1500 : args.delayMs,
+    });
+    let pageLoads = 0;
+    const guarded = {
+      governor,
+      onChallenge: recoverClearance,
+      wrap: (request) => async () => {
+        if (
+          attach &&
+          session.meta &&
+          !session.clearing &&
+          clearanceNeedsRefresh(session.meta, Date.now(), args.refreshMarginMs, {
+            keepWarmMs: args.keepWarmMs,
+            lastRefreshAtMs: session.lastRefreshAtMs,
+          })
+        ) {
+          session.refreshes += 1;
+          await recoverClearance();
+        }
+        if (args.maxPages !== null && pageLoads >= args.maxPages) {
+          throw new MaxPagesReachedError(`--max-pages ${args.maxPages} reached`);
+        }
+        pageLoads += 1;
+        return request();
+      },
+    };
+    const gaps = [];
+    const collectedByEntry = new Map(completed);
+    let stoppedAtMaxPages = false;
+
+    if (pending.length) {
+      runtime.mainPage = context.pages()[0] || (await context.newPage());
+      if (attach) {
+        await runtime.mainPage.goto(ADVANCED_SEARCH, {
+          waitUntil: "domcontentloaded",
+          timeout: 90_000,
+        });
+        await waitForClearance(runtime.mainPage, {
+          ...runtime.clearanceOptions,
+        });
+        await noteClearance();
+      } else {
+        workerPages[0] = runtime.mainPage;
+      }
+      const pageForSlot = async (slot) => {
+        if (!workerPages[slot]) workerPages[slot] = await context.newPage();
+        return workerPages[slot];
+      };
+      try {
+        await runPool({
+          items: pending,
+          governor,
+          run: async (entry, slot) => {
+            const page = await pageForSlot(slot);
+            let collected;
+            try {
+              collected = await collectEntry({
+                page,
+                entry,
+                contract,
+                outDir,
+                registryHash,
+                resume: args.resume,
+                guarded,
+                gaps,
+              });
+            } catch (error) {
+              if (error instanceof EntryIncompleteError) return;
+              throw error;
+            }
+            collectedByEntry.set(entry.id, collected);
+            await removeWithRetry(automaticVerificationStateFile).catch(
+              (error) => {
+                if (error.code !== "ENOENT") throw error;
+              },
+            );
+          },
+        });
+      } catch (error) {
+        if (!(error instanceof MaxPagesReachedError)) throw error;
+        stoppedAtMaxPages = true;
+      }
+    }
+
+    manifest.governor = {
+      workers: args.workers,
+      max_rps: args.maxRps,
+      pause_ms: args.pauseMs,
+      pushbacks: governor.pushbackCount,
+      final_active_workers: governor.activeWorkers,
+      live_page_loads: pageLoads,
+    };
+    if (stoppedAtMaxPages || gaps.length) {
+      await writeNdjson(path.join(outDir, "coverage_gap_ledger.ndjson"), gaps);
+    }
+    if (stoppedAtMaxPages) {
+      manifest.status = "stopped_max_pages";
+      manifest.completed_at = isoNow();
+      manifest.completed_query_ids = [...collectedByEntry.keys()];
+      await writeJson(manifestFile, manifest);
+      await removeWithRetry(partialFile);
+      console.log(
+        `STOPPED at --max-pages ${args.maxPages}: ${pageLoads} live page load(s), ` +
+          `${collectedByEntry.size}/${entries.length} query(ies) complete; no union written`,
+      );
+      return;
+    }
+    if (gaps.length) {
+      const error = new Error(
+        `${gaps.length} page(s) exhausted pushback retries; completed queries and ` +
+          "pages are checkpointed, re-run with --resume.",
+      );
+      error.name = "PageRetryCapExhaustedError";
+      throw error;
+    }
+
     const queryResults = [];
     for (const entry of entries) {
-      let collected = null;
-      let liveCollectionPerformed = false;
-      if (args.resume) {
-        collected = await loadCompletedEntry({
-          entry,
-          contract: registry.collection_contract,
-          outDir,
-          registryHash,
-        });
-      }
-      if (!collected) {
-        liveCollectionPerformed = true;
-        collected = await collectEntry({
-          page,
-          entry,
-          contract: registry.collection_contract,
-          outDir,
-          registryHash,
-          delayMs: args.delayMs,
-          resume: args.resume,
-        });
-      }
-      if (liveCollectionPerformed) {
-        await removeWithRetry(automaticVerificationStateFile).catch(
-          (error) => {
-            if (error.code !== "ENOENT") throw error;
-          },
-        );
-      }
+      const collected = collectedByEntry.get(entry.id);
       queryResults.push(collected);
       const artifact = collected.artifact;
       manifest.queries.push({
@@ -1531,14 +1884,8 @@ async function main() {
         records_sha256: artifact.records_sha256,
         validation: artifact.validation,
       });
-      if (
-        liveCollectionPerformed ||
-        manifest.queries.length === entries.length ||
-        manifest.queries.length % 25 === 0
-      ) {
-        await writeJson(partialFile, manifest);
-      }
     }
+    await writeJson(partialFile, manifest);
 
     const union = buildUnion(queryResults);
     const coverage = buildCoverageVisibility(union.records);
@@ -1615,7 +1962,7 @@ async function main() {
         `${union.memberships.length} query membership(s)`,
     );
   } catch (error) {
-    const activePage = context.pages()[0];
+    const activePage = runtime.mainPage ?? context?.pages()[0];
     const failureDebugDir = path.join(outDir, "raw", "failure_debug");
     await fs.mkdir(failureDebugDir, { recursive: true }).catch(() => {});
     const failureStem = `collector_failure_${process.pid}_${Date.now()}`;
@@ -1666,7 +2013,9 @@ async function main() {
         `${failureStem}_automatic_verification.json`,
       );
       await writeJson(immutableTimeoutReceipt, cooldownState);
-      await writeJson(automaticVerificationStateFile, cooldownState);
+      if (args.headless) {
+        await writeJson(automaticVerificationStateFile, cooldownState);
+      }
       manifest.automatic_verification_timeout = {
         classification: "automatic_verification_timeout",
         receipt_file: path
@@ -1708,7 +2057,15 @@ async function main() {
     await writeJson(partialFile, manifest);
     throw error;
   } finally {
-    await context.close();
+    if (browser) {
+      // Disconnect only: the user's Chrome window and profile stay open.
+      for (const tab of workerPages) {
+        if (tab && tab !== runtime.mainPage) await tab.close().catch(() => {});
+      }
+      await browser.close().catch(() => {});
+    } else if (context) {
+      await context.close().catch(() => {});
+    }
     await releaseRunLock(runLock);
   }
 }
