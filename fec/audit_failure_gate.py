@@ -54,6 +54,9 @@ KNOWN_GATED_FAILURES = (
     # branch claude/sentinel-collectors-progress-f7de7d addresses; UN-GATE when that branch is
     # merged and build_press_engine_feed.py rebuilt; the audit check stays live and visible.
     'press refresh feed is hash-bound and keeps official mentions out of stance/speech',
+    # D-330 (Paul, 2026-10-26): attempt 9's collection_intake_receipt is REJECTED (media gate unmet);
+    # tolerated until the media gate passes, then UN-GATE. Its own name, not a broad pattern.
+    'accepted audio manifest is fully partitioned into a candidate-only review intake',
 )
 # DELIBERATELY NOT LISTED (these must keep aborting the refresh AND failing GATE-2):
 #   'own-source channel inputs within 28 days of the corpus (channels are default-ON)'
