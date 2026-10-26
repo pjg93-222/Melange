@@ -76,16 +76,20 @@ function verifyStatus(value,trustValue,identity,accepted,now=Date.now()){
 function fail(message,reason){const error=new Error(message);error.reason=reason;return error;}
 const REASONS=new Set(['unreachable','timeout','refused','identity','trust','invite']);
 function accessFailure(error){return 'access:'+(REASONS.has(error?.reason)?error.reason:'failed');}
-function accessRequest(trustValue,relative,{method='GET',authorization,body,deadlineMs=15000}={}){
+function accessRequest(trustValue,relative,{method='GET',authorization,body,deadlineMs=15000,signal}={}){
  const trust=descriptor(trustValue),origin=new URL(trust.url);
- if(!/^\/v1\/access\/(requests(?:\/[0-9a-f-]{36})?|activate|status|presence|events|update-enrollment)$/.test(relative))return Promise.reject(new Error('Unsupported access operation'));
- if(!Number.isInteger(deadlineMs)||deadlineMs<50||deadlineMs>15000)return Promise.reject(new Error('Invalid access deadline'));
+ const scrape=relative==='/v1/scrape/query';
+ if(scrape){try{require('./scrape-service.cjs').checkedQuery(body);if(method!=='POST'||!/^Bearer [A-Za-z0-9_-]{43,86}$/.test(authorization||''))throw new Error();}catch{return Promise.reject(new Error('Invalid shared collection request'));}}
+ if(!scrape&&!/^\/v1\/access\/(requests(?:\/[0-9a-f-]{36})?|activate|status|presence|events|update-enrollment)$/.test(relative))return Promise.reject(new Error('Unsupported access operation'));
+ if(!Number.isInteger(deadlineMs)||deadlineMs<50||deadlineMs>(scrape?90000:15000))return Promise.reject(new Error('Invalid access deadline'));
  const data=body===undefined?null:Buffer.from(JSON.stringify(body));if(data&&data.length>(relative.endsWith('/events')?65536:16384))return Promise.reject(new Error('Access request too large'));
  if(authorization&&!/^(Request|Bearer) [A-Za-z0-9_-]{43,86}$/.test(authorization))return Promise.reject(new Error('Invalid access authorization'));
  return new Promise((resolve,reject)=>{
   const agent=new https.Agent({keepAlive:false});let request,response,socket,settled=false;
-  const finish=(error,value)=>{if(settled)return;settled=true;clearTimeout(deadline);response?.destroy();request?.destroy();socket?.destroy();agent.destroy();error?reject(error):resolve(value);};
+  const finish=(error,value)=>{if(settled)return;settled=true;clearTimeout(deadline);signal?.removeEventListener('abort',abort);response?.destroy();request?.destroy();socket?.destroy();agent.destroy();error?reject(error):resolve(value);};
+  const abort=()=>finish(fail('Access request cancelled','refused'));
   const deadline=setTimeout(()=>finish(fail('Access request deadline exceeded','timeout')),deadlineMs);
+  signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted){abort();return;}
   agent.createConnection=(_options,callback)=>{
    let completed=false;const done=(error,connection)=>{if(!completed){completed=true;callback(error,connection);}};
    socket=tls.connect({host:origin.hostname,port:Number(origin.port)||443,...(!net.isIP(origin.hostname)?{servername:origin.hostname}:{}),rejectUnauthorized:false});
@@ -102,6 +106,7 @@ function accessRequest(trustValue,relative,{method='GET',authorization,body,dead
    response=incoming;
    if(![200,201].includes(response.statusCode)){
     const error=fail('Access service refused the request','refused');error.statusCode=response.statusCode;
+    if(scrape&&[429,503].includes(response.statusCode)){const retry=response.headers['retry-after'];if(typeof retry==='string'&&/^[0-9]{1,5}$/.test(retry))error.retryAfter=Math.max(1,Math.min(86400,Number(retry)));}
     if(response.statusCode!==403){finish(error);return;}
     // Only a 403 body is read, and only to tell the fixed invite_invalid answer from any other refusal; anything unreadable stays 'refused'.
     let size=0;const chunks=[];
@@ -111,7 +116,7 @@ function accessRequest(trustValue,relative,{method='GET',authorization,body,dead
     return;
    }
    let size=0,ended=false;const chunks=[];
-   response.on('data',part=>{size+=part.length;if(size>16384)finish(new Error('Access response too large'));else chunks.push(part);});
+   response.on('data',part=>{size+=part.length;if(size>(scrape?24*1024**2:16384))finish(new Error('Access response too large'));else chunks.push(part);});
    response.once('aborted',()=>finish(new Error('Access response interrupted')));
    response.once('error',()=>finish(new Error('Access response unavailable')));
    response.once('close',()=>{if(!ended)finish(new Error('Access response interrupted'));});
@@ -204,6 +209,16 @@ class AccessClient{
   return {...structuredClone(expected),appId:this.identity.appId,deviceId:this.identity.deviceId,deviceToken:reply.deviceToken};
  });}
  async reportActivity(events){return this.accessWrite('/v1/access/events',{events});}
+ async scrape(value,{signal}={}){
+  require('./scrape-service.cjs').checkedQuery(value);
+  const accepted=await this.accepted();if(!accepted||accepted.revoked||!['melange','mentat'].includes(accepted.grant.appId))throw new Error('Active collection approval required');
+  const token=(await this.secrets.read('access-token'))?.tokens?.[accepted.grant.grantId];if(!secret(token))throw new Error('Protected collection credential is missing');
+  const reply=await this.request(this.trust,'/v1/scrape/query',{method:'POST',authorization:'Bearer '+token,body:value,deadlineMs:90000,signal});
+  exact(reply,['schemaVersion','provider','raw']);if(reply.schemaVersion!==1||reply.provider!==value.provider)throw new Error('Invalid shared collection response');
+  require('./scrape-service.cjs').checkedResponse(reply);
+  const current=await this.accepted();if(!current||current.revoked||current.grant.grantId!==accepted.grant.grantId)throw new Error('Collection approval changed');
+  return reply;
+ }
  async presence(value){return this.accessWrite('/v1/access/presence',value);}
  async accessWrite(route,body){
   if(!['/v1/access/events','/v1/access/presence'].includes(route))throw new Error('Unsupported activity operation');

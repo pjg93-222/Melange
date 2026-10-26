@@ -6,6 +6,7 @@ from datetime import datetime,timezone
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from paths import ROOT
 from moneyball_core import dump_atomic
+from surfaces.staffer_live_generation import active_generation
 
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -31,13 +32,16 @@ def is_clean_workspace(path):
 def clean_inputs(root):return {name:digest(root/name) for name in CLEAN_INPUTS if (root/name).is_file()}
 
 def clean_workspace_current(root):
-    """True when the alias is the clean workspace shell that its receipt binds to this generation."""
+    """True when the alias is the clean workspace shell that its receipt binds to this generation, and the served workspace
+    generation (data/system/staffer_live_active.json) is the one the receipt recorded: currency is the installed generation id,
+    not the existence of a directory. A tree with no served generation (legacy approved/) matches a receipt that names none."""
     root=Path(root);alias=root/'Moneyball_Redesign.html'
     try:
         receipt=json.loads((root/RECEIPT).read_text(encoding='utf-8'))
         return bool(is_clean_workspace(alias) and receipt.get('mode')==CLEAN_MODE and receipt.get('status')=='PASS'
                     and receipt.get('sha256')==digest(alias) and receipt.get('source_sha256')==digest(root/'Moneyball.html')
-                    and receipt.get('workspace_inputs_sha256')==clean_inputs(root))
+                    and receipt.get('workspace_inputs_sha256')==clean_inputs(root)
+                    and receipt.get('served_generation')==active_generation(root))
     except (OSError,ValueError,AttributeError):return False
 
 def rebuild_clean_workspace(root,source,alias,guard):
@@ -52,6 +56,7 @@ def rebuild_clean_workspace(root,source,alias,guard):
     receipt={'schema':'live-dashboard-alias-v1','status':'PASS','checked_at':datetime.now(timezone.utc).isoformat(),
              'mode':CLEAN_MODE,'source':str(source),'alias':str(alias),'sha256':digest(alias),'previous_alias_sha256':prior,
              'source_sha256':source_hash,'workspace_inputs_sha256':inputs,'builder':str(builder),
+             'served_generation':active_generation(root),
              'prepublication_source_guard':guard['status'] if guard else 'LEGACY_NO_AUTOMATIC_SOURCE'}
     dump_atomic(receipt,str(root/RECEIPT))
     return receipt
@@ -73,7 +78,7 @@ def rebind_after_rebuild(root,before):
     if before.get('source_sha256')!=digest(root/'Moneyball.html') or before.get('workspace_inputs_sha256')!=clean_inputs(root):
         return {'status':'SKIP_GENERATION_CHANGED'}
     receipt=dict(before,checked_at=datetime.now(timezone.utc).isoformat(),sha256=digest(alias),
-                 previous_alias_sha256=before.get('sha256'),
+                 previous_alias_sha256=before.get('sha256'),served_generation=active_generation(root),
                  rebound_by='build_clean_workspace.py: presentation rebuild of the generation this receipt guarded')
     dump_atomic(receipt,str(root/RECEIPT))
     return receipt

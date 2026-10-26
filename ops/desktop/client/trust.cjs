@@ -107,6 +107,9 @@ function verifyEnvelope(envelope,p,identity,previous={}) {
   if(previous.acceptedVersion&&(!semver.valid(previous.acceptedVersion)||semver.lt(m.version,previous.acceptedVersion)))throw new Error('Previously approved version downgrade refused');
   if(!Number.isFinite(Date.parse(m.issuedAt))||Date.parse(m.issuedAt)>Date.now()+300000) throw new Error('Invalid update timestamp');
   if(m.sequence<(previous.sequence||0)||(m.sequence===previous.sequence&&previous.manifestHash!==digest)) throw new Error('Rollback or equivocation refused');
+  // Optional for legacy manifests; when present it is the installer publisher allow-list (native-signature.cjs), and a
+  // manifest without it can still be read but its installer is refused at activation.
+  if(m.publisherThumbprints!==undefined&&(!Array.isArray(m.publisherThumbprints)||m.publisherThumbprints.length<1||m.publisherThumbprints.length>8||!m.publisherThumbprints.every(value=>typeof value==='string'&&/^[0-9A-F]{40}$/.test(value)))) throw new Error('Invalid publisher thumbprints');
   const pkg=m.package;
   if(!pkg||!/^[-A-Za-z0-9_.]+$/.test(pkg.name)||pkg.name==='.'||pkg.name==='..'||!Number.isSafeInteger(pkg.size)||pkg.size<=0||pkg.size>20*1024**3||!/^[a-f0-9]{64}$/.test(pkg.sha256)||Buffer.from(pkg.sha512||'','base64').length!==64) throw new Error('Invalid update package');
   if(pkg.path!=='/v1/packages/'+m.appId+'/'+m.sequence+'/'+pkg.name) throw new Error('Update package path mismatch');

@@ -73,6 +73,16 @@ test('Terrier uses existing sign-in, terminal request UI is explicit, secrets cl
  assert.equal(g.elements['request-form'].hidden,false);assert.equal(g.elements['activation-form'].hidden,true);assert.equal(g.calls.length,1);
  g.elements['display-name'].value='Fixture';g.elements['invite-code'].value='  ABCD-2345-WXYZ-6789  ';g.elements['request-form'].fire('submit');await tick();assert.deepEqual(g.calls.at(-1),{method:'request',args:{displayName:'Fixture',inviteCode:'ABCD-2345-WXYZ-6789'}});other.dispose();
 });
+test('the Terrier owner sees no password or sign-in step and no Lock; Melange/Mentat keep Lock as the way to ask for the password again',async()=>{
+ const t=fixture({appId:'terrier',appName:'Terrier',phase:'ready',accountIdentity:'admin'}),ui=mount(t.document,t.api,t.window);await ui.ready;
+ assert.equal(t.elements['password-form'].hidden,true);assert.equal(t.elements['ready-panel'].hidden,false);assert.equal(t.elements.lock.hidden,true);
+ assert.equal(t.elements.open.textContent,'Open Terrier');assert.match(t.elements.description.textContent,/does not ask for a password/);
+ t.elements.open.fire('click');await tick();assert.equal(t.calls.at(-1).method,'open');ui.dispose();
+ const m=fixture({...base,phase:'ready'}),other=mount(m.document,m.api,m.window);await other.ready;
+ assert.equal(m.elements.lock.hidden,false);assert.match(m.elements.description.textContent,/will not be asked again/);
+ m.elements.lock.fire('click');await tick();assert.equal(m.calls.at(-1).method,'lock');
+ m.push({...base,phase:'locked'});assert.equal(m.elements['password-form'].hidden,false);assert.match(m.elements.description.textContent,/not be asked again on this computer/);other.dispose();
+});
 test('markup has restrictive external-resource CSP and no inline handlers or HTML interpolation',()=>{
  const html=fs.readFileSync(path.join(__dirname,'../access.html'),'utf8'),js=fs.readFileSync(path.join(__dirname,'../access-ui.js'),'utf8');
  for(const directive of ["default-src 'none'","connect-src 'none'","object-src 'none'","frame-src 'none'","form-action 'none'","base-uri 'none'"])assert.ok(html.includes(directive));
@@ -118,4 +128,11 @@ test('a stored pending request with no reply yet is checked once on load; nothin
  assert.deepEqual(await methods({...base,phase:'pending'}),['info','poll']);
  assert.deepEqual(await methods({...base,phase:'pending',requestStatus:'pending',requestExpiresAt:2000000000}),['info']);
  assert.deepEqual(await methods(base),['info']);
+});
+test('the revoked message says district data was removed only when the app reports the store removed',async()=>{
+ for(const [extra,pattern] of [[{},/Your local data remains on this computer/],[{districtDataRemoved:true},/^Access was revoked by the administrator\. District data has been removed from this computer\.$/]]){
+  const f=fixture({...base,appId:'terrier',appName:'Terrier',phase:'revoked',canRequestAgain:true,...extra}),ui=mount(f.document,f.api,f.window);await ui.ready;
+  assert.match(f.elements.description.textContent,pattern);ui.dispose();
+ }
+ assert.throws(()=>validateState({...base,phase:'revoked',canRequestAgain:true,districtDataRemoved:'yes'}));
 });

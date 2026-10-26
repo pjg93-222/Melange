@@ -11,12 +11,19 @@ from desktop_admin import Refused, canonical
 from access_http import unique_object, RateLimit, HTTPRefused, HeaderDeadlineMixin
 from access_store import fields, secret_hash
 from apps_admin import AppsAdmin, AppsError, UnavailableApps
+from desktop_apps_admin import DesktopApps, ROUTES as DESKTOP_ROUTES
 
 STATIC = Path(__file__).with_name('admin_ui_v2')
 CLIENT = Path(__file__).resolve().parent.parent / 'client'
 
 
-APPS_ROUTES = {'/apps', '/apps/detail', '/apps/logs', '/apps/action', '/apps/invite'}
+APPS_ROUTES = {'/apps', '/apps/detail', '/apps/logs', '/apps/action', '/apps/invite', '/apps/docker-start'} | DESKTOP_ROUTES
+# How long the dashboard process serves after its newest open: one session (8 h) plus the 60 s its bootstrap link may wait to be
+# exchanged, so no session outlives it. Every reopen starts the time again (an old window reopened late in the day gets a whole session).
+LIFETIME = 8*3600+60
+# A browser opens several asset connections together. Keep that burst within the bounded worker budget; four
+# connections can otherwise drop app.js before it runs, leaving the page waiting forever for a local session.
+CONNECTION_LIMIT = 16
 
 
 class SessionCapacityReached(Refused):
@@ -75,13 +82,16 @@ class AdminSessions:
                 raise SessionCapacityReached('four protected dashboard sessions are already open')
             session = AdminSession(self.clock)
             self.sessions.append(session)
+            self.end = self.clock()+LIFETIME   # when the server stops, as far as sessions are concerned (the server's timer starts later)
             return session.bootstrap
 
     def exchange(self, value):
         with self.lock:
             for session in self.sessions:
-                try: return session.exchange(value)
-                except Refused: pass
+                try: result = session.exchange(value)
+                except Refused: continue
+                session.expires = min(session.expires, self.end)   # never a session that outlives the server
+                return result
         raise Refused('bootstrap unavailable')
 
     def authenticate(self, authorization, csrf):
@@ -103,10 +113,11 @@ class AdminSessions:
         raise Refused('local session required')
 
 
-def create_server(access, port=0, apps=None):
+def create_server(access, port=0, apps=None, desktop=None):
     if type(port) is not int or (port and not 1024 <= port <= 65535):
         raise Refused('unprivileged local dashboard port required')
     session, limiter = AdminSessions(), RateLimit()
+    desktop = desktop if desktop is not None else DesktopApps()
     try:
         apps = apps if apps is not None else AppsAdmin(audit=access)
     except ValueError:   # bad MELANGE_ADMIN_COMPOSE_* settings must not stop access approvals from working
@@ -122,6 +133,7 @@ def create_server(access, port=0, apps=None):
             pass
 
         def reply(self, status, body, mime='application/json'):
+            self.discard()
             raw = body if isinstance(body, bytes) else canonical(body)
             self.close_connection = True
             try:
@@ -151,13 +163,10 @@ def create_server(access, port=0, apps=None):
                 raise Refused('exact origin required')
             limiter.check(self.client_address[0])
 
-        def body(self):
-            if self.headers.get('Content-Type') != 'application/json':
-                raise Refused('JSON required')
-            size = self.headers.get('Content-Length', '')
-            if not size.isascii() or not size.isdecimal() or not 0 < int(size) <= 4096:
-                raise Refused('bounded body required')
-            deadline, remaining, chunks = time.monotonic()+5, int(size), []
+        consumed = False   # the request body has been read (or reading it has started)
+
+        def read(self, size):
+            deadline, remaining, chunks = time.monotonic()+5, size, []
             while remaining:
                 left = deadline-time.monotonic()
                 if left <= 0: raise TimeoutError()
@@ -165,7 +174,30 @@ def create_server(access, port=0, apps=None):
                 chunk = self.rfile.read1(remaining)
                 if not chunk: raise Refused('incomplete body')
                 chunks.append(chunk); remaining -= len(chunk)
-            value = json.loads(b''.join(chunks).decode('utf-8'), object_pairs_hook=unique_object,
+            return b''.join(chunks)
+
+        def discard(self):
+            """Read and drop a body no route read, within the same bound, before any answer. A refusal decided on the headers
+            alone would otherwise close with the body unread (http.client sends it in a second write), and Windows then resets
+            the connection, which can destroy the answer before the client reads it (WinError 10053). Nothing is decided here."""
+            size = self.headers.get_all('Content-Length', [])
+            size = size[0] if len(size) == 1 else ''
+            if (self.consumed or self.headers.get_all('Transfer-Encoding') or not size.isascii() or not size.isdecimal()
+                    or len(size) > 4 or not 0 < int(size) <= 4096):
+                return   # nothing to read, or nothing it is safe to read: the connection closes as before
+            self.consumed = True
+            try: self.read(int(size))
+            except (Refused, OSError): pass   # a short or stalled body: answer anyway
+            finally: self.connection.settimeout(5)
+
+        def body(self):
+            if self.headers.get('Content-Type') != 'application/json':
+                raise Refused('JSON required')
+            size = self.headers.get('Content-Length', '')
+            if not size.isascii() or not size.isdecimal() or not 0 < int(size) <= 4096:
+                raise Refused('bounded body required')
+            self.consumed = True
+            value = json.loads(self.read(int(size)).decode('utf-8'), object_pairs_hook=unique_object,
                                parse_constant=lambda _value: (_ for _ in ()).throw(ValueError()))
             if not isinstance(value, dict): raise ValueError('JSON object required')
             return value
@@ -212,6 +244,8 @@ def create_server(access, port=0, apps=None):
                 elif self.path == '/deny':
                     fields(value, {'requestId'})
                     access.deny(value['requestId']); result = {'ok':True}
+                elif self.path in DESKTOP_ROUTES:
+                    result = desktop.handle(self.path, value)
                 elif self.path in APPS_ROUTES:
                     result = apps.handle(self.path, value)
                 elif self.path == '/invite-issue':
@@ -245,11 +279,39 @@ def create_server(access, port=0, apps=None):
 
     class LocalServer(ThreadingHTTPServer):
         daemon_threads = True
-        request_queue_size = 4
+        request_queue_size = CONNECTION_LIMIT
+
+        make_timer = threading.Timer   # tests swap in a recording timer
 
         def __init__(self):
-            self.slots = threading.BoundedSemaphore(4)
+            self.slots = threading.BoundedSemaphore(CONNECTION_LIMIT)
+            self.lifetime, self.lifetime_lock, self.closed = None, threading.Lock(), False   # closed: the shutdown timer fired or the server closed
             super().__init__(('127.0.0.1', port), Handler)
+
+        def arm(self):
+            """Stop serving LIFETIME from now, replacing any earlier time: when serving starts and on every reopen, so a window
+            that is reopened late in the day is not cut off by the timer of the first open. Expired sessions must not leave a
+            permanent listener. Refused once it has ended, so a reopen racing the shutdown is answered BUSY rather than given a closed port
+            (a plain Refused: SessionCapacityReached would tell the reopen that four sessions are open)."""
+            with self.lifetime_lock:
+                if self.closed: raise Refused('the dashboard has ended')
+                if self.lifetime: self.lifetime.cancel()
+                timer = self.make_timer(LIFETIME, lambda: self.expire(timer))
+                timer.daemon = True
+                self.lifetime = timer
+                timer.start()
+
+        def expire(self, timer=None):
+            """Stop serving. From a timer, only while it is still the current one: cancel() cannot stop a timer that has already
+            fired and is waiting for the lock a reopen holds, and that reopen's window must keep its dashboard."""
+            with self.lifetime_lock:
+                if timer is not None and timer is not self.lifetime: return
+                self.closed = True
+            self.shutdown()
+
+        def serve_forever(self, *args, **kwargs):
+            self.arm()
+            super().serve_forever(*args, **kwargs)
 
         def process_request(self, request, address):
             if address[0] != '127.0.0.1' or not self.slots.acquire(blocking=False):
@@ -264,8 +326,17 @@ def create_server(access, port=0, apps=None):
 
         def server_close(self):
             try: apps.shutdown()   # actions still running are written to the activity log as interrupted
-            finally: super().server_close()
+            finally:
+                with self.lifetime_lock:
+                    self.closed = True
+                    if self.lifetime: self.lifetime.cancel()
+                super().server_close()
 
     server = LocalServer()
-    server.fresh_bootstrap_url = lambda: f'http://127.0.0.1:{server.server_port}/#bootstrap={session.new_bootstrap()}'
+
+    def fresh_bootstrap_url():
+        bootstrap = session.new_bootstrap()   # refuses at four open sessions, before anything is re-armed
+        server.arm()
+        return f'http://127.0.0.1:{server.server_port}/#bootstrap={bootstrap}'
+    server.fresh_bootstrap_url = fresh_bootstrap_url
     return server, f'http://127.0.0.1:{server.server_port}/#bootstrap={session.bootstrap}'

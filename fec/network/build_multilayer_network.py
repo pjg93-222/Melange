@@ -2,7 +2,7 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))));from paths import ROOT as MB_ROOT,today  # centralized root (arch review 2026-07-02)
 """MULTILAYER NETWORK BUILDER — integrates the press-derived layers into the live cascade network.
 
-Writes `congress_cosponsor_network_AUG<date>.xlsx` in the exact Edges format the NINE existing loaders
+Writes `congress_cosponsor_network_AUG<YYYYMMDD_HHMMSS>.xlsx` in the exact Edges format the NINE existing loaders
 glob by mtime (`congress_cosponsor_network_*.xlsx`) — so the augmented graph goes live pipeline-wide with
 ZERO loader changes, and REVERT = delete the AUG file (the original xlsx is never touched).
 
@@ -92,7 +92,7 @@ elif CFG=='holistic_norm':
 else:
     srcs=glob.glob(os.path.join(B, 'holistic_network_BASE_*.xlsx'))
     if not srcs: raise SystemExit('NET_CONFIG=holistic: no holistic_network_BASE_*.xlsx at root (fail-closed; the augmenter never bases on the CU family in holistic mode)')
-src=max(srcs,key=os.path.getmtime)
+import source_select; src=source_select.select_network(srcs,'exclude',root=B) if CFG=='cu' else max(srcs,key=os.path.getmtime)  # holistic families stay mtime (out of SEL scope)
 ws=openpyxl.load_workbook(src,data_only=True)['Edges']
 edges={}; deg=collections.Counter()
 _drop=cu_dropped_sponsors(src); dropped_misattributed=0   # CU_IDENTITY_FIX (decision G 2026-10-11)
@@ -192,7 +192,7 @@ if HOL:
         if admit(k,'coappear',w): newcoap+=1
 # 5) write the augmented workbook (Edges sheet = loader contract; Provenance sheet = audit trail)
 if CFG=='cu':
-    out=os.environ.get('AUG_OUT',os.path.join(B, 'congress_cosponsor_network_AUG%s.xlsx'%today().strftime('%Y%m%d')))
+    out=os.environ.get('AUG_OUT',os.path.join(B, 'congress_cosponsor_network_AUG%s_%s.xlsx'%(today().strftime('%Y%m%d'),__import__('datetime').datetime.now().strftime('%H%M%S'))))
 else:
     _pfx='holistic_network_NORM_' if CFG=='holistic_norm' else 'holistic_network_AUG_'
     out=os.environ.get('AUG_OUT',os.path.join(B,_pfx+today().strftime('%Y%m%d')+'.xlsx'))

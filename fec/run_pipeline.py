@@ -704,6 +704,9 @@ def main(argv=None):
         preflight_dependencies()
         with pipeline_run_lock(), _ctx.transaction(MB_ROOT,run_id=_GB_RUN,argv=forwarded,emit=_gb,
                                                    emit_kw={'run_id':_GB_RUN,'correlation_id':_GB_CORR}) as txn:
+            # Served staffer-live generations are named after this run (fec/surfaces/staffer_live_generation.py RUN_ID_ENV),
+            # so a generation directory can be traced to the chain transaction journal that covers its pointer flip.
+            os.environ['MELANGE_CHAIN_RUN_ID']=str(_GB_RUN)
             if txn.recovered and first>0:
                 print('WARNING: a previous run never finalized its chain transaction and was rolled back (%s); this --from run '
                       'starts from the restored (earlier) vintage, so steps before %r are NOT from the run you are resuming.'

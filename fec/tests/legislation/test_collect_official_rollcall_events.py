@@ -2,11 +2,14 @@
 """Offline fixture contracts for staged official roll-call ingestion."""
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 FEC = Path(__file__).resolve().parents[2]
@@ -306,6 +309,57 @@ class OfficialRollcallFixtureTests(unittest.TestCase):
                     name,
                 )
 
+    def test_install_then_publish_carries_the_collectors_own_output(self):
+        with tempfile.TemporaryDirectory() as raw:
+            base = Path(raw)
+            key = RC.MeasureKey(119, "hr", 1)
+            run = FixtureRun(
+                base,
+                [accepted_row("119:hr:1", "CU Tax Status", direction=1)],
+                {
+                    RC.actions_endpoint(key): actions_payload(
+                        "House", HOUSE_URL, 5, "Passed House by Yea-Nay Vote."
+                    ),
+                    HOUSE_URL: house_xml(),
+                },
+            )
+            root = base / "workspace"  # staging must sit outside the data root
+            root.mkdir()
+            config = base / "publish.json"
+            config.write_text(json.dumps({
+                "transport": {"kind": "local", "root": str(base / "remote")},
+                "stagingRoot": str(base / "stagings"),
+            }), encoding="utf-8")
+
+            def main(out, *extra):
+                return RC.main([
+                    "--accepted", str(run.accepted), "--out", str(base / out),
+                    "--fixture-manifest", str(run.fixtures),
+                    "--workspace-root", str(root), *extra,
+                ])
+
+            with patch.dict(os.environ, {"MELANGE_GENERATION_PUBLISH": str(config)}):
+                # Publishing without installing would seal whatever older copy sits in the data root.
+                self.assertEqual(3, main("audit-no-install"))
+                self.assertFalse((root / RC.INSTALL_DIR).exists())
+                self.assertFalse((base / "stagings").exists())
+                self.assertEqual(0, main("audit-install", "--install"))
+            out = base / "audit-install"
+            installed = root / RC.INSTALL_DIR
+            for name in (*RC.OUTPUT_NAMES, "manifest.json"):
+                self.assertEqual((out / name).read_bytes(), (installed / name).read_bytes(), name)
+            self.assertFalse(list(installed.glob("*.part")))
+            self.assertFalse(list(root.rglob("vote_category_lean.json")))
+            staging = next((base / "stagings").iterdir())
+            index = json.loads((staging / "index.json").read_bytes())
+            entry = index["modules"]["melange.official-rollcall-member-votes.v1"]["partitions"][""]
+            votes = (installed / "official_rollcall_member_votes.ndjson").read_bytes()
+            self.assertEqual(hashlib.sha256(votes).hexdigest(), entry["sha256"])
+            self.assertEqual(
+                votes, b"".join((base / "remote" / page["asset"]).read_bytes() for page in entry["pages"])
+            )
+            self.assertEqual(7, len(index["modules"]))
+
     def test_senate_official_association_uses_lis_to_bioguide_mapping(self):
         with tempfile.TemporaryDirectory() as raw:
             base = Path(raw)
@@ -430,6 +484,26 @@ class OfficialRollcallFixtureTests(unittest.TestCase):
                     "selected_source_counts"
                 ],
             )
+
+    def test_broker_refusal_is_a_per_measure_blocker_and_main_exits_2(self):
+        import scrape_client
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as raw:
+            base = Path(raw)
+            accepted = base / "accepted.ndjson"
+            write_ndjson(accepted, [accepted_row("119:hamdt:1", "Payments", direction=1)])
+            out = base / "audit-broker"
+            with mock.patch.object(scrape_client, "available", return_value=True), \
+                 mock.patch.object(scrape_client, "fetch_raw_url", side_effect=scrape_client.ScrapeBrokerError(429, 30)), \
+                 mock.patch("urllib.request.urlopen", side_effect=AssertionError("direct request")):
+                manifest = RC.collect(accepted_path=accepted, out_path=out, workspace_root=base)
+            self.assertFalse(manifest["acceptance_passed"])
+            match = read_ndjson(out / "rollcall_measure_match_audit.ndjson")[0]
+            self.assertEqual("ambiguous", match["disposition"])
+            self.assertIn("Shared collection is unavailable", match["error"])
+            self.assertIn("119:hamdt:1:official_actions_fetch_failed", manifest["blocking_issues"])
+        with mock.patch.object(RC, "collect", side_effect=scrape_client.ScrapeBrokerError()):
+            self.assertEqual(2, RC.main(["--accepted", "a.ndjson", "--out", "audit-x"]))
 
     def test_type_aware_identity_collision_is_unmatched_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as raw:

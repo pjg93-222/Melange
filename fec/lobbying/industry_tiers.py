@@ -1035,7 +1035,7 @@ def main():
     try:
         tags = primacy_factors.load_tags(files[TAGS_PATH])
         from legislation import sentinel_admissions as SA
-        tags = SA.effective_tags(tags, SA.load(MB_ROOT))
+        tags = SA.effective_tags(tags, SA.load(MB_ROOT), MB_ROOT)
     except (OSError, KeyError, TypeError, ValueError) as exc:
         raise IndustryTiersError(
             "cannot load beneficiary tags %s: %s" % (files[TAGS_PATH], exc)

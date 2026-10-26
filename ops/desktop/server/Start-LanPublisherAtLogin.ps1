@@ -1,3 +1,14 @@
+# Login supervisor for the desktop update/access publisher and its tray notifier.
+# Exit codes: 0 only when another supervisor for this Windows user already holds the mutex (this one stands down);
+# 1 on any terminating error (bad arguments or state, a failed publisher start, an exception in the loop).
+# There is no in-script stop. To stop it, Disable-ScheduledTask then Stop-ScheduledTask MelangeDesktopPublisher (a stop alone
+# is undone by the next repetition); to restart, Stop-ScheduledTask then Start-ScheduledTask.
+# Task Scheduler's restart-on-failure setting does not restart a task whose action merely exits non-zero, so the
+# MelangeDesktopPublisher task (Register-LanPublisherStartup.ps1) also repeats every minute with IgnoreNew: a new
+# instance starts only when this one is gone, however it ended. Read exit codes in supervisor.log: while this runs,
+# each skipped repetition sets the task's Last Run Result to 0x800710E0.
+# Logs in the state directory: supervisor.log (this script), publisher.log/.err and notifier.log/.err (child
+# stdout/stderr). Every line is timestamped and masked for credentials; each file rotates to <name>.1 above 10 MB.
 [CmdletBinding(DefaultParameterSetName = 'Lan')]
 param(
     [Parameter(Mandatory = $true, ParameterSetName = 'Lan')][string]$ListenIPAddress,
@@ -9,6 +20,56 @@ param(
     [ValidateRange(1024, 65535)][int]$Port = 38443
 )
 $ErrorActionPreference = 'Stop'
+$logSource = @'
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+public static class MelangeLog {
+    const long Limit = 10L * 1024 * 1024;
+    static readonly object Gate = new object();
+    // Credentials the access server creates are token_urlsafe values (43+ characters) or named key=value/bearer fields.
+    static readonly Regex Secret = new Regex(@"(?i)\b(bearer\s+|(?:bootstrap|token|code|invite|key|secret|password|credential|authorization)\w*[""']?\s*[:=]\s*[""']?)[^\s""',;&]+|[A-Za-z0-9_\-]{32,}");
+    public static string Mask(string line) {
+        return Secret.Replace(line, m => m.Groups[1].Success ? m.Groups[1].Value + "[masked]" : "[masked]");
+    }
+    public static void Append(string path, string line) {
+        try {
+            lock (Gate) {
+                var info = new FileInfo(path);
+                if (info.Exists && info.Length > Limit) File.Move(path, path + ".1", true);
+                File.AppendAllText(path, DateTime.UtcNow.ToString("o") + " " + Mask(line) + Environment.NewLine);
+            }
+        } catch { }  // A full disk or locked log must never end supervision or stop a pipe from draining.
+    }
+    // The .NET process-exit event also fires under pwsh -File, where PowerShell.Exiting engine events never do.
+    // It records how a normal exit ended even if a finally block was skipped; a killed process logs nothing.
+    public static void LogProcessExit(string path) {
+        int pid = Environment.ProcessId;
+        AppDomain.CurrentDomain.ProcessExit += (sender, e) => Append(path, "[" + pid + "] process exiting with code " + Environment.ExitCode);
+    }
+    // Drains a child's redirected stream on a background thread until the child (and any inheritor) closes it;
+    // an undrained pipe would block the child. The caller joins the thread before exiting so final lines are kept.
+    public static Thread Pump(StreamReader reader, string path) {
+        var thread = new Thread(() => { try { string line; while ((line = reader.ReadLine()) != null) Append(path, line); } catch { } });
+        thread.IsBackground = true;
+        thread.Start();
+        return thread;
+    }
+}
+'@
+$supervisorLog = Join-Path $StateDirectory 'supervisor.log'
+function Write-SupervisorLog([string]$Message) {
+    try { [MelangeLog]::Append($supervisorLog, ('[' + $PID + '] ' + $Message)) } catch { }
+}
+trap {
+    Write-SupervisorLog ('terminating error: ' + $_.Exception.Message + ' | ' + ($_.ScriptStackTrace -replace '\r?\n', ' <- '))
+    Write-SupervisorLog 'exiting with code 1'
+    exit 1
+}
+Add-Type -TypeDefinition $logSource
+[MelangeLog]::LogProcessExit($supervisorLog)
+Write-SupervisorLog ('start: pwsh ' + $PSVersionTable.PSVersion + ' ' + (($PSBoundParameters.GetEnumerator() | ForEach-Object { '-' + $_.Key + ' ' + $_.Value }) -join ' '))
 if ($PublicOrigin -and $Port -ne 38443) {
     throw 'PublicOrigin mode listens on 127.0.0.1:38443, the only local port relay_tunnel.py forwards to.'
 }
@@ -25,10 +86,13 @@ $mutex = [Threading.Mutex]::new($false, ('Local\MelangeDesktopPublisher-' + $ide
 $publisherProcess = $null
 $notifierProcess = $null
 $publisherJob = $null
+$pumps = [Collections.Generic.List[Threading.Thread]]::new()
+$exitCode = 1
 $stateDirectory = (Get-Item -LiteralPath $StateDirectory -ErrorAction Stop).FullName
 $statusFile = Join-Path $stateDirectory 'listener-status.json'
 $launchScript = Join-Path $PSScriptRoot 'Start-LanPublisher.ps1'
 $serverScript = Join-Path $PSScriptRoot 'desktop_admin.py'
+$notifierScript = Join-Path $PSScriptRoot 'Start-AccessNotifier.ps1'
 if (-not (Test-Path -LiteralPath (Join-Path $stateDirectory 'trust.json'))) {
     throw 'Initialize the protected publisher state before enabling login startup.'
 }
@@ -52,14 +116,69 @@ function Get-InviteRequired {
 }
 function Write-ListenerStatus([string]$Status) {
     # Fixed status values only: never write enrollment codes, credentials or request data.
-    $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null }; inviteRequired = Get-InviteRequired }
+    # Start-AccessNotifier.ps1 writes no status file of its own; this is its only liveness record.
+    $record = [ordered]@{ status = $Status; checkedAt = [DateTime]::UtcNow.ToString('o'); supervisorPid = $PID; publisherPid = if ($publisherProcess) { $publisherProcess.Id } else { $null }
+        notifierPid = if ($notifierProcess) { $notifierProcess.Id } else { $null }; inviteRequired = Get-InviteRequired }
     $temporary = $statusFile + '.' + $PID + '.tmp'
-    [IO.File]::WriteAllText($temporary, ($record | ConvertTo-Json))
-    [IO.File]::Move($temporary, $statusFile, $true)
+    try {
+        [IO.File]::WriteAllText($temporary, ($record | ConvertTo-Json))
+        [IO.File]::Move($temporary, $statusFile, $true)
+    } catch {
+        # A reader holding listener-status.json makes the replace fail (access denied). That must not end
+        # supervision and take the publisher down with it; the next pass writes the status again.
+        Write-SupervisorLog ('status write failed: ' + $_.Exception.Message)
+        try { [IO.File]::Delete($temporary) } catch { }
+    }
+}
+function Start-LoggedChild([string]$Name, [string]$Executable, [string[]]$Arguments) {
+    # The child's stdout/stderr go to <Name>.log/.err in the state directory through MelangeLog (masked, rotated).
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = $Executable
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    foreach ($argument in $Arguments) { $start.ArgumentList.Add($argument) }
+    $process = [Diagnostics.Process]::Start($start)
+    foreach ($done in @($pumps | Where-Object { -not $_.IsAlive })) { [void]$pumps.Remove($done) }
+    try {
+        $pumps.Add([MelangeLog]::Pump($process.StandardOutput, (Join-Path $stateDirectory ($Name + '.log'))))
+        $pumps.Add([MelangeLog]::Pump($process.StandardError, (Join-Path $stateDirectory ($Name + '.err'))))
+        [MelangePublisherJob]::Assign($publisherJob, $process)
+    } catch {
+        # A child outside the job, or one whose output nobody drains, would outlive the supervisor or block.
+        try { $process.Kill($true) } catch { }
+        $process.Dispose()
+        throw
+    }
+    Write-SupervisorLog ('started ' + $Name + ' pid ' + $process.Id + ': ' + $Executable + ' ' + ($Arguments -join ' '))
+    return $process
+}
+function Test-ChildExited([string]$Name, $Process) {
+    # True once the child has exited: logs its exit code and disposes the handle.
+    if (-not $Process.HasExited) { return $false }
+    Write-SupervisorLog ($Name + ' pid ' + $Process.Id + ' exited with code ' + $Process.ExitCode)
+    $Process.Dispose()
+    return $true
+}
+function Start-AccessNotifierProcess([string]$Executable) {
+    # A failed tray must not end this loop: the supervisor's exit closes the job and takes the
+    # publisher down with it. Return $null so the status records notifierPid null and the next pass retries.
+    # Start-LoggedChild stops a started notifier it could not put in the job, so none outlives the supervisor.
+    try {
+        return Start-LoggedChild 'notifier' $Executable @('-NoProfile','-NonInteractive','-STA','-WindowStyle','Hidden','-File', $notifierScript, '-PythonExecutable',$PythonExecutable,'-StateDirectory',$stateDirectory)
+    } catch {
+        Write-SupervisorLog ('notifier start failed: ' + $_.Exception.Message)
+        return $null
+    }
 }
 try {
     try { $ownedMutex = $mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $ownedMutex = $true }
-    if (-not $ownedMutex) { exit 0 }
+    if (-not $ownedMutex) {
+        Write-SupervisorLog 'another supervisor for this user holds the mutex; standing down'
+        $exitCode = 0
+        exit 0
+    }
     # Closing this OS handle kills only children explicitly assigned to this job,
     # including when the supervisor crashes or is terminated without its finally block.
     Add-Type -TypeDefinition @'
@@ -109,19 +228,9 @@ public static class MelangePublisherJob {
     while ($true) {
         # The local tray works independently of LAN reachability and app windows.
         # Its own SID mutex prevents duplicate notifiers after supervisor restart.
-        if ($notifierProcess -and $notifierProcess.HasExited) {
-            $notifierProcess.Dispose(); $notifierProcess = $null
-        }
+        if ($notifierProcess -and (Test-ChildExited 'notifier' $notifierProcess)) { $notifierProcess = $null }
         if (-not $notifierProcess -and (Test-Path -LiteralPath (Join-Path $stateDirectory 'access.sqlite3'))) {
-            $notifierStart = [Diagnostics.ProcessStartInfo]::new()
-            $notifierStart.FileName = (Get-Process -Id $PID).Path
-            $notifierStart.UseShellExecute = $false
-            $notifierStart.CreateNoWindow = $true
-            foreach ($argument in @('-NoProfile','-NonInteractive','-STA','-WindowStyle','Hidden','-File', (Join-Path $PSScriptRoot 'Start-AccessNotifier.ps1'), '-PythonExecutable',$PythonExecutable,'-StateDirectory',$stateDirectory)) {
-                $notifierStart.ArgumentList.Add($argument)
-            }
-            $notifierProcess = [Diagnostics.Process]::Start($notifierStart)
-            [MelangePublisherJob]::Assign($publisherJob, $notifierProcess)
+            $notifierProcess = Start-AccessNotifierProcess (Get-Process -Id $PID).Path
         }
         $networkReady = $false
         try {
@@ -135,12 +244,10 @@ public static class MelangePublisherJob {
         } catch {
             $networkReady = $false
         }
-        if ($publisherProcess -and $publisherProcess.HasExited) {
-            $publisherProcess.Dispose()
-            $publisherProcess = $null
-        }
+        if ($publisherProcess -and (Test-ChildExited 'publisher' $publisherProcess)) { $publisherProcess = $null }
         if (-not $networkReady) {
             if ($publisherProcess) {
+                Write-SupervisorLog ('stopping publisher pid ' + $publisherProcess.Id + ': approved LAN unavailable')
                 $publisherProcess.Kill($true)
                 $publisherProcess.WaitForExit()
                 $publisherProcess.Dispose()
@@ -148,29 +255,36 @@ public static class MelangePublisherJob {
             }
             Write-ListenerStatus 'waiting-for-approved-lan'
         } elseif (-not $publisherProcess) {
-            $start = [Diagnostics.ProcessStartInfo]::new()
-            $start.FileName = $PythonExecutable
-            $start.UseShellExecute = $false
-            $start.CreateNoWindow = $true
-            foreach ($argument in $serverArguments) {
-                $start.ArgumentList.Add($argument)
-            }
-            $publisherProcess = [Diagnostics.Process]::Start($start)
-            [MelangePublisherJob]::Assign($publisherJob, $publisherProcess)
+            $publisherProcess = Start-LoggedChild 'publisher' $PythonExecutable $serverArguments
             Write-ListenerStatus 'starting'
         } else {
             Write-ListenerStatus 'running'
         }
         Start-Sleep -Seconds 30
     }
+} catch {
+    Write-SupervisorLog ('terminating error: ' + $_.Exception.Message + ' | ' + ($_.ScriptStackTrace -replace '\r?\n', ' <- '))
+    $exitCode = 1
 } finally {
     if ($publisherJob) { $publisherJob.Dispose() }
-    if ($publisherProcess -and -not $publisherProcess.HasExited) {
-        $publisherProcess.Kill($true)
-        $publisherProcess.WaitForExit()
-    }
+    try {
+        if ($publisherProcess -and -not $publisherProcess.HasExited) {
+            $publisherProcess.Kill($true)
+            $publisherProcess.WaitForExit()
+        }
+    } catch { }
     if ($publisherProcess) { $publisherProcess.Dispose() }
     if ($notifierProcess) { $notifierProcess.Dispose() }
+    # The job is closed, so every child has ended and its pipes reach end of file: let the drains write the last
+    # lines, but never hold the exit for more than three seconds.
+    $drainUntil = [DateTime]::UtcNow.AddSeconds(3)
+    foreach ($pump in $pumps) {
+        $left = [int]($drainUntil - [DateTime]::UtcNow).TotalMilliseconds
+        if ($left -le 0) { break }
+        [void]$pump.Join($left)
+    }
     if ($ownedMutex) { $mutex.ReleaseMutex() }
     $mutex.Dispose()
+    Write-SupervisorLog ('exiting with code ' + $exitCode)
 }
+exit $exitCode

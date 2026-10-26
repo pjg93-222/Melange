@@ -41,6 +41,10 @@ TARGETS = {("win32", "x64"), ("darwin", "arm64"), ("darwin", "x64")}
 VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,180}$")
 GATES = {"tests", "security", "dependencies", "redistribution", "dataAllowlist"}
+# Windows installer publisher allow-list, carried inside every Ed25519-signed manifest as publisherThumbprints and
+# checked by the desktop client against the installer signer (ops/desktop/client/native-signature.cjs). Rotation:
+# add the new certificate thumbprint here, ship releases signed by either, then remove the old one.
+PUBLISHER_THUMBPRINTS = ("0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30",)
 PRIVATE_NETWORKS = tuple(ipaddress.ip_network(s) for s in
                          ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "::1/128"))
 
@@ -144,6 +148,19 @@ def protect(data: bytes, decrypt=False):
         ctypes.windll.kernel32.LocalFree(ctypes.cast(output.data, ctypes.c_void_p))
 
 
+def replace_file(source, destination):
+    for wait in (0.05, 0.1, 0.2, 0.4, 0.8, None):
+        try:
+            os.replace(source, destination)
+            break
+        except PermissionError:
+            # Windows refuses the replace while antivirus or the indexer briefly holds the destination open (WinError 5):
+            # wait up to about 1.5 s in all, then raise. Elsewhere it is a real permission error, raised at once.
+            if os.name != "nt" or wait is None:
+                raise
+            time.sleep(wait)
+
+
 def atomic_write(path, data, secret=False):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -155,9 +172,18 @@ def atomic_write(path, data, secret=False):
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        replace_file(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def protect_directory(path):
+    """Owner and SYSTEM only, inherited entries removed (Windows); 0700 elsewhere. Files created inside inherit it."""
+    if os.name == "nt":
+        identity = subprocess.check_output(["whoami"], text=True).strip()
+        subprocess.run(["icacls", str(path), "/inheritance:r", "/grant:r", f"{identity}:(OI)(CI)F", "SYSTEM:(OI)(CI)F"], check=True, capture_output=True)
+    else:
+        os.chmod(path, 0o700)
 
 
 def file_hashes(path):
@@ -218,6 +244,11 @@ def validate_manifest(manifest):
         raise Refused("invalid package hash")
     if len(unb64(package.get("sha512", ""))) != 64:
         raise Refused("invalid package checksum")
+    thumbprints = manifest.get("publisherThumbprints")
+    # Optional so legacy signed manifests stay readable; clients refuse to install a package without it.
+    if thumbprints is not None and (type(thumbprints) is not list or not 1 <= len(thumbprints) <= 8 or
+                                    not all(type(value) is str and re.fullmatch(r"[0-9A-F]{40}", value) for value in thumbprints)):
+        raise Refused("invalid publisher thumbprints")
 
 
 class Store:
@@ -253,11 +284,7 @@ class Store:
         if self.db.exists() or self.config_path.exists():
             raise Refused("publisher already initialized; existing keys will not be replaced")
         self.root.mkdir(parents=True, exist_ok=True)
-        if os.name == "nt":
-            identity = subprocess.check_output(["whoami"], text=True).strip()
-            subprocess.run(["icacls", str(self.root), "/inheritance:r", "/grant:r", f"{identity}:(OI)(CI)F", "SYSTEM:(OI)(CI)F"], check=True, capture_output=True)
-        else:
-            os.chmod(self.root, 0o700)
+        protect_directory(self.root)
         keys = {}
         for app in sorted(APPS):
             key = ed25519.Ed25519PrivateKey.generate()
@@ -471,12 +498,15 @@ class Store:
                 raise Refused("pinned Windows publisher identity is not configured")
             # Pass paths through environment, never interpolate them into shell source.
             env = dict(os.environ, DESKTOP_VERIFY_PACKAGE=str(package))
-            command = "$s=Get-AuthenticodeSignature -LiteralPath $env:DESKTOP_VERIFY_PACKAGE; @{Status=[string]$s.Status;Subject=$s.SignerCertificate.Subject}|ConvertTo-Json -Compress"
+            command = "$s=Get-AuthenticodeSignature -LiteralPath $env:DESKTOP_VERIFY_PACKAGE; @{Status=[string]$s.Status;Subject=$s.SignerCertificate.Subject;Thumbprint=$s.SignerCertificate.Thumbprint}|ConvertTo-Json -Compress"
             result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command], env=env,
                                     capture_output=True, text=True, timeout=60, check=True)
             signature = json.loads(result.stdout)
             if signature.get("Status") != "Valid" or signature.get("Subject") != config["windowsPublisher"]:
                 raise Refused("package is not signed by the pinned Windows publisher")
+            # Every client refuses an installer whose signer is not in the signed allow-list; refuse to publish one.
+            if str(signature.get("Thumbprint") or "").upper() not in (manifest.get("publisherThumbprints") or ()):
+                raise Refused("package signer thumbprint is not in the manifest's publisher allow-list")
         else:
             public = config.get("macReceiptPublicKey")
             attestation = receipt.get("macAttestation")
@@ -499,6 +529,7 @@ class Store:
             raise Refused("update payload must be a Windows installer or Mac application ZIP")
         manifest = {"schemaVersion": 1, "appId": app, "version": version, "sequence": sequence, "platform": platform, "arch": arch,
                     "issuedAt": dt.datetime.now(dt.timezone.utc).isoformat(), "minimumUpdaterVersion": "1.0.0", "dataSchemaVersion": 1,
+                    **({"publisherThumbprints": list(PUBLISHER_THUMBPRINTS)} if platform == "win32" else {}),
                     "package": {"name": source.name, **file_hashes(source), "path": f"/v1/packages/{app}/{sequence}/{source.name}"}}
         validate_manifest(manifest)
         recipients = sorted(set(recipients))
@@ -529,7 +560,7 @@ class Store:
                     if not connection.execute("SELECT 1 FROM devices WHERE app=? AND device_id=? AND revoked=0 AND platform=? AND arch=?",
                                               (app, recipient, platform, arch)).fetchone():
                         raise Refused("recipient is unknown, revoked, or targets another platform")
-                os.replace(temporary, destination)
+                replace_file(temporary, destination)
                 connection.execute("INSERT INTO releases VALUES (?,?,?,?,?,?,?,?,0)",
                                    (app, platform, arch, sequence, version, canonical(envelope).decode(), str(destination.relative_to(self.root)), json.dumps(recipients)))
                 self.audit(connection, "release-published", app, detail=f"{version}/{sequence}/{platform}/{arch}")
@@ -548,7 +579,7 @@ class Store:
         return context
 
 
-def handler_for(store, require_invite=False):
+def handler_for(store, require_invite=False, packs=None, scrape_broker=None):
     class Handler(BaseHTTPRequestHandler):
         server_version = "DesktopUpdates/1"
         publisher_public_origin = store.public_origin
@@ -671,16 +702,21 @@ def handler_for(store, require_invite=False):
                 self.response(500, {"error": "INTERNAL_ERROR"})
     from access_store import AccessStore
     from access_http import handler_for as access_handler_for
-    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler)
+    if scrape_broker is None:
+        from scrape_broker import from_environment
+        scrape_broker = from_environment(store.root)
+    return access_handler_for(AccessStore(store, require_invite=require_invite), Handler, packs, scrape_broker)
 
 
 class BoundedServer(ThreadingHTTPServer):
-    """Bounded clients, including TLS handshakes; one stalled peer cannot block acceptance."""
+    """Bounded workers, including TLS handshakes. A connection that arrives while every worker is busy
+    waits up to SLOT_WAIT seconds for one instead of being dropped; later ones wait in the listen backlog."""
     daemon_threads = True
-    request_queue_size = 16
+    request_queue_size = 128
+    SLOT_WAIT = 15
 
     def __init__(self, address, handler, tls_context, *, public_origin=None):
-        self.slots = threading.BoundedSemaphore(16)
+        self.slots = threading.BoundedSemaphore(32)
         self.tls_context = tls_context
         self.public_origin = https_origin(public_origin, allow_public=True) if public_origin is not None else None
         if self.public_origin != getattr(handler, 'publisher_public_origin', None):
@@ -688,7 +724,7 @@ class BoundedServer(ThreadingHTTPServer):
         super().__init__(address, handler)
 
     def process_request(self, request, client_address):
-        if (not self.public_origin and not private_address(client_address[0])) or not self.slots.acquire(blocking=False):
+        if (not self.public_origin and not private_address(client_address[0])) or not self.slots.acquire(timeout=self.SLOT_WAIT):
             self.shutdown_request(request)
             return
         try:
@@ -744,6 +780,7 @@ def main(argv=None):
     parser.add_argument("--state", type=Path, default=default,
                         help="protected publisher state directory (default: %(default)s)")
     parser.add_argument('--public-origin', help='explicit HTTPS recipient origin; permits public clients only in this mode')
+    parser.add_argument('--packs', type=Path, help='district pack store for pack-publish and serve (default: %%LOCALAPPDATA%%\\MelangeDesktopAdmin\\packs)')
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init")
     sub.add_parser('access-init', help='initialize separate protected application-access signing/state')
@@ -783,6 +820,15 @@ def main(argv=None):
         publish.add_argument("--" + field, required=True)
     publish.add_argument("--sequence", type=int, required=True)
     publish.add_argument("--recipient", action="append", required=True)
+    pack_build = sub.add_parser('pack-build', help="copy one district's allowlisted Terrier data and active summary bundle into a new private directory")
+    pack_build.add_argument('--district', choices=['co-05', 'ct-01', 'or-05'], required=True)
+    pack_build.add_argument('--data', type=Path, required=True, help="the district's Terrier data directory (its stores)")
+    pack_build.add_argument('--terrier-state', type=Path, help='Terrier state directory with accounts.sqlite3 and snapshots (default: --data)')
+    pack_build.add_argument('--out', type=Path, required=True, help='new directory outside OneDrive and every git worktree')
+    pack_publish = sub.add_parser('pack-publish', help='gzip a built district pack into the pack store and sign a revision if it changed')
+    pack_publish.add_argument('--district', choices=['co-05', 'ct-01', 'or-05'], required=True)
+    pack_publish.add_argument('--build', type=Path, required=True)
+    pack_publish.add_argument('--keep-build', action='store_true', help='keep the plaintext build directory (deleted after a successful publish by default)')
     trust = sub.add_parser("trust-publisher")
     trust.add_argument("--windows-subject")
     trust.add_argument("--mac-receipt-key")
@@ -837,15 +883,10 @@ def main(argv=None):
                     return True
                 instance.start(reopen_dashboard)
                 print('Local application approval dashboard opened. No approval keys are logged.', flush=True)
-                # Expired sessions must not leave a permanent listener.
-                lifetime = threading.Timer(8*3600+60, server.shutdown)
-                lifetime.daemon = True
-                lifetime.start()
                 try:
                     if not args.background: open_dashboard_window(url)
-                    server.serve_forever()
+                    server.serve_forever()   # ends itself admin_dashboard.LIFETIME after the newest open: expired sessions must not leave a permanent listener
                 finally:
-                    lifetime.cancel()
                     server.server_close()
             finally:
                 instance.close()
@@ -871,6 +912,18 @@ def main(argv=None):
         elif args.command == 'authorize-existing-release':
             store.authorize_existing_release(args.app, args.sequence, args.recipient)
             print('Named recipients authorized for the existing active release. No package was changed or installed.')
+        elif args.command == 'pack-build':
+            from district_packs import build
+            print(json.dumps({'district': args.district, 'files': build(args.district, args.data, args.out, args.terrier_state)}))
+        elif args.command == 'pack-publish':
+            from access_store import AccessStore
+            from district_packs import publish
+            try:
+                envelope = publish(AccessStore(store), args.district, args.build, keep_build=args.keep_build, packs=args.packs)
+            finally:
+                if args.build.exists():  # kept (--keep-build) or refused
+                    print(f'WARNING: plaintext voter data remains in {args.build.resolve()}; delete it once it is no longer needed.', file=sys.stderr)
+            print(json.dumps({'district': args.district, 'published': envelope is not None, 'buildKept': args.keep_build}))
         elif args.command == "trust-publisher":
             config = store.config()
             if not args.windows_subject and not args.mac_receipt_key:
@@ -895,7 +948,10 @@ def main(argv=None):
             if not allowed_bind or not 1024 <= args.port <= 65535:
                 raise Refused("bind an explicit permitted IP on an unprivileged port; public IPs require --public-origin and wildcard binding is forbidden")
             require_invite = invite_env() or args.require_invite  # Always parsed, so a junk value refuses even when the flag is given.
-            server = BoundedServer((args.listen, args.port), handler_for(store, require_invite), store.tls_context(), public_origin=store.public_origin)
+            handler = handler_for(store, require_invite, args.packs)
+            if handler.packs_root is None:
+                print('WARNING: the district pack store is inside OneDrive or a git worktree; /v1/data/ answers 503.', file=sys.stderr)
+            server = BoundedServer((args.listen, args.port), handler, store.tls_context(), public_origin=store.public_origin)
             print(f"Authenticated update service: {request_origin(server)}; invite codes {'required' if require_invite else 'not required'}", flush=True)
             try:
                 server.serve_forever()

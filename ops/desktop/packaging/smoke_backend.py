@@ -14,6 +14,32 @@ import tempfile
 import time
 import urllib.request
 from urllib.error import HTTPError, URLError
+import uuid
+
+# A first launch selects runtime-roots.cjs's default district, which the client passes as --district.
+TERRIER_DISTRICT='co-05'
+
+
+def terrier_principal(district):
+    """What access-gate.cjs authorize() passes a fresh install's approved administrator: a recipient, not an existing owner."""
+    principal=str(uuid.uuid4())
+    identity='recipient_'+principal.replace('-','')
+    return {'schemaVersion':1,'serverId':str(uuid.uuid4()),'deviceId':str(uuid.uuid4()),'principalId':principal,
+            'accountIdentity':identity,'localAccountIdentity':identity,'localUserId':None,'role':'local_administrator',
+            'districtId':district,'mode':'recipient'}
+
+
+def launch(options, port, token, root):
+    """The backend command and environment, as runtime.cjs starts the app."""
+    environment={k:v for k,v in os.environ.items() if not k.startswith(('CU_','ACCESS_','MENTAT_','MONEYBALL_','MELANGE_'))}
+    environment['DESKTOP_LAUNCH_TOKEN']=token
+    command = ([str(options.runtime / 'python' / 'python.exe'), '-E', '-s', str(options.runtime / 'bootstrap' / 'desktop_backend.py')]
+               if options.runtime else [str(options.binary)] if options.binary else [sys.executable,str(Path(__file__).with_name('desktop_backend.py'))])
+    command+=['--app',options.app,'--port',str(port),'--source-root',str(options.source.resolve()),'--data-root',str(root/'data'),'--state-root',str(root/'state')]
+    if options.app=='terrier':
+        environment['DESKTOP_ACCESS_PRINCIPAL']=json.dumps(terrier_principal(TERRIER_DISTRICT))
+        command+=['--district',TERRIER_DISTRICT]
+    return command,environment
 
 
 def main():
@@ -37,11 +63,7 @@ def main():
             listener.bind(('127.0.0.1',0))
             port=listener.getsockname()[1]
         token=secrets.token_urlsafe(32)
-        environment={k:v for k,v in os.environ.items() if not k.startswith(('CU_','ACCESS_','MENTAT_','MONEYBALL_','MELANGE_'))}
-        environment['DESKTOP_LAUNCH_TOKEN']=token
-        command = ([str(options.runtime / 'python' / 'python.exe'), '-E', '-s', str(options.runtime / 'bootstrap' / 'desktop_backend.py')]
-                   if options.runtime else [str(options.binary)] if options.binary else [sys.executable,str(Path(__file__).with_name('desktop_backend.py'))])
-        command+=['--app',options.app,'--port',str(port),'--source-root',str(options.source.resolve()),'--data-root',str(root/'data'),'--state-root',str(root/'state')]
+        command,environment=launch(options,port,token,root)
         log=root/'backend.log'
         with log.open('w',encoding='utf-8') as output:
             process=subprocess.Popen(command,env=environment,stdout=output,stderr=subprocess.STDOUT,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))

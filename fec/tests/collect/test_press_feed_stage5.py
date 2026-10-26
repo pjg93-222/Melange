@@ -36,8 +36,9 @@ def write_csv(path, fields, rows):
         writer.writerows(rows)
 
 
-def make_run(tmp_path, name, articles, completed_at="2099-01-01T00:00:00+00:00"):
-    """A sealed press run.  ``articles``: (slug, title, body, date, tagged) -> one scored row (+ a host article if the body is non-empty)."""
+def make_run(tmp_path, name, articles, completed_at="2099-01-01T00:00:00+00:00", routes=None):
+    """A sealed press run.  ``articles``: (slug, title, body, date, tagged) -> one scored row (+ a host article if the body is non-empty).
+    ``routes``: slug -> (press_route_kind, press_route_link) for host articles read through an official endpoint."""
     run = tmp_path / name
     run.mkdir()
     scored, hosts = [], []
@@ -49,9 +50,11 @@ def make_run(tmp_path, name, articles, completed_at="2099-01-01T00:00:00+00:00")
                        "categories": "General Credit Union", "word_count": str(len(body.split())),
                        "recency_weight": "0.9", "body_fallback": "title" if tagged else ""})
         if body:
-            hosts.append({**base, "body": body})
+            kind, link = (routes or {}).get(slug, ("", ""))
+            hosts.append({**base, "body": body, "press_route_kind": kind, "press_route_link": link})
     write_csv(run / "press_delta_scored.csv", SCORED_FIELDS, scored)
-    write_csv(run / "press_delta_host_articles.csv", ["member", "bioguide", "url", "title", "body"], hosts)
+    write_csv(run / "press_delta_host_articles.csv",
+              ["member", "bioguide", "url", "title", "body"] + (["press_route_kind", "press_route_link"] if routes else []), hosts)
     write_csv(run / "press_delta_article_mentions.csv", ["member", "bioguide", "url", "title", "body", "date_final"], [])
     (run / "press_network_retry_receipt.json").write_text(
         json.dumps({"completed_at": completed_at, "pending_body_urls": 0}), encoding="utf-8")
@@ -133,6 +136,48 @@ def test_stage5_replaces_the_rules_columns_and_the_receipt_binds_the_published_b
     again = feed.build(run, *outputs(tmp_path, "again"), intake, stage5=scorer(tmp_path, fakes))
     assert again["stage5"]["rows_scored"] == 0 and again["stage5"]["rows_cached"] == 1
     assert len(fakes.debate_batches) == 1
+
+
+def read_jsonl(path):
+    return [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def test_routed_host_articles_carry_their_endpoint_into_the_feed_and_the_receipt(tmp_path):
+    routes = {"a": ("wp_slug", "https://member.house.gov/media/press-releases/a/"),
+              "c": ("html", "https://member.house.gov/newsroom/press-releases/c")}
+    run, intake = make_run(tmp_path, "press_refresh_20990101", [
+        ("a", "Title A", BODY, "2026-07-01", False), ("b", "Title B", BODY, "2026-07-02", False),
+        ("c", "Title C", BODY, "2026-07-03", False)], routes=routes)
+    tone, fulltext, mentions, receipt_path = paths = outputs(tmp_path)
+    receipt = feed.build(run, *paths, intake)
+    rows = {row["url"].rsplit("/", 1)[1]: row for row in read_jsonl(fulltext)}
+    assert rows["a"]["press_route_kind"] == "wp_slug" and rows["a"]["press_route_link"] == routes["a"][1]
+    assert rows["c"]["press_route_kind"] == "html" and rows["c"]["press_route_link"] == routes["c"][1]
+    assert "press_route_kind" not in rows["b"] and "press_route_link" not in rows["b"]    # an unrouted row is unchanged
+    assert receipt["host_routes"] == {"fulltext_rows": 2, "by_kind": {"html": 1, "wp_slug": 1}}
+    assert receipt["counts"] == {"tone_rows": 3, "fulltext_rows": 3, "official_mentions": 0,
+                                 "official_mentions_with_unique_host_member": 0}                  # counts keys untouched
+    assert json.loads(receipt_path.read_text(encoding="utf-8"))["host_routes"] == receipt["host_routes"]
+    # a run with no route columns at all (every run before the routes existed) still builds, and says zero
+    plain, plain_intake = make_run(tmp_path, "press_refresh_20990102", [("a", "Title A", BODY, "2026-07-01", False)])
+    assert feed.build(plain, *outputs(tmp_path, "plain"), plain_intake)["host_routes"] == {"fulltext_rows": 0, "by_kind": {}}
+
+
+def test_cumulative_feed_receipt_records_routed_rows_after_deduplication(tmp_path):
+    run1, intake1 = make_run(tmp_path, "press_refresh_20990101", [("a", "A title", BODY, "2026-07-01", False)])
+    run2, intake2 = make_run(tmp_path, "press_refresh_20990102", [
+        ("a", "A title again", BODY, "2026-07-01", False), ("b", "B title", BODY, "2026-07-02", False)],
+        completed_at="2099-01-02T00:00:00+00:00",
+        routes={"a": ("wp_slug", "https://member.house.gov/media/press-releases/a/")})
+    archive = tmp_path / "accepted"
+    archive.mkdir()
+    (archive / "press_refresh_20990101.json").write_text(intake1.read_text(encoding="utf-8"), encoding="utf-8")
+    tone, fulltext, mentions, receipt_path = outputs(tmp_path)
+    receipt = feed.build_cumulative(tone, fulltext, mentions, receipt_path, intake2, archive)
+    assert receipt["host_routes"] == {"fulltext_rows": 1, "by_kind": {"wp_slug": 1}}     # the later run's routed row won the key
+    assert [entry["host_routes"] for entry in receipt["accepted_runs"]] == [
+        {"fulltext_rows": 0, "by_kind": {}}, {"fulltext_rows": 1, "by_kind": {"wp_slug": 1}}]
+    assert receipt["counts"] == {"accepted_runs": 2, "tone_rows": 2, "fulltext_rows": 2, "official_mentions": 0}
 
 
 def test_a_scored_release_with_no_usable_body_is_scored_on_its_title_not_refused(tmp_path):

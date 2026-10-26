@@ -52,6 +52,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 from legislation import official_billstatus_rollcall_source as BILLSTATUS
+import scrape_client
 
 try:
     from legislation_measure_key import CANONICAL_KEY_RE
@@ -827,6 +828,10 @@ class HttpFetcher:
         parts = urllib.parse.urlsplit(source_url)
         query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
         if parts.hostname and parts.hostname.casefold() == "api.congress.gov":
+            if scrape_client.available():
+                content, status, headers = scrape_client.fetch_raw_url(source_url)
+                if status != 200: raise scrape_client.ScrapeBrokerError(status)
+                return {"source_url":source_url,"final_url":source_url,"status":status,"content_type":headers.get('content-type','application/json').split(';')[0],"content":content}
             if not self.api_key:
                 raise CollectorError(
                     "Congress.gov API action source requires CONGRESS_API_KEY; "
@@ -1027,7 +1032,7 @@ def action_source_for_measure(
         selected = "congress_api"
     elif key.measure_type in BILLSTATUS.BILLSTATUS_SUPPORTED_TYPES:
         selected = "billstatus"
-    elif congress_api_key:
+    elif congress_api_key or scrape_client.available():
         selected = "congress_api"
     else:
         raise CollectorError(
@@ -1046,7 +1051,7 @@ def action_source_for_measure(
     if (
         selected == "congress_api"
         and fixture_manifest is None
-        and not congress_api_key
+        and not congress_api_key and not scrape_client.available()
     ):
         raise CollectorError(
             "Congress.gov API action source requires CONGRESS_API_KEY"
@@ -1937,6 +1942,44 @@ def write_ndjson(path: Path, rows: Iterable[dict[str, Any]]) -> None:
             handle.write(json.dumps(row, sort_keys=True, ensure_ascii=False) + "\n")
 
 
+OUTPUT_NAMES = (
+    "official_rollcall_event_ledger.ndjson",
+    "rollcall_measure_match_audit.ndjson",
+    "official_rollcall_member_votes.ndjson",
+    "rollcall_direction_audit.ndjson",
+    "source_snapshots.ndjson",
+    "official_rollcall_aggregate.json",
+)
+# Installed copy of the latest accepted generation: the paged modules registered for
+# "official-rollcall" in ops/desktop/packaging/module_application_contracts.py.
+INSTALL_DIR = Path("data") / "legislation" / "official_rollcall"
+
+
+def install_outputs(out_path: Path, workspace_root: Path) -> Path:
+    """Copy an accepted generation's outputs, then its manifest, to INSTALL_DIR.
+
+    Each file is checked against its manifest receipt before it replaces the
+    installed copy, and the manifest goes last, so a reader that checks the
+    receipts never accepts a mixed install.  Still never vote_category_lean.json.
+    """
+    out_path = out_path.resolve()
+    manifest = json.loads((out_path / "manifest.json").read_text(encoding="utf-8"))
+    if not manifest.get("acceptance_passed") or set(manifest.get("outputs") or ()) != set(OUTPUT_NAMES):
+        raise CollectorError("only an accepted generation with every output can be installed")
+    target = workspace_root.resolve() / INSTALL_DIR
+    target.mkdir(parents=True, exist_ok=True)
+    for name in (*OUTPUT_NAMES, "manifest.json"):
+        source = out_path / name
+        receipt = manifest["outputs"].get(name) or {"sha256": sha256_file(source)}
+        part = target / (name + ".part")
+        shutil.copyfile(source, part)
+        if sha256_file(part) != receipt["sha256"]:
+            part.unlink()
+            raise CollectorError(f"installed copy differs from its receipt: {name}")
+        os.replace(part, target / name)
+    return target
+
+
 def assert_staging_output_path(path: Path, workspace_root: Path) -> Path:
     resolved = path.expanduser().resolve()
     root = workspace_root.resolve()
@@ -2005,7 +2048,8 @@ def collect(
                         else None
                     ),
                 }
-            except CollectorError as exc:
+            # Broker refusals (429/503/404, partial configuration) stay per-measure blockers.
+            except (CollectorError, scrape_client.ScrapeBrokerError) as exc:
                 action_results[key] = {
                     "action_count": 0,
                     "error": str(exc),
@@ -2097,14 +2141,7 @@ def collect(
             input_paths.append(member_map_path)
         if fixture_manifest:
             input_paths.append(fixture_manifest)
-        output_names = (
-            "official_rollcall_event_ledger.ndjson",
-            "rollcall_measure_match_audit.ndjson",
-            "official_rollcall_member_votes.ndjson",
-            "rollcall_direction_audit.ndjson",
-            "source_snapshots.ndjson",
-            "official_rollcall_aggregate.json",
-        )
+        output_names = OUTPUT_NAMES
         manifest = {
             "schema": SCHEMA_VERSION,
             "generated_at": utc_now(),
@@ -2254,6 +2291,14 @@ def parser() -> argparse.ArgumentParser:
         ),
     )
     result.add_argument(
+        "--install",
+        action="store_true",
+        help=(
+            "after acceptance, copy the manifest and outputs to "
+            "data/legislation/official_rollcall/ (required for page publication)"
+        ),
+    )
+    result.add_argument(
         "--workspace-root",
         type=Path,
         default=Path(__file__).resolve().parent.parent.parent,
@@ -2275,7 +2320,7 @@ def main(argv: list[str] | None = None) -> int:
             congress_api_key=os.environ.get("CONGRESS_API_KEY"),
             action_source=args.action_source,
         )
-    except CollectorError as exc:
+    except (CollectorError, scrape_client.ScrapeBrokerError) as exc:
         print(f"collect_official_rollcall_events: FAIL CLOSED: {exc}", file=sys.stderr)
         return 2
     print(
@@ -2292,7 +2337,30 @@ def main(argv: list[str] | None = None) -> int:
             sort_keys=True,
         )
     )
-    return 0 if manifest["acceptance_passed"] else 2
+    if not manifest["acceptance_passed"]:
+        return 2
+    if args.install:
+        try:
+            installed = install_outputs(args.out, args.workspace_root)
+        except (OSError, ValueError, CollectorError) as exc:
+            print(f"collect_official_rollcall_events: FAIL CLOSED: install: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps({"installed": str(installed)}))
+    # Optional page publication after an accepted collection; inert when unset.
+    try:
+        try:
+            import generation_publish_hook
+        except ImportError:  # pragma: no cover - package import path
+            from fec import generation_publish_hook
+        if args.install:
+            generation_publish_hook.after_collection("official-rollcall", args.workspace_root)
+        elif os.environ.get(generation_publish_hook.ENVIRONMENT):
+            # Without --install the data root holds no output of this run, only older copies.
+            raise CollectorError("--install is required: this run's outputs are not installed")
+    except Exception as exc:
+        print(f"collect_official_rollcall_events: collected; page publication failed: {exc}", file=sys.stderr)
+        return 3
+    return 0
 
 
 if __name__ == "__main__":

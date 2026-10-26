@@ -3,7 +3,7 @@
   const APPS = Object.freeze({melange: 'Melange', mentat: 'Mentat', terrier: 'Terrier'});
   const PHASES = new Set(['needs_request', 'pending', 'needs_password', 'locked', 'ready', 'revoked', 'terrier_signin', 'error']);
   const REQUESTS = new Set(['pending', 'approved', 'used', 'denied', 'expired']);
-  const FIELDS = new Set(['appId', 'appName', 'phase', 'accountIdentity', 'requestStatus', 'requestExpiresAt', 'requestCleanupPending', 'canRequestAgain']);
+  const FIELDS = new Set(['appId', 'appName', 'phase', 'accountIdentity', 'requestStatus', 'requestExpiresAt', 'requestCleanupPending', 'canRequestAgain', 'districtDataRemoved']);
   const GENERIC_ERROR = 'This action could not be completed. Check your connection or try again later.';
   const REASONS = Object.freeze({
     unreachable: "Can't reach the administrator's access server. It may be offline; try again later.",
@@ -20,7 +20,7 @@
     if (value.accountIdentity !== undefined && (typeof value.accountIdentity !== 'string' || !/^[A-Za-z0-9_@.+-]{1,150}$/.test(value.accountIdentity))) throw new Error('Unsupported account identity');
     if (value.requestStatus !== undefined && !REQUESTS.has(value.requestStatus)) throw new Error('Unsupported request state');
     if (value.requestExpiresAt !== undefined && (!Number.isSafeInteger(value.requestExpiresAt) || value.requestExpiresAt < 946684800 || value.requestExpiresAt > 253402300799)) throw new Error('Unsupported request expiry');
-    for (const key of ['requestCleanupPending', 'canRequestAgain']) if (value[key] !== undefined && typeof value[key] !== 'boolean') throw new Error('Unsupported access state');
+    for (const key of ['requestCleanupPending', 'canRequestAgain', 'districtDataRemoved']) if (value[key] !== undefined && typeof value[key] !== 'boolean') throw new Error('Unsupported access state');
     if (value.appId === 'terrier' && ['needs_password', 'locked'].includes(value.phase)) throw new Error('Use Terrier sign-in');
     if (value.appId !== 'terrier' && value.phase === 'terrier_signin') throw new Error('Unsupported sign-in state');
     if (value.canRequestAgain && !['revoked', 'pending'].includes(value.phase)) throw new Error('Unsupported request replacement');
@@ -63,11 +63,11 @@
       const messages = {
         needs_request: 'Request administrator approval for this installation. Connect to the internet or the configured local network to reach your trusted administrator server.',
         pending: 'This installation is waiting for administrator approval.',
-        needs_password: 'This installation is approved. Choose your local password, then sign in.',
-        locked: 'Sign in with your local password to open ' + next.appName + '.',
-        ready: 'You are signed in. Your local workspace is ready to open.',
-        revoked: 'Administrator access has been revoked. Your local data remains on this computer.',
-        terrier_signin: 'This installation is approved. Continue to Terrier to set up or sign in to its existing local account.',
+        needs_password: 'This installation is approved. Choose your local password, then sign in. You only do this once on this computer.',
+        locked: 'Sign in with your local password to open ' + next.appName + '. You will not be asked again on this computer.',
+        ready: next.appId === 'terrier' ? 'This installation is approved for its owner. ' + next.appName + ' does not ask for a password.' : 'You are signed in on this computer and will not be asked again. Your local workspace is ready to open. Lock asks for your password again next time.',
+        revoked: next.districtDataRemoved ? 'Access was revoked by the administrator. District data has been removed from this computer.' : 'Administrator access has been revoked. Your local data remains on this computer.',
+        terrier_signin: 'This installation is approved. Continue to Terrier to set up or sign in to your account.',
         error: 'Access could not be checked. Your workspace has not been opened.'
       };
       el.description.textContent = messages[next.phase];
@@ -88,7 +88,7 @@
       el['password-submit'].textContent = next.phase === 'needs_password' ? 'Save password' : 'Sign in';
       el['ready-panel'].hidden = !['ready', 'terrier_signin'].includes(next.phase);
       el.open.textContent = next.phase === 'terrier_signin' ? 'Continue to Terrier sign-in' : 'Open ' + next.appName;
-      el.lock.hidden = next.phase !== 'ready'; el.retry.hidden = next.phase !== 'error'; lockControls();
+      el.lock.hidden = next.phase !== 'ready' || next.appId === 'terrier'; el.retry.hidden = next.phase !== 'error'; lockControls();
     }
     function failClosed() {
       clearSecrets(); state = null;

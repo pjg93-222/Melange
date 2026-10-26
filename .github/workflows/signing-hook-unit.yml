@@ -1,0 +1,44 @@
+name: signing-hook-unit
+run-name: Signing hook unit tests ${{ github.sha }}
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/signing-hook-unit.yml
+      - ops/desktop/client/release-signing.cjs
+      - ops/desktop/client/sign-staged-binary.ps1
+      - ops/desktop/client/tests/release-signing.test.cjs
+      - ops/desktop/client/builder.cjs
+  push:
+    branches: [main, release/1.0.17]
+    paths:
+      - .github/workflows/signing-hook-unit.yml
+      - ops/desktop/client/release-signing.cjs
+      - ops/desktop/client/sign-staged-binary.ps1
+      - ops/desktop/client/tests/release-signing.test.cjs
+      - ops/desktop/client/builder.cjs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signing-hook-unit-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-unit:
+    if: github.repository == 'pjg93-222/Melange'
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.18.0'
+      - name: Focused signing-hook tests under ordinary Windows policy
+        shell: cmd
+        run: node --test --test-reporter=tap ops/desktop/client/tests/release-signing.test.cjs

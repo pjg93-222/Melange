@@ -12,13 +12,16 @@ if(savedState&&savedState.enabled){
 }
 contextBridge.exposeInMainWorld('desktop',Object.freeze({
   info:()=>ipcRenderer.invoke('desktop:info'),
-  chooseDirectory:()=>ipcRenderer.invoke('desktop:directory'),
-  district:value=>ipcRenderer.invoke('desktop:district',value),
   districts:()=>ipcRenderer.invoke('desktop:districts'),
   switchDistrict:value=>ipcRenderer.invoke('desktop:switch-district',value),
+  districtData:()=>ipcRenderer.invoke('desktop:district-data'),
+  refreshDistrictData:()=>ipcRenderer.invoke('desktop:district-data-refresh'),
+  onDistrictData:callback=>{const listener=(_event,value)=>callback(value);ipcRenderer.on('desktop:district-data-status',listener);return()=>ipcRenderer.removeListener('desktop:district-data-status',listener);},
+  moduleData:()=>ipcRenderer.invoke('desktop:module-data'),
+  refreshModuleData:()=>ipcRenderer.invoke('desktop:module-data-refresh'),
+  onModuleData:callback=>{const listener=(_event,value)=>callback(value);ipcRenderer.on('desktop:module-data-status',listener);return()=>ipcRenderer.removeListener('desktop:module-data-status',listener);},
   rendererReady:()=>ipcRenderer.invoke('desktop:renderer-ready'),
   pair:value=>ipcRenderer.invoke('desktop:pair',value),
   launch:()=>ipcRenderer.invoke('desktop:launch'),
-  trustUpdates:()=>ipcRenderer.invoke('desktop:trust-updates'),
   onStatus:callback=>{const listener=(_event,value)=>callback(String(value));ipcRenderer.on('desktop:status',listener);return()=>ipcRenderer.removeListener('desktop:status',listener);}
 }));

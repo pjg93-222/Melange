@@ -4,6 +4,7 @@
 // license.db, RSQLite's datasets.sqlite, ...) are legitimate and survive. Each removal is logged; this never fails
 // the build. The extraResources glob filter in builder.cjs is case-sensitive and shallow, so this is the real guard.
 const fs=require('node:fs'),path=require('node:path');
+const layout=require('./install-layout.cjs'),{appDefinition}=require('./apps.cjs');
 const DATABASE_SUFFIXES=['.sqlite','.sqlite3','.db','-wal','-shm','-journal'];
 function stripState(runtimeRoot,log=()=>{}){
   const removed=[];
@@ -26,5 +27,16 @@ function stripState(runtimeRoot,log=()=>{}){
 async function afterPack(context){
   const removed=stripState(path.join(context.appOutDir,'resources','runtime'),message=>console.log(message));
   console.log('[after-pack] runtime packing report: removed '+removed.length+' state/database path(s) under runtime/*/sources');
+  // Downloads layout (DL-spec 1.3, 2.8): the long-path gate, then the one writer of the generated NSIS include (builder.cjs nsis.include).
+  const depth=layout.deepestRelative(context.appOutDir),budget=layout.LAYOUT.deepestRelativeBudget;
+  console.log('[after-pack] deepest packaged path: '+depth+' characters (limit '+budget+')');
+  if(depth>budget)throw new Error('The deepest packaged path is '+depth+' characters, over the limit of '+budget+'. The Downloads install path (MAX_PATH) would be exceeded; shorten the packaged paths.');
+  const version=context.packager?.appInfo?.version;
+  if(version){
+    const definition=appDefinition(context.packager.config?.extraMetadata?.desktopAppConfig?.appId||process.env.DESKTOP_APP_ID||'melange');
+    const target=path.join(path.dirname(context.appOutDir),'installer.generated.nsh');
+    fs.writeFileSync(target,layout.nsisInclude({product:definition.name,app:definition.id,version,installerNsh:path.join(__dirname,'installer.nsh')}));
+    console.log('[after-pack] wrote '+target);
+  }
 }
 module.exports=afterPack;module.exports.stripState=stripState;

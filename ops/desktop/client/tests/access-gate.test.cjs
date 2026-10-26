@@ -6,7 +6,7 @@ function fixture(appId='melange'){
  const grant={serverId:'11111111-1111-1111-1111-111111111111',deviceId:'22222222-2222-2222-2222-222222222222',principalId,accountIdentity:'recipient_'+principalId.replaceAll('-',''),appId,grantId:'44444444-4444-4444-4444-444444444444',requestId:'55555555-5555-5555-5555-555555555555',role:appId==='terrier'?'local_administrator':'local_user',districtIds:appId==='terrier'?['co-05']:[]};
  const state={accepted:null,pending:null,password:null,session:null,configuration:{district:'co-05'},calls:[]};
  const client={accepted:async()=>state.accepted,state:async()=>({pending:state.pending}),requestAccess:async(name,options)=>{state.calls.push({name,options});state.pending={requestId:grant.requestId};return {requestId:grant.requestId,status:'pending',expiresAt:2000000000};},poll:async()=>({requestId:state.pending.requestId,status:'approved',expiresAt:2000000000}),activate:async()=>{state.accepted={grant,revoked:false};state.pending=null;return {grant,requestCleanupPending:false};},refresh:async()=>{if(state.offline)throw new Error('offline');}};
- const local={current:()=>state.session,create:async()=>{state.calls.push('password-created');},unlock:async()=>{state.session={authenticated:true};},lock:()=>{state.session=null;}};
+ const local={current:()=>state.session,resume:async()=>state.session,forget:async()=>{state.calls.push('forgot');},create:async()=>{state.calls.push('password-created');},unlock:async()=>{state.session={authenticated:true};},lock:()=>{state.session=null;}};
  const gate=new DesktopAccessGate({appId,client,local,passwords:{read:async()=>state.password},configuration:()=>state.configuration});
  return {gate,state,grant};
 }
@@ -58,4 +58,9 @@ test('request accepts displayName and an optional 1 to 64 character invite code,
  const other=fixture();await other.gate.action('request',{inviteCode:'ABCD-2345-WXYZ-6789',displayName:'Fixture laptop'});assert.equal(other.state.calls[0].options.inviteCode,'ABCD-2345-WXYZ-6789');
  const none=fixture();await none.gate.action('request',{displayName:'Fixture laptop'});assert.deepEqual(none.state.calls,[{name:'Fixture laptop',options:{newRequest:false,reapproval:false,inviteCode:''}}]);
  for(const payload of [{displayName:'Fixture laptop',inviteCode:'x'.repeat(65)},{displayName:'Fixture laptop',inviteCode:' '},{displayName:'Fixture laptop',inviteCode:'ABCD',extra:'x'}]){const third=fixture();await assert.rejects(third.gate.action('request',payload));assert.equal(third.state.calls.length,0);}
+});
+test('a revoked non-legacy Terrier install reports its district store removed; the legacy owner and the other apps keep their data',async()=>{
+ const flags=[];
+ for(const [appId,terrierLegacy] of [['terrier',undefined],['terrier',{district:'co-05'}],['melange',undefined]]){const {gate,state,grant}=fixture(appId);state.configuration={district:'co-05',terrierLegacy};state.accepted={grant,revoked:true};flags.push((await gate.info()).districtDataRemoved);}
+ assert.deepEqual(flags,[true,undefined,undefined]);
 });

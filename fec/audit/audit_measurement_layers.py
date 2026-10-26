@@ -106,7 +106,7 @@ def verify(root):
         check(len(dashboard['name'])==len(set(map(nfc,dashboard['name'])))==len(names),
               'Dashboard duplicated or incomplete roster','surfaces')
         factors = docs['data/engine/primacy_factors.json']
-        tags = SA.effective_tags(PF.load_tags(root/'bill_beneficiary_tags.ndjson'),SA.load(root))
+        tags = SA.effective_tags(PF.load_tags(root/'bill_beneficiary_tags.ndjson'),SA.load(root),root)
         credits = PF.load_adjudicated_credits(root/PF.ADJUDICATION_LEDGER)
         cells = PF.load_cu_tensor_cells(root/PF.CU_TENSOR)
         for member in desk['members']:

@@ -74,22 +74,22 @@ concurrency:
 env:
   APP: melange
   PRODUCT: Melange
-  VERSION: 1.0.5
-  RELEASE_TAG: desktop-preview-v1.0.5
+  VERSION: 1.0.19
+  RELEASE_TAG: desktop-preview-v1.0.19
   # Signed-release input mode (header). Both empty = plain preview. Melange is the first signed release (release owner,
   # 2026-10-16); Geo and Mentat adopt this subject when they are re-pinned for their own signed releases.
   RELEASE_PUBLISHER: 'CN=Melange Systems Desktop Release (self-signed)'
-  STABLE_TAG: desktop-v1.0.5
+  STABLE_TAG: desktop-v1.0.19
   ARTIFACT: melange-desktop-${{ github.sha }}
   # SET AT INTEGRATION: both to the full 40-hex SHA of reviewed source commit T (see the header). Until then preflight fails.
-  REVIEWED_BASE: 8f44cb6a2c8410a618a24680a42cfd1ca2e1aed7
-  RELEASE_TARGET: 8f44cb6a2c8410a618a24680a42cfd1ca2e1aed7
+  REVIEWED_BASE: 0194af87d3d37e3dae5feb14f1ef70b4b15afae6
+  RELEASE_TARGET: 0194af87d3d37e3dae5feb14f1ef70b4b15afae6
   CI_FILES: >-
     .github/workflows/desktop-windows.yml .github/workflows/desktop-installer-acceptance.yml
     ops/desktop/packaging/desktop-access-trust.public.json
     ops/desktop/packaging/melange-runtime.constraints.txt ops/desktop/packaging/THIRD-PARTY-NOTICES/LibreOffice-SOURCES.md
   TRUST_FILE: ops/desktop/packaging/desktop-access-trust.public.json
-  TRUST_SHA256: 081f44db43bac05d25e4cedc93891b7f31595b920f4deda7f6dc04a9f7548a3a
+  TRUST_SHA256: b169ed5c01c32cc71469589144a84679901d8581d8eb487827456b278eadc92a
   LO_NOTICE_FILE: ops/desktop/packaging/THIRD-PARTY-NOTICES/LibreOffice-SOURCES.md
 
 jobs:
@@ -394,6 +394,25 @@ jobs:
 
       # No certificate is configured (CSC_IDENTITY_AUTO_DISCOVERY false, no CSC_LINK or certificateSha1), so electron-builder
       # skips signing every binary; WINDOWS_PUBLISHER_NAME only bakes the public pin (client/builder.cjs:24-25).
+      - name: Reviewed module-input contracts and passive public readers
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          Push-Location ops/desktop/packaging
+          try {
+            & "$env:VENV\Scripts\python.exe" -E -s -B -m unittest -v test_module_data_handoff test_module_public_input_installers test_module_backend_inputs test_module_data_snapshot test_staging test_module_application_inventory test_module_public_input_probe
+            if ($LASTEXITCODE -ne 0) { throw "Module input contract tests failed" }
+            & "$env:VENV\Scripts\python.exe" -E -s -B -m pytest -p no:cacheprovider -q test_data_release_fetch.py
+            if ($LASTEXITCODE -ne 0) { throw "Disabled legacy fetch preservation tests failed" }
+            & "$env:VENV\Scripts\python.exe" -E -s -B -m unittest -v test_module_data_launch test_melange_public_input_probe test_melange_public_payroll_normalize test_melange_public_payroll_projection test_melange_public_provenance
+            if ($LASTEXITCODE -ne 0) { throw "Melange module source tests failed" }
+          } finally { Pop-Location }
+          node --test ops/desktop/client/tests/module-runtime-boundary.test.cjs ops/desktop/client/tests/module-data-transition.test.cjs ops/desktop/client/tests/module-data-startup.test.cjs ops/desktop/client/tests/main-module-lifecycle.test.cjs ops/desktop/client/tests/main-module-preflight.test.cjs ops/desktop/client/tests/runtime-module-guard.test.cjs ops/desktop/client/tests/module-data-adapters.test.cjs ops/desktop/client/tests/backend-command.test.cjs ops/desktop/client/tests/runtime-roots.test.cjs ops/desktop/client/tests/release-files.test.cjs ops/desktop/client/tests/module-application-contract.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Native module input contract tests failed" }
+          & "$env:VENV\Scripts\python.exe" -E -s -B -m unittest -v fec.tests.surfaces.test_melange_public_data
+          if ($LASTEXITCODE -ne 0) { throw "Melange actual public reader and HTTP tests failed" }
+          node --test fec/tests/surfaces/test_melange_public_data_dom.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Melange public data DOM tests failed" }
+
       - name: Package (unsigned NSIS installer plus win-unpacked)
         working-directory: ops/desktop/client
         env:
@@ -587,7 +606,7 @@ jobs:
               --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .workflow_run.id // empty')
           fi
           gh run download "$build_run" -n "$ARTIFACT" -D release \
-            || { echo "::error::build artifact $ARTIFACT is unavailable (1-day retention expired?). Rebuilding is a deliberate decision: record it in the build queue, delete the stale draft by hand, then dispatch."; exit 1; }
+            || { echo "::error::build artifact $ARTIFACT is unavailable (7-day retention expired?). Rebuilding is a deliberate decision: record it in the build queue, delete the stale draft by hand, then dispatch."; exit 1; }
           cd release
           sha256sum -c SHA256SUMS.txt
           prov="$PRODUCT-$VERSION-provenance.json"

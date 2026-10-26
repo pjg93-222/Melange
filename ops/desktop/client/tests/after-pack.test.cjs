@@ -45,3 +45,37 @@ test('an unreadable directory under sources is logged and skipped; the rest is s
   assert.equal(context.exists('mentat/sources/app/b.db'),false,'the readable branch is still stripped');
   assert.ok(lines.some(line=>/could not read .*locked: EACCES/.test(line)),'the unreadable directory is logged');
 });
+
+// ---- Downloads layout (DL-spec 1.3, 2.8): generated NSIS include and the build-time long-path gate ----
+const layout=require('../install-layout.cjs');
+function build(t,appId='terrier',version='1.0.19'){
+  const output=fs.mkdtempSync(path.join(os.tmpdir(),'after-pack-out-'));t.after(()=>fs.rmSync(output,{recursive:true,force:true}));
+  const appOutDir=path.join(output,'win-unpacked');fs.mkdirSync(appOutDir);fs.writeFileSync(path.join(appOutDir,'Terrier.exe'),'x');
+  return {output,appOutDir,packager:{appInfo:{version},config:{extraMetadata:{desktopAppConfig:{appId}}}}};
+}
+
+test('afterPack writes installer.generated.nsh next to win-unpacked with this build\'s names and the absolute installer.nsh',async t=>{
+  const context=build(t);await quiet(context);
+  const text=fs.readFileSync(path.join(context.output,'installer.generated.nsh'),'utf8');
+  assert.equal(text,layout.nsisInclude({product:'Terrier',app:'terrier',version:'1.0.19',installerNsh:path.join(__dirname,'..','installer.nsh')}));
+  assert.match(text,/DL_APP_FOLDER "Terrier-1\.0\.19"/);assert.match(text,/DL_CACHE_FOLDER "terrier"/);assert.match(text,/!include "[A-Za-z]:\\[^"]*installer\.nsh"/);
+  assert.ok(fs.existsSync(path.resolve(text.match(/!include "(.*)"/)[1])),'the included installer.nsh exists');
+});
+
+test('afterPack fails the build when the deepest packaged path exceeds the budget, and passes at the limit',async t=>{
+  const budget=layout.LAYOUT.deepestRelativeBudget;
+  const ok=build(t);const atLimit=path.join(ok.appOutDir,'d'.repeat(budget-'\f'.length));fs.writeFileSync(atLimit,'x');
+  // a file whose relative path is exactly the budget
+  const exact=path.join(ok.appOutDir,'e'.repeat(budget));fs.writeFileSync(exact,'x');
+  await quiet(ok);
+  const bad=build(t);fs.writeFileSync(path.join(bad.appOutDir,'e'.repeat(budget+1)),'x');
+  await assert.rejects(()=>quiet(bad),/deepest packaged path is \d+ characters.*limit of 150/);
+  assert.equal(fs.existsSync(path.join(bad.output,'installer.generated.nsh')),false,'nothing is generated for a build that fails the gate');
+  // removed state paths do not count toward depth
+  const stripped=build(t);const deep=path.join(stripped.appOutDir,'resources','runtime','mentat','sources','state',...Array(30).fill('long-directory-name'));fs.mkdirSync(deep,{recursive:true});fs.writeFileSync(path.join(deep,'f'),'x');
+  await quiet(stripped);
+});
+
+test('afterPack without packager metadata (unit use) leaves no include behind',async t=>{
+  const context=build(t);await quiet({appOutDir:context.appOutDir});assert.equal(fs.existsSync(path.join(context.output,'installer.generated.nsh')),false);
+});

@@ -125,7 +125,7 @@ TC={'Champion':'C','Defender':'F','Ally':'A','Highly Persuadable':'H','Persuadab
 # cpf_diffusion/tgt/coalition boosts via bipartisan.json. BP therefore uses the newest NON-AUG file.
 # BP_SRC=aug restores the augmented definition if the user ever ratifies it.
 if os.environ.get('BP_SRC','cosponsor')=='cosponsor':
-    _n0=max([q for q in glob.glob(os.path.join(MB_ROOT, 'congress_cosponsor_network_*.xlsx')) if 'AUG' not in os.path.basename(q)],key=os.path.getmtime)
+    import source_select; _n0=source_select.select_network(glob.glob(os.path.join(MB_ROOT, 'congress_cosponsor_network_*.xlsx')),'exclude',root=MB_ROOT)
     _e0=openpyxl.load_workbook(_n0,data_only=True)['Edges']
     G0=nx.Graph(); G0.add_nodes_from(members); _drop0=cu_dropped_sponsors(_n0)   # CU_IDENTITY_FIX (decision G)
     for a,b,w in cu_edge_rows(_n0,_e0):   # + CU_PLACEHOLDER_BACKFILL (2026-10-11)

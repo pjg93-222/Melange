@@ -196,13 +196,13 @@ class InviteTests(unittest.TestCase):
         self.assertEqual(sum(results), 1)
         self.assertEqual(self.count('requests'), 1)
 
-    def test_capacity_refusal_does_not_consume_the_code(self):
+    def test_device_conflict_refusal_does_not_consume_the_code(self):
         invite = self.store.issue_invite('Two uses', 2)
         first = self.value(invite['code'])
         self.store.request(first, '127.0.0.1')
         with self.assertRaises(Refused) as caught:  # The device already has a pending request.
             self.submit(invite['code'], deviceId=first['deviceId'])
-        self.assertIn('capacity', str(caught.exception))
+        self.assertIn('conflict', str(caught.exception))
         self.assertEqual(self.invites()[0]['uses'], 1)
         self.submit(invite['code'])
         self.assertEqual(self.invites()[0]['uses'], 2)

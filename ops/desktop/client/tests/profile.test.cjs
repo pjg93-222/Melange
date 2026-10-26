@@ -102,17 +102,19 @@ test('main process applies the isolated plan before userData, lock, login item, 
   at('cacheDirectory:profile.discoveryCache');at('nativeInstallation:profile.nativeInstallation');at('let background=!profile.isolated&&app.isPackaged&&(');
   assert.doesNotMatch(source,/setAsDefaultProtocolClient|setUserTasks|setJumpList/);
   assert.doesNotMatch(source,/getPath\('appData'\),'MelangeDesktop'/);
-  // Runtime data confinement: on load (before the runtime exists), on change (before write), before backend launch and district verification.
+  // Runtime data confinement: on load (before the runtime exists), on district change (before write), before backend launch and district verification.
   const load=at("if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){"),runtime=at('createRuntime=()=>new Runtime(');
   assert.ok(load<runtime&&source.slice(load,runtime).includes('app.quit();return;}'),'invalid loaded settings stop before any runtime is created');
-  const change=at("if(profile.isolated)try{confineIsolatedSettings(profile.boundary,settings);}catch(error){updateStatus(error.message+' Settings were not changed.');return read('settings.json');}write('settings.json',settings);");
-  assert.ok(change>source.indexOf("ipcMain.handle('desktop:directory'"));
   at("confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null");
-  at('verifyDistrictAsync(resources,userData,profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,');
+  const confined=at('const selected=profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,'),prepared=at('effective=await prepareOwnerDistrict(selected);'),verified=at('verifyDistrictAsync(resources,userData,effective,');
+  assert.ok(confined<prepared&&prepared<verified,'district settings are confined before data preparation and effective roots are verified before launch');
   at("write:value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value),");
-  // The only other writer creates the default settings with dataDirectory <userData>\data, inside the confined profile.
-  at("const dataDirectory=path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',");
-  assert.equal(source.match(/write\('settings.json'/g).length,3,'no other settings writer bypasses confinement');
+  // Two writers run before the load check above (default settings and the old-default migration, both inside the confined profile
+  // or its private store, which the load check then verifies); every later writer is the confining saveSettings or the district transition.
+  const created=at("const dataDirectory=packs?path.join(packRoot,'stores'):path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',"),migrated=at("write('settings.json',migrated)");
+  assert.ok(created<load&&migrated<load,'unconfined writers precede the load-time confinement check');
+  at("const saveSettings=value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value);");
+  assert.equal(source.match(/write\('settings.json'/g).length,4,'no other settings writer bypasses confinement');
 });
 function boundaryFixture(t){
   const {home,options}=sandbox(t),root=path.join(home,'iso'),production=path.join(home,'Documents','MelangeApplicationState','mentat');
@@ -159,4 +161,11 @@ test('isolated runtime refuses data roots outside the tree before creating direc
   // Production (no confine) is unchanged: same backend resolution failure, no confinement call.
   const count=seen.length;
   await assert.rejects(new Runtime('mentat',plan.directory,resources,{authorize}).start({dataDirectory:target}),/runtime is not installed/);assert.equal(seen.length,count);
+});
+test('an isolated profile inside the Downloads install root is refused, and elsewhere in Downloads is allowed',t=>{
+  const {home,options}=sandbox(t),downloads=path.join(home,'Downloads');
+  const withDownloads={...options,downloads:()=>downloads};
+  for(const inside of [path.join(downloads,'MelangeApplications'),path.join(downloads,'MelangeApplications','Melange-1.0.19'),path.join(downloads,'MelangeApplications','updates','x')])
+    assert.throws(()=>selectStartupProfile({...withDownloads,appId:'melange',argv:['--melange-isolated-profile='+inside],packaged:true}),error=>error.code==='ISOLATED_PROFILE_REFUSED'&&/separate from production/.test(error.message),inside);
+  assert.equal(selectStartupProfile({...withDownloads,appId:'melange',argv:['--melange-isolated-profile='+path.join(downloads,'acceptance')],packaged:true}).isolated,true);
 });

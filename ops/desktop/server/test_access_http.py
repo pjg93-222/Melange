@@ -1,19 +1,28 @@
+import base64
+import hashlib
 import http.client
+import io
 import json
 from pathlib import Path
 import secrets
 import socket
+import sqlite3
 import ssl
 import sys
 import threading
 import time
 import unittest
+from unittest.mock import patch
 import uuid
+import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from desktop_admin import BoundedServer, handler_for
 from access_http import HTTPRefused, RateLimit
+from access_store import AccessStore
+import district_packs
 import test_access_store as store_tests
+from test_district_packs import stamp
 
 
 class AccessHTTPTests(unittest.TestCase):
@@ -24,7 +33,8 @@ class AccessHTTPTests(unittest.TestCase):
         self.context = ssl._create_unverified_context()  # Fixture server; pin validation belongs to native-client tests.
 
     def serve(self, require_invite):
-        self.server = BoundedServer(('127.0.0.1', 0), handler_for(self.publisher, require_invite), self.publisher.tls_context())
+        self.packs = Path(self.temp.name) / 'packs'
+        self.server = BoundedServer(('127.0.0.1', 0), handler_for(self.publisher, require_invite, self.packs), self.publisher.tls_context())
         self.addCleanup(self.server.server_close)
         worker = threading.Thread(target=self.server.serve_forever, daemon=True)
         worker.start()
@@ -83,7 +93,7 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual((status, repeated['requestId'], repeated['status']), (201, request['requestId'], 'pending'))
         self.assertEqual(self.count('SELECT COUNT(*) FROM requests'), 1)
 
-    def test_used_up_code_is_invalid_while_capacity_and_conflict_mappings_are_unchanged(self):
+    def test_used_up_code_is_invalid_and_a_second_open_request_per_device_is_a_conflict(self):
         self.serve(require_invite=True)
         code = self.store.issue_invite('Single')['code']
         first = {**self.request_value(), 'inviteCode': code}
@@ -92,8 +102,8 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual((status, repeated['requestId'], repeated['status']), (201, first['requestId'], 'pending'))
         self.assertEqual(self.post_request({**self.request_value(), 'inviteCode': code}), (403, {'error': 'invite_invalid'}, None))
         spare = self.store.issue_invite('Spare')
-        self.assertEqual(self.post_request({**self.request_value(), 'deviceId': first['deviceId'], 'inviteCode': spare['code']}), (429, {'error': 'rate_limited'}, '60'))
-        self.assertEqual([i['uses'] for i in self.store.dashboard()['invites'] if i['inviteId'] == spare['inviteId']], [0])  # Capacity refusal spends nothing.
+        self.assertEqual(self.post_request({**self.request_value(), 'deviceId': first['deviceId'], 'inviteCode': spare['code']}), (409, {'error': 'state_conflict'}, None))
+        self.assertEqual([i['uses'] for i in self.store.dashboard()['invites'] if i['inviteId'] == spare['inviteId']], [0])  # Conflict refusal spends nothing.
         self.assertEqual(self.post_request({**first, 'displayName': 'Someone else'}), (409, {'error': 'state_conflict'}, None))
 
     def test_request_activate_status_and_separate_enrollment_over_real_tls(self):
@@ -116,6 +126,40 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual(self.call('GET', '/v1/access/status', headers={'Authorization': 'Bearer '+enrolled['deviceToken']})[0], 403)
         self.assertEqual(self.call('POST', '/v1/status', {'version': '1.0.0', 'status': 'current'}, bearer)[0], 403)
         self.assertEqual(self.call('POST', '/v1/access/approve', {}, bearer)[0], 404)
+
+    def bearer(self):
+        request = self.request_value()
+        self.assertEqual(self.call('POST', '/v1/access/requests', request)[0], 201)
+        key = self.store.approve(request['requestId'], 'local_user', [])['activationKey']
+        activate = {**{k: request[k] for k in ('requestId', 'deviceId', 'appId', 'platform', 'arch')}, 'activationKey': key}
+        status, granted = self.call('POST', '/v1/access/activate', activate, {'Authorization': 'Request ' + request['requestSecret']})
+        self.assertEqual(status, 200)
+        return {'Authorization': 'Bearer ' + granted['accessToken']}
+
+    def test_presence_queues_behind_a_held_write_instead_of_answering_503(self):
+        """Forced lock: a writer holds the database while presence arrives, with SQLite's own busy wait cut to 50 ms.
+        Formerly presence polled past that wait, failed with 'database is locked' and answered 503 (Terrier dry run 11)."""
+        bearer, held, connect = self.bearer(), threading.Event(), sqlite3.connect
+        presence = {'sessionId': str(uuid.uuid4()), 'state': 'active', 'version': '1.0.0', 'districtId': None}
+        def hold():
+            with self.store.connect() as db:
+                db.execute('BEGIN IMMEDIATE'); held.set(); time.sleep(1)
+        with patch('access_store.sqlite3.connect', lambda path, **_: connect(path, timeout=0.05)):
+            writer = threading.Thread(target=hold); writer.start()
+            self.assertTrue(held.wait(5))
+            status = self.call('POST', '/v1/access/presence', presence, bearer)[0]
+            writer.join(5)
+        self.assertEqual(status, 200)
+
+    def test_an_unexpected_failure_still_answers_503_and_logs_its_cause_without_credentials(self):
+        bearer = self.bearer()
+        presence = {'sessionId': str(uuid.uuid4()), 'state': 'active', 'version': '1.0.0', 'districtId': None}
+        with patch.object(AccessStore, 'presence', side_effect=sqlite3.OperationalError('disk I/O error')), \
+                patch('sys.stderr', new_callable=io.StringIO) as log:
+            self.assertEqual(self.call('POST', '/v1/access/presence', presence, bearer), (503, {'error': 'service_unavailable'}))
+        self.assertIn('access POST answered 503', log.getvalue())
+        self.assertIn('sqlite3.OperationalError: disk I/O error', log.getvalue())
+        self.assertNotIn(bearer['Authorization'].split()[1], log.getvalue())
 
     def test_browser_host_json_and_target_rejections(self):
         request = self.request_value()
@@ -165,6 +209,23 @@ class AccessHTTPTests(unittest.TestCase):
         with self.store.connect() as db:
             self.assertEqual(db.execute('SELECT COUNT(*) FROM requests').fetchone()[0], 1)
 
+    def test_body_read_restores_the_socket_timeout_before_the_answer(self):
+        cls = handler_for(self.publisher, False, self.packs)
+        handler, timeouts, body = cls.__new__(cls), [], b'{"a":1}'
+        class Connection:
+            def gettimeout(self): return 30
+            def settimeout(self, value): timeouts.append(value)
+        headers = {'Content-Type': 'application/json', 'Content-Length': str(len(body))}
+        handler.headers = type('Headers', (), {'get': lambda _self, key, default=None: headers.get(key, default)})()
+        handler.path, handler.connection, handler.rfile = '/v1/access/requests', Connection(), io.BytesIO(body)
+        self.assertEqual(handler.access_body(), {'a': 1})
+        self.assertEqual(timeouts[-1], 30)
+        timeouts.clear()
+        handler.rfile = io.BytesIO(b'{"a"')  # short body: refused, and the timeout is still restored
+        with self.assertRaises(HTTPRefused):
+            handler.access_body()
+        self.assertEqual(timeouts[-1], 30)
+
     def test_rate_limit_is_bounded_and_recovers_after_window(self):
         clock = [0]
         limiter = RateLimit(clock=lambda: clock[0])
@@ -174,13 +235,137 @@ class AccessHTTPTests(unittest.TestCase):
         clock[0] = 61
         limiter.check('192.168.1.1')
 
-    def test_relay_rate_limit_uses_only_the_total_bucket(self):
-        limiter = RateLimit(clock=lambda: 0)
-        for _ in range(60): limiter.check('192.168.1.1')
-        with self.assertRaises(HTTPRefused): limiter.check('192.168.1.1')  # Ordinary peers keep 60/min.
-        for _ in range(540): limiter.check('127.0.0.1', per_peer=False)
-        with self.assertRaises(HTTPRefused) as caught: limiter.check('127.0.0.1', per_peer=False)
-        self.assertEqual(caught.exception.status, 429)  # 600/min total still binds the relay.
+    def test_access_routes_have_no_per_address_rate_limit(self):
+        for _ in range(65):  # Formerly 60/min per peer.
+            self.assertEqual(self.call('GET', '/v1/access/status')[0], 403)
+        self.assertEqual(self.call('POST', '/v1/access/requests', self.request_value())[0], 201)
+
+    request, approval, activated, payload = (store_tests.AccessStoreTests.request, store_tests.AccessStoreTests.approval,
+                                             store_tests.AccessStoreTests.activated, store_tests.AccessStoreTests.payload)
+
+    def get(self, path, token=None):
+        connection = http.client.HTTPSConnection('127.0.0.1', self.server.server_port, context=self.context, timeout=3)
+        try:
+            connection.request('GET', path, headers={'Authorization': 'Bearer ' + token} if token else {})
+            response = connection.getresponse()
+            return response.status, response.getheader('Content-Type'), response.getheader('Content-Length'), response.read()
+        finally:
+            connection.close()
+
+    def pack(self, district):
+        """A synthetic published pack: random bytes (the roads object is larger than several 64 KiB reads), except the
+        street and contacts stores, which carry the district's voter-file hash that publish checks."""
+        build = Path(self.temp.name) / ('build-' + secrets.token_hex(4))
+        build.mkdir()
+        for name in district_packs.REQUIRED + ('bundle.zip.sha256',):
+            if name in ('street.sqlite3', 'contacts.sqlite3'):
+                stamp(build / name, district)
+            else:
+                (build / name).write_bytes(secrets.token_bytes(300000 if name == 'roads.sqlite3' else 64))
+        with zipfile.ZipFile(build / 'bundle.zip', 'x') as archive:
+            archive.writestr('manifest.json', json.dumps({'snapshot': district_packs.SNAPSHOT_PREFIX[district] + '0' * 12}))
+        return json.loads(base64.b64decode(district_packs.publish(self.store, district, build, packs=self.packs)['payload']))
+
+    def raw_get(self, path, token):
+        connection = http.client.HTTPSConnection('127.0.0.1', self.server.server_port, context=self.context, timeout=3)
+        self.addCleanup(connection.close)
+        connection.request('GET', path, headers={'Authorization': 'Bearer ' + token})
+        return connection.getresponse()
+
+    @staticmethod
+    def object_url(revision, item, offset=0, length=16):
+        return '/v1/data/objects/%s?offset=%d&length=%d&revisionId=%s' % (item['sha256'], offset, length, revision['revisionId'])
+
+    def test_data_routes_require_an_active_approval_for_that_district(self):
+        co, ct = self.pack('co-05'), self.pack('ct-01')
+        later = self.pack('co-05')
+        _, activated = self.activated('terrier')  # approved for co-05 and or-05
+        token, catalog = activated['accessToken'], '/v1/data/catalog?after=%d&limit=%d&districtId=%s'
+        self.assertEqual(self.get(catalog % (0, 25, 'co-05'))[0], 403)
+        self.assertEqual(self.get(self.object_url(co, co['objects'][0]))[0], 403)
+        status, kind, _, body = self.get(catalog % (0, 1, 'co-05'), token)
+        page = json.loads(body)
+        self.assertEqual((status, kind, sorted(page), page['nextCursor'], page['hasMore']), (200, 'application/json', ['hasMore', 'nextCursor', 'revisions'], 1, True))
+        self.assertEqual(self.payload(page['revisions'][0]), co)
+        page = json.loads(self.get(catalog % (1, 25, 'co-05'), token)[3])
+        self.assertEqual(([self.payload(e)['revisionId'] for e in page['revisions']], page['nextCursor'], page['hasMore']),
+                         ([later['revisionId']], 3, False))
+        self.assertEqual(json.loads(self.get(catalog % (3, 25, 'co-05'), token)[3]), {'revisions': [], 'nextCursor': 3, 'hasMore': False})
+        self.assertEqual(self.get(catalog % (0, 25, 'ct-01'), token)[0], 403)  # not approved for ct-01
+        self.assertEqual(self.get(self.object_url(ct, ct['objects'][0]), token)[0], 403)
+        self.assertEqual(self.get('/v1/data/catalog?after=0&limit=25', token)[0], 403)  # Terrier data is always district-scoped
+        self.assertEqual(self.get(self.object_url(co, co['objects'][0]), token)[0], 200)
+        self.store.revoke(self.payload(activated['grant'])['grantId'])
+        self.assertEqual(self.get(catalog % (0, 25, 'co-05'), token)[0], 403)
+        self.assertEqual(self.get(self.object_url(co, co['objects'][0]), token)[0], 403)
+
+    def test_object_ranges_are_exact_bounded_listed_and_streamed_in_small_reads(self):
+        revision = self.pack('co-05')
+        token = self.activated('terrier')[1]['accessToken']
+        item = max(revision['objects'], key=lambda value: value['size'])
+        data = (self.packs / 'objects' / item['sha256']).read_bytes()
+        self.assertEqual(len(data), item['size'])
+        reads = []
+        class Recording(io.BufferedReader):
+            def read(self, size=-1):
+                reads.append(size)
+                return super().read(size)
+        with patch('access_http.open', create=True, side_effect=lambda path, mode: Recording(io.FileIO(path, mode))):
+            answer = self.get(self.object_url(revision, item, 10, 200000), token)
+        self.assertEqual(answer, (200, 'application/octet-stream', '200000', data[10:200010]))
+        self.assertTrue(len(reads) >= 4 and max(reads) <= 65536, reads)
+        tail = item['size'] - 5
+        self.assertEqual(self.get(self.object_url(revision, item, tail, 5), token)[2:], ('5', data[tail:]))
+        for offset, length in ((tail, 6), (item['size'], 1), (0, 4 * 1024 * 1024 + 1)):
+            self.assertEqual(self.get(self.object_url(revision, item, offset, length), token)[0], 400)
+        self.assertEqual(self.get(self.object_url(revision, {'sha256': hashlib.sha256(b'unlisted').hexdigest()}), token)[0], 403)
+        self.assertEqual(self.get(self.object_url({'revisionId': str(uuid.uuid4())}, item), token)[0], 403)
+        self.assertEqual(self.get('/v1/data/catalog?after=0&limit=25&districtId=co-05&extra=1', token)[0], 404)
+        self.assertEqual(self.get('/v1/data/catalog?after=0&limit=' + '9' * 190, token)[0], 400)  # over 200 characters
+        self.assertEqual(self.get('/v1/access/status?x=1', token)[0], 400)  # '?' stays refused outside /v1/data/
+        self.assertEqual(self.get('/v1/access/status', token)[0], 200)
+
+    def test_data_has_its_own_slots_and_is_refused_at_once_when_they_are_full(self):
+        revision = self.pack('co-05')
+        token = self.activated('terrier')[1]['accessToken']
+        url = self.object_url(revision, revision['objects'][0])
+        self.assertEqual(self.server.RequestHandlerClass.data_slots._initial_value, 16)
+        slots = self.server.RequestHandlerClass.data_slots = threading.BoundedSemaphore(1)
+        slots.acquire()  # every data slot busy
+        started = time.monotonic()
+        response = self.raw_get(url, token)
+        self.assertEqual((response.status, json.loads(response.read()), response.getheader('Retry-After')), (503, {'error': 'service_unavailable'}, '5'))
+        self.assertLess(time.monotonic() - started, 2)  # refused at once, not queued
+        self.assertEqual(self.get('/v1/access/status', token)[0], 200)  # the access routes keep their slots
+        slots.release()
+        self.assertEqual(self.get(url, token)[0], 200)
+        self.assertTrue(slots.acquire(timeout=2))  # released after the response
+
+    def test_an_object_response_past_its_deadline_drops_the_connection_and_frees_its_slot(self):
+        revision = self.pack('co-05')
+        token = self.activated('terrier')[1]['accessToken']
+        item = max(revision['objects'], key=lambda value: value['size'])
+        self.server.RequestHandlerClass.data_slots = threading.BoundedSemaphore(1)
+        with patch.multiple('access_http', DATA_RATE=10 ** 12, DATA_GRACE=-1):  # already past due when the body starts
+            response = self.raw_get(self.object_url(revision, item, 0, item['size']), token)
+            self.assertEqual((response.status, response.getheader('Content-Length')), (200, str(item['size'])))
+            with self.assertRaises(http.client.IncompleteRead):
+                response.read()
+        deadline = time.monotonic() + 2
+        while self.get(self.object_url(revision, item), token)[0] != 200:  # the only slot came back
+            self.assertLess(time.monotonic(), deadline)
+            time.sleep(0.05)
+
+    def test_a_pack_store_in_onedrive_or_git_is_never_served(self):
+        revision = self.pack('co-05')
+        token = self.activated('terrier')[1]['accessToken']
+        self.assertEqual(self.server.RequestHandlerClass.packs_root, self.packs.resolve())
+        synced = handler_for(self.publisher, False, Path(self.temp.name) / 'OneDrive - Org' / 'packs')
+        self.assertIsNone(synced.packs_root)
+        self.server.RequestHandlerClass = synced
+        self.assertEqual(self.get(self.object_url(revision, revision['objects'][0]), token)[0], 503)
+        self.assertEqual(self.get('/v1/data/catalog?after=0&limit=25&districtId=co-05', token)[0], 503)
+        self.assertEqual(self.get('/v1/access/status', token)[0], 200)
 
     def test_header_drip_has_total_deadline_and_releases_connection(self):
         self.server.RequestHandlerClass.header_deadline = 0.15

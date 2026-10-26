@@ -1361,11 +1361,7 @@ if os.path.exists(os.path.join(B, 'member_desk_bundle.json')) and os.path.exists
            all((d.get('validation') or {}).get('predictions_are_out_of_fold') for d in _mgt.values()),
            '%d E members, %d malformed; weights=%s; panel r=%s'%(
            len(_mgem),_mgebad,_mgew,{k:round(v.get('r',0),3) for k,v in _mgpan.items()}))
-        _expected_status={'O':'ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED',
-                          'C':'ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED',
-                          'E':'ACTIVE_EXTERNAL_GOLD_ANCHORED',
-                          'A':'ACTIVE_EXTERNAL_GOLD_ANCHORED',
-                          'N':'ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED'}
+        from members.ratified_trait_status import RATIFIED_STATUS as _expected_status   # the producer caps at the same map
         ck('all broad Big Five traits activate with explicit panel-strength labels',
            {k:v.get('status') for k,v in _mgt.items()}==_expected_status and
            all(any((v.get('association_gates') or {}).values()) for v in _mgt.values()) and
@@ -2113,7 +2109,7 @@ if _g:
     _tag_count=len(_tag_rows)
     from legislation import sentinel_admissions as _SA
     _admissions=_SA.load(B)
-    _effective_tags=_SA.effective_tags({'%s|%s'%(r['bill'],r['congress']):r for r in _tag_rows},_admissions)
+    _effective_tags=_SA.effective_tags({'%s|%s'%(r['bill'],r['congress']):r for r in _tag_rows},_admissions,B)
     _tag_keys={'%s|%s'%(str(row.get('bill') or '').strip(),
                         str(row.get('congress') or '').strip())
                for row in _effective_tags.values()}
@@ -2608,8 +2604,7 @@ try:
                 # (The earlier form asserted the picked name startswith the glob's own prefix, which
                 # is tautologically true for anything the glob returned and could never fail -- a
                 # negative control caught it.)
-                _picked = os.path.basename(max(_g.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),
-                                               key=os.path.getmtime))
+                _picked = os.path.basename(__import__('source_select').select_network(_g.glob(os.path.join(B, 'congress_cosponsor_network_*.xlsx')),'any',root=B))
                 _published = (_D.get('cu') or {}).get('graph')
                 ck('the CU file unfiltered max-by-mtime consumers would pick IS the published graph',
                    bool(_published) and _picked == _published,

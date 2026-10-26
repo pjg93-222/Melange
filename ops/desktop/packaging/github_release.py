@@ -14,7 +14,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server'))
-from desktop_admin import APPS, Refused, Store, canonical, file_hashes, verify_envelope
+from desktop_admin import APPS, PUBLISHER_THUMBPRINTS, Refused, Store, canonical, file_hashes, verify_envelope
 
 REPOSITORY = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*')
 VERSION = re.compile(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)')
@@ -131,6 +131,7 @@ def prepare(store, spec, output):
                 'platform': platform, 'arch': arch,
                 'issuedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
                 'minimumUpdaterVersion': '1.0.0', 'dataSchemaVersion': 1,
+                'publisherThumbprints': list(PUBLISHER_THUMBPRINTS),
                 'purpose': 'melange-desktop-github-release',
                 'distribution': 'public-installations', 'repository': repos[app],
                 'sourceRefs': spec['sourceRefs'],

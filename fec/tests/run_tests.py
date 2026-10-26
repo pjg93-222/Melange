@@ -57,6 +57,9 @@ ok('SGATE monotone down the full ladder',
    all(MC.SGATE[a]>=MC.SGATE[b] for a,b in zip(
        ('Highly Persuadable','Persuadable','Lean Persuadable','True Neutral','Lean Skeptic','Skeptic','Highly Skeptical'),
        ('Persuadable','Lean Persuadable','True Neutral','Lean Skeptic','Skeptic','Highly Skeptical','Opponent'))))
+ok('persuadable ladder TN < LP < P < HP, same order in SGATE and TORD (HP .65 ratified 2026-10-11, Paul-delegated RE-2)',
+   all(t[a]<t[b] for t in (MC.PERS,MC.SGATE,MC.TORD) for a,b in zip(
+       ('True Neutral','Lean Persuadable','Persuadable'),('Lean Persuadable','Persuadable','Highly Persuadable'))))
 ok('auto-repair SMART Acts excluded even when source title is ambiguous',
    BR.excluded_bill('H.R.3664',117,'SMART Act','') and
    BR.excluded_bill('H.R.1707',118,'SMART Act',''))
@@ -811,7 +814,9 @@ _LANE_SPEECH_PKG=(
 _LANE_PYTEST=(
     # S-2 drain (decision F-3, 2026-10-11): 176 suites that existed but no lane named. Each ran
     # green ALONE from LIVE (pytest, this lane's env, 300 s bound, one at a time) and wrote nothing
-    # of its own into the tree. The suites that stayed red are on the census BACKLOG
+    # of its own into the tree -- except test_speech_channel, whose CSV-emission test DID rewrite the live
+    # stance joblib/sidecar, accuracy report and speech_stance_final.csv + receipt until the 2026-10-20
+    # fix; test_speech_channel_no_live_writes now guards that. The suites that stayed red are on the census BACKLOG
     # (fec/tests/infra/test_kernel_registration_census.py) with a one-line reason each.
     'test_acquire_member_longform_audio', 'test_acu_bill_title_corroboration_query_plan',
     'test_adjudicated_corroboration', 'test_admission_membership_projection',
@@ -871,7 +876,8 @@ _LANE_PYTEST=(
     'test_sentinel_govinfo_statute',
     'test_sentinel_source_unavailable', 'test_sentinel_statute_identity',
     'test_snapshot_member_longform_ready_sources',
-    'test_speech_channel', 'test_staffer_assertions', 'test_staffer_automatic_service',
+    'test_speech_channel', 'test_speech_channel_no_live_writes',
+    'test_staffer_assertions', 'test_staffer_automatic_service',
     'test_staffer_canonical_graph', 'test_staffer_connection_facts', 'test_staffer_contact_group',
     'test_staffer_contacts', 'test_staffer_distinct_routes', 'test_staffer_ecosystem_routes',
     'test_staffer_evidence_boundaries', 'test_staffer_governing_audit',
@@ -1044,6 +1050,8 @@ _LANE_PYTEST=(
     # degrade, gold-orphan policy.
     'test_pipeline_failure_diagnostics',
     'test_chain_transaction',
+    # 2026-10-23 reliability task 1: the served staffer-live workspace is a pointer-flipped generation inside the chain transaction.
+    'test_served_generation_txn',
     'test_chain_freshness_degrade',
     'test_gold_orphan_policy',
     # 2026-10-15 admissions spend controls (D-211): classifier quota stop and per-run call budget.
