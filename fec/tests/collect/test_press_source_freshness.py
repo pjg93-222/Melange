@@ -17,12 +17,12 @@ from collect import refresh_press_stream as press
 from collect.build_press_engine_feed import REQUIRED_RUN_FILES
 
 
-SOURCES = {name: str(index) * 64 for index, name in enumerate((
+SOURCES = {name: ("%x" % index) * 64 for index, name in enumerate((
     "refresh_press_delta.R", "press_member_overrides.R", "press_official_coverage.R",
     "press_release_date_precedence.R", "press_wordpress_custom_posts.R",
     "press_official_dated_listings.R",
     "press_request_deadlines.R",
-    "press_backlog.R", "cu_press_release_scraper.R"), 1)}
+    "press_backlog.R", "press_host_routes.R", "cu_press_release_scraper.R"), 1)}
 
 
 def fake_popen(monkeypatch, child):
@@ -132,7 +132,8 @@ def test_source_manifest_binds_each_actual_file(tmp_path, monkeypatch):
              code / "press_official_coverage.R", code / "press_release_date_precedence.R",
              code / "press_wordpress_custom_posts.R",
              code / "press_official_dated_listings.R",
-             code / "press_request_deadlines.R", code / "press_backlog.R", upstream]
+             code / "press_request_deadlines.R", code / "press_backlog.R",
+             code / "press_host_routes.R", upstream]
     for path in files:
         path.write_text(path.name)
     monkeypatch.setattr(press, "ROOT", str(root))

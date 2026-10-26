@@ -441,6 +441,15 @@ def _coverage(root, retry):
             "pending_members": dict(sorted(members.items()))}
 
 
+def _route_counts(fulltext_rows):
+    """Rows of the published fulltext feed that were read through an official per-host endpoint, by route kind."""
+    kinds = {}
+    for row in fulltext_rows:
+        if row.get("press_route_kind"):
+            kinds[row["press_route_kind"]] = kinds.get(row["press_route_kind"], 0) + 1
+    return {"fulltext_rows": sum(kinds.values()), "by_kind": dict(sorted(kinds.items()))}
+
+
 def build(source_root, tone_output, fulltext_output, mentions_output, receipt_output,
           intake_receipt_path, stage5=None):
     root = Path(source_root)
@@ -503,12 +512,17 @@ def build(source_root, tone_output, fulltext_output, mentions_output, receipt_ou
             # (run_stage5.R:73-76); it is marked body_fallback='title', not a failure of the run.
             title_fallback.add(turn_key(row))
             continue
-        fulltext.append({
+        entry = {
             "url": row.get("url") or "", "title": row.get("title") or "", "text": body,
             "member": row.get("member") or "", "bioguide": row.get("bioguide") or "",
             "source": "PRESS_REFRESH_HOST_ARTICLE", "source_run": root.name,
             "body_sha256": hashlib.sha256(body.encode("utf-8", "replace")).hexdigest(),
-        })
+        }
+        if (host or {}).get("press_route_kind"):
+            # Read through an official per-host endpoint (press_host_routes.R): say which, and where. Unrouted rows stay byte-identical.
+            entry["press_route_kind"] = host["press_route_kind"]
+            entry["press_route_link"] = host.get("press_route_link") or ""
+        fulltext.append(entry)
     for row in tone:
         if turn_key(row) in title_fallback:
             row["body_fallback"] = "title"
@@ -568,6 +582,7 @@ def build(source_root, tone_output, fulltext_output, mentions_output, receipt_ou
             "coverage": coverage,
             "stage5": stage5_report,
             "title_fallback_rows": sum(row.get("body_fallback") == "title" for row in tone),
+            "host_routes": _route_counts(fulltext),
             "counts": {"tone_rows": len(tone), "fulltext_rows": len(fulltext),
                        "official_mentions": len(typed_mentions),
                        "official_mentions_with_unique_host_member": host_resolved},
@@ -704,6 +719,7 @@ def build_cumulative(tone_output, fulltext_output, mentions_output, receipt_outp
                 "collection_intake": run_receipt["collection_intake"],
                 "source_sha256": run_receipt["source_sha256"],
                 "counts_before_deduplication": run_receipt["counts"],
+                "host_routes": run_receipt["host_routes"],
                 "coverage": run_receipt["coverage"],
             })
 
@@ -746,6 +762,7 @@ def build_cumulative(tone_output, fulltext_output, mentions_output, receipt_outp
             "coverage": coverage,
             "stage5": stage5_report,
             "title_fallback_rows": sum(row.get("body_fallback") == "title" for row in tone),
+            "host_routes": _route_counts(fulltext),
             "counts": {
                 "accepted_runs": len(ledger),
                 "tone_rows": len(tone),
