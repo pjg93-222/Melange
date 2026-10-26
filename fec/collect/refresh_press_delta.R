@@ -648,6 +648,23 @@ write_retry_receipt <- function(materialized) {
   invisible(payload)
 }
 
+# The sealed press_site_failures.json must match the receipt that claims it (count and SHA-256); a receipt claiming
+# skipped sites over a missing file is refused. A receipt without the fields (older runs) carries no claim.
+validate_site_failures_proof <- function(root, receipt) {
+  claimed <- receipt$site_failures
+  if (is.null(claimed)) return(invisible(TRUE))
+  path <- file.path(root, "press_site_failures.json")
+  if (!file.exists(path)) {
+    if (isTRUE(claimed > 0)) stop("receipt claims ", claimed, " skipped site(s) but press_site_failures.json is missing: ", root)
+    return(invisible(TRUE))
+  }
+  rows <- jsonlite::fromJSON(path, simplifyVector = FALSE)$failures
+  if (!identical(as.integer(length(rows)), as.integer(claimed)) ||
+      !identical(receipt$site_failures_sha256, sha256_file(path)))
+    stop("press_site_failures.json does not match its receipt (count or sha256): ", root)
+  invisible(TRUE)
+}
+
 load_valid_retry_receipt <- function() {
   if (!file.exists(retry_receipt_path))
     stop("score-only requires a completed live-network retry receipt")
@@ -661,6 +678,7 @@ load_valid_retry_receipt <- function() {
       !identical(receipt$fulltext_csv_sha256, sha256_file(full_csv))) {
     stop("live-network retry receipt does not match the fulltext artifacts")
   }
+  validate_site_failures_proof(run_root, receipt)   # a sites-only PARTIAL is admitted only with its proof intact
   validate_official_coverage_artifacts(receipt)
   receipt
 }
@@ -822,6 +840,8 @@ if (!is.na(retry_from)) {
   # over the parent's skips (CodeRabbit PR #94): both stop the recovery.
   parent_site_failures <- file.path(source_root, "press_site_failures.json")
   target_site_failures <- file.path(run_root, "press_site_failures.json")
+  validate_site_failures_proof(source_root, jsonlite::fromJSON(
+    file.path(source_root, "press_network_retry_receipt.json"), simplifyVector = TRUE))   # the parent's own proof
   if (file.exists(parent_site_failures)) {
     if (!isTRUE(file.copy(parent_site_failures, target_site_failures, overwrite = TRUE)))
       stop("failed to copy the parent's press_site_failures.json: ", source_root)

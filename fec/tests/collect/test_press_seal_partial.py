@@ -95,6 +95,7 @@ def test_integrity_failures_stay_fatal(tmp_path, monkeypatch, tamper):
     first = dated("a")
     audited = audit(tmp_path, monkeypatch, dated_rows=[first], scored_rows=[first], mutate=mutate)
     assert audited["live_network_retry_receipt_valid"] is False
+    assert audited["coverage_complete"] is False          # CodeRabbit PR #94: invalid proof is never complete
     assert any("SITE_FAILURES_PROOF_MISMATCH" in error for error in audited["errors"]), audited
 
 
@@ -149,6 +150,8 @@ def test_retry_from_copies_the_parents_skipped_sites_before_the_receipt_is_writt
     # a failed copy stops the recovery, and a stale file is removed when the parent has none (CodeRabbit PR #94)
     assert "if (!isTRUE(file.copy(parent_site_failures, target_site_failures, overwrite = TRUE)))" in source
     assert "unlink(target_site_failures)" in source and 'stop("failed to remove a stale press_site_failures.json' in source
+    # the parent's proof is validated against the parent receipt before it is copied (CodeRabbit PR #94)
+    assert source.index("validate_site_failures_proof(source_root,") < copy
     assert source.index("import_official_coverage_from_run(source_root)") < copy
     assert copy < source.rindex("completion <- write_retry_receipt")
     assert copy < source.index("run_receipt_metrics$retry_source_run <- basename(source_root)")
@@ -179,3 +182,14 @@ def test_feed_coverage_names_the_sites_from_the_validated_file_not_the_receipt_c
     seal_sites(tmp_path, clean, failures=(), status="PASS")
     assert feed._coverage(tmp_path, clean) == {"complete": True, "pending_body_urls_carried": 0,
                                                "pending_body_urls_sha256": None, "pending_members": {}}
+
+
+def test_score_only_admits_a_sites_only_partial_only_with_its_proof_intact():
+    # CodeRabbit PR #94: load_valid_retry_receipt checks press_site_failures.json against the receipt.
+    source = (FEC / "collect" / "refresh_press_delta.R").read_text(encoding="utf-8")
+    helper = source[source.index("validate_site_failures_proof <- function(root, receipt)"):]
+    helper = helper[:helper.index("\n}\n")]
+    assert "is.null(claimed)" in helper and "is missing" in helper and "sha256_file(path)" in helper
+    gate = source[source.index("load_valid_retry_receipt <- function()"):]
+    gate = gate[:gate.index("\n}\n")]
+    assert "validate_site_failures_proof(run_root, receipt)" in gate
