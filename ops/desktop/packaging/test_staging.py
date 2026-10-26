@@ -149,5 +149,29 @@ class TemplateStagingTests(unittest.TestCase):
                 stage_file(source, destination, Path(POCKET_TEMPLATE))
 
 
+class DormantLauncherTests(unittest.TestCase):
+    def test_pip_setuptools_and_venv_launchers_are_not_copied_but_lookalikes_are(self):
+        import shutil
+        from bundle_python import _ignore, dormant_launchers
+        dropped = ['Lib/site-packages/pip/_vendor/distlib/' + name for name in ('t32.exe', 't64.exe', 't64-arm.exe', 'w32.exe', 'w64.exe', 'w64-arm.exe')]
+        dropped += ['lib/setuptools/' + name for name in ('cli.exe', 'cli-32.exe', 'CLI-64.exe', 'cli-arm64.exe', 'gui.exe', 'gui-32.exe', 'gui-64.exe', 'gui-arm64.exe')]
+        dropped += ['Lib/venv/scripts/nt/python.exe', 'Lib/venv/scripts/nt/pythonw.exe', 'bin/venvlauncher.exe', 'bin/venvwlauncher.exe']
+        kept = ['python.exe', 'bin/python.exe', 'Lib/venv/scripts/nt/venv.py', 'Lib/site-packages/pip/_vendor/distlib/scripts.py',
+                'Lib/site-packages/other/t64.exe', 'Lib/site-packages/other/cli.exe', 'Lib/site-packages/numpy/python.exe', 'program/soffice.exe']
+        with tempfile.TemporaryDirectory() as folder:
+            source, target = Path(folder) / 'src', Path(folder) / 'out'
+            for name in dropped + kept:
+                (source / name).parent.mkdir(parents=True, exist_ok=True)
+                (source / name).write_bytes(b'MZ')
+            shutil.copytree(source, target, ignore=dormant_launchers)
+            copied = sorted(path.relative_to(target).as_posix() for path in target.rglob('*') if path.is_file())
+            self.assertEqual(copied, sorted(kept))
+            # bundle_python's own ignore keeps its patterns and adds the launchers
+            self.assertEqual(_ignore('*.pyc')(str(source / 'Lib/venv/scripts/nt'), ['python.exe', 'a.pyc', 'venv.py']), {'python.exe', 'a.pyc'})
+
+    def test_native_runtimes_are_copied_without_the_launchers(self):
+        self.assertIn('ignore=dormant_launchers', (HERE / 'build_runtime.py').read_text(encoding='utf-8'))
+
+
 if __name__ == '__main__':
     unittest.main()
