@@ -24,9 +24,33 @@ function stripState(runtimeRoot,log=()=>{}){
       if(child.isDirectory()&&child.name.toLowerCase()==='sources')walk(path.join(runtimeRoot,application.name,child.name));
   return removed;
 }
+// N20 (Paul: the public installer ships a no-data dashboard shell only). The shell is the first-run page that
+// melange_bootstrap.py writes into the user's data folder; the real Moneyball*.html and any dataset never ship.
+// Dashboards are banned anywhere in the runtime; datasets only in Melange's own sources (Terrier and Mentat name reviewed schema/geo files in the manifest).
+const DASHBOARD_PATTERN=/^moneyball.*\.html$/i,DATASET_PATTERN=/\.(xlsx|xlsm|xls|csv|parquet|feather|ndjson|joblib|pkl|pickle|npz)$/i;
+function findShippedData(runtimeRoot){
+  const found=[];
+  const walk=(directory,datasets)=>{
+    let entries;try{entries=fs.readdirSync(directory,{withFileTypes:true});}catch(error){return;}
+    for(const entry of entries){
+      const full=path.join(directory,entry.name);
+      if(entry.isDirectory())walk(full,datasets);
+      else if(DASHBOARD_PATTERN.test(entry.name)||(datasets&&DATASET_PATTERN.test(entry.name)))found.push(full);
+    }
+  };
+  if(fs.existsSync(runtimeRoot))for(const application of fs.readdirSync(runtimeRoot,{withFileTypes:true}))if(application.isDirectory()){
+    const root=path.join(runtimeRoot,application.name);
+    if(application.name==='melange'){
+      for(const child of fs.readdirSync(root,{withFileTypes:true}))if(child.isDirectory())walk(path.join(root,child.name),child.name.toLowerCase()==='sources');
+    }else walk(root,false);
+  }
+  return found;
+}
 async function afterPack(context){
   const removed=stripState(path.join(context.appOutDir,'resources','runtime'),message=>console.log(message));
   console.log('[after-pack] runtime packing report: removed '+removed.length+' state/database path(s) under runtime/*/sources');
+  const shipped=findShippedData(path.join(context.appOutDir,'resources','runtime'));
+  if(shipped.length)throw new Error('A public installer ships only the no-data dashboard shell (N20), but the package holds a dashboard or dataset: '+shipped.join(', '));
   // Downloads layout (DL-spec 1.3, 2.8): the long-path gate, then the one writer of the generated NSIS include (builder.cjs nsis.include).
   const depth=layout.deepestRelative(context.appOutDir),budget=layout.LAYOUT.deepestRelativeBudget;
   console.log('[after-pack] deepest packaged path: '+depth+' characters (limit '+budget+')');
@@ -39,4 +63,4 @@ async function afterPack(context){
     console.log('[after-pack] wrote '+target);
   }
 }
-module.exports=afterPack;module.exports.stripState=stripState;
+module.exports=afterPack;module.exports.stripState=stripState;module.exports.findShippedData=findShippedData;
