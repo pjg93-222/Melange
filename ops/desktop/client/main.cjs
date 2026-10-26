@@ -119,7 +119,12 @@ async function launchAuthorized(fromAccess){
  try{refuseModuleDataSettings(runtime.configuration||read('settings.json'));}catch(error){await failStartup(error);return;}
  try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await settleDistrict(gate);await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked')await onRevoked();});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(accessGate?.accepted?.revoked)await dropDistrictData();if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
  if(closing||generation!==accessLifecycle.generation)return;
- if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'&&(accessLifecycle.requiresFreshPassword||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))){await showTerrierSignIn();return;}
+ if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'){
+  const passwordlessOwner=await accessLifecycle.refreshPasswordlessOwner({expectedGeneration:generation});
+  const signedIn=passwordlessOwner||(!accessLifecycle.requiresFreshPassword&&await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition));
+  if(closing||generation!==accessLifecycle.generation||accessLifecycle.osLocked)return;
+  if(!signedIn){await showTerrierSignIn();return;}
+ }
  openingAccess=true;
  try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});
    if(closing||generation!==accessLifecycle.generation)return;
