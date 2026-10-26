@@ -625,31 +625,31 @@ press_official_collect <- function(members, floor, request = press_official_defa
   configured <- PRESS_OFFICIAL_DATED_MEMBERS[
     PRESS_OFFICIAL_DATED_MEMBERS$bioguide %in% members$bioguide, , drop = FALSE]
   records <- list(); proofs <- list()
-  for (number in seq_len(nrow(configured))) {
+  attempt <- function(number) {
     config <- configured[number, , drop = FALSE]
     member <- members[members$bioguide == config$bioguide[[1L]], , drop = FALSE]
     if (nrow(member) != 1L)
       stop("official dated press member identity is ambiguous: ", config$bioguide[[1L]])
     if (!press_official_same_host(member$url[[1L]], config$origin[[1L]]))
       stop("official dated press origin no longer matches roster: ", config$bioguide[[1L]])
-    result <- tryCatch({
-      result <- press_official_collect_member(config, floor, request, today)
-      if (config$bioguide[[1L]] == "L000560")
-        result <- press_official_add_larsen_rss(result, request)
-      result
-    }, press_site_unavailable = function(condition) {
-      # No registry to record into (a direct caller): keep the historical fatal behavior.
-      if (is.null(envir)) stop(condition)
-      press_site_failure_record(envir, config$bioguide[[1L]], "official_dated_listing", condition)
-      NULL
-    })
-    if (is.null(result)) next
+    result <- press_official_collect_member(config, floor, request, today)
+    if (config$bioguide[[1L]] == "L000560")
+      result <- press_official_add_larsen_rss(result, request)
     if (!is.null(envir))
       press_official_coverage_register(press_official_shared_coverage_proof(result), envir)
     for (name in intersect(c("member", "chamber", "state", "party"), names(member)))
       result$records[[name]] <- rep(member[[name]][[1L]], nrow(result$records))
+    result
+  }
+  record <- function(number, condition)
+    press_site_failure_record(envir, configured$bioguide[[number]], "official_dated_listing", condition)
+  # No registry (a direct caller): keep the historical fatal behavior, no deferral.
+  results <- press_site_attempt_all(nrow(configured), attempt, record, catch = !is.null(envir))
+  for (number in seq_along(results)) {
+    result <- results[[number]]
+    if (is.null(result)) next
     records[[length(records) + 1L]] <- result$records
-    proofs[[config$bioguide[[1L]]]] <- result$proof
+    proofs[[configured$bioguide[[number]]]] <- result$proof
   }
   list(records = if (length(records)) dplyr::bind_rows(records) else press_official_empty(),
        proofs = proofs)

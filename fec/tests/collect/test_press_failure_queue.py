@@ -106,6 +106,28 @@ def test_record_run_ingests_the_collector_file_and_writes_the_receipt(tmp_path):
     assert rows(queue)[0]["consecutive_runs"] == 2
 
 
+def test_next_full_walk_is_the_backlog_pass_open_row_recovers_or_increments(tmp_path):
+    # Paul 2026-10-26: skipped sites are re-attempted.  The daily full walk re-tries every open row's
+    # member (and each walk retries once in-run), so an open row recovers when the walk no longer
+    # fails it, increments when it still does, and re-opens at 1 if it fails after recovering.
+    queue = tmp_path / "queue.ndjson"
+    q.record_run(write_run(tmp_path, "press_refresh_20261025", [ROW]), queue, now=NOW)
+    q.record_run(write_run(tmp_path, "press_refresh_20261026", [ROW]), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("open", 2)
+    q.record_run(write_run(tmp_path, "press_refresh_20261027", []), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("recovered", 0)
+    assert q.open_count(queue) == 0
+    q.record_run(write_run(tmp_path, "press_refresh_20261028", [ROW]), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("open", 1)
+
+
+def test_the_in_run_retry_knob_is_one_env_var_defaulting_to_60_seconds():
+    text = (FEC / "collect" / "press_official_coverage.R").read_text(encoding="utf-8")
+    assert 'Sys.getenv("PRESS_SITE_RETRY_DELAY_S", "60")' in text
+    for name in ("press_wordpress_custom_posts.R", "press_official_dated_listings.R"):
+        assert "press_site_attempt_all(" in (FEC / "collect" / name).read_text(encoding="utf-8")
+
+
 def test_record_run_on_a_clean_run_is_not_partial(tmp_path):
     run = write_run(tmp_path, "press_refresh_20261025", [])
     receipt = q.record_run(run, tmp_path / "queue.ndjson", now=NOW)

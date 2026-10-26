@@ -285,6 +285,49 @@ press_site_failure_record <- function(envir, bioguide, source, condition) {
   invisible(NULL)
 }
 
+# In-run retry (Paul 2026-10-26: skipped sites are back-logged for another attempt).  A site that is
+# unavailable on the first pass is deferred, and after the whole member loop each deferred site is
+# tried ONCE more, after a single wait.  A retry that succeeds is collected normally and is never
+# recorded as a failure; a retry that fails is recorded exactly as before.  Only the classed
+# press_site_unavailable error is deferred: integrity stop()s stay fatal on either pass.
+# ponytail: calibration knob; the wait is shared by all deferred sites and by both collectors' passes.
+press_site_retry_delay <- function() {
+  value <- suppressWarnings(as.numeric(Sys.getenv("PRESS_SITE_RETRY_DELAY_S", "60")))
+  if (length(value) != 1L || is.na(value) || value < 0) 60 else value
+}
+
+# attempt(i) returns the member's result (never NULL) or raises press_site_unavailable;
+# record(i, condition) is called only for a site that failed its retry too.  Returns a list of
+# length n in member order, NULL where the site stayed unavailable.  catch = FALSE keeps the
+# historical fatal behavior for a caller with no failure registry.
+press_site_attempt_all <- function(n, attempt, record, catch = TRUE) {
+  results <- vector("list", n)
+  if (!catch) {
+    for (i in seq_len(n)) results[i] <- list(attempt(i))
+    return(results)
+  }
+  deferred <- integer(0)
+  for (i in seq_len(n)) {
+    got <- tryCatch(attempt(i), press_site_unavailable = function(condition) {
+      message("PRESS SITE DEFERRED for one retry (", condition$error_class, "): ",
+              conditionMessage(condition))
+      NULL
+    })
+    if (is.null(got)) deferred <- c(deferred, i) else results[i] <- list(got)
+  }
+  if (length(deferred)) {
+    delay <- press_site_retry_delay()
+    message("Retrying ", length(deferred), " skipped press site(s) once after ", delay, "s")
+    if (delay > 0) getOption("press_site_sleep", Sys.sleep)(delay)
+    for (i in deferred)
+      results[i] <- list(tryCatch(attempt(i), press_site_unavailable = function(condition) {
+        record(i, condition)
+        NULL
+      }))
+  }
+  results
+}
+
 # TRUE when no member outside the failed set contributed an index row: every member failed.
 press_site_all_failed <- function(failures, index) {
   if (!length(failures)) return(FALSE)

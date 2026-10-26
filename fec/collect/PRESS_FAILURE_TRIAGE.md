@@ -11,6 +11,14 @@ this fully sustainable."
   `press_site_unavailable` and friends in `collect/press_official_coverage.R`; the loops in
   `collect/press_wordpress_custom_posts.R` (`press_wp_collect`) and
   `collect/press_official_dated_listings.R` (`press_official_collect`).
+- Skipped sites are back-logged for another attempt (Paul 2026-10-26). In-run: every site that was
+  unavailable is retried ONCE at the end of the member loop, after a single wait of
+  `PRESS_SITE_RETRY_DELAY_S` seconds (default 60); a retry that succeeds is collected normally and is not
+  recorded (`press_site_attempt_all`, `collect/press_official_coverage.R`). Across runs: the queue's open
+  rows are the backlog; the next daily full walk re-attempts every one of those sites (the daily press
+  step walks the whole roster), so an open row becomes `recovered` as soon as a sealed walk no longer
+  fails it, or `consecutive_runs` goes up. A separate member-only walk was NOT built: it would need its
+  own run root, seal and intake audit (see the lane report).
 - Still fatal: output cannot be written, a seal or hash is broken, a roster/origin/pagination/date
   integrity violation, the delta safety cap, or EVERY member failing (`press_site_all_failed`,
   `refresh_press_delta.R`, exit 2).
@@ -30,6 +38,10 @@ Rows are never deleted. Recorded again in the same run does not double count. A 
 re-opens.
 
 ## Process it
+
+Claude triage applies to rows that STAYED open after the retries: a row is only worth acting on once it
+has failed its in-run retry (it is in the queue at all) and, ideally, a later walk too
+(`consecutive_runs >= 2`); a row at 1 may still clear on the next daily walk.
 
 1. Read the open rows: `status == "open"`. Highest `consecutive_runs` first. Do not run any collector,
    walk or network job to diagnose; reason from `url`, `error_class`, `http_status`, `last_error`, and

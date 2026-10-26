@@ -283,24 +283,22 @@ press_wp_collect <- function(members, floor, request, envir = .GlobalEnv) {
   outputs <- list()
   configured <- PRESS_WORDPRESS_CUSTOM_MEMBERS[
     PRESS_WORDPRESS_CUSTOM_MEMBERS$bioguide %in% members$bioguide, , drop = FALSE]
-  for (number in seq_len(nrow(configured))) {
+  attempt <- function(number) {
     config <- configured[number, ]
     member <- members[members$bioguide == config$bioguide, , drop = FALSE]
     if (nrow(member) != 1L) stop("official WordPress member identity is ambiguous: ", config$bioguide)
     if (!"url" %in% names(member) || !press_wp_same_host(member$url[[1]], config$origin))
       stop("official WordPress origin no longer matches the verified roster: ", config$bioguide)
-    rows <- tryCatch(
-      press_wp_fetch_member(config$bioguide, config$origin, config$rest_base, floor, request),
-      press_site_unavailable = function(condition) {
-        press_site_failure_record(envir, config$bioguide, "official_wordpress_custom_post", condition)
-        NULL
-      })
-    if (is.null(rows)) next
+    rows <- press_wp_fetch_member(config$bioguide, config$origin, config$rest_base, floor, request)
     press_official_coverage_register(attr(rows, "official_coverage_proof"), envir)
     for (name in intersect(c("member", "chamber", "state", "party"), names(member)))
       rows[[name]] <- rep(member[[name]][[1]], nrow(rows))
-    outputs[[length(outputs) + 1L]] <- rows
+    rows
   }
+  record <- function(number, condition)
+    press_site_failure_record(envir, configured$bioguide[[number]], "official_wordpress_custom_post", condition)
+  for (rows in press_site_attempt_all(nrow(configured), attempt, record))
+    if (!is.null(rows)) outputs[[length(outputs) + 1L]] <- rows
   if (length(outputs)) dplyr::bind_rows(outputs) else press_wp_empty()
 }
 
