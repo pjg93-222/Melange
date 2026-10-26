@@ -211,7 +211,6 @@ def test_vote_audit_requires_fresh_source_dates_and_exact_bytes(tmp_path):
     (tmp_path/'data/legislation').mkdir(parents=True)
     (tmp_path/'votes').mkdir()
     archive=tmp_path/'congress_bills_archive_current.xlsx'
-    archive.write_bytes(b'archive input')
     source=tmp_path/'source'; source.mkdir()
     config={'source_dir':str(source),'historical_exclusions':str(tmp_path/'excluded.csv'),'names':str(tmp_path/'names.json')}
     (tmp_path/'data/legislation/vote_source_snapshot.json').write_text(json.dumps(config),encoding='utf-8')
@@ -222,7 +221,15 @@ def test_vote_audit_requires_fresh_source_dates_and_exact_bytes(tmp_path):
     for path in inputs:
         path.parent.mkdir(parents=True,exist_ok=True); path.write_text('bound input',encoding='utf-8')
     today=datetime.now(timezone.utc).date().isoformat()
-    (source/'HS119_rollcalls.csv').write_text(f'chamber,date\nHouse,{today}\nSenate,{today}\n',encoding='utf-8')
+    (source/'HS119_rollcalls.csv').write_text('chamber,date,session,clerk_rollnumber\nHouse,'+today+',2,1\nSenate,'+today+',2,1\n',encoding='utf-8')
+    import pandas as pd, zipfile
+    pd.DataFrame([{'Congress':119,'Name':'H.R.7','Section':'Payments'}]).to_excel(archive,sheet_name='All Bills',index=False)
+    raw=tmp_path/'raw'; (raw/'billstatus119').mkdir(parents=True)
+    def bill(date):
+        with zipfile.ZipFile(raw/'billstatus119/BILLSTATUS-119-hr.zip','w') as z:
+            z.writestr('BILLSTATUS-119hr7.xml','<billStatus><bill><actions><recordedVotes><recordedVote><rollNumber>1</rollNumber><chamber>House</chamber><congress>119</congress><date>'+date+'</date><sessionNumber>2</sessionNumber></recordedVote></recordedVotes></actions></bill></billStatus>')
+    bill('2026-09-16T15:00:00Z')
+    errs=lambda: vote_source_errors(tmp_path,raw_root=str(raw))
     outputs=[tmp_path/'vote_category_lean.json',tmp_path/'votes/cu_rollcall_votes_clean.csv']
     for path in outputs: path.write_text('verified output',encoding='utf-8')
     receipt={'schema':'vote-category-refresh-v1','status':'PASS','archive':str(archive.resolve()),
@@ -231,23 +238,29 @@ def test_vote_audit_requires_fresh_source_dates_and_exact_bytes(tmp_path):
         'latest_source_vote_dates':{c:datetime.now(timezone.utc).date().isoformat() for c in ('House','Senate')}}
     path=tmp_path/'data/legislation/vote_refresh_receipt.json'
     path.write_text(json.dumps(receipt),encoding='utf-8')
-    assert not vote_source_errors(tmp_path)
+    assert not errs()
     from legislation import sentinel_admissions as SA
     admitted=tmp_path/SA.RELATIVE;admitted.parent.mkdir(parents=True,exist_ok=True)
     admitted.write_text('automatic admission input',encoding='utf-8')
-    assert 'incomplete vote input hash coverage' in vote_source_errors(tmp_path)
+    assert 'incomplete vote input hash coverage' in errs()
     receipt['inputs_sha256'][str(admitted.resolve())]=file_sha256(admitted)
     path.write_text(json.dumps(receipt),encoding='utf-8')
-    assert not vote_source_errors(tmp_path)
+    assert not errs()
     admitted.write_text('changed admission',encoding='utf-8')
-    assert any('input bytes differ' in error for error in vote_source_errors(tmp_path))
+    assert any('input bytes differ' in error for error in errs())
     admitted.write_text('automatic admission input',encoding='utf-8')
     receipt['latest_source_vote_dates']['Senate']='2020-01-01'
     path.write_text(json.dumps(receipt),encoding='utf-8')
-    assert any('coverage dates differ' in error for error in vote_source_errors(tmp_path))
-    (source/'HS119_rollcalls.csv').write_text('chamber,date\nHouse,2020-01-01\nSenate,2020-01-01\n',encoding='utf-8')
-    assert any('stale' in error for error in vote_source_errors(tmp_path))
+    assert any('coverage dates differ' in error for error in errs())
+    receipt['latest_source_vote_dates']['Senate']=datetime.now(timezone.utc).date().isoformat()
+    path.write_text(json.dumps(receipt),encoding='utf-8')
+    assert not errs()
+    bill('2099-01-01T15:00:00Z')   # recorded House vote after the snapshot's latest: the audit mirror says stale
+    assert any('newest uncovered: 119:hr:7 House roll 1' in error for error in errs())
+    import os; os.utime(archive,(4_000_000_000,4_000_000_000)); os.utime(raw/'billstatus119/BILLSTATUS-119-hr.zip',(1,1))
+    assert any('stale' in error for error in errs())   # mtime does not change the verdict
+    bill('2026-09-16T15:00:00Z')
     outputs[0].write_text('fresh timestamp but wrong values',encoding='utf-8')
-    assert any('output bytes differ' in error for error in vote_source_errors(tmp_path))
+    assert any('output bytes differ' in error for error in errs())
     archive.write_bytes(b'changed bill archive')
-    assert any('input bytes differ' in error for error in vote_source_errors(tmp_path))
+    assert any('input bytes differ' in error for error in errs())
