@@ -952,7 +952,16 @@ exit_code <- tryCatch({
   # beside (not inside) the hash-bound receipt; collect/press_failure_queue.py ingests it.
   site_failures <- press_site_failures_snapshot()
   site_failures_temp <- file.path(run_root, "press_site_failures.json.part")
-  jsonlite::write_json(list(schema = "press-site-failures-v1", failures = site_failures),
+  # attempted, per collector source: the members each collector actually walks (its configured members on this
+  # roster), so the queue only marks a row recovered when that member was tried by that row's collector.
+  attempted_for <- function(config) {
+    ids <- if (is.data.frame(config) && "bioguide" %in% names(config)) as.character(config$bioguide) else character(0)
+    as.list(unique(intersect(ids, as.character(members$bioguide))))
+  }
+  attempted <- list(
+    official_wordpress_custom_post = attempted_for(get0("PRESS_WORDPRESS_CUSTOM_MEMBERS", inherits = TRUE)),
+    official_dated_listing = attempted_for(get0("PRESS_OFFICIAL_DATED_MEMBERS", inherits = TRUE)))
+  jsonlite::write_json(list(schema = "press-site-failures-v1", failures = site_failures, attempted = attempted),
                        site_failures_temp, auto_unbox = TRUE, pretty = TRUE, null = "null")
   promote_with_backup(site_failures_temp, file.path(run_root, "press_site_failures.json"))
   if (press_site_all_failed(site_failures, members$bioguide)) {

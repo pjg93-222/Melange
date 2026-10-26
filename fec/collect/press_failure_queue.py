@@ -60,8 +60,14 @@ def _write(path, rows):
     os.replace(str(tmp), str(path))
 
 
-def upsert(failures, run_id, now=None, queue_path=None):
-    """Fold one run's failures into the queue; returns the full row list."""
+def upsert(failures, run_id, now=None, queue_path=None, attempted=None):
+    """Fold one run's failures into the queue; returns the full row list.
+
+    ``attempted`` maps each collector source to the member ids that collector tried in this walk. When it is
+    given, an open row only becomes ``recovered`` if its member was attempted by the row's own source; a member
+    that collector did not try (left the roster, configuration removed) keeps its row open for triage instead of
+    a recovery nobody verified. ``None`` (an older artifact without the field) keeps the previous behaviour.
+    """
     path = queue_path or QUEUE_PATH
     stamp = (now or datetime.now(timezone.utc)).isoformat()
     rows = _read(path)
@@ -84,6 +90,8 @@ def upsert(failures, run_id, now=None, queue_path=None):
                    last_error=str(failure.get("last_error") or "")[:300])
     for row in rows:                          # the current artifact lacks this key: it recovered, including a
         if _key(row) not in seen and row.get("status") == "open":   # same-day reseal of this very run
+            if attempted is not None and row.get("member_id") not in attempted.get(row.get("source"), ()):
+                continue                      # not walked by this row's collector: unverified, stays open
             row.update(status="recovered", consecutive_runs=0)
     _write(path, rows)
     return rows
@@ -109,8 +117,12 @@ def record_run(run_root, queue_path=None, now=None):
     if document.get("schema") != FAILURES_SCHEMA:
         raise ValueError("unexpected press site failures schema in %s" % source)
     failures = document.get("failures") or []
+    attempted = document.get("attempted")
+    attempted = ({str(source): {str(member) for member in ids}
+                  for source, ids in attempted.items() if isinstance(ids, list)}
+                 if isinstance(attempted, dict) else None)
     path = queue_path or QUEUE_PATH
-    upsert(failures, run_root.name, now, path)
+    upsert(failures, run_root.name, now, path, attempted=attempted)
     receipt = {"schema": RECEIPT_SCHEMA, "run_id": run_root.name,
                "generated_at": (now or datetime.now(timezone.utc)).isoformat(),
                "status": "PARTIAL" if failures else "CLEAN",

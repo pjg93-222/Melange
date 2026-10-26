@@ -6,6 +6,10 @@ stopifnot(length(args) == 2L)
             .libPaths()))
 source(args[[1L]], local = globalenv())
 source(args[[2L]], local = globalenv())
+# In-run retry wait: zero by default so no test sleeps; the knob tests set and record it.
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
+slept <- numeric(0)
+options(press_site_sleep = function(seconds) slept <<- c(slept, seconds))
 
 TODAY <- as.Date("2026-09-13")
 FLOOR <- as.Date("2026-06-25")
@@ -279,8 +283,39 @@ stopifnot(setequal(unique(site_collected$records$bioguide), "L000560"),
           site_failures[[1L]]$error_class == "http_403",
           setequal(names(site_collected$proofs), "L000560"),
           press_official_coverage_snapshot(site_env)$member_count == 1L)
-# With no registry to record into, a direct caller keeps the old fatal behavior.
+# With no registry to record into, a direct caller keeps the old fatal behavior (and no retry).
 expect_failure(press_official_collect(members, FLOOR, site_down, TODAY))
+stopifnot(length(slept) == 0L)
+
+# In-run retry: Durbin down on the first pass, up on the retry -> collected, NOT recorded, one
+# wait of PRESS_SITE_RETRY_DELAY_S for the whole retry pass.
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "7")
+retry_env <- new.env(parent = globalenv())
+source(args[[1L]], local = retry_env)
+retry_env$DATE_FLOOR <- FLOOR
+durbin_hits <- 0L
+retry_flaky <- function(url) {
+  if (grepl("durbin", url, fixed = TRUE) && (durbin_hits <<- durbin_hits + 1L) == 1L)
+    press_site_unavailable(paste0("official dated press endpoint unavailable (403): ", url),
+                           url, status = "403", error_class = "http_403")
+  site_base(url)
+}
+retried <- press_official_collect(members, FLOOR, retry_flaky, TODAY, retry_env)
+stopifnot(length(press_site_failures_snapshot(retry_env)) == 0L,
+          setequal(unique(retried$records$bioguide), c("D000563", "L000560")),
+          setequal(names(retried$proofs), c("D000563", "L000560")),
+          press_official_coverage_snapshot(retry_env)$member_count == 2L,
+          identical(slept, 7))
+# Still down on the retry: recorded as before, after the same single wait.
+slept <- numeric(0)
+still_env <- new.env(parent = globalenv())
+source(args[[1L]], local = still_env)
+still_env$DATE_FLOOR <- FLOOR
+still <- press_official_collect(members, FLOOR, site_down, TODAY, still_env)
+stopifnot(length(press_site_failures_snapshot(still_env)) == 1L,
+          press_site_failures_snapshot(still_env)[[1L]]$member_id == "D000563",
+          identical(slept, 7), setequal(names(still$proofs), "L000560"))
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
 
 d_config <- PRESS_OFFICIAL_DATED_MEMBERS[
   PRESS_OFFICIAL_DATED_MEMBERS$bioguide == "D000563", , drop = FALSE]

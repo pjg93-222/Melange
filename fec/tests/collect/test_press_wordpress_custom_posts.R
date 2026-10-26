@@ -3,6 +3,10 @@ args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) == 2L)
 .libPaths(c(file.path(dirname(args[[1]]), "..", "..", "outputs", "r-library"), .libPaths()))
 source(args[[1]], local = globalenv())
+# In-run retry wait: zero by default so no test sleeps; the knob test sets and records it.
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
+slept <- numeric(0)
+options(press_site_sleep = function(seconds) slept <<- c(slept, seconds))
 
 make_record <- function(id, slug, day = Sys.Date(), host = "www.ossoff.senate.gov") list(
   id = id,
@@ -18,7 +22,7 @@ make_record <- function(id, slug, day = Sys.Date(), host = "www.ossoff.senate.go
 )
 
 fixture <- function(records, declared_total = length(records), second_total = declared_total,
-                    unavailable = NULL, by_host = NULL) {
+                    unavailable = NULL, by_host = NULL, fail_times = Inf) {
   env <- new.env(parent = globalenv())
   source(args[[2]], local = env)
   env$DATE_FLOOR <- Sys.Date() - 10L
@@ -44,9 +48,10 @@ fixture <- function(records, declared_total = length(records), second_total = de
     idx
   }
   calls <- character(0)
+  hits <- 0L
   request <- function(url) {
     calls <<- c(calls, url)
-    if (!is.null(unavailable) && grepl(unavailable, url))
+    if (!is.null(unavailable) && grepl(unavailable, url) && (hits <<- hits + 1L) <= fail_times)
       press_site_unavailable(paste0("official WordPress endpoint unavailable (403): ", url),
                                  url, status = "403", error_class = "http_403")
     if (!is.null(by_host)) records <- by_host[[sub("^https?://([^/]+).*$", "\\1", url)]]
@@ -223,6 +228,8 @@ stopifnot(length(failures) == 1L, failures[[1]]$member_id == "O000174",
           press_site_failures_snapshot(skip$env)[[1]]$source == "official_wordpress_custom_post",
           press_official_coverage_snapshot(skip$env)$member_count == 1L)
 stopifnot(!press_site_all_failed(failures, two_members$bioguide))
+# The skipped site was retried exactly once (two /types requests), after zero wait (knob = 0).
+stopifnot(sum(grepl("ossoff.*/types$", skip$calls())) == 2L, length(slept) == 0L)
 # FIX77: "every member failed" compares the ATTEMPTED set with the failed set, never index rows.
 # A member whose walk succeeded with zero rows (quiet) is a success, so one failing site plus a
 # quiet member must not stop the walk.
@@ -234,6 +241,35 @@ stopifnot(press_site_all_failed(both_down, two_members$bioguide),
           !press_site_all_failed(both_down, c(two_members$bioguide, "X000001")),
           !press_site_all_failed(list(), two_members$bioguide),
           !press_site_all_failed(failures, character(0)))
+
+# In-run retry: a site that is down on the first pass and up on the retry is collected normally
+# and is NOT recorded as a failure.  The wait is the PRESS_SITE_RETRY_DELAY_S knob, taken once.
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "7")
+by_host_both <- list(`www.ossoff.senate.gov` = list(make_record(1L, "ossoff-current", today)),
+                     `www.marshall.senate.gov` = marshall_records)
+flaky <- fixture(list(), unavailable = "ossoff", fail_times = 1L, by_host = by_host_both)
+flaky_index <- flaky$env$stage_index(two_members, data.frame(bioguide = two_members$bioguide))
+stopifnot(length(press_site_failures_snapshot(flaky$env)) == 0L,
+          sum(flaky_index$press_wp_api %in% TRUE, na.rm = TRUE) == 2L,
+          press_official_coverage_snapshot(flaky$env)$member_count == 2L,
+          identical(slept, 7))
+# Both sites down for good: one wait for the whole retry pass, both recorded.
+slept <- numeric(0)
+both_down <- fixture(list(), unavailable = "senate", by_host = by_host_both)
+try(both_down$env$stage_index(two_members, data.frame(bioguide = two_members$bioguide)), silent = TRUE)
+stopifnot(length(press_site_failures_snapshot(both_down$env)) == 2L, identical(slept, 7))
+# An integrity stop is never deferred or retried.
+slept <- numeric(0)
+integrity <- fixture(list(make_record(1L, "foreign", today, "example.com")))
+try(integrity$env$stage_index(members, discovery), silent = TRUE)
+stopifnot(length(slept) == 0L)
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
+stopifnot(press_site_retry_delay() == 0)
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "garbage")
+stopifnot(press_site_retry_delay() == 60)
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "Inf")
+stopifnot(press_site_retry_delay() == 60)   # an infinite wait would hang the walk
+Sys.setenv(PRESS_SITE_RETRY_DELAY_S = "0")
 
 # An integrity violation (not an availability failure) stays fatal and is never recorded as a skip.
 foreign <- fixture(list(make_record(1L, "foreign", today, "example.com")))

@@ -118,6 +118,28 @@ def test_record_run_ingests_the_collector_file_and_writes_the_receipt(tmp_path):
     assert rows(queue)[0]["consecutive_runs"] == 2
 
 
+def test_next_full_walk_is_the_backlog_pass_open_row_recovers_or_increments(tmp_path):
+    # Paul 2026-10-26: skipped sites are re-attempted.  The daily full walk re-tries every open row's
+    # member (and each walk retries once in-run), so an open row recovers when the walk no longer
+    # fails it, increments when it still does, and re-opens at 1 if it fails after recovering.
+    queue = tmp_path / "queue.ndjson"
+    q.record_run(write_run(tmp_path, "press_refresh_20261025", [ROW]), queue, now=NOW)
+    q.record_run(write_run(tmp_path, "press_refresh_20261026", [ROW]), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("open", 2)
+    q.record_run(write_run(tmp_path, "press_refresh_20261027", []), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("recovered", 0)
+    assert q.open_count(queue) == 0
+    q.record_run(write_run(tmp_path, "press_refresh_20261028", [ROW]), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("open", 1)
+
+
+def test_the_in_run_retry_knob_is_one_env_var_defaulting_to_60_seconds():
+    text = (FEC / "collect" / "press_official_coverage.R").read_text(encoding="utf-8")
+    assert 'Sys.getenv("PRESS_SITE_RETRY_DELAY_S", "60")' in text
+    for name in ("press_wordpress_custom_posts.R", "press_official_dated_listings.R"):
+        assert "press_site_attempt_all(" in (FEC / "collect" / name).read_text(encoding="utf-8")
+
+
 def test_record_run_on_a_clean_run_is_not_partial(tmp_path):
     run = write_run(tmp_path, "press_refresh_20261025", [])
     receipt = q.record_run(run, tmp_path / "queue.ndjson", now=NOW)
@@ -352,3 +374,37 @@ def test_open_count_treats_a_non_object_row_as_unreadable(tmp_path):
     assert q.open_count(queue) == -1      # a status-less row is damage too, never counted as a clean zero
     queue.write_text(open_row + "\n", encoding="utf-8")
     assert q.open_count(queue) == 1
+
+
+def write_run_attempted(tmp_path, name, failures, attempted):
+    run = tmp_path / "outputs" / name
+    run.mkdir(parents=True)
+    (run / "press_site_failures.json").write_text(json.dumps(
+        {"schema": "press-site-failures-v1", "failures": failures, "attempted": attempted}), encoding="utf-8")
+    return run
+
+
+def test_an_open_row_recovers_only_when_its_collector_attempted_the_member(tmp_path):
+    # CodeRabbit PR #84: a member a collector did not try (left the roster, configuration removed) is not recovered.
+    queue = tmp_path / "queue.ndjson"
+    member, source = ROW["member_id"], ROW["source"]
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261025", [ROW], {source: [member]}), queue, now=NOW)
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261026", [], {source: ["X000001"]}), queue, now=NOW)
+    assert rows(queue)[0]["status"] == "open" and q.open_count(queue) == 1     # not walked: unverified, still open
+    # walked by a different collector only: still not a retry of this row's site
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261027", [],
+                                     {source: [], "official_dated_listing": [member]}), queue, now=NOW)
+    assert rows(queue)[0]["status"] == "open"
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261028", [], {source: [member]}), queue, now=NOW)
+    assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("recovered", 0)
+    # an older artifact without "attempted" keeps the previous behaviour
+    q.record_run(write_run(tmp_path, "press_refresh_20261029", [ROW]), queue, now=NOW)
+    q.record_run(write_run(tmp_path, "press_refresh_20261030", []), queue, now=NOW)
+    assert rows(queue)[0]["status"] == "recovered"
+
+
+def test_the_collector_writes_the_attempted_members_per_source_beside_the_failures():
+    source = (FEC / "collect" / "refresh_press_delta.R").read_text(encoding="utf-8")
+    assert 'official_wordpress_custom_post = attempted_for(get0("PRESS_WORDPRESS_CUSTOM_MEMBERS"' in source
+    assert 'official_dated_listing = attempted_for(get0("PRESS_OFFICIAL_DATED_MEMBERS"' in source
+    assert "failures = site_failures, attempted = attempted" in source
