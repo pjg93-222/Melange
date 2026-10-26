@@ -1,0 +1,737 @@
+[
+{
+"member": "Jake Auchincloss",
+"bioguide": "A000148",
+"chamber": "House"
+},
+{
+"member": "Alma Adams",
+"bioguide": "A000370",
+"chamber": "House"
+},
+{
+"member": "Gabe Amo",
+"bioguide": "A000380",
+"chamber": "House"
+},
+{
+"member": "Yassamin Ansari",
+"bioguide": "A000381",
+"chamber": "House"
+},
+{
+"member": "Sanford Bishop",
+"bioguide": "B000490",
+"chamber": "House"
+},
+{
+"member": "Suzanne Bonamici",
+"bioguide": "B001278",
+"chamber": "House"
+},
+{
+"member": "Joyce Beatty",
+"bioguide": "B001281",
+"chamber": "House"
+},
+{
+"member": "Andy Barr",
+"bioguide": "B001282",
+"chamber": "House"
+},
+{
+"member": "Julia Brownley",
+"bioguide": "B001285",
+"chamber": "House"
+},
+{
+"member": "Cory Booker",
+"bioguide": "B001288",
+"chamber": "Senate"
+},
+{
+"member": "Nanette Barrag\u00e1n",
+"bioguide": "B001300",
+"chamber": "House"
+},
+{
+"member": "Shontel Brown",
+"bioguide": "B001313",
+"chamber": "House"
+},
+{
+"member": "Becca Balint",
+"bioguide": "B001318",
+"chamber": "House"
+},
+{
+"member": "Wesley Bell",
+"bioguide": "B001324",
+"chamber": "House"
+},
+{
+"member": "Janelle Bynum",
+"bioguide": "B001326",
+"chamber": "House"
+},
+{
+"member": "Ed Case",
+"bioguide": "C001055",
+"chamber": "House"
+},
+{
+"member": "Jim Costa",
+"bioguide": "C001059",
+"chamber": "House"
+},
+{
+"member": "Emanuel Cleaver",
+"bioguide": "C001061",
+"chamber": "House"
+},
+{
+"member": "Kathy Castor",
+"bioguide": "C001066",
+"chamber": "House"
+},
+{
+"member": "Steve Cohen",
+"bioguide": "C001068",
+"chamber": "House"
+},
+{
+"member": "Andr\u00e9 Carson",
+"bioguide": "C001072",
+"chamber": "House"
+},
+{
+"member": "Judy Chu",
+"bioguide": "C001080",
+"chamber": "House"
+},
+{
+"member": "Joaquin Castro",
+"bioguide": "C001091",
+"chamber": "House"
+},
+{
+"member": "Luis Correa",
+"bioguide": "C001110",
+"chamber": "House"
+},
+{
+"member": "Sean Casten",
+"bioguide": "C001117",
+"chamber": "House"
+},
+{
+"member": "Troy Carter",
+"bioguide": "C001125",
+"chamber": "House"
+},
+{
+"member": "Herbert Conaway",
+"bioguide": "C001136",
+"chamber": "House"
+},
+{
+"member": "Danny Davis",
+"bioguide": "D000096",
+"chamber": "House"
+},
+{
+"member": "Diana DeGette",
+"bioguide": "D000197",
+"chamber": "House"
+},
+{
+"member": "Mark DeSaulnier",
+"bioguide": "D000623",
+"chamber": "House"
+},
+{
+"member": "Debbie Dingell",
+"bioguide": "D000624",
+"chamber": "House"
+},
+{
+"member": "Madeleine Dean",
+"bioguide": "D000631",
+"chamber": "House"
+},
+{
+"member": "Maxine Dexter",
+"bioguide": "D000635",
+"chamber": "House"
+},
+{
+"member": "Dwight Evans",
+"bioguide": "E000296",
+"chamber": "House"
+},
+{
+"member": "Adriano Espaillat",
+"bioguide": "E000297",
+"chamber": "House"
+},
+{
+"member": "Veronica Escobar",
+"bioguide": "E000299",
+"chamber": "House"
+},
+{
+"member": "Sarah Elfreth",
+"bioguide": "E000301",
+"chamber": "House"
+},
+{
+"member": "Cleo Fields",
+"bioguide": "F000110",
+"chamber": "House"
+},
+{
+"member": "Bill Foster",
+"bioguide": "F000454",
+"chamber": "House"
+},
+{
+"member": "Lois Frankel",
+"bioguide": "F000462",
+"chamber": "House"
+},
+{
+"member": "Lizzie Fletcher",
+"bioguide": "F000468",
+"chamber": "House"
+},
+{
+"member": "Valerie Foushee",
+"bioguide": "F000477",
+"chamber": "House"
+},
+{
+"member": "Shomari Figures",
+"bioguide": "F000481",
+"chamber": "House"
+},
+{
+"member": "Al Green",
+"bioguide": "G000553",
+"chamber": "House"
+},
+{
+"member": "John Garamendi",
+"bioguide": "G000559",
+"chamber": "House"
+},
+{
+"member": "Josh Gottheimer",
+"bioguide": "G000583",
+"chamber": "House"
+},
+{
+"member": "Jimmy Gomez",
+"bioguide": "G000585",
+"chamber": "House"
+},
+{
+"member": "Jes\u00fas Garc\u00eda",
+"bioguide": "G000586",
+"chamber": "House"
+},
+{
+"member": "Sylvia Garcia",
+"bioguide": "G000587",
+"chamber": "House"
+},
+{
+"member": "Daniel Goldman",
+"bioguide": "G000599",
+"chamber": "House"
+},
+{
+"member": "Maggie Goodlander",
+"bioguide": "G000604",
+"chamber": "House"
+},
+{
+"member": "Adelita Grijalva",
+"bioguide": "G000606",
+"chamber": "House"
+},
+{
+"member": "Steny Hoyer",
+"bioguide": "H000874",
+"chamber": "House"
+},
+{
+"member": "Jared Huffman",
+"bioguide": "H001068",
+"chamber": "House"
+},
+{
+"member": "French Hill",
+"bioguide": "H001072",
+"chamber": "House"
+},
+{
+"member": "Chrissy Houlahan",
+"bioguide": "H001085",
+"chamber": "House"
+},
+{
+"member": "Val Hoyle",
+"bioguide": "H001094",
+"chamber": "House"
+},
+{
+"member": "Glenn Ivey",
+"bioguide": "I000058",
+"chamber": "House"
+},
+{
+"member": "Henry Johnson",
+"bioguide": "J000288",
+"chamber": "House"
+},
+{
+"member": "Pramila Jayapal",
+"bioguide": "J000298",
+"chamber": "House"
+},
+{
+"member": "Jonathan Jackson",
+"bioguide": "J000309",
+"chamber": "House"
+},
+{
+"member": "Julie Johnson",
+"bioguide": "J000310",
+"chamber": "House"
+},
+{
+"member": "Marcy Kaptur",
+"bioguide": "K000009",
+"chamber": "House"
+},
+{
+"member": "William Keating",
+"bioguide": "K000375",
+"chamber": "House"
+},
+{
+"member": "Robin Kelly",
+"bioguide": "K000385",
+"chamber": "House"
+},
+{
+"member": "Ro Khanna",
+"bioguide": "K000389",
+"chamber": "House"
+},
+{
+"member": "Raja Krishnamoorthi",
+"bioguide": "K000391",
+"chamber": "House"
+},
+{
+"member": "Timothy Kennedy",
+"bioguide": "K000402",
+"chamber": "House"
+},
+{
+"member": "Teresa Leger Fernandez",
+"bioguide": "L000273",
+"chamber": "House"
+},
+{
+"member": "Rick Larsen",
+"bioguide": "L000560",
+"chamber": "House"
+},
+{
+"member": "Stephen Lynch",
+"bioguide": "L000562",
+"chamber": "House"
+},
+{
+"member": "Susie Lee",
+"bioguide": "L000590",
+"chamber": "House"
+},
+{
+"member": "Greg Landsman",
+"bioguide": "L000601",
+"chamber": "House"
+},
+{
+"member": "Summer Lee",
+"bioguide": "L000602",
+"chamber": "House"
+},
+{
+"member": "George Latimer",
+"bioguide": "L000606",
+"chamber": "House"
+},
+{
+"member": "Nancy Mace",
+"bioguide": "M000194",
+"chamber": "House"
+},
+{
+"member": "James McGovern",
+"bioguide": "M000312",
+"chamber": "House"
+},
+{
+"member": "Patty Murray",
+"bioguide": "M001111",
+"chamber": "Senate"
+},
+{
+"member": "Gregory Meeks",
+"bioguide": "M001137",
+"chamber": "House"
+},
+{
+"member": "Betty McCollum",
+"bioguide": "M001143",
+"chamber": "House"
+},
+{
+"member": "Gwen Moore",
+"bioguide": "M001160",
+"chamber": "House"
+},
+{
+"member": "Doris Matsui",
+"bioguide": "M001163",
+"chamber": "House"
+},
+{
+"member": "Seth Moulton",
+"bioguide": "M001196",
+"chamber": "House"
+},
+{
+"member": "Joseph Morelle",
+"bioguide": "M001206",
+"chamber": "House"
+},
+{
+"member": "Morgan McGarvey",
+"bioguide": "M001220",
+"chamber": "House"
+},
+{
+"member": "Seth Magaziner",
+"bioguide": "M001223",
+"chamber": "House"
+},
+{
+"member": "Kevin Mullin",
+"bioguide": "M001225",
+"chamber": "House"
+},
+{
+"member": "Robert Menendez",
+"bioguide": "M001226",
+"chamber": "House"
+},
+{
+"member": "Jennifer McClellan",
+"bioguide": "M001227",
+"chamber": "House"
+},
+{
+"member": "LaMonica McIver",
+"bioguide": "M001229",
+"chamber": "House"
+},
+{
+"member": "John Mannion",
+"bioguide": "M001231",
+"chamber": "House"
+},
+{
+"member": "Kelly Morrison",
+"bioguide": "M001234",
+"chamber": "House"
+},
+{
+"member": "Kristen McDonald Rivet",
+"bioguide": "M001237",
+"chamber": "House"
+},
+{
+"member": "Sarah McBride",
+"bioguide": "M001238",
+"chamber": "House"
+},
+{
+"member": "Dave Min",
+"bioguide": "M001241",
+"chamber": "House"
+},
+{
+"member": "Analilia Mejia",
+"bioguide": "M001246",
+"chamber": "House"
+},
+{
+"member": "Jerrold Nadler",
+"bioguide": "N000002",
+"chamber": "House"
+},
+{
+"member": "Eleanor Norton",
+"bioguide": "N000147",
+"chamber": "House"
+},
+{
+"member": "Alexandria Ocasio-Cortez",
+"bioguide": "O000172",
+"chamber": "House"
+},
+{
+"member": "Ilhan Omar",
+"bioguide": "O000173",
+"chamber": "House"
+},
+{
+"member": "Frank Pallone",
+"bioguide": "P000034",
+"chamber": "House"
+},
+{
+"member": "Nancy Pelosi",
+"bioguide": "P000197",
+"chamber": "House"
+},
+{
+"member": "Chellie Pingree",
+"bioguide": "P000597",
+"chamber": "House"
+},
+{
+"member": "Scott Peters",
+"bioguide": "P000608",
+"chamber": "House"
+},
+{
+"member": "Chris Pappas",
+"bioguide": "P000614",
+"chamber": "House"
+},
+{
+"member": "Ayanna Pressley",
+"bioguide": "P000617",
+"chamber": "House"
+},
+{
+"member": "Brittany Pettersen",
+"bioguide": "P000620",
+"chamber": "House"
+},
+{
+"member": "Mike Quigley",
+"bioguide": "Q000023",
+"chamber": "House"
+},
+{
+"member": "Jack Reed",
+"bioguide": "R000122",
+"chamber": "Senate"
+},
+{
+"member": "Delia Ramirez",
+"bioguide": "R000617",
+"chamber": "House"
+},
+{
+"member": "Robert Scott",
+"bioguide": "S000185",
+"chamber": "House"
+},
+{
+"member": "Brad Sherman",
+"bioguide": "S000344",
+"chamber": "House"
+},
+{
+"member": "Adam Smith",
+"bioguide": "S000510",
+"chamber": "House"
+},
+{
+"member": "Janice Schakowsky",
+"bioguide": "S001145",
+"chamber": "House"
+},
+{
+"member": "Adam Schiff",
+"bioguide": "S001150",
+"chamber": "Senate"
+},
+{
+"member": "Linda S\u00e1nchez",
+"bioguide": "S001156",
+"chamber": "House"
+},
+{
+"member": "Marilyn Strickland",
+"bioguide": "S001159",
+"chamber": "House"
+},
+{
+"member": "Terri Sewell",
+"bioguide": "S001185",
+"chamber": "House"
+},
+{
+"member": "Jason Smith",
+"bioguide": "S001195",
+"chamber": "House"
+},
+{
+"member": "Lloyd Smucker",
+"bioguide": "S001199",
+"chamber": "House"
+},
+{
+"member": "Mary Scanlon",
+"bioguide": "S001205",
+"chamber": "House"
+},
+{
+"member": "Haley Stevens",
+"bioguide": "S001215",
+"chamber": "House"
+},
+{
+"member": "Kim Schrier",
+"bioguide": "S001216",
+"chamber": "House"
+},
+{
+"member": "Hillary Scholten",
+"bioguide": "S001221",
+"chamber": "House"
+},
+{
+"member": "Eric Sorensen",
+"bioguide": "S001225",
+"chamber": "House"
+},
+{
+"member": "Andrea Salinas",
+"bioguide": "S001226",
+"chamber": "House"
+},
+{
+"member": "Lateefah Simon",
+"bioguide": "S001231",
+"chamber": "House"
+},
+{
+"member": "Bennie Thompson",
+"bioguide": "T000193",
+"chamber": "House"
+},
+{
+"member": "Mike Thompson",
+"bioguide": "T000460",
+"chamber": "House"
+},
+{
+"member": "Dina Titus",
+"bioguide": "T000468",
+"chamber": "House"
+},
+{
+"member": "Paul Tonko",
+"bioguide": "T000469",
+"chamber": "House"
+},
+{
+"member": "Norma Torres",
+"bioguide": "T000474",
+"chamber": "House"
+},
+{
+"member": "Claudia Tenney",
+"bioguide": "T000478",
+"chamber": "House"
+},
+{
+"member": "Rashida Tlaib",
+"bioguide": "T000481",
+"chamber": "House"
+},
+{
+"member": "Lori Trahan",
+"bioguide": "T000482",
+"chamber": "House"
+},
+{
+"member": "Jill Tokuda",
+"bioguide": "T000487",
+"chamber": "House"
+},
+{
+"member": "Shri Thanedar",
+"bioguide": "T000488",
+"chamber": "House"
+},
+{
+"member": "Derek Tran",
+"bioguide": "T000491",
+"chamber": "House"
+},
+{
+"member": "Nydia Vel\u00e1zquez",
+"bioguide": "V000081",
+"chamber": "House"
+},
+{
+"member": "Chris Van Hollen",
+"bioguide": "V000128",
+"chamber": "Senate"
+},
+{
+"member": "Juan Vargas",
+"bioguide": "V000130",
+"chamber": "House"
+},
+{
+"member": "Marc Veasey",
+"bioguide": "V000131",
+"chamber": "House"
+},
+{
+"member": "Maxine Waters",
+"bioguide": "W000187",
+"chamber": "House"
+},
+{
+"member": "Nikema Williams",
+"bioguide": "W000788",
+"chamber": "House"
+},
+{
+"member": "Joe Wilson",
+"bioguide": "W000795",
+"chamber": "House"
+},
+{
+"member": "Debbie Wasserman Schultz",
+"bioguide": "W000797",
+"chamber": "House"
+},
+{
+"member": "Frederica Wilson",
+"bioguide": "W000808",
+"chamber": "House"
+}
+]

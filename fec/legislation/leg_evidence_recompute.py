@@ -2118,7 +2118,21 @@ def claim_e13(ctx):
     )
 
 
+def auto_letter_rows(manual):
+    """Rows legislation/promote_staged_letters.py (D-263) put in the CSV, counted from the rows (Note starts 'auto-letter'): the same
+    definition the member-desk role pin of verify_greenlit_primacy_integration.py uses (legislation/letter_tags.py)."""
+    here = str(Path(__file__).resolve().parents[1])
+    if here not in sys.path:
+        sys.path.insert(0, here)
+    from legislation import letter_tags
+    return letter_tags.auto_letter_accounting(manual)["rows"]
+
+
 def claim_e14(ctx):
+    promoted = auto_letter_rows(ctx.manual)
+    # The report's three counts plus exactly the auto-letter rows the CSV itself carries (each of those rows is an LTR row, has
+    # 'sponsor' in its Role, and is a manual row). Exact: one row more or fewer than the CSV's own accounting is DRIFT.
+    expected_ltr, expected_sponsor, expected_manual = 296 + promoted, 297 + promoted, 297 + promoted
     sponsor_substring = [
         row for row in ctx.manual if "sponsor" in norm_text(row.get("Role")).casefold()
     ]
@@ -2159,9 +2173,9 @@ def claim_e14(ctx):
             if flags and all(flags) and category not in aligned_vote.get(member, set()):
                 resting.append({"member": member, "category": category})
     results = (
-        "MATCH" if len(ltr_rows_any_role) == 296 else "DRIFT",
-        "MATCH" if len(sponsor_substring) == 297 else "DRIFT",
-        "MATCH" if len(ctx.manual) == 297 else "DRIFT",
+        "MATCH" if len(ltr_rows_any_role) == expected_ltr else "DRIFT",
+        "MATCH" if len(sponsor_substring) == expected_sponsor else "DRIFT",
+        "MATCH" if len(ctx.manual) == expected_manual else "DRIFT",
         "MATCH" if len(resting) == 187 else "DRIFT",
     )
     return evidence_entry(
@@ -2175,6 +2189,7 @@ def claim_e14(ctx):
         },
         {
             "ltr_rows_any_role": len(ltr_rows_any_role),
+            "auto_letter_rows": promoted,
             "ltr_role_breakdown": dict(
                 sorted(
                     collections.Counter(
@@ -2208,9 +2223,9 @@ def claim_e14(ctx):
             "cells": sorted(resting, key=lambda row: (row["member"], row["category"])),
         },
         {
-            "ltr_rows_any_role": len(ltr_rows_any_role) - 296,
-            "total_sponsor_substring_pass": len(sponsor_substring) - 297,
-            "manual_rows": len(ctx.manual) - 297,
+            "ltr_rows_any_role": len(ltr_rows_any_role) - expected_ltr,
+            "total_sponsor_substring_pass": len(sponsor_substring) - expected_sponsor,
+            "manual_rows": len(ctx.manual) - expected_manual,
             "letter_only_top_tier_cells": len(resting) - 187,
             "flags": list(results),
         },

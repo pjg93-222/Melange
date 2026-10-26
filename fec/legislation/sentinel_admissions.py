@@ -191,8 +191,12 @@ def augment_bundle(bundle, document):
     return result
 
 
-def effective_tags(tags, document):
+def effective_tags(tags, document, root=None):
     result = dict(tags)
+    if root is not None:  # D-263: auto-promoted sign-on letters; an existing (ratified) tag wins, as for sentinel decisions below
+        from legislation import letter_tags as LT
+        for act, tag in LT.load(root).items():
+            result.setdefault(act, tag)
     active={r['repository_key'] for r in document.get('memberships',[]) if not r.get('withdrawn')}
     for key, bill in document.get('bills', {}).items():
         if 'memberships' in document and key not in active:
