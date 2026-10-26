@@ -206,6 +206,12 @@ def test_ctf_longform_fresh_means_nothing_adjudicated_explains_the_failure(live)
     assert _run([LONGFORM_AGE], live.root) is False
 
 
+def test_ctf_duplicate_overdue_longform_entries_are_not_tolerated(live):
+    entries = json.loads(live.receipt.read_text(encoding='utf-8'))
+    _write(live.receipt, entries + [dict(entries[0])])   # the receipt writer has no duplicate-step check
+    assert _run([LONGFORM_AGE], live.root) is False
+
+
 # --- expiry: the re-bind ends the tolerance -------------------------------------------------------
 
 def test_tolerance_expires_once_the_longform_artifact_is_rebound(live):

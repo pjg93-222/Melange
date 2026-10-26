@@ -157,8 +157,8 @@ def _ctf_only_adjudicated_longform_age(root):
         if _sha256(art) != LONGFORM_LAST_GOOD_SHA256:
             return False, '%s: stale artifact is not the adjudicated one (re-bound: tolerance expired)' % step
         adjudicated += 1
-    if not adjudicated:
-        return False, 'no adjudicated longform-age failure found'
+    if adjudicated != 1:   # zero: nothing adjudicated explains the failure; two+: duplicate receipt entries
+        return False, '%d overdue longform entries (exactly 1 is adjudicated)' % adjudicated
     return True, 'only the adjudicated longform last-good age'
 
 
