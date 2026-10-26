@@ -14,6 +14,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { defaultCongressProfileDir } from "../lib/congress_profile_dir.mjs";
 import {
   classifySingleResultRedirect,
   displayNumberForCanonical,
@@ -95,7 +96,7 @@ function parseArgs(argv) {
       "legfix5",
       "congress_advanced_pages_20260725",
     ),
-    profile: path.join(os.tmpdir(), "codex-congress-pages-profile"),
+    profile: defaultCongressProfileDir(),
     chrome: DEFAULT_CHROME,
     headless: true,
     delayMs: 1500,
