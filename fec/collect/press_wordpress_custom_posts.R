@@ -42,15 +42,20 @@ press_wp_same_host <- function(left, right) {
 press_wp_default_request <- function(url) {
   attempts <- 3L
   for (number in seq_len(attempts)) {
+    failure <- ""
     response <- tryCatch(
       httr::GET(url, httr::user_agent(CHROME_UA), httr::timeout(HTTP_TIMEOUT),
                 httr::add_headers(Accept = "application/json")),
-      error = function(error) NULL
+      error = function(error) { failure <<- conditionMessage(error); NULL }
     )
     if (!is.null(response) && httr::status_code(response) == 200L) {
+      # Integrity before availability: a redirect off the official host stays fatal, never a skipped site.
+      if (!is.null(response$url) && !press_wp_same_host(response$url, url))
+        stop("official WordPress request crossed host boundary: ", url)
       type <- as.character(httr::headers(response)[["content-type"]])
       if (!length(type) || !grepl("application/json", type, ignore.case = TRUE))
-        stop("official WordPress endpoint returned non-JSON content: ", url)
+        press_site_unavailable(paste0("official WordPress endpoint returned non-JSON content: ", url),
+                               url, error_class = "non_json")
       return(list(
         status = 200L,
         headers = httr::headers(response),
@@ -60,8 +65,11 @@ press_wp_default_request <- function(url) {
     }
     if (number < attempts) Sys.sleep(1.5 * number)
   }
-  status <- if (is.null(response)) "network error" else as.character(httr::status_code(response))
-  stop("official WordPress endpoint unavailable (", status, "): ", url)
+  status <- if (is.null(response)) NA_integer_ else httr::status_code(response)
+  press_site_unavailable(
+    paste0("official WordPress endpoint unavailable (",
+           if (is.na(status)) "network error" else status, "): ", url),
+    url, status = status, error_class = press_site_error_class(status, failure))
 }
 
 press_wp_header_integer <- function(response, name) {
@@ -82,12 +90,20 @@ press_wp_header_integer <- function(response, name) {
 }
 
 press_wp_json <- function(response, endpoint) {
-  if (is.null(response$status) || response$status != 200L ||
-      length(response$text) != 1L || is.na(response$text) || !nzchar(response$text))
+  if (is.null(response$status) || response$status != 200L)
     stop("invalid official WordPress response: ", endpoint)
+  if (!is.null(response$url) && length(response$url) == 1L && !press_wp_same_host(response$url, endpoint))
+    stop("official WordPress request crossed host boundary: ", endpoint)
+  # An HTTP-200 body that is empty or not JSON is the site being unavailable, not an integrity violation
+  # (CodeRabbit PR #77): classed, so the member is recorded and skipped instead of aborting the walk.
+  if (length(response$text) != 1L || is.na(response$text) || !nzchar(response$text))
+    press_site_unavailable(paste0("official WordPress endpoint returned an empty body: ", endpoint),
+                           endpoint, status = "200", error_class = "non_json")
   tryCatch(
     jsonlite::fromJSON(response$text, simplifyVector = FALSE),
-    error = function(error) stop("invalid official WordPress JSON: ", endpoint)
+    error = function(error)
+      press_site_unavailable(paste0("official WordPress endpoint returned malformed JSON: ", endpoint),
+                             endpoint, status = "200", error_class = "non_json")
   )
 }
 
@@ -199,6 +215,7 @@ press_wp_fetch_member <- function(bioguide, origin, rest_base, floor, request) {
   type_evidence <- press_wp_verify_type(origin, rest_base, request)
   first_endpoint <- press_wp_page_endpoint(origin, rest_base, floor, 1L)
   first_response <- request(first_endpoint)
+  first_payload <- press_wp_json(first_response, first_endpoint)   # an empty/malformed body is non_json before any header check
   pages <- press_wp_header_integer(first_response, "X-WP-TotalPages")
   total <- press_wp_header_integer(first_response, "X-WP-Total")
   expected_pages <- if (total) as.integer(ceiling(total / 100)) else pages
@@ -207,17 +224,18 @@ press_wp_fetch_member <- function(bioguide, origin, rest_base, floor, request) {
     stop("official WordPress pagination headers are inconsistent: ", origin)
   responses <- list(first_response)
   endpoints <- list(first_endpoint)
-  payloads <- list(press_wp_json(first_response, first_endpoint))
+  payloads <- list(first_payload)
   if (pages > 1L) {
     for (page in 2L:pages) {
       endpoint <- press_wp_page_endpoint(origin, rest_base, floor, page)
       response <- request(endpoint)
+      payload <- press_wp_json(response, endpoint)
       if (press_wp_header_integer(response, "X-WP-TotalPages") != pages ||
           press_wp_header_integer(response, "X-WP-Total") != total)
         stop("official WordPress pagination changed during collection: ", origin)
       responses[[page]] <- response
       endpoints[[page]] <- endpoint
-      payloads[[page]] <- press_wp_json(response, endpoint)
+      payloads[[page]] <- payload
     }
   }
   for (page in seq_along(payloads)) {
@@ -284,7 +302,13 @@ press_wp_collect <- function(members, floor, request, envir = .GlobalEnv) {
     if (nrow(member) != 1L) stop("official WordPress member identity is ambiguous: ", config$bioguide)
     if (!"url" %in% names(member) || !press_wp_same_host(member$url[[1]], config$origin))
       stop("official WordPress origin no longer matches the verified roster: ", config$bioguide)
-    rows <- press_wp_fetch_member(config$bioguide, config$origin, config$rest_base, floor, request)
+    rows <- tryCatch(
+      press_wp_fetch_member(config$bioguide, config$origin, config$rest_base, floor, request),
+      press_site_unavailable = function(condition) {
+        press_site_failure_record(envir, config$bioguide, "official_wordpress_custom_post", condition)
+        NULL
+      })
+    if (is.null(rows)) next
     press_official_coverage_register(attr(rows, "official_coverage_proof"), envir)
     for (name in intersect(c("member", "chamber", "state", "party"), names(member)))
       rows[[name]] <- rep(member[[name]][[1]], nrow(rows))

@@ -17,7 +17,8 @@ make_record <- function(id, slug, day = Sys.Date(), host = "www.ossoff.senate.go
               3L), collapse = " "), "</p>"))
 )
 
-fixture <- function(records, declared_total = length(records), second_total = declared_total) {
+fixture <- function(records, declared_total = length(records), second_total = declared_total,
+                    unavailable = NULL, by_host = NULL) {
   env <- new.env(parent = globalenv())
   source(args[[2]], local = env)
   env$DATE_FLOOR <- Sys.Date() - 10L
@@ -45,6 +46,12 @@ fixture <- function(records, declared_total = length(records), second_total = de
   calls <- character(0)
   request <- function(url) {
     calls <<- c(calls, url)
+    if (!is.null(unavailable) && grepl(unavailable, url))
+      press_site_unavailable(paste0("official WordPress endpoint unavailable (403): ", url),
+                                 url, status = "403", error_class = "http_403")
+    if (!is.null(by_host)) records <- by_host[[sub("^https?://([^/]+).*$", "\\1", url)]]
+    declared_total <- if (is.null(by_host)) declared_total else length(records)
+    second_total <- declared_total
     if (grepl("/types$", url)) {
       payload <- list(post = list(rest_base = "posts"),
                       release = list(rest_base = "press_releases"))
@@ -196,5 +203,79 @@ for (bad in list(
   stopifnot(inherits(try(broken$env$stage_index(members, discovery), silent = TRUE), "try-error"),
             !file.exists(broken_checkpoint))
 }
+
+# D-294: one member site's availability failure (403, timeout, SSL, non-JSON) is recorded and the
+# member skipped; the other members are still collected and the run goes on.
+two_members <- data.frame(
+  bioguide = c("O000174", "M001198"), member = c("Jon Ossoff", "Roger Marshall"),
+  chamber = c("Senate", "Senate"), state = c("GA", "KS"), party = c("Democrat", "Republican"),
+  url = c("https://www.ossoff.senate.gov", "https://www.marshall.senate.gov"),
+  stringsAsFactors = FALSE)
+marshall_records <- list(make_record(7L, "marshall-current", today, "www.marshall.senate.gov"))
+skip <- fixture(list(make_record(1L, "unused")), unavailable = "ossoff",
+                by_host = list(`www.marshall.senate.gov` = marshall_records))
+skipped_index <- skip$env$stage_index(two_members, data.frame(bioguide = two_members$bioguide))
+failures <- press_site_failures_snapshot(skip$env)
+stopifnot(length(failures) == 1L, failures[[1]]$member_id == "O000174",
+          failures[[1]]$http_status == "403", failures[[1]]$error_class == "http_403",
+          grepl("/wp-json/wp/v2/types$", failures[[1]]$url),
+          sum(skipped_index$press_wp_api %in% TRUE, na.rm = TRUE) == 1L,
+          press_site_failures_snapshot(skip$env)[[1]]$source == "official_wordpress_custom_post",
+          press_official_coverage_snapshot(skip$env)$member_count == 1L)
+stopifnot(!press_site_all_failed(failures, two_members$bioguide))
+# FIX77: "every member failed" compares the ATTEMPTED set with the failed set, never index rows.
+# A member whose walk succeeded with zero rows (quiet) is a success, so one failing site plus a
+# quiet member must not stop the walk.
+quiet_index <- skipped_index[0, , drop = FALSE]
+stopifnot(nrow(quiet_index) == 0L, !press_site_all_failed(failures, two_members$bioguide))
+both_down <- c(failures, list(list(member_id = "M001198")))
+stopifnot(press_site_all_failed(both_down, two_members$bioguide),
+          press_site_all_failed(failures, "O000174"),
+          !press_site_all_failed(both_down, c(two_members$bioguide, "X000001")),
+          !press_site_all_failed(list(), two_members$bioguide),
+          !press_site_all_failed(failures, character(0)))
+
+# An integrity violation (not an availability failure) stays fatal and is never recorded as a skip.
+foreign <- fixture(list(make_record(1L, "foreign", today, "example.com")))
+stopifnot(inherits(try(foreign$env$stage_index(members, discovery), silent = TRUE), "try-error"),
+          length(press_site_failures_snapshot(foreign$env)) == 0L)
+
+# Availability classes.
+env_classes <- skip$env
+stopifnot(press_site_error_class(403L, "") == "http_403",
+          press_site_error_class(404L, "") == "http_404",
+          press_site_error_class(503L, "") == "http_5xx",
+          press_site_error_class(NA, "Timeout was reached") == "timeout",
+          press_site_error_class(NA, "SSL certificate problem") == "ssl",
+          press_site_error_class(NA, "Could not resolve host") == "network_error")
+
+# An HTTP-200 body that is empty or malformed JSON is site unavailability (classed non_json, so the member is
+# recorded and skipped), while a non-200 response reaching the parser stays an ordinary fatal error.
+parser <- fixture(list())$env
+body_class <- function(text) tryCatch(
+  { parser$press_wp_json(list(status = 200L, text = text), "https://example.senate.gov/wp-json/wp/v2/types"); "parsed" },
+  press_site_unavailable = function(condition) condition$error_class,
+  error = function(error) "fatal")
+stopifnot(body_class("") == "non_json", body_class("{not json") == "non_json",
+          body_class(NA_character_) == "non_json", body_class("{\"ok\": true}") == "parsed",
+          identical(tryCatch(parser$press_wp_json(list(status = 500L, text = "{}"), "e"),
+                             press_site_unavailable = function(condition) "classed",
+                             error = function(error) "fatal"), "fatal"))
+# Integrity before availability: a 200 with a malformed body that was redirected off the official host stays fatal.
+stopifnot(identical(tryCatch(
+  parser$press_wp_json(list(status = 200L, text = "{not json", url = "https://elsewhere.example.com/x"),
+                       "https://example.senate.gov/wp-json/wp/v2/types"),
+  press_site_unavailable = function(condition) "classed", error = function(error) "fatal"), "fatal"))
+# A malformed first-page body with no pagination headers is classed non_json, not a missing-header integrity stop.
+bad_page <- function(url) {
+  if (grepl("/types$", url))
+    return(list(status = 200L, headers = list(), url = url,
+                text = jsonlite::toJSON(list(post = list(rest_base = "posts")), auto_unbox = TRUE)))
+  list(status = 200L, headers = list(), text = "{not json", url = url)
+}
+stopifnot(identical(tryCatch(
+  parser$press_wp_fetch_member("O000174", "https://www.ossoff.senate.gov", "posts", Sys.Date() - 10L, bad_page),
+  press_site_unavailable = function(condition) condition$error_class,
+  error = function(error) conditionMessage(error)), "non_json"))
 
 cat("PASS: official custom-post pagination, exact dates, canonical identity, body seeding, provenance rejection and retained caches\n")

@@ -260,6 +260,28 @@ stopifnot(identical(wrapped, fixture$env$stage_index))
 expect_failure <- function(expression) {
   stopifnot(inherits(try(force(expression), silent = TRUE), "try-error"))
 }
+# D-294: an unavailable member site is recorded and skipped; the other members still collect.
+site_env <- new.env(parent = globalenv())
+source(args[[1L]], local = site_env)
+site_base <- request_from(standard_responses())
+site_down <- function(url) {
+  if (grepl("durbin", url, fixed = TRUE))
+    press_site_unavailable(paste0("official dated press endpoint unavailable (403): ", url),
+                           url, status = "403", error_class = "http_403")
+  site_base(url)
+}
+site_env$DATE_FLOOR <- FLOOR
+site_collected <- press_official_collect(members, FLOOR, site_down, TODAY, site_env)
+site_failures <- press_site_failures_snapshot(site_env)
+stopifnot(setequal(unique(site_collected$records$bioguide), "L000560"),
+          length(site_failures) == 1L, site_failures[[1L]]$member_id == "D000563",
+          site_failures[[1L]]$source == "official_dated_listing",
+          site_failures[[1L]]$error_class == "http_403",
+          setequal(names(site_collected$proofs), "L000560"),
+          press_official_coverage_snapshot(site_env)$member_count == 1L)
+# With no registry to record into, a direct caller keeps the old fatal behavior.
+expect_failure(press_official_collect(members, FLOOR, site_down, TODAY))
+
 d_config <- PRESS_OFFICIAL_DATED_MEMBERS[
   PRESS_OFFICIAL_DATED_MEMBERS$bioguide == "D000563", , drop = FALSE]
 l_config <- PRESS_OFFICIAL_DATED_MEMBERS[

@@ -101,6 +101,7 @@ collector_sources_sha256 <- lapply(collector_source_paths, sha256_file)
 source(scraper_path, local = globalenv(), chdir = FALSE)
 source(coverage_path, local = globalenv(), chdir = FALSE)
 press_official_coverage_reset()
+press_site_failures_reset()
 source(date_precedence_path, local = globalenv(), chdir = FALSE)
 install_press_release_date_precedence()
 
@@ -946,6 +947,17 @@ exit_code <- tryCatch({
   if (!cache_only) retry_failed_checkpoints(members)
   discovery <- stage_discovery(members, FALSE)
   refreshed_index <- stage_index(members, discovery, FALSE)
+
+  # D-294: a member site that was unavailable is recorded and skipped, not fatal. The file sits
+  # beside (not inside) the hash-bound receipt; collect/press_failure_queue.py ingests it.
+  site_failures <- press_site_failures_snapshot()
+  site_failures_temp <- file.path(run_root, "press_site_failures.json.part")
+  jsonlite::write_json(list(schema = "press-site-failures-v1", failures = site_failures),
+                       site_failures_temp, auto_unbox = TRUE, pretty = TRUE, null = "null")
+  promote_with_backup(site_failures_temp, file.path(run_root, "press_site_failures.json"))
+  if (press_site_all_failed(site_failures, members$bioguide)) {
+    stop("every member failed: ", length(site_failures), " site failure(s), no attempted member succeeded")
+  }
 
   old_index <- utils::read.csv(
     old_index_path,

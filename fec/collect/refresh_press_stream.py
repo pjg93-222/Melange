@@ -178,6 +178,20 @@ def update_tombstone_ledger(run_root):
               % (type(error).__name__, error))
 
 
+def record_site_failures(run_root):
+    """Queue this run's unavailable member sites for Claude (D-294).  Never raises."""
+    try:
+        from collect.press_failure_queue import record_run
+        receipt = record_run(run_root)
+        if receipt:
+            print("press site failures: %d this run, %d open in %s"
+                  % (receipt["failures_this_run"], receipt["press_failures_open"],
+                     receipt["queue_path"]))
+    except Exception as error:                           # noqa: BLE001
+        print("press site failure queue update skipped (non-fatal): %s: %s"
+              % (type(error).__name__, error))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-root", type=Path)
@@ -248,6 +262,7 @@ def main(argv=None):
             print("historical body recovery already completed; this is not fresh inventory coverage")
             return 0
     elif current_source_run(run_root, sources):
+        record_site_failures(run_root)    # idempotent: retries a queue update that failed after the seal
         print("press refresh already has a valid same-day receipt: %s" % run_root)
         return 0
     script = Path(__file__).with_name("refresh_press_delta.R")
@@ -262,6 +277,7 @@ def main(argv=None):
             raise RuntimeError("press collector source changed during collection; clean retry required")
         if not args.retry_from:
             update_tombstone_ledger(run_root)
+            record_site_failures(run_root)
     if code:
         return code
     if args.retry_from:
