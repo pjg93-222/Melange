@@ -264,3 +264,55 @@ def test_vote_audit_requires_fresh_source_dates_and_exact_bytes(tmp_path):
     assert any('output bytes differ' in error for error in errs())
     archive.write_bytes(b'changed bill archive')
     assert any('input bytes differ' in error for error in errs())
+
+
+def test_vote_audit_rebases_stored_windows_paths(tmp_path, monkeypatch):
+    import paths
+    from datetime import datetime, timezone
+    from legislation import sentinel_admissions as SA
+    monkeypatch.setenv('MELANGE_REBASE_STORED', '1')
+    monkeypatch.setattr(paths, '_rebase', lambda: iter([('C:/stored', str(tmp_path))]))
+    (tmp_path/'data/legislation').mkdir(parents=True)
+    (tmp_path/'votes').mkdir()
+    archive = tmp_path/'congress_bills_archive_current.xlsx'
+    source = tmp_path/'source'; source.mkdir()
+    config = {'source_dir': r'C:\stored\source', 'historical_exclusions': r'C:\stored\excluded.csv', 'names': r'C:\stored\names.json'}
+    (tmp_path/'data/legislation/vote_source_snapshot.json').write_text(json.dumps(config), encoding='utf-8')
+    inputs = [archive, source/'receipt.json', tmp_path/'excluded.csv', tmp_path/'names.json',
+              tmp_path/'data/legislation/cfpb_bill_directions.csv', tmp_path/'legislation_exclusion_ledger.ndjson',
+              tmp_path/'legislation_hold_ledger.ndjson', tmp_path/'fec/legislation/vote_by_category.py',
+              tmp_path/'fec/legislation/build_vote_category.py', tmp_path/SA.RELATIVE]
+    inputs.extend(source/f'HS{c}_{kind}.csv' for c in (117, 118, 119) for kind in ('members', 'rollcalls', 'votes'))
+    for path in inputs:
+        path.parent.mkdir(parents=True, exist_ok=True); path.write_text('bound input', encoding='utf-8')
+    today = datetime.now(timezone.utc).date().isoformat()
+    (source/'HS119_rollcalls.csv').write_text(f'chamber,date,session,clerk_rollnumber\nHouse,{today},2,1\nSenate,{today},2,1\n', encoding='utf-8')
+    # the gate reads the archive's bills and the BILLSTATUS raw root: one bill whose only recorded vote is covered by the rollcalls above
+    import pandas as pd, zipfile
+    pd.DataFrame([{'Congress': 119, 'Name': 'H.R.7', 'Section': 'Payments'}]).to_excel(archive, sheet_name='All Bills', index=False)
+    raw = tmp_path/'raw'; (raw/'billstatus119').mkdir(parents=True)
+    with zipfile.ZipFile(raw/'billstatus119/BILLSTATUS-119-hr.zip', 'w') as z:
+        z.writestr('BILLSTATUS-119hr7.xml', '<billStatus><bill><actions><recordedVotes><recordedVote><rollNumber>1</rollNumber><chamber>House</chamber><congress>119</congress><date>2026-09-16T15:00:00Z</date><sessionNumber>2</sessionNumber></recordedVote></recordedVotes></actions></bill></billStatus>')
+    outputs = [tmp_path/'vote_category_lean.json', tmp_path/'votes/cu_rollcall_votes_clean.csv']
+    for path in outputs: path.write_text('verified output', encoding='utf-8')
+    receipt = {'schema': 'vote-category-refresh-v1', 'status': 'PASS', 'archive': r'C:\stored\congress_bills_archive_current.xlsx',
+               'inputs_sha256': {'C:\\stored\\' + str(p.resolve().relative_to(tmp_path.resolve())).replace('/', '\\'): file_sha256(p) for p in inputs},
+               'outputs_sha256': {p.name: file_sha256(p) for p in outputs},
+               'latest_source_vote_dates': {c: today for c in ('House', 'Senate')}}
+    (tmp_path/'data/legislation/vote_refresh_receipt.json').write_text(json.dumps(receipt), encoding='utf-8')
+    # the stored keys are Windows spellings that exist on no host: only the rebase can make them verify
+    assert all(k.startswith('C:\\stored\\') and not Path(k).exists() for k in receipt['inputs_sha256'])
+    assert Path(paths.to_host(receipt['archive'])) == archive
+    assert not vote_source_errors(tmp_path, raw_root=str(raw))
+    monkeypatch.setattr(paths, '_rebase', lambda: iter(()))   # un-patched rebase: the stored paths must NOT verify
+    assert vote_source_errors(tmp_path, raw_root=str(raw))
+
+
+def test_press_unreadable_source_is_recorded_not_raised(press, monkeypatch):
+    import audit.published_source_contracts as psc
+    root, feed, current = press
+    def deny(path):
+        raise PermissionError('offline placeholder')
+    monkeypatch.setattr(psc, 'file_sha256', deny)
+    errors = psc.press_source_errors(feed, root, current)
+    assert any('source bytes differ' in e for e in errors)
