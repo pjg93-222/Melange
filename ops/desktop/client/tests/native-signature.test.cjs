@@ -110,3 +110,8 @@ test('a slow signature probe within the size-scaled limit is accepted; one past 
     assert.deepEqual(limits,[90000,90000]);
   }finally{childProcess.execFile=realExecFile;Object.defineProperty(process,'platform',platform);delete require.cache[modulePath];}
 });
+test('flip guard (T18, Paul 2026-10-26): PUBLISHER_PIN_ENFORCE must be true once the client version is past 1.0.19',()=>{
+  const parts=version=>version.split('-')[0].split('.').map(Number),[a,b,c]=parts(require('../package.json').version),[x,y,z]=parts('1.0.19');
+  const pastWarnOnlyRelease=a>x||(a===x&&(b>y||(b===y&&c>z)));
+  if(pastWarnOnlyRelease)assert.equal(PUBLISHER_PIN_ENFORCE,true,'flip PUBLISHER_PIN_ENFORCE to true: the warn-only release (1.0.19) has shipped');
+});
