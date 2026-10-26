@@ -76,6 +76,13 @@ def current_source_run(run_root, expected):
             print("press receipt is PARTIAL with %d pending body URL(s) carried to the next run; "
                   "not repeating the same-day walk" % count)
             return result
+        # D-294: a PARTIAL whose only gap is skipped member sites (no body backlog) is sealed the same
+        # way; valid_run already proved the site file against the receipt.
+        if (receipt.get("pending_body_urls") == 0 and type(receipt.get("site_failures")) is int
+                and receipt["site_failures"] > 0):
+            print("press receipt is PARTIAL with %d skipped member site(s); not repeating the same-day walk"
+                  % receipt["site_failures"])
+            return result
     elif receipt.get("status") == "PASS" and receipt.get("pending_body_urls") == 0:
         return result
     print("press receipt does not prove complete body attempts; resuming pending work")

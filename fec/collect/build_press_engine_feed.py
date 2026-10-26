@@ -126,6 +126,38 @@ class ReceiptRejected(Exception):
         self.detail = detail
 
 
+SITE_FAILURES = "press_site_failures.json"
+
+
+def site_failure_proof(path, receipt):
+    """The member sites this run skipped (D-294), proven against the walk's sealed file.
+
+    ``{}`` when none; ``{"site_failures_skipped": [{member_id, url, error_class}]}`` otherwise.
+    A skipped site means PARTIAL, never PASS: a PASS receipt beside a non-empty file is refused.
+    When the receipt carries ``site_failures`` it must match the file's count and hash.
+    """
+    file = Path(path) / SITE_FAILURES
+    claimed = receipt.get("site_failures")
+    if not file.is_file():
+        if claimed not in (None, 0):
+            raise ReceiptRejected("SITE_FAILURES_PROOF_MISMATCH", "receipt claims %r skipped sites, no %s" % (claimed, SITE_FAILURES))
+        return {}
+    try:
+        rows = json.loads(file.read_text(encoding="utf-8"))["failures"]
+        if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+            raise ValueError("failures is not a list of objects")
+        if claimed is not None and (claimed != len(rows) or receipt.get("site_failures_sha256") != sha256_file(file)):
+            raise ValueError("receipt site_failures=%r / hash does not match the file (%d rows)" % (claimed, len(rows)))
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise ReceiptRejected("SITE_FAILURES_PROOF_MISMATCH", str(exc)) from exc
+    if not rows:
+        return {}
+    if receipt.get("status") != "PARTIAL":
+        raise ReceiptRejected("PASS_OVER_SKIPPED_SITES",
+                              "%d skipped site(s) but receipt status=%r" % (len(rows), receipt.get("status")))
+    return {"site_failures_skipped": [{k: row.get(k) for k in ("member_id", "url", "error_class")} for row in rows]}
+
+
 def validate_body_completion(path, receipt, *, require_complete=False):
     """Validate new coverage proof while retaining historical receipt readability.
 
@@ -140,8 +172,12 @@ def validate_body_completion(path, receipt, *, require_complete=False):
         if require_complete:
             raise ReceiptRejected("MISSING_BODY_COMPLETION_PROOF", "fresh intake requires explicit completed coverage")
         return completion
-    if (receipt.get("status") != "PASS" or type(receipt.get("pending_body_urls")) is not int
-            or receipt["pending_body_urls"] != 0):
+    sites = site_failure_proof(path, receipt)
+    # A PARTIAL whose only gap is skipped sites has no body backlog to carry: accepted, flagged, sealed.
+    sites_only = (bool(sites) and receipt.get("status") == "PARTIAL"
+                  and type(receipt.get("pending_body_urls")) is int and receipt["pending_body_urls"] == 0)
+    if not sites_only and (receipt.get("status") != "PASS" or type(receipt.get("pending_body_urls")) is not int
+                           or receipt["pending_body_urls"] != 0):
         # Owner ruling 2026-10-15: press must never back up.  A sealed PARTIAL promotes the
         # bodies it fetched and CARRIES its pending URLs to the next run, which retries them.
         # The pending list must be exactly the sealed one (hash-checked below, counted and
@@ -298,7 +334,7 @@ def validate_body_completion(path, receipt, *, require_complete=False):
         except (OSError, UnicodeError, ValueError, TypeError, AttributeError,
                 json.JSONDecodeError, csv.Error) as exc:
             raise ReceiptRejected("OFFICIAL_COVERAGE_PROOF_MISMATCH", str(exc)) from exc
-    return completion
+    return {**completion, **sites}
 
 
 def inspect_run(path):
@@ -436,9 +472,14 @@ def _coverage(root, retry):
             member = (row.get("bioguide") or "").strip().upper()
             if member:
                 members[member] = members.get(member, 0) + 1
-    return {"complete": pending == 0, "pending_body_urls_carried": carried,
-            "pending_body_urls_sha256": retry.get("pending_body_urls_sha256"),
-            "pending_members": dict(sorted(members.items()))}
+    # D-294: completion and the named sites both come from the validated sealed file, never the receipt's own copy
+    skipped = site_failure_proof(root, retry).get("site_failures_skipped", [])
+    coverage = {"complete": pending == 0 and not skipped, "pending_body_urls_carried": carried,
+                "pending_body_urls_sha256": retry.get("pending_body_urls_sha256"),
+                "pending_members": dict(sorted(members.items()))}
+    if skipped:   # skipped member sites make the run PARTIAL; named only when present
+        coverage["site_failures_skipped"] = skipped
+    return coverage
 
 
 def _route_counts(fulltext_rows):

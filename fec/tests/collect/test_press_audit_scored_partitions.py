@@ -49,7 +49,7 @@ def failed(name, status=EXHAUSTED, **fields):
 
 
 def audit(tmp_path, monkeypatch, *, dated_rows=(), undated_rows=(), failed_rows=(), scored_rows=(),
-          scored_fields=FIELDS):
+          scored_fields=FIELDS, mutate=None):
     from collect import press_pending_tombstones as tombstones
     monkeypatch.setattr(tombstones, "DEFAULT_TOMBSTONES", str(tmp_path / "tombstones.json"))
     (tmp_path / "outputs").mkdir()
@@ -78,6 +78,8 @@ def audit(tmp_path, monkeypatch, *, dated_rows=(), undated_rows=(), failed_rows=
         rejected_short_mention_slices=sum(r["collection_status"] == MENTION for r in failed_rows))
     if pending:
         receipt.update(status="PARTIAL", pending_body_urls=len(pending))
+    if mutate:
+        mutate(root, receipt)
     path.write_text(json.dumps(receipt))
     return audit_collection.audit_press_delta(root, "2026-06-25", require_complete=True)
 

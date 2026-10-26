@@ -1256,7 +1256,12 @@ def audit_press_delta(root: Path, floor_text: str, *, require_complete=False):
         # Explicit coverage: what this run carries to the next one, and for whom.
         "pending_body_urls_carried": completion_proof.get("pending_body_urls_carried", 0),
         "pending_members": completion_proof.get("pending_members", {}),
-        "coverage_complete": retry_receipt.get("pending_body_urls") == 0 and not carried_pending,
+        "coverage_complete": (retry_receipt.get("pending_body_urls") == 0 and not carried_pending
+                              and not completion_proof.get("site_failures_skipped")
+                              and retry_receipt_valid),   # an invalid proof is never complete coverage
+        # D-294: skipped member sites are named, and the receipt status is reported as sealed (PARTIAL, never PASS).
+        "press_receipt_status": retry_receipt.get("status"),
+        "site_failures_skipped": completion_proof.get("site_failures_skipped", []),
         "cached_date_rejoins": retry_receipt.get("cached_date_rejoins"),
         "revisit_due_urls": retry_receipt.get("revisit_due_urls"),
         "revisit_attempted_urls": retry_receipt.get("revisit_attempted_urls"),

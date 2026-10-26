@@ -589,6 +589,12 @@ write_retry_receipt <- function(materialized) {
     due = 0L, selected = 0L, attempted = 0L, recovered = 0L,
     historical_retained = nrow(historical), historical_selected = 0L)
   status <- if (nrow(failures)) failures$collection_status else character(0)
+  # PS: a run that skipped any member site is PARTIAL, never PASS.  The skipped sites are named here and
+  # the file is hash-bound, so the intake (build_press_engine_feed.validate_body_completion) can refuse a
+  # PASS over a non-empty file and accept this PARTIAL without a body backlog.  Absent file: no skips.
+  site_failures_path <- file.path(run_root, "press_site_failures.json")
+  site_rows <- if (file.exists(site_failures_path))
+    jsonlite::fromJSON(site_failures_path, simplifyVector = FALSE)$failures else list()
   payload <- list(
     schema_version = 2L,
     mode = if (is.null(run_receipt_metrics$retry_source_run))
@@ -596,7 +602,11 @@ write_retry_receipt <- function(materialized) {
     inventory_freshness = if (is.null(run_receipt_metrics$retry_source_run))
       "fresh" else "historical",
     historical_inventory_source = run_receipt_metrics$historical_inventory_source,
-    status = if (nrow(pending)) "PARTIAL" else "PASS",
+    status = if (nrow(pending) || length(site_rows)) "PARTIAL" else "PASS",
+    site_failures = length(site_rows),
+    site_failures_sha256 = if (file.exists(site_failures_path)) sha256_file(site_failures_path) else NA_character_,
+    skipped_sites = lapply(site_rows, function(row) list(
+      member_id = row$member_id, url = row$url, error_class = row$error_class)),
     pending_body_urls = nrow(pending),
     pending_body_urls_sha256 = sha256_file(pending_path),
     cached_date_rejoins = nrow(cached_dates),
@@ -638,6 +648,23 @@ write_retry_receipt <- function(materialized) {
   invisible(payload)
 }
 
+# The sealed press_site_failures.json must match the receipt that claims it (count and SHA-256); a receipt claiming
+# skipped sites over a missing file is refused. A receipt without the fields (older runs) carries no claim.
+validate_site_failures_proof <- function(root, receipt) {
+  claimed <- receipt$site_failures
+  if (is.null(claimed)) return(invisible(TRUE))
+  path <- file.path(root, "press_site_failures.json")
+  if (!file.exists(path)) {
+    if (isTRUE(claimed > 0)) stop("receipt claims ", claimed, " skipped site(s) but press_site_failures.json is missing: ", root)
+    return(invisible(TRUE))
+  }
+  rows <- jsonlite::fromJSON(path, simplifyVector = FALSE)$failures
+  if (!identical(as.integer(length(rows)), as.integer(claimed)) ||
+      !identical(receipt$site_failures_sha256, sha256_file(path)))
+    stop("press_site_failures.json does not match its receipt (count or sha256): ", root)
+  invisible(TRUE)
+}
+
 load_valid_retry_receipt <- function() {
   if (!file.exists(retry_receipt_path))
     stop("score-only requires a completed live-network retry receipt")
@@ -645,10 +672,19 @@ load_valid_retry_receipt <- function() {
   full_rds <- file.path(run_root, "press_delta_fulltext.rds")
   full_csv <- file.path(run_root, "press_delta_fulltext.csv")
   if (!identical(receipt$mode, "live_network_retry") ||
-      identical(receipt$status, "PARTIAL") || isTRUE(receipt$pending_body_urls > 0) ||
+      (identical(receipt$status, "PARTIAL") && !isTRUE(receipt$site_failures > 0)) ||
+      isTRUE(receipt$pending_body_urls > 0) ||
       !identical(receipt$fulltext_rds_sha256, sha256_file(full_rds)) ||
       !identical(receipt$fulltext_csv_sha256, sha256_file(full_csv))) {
     stop("live-network retry receipt does not match the fulltext artifacts")
+  }
+  validate_site_failures_proof(run_root, receipt)   # a sites-only PARTIAL is admitted only with its proof intact
+  if (identical(receipt$status, "PARTIAL")) {         # ... and with an explicit, hash-bound, empty pending set
+    pending_path <- file.path(run_root, "press_delta_pending.csv")
+    if (is.null(receipt$pending_body_urls) || !identical(as.integer(receipt$pending_body_urls), 0L) ||
+        !file.exists(pending_path) || !identical(receipt$pending_body_urls_sha256, sha256_file(pending_path)) ||
+        sum(nzchar(readLines(pending_path, warn = FALSE))) > 1L)   # any line beyond the header is a pending row
+      stop("a sites-only PARTIAL needs an explicit zero, hash-bound, empty press_delta_pending.csv for score-only")
   }
   validate_official_coverage_artifacts(receipt)
   receipt
@@ -805,6 +841,22 @@ if (!is.na(retry_from)) {
   }
   run_receipt_metrics$historical_inventory_source <- bind_historical_retry_source(source_root)
   import_official_coverage_from_run(source_root)
+  # PS: the inventory is the parent's, so its skipped member sites are this run's; write_retry_receipt
+  # then seals PARTIAL (never PASS) over them.
+  # A failed copy, or a stale file left in run_root when the parent has none, would let the receipt seal PASS
+  # over the parent's skips (CodeRabbit PR #94): both stop the recovery.
+  parent_site_failures <- file.path(source_root, "press_site_failures.json")
+  target_site_failures <- file.path(run_root, "press_site_failures.json")
+  validate_site_failures_proof(source_root, jsonlite::fromJSON(
+    file.path(source_root, "press_network_retry_receipt.json"), simplifyVector = TRUE))   # the parent's own proof
+  if (file.exists(parent_site_failures)) {
+    if (!isTRUE(file.copy(parent_site_failures, target_site_failures, overwrite = TRUE)))
+      stop("failed to copy the parent's press_site_failures.json: ", source_root)
+  } else if (file.exists(target_site_failures)) {
+    unlink(target_site_failures)
+    if (file.exists(target_site_failures))
+      stop("failed to remove a stale press_site_failures.json: ", run_root)
+  }
   source_full_path <- file.path(source_root, "press_delta_fulltext.rds")
   if (!file.exists(source_full_path)) stop("retry source lacks press_delta_fulltext.rds: ", source_root)
   source_full <- readRDS(source_full_path)
