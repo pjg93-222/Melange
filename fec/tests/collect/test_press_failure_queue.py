@@ -384,20 +384,27 @@ def write_run_attempted(tmp_path, name, failures, attempted):
     return run
 
 
-def test_an_open_row_recovers_only_when_its_member_was_attempted(tmp_path):
-    # CodeRabbit PR #84: a member the walk did not try (left the roster) must not read as recovered.
+def test_an_open_row_recovers_only_when_its_collector_attempted_the_member(tmp_path):
+    # CodeRabbit PR #84: a member a collector did not try (left the roster, configuration removed) is not recovered.
     queue = tmp_path / "queue.ndjson"
-    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261025", [ROW], [ROW["member_id"]]), queue, now=NOW)
-    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261026", [], ["X000001"]), queue, now=NOW)
+    member, source = ROW["member_id"], ROW["source"]
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261025", [ROW], {source: [member]}), queue, now=NOW)
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261026", [], {source: ["X000001"]}), queue, now=NOW)
     assert rows(queue)[0]["status"] == "open" and q.open_count(queue) == 1     # not walked: unverified, still open
-    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261027", [], [ROW["member_id"]]), queue, now=NOW)
+    # walked by a different collector only: still not a retry of this row's site
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261027", [],
+                                     {source: [], "official_dated_listing": [member]}), queue, now=NOW)
+    assert rows(queue)[0]["status"] == "open"
+    q.record_run(write_run_attempted(tmp_path, "press_refresh_20261028", [], {source: [member]}), queue, now=NOW)
     assert (rows(queue)[0]["status"], rows(queue)[0]["consecutive_runs"]) == ("recovered", 0)
     # an older artifact without "attempted" keeps the previous behaviour
-    q.record_run(write_run(tmp_path, "press_refresh_20261028", [ROW]), queue, now=NOW)
-    q.record_run(write_run(tmp_path, "press_refresh_20261029", []), queue, now=NOW)
+    q.record_run(write_run(tmp_path, "press_refresh_20261029", [ROW]), queue, now=NOW)
+    q.record_run(write_run(tmp_path, "press_refresh_20261030", []), queue, now=NOW)
     assert rows(queue)[0]["status"] == "recovered"
 
 
-def test_the_collector_writes_the_attempted_roster_beside_the_failures():
+def test_the_collector_writes_the_attempted_members_per_source_beside_the_failures():
     source = (FEC / "collect" / "refresh_press_delta.R").read_text(encoding="utf-8")
-    assert "attempted = as.list(unique(as.character(members$bioguide)))" in source
+    assert 'official_wordpress_custom_post = attempted_for(get0("PRESS_WORDPRESS_CUSTOM_MEMBERS"' in source
+    assert 'official_dated_listing = attempted_for(get0("PRESS_OFFICIAL_DATED_MEMBERS"' in source
+    assert "failures = site_failures, attempted = attempted" in source

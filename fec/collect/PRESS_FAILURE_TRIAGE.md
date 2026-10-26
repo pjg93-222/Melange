@@ -18,8 +18,9 @@ this fully sustainable."
   rows are the backlog; the next daily full walk re-attempts every one of those sites (the daily press
   step walks the whole roster), so an open row becomes `recovered` as soon as a sealed walk that attempted
   that member no longer fails it, or `consecutive_runs` goes up. A missing failure is not proof of recovery:
-  `press_site_failures.json` lists the `attempted` member ids, and a row whose member was not attempted
-  (left the roster, filtered out) stays `open` for triage rather than being marked `recovered`. A separate member-only walk was NOT built: it would need its
+  `press_site_failures.json` lists the `attempted` member ids per collector source, and a row whose member
+  was not attempted by that row's collector (left the roster, configuration removed) stays `open` for triage
+  rather than being marked `recovered`. A separate member-only walk was NOT built: it would need its
   own run root, seal and intake audit (see the lane report).
 - Still fatal: output cannot be written, a seal or hash is broken, a roster/origin/pagination/date
   integrity violation, the delta safety cap, or EVERY member failing (`press_site_all_failed`,
