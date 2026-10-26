@@ -14,8 +14,9 @@ KNOWN_GATED_FAILURES into the supervisor would make the two gates able to disagr
 failures are ratified, and a name added in one place would silently not apply in the other.
 
 Everything here fails CLOSED: a report that cannot be read as complete and self-consistent is
-treated as novel breakage, because a report we cannot read proves nothing. Import cost is one
-regex module — the supervisor imports this on every 10-minute tick.
+treated as novel breakage, because a report we cannot read proves nothing. Import cost is stdlib
+only — the supervisor imports this on every 10-minute tick; the two D-330 condition checks read
+files only when one of their names is actually failing.
 
 CALLER OBLIGATION (not enforceable here): tolerating audit_full's verdict is only safe when every
 PRODUCER has already run, so the audit's dissent cannot be masking unrun work. weekly_refresh
@@ -24,7 +25,11 @@ satisfies it by construction — audit_full is its last gate_step and every earl
 already in the required-dict.
 """
 import ast
+import hashlib
+import json
+import os
 import re
+import time
 
 # audit_full.py is the LAST step of run_pipeline's CHAIN (fec\run_pipeline.py:135) and the LAST
 # step of collector_supervisor's GATE-2, so when it is the step that fails, every PRODUCER has
@@ -55,6 +60,127 @@ KNOWN_GATED_FAILURES = (
     # merged and build_press_engine_feed.py rebuilt; the audit check stays live and visible.
     'press refresh feed is hash-bound and keeps official mentions out of stance/speech',
 )
+# The two D-330 tolerances are NOT in KNOWN_GATED_FAILURES: each audit_full check below is a
+# conjunction of several sub-conditions, and D-330 adjudicated exactly ONE sub-condition of each.
+# Tolerating the whole name would also waive the others (hash binding, candidate-only status,
+# partition completeness, no active writes; a malformed receipt; any other tolerated step going
+# stale). So each name is tolerated only when a read-only re-derivation of the check from the same
+# live files finds that the adjudicated sub-condition is the ONLY one failing. Any other failing
+# sub-condition, an unreadable file, or a failure the re-derivation cannot explain = NOVEL.
+INTAKE_CHECK = 'accepted audio manifest is fully partitioned into a candidate-only review intake'
+CTF_CHECK = 'chain_tolerated_failures'
+# D-330 ruling 8: tolerate the age of THIS last-good longform artifact (mtime 2026-09-05T20:58:27Z,
+# 47 d at attempt 9) until the re-bind after attempt 10. The tolerance is pinned to the artifact's
+# bytes, so it EXPIRES BY ITSELF: the re-bind writes a new artifact, its hash no longer matches, and
+# from then on the 21-day age limit binds the longform step like every other tolerated step.
+LONGFORM_STEP = 'build_member_longform_turn_features.py'
+LONGFORM_LAST_GOOD_SHA256 = '02da7ca4884066f3a6e046e5e92e8a5b90f5681ab095862e25352fb9101dbc39'
+CTF_MAX_AGE_DAYS = 21   # mirrors fec\audit\audit_full.py _CTF_MAX_AGE_DAYS
+
+
+def _root(root=None):
+    # Same resolution as fec\paths.py ROOT (audit_full's B), without importing it.
+    return os.path.abspath(root or os.environ.get('MONEYBALL_ROOT')
+                           or os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
+
+
+def _sha256(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _load_json(path):
+    with open(path, encoding='utf-8') as fh:
+        return json.load(fh)
+
+
+def _intake_only_rejected(root):
+    """D-330 attempt-9 residual: collection_intake REJECTED, tolerated until the media gate passes.
+    Mirrors fec\\audit\\audit_full.py (the 'accepted audio manifest ...' ck). Tolerated only when the
+    intake receipt's status is exactly REJECTED and EVERY other conjunct of that check holds."""
+    intake = _load_json(os.path.join(root, 'data', 'engine', 'collection_intake_receipt.json'))
+    cand = _load_json(os.path.join(root, 'data', 'members', 'b5_audio_reviews_v2.json.candidate'))
+    if not isinstance(intake, dict) or not isinstance(cand, dict):
+        return False, 'intake receipt or audio candidate is not an object'
+    if intake.get('status') != 'REJECTED':
+        return False, 'intake status is %r, not the adjudicated REJECTED' % (intake.get('status'),)
+    part = cand.get('partition') or {}
+    src = cand.get('source_manifest') or {}
+    manifest = src.get('path') or ''
+    expected = int(((intake.get('house') or {}).get('all_clip_rows')) or -1)
+    queued, excluded, total = part.get('queued'), part.get('excluded'), part.get('total')
+    others = (
+        ('candidate schema', cand.get('schema') == 'b5-audio-review-v2-candidate'),
+        ('candidate-only status',
+         cand.get('status') == 'CANDIDATE_ONLY_CONSUMED_BY_NOTHING_AWAITING_DOUBLE_REVIEW'),
+        ('intake schema', intake.get('schema') == 'collection-intake-receipt-v1'),
+        ('manifest present', bool(manifest) and os.path.isfile(manifest)),
+        ('candidate hash binds the manifest',
+         bool(manifest) and os.path.isfile(manifest) and src.get('sha256') == _sha256(manifest)),
+        ('intake hash binds the candidate',
+         bool(src.get('sha256')) and (intake.get('inputs') or {}).get('clip_manifest_sha256') == src.get('sha256')),
+        ('partition total', total == expected),
+        ('partition complete', all(isinstance(v, int) and not isinstance(v, bool) for v in (queued, excluded, total))
+         and queued + excluded == total),
+        ('no active artifact writes', (cand.get('contract') or {}).get('active_artifacts_written') is False),
+    )
+    bad = [n for n, ok in others if not ok]
+    if bad:
+        return False, 'intake REJECTED but also failing: %s' % ', '.join(bad)
+    return True, 'only the adjudicated intake status REJECTED'
+
+
+def _ctf_only_adjudicated_longform_age(root):
+    """D-330 ruling 8. Mirrors fec\\audit\\audit_full.py's chain_tolerated_failures ck. Tolerated only
+    when the receipt is well-formed, every tolerated step's last-good artifact exists, and the ONLY
+    entry over the age limit is the longform step serving the adjudicated (pinned) artifact."""
+    receipt = os.path.join(root, 'data', 'engine', 'chain_tolerated_failures.json')
+    if not os.path.exists(receipt):
+        return False, 'receipt absent, so the check cannot be failing on the longform age'
+    entries = _load_json(receipt)
+    if not isinstance(entries, list):
+        return False, 'receipt malformed'
+    now = time.time(); adjudicated = 0
+    for e in entries:
+        if not isinstance(e, dict):
+            return False, 'receipt entry malformed'
+        step = str(e.get('step') or '?'); art = e.get('last_good_path')
+        if not isinstance(art, str) or not os.path.isfile(art):
+            return False, '%s: last-good artifact missing' % step
+        if (now - os.path.getmtime(art)) / 86400.0 <= CTF_MAX_AGE_DAYS:
+            continue
+        if step != LONGFORM_STEP:
+            return False, '%s: last-good artifact over %d days (not adjudicated)' % (step, CTF_MAX_AGE_DAYS)
+        if _sha256(art) != LONGFORM_LAST_GOOD_SHA256:
+            return False, '%s: stale artifact is not the adjudicated one (re-bound: tolerance expired)' % step
+        adjudicated += 1
+    if adjudicated != 1:   # zero: nothing adjudicated explains the failure; two+: duplicate receipt entries
+        return False, '%d overdue longform entries (exactly 1 is adjudicated)' % adjudicated
+    return True, 'only the adjudicated longform last-good age'
+
+
+CONDITIONALLY_GATED_FAILURES = {
+    # D-330 (Paul, 2026-10-26): attempt 9's collection_intake_receipt is REJECTED (media gate unmet);
+    # tolerated until the media gate passes. UN-GATE then.
+    INTAKE_CHECK: _intake_only_rejected,
+    # D-330 ruling 8 (Paul, 2026-10-26): re-bind longform after attempt 10, tolerate the age until then.
+    # Self-expiring (LONGFORM_LAST_GOOD_SHA256); remove this entry once the re-bind lands.
+    CTF_CHECK: _ctf_only_adjudicated_longform_age,
+}
+
+
+def conditional_tolerance(name, root=None):
+    """(tolerated, reason) for a CONDITIONALLY_GATED_FAILURES name. Fails CLOSED on any error."""
+    predicate = CONDITIONALLY_GATED_FAILURES.get(name)
+    if predicate is None:
+        return False, 'not conditionally gated'
+    try:
+        return predicate(_root(root))
+    except Exception as e:
+        return False, 'condition unreadable (%s: %s)' % (type(e).__name__, str(e)[:160])
 # DELIBERATELY NOT LISTED (these must keep aborting the refresh AND failing GATE-2):
 #   'own-source channel inputs within 28 days of the corpus (channels are default-ON)'
 #       — fec\audit\audit_full.py:627. A REAL staleness tripwire: it means a channel sidecar has
@@ -128,16 +254,31 @@ def audit_failures(stdout, stderr):
     return names, ''
 
 
-def tolerate_known_gated(stdout, stderr, log=print, prefix='   '):
+def tolerate_known_gated(stdout, stderr, log=print, prefix='   ', root=None):
     """Decide whether a non-zero audit_full result is ONLY the known Paul-gated dissent.
 
     Returns (tolerate, names). Every uncertain path returns tolerate=False. `log` is the caller's
-    own logger so the decision lands in whichever unattended log the operator will actually read."""
+    own logger so the decision lands in whichever unattended log the operator will actually read.
+    `root` is the Moneyball root whose files the audit read (default: fec\\paths.py's ROOT); only the
+    CONDITIONALLY_GATED_FAILURES names consult it."""
     names, reason = audit_failures(stdout, stderr)
     if names is None:
         log('%snot a readable audit failure report (%s) — abort stands' % (prefix, reason))
         return False, []
-    novel = [n for n in names if n not in KNOWN_GATED_FAILURES and not any(p.match(n) for p in KNOWN_GATED_PATTERNS)]
+    novel = []; tags = {}
+    for n in names:
+        if n in KNOWN_GATED_FAILURES:
+            tags[n] = ''
+        elif any(p.match(n) for p in KNOWN_GATED_PATTERNS):
+            tags[n] = ' (pattern)'
+        elif n in CONDITIONALLY_GATED_FAILURES:
+            ok, why = conditional_tolerance(n, root)
+            if ok:
+                tags[n] = ' (condition: %s)' % why
+            else:
+                novel.append('%s [%s]' % (n, why))
+        else:
+            novel.append(n)
     if novel:
         log('%sNOVEL audit failure(s) — abort stands:' % prefix)
         for n in novel:
@@ -145,6 +286,5 @@ def tolerate_known_gated(stdout, stderr, log=print, prefix='   '):
         return False, names
     log('%sknown Paul-gated dissent only — tolerating:' % prefix)
     for n in names:
-        tag = '' if n in KNOWN_GATED_FAILURES else ' (pattern)'
-        log('%s  %s%s' % (prefix, n, tag))
+        log('%s  %s%s' % (prefix, n, tags[n]))
     return True, names
