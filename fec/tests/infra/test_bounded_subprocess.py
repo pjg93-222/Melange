@@ -1167,6 +1167,7 @@ class WeeklyRefreshStepTimeouts(unittest.TestCase):
     # measurement (600 s for a CSV regenerator up to 129600 s for the full press walk).
     HEAD_TIMEOUTS = (600, 600, 600, 600, 600, 600,
                      900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900,
+                     900,  # CR member lane (side copy), after 'multilayer network' (lane/crw-weekly)
                      1200, 1200, 1200,
                      1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800,
                      1800, 1800,
@@ -1189,7 +1190,7 @@ class WeeklyRefreshStepTimeouts(unittest.TestCase):
             self.assertIsNotNone(keyword, 'a step() call left its timeout to the default')
             self.assertIsInstance(keyword.value, ast.Constant)
             found.append(keyword.value.value)
-        self.assertEqual(49, len(self.HEAD_TIMEOUTS))
+        self.assertEqual(50, len(self.HEAD_TIMEOUTS))
         self.assertEqual(len(self.HEAD_TIMEOUTS), len(found))
         self.assertEqual(sorted(self.HEAD_TIMEOUTS), sorted(found))
 
