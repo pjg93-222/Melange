@@ -97,7 +97,8 @@ def private_pem(data):
 
 
 def stream_file(file, output=None):
-    parent_chain(file.parent)
+    # Strict canonical resolution checks every ancestor before and after reading.
+    # Rewalking the full ancestor chain here repeats that work for every file.
     before = physical(file)
     digest, count, tail = hashlib.sha256(), 0, b""
     fd = os.open(file, os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0))
@@ -124,6 +125,7 @@ def inventory_for(source, app_id, version):
     parent_chain(source)
     records, omitted, aliases, directories, total = [], [], set(), {}, 0
     for current, dirs, filenames in os.walk(source, followlinks=False):
+        physical(Path(current), directory=True)
         dirs.sort()
         filenames.sort()
         for directory in dirs:

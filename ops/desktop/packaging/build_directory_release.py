@@ -119,6 +119,17 @@ def frozen_plan_identity(value):
             sorted((app, config["source"]["repository"], config["source"]["commit"]) for app, config in value["apps"].items()))
 
 
+def packager_for_resume(output, frozen_packaging, frozen_commit):
+    record = output / "packager-implementation.json"
+    if not record.exists():
+        # Older controllers ran the packager from the verified frozen export.
+        return frozen_packaging, {"source": "frozen-tooling", "sha256": digest(frozen_packaging / "directory_zip.py"), "commit": frozen_commit, "dirty": False}
+    identity = json.loads(record.read_text())
+    require(set(identity) == {"source", "sha256", "commit", "dirty"} and identity["source"] == "controller" and identity["dirty"] is False and re.fullmatch(r"[0-9a-f]{40}", identity["commit"]), "Invalid recorded packager implementation")
+    require(digest(HERE / "directory_zip.py") == identity["sha256"], "Packager implementation changed since ZIP creation")
+    return HERE, identity
+
+
 def git(repo, *args, missing=False):
     result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, stdin=subprocess.DEVNULL)
     if missing and result.returncode:
@@ -248,7 +259,21 @@ class Build:
     def zip_command(self, app, packaging, unpacked, package):
         return [str(value) for value in [self.python, "-B", packaging / "directory_zip.py", "--app", app, "--version", self.plan["version"], "--source", unpacked, "--output", package, "--publisher-payload", package.parent / "publisher-payload.json"]]
 
-    def finish_package(self, app, descriptor, provenance):
+    def package_signed_tree(self, app, unpacked, package):
+        script = HERE / "directory_zip.py"
+        commit = git(HERE.parents[2], "rev-parse", "HEAD").decode().strip()
+        dirty = bool(git(HERE.parents[2], "status", "--porcelain", "--", "ops/desktop/packaging/directory_zip.py").strip())
+        require(not dirty, "Commit the reviewed packager before building")
+        identity = {"source": "controller", "sha256": digest(script), "commit": commit, "dirty": False}
+        json_write(package.parent / "packager-implementation.json", identity)
+        command = self.zip_command(app, HERE, unpacked, package)
+        self.call(app + "-zip", command, reserve=tree_bytes(unpacked) + GIB // 4)
+        require(digest(script) == identity["sha256"], "Packager implementation changed during ZIP creation")
+        text = (self.root / "logs" / (app + "-zip.log")).read_text(encoding="utf-8")
+        descriptor = package_log_descriptor(text, app, self.plan["version"], package, subprocess.list2cmdline(command))
+        return descriptor, identity
+
+    def finish_package(self, app, descriptor, provenance, packager_identity):
         output = self.artifacts / app
         tools = self.root / "src/tooling"
         client, packaging = tools / "ops/desktop/client", tools / "ops/desktop/packaging"
@@ -269,7 +294,7 @@ class Build:
         self.remove(Path("verify") / app)
         self.remove(Path("src") / app)
         receipt = {"schemaVersion": 1, "appId": app, "version": self.plan["version"], "sourceCommit": provenance["sourceCommit"], "toolingCommit": provenance["toolingCommit"], "package": descriptor,
-                   "controller": self.controller, "verifier": verifier_identity,
+                   "controller": self.controller, "verifier": verifier_identity, "packager": packager_identity,
                    "sourceInventorySha256": digest(output / "runtime-source-inventory.json"), "nativeVerificationSha256": digest(output / "native-verification.json"), "publisherProofSha256": digest(output / "publisher-proof.json"),
                    "publicationAllowed": False, "acceptanceNotRun": ["isolated-packaged-app-smoke", "automatic-update-smoke", "security-gate", "dependency-and-redistribution-review", "recipient-ThreatLocker-policy"], "completedAt": dt.datetime.now(dt.timezone.utc).isoformat()}
         json_write(output / "engineering-receipt.json", receipt)
@@ -294,9 +319,10 @@ class Build:
         require((output / "build-signatures.json").is_file() and (output / "runtime-source-inventory.json").is_file(), "Complete build evidence missing")
         package = output / f"{app}-{saved['version']}-win32-x64.zip"
         unpacked = self.root / "signing" / app / "dist" / app / "win-unpacked"
-        command = subprocess.list2cmdline(self.zip_command(app, tools / "ops/desktop/packaging", unpacked, package))
+        packager, identity = packager_for_resume(output, tools / "ops/desktop/packaging", saved["tooling"]["commit"])
+        command = subprocess.list2cmdline(self.zip_command(app, packager, unpacked, package))
         descriptor = package_log_descriptor((self.root / "logs" / (app + "-zip.log")).read_text(), app, saved["version"], package, command)
-        return self.finish_package(app, descriptor, provenance)
+        return self.finish_package(app, descriptor, provenance, identity)
 
     def run(self):
         require(os.name == "nt" and not os.environ.get("CI") and not os.environ.get("GITHUB_ACTIONS"), "Local Windows build required")
@@ -370,13 +396,11 @@ class Build:
             unpacked = signing / "dist" / app / "win-unpacked"
             require((unpacked.with_name(unpacked.name + ".signatures.json")).is_file(), "Directory signing receipt missing")
             shutil.copy2(unpacked.with_name(unpacked.name + ".signatures.json"), output / "build-signatures.json")
-            # Run the frozen packager, never the caller's potentially dirty file.
+            # Packaging is separately committed controller code; program sources
+            # and signing logic above still come from the frozen tooling export.
             package = output / (app + "-" + self.plan["version"] + "-win32-x64.zip")
-            command = self.zip_command(app, packaging, unpacked, package)
-            self.call(app + "-zip", command, reserve=tree_bytes(unpacked) + GIB // 4)
-            text = (self.root / "logs" / (app + "-zip.log")).read_text(encoding="utf-8")
-            descriptor = package_log_descriptor(text, app, self.plan["version"], package, subprocess.list2cmdline(command))
-            completed[app] = self.finish_package(app, descriptor, provenance)
+            descriptor, identity = self.package_signed_tree(app, unpacked, package)
+            completed[app] = self.finish_package(app, descriptor, provenance, identity)
         json_write(self.root / "completed.json", completed)
         return completed
 

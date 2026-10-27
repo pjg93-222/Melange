@@ -158,6 +158,24 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
             self.assertNotEqual(module.frozen_plan_identity(prepared), module.frozen_plan_identity(same))
             target["commit"] = before
 
+    def test_resume_records_actual_legacy_or_controller_packager(self):
+        frozen = self.root / "frozen-packaging"
+        frozen.mkdir()
+        (frozen / "directory_zip.py").write_bytes(b"original frozen implementation")
+        directory, identity = module.packager_for_resume(self.root, frozen, self.commit)
+        self.assertEqual(directory, frozen)
+        self.assertEqual(identity, {"source": "frozen-tooling", "sha256": module.digest(frozen / "directory_zip.py"), "commit": self.commit, "dirty": False})
+        current = {"source": "controller", "sha256": module.digest(module.HERE / "directory_zip.py"), "commit": self.commit, "dirty": False}
+        record = self.root / "packager-implementation.json"
+        record.write_text(json.dumps(current))
+        self.assertEqual(module.packager_for_resume(self.root, frozen, self.commit), (module.HERE, current))
+        record.write_text(json.dumps({**current, "sha256": "a" * 64}))
+        with self.assertRaisesRegex(module.Refused, "implementation changed"):
+            module.packager_for_resume(self.root, frozen, self.commit)
+        record.write_text(json.dumps({**current, "dirty": True}))
+        with self.assertRaisesRegex(module.Refused, "Invalid recorded"):
+            module.packager_for_resume(self.root, frozen, self.commit)
+
     def test_terrier_constraint_matches_reviewed_pypi_certifi_wheel(self):
         text = Path(__file__).with_name("terrier-runtime.constraints.txt").read_text()
         self.assertIn("certifi==2026.10.19", text)

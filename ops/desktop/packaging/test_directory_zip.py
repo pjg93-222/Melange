@@ -2,9 +2,12 @@ import importlib.util
 import base64
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 spec = importlib.util.spec_from_file_location("directory_zip", Path(__file__).with_name("directory_zip.py"))
@@ -109,6 +112,45 @@ class DirectoryZipTests(unittest.TestCase):
         (self.root / "linked.exe").hardlink_to(self.source / "Melange.exe")
         with self.assertRaises(module.Refused):
             module.inventory_for(self.source, "melange", "1.0.20")
+
+    def junction(self, target, link):
+        subprocess.run(["node", "-e", "require('fs').symlinkSync(process.argv[1],process.argv[2],'junction')", str(target), str(link)], check=True, capture_output=True)
+
+    @unittest.skipUnless(os.name == "nt", "Windows junction regression")
+    def test_parent_junction_is_rejected_by_per_file_canonical_check(self):
+        link = self.root / "redirected"
+        self.junction(self.source, link)
+        with self.assertRaisesRegex(module.Refused, "Redirected"):
+            module.stream_file(link / "Melange.exe")
+
+    @unittest.skipUnless(os.name == "nt", "Windows junction regression")
+    def test_parent_substitution_at_open_is_rejected_by_file_identity(self):
+        replacement = self.root / "replacement"
+        replacement.mkdir()
+        target = self.source / "Melange.exe"
+        (replacement / target.name).write_bytes(target.read_bytes())
+        original_open = module.os.open
+        def substitute(file, flags):
+            backup = self.root / "original"
+            self.assertTrue(self.source.resolve().is_relative_to(self.root))
+            self.assertTrue(backup.resolve().is_relative_to(self.root))
+            self.source.rename(backup)
+            self.junction(replacement, self.source)
+            return original_open(file, flags)
+        with patch.object(module.os, "open", side_effect=substitute), self.assertRaisesRegex(module.Refused, "changed before opening"):
+            module.stream_file(target)
+
+    def test_second_pass_content_change_is_rejected_before_zip_publication(self):
+        original = module.stream_file
+        def changed(file, output=None):
+            if output is not None and file.name == "Melange.exe":
+                file.write_bytes(b"MZ changed fixture")
+            return original(file, output)
+        destination = self.root / "changed.zip"
+        with patch.object(module, "stream_file", side_effect=changed), self.assertRaisesRegex(module.Refused, "changed after inventory"):
+            module.build(self.source, destination, "melange", "1.0.20")
+        self.assertFalse(destination.exists())
+        self.assertEqual(list(self.root.glob(".directory-zip-*.tmp")), [])
 
 
 if __name__ == "__main__":
