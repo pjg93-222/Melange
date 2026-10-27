@@ -1124,7 +1124,9 @@ _LANE_PYTEST=(
     # budget; Washington Journal failures carry the R error tail. Scripted WordPress API / fake Rscript, tmp_path only.
     'test_msnow_walk','test_refresh_cspan_wj_errors','test_cspan_chromote_retry',
     # 2026-10-26 the CR member lane suite merged unregistered (kernel_registration_census red); synthetic tmp_path roots.
-    'test_cu_member_lane')
+    'test_cu_member_lane',
+    # 2026-10-27 lane/as-of-tz: paths.utc_instant, the one local-date vs UTC-stamp clock (M7 attempt 10b). Pure, no tree.
+    'test_field_action_as_of_tz')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on

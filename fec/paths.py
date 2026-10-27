@@ -99,6 +99,25 @@ def today():
         sys.stderr.flush()
     return pinned
 
+LOCAL_ZONE = None   # zone of a local calendar date in utc_instant(); None = the host zone, the one date.today() reads
+
+def utc_instant(value):
+    """The one clock for comparing a LOCAL calendar date (today(), an as_of) with a UTC stamp (checked_at, a receipt
+    or snapshot time): both become aware UTC datetimes, then compare those.  Never slice a stamp to its date: a stamp
+    written after 20:00 EDT carries tomorrow's UTC date (M7 attempt 10b refused its own same-run admissions snapshot).
+    A date (date object or 'YYYY-MM-DD') is a local day and maps to its local midnight; a timestamp maps to its
+    instant, a naive one read as UTC (the system writes stamps in UTC).  Day D covers [utc_instant(D), utc_instant(D+1))."""
+    import datetime
+    if isinstance(value, datetime.datetime):
+        stamp = value
+    elif isinstance(value, datetime.date) or len(str(value)) == 10:
+        day = value if isinstance(value, datetime.date) else datetime.date.fromisoformat(str(value))
+        # naive (LOCAL_ZONE None) .astimezone() reads the wall time in the host zone, DST included
+        return datetime.datetime.combine(day, datetime.time(), LOCAL_ZONE).astimezone(datetime.timezone.utc)
+    else:
+        stamp = datetime.datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+    return (stamp if stamp.tzinfo is not None else stamp.replace(tzinfo=datetime.timezone.utc)).astimezone(datetime.timezone.utc)
+
 def stored_name(path):
     """Last component of a path stored inside data, whichever separator it was written with.  On Windows this is
     Path(path).name; PureWindowsPath reads both separators, so a Windows path stored in a manifest names the same
