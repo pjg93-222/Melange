@@ -15,6 +15,7 @@ import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server'))
 from desktop_admin import APPS, PUBLISHER_THUMBPRINTS, Refused, Store, canonical, file_hashes, verify_envelope
+import directory_package_proof as directory_proof
 
 REPOSITORY = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*')
 VERSION = re.compile(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)')
@@ -29,7 +30,11 @@ assert set(REPOSITORIES) == APPS
 TRUST_LAUNCHER = Path(__file__).resolve().parents[1] / 'client' / 'turn-on-updates.cmd'
 
 
-def app_assets(app, version, launcher=True):
+def app_assets(app, version, launcher=True, package_format=None):
+    if package_format == directory_proof.FORMAT:
+        return sorted((f'{app}-win32-x64-directory-zip.manifest.json', app + '-trust.json', f'{app}-{version}-win32-x64.zip'))
+    if package_format not in (None, 'nsis'):
+        raise Refused('unsupported release package format')
     return sorted((f'{app}-win32-x64.manifest.json', app + '-trust.json', f'{app}-{version}-win32-x64.exe')
                   + ((TRUST_LAUNCHER.name,) if launcher else ()))
 
@@ -88,9 +93,17 @@ def validate_spec(spec):
             raise Refused('invalid committed source reference for ' + app)
     for app in sorted(spec['packages']):
         files = spec['packages'][app]
-        if (not isinstance(files, dict) or not {'package', 'receipt'} <= set(files) <= {'package', 'receipt', 'version', 'sequence'}
+        if (not isinstance(files, dict) or not {'package', 'receipt'} <= set(files) <= {'package', 'receipt', 'version', 'sequence', 'format', 'publisherProof'}
                 or any(not isinstance(files[key], str) or not files[key] or '\0' in files[key] for key in ('package', 'receipt'))):
             raise Refused('package and exact-byte gate receipt required for ' + app)
+        package_format = files.get('format')
+        if package_format not in (None, 'nsis', directory_proof.FORMAT):
+            raise Refused('unsupported package format for ' + app)
+        if package_format == directory_proof.FORMAT:
+            if not isinstance(files.get('publisherProof'), str) or not files['publisherProof'] or '\0' in files['publisherProof']:
+                raise Refused('directory ZIP requires a publisher proof sidecar for ' + app)
+        elif 'publisherProof' in files:
+            raise Refused('publisher proof sidecar only applies to directory ZIP releases')
         version, sequence = app_release(spec, app)
         if not valid_version(version) or not valid_sequence(sequence):
             raise Refused('invalid version or sequence for ' + app)
@@ -116,10 +129,13 @@ def prepare(store, spec, output):
         for app in apps:
             version, sequence = app_release(spec, app)
             package_input = Path(spec['packages'][app]['package'])
-            if package_input.is_symlink() or not package_input.is_file() or package_input.suffix.lower() != '.exe':
-                raise Refused('a regular NSIS installer is required for ' + app)
+            package_format = spec['packages'][app].get('format')
+            is_directory = package_format == directory_proof.FORMAT
+            extension = '.zip' if is_directory else '.exe'
+            if package_input.is_symlink() or not package_input.is_file() or package_input.suffix.lower() != extension:
+                raise Refused('a regular ' + extension + ' package is required for ' + app)
             (stage / app).mkdir(parents=True)
-            name = f'{app}-{version}-{platform}-{arch}.exe'
+            name = f'{app}-{version}-{platform}-{arch}{extension}'
             destination = stage / app / name
             shutil.copyfile(package_input, destination)
             hashes = file_hashes(destination)
@@ -130,13 +146,19 @@ def prepare(store, spec, output):
                 'schemaVersion': 1, 'appId': app, 'version': version, 'sequence': sequence,
                 'platform': platform, 'arch': arch,
                 'issuedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
-                'minimumUpdaterVersion': '1.0.0', 'dataSchemaVersion': 1,
+                'minimumUpdaterVersion': directory_proof.UPDATER_VERSION if is_directory else '1.0.0', 'dataSchemaVersion': 1,
                 'publisherThumbprints': list(PUBLISHER_THUMBPRINTS),
                 'purpose': 'melange-desktop-github-release',
                 'distribution': 'public-installations', 'repository': repos[app],
                 'sourceRefs': spec['sourceRefs'],
                 'package': {'name': name, 'path': f'/v1/packages/{app}/{sequence}/{name}', **hashes},
             }
+            if is_directory:
+                proof_path = Path(spec['packages'][app]['publisherProof'])
+                if proof_path.is_symlink() or not proof_path.is_file() or proof_path.stat().st_size > 65536:
+                    raise Refused('publisher proof must be a bounded regular JSON file')
+                manifest['package'].update(format=directory_proof.FORMAT, entrypoint=directory_proof.NAMES[app] + '.exe',
+                                           publisherProof=json.loads(proof_path.read_text(encoding='utf-8-sig')))
             # The actual publisher OS-signature and exact-byte gates run against
             # the staged copy. No synthetic receipt or bypass exists in this tool.
             store.verify_release_gates(receipt, manifest, destination)
@@ -175,13 +197,18 @@ def prepare(store, spec, output):
                 directory = stage / app
                 if file_hashes(directory / manifest['package']['name']) != {key: manifest['package'][key] for key in ('size', 'sha256', 'sha512')}:
                     raise Refused('installer changed before staging completed')
-                (directory / f'{app}-{platform}-{arch}.manifest.json').write_bytes(canonical(envelope))
+                is_directory = manifest['package'].get('format') == directory_proof.FORMAT
+                suffix = '-directory-zip' if is_directory else ''
+                (directory / f'{app}-{platform}-{arch}{suffix}.manifest.json').write_bytes(canonical(envelope))
                 (directory / (app + '-trust.json')).write_bytes(canonical({'transitions': config['apps'][app].get('transitions', [])}))
-                (directory / TRUST_LAUNCHER.name).write_bytes(TRUST_LAUNCHER.read_bytes())
-                assets = app_assets(app, version)
+                if not is_directory:
+                    (directory / TRUST_LAUNCHER.name).write_bytes(TRUST_LAUNCHER.read_bytes())
+                assets = app_assets(app, version, package_format=manifest['package'].get('format'))
                 index = {'schemaVersion': 1, 'purpose': 'melange-desktop-github-release', 'repository': repos[app], 'appId': app,
                          'tag': tag, 'version': version, 'sequence': sequence, 'platform': platform, 'arch': arch,
                          'sourceRefs': spec['sourceRefs'], 'assets': assets, 'published': False}
+                if is_directory:
+                    index['packageFormat'] = directory_proof.FORMAT
                 (directory / 'release.json').write_bytes(canonical(index))
                 (directory / 'SHA256SUMS').write_text(''.join(file_hashes(directory / name)['sha256'] + '  ' + name + '\n'
                                                               for name in sorted(assets + ['release.json'])), encoding='ascii')
@@ -213,7 +240,8 @@ def verify_bundle(store, output, repository=None):
     if repository is not None and (not isinstance(repository, str) or repository.lower() != index['repository']):
         raise Refused(f'{app} release belongs to {REPOSITORIES[app]}, not {repository}')
     # Releases prepared before the trust launcher (desktop-v1.0.5) still verify with their original asset set.
-    assets = next((candidate for candidate in (app_assets(app, index['version']), app_assets(app, index['version'], False))
+    package_format = index.get('packageFormat')
+    assets = next((candidate for candidate in (app_assets(app, index['version'], package_format=package_format), app_assets(app, index['version'], False, package_format))
                    if index.get('assets') == candidate), None)
     if assets is None or {path.name for path in output.iterdir()} != set(assets + ['release.json', 'SHA256SUMS']):
         raise Refused('public release must contain exactly the declared app assets')
@@ -222,14 +250,17 @@ def verify_bundle(store, output, repository=None):
     if TRUST_LAUNCHER.name in assets and (output / TRUST_LAUNCHER.name).read_bytes() != TRUST_LAUNCHER.read_bytes():
         raise Refused('trust launcher differs from the reviewed client file')
     config = store.config()
-    envelope = json.loads((output / f'{app}-win32-x64.manifest.json').read_text(encoding='utf-8'))
+    is_directory = package_format == directory_proof.FORMAT
+    suffix = '-directory-zip' if is_directory else ''
+    envelope = json.loads((output / f'{app}-win32-x64{suffix}.manifest.json').read_text(encoding='utf-8'))
     manifest = verify_envelope(envelope, config['apps'][app]['publicKeys'], app=app, platform='win32', arch='x64')
     for key in ('version', 'sequence', 'repository', 'sourceRefs', 'purpose'):
         if manifest.get(key) != index[key]:
             raise Refused('signed manifest differs from release identity: ' + key)
-    name = f"{app}-{index['version']}-win32-x64.exe"
+    name = f"{app}-{index['version']}-win32-x64." + ('zip' if is_directory else 'exe')
     package = manifest['package']
     if (manifest.get('distribution') != 'public-installations' or package['name'] != name
+            or (package.get('format') == directory_proof.FORMAT) != is_directory
             or package['path'] != f"/v1/packages/{app}/{index['sequence']}/{name}"
             or file_hashes(output / name) != {key: package[key] for key in ('size', 'sha256', 'sha512')}):
         raise Refused('installer bytes or public distribution identity changed')

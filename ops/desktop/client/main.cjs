@@ -10,6 +10,8 @@ const {selectStartupProfile,confineIsolatedPath,confineIsolatedSettings,ISOLATED
 const applicationConfig=app.isPackaged?require('./package.json').desktopAppConfig:{};
 if(!applicationConfig||(app.isPackaged&&!applicationConfig.appId))throw new Error('Packaged application identity is missing.');
 const definition=appDefinition(applicationConfig.appId||(process.env.DESKTOP_APP_ID||'melange'));
+if(applicationConfig.desktopDistribution!==undefined&&applicationConfig.desktopDistribution!=='directory-zip')throw new Error('Invalid packaged distribution.');
+const directoryDistribution=applicationConfig.desktopDistribution==='directory-zip';
 const githubConfig=applicationConfig.desktopUpdateSource?.provider==='github'?require('./github-source.cjs').configuration(applicationConfig.desktopUpdateSource):null;
 app.setName(definition.name);
 // Without the explicit isolated switch this resolves exactly the production profile, AppUserModelId, discovery cache and login registration.
@@ -48,6 +50,27 @@ const launchInstall=new(require('./launch-install.cjs').LaunchInstall)({createWi
  owned.loadURL(installingURL).catch(()=>{});return owned;}});
 const resources=app.isPackaged?process.resourcesPath:__dirname;
 const portable=app.isPackaged&&require('./portable-mode.cjs').portableMode(resources,definition.id);
+if(portable&&directoryDistribution)throw new Error('Automatic directory updates cannot use the manual portable marker.');
+
+function registerLoginStartup(){
+ if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
+}
+function registerDirectoryStartup(){
+ if(!directoryDistribution||!updater?.applicationReady||!profile.registerLoginItem||process.platform!=='win32')return;
+ const root=dlLayout.root(app.getPath('downloads'));
+ if(!dlLayout.isUnder(process.execPath,root))return;
+ registerLoginStartup();
+ // Update only our own shortcut under the managed application root. Existing
+ // Desktop shortcuts remain safe through redirectInstalled's signed lookup.
+ const shortcut=path.join(root,definition.name+'.lnk');
+ try{
+  if(fs.existsSync(shortcut)){
+   const old=shell.readShortcutLink(shortcut);
+   if(!dlLayout.isUnder(old.target,root)||path.basename(old.target).toLowerCase()!==(definition.name+'.exe').toLowerCase())return;
+  }
+  shell.writeShortcutLink(shortcut,fs.existsSync(shortcut)?'update':'create',{target:process.execPath,cwd:path.dirname(process.execPath),description:definition.name,icon:process.execPath,iconIndex:0,appUserModelId:definition.applicationId});
+ }catch(error){updateStatus('App is ready; its shortcut could not be updated: '+error.message);}
+}
 const accessTransition=new(require('./access-transition.cjs').AccessTransition)(()=>Boolean(runtime?.child));
 async function accessOperation(action){const finish=accessTransition.begin();try{return await action();}finally{finish();}}
 const file=name=>path.join(userData,name);
@@ -233,7 +256,7 @@ async function resumeTerrierSession(){
  const owned=authenticationWindow,ticket=authenticationTicket;if(!owned||owned.isDestroyed()||!accessLifecycle.authenticationCurrent(ticket)||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))return;
  try{const approved=await accessGate.authorize();if(authenticationWindow!==owned||!accessLifecycle.authenticationCurrent(ticket))return;await accessLifecycle.resume(approved,{freshPassword:true,expectedGeneration:ticket.generation});if(closing||!await accessLifecycle.canReveal(ticket.generation,approved))return;openingAccess=true;owned.close();accessWindow?.close();window.show();await accessLifecycle.heartbeat();}catch{}finally{openingAccess=false;}
 }
-async function checkUpdates(){
+async function checkUpdates({manual=false}={}){
  if(portable){updateStatus('Portable copy: replace this extracted application folder to update. Your local data remains separate.');if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();}catch{}await drainActivity();return;}
 
  if(checkingUpdates||closing||updater.osShutdown)return;checkingUpdates=true;
@@ -241,7 +264,7 @@ async function checkUpdates(){
   let enrollmentDeferred=false;
   try{if(githubConfig)await require('./github-source.cjs').enrollGitHub({appId:definition.id,publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp[definition.id],config:githubConfig,load:loadEnrollment,save:saveEnrollment});else await accessOperation(async()=>{const gate=await ensureAccess();await enrollApproved({client:gate.client,version:app.getVersion(),load:loadEnrollment,save:saveEnrollment});});}
   catch{enrollmentDeferred=true;}
-  await updater.check();
+  await updater.check({manual});
   if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile)))updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');
   if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}
   await drainActivity();
@@ -366,16 +389,23 @@ app.whenReady().then(async()=>{
   // below, so nothing resets; installers cached at the old location (legacyUserData) are ignored: a staged one is fetched
   // again once, and an update already installed from it is confirmed by its running version.
   const localRoot=process.platform==='win32'&&app.isPackaged&&!profile.isolated?path.join(process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),definition.applicationId):null;
-  const updaterRoot=localRoot?path.join(localRoot,'updater'):githubConfig?path.join(userData,'github-updates'):userData;
-  const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
+  const updaterRoot=localRoot?path.join(localRoot,directoryDistribution?'directory-updater':'updater'):githubConfig?path.join(userData,directoryDistribution?'github-directory-updates':'github-updates'):userData;
+  const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache,...(directoryDistribution?{distribution:'directory-zip'}:{})}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
   // Downloads layout (DL-spec 2.4): only an app that runs from <Downloads>/MelangeApplications; Documents/Programs installs behave exactly as before.
   const downloadsFolder=process.platform==='win32'&&app.isPackaged&&!profile.isolated?app.getPath('downloads'):null;
   const layoutMode=Boolean(downloadsFolder&&dlLayout.downloadsMode({execPath:process.execPath,downloads:downloadsFolder}));
-  const installLayout=layoutMode?{cacheDirectory:dlLayout.updaterCacheDirectory(downloadsFolder,definition.id),
+  const installLayout=layoutMode&&!directoryDistribution?{cacheDirectory:dlLayout.updaterCacheDirectory(downloadsFolder,definition.id),
     sweep:state=>dlLayout.sweepLayout({downloads:downloadsFolder,documents:app.getPath('documents'),home:app.getPath('home'),localAppData:process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),product:definition.name,app:definition.id,applicationId:definition.applicationId,current:app.getVersion(),execPath:process.execPath,userData,state,log:updateStatus})}:null;
   if(layoutMode)dlLayout.layoutWarnings({downloads:downloadsFolder,home:app.getPath('home'),env:process.env,execFile:require('node:util').promisify(require('node:child_process').execFile)}).then(warnings=>{if(warnings.length)updateStatus(warnings.join(' '));}).catch(()=>{});
-  updater=new DesktopUpdater({installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
+  const directoryInstaller=directoryDistribution&&downloadsFolder?new(require('./directory-installer.cjs').DirectoryInstaller)({root:dlLayout.root(downloadsFolder),appId:definition.id,activate:async(executable,run)=>{
+    await districtSwitch?.stopAll();await runtime?.stop();
+    app.relaunch({execPath:executable,args:run?[]:['--desktop-updater']});
+    closing=true;launchInstall.closeWindow();app.quit();
+  }}):null;
+  const directoryRetention=directoryInstaller?new(require('./directory-retention.cjs').DirectoryRetention)({root:dlLayout.root(downloadsFolder),appId:definition.id,recordFile:path.join(userData,'directory-program-ownership.json')}):null;
+  const updateStateFile=directoryDistribution?(githubConfig?'github-directory-update-state.json':'directory-update-state.json'):(githubConfig?'github-update-state.json':'update-state.json');
+  updater=new DesktopUpdater({onApplicationReady:registerDirectoryStartup,directoryInstaller,directoryRetention,installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(updateStateFile),writeState:value=>write(updateStateFile,value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:!directoryDistribution&&localRoot?path.join(localRoot,'baseline'):null,legacyUserData:!directoryDistribution&&localRoot&&githubConfig?path.join(userData,'github-updates'):null});
   // Updates do not depend on the release certificate being in the user's Trusted Root store: the Ed25519-signed manifest and sha256/sha512 checks (trust.cjs, github-source.cjs) still gate every install.
   // builder.cjs keeps verifyUpdateCodeSignature:true so publisherName stays configured for updater.cjs nativeTrust; only the Authenticode chain checks are skipped.
   // electron-updater's own check would require the release root in the user's Trusted Root store (Status Valid) and match a
@@ -388,6 +418,7 @@ app.whenReady().then(async()=>{
   powerMonitor.on('shutdown',()=>updater.suspendInstallation());
   window.on('query-session-end',()=>updater.suspendInstallation());
   window.on('session-end',()=>updater.suspendInstallation());
+  if(directoryDistribution&&await updater.redirectInstalled(!background))return;
   // A verified update still pending from an earlier session installs silently now, before the app window is shown
   // or a backend started. Launch requests meanwhile (second instance, access IPC) are only recorded; the app relaunches
   // when the start was interactive or one was recorded, decided after preparation. Failure continues a normal start
@@ -415,7 +446,7 @@ app.whenReady().then(async()=>{
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})}]:[]),{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})}]:[]),{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:()=>checkUpdates({manual:true})},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
   window.on('close',event=>{
     if(updater.osShutdown||closeApproved||!runtime.child)return;
     event.preventDefault();if(askingClose)return;askingClose=true;
@@ -425,7 +456,8 @@ app.whenReady().then(async()=>{
   require('./district-switch.cjs').preserveUnloadVeto(window.webContents,()=>{closeApproved=false;districtSwitch?.cancel();});
   if(!background&&definition.id==='terrier'){await window.loadURL(loadingURL);window.show();}else await window.loadURL('about:blank');
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else{updateStatus('Application startup failed: no local data location is configured. Check local logs.');await showSetup();}}
-  if(!portable)if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
+  if(directoryDistribution)registerDirectoryStartup();
+  else if(!portable)registerLoginStartup();
   checkUpdates();interval=setInterval(checkUpdates,15*60*1000);interval.unref();
   districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),5*60*1000);districtDataInterval.unref();
   networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:()=>{checkUpdates();moduleDataStartup?.stage({skipIfBusy:true}).catch(()=>{});}});

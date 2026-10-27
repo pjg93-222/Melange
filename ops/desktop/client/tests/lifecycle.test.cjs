@@ -525,10 +525,11 @@ test('an installer at the current path keeps the readiness gate: a background-on
 
 test('main.cjs moves only the updater file root to %LOCALAPPDATA%, leaving the update state in the profile',()=>{
   const main=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
-  assert.match(main,/const updaterRoot=localRoot\?path\.join\(localRoot,'updater'\):githubConfig\?path\.join\(userData,'github-updates'\):userData;/);
-  assert.match(main,/baselineRoot:localRoot\?path\.join\(localRoot,'baseline'\):null/);assert.match(main,/userData:updaterRoot,loadEnrollment/);
-  assert.match(main,/legacyUserData:localRoot&&githubConfig\?path\.join\(userData,'github-updates'\):null/,'the pre-move cache stays known to the updater');
-  assert.match(main,/readState:\(\)=>read\(githubConfig\?'github-update-state\.json':'update-state\.json'\),writeState:value=>write\(/,'state stays in the profile');
+  assert.match(main,/const updaterRoot=localRoot\?path\.join\(localRoot,directoryDistribution\?'directory-updater':'updater'\)/);
+  assert.match(main,/baselineRoot:!directoryDistribution&&localRoot\?path\.join\(localRoot,'baseline'\):null/);assert.match(main,/userData:updaterRoot,loadEnrollment/);
+  assert.match(main,/legacyUserData:!directoryDistribution&&localRoot&&githubConfig\?path\.join\(userData,'github-updates'\):null/,'native builds retain the pre-move cache; directory builds isolate it');
+  assert.match(main,/readState:\(\)=>read\(updateStateFile\),writeState:value=>write\(updateStateFile,value\)/,'state stays in the profile');
+  assert.match(main,/github-directory-update-state\.json/,'directory mode has independent installer history');
 });
 
 // ---- Downloads install layout (DL-spec 2.3 / 3.2) ----

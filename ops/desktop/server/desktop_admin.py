@@ -30,11 +30,13 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 import uuid
+import zipfile
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519, ec
 from cryptography.x509.oid import NameOID
+import directory_package_proof as directory_proof
 
 APPS = {"melange", "terrier", "mentat"}
 TARGETS = {("win32", "x64"), ("darwin", "arm64"), ("darwin", "x64")}
@@ -229,7 +231,8 @@ def validate_manifest(manifest):
         raise Refused("version must be stable major.minor.patch")
     if type(manifest.get("sequence")) is not int or manifest["sequence"] < 1:
         raise Refused("invalid release sequence")
-    if manifest.get("minimumUpdaterVersion") != "1.0.0" or manifest.get("dataSchemaVersion") != 1:
+    is_directory = manifest.get('package', {}).get('format') == directory_proof.FORMAT
+    if manifest.get("minimumUpdaterVersion") != (directory_proof.UPDATER_VERSION if is_directory else "1.0.0") or manifest.get("dataSchemaVersion") != 1:
         raise Refused("unsupported updater or data schema; migration implementation required")
     package = manifest.get("package", {})
     name = package.get("name", "")
@@ -249,6 +252,30 @@ def validate_manifest(manifest):
     if thumbprints is not None and (type(thumbprints) is not list or not 1 <= len(thumbprints) <= 8 or
                                     not all(type(value) is str and re.fullmatch(r"[0-9A-F]{40}", value) for value in thumbprints)):
         raise Refused("invalid publisher thumbprints")
+    if is_directory:
+        try:
+            directory_proof.verify_directory_package_proof(manifest)
+        except Exception as error:
+            raise Refused('invalid directory ZIP publisher proof') from error
+    elif package.get('format') not in (None, 'nsis'):
+        raise Refused('unsupported package format')
+
+
+def verify_windows_publisher(package, manifest, config):
+    if os.name != 'nt' or not config.get('windowsPublisher'):
+        raise Refused('pinned Windows publisher identity is not configured')
+    env = dict(os.environ, DESKTOP_VERIFY_PACKAGE=str(package))
+    command = "$s=Get-AuthenticodeSignature -LiteralPath $env:DESKTOP_VERIFY_PACKAGE; @{Status=[string]$s.Status;Subject=$s.SignerCertificate.Subject;Thumbprint=$s.SignerCertificate.Thumbprint}|ConvertTo-Json -Compress"
+    result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', command], env=env,
+                            capture_output=True, text=True, timeout=60, check=True)
+    signature = json.loads(result.stdout)
+    if signature.get('Status') != 'Valid' or signature.get('Subject') != config['windowsPublisher']:
+        raise Refused('package is not signed by the pinned Windows publisher')
+    thumbprint = str(signature.get('Thumbprint') or '').upper()
+    if thumbprint not in (manifest.get('publisherThumbprints') or ()):
+        raise Refused("package signer thumbprint is not in the manifest's publisher allow-list")
+    if manifest['package'].get('format') == directory_proof.FORMAT and thumbprint != directory_proof.PINNED_THUMBPRINT:
+        raise Refused('directory ZIP entrypoint differs from pinned publisher')
 
 
 class Store:
@@ -378,13 +405,19 @@ class Store:
                 raise Refused("device not authorized")
             return dict(row)
 
-    def latest(self, device, platform, arch):
+    def latest(self, device, platform, arch, distribution='native'):
+        if distribution not in ('native', directory_proof.DISTRIBUTION):
+            raise Refused('unsupported installation distribution')
         if (platform, arch) != (device["platform"], device["arch"]):
             raise Refused("device platform mismatch")
         with self.connect() as connection:
             rows = connection.execute("SELECT * FROM releases WHERE app=? AND platform=? AND arch=? AND withdrawn=0 ORDER BY sequence DESC",
                                       (device["app"], platform, arch)).fetchall()
         for row in rows:
+            manifest = verify_envelope(json.loads(row['envelope']), self.config()['apps'][device['app']]['publicKeys'])
+            is_directory = manifest['package'].get('format') == directory_proof.FORMAT
+            if is_directory != (distribution == directory_proof.DISTRIBUTION):
+                continue
             if device["device_id"] in json.loads(row["recipients"]):
                 return dict(row)
         return None
@@ -403,13 +436,20 @@ class Store:
             raise Refused("unsafe package path")
         return path, manifest["package"]
 
-    def recovery_seed(self, device, platform, arch, version):
+    def recovery_seed(self, device, platform, arch, version, distribution='native'):
+        if distribution not in ('native', directory_proof.DISTRIBUTION):
+            raise Refused('unsupported installation distribution')
         if (platform, arch) != (device['platform'], device['arch']) or not VERSION.fullmatch(str(version)):
             raise Refused('invalid recovery target')
         with self.connect() as connection:
             rows = connection.execute('SELECT * FROM releases WHERE app=? AND platform=? AND arch=? AND version=? AND withdrawn=0 ORDER BY sequence DESC',
                                       (device['app'], platform, arch, version)).fetchall()
-        return next((dict(row) for row in rows if device['device_id'] in json.loads(row['recipients'])), None)
+        for row in rows:
+            manifest = verify_envelope(json.loads(row['envelope']), self.config()['apps'][device['app']]['publicKeys'])
+            if ((manifest['package'].get('format') == directory_proof.FORMAT) == (distribution == directory_proof.DISTRIBUTION)
+                    and device['device_id'] in json.loads(row['recipients'])):
+                return dict(row)
+        return None
 
     def authorize_existing_release(self, app, sequence, recipients):
         app_check(app)
@@ -492,21 +532,33 @@ class Store:
             raise Refused("all tests, security, dependency, redistribution and data gates must pass")
         if receipt.get("osSignature", {}).get("status") != "passed":
             raise Refused("operating-system signature gate has not passed")
+        if manifest['package'].get('format') == directory_proof.FORMAT:
+            try:
+                directory_proof.verify_directory_package_proof(manifest)
+            except Exception as error:
+                raise Refused('directory ZIP publisher proof failed') from error
+            # The publisher proof authenticates the complete ZIP using the same
+            # pinned certificate. Native acceptance/signature receipts must bind
+            # these exact ZIP bytes; never treat a ZIP as Authenticode executable.
+            if receipt.get('osSignature', {}).get('format') != directory_proof.FORMAT:
+                raise Refused('directory ZIP requires its own signature gate receipt')
+            # Extract exactly one named regular member; never interpret archive
+            # paths as filesystem destinations or execute the entrypoint.
+            with zipfile.ZipFile(package) as archive, tempfile.TemporaryDirectory(prefix='desktop-zip-signature-') as temporary:
+                entrypoint = manifest['package']['entrypoint']
+                matches = [item for item in archive.infolist() if item.filename.casefold() == entrypoint.casefold()]
+                if (len(matches) != 1 or matches[0].filename != entrypoint or matches[0].is_dir()
+                        or matches[0].flag_bits & 1 or not 0 < matches[0].file_size <= 1024**3
+                        or (matches[0].external_attr >> 16) & 0o170000 not in (0, 0o100000)):
+                    raise Refused('directory ZIP has no unique regular application entrypoint')
+                target = Path(temporary) / entrypoint
+                with archive.open(matches[0]) as source, target.open('xb') as destination:
+                    shutil.copyfileobj(source, destination, 1024 * 1024)
+                verify_windows_publisher(target, manifest, self.config())
+            return
         config = self.config()
         if manifest["platform"] == "win32":
-            if os.name != "nt" or not config.get("windowsPublisher"):
-                raise Refused("pinned Windows publisher identity is not configured")
-            # Pass paths through environment, never interpolate them into shell source.
-            env = dict(os.environ, DESKTOP_VERIFY_PACKAGE=str(package))
-            command = "$s=Get-AuthenticodeSignature -LiteralPath $env:DESKTOP_VERIFY_PACKAGE; @{Status=[string]$s.Status;Subject=$s.SignerCertificate.Subject;Thumbprint=$s.SignerCertificate.Thumbprint}|ConvertTo-Json -Compress"
-            result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command], env=env,
-                                    capture_output=True, text=True, timeout=60, check=True)
-            signature = json.loads(result.stdout)
-            if signature.get("Status") != "Valid" or signature.get("Subject") != config["windowsPublisher"]:
-                raise Refused("package is not signed by the pinned Windows publisher")
-            # Every client refuses an installer whose signer is not in the signed allow-list; refuse to publish one.
-            if str(signature.get("Thumbprint") or "").upper() not in (manifest.get("publisherThumbprints") or ()):
-                raise Refused("package signer thumbprint is not in the manifest's publisher allow-list")
+            verify_windows_publisher(package, manifest, config)
         else:
             public = config.get("macReceiptPublicKey")
             attestation = receipt.get("macAttestation")
@@ -518,19 +570,28 @@ class Store:
             except Exception as error:
                 raise Refused("invalid macOS signing/notarization attestation") from error
 
-    def publish(self, app, package, receipt, version, sequence, platform, arch, recipients):
+    def publish(self, app, package, receipt, version, sequence, platform, arch, recipients, *, package_format=None, publisher_proof=None):
         app_check(app)
         original = Path(package)
         source = original.resolve(strict=True)
         if original.is_symlink() or not source.is_file():
             raise Refused("package must be a regular file")
-        extension = ".exe" if platform == "win32" else ".zip"
+        if package_format not in (None, 'nsis', directory_proof.FORMAT):
+            raise Refused('unsupported update package format')
+        is_directory = package_format == directory_proof.FORMAT
+        if is_directory and (platform, arch) != ('win32', 'x64'):
+            raise Refused('directory ZIP requires Windows x64')
+        if not is_directory and publisher_proof is not None:
+            raise Refused('publisher proof requires directory ZIP format')
+        extension = '.zip' if is_directory or platform != 'win32' else '.exe'
         if source.suffix.lower() != extension:
             raise Refused("update payload must be a Windows installer or Mac application ZIP")
         manifest = {"schemaVersion": 1, "appId": app, "version": version, "sequence": sequence, "platform": platform, "arch": arch,
-                    "issuedAt": dt.datetime.now(dt.timezone.utc).isoformat(), "minimumUpdaterVersion": "1.0.0", "dataSchemaVersion": 1,
+                    "issuedAt": dt.datetime.now(dt.timezone.utc).isoformat(), "minimumUpdaterVersion": directory_proof.UPDATER_VERSION if is_directory else "1.0.0", "dataSchemaVersion": 1,
                     **({"publisherThumbprints": list(PUBLISHER_THUMBPRINTS)} if platform == "win32" else {}),
                     "package": {"name": source.name, **file_hashes(source), "path": f"/v1/packages/{app}/{sequence}/{source.name}"}}
+        if is_directory:
+            manifest['package'].update(format=directory_proof.FORMAT, entrypoint=directory_proof.NAMES[app] + '.exe', publisherProof=publisher_proof)
         validate_manifest(manifest)
         recipients = sorted(set(recipients))
         if not recipients:
@@ -651,15 +712,15 @@ def handler_for(store, require_invite=False, packs=None, scrape_broker=None):
                         self.response(200, {"transitions": store.config()["apps"][app].get("transitions", [])})
                         return
                     query = parse_qs(parsed.query, strict_parsing=True)
-                    if any(len(values) != 1 for values in query.values()) or set(query) - {"platform", "arch", "version", "noCache"}:
+                    if any(len(values) != 1 for values in query.values()) or set(query) - {"platform", "arch", "version", "noCache", "distribution"}:
                         raise Refused("invalid query")
                     if parts[3:] == ['recovery']:
-                        if set(query) != {'platform', 'arch', 'version'}:
+                        if set(query) not in ({'platform', 'arch', 'version'}, {'platform', 'arch', 'version', 'distribution'}):
                             raise Refused('exact recovery target required')
-                        release = store.recovery_seed(device, query['platform'][0], query['arch'][0], query['version'][0])
+                        release = store.recovery_seed(device, query['platform'][0], query['arch'][0], query['version'][0], query.get('distribution', ['native'])[0])
                         self.response(200, json.loads(release['envelope'])) if release else self.response(204)
                         return
-                    release = store.latest(device, query.get("platform", [device["platform"]])[0], query.get("arch", [device["arch"]])[0])
+                    release = store.latest(device, query.get("platform", [device["platform"]])[0], query.get("arch", [device["arch"]])[0], query.get('distribution', ['native'])[0])
                     if not release:
                         self.response(204)
                         return
@@ -821,6 +882,8 @@ def main(argv=None):
         publish.add_argument("--" + field, required=True)
     publish.add_argument("--sequence", type=int, required=True)
     publish.add_argument("--recipient", action="append", required=True)
+    publish.add_argument('--format', choices=['nsis', directory_proof.FORMAT], default='nsis')
+    publish.add_argument('--publisher-proof', type=Path, help='pinned publisher proof JSON for a directory ZIP')
     pack_build = sub.add_parser('pack-build', help="copy one district's allowlisted Terrier data and active summary bundle into a new private directory")
     pack_build.add_argument('--district', choices=['co-05', 'ct-01', 'or-05'], required=True)
     pack_build.add_argument('--data', type=Path, required=True, help="the district's Terrier data directory (its stores)")
@@ -941,7 +1004,13 @@ def main(argv=None):
             print("Publisher trust updated locally.")
         elif args.command == "publish":
             receipt = json.loads(Path(args.receipt).read_text(encoding="utf-8"))
-            envelope = store.publish(args.app, args.package, receipt, args.version, args.sequence, args.platform, args.arch, args.recipient)
+            proof = None
+            if args.publisher_proof:
+                if args.publisher_proof.is_symlink() or not args.publisher_proof.is_file() or args.publisher_proof.stat().st_size > 65536:
+                    raise Refused('publisher proof must be a bounded regular JSON file')
+                proof = json.loads(args.publisher_proof.read_text(encoding='utf-8-sig'))
+            envelope = store.publish(args.app, args.package, receipt, args.version, args.sequence, args.platform, args.arch, args.recipient,
+                                     package_format=args.format, publisher_proof=proof)
             print(json.dumps({"published": True, "appId": args.app, "version": args.version, "sequence": args.sequence, "keyId": envelope["keyId"]}))
         elif args.command == "serve":
             try:

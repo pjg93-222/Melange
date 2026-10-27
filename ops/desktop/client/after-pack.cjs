@@ -52,7 +52,7 @@ async function afterPack(context){
   console.log('[after-pack] deepest packaged path: '+depth+' characters (limit '+budget+')');
   if(depth>budget)throw new Error('The deepest packaged path is '+depth+' characters, over the limit of '+budget+'. The Downloads install path (MAX_PATH) would be exceeded; shorten the packaged paths.');
   const version=context.packager?.appInfo?.version;
-  if(version){
+  if(version&&context.packager?.config?.extraMetadata?.desktopAppConfig?.desktopDistribution!=='directory-zip'){
     const definition=appDefinition(context.packager.config?.extraMetadata?.desktopAppConfig?.appId||process.env.DESKTOP_APP_ID||'melange');
     const target=path.join(path.dirname(context.appOutDir),'installer.generated.nsh');
     fs.writeFileSync(target,layout.nsisInclude({product:definition.name,app:definition.id,version,installerNsh:path.join(__dirname,'installer.nsh')}));

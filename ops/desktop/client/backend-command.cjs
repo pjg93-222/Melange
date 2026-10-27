@@ -10,7 +10,7 @@ function backendCommand(resources,appId,platform=process.platform,runtimeRoot=pa
   if(fs.existsSync(interpreter)&&fs.existsSync(bootstrap)){
     // Ignore environment-based Python injection and user site packages while retaining
     // bootstrap sibling imports. Python subprocesses keep real interpreter semantics.
-    return {binary:interpreter,args:['-E','-s','-u',bootstrap],runtime};
+    return {binary:interpreter,args:['-E','-B','-s','-u',bootstrap],runtime};
   }
   const frozen=path.join(runtime,platform==='win32'?'desktop-backend.exe':'desktop-backend');
   if(fs.existsSync(frozen))return {binary:frozen,args:[],runtime};
@@ -22,7 +22,7 @@ function backendEnvironment(){
   for(const key of Object.keys(environment)){
     if(/^(ACCESS_|CU_|MENTAT_|MONEYBALL_|MELANGE_|DESKTOP_MODULE_)/.test(key)||/^PYTHON(?:HOME|PATH|USERBASE|STARTUP|INSPECT)$/.test(key))delete environment[key];
   }
-  environment.PYTHONNOUSERSITE='1';environment.PYTHONUNBUFFERED='1';
+  environment.PYTHONNOUSERSITE='1';environment.PYTHONUNBUFFERED='1';environment.PYTHONDONTWRITEBYTECODE='1';
   return environment;
 }
 module.exports={backendCommand,backendEnvironment};

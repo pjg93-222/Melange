@@ -5,7 +5,7 @@ const read=name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8');
 // gate every install; the Windows certificate store and Authenticode chain are not consulted.
 test('updates are checked unconditionally and the Authenticode chain checks are skipped',()=>{
  const main=read('main.cjs');
- assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*await updater\.check\(\);/);
+ assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*await updater\.check\(\{manual\}\);/);
  assert.doesNotMatch(main,/publisher-trust|publisherTrusted|trustPublisher|trustUpdates|trust-updates|offerUpdateTrust|UPDATES_UNTRUSTED|updatesTrusted|Turn on updates/);
  // The installer publisher check is not disabled: updater.cjs uses its default, native-signature.cjs, which pins the
  // signer thumbprint to the signed manifest's publisherThumbprints (tests/publisher-thumbprint.test.cjs).

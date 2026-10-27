@@ -6,9 +6,14 @@ const {pipeline}=require('node:stream/promises');const {Transform}=require('node
 const {verifyPackageFile}=require('./trust.cjs');
 const {DiscoveryCache,rateLimit}=require('./github-discovery.cjs');
 const PURPOSE='melange-desktop-github-release',DISTRIBUTION='public-installations';
+const directoryPackage=require('./directory-package-proof.cjs');
+function distribution(value='native'){if(!['native',directoryPackage.DISTRIBUTION].includes(value))throw new Error('Invalid GitHub installation distribution');return value;}
+function manifestName(app,mode='native'){return app+'-win32-x64'+(distribution(mode)===directoryPackage.DISTRIBUTION?'-directory-zip':'')+'.manifest.json';}
+function packageName(app,version,mode='native'){return app+'-'+version+'-win32-x64.'+(distribution(mode)===directoryPackage.DISTRIBUTION?'zip':'exe');}
+function assetNames(app,version,mode='native'){return [manifestName(app,mode),app+'-trust.json',packageName(app,version,mode)];}
 const ASSET_HOSTS=new Set(['github.com','release-assets.githubusercontent.com','objects.githubusercontent.com']);
 function repository(value){if(typeof value!=='string'||! /^[A-Za-z0-9][A-Za-z0-9_.-]*\/[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(value)||value.split('/').some(part=>part.length>100))throw new Error('Invalid GitHub repository');return value.toLowerCase();}
-function configuration(value){if(!value||Object.keys(value).sort().join('|')!=='provider|repository'||value.provider!=='github')throw new Error('Invalid GitHub update configuration');return {provider:'github',repository:repository(value.repository)};}
+function configuration(value){if(!value||!['provider|repository','distribution|provider|repository'].includes(Object.keys(value).sort().join('|'))||value.provider!=='github')throw new Error('Invalid GitHub update configuration');return {provider:'github',repository:repository(value.repository),...(value.distribution===undefined?{}:{distribution:distribution(value.distribution)})};}
 function tag(version){if(typeof version!=='string'||!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version)||semver.valid(version)!==version)throw new Error('Stable desktop version required');return 'desktop-v'+version;}
 function checkedURL(value,asset=false){const u=new URL(value);if(u.protocol!=='https:'||u.port||u.username||u.password||u.hash||!(asset?ASSET_HOSTS.has(u.hostname):u.hostname==='api.github.com'))throw new Error('GitHub update URL refused');return u;}
 function response(url,{asset=false,redirects=0,deadlineMs=15000}={}){
@@ -43,18 +48,22 @@ function assetURL(repo,release,name){
  return expected;
 }
 function release(value){if(!value||value.draft!==false||value.prerelease!==false||typeof value.tag_name!=='string'||!value.tag_name.startsWith('desktop-v')||!Array.isArray(value.assets)||value.assets.length>100)throw new Error('Unsupported GitHub release');const version=value.tag_name.slice(9);tag(version);return {version,assets:value.assets};}
-function discoveryMetadata(values,repo){
+function discoveryMetadata(values,repo,mode='native'){
+ distribution(mode);
  if(!Array.isArray(values)||values.length>500)throw new Error('Invalid cached GitHub releases');
  return values.map(item=>{
   if(!item||typeof item!=='object'||Object.keys(item).sort().join('|')!=='assets|version'||!Array.isArray(item.assets)||item.assets.length>9)throw new Error('Invalid cached GitHub release');tag(item.version);
   const names=new Set();const assets=item.assets.map(asset=>{
-   if(!asset||Object.keys(asset).sort().join('|')!=='browser_download_url|name|size'||typeof asset.browser_download_url!=='string'||asset.browser_download_url.length>1024||!['melange','mentat','terrier'].some(app=>[app+'-win32-x64.manifest.json',app+'-trust.json',app+'-'+item.version+'-win32-x64.exe'].includes(asset.name))||names.has(asset.name))throw new Error('Invalid cached GitHub asset');
+   if(!asset||Object.keys(asset).sort().join('|')!=='browser_download_url|name|size'||typeof asset.browser_download_url!=='string'||asset.browser_download_url.length>1024||!['melange','mentat','terrier'].some(app=>assetNames(app,item.version,mode).includes(asset.name))||names.has(asset.name))throw new Error('Invalid cached GitHub asset');
    assetURL(repo,{version:item.version,assets:[asset]},asset.name);if(asset.size>20*1024**3)throw new Error('Invalid cached GitHub asset size');names.add(asset.name);return {...asset};
   });return {version:item.version,assets};
  });
 }
-function githubPolicy(manifest,repo){
- if(manifest.purpose!==PURPOSE||manifest.distribution!==DISTRIBUTION||manifest.repository!==repository(repo)||manifest.platform!=='win32'||manifest.arch!=='x64'||manifest.package?.name!==manifest.appId+'-'+manifest.version+'-win32-x64.exe')throw new Error('Signed GitHub release policy does not match this installation');
+function githubPolicy(manifest,repo,mode='native'){
+ distribution(mode);
+ if(manifest.purpose!==PURPOSE||manifest.distribution!==DISTRIBUTION||manifest.repository!==repository(repo)||manifest.platform!=='win32'||manifest.arch!=='x64'||manifest.package?.name!==packageName(manifest.appId,manifest.version,mode))throw new Error('Signed GitHub release policy does not match this installation');
+ if(mode===directoryPackage.DISTRIBUTION)directoryPackage.directoryPackageIdentity(manifest);
+ else if(manifest.package.format!==undefined&&manifest.package.format!=='nsis')throw new Error('Signed GitHub package format does not match this installation');
  const sources=manifest.sourceRefs;
  if(!sources||Array.isArray(sources)||Object.keys(sources).sort().join('|')!=='melange|mentat|terrier')throw new Error('Signed GitHub source provenance is missing');
  for(const source of Object.values(sources)){
@@ -64,16 +73,16 @@ function githubPolicy(manifest,repo){
  tag(manifest.version);return manifest;
 }
 class GitHubSource{
- constructor({repository:repo,appId,platform='win32',arch='x64',readJSON=json,open=response,cacheDirectory,cacheOptions={}}){if(!['melange','mentat','terrier'].includes(appId)||platform!=='win32'||arch!=='x64')throw new Error('Unsupported GitHub desktop target');this.repository=repository(repo);this.appId=appId;this.platform=platform;this.arch=arch;this.open=open;
-  this.cache=cacheDirectory?new DiscoveryCache({...cacheOptions,directory:cacheDirectory,repository:this.repository,validate:values=>discoveryMetadata(values,this.repository),onStatus:value=>{this.discoveryInfo=value;}}):null;
+ constructor({repository:repo,appId,platform='win32',arch='x64',distribution:mode='native',readJSON=json,open=response,cacheDirectory,cacheOptions={}}){if(!['melange','mentat','terrier'].includes(appId)||platform!=='win32'||arch!=='x64')throw new Error('Unsupported GitHub desktop target');this.repository=repository(repo);this.appId=appId;this.platform=platform;this.arch=arch;this.open=open;this.distribution=distribution(mode);
+  this.cache=cacheDirectory?new DiscoveryCache({...cacheOptions,directory:mode===directoryPackage.DISTRIBUTION?path.join(cacheDirectory,'directory-zip'):cacheDirectory,repository:this.repository,validate:values=>discoveryMetadata(values,this.repository,this.distribution),onStatus:value=>{this.discoveryInfo=value;}}):null;
   this.readJSON=(url,options)=>this.cache&&new URL(url).hostname==='api.github.com'?this.cache.request(()=>readJSON(url,options)):readJSON(url,options);
  }
  discoverySummary(){const info=this.discoveryInfo;if(!info)return '';if(info.backoffUntil)return 'GitHub API retry after '+new Date(info.backoffUntil).toISOString()+'.';if(!info.checkedAt)return '';return (info.cached?'Using cached release list checked ':'Release list checked ')+new Date(info.checkedAt).toISOString()+'. '+(info.refreshDeferred?'Refresh deferred.':'Next discovery after '+new Date(info.nextCheckAt).toISOString()+'.');}
  identity(enrollment){if(enrollment?.source!=='github'||enrollment.repository!==this.repository||enrollment.appId!==this.appId||enrollment.deviceToken)throw new Error('GitHub update source identity mismatch');}
  api(suffix){return 'https://api.github.com/repos/'+this.repository+'/releases'+suffix;}
- async discover(){const candidates=[];for(let page=1;page<=5;page++){const values=await this.readJSON(this.api('?per_page=100&page='+page));if(!Array.isArray(values)||values.length>100)throw new Error('Invalid GitHub releases');for(const value of values){try{const item=release(value);item.assets=item.assets.filter(asset=>asset&&['melange','mentat','terrier'].some(app=>[app+'-win32-x64.manifest.json',app+'-trust.json',app+'-'+item.version+'-win32-x64.exe'].includes(asset.name))).map(({name,size,browser_download_url})=>({name,size,browser_download_url}));candidates.push(...discoveryMetadata([item],this.repository));}catch{}}if(values.length<100)break;}return candidates;}
- async latest(){const values=this.cache?await this.cache.get(()=>this.discover()):await this.discover();const candidates=values.filter(item=>{try{assetURL(this.repository,item,this.appId+'-'+this.platform+'-'+this.arch+'.manifest.json');return true;}catch{return false;}});return candidates.sort((a,b)=>semver.rcompare(a.version,b.version))[0]||null;}
- async manifest(item){const url=assetURL(this.repository,item,this.appId+'-'+this.platform+'-'+this.arch+'.manifest.json');const envelope=await this.readJSON(url,{asset:true,maxBytes:1024*1024});if(!envelope||typeof envelope.payload!=='string'||envelope.payload.length>2*1024*1024)throw new Error('Invalid GitHub manifest');const body=githubPolicy(JSON.parse(Buffer.from(envelope.payload,'base64').toString('utf8')),this.repository);if(body.version!==item.version||body.appId!==this.appId||body.platform!==this.platform||body.arch!==this.arch)throw new Error('GitHub release target differs from signed manifest');assetURL(this.repository,item,body.package.name);const metadata=item.assets.find(asset=>asset.name===body.package.name);if(metadata.size!==body.package.size)throw new Error('GitHub package size differs from signed manifest');return envelope;}
+ async discover(){const candidates=[];for(let page=1;page<=5;page++){const values=await this.readJSON(this.api('?per_page=100&page='+page));if(!Array.isArray(values)||values.length>100)throw new Error('Invalid GitHub releases');for(const value of values){try{const item=release(value);item.assets=item.assets.filter(asset=>asset&&['melange','mentat','terrier'].some(app=>assetNames(app,item.version,this.distribution).includes(asset.name))).map(({name,size,browser_download_url})=>({name,size,browser_download_url}));candidates.push(...discoveryMetadata([item],this.repository,this.distribution));}catch{}}if(values.length<100)break;}return candidates;}
+ async latest(){const values=this.cache?await this.cache.get(()=>this.discover()):await this.discover();const candidates=values.filter(item=>{try{assetURL(this.repository,item,manifestName(this.appId,this.distribution));return true;}catch{return false;}});return candidates.sort((a,b)=>semver.rcompare(a.version,b.version))[0]||null;}
+ async manifest(item){const url=assetURL(this.repository,item,manifestName(this.appId,this.distribution));const envelope=await this.readJSON(url,{asset:true,maxBytes:1024*1024});if(!envelope||typeof envelope.payload!=='string'||envelope.payload.length>2*1024*1024)throw new Error('Invalid GitHub manifest');const body=githubPolicy(JSON.parse(Buffer.from(envelope.payload,'base64').toString('utf8')),this.repository,this.distribution);if(body.version!==item.version||body.appId!==this.appId||body.platform!==this.platform||body.arch!==this.arch)throw new Error('GitHub release target differs from signed manifest');assetURL(this.repository,item,body.package.name);const metadata=item.assets.find(asset=>asset.name===body.package.name);if(metadata.size!==body.package.size)throw new Error('GitHub package size differs from signed manifest');return envelope;}
  async request(enrollment,relative){
   this.identity(enrollment);const base='/v1/apps/'+this.appId;
   if(relative==='/v1/status')return {ok:true,localOnly:true};
@@ -85,7 +94,7 @@ class GitHubSource{
   const item=this.discoveryLoaded?this.current:await this.latest();if(!item||semver.lte(item.version,query.get('version')))return null;return this.manifest(item);
  }
  async download(enrollment,_token,manifest,directory){
-  this.identity(enrollment);githubPolicy(manifest,this.repository);
+  this.identity(enrollment);githubPolicy(manifest,this.repository,this.distribution);
   if(manifest.appId!==this.appId)throw new Error('GitHub package belongs to another app');
   const item=release(await this.readJSON(this.api('/tags/'+tag(manifest.version))));if(item.version!==manifest.version)throw new Error('GitHub package release differs');
   const url=assetURL(this.repository,item,manifest.package.name);if(item.assets.find(asset=>asset.name===manifest.package.name).size!==manifest.package.size)throw new Error('GitHub package size differs');
@@ -102,4 +111,4 @@ async function enrollGitHub({appId,publicKeys,config,load,save}){
  // account state or device identifier is needed or sent to GitHub.
  const value={source:'github',repository:selected.repository,appId,publicKeys:structuredClone(publicKeys)};await save(value);return value;
 }
-module.exports={GitHubSource,configuration,repository,tag,checkedURL,githubPolicy,enrollGitHub,response,json,assetURL,release,discoveryMetadata};
+module.exports={GitHubSource,configuration,repository,tag,checkedURL,githubPolicy,enrollGitHub,response,json,assetURL,release,discoveryMetadata,manifestName,packageName};

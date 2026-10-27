@@ -6,6 +6,8 @@ const run=promisify(execFile);
 const THUMBPRINT='0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30';
 const SUBJECT='CN=Melange Systems Desktop Release (self-signed)';
 const PE=/\.(exe|dll|pyd|node|ocx)$/i;
+function hasPEHeader(file){const fd=fs.openSync(file,'r');try{const head=Buffer.alloc(64);if(fs.readSync(fd,head,0,64,0)!==64||head.toString('ascii',0,2)!=='MZ')return false;const offset=head.readUInt32LE(60),signature=Buffer.alloc(4);return offset<=fs.fstatSync(fd).size-4&&fs.readSync(fd,signature,0,4,offset)===4&&signature.equals(Buffer.from([80,69,0,0]));}finally{fs.closeSync(fd);}}
+const nativeFile=file=>PE.test(file)||hasPEHeader(file);
 function within(root,file){const relative=path.relative(root,file);return relative!==''&&!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative);}
 function regular(file,directory=false){const stat=fs.lstatSync(file);if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1))throw new Error('Build path must be a private regular '+(directory?'directory':'file'));return stat;}
 function ancestors(file,directory=false){regular(file,directory);for(let parent=path.dirname(file);;parent=path.dirname(parent)){regular(parent,true);if(parent===path.dirname(parent))break;}}
@@ -25,7 +27,7 @@ async function signPool(files,task){
 }
 async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  const requestedFile=path.resolve(file),requestedRoot=path.resolve(root);
- if(!within(requestedRoot,requestedFile)||!PE.test(requestedFile))throw new Error('Refusing binary outside private build root');
+ if(!within(requestedRoot,requestedFile)||!nativeFile(requestedFile))throw new Error('Refusing binary outside private build root');
  const snapshot=(target,directory)=>{
   ancestors(target,directory);const stat=fs.lstatSync(target,{bigint:true});
   if(stat.isSymbolicLink()||!(directory?stat.isDirectory():stat.isFile())||(!directory&&stat.nlink!==1n)||stat.ino===0n)throw new Error('Build path must retain a private physical identity');
@@ -33,7 +35,7 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  };
  const rootIdentity=snapshot(requestedRoot,true),fileIdentity=snapshot(requestedFile,false);
  root=fs.realpathSync.native(requestedRoot);file=fs.realpathSync.native(requestedFile);
- if(!within(root,file)||!PE.test(file))throw new Error('Refusing binary outside private build root');
+ if(!within(root,file)||!nativeFile(file))throw new Error('Refusing binary outside private build root');
  const checkIdentity=()=>{
   for(const [target,before,directory] of [[requestedRoot,rootIdentity,true],[requestedFile,fileIdentity,false],[root,rootIdentity,true],[file,fileIdentity,false]]){
    const after=snapshot(target,directory);
@@ -58,7 +60,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  if(env.CSC_LINK||env.WIN_CSC_LINK||env.CSC_KEY_PASSWORD||env.WIN_CSC_KEY_PASSWORD||env.ELECTRON_BUILDER_OFFLINE==='true')throw new Error('Release signing uses only the existing CurrentUser certificate and online timestamps');
  // A cached executable can bypass the sign hook and omits fuses from its key.
  env.ELECTRON_BUILDER_DISABLE_BUILD_CACHE='true';
- const root=path.resolve(env.DESKTOP_SIGNING_ROOT),records=[];let ready=false,appDirectory;
+ const root=path.resolve(env.DESKTOP_SIGNING_ROOT),records=[],directoryMode=env.DESKTOP_DISTRIBUTION==='directory-zip';let ready=false,appDirectory;
  ancestors(root,true);
  const identity=file=>path.resolve(file).toLowerCase();
  const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file))||(appDirectory&&identity(file)===identity(path.join(appDirectory,'resources','elevate.exe')));
@@ -72,6 +74,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   win:{signtoolOptions:{publisherName:SUBJECT,signingHashAlgorithms:['sha256'],sign:async configuration=>{if(!ready)throw new Error('Private signing tools were not prepared');await record(configuration.path);}}},
   beforePack:async context=>{
    if(context.electronPlatformName!=='win32'||ready||!within(root,path.resolve(context.appOutDir)))throw new Error('Release signing supports one fresh private Windows package per build');
+   if(directoryMode){ready=true;return;}
    if(env.ELECTRON_BUILDER_NSIS_DIR||env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR)throw new Error('Release signing refuses inherited NSIS tool overrides');
    const tools=toolset||require('app-builder-lib/out/toolsets/windows.js');
    const compiler=await tools.getMakeNsisPath(),plugins=await tools.getNsisPluginsPath();
@@ -92,10 +95,22 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    // Fuses and resource editing have already completed. Sign remaining DLL/PYD
    // dependencies; valid third-party signatures are checked and left unchanged.
    appDirectory=path.resolve(context.appOutDir);
-   await signPool(tree(appDirectory).filter(file=>PE.test(file)),file=>record(file,false,owned(file)));
-   await record(path.join(context.appOutDir,app.name+'.exe'),true,true);verifyToolCopies();
+   const appBinaries=tree(appDirectory).filter(file=>directoryMode?nativeFile(file):PE.test(file));
+   await signPool(appBinaries,file=>record(file,false,owned(file)));
+   await record(path.join(context.appOutDir,app.name+'.exe'),true,true);
+   if(directoryMode){
+    const current=[];await signPool(appBinaries,async file=>current.push(await record(file,true,owned(file))));
+    for(const row of current){ancestors(row.path);if(row.sha256!==hash(row.path)||row.status!=='Valid')throw new Error('Current directory signature evidence changed');}
+    const main=current.find(row=>identity(row.path)===identity(path.join(appDirectory,app.name+'.exe')));
+    if(!main||main.thumbprint!==THUMBPRINT||main.timestamped!==true)throw new Error('Current application signature evidence is missing');
+    const receipt={schemaVersion:1,appId:app.id,format:'windows-directory-zip-v1',certificateThumbprint:THUMBPRINT,appDirectory,files:records,currentFiles:current};
+    fs.writeFileSync(appDirectory+'.signatures.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
+    return;
+   }
+   verifyToolCopies();
   },
   artifactBuildCompleted:async event=>{
+   if(directoryMode)return;
    if(!event.file?.toLowerCase().endsWith('.exe'))return;
    if(!appDirectory)throw new Error('Application signing has not completed');
    const current=new Map();
@@ -113,4 +128,4 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   }
  };
 }
-module.exports={THUMBPRINT,SUBJECT,within,tree,signFile,signPool,options};
+module.exports={THUMBPRINT,SUBJECT,within,tree,signFile,signPool,options,hasPEHeader};

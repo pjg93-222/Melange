@@ -243,10 +243,10 @@ test('main.cjs wires the layout only for an app running from Downloads, and leav
   assert.match(main,/documents:\(\)=>app\.getPath\('documents'\),downloads:\(\)=>app\.getPath\('downloads'\),protectedPaths:/);
   assert.match(main,/const downloadsFolder=process\.platform==='win32'&&app\.isPackaged&&!profile\.isolated\?app\.getPath\('downloads'\):null;/);
   assert.match(main,/const layoutMode=Boolean\(downloadsFolder&&dlLayout\.downloadsMode\(\{execPath:process\.execPath,downloads:downloadsFolder\}\)\);/);
-  assert.match(main,/const installLayout=layoutMode\?\{cacheDirectory:dlLayout\.updaterCacheDirectory\(downloadsFolder,definition\.id\),\s*sweep:/);
+  assert.match(main,/const installLayout=layoutMode&&!directoryDistribution\?\{cacheDirectory:dlLayout\.updaterCacheDirectory\(downloadsFolder,definition\.id\),\s*sweep:/);
   assert.ok(!/installDirectory:version/.test(main),'no /D from the app');
   assert.match(main,/if\(layoutMode\)dlLayout\.layoutWarnings\(/);
-  assert.match(main,/new DesktopUpdater\(\{installLayout,\.\.\.githubOptions,/);
+  assert.match(main,/new DesktopUpdater\(\{onApplicationReady:registerDirectoryStartup,directoryInstaller,directoryRetention,installLayout,\.\.\.githubOptions,/);
   assert.match(main,/autoUpdater:require\('electron-updater'\)\.autoUpdater,packaged:/);
   assert.match(main,/const dlLayout=require\('\.\/install-layout\.cjs'\);/);
 });

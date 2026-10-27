@@ -100,9 +100,11 @@ function verifyEnvelope(envelope,p,identity,previous={}) {
   const key=crypto.createPublicKey({key:Buffer.concat([Buffer.from('302a300506032b6570032100','hex'),Buffer.from(raw,'base64')]),format:'der',type:'spki'});
   if(!crypto.verify(null,payload,key,Buffer.from(envelope.signature,'base64'))) throw new Error('Invalid update signature');
   const m=JSON.parse(payload.toString('utf8')), digest=crypto.createHash('sha256').update(payload).digest('hex');
-  if(p.source==='github')require('./github-source.cjs').githubPolicy(m,p.repository);
+  const directory=require('./directory-package-proof.cjs'),zipIdentity=identity.distribution===directory.DISTRIBUTION;
+  if(identity.distribution!==undefined&&!['native',directory.DISTRIBUTION].includes(identity.distribution))throw new Error('Unsupported installation distribution');
+  if(p.source==='github')require('./github-source.cjs').githubPolicy(m,p.repository,identity.distribution);
   if(m.schemaVersion!==1||m.appId!==identity.appId||m.platform!==identity.platform||m.arch!==identity.arch) throw new Error('Update belongs to a different app or platform');
-  if(!VERSION.test(m.version)||!Number.isSafeInteger(m.sequence)||m.sequence<1||m.minimumUpdaterVersion!=='1.0.0'||m.dataSchemaVersion!==1) throw new Error('Unsupported update metadata');
+  if(!VERSION.test(m.version)||!Number.isSafeInteger(m.sequence)||m.sequence<1||m.minimumUpdaterVersion!==(zipIdentity?directory.UPDATER_VERSION:'1.0.0')||m.dataSchemaVersion!==1) throw new Error('Unsupported update metadata');
   if(!semver.valid(m.version)||(identity.version&&(!semver.valid(identity.version)||semver.lt(m.version,identity.version))))throw new Error('Application version downgrade refused');
   if(previous.acceptedVersion&&(!semver.valid(previous.acceptedVersion)||semver.lt(m.version,previous.acceptedVersion)))throw new Error('Previously approved version downgrade refused');
   if(!Number.isFinite(Date.parse(m.issuedAt))||Date.parse(m.issuedAt)>Date.now()+300000) throw new Error('Invalid update timestamp');
@@ -113,7 +115,12 @@ function verifyEnvelope(envelope,p,identity,previous={}) {
   const pkg=m.package;
   if(!pkg||!/^[-A-Za-z0-9_.]+$/.test(pkg.name)||pkg.name==='.'||pkg.name==='..'||!Number.isSafeInteger(pkg.size)||pkg.size<=0||pkg.size>20*1024**3||!/^[a-f0-9]{64}$/.test(pkg.sha256)||Buffer.from(pkg.sha512||'','base64').length!==64) throw new Error('Invalid update package');
   if(pkg.path!=='/v1/packages/'+m.appId+'/'+m.sequence+'/'+pkg.name) throw new Error('Update package path mismatch');
-  if(identity.platform==='win32'&&!pkg.name.endsWith('.exe')) throw new Error('Windows updates require an NSIS installer');
+  if(zipIdentity){
+    directory.verifyDirectoryPackageProof(m);
+  }else{
+    if(pkg.format!==undefined&&pkg.format!=='nsis')throw new Error('Update package format differs from installation distribution');
+    if(identity.platform==='win32'&&!pkg.name.endsWith('.exe')) throw new Error('Windows updates require an NSIS installer');
+  }
   if(identity.platform==='darwin'&&!pkg.name.endsWith('.zip')) throw new Error('Mac updates require a signed application zip');
   return {manifest:m,manifestHash:digest};
 }

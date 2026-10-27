@@ -6,6 +6,18 @@ param(
   [switch]$RequirePublisher
 )
 $ErrorActionPreference = 'Stop'
+function Test-PortableExecutableFile([string]$Path) {
+  $stream = [IO.File]::OpenRead($Path)
+  try {
+    $header = [byte[]]::new(64)
+    if ($stream.Read($header, 0, 64) -ne 64 -or $header[0] -ne 77 -or $header[1] -ne 90) { return $false }
+    $offset = [BitConverter]::ToUInt32($header, 60)
+    if ($offset -gt $stream.Length - 4) { return $false }
+    $stream.Position = $offset
+    $signature = [byte[]]::new(4)
+    return $stream.Read($signature, 0, 4) -eq 4 -and $signature[0] -eq 80 -and $signature[1] -eq 69 -and $signature[2] -eq 0 -and $signature[3] -eq 0
+  } finally { $stream.Dispose() }
+}
 if ($PSHOME -ne 'C:\Windows\System32\WindowsPowerShell\v1.0' -or $PSVersionTable.PSEdition -ne 'Desktop' -or $PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Fixed WindowsPowerShell 5.1 host required' }
 Import-Module -Name ($PSHOME + '\Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 Import-Module -Name ($PSHOME + '\Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1') -ErrorAction Stop
@@ -24,13 +36,14 @@ $filePath = [IO.Path]::GetFullPath($File)
 $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd('\')
 if (-not $filePath.StartsWith($rootPath + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Signing target is outside the private build root' }
 $item = Get-Item -LiteralPath $filePath
-if ($item.PSIsContainer -or $item.Extension.ToLowerInvariant() -notin @('.exe','.dll','.pyd','.node','.ocx')) { throw 'Signing target is not an executable binary' }
+if ($item.PSIsContainer) { throw 'Signing target is not an executable binary' }
 if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Signing target is a reparse point' }
 for ($parent = $item.Directory; $null -ne $parent; $parent = $parent.Parent) {
   if ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Signing target traverses a reparse point' }
 }
 $links = @(& fsutil.exe hardlink list $filePath)
 if ($LASTEXITCODE -ne 0 -or $links.Count -ne 1) { throw 'Signing target must have exactly one hard link' }
+if ($item.Extension.ToLowerInvariant() -notin @('.exe','.dll','.pyd','.node','.ocx') -and -not (Test-PortableExecutableFile $filePath)) { throw 'Signing target is not an executable binary' }
 $before = (Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash.ToLowerInvariant()
 $signature = Microsoft.PowerShell.Security\Get-AuthenticodeSignature -LiteralPath $filePath
 $signed = $false

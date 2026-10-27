@@ -15,9 +15,9 @@ argon2-cffi-bindings==26.1.0 \
 asgiref==3.12.1 \
     --hash=sha256:fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094
     # asgiref-3.12.1-py3-none-any.whl (dependency)
-certifi==2026.7.22 \
-    --hash=sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775
-    # certifi-2026.7.22-py3-none-any.whl (dependency)
+certifi==2026.10.19 \
+    --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b
+    # certifi-2026.10.19-py3-none-any.whl; https://pypi.org/pypi/certifi/2026.10.19/json
 cffi==2.1.1 \
     --hash=sha256:f53e442b08449d42821fa4a4fba000095af9f62742a500f978a9f557ec44339a
     # cffi-2.1.1-cp312-cp312-win_amd64.whl (dependency)

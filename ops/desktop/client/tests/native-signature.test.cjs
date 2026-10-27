@@ -26,8 +26,8 @@ test('T18 (D-328): with enforcement on, the signer must equal the client-pinned 
   for(const status of [2,3])assert.throws(()=>verifySignatureResult({...signed(PIN),status},filename,[PIN],on),/could not be verified/);
   assert.throws(()=>verifySignatureResult({...signed(PIN),path:'C:\Other\Package.exe'},filename,[PIN],on),/could not be verified/);
 });
-test('T18 (Paul 2026-10-26): the shipped default is warn-only for 1.0.19 (flip PUBLISHER_PIN_ENFORCE in the next release)',()=>{
-  assert.equal(PUBLISHER_PIN_ENFORCE,false);
+test('T18 (Paul 2026-10-26): the shipped default enforces the publisher pin after 1.0.19',()=>{
+  assert.equal(PUBLISHER_PIN_ENFORCE,true);
 });
 test('T18 warn-only: a pin mismatch warns and proceeds while enforcement is off; the allow-list and release-signing checks still refuse',()=>{
   const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename}),off={enforce:false};
@@ -44,10 +44,10 @@ test('T18 warn-only: a pin mismatch warns and proceeds while enforcement is off;
   for(const status of [2,3])assert.throws(()=>run({...signed(PIN),status},[PIN]),/could not be verified/);
   assert.throws(()=>run({...signed(PIN),path:'C:\Other\Package.exe'},[PIN]),/could not be verified/);
   assert.throws(()=>run(signed(PIN),[]),/names no publisher thumbprint/);
-  // The module default (off) behaves the same without options, and console.warn is the log.
+  // The shipped default now refuses these same mismatches without an opt-out.
   const logged=[],realWarn=console.warn;console.warn=message=>logged.push(message);
-  try{verifySignatureResult(signed(OTHER),filename,[OTHER]);}finally{console.warn=realWarn;}
-  assert.equal(logged.length,1);
+  try{assert.throws(()=>verifySignatureResult(signed(OTHER),filename,[OTHER]),/does not name the pinned publisher thumbprint/);}finally{console.warn=realWarn;}
+  assert.equal(logged.length,0);
 });
 test('T18 flip: the same mismatches that warn while off block once enforcement is on',()=>{
   const filename='C:\Test\Package.exe',signed=thumbprint=>({status:0,thumbprint,path:filename});

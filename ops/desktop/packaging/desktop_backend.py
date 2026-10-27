@@ -565,10 +565,11 @@ def github_district_extract_main():
 
 
 def main():
-    if '--desktop-module-input' in sys.argv[1:]:
-        # -E ignores the environment bytecode setting. Suppress writes before
-        # importing the parent-frame/parser/contract or any domain module.
-        sys.dont_write_bytecode = True
+    # Every helper and ordinary launch shares an immutable signed program tree.
+    # -E ignores this environment setting in the parent, so set the interpreter
+    # flag too; child Python jobs inherit the environment protection.
+    sys.dont_write_bytecode = True
+    os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
     import multiprocessing
     multiprocessing.freeze_support()
     if sys.argv[1:] == ['--desktop-credential']:

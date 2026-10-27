@@ -20,6 +20,26 @@ test('release signing is explicit, approved identity only and no credential or t
  for(const change of [{DESKTOP_SIGNING_CERT_SHA1:'a'.repeat(40)},{WINDOWS_PUBLISHER_NAME:'CN=Other'},{DESKTOP_DIST_ROOT:f.vendor},{CSC_LINK:'key.pfx'},{ELECTRON_BUILDER_OFFLINE:'true'}])assert.throws(()=>options(app,{env:{...f.env,...change},platform:'win32'}));
  const selected=options(app,{env:f.env,platform:'win32',sign:f.sign,toolset:f.toolset});assert.equal(selected.forceCodeSigning,true);assert.equal(f.env.ELECTRON_BUILDER_DISABLE_BUILD_CACHE,'true');assert.deepEqual(selected.win.signtoolOptions.signingHashAlgorithms,['sha256']);assert.equal(selected.win.signExts,undefined);
 });
+
+test('directory signing prepares no NSIS tools and records freshly verified app files',async t=>{
+ const f=fixture(t),vendorHash=f.digest(f.third),env={...f.env,DESKTOP_DISTRIBUTION:'directory-zip'};
+ const toolset={getMakeNsisPath:async()=>{throw new Error('NSIS must not load');},getNsisPluginsPath:async()=>{throw new Error('NSIS must not load');}};
+ const config=options(app,{env,platform:'win32',sign:f.sign,toolset});
+ await config.beforePack(f.context);assert.equal(fs.existsSync(path.join(f.root,'nsis')),false);assert.equal(env.ELECTRON_BUILDER_NSIS_DIR,undefined);
+ await config.win.signtoolOptions.sign({path:f.main});await config.afterSign(f.context);
+ const receipt=JSON.parse(fs.readFileSync(f.context.appOutDir+'.signatures.json'));
+ assert.equal(receipt.format,'windows-directory-zip-v1');assert.equal(receipt.appId,'terrier');assert.equal(receipt.installer,undefined);
+ assert.equal(receipt.currentFiles.length,3);for(const row of receipt.currentFiles){assert.equal(row.sha256,f.digest(row.path));assert.equal(row.status,'Valid');assert.ok(f.calls.some(call=>call.file===row.path&&call.verify));}
+ assert.equal(f.digest(f.third),vendorHash);assert.equal(receipt.currentFiles.find(row=>row.path===f.third).thumbprint,'vendor');
+ await config.artifactBuildCompleted({file:f.main});assert.equal(fs.existsSync(f.main+'.signatures.json'),false);
+});
+
+test('directory signing refuses stale verification evidence and writes no receipt',async t=>{
+ const f=fixture(t),env={...f.env,DESKTOP_DISTRIBUTION:'directory-zip'};
+ const sign=async(file,root,options)=>{const result=await f.sign(file,root,options);if(options.verify&&file===f.third)fs.appendFileSync(file,'changed');return result;};
+ const config=options(app,{env,platform:'win32',sign,toolset:f.toolset});await config.beforePack(f.context);
+ await assert.rejects(config.afterSign(f.context),/evidence changed/);assert.equal(fs.existsSync(f.context.appOutDir+'.signatures.json'),false);
+});
 test('private NSIS copies, inner application, generated uninstaller and outer installer share approved signer',async t=>{
  const f=fixture(t),sourceHash=f.digest(path.join(f.vendor,'nsis','Plugins','x86-unicode','System.dll')),vendorHash=f.digest(f.third),config=options(app,{env:f.env,platform:'win32',sign:f.sign,toolset:f.toolset});
  await assert.rejects(config.win.signtoolOptions.sign({path:f.main}),/not prepared/);

@@ -5,6 +5,8 @@
 process.env.ELECTRON_BUILDER_7Z_FILTER='BCJ';
 const fs=require('node:fs');const path=require('node:path');const {appDefinition}=require('./apps.cjs');
 const selected=appDefinition(process.env.DESKTOP_APP_ID||'melange');
+const distribution=process.env.DESKTOP_DISTRIBUTION||'native';
+if(!['native','directory-zip'].includes(distribution))throw new Error('Unsupported desktop distribution');
 // Each app updates from its own public repository (Paul, 2026-10-15); DESKTOP_GITHUB_REPOSITORY still overrides.
 const DEFAULT_GITHUB_REPOSITORY=Object.freeze({melange:'pjg93-222/Melange',mentat:'pjg93-222/Mentat',terrier:'pjg93-222/Geo'});
 const runtimeRoot=path.resolve(process.env.DESKTOP_RUNTIME_ROOT||path.join(__dirname,'runtime'));
@@ -13,7 +15,7 @@ const icon=path.join(__dirname,'icons',selected.id+'.ico');
 const accessTrust=process.env.DESKTOP_ACCESS_TRUST?require('./access-client.cjs').descriptor(JSON.parse(fs.readFileSync(path.resolve(process.env.DESKTOP_ACCESS_TRUST),'utf8'))):null;
 const updateProvider=process.env.DESKTOP_UPDATE_PROVIDER||'github';
 if(!['github','publisher'].includes(updateProvider))throw new Error('Unsupported desktop update provider');
-const desktopUpdateSource=updateProvider==='github'?require('./github-source.cjs').configuration({provider:'github',repository:process.env.DESKTOP_GITHUB_REPOSITORY||DEFAULT_GITHUB_REPOSITORY[selected.id]}):{provider:'publisher'};
+const desktopUpdateSource=updateProvider==='github'?require('./github-source.cjs').configuration({provider:'github',repository:process.env.DESKTOP_GITHUB_REPOSITORY||DEFAULT_GITHUB_REPOSITORY[selected.id],...(distribution==='directory-zip'?{distribution}:{})}):{provider:'publisher'};
 // Shared collection through the publisher's scrape broker (ops/desktop/server/SCRAPE-BROKER.md); off unless set to 1.
 if(!['','0','1'].includes(process.env.DESKTOP_SHARED_SCRAPE||''))throw new Error('DESKTOP_SHARED_SCRAPE must be 0 or 1');
 const desktopScrapeBroker=process.env.DESKTOP_SHARED_SCRAPE==='1'&&['melange','mentat'].includes(selected.id);
@@ -35,8 +37,10 @@ module.exports={
   extraResources:[{from:runtime,to:'runtime/'+selected.id,filter:['**/*','!sources/**/state/**','!sources/**/*.{sqlite,sqlite3,db,sqlite-wal,sqlite-shm,sqlite-journal,sqlite3-wal,sqlite3-shm,sqlite3-journal,db-wal,db-shm,db-journal}']},
    // Public release certificate only (no longer used by the app; kept for publisher-trust.cjs and turn-on-updates.cmd).
    {from:path.join(__dirname,'melange-systems-desktop-release.cer'),to:'melange-systems-desktop-release.cer'}],
-  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
-  win:{target:['nsis'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
+  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,...(distribution==='directory-zip'?{desktopDistribution:distribution}:{}),windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
+  // The directory target signs the complete unpacked app without NSIS. The
+  // directory_zip.py packager then adds its inventory and produces the release ZIP.
+  win:{target:[distribution==='directory-zip'?'dir':'nsis'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
   nsis:{oneClick:false,perMachine:false,allowToChangeInstallationDirectory:false,deleteAppDataOnUninstall:false,runAfterFinish:false,
     // Downloads layout (DL-spec 1.3): after-pack.cjs writes this include (the DL_* defines, then !include installer.nsh) into the output directory; builder.cjs writes nothing.
     include:path.join(path.resolve(__dirname,outputDir),'installer.generated.nsh'),installerIcon:icon,uninstallerIcon:icon},
