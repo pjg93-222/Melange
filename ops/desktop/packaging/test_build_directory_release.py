@@ -109,8 +109,39 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
     def test_peak_reserve_covers_measured_runtime_copies_and_fresh_venv(self):
         reused = {"runtime": {"inputBytes": 2 * module.GIB}, "source": {"exportBytes": 10_000}}
         fresh = {"runtime": None, "runtimeBaselineBytes": module.GIB, "source": {"exportBytes": 10_000}}
-        self.assertGreaterEqual(module.peak_reserve(reused), 3 * reused["runtime"]["inputBytes"] + 2 * module.GIB)
-        self.assertGreaterEqual(module.peak_reserve(fresh), 4 * module.runtime_budget(fresh) + 2 * module.GIB)
+        self.assertGreaterEqual(module.peak_reserve(reused), 2 * reused["runtime"]["inputBytes"] + 2 * module.GIB)
+        self.assertGreaterEqual(module.peak_reserve(fresh), 3 * module.runtime_budget(fresh) + 2 * module.GIB)
+
+    def test_runtime_retirement_requires_completed_signed_tree_and_saved_receipt(self):
+        runtime = self.runtime()
+        config = self.config()
+        config["apps"]["melange"]["runtime"] = str(runtime)
+        prepared = module.plan(config)
+        for valid in [True, False]:
+            build = module.Build(prepared, self.root / ("good" if valid else "bad"), self.root / ("out-good" if valid else "out-bad"), self.root / "python.exe")
+            def call(label, *_args, **_kwargs):
+                if label == "melange-runtime":
+                    (build.root / "runtime/melange/bootstrap").mkdir()
+                if label == "melange-electron":
+                    unpacked = build.root / "signing/melange/dist/melange/win-unpacked"
+                    unpacked.mkdir(parents=True)
+                    (unpacked / "Melange.exe").write_bytes(b"completed signed app fixture")
+                    if valid:
+                        unpacked.with_name(unpacked.name + ".signatures.json").write_text('{"fixture":"completed signing receipt"}')
+            def packaged(_app, unpacked, _package):
+                self.assertFalse((build.root / "runtime/melange").exists())
+                self.assertEqual((unpacked / "Melange.exe").read_bytes(), b"completed signed app fixture")
+                self.assertEqual((build.artifacts / "melange/build-signatures.json").read_text(), '{"fixture":"completed signing receipt"}')
+                return {}, {}
+            with patch.object(build, "space"), patch.object(build, "call", side_effect=call), patch.object(build, "package_signed_tree", side_effect=packaged) as packaging, patch.object(build, "finish_package", return_value={"complete": True}):
+                if valid:
+                    build.run()
+                    packaging.assert_called_once()
+                else:
+                    with self.assertRaisesRegex(module.Refused, "signing receipt missing"):
+                        build.run()
+                    self.assertTrue((build.root / "runtime/melange").exists())
+                    packaging.assert_not_called()
 
     def test_packager_descriptor_is_independent_of_command_log_position(self):
         package = self.root / "melange-1.0.20-win32-x64.zip"
@@ -200,6 +231,16 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
         self.assertIn("certifi==2026.10.19", text)
         self.assertIn("42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b", text)
         self.assertIn("https://pypi.org/pypi/certifi/2026.10.19/json", text)
+
+    def test_terrier_desktop_extras_cover_required_runtime_imports_at_existing_versions(self):
+        text = Path(__file__).with_name("terrier-runtime.constraints.txt").read_text()
+        manifest = json.loads(Path(__file__).with_name("runtime-manifest.json").read_text())
+        for name, version, sha in [("cryptography", "49.0.0", "e5dfc1e64de5677cec922ffa8da89c546d0415bf6efdf081842e5d44c84e1f0e"),
+                                   ("joblib", "1.5.3", "5fc3c5039fc5ca8c0276333a188bbd59d6b7ab37fe6632daa76bc7f9ec18e713"),
+                                   ("pyarrow", "24.0.0", "295f0a7f2e242dabd513737cf076007dc5b2d59237e3eca37b05c0c6446f3826"),
+                                   ("scipy", "1.18.0", "71ccc8faa2dd16ac310233203474a8b5cb67f10dedd54a3116d34943f4b19132")]:
+            self.assertIn(name, manifest["apps"]["terrier"]["hiddenImports"])
+            self.assertIn(name + "==" + version + " \\\n    --hash=sha256:" + sha, text)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
 #   python -m pip install --dry-run --ignore-installed --report report.json --only-binary=:all:
 #     --platform win_amd64 --python-version 3.12 --implementation cp --abi cp312 --target <unused> -r requirements.lock.txt
 # One wheel hash per package (the file pip selected for this target). Every requirements.lock.txt pin appears at the
-# same version; no package outside the lock was added. Terrier ships no test/runtime extras beyond Geo's lock.
+# same version. Desktop-only extras below satisfy runtime-manifest.json and match the existing Terrier runtime.
 # Install: pip install --require-hashes --only-binary=:all: --no-deps -r terrier-runtime.constraints.txt
 argon2-cffi==25.1.0 \
     --hash=sha256:fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741
@@ -75,3 +75,18 @@ urllib3==2.8.0 \
 waitress==3.0.2 \
     --hash=sha256:c56d67fd6e87c2ee598b76abdd4e96cfad1f24cacdea5078d382b1f9d7b5ed2e
     # waitress-3.0.2-py3-none-any.whl
+
+# Desktop runtime extras already present in Terrier 1.0.17, omitted from Geo's web-server lock.
+# Exact Windows wheels verified against official PyPI metadata on 2026-10-27.
+cryptography==49.0.0 \
+    --hash=sha256:e5dfc1e64de5677cec922ffa8da89c546d0415bf6efdf081842e5d44c84e1f0e
+    # cryptography-49.0.0-cp311-abi3-win_amd64.whl; https://pypi.org/pypi/cryptography/49.0.0/json
+joblib==1.5.3 \
+    --hash=sha256:5fc3c5039fc5ca8c0276333a188bbd59d6b7ab37fe6632daa76bc7f9ec18e713
+    # joblib-1.5.3-py3-none-any.whl; https://pypi.org/pypi/joblib/1.5.3/json
+pyarrow==24.0.0 \
+    --hash=sha256:295f0a7f2e242dabd513737cf076007dc5b2d59237e3eca37b05c0c6446f3826
+    # pyarrow-24.0.0-cp312-cp312-win_amd64.whl; https://pypi.org/pypi/pyarrow/24.0.0/json
+scipy==1.18.0 \
+    --hash=sha256:71ccc8faa2dd16ac310233203474a8b5cb67f10dedd54a3116d34943f4b19132
+    # scipy-1.18.0-cp312-cp312-win_amd64.whl; https://pypi.org/pypi/scipy/1.18.0/json

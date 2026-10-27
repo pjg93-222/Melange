@@ -60,8 +60,9 @@ def runtime_budget(config):
 
 
 def peak_reserve(config):
-    # Reused: runtime + unpacked app + worst-case ZIP. Fresh also holds a venv.
-    copies = 3 if config["runtime"] else 4
+    # Runtime is retired after the signed app is complete, before ZIP creation.
+    # Peak is runtime+app OR app+ZIP; a fresh dependency build also holds a venv.
+    copies = 2 if config["runtime"] else 3
     return copies * (runtime_budget(config) + GIB // 2) + config["source"]["exportBytes"] + GIB
 
 
@@ -415,6 +416,9 @@ class Build:
             unpacked = signing / "dist" / app / "win-unpacked"
             require((unpacked.with_name(unpacked.name + ".signatures.json")).is_file(), "Directory signing receipt missing")
             shutil.copy2(unpacked.with_name(unpacked.name + ".signatures.json"), output / "build-signatures.json")
+            # The complete signed app and source receipts now preserve every
+            # required byte. Retain that tree for ZIP retry, retire its input copy.
+            self.remove(Path("runtime") / app)
             # Packaging is separately committed controller code; program sources
             # and signing logic above still come from the frozen tooling export.
             package = output / (app + "-" + self.plan["version"] + "-win32-x64.zip")
