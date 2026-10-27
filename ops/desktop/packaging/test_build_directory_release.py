@@ -176,6 +176,25 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
         with self.assertRaisesRegex(module.Refused, "Invalid recorded"):
             module.packager_for_resume(self.root, frozen, self.commit)
 
+    def test_native_resume_binds_every_helper_and_executable_identity(self):
+        names = ["directory_zip_native.py", "directory_inventory_parallel.py", "directory_zip.py"]
+        tool = self.root / "7za.exe"
+        tool.write_bytes(b"native-tool-fixture")
+        identity = {"source": "native-controller", "sha256": module.digest(module.HERE / names[0]), "modules": {name: module.digest(module.HERE / name) for name in names},
+                    "nativeTool": {"path": str(tool), "sha256": module.digest(tool)}, "commit": self.commit, "dirty": False}
+        record = self.root / "packager-implementation.json"
+        record.write_text(json.dumps(identity))
+        self.assertEqual(module.packager_for_resume(self.root, self.root, self.commit), (module.HERE, identity))
+        changed = json.loads(json.dumps(identity))
+        changed["modules"]["directory_inventory_parallel.py"] = "a" * 64
+        record.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(module.Refused, "implementation changed"):
+            module.packager_for_resume(self.root, self.root, self.commit)
+        record.write_text(json.dumps(identity))
+        tool.write_bytes(b"changed tool")
+        with self.assertRaisesRegex(module.Refused, "tool changed"):
+            module.packager_for_resume(self.root, self.root, self.commit)
+
     def test_terrier_constraint_matches_reviewed_pypi_certifi_wheel(self):
         text = Path(__file__).with_name("terrier-runtime.constraints.txt").read_text()
         self.assertIn("certifi==2026.10.19", text)

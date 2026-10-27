@@ -125,6 +125,14 @@ def packager_for_resume(output, frozen_packaging, frozen_commit):
         # Older controllers ran the packager from the verified frozen export.
         return frozen_packaging, {"source": "frozen-tooling", "sha256": digest(frozen_packaging / "directory_zip.py"), "commit": frozen_commit, "dirty": False}
     identity = json.loads(record.read_text())
+    if identity.get("source") == "native-controller":
+        require(set(identity) == {"source", "sha256", "modules", "nativeTool", "commit", "dirty"} and identity["dirty"] is False
+                and re.fullmatch(r"[0-9a-f]{40}", identity["commit"]), "Invalid native packager implementation")
+        expected = {"directory_zip_native.py", "directory_inventory_parallel.py", "directory_zip.py"}
+        require(set(identity["modules"]) == expected and identity["sha256"] == identity["modules"]["directory_zip_native.py"]
+                and all(digest(HERE / name) == sha for name, sha in identity["modules"].items()), "Native packager implementation changed")
+        require(set(identity["nativeTool"]) == {"path", "sha256"} and digest(physical(identity["nativeTool"]["path"])) == identity["nativeTool"]["sha256"], "Native ZIP tool changed")
+        return HERE, identity
     require(set(identity) == {"source", "sha256", "commit", "dirty"} and identity["source"] == "controller" and identity["dirty"] is False and re.fullmatch(r"[0-9a-f]{40}", identity["commit"]), "Invalid recorded packager implementation")
     require(digest(HERE / "directory_zip.py") == identity["sha256"], "Packager implementation changed since ZIP creation")
     return HERE, identity
@@ -224,9 +232,10 @@ def export_commit(source, destination):
 
 
 class Build:
-    def __init__(self, prepared, root, artifacts, python, free_floor_gib=32):
+    def __init__(self, prepared, root, artifacts, python, free_floor_gib=32, seven_zip=None):
         self.plan, self.root, self.artifacts, self.python = prepared, Path(root).absolute(), Path(artifacts).absolute(), Path(python).absolute()
         self.floor = free_floor_gib * GIB
+        self.seven_zip = Path(seven_zip).absolute() if seven_zip else None
         self.environment = {key: value for key, value in os.environ.items() if not key.upper().startswith(("DESKTOP_", "CSC_", "WIN_CSC_")) and key.upper() not in {"PSMODULEPATH", "NODE_OPTIONS", "PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "ELECTRON_RUN_AS_NODE", "ELECTRON_BUILDER_NSIS_DIR", "ELECTRON_BUILDER_NSIS_RESOURCES_DIR"}}
         controller_commit = git(HERE.parents[2], "rev-parse", "HEAD", missing=True)
         controller_dirty = git(HERE.parents[2], "status", "--porcelain", "--", "ops/desktop/packaging/build_directory_release.py", missing=True)
@@ -256,19 +265,29 @@ class Build:
             require(json.loads((self.root / "owner.json").read_text())["id"] == self.owner, "Build ownership changed")
             shutil.rmtree(target)
 
-    def zip_command(self, app, packaging, unpacked, package):
-        return [str(value) for value in [self.python, "-B", packaging / "directory_zip.py", "--app", app, "--version", self.plan["version"], "--source", unpacked, "--output", package, "--publisher-payload", package.parent / "publisher-payload.json"]]
+    def zip_command(self, app, packaging, unpacked, package, native_tool=None):
+        command = [self.python, "-B", packaging / ("directory_zip_native.py" if native_tool else "directory_zip.py"), "--app", app, "--version", self.plan["version"], "--source", unpacked, "--output", package, "--publisher-payload", package.parent / "publisher-payload.json"]
+        if native_tool:
+            command.extend(["--seven-zip", native_tool])
+        return [str(value) for value in command]
 
     def package_signed_tree(self, app, unpacked, package):
-        script = HERE / "directory_zip.py"
+        names = ["directory_zip_native.py", "directory_inventory_parallel.py", "directory_zip.py"]
+        script = HERE / names[0]
         commit = git(HERE.parents[2], "rev-parse", "HEAD").decode().strip()
-        dirty = bool(git(HERE.parents[2], "status", "--porcelain", "--", "ops/desktop/packaging/directory_zip.py").strip())
+        dirty = bool(git(HERE.parents[2], "status", "--porcelain", "--", *("ops/desktop/packaging/" + name for name in names)).strip())
         require(not dirty, "Commit the reviewed packager before building")
-        identity = {"source": "controller", "sha256": digest(script), "commit": commit, "dirty": False}
+        candidates = [self.seven_zip] if self.seven_zip else list((Path(os.environ["LOCALAPPDATA"]) / "electron-builder/Cache/7zip@1.0.0").glob("7zip-win-x64-*/bin/7za.exe"))
+        require(len(candidates) == 1, "Pass --seven-zip with the reviewed native executable")
+        tool = physical(candidates[0].resolve(strict=True))
+        identity = {"source": "native-controller", "sha256": digest(script), "modules": {name: digest(HERE / name) for name in names},
+                    "nativeTool": {"path": str(tool), "sha256": digest(tool)}, "commit": commit, "dirty": False}
         json_write(package.parent / "packager-implementation.json", identity)
-        command = self.zip_command(app, HERE, unpacked, package)
+        command = self.zip_command(app, HERE, unpacked, package, native_tool=tool)
         self.call(app + "-zip", command, reserve=tree_bytes(unpacked) + GIB // 4)
-        require(digest(script) == identity["sha256"], "Packager implementation changed during ZIP creation")
+        require(all(digest(HERE / name) == sha for name, sha in identity["modules"].items()) and digest(tool) == identity["nativeTool"]["sha256"], "Packager implementation changed during ZIP creation")
+        evidence = json.loads((package.parent / "native-zip-evidence.json").read_text())
+        require(evidence["implementations"] == identity["modules"] and evidence["nativeToolSha256"] == identity["nativeTool"]["sha256"] and evidence["contentMatchesSourceInventory"] is True, "Native ZIP evidence mismatch")
         text = (self.root / "logs" / (app + "-zip.log")).read_text(encoding="utf-8")
         descriptor = package_log_descriptor(text, app, self.plan["version"], package, subprocess.list2cmdline(command))
         return descriptor, identity
@@ -320,7 +339,7 @@ class Build:
         package = output / f"{app}-{saved['version']}-win32-x64.zip"
         unpacked = self.root / "signing" / app / "dist" / app / "win-unpacked"
         packager, identity = packager_for_resume(output, tools / "ops/desktop/packaging", saved["tooling"]["commit"])
-        command = subprocess.list2cmdline(self.zip_command(app, packager, unpacked, package))
+        command = subprocess.list2cmdline(self.zip_command(app, packager, unpacked, package, native_tool=identity.get("nativeTool", {}).get("path")))
         descriptor = package_log_descriptor((self.root / "logs" / (app + "-zip.log")).read_text(), app, saved["version"], package, command)
         return self.finish_package(app, descriptor, provenance, identity)
 
@@ -412,6 +431,7 @@ def main():
     parser.add_argument("--artifacts", type=Path, required=True)
     parser.add_argument("--python312", type=Path, required=True)
     parser.add_argument("--free-floor-gib", type=int, default=32)
+    parser.add_argument("--seven-zip", type=Path, help="Reviewed native 7za executable; otherwise use the unique Electron Builder cached copy")
     parser.add_argument("--build", action="store_true", help="Perform the local build; default only validates frozen inputs")
     parser.add_argument("--resume-packaged", choices=APPS, help="Finish one candidate interrupted immediately after complete ZIP output; no program rebuild")
     args = parser.parse_args()
@@ -419,9 +439,9 @@ def main():
     prepared = plan(json.loads(args.spec.read_text(encoding="utf-8")))
     if args.resume_packaged:
         require(not args.build, "Choose build or packaged continuation")
-        print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib).resume_packaged(args.resume_packaged), indent=2))
+        print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib, args.seven_zip).resume_packaged(args.resume_packaged), indent=2))
     elif args.build:
-        print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib).run(), indent=2))
+        print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib, args.seven_zip).run(), indent=2))
     else:
         print(json.dumps(prepared, indent=2))
 
