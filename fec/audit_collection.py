@@ -19,7 +19,7 @@ import sys
 import wave
 
 from collect.press_receipt import ReceiptTimestampError, parse_receipt_timestamp
-from paths import MELANGE_DATA, ROOT, stored_name, to_host, to_stored, today
+from paths import MELANGE_DATA, ROOT, stored_name, to_host, to_stored, today, utc_instant
 
 # Of the inputs a local-youtube verification receipt declares, these are the ones
 # that decide WHO a voice belongs to.  A change to any of them voids the
@@ -560,9 +560,10 @@ def audit_db(path: Path, source_receipts_dir: Path | None = None):
             summary.setdefault("source_terminal_date", None)
             summary["collector_horizon"] = horizon_by_source.get(label)
             if summary["freshness_mode"] == "historical_archive":
-                checked = str(summary.get("collector_checked_at") or "")[:10]
+                # completed_at is a UTC stamp, yesterday a local day: compare instants (paths.utc_instant), not the UTC date
+                checked = summary.get("collector_checked_at")
                 summary["collector_checked_through_yesterday"] = bool(
-                    checked and date.fromisoformat(checked) >= yesterday
+                    checked and utc_instant(checked) >= utc_instant(yesterday)
                 )
             else:
                 checked = summary.get("collector_horizon")

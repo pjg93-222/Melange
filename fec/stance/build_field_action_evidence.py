@@ -9,7 +9,7 @@ from __future__ import annotations
 import ast
 from collections import Counter, defaultdict
 import csv
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 import hashlib
 import io
@@ -21,7 +21,7 @@ import re
 from stance.rank_honors_policy import POLICY, CONVERSION_TOLERANCE, literal, number
 import bill_rules as BR
 from legislation import sentinel_admissions as SA
-from paths import to_host
+from paths import to_host, utc_instant
 
 
 def integer(value):
@@ -526,7 +526,8 @@ def build_evidence(snapshot, as_of):
         _require_hash(snapshot, path, digest)
     counts = Counter()
     admissions = _admissions(snapshot, counts)
-    if date.fromisoformat(admissions['checked_at'][:10]) > as_of:
+    # as_of is a local day, checked_at a UTC stamp: refuse only a snapshot taken after as_of's local day ended (paths.utc_instant)
+    if utc_instant(admissions['checked_at']) >= utc_instant(as_of + timedelta(days=1)):
         raise ValueError('As-of precedes accepted source snapshot; historical backtesting unsupported')
     titles = {}
     legislation = legislative_actions(snapshot, roster, categories, admissions, counts, titles)
