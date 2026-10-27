@@ -244,6 +244,8 @@ class AccessHTTPTests(unittest.TestCase):
         with self.assertRaises(HTTPRefused) as caught: limiter.check('192.168.9.9', per_peer=False)
         self.assertEqual((caught.exception.status, caught.exception.code), (429, 'rate_limited'))
         self.assertEqual(list(limiter.entries), ['*'])  # no per-address table is kept
+        clock[0] = 59
+        with self.assertRaises(HTTPRefused): limiter.check('127.0.0.1', per_peer=False)  # still inside the window
         clock[0] = 61
         limiter.check('127.0.0.1', per_peer=False)
         admin = RateLimit(clock=lambda: 0)
