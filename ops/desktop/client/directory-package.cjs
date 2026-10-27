@@ -54,6 +54,7 @@ function validateInventory(value,options,limits){
 }
 const samePath=(a,b)=>process.platform==='win32'?path.resolve(a).toLowerCase()===path.resolve(b).toLowerCase():path.resolve(a)===path.resolve(b);
 const sameFile=(a,b)=>a.dev===b.dev&&a.ino===b.ino&&a.size===b.size&&a.mtimeNs===b.mtimeNs&&a.ctimeNs===b.ctimeNs;
+const sameDirectory=(a,b)=>a.dev===b.dev&&a.ino===b.ino;
 async function physicalDirectory(directory){
  const requested=path.resolve(directory),info=await fsp.lstat(requested,{bigint:true});
  requireValue(info.isDirectory()&&!info.isSymbolicLink()&&samePath(requested,await fsp.realpath(requested)),'directory is linked or redirected');
@@ -68,14 +69,42 @@ async function regularFile(file){
  requireValue(info.isFile()&&!info.isSymbolicLink()&&info.nlink===1n&&samePath(file,await fsp.realpath(file)),'file is linked, redirected or nonregular');
  return info;
 }
-async function parents(root,relative,create=false){
- await physicalDirectory(root);let current=root;
- for(const component of relative.split('/').slice(0,-1)){
-  current=path.join(current,component);
-  if(create)try{await fsp.mkdir(current,{mode:0o700});}catch(error){if(error.code!=='EEXIST')throw error;}
-  await physicalDirectory(current);
+async function assertDirectory(directory,expected){
+ requireValue(sameDirectory(expected,await physicalDirectory(directory)),'directory identity changed');
+}
+function stagingDirectories(root,initial){
+ const known=new Map([[root,initial]]),creating=new Map();
+ async function check(directory){
+  const expected=known.get(directory);requireValue(expected,'staging parent was not created by this extraction');
+  // realpath resolves the complete ancestor chain. Checking the immediate
+  // parent's canonical path plus remembered identity also detects redirection
+  // or same-path replacement without repeating every ancestor syscall.
+  await assertDirectory(directory,expected);
  }
- return path.join(root,...relative.split('/'));
+ async function ensure(directory){
+  if(known.has(directory))return check(directory);
+  if(creating.has(directory))return creating.get(directory);
+  const operation=(async()=>{
+   await ensure(path.dirname(directory));await fsp.mkdir(directory,{mode:0o700});
+   known.set(directory,await physicalDirectory(directory));
+  })();
+  creating.set(directory,operation);
+  try{await operation;}finally{creating.delete(directory);}
+ }
+ return {async parent(relative,create=false){
+  const target=path.join(root,...relative.split('/')),directory=path.dirname(target);
+  await (create?ensure(directory):check(directory));return target;
+ },checkRoot:()=>check(root)};
+}
+async function boundedJobs(items,operation){
+ let cursor=0,failed=false,failure;
+ await Promise.all(Array.from({length:Math.min(4,items.length)},async()=>{
+  while(!failed){const next=cursor++;if(next>=items.length)return;
+   try{await operation(items[next]);}catch(error){if(!failed){failed=true;failure=error;}return;}
+  }
+ }));
+ // Every active operation closes its held handles before cleanup or success.
+ if(failed)throw failure;
 }
 function openZip(file){return new Promise((resolve,reject)=>yauzl.open(file,{lazyEntries:true,autoClose:false,strictFileNames:true,validateEntrySizes:true},(error,zip)=>error?reject(error):resolve(zip)));}
 function fdStat(fd){return new Promise((resolve,reject)=>fs.fstat(fd,{bigint:true},(error,value)=>error?reject(error):resolve(value)));}
@@ -161,18 +190,23 @@ async function extract(file,destination,options){
  let owned;
  try{return await withZip(file,options,async(zip,index,limits)=>{
   const root=path.resolve(destination);await ancestors(path.dirname(root));await fsp.mkdir(root,{mode:0o700});const initial=await physicalDirectory(root);
-  owned={root,initial};
+  owned={root,initial};const directories=stagingDirectories(root,initial);
   // No existing directory is merged or overwritten. Failed partial staging is
   // removed only while this process still owns the physical directory identity.
-  for(const entry of index.entries){
-   const expected=index.files.get(caseKey(entry.fileName)),target=await parents(root,expected.path,true),hash=crypto.createHash('sha256');let count=0;
-   const input=await readStream(zip,entry),output=fs.createWriteStream(target,{flags:'wx',mode:0o600});
-   const check=new Transform({transform(chunk,_encoding,done){count+=chunk.length;if(count>expected.size)return done(fail('expanded member exceeds declared size'));hash.update(chunk);done(null,chunk);}});
-   await pipeline(input,check,output);
-   requireValue(count===expected.size&&hash.digest('hex')===expected.sha256,'extracted file hash mismatch');
-   await parents(root,expected.path);await regularFile(target);
-  }
-  requireValue((await physicalDirectory(root)).ino===initial.ino,'staging directory changed');
+  await boundedJobs(index.entries,async entry=>{
+   const expected=index.files.get(caseKey(entry.fileName)),target=await directories.parent(expected.path,true),hash=crypto.createHash('sha256');let count=0;
+   const handle=await fsp.open(target,fs.constants.O_WRONLY|fs.constants.O_CREAT|fs.constants.O_EXCL|(fs.constants.O_NOFOLLOW||0),0o600);
+   try{
+    const before=await handle.stat({bigint:true});requireValue(before.isFile()&&before.nlink===1n&&sameFile(before,await regularFile(target)),'extracted file replaced before writing');
+    const input=await readStream(zip,entry),output=fs.createWriteStream(target,{fd:handle.fd,autoClose:false});
+    const check=new Transform({transform(chunk,_encoding,done){count+=chunk.length;if(count>expected.size)return done(fail('expanded member exceeds declared size'));hash.update(chunk);done(null,chunk);}});
+    await pipeline(input,check,output);
+    requireValue(count===expected.size&&hash.digest('hex')===expected.sha256,'extracted file hash mismatch');
+    const after=await handle.stat({bigint:true});requireValue(sameDirectory(before,after)&&after.nlink===1n&&after.size===BigInt(expected.size)&&sameFile(after,await regularFile(target)),'extracted file changed during writing');
+    await directories.parent(expected.path);
+   }finally{await handle.close();}
+  });
+  await directories.checkRoot();
   await fsp.writeFile(path.join(root,INVENTORY),index.bytes,{flag:'wx',mode:0o600});
   await verifyDirectory(root,{...options,inventory:index.inventory,limits});return structuredClone(index.inventory);
  });}catch(error){
@@ -182,30 +216,46 @@ async function extract(file,destination,options){
 }
 async function verifyDirectory(directory,options){
  const limits=limitsFor(options),index=validateInventory(options?.inventory,options,limits),root=path.resolve(directory);
- await ancestors(root);const initial=await physicalDirectory(root),seen=new Set(),seenDirectories=new Set();let count=0;
- async function walk(current,prefix=''){
-  await physicalDirectory(current);
-  for(const entry of await fsp.readdir(current,{withFileTypes:true})){
-   const relative=prefix?prefix+'/'+entry.name:entry.name;safePath(relative,limits);const key=caseKey(relative),target=path.join(current,entry.name);
-   requireValue(!entry.isSymbolicLink(),'installed tree contains a link');
-   if(entry.isDirectory()){requireValue(index.directories.get(key)===relative&&!seenDirectories.has(key),'unexpected installed directory');seenDirectories.add(key);await walk(target,relative);continue;}
-   requireValue(entry.isFile()&&!seen.has(key),'unexpected installed file type or alias');seen.add(key);count++;requireValue(count<=limits.maxFiles+1,'installed tree has too many files');
-   if(relative===INVENTORY){const info=await regularFile(target);requireValue(info.size<=BigInt(limits.maxInventoryBytes),'installed inventory too large');
-    let value;try{value=JSON.parse(await fsp.readFile(target,'utf8'));}catch{throw fail('invalid installed inventory');}
-    // Comparison uses the caller's authenticated inventory, never local authority.
-    requireValue(JSON.stringify(value)===JSON.stringify(index.inventory),'installed inventory changed');continue;}
-   const expected=index.files.get(key);requireValue(expected&&expected.path===relative,'unexpected installed file');
-   const before=await regularFile(target);requireValue(before.size===BigInt(expected.size),'installed file size mismatch');
-   const handle=await fsp.open(target,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW||0));
-   try{requireValue(sameFile(before,await handle.stat({bigint:true})),'installed file replaced before verification');const hash=crypto.createHash('sha256');let size=0;
+ await ancestors(root);const initial=await physicalDirectory(root),directories=new Map(),jobs=[];
+ async function enumerate(collect){
+  const seen=new Set(),seenDirectories=new Set();let count=0;
+  async function walk(current,prefix=''){
+   const directoryIdentity=await physicalDirectory(current);
+   if(collect)directories.set(current,directoryIdentity);else requireValue(directories.has(current)&&sameDirectory(directories.get(current),directoryIdentity),'directory identity changed');
+   for(const entry of await fsp.readdir(current,{withFileTypes:true})){
+    const relative=prefix?prefix+'/'+entry.name:entry.name;safePath(relative,limits);const key=caseKey(relative),target=path.join(current,entry.name);
+    requireValue(!entry.isSymbolicLink(),'installed tree contains a link');
+    if(entry.isDirectory()){requireValue(index.directories.get(key)===relative&&!seenDirectories.has(key),'unexpected installed directory');seenDirectories.add(key);await walk(target,relative);continue;}
+    requireValue(entry.isFile()&&!seen.has(key),'unexpected installed file type or alias');seen.add(key);count++;requireValue(count<=limits.maxFiles+1,'installed tree has too many files');
+    const expected=index.files.get(key);requireValue(relative===INVENTORY||(expected&&expected.path===relative),'unexpected installed file');
+    if(collect)jobs.push({relative,target,current,directoryIdentity,expected});
+   }
+   await assertDirectory(current,directoryIdentity);
+  }
+  await walk(root);requireValue(seen.size===index.files.size+1&&seen.has(caseKey(INVENTORY))&&seenDirectories.size===index.directories.size,'installed package is incomplete');
+ }
+ await enumerate(true);
+ await boundedJobs(jobs,async({relative,target,current,directoryIdentity,expected})=>{
+  const before=await regularFile(target);requireValue(relative===INVENTORY?before.size<=BigInt(limits.maxInventoryBytes):before.size===BigInt(expected.size),relative===INVENTORY?'installed inventory too large':'installed file size mismatch');
+  const handle=await fsp.open(target,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW||0));
+  try{
+   requireValue(sameFile(before,await handle.stat({bigint:true})),'installed file replaced before verification');
+   if(relative===INVENTORY){
+    let value;try{value=JSON.parse(await handle.readFile('utf8'));}catch{throw fail('invalid installed inventory');}
+    // Only the authenticated caller inventory authorizes installed bytes.
+    requireValue(JSON.stringify(value)===JSON.stringify(index.inventory),'installed inventory changed');
+   }else{
+    const hash=crypto.createHash('sha256');let size=0;
     for await(const chunk of handle.createReadStream({autoClose:false})){size+=chunk.length;requireValue(size<=expected.size,'installed file grew during verification');hash.update(chunk);}
     requireValue(size===expected.size&&hash.digest('hex')===expected.sha256,'installed file hash mismatch');
-    requireValue(sameFile(before,await handle.stat({bigint:true}))&&sameFile(before,await regularFile(target)),'installed file changed during verification');
-   }finally{await handle.close();}
-   await parents(root,relative);
-  }
- }
- await walk(root);requireValue(seen.size===index.files.size+1&&seen.has(caseKey(INVENTORY))&&seenDirectories.size===index.directories.size,'installed package is incomplete');
+   }
+   requireValue(sameFile(before,await handle.stat({bigint:true}))&&sameFile(before,await regularFile(target)),'installed file changed during verification');
+  }finally{await handle.close();}
+  await assertDirectory(current,directoryIdentity);
+ });
+ // Recheck exact names/types after all readers drain, so files added during
+ // parallel hashing cannot escape the final completeness check.
+ await enumerate(false);
  const after=await physicalDirectory(root);requireValue(initial.dev===after.dev&&initial.ino===after.ino,'installed root changed');return structuredClone(index.inventory);
 }
 module.exports={inspect,extract,verifyDirectory,captureStagingOwnership,assertStagingOwnership,cleanupStaging,INVENTORY,DEFAULT_LIMITS,safePath};
