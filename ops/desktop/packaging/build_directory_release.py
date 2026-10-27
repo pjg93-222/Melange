@@ -260,11 +260,16 @@ class Build:
         for relative in [Path("signing") / app, Path("runtime") / app, Path("build") / app, Path("venv") / app]:
             self.remove(relative)
         self.space(descriptor["expandedBytes"] + GIB)
-        self.call(app + "-verify", ["node", packaging / "verify_directory_release.cjs", client, output, self.root, self.plan["version"]], cwd=client)
+        verifier = HERE / "verify_directory_release.cjs"
+        verifier_commit = git(HERE.parents[2], "rev-parse", "HEAD", missing=True)
+        verifier_dirty = git(HERE.parents[2], "status", "--porcelain", "--", "ops/desktop/packaging/verify_directory_release.cjs", missing=True)
+        verifier_identity = {"sha256": digest(verifier), "commit": verifier_commit.decode().strip() if verifier_commit else None, "dirty": bool(verifier_dirty)}
+        self.call(app + "-verify", ["node", verifier, client, output, self.root, self.plan["version"]], cwd=client)
+        require(digest(verifier) == verifier_identity["sha256"] and json.loads((output / "native-verification.json").read_text())["verifierImplementationSha256"] == verifier_identity["sha256"], "Verifier implementation changed during inspection")
         self.remove(Path("verify") / app)
         self.remove(Path("src") / app)
         receipt = {"schemaVersion": 1, "appId": app, "version": self.plan["version"], "sourceCommit": provenance["sourceCommit"], "toolingCommit": provenance["toolingCommit"], "package": descriptor,
-                   "controller": self.controller,
+                   "controller": self.controller, "verifier": verifier_identity,
                    "sourceInventorySha256": digest(output / "runtime-source-inventory.json"), "nativeVerificationSha256": digest(output / "native-verification.json"), "publisherProofSha256": digest(output / "publisher-proof.json"),
                    "publicationAllowed": False, "acceptanceNotRun": ["isolated-packaged-app-smoke", "automatic-update-smoke", "security-gate", "dependency-and-redistribution-review", "recipient-ThreatLocker-policy"], "completedAt": dt.datetime.now(dt.timezone.utc).isoformat()}
         json_write(output / "engineering-receipt.json", receipt)
