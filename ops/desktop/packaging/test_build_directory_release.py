@@ -36,7 +36,7 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
         self.temp.cleanup()
 
     def git(self, *args):
-        return subprocess.check_output(["git", "-C", str(self.repo), "-c", "core.hooksPath=" + str(self.root / "no-hooks"), "-c", "commit.gpgsign=false", *args], stderr=subprocess.DEVNULL).decode().strip()
+        return subprocess.check_output(["git", "-C", str(self.repo), "-c", "maintenance.auto=false", "-c", "gc.auto=0", "-c", "core.hooksPath=" + str(self.root / "no-hooks"), "-c", "commit.gpgsign=false", *args], stderr=subprocess.DEVNULL).decode().strip()
 
     def commit_files(self):
         self.git("add", ".")
@@ -225,6 +225,114 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
         tool.write_bytes(b"changed tool")
         with self.assertRaisesRegex(module.Refused, "tool changed"):
             module.packager_for_resume(self.root, self.root, self.commit)
+
+    def verification_fixture(self, name="retry", shared=False):
+        config = self.config()
+        if not shared:
+            (self.repo / "controller-fixture.txt").write_text(name)
+            config["tooling"] = {"path": str(self.repo), "commit": self.commit_files()}
+        prepared = module.plan(config)
+        scratch, artifacts = self.root / name, self.root / (name + "-outputs")
+        scratch.mkdir()
+        (scratch / "src").mkdir()
+        (scratch / "logs").mkdir()
+        (scratch / "verify/melange").mkdir(parents=True)
+        output = artifacts / "melange"
+        output.mkdir(parents=True)
+        module.json_write(scratch / "plan.json", prepared)
+        module.json_write(scratch / "owner.json", {"id": "f" * 32, "purpose": "local-directory-candidate"})
+        for label in ["tooling", "melange"]:
+            source = prepared["tooling"] if label == "tooling" else prepared["apps"]["melange"]["source"]
+            if shared and label == "melange":
+                rows = json.loads((scratch / "tooling-source-inventory.json").read_text())
+            else:
+                rows = module.export_commit(source, scratch / "src" / label)
+            module.json_write(scratch / (label + "-source-inventory.json"), rows)
+        provenance = {"sourceCommit": self.commit, "toolingCommit": prepared["tooling"]["commit"], "dirty": False,
+                      "sourceExportInventorySha256": module.digest(scratch / "melange-source-inventory.json"),
+                      "toolingExportInventorySha256": module.digest(scratch / "tooling-source-inventory.json")}
+        module.json_write(output / "source-provenance.json", provenance)
+        for value in ["build-signatures.json", "runtime-source-inventory.json", "publisher-proof.json"]:
+            module.json_write(output / value, {})
+        identity = {"source": "controller", "sha256": module.digest(module.HERE / "directory_zip.py"), "commit": self.commit, "dirty": False}
+        module.json_write(output / "packager-implementation.json", identity)
+        build = module.Build(prepared, scratch, artifacts, self.root / "python.exe")
+        package = output / "melange-1.0.20-win32-x64.zip"
+        descriptor = self.descriptor(package)
+        module.json_write(output / "package.json", descriptor)
+        unpacked = scratch / "signing/melange/dist/melange/win-unpacked"
+        command = subprocess.list2cmdline([str(x) for x in build.zip_command("melange", module.HERE, unpacked, package)])
+        (scratch / "logs/melange-zip.log").write_text(command + "\n" + json.dumps(descriptor, indent=2))
+        (scratch / "logs/melange-verify.log").write_bytes(b"preserved original verification failure\n")
+        return build, descriptor, provenance, identity
+
+    def test_verification_resume_supports_a_shared_tooling_source_export(self):
+        build, _, _, _ = self.verification_fixture(shared=True)
+        self.assertFalse((build.root / "src/melange").exists())
+        with patch.object(build, "call"), patch.object(build, "verify_package", return_value={"verified": True}):
+            self.assertEqual(build.resume_verification("melange"), {"verified": True})
+
+    def test_verification_resume_preserves_failed_log_and_only_checks_existing_proof(self):
+        build, descriptor, _provenance, _identity = self.verification_fixture()
+        original = (build.root / "logs/melange-verify.log").read_bytes()
+        with patch.object(build, "call") as call, patch.object(build, "verify_package", return_value={"verified": True}) as verify:
+            self.assertEqual(build.resume_verification("melange"), {"verified": True})
+        self.assertEqual(call.call_count, 1)
+        self.assertIn("-proof", call.call_args.args[0])
+        self.assertEqual(call.call_args.args[1][0:2], ["node", "-e"])
+        self.assertEqual(verify.call_args.args[1], descriptor)
+        continuation = verify.call_args.args[4]
+        self.assertTrue(continuation["retainedExtraction"])
+        self.assertEqual(continuation["previousVerifierLogSha256"], hashlib.sha256(original).hexdigest())
+        self.assertNotEqual(continuation["verificationLogLabel"], "melange-verify")
+        self.assertEqual((build.root / "logs/melange-verify.log").read_bytes(), original)
+
+    def test_verification_resume_rejects_changed_inputs_and_passed_evidence_before_calling_tools(self):
+        for case in ["source", "tooling", "zip", "plan", "native-verification.json", "engineering-receipt.json"]:
+            with self.subTest(case=case):
+                build, descriptor, _, _ = self.verification_fixture("retry-" + case.replace(".", "-"))
+                output = build.artifacts / "melange"
+                if case in ["source", "tooling"]:
+                    (build.root / "src" / ("melange" if case == "source" else "tooling") / "requirements.txt").write_bytes(b"changed source")
+                elif case == "zip":
+                    Path(descriptor["path"]).write_bytes(b"changed zip")
+                elif case == "plan":
+                    saved = json.loads((build.root / "plan.json").read_text())
+                    saved["tooling"]["commit"] = "a" * 40
+                    (build.root / "plan.json").write_text(json.dumps(saved))
+                else:
+                    module.json_write(output / case, {"passed": True})
+                with patch.object(build, "call") as call, patch.object(build, "verify_package") as verify:
+                    with self.assertRaises(module.Refused):
+                        build.resume_verification("melange")
+                    call.assert_not_called()
+                    verify.assert_not_called()
+
+    def test_verification_resume_proof_failure_never_reaches_directory_or_native_checks(self):
+        build, _, _, _ = self.verification_fixture()
+        with patch.object(build, "call", side_effect=module.Refused("publisher proof invalid")), patch.object(build, "verify_package") as verify:
+            with self.assertRaisesRegex(module.Refused, "publisher proof"):
+                build.resume_verification("melange")
+            verify.assert_not_called()
+
+    def test_verification_continuation_requests_full_recheck_and_writes_fresh_provenance(self):
+        build, descriptor, provenance, identity = self.verification_fixture()
+        build.owner, build.root_identity = "f" * 32, build.root.stat().st_ino
+        continuation = {"retainedExtraction": True, "verificationLogLabel": "melange-unique-retry"}
+        def checked(label, command, **_kwargs):
+            self.assertEqual(label, "melange-unique-retry")
+            self.assertEqual(command[-1], "--reuse-extraction")
+            self.assertTrue((build.root / "verify/melange").is_dir())
+            module.json_write(build.artifacts / "melange/native-verification.json", {"verifierImplementationSha256": module.digest(module.HERE / "verify_directory_release.cjs")})
+        with patch.object(build, "space") as space, patch.object(build, "call", side_effect=checked):
+            receipt = build.verify_package("melange", descriptor, provenance, identity, continuation)
+        space.assert_called_once_with(0)
+        self.assertEqual(receipt["verificationContinuation"], continuation)
+        self.assertFalse(receipt["publicationAllowed"])
+        self.assertFalse((build.root / "verify/melange").exists())
+        self.assertTrue((build.artifacts / "melange/engineering-receipt.json").is_file())
+        with self.assertRaisesRegex(module.Refused, "already exists"):
+            build.verify_package("melange", descriptor, provenance, identity, continuation)
 
     def test_terrier_constraint_matches_reviewed_pypi_certifi_wheel(self):
         text = Path(__file__).with_name("terrier-runtime.constraints.txt").read_text()

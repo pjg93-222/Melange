@@ -304,12 +304,21 @@ class Build:
         self.call(app + "-proof-check", ["node", "-e", check, client, output])
         for relative in [Path("signing") / app, Path("runtime") / app, Path("build") / app, Path("venv") / app]:
             self.remove(relative)
-        self.space(descriptor["expandedBytes"] + GIB)
+        return self.verify_package(app, descriptor, provenance, packager_identity)
+
+    def verify_package(self, app, descriptor, provenance, packager_identity, continuation=None):
+        output = self.artifacts / app
+        client = self.root / "src/tooling/ops/desktop/client"
+        require(not any((output / name).exists() for name in ["native-verification.json", "engineering-receipt.json"]), "Completed verification evidence already exists")
+        self.space(0 if continuation else descriptor["expandedBytes"] + GIB)
         verifier = HERE / "verify_directory_release.cjs"
         verifier_commit = git(HERE.parents[2], "rev-parse", "HEAD", missing=True)
         verifier_dirty = git(HERE.parents[2], "status", "--porcelain", "--", "ops/desktop/packaging/verify_directory_release.cjs", missing=True)
         verifier_identity = {"sha256": digest(verifier), "commit": verifier_commit.decode().strip() if verifier_commit else None, "dirty": bool(verifier_dirty)}
-        self.call(app + "-verify", ["node", verifier, client, output, self.root, self.plan["version"]], cwd=client)
+        command = ["node", verifier, client, output, self.root, self.plan["version"]]
+        if continuation:
+            command.append("--reuse-extraction")
+        self.call(continuation["verificationLogLabel"] if continuation else app + "-verify", command, cwd=client)
         require(digest(verifier) == verifier_identity["sha256"] and json.loads((output / "native-verification.json").read_text())["verifierImplementationSha256"] == verifier_identity["sha256"], "Verifier implementation changed during inspection")
         self.remove(Path("verify") / app)
         self.remove(Path("src") / app)
@@ -317,8 +326,50 @@ class Build:
                    "controller": self.controller, "verifier": verifier_identity, "packager": packager_identity,
                    "sourceInventorySha256": digest(output / "runtime-source-inventory.json"), "nativeVerificationSha256": digest(output / "native-verification.json"), "publisherProofSha256": digest(output / "publisher-proof.json"),
                    "publicationAllowed": False, "acceptanceNotRun": ["isolated-packaged-app-smoke", "automatic-update-smoke", "security-gate", "dependency-and-redistribution-review", "recipient-ThreatLocker-policy"], "completedAt": dt.datetime.now(dt.timezone.utc).isoformat()}
+        if continuation:
+            receipt["verificationContinuation"] = continuation
         json_write(output / "engineering-receipt.json", receipt)
         return receipt
+
+    def resume_verification(self, app):
+        require(os.name == "nt" and app in self.plan["apps"], "Invalid verification continuation target")
+        physical(self.root)
+        saved = json.loads((self.root / "plan.json").read_text())
+        require(frozen_plan_identity(saved) == frozen_plan_identity(self.plan), "Frozen verification source plan changed")
+        owner = json.loads((self.root / "owner.json").read_text())
+        require(owner.get("purpose") == "local-directory-candidate" and re.fullmatch(r"[0-9a-f]{32}", owner.get("id", "")), "Build ownership missing")
+        self.owner, self.root_identity = owner["id"], self.root.stat().st_ino
+        output, tools = physical(self.artifacts / app), physical(self.root / "src/tooling")
+        require(not any((output / name).exists() for name in ["native-verification.json", "engineering-receipt.json"]), "Completed verification evidence already exists")
+        provenance = json.loads((output / "source-provenance.json").read_text())
+        require(provenance["sourceCommit"] == saved["apps"][app]["source"]["commit"] and provenance["toolingCommit"] == saved["tooling"]["commit"] and provenance["dirty"] is False, "Packaged source provenance changed")
+        app_source = saved["apps"][app]["source"]
+        shares_tools = app_source["repository"] == saved["tooling"]["repository"] and app_source["commit"] == saved["tooling"]["commit"]
+        source_directory = tools if shares_tools else self.root / "src" / app
+        for directory, record, expected in [(tools, self.root / "tooling-source-inventory.json", provenance["toolingExportInventorySha256"]),
+                                            (source_directory, self.root / (app + "-source-inventory.json"), provenance["sourceExportInventorySha256"])]:
+            physical(directory)
+            require(digest(record) == expected, "Saved export inventory changed")
+            for row in json.loads(record.read_text()):
+                file = physical(directory / row["path"])
+                require(file.is_relative_to(directory) and file.is_file() and file.stat().st_nlink == 1 and file.stat().st_size == row["size"] and digest(file) == row["sha256"], "Frozen source export changed")
+        for name in ["build-signatures.json", "runtime-source-inventory.json", "publisher-proof.json"]:
+            require(physical(output / name).is_file(), "Complete verification inputs missing")
+        package = output / f"{app}-{saved['version']}-win32-x64.zip"
+        packager, identity = packager_for_resume(output, tools / "ops/desktop/packaging", saved["tooling"]["commit"])
+        unpacked = self.root / "signing" / app / "dist" / app / "win-unpacked"
+        command = subprocess.list2cmdline(self.zip_command(app, packager, unpacked, package, native_tool=identity.get("nativeTool", {}).get("path")))
+        descriptor = package_log_descriptor((self.root / "logs" / (app + "-zip.log")).read_text(), app, saved["version"], package, command)
+        require(json.loads((output / "package.json").read_text()) == descriptor, "Saved package descriptor changed")
+        validate_packaged_bytes(descriptor, package)
+        require(physical(self.root / "verify" / app).is_dir(), "Retained extraction is missing")
+        prior_log = physical(self.root / "logs" / (app + "-verify.log"))
+        retry = app + "-verification-retry-" + uuid.uuid4().hex
+        continuation = {"retainedExtraction": True, "previousVerifierLogSha256": digest(prior_log),
+                        "proofCheckLogLabel": retry + "-proof", "verificationLogLabel": retry}
+        check = "const fs=require('fs'),path=require('path'),[client,out]=process.argv.slice(1),p=JSON.parse(fs.readFileSync(path.join(out,'package.json'))),proof=JSON.parse(fs.readFileSync(path.join(out,'publisher-proof.json')));require(path.join(client,'directory-package-proof.cjs')).verifyDirectoryPackageProof({...p,issuedAt:new Date().toISOString(),publisherThumbprints:['" + PIN + "'],package:{...p,publisherProof:proof}});"
+        self.call(continuation["proofCheckLogLabel"], ["node", "-e", check, tools / "ops/desktop/client", output])
+        return self.verify_package(app, descriptor, provenance, identity, continuation)
 
     def resume_packaged(self, app):
         require(os.name == "nt" and app in self.plan["apps"], "Invalid local resume target")
@@ -438,11 +489,14 @@ def main():
     parser.add_argument("--seven-zip", type=Path, help="Reviewed native 7za executable; otherwise use the unique Electron Builder cached copy")
     parser.add_argument("--build", action="store_true", help="Perform the local build; default only validates frozen inputs")
     parser.add_argument("--resume-packaged", choices=APPS, help="Finish one candidate interrupted immediately after complete ZIP output; no program rebuild")
+    parser.add_argument("--resume-verification", choices=APPS, help="Retry failed final verification using retained extraction and existing signed ZIP; no build or signing")
     args = parser.parse_args()
     require(args.free_floor_gib >= 32, "Free-space floor must be at least 32 GiB")
     prepared = plan(json.loads(args.spec.read_text(encoding="utf-8")))
-    if args.resume_packaged:
-        require(not args.build, "Choose build or packaged continuation")
+    require(sum(bool(value) for value in [args.build, args.resume_packaged, args.resume_verification]) <= 1, "Choose one build or continuation mode")
+    if args.resume_verification:
+        print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib, args.seven_zip).resume_verification(args.resume_verification), indent=2))
+    elif args.resume_packaged:
         print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib, args.seven_zip).resume_packaged(args.resume_packaged), indent=2))
     elif args.build:
         print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib, args.seven_zip).run(), indent=2))
