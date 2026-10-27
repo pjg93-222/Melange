@@ -85,12 +85,12 @@ def test_public_peer_and_host_checks_are_explicit_and_ignore_forwarded_headers(t
         accepted.assert_called_once()
 
 
-def test_access_preflight_never_rate_limits_by_peer(tmp_path):
+def test_access_preflight_uses_only_the_total_bucket_for_every_peer(tmp_path):
     store = Store(tmp_path, public_origin='https://updates.example.com')
     request = object.__new__(handler_for(store))
     request.path = '/v1/access/status'
     calls = []
-    with patch.object(RateLimit, 'check', lambda _self, address: calls.append(address)), \
+    with patch.object(RateLimit, 'check', lambda _self, address, per_peer=True: calls.append((address, per_peer))), \
             patch.object(Path, 'is_file', return_value=True):
         for peer, public_origin, host in (('127.0.0.1', store.public_origin, 'updates.example.com'),
                                           ('203.0.113.10', store.public_origin, 'updates.example.com'),
@@ -100,7 +100,8 @@ def test_access_preflight_never_rate_limits_by_peer(tmp_path):
             request.headers = Message()
             request.headers['Host'] = host
             request.access_preflight()
-    assert calls == []  # relay, direct public and LAN peers alike: no per-address or network-keyed bucket
+    # Relay, direct public and LAN peers alike: the shared 600/min total bucket, no per-address bucket.
+    assert calls == [('127.0.0.1', False), ('203.0.113.10', False), ('127.0.0.1', False)]
 
 
 def test_public_origin_serve_accepts_loopback_bind_and_refuses_wildcard(tmp_path, monkeypatch):

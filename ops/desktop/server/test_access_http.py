@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 import unittest
+from email.message import Message
 from unittest.mock import patch
 import uuid
 import zipfile
@@ -234,6 +235,36 @@ class AccessHTTPTests(unittest.TestCase):
         self.assertEqual(caught.exception.status, 429)
         clock[0] = 61
         limiter.check('192.168.1.1')
+
+    def test_access_bucket_is_total_only_and_still_binds_at_600_per_minute(self):
+        clock = [0]
+        limiter = RateLimit(clock=lambda: clock[0])
+        for n in range(600):  # one relay address and 250 distinct LAN peers alike: no per-peer or peer-table refusal
+            limiter.check('127.0.0.1' if n < 350 else f'192.168.{n // 200}.{n % 200}', per_peer=False)
+        with self.assertRaises(HTTPRefused) as caught: limiter.check('192.168.9.9', per_peer=False)
+        self.assertEqual((caught.exception.status, caught.exception.code), (429, 'rate_limited'))
+        self.assertEqual(list(limiter.entries), ['*'])  # no per-address table is kept
+        clock[0] = 61
+        limiter.check('127.0.0.1', per_peer=False)
+        admin = RateLimit(clock=lambda: 0)
+        for _ in range(60): admin.check('192.168.1.1')
+        with self.assertRaises(HTTPRefused): admin.check('192.168.1.1')  # the admin dashboard keeps 60/min per peer
+
+    def test_access_routes_share_one_total_bucket_and_data_routes_do_not_spend_it(self):
+        clock = [0]
+        with patch('access_http.RateLimit', lambda: RateLimit(clock=lambda: clock[0])):
+            request = object.__new__(handler_for(self.publisher, False, self.packs))
+        request.client_address, request.server = ('127.0.0.1', 1), self.server
+        def preflight(path):
+            request.path, request.headers = path, Message()
+            request.headers['Host'] = f'127.0.0.1:{self.server.server_port}'
+            request.access_preflight()
+        for _ in range(600): preflight('/v1/access/status')
+        for _ in range(5): preflight('/v1/data/catalog?after=0&limit=1')
+        with self.assertRaises(HTTPRefused) as caught: preflight('/v1/access/requests')
+        self.assertEqual((caught.exception.status, caught.exception.code), (429, 'rate_limited'))
+        clock[0] = 61
+        preflight('/v1/access/requests')
 
     def test_access_routes_have_no_per_address_rate_limit(self):
         for _ in range(65):  # Formerly 60/min per peer.
