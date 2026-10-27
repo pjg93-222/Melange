@@ -1,4 +1,6 @@
 import importlib.util
+import base64
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -109,6 +111,52 @@ class FrozenDirectoryBuildTests(unittest.TestCase):
         fresh = {"runtime": None, "runtimeBaselineBytes": module.GIB, "source": {"exportBytes": 10_000}}
         self.assertGreaterEqual(module.peak_reserve(reused), 3 * reused["runtime"]["inputBytes"] + 2 * module.GIB)
         self.assertGreaterEqual(module.peak_reserve(fresh), 4 * module.runtime_budget(fresh) + 2 * module.GIB)
+
+    def test_packager_descriptor_is_independent_of_command_log_position(self):
+        package = self.root / "melange-1.0.20-win32-x64.zip"
+        value = self.descriptor(package)
+        payload = json.dumps(value, indent=2)
+        for text in ["python directory_zip.py\n" + payload + "\n", payload + "\npython directory_zip.py\n"]:
+            self.assertEqual(module.package_log_descriptor(text, "melange", "1.0.20", package, "python directory_zip.py"), value)
+        with self.assertRaises(module.Refused):
+            module.package_log_descriptor("no output\n", "melange", "1.0.20", package, "python directory_zip.py")
+        for text in [payload + "\n{}\n", "unreviewed-command\n" + payload, "python directory_zip.py\n" + payload + "\n{}"]:
+            with self.assertRaises(module.Refused):
+                module.package_log_descriptor(text, "melange", "1.0.20", package, "python directory_zip.py")
+        for change in [{"appId": "terrier"}, {"version": "1.0.21"}, {"sha256": "wrong"}, {"size": True}, {"path": str(self.root / "other.zip")}, {"extra": 1}]:
+            with self.assertRaises(module.Refused):
+                module.package_log_descriptor("python directory_zip.py\n" + json.dumps({**value, **change}, indent=2), "melange", "1.0.20", package, "python directory_zip.py")
+
+    def descriptor(self, package):
+        contents = b"zip fixture"
+        package.write_bytes(contents)
+        value = {"path": str(package), "appId": "melange", "version": "1.0.20", "platform": "win32", "arch": "x64", "format": "windows-directory-zip-v1", "entrypoint": "Melange.exe", "name": package.name, "size": len(contents), "sha256": hashlib.sha256(contents).hexdigest(), "sha512": base64.b64encode(hashlib.sha512(contents).digest()).decode(), "fileCount": 3, "expandedBytes": 30, "excludedInstallerFiles": [], "publisherProofPayloadPath": str(package.parent / "publisher-payload.json")}
+        names = ("appId", "version", "platform", "arch", "format", "entrypoint", "name", "size", "sha256", "sha512")
+        (package.parent / "publisher-payload.json").write_bytes(b"MELANGE-DESKTOP-DIRECTORY-ZIP-V1\n" + json.dumps({key: value[key] for key in names}, separators=(",", ":")).encode())
+        return value
+
+    def test_resume_bytes_and_canonical_signing_payload_are_bound_before_signing(self):
+        package = self.root / "melange-1.0.20-win32-x64.zip"
+        value = self.descriptor(package)
+        module.validate_packaged_bytes(value, package)
+        package.write_bytes(b"bad fixture")
+        with self.assertRaisesRegex(module.Refused, "hash changed"):
+            module.validate_packaged_bytes(value, package)
+        value = self.descriptor(package)
+        (package.parent / "publisher-payload.json").write_bytes(b"changed")
+        with self.assertRaisesRegex(module.Refused, "payload changed"):
+            module.validate_packaged_bytes(value, package)
+
+    def test_frozen_resume_identity_requires_every_source_and_tooling_commit(self):
+        prepared = module.plan(self.config())
+        same = json.loads(json.dumps(prepared))
+        same["tooling"]["checkoutDirty"] = not same["tooling"]["checkoutDirty"]
+        self.assertEqual(module.frozen_plan_identity(prepared), module.frozen_plan_identity(same))
+        for target in [same["tooling"], same["apps"]["melange"]["source"]]:
+            before = target["commit"]
+            target["commit"] = "a" * 40
+            self.assertNotEqual(module.frozen_plan_identity(prepared), module.frozen_plan_identity(same))
+            target["commit"] = before
 
     def test_terrier_constraint_matches_reviewed_pypi_certifi_wheel(self):
         text = Path(__file__).with_name("terrier-runtime.constraints.txt").read_text()

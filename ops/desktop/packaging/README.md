@@ -18,6 +18,12 @@ Use Python 3.12 on the target OS/architecture. Install the application's origina
 
 `npm run build` makes NSIS installers on Windows, and DMG/ZIP artifacts on macOS. Build Mac packages on a native Mac, including their native geospatial and scientific libraries. The CI workflow is an inert template until reviewed and installed into the private release repository.
 
+For signed Windows applications that run from an extracted folder, use the
+[directory ZIP build and migration workflow](../DIRECTORY_DISTRIBUTION.md).
+Directory installations require future signed ZIP manifests; an NSIS-only release
+from `release_from_main.py` does not update them. The existing native build default
+remains available for clients that have not migrated.
+
 No user database, credentials or source dataset should be supplied as a runtime resource. Each installed app asks for its independently prepared, reviewed data directory. Terrier migrates only its installation-owned accounts database. Source staging rejects the Pocket template that contains a historical data snapshot rather than silently shipping it.
 
 `runtime-status.json` lists missing native components. Full Mentat requires R plus its exact package library and any used Node/Chromium helpers; full Melange compute requires LibreOffice. Providing the Python backend alone is not a claim that these operations have passed. The native-runtime directory must contain approved redistributable builds for the target architecture. No successful release receipt is synthesized by this builder.

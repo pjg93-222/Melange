@@ -1,5 +1,13 @@
 # Public GitHub desktop updates
 
+Windows directory installations have a separate signed ZIP manifest channel.
+Build and package them with the [directory distribution workflow](DIRECTORY_DISTRIBUTION.md),
+then prepare their release with the publisher's `windows-directory-zip-v1` package
+format and publisher proof after its release gates pass. Every future directory
+update needs these ZIP assets and manifests. The legacy `release_from_main.py`
+NSIS-only output cannot update a migrated directory installation; it remains the
+default for existing installer clients until they migrate.
+
 The Electron apps can use public GitHub Releases. Each app has its own public
 repository (Paul's correction, 2026-10-15): Melange `pjg93-222/Melange`, Mentat
 `pjg93-222/Mentat`, Terrier `pjg93-222/Geo`. The combined `melange-platform`

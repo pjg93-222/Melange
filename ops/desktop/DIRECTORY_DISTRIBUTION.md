@@ -84,7 +84,14 @@ python ops/desktop/packaging/build_directory_release.py `
 
 The default command validates inputs. Add `--build` to build locally. Use a fresh
 short scratch root, at most 70 characters, outside the output directory. Failed
-runs retain their logs; a retry uses a new scratch/output root. The command keeps
+runs retain their logs; a retry generally uses a new scratch/output root. If a
+controller failed immediately after successfully producing the ZIP, use
+`--resume-packaged melange` (or the relevant app) with its original root/spec.
+This limited continuation binds saved source inventories, ZIP hashes and signing
+payload before creating proof and rerunning independent final verification. It
+does not rebuild the app. Queued apps can then use a new scratch root with the
+same frozen source/tooling commits. Controller commit/hash evidence is recorded
+separately from program source provenance. The command keeps
 at least 32 GiB free, builds apps sequentially, and removes only its owned scratch
 directories after preserving the package and evidence.
 

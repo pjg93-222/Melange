@@ -5,6 +5,7 @@ security and redistribution acceptance remain separate release gates.
 """
 from __future__ import annotations
 import argparse
+import base64
 import datetime as dt
 import hashlib
 import json
@@ -19,6 +20,7 @@ import tarfile
 import uuid
 
 HERE = Path(__file__).resolve().parent
+CONTROLLER_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 APPS = {"melange": "Melange", "mentat": "Mentat", "terrier": "Geo"}
 PIN = "0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30"
 SUBJECT = "CN=Melange Systems Desktop Release (self-signed)"
@@ -75,6 +77,46 @@ def json_write(path, value):
     with Path(path).open("x", encoding="utf-8") as stream:
         json.dump(value, stream, indent=2)
         stream.write("\n")
+
+
+def package_log_descriptor(text, app, version, package, command):
+    start = text.find("{\n")
+    require(start >= 0, "Packager wrote no JSON descriptor")
+    value, end = json.JSONDecoder().raw_decode(text[start:])
+    prefix, suffix = text[:start].strip(), text[start + end:].strip()
+    require((prefix, suffix) in [(command, ""), ("", command)], "Unexpected data around package descriptor")
+    keys = {"path", "appId", "version", "platform", "arch", "format", "entrypoint", "name", "size", "sha256", "sha512", "fileCount", "expandedBytes", "excludedInstallerFiles", "publisherProofPayloadPath"}
+    require(isinstance(value, dict) and set(value) == keys and value["format"] == "windows-directory-zip-v1", "Invalid packager descriptor")
+    require(value["appId"] == app and value["version"] == version and value["platform"] == "win32" and value["arch"] == "x64" and value["entrypoint"] == app.title() + ".exe", "Package identity mismatch")
+    require(Path(value["path"]) == package and value["name"] == f"{app}-{version}-win32-x64.zip" and Path(value["publisherProofPayloadPath"]) == package.parent / "publisher-payload.json", "Package output path mismatch")
+    require(all(type(value[name]) is int and 0 < value[name] <= maximum for name, maximum in [("size", 4 * GIB), ("expandedBytes", 8 * GIB), ("fileCount", 100_000)]), "Invalid package sizes")
+    require(isinstance(value["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", value["sha256"]), "Invalid package SHA-256")
+    try:
+        raw = base64.b64decode(value["sha512"], validate=True)
+    except (ValueError, TypeError) as error:
+        raise Refused("Invalid package SHA-512") from error
+    require(len(raw) == 64 and base64.b64encode(raw).decode() == value["sha512"], "Invalid package SHA-512")
+    require(isinstance(value["excludedInstallerFiles"], list) and all(isinstance(name, str) for name in value["excludedInstallerFiles"]), "Invalid excluded-file record")
+    return value
+
+
+def validate_packaged_bytes(descriptor, package):
+    physical(package)
+    require(package.stat().st_size == descriptor["size"], "Packaged ZIP size changed")
+    sha256, sha512 = hashlib.sha256(), hashlib.sha512()
+    with package.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            sha256.update(chunk)
+            sha512.update(chunk)
+    require(sha256.hexdigest() == descriptor["sha256"] and base64.b64encode(sha512.digest()).decode() == descriptor["sha512"], "Packaged ZIP hash changed")
+    names = ("appId", "version", "platform", "arch", "format", "entrypoint", "name", "size", "sha256", "sha512")
+    expected = b"MELANGE-DESKTOP-DIRECTORY-ZIP-V1\n" + json.dumps({key: descriptor[key] for key in names}, separators=(",", ":")).encode()
+    require((package.parent / "publisher-payload.json").read_bytes() == expected, "Canonical publisher payload changed")
+
+
+def frozen_plan_identity(value):
+    return (value["version"], value["tooling"]["repository"], value["tooling"]["commit"],
+            sorted((app, config["source"]["repository"], config["source"]["commit"]) for app, config in value["apps"].items()))
 
 
 def git(repo, *args, missing=False):
@@ -175,6 +217,9 @@ class Build:
         self.plan, self.root, self.artifacts, self.python = prepared, Path(root).absolute(), Path(artifacts).absolute(), Path(python).absolute()
         self.floor = free_floor_gib * GIB
         self.environment = {key: value for key, value in os.environ.items() if not key.upper().startswith(("DESKTOP_", "CSC_", "WIN_CSC_")) and key.upper() not in {"PSMODULEPATH", "NODE_OPTIONS", "PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "ELECTRON_RUN_AS_NODE", "ELECTRON_BUILDER_NSIS_DIR", "ELECTRON_BUILDER_NSIS_RESOURCES_DIR"}}
+        controller_commit = git(HERE.parents[2], "rev-parse", "HEAD", missing=True)
+        controller_dirty = git(HERE.parents[2], "status", "--porcelain", "--", "ops/desktop/packaging/build_directory_release.py", missing=True)
+        self.controller = {"sha256": CONTROLLER_SHA256, "commit": controller_commit.decode().strip() if controller_commit else None, "dirty": bool(controller_dirty)}
 
     def space(self, additional=0):
         require(shutil.disk_usage(self.root).free >= self.floor + additional, "Build would cross configured free-space floor")
@@ -186,6 +231,7 @@ class Build:
         command[0] = shutil.which(command[0]) or command[0]
         with (self.root / "logs" / (label + ".log")).open("xb") as output:
             output.write((subprocess.list2cmdline(command) + "\n").encode())
+            output.flush()
             result = subprocess.run(command, cwd=cwd, env=env or self.environment, stdout=output, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
         require(result.returncode == 0, label + " failed; see logs/" + label + ".log")
         self.space()
@@ -198,6 +244,54 @@ class Build:
             require(self.root.stat().st_ino == self.root_identity, "Build directory identity changed")
             require(json.loads((self.root / "owner.json").read_text())["id"] == self.owner, "Build ownership changed")
             shutil.rmtree(target)
+
+    def zip_command(self, app, packaging, unpacked, package):
+        return [str(value) for value in [self.python, "-B", packaging / "directory_zip.py", "--app", app, "--version", self.plan["version"], "--source", unpacked, "--output", package, "--publisher-payload", package.parent / "publisher-payload.json"]]
+
+    def finish_package(self, app, descriptor, provenance):
+        output = self.artifacts / app
+        tools = self.root / "src/tooling"
+        client, packaging = tools / "ops/desktop/client", tools / "ops/desktop/packaging"
+        validate_packaged_bytes(descriptor, Path(descriptor["path"]))
+        json_write(output / "package.json", descriptor)
+        self.call(app + "-publisher-proof", [POWERSHELL, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", packaging / "sign_directory_package.ps1", "-PayloadFile", output / "publisher-payload.json", "-OutputFile", output / "publisher-proof.json"])
+        check = "const fs=require('fs'),path=require('path'),[client,out]=process.argv.slice(1),p=JSON.parse(fs.readFileSync(path.join(out,'package.json'))),proof=JSON.parse(fs.readFileSync(path.join(out,'publisher-proof.json')));require(path.join(client,'directory-package-proof.cjs')).verifyDirectoryPackageProof({...p,issuedAt:new Date().toISOString(),publisherThumbprints:['" + PIN + "'],package:{...p,publisherProof:proof}});"
+        self.call(app + "-proof-check", ["node", "-e", check, client, output])
+        for relative in [Path("signing") / app, Path("runtime") / app, Path("build") / app, Path("venv") / app]:
+            self.remove(relative)
+        self.space(descriptor["expandedBytes"] + GIB)
+        self.call(app + "-verify", ["node", packaging / "verify_directory_release.cjs", client, output, self.root, self.plan["version"]], cwd=client)
+        self.remove(Path("verify") / app)
+        self.remove(Path("src") / app)
+        receipt = {"schemaVersion": 1, "appId": app, "version": self.plan["version"], "sourceCommit": provenance["sourceCommit"], "toolingCommit": provenance["toolingCommit"], "package": descriptor,
+                   "controller": self.controller,
+                   "sourceInventorySha256": digest(output / "runtime-source-inventory.json"), "nativeVerificationSha256": digest(output / "native-verification.json"), "publisherProofSha256": digest(output / "publisher-proof.json"),
+                   "publicationAllowed": False, "acceptanceNotRun": ["isolated-packaged-app-smoke", "automatic-update-smoke", "security-gate", "dependency-and-redistribution-review", "recipient-ThreatLocker-policy"], "completedAt": dt.datetime.now(dt.timezone.utc).isoformat()}
+        json_write(output / "engineering-receipt.json", receipt)
+        return receipt
+
+    def resume_packaged(self, app):
+        require(os.name == "nt" and app in self.plan["apps"], "Invalid local resume target")
+        physical(self.root)
+        saved = json.loads((self.root / "plan.json").read_text())
+        require(frozen_plan_identity(saved) == frozen_plan_identity(self.plan), "Frozen resume source plan changed")
+        owner = json.loads((self.root / "owner.json").read_text())
+        require(owner.get("purpose") == "local-directory-candidate" and re.fullmatch(r"[0-9a-f]{32}", owner.get("id", "")), "Build ownership missing")
+        self.owner, self.root_identity = owner["id"], self.root.stat().st_ino
+        output, tools = physical(self.artifacts / app), physical(self.root / "src/tooling")
+        require(not any((output / name).exists() for name in ["package.json", "publisher-proof.json", "native-verification.json", "engineering-receipt.json"]), "Resume is limited to interruption immediately after ZIP packaging")
+        for row in json.loads((self.root / "tooling-source-inventory.json").read_text()):
+            file = physical(tools / row["path"])
+            require(file.is_relative_to(tools) and digest(file) == row["sha256"], "Frozen tooling export changed")
+        provenance = json.loads((output / "source-provenance.json").read_text())
+        require(provenance["sourceCommit"] == saved["apps"][app]["source"]["commit"] and provenance["toolingCommit"] == saved["tooling"]["commit"] and provenance["dirty"] is False, "Packaged source provenance changed")
+        require(digest(self.root / "tooling-source-inventory.json") == provenance["toolingExportInventorySha256"] and digest(self.root / (app + "-source-inventory.json")) == provenance["sourceExportInventorySha256"], "Saved export inventory changed")
+        require((output / "build-signatures.json").is_file() and (output / "runtime-source-inventory.json").is_file(), "Complete build evidence missing")
+        package = output / f"{app}-{saved['version']}-win32-x64.zip"
+        unpacked = self.root / "signing" / app / "dist" / app / "win-unpacked"
+        command = subprocess.list2cmdline(self.zip_command(app, tools / "ops/desktop/packaging", unpacked, package))
+        descriptor = package_log_descriptor((self.root / "logs" / (app + "-zip.log")).read_text(), app, saved["version"], package, command)
+        return self.finish_package(app, descriptor, provenance)
 
     def run(self):
         require(os.name == "nt" and not os.environ.get("CI") and not os.environ.get("GITHUB_ACTIONS"), "Local Windows build required")
@@ -273,24 +367,11 @@ class Build:
             shutil.copy2(unpacked.with_name(unpacked.name + ".signatures.json"), output / "build-signatures.json")
             # Run the frozen packager, never the caller's potentially dirty file.
             package = output / (app + "-" + self.plan["version"] + "-win32-x64.zip")
-            self.call(app + "-zip", [self.python, "-B", packaging / "directory_zip.py", "--app", app, "--version", self.plan["version"], "--source", unpacked, "--output", package, "--publisher-payload", output / "publisher-payload.json"], reserve=tree_bytes(unpacked) + GIB // 4)
+            command = self.zip_command(app, packaging, unpacked, package)
+            self.call(app + "-zip", command, reserve=tree_bytes(unpacked) + GIB // 4)
             text = (self.root / "logs" / (app + "-zip.log")).read_text(encoding="utf-8")
-            descriptor = json.loads(text[text.index("{\n"):])
-            json_write(output / "package.json", descriptor)
-            self.call(app + "-publisher-proof", [POWERSHELL, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", packaging / "sign_directory_package.ps1", "-PayloadFile", output / "publisher-payload.json", "-OutputFile", output / "publisher-proof.json"])
-            self.remove(Path("signing") / app)
-            self.remove(Path("runtime") / app)
-            self.remove(Path("build") / app)
-            self.remove(Path("venv") / app)
-            self.space(descriptor["expandedBytes"] + GIB)
-            self.call(app + "-verify", ["node", packaging / "verify_directory_release.cjs", client, output, self.root, self.plan["version"]], cwd=client)
-            self.remove(Path("verify") / app)
-            self.remove(Path("src") / app)
-            receipt = {"schemaVersion": 1, "appId": app, "version": self.plan["version"], "sourceCommit": provenance["sourceCommit"], "toolingCommit": provenance["toolingCommit"], "package": descriptor,
-                       "sourceInventorySha256": digest(output / "runtime-source-inventory.json"), "nativeVerificationSha256": digest(output / "native-verification.json"), "publisherProofSha256": digest(output / "publisher-proof.json"),
-                       "publicationAllowed": False, "acceptanceNotRun": ["isolated-packaged-app-smoke", "automatic-update-smoke", "security-gate", "dependency-and-redistribution-review", "recipient-ThreatLocker-policy"], "completedAt": dt.datetime.now(dt.timezone.utc).isoformat()}
-            json_write(output / "engineering-receipt.json", receipt)
-            completed[app] = receipt
+            descriptor = package_log_descriptor(text, app, self.plan["version"], package, subprocess.list2cmdline(command))
+            completed[app] = self.finish_package(app, descriptor, provenance)
         json_write(self.root / "completed.json", completed)
         return completed
 
@@ -303,10 +384,14 @@ def main():
     parser.add_argument("--python312", type=Path, required=True)
     parser.add_argument("--free-floor-gib", type=int, default=32)
     parser.add_argument("--build", action="store_true", help="Perform the local build; default only validates frozen inputs")
+    parser.add_argument("--resume-packaged", choices=APPS, help="Finish one candidate interrupted immediately after complete ZIP output; no program rebuild")
     args = parser.parse_args()
     require(args.free_floor_gib >= 32, "Free-space floor must be at least 32 GiB")
     prepared = plan(json.loads(args.spec.read_text(encoding="utf-8")))
-    if args.build:
+    if args.resume_packaged:
+        require(not args.build, "Choose build or packaged continuation")
+        print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib).resume_packaged(args.resume_packaged), indent=2))
+    elif args.build:
         print(json.dumps(Build(prepared, args.root, args.artifacts, args.python312, args.free_floor_gib).run(), indent=2))
     else:
         print(json.dumps(prepared, indent=2))
