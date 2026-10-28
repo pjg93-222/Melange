@@ -28,7 +28,8 @@ test('main.cjs routes every launch entry point through the install guard, and de
   // The notice window is closed synchronously before anything is awaited or quit.
   assert.match(main,/if\(installed\)\{closing=true;launchInstall\.closeWindow\(\);await runtime\.stop\(\)/);
   assert.match(main,/updater\.close\(\);launchInstall\.closeWindow\(\);app\.quit\(\)/,'error handler quit path');
-  assert.match(main,/app\.on\('before-quit',event=>\{launchInstall\.closeWindow\(\);if\(!closing&&!launchInstall\.installing/,'any other quit path');
+  const beforeQuit=main.split('\n').find(line=>line.startsWith("app.on('before-quit'"));
+  assert.match(beforeQuit,/launchInstall\.closeWindow\(\);if\(!closing&&!launchInstall\.installing/,'close the startup notice before allowing a quit; deferred shutdown is covered by shutdown.test.cjs');
 });
 
 test('shutdown handlers are attached before the launch install block',()=>{

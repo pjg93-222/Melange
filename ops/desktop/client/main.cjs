@@ -161,7 +161,13 @@ async function launchAuthorized(fromAccess){
     await loadingStatus('Preparing reviewed public data. Larger sources can take several minutes.');
     if(closing||generation!==accessLifecycle.generation)return;
    }
-   const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+   const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();
+   if(configuration.standaloneGitHubData){
+    const openedRuntime=runtime;
+    ownerDistrictController()?.retire(configuration,{canRetire:()=>!closing&&!districtSwitch?.busy&&!accessLifecycle.suspended&&runtime===openedRuntime&&runtime.child&&runtime.configuration?.district===configuration.district&&runtime.configuration?.standaloneGitHubData?.schemaVersion===configuration.standaloneGitHubData.schemaVersion&&runtime.configuration?.standaloneGitHubData?.catalogueSha256===configuration.standaloneGitHubData.catalogueSha256})
+     .catch(()=>districtLog('Previous public district cache retirement was deferred.'));
+   }
+  }
  catch(error){await failStartup(error);}
  finally{openingAccess=false;}
 }
@@ -288,7 +294,24 @@ async function confirmClose(){
     if(response===1){if(await runtime.activity()===true){updateStatus('Close deferred: a calculation is running.');return;}closeApproved=true;window.close();}
   }finally{askingClose=false;}
 }
-async function finishClose(){if(closing)return;closing=true;downloads.abort();clearInterval(interval);clearInterval(presenceInterval);clearInterval(districtDataInterval);networkWatcher?.close();await moduleDataStartup?.shutdown();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
+async function finishClose(){
+ if(closing||finishClose.inProgress)return false;
+ closing=true;finishClose.inProgress=true;finishClose.deferred=false;finishClose.stopped=false;
+ try{
+  downloads.abort();clearInterval(interval);clearInterval(presenceInterval);clearInterval(districtDataInterval);networkWatcher?.close();
+  await moduleDataStartup?.shutdown();
+  if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();
+  finishClose.stopped=true;
+  const activating=portable?false:await updater?.activateAfterClose();
+  if(!activating){updater?.close();app.quit();}
+  return true;
+ }catch{
+  closing=false;closeApproved=false;finishClose.deferred=true;
+  try{updateStatus('Closing is delayed. Open the app again or choose Quit to retry stopping its local processes.');updateGitHubStatus('Update deferred: waiting for the local app to finish closing.');}catch{}
+  if(!updater?.osShutdown)try{dialog.showErrorBox(definition.name+' could not finish closing','Automatic installation is paused. Open the app again or choose Quit to retry closing it. Your local data has been retained.');}catch{}
+  return false;
+ }finally{finishClose.inProgress=false;}
+}
 function createModuleDataStartup(){
  if(!['melange','mentat'].includes(definition.id))return null;
  const {ModuleDataStartup,compiledApplicationContract}=require('./module-data-startup.cjs');
@@ -325,7 +348,7 @@ async function openPublicData(){
  if(runtime!==current||current.origin!==origin||accessLifecycle.generation!==generation||closing)return;
  await window.loadURL(origin+target);
 }
-app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
+app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(finishClose.deferred){finishClose().catch(()=>{});return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
@@ -485,6 +508,6 @@ app.whenReady().then(async()=>{
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();
 });
 app.on('window-all-closed',finishClose);
-app.on('before-quit',event=>{launchInstall.closeWindow();if(!closing&&!launchInstall.installing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
+app.on('before-quit',event=>{if(finishClose.deferred||(finishClose.inProgress&&!finishClose.stopped)){event.preventDefault();if(finishClose.deferred)finishClose().catch(()=>{});return;}launchInstall.closeWindow();if(!closing&&!launchInstall.installing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
 }
 }
