@@ -268,6 +268,15 @@ class AccessHTTPTests(unittest.TestCase):
         clock[0] = 61
         preflight('/v1/access/requests')
 
+    def test_exhausted_access_bucket_answers_429_with_retry_after_60_over_https(self):
+        def full():
+            limiter = RateLimit(clock=lambda: 0)
+            limiter.entries['*'] = [0] * 600  # the total bucket is already spent for this minute
+            return limiter
+        with patch('access_http.RateLimit', full):
+            self.serve(require_invite=False)
+        self.assertEqual(self.post_request(self.request_value()), (429, {'error': 'rate_limited'}, '60'))
+
     def test_access_routes_have_no_per_address_rate_limit(self):
         for _ in range(65):  # Formerly 60/min per peer.
             self.assertEqual(self.call('GET', '/v1/access/status')[0], 403)
