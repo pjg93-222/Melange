@@ -172,6 +172,59 @@ class BuildTest(unittest.TestCase):
         self.assertTrue(set(pending) <= set(m["excluded"]))
         self.assertFalse(set(pending) & {f["path"] for f in m["files"]})
 
+    def test_section_copies_with_any_extension_are_denied(self):
+        copies = ["data/engine/staffer_organisations_section.json.gz", "b/staffer_clients_section.json.zst",
+                  "b/staffer_organisations_section.json.bak", "b/staffer_clients_section"]
+        self._write({rel: rel.encode() for rel in copies} | {"data/engine/staffer_offices_section.json": b"{}"})
+        m = self._build_all()
+        self.assertTrue(set(copies) <= set(m["excluded"]))
+        self.assertIn("data/engine/staffer_offices_section.json", {f["path"] for f in m["files"]})
+
+    def test_gzipped_copy_of_restricted_content_is_refused(self):
+        known, local = b'{"organisations": [1]}', b"lobbyist rows\n" * 50
+        self._write({
+            "catalog/orgs.json.gz": gzip.compress(known),
+            "__state__/M/normalized/lda-source-native/g/rows.ndjson": local,
+            "z/copy.bin.gz": gzip.compress(local, mtime=0),
+            "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 50),
+            "z/corrupt.ndjson.gz": gzip.compress(b"x" * 999)[:10] + b"\xff" * 40,
+        })
+        with mock.patch.dict(data_release.RESTRICTED_SHA256, {hashlib.sha256(known).hexdigest(): len(known)}):
+            m = self._build_all()
+        self.assertTrue({"catalog/orgs.json.gz", "z/copy.bin.gz", "z/corrupt.ndjson.gz"} <= set(m["excluded"]))
+        self.assertIn("z/fine.ndjson.gz", {f["path"] for f in m["files"]})
+
+    def test_recompressed_or_inflated_copy_of_restricted_gz_is_refused(self):
+        rows = b"lobbyist assertion rows\n" * 80
+        self._write({
+            "__state__/M/normalized/lda-source-native/g/rows.ndjson.gz": gzip.compress(rows, 9, mtime=0),
+            "z/recompressed.bin.gz": gzip.compress(rows, 1, mtime=7),
+            "z/inflated.ndjson": rows,
+            "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 80, 1, mtime=7),
+        })
+        m = self._build_all()
+        self.assertTrue({"z/recompressed.bin.gz", "z/inflated.ndjson"} <= set(m["excluded"]))
+        self.assertIn("z/fine.ndjson.gz", {f["path"] for f in m["files"]})
+
+    def test_gz_bomb_is_bounded(self):
+        with mock.patch.object(data_release, "GZ_LIMIT", 1 << 20):
+            self._write({"bomb.html.gz": gzip.compress(b" " * (3 << 20)), "ok.html.gz": gzip.compress(b"<p>")})
+            m = self._build_all()
+        self.assertIn("bomb.html.gz", m["excluded"])
+        self.assertIn("ok.html.gz", {f["path"] for f in m["files"]})
+
+    def test_utf16_pages_inlining_odata_are_refused(self):
+        self._write({
+            "a.html": "<script>const ODATA={}</script>".encode("utf-16"),
+            "b.html": "const  CDATA = {}".encode("utf-16-be"),
+            "c.js": "const odata={}".encode("utf-16-le"),
+            "d.html.gz": gzip.compress("const ODATA={}".encode("utf-16")),
+            "e.html": "<script>const SDATA={}</script>".encode("utf-16"),
+        })
+        m = self._build_all()
+        self.assertTrue({"a.html", "b.html", "c.js", "d.html.gz"} <= set(m["excluded"]))
+        self.assertIn("e.html", {f["path"] for f in m["files"]})
+
     def test_single_file_map_cannot_rename_a_credential_in(self):
         m = data_release.build("melange", None, self.out, "data-melange-2026-10-21", ["**/*"], data_release.DENY,
                                data_release.DEFAULT_PART_BYTES, [("catalog/one.json", self.root / "keys" / "x.json"),

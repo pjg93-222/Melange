@@ -56,7 +56,8 @@ DENY = [
 # of any of these under another name is refused by content hash, and any page carrying the ODATA/CDATA
 # islands is refused by content (see select()).
 RESTRICTED = [
-    "**/lda-source-native/**", "**/staffer_organisations_section.json", "**/staffer_clients_section.json",
+    # Trailing * takes .gz/.zst/.bak copies; staffer_offices_section.json is public and stays shippable.
+    "**/lda-source-native/**", "**/staffer_organisations_section*", "**/staffer_clients_section*",
     "**/staffer-network.html",
     # Derived LDA stores: pending Paul ruling on LDA restriction scope (X2 Q1).
     # Trailing * also takes the -wal/-shm/-journal sidecars, which hold database pages.
@@ -85,8 +86,13 @@ RESTRICTED_SHA256 = {
     "f085bc383b7a77df591c46315b62be56551f2fe33af0c69f4db88efde5631b0b": 3939693,
 }
 # The staffer panel's organisations/clients islands (make_staffer_network_html.py, make_combined.py).
-INLINE_RESTRICTED = re.compile(rb"const\s+[oc]data\s*=", re.I)
+# UTF-8/ASCII, plus the UTF-16LE and UTF-16BE (BOM or not) encodings of the same marker, matched on raw bytes.
+INLINE_RESTRICTED = re.compile(
+    rb"const\s+[oc]data\s*="
+    rb"|c\x00o\x00n\x00s\x00t\x00(?:\s\x00)+[oc]\x00d\x00a\x00t\x00a\x00(?:\s\x00)*=\x00"
+    rb"|\x00c\x00o\x00n\x00s\x00t(?:\x00\s)+\x00[oc]\x00d\x00a\x00t\x00a(?:\x00\s)*\x00=", re.I)
 PAGE_SUFFIXES = (".html", ".htm", ".js", ".mjs", ".cjs")
+GZ_LIMIT = 2 * 1024**3  # decompressed bytes read from one .gz page; past this it is excluded (bomb cap)
 
 
 def _match(rel: str, patterns: list[str]) -> bool:
@@ -160,33 +166,73 @@ def select(sources, allow: list[str], deny: list[str]):
         else:
             kept.append((rel, p))
     # Content checks, so a rename cannot carry restricted data out: hash only where sizes collide.
+    # A kept .gz is checked by its decompressed content too, so restricted digests are needed whenever one exists.
     sizes = {p.stat().st_size for _, p in kept}
+    any_gz = any(p.name.lower().endswith(".gz") for _, p in kept)
     digests = dict(RESTRICTED_SHA256)
     for p in restricted:
-        if p.stat().st_size in sizes:
+        if p.stat().st_size and (any_gz or p.stat().st_size in sizes):
             digests[sha256_file(p)] = p.stat().st_size
+        # A restricted .gz is also known by its content, so a recompressed or inflated copy is caught.
+        # ponytail: inflates the whole restricted corpus each build (seconds per GB).
+        if p.name.lower().endswith(".gz"):
+            try:
+                got = _gz_sha256(p, float("inf"))
+            except (OSError, EOFError, zlib.error):
+                got = None
+            if got and got[1]:
+                digests[got[0]] = got[1]
     deny_sizes = set(digests.values()) - {0}
     clean = []
     for rel, p in kept:
         size = p.stat().st_size
-        if (size in deny_sizes and sha256_file(p) in digests) or _inlines_restricted(p):
+        if ((size in deny_sizes and sha256_file(p) in digests) or _gz_restricted(p, digests, max(deny_sizes))
+                or _inlines_restricted(p)):
             excluded.append((rel, size))
         else:
             clean.append((rel, p))
     return clean, sorted(excluded)
 
 
+def _gz_sha256(p: Path, cap) -> tuple[str, int] | None:
+    """(sha256, size) of a .gz's decompressed content, streamed; None once it inflates past ``cap``."""
+    h, n = hashlib.sha256(), 0
+    with gzip.open(p, "rb") as fh:
+        while chunk := fh.read(1 << 20):
+            n += len(chunk)
+            if n > cap:
+                return None
+            h.update(chunk)
+    return h.hexdigest(), n
+
+
+def _gz_restricted(p: Path, digests: dict, cap: int) -> bool:
+    """A .gz whose decompressed content has a restricted digest. Stopped past ``cap`` (the largest restricted
+    size, so nothing bigger can match: the bomb cap). Unreadable gzip fails closed."""
+    if not p.name.lower().endswith(".gz"):
+        return False
+    try:
+        got = _gz_sha256(p, cap)
+    except (OSError, EOFError, zlib.error):
+        return True
+    return got is not None and got[0] in digests
+
+
 def _inlines_restricted(p: Path) -> bool:
-    """A page or script (or its .gz) carrying the staffer ODATA/CDATA islands. Unreadable gzip fails closed."""
+    """A page or script (or its .gz) carrying the staffer ODATA/CDATA islands. Unreadable gzip, or a .gz page
+    that inflates past GZ_LIMIT, fails closed."""
     name = p.name.lower()
     if not name.removesuffix(".gz").endswith(PAGE_SUFFIXES):
         return False
     # Streamed, so a ~100 MB page or a .gz bomb never sits in memory. ponytail: a marker whose whitespace run
     # straddles a 1 MiB chunk boundary by more than 4 KiB is missed; the generators emit "const ODATA=".
-    tail = b""
+    tail, n = b"", 0
     try:
         with (gzip.open(p, "rb") if name.endswith(".gz") else p.open("rb")) as fh:
             while chunk := fh.read(1 << 20):
+                n += len(chunk)
+                if name.endswith(".gz") and n > GZ_LIMIT:
+                    return True
                 buf = tail + chunk
                 if INLINE_RESTRICTED.search(buf):
                     return True
