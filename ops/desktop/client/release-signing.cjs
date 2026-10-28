@@ -41,8 +41,7 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
   }
  };
  checkIdentity();
- // Process-scoped bypass for this one child (as 1.0.16 was signed); no host execution policy is read or changed.
- const args=['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
+ const args=['-NoProfile','-NonInteractive','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
  const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
  checkIdentity();
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
