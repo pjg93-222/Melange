@@ -26,10 +26,31 @@ function refuseModuleDataSettings(configuration){
   // Settings cannot turn their source descriptor into a native launch capability.
   if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
 }
+const childExited=child=>Boolean(child&&(child.exitCode!=null||child.signalCode!=null));
+function waitForChildExit(child,timeout){
+  if(childExited(child))return Promise.resolve(true);
+  return new Promise(resolve=>{
+    let timer;const done=()=>{clearTimeout(timer);child.removeListener('exit',done);resolve(childExited(child));};
+    child.once('exit',done);timer=setTimeout(done,timeout);if(childExited(child))done();
+  });
+}
+function requestWindowsStop(child){
+  return new Promise(resolve=>{
+    let killer,timer,finished=false;
+    const done=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
+    const fallback=()=>{try{child.kill();}catch{}done();};
+    try{killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});}catch{fallback();return;}
+    killer.once('error',fallback);killer.once('exit',done);
+    timer=setTimeout(()=>{try{killer.kill('SIGKILL');}catch{}done();},5000);
+    if(childExited(killer))done();
+  });
+}
 class Runtime {
   constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,authentication='password',confine=null,logRoot=null}={}){this.allowStandalone=allowStandalone===true;if(!['windows','password'].includes(authentication)||(authentication==='windows'&&!this.allowStandalone))throw new Error('Unsupported runtime authentication mode');this.authentication=authentication;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
     initializeModuleRuntime(this,()=>{const command=backendCommand(this.resources,this.definition.id);return {source:path.join(command.runtime,'sources'),bootstrap:path.join(command.runtime,'bootstrap')};});}
   async start(configuration,capability){
+    if(this.stopPromise||(this.stoppingChild&&!childExited(this.stoppingChild)))throw new Error('Application shutdown is still pending.');
+    if(this.stoppingChild){if(this.child===this.stoppingChild)this.child=null;this.stoppingChild=null;}
     refuseModuleDataSettings(configuration);
     configuration=structuredClone(configuration);
     const moduleInput=capability===undefined?null:consumeModuleCapability(this,capability,configuration);
@@ -89,7 +110,7 @@ class Runtime {
     let child;
     try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput?'pipe':'ignore',log,log]});}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.renderer=null;this.scrape=null;throw error;}finally{fs.closeSync(log);}
     this.child=child;
-    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}if(scrape&&this.scrape===scrape){this.scrape=null;Promise.resolve(scrape.close()).catch(()=>{});}});
+    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer&&this.renderer===renderer){this.renderer=null;Promise.resolve(renderer.close()).catch(()=>{});}if(scrape&&this.scrape===scrape){this.scrape=null;Promise.resolve(scrape.close()).catch(()=>{});}});
     try{
       if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
       const deadline=Date.now()+(moduleInput?moduleInput.startupTimeoutMs:120000);
@@ -104,11 +125,30 @@ class Runtime {
   }
   originalConfiguration(){return this.configuration===null?null:structuredClone(this.configuration);}
   async verifyModuleHealth(binding){const active=activeModule(this),child=this.child,generation=this.generation||0,origin=this.origin,token=this.token;if(!active||active.child!==child)return false;const value=await health(origin,token,this.definition.id);return this.child===child&&(this.generation||0)===generation&&this.origin===origin&&this.token===token&&activeModule(this)===active&&matchesModuleHealth(this,value,binding);}
-  async stop(){this.generation=(this.generation||0)+1;const child=this.child,renderer=this.renderer,scrape=this.scrape;clearActiveModule(this);this.child=null;this.renderer=null;this.scrape=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});if(!child)return;
-    if(process.platform==='win32') await new Promise(resolve=>{const killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});killer.once('error',()=>{child.kill();resolve();});killer.once('exit',resolve);});
-    else {try{process.kill(-child.pid,'SIGTERM');}catch{}}
-    if(child.exitCode===null)await Promise.race([new Promise(r=>child.once('exit',r)),new Promise(r=>setTimeout(r,5000))]);
-    if(child.exitCode===null){if(process.platform==='win32')child.kill('SIGKILL');else try{process.kill(-child.pid,'SIGKILL');}catch{}}
+  stop(){
+    this.requestsAllowed=false;
+    if(this.stopPromise)return this.stopPromise;
+    this.generation=(this.generation||0)+1;
+    const child=this.stoppingChild||this.child,renderer=this.renderer,scrape=this.scrape;
+    this.stoppingChild=child;clearActiveModule(this);
+    this.renderer=null;this.scrape=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+    const operation=(async()=>{
+      if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});
+      if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});
+      if(child&&!childExited(child)){
+        if(process.platform==='win32')await requestWindowsStop(child);
+        else try{process.kill(-child.pid,'SIGTERM');}catch{}
+        if(!await waitForChildExit(child,5000)){
+          try{if(process.platform==='win32')child.kill('SIGKILL');else process.kill(-child.pid,'SIGKILL');}catch{}
+          // A signal request is not proof of exit: callers may retire its data only after this resolves.
+          if(!await waitForChildExit(child,5000))throw Object.assign(new Error('Backend shutdown did not complete. Its data must be retained.'),{code:'BACKEND_STOP_TIMEOUT'});
+        }
+      }
+      if(this.child===child)this.child=null;
+      if(this.stoppingChild===child)this.stoppingChild=null;
+    })();
+    const pending=operation.finally(()=>{if(this.stopPromise===pending)this.stopPromise=null;});
+    this.stopPromise=pending;return pending;
   }
   activity(){return activity(this.origin,this.token,this.definition.id);}
 }
