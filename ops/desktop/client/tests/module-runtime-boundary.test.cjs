@@ -29,7 +29,7 @@ function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,re
  };
  vm.runInNewContext(fs.readFileSync(runtimeFile,'utf8'),{module,require:name=>Object.hasOwn(dependencies,name)?dependencies[name]:realRequire(name),structuredClone,process:{platform:'win32'},URL,setTimeout,clearTimeout},{filename:runtimeFile});
  runtime=new module.exports.Runtime(appId,data.profile,resources,{authorize:data.options.authorize,rendererFactory});
- const context={definition:{id:appId},userData:data.profile,runtime,resources,refuseModuleDataSettings:module.exports.refuseModuleDataSettings,applicationConfig:{desktopAccessTrust:{updatePublicKeysByApp:{[appId]:data.remote.publicKeys}}},app:{getAppPath:()=>resources},path,process:{execPath:path.join(resources,'desktop.exe')},
+ const context={standaloneMode:false,definition:{id:appId},userData:data.profile,runtime,resources,refuseModuleDataSettings:module.exports.refuseModuleDataSettings,applicationConfig:{desktopAccessTrust:{updatePublicKeysByApp:{[appId]:data.remote.publicKeys}}},app:{getAppPath:()=>resources},path,process:{execPath:path.join(resources,'desktop.exe')},
   updateStatus:message=>{assert.equal(message,'Preparing reviewed public data. Larger sources can take several minutes.');calls.push('preparing');},read:()=>selected,ensureAccess:async()=>({authorize:data.options.authorize}),accessLifecycle:{generation:0,suspended:false},askingClose:false,closing:false,
   window:{isDestroyed:()=>false,webContents:{send:(_name,state)=>messages.push(state)}},powerSaveBlocker:{start:()=>1,stop(){}},
   require:name=>{

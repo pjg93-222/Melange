@@ -4,7 +4,8 @@ const {startupFixture}=require('./fixtures/module-startup-fixture.cjs');
 const mainFile=path.join(__dirname,'..','main.cjs'),source=fs.readFileSync(mainFile,'utf8');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function deferred(){let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};}
-function actual(startText,endText,context){const start=source.indexOf(startText),end=source.indexOf(endText,start);assert.ok(start>=0&&end>start);vm.runInNewContext(source.slice(start,end),context,{filename:mainFile});return context;}
+function actual(startText,endText,context){const start=source.indexOf(startText),end=source.indexOf(endText,start);assert.ok(start>=0&&end>start);if(!Object.hasOwn(context,'standaloneMode'))context.standaloneMode=false;vm.runInNewContext(source.slice(start,end),context,{filename:mainFile});return context;}
+function bounded(promise){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Fixture staging did not enter within five seconds')),5000);})]).finally(()=>clearTimeout(timer));}
 
 for(const appId of ['terrier','melange','mentat']){
  test(`actual ${appId} factory requires the exact installed program before activation`,async t=>{
@@ -40,18 +41,19 @@ test('actual native factory never reads a marker accessor before unsupported lau
 test('actual approved close drains held signed staging before stopping runtime or activating an update',async t=>{
  const f=startupFixture(t),entered=deferred(),release=deferred(),events=[],segment=f.data.transport.segment;
  f.runtime.child={existing:true};f.data.transport.segment=async(...args)=>{entered.resolve();await release.promise;return segment(...args);};
- const staging=f.startup.stage().catch(error=>error);await entered.promise;const stop=f.runtime.stop;f.runtime.stop=async()=>{events.push('stop');return stop.call(f.runtime);};
+ const staging=f.startup.stage().catch(error=>error);try{await bounded(entered.promise);const stop=f.runtime.stop;f.runtime.stop=async()=>{events.push('stop');return stop.call(f.runtime);};
  const context={closing:false,moduleDataStartup:f.startup,downloads:{abort:()=>events.push('abort')},clearInterval:()=>{},interval:null,presenceInterval:null,districtDataInterval:null,
   networkWatcher:{close:()=>events.push('network-close')},districtSwitch:null,runtime:f.runtime,portable:false,
   updater:{activateAfterClose:async()=>{events.push('activate');return false;},close:()=>events.push('updater-close')},app:{quit:()=>events.push('quit')}};
  actual('async function finishClose()','\nfunction createModuleDataStartup()',context);
  const closing=context.finishClose();await tick();assert.deepEqual(events,['abort','network-close']);assert.ok(f.runtime.child);
  release.resolve();assert.equal((await staging).code,'cancelled');await closing;assert.deepEqual(events,['abort','network-close','stop','activate','updater-close','quit']);
+ }finally{release.resolve();await staging;}
 });
 
 test('actual access lifecycle callback cancels staging synchronously and awaits drain while retaining an open user backend',async t=>{
  const f=startupFixture(t),entered=deferred(),release=deferred(),segment=f.data.transport.segment,existing={userWork:true};f.runtime.child=existing;f.runtime.definition={id:'mentat'};
- f.data.transport.segment=async(...args)=>{entered.resolve();await release.promise;return segment(...args);};const staging=f.startup.stage().catch(error=>error);await entered.promise;
+ f.data.transport.segment=async(...args)=>{entered.resolve();await release.promise;return segment(...args);};const staging=f.startup.stage().catch(error=>error);try{await bounded(entered.promise);
  const gate={local:{lock(){}},client:{presence:async()=>{}}};const context={accessTransition:{mutating:false,begin:()=>()=>{}},accessGate:null,accessInitializing:null,activityOutbox:null,accessLifecycle:null,
   resources:'synthetic-resources',userData:'synthetic-profile',definition:{id:'mentat'},applicationConfig:{},app:{isPackaged:false,getVersion:()=> '1.0.0'},read:()=>({}),runtime:f.runtime,moduleDataStartup:f.startup,
   window:{hide(){}},showAccess:async()=>{},districtSwitch:null,runtimePartition:null,
@@ -64,6 +66,7 @@ test('actual access lifecycle callback cancels staging synchronously and awaits 
  let drained=false;const locking=context.accessLifecycle.suspend('locked').then(()=>{drained=true;});assert.equal(f.runtime.requestsAllowed,false);assert.equal(context.accessLifecycle.generation,1);
  await tick();assert.equal(drained,false);assert.equal(f.runtime.child,existing);release.resolve();assert.equal((await staging).code,'cancelled');await locking;
  assert.equal(f.runtime.child,existing);assert.equal(f.events.includes('stop'),false);assert.equal(f.data.journal.active,null);
+ }finally{release.resolve();await staging;}
 });
 
 test('actual close confirmation retains calculation and user cancellation guards before teardown',async()=>{
