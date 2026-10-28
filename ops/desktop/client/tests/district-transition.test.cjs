@@ -112,6 +112,11 @@ test('failed navigation never retires the prior district cache',async()=>{
  const f=fixture();f.controller.retainInactive=()=>false;f.controller.retire=async()=>assert.fail('must preserve cache');f.controller.navigate=async()=>{throw new Error('navigation failed');};
  await assert.rejects(f.controller.switch('or-05'),/navigation failed/);assert.equal(f.initial.stops,0);assert.equal(f.configuration.district,'co-05');
 });
+test('an unseeded initial backend is stopped before any public cache retirement',async()=>{
+ const f=fixture();f.controller.pool.clear();f.controller.retainInactive=()=>false;
+ f.controller.retire=async()=>assert.equal(f.initial.child,null);
+ await f.controller.switch('or-05');assert.equal(f.initial.stops,1);assert.equal(f.controller.pool.size,1);
+});
 test('failed inactive shutdown defers retirement and keeps the committed district usable',async()=>{
  const f=fixture();f.controller.retainInactive=()=>false;f.initial.stop=async()=>{throw new Error('busy');};f.controller.retire=async()=>assert.fail('backend still holds data');
  assert.equal(await f.controller.switch('or-05'),true);assert.equal(f.configuration.district,'or-05');assert.equal(f.current.stops,0);assert.equal(f.controller.pool.has('co-05'),true);assert.equal(f.events.at(-1).phase,'cache-retirement-deferred');
