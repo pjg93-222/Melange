@@ -11,6 +11,9 @@ const {checkedNativeCacheRoot}=require('./module-data-binding.cjs');
 const {fail,requireValue,authorized,hash,integer,TAG,COMMIT}=protocol;
 const RECORD=['catalogSequence','pointerDigest','manifestSha256','releaseTag','releaseCommit','identityDigest'];
 const OFFLINE=new Set(['unreachable','timeout','rate_limited']);
+// Large public tables are streamed sequentially. Bounded 4 MiB reads avoid
+// thousands of Windows I/O round trips while retaining every integrity check.
+const READ_BYTES=4*1024*1024;
 const stagingOwners=new WeakMap();
 function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module data operation cancelled');}
 function inside(root,target,equal=false){const rel=path.relative(root,target);return (equal||rel!=='')&&rel!=='..'&&!rel.startsWith('..'+path.sep)&&!path.isAbsolute(rel);}
@@ -27,7 +30,7 @@ async function fileDigest(file,{signal,identity}={}){
  const before=await fsp.lstat(file,{bigint:true});requireValue(before.isFile()&&!before.isSymbolicLink()&&before.nlink===1n&&before.size<=BigInt(protocol.MAX_TOTAL),'Unsafe module cache file');
  if(identity)requireValue(sameFile(before,identity),'Module file changed during verification');
  const h=crypto.createHash('sha256');let bytes=0;
- for await(const chunk of fs.createReadStream(file)){canceled(signal);bytes+=chunk.length;requireValue(BigInt(bytes)<=before.size,'Module file grew during verification');h.update(chunk);}
+ for await(const chunk of fs.createReadStream(file,{highWaterMark:READ_BYTES})){canceled(signal);bytes+=chunk.length;requireValue(BigInt(bytes)<=before.size,'Module file grew during verification');h.update(chunk);}
  const after=await fsp.lstat(file,{bigint:true});
  requireValue(after.isFile()&&!after.isSymbolicLink()&&after.nlink===1n&&sameFile(before,after)&&BigInt(bytes)===before.size,'Module file changed during verification');
  return {bytes,sha256:h.digest('hex')};
@@ -284,7 +287,7 @@ class GitHubModules{
   let before;try{before=await fsp.lstat(source,{bigint:true});}catch(error){if(error.code==='ENOENT')return false;throw error;}
   requireValue(before.isFile()&&!before.isSymbolicLink()&&before.nlink===1n,'Unsafe legacy module candidate');if(before.size!==BigInt(object.bytes))return false;
   const h=crypto.createHash('sha256');let handle,bytes=0,receipt;
-  try{handle=await fsp.open(destination,'wx');const initial=await this.openedCacheHandle(handle,destination,0);for await(const chunk of fs.createReadStream(source)){canceled(signal);bytes+=chunk.length;if(bytes>object.bytes)break;h.update(chunk);await handle.writeFile(chunk);}await handle.sync();
+  try{handle=await fsp.open(destination,'wx');const initial=await this.openedCacheHandle(handle,destination,0);for await(const chunk of fs.createReadStream(source,{highWaterMark:READ_BYTES})){canceled(signal);bytes+=chunk.length;if(bytes>object.bytes)break;h.update(chunk);await handle.writeFile(chunk);}await handle.sync();
    const stamp=await this.openedCacheHandle(handle,destination,bytes);requireValue(sameIdentity(initial,stamp),'Legacy module writer identity changed');receipt={stamp,bytes,sha256:h.digest('hex')};
   }finally{await handle?.close();}
   const after=await fsp.lstat(source,{bigint:true}),stable=after.isFile()&&!after.isSymbolicLink()&&sameFile(before,after);
@@ -324,7 +327,7 @@ class GitHubModules{
       const initial=await this.openedCacheHandle(handle,destination,0);
       for(const segment of object.segments){
        const file=await this.segment(checked.value.releaseTag,segment,{signal,onProgress:n=>this.status('downloading',checked.value,{onStatus,totalBytes:manifest.totalBytes,receivedBytes:Math.min(manifest.totalBytes,completed+bytes+n)})});
-       for await(const chunk of fs.createReadStream(file)){canceled(signal);bytes+=chunk.length;requireValue(bytes<=object.bytes,'Logical module role exceeds its bound');h.update(chunk);await handle.writeFile(chunk);}
+       for await(const chunk of fs.createReadStream(file,{highWaterMark:READ_BYTES})){canceled(signal);bytes+=chunk.length;requireValue(bytes<=object.bytes,'Logical module role exceeds its bound');h.update(chunk);await handle.writeFile(chunk);}
       }
       await handle.sync();const stamp=await this.openedCacheHandle(handle,destination,bytes);requireValue(sameIdentity(initial,stamp),'Staged module writer identity changed');receipt={stamp,bytes,sha256:h.digest('hex')};
      }finally{await handle?.close();}

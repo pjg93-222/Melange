@@ -62,7 +62,9 @@ class ReadView{
    requireValue(inside(this.root,await fsp.realpath(file)),'Module binding file leaves its cache');
    if(bytes!==undefined)requireValue(before.size===BigInt(bytes),'Module binding file size differs');
    const hash=crypto.createHash('sha256'),chunks=[];let received=0;
-   const buffer=Buffer.alloc(64*1024);
+   // Keep large-table reads bounded without paying a Windows I/O round trip
+   // for every 64 KiB; tiny metadata still allocates only its actual size.
+   const buffer=Buffer.alloc(Math.max(1,Math.min(4*1024*1024,Number(before.size))));
    while(true){
     canceled(this.signal);const result=await handle.read(buffer,0,buffer.length,null);if(result.bytesRead===0)break;
     received+=result.bytesRead;requireValue(BigInt(received)<=before.size,'Module binding file grew during verification');
