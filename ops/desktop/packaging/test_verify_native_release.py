@@ -224,14 +224,80 @@ class NativeFixture(unittest.TestCase):
                 n.extract(self.tool, self.installer, self.root / "under-reserve", 1, reserve=16 * n.GIB)
             self.assertFalse((self.root / "under-reserve").exists())
 
+    def test_nsis_reader_capability_is_required(self):
+        with mock.patch.object(n.legacy, "run", return_value=b"0  C  7z 7z\n"):
+            with self.assertRaisesRegex(n.Refused, "NSIS-capable"):
+                n.reader_capabilities(self.tool)
+        with mock.patch.object(n.legacy, "run", return_value=b"0 ...F.G... Nsis nsis offset=4\n"):
+            self.assertTrue(n.reader_capabilities(self.tool)["nsis"])
+
+    def test_unknown_sizes_are_only_allowed_for_exact_nsis_member_closure(self):
+        calls = []
+        listing = "\n\n".join("Path = " + name + "\nSize = \n" for name in n.NSIS_MEMBERS).encode()
+        def run(argv, **_kwargs):
+            calls.append(argv)
+            if "l" in argv:
+                return listing
+            destination = Path(next(arg[2:] for arg in argv if isinstance(arg, str) and arg.startswith("-o")))
+            for name in n.NSIS_MEMBERS:
+                file = destination / name
+                file.parent.mkdir(exist_ok=True)
+                file.write_bytes(b"x")
+            return b""
+        with mock.patch.object(n.legacy, "run", side_effect=run):
+            self.assertEqual(n.extract(self.tool, self.installer, self.root / "unknown-nsis", n.GIB, reserve=16 * n.GIB, archive_format="Nsis"), 9)
+            self.assertTrue(all("-tNsis" in command for command in calls))
+            with self.assertRaisesRegex(n.Refused, "Missing or invalid"):
+                n.extract(self.tool, self.installer, self.root / "unknown-inner", n.GIB, reserve=16 * n.GIB)
+            listing += b"\n\nPath = unexpected.exe\nSize = \n"
+            with self.assertRaisesRegex(n.Refused, "member set"):
+                n.extract(self.tool, self.installer, self.root / "unexpected", n.GIB, reserve=16 * n.GIB, archive_format="Nsis")
+
+    def test_unknown_nsis_sizes_still_reserve_space_before_extraction(self):
+        listing = "\n\n".join("Path = " + name + "\nSize = \n" for name in n.NSIS_MEMBERS).encode()
+        with mock.patch.object(n.legacy, "run", return_value=listing) as command, mock.patch.object(n.shutil, "disk_usage", return_value=SimpleNamespace(free=16 * n.GIB + 1)):
+            with self.assertRaisesRegex(n.Refused, "selected desktop workspace reserve"):
+                n.extract(self.tool, self.installer, self.root / "under-nsis-reserve", n.GIB, reserve=16 * n.GIB, archive_format="Nsis")
+            self.assertEqual(command.call_count, 1)
+            self.assertFalse((self.root / "under-nsis-reserve").exists())
+
+    @unittest.skipUnless(os.name == "nt" and os.environ.get("NATIVE_VERIFIER_TEST_7Z") and os.environ.get("NATIVE_VERIFIER_TEST_NSIS"), "Explicit real7z/NSIS fixture tools required")
+    def test_real_compiled_nsis_unknown_sizes_and_exact_inner7z_roundtrip(self):
+        seven = Path(os.environ["NATIVE_VERIFIER_TEST_7Z"])
+        compiler = Path(os.environ["NATIVE_VERIFIER_TEST_NSIS"])
+        self.assertTrue(n.reader_capabilities(seven)["nsis"])
+        member = self.root / "payload.txt"
+        member.write_bytes(b"real archive fixture; never execute installer")
+        inner = self.root / "inner.7z"
+        n.legacy.run([seven, "a", "-t7z", inner, member])
+        installer = self.root / "compiled-fixture.exe"
+        script = self.root / "fixture.nsi"
+        lines = ['Name "Native verifier fixture"', 'OutFile "' + str(installer) + '"', 'SetCompressor zlib', 'SetCompress force', 'Section', 'SetOutPath "$PLUGINSDIR"']
+        for name in sorted(n.NSIS_MEMBERS):
+            source = inner if name.endswith("/app-64.7z") else member
+            lines.append('File /oname=' + name.split("/")[-1] + ' "' + str(source) + '"')
+        script.write_text("\n".join([*lines, "SectionEnd", ""]), encoding="utf-8")
+        n.legacy.run([compiler, "-V2", "-WX", script])
+        listing = n.legacy.run([seven, "l", "-tNsis", "-slt", "-ba", installer]).decode()
+        self.assertRegex(listing, r"Size = \r?\n")
+        outer = self.root / "real-nsis"
+        with n.locked_input(installer):
+            used = n.extract(seven, installer, outer, n.GIB, reserve=16 * n.GIB, archive_format="Nsis")
+        self.assertGreater(used, 0)
+        self.assertEqual(set(n.legacy.tree(outer)), n.NSIS_MEMBERS)
+        extracted = self.root / "real-inner"
+        self.assertEqual(n.extract(seven, outer / "$PLUGINSDIR/app-64.7z", extracted, n.GIB, reserve=16 * n.GIB), member.stat().st_size)
+        self.assertEqual((extracted / "payload.txt").read_bytes(), member.read_bytes())
+
     @unittest.skipUnless(os.name == "nt", "Windows input sharing semantics")
     def test_full_verifier_rejects_bad_native_verdict_and_passes_complete_fixture(self):
         args = SimpleNamespace(app="melange", version="1.0.21", installer=str(self.installer), program_directory=str(self.program),
             client=str(self.client), staged_sources=str(self.staged), client_commit="1" * 40, source_commit="2" * 40,
             trust_descriptor=str(self.trust), signing_receipt=str(self.receipt_path), seven_zip=str(self.tool),
             source=None, output=str(self.root / "inspection"), free_floor_gib=16)
-        def extract(_seven, _archive, destination, _budget, *, reserve):
+        def extract(_seven, _archive, destination, _budget, *, reserve, archive_format="7z"):
             self.assertEqual(reserve, 16 * n.GIB)
+            self.assertEqual(archive_format, "Nsis" if destination.name == "nsis" else "7z")
             destination.mkdir()
             files = self.outer if destination.name == "nsis" else self.payload
             self.write_files(destination, files)
@@ -243,7 +309,7 @@ class NativeFixture(unittest.TestCase):
                 "thumbprint": "A" * 40 if key == "app/resources/vendor.dll" else n.legacy.PIN,
                 "signatureType": "Authenticode", "timestampSubject": "DigiCert fixture", "fileVersion": "1.0.21", "productVersion": "1.0.21"}
                 for key, file in items.items()}
-        with mock.patch.object(n, "extract", side_effect=extract), mock.patch.object(n.legacy, "signatures", side_effect=signatures):
+        with mock.patch.object(n, "reader_capabilities", return_value={"nsis": True}), mock.patch.object(n, "extract", side_effect=extract), mock.patch.object(n.legacy, "signatures", side_effect=signatures):
             with self.assertRaisesRegex(n.Refused, "not Valid"):
                 n.verify(args)
             self.assertTrue(Path(args.output).is_dir(), "failed inspection remains reviewable")

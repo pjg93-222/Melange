@@ -35,6 +35,7 @@ MAX_EXPANDED = 8 * 1024 ** 3
 NATIVE_PLUGINS = frozenset({"System.dll", "UAC.dll", "StdUtils.dll", "nsDialogs.dll",
                             "nsExec.dll", "nsis7z.dll", "WinShell.dll"})
 BUILD_INPUTS = ("builder.cjs", "nsis-no-uninstaller.cjs", "nsis-no-uninstaller-extract.nsh", "installer.nsh")
+NSIS_MEMBERS = frozenset("$PLUGINSDIR/" + name for name in (*NATIVE_PLUGINS, "modern-wizard.bmp", "app-64.7z"))
 
 
 def load_helper(name):
@@ -106,10 +107,17 @@ def scan(directory):
     return files, pes, {name: {"sha256": hashes[name], "size": file.stat().st_size} for name, file in files.items()}
 
 
-def extract(seven, archive, destination, budget, *, reserve=RESERVE):
+def reader_capabilities(seven):
+    info = legacy.run([seven, "i"]).decode("utf-8", "strict")
+    require(re.search(r"\bNsis\s+nsis\b", info, re.IGNORECASE), "A full NSIS-capable 7-Zip reader is required")
+    return {"nsis": True, "formatSelection": "explicit Nsis outer, 7z inner"}
+
+
+def extract(seven, archive, destination, budget, *, reserve=RESERVE, archive_format="7z"):
     physical(destination.parent, True)
-    listing = legacy.run([seven, "l", "-slt", "-ba", archive]).decode("utf-8", "strict").replace("\r\n", "\n")
-    names, aliases, total = set(), set(), 0
+    require(archive_format in ("Nsis", "7z"), "Unsupported inspection archive format")
+    listing = legacy.run([seven, "l", "-t" + archive_format, "-slt", "-ba", archive]).decode("utf-8", "strict").replace("\r\n", "\n")
+    names, aliases, sizes, total = set(), set(), {}, 0
     for block in listing.strip().split("\n\n"):
         row = dict(line.split(" = ", 1) for line in block.splitlines() if " = " in line)
         if "Path" not in row:
@@ -120,21 +128,36 @@ def extract(seven, archive, destination, budget, *, reserve=RESERVE):
         require(len(aliases) <= 200000, "Archive file count exceeds inspection bound")
         if row.get("Folder") == "+" or row.get("Attributes", "").startswith("D"):
             continue
-        size = int(row.get("Size", "0") or "0")
-        require(size >= 0, "Negative archive member size")
-        total += size
+        value = row.get("Size", "")
+        require(value.isdecimal() or archive_format == "Nsis" and value == "", "Missing or invalid archive member size")
+        size = int(value) if value else None
+        sizes[name] = size
+        total += size or 0
         names.add(name)
-    require(reserve >= 16 * GIB and total <= budget and shutil.disk_usage(destination.parent).free - total >= reserve,
+    # NSIS omits unpacked sizes for compressed plugin/resource members. Its
+    # reviewed nine-member closure and bounded reservation avoid interpreting
+    # unknown as zero; inner7z still requires every exact declared byte count.
+    if archive_format == "Nsis":
+        require(names == NSIS_MEMBERS, "NSIS member set differs from reviewed native template")
+        bound = min(budget, Path(archive).stat().st_size * 2 + 64 * 1024 ** 2)
+    else:
+        bound = total
+    require(reserve >= 16 * GIB and total <= bound <= budget and shutil.disk_usage(destination.parent).free - bound >= reserve,
             "Extraction would exceed its bound or selected desktop workspace reserve")
     destination.mkdir()
     owned = destination.stat()
-    legacy.run([seven, "x", archive, "-o" + str(destination), "-y"], timeout=1800)
+    legacy.run([seven, "x", "-t" + archive_format, archive, "-o" + str(destination), "-y"], timeout=1800)
     after = physical(destination, True)
     require((owned.st_dev, owned.st_ino) == (after.st_dev, after.st_ino), "Inspection root was replaced")
     files = legacy.tree(destination)
     require(set(files) == names, "Extracted paths differ from inspected archive listing")
-    require(sum(file.stat().st_size for file in files.values()) == total, "Extracted byte count differs from archive listing")
-    return total
+    actual = {name: file.stat().st_size for name, file in files.items()}
+    require(all(actual[name] == size for name, size in sizes.items() if size is not None), "Extracted byte count differs from archive listing")
+    require(archive_format != "Nsis" or all(size <= 8 * 1024 ** 2 for name, size in actual.items() if name != "$PLUGINSDIR/app-64.7z"),
+            "NSIS plugin/resource exceeds its inspection bound")
+    used = sum(actual.values())
+    require(used <= bound and shutil.disk_usage(destination.parent).free >= reserve, "Extracted bytes exceed bound or desktop workspace reserve")
+    return used
 
 
 def same_tree(actual, expected, label):
@@ -287,6 +310,14 @@ def verify(args):
     output, installer = Path(args.output).absolute(), Path(args.installer).absolute()
     program, client, staged = (Path(value).absolute() for value in (args.program_directory, args.client, args.staged_sources))
     seven = Path(args.seven_zip).resolve(strict=True)  # known tool cache may have a legitimate parent redirect
+    tool_inputs = [seven]
+    if seven.with_suffix(".dll").exists():
+        tool_inputs.append(seven.with_suffix(".dll"))
+    # Reject the limited7za reader before any large program scan or extraction.
+    with contextlib.ExitStack() as locks:
+        for file in tool_inputs:
+            locks.enter_context(locked_input(file))
+        reader = reader_capabilities(seven)
     trust, receipt_path = Path(args.trust_descriptor).absolute(), Path(args.signing_receipt).absolute()
     for folder in (program, client, staged, output.parent):
         physical(folder, True)
@@ -294,7 +325,7 @@ def verify(args):
         physical(Path(args.source), True)
     require(not output.exists(), "Inspection output must be fresh")
     output.mkdir()
-    paths = [installer, receipt_path, trust, seven, Path(__file__), HERE / "verify_signed_release.py", HERE / "no_uninstaller_contract.py"]
+    paths = [installer, receipt_path, trust, *tool_inputs, Path(__file__), HERE / "verify_signed_release.py", HERE / "no_uninstaller_contract.py"]
     inputs = {str(file): snapshot(file) for file in paths}
     reference_files, reference_pes, reference = scan(program)
     report = {"schemaVersion": 1, "status": "failed", "appId": args.app, "version": args.version,
@@ -303,13 +334,16 @@ def verify(args):
               "frozenExportBinding": "exports and gated stage supplied by the release controller; actual packaged bytes compared independently",
               "installerSha256": inputs[str(installer)][-1], "inputs": {name: row[-1] for name, row in inputs.items()},
               "freeFloorGiB": args.free_floor_gib,
+              "archiveReader": reader,
               "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
-    with locked_input(installer), locked_input(seven):
+    with locked_input(installer), contextlib.ExitStack() as locks:
+        for file in tool_inputs:
+            locks.enter_context(locked_input(file))
         preflight = output / "preflight"
         preflight.mkdir()
         legacy.required_owner(legacy.signatures({"installer": installer}, preflight, preserve_execution_policy=True)["installer"])
         outer, extracted = output / "nsis", output / "app"
-        used = extract(seven, installer, outer, MAX_EXPANDED, reserve=reserve)
+        used = extract(seven, installer, outer, MAX_EXPANDED, reserve=reserve, archive_format="Nsis")
         archives = list(outer.rglob("app-64.7z"))
         require(len(archives) == 1, "Exactly one native x64 application payload required")
         used += extract(seven, archives[0], extracted, MAX_EXPANDED - used, reserve=reserve)
