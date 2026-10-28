@@ -55,7 +55,7 @@ test('actual access lifecycle callback cancels staging synchronously and awaits 
  const f=startupFixture(t),entered=deferred(),release=deferred(),segment=f.data.transport.segment,existing={userWork:true};f.runtime.child=existing;f.runtime.definition={id:'mentat'};
  f.data.transport.segment=async(...args)=>{entered.resolve();await release.promise;return segment(...args);};const staging=f.startup.stage().catch(error=>error);try{await bounded(entered.promise);
  const gate={local:{lock(){}},client:{presence:async()=>{}}};const context={accessTransition:{mutating:false,begin:()=>()=>{}},accessGate:null,accessInitializing:null,activityOutbox:null,accessLifecycle:null,
-  resources:'synthetic-resources',userData:'synthetic-profile',definition:{id:'mentat'},applicationConfig:{},app:{isPackaged:false,getVersion:()=> '1.0.0'},read:()=>({}),runtime:f.runtime,moduleDataStartup:f.startup,
+  resources:'synthetic-resources',userData:'synthetic-profile',definition:{id:'mentat'},applicationConfig:{},safeStorage:{},app:{isPackaged:false,getVersion:()=> '1.0.0'},read:()=>({}),runtime:f.runtime,moduleDataStartup:f.startup,
   window:{hide(){}},showAccess:async()=>{},districtSwitch:null,runtimePartition:null,
   require:name=>{
    if(name==='./access-bootstrap.cjs')return {bootstrapAccess:async()=>gate};
