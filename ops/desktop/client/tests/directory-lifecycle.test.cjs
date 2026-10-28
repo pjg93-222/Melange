@@ -34,7 +34,7 @@ function fixture(t){
    download:async(p,token,m,target)=>{fs.mkdirSync(target,{recursive:true});fs.writeFileSync(path.join(target,m.package.name),bytes);},...extra});clients.push(c);return c;
  }
  t.after(()=>clients.forEach(c=>c.close()));
- return {client,events,queries,releases,get state(){return state;},set state(s){state=s;},set version(v){version=v;},set offered(v){offered=v;},set failLaunch(v){failLaunch=v;},set validFolder(v){validFolder=v;}};
+ return {client,events,queries,releases,sign,get state(){return state;},set state(s){state=s;},set version(v){version=v;},set offered(v){offered=v;},set failLaunch(v){failLaunch=v;},set validFolder(v){validFolder=v;}};
 }
 test('ZIP update stages, activates after close, confirms readiness and performs second update without NSIS',async t=>{
  const f=fixture(t),first=f.client();await first.check();assert.equal(f.state.pending.phase,'prepared');
@@ -79,6 +79,39 @@ test('repeated unacknowledged new-process failure falls back without an endless 
  const f=fixture(t),old=f.client();await old.check();await old.activateAfterClose(false);
  assert.equal(await old.redirectInstalled(false),true);assert.equal(await old.redirectInstalled(false),true);
  assert.equal(await old.redirectInstalled(false),false);assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.installed.version,'1.0.20');
+});
+
+test('failed running version discovers a correction while retaining last-good rollback and highwater',async t=>{
+ const f=fixture(t),old=f.client();await old.check();await old.activateAfterClose(false);
+ f.version='1.0.21';f.offered=null;const failed=f.client();await failed.markApplicationFailed();await failed.check();
+ assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.installed.version,'1.0.20');
+ assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.0.21');assert.ok(f.state.suspendedVersions.includes('1.0.21'));
+ // A valid older envelope and a freshly signed conflicting sequence cannot reset the failed release's high-water.
+ f.offered='1.0.20';await failed.check();assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.sequence,2);
+ f.offered='1.0.22';f.releases['1.0.22']=f.sign('1.0.22',2);await failed.check();
+ assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.installed.version,'1.0.20');assert.equal(f.state.sequence,2);
+ f.releases['1.0.22']=f.sign('1.0.22',3);await failed.check();
+ assert.equal(f.state.pending.version,'1.0.22');assert.equal(f.state.pending.phase,'prepared');
+ assert.equal(f.state.installed.version,'1.0.20');assert.equal(failed.recoveryCandidate().version,'1.0.20');
+ assert.equal(f.state.sequence,3);assert.equal(f.state.acceptedVersion,'1.0.22');
+ assert.equal(await failed.activateAfterClose(false),true);
+ f.version='1.0.22';f.offered=null;const corrected=f.client();await corrected.check();
+ assert.equal(f.state.pending.phase,'awaiting-ready');assert.equal(f.state.installed.version,'1.0.20');
+ corrected.markApplicationReady();await corrected.check();
+ assert.equal(f.state.installed.version,'1.0.22');assert.equal(f.state.previous.version,'1.0.20');
+ assert.equal(f.state.pending,null);assert.equal(f.state.sequence,3);
+});
+
+test('failed running version cannot authorize a correction from a missing or changed last-good baseline',async t=>{
+ const f=fixture(t),old=f.client();await old.check();await old.activateAfterClose(false);
+ f.version='1.0.21';f.offered='1.0.22';const failed=f.client();await failed.markApplicationFailed();
+ const good=f.state.installed;f.state={...f.state,installed:null};await failed.check();
+ assert.equal(f.state.installed,null);assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.sequence,2);
+ f.state={...f.state,installed:{...good,version:'1.0.19'}};await failed.check();
+ assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.sequence,2);
+ f.state={...f.state,installed:{...good,envelope:{...good.envelope,signature:Buffer.alloc(64).toString('base64')}}};await failed.check();
+ assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.sequence,2);
+ assert.equal(f.events.some(event=>event==='prepare:1.0.22'),false);
 });
 
 test('background startup verifies once per process and rechecks on real application readiness',async t=>{

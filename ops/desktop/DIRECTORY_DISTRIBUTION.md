@@ -128,3 +128,99 @@ replacement from the next version directory, waits for readiness, and retains
 the previous verified version for rollback. Retention protects active, staged,
 last-good and pending-activation directories. It never treats arbitrary folders
 under Downloads as disposable app versions.
+
+
+## Receiver schedule and migration verification
+
+The receiver enrolls from the verification keys bundled in the application; it
+does not need a GitHub token or feature-access approval to receive public binary
+updates. It checks at application/login startup and on reconnect/resume/unlock,
+then every 15 minutes while running. GitHub release discovery has a separate
+6–6.5 hour cache to limit anonymous API traffic. Consequently, a newly published
+release is not guaranteed to appear at the next 15-minute tick. Offline machines,
+closed processes, GitHub rate limits and recipient policy can delay updates.
+
+A successful application-ready launch from `Downloads/MelangeApplications`
+registers this version's executable as the login receiver. Verify the actual
+login target and shortcuts after migrating: an existing entry pointing into
+`Documents/MelangeApplications` still starts the old NSIS client. Merely extracting
+a ZIP or opening its setup screen does not prove successful registration.
+Updates download and verify in the background, then activate after safe close or
+before a later normal launch. Readiness, rather than process creation alone,
+confirms the replacement; retain the last verified working version for rollback.
+
+## Publishing an update to this channel
+
+Use the directory build above and `packaging/github_release.py` for every future
+ZIP update. The existing default Windows workflow and `release_from_main.py`
+produce the native/NSIS channel; their successful completion does not publish a
+ZIP update. Source commits and private drafts are not receiver-visible releases.
+
+1. Freeze the common client and each backend commit. Build a new immutable
+   application version, preserving valid vendor signatures. Never replace a
+   distributed ZIP with different bytes under the same version.
+2. Complete the required tests, shipped-source secret/data scans, dependency and
+   redistribution checks, final native/inventory verification, and isolated
+   packaged-app/update acceptance. Record actual evidence in the publisher gate
+   receipt bound to the final ZIP's SHA-256. An engineering build receipt is not
+   a passing publisher gate receipt.
+3. Choose a version and sequence higher than that app's protected publisher
+   ledger. Prepare a release specification using the structure below. All three
+   source references are required even when releasing only one app. Each package
+   entry may override the top-level version and sequence for independent releases.
+4. Run the protected publisher, then independently verify its output. It produces
+   exactly five assets per app: ZIP, directory manifest, trust transitions,
+   `release.json`, and `SHA256SUMS`. Use the existing protected signing state;
+   never initialize replacement keys or export private signing material.
+5. Upload all five assets to a private draft `desktop-v<version>` in the app's
+   own repository (`Melange`, `Mentat`, or `Geo`). Download them back into a fresh
+   directory and run the same `--verify-output` command against those bytes.
+6. After release authorization and all gates pass, publish as a stable release
+   (`draft: false`, `prerelease: false`). Discovery ignores drafts and prereleases
+   and selects the highest eligible signed ZIP version independently of GitHub's
+   `Latest` badge. A native-only release cannot advance this channel. Verify the
+   permanent download URL and signed recovery baseline anonymously after publishing.
+
+```json
+{
+  "version": "1.0.21",
+  "sequence": 14,
+  "platform": "win32",
+  "arch": "x64",
+  "sourceRefs": {
+    "melange": {"repository": "pjg93-222/Melange", "ref": "FULL_COMMIT", "commit": "FULL_COMMIT"},
+    "mentat": {"repository": "pjg93-222/Mentat", "ref": "FULL_COMMIT", "commit": "FULL_COMMIT"},
+    "terrier": {"repository": "pjg93-222/Geo", "ref": "FULL_COMMIT", "commit": "FULL_COMMIT"}
+  },
+  "packages": {
+    "mentat": {
+      "package": "C:/candidate-output/mentat/mentat-1.0.21-win32-x64.zip",
+      "receipt": "C:/verified-release-evidence/mentat-publisher-gates.json",
+      "format": "windows-directory-zip-v1",
+      "publisherProof": "C:/candidate-output/mentat/publisher-proof.json"
+    }
+  }
+}
+```
+
+The example numbers are placeholders, not reserved release identities. Check the
+existing ledger before selecting them. The source values must be full real Git
+commit IDs and the receipt must bind those exact sources and package bytes.
+
+```powershell
+python ops/desktop/packaging/github_release.py `
+  --state C:/Users/pgoff/Documents/MelangeDesktopAdmin `
+  --spec C:/verified-release-evidence/github-directory-spec.json `
+  --output C:/fresh-release-assets
+
+python ops/desktop/packaging/github_release.py `
+  --state C:/Users/pgoff/Documents/MelangeDesktopAdmin `
+  --verify-output C:/fresh-release-assets/mentat `
+  --repository pjg93-222/Mentat
+```
+
+Repeat verification on the downloaded-back asset directory before publication.
+Keep every installed version's approved signed recovery manifest and ZIP hosted;
+removing that baseline can prevent its next automatic update. Permanent links
+use the public release URL, not an expiring redirected storage URL:
+`https://github.com/<owner>/<repository>/releases/download/desktop-v<version>/<app>-<version>-win32-x64.zip`.
