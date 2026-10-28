@@ -7,11 +7,13 @@
   <title>Application access</title>
   <link rel="stylesheet" href="desktop-chrome.css">
   <link rel="stylesheet" href="access.css">
+  <link rel="stylesheet" href="update-status.css">
 </head>
 <body>
 <main>
   <header class="app-header"><img id="app-logo" class="app-logo" alt="" hidden><div><p class="eyebrow">APPLICATION ACCESS</p><h1 id="app-name">Application access</h1></div></header>
   <p id="description" class="description">Checking this installation's access.</p>
+  <aside id="desktop-update-status" class="desktop-update" aria-label="Application updates" data-state="waiting"><span id="desktop-installed-version" class="desktop-installed-version">Installed application</span><p id="desktop-update-message" class="desktop-update-message" role="status" aria-live="polite">GitHub updates: waiting to check.</p></aside>
   <p id="account" class="account" hidden></p>
   <p id="notice" class="notice" hidden></p>
   <form id="request-form" hidden>
@@ -50,8 +52,8 @@
   </section>
   <button id="retry" class="secondary" type="button" hidden>Check again</button>
   <p id="status" role="status" aria-live="polite"></p>
-  <p class="footer">Approved installations can work offline. Approval, activity and updates use the configured trusted administrator server.</p>
+  <p class="footer" id="access-footer">Application access and signed release updates have separate status.</p>
 </main>
-<script src="access-ui.js"></script>
+<script src="update-status-ui.js"></script><script src="access-ui.js"></script>
 </body>
 </html>

@@ -142,5 +142,11 @@
   }
   const exported = {validateState, displayName, inviteCode, activationKey, password, mount};
   if (typeof module === 'object' && module.exports) module.exports = exported;
-  else root.addEventListener('DOMContentLoaded', () => mount(root.document, root.desktopAccess, root), {once: true});
+  else root.addEventListener('DOMContentLoaded', () => {
+    mount(root.document, root.desktopAccess, root);
+    const disposeUpdates=root.desktopUpdateStatus?.mount(root.document,root.desktopAccess,{onInfo:info=>{
+      if(info.accessMode==='standalone')root.document.getElementById('access-footer').textContent='This application runs on your computer. Updates use signed GitHub releases.';
+    }});
+    root.addEventListener('pagehide',()=>disposeUpdates?.(),{once:true});
+  }, {once: true});
 })(typeof window === 'object' ? window : globalThis);

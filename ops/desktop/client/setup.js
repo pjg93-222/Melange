@@ -6,3 +6,10 @@ async function refresh(){const info=await window.desktop.info();document.title=i
 byId('launch').addEventListener('click',()=>action(()=>window.desktop.launch()));
 byId('pair').addEventListener('click',()=>action(async()=>{await window.desktop.pair(byId('pairing').value);byId('pairing').value='';await refresh();}));
 window.desktop.onStatus(status);action(refresh);
+const disposeUpdates=window.desktopUpdateStatus?.mount(document,window.desktop,{onInfo:info=>{
+ const github=info.provider==='github';byId('update-heading').textContent=github?'GitHub updates':'Publisher updates';
+ byId('update-description').textContent=github?'Signed GitHub releases download automatically and install after you close the app. Your local data is retained.':'This installation receives signed releases from its configured publisher. Pairing is needed only when that publisher supplies a bundle.';
+ if(info.accessMode==='standalone')byId('settings-description').textContent='Local application and GitHub release updates.';
+ byId('pairing').hidden=github;byId('pair').hidden=github;
+}});
+window.addEventListener('pagehide',()=>disposeUpdates?.(),{once:true});

@@ -12,6 +12,8 @@ if(savedState&&savedState.enabled){
 }
 contextBridge.exposeInMainWorld('desktop',Object.freeze({
   info:()=>ipcRenderer.invoke('desktop:info'),
+  getUpdateInfo:()=>ipcRenderer.invoke('desktop:update-info'),
+  onUpdateStatus:callback=>{if(typeof callback!=='function')throw new Error('Update status callback required');const listener=(_event,value)=>callback(value);ipcRenderer.on('desktop:update-status',listener);return()=>ipcRenderer.removeListener('desktop:update-status',listener);},
   districts:()=>ipcRenderer.invoke('desktop:districts'),
   switchDistrict:value=>ipcRenderer.invoke('desktop:switch-district',value),
   districtData:()=>ipcRenderer.invoke('desktop:district-data'),
