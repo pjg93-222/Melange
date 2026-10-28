@@ -59,7 +59,8 @@ RESTRICTED = [
     "**/lda-source-native/**", "**/staffer_organisations_section.json", "**/staffer_clients_section.json",
     "**/staffer-network.html",
     # Derived LDA stores: pending Paul ruling on LDA restriction scope (X2 Q1).
-    "**/lda_source_catalog_v1.sqlite", "**/lda_activity_v1.sqlite", "**/lda_activity_v2.sqlite",
+    # Trailing * also takes the -wal/-shm/-journal sidecars, which hold database pages.
+    "**/lda_source_catalog_v1.sqlite*", "**/lda_activity_v1.sqlite*", "**/lda_activity_v2.sqlite*",
     "**/lda-identity-candidates*",
 ]
 HARD_DENY = [

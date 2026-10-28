@@ -165,7 +165,8 @@ class BuildTest(unittest.TestCase):
 
     def test_derived_lda_stores_are_denied_pending_ruling(self):
         pending = ["__state__/M/live_catalog/lda_source_catalog_v1.sqlite", "audits/r/lda_activity_v1.sqlite",
-                   "audits/r/lda_activity_v2.sqlite", "__state__/M/normalized/lda-identity-candidates/g/c.ndjson.gz"]
+                   "audits/r/lda_activity_v2.sqlite", "__state__/M/normalized/lda-identity-candidates/g/c.ndjson.gz",
+                   "audits/r/lda_activity_v1.sqlite-wal", "audits/r/lda_activity_v1.sqlite-journal"]
         self._write({rel: rel.encode() for rel in pending})
         m = self._build_all()
         self.assertTrue(set(pending) <= set(m["excluded"]))
