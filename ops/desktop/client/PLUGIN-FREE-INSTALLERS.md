@@ -16,6 +16,9 @@ when a solid build first accumulates the full uncompressed runtime. Each build
 uses a fresh `<output>.work` directory for compiler temporary files; failed build
 evidence is retained there.
 
+Pass `--compression zlib` for faster per-file compression at the cost of a larger
+download. Both supported codecs are built into NSIS; neither needs a plug-in DLL.
+
 The shared builder supports Melange, Mentat and Terrier. Its input is an existing
 signed application directory; it does not compile the backend or sign the output.
 
