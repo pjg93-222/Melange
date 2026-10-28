@@ -261,6 +261,71 @@ class NativeFixture(unittest.TestCase):
             self.assertEqual(command.call_count, 1)
             self.assertFalse((self.root / "under-nsis-reserve").exists())
 
+    def test_direct_nsis_requires_exact_reference_and_reserves_actual_expanded_bytes(self):
+        reference = {"Melange.exe": {"size": 3, "sha256": hashlib.sha256(b"app").hexdigest()},
+                     "resources/app.asar": {"size": 4, "sha256": hashlib.sha256(b"asar").hexdigest()}}
+        listing = b"Path = Melange.exe\nSize = \n\nPath = resources/app.asar\nSize = \n"
+        calls = []
+        def run(argv, **_kwargs):
+            calls.append(argv)
+            if "l" in argv:
+                return listing
+            destination = Path(next(arg[2:] for arg in argv if isinstance(arg, str) and arg.startswith("-o")))
+            self.write_files(destination, {"Melange.exe": b"app", "resources/app.asar": b"asar"})
+            return b""
+        with mock.patch.object(n.legacy, "run", side_effect=run), mock.patch.object(n.shutil, "disk_usage", return_value=SimpleNamespace(free=16 * n.GIB + 7)):
+            self.assertEqual(n.extract(self.tool, self.installer, self.root / "direct", 7, reserve=16 * n.GIB,
+                                       archive_format="Nsis", expected_files=reference), 7)
+            self.assertEqual(len(calls), 2)
+            listing += b"\nPath = $PLUGINSDIR/System.dll\nSize = \n"
+            with self.assertRaisesRegex(n.Refused, "Direct NSIS member set"):
+                n.extract(self.tool, self.installer, self.root / "direct-plugin", 7, reserve=16 * n.GIB,
+                          archive_format="Nsis", expected_files=reference)
+            self.assertFalse((self.root / "direct-plugin").exists())
+        listing = b"Path = Melange.exe\nSize = \n\nPath = resources/app.asar\nSize = \n"
+        with mock.patch.object(n.legacy, "run", side_effect=run), mock.patch.object(n.shutil, "disk_usage", return_value=SimpleNamespace(free=16 * n.GIB + 6)):
+            with self.assertRaisesRegex(n.Refused, "workspace reserve"):
+                n.extract(self.tool, self.installer, self.root / "direct-reserve", 7, reserve=16 * n.GIB,
+                          archive_format="Nsis", expected_files=reference)
+            self.assertFalse((self.root / "direct-reserve").exists())
+
+    def test_direct_nsis_rejects_declared_and_extracted_size_mismatch(self):
+        reference = {"payload": {"size": 2, "sha256": hashlib.sha256(b"ab").hexdigest()}}
+        listing = b"Path = payload\nSize = 3\n"
+        def run(argv, **_kwargs):
+            if "l" in argv:
+                return listing
+            destination = Path(next(arg[2:] for arg in argv if isinstance(arg, str) and arg.startswith("-o")))
+            (destination / "payload").write_bytes(b"x")
+            return b""
+        with mock.patch.object(n.legacy, "run", side_effect=run):
+            with self.assertRaisesRegex(n.Refused, "declared size"):
+                n.extract(self.tool, self.installer, self.root / "direct-declared", 2, reserve=16 * n.GIB,
+                          archive_format="Nsis", expected_files=reference)
+            self.assertFalse((self.root / "direct-declared").exists())
+            listing = b"Path = payload\nSize = \n"
+            with self.assertRaisesRegex(n.Refused, "extracted sizes"):
+                n.extract(self.tool, self.installer, self.root / "direct-size", 2, reserve=16 * n.GIB,
+                          archive_format="Nsis", expected_files=reference)
+
+    def test_direct_native_census_counts_program_once_and_refuses_extra_plugin(self):
+        files, pes, mapping = n.scan(self.program)
+        receipt = dict(self.receipt, installerFormat="builtin-nsis-v1", installerPlugins=[])
+        args = dict(installer=self.installer, program_directory=self.program, app_files=files, app_pes=pes,
+                    app_map=mapping, nsis_files=files, nsis_pes=pes, nsis_map=mapping, receipt=receipt,
+                    installer_format="builtin-nsis-v1")
+        items, expected = n.native_census(**args)
+        self.assertEqual(len(items), 1 + len(pes))
+        self.assertEqual(set(items), {"installer", *("app/" + name for name in pes)})
+        self.assertEqual(set(expected), pes)
+        receipt["installerPlugins"] = ["System.dll"]
+        with self.assertRaisesRegex(n.Refused, "zero-plugin"):
+            n.native_census(**args)
+        receipt["installerPlugins"] = []
+        args["nsis_files"] = {**files, "$PLUGINSDIR/System.dll": self.tool}
+        with self.assertRaisesRegex(n.Refused, "Direct NSIS census"):
+            n.native_census(**args)
+
     @unittest.skipUnless(os.name == "nt" and os.environ.get("NATIVE_VERIFIER_TEST_7Z") and os.environ.get("NATIVE_VERIFIER_TEST_NSIS"), "Explicit real7z/NSIS fixture tools required")
     def test_real_compiled_nsis_unknown_sizes_and_exact_inner7z_roundtrip(self):
         seven = Path(os.environ["NATIVE_VERIFIER_TEST_7Z"])
@@ -295,9 +360,13 @@ class NativeFixture(unittest.TestCase):
             client=str(self.client), staged_sources=str(self.staged), client_commit="1" * 40, source_commit="2" * 40,
             trust_descriptor=str(self.trust), signing_receipt=str(self.receipt_path), seven_zip=str(self.tool),
             source=None, output=str(self.root / "inspection"), free_floor_gib=16)
-        def extract(_seven, _archive, destination, _budget, *, reserve, archive_format="7z"):
+        def extract(_seven, _archive, destination, _budget, *, reserve, archive_format="7z", expected_files=None):
             self.assertEqual(reserve, 16 * n.GIB)
-            self.assertEqual(archive_format, "Nsis" if destination.name == "nsis" else "7z")
+            if expected_files is not None:
+                self.assertEqual(archive_format, "Nsis")
+                self.assertEqual(set(expected_files), set(self.payload))
+            else:
+                self.assertEqual(archive_format, "Nsis" if destination.name == "nsis" else "7z")
             destination.mkdir()
             files = self.outer if destination.name == "nsis" else self.payload
             self.write_files(destination, files)
@@ -316,6 +385,14 @@ class NativeFixture(unittest.TestCase):
             args.output = str(self.root / "inspection-passing")
             bad = False
             report = n.verify(args)
+            args.output = str(self.root / "inspection-builtin")
+            args.installer_format = "builtin-nsis-v1"
+            self.receipt.update(installerFormat="builtin-nsis-v1", installerPlugins=[])
+            self.persist()
+            for name in n.BUILTIN_BUILD_INPUTS:
+                if not (self.client / name).exists():
+                    (self.client / name).write_bytes(b"reviewed builtin installer source")
+            builtin_report = n.verify(args)
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["freeFloorGiB"], 16)
         self.assertTrue(report["completeNativeCensus"])
@@ -323,6 +400,12 @@ class NativeFixture(unittest.TestCase):
         self.assertEqual(report["completeNativeCount"], 11)
         self.assertEqual(report["installerSha256"], n.legacy.digest(self.installer))
         self.assertEqual(report["noUninstaller"]["observedUninstallerFiles"], 0)
+        self.assertEqual(builtin_report["status"], "passed")
+        self.assertEqual(builtin_report["installerFormat"], "builtin-nsis-v1")
+        self.assertEqual(builtin_report["nsisPluginCount"], 0)
+        self.assertEqual(builtin_report["completeNativeCount"], 4)
+        self.assertEqual(builtin_report["nsisPluginContract"]["files"], [])
+        self.assertEqual(builtin_report["extractedBytes"], sum(map(len, self.payload.values())))
 
 
 if __name__ == "__main__":

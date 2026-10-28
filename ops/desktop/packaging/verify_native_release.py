@@ -35,6 +35,8 @@ MAX_EXPANDED = 8 * 1024 ** 3
 NATIVE_PLUGINS = frozenset({"System.dll", "UAC.dll", "StdUtils.dll", "nsDialogs.dll",
                             "nsExec.dll", "nsis7z.dll", "WinShell.dll"})
 BUILD_INPUTS = ("builder.cjs", "nsis-no-uninstaller.cjs", "nsis-no-uninstaller-extract.nsh", "installer.nsh")
+BUILTIN_BUILD_INPUTS = ("builder.cjs", "build-plugin-free.cjs", "plugin-free-installer.nsi", "release-signing.cjs")
+INSTALLER_FORMATS = ("legacy-nsis-v1", "builtin-nsis-v1")
 NSIS_MEMBERS = frozenset("$PLUGINSDIR/" + name for name in (*NATIVE_PLUGINS, "modern-wizard.bmp", "app-64.7z"))
 
 
@@ -113,9 +115,16 @@ def reader_capabilities(seven):
     return {"nsis": True, "formatSelection": "explicit Nsis outer, 7z inner"}
 
 
-def extract(seven, archive, destination, budget, *, reserve=RESERVE, archive_format="7z"):
+def extract(seven, archive, destination, budget, *, reserve=RESERVE, archive_format="7z", expected_files=None):
     physical(destination.parent, True)
     require(archive_format in ("Nsis", "7z"), "Unsupported inspection archive format")
+    if expected_files is not None:
+        require(archive_format == "Nsis" and isinstance(expected_files, dict) and bool(expected_files),
+                "Direct NSIS inspection requires a complete signed program reference")
+        require(all(isinstance(name, str) and legacy.safe_name(name) == name
+                    and not any(part.casefold() == "$pluginsdir" for part in name.split("/"))
+                    and isinstance(value, dict) and type(value.get("size")) is int and value["size"] >= 0
+                    for name, value in expected_files.items()), "Invalid direct NSIS program reference")
     listing = legacy.run([seven, "l", "-t" + archive_format, "-slt", "-ba", archive]).decode("utf-8", "strict").replace("\r\n", "\n")
     names, aliases, sizes, total = set(), set(), {}, 0
     for block in listing.strip().split("\n\n"):
@@ -137,7 +146,14 @@ def extract(seven, archive, destination, budget, *, reserve=RESERVE, archive_for
     # NSIS omits unpacked sizes for compressed plugin/resource members. Its
     # reviewed nine-member closure and bounded reservation avoid interpreting
     # unknown as zero; inner7z still requires every exact declared byte count.
-    if archive_format == "Nsis":
+    if expected_files is not None:
+        require(names == set(expected_files), "Direct NSIS member set differs from signed program reference")
+        require(all(size is None or size == expected_files[name]["size"] for name, size in sizes.items()),
+                "Direct NSIS declared size differs from signed program reference")
+        # NSIS can omit unpacked sizes. Reserve the complete authenticated build
+        # reference, then require every extracted byte count and hash to match it.
+        bound = sum(value["size"] for value in expected_files.values())
+    elif archive_format == "Nsis":
         require(names == NSIS_MEMBERS, "NSIS member set differs from reviewed native template")
         bound = min(budget, Path(archive).stat().st_size * 2 + 64 * 1024 ** 2)
     else:
@@ -153,7 +169,10 @@ def extract(seven, archive, destination, budget, *, reserve=RESERVE, archive_for
     require(set(files) == names, "Extracted paths differ from inspected archive listing")
     actual = {name: file.stat().st_size for name, file in files.items()}
     require(all(actual[name] == size for name, size in sizes.items() if size is not None), "Extracted byte count differs from archive listing")
-    require(archive_format != "Nsis" or all(size <= 8 * 1024 ** 2 for name, size in actual.items() if name != "$PLUGINSDIR/app-64.7z"),
+    if expected_files is not None:
+        require(actual == {name: value["size"] for name, value in expected_files.items()},
+                "Direct NSIS extracted sizes differ from signed program reference")
+    require(expected_files is not None or archive_format != "Nsis" or all(size <= 8 * 1024 ** 2 for name, size in actual.items() if name != "$PLUGINSDIR/app-64.7z"),
             "NSIS plugin/resource exceeds its inspection bound")
     used = sum(actual.values())
     require(used <= bound and shutil.disk_usage(destination.parent).free >= reserve, "Extracted bytes exceed bound or desktop workspace reserve")
@@ -193,7 +212,8 @@ def client_manifest(client):
     return files
 
 
-def verify_sources(*, app, version, program_files, program_map, members, client, staged, trust):
+def verify_sources(*, app, version, program_files, program_map, members, client, staged, trust, installer_format="legacy-nsis-v1"):
+    require(installer_format in INSTALLER_FORMATS, "Unsupported native installer format")
     names = client_manifest(client)
     own = {name for name in members if not name.startswith("node_modules/")}
     require(own == set(names), "ASAR application member set differs from frozen client manifest")
@@ -216,7 +236,8 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
             and update.get("distribution", "native") == "native", "Native GitHub receiver configuration differs")
     require(config.get("desktopAccessTrust") == json.loads(trust.read_text(encoding="utf-8")), "Packaged public trust differs from frozen descriptor")
     require(re.search(r"const\s+PUBLISHER_PIN_ENFORCE\s*=\s*true\s*;", (client / "native-signature.cjs").read_text()), "Publisher pin is not enforced")
-    build_inputs = {name: snapshot(client / name)[-1] for name in BUILD_INPUTS}
+    build_inputs = {name: snapshot(client / name)[-1]
+                    for name in (BUILTIN_BUILD_INPUTS if installer_format == "builtin-nsis-v1" else BUILD_INPUTS)}
     certificate = "melange-systems-desktop-release.cer"
     cert_info = physical(client / certificate)
     require(program_map.get("resources/" + certificate) == {"sha256": legacy.digest(client / certificate), "size": cert_info.st_size},
@@ -246,8 +267,10 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
                                 "stagedSources": legacy.digest(staged_inventory_path)}}, package
 
 
-def native_census(*, installer, program_directory, app_files, app_pes, app_map, nsis_files, nsis_pes, nsis_map, receipt):
+def native_census(*, installer, program_directory, app_files, app_pes, app_map, nsis_files, nsis_pes, nsis_map, receipt,
+                  installer_format="legacy-nsis-v1"):
     """Bind every header-detected native file to fresh build signature evidence."""
+    require(installer_format in INSTALLER_FORMATS, "Unsupported native installer format")
     current = receipt.get("currentFiles") or []
     require(len({identity(row["path"]) for row in current}) == len(current), "Duplicate current signature records")
     expected = {}
@@ -262,8 +285,16 @@ def native_census(*, installer, program_directory, app_files, app_pes, app_map, 
         require(rel in app_pes and row.get("sha256") == app_map[rel]["sha256"], "Current program signature bytes/census differ: " + rel)
         expected[rel] = row
     require(set(expected) == app_pes, "Native header census differs from complete build signature receipt")
-    plugins = {"$PLUGINSDIR/" + name for name in NATIVE_PLUGINS}
-    require(nsis_pes == plugins, "Outer NSIS native census differs from the exact seven reviewed native plugins")
+    if installer_format == "builtin-nsis-v1":
+        require(receipt.get("installerFormat") == installer_format and receipt.get("installerPlugins") == [],
+                "Build signature receipt must declare the zero-plugin installer format")
+        require(nsis_map == app_map and nsis_pes == app_pes and set(nsis_files) == set(app_files)
+                and not any(part.casefold() == "$pluginsdir" for name in nsis_files for part in name.split("/")),
+                "Direct NSIS census differs from complete program or contains installer plugins")
+        plugins = set()
+    else:
+        plugins = {"$PLUGINSDIR/" + name for name in NATIVE_PLUGINS}
+        require(nsis_pes == plugins, "Outer NSIS native census differs from the exact seven reviewed native plugins")
     items = {"installer": installer, **{"app/" + rel: app_files[rel] for rel in sorted(app_pes)},
              **{"plugin/" + rel: nsis_files[rel] for rel in sorted(plugins)}}
     history = receipt.get("files") or []
@@ -303,6 +334,8 @@ def check_verdicts(rows, items, expected, app_map, nsis_map, app, version):
 
 def verify(args):
     require(os.name == "nt", "Actual native release verification requires Windows")
+    installer_format = getattr(args, "installer_format", "legacy-nsis-v1")
+    require(installer_format in INSTALLER_FORMATS, "Unsupported native installer format")
     reserve = free_floor_gib(args.free_floor_gib) * GIB
     for sha in (args.client_commit, args.source_commit):
         require(re.fullmatch(r"[0-9a-f]{40}", sha), "Frozen commit identity required")
@@ -334,7 +367,7 @@ def verify(args):
               "frozenExportBinding": "exports and gated stage supplied by the release controller; actual packaged bytes compared independently",
               "installerSha256": inputs[str(installer)][-1], "inputs": {name: row[-1] for name, row in inputs.items()},
               "freeFloorGiB": args.free_floor_gib,
-              "archiveReader": reader,
+              "archiveReader": reader, "installerFormat": installer_format,
               "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
     with locked_input(installer), contextlib.ExitStack() as locks:
         for file in tool_inputs:
@@ -342,24 +375,34 @@ def verify(args):
         preflight = output / "preflight"
         preflight.mkdir()
         legacy.required_owner(legacy.signatures({"installer": installer}, preflight, preserve_execution_policy=True)["installer"])
-        outer, extracted = output / "nsis", output / "app"
-        used = extract(seven, installer, outer, MAX_EXPANDED, reserve=reserve, archive_format="Nsis")
-        archives = list(outer.rglob("app-64.7z"))
-        require(len(archives) == 1, "Exactly one native x64 application payload required")
-        used += extract(seven, archives[0], extracted, MAX_EXPANDED - used, reserve=reserve)
-        app_files, app_pes, app_map = scan(extracted)
-        nsis_files, nsis_pes, nsis_map = scan(outer)
+        if installer_format == "builtin-nsis-v1":
+            # The container directly holds the program. Extract/census once;
+            # there are no install-time plugin DLLs or nested payload archive.
+            outer = extracted = output / "app"
+            used = extract(seven, installer, extracted, MAX_EXPANDED, reserve=reserve,
+                           archive_format="Nsis", expected_files=reference)
+            app_files, app_pes, app_map = scan(extracted)
+            nsis_files, nsis_pes, nsis_map = app_files, app_pes, app_map
+        else:
+            outer, extracted = output / "nsis", output / "app"
+            used = extract(seven, installer, outer, MAX_EXPANDED, reserve=reserve, archive_format="Nsis")
+            archives = list(outer.rglob("app-64.7z"))
+            require(len(archives) == 1, "Exactly one native x64 application payload required")
+            used += extract(seven, archives[0], extracted, MAX_EXPANDED - used, reserve=reserve)
+            app_files, app_pes, app_map = scan(extracted)
+            nsis_files, nsis_pes, nsis_map = scan(outer)
         same_tree(app_map, reference, "Complete signed application")
         require(app_pes == reference_pes, "Native classification differs from signed program tree")
         asar_header_hash, members = legacy.asar(app_files["resources/app.asar"])
         verify_asar_integrity(app_files[PRODUCTS[args.app] + ".exe"], asar_header_hash)
         source_evidence, package = verify_sources(app=args.app, version=args.version, program_files=app_files,
-            program_map=app_map, members=members, client=client, staged=staged, trust=trust)
+            program_map=app_map, members=members, client=client, staged=staged, trust=trust, installer_format=installer_format)
         absence = contract.verify_without_uninstaller(installer=installer, package_json=package,
             nsis_files=nsis_files, app_files=app_files, asar_members=members, signing_receipt=receipt_path)
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
         items, expected = native_census(installer=installer, program_directory=program, app_files=app_files,
-            app_pes=app_pes, app_map=app_map, nsis_files=nsis_files, nsis_pes=nsis_pes, nsis_map=nsis_map, receipt=receipt)
+            app_pes=app_pes, app_map=app_map, nsis_files=nsis_files, nsis_pes=nsis_pes, nsis_map=nsis_map, receipt=receipt,
+            installer_format=installer_format)
         native = output / "native"
         native.mkdir()
         print(json.dumps({"phase": "complete-native-signature-census", "appId": args.app, "files": len(items)}), flush=True)
@@ -367,16 +410,19 @@ def verify(args):
         check_verdicts(rows, items, expected, app_map, nsis_map, args.app, args.version)
         require(rows["installer"]["sha256"] == report["installerSha256"], "Outer installer changed during signature verification")
         same_tree(scan(extracted)[2], app_map, "Final extracted application")
-        same_tree(scan(outer)[2], nsis_map, "Final NSIS container")
+        if outer != extracted:
+            same_tree(scan(outer)[2], nsis_map, "Final NSIS container")
         same_tree(scan(program)[2], reference, "Final signed program input")
         final_sources, _ = verify_sources(app=args.app, version=args.version, program_files=app_files,
-            program_map=app_map, members=legacy.asar(app_files["resources/app.asar"])[1], client=client, staged=staged, trust=trust)
+            program_map=app_map, members=legacy.asar(app_files["resources/app.asar"])[1], client=client, staged=staged, trust=trust,
+            installer_format=installer_format)
         require(final_sources == source_evidence, "Frozen source inputs changed during verification")
         for file, before in inputs.items():
             require(snapshot(file) == before, "Verification input changed: " + file)
+        plugins = [] if installer_format == "builtin-nsis-v1" else sorted(NATIVE_PLUGINS)
         report.update(status="passed", payloadFileCount=len(app_files), payloadPeCount=len(app_pes),
-            nsisPluginCount=len(NATIVE_PLUGINS), completeNativeCount=len(items), extractedBytes=used,
-            nsisPluginContract={"electronBuilderVersion": "26.15.3", "mode": "assisted-per-user-without-uninstaller", "files": sorted(NATIVE_PLUGINS)},
+            nsisPluginCount=len(plugins), completeNativeCount=len(items), extractedBytes=used,
+            nsisPluginContract={"format": installer_format, "mode": "builtin-per-user-without-uninstaller" if not plugins else "assisted-per-user-without-uninstaller", "files": plugins},
             embeddedAsarIntegrityVerified=True, asarHeaderSha256=asar_header_hash,
             completeNativeCensus=True, desktopUninstaller=False,
             noUninstaller=absence, sourceEvidence=source_evidence, applicationFiles=app_map, nsisFiles=nsis_map,
@@ -399,6 +445,8 @@ def main(argv=None):
                  "client-commit", "source-commit", "trust-descriptor", "seven-zip", "output", "report"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
+    parser.add_argument("--installer-format", choices=INSTALLER_FORMATS, default="legacy-nsis-v1",
+                        help="explicit native payload layout; builtin layout forbids external installer plugins")
     parser.add_argument("--free-floor-gib", type=free_floor_gib, default=32,
                         help="desktop workspace reserve in GiB (at least 16; default 32)")
     args = parser.parse_args(argv)
