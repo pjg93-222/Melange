@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
-const KINDS=new Set(['account','password','device']);
+const KINDS=new Set(['account','password','device','windows']);
 // These files are separate from the previous administrator grants and Windows
 // Credential Manager records, so upgrading does not destroy rollback data.
 function protectedLocalStores({profile,appId,deviceId,safeStorage,platform=process.platform}){
@@ -30,6 +30,6 @@ function protectedLocalStores({profile,appId,deviceId,safeStorage,platform=proce
   },
   async delete(){available();directory();if(checkedFile(target))fs.unlinkSync(target);}
  };}
- return {accountStore:store('account'),passwords:store('password'),devices:store('device')};
+ return {accountStore:store('account'),passwords:store('password'),devices:store('device'),windowsStore:store('windows')};
 }
 module.exports={protectedLocalStores};

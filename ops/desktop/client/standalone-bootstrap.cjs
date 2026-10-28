@@ -5,8 +5,9 @@ const {bootstrapAccess,exactIdentity}=require('./access-bootstrap.cjs');
 const {deviceStore}=require('./access-credentials.cjs');
 const {protectedLocalStores}=require('./standalone-state.cjs');
 const {createStandaloneGate}=require('./standalone-access.cjs');
-async function bootstrapStandalone({resources,appId,profile,configuration,packaged,bundledTrust,safeStorage}){
+async function bootstrapStandalone({resources,appId,profile,configuration,packaged,bundledTrust,safeStorage,authentication='password'}){
  if(process.platform!=='win32'||process.arch!=='x64')throw new Error('Local desktop access supports Windows x64 only');
+ if(!['password','windows'].includes(authentication))throw new Error('Unsupported local authentication mode');
  const identityStore=accessStateStore({resources,appId,profile,kind:'identity'});
  let saved=await identityStore.read();
  if(!saved){saved={schemaVersion:1,appId,deviceId:crypto.randomUUID(),platform:'win32',arch:'x64'};await identityStore.write(saved);}
@@ -33,6 +34,7 @@ async function bootstrapStandalone({resources,appId,profile,configuration,packag
    }
   }
  }
- return createStandaloneGate({appId,identity,configuration,...stores,legacy});
+ const windowsSessionProvider=authentication==='windows'?()=>require('./windows-session.cjs').windowsSession(resources,appId):undefined;
+ return createStandaloneGate({appId,identity,configuration,...stores,legacy,authentication,windowsSessionProvider});
 }
 module.exports={bootstrapStandalone};

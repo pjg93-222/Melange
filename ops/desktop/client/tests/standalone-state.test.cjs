@@ -27,3 +27,12 @@ test('failed atomic write preserves prior record and leaves old approval files a
  f.fail=true;await assert.rejects(f.stores.accountStore.write({fixture:2}),/encryption failure/);f.fail=false;
  assert.deepEqual(fs.readFileSync(file),original);assert.deepEqual(await f.stores.accountStore.read(),{fixture:1});assert.equal(fs.readFileSync(legacy,'utf8'),'preserved');assert.equal(fs.readdirSync(f.profile).some(name=>name.endsWith('.tmp')),false);
 });
+
+test('Windows account binding has its own protected scope and preserves 24 account records',async t=>{
+ const f=fixture(t);await f.stores.accountStore.write({existing:24});await f.stores.passwords.write({existing:'password'});await f.stores.devices.write({existing:'device'});
+ const old=['account','password','device'].map(kind=>[kind,fs.readFileSync(path.join(f.profile,'standalone-'+kind+'.enc'))]);
+ await f.stores.windowsStore.write({userSid:'S-1-5-21-100-200-300-1001'});
+ for(const [kind,bytes] of old)assert.deepEqual(fs.readFileSync(path.join(f.profile,'standalone-'+kind+'.enc')),bytes);
+ const windows=path.join(f.profile,'standalone-windows.enc');assert.equal(fs.readFileSync(windows).includes(Buffer.from('S-1-5-21')),false);
+ fs.copyFileSync(path.join(f.profile,'standalone-account.enc'),windows);await assert.rejects(f.stores.windowsStore.read(),/another installation/);
+});

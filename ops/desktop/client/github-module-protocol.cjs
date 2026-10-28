@@ -29,7 +29,7 @@ function authorized(appId,selected,authorization){
    exact(authorization,['mode','identity','session','principal']);
    const identity=require('./standalone-access.cjs').validIdentity(authorization.identity),session=authorization.session;
    exact(session,[...Object.keys(identity),'sessionId','authenticatedAt','method']);
-   return identity.appId===appId&&authorization.principal===null&&Object.keys(identity).every(key=>session[key]===identity[key])&&uuid(session.sessionId)&&integer(session.authenticatedAt)&&['local-password','device-trust'].includes(session.method);
+   return identity.appId===appId&&authorization.principal===null&&Object.keys(identity).every(key=>session[key]===identity[key])&&uuid(session.sessionId)&&integer(session.authenticatedAt)&&['local-password','device-trust','windows-session'].includes(session.method);
   }catch{return false;}
  }
  const {accepted,owner}=authorization||{},grant=accepted?.grant,bindings=owner?.dataBindings;
