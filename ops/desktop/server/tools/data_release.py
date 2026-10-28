@@ -28,9 +28,11 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import fnmatch
+import gzip
 import hashlib
 import json
 import os
+import re
 import sys
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -48,14 +50,41 @@ DENY = [
 ]
 # Credential stores, the consumer's marker and its download cache: excluded even when --allow names them, and
 # also matched against the real absolute path (a --map can mount .../credentials or rename keys.json to anything).
+# Restricted LDA identity corpus (receipt: publication_enabled false, restricted-machine-local) and the
+# staffer sections/page that inline it as ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2). Fail closed: a copy
+# of any of these under another name is refused by content hash, and any page carrying the ODATA/CDATA
+# islands is refused by content (see select()).
+RESTRICTED = [
+    "**/lda-source-native/**", "**/staffer_organisations_section.json", "**/staffer_clients_section.json",
+    "**/staffer-network.html",
+    # Derived LDA stores: pending Paul ruling on LDA restriction scope (X2 Q1).
+    "**/lda_source_catalog_v1.sqlite", "**/lda_activity_v1.sqlite", "**/lda_activity_v2.sqlite",
+    "**/lda-identity-candidates*",
+]
 HARD_DENY = [
     "**/accounts.sqlite3", "**/*.dpapi", "**/keys/**", "**/keys.json", "**/.env*", "**/credentials/**",
     "**/*.pfx", "**/*.pem", ".melange-data-release.json", "__state__/data-download/**",
-    # Restricted LDA identity corpus (receipt: publication_enabled false, restricted-machine-local) and the
-    # staffer sections/page that inline it as ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2).
-    "**/lda-source-native/**", "**/staffer_organisations_section.json", "**/staffer_clients_section.json",
-    "**/staffer-network.html",
-]
+] + RESTRICTED
+# sha256 -> bytes of known restricted files (lda-source-native generation-20260830T231200Z and the
+# staffer_{organisations,clients}_section.json builds seen on the owner machine, 2026-10-28). Any member with
+# this content is refused whatever its name; restricted files present in the build are added at build time,
+# so a new generation's copies are caught too. ponytail: a new section build that is renamed AND absent from
+# the build under its own name escapes this list; regenerate the digests when the sections are rebuilt.
+RESTRICTED_SHA256 = {
+    "2ff6864f8a06e822277083230ab6a59abcc979ca12681e58490c89cb8a85b485": 110195153,
+    "81841c810269bf967cb3edc10664dbbad5aa17261089eaa67e4f288c2fcda625": 58789826,
+    "363027b2c3fff40331b304c9dd9b1d7bd81691bc9f9915aaf1b8f4acd0a869b7": 430061239,
+    "80ac82346c435bb8f1231d9f3425d759ca9a8ae063db879ec104244f9fcd282e": 1928569,
+    "0d35902244f02688d9ac961379efee0f96e3cfab1184409a4c93bb0584a1aed2": 2503228,
+    "5dfd3bbb16dea6ce940a687b15c74f07e720073d02b559d8000bb33db49dce8c": 2386,
+    "d3b2b1a9dea5d5ea9d44a0a1329d51a836c99539518c391b900c8220d847a774": 3892182,
+    "06db0d498a9e090bf676e0ceb139a4bc97c3b61bc5ec2f52ab4259ebc8feb3ee": 3892182,
+    "c0808b7b7991deda567c6d44bdd6cc479d2a12ec2a00ad7c25d342f38a000a72": 3940057,
+    "f085bc383b7a77df591c46315b62be56551f2fe33af0c69f4db88efde5631b0b": 3939693,
+}
+# The staffer panel's organisations/clients islands (make_staffer_network_html.py, make_combined.py).
+INLINE_RESTRICTED = re.compile(rb"const\s+[oc]data\s*=", re.I)
+PAGE_SUFFIXES = (".html", ".htm", ".js", ".mjs", ".cjs")
 
 
 def _match(rel: str, patterns: list[str]) -> bool:
@@ -119,14 +148,43 @@ def select(sources, allow: list[str], deny: list[str]):
             if rel in found:
                 raise ValueError(f"virtual path {rel} comes from both {found[rel][0]} and {p}")
             found[rel] = p, real, link
-    kept, excluded = [], []
+    kept, excluded, restricted = [], [], []
     for rel in sorted(found):
         p, real, link = found[rel]
         if link or _match(rel, HARD_DENY) or _match(real, HARD_DENY) or (_match(rel, deny) and not _match(rel, allow)):
             excluded.append((rel, 0 if link else p.stat().st_size))
+            if not link and (_match(rel, RESTRICTED) or _match(real, RESTRICTED)):
+                restricted.append(p)
         else:
             kept.append((rel, p))
-    return kept, excluded
+    # Content checks, so a rename cannot carry restricted data out: hash only where sizes collide.
+    sizes = {p.stat().st_size for _, p in kept}
+    digests = dict(RESTRICTED_SHA256)
+    for p in restricted:
+        if p.stat().st_size in sizes:
+            digests[sha256_file(p)] = p.stat().st_size
+    deny_sizes = set(digests.values()) - {0}
+    clean = []
+    for rel, p in kept:
+        size = p.stat().st_size
+        if (size in deny_sizes and sha256_file(p) in digests) or _inlines_restricted(p):
+            excluded.append((rel, size))
+        else:
+            clean.append((rel, p))
+    return clean, sorted(excluded)
+
+
+def _inlines_restricted(p: Path) -> bool:
+    """A page or script (or its .gz) carrying the staffer ODATA/CDATA islands. Unreadable gzip fails closed."""
+    name = p.name.lower()
+    gz = name.endswith(".gz")
+    if not name.removesuffix(".gz").endswith(PAGE_SUFFIXES):
+        return False
+    try:
+        body = gzip.decompress(p.read_bytes()) if gz else p.read_bytes()  # ponytail: whole-file read; pages are ~100 MB
+    except (OSError, EOFError):
+        return True
+    return INLINE_RESTRICTED.search(body) is not None
 
 
 def build(app: str, data_root: Path | None, out: Path, tag: str, allow: list[str], deny: list[str],

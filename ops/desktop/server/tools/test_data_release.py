@@ -1,3 +1,4 @@
+import gzip
 import hashlib
 import json
 import os
@@ -102,7 +103,7 @@ class BuildTest(unittest.TestCase):
                   "staffer-network.html"]
         for rel in corpus + ["data/engine/staffer_offices_section.json"]:
             (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
-            (self.root / rel).write_bytes(b"x")
+            (self.root / rel).write_bytes(rel.encode())
         m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21",
                                ["**/*"], data_release.DENY, data_release.DEFAULT_PART_BYTES)
         shipped = {f["path"] for f in m["files"]}
@@ -113,6 +114,60 @@ class BuildTest(unittest.TestCase):
         m = data_release.build("melange", None, self.out, "data-melange-2026-10-21", ["**/*"], data_release.DENY,
                                data_release.DEFAULT_PART_BYTES, [("catalog/c", self.root / "__state__")])
         self.assertEqual(m["files"], [])
+
+    def _write(self, files):
+        for rel, body in files.items():
+            (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
+            (self.root / rel).write_bytes(body)
+
+    def _build_all(self):
+        return data_release.build("melange", self.root, self.out, "data-melange-2026-10-21", ["**/*"],
+                                  data_release.DENY, data_release.DEFAULT_PART_BYTES)
+
+    def test_renamed_copy_of_restricted_file_is_refused_by_content(self):
+        corpus = b"lobbyist rows" * 10
+        self._write({
+            "__state__/M/normalized/lda-source-native/g/lda_lobbyist_assertions.ndjson.gz": corpus,
+            "__state__/M/normalized/operational-spine/g1/inputs/lda_records.ndjson.gz": corpus,
+            "data/engine/neutral.bin": corpus,
+            "data/engine/same_size_other.bin": b"other  rows" * 10 + b"xx" * 10,
+        })
+        m = self._build_all()
+        shipped = {f["path"] for f in m["files"]}
+        self.assertIn("__state__/M/normalized/operational-spine/g1/inputs/lda_records.ndjson.gz", m["excluded"])
+        self.assertIn("data/engine/neutral.bin", m["excluded"])
+        self.assertIn("data/engine/same_size_other.bin", shipped)
+
+    def test_known_restricted_digest_is_refused_without_the_original_present(self):
+        body = b'{"meta": {}, "organisations": []}'
+        self._write({"catalog/orgs.json": body})
+        with mock.patch.dict(data_release.RESTRICTED_SHA256, {hashlib.sha256(body).hexdigest(): len(body)}):
+            m = self._build_all()
+        self.assertIn("catalog/orgs.json", m["excluded"])
+        self.assertIn("Moneyball.html", {f["path"] for f in m["files"]})
+
+    def test_pages_inlining_staffer_odata_or_cdata_are_refused(self):
+        self._write({
+            "Moneyball.html": b"<script>const SDATA={};\nCONST \t odata = {}</script>",
+            "x/app.js": b"const CDATA={}",
+            "outputs/Moneyball.HTML.gz": gzip.compress(b"const ODATA={}"),
+            "outputs/broken.html.gz": b"not gzip",
+            "y/staffer-free.html": b"<script>const SDATA={};const GDATA={}</script>",
+            "y/notes.json": b'"const ODATA="',
+        })
+        m = self._build_all()
+        self.assertTrue({"Moneyball.html", "x/app.js", "outputs/Moneyball.HTML.gz", "outputs/broken.html.gz"}
+                        <= set(m["excluded"]))
+        shipped = {f["path"] for f in m["files"]}
+        self.assertTrue({"y/staffer-free.html", "y/notes.json"} <= shipped)
+
+    def test_derived_lda_stores_are_denied_pending_ruling(self):
+        pending = ["__state__/M/live_catalog/lda_source_catalog_v1.sqlite", "audits/r/lda_activity_v1.sqlite",
+                   "audits/r/lda_activity_v2.sqlite", "__state__/M/normalized/lda-identity-candidates/g/c.ndjson.gz"]
+        self._write({rel: rel.encode() for rel in pending})
+        m = self._build_all()
+        self.assertTrue(set(pending) <= set(m["excluded"]))
+        self.assertFalse(set(pending) & {f["path"] for f in m["files"]})
 
     def test_single_file_map_cannot_rename_a_credential_in(self):
         m = data_release.build("melange", None, self.out, "data-melange-2026-10-21", ["**/*"], data_release.DENY,
