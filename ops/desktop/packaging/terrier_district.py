@@ -55,14 +55,16 @@ def validate_github_runtime(source, data, district):
     return {'district': definition['id'], 'validated': True}
 
 
-def validate_district(source, data, district, *, legacy=False, state_root=None, github_data=False):
+def validate_district(source, data, district, *, legacy=False, state_root=None, github_data=False, standalone=False):
     source, data = Path(source).resolve(), Path(data).resolve()
     if str(source) not in sys.path:
         sys.path.insert(0, str(source))
     from tools import districts
     definition = districts.get(district)
-    if github_data and (not legacy or state_root is None):
-        raise ValueError('GitHub cache requires the original approved owner state.')
+    if type(standalone) is not bool:
+        raise ValueError('An explicit local access mode is required.')
+    if github_data and (not (legacy or standalone) or state_root is None):
+        raise ValueError('GitHub cache requires explicit local access and a separate state directory.')
     state = Path(state_root).resolve() if github_data else data
     if github_data:
         if state == data or state.is_relative_to(data) or data.is_relative_to(state):
@@ -98,13 +100,15 @@ def main(owner=False, github_runtime=False):
             print(json.dumps(validate_github_runtime(request['sourceRoot'], request['dataRoot'], request['district'])))
             return 0
         keys = {'sourceRoot', 'dataRoot', 'district', 'legacy'}
-        github = set(request) == keys | {'stateRoot', 'githubDistrictData'}
+        standalone = request.get('standalone') is True
+        github_keys = keys | {'stateRoot', 'githubDistrictData'}
+        github = set(request) == github_keys or standalone and set(request) == github_keys | {'standalone'}
         if (set(request) != keys and not github) or not isinstance(request['legacy'], bool):
             raise ValueError('Invalid district validation request.')
-        if github and (owner or request['githubDistrictData'] is not True or request['legacy'] is not True or not isinstance(request['stateRoot'], str)):
-            raise ValueError('Invalid GitHub owner state validation request.')
+        if github and (owner or request['githubDistrictData'] is not True or not (request['legacy'] is True or standalone) or not isinstance(request['stateRoot'], str)):
+            raise ValueError('Invalid GitHub local state validation request.')
         result = validate_district(request['sourceRoot'], request['dataRoot'], request['district'], legacy=request['legacy'],
-                                   state_root=request.get('stateRoot'), github_data=github)
+                                   state_root=request.get('stateRoot'), github_data=github, standalone=standalone)
         if owner:
             if not request['legacy']:
                 raise ValueError('An explicit existing account mapping is required.')

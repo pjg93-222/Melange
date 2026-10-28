@@ -57,6 +57,44 @@ test('recipient, revoked or forged owner contexts never make GitHub requests',as
  for(const authorization of [null,{...f.authorization,owner:null},{...f.authorization,accepted:{...f.authorization.accepted,revoked:true}},{...f.authorization,principal:{...f.authorization.principal,mode:'recipient'}},{...f.authorization,principal:{...f.authorization.principal,deviceId:'other'}}]){assert.equal(await p.ensure(f.config,authorization),f.config);assert.equal(await p.discover(f.config,authorization),null);}
  assert.equal(f.requests.length,0);assert.equal(f.state,null);assert.equal(p.info(f.config),null);
 });
+
+function standaloneAuthorization(district='co-05'){
+ return {mode:'standalone',identity:{schemaVersion:1,appId:'terrier',deviceId:crypto.randomUUID(),accountId:crypto.randomUUID(),accountIdentity:'local_owner'},session:null,principal:{mode:'standalone',districtId:district}};
+}
+test('fresh standalone uses signed public data with separate local accounts and no server grant',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},provider=f.create();
+ const result=await provider.ensure(configuration,authorization);
+ assert.ok(result.standaloneGitHubData);assert.equal(result.terrierLegacy,undefined);assert.equal(result.ownerGitHubData,undefined);
+ assert.equal(f.state.identity.mode,'standalone');assert.equal(f.state.identity.accountId,authorization.identity.accountId);assert.equal(f.state.identity.serverId,undefined);
+ assert.equal(f.downloads.length,1);assert.equal(f.extractCount,1);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result);assert.equal(roots.standaloneDistrictData,true);assert.equal(roots.legacyOwner,undefined);assert.notEqual(roots.data,roots.state);
+ const accounts=path.join(roots.state,'accounts.sqlite3');fs.writeFileSync(accounts,'existing local account fixture');
+ f.networkDown=true;const offline=await provider.ensure(configuration,authorization);assert.deepEqual(offline,result);assert.equal(fs.readFileSync(accounts,'utf8'),'existing local account fixture');
+ assert.equal(f.statuses.at(-1).phase,'offline');assert.equal(f.downloads.length,1);
+ const switched=districtConfiguration(result,'or-05',IDS);assert.equal(switched.standaloneGitHubData,undefined);assert.equal(switched.district,'or-05');
+});
+test('standalone public data refuses wrong district, account binding, and fake grants before network access',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},provider=f.create();
+ for(const denied of [{...authorization,principal:{mode:'standalone',districtId:'or-05'}},{...authorization,identity:{...authorization.identity,appId:'melange'}},{...authorization,identity:{...authorization.identity,accountId:'invalid'}},{...authorization,accepted:{grant:{}}}])assert.equal(await provider.ensure(configuration,denied),configuration);
+ assert.equal(f.requests.length,0);assert.equal(f.state,null);
+ await provider.ensure(configuration,authorization);
+ await assert.rejects(provider.ensure(configuration,{...authorization,identity:{...authorization.identity,accountId:crypto.randomUUID()}}),/another owner/);
+});
+test('standalone journal migration retains signed high-water and leaves managed state unchanged',async t=>{
+ const f=fixture(t);f.world=f.build(2);await f.create().ensure(f.config,f.authorization);const previous=structuredClone(f.state),original=JSON.stringify(previous);let local=null;
+ const provider=f.create({store:{read:async()=>structuredClone(local),write:async value=>{local=structuredClone(value);}},previousStore:{read:async()=>structuredClone(previous)}});
+ f.world=f.build(1);const configuration={dataDirectory:f.legacy,district:'co-05'},authorization=standaloneAuthorization();
+ await assert.rejects(provider.ensure(configuration,authorization),/rollback/);
+ assert.equal(local.latest,previous.latest);assert.deepEqual(local.active,{});assert.deepEqual(local.staged,{});assert.equal(local.identity.mode,'standalone');
+ assert.equal(JSON.stringify(previous),original);assert.deepEqual(f.state,previous);
+ f.world=f.build(2);const downloads=f.downloads.length;await provider.ensure(configuration,authorization);assert.equal(f.downloads.length,downloads);
+});
+test('standalone district switching matches the local account independently of selected district',()=>{
+ const {approvalIdentity}=require('../district-transition.cjs'),first=standaloneAuthorization();
+ assert.equal(approvalIdentity(first),approvalIdentity({...first,principal:{mode:'standalone',districtId:'or-05'}}));
+ assert.notEqual(approvalIdentity(first),approvalIdentity({...first,identity:{...first.identity,accountId:crypto.randomUUID()}}));
+ assert.throws(()=>approvalIdentity({...first,accepted:{grant:{}}}),/local account/);
+});
 test('identical legacy runtime bytes are reused with zero archive downloads and native owner roots unchanged',async t=>{
  const f=fixture(t);f.writeLegacy();const before=ownerBindingFingerprint('terrier',f.profile,f.config,f.authorization.accepted.grant),p=f.create(),result=await p.ensure(f.config,f.authorization);
  assert.deepEqual(result,f.config);assert.equal(f.downloads.length,0);assert.equal(f.extractCount,0);assert.equal(f.checks.length,1);assert.equal(p.info(f.config).phase,'ready');assert.equal(f.state.active['co-05'].source,'legacy');assert.equal(ownerBindingFingerprint('terrier',f.profile,result,f.authorization.accepted.grant),before);

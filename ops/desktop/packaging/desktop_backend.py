@@ -278,10 +278,13 @@ def run(options, token, *, module_inputs=None):
     source = options.source_root.resolve()
     data = options.data_root.resolve()
     state = options.state_root.resolve()
+    standalone = bool(getattr(options, 'standalone', False))
+    if standalone and options.app != 'terrier':
+        raise ValueError('Standalone backend mode is only available for Terrier')
     github_data = bool(getattr(options, 'github_district_data', False))
-    if github_data and (options.app != 'terrier' or not getattr(options, 'legacy_owner', None)
+    if github_data and (options.app != 'terrier' or not (standalone or getattr(options, 'legacy_owner', None))
                         or data == state or data.is_relative_to(state) or state.is_relative_to(data)):
-        raise ValueError('GitHub district data requires an existing owner and separate data/state roots')
+        raise ValueError('GitHub district data requires explicit local access and separate data/state roots')
     principal = None
     if options.app == 'terrier':
         sys.path.insert(0, str(source))
@@ -289,9 +292,13 @@ def run(options, token, *, module_inputs=None):
         raw_principal = os.environ.pop('DESKTOP_ACCESS_PRINCIPAL', '')
         if len(raw_principal) > 4096:
             raise ValueError('Approved desktop principal is required')
-        principal = parse_principal(json.loads(raw_principal), options.district)
-        if (principal.mode == 'existing-owner') != bool(getattr(options, 'legacy_owner', None)):
-            raise ValueError('Explicit owner mapping does not match the approved principal')
+        if standalone:
+            if raw_principal:
+                raise ValueError('Standalone access cannot impersonate an approved principal')
+        else:
+            principal = parse_principal(json.loads(raw_principal), options.district)
+            if (principal.mode == 'existing-owner') != bool(getattr(options, 'legacy_owner', None)):
+                raise ValueError('Explicit owner mapping does not match the approved principal')
     for directory in (data, state):
         if module_inputs is not None:
             recheck_original_roots(module_inputs)
@@ -398,7 +405,8 @@ def run(options, token, *, module_inputs=None):
                           TERRIER_WORK_PY=sys.executable, TERRIER_PY312=sys.executable, TERRIER_COMPUTE='windows')
         legacy_owner = getattr(options, 'legacy_owner', None)
         from terrier_district import validate_district
-        validate_district(source, data, options.district, legacy=bool(legacy_owner), state_root=state, github_data=github_data)
+        validate_district(source, data, options.district, legacy=bool(legacy_owner), state_root=state,
+                          github_data=github_data, standalone=standalone)
         if legacy_owner:
             from terrier_owner import legacy_secret_path
             key = legacy_secret_path(data, state, legacy_owner, separate_data=github_data)
@@ -408,14 +416,17 @@ def run(options, token, *, module_inputs=None):
             key.write_text(secrets.token_urlsafe(64), encoding='utf-8')
             if os.name != 'nt':
                 key.chmod(0o600)
-        os.environ.update(DJANGO_SETTINGS_MODULE='server.settings', CU_DEPLOYMENT='desktop', CU_BIND='127.0.0.1',
+        os.environ.update(DJANGO_SETTINGS_MODULE='server.settings', CU_DEPLOYMENT='desktop-standalone' if standalone else 'desktop', CU_BIND='127.0.0.1',
                           CU_ALLOWED_HOSTS='127.0.0.1,localhost', CU_DATA_DIR=str(data), CU_STATE_DIR=str(state),
                           CU_SECRET_KEY=key.read_text(encoding='utf-8'), CU_DISTRICT=options.district,
                           CU_COOKIE_PREFIX='desktop_' + options.district.replace('-', '') + '_')
         # The existing owner's one password and one sign-in for every district (Geo server/research/desktop_owner.py):
         # a desktop-level directory outside every district and a per-app-session key, which settings removes from the environment.
         session_key = os.environ.pop('DESKTOP_OWNER_SESSION_KEY', '')
-        if legacy_owner:
+        if standalone:
+            os.environ.pop('CU_DESKTOP_OWNER_ROOT', None)
+            os.environ.pop('CU_DESKTOP_OWNER_SESSION', None)
+        if legacy_owner and not standalone:
             owner_root = getattr(options, 'owner_root', None)
             owner_root = owner_root.resolve() if owner_root else None
             if owner_root is None or len(session_key) < 32 or any(owner_root == root or owner_root.is_relative_to(root) or root.is_relative_to(owner_root)
@@ -425,12 +436,22 @@ def run(options, token, *, module_inputs=None):
             os.environ.update(CU_DESKTOP_OWNER_ROOT=str(owner_root), CU_DESKTOP_OWNER_SESSION=session_key)
         import django
         django.setup()
+        if standalone:
+            from terrier_standalone import configure_settings
+            configure_settings()
         from django.core.management import call_command
         # The explicit selected state store is backed up and verified before any migration.
         from desktop_migrations import migrate_django
         migrate_django(state)
-        from server.research.desktop_principal import prepare_principal
-        launch_path = prepare_principal(principal, state)
+        if standalone:
+            from terrier_standalone import prepare_accounts, StandaloneBoundary
+            launch_path = prepare_accounts(state, legacy_owner=legacy_owner)
+            boundary = StandaloneBoundary(options.district, options.port)
+        else:
+            from server.research.desktop_principal import prepare_principal
+            from server.research.desktop_access import DesktopBoundary
+            launch_path = prepare_principal(principal, state)
+            boundary = DesktopBoundary(options.district, options.port, principal)
         import_district_bundle(data, state)
         command = importlib.import_module('server.research.management.commands.serve')
         def desktop_fault_log(port):
@@ -441,10 +462,9 @@ def run(options, token, *, module_inputs=None):
             faulthandler.enable(file=command._fault_log, all_threads=True)
         command.enable_fault_log = desktop_fault_log
         from desktop_audit import DesktopAudit
-        from server.research.desktop_access import DesktopBoundary
         audit = DesktopAudit(state / 'audit', options.app, options.district)
         command.application = GuardedWSGI(command.application, token, options.app, audit, launch_path=launch_path,
-                                          desktop_boundary=DesktopBoundary(options.district, options.port, principal))
+                                          desktop_boundary=boundary)
         call_command('serve', port=options.port)
 
 
@@ -604,6 +624,7 @@ def main():
     parser.add_argument('--legacy-owner', choices=['admin'])
     parser.add_argument('--owner-root', type=Path)
     parser.add_argument('--github-district-data', action='store_true')
+    parser.add_argument('--standalone', action='store_true')
     parser.add_argument('--desktop-module-input', action='store_true')
     parser.add_argument('--profile-root', type=Path)
     options = parser.parse_args()
@@ -614,13 +635,15 @@ def main():
         parser.error('Installed code and writable data must be separate')
     if options.legacy_owner and options.app != 'terrier':
         parser.error('Legacy owner setup is only available for Terrier')
+    if options.standalone and options.app != 'terrier':
+        parser.error('Standalone backend mode is only available for Terrier')
     if bool(options.owner_root) != bool(options.legacy_owner):
         parser.error('The desktop owner directory is used with, and only with, the existing Terrier owner')
-    if options.github_district_data and (options.app != 'terrier' or not options.legacy_owner
+    if options.github_district_data and (options.app != 'terrier' or not (options.standalone or options.legacy_owner)
             or options.data_root.resolve() == options.state_root.resolve()
             or options.data_root.resolve().is_relative_to(options.state_root.resolve())
             or options.state_root.resolve().is_relative_to(options.data_root.resolve())):
-        parser.error('GitHub district cache requires an explicit existing Terrier owner and separate data/state roots')
+        parser.error('GitHub district cache requires explicit local access and separate data/state roots')
     if bool(options.profile_root) != bool(options.desktop_module_input) or (options.desktop_module_input and
             (options.app not in ('melange', 'mentat') or options.github_district_data or options.legacy_owner)):
         parser.error('Native module input requires an explicit profile and a supported original application')

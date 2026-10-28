@@ -20,6 +20,16 @@ spec.loader.exec_module(backend)
 
 
 class BackendBoundaryTests(unittest.TestCase):
+    def test_standalone_terrier_allows_separate_public_cache_without_a_legacy_owner(self):
+        base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state', '--standalone']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
+            with patch('sys.argv', base + ['--github-district-data']):
+                backend.main()
+            self.assertTrue(run.call_args.args[0].standalone)
+            for invalid in (base + ['--github-district-data', '--state-root', 'data'], [*base[:2], 'mentat', *base[3:]]):
+                with patch('sys.argv', invalid), self.assertRaises(SystemExit):
+                    backend.main()
+
     def test_github_dataset_flag_requires_existing_terrier_owner_and_separate_roots(self):
         base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
         with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):

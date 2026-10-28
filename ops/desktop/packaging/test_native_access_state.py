@@ -10,6 +10,20 @@ import native_access_state as state
 
 @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
 class ProtectedStateTests(unittest.TestCase):
+    def test_local_public_journals_remain_separate_from_managed_authority(self):
+        with tempfile.TemporaryDirectory(prefix='local-public-state-fixture-') as directory:
+            root = Path(directory)
+            kinds = ('github-district-local-state', 'github-module-local-state', 'github-district-state', 'github-module-state', 'state')
+            for index, kind in enumerate(kinds):
+                state.write(root, kind, {'fixture': index})
+            for index, kind in enumerate(kinds):
+                self.assertEqual(state.read(root, kind), {'fixture': index})
+            target = root / 'access-github-district-local-state.dpapi'
+            for kind in kinds[1:]:
+                target.write_bytes((root / ('access-' + kind + '.dpapi')).read_bytes())
+                with self.assertRaises(state.StateError):
+                    state.read(root, 'github-district-local-state')
+
     def test_actual_dpapi_roundtrip_profile_kind_and_tamper_binding(self):
         with tempfile.TemporaryDirectory(prefix='access-state-fixture-') as directory:
             root=Path(directory);other=root/'other';other.mkdir()

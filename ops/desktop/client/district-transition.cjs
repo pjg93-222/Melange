@@ -14,7 +14,16 @@ function districtFingerprint(profile,configuration){
  records.push(['snapshots',entries]);for(const key of entries)for(const name of ['manifest.json','rows.json','geometry.json','streets.geojson','district.geojson','area_indices.json','adjacency.json'])record(path.join(snapshots,key,name));
  return JSON.stringify([roots,records]);
 }
-function approvalIdentity(authorization){const grant=authorization?.accepted?.grant;if(!grant||authorization.accepted.revoked)throw new Error('Current approval is required.');return JSON.stringify({serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity,role:grant.role,districtIds:grant.districtIds,owner:Boolean(authorization.owner)});}
+function approvalIdentity(authorization){
+ if(authorization?.mode==='standalone'){
+  const identity=require('./standalone-access.cjs').validIdentity(authorization.identity);
+  if(identity.appId!=='terrier'||authorization.principal?.mode!=='standalone'||!['co-05','or-05','ct-01'].includes(authorization.principal.districtId)||authorization.accepted||authorization.owner)throw new Error('Current local account is required.');
+  // The same local account may switch districts; district binding is checked
+  // separately against each selected runtime and must not enter this key.
+  return JSON.stringify({mode:'standalone',appId:identity.appId,deviceId:identity.deviceId,accountId:identity.accountId,accountIdentity:identity.accountIdentity});
+ }
+ const grant=authorization?.accepted?.grant;if(!grant||authorization.accepted.revoked)throw new Error('Current approval is required.');return JSON.stringify({serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity,role:grant.role,districtIds:grant.districtIds,owner:Boolean(authorization.owner)});
+}
 class DistrictTransition{
  constructor({read,write,scope,verify,createRuntime,current,activate,navigate,location,canReveal,fingerprint=configuration=>JSON.stringify(configuration),onUnavailable=async()=>{},log=()=>{},freeMemory=os.freemem,maxWarm=3}){
   Object.assign(this,{read,write,scope,verify,createRuntime,current,activate,navigate,location,canReveal,fingerprint,onUnavailable,log,freeMemory,maxWarm});this.pool=new Map();this.generation=0;this.busy=false;this.pendingReady=null;this.starting=null;

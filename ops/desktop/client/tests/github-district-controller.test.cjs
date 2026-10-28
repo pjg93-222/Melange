@@ -64,7 +64,7 @@ test('preload exposes a read, argument-free refresh and a removable data status 
 test('owner data failures stay on the loading boundary and cannot mark a binary update as failed',async()=>{
  const source=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
  const start=source.indexOf('async function prepareDistrictData(){'),end=source.indexOf('// Learned revocation:',start);assert.ok(start>0&&end>start);
- const notices=[],settings={...configuration},context={read:()=>settings,prepareOwnerDistrict:async()=>{throw new Error('private/path and private response');},closing:false,downloads:{signal:{aborted:false}},districtLog:text=>notices.push(text),loadingStatus:text=>notices.push(text)};
+ const notices=[],settings={...configuration},context={standaloneMode:false,read:()=>settings,prepareOwnerDistrict:async()=>{throw new Error('private/path and private response');},closing:false,downloads:{signal:{aborted:false}},districtLog:text=>notices.push(text),loadingStatus:text=>notices.push(text)};
  vm.createContext(context);vm.runInContext(source.slice(start,end)+';globalThis.prepare=prepareDistrictData;',context);
  assert.equal(await context.prepare(),false);assert.equal(notices.length,2);assert.match(notices[1],/Existing files were preserved/);assert.doesNotMatch(notices.join(' '),/private\/path|private response/);
 });

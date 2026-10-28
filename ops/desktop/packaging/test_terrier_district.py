@@ -88,6 +88,17 @@ class DistrictValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_district(self.source, self.data, 'co-05', legacy=True, state_root=self.data, github_data=True)
 
+    def test_standalone_public_cache_needs_no_legacy_account_but_keeps_separate_state(self):
+        cache = self.github_cache()
+        state = self.data / 'new-local-state'
+        self.assertEqual(validate_district(self.source, cache, 'co-05', state_root=state,
+                                         github_data=True, standalone=True), {'district': 'co-05', 'validated': True})
+        self.assertFalse(state.exists())
+        self.assertFalse((cache / 'accounts.sqlite3').exists())
+        self.assertFalse((cache / '.secret').exists())
+        with self.assertRaises(ValueError):
+            validate_district(self.source, cache, 'co-05', state_root=cache, github_data=True, standalone=True)
+
     def test_github_cache_checks_all_source_bindings_and_original_accounts_integrity(self):
         cache = self.github_cache()
         for role, key in (('contacts.sqlite3', 'source_sha256'), ('walk.sqlite3', 'source_sha256'),
@@ -120,6 +131,20 @@ class DistrictValidationTests(unittest.TestCase):
         self.assertTrue(all('accounts.sqlite3' not in file for file in opened))
         self.assertTrue(all('mode=ro' in file for file in opened))
         self.assertFalse((cache / 'accounts.sqlite3').exists())
+
+    def test_standalone_native_probe_validates_public_files_without_owner_identity(self):
+        cache = self.github_cache()
+        request = {'sourceRoot': str(self.source), 'dataRoot': str(cache), 'district': 'co-05', 'legacy': False,
+                   'stateRoot': str(self.data / 'new-local-state'), 'githubDistrictData': True, 'standalone': True}
+        incoming, output = type('Input', (), {'buffer': io.BytesIO(json.dumps(request).encode())})(), io.StringIO()
+        with patch('sys.stdin', incoming), patch('sys.stdout', output):
+            self.assertEqual(district_main(), 0)
+        self.assertEqual(json.loads(output.getvalue()), {'district': 'co-05', 'validated': True})
+        self.assertFalse((self.data / 'new-local-state').exists())
+        for changed in ({'standalone': 'true'}, {'standalone': False}):
+            incoming = type('Input', (), {'buffer': io.BytesIO(json.dumps({**request, **changed}).encode())})()
+            with patch('sys.stdin', incoming), patch('sys.stdout', io.StringIO()):
+                self.assertEqual(district_main(), 1)
 
     def test_github_probe_cannot_be_used_as_owner_mapping_or_accept_extra_paths(self):
         cache = self.github_cache()

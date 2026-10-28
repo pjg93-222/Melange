@@ -64,8 +64,14 @@ function manifest(bytes,checked){
  requireValue(value.files.filter(item=>item.roles.includes('runtime_dataset')).length===18);
  return {value,runtime,assets,bytes:Buffer.from(bytes),sha256:checked.value.manifest.sha256};
 }
+function standaloneAuthorized(configuration,authorization){
+ const {mode,identity,principal}=authorization||{},district=configuration?.district;
+ const uuid=value=>typeof value==='string'&&/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(value)&&value!=='00000000-0000-0000-0000-000000000000';
+ return Boolean(mode==='standalone'&&identity?.schemaVersion===1&&identity.appId==='terrier'&&uuid(identity.deviceId)&&uuid(identity.accountId)&&typeof identity.accountIdentity==='string'&&/^[A-Za-z0-9_@.+-]{1,150}$/.test(identity.accountIdentity)&&IDS.includes(district)&&principal?.mode==='standalone'&&principal.districtId===district&&!authorization.accepted&&!authorization.owner);
+}
 function authorized(configuration,authorization){
+ if(standaloneAuthorized(configuration,authorization))return true;
  const {accepted,owner,principal}=authorization||{},grant=accepted?.grant,district=configuration?.district;
  return Boolean(configuration?.terrierLegacy&&IDS.includes(district)&&accepted?.revoked===false&&grant?.appId==='terrier'&&Array.isArray(grant.districtIds)&&grant.districtIds.includes(district)&&owner?.mode==='existing-owner'&&owner.appId==='terrier'&&owner.grantId===grant.grantId&&owner.accountIdentity===grant.accountIdentity&&owner.dataBindings?.some(item=>item.districtId===district)&&principal?.mode==='existing-owner'&&principal.districtId===district&&['serverId','deviceId','principalId','accountIdentity'].every(key=>typeof grant[key]==='string'&&principal[key]===grant[key]));
 }
-module.exports={REPOSITORY,POINTER_PATH,IDS,ROLES,COMMIT,TAG,MAX_MANIFEST,MAX_FILE,MAX_ARCHIVE,assetURL,pointer,manifest,authorized,requireValue};
+module.exports={REPOSITORY,POINTER_PATH,IDS,ROLES,COMMIT,TAG,MAX_MANIFEST,MAX_FILE,MAX_ARCHIVE,assetURL,pointer,manifest,authorized,standaloneAuthorized,requireValue};

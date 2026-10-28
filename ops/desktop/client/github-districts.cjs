@@ -1,5 +1,6 @@
 'use strict';
-// Owner-only public transport. Approval credentials never enter this transport;
+// Public signed data for an approved owner or explicit standalone local mode.
+// Approval credentials never enter this transport;
 // the recipient access-server dataset client retains its separate TLS protocol.
 const fs=require('node:fs'),fsp=fs.promises,path=require('node:path'),crypto=require('node:crypto');
 const {pipeline}=require('node:stream/promises'),{Transform}=require('node:stream');
@@ -60,14 +61,24 @@ async function discardStaging(root,stagingRoot,target){
  }
  await remove(target,0);
 }
-function identity(authorization){const grant=authorization.accepted.grant;return {appId:'terrier',repository:REPOSITORY,serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity};}
+function identity(authorization){
+ if(authorization.mode==='standalone'){const local=authorization.identity;return {mode:'standalone',appId:'terrier',repository:REPOSITORY,deviceId:local.deviceId,accountId:local.accountId,accountIdentity:local.accountIdentity};}
+ const grant=authorization.accepted.grant;return {appId:'terrier',repository:REPOSITORY,serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity};
+}
 function legacy(configuration){return path.resolve(configuration.terrierLegacy.dataDirectory);}
-function configurationFor(configuration,entry,root){const {ownerGitHubData,...base}=configuration;if(entry.source==='legacy')return base;return {...base,ownerGitHubData:{schemaVersion:1,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};}
+function localDirectory(configuration){return configuration.terrierLegacy?legacy(configuration):path.join(path.resolve(configuration.dataDirectory),'districts',configuration.district);}
+function configurationFor(configuration,entry,root,authorization){
+ const {ownerGitHubData,standaloneGitHubData,...base}=configuration;
+ if(entry.source==='legacy'||entry.source==='local')return base;
+ const field=protocol.standaloneAuthorized(configuration,authorization)?'standaloneGitHubData':'ownerGitHubData';
+ return {...base,[field]:{schemaVersion:1,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};
+}
 class GitHubDistricts{
- constructor({resources,profile,root,publicKeys,store,transport=publicTransport,checkExisting,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
+ constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
   requireValue(typeof profile==='string'&&typeof root==='string'&&publicKeys&&Object.keys(publicKeys).length>0&&Object.keys(publicKeys).length<=8&&store?.read&&store?.write&&typeof transport?.read==='function'&&typeof transport.download==='function'&&typeof checkExisting==='function'&&typeof extract==='function','GitHub district provider requires pinned keys and protected storage');
   for(const [id,value]of Object.entries(publicKeys))requireValue(/^[A-Za-z0-9._-]{1,100}$/.test(id)&&typeof value==='string'&&Buffer.from(value,'base64').length===32&&Buffer.from(value,'base64').toString('base64')===value,'Invalid GitHub district verification key');
-  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,transport,checkExisting,extract,onStatus,signal,now,statfs});this.states=new Map();this.busy=false;
+  requireValue(previousStore===null||typeof previousStore.read==='function','Invalid previous public dataset journal');
+  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,previousStore,transport,checkExisting,extract,onStatus,signal,now,statfs});this.states=new Map();this.busy=false;
  }
  status(configuration,phase,extra={}){const previous=this.states.get(configuration.district),retained={};for(const key of ['releaseTag','catalogueSequence','checkedAt','verifiedAt'])if(previous?.[key]!==undefined)retained[key]=previous[key];const value={provider:'github',repository:REPOSITORY,district:configuration.district,phase,cached:previous?.cached||false,canRefresh:true,...retained,...extra};this.states.set(configuration.district,value);this.onStatus(structuredClone(value));return structuredClone(value);}
  info(configuration){return this.states.has(configuration?.district)?structuredClone(this.states.get(configuration.district)):null;}
@@ -77,13 +88,33 @@ class GitHubDistricts{
  }
  directory(manifestSha256,district){return path.join(this.root,'github-districts','datasets',manifestSha256,district);}
  async readState(authorization){
-  const expected=identity(authorization),saved=await this.store.read();
+  const expected=identity(authorization);let saved=await this.store.read();
+  if(!saved&&expected.mode==='standalone'&&this.previousStore){
+   const previous=await this.previousStore.read();
+   if(previous){
+    // The original protected journal stays intact. Carry only independently
+    // verified catalogue history, never its server authority or active mapping.
+    exact(previous.identity,['appId','repository','serverId','deviceId','principalId','accountIdentity']);
+    requireValue(previous.identity.appId==='terrier'&&previous.identity.repository===REPOSITORY,'Invalid previous district journal identity');
+    const checked=this.checkedState(previous,previous.identity);
+    requireValue(checked.latest!==null||Object.keys(checked.catalogues).length===0,'Previous district high-water mark is missing');
+    if(checked.latest){
+     const latest=this.catalogue(checked).pointer.value.catalogSequence;
+     for(const key of Object.keys(checked.catalogues))requireValue(this.catalogue(checked,key).pointer.value.catalogSequence<=latest,'Previous district high-water mark is inconsistent');
+     saved={schemaVersion:1,identity:expected,latest:checked.latest,catalogues:{[checked.latest]:checked.catalogues[checked.latest]},active:{},staged:{}};
+     await this.commit(saved);
+    }
+   }
+  }
   if(!saved)return {schemaVersion:1,identity:expected,latest:null,catalogues:{},active:{},staged:{}};
+  return this.checkedState(saved,expected);
+ }
+ checkedState(saved,expected){
   exact(saved,['schemaVersion','identity','latest','catalogues','active','staged']);requireValue(saved.schemaVersion===1&&canonical(saved.identity)===canonical(expected),'GitHub district state belongs to another owner');
   requireValue(Buffer.byteLength(JSON.stringify(saved))<6*1024*1024&&saved.catalogues&&typeof saved.catalogues==='object'&&!Array.isArray(saved.catalogues)&&Object.keys(saved.catalogues).length<=16);
   for(const [key,item]of Object.entries(saved.catalogues)){exact(item,['envelope','manifestBase64','commit']);requireValue(COMMIT.test(item.commit)&&typeof item.manifestBase64==='string'&&item.manifestBase64.length<4*Math.ceil(MAX_MANIFEST/3));const checked=protocol.pointer(item.envelope,this.publicKeys);requireValue(checked.digest===key);const bytes=Buffer.from(item.manifestBase64,'base64');requireValue(bytes.toString('base64')===item.manifestBase64);protocol.manifest(bytes,checked);}
   if(saved.latest!==null)requireValue(typeof saved.latest==='string'&&Object.hasOwn(saved.catalogues,saved.latest));
-  for(const group of ['active','staged']){requireValue(saved[group]&&typeof saved[group]==='object'&&!Array.isArray(saved[group])&&Object.keys(saved[group]).length<=3);for(const [id,item]of Object.entries(saved[group])){exact(item,['pointerDigest','manifestSha256','catalogSequence','releaseTag','source','verifiedAt']);const checked=this.catalogue(saved,item.pointerDigest);requireValue(IDS.includes(id)&&['cache','legacy'].includes(item.source)&&item.manifestSha256===checked.manifest.sha256&&item.catalogSequence===checked.pointer.value.catalogSequence&&item.releaseTag===checked.pointer.value.releaseTag&&typeof item.verifiedAt==='string'&&Number.isFinite(Date.parse(item.verifiedAt)));}}
+  for(const group of ['active','staged']){requireValue(saved[group]&&typeof saved[group]==='object'&&!Array.isArray(saved[group])&&Object.keys(saved[group]).length<=3);for(const [id,item]of Object.entries(saved[group])){exact(item,['pointerDigest','manifestSha256','catalogSequence','releaseTag','source','verifiedAt']);const checked=this.catalogue(saved,item.pointerDigest);requireValue(IDS.includes(id)&&(['cache','legacy'].includes(item.source)||expected.mode==='standalone'&&item.source==='local')&&item.manifestSha256===checked.manifest.sha256&&item.catalogSequence===checked.pointer.value.catalogSequence&&item.releaseTag===checked.pointer.value.releaseTag&&typeof item.verifiedAt==='string'&&Number.isFinite(Date.parse(item.verifiedAt)));}}
   return structuredClone(saved);
  }
  catalogue(state,key=state.latest){requireValue(key&&Object.hasOwn(state.catalogues,key),'No previously verified GitHub district catalogue');const row=state.catalogues[key],pointer=protocol.pointer(row.envelope,this.publicKeys);return {pointer,manifest:protocol.manifest(Buffer.from(row.manifestBase64,'base64'),pointer)};}
@@ -127,16 +158,17 @@ class GitHubDistricts{
   }catch(error){if(this.signal?.aborted)throw error;return false;}
  }
  summary(bundle){return {releaseTag:bundle.releaseTag,catalogueSequence:bundle.catalogSequence,verifiedAt:bundle.verifiedAt,cached:true};}
- async useVerified(configuration,state,entry,{offline=false}={}){
-  const checked=this.catalogue(state,entry.pointerDigest),directory=entry.source==='legacy'?legacy(configuration):this.directory(entry.manifestSha256,configuration.district);
+ async useVerified(configuration,state,entry,{offline=false,authorization}={}){
+  const checked=this.catalogue(state,entry.pointerDigest),directory=entry.source==='legacy'?legacy(configuration):entry.source==='local'?localDirectory(configuration):this.directory(entry.manifestSha256,configuration.district);
   if(!await this.verifyDirectory(directory,configuration.district,checked.manifest.runtime[configuration.district],{managed:entry.source==='cache'}))return null;
-  this.status(configuration,offline?'offline':'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:offline?TEXT.offline:TEXT.ready});return configurationFor(configuration,entry,this.root);
+  this.status(configuration,offline?'offline':'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:offline?TEXT.offline:TEXT.ready});return configurationFor(configuration,entry,this.root,authorization);
  }
- async prepare(configuration,state,checked){
+ async prepare(configuration,state,checked,authorization){
   const district=configuration.district,{pointer,manifest}=checked,files=manifest.runtime[district];
   this.status(configuration,'verifying',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,checkedAt:new Date(this.now()).toISOString(),message:TEXT.verifying});
   let source;
-  if(await this.verifyDirectory(legacy(configuration),district,files))source='legacy';
+  const standalone=protocol.standaloneAuthorized(configuration,authorization);
+  if(await this.verifyDirectory(standalone?localDirectory(configuration):legacy(configuration),district,files))source=standalone?'local':'legacy';
   const place=this.directory(manifest.sha256,district);
   if(!source&&await this.verifyDirectory(place,district,files,{managed:true}))source='cache';
   if(!source){
@@ -174,18 +206,18 @@ class GitHubDistricts{
    const checked=await this.discoverCatalogue(state);
    const previous=state.active[configuration.district];
    if(stageOnly&&previous?.pointerDigest===checked.pointer.digest)return this.status(configuration,'ready',{...this.summary(previous),checkedAt:new Date(this.now()).toISOString(),updateAvailable:false,message:TEXT.ready});
-   const entry=await this.prepare(configuration,state,checked);
+   const entry=await this.prepare(configuration,state,checked,authorization);
    if(stageOnly){
     state.staged[configuration.district]=entry;await this.commit(state);
     const update=Boolean(previous&&previous.manifestSha256!==entry.manifestSha256);
     return this.status(configuration,update?'update-ready':'ready',{...this.summary(update?previous:entry),checkedAt:new Date(this.now()).toISOString(),updateAvailable:update,message:update?TEXT.update:TEXT.ready});
    }
    state.active[configuration.district]=entry;delete state.staged[configuration.district];await this.commit(state);
-   this.status(configuration,'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:TEXT.ready});return configurationFor(configuration,entry,this.root);
+   this.status(configuration,'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:TEXT.ready});return configurationFor(configuration,entry,this.root,authorization);
   }catch(error){
    // Only connection failures permit offline use; untrusted metadata and
    // signature/rollback failures remain visible and preserve accepted state.
-   if(!this.signal?.aborted&&error instanceof ConnectionError&&state?.active?.[configuration.district]){const reused=await this.useVerified(configuration,state,state.active[configuration.district],{offline:true});if(reused)return stageOnly?this.info(configuration):reused;}
+   if(!this.signal?.aborted&&error instanceof ConnectionError&&state?.active?.[configuration.district]){const reused=await this.useVerified(configuration,state,state.active[configuration.district],{offline:true,authorization});if(reused)return stageOnly?this.info(configuration):reused;}
    const active=state?.active?.[configuration.district];if(!this.signal?.aborted)this.status(configuration,'error',{...(active?this.summary(active):{}),cached:Boolean(active),message:TEXT.error});throw error;
   }
   finally{this.busy=false;}
