@@ -23,7 +23,8 @@ import sys
 HERE = Path(__file__).resolve().parent
 PRODUCTS = {"melange": "Melange", "mentat": "Mentat", "terrier": "Terrier"}
 REPOSITORIES = {"melange": "pjg93-222/melange", "mentat": "pjg93-222/mentat", "terrier": "pjg93-222/geo"}
-RESERVE = 32 * 1024 ** 3
+GIB = 1024 ** 3
+RESERVE = 32 * GIB
 MAX_EXPANDED = 8 * 1024 ** 3
 # Reviewed electron-builder26.15.3 assisted, per-user native include graph:
 # installer.onInit/mutex -> System/UAC; common isUpdated -> StdUtils;
@@ -105,7 +106,7 @@ def scan(directory):
     return files, pes, {name: {"sha256": hashes[name], "size": file.stat().st_size} for name, file in files.items()}
 
 
-def extract(seven, archive, destination, budget):
+def extract(seven, archive, destination, budget, *, reserve=RESERVE):
     physical(destination.parent, True)
     listing = legacy.run([seven, "l", "-slt", "-ba", archive]).decode("utf-8", "strict").replace("\r\n", "\n")
     names, aliases, total = set(), set(), 0
@@ -123,8 +124,8 @@ def extract(seven, archive, destination, budget):
         require(size >= 0, "Negative archive member size")
         total += size
         names.add(name)
-    require(total <= budget and shutil.disk_usage(destination.parent).free - total >= RESERVE,
-            "Extraction would exceed its bound or32GiB reserve")
+    require(reserve >= 16 * GIB and total <= budget and shutil.disk_usage(destination.parent).free - total >= reserve,
+            "Extraction would exceed its bound or selected desktop workspace reserve")
     destination.mkdir()
     owned = destination.stat()
     legacy.run([seven, "x", archive, "-o" + str(destination), "-y"], timeout=1800)
@@ -279,6 +280,7 @@ def check_verdicts(rows, items, expected, app_map, nsis_map, app, version):
 
 def verify(args):
     require(os.name == "nt", "Actual native release verification requires Windows")
+    reserve = free_floor_gib(args.free_floor_gib) * GIB
     for sha in (args.client_commit, args.source_commit):
         require(re.fullmatch(r"[0-9a-f]{40}", sha), "Frozen commit identity required")
     require(re.fullmatch(r"\d+\.\d+\.\d+", args.version), "Stable native version required")
@@ -300,16 +302,17 @@ def verify(args):
               "originalSourceExport": args.source,
               "frozenExportBinding": "exports and gated stage supplied by the release controller; actual packaged bytes compared independently",
               "installerSha256": inputs[str(installer)][-1], "inputs": {name: row[-1] for name, row in inputs.items()},
+              "freeFloorGiB": args.free_floor_gib,
               "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
     with locked_input(installer), locked_input(seven):
         preflight = output / "preflight"
         preflight.mkdir()
         legacy.required_owner(legacy.signatures({"installer": installer}, preflight, preserve_execution_policy=True)["installer"])
         outer, extracted = output / "nsis", output / "app"
-        used = extract(seven, installer, outer, MAX_EXPANDED)
+        used = extract(seven, installer, outer, MAX_EXPANDED, reserve=reserve)
         archives = list(outer.rglob("app-64.7z"))
         require(len(archives) == 1, "Exactly one native x64 application payload required")
-        used += extract(seven, archives[0], extracted, MAX_EXPANDED - used)
+        used += extract(seven, archives[0], extracted, MAX_EXPANDED - used, reserve=reserve)
         app_files, app_pes, app_map = scan(extracted)
         nsis_files, nsis_pes, nsis_map = scan(outer)
         same_tree(app_map, reference, "Complete signed application")
@@ -347,6 +350,14 @@ def verify(args):
     return report
 
 
+def free_floor_gib(value):
+    # Per-run desktop workspace bound, not the unrelated DE-076 data transaction.
+    value = int(value)
+    if value < 16:
+        raise argparse.ArgumentTypeError("--free-floor-gib must be at least 16")
+    return value
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--app", choices=PRODUCTS, required=True)
@@ -354,6 +365,8 @@ def main(argv=None):
                  "client-commit", "source-commit", "trust-descriptor", "seven-zip", "output", "report"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
+    parser.add_argument("--free-floor-gib", type=free_floor_gib, default=32,
+                        help="desktop workspace reserve in GiB (at least 16; default 32)")
     args = parser.parse_args(argv)
     report_path = Path(args.report).absolute()
     physical(report_path.parent, True)

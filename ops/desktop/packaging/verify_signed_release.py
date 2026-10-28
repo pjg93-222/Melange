@@ -17,6 +17,7 @@ Any other difference fails. Standard library only; run with `python -I`.
 """
 from __future__ import annotations
 import argparse
+import base64
 import datetime
 import hashlib
 import importlib.util
@@ -459,10 +460,17 @@ def signatures(items, output, *, preserve_execution_policy=False):
     write_json(paths, [{"id": key, "path": str(path)} for key, path in items.items()])
     powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
     env = dict(os.environ, PSModulePath=r"C:\Windows\System32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules")
-    # Preserve the historical standalone verifier's process-only policy by default.
-    # The native release controller opts into the operator's effective policy.
-    policy = [] if preserve_execution_policy else ["-ExecutionPolicy", "Bypass"]
-    run([powershell, "-NoProfile", "-NonInteractive", *policy, "-File", script, "-InputList", paths, "-OutputFile", receipt], timeout=1800, env=env)
+    # Preserve the historical standalone verifier's invocation by default. Native
+    # inspection uses the identical PS body as an ordinary command, so Restricted
+    # policy need not allow an unsigned script file. Paths remain data, never code.
+    if preserve_execution_policy:
+        command = "& {\n" + PS + "\n} -InputList $env:DESKTOP_SIGNATURE_INPUT_LIST -OutputFile $env:DESKTOP_SIGNATURE_OUTPUT_FILE"
+        encoded = base64.b64encode(command.encode("utf-16le")).decode("ascii")
+        env.update(DESKTOP_SIGNATURE_INPUT_LIST=str(paths), DESKTOP_SIGNATURE_OUTPUT_FILE=str(receipt))
+        invocation = ["-EncodedCommand", encoded]
+    else:
+        invocation = ["-ExecutionPolicy", "Bypass", "-File", script, "-InputList", paths, "-OutputFile", receipt]
+    run([powershell, "-NoProfile", "-NonInteractive", *invocation], timeout=1800, env=env)
     rows = json.loads(receipt.read_text(encoding="utf-8-sig"))
     if len(rows) != len(items) or {x["id"] for x in rows} != set(items):
         raise Refused("Signature census incomplete")

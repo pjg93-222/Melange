@@ -742,14 +742,23 @@ def test_build_python_skips_the_interpreter_check(world, capsys, monkeypatch):
     assert code == 0, capsys.readouterr().err
 
 
-@pytest.mark.parametrize('policy', ['Restricted', 'AllSigned', 'Undefined', ''])
-def test_blocking_execution_policy_is_refused_at_local(world, capsys, policy):
+@pytest.mark.parametrize('policy', ['Restricted', 'AllSigned', 'Undefined'])
+def test_effective_policy_does_not_reject_the_existing_child_scoped_hook(world, capsys, policy):
+    fake = Fake()
+    fake.policy = policy
+    code, fake = release(world, fake=fake)
+    assert code == 0, capsys.readouterr().err
+    assert all('Set-ExecutionPolicy' not in ' '.join(command) for command in fake.calls)
+    assert all('-ExecutionPolicy' not in command for command in fake.calls)
+
+
+@pytest.mark.parametrize('policy', ['', 'Unrecognized'])
+def test_unknown_execution_policy_is_refused_at_local(world, capsys, policy):
     fake = Fake()
     fake.policy = policy
     code, fake = release(world, fake=fake)
     error = capsys.readouterr().err
-    assert code == 1 and "step 'local'" in error and 'sign-staged-binary.ps1' in error
-    assert 'Set-ExecutionPolicy -Scope Process RemoteSigned' in error and 'your decision' in error
+    assert code == 1 and "step 'local'" in error and 'unrecognized effective PowerShell execution policy' in error
     assert fake.calls == [[rfm.POWERSHELL, '-NoProfile', '-NonInteractive', '-Command', 'Get-ExecutionPolicy']]
 
 
@@ -1292,3 +1301,16 @@ def test_space_floor_refuses_before_runtime_copy(world, monkeypatch, capsys):
     with pytest.raises(rfm.StepFailed, match='free-space floor'):
         instance.space('build', 1)
     assert folder.is_dir()
+
+
+def test_desktop_space_floor16_is_accepted_and_propagated(world, capsys):
+    code, fake = release(world, '--apps', 'melange', '--free-floor-gib', '16')
+    assert code == 0, capsys.readouterr().err
+    commands = [cmd for cmd in fake.calls if any(part.endswith('verify_native_release.py') for part in cmd)]
+    assert len(commands) == 1 and commands[0][commands[0].index('--free-floor-gib') + 1] == '16'
+
+
+def test_desktop_space_floor_below16_is_refused_and_default_remains32():
+    assert rfm.parse([]).free_floor_gib == 32
+    with pytest.raises(SystemExit):
+        rfm.parse(['--free-floor-gib', '15'])

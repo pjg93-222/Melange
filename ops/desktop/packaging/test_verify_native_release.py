@@ -4,6 +4,8 @@ PE header classification, source/ASAR/file-set checks, receipt binding and all
 signature policy decisions run normally. No fixture executable is launched.
 """
 import copy
+import base64
+import argparse
 import hashlib
 import json
 import os
@@ -181,9 +183,18 @@ class NativeFixture(unittest.TestCase):
 
     def test_native_signature_command_preserves_policy_and_legacy_default_is_unchanged(self):
         commands = []
-        def run(argv, **_kwargs):
+        def run(argv, **kwargs):
             commands.append([str(value) for value in argv])
-            Path(argv[argv.index("-OutputFile") + 1]).write_text('[{"id":"installer"}]')
+            if "-EncodedCommand" in argv:
+                command = base64.b64decode(argv[argv.index("-EncodedCommand") + 1]).decode("utf-16le")
+                self.assertEqual(command, "& {\n" + n.legacy.PS + "\n} -InputList $env:DESKTOP_SIGNATURE_INPUT_LIST -OutputFile $env:DESKTOP_SIGNATURE_OUTPUT_FILE")
+                output = Path(kwargs["env"]["DESKTOP_SIGNATURE_OUTPUT_FILE"])
+                self.assertEqual(json.loads(Path(kwargs["env"]["DESKTOP_SIGNATURE_INPUT_LIST"]).read_text()),
+                                 [{"id": "installer", "path": str(self.installer)}])
+                self.assertEqual((output.parent / "inspect-signatures.ps1").read_text(), n.legacy.PS)
+            else:
+                output = Path(argv[argv.index("-OutputFile") + 1])
+            output.write_text('[{"id":"installer"}]')
             return b""
         with mock.patch.object(n.legacy, "run", side_effect=run):
             for name, options in (("native-policy", {"preserve_execution_policy": True}), ("legacy-policy", {})):
@@ -192,15 +203,35 @@ class NativeFixture(unittest.TestCase):
                 n.legacy.signatures({"installer": self.installer}, folder, **options)
         self.assertNotIn("-ExecutionPolicy", commands[0])
         self.assertNotIn("Bypass", commands[0])
+        self.assertNotIn("-File", commands[0])
+        self.assertIn("-EncodedCommand", commands[0])
         self.assertEqual(commands[1][commands[1].index("-ExecutionPolicy") + 1], "Bypass")
+
+    def test_desktop_reserve_accepts16_and_refuses_below16_and_overbudget_extraction(self):
+        self.assertEqual(n.free_floor_gib("16"), 16)
+        with self.assertRaises(argparse.ArgumentTypeError):
+            n.free_floor_gib("15")
+        def run(argv, **_kwargs):
+            if "l" in argv:
+                return b"Path = fixture.txt\nSize = 1\n"
+            destination = Path(next(arg[2:] for arg in argv if isinstance(arg, str) and arg.startswith("-o")))
+            (destination / "fixture.txt").write_bytes(b"x")
+            return b""
+        with mock.patch.object(n.legacy, "run", side_effect=run), mock.patch.object(n.shutil, "disk_usage", return_value=SimpleNamespace(free=16 * n.GIB + 1)):
+            self.assertEqual(n.extract(self.tool, self.installer, self.root / "reserve16", 1, reserve=16 * n.GIB), 1)
+        with mock.patch.object(n.legacy, "run", side_effect=run), mock.patch.object(n.shutil, "disk_usage", return_value=SimpleNamespace(free=16 * n.GIB)):
+            with self.assertRaisesRegex(n.Refused, "selected desktop workspace reserve"):
+                n.extract(self.tool, self.installer, self.root / "under-reserve", 1, reserve=16 * n.GIB)
+            self.assertFalse((self.root / "under-reserve").exists())
 
     @unittest.skipUnless(os.name == "nt", "Windows input sharing semantics")
     def test_full_verifier_rejects_bad_native_verdict_and_passes_complete_fixture(self):
         args = SimpleNamespace(app="melange", version="1.0.21", installer=str(self.installer), program_directory=str(self.program),
             client=str(self.client), staged_sources=str(self.staged), client_commit="1" * 40, source_commit="2" * 40,
             trust_descriptor=str(self.trust), signing_receipt=str(self.receipt_path), seven_zip=str(self.tool),
-            source=None, output=str(self.root / "inspection"))
-        def extract(_seven, _archive, destination, _budget):
+            source=None, output=str(self.root / "inspection"), free_floor_gib=16)
+        def extract(_seven, _archive, destination, _budget, *, reserve):
+            self.assertEqual(reserve, 16 * n.GIB)
             destination.mkdir()
             files = self.outer if destination.name == "nsis" else self.payload
             self.write_files(destination, files)
@@ -220,6 +251,7 @@ class NativeFixture(unittest.TestCase):
             bad = False
             report = n.verify(args)
         self.assertEqual(report["status"], "passed")
+        self.assertEqual(report["freeFloorGiB"], 16)
         self.assertTrue(report["completeNativeCensus"])
         self.assertFalse(report["desktopUninstaller"])
         self.assertEqual(report["completeNativeCount"], 11)

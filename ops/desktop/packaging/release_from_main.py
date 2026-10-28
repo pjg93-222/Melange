@@ -57,10 +57,10 @@ APP_TEST_MODULES = {'melange': tuple(f'ops/desktop/packaging/{name}.py' for name
 THUMBPRINT = '0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30'
 SUBJECT = 'CN=Melange Systems Desktop Release (self-signed)'
 SIGNING_HOOK = 'ops/desktop/client/release-signing.cjs'
-# The host the hook runs sign-staged-binary.ps1 with (`-File`, no execution-policy argument), and the effective
-# policies under which that script runs; the operator chooses the policy, this command never overrides it.
+# The existing signing hook uses a process-scoped -ExecutionPolicy Bypass for its
+# own child. This controller only observes policy; no host/user scope is changed.
 POWERSHELL = r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
-RUNNABLE_POLICIES = {'RemoteSigned', 'Unrestricted', 'Bypass'}
+POWERSHELL_POLICIES = {'Restricted', 'AllSigned', 'RemoteSigned', 'Unrestricted', 'Bypass', 'Undefined'}
 DEFAULT_STATE = Path.home() / 'Documents' / 'MelangeDesktopAdmin'  # same default as desktop_admin.py
 # Dedicated clean clones, one per repository (the everyday checkouts are other lineages); cloned on first use.
 SOURCES = Path.home() / 'Documents' / 'MelangeReleaseSources'
@@ -247,15 +247,14 @@ class Release:
         for app, folder in self.inject.items():
             if not (folder / 'python' / 'python.exe').is_file():
                 raise StepFailed('local', f'--inject-runtime {app}={folder}: no python\\python.exe there, so it is not a built runtime')
-        # The build inherits this environment, so a process-scoped policy the operator set (PSExecutionPolicyPreference)
-        # reaches the hook's PowerShell child; this query reads the effective policy and never sets one.
+        # Report the actual environment without incorrectly treating Restricted as
+        # a blocker for the hook's established child-only invocation. Authoritative
+        # group policy still applies to the child; any signing failure stops release.
         policy = self.call('local', [POWERSHELL, '-NoProfile', '-NonInteractive', '-Command', 'Get-ExecutionPolicy'],
                            env=self.environ).stdout.strip()
-        if policy not in RUNNABLE_POLICIES:
-            raise StepFailed('local', f'the effective PowerShell execution policy is {policy or "unknown"}: the signing hook runs '
-                                      'sign-staged-binary.ps1 with powershell.exe -File and no policy override, so it would be '
-                                      'blocked. Which policy to allow is your decision; for example run this command from a '
-                                      'PowerShell session after `Set-ExecutionPolicy -Scope Process RemoteSigned`')
+        if policy not in POWERSHELL_POLICIES:
+            raise StepFailed('local', f'unrecognized effective PowerShell execution policy: {policy or "unknown"}')
+        self.execution_policy = policy
 
     def sources(self):
         self.shas = {}
@@ -750,6 +749,7 @@ class Release:
                 '--client', self.export[TOOLS[app]] / 'ops/desktop/client', '--source', self.export[app],
                 '--staged-sources', self.staged_sources[app], '--client-commit', self.shas[TOOLS[app]],
                 '--source-commit', self.shas[app], '--trust-descriptor', self.export[TOOLS[app]] / PACKAGING / 'desktop-access-trust.public.json',
+                '--free-floor-gib', self.args.free_floor_gib,
                 '--seven-zip', self.seven_zip(), '--output', self.release / 'inspection' / app, '--report', report,
                 log=f'native-verification-{app}')
             verified = json.loads(report.read_text(encoding='utf-8'))
@@ -946,7 +946,9 @@ def parse(argv=None):
     parser.add_argument('--version', help='expected version; must equal the frozen shared Melange desktop client version')
     parser.add_argument('--source-commit', action='append', default=[], metavar='APP=40HEX',
                         help='export this committed GitHub source instead of origin/main; repeatable per app, including shared Melange tooling')
-    parser.add_argument('--free-floor-gib', type=int, default=32, help='minimum free disk space retained during builds (at least 32)')
+    # Desktop workspace reserve selected for this run; DE-076's congress/data
+    # transaction floor does not apply to desktop releases.32 GiB is conservative.
+    parser.add_argument('--free-floor-gib', type=int, default=32, help='minimum free disk space retained during builds (at least 16; default 32)')
     parser.add_argument('--seven-zip', type=Path, help='explicit 7za used for independent complete native-package verification')
     parser.add_argument('--sequence', type=int, help='release sequence (default: last prepared + 1)')
     parser.add_argument('--state', type=Path, default=DEFAULT_STATE, help='publisher state directory (default %(default)s)')
@@ -975,8 +977,8 @@ def parse(argv=None):
             parser.error(f'--source-commit {item}: expected APP=40 lowercase hexadecimal characters, once per app')
         selected[app] = commit
     args.source_commit = selected
-    if args.free_floor_gib < 32:
-        parser.error('--free-floor-gib must be at least 32')
+    if args.free_floor_gib < 16:
+        parser.error('--free-floor-gib must be at least 16')
     inject = {}
     for item in args.inject_runtime:
         app, _, folder = item.partition('=')

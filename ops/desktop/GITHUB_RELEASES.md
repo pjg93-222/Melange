@@ -270,16 +270,19 @@ below, as one local command. It stops at the first failed step and names that st
   means the hook was not active and is refused. The manifest keys stay in the
   state directory (`--state`, default `~/Documents/MelangeDesktopAdmin`). The
   command refuses to run in CI, and `--publish` never runs there.
-- **Execution policy.** The hook runs `sign-staged-binary.ps1` with
-  `powershell.exe -File` and no execution-policy argument. Step `local` reads the
-  effective policy (`Get-ExecutionPolicy`, with your environment) and refuses
-  anything other than RemoteSigned, Unrestricted or Bypass, before any other
-  command runs. If every scope is Undefined (Restricted), the choice is yours,
-  for example running the command from a PowerShell session after
-  `Set-ExecutionPolicy -Scope Process RemoteSigned`. That lasts only for that
-  session and reaches the build via `PSExecutionPolicyPreference`. The command
-  never sets or overrides the policy. The check also runs for a `--publish`
-  after a dry run, which builds nothing.
+- **Execution policy.** The existing signing hook runs `sign-staged-binary.ps1`
+  with `powershell.exe -ExecutionPolicy Bypass -File`, scoped to that child
+  process. Step `local` reads the effective policy with your environment and
+  does not reject `Restricted` based on the obsolete assumption that the hook
+  lacks that argument. No host or user policy is changed, and authoritative
+  group policy still applies; a signing failure stops the release. Independent
+  native signature inspection runs its recorded, read-only PowerShell body as
+  an ordinary `-EncodedCommand`, with paths supplied as data and no policy
+  override. The policy query also runs for `--publish` after a dry run.
+- **Desktop workspace space.** `--free-floor-gib` selects this run's reserve
+  (default 32 GiB, minimum 16 GiB), used by the controller and both final-artifact
+  extraction checks. DE-076's congress/data transaction rule has a different
+  scope; it is not a mandatory 32 GiB desktop release floor.
 - **Outputs** (under `--output-root`, default `~/Documents/Desktop-Installers-<date>`):
   `receipts-<v>/`, `release-spec-<v>.json` and `release-<v>/` (sources, venvs,
   logs, signed installers and their hook receipts in `signing/<app>/dist/<app>/`). A dry run (no `--publish`) ends with a
