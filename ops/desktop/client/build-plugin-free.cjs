@@ -46,8 +46,9 @@ function payloadShape(program, executable) {
   walk(program, '');
   return count;
 }
-function build({appId, version, program, output, makensis, appExecutable, appAsar}) {
+function build({appId, version, program, output, makensis, appExecutable, appAsar, compression = 'lzma'}) {
   if (process.platform !== 'win32') throw new Error('This native installer build requires Windows');
+  if (!['lzma', 'zlib'].includes(compression)) throw new Error('Compression must be lzma or zlib');
   const app = appDefinition(appId);
   if (!/^\d+\.\d+\.\d+$/.test(version) || version.split('.').some(value => Number(value) > 65535)) {
     throw new Error('A numeric Windows release version is required');
@@ -92,12 +93,12 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
   physical(compilerWorkDirectory, true);
   fs.writeFileSync(path.join(compilerWorkDirectory, 'owner.json'), JSON.stringify({
     schemaVersion:1, purpose:'plugin-free-nsis-compiler', appId, version, output,
-    sourceProgram:program, compiler, createdAt:new Date().toISOString()
+    sourceProgram:program, compiler, compression, createdAt:new Date().toISOString()
   }, null, 2) + '\n', {flag:'wx'});
   const definitions = {
     PF_PRODUCT:app.name, PF_APP_ID:app.applicationId, PF_VERSION:version, PF_EXE:executable,
     PF_PROGRAM:program, PF_EXECUTABLE_SOURCE:appExecutable, PF_ASAR_SOURCE:appAsar,
-    PF_OUTPUT:output, PF_ICON:icon, PF_LANGUAGE:language,
+    PF_OUTPUT:output, PF_ICON:icon, PF_LANGUAGE:language, PF_COMPRESSION:compression,
     PF_ROOT:layout.LAYOUT.rootName, PF_FOLDER:layout.fill(layout.LAYOUT.appFolder, {product:app.name, version}),
     PF_DOWNLOADS_GUID:layout.LAYOUT.downloadsKnownFolder, PF_MAX_DIRECTORY:String(layout.maxDirectory())
   };
@@ -113,14 +114,15 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
   const receipt = {
     schemaVersion:1, appId, version, format:'builtin-nsis-v1', desktopUninstaller:false, installerPlugins:[],
     sourceProgram:program, appExecutable, appAsar, inputFileCount:fileCount, compiler, compilerWorkDirectory,
-    generatedScript:script, installer:output, compression:{method:'lzma', solid:false, dictionaryMiB:8},
+    generatedScript:script, installer:output,
+    compression:{method:compression, solid:false, ...(compression === 'lzma' ? {dictionaryMiB:8} : {})},
     verificationStage:'Not run; this command only compiles the installer. Signing and release acceptance are separate.'
   };
   fs.writeFileSync(receiptPath, JSON.stringify(receipt, null, 2) + '\n', {flag:'wx'});
   return receipt;
 }
 function argumentsFor(argv) {
-  const allowed = new Set(['app', 'version', 'program', 'output', 'makensis', 'app-executable', 'app-asar']);
+  const allowed = new Set(['app', 'version', 'program', 'output', 'makensis', 'app-executable', 'app-asar', 'compression']);
   const args = {};
   for (let index = 0; index < argv.length; index += 2) {
     const key = argv[index].replace(/^--/, '');
@@ -130,7 +132,7 @@ function argumentsFor(argv) {
   }
   for (const key of ['app', 'version', 'program', 'output', 'makensis']) if (!args[key]) throw new Error('Missing --' + key);
   return {appId:args.app, version:args.version, program:args.program, output:args.output, makensis:args.makensis,
-    appExecutable:args['app-executable'], appAsar:args['app-asar']};
+    appExecutable:args['app-executable'], appAsar:args['app-asar'], compression:args.compression || 'lzma'};
 }
 module.exports = {build, argumentsFor};
 if (require.main === module) {
