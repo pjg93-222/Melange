@@ -1,7 +1,9 @@
 """Re-hash the reviewed program path list after changing packaged source code.
 
 This does not discover files or expand authority from downloaded metadata. New
-imports must be explicitly added to ADDITIONS and reviewed before packaging.
+imports must be explicitly added to ADDITIONS or BOOTSTRAP_ADDITIONS and reviewed
+before packaging. Bootstrap-only refreshes retain the previously reviewed source
+descriptors without inspecting a different source checkout in a split repository.
 """
 import argparse
 import hashlib
@@ -13,13 +15,14 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 ADDITIONS = {'melange': ('fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py',
                          'fec/surfaces/staffer_live_generation.py')}
+BOOTSTRAP_ADDITIONS = {'melange': ('terrier_standalone.py',), 'mentat': ('terrier_standalone.py',)}
 
 
 def encoded(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
 
 
-def outputs(applications=('melange', 'mentat')):
+def outputs(applications=('melange', 'mentat'), *, bootstrap_only=False):
     existing = runpy.run_path(str(HERE / 'module_application_inventory.py'))['APPLICATION_SPECS']
     specs = {}
     for app, original in existing.items():
@@ -28,10 +31,16 @@ def outputs(applications=('melange', 'mentat')):
             spec['programFiles'] = [dict(item) for item in spec['programFiles']]
             specs[app] = spec
             continue
-        paths = {(item['root'], item['path']) for item in original['programFiles']}
-        paths.update(('source', name) for name in ADDITIONS.get(app, ()))
+        previous = {(item['root'], item['path']): item for item in original['programFiles']}
+        paths = set(previous)
+        paths.update(('bootstrap', name) for name in BOOTSTRAP_ADDITIONS.get(app, ()))
+        if not bootstrap_only:
+            paths.update(('source', name) for name in ADDITIONS.get(app, ()))
         files = []
         for area, name in sorted(paths):
+            if bootstrap_only and area == 'source':
+                files.append(dict(previous[(area, name)]))
+                continue
             file = (HERE if area == 'bootstrap' else ROOT) / name
             if file.is_symlink() or not file.is_file():
                 raise ValueError(f'Reviewed program input is unavailable: {file}')
@@ -66,11 +75,13 @@ def outputs(applications=('melange', 'mentat')):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write', action='store_true', help='Update both literal inventories after review')
+    parser.add_argument('--bootstrap-only', action='store_true',
+                        help='Rehash reviewed bootstrap files; retain source descriptors without reading source files')
     parser.add_argument('--app', choices=('melange', 'mentat'), action='append',
                         help='Hash only this app; retain the other app declaration in split repositories')
     options = parser.parse_args()
     changed = []
-    for file, value in outputs(options.app or ('melange', 'mentat')).items():
+    for file, value in outputs(options.app or ('melange', 'mentat'), bootstrap_only=options.bootstrap_only).items():
         if file.read_bytes() != value.encode('utf-8'):
             changed.append(str(file))
             if options.write: file.write_text(value, encoding='utf-8', newline='\n')
