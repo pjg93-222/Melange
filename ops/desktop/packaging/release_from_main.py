@@ -57,6 +57,7 @@ APP_TEST_MODULES = {'melange': tuple(f'ops/desktop/packaging/{name}.py' for name
 THUMBPRINT = '0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30'
 SUBJECT = 'CN=Melange Systems Desktop Release (self-signed)'
 SIGNING_HOOK = 'ops/desktop/client/release-signing.cjs'
+INSTALLER_FORMAT = 'builtin-nsis-v1'
 # The existing signing hook uses a process-scoped -ExecutionPolicy Bypass for its
 # own child. This controller only observes policy; no host/user scope is changed.
 POWERSHELL = r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
@@ -164,10 +165,12 @@ class Release:
         shutil.rmtree(target)
 
     def seven_zip(self):
-        candidates = ([self.args.seven_zip] if self.args.seven_zip else list(
-            (Path(self.environ.get('LOCALAPPDATA', '')) / 'electron-builder/Cache/7zip@1.0.0').glob('7zip-win-x64-*/bin/7za.exe')))
+        # The limited cached 7za cannot inspect NSIS, even though it can inspect
+        # the legacy nested 7z archive. Never select it as a fallback.
+        candidates = ([self.args.seven_zip] if self.args.seven_zip else [
+            Path(self.environ.get('ProgramFiles', r'C:\Program Files')) / '7-Zip/7z.exe'])
         if len(candidates) != 1 or not candidates[0].is_file():
-            raise StepFailed('sign', 'Pass --seven-zip with the reviewed native archive inspector')
+            raise StepFailed('sign', 'Pass --seven-zip with a reviewed full NSIS-capable 7z.exe inspector')
         return candidates[0]
 
     def call(self, step, cmd, cwd=None, env=None, log=None, check=True):
@@ -500,6 +503,7 @@ class Release:
             dist_root = signing_root / 'dist'
             env = {**build_env, 'DESKTOP_APP_ID': app, 'DESKTOP_RUNTIME_ROOT': str(runtime_root), 'DESKTOP_DIST_ROOT': str(dist_root),
                    'DESKTOP_SIGNING_ROOT': str(signing_root), 'DESKTOP_SIGNING_CERT_SHA1': THUMBPRINT,
+                   'DESKTOP_INSTALLER_FORMAT': INSTALLER_FORMAT,
                    'WINDOWS_PUBLISHER_NAME': self.publisher, 'DESKTOP_UPDATE_PROVIDER': 'github',
                    'DESKTOP_GITHUB_REPOSITORY': REPOSITORIES[app],
                    'DESKTOP_ACCESS_TRUST': str(tools / PACKAGING / 'desktop-access-trust.public.json')}
@@ -508,7 +512,7 @@ class Release:
                       log=f'npm-build-{app}')
             installer = dist_root / app / f'{PRODUCTS[app]}-{self.version}-win-x64.exe'
             if not installer.is_file():
-                raise StepFailed('build', f'{app}: electron-builder produced no {installer}')
+                raise StepFailed('build', f'{app}: native build produced no {installer}')
             self.installers[app] = installer
             packaged = dist_root / app / 'win-unpacked' / 'resources' / 'runtime' / app
             smoke = self.python_tool('nativeAcceptance', app, 'smoke_backend.py', '--app', app, '--runtime', packaged,
@@ -740,8 +744,12 @@ class Release:
                                          f'installer bytes ({digest})')
             if receipt.get('desktopUninstaller') is not False or receipt.get('uninstallerEvidence') != 'intentionally-absent':
                 raise StepFailed('sign', f'{evidence} does not assert the no-uninstaller build contract')
+            if receipt.get('installerFormat') != INSTALLER_FORMAT or receipt.get('installerPlugins') != []:
+                raise StepFailed('sign', f'{evidence} does not assert the built-in installer without external plug-ins')
             program = installer.parent / 'win-unpacked'
-            self.space('sign', 2 * self.tree_bytes(program) + GIB // 2)
+            # Direct NSIS payloads need one application extraction, with no
+            # separate nested archive copy alongside it.
+            self.space('sign', self.tree_bytes(program) + GIB // 2)
             (self.release / 'inspection').mkdir(exist_ok=True)
             report = self.logs / f'native-verification-{app}.json'
             inspected = self.python_tool('sign', app, 'verify_native_release.py', '--app', app, '--version', self.version,
@@ -749,13 +757,15 @@ class Release:
                 '--client', self.export[TOOLS[app]] / 'ops/desktop/client', '--source', self.export[app],
                 '--staged-sources', self.staged_sources[app], '--client-commit', self.shas[TOOLS[app]],
                 '--source-commit', self.shas[app], '--trust-descriptor', self.export[TOOLS[app]] / PACKAGING / 'desktop-access-trust.public.json',
+                '--installer-format', INSTALLER_FORMAT,
                 '--free-floor-gib', self.args.free_floor_gib,
                 '--seven-zip', self.seven_zip(), '--output', self.release / 'inspection' / app, '--report', report,
                 log=f'native-verification-{app}')
             verified = json.loads(report.read_text(encoding='utf-8'))
             expected = {'status': 'passed', 'appId': app, 'version': self.version, 'installerSha256': digest,
                         'sourceCommit': self.shas[app], 'clientCommit': self.shas[TOOLS[app]],
-                        'completeNativeCensus': True, 'desktopUninstaller': False}
+                        'completeNativeCensus': True, 'desktopUninstaller': False,
+                        'installerFormat': INSTALLER_FORMAT, 'nsisPluginCount': 0}
             if any(verified.get(key) != value for key, value in expected.items()) or sha256(installer) != digest:
                 raise StepFailed('sign', f'{report} does not bind the complete native census to this installer and sources')
             self.remove_owned(Path('inspection') / app)
@@ -949,7 +959,7 @@ def parse(argv=None):
     # Desktop workspace reserve selected for this run; DE-076's congress/data
     # transaction floor does not apply to desktop releases.32 GiB is conservative.
     parser.add_argument('--free-floor-gib', type=int, default=32, help='minimum free disk space retained during builds (at least 16; default 32)')
-    parser.add_argument('--seven-zip', type=Path, help='explicit 7za used for independent complete native-package verification')
+    parser.add_argument('--seven-zip', type=Path, help='full NSIS-capable 7z.exe used for independent complete native-package verification')
     parser.add_argument('--sequence', type=int, help='release sequence (default: last prepared + 1)')
     parser.add_argument('--state', type=Path, default=DEFAULT_STATE, help='publisher state directory (default %(default)s)')
     parser.add_argument('--security-root', type=Path, default=Path(environ.get('DESKTOP_SECURITY_ROOT') or SECURITY_ROOT),

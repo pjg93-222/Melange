@@ -67,6 +67,9 @@ class Fake:
         self.policy = 'RemoteSigned'  # effective execution policy Get-ExecutionPolicy reports
         self.hook = True  # the build's signing hook signs the installer
         self.hook_receipt = True  # and writes <installer>.signatures.json
+        self.installer_format = rfm.INSTALLER_FORMAT
+        self.installer_plugins = []
+        self.verified_plugins = 0
         self.existing = set()  # repositories whose desktop release already exists
         self.fail = lambda cmd: False  # gh commands to fail
         self.tamper = None  # app whose prepared release.json gets another sequence
@@ -110,6 +113,7 @@ class Fake:
         self.builds.append(env)
         root, dist = Path(env['DESKTOP_SIGNING_ROOT']), Path(env['DESKTOP_DIST_ROOT'])
         assert env['DESKTOP_SIGNING_CERT_SHA1'] == rfm.THUMBPRINT and env['WINDOWS_PUBLISHER_NAME'] == rfm.SUBJECT
+        assert env['DESKTOP_INSTALLER_FORMAT'] == rfm.INSTALLER_FORMAT
         assert root.is_absolute() and root.is_dir() and dist.parent == root
         assert not (root / 'nsis').exists() and not (root / 'nsis-resources').exists()  # one fresh package per root
         assert not {'CSC_LINK', 'WIN_CSC_LINK', 'CSC_KEY_PASSWORD', 'WIN_CSC_KEY_PASSWORD'} & set(env)
@@ -128,7 +132,8 @@ class Fake:
                    'thumbprint': rfm.THUMBPRINT, 'timestamped': True}
             (installer.parent / (installer.name + '.signatures.json')).write_text(json.dumps(
                 {'schemaVersion': 1, 'appId': app, 'certificateThumbprint': rfm.THUMBPRINT, 'installer': str(installer),
-                 'files': [row], 'currentFiles': [row], 'desktopUninstaller': False, 'uninstallerEvidence': 'intentionally-absent'}), encoding='utf-8')
+                 'files': [row], 'currentFiles': [row], 'desktopUninstaller': False, 'uninstallerEvidence': 'intentionally-absent',
+                 'installerFormat': self.installer_format, 'installerPlugins': self.installer_plugins}), encoding='utf-8')
 
     def gh(self, cmd):
         if self.fail(cmd):
@@ -179,12 +184,14 @@ class Fake:
                 (runtime / 'runtime-status.json').write_text(json.dumps({'appId': app, 'missingNativeRuntimes': []}), encoding='utf-8')
                 (runtime / 'dependency-inventory.json').write_text(json.dumps([{'name': 'pkg', 'license': 'MIT'}]), encoding='utf-8')
         elif script == 'verify_native_release.py':
+            assert arg('--installer-format') == rfm.INSTALLER_FORMAT
             assert Path(arg('--output')).parent.is_dir()
             Path(arg('--output')).mkdir()
             report = {'status': 'passed', 'appId': arg('--app'), 'version': arg('--version'),
                       'installerSha256': hashlib.sha256(Path(arg('--installer')).read_bytes()).hexdigest(),
                       'sourceCommit': arg('--source-commit'), 'clientCommit': arg('--client-commit'),
-                      'completeNativeCensus': True, 'desktopUninstaller': False}
+                      'completeNativeCensus': True, 'desktopUninstaller': False,
+                      'installerFormat': rfm.INSTALLER_FORMAT, 'nsisPluginCount': self.verified_plugins}
             Path(arg('--report')).write_text(json.dumps(report), encoding='utf-8')
         elif script == 'github_release.py' and '--spec' in cmd:
             spec = json.loads(Path(arg('--spec')).read_text(encoding='utf-8'))
@@ -823,6 +830,23 @@ def test_hook_receipt_for_other_bytes_is_refused_at_sign(world, capsys):
     code, _ = release(world, fake=Changed())
     error = capsys.readouterr().err
     assert code == 1 and "step 'sign'" in error and 'does not record' in error
+
+
+@pytest.mark.parametrize('installer_format,plugins', [('legacy-nsis-v1', []), ('builtin-nsis-v1', ['System.dll'])])
+def test_legacy_or_plugin_installer_receipt_is_refused(world, capsys, installer_format, plugins):
+    fake = Fake()
+    fake.installer_format, fake.installer_plugins = installer_format, plugins
+    code, fake = release(world, fake=fake)
+    assert code == 1 and 'without external plug-ins' in capsys.readouterr().err
+    assert not (world['out'] / f'receipts-{VERSION}').exists()
+
+
+def test_independent_census_must_confirm_no_installer_plugins(world, capsys):
+    fake = Fake()
+    fake.verified_plugins = 1
+    code, fake = release(world, fake=fake)
+    assert code == 1 and 'does not bind the complete native census' in capsys.readouterr().err
+    assert not (world['out'] / f'receipts-{VERSION}').exists()
 
 
 def test_terrier_alone_needs_only_melange_and_geo(world, capsys):
