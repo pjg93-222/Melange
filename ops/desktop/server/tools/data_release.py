@@ -173,6 +173,15 @@ def select(sources, allow: list[str], deny: list[str]):
     for p in restricted:
         if p.stat().st_size and (any_gz or p.stat().st_size in sizes):
             digests[sha256_file(p)] = p.stat().st_size
+        # A restricted .gz is also known by its content, so a recompressed or inflated copy is caught.
+        # ponytail: inflates the whole restricted corpus each build (seconds per GB).
+        if p.name.lower().endswith(".gz"):
+            try:
+                got = _gz_sha256(p, float("inf"))
+            except (OSError, EOFError, zlib.error):
+                got = None
+            if got and got[1]:
+                digests[got[0]] = got[1]
     deny_sizes = set(digests.values()) - {0}
     clean = []
     for rel, p in kept:
@@ -185,22 +194,28 @@ def select(sources, allow: list[str], deny: list[str]):
     return clean, sorted(excluded)
 
 
+def _gz_sha256(p: Path, cap) -> tuple[str, int] | None:
+    """(sha256, size) of a .gz's decompressed content, streamed; None once it inflates past ``cap``."""
+    h, n = hashlib.sha256(), 0
+    with gzip.open(p, "rb") as fh:
+        while chunk := fh.read(1 << 20):
+            n += len(chunk)
+            if n > cap:
+                return None
+            h.update(chunk)
+    return h.hexdigest(), n
+
+
 def _gz_restricted(p: Path, digests: dict, cap: int) -> bool:
-    """A .gz whose decompressed content has a restricted digest. Streamed and stopped past ``cap`` (the largest
-    restricted size, so nothing bigger can match: the bomb cap). Unreadable gzip fails closed."""
+    """A .gz whose decompressed content has a restricted digest. Stopped past ``cap`` (the largest restricted
+    size, so nothing bigger can match: the bomb cap). Unreadable gzip fails closed."""
     if not p.name.lower().endswith(".gz"):
         return False
-    h, n = hashlib.sha256(), 0
     try:
-        with gzip.open(p, "rb") as fh:
-            while chunk := fh.read(1 << 20):
-                n += len(chunk)
-                if n > min(cap, GZ_LIMIT):
-                    return False
-                h.update(chunk)
+        got = _gz_sha256(p, cap)
     except (OSError, EOFError, zlib.error):
         return True
-    return h.hexdigest() in digests
+    return got is not None and got[0] in digests
 
 
 def _inlines_restricted(p: Path) -> bool:

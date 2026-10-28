@@ -194,6 +194,18 @@ class BuildTest(unittest.TestCase):
         self.assertTrue({"catalog/orgs.json.gz", "z/copy.bin.gz", "z/corrupt.ndjson.gz"} <= set(m["excluded"]))
         self.assertIn("z/fine.ndjson.gz", {f["path"] for f in m["files"]})
 
+    def test_recompressed_or_inflated_copy_of_restricted_gz_is_refused(self):
+        rows = b"lobbyist assertion rows\n" * 80
+        self._write({
+            "__state__/M/normalized/lda-source-native/g/rows.ndjson.gz": gzip.compress(rows, 9, mtime=0),
+            "z/recompressed.bin.gz": gzip.compress(rows, 1, mtime=7),
+            "z/inflated.ndjson": rows,
+            "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 80, 1, mtime=7),
+        })
+        m = self._build_all()
+        self.assertTrue({"z/recompressed.bin.gz", "z/inflated.ndjson"} <= set(m["excluded"]))
+        self.assertIn("z/fine.ndjson.gz", {f["path"] for f in m["files"]})
+
     def test_gz_bomb_is_bounded(self):
         with mock.patch.object(data_release, "GZ_LIMIT", 1 << 20):
             self._write({"bomb.html.gz": gzip.compress(b" " * (3 << 20)), "ok.html.gz": gzip.compress(b"<p>")})
