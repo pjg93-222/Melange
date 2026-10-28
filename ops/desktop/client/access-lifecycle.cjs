@@ -1,6 +1,13 @@
 'use strict';
 const http=require('node:http');
 function authorizationIdentity(value){
+ if(value?.mode==='standalone'){
+  const identity=require('./standalone-access.cjs').validIdentity(value.identity);
+  if(identity.appId==='terrier'){
+   if(value.principal?.mode!=='standalone'||!require('./standalone-access.cjs').DISTRICTS.includes(value.principal.districtId))throw new Error('Local district sign-in is required');
+  }else if(value.principal!==null||!value.session||['schemaVersion','appId','deviceId','accountId','accountIdentity'].some(key=>value.session[key]!==identity[key])||!['local-password','device-trust'].includes(value.session.method))throw new Error('Local sign-in is required');
+  return JSON.stringify({mode:'standalone',identity,principal:value.principal});
+ }
  const grant=value?.accepted?.grant;if(!grant||value.accepted.revoked)throw new Error('Current approval is required');
  return JSON.stringify({serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,
   accountIdentity:grant.accountIdentity,appId:grant.appId,role:grant.role,districtIds:grant.districtIds,
@@ -19,7 +26,8 @@ async function terrierSession(runtime,partition,{logout=false,passwordLockDisabl
   });req.on('error',()=>resolve(null));req.on('timeout',()=>req.destroy());req.end(body);
  });
  const value=await request('/api/auth/session');
- const authenticated=Boolean(value?.authenticated===true&&value.administrator===true&&value.username===runtime.authorization.principal.localAccountIdentity);
+ const local=runtime.authorization.mode==='standalone'&&runtime.authorization.principal.mode==='standalone';
+ const authenticated=Boolean(value?.authenticated===true&&value.administrator===true&&(local?typeof value.username==='string'&&value.username.length>0:value.username===runtime.authorization.principal.localAccountIdentity));
  if(logout){if(!value||typeof value.csrf!=='string')return false;const result=await request('/api/auth/logout','POST',value.csrf);return result?.ok===true;}
  return authenticated&&(!passwordLockDisabled||value.password_lock_disabled===true);
 }

@@ -27,7 +27,7 @@ function refuseModuleDataSettings(configuration){
   if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
 }
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,confine=null,logRoot=null}={}){this.allowStandalone=allowStandalone===true;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
     initializeModuleRuntime(this,()=>{const command=backendCommand(this.resources,this.definition.id);return {source:path.join(command.runtime,'sources'),bootstrap:path.join(command.runtime,'bootstrap')};});}
   async start(configuration,capability){
     refuseModuleDataSettings(configuration);
@@ -35,14 +35,19 @@ class Runtime {
     const moduleInput=capability===undefined?null:consumeModuleCapability(this,capability,configuration);
     const generation=this.generation||0,check=()=>{if(generation!==(this.generation||0))throw new Error('Application startup cancelled.');moduleInput?.guard();};
     if(moduleInput){await moduleInput.validate();check();}
-    if(typeof this.authorize!=='function')throw new Error('Administrator approval and local authentication are required.');
+    if(typeof this.authorize!=='function')throw new Error('Local authentication is required.');
     const authorization=await this.authorize(configuration);
     check();
     moduleInput?.checkAuthorization(authorization);
-    if(!authorization?.accepted?.grant||authorization.accepted.revoked)throw new Error('Administrator approval is required.');
+    if(authorization?.mode==='standalone'){
+      if(!this.allowStandalone||authorization.identity?.appId!==this.definition.id)throw new Error('Local authorization is unavailable in this build.');
+      require('./access-lifecycle.cjs').authorizationIdentity(authorization);
+    }else if(!authorization?.accepted?.grant||authorization.accepted.revoked)throw new Error('Administrator approval is required.');
     if(this.child&&this.authorization&&require('./access-lifecycle.cjs').authorizationIdentity(authorization)!==require('./access-lifecycle.cjs').authorizationIdentity(this.authorization))throw new Error('Close the app before changing its approved account.');
     this.authorization=authorization;
     const desired=runtimeRoots(this.definition.id,this.userData,configuration);
+    if(desired.standaloneDistrictData&&!this.allowStandalone)throw new Error('Local district data is unavailable in this build.');
+    if(desired.standaloneDistrictData&&authorization.mode!=='standalone')throw new Error('Local district authorization is required.');
     if(this.child){if(JSON.stringify(desired)!==JSON.stringify(this.roots))throw new Error('Close the app before changing its district or data directory.');
       checkWarmModule(this,configuration,authorization);
       if(activeModule(this)){const child=this.child,ready=await health(this.origin,this.token,this.definition.id);check();if(this.child!==child||!matchesModuleHealth(this,ready))throw new Error('Native module input is unavailable.');}
@@ -57,9 +62,10 @@ class Runtime {
     // logRoot (Terrier's private store, main.cjs) keeps backend.log out of the synced profile; the legacy owner and the other apps log in the profile.
     const state=roots.state,logs=this.logRoot&&!roots.legacyOwner?this.logRoot:path.join(this.userData,'logs');fs.mkdirSync(logs,{recursive:true});
     const environment={...backendEnvironment(),DESKTOP_LAUNCH_TOKEN:this.token};
+    if(authorization.mode==='standalone')delete environment.DESKTOP_ACCESS_PRINCIPAL;
     if(appId==='terrier'){
       if(!authorization.principal||authorization.principal.districtId!==roots.district)throw new Error('Approved Terrier account is required.');
-      environment.DESKTOP_ACCESS_PRINCIPAL=JSON.stringify(authorization.principal);
+      if(authorization.mode!=='standalone')environment.DESKTOP_ACCESS_PRINCIPAL=JSON.stringify(authorization.principal);
     }
     // The existing owner's one password and sign-in for all districts live in the profile's desktop-level state.
     const ownerRoot=roots.legacyOwner?path.join(this.userData,'state','terrier-owner'):null;
@@ -74,6 +80,7 @@ class Runtime {
     const log=fs.openSync(path.join(logs,'backend.log'),'a',0o600);
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
+    if(appId==='terrier'&&authorization.mode==='standalone')args.push('--standalone');
     if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner,'--owner-root',ownerRoot);
     if(roots.githubDistrictData===true) args.push('--github-district-data');
     if(moduleInput)args.push('--desktop-module-input','--profile-root',this.userData);

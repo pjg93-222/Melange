@@ -11,6 +11,10 @@ const applicationConfig=app.isPackaged?require('./package.json').desktopAppConfi
 if(!applicationConfig||(app.isPackaged&&!applicationConfig.appId))throw new Error('Packaged application identity is missing.');
 const definition=appDefinition(applicationConfig.appId||(process.env.DESKTOP_APP_ID||'melange'));
 const githubConfig=applicationConfig.desktopUpdateSource?.provider==='github'?require('./github-source.cjs').configuration(applicationConfig.desktopUpdateSource):null;
+const accessMode=applicationConfig.desktopAccessMode||(app.isPackaged?'managed':process.env.DESKTOP_ACCESS_MODE||'standalone');
+if(!['managed','standalone'].includes(accessMode))throw new Error('Unsupported desktop access mode');
+const standaloneMode=accessMode==='standalone';
+const updatePresentation=require('./update-status.cjs').createUpdateStatus({appId:definition.id,appName:definition.name,installedVersion:app.getVersion(),provider:githubConfig?'github':'publisher',accessMode});
 app.setName(definition.name);
 // Without the explicit isolated switch this resolves exactly the production profile, AppUserModelId, discovery cache and login registration.
 let profile,isolationRefused=null;
@@ -59,6 +63,23 @@ function saveEnrollment(value){if(!safeStorage.isEncryptionAvailable())throw new
 // Settings written after startup always pass isolated-profile confinement.
 const saveSettings=value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value);
 function updateStatus(message){status=message;if(settingsWindow&&!settingsWindow.isDestroyed())settingsWindow.webContents.send('desktop:status',message);}
+function updateSnapshot(){return {...updatePresentation.current(),accessMode};}
+function showUpdateTitle(){
+ if(!window||window.isDestroyed())return;
+ const title=definition.name+' '+app.getVersion()+' — '+updateSnapshot().message+(profile.isolated?ISOLATED_TITLE_SUFFIX:'');
+ window.setTitle(title);
+}
+function updateGitHubStatus(message){
+ updatePresentation.record(message);const value=updateSnapshot();
+ for(const owned of [window,settingsWindow,accessWindow,authenticationWindow])if(owned&&!owned.isDestroyed())owned.webContents.send('desktop:update-status',value);
+ showUpdateTitle();
+}
+function updateInfoOnly(event){
+ const owned=[window,settingsWindow,accessWindow,authenticationWindow].find(item=>item&&!item.isDestroyed()&&item.webContents===event.sender);
+ if(!owned||event.senderFrame!==owned.webContents.mainFrame)throw new Error('Untrusted update-status request');
+ const url=event.senderFrame.url;
+ if(![setupURL,accessURL,loadingURL].includes(url)&&!(runtime?.origin&&new URL(url).origin===runtime.origin))throw new Error('Untrusted update-status page');
+}
 function setupOnly(event){if(!settingsWindow||settingsWindow.isDestroyed()||event.sender!==settingsWindow.webContents||event.senderFrame!==settingsWindow.webContents.mainFrame||event.senderFrame.url!==setupURL)throw new Error('Untrusted desktop request');}
 function runtimeOnly(event){if(runtime.requestsAllowed===false||accessLifecycle?.suspended||event.sender!==window.webContents||event.senderFrame!==window.webContents.mainFrame||!runtime.origin||new URL(event.senderFrame.url).origin!==runtime.origin)throw new Error('Untrusted application request');}
 async function showSetup(){
@@ -71,14 +92,15 @@ async function showSetup(){
 async function ensureAccess(){
  if(accessTransition.mutating)throw new Error('Administrator trust is being verified');
  if(accessGate)return accessGate;if(accessInitializing)return accessInitializing;
- const finish=accessTransition.begin();accessInitializing=(async()=>{const gate=await require('./access-bootstrap.cjs').bootstrapAccess({resources,appId:definition.id,profile:userData,configuration:()=>read('settings.json'),packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust});accessGate=gate;
-  activityOutbox=new(require('./activity-outbox.cjs').ActivityOutbox)({store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'activity'})});
+ const finish=accessTransition.begin();accessInitializing=(async()=>{const bootstrap=standaloneMode?require('./standalone-bootstrap.cjs').bootstrapStandalone:require('./access-bootstrap.cjs').bootstrapAccess;
+  const gate=await bootstrap({resources,appId:definition.id,profile:userData,configuration:()=>read('settings.json'),packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust,safeStorage});accessGate=gate;
+  if(!standaloneMode)activityOutbox=new(require('./activity-outbox.cjs').ActivityOutbox)({store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'activity'})});
   const {AccessLifecycle,terrierSession}=require('./access-lifecycle.cjs');
   accessLifecycle=new AccessLifecycle({runtime,gate:accessGate,hide:()=>window.hide(),showBoundary:showAccess,
    terrierAuthenticated:()=>terrierSession(runtime,runtimePartition),terrierLogout:()=>terrierSession(runtime,runtimePartition,{logout:true}),
    terrierPasswordLockDisabled:()=>terrierSession(runtime,runtimePartition,{passwordLockDisabled:true}),
    onSuspend:()=>Promise.all([districtSwitch?.suspend(),moduleDataStartup?.invalidate('authorization')]),
-   presence:(state,sessionId)=>accessGate.client.presence({sessionId,state,version:app.getVersion(),districtId:definition.id==='terrier'&&state==='active'?read('settings.json').district:null})});
+   presence:standaloneMode?async()=>{}:(state,sessionId)=>accessGate.client.presence({sessionId,state,version:app.getVersion(),districtId:definition.id==='terrier'&&state==='active'?read('settings.json').district:null})});
  return gate;})();
  try{return await accessInitializing;}catch(error){try{fs.mkdirSync(path.join(userData,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(userData,'logs','access.log'),new Date().toISOString()+' access bootstrap failed (reason='+(error?.reason||'none')+'): '+String(error?.message).slice(0,200)+'\n',{mode:0o600});}catch{}throw error;}finally{accessInitializing=null;finish();}
 }
@@ -172,7 +194,8 @@ function ownerDistrictController(){
    keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);},
    createProvider:onStatus=>new(require('./github-districts.cjs').GitHubDistricts)({resources,profile:userData,root:packRoot,
     publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.terrier,
-    store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}),signal:downloads.signal,onStatus,
+    store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:standaloneMode?'github-district-local-state':'github-district-state'}),
+    previousStore:standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}):null,signal:downloads.signal,onStatus,
     checkExisting:async(dataRoot,district)=>{const result=await probe(command,'--desktop-github-district-check',{sourceRoot,dataRoot,district},{signal:downloads.signal});return result.validated===true&&result.district===district;},
     extract:request=>probe(command,'--desktop-github-district-extract',{...request,sourceRoot},{timeout:10*60*1000,signal:downloads.signal})
    })
@@ -181,13 +204,13 @@ function ownerDistrictController(){
  return districtDataController;
 }
 async function prepareOwnerDistrict(configuration){
- if(!configuration.terrierLegacy)return configuration;
+ if(!standaloneMode&&!configuration.terrierLegacy)return configuration;
  const controller=ownerDistrictController();return controller?await controller.ensure(configuration):configuration;
 }
 async function discoverDistrictData({skipIfBusy=false}={}){
  if(closing||!runtime?.child||accessLifecycle?.suspended||districtSwitch?.busy)return null;
  const configuration=runtime.configuration||read('settings.json');
- if(!configuration.terrierLegacy)return null;
+ if(!standaloneMode&&!configuration.terrierLegacy)return null;
  const controller=ownerDistrictController();
  try{await controller?.discover(configuration,{skipIfBusy});}catch{/* The provider emits fixed error/offline state; the open runtime stays intact. */}
  return controller?.info(configuration,runtime.authorization)||null;
@@ -196,14 +219,14 @@ async function discoverDistrictData({skipIfBusy=false}={}){
 async function prepareDistrictData(){
  const settings=read('settings.json');
  try{
-  if(settings.terrierLegacy!==undefined)return await prepareOwnerDistrict(settings);
+  if(standaloneMode||settings.terrierLegacy!==undefined)return await prepareOwnerDistrict(settings);
   await packs.ensureDistrictData(accessGate,{root:packRoot,settings,journal:journalStore(),check:packs.districtCheck({resources,protectedPaths:[app.getAppPath(),path.dirname(process.execPath)]}),
    confine:profile.isolated?item=>confineIsolatedPath(profile.boundary,item,'The district data store'):null,onStatus:loadingStatus,signal:downloads.signal,
    keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);}});
   return settings;
  }catch(error){
   if(closing||downloads.signal.aborted)return false;
-  if(settings.terrierLegacy!==undefined){districtLog('GitHub district preparation could not complete.');loadingStatus('GitHub district data could not be verified. Existing files were preserved. Reopen Terrier to try again.');return false;}
+  if(standaloneMode||settings.terrierLegacy!==undefined){districtLog('GitHub district preparation could not complete.');loadingStatus('GitHub district data could not be verified. Existing files were preserved. Reopen Terrier to try again.');return false;}
   districtLog(error?.cause?.message||error?.message);
   if(error instanceof packs.DistrictDataStop){loadingStatus(error.message+' Reopen Terrier to try again.');return false;}
   throw error;
@@ -237,16 +260,17 @@ async function checkUpdates(){
  if(portable){updateStatus('Portable copy: replace this extracted application folder to update. Your local data remains separate.');if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();}catch{}await drainActivity();return;}
 
  if(checkingUpdates||closing||updater.osShutdown)return;checkingUpdates=true;
+ updateGitHubStatus('Checking for updates…');
  try{
   let enrollmentDeferred=false;
   try{if(githubConfig)await require('./github-source.cjs').enrollGitHub({appId:definition.id,publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp[definition.id],config:githubConfig,load:loadEnrollment,save:saveEnrollment});else await accessOperation(async()=>{const gate=await ensureAccess();await enrollApproved({client:gate.client,version:app.getVersion(),load:loadEnrollment,save:saveEnrollment});});}
   catch{enrollmentDeferred=true;}
   await updater.check();
-  if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile)))updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');
+  if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile))){updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');updateGitHubStatus('Update deferred: update setup is unavailable. Retrying automatically.');}
   if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}
   await drainActivity();
   if(background&&!runtime.child&&!window.isVisible()&&!updater.osShutdown){const activating=await updater.activateAfterClose();if(activating)closing=true;}
- }catch{updateStatus('Update check deferred. The receiver will retry; local work remains available.');}
+ }catch{updateStatus('Update check deferred. The receiver will retry; local work remains available.');updateGitHubStatus('Update deferred: unable to check. Retrying automatically.');}
  finally{checkingUpdates=false;}
 }
 async function recoverPrevious(){if(portable){updateStatus('Portable copy: replace the extracted application folder to change versions.');return;}try{const target=updater.recoveryCandidate();const result=await dialog.showMessageBox(window,{type:'warning',buttons:['Cancel','Prepare recovery'],defaultId:0,cancelId:0,title:'Restore previous '+definition.name+' version?',message:'Restore previously authorized version '+target.version+'?',detail:'Program files will be restored only after you close the app. Local data is retained. This recovery cannot reverse data changes made by a newer version.'});if(result.response===1)await updater.beginRecovery();}catch(error){updateStatus('Recovery unavailable: '+error.message);}}
@@ -283,7 +307,8 @@ function createModuleDataStartup(){
    transport:contract.contractId==='melange.public-data.pages.v1'?new(require('./github-module-transport.cjs').GitHubModuleTransport)(definition.id,{paged:true}):undefined,
    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,
    protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)],
-   store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}),
+   store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:standaloneMode?'github-module-local-state':'github-module-state'}),
+   previousStore:standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}):null,
    authorize:async configuration=>(await ensureAccess()).authorize(configuration),
    effectiveConfiguration:({originalSelected,source})=>({...originalSelected,ownerGitHubModuleData:source})})});
 }
@@ -300,7 +325,7 @@ app.whenReady().then(async()=>{
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
   // Terrier: new installs use the private store; a tester still on the old default <profile>\data is moved to it (explicit directories are never changed).
   if(!fs.existsSync(file('settings.json'))){const dataDirectory=packs?path.join(packRoot,'stores'):path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',{dataDirectory,...(definition.id==='terrier'?{district:'co-05'}:{})});}
-  else if(packs){
+  else if(packs&&!standaloneMode){
    const previous=read('settings.json'),migrated=packs.migrateSettings(previous,{userData,root:packRoot});
    if(migrated){
     // The old default data and state trees (voter data, accounts, secrets) must not stay in Documents. They go first: if that fails the settings stay and the next start retries.
@@ -309,10 +334,10 @@ app.whenReady().then(async()=>{
    }
   }
   if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){dialog.showErrorBox(definition.name+' isolated test profile refused',error.message+' The backend was not started. Correct or remove settings.json in '+userData+'.');app.quit();return;}
-  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,
+  const createRuntime=()=>new Runtime(definition.id,userData,resources,{allowStandalone:standaloneMode,protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,
    // Packaged only with DESKTOP_SHARED_SCRAPE=1 (builder.cjs). The backend gets a loopback capability; the protected access
    // bearer stays in this process and provider API keys stay on the publisher (ops/desktop/server/SCRAPE-BROKER.md).
-   scrapeFactory:applicationConfig.desktopScrapeBroker===true&&['melange','mentat'].includes(definition.id)?async configuration=>require('./scrape-service.cjs').startScrapeService({authorize:async()=>{if(closing||accessLifecycle?.suspended)throw new Error('Collection is suspended');return (await ensureAccess()).authorize(configuration);},query:async(value,options)=>(await ensureAccess()).client.scrape(value,options)}):null,
+   scrapeFactory:!standaloneMode&&applicationConfig.desktopScrapeBroker===true&&['melange','mentat'].includes(definition.id)?async configuration=>require('./scrape-service.cjs').startScrapeService({authorize:async()=>{if(closing||accessLifecycle?.suspended)throw new Error('Collection is suspended');return (await ensureAccess()).authorize(configuration);},query:async(value,options)=>(await ensureAccess()).client.scrape(value,options)}):null,
    authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
   runtime=createRuntime();
   moduleDataStartup=createModuleDataStartup();
@@ -355,6 +380,8 @@ app.whenReady().then(async()=>{
   // Visibility is granted only by the post-await authorization checks in launch.
   // A late ready-to-show event must never reveal preserved locked content.
   window.on('closed',()=>{authenticationWindow?.close();accessWindow?.close();settingsWindow?.close();});
+  window.on('page-title-updated',event=>{event.preventDefault();showUpdateTitle();});
+  showUpdateTitle();
   const permitted=url=>url===loadingURL||Boolean(runtime.origin&&new URL(url).origin===runtime.origin);
   window.webContents.on('did-finish-load',()=>{if(loadingText&&window.webContents.getURL()===loadingURL)window.webContents.send('desktop:status',loadingText);});
   window.webContents.on('will-navigate',(event,url)=>{if(!permitted(url))event.preventDefault();});
@@ -375,7 +402,7 @@ app.whenReady().then(async()=>{
   const installLayout=layoutMode?{cacheDirectory:dlLayout.updaterCacheDirectory(downloadsFolder,definition.id),
     sweep:state=>dlLayout.sweepLayout({downloads:downloadsFolder,documents:app.getPath('documents'),home:app.getPath('home'),localAppData:process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),product:definition.name,app:definition.id,applicationId:definition.applicationId,current:app.getVersion(),execPath:process.execPath,userData,state,log:updateStatus})}:null;
   if(layoutMode)dlLayout.layoutWarnings({downloads:downloadsFolder,home:app.getPath('home'),env:process.env,execFile:require('node:util').promisify(require('node:child_process').execFile)}).then(warnings=>{if(warnings.length)updateStatus(warnings.join(' '));}).catch(()=>{});
-  updater=new DesktopUpdater({installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
+  updater=new DesktopUpdater({installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>{const detail=githubSource?message+' '+githubSource.discoverySummary():message;updateGitHubStatus(detail);updateStatus(detail);},autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
   // Updates do not depend on the release certificate being in the user's Trusted Root store: the Ed25519-signed manifest and sha256/sha512 checks (trust.cjs, github-source.cjs) still gate every install.
   // builder.cjs keeps verifyUpdateCodeSignature:true so publisherName stays configured for updater.cjs nativeTrust; only the Authenticode chain checks are skipped.
   // electron-updater's own check would require the release root in the user's Trusted Root store (Status Valid) and match a
@@ -398,7 +425,8 @@ app.whenReady().then(async()=>{
    if(installed){closing=true;launchInstall.closeWindow();await runtime.stop().catch(()=>{});return;}
    launchInstall.closeWindow();if(requested)background=false;
   }
-  ipcMain.handle('desktop:info',event=>{setupOnly(event);return {name:definition.name,appId:definition.id,version:app.getVersion(),updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile))};});
+  ipcMain.handle('desktop:update-info',event=>{updateInfoOnly(event);return updateSnapshot();});
+  ipcMain.handle('desktop:info',event=>{setupOnly(event);return {name:definition.name,appId:definition.id,version:app.getVersion(),accessMode,updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile))};});
   async function selectDistrict(event,district){
     runtimeOnly(event);
     if(definition.id!=='terrier'||askingClose||closing||accessLifecycle?.suspended)throw new Error('District switching is unavailable.');
@@ -415,7 +443,7 @@ app.whenReady().then(async()=>{
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})}]:[]),{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})}]:[]),{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},...(!standaloneMode?[{label:'Import or refresh administrator server trust',click:importAccessTrust}]:[]),{label:'Check for updates',click:checkUpdates},{label:'Restore previous version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
   window.on('close',event=>{
     if(updater.osShutdown||closeApproved||!runtime.child)return;
     event.preventDefault();if(askingClose)return;askingClose=true;
@@ -423,10 +451,12 @@ app.whenReady().then(async()=>{
   });
   // Never override a renderer beforeunload veto; unsaved-work protections remain active.
   require('./district-switch.cjs').preserveUnloadVeto(window.webContents,()=>{closeApproved=false;districtSwitch?.cancel();});
-  if(!background&&definition.id==='terrier'){await window.loadURL(loadingURL);window.show();}else await window.loadURL('about:blank');
+  if(!background){await window.loadURL(loadingURL);window.show();}else await window.loadURL('about:blank');
+  // GitHub status and discovery start independently of sign-in/data preparation.
+  checkUpdates();
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else{updateStatus('Application startup failed: no local data location is configured. Check local logs.');await showSetup();}}
   if(!portable)if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
-  checkUpdates();interval=setInterval(checkUpdates,15*60*1000);interval.unref();
+  interval=setInterval(checkUpdates,15*60*1000);interval.unref();
   districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),5*60*1000);districtDataInterval.unref();
   networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:()=>{checkUpdates();moduleDataStartup?.stage({skipIfBusy:true}).catch(()=>{});}});
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();

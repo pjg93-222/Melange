@@ -11,6 +11,7 @@ module.exports=Object.freeze([
   'access-bootstrap.cjs','access-client.cjs','access-credentials.cjs','access-gate.cjs',
   'access-lifecycle.cjs','access-preload.cjs','access-state.cjs','access-transition.cjs','activity-outbox.cjs',
   'local-access.cjs','owner-access.cjs','publisher-trust.cjs',
+  'standalone-access.cjs','standalone-state.cjs','standalone-bootstrap.cjs','update-status.cjs','update-status-ui.js','update-status.css',
   'access.html','access.css','access-ui.js','setup.html','setup.css','setup.js','desktop-chrome.css',
   'install-layout.cjs','icons/melange.ico','icons/terrier.ico','icons/mentat.ico','package.json'
 ]);

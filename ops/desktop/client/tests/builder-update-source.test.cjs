@@ -14,10 +14,11 @@ function updateSource(fixture,appId,repository){
   delete env.DESKTOP_GITHUB_REPOSITORY;delete env.DESKTOP_UPDATE_PROVIDER;
   if(repository!==undefined)env.DESKTOP_GITHUB_REPOSITORY=repository;
   const child=spawnSync(process.execPath,['-e',
-    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,nsis:c.nsis,target:c.win.target}))"],
+    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,accessMode:c.extraMetadata.desktopAppConfig.desktopAccessMode,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,nsis:c.nsis,target:c.win.target}))"],
     {cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
   assert.equal(child.status,0,child.stderr);
   const result=JSON.parse(child.stdout);
+  assert.equal(result.accessMode,'standalone','new builds use local access without remote administrator approval');
   assert.equal(result.uninstaller,false,appId+' native metadata disables the uninstaller');
   assert.equal(result.nsis,undefined,'the normal build must not restore legacy installer plug-ins');
   assert.deepEqual(result.target,['dir'],'the signed directory is completed by build-native.cjs');

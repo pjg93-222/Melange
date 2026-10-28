@@ -2,6 +2,16 @@
 
 The current release target is Windows x64. Each app has an independent Electron identity, data directory, credential entry, backend process, and update channel. End users do not need Docker.
 
+## Local access and visible update status
+
+New builds default to `DESKTOP_ACCESS_MODE=standalone`. Melange and Mentat use a local password and protected device session. Terrier uses its real local Django account/password and administrator role. Opening these builds does not request remote administrator approval or contact the Bore approval endpoint. Existing verified local password/device records can migrate into separately encrypted local records; existing application data and old managed records remain available. No managed grant, bearer token or private-server permission is synthesized. The legacy managed mode remains an explicit build option.
+
+All three apps check their own public GitHub Releases directly. The launch, local sign-in and settings screens show the installed version and update state; the main window title retains that status. A successful current check, a cached result, API cooldown, a download, a prepared update and a failed check are reported separately. A failed or deferred check never says the app is freshly synchronized. This updates published application releases, not arbitrary source commits or user files.
+
+Update discovery starts before local sign-in or dataset preparation. A running version awaiting backend readiness can still discover a newer corrective release while retaining the last confirmed recovery baseline. A version 1.0.23 installation already stuck in its previous readiness logic may need one manual upgrade. Public dataset downloads are separate from application updates and retain their signed catalogue, hash and rollback checks; their availability does not imply private-server access.
+
+For the optional private publisher or shared scrape broker, select `DESKTOP_ACCESS_MODE=managed` explicitly. Standalone builds refuse those private services. The packaged trust descriptor still supplies the signed GitHub verification keys; its legacy access-server URL is not used for standalone authorization.
+
 The runtime launcher prefers `runtime/<app>/python/python.exe` with `bootstrap/desktop_backend.py`. It passes `-E -s -u`, rejects host Python fallback, and removes inherited Python path/home settings. A real bundled interpreter preserves application child-script semantics. The earlier frozen backend remains supported for development artifacts only. The native credential helper uses the same app-specific runtime.
 
 ## Building the signed Windows installer
@@ -16,7 +26,7 @@ npm run build -- --win --x64 --publish never
 
 The build produces `<Product>-<version>-win-x64.exe` beside `win-unpacked`. The release driver performs its package-bound gates and signed-feed publication, using canonical GitHub names `<app>-<version>-win32-x64.exe`; it also publishes the signed manifest and trust assets. `npm run build` alone does not publish an update. See [the release procedure](../GITHUB_RELEASES.md).
 
-The installer keeps per-file progress while avoiding thousands of details-list insertions during extraction. It preserves all program files and the initial recovery copy; no end-to-end install-time improvement has been measured. Version 1.0.23 and its stable signed feed are in preparation, with managed-workstation acceptance still pending. [The ThreatLocker deployment guide](THREATLOCKER-DEPLOYMENT.md) covers IT's complete-application capture workflow, shortcuts, required execution paths and the locally inspected 1.0.22 vendor signatures.
+The installer keeps per-file progress while avoiding thousands of details-list insertions during extraction. It preserves all program files and the initial recovery copy; no end-to-end install-time improvement has been measured. Version 1.0.23 and its stable signed feeds were published before the standalone-access changes described above; source changes alone do not upgrade that existing package. [The ThreatLocker deployment guide](THREATLOCKER-DEPLOYMENT.md) covers IT's complete-application capture workflow, shortcuts, required execution paths and the locally inspected 1.0.22 vendor signatures.
 
 ## Update lifecycle
 
