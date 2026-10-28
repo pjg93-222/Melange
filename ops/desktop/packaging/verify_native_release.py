@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import ast
 import contextlib
+from concurrent.futures import ThreadPoolExecutor
 import ctypes
 import datetime
 import hashlib
@@ -103,10 +104,22 @@ def locked_input(path):
 def scan(directory):
     physical(directory, True)
     files = legacy.tree(Path(directory))
-    for file in files.values():
+    # Windows final-path checks and small reads have substantial per-file
+    # latency. Bound concurrency while preserving every physical-path check,
+    # header classification, hash, and before/after stat invariant. No verdict
+    # is cached, and callers still repeat their independent final comparisons.
+    def inspect(item):
+        name, file = item
         physical(file)
-    pes, hashes = legacy.inspect_files(files)
-    return files, pes, {name: {"sha256": hashes[name], "size": file.stat().st_size} for name, file in files.items()}
+        native, hashes = legacy.inspect_files({name: file})
+        return name, bool(native), {"sha256": hashes[name], "size": file.stat().st_size}
+    pes, mapping = set(), {}
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        for name, native, value in pool.map(inspect, files.items()):
+            if native:
+                pes.add(name)
+            mapping[name] = value
+    return files, pes, mapping
 
 
 def reference_overlays(files, pes, mapping, app, *, executable=None, asar=None):
