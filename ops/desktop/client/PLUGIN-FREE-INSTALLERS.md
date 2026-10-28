@@ -5,11 +5,16 @@ blocks for `StdUtils.dll`, `nsis7z.dll`, `System.dll`, and `UAC.dll`. Removing t
 uninstaller did not remove those NSIS dependencies.
 
 Use `build-plugin-free.cjs` for the replacement Windows distribution. It embeds
-the application files using NSIS's built-in solid LZMA compression and `File`
+the application files using NSIS's built-in per-file LZMA compression and `File`
 instructions. It uses built-in commands for the per-user Downloads path,
 shortcuts, registry entry, and launch arguments. It creates no uninstaller and
 uses no external installer plug-ins or elevation calls. The legacy
 electron-builder NSIS output still uses plug-ins and is not this replacement.
+
+Per-file compression with an 8 MiB dictionary avoids the old compiler's size limit
+when a solid build first accumulates the full uncompressed runtime. Each build
+uses a fresh `<output>.work` directory for compiler temporary files; failed build
+evidence is retained there.
 
 The shared builder supports Melange, Mentat and Terrier. Its input is an existing
 signed application directory; it does not compile the backend or sign the output.
