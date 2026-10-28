@@ -15,6 +15,8 @@ from unittest.mock import patch
 
 import pytest
 
+import access_http
+from access_http import RateLimit
 from desktop_admin import BoundedServer, Store, handler_for
 from access_store import AccessStore
 
@@ -26,7 +28,9 @@ TLS = ssl._create_unverified_context()  # fixture server; pin validation belongs
 def clock():
     """Simulated hours: the kept 100-new-requests-per-hour flood bound is a rate, not a head count."""
     offset = [0]
-    with patch.object(AccessStore, 'now', lambda _self: int(time.time()) + offset[0]):
+    # The access listener's 600/min total bucket reads the same simulated clock.
+    with patch.object(AccessStore, 'now', lambda _self: int(time.time()) + offset[0]), \
+            patch.object(access_http, 'RateLimit', lambda: RateLimit(clock=lambda: time.monotonic() + offset[0])):
         yield offset
 
 
@@ -70,7 +74,8 @@ def dummy(n):
 
 def test_150_relayed_dummies_all_end_approved_and_active(tmp_path, clock):
     """Public-origin mode: every dummy arrives through the relay as 127.0.0.1. Formerly 100 open
-    requests, 600 calls/min in total and (in LAN mode) 10 requests/hour and 60 calls/min per address."""
+    requests and (in LAN mode) 10 requests/hour and 60 calls/min per address. The 600 calls/min total
+    bucket is kept (C12); these arrivals span two simulated hours, so it never binds here."""
     server, worker, admin = listener(tmp_path, ORIGIN)
     relay = dict(host='updates.example.com')
 

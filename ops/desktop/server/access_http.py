@@ -61,21 +61,23 @@ def unique_object(pairs):
 
 
 class RateLimit:
-    """Per-minute buckets for the loopback-only admin dashboard. The recipient access routes have none:
-    their load is bounded by the listener's worker slots, not by refusing addresses or people."""
+    """Per-minute buckets. The loopback-only admin dashboard keeps per-peer (60), peer-table (201) and total (600)
+    buckets. The recipient access routes use the total bucket only (per_peer=False): no address or person is
+    refused, but all recipients together get at most 600 requests a minute, as before #24."""
     def __init__(self, clock=time.monotonic):
         self.clock, self.lock, self.entries = clock, threading.Lock(), {}
 
-    def check(self, address):
+    def check(self, address, per_peer=True):
         now = self.clock()
         with self.lock:
             self.entries = {key: [stamp for stamp in stamps if now-stamp < 60]
                             for key, stamps in self.entries.items() if any(now-stamp < 60 for stamp in stamps)}
             peer = self.entries.get(address, [])
             total = self.entries.get('*', [])
-            if len(peer) >= 60 or len(total) >= 600 or (address not in self.entries and len(self.entries) >= 201):
+            if (per_peer and (len(peer) >= 60 or (address not in self.entries and len(self.entries) >= 201))) or len(total) >= 600:
                 raise HTTPRefused(429, 'rate_limited')
-            self.entries[address] = peer + [now]
+            if per_peer:
+                self.entries[address] = peer + [now]
             self.entries['*'] = total + [now]
 
 
@@ -84,6 +86,7 @@ def handler_for(access, fallback, packs=None, scrape_broker=None):
         packs_root = district_packs.refuse_synced(packs or district_packs.default_packs())
     except Refused:
         packs_root = None
+    limiter = RateLimit()
 
     class Handler(HeaderDeadlineMixin, fallback):
         data_slots = threading.BoundedSemaphore(DATA_SLOTS)
@@ -122,6 +125,10 @@ def handler_for(access, fallback, packs=None, scrape_broker=None):
             if (len(self.path) > (200 if data else 160) or any(char in self.path for char in ('%', '\\', '#') + (() if data else ('?',)))
                     or '..' in self.path):
                 raise HTTPRefused(400, 'invalid_request')
+            # The /v1/access routes the bucket covered before #24 share one total bucket: every relay recipient arrives
+            # as 127.0.0.1, so no address or person is refused. Data and scrape routes keep their own slot and quota bounds.
+            if self.path.startswith('/v1/access'):
+                limiter.check(self.client_address[0], per_peer=False)
             if not access.db.is_file():
                 raise HTTPRefused(503, 'service_unavailable')
 
