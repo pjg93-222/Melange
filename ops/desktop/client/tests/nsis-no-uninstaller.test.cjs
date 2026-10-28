@@ -18,6 +18,9 @@ test('actual pinned templates preserve installation but contain no uninstaller w
   for(const operation of ['CHECK_APP_RUNNING','installApplicationFiles','registryAddInstallInfo','addStartMenuLink','addDesktopLink','customInstall'])assert.ok(section.includes(operation),operation);
   assert.ok(section.indexOf('!insertmacro installApplicationFiles')<section.indexOf('!insertmacro customInstall'),'startup registration follows successful extraction');
   assert.doesNotMatch(installer,/RMDir\s+\/r|Delete "\$INSTDIR/,'old program folders are retained');
+  const utilities=g.read('nsis-without-uninstaller/include/installUtil.nsh');
+  assert.doesNotMatch(utilities,/^(?:Function|!macro) (?:GetInQuotes|GetFileParent|handleUninstallResult|uninstallOldVersion)\b/m);
+  for(const name of ['moveFile','copyFile','setIsTryToKeepShortcuts'])assert.match(utilities,new RegExp('!macro '+name+'\\b'));
 });
 
 test('electron-builder custom-script branch never generates or signs an uninstaller',async t=>{
@@ -43,6 +46,44 @@ function compiler(){
   try{for(const group of fs.readdirSync(cache).filter(name=>/^nsis-\d/.test(name)))for(const version of fs.readdirSync(path.join(cache,group)))candidates.push(path.join(cache,group,version,'Bin','makensis.exe'));}catch{}
   return candidates.find(file=>fs.existsSync(file));
 }
+
+test('complete generated assisted installer compiles with warnings as errors; original unused closure fails',async t=>{
+  const makensis=compiler(),cache=path.join(process.env.LOCALAPPDATA||'','electron-builder','Cache','nsis-resources-3.4.1');
+  const resource=fs.existsSync(cache)&&fs.readdirSync(cache).map(name=>path.join(cache,name,'plugins','x86-unicode')).find(file=>fs.existsSync(file));
+  if(process.platform!=='win32'||!makensis||!resource){t.skip('pinned NSIS compiler/resources unavailable');return;}
+  require('app-builder-lib');
+  const {NsisScriptGenerator}=require('app-builder-lib/out/targets/nsis/nsisScriptGenerator');
+  const {LangConfigurator,createAddLangsMacro,addCustomMessageFileInclude}=require('app-builder-lib/out/targets/nsis/nsisLang');
+  const g=generated(t),header=new NsisScriptGenerator(),languages=new LangConfigurator({multiLanguageInstaller:false});
+  header.include(path.join(templates,'include','StdUtils.nsh'));
+  header.addIncludeDir(path.join(templates,'include'));header.addPluginDir('x86-unicode',resource);
+  header.flags(['updated','force-run','keep-shortcuts','no-desktop-shortcut','delete-app-data','allusers','currentuser']);
+  createAddLangsMacro(header,languages);
+  let index=0;const packager={getTempFile:async()=>path.join(g.directory,'messages-'+index++ + '.nsh')};
+  await addCustomMessageFileInclude('messages.yml',packager,header,languages);
+  await addCustomMessageFileInclude('assistedMessages.yml',packager,header,languages);
+  const layout=path.join(g.directory,'installer.generated.nsh');
+  fs.writeFileSync(layout,require('../install-layout.cjs').nsisInclude({product:'Melange',app:'melange',version:'1.0.21',installerNsh:path.join(__dirname,'..','installer.nsh')}));
+  header.include(layout);
+  const archive=path.join(g.directory,'fixture.7z');fs.writeFileSync(archive,'compile-only payload; never extracted or executed');
+  const definitions={APP_ID:'org.melange.desktop.compile-fixture',APP_GUID:'00000000-0000-4000-8000-000000000001',UNINSTALL_APP_KEY:'00000000-0000-4000-8000-000000000001',
+    PRODUCT_NAME:'Melange',PRODUCT_FILENAME:'Melange',APP_FILENAME:'Melange',APP_DESCRIPTION:'Compile fixture',VERSION:'1.0.21',PROJECT_DIR:g.directory,
+    BUILD_RESOURCES_DIR:g.directory,APP_PACKAGE_NAME:'melange-desktop',APP_64:archive,APP_64_NAME:'fixture.7z',APP_64_UNPACKED_SIZE:'1',
+    APP_INSTALLER_STORE_FILE:'melange-desktop-updater\\installer.exe',COMPRESSION_METHOD:'7z',HIDE_RUN_AFTER_FINISH:null,
+    MULTIUSER_INSTALLMODE_ALLOW_ELEVATION:null,INSTALL_MODE_PER_ALL_USERS_REQUIRED:null,SHORTCUT_NAME:'Melange',UNINSTALL_DISPLAY_NAME:'Melange 1.0.21',ESTIMATED_SIZE:'1',COMPRESS:'auto',UNINSTALLER_OUT_FILE:null};
+  const script=path.join(g.directory,'complete.nsi'),exe=path.join(g.directory,'compile-only.exe');
+  const prelude=['Unicode true','OutFile "'+exe+'"','VIProductVersion 1.0.21.0',
+    ...['ProductName','ProductVersion','LegalCopyright','FileDescription','FileVersion'].map(name=>'VIAddVersionKey /LANG=1033 '+name+' "'+(name.endsWith('Version')?'1.0.21':'Compile fixture')+'"'),
+    ...Object.entries(definitions).map(([name,value])=>'!define '+name+(value===null?'':' "'+value+'"'))].join('\n');
+  fs.writeFileSync(script,prelude+'\n'+header.build()+fs.readFileSync(g.script,'utf8'));
+  // Match electron-builder's stdin/cwd invocation so its multiUser.nsh wins over
+  // NSIS's unrelated, case-insensitively named standard MultiUser.nsh.
+  const compile=()=>spawnSync(makensis,['-WX','-V2','-INPUTCHARSET','UTF8','-'],{cwd:templates,input:fs.readFileSync(script,'utf8'),encoding:'utf8',windowsHide:true,timeout:60000});
+  const success=compile();assert.equal(success.status,0,success.stdout+success.stderr);assert.doesNotMatch(success.stdout+success.stderr,/warning\s+\d+:/i);
+  assert.ok(fs.statSync(exe).size>0); // Never execute the compiled installer.
+  fs.copyFileSync(path.join(templates,'include','installUtil.nsh'),path.join(g.directory,'nsis-without-uninstaller','include','installUtil.nsh'));
+  const regression=compile();assert.notEqual(regression.status,0);assert.match(regression.stdout+regression.stderr,/warning\s+6010/);
+});
 for(const mode of ['success','blocked-plugin','empty-extraction'])test('compiled extraction '+mode+' preserves destination and fails closed',t=>{
   const makensis=compiler();if(process.platform!=='win32'||!makensis){t.skip('pinned NSIS compiler unavailable');return;}
   const g=generated(t),target=path.join(g.directory,'program'),exe=path.join(g.directory,'fixture.exe');

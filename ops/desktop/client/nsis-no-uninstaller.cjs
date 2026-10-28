@@ -6,6 +6,7 @@ const PINNED=Object.freeze({
   'installer.nsi':'8811964416d122612c3e7601728af5d3f998d677918df829a4e8b4c739c8b9f8',
   'installSection.nsh':'74c4dbb4163cdd90ca4850b75d304e916235c882d6af7b5cdad63bffbc977072',
   'include/installer.nsh':'0e319437dd01dcbf911f3f48f664fde0cefbaef704f1cdb1739f63d563f5d4a0',
+  'include/installUtil.nsh':'97bd546b5cd2aaf16b77bc9e2be8a18962dd74ab5c4d23b35b163ca89bf4dd2a',
   'include/extractAppPackage.nsh':'e4174388a0f7a1df0b85a0742aa1ea7a4b2b18f9f29dccd6ef10a66212f68148'
 });
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -31,6 +32,7 @@ function prepare({directory,templates=path.join(path.dirname(require.resolve('ap
   const generated=path.join(directory,'nsis-without-uninstaller');
   const include=path.join(generated,'include');
   let main=replaceOnce(originals['installer.nsi'],'!include "installSection.nsh"','!include '+quote(path.join(generated,'installSection.nsh')));
+  main=replaceOnce(main,'!include "installUtil.nsh"','!include '+quote(path.join(include,'installUtil.nsh')));
   main='; Generated from pinned electron-builder 26.15.3; no uninstaller build pass.\n!addincludedir '+quote(templates)+'\n!addincludedir '+quote(path.join(templates,'include'))+'\n'+main;
   let section=replaceOnce(originals['installSection.nsh'],'!include installer.nsh','!include '+quote(path.join(include,'installer.nsh')));
   section=replaceOnce(section,'!insertmacro uninstallOldVersion SHELL_CONTEXT\n!insertmacro handleUninstallResult SHELL_CONTEXT\n\n${if} $installMode == "all"\n  !insertmacro uninstallOldVersion HKEY_CURRENT_USER\n  !insertmacro handleUninstallResult HKEY_CURRENT_USER\n${endIf}','; Previous program folders remain intact; no old uninstaller is invoked.');
@@ -41,6 +43,19 @@ function prepare({directory,templates=path.join(path.dirname(require.resolve('ap
     '  DeleteRegValue SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" UninstallString\n  DeleteRegValue SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" QuietUninstallString\n  WriteRegDWORD SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" NoRemove 1');
   installer=replaceOnce(installer,'  !ifdef UNINSTALLER_ICON\n    WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon" "$INSTDIR\\uninstallerIcon.ico"\n  !else\n    WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon" "$appExe,0"\n  !endif',
     '  WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "DisplayIcon" "$appExe,0"');
+  // These four functions form only the removed old-uninstaller call graph.
+  // Keep warnings-as-errors: do not emit unreachable functions (NSIS6010).
+  let utilities=originals['include/installUtil.nsh'];
+  for(const name of ['GetInQuotes','GetFileParent','handleUninstallResult','uninstallOldVersion']){
+    const blocks=utilities.match(new RegExp('^Function '+name+'\\n[\\s\\S]*?^FunctionEnd\\n','gm'));
+    if(blocks?.length!==1)throw new Error('Pinned old-uninstaller function is missing or duplicated: '+name);
+    utilities=replaceOnce(utilities,blocks[0],'');
+  }
+  for(const name of ['GetInQuotes','handleUninstallResult','uninstallOldVersion']){
+    const blocks=utilities.match(new RegExp('^!macro '+name+' [^\\n]*\\n[\\s\\S]*?^!macroend\\n','gm'));
+    if(blocks?.length!==1)throw new Error('Pinned old-uninstaller macro is missing or duplicated: '+name);
+    utilities=replaceOnce(utilities,blocks[0],'');
+  }
   const extraction=originals['include/extractAppPackage.nsh'];
   const start=extraction.indexOf('!macro extractUsing7za FILE\n');
   if(start<0||extraction.indexOf('!macro extractUsing7za FILE\n',start+1)>=0)throw new Error('Pinned extraction macro is missing or duplicated');
@@ -49,6 +64,7 @@ function prepare({directory,templates=path.join(path.dirname(require.resolve('ap
     'installer.no-uninstaller.nsi':main,
     'nsis-without-uninstaller/installSection.nsh':section,
     'nsis-without-uninstaller/include/installer.nsh':installer,
+    'nsis-without-uninstaller/include/installUtil.nsh':utilities,
     'nsis-without-uninstaller/include/extractAppPackage.nsh':patchedExtraction
   };
   fs.mkdirSync(include,{recursive:true});
