@@ -1,15 +1,16 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
-const {options,THUMBPRINT,SUBJECT,signFile,signPool}=require('../release-signing.cjs');
+const {options,THUMBPRINT,SUBJECT,signFile,signPool,isPE,tree}=require('../release-signing.cjs');
 const app={id:'terrier',name:'Terrier'};
+const PE_HEAD='MZ'+'\0'.repeat(58)+'@\0\0\0'+'PE\0\0';
 function fixture(t){
  const outer=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-signing-')),root=path.join(outer,'private'),vendor=path.join(outer,'cache'),build=path.join(outer,'build-resources');fs.mkdirSync(root);fs.mkdirSync(build);
- const put=(name,body='unsigned')=>{const file=path.join(outer,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,body);return file;};
- put('cache/nsis/Bin/makensis.exe');put('cache/nsis/elevate.exe');put('cache/nsis/Plugins/x86-unicode/System.dll');put('cache/nsis/Plugins/x86-unicode/nsDialogs.dll');put('cache/resources/plugins/x86-unicode/StdUtils.dll');put('cache/resources/plugins/x86-unicode/nsis7z.dll');
+ const put=(name,body='unsigned')=>{const file=path.join(outer,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,PE_HEAD+body);return file;};
+ put('cache/nsis/Bin/makensis.exe');put('cache/nsis/elevate.exe');put('cache/nsis/Plugins/x86-unicode/System.dll');put('cache/nsis/Plugins/x86-unicode/nsDialogs.dll');put('cache/nsis/Stubs/zlib-x86-unicode');put('cache/resources/plugins/x86-unicode/StdUtils.dll');put('cache/resources/plugins/x86-unicode/nsis7z.dll');
  const appOutDir=path.join(root,'dist','terrier','win-unpacked'),main=put('private/dist/terrier/win-unpacked/Terrier.exe'),dll=put('private/dist/terrier/win-unpacked/ffmpeg.dll'),third=put('private/dist/terrier/win-unpacked/resources/runtime/vendor.dll','valid-vendor');
  const env={DESKTOP_SIGNING_CERT_SHA1:THUMBPRINT,WINDOWS_PUBLISHER_NAME:SUBJECT,DESKTOP_SIGNING_ROOT:root,DESKTOP_DIST_ROOT:path.join(root,'dist')};
  const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),calls=[];
- const sign=async(file,_root,{verify,owned})=>{let content=fs.readFileSync(file,'utf8');const valid=content.startsWith('valid-');if(verify&&!valid)throw new Error('NotSigned');if(owned&&content==='valid-vendor')throw new Error('Wrong publisher');if(!verify&&!valid){content='valid-release:'+content;fs.writeFileSync(file,content);}calls.push({file,verify,owned});return {path:file,sha256:digest(file),status:'Valid',thumbprint:content==='valid-vendor'?'vendor':THUMBPRINT,timestamped:content!=='valid-vendor',preserved:valid};};
+ const sign=async(file,_root,{verify,owned})=>{let content=fs.readFileSync(file,'utf8').slice(PE_HEAD.length);const valid=content.startsWith('valid-');if(verify&&!valid)throw new Error('NotSigned');if(owned&&content==='valid-vendor')throw new Error('Wrong publisher');if(!verify&&!valid){content='valid-release:'+content;fs.writeFileSync(file,PE_HEAD+content);}calls.push({file,verify,owned});return {path:file,sha256:digest(file),status:'Valid',thumbprint:content==='valid-vendor'?'vendor':THUMBPRINT,timestamped:content!=='valid-vendor',preserved:valid};};
  const toolset={getMakeNsisPath:async()=>({path:path.join(vendor,'nsis','Bin','makensis.exe'),env:{NSISDIR:path.join(vendor,'nsis')}}),getNsisPluginsPath:async()=>path.join(vendor,'resources','plugins')};
  const context={electronPlatformName:'win32',appOutDir,packager:{info:{buildResourcesDir:build}}};
  t.after(()=>{assert.equal(path.dirname(outer),fs.realpathSync(os.tmpdir()));fs.rmSync(outer,{recursive:true,force:true});});
@@ -24,7 +25,8 @@ test('private NSIS copies, inner application, generated uninstaller and outer in
  const f=fixture(t),sourceHash=f.digest(path.join(f.vendor,'nsis','Plugins','x86-unicode','System.dll')),vendorHash=f.digest(f.third),config=options(app,{env:f.env,platform:'win32',sign:f.sign,toolset:f.toolset});
  await assert.rejects(config.win.signtoolOptions.sign({path:f.main}),/not prepared/);
  await config.beforePack(f.context);assert.ok(f.env.ELECTRON_BUILDER_NSIS_DIR.startsWith(f.root));assert.equal(f.digest(path.join(f.vendor,'nsis','Plugins','x86-unicode','System.dll')),sourceHash);
- assert.ok(fs.readFileSync(path.join(f.root,'nsis','Plugins','x86-unicode','System.dll'),'utf8').startsWith('valid-release:'));
+ assert.ok(fs.readFileSync(path.join(f.root,'nsis','Plugins','x86-unicode','System.dll'),'utf8').startsWith(PE_HEAD+'valid-release:'));
+ assert.equal(f.digest(path.join(f.root,'nsis','Stubs','zlib-x86-unicode')),f.digest(path.join(f.vendor,'nsis','Stubs','zlib-x86-unicode')));assert.equal(f.calls.some(row=>/[\/]Stubs[\/]/.test(row.file)),false);
  // electron-builder completes fuse/resource editing, then calls the sign hook.
  const deferred=['pyd','node','ocx','exe'].map(ext=>f.put('private/dist/terrier/win-unpacked/resources/runtime/native.'+ext));
  fs.appendFileSync(f.main,'+fuses');await config.win.signtoolOptions.sign({path:f.main});await config.afterSign(f.context);assert.equal(f.digest(f.third),vendorHash);for(const file of [f.dll,...deferred])assert.ok(f.calls.some(item=>item.file===file));
@@ -36,7 +38,7 @@ test('private NSIS copies, inner application, generated uninstaller and outer in
 });
 test('missing inner signature or changed private NSIS plugin cannot yield a release receipt',async t=>{
  const f=fixture(t),config=options(app,{env:f.env,platform:'win32',sign:f.sign,toolset:f.toolset});await config.beforePack(f.context);
- fs.writeFileSync(path.join(f.root,'nsis','Plugins','x86-unicode','System.dll'),'changed');await assert.rejects(config.afterSign(f.context),/changed after signing/);
+ fs.writeFileSync(path.join(f.root,'nsis','Plugins','x86-unicode','System.dll'),PE_HEAD+'changed');await assert.rejects(config.afterSign(f.context),/changed after signing/);
 });
 test('private staging refuses reuse, external files and custom plugin shadowing',async t=>{
  const f=fixture(t);f.put('build-resources/x86-unicode/System.dll');const config=options(app,{env:f.env,platform:'win32',sign:f.sign,toolset:f.toolset});await assert.rejects(config.beforePack(f.context),/custom NSIS plugins/);
@@ -140,6 +142,12 @@ test('actual Windows subprocess verifies a copied vendor binary without signing 
  assert.equal(result.status,'Valid');assert.equal(result.signed,false);assert.equal(result.preserved,true);assert.equal(result.sha256,before);assert.equal(f.digest(file),before);
 });
 
+test('signing targets are census by MZ header, not extension',async t=>{
+ const f=fixture(t),text=f.put('private/dist/payload.dll'),bare=path.join(f.root,'tool.bin');const mzonly=path.join(f.root,'mzonly.bin');fs.writeFileSync(text,'plain text');fs.writeFileSync(bare,PE_HEAD+'body');fs.writeFileSync(mzonly,Buffer.concat([Buffer.from('MZ'),Buffer.alloc(62)]));
+ assert.equal(isPE(text),false);assert.equal(isPE(bare),true);assert.equal(isPE(mzonly),false);
+ await assert.rejects(signFile(text,f.root,{execute:async()=>assert.fail('Non-PE file reached signing')}),/outside private build root/);
+ const found=tree(f.root).filter(isPE);assert.ok(found.includes(bare));assert.equal(found.includes(text),false);assert.equal(found.includes(mzonly),false);
+});
 test('signing pool bounds concurrency to four, visits every unique file and refuses duplicates',async()=>{
  let active=0,peak=0;const visited=[];
  await signPool(Array.from({length:13},(_,i)=>String(i)+'.dll'),async file=>{active++;peak=Math.max(peak,active);await new Promise(resolve=>setTimeout(resolve,10));visited.push(file);active--;});
@@ -164,11 +172,11 @@ async function preparedRelease(t,decorate=sign=>sign){
 }
 test('current owned helper rejects a changed vendor signer despite approved historical evidence',async t=>{
  const attempts=[],f=await preparedRelease(t,(sign,_f)=>async(file,root,request)=>{attempts.push({file,...request});return sign(file,root,request);});
- const original=f.digest(f.elevate);fs.writeFileSync(f.elevate,'valid-vendor');
+ const original=f.digest(f.elevate);fs.writeFileSync(f.elevate,PE_HEAD+'valid-vendor');
  assert.notEqual(f.digest(f.elevate),original);
  await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/Wrong publisher/);
  const current=attempts.filter(row=>row.file===f.elevate&&row.verify).at(-1);
- assert.equal(current.owned,true);assert.equal(fs.readFileSync(f.elevate,'utf8'),'valid-vendor');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+ assert.equal(current.owned,true);assert.equal(fs.readFileSync(f.elevate,'utf8'),PE_HEAD+'valid-vendor');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
 });
 test('current helper requires a timestamp even when its reported signer is approved',async t=>{
  let final=false;
@@ -181,14 +189,14 @@ test('another same-named vendor helper cannot replace the exact current applicat
  const f=await preparedRelease(t),decoy=f.put('private/dist/terrier/win-unpacked/resources/vendor/elevate.exe','valid-vendor');
  fs.unlinkSync(f.elevate);
  await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/Current application, elevation helper or installer signature/);
- assert.equal(f.calls.filter(row=>row.file===decoy).at(-1).owned,false);assert.equal(fs.readFileSync(decoy,'utf8'),'valid-vendor');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+ assert.equal(f.calls.filter(row=>row.file===decoy).at(-1).owned,false);assert.equal(fs.readFileSync(decoy,'utf8'),PE_HEAD+'valid-vendor');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
 });
 test('helper bytes changed after its current verification cannot yield a receipt',async t=>{
  let final=false;
- const f=await preparedRelease(t,(sign,base)=>async(file,root,request)=>{const result=await sign(file,root,request);if(final&&request.verify&&file.endsWith('Terrier-1.0.15-win-x64.exe'))fs.writeFileSync(path.join(base.context.appOutDir,'resources','elevate.exe'),'valid-release:changed-after-verification');return result;});
+ const f=await preparedRelease(t,(sign,base)=>async(file,root,request)=>{const result=await sign(file,root,request);if(final&&request.verify&&file.endsWith('Terrier-1.0.15-win-x64.exe'))fs.writeFileSync(path.join(base.context.appOutDir,'resources','elevate.exe'),PE_HEAD+'valid-release:changed-after-verification');return result;});
  final=true;
  await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/changed after verification/);
- assert.equal(fs.readFileSync(f.elevate,'utf8'),'valid-release:changed-after-verification');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+ assert.equal(fs.readFileSync(f.elevate,'utf8'),PE_HEAD+'valid-release:changed-after-verification');assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
 });
 test('fresh exact current rows are distinct from staged uninstaller history and preserve vendors',async t=>{
  const f=await preparedRelease(t),vendor=f.digest(f.third);

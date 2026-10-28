@@ -31,13 +31,14 @@ is `C:\Program Files (x86)\Windows Kits\10\bin\10.0.28000.0\x64\signtool.exe`.
 `beforePack` copies the pinned NSIS compiler/resources into the private root,
 signs their unsigned executable binaries, and selects those copies using the
 builder's supported NSIS environment overrides. Shared tool caches are checked
-for unchanged bytes. This includes the plugins embedded into the installer.
+for unchanged bytes. This includes the plugins embedded into the installer. NSIS `Stubs` templates are
+copied unsigned; the installer and uninstaller built from them are signed afterwards.
 
 The builder's sign hook runs after Electron fuse/resource editing and before
 NSIS archives the app. It also signs the elevation helper, generated uninstaller
 and final installer. Executable build caching is disabled because a cache hit
-can bypass signing. `afterSign` checks/signs remaining EXE/DLL/PYD/NODE/OCX files
-in the packed application. Valid vendor signatures are preserved byte-for-byte;
+can bypass signing. `afterSign` checks/signs remaining PE binaries (recognised by the DOS `MZ` header plus the `PE\0\0`
+signature at `e_lfanew`, not their extension) in the packed application. Valid vendor signatures are preserved byte-for-byte;
 an invalid existing signature fails rather than being overwritten.
 
 The release requires Windows Authenticode status `Valid`, the approved exact
