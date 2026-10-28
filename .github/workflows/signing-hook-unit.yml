@@ -2,21 +2,54 @@ name: signing-hook-unit
 run-name: Signing hook unit tests ${{ github.sha }}
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - .github/workflows/signing-hook-unit.yml
+      - ops/desktop/client/package.json
+      - ops/desktop/client/package-lock.json
+      - ops/desktop/client/build-native.cjs
+      - ops/desktop/client/build-plugin-free.cjs
+      - ops/desktop/client/plugin-free-installer.nsi
       - ops/desktop/client/release-signing.cjs
       - ops/desktop/client/sign-staged-binary.ps1
       - ops/desktop/client/tests/release-signing.test.cjs
       - ops/desktop/client/builder.cjs
+      - ops/desktop/client/after-pack.cjs
+      - ops/desktop/client/apps.cjs
+      - ops/desktop/client/backend-command.cjs
+      - ops/desktop/client/install-layout.cjs
+      - ops/desktop/client/installer.nsh
+      - ops/desktop/client/nsis-no-uninstaller.cjs
+      - ops/desktop/client/release-files.cjs
+      - ops/desktop/client/tests/build-native.test.cjs
+      - ops/desktop/client/tests/after-pack.test.cjs
+      - ops/desktop/client/tests/builder-update-source.test.cjs
+      - ops/desktop/client/tests/build-codec.test.cjs
   push:
     branches: [main, release/1.0.17]
     paths:
       - .github/workflows/signing-hook-unit.yml
+      - ops/desktop/client/package.json
+      - ops/desktop/client/package-lock.json
+      - ops/desktop/client/build-native.cjs
+      - ops/desktop/client/build-plugin-free.cjs
+      - ops/desktop/client/plugin-free-installer.nsi
       - ops/desktop/client/release-signing.cjs
       - ops/desktop/client/sign-staged-binary.ps1
       - ops/desktop/client/tests/release-signing.test.cjs
       - ops/desktop/client/builder.cjs
+      - ops/desktop/client/after-pack.cjs
+      - ops/desktop/client/apps.cjs
+      - ops/desktop/client/backend-command.cjs
+      - ops/desktop/client/install-layout.cjs
+      - ops/desktop/client/installer.nsh
+      - ops/desktop/client/nsis-no-uninstaller.cjs
+      - ops/desktop/client/release-files.cjs
+      - ops/desktop/client/tests/build-native.test.cjs
+      - ops/desktop/client/tests/after-pack.test.cjs
+      - ops/desktop/client/tests/builder-update-source.test.cjs
+      - ops/desktop/client/tests/build-codec.test.cjs
 
 permissions:
   contents: read
@@ -39,6 +72,17 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24.18.0'
-      - name: Focused signing-hook tests under ordinary Windows policy
+      - name: Install locked test dependencies without lifecycle scripts
+        working-directory: ops/desktop/client
         shell: cmd
-        run: node --test --test-reporter=tap ops/desktop/client/tests/release-signing.test.cjs
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Focused signing and installer integration tests under ordinary Windows policy
+        working-directory: ops/desktop/client
+        shell: cmd
+        run: >-
+          node --test --test-reporter=tap
+          tests/release-signing.test.cjs
+          tests/build-native.test.cjs
+          tests/after-pack.test.cjs
+          tests/builder-update-source.test.cjs
+          tests/build-codec.test.cjs
