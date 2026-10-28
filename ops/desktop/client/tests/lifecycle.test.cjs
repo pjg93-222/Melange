@@ -120,6 +120,97 @@ test('installed status requires backend readiness and preserves previous authori
   assert.equal(f.state.installed.version,'1.2.0');assert.equal(f.state.previous.version,'1.1.0');assert.ok(fs.existsSync(path.join(f.directory,'updates','2','Terrier.exe')));
 });
 
+test('unconfirmed running update can discover and activate a corrective release without promoting its baseline',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',2);const waiting=f.client();await waiting.check();
+  assert.notEqual(waiting.applicationReady,true);assert.equal(f.state.installed.version,'1.0.0');
+  assert.equal(f.state.startupPendingVersion,'1.1.0');assert.equal(f.state.pending.version,'1.2.0');
+  assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.acceptedVersion,'1.2.0');
+  assert.equal(waiting.recoveryCandidate().version,'1.0.0');
+  assert.equal(await waiting.activateAfterClose(),true);assert.equal(f.installs,2);
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(f.state.sequence,3);
+});
+
+test('corrective download failure and restart preserve the unconfirmed version and last confirmed baseline',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',2);
+  const failed=f.client('Fixture Publisher',{download:async()=>{throw new Error('transfer interrupted');}});await failed.check();
+  assert.equal(f.state.pending,null);assert.equal(f.state.startupPendingVersion,'1.1.0');
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(f.state.sequence,3);
+  assert.match(f.status.at(-1),/Update deferred: transfer interrupted/);
+  const restarted=f.client();await restarted.check();
+  assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.pending.version,'1.2.0');
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(f.state.startupPendingVersion,'1.1.0');
+});
+
+for(const invalid of ['missing','forged','mismatched'])test('corrective release requires the real last confirmed baseline: '+invalid,async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';
+  const old=f.state.installed;
+  const baseline=invalid==='missing'?null:invalid==='forged'?{...old,envelope:{...old.envelope,signature:Buffer.alloc(64).toString('base64')}}:
+    {...old,envelope:f.sign('1.0.1',0)};
+  f.state={...f.state,installed:baseline};f.envelope=f.sign('1.2.0',2);const before=f.downloads;
+  const waiting=f.client();await waiting.check();
+  assert.equal(f.downloads,before);assert.equal(f.state.pending.version,'1.1.0');assert.equal(f.state.sequence,2);
+  assert.equal(waiting.ready,null);assert.equal(await waiting.activateAfterClose(),false);assert.equal(f.installs,1);
+});
+
+test('corrective release still requires native signature verification',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',2);f.nativeValid=false;const waiting=f.client();await waiting.check();
+  assert.equal(waiting.ready,null);assert.equal(await waiting.activateAfterClose(),false);assert.equal(f.installs,1);
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(f.state.startupPendingVersion,'1.1.0');
+  assert.match(f.status.at(-1),/Native signature refused/);
+});
+
+test('genuine readiness promotes an unconfirmed version after a failed corrective download',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',2);
+  await f.client('Fixture Publisher',{download:async()=>{throw new Error('transfer interrupted');}}).check();
+  f.seed=f.sign('1.1.0',1);const ready=f.client();ready.markApplicationReady();await ready.check();
+  assert.equal(f.state.startupPendingVersion,null);assert.equal(f.state.installed.version,'1.1.0');
+  assert.equal(f.state.previous.version,'1.0.0');assert.equal(f.state.pending.version,'1.2.0');
+  assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.sequence,3);
+});
+
+test('a later ready corrective version clears the earlier unconfirmed marker and retains the good baseline',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',2);const waiting=f.client();await waiting.check();await waiting.activateAfterClose();
+  f.version='1.2.0';const corrected=f.client();corrected.markApplicationReady();await corrected.check();
+  assert.equal(f.state.startupPendingVersion,null);assert.equal(f.state.pending,null);
+  assert.equal(f.state.installed.version,'1.2.0');assert.equal(f.state.previous.version,'1.0.0');
+});
+
+test('readiness arriving during discovery preserves the pending identity until real baseline promotion',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',2);const waiting=f.client(),request=waiting.request;
+  waiting.request=async(...args)=>{if(args[1].includes('/updates?'))waiting.markApplicationReady();return request(...args);};
+  await waiting.check();assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.startupPendingVersion,'1.1.0');
+  assert.equal(f.state.installed.version,'1.0.0');f.seed=f.sign('1.1.0',1);await waiting.check();
+  assert.equal(f.state.startupPendingVersion,null);assert.equal(f.state.installed.version,'1.1.0');assert.equal(f.state.previous.version,'1.0.0');
+});
+
+for(const during of ['recovery fetch','native trust'])test('readiness lost during '+during+' cannot promote the unconfirmed baseline',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';f.envelope=f.sign('1.2.0',2);
+  await f.client('Fixture Publisher',{download:async()=>{throw new Error('transfer interrupted');}}).check();
+  f.seed=f.sign('1.1.0',1);const ready=f.client();ready.markApplicationReady();
+  if(during==='recovery fetch'){
+    const request=ready.request;ready.request=async(...args)=>{if(args[1].includes('/recovery?'))await ready.markApplicationFailed();return request(...args);};
+  }else{
+    const nativeTrust=ready.nativeTrust.bind(ready);let once=true;
+    ready.nativeTrust=async()=>{if(once){once=false;await ready.markApplicationFailed();}return nativeTrust();};
+  }
+  await ready.check();assert.equal(ready.applicationReady,false);assert.equal(f.state.installed.version,'1.0.0');
+  assert.equal(f.state.startupPendingVersion,'1.1.0');assert.equal(f.state.pending.version,'1.2.0');
+  assert.equal(f.state.pending.phase,'prepared');assert.equal(ready.recoveryCandidate().version,'1.0.0');
+});
+
+test('update status starts with a real check and replaces prior current status when the network fails',async t=>{
+  const f=fixture(t);f.envelope=null;const client=f.client();await client.check();
+  assert.equal(f.status[0],'Checking for updates…');assert.match(f.status.at(-1),/No newer signed update/);
+  f.offline=true;await client.check();assert.equal(f.status.at(-2),'Checking for updates…');
+  assert.match(f.status.at(-1),/^Update deferred: offline/);
+});
+
 test('higher release sequence cannot downgrade an already accepted version',t=>{
   const f=fixture(t);
   assert.throws(()=>verifyEnvelope(f.sign('1.1.0',3),f.enrollment,{appId:'terrier',platform:'win32',arch:'x64',version:'1.0.0'},{sequence:2,acceptedVersion:'1.2.0'}),/approved version downgrade/);
