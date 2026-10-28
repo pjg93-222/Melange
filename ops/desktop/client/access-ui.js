@@ -1,10 +1,11 @@
 'use strict';
 (function (root) {
   const APPS = Object.freeze({melange: 'Melange', mentat: 'Mentat', terrier: 'Terrier'});
-  const PHASES = new Set(['needs_request', 'pending', 'needs_password', 'locked', 'ready', 'revoked', 'terrier_signin', 'error']);
+  const PHASES = new Set(['needs_request', 'pending', 'needs_password', 'locked', 'ready', 'revoked', 'terrier_signin', 'error', 'windows_locked', 'windows_unavailable']);
   const REQUESTS = new Set(['pending', 'approved', 'used', 'denied', 'expired']);
-  const FIELDS = new Set(['appId', 'appName', 'phase', 'accountIdentity', 'requestStatus', 'requestExpiresAt', 'requestCleanupPending', 'canRequestAgain', 'districtDataRemoved']);
+  const FIELDS = new Set(['appId', 'appName', 'phase', 'accountIdentity', 'requestStatus', 'requestExpiresAt', 'requestCleanupPending', 'canRequestAgain', 'districtDataRemoved', 'accessMode', 'authentication', 'windowsAccountDisplayName']);
   const GENERIC_ERROR = 'This action could not be completed. Check your connection or try again later.';
+  const WINDOWS_ERROR = 'Your Windows sign-in could not be verified. Check that Windows is unlocked and try again.';
   const REASONS = Object.freeze({
     unreachable: "Can't reach the administrator's access server. It may be offline; try again later.",
     timeout: "The administrator's access server took too long to respond. Try again later.",
@@ -18,6 +19,12 @@
   function validateState(value, expectedApp) {
     if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(key => !FIELDS.has(key)) || !Object.hasOwn(APPS, value.appId) || value.appName !== APPS[value.appId] || !PHASES.has(value.phase) || (expectedApp && value.appId !== expectedApp)) throw new Error('Unsupported access state');
     if (value.accountIdentity !== undefined && (typeof value.accountIdentity !== 'string' || !/^[A-Za-z0-9_@.+-]{1,150}$/.test(value.accountIdentity))) throw new Error('Unsupported account identity');
+    if (value.accessMode !== undefined && !['standalone', 'managed'].includes(value.accessMode)) throw new Error('Unsupported access mode');
+    if (value.authentication !== undefined && !['windows', 'local-password'].includes(value.authentication)) throw new Error('Unsupported authentication');
+    if (value.authentication === 'windows') {
+      if (value.accessMode !== 'standalone' || !['ready', 'windows_locked', 'windows_unavailable'].includes(value.phase) || ['requestStatus', 'requestExpiresAt', 'requestCleanupPending', 'canRequestAgain', 'districtDataRemoved'].some(key => Object.hasOwn(value, key))) throw new Error('Unsupported Windows sign-in state');
+      if (value.windowsAccountDisplayName !== undefined && (typeof value.windowsAccountDisplayName !== 'string' || value.windowsAccountDisplayName.trim() !== value.windowsAccountDisplayName || Array.from(value.windowsAccountDisplayName).length < 1 || Array.from(value.windowsAccountDisplayName).length > 256 || /[\x00-\x1f\x7f]/.test(value.windowsAccountDisplayName))) throw new Error('Unsupported Windows account display');
+    } else if (['windows_locked', 'windows_unavailable'].includes(value.phase) || value.windowsAccountDisplayName !== undefined) throw new Error('Unexpected Windows sign-in fields');
     if (value.requestStatus !== undefined && !REQUESTS.has(value.requestStatus)) throw new Error('Unsupported request state');
     if (value.requestExpiresAt !== undefined && (!Number.isSafeInteger(value.requestExpiresAt) || value.requestExpiresAt < 946684800 || value.requestExpiresAt > 253402300799)) throw new Error('Unsupported request expiry');
     for (const key of ['requestCleanupPending', 'canRequestAgain', 'districtDataRemoved']) if (value[key] !== undefined && typeof value[key] !== 'boolean') throw new Error('Unsupported access state');
@@ -49,14 +56,16 @@
     const ids = ['app-name', 'description', 'account', 'notice', 'request-form', 'display-name', 'invite-code', 'request-submit', 'pending-panel', 'request-status', 'request-expiry', 'poll', 'activation-form', 'activation-key', 'password-form', 'password-label', 'password', 'confirm-panel', 'password-confirm', 'password-submit', 'ready-panel', 'open', 'lock', 'retry', 'status'];
     const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
     if (ids.some(id => !el[id])) throw new Error('Access UI is incomplete');
-    let state = null, appId = null, busy = false, disposed = false, pollTimer = null, unsubscribe;
+    let state = null, appId = null, busy = false, disposed = false, pollTimer = null, unsubscribe, windowsAuthentication = false, statusEvents = 0;
     const secretFields = ['invite-code', 'activation-key', 'password', 'password-confirm'];
     const clearSecrets = () => { for (const id of secretFields) el[id].value = ''; };
     const status = value => { el.status.textContent = value; };
     function lockControls() { for (const element of document.querySelectorAll('button, input')) element.disabled = busy || !state; if (pollTimer) el.poll.disabled = true; if (!el.retry.hidden) el.retry.disabled = busy; }
     function render(raw) {
       const next = validateState(raw, appId);
-      if (!state || state.phase !== next.phase || state.accountIdentity !== next.accountIdentity) clearSecrets();
+      if (windowsAuthentication && next.authentication !== 'windows') throw new Error('Authentication mode changed');
+      if (next.authentication === 'windows') windowsAuthentication = true;
+      if (!state || state.phase !== next.phase || state.accountIdentity !== next.accountIdentity || state.authentication !== next.authentication) clearSecrets();
       state = next; appId = next.appId;
       el['app-name'].textContent = next.appName; document.title = next.appName + ' access';
       const logo=document.getElementById('app-logo');if(logo){logo.src='icons/'+next.appId+'.ico';logo.hidden=false;document.body.dataset.app=next.appId;}
@@ -70,8 +79,21 @@
         terrier_signin: 'This installation is approved. Continue to Terrier to set up or sign in to your account.',
         error: 'Access could not be checked. Your workspace has not been opened.'
       };
-      el.description.textContent = messages[next.phase];
-      el.account.hidden = !next.accountIdentity; el.account.textContent = next.accountIdentity ? 'Local account: ' + next.accountIdentity : '';
+      if (next.accessMode === 'standalone') Object.assign(messages, {
+        needs_password: 'Choose a password for your local ' + next.appName + ' workspace, then sign in.',
+        ready: 'Your local ' + next.appName + ' workspace is ready to open.',
+        terrier_signin: 'Continue to Terrier to set up or sign in to your local account.'
+      });
+      const windowsMessages = {
+        ready: 'Your Windows sign-in is verified. ' + next.appName + ' opens automatically without a separate application password.',
+        windows_locked: 'Unlock Windows to continue. ' + next.appName + ' uses the account already signed in to this computer.',
+        windows_unavailable: WINDOWS_ERROR
+      };
+      el.description.textContent = windowsAuthentication ? windowsMessages[next.phase] : messages[next.phase];
+      const account = windowsAuthentication ? next.windowsAccountDisplayName : next.accountIdentity;
+      el.account.hidden = !account; el.account.textContent = account ? (windowsAuthentication ? 'Windows account: ' : 'Local account: ') + account : '';
+      const footer = document.getElementById('access-footer');
+      if (footer && next.accessMode === 'standalone') footer.textContent = windowsAuthentication ? 'Windows sign-in opens this application. Updates use signed GitHub releases.' : 'This application runs on your computer. Updates use signed GitHub releases.';
       el.notice.hidden = !next.requestCleanupPending; el.notice.textContent = next.requestCleanupPending ? 'Approval is saved. Background cleanup will be retried; you do not need another approval key.' : '';
       el['request-form'].hidden = !(next.phase === 'needs_request' || next.canRequestAgain);
       el['request-submit'].textContent = next.canRequestAgain ? 'Request access again' : 'Request access';
@@ -81,31 +103,34 @@
       if (next.canRequestAgain && next.requestStatus === 'used') el['request-status'].textContent = 'Activation recovery expired. Send a new request for administrator review.';
       el['request-expiry'].textContent = next.requestExpiresAt ? 'Request or recovery deadline: ' + new Date(next.requestExpiresAt * 1000).toLocaleString() : '';
       el['activation-form'].hidden = !(next.phase === 'pending' && ['approved', 'used'].includes(next.requestStatus) && !next.canRequestAgain);
-      el['password-form'].hidden = !['needs_password', 'locked'].includes(next.phase);
+      el['password-form'].hidden = windowsAuthentication || !['needs_password', 'locked'].includes(next.phase);
       el['confirm-panel'].hidden = next.phase !== 'needs_password'; el['password-confirm'].required = next.phase === 'needs_password';
       el.password.autocomplete = next.phase === 'needs_password' ? 'new-password' : 'current-password';
       el['password-label'].textContent = next.phase === 'needs_password' ? 'Choose a password' : 'Password';
       el['password-submit'].textContent = next.phase === 'needs_password' ? 'Save password' : 'Sign in';
       el['ready-panel'].hidden = !['ready', 'terrier_signin'].includes(next.phase);
       el.open.textContent = next.phase === 'terrier_signin' ? 'Continue to Terrier sign-in' : 'Open ' + next.appName;
-      el.lock.hidden = next.phase !== 'ready' || next.appId === 'terrier'; el.retry.hidden = next.phase !== 'error'; lockControls();
+      el.lock.hidden = windowsAuthentication || next.phase !== 'ready' || next.appId === 'terrier'; el.retry.hidden = !['error', 'windows_unavailable'].includes(next.phase); lockControls();
     }
     function failClosed() {
       clearSecrets(); state = null;
       for (const id of ['request-form', 'pending-panel', 'activation-form', 'password-form', 'ready-panel']) el[id].hidden = true;
-      el.retry.hidden = false; el.retry.disabled = false; lockControls(); el.retry.disabled = false; status(GENERIC_ERROR);
+      if (windowsAuthentication) { el.description.textContent = WINDOWS_ERROR; el.account.hidden = true; el.account.textContent = ''; }
+      el.retry.hidden = false; el.retry.disabled = false; lockControls(); el.retry.disabled = false; status(windowsAuthentication ? WINDOWS_ERROR : GENERIC_ERROR);
     }
     async function act(method, value) {
       if (busy || disposed) return;
+      if (windowsAuthentication && !['info', 'open'].includes(method)) return;
+      const startedEvents = statusEvents;
       busy = true; clearSecrets(); status('Working…'); lockControls();
       try {
         const result = value === undefined ? await api[method]() : await api[method](value);
-        if (!disposed) { try { render(result); status(method === 'setPassword' ? 'Password saved. Sign in to continue.' : ''); } catch { failClosed(); } }
+        if (!disposed && statusEvents === startedEvents) { try { render(result); status(method === 'setPassword' ? 'Password saved. Sign in to continue.' : ''); } catch { failClosed(); } }
       } catch (error) {
-        if (!disposed) {
+        if (!disposed && statusEvents === startedEvents) {
           if (!state) failClosed();
           else {
-            status(failure(error));
+            status(windowsAuthentication ? WINDOWS_ERROR : failure(error));
             // A failed request may already be stored (show it so Check can re-send it); an invite refusal clears it (show the form again).
             if (method === 'request' || /\baccess:invite\b/.test(String(error && error.message))) { try { render(await api.info()); } catch { /* keep the current view */ } }
           }
@@ -117,7 +142,7 @@
     submit('request-form', () => { if (state.phase !== 'needs_request' && !state.canRequestAgain) return; const code = inviteCode(el['invite-code'].value); return act('request', {displayName: displayName(el['display-name'].value), ...(code ? {inviteCode: code} : {})}); });
     submit('activation-form', () => { if (el['activation-form'].hidden) return; return act('activate', {activationKey: activationKey(el['activation-key'].value)}); });
     submit('password-form', () => {
-      if (!['needs_password', 'locked'].includes(state.phase)) return;
+      if (windowsAuthentication || !['needs_password', 'locked'].includes(state.phase)) return;
       const value = password(el.password.value);
       if (state.phase === 'needs_password' && value !== el['password-confirm'].value) throw new Error('The passwords do not match. Enter them again.');
       return act(state.phase === 'needs_password' ? 'setPassword' : 'unlock', {password: value});
@@ -129,13 +154,13 @@
     }
     el.poll.addEventListener('click', () => { void checkApproval(); });
     el.open.addEventListener('click', () => { if (state && ['ready', 'terrier_signin'].includes(state.phase)) void act('open'); });
-    el.lock.addEventListener('click', () => { if (state?.phase === 'ready') void act('lock'); });
+    el.lock.addEventListener('click', () => { if (!windowsAuthentication && state?.phase === 'ready') void act('lock'); });
     el.retry.addEventListener('click', () => { if (!busy) void act('info'); });
     function dispose() { disposed = true; clearSecrets(); if (pollTimer) windowObject.clearTimeout(pollTimer); unsubscribe?.(); }
     windowObject.addEventListener('pagehide', dispose, {once: true});
     const required = ['info', 'request', 'poll', 'activate', 'setPassword', 'unlock', 'open', 'lock', 'onStatus'];
     if (!api || required.some(key => typeof api[key] !== 'function')) { failClosed(); return {dispose, ready: Promise.resolve()}; }
-    unsubscribe = api.onStatus(value => { if (disposed) return; try { render(value); status(''); } catch { failClosed(); } });
+    unsubscribe = api.onStatus(value => { if (disposed) return; statusEvents++; try { render(value); status(''); } catch { failClosed(); } });
     // A request stored before the app quit has had no reply this session; ask once so a request that never reached the server is re-sent.
     const ready = act('info').then(() => { if (!disposed && state?.phase === 'pending' && state.requestStatus === undefined) return checkApproval(); });
     return {dispose, ready};
@@ -145,7 +170,7 @@
   else root.addEventListener('DOMContentLoaded', () => {
     mount(root.document, root.desktopAccess, root);
     const disposeUpdates=root.desktopUpdateStatus?.mount(root.document,root.desktopAccess,{onInfo:info=>{
-      if(info.accessMode==='standalone')root.document.getElementById('access-footer').textContent='This application runs on your computer. Updates use signed GitHub releases.';
+      const footer=root.document.getElementById('access-footer');if(info.accessMode==='standalone'&&footer&&!footer.textContent.startsWith('Windows sign-in'))footer.textContent='This application runs on your computer. Updates use signed GitHub releases.';
     }});
     root.addEventListener('pagehide',()=>disposeUpdates?.(),{once:true});
   }, {once: true});
