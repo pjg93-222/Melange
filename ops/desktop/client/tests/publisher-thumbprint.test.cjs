@@ -118,12 +118,44 @@ test('publisherThumbprints must be a non-empty list of 40 uppercase hex digits w
     assert.throws(()=>verifyEnvelope(f.sign('1.1.0',2,{publisherThumbprints:bad}),f.enrollment,identity),/Invalid publisher thumbprints/);
 });
 
-test('T18 warn-only (Paul 2026-10-26): a manifest that does not name the pinned publisher still installs for 1.0.19 and the update status carries the warning',async t=>{
+test('T18 enforcement after 1.0.19 refuses a manifest that omits the pinned publisher',async t=>{
   const f=fixture(t,{thumbprints:[OTHER]});signer={status:4,thumbprint:OTHER};
-  const realWarn=console.warn;console.warn=()=>{};
-  try{const client=f.client();await client.check();
-    assert.match(f.status.at(-1),/verified. Installs after you close this app. Update publisher warning: /,'the final status keeps the warning');
-    assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);assert.equal(f.installs,1);
-  }finally{console.warn=realWarn;}
-  assert.ok(f.status.some(message=>/Update publisher warning: .*does not name the pinned publisher certificate/.test(message)),f.status.join(' | '));
+  await refusedAndStillRunning(f,f.client(),/does not name the pinned publisher thumbprint/);
+  assert.equal(signatureCalls,0,'manifest cannot widen the client publisher pin');
+});
+
+test('failed running native release accepts a signed correction while keeping last-good rollback and highwater',async t=>{
+  const f=fixture(t),old=f.client();await old.check();await old.activateAfterClose(false);
+  f.version='1.1.0';const failed=f.client();await failed.markApplicationFailed();await failed.check();
+  assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.installed.version,'1.0.0');
+  assert.equal(f.state.sequence,2);assert.equal(f.state.acceptedVersion,'1.1.0');assert.ok(f.state.suspendedVersions.includes('1.1.0'));
+  const downloads=f.downloads;
+  f.envelope=f.sign('1.0.0',1);await failed.check();assert.equal(f.downloads,downloads);
+  f.envelope=f.sign('1.2.0',2);await failed.check();assert.equal(f.downloads,downloads);
+  assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.sequence,2);
+  f.envelope=f.sign('1.2.0',3);await failed.check();
+  assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.pending.version,'1.2.0');
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(failed.recoveryCandidate().version,'1.0.0');
+  assert.equal(f.state.sequence,3);assert.equal(f.state.acceptedVersion,'1.2.0');assert.ok(signatureCalls>0);
+  assert.equal(await failed.activateAfterClose(false),true);assert.equal(f.installs,2);
+  f.version='1.2.0';const corrected=f.client();await corrected.check();
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(f.state.pending.version,'1.2.0');
+  corrected.markApplicationReady();await corrected.check();
+  assert.equal(f.state.installed.version,'1.2.0');assert.equal(f.state.previous.version,'1.0.0');
+  assert.equal(f.state.pending,null);assert.equal(f.state.sequence,3);
+});
+
+test('failed native startup cannot replace a missing or forged last-good anchor or accept a wrong publisher',async t=>{
+  const f=fixture(t),old=f.client();await old.check();await old.activateAfterClose(false);
+  f.version='1.1.0';f.envelope=f.sign('1.2.0',3);const failed=f.client();await failed.markApplicationFailed();
+  const good=f.state.installed,downloads=f.downloads;
+  f.state={...f.state,installed:null};await failed.check();
+  assert.equal(f.state.installed,null);assert.equal(f.downloads,downloads);assert.equal(f.state.sequence,2);
+  f.state={...f.state,installed:{...good,version:'0.9.0'}};await failed.check();assert.equal(f.downloads,downloads);
+  f.state={...f.state,installed:{...good,envelope:{...good.envelope,signature:Buffer.alloc(64).toString('base64')}}};
+  await failed.check();assert.equal(f.downloads,downloads);assert.equal(f.state.pending.phase,'failed');
+  f.state={...f.state,installed:good};signer={status:0,thumbprint:OTHER};await failed.check();
+  assert.equal(f.state.installed.version,'1.0.0');assert.notEqual(f.state.pending?.phase,'prepared');
+  assert.equal(await failed.activateAfterClose(false),false);assert.equal(f.installs,1);
+  assert.equal(f.state.sequence,3);assert.equal(f.state.acceptedVersion,'1.2.0');
 });

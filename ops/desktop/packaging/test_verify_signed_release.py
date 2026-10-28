@@ -7,6 +7,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import verify_signed_release as v
@@ -157,6 +159,112 @@ class AsarAndPackage(unittest.TestCase):
             v.check_package(old, dict(new, main="evil.cjs"), keys)
         with self.assertRaisesRegex(v.Refused, "values changed"):
             v.check_package(old, dict(new, desktopAppConfig={"appId": "mentat"}), keys)
+
+
+class NoUninstallerIntegration(unittest.TestCase):
+    """Exercise the full verifier with tiny archives and synthetic OS verdicts.
+
+    Real PE classification, ASAR parsing, metadata/source checks and signature
+    requirements run; no installer or native payload is executed.
+    """
+    def inspect_fixture(self, without=True, candidate_uninstaller=False, bad_signature=None):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build = root / "build"
+            candidate = build / "dist" / "melange" / "Melange-1.0.17-win-x64.exe"
+            candidate.parent.mkdir(parents=True)
+            candidate.write_bytes(b"candidate-container")
+            baseline, seven, output = root / "baseline.exe", root / "7za.exe", root / "inspection"
+            baseline.write_bytes(b"baseline-container")
+            seven.write_bytes(b"inspection-tool-fixture")
+            output.mkdir()
+            package = lambda version: {"name": "melange-desktop", "version": version,
+                                       "desktopAppConfig": {"appId": "melange"}}
+            old_package, new_package = package(v.OLD), package(v.NEW)
+            if without:
+                new_package["desktopAppConfig"]["desktopUninstaller"] = False
+            payloads = {}
+            for label, pkg in (("baseline", old_package), ("candidate", new_package)):
+                payloads[label] = {"Melange.exe": pe(label.encode()), "resources/elevate.exe": pe(b"elevate"),
+                                   "resources/app.asar": asar_bytes({"package.json": json.dumps(pkg).encode(), "main.cjs": b"unchanged JS"}),
+                                   v.SOURCE_INVENTORY: b"[]"}
+            head, base = "a" * 40, "b" * 40
+            inputs = {"app": v.APP, "version": v.NEW, "baselineInstallerSHA256": v.digest(baseline),
+                      "packagingSource": head, "basePin": base, "root": str(build)}
+            result = {"exitCode": 0, "sourcePin": head, "sourceClean": True, "inputsUnchanged": True,
+                      "boundBuildOutputs": {key: sha(payloads["candidate"][key]) for key in v.BUILD_OUTPUTS}}
+            v.write_json(build / "build-inputs.json", inputs)
+            v.write_json(build / "build-result.json", result)
+            row = {"path": str(candidate), "sha256": v.digest(candidate), "status": "Valid", "thumbprint": v.PIN, "timestamped": True}
+            v.write_json(str(candidate) + ".signatures.json", {"schemaVersion": 1, "appId": "melange", "certificateThumbprint": v.PIN,
+                "installer": str(candidate), "desktopUninstaller": False, "uninstallerEvidence": "intentionally-absent",
+                "files": [row], "currentFiles": [row]})
+
+            def extract(_seven, archive, destination, _budget):
+                destination.mkdir()
+                label = destination.parent.name
+                if destination.name == "app":
+                    files = payloads[label]
+                else:
+                    files = {"$PLUGINSDIR/app-64.7z": b"archive", **{"$PLUGINSDIR/" + name: pe(name.encode()) for name in v.PLUGINS}}
+                    if label == "baseline" or candidate_uninstaller:
+                        files["$PLUGINSDIR/Uninstall Melange.exe"] = pe(b"uninstaller")
+                for name, content in files.items():
+                    target = destination / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(content)
+                return sum(map(len, files.values()))
+
+            native_ids = []
+            def signatures(items, _output):
+                native_ids.extend(items)
+                return {key: {"id": key, "sha256": v.digest(file), "status": "NotSigned" if key == bad_signature else "Valid",
+                              "thumbprint": v.PIN, "signatureType": "Authenticode", "timestampSubject": "DigiCert fixture",
+                              "fileVersion": v.NEW, "productVersion": v.NEW} for key, file in items.items()}
+
+            helper = Path(v.__file__).with_name("no_uninstaller_contract.py")
+            head_files = {"ops/desktop/client/main.cjs": sha(b"unchanged JS"),
+                          "ops/desktop/packaging/no_uninstaller_contract.py": v.digest(helper)}
+            args = SimpleNamespace(installer=str(candidate), baseline=str(baseline), output=str(output), seven_zip=str(seven),
+                                   repo=str(root), head="HEAD", build_inputs=str(build / "build-inputs.json"),
+                                   without_uninstaller=without, signing_receipt=None)
+            with mock.patch.multiple(v, BASE_SHA=v.digest(baseline), EXPECTED_PES=2), \
+                    mock.patch.object(v, "extract", side_effect=extract), \
+                    mock.patch.object(v, "resolve_commit", side_effect=lambda _repo, ref: base if ref == v.BASE_PIN else head), \
+                    mock.patch.object(v, "changed_paths", return_value={}), \
+                    mock.patch.object(v, "head_contents", return_value=head_files), \
+                    mock.patch.object(v, "git", return_value=b"extraMetadata:{desktopAppConfig:{appId:selected.id,desktopUninstaller:false}}"), \
+                    mock.patch.object(v, "signatures", side_effect=signatures), \
+                    mock.patch.object(v, "compare_signed_pe", return_value="authenticode-plus-version-and-asar-integrity"):
+                report = {}
+                v.verify(args, report)
+            return report, native_ids
+
+    def test_opt_in_keeps_complete_other_native_census(self):
+        report, ids = self.inspect_fixture()
+        self.assertEqual(report["status"], "passed")
+        self.assertNotIn("candidate/uninstaller", ids)
+        self.assertIn("baseline/uninstaller", ids)
+        self.assertEqual(len(ids), 2 + 1 + 2 * 2 + 2 * len(v.PLUGINS))
+        self.assertTrue(report["checks"]["uninstallerIntentionallyAbsent"])
+        self.assertTrue(report["checks"]["mainElevateOuterApprovedAndTimestamped"])
+        self.assertNotIn("mainElevateUninstallerOuterApprovedAndTimestamped", report["checks"])
+        self.assertIsNone(report["generatedUninstaller"])
+
+    def test_legacy_default_still_requires_and_verifies_uninstaller(self):
+        with self.assertRaisesRegex(v.Refused, "uninstaller missing"):
+            self.inspect_fixture(without=False)
+        report, ids = self.inspect_fixture(without=False, candidate_uninstaller=True)
+        self.assertIn("candidate/uninstaller", ids)
+        self.assertTrue(report["checks"]["mainElevateUninstallerOuterApprovedAndTimestamped"])
+        self.assertEqual(report["generatedUninstaller"]["thumbprint"], v.PIN)
+
+    def test_opt_in_refuses_existing_uninstaller_and_any_bad_remaining_signature(self):
+        with self.assertRaisesRegex(ValueError, "Unexpected uninstaller"):
+            self.inspect_fixture(candidate_uninstaller=True)
+        for name in ("candidate/installer", "candidate/app/Melange.exe", "candidate/app/resources/elevate.exe", "candidate/plugin/System.dll"):
+            with self.subTest(name=name), self.assertRaisesRegex(v.Refused, "Expected valid"):
+                self.inspect_fixture(bad_signature=name)
 
 
 if __name__ == "__main__":

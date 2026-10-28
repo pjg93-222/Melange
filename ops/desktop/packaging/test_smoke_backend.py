@@ -36,3 +36,16 @@ def test_other_apps_get_no_principal_or_district(tmp_path):
     for app in ('melange', 'mentat'):
         command, environment = launch(app, tmp_path)
         assert '--district' not in command and 'DESKTOP_ACCESS_PRINCIPAL' not in environment
+
+
+def test_packaged_python_smoke_does_not_write_bytecode_into_signed_tree(tmp_path):
+    import subprocess
+    import sys
+    bootstrap = tmp_path / 'runtime' / 'bootstrap'
+    bootstrap.mkdir(parents=True)
+    (bootstrap / 'desktop_backend.py').write_text('import fixture_dependency\n')
+    (bootstrap / 'fixture_dependency.py').write_text('value = 42\n')
+    command, environment = launch('melange', tmp_path)
+    command[0] = sys.executable  # execute only these temporary fixture modules
+    subprocess.run(command, env=environment, check=True, capture_output=True)
+    assert not list((tmp_path / 'runtime').rglob('__pycache__'))

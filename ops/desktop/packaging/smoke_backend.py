@@ -33,7 +33,7 @@ def launch(options, port, token, root):
     """The backend command and environment, as runtime.cjs starts the app."""
     environment={k:v for k,v in os.environ.items() if not k.startswith(('CU_','ACCESS_','MENTAT_','MONEYBALL_','MELANGE_'))}
     environment['DESKTOP_LAUNCH_TOKEN']=token
-    command = ([str(options.runtime / 'python' / 'python.exe'), '-E', '-s', str(options.runtime / 'bootstrap' / 'desktop_backend.py')]
+    command = ([str(options.runtime / 'python' / 'python.exe'), '-E', '-s', '-B', str(options.runtime / 'bootstrap' / 'desktop_backend.py')]
                if options.runtime else [str(options.binary)] if options.binary else [sys.executable,str(Path(__file__).with_name('desktop_backend.py'))])
     command+=['--app',options.app,'--port',str(port),'--source-root',str(options.source.resolve()),'--data-root',str(root/'data'),'--state-root',str(root/'state')]
     if options.app=='terrier':

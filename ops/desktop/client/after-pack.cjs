@@ -57,6 +57,10 @@ async function afterPack(context){
     const target=path.join(path.dirname(context.appOutDir),'installer.generated.nsh');
     fs.writeFileSync(target,layout.nsisInclude({product:definition.name,app:definition.id,version,installerNsh:path.join(__dirname,'installer.nsh')}));
     console.log('[after-pack] wrote '+target);
+    if(context.packager.config?.extraMetadata?.desktopAppConfig?.desktopUninstaller===false){
+      const script=require('./nsis-no-uninstaller.cjs').prepare({directory:path.dirname(context.appOutDir)});
+      console.log('[after-pack] wrote '+script);
+    }
   }
 }
 module.exports=afterPack;module.exports.stripState=stripState;module.exports.findShippedData=findShippedData;

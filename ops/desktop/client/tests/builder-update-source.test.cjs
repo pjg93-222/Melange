@@ -14,10 +14,14 @@ function updateSource(fixture,appId,repository){
   delete env.DESKTOP_GITHUB_REPOSITORY;delete env.DESKTOP_UPDATE_PROVIDER;
   if(repository!==undefined)env.DESKTOP_GITHUB_REPOSITORY=repository;
   const child=spawnSync(process.execPath,['-e',
-    "process.stdout.write(JSON.stringify(require('./builder.cjs').extraMetadata.desktopAppConfig.desktopUpdateSource))"],
+    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,script:c.nsis.script,target:c.win.target}))"],
     {cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
   assert.equal(child.status,0,child.stderr);
-  return JSON.parse(child.stdout);
+  const result=JSON.parse(child.stdout);
+  assert.equal(result.uninstaller,false,appId+' native metadata disables the uninstaller');
+  assert.equal(path.basename(result.script),'installer.no-uninstaller.nsi');
+  assert.deepEqual(result.target,['nsis'],'the normal executable installer remains');
+  return result.source;
 }
 
 function signingConfig(fixture,publisher){

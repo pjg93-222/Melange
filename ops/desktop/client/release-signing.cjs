@@ -51,7 +51,8 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  checkIdentity();
  return {...result,path:requestedFile,verifiedPath:result.path};
 }
-function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset}={}){
+function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset,withoutUninstaller=false}={}){
+ if(typeof withoutUninstaller!=='boolean')throw new Error('Explicit boolean uninstaller contract required');
  const configured=env.DESKTOP_SIGNING_CERT_SHA1;
  if(!configured)return {};
  if(platform!=='win32'||configured!==THUMBPRINT||env.WINDOWS_PUBLISHER_NAME!==SUBJECT||!env.DESKTOP_SIGNING_ROOT||!path.isAbsolute(env.DESKTOP_SIGNING_ROOT)||!env.DESKTOP_DIST_ROOT||!within(path.resolve(env.DESKTOP_SIGNING_ROOT),path.resolve(env.DESKTOP_DIST_ROOT)))throw new Error('Release signing requires the approved certificate and a private build/dist root');
@@ -72,6 +73,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   win:{signtoolOptions:{publisherName:SUBJECT,signingHashAlgorithms:['sha256'],sign:async configuration=>{if(!ready)throw new Error('Private signing tools were not prepared');await record(configuration.path);}}},
   beforePack:async context=>{
    if(context.electronPlatformName!=='win32'||ready||!within(root,path.resolve(context.appOutDir)))throw new Error('Release signing supports one fresh private Windows package per build');
+   if(withoutUninstaller&&context.packager.config?.extraMetadata?.desktopAppConfig?.desktopUninstaller!==false)throw new Error('No-uninstaller signing requires matching application metadata');
    if(env.ELECTRON_BUILDER_NSIS_DIR||env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR)throw new Error('Release signing refuses inherited NSIS tool overrides');
    const tools=toolset||require('app-builder-lib/out/toolsets/windows.js');
    const compiler=await tools.getMakeNsisPath(),plugins=await tools.getNsisPluginsPath();
@@ -107,8 +109,11 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
     if(!result||identity(result.path)!==identity(file)||result.status!=='Valid'||result.thumbprint!==THUMBPRINT||result.timestamped!==true)throw new Error('Current application, elevation helper or installer signature evidence is missing');
     ancestors(file);if(result.sha256!==hash(file))throw new Error('Current application, elevation helper or installer changed after verification');
    }
-   if(!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.status==='Valid'&&row.thumbprint===THUMBPRINT&&row.timestamped===true))throw new Error('Staged uninstaller signature evidence is missing');
-   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records,currentFiles:[...current.values()],uninstallerEvidence:'staged-history-only'};
+   if(withoutUninstaller){
+    const uninstaller=file=>{const name=path.basename(file).toLowerCase();return name.endsWith('.exe')&&(name.startsWith('unins')||name.endsWith('__uninstaller.exe')||name==='old-uninstaller.exe');};
+    if(records.some(row=>uninstaller(row.path))||tree(appDirectory).some(uninstaller))throw new Error('No-uninstaller release contains uninstaller evidence or files');
+   }else if(!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.status==='Valid'&&row.thumbprint===THUMBPRINT&&row.timestamped===true))throw new Error('Staged uninstaller signature evidence is missing');
+   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records,currentFiles:[...current.values()],desktopUninstaller:!withoutUninstaller,uninstallerEvidence:withoutUninstaller?'intentionally-absent':'staged-history-only'};
    fs.writeFileSync(event.file+'.signatures.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   }
  };

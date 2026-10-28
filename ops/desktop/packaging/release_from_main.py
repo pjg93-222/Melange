@@ -1,4 +1,4 @@
-"""Build, gate, sign and stage desktop-v<version> of Melange, Mentat and Terrier from each repository's origin/main.
+"""Build, gate, sign and stage native desktops from origin/main or explicit pushed source commits.
 
 Local only: the Authenticode certificate (pinned thumbprint below, used by each client's release-signing.cjs hook during
 the build) and the update-manifest keys in the publisher state directory never leave this PC, so the command refuses to
@@ -33,9 +33,9 @@ from desktop_admin import PUBLISHER_THUMBPRINTS, Store  # importable once github
 
 APPS = ('melange', 'mentat', 'terrier')
 PRODUCTS = {'melange': 'Melange', 'mentat': 'Mentat', 'terrier': 'Terrier'}
-# The export whose ops/desktop/{client,packaging} builds each app: Mentat ships its own client; Terrier is built by
-# Melange's client and packaging with Geo as the application source. Every app's source is its own export.
-TOOLS = {'melange': 'melange', 'mentat': 'mentat', 'terrier': 'melange'}
+# One desktop client/toolchain; each app's backend still comes from its own repository.
+TOOLS = {'melange': 'melange', 'mentat': 'melange', 'terrier': 'melange'}
+GIB = 1024 ** 3
 PACKAGING = Path('ops') / 'desktop' / 'packaging'
 GATES = ('tests', 'security', 'dependencies', 'redistribution', 'dataAllowlist')
 PYTEST = ('colorama', 'iniconfig', 'pluggy', 'pygments', 'pytest')  # pytest 9's closure beyond packaging, on Windows
@@ -143,6 +143,33 @@ class Release:
         self.resume = False
 
     # ---------------------------------------------------------------- helpers
+    def space(self, step, additional=0):
+        folder = getattr(self, 'release', self.root)
+        while not folder.exists():
+            folder = folder.parent
+        if shutil.disk_usage(folder).free < self.args.free_floor_gib * GIB + additional:
+            raise StepFailed(step, f'Build would cross the {self.args.free_floor_gib} GiB free-space floor')
+
+    @staticmethod
+    def tree_bytes(folder):
+        return sum(path.stat().st_size for path in Path(folder).rglob('*') if path.is_file()) if Path(folder).exists() else 0
+
+    def remove_owned(self, relative):
+        target = self.release / relative
+        if not target.exists():
+            return
+        if (self.release.resolve() != self.release or self.release.stat().st_ino != self.release_identity
+                or not target.is_relative_to(self.release) or target == self.release or target.resolve() != target):
+            raise StepFailed('cleanup', 'Owned release cleanup identity/path changed')
+        shutil.rmtree(target)
+
+    def seven_zip(self):
+        candidates = ([self.args.seven_zip] if self.args.seven_zip else list(
+            (Path(self.environ.get('LOCALAPPDATA', '')) / 'electron-builder/Cache/7zip@1.0.0').glob('7zip-win-x64-*/bin/7za.exe')))
+        if len(candidates) != 1 or not candidates[0].is_file():
+            raise StepFailed('sign', 'Pass --seven-zip with the reviewed native archive inspector')
+        return candidates[0]
+
     def call(self, step, cmd, cwd=None, env=None, log=None, check=True):
         cmd = [str(part) for part in cmd]
         shown = subprocess.list2cmdline(cmd)
@@ -163,7 +190,7 @@ class Release:
         return ran
 
     def git(self, step, app, *args, check=True):
-        result = self.call(step, ['git', *args], cwd=self.paths[app], check=False)
+        result = self.call(step, ['git', '-c', 'maintenance.auto=false', '-c', 'gc.auto=0', *args], cwd=self.paths[app], check=False)
         if check and result.returncode != 0:
             raise StepFailed(step, f'{self.label(app)}: git {" ".join(args)} failed: {result.stderr.strip()}')
         return result
@@ -248,6 +275,17 @@ class Release:
             if self.git('sources', app, 'status', '--porcelain', '--untracked-files=no').stdout.strip():
                 raise StepFailed('sources', f'{self.label(app)}: tracked files are modified; commit to main or discard them')
             head = self.git('sources', app, 'rev-parse', 'HEAD').stdout.strip()
+            selected = self.args.source_commit.get(app)
+            if selected:
+                remote = self.call('sources', ['gh', 'api', f'repos/{REPOSITORIES[app]}/commits/{selected}', '--jq', '.sha']).stdout.strip()
+                if remote != selected:
+                    raise StepFailed('sources', f'{self.label(app)}: selected commit is not confirmed on GitHub')
+                self.git('sources', app, 'fetch', 'origin', selected)
+                actual = self.git('sources', app, 'rev-parse', '--verify', selected + '^{commit}').stdout.strip()
+                if actual != selected:
+                    raise StepFailed('sources', f'{self.label(app)}: selected commit is unavailable')
+                self.shas[app] = selected
+                continue
             main = self.git('sources', app, 'rev-parse', '--verify', 'refs/remotes/origin/main^{commit}').stdout.strip()
             if not re.fullmatch(r'[0-9a-f]{40}', head) or head != main:
                 raise StepFailed('sources', f'{self.label(app)}: HEAD {head[:12]} is not origin/main {main[:12]}; '
@@ -337,14 +375,16 @@ class Release:
         return (self.ledger('SELECT MAX(sequence) FROM prepared') or (0,))[0] or 0
 
     def source(self, app):
-        return {'repository': REPOSITORIES[app], 'ref': 'main', 'commit': self.shas[app]}
+        return {'repository': REPOSITORIES[app], 'ref': self.args.source_commit.get(app, 'main'), 'commit': self.shas[app]}
 
     def export_step(self):
+        self.space('export', GIB)
         if self.release.exists():
             raise StepFailed('export', f'{self.release} already exists; remove it or bump the version '
                                        '(--publish reuses it only when its receipts and release spec are complete)')
         self.logs = self.release / 'logs'
         self.logs.mkdir(parents=True)
+        self.release_identity = self.release.stat().st_ino
         (self.release / 'src').mkdir()
         self.export = {}
         # The selected apps' sources and their client repositories; Melange's always (github_release.py).
@@ -373,15 +413,15 @@ class Release:
         locks = {} if self.build_python else {app: self.lock_file(app) for app in built}  # all found before any venv is made
         for app in self.apps:
             if app in self.inject:  # no venv: the reused runtime's own interpreter runs this app's tools
-                folder, runtime = self.inject[app], self.release / 'runtime' / app
-                shutil.copytree(folder, runtime)
-                self.pythons[app] = runtime / 'python' / 'python.exe'
+                folder = self.inject[app]
+                self.pythons[app] = folder / 'python' / 'python.exe'  # read-only until this app is built
                 self.frozen[app] = (f'runtime injected from {folder} (no venv, no full build): dependency-inventory.json sha256 '
                                     f'{sha256(folder / "dependency-inventory.json")}, runtime-status.json sha256 '
                                     f'{sha256(folder / "runtime-status.json")}')
                 continue
             python = self.build_python
             if python is None:
+                self.space('venv', 3 * GIB)
                 folder = self.release / 'venv' / app
                 self.call('venv', [self.python, '-I', '-m', 'venv', folder], log=f'venv-{app}')
                 python = folder / 'Scripts' / 'python.exe'
@@ -400,20 +440,41 @@ class Release:
         self.installers = {}
         self.frontend_audit = {}
         self.test_venvs = {}
+        self.staged_sources = {}
         # Data and security gates first, from the pristine exports (before npm ci or pytest write into them): the security
         # gate scans the staged sources each app ships (owner ruling 2026-10-24 "Scan shipped files only").
         for app in self.apps:
             built = self.frontend(app)
             evidence, shipped = self.data_allowlist(app)
+            self.staged_sources[app] = shipped
             self.gates[app]['dataAllowlist'] = gate(built + evidence)
             self.gates[app]['security'] = gate(self.security(app, shipped))
         runtime_root = self.release / 'runtime'
+        tested, audited = {}, {}
+        for tool in self.tools:  # once per client repository
+            client = self.export[tool] / 'ops' / 'desktop' / 'client'
+            tested[tool] = self.tests(tool, client)
+            audited[tool] = self.call('dependencies', ['npm', 'audit', '--omit=dev', '--audit-level=high'], cwd=client,
+                                      log=f'npm-audit-{tool}').evidence
+        # All shared tests have completed; their private environments are not shipped.
+        for name in self.test_venvs:
+            self.remove_owned(Path('venv') / f'{name}-tests')
+        build_env = {key: value for key, value in self.environ.items()
+                     if key.upper() not in {'CSC_LINK', 'CSC_KEY_PASSWORD', 'WIN_CSC_LINK', 'WIN_CSC_KEY_PASSWORD', 'CSC_NAME'}}
         for app in self.apps:
+            if app in self.inject:
+                original, runtime = self.inject[app], runtime_root / app
+                self.frozen[app] += '; ' + self.requirements(app, original)
+                self.space('build', 3 * self.tree_bytes(original) + 2 * GIB)
+                shutil.copytree(original, runtime, ignore=lambda folder, names: set(names) & {'sources', 'bootstrap'} if Path(folder) == original else set())
+                (runtime / 'sources').mkdir()
+                self.pythons[app] = runtime / 'python/python.exe'
+            else:
+                self.space('build', 6 * GIB)
             native = ['--native-root', self.args.native_root] if self.args.native_root else []
-            if app in self.inject:  # only the sources are replaced, so the reused dependencies must still satisfy main's
-                self.frozen[app] += '; ' + self.requirements(app, runtime_root / app)
+            if app in self.inject:  # refresh sources; requirement bytes must match the selected backend commit
                 native = ['--sync-sources-only']
-            built = self.call('build', [self.pythons[app], self.export[TOOLS[app]] / PACKAGING / 'build_runtime.py', '--app', app,
+            built = self.call('build', [self.pythons[app], '-B', self.export[TOOLS[app]] / PACKAGING / 'build_runtime.py', '--app', app,
                                         '--source', self.export[app], *native, '--build-root', self.release / 'build',
                                         '--runtime-root', runtime_root], cwd=self.export[TOOLS[app]], log=f'runtime-{app}')
             status_path = runtime_root / app / 'runtime-status.json'
@@ -425,18 +486,13 @@ class Release:
             redistribution = self.redistribution(app, runtime_root / app / 'dependency-inventory.json')
             self.gates[app]['redistribution'] = gate((f'runtime injected from {self.inject[app]}; ' if app in self.inject else '')
                                                      + redistribution)
-        tested, audited = {}, {}
-        for tool in self.tools:  # once per client repository
-            client = self.export[tool] / 'ops' / 'desktop' / 'client'
-            tested[tool] = self.tests(tool, client)
-            audited[tool] = self.call('dependencies', ['npm', 'audit', '--omit=dev', '--audit-level=high'], cwd=client,
-                                      log=f'npm-audit-{tool}').evidence
-        for app in self.apps:
+            old_provenance = runtime_root / app / 'source-provenance.json'
+            reused = json.loads(old_provenance.read_text()) if app in self.inject else None
+            old_provenance.write_text(json.dumps({'schemaVersion': 1, 'app': app, 'repository': REPOSITORIES[app],
+                'commit': self.shas[app], 'sourceCommit': self.shas[app], 'toolingCommit': self.shas[TOOLS[app]],
+                'dirty': False, 'dependencyReuse': reused}, indent=2) + '\n', encoding='utf-8')
             self.gates[app]['tests'] = gate('; '.join(tested[TOOLS[app]] + [self.frozen[app]]))
             self.gates[app]['dependencies'] = gate(audited[TOOLS[app]] + self.frontend_audit.get(app, ''))
-        build_env = {key: value for key, value in self.environ.items()
-                     if key.upper() not in {'CSC_LINK', 'CSC_KEY_PASSWORD', 'WIN_CSC_LINK', 'WIN_CSC_KEY_PASSWORD', 'CSC_NAME'}}
-        for app in self.apps:
             tools = self.export[TOOLS[app]]
             # The hook accepts one fresh package per signing root (it stages its own NSIS copies there), so each app gets its
             # own; the dist root must lie inside it.
@@ -448,6 +504,7 @@ class Release:
                    'WINDOWS_PUBLISHER_NAME': self.publisher, 'DESKTOP_UPDATE_PROVIDER': 'github',
                    'DESKTOP_GITHUB_REPOSITORY': REPOSITORIES[app],
                    'DESKTOP_ACCESS_TRUST': str(tools / PACKAGING / 'desktop-access-trust.public.json')}
+            self.space('build', 2 * self.tree_bytes(runtime_root / app) + 2 * GIB)
             self.call('build', ['npm', 'run', 'build', '--', '--publish', 'never'], cwd=tools / 'ops' / 'desktop' / 'client', env=env,
                       log=f'npm-build-{app}')
             installer = dist_root / app / f'{PRODUCTS[app]}-{self.version}-win-x64.exe'
@@ -458,6 +515,9 @@ class Release:
             smoke = self.python_tool('nativeAcceptance', app, 'smoke_backend.py', '--app', app, '--runtime', packaged,
                                      '--output', self.logs / f'smoke-{app}.json', log=f'smoke-{app}', python=self.pythons[app])
             self.native[app] += '; packaged backend smoke on empty data: ' + smoke.evidence
+            self.remove_owned(Path('runtime') / app)
+            if self.build_python is None and app not in self.inject:
+                self.remove_owned(Path('venv') / app)
 
     def tests(self, tool, client):
         """Every test module under the client repository's ops/desktop, each given what it needs. npm ci first: the client tests
@@ -515,6 +575,7 @@ class Release:
         folder = self.release / 'venv' / f'{name}-tests'
         python = folder / 'Scripts' / 'python.exe'
         if name not in self.test_venvs:
+            self.space('tests', 3 * GIB)
             self.call('tests', [self.python, '-I', '-m', 'venv', folder], log=f'venv-{name}-tests')
             installed = self.call('tests', [python, '-m', 'pip', 'install', '--disable-pip-version-check', '--no-input', '--require-hashes',
                                             '--only-binary=:all:', '--no-deps', *[part for lock in locks for part in ('-r', lock)]],
@@ -549,7 +610,7 @@ class Release:
             provenance = json.loads((runtime / 'source-provenance.json').read_text(encoding='utf-8'))
         except (OSError, ValueError) as error:
             raise StepFailed('build', f'{app}: {self.inject[app]} has no readable source-provenance.json, so its dependencies '
-                                      'cannot be matched to main; a full build is required') from error
+                                      'cannot be matched to the selected source; a full build is required') from error
         if not isinstance(provenance, dict) or str(provenance.get('repository', '')).lower() != REPOSITORIES[app].lower():
             raise StepFailed('build', f'{app}: {self.inject[app]} source-provenance.json names repository '
                                       f'{provenance.get("repository") if isinstance(provenance, dict) else None}, not {REPOSITORIES[app]}')
@@ -576,17 +637,19 @@ class Release:
             now = sha256(self.export[app] / name) if (self.export[app] / name).is_file() else 'absent'
             if then != now:
                 raise StepFailed('build', f'{app}: {name} at the injected runtime\'s {used[0]} {used[1][:12]} (sha256 {then}) differs '
-                                          f'from {REPOSITORIES[app]} main (sha256 {now}): the dependencies changed, so a full build '
+                                          f'from {REPOSITORIES[app]} selected source (sha256 {now}): the dependencies changed, so a full build '
                                           f'is required (drop --inject-runtime {app}=...)')
             hashes.append(f'{name} sha256 {now}')
         return (f'source-provenance.json {used[0]} {used[1]}: ' + ', '.join(hashes)
-                + ' identical at that commit and on main')
+                + ' identical at that commit and the selected source')
 
     def security(self, app, shipped):
         report = self.logs / f'security-{app}.json'
         original = self.security_root / 'ops' / 'security' / 'exceptions.toml'
         hashes = f'exceptions.toml {original} sha256 {sha256(original) if original.is_file() else "absent"}'
-        extra = self.export[TOOLS[app]] / PACKAGING / f'{app}-security-exceptions.toml'
+        extra = self.export[app] / PACKAGING / f'{app}-security-exceptions.toml'
+        if not extra.is_file():
+            extra = self.export[TOOLS[app]] / PACKAGING / f'{app}-security-exceptions.toml'
         exceptions = []
         if extra.is_file():  # the gate's --exceptions replaces its file, so the app's entries are appended to a copy
             merged = self.release / 'security-gate' / f'{app}-exceptions.toml'
@@ -603,17 +666,6 @@ class Release:
         if raw.returncode == 0:
             return (f'security_gate.py export (gitleaks, data leak, exact secrets) from {self.security_root} on the {app} shipped '
                     f'sources {shipped}: {raw.evidence}; report sha256 {sha256(report)}; {hashes}')
-        if app == 'mentat' and raw.returncode == 1:
-            # The one reviewed finding (desktop_source_review.py: a fixed localStorage key name); anything else blocks. Still
-            # needed on the shipped sources: the staged Pocket template keeps that literal. The review hashes the export's bytes.
-            review = self.logs / 'security-mentat-review.json'
-            reviewed = self.python_tool('security', app, 'desktop_source_review.py', '--report', report, '--source', self.export[app],
-                                        '--output', review, log='security-review-mentat', check=False,
-                                        root=self.tool(app, PACKAGING / 'desktop_source_review.py'))
-            if reviewed.returncode == 0:
-                return (f'security_gate.py export on the mentat shipped sources {shipped}: {raw.evidence}; its only finding is the '
-                        f'reviewed mentat-pocket.html localStorage key name: {reviewed.evidence}; review sha256 {sha256(review)}; {hashes}')
-            raise StepFailed('security', f'mentat: findings beyond the reviewed one ({reviewed.evidence})')
         raise StepFailed('security', f'{app}: security_gate.py export failed ({raw.evidence})')
 
     def frontend(self, app):
@@ -633,7 +685,7 @@ class Release:
 
     def data_allowlist(self, app):
         stage = self.release / 'stage'
-        staged = self.call('dataAllowlist', [self.pythons[app], self.export[TOOLS[app]] / PACKAGING / 'build_runtime.py', '--app', app,
+        staged = self.call('dataAllowlist', [self.pythons[app], '-B', self.export[TOOLS[app]] / PACKAGING / 'build_runtime.py', '--app', app,
                                              '--source', self.export[app], '--stage-only', '--build-root', stage,
                                              '--runtime-root', self.release / 'runtime'], cwd=self.export[TOOLS[app]], log=f'stage-{app}')
         inventories = list((stage / app).glob('*/source-inventory.json'))
@@ -687,11 +739,32 @@ class Release:
                     or current[0].get('sha256') != digest or current[0].get('timestamped') is not True):
                 raise StepFailed('sign', f'{evidence} does not record a Valid, timestamped {THUMBPRINT} signature on these '
                                          f'installer bytes ({digest})')
+            if receipt.get('desktopUninstaller') is not False or receipt.get('uninstallerEvidence') != 'intentionally-absent':
+                raise StepFailed('sign', f'{evidence} does not assert the no-uninstaller build contract')
+            program = installer.parent / 'win-unpacked'
+            self.space('sign', 2 * self.tree_bytes(program) + GIB // 2)
+            (self.release / 'inspection').mkdir(exist_ok=True)
+            report = self.logs / f'native-verification-{app}.json'
+            inspected = self.python_tool('sign', app, 'verify_native_release.py', '--app', app, '--version', self.version,
+                '--installer', installer, '--signing-receipt', evidence, '--program-directory', program,
+                '--client', self.export[TOOLS[app]] / 'ops/desktop/client', '--source', self.export[app],
+                '--staged-sources', self.staged_sources[app], '--client-commit', self.shas[TOOLS[app]],
+                '--source-commit', self.shas[app], '--trust-descriptor', self.export[TOOLS[app]] / PACKAGING / 'desktop-access-trust.public.json',
+                '--seven-zip', self.seven_zip(), '--output', self.release / 'inspection' / app, '--report', report,
+                log=f'native-verification-{app}')
+            verified = json.loads(report.read_text(encoding='utf-8'))
+            expected = {'status': 'passed', 'appId': app, 'version': self.version, 'installerSha256': digest,
+                        'sourceCommit': self.shas[app], 'clientCommit': self.shas[TOOLS[app]],
+                        'completeNativeCensus': True, 'desktopUninstaller': False}
+            if any(verified.get(key) != value for key, value in expected.items()) or sha256(installer) != digest:
+                raise StepFailed('sign', f'{report} does not bind the complete native census to this installer and sources')
+            self.remove_owned(Path('inspection') / app)
             self.signatures[app] = gate(
                 f'Get-AuthenticodeSignature Valid, {self.publisher}, thumbprint {THUMBPRINT}, timestamped; signed during '
                 f'`npm run build` by {SIGNING_HOOK} at {REPOSITORIES[TOOLS[app]]}@{self.shas[TOOLS[app]]}; hook receipt '
                 f'{evidence} sha256 {sha256(evidence)}: {len(receipt.get("files") or [])} signing records, installer sha256 '
-                f'{digest} verified by the hook')
+                f'{digest} verified by the hook; independent final native/source census {inspected.evidence}; '
+                f'{report} sha256 {sha256(report)}, desktopUninstaller false')
 
     def write_receipts(self):
         targets = [self.spec_path] + [self.receipts / f'{app}.json' for app in self.apps]
@@ -769,17 +842,17 @@ class Release:
 
     def publish(self):
         notes = self.release / 'release-notes.md'
-        notes.write_text(f'Desktop {self.version} (sequence {self.sequence}), built from each repository\'s main:\n\n'
+        notes.write_text(f'Desktop {self.version} (sequence {self.sequence}), built from explicit committed sources:\n\n'
                          + ''.join(f'- {PRODUCTS[app]}: {REPOSITORIES[app]}@{self.shas[app]}\n' for app in self.apps), encoding='utf-8')
         downloads = self.release / 'verify-download'
         downloads.mkdir(exist_ok=True)
         for app in self.shipped:  # a shipped client repository that is no app here still must not have moved
             if app not in self.apps:
                 expected = self.spec['sourceRefs'][app]['commit']
-                tip = self.call('publish', ['gh', 'api', f'repos/{REPOSITORIES[app]}/commits/main', '--jq', '.sha'],
+                tip = self.call('publish', ['gh', 'api', f'repos/{REPOSITORIES[app]}/commits/{self.source(app)["ref"]}', '--jq', '.sha'],
                                 log=f'gh-main-{app}').stdout.strip()
                 if tip != expected:
-                    raise StepFailed('publish', f'{REPOSITORIES[app]} main moved to {tip or "unknown"} since the release spec was made '
+                    raise StepFailed('publish', f'{REPOSITORIES[app]} selected source ref moved to {tip or "unknown"} since the release spec was made '
                                                 f'from {expected}')
         # All-or-nothing as far as GitHub allows: checks, then verified drafts for every app, and only then the public edits.
         for app in self.apps:  # read-only checks first, so a refusal leaves no draft behind
@@ -792,9 +865,9 @@ class Release:
             if remote.stdout.strip() != sha:
                 raise StepFailed('publish', f'{sha} is not on {repo}')
             expected = self.spec['sourceRefs'][app]['commit']
-            tip = self.call('publish', ['gh', 'api', f'repos/{repo}/commits/main', '--jq', '.sha'], log=f'gh-main-{app}').stdout.strip()
+            tip = self.call('publish', ['gh', 'api', f'repos/{repo}/commits/{self.source(app)["ref"]}', '--jq', '.sha'], log=f'gh-main-{app}').stdout.strip()
             if tip != expected:
-                raise StepFailed('publish', f'{repo} main moved to {tip or "unknown"} since the release spec was made from {expected}')
+                raise StepFailed('publish', f'{repo} selected source ref moved to {tip or "unknown"} since the release spec was made from {expected}')
             if self.git('publish', app, 'ls-remote', '--tags', 'origin', 'refs/tags/' + self.tag).stdout.strip():
                 raise StepFailed('publish', f'{repo} already has {self.tag}')
             view = self.call('publish', ['gh', 'release', 'view', self.tag, '--repo', repo], log=f'gh-view-{app}', check=False)
@@ -870,7 +943,11 @@ def parse(argv=None):
                         help=f'Mentat checkout (env DESKTOP_MENTAT_SOURCE; default {SOURCES / "Mentat"}, cloned if absent)')
     parser.add_argument('--geo', type=Path,
                         help=f'Geo (Terrier) checkout (env DESKTOP_GEO_SOURCE; default {SOURCES / "Geo"}, cloned if absent)')
-    parser.add_argument('--version', help='expected version; must equal ops/desktop/client/package.json on Melange and Mentat main')
+    parser.add_argument('--version', help='expected version; must equal the frozen shared Melange desktop client version')
+    parser.add_argument('--source-commit', action='append', default=[], metavar='APP=40HEX',
+                        help='export this committed GitHub source instead of origin/main; repeatable per app, including shared Melange tooling')
+    parser.add_argument('--free-floor-gib', type=int, default=32, help='minimum free disk space retained during builds (at least 32)')
+    parser.add_argument('--seven-zip', type=Path, help='explicit 7za used for independent complete native-package verification')
     parser.add_argument('--sequence', type=int, help='release sequence (default: last prepared + 1)')
     parser.add_argument('--state', type=Path, default=DEFAULT_STATE, help='publisher state directory (default %(default)s)')
     parser.add_argument('--security-root', type=Path, default=Path(environ.get('DESKTOP_SECURITY_ROOT') or SECURITY_ROOT),
@@ -891,6 +968,15 @@ def parse(argv=None):
     if not apps or not apps <= set(APPS):
         parser.error(f'--apps {args.apps}: name one or more of {",".join(APPS)}')
     args.apps = tuple(app for app in APPS if app in apps)
+    selected = {}
+    for item in args.source_commit:
+        app, _, commit = item.partition('=')
+        if app not in APPS or app in selected or not re.fullmatch(r'[0-9a-f]{40}', commit) or commit == '0' * 40:
+            parser.error(f'--source-commit {item}: expected APP=40 lowercase hexadecimal characters, once per app')
+        selected[app] = commit
+    args.source_commit = selected
+    if args.free_floor_gib < 32:
+        parser.error('--free-floor-gib must be at least 32')
     inject = {}
     for item in args.inject_runtime:
         app, _, folder = item.partition('=')
@@ -905,7 +991,7 @@ def parse(argv=None):
             if not given:
                 args.default_sources.add(app)
             setattr(args, name, Path(given) if given else SOURCES / REPOSITORIES[app].split('/')[1])
-    for name in ('melange', 'mentat', 'geo', 'state', 'output_root', 'security_root', 'native_root', 'build_python'):
+    for name in ('melange', 'mentat', 'geo', 'state', 'output_root', 'security_root', 'native_root', 'build_python', 'seven_zip'):
         if getattr(args, name) is not None:
             setattr(args, name, getattr(args, name).expanduser().absolute())
     return args

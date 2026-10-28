@@ -77,6 +77,14 @@ class DesktopUpdater {
   }
   async ensureRecoveryBaseline(enrollment,fetch=true){
     let state=this.readState(),candidate=state.installed;
+    if(state.suspendedVersions?.includes(this.version)){
+      // A failed running release must not replace the last-good recovery anchor.
+      // Its corrected successor still passes every release high-water check.
+      if(candidate?.phase!=='installed'||!semver.valid(candidate.version)||!semver.lt(candidate.version,this.version))throw new Error('A previously confirmed version is required after a failed startup.');
+      const verified=verifyEnvelope(candidate.envelope,enrollment,{...this.identity(),version:candidate.version},{});
+      if(verified.manifest.version!==candidate.version)throw new Error('Last-good recovery baseline mismatch.');
+      return candidate;
+    }
     if(candidate?.version!==this.version){
       if(!fetch)throw new Error('A verified installer for the current version is required before the first update.');
       const query=new URLSearchParams({platform:this.platform,arch:this.arch,version:this.version});
@@ -238,7 +246,10 @@ class DesktopUpdater {
     const pending=state.pending;
     if(!pending)return;
     if(pending.version===this.version){
-      if(pending.phase==='failed'){this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;}
+      if(pending.phase==='failed'){
+        if(!state.suspendedVersions?.includes(this.version))this.writeState({...state,suspendedVersions:[...(state.suspendedVersions||[]),this.version]});
+        this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;
+      }
       // An installer found only at the pre-move cache path (legacyUserData) proves that this release was installed from the old
       // updater file root, so the running version confirms it with no readiness wait (a background-only run never starts a
       // backend). Otherwise a version string alone does not prove that its backend can start; a copy that is gone everywhere
@@ -275,7 +286,8 @@ class DesktopUpdater {
     try {
       enrollment=this.loadEnrollment();if(!enrollment){this.onStatus('Update receiver awaits administrator approval and activation.');return;}
       const notice=await this.recover(enrollment);
-      if(this.readState().pending?.version===this.version)return;
+      const runningPending=this.readState().pending;
+      if(runningPending?.version===this.version&&runningPending.phase!=='failed')return;
       if(this.ready?.recovery||['staged','prepared','activating'].includes(this.readState().recovery?.phase))return;
       const trust=await this.request(enrollment,'/v1/apps/'+this.appId+'/trust',{token:enrollment.deviceToken});
       enrollment=applyKeyTransitions(enrollment,trust.transitions);this.saveEnrollment(enrollment);

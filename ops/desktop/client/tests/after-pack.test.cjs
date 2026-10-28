@@ -83,6 +83,14 @@ test('afterPack without packager metadata (unit use) leaves no include behind',a
   const context=build(t);await quiet({appOutDir:context.appOutDir});assert.equal(fs.existsSync(path.join(context.output,'installer.generated.nsh')),false);
 });
 
+test('native no-uninstaller metadata generates the pinned custom script for this build',async t=>{
+  const context=build(t,'melange','1.0.21');context.packager.config.extraMetadata.desktopAppConfig.desktopUninstaller=false;
+  await quiet(context);
+  assert.ok(fs.existsSync(path.join(context.output,'installer.no-uninstaller.nsi')));
+  const evidence=JSON.parse(fs.readFileSync(path.join(context.output,'nsis-no-uninstaller.provenance.json'),'utf8'));
+  assert.equal(evidence.mode,'native-without-uninstaller');assert.equal(evidence.electronBuilderVersion,'26.15.3');
+});
+
 // ---- N20: the public installer ships a no-data dashboard shell only ----
 test('N20: afterPack fails on a real Moneyball.html or a Melange dataset, and passes on the shell-only runtime',async t=>{
   const shell=['melange/sources/fec/surfaces/staffer_live_server.py','melange/bootstrap/melange_bootstrap.py','terrier/sources/data/field_dictionary.csv'];
