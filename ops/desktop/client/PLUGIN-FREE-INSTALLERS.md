@@ -49,6 +49,10 @@ the recipient administrator's application definitions and policies. Preserve
 vendor signatures and keep approval scoped to the intended apps. Do not treat
 this packaging change as proof of ThreatLocker approval.
 
+See [ThreatLocker deployment](THREATLOCKER-DEPLOYMENT.md) for per-application
+runtime and dependency coverage, login/update paths, and the audit details IT
+needs to investigate a denial.
+
 ## Current delivery evidence
 
 For the October 28, 2026 manual test delivery, the user explicitly requested that
