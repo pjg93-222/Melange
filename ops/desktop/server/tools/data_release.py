@@ -35,6 +35,7 @@ import os
 import re
 import sys
 import zipfile
+import zlib
 from pathlib import Path, PurePosixPath
 
 SCHEMA = "melange-desktop-data/v1"
@@ -177,14 +178,21 @@ def select(sources, allow: list[str], deny: list[str]):
 def _inlines_restricted(p: Path) -> bool:
     """A page or script (or its .gz) carrying the staffer ODATA/CDATA islands. Unreadable gzip fails closed."""
     name = p.name.lower()
-    gz = name.endswith(".gz")
     if not name.removesuffix(".gz").endswith(PAGE_SUFFIXES):
         return False
+    # Streamed, so a ~100 MB page or a .gz bomb never sits in memory. ponytail: a marker whose whitespace run
+    # straddles a 1 MiB chunk boundary by more than 4 KiB is missed; the generators emit "const ODATA=".
+    tail = b""
     try:
-        body = gzip.decompress(p.read_bytes()) if gz else p.read_bytes()  # ponytail: whole-file read; pages are ~100 MB
-    except (OSError, EOFError):
+        with (gzip.open(p, "rb") if name.endswith(".gz") else p.open("rb")) as fh:
+            while chunk := fh.read(1 << 20):
+                buf = tail + chunk
+                if INLINE_RESTRICTED.search(buf):
+                    return True
+                tail = buf[-4096:]
+    except (OSError, EOFError, zlib.error):
         return True
-    return INLINE_RESTRICTED.search(body) is not None
+    return False
 
 
 def build(app: str, data_root: Path | None, out: Path, tag: str, allow: list[str], deny: list[str],

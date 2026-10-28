@@ -152,11 +152,13 @@ class BuildTest(unittest.TestCase):
             "x/app.js": b"const CDATA={}",
             "outputs/Moneyball.HTML.gz": gzip.compress(b"const ODATA={}"),
             "outputs/broken.html.gz": b"not gzip",
+            "outputs/bad-deflate.html.gz": gzip.compress(b"x" * 9999)[:10] + b"\xff" * 40,
             "y/staffer-free.html": b"<script>const SDATA={};const GDATA={}</script>",
             "y/notes.json": b'"const ODATA="',
         })
         m = self._build_all()
-        self.assertTrue({"Moneyball.html", "x/app.js", "outputs/Moneyball.HTML.gz", "outputs/broken.html.gz"}
+        self.assertTrue({"Moneyball.html", "x/app.js", "outputs/Moneyball.HTML.gz", "outputs/broken.html.gz",
+                         "outputs/bad-deflate.html.gz"}
                         <= set(m["excluded"]))
         shipped = {f["path"] for f in m["files"]}
         self.assertTrue({"y/staffer-free.html", "y/notes.json"} <= shipped)
