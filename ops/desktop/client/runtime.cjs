@@ -27,7 +27,7 @@ function refuseModuleDataSettings(configuration){
   if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
 }
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,confine=null,logRoot=null}={}){this.allowStandalone=allowStandalone===true;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,authentication='password',confine=null,logRoot=null}={}){this.allowStandalone=allowStandalone===true;if(!['windows','password'].includes(authentication)||(authentication==='windows'&&!this.allowStandalone))throw new Error('Unsupported runtime authentication mode');this.authentication=authentication;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
     initializeModuleRuntime(this,()=>{const command=backendCommand(this.resources,this.definition.id);return {source:path.join(command.runtime,'sources'),bootstrap:path.join(command.runtime,'bootstrap')};});}
   async start(configuration,capability){
     refuseModuleDataSettings(configuration);
@@ -42,6 +42,7 @@ class Runtime {
     if(authorization?.mode==='standalone'){
       if(!this.allowStandalone||authorization.identity?.appId!==this.definition.id)throw new Error('Local authorization is unavailable in this build.');
       require('./access-lifecycle.cjs').authorizationIdentity(authorization);
+      if((authorization.session?.method==='windows-session')!==(this.authentication==='windows'))throw new Error('The local sign-in does not match this build.');
     }else if(!authorization?.accepted?.grant||authorization.accepted.revoked)throw new Error('Administrator approval is required.');
     if(this.child&&this.authorization&&require('./access-lifecycle.cjs').authorizationIdentity(authorization)!==require('./access-lifecycle.cjs').authorizationIdentity(this.authorization))throw new Error('Close the app before changing its approved account.');
     this.authorization=authorization;
@@ -81,6 +82,7 @@ class Runtime {
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
     if(appId==='terrier'&&authorization.mode==='standalone')args.push('--standalone');
+    if(appId==='terrier'&&authorization.mode==='standalone'&&this.authentication==='windows')args.push('--windows-session');
     if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner,'--owner-root',ownerRoot);
     if(roots.githubDistrictData===true) args.push('--github-district-data');
     if(moduleInput)args.push('--desktop-module-input','--profile-root',this.userData);

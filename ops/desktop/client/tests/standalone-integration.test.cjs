@@ -57,6 +57,35 @@ test('standalone Terrier lifecycle still requires genuine backend sign-in after 
  backendSignedIn=true;await life.resume(approved,{freshPassword:true});assert.equal(await life.authenticated(),true);assert.equal(approved.session,null);
 });
 
+function windowsLocal(appId='melange'){
+ const value=local(appId);value.session={...value.identity,sessionId:'33333333-3333-4333-8333-333333333333',authenticatedAt:1800000000000,method:'windows-session'};return value;
+}
+for(const appId of ['melange','mentat','terrier'])test(`${appId} Windows mode uses an explicit native launch without a managed principal`,async t=>{
+ const f=launcher(t,appId),approved=windowsLocal(appId),runtime=f.make({allowStandalone:true,authentication:'windows',authorize:async()=>approved});
+ await runtime.start(f.configuration);assert.equal(f.spawns.length,1);const invocation=f.spawns[0];
+ assert.equal(invocation.args.includes('--windows-session'),appId==='terrier');assert.equal(invocation.args.includes('--standalone'),appId==='terrier');
+ assert.equal(invocation.options.env.DESKTOP_ACCESS_PRINCIPAL,undefined);assert.equal('accepted' in runtime.authorization,false);
+});
+test('Windows authentication cannot be injected into a password or managed build',async t=>{
+ const f=launcher(t,'terrier');assert.throws(()=>f.make({authentication:'windows'}),/Unsupported runtime authentication/);
+ await assert.rejects(f.make({allowStandalone:true,authorize:async()=>windowsLocal('terrier')}).start(f.configuration),/sign-in does not match/);
+ await assert.rejects(f.make({allowStandalone:true,authentication:'windows'}).start(f.configuration),/sign-in does not match/);
+ assert.equal(f.spawns.length,0);
+ const wrong=windowsLocal('terrier');wrong.session.accountId='55555555-5555-4555-8555-555555555555';assert.throws(()=>authorizationIdentity(wrong),/Windows sign-in/);
+ assert.notEqual(authorizationIdentity(local('terrier')),authorizationIdentity(windowsLocal('terrier')));
+});
+test('Windows lock preserves Terrier account credentials and only a current OS-unlock probe can resume',async()=>{
+ const approved=windowsLocal('terrier'),runtime={allowStandalone:true,authentication:'windows',definition:{id:'terrier'},child:{pid:1},authorization:approved,requestsAllowed:true};
+ let unlocked=true,probes=0,logouts=0;
+ const gate={authorize:async()=>{if(!unlocked)throw new Error('Windows locked');return approved;},local:{lock(){unlocked=false;},async resume(){probes++;unlocked=true;}}};
+ const life=new AccessLifecycle({runtime,gate,hide(){},showBoundary:async()=>{},terrierAuthenticated:async()=>true,terrierLogout:async()=>{logouts++;}});
+ life.osLocked=true;await life.suspend('locked');assert.equal(logouts,0);assert.equal(life.requiresFreshPassword,false);assert.equal(runtime.requestsAllowed,false);
+ await assert.rejects(life.resumeWindows(),/Unlock Windows/);assert.equal(probes,0);
+ life.osLocked=false;const current=await life.resumeWindows();assert.equal(probes,1);assert.equal(runtime.requestsAllowed,false);
+ await life.resume(current);assert.equal(await life.canReveal(life.generation,current),true);
+ await life.suspend('locked');let finish;gate.local.resume=()=>new Promise(resolve=>{finish=resolve;});const pending=life.resumeWindows();await life.suspend('locked');finish();await assert.rejects(pending,/access changed/);assert.equal(runtime.requestsAllowed,false);
+});
+
 function memory(value=null){let current=structuredClone(value);return {read:async()=>structuredClone(current),write:async(...args)=>{current=structuredClone(args.at(-1));},delete:async()=>{current=null;},get value(){return structuredClone(current);}};}
 function bootstrapFixture({existing=false,staleDevice=false}={}){
  const deviceId=local().identity.deviceId,identity={schemaVersion:1,appId:'melange',deviceId,platform:'win32',arch:'x64'};

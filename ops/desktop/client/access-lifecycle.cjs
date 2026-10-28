@@ -3,10 +3,12 @@ const http=require('node:http');
 function authorizationIdentity(value){
  if(value?.mode==='standalone'){
   const identity=require('./standalone-access.cjs').validIdentity(value.identity);
+  const windows=value.session?.method==='windows-session';
+  if(windows&&['schemaVersion','appId','deviceId','accountId','accountIdentity'].some(key=>value.session[key]!==identity[key]))throw new Error('Windows sign-in is required');
   if(identity.appId==='terrier'){
    if(value.principal?.mode!=='standalone'||!require('./standalone-access.cjs').DISTRICTS.includes(value.principal.districtId))throw new Error('Local district sign-in is required');
-  }else if(value.principal!==null||!value.session||['schemaVersion','appId','deviceId','accountId','accountIdentity'].some(key=>value.session[key]!==identity[key])||!['local-password','device-trust'].includes(value.session.method))throw new Error('Local sign-in is required');
-  return JSON.stringify({mode:'standalone',identity,principal:value.principal});
+  }else if(value.principal!==null||!value.session||['schemaVersion','appId','deviceId','accountId','accountIdentity'].some(key=>value.session[key]!==identity[key])||!['local-password','device-trust','windows-session'].includes(value.session.method))throw new Error('Local sign-in is required');
+  return JSON.stringify({mode:'standalone',authentication:windows?'windows':'password',identity,principal:value.principal});
  }
  const grant=value?.accepted?.grant;if(!grant||value.accepted.revoked)throw new Error('Current approval is required');
  return JSON.stringify({serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,
@@ -27,7 +29,8 @@ async function terrierSession(runtime,partition,{logout=false,passwordLockDisabl
  });
  const value=await request('/api/auth/session');
  const local=runtime.authorization.mode==='standalone'&&runtime.authorization.principal.mode==='standalone';
- const authenticated=Boolean(value?.authenticated===true&&value.administrator===true&&(local?typeof value.username==='string'&&value.username.length>0:value.username===runtime.authorization.principal.localAccountIdentity));
+ const windows=local&&runtime.authorization.session?.method==='windows-session';
+ const authenticated=Boolean(value?.authenticated===true&&value.administrator===true&&(!windows||value.authentication==='windows')&&(local?typeof value.username==='string'&&value.username.length>0:value.username===runtime.authorization.principal.localAccountIdentity));
  if(logout){if(!value||typeof value.csrf!=='string')return false;const result=await request('/api/auth/logout','POST',value.csrf);return result?.ok===true;}
  return authenticated&&(!passwordLockDisabled||value.password_lock_disabled===true);
 }
@@ -41,17 +44,18 @@ class AccessLifecycle{
  }
  async suspend(reason){
   // Stop new network activity first. Existing requests/compute and the DOM remain intact.
-  this.generation++;this.runtime.requestsAllowed=false;this.suspended=true;this.gate.local?.lock();this.hide();
+  const generation=++this.generation;this.runtime.requestsAllowed=false;this.suspended=true;this.gate.local?.lock();this.hide();
   // onSuspend cancels in-flight district switches synchronously; its backend stops never gate or skip the lock.
   const stopped=(async()=>this.onSuspend())().catch(()=>{});
-  if(['locked','signed_out'].includes(reason)&&this.runtime.definition.id==='terrier'){
+  const windows=this.runtime.allowStandalone===true&&this.runtime.authentication==='windows';
+  if(['locked','signed_out'].includes(reason)&&this.runtime.definition.id==='terrier'&&!windows){
    // Fail closed while the password-lock preference is read; the final value is set below.
    this.requiresFreshPassword=true;let passwordless=false;try{passwordless=await this.terrierPasswordLockDisabled();}catch{}
    this.requiresFreshPassword=!passwordless;if(!passwordless)await this.terrierLogout();
   }
   await stopped;
   try{await this.presence(reason==='signed_out'?'signed_out':'locked',this.sessionId);}catch{}
-  await this.showBoundary();
+  if(generation===this.generation&&this.suspended)await this.showBoundary();
  }
  async resume(approved,{freshPassword=false,expectedGeneration=this.generation}={}){
   if(this.osLocked)throw new Error('Unlock Windows before opening the workspace');
@@ -59,6 +63,17 @@ class AccessLifecycle{
   if(this.requiresFreshPassword&&!freshPassword)throw new Error('Fresh Terrier password authentication required');
   if(this.runtime.child&&this.runtime.authorization&&authorizationIdentity(approved)!==authorizationIdentity(this.runtime.authorization))throw new Error('Close the workspace before changing its approved account');
   this.runtime.requestsAllowed=true;this.suspended=false;this.requiresFreshPassword=false;
+ }
+ async resumeWindows({expectedGeneration=this.generation}={}){
+  const current=()=>this.runtime.allowStandalone===true&&this.runtime.authentication==='windows'&&!this.osLocked&&expectedGeneration===this.generation;
+  if(!current())throw new Error('Unlock Windows before opening the workspace');
+  await this.gate.local.resume();
+  if(!current())throw new Error('Windows access changed while resuming');
+  const approved=await this.gate.authorize();
+  if(!current()||approved?.mode!=='standalone'||approved.session?.method!=='windows-session')throw new Error('Windows sign-in is required');
+  authorizationIdentity(approved);
+  if(this.runtime.child&&this.runtime.authorization&&authorizationIdentity(approved)!==authorizationIdentity(this.runtime.authorization))throw new Error('Close the workspace before changing its Windows account');
+  return approved; // Normal launch still checks the backend, generation and reveal boundary.
  }
  async refreshPasswordlessOwner({expectedGeneration=this.generation}={}){
   if(this.runtime.definition.id!=='terrier'||!this.suspended)return false;

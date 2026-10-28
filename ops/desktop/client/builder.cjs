@@ -19,6 +19,8 @@ if(!['','0','1'].includes(process.env.DESKTOP_SHARED_SCRAPE||''))throw new Error
 const desktopScrapeBroker=process.env.DESKTOP_SHARED_SCRAPE==='1'&&['melange','mentat'].includes(selected.id);
 const desktopAccessMode=process.env.DESKTOP_ACCESS_MODE||'standalone';
 if(!['standalone','managed'].includes(desktopAccessMode))throw new Error('Unsupported desktop access mode');
+const desktopAuthentication=process.env.DESKTOP_AUTHENTICATION||(desktopAccessMode==='standalone'?'windows':'password');
+if(!['windows','password'].includes(desktopAuthentication)||(desktopAuthentication==='windows'&&desktopAccessMode!=='standalone'))throw new Error('Unsupported desktop authentication mode');
 if(desktopAccessMode==='standalone'&&(updateProvider!=='github'||desktopScrapeBroker))throw new Error('Standalone apps require GitHub updates and cannot use the private administrator scrape broker');
 const publicDataMode=process.env.DESKTOP_PUBLIC_DATA_MODE||'legacy';
 if(!['legacy','paged-v1'].includes(publicDataMode)||(publicDataMode==='paged-v1'&&selected.id!=='melange'))throw new Error('Unsupported public data mode for this application');
@@ -38,7 +40,7 @@ module.exports={
   extraResources:[{from:runtime,to:'runtime/'+selected.id,filter:['**/*','!sources/**/state/**','!sources/**/*.{sqlite,sqlite3,db,sqlite-wal,sqlite-shm,sqlite-journal,sqlite3-wal,sqlite3-shm,sqlite3-journal,db-wal,db-shm,db-journal}']},
    // Public release certificate only (no longer used by the app; kept for publisher-trust.cjs and turn-on-updates.cmd).
    {from:path.join(__dirname,'melange-systems-desktop-release.cer'),to:'melange-systems-desktop-release.cer'}],
-  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,desktopUninstaller:false,desktopAccessMode,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
+  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,desktopUninstaller:false,desktopAccessMode,desktopAuthentication,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
   // build-native.cjs completes the signed directory with the shared built-in
   // installer. Electron-builder's NSIS target would restore external plug-ins.
   win:{target:['dir'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
