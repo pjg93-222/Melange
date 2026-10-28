@@ -91,6 +91,11 @@ FunctionEnd
 Section "${PF_PRODUCT}"
   SetShellVarContext current
   SetOverwrite on
+  SetDetailsPrint both
+  DetailPrint "Installing ${PF_PRODUCT} program files..."
+  ; Keep current-file status and progress without inserting tens of thousands
+  ; of rows into the details list. NSIS recommends textonly for many small files.
+  SetDetailsPrint textonly
   ClearErrors
   SetOutPath "$INSTDIR"
   IfErrors extraction_failed
@@ -107,12 +112,15 @@ Section "${PF_PRODUCT}"
   IfErrors extraction_failed
   SetOutPath "$INSTDIR"
   ; Only a fully extracted version can become the next-login update receiver.
+  SetDetailsPrint both
+  DetailPrint "Preparing automatic updates..."
   ClearErrors
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PF_APP_ID}" '$\"$INSTDIR\${PF_EXE}$\" --desktop-updater'
   IfErrors registration_failed
   WriteRegStr HKCU "Software\${PF_APP_ID}" "InstallLocation" "$INSTDIR"
   WriteRegStr HKCU "Software\${PF_APP_ID}" "Version" "${PF_VERSION}"
   ; Update existing shortcuts, retaining the user's choice to delete a link.
+  DetailPrint "Updating application shortcuts..."
   StrCmp $pfUpdated "1" update_start start_link
   update_start:
     IfFileExists "$SMPROGRAMS\${PF_PRODUCT}.lnk" start_link desktop
@@ -128,18 +136,23 @@ Section "${PF_PRODUCT}"
     ; Best effort only. Silent/update installs do not copy their own installer.
     IfSilent launch
     StrCmp $pfUpdated "1" launch
+    DetailPrint "Preparing recovery..."
     ClearErrors
     CreateDirectory "$LOCALAPPDATA\${PF_APP_ID}\baseline\${PF_VERSION}"
     CopyFiles /SILENT "$EXEPATH" "$LOCALAPPDATA\${PF_APP_ID}\baseline\${PF_VERSION}\$EXEFILE"
   launch:
     ClearErrors
     StrCmp $pfForceRun "1" 0 complete
+    DetailPrint "Starting ${PF_PRODUCT}..."
     Exec '$\"$INSTDIR\${PF_EXE}$\" --updated'
     IfErrors launch_failed
   complete:
+    DetailPrint "${PF_PRODUCT} installation is complete."
     SetErrorLevel 0
     Goto done
   extraction_failed:
+    SetDetailsPrint both
+    DetailPrint "Installation stopped while writing program files."
     MessageBox MB_OK|MB_ICONSTOP "${PF_PRODUCT} could not write its program files. No new login receiver has been registered. Close this installer and ask IT to check the blocked file or folder." /SD IDOK
     SetErrorLevel 3
     Abort
