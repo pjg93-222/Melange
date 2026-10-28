@@ -21,6 +21,10 @@ const MESSAGES=Object.freeze({
  error:'The module data check could not be completed. Existing files were preserved.',
  unsupported:'GitHub preload is not available for this component.'
 });
+const MENTAT_MESSAGES=Object.freeze({
+ ready:'Verified public FEC tables are cached locally. Industry reports and forecasts use separate local files.',
+ offline:'Using verified cached public FEC tables while GitHub is unavailable. Industry reports and forecasts use separate local files.'
+});
 const ERROR_MESSAGES=Object.freeze({
  authorization:'Current existing-owner approval is required.',
  integrity:'Module data verification failed.',
@@ -44,7 +48,7 @@ function sanitizeModuleStatus(appId,value,{canRefresh=false}={}){
     (value.appId!==undefined&&value.appId!==appId)||
     (value.repository!==undefined&&(typeof value.repository!=='string'||value.repository.toLowerCase()!==repository)))return null;
  const phase=PHASES.has(value.phase)?value.phase:'error';
- const result={provider:'github',appId,repository,phase,cached:value.cached===true,canRefresh:canRefresh===true&&phase!=='unsupported',message:MESSAGES[phase]};
+ const result={provider:'github',appId,repository,phase,cached:value.cached===true,canRefresh:canRefresh===true&&phase!=='unsupported',message:appId==='mentat'&&MENTAT_MESSAGES[phase]||MESSAGES[phase]};
  if(typeof value.releaseTag==='string'&&TAG.test(value.releaseTag))result.releaseTag=value.releaseTag;
  if(Number.isSafeInteger(value.catalogueSequence)&&value.catalogueSequence>0)result.catalogueSequence=value.catalogueSequence;
  for(const key of ['checkedAt','verifiedAt'])if(timestamp(value[key]))result[key]=value[key];
