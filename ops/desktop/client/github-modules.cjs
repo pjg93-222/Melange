@@ -33,12 +33,13 @@ async function fileDigest(file,{signal,identity}={}){
  return {bytes,sha256:h.digest('hex')};
 }
 class GitHubModules{
- constructor({appId,publicKeys,profile,cacheRoot,protectedRoots=[],store,registry,requiredKinds=Object.keys(registry||{}),effectiveConfiguration,authorize,transport,now=Date.now,minimumFreeBytes=512*1024**2}){
+ constructor({appId,publicKeys,profile,cacheRoot,protectedRoots=[],store,previousStore=null,registry,requiredKinds=Object.keys(registry||{}),effectiveConfiguration,authorize,transport,now=Date.now,minimumFreeBytes=512*1024**2}){
   this.appId=appId;this.app=protocol.configuration(appId);protocol.checkedRegistry(appId,registry,requiredKinds);
   if(!store?.read||!store?.write||typeof authorize!=='function'||typeof effectiveConfiguration!=='function'||!publicKeys||typeof publicKeys!=='object')throw fail('integrity','Native module data dependencies are required');
+  if(previousStore!==null&&(typeof previousStore?.read!=='function'||previousStore===store))throw fail('integrity','A separate previous public data journal is required');
   if(typeof profile!=='string'||!path.isAbsolute(profile)||!fs.statSync(profile).isDirectory()||fs.lstatSync(profile).isSymbolicLink())throw fail('integrity','An existing native profile is required');
   if(!Array.isArray(protectedRoots)||protectedRoots.some(root=>typeof root!=='string'||!path.isAbsolute(root))||!integer(minimumFreeBytes))throw fail('integrity','Invalid native module data boundaries');
-  this.profile=fs.realpathSync.native(profile);this.publicKeys=structuredClone(publicKeys);this.store=store;this.registry=registry;this.requiredKinds=[...requiredKinds];this.effectiveConfiguration=effectiveConfiguration;this.authorize=authorize;this.transport=transport||new GitHubModuleTransport(appId);this.now=now;this.minimumFreeBytes=minimumFreeBytes;
+  this.profile=fs.realpathSync.native(profile);this.publicKeys=structuredClone(publicKeys);this.store=store;this.previousStore=previousStore;this.registry=registry;this.requiredKinds=[...requiredKinds];this.effectiveConfiguration=effectiveConfiguration;this.authorize=authorize;this.transport=transport||new GitHubModuleTransport(appId);this.now=now;this.minimumFreeBytes=minimumFreeBytes;
   const localBase=process.env.LOCALAPPDATA?fs.realpathSync.native(path.resolve(process.env.LOCALAPPDATA)):null;
   const choices=[{base:this.profile,root:path.join(this.profile,'packs','github-module-data')},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,'github-module-data')}]:[])];
   const chosen=cacheRoot?choices.find(choice=>physicalPath(choice.root)===physicalPath(cacheRoot)):choices.at(-1);
@@ -176,8 +177,7 @@ class GitHubModules{
    this.ownedFile(temporary,receipt,{links:2n});fs.unlinkSync(temporary);this.ownedFile(file,receipt,{linkTransition:true});return file;
   }finally{await handle?.close().catch(()=>{});this.removeOwnedFile(temporary,receipt);}
  }
- async state(){
-  const value=await this.store.read();
+ checkedState(value){
   if(value===null||value===undefined)return {schemaVersion:1,appId:this.appId,repository:this.app.repository,highwater:{catalogSequence:0,pointerDigest:null},accepted:null,staged:null,active:null};
   try{
    requireValue(Buffer.byteLength(JSON.stringify(value))<=16384,'Protected module journal is too large');exact(value,['schemaVersion','appId','repository','highwater','accepted','staged','active']);exact(value.highwater,['catalogSequence','pointerDigest']);
@@ -186,6 +186,24 @@ class GitHubModules{
    if(value.accepted)requireValue(value.accepted.catalogSequence===value.highwater.catalogSequence&&value.accepted.pointerDigest===value.highwater.pointerDigest,'Module accepted record differs from high-water');
    return structuredClone(value);
   }catch(error){if(error.reason)throw error;throw fail('integrity','Protected module journal is invalid');}
+ }
+ async state(){
+  const value=await this.store.read();
+  if(value!==null&&value!==undefined||!this.previousStore)return this.checkedState(value);
+  // A mode change must not reset the highest signed public revision observed.
+  // Only its watermark crosses authorities; prior active/staged bindings do not.
+  const previous=this.checkedState(await this.previousStore.read()),next=this.checkedState(null);
+  if(previous.highwater.catalogSequence){
+   try{
+    const envelope=protocol.parseJson(await this.read(await this.file('pointers/'+previous.highwater.pointerDigest+'.json'),32768));
+    const checked=protocol.pointer(this.appId,envelope,this.publicKeys,previous.highwater);
+    requireValue(checked.digest===previous.highwater.pointerDigest&&checked.value.catalogSequence===previous.highwater.catalogSequence,'Previous public data high-water does not match its signed pointer');
+    next.highwater=structuredClone(previous.highwater);
+   }catch{throw fail('integrity','Previous public data high-water could not be verified; existing data was preserved');}
+  }
+  // A completed local journal always wins over migration, including after a retry.
+  const current=await this.store.read();if(current!==null&&current!==undefined)return this.checkedState(current);
+  await this.save(next);return next;
  }
  async save(state){await this.store.write(structuredClone(state));}
  status(phase,record,{onStatus,cached=false,receivedBytes,totalBytes,message}={}){
