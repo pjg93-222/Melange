@@ -281,6 +281,9 @@ def run(options, token, *, module_inputs=None):
     standalone = bool(getattr(options, 'standalone', False))
     if standalone and options.app != 'terrier':
         raise ValueError('Standalone backend mode is only available for Terrier')
+    windows_session = bool(getattr(options, 'windows_session', False))
+    if windows_session and (not standalone or options.app != 'terrier' or os.name != 'nt'):
+        raise ValueError('Windows desktop sign-in requires standalone Terrier on Windows')
     github_data = bool(getattr(options, 'github_district_data', False))
     if github_data and (options.app != 'terrier' or not (standalone or getattr(options, 'legacy_owner', None))
                         or data == state or data.is_relative_to(state) or state.is_relative_to(data)):
@@ -438,15 +441,16 @@ def run(options, token, *, module_inputs=None):
         django.setup()
         if standalone:
             from terrier_standalone import configure_settings
-            configure_settings()
+            configure_settings(windows_session=windows_session)
         from django.core.management import call_command
         # The explicit selected state store is backed up and verified before any migration.
         from desktop_migrations import migrate_django
         migrate_django(state)
         if standalone:
-            from terrier_standalone import prepare_accounts, StandaloneBoundary
-            launch_path = prepare_accounts(state, legacy_owner=legacy_owner)
-            boundary = StandaloneBoundary(options.district, options.port)
+            from terrier_standalone import prepare_accounts, prepare_windows_account, StandaloneBoundary
+            windows_account = prepare_windows_account(state) if windows_session else None
+            launch_path = None if windows_session else prepare_accounts(state, legacy_owner=legacy_owner)
+            boundary = StandaloneBoundary(options.district, options.port, windows_account=windows_account)
         else:
             from server.research.desktop_principal import prepare_principal
             from server.research.desktop_access import DesktopBoundary
@@ -585,6 +589,9 @@ def github_district_extract_main():
 
 
 def main():
+    if sys.argv[1:] == ['--desktop-windows-session']:
+        from desktop_credentials import main as windows_session_main
+        return windows_session_main()
     if '--desktop-module-input' in sys.argv[1:]:
         # -E ignores the environment bytecode setting. Suppress writes before
         # importing the parent-frame/parser/contract or any domain module.
@@ -625,6 +632,7 @@ def main():
     parser.add_argument('--owner-root', type=Path)
     parser.add_argument('--github-district-data', action='store_true')
     parser.add_argument('--standalone', action='store_true')
+    parser.add_argument('--windows-session', action='store_true')
     parser.add_argument('--desktop-module-input', action='store_true')
     parser.add_argument('--profile-root', type=Path)
     options = parser.parse_args()
@@ -637,6 +645,8 @@ def main():
         parser.error('Legacy owner setup is only available for Terrier')
     if options.standalone and options.app != 'terrier':
         parser.error('Standalone backend mode is only available for Terrier')
+    if options.windows_session and (not options.standalone or options.app != 'terrier' or os.name != 'nt'):
+        parser.error('Windows desktop sign-in requires standalone Terrier on Windows')
     if bool(options.owner_root) != bool(options.legacy_owner):
         parser.error('The desktop owner directory is used with, and only with, the existing Terrier owner')
     if options.github_district_data and (options.app != 'terrier' or not (options.standalone or options.legacy_owner)

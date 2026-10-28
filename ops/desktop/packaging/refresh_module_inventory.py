@@ -15,7 +15,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 ADDITIONS = {'melange': ('fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py',
                          'fec/surfaces/staffer_live_generation.py')}
-BOOTSTRAP_ADDITIONS = {'melange': ('terrier_standalone.py',), 'mentat': ('terrier_standalone.py',)}
+BOOTSTRAP_ADDITIONS = {'melange': ('terrier_standalone.py', 'desktop_credentials.py'),
+                       'mentat': ('terrier_standalone.py', 'desktop_credentials.py')}
 
 
 def encoded(value):

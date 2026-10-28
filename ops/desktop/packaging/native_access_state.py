@@ -13,7 +13,7 @@ from pathlib import Path
 import secrets
 import sys
 
-KINDS = frozenset({'identity', 'trust', 'state', 'owner', 'activity', 'dataset-journal', 'github-district-state', 'github-module-state', 'github-district-local-state', 'github-module-local-state'})
+KINDS = frozenset({'identity', 'trust', 'state', 'owner', 'activity', 'dataset-journal', 'github-district-state', 'github-module-state', 'github-district-local-state', 'github-module-local-state', 'windows-account'})
 MAX_VALUE = 8 * 1024 * 1024
 MAX_REQUEST = 12 * 1024 * 1024
 MAGIC = b'MDA1\0'

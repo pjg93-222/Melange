@@ -20,6 +20,20 @@ spec.loader.exec_module(backend)
 
 
 class BackendBoundaryTests(unittest.TestCase):
+    def test_windows_session_cli_is_native_probe_or_explicit_standalone_terrier(self):
+        with patch('sys.argv', ['desktop_backend', '--desktop-windows-session']), patch('desktop_credentials.main', return_value=0) as probe:
+            self.assertEqual(backend.main(), 0)
+            probe.assert_called_once_with()
+        base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
+            for invalid in (base + ['--windows-session'], [*base[:2], 'mentat', *base[3:], '--standalone', '--windows-session']):
+                with patch('sys.argv', invalid), self.assertRaises(SystemExit):
+                    backend.main()
+            if backend.os.name == 'nt':
+                with patch('sys.argv', base + ['--standalone', '--windows-session']):
+                    backend.main()
+                self.assertTrue(run.call_args.args[0].windows_session)
+
     def test_standalone_terrier_allows_separate_public_cache_without_a_legacy_owner(self):
         base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state', '--standalone']
         with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):

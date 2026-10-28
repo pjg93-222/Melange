@@ -13,7 +13,7 @@ class ProtectedStateTests(unittest.TestCase):
     def test_local_public_journals_remain_separate_from_managed_authority(self):
         with tempfile.TemporaryDirectory(prefix='local-public-state-fixture-') as directory:
             root = Path(directory)
-            kinds = ('github-district-local-state', 'github-module-local-state', 'github-district-state', 'github-module-state', 'state')
+            kinds = ('github-district-local-state', 'github-module-local-state', 'github-district-state', 'github-module-state', 'state', 'windows-account')
             for index, kind in enumerate(kinds):
                 state.write(root, kind, {'fixture': index})
             for index, kind in enumerate(kinds):

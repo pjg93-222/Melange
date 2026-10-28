@@ -40,6 +40,7 @@ class RefreshInventoryTests(unittest.TestCase):
         (self.here / 'module_application_inventory.py').write_text('APPLICATION_SPECS = ' + repr(self.specs), encoding='utf-8')
         (self.here / 'old_bootstrap.py').write_bytes(b'changed bootstrap')
         (self.here / 'terrier_standalone.py').write_bytes(b'new standalone boundary')
+        (self.here / 'desktop_credentials.py').write_bytes(b'new Windows identity helper')
         (self.source / 'new_source.py').write_bytes(b'new reviewed source')
         for target, value in (('HERE', self.here), ('ROOT', self.source), ('ADDITIONS', {'melange': ('new_source.py',)})):
             instance = patch.object(refresh, target, value)
@@ -58,7 +59,7 @@ class RefreshInventoryTests(unittest.TestCase):
                              [row for row in self.specs[app]['programFiles'] if row['root'] == 'source'])
             self.assertEqual(spec['programFingerprint'], hashlib.sha256(refresh.encoded(spec['programFiles'])).hexdigest())
             bootstrap = {row['path']: row for row in spec['programFiles'] if row['root'] == 'bootstrap'}
-            self.assertEqual(set(bootstrap), {'old_bootstrap.py', 'terrier_standalone.py'})
+            self.assertEqual(set(bootstrap), {'old_bootstrap.py', 'terrier_standalone.py', 'desktop_credentials.py'})
             for name, row in bootstrap.items():
                 raw = (self.here / name).read_bytes()
                 self.assertEqual((row['bytes'], row['sha256']), (len(raw), hashlib.sha256(raw).hexdigest()))
