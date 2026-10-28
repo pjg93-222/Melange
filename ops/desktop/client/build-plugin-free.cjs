@@ -80,11 +80,20 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
   }
   const script = output + '.plugin-free.nsi';
   const receiptPath = output + '.build.json';
-  for (const file of [output, script, receiptPath]) {
+  const compilerWorkDirectory = output + '.work';
+  for (const file of [output, script, receiptPath, compilerWorkDirectory]) {
     if (fs.existsSync(file)) throw new Error('Use a fresh installer output path: ' + file);
   }
   fs.mkdirSync(path.dirname(output), {recursive:true});
   physical(path.dirname(output), true);
+  // Keep compiler scratch local to this fresh output, including on failure.
+  // The caller can retire this exact owned directory after preserving evidence.
+  fs.mkdirSync(compilerWorkDirectory);
+  physical(compilerWorkDirectory, true);
+  fs.writeFileSync(path.join(compilerWorkDirectory, 'owner.json'), JSON.stringify({
+    schemaVersion:1, purpose:'plugin-free-nsis-compiler', appId, version, output,
+    sourceProgram:program, compiler, createdAt:new Date().toISOString()
+  }, null, 2) + '\n', {flag:'wx'});
   const definitions = {
     PF_PRODUCT:app.name, PF_APP_ID:app.applicationId, PF_VERSION:version, PF_EXE:executable,
     PF_PROGRAM:program, PF_EXECUTABLE_SOURCE:appExecutable, PF_ASAR_SOURCE:appAsar,
@@ -96,13 +105,15 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
     fs.readFileSync(path.join(__dirname, 'plugin-free-installer.nsi'), 'utf8');
   fs.writeFileSync(script, source, {flag:'wx'});
   const compiled = spawnSync(compiler, ['/INPUTCHARSET', 'UTF8', '/V3', '/WX', script], {
-    stdio:'inherit', windowsHide:true, env:{...process.env, NSISDIR:nsisDirectory}
+    stdio:'inherit', windowsHide:true,
+    env:{...process.env, NSISDIR:nsisDirectory, TEMP:compilerWorkDirectory, TMP:compilerWorkDirectory}
   });
   if (compiled.error) throw compiled.error;
   if (compiled.status !== 0) throw new Error('NSIS compilation failed (' + compiled.status + '); generated script retained at ' + script);
   const receipt = {
     schemaVersion:1, appId, version, format:'builtin-nsis-v1', desktopUninstaller:false, installerPlugins:[],
-    sourceProgram:program, appExecutable, appAsar, inputFileCount:fileCount, compiler, generatedScript:script, installer:output,
+    sourceProgram:program, appExecutable, appAsar, inputFileCount:fileCount, compiler, compilerWorkDirectory,
+    generatedScript:script, installer:output, compression:{method:'lzma', solid:false, dictionaryMiB:8},
     verificationStage:'Not run; this command only compiles the installer. Signing and release acceptance are separate.'
   };
   fs.writeFileSync(receiptPath, JSON.stringify(receipt, null, 2) + '\n', {flag:'wx'});

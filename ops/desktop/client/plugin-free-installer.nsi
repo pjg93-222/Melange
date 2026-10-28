@@ -12,8 +12,10 @@ VIAddVersionKey /LANG=1033 "FileDescription" "${PF_PRODUCT} installer"
 VIAddVersionKey /LANG=1033 "FileVersion" "${PF_VERSION}"
 VIAddVersionKey /LANG=1033 "ProductVersion" "${PF_VERSION}"
 VIAddVersionKey /LANG=1033 "LegalCopyright" "Melange Systems"
-SetCompressor /SOLID lzma
-SetCompressorDictSize 32
+; Compress each file before adding it to the compiler datablock. A solid build
+; accumulates the raw program and exceeds this compiler's 2 GiB mapping limit.
+SetCompressor lzma
+SetCompressorDictSize 8
 SetDatablockOptimize on
 ShowInstDetails show
 AutoCloseWindow false
