@@ -52,7 +52,26 @@ async function afterPack(context){
   console.log('[after-pack] deepest packaged path: '+depth+' characters (limit '+budget+')');
   if(depth>budget)throw new Error('The deepest packaged path is '+depth+' characters, over the limit of '+budget+'. The Downloads install path (MAX_PATH) would be exceeded; shorten the packaged paths.');
   const version=context.packager?.appInfo?.version;
-  if(version){
+  const config=context.packager?.config;
+  const windows=context.electronPlatformName===undefined||context.electronPlatformName==='win32';
+  const targets=[config?.win?.target??[]].flat().map(target=>typeof target==='string'?target:target.target);
+  if(version&&windows&&targets.includes('dir')&&!targets.some(target=>target.startsWith('nsis'))){
+    // electron-builder writes app-update.yml only for its NSIS targets. Our
+    // built-in installer still requires the same publisher pin and cache name.
+    const definition=appDefinition(config?.extraMetadata?.desktopAppConfig?.appId||process.env.DESKTOP_APP_ID||'melange');
+    const publisher=config?.extraMetadata?.desktopAppConfig?.windowsPublisherName;
+    const publish=config?.publish;
+    if(publish?.provider!=='generic'||typeof publish.url!=='string')throw new Error('The native directory build requires its configured update endpoint');
+    const resources=path.join(context.appOutDir,'resources');
+    fs.mkdirSync(resources,{recursive:true});
+    if(fs.lstatSync(resources).isSymbolicLink())throw new Error('Updater configuration requires physical packaged resources');
+    const updateConfig={provider:publish.provider,url:publish.url,updaterCacheDirName:context.packager.appInfo.updaterCacheDirName||definition.id+'-desktop-updater',...(publisher?{publisherName:[publisher]}:{})};
+    // JSON is valid YAML and preserves literal publisher names without a YAML
+    // serialization dependency. This file is consumed by electron-updater.
+    const target=path.join(resources,'app-update.yml');
+    fs.writeFileSync(target,JSON.stringify(updateConfig,null,2)+'\n',{flag:'wx'});
+    console.log('[after-pack] wrote '+target+' for the built-in installer');
+  }else if(version&&windows){
     const definition=appDefinition(context.packager.config?.extraMetadata?.desktopAppConfig?.appId||process.env.DESKTOP_APP_ID||'melange');
     const target=path.join(path.dirname(context.appOutDir),'installer.generated.nsh');
     fs.writeFileSync(target,layout.nsisInclude({product:definition.name,app:definition.id,version,installerNsh:path.join(__dirname,'installer.nsh')}));

@@ -1,7 +1,7 @@
 'use strict';
-// Pinned Nsis7z 19 cannot decode 7-Zip 24's automatic ARM64 filter and can
-// silently omit those files. Enforce its supported BCJ codec for every build,
-// including ordinary npm commands and inherited conflicting filter settings.
+// Keep explicit legacy archive/staging operations compatible with the pinned
+// archive reader. Production Windows installers use built-in NSIS compression
+// through build-native.cjs and never invoke the Nsis7z plug-in.
 process.env.ELECTRON_BUILDER_7Z_FILTER='BCJ';
 const fs=require('node:fs');const path=require('node:path');const {appDefinition}=require('./apps.cjs');
 const selected=appDefinition(process.env.DESKTOP_APP_ID||'melange');
@@ -22,7 +22,7 @@ if(!['legacy','paged-v1'].includes(publicDataMode)||(publicDataMode==='paged-v1'
 const desktopPublicData=publicDataMode==='paged-v1'?{melange:'paged-v1'}:{};
 if(!fs.existsSync(icon))throw new Error('Original application icon is missing.');
 require('./backend-command.cjs').backendCommand(__dirname,selected.id,process.platform,runtimeRoot);
-const releaseSigning=require('./release-signing.cjs').options(selected,{withoutUninstaller:true});
+const releaseSigning=require('./release-signing.cjs').options(selected,{withoutUninstaller:true,builtinInstaller:true});
 const outputDir=process.env.DESKTOP_DIST_ROOT?path.join(path.resolve(process.env.DESKTOP_DIST_ROOT),selected.id):'dist/'+selected.id;
 module.exports={
   ...releaseSigning,
@@ -36,11 +36,9 @@ module.exports={
    // Public release certificate only (no longer used by the app; kept for publisher-trust.cjs and turn-on-updates.cmd).
    {from:path.join(__dirname,'melange-systems-desktop-release.cer'),to:'melange-systems-desktop-release.cer'}],
   extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,desktopUninstaller:false,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
-  win:{target:['nsis'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
-  nsis:{oneClick:false,perMachine:false,allowToChangeInstallationDirectory:false,deleteAppDataOnUninstall:false,runAfterFinish:false,
-    // Downloads layout (DL-spec 1.3): after-pack.cjs writes this include (the DL_* defines, then !include installer.nsh) into the output directory; builder.cjs writes nothing.
-    include:path.join(path.resolve(__dirname,outputDir),'installer.generated.nsh'),
-    script:require('./nsis-no-uninstaller.cjs').scriptPath(path.resolve(__dirname,outputDir)),installerIcon:icon},
+  // build-native.cjs completes the signed directory with the shared built-in
+  // installer. Electron-builder's NSIS target would restore external plug-ins.
+  win:{target:['dir'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},
   mac:{target:['dmg','zip'],category:'public.app-category.productivity',hardenedRuntime:true,notarize:process.env.APPLE_ID?true:false},
   publish:{provider:'generic',url:'https://127.0.0.1/desktop-feed-disabled-until-paired/'},
   electronFuses:{runAsNode:false,enableCookieEncryption:true,enableNodeOptionsEnvironmentVariable:false,enableNodeCliInspectArguments:false,enableEmbeddedAsarIntegrityValidation:true,onlyLoadAppFromAsar:true}

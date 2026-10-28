@@ -1,13 +1,13 @@
 {
   "name": "melange-desktop-client",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "private": true,
   "description": "Independent Melange, Terrier and Mentat desktop applications",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
-    "build": "electron-builder --config builder.cjs",
+    "build": "node build-native.cjs",
     "build:dir": "electron-builder --dir --config builder.cjs",
     "build:plugin-free": "node build-plugin-free.cjs"
   },

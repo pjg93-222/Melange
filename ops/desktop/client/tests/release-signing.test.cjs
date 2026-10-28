@@ -272,3 +272,42 @@ test('no-uninstaller receipt rejects each recognized legacy or generated executa
   assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
  });
 });
+
+async function preparedBuiltin(t){
+ const f=fixture(t);f.context.packager.config={extraMetadata:{desktopAppConfig:{desktopUninstaller:false}}};
+ f.toolset.getNsisPluginsPath=async()=>{throw new Error('Built-in packaging must not request installer plug-ins');};
+ const config=options(app,{env:f.env,platform:'win32',sign:f.sign,toolset:f.toolset,withoutUninstaller:true,builtinInstaller:true});
+ await config.beforePack(f.context);await config.afterSign(f.context);
+ const installer=f.put('private/dist/terrier/Terrier-1.0.23-win-x64.exe');await config.win.signtoolOptions.sign({path:installer});
+ return {...f,config,installer};
+}
+
+test('built-in installer signs the program and installer without adding plug-ins or an elevation helper',async t=>{
+ const f=await preparedBuiltin(t),vendor=f.digest(f.third);
+ assert.equal(fs.existsSync(path.join(f.root,'nsis-resources')),false);
+ assert.equal(fs.existsSync(path.join(f.root,'nsis','Plugins')),false);
+ assert.equal(f.env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR,undefined);
+ assert.equal(f.calls.some(row=>withinTool(row.file)),false);
+ function withinTool(file){return file.startsWith(path.join(f.root,'nsis')+path.sep);}
+ const compiler=path.join(f.root,'nsis','Bin','makensis.exe');
+ assert.equal(f.digest(compiler),f.digest(path.join(f.vendor,'nsis','Bin','makensis.exe')));
+ await f.config.artifactBuildCompleted({file:f.installer});
+ const receipt=JSON.parse(fs.readFileSync(f.installer+'.signatures.json'));
+ assert.equal(receipt.installerFormat,'builtin-nsis-v1');assert.deepEqual(receipt.installerPlugins,[]);
+ assert.equal(receipt.desktopUninstaller,false);assert.equal(receipt.uninstallerEvidence,'intentionally-absent');
+ assert.ok(receipt.compilerFiles.some(row=>row.path===compiler&&row.sha256===f.digest(compiler)));
+ assert.deepEqual(new Set(receipt.currentFiles.map(row=>row.path)),new Set([f.main,f.dll,f.third,f.installer]));
+ assert.equal(f.digest(f.third),vendor);assert.equal(receipt.currentFiles.find(row=>row.path===f.third).thumbprint,'vendor');
+});
+
+test('built-in installer refuses a compiler changed after staging',async t=>{
+ const f=await preparedBuiltin(t);fs.appendFileSync(path.join(f.root,'nsis','Bin','makensis.exe'),'changed');
+ await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/compiler changed after staging/);
+ assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+});
+
+test('built-in installer refuses a changed compiler file set',async t=>{
+ const f=await preparedBuiltin(t);f.put('private/nsis/extra.nsh');
+ await assert.rejects(f.config.artifactBuildCompleted({file:f.installer}),/compiler file set changed/);
+ assert.equal(fs.existsSync(f.installer+'.signatures.json'),false);
+});

@@ -14,13 +14,13 @@ function updateSource(fixture,appId,repository){
   delete env.DESKTOP_GITHUB_REPOSITORY;delete env.DESKTOP_UPDATE_PROVIDER;
   if(repository!==undefined)env.DESKTOP_GITHUB_REPOSITORY=repository;
   const child=spawnSync(process.execPath,['-e',
-    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,script:c.nsis.script,target:c.win.target}))"],
+    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,nsis:c.nsis,target:c.win.target}))"],
     {cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
   assert.equal(child.status,0,child.stderr);
   const result=JSON.parse(child.stdout);
   assert.equal(result.uninstaller,false,appId+' native metadata disables the uninstaller');
-  assert.equal(path.basename(result.script),'installer.no-uninstaller.nsi');
-  assert.deepEqual(result.target,['nsis'],'the normal executable installer remains');
+  assert.equal(result.nsis,undefined,'the normal build must not restore legacy installer plug-ins');
+  assert.deepEqual(result.target,['dir'],'the signed directory is completed by build-native.cjs');
   return result.source;
 }
 
@@ -53,12 +53,12 @@ test('an unset DESKTOP_GITHUB_REPOSITORY gives each app its own repository, and 
     assert.deepEqual(updateSource(fixture,'mentat','Example/Override'),{provider:'github',repository:'example/override'});
     const source=fs.readFileSync(path.join(__dirname,'..','builder.cjs'),'utf8');
     assert.ok(!source.includes('melange-platform'),'the combined repository is no longer a default');
-    // Signed-release input (self-signed design, 2026-10-16): the hosted build bakes the public publisher pin but carries
-    // no signing material, so electron-builder finds no certificate and leaves every binary unsigned; the release
-    // owner signs the installer locally. Without the variable the updater stays fail-closed (pin null).
+    // Explicit directory staging can carry the public pin without signing material.
+    // Production build-native.cjs refuses this unsigned configuration. Without a
+    // pin the packaged updater remains fail-closed.
     const subject='CN=Melange Systems Desktop Release (self-signed)';
     assert.deepEqual(signingConfig(fixture,subject),{pin:subject,force:null,
-      win:{target:['nsis'],icon:path.join(path.resolve(__dirname,'..'),'icons','melange.ico'),signtoolOptions:{publisherName:subject},verifyUpdateCodeSignature:true}});
+      win:{target:['dir'],icon:path.join(path.resolve(__dirname,'..'),'icons','melange.ico'),signtoolOptions:{publisherName:subject},verifyUpdateCodeSignature:true}});
     const unpinned=signingConfig(fixture);
     assert.equal(unpinned.pin,null);assert.equal(unpinned.win.signtoolOptions,undefined);assert.equal(unpinned.win.verifyUpdateCodeSignature,true);
   }finally{
@@ -69,7 +69,7 @@ test('an unset DESKTOP_GITHUB_REPOSITORY gives each app its own repository, and 
   }
 });
 
-test('the NSIS target is Downloads-only and reads the include that after-pack generates in the output directory',()=>{
+test('normal directory builds have no legacy NSIS target or generated script configuration',()=>{
   const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'melange-update-source-'));
   try{
     fs.mkdirSync(path.join(fixture,'melange','python'),{recursive:true});fs.mkdirSync(path.join(fixture,'melange','bootstrap'),{recursive:true});
@@ -83,11 +83,10 @@ test('the NSIS target is Downloads-only and reads the include that after-pack ge
     };
     const before=fs.readdirSync(fixture).length;
     const plain=config();
-    assert.equal(plain.nsis.allowToChangeInstallationDirectory,false);assert.equal(plain.nsis.oneClick,false);assert.equal(plain.nsis.perMachine,false);
-    assert.equal(plain.nsis.include,path.join(path.resolve(__dirname,'..'),'dist','melange','installer.generated.nsh'),'default output is dist/melange under the client directory');
+    assert.equal(plain.nsis,undefined);assert.equal(plain.output,'dist/melange');
     const dist=path.join(fixture,'out');
     const rooted=config(dist);
-    assert.equal(rooted.output,path.join(dist,'melange'));assert.equal(rooted.nsis.include,path.join(dist,'melange','installer.generated.nsh'));
+    assert.equal(rooted.output,path.join(dist,'melange'));assert.equal(rooted.nsis,undefined);
     assert.equal(fs.readdirSync(fixture).length,before,'builder.cjs writes no files; after-pack is the only writer');
   }finally{
     assert.equal(path.dirname(fixture),path.resolve(os.tmpdir()));assert.ok(path.basename(fixture).startsWith('melange-update-source-'));

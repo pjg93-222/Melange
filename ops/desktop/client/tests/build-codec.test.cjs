@@ -9,7 +9,8 @@ const {spawnSync}=require('node:child_process');
 test('ordinary build config forces the extractor-compatible codec before pinned archive arguments are computed',()=>{
   const root=path.resolve(__dirname,'..');
   const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
-  for(const command of ['build','build:dir'])assert.match(pkg.scripts[command],/--config builder\.cjs(?:$|\s)/);
+  assert.equal(pkg.scripts.build,'node build-native.cjs');
+  assert.match(pkg.scripts['build:dir'],/--config builder\.cjs(?:$|\s)/);
   const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'melange-build-codec-'));
   try{
     fs.mkdirSync(path.join(fixture,'terrier','python'),{recursive:true});
