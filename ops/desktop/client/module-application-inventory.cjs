@@ -23,8 +23,14 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 40245,
-        "sha256": "775b7b2b969f4c0152a6268d4fb5e422b0c4f4717638aeca04eef137ae25c825"
+        "bytes": 41129,
+        "sha256": "a9f6c243f87dd88eb8e1a61886eeb767897b621648a38aebb2eb0718f6201092"
+      },
+      {
+        "root": "bootstrap",
+        "path": "desktop_credentials.py",
+        "bytes": 7888,
+        "sha256": "ca892d3430a915596cde1d23ba1882426e257d9d9d40a4e00c04fba8a907d860"
       },
       {
         "root": "bootstrap",
@@ -119,8 +125,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "native_access_state.py",
-        "bytes": 7950,
-        "sha256": "e64af6d86ab587fae447c3ca68c5d7af8702b0df4219ca398694c72d13da0042"
+        "bytes": 7969,
+        "sha256": "5a9419866f149d9ddd2032c63528fdc7a237d9b355369c9dca610018153f290e"
       },
       {
         "root": "bootstrap",
@@ -143,8 +149,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "terrier_standalone.py",
-        "bytes": 6365,
-        "sha256": "41502256f344bbf80cf252943613d28b84f54e22f3c815cc63e2c77f2e87d0d1"
+        "bytes": 14420,
+        "sha256": "561278ff5cba89480019e281536aaa46e4a5a6f08a154549911a667eb3878e8c"
       },
       {
         "root": "source",
@@ -477,7 +483,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "f7137677035aff4b9cfe09a20ec464a6b45a603c68cf0c97be4a68ea87190d22",
+    "programFingerprint": "c9ea48b6ac437a198adebf2b234d9ffe2f1ac4294a9a2808e95e2aeb18c3c1d7",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -512,8 +518,14 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 40245,
-        "sha256": "775b7b2b969f4c0152a6268d4fb5e422b0c4f4717638aeca04eef137ae25c825"
+        "bytes": 41129,
+        "sha256": "a9f6c243f87dd88eb8e1a61886eeb767897b621648a38aebb2eb0718f6201092"
+      },
+      {
+        "root": "bootstrap",
+        "path": "desktop_credentials.py",
+        "bytes": 7888,
+        "sha256": "ca892d3430a915596cde1d23ba1882426e257d9d9d40a4e00c04fba8a907d860"
       },
       {
         "root": "bootstrap",
@@ -608,8 +620,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "native_access_state.py",
-        "bytes": 7950,
-        "sha256": "e64af6d86ab587fae447c3ca68c5d7af8702b0df4219ca398694c72d13da0042"
+        "bytes": 7969,
+        "sha256": "5a9419866f149d9ddd2032c63528fdc7a237d9b355369c9dca610018153f290e"
       },
       {
         "root": "bootstrap",
@@ -632,8 +644,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "terrier_standalone.py",
-        "bytes": 6365,
-        "sha256": "41502256f344bbf80cf252943613d28b84f54e22f3c815cc63e2c77f2e87d0d1"
+        "bytes": 14420,
+        "sha256": "561278ff5cba89480019e281536aaa46e4a5a6f08a154549911a667eb3878e8c"
       },
       {
         "root": "source",
@@ -2016,7 +2028,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "2b49f1e5b7dbc7f7b526c5501425c724ea91db1823a6c32b0b62bea61aad7e95",
+    "programFingerprint": "7a1818844ce857bd87cbb3c220313a3f1efc5b6c9f5d290de89e3f51e2548be0",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],
