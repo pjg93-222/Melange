@@ -101,6 +101,25 @@ test('effective verification for a different district is refused before starting
  await assert.rejects(f.controller.switch('or-05'),/different district/);assert.equal(f.created.length,1);assert.equal(f.current,f.initial);assert.deepEqual(f.configuration,{district:'co-05',dataDirectory:'data'});
 });
 test('low memory evicts only inactive runtimes and quit stops all',async()=>{const f=fixture();f.controller.freeMemory=()=>1024;await f.controller.switch('or-05');assert.equal(f.initial.stops,1);assert.equal(f.current.stops,0);await f.controller.stopAll();assert.equal(f.current.stops,1);});
+test('single-cache district switch retires data only after navigation commits and old backend stops',async()=>{
+ const f=fixture(),events=[];f.controller.retainInactive=()=>false;
+ const navigate=f.controller.navigate;f.controller.navigate=async url=>{events.push('navigate');await navigate(url);};
+ const stop=f.initial.stop.bind(f.initial);f.initial.stop=async()=>{events.push('stop');await stop();};
+ f.controller.retire=async configuration=>{events.push('retire');assert.equal(configuration.district,'or-05');assert.equal(f.current.stops,0);assert.equal(f.initial.child,null);};
+ assert.equal(await f.controller.switch('or-05'),true);assert.deepEqual(events,['navigate','stop','retire']);assert.equal(f.controller.pool.size,1);
+});
+test('failed navigation never retires the prior district cache',async()=>{
+ const f=fixture();f.controller.retainInactive=()=>false;f.controller.retire=async()=>assert.fail('must preserve cache');f.controller.navigate=async()=>{throw new Error('navigation failed');};
+ await assert.rejects(f.controller.switch('or-05'),/navigation failed/);assert.equal(f.initial.stops,0);assert.equal(f.configuration.district,'co-05');
+});
+test('failed inactive shutdown defers retirement and keeps the committed district usable',async()=>{
+ const f=fixture();f.controller.retainInactive=()=>false;f.initial.stop=async()=>{throw new Error('busy');};f.controller.retire=async()=>assert.fail('backend still holds data');
+ assert.equal(await f.controller.switch('or-05'),true);assert.equal(f.configuration.district,'or-05');assert.equal(f.current.stops,0);assert.equal(f.controller.pool.has('co-05'),true);assert.equal(f.events.at(-1).phase,'cache-retirement-deferred');
+});
+test('cleanup failure after commit cannot roll back to the stopped previous backend',async()=>{
+ const f=fixture();f.controller.retainInactive=()=>false;f.controller.retire=async()=>{throw new Error('locked cache');};
+ assert.equal(await f.controller.switch('or-05'),true);assert.equal(f.initial.child,null);assert.notEqual(f.current,f.initial);assert.equal(f.configuration.district,'or-05');assert.equal(f.current.stops,0);
+});
 test('prospective authorization failure leaves current district usable',async()=>{const f=fixture();f.controller.createRuntime=()=>({...f.initial,async start(){throw new Error('revoked');},async stop(){}});await assert.rejects(f.controller.switch('or-05'),/revoked/);assert.equal(f.current,f.initial);assert.equal(f.initial.stops,0);assert.equal(f.configuration.district,'co-05');});
 test('launch headers follow active runtime and never send a retained token to old origin',()=>{
  let handlers={},active={contentsId:7,origin:'http://127.0.0.1:1',token:'first'};attachLaunchHeader({webRequest:{onBeforeRequest:f=>handlers.before=f,onBeforeSendHeaders:f=>handlers.headers=f}},()=>active);

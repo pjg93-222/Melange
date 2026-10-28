@@ -27,6 +27,14 @@ class GitHubDistrictController{
   const result=this.tail.then(()=>this.run(configuration,stageOnly));this.tail=result.catch(()=>{});return result;
  }
  ensure(configuration){return this.enqueue(configuration,false);}
+ retire(configuration){
+  const result=this.tail.then(async()=>{
+   if(!this.provider||!configuration.standaloneGitHubData)return null;
+   const authorization=await this.authorize(configuration);
+   if(!authorized(configuration,authorization))return null;
+   this.busy=true;try{return await this.provider.retireInactive(configuration,authorization);}finally{this.busy=false;}
+  });this.tail=result.catch(()=>{});return result;
+ }
  discover(configuration,{skipIfBusy=false}={}){if(skipIfBusy&&this.busy)return Promise.resolve(null);return this.enqueue(configuration,true);}
 }
 function registerDistrictDataIPC(ipc,{runtimeOnly,info,refresh,canRefresh}){

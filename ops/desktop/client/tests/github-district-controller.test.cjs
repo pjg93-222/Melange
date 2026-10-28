@@ -44,6 +44,17 @@ test('provider failure releases sleep protection and the queue permits a later v
  await assert.rejects(f.controller.ensure(configuration),/verification/);assert.equal(f.controller.busy,false);assert.equal(f.calls.at(-1),'release');
  f.provider.ensure=async config=>config;assert.equal(await f.controller.ensure(configuration),configuration);
 });
+
+test('public cache retirement waits for ongoing provider work and checks authorization again',async()=>{
+ const selected={district:'co-05',dataDirectory:'fixture',standaloneGitHubData:{schemaVersion:2}},f=fixture();
+ let allowed=true,finish,retired=0;
+ const local={mode:'standalone',identity:{schemaVersion:1,appId:'terrier',deviceId:'11111111-1111-4111-8111-111111111111',accountId:'22222222-2222-4222-8222-222222222222',accountIdentity:'local_user'},principal:{mode:'standalone',districtId:'co-05'}};
+ f.controller.authorize=async()=>allowed?local:null;await f.controller.ensure(selected);
+ f.provider.retireInactive=async()=>{retired++;};f.provider.discover=async()=>new Promise(resolve=>{finish=resolve;});
+ const discovery=f.controller.discover(selected);await new Promise(resolve=>setImmediate(resolve));const retirement=f.controller.retire(selected);assert.equal(retired,0);
+ allowed=false;finish();await discovery;assert.equal(await retirement,null);assert.equal(retired,0);
+ allowed=true;await f.controller.retire(selected);assert.equal(retired,1);
+});
 test('runtime IPC denies untrusted frames before reads or refresh and ignores renderer arguments',async()=>{
  const handlers=new Map(),trusted={},calls=[];
  registerDistrictDataIPC({handle:(name,callback)=>handlers.set(name,callback)},{runtimeOnly:event=>{if(event!==trusted)throw new Error('Untrusted application request');},info:()=>{calls.push('info');return {phase:'ready'};},refresh:()=>{calls.push('refresh');return {phase:'update-ready'};},canRefresh:()=>true});

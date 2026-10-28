@@ -355,6 +355,8 @@ app.whenReady().then(async()=>{
      verify:async configuration=>{const selected=profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,effective=await prepareOwnerDistrict(selected);await verifyDistrictAsync(resources,userData,effective,[app.getAppPath(),path.dirname(process.execPath)]);return effective;},createRuntime,current:()=>runtime,
      activate:next=>{runtime=next;runtime.contentsId=window.webContents.id;if(accessLifecycle)accessLifecycle.runtime=next;bundleNotice();},
      location:()=>window.webContents.getURL(),navigate:url=>window.loadURL(url),
+     retainInactive:configuration=>!configuration.standaloneGitHubData,
+     retire:configuration=>ownerDistrictController()?.retire(configuration),
      canReveal:approved=>!closing&&accessLifecycle.canReveal(accessLifecycle.generation,approved),onUnavailable:showAccess,
      log:value=>{try{const logs=path.join(userData,'logs');fs.mkdirSync(logs,{recursive:true});fs.appendFileSync(path.join(logs,'district-switch.jsonl'),JSON.stringify({...value,time:new Date().toISOString()})+'\n');}catch{}}
     });

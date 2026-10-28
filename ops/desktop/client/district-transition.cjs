@@ -25,15 +25,15 @@ function approvalIdentity(authorization){
  const grant=authorization?.accepted?.grant;if(!grant||authorization.accepted.revoked)throw new Error('Current approval is required.');return JSON.stringify({serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity,role:grant.role,districtIds:grant.districtIds,owner:Boolean(authorization.owner)});
 }
 class DistrictTransition{
- constructor({read,write,scope,verify,createRuntime,current,activate,navigate,location,canReveal,fingerprint=configuration=>JSON.stringify(configuration),onUnavailable=async()=>{},log=()=>{},freeMemory=os.freemem,maxWarm=3}){
-  Object.assign(this,{read,write,scope,verify,createRuntime,current,activate,navigate,location,canReveal,fingerprint,onUnavailable,log,freeMemory,maxWarm});this.pool=new Map();this.generation=0;this.busy=false;this.pendingReady=null;this.starting=null;
+ constructor({read,write,scope,verify,createRuntime,current,activate,navigate,location,canReveal,fingerprint=configuration=>JSON.stringify(configuration),onUnavailable=async()=>{},retainInactive=()=>true,retire=async()=>{},log=()=>{},freeMemory=os.freemem,maxWarm=3}){
+  Object.assign(this,{read,write,scope,verify,createRuntime,current,activate,navigate,location,canReveal,fingerprint,onUnavailable,retainInactive,retire,log,freeMemory,maxWarm});this.pool=new Map();this.generation=0;this.busy=false;this.pendingReady=null;this.starting=null;
  }
  mark(operation,phase,extra={}){this.log({event:'district-switch',district:operation.district,phase,elapsedMs:Math.round((performance.now()-operation.started)*10)/10,...extra});}
  cancel(){this.generation++;}
  async suspend(){this.cancel();this.pendingReady=null;for(const item of this.pool.values())item.runtime.requestsAllowed=false;if(this.starting&&this.starting!==this.current())await this.starting.stop();await this.clearInactive();}
- async clearInactive(){const active=this.current();for(const [id,item]of this.pool){if(item.runtime!==active){this.pool.delete(id);await item.runtime.stop();}}}
+ async clearInactive(){const active=this.current();for(const [id,item]of this.pool){if(item.runtime!==active){item.runtime.requestsAllowed=false;await item.runtime.stop();this.pool.delete(id);}}}
  async stopAll(){this.cancel();const runtimes=new Set([this.current(),this.starting,...Array.from(this.pool.values(),item=>item.runtime)]);this.pool.clear();await Promise.all(Array.from(runtimes,runtime=>runtime?.stop()));}
- async prune(){const active=this.current();for(const [id,item]of this.pool){if(item.runtime!==active&&(this.pool.size>this.maxWarm||this.freeMemory()<2*1024**3)){this.pool.delete(id);await item.runtime.stop();}}}
+ async prune(){const active=this.current();for(const [id,item]of this.pool){if(item.runtime!==active&&(this.pool.size>this.maxWarm||this.freeMemory()<2*1024**3)){item.runtime.requestsAllowed=false;await item.runtime.stop();this.pool.delete(id);}}}
  remember(configuration,runtime){this.pool.delete(configuration.district);this.pool.set(configuration.district,{runtime,fingerprint:this.fingerprint(configuration)});}
  rendererReady(){const operation=this.pendingReady;if(!operation||operation.district!==this.read().district)return;operation.readyAt=performance.now();if(operation.committed){this.pendingReady=null;this.mark(operation,'renderer-ready',{cacheHit:operation.cacheHit});}}
  async switch(district){
@@ -74,7 +74,12 @@ class DistrictTransition{
    if(!await this.canReveal(target.authorization))throw new Error('Access changed while opening the district.');check();
    if(this.fingerprint(effective)!==loadedFingerprint)throw new Error('District data changed while opening. Please try again.');
    target.launchPath='/';this.remember(effective,target);operation.committed=true;
-   this.mark(operation,'navigation-ready',{cacheHit:operation.cacheHit});if(operation.readyAt){this.pendingReady=null;this.mark(operation,'renderer-ready',{cacheHit:operation.cacheHit,rendererElapsedMs:Math.round((operation.readyAt-operation.started)*10)/10});}await this.prune();return true;
+   this.mark(operation,'navigation-ready',{cacheHit:operation.cacheHit});if(operation.readyAt){this.pendingReady=null;this.mark(operation,'renderer-ready',{cacheHit:operation.cacheHit,rendererElapsedMs:Math.round((operation.readyAt-operation.started)*10)/10});}
+   // Cleanup is after commit. Its failure must never roll back to a backend
+   // already stopped during retirement, or delete data still held by one.
+   try{if(this.retainInactive(effective))await this.prune();else{await this.clearInactive();await this.retire(effective);}}
+   catch{this.mark(operation,'cache-retirement-deferred');}
+   return true;
   }catch(error){
    this.mark(operation,'failed',{cacheHit:operation.cacheHit});
    this.pendingReady=null;
