@@ -51,6 +51,10 @@ DENY = [
 HARD_DENY = [
     "**/accounts.sqlite3", "**/*.dpapi", "**/keys/**", "**/keys.json", "**/.env*", "**/credentials/**",
     "**/*.pfx", "**/*.pem", ".melange-data-release.json", "__state__/data-download/**",
+    # Restricted LDA identity corpus (receipt: publication_enabled false, restricted-machine-local) and the
+    # staffer sections/page that inline it as ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2).
+    "**/lda-source-native/**", "**/staffer_organisations_section.json", "**/staffer_clients_section.json",
+    "**/staffer-network.html",
 ]
 
 

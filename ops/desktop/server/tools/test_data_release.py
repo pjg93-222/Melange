@@ -96,6 +96,24 @@ class BuildTest(unittest.TestCase):
         self.assertIn("audits/session_118.json", {f["path"] for f in m["files"]})
         self.assertIn("audits/staffer_network/politico_profile_crawl_1_raw/a.html", {f["path"] for f in m["files"]})
 
+    def test_restricted_lda_corpus_never_ships_even_when_allowed(self):
+        corpus = ["__state__/Melange/staffer_network/normalized/lda-source-native/generation-x/lda_lobbyist_assertions.ndjson.gz",
+                  "data/engine/staffer_organisations_section.json", "data/engine/staffer_clients_section.json",
+                  "staffer-network.html"]
+        for rel in corpus + ["data/engine/staffer_offices_section.json"]:
+            (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
+            (self.root / rel).write_bytes(b"x")
+        m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21",
+                               ["**/*"], data_release.DENY, data_release.DEFAULT_PART_BYTES)
+        shipped = {f["path"] for f in m["files"]}
+        self.assertFalse(shipped & set(corpus))
+        self.assertTrue(set(corpus) <= set(m["excluded"]))
+        self.assertIn("data/engine/staffer_offices_section.json", shipped)
+        # A --map mount under a neutral name is still caught by the real path.
+        m = data_release.build("melange", None, self.out, "data-melange-2026-10-21", ["**/*"], data_release.DENY,
+                               data_release.DEFAULT_PART_BYTES, [("catalog/c", self.root / "__state__")])
+        self.assertEqual(m["files"], [])
+
     def test_single_file_map_cannot_rename_a_credential_in(self):
         m = data_release.build("melange", None, self.out, "data-melange-2026-10-21", ["**/*"], data_release.DENY,
                                data_release.DEFAULT_PART_BYTES, [("catalog/one.json", self.root / "keys" / "x.json"),
