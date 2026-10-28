@@ -22,7 +22,7 @@ function verifiedFeed(manifest,filename){
     if(pathname===prefix+'latest.yml'||pathname===prefix+'latest-mac.yml') {response.writeHead(200,{'Content-Type':'text/yaml','Cache-Control':'no-store'});response.end(request.method==='HEAD'?'':yaml);return;}
     if(pathname!==prefix+pkg.name){response.writeHead(404).end();return;}
     response.writeHead(200,{'Content-Type':'application/octet-stream','Content-Length':pkg.size,'Cache-Control':'no-store'});
-    if(request.method==='HEAD')response.end();else {const stream=fs.createReadStream(filename);stream.on('error',()=>response.destroy());stream.pipe(response);}
+    if(request.method==='HEAD')response.end();else {const stream=fs.createReadStream(filename,{highWaterMark:4*1024*1024});stream.on('error',()=>response.destroy());stream.pipe(response);}
   });
   return new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',()=>resolve({url:'http://127.0.0.1:'+server.address().port+'/'+nonce+'/',close:()=>server.close()}));});
 }
