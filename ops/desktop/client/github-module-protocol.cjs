@@ -22,6 +22,16 @@ function assetName(value){return typeof value==='string'&&/^[A-Za-z0-9][A-Za-z0-
 function relative(value){return typeof value==='string'&&value.length>0&&value.length<=400&&value.split('/').every(part=>assetName(part)&&part!=='.'&&part!=='..');}
 function authorized(appId,selected,authorization){
  if(!Object.hasOwn(APPS,appId)||!selected||typeof selected.dataDirectory!=='string'||!path.isAbsolute(selected.dataDirectory))return false;
+ if(authorization?.mode==='standalone'){
+  // This proves local sign-in for PUBLIC GitHub datasets only. Private data
+  // transports still require their real server grants and bearer credentials.
+  try{
+   exact(authorization,['mode','identity','session','principal']);
+   const identity=require('./standalone-access.cjs').validIdentity(authorization.identity),session=authorization.session;
+   exact(session,[...Object.keys(identity),'sessionId','authenticatedAt','method']);
+   return identity.appId===appId&&authorization.principal===null&&Object.keys(identity).every(key=>session[key]===identity[key])&&uuid(session.sessionId)&&integer(session.authenticatedAt)&&['local-password','device-trust'].includes(session.method);
+  }catch{return false;}
+ }
  const {accepted,owner}=authorization||{},grant=accepted?.grant,bindings=owner?.dataBindings;
  return Boolean(accepted?.revoked===false&&grant?.appId===appId&&owner?.mode==='existing-owner'&&owner.appId===appId&&owner.grantId===grant.grantId&&owner.accountIdentity===grant.accountIdentity&&typeof grant.grantId==='string'&&typeof grant.accountIdentity==='string'&&Array.isArray(bindings)&&bindings.length===1&&bindings[0]?.districtId===null&&bindings[0]?.localUserId===null&&bindings[0]?.localUsername===null&&hash(bindings[0]?.dataRootHash));
 }

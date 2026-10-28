@@ -55,8 +55,9 @@ class GitHubModules{
  }
  async owner(selected){
   if(Object.hasOwn(selected||{},'ownerGitHubModuleData')||Object.hasOwn(selected||{},'ownerGitHubData'))throw fail('authorization','Original owner configuration is required');
-  let authorization;try{authorization=await this.authorize(structuredClone(selected));}catch{throw fail('authorization','Verified existing-owner approval is required');}
-  if(!authorized(this.appId,selected,authorization))throw fail('authorization','Verified existing-owner approval is required');
+  let authorization;try{authorization=await this.authorize(structuredClone(selected));}catch{throw fail('authorization','Verified local access is required for public data');}
+  if(!authorized(this.appId,selected,authorization))throw fail('authorization','Verified local access is required for public data');
+  if(authorization.mode==='standalone')return digest(Buffer.from(canonical({mode:'standalone',identity:authorization.identity,selectedRoot:physicalPath(selected.dataDirectory),selected})));
   const grant=authorization.accepted.grant,owner=authorization.owner;
   return digest(Buffer.from(canonical({appId:this.appId,grantId:grant.grantId,serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity,ownerBindings:owner.dataBindings,selected})));
  }
