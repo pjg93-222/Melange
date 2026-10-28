@@ -62,7 +62,13 @@ function manifest(bytes,checked){
   requireValue(runtime[id].reduce((sum,item)=>sum+item.bytes,0)<=12*1024**3);
  }
  requireValue(value.files.filter(item=>item.roles.includes('runtime_dataset')).length===18);
- return {value,runtime,assets,bytes:Buffer.from(bytes),sha256:checked.value.manifest.sha256};
+ const dataFiles={};
+ for(const id of IDS){
+  const snapshots=value.files.filter(item=>item.district===id&&item.roles.includes('snapshot_or_cache')&&/^snapshots\/(?:co-cd005|or-cd005|ct-cd001)-[a-f0-9]{12}\/(?:(?:manifest|rows|geometry|area_indices|adjacency)\.json|(?:streets|district)\.geojson|derived\/[A-Za-z0-9_-]+\.json(?:\.gz)?)$/.test(item.path.slice((id+'/data/').length))&&item.path.startsWith(id+'/data/'));
+  dataFiles[id]=[...runtime[id],...snapshots.map(item=>({role:item.path.slice((id+'/data/').length),path:item.path,bytes:item.bytes,sha256:item.sha256}))];
+  requireValue(dataFiles[id].reduce((sum,item)=>sum+item.bytes,0)<=12*1024**3,'District runtime and snapshots exceed their size limit');
+ }
+ return {value,runtime,dataFiles,assets,bytes:Buffer.from(bytes),sha256:checked.value.manifest.sha256};
 }
 function standaloneAuthorized(configuration,authorization){
  const {mode,identity,principal}=authorization||{},district=configuration?.district;

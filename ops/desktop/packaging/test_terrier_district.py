@@ -71,6 +71,16 @@ class DistrictValidationTests(unittest.TestCase):
                 connection.execute('INSERT INTO ' + table + ' VALUES (?,?)', (key, source_sha if role == 'walk.sqlite3' else json.dumps(source_sha)))
                 connection.commit()
         (cache / 'density.json').write_text('{}')
+        with closing(sqlite3.connect(cache / 'scores.sqlite3')) as connection:
+            connection.execute('INSERT INTO metadata VALUES (?, ?)', ('area_table_sha256', json.dumps('a' * 64)))
+            connection.commit()
+        snapshot = cache / 'snapshots' / 'co-cd005-111111111111'
+        snapshot.mkdir(parents=True)
+        from terrier_github_snapshot import BASE_FILES
+        for filename in BASE_FILES:
+            (snapshot / filename).write_text('{}')
+        (snapshot / 'manifest.json').write_text(json.dumps({'schema': 'cu-summary-v4', 'snapshot': snapshot.name,
+            'source_sha256': source_sha, 'row_framework': {'area_table_sha256': 'a' * 64}}))
         return cache
 
     def test_github_cache_uses_original_owner_state_without_requiring_or_copying_accounts_into_data(self):
@@ -184,7 +194,7 @@ class DistrictValidationTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
         archive = root / 'district.zip'
-        roles = ('contacts.sqlite3', 'density.json', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3')
+        roles = tuple(sorted(p.relative_to(cache).as_posix() for p in cache.rglob('*') if p.is_file()))
         def request(output):
             with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
                 for role in roles:
@@ -194,7 +204,7 @@ class DistrictValidationTests(unittest.TestCase):
                                'sha256': hashlib.sha256((cache / role).read_bytes()).hexdigest()} for role in roles]}
         result = extract_github_district_archive(request(root / 'accepted'))
         self.assertEqual(result['sourceMetadataAccepted'], True)
-        self.assertEqual({p.name for p in (root / 'accepted').iterdir()}, set(roles))
+        self.assertEqual({p.relative_to(root / 'accepted').as_posix() for p in (root / 'accepted').rglob('*') if p.is_file()}, set(roles))
         with closing(sqlite3.connect(cache / 'contacts.sqlite3')) as connection:
             connection.execute('UPDATE metadata SET value=?', (json.dumps('wrong source with valid archive hashes'),))
             connection.commit()

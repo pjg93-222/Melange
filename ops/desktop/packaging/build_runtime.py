@@ -29,7 +29,7 @@ POCKET_PATTERN = re.compile(r'(/\*__DATA_START__\*/).*?(/\*__DATA_END__\*/)', re
 BOOTSTRAP_FILES = (
     'desktop_backend.py', 'desktop_audit.py', 'native_credentials.py', 'native_access_state.py',
     'melange_bootstrap.py', 'melange_data_paths.py', 'mentat_layout.py', 'desktop_migrations.py',
-    'terrier_owner.py', 'terrier_district.py', 'terrier_standalone.py', 'desktop_credentials.py', 'desktop_figure_renderer.py',
+    'terrier_owner.py', 'terrier_district.py', 'terrier_github_snapshot.py', 'terrier_standalone.py', 'desktop_credentials.py', 'desktop_figure_renderer.py',
     'module_data_snapshot.py', 'melange_module_data.py', 'mentat_module_data.py',
     'module_data_launch.py', 'module_application_contracts.py', 'module_application_inventory.py', 'module_data_handoff.py',
     'module_public_input_installers.py', 'data_release_fetch.py',

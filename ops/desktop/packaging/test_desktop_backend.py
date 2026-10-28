@@ -263,6 +263,28 @@ class GitHubDistrictArchiveTests(unittest.TestCase):
     def extract(self, request=None, check=lambda *_: None):
         return backend.extract_github_district_archive(request or self.request(), check=check)
 
+    def test_extracts_signed_nested_snapshot_files_and_checks_their_hashes(self):
+        self.content['snapshots/co-cd005-111111111111/manifest.json'] = b'{"schema":"fixture"}'
+        self.content['snapshots/co-cd005-111111111111/derived/v3_meta.json.gz'] = b'signed fixture bytes'
+        self.pack([('co-05/sources/example.csv', b'excluded fixture source')])
+        result = self.extract()
+        self.assertTrue(result['sourceMetadataAccepted'])
+        for role, content in self.content.items():
+            self.assertEqual((self.output / role).read_bytes(), content)
+        self.assertFalse((self.output / 'sources').exists())
+
+    def test_snapshot_checksum_failure_preserves_preexisting_state(self):
+        self.content['snapshots/co-cd005-111111111111/rows.json'] = b'[]'
+        self.pack()
+        request = self.request()
+        request['files'][-1]['sha256'] = '0' * 64
+        accounts = self.root / 'accounts.sqlite3'
+        accounts.write_bytes(b'preserved local state')
+        with self.assertRaises(ValueError):
+            self.extract(request)
+        self.assertFalse(self.output.exists())
+        self.assertEqual(accounts.read_bytes(), b'preserved local state')
+
     def test_extracts_only_six_roles_then_validates_source_metadata(self):
         self.pack([('co-05/sources/example.csv', b'invented fixture')])
         checked = []

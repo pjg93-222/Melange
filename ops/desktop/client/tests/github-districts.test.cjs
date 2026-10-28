@@ -9,7 +9,7 @@ const {districtConfiguration,verifyDistrictAsync}=require('../district-switch.cj
 const {REPOSITORY,POINTER_PATH,IDS,ROLES,assetURL}=protocol;
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value));
-function fixture(t){
+function fixture(t,{snapshots=false}={}){
  const temporary=fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(),'github-district-fixture-')));t.after(()=>fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5}));
  const profile=path.join(temporary,'profile'),root=path.join(profile,'packs'),legacy=path.join(temporary,'legacy');fs.mkdirSync(root,{recursive:true});fs.mkdirSync(legacy);
  const keys=crypto.generateKeyPairSync('ed25519'),raw=keys.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64'),publicKeys={fixture:raw};
@@ -22,9 +22,10 @@ function fixture(t){
   const tag='district-testsets-2026-10-21'+(sequence>1?'-r'+sequence:''),files=[],runtime_roles={},dataset_assets=[],data=new Map(),archives=new Map();
   for(const id of IDS){runtime_roles[id]={};const name='terrier-testsets-'+id+'-'+tag.slice('district-testsets-'.length)+'.zip',archive=Buffer.from('fixture archive '+id+' revision '+sequence);archives.set(id,archive);
    for(const role of ROLES){const bytes=role.endsWith('.sqlite3')?Buffer.concat([Buffer.from('SQLite format 3\0'),Buffer.from([0,0,1,1]),Buffer.from(id+role+sequence)]):Buffer.from(JSON.stringify({district:id,revision:sequence}));data.set(id+'/'+role,bytes);const item={path:id+'/data/'+role,district:id,bytes:bytes.length,roles:['runtime_dataset'],sha256:sha(bytes),asset:name};files.push(item);runtime_roles[id][role]={path:item.path,bytes:item.bytes,sha256:item.sha256,asset:name};}
-   dataset_assets.push({name,bytes:archive.length,sha256:sha(archive),members:6,raw_bytes:files.filter(item=>item.district===id).reduce((n,item)=>n+item.bytes,0),member_sha256_verified:true,zip_crc_verified:true,download_url:assetURL(tag,name)});
+   if(snapshots){const key={'co-05':'co-cd005','or-05':'or-cd005','ct-01':'ct-cd001'}[id]+'-111111111111';for(const filename of ['manifest.json','rows.json','geometry.json','streets.geojson','district.geojson','area_indices.json','adjacency.json','derived/v3_meta.json','derived/v3_meta.json.gz']){const role='snapshots/'+key+'/'+filename,bytes=json({district:id,filename,revision:sequence});data.set(id+'/'+role,bytes);files.push({path:id+'/data/'+role,district:id,bytes:bytes.length,roles:['snapshot_or_cache'],sha256:sha(bytes),asset:name});}}
+   dataset_assets.push({name,bytes:archive.length,sha256:sha(archive),members:files.filter(item=>item.district===id).length,raw_bytes:files.filter(item=>item.district===id).reduce((n,item)=>n+item.bytes,0),member_sha256_verified:true,zip_crc_verified:true,download_url:assetURL(tag,name)});
   }
-  const manifest=json({schema:'terrier-district-testsets-v1',repository:REPOSITORY,release_tag:tag,districts:[...IDS],unique_dataset_files:18,dataset_input_bytes:files.reduce((n,item)=>n+item.bytes,0),distribution:{kind:'data_prerelease',make_latest:false,desktop_update_tag:false},files,runtime_roles,dataset_assets});
+  const manifest=json({schema:'terrier-district-testsets-v1',repository:REPOSITORY,release_tag:tag,districts:[...IDS],unique_dataset_files:files.length,dataset_input_bytes:files.reduce((n,item)=>n+item.bytes,0),distribution:{kind:'data_prerelease',make_latest:false,desktop_update_tag:false},files,runtime_roles,dataset_assets});
   const body={schemaVersion:1,purpose:'terrier-public-district-data',appId:'terrier',repository:REPOSITORY,catalogSequence:sequence,releaseTag:tag,releaseCommit:String(sequence).repeat(40),manifest:{asset:'manifest.json',bytes:manifest.length,sha256:sha(manifest)}};
   const result={body,envelope:sign(body),manifest,data,archives};worlds.set(tag,result);return result;
  }
@@ -32,7 +33,7 @@ function fixture(t){
  const store={read:async()=>structuredClone(saved),write:async value=>{saved=structuredClone(value);}};
  const transport={read:async(url,options)=>{requests.push({url,options});if(networkDown)throw Object.assign(new Error('fixture network unavailable bearer=SENTINEL'),{code:'ENETUNREACH'});if(url.endsWith('/commits/main'))return json({sha:'a'.repeat(40)});if(url.includes('/contents/')){const bytes=json(world.envelope);return json({type:'file',encoding:'base64',path:POINTER_PATH,size:bytes.length,content:bytes.toString('base64')});}if(url.includes('/git/ref/tags/'))return json(tagRef?tagRef(world):{ref:'refs/tags/'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});if(url.includes('/git/tags/')){const entry=tagObjects.get(url.slice(url.indexOf('/git/tags/')+'/git/tags/'.length));assert.ok(entry,url);return json(typeof entry==='function'?entry(world):entry);}const target=[...worlds.values()].find(item=>url===assetURL(item.body.releaseTag,'manifest.json'));assert.ok(target,url);return target.manifest;},download:async(url,target,options)=>{downloads.push({url,options});const item=[...worlds.values()].find(item=>url.includes('/'+item.body.releaseTag+'/')),id=IDS.find(id=>url.includes('-'+id+'-'));assert.ok(item&&id);const bytes=corruptDownload?Buffer.alloc(item.archives.get(id).length):item.archives.get(id);await fsp.writeFile(target,bytes,{flag:'wx'});options.onProgress(bytes.length);}};
  const checkExisting=async(directory,district)=>{checks.push({directory,district});return true;};
- const extract=async({archive,destination,district,files})=>{extractCount++;assert.ok(archive.endsWith('.zip'));await fsp.mkdir(destination);if(extractFails){await fsp.writeFile(path.join(destination,'partial'),'fixture');throw new Error('fixture extraction failure');}const item=[...worlds.values()].find(item=>files[0].sha256===sha(item.data.get(district+'/'+files[0].role)));assert.ok(item);for(const file of files)await fsp.writeFile(path.join(destination,file.role),item.data.get(district+'/'+file.role),{flag:'wx'});return {ok:true,district,files:files.map(({role,bytes,sha256})=>({role,bytes,sha256})),sourceMetadataAccepted:true};};
+ const extract=async({archive,destination,district,files})=>{extractCount++;assert.ok(archive.endsWith('.zip'));await fsp.mkdir(destination);if(extractFails){await fsp.writeFile(path.join(destination,'partial'),'fixture');throw new Error('fixture extraction failure');}const item=[...worlds.values()].find(item=>files[0].sha256===sha(item.data.get(district+'/'+files[0].role)));assert.ok(item);for(const file of files){await fsp.mkdir(path.dirname(path.join(destination,file.role)),{recursive:true});await fsp.writeFile(path.join(destination,file.role),item.data.get(district+'/'+file.role),{flag:'wx'});}return {ok:true,district,files:files.map(({role,bytes,sha256})=>({role,bytes,sha256})),sourceMetadataAccepted:true};};
  const create=(overrides={})=>new GitHubDistricts({profile,root,publicKeys,store,transport,checkExisting,extract,onStatus:status=>statuses.push(status),statfs:async()=>({bavail:100000000000,bsize:1}),...overrides});
  function writeLegacy(item=world){for(const id of IDS){const directory=id==='co-05'?legacy:path.join(legacy,id);fs.mkdirSync(directory,{recursive:true});for(const role of ROLES)fs.writeFileSync(path.join(directory,role),item.data.get(id+'/'+role));fs.writeFileSync(path.join(directory,'accounts.sqlite3'),'fixture account remains local');fs.writeFileSync(path.join(directory,'.secret'),'fixture secret remains local');}}
  return {temporary,profile,root,legacy,config,authorization,publicKeys,sign,build,create,writeLegacy,requests,downloads,checks,statuses,transport,get world(){return world;},set world(value){world=value;},get state(){return saved;},set state(value){saved=value;},set networkDown(value){networkDown=value;},set corruptDownload(value){corruptDownload=value;},set extractFails(value){extractFails=value;},set tagRef(value){tagRef=value;},tagObjects,get extractCount(){return extractCount;}};
@@ -149,7 +150,7 @@ test('offline reuse revalidates exact bytes; signature/rollback failures never m
 test('cached catalogue/protected owner identity tamper and cache junctions are refused',async t=>{
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);
  f.state={...f.state,identity:{...f.state.identity,deviceId:'wrong'}};await assert.rejects(()=>p.ensure(f.config,f.authorization),/another owner/);f.state=accepted;
- const root=path.join(f.root,'github-districts','datasets'),outside=path.join(f.temporary,'outside');fs.mkdirSync(outside);fs.rmSync(root,{recursive:true});fs.symlinkSync(outside,root,process.platform==='win32'?'junction':'dir');await assert.rejects(()=>p.ensure(f.config,f.authorization),/Unsafe/);assert.deepEqual(fs.readdirSync(outside),[]);
+ const root=path.join(f.root,'github-districts','datasets-v2'),outside=path.join(f.temporary,'outside');fs.mkdirSync(outside);fs.rmSync(root,{recursive:true});fs.symlinkSync(outside,root,process.platform==='win32'?'junction':'dir');await assert.rejects(()=>p.ensure(f.config,f.authorization),/Unsafe/);assert.deepEqual(fs.readdirSync(outside),[]);
 });
 test('a network interruption preparing a newer revision reuses only the prior verified active data',async t=>{
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const active=structuredClone(f.state.active);f.world=f.build(2);f.transport.download=async()=>{throw Object.assign(new Error('fixture disconnected'),{code:'ECONNRESET'});};
@@ -218,4 +219,33 @@ test('a tag object whose sha differs from the requested sha, or a mismatched ref
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);f.world=f.build(2);
  annotate(f,2,{mismatch:1});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
  f.tagRef=world=>({ref:'refs/tags/other-'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
+});
+
+
+test('signed snapshot files are preserved in the schema2 cache without replacing old six-file caches',async t=>{
+ const f=fixture(t,{snapshots:true}),old=path.join(f.root,'github-districts','datasets','a'.repeat(64),'co-05');fs.mkdirSync(old,{recursive:true});fs.writeFileSync(path.join(old,'contacts.sqlite3'),'existing six-file cache');
+ const p=f.create(),authorization=standaloneAuthorization(),result=await p.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ assert.equal(result.standaloneGitHubData.schemaVersion,2);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result);assert.ok(roots.data.includes('datasets-v2'));
+ assert.ok(fs.existsSync(path.join(roots.data,'snapshots','co-cd005-111111111111','rows.json')));
+ assert.ok(fs.existsSync(path.join(roots.data,'snapshots','co-cd005-111111111111','derived','v3_meta.json.gz')));
+ assert.equal(fs.readFileSync(path.join(old,'contacts.sqlite3'),'utf8'),'existing six-file cache');
+ const count=f.downloads.length;await p.ensure(result,authorization);assert.equal(f.downloads.length,count);
+});
+
+test('a changed signed snapshot byte fails verification without touching user state',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),p=f.create(),result=await p.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result),file=path.join(roots.data,'snapshots','co-cd005-111111111111','rows.json');
+ fs.writeFileSync(file,Buffer.alloc(fs.statSync(file).size));const saved=JSON.stringify(f.state);
+ await assert.rejects(p.ensure(result,authorization),/failed verification/);
+ assert.equal(JSON.stringify(f.state),saved);assert.equal(f.downloads.length,1);
+});
+
+
+test('managed snapshot caches reject unsigned extra derived files',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),p=f.create(),result=await p.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result),file=path.join(roots.data,'snapshots','co-cd005-111111111111','derived','v3_unlisted.json');
+ fs.writeFileSync(file,'{"unlisted":true}');
+ await assert.rejects(p.ensure(result,authorization),/failed verification/);
+ assert.equal(fs.readFileSync(file,'utf8'),'{"unlisted":true}');
 });

@@ -28,7 +28,7 @@ const fingerprint=stat=>[String(stat.dev),String(stat.ino),String(stat.size),Str
 async function digest(file,signal){
  const before=await fsp.lstat(file,{bigint:true});requireValue(before.isFile()&&!before.isSymbolicLink(),'Unsafe GitHub district file');
  const hash=crypto.createHash('sha256');let bytes=0;
- for await(const chunk of fs.createReadStream(file)){canceled(signal);hash.update(chunk);bytes+=chunk.length;}
+ for await(const chunk of fs.createReadStream(file,{highWaterMark:4*1024*1024})){canceled(signal);hash.update(chunk);bytes+=chunk.length;}
  requireValue(fingerprint(await fsp.lstat(file,{bigint:true}))===fingerprint(before)&&BigInt(bytes)===before.size,'GitHub district file changed while verifying');
  return {bytes,sha256:hash.digest('hex'),fingerprint:fingerprint(before)};
 }
@@ -71,7 +71,7 @@ function configurationFor(configuration,entry,root,authorization){
  const {ownerGitHubData,standaloneGitHubData,...base}=configuration;
  if(entry.source==='legacy'||entry.source==='local')return base;
  const field=protocol.standaloneAuthorized(configuration,authorization)?'standaloneGitHubData':'ownerGitHubData';
- return {...base,[field]:{schemaVersion:1,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};
+ return {...base,[field]:{schemaVersion:2,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};
 }
 class GitHubDistricts{
  constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
@@ -84,9 +84,9 @@ class GitHubDistricts{
  info(configuration){return this.states.has(configuration?.district)?structuredClone(this.states.get(configuration.district)):null;}
  async initialize(){
   await fsp.mkdir(this.root,{recursive:true,mode:0o700});requireValue(!(await fsp.lstat(this.root)).isSymbolicLink(),'Unsafe GitHub cache root');this.realRoot=await fsp.realpath(this.root);this.root=this.realRoot;
-  for(const name of ['github-districts','github-districts/datasets','github-districts/downloads','github-districts/staging'])await safeDirectory(this.realRoot,path.join(this.root,...name.split('/')),{create:true});
+  for(const name of ['github-districts','github-districts/datasets-v2','github-districts/downloads','github-districts/staging'])await safeDirectory(this.realRoot,path.join(this.root,...name.split('/')),{create:true});
  }
- directory(manifestSha256,district){return path.join(this.root,'github-districts','datasets',manifestSha256,district);}
+ directory(manifestSha256,district){return path.join(this.root,'github-districts','datasets-v2',manifestSha256,district);}
  async readState(authorization){
   const expected=identity(authorization);let saved=await this.store.read();
   if(!saved&&expected.mode==='standalone'&&this.previousStore){
@@ -142,33 +142,50 @@ class GitHubDistricts{
   const bytes=await read(assetURL(checked.value.releaseTag,checked.value.manifest.asset),{maxBytes:checked.value.manifest.bytes,asset:true}),manifest=protocol.manifest(bytes,checked);
   state.catalogues[checked.digest]={envelope:checked.envelope,manifestBase64:bytes.toString('base64'),commit};state.latest=checked.digest;await this.commit(state);return {pointer:checked,manifest};
  }
+ async verifyInventory(directory,files){
+  const expected=new Set(files.map(item=>item.role)),parents=new Set(),seen=new Set();
+  for(const name of expected){const parts=name.split('/');for(let count=1;count<parts.length;count++)parents.add(parts.slice(0,count).join('/'));}
+  const walk=async(current,prefix='')=>{
+   for(const entry of await fsp.readdir(current,{withFileTypes:true})){
+    canceled(this.signal);const relative=prefix+entry.name;
+    requireValue(!entry.isSymbolicLink(),'Public district cache contains a link');
+    if(entry.isDirectory()){requireValue(parents.has(relative),'Unexpected public district directory');await safeDirectory(directory,path.join(directory,relative));await walk(path.join(current,entry.name),relative+'/');}
+    else{requireValue(entry.isFile()&&expected.has(relative)&&!seen.has(relative),'Unexpected public district file');seen.add(relative);}
+   }
+  };
+  await walk(directory);requireValue(seen.size===expected.size,'Public district inventory is incomplete');
+ }
  async verifyDirectory(directory,district,files,{managed=false}={}){
   try{
    if(managed)await safeDirectory(this.realRoot,directory);else{const stat=await fsp.lstat(directory);requireValue(stat.isDirectory()&&!stat.isSymbolicLink());}
+   if(managed)await this.verifyInventory(directory,files);
    const verified=[];
    for(const item of files){
-    const file=path.join(directory,item.role),actual=await digest(file,this.signal);if(actual.bytes!==item.bytes||actual.sha256!==item.sha256)return false;
+    const file=path.join(directory,item.role);if(path.dirname(file)!==directory)await safeDirectory(directory,path.dirname(file));const actual=await digest(file,this.signal);if(actual.bytes!==item.bytes||actual.sha256!==item.sha256)return false;
     verified.push({file,fingerprint:actual.fingerprint});
     if(item.role.endsWith('.sqlite3')){for(const suffix of ['-wal','-shm','-journal'])if(await fsp.lstat(file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}))return false;
      const header=Buffer.alloc(20),handle=await fsp.open(file,'r');try{requireValue((await handle.read(header,0,20,0)).bytesRead===20&&header.subarray(0,16).toString('latin1')==='SQLite format 3\0'&&header[18]===1&&header[19]===1);}finally{await handle.close();}}
    }
    canceled(this.signal);if(await this.checkExisting(directory,district)!==true)return false;
    for(const item of verified){const stat=await fsp.lstat(item.file,{bigint:true});requireValue(!stat.isSymbolicLink()&&fingerprint(stat)===item.fingerprint,'GitHub district files changed during metadata validation');if(item.file.endsWith('.sqlite3'))for(const suffix of ['-wal','-shm','-journal'])if(await fsp.lstat(item.file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}))return false;}
+   if(managed)await this.verifyInventory(directory,files);
    return true;
   }catch(error){if(this.signal?.aborted)throw error;return false;}
  }
  summary(bundle){return {releaseTag:bundle.releaseTag,catalogueSequence:bundle.catalogSequence,verifiedAt:bundle.verifiedAt,cached:true};}
  async useVerified(configuration,state,entry,{offline=false,authorization}={}){
   const checked=this.catalogue(state,entry.pointerDigest),directory=entry.source==='legacy'?legacy(configuration):entry.source==='local'?localDirectory(configuration):this.directory(entry.manifestSha256,configuration.district);
-  if(!await this.verifyDirectory(directory,configuration.district,checked.manifest.runtime[configuration.district],{managed:entry.source==='cache'}))return null;
+  if(!await this.verifyDirectory(directory,configuration.district,checked.manifest.dataFiles[configuration.district],{managed:entry.source==='cache'}))return null;
   this.status(configuration,offline?'offline':'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:offline?TEXT.offline:TEXT.ready});return configurationFor(configuration,entry,this.root,authorization);
  }
  async prepare(configuration,state,checked,authorization){
-  const district=configuration.district,{pointer,manifest}=checked,files=manifest.runtime[district];
+  const district=configuration.district,{pointer,manifest}=checked,files=manifest.dataFiles[district];
   this.status(configuration,'verifying',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,checkedAt:new Date(this.now()).toISOString(),message:TEXT.verifying});
   let source;
   const standalone=protocol.standaloneAuthorized(configuration,authorization);
-  if(await this.verifyDirectory(standalone?localDirectory(configuration):legacy(configuration),district,files))source=standalone?'local':'legacy';
+  // Standalone data needs the schema2 descriptor so native startup also activates
+  // its verified summary in the separate account state. Preserve original local files.
+  if(!standalone&&await this.verifyDirectory(legacy(configuration),district,files))source='legacy';
   const place=this.directory(manifest.sha256,district);
   if(!source&&await this.verifyDirectory(place,district,files,{managed:true}))source='cache';
   if(!source){
@@ -189,7 +206,7 @@ class GitHubDistricts{
     const result=await this.extract({archive,destination:staging,district,files:structuredClone(files)});
     requireValue(result===true||result?.ok===true&&result.district===district&&result.sourceMetadataAccepted===true,'GitHub district extractor refused data');
     requireValue(await this.verifyDirectory(staging,district,files,{managed:true}),'Extracted GitHub district data failed verification');
-    const names=await fsp.readdir(staging);requireValue(names.length===ROLES.length&&names.every(name=>ROLES.includes(name)),'Unexpected files in GitHub district staging');
+    const names=await fsp.readdir(staging),expectedTop=new Set(files.map(item=>item.role.split('/')[0]));requireValue(names.length===expectedTop.size&&names.every(name=>expectedTop.has(name)),'Unexpected files in GitHub district staging');
     await safeDirectory(this.realRoot,path.dirname(place),{create:true});canceled(this.signal);await fsp.rename(staging,place);
    }finally{await discardStaging(this.realRoot,stagingRoot,staging);}
    source='cache';
@@ -221,6 +238,17 @@ class GitHubDistricts{
    const active=state?.active?.[configuration.district];if(!this.signal?.aborted)this.status(configuration,'error',{...(active?this.summary(active):{}),cached:Boolean(active),message:TEXT.error});throw error;
   }
   finally{this.busy=false;}
+ }
+ async retireInactive(configuration,authorization){
+  requireValue(protocol.standaloneAuthorized(configuration,authorization)&&configuration.standaloneGitHubData,'Local public district authorization is required');
+  requireValue(!this.busy,'GitHub district preparation is already running');
+  this.busy=true;
+  try{
+   await this.initialize();const state=await this.readState(authorization),selected=configuration.standaloneGitHubData,active=state.active[configuration.district];
+   requireValue(active?.source==='cache'&&active.manifestSha256===selected.catalogueSha256&&path.resolve(selected.cacheRoot)===this.root,'Only the active verified public district may retire previous caches');
+   const manifests=Object.keys(state.catalogues).map(key=>this.catalogue(state,key).manifest);
+   return await require('./public-district-cache.cjs').retirePublicDistrictCaches({root:this.root,configuration,manifests});
+  }finally{this.busy=false;}
  }
  ensure(configuration,authorization){return this.operation(configuration,authorization);}
  discover(configuration,authorization,{stageOnly=true}={}){return this.operation(configuration,authorization,{stageOnly});}

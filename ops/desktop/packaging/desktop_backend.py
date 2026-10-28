@@ -456,7 +456,11 @@ def run(options, token, *, module_inputs=None):
             from server.research.desktop_access import DesktopBoundary
             launch_path = prepare_principal(principal, state)
             boundary = DesktopBoundary(options.district, options.port, principal)
-        import_district_bundle(data, state)
+        if github_data:
+            from terrier_github_snapshot import activate_snapshot
+            activate_snapshot(source, data, state, options.district)
+        else:
+            import_district_bundle(data, state)
         command = importlib.import_module('server.research.management.commands.serve')
         def desktop_fault_log(port):
             import faulthandler
@@ -473,16 +477,17 @@ def run(options, token, *, module_inputs=None):
 
 
 def extract_github_district_archive(request, *, check=None):
-    """Extract only six signed runtime roles into a new, disposable directory."""
+    """Extract signed runtime stores and approved summary snapshot files into a new directory."""
     import re
     import shutil
     import stat
     import zipfile
+    from terrier_github_snapshot import snapshot_role
     required = {'contacts.sqlite3', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3', 'density.json'}
     if not isinstance(request, dict) or set(request) != {'archive', 'destination', 'district', 'files', 'sourceRoot'}:
         raise ValueError('Invalid district archive request')
     district = request['district']
-    if district not in {'co-05', 'or-05', 'ct-01'} or not isinstance(request['files'], list) or len(request['files']) != 6:
+    if district not in {'co-05', 'or-05', 'ct-01'} or not isinstance(request['files'], list) or not 6 <= len(request['files']) <= 10000:
         raise ValueError('Invalid district runtime roles')
     for key in ('archive', 'destination', 'sourceRoot'):
         if not isinstance(request[key], str) or not Path(request[key]).is_absolute():
@@ -500,12 +505,12 @@ def extract_github_district_archive(request, *, check=None):
         if not isinstance(item, dict) or set(item) != {'role', 'path', 'bytes', 'sha256'}:
             raise ValueError('Invalid runtime file specification')
         role = item['role']
-        if role not in required or role in specs or item['path'] != district + '/data/' + role:
+        if not (role in required or snapshot_role(role)) or role in specs or item['path'] != district + '/data/' + role:
             raise ValueError('Invalid or duplicate runtime path')
         if type(item['bytes']) is not int or not 0 < item['bytes'] <= 3 * 1024**3 or not isinstance(item['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', item['sha256']):
             raise ValueError('Invalid runtime file size or checksum')
         specs[role] = item
-    if set(specs) != required or sum(item['bytes'] for item in specs.values()) > 12 * 1024**3:
+    if not required.issubset(specs) or sum(item['bytes'] for item in specs.values()) > 12 * 1024**3:
         raise ValueError('Incomplete or oversized district')
     created = None
     try:
@@ -528,18 +533,19 @@ def extract_github_district_archive(request, *, check=None):
                     raise ValueError('Unsafe or ambiguous ZIP entry')
                 names.add(name.casefold().rstrip('/'))
                 role = name.removeprefix(district + '/data/')
-                if role in required and name == specs[role]['path']:
+                if role in specs and name == specs[role]['path']:
                     if item.is_dir() or item.file_size != specs[role]['bytes']:
                         raise ValueError('Runtime ZIP entry size mismatch')
                     selected[role] = item
-            if set(selected) != required:
+            if set(selected) != set(specs):
                 raise ValueError('District archive lacks a required runtime file')
             output.mkdir(mode=0o700)
             created = output.stat()
             verified = []
-            for role in sorted(required):
+            for role in sorted(specs):
                 item, expected = selected[role], specs[role]
                 digest, count = hashlib.sha256(), 0
+                (output / role).parent.mkdir(parents=True, exist_ok=True)
                 with zipped.open(item) as incoming, (output / role).open('xb') as target:
                     while block := incoming.read(1024 * 1024):
                         count += len(block)

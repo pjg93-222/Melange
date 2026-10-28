@@ -52,6 +52,8 @@ def validate_github_runtime(source, data, district):
             raise ValueError('GitHub district data changed during validation.')
         if role.endswith('.sqlite3') and any(file.with_name(role + suffix).exists() for suffix in ('-wal', '-shm', '-journal')):
             raise ValueError('A GitHub district database acquired SQLite sidecars.')
+    from terrier_github_snapshot import select_snapshot
+    select_snapshot(source, data, district)
     return {'district': definition['id'], 'validated': True}
 
 
