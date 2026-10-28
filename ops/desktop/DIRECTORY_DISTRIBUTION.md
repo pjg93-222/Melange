@@ -1,5 +1,9 @@
 # Windows directory ZIP distribution
 
+See the [engineering handoff](INSTALLER_FREE_HANDOFF.md) for the exact tested
+candidate baseline, migration/channel requirements, evidence limits and
+coordination with concurrent development.
+
 The `directory-zip` build contains the complete signed Electron application and
 its private runtime. It has no NSIS launcher, installer, uninstaller, extraction
 plugin, elevation step, or legacy `portable.marker`. The user extracts the ZIP

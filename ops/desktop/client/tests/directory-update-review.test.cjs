@@ -162,4 +162,3 @@ with zipfile.ZipFile(sys.argv[1],'x',compression=zipfile.ZIP_STORED) as archive:
  await assert.rejects(f.installer.launch(f.zip,f.manifest,true),/hash|integrity|archive changed/i);
  assert.deepEqual(f.activated,[]);
 });
-

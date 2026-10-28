@@ -6,7 +6,11 @@ then prepare their release with the publisher's `windows-directory-zip-v1` packa
 format and publisher proof after its release gates pass. Every future directory
 update needs these ZIP assets and manifests. The legacy `release_from_main.py`
 NSIS-only output cannot update a migrated directory installation; it remains the
-default for existing installer clients until they migrate.
+default for existing installer clients until they migrate. The current
+`.github/workflows/desktop-windows.yml` path also builds NSIS installer assets,
+not the directory ZIP channel. Pushing source does not build, publish or enable
+that channel. Publish the current version's exact ZIP and signed manifest as its
+recovery baseline before higher automatic updates, after release gates pass.
 
 The Electron apps can use public GitHub Releases. Each app has its own public
 repository (Paul's correction, 2026-10-15): Melange `pjg93-222/Melange`, Mentat
@@ -14,13 +18,14 @@ repository (Paul's correction, 2026-10-15): Melange `pjg93-222/Melange`, Mentat
 repository is no longer a destination. Binary update checks are independent of application
 feature approval. The app still verifies an Ed25519 manifest against its
 independently installed update roots, exact app/OS/architecture, increasing
-sequence/version, installer hashes, and the native OS signer before activation.
+sequence/version, package hashes, and the pinned native OS signer before activation.
+Directory packages also require the independent whole-ZIP publisher proof.
 Feature access keeps its separate signed approval checks. No GitHub PAT,
 publisher private key, access credential, or recipient list belongs in an app
 or release asset. Making the repository public is an owner action; none of the
 tools here change repository visibility.
 
-> **Signing: self-signed certificate; no trust step in current builds (Paul's choice,
+> **Native NSIS signing workflow: self-signed certificate; no trust step in current builds (Paul's choice,
 > 2026-10-16; the one-click trust step was added for 1.0.6 and later removed).**
 > Each installer is Authenticode-signed
 > on Paul's PC with the self-signed certificate
@@ -28,14 +33,14 @@ tools here change repository visibility.
 > `0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30`; end-entity, CA:false, Code Signing
 > EKU only, Digital Signature key usage). Its non-exportable key stays in Paul's
 > `CurrentUser\My`; no publicly trusted signing identity is used or needed. The
-> hosted build stays unsigned but bakes the public pin
+> hosted NSIS build stays unsigned but bakes the publisher-name configuration
 > `WINDOWS_PUBLISHER_NAME = CN=Melange Systems Desktop Release (self-signed)`
 > (workflow `RELEASE_PUBLISHER`, signed-release input mode, with `STABLE_TAG`
 > reserved). Paul then signs the installer (RFC 3161 timestamp),
 > `packaging/authenticode_binding.py` proves the signed file is the hosted bytes
 > plus only an appended signature, and the steps below prepare and publish the
 > stable `desktop-v<version>` release. The per-app Ed25519 update roots and the
-> pinned publisher subject live in the protected publisher state
+> configured publisher subject live in the protected publisher state
 > (`server/desktop_admin.py` `init` and `trust-publisher`), outside this repository.
 >
 > The app no longer asks for trust. Updates are always on and do not depend on the
@@ -51,9 +56,13 @@ tools here change repository visibility.
 > install), or, if one is still pending (for example after a shutdown), at the
 > next start before any window or backend opens, followed by a relaunch. A
 > running session is never interrupted. None of the manifest, sequence,
-> anti-rollback, hash or exact-publisher checks changed.
+> anti-rollback, hash or exact-publisher checks are bypassed. Current 1.0.20
+> clients enforce the certificate thumbprint above; a matching subject alone
+> is insufficient. Directory ZIP activation uses the same fixed thumbprint for
+> its executable and whole-ZIP proof, and relaunches a verified version folder
+> instead of invoking the NSIS step described here.
 
-## From committed sources to a prepared installer
+## Native NSIS: from committed sources to a prepared installer
 
 1. Commit completed source to each app's own repository `main` (Melange to
    `pjg93-222/Melange`, Mentat to `pjg93-222/Mentat`, Terrier to
@@ -99,7 +108,8 @@ One specification names one or more apps under `packages` (release owner,
 2026-10-16: the first signed release is Melange only). The named apps are signed
 together or not at all. Each takes the top-level `version` and `sequence` unless
 its `packages` entry sets its own, and each passes every per-app gate:
-Authenticode Valid by the exact subject, the receipt bound to its bytes and
+Authenticode Valid with the configured subject and pinned certificate thumbprint,
+the receipt bound to its bytes and
 source, and its own ledger advance. `sourceRefs` always names all three apps,
 because every signed manifest binds them and the installed client requires all
 three (`client/github-source.cjs` `githubPolicy`). For an app that is not released,
@@ -137,14 +147,18 @@ mismatch, old versions/sequences, and reusing a sequence for different bytes.
 The sequence ledger is checked per app across every repository it has recorded,
 and each new row records that app's own repository. Repeating the identical
 release at a new directory reproduces its envelopes. No network request or upload
-occurs. The output holds one directory per app, each with exactly six files:
+occurs. Native NSIS preparation holds one directory per app, each with exactly six files:
 
 - `<app>-win32-x64.manifest.json`, `<app>-<version>-win32-x64.exe`, `<app>-trust.json`;
 - `turn-on-updates.cmd`, byte-identical to `client/turn-on-updates.cmd` (the
   historical one-click trust launcher; `--verify-output` refuses any other bytes);
 - that app's `release.json` (with its `appId` and `repository`) and `SHA256SUMS`.
 
-A directory prepared before the trust file existed (`desktop-v1.0.5`) still
+Directory ZIP preparation instead contains `<app>-win32-x64-directory-zip.manifest.json`,
+`<app>-<version>-win32-x64.zip`, `<app>-trust.json`, `release.json` and
+`SHA256SUMS`; it does not include the legacy trust launcher.
+
+A native release directory prepared before the trust file existed (`desktop-v1.0.5`) still
 verifies with its original five files.
 
 Each signed manifest binds `purpose: melange-desktop-github-release`,
@@ -156,7 +170,8 @@ release uploaded to another app's repository cannot install. The signed logical
 package path remains `/v1/packages/<app>/<sequence>/<installer-name>`; the GitHub
 adapter maps it to the exact asset in `desktop-v<version>`. Trust files contain
 only signed key transitions rooted in keys the installed app already trusts. A
-failed download cannot replace those roots. From 1.0.6 the client records the
+failed download cannot replace those roots. In the native NSIS channel, from
+1.0.6 the client records the
 running version's signed manifest as its rollback baseline without downloading
 that version's installer, and rollback works offline from locally kept
 installers: the installer that was downloaded to update stays in the app's own
@@ -169,14 +184,19 @@ the immediately previous version keep one (older ones are pruned once the new
 version is confirmed running), and an interactive first install keeps a copy of
 its own setup file (`%LOCALAPPDATA%\<application id>\baseline\<version>`) so
 even the first rollback needs no download. A rollback verifies the local copy
-exactly as an activation does (signed-manifest hashes, then the exact
-Authenticode subject, twice). Only when no local copy exists, or it fails
+exactly as an activation does (signed-manifest hashes, then the pinned
+Authenticode signer thumbprint before staging and activation). Only when no local
+copy exists, or it fails
 verification (it is then deleted), is the older installer fetched from its
 exact `desktop-v<version>` release, which therefore must stay hosted for that
 fallback. Network is needed only to fetch new updates. A per-machine (all users) install skips the first-install copy, because the app reads the signed-in user's `%LOCALAPPDATA%`; the first rollback there falls back to the network. The baseline copy is copied (not moved) and removed only after the rollback completes and the target version is confirmed running. A cached installer is deleted only when its own size or hash check fails, never for an untrusted signature or a tool error. If the installer later cannot be spawned, electron-updater exits the app once and the update is recorded as failed at the next start; the exceptions are EACCES/UNKNOWN (retried through its elevation helper, which can show a UAC prompt, rare for this per-user install) and ENOENT (opened interactively without `/S`), neither of which reports an error. Disk cost is about one
 extra installer per app (Melange roughly 575 MB).
 
-## Release from main
+## Release from main (native NSIS only)
+
+This default pipeline does not build directory ZIP releases or enable their
+update channel. Use [DIRECTORY_DISTRIBUTION.md](DIRECTORY_DISTRIBUTION.md) for
+that separate build and publication contract.
 
 `packaging/release_from_main.py` runs the steps above, and the publishing steps
 below, as one local command. It stops at the first failed step and names that step.
