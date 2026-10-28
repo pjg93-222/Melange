@@ -60,6 +60,11 @@ test('an in-flight native probe cannot undo a later Windows lock',async()=>{
 test('simultaneous initial access checks share one native probe and one session',async()=>{
  const f=fixture(),gate=await createStandaloneGate(f.options);const [first,second]=await Promise.all([gate.authorize(),gate.authorize()]);assert.equal(first.session,second.session);assert.equal(f.probes,1);assert.equal(f.windowsStore.writes,1);
 });
+test('an explicit OS resume rechecks Windows even if the preceding lock notification was missed',async()=>{
+ const f=fixture(),gate=await createStandaloneGate(f.options);await gate.authorize();assert.equal(f.probes,1);
+ f.observed={...f.observed,locked:true};assert.equal(await gate.local.resume(),null);assert.equal(f.probes,2);assert.equal(gate.session,null);await assert.rejects(gate.authorize(),/Unlock Windows/);
+ f.observed={...f.observed,locked:false};await gate.local.resume();assert.equal(f.probes,3);assert.equal((await gate.authorize()).session.method,'windows-session');
+});
 test('native identity input must have only validated token/session fields',()=>{
  const f=fixture();for(const changed of [{userSid:'from-environment'},{accountName:'name\nforged'},{locked:'false'},{sessionId:0},{sessionId:-1},{role:'owner'},{schemaVersion:2}])assert.throws(()=>checkedWindowsIdentity({...f.observed,...changed}),/could not be verified/);
 });

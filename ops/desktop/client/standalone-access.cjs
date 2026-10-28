@@ -120,6 +120,9 @@ class WindowsStandaloneAccessGate extends StandaloneAccessGate{
  lock(){super.lock();this.suspended=true;}
  async forget(){this.lock();}
  async resume(afterWindowsUnlock=false){
+  // A trusted OS-resume notification always starts a new native observation,
+  // even if a preceding lock notification was missed or is still in flight.
+  if(afterWindowsUnlock){this.epoch++;this.session=null;}
   if(this.session&&!this.suspended)return this.session;
   if(this.suspended&&!afterWindowsUnlock)return null;
   const epoch=this.epoch;
