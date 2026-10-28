@@ -109,6 +109,28 @@ def scan(directory):
     return files, pes, {name: {"sha256": hashes[name], "size": file.stat().st_size} for name, file in files.items()}
 
 
+def reference_overlays(files, pes, mapping, app, *, executable=None, asar=None):
+    """Map the two explicit build overlays without duplicating a signed runtime.
+
+    Every mapped input stays a physical, single-link file. The final archive is
+    still extracted independently and compared to this exact merged reference.
+    """
+    files, pes, mapping = dict(files), set(pes), dict(mapping)
+    for relative, source in ((PRODUCTS[app] + ".exe", executable), ("resources/app.asar", asar)):
+        if source is None:
+            continue
+        require(relative in files, "Overlay has no corresponding program member")
+        file = Path(source).absolute()
+        physical(file)
+        native, hashes = legacy.inspect_files({relative: file})
+        require(native == ({relative} if relative.endswith(".exe") else set()), "Overlay native classification differs")
+        files[relative] = file
+        pes.discard(relative)
+        pes.update(native)
+        mapping[relative] = {"sha256": hashes[relative], "size": file.stat().st_size}
+    return files, pes, mapping
+
+
 def reader_capabilities(seven):
     info = legacy.run([seven, "i"]).decode("utf-8", "strict")
     require(re.search(r"\bNsis\s+nsis\b", info, re.IGNORECASE), "A full NSIS-capable 7-Zip reader is required")
@@ -236,8 +258,12 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
             and update.get("distribution", "native") == "native", "Native GitHub receiver configuration differs")
     require(config.get("desktopAccessTrust") == json.loads(trust.read_text(encoding="utf-8")), "Packaged public trust differs from frozen descriptor")
     require(re.search(r"const\s+PUBLISHER_PIN_ENFORCE\s*=\s*true\s*;", (client / "native-signature.cjs").read_text()), "Publisher pin is not enforced")
-    build_inputs = {name: snapshot(client / name)[-1]
-                    for name in (BUILTIN_BUILD_INPUTS if installer_format == "builtin-nsis-v1" else BUILD_INPUTS)}
+    build_names = list(BUILTIN_BUILD_INPUTS if installer_format == "builtin-nsis-v1" else BUILD_INPUTS)
+    # Historical direct builds predate the production wrapper. Bind that wrapper
+    # whenever the frozen source's production entry point invokes it.
+    if installer_format == "builtin-nsis-v1" and "build-native.cjs" in str(original.get("scripts", {}).get("build", "")):
+        build_names.append("build-native.cjs")
+    build_inputs = {name: snapshot(client / name)[-1] for name in build_names}
     certificate = "melange-systems-desktop-release.cer"
     cert_info = physical(client / certificate)
     require(program_map.get("resources/" + certificate) == {"sha256": legacy.digest(client / certificate), "size": cert_info.st_size},
@@ -268,7 +294,7 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
 
 
 def native_census(*, installer, program_directory, app_files, app_pes, app_map, nsis_files, nsis_pes, nsis_map, receipt,
-                  installer_format="legacy-nsis-v1"):
+                  installer_format="legacy-nsis-v1", reference_files=None):
     """Bind every header-detected native file to fresh build signature evidence."""
     require(installer_format in INSTALLER_FORMATS, "Unsupported native installer format")
     current = receipt.get("currentFiles") or []
@@ -278,10 +304,17 @@ def native_census(*, installer, program_directory, app_files, app_pes, app_map, 
         file = Path(row["path"])
         if identity(file) == identity(installer):
             continue
-        try:
-            rel = file.relative_to(program_directory).as_posix()
-        except ValueError as error:
-            raise Refused("Current signature row escapes signed program tree") from error
+        if "payloadRelativePath" in row:
+            rel = row["payloadRelativePath"]
+            require(isinstance(rel, str) and legacy.safe_name(rel) == rel, "Invalid payload relative signature path")
+        else:
+            try:
+                rel = file.relative_to(program_directory).as_posix()
+            except ValueError as error:
+                raise Refused("Current signature row escapes signed program tree") from error
+        source = (reference_files or {}).get(rel, Path(program_directory) / rel)
+        require(identity(file) == identity(source), "Current signature row does not identify its actual reference input")
+        require(rel not in expected, "Duplicate native payload signature mapping")
         require(rel in app_pes and row.get("sha256") == app_map[rel]["sha256"], "Current program signature bytes/census differ: " + rel)
         expected[rel] = row
     require(set(expected) == app_pes, "Native header census differs from complete build signature receipt")
@@ -342,6 +375,8 @@ def verify(args):
     require(re.fullmatch(r"\d+\.\d+\.\d+", args.version), "Stable native version required")
     output, installer = Path(args.output).absolute(), Path(args.installer).absolute()
     program, client, staged = (Path(value).absolute() for value in (args.program_directory, args.client, args.staged_sources))
+    overlays = {"executable": getattr(args, "app_executable", None), "asar": getattr(args, "app_asar", None)}
+    require(installer_format == "builtin-nsis-v1" or not any(overlays.values()), "Reference overlays require the built-in installer format")
     seven = Path(args.seven_zip).resolve(strict=True)  # known tool cache may have a legitimate parent redirect
     tool_inputs = [seven]
     if seven.with_suffix(".dll").exists():
@@ -358,9 +393,12 @@ def verify(args):
         physical(Path(args.source), True)
     require(not output.exists(), "Inspection output must be fresh")
     output.mkdir()
-    paths = [installer, receipt_path, trust, *tool_inputs, Path(__file__), HERE / "verify_signed_release.py", HERE / "no_uninstaller_contract.py"]
+    paths = [installer, receipt_path, trust, *tool_inputs, Path(__file__), HERE / "verify_signed_release.py", HERE / "no_uninstaller_contract.py",
+             *(Path(value).absolute() for value in overlays.values() if value)]
     inputs = {str(file): snapshot(file) for file in paths}
     reference_files, reference_pes, reference = scan(program)
+    original_reference = dict(reference)
+    reference_files, reference_pes, reference = reference_overlays(reference_files, reference_pes, reference, args.app, **overlays)
     report = {"schemaVersion": 1, "status": "failed", "appId": args.app, "version": args.version,
               "clientCommit": args.client_commit, "sourceCommit": args.source_commit,
               "originalSourceExport": args.source,
@@ -368,6 +406,7 @@ def verify(args):
               "installerSha256": inputs[str(installer)][-1], "inputs": {name: row[-1] for name, row in inputs.items()},
               "freeFloorGiB": args.free_floor_gib,
               "archiveReader": reader, "installerFormat": installer_format,
+              "referenceOverlays": {name: str(Path(value).absolute()) for name, value in overlays.items() if value},
               "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
     with locked_input(installer), contextlib.ExitStack() as locks:
         for file in tool_inputs:
@@ -402,7 +441,7 @@ def verify(args):
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
         items, expected = native_census(installer=installer, program_directory=program, app_files=app_files,
             app_pes=app_pes, app_map=app_map, nsis_files=nsis_files, nsis_pes=nsis_pes, nsis_map=nsis_map, receipt=receipt,
-            installer_format=installer_format)
+            installer_format=installer_format, reference_files=reference_files)
         native = output / "native"
         native.mkdir()
         print(json.dumps({"phase": "complete-native-signature-census", "appId": args.app, "files": len(items)}), flush=True)
@@ -412,7 +451,7 @@ def verify(args):
         same_tree(scan(extracted)[2], app_map, "Final extracted application")
         if outer != extracted:
             same_tree(scan(outer)[2], nsis_map, "Final NSIS container")
-        same_tree(scan(program)[2], reference, "Final signed program input")
+        same_tree(scan(program)[2], original_reference, "Final signed program input")
         final_sources, _ = verify_sources(app=args.app, version=args.version, program_files=app_files,
             program_map=app_map, members=legacy.asar(app_files["resources/app.asar"])[1], client=client, staged=staged, trust=trust,
             installer_format=installer_format)
@@ -445,6 +484,8 @@ def main(argv=None):
                  "client-commit", "source-commit", "trust-descriptor", "seven-zip", "output", "report"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
+    parser.add_argument("--app-executable", help="Explicit signed main-executable overlay used by the built-in installer")
+    parser.add_argument("--app-asar", help="Explicit ASAR overlay used by the built-in installer")
     parser.add_argument("--installer-format", choices=INSTALLER_FORMATS, default="legacy-nsis-v1",
                         help="explicit native payload layout; builtin layout forbids external installer plugins")
     parser.add_argument("--free-floor-gib", type=free_floor_gib, default=32,

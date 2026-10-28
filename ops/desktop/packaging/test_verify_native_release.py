@@ -133,6 +133,37 @@ class NativeFixture(unittest.TestCase):
         with self.assertRaisesRegex(n.Refused, "header census"):
             self.census()
 
+    def test_explicit_reference_overlays_bind_actual_paths_and_bytes_without_copying_runtime(self):
+        original_files, original_pes, original_map = n.scan(self.program)
+        overlay = self.root / "signed-overlay.exe"
+        overlay.write_bytes(original_files["Melange.exe"].read_bytes() + b"reviewed version-resource overlay")
+        files, pes, mapping = n.reference_overlays(original_files, original_pes, original_map, "melange", executable=overlay)
+        self.assertEqual(original_map["Melange.exe"]["sha256"], n.legacy.digest(self.program / "Melange.exe"))
+        self.assertNotEqual(original_map["Melange.exe"], mapping["Melange.exe"])
+        receipt = copy.deepcopy(self.receipt)
+        receipt.update(installerFormat="builtin-nsis-v1", installerPlugins=[])
+        main = next(row for row in receipt["currentFiles"] if row["path"] == str(self.program / "Melange.exe"))
+        main.update(self.row(overlay), payloadRelativePath="Melange.exe")
+        kwargs = dict(installer=self.installer, program_directory=self.program, app_files=files, app_pes=pes,
+                      app_map=mapping, nsis_files=files, nsis_pes=pes, nsis_map=mapping,
+                      receipt=receipt, installer_format="builtin-nsis-v1", reference_files=files)
+        items, _ = n.native_census(**kwargs)
+        self.assertEqual(len(items), 4)
+        main["path"] = str(self.program / "Melange.exe")
+        with self.assertRaisesRegex(n.Refused, "actual reference input"):
+            n.native_census(**kwargs)
+        main["path"] = str(overlay)
+        main["payloadRelativePath"] = "../Melange.exe"
+        with self.assertRaises(n.Refused):
+            n.native_census(**kwargs)
+
+    def test_reference_overlay_cannot_change_native_classification(self):
+        files, pes, mapping = n.scan(self.program)
+        invalid = self.root / "not-an-executable.exe"
+        invalid.write_bytes(b"not a Windows executable")
+        with self.assertRaisesRegex(n.Refused, "native classification"):
+            n.reference_overlays(files, pes, mapping, "melange", executable=invalid)
+
     def test_unknown_native_plugin_or_changed_plugin_bytes_fail(self):
         self.outer["$PLUGINSDIR/hidden.dat"] = pe(b"hidden")
         with self.assertRaisesRegex(n.Refused, "exact seven"):
