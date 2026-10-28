@@ -117,7 +117,7 @@ def build(source, destination, app_id, version, seven_zip):
             info = os.fstat(stream.fileno())
             listing_identity = (info.st_dev, info.st_ino)
             stream.write("".join(row["path"] + "\n" for row in inventory["files"]))
-        command = [str(seven_zip), "a", "-tzip", "-mm=Deflate", "-mx=1", "-mmt=4", "-scsUTF-8", "-spd", "-r-", "-y", str(temporary), "@" + str(listing)]
+        command = [str(seven_zip), "a", "-tzip", "-mm=Deflate", "-mx=5", "-mmt=4", "-scsUTF-8", "-spd", "-r-", "-y", str(temporary), "@" + str(listing)]
         with (destination.parent / "native-compression.log").open("xb") as log:
             result = subprocess.run(command, cwd=source, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
         guard.require(result.returncode == 0, "Native compression failed; see native-compression.log")
@@ -137,7 +137,7 @@ def build(source, destination, app_id, version, seven_zip):
             sha256.update(chunk)
             sha512.update(chunk)
     evidence = {"schemaVersion": 1, "implementations": implementations, "nativeToolPath": str(seven_zip), "nativeToolSha256": tool_hash,
-                "inventorySha256": hashlib.sha256(encoded).hexdigest(), "inventoryWorkers": 8, "compressionThreads": 4,
+                "inventorySha256": hashlib.sha256(encoded).hexdigest(), "inventoryWorkers": 8, "compressionThreads": 4, "compressionMethod": "Deflate", "compressionLevel": 5,
                 "centralDirectory": central, "contentMatchesSourceInventory": True, "packageSha256": sha256.hexdigest()}
     with (destination.parent / "native-zip-evidence.json").open("x", encoding="utf-8") as output:
         json.dump(evidence, output, indent=2)
