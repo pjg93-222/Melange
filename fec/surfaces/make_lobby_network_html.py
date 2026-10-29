@@ -49,7 +49,6 @@ RESPONSIVENESS_TIER_NOTE = (
     " Denominators are member-specific (chamber, party, and service scoped); "
     "rates are not comparable across members."
 )
-CHAMPIONS_V2_PAGE_CAP = 15
 CHAMPIONS_V2_METHOD_NOTE = (
     "Signed attention is inferred (leads, not disclosures) except canonical "
     "rows, which carry Paul's marks; boards are DESCRIPTIVE decision aids - "
@@ -2162,6 +2161,13 @@ def _load_champions_v2(path):
     sector_receipts = receipt.get("sectors")
     if not isinstance(sector_receipts, dict):
         raise IngestError("champions v2 lacks per-sector receipts")
+    run_diff = receipt.get("run_diff")    # D-362: boards built before it carry none
+    if run_diff is not None and (
+        not isinstance(run_diff, dict)
+        or run_diff.get("schema") != "champions-v2-run-diff-v1"
+        or not isinstance(run_diff.get("sectors"), dict)
+    ):
+        raise IngestError("champions v2 run diff malformed")
     expected_components = {
         "credit_union": [
             "log1p_supportive_att", "net_directional", "O",
@@ -2651,46 +2657,31 @@ def _org_mentions_page_payload(mentions, companies):
     }
 
 
-def _champions_v2_page_payload(payload, cap=None):
-    """Copy boards for the page, optionally capping threat/mixed per chamber."""
-    page_payload = json.loads(json.dumps(payload, ensure_ascii=False))
-    before = {}
-    after = {}
-    for sector in CHAMPIONS_V2_SECTORS:
-        before[sector] = {}
-        after[sector] = {}
-        boards = page_payload["sectors"][sector]
-        for board_name in ("threats", "mixed"):
-            rows = boards[board_name]
-            before[sector][board_name] = {
-                chamber: sum(row["chamber"] == chamber for row in rows)
-                for chamber in ("House", "Senate")
-            }
-            if cap is not None:
-                used = {"House": 0, "Senate": 0}
-                retained = []
-                for row in rows:
-                    chamber = row["chamber"]
-                    if used[chamber] < cap:
-                        retained.append(row)
-                        used[chamber] += 1
-                boards[board_name] = retained
-                rows = retained
-            after[sector][board_name] = {
-                chamber: sum(row["chamber"] == chamber for row in rows)
-                for chamber in ("House", "Senate")
-            }
-    page_payload["receipt"]["page_retention"] = {
-        "cap_applied": cap is not None,
-        "threat_mixed_per_chamber_cap": cap,
-        "rows_before": before,
-        "rows_after": after,
-        "reason": (
-            "champions page exceeded MAX_DOCUMENT_BYTES with full boards"
-            if cap is not None else "full boards fit below MAX_DOCUMENT_BYTES"
-        ),
-    }
-    return page_payload
+def _champions_v2_page_payload(payload):
+    """Page copy of champions_v2: the sector order, the tier boards and the tier moves.
+
+    The LDA board panels (Most supportive, threats, mixed) are retired from display
+    (Paul 2026-10-27: "Remove them"), so their rows and seat changes no longer ship in
+    the page.  boards.json keeps them for efficiency_layers and audit_full.  The run
+    diff's rank_honors tier moves stay (D-362; Paul: "I still want the champions, tier 2,
+    and tier 3"); a no-change run shows the last real change, as the D-362 panel did.
+    """
+    diff = payload["receipt"].get("run_diff")
+    tier_moves = None
+    if diff is not None:
+        shown = diff
+        if not diff.get("changed") and (diff.get("last_change") or {}).get("sectors"):
+            shown = diff["last_change"]
+        tier_moves = {
+            "generated_utc": shown.get("generated_utc"),
+            "previous_generated_utc": shown.get("previous_generated_utc"),
+            "moves": shown.get("tier_moves") or [],
+        }
+    return json.loads(json.dumps({
+        "receipt": {"sector_order": list(payload["receipt"]["sector_order"])},
+        "industry_tiers": payload["industry_tiers"],
+        "tier_moves": tier_moves,
+    }, ensure_ascii=False))
 
 
 def _screen_bill_label(bill_key):
@@ -3284,7 +3275,6 @@ def _document(cards, payload, forecast, screen, hashes_markup):
     )
     champion_receipt = payload["receipts"]["champions"]
     champions_v2 = payload["champions_v2"]
-    champions_v2_receipt = champions_v2["receipt"]
     sector_receipt = payload["receipts"]["sectors"]
     bill_receipt = payload["receipts"]["bills"]
     repository_receipt = bill_receipt["repository"]
@@ -3535,14 +3525,9 @@ section[id],footer[id]{scroll-margin-top:96px}
 <div class=tabletop><div><h4>Roster organizations</h4><p class=subtle id=roster-note></p></div><p id=roster-count class=rowcount aria-live=polite></p></div>
 <div class=tablewrap><table><thead><tr><th scope=col>Organization</th><th scope=col id=roster-tier-head class=hidden>Bank tier</th><th scope=col>Years on the roster</th><th scope=col class=num>Client IDs</th><th scope=col>Identity basis</th></tr></thead><tbody id=roster-body></tbody></table></div>
 <p class=receipt>{html.escape(TIER_ROSTER_LABEL_NOTE)}</p></details></div>
-<div class=subsection id=champions><div class=panelhead><div><h2 id=champions-title>Most supportive and most opposed</h2><div class=subtle>Support, opposition, and opposed sponsorship are routed before any member can reach a board.</div></div></div>
-<div class=filters aria-label="Champion board controls"><div class=field><label>Sector</label><div class=toggle id=champion-sector-tabs role=tablist aria-label="Champion sectors"></div></div><div class=field><label>Chamber</label><div class=toggle id=champion-chamber-toggle aria-label="Champion chamber"><button type=button data-v2-chamber=Both class=active aria-pressed=true>Both</button><button type=button data-v2-chamber=House aria-pressed=false>House</button><button type=button data-v2-chamber=Senate aria-pressed=false>Senate</button></div></div><div class="field searchfield"><label for=champion-member-search>Member search</label><input id=champion-member-search type=search placeholder="Search all three boards" autocomplete=off></div></div>
-<details class=tierfold><summary>Tier board — member-desk methodology ▾</summary><div class="subsection board panel" id=industry-tier-board-panel><div class=panelhead><div><h3>Tier board — member-desk methodology</h3></div></div><div id=industry-tier-board></div></div></details>
-<div class=v2-layer-title>LDA evidence boards (signed lobbying attention)</div>
-<div class=honesty><p>{html.escape(CHAMPIONS_V2_METHOD_NOTE)}</p><p>Chamber-normalized scores are not cross-chamber comparable; compare members only within House or within Senate.</p></div>
-<div class="subsection board panel" data-v2-board=champions><div class=panelhead><div><h3>Most supportive</h3><div class=subtle>Not vetoed and not routed to the mixed docket; top 25 retained per chamber. A member on any sector&#39;s threat board holds no champions seat (the champion seat yields; crowns instead never appear as threats).</div></div></div><div class="subtle hidden" data-v2-empty=champions></div><div class=tablewrap data-v2-tables=champions><table><thead><tr><th scope=col class=num>Rank</th><th scope=col>Member</th><th scope=col>Tier</th><th scope=col class=num>Score</th><th scope=col class=num>Supportive lobbying</th><th scope=col class=num>Opposing lobbying</th><th scope=col>Driving bills</th></tr></thead><tbody id=v2-champions-body></tbody></table></div></div>
-<div class="subsection board panel" data-v2-board=threats><div class=panelhead><div><h3>Most opposed</h3><div class=subtle>Opposing lobbying exceeds supportive lobbying; rows expand to the opposed bills driving the veto. A Tier-1 crown (overall display Champion) never appears on a sector threat board.</div></div></div><div class="subtle hidden" data-v2-empty=threats></div><div class=tablewrap data-v2-tables=threats><table><thead><tr><th scope=col class=num>Rank</th><th scope=col>Member</th><th scope=col class=num>Threat</th><th scope=col class=num>Opposed sponsored</th><th scope=col class=num>Opposed cosponsored</th><th scope=col>Driving bills</th></tr></thead><tbody id=v2-threats-body></tbody></table></div></div>
-<details class=tierfold><summary>Mixed records ▾</summary><div class="subsection board panel" data-v2-board=mixed><div class=panelhead><div><h3>Mixed record</h3><div class=subtle>Not vetoed, but opposed sponsorship or repeated opposition makes alignment issue-specific; rows expand to the driving bills.</div></div></div><div class="subtle hidden" data-v2-empty=mixed></div><div class=orgmeta data-v2-tables=mixed><div><h4>House</h4><div class=tablewrap><table><thead><tr><th scope=col>Member</th><th scope=col class=num>Score</th><th scope=col class=num>Support</th><th scope=col class=num>Opposition</th><th scope=col>Issues</th><th scope=col>Driving evidence</th></tr></thead><tbody id=v2-mixed-house></tbody></table></div></div><div><h4>Senate</h4><div class=tablewrap><table><thead><tr><th scope=col>Member</th><th scope=col class=num>Score</th><th scope=col class=num>Support</th><th scope=col class=num>Opposition</th><th scope=col>Issues</th><th scope=col>Driving evidence</th></tr></thead><tbody id=v2-mixed-senate></tbody></table></div></div></div></div></details>
+<div class=subsection id=champions><div class=panelhead><div><h2 id=champions-title>Tier boards</h2></div></div>
+<div class=filters aria-label="Sector controls"><div class=field><label>Sector</label><div class=toggle id=champion-sector-tabs role=tablist aria-label="Sectors"></div></div></div>
+<details class=tierfold open><summary>Tier board — member-desk methodology ▾</summary><div class="subsection board panel" id=industry-tier-board-panel><div class=panelhead><div><h3>Tier board — member-desk methodology</h3></div></div><div id=industry-tier-board></div><div id=tier-moves></div></div></details>
 <details class=tierfold><summary>Most lobbied ▾</summary><div class=subsection id=attention-intensity><div class=panelhead><div><div class=eyebrow>Legacy residual lens</div><h3>Most lobbied</h3><div class=subtle>Raw shows whom an organization works hardest by champion_score; org-specific uses sector_relative_score, net of what other finance organizations in its champion comparison pool do.</div></div><div class=toggle aria-label="Champion score mode"><button type=button data-mode=raw class=active aria-pressed=true>Raw</button><button type=button data-mode=sector aria-pressed=false>Org-specific</button></div></div>
 <div class=honesty><p>Heavy lobbying around this member's bills, from both sides. Not an alignment ranking; see the boards above.</p></div><details class=methnote><summary>How to read this (methodology)</summary><div class=methbody><p>{html.escape(CHAMPION_NOTE)}</p><p>{html.escape(WORKS_NOTE)}</p><p>{html.escape(FORMER_MEMBER_NOTE)}</p><p>Raw ranks use champion_score; org-specific ranks use sector_relative_score, net of the comparison sector. A missing sector comparison is shown as “—”, never zero. Raw bill counts, years present, and direction of travel remain visible in both modes.</p><p><b>Posture.</b> {html.escape(posture.POSTURE_HONESTY_NOTE)}</p><p>{html.escape(posture.POSTURE_RULE_NOTE)}</p><p>{posture_coverage_markup}</p></div></details>
 <div class=tabletop><span class=subtle>Top three members per organization in the selected mode</span><p id=champion-count class=rowcount aria-live=polite></p></div><div class=tablewrap><table><thead><tr><th scope=col>Organization</th><th scope=col>Top member</th><th scope=col>Posture</th><th scope=col class=num id=score-heading>Score</th><th scope=col class=num>Bills lobbied</th><th scope=col class=num>Years present</th><th scope=col>Direction</th><th scope=col>Filings</th></tr></thead><tbody id=champion-body></tbody></table></div></div></details></section>
@@ -3575,9 +3560,6 @@ let currentSector=(DATA.industries||[])[0]?.sector||"";
 let attentionExpanded=false;
 let publicMentionsExpanded=false;
 let championMode="raw";
-let championSearch="";
-let championChamber="Both";
-const openChampionDetails=new Set();
 let activeCompanyId=null;
 let openBillKey=null;
 let showAllBills=false;
@@ -3708,66 +3690,17 @@ function renderIndustryTierBoard(){
   const note=currentSector==="credit_union"?`${esc(block.receipts.oppose_handling)}. Scope: ${esc(block.receipts.scope)}.${responsivenessNote}`:`Valence: ${esc(block.receipts.oppose_handling)}. Primary-tagged acts: ${number(block.receipts.primary_act_count)}. Conduct ledger: ${esc(block.receipts.conduct_ledger)}. Overrides: ${esc(block.receipts.overrides)}. Scope: ${esc(block.receipts.scope)}.${rhetFrame}`;
   target.innerHTML=`<div><h4>${tierOneTitle}</h4><ul class=tier-board-list>${rows(1)}</ul></div><details class=tierfold><summary>Tier 2</summary><ul class=tier-board-list>${rows(2)}</ul></details><details class=tierfold><summary>Tier 3</summary><ul class=tier-board-list>${rows(3)}</ul></details><p class="subtle tier-board-note">${note}</p>`;
 }
-function v2Boards(){return DATA.championsV2?.sectors?.[currentSector]||{champions:[],threats:[],mixed:[]};}
-function v2TierValue(row){
-  if(currentSector==="credit_union")return row.tier;
-  const tierRows=DATA.championsV2?.industry_tiers?.industries?.[currentSector]?.rows||[];
-  return tierRows.find(item=>item.bioguide===row.bioguide)?.tier;
+// The LDA board panels are retired (Paul 2026-10-27, "Remove them"); boards.json still feeds efficiency_layers and audit_full.
+// rank_honors tier moves since the previous champions run (D-362 data); the tier is the CU board's, so CU only.
+function renderTierMoves(){
+  const target=document.getElementById("tier-moves");
+  if(!target)return;
+  const block=DATA.championsV2?.tier_moves;
+  if(currentSector!=="credit_union"||!block){target.innerHTML="";return;}
+  const moves=block.moves||[],stamp=`run ${esc(block.generated_utc||EM_DASH)} against ${esc(block.previous_generated_utc||"no previous run")}`;
+  target.innerHTML=moves.length?`<details class=tierfold><summary>Tier moves since the previous run (${number(moves.length)}) ▾</summary><p class=subtle>${stamp}</p><ul class=tier-board-list>${moves.map(entry=>`<li>${memberLink(entry.name||entry.bioguide,entry.bioguide)} <span class=subtle>${esc(entry.reason||"")}</span></li>`).join("")}</ul></details>`:`<p class=subtle>No tier moved since the previous run (${stamp}).</p>`;
 }
-function v2TierPill(row){const tier=v2TierValue(row);return [1,2,3].includes(tier)?`<span class=tierbadge>T${esc(tier)}</span>`:EM_DASH;}
-function v2Member(row){
-  const metadata=currentSector==="credit_union"&&[1,2,3].includes(row.tier)?` <span class=subtle>Tier ${esc(row.tier)}</span>`:"";
-  return `${memberLink(row.name,row.bioguide)}${metadata}`;
-}
-const v2Score=value=>value===null||value===undefined?EM_DASH:Number(value).toFixed(2);
-const nullableCount=value=>value===null||value===undefined?EM_DASH:number(value);
-function v2Provenance(row){
-  const counts=row.components?.sign_source_counts||{};
-  return ["canonical","kim","prior"].map(source=>`${source}: ${number(counts[source]||0)}`).join(" · ");
-}
-function v2DrivingDetail(row){
-  const bills=row.driving_bills||[];
-  const issues=(row.issues||[]).filter(Boolean),issueMarkup=issues.length?`<div class=subtle>Issues: ${esc(issues.join("; "))}</div>`:"";
-  const billMarkup=bills.length?bills.map(bill=>`<div class=bill-detail><b>${esc(bill.title||bill.bill_key)}</b><div class=subtle>${bill.category?esc(bill.category):"Unmarked category"} · Sign source: ${esc(bill.sign_source||"unavailable")} · ${esc(bill.bill_key)}</div></div>`).join(""):`<div class=empty>No driving bills were retained.</div>`;
-  return `<div class=detailbox><div class=receipt>Opposition provenance · ${esc(v2Provenance(row))}</div>${issueMarkup}${billMarkup}</div>`;
-}
-function v2BoardRows(boardName){
-  const query=championSearch.trim().toLocaleLowerCase();
-  const rows=(v2Boards()[boardName]||[]).filter(row=>(championChamber==="Both"||row.chamber===championChamber)&&(!query||String(row.name||"").toLocaleLowerCase().includes(query)||String(row.bioguide||"").toLocaleLowerCase().includes(query)));
-  const colspan=boardName==="champions"?7:6,markup=[];
-  if(!rows.length)return `<tr><td colspan=${colspan}><div class=empty>No members match this board, chamber, and search.</div></td></tr>`;
-  rows.forEach((row,index)=>{
-    const detailKey=`${currentSector}|${boardName}|${row.bioguide}`,expanded=openChampionDetails.has(detailKey);
-    const detailButton=`<button type=button class=disclosure data-v2-detail="${esc(detailKey)}" aria-expanded="${expanded}">${expanded?"Hide":"Show"} ${number((row.driving_bills||[]).length)} driving bill${(row.driving_bills||[]).length===1?"":"s"}</button>`;
-    const member=`${v2Member(row)} <span class=chambermark>${esc(row.chamber)}</span>`;
-    if(boardName==="champions")markup.push(`<tr><td class="rank num">${index+1}</td><td class="member left">${member}</td><td>${v2TierPill(row)}</td><td class=num>${v2Score(row.composite)}</td><td class=num>${number(row.components.supportive_att)}</td><td class=num>${number(row.components.opposition_att)}</td><td>${detailButton}</td></tr>`);
-    else markup.push(`<tr><td class="rank num">${index+1}</td><td class="member left">${member}</td><td class=num>${v2Score(row.threat)}</td><td class=num>${nullableCount(row.components?.opp_sponsored)}</td><td class=num>${nullableCount(row.components?.opp_cosponsored)}</td><td>${detailButton}</td></tr>`);
-    if(expanded)markup.push(`<tr class=detailrow><td colspan=${colspan}>${v2DrivingDetail(row)}</td></tr>`);
-  });
-  return markup.join("");
-}
-function v2MixedRows(chamber){
-  const query=championSearch.trim().toLocaleLowerCase();
-  const rows=(v2Boards().mixed||[]).filter(row=>row.chamber===chamber&&(!query||String(row.name||"").toLocaleLowerCase().includes(query)||String(row.bioguide||"").toLocaleLowerCase().includes(query))),markup=[];
-  if(!rows.length)return `<tr><td colspan=6><div class=empty>No ${esc(chamber)} members match this board and search.</div></td></tr>`;
-  rows.forEach(row=>{
-    const detailKey=`${currentSector}|mixed|${row.bioguide}`,expanded=openChampionDetails.has(detailKey);
-    markup.push(`<tr><td class="member left">${v2Member(row)}</td><td class=num>${v2Score(row.composite)}</td><td class=num>${number(row.components.supportive_att)}</td><td class=num>${number(row.components.opposition_att)}</td><td class=member>${esc((row.issues||[]).join("; ")||EM_DASH)}</td><td><button type=button class=disclosure data-v2-detail="${esc(detailKey)}" aria-expanded="${expanded}">${expanded?"Hide":"Show"} ${number((row.driving_bills||[]).length)} driving bill${(row.driving_bills||[]).length===1?"":"s"}</button></td></tr>`);
-    if(expanded)markup.push(`<tr class=detailrow><td colspan=6>${v2DrivingDetail(row)}</td></tr>`);
-  });
-  return markup.join("");
-}
-const EMPTY_V2_BOARD_NOTE="No oppose-signed evidence in this sector yet — this board is empty by construction, not by absence of lobbying.";
-function renderV2Boards(){
-  for(const boardName of ["champions","threats","mixed"]){
-    const empty=!(v2Boards()[boardName]||[]).length;
-    const emptyNote=document.querySelector(`[data-v2-empty="${boardName}"]`),tables=document.querySelector(`[data-v2-tables="${boardName}"]`);
-    if(emptyNote){emptyNote.textContent=EMPTY_V2_BOARD_NOTE;emptyNote.classList.toggle("hidden",!empty);}
-    tables?.classList.toggle("hidden",empty);
-    if(empty)continue;
-    if(boardName==="mixed")for(const chamber of ["House","Senate"]){const body=document.getElementById(`v2-mixed-${chamber.toLocaleLowerCase()}`);if(body)body.innerHTML=v2MixedRows(chamber);}
-    else{const body=document.getElementById(`v2-${boardName}-body`);if(body)body.innerHTML=v2BoardRows(boardName);}
-  }
+function markV2Sector(){
   document.querySelectorAll("[data-v2-sector]").forEach(button=>{const active=button.dataset.v2Sector===currentSector;button.classList.toggle("active",active);button.setAttribute("aria-selected",active?"true":"false");button.setAttribute("aria-pressed",active?"true":"false");});
 }
 function companyBoundary(company){
@@ -4139,12 +4072,9 @@ function setupChampions(){
   if(!sectors.includes(currentSector))currentSector=sectors[0];
   const tabs=document.getElementById("champion-sector-tabs");
   tabs.innerHTML=sectors.map(sector=>`<button type=button role=tab data-v2-sector="${esc(sector)}" aria-selected=false aria-pressed=false>${esc(displaySector(sector))}</button>`).join("");
-  tabs.addEventListener("click",event=>{const button=event.target.closest("[data-v2-sector]");if(!button)return;currentSector=button.dataset.v2Sector;openChampionDetails.clear();renderIndustryTierBoard();renderV2Boards();renderBoard();});
-  document.getElementById("champion-chamber-toggle").addEventListener("click",event=>{const button=event.target.closest("[data-v2-chamber]");if(!button)return;championChamber=button.dataset.v2Chamber;document.querySelectorAll("[data-v2-chamber]").forEach(item=>{item.classList.toggle("active",item===button);item.setAttribute("aria-pressed",item===button?"true":"false");});renderV2Boards();});
-  document.getElementById("champion-member-search").addEventListener("input",event=>{championSearch=event.target.value;renderV2Boards();});
-  document.getElementById("champions").addEventListener("click",event=>{const button=event.target.closest("[data-v2-detail]");if(!button)return;const key=button.dataset.v2Detail;if(openChampionDetails.has(key))openChampionDetails.delete(key);else openChampionDetails.add(key);renderV2Boards();});
+  tabs.addEventListener("click",event=>{const button=event.target.closest("[data-v2-sector]");if(!button)return;currentSector=button.dataset.v2Sector;renderIndustryTierBoard();renderTierMoves();markV2Sector();renderBoard();});
   document.querySelectorAll("[data-mode]").forEach(button=>button.addEventListener("click",()=>{championMode=button.dataset.mode;document.querySelectorAll("[data-mode]").forEach(item=>{item.classList.toggle("active",item===button);item.setAttribute("aria-pressed",item===button?"true":"false");});renderBoard();}));
-  setupPostureButtons(renderBoard);renderIndustryTierBoard();renderV2Boards();renderBoard();
+  setupPostureButtons(renderBoard);renderIndustryTierBoard();renderTierMoves();markV2Sector();renderBoard();
 }
 const SCREEN_BILL_LABELS={hr:"H.R.",s:"S.",hjres:"H.J.Res.",sjres:"S.J.Res.",hconres:"H.Con.Res.",sconres:"S.Con.Res.",hres:"H.Res.",sres:"S.Res."};
 function screenBillLabel(key){const [congress,type,billNumber]=key.split(":");return `${SCREEN_BILL_LABELS[type]||type.toUpperCase()} ${billNumber} (${congress}th)`;}
@@ -4296,37 +4226,12 @@ function forecastBillLinks(bill){
         f"{posture_receipt['sign_override']['adversarial_dyads']:,} render as "
         "Adversarial under the oppose_n >= 2 corroboration floor.",
     )
-    v2_board_counts = {
-        board: sum(
-            len(champions_v2["sectors"][sector][board])
-            for sector in CHAMPIONS_V2_SECTORS
-        )
-        for board in ("champions", "threats", "mixed")
-    }
-    v2_component_receipt = "; ".join(
-        f"{_display_sector(sector)}: "
-        + ", ".join(
-            champions_v2_receipt["sectors"][sector]["composite_components"]
-        )
-        for sector in CHAMPIONS_V2_SECTORS
-    )
-    page_retention = champions_v2_receipt["page_retention"]
-    retention_text = (
-        f"Byte fallback applied: threat and mixed boards capped at top "
-        f"{page_retention['threat_mixed_per_chamber_cap']} per chamber; "
-        "before/after counts are carried in the embedded page receipt."
-        if page_retention["cap_applied"]
-        else "Byte receipt: full threat and mixed boards fit below MAX_DOCUMENT_BYTES; no cap applied."
-    )
     champions_footer = footer(
-        f"Direction-aware boards ({CHAMPIONS_V2_SCHEMA}): "
-        f"{v2_board_counts['champions']:,} champions, "
-        f"{v2_board_counts['threats']:,} threats, and "
-        f"{v2_board_counts['mixed']:,} mixed rows rendered. {retention_text}",
+        "The LDA lobbying-activity boards (Most supportive, Most opposed, Mixed record) are retired "
+        "from display.",
         ("CU uses the same full primacy board as the member desk and allocation engines; adjudicated credits and conduct adjustments are included."
          if champions_v2['industry_tiers']['validation']['method'] == 'canonical-cu-primacy-v2'
          else "Historical industry evidence board; desk adjustments were excluded."),
-        f"Composite component receipt: {html.escape(v2_component_receipt)}.",
         f"Unsigned attention payload: {champion_receipt['retained_rows']:,} of "
         f"{champion_receipt['sector_eligible_rows']:,} sector-eligible rows retained from "
         f"each organization's top {champion_receipt['leader_limit']} raw and org-specific ranks; "
@@ -4647,17 +4552,6 @@ def build(
         contest_screen,
         _hash_footer(input_paths, hashes),
     )
-    if len(documents["champions"].encode("utf-8")) >= MAX_DOCUMENT_BYTES:
-        payload["champions_v2"] = _champions_v2_page_payload(
-            champions_v2, cap=CHAMPIONS_V2_PAGE_CAP
-        )
-        documents = _document(
-            _industry_cards(spend, tier_meta),
-            payload,
-            forecast,
-            contest_screen,
-            _hash_footer(input_paths, hashes),
-        )
     output_rows = []
     for page, filename, _label in PAGE_FAMILY:
         document = documents[page]

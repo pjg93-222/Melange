@@ -25,7 +25,8 @@ CHAIN TRANSACTION (run_pipeline.main holds the pipeline lease, then opens one of
 
 WRITE SET.  There is no declared step->outputs table, so the set is a declared scope chosen from a measured census of the last
 full chain (2026-10-11): root-level artifacts by extension + the data/ trees the chain writes into.  Three classes:
-  copy     before-image taken, restored on rollback.
+  copy     before-image taken, restored on rollback.  TRACK_ONLY_EXCEPT puts the two mutable rank_honors pointer files here
+           even though their store is tracked.
   track    append-only generation stores (rank_honors, congress_advanced_current, ...): too big to copy and immutable by
            construction, so (size, mtime, sha256) is journalled and nothing is copied.  A NEW file is deleted on rollback; a
            MODIFIED or MISSING one cannot be restored, so it makes the rollback ROLLBACK_FAILED.  Rollback re-hashes every tracked
@@ -95,6 +96,10 @@ EXTRA_FILES = ('backups/Moneyball_Redesign.previous-generation.html',)   # sync_
 TRACK_ONLY = ('data/stance/rank_honors', 'data/legislation/vote_sources', 'data/legislation/congress_advanced_current',
               'data/legislation/sentinel_evidence', 'data/money/fec_generations', 'data/money/fec_page_cache',
               'data/speech/source_media_*')
+# Mutable pointers INSIDE a TRACK_ONLY store: the chain rewrites them in place (build_rank_honors -> active.json, honors_workbook
+# -> workbook_publications.json), so a hash-only journal cannot restore them and every chain failing after build_rank_honors ended
+# ROLLBACK_FAILED (run 20261021T040051Z).  They get a before-image like any copy path; the generation directories stay tracked.
+TRACK_ONLY_EXCEPT = ('data/stance/rank_honors/active.json', 'data/stance/rank_honors/workbook_publications.json')
 NEVER = ('data/engine/chain_txn', 'data/engine/dead_letter', 'data/engine/source_freshness.json',
          'data/engine/congress_pipeline_*', 'data/engine/daily_refresh_*', 'data/engine/weekly_refresh*',
          'data/engine/gate_step_*', 'data/engine/collector_gate1_cooldown.json', 'data/system/audit_scratch',
@@ -161,7 +166,7 @@ def iter_scope(root):
                 path = os.path.join(dirpath, name)
                 if _excluded(rel, NEVER) or os.path.islink(path):
                     continue
-                yield rel, path, 'track' if _excluded(rel, TRACK_ONLY) else 'copy'
+                yield rel, path, 'track' if _excluded(rel, TRACK_ONLY) and not _excluded(rel, TRACK_ONLY_EXCEPT) else 'copy'
     for rel in EXTRA_FILES:
         path = os.path.join(root, *rel.split('/'))
         if os.path.isfile(path) and not os.path.islink(path):
@@ -292,6 +297,56 @@ def _finalized_dirs(base):
     return out
 
 
+OPEN_PID_SKEW_SECONDS = 120
+
+
+def _owns_open_journal(journal, alive, start_time):
+    """True only when the journal's pid is alive AND that process began before the journal was opened (plus skew): a recycled
+    pid, or one whose start time cannot be read, is not the run that wrote it."""
+    pid = journal.get('pid')
+    if not alive(pid):
+        return False
+    began = start_time(pid)
+    try:
+        opened = datetime.strptime(str(journal.get('started_utc')), '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
+    except ValueError:
+        return False
+    return began is not None and began <= opened.timestamp() + OPEN_PID_SKEW_SECONDS
+
+
+def journal_closed(root, bases, alive=None, start_time=None):
+    """audit_full live_sync_chain_journal_closed: (ok, detail) for this root's newest journal, or None when there is none.
+
+    An OPEN journal still owned by its live writer is the transaction the calling audit runs inside (audit_full is the chain's
+    last step), so the verdict falls to the one before it.  OPEN with no live owner is a run that never finalized;
+    ROLLBACK_FAILED is unproven; ROLLED_BACK must carry a rollback summary with zero errors and nothing unrestorable.  Journals
+    of another root (a shared MELANGE_CHAIN_TXN_DIR) are ignored, as recover() ignores them."""
+    if alive is None or start_time is None:
+        from process_liveness import process_alive, process_start_time
+        alive, start_time = alive or process_alive, start_time or process_start_time
+    dirs = []
+    for base in bases:
+        try:
+            dirs += [os.path.join(base, n) for n in os.listdir(base)]
+        except OSError:
+            pass
+    mine, skipped = os.path.normcase(os.path.abspath(root)), []
+    for path in sorted(dirs, key=os.path.basename, reverse=True):
+        journal = _read_journal(path) if os.path.isdir(path) else None
+        if journal is None or os.path.normcase(str(journal.get('root'))) != mine:
+            continue                                   # unfinished snapshot (LIVE never touched) or another root's run
+        name, state = os.path.basename(path), journal.get('state')
+        if state == OPEN and _owns_open_journal(journal, alive, start_time):
+            skipped.append(name)
+            continue
+        counts = (journal.get('rollback') or {}).get('counts') or {}
+        ok = state == COMMITTED or (state == ROLLED_BACK and all(
+            counts.get(k) == 0 for k in ('errors', 'unrestorable_modified', 'unrestorable_missing')))
+        return ok, '%s state=%s rollback=%s%s' % (name, state, counts or None,
+                                                  ' (live OPEN skipped: %s)' % skipped if skipped else '')
+    return None
+
+
 def prune(base, keep=KEEP, log=print):
     """Delete finalized transactions older than the newest `keep`.  OPEN / incomplete ones are never touched here."""
     for path, _journal in _finalized_dirs(base)[max(keep, 0):]:
@@ -320,6 +375,12 @@ def _gate(base, copy_bytes, log):
             'chain transaction refused to start: the before-image (%.2f GB) would leave %.2f GB free on %s, below the %.0f GB '
             'floor (free now %.2f GB). Free disk or move the staging area (%s) and rerun; nothing was written.'
             % (copy_bytes / 1e9, max(left, 0) / 1e9, drive, floor_gb, free / 1e9, TXN_DIR_ENV))
+
+
+def preflight(root, log=print):
+    """Read-only: raise the refusal begin() would raise, before a wrapper spends time on steps whose chain cannot start."""
+    root = os.path.abspath(root)
+    _gate(txn_base(root), plan(root)['copy_bytes'], log)
 
 
 class ChainTxn:

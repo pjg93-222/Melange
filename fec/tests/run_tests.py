@@ -14,6 +14,7 @@ def ok(name,cond,detail=''):
     print(('  OK   ' if cond else 'FAIL  ')+name+(('  :: '+str(detail)) if (detail and not cond) else ''))
 
 import moneyball_core as MC
+import roster
 import bill_rules as BR
 import stance.stance_rules as SR
 import stance.media_rules as MR
@@ -160,7 +161,7 @@ ok('identity resolver rejects an ambiguous surname instead of taking first roste
    _ir.resolve('Smith') is None and _ir.resolve('X. Smith') is None)
 print('[core: rosters + network]')
 mem=MC.members()
-ok('533 members',len(mem)==533,len(mem))
+ok('roster members (%d)'%roster.count(),len(mem)==roster.count(),len(mem))
 prt=MC.party()
 ok('party coverage (no ? beyond a handful)',sum(1 for m in mem if prt[m]=='?')<=5,sum(1 for m in mem if prt[m]=='?'))
 # PIN TO CU. load_network() reads NET_CONFIG per call, so unscoped these gates bind whatever the
@@ -345,6 +346,8 @@ _LANE_MODULES=('test_audio_calibrate','test_audio_identity','test_audio_linear_h
                'test_bill_collision_guards',
                'test_b5_onc_successor',
                'test_b5_o_coverage_recovery',
+               'test_b5_gold_identity', 'test_b5_frozen_builder',
+               'test_b5_frozen_consumer_contract',
                'test_primacy_tier',
                # The per-area board (D-031) that test_primacy_tier now calls the
                # revert switch of. It shipped 2026-09-16 in NO lane tuple, so the
@@ -450,6 +453,7 @@ _LANE_MODULES=('test_audio_calibrate','test_audio_identity','test_audio_linear_h
                'test_honors_workbook_region',
                'test_dashboard_honors',
                'test_member_desk_honors',
+               'test_desk_analytic_bootstrap',
                'test_honors_publication',
                'test_zip_compression',
                'test_voteview_party_map',
@@ -861,7 +865,7 @@ _LANE_PYTEST=(
     'test_member_longform_no_cue_retry_queue', 'test_member_longform_youtube_discovery',
     'test_money_observation', 'test_moneyball_desktop', 'test_moneyball_manual_corroboration_roles',
     'test_mtp_sitemap_fail_closed', 'test_official_senate_payroll_lane', 'test_operational_spine',
-    'test_operational_spine_evaluation', 'test_personal_display_dedupe', 'test_pillar_freshness',
+    'test_operational_spine_evaluation', 'test_personal_display_dedupe', 'test_personal_texture_local_todo', 'test_pillar_freshness',
     'test_pillar_policy', 'test_prepare_member_longform_automated_batch', 'test_press_backlog',
     'test_press_official_coverage', 'test_press_official_dated_listings',
     'test_press_release_date_precedence', 'test_press_request_deadlines',
@@ -874,6 +878,8 @@ _LANE_PYTEST=(
     'test_screen_member_longform_identity_cues', 'test_select_member_longform_profile_sources',
     'test_sentinel_decision_stability', 'test_sentinel_network_retries', 'test_sentinel_qme_fixes',
     'test_sentinel_govinfo_statute',
+    'test_sentinel_invalid_category_hold',
+    'test_sentinel_statute_source_switch',
     'test_sentinel_source_unavailable', 'test_sentinel_statute_identity',
     'test_snapshot_member_longform_ready_sources',
     'test_speech_channel', 'test_speech_channel_no_live_writes',
@@ -953,6 +959,15 @@ _LANE_PYTEST=(
     'test_refresh_congress_pipeline',
     'test_daily_refresh',
     'test_sentinel_admissions_no_llm',
+    # 2026-10-26 M22L-INT: sign-on letters (D-263; pypdf kerning + particle guard) and M22 press suites that merged unregistered (census).
+    'test_collect_signon_letters',
+    'test_promote_staged_letters',
+    'test_letter_tags',
+    'test_leg_evidence_letters_pin',
+    'test_per_area_letter_sidecar',
+    'test_public_fetch_guard',
+    'test_press_host_routes',
+    'test_press_terminal_nonarticles',
     # 2026-09-30 (Paul: "Hold low-confidence + longer timeout"): below-high-confidence classifier decisions
     # become retryable holds for every key, the claude-cli call is bounded at 480 s, and a failed call reports
     # its stdout. Pytest-native and tmp_path-only; imports the import-safe refresh_sentinel_admissions module.
@@ -961,6 +976,14 @@ _LANE_PYTEST=(
     # retryable hold on the reused, fresh and --no-llm carried-forward paths, and sentinel_admissions.load refuses
     # a generation that still admits one. Pytest-native and tmp_path-only, like the suite above.
     'test_sentinel_mixed_directions',
+    # 2026-10-28 M5a (D-366/D-369): section-aware evidence selection; envelope failures are FAILED, never held. The _live
+    # suite is read-only and skips unless MELANGE_LIVE_ROOT is set. Pytest-native and tmp_path-only.
+    'test_sentinel_evidence_selection',
+    'test_sentinel_keys_file',
+    # 2026-10-28: a bill present as BOTH an archive row and a verified ledger membership row (newly possible via
+    # --keys-file) is scored once, strongest role wins. Drives the producer as a subprocess on a tmp_path root.
+    'test_archive_sentinel_dedup',
+    'test_sentinel_evidence_selection_live',
     # The shared atomic-rename retry (2026-09-13). A concurrent reader holding a
     # status document made os.replace fail with WinError 5 and killed a whole
     # scheduled run; this suite is the only thing that asserts the retry, the
@@ -1041,6 +1064,39 @@ _LANE_PYTEST=(
     'test_audit_completion_20260716',
     'test_member_narratives_v2_repair',
     'test_policy_repairs_20260718',
+    'test_audit_full_roster_tolerance',
+    'test_axe_segment_feature_failure',
+    'test_backfill_attribution',
+    'test_basis_counts',
+    'test_bundle_speech_profile_withhold',
+    'test_crec_speaker_attribution',
+    'test_crec_term_dates',
+    'test_dashboard_integrity_district_briefs',
+    'test_dashboard_integrity_preflight_analytic',
+    'test_desk_district_briefs_withhold',
+    'test_discover_gap_youtube_turns',
+    'test_efficiency_layers_roster_withhold',
+    'test_exchange_context_audit_checks',
+    'test_fetch_demographics_guards',
+    'test_fetch_hearing_pilot_provenance',
+    'test_member_brief_v3_render',
+    'test_member_briefs_v3',
+    'test_member_briefs_v3_batches',
+    'test_mine_anchors_matcher',
+    'test_process_member_longform_automated_batch',
+    'test_quarantine_attribution',
+    'test_refine_apply',
+    'test_refine_quarantine',
+    'test_refinement_common_write_json',
+    'test_refinement_report_guards',
+    'test_refresh_roster',
+    'test_roster_drift',
+    'test_source_to_dashboard_drift',
+    'test_tier_roster_withhold',
+    'test_transcribe_local_youtube_holdings',
+    'test_validate_guarded_profile_roster_drift',
+    'test_verify_member_interview_sources',
+    'test_workbook_rows',
     # Staffer fixture isolation and native verdict/exit-status fail-closed contract (QME 2026-10-02).
     'test_staffer_harness_contract',
     # Stale-import detector controls (QME 2026-10-02).
@@ -1057,6 +1113,7 @@ _LANE_PYTEST=(
     # 2026-10-15 admissions spend controls (D-211): classifier quota stop and per-run call budget.
     'test_sentinel_classifier_quota',
     'test_sentinel_classifier_budget',
+    'test_sentinel_api_transport',   # ATTEMPT10-400: api model id, cross-transport reuse, 4xx fail-fast
     # 2026-10-19 pipeline-health Fix 3 (ruling R1): a classifier timeout on an unadmitted measure defers it, never FAILs the step.
     'test_sentinel_classifier_deferral',
     # 2026-10-19 pipeline-health Fix 2: a sidecar bound to neither repository is recorded as unhealable drift, not "verified".
@@ -1123,10 +1180,22 @@ _LANE_PYTEST=(
     # 2026-10-19 pipeline-health Fixes 4-5 (weekly 10-18): MS NOW newest-first walk with caught-up stop, log-intact guard and
     # budget; Washington Journal failures carry the R error tail. Scripted WordPress API / fake Rscript, tmp_path only.
     'test_msnow_walk','test_refresh_cspan_wj_errors','test_cspan_chromote_retry',
-    # 2026-10-26 the CR member lane suite merged unregistered (kernel_registration_census red); synthetic tmp_path roots.
-    'test_cu_member_lane',
+    # 2026-10-26 the six suites the overnight lanes merged unregistered (kernel_registration_census red). Each ran green
+    # ALONE from LIVE under pytest (26/1/1/17/6/10 tests); synthetic tmp_path roots.
+    'test_cu_member_lane','test_f5_coverage_record_addendum','test_fulltext_pipeline_collector_flags',
+    'test_press_failure_queue','test_source_select','test_vote_coverage',
+    # 2026-10-26 the three suites tonight's lanes merged unregistered (kernel_registration_census red); run alone.
+    'test_audit_failure_gate_d330','test_chain_transaction_staffer_live','test_press_seal_partial',
     # 2026-10-27 lane/as-of-tz: paths.utc_instant, the one local-date vs UTC-stamp clock (M7 attempt 10b). Pure, no tree.
-    'test_field_action_as_of_tz')
+    'test_field_action_as_of_tz',
+    # 2026-10-27 congress-restore: discovery verdict (GovInfo fallback = DEGRADED, never PASS); tmp_path, stubbed children.
+    'test_discovery_degraded_status',
+    # 2026-10-28 the three suites lane/member-briefs-v3 merged unregistered (kernel_registration_census red). Each ran green
+    # ALONE from LIVE under pytest (12/2/10 tests); tmp_path roots, stubbed children.
+    'test_current_role_automated_batch','test_ledger_hearing_candidate','test_two_pass_cli_backend',
+    # 2026-10-28 lane/sna-health: audit_full [SYNC] live_sync_* names, edge-file re-hash, chain-tail guard literal,
+    # chain_transaction.journal_closed. Source text + tmp_path journals only.
+    'test_live_sync_check')
 
 # Node lane (2026-10-11, census follow-up to 7d57fb209): the git-tracked fec/tests/**/test_*.cjs
 # suites, run as `node <file>`. Most use node:test, the rest plain assert with a nonzero exit on

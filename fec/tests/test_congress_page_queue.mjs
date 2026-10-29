@@ -137,3 +137,22 @@ test("pool rejects and stops dispatching on a fatal error", async () => {
   );
   assert.deepEqual(ran, [1, 2]);
 });
+
+test("a transient 'Failed to fetch' is retried and, if it persists, is a gap result, never a thrown error", async () => {
+  const c = fakeClock();
+  const g = createGovernor({ maxWorkers: 4, maxRps: 1000, now: c.now });
+  let calls = 0;
+  const recovered = await governedAttempt({
+    governor: g, sleep: c.sleep, transportBackoffMs: 10,
+    request: async () => { calls += 1; if (calls === 1) throw new TypeError("page.evaluate: TypeError: Failed to fetch"); return "html"; },
+  });
+  assert.equal(recovered.ok, true);
+  assert.equal(recovered.attempts, 2);
+  const exhausted = await governedAttempt({
+    governor: g, sleep: c.sleep, transportBackoffMs: 10,
+    request: async () => { throw new TypeError("Failed to fetch"); },
+  });
+  assert.equal(exhausted.ok, false);
+  assert.match(exhausted.error.message, /Failed to fetch/);
+  await assert.rejects(governedAttempt({ governor: g, sleep: c.sleep, request: async () => { throw new RangeError("a real bug"); } }), /a real bug/);
+});

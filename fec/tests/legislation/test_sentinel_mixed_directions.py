@@ -464,10 +464,10 @@ def test_held_admitted_bill_is_retried(tmp_path, monkeypatch, cause, retry):
     assert CURATED not in generation['deferred_keys']
 
 
-def test_tracked_hold_that_was_never_admitted_stays_out_of_the_pool(tmp_path, monkeypatch):
-    """Only catalogued (once admitted) holds return. CURATED keeps the tracked exclusion, so --keys refuses it."""
+def test_tracked_hold_that_was_never_admitted_is_reached_only_by_naming_it(tmp_path, monkeypatch):
+    """Only catalogued (once admitted) holds return to the default pool; the test above pins that CURATED stays out of
+    a default run. Naming it with --keys is explicit targeting (R-set, 2026-10-28) and now collects it."""
     world = World(tmp_path, monkeypatch, prior={'Mortgage & Housing': 1}, curated_hold=True)
-    world.classifier(monkeypatch)  # tripwire
-    with pytest.raises(ValueError, match='canary keys must be eligible discovered measures'):
-        R.main(['--root', str(tmp_path), '--keys', CURATED, '--model', MODEL, '--transport', TRANSPORT])
-    assert world.collected == [] and world.calls == []
+    world.classifier(monkeypatch, {'Mortgage & Housing': 1})
+    R.main(['--root', str(tmp_path), '--keys', CURATED, '--model', MODEL, '--transport', TRANSPORT])
+    assert world.collected == [CURATED]

@@ -267,6 +267,36 @@ class DegradeTest(unittest.TestCase):
         base.run_tick(root, '--only', ADMISSIONS, '--skip-compute')
         self.assertEqual(2, base.invocations(root, admissions), 'a second attempt in one window')
 
+    def test_admissions_rejected_request_is_a_quota_class_stop_never_backoff_retried(self):
+        # D-356: lane/w3-sentinel-api's CLASSIFIER_REQUEST_REJECTED stop (a 4xx on every call: bad model id or key) must not
+        # fall through to TRANSIENT, which the tick would retry with backoff up to MAX_ATTEMPTS_PER_DAY times.
+        admissions = self.step(ADMISSIONS)
+        root = self.root({base.stub_key(admissions): {
+            'always_fail': True, 'write_then_fail': True,
+            'stdout': 'classifier API HTTP 400: not a valid model id\n'
+                      'HR1-119 CLASSIFIER_REQUEST_REJECTED: classifier API rejected the request (HTTP 400)\n'
+                      'Run stopped on a rejected classifier request (CLASSIFIER_REQUEST_REJECTED) at HR1-119; '
+                      '3 selected key(s) not attempted. Checkpointed decisions will be reused on rerun.\n'}})
+        seeded = stale_entry(25.0)
+        base.seed_state(root, steps={ADMISSIONS: dict(seeded)})
+        code, output, _ = base.run_tick(root)
+        self.assertEqual(0, code, output[-3000:])
+        entry = base.read_state(root)['steps'][ADMISSIONS]
+        self.assertEqual(S.FAILED, entry['state'])
+        self.assertEqual((S.BUDGET_QUOTA, S.STOP_REJECTED),
+                         (entry['failure']['class'], entry['failure']['reason']))
+        self.assertIsNone(entry['next_attempt_utc'], 'a rejected request was scheduled for a backoff retry')
+        self.assertTrue(entry['quota_stop_utc'])
+        self.assertEqual(seeded['last_ok_utc'], entry['last_ok_utc'])
+        label = base.read_state(root)['publication']['labels'][ADMISSIONS]
+        self.assertEqual(S.STALE_LABELLED, label['status'])
+        self.assertIn('classifier request rejected (CLASSIFIER_REQUEST_REJECTED)', label['detail'])
+        # the same day, even on an ancient cadence stamp: no retry
+        base.run_tick(root)
+        edit_state(root, ADMISSIONS, last_ok_utc=ago(400.0), last_attempt_utc=ago(3.0))
+        base.run_tick(root, '--only', ADMISSIONS, '--skip-compute')
+        self.assertEqual(1, base.invocations(root, admissions), 'a rejected request was retried within its window')
+
     def test_a_clean_exit_on_the_call_budget_is_a_pass_at_the_normal_cadence(self):
         admissions = self.step(ADMISSIONS)
         root = self.root({base.stub_key(admissions): {
@@ -1367,6 +1397,15 @@ class DegradeTest(unittest.TestCase):
              S.STOP_QUOTA),
             ((1, False, '', 'anthropic.RateLimitError: 429 spend limit reached'), S.BUDGET_QUOTA,
              S.STOP_QUOTA),
+            # D-356: the api transport's rejected-request stop is a quota-class stop, never TRANSIENT (no backoff retries)
+            ((1, False, 'classifier API HTTP 400: {"type":"error","error":{"type":"invalid_request_error",'
+                        '"message":"model: not a valid model id"}}\n'
+                        'HR1-119 CLASSIFIER_REQUEST_REJECTED: classifier API rejected the request (HTTP 400)\n'
+                        'Run stopped on a rejected classifier request (CLASSIFIER_REQUEST_REJECTED) at HR1-119; '
+                        '3 selected key(s) not attempted.', ''), S.BUDGET_QUOTA, S.STOP_REJECTED),
+            # the producer's quota token wins when one log carries both stops
+            ((1, False, 'CLASSIFIER_QUOTA_EXHAUSTED: credit balance\nCLASSIFIER_REQUEST_REJECTED', ''),
+             S.BUDGET_QUOTA, S.STOP_QUOTA),
             # a call-budget stop is a CLEAN exit: the same words on a run that FAILED explain nothing
             ((1, False, 'Run stopped on the classifier call budget (48 call(s))', ''),
              S.TRANSIENT, 'unclassified non-zero exit 1 (treated as transient)'),
@@ -1395,6 +1434,8 @@ class DegradeTest(unittest.TestCase):
         self.assertIsNone(F.budget_stop_reason(
             'CLASSIFIER_QUOTA_EXHAUSTED: spend limit\nRun stopped on the classifier call budget', ''))
         self.assertIsNone(F.budget_stop_reason('the spend limit was never reached', ''))
+        self.assertIsNone(F.budget_stop_reason(
+            'CLASSIFIER_REQUEST_REJECTED: HTTP 400\nRun stopped on the classifier call budget', ''))
         self.assertIsNone(F.budget_stop_reason('{"status": "PASS"}', ''))
         tail = F.log_tail('\n'.join(str(index) for index in range(100)), 'tail line\n')
         self.assertEqual(40, len(tail))

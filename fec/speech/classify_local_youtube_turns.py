@@ -75,7 +75,7 @@ FIRST_NAME_EQUIVALENTS = tuple(
         "patrick pat",
         "raymond ray",
         "rebecca becky",
-        "richard rich rick",
+        "richard rich rick dick",
         "robert rob bob bobby",
         "ronald ron",
         "stephen steven steve",

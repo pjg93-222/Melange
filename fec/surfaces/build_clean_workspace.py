@@ -12,6 +12,8 @@ import json
 import re
 import shutil
 import sqlite3
+import os
+import stat
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -592,6 +594,17 @@ def compute_people_days(paths):
     return days, counts
 
 
+def remove_tree(target):
+    """rmtree that clears the read-only attribute and retries. OneDrive marks every folder read-only and Windows refuses
+    os.rmdir on one (attempt 8, 2026-10-22: WinError 5 on people-days at the chain's alias step). Other errors still raise."""
+    def onexc(function, path, error):
+        if not isinstance(error, PermissionError):
+            raise error
+        os.chmod(path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+        function(path)
+    shutil.rmtree(target, onexc=onexc)
+
+
 def people_days(prior_dir=None):
     """data/people-days/index.json + shard-NN.json; reuses the served generation's output (prior_dir, copied byte-exactly into
     this one) when every input hash is unchanged."""
@@ -620,13 +633,13 @@ def people_days(prior_dir=None):
         days, counts = compute_people_days(paths)
     except Exception as exc:  # the rest of the workspace does not depend on this column; the page shows the reason
         if target.exists():
-            shutil.rmtree(target)
+            remove_tree(target)
         meta['reason'] = f'{type(exc).__name__}: {exc}'
         write_json(f'{PEOPLE_DAYS_DIR}/index.json', meta)
         print('People days: NOT AVAILABLE -', meta['reason'])
         return
     if target.exists():
-        shutil.rmtree(target)
+        remove_tree(target)
     shards = [{} for _ in range(PEOPLE_DAYS_SHARDS)]
     for group in sorted(days):
         shards[shard_of(group)][group] = {person: days[group][person] for person in sorted(days[group])}

@@ -9,6 +9,15 @@ on any retained threat board holds no champions seat (the champion seat
 yields, Paul 2026-08-09).  The crown set is the ACTIVE rank_honors generation's
 (D-157 F-20), never the previous cycle's member_desk_bundle.json tiers; the
 build fails closed when that generation is absent.
+
+The CU "O" component is the live legislative score the rank path uses: the
+``legislative_pillar.pillar`` that compute_pillars.py --write records in
+ranks_python.json (D-362, Paul 2026-10-27).  The 2026-09-03
+pillar_inputs_snapshot.json is never read; with no live pillar in the rank
+authority the build fails closed.  Each run also writes a diff against the
+previous run's boards (who entered, who left, tier moves, with reasons) into
+the boards receipt, a dated file under diffs/, and standing.json for the next
+run's reasons.
 """
 
 import os as _o, sys as _s; _s.path.insert(0, _o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))))  # noqa: E501,E702
@@ -124,9 +133,7 @@ def _default_paths():
         "panel_path": os.path.join(
             derived, "member_congress_panel", "panel.csv"
         ),
-        "pillar_path": os.path.join(
-            MB_ROOT, "data", "engine", "pillar_inputs_snapshot.json"
-        ),
+        "ranks_path": os.path.join(MB_ROOT, "ranks_python.json"),
         "member_bundle_path": os.path.join(MB_ROOT, "member_desk_bundle.json"),
         "titles_path": os.path.join(derived, "bill_titles", "titles.json"),
         "bill_directions_path": os.path.join(
@@ -317,15 +324,40 @@ def _load_panel(path):
     return dict(net_by_member), rows
 
 
+LIVE_PILLAR_SCHEMA = "live-legislative-pillar-v1"
+
+
 def _load_o(path):
-    payload = _load_json(path, "pillar input snapshot")
-    values = payload.get("O") if isinstance(payload, dict) else None
+    """O = the rank authority's live legislative pillar (D-362); no snapshot fallback."""
+    payload = _load_json(path, "rank authority")
+    pillar = payload.get("legislative_pillar") if isinstance(payload, dict) else None
+    if not isinstance(pillar, dict):
+        raise ChampionsV2Error(
+            f"rank authority {path} carries no live legislative pillar "
+            "(sentinel_admission_policy live_legislative_pillar is off or the "
+            "ranks predate it); champions will not fall back to "
+            "pillar_inputs_snapshot.json -- run compute_pillars.py --write"
+        )
+    if pillar.get("schema") != LIVE_PILLAR_SCHEMA:
+        raise ChampionsV2Error(
+            f"rank authority legislative pillar schema {pillar.get('schema')!r} "
+            f"is not {LIVE_PILLAR_SCHEMA!r}"
+        )
+    values = pillar.get("pillar")
     if not isinstance(values, dict) or not values:
-        raise ChampionsV2Error("pillar input snapshot lacks non-empty O mapping")
-    return {
-        str(name): _number(value, f"pillar O for {name}")
+        raise ChampionsV2Error("rank authority legislative pillar is empty")
+    o_by_name = {
+        str(name): _number(value, f"live legislative pillar for {name}", 0.0, 1.0)
         for name, value in values.items()
     }
+    source = {
+        "path": os.path.basename(path),
+        "field": "legislative_pillar.pillar",
+        "schema": LIVE_PILLAR_SCHEMA,
+        "members": len(o_by_name),
+        "inputs_sha256": pillar.get("inputs_sha256"),
+    }
+    return o_by_name, source
 
 
 def _load_member_bundle(path):
@@ -372,10 +404,9 @@ def _load_member_bundle(path):
 
 
 def _load_crown_tiers():
-    """(priority tier by desk name, generation id) from the ACTIVE rank_honors generation; fails closed."""
+    """(tier, board seat, generation id) by desk name from the ACTIVE rank_honors generation; fails closed."""
     try:
-        tier, _rank, generation = active_board(MB_ROOT)
-        return tier, generation
+        return active_board(MB_ROOT)
     except ValueError as exc:
         raise ChampionsV2Error(f"crown set unavailable: {exc}") from exc
 
@@ -557,25 +588,351 @@ def _assert_boards(sector, boards, crown_bioguides, threat_bioguides):
             )
 
 
+BOARD_NAMES = ("champions", "threats", "mixed")
+DIFF_SCHEMA = "champions-v2-run-diff-v1"
+STANDING_SCHEMA = "champions-v2-standing-v1"
+DIFF_COMPONENTS = (
+    "O", "supportive_att", "opposition_att", "net_directional", "invested",
+    "rapport", "opp_sponsored", "opp_cosponsored",
+)
+PLACEMENT_TEXT = {
+    "champions": "a champions seat",
+    "threats": "the threat board",
+    "mixed": "the mixed board",
+    "below_cut": "below the champions cut",
+    "cross_sector_excluded": "champions class, but the seat yields to a retained threat seat",
+    "threat_cut": "beyond the 25-seat threat cap",
+    "crown_omitted": "omitted as a Tier-1 crown (crown law; opposition below the mixed threshold)",
+    "former": "a former member",
+    "desk_unavailable": "not on the member desk",
+    "absent": "no signed lobbying attention in this sector",
+    "off_board": "off the boards (the previous run kept no detail)",
+}
+
+
+def _standing_entry(row, placement, tier_seat=(None, None), **extra):
+    components = row.get("components") or {}
+    entry = {
+        "name": row.get("name"),
+        "chamber": row.get("chamber"),
+        "placement": placement,
+        "composite": row.get("composite"),
+        "threat": row.get("threat"),
+        "crown_tier": tier_seat[0],
+        "primacy_seat": tier_seat[1],
+        "components": {
+            key: components.get(key) for key in DIFF_COMPONENTS if key in components
+        },
+    }
+    entry.update(extra)
+    return entry
+
+
+def _sector_standing(staged, boards, cross_sector_exclusions, tier_by_bioguide):
+    """Where every candidate of one sector landed this run, and on what inputs."""
+    placement = {}
+    for board_name in BOARD_NAMES:
+        for row in boards[board_name]:
+            placement[row["bioguide"]] = board_name
+    yielded = {item["bioguide"]: item["threat_sectors"] for item in cross_sector_exclusions}
+    capped = {row["bioguide"] for row in staged["threat_cut"]}
+    omitted = {
+        item["bioguide"] for item in staged["crown_threat_exclusions"]
+        if item["routed_to"] == "omitted"
+    }
+    out = {}
+    for row in staged["rows"]:
+        bioguide = row["bioguide"]
+        extra = {}
+        if bioguide in placement:
+            where = placement[bioguide]
+        elif bioguide in yielded:
+            where, extra = "cross_sector_excluded", {"threat_sectors": yielded[bioguide]}
+        elif bioguide in capped:
+            where = "threat_cut"
+        elif bioguide in omitted:
+            where = "crown_omitted"
+        else:
+            where = "below_cut"
+        out[bioguide] = _standing_entry(
+            row, where, tier_by_bioguide.get(bioguide, (None, None)), **extra
+        )
+    for bioguide in staged["former_members"]:
+        out[bioguide] = {"name": None, "placement": "former"}
+    for bioguide in staged["desk_unavailable_members"]:
+        out[bioguide] = {"name": None, "placement": "desk_unavailable"}
+    return out
+
+
+def _standing_from_payload(payload):
+    """Best-effort standing for a previous run that wrote no standing.json."""
+    out = {}
+    receipts = (payload.get("receipt") or {}).get("sectors") or {}
+    for sector in SECTORS:
+        boards = (payload.get("sectors") or {}).get(sector) or {}
+        receipt = receipts.get(sector) or {}
+        sector_out = {}
+        for bioguide in receipt.get("former_bioguides") or ():
+            sector_out[bioguide] = {"name": None, "placement": "former"}
+        for item in receipt.get("crown_threat_exclusions") or ():
+            if item.get("routed_to") == "omitted":
+                sector_out[item["bioguide"]] = {
+                    "name": item.get("name"), "chamber": item.get("chamber"),
+                    "placement": "crown_omitted", "crown_tier": 1,
+                }
+        for item in receipt.get("cross_sector_exclusions") or ():
+            sector_out[item["bioguide"]] = {
+                "name": item.get("name"), "chamber": item.get("chamber"),
+                "placement": "cross_sector_excluded", "composite": item.get("composite"),
+                "threat_sectors": item.get("threat_sectors"),
+            }
+        for board_name in BOARD_NAMES:
+            for row in boards.get(board_name) or ():
+                sector_out[row["bioguide"]] = _standing_entry(
+                    row, board_name, (row.get("tier"), None)
+                )
+        out[sector] = sector_out
+    return out
+
+
+def _fmt(value):
+    if isinstance(value, float) and not value.is_integer():
+        return f"{value:.4f}"
+    if isinstance(value, float):
+        return str(int(value))
+    return str(value)
+
+
+def _champion_cuts(boards):
+    """Composite of the last retained champion per chamber when the board is full."""
+    cuts = {}
+    for chamber in CHAMBERS:
+        rows = [row for row in boards["champions"] if row["chamber"] == chamber]
+        if len(rows) >= CHAMPION_LIMIT_PER_CHAMBER:
+            cuts[chamber] = min(row["composite"] for row in rows)
+    return cuts
+
+
+def _seat(boards, board_name, bioguide):
+    rows = boards[board_name]
+    chamber = next(row["chamber"] for row in rows if row["bioguide"] == bioguide)
+    same = [row["bioguide"] for row in rows if row["chamber"] == chamber]
+    return same.index(bioguide) + 1
+
+
+def _move_reason(old, new, boards, bioguide, cuts):
+    old_place = (old or {}).get("placement", "absent")
+    new_place = (new or {}).get("placement", "absent")
+    from_text = PLACEMENT_TEXT.get(old_place, old_place)
+    to_text = PLACEMENT_TEXT.get(new_place, new_place)
+    if new_place == "cross_sector_excluded":
+        to_text += " in " + ", ".join(new.get("threat_sectors") or ())
+    parts = [f"{from_text} -> {to_text}"]
+    chamber = (new or old or {}).get("chamber")
+    score = "threat" if new_place == "threats" else "composite"
+    value = (new or {}).get(score)
+    if new_place in BOARD_NAMES:
+        seat = _seat(boards, new_place, bioguide)
+        parts.append(f"{score} {_fmt(value)}, {chamber} seat {seat}")
+    elif new_place == "below_cut" and value is not None and chamber in cuts:
+        parts.append(
+            f"composite {_fmt(value)} is below the {chamber} cut {_fmt(cuts[chamber])}"
+        )
+    old_value = (old or {}).get(score)
+    if value is not None and old_value is not None:
+        parts.append(f"{score} was {_fmt(old_value)}")
+    old_components = (old or {}).get("components") or {}
+    new_components = (new or {}).get("components") or {}
+    changed = {
+        key: [old_components[key], new_components[key]]
+        for key in DIFF_COMPONENTS
+        if key in old_components and key in new_components
+        and old_components[key] is not None and new_components[key] is not None
+        and abs(float(old_components[key]) - float(new_components[key])) > 1e-9
+    }
+    if changed:
+        parts.append("inputs changed: " + ", ".join(
+            f"{key} {_fmt(pair[0])} -> {_fmt(pair[1])}" for key, pair in changed.items()
+        ))
+    # The cause, most specific first; the generic displacement text only when nothing else applies.
+    old_tier, new_tier = (old or {}).get("crown_tier"), (new or {}).get("crown_tier")
+    crown_routed = {old_place, new_place} & {"threats", "threat_cut", "crown_omitted"}
+    if (old_tier is not None and new_tier is not None
+            and (old_tier == 1) != (new_tier == 1) and crown_routed):
+        # Only gaining or losing the crown re-routes a member (crown law); other tier moves do not.
+        parts.append(f"moved because it {'gained' if new_tier == 1 else 'lost'} the crown "
+                     f"(tier {old_tier} -> {new_tier}; crown law)")
+    elif new_place == "cross_sector_excluded":
+        parts.append(
+            "its champions seat yields to its retained threat seat in "
+            + ", ".join(new.get("threat_sectors") or ())
+        )
+    elif old_place == "cross_sector_excluded":
+        parts.append(
+            "its threat seat in " + ", ".join(old.get("threat_sectors") or ())
+            + " is no longer retained"
+        )
+    elif (new_place == "champions" and old_place == "below_cut"
+          and value is not None and old_value is not None and value <= old_value):
+        parts.append("its score did not rise; members above it left the board or fell below the cut")
+    elif (old_place == "champions" and new_place == "below_cut"
+          and value is not None and old_value is not None and value >= old_value):
+        parts.append("its score did not fall; displaced by members now ranked above it")
+    elif not changed and old_components and new_components:
+        parts.append("own inputs unchanged; moved because other members' scores changed")
+    return "; ".join(parts), changed
+
+
+def champions_diff(previous, previous_standing, payload, standing):
+    """Seat-level diff of this run's boards against the previous run's, with reasons."""
+    baseline = "previous boards.json"
+    unknown_old = None    # a member missing from a full previous standing had no attention
+    if previous is None:
+        baseline = "none: no previous boards.json, so every seat is new"
+        previous_standing = {}
+    elif previous_standing is None:
+        baseline = "previous boards.json (no matching standing.json; reasons use board rows only)"
+        previous_standing = _standing_from_payload(previous)
+        unknown_old = {"placement": "off_board"}    # off the old boards, placement unrecorded
+    previous_receipt = (previous or {}).get("receipt") or {}
+    sectors = {}
+    lines = []
+    tier_moves = {}
+    for sector in SECTORS:
+        boards = payload["sectors"][sector]
+        old_boards = ((previous or {}).get("sectors") or {}).get(sector) or {}
+        old = previous_standing.get(sector) or {}
+        new = standing.get(sector) or {}
+        cuts = _champion_cuts(boards)
+        sector_diff = {}
+        counts = []
+        for board_name in BOARD_NAMES:
+            old_set = {row["bioguide"] for row in old_boards.get(board_name) or ()}
+            new_set = {row["bioguide"] for row in boards[board_name]}
+            moves = {"entered": [], "left": []}
+            for key, members in (("entered", new_set - old_set), ("left", old_set - new_set)):
+                for bioguide in sorted(members):
+                    before, after = old.get(bioguide, unknown_old), new.get(bioguide)
+                    reason, changed = _move_reason(before, after, boards, bioguide, cuts)
+                    moves[key].append({
+                        "bioguide": bioguide,
+                        "name": (after or {}).get("name") or (before or {}).get("name"),
+                        "chamber": (after or {}).get("chamber") or (before or {}).get("chamber"),
+                        "from": (before or {}).get("placement", "absent"),
+                        "to": (after or {}).get("placement", "absent"),
+                        "inputs_changed": changed,
+                        "reason": reason,
+                    })
+            sector_diff[board_name] = moves
+            counts.append(f"{board_name} +{len(moves['entered'])}/-{len(moves['left'])}")
+        sector_diff["champion_cut"] = cuts
+        sectors[sector] = sector_diff
+        lines.append(f"{sector}: " + ", ".join(counts))
+        for bioguide, after in new.items():
+            before = old.get(bioguide) or {}
+            if (
+                bioguide in tier_moves
+                or before.get("crown_tier") is None
+                or after.get("crown_tier") is None
+                or before["crown_tier"] == after["crown_tier"]
+            ):
+                continue
+            reason = f"tier {before['crown_tier']} -> {after['crown_tier']} on the rank_honors board"
+            if unknown_old is not None:
+                reason += " (the previous tier is read from the previous boards' rows)"
+            if before.get("primacy_seat") and after.get("primacy_seat"):
+                reason += f", primacy seat {before['primacy_seat']} -> {after['primacy_seat']}"
+            if after["crown_tier"] == 1:
+                reason += "; gains the crown (crown law: never on a threat board)"
+            elif before["crown_tier"] == 1:
+                reason += "; loses the crown (no longer protected from threat boards)"
+            tier_moves[bioguide] = {
+                "bioguide": bioguide,
+                "name": after.get("name"),
+                "from_tier": before["crown_tier"],
+                "to_tier": after["crown_tier"],
+                "reason": reason,
+            }
+    moved = sum(
+        len(sectors[sector][board][key])
+        for sector in SECTORS for board in BOARD_NAMES for key in ("entered", "left")
+    )
+    changed = bool(moved or tier_moves)
+    summary = (
+        "; ".join(lines) + f"; tier moves {len(tier_moves)}"
+        if changed else
+        "No champions, threat or mixed seat changed and no tier moved since the previous run."
+    )
+    return {
+        "schema": DIFF_SCHEMA,
+        "baseline": baseline,
+        "previous_generated_utc": (previous or {}).get("generated_utc"),
+        "generated_utc": payload.get("generated_utc"),
+        "previous_honors_generation": previous_receipt.get("honors_generation"),
+        "honors_generation": payload["receipt"].get("honors_generation"),
+        "previous_o_source": previous_receipt.get(
+            "o_source",
+            None if previous is None else
+            "not recorded: runs before D-362 read data/engine/pillar_inputs_snapshot.json",
+        ),
+        "o_source": payload["receipt"].get("o_source"),
+        "changed": changed,
+        "summary": summary,
+        "sectors": sectors,
+        "tier_moves": sorted(
+            tier_moves.values(), key=lambda item: (item["name"] or "", item["bioguide"])
+        ),
+    }
+
+
+def _load_previous(out_path):
+    """(previous boards payload or None, its standing or None, note)."""
+    if not os.path.exists(out_path):
+        return None, None, None
+    try:
+        previous = _load_json(out_path, "previous champions boards")
+    except ChampionsV2Error as exc:
+        return None, None, str(exc)
+    if not isinstance(previous, dict) or previous.get("schema") != SCHEMA:
+        return None, None, "previous boards.json has another schema"
+    standing_path = os.path.join(os.path.dirname(os.path.abspath(out_path)), "standing.json")
+    try:
+        standing = _load_json(standing_path, "previous standing")
+    except ChampionsV2Error:    # absent or unreadable: reasons fall back to board rows
+        return previous, None, None
+    if (
+        isinstance(standing, dict)
+        and standing.get("schema") == STANDING_SCHEMA
+        and standing.get("boards_generated_utc") == previous.get("generated_utc")
+        and isinstance(standing.get("sectors"), dict)
+    ):
+        return previous, standing.get("sectors"), None
+    return previous, None, None
+
+
 def build_payload(
     signed_attention_path=None,
     interactions_path=None,
     panel_path=None,
-    pillar_path=None,
+    ranks_path=None,
     member_bundle_path=None,
     titles_path=None,
     bill_directions_path=None,
     resolver=None,
     crown_tiers=None,
+    standing=None,
 ):
+    """Build the boards.  ``standing``, when a dict, is filled with every
+    candidate's placement and inputs per sector (the next run's diff reasons)."""
     honors_generation = None    # None: the caller passed crown_tiers itself
+    crown_seats = {}
     if crown_tiers is None:
-        crown_tiers, honors_generation = _load_crown_tiers()
+        crown_tiers, crown_seats, honors_generation = _load_crown_tiers()
     defaults = _default_paths()
     signed_attention_path = signed_attention_path or defaults["signed_attention_path"]
     interactions_path = interactions_path or defaults["interactions_path"]
     panel_path = panel_path or defaults["panel_path"]
-    pillar_path = pillar_path or defaults["pillar_path"]
+    ranks_path = ranks_path or defaults["ranks_path"]
     member_bundle_path = member_bundle_path or defaults["member_bundle_path"]
     titles_path = titles_path or defaults["titles_path"]
     bill_directions_path = bill_directions_path or defaults["bill_directions_path"]
@@ -583,7 +940,7 @@ def build_payload(
     signed_rows, sign_coverage = _load_signed_attention(signed_attention_path)
     members_by_bill, interaction_rows = _load_interactions(interactions_path)
     net_by_member, panel_rows = _load_panel(panel_path)
-    o_by_name = _load_o(pillar_path)
+    o_by_name, o_source = _load_o(ranks_path)
     desk_by_name, desk_resolver, desk_members = _load_member_bundle(member_bundle_path)
     titles = _load_titles(titles_path)
     categories, direction_rows = _load_bill_directions(bill_directions_path)
@@ -660,6 +1017,7 @@ def build_payload(
     all_formers = set()
     all_desk_unavailable = set()
     crown_bioguides = set()
+    crown_tier_by_bioguide = {}
     for sector in SECTORS:
         candidates = sorted(set(support[sector]) | set(opposition[sector]))
         rows = []
@@ -693,6 +1051,7 @@ def build_payload(
                     "from the active rank_honors generation"
                 )
             desk_tier = crown_tiers[name]
+            crown_tier_by_bioguide[bioguide] = (desk_tier, crown_seats.get(name))
             if desk_tier == 1:
                 crown_bioguides.add(bioguide)
             supportive_att = int(support[sector][bioguide])
@@ -718,7 +1077,7 @@ def build_payload(
                     )
                 if name not in o_by_name:
                     raise ChampionsV2Error(
-                        f"CU candidate {bioguide} / {name} is absent from pillar O"
+                        f"CU candidate {bioguide} / {name} is absent from the live legislative pillar"
                     )
                 components.update(
                     {
@@ -799,6 +1158,7 @@ def build_payload(
                 champions.append(row)
 
         threats.sort(key=lambda row: _row_sort(row, "threat"))
+        threat_cut = threats[THREAT_LIMIT:]
         threats = threats[:THREAT_LIMIT]
         mixed.sort(key=lambda row: _row_sort(row, "composite"))
         staged_sectors[sector] = {
@@ -810,6 +1170,8 @@ def build_payload(
             "former_members": former_members,
             "desk_unavailable_members": desk_unavailable_members,
             "crown_threat_exclusions": crown_threat_exclusions,
+            "rows": rows,
+            "threat_cut": threat_cut,
         }
 
     # CROSS-SECTOR EXCLUSIVITY (champion seat yields, Paul 2026-08-09): the
@@ -860,6 +1222,10 @@ def build_payload(
         }
         _assert_boards(sector, boards, crown_bioguides, threat_bioguides)
         sectors_payload[sector] = boards
+        if standing is not None:
+            standing[sector] = _sector_standing(
+                staged, boards, cross_sector_exclusions, crown_tier_by_bioguide
+            )
         sector_receipts[sector] = {
             "composite_components": list(
                 CU_COMPONENTS if sector == "credit_union" else OTHER_COMPONENTS
@@ -889,6 +1255,7 @@ def build_payload(
             "sectors": sector_receipts,
             "ladder": "canonical > kim > prior",
             "honors_generation": honors_generation,
+            "o_source": o_source,
             "rules": {
                 "veto": VETO_RULE,
                 "mixed": MIXED_RULE,
@@ -950,7 +1317,7 @@ def main(argv=None):
     parser.add_argument("--signed-attention", default=defaults["signed_attention_path"])
     parser.add_argument("--interactions", default=defaults["interactions_path"])
     parser.add_argument("--panel", default=defaults["panel_path"])
-    parser.add_argument("--pillar", default=defaults["pillar_path"])
+    parser.add_argument("--ranks", default=defaults["ranks_path"])
     parser.add_argument("--member-bundle", default=defaults["member_bundle_path"])
     parser.add_argument("--titles", default=defaults["titles_path"])
     parser.add_argument("--bill-directions", default=defaults["bill_directions_path"])
@@ -959,17 +1326,45 @@ def main(argv=None):
         default=os.path.join(_derived_dir(), "champions_v2", "boards.json"),
     )
     args = parser.parse_args(argv)
+    previous, previous_standing, baseline_note = _load_previous(args.out)
+    standing = {}
     payload = build_payload(
         signed_attention_path=args.signed_attention,
         interactions_path=args.interactions,
         panel_path=args.panel,
-        pillar_path=args.pillar,
+        ranks_path=args.ranks,
         member_bundle_path=args.member_bundle,
         titles_path=args.titles,
         bill_directions_path=args.bill_directions,
+        standing=standing,
     )
-    payload["generated_utc"] = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
+    payload["generated_utc"] = now.isoformat()
+    diff = champions_diff(previous, previous_standing, payload, standing)
+    if baseline_note:
+        diff["baseline"] += f" ({baseline_note})"
+    if not diff["changed"] and previous is not None:
+        # A no-change run (a rerun after a failed chain, say) keeps the last real change visible.
+        prior = (previous.get("receipt") or {}).get("run_diff")
+        prior = prior if isinstance(prior, dict) else {}
+        carried = prior if prior.get("changed") else prior.get("last_change")
+        if isinstance(carried, dict):
+            diff["last_change"] = {key: value for key, value in carried.items() if key != "last_change"}
+    payload["receipt"]["run_diff"] = diff
+    out_dir = os.path.dirname(os.path.abspath(args.out))
     size = _write_json_atomic(payload, args.out)
+    _write_json_atomic(
+        {
+            "schema": STANDING_SCHEMA,
+            "boards_generated_utc": payload["generated_utc"],
+            "sectors": standing,
+        },
+        os.path.join(out_dir, "standing.json"),
+    )
+    diff_path = os.path.join(
+        out_dir, "diffs", "champions_diff_%s.json" % now.strftime("%Y%m%dT%H%M%S%fZ")
+    )
+    _write_json_atomic(diff, diff_path)
     counts = {
         board: sum(len(payload["sectors"][sector][board]) for sector in SECTORS)
         for board in ("champions", "threats", "mixed")
@@ -981,6 +1376,7 @@ def main(argv=None):
             os.path.abspath(args.out),
         )
     )
+    print("champions diff: %s -> %s" % (diff["summary"], diff_path))
     return 0
 
 

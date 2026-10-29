@@ -330,6 +330,36 @@ def test_current_leader_baseline_pre_role_gate(tmp_path, published, expected, ba
     assert row["baseline_measurement_eligible"] is baseline
 
 
+def test_pre_congress_measurements_keep_scope_and_cannot_be_baseline(tmp_path):
+    fixture = case(tmp_path, modern=True)
+    fixture.turn['source_era'] = fixture.source['source_era'] = 'PRE_CONGRESS_LOCAL_OFFICE'
+    jsonl(fixture.source_path, [fixture.source])
+    save(fixture)
+    result = build(fixture)
+    row = result['turns'][0]
+    assert row['source_era'] == 'PRE_CONGRESS_LOCAL_OFFICE'
+    assert row['profile_measurement_eligible'] is True
+    assert row['baseline_measurement_eligible'] is False
+    assert not result['members']['Example Member']['qualified_baseline']['turns']
+
+
+@pytest.mark.parametrize('era,published', [
+    ('CURRENT_ROLE_CONDITIONED', '2019-01-01'),
+    ('PRE_CURRENT_LEADERSHIP_ROLE', '2025-01-01'),
+    ('CURRENT_ROLE_CONDITIONED', None),
+])
+def test_explicit_role_era_must_agree_with_verified_source_date(era, published):
+    role = {'Example Member': {'current_role_assumed_on': '2023-01-03'}}
+    with pytest.raises(mod.FeatureRefusal):
+        mod.source_era({'member': 'Example Member', 'source_era': era}, {'published': published}, role)
+
+
+def test_source_and_materialized_era_conflict_cannot_be_qualified():
+    with pytest.raises(mod.FeatureRefusal):
+        mod.source_era({'member': 'Example Member', 'source_era': 'NOT_CURRENT_FORMAL_LEADERSHIP'},
+                       {'source_era': 'PRE_CONGRESS_LOCAL_OFFICE', 'published': '2021-01-01'}, {})
+
+
 @pytest.mark.parametrize("match_hold", [True, False])
 def test_exact_quality_hold_blocks_qualification_without_altering_measurements(tmp_path, match_hold):
     fixture = case(tmp_path, modern=True)

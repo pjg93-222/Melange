@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import os
 from pathlib import Path
@@ -21,26 +22,52 @@ class GoldMultitraitContracts(unittest.TestCase):
         self.desk = {row["name"]: row for row in
                      json.loads((DATA_ROOT / "member_desk_bundle.json").read_text(encoding="utf-8"))["members"]}
 
-    def test_every_big_five_trait_has_out_of_fold_gold_results(self):
+    def test_fixed_weight_audit_is_separate_from_historical_out_of_fold_results(self):
         self.assertEqual("big5-gold-anchored-v2", self.artifact["schema"])
         self.assertEqual({"O", "C", "E", "A", "N"}, set(self.artifact["traits"]))
+        design = self.artifact["design"]
+        self.assertEqual("frozen_accepted_weights", design["production_weights"])
+        self.assertEqual("fixed_accepted_weight_correction_audit", design["validation"])
+        self.assertIs(False, design["predictions_are_out_of_fold"])
+        self.assertIs(True, design["historical_gold_used_to_fit_weights"])
+        spec = ROOT / "source_data" / "big5" / "frozen_accepted_spec.json"
+        self.assertEqual(hashlib.sha256(spec.read_bytes()).hexdigest(), design["frozen_spec_sha256"])
         for trait, result in self.artifact["traits"].items():
             self.assertIn(result["status"], {
                 "ACTIVE_EXTERNAL_GOLD_ANCHORED",
                 "ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED",
                 "WITHHELD_FAILED_GATES",
             })
-            self.assertTrue(result["validation"]["predictions_are_out_of_fold"], trait)
-            self.assertEqual({"senate_insiders", "academic_experts"}, set(result["validation"]["panels"]), trait)
+            self.assertIs(False, result["validation"]["predictions_are_out_of_fold"], trait)
+            self.assertIs(True, result["validation"]["diagnostic_only"], trait)
+            self.assertIn(result["validation"]["evaluation_kind"], {
+                "fixed_accepted_weight_correction_audit", "not_reaudited"}, trait)
+            self.assertIs(True, result["historical_validation"]["predictions_are_out_of_fold"], trait)
+            self.assertEqual({"senate_insiders", "academic_experts"},
+                             set(result["historical_validation"]["panels"]), trait)
             self.assertIn("selected_weights", result, trait)
-            self.assertIn("ablation", result, trait)
 
-    def test_e_explicitly_tests_dominance_and_role_adjusted_visibility(self):
+    def test_accepted_weights_and_current_roster_are_preserved(self):
+        expected = {
+            "O": {"blue_text_o": .5, "pink_observer_o": .5},
+            "C": {"blue_text_c": .2, "pink_observer_c": .8},
+            "E": {"blue_visibility_calibrated_e": .2, "pink_observer_e": .6,
+                  "interaction_dominance": .1, "role_adjusted_visibility": .1},
+            "A": {"blue_low_antagonism_a": .1, "pink_observer_a": .9},
+            "N": {"affective_content_n": .1, "pink_observer_n": .9},
+        }
+        roster = {row["member"] for row in json.loads(
+            (DATA_ROOT / "data" / "engine" / "congestion.json").read_text(encoding="utf-8"))}
+        self.assertEqual(len(roster), self.artifact["coverage"]["roster_n"])
+        for trait, result in self.artifact["traits"].items():
+            self.assertEqual(expected[trait], result["selected_weights"], trait)
+            self.assertTrue(set(result["members"]) <= roster, trait)
+            self.assertEqual(len(result["members"]), result["coverage_n"], trait)
+
+    def test_e_preserves_accepted_dominance_and_visibility_weights(self):
         e = self.artifact["traits"]["E"]
         self.assertIn("interaction_dominance", e["candidate_channels"])
         self.assertIn("role_adjusted_visibility", e["candidate_channels"])
-        self.assertIn("without_interaction_dominance", e["ablation"])
-        self.assertIn("without_role_adjusted_visibility", e["ablation"])
         self.assertEqual(
             e["uses_interaction_dominance"],
             e["selected_weights"].get("interaction_dominance", 0) > 0,
@@ -56,7 +83,7 @@ class GoldMultitraitContracts(unittest.TestCase):
         self.assertIn("affective_content_n", n["candidate_channels"])
         self.assertGreaterEqual(n["coverage_n"], 450)
 
-    def test_all_broad_traits_activate_when_at_least_one_panel_passes(self):
+    def test_accepted_trait_statuses_do_not_follow_repeated_diagnostic_looks(self):
         self.assertEqual(
             {"O": "ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED",
              "C": "ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED",
