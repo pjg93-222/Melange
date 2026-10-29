@@ -85,6 +85,23 @@ def _native_request(request):
             and marker[1] == settings.DISTRICT['id'] and _direct(request.META, marker[2]))
 
 
+def standalone_administrator_authorized(request):
+    """Existing app capability issued by this launch's Windows boundary."""
+    from django.conf import settings
+    user = getattr(request, 'user', None)
+    if (not getattr(settings, 'DESKTOP_STANDALONE', False)
+            or not getattr(settings, 'DESKTOP_WINDOWS_SESSION', False)
+            or settings.HOSTED or settings.DESKTOP_BOUNDARY or settings.LOCAL_ADMIN_ACCESS
+            or getattr(request, 'local_admin_access', False) is not True
+            or not user or not user.is_authenticated or not user.is_active or not user.is_staff
+            or not _native_request(request)):
+        return False
+    marker = request.META.get(WINDOWS_MARKER)
+    return bool(isinstance(marker, tuple) and len(marker) == 4
+                and marker[0] is _WINDOWS_ISSUER and type(marker[1]) is int
+                and user.pk == marker[1] and user.username == marker[2])
+
+
 class StandaloneDesktopMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

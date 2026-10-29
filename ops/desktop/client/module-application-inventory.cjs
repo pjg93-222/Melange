@@ -155,8 +155,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "terrier_standalone.py",
-        "bytes": 14420,
-        "sha256": "561278ff5cba89480019e281536aaa46e4a5a6f08a154549911a667eb3878e8c"
+        "bytes": 15342,
+        "sha256": "077f5936fca26cab3e382d34d6993f452d2b657ba951656362552bbcc4afa8e7"
       },
       {
         "root": "source",
@@ -489,7 +489,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "92a04600bf9e2ca60ffd5522520878ed8dc2fe1275c256c0fe5f28fa14780b9e",
+    "programFingerprint": "570e84f9436e5b1ce87851d45dd82dcb814f0aaa897573dfc9b0bd9c083e6d3f",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -656,8 +656,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "terrier_standalone.py",
-        "bytes": 14420,
-        "sha256": "561278ff5cba89480019e281536aaa46e4a5a6f08a154549911a667eb3878e8c"
+        "bytes": 15342,
+        "sha256": "077f5936fca26cab3e382d34d6993f452d2b657ba951656362552bbcc4afa8e7"
       },
       {
         "root": "source",
@@ -2040,7 +2040,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "6dda41a6346c183d251f96ea341c081a634d0db58433e0667177ef5c54511386",
+    "programFingerprint": "7db1eb2da89ac8727bce3177adadbd2ea1cd968d6ba0b3017335f68fa2ced269",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],
