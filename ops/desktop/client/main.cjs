@@ -428,6 +428,7 @@ app.whenReady().then(async()=>{
   const updaterRoot=localRoot?path.join(localRoot,'updater'):githubConfig?path.join(userData,'github-updates'):userData;
   githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
+  if(process.platform==='win32'&&app.isPackaged&&!profile.isolated)githubOptions.activationTarget=version=>dlLayout.appDirectory(app.getPath('downloads'),definition.name,version);
   // Downloads layout (DL-spec 2.4): only an app that runs from <Downloads>/MelangeApplications; Documents/Programs installs behave exactly as before.
   const downloadsFolder=process.platform==='win32'&&app.isPackaged&&!profile.isolated?app.getPath('downloads'):null;
   const layoutMode=Boolean(downloadsFolder&&dlLayout.downloadsMode({execPath:process.execPath,downloads:downloadsFolder}));

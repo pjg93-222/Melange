@@ -5,6 +5,7 @@ const http=require('node:http');
 const crypto=require('node:crypto');
 const semver=require('semver');
 const {verifyWindowsPackage}=require('./native-signature.cjs');
+const activation=require('./installer-activation.cjs');
 const {jsonRequest,verifyEnvelope,applyKeyTransitions,downloadVerified,verifyPackageFile}=require('./trust.cjs');
 const VERIFY_RETRY_MS=6*60*60*1000;
 // Launch-time installs wait for the signature tool (up to 20 s). After this many 'no verdict' starts for the same
@@ -32,6 +33,7 @@ class DesktopUpdater {
     this.platform=options.platform||process.platform;this.arch=options.arch||process.arch;
     this.request=options.request||jsonRequest;this.download=options.download||downloadVerified;
     this.verifyNativePackage=options.verifyNativePackage||verifyWindowsPackage;
+    this.observeActivation=options.observeActivation||activation.observeAttempt;
     this.makeFeed=options.makeFeed||verifiedFeed;this.busy=false;this.feed=null;this.ready=null;
     this.checkPromise=null;this.startupConfirmationRequested=false;this.startupConfirmationQueued=false;
     this.autoUpdater.autoDownload=false;this.autoUpdater.autoInstallOnAppQuit=false;
@@ -242,6 +244,32 @@ class DesktopUpdater {
       return target.version;
     }finally{this.busy=false;this.queueStartupConfirmation();}
   }
+  async activationProgress(enrollment,transaction,recovery=false){
+    if(!transaction.activation||!this.activationTarget)return false; // Legacy attempts retain their original failure rules.
+    const verified=recovery?this.verifyRecovery(enrollment,transaction):verifyEnvelope(transaction.envelope,enrollment,this.identity(),this.readState());
+    const manifest=verified.manifest,field=recovery?'recovery':'pending';
+    const current=()=>{const value=this.readState()[field];return value?.phase==='activating'&&value.activatedAt===transaction.activatedAt&&
+      value.activation?.token===transaction.activation.token&&(recovery?value.manifestHash:envelopeHash(value.envelope))===verified.manifestHash?value:null;};
+    const result=await this.observeActivation(transaction.activation,{appId:this.appId,version:manifest.version,nativeFiles:transaction.nativeFiles,
+      target:this.activationTarget(manifest.version),activatedAt:transaction.activatedAt});
+    if(!current())return true;
+    if(result.status==='running'||result.status==='complete'){
+      if(!Array.isArray(transaction.nativeFiles)||transaction.nativeFiles.length!==1)throw new Error('Installer activation has no verified native file.');
+      // Progress receipts are unsigned. Reverify the exact signed package and
+      // publisher before using one; only the target's healthy startup confirms.
+      await this.verifyNativeFile(transaction.nativeFiles[0],manifest);
+      if(!current())return true;
+      if(result.status==='running'){
+        const latest=this.readState();this.writeState({...latest,[field]:{...latest[field],activation:{...latest[field].activation,process:result.process}}});
+        this.onStatus('Installation of version '+manifest.version+' is still running.'+(result.longRunning?' It is taking longer than expected.':'')+' Wait before opening the updated shortcut.');
+      }else this.onStatus('Installation of version '+manifest.version+' finished; close this old copy and open the updated shortcut to confirm startup.');
+      return true;
+    }
+    if(result.status==='unknown'){
+      this.onStatus('Installation progress is not yet known. Waiting for the installer before retrying.');return true;
+    }
+    return false;
+  }
   async recover(enrollment){
     let state=this.readState();const recovery=state.recovery;
     if(recovery&&!['completed','failed'].includes(recovery.phase)){
@@ -257,7 +285,9 @@ class DesktopUpdater {
         return;
       }
       if(recovery.phase==='activating'){
-        this.writeState({...state,recovery:{...recovery,phase:'failed'}});
+        if(await this.activationProgress(enrollment,recovery,true))return;
+        state=this.readState();if(state.recovery?.phase!=='activating'||state.recovery.manifestHash!==recovery.manifestHash)return;
+        this.writeState({...state,recovery:{...state.recovery,phase:'failed'}});
         await this.report(enrollment,'failed','RECOVERY_FAILED');return;
       }
       try{await this.prepareRecovery(enrollment,recovery);}catch(error){const notice='Previous version '+recovery.target.version+' failed verification and was not restored: '+error.message;this.onStatus(notice);return notice;}
@@ -295,7 +325,9 @@ class DesktopUpdater {
       await this.report(enrollment,'installed');return;
     }
     if(pending.phase==='activating'){
-      this.writeState({...state,pending:{...pending,phase:'failed'}});
+      if(await this.activationProgress(enrollment,pending))return;
+      state=this.readState();if(state.pending?.phase!=='activating'||envelopeHash(state.pending.envelope)!==envelopeHash(pending.envelope))return;
+      this.writeState({...state,pending:{...state.pending,phase:'failed'}});
       await this.report(enrollment,'failed','INSTALL_FAILED');
       this.onStatus('Previous installation did not complete. Local data retained; a corrected release is required.');return;
     }
@@ -326,6 +358,8 @@ class DesktopUpdater {
       enrollment=this.loadEnrollment();if(!enrollment){this.onStatus('Update receiver is not initialized. It will retry when protected update credentials are available.');return;}
       const notice=await this.recover(enrollment);
       if(this.ready?.recovery||['staged','prepared','activating'].includes(this.readState().recovery?.phase))return;
+      const inFlight=this.readState().pending;
+      if(inFlight?.phase==='activating'&&inFlight.version!==this.version)return;
       const trust=await this.request(enrollment,'/v1/apps/'+this.appId+'/trust',{token:enrollment.deviceToken});
       enrollment=applyKeyTransitions(enrollment,trust.transitions);this.saveEnrollment(enrollment);
       const outbox=this.readState().outbox;if(outbox)await this.report(enrollment,outbox.status,outbox.errorCode);
@@ -437,7 +471,12 @@ class DesktopUpdater {
       await this.verifyNativeFile(this.packagePath(verified.manifest),verified.manifest);
       for(const filename of this.ready.nativeFiles)await this.verifyNativeFile(filename,verified.manifest);
       if(this.osShutdown)return false;
-      const transaction={...(recovery||state.pending),phase:'activating',activatedAt:new Date().toISOString()};
+      const activatedAt=new Date().toISOString();
+      const attempt=this.activationTarget?activation.createAttempt({appId:this.appId,version:verified.manifest.version,
+        installerPath:this.ready.nativeFiles[0],target:this.activationTarget(verified.manifest.version),now:Date.parse(activatedAt)}):null;
+      this.restoreActivationDispatch?.();
+      if(attempt)this.restoreActivationDispatch=activation.bindDispatch(this.autoUpdater,attempt);
+      const transaction={...(recovery||state.pending),phase:'activating',activatedAt,...(attempt?{activation:attempt}:{})};
       this.writeState(recovery?{...state,recovery:transaction}:{...state,pending:transaction});
       // Silent NSIS (/S): no update-caused prompt. electron-updater 6.8.9 resets quitAndInstallCalled only when
       // install() fails synchronously (no installer path, doInstall threw). NsisUpdater.doInstall otherwise returns
@@ -457,6 +496,6 @@ class DesktopUpdater {
     }catch(error){this.activationFailure=error;this.onStatus('Update activation refused: '+error.message);return false;}
   }
   suspendInstallation(){this.osShutdown=true;this.autoUpdater.autoInstallOnAppQuit=false;}
-  close(){this.startupConfirmationRequested=false;this.feed?.close();this.feed=null;}
+  close(){this.startupConfirmationRequested=false;this.feed?.close();this.feed=null;this.restoreActivationDispatch?.();this.restoreActivationDispatch=null;}
 }
 module.exports={DesktopUpdater,verifiedFeed};

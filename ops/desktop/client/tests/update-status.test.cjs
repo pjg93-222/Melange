@@ -24,6 +24,17 @@ test('pending startup or failed preparation never becomes a healthy up-to-date c
   assert.equal(status.record('No newer signed update. Staged update 1.0.25 was not prepared: Native signature refused').state,'unavailable');
   assert.equal(status.record('Update deferred: request failed').state,'unavailable');
 });
+test('installer progress and suspended failures do not masquerade as network retries',()=>{
+  const status=make();
+  for(const text of ['Failed release remains suspended. Awaiting a corrected release.','Recovered release remains suspended. Awaiting a corrected release.','This release failed local startup. Its data is retained.','Previous installation did not complete. Local data retained.']){
+    assert.equal(status.record(text).state,'unavailable');assert.match(status.current().message,/corrected release is required/);assert.doesNotMatch(status.current().message,/retry automatically|check unavailable/);
+  }
+  assert.equal(status.record('Installation of version 1.0.31 is still running. Wait before opening the updated shortcut.').state,'waiting');
+  assert.match(status.current().message,/is installing/);
+  assert.equal(status.record('Installation of version 1.0.31 finished; close this old copy and open the updated shortcut to confirm startup.').state,'waiting');
+  assert.match(status.current().message,/confirm startup/);assert.doesNotMatch(status.current().message,/Up to date/);
+  assert.equal(status.record('Installation progress is not yet known. Waiting for the installer before retrying.').state,'waiting');
+});
 test('cached discovery uses its real timestamp and a deferred refresh cannot claim current',()=>{
   const status=make(),older='2026-10-28T18:00:00.000Z';
   status.record('Already current. Using cached release list checked '+older+'. Next discovery after '+clock+'.');

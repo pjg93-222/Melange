@@ -111,6 +111,61 @@ test('interrupted activation suspends repeated installation and retains recovera
   f.envelope=f.sign('1.1.1',2);await next.check();assert.equal(f.state.pending.version,'1.1.1');assert.equal(f.state.pending.phase,'prepared');
 });
 
+function activationClient(f,extra={}){
+  const client=f.client('Fixture Publisher',{activationTarget:version=>path.join(f.directory,'Terrier-'+version),...extra});
+  client.autoUpdater.spawnLog=async()=>true;return client;
+}
+function activationReceipt(transaction,outcome='complete',code=0){
+  const {receiptPath}=require('../installer-activation.cjs'),a=transaction.activation;
+  const fields={schema:'1',app:a.appId,version:a.version,token:a.token,target:a.target,outcome,code:String(code)};
+  fs.writeFileSync(receiptPath(a),Buffer.from('\ufeff[activation]\r\n'+Object.entries(fields).map(([key,value])=>key+'='+value).join('\r\n')+'\r\n','utf16le'));
+}
+test('old client relaunch while its exact installer runs does not fail or reinstall the update',async t=>{
+  const f=fixture(t),first=activationClient(f);await first.check();await first.activateAfterClose();
+  const {observeAttempt,MAX_AMBIGUOUS_MS}=require('../installer-activation.cjs'),started=Date.parse(f.state.pending.activatedAt);
+  const nativeBefore=f.nativeChecks,downloads=f.downloads;
+  const old=activationClient(f,{observeActivation:(attempt,context)=>observeAttempt(attempt,{...context,now:started+MAX_AMBIGUOUS_MS+1,
+    processes:async()=>[{pid:4321,startedAt:new Date(started+1).toISOString(),installerPath:attempt.installerPath}]})});
+  await old.check();assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.pending.activation.process.pid,4321);
+  assert.equal(f.state.installed.version,'1.0.0');assert.equal(f.state.sequence,2);assert.equal(f.downloads,downloads);
+  assert.equal(f.nativeChecks,nativeBefore);assert.equal(f.installs,1);assert.match(f.status.at(-1),/still running.*longer than expected/);
+});
+test('completed installer followed by old-pin launch waits for verified healthy target startup',async t=>{
+  const f=fixture(t),first=activationClient(f);await first.check();await first.activateAfterClose();activationReceipt(f.state.pending);
+  let verified=0;
+  const old=activationClient(f,{verifyNativePackage:async()=>{verified++;}});await old.check();
+  assert.equal(verified,1,'unsigned completion is not used until the cached native installer is reverified');
+  assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.0');assert.match(f.status.at(-1),/finished; close this old copy/);
+  await old.check();assert.equal(f.installs,1);assert.equal(f.state.pending.phase,'activating','repeated old-pin launches never classify completed installation as failure');
+  f.version='1.1.0';const next=activationClient(f);await next.check();
+  assert.equal(f.state.pending.phase,'activating');assert.match(f.status.at(-1),/awaits a successful local startup/);
+  f.nativeValid=false;next.markApplicationReady();await next.check();
+  assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.0','receipt and healthy backend cannot bypass native verification');
+  f.nativeValid=true;await next.check();assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');
+});
+test('abandoned or explicitly failed new attempts retain the original failed-release guard',async t=>{
+  for(const outcome of ['abandoned','failed']){
+    const f=fixture(t),first=activationClient(f);await first.check();await first.activateAfterClose();
+    if(outcome==='failed')activationReceipt(f.state.pending,'failed',3);
+    const {observeAttempt,MAX_AMBIGUOUS_MS}=require('../installer-activation.cjs');
+    const old=activationClient(f,{observeActivation:(attempt,context)=>observeAttempt(attempt,{...context,now:Date.parse(attempt.startedAt)+MAX_AMBIGUOUS_MS+1,processes:async()=>[]})});
+    await old.check();assert.equal(f.state.pending.phase,'failed');assert.equal(f.installs,1);assert.match(f.status.at(-1),/Failed release remains suspended/);
+    assert.equal(await old.activateAfterClose(),false);assert.equal(f.state.installed.version,'1.0.0');
+  }
+});
+test('a receipt never clears an existing failed target transaction',async t=>{
+  const f=fixture(t),first=activationClient(f);await first.check();await first.activateAfterClose();activationReceipt(f.state.pending);
+  f.state={...f.state,pending:{...f.state.pending,phase:'failed'}};f.version='1.1.0';
+  const next=activationClient(f,{observeActivation:()=>assert.fail('failed state cannot consult a progress receipt')});next.markApplicationReady();await next.check();
+  assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.installed.version,'1.0.0');assert.ok(f.state.suspendedVersions.includes('1.1.0'));
+});
+test('stale observation cannot overwrite a failure recorded during its await',async t=>{
+  const f=fixture(t),first=activationClient(f);await first.check();await first.activateAfterClose();
+  const old=activationClient(f,{observeActivation:async()=>{f.state={...f.state,pending:{...f.state.pending,phase:'failed'}};return {status:'running',process:{pid:1,startedAt:new Date().toISOString()}};},
+    verifyNativePackage:()=>assert.fail('changed transaction must not use stale liveness')});
+  await old.check();assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.pending.activation.process,undefined);
+});
+
 for(const offline of [false,true])test('healthy startup confirms its signed local installer automatically'+(offline?' without GitHub availability':''),async t=>{
   const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
   f.version='1.1.0';f.offline=offline;let verified=0;

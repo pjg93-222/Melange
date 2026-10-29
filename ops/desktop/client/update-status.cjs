@@ -18,6 +18,12 @@ function createUpdateStatus({appId,appName,installedVersion,provider='github',ac
     else if(version&&/^Downloading verified update /.test(text)){state='downloading';message='Downloading version '+version+'…';}
     else if(version&&/^(?:Verified update [0-9.]+ waits for this app to close|Update [0-9.]+ verified\.)/.test(text)){state='ready';message='Version '+version+' ready; installs when you close the app.';}
     else if(version&&/^Previous version [0-9.]+ verified/.test(text)){state='ready';message='Recovery version '+version+' ready; installs when you close the app.';}
+    else if(/^Installation of version [0-9.]+ is still running\./.test(text)){state='waiting';message='An update is installing. Wait before opening the updated shortcut.';}
+    else if(/^Installation of version [0-9.]+ finished;/.test(text)){state='waiting';message='Installer finished; close this old copy and open the updated shortcut to confirm startup.';}
+    else if(/^Installation progress is not yet known\./.test(text)){state='waiting';message='Waiting to determine whether installation finished. It will check again automatically.';}
+    else if(/^(?:Failed release remains suspended\.|Recovered release remains suspended\.|This release failed local startup\.|Previous installation did not complete\.)/.test(text)){
+      message='This update was not confirmed after an installation or startup failure. A corrected release is required.';
+    }
     else if(/(?:deferred|refused|failed|failure|unavailable|suspended|not initialized|initialization is pending|initialization failed|did not complete|GitHub API retry after)/i.test(text)){
       message=/verified update remains staged/i.test(text)?'Update check unavailable; a verified update is still staged.':'Update check unavailable. It will retry automatically.';
     }else if(/awaits a successful local startup/.test(text)){
