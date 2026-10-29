@@ -4,7 +4,7 @@ const {Readable}=require('node:stream');const {EventEmitter}=require('node:event
 const {GitHubSource,configuration,checkedURL,githubPolicy,enrollGitHub,response,json}=require('../github-source.cjs');
 const {verifyEnvelope}=require('../trust.cjs');const {DesktopUpdater}=require('../updater.cjs');
 const repo='owner/desktop-updates';
-function fixture(){
+function fixture({cacheDirectory,cacheOptions}={}){
  const keys=crypto.generateKeyPairSync('ed25519'),publicKeys={root:keys.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64')};
  const enrollment={source:'github',repository:repo,appId:'melange',publicKeys};
  const sourceRefs=Object.fromEntries(['melange','mentat','terrier'].map(app=>[app,{repository:'Owner/'+app,ref:'main',commit:'a'.repeat(40)}]));
@@ -17,7 +17,7 @@ function fixture(){
   releases.set(version,{draft:false,prerelease:false,tag_name:'desktop-v'+version,assets:[asset(name,bytes.length),asset('melange-win32-x64.manifest.json',JSON.stringify(envelope).length),asset('melange-trust.json',18)]});return manifest;
  }
  const seed=add('1.0.0',1),next=add('1.0.1',2),calls=[];let corrupt=false;
- const source=new GitHubSource({repository:repo,appId:'melange',readJSON:async url=>{calls.push(url);if(url.includes('?per_page=100&page='))return [...releases.values()].reverse();if(url.includes('/tags/'))return releases.get(url.split('desktop-v')[1]);if(url.endsWith('/melange-trust.json'))return {transitions:[]};return manifests.get(url.split('/desktop-v')[1].split('/')[0]);},open:async url=>Readable.from(corrupt?Buffer.from('bad fixture'):packages.get(url.split('/').at(-1)))});
+ const source=new GitHubSource({repository:repo,appId:'melange',cacheDirectory,cacheOptions,readJSON:async url=>{calls.push(url);if(url.includes('?per_page=100&page='))return [...releases.values()].reverse();if(url.includes('/tags/'))return releases.get(url.split('desktop-v')[1]);if(url.endsWith('/melange-trust.json'))return {transitions:[]};return manifests.get(url.split('/desktop-v')[1].split('/')[0]);},open:async url=>Readable.from(corrupt?Buffer.from('bad fixture'):packages.get(url.split('/').at(-1)))});
  return {source,enrollment,seed,next,manifests,releases,packages,calls,set corrupt(value){corrupt=value;}};
 }
 test('GitHub source selects stable app assets, exact current recovery and rejects repository/audience/signature/replay changes',async()=>{
@@ -32,6 +32,28 @@ test('GitHub source selects stable app assets, exact current recovery and reject
  assert.throws(()=>verifyEnvelope(next,{...f.enrollment,repository:'owner/other'},identity),/policy/);
  await assert.rejects(f.source.request({...f.enrollment,deviceToken:'never-send'},'/v1/apps/melange/trust'),/identity/);
  f.releases.get('1.0.1').assets[0].browser_download_url='https://evil.example/package.exe';await assert.rejects(f.source.manifest({version:'1.0.1',assets:f.releases.get('1.0.1').assets}),/asset/);
+});
+
+test('explicit discovery refresh feeds the existing signed update sequence without a second list scan',async t=>{
+ const cacheDirectory=fs.mkdtempSync(path.join(os.tmpdir(),'github-source-manual-'));t.after(()=>fs.rmSync(cacheDirectory,{recursive:true,force:true}));
+ let now=Date.now();const f=fixture({cacheDirectory,cacheOptions:{now:()=>now,random:()=>0}}),newer=f.releases.get('1.0.1');f.releases.delete('1.0.1');
+ const trust='/v1/apps/melange/trust',updates='/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0';
+ await f.source.request(f.enrollment,trust);assert.equal(await f.source.request(f.enrollment,updates),null);
+ f.releases.set('1.0.1',newer);now+=60000;
+ assert.equal((await f.source.refreshDiscovery()).version,'1.0.1');await f.source.request(f.enrollment,trust);
+ assert.equal(f.source.discoveryInfo.cached,false);assert.doesNotMatch(f.source.discoverySummary(),/Using cached/);
+ const envelope=await f.source.request(f.enrollment,updates);
+ assert.equal(verifyEnvelope(envelope,f.enrollment,{appId:'melange',version:'1.0.0',platform:'win32',arch:'x64'}).manifest.version,'1.0.1');
+ assert.equal(f.calls.filter(url=>url.includes('?per_page=100&page=')).length,2);
+ await f.source.request(f.enrollment,trust);assert.equal(f.source.discoveryInfo.cached,true);
+});
+
+test('manual discovery consumes empty results once and expires a refresh that was not consumed promptly',async()=>{
+ let calls=0;const source=new GitHubSource({repository:repo,appId:'melange',readJSON:async()=>{calls++;return [];}}),enrollment={source:'github',repository:repo,appId:'melange'};
+ assert.equal(await source.refreshDiscovery(),null);await source.request(enrollment,'/v1/apps/melange/trust');assert.equal(calls,1);
+ await source.request(enrollment,'/v1/apps/melange/trust');assert.equal(calls,2);
+ await source.refreshDiscovery();source.manualDiscovery.expiresAt=Date.now()-1;
+ await source.request(enrollment,'/v1/apps/melange/trust');assert.equal(calls,4);
 });
 
 test('repository capitalization is normalized only for GitHub owner/repo and signed source provenance is required',async()=>{

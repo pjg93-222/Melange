@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawnSync}=require('node:child_process');
-const {DiscoveryCache,rateLimit,deadline,TTL,JITTER,MAX_DELAY}=require('../github-discovery.cjs');
+const {DiscoveryCache,rateLimit,deadline,TTL,JITTER,MANUAL_INTERVAL,MAX_DELAY}=require('../github-discovery.cjs');
 const {GitHubSource,discoveryMetadata}=require('../github-source.cjs');
 const repo='owner/releases';
 function directory(t){const value=fs.mkdtempSync(path.join(os.tmpdir(),'github-discovery-'));t.after(()=>fs.rmSync(value,{recursive:true,force:true}));return value;}
@@ -27,6 +27,39 @@ test('empty discovery is cached across apps/restarts and trust plus update never
  assert.deepEqual(await a.request(enrollment,'/v1/apps/melange/trust'),{transitions:[]});
  assert.equal(await a.request(enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),null);
  assert.equal(await create('terrier').latest(),null);assert.equal(await create('melange').latest(),null);assert.equal(calls,1);
+});
+test('manual checks discover 26 from a cached25 list without waiting six hours; repeated clicks share a recent success',async t=>{
+ const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
+ const source=create();assert.equal((await source.latest()).version,'1.0.25');version='1.0.26';now+=MANUAL_INTERVAL;
+ assert.equal((await source.latest()).version,'1.0.25');assert.equal(calls,1);
+ assert.equal((await source.refreshDiscovery()).version,'1.0.26');assert.equal(calls,2);assert.equal(source.discoveryInfo.cached,false);
+ assert.equal((await source.refreshDiscovery()).version,'1.0.26');assert.equal((await create().refreshDiscovery()).version,'1.0.26');assert.equal(calls,2);
+ now+=MANUAL_INTERVAL-1;await source.refreshDiscovery();assert.equal(calls,2);
+ now++;await source.refreshDiscovery();assert.equal(calls,3);
+});
+test('manual checks honor a persisted API cooldown and never disguise refresh failures as a current result',async t=>{
+ const root=directory(t);let now=Date.now(),calls=0,failure=null;
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;if(failure)throw failure;return [release('1.0.25')];}});
+ const source=create();await source.latest();now+=MANUAL_INTERVAL;
+ failure=new Error('offline fixture');await assert.rejects(source.refreshDiscovery(),/refresh deferred/);assert.equal(calls,2);assert.match(source.discoverySummary(),/Refresh deferred/);
+ failure=rateLimit(429,{'retry-after':'3600'});await assert.rejects(source.refreshDiscovery(),/API retry after/);assert.equal(calls,3);
+ const restarted=create();await assert.rejects(restarted.refreshDiscovery(),/API retry after/);assert.equal(calls,3);
+ failure=null;now+=3600001;assert.equal((await restarted.refreshDiscovery()).version,'1.0.25');assert.equal(calls,4);
+});
+test('concurrent manual refreshes reuse the newly committed list and preserve bounded competing waits',async t=>{
+ let now=Date.now(),calls=0,unblock,entered;
+ const config=options(t,{now:()=>now,waitMs:100}),first=new DiscoveryCache(config),second=new DiscoveryCache(config);
+ await first.get(async()=>[]);now+=MANUAL_INTERVAL;
+ const begin=new Promise(resolve=>{entered=resolve;});
+ const pending=first.get(async()=>{calls++;entered();await new Promise(resolve=>{unblock=resolve;});return [{version:'1.0.26',assets:release('1.0.26').assets}];},{forceRefresh:true});await begin;
+ const competing=second.get(async()=>{calls++;return [];},{forceRefresh:true});unblock();
+ const [fresh,shared]=await Promise.all([pending,competing]);assert.equal(fresh[0].version,'1.0.26');assert.deepEqual(shared,fresh);assert.equal(calls,1);
+ now+=MANUAL_INTERVAL;const held=first.cacheDB();
+ try{held.exec('BEGIN IMMEDIATE');let status;second.onStatus=value=>{status=value;};
+  assert.equal((await second.get(async()=>{calls++;return [];},{forceRefresh:true}))[0].version,'1.0.26');
+  assert.equal(calls,1);assert.equal(status.refreshDeferred,true);
+ }finally{held.exec('ROLLBACK');held.close();}
 });
 test('quota cooldown persists across apps/restart and blocks list and exact-tag APIs until reset',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,limited=false;

@@ -3,7 +3,7 @@
 // remain in the updater. SQLite provides cross-process locks released on crash.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {DatabaseSync}=require('node:sqlite');
-const TTL=6*60*60*1000,JITTER=30*60*1000,MAX_DELAY=7*24*60*60*1000,MAX_BYTES=4*1024*1024;
+const TTL=6*60*60*1000,JITTER=30*60*1000,MANUAL_INTERVAL=60*1000,MAX_DELAY=7*24*60*60*1000,MAX_BYTES=4*1024*1024;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function rateLimit(status,headers={},body=''){
  const limited=status===429||(status===403&&(String(headers['x-ratelimit-remaining'])==='0'||headers['retry-after']!==undefined||/rate limit|abuse detection/i.test(body)));
@@ -60,21 +60,24 @@ class DiscoveryCache{
  }
  async request(operation){await this.permitted();try{return await operation();}catch(error){await this.note(error);throw error;}}
  result(cached,extra={}){this.onStatus({checkedAt:cached.checkedAt,nextCheckAt:cached.nextCheckAt,cached:true,...extra});return cached.releases;}
- async get(refresh){
+ async get(refresh,{forceRefresh=false}={}){
+  // An explicit check can refresh an older list while repeated clicks and
+  // competing processes still share a recent successful response.
+  const reusable=cached=>cached&&this.now()<(forceRefresh===true?cached.checkedAt+MANUAL_INTERVAL:cached.nextCheckAt);
   const started=Date.now();let db,locked=false,cached;
   try{
    db=this.cacheDB();cached=this.read(db);const until=this.cooldown();
    if(until){if(cached)return this.result(cached,{backoffUntil:until});this.onStatus({backoffUntil:until});throw new Error('GitHub API paused until '+new Date(until).toISOString());}
-   if(cached&&this.now()<cached.nextCheckAt)return this.result(cached);
+   if(reusable(cached))return this.result(cached);
    while(!locked){
     try{db.exec('BEGIN IMMEDIATE');locked=true;}
     catch(error){if(!/locked|busy/i.test(error.message))throw error;
      if(Date.now()-started>=this.waitMs){if(cached)return this.result(cached,{refreshDeferred:true});throw new Error('GitHub release discovery is already refreshing; retry later');}
-     await sleep(50);cached=this.read(db);if(cached&&this.now()<cached.nextCheckAt)return this.result(cached);
+     await sleep(50);cached=this.read(db);if(reusable(cached))return this.result(cached);
     }
    }
    // Another app may have finished just before this writer acquired the lock.
-   cached=this.read(db);if(cached&&this.now()<cached.nextCheckAt)return this.result(cached);
+   cached=this.read(db);if(reusable(cached))return this.result(cached);
    await this.permitted();
    const releases=this.validate(await refresh()),payload=JSON.stringify(releases);
    if(Buffer.byteLength(payload)>MAX_BYTES)throw new Error('GitHub discovery metadata exceeds cache limit');
@@ -85,4 +88,4 @@ class DiscoveryCache{
   finally{if(locked)try{db.exec('ROLLBACK');}catch{}db?.close();}
  }
 }
-module.exports={DiscoveryCache,rateLimit,deadline,TTL,JITTER,MAX_DELAY,MAX_BYTES};
+module.exports={DiscoveryCache,rateLimit,deadline,TTL,JITTER,MANUAL_INTERVAL,MAX_DELAY,MAX_BYTES};

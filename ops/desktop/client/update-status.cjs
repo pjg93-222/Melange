@@ -11,6 +11,8 @@ function createUpdateStatus({appId,appName,installedVersion,provider='github',ac
     let state='unavailable',message='Update status unavailable.',checkedAt=snapshot.checkedAt;
     const version=/^(?:Downloading verified update|Verified update|Update|Previous version) ([0-9]{1,10}\.[0-9]{1,10}\.[0-9]{1,10})/.exec(text)?.[1];
     const discovered=/(?:Release list checked|Using cached release list checked) (\d{4}-\d{2}-\d{2}T[\d:.]+Z)/.exec(text)?.[1];
+    const nextDiscovery=/Next discovery after (\d{4}-\d{2}-\d{2}T[\d:.]+Z)/.exec(text)?.[1];
+    const displayTime=value=>new Date(value).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
     const checked=()=>discovered&&Number.isFinite(Date.parse(discovered))?discovered:now().toISOString();
     if(/^Checking for updates/.test(text)){state='checking';message='Checking for updates…';}
     else if(version&&/^Downloading verified update /.test(text)){state='downloading';message='Downloading version '+version+'…';}
@@ -22,7 +24,11 @@ function createUpdateStatus({appId,appName,installedVersion,provider='github',ac
       state='waiting';message=/^No newer signed update\./.test(text)?'No newer release; local startup is not yet confirmed.':'Local startup is not yet confirmed; updates can still be checked.';
       if(/^No newer signed update\./.test(text))checkedAt=checked();
     }else if(/^(?:Already current\.|No newer signed update\.|No approved update\.)/.test(text)){
-      state='current';message=/Using cached release list checked/.test(text)?'No newer release in the last checked release list.':'Up to date with published releases.';checkedAt=checked();
+      checkedAt=checked();
+      if(/Using cached release list checked/.test(text)){
+        state='waiting';message='Release list last checked '+displayTime(checkedAt)+'.';
+        if(nextDiscovery&&Number.isFinite(Date.parse(nextDiscovery)))message+=' Next automatic check after '+displayTime(nextDiscovery)+'.';
+      }else{state='current';message='Up to date with published releases.';}
     }
     snapshot=Object.freeze({...identity,state,message,checkedAt});return snapshot;
   }});

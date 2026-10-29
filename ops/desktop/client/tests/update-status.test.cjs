@@ -27,7 +27,9 @@ test('pending startup or failed preparation never becomes a healthy up-to-date c
 test('cached discovery uses its real timestamp and a deferred refresh cannot claim current',()=>{
   const status=make(),older='2026-10-28T18:00:00.000Z';
   status.record('Already current. Using cached release list checked '+older+'. Next discovery after '+clock+'.');
-  assert.equal(status.current().checkedAt,older);assert.match(status.current().message,/last checked release list/);
+  assert.equal(status.current().checkedAt,older);assert.equal(status.current().state,'waiting');
+  assert.match(status.current().message,/Release list last checked .+\. Next automatic check after .+\./);
+  assert.doesNotMatch(status.current().message,/Up to date|No newer release/);
   assert.equal(status.record('Already current. GitHub API retry after '+clock+'.').state,'unavailable');
   assert.equal(status.current().checkedAt,older);
   assert.equal(status.record('Already current. Using cached release list checked '+older+'. Refresh deferred.').state,'unavailable');
