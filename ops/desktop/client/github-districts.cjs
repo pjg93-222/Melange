@@ -118,9 +118,26 @@ class GitHubDistricts{
   return structuredClone(saved);
  }
  catalogue(state,key=state.latest){requireValue(key&&Object.hasOwn(state.catalogues,key),'No previously verified GitHub district catalogue');const row=state.catalogues[key],pointer=protocol.pointer(row.envelope,this.publicKeys);return {pointer,manifest:protocol.manifest(Buffer.from(row.manifestBase64,'base64'),pointer)};}
+ async hasCachedInventory(manifest){
+  requireValue(/^[a-f0-9]{64}$/.test(manifest.sha256));
+  for(const namespace of ['datasets','datasets-v2']){
+   let current=this.root,missing=false;
+   for(const part of ['', 'github-districts',namespace,manifest.sha256]){
+    if(part)current=path.join(current,part);
+    let stat;try{stat=await fsp.lstat(current);}catch(error){if(error.code==='ENOENT'){missing=true;break;}throw error;}
+    // An unexpected object preserves its signed inventory. Never traverse a
+    // link, or mistake an unsafe/temporarily unavailable path for retired data.
+    if(stat.isSymbolicLink()||!stat.isDirectory())return true;
+   }
+   if(missing)continue;
+   for(const district of IDS){try{await fsp.lstat(path.join(current,district));return true;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  }
+  return false;
+ }
  async commit(state){
-  const keep=new Set([state.latest,...Object.values(state.active).map(item=>item.pointerDigest),...Object.values(state.staged).map(item=>item.pointerDigest)]);for(const key of Object.keys(state.catalogues))if(!keep.has(key))delete state.catalogues[key];
-  requireValue(Object.keys(state.catalogues).length<=7&&Buffer.byteLength(JSON.stringify(state))<6*1024*1024);await this.store.write(structuredClone(state));
+  const keep=new Set([state.latest,...Object.values(state.active).map(item=>item.pointerDigest),...Object.values(state.staged).map(item=>item.pointerDigest)]);
+  for(const key of Object.keys(state.catalogues))if(!keep.has(key)&&!await this.hasCachedInventory(this.catalogue(state,key).manifest))delete state.catalogues[key];
+  requireValue(Object.keys(state.catalogues).length<=16&&Buffer.byteLength(JSON.stringify(state))<6*1024*1024);await this.store.write(structuredClone(state));
  }
  async discoverCatalogue(state){
   const read=async(url,options={})=>{canceled(this.signal);let bytes;try{bytes=await this.transport.read(url,{maxBytes:512*1024,signal:this.signal,...options});}catch(error){throw connectionFailure(error)?new ConnectionError(error):error;}requireValue(Buffer.isBuffer(bytes));return bytes;};
@@ -247,7 +264,8 @@ class GitHubDistricts{
    await this.initialize();const state=await this.readState(authorization),selected=configuration.standaloneGitHubData,active=state.active[configuration.district];
    requireValue(active?.source==='cache'&&active.manifestSha256===selected.catalogueSha256&&path.resolve(selected.cacheRoot)===this.root,'Only the active verified public district may retire previous caches');
    const manifests=Object.keys(state.catalogues).map(key=>this.catalogue(state,key).manifest);
-   return await require('./public-district-cache.cjs').retirePublicDistrictCaches({root:this.root,configuration,manifests});
+   const result=await require('./public-district-cache.cjs').retirePublicDistrictCaches({root:this.root,configuration,manifests});
+   await this.commit(state);return result;
   }finally{this.busy=false;}
  }
  ensure(configuration,authorization){return this.operation(configuration,authorization);}

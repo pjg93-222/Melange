@@ -249,3 +249,38 @@ test('managed snapshot caches reject unsigned extra derived files',async t=>{
  await assert.rejects(p.ensure(result,authorization),/failed verification/);
  assert.equal(fs.readFileSync(file,'utf8'),'{"unlisted":true}');
 });
+
+test('same-district upgrades retain signed inventories across restart until both cache generations retire',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},first=f.world;
+ const initial=await f.create().ensure(configuration,authorization),previous=structuredClone(f.state),oldKey=previous.latest,oldHash=initial.standaloneGitHubData.catalogueSha256;
+ const oldV2=path.join(f.root,'github-districts','datasets-v2',oldHash,'co-05'),oldV1=path.join(f.root,'github-districts','datasets',oldHash,'co-05');
+ fs.mkdirSync(oldV1,{recursive:true});for(const role of ROLES)fs.writeFileSync(path.join(oldV1,role),first.data.get('co-05/'+role));
+ f.world=f.build(2);const upgraded=await f.create().ensure(initial,authorization),current=structuredClone(f.state);
+ assert.ok(current.catalogues[oldKey]);assert.notEqual(current.latest,oldKey);assert.ok(fs.existsSync(oldV1)&&fs.existsSync(oldV2));
+ const restarted=f.create();await restarted.initialize();assert.ok((await restarted.readState(authorization)).catalogues[oldKey]);
+ const result=await restarted.retireInactive(upgraded,authorization);
+ assert.ok(result.retired.includes(oldV1)&&result.retired.includes(oldV2));assert.equal(f.state.catalogues[oldKey],undefined);
+ assert.equal(f.state.latest,current.latest);assert.deepEqual(f.state.active,current.active);assert.deepEqual(f.state.staged,current.staged);
+ assert.ok(fs.existsSync(path.join(f.root,'github-districts','datasets-v2',upgraded.standaloneGitHubData.catalogueSha256,'co-05')));
+ f.world=first;await assert.rejects(f.create().ensure(upgraded,authorization),/rollback/);
+});
+
+test('unsafe cached catalogue paths retain inventory without following their junction',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'};
+ const initial=await f.create().ensure(configuration,authorization),oldKey=f.state.latest,oldHash=initial.standaloneGitHubData.catalogueSha256;
+ const oldPath=path.join(f.root,'github-districts','datasets-v2',oldHash),outside=path.join(f.temporary,'outside');fs.mkdirSync(outside);fs.writeFileSync(path.join(outside,'keep'),'unrelated');
+ fs.rmSync(oldPath,{recursive:true});fs.symlinkSync(outside,oldPath,'junction');
+ f.world=f.build(2);const upgraded=await f.create().ensure(initial,authorization);assert.ok(f.state.catalogues[oldKey]);
+ await f.create().retireInactive(upgraded,authorization);assert.ok(f.state.catalogues[oldKey]);assert.equal(fs.readFileSync(path.join(outside,'keep'),'utf8'),'unrelated');
+});
+
+test('retained cached catalogues stay within the existing sixteen-catalogue journal limit',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create();await provider.initialize();const state=await provider.readState(authorization);
+ for(let sequence=1;sequence<=17;sequence++){
+  const world=f.build(sequence);world.body.releaseCommit=world.body.releaseCommit.slice(0,40);world.envelope=f.sign(world.body);
+  const pointer=protocol.pointer(world.envelope,f.publicKeys);state.catalogues[pointer.digest]={envelope:world.envelope,manifestBase64:world.manifest.toString('base64'),commit:'a'.repeat(40)};state.latest=pointer.digest;
+  fs.mkdirSync(path.join(f.root,'github-districts','datasets-v2',world.body.manifest.sha256,'co-05'),{recursive:true});
+  if(sequence===16)await provider.commit(state);
+ }
+ const saved=structuredClone(f.state);assert.equal(Object.keys(saved.catalogues).length,16);await assert.rejects(provider.commit(state));assert.deepEqual(f.state,saved);
+});
