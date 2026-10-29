@@ -73,6 +73,7 @@ test('exact NSIS include emits every effective input once with safe dollar and q
   out.files.set('folder $/name " x.txt',path.join(f.root,'source $ " x.txt'));
   const include=producer.payloadInclude(out.files);
   assert.equal((include.match(/^  File /gm)||[]).length,out.files.size);
+  for(const line of include.split('\n').filter(value=>/^  File /.test(value)))assert.match(line,/^  File "\/oname=/,'NSIS requires the whole oname argument quoted');
   assert.equal((include.match(/terrier_standalone\.py"/g)||[]).length,2,'one destination and one new source');
   assert.ok(!include.includes(f.base));assert.ok(!include.includes('File /r'));
   assert.ok(include.includes('folder $$'));assert.ok(include.includes('$\\"'));

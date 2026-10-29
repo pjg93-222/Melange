@@ -9,9 +9,10 @@ const asar = require('@electron/asar');
 const {appDefinition} = require('./apps.cjs');
 const layout = require('./install-layout.cjs');
 
-const quote = value => {
+const quote = (value, escapeDollars = true) => {
   if (/[\r\n\0]/.test(String(value))) throw new Error('Invalid NSIS definition');
-  return '"' + String(value).replace(/\$/g, '$$$$').replace(/"/g, '$\\"') + '"';
+  const text = escapeDollars ? String(value).replace(/\$/g, '$$$$') : String(value);
+  return '"' + text.replace(/"/g, '$\\"') + '"';
 };
 function physical(file, directory = false) {
   const resolved = path.resolve(file);
@@ -114,7 +115,8 @@ function payloadInclude(files) {
       lines.push('  SetOutPath "$INSTDIR' + (directory ? '\\' + quote(directory).slice(1,-1) : '') + '"', '  IfErrors extraction_failed');
       previous = directory;
     }
-    lines.push('  File /oname=' + quote(name) + ' ' + quote(source), '  IfErrors extraction_failed');
+    // File's source is resolved at compile time; dollars there are literal.
+    lines.push('  File ' + quote('/oname=' + name) + ' ' + quote(source, false), '  IfErrors extraction_failed');
   }
   return lines.join('\n') + '\n';
 }
